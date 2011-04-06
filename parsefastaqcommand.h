@@ -18,18 +18,18 @@ class ParseFastaQCommand : public Command {
 public:
 	ParseFastaQCommand(string);
 	ParseFastaQCommand();
-	~ParseFastaQCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();	
+	~ParseFastaQCommand() {}
 	
+	vector<string> setParameters();
+	string getCommandName()			{ return "parse.fastq";		}
+	string getCommandCategory()		{ return "Sequence Processing"; }
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }		
 private:
 
 	vector<string> outputNames;	
-	map<string, vector<string> > outputTypes;
 	string outputDir, fastaQFile;
 	bool abort;
 	

@@ -11,48 +11,47 @@
 #include "needlemanoverlap.hpp"
 
 //**********************************************************************************************************************
-
-vector<string> TrimFlowsCommand::getValidParameters(){	
+vector<string> TrimFlowsCommand::setParameters(){	
 	try {
-		string Array[] =  {"flow", "maxflows", "minflows",
-			"fasta", "minlength", "maxlength", "maxhomop", "signal", "noise"
-			"oligos", "pdiffs", "bdiffs", "tdiffs",  "order",
-			"allfiles", "processors",
-			"outputdir","inputdir"
+		CommandParameter pflow("flow", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pflow);
+		CommandParameter poligos("oligos", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(poligos);
+		CommandParameter pmaxhomop("maxhomop", "Number", "", "9", "", "", "",false,false); parameters.push_back(pmaxhomop);
+		CommandParameter pmaxflows("maxflows", "Number", "", "720", "", "", "",false,false); parameters.push_back(pmaxflows);
+		CommandParameter pminflows("minflows", "Number", "", "360", "", "", "",false,false); parameters.push_back(pminflows);
+		CommandParameter pminlength("minlength", "Number", "", "0", "", "", "",false,false); parameters.push_back(pminlength);
+		CommandParameter pmaxlength("maxlength", "Number", "", "0", "", "", "",false,false); parameters.push_back(pmaxlength);
+		CommandParameter ppdiffs("pdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(ppdiffs);
+		CommandParameter pbdiffs("bdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(pbdiffs);
+		CommandParameter ptdiffs("tdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(ptdiffs);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
+		CommandParameter psignal("signal", "Number", "", "0.50", "", "", "",false,false); parameters.push_back(psignal);
+		CommandParameter pnoise("noise", "Number", "", "0.70", "", "", "",false,false); parameters.push_back(pnoise);
+		CommandParameter pallfiles("allfiles", "Boolean", "", "t", "", "", "",false,false); parameters.push_back(pallfiles);
+		CommandParameter porder("order", "String", "", "", "", "", "",false,false); parameters.push_back(porder);
+		CommandParameter pfasta("fasta", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pfasta);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
 		
-		};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "TrimFlowsCommand", "getValidParameters");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
-vector<string> TrimFlowsCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"flow"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "TrimFlowsCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
-vector<string> TrimFlowsCommand::getRequiredFiles(){	
-	try {
 		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "TrimFlowsCommand", "getRequiredFiles");
+		m->errorOut(e, "TrimFlowsCommand", "setParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string TrimFlowsCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The trim.flows command reads a flowgram file and creates .....\n";
+		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n";
+		helpString += "For more details please check out the wiki http://www.mothur.org/wiki/Trim.flows.\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "TrimFlowsCommand", "getHelpString");
 		exit(1);
 	}
 }
@@ -62,6 +61,7 @@ vector<string> TrimFlowsCommand::getRequiredFiles(){
 TrimFlowsCommand::TrimFlowsCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["flow"] = tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
@@ -71,26 +71,6 @@ TrimFlowsCommand::TrimFlowsCommand(){
 		exit(1);
 	}
 }
-
-//***************************************************************************************************************
-
-TrimFlowsCommand::~TrimFlowsCommand(){	/*	do nothing	*/	}
-
-//***************************************************************************************************************
-
-void TrimFlowsCommand::help(){
-	try {
-		m->mothurOut("The trim.flows command reads a flowgram file and creates .....\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n");
-		m->mothurOut("For more details please check out the wiki http://www.mothur.org/wiki/Trim.flows.\n\n");
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "TrimFlowsCommand", "help");
-		exit(1);
-	}
-}
-
 //**********************************************************************************************************************
 
 TrimFlowsCommand::TrimFlowsCommand(string option)  {
@@ -103,18 +83,8 @@ TrimFlowsCommand::TrimFlowsCommand(string option)  {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string AlignArray[] =  {"flow", "maxflows", "minflows",
-				"fasta", "minlength", "maxlength", "maxhomop", "signal", "noise",
-				"oligos", "pdiffs", "bdiffs", "tdiffs", "order",
-				"allfiles", "processors",
-		
-				//			"group",
-				"outputdir","inputdir"
-				
-			};
-			
-			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+						
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
@@ -224,8 +194,9 @@ TrimFlowsCommand::TrimFlowsCommand(string option)  {
 			temp = validParameter.validFile(parameters, "allfiles", false);		if (temp == "not found"){ temp = "T";		}
 			allFiles = m->isTrue(temp);
 			
-			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){ temp = "1";		}
-			convert(temp, processors); 
+			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
+			m->setProcessors(temp);
+			convert(temp, processors);
 	
 			flowOrder = validParameter.validFile(parameters, "order", false);
 			if (flowOrder == "not found"){ flowOrder = "TACG";		}

@@ -13,7 +13,6 @@
 #include "command.hpp"
 #include "readtree.h"
 #include "treemap.h"
-#include "globaldata.hpp"
 #include "sharedrabundvector.h"
 #include "sharedrabundfloatvector.h"
 #include "inputdata.h"
@@ -22,23 +21,23 @@ class IndicatorCommand : public Command {
 public:
 	IndicatorCommand(string);
 	IndicatorCommand();
-	~IndicatorCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
+	~IndicatorCommand(){}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "indicator";				}
+	string getCommandCategory()		{ return "Hypothesis Testing";		}
+	string getHelpString();	
+	
 	int execute();
-	void help();
+	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	GlobalData* globaldata;
 	ReadTree* read;
 	TreeMap* treeMap;
 	GroupMap* designMap;
 	string treefile, sharedfile, relabundfile, groups, label, inputFileName, outputDir, designfile;
 	bool abort;
 	vector<string> outputNames, Groups;
-	map<string, vector<string> > outputTypes;
 	vector<SharedRAbundVector*> lookup;
 	vector<SharedRAbundFloatVector*> lookupFloat;
 	

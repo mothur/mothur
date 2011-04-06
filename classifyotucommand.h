@@ -20,13 +20,15 @@ class ClassifyOtuCommand : public Command {
 public:
 	ClassifyOtuCommand(string);
 	ClassifyOtuCommand();
-	~ClassifyOtuCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();
+	~ClassifyOtuCommand() {}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "classify.otu";		}
+	string getCommandCategory()		{ return "Phylotype Analysis";	}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
 
 private:
 
@@ -39,7 +41,6 @@ private:
 	vector<string> outputNames;
 	map<string, string> nameMap;
 	map<string, string> taxMap;
-	map<string, vector<string> > outputTypes;
 
 	int readNamesFile();
 	int readTaxonomyFile();

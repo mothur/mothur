@@ -9,41 +9,8 @@
 
 #include "systemcommand.h"
 
-//**********************************************************************************************************************
-vector<string> SystemCommand::getValidParameters(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SystemCommand", "getValidParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> SystemCommand::getRequiredParameters(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SystemCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> SystemCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SystemCommand", "getRequiredFiles");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 
+//**********************************************************************************************************************
 SystemCommand::SystemCommand(string option)  {
 	try {
 		abort = false; calledHelp = false;   
@@ -74,12 +41,14 @@ SystemCommand::SystemCommand(string option)  {
 }
 //**********************************************************************************************************************
 
-void SystemCommand::help(){
+string SystemCommand::getHelpString(){
 	try {
-		m->mothurOut("The system command allows you to execute a system command from within mothur.\n");
-		m->mothurOut("The system has no parameters.\n");
-		m->mothurOut("The system command should be in the following format: system(yourCommand).\n");
-		m->mothurOut("Example system(clear).\n");
+		string helpString = "";
+		helpString += "The system command allows you to execute a system command from within mothur.\n";
+		helpString += "The system has no parameters.\n";
+		helpString += "The system command should be in the following format: system(yourCommand).\n";
+		helpString += "Example system(clear).\n";
+		return helpString;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SystemCommand", "help");

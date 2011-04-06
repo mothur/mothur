@@ -12,8 +12,7 @@
 
 #include "command.hpp"
 #include "linearalgebra.h"
-#include "globaldata.hpp"
-
+#include "sharedrabundfloatvector.h"
 
 /*****************************************************************/
 class PCACommand : public Command {
@@ -21,22 +20,23 @@ class PCACommand : public Command {
 public:
 	PCACommand(string);	
 	PCACommand();
-	~PCACommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();	
-	void help();
+	~PCACommand() {}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "pca";					}
+	string getCommandCategory()		{ return "Hypothesis Testing";	}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
+	
 	
 private:
-	GlobalData* globaldata;
-	
+
 	bool abort, metric;
-	string outputDir, mode, inputFile, label, groups;
+	string outputDir, mode, inputFile, label, groups, sharedfile, relabundfile;
 	vector<string> outputNames, Groups;
 	set<string> labels;
-	map<string, vector<string> > outputTypes;
 	LinearAlgebra linearCalc;
 	
 	//vector< vector<double> > createMatrix(vector<SharedRAbundFloatVector*>);

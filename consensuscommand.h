@@ -13,24 +13,24 @@
 #include "tree.h"
 #include "treemap.h"
 #include "sharedutilities.h"
-	
-class GlobalData;
 
 class ConcensusCommand : public Command {
 	
 public:
 	ConcensusCommand(string);	
 	ConcensusCommand();
-	~ConcensusCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();	
+	~ConcensusCommand() {}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "concensus";	}
+	string getCommandCategory()		{ return "Hidden";		}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
+	
 	
 private:
-	GlobalData* globaldata;
 	SharedUtil* util;
 	vector<Tree*> t;
 	Tree* consensusTree;
@@ -49,7 +49,6 @@ private:
 	ofstream out, out2;
 	int numNodes, numLeaves, count;  //count is the next available spot in the tree vector
 	vector<string> outputNames;
-	map<string, vector<string> > outputTypes;
 									 	
 	int getSets();
 	int getSubgroupRating(vector<string>);

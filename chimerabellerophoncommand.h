@@ -21,13 +21,16 @@ class ChimeraBellerophonCommand : public Command {
 public:
 	ChimeraBellerophonCommand(string);
 	ChimeraBellerophonCommand();
-	~ChimeraBellerophonCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map< string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();
+	~ChimeraBellerophonCommand(){}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "chimera.bellerophon";	}
+	string getCommandCategory()		{ return "Sequence Processing"; }
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
+	
 		
 private:
 
@@ -36,7 +39,6 @@ private:
 	int processors, window, increment, numSeqs;
 	Chimera* chimera;
 	vector<string> outputNames;
-	map<string, vector<string> > outputTypes;
 	vector<string> fastaFileNames;
 };
 

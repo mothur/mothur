@@ -21,23 +21,22 @@ namefile=yourNameFile, cutoff=yourCutoff, precision=yourPrecision). The phylipfi
 If you do not provide a cutoff value 10.00 is assumed. If you do not provide a precision value then 100 is assumed.  */
 
 class NameAssignment;
-class GlobalData;
-
 
 class ReadDistCommand : public Command {
 public:
 	ReadDistCommand(string);
 	ReadDistCommand() { abort = true; calledHelp = true; }
-	~ReadDistCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();
+	~ReadDistCommand() {}
+	
+	vector<string> setParameters() {  return outputNames; } //dummy doesn't really do anything
+	string getCommandName()			{ return "read.dist";	}
+	string getCommandCategory()		{ return "Hidden";	}
+	string getHelpString() { return "This command is no longer available. You can provide your distance files directly to the downstream commands like cluster."; }	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	GlobalData* globaldata;
 	double cutoff;
 	int precision;
 	ReadMatrix* read;
@@ -47,7 +46,6 @@ private:
 	string phylipfile, columnfile, namefile, groupfile, outputDir;
 	NameAssignment* nameMap;
 	vector<string> outputNames;
-	map<string, vector<string> > outputTypes;
 
 	bool abort, sim;
 

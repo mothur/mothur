@@ -13,21 +13,52 @@
 #include "sharedutilities.h"
 
 //**********************************************************************************************************************
-vector<string> GetGroupsCommand::getValidParameters(){	
+vector<string> GetGroupsCommand::setParameters(){	
 	try {
-		string Array[] =  {"fasta","name", "group", "accnos", "groups","list","taxonomy","outputdir","inputdir" };
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pfasta);
+		CommandParameter pname("name", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pname);
+		CommandParameter pgroup("group", "InputTypes", "", "", "none", "FNGLT", "none",false,true); parameters.push_back(pgroup);
+		CommandParameter plist("list", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(plist);
+		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(ptaxonomy);
+		CommandParameter paccnos("accnos", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(paccnos);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "GetGroupsCommand", "getValidParameters");
+		m->errorOut(e, "GetGroupsCommand", "setParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string GetGroupsCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The get.groups command selects sequences from a specfic group or set of groups from the following file types: fasta, name, group, list, taxonomy.\n";
+		helpString += "It outputs a file containing the sequences in the those specified groups.\n";
+		helpString += "The get.groups command parameters are accnos, fasta, name, group, list, taxonomy and groups. The group parameter is required, unless you have a current group file.\n";
+		helpString += "You must also provide an accnos containing the list of groups to get or set the groups parameter to the groups you wish to select.\n";
+		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like.  You can separate group names with dashes.\n";
+		helpString += "The get.groups command should be in the following format: get.groups(accnos=yourAccnos, fasta=yourFasta, group=yourGroupFile).\n";
+		helpString += "Example get.groups(accnos=amazon.accnos, fasta=amazon.fasta, group=amazon.groups).\n";
+		helpString += "or get.groups(groups=pasture, fasta=amazon.fasta, group=amazon.groups).\n";
+		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetGroupsCommand", "getHelpString");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
 GetGroupsCommand::GetGroupsCommand(){	
 	try {
-		abort = true; calledHelp = true; 
+		abort = true; calledHelp = true;
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
 		outputTypes["taxonomy"] = tempOutNames;
@@ -41,29 +72,6 @@ GetGroupsCommand::GetGroupsCommand(){
 	}
 }
 //**********************************************************************************************************************
-vector<string> GetGroupsCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"group"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetGroupsCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> GetGroupsCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetGroupsCommand", "getRequiredFiles");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 GetGroupsCommand::GetGroupsCommand(string option)  {
 	try {
 		abort = false; calledHelp = false;   
@@ -72,9 +80,7 @@ GetGroupsCommand::GetGroupsCommand(string option)  {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"fasta","name", "group", "accnos", "groups", "list","taxonomy","outputdir","inputdir" };
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
@@ -169,7 +175,12 @@ GetGroupsCommand::GetGroupsCommand(string option)  {
 			
 			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") { abort = true; }
-			else if (groupfile == "not found") {  groupfile = "";  m->mothurOut("You must provide a group file."); m->mothurOutEndLine(); abort = true; }	
+			else if (groupfile == "not found") {  
+				//if there is a current group file, use it
+				groupfile = m->getGroupFile(); 
+				if (groupfile != "") { m->mothurOut("Using " + groupfile + " as input file for the group parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current groupfile and the group parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}	
 			
 			listfile = validParameter.validFile(parameters, "list", true);
 			if (listfile == "not open") { abort = true; }
@@ -180,10 +191,9 @@ GetGroupsCommand::GetGroupsCommand(string option)  {
 			else if (taxfile == "not found") {  taxfile = "";  }
 			
 			groups = validParameter.validFile(parameters, "groups", false);			
-			if (groups == "not found") { groups = ""; }
-			else { 
-				m->splitAtDash(groups, Groups);
-			}
+			if (groups == "not found") { groups = "all"; }
+			m->splitAtDash(groups, Groups);
+			
 			
 			if ((accnosfile == "") && (Groups.size() == 0)) { m->mothurOut("You must provide an accnos file or specify groups using the groups parameter."); m->mothurOutEndLine(); abort = true; }
 			
@@ -196,26 +206,6 @@ GetGroupsCommand::GetGroupsCommand(string option)  {
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-
-void GetGroupsCommand::help(){
-	try {
-		m->mothurOut("The get.groups command selects sequences from a specfic group or set of groups from the following file types: fasta, name, group, list, taxonomy.\n");
-		m->mothurOut("It outputs a file containing the sequences in the those specified groups.\n");
-		m->mothurOut("The get.groups command parameters are accnos, fasta, name, group, list, taxonomy and groups. The group parameter is required.\n");
-		m->mothurOut("You must also provide an accnos containing the list of groups to get or set the groups parameter to the groups you wish to select.\n");
-		m->mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like.  You can separate group names with dashes.\n");
-		m->mothurOut("The get.groups command should be in the following format: get.groups(accnos=yourAccnos, fasta=yourFasta, group=yourGroupFile).\n");
-		m->mothurOut("Example get.groups(accnos=amazon.accnos, fasta=amazon.fasta, group=amazon.groups).\n");
-		m->mothurOut("or get.groups(groups=pasture, fasta=amazon.fasta, group=amazon.groups).\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetGroupsCommand", "help");
-		exit(1);
-	}
-}
-
 //**********************************************************************************************************************
 
 int GetGroupsCommand::execute(){

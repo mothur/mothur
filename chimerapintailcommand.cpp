@@ -11,14 +11,57 @@
 #include "pintail.h"
 
 //**********************************************************************************************************************
-vector<string> ChimeraPintailCommand::getValidParameters(){	
+vector<string> ChimeraPintailCommand::setParameters(){	
 	try {
-		string AlignArray[] =  {"fasta","filter","processors","window" ,"increment","template","conservation","quantile","mask","outputdir","inputdir"};
-		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+		CommandParameter ptemplate("reference", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(ptemplate);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
+		CommandParameter pconservation("conservation", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pconservation);
+		CommandParameter pquantile("quantile", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pquantile);
+		CommandParameter pfilter("filter", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pfilter);
+		CommandParameter pwindow("window", "Number", "", "0", "", "", "",false,false); parameters.push_back(pwindow);
+		CommandParameter pincrement("increment", "Number", "", "25", "", "", "",false,false); parameters.push_back(pincrement);
+		CommandParameter pmask("mask", "String", "", "", "", "", "",false,false); parameters.push_back(pmask);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ChimeraPintailCommand", "getValidParameters");
+		m->errorOut(e, "ChimeraPintailCommand", "setParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string ChimeraPintailCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The chimera.pintail command reads a fastafile and referencefile and outputs potentially chimeric sequences.\n";
+		helpString += "This command was created using the algorythms described in the 'At Least 1 in 20 16S rRNA Sequence Records Currently Held in the Public Repositories is Estimated To Contain Substantial Anomalies' paper by Kevin E. Ashelford 1, Nadia A. Chuzhanova 3, John C. Fry 1, Antonia J. Jones 2 and Andrew J. Weightman 1.\n";
+		helpString += "The chimera.pintail command parameters are fasta, reference, filter, mask, processors, window, increment, conservation and quantile.\n";
+		helpString += "The fasta parameter allows you to enter the fasta file containing your potentially chimeric sequences, and is required unless you have a valid current fasta file. \n";
+		helpString += "You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amzon.fasta \n";
+		helpString += "The reference parameter allows you to enter a reference file containing known non-chimeric sequences, and is required. \n";
+		helpString += "The filter parameter allows you to specify if you would like to apply a vertical and 50% soft filter. \n";
+		helpString += "The mask parameter allows you to specify a file containing one sequence you wish to use as a mask for the your sequences, by default no mask is applied.  You can apply an ecoli mask by typing, mask=default. \n";
+		helpString += "The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n";
+#ifdef USE_MPI
+		helpString += "When using MPI, the processors parameter is set to the number of MPI processes running. \n";
+#endif
+		helpString += "The window parameter allows you to specify the window size for searching for chimeras, default=300. \n";
+		helpString += "The increment parameter allows you to specify how far you move each window while finding chimeric sequences, default=25.\n";
+		helpString += "The conservation parameter allows you to enter a frequency file containing the highest bases frequency at each place in the alignment.\n";
+		helpString += "The quantile parameter allows you to enter a file containing quantiles for a template files sequences, if you use the filter the quantile file generated becomes unique to the fasta file you used.\n";
+		helpString += "The chimera.pintail command should be in the following format: \n";
+		helpString += "chimera.pintail(fasta=yourFastaFile, reference=yourTemplate) \n";
+		helpString += "Example: chimera.pintail(fasta=AD.align, reference=silva.bacteria.fasta) \n";
+		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n";	
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChimeraPintailCommand", "getHelpString");
 		exit(1);
 	}
 }
@@ -26,35 +69,13 @@ vector<string> ChimeraPintailCommand::getValidParameters(){
 ChimeraPintailCommand::ChimeraPintailCommand(){	
 	try {
 		abort = true; calledHelp = true;
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["chimera"] = tempOutNames;
 		outputTypes["accnos"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ChimeraPintailCommand", "ChimeraPintailCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> ChimeraPintailCommand::getRequiredParameters(){	
-	try {
-		string AlignArray[] =  {"template","fasta"};
-		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChimeraPintailCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> ChimeraPintailCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChimeraPintailCommand", "getRequiredFiles");
 		exit(1);
 	}
 }
@@ -67,9 +88,7 @@ ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"fasta","filter","processors","window" ,"increment","template","conservation","quantile","mask","outputdir","inputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
@@ -91,12 +110,12 @@ ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
-				it = parameters.find("template");
+				it = parameters.find("reference");
 				//user has given a template file
 				if(it != parameters.end()){ 
 					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["template"] = inputDir + it->second;		}
+					if (path == "") {	parameters["reference"] = inputDir + it->second;		}
 				}
 				
 				it = parameters.find("conservation");
@@ -119,8 +138,12 @@ ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
 			
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", false);
-			if (fastafile == "not found") { fastafile = ""; m->mothurOut("fasta is a required parameter for the chimera.pintail command."); m->mothurOutEndLine(); abort = true;  }
-			else { 
+			if (fastafile == "not found") { 				
+				//if there is a current fasta file, use it
+				string filename = m->getFastaFile(); 
+				if (filename != "") { fastaFileNames.push_back(filename); m->mothurOut("Using " + filename + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}else { 
 				m->splitAtDash(fastafile, fastaFileNames);
 				
 				//go through files and make sure they are good, if not, then disregard them
@@ -177,7 +200,8 @@ ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
 			temp = validParameter.validFile(parameters, "filter", false);			if (temp == "not found") { temp = "F"; }
 			filter = m->isTrue(temp);
 			
-			temp = validParameter.validFile(parameters, "processors", false);		if (temp == "not found") { temp = "1"; }
+			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
+			m->setProcessors(temp);
 			convert(temp, processors);
 			
 			temp = validParameter.validFile(parameters, "window", false);			if (temp == "not found") { temp = "0"; }
@@ -231,9 +255,9 @@ ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
 		
-			templatefile = validParameter.validFile(parameters, "template", true);
+			templatefile = validParameter.validFile(parameters, "reference", true);
 			if (templatefile == "not open") { abort = true; }
-			else if (templatefile == "not found") { templatefile = "";  m->mothurOut("template is a required parameter for the chimera.pintail command."); m->mothurOutEndLine(); abort = true;  }
+			else if (templatefile == "not found") { templatefile = "";  m->mothurOut("reference is a required parameter for the chimera.pintail command."); m->mothurOutEndLine(); abort = true;  }
 			
 			consfile = validParameter.validFile(parameters, "conservation", true);
 			if (consfile == "not open") { abort = true; }
@@ -269,42 +293,6 @@ ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-
-void ChimeraPintailCommand::help(){
-	try {
-	
-		m->mothurOut("The chimera.pintail command reads a fastafile and templatefile and outputs potentially chimeric sequences.\n");
-		m->mothurOut("This command was created using the algorythms described in the 'At Least 1 in 20 16S rRNA Sequence Records Currently Held in the Public Repositories is Estimated To Contain Substantial Anomalies' paper by Kevin E. Ashelford 1, Nadia A. Chuzhanova 3, John C. Fry 1, Antonia J. Jones 2 and Andrew J. Weightman 1.\n");
-		m->mothurOut("The chimera.pintail command parameters are fasta, template, filter, mask, processors, window, increment, conservation and quantile.\n");
-		m->mothurOut("The fasta parameter allows you to enter the fasta file containing your potentially chimeric sequences, and is required. \n");
-		m->mothurOut("You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amzon.fasta \n");
-		m->mothurOut("The template parameter allows you to enter a template file containing known non-chimeric sequences, and is required. \n");
-		m->mothurOut("The filter parameter allows you to specify if you would like to apply a vertical and 50% soft filter. \n");
-		m->mothurOut("The mask parameter allows you to specify a file containing one sequence you wish to use as a mask for the your sequences, by default no mask is applied.  You can apply an ecoli mask by typing, mask=default. \n");
-		m->mothurOut("The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n");
-		#ifdef USE_MPI
-		m->mothurOut("When using MPI, the processors parameter is set to the number of MPI processes running. \n");
-		#endif
-		m->mothurOut("The window parameter allows you to specify the window size for searching for chimeras, default=300. \n");
-		m->mothurOut("The increment parameter allows you to specify how far you move each window while finding chimeric sequences, default=25.\n");
-		m->mothurOut("The conservation parameter allows you to enter a frequency file containing the highest bases frequency at each place in the alignment.\n");
-		m->mothurOut("The quantile parameter allows you to enter a file containing quantiles for a template files sequences, if you use the filter the quantile file generated becomes unique to the fasta file you used.\n");
-		m->mothurOut("The chimera.pintail command should be in the following format: \n");
-		m->mothurOut("chimera.pintail(fasta=yourFastaFile, template=yourTemplate) \n");
-		m->mothurOut("Example: chimera.pintail(fasta=AD.align, template=silva.bacteria.fasta) \n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n");	
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChimeraPintailCommand", "help");
-		exit(1);
-	}
-}
-
-//***************************************************************************************************************
-
-ChimeraPintailCommand::~ChimeraPintailCommand(){	/*	do nothing	*/	}
-
 //***************************************************************************************************************
 
 int ChimeraPintailCommand::execute(){

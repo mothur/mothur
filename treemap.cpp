@@ -170,13 +170,13 @@ void TreeMap::print(ostream& output){
 }
 
 /************************************************************/
-void TreeMap::makeSim(GroupMap* groupmap) {
+void TreeMap::makeSim(vector<string> ThisnamesOfGroups) {
 	try {
 		//set names of groups
-		namesOfGroups = groupmap->namesOfGroups;
+		namesOfGroups = ThisnamesOfGroups;
 		
 		//set names of seqs to names of groups
-		namesOfSeqs = groupmap->namesOfGroups;
+		namesOfSeqs = ThisnamesOfGroups;
 		
 		// make map where key and value are both the group name since that what the tree.shared command wants
 		for (int i = 0; i < namesOfGroups.size(); i++) {

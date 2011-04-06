@@ -11,49 +11,50 @@
 #include "sequence.hpp"
 
 //**********************************************************************************************************************
-vector<string> SeqSummaryCommand::getValidParameters(){	
+vector<string> SeqSummaryCommand::setParameters(){	
 	try {
-		string Array[] =  {"fasta","name","processors","outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
+		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "SeqSummaryCommand", "getValidParameters");
+		m->errorOut(e, "SeqSummaryCommand", "setParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
+string SeqSummaryCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The summary.seqs command reads a fastafile and summarizes the sequences.\n";
+		helpString += "The summary.seqs command parameters are fasta, name and processors, fasta is required, unless you have a valid current fasta file.\n";
+		helpString += "The name parameter allows you to enter a name file associated with your fasta file. \n";
+		helpString += "The summary.seqs command should be in the following format: \n";
+		helpString += "summary.seqs(fasta=yourFastaFile, processors=2) \n";
+		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n";	
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SeqSummaryCommand", "getHelpString");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
 SeqSummaryCommand::SeqSummaryCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["summary"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SeqSummaryCommand", "SeqSummaryCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> SeqSummaryCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"fasta"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SeqSummaryCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> SeqSummaryCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SeqSummaryCommand", "getRequiredFiles");
 		exit(1);
 	}
 }
@@ -67,9 +68,7 @@ SeqSummaryCommand::SeqSummaryCommand(string option)  {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"fasta","name","processors","outputdir","inputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
@@ -111,7 +110,11 @@ SeqSummaryCommand::SeqSummaryCommand(string option)  {
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not open") { abort = true; }
-			else if (fastafile == "not found") { fastafile = ""; m->mothurOut("fasta is a required parameter for the summary.seqs command."); m->mothurOutEndLine(); abort = true;  }	
+			else if (fastafile == "not found") { 				
+				fastafile = m->getFastaFile(); 
+				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}	
 			
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not open") { namefile = ""; abort = true; }
@@ -123,8 +126,9 @@ SeqSummaryCommand::SeqSummaryCommand(string option)  {
 				outputDir += m->hasPath(fastafile); //if user entered a file with a path then preserve it	
 			}
 			
-			string temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = "1";				}
-			convert(temp, processors); 
+			string temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
+			m->setProcessors(temp);
+			convert(temp, processors);
 
 
 		}
@@ -134,33 +138,15 @@ SeqSummaryCommand::SeqSummaryCommand(string option)  {
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-
-void SeqSummaryCommand::help(){
-	try {
-		m->mothurOut("The summary.seqs command reads a fastafile and summarizes the sequences.\n");
-		m->mothurOut("The summary.seqs command parameters are fasta, name and processors, fasta is required.\n");
-		m->mothurOut("The name parameter allows you to enter a name file associated with your fasta file. \n");
-		m->mothurOut("The summary.seqs command should be in the following format: \n");
-		m->mothurOut("summary.seqs(fasta=yourFastaFile, processors=2) \n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n");	
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SeqSummaryCommand", "help");
-		exit(1);
-	}
-}
-
-//***************************************************************************************************************
-
-SeqSummaryCommand::~SeqSummaryCommand(){	/*	do nothing	*/	}
-
 //***************************************************************************************************************
 
 int SeqSummaryCommand::execute(){
 	try{
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		
+		//set current fasta to fastafile
+		m->setFastaFile(fastafile);
 		
 		string summaryFile = outputDir + m->getSimpleName(fastafile) + ".summary";
 				

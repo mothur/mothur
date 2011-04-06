@@ -10,21 +10,56 @@
 #include "normalizesharedcommand.h"
 
 //**********************************************************************************************************************
-vector<string> NormalizeSharedCommand::getValidParameters(){	
+vector<string> NormalizeSharedCommand::setParameters(){	
 	try {
-		string Array[] =  {"groups","label","method","makerelabund","outputdir","inputdir","norm"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter pshared("shared", "InputTypes", "", "", "LRSS", "LRSS", "none",false,false); parameters.push_back(pshared);	
+		CommandParameter prelabund("relabund", "InputTypes", "", "", "LRSS", "LRSS", "none",false,false); parameters.push_back(prelabund);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
+		CommandParameter pmethod("method", "Multiple", "totalgroup-zscore", "totalgroup", "", "", "",false,false); parameters.push_back(pmethod);
+		CommandParameter pnorm("norm", "Number", "", "0", "", "", "",false,false); parameters.push_back(pnorm);
+		CommandParameter pmakerelabund("makerelabund", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pmakerelabund);
+		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "NormalizeSharedCommand", "getValidParameters");
+		m->errorOut(e, "NormalizeSharedCommand", "setParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
+string NormalizeSharedCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The normalize.shared command parameters are shared, relabund, groups, method, norm, makerelabund and label.  shared or relabund is required, unless you have a valid current file.\n";
+		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like included. The group names are separated by dashes.\n";
+		helpString += "The label parameter allows you to select what distance levels you would like, and are also separated by dashes.\n";
+		helpString += "The method parameter allows you to select what method you would like to use to normalize. The options are totalgroup and zscore. We hope to add more ways to normalize in the future, suggestions are welcome!\n";
+		helpString += "The makerelabund parameter allows you to convert a shared file to a relabund file before you normalize. default=f.\n";
+		helpString += "The norm parameter allows you to number you would like to normalize to. By default this is set to the number of sequences in your smallest group.\n";
+		helpString += "The normalize.shared command should be in the following format: normalize.shared(groups=yourGroups, label=yourLabels).\n";
+		helpString += "Example normalize.shared(groups=A-B-C, scale=totalgroup).\n";
+		helpString += "The default value for groups is all the groups in your groupfile, and all labels in your inputfile will be used.\n";
+		helpString += "The normalize.shared command outputs a .norm.shared file.\n";
+		helpString += "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "NormalizeSharedCommand", "getHelpString");
+		exit(1);
+	}
+}
+
+
+//**********************************************************************************************************************
 NormalizeSharedCommand::NormalizeSharedCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["shared"] = tempOutNames;
 	}
@@ -34,52 +69,26 @@ NormalizeSharedCommand::NormalizeSharedCommand(){
 	}
 }
 //**********************************************************************************************************************
-vector<string> NormalizeSharedCommand::getRequiredParameters(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "NormalizeSharedCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> NormalizeSharedCommand::getRequiredFiles(){	
-	try {
-		string Array[] =  {"shared"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "NormalizeSharedCommand", "getRequiredFiles");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 
 NormalizeSharedCommand::NormalizeSharedCommand(string option) {
 	try {
-		globaldata = GlobalData::getInstance();
 		abort = false; calledHelp = false;   
 		allLines = 1;
-		labels.clear();
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string AlignArray[] =  {"groups","label","method","makerelabund","outputdir","inputdir","norm"};
-			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
+			map<string,string>::iterator it;
 			
 			ValidParameters validParameter;
 			
 			//check to make sure all parameters are valid for command
-			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
@@ -87,20 +96,59 @@ NormalizeSharedCommand::NormalizeSharedCommand(string option) {
 			vector<string> tempOutNames;
 			outputTypes["shared"] = tempOutNames;
 			
+			//if the user changes the input directory command factory will send this info to us in the output parameter 
+			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			if (inputDir == "not found"){	inputDir = "";		}
+			else {
+				string path;
+				it = parameters.find("shared");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("relabund");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["relabund"] = inputDir + it->second;		}
+				}
+			}
+			
+			sharedfile = validParameter.validFile(parameters, "shared", true);
+			if (sharedfile == "not open") { sharedfile = ""; abort = true; }	
+			else if (sharedfile == "not found") { sharedfile = ""; }
+			else {  format = "sharedfile"; inputfile = sharedfile; }
+			
+			relabundfile = validParameter.validFile(parameters, "relabund", true);
+			if (relabundfile == "not open") { relabundfile = ""; abort = true; }	
+			else if (relabundfile == "not found") { relabundfile = ""; }
+			else {  format = "relabund"; inputfile = relabundfile; }
+			
+			
+			if ((sharedfile == "") && (relabundfile == "")) { 
+				//is there are current file available for any of these?
+				//give priority to shared, then list, then rabund, then sabund
+				//if there is a current shared file, use it
+				sharedfile = m->getSharedFile(); 
+				if (sharedfile != "") { inputfile = sharedfile; format = "sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+				else { 
+					relabundfile = m->getRelAbundFile(); 
+					if (relabundfile != "") { inputfile = relabundfile; format = "relabund"; m->mothurOut("Using " + relabundfile + " as input file for the relabund parameter."); m->mothurOutEndLine(); }
+					else { 
+						m->mothurOut("No valid current files. You must provide a list, sabund, rabund, relabund or shared file."); m->mothurOutEndLine(); 
+						abort = true;
+					}
+				}
+			}
+			
+			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
-				outputDir = "";	
-				outputDir += m->hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
-			}
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(inputfile);		}
 			
-			//make sure the user has already run the read.otu command
-			if ((globaldata->getSharedFile() == "") && (globaldata->getRelAbundFile() == "")) {
-				 m->mothurOut("You must read a list and a group, shared or relabund file before you can use the normalize.shared command."); m->mothurOutEndLine(); abort = true; 
-			}
-			
-			if ((globaldata->getSharedFile() != "") && (globaldata->getRelAbundFile() != "")) {
-				m->mothurOut("You may not use both a shared and relabund file as input for normalize.shared command."); m->mothurOutEndLine(); abort = true; 
-			}
 			
 
 			//check for optional parameter and set defaults
@@ -112,18 +160,12 @@ NormalizeSharedCommand::NormalizeSharedCommand(string option) {
 				else { allLines = 1;  }
 			}
 			
-			//if the user has not specified any labels use the ones from read.otu
-			if (label == "") {  
-				allLines = globaldata->allLines; 
-				labels = globaldata->labels; 
-			}
-			
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = ""; pickedGroups = false; }
 			else { 
 				pickedGroups = true;
 				m->splitAtDash(groups, Groups);
-				globaldata->Groups = Groups;
+				m->Groups = Groups;
 			}
 			
 			method = validParameter.validFile(parameters, "method", false);				if (method == "not found") { method = "totalgroup"; }
@@ -139,9 +181,6 @@ NormalizeSharedCommand::NormalizeSharedCommand(string option) {
 			
 			temp = validParameter.validFile(parameters, "makerelabund", false);	if (temp == "") { temp = "f"; }
 			makeRelabund = m->isTrue(temp);
-			
-			if ((globaldata->getFormat() != "sharedfile") && makeRelabund) { m->mothurOut("makerelabund can only be used with a shared file."); m->mothurOutEndLine(); }
-			
 		}
 
 	}
@@ -150,35 +189,6 @@ NormalizeSharedCommand::NormalizeSharedCommand(string option) {
 		exit(1);
 	}
 }
-
-//**********************************************************************************************************************
-
-void NormalizeSharedCommand::help(){
-	try {
-		m->mothurOut("The normalize.shared command can only be executed after a successful read.otu command of a list and group, shared or relabund file.\n");
-		m->mothurOut("The normalize.shared command parameters are groups, method, norm, makerelabund and label.  No parameters are required.\n");
-		m->mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like included. The group names are separated by dashes.\n");
-		m->mothurOut("The label parameter allows you to select what distance levels you would like, and are also separated by dashes.\n");
-		m->mothurOut("The method parameter allows you to select what method you would like to use to normalize. The options are totalgroup and zscore. We hope to add more ways to normalize in the future, suggestions are welcome!\n");
-		m->mothurOut("The makerelabund parameter allows you to convert a shared file to a relabund file before you normalize. default=f.\n");
-		m->mothurOut("The norm parameter allows you to number you would like to normalize to. By default this is set to the number of sequences in your smallest group.\n");
-		m->mothurOut("The normalize.shared command should be in the following format: normalize.shared(groups=yourGroups, label=yourLabels).\n");
-		m->mothurOut("Example normalize.shared(groups=A-B-C, scale=totalgroup).\n");
-		m->mothurOut("The default value for groups is all the groups in your groupfile, and all labels in your inputfile will be used.\n");
-		m->mothurOut("The normalize.shared command outputs a .norm.shared file.\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n");
-
-	}
-	catch(exception& e) {
-		m->errorOut(e, "NormalizeSharedCommand", "help");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
-NormalizeSharedCommand::~NormalizeSharedCommand(){}
-
 //**********************************************************************************************************************
 
 int NormalizeSharedCommand::execute(){
@@ -186,17 +196,32 @@ int NormalizeSharedCommand::execute(){
 	
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName)) + "norm.shared";
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(inputfile)) + "norm.shared";
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		
-		if (globaldata->getFormat() == "sharedfile") {  input = new InputData(globaldata->inputFileName, "sharedfile"); }
-		else { input = new InputData(globaldata->inputFileName, "relabund"); }
-
+		input = new InputData(inputfile, format);
+		
 		//you are reading a sharedfile and you do not want to make relabund
-		if ((globaldata->getFormat() == "sharedfile") && (!makeRelabund)) {
+		if ((format == "sharedfile") && (!makeRelabund)) {
 			lookup = input->getSharedRAbundVectors();
 			string lastLabel = lookup[0]->getLabel();
+			
+			//look for groups whose numseqs is below norm and remove them, warning the user
+			if (norm != 0) { 
+				m->Groups.clear();
+				vector<SharedRAbundVector*> temp;
+				for (int i = 0; i < lookup.size(); i++) {
+					if (lookup[i]->getNumSeqs() < norm) { 
+						m->mothurOut(lookup[i]->getGroup() + " contains " + toString(lookup[i]->getNumSeqs()) + ". Eliminating."); m->mothurOutEndLine();
+						delete lookup[i];
+					}else { 
+						m->Groups.push_back(lookup[i]->getGroup()); 
+						temp.push_back(lookup[i]);
+					}
+				} 
+				lookup = temp;
+			}
 			
 			//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 			set<string> processedLabels;
@@ -217,7 +242,7 @@ int NormalizeSharedCommand::execute(){
 			//as long as you are not at the end of the file or done wih the lines you want
 			while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 				
-				if (m->control_pressed) { outputTypes.clear();  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } globaldata->Groups.clear();   out.close(); remove(outputFileName.c_str()); return 0; }
+				if (m->control_pressed) { outputTypes.clear();  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } m->Groups.clear();   out.close(); remove(outputFileName.c_str()); return 0; }
 				
 				if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
 					
@@ -248,13 +273,13 @@ int NormalizeSharedCommand::execute(){
 				//prevent memory leak
 				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
 				
-				if (m->control_pressed) {  outputTypes.clear(); globaldata->Groups.clear();  out.close(); remove(outputFileName.c_str()); return 0; }
+				if (m->control_pressed) {  outputTypes.clear(); m->Groups.clear();  out.close(); remove(outputFileName.c_str()); return 0; }
 				
 				//get next line to process
 				lookup = input->getSharedRAbundVectors();				
 			}
 			
-			if (m->control_pressed) { outputTypes.clear(); globaldata->Groups.clear();  out.close(); remove(outputFileName.c_str());  return 0; }
+			if (m->control_pressed) { outputTypes.clear(); m->Groups.clear();  out.close(); remove(outputFileName.c_str());  return 0; }
 			
 			//output error messages about any remaining user labels
 			set<string>::iterator it;
@@ -289,6 +314,22 @@ int NormalizeSharedCommand::execute(){
 			set<string> processedLabels;
 			set<string> userLabels = labels;
 			
+			//look for groups whose numseqs is below norm and remove them, warning the user
+			if (norm != 0) { 
+				m->Groups.clear();
+				vector<SharedRAbundFloatVector*> temp;
+				for (int i = 0; i < lookupFloat.size(); i++) {
+					if (lookupFloat[i]->getNumSeqs() < norm) { 
+						m->mothurOut(lookupFloat[i]->getGroup() + " contains " + toString(lookupFloat[i]->getNumSeqs()) + ". Eliminating."); m->mothurOutEndLine();
+						delete lookupFloat[i];
+					}else { 
+						m->Groups.push_back(lookupFloat[i]->getGroup()); 
+						temp.push_back(lookupFloat[i]);
+					}
+				} 
+				lookupFloat = temp;
+			}
+			
 			//set norm to smallest group number
 			if (method == "totalgroup") {
 				if (norm == 0) { 
@@ -304,7 +345,7 @@ int NormalizeSharedCommand::execute(){
 			//as long as you are not at the end of the file or done wih the lines you want
 			while((lookupFloat[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 				
-				if (m->control_pressed) { outputTypes.clear();  for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  } globaldata->Groups.clear();   out.close(); remove(outputFileName.c_str()); return 0; }
+				if (m->control_pressed) { outputTypes.clear();  for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  } m->Groups.clear();   out.close(); remove(outputFileName.c_str()); return 0; }
 				
 				if(allLines == 1 || labels.count(lookupFloat[0]->getLabel()) == 1){			
 					
@@ -335,13 +376,13 @@ int NormalizeSharedCommand::execute(){
 				//prevent memory leak
 				for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i]; lookupFloat[i] = NULL; }
 				
-				if (m->control_pressed) {  outputTypes.clear(); globaldata->Groups.clear();  out.close(); remove(outputFileName.c_str()); return 0; }
+				if (m->control_pressed) {  outputTypes.clear(); m->Groups.clear();  out.close(); remove(outputFileName.c_str()); return 0; }
 				
 				//get next line to process
 				lookupFloat = input->getSharedRAbundFloatVectors();				
 			}
 			
-			if (m->control_pressed) { outputTypes.clear(); globaldata->Groups.clear();  out.close(); remove(outputFileName.c_str());  return 0; }
+			if (m->control_pressed) { outputTypes.clear(); m->Groups.clear();  out.close(); remove(outputFileName.c_str());  return 0; }
 			
 			//output error messages about any remaining user labels
 			set<string>::iterator it;
@@ -370,7 +411,7 @@ int NormalizeSharedCommand::execute(){
 			
 		}
 		//reset groups parameter
-		globaldata->Groups.clear();  
+		m->Groups.clear();  
 		delete input;
 		out.close();
 		

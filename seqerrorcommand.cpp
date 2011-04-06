@@ -13,14 +13,39 @@
 #include "refchimeratest.h"
 
 //**********************************************************************************************************************
-vector<string> SeqErrorCommand::getValidParameters(){	
+vector<string> SeqErrorCommand::setParameters(){	
 	try {
-		string Array[] =  {"query", "reference", "name", "qfile", "report", "threshold", "ignorechimeras", "inputdir", "outputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter pquery("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pquery);
+		CommandParameter preference("reference", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(preference);
+		CommandParameter pqfile("qfile", "InputTypes", "", "", "none", "none", "QualReport",false,false); parameters.push_back(pqfile);
+		CommandParameter preport("report", "InputTypes", "", "", "none", "none", "QualReport",false,false); parameters.push_back(preport);
+		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
+		CommandParameter pignorechimeras("ignorechimeras", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pignorechimeras);
+		CommandParameter pthreshold("threshold", "Number", "", "1.0", "", "", "",false,false); parameters.push_back(pthreshold);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "SeqErrorCommand", "getValidParameters");
+		m->errorOut(e, "SeqErrorCommand", "setParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string SeqErrorCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The seq.error command reads a query alignment file and a reference alignment file and creates .....\n";
+		helpString += "Example seq.error(...).\n";
+		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n";
+		helpString += "For more details please check out the wiki http://www.mothur.org/wiki/seq.error .\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SeqErrorCommand", "getHelpString");
 		exit(1);
 	}
 }
@@ -44,29 +69,6 @@ SeqErrorCommand::SeqErrorCommand(){
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-vector<string> SeqErrorCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"query","reference"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SeqErrorCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> SeqErrorCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SeqErrorCommand", "getRequiredFiles");
-		exit(1);
-	}
-}
 //***************************************************************************************************************
 
 SeqErrorCommand::SeqErrorCommand(string option)  {
@@ -79,11 +81,7 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 		
 		else {
 			string temp;
-			
-			//valid paramters for this command
-			string AlignArray[] =  {"query", "reference", "name", "qfile", "report", "threshold", "inputdir", "ignorechimeras", "outputdir"};
-			
-			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
@@ -114,12 +112,12 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
-				it = parameters.find("query");
+				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
 					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["query"] = inputDir + it->second;		}
+					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
 				
 				it = parameters.find("reference");
@@ -156,8 +154,12 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 				
 			}
 			//check for required parameters
-			queryFileName = validParameter.validFile(parameters, "query", true);
-			if (queryFileName == "not found") { m->mothurOut("query is a required parameter for the seq.error command."); m->mothurOutEndLine(); abort = true; }
+			queryFileName = validParameter.validFile(parameters, "fasta", true);
+			if (queryFileName == "not found") { 
+				queryFileName = m->getFastaFile(); 
+				if (queryFileName != "") { m->mothurOut("Using " + queryFileName + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current fasta file and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}
 			else if (queryFileName == "not open") { abort = true; }	
 			
 			referenceFileName = validParameter.validFile(parameters, "reference", true);
@@ -168,12 +170,15 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 			//check for optional parameters
 			namesFileName = validParameter.validFile(parameters, "name", true);
 			if(namesFileName == "not found"){	namesFileName = "";	}
+			else if (namesFileName == "not open") { namesFileName = ""; abort = true; }	
 			
 			qualFileName = validParameter.validFile(parameters, "qfile", true);
 			if(qualFileName == "not found"){	qualFileName = "";	}
+			else if (qualFileName == "not open") { qualFileName = ""; abort = true; }	
 
 			reportFileName = validParameter.validFile(parameters, "report", true);
 			if(reportFileName == "not found"){	reportFileName = "";	}
+			else if (reportFileName == "not open") { reportFileName = ""; abort = true; }	
 			
 			if((reportFileName != "" && qualFileName == "") || (reportFileName == "" && qualFileName != "")){
 				m->mothurOut("if you use either a qual file or a report file, you have to have both.");
@@ -204,26 +209,6 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 		exit(1);
 	}
 }
-
-//**********************************************************************************************************************
-
-void SeqErrorCommand::help(){
-	try {
-		m->mothurOut("The seq.error command reads a query alignment file and a reference alignment file and creates .....\n");
-		m->mothurOut("Example seq.error(...).\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n");
-		m->mothurOut("For more details please check out the wiki http://www.mothur.org/wiki/seq.error .\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SeqErrorCommand", "help");
-		exit(1);
-	}
-}
-
-//***************************************************************************************************************
-
-SeqErrorCommand::~SeqErrorCommand(){	/*	void	*/	}
-
 //***************************************************************************************************************
 
 int SeqErrorCommand::execute(){

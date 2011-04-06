@@ -14,26 +14,24 @@
 #include "inputdata.h"
 #include "sharedrabundvector.h"
 
-class GlobalData;
-
 class MergeGroupsCommand : public Command {
 	
 public:
 	MergeGroupsCommand(string);
 	MergeGroupsCommand();
-	~MergeGroupsCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();
+	~MergeGroupsCommand() {}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "merge.groups";	}
+	string getCommandCategory()		{ return "General";			}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	GlobalData* globaldata;
 	GroupMap* designMap;
 	vector<SharedRAbundVector*> lookup;
-	map<string, vector<string> > outputTypes;
 	
 	bool abort, allLines, pickedGroups;
 	set<string> labels; //holds labels to be used

@@ -10,45 +10,8 @@
 #include "nocommands.h"
 
 //**********************************************************************************************************************
-vector<string> NoCommand::getValidParameters(){	
-	try {
-		vector<string> myArray; 
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "NoCommand", "getValidParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> NoCommand::getRequiredParameters(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "NoCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> NoCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "NoCommand", "getRequiredFiles");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 
 NoCommand::NoCommand(string option)  {}
-
-//**********************************************************************************************************************
-
-NoCommand::~NoCommand(){}
 
 //**********************************************************************************************************************
 

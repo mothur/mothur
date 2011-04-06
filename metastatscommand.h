@@ -12,23 +12,22 @@
  
 #include "command.hpp"
 #include "inputdata.h"
-#include "readotu.h"
 #include "sharedrabundvector.h"
-
-class GlobalData;
 
 class MetaStatsCommand : public Command {
 
 public:
 	MetaStatsCommand(string);
 	MetaStatsCommand();
-	~MetaStatsCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();
+	~MetaStatsCommand() {}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "metastats";				}
+	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
 	struct linePair {
@@ -38,16 +37,13 @@ private:
 	};
 	vector<linePair> lines;
 	
-	GlobalData* globaldata;
 	GroupMap* designMap;
-	ReadOTUFile* read;
 	InputData* input;
 	vector<SharedRAbundVector*> lookup;
-	map<string, vector<string> > outputTypes;
-	
+		
 	bool abort, allLines, pickedGroups;
 	set<string> labels; //holds labels to be used
-	string groups, label, outputDir, inputDir, designfile, sets;
+	string groups, label, outputDir, inputDir, designfile, sets, sharedfile;
 	vector<string> Groups, outputNames, Sets;
 	vector< vector<string> > namesOfGroupCombos;
 	int iters, processors;

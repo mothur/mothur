@@ -9,23 +9,59 @@
 
 #include "getsharedotucommand.h"
 
-
 //**********************************************************************************************************************
-vector<string> GetSharedOTUCommand::getValidParameters(){	
+vector<string> GetSharedOTUCommand::setParameters(){	
 	try {
-		string Array[] =  {"label","unique","shared","fasta","list","group","output","outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pfasta);
+		CommandParameter pgroup("group", "InputTypes", "", "", "none", "FNGLT", "none",false,true); parameters.push_back(pgroup);
+		CommandParameter plist("list", "InputTypes", "", "", "none", "FNGLT", "none",false,true); parameters.push_back(plist);
+		CommandParameter poutput("output", "Multiple", "accnos-default", "default", "", "", "",false,false); parameters.push_back(poutput);
+		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
+		CommandParameter punique("unique", "String", "", "", "", "", "",false,false); parameters.push_back(punique);
+		CommandParameter pshared("shared", "String", "", "", "", "", "",false,false); parameters.push_back(pshared);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "GetSharedOTUCommand", "getValidParameters");
+		m->errorOut(e, "GetSharedOTUCommand", "setParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string GetSharedOTUCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The get.sharedseqs command parameters are list, group, label, unique, shared, output and fasta.  The list and group parameters are required, unless you have valid current files.\n";
+		helpString += "The label parameter allows you to select what distance levels you would like output files for, and are separated by dashes.\n";
+		helpString += "The unique and shared parameters allow you to select groups you would like to know the shared info for, and are separated by dashes.\n";
+		helpString += "If you enter your groups under the unique parameter mothur will return the otus that contain ONLY sequences from those groups.\n";
+		helpString += "If you enter your groups under the shared parameter mothur will return the otus that contain sequences from those groups and may also contain sequences from other groups.\n";
+		helpString += "If you do not enter any groups then the get.sharedseqs command will return sequences that are unique to all groups in your group file.\n";
+		helpString += "The fasta parameter allows you to input a fasta file and outputs a fasta file for each distance level containing only the sequences that are in OTUs shared by the groups specified.\n";
+		helpString += "The output parameter allows you to output the list of names without the group and bin number added. \n";
+		helpString += "With this option you can use the names file as an input in get.seqs and remove.seqs commands. To do this enter output=accnos. \n";
+		helpString += "The get.sharedseqs command outputs a .names file for each distance level containing a list of sequences in the OTUs shared by the groups specified.\n";
+		helpString += "The get.sharedseqs command should be in the following format: get.sharedseqs(label=yourLabels, groups=yourGroups, fasta=yourFastafile, output=yourOutput).\n";
+		helpString += "Example get.sharedseqs(list=amazon.fn.list, label=unique-0.01, group=forest-pasture, fasta=amazon.fasta, output=accnos).\n";
+		helpString += "The output to the screen is the distance and the number of otus at that distance for the groups you specified.\n";
+		helpString += "The default value for label is all labels in your inputfile. The default for groups is all groups in your file.\n";
+		helpString += "Note: No spaces between parameter labels (i.e. label), '=' and parameters (i.e.yourLabel).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetSharedOTUCommand", "getHelpString");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
 GetSharedOTUCommand::GetSharedOTUCommand(){	
 	try {
-		abort = true; calledHelp = true; 
+		abort = true; calledHelp = true;
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
 		outputTypes["accnos"] = tempOutNames;
@@ -37,45 +73,18 @@ GetSharedOTUCommand::GetSharedOTUCommand(){
 	}
 }
 //**********************************************************************************************************************
-vector<string> GetSharedOTUCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"list","group"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetSharedOTUCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> GetSharedOTUCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetSharedOTUCommand", "getRequiredFiles");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
 	try {
 	
-		globaldata = GlobalData::getInstance();
 		abort = false; calledHelp = false;   
 		unique = true;
 		allLines = 1;
-		labels.clear();
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"label","unique","shared","fasta","list","group","output","outputdir","inputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
@@ -131,12 +140,25 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
 			//check for required parameters
 			listfile = validParameter.validFile(parameters, "list", true);
 			if (listfile == "not open") { abort = true; }
-			else if (listfile == "not found") { listfile = ""; }	
-			else {  globaldata->setListFile(listfile);  globaldata->setFormat("list"); 	}
+			else if (listfile == "not found") { 
+				listfile = m->getListFile(); 
+				if (listfile != "") { format = "list"; m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
+				else { 
+					m->mothurOut("No valid current list file. You must provide a list file."); m->mothurOutEndLine(); 
+					abort = true;
+				}
+			}else {  format = "list"; 	}
 			
 			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") { abort = true; }	
-			else if (groupfile == "not found") { groupfile = ""; }
+			else if (groupfile == "not found") { 
+				groupfile = m->getGroupFile(); 
+				if (groupfile != "") { m->mothurOut("Using " + groupfile + " as input file for the group parameter."); m->mothurOutEndLine(); }
+				else { 
+					m->mothurOut("No valid current group file. You must provide a group file."); m->mothurOutEndLine(); 
+					abort = true;
+				}
+			}
 						
 			if ((listfile == "") || (groupfile == "")) { m->mothurOut("The list and group parameters are required."); m->mothurOutEndLine(); abort = true; }
 			
@@ -151,13 +173,14 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
 			
 			output = validParameter.validFile(parameters, "output", false);			
 			if (output == "not found") { output = ""; }
+			else if (output == "default") { output = ""; }
 			
 			groups = validParameter.validFile(parameters, "unique", false);			
 			if (groups == "not found") { groups = ""; }
 			else { 
 				userGroups = "unique." + groups;
 				m->splitAtDash(groups, Groups);
-				globaldata->Groups = Groups;
+				m->Groups = Groups;
 				
 			}
 			
@@ -166,7 +189,7 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
 			else { 
 				userGroups = groups;
 				m->splitAtDash(groups, Groups);
-				globaldata->Groups = Groups;
+				m->Groups = Groups;
 				unique = false;
 			}
 			
@@ -184,36 +207,6 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
 }
 //**********************************************************************************************************************
 
-void GetSharedOTUCommand::help(){
-	try {
-		m->mothurOut("The get.sharedseqs command parameters are list, group, label, unique, shared, output and fasta.  The list and group parameters are required.\n");
-		m->mothurOut("The label parameter allows you to select what distance levels you would like output files for, and are separated by dashes.\n");
-		m->mothurOut("The unique and shared parameters allow you to select groups you would like to know the shared info for, and are separated by dashes.\n");
-		m->mothurOut("If you enter your groups under the unique parameter mothur will return the otus that contain ONLY sequences from those groups.\n");
-		m->mothurOut("If you enter your groups under the shared parameter mothur will return the otus that contain sequences from those groups and may also contain sequences from other groups.\n");
-		m->mothurOut("If you do not enter any groups then the get.sharedseqs command will return sequences that are unique to all groups in your group file.\n");
-		m->mothurOut("The fasta parameter allows you to input a fasta file and outputs a fasta file for each distance level containing only the sequences that are in OTUs shared by the groups specified.\n");
-		m->mothurOut("The output parameter allows you to output the list of names without the group and bin number added. \n");
-		m->mothurOut("With this option you can use the names file as an input in get.seqs and remove.seqs commands. To do this enter output=accnos. \n");
-		m->mothurOut("The get.sharedseqs command outputs a .names file for each distance level containing a list of sequences in the OTUs shared by the groups specified.\n");
-		m->mothurOut("The get.sharedseqs command should be in the following format: get.sharedseqs(label=yourLabels, groups=yourGroups, fasta=yourFastafile, output=yourOutput).\n");
-		m->mothurOut("Example get.sharedseqs(list=amazon.fn.list, label=unique-0.01, group=forest-pasture, fasta=amazon.fasta, output=accnos).\n");
-		m->mothurOut("The output to the screen is the distance and the number of otus at that distance for the groups you specified.\n");
-		m->mothurOut("The default value for label is all labels in your inputfile. The default for groups is all groups in your file.\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. label), '=' and parameters (i.e.yourLabel).\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetSharedOTUCommand", "help");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
-GetSharedOTUCommand::~GetSharedOTUCommand(){}
-
-//**********************************************************************************************************************
-
 int GetSharedOTUCommand::execute(){
 	try {
 		
@@ -224,8 +217,6 @@ int GetSharedOTUCommand::execute(){
 		if (error == 1) { delete groupMap; return 0; }
 		
 		if (m->control_pressed) { delete groupMap; return 0; }
-		
-		globaldata->gGroupmap = groupMap;
 		
 		if (Groups.size() == 0) {
 			Groups = groupMap->namesOfGroups;
@@ -328,7 +319,7 @@ int GetSharedOTUCommand::execute(){
 		
 
 		//reset groups parameter
-		globaldata->Groups.clear();  
+		m->Groups.clear();  
 		
 		if (lastlist != NULL) {		delete lastlist;	}
 		

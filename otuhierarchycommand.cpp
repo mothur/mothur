@@ -10,49 +10,53 @@
 #include "otuhierarchycommand.h"
 
 //**********************************************************************************************************************
-vector<string> OtuHierarchyCommand::getValidParameters(){	
+vector<string> OtuHierarchyCommand::setParameters(){	
 	try {
-		string Array[] =  {"list","label","output","outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter poutput("output", "Multiple", "name-number", "name", "", "", "",false,false); parameters.push_back(poutput);
+		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(plist);
+		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "OtuHierarchyCommand", "getValidParameters");
+		m->errorOut(e, "OtuHierarchyCommand", "setParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
+string OtuHierarchyCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The otu.hierarchy command is used to see how otus relate at two distances. \n";
+		helpString += "The otu.hierarchy command parameters are list, label and output.  list and label parameters are required. \n";
+		helpString += "The output parameter allows you to output the names of the sequence in the OTUs or the OTU numbers. Options are name and number, default is name. \n";
+		helpString += "The otu.hierarchy command should be in the following format: \n";
+		helpString += "otu.hierarchy(list=yourListFile, label=yourLabels).\n";
+		helpString += "Example otu.hierarchy(list=amazon.fn.list, label=0.01-0.03).\n";
+		helpString += "The otu.hierarchy command outputs a .otu.hierarchy file which is described on the wiki.\n";
+		helpString += "Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListFile).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "OtuHierarchyCommand", "getHelpString");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
 OtuHierarchyCommand::OtuHierarchyCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["otuheirarchy"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "OtuHierarchyCommand", "OtuHierarchyCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> OtuHierarchyCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"list","label"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "OtuHierarchyCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> OtuHierarchyCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "OtuHierarchyCommand", "getRequiredFiles");
 		exit(1);
 	}
 }
@@ -65,9 +69,7 @@ OtuHierarchyCommand::OtuHierarchyCommand(string option) {
 		if(option == "help") {  help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"list","label","output","outputdir","inputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
@@ -99,8 +101,14 @@ OtuHierarchyCommand::OtuHierarchyCommand(string option) {
 			}
 
 			listFile = validParameter.validFile(parameters, "list", true);
-			if (listFile == "not found") { m->mothurOut("list is a required parameter for the otu.hierarchy command."); m->mothurOutEndLine(); abort = true; }
-			else if (listFile == "not open") { abort = true; }	
+			if (listFile == "not found") { 
+				listFile = m->getListFile(); 
+				if (listFile != "") {  m->mothurOut("Using " + listFile + " as input file for the list parameter."); m->mothurOutEndLine(); }
+				else { 
+					m->mothurOut("No valid current list file. You must provide a list file."); m->mothurOutEndLine(); 
+					abort = true;
+				}
+			}else if (listFile == "not open") { abort = true; }	
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
@@ -128,29 +136,6 @@ OtuHierarchyCommand::OtuHierarchyCommand(string option) {
 		exit(1);
 	}			
 }
-//**********************************************************************************************************************
-
-void OtuHierarchyCommand::help(){
-	try {
-		m->mothurOut("The otu.hierarchy command is used to see how otus relate at two distances. \n");
-		m->mothurOut("The otu.hierarchy command parameters are list, label and output.  list and label parameters are required. \n");
-		m->mothurOut("The output parameter allows you to output the names of the sequence in the OTUs or the OTU numbers. Options are name and number, default is name. \n");
-		m->mothurOut("The otu.hierarchy command should be in the following format: \n");
-		m->mothurOut("otu.hierarchy(list=yourListFile, label=yourLabels).\n");
-		m->mothurOut("Example otu.hierarchy(list=amazon.fn.list, label=0.01-0.03).\n");
-		m->mothurOut("The otu.hierarchy command outputs a .otu.hierarchy file which is described on the wiki.\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListFile).\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "OtuHierarchyCommand", "help");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
-OtuHierarchyCommand::~OtuHierarchyCommand(){}
-
 //**********************************************************************************************************************
 
 int OtuHierarchyCommand::execute(){

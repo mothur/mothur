@@ -11,26 +11,46 @@
 #include "sharedutilities.h"
 
 //**********************************************************************************************************************
-vector<string> CorrAxesCommand::getValidParameters(){	
+vector<string> CorrAxesCommand::setParameters(){	
 	try {
-		string Array[] =  {"axes","shared","relabund","numaxes","label","groups","method","metadata","outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter paxes("axes", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(paxes);
+		CommandParameter pshared("shared", "InputTypes", "", "", "SharedRelMeta", "SharedRelMeta", "none",false,false); parameters.push_back(pshared);
+		CommandParameter prelabund("relabund", "InputTypes", "", "", "SharedRelMeta", "SharedRelMeta", "none",false,false); parameters.push_back(prelabund);
+		CommandParameter pmetadata("metadata", "InputTypes", "", "", "SharedRelMeta", "SharedRelMeta", "none",false,false); parameters.push_back(pmetadata);
+		CommandParameter pnumaxes("numaxes", "Number", "", "3", "", "", "",false,false); parameters.push_back(pnumaxes);
+		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
+		CommandParameter pmethod("method", "Multiple", "pearson-spearman-kendall", "pearson", "", "", "",false,false); parameters.push_back(pmethod);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "CorrAxesCommand", "getValidParameters");
+		m->errorOut(e, "CorrAxesCommand", "setParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-vector<string> CorrAxesCommand::getRequiredParameters(){	
+string CorrAxesCommand::getHelpString(){	
 	try {
-		string Array[] =  {"axes"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
+		string helpString = "";
+		helpString += "The corr.axes command reads a shared, relabund or metadata file as well as an axes file and calculates the correlation coefficient.\n";
+		helpString += "The corr.axes command parameters are shared, relabund, axes, metadata, groups, method, numaxes and label.  The shared, relabund or metadata and axes parameters are required.  If shared is given the relative abundance is calculated.\n";
+		helpString += "The groups parameter allows you to specify which of the groups you would like included. The group names are separated by dashes.\n";
+		helpString += "The label parameter allows you to select what distance level you would like used, if none is given the first distance is used.\n";
+		helpString += "The method parameter allows you to select what method you would like to use. Options are pearson, spearman and kendall. Default=pearson.\n";
+		helpString += "The numaxes parameter allows you to select the number of axes you would like to use. Default=3.\n";
+		helpString += "The corr.axes command should be in the following format: corr.axes(axes=yourPcoaFile, shared=yourSharedFile, method=yourMethod).\n";
+		helpString += "Example corr.axes(axes=genus.pool.thetayc.genus.lt.pcoa, shared=genus.pool.shared, method=kendall).\n";
+		helpString += "The corr.axes command outputs a .corr.axes file.\n";
+		helpString += "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n";
+		return helpString;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "CorrAxesCommand", "getRequiredParameters");
+		m->errorOut(e, "CorrAxesCommand", "getHelpString");
 		exit(1);
 	}
 }
@@ -38,6 +58,7 @@ vector<string> CorrAxesCommand::getRequiredParameters(){
 CorrAxesCommand::CorrAxesCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["corr.axes"] = tempOutNames;
 	}
@@ -46,31 +67,16 @@ CorrAxesCommand::CorrAxesCommand(){
 		exit(1);
 	}
 }
-
-//**********************************************************************************************************************
-vector<string> CorrAxesCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "CorrAxesCommand", "getRequiredFiles");
-		exit(1);
-	}
-}
 //**********************************************************************************************************************
 CorrAxesCommand::CorrAxesCommand(string option)  {
 	try {
 		abort = false; calledHelp = false;   
-		globaldata = GlobalData::getInstance();
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"axes","shared","relabund","numaxes","label","groups","method","metadata","outputdir","inputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string, string> parameters = parser.getParameters();
@@ -151,14 +157,27 @@ CorrAxesCommand::CorrAxesCommand(string option)  {
 				pickedGroups = true;
 				m->splitAtDash(groups, Groups);	
 			}			
-			globaldata->Groups = Groups;
+			m->Groups = Groups;
 			
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(inputFileName);	}
 			
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; m->mothurOut("You did not provide a label, I will use the first label in your inputfile."); m->mothurOutEndLine(); label=""; }	
 			
-			if ((relabundfile == "") && (sharedfile == "") && (metadatafile == "")) { m->mothurOut("You must provide either a shared, relabund, or metadata file."); m->mothurOutEndLine(); abort = true;  }
+			if ((relabundfile == "") && (sharedfile == "") && (metadatafile == "")) { 
+				//is there are current file available for any of these?
+				//give priority to shared, then relabund
+				//if there is a current shared file, use it
+				sharedfile = m->getSharedFile(); 
+				if (sharedfile != "") { inputFileName = sharedfile; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+				else { 
+					relabundfile = m->getRelAbundFile(); 
+					if (relabundfile != "") { inputFileName = relabundfile;  m->mothurOut("Using " + relabundfile + " as input file for the relabund parameter."); m->mothurOutEndLine(); }
+					else { 
+						m->mothurOut("You must provide either a shared, relabund, or metadata file."); m->mothurOutEndLine(); abort = true; 
+					}
+				}
+			}	
 			
 			if (metadatafile != "") {
 				if ((relabundfile != "") || (sharedfile != "")) { m->mothurOut("You may only use one of the following : shared, relabund or metadata file."); m->mothurOutEndLine(); abort = true;  }
@@ -180,31 +199,6 @@ CorrAxesCommand::CorrAxesCommand(string option)  {
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-
-void CorrAxesCommand::help(){
-	try {
-		m->mothurOut("The corr.axes command reads a shared, relabund or metadata file as well as an axes file and calculates the correlation coefficient.\n");
-		m->mothurOut("The corr.axes command parameters are shared, relabund, axes, metadata, groups, method, numaxes and label.  The shared, relabund or metadata and axes parameters are required.  If shared is given the relative abundance is calculated.\n");
-		m->mothurOut("The groups parameter allows you to specify which of the groups you would like included. The group names are separated by dashes.\n");
-		m->mothurOut("The label parameter allows you to select what distance level you would like used, if none is given the first distance is used.\n");
-		m->mothurOut("The method parameter allows you to select what method you would like to use. Options are pearson, spearman and kendall. Default=pearson.\n");
-		m->mothurOut("The numaxes parameter allows you to select the number of axes you would like to use. Default=3.\n");
-		m->mothurOut("The corr.axes command should be in the following format: corr.axes(axes=yourPcoaFile, shared=yourSharedFile, method=yourMethod).\n");
-		m->mothurOut("Example corr.axes(axes=genus.pool.thetayc.genus.lt.pcoa, shared=genus.pool.shared, method=kendall).\n");
-		m->mothurOut("The corr.axes command outputs a .corr.axes file.\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "CorrAxesCommand", "help");	
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
-CorrAxesCommand::~CorrAxesCommand(){}
-
 //**********************************************************************************************************************
 
 int CorrAxesCommand::execute(){
@@ -906,11 +900,11 @@ int CorrAxesCommand::getMetadata(){
 		SharedUtil* util;
 		util = new SharedUtil();
 		
-		util->setGroups(globaldata->Groups, groupNames);
+		util->setGroups(m->Groups, groupNames);
 		
 		for (int i = 0; i < lookupFloat.size(); i++) {
 			//if this sharedrabund is not from a group the user wants then delete it.
-			if (util->isValidGroup(lookupFloat[i]->getGroup(), globaldata->Groups) == false) { 
+			if (util->isValidGroup(lookupFloat[i]->getGroup(), m->Groups) == false) { 
 				delete lookupFloat[i]; lookupFloat[i] = NULL;
 				lookupFloat.erase(lookupFloat.begin()+i); 
 				i--; 

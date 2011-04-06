@@ -13,12 +13,11 @@
 
 EstOutput Parsimony::getValues(Tree* t, int p, string o) {
 	try {
-		globaldata = GlobalData::getInstance();
 		processors = p;
 		outputDir = o;
 		
 		//if the users enters no groups then give them the score of all groups
-		int numGroups = globaldata->Groups.size();
+		int numGroups = m->Groups.size();
 		
 		//calculate number of comparsions
 		int numComp = 0;
@@ -26,7 +25,7 @@ EstOutput Parsimony::getValues(Tree* t, int p, string o) {
 		for (int r=0; r<numGroups; r++) { 
 			for (int l = r+1; l < numGroups; l++) {
 				numComp++;
-				vector<string> groups; groups.push_back(globaldata->Groups[r]); groups.push_back(globaldata->Groups[l]);
+				vector<string> groups; groups.push_back(m->Groups[r]); groups.push_back(m->Groups[l]);
 				//cout << globaldata->Groups[r] << '\t' << globaldata->Groups[l] << endl;
 				namesOfGroupCombos.push_back(groups);
 			}
@@ -45,8 +44,8 @@ EstOutput Parsimony::getValues(Tree* t, int p, string o) {
 				}
 				namesOfGroupCombos.push_back(groups);
 			}else {
-				for (int i = 0; i < globaldata->Groups.size(); i++) {
-					groups.push_back(globaldata->Groups[i]);
+				for (int i = 0; i < m->Groups.size(); i++) {
+					groups.push_back(m->Groups[i]);
 					//cout << globaldata->Groups[i] << endl;
 				}
 				namesOfGroupCombos.push_back(groups);
@@ -173,7 +172,7 @@ EstOutput Parsimony::driver(Tree* t, vector< vector<string> > namesOfGroupCombos
 		
 		EstOutput results; results.resize(num);
 		
-		Tree* copyTree = new Tree();
+		Tree* copyTree = new Tree(tmap);
 		int count = 0;
 		
 		for (int h = start; h < (start+num); h++) {

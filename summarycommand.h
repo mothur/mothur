@@ -13,39 +13,34 @@
 #include "sabundvector.hpp"
 #include "inputdata.h"
 #include "calculator.h"
-#include "readotu.h"
 #include "validcalculator.h"
-
-class GlobalData;
 
 class SummaryCommand : public Command {
 
 public:
 	SummaryCommand(string);
 	SummaryCommand();
-	~SummaryCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();
+	~SummaryCommand(){}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "summary.single";			}
+	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	GlobalData* globaldata;
-	ReadOTUFile* read;
 	vector<Calculator*> sumCalculators;	
 	InputData* input;
-	ValidCalculators* validCalculator;
 	SAbundVector* sabund;
 	int abund, size;
 
 	bool abort, allLines, groupMode;
 	set<string> labels; //holds labels to be used
-	string label, calc, outputDir;
+	string label, calc, outputDir, sharedfile, listfile, rabundfile, sabundfile, format, inputfile;
 	vector<string>  Estimators;
 	vector<string> inputFileNames, outputNames;
-	map<string, vector<string> > outputTypes;
 	vector<string> groups;
 	
 	vector<string> parseSharedFile(string);

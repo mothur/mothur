@@ -14,14 +14,47 @@
 #include "inputdata.h"
 
 //**********************************************************************************************************************
-vector<string> RemoveRareCommand::getValidParameters(){	
+vector<string> RemoveRareCommand::setParameters(){	
 	try {
-		string Array[] =  {"rabund","sabund", "group", "list", "shared","bygroup","nseqs","groups","label","outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(plist);
+		CommandParameter prabund("rabund", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(prabund);
+		CommandParameter psabund("sabund", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(psabund);
+		CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pshared);
+		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pgroup);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
+		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
+		CommandParameter pnseqs("nseqs", "Number", "", "0", "", "", "",false,true); parameters.push_back(pnseqs);
+		CommandParameter pbygroup("bygroup", "Boolean", "", "f", "", "", "",false,true); parameters.push_back(pbygroup);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "RemoveRareCommand", "getValidParameters");
+		m->errorOut(e, "RemoveRareCommand", "setParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string RemoveRareCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The remove.rare command parameters are list, rabund, sabund, shared, group, label, groups, bygroup and nseqs.\n";
+		helpString += "The remove.rare command reads one of the following file types: list, rabund, sabund or shared file. It outputs a new file after removing the rare otus.\n";
+		helpString += "The groups parameter allows you to specify which of the groups you would like analyzed.  Default=all. You may separate group names with dashes.\n";
+		helpString += "The label parameter is used to analyze specific labels in your input. default=all. You may separate label names with dashes.\n";
+		helpString += "The bygroup parameter is only valid with the shared file. default=f, meaning remove any OTU that has nseqs or fewer sequences across all groups.\n";
+		helpString += "bygroups=T means remove any OTU that has nseqs or fewer sequences in each group (if groupA has 1 sequence and group B has 100 sequences in OTUZ and nseqs=1, then set the groupA count for OTUZ to 0 and keep groupB's count at 100.) \n";
+		helpString += "The nseqs parameter allows you to set the cutoff for an otu to be deemed rare. It is required.\n";
+		helpString += "The remove.rare command should be in the following format: remove.rare(shared=yourSharedFile, nseqs=yourRareCutoff).\n";
+		helpString += "Example remove.rare(shared=amazon.fn.shared, nseqs=2).\n";
+		helpString += "Note: No spaces between parameter labels (i.e. shared), '=' and parameters (i.e.yourSharedFile).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "RemoveRareCommand", "getHelpString");
 		exit(1);
 	}
 }
@@ -29,6 +62,7 @@ vector<string> RemoveRareCommand::getValidParameters(){
 RemoveRareCommand::RemoveRareCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["rabund"] = tempOutNames;
 		outputTypes["sabund"] = tempOutNames;
@@ -42,32 +76,8 @@ RemoveRareCommand::RemoveRareCommand(){
 	}
 }
 //**********************************************************************************************************************
-vector<string> RemoveRareCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"nseqs"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "RemoveRareCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> RemoveRareCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "RemoveRareCommand", "getRequiredFiles");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 RemoveRareCommand::RemoveRareCommand(string option)  {
 	try {
-		globaldata = GlobalData::getInstance();
 		abort = false; calledHelp = false;   
 		allLines = 1;
 		
@@ -75,9 +85,7 @@ RemoveRareCommand::RemoveRareCommand(string option)  {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"rabund","sabund", "group", "list", "shared", "bygroup", "nseqs","groups","label","outputdir","inputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
@@ -169,7 +177,29 @@ RemoveRareCommand::RemoveRareCommand(string option)  {
 			if (sharedfile == "not open") { sharedfile = "";  abort = true; }
 			else if (sharedfile == "not found") {  sharedfile = "";  }
 			
-			if ((sabundfile == "") && (rabundfile == "")  && (sharedfile == "") && (listfile == ""))  { m->mothurOut("You must provide at least one of the following: rabund, sabund, shared or list."); m->mothurOutEndLine(); abort = true; }
+			if ((sharedfile == "") && (listfile == "") && (rabundfile == "") && (sabundfile == "")) { 
+				//is there are current file available for any of these?
+				//give priority to shared, then list, then rabund, then sabund
+				//if there is a current shared file, use it
+				sharedfile = m->getSharedFile(); 
+				if (sharedfile != "") {  m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+				else { 
+					listfile = m->getListFile(); 
+					if (listfile != "") {  m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
+					else { 
+						rabundfile = m->getRabundFile(); 
+						if (rabundfile != "") {  m->mothurOut("Using " + rabundfile + " as input file for the rabund parameter."); m->mothurOutEndLine(); }
+						else { 
+							sabundfile = m->getSabundFile(); 
+							if (sabundfile != "") {  m->mothurOut("Using " + sabundfile + " as input file for the sabund parameter."); m->mothurOutEndLine(); }
+							else { 
+								m->mothurOut("No valid current files. You must provide a list, sabund, rabund or shared file."); m->mothurOutEndLine(); 
+								abort = true;
+							}
+						}
+					}
+				}
+			} 
 			
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = "all"; }
@@ -200,27 +230,6 @@ RemoveRareCommand::RemoveRareCommand(string option)  {
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-
-void RemoveRareCommand::help(){
-	try {
-		m->mothurOut("The remove.rare command parameters are list, rabund, sabund, shared, group, label, groups, bygroup and nseqs.\n");
-		m->mothurOut("The remove.rare command reads one of the following file types: list, rabund, sabund or shared file. It outputs a new file after removing the rare otus.\n");
-		m->mothurOut("The groups parameter allows you to specify which of the groups you would like analyzed.  Default=all. You may separate group names with dashes.\n");
-		m->mothurOut("The label parameter is used to analyze specific labels in your input. default=all. You may separate label names with dashes.\n");
-		m->mothurOut("The bygroup parameter is only valid with the shared file. default=f, meaning remove any OTU that has nseqs or fewer sequences across all groups.\n");
-		m->mothurOut("bygroups=T means remove any OTU that has nseqs or fewer sequences in each group (if groupA has 1 sequence and group B has 100 sequences in OTUZ and nseqs=1, then set the groupA count for OTUZ to 0 and keep groupB's count at 100.) \n");
-		m->mothurOut("The nseqs parameter allows you to set the cutoff for an otu to be deemed rare. It is required.\n");
-		m->mothurOut("The remove.rare command should be in the following format: remove.rare(shared=yourSharedFile, nseqs=yourRareCutoff).\n");
-		m->mothurOut("Example remove.rare(shared=amazon.fn.shared, nseqs=2).\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. shared), '=' and parameters (i.e.yourSharedFile).\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "RemoveRareCommand", "help");
-		exit(1);
-	}
-}
-
 //**********************************************************************************************************************
 
 int RemoveRareCommand::execute(){
@@ -609,7 +618,7 @@ int RemoveRareCommand::processRabund(){
 //**********************************************************************************************************************
 int RemoveRareCommand::processShared(){
 	try {
-		globaldata->Groups = Groups;
+		m->Groups = Groups;
 		
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(sharedfile);  }

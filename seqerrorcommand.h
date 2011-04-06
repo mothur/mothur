@@ -43,13 +43,15 @@ class SeqErrorCommand : public Command {
 public:
 	SeqErrorCommand(string);
 	SeqErrorCommand();
-	~SeqErrorCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();
+	~SeqErrorCommand() {}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "seq.error";				}
+	string getCommandCategory()		{ return "Sequence Processing";		}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
 	bool abort;
@@ -71,7 +73,6 @@ private:
 	int maxLength;
 	ofstream errorSummaryFile, errorSeqFile;
 	vector<string> outputNames;
-	map<string, vector<string> > outputTypes;
 	
 	vector<Sequence> referenceSeqs;
 	vector<vector<int> > substitutionMatrix;

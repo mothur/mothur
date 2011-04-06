@@ -16,19 +16,17 @@
 
 /***********************************************************************/
 
-SharedListVector::SharedListVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0){globaldata = GlobalData::getInstance(); groupmap = NULL; }
+SharedListVector::SharedListVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0){ groupmap = NULL; }
 
 /***********************************************************************/
 
-SharedListVector::SharedListVector(int n):	DataVector(), data(n, "") , maxRank(0), numBins(0), numSeqs(0){globaldata = GlobalData::getInstance(); groupmap = NULL; }
+SharedListVector::SharedListVector(int n):	DataVector(), data(n, "") , maxRank(0), numBins(0), numSeqs(0){ groupmap = NULL; }
 
 /***********************************************************************/
 SharedListVector::SharedListVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), numSeqs(0) {
 	try {
-		globaldata = GlobalData::getInstance();
-
 		//set up groupmap for later.
-		groupmap = new GroupMap(globaldata->getGroupFile());
+		groupmap = new GroupMap(m->getGroupFile());
 		groupmap->readMap(); 
 
 		int hold;
@@ -269,16 +267,16 @@ vector<SharedRAbundVector*> SharedListVector::getSharedRAbundVector() {
 		map<string, SharedRAbundVector*> finder;  //contains all groups in groupmap
 		string group, names, name;
 	
-		util->setGroups(globaldata->Groups, globaldata->gGroupmap->namesOfGroups);
+		util->setGroups(m->Groups, groupmap->namesOfGroups);
 		delete util;
 
-		for (int i = 0; i < globaldata->gGroupmap->namesOfGroups.size(); i++) {
+		for (int i = 0; i < groupmap->namesOfGroups.size(); i++) {
 			SharedRAbundVector* temp = new SharedRAbundVector(data.size());
-			finder[globaldata->gGroupmap->namesOfGroups[i]] = temp;
-			finder[globaldata->gGroupmap->namesOfGroups[i]]->setLabel(label);
-			finder[globaldata->gGroupmap->namesOfGroups[i]]->setGroup(globaldata->gGroupmap->namesOfGroups[i]);
-			if (m->inUsersGroups(globaldata->gGroupmap->namesOfGroups[i], globaldata->Groups)) {  //if this group is in user groups
-				lookup.push_back(finder[globaldata->gGroupmap->namesOfGroups[i]]);
+			finder[groupmap->namesOfGroups[i]] = temp;
+			finder[groupmap->namesOfGroups[i]]->setLabel(label);
+			finder[groupmap->namesOfGroups[i]]->setGroup(groupmap->namesOfGroups[i]);
+			if (m->inUsersGroups(groupmap->namesOfGroups[i], m->Groups)) {  //if this group is in user groups
+				lookup.push_back(finder[groupmap->namesOfGroups[i]]);
 			}
 		}
 	

@@ -20,19 +20,21 @@ public:
 	MakeFastQCommand(string);	
 	MakeFastQCommand();
 	~MakeFastQCommand(){}
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();	
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "make.fastq";				}
+	string getCommandCategory()		{ return "Sequence Processing";		}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
+	
 	
 private:
 	
 	string fastafile, qualfile, outputDir;
 	bool abort;
 	vector<string> outputNames;
-	map<string, vector<string> > outputTypes;
 	
 	string convertQual(vector<int>);
 	

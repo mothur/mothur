@@ -11,14 +11,41 @@
 #include "globaldata.hpp"
 
 //**********************************************************************************************************************
-vector<string> CatchAllCommand::getValidParameters(){	
+vector<string> CatchAllCommand::setParameters(){	
 	try {
-		string AlignArray[] =  {"sabund","shared","label","inputdir","outputdir"};
-		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
+		//can choose shared or sabund not both, so put them in the same chooseOnlyOneGroup
+		CommandParameter pshared("shared", "InputTypes", "", "", "catchallInputs", "catchallInputs", "none",false,false); parameters.push_back(pshared);
+		CommandParameter psabund("sabund", "InputTypes", "", "", "catchallInputs", "catchallInputs", "none",false,false); parameters.push_back(psabund);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "CatchAllCommand", "getValidParameters");
+		m->errorOut(e, "CatchAllCommand", "setParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string CatchAllCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The catchall command interfaces mothur with the catchall program written by Linda Woodard, Sean Connolly and John Bunge.\n";
+		helpString += "For more information about catchall refer to http://www.northeastern.edu/catchall/index.html \n";
+		helpString += "The catchall executable must be in the same folder as your mothur executable. \n";
+		helpString += "If you are a MAC or Linux user you must also have installed mono, a link to mono is on the webpage. \n";
+		helpString += "The catchall command parameters are shared, sabund and label.  shared or sabund is required. \n";
+		helpString += "The label parameter is used to analyze specific labels in your input.\n";
+		helpString += "The catchall command should be in the following format: \n";
+		helpString += "catchall(sabund=yourSabundFile) \n";
+		helpString += "Example: catchall(sabund=abrecovery.fn.sabund) \n";	
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "CatchAllCommand", "getHelpString");
 		exit(1);
 	}
 }
@@ -26,6 +53,7 @@ vector<string> CatchAllCommand::getValidParameters(){
 CatchAllCommand::CatchAllCommand(){	
 	try {
 		abort = true; calledHelp = true;
+		setParameters();
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["csv"] = tempOutNames;
@@ -36,33 +64,10 @@ CatchAllCommand::CatchAllCommand(){
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-vector<string> CatchAllCommand::getRequiredParameters(){	
-	try {
-		string AlignArray[] =  {"sabund","shared","or"};
-		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "CatchAllCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> CatchAllCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "CatchAllCommand", "getRequiredFiles");
-		exit(1);
-	}
-}
 /**************************************************************************************/
 CatchAllCommand::CatchAllCommand(string option)  {	
 	try {
-		globaldata = GlobalData::getInstance();
+		
 		abort = false; calledHelp = false;   
 		allLines = 1;
 		
@@ -70,9 +75,7 @@ CatchAllCommand::CatchAllCommand(string option)  {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"shared","sabund","label","inputdir","outputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
@@ -116,16 +119,10 @@ CatchAllCommand::CatchAllCommand(string option)  {
 			sabundfile = validParameter.validFile(parameters, "sabund", true);
 			if (sabundfile == "not open") { sabundfile = ""; abort = true; }
 			else if (sabundfile == "not found") { sabundfile = "";  }
-			else { globaldata->setSabundFile(sabundfile); globaldata->setFormat("sabund"); }
 			
 			sharedfile = validParameter.validFile(parameters, "shared", true);
 			if (sharedfile == "not open") { sharedfile = ""; abort = true; }
 			else if (sharedfile == "not found") { sharedfile = "";   }
-			
-			//check for shared file loaded during read.otu
-			if (sharedfile == "") {
-				if (globaldata->getSharedFile() != "") { sharedfile = globaldata->getSharedFile(); }
-			}
 			
 			string label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
@@ -134,8 +131,22 @@ CatchAllCommand::CatchAllCommand(string option)  {
 				else { allLines = 1;  }
 			}
 		
-			if ((sharedfile == "") && (sabundfile == "")) { m->mothurOut("You must provide a sabund or shared file for the catchall command."); m->mothurOutEndLine(); abort=true; }
-
+			if ((sharedfile == "") && (sabundfile == "")) { 
+				//is there are current file available for either of these?
+				//give priority to shared, then sabund
+				//if there is a current shared file, use it
+				sharedfile = m->getSharedFile(); 
+				if (sharedfile != "") {  m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+				else { 
+					sabundfile = m->getSabundFile(); 
+					if (sabundfile != "") {  m->mothurOut("Using " + sabundfile + " as input file for the sabund parameter."); m->mothurOutEndLine(); }
+					else { 
+						m->mothurOut("No valid current files. You must provide a sabund or shared file before you can use the catchall command."); m->mothurOutEndLine(); 
+						abort = true;
+					}
+				}
+			}
+			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		
 			if (outputDir == "not found"){	
@@ -150,26 +161,6 @@ CatchAllCommand::CatchAllCommand(string option)  {
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-
-void CatchAllCommand::help(){
-	try {
-		m->mothurOut("The catchall command interfaces mothur with the catchall program written by Linda Woodard, Sean Connolly and John Bunge.\n");
-		m->mothurOut("For more information about catchall refer to http://www.northeastern.edu/catchall/index.html \n");
-		m->mothurOut("The catchall executable must be in the same folder as your mothur executable. \n");
-		m->mothurOut("If you are a MAC or Linux user you must also have installed mono, a link to mono is on the webpage. \n");
-		m->mothurOut("The catchall command parameters are shared, sabund and label.  shared or sabund is required. \n");
-		m->mothurOut("The label parameter is used to analyze specific labels in your input.\n");
-		m->mothurOut("The catchall command should be in the following format: \n");
-		m->mothurOut("catchall(sabund=yourSabundFile) \n");
-		m->mothurOut("Example: catchall(sabund=abrecovery.fn.sabund) \n");	
-	}
-	catch(exception& e) {
-		m->errorOut(e, "CatchAllCommand", "help");
-		exit(1);
-	}
-}
-
 /**************************************************************************************/
 int CatchAllCommand::execute() {	
 	try {
@@ -177,8 +168,7 @@ int CatchAllCommand::execute() {
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//get location of catchall
-		GlobalData* globaldata = GlobalData::getInstance();
-		path = globaldata->argv;
+		path = m->argv;
 		path = path.substr(0, (path.find_last_of("othur")-5));
 		path = m->getFullPathName(path);
 		
@@ -196,7 +186,7 @@ int CatchAllCommand::execute() {
 		outputDir = m->getFullPathName(outputDir);
 		
 		vector<string> inputFileNames;
-		if (sharedfile != "") { inputFileNames = parseSharedFile(sharedfile);  globaldata->setFormat("sabund");  }
+		if (sharedfile != "") { inputFileNames = parseSharedFile(sharedfile);   }
 		else {  inputFileNames.push_back(sabundfile);  }		
 		
 		for (int p = 0; p < inputFileNames.size(); p++) {
@@ -386,8 +376,6 @@ int CatchAllCommand::execute() {
 			}
 			string summaryfilename = combineSummmary(sumNames);
 			outputNames.push_back(summaryfilename); outputTypes["summary"].push_back(summaryfilename);
-			
-			globaldata->setSharedFile(sharedfile); globaldata->setFormat("sharedfile");
 		}
 		
 		m->mothurOutEndLine();

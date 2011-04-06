@@ -16,22 +16,22 @@
 #include "progress.hpp"
 #include "sharedutilities.h"
 #include "fileoutput.h"
-
-
-class GlobalData;
+#include "readtree.h"
 
 class UnifracWeightedCommand : public Command {
 	
 	public:
 		UnifracWeightedCommand(string);
 		UnifracWeightedCommand();
-		~UnifracWeightedCommand() { if (abort == false) {  delete weighted; delete util; } }
-		vector<string> getRequiredParameters();
-		vector<string> getValidParameters();
-		vector<string> getRequiredFiles();
-		map<string, vector<string> > getOutputFiles() { return outputTypes; }
-		int execute();	
-		void help();
+		~UnifracWeightedCommand() {}
+	
+		vector<string> setParameters();
+		string getCommandName()			{ return "unifrac.weighted";		}
+		string getCommandCategory()		{ return "Hypothesis Testing";		}
+		string getHelpString();	
+	
+		int execute();
+		void help() { m->mothurOut(getHelpString()); }
 	
 	private:
 		struct linePair {
@@ -41,7 +41,7 @@ class UnifracWeightedCommand : public Command {
 		};
 		vector<linePair> lines;
 		
-		GlobalData* globaldata;
+		ReadTree* read;
 		SharedUtil* util;
 		FileOutput* output;
 		vector<Tree*> T;	   //user trees
@@ -61,13 +61,11 @@ class UnifracWeightedCommand : public Command {
 		map<float, float>  validScores;  //map contains scores from random
 		
 		bool abort, phylip, random, includeRoot;
-		string groups, itersString, outputForm;
+		string groups, itersString, outputForm, treefile, groupfile, namefile;
 		vector<string> Groups, outputNames; //holds groups to be used
-		map<string, vector<string> > outputTypes;
-		int processors;
-
-		
+		int processors, numUniquesInName;
 		ofstream outSum;
+		map<string, string> nameMap;
 		
 		void printWSummaryFile();
 		void printWeightedFile();  
@@ -77,6 +75,7 @@ class UnifracWeightedCommand : public Command {
 		void calculateFreqsCumuls();
 		int createProcesses(Tree*,  vector< vector<string> >,  vector< vector<double> >&);
 		int driver(Tree*, vector< vector<string> >, int, int,  vector< vector<double> >&);
+		int readNamesFile();
 		
 };
 

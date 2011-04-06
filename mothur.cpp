@@ -14,7 +14,6 @@
 
 /**************************************************************************************************/
 
-GlobalData* GlobalData::_uniqueInstance = 0;
 CommandFactory* CommandFactory::_uniqueInstance = 0;
 MothurOut* MothurOut::_uniqueInstance = 0;
 

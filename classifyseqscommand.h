@@ -12,7 +12,6 @@
 
 #include "mothur.h"
 #include "command.hpp"
-//#include "alignment.hpp"
 #include "classify.h"
 
 //KNN and Bayesian methods modeled from algorithms in
@@ -31,12 +30,16 @@ public:
 	ClassifySeqsCommand(string);
 	ClassifySeqsCommand();
 	~ClassifySeqsCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "classify.seqs";		}
+	string getCommandCategory()		{ return "Phylotype Analysis";	}
+	string getHelpString();	
+	
 	int execute(); 
-	void help();	
+	void help() { m->mothurOut(getHelpString()); }	
+	
+	
 	
 private:
 	struct linePair {
@@ -53,7 +56,6 @@ private:
 	vector<string> outputNames;
 	map<string, vector<string> > nameMap;
 	map<string,  vector<string> >::iterator itNames;
-	map<string, vector<string> > outputTypes;
 	
 	Classify* classify;
 	

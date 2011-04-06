@@ -20,13 +20,15 @@ class TrimSeqsCommand : public Command {
 public:
 	TrimSeqsCommand(string);
 	TrimSeqsCommand();
-	~TrimSeqsCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();
+	~TrimSeqsCommand(){}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "trim.seqs";	}
+	string getCommandCategory()		{ return "Sequence Processing";		}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
 	
@@ -51,7 +53,6 @@ private:
 	bool cullAmbigs(Sequence&);
 	bool compareDNASeq(string, string);
 	int countDiffs(string, string);
-	map<string, vector<string> > outputTypes;
 
 	bool abort;
 	string fastaFile, oligoFile, qFileName, groupfile, outputDir;

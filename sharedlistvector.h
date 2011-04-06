@@ -12,7 +12,6 @@
 
 #include "datavector.hpp"
 #include "groupmap.h"
-#include "globaldata.hpp"
 #include "sharedrabundvector.h"
 #include "sharedsabundvector.h"
 
@@ -33,7 +32,7 @@ public:
 	SharedListVector();
 	SharedListVector(int);
 	SharedListVector(ifstream&);
-	SharedListVector(const SharedListVector& lv) : DataVector(lv.label), data(lv.data), maxRank(lv.maxRank), numBins(lv.numBins), numSeqs(lv.numSeqs){globaldata = GlobalData::getInstance(); groupmap = NULL; };
+	SharedListVector(const SharedListVector& lv) : DataVector(lv.label), data(lv.data), maxRank(lv.maxRank), numBins(lv.numBins), numSeqs(lv.numSeqs){ groupmap = NULL; };
 	~SharedListVector(){ if (groupmap != NULL) { delete groupmap; } };
 	
 	int getNumBins()							{	return numBins;		}
@@ -58,7 +57,6 @@ public:
 	
 private:
 	vector<string> data;  //data[i] is a list of names of sequences in the ith OTU.
-	GlobalData* globaldata;
 	GroupMap* groupmap;
 	int maxRank;
 	int numBins;

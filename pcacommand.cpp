@@ -11,14 +11,40 @@
 #include "inputdata.h"
 
 //**********************************************************************************************************************
-vector<string> PCACommand::getValidParameters(){	
+vector<string> PCACommand::setParameters(){	
 	try {
-		string Array[] =  {"label", "groups","metric","outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter pshared("shared", "InputTypes", "", "", "LRSS", "LRSS", "none",false,false); parameters.push_back(pshared);	
+		CommandParameter prelabund("relabund", "InputTypes", "", "", "LRSS", "LRSS", "none",false,false); parameters.push_back(prelabund);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
+		CommandParameter pmetric("metric", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pmetric);
+		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "PCACommand", "getValidParameters");
+		m->errorOut(e, "PCACommand", "setParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string PCACommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The pca command parameters are shared, relabund, label, groups and metric.  shared or relabund is required unless you have a valid current file."; 
+		helpString += "The label parameter is used to analyze specific labels in your input. Default is the first label in your shared or relabund file. Multiple labels may be separated by dashes.\n";
+		helpString += "The groups parameter allows you to specify which groups you would like analyzed. Groupnames are separated by dashes.\n";
+		helpString += "The metric parameter allows indicate you if would like the pearson correlation coefficient calculated. Default=True";
+		helpString += "Example pca(groups=yourGroups).\n";
+		helpString += "Example pca(groups=A-B-C).\n";
+		helpString += "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PCACommand", "getHelpString");
 		exit(1);
 	}
 }
@@ -26,6 +52,7 @@ vector<string> PCACommand::getValidParameters(){
 PCACommand::PCACommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["pca"] = tempOutNames;
 		outputTypes["loadings"] = tempOutNames;
@@ -36,43 +63,16 @@ PCACommand::PCACommand(){
 	}
 }
 //**********************************************************************************************************************
-vector<string> PCACommand::getRequiredParameters(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PCACommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> PCACommand::getRequiredFiles(){	
-	try {
-		string Array[] =  {"shared","relabund","or"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PCACommand", "getRequiredFiles");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 
 PCACommand::PCACommand(string option)  {
 	try {
 		abort = false; calledHelp = false;   
 		
-		globaldata = GlobalData::getInstance();
-		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"label","groups","metric","outputdir", "inputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string, string> parameters = parser. getParameters();
@@ -84,22 +84,62 @@ PCACommand::PCACommand(string option)  {
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		if (inputDir == "not found"){	inputDir = "";		}
-			
+	
 			//initialize outputTypes
 			vector<string> tempOutNames;
 			outputTypes["pca"] = tempOutNames;
 			outputTypes["loadings"] = tempOutNames;
 			
-			//make sure the user has already run the read.otu command
-			if ((globaldata->getSharedFile() == "") && (globaldata->getRelAbundFile() == "")) {
-				m->mothurOut("You must read a list and a group, shared or relabund file before you can use the pca command."); m->mothurOutEndLine(); abort = true; 
+			//if the user changes the input directory command factory will send this info to us in the output parameter 
+			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			if (inputDir == "not found"){	inputDir = "";		}
+			else {
+				string path;
+				it = parameters.find("shared");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("relabund");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["relabund"] = inputDir + it->second;		}
+				}
 			}
 			
-			if (globaldata->getSharedFile() != "")		{ mode = "shared"; inputFile = globaldata->getSharedFile();		}
-			if (globaldata->getRelAbundFile() != "")	{ mode = "relabund"; inputFile = globaldata->getRelAbundFile(); }
+			//check for required parameters
+			sharedfile = validParameter.validFile(parameters, "shared", true);
+			if (sharedfile == "not open") { sharedfile = ""; abort = true; }	
+			else if (sharedfile == "not found") { sharedfile = ""; }
+			else {  mode = "sharedfile"; inputFile = sharedfile; }
 			
+			relabundfile = validParameter.validFile(parameters, "relabund", true);
+			if (relabundfile == "not open") { relabundfile = ""; abort = true; }	
+			else if (relabundfile == "not found") { relabundfile = ""; }
+			else {  mode = "relabund"; inputFile = relabundfile; }
+			
+			
+			if ((sharedfile == "") && (relabundfile == "")) { 
+				//is there are current file available for any of these?
+				//give priority to shared, then list, then rabund, then sabund
+				//if there is a current shared file, use it
+				sharedfile = m->getSharedFile(); 
+				if (sharedfile != "") { inputFile = sharedfile; mode = "sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+				else { 
+					relabundfile = m->getRelAbundFile(); 
+					if (relabundfile != "") { inputFile = relabundfile; mode = "relabund"; m->mothurOut("Using " + relabundfile + " as input file for the relabund parameter."); m->mothurOutEndLine(); }
+					else { 
+						m->mothurOut("No valid current files. You must provide a relabund or shared file."); m->mothurOutEndLine(); 
+						abort = true;
+					}
+				}
+			}
+				
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
 				outputDir = "";	
@@ -110,13 +150,13 @@ PCACommand::PCACommand(string option)  {
 			metric = m->isTrue(temp); 
 			
 			label = validParameter.validFile(parameters, "label", false);			
-			if (label == "not found") { label = ""; labels = globaldata->labels; if(labels.size() == 0) {  m->mothurOut("You did not provide a label, I will use the first label in your inputfile."); m->mothurOutEndLine(); } }
+			if (label == "not found") { label = ""; if(labels.size() == 0) {  m->mothurOut("You did not provide a label, I will use the first label in your inputfile."); m->mothurOutEndLine(); } }
 			else { m->splitAtDash(label, labels); }
 			
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = "";  }
 			else { m->splitAtDash(groups, Groups);	}			
-			globaldata->Groups = Groups;			
+			m->Groups = Groups;			
 			
 		}
 		
@@ -126,25 +166,6 @@ PCACommand::PCACommand(string option)  {
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-void PCACommand::help(){
-	try {
-		m->mothurOut("The pca command can only be run after a successful read.otu command of a shared or relabund file."); m->mothurOutEndLine();
-		m->mothurOut("The pca command parameters are label, groups and metric. No parameters are required."); m->mothurOutEndLine();
-		m->mothurOut("The label parameter is used to analyze specific labels in your input. Default is the first label in your shared or relabund file. Multiple labels may be separated by dashes.\n");
-		m->mothurOut("The groups parameter allows you to specify which groups you would like analyzed. Groupnames are separated by dashes.\n");
-		m->mothurOut("The metric parameter allows indicate you if would like the pearson correlation coefficient calculated. Default=True"); m->mothurOutEndLine();
-		m->mothurOut("Example pca(groups=yourGroups).\n");
-		m->mothurOut("Example pca(groups=A-B-C).\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PCACommand", "help");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-PCACommand::~PCACommand(){}
 //**********************************************************************************************************************
 int PCACommand::execute(){
 	try {
@@ -344,7 +365,7 @@ int PCACommand::process(vector<SharedRAbundFloatVector*>& lookupFloat){
 		
 		string fbase = outputDir + m->getRootName(m->getSimpleName(inputFile));
 		string outputFileName = fbase + lookupFloat[0]->getLabel();
-		output(outputFileName, globaldata->Groups, G, d);
+		output(outputFileName, m->Groups, G, d);
 		
 		if (metric) {   
 			

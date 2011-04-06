@@ -12,14 +12,53 @@
 #include "phylosummary.h"
 
 //**********************************************************************************************************************
-vector<string> ClassifyOtuCommand::getValidParameters(){	
+vector<string> ClassifyOtuCommand::setParameters(){	
 	try {
-		string AlignArray[] =  {"list","label","name","taxonomy","basis","cutoff","probs","group","reftaxonomy","outputdir","inputdir"};
-		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(plist);
+		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(ptaxonomy);
+		CommandParameter preftaxonomy("reftaxonomy", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(preftaxonomy);
+		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
+		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pgroup);
+		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
+		CommandParameter pbasis("basis", "Multiple", "otu-sequence", "otu", "", "", "",false,false); parameters.push_back(pbasis);
+		CommandParameter pcutoff("cutoff", "Number", "", "51", "", "", "",false,true); parameters.push_back(pcutoff);
+		CommandParameter pprobs("probs", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pprobs);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ClassifyOtuCommand", "getValidParameters");
+		m->errorOut(e, "ClassifyOtuCommand", "setParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string ClassifyOtuCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The classify.otu command parameters are list, taxonomy, reftaxonomy, name, group, cutoff, label, basis and probs.  The taxonomy and list parameters are required unless you have a valid current file.\n";
+		helpString += "The reftaxonomy parameter allows you give the name of the reference taxonomy file used when you classified your sequences. Providing it will keep the rankIDs in the summary file static.\n";
+		helpString += "The name parameter allows you add a names file with your taxonomy file.\n";
+		helpString += "The group parameter allows you provide a group file to use in creating the summary file breakdown.\n";
+		helpString += "The basis parameter allows you indicate what you want the summary file to represent, options are otu and sequence. Default is otu.\n";
+		helpString += "For example consider the following basis=sequence could give Clostridiales	3	105	16	43	46, where 105 is the total number of sequences whose otu classified to Clostridiales.\n";
+		helpString += "16 is the number of sequences in the otus from groupA, 43 is the number of sequences in the otus from groupB, and 46 is the number of sequences in the otus from groupC.\n";
+		helpString += "Now for basis=otu could give Clostridiales	3	7	6	1	2, where 7 is the number of otus that classified to Clostridiales.\n";
+		helpString += "6 is the number of otus containing sequences from groupA, 1 is the number of otus containing sequences from groupB, and 2 is the number of otus containing sequences from groupC.\n";
+		helpString += "The label parameter allows you to select what distance levels you would like a output files created for, and is separated by dashes.\n";
+		helpString += "The default value for label is all labels in your inputfile.\n";
+		helpString += "The cutoff parameter allows you to specify a consensus confidence threshold for your taxonomy.  The default is 51, meaning 51%. Cutoff cannot be below 51.\n";
+		helpString += "The probs parameter shuts off the outputting of the consensus confidence results. The default is true, meaning you want the confidence to be shown.\n";
+		helpString += "The classify.otu command should be in the following format: classify.otu(taxonomy=yourTaxonomyFile, list=yourListFile, name=yourNamesFile, label=yourLabels).\n";
+		helpString += "Example classify.otu(taxonomy=abrecovery.silva.full.taxonomy, list=abrecovery.fn.list, label=0.10).\n";
+		helpString += "Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListFile).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClassifyOtuCommand", "getHelpString");
 		exit(1);
 	}
 }
@@ -27,6 +66,7 @@ vector<string> ClassifyOtuCommand::getValidParameters(){
 ClassifyOtuCommand::ClassifyOtuCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["constaxonomy"] = tempOutNames;
 		outputTypes["taxsummary"] = tempOutNames;
@@ -36,29 +76,7 @@ ClassifyOtuCommand::ClassifyOtuCommand(){
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-vector<string> ClassifyOtuCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"list","taxonomy"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClassifyOtuCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> ClassifyOtuCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClassifyOtuCommand", "getRequiredFiles");
-		exit(1);
-	}
-}
+
 //**********************************************************************************************************************
 ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 	try{
@@ -70,9 +88,7 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 		if (option == "help") { 
 			help(); abort = true; calledHelp = true;
 		} else {
-			//valid paramters for this command
-			string Array[] =  {"list","label","name","taxonomy","cutoff","probs","basis","reftaxonomy","group","outputdir","inputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string, string> parameters = parser.getParameters();
@@ -142,11 +158,20 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 			
 			//check for required parameters
 			listfile = validParameter.validFile(parameters, "list", true);
-			if (listfile == "not found") { m->mothurOut("list is a required parameter for the classify.otu command."); m->mothurOutEndLine(); abort = true; }
+			if (listfile == "not found") {				
+				//if there is a current list file, use it
+				listfile = m->getListFile(); 
+				if (listfile != "") {  m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current listfile and the list parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}
 			else if (listfile == "not open") { abort = true; }	
 			
 			taxfile = validParameter.validFile(parameters, "taxonomy", true);
-			if (taxfile == "not found") {  m->mothurOut("taxonomy is a required parameter for the classify.otu command."); m->mothurOutEndLine(); abort = true; }
+			if (taxfile == "not found") {  //if there is a current list file, use it
+				taxfile = m->getTaxonomyFile(); 
+				if (taxfile != "") {  m->mothurOut("Using " + taxfile + " as input file for the taxonomy parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current taxonomy file and the taxonomy parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}
 			else if (taxfile == "not open") { abort = true; }
 			
 			refTaxonomy = validParameter.validFile(parameters, "reftaxonomy", true);
@@ -191,38 +216,6 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 		exit(1);
 	}
 }
-
-//**********************************************************************************************************************
-
-void ClassifyOtuCommand::help(){
-	try {
-		m->mothurOut("The classify.otu command parameters are list, taxonomy, reftaxonomy, name, group, cutoff, label, basis and probs.  The taxonomy and list parameters are required.\n");
-		m->mothurOut("The reftaxonomy parameter allows you give the name of the reference taxonomy file used when you classified your sequences. Providing it will keep the rankIDs in the summary file static.\n");
-		m->mothurOut("The name parameter allows you add a names file with your taxonomy file.\n");
-		m->mothurOut("The group parameter allows you provide a group file to use in creating the summary file breakdown.\n");
-		m->mothurOut("The basis parameter allows you indicate what you want the summary file to represent, options are otu and sequence. Default is otu.\n");
-		m->mothurOut("For example consider the following basis=sequence could give Clostridiales	3	105	16	43	46, where 105 is the total number of sequences whose otu classified to Clostridiales.\n");
-		m->mothurOut("16 is the number of sequences in the otus from groupA, 43 is the number of sequences in the otus from groupB, and 46 is the number of sequences in the otus from groupC.\n");
-		m->mothurOut("Now for basis=otu could give Clostridiales	3	7	6	1	2, where 7 is the number of otus that classified to Clostridiales.\n");
-		m->mothurOut("6 is the number of otus containing sequences from groupA, 1 is the number of otus containing sequences from groupB, and 2 is the number of otus containing sequences from groupC.\n");
-		m->mothurOut("The label parameter allows you to select what distance levels you would like a output files created for, and is separated by dashes.\n");
-		m->mothurOut("The default value for label is all labels in your inputfile.\n");
-		m->mothurOut("The cutoff parameter allows you to specify a consensus confidence threshold for your taxonomy.  The default is 51, meaning 51%. Cutoff cannot be below 51.\n");
-		m->mothurOut("The probs parameter shuts off the outputting of the consensus confidence results. The default is true, meaning you want the confidence to be shown.\n");
-		m->mothurOut("The classify.otu command should be in the following format: classify.otu(taxonomy=yourTaxonomyFile, list=yourListFile, name=yourNamesFile, label=yourLabels).\n");
-		m->mothurOut("Example classify.otu(taxonomy=abrecovery.silva.full.taxonomy, list=abrecovery.fn.list, label=0.10).\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListFile).\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClassifyOtuCommand", "help");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
-ClassifyOtuCommand::~ClassifyOtuCommand(){}
-
 //**********************************************************************************************************************
 
 int ClassifyOtuCommand::execute(){

@@ -11,7 +11,6 @@
  */
 
 #include "calculator.h"
-#include "globaldata.hpp"
 
 /*This class implements the SharedJackknife estimator. 
 It is a child of the calculator class.*/ 
@@ -26,7 +25,6 @@ public:
 	EstOutput getValues(vector<SharedRAbundVector*>);
 	
 private:
-	GlobalData* globaldata;
 	int numGroups, callCount, count;
 	bool currentCallDone;
 	vector<SharedRAbundVector*> groups;

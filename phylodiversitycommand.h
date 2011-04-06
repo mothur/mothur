@@ -12,31 +12,35 @@
 
 #include "command.hpp"
 #include "treemap.h"
-#include "globaldata.hpp"
+#include "readtree.h"
+#include "sharedutilities.h"
+
 
 class PhyloDiversityCommand : public Command {
 	
 	public:
 		PhyloDiversityCommand(string);
 		PhyloDiversityCommand();
-		~PhyloDiversityCommand();
-		vector<string> getRequiredParameters();
-		vector<string> getValidParameters();
-		vector<string> getRequiredFiles();
-		map<string, vector<string> > getOutputFiles() { return outputTypes; }
-		int execute();	
-		void help();
+		~PhyloDiversityCommand(){}
 	
-	private:
-		GlobalData* globaldata;
-		
+		vector<string> setParameters();
+		string getCommandName()			{ return "phylo.diversity";			}
+		string getCommandCategory()		{ return "Hypothesis Testing";		}
+		string getHelpString();	
+	
+		int execute();
+		void help() { m->mothurOut(getHelpString()); }
+private:
+		ReadTree* read;
+		TreeMap* tmap;
 		float freq;
-		int iters, processors;  
+		int iters, processors, numUniquesInName;  
 		bool abort, rarefy, summary, collect, scale;
-		string groups, outputDir;
+		string groups, outputDir, treefile, groupfile, namefile;
 		vector<string> Groups, outputNames; //holds groups to be used, and outputFile names
-		map<string, vector<string> > outputTypes;
+		map<string, string> nameMap;
 		
+		int readNamesFile();
 		void printData(set<int>&, map< string, vector<float> >&, ofstream&, int);
 		void printSumData(map< string, vector<float> >&, ofstream&, int);
 		vector<float> calcBranchLength(Tree*, int, map< string, set<int> >&);

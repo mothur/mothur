@@ -21,6 +21,7 @@ also allow an option where a user can give a group file with the list or names f
 #include "groupmap.h"
 #include "inputdata.h"
 #include "listvector.hpp"
+#include "sequence.hpp"
 
 /***************************************************************************************/
 
@@ -30,13 +31,14 @@ public:
 	SplitAbundCommand(string);	
 	SplitAbundCommand();
 	~SplitAbundCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();	
-	void help();
-
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "split.abund";				}
+	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
 	int splitList(ListVector*);
@@ -50,7 +52,6 @@ private:
 	int createNameMap(ListVector*);
 	
 	vector<string> outputNames;
-	map<string, vector<string> > outputTypes;
 	ListVector* list;
 	GroupMap* groupMap;
 	InputData* input;

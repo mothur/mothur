@@ -11,7 +11,7 @@
 #include "progress.hpp"
 
 /***********************************************************************/
-ClusterClassic::ClusterClassic(float c, string f) : method(f), smallDist(1e6), nseqs(0) {
+ClusterClassic::ClusterClassic(float c, string f, bool s) : method(f), smallDist(1e6), nseqs(0), sim(s) {
 	try {
 		mapWanted = false;  //set to true by mgcluster to speed up overlap merge
 	
@@ -19,7 +19,6 @@ ClusterClassic::ClusterClassic(float c, string f) : method(f), smallDist(1e6), n
 		cutoff = c;
 		aboveCutoff = cutoff + 10000.0;
 		m = MothurOut::getInstance();
-		globaldata = GlobalData::getInstance();
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClusterClassic", "ClusterClassic");
@@ -102,7 +101,7 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 										fileHandle >> distance;
 							
 										if (distance == -1) { distance = 1000000; }
-										else if (globaldata->sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
+										else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
 								
 										//if(distance < cutoff){
 											dMatrix[i][j] = distance;
@@ -124,7 +123,7 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 										if (m->control_pressed) { delete reading; fileHandle.close(); return 0;  }
 				
 										if (distance == -1) { distance = 1000000; }
-										else if (globaldata->sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
+										else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
 										
 										//if(distance < cutoff){
 											if (distance < smallDist) { smallDist = distance; }
@@ -162,7 +161,7 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 										if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
 										
 										if (distance == -1) { distance = 1000000; }
-										else if (globaldata->sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
+										else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
 										
 										if(j < i){
 											if (distance < smallDist) { smallDist = distance; }
@@ -185,7 +184,7 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 										if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
 										
 									   if (distance == -1) { distance = 1000000; }
-										else if (globaldata->sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.                                                        
+										else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.                                                        
 										
 										if(j < i){
 											if (distance < smallDist) { smallDist = distance; }

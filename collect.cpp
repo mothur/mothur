@@ -70,17 +70,15 @@ int Collect::getCurve(float percentFreq = 0.01){
 /***********************************************************************/
 int Collect::getSharedCurve(float percentFreq = 0.01){
 try {
-				globaldata = GlobalData::getInstance();
                 vector<SharedRAbundVector*> lookup; 
 				vector<SharedRAbundVector*> subset;
 
                 //create and initialize vector of sharedvectors, one for each group
-                for (int i = 0; i < globaldata->Groups.size(); i++) { 
+                for (int i = 0; i < m->Groups.size(); i++) { 
                         SharedRAbundVector* temp = new SharedRAbundVector(sharedorder->getNumBins());
                         temp->setLabel(sharedorder->getLabel());
-                        temp->setGroup(globaldata->Groups[i]);
-                        temp->setGroupIndex(globaldata->gGroupmap->groupIndex[globaldata->Groups[i]]);
-                        lookup.push_back(temp);
+                        temp->setGroup(m->Groups[i]);
+						lookup.push_back(temp);
                 }
 
                 SharedCollectorsCurveData* ccd = new SharedCollectorsCurveData();
@@ -144,13 +142,13 @@ try {
 													if ((w != k) && (w != l)) { subset.push_back(lookup[w]); }
 												}
 											
-                                                ccd->updateSharedData(subset, i+1, globaldata->Groups.size(), pair);
+                                                ccd->updateSharedData(subset, i+1, m->Groups.size(), pair);
                                         }
                                         n++;
                                 }
 								//if this is a calculator that can do multiples then do them
 								pair = false;
-								ccd->updateSharedData(lookup, i+1, globaldata->Groups.size(), pair); 
+								ccd->updateSharedData(lookup, i+1, m->Groups.size(), pair); 
                         }
                         totalNumSeq = i+1;
                 }
@@ -171,13 +169,13 @@ try {
 											if ((w != k) && (w != l)) { subset.push_back(lookup[w]); }
 										}
 									
-										ccd->updateSharedData(subset, totalNumSeq, globaldata->Groups.size(), pair);
+										ccd->updateSharedData(subset, totalNumSeq, m->Groups.size(), pair);
                                 }
                                 n++;
                         }
 						//if this is a calculator that can do multiples then do them
 						pair = false;
-						ccd->updateSharedData(lookup, totalNumSeq, globaldata->Groups.size(), pair); 
+						ccd->updateSharedData(lookup, totalNumSeq, m->Groups.size(), pair); 
                 }
                 
                 //resets output files
@@ -208,9 +206,9 @@ void Collect::getGroupComb() {
 	numGroupComb = 0;
                 
 	int n = 1;
-	for (int i = 0; i < (globaldata->Groups.size() - 1); i++) {
-		for (int l = n; l < globaldata->Groups.size(); l++) {
-			group = globaldata->Groups[i] + globaldata->Groups[l];
+	for (int i = 0; i < (m->Groups.size() - 1); i++) {
+		for (int l = n; l < m->Groups.size(); l++) {
+			group = m->Groups[i] + m->Groups[l];
 			groupComb.push_back(group);        
 			numGroupComb++;
 		}

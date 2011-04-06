@@ -12,21 +12,58 @@
 #include "listvector.hpp"
 
 //**********************************************************************************************************************
-vector<string> RemoveLineageCommand::getValidParameters(){	
+vector<string> RemoveLineageCommand::setParameters(){	
 	try {
-		string Array[] =  {"fasta","name", "group", "alignreport", "taxon", "dups", "list","taxonomy","outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pfasta);
+		CommandParameter pname("name", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pname);
+		CommandParameter pgroup("group", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pgroup);
+		CommandParameter plist("list", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(plist);
+		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "FNGLT", "none",false,true); parameters.push_back(ptaxonomy);
+		CommandParameter palignreport("alignreport", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(palignreport);
+		CommandParameter ptaxon("taxon", "String", "", "", "", "", "",false,true); parameters.push_back(ptaxon);
+		CommandParameter pdups("dups", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pdups);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "RemoveLineageCommand", "getValidParameters");
+		m->errorOut(e, "RemoveLineageCommand", "setParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
+string RemoveLineageCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The remove.lineage command reads a taxonomy file and any of the following file types: fasta, name, group, list or alignreport file.\n";
+		helpString += "It outputs a file containing only the sequences from the taxonomy file that are not from the taxon you requested to be removed.\n";
+		helpString += "The remove.lineage command parameters are taxon, fasta, name, group, list, taxonomy, alignreport and dups.  You must provide taxonomy unless you have a valid current taxonomy file.\n";
+		helpString += "The dups parameter allows you to add the entire line from a name file if you add any name from the line. default=false. \n";
+		helpString += "The taxon parameter allows you to select the taxons you would like to remove, and is required.\n";
+		helpString += "You may enter your taxons with confidence scores, doing so will remove only those sequences that belong to the taxonomy and whose cofidence scores fall below the scores you give.\n";
+		helpString += "If they belong to the taxonomy and have confidences above those you provide the sequence will not be removed.\n";
+		helpString += "The remove.lineage command should be in the following format: remove.lineage(taxonomy=yourTaxonomyFile, taxon=yourTaxons).\n";
+		helpString += "Example remove.lineage(taxonomy=amazon.silva.taxonomy, taxon=Bacteria;Firmicutes;Bacilli;Lactobacillales;).\n";
+		helpString += "Note: If you are running mothur in script mode you must wrap the taxon in ' characters so mothur will ignore the ; in the taxon.\n";
+		helpString += "Example remove.lineage(taxonomy=amazon.silva.taxonomy, taxon='Bacteria;Firmicutes;Bacilli;Lactobacillales;').\n";
+		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "RemoveLineageCommand", "getHelpString");
+		exit(1);
+	}
+}
+
+
+//**********************************************************************************************************************
 RemoveLineageCommand::RemoveLineageCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
 		outputTypes["taxonomy"] = tempOutNames;
@@ -37,29 +74,6 @@ RemoveLineageCommand::RemoveLineageCommand(){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "RemoveLineageCommand", "RemoveLineageCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> RemoveLineageCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"taxonomy"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "RemoveLineageCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> RemoveLineageCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "RemoveLineageCommand", "getRequiredFiles");
 		exit(1);
 	}
 }
@@ -177,7 +191,11 @@ RemoveLineageCommand::RemoveLineageCommand(string option)  {
 			
 			taxfile = validParameter.validFile(parameters, "taxonomy", true);
 			if (taxfile == "not open") { abort = true; }
-			else if (taxfile == "not found") {  taxfile = ""; m->mothurOut("The taxonomy parameter is required for the get.lineage command."); m->mothurOutEndLine();  abort = true; }
+			else if (taxfile == "not found") {  		
+				taxfile = m->getTaxonomyFile(); 
+				if (taxfile != "") { m->mothurOut("Using " + taxfile + " as input file for the taxonomy parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current taxonomy file and the taxonomy parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}
 			
 			string usedDups = "true";
 			string temp = validParameter.validFile(parameters, "dups", false);	
@@ -208,29 +226,6 @@ RemoveLineageCommand::RemoveLineageCommand(string option)  {
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-
-void RemoveLineageCommand::help(){
-	try {
-		m->mothurOut("The remove.lineage command reads a taxonomy file and any of the following file types: fasta, name, group, list or alignreport file.\n");
-		m->mothurOut("It outputs a file containing only the sequences from the taxonomy file that are not from the taxon you requested to be removed.\n");
-		m->mothurOut("The remove.lineage command parameters are taxon, fasta, name, group, list, taxonomy, alignreport and dups.  You must provide taxonomy and taxon.\n");
-		m->mothurOut("The dups parameter allows you to add the entire line from a name file if you add any name from the line. default=false. \n");
-		m->mothurOut("The taxon parameter allows you to select the taxons you would like to remove.\n");
-		m->mothurOut("You may enter your taxons with confidence scores, doing so will remove only those sequences that belong to the taxonomy and whose cofidence scores fall below the scores you give.\n");
-		m->mothurOut("If they belong to the taxonomy and have confidences above those you provide the sequence will not be removed.\n");
-		m->mothurOut("The remove.lineage command should be in the following format: remove.lineage(taxonomy=yourTaxonomyFile, taxon=yourTaxons).\n");
-		m->mothurOut("Example remove.lineage(taxonomy=amazon.silva.taxonomy, taxon=Bacteria;Firmicutes;Bacilli;Lactobacillales;).\n");
-		m->mothurOut("Note: If you are running mothur in script mode you must wrap the taxon in ' characters so mothur will ignore the ; in the taxon.\n");
-		m->mothurOut("Example remove.lineage(taxonomy=amazon.silva.taxonomy, taxon='Bacteria;Firmicutes;Bacilli;Lactobacillales;').\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "RemoveLineageCommand", "help");
-		exit(1);
-	}
-}
-
 //**********************************************************************************************************************
 
 int RemoveLineageCommand::execute(){

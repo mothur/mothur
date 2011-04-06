@@ -11,14 +11,53 @@
 #include "sharedutilities.h"
 
 //**********************************************************************************************************************
-vector<string> SubSampleCommand::getValidParameters(){	
-	try {
-		string Array[] =  {"fasta", "group", "list","shared","rabund","persample", "name","sabund","size","groups","label","outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+vector<string> SubSampleCommand::setParameters(){	
+	try {		
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "FLSSR", "none",false,false); parameters.push_back(pfasta);
+		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
+		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pgroup);
+		CommandParameter plist("list", "InputTypes", "", "", "none", "FLSSR", "none",false,false); parameters.push_back(plist);
+		CommandParameter pshared("shared", "InputTypes", "", "", "none", "FLSSR", "none",false,false); parameters.push_back(pshared);
+		CommandParameter prabund("rabund", "InputTypes", "", "", "none", "FLSSR", "none",false,false); parameters.push_back(prabund);
+		CommandParameter psabund("sabund", "InputTypes", "", "", "none", "FLSSR", "none",false,false); parameters.push_back(psabund);
+		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
+		CommandParameter psize("size", "Number", "", "0", "", "", "",false,false); parameters.push_back(psize);
+		CommandParameter ppersample("persample", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(ppersample);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "SubSampleCommand", "getValidParameters");
+		m->errorOut(e, "SubSampleCommand", "setParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string SubSampleCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The sub.sample command is designed to be used as a way to normalize your data, or create a smaller set from your original set.\n";
+		helpString += "The sub.sample command parameters are fasta, name, list, group, rabund, sabund, shared, groups, size, persample and label.  You must provide a fasta, list, sabund, rabund or shared file as an input file.\n";
+		helpString += "The namefile is only used with the fasta file, not with the listfile, because the list file should contain all sequences.\n";
+		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like included. The group names are separated by dashes.\n";
+		helpString += "The label parameter allows you to select what distance levels you would like, and are also separated by dashes.\n";
+		helpString += "The size parameter allows you indicate the size of your subsample.\n";
+		helpString += "The persample parameter allows you indicate you want to select subsample of the same size from each of your groups, default=false. It is only used with the list and fasta files if a groupfile is given.\n";
+		helpString += "persample=false will select a random set of sequences of the size you select, but the number of seqs from each group may differ.\n";
+		helpString += "The size parameter is not set: with shared file size=number of seqs in smallest sample, with all other files if a groupfile is given and persample=true, then size=number of seqs in smallest sample, otherwise size=10% of number of seqs.\n";
+		helpString += "The sub.sample command should be in the following format: sub.sample(list=yourListFile, group=yourGroupFile, groups=yourGroups, label=yourLabels).\n";
+		helpString += "Example sub.sample(list=abrecovery.fn.list, group=abrecovery.groups, groups=B-C, size=20).\n";
+		helpString += "The default value for groups is all the groups in your groupfile, and all labels in your inputfile will be used.\n";
+		helpString += "The sub.sample command outputs a .subsample file.\n";
+		helpString += "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SubSampleCommand", "getHelpString");
 		exit(1);
 	}
 }
@@ -26,6 +65,7 @@ vector<string> SubSampleCommand::getValidParameters(){
 SubSampleCommand::SubSampleCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["shared"] = tempOutNames;
 		outputTypes["list"] = tempOutNames;
@@ -41,43 +81,16 @@ SubSampleCommand::SubSampleCommand(){
 	}
 }
 //**********************************************************************************************************************
-vector<string> SubSampleCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"fasta","list","shared","rabund", "sabund","or"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SubSampleCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> SubSampleCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SubSampleCommand", "getRequiredFiles");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 SubSampleCommand::SubSampleCommand(string option) {
 	try {
-		globaldata = GlobalData::getInstance();
 		abort = false; calledHelp = false;   
 		allLines = 1;
-		labels.clear();
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"fasta", "group", "list","shared","rabund","persample", "sabund","name","size","groups","label","outputdir","inputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
@@ -209,7 +222,7 @@ SubSampleCommand::SubSampleCommand(string option) {
 			else { 
 				pickedGroups = true;
 				m->splitAtDash(groups, Groups);
-				globaldata->Groups = Groups;
+				m->Groups = Groups;
 			}
 			
 			string temp = validParameter.validFile(parameters, "size", false);		if (temp == "not found"){	temp = "0";		}
@@ -242,37 +255,6 @@ SubSampleCommand::SubSampleCommand(string option) {
 		exit(1);
 	}
 }
-
-//**********************************************************************************************************************
-
-void SubSampleCommand::help(){
-	try {
-		m->mothurOut("The sub.sample command is designed to be used as a way to normalize your data, or create a smaller set from your original set.\n");
-		m->mothurOut("The sub.sample command parameters are fasta, name, list, group, rabund, sabund, shared, groups, size, persample and label.  You must provide a fasta, list, sabund, rabund or shared file as an input file.\n");
-		m->mothurOut("The namefile is only used with the fasta file, not with the listfile, because the list file should contain all sequences.\n");
-		m->mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like included. The group names are separated by dashes.\n");
-		m->mothurOut("The label parameter allows you to select what distance levels you would like, and are also separated by dashes.\n");
-		m->mothurOut("The size parameter allows you indicate the size of your subsample.\n");
-		m->mothurOut("The persample parameter allows you indicate you want to select subsample of the same size from each of your groups, default=false. It is only used with the list and fasta files if a groupfile is given.\n");
-		m->mothurOut("persample=false will select a random set of sequences of the size you select, but the number of seqs from each group may differ.\n");
-		m->mothurOut("The size parameter is not set: with shared file size=number of seqs in smallest sample, with all other files if a groupfile is given and persample=true, then size=number of seqs in smallest sample, otherwise size=10% of number of seqs.\n");
-		m->mothurOut("The sub.sample command should be in the following format: sub.sample(list=yourListFile, group=yourGroupFile, groups=yourGroups, label=yourLabels).\n");
-		m->mothurOut("Example sub.sample(list=abrecovery.fn.list, group=abrecovery.groups, groups=B-C, size=20).\n");
-		m->mothurOut("The default value for groups is all the groups in your groupfile, and all labels in your inputfile will be used.\n");
-		m->mothurOut("The sub.sample command outputs a .subsample file.\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n");
-
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SubSampleCommand", "help");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
-SubSampleCommand::~SubSampleCommand(){}
-
 //**********************************************************************************************************************
 
 int SubSampleCommand::execute(){

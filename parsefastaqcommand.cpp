@@ -11,14 +11,34 @@
 #include "sequence.hpp"
 
 //**********************************************************************************************************************
-vector<string> ParseFastaQCommand::getValidParameters(){	
+vector<string> ParseFastaQCommand::setParameters(){	
 	try {
-		string Array[] =  {"fastq", "outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter pfastq("fastq", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfastq);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ParseFastaQCommand", "getValidParameters");
+		m->errorOut(e, "ParseFastaQCommand", "setParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string ParseFastaQCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The fastq.info command reads a fastq file and creates a fasta and quality file.\n";
+		helpString += "The fastq.info command parameter is fastq, and it is required.\n";
+		helpString += "The fastq.info command should be in the following format: fastq.info(fastaq=yourFastaQFile).\n";
+		helpString += "Example fastq.info(fastaq=test.fastaq).\n";
+		helpString += "Note: No spaces between parameter labels (i.e. fastq), '=' and yourFastQFile.\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ParseFastaQCommand", "getHelpString");
 		exit(1);
 	}
 }
@@ -26,35 +46,13 @@ vector<string> ParseFastaQCommand::getValidParameters(){
 ParseFastaQCommand::ParseFastaQCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
 		outputTypes["qfile"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ParseFastaQCommand", "ParseFastaQCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> ParseFastaQCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"fastq"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ParseFastaQCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> ParseFastaQCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ParseFastaQCommand", "getRequiredFiles");
 		exit(1);
 	}
 }
@@ -66,9 +64,7 @@ ParseFastaQCommand::ParseFastaQCommand(string option){
 		if(option == "help") {	help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"fastq", "outputdir", "inputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
@@ -115,26 +111,6 @@ ParseFastaQCommand::ParseFastaQCommand(string option){
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-
-void ParseFastaQCommand::help(){
-	try {
-		m->mothurOut("The fastq.info command reads a fastq file and creates a fasta and quality file.\n");
-		m->mothurOut("The fastq.info command parameter is fastq, and it is required.\n");
-		m->mothurOut("The fastq.info command should be in the following format: fastq.info(fastaq=yourFastaQFile).\n");
-		m->mothurOut("Example fastq.info(fastaq=test.fastaq).\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. fastq), '=' and yourFastQFile.\n");
-		m->mothurOutEndLine();
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ParseFastaQCommand", "help");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-
-ParseFastaQCommand::~ParseFastaQCommand()	{	/*	do nothing	*/	}
-
 //**********************************************************************************************************************
 
 int ParseFastaQCommand::execute(){

@@ -17,23 +17,59 @@
 #include "sharedace.h"
 #include "nseqs.h"
 
-
 //**********************************************************************************************************************
-vector<string> VennCommand::getValidParameters(){	
+vector<string> VennCommand::setParameters(){	
 	try {
-		string Array[] =  {"groups","label","calc","permute", "abund","nseqs","outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter plist("list", "InputTypes", "", "", "LRSS", "LRSS", "none",false,false); parameters.push_back(plist);
+		CommandParameter pshared("shared", "InputTypes", "", "", "LRSS", "LRSS", "none",false,false); parameters.push_back(pshared);	
+		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
+		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
+		CommandParameter pcalc("calc", "String", "", "", "", "", "",false,false); parameters.push_back(pcalc);
+		CommandParameter pabund("abund", "Number", "", "10", "", "", "",false,false); parameters.push_back(pabund);
+		CommandParameter pnseqs("nseqs", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pnseqs);
+		CommandParameter ppermute("permute", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(ppermute);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "VennCommand", "getValidParameters");
+		m->errorOut(e, "VennCommand", "setParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
+string VennCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The venn command parameters are list, shared, groups, calc, abund, nseqs, permute and label.   shared, relabund, list, rabund or sabund is required unless you have a valid current file.\n";
+		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like included in your venn diagram, you may only use a maximum of 4 groups.\n";
+		helpString += "The group names are separated by dashes. The label allows you to select what distance levels you would like a venn diagram created for, and are also separated by dashes.\n";
+		helpString += "The venn command should be in the following format: venn(groups=yourGroups, calc=yourCalcs, label=yourLabels, abund=yourAbund).\n";
+		helpString += "Example venn(groups=A-B-C, calc=sharedsobs-sharedchao, abund=20).\n";
+		helpString += "The default value for groups is all the groups in your groupfile up to 4, and all labels in your inputfile will be used.\n";
+		helpString += "The default value for calc is sobs if you have only read a list file or if you have selected only one group, and sharedsobs if you have multiple groups.\n";
+		helpString += "The default available estimators for calc are sobs, chao and ace if you have only read a list file, and sharedsobs, sharedchao and sharedace if you have read a shared file.\n";
+		helpString += "The nseqs parameter will output the number of sequences represented by the otus in the picture, default=F.\n";
+		helpString += "If you have more than 4 groups, the permute parameter will find all possible combos of 4 of your groups and create pictures for them, default=F.\n";
+		helpString += "The only estimators available four 4 groups are sharedsobs and sharedchao.\n";
+		helpString += "The venn command outputs a .svg file for each calculator you specify at each distance you choose.\n";
+		helpString += "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "VennCommand", "getHelpString");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
 VennCommand::VennCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["svg"] = tempOutNames;
 	}
@@ -43,47 +79,21 @@ VennCommand::VennCommand(){
 	}
 }
 //**********************************************************************************************************************
-vector<string> VennCommand::getRequiredParameters(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "VennCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> VennCommand::getRequiredFiles(){	
-	try {
-		string Array[] =  {"list","shared","or"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "VennCommand", "getRequiredFiles");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 
 VennCommand::VennCommand(string option)  {
 	try {
-		globaldata = GlobalData::getInstance();
 		abort = false; calledHelp = false;   
 		allLines = 1;
-		labels.clear();
 			
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string AlignArray[] =  {"groups","label","calc","permute", "abund","nseqs","outputdir","inputdir"};
-			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
+			map<string,string>::iterator it;
 			
 			ValidParameters validParameter;
 			
@@ -92,16 +102,57 @@ VennCommand::VennCommand(string option)  {
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
-			//make sure the user has already run the read.otu command
-			if ((globaldata->getListFile() == "") && (globaldata->getSharedFile() == "")) {
-				m->mothurOut("You must read a list, or a list and a group, or a shared before you can use the venn command."); m->mothurOutEndLine(); abort = true; 
+			//if the user changes the input directory command factory will send this info to us in the output parameter 
+			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			if (inputDir == "not found"){	inputDir = "";		}
+			else {
+				string path;
+				it = parameters.find("shared");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("list");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["list"] = inputDir + it->second;		}
+				}
+			}
+			
+			//check for required parameters
+			listfile = validParameter.validFile(parameters, "list", true);
+			if (listfile == "not open") { listfile = ""; abort = true; }
+			else if (listfile == "not found") { listfile = ""; }
+			else {  format = "list"; inputfile = listfile; }
+			
+			sharedfile = validParameter.validFile(parameters, "shared", true);
+			if (sharedfile == "not open") { sharedfile = ""; abort = true; }	
+			else if (sharedfile == "not found") { sharedfile = ""; }
+			else {  format = "sharedfile"; inputfile = sharedfile; }
+			
+			if ((sharedfile == "") && (listfile == "")) { 
+				//is there are current file available for any of these?
+				//give priority to shared, then list, then rabund, then sabund
+				//if there is a current shared file, use it
+				sharedfile = m->getSharedFile(); 
+				if (sharedfile != "") { inputfile = sharedfile; format = "sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+				else { 
+					listfile = m->getListFile(); 
+					if (listfile != "") { inputfile = listfile; format = "list"; m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
+					else { 
+						m->mothurOut("No valid current files. You must provide a list or shared file."); m->mothurOutEndLine(); 
+						abort = true;
+					}
+				}
 			}
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
-				outputDir = "";	
-				outputDir += m->hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
-			}
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(inputfile);		}
 
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -112,20 +163,13 @@ VennCommand::VennCommand(string option)  {
 				else { allLines = 1;  }
 			}
 			
-			//if the user has not specified any labels use the ones from read.otu
-			if (label == "") {  
-				allLines = globaldata->allLines; 
-				labels = globaldata->labels; 
-			}
-			
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = ""; }
 			else { 
 				m->splitAtDash(groups, Groups);
-				globaldata->Groups = Groups;
+				m->Groups = Groups;
 			}
 			
-			format = globaldata->getFormat();
 			calc = validParameter.validFile(parameters, "calc", false);			
 			if (calc == "not found") { 
 				if(format == "list") { calc = "sobs"; }
@@ -149,47 +193,7 @@ VennCommand::VennCommand(string option)  {
 			temp = validParameter.validFile(parameters, "permute", false);			if (temp == "not found"){	temp = "f";				}
 			perm = m->isTrue(temp); 
 
-			if (abort == false) {
-				validCalculator = new ValidCalculators();
-		
-				int i;
-				
-				if (format == "list") {
-					for (i=0; i<Estimators.size(); i++) {
-						if (validCalculator->isValidCalculator("vennsingle", Estimators[i]) == true) { 
-							if (Estimators[i] == "sobs") { 
-								vennCalculators.push_back(new Sobs());
-							}else if (Estimators[i] == "chao") { 
-								vennCalculators.push_back(new Chao1());
-							}else if (Estimators[i] == "ace") {
-								if(abund < 5)
-									abund = 10;
-								vennCalculators.push_back(new Ace(abund));
-							}
-						}
-					}
-				}else {
-					for (i=0; i<Estimators.size(); i++) {
-						if (validCalculator->isValidCalculator("vennshared", Estimators[i]) == true) { 
-							if (Estimators[i] == "sharedsobs") { 
-								vennCalculators.push_back(new SharedSobsCS());
-							}else if (Estimators[i] == "sharedchao") { 
-								vennCalculators.push_back(new SharedChao1());
-							}else if (Estimators[i] == "sharedace") { 
-								vennCalculators.push_back(new SharedAce());
-							}
-						}
-					}
-				}
-				
-				//if the users entered no valid calculators don't execute command
-				if (vennCalculators.size() == 0) { m->mothurOut("No valid calculators given, please correct."); m->mothurOutEndLine(); abort = true;  }
-				else {  venn = new Venn(outputDir, nseqs);  }
-			}
-			
 		}
-
-		
 				
 	}
 	catch(exception& e) {
@@ -197,73 +201,59 @@ VennCommand::VennCommand(string option)  {
 		exit(1);
 	}
 }
-
-//**********************************************************************************************************************
-
-void VennCommand::help(){
-	try {
-		m->mothurOut("The venn command can only be executed after a successful read.otu command.\n");
-		m->mothurOut("The venn command parameters are groups, calc, abund, nseqs, permute and label.  No parameters are required.\n");
-		m->mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like included in your venn diagram, you may only use a maximum of 4 groups.\n");
-		m->mothurOut("The group names are separated by dashes. The label allows you to select what distance levels you would like a venn diagram created for, and are also separated by dashes.\n");
-		m->mothurOut("The venn command should be in the following format: venn(groups=yourGroups, calc=yourCalcs, label=yourLabels, abund=yourAbund).\n");
-		m->mothurOut("Example venn(groups=A-B-C, calc=sharedsobs-sharedchao, abund=20).\n");
-		m->mothurOut("The default value for groups is all the groups in your groupfile up to 4, and all labels in your inputfile will be used.\n");
-		m->mothurOut("The default value for calc is sobs if you have only read a list file or if you have selected only one group, and sharedsobs if you have multiple groups.\n");
-		m->mothurOut("The default available estimators for calc are sobs, chao and ace if you have only read a list file, and sharedsobs, sharedchao and sharedace if you have read a list and group file or a shared file.\n");
-		m->mothurOut("The nseqs parameter will output the number of sequences represented by the otus in the picture, default=F.\n");
-		m->mothurOut("If you have more than 4 groups, the permute parameter will find all possible combos of 4 of your groups and create pictures for them, default=F.\n");
-		m->mothurOut("The only estimators available four 4 groups are sharedsobs and sharedchao.\n");
-		m->mothurOut("The venn command outputs a .svg file for each calculator you specify at each distance you choose.\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "VennCommand", "help");
-		exit(1);
-	}
-}
-
-
-//**********************************************************************************************************************
-
-VennCommand::~VennCommand(){
-	if (abort == false) {
-		delete input; globaldata->ginput = NULL;
-		delete read;
-		delete venn;
-		globaldata->sabund = NULL;
-		delete validCalculator;
-	}
-	
-}
-
 //**********************************************************************************************************************
 
 int VennCommand::execute(){
 	try {
 	
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+	
+		ValidCalculators validCalculator;
+					
+		if (format == "list") {
+			for (int i=0; i<Estimators.size(); i++) {
+				if (validCalculator.isValidCalculator("vennsingle", Estimators[i]) == true) { 
+					if (Estimators[i] == "sobs") { 
+						vennCalculators.push_back(new Sobs());
+					}else if (Estimators[i] == "chao") { 
+						vennCalculators.push_back(new Chao1());
+					}else if (Estimators[i] == "ace") {
+						if(abund < 5)
+							abund = 10;
+						vennCalculators.push_back(new Ace(abund));
+					}
+				}
+			}
+		}else {
+			for (int i=0; i<Estimators.size(); i++) {
+				if (validCalculator.isValidCalculator("vennshared", Estimators[i]) == true) { 
+					if (Estimators[i] == "sharedsobs") { 
+						vennCalculators.push_back(new SharedSobsCS());
+					}else if (Estimators[i] == "sharedchao") { 
+						vennCalculators.push_back(new SharedChao1());
+					}else if (Estimators[i] == "sharedace") { 
+						vennCalculators.push_back(new SharedAce());
+					}
+				}
+			}
+		}
+			
+		//if the users entered no valid calculators don't execute command
+		if (vennCalculators.size() == 0) { m->mothurOut("No valid calculators given, please correct."); m->mothurOutEndLine(); return 0;  }
+		
+		venn = new Venn(outputDir, nseqs, inputfile); 
+		input = new InputData(inputfile, format);
 		
 		string lastLabel;
 		
 		if (format == "sharedfile") {
-			//you have groups
-			read = new ReadOTUFile(globaldata->inputFileName);	
-			read->read(&*globaldata); 
-			
-			input = globaldata->ginput;
 			lookup = input->getSharedRAbundVectors();
 			lastLabel = lookup[0]->getLabel();
 			
 			if ((lookup.size() > 4) && (perm)) { combosOfFour = findCombinations(lookup.size()); }
 		}else if (format == "list") {
-			//you are using just a list file and have only one group
-			read = new ReadOTUFile(globaldata->inputFileName);	
-			read->read(&*globaldata); 
-		
-			sabund = globaldata->sabund;
+			sabund = input->getSAbundVector();
 			lastLabel = sabund->getLabel();
-			input = globaldata->ginput;
 		}
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
@@ -278,7 +268,7 @@ int VennCommand::execute(){
 				if (m->control_pressed) {
 					for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
 					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
-					globaldata->Groups.clear(); 
+					m->Groups.clear(); delete venn; delete input;
 					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
 					return 0;
 				}
@@ -361,7 +351,7 @@ int VennCommand::execute(){
 			
 			if (m->control_pressed) {
 					for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
-					globaldata->Groups.clear(); 
+					m->Groups.clear(); delete venn; delete input; 
 					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
 					return 0;
 			}
@@ -418,9 +408,10 @@ int VennCommand::execute(){
 		
 
 			//reset groups parameter
-			globaldata->Groups.clear();  
+			m->Groups.clear();  
 			
 			if (m->control_pressed) {
+					m->Groups.clear(); delete venn; delete input;
 					for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
 					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
 					return 0;
@@ -433,7 +424,7 @@ int VennCommand::execute(){
 			
 				if (m->control_pressed) {
 					for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
-					delete sabund;
+					delete sabund; delete venn; delete input;
 					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
 					return 0;
 				}
@@ -476,6 +467,7 @@ int VennCommand::execute(){
 			if (m->control_pressed) {
 					for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
 					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+					delete venn; delete input;
 					return 0;
 			}
 			
@@ -506,6 +498,7 @@ int VennCommand::execute(){
 			}
 			
 			if (m->control_pressed) {
+					delete venn; delete input;
 					for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
 					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
 					return 0;
@@ -513,6 +506,7 @@ int VennCommand::execute(){
 		}
 		
 		for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
+		delete venn; delete input;
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();

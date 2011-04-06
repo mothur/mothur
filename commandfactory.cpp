@@ -8,9 +8,9 @@
  */
 
 #include "command.hpp"
-#include "readdistcommand.h"
-#include "readtreecommand.h"
-#include "readotucommand.h"
+//#include "readdistcommand.h"
+//#include "readtreecommand.h"
+//#include "readotucommand.h"
 #include "clustercommand.h"
 #include "collectcommand.h"
 #include "collectsharedcommand.h"
@@ -48,7 +48,6 @@
 #include "reversecommand.h"
 #include "trimseqscommand.h"
 #include "mergefilecommand.h"
-#include "chimeraseqscommand.h"
 #include "listseqscommand.h"
 #include "getseqscommand.h"
 #include "removeseqscommand.h"
@@ -116,6 +115,7 @@
 #include "anosimcommand.h"
 #include "getcurrentcommand.h"
 #include "setcurrentcommand.h"
+#include "sharedcommand.h"
 
 /*******************************************************/
 
@@ -148,9 +148,10 @@ CommandFactory::CommandFactory(){
 	append = false;
 	
 	//initialize list of valid commands
-	commands["read.dist"]			= "read.dist"; 
-	commands["read.otu"]			= "read.otu";
-	commands["read.tree"]			= "read.tree"; 
+	//commands["read.dist"]			= "read.dist"; 
+	//commands["read.otu"]			= "read.otu";
+	//commands["read.tree"]			= "read.tree"; 
+	commands["make.shared"]			= "make.shared"; 
 	commands["bin.seqs"]			= "bin.seqs"; 
 	commands["get.oturep"]			= "get.oturep";
 	commands["cluster"]				= "cluster"; 
@@ -241,7 +242,6 @@ CommandFactory::CommandFactory(){
 	commands["dist.seqs"]			= "MPIEnabled";
 	commands["filter.seqs"]			= "MPIEnabled";
 	commands["align.seqs"]			= "MPIEnabled";
-	commands["chimera.seqs"]		= "chimera.seqs";
 	commands["chimera.ccode"]		= "MPIEnabled";
 	commands["chimera.check"]		= "MPIEnabled";
 	commands["chimera.slayer"]		= "MPIEnabled";
@@ -297,10 +297,10 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 			else { optionString += "inputdir=" + inputDir; }
 		}
 		
-		if(commandName == "read.dist")					{	command = new ReadDistCommand(optionString);				}
-		else if(commandName == "read.otu")				{	command = new ReadOtuCommand(optionString);					}
-		else if(commandName == "read.tree")				{	command = new ReadTreeCommand(optionString);				}
-		else if(commandName == "cluster")				{	command = new ClusterCommand(optionString);					}
+		//if(commandName == "read.dist")					{	command = new ReadDistCommand(optionString);				}
+		//else if(commandName == "read.otu")				{	command = new ReadOtuCommand(optionString);					}
+		//else if(commandName == "read.tree")				{	command = new ReadTreeCommand(optionString);				}
+		if(commandName == "cluster")					{	command = new ClusterCommand(optionString);					}
 		else if(commandName == "unique.seqs")			{	command = new DeconvoluteCommand(optionString);				}
 		else if(commandName == "parsimony")				{	command = new ParsimonyCommand(optionString);				}
 		else if(commandName == "help")					{	command = new HelpCommand(optionString);					}
@@ -336,7 +336,6 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "trim.seqs")				{	command = new TrimSeqsCommand(optionString);				}
 		else if(commandName == "trim.flows")			{	command = new TrimFlowsCommand(optionString);				}
 		else if(commandName == "shhh.seqs")				{	command = new ShhherCommand(optionString);					}
-		else if(commandName == "chimera.seqs")			{	command = new ChimeraSeqsCommand(optionString);				}
 		else if(commandName == "list.seqs")				{	command = new ListSeqsCommand(optionString);				}
 		else if(commandName == "get.seqs")				{	command = new GetSeqsCommand(optionString);					}
 		else if(commandName == "remove.seqs")			{	command = new RemoveSeqsCommand(optionString);				}
@@ -403,6 +402,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "get.current")			{	command = new GetCurrentCommand(optionString);				}
 		else if(commandName == "set.current")			{	command = new SetCurrentCommand(optionString);				}
 		else if(commandName == "anosim")				{	command = new AnosimCommand(optionString);					}
+		else if(commandName == "make.shared")			{	command = new SharedCommand(optionString);					}
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -432,10 +432,10 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 			else { optionString += "inputdir=" + inputDir; }
 		}
 		
-		if(commandName == "read.dist")					{	pipecommand = new ReadDistCommand(optionString);				}
-		else if(commandName == "read.otu")				{	pipecommand = new ReadOtuCommand(optionString);					}
-		else if(commandName == "read.tree")				{	pipecommand = new ReadTreeCommand(optionString);				}
-		else if(commandName == "cluster")				{	pipecommand = new ClusterCommand(optionString);					}
+		//if(commandName == "read.dist")					{	pipecommand = new ReadDistCommand(optionString);				}
+		//else if(commandName == "read.otu")				{	pipecommand = new ReadOtuCommand(optionString);					}
+		//else if(commandName == "read.tree")				{	pipecommand = new ReadTreeCommand(optionString);				}
+		if(commandName == "cluster")					{	pipecommand = new ClusterCommand(optionString);					}
 		else if(commandName == "unique.seqs")			{	pipecommand = new DeconvoluteCommand(optionString);				}
 		else if(commandName == "parsimony")				{	pipecommand = new ParsimonyCommand(optionString);				}
 		else if(commandName == "help")					{	pipecommand = new HelpCommand(optionString);					}
@@ -471,7 +471,6 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "trim.seqs")				{	pipecommand = new TrimSeqsCommand(optionString);				}
 		else if(commandName == "trim.flows")			{	pipecommand = new TrimFlowsCommand(optionString);				}
 		else if(commandName == "shhh.seqs")				{	pipecommand = new ShhherCommand(optionString);					}
-		else if(commandName == "chimera.seqs")			{	pipecommand = new ChimeraSeqsCommand(optionString);				}
 		else if(commandName == "list.seqs")				{	pipecommand = new ListSeqsCommand(optionString);				}
 		else if(commandName == "get.seqs")				{	pipecommand = new GetSeqsCommand(optionString);					}
 		else if(commandName == "remove.seqs")			{	pipecommand = new RemoveSeqsCommand(optionString);				}
@@ -537,6 +536,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "make.fastq")			{	pipecommand = new MakeFastQCommand(optionString);				}
 		else if(commandName == "get.current")			{	pipecommand = new GetCurrentCommand(optionString);				}
 		else if(commandName == "set.current")			{	pipecommand = new SetCurrentCommand(optionString);				}
+		else if(commandName == "make.shared")			{	pipecommand = new SharedCommand(optionString);					}
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -554,10 +554,10 @@ Command* CommandFactory::getCommand(string commandName){
 	try {
 		delete shellcommand;   //delete the old command
 		
-		if(commandName == "read.dist")					{	shellcommand = new ReadDistCommand();				}
-		else if(commandName == "read.otu")				{	shellcommand = new ReadOtuCommand();				}
-		else if(commandName == "read.tree")				{	shellcommand = new ReadTreeCommand();				}
-		else if(commandName == "cluster")				{	shellcommand = new ClusterCommand();				}
+		//if(commandName == "read.dist")					{	shellcommand = new ReadDistCommand();				}
+		//else if(commandName == "read.otu")				{	shellcommand = new ReadOtuCommand();				}
+		//else if(commandName == "read.tree")				{	shellcommand = new ReadTreeCommand();				}
+		if(commandName == "cluster")					{	shellcommand = new ClusterCommand();				}
 		else if(commandName == "unique.seqs")			{	shellcommand = new DeconvoluteCommand();			}
 		else if(commandName == "parsimony")				{	shellcommand = new ParsimonyCommand();				}
 		else if(commandName == "help")					{	shellcommand = new HelpCommand();					}
@@ -593,7 +593,6 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "trim.seqs")				{	shellcommand = new TrimSeqsCommand();				}
 		else if(commandName == "trim.flows")			{	shellcommand = new TrimFlowsCommand();				}
 		else if(commandName == "shhh.seqs")				{	shellcommand = new ShhherCommand();					}
-		else if(commandName == "chimera.seqs")			{	shellcommand = new ChimeraSeqsCommand();			}
 		else if(commandName == "list.seqs")				{	shellcommand = new ListSeqsCommand();				}
 		else if(commandName == "get.seqs")				{	shellcommand = new GetSeqsCommand();				}
 		else if(commandName == "remove.seqs")			{	shellcommand = new RemoveSeqsCommand();				}
@@ -659,6 +658,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "make.fastq")			{	shellcommand = new MakeFastQCommand();				}
 		else if(commandName == "get.current")			{	shellcommand = new GetCurrentCommand();				}
 		else if(commandName == "set.current")			{	shellcommand = new SetCurrentCommand();				}
+		else if(commandName == "make.shared")			{	shellcommand = new SharedCommand();					}
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;

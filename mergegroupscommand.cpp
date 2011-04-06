@@ -11,14 +11,43 @@
 #include "sharedutilities.h"
 
 //**********************************************************************************************************************
-vector<string> MergeGroupsCommand::getValidParameters(){	
+vector<string> MergeGroupsCommand::setParameters(){	
 	try {
-		string Array[] =  {"shared","label","outputdir","design","groups","processors","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pshared);
+		CommandParameter pdesign("design", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pdesign);
+		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "MergeGroupsCommand", "getValidParameters");
+		m->errorOut(e, "MergeGroupsCommand", "setParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string MergeGroupsCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The merge.groups command reads a shared file and a design file and merges the groups in the shared file that are in the same grouping in the design file.\n";
+		helpString += "The merge.groups command outputs a .shared file. \n";
+		helpString += "The merge.groups command parameters are shared, groups, label and design.  The design and shared parameter are required.\n";
+		helpString += "The design parameter allows you to assign your groups to sets. It is required. \n";
+		helpString += "The design file looks like the group file.  It is a 2 column tab delimited file, where the first column is the group name and the second column is the set the group belongs to.\n";
+		helpString += "The groups parameter allows you to specify which of the groups in your shared you would like included. The group names are separated by dashes.\n";
+		helpString += "The label parameter allows you to select what distance levels you would like, and are also separated by dashes.\n";
+		helpString += "The merge.groups command should be in the following format: merge.groups(design=yourDesignFile, shared=yourSharedFile).\n";
+		helpString += "Example merge.groups(design=temp.design, groups=A-B-C, shared=temp.shared).\n";
+		helpString += "The default value for groups is all the groups in your sharedfile, and all labels in your inputfile will be used.\n";
+		helpString += "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "MergeGroupsCommand", "getHelpString");
 		exit(1);
 	}
 }
@@ -26,6 +55,7 @@ vector<string> MergeGroupsCommand::getValidParameters(){
 MergeGroupsCommand::MergeGroupsCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["shared"] = tempOutNames;
 	}
@@ -35,45 +65,17 @@ MergeGroupsCommand::MergeGroupsCommand(){
 	}
 }
 //**********************************************************************************************************************
-vector<string> MergeGroupsCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"design", "shared"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "MergeGroupsCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> MergeGroupsCommand::getRequiredFiles(){	
-	try {
-		string Array[] =  {};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "MergeGroupsCommand", "getRequiredFiles");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 
 MergeGroupsCommand::MergeGroupsCommand(string option) {
 	try {
-		globaldata = GlobalData::getInstance();
 		abort = false; calledHelp = false;   
 		allLines = 1;
-		labels.clear();
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string AlignArray[] =  {"groups","label","outputdir","shared","design","processors","inputdir"};
-			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
@@ -118,12 +120,22 @@ MergeGroupsCommand::MergeGroupsCommand(string option) {
 			//check for required parameters
 			designfile = validParameter.validFile(parameters, "design", true);
 			if (designfile == "not open") { abort = true; }
-			else if (designfile == "not found") {  designfile = "";  m->mothurOut("You must provide a design file."); m->mothurOutEndLine(); abort = true; }	
+			else if (designfile == "not found") {  				
+				//if there is a current shared file, use it
+				designfile = m->getDesignFile(); 
+				if (designfile != "") { m->mothurOut("Using " + designfile + " as input file for the design parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current designfile and the design parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}	
 			
 			//make sure the user has already run the read.otu command
 			sharedfile = validParameter.validFile(parameters, "shared", true);
 			if (sharedfile == "not open") { abort = true; }
-			else if (sharedfile == "not found") {  sharedfile = "";  m->mothurOut("You must provide a shared file."); m->mothurOutEndLine(); abort = true; }	
+			else if (sharedfile == "not found") {  				
+				//if there is a current shared file, use it
+				sharedfile = m->getSharedFile(); 
+				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}	
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -137,7 +149,7 @@ MergeGroupsCommand::MergeGroupsCommand(string option) {
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = "all";  }
 			m->splitAtDash(groups, Groups);
-			globaldata->Groups = Groups;
+			m->Groups = Groups;
 		}
 		
 	}
@@ -146,34 +158,6 @@ MergeGroupsCommand::MergeGroupsCommand(string option) {
 		exit(1);
 	}
 }
-
-//**********************************************************************************************************************
-
-void MergeGroupsCommand::help(){
-	try {
-		m->mothurOut("The merge.groups command reads a shared file and a design file and merges the groups in the shared file that are in the same grouping in the design file.\n");
-		m->mothurOut("The merge.groups command outputs a .shared file. \n");
-		m->mothurOut("The merge.groups command parameters are shared, groups, label and design.  The design and shared parameter are required.\n");
-		m->mothurOut("The design parameter allows you to assign your groups to sets when you are running metastat. mothur will run all pairwise comparisons of the sets. It is required. \n");
-		m->mothurOut("The design file looks like the group file.  It is a 2 column tab delimited file, where the first column is the group name and the second column is the set the group belongs to.\n");
-		m->mothurOut("The groups parameter allows you to specify which of the groups in your shared you would like included. The group names are separated by dashes.\n");
-		m->mothurOut("The label parameter allows you to select what distance levels you would like, and are also separated by dashes.\n");
-		m->mothurOut("The merge.groups command should be in the following format: merge.groups(design=yourDesignFile, shared=yourSharedFile).\n");
-		m->mothurOut("Example merge.groups(design=temp.design, groups=A-B-C, shared=temp.shared).\n");
-		m->mothurOut("The default value for groups is all the groups in your sharedfile, and all labels in your inputfile will be used.\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n");
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "MergeGroupsCommand", "help");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
-MergeGroupsCommand::~MergeGroupsCommand(){}
-
 //**********************************************************************************************************************
 
 int MergeGroupsCommand::execute(){
@@ -202,7 +186,7 @@ int MergeGroupsCommand::execute(){
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-			if (m->control_pressed) {  out.close(); for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } globaldata->Groups.clear();  delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
+			if (m->control_pressed) {  out.close(); for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } m->Groups.clear();  delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
 			
 			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
 				
@@ -233,13 +217,13 @@ int MergeGroupsCommand::execute(){
 			//prevent memory leak
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
 			
-			if (m->control_pressed) {  out.close(); globaldata->Groups.clear();   delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
+			if (m->control_pressed) {  out.close(); m->Groups.clear();   delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
 			
 			//get next line to process
 			lookup = input.getSharedRAbundVectors();				
 		}
 		
-		if (m->control_pressed) { out.close(); globaldata->Groups.clear();  delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }  return 0; }
+		if (m->control_pressed) { out.close(); m->Groups.clear();  delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }  return 0; }
 		
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -268,7 +252,7 @@ int MergeGroupsCommand::execute(){
 		
 		out.close();
 		//reset groups parameter
-		globaldata->Groups.clear();  
+		m->Groups.clear();  
 		delete designMap;
 		
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0;}

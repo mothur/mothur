@@ -17,7 +17,6 @@
 BlastDB::BlastDB(float gO, float gE, float m, float mM) : Database(), 
 gapOpen(gO), gapExtend(gE), match(m), misMatch(mM) {
 	
-	globaldata = GlobalData::getInstance();
 	count = 0;
 
 	int randNumber = rand();
@@ -30,7 +29,6 @@ gapOpen(gO), gapExtend(gE), match(m), misMatch(mM) {
 
 BlastDB::BlastDB() : Database() {
 	try {
-		globaldata = GlobalData::getInstance();
 		count = 0;
 
 		int randNumber = rand();
@@ -185,7 +183,7 @@ void BlastDB::generateDB() {
 	
 		//m->mothurOut("Generating the temporary BLAST database...\t");	cout.flush();
 		
-		path = globaldata->argv;
+		path = m->argv;
 		path = path.substr(0, (path.find_last_of('m')));
 	
 		string formatdbCommand = path + "blast/bin/formatdb -p F -o T -i " + dbFileName;	//	format the database, -o option gives us the ability

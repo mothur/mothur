@@ -21,13 +21,15 @@ class HomovaCommand : public Command {
 public:
 	HomovaCommand(string);
 	HomovaCommand();
-	~HomovaCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
+	~HomovaCommand(){}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "homova";					}
+	string getCommandCategory()		{ return "Hypothesis Testing";		}
+	string getHelpString();	
+	
 	int execute();
-	void help();
+	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
 	double runHOMOVA(ofstream& , map<string, vector<int> >, double);
@@ -36,7 +38,6 @@ private:
 	map<string, vector<int> > getRandomizedGroups(map<string, vector<int> >);
 
 	bool abort;
-	map<string, vector<string> > outputTypes;
 	vector<string> outputNames;
 
 	string outputDir, inputDir, designFileName, phylipFileName;

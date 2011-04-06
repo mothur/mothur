@@ -13,13 +13,10 @@
 
 
 #include "mothur.h"
-#include "globaldata.hpp"
 #include "commandoptionparser.hpp"
 #include "command.hpp"
 #include "commandfactory.hpp"
 #include "mothurout.h"
-
-class GlobalData;
 
 class Engine {
 public:
@@ -48,7 +45,6 @@ public:
 	virtual bool getInput();
 	int openedBatch;
 private:
-	GlobalData* globaldata;
 	ifstream inputBatchFile;
 	string getNextCommand(ifstream&);
 
@@ -62,7 +58,7 @@ public:
 	~InteractEngine();
 	virtual bool getInput();
 private:
-	GlobalData* globaldata;
+	
 };
 
 
@@ -73,7 +69,6 @@ public:
 	virtual bool getInput();
 	int openedBatch;
 private:
-	GlobalData* globaldata;
 	string listOfCommands;
 	string getNextCommand(string&);
 

@@ -20,20 +20,21 @@ class PCOACommand : public Command {
 public:
 	PCOACommand(string);	
 	PCOACommand();
-	~PCOACommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();	
-	void help();
+	~PCOACommand(){}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "pcoa";					}
+	string getCommandCategory()		{ return "Hypothesis Testing";		}
+	string getHelpString();	
+	
+	int execute();
+	void help() { m->mothurOut(getHelpString()); }
 	
 private:
 
 	bool abort, metric;
 	string phylipfile, filename, fbase, outputDir;
 	vector<string> outputNames;
-	map<string, vector<string> > outputTypes;
 	LinearAlgebra linearCalc;
 	
 	void get_comment(istream&, char, char);

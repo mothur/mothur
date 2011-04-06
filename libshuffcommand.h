@@ -13,9 +13,8 @@
 #include "command.hpp"
 #include "fullmatrix.h"
 #include "libshuff.h"
+#include "groupmap.h"
 
-
-class GlobalData;
 
 class LibShuffCommand : public Command {
 	
@@ -23,34 +22,35 @@ public:
 	LibShuffCommand(string);
 	LibShuffCommand();	
 	~LibShuffCommand(){};
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "libshuff";				}
+	string getCommandCategory()		{ return "Hypothesis Testing";		}
+	string getHelpString();	
+	
 	int execute();
-	void help();	
-
+	void help() { m->mothurOut(getHelpString()); }	
+	
 private:
 	vector<string> groupNames;
 	
 	void setGroups();
 	int printCoverageFile();
 	int printSummaryFile();
-
-	GlobalData* globaldata;
+	
+	GroupMap* groupMap;
 	FullMatrix* matrix;
 	Libshuff* form;
 	float cutOff, step;
 	int numGroups, numComp, iters;
-	string coverageFile, summaryFile;
+	string coverageFile, summaryFile, phylipfile, groupfile;
 	vector<vector<int> > pValueCounts;
 	vector<vector<double> > savedDXYValues;
 	vector<vector<vector<double> > > savedMinValues;
 
-	bool abort;
+	bool abort, sim;
 	string outputFile, groups, userform, savegroups, outputDir;
 	vector<string> Groups, outputNames; //holds groups to be used
-	map<string, vector<string> > outputTypes;
 };
 
 #endif

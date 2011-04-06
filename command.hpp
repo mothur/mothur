@@ -17,22 +17,33 @@
 #include "optionparser.h"
 #include "validparameter.h"
 #include "mothurout.h"
+#include "commandparameter.h"
 
 
 class Command {
 	
 	public:
 		Command() {  m = MothurOut::getInstance();   } 
-		virtual vector<string> getValidParameters() = 0;
-		virtual vector<string> getRequiredParameters() = 0; //adding "or" as the last element indicates one of the previous is needed
-		virtual vector<string> getRequiredFiles() = 0; //adding "or" as the last element indicates one of the previous is needed
-		virtual map<string, vector<string> > getOutputFiles() = 0; //file type to names
+		
+		//needed by gui
+		virtual string getCommandName() = 0;
+		virtual string getCommandCategory() = 0;
+		virtual string getHelpString() = 0;
+		
+		virtual map<string, vector<string> > getOutputFiles() { return outputTypes; }
+		virtual vector<string> setParameters() = 0; //to fill parameters
+		virtual vector<CommandParameter> getParameters() { return parameters; }
+	
 		virtual int execute() = 0;
 		virtual void help() = 0;
 		virtual ~Command() { }
+	
 	protected:
 		MothurOut* m;
 		bool calledHelp;
+			
+		map<string, vector<string> > outputTypes;
+		vector<CommandParameter> parameters;
 	
 		map<string, vector<string> >::iterator itTypes;
 };

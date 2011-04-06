@@ -12,7 +12,7 @@
  */
  
 #include "mothur.h"
-#include "globaldata.hpp"
+
 
 class BlastAlignment : public Alignment {
 
@@ -34,6 +34,5 @@ private:
 	float mismatch;
 	float gapOpen;
 	float gapExtend;
-	GlobalData* globaldata;
 };
 

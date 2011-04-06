@@ -9,51 +9,17 @@
 
 #include "readtreecommand.h"
 
-//**********************************************************************************************************************
-vector<string> ReadTreeCommand::getValidParameters(){	
-	try {
-		string Array[] =  {"tree","group","name","outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ReadTreeCommand", "getValidParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> ReadTreeCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"tree"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ReadTreeCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> ReadTreeCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ReadTreeCommand", "getRequiredFiles");
-		exit(1);
-	}
-}
+
 //**********************************************************************************************************************
 ReadTreeCommand::ReadTreeCommand(string option)  {
 	try {
-		globaldata = GlobalData::getInstance();
 		abort = false; calledHelp = false;   
 				
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
+			/*
 			//valid paramters for this command
 			string Array[] =  {"tree","group","name","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
@@ -107,7 +73,6 @@ ReadTreeCommand::ReadTreeCommand(string option)  {
 			treefile = validParameter.validFile(parameters, "tree", true);
 			if (treefile == "not open") { abort = true; }
 			else if (treefile == "not found") { treefile = ""; m->mothurOut("tree is a required parameter for the read.tree command."); m->mothurOutEndLine(); abort = true;  }	
-			else {  globaldata->setTreeFile(treefile);  globaldata->setFormat("tree"); 	}
 			
 			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") { abort = true; }	
@@ -118,18 +83,14 @@ ReadTreeCommand::ReadTreeCommand(string option)  {
 				
 				if (treefile != "") {  Tree* tree = new Tree(treefile); delete tree;  } //extracts names from tree to make faked out groupmap
 				
-				globaldata->setGroupFile(groupfile); 
 				//read in group map info.
 				treeMap = new TreeMap();
-				for (int i = 0; i < globaldata->Treenames.size(); i++) { treeMap->addSeq(globaldata->Treenames[i], "Group1"); }
-				globaldata->gTreemap = treeMap;
+				for (int i = 0; i < m->Treenames.size(); i++) { treeMap->addSeq(m->Treenames[i], "Group1"); }
 					
 			}else {  
-				globaldata->setGroupFile(groupfile); 
 				//read in group map info.
 				treeMap = new TreeMap(groupfile);
 				treeMap->readMap();
-				globaldata->gTreemap = treeMap;
 			}
 			
 			namefile = validParameter.validFile(parameters, "name", true);
@@ -141,7 +102,7 @@ ReadTreeCommand::ReadTreeCommand(string option)  {
 				filename = treefile;
 				read = new ReadNewickTree(filename);
 			}
-						
+			*/			
 		}
 	}
 	catch(exception& e) {
@@ -151,42 +112,19 @@ ReadTreeCommand::ReadTreeCommand(string option)  {
 }
 //**********************************************************************************************************************
 
-void ReadTreeCommand::help(){
-	try {
-		m->mothurOut("The read.tree command must be run before you execute a unifrac.weighted, unifrac.unweighted. \n");
-		m->mothurOut("It also must be run before using the parsimony command, unless you are using the randomtree parameter.\n");
-		m->mothurOut("The read.tree command parameters are tree, group and name.\n");
-		m->mothurOut("The read.tree command should be in the following format: read.tree(tree=yourTreeFile, group=yourGroupFile).\n");
-		m->mothurOut("The tree and group parameters are both required, if no group file is given then one group is assumed.\n");
-		m->mothurOut("The name parameter allows you to enter a namefile.\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. tree), '=' and parameters (i.e.yourTreefile).\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ReadTreeCommand", "help");	
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
-ReadTreeCommand::~ReadTreeCommand(){
-	if (abort == false) { delete read; }
-}
-
-//**********************************************************************************************************************
-
 int ReadTreeCommand::execute(){
 	try {
 	
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
-		
+		m->mothurOut(getHelpString()); m->mothurOutEndLine();
+		/*
 		int readOk;
 		
-		readOk = read->read(); 
+		readOk = read->read(treeMap); 
 		
 		if (readOk != 0) { m->mothurOut("Read Terminated."); m->mothurOutEndLine(); globaldata->gTree.clear(); delete globaldata->gTreemap; return 0; }
 		
-		vector<Tree*> T = globaldata->gTree;
+		vector<Tree*> T = read->gTree;
 
 		//assemble users trees
 		for (int i = 0; i < T.size(); i++) {
@@ -241,7 +179,7 @@ int ReadTreeCommand::execute(){
 			
 			globaldata->gTreemap = treeMap;
 		}
-
+		 */
 		return 0;
 	}
 	catch(exception& e) {
@@ -252,7 +190,8 @@ int ReadTreeCommand::execute(){
 /*****************************************************************/
 int ReadTreeCommand::readNamesFile() {
 	try {
-		globaldata->names.clear();
+		/*
+		m->names.clear();
 		numUniquesInName = 0;
 		
 		ifstream in;
@@ -266,7 +205,7 @@ int ReadTreeCommand::readNamesFile() {
 			
 			numUniquesInName++;
 
-			itNames = globaldata->names.find(first);
+			itNames = m->names.find(first);
 			if (itNames == globaldata->names.end()) {  
 				globaldata->names[first] = second; 
 				
@@ -278,7 +217,7 @@ int ReadTreeCommand::readNamesFile() {
 			}else {  m->mothurOut(first + " has already been seen in namefile, disregarding names file."); m->mothurOutEndLine(); in.close(); globaldata->names.clear(); namefile = ""; return 1; }			
 		}
 		in.close();
-		
+		*/
 		return 0;
 	}
 	catch(exception& e) {

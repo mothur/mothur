@@ -10,53 +10,11 @@
 #include "helpcommand.h"
 
 //**********************************************************************************************************************
-vector<string> HelpCommand::getValidParameters(){	
-	try {
-		
-		vector<string> myArray; 
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "HelpCommand", "getValidParameters");
-		exit(1);
-	}
+
+HelpCommand::HelpCommand(string option)  {	
+	validCommands = CommandFactory::getInstance();	
 }
 //**********************************************************************************************************************
-vector<string> HelpCommand::getRequiredParameters(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "HelpCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> HelpCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "HelpCommand", "getRequiredFiles");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-
-HelpCommand::HelpCommand(string option)  {
-	
-	validCommands = CommandFactory::getInstance();
-	
-}
-
-//**********************************************************************************************************************
-
-HelpCommand::~HelpCommand(){}
-
-//**********************************************************************************************************************
-
 int HelpCommand::execute(){
 	try {
 		validCommands->printCommands(cout);
@@ -71,5 +29,4 @@ int HelpCommand::execute(){
 		exit(1);
 	}
 }
-
 //**********************************************************************************************************************/

@@ -18,20 +18,22 @@ class GetSeqsCommand : public Command {
 	
 		GetSeqsCommand(string);
 		GetSeqsCommand();
-		~GetSeqsCommand(){};
-		vector<string> getRequiredParameters();
-		vector<string> getValidParameters();
-		vector<string> getRequiredFiles();
-		map<string, vector<string> > getOutputFiles() { return outputTypes; }
-		int execute();
-		void help();	
-		
+		~GetSeqsCommand(){}
+	
+		vector<string> setParameters();
+		string getCommandName()			{ return "get.seqs";				}
+		string getCommandCategory()		{ return "Sequence Processing";		}
+		string getHelpString();	
+	
+		int execute(); 
+		void help() { m->mothurOut(getHelpString()); }	
+	
+	
 	private:
 		set<string> names;
 		vector<string> outputNames;
 		string accnosfile, accnosfile2, fastafile, namefile, groupfile, alignfile, listfile, taxfile, qualfile, outputDir;
 		bool abort, dups;
-		map<string, vector<string> > outputTypes;
 		
 		int readFasta();
 		int readName();

@@ -12,7 +12,6 @@
 
 #include "command.hpp"
 #include "commandfactory.hpp"
-#include "globaldata.hpp"
 
 /**********************************************************/
 
@@ -20,21 +19,23 @@ class SetDirectoryCommand : public Command {
 	
 public:
 	SetDirectoryCommand(string);
-	SetDirectoryCommand() { abort = true; calledHelp = true; }
-	~SetDirectoryCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();
+	SetDirectoryCommand() { abort = true; calledHelp = true; setParameters(); }
+	~SetDirectoryCommand(){}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "set.dir";		}
+	string getCommandCategory()		{ return "General";		}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
 	CommandFactory* commandFactory;
 	string output, input, tempdefault;
 	bool abort;
 	vector<string> outputNames;
-	map<string, vector<string> > outputTypes;
+	
 		
 };
 

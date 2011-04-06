@@ -25,39 +25,59 @@
 #include "nast.hpp"
 #include "nastreport.hpp"
 
+//**********************************************************************************************************************
+vector<string> AlignCommand::setParameters(){	
+	try {
+		CommandParameter ptemplate("reference", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(ptemplate);
+		CommandParameter pcandidate("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pcandidate);
+		CommandParameter psearch("search", "Multiple", "kmer-blast-suffix", "kmer", "", "", "",false,false); parameters.push_back(psearch);
+		CommandParameter pksize("ksize", "Number", "", "8", "", "", "",false,false); parameters.push_back(pksize);
+		CommandParameter pmatch("match", "Number", "", "1.0", "", "", "",false,false); parameters.push_back(pmatch);
+		CommandParameter palign("align", "Multiple", "needleman-gotoh-blast-noalign", "needleman", "", "", "",false,false); parameters.push_back(palign);
+		CommandParameter pmismatch("mismatch", "Number", "", "-1.0", "", "", "",false,false); parameters.push_back(pmismatch);
+		CommandParameter pgapopen("gapopen", "Number", "", "-2.0", "", "", "",false,false); parameters.push_back(pgapopen);
+		CommandParameter pgapextend("gapextend", "Number", "", "-1.0", "", "", "",false,false); parameters.push_back(pgapextend);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
+		CommandParameter pflip("flip", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pflip);
+		CommandParameter pthreshold("threshold", "Number", "", "0.50", "", "", "",false,false); parameters.push_back(pthreshold);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
 
-//**********************************************************************************************************************
-vector<string> AlignCommand::getValidParameters(){	
-	try {
-		string AlignArray[] =  {"template","candidate","search","ksize","align","match","mismatch","gapopen","gapextend", "processors","flip","threshold","outputdir","inputdir"};
-		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "AlignCommand", "getValidParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> AlignCommand::getRequiredParameters(){	
-	try {
-		string AlignArray[] =  {"template","candidate"};
-		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "AlignCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> AlignCommand::getRequiredFiles(){	
-	try {
 		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "AlignCommand", "getRequiredFiles");
+		m->errorOut(e, "AlignCommand", "setParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string AlignCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The align.seqs command reads a file containing sequences and creates an alignment file and a report file.\n";
+		helpString += "The align.seqs command parameters are reference, fasta, search, ksize, align, match, mismatch, gapopen, gapextend and processors.\n";
+		helpString += "The reference and fasta parameters are required. You may leave fasta blank if you have a valid fasta file. You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amzon.fasta \n";
+		helpString += "The search parameter allows you to specify the method to find most similar template.  Your options are: suffix, kmer and blast. The default is kmer.\n";
+		helpString += "The align parameter allows you to specify the alignment method to use.  Your options are: gotoh, needleman, blast and noalign. The default is needleman.\n";
+		helpString += "The ksize parameter allows you to specify the kmer size for finding most similar template to candidate.  The default is 8.\n";
+		helpString += "The match parameter allows you to specify the bonus for having the same base. The default is 1.0.\n";
+		helpString += "The mistmatch parameter allows you to specify the penalty for having different bases.  The default is -1.0.\n";
+		helpString += "The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -2.0.\n";
+		helpString += "The gapextend parameter allows you to specify the penalty for extending a gap in an alignment.  The default is -1.0.\n";
+		helpString += "The flip parameter is used to specify whether or not you want mothur to try the reverse complement if a sequence falls below the threshold.  The default is false.\n";
+		helpString += "The threshold is used to specify a cutoff at which an alignment is deemed 'bad' and the reverse complement may be tried. The default threshold is 0.50, meaning 50% of the bases are removed in the alignment.\n";
+		helpString += "If the flip parameter is set to true the reverse complement of the sequence is aligned and the better alignment is reported.\n";
+		helpString += "The default for the threshold parameter is 0.50, meaning at least 50% of the bases must remain or the sequence is reported as potentially reversed.\n";
+		helpString += "The align.seqs command should be in the following format: \n";
+		helpString += "align.seqs(reference=yourTemplateFile, fasta=yourCandidateFile, align=yourAlignmentMethod, search=yourSearchmethod, ksize=yourKmerSize, match=yourMatchBonus, mismatch=yourMismatchpenalty, gapopen=yourGapopenPenalty, gapextend=yourGapExtendPenalty) \n";
+		helpString += "Example align.seqs(candidate=candidate.fasta, template=core.filtered, align=kmer, search=gotoh, ksize=8, match=2.0, mismatch=3.0, gapopen=-2.0, gapextend=-1.0)\n";
+		helpString += "Note: No spaces between parameter labels (i.e. candidate), '=' and parameters (i.e.yourFastaFile).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "AlignCommand", "getHelpString");
 		exit(1);
 	}
 }
@@ -65,6 +85,7 @@ vector<string> AlignCommand::getRequiredFiles(){
 AlignCommand::AlignCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
 		outputTypes["alignreport"] = tempOutNames;
@@ -84,10 +105,7 @@ AlignCommand::AlignCommand(string option)  {
 		if(option == "help") { help(); abort = true; calledHelp = true;}
 		
 		else {
-			
-			//valid paramters for this command
-			string AlignArray[] =  {"template","candidate","search","ksize","align","match","mismatch","gapopen","gapextend", "processors","flip","threshold","outputdir","inputdir"};
-			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string, string> parameters = parser.getParameters(); 
@@ -117,27 +135,31 @@ AlignCommand::AlignCommand(string option)  {
 			else {
 				string path;
 
-				it = parameters.find("template");
+				it = parameters.find("reference");
 
 				//user has given a template file
 				if(it != parameters.end()){ 
 					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["template"] = inputDir + it->second;		}
+					if (path == "") {	parameters["reference"] = inputDir + it->second;		}
 				}
 			}
 
 			//check for required parameters
-			templateFileName = validParameter.validFile(parameters, "template", true);
+			templateFileName = validParameter.validFile(parameters, "reference", true);
 			
 			if (templateFileName == "not found") { 
-				m->mothurOut("template is a required parameter for the align.seqs command."); 
+				m->mothurOut("reference is a required parameter for the align.seqs command."); 
 				m->mothurOutEndLine();
 				abort = true; 
 			}else if (templateFileName == "not open") { abort = true; }	
 			
-			candidateFileName = validParameter.validFile(parameters, "candidate", false);
+			candidateFileName = validParameter.validFile(parameters, "fasta", false);
 			if (candidateFileName == "not found") { 
+				//if there is a current fasta file, use it
+				string filename = m->getFastaFile(); 
+				if (filename != "") { candidateFileNames.push_back(filename); m->mothurOut("Using " + filename + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current fastafile and the candidate parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}else { 
 				m->splitAtDash(candidateFileName, candidateFileNames);
 				
@@ -213,7 +235,8 @@ AlignCommand::AlignCommand(string option)  {
 			temp = validParameter.validFile(parameters, "gapextend", false);	if (temp == "not found"){	temp = "-1.0";			}
 			convert(temp, gapExtend); 
 			
-			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = "1";				}
+			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
+			m->setProcessors(temp);
 			convert(temp, processors); 
 			
 			temp = validParameter.validFile(parameters, "flip", false);			if (temp == "not found"){	temp = "f";				}
@@ -223,8 +246,11 @@ AlignCommand::AlignCommand(string option)  {
 			convert(temp, threshold); 
 			
 			search = validParameter.validFile(parameters, "search", false);		if (search == "not found"){	search = "kmer";		}
+			if ((search != "suffix") && (search != "kmer") && (search != "blast")) { m->mothurOut("invalid search option: choices are kmer, suffix or blast."); m->mothurOutEndLine(); abort=true; }
 			
 			align = validParameter.validFile(parameters, "align", false);		if (align == "not found"){	align = "needleman";	}
+			if ((align != "needleman") && (align != "gotoh") && (align != "blast") && (align != "noalign")) { m->mothurOut("invalid align option: choices are needleman, gotoh, blast or noalign."); m->mothurOutEndLine(); abort=true; }
+
 		}
 		
 	}
@@ -234,7 +260,6 @@ AlignCommand::AlignCommand(string option)  {
 	}
 }
 //**********************************************************************************************************************
-
 AlignCommand::~AlignCommand(){	
 
 	if (abort == false) {
@@ -243,37 +268,6 @@ AlignCommand::~AlignCommand(){
 		delete alignment;
 	}
 }
-
-//**********************************************************************************************************************
-
-void AlignCommand::help(){
-	try {
-		m->mothurOut("The align.seqs command reads a file containing sequences and creates an alignment file and a report file.\n");
-		m->mothurOut("The align.seqs command parameters are template, candidate, search, ksize, align, match, mismatch, gapopen, gapextend and processors.\n");
-		m->mothurOut("The template and candidate parameters are required. You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amzon.fasta \n");
-		m->mothurOut("The search parameter allows you to specify the method to find most similar template.  Your options are: suffix, kmer and blast. The default is kmer.\n");
-		m->mothurOut("The align parameter allows you to specify the alignment method to use.  Your options are: gotoh, needleman, blast and noalign. The default is needleman.\n");
-		m->mothurOut("The ksize parameter allows you to specify the kmer size for finding most similar template to candidate.  The default is 8.\n");
-		m->mothurOut("The match parameter allows you to specify the bonus for having the same base. The default is 1.0.\n");
-		m->mothurOut("The mistmatch parameter allows you to specify the penalty for having different bases.  The default is -1.0.\n");
-		m->mothurOut("The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -2.0.\n");
-		m->mothurOut("The gapextend parameter allows you to specify the penalty for extending a gap in an alignment.  The default is -1.0.\n");
-		m->mothurOut("The flip parameter is used to specify whether or not you want mothur to try the reverse complement if a sequence falls below the threshold.  The default is false.\n");
-		m->mothurOut("The threshold is used to specify a cutoff at which an alignment is deemed 'bad' and the reverse complement may be tried. The default threshold is 0.50, meaning 50% of the bases are removed in the alignment.\n");
-		m->mothurOut("If the flip parameter is set to true the reverse complement of the sequence is aligned and the better alignment is reported.\n");
-		m->mothurOut("The default for the threshold parameter is 0.50, meaning at least 50% of the bases must remain or the sequence is reported as potentially reversed.\n");
-		m->mothurOut("The align.seqs command should be in the following format: \n");
-		m->mothurOut("align.seqs(template=yourTemplateFile, candidate=yourCandidateFile, align=yourAlignmentMethod, search=yourSearchmethod, ksize=yourKmerSize, match=yourMatchBonus, mismatch=yourMismatchpenalty, gapopen=yourGapopenPenalty, gapextend=yourGapExtendPenalty) \n");
-		m->mothurOut("Example align.seqs(candidate=candidate.fasta, template=core.filtered, align=kmer, search=gotoh, ksize=8, match=2.0, mismatch=3.0, gapopen=-2.0, gapextend=-1.0)\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. candidate), '=' and parameters (i.e.yourFastaFile).\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "AlignCommand", "help");
-		exit(1);
-	}
-}
-
-
 //**********************************************************************************************************************
 
 int AlignCommand::execute(){
@@ -815,7 +809,7 @@ int AlignCommand::createProcesses(string alignFileName, string reportFileName, s
 		num = driver(lines[0], alignFileName, reportFileName, accnosFName, filename);
 		
 		//force parent to wait until all the processes are done
-		for (int i=0;i<processors;i++) { 
+		for (int i=0;i<processIDS.size();i++) { 
 			int temp = processIDS[i];
 			wait(&temp);
 		}

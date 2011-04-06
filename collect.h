@@ -8,7 +8,6 @@
 #include "rabundvector.hpp"
 #include "sharedordervector.h"
 #include "datavector.hpp"
-#include "globaldata.hpp"
 #include "mothurout.h"
 
 /***********************************************************************/
@@ -27,7 +26,6 @@ public:
 	
 private:
 	SharedOrderVector* sharedorder;
-	GlobalData* globaldata;
 	OrderVector* order;
 	vector<Display*> displays;
 	int numSeqs, numGroupComb, totalNumSeq;

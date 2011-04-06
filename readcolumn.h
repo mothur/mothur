@@ -17,6 +17,7 @@ class ReadColumnMatrix : public ReadMatrix {
 	
 public:
 	ReadColumnMatrix(string);
+	ReadColumnMatrix(string, bool);
 	~ReadColumnMatrix();
 	int read(NameAssignment*);
 private:

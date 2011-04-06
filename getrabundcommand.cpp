@@ -10,21 +10,49 @@
 #include "getrabundcommand.h"
 
 //**********************************************************************************************************************
-vector<string> GetRAbundCommand::getValidParameters(){	
+vector<string> GetRAbundCommand::setParameters(){	
 	try {
-		string Array[] =  {"label","sorted","outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter plist("list", "InputTypes", "", "", "LRSS", "LRSS", "none",false,false); parameters.push_back(plist);
+		CommandParameter psabund("sabund", "InputTypes", "", "", "LRSS", "LRSS", "none",false,false); parameters.push_back(psabund);		
+		CommandParameter psorted("sorted", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(psorted);
+		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "GetRAbundCommand", "getValidParameters");
+		m->errorOut(e, "GetRAbundCommand", "setParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
+string GetRAbundCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The get.rabund command parameters are list, sabund, label and sorted.  list or sabund parameters are required, unless you have valid current files.\n";
+		helpString += "The label parameter allows you to select what distance levels you would like included in your .rabund file, and are separated by dashes.\n";
+		helpString += "The sorted parameters allows you to print the rabund results sorted by abundance or not.  The default is sorted.\n";
+		helpString += "The get.rabund command should be in the following format: get.rabund(label=yourLabels, sorted=yourSorted).\n";
+		helpString += "Example get.rabund(sorted=F).\n";
+		helpString += "The default value for label is all labels in your inputfile.\n";
+		helpString += "The get.rabund command outputs a .rabund file containing the lines you selected.\n";
+		helpString += "Note: No spaces between parameter labels (i.e. label), '=' and parameters (i.e.yourLabels).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetRAbundCommand", "getHelpString");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
 GetRAbundCommand::GetRAbundCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["rabund"] = tempOutNames;
 	}
@@ -34,71 +62,69 @@ GetRAbundCommand::GetRAbundCommand(){
 	}
 }
 //**********************************************************************************************************************
-vector<string> GetRAbundCommand::getRequiredParameters(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetRAbundCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> GetRAbundCommand::getRequiredFiles(){	
-	try {
-		string Array[] =  {"list"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetRAbundCommand", "getRequiredFiles");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 GetRAbundCommand::GetRAbundCommand(string option)  {
 	try {
-		globaldata = GlobalData::getInstance();
 		abort = false; calledHelp = false;   
 		allLines = 1;
-		labels.clear();
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"label","sorted","outputdir","inputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
+			map<string,string>::iterator it;
 			
 			ValidParameters validParameter;
 			
 			//check to make sure all parameters are valid for command
-			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
-			}
-			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			string outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
-				outputDir = "";	
-				outputDir += m->hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
 			}
 			
 			//initialize outputTypes
 			vector<string> tempOutNames;
 			outputTypes["rabund"] = tempOutNames;
 			
-			//make sure the user has already run the read.otu command
-			if (globaldata->getListFile() == "") { m->mothurOut("You must read a listfile before you can use the get.rabund command."); m->mothurOutEndLine(); abort = true; }
+			//if the user changes the input directory command factory will send this info to us in the output parameter 
+			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			if (inputDir == "not found"){	inputDir = "";		}
+			else {
+				string path;
+				it = parameters.find("list");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["list"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("sabund");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["sabund"] = inputDir + it->second;		}
+				}
+			}
+			
+			
+			//check for required parameters
+			listfile = validParameter.validFile(parameters, "list", true);
+			if (listfile == "not open") { listfile = ""; abort = true; }
+			else if (listfile == "not found") { listfile = ""; }
+			else {  format = "list"; inputfile = listfile; }
+			
+			sabundfile = validParameter.validFile(parameters, "sabund", true);
+			if (sabundfile == "not open") { sabundfile = ""; abort = true; }	
+			else if (sabundfile == "not found") { sabundfile = ""; }
+			else {  format = "sabund"; inputfile = sabundfile; }
+			
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			
 			string temp;
 			temp = validParameter.validFile(parameters, "sorted", false);			if (temp == "not found") { temp = "T"; }
 			sorted = m->isTrue(temp);
@@ -110,17 +136,28 @@ GetRAbundCommand::GetRAbundCommand(string option)  {
 				else { allLines = 1;  }
 			}
 			
-			//if the user has not specified any labels use the ones from read.otu
-			if(label == "") {  
-				allLines = globaldata->allLines; 
-				labels = globaldata->labels; 
+			if ((listfile == "") && (sabundfile == "")) { 
+				//is there are current file available for any of these?
+				//give priority to shared, then list, then rabund, then sabund
+				//if there is a current shared file, use it
+				listfile = m->getListFile(); 
+				if (listfile != "") { inputfile = listfile; format = "list"; m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
+				else { 
+					sabundfile = m->getSabundFile(); 
+					if (sabundfile != "") { inputfile = sabundfile; format = "sabund"; m->mothurOut("Using " + sabundfile + " as input file for the sabund parameter."); m->mothurOutEndLine(); }
+					else { 
+						m->mothurOut("No valid current files. You must provide a list or sabund file."); m->mothurOutEndLine(); 
+						abort = true;
+					}
+				}
 			}
-				
-			if (abort == false) {
-				filename = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName)) + "rabund";
-				m->openOutputFile(filename, out);
-			}
+			
+			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(inputfile); 	}			
+			
 		}
+			
 
 	}
 	catch(exception& e) {
@@ -130,96 +167,66 @@ GetRAbundCommand::GetRAbundCommand(string option)  {
 }
 //**********************************************************************************************************************
 
-void GetRAbundCommand::help(){
-	try {
-		m->mothurOut("The get.rabund command can only be executed after a successful read.otu of a listfile.\n");
-		m->mothurOut("The get.rabund command parameters are label and sorted.  No parameters are required.\n");
-		m->mothurOut("The label parameter allows you to select what distance levels you would like included in your .rabund file, and are separated by dashes.\n");
-		m->mothurOut("The sorted parameters allows you to print the rabund results sorted by abundance or not.  The default is sorted.\n");
-		m->mothurOut("The get.rabund command should be in the following format: get.rabund(label=yourLabels, sorted=yourSorted).\n");
-		m->mothurOut("Example get.rabund(sorted=F).\n");
-		m->mothurOut("The default value for label is all labels in your inputfile.\n");
-		m->mothurOut("The get.rabund command outputs a .rabund file containing the lines you selected.\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. label), '=' and parameters (i.e.yourLabels).\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetRAbundCommand", "help");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
-GetRAbundCommand::~GetRAbundCommand(){}
-
-//**********************************************************************************************************************
-
 int GetRAbundCommand::execute(){
 	try {
 	
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
-		//read first line
-		read = new ReadOTUFile(globaldata->inputFileName);	
-		read->read(&*globaldata); 
-			
-		input = globaldata->ginput;
-		list = globaldata->gListVector;
-		string lastLabel = list->getLabel();
+		filename = outputDir + m->getRootName(m->getSimpleName(inputfile)) + "rabund";
+		m->openOutputFile(filename, out);
+		
+		input = new InputData(inputfile, format);
+		rabund = input->getRAbundVector();
+		string lastLabel = rabund->getLabel();
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = labels;
 		
-		if (m->control_pressed) {  outputTypes.clear();  out.close(); remove(filename.c_str());  delete list; globaldata->gListVector = NULL;  return 0; }
+		if (m->control_pressed) {  outputTypes.clear();  out.close(); remove(filename.c_str()); delete rabund; delete input; return 0; }
 		
-		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+		while((rabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-			if(allLines == 1 || labels.count(list->getLabel()) == 1){
-					m->mothurOut(list->getLabel()); m->mothurOutEndLine();
-					rabund = new RAbundVector();				
-					*rabund = (list->getRAbundVector());
+			if(allLines == 1 || labels.count(rabund->getLabel()) == 1){
+					m->mothurOut(rabund->getLabel()); m->mothurOutEndLine();
 					
-					if (m->control_pressed) {   outputTypes.clear(); out.close(); remove(filename.c_str());  delete list; delete rabund; globaldata->gListVector = NULL;  return 0; }
-
+					if (m->control_pressed) {   outputTypes.clear(); out.close(); remove(filename.c_str());  delete input; delete rabund;  return 0;  }
 					
 					if(sorted)	{   rabund->print(out);				}
 					else		{	rabund->nonSortedPrint(out);	}
 					
 					delete rabund;
 															
-					processedLabels.insert(list->getLabel());
-					userLabels.erase(list->getLabel());
+					processedLabels.insert(rabund->getLabel());
+					userLabels.erase(rabund->getLabel());
 			}
 			
-			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-					string saveLabel = list->getLabel();
+			if ((m->anyLabelsToProcess(rabund->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+					string saveLabel = rabund->getLabel();
 					
-					delete list;
-					list = input->getListVector(lastLabel);
+					delete rabund;
+					rabund = input->getRAbundVector(lastLabel);
 					
-					m->mothurOut(list->getLabel()); m->mothurOutEndLine();
-					rabund = new RAbundVector();
-					*rabund = (list->getRAbundVector());
+					m->mothurOut(rabund->getLabel()); m->mothurOutEndLine();
 					
-					if (m->control_pressed) {   outputTypes.clear(); out.close(); remove(filename.c_str());  delete list; delete rabund; globaldata->gListVector = NULL;  return 0; }
+					if (m->control_pressed) {   outputTypes.clear(); out.close(); remove(filename.c_str());  delete input; delete rabund;  return 0;  }
 					
 					if(sorted)	{   rabund->print(out);				}
 					else		{	rabund->nonSortedPrint(out);	}
 
 					delete rabund;
 
-					processedLabels.insert(list->getLabel());
-					userLabels.erase(list->getLabel());
+					processedLabels.insert(rabund->getLabel());
+					userLabels.erase(rabund->getLabel());
 					
 					//restore real lastlabel to save below
-					list->setLabel(saveLabel);
+					rabund->setLabel(saveLabel);
 			}
 			
-			lastLabel = list->getLabel();		
+			lastLabel = rabund->getLabel();		
 			
-			delete list;
-			list = input->getListVector();
+			delete rabund;
+			rabund = input->getRAbundVector();
 		}
 		
 		//output error messages about any remaining user labels
@@ -237,20 +244,17 @@ int GetRAbundCommand::execute(){
 		
 		//run last label if you need to
 		if (needToRun == true)  {
-			if (list != NULL) {	delete list;	}
-			list = input->getListVector(lastLabel);
+			if (rabund != NULL) {	delete rabund;	}
+			rabund = input->getRAbundVector(lastLabel);
 			
-			m->mothurOut(list->getLabel()); m->mothurOutEndLine();
-			rabund = new RAbundVector();
-			*rabund = (list->getRAbundVector());
-			
-			if (m->control_pressed) {  outputTypes.clear(); out.close(); remove(filename.c_str());  delete list; delete rabund; globaldata->gListVector = NULL;  return 0; }
+			m->mothurOut(rabund->getLabel()); m->mothurOutEndLine();
+					
+			if (m->control_pressed) {  outputTypes.clear(); out.close(); remove(filename.c_str());  delete input; delete rabund;  return 0; }
 			
 			if(sorted)	{   rabund->print(out);				}
 			else		{	rabund->nonSortedPrint(out);	}
 
 			delete rabund;
-			delete list;
 		}
 		
 		m->mothurOutEndLine();
@@ -259,9 +263,7 @@ int GetRAbundCommand::execute(){
 		m->mothurOutEndLine();
 		
 		out.close(); 
-		
-		globaldata->gListVector = NULL;
-		
+				
 		//set rabund file as new current rabundfile
 		string current = "";
 		itTypes = outputTypes.find("rabund");

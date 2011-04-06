@@ -32,7 +32,6 @@ class Unweighted : public TreeCalculator  {
 		};
 		vector<linePair> lines;
 		
-		GlobalData* globaldata;
 		EstOutput data;
 		TreeMap* tmap;
 		int processors;

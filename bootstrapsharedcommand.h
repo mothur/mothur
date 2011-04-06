@@ -14,14 +14,11 @@
 #include "sharedordervector.h"
 #include "inputdata.h"
 #include "groupmap.h"
-#include "readotu.h"
 #include "validcalculator.h"
 #include "tree.h"
 #include "treemap.h"
 #include "sharedutilities.h"
 #include "consensuscommand.h"
-	
-class GlobalData;
 
 class BootSharedCommand : public Command {
 	
@@ -29,22 +26,21 @@ public:
 	BootSharedCommand(string);	
 	BootSharedCommand();
 	~BootSharedCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();	
-	void help();
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "bootstrap.shared";	}
+	string getCommandCategory()		{ return "Hidden";				}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
 	int createTree(ostream*, Tree*);
 	void printSims();
 	int process(SharedOrderVector*);
 	
-	
-	GlobalData* globaldata;
 	SharedUtil* util;
-	ReadOTUFile* read;
 	TreeMap* tmap;
 	Tree* t;
 	Tree* tempTree;
@@ -61,11 +57,9 @@ private:
 
 	bool abort, allLines;
 	set<string> labels; //holds labels to be used
-	string outputFile, calc, groups, label, outputDir;
+	string outputFile, calc, groups, label, outputDir, sharedfile;
 	int numGroups, iters;
 	vector<string>  Estimators, Groups, outputNames; //holds estimators to be used
-	map< string, vector<string> > outputTypes;
-
 };
 	
 	

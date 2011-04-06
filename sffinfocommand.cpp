@@ -11,21 +11,57 @@
 #include "endiannessmacros.h"
 
 //**********************************************************************************************************************
-vector<string> SffInfoCommand::getValidParameters(){	
-	try {
-		string Array[] =  {"sff","qfile","fasta","flow","trim","accnos","sfftxt","outputdir","inputdir", "outputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+vector<string> SffInfoCommand::setParameters(){	
+	try {		
+		CommandParameter psff("sff", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(psff);
+		CommandParameter paccnos("accnos", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(paccnos);
+		CommandParameter psfftxt("sfftxt", "String", "", "", "", "", "",false,false); parameters.push_back(psfftxt);
+		CommandParameter pflow("flow", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pflow);
+		CommandParameter ptrim("trim", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(ptrim);
+		CommandParameter pfasta("fasta", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pfasta);
+		CommandParameter pqfile("name", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pqfile);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "SffInfoCommand", "getValidParameters");
+		m->errorOut(e, "SffInfoCommand", "setParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
+string SffInfoCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The sffinfo command reads a sff file and extracts the sequence data, or you can use it to parse a sfftxt file.\n";
+		helpString += "The sffinfo command parameters are sff, fasta, qfile, accnos, flow, sfftxt, and trim. sff is required. \n";
+		helpString += "The sff parameter allows you to enter the sff file you would like to extract data from.  You may enter multiple files by separating them by -'s.\n";
+		helpString += "The fasta parameter allows you to indicate if you would like a fasta formatted file generated.  Default=True. \n";
+		helpString += "The qfile parameter allows you to indicate if you would like a quality file generated.  Default=True. \n";
+		helpString += "The flow parameter allows you to indicate if you would like a flowgram file generated.  Default=False. \n";
+		helpString += "The sfftxt parameter allows you to indicate if you would like a sff.txt file generated.  Default=False. \n";
+		helpString += "If you want to parse an existing sfftxt file into flow, fasta and quality file, enter the file name using the sfftxt parameter. \n";
+		helpString += "The trim parameter allows you to indicate if you would like a sequences and quality scores trimmed to the clipQualLeft and clipQualRight values.  Default=True. \n";
+		helpString += "The accnos parameter allows you to provide a accnos file containing the names of the sequences you would like extracted. You may enter multiple files by separating them by -'s. \n";
+		helpString += "Example sffinfo(sff=mySffFile.sff, trim=F).\n";
+		helpString += "Note: No spaces between parameter labels (i.e. sff), '=' and parameters (i.e.yourSffFileName).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SffInfoCommand", "getHelpString");
+		exit(1);
+	}
+}
+
+
+//**********************************************************************************************************************
 SffInfoCommand::SffInfoCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
 		outputTypes["flow"] = tempOutNames;
@@ -34,29 +70,6 @@ SffInfoCommand::SffInfoCommand(){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SffInfoCommand", "SffInfoCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> SffInfoCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"sff", "sfftxt", "or"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SffInfoCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> SffInfoCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SffInfoCommand", "getRequiredFiles");
 		exit(1);
 	}
 }
@@ -72,8 +85,7 @@ SffInfoCommand::SffInfoCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"sff","qfile","fasta","flow","trim","accnos","sfftxt","outputdir","inputdir", "outputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string, string> parameters = parser.getParameters();
@@ -240,7 +252,12 @@ SffInfoCommand::SffInfoCommand(string option)  {
 				else if (sfftxtFilename == "not open") { sfftxtFilename = "";  }
 			}
 			
-			if ((sfftxtFilename == "") && (filenames.size() == 0)) {  m->mothurOut("[ERROR]: you must provide a valid sff or sfftxt file."); m->mothurOutEndLine(); abort=true; }
+			if ((sfftxtFilename == "") && (filenames.size() == 0)) {  
+				//if there is a current fasta file, use it
+				string filename = m->getSFFFile(); 
+				if (filename != "") { filenames.push_back(filename); m->mothurOut("Using " + filename + " as input file for the sff parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("[ERROR]: you must provide a valid sff or sfftxt file."); m->mothurOutEndLine(); abort=true;  }
+			}
 		}
 	}
 	catch(exception& e) {
@@ -248,32 +265,6 @@ SffInfoCommand::SffInfoCommand(string option)  {
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-
-void SffInfoCommand::help(){
-	try {
-		m->mothurOut("The sffinfo command reads a sff file and extracts the sequence data, or you can use it to parse a sfftxt file..\n");
-		m->mothurOut("The sffinfo command parameters are sff, fasta, qfile, accnos, flow, sfftxt, and trim. sff is required. \n");
-		m->mothurOut("The sff parameter allows you to enter the sff file you would like to extract data from.  You may enter multiple files by separating them by -'s.\n");
-		m->mothurOut("The fasta parameter allows you to indicate if you would like a fasta formatted file generated.  Default=True. \n");
-		m->mothurOut("The qfile parameter allows you to indicate if you would like a quality file generated.  Default=True. \n");
-		m->mothurOut("The flow parameter allows you to indicate if you would like a flowgram file generated.  Default=False. \n");
-		m->mothurOut("The sfftxt parameter allows you to indicate if you would like a sff.txt file generated.  Default=False. \n");
-		m->mothurOut("If you want to parse an existing sfftxt file into flow, fasta and quality file, enter the file name using the sfftxt parameter. \n");
-		m->mothurOut("The trim parameter allows you to indicate if you would like a sequences and quality scores trimmed to the clipQualLeft and clipQualRight values.  Default=True. \n");
-		m->mothurOut("The accnos parameter allows you to provide a accnos file containing the names of the sequences you would like extracted. You may enter multiple files by separating them by -'s. \n");
-		m->mothurOut("Example sffinfo(sff=mySffFile.sff, trim=F).\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. sff), '=' and parameters (i.e.yourSffFileName).\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SffInfoCommand", "help");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-
-SffInfoCommand::~SffInfoCommand(){}
-
 //**********************************************************************************************************************
 int SffInfoCommand::execute(){
 	try {

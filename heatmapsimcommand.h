@@ -12,41 +12,37 @@
 
 #include "command.hpp"
 #include "inputdata.h"
-#include "readotu.h"
 #include "validcalculator.h"
 #include "heatmapsim.h"
-
-class GlobalData;
+#include "nameassignment.hpp"
 
 class HeatMapSimCommand : public Command {
 
 public:
 	HeatMapSimCommand(string);
 	HeatMapSimCommand();
-	~HeatMapSimCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();
+	~HeatMapSimCommand(){}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "heatmap.sim";				}
+	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
+	
 	
 private:
-	GlobalData* globaldata;
-	ReadOTUFile* read;
 	InputData* input;
 	vector<SharedRAbundVector*> lookup;
 	vector<Calculator*> heatCalculators;
 	ValidCalculators* validCalculator;
 	HeatMapSim* heatmap;
 	OptionParser* parser;
-	map<string, string> parameters;
-	map<string, string>::iterator it;
 	bool abort, allLines;
 	set<string> labels; //holds labels to be used
-	string format, groups, label, calc, phylipfile, columnfile, namefile, outputDir;
+	string format, groups, label, calc, sharedfile, phylipfile, columnfile, namefile, outputDir, inputfile;
 	vector<string> Estimators, Groups, outputNames;
-	map<string, vector<string> > outputTypes;
 	
 	int runCommandShared();
 	int runCommandDist();

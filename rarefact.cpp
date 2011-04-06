@@ -183,7 +183,7 @@ try {
 		}
 		
 		//if jumble is false all iters will be the same
-		if (globaldata->jumble == false)  {  nIters = 1;  }
+		if (m->jumble == false)  {  nIters = 1;  }
 		
 		//convert freq percentage to number
 		int increment = 1;
@@ -196,7 +196,7 @@ try {
 				displays[i]->init(label);		  
 			}
 			
-			if (globaldata->jumble == true)  {
+			if (m->jumble == true)  {
 				//randomize the groups
 				random_shuffle(lookup.begin(), lookup.end());
 			}

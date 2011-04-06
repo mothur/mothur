@@ -9,38 +9,49 @@
 
 #include "getlabelcommand.h"
 
+
 //**********************************************************************************************************************
-vector<string> GetlabelCommand::getValidParameters(){	
+vector<string> GetlabelCommand::setParameters(){	
 	try {
-		string Array[] =  {"outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetlabelCommand", "getValidParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> GetlabelCommand::getRequiredParameters(){	
-	try {
+		CommandParameter plist("list", "InputTypes", "", "", "LRSS", "LRSS", "none",false,false); parameters.push_back(plist);
+		CommandParameter prabund("rabund", "InputTypes", "", "", "LRSS", "LRSS", "none",false,false); parameters.push_back(prabund);
+		CommandParameter psabund("sabund", "InputTypes", "", "", "LRSS", "LRSS", "none",false,false); parameters.push_back(psabund);
+		CommandParameter pshared("shared", "InputTypes", "", "", "LRSS", "LRSS", "none",false,false); parameters.push_back(pshared);		
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
 		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "GetlabelCommand", "getRequiredParameters");
+		m->errorOut(e, "GetlabelCommand", "setParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-vector<string> GetlabelCommand::getRequiredFiles(){	
+GetlabelCommand::GetlabelCommand(){	
 	try {
-		string Array[] =  {"list","rabund","sabund", "or"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
+		abort = true; calledHelp = true; 
+		setParameters();
 	}
 	catch(exception& e) {
-		m->errorOut(e, "GetlabelCommand", "getRequiredFiles");
+		m->errorOut(e, "GetlabelCommand", "CollectCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string GetlabelCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The get.label command parameters are list, sabund, rabund and shared file. \n";
+		helpString += "The get.label command should be in the following format: \n";
+		helpString += "get.label()\n";
+		helpString += "Example get.label().\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetlabelCommand", "getHelpString");
 		exit(1);
 	}
 }
@@ -48,14 +59,108 @@ vector<string> GetlabelCommand::getRequiredFiles(){
 
 GetlabelCommand::GetlabelCommand(string option)  {
 	try {
-		globaldata = GlobalData::getInstance();
 		abort = false; calledHelp = false;   
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			if ((globaldata->getListFile() == "") && (globaldata->getRabundFile() == "") && (globaldata->getSabundFile() == "")) { m->mothurOut("You must read a list, sabund or rabund before you can use the get.label command."); m->mothurOutEndLine(); abort = true; }				
+			vector<string> myArray = setParameters();
+			
+			OptionParser parser(option);
+			map<string,string> parameters = parser.getParameters();
+			map<string,string>::iterator it;
+			
+			ValidParameters validParameter;
+			
+			//check to make sure all parameters are valid for command
+			for (it = parameters.begin(); it != parameters.end(); it++) { 
+				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+			}
+			
+			//if the user changes the input directory command factory will send this info to us in the output parameter 
+			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			if (inputDir == "not found"){	inputDir = "";		}
+			else {
+				string path;
+				it = parameters.find("shared");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("rabund");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["rabund"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("sabund");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["sabund"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("list");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["list"] = inputDir + it->second;		}
+				}
+			}
+			
+			//check for required parameters
+			listfile = validParameter.validFile(parameters, "list", true);
+			if (listfile == "not open") { listfile = ""; abort = true; }
+			else if (listfile == "not found") { listfile = ""; }
+			else {  format = "list"; inputfile = listfile; }
+			
+			sabundfile = validParameter.validFile(parameters, "sabund", true);
+			if (sabundfile == "not open") { sabundfile = ""; abort = true; }	
+			else if (sabundfile == "not found") { sabundfile = ""; }
+			else {  format = "sabund"; inputfile = sabundfile; }
+			
+			rabundfile = validParameter.validFile(parameters, "rabund", true);
+			if (rabundfile == "not open") { rabundfile = ""; abort = true; }	
+			else if (rabundfile == "not found") { rabundfile = ""; }
+			else {  format = "rabund"; inputfile = rabundfile; }
+			
+			sharedfile = validParameter.validFile(parameters, "shared", true);
+			if (sharedfile == "not open") { sharedfile = ""; abort = true; }	
+			else if (sharedfile == "not found") { sharedfile = ""; }
+			else {  format = "sharedfile"; inputfile = sharedfile; }
+			
+			if ((sharedfile == "") && (listfile == "") && (rabundfile == "") && (sabundfile == "")) { 
+				//is there are current file available for any of these?
+				//give priority to shared, then list, then rabund, then sabund
+				//if there is a current shared file, use it
+				sharedfile = m->getSharedFile(); 
+				if (sharedfile != "") { inputfile = sharedfile; format = "sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+				else { 
+					listfile = m->getListFile(); 
+					if (listfile != "") { inputfile = listfile; format = "list"; m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
+					else { 
+						rabundfile = m->getRabundFile(); 
+						if (rabundfile != "") { inputfile = rabundfile; format = "rabund"; m->mothurOut("Using " + rabundfile + " as input file for the rabund parameter."); m->mothurOutEndLine(); }
+						else { 
+							sabundfile = m->getSabundFile(); 
+							if (sabundfile != "") { inputfile = sabundfile; format = "sabund"; m->mothurOut("Using " + sabundfile + " as input file for the sabund parameter."); m->mothurOutEndLine(); }
+							else { 
+								m->mothurOut("No valid current files. You must provide a list, sabund, rabund or shared file before you can use the collect.single command."); m->mothurOutEndLine(); 
+								abort = true;
+							}
+						}
+					}
+				}
+			}
+			
 		}
 
 	}
@@ -66,53 +171,29 @@ GetlabelCommand::GetlabelCommand(string option)  {
 }
 //**********************************************************************************************************************
 
-void GetlabelCommand::help(){
-	try {
-		m->mothurOut("The get.label command can only be executed after a successful read.otu command.\n");
-		m->mothurOut("You may not use any parameters with the get.label command.\n");
-		m->mothurOut("The get.label command should be in the following format: \n");
-		m->mothurOut("get.label()\n");
-		m->mothurOut("Example get.label().\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetlabelCommand", "help");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
-GetlabelCommand::~GetlabelCommand(){
-}
-
-//**********************************************************************************************************************
-
 int GetlabelCommand::execute(){
 	try {
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
-		filename = globaldata->inputFileName;
-		ifstream in;
-		m->openInputFile(filename, in);
-		string label;
-		int numBins = 0;
-		int count = -1;
-		while(in.good()) {
-			
-			if (m->control_pressed) { in.close();  return 0; }
-			
-			if(count > numBins)
-				count = 0;
-			if(count == 0) {
-				m->mothurOut(label); m->mothurOutEndLine();
-				in >> numBins;
-			}
-			in >> label;
-			count++;
-		}	
+		InputData* input = new InputData(inputfile, format);
+		OrderVector* order = input->getOrderVector();
+		string label = order->getLabel();
 		
-		in.close();
+		while (order != NULL) {
+			
+			if (m->control_pressed) { delete input;  delete order; return 0; }
+			
+			m->mothurOut(label); m->mothurOutEndLine();
+			
+			label = order->getLabel();	
+			
+			delete order;		
+			order = input->getOrderVector();
+		}
+		
+		delete input; 
+		
 		return 0;	
 	}
 
@@ -121,4 +202,6 @@ int GetlabelCommand::execute(){
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
+
 

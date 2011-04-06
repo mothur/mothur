@@ -11,14 +11,36 @@
 #include "sequence.hpp"
 
 //**********************************************************************************************************************
-vector<string> AlignCheckCommand::getValidParameters(){	
+vector<string> AlignCheckCommand::setParameters(){	
 	try {
-		string Array[] =  {"fasta", "name","map", "outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
+		CommandParameter pmap("map", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pmap);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "AlignCheckCommand", "getValidParameters");
+		m->errorOut(e, "AlignCheckCommand", "setParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string AlignCheckCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The align.check command reads a fasta file and map file.\n";
+		helpString += "It outputs a file containing the secondary structure matches in the .align.check file.\n";
+		helpString += "The align.check command parameters are fasta and map, both are required.\n";
+		helpString += "The align.check command should be in the following format: align.check(fasta=yourFasta, map=yourMap).\n";
+		helpString += "Example align.check(map=silva.ss.map, fasta=amazon.fasta).\n";
+		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "AlignCheckCommand", "getHelpString");
 		exit(1);
 	}
 }
@@ -26,34 +48,12 @@ vector<string> AlignCheckCommand::getValidParameters(){
 AlignCheckCommand::AlignCheckCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["aligncheck"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "AlignCheckCommand", "AlignCheckCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> AlignCheckCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"fasta","map"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "AlignCheckCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> AlignCheckCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "AlignCheckCommand", "getRequiredFiles");
 		exit(1);
 	}
 }
@@ -68,9 +68,7 @@ AlignCheckCommand::AlignCheckCommand(string option)  {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"fasta","name","map", "outputdir","inputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
@@ -124,7 +122,11 @@ AlignCheckCommand::AlignCheckCommand(string option)  {
 			
 			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not open") { abort = true; }
-			else if (fastafile == "not found") {  fastafile = "";  m->mothurOut("You must provide an fasta file."); m->mothurOutEndLine(); abort = true;  }	
+			else if (fastafile == "not found") {  				
+				fastafile = m->getFastaFile(); 
+				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}	
 			
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not open") { namefile = ""; abort = true; }
@@ -140,27 +142,10 @@ AlignCheckCommand::AlignCheckCommand(string option)  {
 
 	}
 	catch(exception& e) {
-		m->errorOut(e, "AlignCheckCommand", "RemoveSeqsCommand");
+		m->errorOut(e, "AlignCheckCommand", "AlignCheckCommand");
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-
-void AlignCheckCommand::help(){
-	try {
-		m->mothurOut("The align.check command reads a fasta file and map file.\n");
-		m->mothurOut("It outputs a file containing the secondary structure matches in the .align.check file.\n");
-		m->mothurOut("The align.check command parameters are fasta and map, both are required.\n");
-		m->mothurOut("The align.check command should be in the following format: align.check(fasta=yourFasta, map=yourMap).\n");
-		m->mothurOut("Example align.check(map=silva.ss.map, fasta=amazon.fasta).\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "AlignCheckCommand", "help");
-		exit(1);
-	}
-}
-
 //**********************************************************************************************************************
 
 int AlignCheckCommand::execute(){
@@ -209,7 +194,7 @@ int AlignCheckCommand::execute(){
 					//make sure this sequence is in the namefile, else error 
 					map<string, int>::iterator it = nameMap.find(seq.getName());
 					
-					if (it == nameMap.end()) { cout << "[ERROR]: " << seq.getName() << " is not in your namefile, please correct." << endl; m->control_pressed = true; }
+					if (it == nameMap.end()) { m->mothurOut("[ERROR]: " + seq.getName() + " is not in your namefile, please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
 					else { num = it->second; }
 				}
 				

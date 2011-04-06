@@ -13,31 +13,29 @@
 
 #include "command.hpp"
 #include "inputdata.h"
-#include "readotu.h"
 #include "sharedlistvector.h"
 #include "heatmap.h"
 #include "rabundvector.hpp"
 
-class GlobalData;
 
 class HeatMapCommand : public Command {
 
 public:
 	HeatMapCommand(string);
 	HeatMapCommand();
-	~HeatMapCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();
+	~HeatMapCommand(){}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "heatmap.bin";				}
+	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
+	
 	
 private:
-	GlobalData* globaldata;
-	ReadOTUFile* read;
 	InputData* input;
-	SharedListVector* SharedList;
 	RAbundVector* rabund;
 	vector<SharedRAbundVector*> lookup;
 	vector<SharedRAbundFloatVector*> lookupFloat;
@@ -45,9 +43,8 @@ private:
 
 	bool abort, allLines;
 	set<string> labels; //holds labels to be used
-	string format, groups, sorted, scale, label, outputDir;
+	string format, groups, sorted, scale, label, outputDir, sharedfile, relabundfile, listfile, rabundfile, sabundfile, inputfile;
 	vector<string> Groups, outputNames;
-	map<string, vector<string> > outputTypes;
 	int numOTU, fontSize;
 
 

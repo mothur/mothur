@@ -21,15 +21,16 @@ class ChimeraSlayerCommand : public Command {
 public:
 	ChimeraSlayerCommand(string);
 	ChimeraSlayerCommand();
-	~ChimeraSlayerCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();
+	~ChimeraSlayerCommand() {}
 	
-		
+	vector<string> setParameters();
+	string getCommandName()			{ return "chimera.slayer";		}
+	string getCommandCategory()		{ return "Sequence Processing"; }
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }		
+	
 private:
 
 	struct linePair {
@@ -56,7 +57,6 @@ private:
 	Chimera* chimera;
 	
 	vector<string> outputNames;
-	map<string, vector<string> > outputTypes;
 	vector<string> fastaFileNames;
 	vector<string> nameFileNames;
 	

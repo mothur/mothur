@@ -12,7 +12,6 @@
 
 #include "command.hpp"
 #include "nameassignment.hpp"
-#include "globaldata.hpp"
 #include "rabundvector.hpp"
 #include "sabundvector.hpp"
 #include "listvector.hpp"
@@ -23,16 +22,18 @@ class ClusterDoturCommand : public Command {
 public:
 	ClusterDoturCommand(string);
 	ClusterDoturCommand();
-	~ClusterDoturCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();	
-	void help();
+	~ClusterDoturCommand(){}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "cluster.classic";			}
+	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	bool abort, hard;
+	bool abort, hard, sim;
 	string method, fileroot, tag, outputDir, phylipfile, namefile;
 	double cutoff;
 	int precision, length;
@@ -45,7 +46,6 @@ private:
 	
 	void printData(string label);
 	vector<string> outputNames;
-	map<string, vector<string> > outputTypes;
 };
 
 #endif

@@ -20,20 +20,21 @@ class PipelineCommand : public Command {
 	
 public:
 	PipelineCommand(string);
-	PipelineCommand() { abort = true; calledHelp = true; }
-	~PipelineCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; } //empty
-	int execute();
-	void help();
+	PipelineCommand() { abort = true; calledHelp = true; setParameters(); }
+	~PipelineCommand(){}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "pipeline.pds";	}
+	string getCommandCategory()		{ return "Hidden";			}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
 	bool abort;
 	CommandFactory* cFactory;
 	vector<string> outputNames;
-	map<string, vector<string> > outputTypes;
 	vector<string> commands;
 	string outputDir, sffFile, alignFile, oligosFile, taxonomyFile, pipeFilename, classifyFile, chimeraFile;
 	int processors;

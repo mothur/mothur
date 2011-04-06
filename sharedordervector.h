@@ -42,11 +42,7 @@ struct individualFloat {
 #include "rabundvector.hpp"
 #include "sharedrabundvector.h"
 #include "sharedsabundvector.h"
-#include "globaldata.hpp"
 #include "groupmap.h"
-//#include "globaldata.hpp"
-
-class GlobalData;
 
 class SharedOrderVector : public DataVector {
 	
@@ -83,7 +79,6 @@ public:
 	vector<SharedRAbundVector*> getSharedRAbundVector(); //returns sharedRabundVectors for all the users groups
 	
 private:
-	GlobalData* globaldata;
 	GroupMap* groupmap;
 	vector<individual>  data; 
 	map< int, vector<individual> >::iterator it;

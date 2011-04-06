@@ -17,13 +17,15 @@ class MantelCommand : public Command {
 public:
 	MantelCommand(string);
 	MantelCommand();
-	~MantelCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
+	~MantelCommand(){}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "mantel";					}
+	string getCommandCategory()		{ return "Hypothesis Testing";		}
+	string getHelpString();	
+	
 	int execute();
-	void help();
+	void help() { m->mothurOut(getHelpString()); }
 	
 private:
 	
@@ -32,7 +34,6 @@ private:
 	int iters;
 	
 	vector<string> outputNames;
-	map<string, vector<string> > outputTypes;
 };
 
 

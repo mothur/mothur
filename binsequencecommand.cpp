@@ -9,39 +9,43 @@
 
 #include "binsequencecommand.h"
 
+
 //**********************************************************************************************************************
-vector<string> BinSeqCommand::getValidParameters(){	
+vector<string> BinSeqCommand::setParameters(){	
 	try {
-		string AlignArray[] =  {"fasta","label","name", "group","outputdir","inputdir"};
-		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(plist);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
+		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
+		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pgroup);
+		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+	
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "BinSeqCommand", "getValidParameters");
+		m->errorOut(e, "BinSeqCommand", "setParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-vector<string> BinSeqCommand::getRequiredParameters(){	
+string BinSeqCommand::getHelpString(){	
 	try {
-		string AlignArray[] =  {"fasta"};
-		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
-		return myArray;
+		string helpString = "";
+		helpString += "The bin.seqs command parameters are list, fasta, name, label and group.  The fasta and list are required, unless you have a valid current list and fasta file.\n";
+		helpString += "The label parameter allows you to select what distance levels you would like a output files created for, and are separated by dashes.\n";
+		helpString += "The bin.seqs command should be in the following format: bin.seqs(fasta=yourFastaFile, name=yourNamesFile, group=yourGroupFile, label=yourLabels).\n";
+		helpString += "Example bin.seqs(fasta=amazon.fasta, group=amazon.groups, name=amazon.names).\n";
+		helpString += "The default value for label is all lines in your inputfile.\n";
+		helpString += "The bin.seqs command outputs a .fasta file for each distance you specify appending the OTU number to each name.\n";
+		helpString += "If you provide a groupfile, then it also appends the sequences group to the name.\n";
+		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n";
+		return helpString;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "BinSeqCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> BinSeqCommand::getRequiredFiles(){	
-	try {
-		string AlignArray[] =  {"list"};
-		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "BinSeqCommand", "getRequiredFiles");
+		m->errorOut(e, "BinSeqCommand", "getHelpString");
 		exit(1);
 	}
 }
@@ -49,6 +53,7 @@ vector<string> BinSeqCommand::getRequiredFiles(){
 BinSeqCommand::BinSeqCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
 	}
@@ -60,7 +65,6 @@ BinSeqCommand::BinSeqCommand(){
 //**********************************************************************************************************************
 BinSeqCommand::BinSeqCommand(string option) {
 	try {
-		globaldata = GlobalData::getInstance();
 		abort = false; calledHelp = false;   
 		allLines = 1;
 		labels.clear();
@@ -69,9 +73,7 @@ BinSeqCommand::BinSeqCommand(string option) {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string AlignArray[] =  {"fasta","label","name", "group","outputdir","inputdir"};
-			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string, string> parameters = parser.getParameters();
@@ -88,20 +90,6 @@ BinSeqCommand::BinSeqCommand(string option) {
 			vector<string> tempOutNames;
 			outputTypes["fasta"] = tempOutNames;
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
-				outputDir = "";	
-				outputDir += m->hasPath(globaldata->getListFile()); //if user entered a file with a path then preserve it	
-			}
-
-			
-			//make sure the user has already run the read.otu command
-			if (globaldata->getListFile() == "") { 
-				m->mothurOut("You must read a listfile before running the bin.seqs command."); 
-				m->mothurOutEndLine(); 
-				abort = true; 
-			}
-			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
 			if (inputDir == "not found"){	inputDir = "";		}
@@ -113,6 +101,14 @@ BinSeqCommand::BinSeqCommand(string option) {
 					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("list");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["list"] = inputDir + it->second;		}
 				}
 				
 				it = parameters.find("name");
@@ -135,8 +131,27 @@ BinSeqCommand::BinSeqCommand(string option) {
 			
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", true);
-			if (fastafile == "not found") { m->mothurOut("fasta is a required parameter for the bin.seqs command.");  m->mothurOutEndLine(); abort = true; }
+			if (fastafile == "not found") { 				//if there is a current phylip file, use it
+				fastafile = m->getFastaFile(); 
+				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current fasta file and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}
 			else if (fastafile == "not open") { abort = true; }	
+			
+			listfile = validParameter.validFile(parameters, "list", true);
+			if (listfile == "not found") { 			
+				listfile = m->getListFile(); 
+				if (listfile != "") { m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current list file and the list parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}
+			else if (listfile == "not open") { listfile = ""; abort = true; }	
+			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+				outputDir = "";	
+				outputDir += m->hasPath(listfile); //if user entered a file with a path then preserve it	
+			}
+			
 		
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -148,12 +163,6 @@ BinSeqCommand::BinSeqCommand(string option) {
 				else { allLines = 1;  }
 			}
 			
-			//if the user has not specified any labels use the ones from read.otu
-			if (label == "") {  
-				allLines = globaldata->allLines; 
-				labels = globaldata->labels; 
-			}
-			
 			namesfile = validParameter.validFile(parameters, "name", true);
 			if (namesfile == "not open") { abort = true; }	
 			else if (namesfile == "not found") { namesfile = ""; }
@@ -162,17 +171,6 @@ BinSeqCommand::BinSeqCommand(string option) {
 			if (groupfile == "not open") { abort = true; }
 			else if (groupfile == "not found") { groupfile = ""; }
 			
-			if (abort == false) { 
-//				m->openInputFile(fastafile, in);
-				fasta = new FastaMap();
-				if (groupfile != "") {
-					groupMap = new GroupMap(groupfile);
-					
-					int error = groupMap->readMap();
-					if (error == 1) { delete groupMap; abort = true; }
-				}
-			}
-	
 		}
 	}
 	catch(exception& e) {
@@ -182,37 +180,7 @@ BinSeqCommand::BinSeqCommand(string option) {
 }
 //**********************************************************************************************************************
 
-void BinSeqCommand::help(){
-	try {
-		m->mothurOut("The bin.seqs command can only be executed after a successful read.otu command of a listfile.\n");
-		m->mothurOut("The bin.seqs command parameters are fasta, name, label and group.  The fasta parameter is required.\n");
-		m->mothurOut("The label parameter allows you to select what distance levels you would like a output files created for, and are separated by dashes.\n");
-		m->mothurOut("The bin.seqs command should be in the following format: bin.seqs(fasta=yourFastaFile, name=yourNamesFile, group=yourGroupFile, label=yourLabels).\n");
-		m->mothurOut("Example bin.seqs(fasta=amazon.fasta, group=amazon.groups, name=amazon.names).\n");
-		m->mothurOut("The default value for label is all lines in your inputfile.\n");
-		m->mothurOut("The bin.seqs command outputs a .fasta file for each distance you specify appending the OTU number to each name.\n");
-		m->mothurOut("If you provide a groupfile, then it also appends the sequences group to the name.\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "BinSeqCommand", "help");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
-BinSeqCommand::~BinSeqCommand(){
-	//made new in execute
-	if (abort == false) {
-		delete input;  globaldata->ginput = NULL;
-		delete read;
-		globaldata->gListVector = NULL;
-		delete fasta;
-		if (groupfile != "") {  delete groupMap;  globaldata->gGroupmap = NULL; }
-	}
-}
-
+BinSeqCommand::~BinSeqCommand(){}
 //**********************************************************************************************************************
 
 int BinSeqCommand::execute(){
@@ -221,27 +189,25 @@ int BinSeqCommand::execute(){
 	
 		int error = 0;
 		
+		fasta = new FastaMap();
+		if (groupfile != "") {
+			groupMap = new GroupMap(groupfile);
+			groupMap->readMap();
+		}
+		
 		//read fastafile
 		fasta->readFastaFile(fastafile);
-		
-		
-		//set format to list so input can get listvector
-//		globaldata->setFormat("list");
 		
 		//if user gave a namesfile then use it
 		if (namesfile != "") {
 			readNamesFile();
 		}
 		
-		//read list file
-		read = new ReadOTUFile(globaldata->getListFile());	
-		read->read(&*globaldata); 
-		
-		input = globaldata->ginput;
-		list = globaldata->gListVector;
+		input = new InputData(listfile, "list");
+		list = input->getListVector();
 		string lastLabel = list->getLabel();
 		
-		if (m->control_pressed) {  return 0; }
+		if (m->control_pressed) {  delete input;  delete fasta; if (groupfile != "") {  delete groupMap;   } return 0; }
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
@@ -250,12 +216,12 @@ int BinSeqCommand::execute(){
 				
 		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-			if(m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());		} return 0; }	
+			if(m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());		} delete input;  delete fasta; if (groupfile != "") {  delete groupMap;   } return 0; }	
 			
 			if(allLines == 1 || labels.count(list->getLabel()) == 1){
 				
 				error = process(list);	
-				if (error == 1) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());		} return 0; }	
+				if (error == 1) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());		} delete input;  delete fasta; if (groupfile != "") {  delete groupMap;   } return 0; }	
 							
 				processedLabels.insert(list->getLabel());
 				userLabels.erase(list->getLabel());
@@ -268,7 +234,7 @@ int BinSeqCommand::execute(){
 				list = input->getListVector(lastLabel);
 				
 				error = process(list);	
-				if (error == 1) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());		} return 0; }
+				if (error == 1) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());		} delete input;  delete fasta; if (groupfile != "") {  delete groupMap;   } return 0; }
 													
 				processedLabels.insert(list->getLabel());
 				userLabels.erase(list->getLabel());
@@ -283,7 +249,7 @@ int BinSeqCommand::execute(){
 			list = input->getListVector();
 		}
 		
-		if(m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());		} return 0; }	
+		if(m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());		} delete input;  delete fasta; if (groupfile != "") {  delete groupMap;   } return 0; }	
 
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -304,13 +270,21 @@ int BinSeqCommand::execute(){
 			list = input->getListVector(lastLabel);
 				
 			error = process(list);	
-			if (error == 1) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());		} return 0; }
+			if (error == 1) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());		} delete input;  delete fasta; if (groupfile != "") {  delete groupMap;   } return 0; }
 			
 			delete list;  
 		}
 		
-		if(m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());		} return 0; }	
-
+		delete input;  
+		delete fasta; 
+		if (groupfile != "") {  delete groupMap;   } 
+		
+		if(m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());		}  return 0; }	
+		
+		delete input;  
+		delete fasta; 
+		if (groupfile != "") {  delete groupMap;   } 
+		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
@@ -364,7 +338,7 @@ int BinSeqCommand::process(ListVector* list) {
 	try {
 				string binnames, name, sequence;
 				
-				string outputFileName = outputDir + m->getRootName(m->getSimpleName(globaldata->getListFile())) + list->getLabel() + ".fasta";
+				string outputFileName = outputDir + m->getRootName(m->getSimpleName(listfile)) + list->getLabel() + ".fasta";
 				m->openOutputFile(outputFileName, out);
 				
 				//save to output list of output file names

@@ -11,51 +11,57 @@
 
 //**********************************************************************************************************************
 inline bool comparePriority(seqPNode first, seqPNode second) {  return (first.numIdentical > second.numIdentical); }
+
 //**********************************************************************************************************************
-vector<string> PreClusterCommand::getValidParameters(){	
+vector<string> PreClusterCommand::setParameters(){	
 	try {
-		string Array[] =  {"fasta", "name", "diffs", "outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
+		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
+		CommandParameter pdiffs("diffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(pdiffs);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "PreClusterCommand", "getValidParameters");
+		m->errorOut(e, "PreClusterCommand", "setParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
+string PreClusterCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The pre.cluster command groups sequences that are within a given number of base mismatches.\n";
+		helpString += "The pre.cluster command outputs a new fasta and name file.\n";
+		helpString += "The pre.cluster command parameters are fasta, names and diffs. The fasta parameter is required. \n";
+		helpString += "The names parameter allows you to give a list of seqs that are identical. This file is 2 columns, first column is name or representative sequence, second column is a list of its identical sequences separated by commas.\n";
+		helpString += "The diffs parameter allows you to specify maximum number of mismatched bases allowed between sequences in a grouping. The default is 1.\n";
+		helpString += "The pre.cluster command should be in the following format: \n";
+		helpString += "pre.cluster(fasta=yourFastaFile, names=yourNamesFile, diffs=yourMaxDiffs) \n";
+		helpString += "Example pre.cluster(fasta=amazon.fasta, diffs=2).\n";
+		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PreClusterCommand", "getHelpString");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
 PreClusterCommand::PreClusterCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
 		outputTypes["name"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PreClusterCommand", "PreClusterCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> PreClusterCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"fasta"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PreClusterCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> PreClusterCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PreClusterCommand", "getRequiredFiles");
 		exit(1);
 	}
 }
@@ -69,9 +75,7 @@ PreClusterCommand::PreClusterCommand(string option) {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"fasta", "name", "diffs", "outputdir","inputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string, string> parameters = parser.getParameters();
@@ -113,7 +117,11 @@ PreClusterCommand::PreClusterCommand(string option) {
 
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", true);
-			if (fastafile == "not found") { m->mothurOut("fasta is a required parameter for the pre.cluster command."); m->mothurOutEndLine(); abort = true; }
+			if (fastafile == "not found") { 				
+				fastafile = m->getFastaFile(); 
+				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}
 			else if (fastafile == "not open") { abort = true; }	
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
@@ -136,28 +144,6 @@ PreClusterCommand::PreClusterCommand(string option) {
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PreClusterCommand", "PreClusterCommand");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-PreClusterCommand::~PreClusterCommand(){}	
-//**********************************************************************************************************************
-
-void PreClusterCommand::help(){
-	try {
-		m->mothurOut("The pre.cluster command groups sequences that are within a given number of base mismatches.\n");
-		m->mothurOut("The pre.cluster command outputs a new fasta and name file.\n");
-		m->mothurOut("The pre.cluster command parameters are fasta, names and diffs. The fasta parameter is required. \n");
-		m->mothurOut("The names parameter allows you to give a list of seqs that are identical. This file is 2 columns, first column is name or representative sequence, second column is a list of its identical sequences separated by commas.\n");
-		m->mothurOut("The diffs parameter allows you to specify maximum number of mismatched bases allowed between sequences in a grouping. The default is 1.\n");
-		m->mothurOut("The pre.cluster command should be in the following format: \n");
-		m->mothurOut("pre.cluster(fasta=yourFastaFile, names=yourNamesFile, diffs=yourMaxDiffs) \n");
-		m->mothurOut("Example pre.cluster(fasta=amazon.fasta, diffs=2).\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PreClusterCommand", "help");
 		exit(1);
 	}
 }

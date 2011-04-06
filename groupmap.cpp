@@ -44,6 +44,7 @@ int GroupMap::readMap() {
 			m->gobble(fileHandle);
 		}
 		fileHandle.close();
+		m->namesOfGroups = namesOfGroups;
 		return error;
 }
 /************************************************************/
@@ -69,6 +70,7 @@ int GroupMap::readDesignMap() {
 			m->gobble(fileHandle);
 		}
 		fileHandle.close();
+		m->namesOfGroups = namesOfGroups;
 		return error;
 }
 

@@ -29,7 +29,6 @@ public:
 	ListVector* getListVector()		{	return list;	}
 	
 private:
-	GlobalData* globaldata;
 	string distFile, outputDir;
 	string OutPutFile, format;
 	ListVector* list;

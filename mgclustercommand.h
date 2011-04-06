@@ -14,9 +14,10 @@
 #include "readblast.h"
 #include "sparsematrix.hpp"
 #include "nameassignment.hpp"
-#include "globaldata.hpp"
 #include "cluster.hpp"
 #include "hcluster.h"
+#include "rabundvector.hpp"
+#include "sabundvector.hpp"
 
 /**********************************************************************/
 
@@ -25,16 +26,18 @@ class MGClusterCommand : public Command {
 public:
 	MGClusterCommand(string);
 	MGClusterCommand();
-	~MGClusterCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();
+	~MGClusterCommand(){}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "mgcluster";				}
+	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
+	
 	
 private:
-	GlobalData* globaldata;
 	ReadBlast* read;
 	NameAssignment* nameMap;
 	Cluster* cluster;
@@ -43,7 +46,6 @@ private:
 	ListVector oldList;
 	vector<seqDist> overlapMatrix;
 	vector<string> outputNames;
-	map<string, vector<string> > outputTypes;
 	
 	string blastfile, method, namefile, overlapFile, distFile, outputDir;
 	ofstream sabundFile, rabundFile, listFile;

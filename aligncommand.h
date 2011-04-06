@@ -22,12 +22,14 @@ public:
 	AlignCommand(string);	
 	AlignCommand();
 	~AlignCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "align.seqs";			}
+	string getCommandCategory()		{ return "Sequence Processing"; }
+	string getHelpString();	
+	
 	int execute(); 
-	void help();	
+	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
 	struct linePair {
@@ -38,7 +40,6 @@ private:
 	vector<int> processIDS;   //processid
 	vector<linePair*> lines;
 	bool MPIWroteAccnos;
-	map<string, vector<string> > outputTypes;
 	
 	AlignmentDB* templateDB;
 	Alignment* alignment;

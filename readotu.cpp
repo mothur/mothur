@@ -9,14 +9,14 @@
 
 #include "readotu.h"
 
-/***********************************************************************/
+/***********************************************************************
 
 ReadOTUFile::ReadOTUFile(string pf): philFile(pf){
 	m = MothurOut::getInstance();
 	//m->openInputFile(philFile, fileHandle);
 }
 
-/***********************************************************************/
+/***********************************************************************
 //This function reads the list, rabund or sabund files to be used by collect and rarefact command.
 void ReadOTUFile::read(GlobalData* globaldata){
 	try {
@@ -75,7 +75,7 @@ void ReadOTUFile::read(GlobalData* globaldata){
 	}
 }
 
-/***********************************************************************/
+/***********************************************************************
 
 ReadOTUFile::~ReadOTUFile(){
 //	delete input;

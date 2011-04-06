@@ -26,14 +26,43 @@ inline bool comparePriority(seqRNode first, seqRNode second) {
 	return better; 
 }
 //**********************************************************************************************************************
-vector<string> ClusterFragmentsCommand::getValidParameters(){	
+vector<string> ClusterFragmentsCommand::setParameters(){	
 	try {
-		string AlignArray[] =  {"fasta","name","diffs","percent","outputdir","inputdir"};
-		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
+		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
+		CommandParameter pdiffs("diffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(pdiffs);
+		CommandParameter ppercent("percent", "Number", "", "0", "", "", "",false,false); parameters.push_back(ppercent);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ClusterFragmentsCommand", "getValidParameters");
+		m->errorOut(e, "ClusterFragmentsCommand", "setParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string ClusterFragmentsCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The cluster.fragments command groups sequences that are part of a larger sequence.\n";
+		helpString += "The cluster.fragments command outputs a new fasta and name file.\n";
+		helpString += "The cluster.fragments command parameters are fasta, name, diffs and percent. The fasta parameter is required, unless you have a valid current file. \n";
+		helpString += "The names parameter allows you to give a list of seqs that are identical. This file is 2 columns, first column is name or representative sequence, second column is a list of its identical sequences separated by commas.\n";
+		helpString += "The diffs parameter allows you to set the number of differences allowed, default=0. \n";
+		helpString += "The percent parameter allows you to set percentage of differences allowed, default=0. percent=2 means if the number of difference is less than or equal to two percent of the length of the fragment, then cluster.\n";
+		helpString += "You may use diffs and percent at the same time to say something like: If the number or differences is greater than 1 or more than 2% of the fragment length, don't merge. \n";
+		helpString += "The cluster.fragments command should be in the following format: \n";
+		helpString += "cluster.fragments(fasta=yourFastaFile, names=yourNamesFile) \n";
+		helpString += "Example cluster.fragments(fasta=amazon.fasta).\n";
+		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClusterFragmentsCommand", "getHelpString");
 		exit(1);
 	}
 }
@@ -41,35 +70,13 @@ vector<string> ClusterFragmentsCommand::getValidParameters(){
 ClusterFragmentsCommand::ClusterFragmentsCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
 		outputTypes["name"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClusterFragmentsCommand", "ClusterFragmentsCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> ClusterFragmentsCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"fasta"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClusterFragmentsCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> ClusterFragmentsCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClusterFragmentsCommand", "getRequiredFiles");
 		exit(1);
 	}
 }
@@ -82,9 +89,7 @@ ClusterFragmentsCommand::ClusterFragmentsCommand(string option) {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"fasta","name","diffs","percent","outputdir","inputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string, string> parameters = parser.getParameters();
@@ -126,8 +131,12 @@ ClusterFragmentsCommand::ClusterFragmentsCommand(string option) {
 
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", true);
-			if (fastafile == "not found") { m->mothurOut("fasta is a required parameter for the cluster.fragments command."); m->mothurOutEndLine(); abort = true; }
-			else if (fastafile == "not open") { abort = true; }	
+			if (fastafile == "not found") { 				
+				fastafile = m->getFastaFile(); 
+				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}
+			else if (fastafile == "not open") { fastafile = ""; abort = true; }	
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(fastafile); 	}
@@ -151,29 +160,6 @@ ClusterFragmentsCommand::ClusterFragmentsCommand(string option) {
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClusterFragmentsCommand", "ClusterFragmentsCommand");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-ClusterFragmentsCommand::~ClusterFragmentsCommand(){}	
-//**********************************************************************************************************************
-void ClusterFragmentsCommand::help(){
-	try {
-		m->mothurOut("The cluster.fragments command groups sequences that are part of a larger sequence.\n");
-		m->mothurOut("The cluster.fragments command outputs a new fasta and name file.\n");
-		m->mothurOut("The cluster.fragments command parameters are fasta, name, diffs and percent. The fasta parameter is required. \n");
-		m->mothurOut("The names parameter allows you to give a list of seqs that are identical. This file is 2 columns, first column is name or representative sequence, second column is a list of its identical sequences separated by commas.\n");
-		m->mothurOut("The diffs parameter allows you to set the number of differences allowed, default=0. \n");
-		m->mothurOut("The percent parameter allows you to set percentage of differences allowed, default=0. percent=2 means if the number of difference is less than or equal to two percent of the length of the fragment, then cluster.\n");
-		m->mothurOut("You may use diffs and percent at the same time to say something like: If the number or differences is greater than 1 or more than 2% of the fragment length, don't merge. \n");
-		m->mothurOut("The cluster.fragments command should be in the following format: \n");
-		m->mothurOut("cluster.fragments(fasta=yourFastaFile, names=yourNamesFile) \n");
-		m->mothurOut("Example cluster.fragments(fasta=amazon.fasta).\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClusterFragmentsCommand", "help");
 		exit(1);
 	}
 }

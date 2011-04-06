@@ -21,13 +21,15 @@ class PhylotypeCommand : public Command {
 public:
 	PhylotypeCommand(string);	
 	PhylotypeCommand();
-	~PhylotypeCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute(); 
-	void help();	
+	~PhylotypeCommand(){}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "phylotype";				}
+	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getHelpString();	
+	
+	int execute();
+	void help() { m->mothurOut(getHelpString()); }
 	
 private:
 	bool abort, allLines;

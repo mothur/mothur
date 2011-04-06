@@ -14,23 +14,23 @@
 #include "sharedrabundvector.h"
 #include "inputdata.h"
 #include "calculator.h"
-#include "readotu.h"
 #include "validcalculator.h"
-
-class GlobalData;
 
 class SummarySharedCommand : public Command {
 
 public:
 	SummarySharedCommand(string);
 	SummarySharedCommand();
-	~SummarySharedCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();
+	~SummarySharedCommand() {}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "summary.shared";			}
+	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
+	
 	
 private:
 	struct linePair {
@@ -38,17 +38,13 @@ private:
 		int end;
 	};
 	vector<linePair> lines;
-	GlobalData* globaldata;
-	ReadOTUFile* read;
 	vector<Calculator*> sumCalculators;	
 	InputData* input;
-	ValidCalculators* validCalculator;
 	
 	bool abort, allLines, mult, all, createPhylip;
 	set<string> labels; //holds labels to be used
-	string label, calc, groups;
+	string label, calc, groups, sharedfile;
 	vector<string>  Estimators, Groups, outputNames;
-	map<string, vector<string> > outputTypes;
 	vector<SharedRAbundVector*> lookup;
 	string format, outputDir;
 	int numGroups, processors;

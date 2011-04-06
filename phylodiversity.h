@@ -12,7 +12,6 @@
  */
 
 #include "treemap.h"
-#include "globaldata.hpp"
 #include "mothurout.h"
 
 
@@ -21,14 +20,13 @@
 class PhyloDiversity  {
 	
 	public:
-		PhyloDiversity(TreeMap* t) : tmap(t) { globaldata = GlobalData::getInstance();  m = MothurOut::getInstance(); }
+		PhyloDiversity(TreeMap* t) : tmap(t) {  m = MothurOut::getInstance(); }
 		~PhyloDiversity() {};
 		
 		//int getValues(Tree*, vector<int>, vector< vector< float> >&);
 		
 		
 	private:
-		GlobalData* globaldata;
 		MothurOut* m;
 		TreeMap* tmap;
 };

@@ -34,38 +34,48 @@
 #include "shen.h"
 #include "coverage.h"
 
+
 //**********************************************************************************************************************
-vector<string> CollectCommand::getValidParameters(){	
+vector<string> CollectCommand::setParameters(){	
 	try {
-		string AlignArray[] =  {"freq","label","calc","abund","size","outputdir","inputdir"};
-		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "CollectCommand", "getValidParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> CollectCommand::getRequiredParameters(){	
-	try {
+		CommandParameter plist("list", "InputTypes", "", "", "LRSS", "LRSS", "none",false,false); parameters.push_back(plist);
+		CommandParameter prabund("rabund", "InputTypes", "", "", "LRSS", "LRSS", "none",false,false); parameters.push_back(prabund);
+		CommandParameter psabund("sabund", "InputTypes", "", "", "LRSS", "LRSS", "none",false,false); parameters.push_back(psabund);
+		CommandParameter pshared("shared", "InputTypes", "", "", "LRSS", "LRSS", "none",false,false); parameters.push_back(pshared);
+		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
+		CommandParameter pfreq("freq", "Number", "", "100", "", "", "",false,false); parameters.push_back(pfreq);
+		CommandParameter pcalc("calc", "Multiple", "sobs-chao-nseqs-coverage-ace-jack-shannon-shannoneven-np_shannon-heip-smithwilson-simpson-simpsoneven-invsimpson-bootstrap-geometric-qstat-logseries-bergerparker-bstick-goodscoverage-efron-boneh-solow-shen", "sobs-chao-ace-jack-shannon-npshannon-simpson", "", "", "",true,false); parameters.push_back(pcalc);
+		CommandParameter pabund("abund", "Number", "", "10", "", "", "",false,false); parameters.push_back(pabund);
+		CommandParameter psize("size", "Number", "", "0", "", "", "",false,false); parameters.push_back(psize);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
 		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "CollectCommand", "getRequiredParameters");
+		m->errorOut(e, "CollectCommand", "setParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-vector<string> CollectCommand::getRequiredFiles(){	
+string CollectCommand::getHelpString(){	
 	try {
-		string AlignArray[] =  {"shared","list","rabund","sabund","or"};
-		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
-		return myArray;
+		string helpString = "";
+		helpString += "The collect.single command parameters are list, sabund, rabund, shared, label, freq, calc and abund.  list, sabund, rabund or shared is required unless you have a valid current file. \n";
+		helpString += "The collect.single command should be in the following format: \n";
+		helpString += "The freq parameter is used indicate when to output your data, by default it is set to 100. But you can set it to a percentage of the number of sequence. For example freq=0.10, means 10%. \n";
+		helpString += "collect.single(label=yourLabel, iters=yourIters, freq=yourFreq, calc=yourEstimators).\n";
+		helpString += "Example collect(label=unique-.01-.03, iters=10000, freq=10, calc=sobs-chao-ace-jack).\n";
+		helpString += "The default values for freq is 100, and calc are sobs-chao-ace-jack-shannon-npshannon-simpson.\n";
+		helpString += validCalculator->printCalc("single");
+		helpString += "The label parameter is used to analyze specific labels in your input.\n";
+		helpString += "Note: No spaces between parameter labels (i.e. freq), '=' and parameters (i.e.yourFreq).\n\n";
+		return helpString;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "CollectCommand", "getRequiredFiles");
+		m->errorOut(e, "CollectCommand", "getHelpString");
 		exit(1);
 	}
 }
@@ -73,6 +83,7 @@ vector<string> CollectCommand::getRequiredFiles(){
 CollectCommand::CollectCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["sobs"] = tempOutNames;
 		outputTypes["chao"] = tempOutNames;
@@ -108,30 +119,26 @@ CollectCommand::CollectCommand(){
 //**********************************************************************************************************************
 CollectCommand::CollectCommand(string option)  {
 	try {
-		globaldata = GlobalData::getInstance();
 		abort = false; calledHelp = false;   
 		allLines = 1;
-		labels.clear();
-		Estimators.clear();
 		
 		//allow user to run help
 		if(option == "help") { validCalculator = new ValidCalculators(); help(); delete validCalculator; abort = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"freq","label","calc","abund","size","outputdir","inputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
+			map<string,string>::iterator it;
 			
 			ValidParameters validParameter;
 		
 			//check to make sure all parameters are valid for command
-			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
-			
+
 			//initialize outputTypes
 			vector<string> tempOutNames;
 			outputTypes["sobs"] = tempOutNames;
@@ -160,11 +167,92 @@ CollectCommand::CollectCommand(string option)  {
 			outputTypes["solow"] = tempOutNames;
 			outputTypes["shen"] = tempOutNames;
 			
+			//if the user changes the input directory command factory will send this info to us in the output parameter 
+			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			if (inputDir == "not found"){	inputDir = "";		}
+			else {
+				string path;
+				it = parameters.find("shared");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("rabund");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["rabund"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("sabund");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["sabund"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("list");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["list"] = inputDir + it->second;		}
+				}
+			}
+			
+			//check for required parameters
+			listfile = validParameter.validFile(parameters, "list", true);
+			if (listfile == "not open") { listfile = ""; abort = true; }
+			else if (listfile == "not found") { listfile = ""; }
+			else {  format = "list"; inputfile = listfile; }
+			
+			sabundfile = validParameter.validFile(parameters, "sabund", true);
+			if (sabundfile == "not open") { sabundfile = ""; abort = true; }	
+			else if (sabundfile == "not found") { sabundfile = ""; }
+			else {  format = "sabund"; inputfile = sabundfile; }
+			
+			rabundfile = validParameter.validFile(parameters, "rabund", true);
+			if (rabundfile == "not open") { rabundfile = ""; abort = true; }	
+			else if (rabundfile == "not found") { rabundfile = ""; }
+			else {  format = "rabund"; inputfile = rabundfile; }
+			
+			sharedfile = validParameter.validFile(parameters, "shared", true);
+			if (sharedfile == "not open") { sharedfile = ""; abort = true; }	
+			else if (sharedfile == "not found") { sharedfile = ""; }
+			else {  format = "sharedfile"; inputfile = sharedfile; }
+			
+			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
 			
-			//make sure the user has already run the read.otu command
-			if ((globaldata->getSharedFile() == "") && (globaldata->getListFile() == "") && (globaldata->getRabundFile() == "") && (globaldata->getSabundFile() == "")) { m->mothurOut("You must read a list, sabund, rabund or shared file before you can use the collect.single command."); m->mothurOutEndLine(); abort = true; }
+			if ((sharedfile == "") && (listfile == "") && (rabundfile == "") && (sabundfile == "")) { 
+				//is there are current file available for any of these?
+				//give priority to shared, then list, then rabund, then sabund
+				//if there is a current shared file, use it
+				sharedfile = m->getSharedFile(); 
+				if (sharedfile != "") { inputfile = sharedfile; format = "sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+				else { 
+					listfile = m->getListFile(); 
+					if (listfile != "") { inputfile = listfile; format = "list"; m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
+					else { 
+						rabundfile = m->getRabundFile(); 
+						if (rabundfile != "") { inputfile = rabundfile; format = "rabund"; m->mothurOut("Using " + rabundfile + " as input file for the rabund parameter."); m->mothurOutEndLine(); }
+						else { 
+							sabundfile = m->getSabundFile(); 
+							if (sabundfile != "") { inputfile = sabundfile; format = "sabund"; m->mothurOut("Using " + sabundfile + " as input file for the sabund parameter."); m->mothurOutEndLine(); }
+							else { 
+								m->mothurOut("No valid current files. You must provide a list, sabund, rabund or shared file before you can use the collect.single command."); m->mothurOutEndLine(); 
+								abort = true;
+							}
+						}
+					}
+				}
+			}
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -175,12 +263,7 @@ CollectCommand::CollectCommand(string option)  {
 				else { allLines = 1;  }
 			}
 			
-			//if the user has not specified any labels use the ones from read.otu
-			if (label == "") {  
-				allLines = globaldata->allLines; 
-				labels = globaldata->labels; 
-			}
-				
+			//NOTE: if you add new calc options, don't forget to add them to the parameter initialize in setParameters or the gui won't be able to use them
 			calc = validParameter.validFile(parameters, "calc", false);			
 			if (calc == "not found") { calc = "sobs-chao-ace-jack-shannon-npshannon-simpson";  }
 			else { 
@@ -207,48 +290,21 @@ CollectCommand::CollectCommand(string option)  {
 }
 //**********************************************************************************************************************
 
-void CollectCommand::help(){
-	try {
-		m->mothurOut("The collect.single command can only be executed after a successful read.otu command. WITH ONE EXECEPTION. \n");
-		m->mothurOut("The collect.single command can be executed after a successful cluster command.  It will use the .list file from the output of the cluster.\n");
-		m->mothurOut("The collect.single command parameters are label, freq, calc and abund.  No parameters are required. \n");
-		m->mothurOut("The collect.single command should be in the following format: \n");
-		m->mothurOut("The freq parameter is used indicate when to output your data, by default it is set to 100. But you can set it to a percentage of the number of sequence. For example freq=0.10, means 10%. \n");
-		m->mothurOut("collect.single(label=yourLabel, iters=yourIters, freq=yourFreq, calc=yourEstimators).\n");
-		m->mothurOut("Example collect(label=unique-.01-.03, iters=10000, freq=10, calc=sobs-chao-ace-jack).\n");
-		m->mothurOut("The default values for freq is 100, and calc are sobs-chao-ace-jack-shannon-npshannon-simpson.\n");
-		validCalculator->printCalc("single", cout);
-		m->mothurOut("The label parameter is used to analyze specific labels in your input.\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. freq), '=' and parameters (i.e.yourFreq).\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "CollectCommand", "help");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
-CollectCommand::~CollectCommand(){}
-
-//**********************************************************************************************************************
-
 int CollectCommand::execute(){
 	try {
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
-		
-		string hadShared = "";
-		if ((globaldata->getFormat() != "sharedfile")) { inputFileNames.push_back(globaldata->inputFileName);  }
-		else { hadShared = globaldata->getSharedFile(); inputFileNames = parseSharedFile(globaldata->getSharedFile());  globaldata->setFormat("rabund");  }
+	
+		if ((format != "sharedfile")) { inputFileNames.push_back(inputfile);  }
+		else {  inputFileNames = parseSharedFile(sharedfile);  format = "rabund"; }
 	
 		for (int p = 0; p < inputFileNames.size(); p++) {
 			
-			if (m->control_pressed) {  outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}  globaldata->Groups.clear(); if (hadShared != "") {  globaldata->setSharedFile(hadShared); globaldata->setFormat("sharedfile");  } return 0; }
+			if (m->control_pressed) {  outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}  m->Groups.clear();  return 0; }
 			
 			if (outputDir == "") { outputDir += m->hasPath(inputFileNames[p]); }
 			string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(inputFileNames[p]));
-			globaldata->inputFileName = inputFileNames[p];
+			//globaldata->inputFileName = inputFileNames[p];
 		
 			if (inputFileNames.size() > 1) {
 				m->mothurOutEndLine(); m->mothurOut("Processing group " + groups[p]); m->mothurOutEndLine(); m->mothurOutEndLine();
@@ -338,14 +394,11 @@ int CollectCommand::execute(){
 			}
 		
 			//if the users entered no valid calculators don't execute command
-			if (cDisplays.size() == 0) { if (hadShared != "") {  globaldata->setSharedFile(hadShared); globaldata->setFormat("sharedfile");  } return 0; }
+			if (cDisplays.size() == 0) { return 0; }
 			
-			read = new ReadOTUFile(inputFileNames[p]);	
-			read->read(&*globaldata); 
-		
-			order = globaldata->gorder;
+			input = new InputData(inputFileNames[p], format);
+			order = input->getOrderVector();
 			string lastLabel = order->getLabel();
-			input = globaldata->ginput;
 			
 			//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 			set<string> processedLabels;
@@ -354,12 +407,10 @@ int CollectCommand::execute(){
 			if (m->control_pressed) {  
 				for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
 				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	} outputTypes.clear(); 
-				delete input;  globaldata->ginput = NULL;
-				delete read;
-				delete order; globaldata->gorder = NULL;
+				delete input;  
+				delete order; 
 				delete validCalculator;
-				globaldata->Groups.clear();
-				if (hadShared != "") {  globaldata->setSharedFile(hadShared); globaldata->setFormat("sharedfile");  }
+				m->Groups.clear();
 				return 0;
 			}
 
@@ -369,12 +420,10 @@ int CollectCommand::execute(){
 				if (m->control_pressed) { 
 					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
 					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	} outputTypes.clear(); 
-					delete input;  globaldata->ginput = NULL;
-					delete read;
-					delete order; globaldata->gorder = NULL;
+					delete input;  
+					delete order; 
 					delete validCalculator;
-					globaldata->Groups.clear();
-					if (hadShared != "") {  globaldata->setSharedFile(hadShared); globaldata->setFormat("sharedfile");  }
+					m->Groups.clear();
 					return 0;
 				}
 
@@ -421,11 +470,9 @@ int CollectCommand::execute(){
 			if (m->control_pressed) { 
 					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
 					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	} outputTypes.clear(); 
-					delete input;  globaldata->ginput = NULL;
-					delete read;
+					delete input;  
 					delete validCalculator;
-					globaldata->Groups.clear();
-					if (hadShared != "") {  globaldata->setSharedFile(hadShared); globaldata->setFormat("sharedfile");  }
+					m->Groups.clear();
 					return 0;
 			}
 				
@@ -456,12 +503,10 @@ int CollectCommand::execute(){
 				if (m->control_pressed) { 
 					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
 					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	} outputTypes.clear(); 
-					delete input;  globaldata->ginput = NULL;
-					delete read;
-					delete order; globaldata->gorder = NULL;
+					delete input;  
+					delete order; 
 					delete validCalculator;
-					globaldata->Groups.clear();
-					if (hadShared != "") {  globaldata->setSharedFile(hadShared); globaldata->setFormat("sharedfile");  }
+					m->Groups.clear();
 					return 0;
 				}
 				delete order;
@@ -469,15 +514,10 @@ int CollectCommand::execute(){
 			
 			for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
 			cDisplays.clear();
-			delete input;  globaldata->ginput = NULL;
-			delete read;
-			globaldata->gorder = NULL;
+			delete input;  
 			delete validCalculator;
 		}
 		
-		//return to shared mode if you changed above
-		if (hadShared != "") {  globaldata->setSharedFile(hadShared); globaldata->setFormat("sharedfile");  }
-
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	} return 0; }
 				
 		m->mothurOutEndLine();
@@ -501,13 +541,8 @@ vector<string> CollectCommand::parseSharedFile(string filename) {
 		
 		map<string, ofstream*> filehandles;
 		map<string, ofstream*>::iterator it3;
-		
-				
-		//read first line
-		read = new ReadOTUFile(filename);	
-		read->read(&*globaldata); 
-			
-		input = globaldata->ginput;
+					
+		input = new InputData(filename, "sharedfile");
 		vector<SharedRAbundVector*> lookup = input->getSharedRAbundVectors();
 		
 		string sharedFileRoot = m->getRootName(filename);
@@ -542,9 +577,8 @@ vector<string> CollectCommand::parseSharedFile(string filename) {
 		for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {
 			delete it3->second;
 		}
-		delete read;
+		
 		delete input;
-		globaldata->ginput = NULL;
 
 		return filenames;
 	}

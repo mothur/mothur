@@ -18,13 +18,15 @@ class ConsensusSeqsCommand : public Command {
 public:
 	ConsensusSeqsCommand(string);
 	ConsensusSeqsCommand();
-	~ConsensusSeqsCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();
+	~ConsensusSeqsCommand(){}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "consensus.seqs";		}
+	string getCommandCategory()		{ return "Sequence Processing"; }
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
 	
@@ -32,7 +34,6 @@ private:
 	string fastafile, listfile, namefile, label, outputDir;
 	set<string> labels;
 	vector<string> outputNames;
-	map<string, vector<string> > outputTypes;
 	map<string, string> fastaMap;
 	map<string, string> nameMap;
 	map<string, string> nameFileMap;

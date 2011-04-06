@@ -10,36 +10,33 @@
 #include "consensuscommand.h"
 
 //**********************************************************************************************************************
-vector<string> ConcensusCommand::getValidParameters(){	
+vector<string> ConcensusCommand::setParameters(){	
 	try {
-		vector<string> myArray; 
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ConcensusCommand", "getValidParameters");
+		m->errorOut(e, "ConcensusCommand", "setParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-vector<string> ConcensusCommand::getRequiredParameters(){	
+string ConcensusCommand::getHelpString(){	
 	try {
-		vector<string> myArray; 
-		return myArray;
+		string helpString = "";
+		helpString += "The consensus command can only be executed after a successful read.tree command.\n";
+		helpString += "The consensus command has no parameters.\n";
+		helpString += "The consensus command should be in the following format: consensus().\n";
+		helpString += "The consensus command output two files: .consensus.tre and .consensuspairs.\n";
+		helpString += "The .consensus.tre file contains the consensus tree of the trees in your input file.\n";
+		helpString += "The branch lengths are the percentage of trees in your input file that had the given pair.\n";
+		helpString += "The .consensuspairs file contains a list of the internal nodes in your tree.  For each node, the pair that was used in the consensus tree \n";
+		helpString += "is reported with its percentage, as well as the other pairs that were seen for that node but not used and their percentages.\n\n";		
+		return helpString;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ConcensusCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> ConcensusCommand::getRequiredFiles(){	
-	try {
-		string AlignArray[] =  {"tree","group"};
-		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ConcensusCommand", "getRequiredFiles");
+		m->errorOut(e, "ConcensusCommand", "getHelpString");
 		exit(1);
 	}
 }
@@ -47,6 +44,7 @@ vector<string> ConcensusCommand::getRequiredFiles(){
 ConcensusCommand::ConcensusCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["tree"] = tempOutNames;
 		outputTypes["nodepairs"] = tempOutNames;
@@ -60,8 +58,9 @@ ConcensusCommand::ConcensusCommand(){
 
 ConcensusCommand::ConcensusCommand(string fileroot)  {
 	try {
-		globaldata = GlobalData::getInstance();
 		abort = false; calledHelp = false;   
+		
+		setParameters();
 		
 		//initialize outputTypes
 		vector<string> tempOutNames;
@@ -69,8 +68,6 @@ ConcensusCommand::ConcensusCommand(string fileroot)  {
 		outputTypes["nodepairs"] = tempOutNames;
 		
 		filename = fileroot;
-		
-		t = globaldata->gTree;
 	
 	}
 	catch(exception& e) {
@@ -78,40 +75,19 @@ ConcensusCommand::ConcensusCommand(string fileroot)  {
 		exit(1);
 	}
 }
-
-//**********************************************************************************************************************
-
-void ConcensusCommand::help(){
-	try {
-		m->mothurOut("The consensus command can only be executed after a successful read.tree command.\n");
-		m->mothurOut("The consensus command has no parameters.\n");
-		m->mothurOut("The consensus command should be in the following format: consensus().\n");
-		m->mothurOut("The consensus command output two files: .consensus.tre and .consensuspairs.\n");
-		m->mothurOut("The .consensus.tre file contains the consensus tree of the trees in your input file.\n");
-		m->mothurOut("The branch lengths are the percentage of trees in your input file that had the given pair.\n");
-		m->mothurOut("The .consensuspairs file contains a list of the internal nodes in your tree.  For each node, the pair that was used in the consensus tree \n");
-		m->mothurOut("is reported with its percentage, as well as the other pairs that were seen for that node but not used and their percentages.\n\n");		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ConcensusCommand", "help");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
-ConcensusCommand::~ConcensusCommand(){}
-
 //**********************************************************************************************************************
 
 int ConcensusCommand::execute(){
 	try {
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
-		else {  
-			numNodes = t[0]->getNumNodes();
-			numLeaves = t[0]->getNumLeaves();
-		}
+		
+		m->mothurOut("This command is not currently in use."); m->mothurOutEndLine();
+	/*	
+		t = globaldata->gTree;
+		numNodes = t[0]->getNumNodes();
+		numLeaves = t[0]->getNumLeaves();
+		
 		
 		//get the possible pairings
 		getSets();	
@@ -217,7 +193,7 @@ int ConcensusCommand::execute(){
 		if (itTypes != outputTypes.end()) {
 			if ((itTypes->second).size() != 0) { currentTree = (itTypes->second)[0]; m->setTreeFile(currentTree); }
 		}
-		
+		*/
 		return 0;
 	}
 	catch(exception& e) {

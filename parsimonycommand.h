@@ -15,25 +15,26 @@
 #include "progress.hpp"
 #include "sharedutilities.h"
 #include "fileoutput.h"
+#include "readtree.h"
 
-
-class GlobalData;
 
 class ParsimonyCommand : public Command {
 
 public:
 	ParsimonyCommand(string);	
 	ParsimonyCommand();
-	~ParsimonyCommand() { if (abort == false) { delete pars; delete util; delete output; }  }
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();	
-	void help();
-
+	~ParsimonyCommand(){}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "parsimony";				}
+	string getCommandCategory()		{ return "Hypothesis Testing";		}
+	string getHelpString();	
+	
+	int execute();
+	void help() { m->mothurOut(getHelpString()); }
+	
 private:
-	GlobalData* globaldata;
+	ReadTree* read;
 	SharedUtil* util;
 	FileOutput* output;
 	vector<Tree*> T;	   //user trees
@@ -43,8 +44,8 @@ private:
 	TreeMap* savetmap;
 	Parsimony* pars;
 	vector<string> groupComb; // AB. AC, BC...
-	string sumFile, randomtree, allGroups, outputDir;
-	int iters, numGroups, numComp, counter, processors;
+	string sumFile, randomtree, allGroups, outputDir, treefile, groupfile, namefile;
+	int iters, numGroups, numComp, counter, processors, numUniquesInName;
 	vector<int> numEachGroup; //vector containing the number of sequences in each group the users wants for random distrib.
 	vector< vector<float> > userTreeScores; //scores for users trees for each comb.
 	vector< vector<float> > UScoreSig;  //tree score signifigance when compared to random trees - percentage of random trees with that score or lower.
@@ -57,16 +58,15 @@ private:
 	vector< map<int, double> > uCumul;  //map <pscore, cumulative percentage of number of user trees with that score or lower .> -vector entry for each combination.
 	
 	ofstream outSum;
-	
-
 	bool abort;
 	string groups, itersString;
 	vector<string> Groups, outputNames; //holds groups to be used
-	map<string, vector<string> > outputTypes;
-
+	map<string, string> nameMap;
+	
 	void printParsimonyFile();  
 	int printUSummaryFile();
 	void getUserInput();
+	int readNamesFile();
 	
 };
 

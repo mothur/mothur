@@ -13,7 +13,7 @@
 #include "sharedrabundvector.h"
 #include "sharedrabundfloatvector.h"
 #include "datavector.hpp"
-#include "globaldata.hpp"
+
 
 /***********************************************************************/
 struct binCount {
@@ -43,7 +43,7 @@ inline bool comparebinFloatCounts(binCountFloat left, binCountFloat right){
 class HeatMap {
 	
 	public:
-		HeatMap(string, string, int, int, string);
+		HeatMap(string, string, int, int, string, string);
 		~HeatMap(){};
 	
 		string getPic(RAbundVector*);
@@ -56,8 +56,7 @@ class HeatMap {
 		int sortRabund(RAbundVector*&);
 		void printLegend(int, float);
 
-		GlobalData* globaldata;
-		string format, sorted, groupComb, scaler, outputDir;
+		string format, sorted, groupComb, scaler, outputDir, inputfile;
 		ofstream outsvg;
 		MothurOut* m;
 		int numOTU, fontSize;

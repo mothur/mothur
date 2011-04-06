@@ -17,13 +17,16 @@ class ScreenSeqsCommand : public Command {
 public:
 	ScreenSeqsCommand(string);
 	ScreenSeqsCommand();
-	~ScreenSeqsCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();
+	~ScreenSeqsCommand() {}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "screen.seqs";				}
+	string getCommandCategory()		{ return "Sequence Processing";		}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
+	
 	
 private:
 
@@ -52,7 +55,6 @@ private:
 	int startPos, endPos, maxAmbig, maxHomoP, minLength, maxLength, processors, criteria;
 	vector<string> outputNames;
 	vector<string> optimize;
-	map<string, vector<string> > outputTypes;
 	map<string, int> nameMap;
 	int readNames();
 	

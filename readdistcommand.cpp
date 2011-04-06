@@ -13,51 +13,15 @@
 #include "readmatrix.hpp"
 
 //**********************************************************************************************************************
-vector<string> ReadDistCommand::getValidParameters(){	
-	try {
-		string Array[] =  {"phylip", "column", "name", "cutoff", "precision", "group","outputdir","inputdir","sim"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ReadDistCommand", "getValidParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> ReadDistCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"phylip","column","or"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ReadDistCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> ReadDistCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ReadDistCommand", "getRequiredFiles");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 ReadDistCommand::ReadDistCommand(string option) {
 	try {
-		globaldata = GlobalData::getInstance();
 		abort = false; calledHelp = false;   
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
+			/*//valid paramters for this command
 			string Array[] =  {"phylip", "column", "name", "cutoff", "precision", "group","outputdir","inputdir","sim"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
@@ -193,7 +157,7 @@ ReadDistCommand::ReadDistCommand(string option) {
 					}
 				}
 			}
-
+*/
 		}
 
 	}
@@ -203,44 +167,12 @@ ReadDistCommand::ReadDistCommand(string option) {
 	}
 }
 //**********************************************************************************************************************
-
-void ReadDistCommand::help(){
-	try {
-		m->mothurOut("The read.dist command parameter options are phylip or column, group, name, sim, cutoff and precision\n");
-		m->mothurOut("The read.dist command can be used in two ways.  The first is to read a phylip or column and run the cluster command\n");
-		m->mothurOut("For this use the read.dist command should be in the following format: \n");
-		m->mothurOut("read.dist(phylip=yourDistFile, name=yourNameFile, cutoff=yourCutoff, precision=yourPrecision) \n");
-		m->mothurOut("The phylip or column parameter is required, but only one may be used.  If you use a column file the name filename is required. \n");
-		m->mothurOut("The sim parameter is used to indicate that your distance file contains similarity values instead of distance values. The default is false, if sim=true then mothur will convert the similarity values to distances. \n");
-		m->mothurOut("If you do not provide a cutoff value 10.00 is assumed. If you do not provide a precision value then 100 is assumed.\n");
-		m->mothurOut("The second way to use the read.dist command is to read a phylip or column and a group, so you can use the libshuff command.\n");
-		m->mothurOut("For this use the read.dist command should be in the following format: \n");
-		m->mothurOut("read.dist(phylip=yourPhylipfile, group=yourGroupFile). The cutoff and precision parameters are not valid with this use.  \n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. phylip), '=' and parameters (i.e.yourPhylipfile).\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ReadDistCommand", "help");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
-ReadDistCommand::~ReadDistCommand(){
-	if (abort == false) {
-		if (format != "matrix") { 
-			delete read; 
-			delete nameMap; 
-		}
-	}
-}
-
-//**********************************************************************************************************************
 int ReadDistCommand::execute(){
 	try {
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
-
+		m->mothurOut(getHelpString()); m->mothurOutEndLine();
+/*
 		time_t start = time(NULL);
 		size_t numDists = 0;
 		
@@ -314,6 +246,7 @@ int ReadDistCommand::execute(){
 		}
 		
 		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to read "); m->mothurOutEndLine();
+ */
 		return 0;
 		
 	}

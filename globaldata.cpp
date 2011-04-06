@@ -1,5 +1,5 @@
 
-
+/*
 #include "globaldata.hpp"
 #include "sharedlistvector.h"
 #include "inputdata.h"
@@ -7,7 +7,7 @@
 
 /*******************************************************/
 
-/******************************************************/
+/******************************************************
 GlobalData* GlobalData::getInstance() {
 	if( _uniqueInstance == 0) {
 		_uniqueInstance = new GlobalData();
@@ -16,7 +16,7 @@ GlobalData* GlobalData::getInstance() {
 }
 /*******************************************************/
 
-/******************************************************/
+/******************************************************
 // These functions give you the option parameters of the commands
 string GlobalData::getPhylipFile()		{	return phylipfile;		}
 string GlobalData::getColumnFile()		{	return columnfile;		}
@@ -49,7 +49,7 @@ void GlobalData::setFormat(string Format)		{	format = Format;		}
 
 /*******************************************************/
 
-/******************************************************/
+/******************************************************
 GlobalData::GlobalData() {
 	m = MothurOut::getInstance();
 	//option definitions should go here...
@@ -71,7 +71,7 @@ GlobalData::GlobalData() {
 }
 /*******************************************************/
 
-/******************************************************/
+/******************************************************
 void GlobalData::clear() {
 	//option definitions should go here...
 	phylipfile		=	""; //do we need this?
@@ -94,7 +94,7 @@ void GlobalData::clear() {
 
 /*******************************************************/
 
-/******************************************************/
+/******************************************************
 void GlobalData::newRead() {
 	try{	
 			//remove old file names
@@ -143,7 +143,7 @@ void GlobalData::newRead() {
 
 //******************************************************/
 
-/******************************************************/
+/*****************************************************
 GlobalData::~GlobalData() {
 	_uniqueInstance = 0;
 	try {

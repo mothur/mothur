@@ -28,10 +28,9 @@ SharedOrderVector::SharedOrderVector(string id, vector<individual>  ov) :
 
 SharedOrderVector::SharedOrderVector(ifstream& f) : DataVector() {  //reads in a shared file
 	try {
-		globaldata = GlobalData::getInstance();
 		maxRank = 0; numBins = 0; numSeqs = 0;
-		
-		if (globaldata->gGroupmap == NULL) {  groupmap = new GroupMap(); }
+				
+		groupmap = new GroupMap(); 
 		
 		int num, inputData, count;
 		count = 0;  numSeqs = 0;
@@ -42,11 +41,11 @@ SharedOrderVector::SharedOrderVector(ifstream& f) : DataVector() {  //reads in a
 		f >> label >> groupN >> num;
 		holdLabel = label;
 		
-		if (globaldata->gGroupmap == NULL) { 
-			//save group in groupmap
-			groupmap->namesOfGroups.push_back(groupN);
-			groupmap->groupIndex[groupN] = 0;
-		}
+		
+		//save group in groupmap
+		groupmap->namesOfGroups.push_back(groupN);
+		groupmap->groupIndex[groupN] = 0;
+		
 		
 		for(int i=0;i<num;i++){
 			f >> inputData;
@@ -66,11 +65,11 @@ SharedOrderVector::SharedOrderVector(ifstream& f) : DataVector() {  //reads in a
 			f >> groupN >> num;
 			count++;
 			
-			if (globaldata->gGroupmap == NULL) { 
-				//save group in groupmap
-				groupmap->namesOfGroups.push_back(groupN);
-				groupmap->groupIndex[groupN] = count;
-			}
+			
+			//save group in groupmap
+			groupmap->namesOfGroups.push_back(groupN);
+			groupmap->groupIndex[groupN] = count;
+			
 			
 			for(int i=0;i<num;i++){
 				f >> inputData;
@@ -90,7 +89,7 @@ SharedOrderVector::SharedOrderVector(ifstream& f) : DataVector() {  //reads in a
 		//put file pointer back since you are now at a new distance label
 		for (int i = 0; i < nextLabel.length(); i++) { f.unget();  }
 	
-		if (globaldata->gGroupmap == NULL) { globaldata->gGroupmap = groupmap; }
+		m->namesOfGroups = groupmap->namesOfGroups;
 		
 		updateStats();
 		
@@ -286,8 +285,8 @@ vector<SharedRAbundVector*> SharedOrderVector::getSharedRAbundVector() {
 		util = new SharedUtil();
 		vector<SharedRAbundVector*> lookup;
 		
-		util->setGroups(globaldata->Groups, globaldata->gGroupmap->namesOfGroups);
-		util->getSharedVectors(globaldata->Groups, lookup, this);
+		util->setGroups(m->Groups, m->namesOfGroups);
+		util->getSharedVectors(m->Groups, lookup, this);
 		
 		return lookup;
 	}

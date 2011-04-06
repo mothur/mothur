@@ -22,17 +22,19 @@ public:
 	QuitCommand(string);
 	QuitCommand() {}
 	~QuitCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();
+	
+	vector<string> setParameters()	{ return outputNames;	} //dummy, doesn't really do anything	
+	string getCommandName()			{ return "quit";		}
+	string getCommandCategory()		{ return "Hidden";		}
+	string getHelpString() { return "The quit command will terminate mothur and should be in the following format: quit() or quit. \n"; }	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
+	
 	
 private:
 	bool abort;
 	vector<string> outputNames;
-	map<string, vector<string> > outputTypes;
 };
 
 #endif

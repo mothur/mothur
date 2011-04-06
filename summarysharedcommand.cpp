@@ -51,14 +51,49 @@
 #include "mempearson.h"
 
 //**********************************************************************************************************************
-vector<string> SummarySharedCommand::getValidParameters(){	
+vector<string> SummarySharedCommand::setParameters(){	
 	try {
-		string Array[] =  {"label","calc","groups","all","outputdir","distance","inputdir", "processors"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pshared);
+		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
+		CommandParameter pdistance("distance", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pdistance);
+		CommandParameter pcalc("calc", "Multiple", "sharedchao-sharedsobs-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan-kstest-whittaker-sharednseqs-ochiai-anderberg-skulczynski-kulczynskicody-lennon-morisitahorn-braycurtis-odum-canberra-structeuclidean-structchord-hellinger-manhattan-structpearson-soergel-spearman-structkulczynski-speciesprofile-structchi2-hamming-gower-memchi2-memchord-memeuclidean-mempearson", "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan", "", "", "",true,false); parameters.push_back(pcalc);
+		CommandParameter pall("all", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pall);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "SummarySharedCommand", "getValidParameters");
+		m->errorOut(e, "SummarySharedCommand", "setParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string SummarySharedCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		ValidCalculators validCalculator;
+		helpString += "The summary.shared command parameters are shared, label, calc, distance, processors and all.  shared is required if there is no current sharedfile.\n";
+		helpString += "The summary.shared command should be in the following format: \n";
+		helpString += "summary.shared(label=yourLabel, calc=yourEstimators, groups=yourGroups).\n";
+		helpString += "Example summary.shared(label=unique-.01-.03, groups=B-C, calc=sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan).\n";
+		helpString +=  validCalculator.printCalc("sharedsummary");
+		helpString += "The default value for calc is sharedsobs-sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan\n";
+		helpString += "The default value for groups is all the groups in your groupfile.\n";
+		helpString += "The distance parameter allows you to indicate you would like a distance file created for each calculator for each label, default=f.\n";
+		helpString += "The label parameter is used to analyze specific labels in your input.\n";
+		helpString += "The all parameter is used to specify if you want the estimate of all your groups together.  This estimate can only be made for sharedsobs and sharedchao calculators. The default is false.\n";
+		helpString += "If you use sharedchao and run into memory issues, set all to false. \n";
+		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups.\n";
+		helpString += "Note: No spaces between parameter labels (i.e. label), '=' and parameters (i.e.yourLabel).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SummarySharedCommand", "getHelpString");
 		exit(1);
 	}
 }
@@ -66,6 +101,7 @@ vector<string> SummarySharedCommand::getValidParameters(){
 SummarySharedCommand::SummarySharedCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["summary"] = tempOutNames;
 	}
@@ -75,48 +111,21 @@ SummarySharedCommand::SummarySharedCommand(){
 	}
 }
 //**********************************************************************************************************************
-vector<string> SummarySharedCommand::getRequiredParameters(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SummarySharedCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> SummarySharedCommand::getRequiredFiles(){	
-	try {
-		string Array[] =  {"shared"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SummarySharedCommand", "getRequiredFiles");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 
 SummarySharedCommand::SummarySharedCommand(string option)  {
 	try {
-		globaldata = GlobalData::getInstance();
 		abort = false; calledHelp = false;   
 		allLines = 1;
-		labels.clear();
-		Estimators.clear();
-		
+				
 		//allow user to run help
-		if(option == "help") { validCalculator = new ValidCalculators(); help(); abort = true; calledHelp = true; }
+		if(option == "help") {  help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"label","calc","groups","all","outputdir","distance","inputdir", "processors"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string, string> parameters = parser.getParameters();
+			map<string, string>::iterator it;
 			
 			ValidParameters validParameter;
 		
@@ -125,20 +134,38 @@ SummarySharedCommand::SummarySharedCommand(string option)  {
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
-			//make sure the user has already run the read.otu command
-			if (globaldata->getSharedFile() == "") {
-				 m->mothurOut("You must read a list and a group, or a shared before you can use the summary.shared command."); m->mothurOutEndLine(); abort = true; 
-			}
-			
 			//initialize outputTypes
 			vector<string> tempOutNames;
 			outputTypes["summary"] = tempOutNames;
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
-				outputDir = "";	
-				outputDir += m->hasPath(globaldata->getSharedFile()); //if user entered a file with a path then preserve it	
+			//if the user changes the input directory command factory will send this info to us in the output parameter 
+			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			if (inputDir == "not found"){	inputDir = "";		}
+			else {
+				string path;
+				it = parameters.find("shared");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
+				}
 			}
+			
+			//get shared file
+			sharedfile = validParameter.validFile(parameters, "shared", true);
+			if (sharedfile == "not open") { sharedfile = ""; abort = true; }	
+			else if (sharedfile == "not found") { 
+				//if there is a current shared file, use it
+				sharedfile = m->getSharedFile(); 
+				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}
+			
+			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(sharedfile);		}
+			
 
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -149,12 +176,7 @@ SummarySharedCommand::SummarySharedCommand(string option)  {
 				else { allLines = 1;  }
 			}
 			
-			//if the user has not specified any labels use the ones from read.otu
-			if(label == "") {  
-				allLines = globaldata->allLines; 
-				labels = globaldata->labels; 
-			}
-				
+					
 			calc = validParameter.validFile(parameters, "calc", false);			
 			if (calc == "not found") { calc = "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan";  }
 			else { 
@@ -166,7 +188,7 @@ SummarySharedCommand::SummarySharedCommand(string option)  {
 			if (groups == "not found") { groups = ""; }
 			else { 
 				m->splitAtDash(groups, Groups);
-				globaldata->Groups = Groups;
+				m->Groups = Groups;
 			}
 			
 			string temp = validParameter.validFile(parameters, "all", false);				if (temp == "not found") { temp = "false"; }
@@ -175,16 +197,17 @@ SummarySharedCommand::SummarySharedCommand(string option)  {
 			temp = validParameter.validFile(parameters, "distance", false);					if (temp == "not found") { temp = "false"; }
 			createPhylip = m->isTrue(temp);
 			
-			temp = validParameter.validFile(parameters, "processors", false);	if(temp == "not found"){	temp = "1"; }
+			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
+			m->setProcessors(temp);
 			convert(temp, processors); 
 			
 			if (abort == false) {
 			
-				validCalculator = new ValidCalculators();
+				ValidCalculators validCalculator;
 				int i;
 				
 				for (i=0; i<Estimators.size(); i++) {
-					if (validCalculator->isValidCalculator("sharedsummary", Estimators[i]) == true) { 
+					if (validCalculator.isValidCalculator("sharedsummary", Estimators[i]) == true) { 
 						if (Estimators[i] == "sharedsobs") { 
 							sumCalculators.push_back(new SharedSobsCS());
 						}else if (Estimators[i] == "sharedchao") { 
@@ -276,41 +299,6 @@ SummarySharedCommand::SummarySharedCommand(string option)  {
 		exit(1);
 	}
 }
-
-//**********************************************************************************************************************
-
-void SummarySharedCommand::help(){
-	try {
-		m->mothurOut("The summary.shared command can only be executed after a successful read.otu command.\n");
-		m->mothurOut("The summary.shared command parameters are label, calc, distance and all.  No parameters are required.\n");
-		m->mothurOut("The summary.shared command should be in the following format: \n");
-		m->mothurOut("summary.shared(label=yourLabel, calc=yourEstimators, groups=yourGroups).\n");
-		m->mothurOut("Example summary.shared(label=unique-.01-.03, groups=B-C, calc=sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan).\n");
-		validCalculator->printCalc("sharedsummary", cout);
-		m->mothurOut("The default value for calc is sharedsobs-sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan\n");
-		m->mothurOut("The default value for groups is all the groups in your groupfile.\n");
-		m->mothurOut("The distance parameter allows you to indicate you would like a distance file created for each calculator for each label, default=f.\n");
-		m->mothurOut("The label parameter is used to analyze specific labels in your input.\n");
-		m->mothurOut("The all parameter is used to specify if you want the estimate of all your groups together.  This estimate can only be made for sharedsobs and sharedchao calculators. The default is false.\n");
-		m->mothurOut("If you use sharedchao and run into memory issues, set all to false. \n");
-		m->mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups.\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. label), '=' and parameters (i.e.yourLabel).\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SummarySharedCommand", "help");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
-SummarySharedCommand::~SummarySharedCommand(){
-	if (abort == false) {
-		delete read;
-		delete validCalculator;
-	}
-}
-
 //**********************************************************************************************************************
 
 int SummarySharedCommand::execute(){
@@ -319,7 +307,7 @@ int SummarySharedCommand::execute(){
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		ofstream outputFileHandle, outAll;
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName)) + "shared.summary";
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + "shared.summary";
 		
 		//if the users entered no valid calculators don't execute command
 		if (sumCalculators.size() == 0) { return 0; }
@@ -331,12 +319,8 @@ int SummarySharedCommand::execute(){
 				}
 			}
 		}
-		
-		//read first line
-		read = new ReadOTUFile(globaldata->inputFileName);	
-		read->read(&*globaldata); 
 			
-		input = globaldata->ginput;
+		input = new InputData(sharedfile, "sharedfile");
 		lookup = input->getSharedRAbundVectors();
 		string lastLabel = lookup[0]->getLabel();
 	
@@ -354,7 +338,7 @@ int SummarySharedCommand::execute(){
 		outputFileHandle.close();
 		
 		//create file and put column headers for multiple groups file
-		string outAllFileName = ((m->getRootName(globaldata->inputFileName)) + "sharedmultiple.summary");
+		string outAllFileName = ((m->getRootName(sharedfile)) + "sharedmultiple.summary");
 		if (mult == true) {
 			m->openOutputFile(outAllFileName, outAll);
 			outputNames.push_back(outAllFileName);
@@ -387,10 +371,10 @@ int SummarySharedCommand::execute(){
 		if (m->control_pressed) {
 			if (mult) {  remove(outAllFileName.c_str());  }
 			remove(outputFileName.c_str()); 
-			delete input; globaldata->ginput = NULL;
+			delete input;
 			for (int i = 0; i < lookup.size(); i++) { delete lookup[i]; }
 			for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }
-			globaldata->Groups.clear(); 
+			m->Groups.clear(); 
 			return 0;
 		}
 		/******************************************************/
@@ -398,7 +382,7 @@ int SummarySharedCommand::execute(){
 		
 		/******************************************************/
 		//comparison breakup to be used by different processes later
-		numGroups = globaldata->Groups.size();
+		numGroups = m->Groups.size();
 		lines.resize(processors);
 		for (int i = 0; i < processors; i++) {
 			lines[i].start = int (sqrt(float(i)/float(processors)) * numGroups);
@@ -415,10 +399,10 @@ int SummarySharedCommand::execute(){
 			if (m->control_pressed) {
 				if (mult) {  remove(outAllFileName.c_str());  }
 				remove(outputFileName.c_str()); 
-				delete input; globaldata->ginput = NULL;
+				delete input; 
 				for (int i = 0; i < lookup.size(); i++) { delete lookup[i]; }
 				for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }
-				globaldata->Groups.clear(); 
+				m->Groups.clear(); 
 				return 0;
 			}
 
@@ -458,9 +442,9 @@ int SummarySharedCommand::execute(){
 		if (m->control_pressed) {
 			if (mult) { remove(outAllFileName.c_str());  }
 			remove(outputFileName.c_str()); 
-			delete input; globaldata->ginput = NULL;
+			delete input; 
 			for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }
-			globaldata->Groups.clear(); 
+			m->Groups.clear(); 
 			return 0;
 		}
 
@@ -489,10 +473,10 @@ int SummarySharedCommand::execute(){
 		
 				
 		//reset groups parameter
-		globaldata->Groups.clear();  
+		m->Groups.clear();  
 		
 		for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }
-		delete input;  globaldata->ginput = NULL;
+		delete input;  
 		
 		if (m->control_pressed) {
 			remove(outAllFileName.c_str());  

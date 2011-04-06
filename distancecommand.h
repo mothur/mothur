@@ -22,13 +22,16 @@ class DistanceCommand : public Command {
 public:
 	DistanceCommand(string);
 	DistanceCommand();
-	~DistanceCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();	
-	void help();
+	~DistanceCommand() {}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "dist.seqs";			}
+	string getCommandCategory()		{ return "Sequence Processing";	}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
+	
 	
 private:
 	struct distlinePair {
@@ -49,7 +52,6 @@ private:
 	
 	bool abort;
 	vector<string>  Estimators, outputNames; //holds estimators to be used
-	map<string, vector<string> > outputTypes;
 	
 	//void m->appendFiles(string, string);
 	void createProcesses(string);

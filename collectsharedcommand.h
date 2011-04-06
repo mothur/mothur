@@ -12,16 +12,12 @@
 
 #include "command.hpp"
 #include "sharedordervector.h"
-#include "sharedlistvector.h"
 #include "inputdata.h"
-#include "groupmap.h"
 #include "collect.h"
 #include "display.h"
-#include "readotu.h"
 #include "validcalculator.h"
 #include "sharedutilities.h"
 
-class GlobalData;
 
 class CollectSharedCommand : public Command {
 	
@@ -29,34 +25,27 @@ public:
 	CollectSharedCommand(string);	
 	CollectSharedCommand();	
 	~CollectSharedCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();	
-	void help();
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "collect.shared";			}
+	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
+	
 	
 private:
-	GlobalData* globaldata;
-	SharedUtil* util;
-	GroupMap* groupmap;
-	SharedListVector* SharedList;
-	ReadOTUFile* read;
 	SharedOrderVector* order;
 	InputData* input;
-	ValidCalculators* validCalculator;
 	Collect* cCurve;
 	vector<Display*> cDisplays;
 	float freq;
-	string format;
 
 	bool abort, allLines, all;
 	set<string> labels; //holds labels to be used
-	string label, calc, groups, outputDir;
+	string label, calc, groups, outputDir, sharedfile;
 	vector<string>  Estimators, Groups, outputNames;
-	map<string, vector<string> > outputTypes;
-
-
 };
 
 #endif

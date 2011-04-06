@@ -17,17 +17,18 @@ class MergeFileCommand : public Command {
 public:
 	MergeFileCommand(string);
 	MergeFileCommand();
-	~MergeFileCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();	
-
+	~MergeFileCommand(){}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "merge.files";	}
+	string getCommandCategory()		{ return "General";		}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
+	
 private:
 	vector<string> fileNames, outputNames;
-	map<string, vector<string> > outputTypes;
 	string outputFileName;
 	int numInputFiles;
 	bool abort;

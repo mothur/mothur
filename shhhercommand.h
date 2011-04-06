@@ -12,26 +12,25 @@
 
 #include "mothur.h"
 #include "command.hpp"
-#include "globaldata.hpp"
+
 
 class ShhherCommand : public Command {
 	
 public:
 	ShhherCommand(string);
 	ShhherCommand();
-	~ShhherCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();
+	~ShhherCommand() {}
 	
+	vector<string> setParameters();
+	string getCommandName()			{ return "shhh.seqs";	}
+	string getCommandCategory()		{ return "Hidden";		}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }		
 private:
-	GlobalData* globaldata;
 	
 	int abort;
-	map<string, vector<string> > outputTypes;
 	
 	string outputDir, flowFileName, flowFilesFileName, lookupFileName, compositeFASTAFileName;
 

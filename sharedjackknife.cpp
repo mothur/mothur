@@ -88,8 +88,7 @@ EstOutput SharedJackknife::getValues(vector<SharedRAbundVector*> vectorShared){ 
 		SharedRAbundVector* shared1 = vectorShared[0];
 		SharedRAbundVector* shared2 = vectorShared[1];
 		if(numGroups == -1) {
-			globaldata = GlobalData::getInstance();
-			numGroups = globaldata->Groups.size();
+			numGroups = m->Groups.size();
 		}
 
 		if(callCount == numGroups*(numGroups-1)/2) {

@@ -12,21 +12,54 @@
 #include "listvector.hpp"
 
 //**********************************************************************************************************************
-vector<string> RemoveSeqsCommand::getValidParameters(){	
+vector<string> RemoveSeqsCommand::setParameters(){	
 	try {
-		string Array[] =  {"fasta","name", "group", "alignreport", "accnos", "qfile","list","taxonomy","outputdir","inputdir", "dups" };
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pfasta);
+		CommandParameter pname("name", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pname);
+		CommandParameter pgroup("group", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pgroup);
+		CommandParameter plist("list", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(plist);
+		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(ptaxonomy);
+		CommandParameter palignreport("alignreport", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(palignreport);
+		CommandParameter pqfile("qfile", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pqfile);
+		CommandParameter paccnos("accnos", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(paccnos);
+		CommandParameter pdups("dups", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pdups);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "RemoveSeqsCommand", "getValidParameters");
+		m->errorOut(e, "RemoveSeqsCommand", "setParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
+string RemoveSeqsCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The remove.seqs command reads an .accnos file and at least one of the following file types: fasta, name, group, list, taxonomy, quality or alignreport file.\n";
+		helpString += "It outputs a file containing the sequences NOT in the .accnos file.\n";
+		helpString += "The remove.seqs command parameters are accnos, fasta, name, group, list, taxonomy, qfile, alignreport and dups.  You must provide accnos and at least one of the file parameters.\n";
+		helpString += "The dups parameter allows you to remove the entire line from a name file if you remove any name from the line. default=true. \n";
+		helpString += "The remove.seqs command should be in the following format: remove.seqs(accnos=yourAccnos, fasta=yourFasta).\n";
+		helpString += "Example remove.seqs(accnos=amazon.accnos, fasta=amazon.fasta).\n";
+		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "RemoveSeqsCommand", "getHelpString");
+		exit(1);
+	}
+}
+
+
+//**********************************************************************************************************************
 RemoveSeqsCommand::RemoveSeqsCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
 		outputTypes["taxonomy"] = tempOutNames;
@@ -42,29 +75,6 @@ RemoveSeqsCommand::RemoveSeqsCommand(){
 	}
 }
 //**********************************************************************************************************************
-vector<string> RemoveSeqsCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"accnos"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "RemoveSeqsCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> RemoveSeqsCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "RemoveSeqsCommand", "getRequiredFiles");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
 	try {
 		abort = false; calledHelp = false;   
@@ -73,9 +83,7 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"fasta","name", "group", "alignreport", "accnos", "qfile", "list","taxonomy","outputdir","inputdir", "dups" };
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
@@ -175,7 +183,14 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
 			//check for required parameters
 			accnosfile = validParameter.validFile(parameters, "accnos", true);
 			if (accnosfile == "not open") { abort = true; }
-			else if (accnosfile == "not found") {  accnosfile = "";  m->mothurOut("You must provide an accnos file."); m->mothurOutEndLine(); abort = true; }	
+			else if (accnosfile == "not found") {  
+				accnosfile = m->getAccnosFile(); 
+				if (accnosfile != "") {  m->mothurOut("Using " + accnosfile + " as input file for the accnos parameter."); m->mothurOutEndLine(); }
+				else { 
+					m->mothurOut("You have no valid accnos file and accnos is required."); m->mothurOutEndLine(); 
+					abort = true;
+				}  
+			}	
 			
 			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not open") { abort = true; }
@@ -216,7 +231,6 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
 			
 			if ((fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == "") && (taxfile == "") && (qualfile == ""))  { m->mothurOut("You must provide at least one of the following: fasta, name, group, taxonomy, quality, alignreport or list."); m->mothurOutEndLine(); abort = true; }
 			
-			if ((usedDups != "") && (namefile == "")) {  m->mothurOut("You may only use dups with the name option."); m->mothurOutEndLine();  abort = true; }			
 		}
 
 	}
@@ -225,24 +239,6 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-
-void RemoveSeqsCommand::help(){
-	try {
-		m->mothurOut("The remove.seqs command reads an .accnos file and at least one of the following file types: fasta, name, group, list, taxonomy, quality or alignreport file.\n");
-		m->mothurOut("It outputs a file containing the sequences NOT in the .accnos file.\n");
-		m->mothurOut("The remove.seqs command parameters are accnos, fasta, name, group, list, taxonomy, qfile, alignreport and dups.  You must provide accnos and at least one of the file parameters.\n");
-		m->mothurOut("The dups parameter allows you to remove the entire line from a name file if you remove any name from the line. default=true. \n");
-		m->mothurOut("The remove.seqs command should be in the following format: remove.seqs(accnos=yourAccnos, fasta=yourFasta).\n");
-		m->mothurOut("Example remove.seqs(accnos=amazon.accnos, fasta=amazon.fasta).\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "RemoveSeqsCommand", "help");
-		exit(1);
-	}
-}
-
 //**********************************************************************************************************************
 
 int RemoveSeqsCommand::execute(){

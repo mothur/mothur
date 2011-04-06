@@ -952,7 +952,7 @@ map<int, int> DeCalculator::trimSeqs(Sequence* query, vector<Sequence*> topMatch
 		map<int, int> trimmedPos;
 		//check to make sure that is not whole seq
 		if ((rearPos - frontPos - 1) <= 0) {  
-			m->mothurOut("[ERROR]: when I trim " + query->getName() + ", the entire sequence is trimmed. Skipping."); m->mothurOutEndLine();  
+			//m->mothurOut("[ERROR]: when I trim " + query->getName() + ", the entire sequence is trimmed. Skipping."); m->mothurOutEndLine();  
 			query->setAligned("");
 			//trim topMatches
 			for (int i = 0; i < topMatches.size(); i++) {

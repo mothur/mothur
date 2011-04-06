@@ -13,50 +13,58 @@
 
 
 //**********************************************************************************************************************
-vector<string> GetOtusCommand::getValidParameters(){	
+vector<string> GetOtusCommand::setParameters(){	
 	try {
-		string Array[] =  { "group", "accnos","label", "groups","list","outputdir","inputdir" };
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pgroup);
+		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(plist);
+		CommandParameter paccnos("accnos", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(paccnos);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
+		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "GetOtusCommand", "getValidParameters");
+		m->errorOut(e, "GetOtusCommand", "setParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
+string GetOtusCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The get.otus command selects otus containing sequences from a specfic group or set of groups.\n";
+		helpString += "It outputs a new list file containing the otus containing sequences from in the those specified groups.\n";
+		helpString += "The get.otus command parameters are accnos, group, list, label and groups. The group and list parameters are required, unless you have valid current files.\n";
+		helpString += "You must also provide an accnos containing the list of groups to get or set the groups parameter to the groups you wish to select.\n";
+		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like.  You can separate group names with dashes.\n";
+		helpString += "The label parameter allows you to specify which distance you want to process.\n";
+		helpString += "The get.otus command should be in the following format: get.otus(accnos=yourAccnos, list=yourListFile, group=yourGroupFile, label=yourLabel).\n";
+		helpString += "Example get.otus(accnos=amazon.accnos, list=amazon.fn.list, group=amazon.groups, label=0.03).\n";
+		helpString += "or get.otus(groups=pasture, list=amazon.fn.list, amazon.groups, label=0.03).\n";
+		helpString += "Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListFile).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetOtusCommand", "getHelpString");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
 GetOtusCommand::GetOtusCommand(){	
 	try {
-		abort = true; calledHelp = true; 
+		abort = true; calledHelp = true;
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["group"] = tempOutNames;
 		outputTypes["list"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "GetOtusCommand", "GetOtusCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> GetOtusCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"group","label", "list"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetOtusCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> GetOtusCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetOtusCommand", "getRequiredFiles");
 		exit(1);
 	}
 }
@@ -69,9 +77,7 @@ GetOtusCommand::GetOtusCommand(string option)  {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  { "group", "accnos","label", "groups", "list","outputdir","inputdir" };
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
@@ -131,11 +137,19 @@ GetOtusCommand::GetOtusCommand(string option)  {
 			
 			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") { abort = true; }
-			else if (groupfile == "not found") {  groupfile = "";  m->mothurOut("You must provide a group file."); m->mothurOutEndLine(); abort = true; }	
+			else if (groupfile == "not found") {  				
+				groupfile = m->getGroupFile(); 
+				if (groupfile != "") { m->mothurOut("Using " + groupfile + " as input file for the group parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current group file and the group parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}	
 			
 			listfile = validParameter.validFile(parameters, "list", true);
 			if (listfile == "not open") { abort = true; }
-			else if (listfile == "not found") {  listfile = ""; m->mothurOut("You must provide a list file."); m->mothurOutEndLine(); abort = true; }	
+			else if (listfile == "not found") {  				
+				listfile = m->getListFile(); 
+				if (listfile != "") { m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current list file and the list parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}	
 			
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = ""; }
@@ -144,7 +158,7 @@ GetOtusCommand::GetOtusCommand(string option)  {
 			}
 			
 			label = validParameter.validFile(parameters, "label", false);			
-			if (label == "not found") { label = ""; m->mothurOut("You must provide a label to process."); m->mothurOutEndLine(); abort = true; }	
+			if (label == "not found") { label = ""; m->mothurOut("You did not provide a label, I will use the first label in your inputfile."); m->mothurOutEndLine(); label=""; }	
 			
 			if ((accnosfile == "") && (Groups.size() == 0)) { m->mothurOut("You must provide an accnos file or specify groups using the groups parameter."); m->mothurOutEndLine(); abort = true; }
 		}
@@ -155,27 +169,6 @@ GetOtusCommand::GetOtusCommand(string option)  {
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-
-void GetOtusCommand::help(){
-	try {
-		m->mothurOut("The get.otus command selects otus containing sequences from a specfic group or set of groups.\n");
-		m->mothurOut("It outputs a new list file containing the otus containing sequences from in the those specified groups.\n");
-		m->mothurOut("The get.otus command parameters are accnos, group, list, label and groups. The group, list and label parameters are required.\n");
-		m->mothurOut("You must also provide an accnos containing the list of groups to get or set the groups parameter to the groups you wish to select.\n");
-		m->mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like.  You can separate group names with dashes.\n");
-		m->mothurOut("The label parameter allows you to specify which distance you want to process.\n");
-		m->mothurOut("The get.otus command should be in the following format: get.otus(accnos=yourAccnos, list=yourListFile, group=yourGroupFile, label=yourLabel).\n");
-		m->mothurOut("Example get.otus(accnos=amazon.accnos, list=amazon.fn.list, group=amazon.groups, label=0.03).\n");
-		m->mothurOut("or get.otus(groups=pasture, list=amazon.fn.list, amazon.groups, label=0.03).\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListFile).\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetOtusCommand", "help");
-		exit(1);
-	}
-}
-
 //**********************************************************************************************************************
 
 int GetOtusCommand::execute(){
@@ -249,6 +242,9 @@ int GetOtusCommand::readListGroup(){
 		InputData* input = new InputData(listfile, "list");
 		ListVector* list = input->getListVector();
 		string lastLabel = list->getLabel();
+		
+		//using first label seen if none is provided
+		if (label == "") { label = lastLabel; }
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> labels; labels.insert(label);

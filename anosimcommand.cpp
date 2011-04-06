@@ -12,50 +12,54 @@
 #include "readphylipvector.h"
 
 //**********************************************************************************************************************
-vector<string> AnosimCommand::getValidParameters(){	
+vector<string> AnosimCommand::setParameters(){	
 	try {
-		string Array[] =  {"outputdir","iters","phylip","design", "alpha","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter pdesign("design", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pdesign);
+		CommandParameter pphylip("phylip", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pphylip);
+		CommandParameter piters("iters", "Number", "", "1000", "", "", "",false,false); parameters.push_back(piters);
+		CommandParameter palpha("alpha", "Number", "", "0.05", "", "", "",false,false); parameters.push_back(palpha);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "AnosimCommand", "getValidParameters");
+		m->errorOut(e, "AnosimCommand", "setParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
+string AnosimCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "Referenced: Clarke, K. R. (1993). Non-parametric multivariate analysis of changes in community structure.   _Australian Journal of Ecology_ 18, 117-143.\n";
+		helpString += "The anosim command outputs a .anosim file. \n";
+		helpString += "The anosim command parameters are phylip, iters, and alpha.  The phylip and design parameters are required, unless you have valid current files.\n";
+		helpString += "The design parameter allows you to assign your samples to groups when you are running anosim. It is required. \n";
+		helpString += "The design file looks like the group file.  It is a 2 column tab delimited file, where the first column is the sample name and the second column is the group the sample belongs to.\n";
+		helpString += "The iters parameter allows you to set number of randomization for the P value.  The default is 1000. \n";
+		helpString += "The anosim command should be in the following format: anosim(phylip=file.dist, design=file.design).\n";
+		helpString += "Note: No spaces between parameter labels (i.e. iters), '=' and parameters (i.e. 1000).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "AnosimCommand", "getHelpString");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
 AnosimCommand::AnosimCommand(){	
 	try {
-		abort = true; calledHelp = true; 
+		abort = true; calledHelp = true;
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["anosim"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "AnosimCommand", "AnosimCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> AnosimCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"design"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "AnosimCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> AnosimCommand::getRequiredFiles(){	
-	try {
-		string Array[] =  {};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "AnosimCommand", "getRequiredFiles");
 		exit(1);
 	}
 }
@@ -69,9 +73,7 @@ AnosimCommand::AnosimCommand(string option) {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string AlignArray[] =  {"outputdir","iters","phylip","design", "alpha","inputdir"};
-			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
@@ -116,14 +118,21 @@ AnosimCommand::AnosimCommand(string option) {
 			phylipFileName = validParameter.validFile(parameters, "phylip", true);
 			if (phylipFileName == "not open") { phylipFileName = ""; abort = true; }
 			else if (phylipFileName == "not found") { 
-				phylipFileName = ""; 	
+				//if there is a current phylip file, use it
+				phylipFileName = m->getPhylipFile(); 
+				if (phylipFileName != "") { m->mothurOut("Using " + phylipFileName + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current phylip file and the phylip parameter is required."); m->mothurOutEndLine(); abort = true; }
+				
 			}	
 			
 			//check for required parameters
 			designFileName = validParameter.validFile(parameters, "design", true);
 			if (designFileName == "not open") { abort = true; }
 			else if (designFileName == "not found") {
-				designFileName = "";
+				//if there is a current design file, use it
+				designFileName = m->getDesignFile(); 
+				if (designFileName != "") { m->mothurOut("Using " + designFileName + " as input file for the design parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current design file and the design parameter is required."); m->mothurOutEndLine(); abort = true; }								
 			}	
 			
 			string temp = validParameter.validFile(parameters, "iters", false);
@@ -141,33 +150,7 @@ AnosimCommand::AnosimCommand(string option) {
 		exit(1);
 	}
 }
-
 //**********************************************************************************************************************
-
-void AnosimCommand::help(){
-	try {
-		m->mothurOut("Referenced: Clarke, K. R. (1993). Non-parametric multivariate analysis of changes in community structure.   _Australian Journal of Ecology_ 18, 117-143.\n");
-		m->mothurOut("The anosim command outputs a .anosim file. \n");
-		m->mothurOut("The anosim command parameters are phylip, iters, and alpha.  The phylip and design parameters are required.\n");
-		m->mothurOut("The design parameter allows you to assign your samples to groups when you are running anosim. It is required. \n");
-		m->mothurOut("The design file looks like the group file.  It is a 2 column tab delimited file, where the first column is the sample name and the second column is the group the sample belongs to.\n");
-		m->mothurOut("The iters parameter allows you to set number of randomization for the P value.  The default is 1000. \n");
-		m->mothurOut("The anosim command should be in the following format: anosim(phylip=file.dist, design=file.design).\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. iters), '=' and parameters (i.e. 1000).\n\n");
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "AnosimCommand", "help");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
-AnosimCommand::~AnosimCommand(){}
-
-//**********************************************************************************************************************
-
 int AnosimCommand::execute(){
 	try {
 		

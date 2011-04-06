@@ -17,18 +17,20 @@ class GetCurrentCommand : public Command {
 	public:
 		GetCurrentCommand(string);
 		GetCurrentCommand();
-		~GetCurrentCommand();
-		vector<string> getRequiredParameters();
-		vector<string> getValidParameters();
-		vector<string> getRequiredFiles();
-		map<string, vector<string> > getOutputFiles() { return outputTypes; }
-		int execute();
-		void help();
-		
+		~GetCurrentCommand() {}
+	
+		vector<string> setParameters();
+		string getCommandName()			{ return "get.current";	}
+		string getCommandCategory()		{ return "General";		}
+		string getHelpString();	
+	
+		int execute(); 
+		void help() { m->mothurOut(getHelpString()); }	
+	
+	
 	private:
 		
 		vector<string> outputNames;
-		map<string, vector<string> > outputTypes;
 		bool abort;
 	
 		string clearTypes;

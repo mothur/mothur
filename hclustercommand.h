@@ -11,7 +11,6 @@
  */
 
 #include "command.hpp"
-#include "globaldata.hpp"
 #include "hcluster.h"
 #include "rabundvector.hpp"
 #include "sabundvector.hpp"
@@ -34,16 +33,18 @@ class HClusterCommand : public Command {
 public:
 	HClusterCommand(string);
 	HClusterCommand();	
-	~HClusterCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();	
-	void help();
+	~HClusterCommand(){}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "hcluster";				}
+	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
+	
 	
 private:
-	GlobalData* globaldata;
 	HCluster* cluster;
 	ListVector* list;
 	RAbundVector* rabund;
@@ -59,7 +60,6 @@ private:
 	time_t start;
 	unsigned long loops;
 	vector<string> outputNames;
-	map<string, vector<string> > outputTypes;
 	
 	void printData(string label);
 };

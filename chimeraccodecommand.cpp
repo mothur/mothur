@@ -9,16 +9,54 @@
 
 #include "chimeraccodecommand.h"
 #include "ccode.h"
-
 //**********************************************************************************************************************
-vector<string> ChimeraCcodeCommand::getValidParameters(){	
+vector<string> ChimeraCcodeCommand::setParameters(){	
 	try {
-		string AlignArray[] =  {"fasta", "filter", "processors", "window", "template", "mask", "numwanted", "outputdir","inputdir" };
-		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+		CommandParameter ptemplate("reference", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(ptemplate);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
+		CommandParameter pfilter("filter", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pfilter);
+		CommandParameter pwindow("window", "Number", "", "0", "", "", "",false,false); parameters.push_back(pwindow);
+		CommandParameter pnumwanted("numwanted", "Number", "", "20", "", "", "",false,false); parameters.push_back(pnumwanted);
+		CommandParameter pmask("mask", "String", "", "", "", "", "",false,false); parameters.push_back(pmask);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ChimeraCcodeCommand", "getValidParameters");
+		m->errorOut(e, "ChimeraCcodeCommand", "setParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string ChimeraCcodeCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The chimera.ccode command reads a fastafile and referencefile and outputs potentially chimeric sequences.\n";
+		helpString += "This command was created using the algorythms described in the 'Evaluating putative chimeric sequences from PCR-amplified products' paper by Juan M. Gonzalez, Johannes Zimmerman and Cesareo Saiz-Jimenez.\n";
+		helpString += "The chimera.ccode command parameters are fasta, reference, filter, mask, processors, window and numwanted.\n";
+		helpString += "The fasta parameter allows you to enter the fasta file containing your potentially chimeric sequences, and is required unless you have a valid current fasta file. \n";
+		helpString += "You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amzon.fasta \n";
+		helpString += "The reference parameter allows you to enter a reference file containing known non-chimeric sequences, and is required. \n";
+		helpString += "The filter parameter allows you to specify if you would like to apply a vertical and 50% soft filter. \n";
+		helpString += "The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n";
+#ifdef USE_MPI
+		helpString += "When using MPI, the processors parameter is set to the number of MPI processes running. \n";
+#endif
+		helpString += "The mask parameter allows you to specify a file containing one sequence you wish to use as a mask for the your sequences. \n";
+		helpString += "The window parameter allows you to specify the window size for searching for chimeras. \n";
+		helpString += "The numwanted parameter allows you to specify how many sequences you would each query sequence compared with.\n";
+		helpString += "The chimera.ccode command should be in the following format: \n";
+		helpString += "chimera.ccode(fasta=yourFastaFile, reference=yourTemplate) \n";
+		helpString += "Example: chimera.ccode(fasta=AD.align, reference=core_set_aligned.imputed.fasta) \n";
+		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n";	
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChimeraCcodeCommand", "getHelpString");
 		exit(1);
 	}
 }
@@ -26,6 +64,7 @@ vector<string> ChimeraCcodeCommand::getValidParameters(){
 ChimeraCcodeCommand::ChimeraCcodeCommand(){	
 	try {
 		abort = true; calledHelp = true;
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["chimera"] = tempOutNames;
 		outputTypes["mapinfo"] = tempOutNames;
@@ -33,29 +72,6 @@ ChimeraCcodeCommand::ChimeraCcodeCommand(){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ChimeraCcodeCommand", "ChimeraCcodeCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> ChimeraCcodeCommand::getRequiredParameters(){	
-	try {
-		string AlignArray[] =  {"template","fasta"};
-		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChimeraCcodeCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> ChimeraCcodeCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChimeraCcodeCommand", "getRequiredFiles");
 		exit(1);
 	}
 }
@@ -68,9 +84,7 @@ ChimeraCcodeCommand::ChimeraCcodeCommand(string option)  {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"fasta", "filter", "processors", "window", "template", "mask", "numwanted", "outputdir","inputdir" };
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
@@ -93,19 +107,22 @@ ChimeraCcodeCommand::ChimeraCcodeCommand(string option)  {
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
-				it = parameters.find("template");
+				it = parameters.find("reference");
 				//user has given a template file
 				if(it != parameters.end()){ 
 					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["template"] = inputDir + it->second;		}
+					if (path == "") {	parameters["reference"] = inputDir + it->second;		}
 				}
 			}
 
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", false);
-			if (fastafile == "not found") { fastafile = ""; m->mothurOut("fasta is a required parameter for the chimera.ccode command."); m->mothurOutEndLine(); abort = true;  }
-			else { 
+			if (fastafile == "not found") { 				//if there is a current fasta file, use it
+				string filename = m->getFastaFile(); 
+				if (filename != "") { fastaFileNames.push_back(filename); m->mothurOut("Using " + filename + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}else { 
 				m->splitAtDash(fastafile, fastaFileNames);
 				
 				//go through files and make sure they are good, if not, then disregard them
@@ -162,9 +179,9 @@ ChimeraCcodeCommand::ChimeraCcodeCommand(string option)  {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
 
-			templatefile = validParameter.validFile(parameters, "template", true);
+			templatefile = validParameter.validFile(parameters, "reference", true);
 			if (templatefile == "not open") { abort = true; }
-			else if (templatefile == "not found") { templatefile = ""; m->mothurOut("template is a required parameter for the chimera.ccode command."); m->mothurOutEndLine(); abort = true;  }		
+			else if (templatefile == "not found") { templatefile = ""; m->mothurOut("reference is a required parameter for the chimera.ccode command."); m->mothurOutEndLine(); abort = true;  }		
 			
 			maskfile = validParameter.validFile(parameters, "mask", false);
 			if (maskfile == "not found") { maskfile = "";  }	
@@ -185,7 +202,8 @@ ChimeraCcodeCommand::ChimeraCcodeCommand(string option)  {
 			temp = validParameter.validFile(parameters, "filter", false);			if (temp == "not found") { temp = "F"; }
 			filter = m->isTrue(temp);
 			
-			temp = validParameter.validFile(parameters, "processors", false);		if (temp == "not found") { temp = "1"; }
+			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
+			m->setProcessors(temp);
 			convert(temp, processors);
 			
 			temp = validParameter.validFile(parameters, "window", false);			if (temp == "not found") { temp = "0"; }
@@ -201,42 +219,7 @@ ChimeraCcodeCommand::ChimeraCcodeCommand(string option)  {
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-
-void ChimeraCcodeCommand::help(){
-	try {
-	
-		m->mothurOut("The chimera.ccode command reads a fastafile and templatefile and outputs potentially chimeric sequences.\n");
-		m->mothurOut("This command was created using the algorythms described in the 'Evaluating putative chimeric sequences from PCR-amplified products' paper by Juan M. Gonzalez, Johannes Zimmerman and Cesareo Saiz-Jimenez.\n");
-		m->mothurOut("The chimera.ccode command parameters are fasta, template, filter, mask, processors, window and numwanted.\n");
-		m->mothurOut("The fasta parameter allows you to enter the fasta file containing your potentially chimeric sequences, and is required. \n");
-		m->mothurOut("You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amzon.fasta \n");
-		m->mothurOut("The template parameter allows you to enter a template file containing known non-chimeric sequences, and is required. \n");
-		m->mothurOut("The filter parameter allows you to specify if you would like to apply a vertical and 50% soft filter. \n");
-		m->mothurOut("The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n");
-		#ifdef USE_MPI
-		m->mothurOut("When using MPI, the processors parameter is set to the number of MPI processes running. \n");
-		#endif
-		m->mothurOut("The mask parameter allows you to specify a file containing one sequence you wish to use as a mask for the your sequences. \n");
-		m->mothurOut("The window parameter allows you to specify the window size for searching for chimeras. \n");
-		m->mothurOut("The numwanted parameter allows you to specify how many sequences you would each query sequence compared with.\n");
-		m->mothurOut("The chimera.ccode command should be in the following format: \n");
-		m->mothurOut("chimera.ccode(fasta=yourFastaFile, template=yourTemplate) \n");
-		m->mothurOut("Example: chimera.ccode(fasta=AD.align, template=core_set_aligned.imputed.fasta) \n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n");	
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChimeraCcodeCommand", "help");
-		exit(1);
-	}
-}
-
 //***************************************************************************************************************
-
-ChimeraCcodeCommand::~ChimeraCcodeCommand(){	/*	do nothing	*/	}
-
-//***************************************************************************************************************
-
 int ChimeraCcodeCommand::execute(){
 	try{
 		

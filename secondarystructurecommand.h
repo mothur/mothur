@@ -35,20 +35,21 @@ class AlignCheckCommand : public Command {
 		AlignCheckCommand(string);	
 		AlignCheckCommand();
 		~AlignCheckCommand(){}
-		vector<string> getRequiredParameters();
-		vector<string> getValidParameters();
-		vector<string> getRequiredFiles();
-		map<string, vector<string> > getOutputFiles() { return outputTypes; }
-		int execute();
-		void help();	
-		
+	
+		vector<string> setParameters();
+		string getCommandName()			{ return "align.check";				}
+		string getCommandCategory()		{ return "Sequence Processing";		}
+		string getHelpString();	
+	
+		int execute(); 
+		void help() { m->mothurOut(getHelpString()); }	
+	
 	private:
 		vector<int> structMap;
 		string mapfile, fastafile, outputDir, namefile;
 		bool abort;
 		int seqLength, haderror;
 		vector<string> outputNames;
-		map<string, vector<string> > outputTypes;
 		map<string, int> nameMap;
 		
 		void readMap();

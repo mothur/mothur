@@ -11,11 +11,11 @@
  */
  
 #include "command.hpp"
-#include "globaldata.hpp"
 #include "sharedrabundvector.h"
 #include "listvector.hpp"
 #include "rabundvector.hpp"
 #include "inputdata.h"
+#include "sequence.hpp"
 
 
 class SubSampleCommand : public Command {
@@ -23,23 +23,22 @@ class SubSampleCommand : public Command {
 public:
 	SubSampleCommand(string);
 	SubSampleCommand();
-	~SubSampleCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();
+	~SubSampleCommand() {}
 	
-private:
-	GlobalData* globaldata;
+	vector<string> setParameters();
+	string getCommandName()			{ return "sub.sample";	}
+	string getCommandCategory()		{ return "General";		}
+	string getHelpString();	
 	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
+	
+private:	
 	bool abort, pickedGroups, allLines, persample;
 	string listfile, groupfile, sharedfile, rabundfile, sabundfile, fastafile, namefile;
 	set<string> labels; //holds labels to be used
 	string groups, label, outputDir;
 	vector<string> Groups, outputNames;
-	map<string, vector<string> > outputTypes;
 	int size;
 	vector<string> names;
 	map<string, vector<string> > nameMap;

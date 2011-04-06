@@ -10,37 +10,54 @@
 #include "chimeracheckcommand.h"
 
 //**********************************************************************************************************************
-vector<string> ChimeraCheckCommand::getValidParameters(){	
+vector<string> ChimeraCheckCommand::setParameters(){	
 	try {
-		string AlignArray[] =  {"fasta","processors","increment","template","ksize","svg", "name","outputdir","inputdir" };
-		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChimeraCheckCommand", "getValidParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> ChimeraCheckCommand::getRequiredParameters(){	
-	try {
-		string AlignArray[] =  {"template","fasta"};
-		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChimeraCheckCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> ChimeraCheckCommand::getRequiredFiles(){	
-	try {
+		CommandParameter ptemplate("reference", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(ptemplate);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
+		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
+		CommandParameter psvg("svg", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(psvg);
+		CommandParameter pincrement("increment", "Number", "", "10", "", "", "",false,false); parameters.push_back(pincrement);
+		CommandParameter pksize("ksize", "Number", "", "7", "", "", "",false,false); parameters.push_back(pksize);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
 		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ChimeraCheckCommand", "getRequiredFiles");
+		m->errorOut(e, "ChimeraCheckCommand", "setParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string ChimeraCheckCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The chimera.check command reads a fastafile and referencefile and outputs potentially chimeric sequences.\n";
+		helpString += "This command was created using the algorythms described in CHIMERA_CHECK version 2.7 written by Niels Larsen. \n";
+		helpString += "The chimera.check command parameters are fasta, reference, processors, ksize, increment, svg and name.\n";
+		helpString += "The fasta parameter allows you to enter the fasta file containing your potentially chimeric sequences, and is required unless you have a valid current fasta file. \n";
+		helpString += "You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amzon.fasta \n";
+		helpString += "The reference parameter allows you to enter a reference file containing known non-chimeric sequences, and is required. \n";
+		helpString += "The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n";
+#ifdef USE_MPI
+		helpString += "When using MPI, the processors parameter is set to the number of MPI processes running. \n";
+#endif
+		helpString += "The increment parameter allows you to specify how far you move each window while finding chimeric sequences, default is 10.\n";
+		helpString += "The ksize parameter allows you to input kmersize, default is 7. \n";
+		helpString += "The svg parameter allows you to specify whether or not you would like a svg file outputted for each query sequence, default is False.\n";
+		helpString += "The name parameter allows you to enter a file containing names of sequences you would like .svg files for.\n";
+		helpString += "You may enter multiple name files by separating their names with dashes. ie. fasta=abrecovery.svg.names-amzon.svg.names \n";
+		helpString += "The chimera.check command should be in the following format: \n";
+		helpString += "chimera.check(fasta=yourFastaFile, reference=yourTemplateFile, processors=yourProcessors, ksize=yourKmerSize) \n";
+		helpString += "Example: chimera.check(fasta=AD.fasta, reference=core_set_aligned,imputed.fasta, processors=4, ksize=8) \n";
+		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n";	
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChimeraCheckCommand", "getHelpString");
 		exit(1);
 	}
 }
@@ -48,6 +65,7 @@ vector<string> ChimeraCheckCommand::getRequiredFiles(){
 ChimeraCheckCommand::ChimeraCheckCommand(){	
 	try {
 		abort = true; calledHelp = true;
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["chimera"] = tempOutNames;
 	}
@@ -65,9 +83,7 @@ ChimeraCheckCommand::ChimeraCheckCommand(string option)  {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"fasta","processors","increment","template","ksize","svg", "name","outputdir","inputdir" };
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
@@ -87,19 +103,23 @@ ChimeraCheckCommand::ChimeraCheckCommand(string option)  {
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
-				it = parameters.find("template");
+				it = parameters.find("reference");
 				//user has given a template file
 				if(it != parameters.end()){ 
 					string path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["template"] = inputDir + it->second;		}
+					if (path == "") {	parameters["reference"] = inputDir + it->second;		}
 				}
 			}
 			
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", false);
-			if (fastafile == "not found") { fastafile = ""; m->mothurOut("fasta is a required parameter for the chimera.check command."); m->mothurOutEndLine(); abort = true;  }
-			else { 
+			if (fastafile == "not found") { 				
+				//if there is a current fasta file, use it
+				string filename = m->getFastaFile(); 
+				if (filename != "") { fastaFileNames.push_back(filename); m->mothurOut("Using " + filename + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}else { 
 				m->splitAtDash(fastafile, fastaFileNames);
 				
 				//go through files and make sure they are good, if not, then disregard them
@@ -156,9 +176,9 @@ ChimeraCheckCommand::ChimeraCheckCommand(string option)  {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
 
-			templatefile = validParameter.validFile(parameters, "template", true);
+			templatefile = validParameter.validFile(parameters, "reference", true);
 			if (templatefile == "not open") { abort = true; }
-			else if (templatefile == "not found") { templatefile = "";  m->mothurOut("template is a required parameter for the chimera.check command."); m->mothurOutEndLine(); abort = true;  }	
+			else if (templatefile == "not found") { templatefile = "";  m->mothurOut("reference is a required parameter for the chimera.check command."); m->mothurOutEndLine(); abort = true;  }	
 			
 			namefile = validParameter.validFile(parameters, "name", false);
 			if (namefile == "not found") { namefile = ""; }
@@ -222,7 +242,8 @@ ChimeraCheckCommand::ChimeraCheckCommand(string option)  {
 				}
 			}
 
-			string temp = validParameter.validFile(parameters, "processors", false);		if (temp == "not found") { temp = "1"; }
+			string temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
+			m->setProcessors(temp);
 			convert(temp, processors);
 			
 			temp = validParameter.validFile(parameters, "ksize", false);			if (temp == "not found") { temp = "7"; }
@@ -241,41 +262,6 @@ ChimeraCheckCommand::ChimeraCheckCommand(string option)  {
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-
-void ChimeraCheckCommand::help(){
-	try {
-	
-		m->mothurOut("The chimera.check command reads a fastafile and templatefile and outputs potentially chimeric sequences.\n");
-		m->mothurOut("This command was created using the algorythms described in CHIMERA_CHECK version 2.7 written by Niels Larsen. \n");
-		m->mothurOut("The chimera.check command parameters are fasta, template, processors, ksize, increment, svg and name.\n");
-		m->mothurOut("The fasta parameter allows you to enter the fasta file containing your potentially chimeric sequences, and is required. \n");
-		m->mothurOut("You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amzon.fasta \n");
-		m->mothurOut("The template parameter allows you to enter a template file containing known non-chimeric sequences, and is required. \n");
-		m->mothurOut("The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n");
-		#ifdef USE_MPI
-		m->mothurOut("When using MPI, the processors parameter is set to the number of MPI processes running. \n");
-		#endif
-		m->mothurOut("The increment parameter allows you to specify how far you move each window while finding chimeric sequences, default is 10.\n");
-		m->mothurOut("The ksize parameter allows you to input kmersize, default is 7. \n");
-		m->mothurOut("The svg parameter allows you to specify whether or not you would like a svg file outputted for each query sequence, default is False.\n");
-		m->mothurOut("The name parameter allows you to enter a file containing names of sequences you would like .svg files for.\n");
-		m->mothurOut("You may enter multiple name files by separating their names with dashes. ie. fasta=abrecovery.svg.names-amzon.svg.names \n");
-		m->mothurOut("The chimera.check command should be in the following format: \n");
-		m->mothurOut("chimera.check(fasta=yourFastaFile, template=yourTemplateFile, processors=yourProcessors, ksize=yourKmerSize) \n");
-		m->mothurOut("Example: chimera.check(fasta=AD.fasta, template=core_set_aligned,imputed.fasta, processors=4, ksize=8) \n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n");	
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChimeraCheckCommand", "help");
-		exit(1);
-	}
-}
-
-//***************************************************************************************************************
-
-ChimeraCheckCommand::~ChimeraCheckCommand(){	/*	do nothing	*/	}
-
 //***************************************************************************************************************
 
 int ChimeraCheckCommand::execute(){
