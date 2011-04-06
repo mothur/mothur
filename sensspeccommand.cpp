@@ -36,25 +36,7 @@ vector<string> SensSpecCommand::setParameters(){
 string SensSpecCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The get.oturep command parameters are phylip, column, list, fasta, name, group, large, weighted, cutoff, precision, groups, sorted and label.  The fasta and list parameters are required, as well as phylip or column and name, unless you have valid current files.\n";
-		helpString += "The label parameter allows you to select what distance levels you would like a output files created for, and is separated by dashes.\n";
-		helpString += "The phylip or column parameter is required, but only one may be used.  If you use a column file the name filename is required. \n";
-		helpString += "If you do not provide a cutoff value 10.00 is assumed. If you do not provide a precision value then 100 is assumed.\n";
-		helpString += "The get.oturep command should be in the following format: get.oturep(phylip=yourDistanceMatrix, fasta=yourFastaFile, list=yourListFile, name=yourNamesFile, group=yourGroupFile, label=yourLabels).\n";
-		helpString += "Example get.oturep(phylip=amazon.dist, fasta=amazon.fasta, list=amazon.fn.list, group=amazon.groups).\n";
-		helpString += "The default value for label is all labels in your inputfile.\n";
-		helpString += "The sorted parameter allows you to indicate you want the output sorted. You can sort by sequence name, bin number, bin size or group. The default is no sorting, but your options are name, number, size, or group.\n";
-		helpString += "The large parameter allows you to indicate that your distance matrix is too large to fit in RAM.  The default value is false.\n";
-		helpString += "The weighted parameter allows you to indicate that want to find the weighted representative. You must provide a namesfile to set weighted to true.  The default value is false.\n";
-		helpString += "The representative is found by selecting the sequence that has the smallest total distance to all other sequences in the OTU. If a tie occurs the smallest average distance is used.\n";
-		helpString += "For weighted = false, mothur assumes the distance file contains only unique sequences, the list file may contain all sequences, but only the uniques are considered to become the representative. If your distance file contains all the sequences it would become weighted=true.\n";
-		helpString += "For weighted = true, mothur assumes the distance file contains only unique sequences, the list file must contain all sequences, all sequences are considered to become the representative, but unique name will be used in the output for consistency.\n";
-		helpString += "If your distance file contains all the sequence and you do not provide a name file, the weighted representative will be given, unless your listfile is unique. If you provide a namefile, then you can select weighted or unweighted.\n";
-		helpString += "The group parameter allows you provide a group file.\n";
-		helpString += "The groups parameter allows you to indicate that you want representative sequences for each group specified for each OTU, group name should be separated by dashes. ex. groups=A-B-C.\n";
-		helpString += "The get.oturep command outputs a .fastarep and .rep.names file for each distance you specify, selecting one OTU representative for each bin.\n";
-		helpString += "If you provide a groupfile, then it also appends the names of the groups present in that bin.\n";
-		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n";
+		helpString += "The sens.spec command....\n";
 		return helpString;
 	}
 	catch(exception& e) {
@@ -87,11 +69,8 @@ SensSpecCommand::SensSpecCommand(string option)  {
 		
 		else {
 			string temp;
-
-			//valid paramters for this command
-			string AlignArray[] =  {"list", "phylip", "column", "hard", "label", "cutoff", "precision", "outputdir", "inputdir"};
 			
-			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();

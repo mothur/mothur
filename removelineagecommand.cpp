@@ -86,9 +86,7 @@ RemoveLineageCommand::RemoveLineageCommand(string option)  {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"fasta","name", "group", "alignreport", "taxon", "dups", "list","taxonomy","outputdir","inputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();	
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
