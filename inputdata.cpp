@@ -16,21 +16,16 @@
 
 InputData::InputData(string fName, string f) : format(f){
 	m = MothurOut::getInstance();
-	globaldata = GlobalData::getInstance();
 	m->openInputFile(fName, fileHandle);
 	filename = fName;
+	m->saveNextLabel = "";
 	
 }
-
 /***********************************************************************/
-
 
 InputData::~InputData(){
 	fileHandle.close();
-	globaldata = GlobalData::getInstance();
-	globaldata->saveNextLabel = "";
-//	delete output;
-	
+	m->saveNextLabel = "";
 }
 
 /***********************************************************************/
@@ -38,7 +33,6 @@ InputData::~InputData(){
 InputData::InputData(string fName, string orderFileName, string f) : format(f){
 	try {
 		m = MothurOut::getInstance();
-		globaldata = GlobalData::getInstance();
 		ifstream ofHandle;
 		m->openInputFile(orderFileName, ofHandle);
 		string name;
@@ -431,6 +425,7 @@ vector<SharedRAbundVector*> InputData::getSharedRAbundVectors(){
 				}
 			}else if (format == "shared") {
 				SharedList = new SharedListVector(fileHandle);
+				
 				if (SharedList != NULL) {
 					return SharedList->getSharedRAbundVector();
 				}
@@ -455,7 +450,7 @@ vector<SharedRAbundVector*> InputData::getSharedRAbundVectors(string label){
 		string  thisLabel;
 		
 		m->openInputFile(filename, in);
-		globaldata->saveNextLabel = "";
+		m->saveNextLabel = "";
 	
 		if(in){
 			if (format == "sharedfile")  {
@@ -481,6 +476,7 @@ vector<SharedRAbundVector*> InputData::getSharedRAbundVectors(string label){
 				while (in.eof() != true) {
 					
 					SharedList = new SharedListVector(in);
+					
 					if (SharedList != NULL) {
 						thisLabel = SharedList->getLabel();
 						//if you are at the last label
@@ -549,7 +545,7 @@ vector<SharedRAbundFloatVector*> InputData::getSharedRAbundFloatVectors(string l
 		string  thisLabel;
 		
 		m->openInputFile(filename, in);
-		globaldata->saveNextLabel = "";
+		m->saveNextLabel = "";
 		
 		if(in){
 			if (format == "relabund")  {

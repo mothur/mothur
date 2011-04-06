@@ -19,17 +19,19 @@ class NoCommand : public Command {
 public:
 	NoCommand(string);
 	NoCommand() {}
-	~NoCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help() {}
+	~NoCommand(){}
+	
+	vector<string> setParameters()	{ return outputNames;	} //dummy, doesn't really do anything	
+	string getCommandName()			{ return "NoCommand";	}
+	string getCommandCategory()		{ return "Hidden";		}
+	string getHelpString() { return "No Command"; }	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
+	
 	
 private:
 	vector<string> outputNames;
-	map<string, vector<string> > outputTypes;
 		
 };
 

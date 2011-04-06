@@ -23,13 +23,15 @@ class PairwiseSeqsCommand : public Command {
 public:
 	PairwiseSeqsCommand(string);	
 	PairwiseSeqsCommand();
-	~PairwiseSeqsCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
+	~PairwiseSeqsCommand() {}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "pairwise.seqs";		}
+	string getCommandCategory()		{ return "Sequence Processing"; }
+	string getHelpString();	
+	
 	int execute(); 
-	void help();	
+	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
 	struct distlinePair {
@@ -37,10 +39,8 @@ private:
 		int end;
 	};
 	
-	
 	vector<int> processIDS;   //end line, processid
 	vector<distlinePair> lines;
-	map<string, vector<string> > outputTypes;
 	
 	Alignment* alignment;
 	Dist* distCalculator;

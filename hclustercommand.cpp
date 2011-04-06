@@ -10,14 +10,44 @@
 #include "hclustercommand.h"
 
 //**********************************************************************************************************************
-vector<string> HClusterCommand::getValidParameters(){	
+vector<string> HClusterCommand::setParameters(){	
 	try {
-		string Array[] =  {"cutoff","hard","precision","method","phylip","column","name","sorted","showabund","timing","outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter pphylip("phylip", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "none",false,false); parameters.push_back(pphylip);
+		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "ColumnName",false,false); parameters.push_back(pname);
+		CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "ColumnName",false,false); parameters.push_back(pcolumn);
+		CommandParameter pcutoff("cutoff", "Number", "", "10", "", "", "",false,false); parameters.push_back(pcutoff);
+		CommandParameter pprecision("precision", "Number", "", "100", "", "", "",false,false); parameters.push_back(pprecision);
+		CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted", "furthest", "", "", "",false,false); parameters.push_back(pmethod);
+		CommandParameter phard("hard", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(phard);
+		CommandParameter psorted("sorted", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(psorted);
+		CommandParameter pshowabund("showabund", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pshowabund);
+		CommandParameter ptiming("timing", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(ptiming);		
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+			
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "HClusterCommand", "getValidParameters");
+		m->errorOut(e, "HClusterCommand", "setParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string HClusterCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The hcluster command parameter options are cutoff, precision, method, phylip, column, name, showabund, timing and sorted. Phylip or column and name are required, unless you have valid current files.\n";
+		helpString += "The phylip and column parameter allow you to enter your distance file, and sorted indicates whether your column distance file is already sorted. \n";
+		helpString += "The name parameter allows you to enter your name file and is required if your distance file is in column format. \n";
+		helpString += "The hcluster command should be in the following format: \n";
+		helpString += "hcluster(column=youDistanceFile, name=yourNameFile, method=yourMethod, cutoff=yourCutoff, precision=yourPrecision) \n";
+		helpString += "The acceptable hcluster methods are furthest, nearest, weighted and average.\n\n";	
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "HClusterCommand", "getHelpString");
 		exit(1);
 	}
 }
@@ -25,6 +55,7 @@ vector<string> HClusterCommand::getValidParameters(){
 HClusterCommand::HClusterCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["list"] = tempOutNames;
 		outputTypes["rabund"] = tempOutNames;
@@ -36,33 +67,9 @@ HClusterCommand::HClusterCommand(){
 	}
 }
 //**********************************************************************************************************************
-vector<string> HClusterCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"phylip","column","or"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "HClusterCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> HClusterCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "HClusterCommand", "getRequiredFiles");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 //This function checks to make sure the cluster command has no errors and then clusters based on the method chosen.
 HClusterCommand::HClusterCommand(string option)  {
 	try{
-		globaldata = GlobalData::getInstance();
 		abort = false; calledHelp = false;   
 		
 		//allow user to run help
@@ -92,8 +99,6 @@ HClusterCommand::HClusterCommand(string option)  {
 			outputTypes["rabund"] = tempOutNames;
 			outputTypes["sabund"] = tempOutNames;
 		
-			globaldata->newRead();
-			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
 			if (inputDir == "not found"){	inputDir = "";		}
@@ -142,11 +147,31 @@ HClusterCommand::HClusterCommand(string option)  {
 			if (namefile == "not open") { abort = true; }	
 			else if (namefile == "not found") { namefile = ""; }
 			
-			if ((phylipfile == "") && (columnfile == "")) { m->mothurOut("When executing a hcluster command you must enter a phylip or a column."); m->mothurOutEndLine(); abort = true; }
+			if ((phylipfile == "") && (columnfile == "")) { 
+				//is there are current file available for either of these?
+				//give priority to column, then phylip
+				columnfile = m->getColumnFile(); 
+				if (columnfile != "") {  m->mothurOut("Using " + columnfile + " as input file for the column parameter."); m->mothurOutEndLine(); }
+				else { 
+					phylipfile = m->getPhylipFile(); 
+					if (phylipfile != "") {  m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
+					else { 
+						m->mothurOut("No valid current files. You must provide a phylip or column file before you can use the hcluster command."); m->mothurOutEndLine(); 
+						abort = true;
+					}
+				}
+			}
 			else if ((phylipfile != "") && (columnfile != "")) { m->mothurOut("When executing a hcluster command you must enter ONLY ONE of the following: phylip or column."); m->mothurOutEndLine(); abort = true; }
 		
 			if (columnfile != "") {
-				if (namefile == "") {  cout << "You need to provide a namefile if you are going to use the column format." << endl; abort = true; }
+				if (namefile == "") { 
+					namefile = m->getNameFile(); 
+					if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
+					else { 
+						m->mothurOut("You need to provide a namefile if you are going to use the column format."); m->mothurOutEndLine(); 
+						abort = true; 
+					}	
+				}
 			}
 			
 			//check for optional parameter and set defaults
@@ -212,45 +237,23 @@ HClusterCommand::HClusterCommand(string option)  {
 
 //**********************************************************************************************************************
 
-void HClusterCommand::help(){
-	try {
-		m->mothurOut("The hcluster command parameter options are cutoff, precision, method, phylip, column, name, showabund, timing and sorted. Phylip or column and name are required.\n");
-		m->mothurOut("The phylip and column parameter allow you to enter your distance file, and sorted indicates whether your column distance file is already sorted. \n");
-		m->mothurOut("The name parameter allows you to enter your name file and is required if your distance file is in column format. \n");
-		m->mothurOut("The hcluster command should be in the following format: \n");
-		m->mothurOut("hcluster(column=youDistanceFile, name=yourNameFile, method=yourMethod, cutoff=yourCutoff, precision=yourPrecision) \n");
-		m->mothurOut("The acceptable hcluster methods are furthest, nearest, weighted and average.\n\n");	
-	}
-	catch(exception& e) {
-		m->errorOut(e, "HClusterCommand", "help");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
-HClusterCommand::~HClusterCommand(){}
-
-//**********************************************************************************************************************
-
 int HClusterCommand::execute(){
 	try {
 	
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
+		NameAssignment* nameMap = NULL;
 		if(namefile != ""){	
-			globaldata->nameMap = new NameAssignment(namefile);
-			globaldata->nameMap->readMap();
-		}else{
-			globaldata->nameMap = NULL;
-		}
+			nameMap = new NameAssignment(namefile);
+			nameMap->readMap();
+		}		
 		
 		time_t estart = time(NULL);
 		
 		if (!sorted) {
 			read = new ReadCluster(distfile, cutoff, outputDir, true); 	
 			read->setFormat(format);
-			read->read(globaldata->nameMap);
+			read->read(nameMap);
 			
 			if (m->control_pressed) {  
 				delete read; 
@@ -266,7 +269,7 @@ int HClusterCommand::execute(){
 			list = read->getListVector();
 			delete read;
 		}else {
-			list = new ListVector(globaldata->nameMap->getListVector());
+			list = new ListVector(nameMap->getListVector());
 		}
 		
 		if (m->control_pressed) {  
@@ -295,7 +298,7 @@ int HClusterCommand::execute(){
 		print_start = true;
 		start = time(NULL);
 				
-		cluster = new HCluster(rabund, list, method, distfile, globaldata->nameMap, cutoff);
+		cluster = new HCluster(rabund, list, method, distfile, nameMap, cutoff);
 		vector<seqDist> seqs; seqs.resize(1); // to start loop
 		
 		if (m->control_pressed) {  
@@ -374,18 +377,7 @@ int HClusterCommand::execute(){
 		else if(rndPreviousDist<cutoff){
 			printData(toString(rndPreviousDist, length-1));
 		}
-		
-		//delete globaldata's copy of the sparsematrix and listvector to free up memory
-		delete globaldata->gListVector;	 globaldata->gListVector = NULL;
-		
-		//saves .list file so you can do the collect, rarefaction and summary commands without doing a read.list
-		if (globaldata->getFormat() == "phylip") { globaldata->setPhylipFile(""); }
-		else if (globaldata->getFormat() == "column") { globaldata->setColumnFile(""); }
-		
-		globaldata->setListFile(fileroot+ tag + ".list");
-		globaldata->setNameFile("");
-		globaldata->setFormat("list");
-		
+				
 		sabundFile.close();
 		rabundFile.close();
 		listFile.close();

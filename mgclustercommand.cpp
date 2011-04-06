@@ -9,16 +9,54 @@
 
 #include "mgclustercommand.h"
 
-
 //**********************************************************************************************************************
-vector<string> MGClusterCommand::getValidParameters(){	
+vector<string> MGClusterCommand::setParameters(){	
 	try {
-		string Array[] =  {"blast", "method", "name", "hard", "cutoff", "precision", "length", "min", "penalty", "hcluster","merge","outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter pblast("blast", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pblast);
+		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
+		CommandParameter plength("length", "Number", "", "5", "", "", "",false,false); parameters.push_back(plength);
+		CommandParameter ppenalty("penalty", "Number", "", "0.10", "", "", "",false,false); parameters.push_back(ppenalty);
+		CommandParameter pcutoff("cutoff", "Number", "", "0.70", "", "", "",false,false); parameters.push_back(pcutoff);
+		CommandParameter pprecision("precision", "Number", "", "100", "", "", "",false,false); parameters.push_back(pprecision);
+		CommandParameter pmethod("method", "Multiple", "furthest-nearest-average", "furthest", "", "", "",false,false); parameters.push_back(pmethod);
+		CommandParameter phard("hard", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(phard);
+		CommandParameter pmin("min", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pmin);
+		CommandParameter pmerge("merge", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pmerge);
+		CommandParameter phcluster("hcluster", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(phcluster);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "MGClusterCommand", "getValidParameters");
+		m->errorOut(e, "MGClusterCommand", "setParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string MGClusterCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The mgcluster command parameter options are blast, name, cutoff, precision, hard,  method, merge, min, length, penalty and hcluster. The blast parameter is required.\n";
+		helpString += "The mgcluster command reads a blast and name file and clusters the sequences into OPF units similiar to the OTUs.\n";
+		helpString += "This command outputs a .list, .rabund and .sabund file that can be used with mothur other commands to estimate richness.\n";
+		helpString += "The cutoff parameter is used to specify the maximum distance you would like to cluster to. The default is 0.70.\n";
+		helpString += "The precision parameter's default value is 100. \n";
+		helpString += "The acceptable mgcluster methods are furthest, nearest and average.  If no method is provided then furthest is assumed.\n\n";	
+		helpString += "The min parameter allows you to specify is you want the minimum or maximum blast score ratio used in calculating the distance. The default is true, meaning you want the minimum.\n";
+		helpString += "The length parameter is used to specify the minimum overlap required.  The default is 5.\n";
+		helpString += "The penalty parameter is used to adjust the error rate.  The default is 0.10.\n";
+		helpString += "The merge parameter allows you to shut off merging based on overlaps and just cluster.  By default merge is true, meaning you want to merge.\n";
+		helpString += "The hcluster parameter allows you to use the hcluster algorithm when clustering.  This may be neccessary if your file is too large to fit into RAM. The default is false.\n";
+		helpString += "The mgcluster command should be in the following format: \n";
+		helpString += "mgcluster(blast=yourBlastfile, name=yourNameFile, cutoff=yourCutOff).\n";
+		helpString += "Note: No spaces between parameter labels (i.e. balst), '=' and parameters (i.e.yourBlastfile).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "MGClusterCommand", "getHelpString");
 		exit(1);
 	}
 }
@@ -26,6 +64,7 @@ vector<string> MGClusterCommand::getValidParameters(){
 MGClusterCommand::MGClusterCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["list"] = tempOutNames;
 		outputTypes["rabund"] = tempOutNames;
@@ -37,41 +76,15 @@ MGClusterCommand::MGClusterCommand(){
 	}
 }
 //**********************************************************************************************************************
-vector<string> MGClusterCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"blast"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "MGClusterCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> MGClusterCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "MGClusterCommand", "getRequiredFiles");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 MGClusterCommand::MGClusterCommand(string option) {
 	try {
-		globaldata = GlobalData::getInstance();
 		abort = false; calledHelp = false;   
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"blast", "method", "name", "hard", "cutoff", "precision", "length", "min", "penalty", "hcluster","merge","outputdir","inputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string, string> parameters = parser.getParameters();
@@ -115,7 +128,7 @@ MGClusterCommand::MGClusterCommand(string option) {
 			
 			//check for required parameters
 			blastfile = validParameter.validFile(parameters, "blast", true);
-			if (blastfile == "not open") { abort = true; }	
+			if (blastfile == "not open") { blastfile = ""; abort = true; }	
 			else if (blastfile == "not found") { blastfile = ""; }
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
@@ -171,32 +184,6 @@ MGClusterCommand::MGClusterCommand(string option) {
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-
-void MGClusterCommand::help(){
-	try {
-		m->mothurOut("The mgcluster command parameter options are blast, name, cutoff, precision, method, merge, min, length, penalty and hcluster. The blast parameter is required.\n");
-		m->mothurOut("The mgcluster command reads a blast and name file and clusters the sequences into OPF units similiar to the OTUs.\n");
-		m->mothurOut("This command outputs a .list, .rabund and .sabund file that can be used with mothur other commands to estimate richness.\n");
-		m->mothurOut("The cutoff parameter is used to specify the maximum distance you would like to cluster to. The default is 0.70.\n");
-		m->mothurOut("The precision parameter's default value is 100. \n");
-		m->mothurOut("The acceptable mgcluster methods are furthest, nearest and average.  If no method is provided then furthest is assumed.\n\n");	
-		m->mothurOut("The min parameter allows you to specify is you want the minimum or maximum blast score ratio used in calculating the distance. The default is true, meaning you want the minimum.\n");
-		m->mothurOut("The length parameter is used to specify the minimum overlap required.  The default is 5.\n");
-		m->mothurOut("The penalty parameter is used to adjust the error rate.  The default is 0.10.\n");
-		m->mothurOut("The merge parameter allows you to shut off merging based on overlaps and just cluster.  By default merge is true, meaning you want to merge.\n");
-		m->mothurOut("The hcluster parameter allows you to use the hcluster algorithm when clustering.  This may be neccessary if your file is too large to fit into RAM. The default is false.\n");
-		m->mothurOut("The mgcluster command should be in the following format: \n");
-		m->mothurOut("mgcluster(blast=yourBlastfile, name=yourNameFile, cutoff=yourCutOff).\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. balst), '=' and parameters (i.e.yourBlastfile).\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "MGClusterCommand", "help");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-MGClusterCommand::~MGClusterCommand(){}
 //**********************************************************************************************************************
 int MGClusterCommand::execute(){
 	try {
@@ -488,14 +475,9 @@ int MGClusterCommand::execute(){
 		sabundFile.close();
 		rabundFile.close();
 	
-		globaldata->setListFile(fileroot+ tag + ".list");
-		globaldata->setFormat("list");
-		
 		if (m->control_pressed) { 
 			delete nameMap; 
 			listFile.close(); rabundFile.close(); sabundFile.close(); remove((fileroot+ tag + ".list").c_str()); remove((fileroot+ tag + ".rabund").c_str()); remove((fileroot+ tag + ".sabund").c_str());
-			globaldata->setListFile("");
-			globaldata->setFormat("");
 			outputTypes.clear();
 			return 0; 
 		}

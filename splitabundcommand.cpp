@@ -10,21 +10,58 @@
 #include "splitabundcommand.h"
 
 //**********************************************************************************************************************
-vector<string> SplitAbundCommand::getValidParameters(){	
-	try {
-		string Array[] =  {"name","group","list","label","accnos","groups","fasta","cutoff","outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+vector<string> SplitAbundCommand::setParameters(){	
+	try {		
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
+		CommandParameter pname("name", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pname);
+		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pgroup);
+		CommandParameter plist("list", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(plist);
+		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
+		CommandParameter pcutoff("cutoff", "Number", "", "0", "", "", "",false,true); parameters.push_back(pcutoff);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
+		CommandParameter paccnos("accnos", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(paccnos);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "SplitAbundCommand", "getValidParameters");
+		m->errorOut(e, "SplitAbundCommand", "setParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
+string SplitAbundCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The split.abund command reads a fasta file and a list or a names file splits the sequences into rare and abundant groups. \n";
+		helpString += "The split.abund command parameters are fasta, list, name, cutoff, group, label, groups, cutoff and accnos.\n";
+		helpString += "The fasta and a list or name parameter are required, and you must provide a cutoff value.\n";
+		helpString += "The cutoff parameter is used to qualify what is abundant and rare.\n";
+		helpString += "The group parameter allows you to parse a group file into rare and abundant groups.\n";
+		helpString += "The label parameter is used to read specific labels in your listfile you want to use.\n";
+		helpString += "The accnos parameter allows you to output a .rare.accnos and .abund.accnos files to use with the get.seqs and remove.seqs commands.\n";
+		helpString += "The groups parameter allows you to parse the files into rare and abundant files by group.  \n";
+		helpString += "For example if you set groups=A-B-C, you will get a .A.abund, .A.rare, .B.abund, .B.rare, .C.abund, .C.rare files.  \n";
+		helpString += "If you want .abund and .rare files for all groups, set groups=all.  \n";
+		helpString += "The split.abund command should be used in the following format: split.abund(fasta=yourFasta, list=yourListFile, group=yourGroupFile, label=yourLabels, cutoff=yourCutoff).\n";
+		helpString += "Example: split.abund(fasta=abrecovery.fasta, list=abrecovery.fn.list, group=abrecovery.groups, label=0.03, cutoff=2).\n";
+		helpString += "Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListfile).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SplitAbundCommand", "getHelpString");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
 SplitAbundCommand::SplitAbundCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["list"] = tempOutNames;
 		outputTypes["name"] = tempOutNames;
@@ -34,29 +71,6 @@ SplitAbundCommand::SplitAbundCommand(){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SplitAbundCommand", "SplitAbundCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> SplitAbundCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"fasta","list","name","or"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SplitAbundCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> SplitAbundCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SplitAbundCommand", "getRequiredFiles");
 		exit(1);
 	}
 }
@@ -149,7 +163,11 @@ SplitAbundCommand::SplitAbundCommand(string option)  {
 		
 			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not open") { abort = true; }
-			else if (fastafile == "not found") { fastafile = ""; m->mothurOut("fasta is a required parameter for the split.abund command. "); m->mothurOutEndLine(); abort = true;  }	
+			else if (fastafile == "not found") { 				
+				fastafile = m->getFastaFile(); 
+				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}	
 			
 			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") {  groupfile = ""; abort = true; }	
@@ -174,7 +192,15 @@ SplitAbundCommand::SplitAbundCommand(string option)  {
 			if ((groupfile == "") && (groups != "")) {  m->mothurOut("You cannot select groups without a valid groupfile, I will disregard your groups selection. "); m->mothurOutEndLine(); groups = "";  Groups.clear(); }
 			
 			//do you have all files needed
-			if ((listfile == "") && (namefile == "")) { m->mothurOut("You must either a listfile or a namefile for the split.abund command. "); m->mothurOutEndLine(); abort = true;  }
+			if ((listfile == "") && (namefile == "")) { 
+				namefile = m->getNameFile(); 
+				if (namefile != "") { m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
+				else { 				
+					listfile = m->getListFile(); 
+					if (listfile != "") { m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
+					else { 	m->mothurOut("You have no current list or namefile and the list or name parameter is required."); m->mothurOutEndLine(); abort = true; }
+				}
+			}
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -198,29 +224,6 @@ SplitAbundCommand::SplitAbundCommand(string option)  {
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SplitAbundCommand", "SplitAbundCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-void SplitAbundCommand::help(){
-	try {
-		m->mothurOut("The split.abund command reads a fasta file and a list or a names file splits the sequences into rare and abundant groups. \n");
-		m->mothurOut("The split.abund command parameters are fasta, list, name, cutoff, group, label, groups, cutoff and accnos.\n");
-		m->mothurOut("The fasta and a list or name parameter are required, and you must provide a cutoff value.\n");
-		m->mothurOut("The cutoff parameter is used to qualify what is abundant and rare.\n");
-		m->mothurOut("The group parameter allows you to parse a group file into rare and abundant groups.\n");
-		m->mothurOut("The label parameter is used to read specific labels in your listfile you want to use.\n");
-		m->mothurOut("The accnos parameter allows you to output a .rare.accnos and .abund.accnos files to use with the get.seqs and remove.seqs commands.\n");
-		m->mothurOut("The groups parameter allows you to parse the files into rare and abundant files by group.  \n");
-		m->mothurOut("For example if you set groups=A-B-C, you will get a .A.abund, .A.rare, .B.abund, .B.rare, .C.abund, .C.rare files.  \n");
-		m->mothurOut("If you want .abund and .rare files for all groups, set groups=all.  \n");
-		m->mothurOut("The split.abund command should be used in the following format: split.abund(fasta=yourFasta, list=yourListFile, group=yourGroupFile, label=yourLabels, cutoff=yourCutoff).\n");
-		m->mothurOut("Example: split.abund(fasta=abrecovery.fasta, list=abrecovery.fn.list, group=abrecovery.groups, label=0.03, cutoff=2).\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListfile).\n\n");
-
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SplitAbundCommand", "help");
 		exit(1);
 	}
 }

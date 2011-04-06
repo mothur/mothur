@@ -14,48 +14,41 @@
 #include "inputdata.h"
 #include "rarefact.h"
 #include "display.h"
-#include "readotu.h"
 #include "validcalculator.h"
-
-
-class GlobalData;
 
 class RareFactCommand : public Command {
 	
 public:
 	RareFactCommand(string);
 	RareFactCommand();	
-	~RareFactCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();	
+	~RareFactCommand(){}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "rarefaction.single";		}
+	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	GlobalData* globaldata;
+	
 	vector<Display*> rDisplays;
-	ReadOTUFile* read;
 	OrderVector* order;
 	InputData* input;
-	ValidCalculators* validCalculator;
 	Rarefact* rCurve;
 	int nIters, abund, processors;
 	float freq;
 	
 	bool abort, allLines;
 	set<string> labels; //holds labels to be used
-	string label, calc;
+	string label, calc, sharedfile, listfile, rabundfile, sabundfile, format, inputfile;
 	vector<string>  Estimators;
 	vector<string> inputFileNames, outputNames;
 	vector<string> groups;
-	map<string, vector<string> > outputTypes;
 	string outputDir;
 	
 	vector<string> parseSharedFile(string);
-
-
 };
 
 #endif

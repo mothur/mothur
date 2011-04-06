@@ -21,13 +21,15 @@ class ParseListCommand : public Command {
 public:
 	ParseListCommand(string);
 	ParseListCommand();	
-	~ParseListCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();	
-	void help();
+	~ParseListCommand() {}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "parse.list";				}
+	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
 	int parse(ListVector*);
@@ -41,7 +43,6 @@ private:
 	set<string> labels;
 	bool abort, allLines;
 	vector<string> outputNames;
-	map<string, vector<string> > outputTypes;
 	
 	map<string, ofstream*> filehandles;
 	map<string, ofstream*>::iterator it3;

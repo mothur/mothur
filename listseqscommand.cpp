@@ -11,50 +11,55 @@
 #include "sequence.hpp"
 #include "listvector.hpp"
 
+
 //**********************************************************************************************************************
-vector<string> ListSeqsCommand::getValidParameters(){	
+vector<string> ListSeqsCommand::setParameters(){	
 	try {
-		string Array[] =  {"fasta","name", "group", "alignreport","list","taxonomy","outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "FNGLT", "FNGLT", "none",false,false); parameters.push_back(pfasta);
+		CommandParameter pname("name", "InputTypes", "", "", "FNGLT", "FNGLT", "none",false,false); parameters.push_back(pname);
+		CommandParameter pgroup("group", "InputTypes", "", "", "FNGLT", "FNGLT", "none",false,false); parameters.push_back(pgroup);
+		CommandParameter plist("list", "InputTypes", "", "", "FNGLT", "FNGLT", "none",false,false); parameters.push_back(plist);
+		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "FNGLT", "FNGLT", "none",false,false); parameters.push_back(ptaxonomy);
+		CommandParameter palignreport("alignreport", "InputTypes", "", "", "FNGLT", "FNGLT", "none",false,false); parameters.push_back(palignreport);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ListSeqsCommand", "getValidParameters");
+		m->errorOut(e, "ListSeqsCommand", "setParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
+string ListSeqsCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The list.seqs command reads a fasta, name, group, list, taxonomy or alignreport file and outputs a .accnos file containing sequence names.\n";
+		helpString += "The list.seqs command parameters are fasta, name, group, list, taxonomy and alignreport.  You must provide one of these parameters.\n";
+		helpString += "The list.seqs command should be in the following format: list.seqs(fasta=yourFasta).\n";
+		helpString += "Example list.seqs(fasta=amazon.fasta).\n";
+		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ListSeqsCommand", "getHelpString");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
 ListSeqsCommand::ListSeqsCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["accnos"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ListSeqsCommand", "ListSeqsCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> ListSeqsCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"fasta","name", "group", "alignreport","list","taxonomy","or"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ListSeqsCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> ListSeqsCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ListSeqsCommand", "getRequiredFiles");
 		exit(1);
 	}
 }
@@ -68,9 +73,7 @@ ListSeqsCommand::ListSeqsCommand(string option)  {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"fasta","name", "group", "alignreport","list","taxonomy","outputdir","inputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
@@ -184,22 +187,6 @@ ListSeqsCommand::ListSeqsCommand(string option)  {
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-
-void ListSeqsCommand::help(){
-	try {
-		m->mothurOut("The list.seqs command reads a fasta, name, group, list, taxonomy or alignreport file and outputs a .accnos file containing sequence names.\n");
-		m->mothurOut("The list.seqs command parameters are fasta, name, group, list, taxonomy and alignreport.  You must provide one of these parameters.\n");
-		m->mothurOut("The list.seqs command should be in the following format: list.seqs(fasta=yourFasta).\n");
-		m->mothurOut("Example list.seqs(fasta=amazon.fasta).\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ListSeqsCommand", "help");
-		exit(1);
-	}
-}
-
 //**********************************************************************************************************************
 
 int ListSeqsCommand::execute(){

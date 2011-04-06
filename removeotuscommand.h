@@ -21,18 +21,19 @@ public:
 	RemoveOtusCommand(string);	
 	RemoveOtusCommand();
 	~RemoveOtusCommand(){}
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();	
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "remove.otus";				}
+	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
 	string accnosfile, groupfile, listfile, outputDir, groups, label;
 	bool abort;
 	vector<string> outputNames, Groups;
-	map<string, vector<string> > outputTypes;
 	GroupMap* groupMap;
 	
 	void readAccnos();

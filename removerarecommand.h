@@ -13,7 +13,7 @@
 
 #include "command.hpp"
 #include "listvector.hpp"
-#include "globaldata.hpp"
+
 
 class RemoveRareCommand : public Command {
 	
@@ -22,21 +22,21 @@ public:
 	RemoveRareCommand(string);	
 	RemoveRareCommand();
 	~RemoveRareCommand(){}
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();	
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "remove.rare";				}
+	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	GlobalData* globaldata;
 	string sabundfile, rabundfile, sharedfile, groupfile, listfile, outputDir, groups, label;
 	int nseqs, allLines;
 	bool abort, byGroup;
 	vector<string> outputNames, Groups;
 	set<string> labels;
-	map<string, vector<string> > outputTypes;
 	
 	int processSabund();
 	int processRabund();

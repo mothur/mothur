@@ -11,37 +11,41 @@
 #include "sharedutilities.h"
 
 //**********************************************************************************************************************
-vector<string> SplitGroupCommand::getValidParameters(){	
-	try {
-		string Array[] =  {"name","group","groups","fasta","outputdir","inputdir"}; 
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SplitGroupCommand", "getValidParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> SplitGroupCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"fasta","group"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SplitGroupCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> SplitGroupCommand::getRequiredFiles(){	
-	try {
+vector<string> SplitGroupCommand::setParameters(){	
+	try {		
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
+		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
+		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pgroup);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
 		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "SplitGroupCommand", "getRequiredFiles");
+		m->errorOut(e, "SplitGroupCommand", "setParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string SplitGroupCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The split.group command reads a group file, and parses your fasta and names files by groups. \n";
+		helpString += "The split.group command parameters are fasta, name, group and groups.\n";
+		helpString += "The fasta and group parameters are required.\n";
+		helpString += "The groups parameter allows you to select groups to create files for.  \n";
+		helpString += "For example if you set groups=A-B-C, you will get a .A.fasta, .A.names, .B.fasta, .B.names, .C.fasta, .C.names files.  \n";
+		helpString += "If you want .fasta and .names files for all groups, set groups=all.  \n";
+		helpString += "The split.group command should be used in the following format: split.group(fasta=yourFasta, group=yourGroupFile).\n";
+		helpString += "Example: split.group(fasta=abrecovery.fasta, group=abrecovery.groups).\n";
+		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SplitGroupCommand", "getHelpString");
 		exit(1);
 	}
 }
@@ -49,6 +53,7 @@ vector<string> SplitGroupCommand::getRequiredFiles(){
 SplitGroupCommand::SplitGroupCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
 		outputTypes["name"] = tempOutNames;
@@ -67,9 +72,7 @@ SplitGroupCommand::SplitGroupCommand(string option)  {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"name","group","groups","fasta","outputdir","inputdir"}; 
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string, string> parameters = parser.getParameters();
@@ -125,11 +128,19 @@ SplitGroupCommand::SplitGroupCommand(string option)  {
 		
 			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not open") { abort = true; }
-			else if (fastafile == "not found") { fastafile = ""; m->mothurOut("fasta is a required parameter for the split.group command. "); m->mothurOutEndLine(); abort = true;  }	
+			else if (fastafile == "not found") {			
+				fastafile = m->getFastaFile(); 
+				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}	
 			
 			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") {  groupfile = ""; abort = true; }	
-			else if (groupfile == "not found") { groupfile = ""; m->mothurOut("group is a required parameter for the split.group command. "); m->mothurOutEndLine(); abort = true; }
+			else if (groupfile == "not found") { 			
+				groupfile = m->getGroupFile(); 
+				if (groupfile != "") { m->mothurOut("Using " + groupfile + " as input file for the group parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current groupfile and the group parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}
 			
 			groups = validParameter.validFile(parameters, "groups", false);		
 			if (groups == "not found") { groups = ""; }
@@ -145,27 +156,6 @@ SplitGroupCommand::SplitGroupCommand(string option)  {
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-void SplitGroupCommand::help(){
-	try {
-		m->mothurOut("The split.group command reads a group file, and parses your fasta and names files by groups. \n");
-		m->mothurOut("The split.group command parameters are fasta, name, group and groups.\n");
-		m->mothurOut("The fasta and group parameters are required.\n");
-		m->mothurOut("The groups parameter allows you to select groups to create files for.  \n");
-		m->mothurOut("For example if you set groups=A-B-C, you will get a .A.fasta, .A.names, .B.fasta, .B.names, .C.fasta, .C.names files.  \n");
-		m->mothurOut("If you want .fasta and .names files for all groups, set groups=all.  \n");
-		m->mothurOut("The split.group command should be used in the following format: split.group(fasta=yourFasta, group=yourGroupFile).\n");
-		m->mothurOut("Example: split.group(fasta=abrecovery.fasta, group=abrecovery.groups).\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
-
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SplitGroupCommand", "help");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-SplitGroupCommand::~SplitGroupCommand(){ }
 //**********************************************************************************************************************
 int SplitGroupCommand::execute(){
 	try {

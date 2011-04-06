@@ -10,9 +10,8 @@
 #include "heatmap.h"
 
 //**********************************************************************************************************************
-HeatMap::HeatMap(string sort, string scale, int num, int fsize, string dir){
+HeatMap::HeatMap(string sort, string scale, int num, int fsize, string dir, string i){
 	try {
-		globaldata = GlobalData::getInstance();
 		m = MothurOut::getInstance();
 //		format = globaldata->getFormat();
 		sorted = sort;
@@ -20,6 +19,7 @@ HeatMap::HeatMap(string sort, string scale, int num, int fsize, string dir){
 		outputDir = dir;
 		numOTU = num;
 		fontSize = fsize;
+		inputfile = i;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "HeatMap", "HeatMap");
@@ -70,7 +70,7 @@ string HeatMap::getPic(RAbundVector* rabund) {
 		}
 		
 		
-		string filenamesvg = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName)) + rabund->getLabel() + ".heatmap.bin.svg";
+		string filenamesvg = outputDir + m->getRootName(m->getSimpleName(inputfile)) + rabund->getLabel() + ".heatmap.bin.svg";
 		m->openOutputFile(filenamesvg, outsvg);
 		
 		//svg image
@@ -156,7 +156,7 @@ string HeatMap::getPic(vector<SharedRAbundVector*> lookup) {
 			}
 		}
 
-		string filenamesvg = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName)) + lookup[0]->getLabel() + ".heatmap.bin.svg";
+		string filenamesvg = outputDir + m->getRootName(m->getSimpleName(inputfile)) + lookup[0]->getLabel() + ".heatmap.bin.svg";
 		m->openOutputFile(filenamesvg, outsvg);
 		
 		//svg image
@@ -453,7 +453,7 @@ string HeatMap::getPic(vector<SharedRAbundFloatVector*> lookup) {
 			}
 		}
 
-		string filenamesvg = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName)) + lookup[0]->getLabel() + ".heatmap.bin.svg";
+		string filenamesvg = outputDir + m->getRootName(m->getSimpleName(inputfile)) + lookup[0]->getLabel() + ".heatmap.bin.svg";
 		m->openOutputFile(filenamesvg, outsvg);
 		
 		//svg image

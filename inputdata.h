@@ -46,7 +46,6 @@ private:
 	map<string,int> orderMap;
 	string filename;
 	MothurOut* m;
-	GlobalData* globaldata;
 };
 
 

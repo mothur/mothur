@@ -12,35 +12,32 @@
  
 #include "command.hpp"
 #include "inputdata.h"
-#include "readotu.h"
 #include "sharedrabundvector.h"
 
-class GlobalData;
 
 class GetRelAbundCommand : public Command {
 
 public:
 	GetRelAbundCommand(string);
 	GetRelAbundCommand();
-	~GetRelAbundCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();
+	~GetRelAbundCommand(){}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "get.relabund";			}
+	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	GlobalData* globaldata;
-	ReadOTUFile* read;
 	InputData* input;
 	vector<SharedRAbundVector*> lookup;
 	
 	bool abort, allLines, pickedGroups;
 	set<string> labels; //holds labels to be used
-	string groups, label, outputDir, scale;
+	string groups, label, outputDir, scale, sharedfile;
 	vector<string> Groups, outputNames;
-	map<string, vector<string> > outputTypes;
 	
 	int getRelAbundance(vector<SharedRAbundVector*>&, ofstream&);
 

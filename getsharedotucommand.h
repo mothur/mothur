@@ -14,7 +14,6 @@
 #include "listvector.hpp"
 #include "sequence.hpp"
 #include "groupmap.h"
-#include "globaldata.hpp"
 
 //**********************************************************************************************************************
 class GetSharedOTUCommand : public Command {
@@ -23,29 +22,31 @@ class GetSharedOTUCommand : public Command {
 	
 		GetSharedOTUCommand(string);	
 		GetSharedOTUCommand();	
-		~GetSharedOTUCommand();
-		vector<string> getRequiredParameters();
-		vector<string> getValidParameters();
-		vector<string> getRequiredFiles();
-		map<string, vector<string> > getOutputFiles() { return outputTypes; }
-		int execute();
-		void help();	
+		~GetSharedOTUCommand() {}
+	
+		vector<string> setParameters();
+		string getCommandName()			{ return "get.sharedseqs";			}
+		string getCommandCategory()		{ return "OTU-Based Approaches";	}
+		string getRequiredCommand()		{ return "none";					}
+		string getHelpString();	
+	
+		int execute(); 
+		void help() { m->mothurOut(getHelpString()); }	
+	
+	
 		
 	private:
-		
-		GlobalData* globaldata;
 		ListVector* list;
 		GroupMap* groupMap;
 		
 		set<string> labels;
-		string fastafile, label, groups, listfile, groupfile, output, userGroups, outputDir;
+		string fastafile, label, groups, listfile, groupfile, output, userGroups, outputDir, format;
 		bool abort, allLines, unique;
 		vector<string> Groups;
 		map<string, string> groupFinder;
 		map<string, string>::iterator it;
 		vector<Sequence> seqs;
 		vector<string> outputNames;
-		map<string, vector<string> > outputTypes;
 		
 		int process(ListVector*);
 		

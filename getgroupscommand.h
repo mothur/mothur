@@ -21,19 +21,21 @@ public:
 	GetGroupsCommand(string);	
 	GetGroupsCommand();
 	~GetGroupsCommand(){}
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();	
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "get.groups";				}
+	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
+	
 	
 private:
 	set<string> names;
 	string accnosfile, fastafile, namefile, groupfile, listfile, taxfile, outputDir, groups;
 	bool abort;
 	vector<string> outputNames, Groups;
-	map<string, vector<string> > outputTypes;
 	GroupMap* groupMap;
 	
 	int readFasta();

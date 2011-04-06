@@ -19,18 +19,20 @@ public:
 	DeUniqueSeqsCommand(string);
 	DeUniqueSeqsCommand();
 	~DeUniqueSeqsCommand() {}
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();	
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "deunique.seqs";		}
+	string getCommandCategory()		{ return "Sequence Processing";		}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
+	
 	
 private:
 
 	string fastaFile, nameFile, outputDir;
 	vector<string> outputNames;
-	map<string, vector<string> > outputTypes;
 	bool abort;
 	
 	map<string, string> nameMap;

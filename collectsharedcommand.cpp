@@ -50,38 +50,50 @@
 #include "memeuclidean.h"
 #include "mempearson.h"
 
+
 //**********************************************************************************************************************
-vector<string> CollectSharedCommand::getValidParameters(){	
+vector<string> CollectSharedCommand::setParameters(){	
 	try {
-		string AlignArray[] =  {"freq","label","calc","groups","all","outputdir","inputdir"};
-		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "CollectSharedCommand", "getValidParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> CollectSharedCommand::getRequiredParameters(){	
-	try {
+		CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pshared);
+		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
+		CommandParameter pfreq("freq", "Number", "", "100", "", "", "",false,false); parameters.push_back(pfreq);
+		CommandParameter pcalc("calc", "Multiple", "sharedchao-sharedsobs-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan-kstest-whittaker-sharednseqs-ochiai-anderberg-skulczynski-kulczynskicody-lennon-morisitahorn-braycurtis-odum-canberra-structeuclidean-structchord-hellinger-manhattan-structpearson-soergel-spearman-structkulczynski-speciesprofile-structchi2-hamming-gower-memchi2-memchord-memeuclidean-mempearson", "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan", "", "", "",true,false); parameters.push_back(pcalc);
+		CommandParameter pall("all", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pall);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
 		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "CollectSharedCommand", "getRequiredParameters");
+		m->errorOut(e, "CollectSharedCommand", "setParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-vector<string> CollectSharedCommand::getRequiredFiles(){	
+string CollectSharedCommand::getHelpString(){	
 	try {
-		string AlignArray[] =  {"shared"};
-		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
-		return myArray;
+		string helpString = "";
+		ValidCalculators validCalculator;
+		helpString += "The collect.shared command parameters are shared, label, freq, calc and groups.  shared is required if there is no current sharedfile. \n";
+		helpString += "The collect.shared command should be in the following format: \n";
+		helpString += "collect.shared(label=yourLabel, freq=yourFreq, calc=yourEstimators, groups=yourGroups).\n";
+		helpString += "Example collect.shared(label=unique-.01-.03, freq=10, groups=B-C, calc=sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan).\n";
+		helpString += "The default values for freq is 100 and calc are sharedsobs-sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan.\n";
+		helpString += "The default value for groups is all the groups in your groupfile.\n";
+		helpString += "The freq parameter is used indicate when to output your data, by default it is set to 100. But you can set it to a percentage of the number of sequence. For example freq=0.10, means 10%. \n";
+		helpString += validCalculator.printCalc("shared");
+		helpString += "The label parameter is used to analyze specific labels in your input.\n";
+		helpString += "The all parameter is used to specify if you want the estimate of all your groups together.  This estimate can only be made for sharedsobs and sharedchao calculators. The default is false.\n";
+		helpString += "If you use sharedchao and run into memory issues, set all to false. \n";
+		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups.\n";
+		helpString += "Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListfile).\n\n";
+		return helpString;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "CollectSharedCommand", "getRequiredFiles");
+		m->errorOut(e, "CollectSharedCommand", "getHelpString");
 		exit(1);
 	}
 }
@@ -89,6 +101,7 @@ vector<string> CollectSharedCommand::getRequiredFiles(){
 CollectSharedCommand::CollectSharedCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["sharedchao"] = tempOutNames;
 		outputTypes["sharedsobs"] = tempOutNames;
@@ -139,31 +152,26 @@ CollectSharedCommand::CollectSharedCommand(){
 //**********************************************************************************************************************
 CollectSharedCommand::CollectSharedCommand(string option)  {
 	try {
-		globaldata = GlobalData::getInstance();
 		abort = false; calledHelp = false;   
 		allLines = 1;
-		labels.clear();
-		Estimators.clear();
-		Groups.clear();
 		
 		//allow user to run help
-		if(option == "help") { validCalculator = new ValidCalculators(); help(); abort = true; calledHelp = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"freq","label","calc","groups","all","outputdir","inputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters=parser.getParameters();
+			map<string,string>::iterator it;
 			
 			ValidParameters validParameter;
 		
 			//check to make sure all parameters are valid for command
-			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
-			
+	
 			//initialize outputTypes
 			vector<string> tempOutNames;
 			outputTypes["sharedchao"] = tempOutNames;
@@ -206,16 +214,34 @@ CollectSharedCommand::CollectSharedCommand(string option)  {
 			outputTypes["memeuclidean"] = tempOutNames;
 			outputTypes["mempearson"] = tempOutNames;
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
 			
-						
-			//make sure the user has already run the read.otu command
-			if (globaldata->getSharedFile() == "") {
-				if (globaldata->getListFile() == "") { m->mothurOut("You must read a list and a group, or a shared before you can use the collect.shared command."); m->mothurOutEndLine(); abort = true; }
-				else if (globaldata->getGroupFile() == "") { m->mothurOut("You must read a list and a group, or a shared before you can use the collect.shared command."); m->mothurOutEndLine(); abort = true; }
+			//if the user changes the input directory command factory will send this info to us in the output parameter 
+			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			if (inputDir == "not found"){	inputDir = "";		}
+			else {
+				string path;
+				it = parameters.find("shared");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
+				}
 			}
-
+			
+			//get shared file
+			sharedfile = validParameter.validFile(parameters, "shared", true);
+			if (sharedfile == "not open") { sharedfile = ""; abort = true; }	
+			else if (sharedfile == "not found") { 
+				//if there is a current shared file, use it
+				sharedfile = m->getSharedFile(); 
+				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}
+			
+			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(sharedfile);		}
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking..
@@ -226,12 +252,6 @@ CollectSharedCommand::CollectSharedCommand(string option)  {
 				else { allLines = 1;  }
 			}
 			
-			//if the user has not specified any labels use the ones from read.otu
-			if(label == "") {  
-				allLines = globaldata->allLines; 
-				labels = globaldata->labels; 
-			}
-				
 			calc = validParameter.validFile(parameters, "calc", false);			
 			if (calc == "not found") { calc = "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan";  }
 			else { 
@@ -244,7 +264,7 @@ CollectSharedCommand::CollectSharedCommand(string option)  {
 			else { 
 				m->splitAtDash(groups, Groups);
 			}
-			globaldata->Groups = Groups;
+			m->Groups = Groups;
 			
 			string temp;
 			temp = validParameter.validFile(parameters, "freq", false);			if (temp == "not found") { temp = "100"; }
@@ -255,16 +275,12 @@ CollectSharedCommand::CollectSharedCommand(string option)  {
 						
 			if (abort == false) {
 				
-				if (outputDir == "") { outputDir += m->hasPath(globaldata->inputFileName); }
-				string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName));
-				format = globaldata->getFormat();
-				int i;
+				string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(sharedfile));
 				
-				validCalculator = new ValidCalculators();
-				util = new SharedUtil();
+				ValidCalculators validCalculator;
 				
-				for (i=0; i<Estimators.size(); i++) {
-					if (validCalculator->isValidCalculator("shared", Estimators[i]) == true) { 
+				for (int i=0; i<Estimators.size(); i++) {
+					if (validCalculator.isValidCalculator("shared", Estimators[i]) == true) { 
 						if (Estimators[i] == "sharedchao") { 
 							cDisplays.push_back(new CollectDisplay(new SharedChao1(), new SharedOneColumnFile(fileNameRoot+"shared.chao")));
 							outputNames.push_back(fileNameRoot+"shared.chao"); outputTypes["sharedchao"].push_back(fileNameRoot+"shared.chao");
@@ -396,43 +412,7 @@ CollectSharedCommand::CollectSharedCommand(string option)  {
 	}
 }
 //**********************************************************************************************************************
-
-void CollectSharedCommand::help(){
-	try {
-		m->mothurOut("The collect.shared command can only be executed after a successful read.otu command.\n");
-		m->mothurOut("The collect.shared command parameters are label, freq, calc and groups.  No parameters are required \n");
-		m->mothurOut("The collect.shared command should be in the following format: \n");
-		m->mothurOut("collect.shared(label=yourLabel, freq=yourFreq, calc=yourEstimators, groups=yourGroups).\n");
-		m->mothurOut("Example collect.shared(label=unique-.01-.03, freq=10, groups=B-C, calc=sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan).\n");
-		m->mothurOut("The default values for freq is 100 and calc are sharedsobs-sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan.\n");
-		m->mothurOut("The default value for groups is all the groups in your groupfile.\n");
-		m->mothurOut("The freq parameter is used indicate when to output your data, by default it is set to 100. But you can set it to a percentage of the number of sequence. For example freq=0.10, means 10%. \n");
-		validCalculator->printCalc("shared", cout);
-		m->mothurOut("The label parameter is used to analyze specific labels in your input.\n");
-		m->mothurOut("The all parameter is used to specify if you want the estimate of all your groups together.  This estimate can only be made for sharedsobs and sharedchao calculators. The default is false.\n");
-		m->mothurOut("If you use sharedchao and run into memory issues, set all to false. \n");
-		m->mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups.\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListfile).\n\n");
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "CollectSharedCommand", "help");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
-CollectSharedCommand::~CollectSharedCommand(){
-	if (abort == false) {
-		delete input; globaldata->ginput = NULL;
-		delete read;
-		delete util;
-		delete validCalculator;
-		globaldata->gorder = NULL;
-	}
-}
-
+CollectSharedCommand::~CollectSharedCommand(){}
 //**********************************************************************************************************************
 
 int CollectSharedCommand::execute(){
@@ -444,10 +424,7 @@ int CollectSharedCommand::execute(){
 		if (cDisplays.size() == 0) { return 0; }
 		for(int i=0;i<cDisplays.size();i++){	cDisplays[i]->setAll(all);	}	
 	
-		read = new ReadOTUFile(globaldata->inputFileName);	
-		read->read(&*globaldata); 
-		
-		input = globaldata->ginput;
+		input = new InputData(sharedfile, "sharedfile");
 		order = input->getSharedOrderVector();
 		string lastLabel = order->getLabel();
 		
@@ -456,15 +433,16 @@ int CollectSharedCommand::execute(){
 		set<string> userLabels = labels;
 			
 		//set users groups
-		util->setGroups(globaldata->Groups, globaldata->gGroupmap->namesOfGroups, "collect");
-		util->updateGroupIndex(globaldata->Groups, globaldata->gGroupmap->groupIndex);
+		SharedUtil* util = new SharedUtil();
+		util->setGroups(m->Groups, m->namesOfGroups, "collect");
+		delete util;
 
 		while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			if (m->control_pressed) { 
 					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}  outputTypes.clear();
 					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
-					delete order; 
-					globaldata->Groups.clear();
+					delete order; delete input;
+					m->Groups.clear();
 					return 0;
 			}
 
@@ -511,7 +489,8 @@ int CollectSharedCommand::execute(){
 		if (m->control_pressed) { 
 					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}   outputTypes.clear();
 					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
-					globaldata->Groups.clear();
+					m->Groups.clear();
+					delete input;
 					return 0;
 		}
 		
@@ -542,7 +521,8 @@ int CollectSharedCommand::execute(){
 				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}  outputTypes.clear();
 				for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
 				delete order; 
-				globaldata->Groups.clear();
+				delete input;
+				m->Groups.clear();
 				return 0;
 			}
 
@@ -552,7 +532,8 @@ int CollectSharedCommand::execute(){
 		for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}	
 		
 		//reset groups parameter
-		globaldata->Groups.clear(); 
+		m->Groups.clear(); 
+		delete input;
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();

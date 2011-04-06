@@ -12,7 +12,6 @@
  */
 
 #include "mothur.h"
-#include "globaldata.hpp"
 
 class BlastDB : public Database {
 
@@ -37,7 +36,6 @@ private:
 	float gapExtend;
 	float match;
 	float misMatch;
-	GlobalData* globaldata;
 };
 
 #endif

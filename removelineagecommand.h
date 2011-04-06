@@ -19,17 +19,18 @@ class RemoveLineageCommand : public Command {
 		RemoveLineageCommand(string);
 		RemoveLineageCommand();
 		~RemoveLineageCommand(){};
-		vector<string> getRequiredParameters();
-		vector<string> getValidParameters();
-		vector<string> getRequiredFiles();
-		map<string, vector<string> > getOutputFiles() { return outputTypes; }
-		int execute();
-		void help();	
-		
+	
+		vector<string> setParameters();
+		string getCommandName()			{ return "remove.lineage";			}
+		string getCommandCategory()		{ return "Phylotype Analysis";		}
+		string getHelpString();	
+	
+		int execute(); 
+		void help() { m->mothurOut(getHelpString()); }	
+	
 	private:
 		set<string> names;
 		vector<string> outputNames;
-		map<string, vector<string> > outputTypes;
 		string fastafile, namefile, groupfile, alignfile, listfile, taxfile, outputDir, taxons;
 		bool abort, dups;
 		

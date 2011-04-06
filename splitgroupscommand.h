@@ -25,21 +25,21 @@ class SplitGroupCommand : public Command {
 public:
 	SplitGroupCommand(string);	
 	SplitGroupCommand();
-	~SplitGroupCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();	
-	void help();
-
+	~SplitGroupCommand() {}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "split.group";				}
+	string getCommandCategory()		{ return "Sequence Processing";		}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
 	int readNames(); 
 	int splitFasta(); 
 	
 	vector<string> outputNames;
-	map<string, vector<string> > outputTypes;
 	map<string, vector<string> > nameMap;
 	map<string, vector<string> >::iterator itNames;
 	GroupMap* groupMap;

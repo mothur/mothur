@@ -14,21 +14,51 @@
 #include "sabundvector.hpp"
 
 //**********************************************************************************************************************
-vector<string> PhylotypeCommand::getValidParameters(){	
+vector<string> PhylotypeCommand::setParameters(){	
 	try {
-		string Array[] =  {"taxonomy","cutoff","label","name","outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(ptaxonomy);
+		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
+		CommandParameter pcutoff("cutoff", "Number", "", "-1", "", "", "",false,false); parameters.push_back(pcutoff);
+		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "PhylotypeCommand", "getValidParameters");
+		m->errorOut(e, "PhylotypeCommand", "setParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
+string PhylotypeCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The phylotype command reads a taxonomy file and outputs a .list, .rabund and .sabund file. \n";
+		helpString += "The phylotype command parameter options are taxonomy, cutoff and label. The taxonomy parameter is required.\n";
+		helpString += "The cutoff parameter allows you to specify the level you want to stop at.  The default is the highest level in your taxonomy file. \n";
+		helpString += "For example: taxonomy = Bacteria;Bacteroidetes-Chlorobi;Bacteroidetes; - cutoff=2, would truncate the taxonomy to Bacteria;Bacteroidetes-Chlorobi; \n";
+		helpString += "For the cutoff parameter levels count up from the root of the phylotree. This enables you to look at the grouping down to a specific resolution, say the genus level.\n";
+		helpString += "The label parameter allows you to specify which level you would like, and are separated by dashes.  The default all levels in your taxonomy file. \n";
+		helpString += "For the label parameter, levels count down from the root to keep the output similiar to mothur's other commands which report information from finer resolution to coarser resolutions.\n";
+		helpString += "The phylotype command should be in the following format: \n";
+		helpString += "phylotype(taxonomy=yourTaxonomyFile, cutoff=yourCutoff, label=yourLabels) \n";
+		helpString += "Eaxample: phylotype(taxonomy=amazon.taxonomy, cutoff=5, label=1-3-5).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PhylotypeCommand", "getHelpString");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
 PhylotypeCommand::PhylotypeCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["list"] = tempOutNames;
 		outputTypes["sabund"] = tempOutNames;
@@ -36,29 +66,6 @@ PhylotypeCommand::PhylotypeCommand(){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PhylotypeCommand", "PhylotypeCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> PhylotypeCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"taxonomy"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PhylotypeCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> PhylotypeCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PhylotypeCommand", "getRequiredFiles");
 		exit(1);
 	}
 }
@@ -71,10 +78,7 @@ PhylotypeCommand::PhylotypeCommand(string option)  {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			
-			//valid paramters for this command
-			string AlignArray[] =  {"taxonomy","cutoff","label","name","outputdir","inputdir"};
-			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string, string> parameters = parser.getParameters(); 
@@ -117,9 +121,12 @@ PhylotypeCommand::PhylotypeCommand(string option)  {
 
 			taxonomyFileName = validParameter.validFile(parameters, "taxonomy", true);
 			if (taxonomyFileName == "not found") { 
-				m->mothurOut("taxonomy is a required parameter for the phylotype command."); 
-				m->mothurOutEndLine();
-				abort = true; 
+				taxonomyFileName = m->getTaxonomyFile(); 
+				if (taxonomyFileName != "") {  m->mothurOut("Using " + taxonomyFileName + " as input file for the taxonomy parameter."); m->mothurOutEndLine(); }
+				else { 
+					m->mothurOut("No valid current files. taxonomy is a required parameter."); m->mothurOutEndLine(); 
+					abort = true; 
+				}
 			}else if (taxonomyFileName == "not open") { abort = true; }	
 			
 			namefile = validParameter.validFile(parameters, "name", true);
@@ -151,30 +158,6 @@ PhylotypeCommand::PhylotypeCommand(string option)  {
 		exit(1);
 	}
 }
-/**********************************************************************************************************************/
-
-void PhylotypeCommand::help(){
-	try {
-		m->mothurOut("The phylotype command reads a taxonomy file and outputs a .list, .rabund and .sabund file. \n");
-		m->mothurOut("The phylotype command parameter options are taxonomy, cutoff and label. The taxonomy parameter is required.\n");
-		m->mothurOut("The cutoff parameter allows you to specify the level you want to stop at.  The default is the highest level in your taxonomy file. \n");
-		m->mothurOut("For example: taxonomy = Bacteria;Bacteroidetes-Chlorobi;Bacteroidetes; - cutoff=2, would truncate the taxonomy to Bacteria;Bacteroidetes-Chlorobi; \n");
-		m->mothurOut("For the cutoff parameter levels count up from the root of the phylotree. This enables you to look at the grouping down to a specific resolution, say the genus level.\n");
-		m->mothurOut("The label parameter allows you to specify which level you would like, and are separated by dashes.  The default all levels in your taxonomy file. \n");
-		m->mothurOut("For the label parameter, levels count down from the root to keep the output similiar to mothur's other commands which report information from finer resolution to coarser resolutions.\n");
-		m->mothurOut("The phylotype command should be in the following format: \n");
-		m->mothurOut("phylotype(taxonomy=yourTaxonomyFile, cutoff=yourCutoff, label=yourLabels) \n");
-		m->mothurOut("Eaxample: phylotype(taxonomy=amazon.taxonomy, cutoff=5, label=1-3-5).\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PhylotypeCommand", "help");
-		exit(1);
-	}
-}
-/**********************************************************************************************************************/
-
-PhylotypeCommand::~PhylotypeCommand(){}
-
 /**********************************************************************************************************************/
 
 int PhylotypeCommand::execute(){

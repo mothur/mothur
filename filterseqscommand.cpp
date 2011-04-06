@@ -10,15 +10,49 @@
 #include "filterseqscommand.h"
 #include "sequence.hpp"
 
+
 //**********************************************************************************************************************
-vector<string> FilterSeqsCommand::getValidParameters(){	
+vector<string> FilterSeqsCommand::setParameters(){	
 	try {
-		string Array[] =  {"fasta", "trump", "soft", "hard", "vertical", "outputdir","inputdir", "processors"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
+		CommandParameter phard("hard", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(phard);
+		CommandParameter ptrump("trump", "String", "", "*", "", "", "",false,false); parameters.push_back(ptrump);
+		CommandParameter psoft("soft", "Number", "", "0", "", "", "",false,false); parameters.push_back(psoft);
+		CommandParameter pvertical("vertical", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pvertical);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "FilterSeqsCommand", "getValidParameters");
+		m->errorOut(e, "FilterSeqsCommand", "setParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string FilterSeqsCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The filter.seqs command reads a file containing sequences and creates a .filter and .filter.fasta file.\n";
+		helpString += "The filter.seqs command parameters are fasta, trump, soft, hard, processors and vertical. \n";
+		helpString += "The fasta parameter is required, unless you have a valid current fasta file. You may enter several fasta files to build the filter from and filter, by separating their names with -'s.\n";
+		helpString += "For example: fasta=abrecovery.fasta-amazon.fasta \n";
+		helpString += "The trump option will remove a column if the trump character is found at that position in any sequence of the alignment. Default=*, meaning no trump. \n";
+		helpString += "A soft mask removes any column where the dominant base (i.e. A, T, G, C, or U) does not occur in at least a designated percentage of sequences. Default=0.\n";
+		helpString += "The hard parameter allows you to enter a file containing the filter you want to use.\n";
+		helpString += "The vertical parameter removes columns where all sequences contain a gap character. The default is T.\n";
+		helpString += "The processors parameter allows you to specify the number of processors to use. The default is 1.\n";
+		helpString += "The filter.seqs command should be in the following format: \n";
+		helpString += "filter.seqs(fasta=yourFastaFile, trump=yourTrump) \n";
+		helpString += "Example filter.seqs(fasta=abrecovery.fasta, trump=.).\n";
+		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "FilterSeqsCommand", "getHelpString");
 		exit(1);
 	}
 }
@@ -26,35 +60,13 @@ vector<string> FilterSeqsCommand::getValidParameters(){
 FilterSeqsCommand::FilterSeqsCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
 		outputTypes["filter"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "FilterSeqsCommand", "FilterSeqsCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> FilterSeqsCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"fasta"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "FilterSeqsCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> FilterSeqsCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "FilterSeqsCommand", "getRequiredFiles");
 		exit(1);
 	}
 }
@@ -68,9 +80,7 @@ FilterSeqsCommand::FilterSeqsCommand(string option)  {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"fasta", "trump", "soft", "hard", "vertical", "outputdir","inputdir", "processors"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
@@ -112,7 +122,11 @@ FilterSeqsCommand::FilterSeqsCommand(string option)  {
 			
 			//check for required parameters
 			fasta = validParameter.validFile(parameters, "fasta", false);
-			if (fasta == "not found") { m->mothurOut("fasta is a required parameter for the filter.seqs command."); m->mothurOutEndLine(); abort = true;  }
+			if (fasta == "not found") { 				
+				fasta = m->getFastaFile(); 
+				if (fasta != "") { fastafileNames.push_back(fasta);  m->mothurOut("Using " + fasta + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}
 			else { 
 				m->splitAtDash(fasta, fastafileNames);
 				
@@ -189,7 +203,8 @@ FilterSeqsCommand::FilterSeqsCommand(string option)  {
 			temp = validParameter.validFile(parameters, "soft", false);				if (temp == "not found") { soft = 0; }
 			else {  soft = (float)atoi(temp.c_str()) / 100.0;  }
 			
-			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = "1";				}
+			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
+			m->setProcessors(temp);
 			convert(temp, processors); 
 			
 			vertical = validParameter.validFile(parameters, "vertical", false);		
@@ -207,33 +222,6 @@ FilterSeqsCommand::FilterSeqsCommand(string option)  {
 		exit(1);
 	}
 }
-
-//**********************************************************************************************************************
-
-void FilterSeqsCommand::help(){
-	try {
-				
-		m->mothurOut("The filter.seqs command reads a file containing sequences and creates a .filter and .filter.fasta file.\n");
-		m->mothurOut("The filter.seqs command parameters are fasta, trump, soft, hard, processors and vertical. \n");
-		m->mothurOut("The fasta parameter is required. You may enter several fasta files to build the filter from and filter, by separating their names with -'s.\n");
-		m->mothurOut("For example: fasta=abrecovery.fasta-amazon.fasta \n");
-		m->mothurOut("The trump parameter .... The default is ...\n");
-		m->mothurOut("The soft parameter .... The default is ....\n");
-		m->mothurOut("The hard parameter allows you to enter a file containing the filter you want to use.\n");
-		m->mothurOut("The vertical parameter removes columns where all sequences contain a gap character. The default is T.\n");
-		m->mothurOut("The processors parameter allows you to specify the number of processors to use. The default is 1.\n");
-		m->mothurOut("The filter.seqs command should be in the following format: \n");
-		m->mothurOut("filter.seqs(fasta=yourFastaFile, trump=yourTrump) \n");
-		m->mothurOut("Example filter.seqs(fasta=abrecovery.fasta, trump=.).\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "FilterSeqsCommand", "help");
-		exit(1);
-	}
-}
-
 /**************************************************************************************/
 
 int FilterSeqsCommand::execute() {	

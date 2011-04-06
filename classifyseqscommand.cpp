@@ -16,14 +16,71 @@
 
 
 //**********************************************************************************************************************
-vector<string> ClassifySeqsCommand::getValidParameters(){	
+vector<string> ClassifySeqsCommand::setParameters(){	
 	try {
-		string AlignArray[] =  {"template","fasta","name","group","search","ksize","method","processors","taxonomy","match","mismatch","gapopen","gapextend","numwanted","cutoff","probs","iters", "outputdir","inputdir"};
-		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(ptaxonomy);
+		CommandParameter ptemplate("reference", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(ptemplate);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
+		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
+		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pgroup);
+		CommandParameter psearch("search", "Multiple", "kmer-blast-suffix-distance", "kmer", "", "", "",false,false); parameters.push_back(psearch);
+		CommandParameter pksize("ksize", "Number", "", "8", "", "", "",false,false); parameters.push_back(pksize);
+		CommandParameter pmethod("method", "Multiple", "bayesian-knn", "bayesian", "", "", "",false,false); parameters.push_back(pmethod);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
+		CommandParameter pmatch("match", "Number", "", "1.0", "", "", "",false,false); parameters.push_back(pmatch);
+		CommandParameter pmismatch("mismatch", "Number", "", "-1.0", "", "", "",false,false); parameters.push_back(pmismatch);
+		CommandParameter pgapopen("gapopen", "Number", "", "-2.0", "", "", "",false,false); parameters.push_back(pgapopen);
+		CommandParameter pgapextend("gapextend", "Number", "", "-1.0", "", "", "",false,false); parameters.push_back(pgapextend);
+		CommandParameter pcutoff("cutoff", "Number", "", "0", "", "", "",false,true); parameters.push_back(pcutoff);
+		CommandParameter pprobs("probs", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pprobs);
+		CommandParameter piters("iters", "Number", "", "100", "", "", "",false,true); parameters.push_back(piters);
+		CommandParameter pnumwanted("numwanted", "Number", "", "10", "", "", "",false,true); parameters.push_back(pnumwanted);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ClassifySeqsCommand", "getValidParameters");
+		m->errorOut(e, "ClassifySeqsCommand", "setParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string ClassifySeqsCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The classify.seqs command reads a fasta file containing sequences and creates a .taxonomy file and a .tax.summary file.\n";
+		helpString += "The classify.seqs command parameters are reference, fasta, name, search, ksize, method, taxonomy, processors, match, mismatch, gapopen, gapextend, numwanted and probs.\n";
+		helpString += "The reference, fasta and taxonomy parameters are required. You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amzon.fasta \n";
+		helpString += "The search parameter allows you to specify the method to find most similar template.  Your options are: suffix, kmer, blast and distance. The default is kmer.\n";
+		helpString += "The name parameter allows you add a names file with your fasta file, if you enter multiple fasta files, you must enter matching names files for them.\n";
+		helpString += "The group parameter allows you add a group file so you can have the summary totals broken up by group.\n";
+		helpString += "The method parameter allows you to specify classification method to use.  Your options are: bayesian and knn. The default is bayesian.\n";
+		helpString += "The ksize parameter allows you to specify the kmer size for finding most similar template to candidate.  The default is 8.\n";
+		helpString += "The processors parameter allows you to specify the number of processors to use. The default is 1.\n";
+#ifdef USE_MPI
+		helpString += "When using MPI, the processors parameter is set to the number of MPI processes running. \n";
+#endif
+		helpString += "The match parameter allows you to specify the bonus for having the same base. The default is 1.0.\n";
+		helpString += "The mistmatch parameter allows you to specify the penalty for having different bases.  The default is -1.0.\n";
+		helpString += "The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -2.0.\n";
+		helpString += "The gapextend parameter allows you to specify the penalty for extending a gap in an alignment.  The default is -1.0.\n";
+		helpString += "The numwanted parameter allows you to specify the number of sequence matches you want with the knn method.  The default is 10.\n";
+		helpString += "The cutoff parameter allows you to specify a bootstrap confidence threshold for your taxonomy.  The default is 0.\n";
+		helpString += "The probs parameter shuts off the bootstrapping results for the bayesian method. The default is true, meaning you want the bootstrapping to be shown.\n";
+		helpString += "The iters parameter allows you to specify how many iterations to do when calculating the bootstrap confidence score for your taxonomy with the bayesian method.  The default is 100.\n";
+		helpString += "The classify.seqs command should be in the following format: \n";
+		helpString += "classify.seqs(reference=yourTemplateFile, fasta=yourFastaFile, method=yourClassificationMethod, search=yourSearchmethod, ksize=yourKmerSize, taxonomy=yourTaxonomyFile, processors=yourProcessors) \n";
+		helpString += "Example classify.seqs(fasta=amazon.fasta, reference=core.filtered, method=knn, search=gotoh, ksize=8, processors=2)\n";
+		helpString += "The .taxonomy file consists of 2 columns: 1 = your sequence name, 2 = the taxonomy for your sequence. \n";
+		helpString += "The .tax.summary is a summary of the different taxonomies represented in your fasta file. \n";
+		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClassifySeqsCommand", "getHelpString");
 		exit(1);
 	}
 }
@@ -31,6 +88,7 @@ vector<string> ClassifySeqsCommand::getValidParameters(){
 ClassifySeqsCommand::ClassifySeqsCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["taxonomy"] = tempOutNames;
 		outputTypes["taxsummary"] = tempOutNames;
@@ -38,29 +96,6 @@ ClassifySeqsCommand::ClassifySeqsCommand(){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClassifySeqsCommand", "ClassifySeqsCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> ClassifySeqsCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"fasta","template","taxonomy"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClassifySeqsCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> ClassifySeqsCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClassifySeqsCommand", "getRequiredFiles");
 		exit(1);
 	}
 }
@@ -73,10 +108,7 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			
-			//valid paramters for this command
-			string AlignArray[] =  {"template","fasta","name","group","search","ksize","method","processors","taxonomy","match","mismatch","gapopen","gapextend","numwanted","cutoff","probs","iters", "outputdir","inputdir"};
-			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string, string> parameters = parser.getParameters(); 
@@ -103,12 +135,12 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
-				it = parameters.find("template");
+				it = parameters.find("reference");
 				//user has given a template file
 				if(it != parameters.end()){ 
 					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["template"] = inputDir + it->second;		}
+					if (path == "") {	parameters["reference"] = inputDir + it->second;		}
 				}
 				
 				it = parameters.find("taxonomy");
@@ -129,9 +161,9 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 			}
 
 			//check for required parameters
-			templateFileName = validParameter.validFile(parameters, "template", true);
+			templateFileName = validParameter.validFile(parameters, "reference", true);
 			if (templateFileName == "not found") { 
-				m->mothurOut("template is a required parameter for the classify.seqs command."); 
+				m->mothurOut("reference is a required parameter for the classify.seqs command."); 
 				m->mothurOutEndLine();
 				abort = true; 
 			}
@@ -139,7 +171,12 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 			
 						
 			fastaFileName = validParameter.validFile(parameters, "fasta", false);
-			if (fastaFileName == "not found") { m->mothurOut("fasta is a required parameter for the classify.seqs command."); m->mothurOutEndLine(); abort = true;  }
+			if (fastaFileName == "not found") { 				
+				//if there is a current fasta file, use it
+				string filename = m->getFastaFile(); 
+				if (filename != "") { fastaFileNames.push_back(filename); m->mothurOut("Using " + filename + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}
 			else { 
 				m->splitAtDash(fastaFileName, fastaFileNames);
 				
@@ -323,7 +360,8 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 			temp = validParameter.validFile(parameters, "ksize", false);		if (temp == "not found"){	temp = "8";				}
 			convert(temp, kmerSize); 
 			
-			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = "1";				}
+			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
+			m->setProcessors(temp);
 			convert(temp, processors); 
 			
 			search = validParameter.validFile(parameters, "search", false);		if (search == "not found"){	search = "kmer";		}
@@ -370,52 +408,11 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 }
 
 //**********************************************************************************************************************
-
 ClassifySeqsCommand::~ClassifySeqsCommand(){	
-
 	if (abort == false) {
 		for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
 	}
 }
-
-//**********************************************************************************************************************
-
-void ClassifySeqsCommand::help(){
-	try {
-		m->mothurOut("The classify.seqs command reads a fasta file containing sequences and creates a .taxonomy file and a .tax.summary file.\n");
-		m->mothurOut("The classify.seqs command parameters are template, fasta, name, search, ksize, method, taxonomy, processors, match, mismatch, gapopen, gapextend, numwanted and probs.\n");
-		m->mothurOut("The template, fasta and taxonomy parameters are required. You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amzon.fasta \n");
-		m->mothurOut("The search parameter allows you to specify the method to find most similar template.  Your options are: suffix, kmer, blast and distance. The default is kmer.\n");
-		m->mothurOut("The name parameter allows you add a names file with your fasta file, if you enter multiple fasta files, you must enter matching names files for them.\n");
-		m->mothurOut("The group parameter allows you add a group file so you can have the summary totals broken up by group.\n");
-		m->mothurOut("The method parameter allows you to specify classification method to use.  Your options are: bayesian and knn. The default is bayesian.\n");
-		m->mothurOut("The ksize parameter allows you to specify the kmer size for finding most similar template to candidate.  The default is 8.\n");
-		m->mothurOut("The processors parameter allows you to specify the number of processors to use. The default is 1.\n");
-		#ifdef USE_MPI
-		m->mothurOut("When using MPI, the processors parameter is set to the number of MPI processes running. \n");
-		#endif
-		m->mothurOut("The match parameter allows you to specify the bonus for having the same base. The default is 1.0.\n");
-		m->mothurOut("The mistmatch parameter allows you to specify the penalty for having different bases.  The default is -1.0.\n");
-		m->mothurOut("The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -2.0.\n");
-		m->mothurOut("The gapextend parameter allows you to specify the penalty for extending a gap in an alignment.  The default is -1.0.\n");
-		m->mothurOut("The numwanted parameter allows you to specify the number of sequence matches you want with the knn method.  The default is 10.\n");
-		m->mothurOut("The cutoff parameter allows you to specify a bootstrap confidence threshold for your taxonomy.  The default is 0.\n");
-		m->mothurOut("The probs parameter shuts off the bootstrapping results for the bayesian method. The default is true, meaning you want the bootstrapping to be shown.\n");
-		m->mothurOut("The iters parameter allows you to specify how many iterations to do when calculating the bootstrap confidence score for your taxonomy with the bayesian method.  The default is 100.\n");
-		m->mothurOut("The classify.seqs command should be in the following format: \n");
-		m->mothurOut("classify.seqs(template=yourTemplateFile, fasta=yourFastaFile, method=yourClassificationMethod, search=yourSearchmethod, ksize=yourKmerSize, taxonomy=yourTaxonomyFile, processors=yourProcessors) \n");
-		m->mothurOut("Example classify.seqs(fasta=amazon.fasta, template=core.filtered, method=knn, search=gotoh, ksize=8, processors=2)\n");
-		m->mothurOut("The .taxonomy file consists of 2 columns: 1 = your sequence name, 2 = the taxonomy for your sequence. \n");
-		m->mothurOut("The .tax.summary is a summary of the different taxonomies represented in your fasta file. \n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClassifySeqsCommand", "help");
-		exit(1);
-	}
-}
-
-
 //**********************************************************************************************************************
 
 int ClassifySeqsCommand::execute(){

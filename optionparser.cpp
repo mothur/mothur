@@ -21,11 +21,15 @@ OptionParser::OptionParser(string option) {
 			while((option.find_first_of(',') != -1)) {  //while there are parameters
 				m->splitAtComma(value, option);
 				m->splitAtEquals(key, value);
+				if ((key == "candidate") || (key == "query")) { key = "fasta"; }
+				if (key == "template") { key = "reference"; }
 				parameters[key] = value;
 			}
 			
 			//in case there is no comma and to get last parameter after comma
 			m->splitAtEquals(key, option);
+			if ((key == "candidate") || (key == "query")) { key = "fasta"; }
+			if (key == "template") { key = "reference"; }
 			parameters[key] = option;
 		}
 	}
@@ -49,7 +53,7 @@ map<string, string> OptionParser::getParameters() {
 			if (it->second == "current") {
 				
 				//look for file types
-				if ((it->first == "fasta") || (it->first == "candidate")) {
+				if (it->first == "fasta") {
 					it->second = m->getFastaFile();
 				}else if (it->first == "qfile") {
 					it->second = m->getQualFile();

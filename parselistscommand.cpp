@@ -10,50 +10,51 @@
 #include "parselistscommand.h"
 
 //**********************************************************************************************************************
-vector<string> ParseListCommand::getValidParameters(){	
+vector<string> ParseListCommand::setParameters(){	
 	try {
-		string Array[] =  {"list","group", "label", "outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(plist);
+		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pgroup);
+		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ParseListCommand", "getValidParameters");
+		m->errorOut(e, "ParseListCommand", "setParameters");
 		exit(1);
 	}
 }
-
+//**********************************************************************************************************************
+string ParseListCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The parse.list command reads a list and group file and generates a list file for each group in the groupfile. \n";
+		helpString += "The parse.list command parameters are list, group and label.\n";
+		helpString += "The list and group parameters are required.\n";
+		helpString += "The label parameter is used to read specific labels in your input you want to use.\n";
+		helpString += "The parse.list command should be used in the following format: parse.list(list=yourListFile, group=yourGroupFile, label=yourLabels).\n";
+		helpString += "Example: parse.list(list=abrecovery.fn.list, group=abrecovery.groups, label=0.03).\n";
+		helpString += "Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListfile).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ParseListCommand", "getHelpString");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 ParseListCommand::ParseListCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["list"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ParseListCommand", "ParseListCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> ParseListCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"list","group"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ParseListCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> ParseListCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ParseListCommand", "getRequiredFiles");
 		exit(1);
 	}
 }
@@ -67,9 +68,7 @@ ParseListCommand::ParseListCommand(string option)  {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"list","group", "label", "outputdir","inputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string, string> parameters = parser.getParameters();
@@ -115,12 +114,28 @@ ParseListCommand::ParseListCommand(string option)  {
 			//check for required parameters
 			listfile = validParameter.validFile(parameters, "list", true);
 			if (listfile == "not open") { abort = true; }
-			else if (listfile == "not found") { listfile = ""; }	
+			else if (listfile == "not found") { 
+				listfile = m->getListFile(); 
+				if (listfile != "") {  m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
+				else { 
+					m->mothurOut("No valid current list file. You must provide a list file."); m->mothurOutEndLine(); 
+					abort = true;
+						
+				}
+			}	
 			
 			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") { abort = true; }	
-			else if (groupfile == "not found") { groupfile = ""; }
-			else {  
+			else if (groupfile == "not found") { 
+				groupfile = m->getListFile(); 
+				if (groupfile != "") {  
+					m->mothurOut("Using " + groupfile + " as input file for the group parameter."); m->mothurOutEndLine(); 
+					groupMap = new GroupMap(groupfile);
+					
+					int error = groupMap->readMap();
+					if (error == 1) { abort = true; }
+				}else { m->mothurOut("No valid current group file. You must provide a group file."); m->mothurOutEndLine();  abort = true; } 
+			}else {  
 				groupMap = new GroupMap(groupfile);
 				
 				int error = groupMap->readMap();
@@ -146,25 +161,6 @@ ParseListCommand::ParseListCommand(string option)  {
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-void ParseListCommand::help(){
-	try {
-		m->mothurOut("The parse.list command reads a list and group file and generates a list file for each group in the groupfile. \n");
-		m->mothurOut("The parse.list command parameters are list, group and label.\n");
-		m->mothurOut("The list and group parameters are required.\n");
-		m->mothurOut("The label parameter is used to read specific labels in your input you want to use.\n");
-		m->mothurOut("The parse.list command should be used in the following format: parse.list(list=yourListFile, group=yourGroupFile, label=yourLabels).\n");
-		m->mothurOut("Example: parse.list(list=abrecovery.fn.list, group=abrecovery.groups, label=0.03).\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListfile).\n\n");
-
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ParseListCommand", "help");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-ParseListCommand::~ParseListCommand(){}
 //**********************************************************************************************************************
 int ParseListCommand::execute(){
 	try {

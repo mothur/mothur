@@ -20,18 +20,19 @@ class AnosimCommand : public Command {
 public:
 	AnosimCommand(string);
 	AnosimCommand();
-	~AnosimCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
+	~AnosimCommand(){}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "anosim";					}
+	string getCommandCategory()		{ return "Hypothesis Testing";		}
+	string getHelpString();	
+	
 	int execute();
-	void help();
+	void help() { m->mothurOut(getHelpString()); }
 	
 private:
 	bool abort;
 	GroupMap* designMap;
-	map<string, vector<string> > outputTypes;
 	string outputDir, inputDir, designFileName, phylipFileName;
 	
 	vector<vector<double> > convertToRanks(vector<vector<double> >);

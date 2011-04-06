@@ -11,36 +11,30 @@
  
 #include "command.hpp"
 #include "inputdata.h"
-#include "readotu.h"
 #include "sharedlistvector.h"
 #include "venn.h"
 #include "validcalculator.h"
-
-
-class GlobalData;
-
 
 class VennCommand : public Command {
 
 public:
 	VennCommand(string);
 	VennCommand();
-	~VennCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();
+	~VennCommand() {}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "venn";					}
+	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	GlobalData* globaldata;
-	ReadOTUFile* read;
 	InputData* input;
 	SharedListVector* SharedList;
 	Venn* venn;
 	vector<Calculator*> vennCalculators;	
-	ValidCalculators* validCalculator;
 	vector<SharedRAbundVector*> lookup;
 	set< set<int> > combosOfFour;
 	SAbundVector* sabund;
@@ -48,9 +42,8 @@ private:
 	
 	bool abort, allLines, nseqs, perm;
 	set<string> labels; //holds labels to be used
-	string format, groups, calc, label, outputDir;
+	string format, groups, calc, label, outputDir, sharedfile, listfile, inputfile;
 	vector<string> Estimators, Groups, outputNames;
-	map<string, vector<string> > outputTypes;
 	
 	set< set<int> > findCombinations(int);
 	int getCombos(set<int>, set< set<int> >&);

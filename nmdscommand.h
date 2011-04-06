@@ -32,13 +32,15 @@ class NMDSCommand : public Command {
 public:
 	NMDSCommand(string);	
 	NMDSCommand();
-	~NMDSCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();	
-	void help();
+	~NMDSCommand(){}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "nmds";					}
+	string getCommandCategory()		{ return "Hypothesis Testing";		}
+	string getHelpString();	
+	
+	int execute();
+	void help() { m->mothurOut(getHelpString()); }
 	
 private:
 	
@@ -47,7 +49,6 @@ private:
 	int maxdim, mindim, maxIters, iters;
 	double epsilon;
 	vector<string> outputNames;
-	map<string, vector<string> > outputTypes;
 	LinearAlgebra linearCalc;
 	
 	vector< vector<double> > nmdsCalc(vector< vector<double> >&, vector< vector<double> >&, double&);

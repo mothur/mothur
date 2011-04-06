@@ -11,28 +11,29 @@
  */
 
 #include "command.hpp"
-#include "readmatrix.hpp"
+#include "ordervector.hpp"
+#include "inputdata.h"
 
-class GlobalData;
 
 class GetlabelCommand : public Command {
 public:
 	GetlabelCommand(string);
-	GetlabelCommand(){}
-	~GetlabelCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();
+	GetlabelCommand();
+	~GetlabelCommand(){}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "get.label";				}
+	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
+	
 	
 private:
-	GlobalData* globaldata;
-	string filename;
+	string inputfile, listfile, rabundfile, sabundfile, sharedfile, format;
 	bool abort;
 	vector<string> outputNames;
-	map<string, vector<string> > outputTypes;
 };
 
 #endif

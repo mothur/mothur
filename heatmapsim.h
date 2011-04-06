@@ -12,7 +12,6 @@
 
 #include "sharedrabundvector.h"
 #include "datavector.hpp"
-#include "globaldata.hpp"
 #include "calculator.h"
 
 /***********************************************************************/
@@ -20,7 +19,7 @@
 class HeatMapSim {
 	
 	public:
-		HeatMapSim(string);
+		HeatMapSim(string, string);
 		~HeatMapSim(){};
 	
 		vector<string> getPic(vector<SharedRAbundVector*>, vector<Calculator*>);
@@ -29,8 +28,7 @@ class HeatMapSim {
 	private:
 		void printLegend(int, float);
 
-		GlobalData* globaldata;
-		string format, groupComb, outputDir;
+		string format, groupComb, outputDir, inputfile;
 		ofstream outsvg;
 		MothurOut* m;
 			

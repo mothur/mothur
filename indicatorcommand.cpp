@@ -10,34 +10,54 @@
 #include "indicatorcommand.h"
 #include "sharedutilities.h"
 
+
 //**********************************************************************************************************************
-vector<string> IndicatorCommand::getValidParameters(){	
+vector<string> IndicatorCommand::setParameters(){	
 	try {
-		string Array[] =  {"tree","shared","relabund","design","label","groups","outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter pdesign("design", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pdesign);
+		CommandParameter pshared("shared", "InputTypes", "", "", "SharedRel", "SharedRel", "none",false,false); parameters.push_back(pshared);	
+		CommandParameter prelabund("relabund", "InputTypes", "", "", "SharedRel", "SharedRel", "none",false,false); parameters.push_back(prelabund);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
+		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
+		CommandParameter ptree("tree", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(ptree);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "IndicatorCommand", "getValidParameters");
+		m->errorOut(e, "IndicatorCommand", "setParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-vector<string> IndicatorCommand::getRequiredParameters(){	
+string IndicatorCommand::getHelpString(){	
 	try {
-		string Array[] =  {"tree"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
+		string helpString = "";
+		helpString += "The indicator command reads a shared or relabund file and a tree file, and outputs a .indicator.tre and .indicator.summary file. \n";
+		helpString += "The new tree contains labels at each internal node.  The label is the node number so you can relate the tree to the summary file.\n";
+		helpString += "The summary file lists the indicator value for each OTU for each node.\n";
+		helpString += "The indicator command parameters are tree, groups, shared, relabund, design and label. The tree parameter is required as well as either shared or relabund.\n";
+		helpString += "The design parameter allows you to provide a design file to relate the tree to the shared or relabund file.\n";		
+		helpString += "The groups parameter allows you to specify which of the groups in your shared or relabund you would like analyzed, or if you provide a design file the groups in your design file.  The groups may be entered separated by dashes.\n";
+		helpString += "The label parameter indicates at what distance your tree relates to the shared or relabund.\n";
+		helpString += "The indicator command should be used in the following format: indicator(tree=test.tre, shared=test.shared, label=0.03)\n";
+		helpString += "Note: No spaces between parameter labels (i.e. tree), '=' and parameters (i.e.yourTreefile).\n\n"; 
+		return helpString;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "IndicatorCommand", "getRequiredParameters");
+		m->errorOut(e, "IndicatorCommand", "getHelpString");
 		exit(1);
 	}
 }
+
 //**********************************************************************************************************************
 IndicatorCommand::IndicatorCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["tree"] = tempOutNames;
 		outputTypes["summary"] = tempOutNames;
@@ -47,31 +67,16 @@ IndicatorCommand::IndicatorCommand(){
 		exit(1);
 	}
 }
-
-//**********************************************************************************************************************
-vector<string> IndicatorCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "IndicatorCommand", "getRequiredFiles");
-		exit(1);
-	}
-}
 //**********************************************************************************************************************
 IndicatorCommand::IndicatorCommand(string option)  {
 	try {
-		globaldata = GlobalData::getInstance();
 		abort = false; calledHelp = false;   
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"tree","shared","design","relabund","groups","label","outputdir","inputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string, string> parameters = parser.getParameters();
@@ -84,7 +89,7 @@ IndicatorCommand::IndicatorCommand(string option)  {
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
-			globaldata->newRead();
+			m->runParse = true;
 			
 			vector<string> tempOutNames;
 			outputTypes["tree"] = tempOutNames;
@@ -133,8 +138,11 @@ IndicatorCommand::IndicatorCommand(string option)  {
 			//check for required parameters
 			treefile = validParameter.validFile(parameters, "tree", true);
 			if (treefile == "not open") { abort = true; }
-			else if (treefile == "not found") { treefile = ""; m->mothurOut("tree is a required parameter for the indicator command."); m->mothurOutEndLine(); abort = true;  }	
-			else {  globaldata->setTreeFile(treefile);  globaldata->setFormat("tree"); 	}
+			else if (treefile == "not found") { 				//if there is a current design file, use it
+				treefile = m->getTreeFile(); 
+				if (treefile != "") { m->mothurOut("Using " + treefile + " as input file for the tree parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current tree file and the tree parameter is required."); m->mothurOutEndLine(); abort = true; }								
+			}	
 			
 			sharedfile = validParameter.validFile(parameters, "shared", true);
 			if (sharedfile == "not open") { abort = true; }
@@ -153,12 +161,25 @@ IndicatorCommand::IndicatorCommand(string option)  {
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = "";  Groups.push_back("all"); }
 			else { m->splitAtDash(groups, Groups);	}			
-			globaldata->Groups = Groups;
+			m->Groups = Groups;
 			
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; m->mothurOut("You did not provide a label, I will use the first label in your inputfile."); m->mothurOutEndLine(); label=""; }	
 			
-			if ((relabundfile == "") && (sharedfile == "")) { m->mothurOut("You must provide either a shared or relabund file."); m->mothurOutEndLine(); abort = true;  }
+			if ((relabundfile == "") && (sharedfile == "")) { 
+				//is there are current file available for either of these?
+				//give priority to shared, then relabund
+				sharedfile = m->getSharedFile(); 
+				if (sharedfile != "") {  inputFileName = sharedfile; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+				else { 
+					relabundfile = m->getRelAbundFile(); 
+					if (relabundfile != "") {  inputFileName = relabundfile; m->mothurOut("Using " + relabundfile + " as input file for the relabund parameter."); m->mothurOutEndLine(); }
+					else { 
+						m->mothurOut("No valid current files. You must provide a shared or relabund."); m->mothurOutEndLine(); 
+						abort = true;
+					}
+				}
+			}
 			
 			if ((relabundfile != "") && (sharedfile != "")) { m->mothurOut("You may not use both a shared and relabund file."); m->mothurOutEndLine(); abort = true;  }
 			
@@ -169,30 +190,6 @@ IndicatorCommand::IndicatorCommand(string option)  {
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-
-void IndicatorCommand::help(){
-	try {
-		m->mothurOut("The indicator command reads a shared or relabund file and a tree file, and outputs a .indicator.tre and .indicator.summary file. \n");
-		m->mothurOut("The new tree contains labels at each internal node.  The label is the node number so you can relate the tree to the summary file.\n");
-		m->mothurOut("The summary file lists the indicator value for each OTU for each node.\n");
-		m->mothurOut("The indicator command parameters are tree, groups, shared, relabund, design and label. The tree parameter is required as well as either shared or relabund.\n");
-		m->mothurOut("The design parameter allows you to provide a design file to relate the tree to the shared or relabund file.\n");		
-		m->mothurOut("The groups parameter allows you to specify which of the groups in your shared or relabund you would like analyzed, or if you provide a design file the groups in your design file.  The groups may be entered separated by dashes.\n");
-		m->mothurOut("The label parameter indicates at what distance your tree relates to the shared or relabund.\n");
-		m->mothurOut("The indicator command should be used in the following format: indicator(tree=test.tre, shared=test.shared, label=0.03)\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. tree), '=' and parameters (i.e.yourTreefile).\n\n"); 
-	}
-	catch(exception& e) {
-		m->errorOut(e, "IndicatorCommand", "help");	
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
-IndicatorCommand::~IndicatorCommand(){}
-
 //**********************************************************************************************************************
 
 int IndicatorCommand::execute(){
@@ -211,7 +208,7 @@ int IndicatorCommand::execute(){
 			delete util;
 			
 			//loop through the Groups and fill Globaldata's Groups with the design file info
-			globaldata->Groups = designMap->getNamesSeqs(Groups);
+			m->Groups = designMap->getNamesSeqs(Groups);
 		}
 	
 		/***************************************************/
@@ -228,41 +225,39 @@ int IndicatorCommand::execute(){
 		}
 		
 		//reset Globaldatas groups if needed
-		if (designfile != "") { globaldata->Groups = Groups; }
+		if (designfile != "") { m->Groups = Groups; }
 			
 		/***************************************************/
 		//    reading tree info							   //
 		/***************************************************/
 		string groupfile = ""; 
 		Tree* tree = new Tree(treefile); delete tree;  //extracts names from tree to make faked out groupmap
-	 
-		globaldata->setGroupFile(groupfile); 
 		treeMap = new TreeMap();
 		bool mismatch = false;
 			
-		for (int i = 0; i < globaldata->Treenames.size(); i++) { 
+		for (int i = 0; i < m->Treenames.size(); i++) { 
 			//sanity check - is this a group that is not in the sharedfile?
 			if (designfile == "") {
-				if (!(m->inUsersGroups(globaldata->Treenames[i], globaldata->gGroupmap->namesOfGroups))) {
-					m->mothurOut("[ERROR]: " + globaldata->Treenames[i] + " is not a group in your shared or relabund file."); m->mothurOutEndLine();
+				if (!(m->inUsersGroups(m->Treenames[i], m->namesOfGroups))) {
+					m->mothurOut("[ERROR]: " + m->Treenames[i] + " is not a group in your shared or relabund file."); m->mothurOutEndLine();
 					mismatch = true;
 				}
-				treeMap->addSeq(globaldata->Treenames[i], "Group1"); 
+				treeMap->addSeq(m->Treenames[i], "Group1"); 
 			}else{
-				vector<string> myGroups; myGroups.push_back(globaldata->Treenames[i]);
+				vector<string> myGroups; myGroups.push_back(m->Treenames[i]);
 				vector<string> myNames = designMap->getNamesSeqs(myGroups);
 				
 				for(int k = 0; k < myNames.size(); k++) {
-					if (!(m->inUsersGroups(myNames[k], globaldata->gGroupmap->namesOfGroups))) {
+					if (!(m->inUsersGroups(myNames[k], m->namesOfGroups))) {
 						m->mothurOut("[ERROR]: " + myNames[k] + " is not a group in your shared or relabund file."); m->mothurOutEndLine();
 						mismatch = true;
 					}
 				}
-				treeMap->addSeq(globaldata->Treenames[i], "Group1");
+				treeMap->addSeq(m->Treenames[i], "Group1");
 			}
 		}
 		
-		if ((designfile != "") && (globaldata->Treenames.size() != Groups.size())) { m->mothurOut("[ERROR]: You design file does not match your tree, aborting."); m->mothurOutEndLine(); mismatch = true; }
+		if ((designfile != "") && (m->Treenames.size() != Groups.size())) { m->mothurOut("[ERROR]: You design file does not match your tree, aborting."); m->mothurOutEndLine(); mismatch = true; }
 				
 		if (mismatch) { //cleanup and exit
 			if (designfile != "") { delete designMap; }
@@ -271,15 +266,13 @@ int IndicatorCommand::execute(){
 			delete treeMap;
 			return 0;
 		}
-			
-		globaldata->gTreemap = treeMap;
 	 
 		read = new ReadNewickTree(treefile);
-		int readOk = read->read(); 
+		int readOk = read->read(treeMap); 
 		
-		if (readOk != 0) { m->mothurOut("Read Terminated."); m->mothurOutEndLine(); globaldata->gTree.clear(); delete globaldata->gTreemap; delete read; return 0; }
+		if (readOk != 0) { m->mothurOut("Read Terminated."); m->mothurOutEndLine(); delete treeMap; delete read; return 0; }
 		
-		vector<Tree*> T = globaldata->gTree;
+		vector<Tree*> T = read->getTrees();
 		
 		delete read;
 		
@@ -287,7 +280,7 @@ int IndicatorCommand::execute(){
 			if (designfile != "") { delete designMap; }
 			if (sharedfile != "") {  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } }
 			else { for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  } }
-			for (int i = 0; i < T.size(); i++) {  delete T[i];  } globaldata->gTree.clear(); delete globaldata->gTreemap; return 0; 
+			for (int i = 0; i < T.size(); i++) {  delete T[i];  }  delete treeMap; return 0; 
 		}
 			
 		T[0]->assembleTree();
@@ -295,20 +288,20 @@ int IndicatorCommand::execute(){
 		/***************************************************/
 		//    create ouptut tree - respecting pickedGroups //
 		/***************************************************/
-		Tree* outputTree = new Tree(globaldata->Groups.size()); 
+		Tree* outputTree = new Tree(m->Groups.size(), treeMap); 
 		
-		outputTree->getSubTree(T[0], globaldata->Groups);
+		outputTree->getSubTree(T[0], m->Groups);
 		outputTree->assembleTree();
 			
 		//no longer need original tree, we have output tree to use and label
-		for (int i = 0; i < T.size(); i++) {  delete T[i];  } globaldata->gTree.clear();
+		for (int i = 0; i < T.size(); i++) {  delete T[i];  } 
 		
 				
 		if (m->control_pressed) { 
 			if (designfile != "") { delete designMap; }
 			if (sharedfile != "") {  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } }
 			else { for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  } }
-			delete outputTree; delete globaldata->gTreemap;  return 0; 
+			delete outputTree; delete treeMap;  return 0; 
 		}
 		
 		/***************************************************/
@@ -317,13 +310,12 @@ int IndicatorCommand::execute(){
 		GetIndicatorSpecies(outputTree);
 		
 		if (designfile != "") { delete designMap; }
+		if (sharedfile != "") {  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } }
+		else { for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  } }
+		delete outputTree; delete treeMap;
 		
-		if (m->control_pressed) {  
-			if (sharedfile != "") {  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } }
-			else { for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  } }
-			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	}
-			delete outputTree; delete globaldata->gTreemap;  return 0; 
-		}
+		
+		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} return 0; }
 		
 		//set tree file as new current treefile
 		string current = "";

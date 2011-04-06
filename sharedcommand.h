@@ -12,7 +12,6 @@
 #include "command.hpp"
 #include "sharedlistvector.h"
 #include "inputdata.h"
-#include "readotu.h"
 
 /* The shared() command:
 	The shared command can only be executed after a successful read.shared command.  
@@ -21,20 +20,20 @@
 	There are no shared command parameters.  The shared command should be in the following format: shared(). */
 
 
-class GlobalData;
-
 class SharedCommand : public Command {
 	
 public:
 	SharedCommand(string);	
 	SharedCommand();
 	~SharedCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();	
-	void help() {}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "make.shared";				}
+	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
 	void printSharedData(vector<SharedRAbundVector*>);
@@ -42,17 +41,15 @@ private:
 	int readOrderFile();
 	bool isValidGroup(string, vector<string>);
 	int eliminateZeroOTUS(vector<SharedRAbundVector*>&);
-	map<string, vector<string> > outputTypes;
 	
-	GlobalData* globaldata;
-	ReadOTUFile* read;
 	SharedListVector* SharedList;
 	InputData* input;
 	GroupMap* groupMap;
-	vector<string> groups, outputNames, order;
+	vector<string> Groups, outputNames, order;
+	set<string> labels;
 	ofstream out;
-	string filename, fileroot, outputDir;
-	bool firsttime, pickedGroups;
+	string filename, fileroot, outputDir, listfile, groupfile, ordergroupfile;
+	bool firsttime, pickedGroups, abort, allLines;
 	map<string, ofstream*> filehandles;
 	map<string, ofstream*>::iterator it3;
 

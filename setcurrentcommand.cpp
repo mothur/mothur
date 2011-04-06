@@ -10,47 +10,67 @@
 #include "setcurrentcommand.h"
 
 //**********************************************************************************************************************
-vector<string> SetCurrentCommand::getValidParameters(){	
+vector<string> SetCurrentCommand::setParameters(){	
 	try {
-		string Array[] =  {"outputdir","inputdir","clear", "phylip", "column", "list","rabund","sabund","name","group",
-			"design","order","tree","shared","ordergroup","relabund","fasta","qfile","sff","oligos","accnos","taxonomy"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			
+		CommandParameter pphylip("phylip", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pphylip);
+		CommandParameter pcolumn("column", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pcolumn);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pfasta);
+		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
+		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pgroup);
+		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(plist);
+		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(ptaxonomy);
+		CommandParameter pqfile("qfile", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pqfile);
+		CommandParameter paccnos("accnos", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(paccnos);		
+		CommandParameter prabund("rabund", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(prabund);
+		CommandParameter psabund("sabund", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(psabund);
+		CommandParameter pdesign("design", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pdesign);
+		CommandParameter porder("order", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(porder);
+		CommandParameter ptree("tree", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(ptree);
+		CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pshared);
+		CommandParameter pordergroup("ordergroup", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pordergroup);
+		CommandParameter prelabund("relabund", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(prelabund);
+		CommandParameter psff("sff", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(psff);
+		CommandParameter poligos("oligos", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(poligos);
+		CommandParameter pclear("clear", "String", "", "", "", "", "",false,false); parameters.push_back(pclear);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "SetCurrentCommand", "getValidParameters");
+		m->errorOut(e, "SetCurrentCommand", "setParameters");
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
+string SetCurrentCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The set.current command allows you to set the current files saved by mothur.\n";
+		helpString += "The set.current command parameters are: clear, phylip, column, list, rabund, sabund, name, group, design, order, tree, shared, ordergroup, relabund, fasta, qfile, sff, oligos, accnos, taxonomy.\n";
+		helpString += "The clear paramter is used to indicate which file types you would like to clear values for, multiple types can be separated by dashes.\n";
+		helpString += "The set.current command should be in the following format: \n";
+		helpString += "set.current(fasta=yourFastaFile) or set.current(fasta=amazon.fasta, clear=name-accnos)\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SetCurrentCommand", "getHelpString");
+		exit(1);
+	}
+}
+
+
 //**********************************************************************************************************************
 SetCurrentCommand::SetCurrentCommand(){	
 	try {
-		abort = true; calledHelp = true; 
+		abort = true; calledHelp = true;
+		setParameters();
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SetCurrentCommand", "SetCurrentCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> SetCurrentCommand::getRequiredParameters(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SetCurrentCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> SetCurrentCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SetCurrentCommand", "getRequiredFiles");
 		exit(1);
 	}
 }
@@ -64,9 +84,7 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"outputdir","inputdir","clear", "phylip", "column", "list","rabund","sabund","name","group",
-				"design","order","tree","shared","ordergroup","relabund","fasta","qfile","sff","oligos","accnos","taxonomy"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
@@ -352,25 +370,6 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-
-void SetCurrentCommand::help(){
-	try {
-		m->mothurOut("The set.current command allows you to set the current files saved by mothur.\n");
-		m->mothurOut("The set.current command parameters are: clear, phylip, column, list, rabund, sabund, name, group, design, order, tree, shared, ordergroup, relabund, fasta, qfile, sff, oligos, accnos, taxonomy.\n");
-		m->mothurOut("The clear paramter is used to indicate which file types you would like to clear values for, multiple types can be separated by dashes.\n");
-		m->mothurOut("The set.current command should be in the following format: \n");
-		m->mothurOut("set.current(fasta=yourFastaFile) or set.current(fasta=amazon.fasta, clear=name-accnos)\n");
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SetCurrentCommand", "help");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-SetCurrentCommand::~SetCurrentCommand(){}
 //**********************************************************************************************************************
 
 int SetCurrentCommand::execute(){

@@ -12,7 +12,6 @@
 
 #include "command.hpp"
 #include "inputdata.h"
-#include "readotu.h"
 #include "sabundvector.hpp"
 
 /* 
@@ -28,22 +27,20 @@ public:
 	CatchAllCommand(string);
 	CatchAllCommand();
 	~CatchAllCommand() {}
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map< string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();	
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "catchall";			}
+	string getCommandCategory()		{ return "Hypothesis Testing";	}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-
-	GlobalData* globaldata;
-	
-	string outputDir, sharedfile, sabundfile, rabundfile, listfile, format, path, savedOutputDir;
+	string outputDir, sharedfile, sabundfile, format, path, savedOutputDir;
 	bool abort, allLines;
 	set<string> labels;
 	vector<string> outputNames;
-	map< string, vector<string> > outputTypes;
 	vector<string> groups;
 	
 	string process(SAbundVector*, string);

@@ -12,22 +12,48 @@
 //sorts lowest to highest
 inline bool compareSharedRabunds(SharedRAbundVector* left, SharedRAbundVector* right){
 	return (left->getGroup() < right->getGroup());	
-} 
+}
 //**********************************************************************************************************************
-vector<string> SharedCommand::getValidParameters(){	
+vector<string> SharedCommand::setParameters(){	
 	try {
-		vector<string> myArray; 
+		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(plist);
+		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pgroup);
+		CommandParameter pordergroup("ordergroup", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pordergroup);
+		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "SharedCommand", "getValidParameters");
+		m->errorOut(e, "SharedCommand", "setParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string SharedCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The make.shared command reads a list and group file and creates a shared file, as well as a rabund file for each group.\n";
+		helpString += "The make.shared command parameters are list, group, ordergroup, groups and label. list and group are required unless a current file is available.\n";
+		helpString += "The groups parameter allows you to indicate which groups you want to include, group names should be separated by dashes. ex. groups=A-B-C. Default is all groups in your groupfile.\n";
+		helpString += "The label parameter allows you to indicate which labels you want to include, label names should be separated by dashes. Default is all labels in your list file.\n";
+		helpString += "The ordergroup parameter allows you to indicate the order of the groups in the sharedfile, by default the groups are listed alphabetically.\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SharedCommand", "getHelpString");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
 SharedCommand::SharedCommand(){	
-	try {		
-		
+	try {
+		abort = true; calledHelp = true; 
+		setParameters();
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["rabund"] = tempOutNames;
@@ -39,77 +65,152 @@ SharedCommand::SharedCommand(){
 	}
 }
 //**********************************************************************************************************************
-vector<string> SharedCommand::getRequiredParameters(){	
+SharedCommand::SharedCommand(string option)  {
 	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SharedCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> SharedCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SharedCommand", "getRequiredFiles");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-
-SharedCommand::SharedCommand(string o) : outputDir(o) {
-	try {
-		globaldata = GlobalData::getInstance();
+		abort = false; calledHelp = false;   
+		allLines = 1;
 		
-		//initialize outputTypes
-		vector<string> tempOutNames;
-		outputTypes["rabund"] = tempOutNames;
-		outputTypes["shared"] = tempOutNames;
+		//allow user to run help
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
-		//getting output filename
-		filename = globaldata->inputFileName;
-		if (outputDir == "") { outputDir += m->hasPath(filename); }
-		
-		filename = outputDir + m->getRootName(m->getSimpleName(filename));
-		filename = filename + "shared";
-		outputTypes["shared"].push_back(filename);
-		
-		m->openOutputFile(filename, out);
-		pickedGroups = false;
-		
-		groupMap = globaldata->gGroupmap;
-		
-		//if hte user has not specified any groups then use them all
-		if (globaldata->Groups.size() == 0) {
-			groups = groupMap->namesOfGroups;
-		}else{ //they have specified groups
-			groups = globaldata->Groups;
-			pickedGroups = true;
+		else {
+			
+			 //valid paramters for this command
+			 string Array[] =  {"list","label","group","groups","ordergroup","outputdir","inputdir"};
+			 vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			 
+			 OptionParser parser(option);
+			 map<string, string> parameters = parser.getParameters();
+			 
+			 ValidParameters validParameter;
+			 map<string, string>::iterator it;
+			 
+			 //check to make sure all parameters are valid for command
+			 for (it = parameters.begin(); it != parameters.end(); it++) { 
+				 if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+			 }
+			 
+			 //if the user changes the input directory command factory will send this info to us in the output parameter 
+			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			 if (inputDir == "not found"){	inputDir = "";		}
+			 else {
+				 string path;
+				 it = parameters.find("list");
+				 //user has given a template file
+				 if(it != parameters.end()){ 
+					 path = m->hasPath(it->second);
+					 //if the user has not given a path then, add inputdir. else leave path alone.
+					 if (path == "") {	parameters["list"] = inputDir + it->second;		}
+				 }
+			 
+				 it = parameters.find("group");
+				 //user has given a template file
+				 if(it != parameters.end()){ 
+					 path = m->hasPath(it->second);
+					 //if the user has not given a path then, add inputdir. else leave path alone.
+					 if (path == "") {	parameters["group"] = inputDir + it->second;		}
+				 }
+			 
+				 it = parameters.find("ordergroup");
+				 //user has given a template file
+				 if(it != parameters.end()){ 
+					 path = m->hasPath(it->second);
+					 //if the user has not given a path then, add inputdir. else leave path alone.
+					 if (path == "") {	parameters["ordergroup"] = inputDir + it->second;		}
+				 }
+			 }
+			 
+			 
+			 //if the user changes the output directory command factory will send this info to us in the output parameter 
+			 outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
+			 
+			 //check for required parameters
+			 listfile = validParameter.validFile(parameters, "list", true);
+			 if (listfile == "not open") { abort = true; }
+			 else if (listfile == "not found") { 
+				 listfile = m->getListFile(); 
+				 if (listfile != "") { m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
+				 else { 	m->mothurOut("You have no current list file and the list parameter is required."); m->mothurOutEndLine(); abort = true; }
+			 }	
+							
+			 ordergroupfile = validParameter.validFile(parameters, "ordergroup", true);
+			 if (ordergroupfile == "not open") { abort = true; }	
+			 else if (ordergroupfile == "not found") { ordergroupfile = ""; }
+			 			 
+			 groupfile = validParameter.validFile(parameters, "group", true);
+			 if (groupfile == "not open") { abort = true; }	
+			 else if (groupfile == "not found") { 
+				 groupfile = m->getGroupFile(); 
+				 if (groupfile != "") { 
+					 m->mothurOut("Using " + groupfile + " as input file for the group parameter."); m->mothurOutEndLine();
+					 groupMap = new GroupMap(groupfile);
+					 
+					 int error = groupMap->readMap();
+					 if (error == 1) { abort = true; }
+					 m->namesOfGroups = groupMap->namesOfGroups;
+				 }
+				 else { 	m->mothurOut("You have no current group file and the group parameter is required."); m->mothurOutEndLine(); abort = true; }
+			 }else {  
+				 groupMap = new GroupMap(groupfile);
+			 
+				 int error = groupMap->readMap();
+				 if (error == 1) { abort = true; }
+				 m->namesOfGroups = groupMap->namesOfGroups;
+				 m->setGroupFile(groupfile);
+			 }
+			 
+			 string groups = validParameter.validFile(parameters, "groups", false);			
+			 if (groups == "not found") { groups = ""; }
+			 else { 
+				 m->splitAtDash(groups, Groups);
+				 m->Groups = Groups;
+			 }
+			 
+			 //check for optional parameter and set defaults
+			 // ...at some point should added some additional type checking...
+			 string label = validParameter.validFile(parameters, "label", false);			
+			 if (label == "not found") { label = ""; }
+			 else { 
+				 if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
+				 else { allLines = 1;  }
+			 }
+			
+			//getting output filename
+			filename = listfile;
+			if (outputDir == "") { outputDir += m->hasPath(filename); }
+			
+			filename = outputDir + m->getRootName(m->getSimpleName(filename));
+			filename = filename + "shared";
+			outputTypes["shared"].push_back(filename);
+			
+			m->openOutputFile(filename, out);
+			pickedGroups = false;
+						
+			//if hte user has not specified any groups then use them all
+			if (Groups.size() == 0) {
+				Groups = groupMap->namesOfGroups; m->Groups = Groups;
+			}
+			
+			//fill filehandles with neccessary ofstreams
+			int i;
+			ofstream* temp;
+			for (i=0; i<Groups.size(); i++) {
+				temp = new ofstream;
+				filehandles[Groups[i]] = temp;
+			}
+			
+			//set fileroot
+			fileroot = outputDir + m->getRootName(m->getSimpleName(listfile));
+			
+			//clears file before we start to write to it below
+			for (int i=0; i<Groups.size(); i++) {
+				remove((fileroot + Groups[i] + ".rabund").c_str());
+				outputNames.push_back((fileroot + Groups[i] + ".rabund"));
+				outputTypes["rabund"].push_back((fileroot + Groups[i] + ".rabund"));
+			}
+			
 		}
 		
-		//fill filehandles with neccessary ofstreams
-		int i;
-		ofstream* temp;
-		for (i=0; i<groups.size(); i++) {
-			temp = new ofstream;
-			filehandles[groups[i]] = temp;
-		}
-		
-		//set fileroot
-		fileroot = outputDir + m->getRootName(m->getSimpleName(globaldata->getListFile()));
-		
-		//clears file before we start to write to it below
-		for (int i=0; i<groups.size(); i++) {
-			remove((fileroot + groups[i] + ".rabund").c_str());
-			outputNames.push_back((fileroot + groups[i] + ".rabund"));
-			outputTypes["rabund"].push_back((fileroot + groups[i] + ".rabund"));
-		}
-
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SharedCommand", "SharedCommand");
@@ -126,27 +227,22 @@ int SharedCommand::execute(){
 		//errorOff = "";
 		
 		//if user provided an order file containing the order the shared file should be in read it
-		if (globaldata->getOrderGroupFile() != "") { readOrderFile(); }
+		if (ordergroupfile != "") { readOrderFile(); }
 		
-		//read in listfile
-		read = new ReadOTUFile(globaldata->inputFileName);	
-		read->read(&*globaldata); 
-		delete read;
-
-		input = globaldata->ginput;
-		SharedList = globaldata->gSharedList;
+		input = new InputData(listfile, "shared");
+		SharedList = input->getSharedListVector();
 		string lastLabel = SharedList->getLabel();
 		vector<SharedRAbundVector*> lookup; 
 		
 		if (m->control_pressed) { 
-			delete input; delete SharedList; globaldata->ginput = NULL; globaldata->gSharedList = NULL; 
+			delete input; delete SharedList; delete groupMap; 
 			for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {  delete it3->second;  }
 			out.close(); remove(filename.c_str()); 
-			for (int i=0; i<groups.size(); i++) {  remove((fileroot + groups[i] + ".rabund").c_str());		}
-			return 1; 
+			for (int i=0; i<Groups.size(); i++) {  remove((fileroot + Groups[i] + ".rabund").c_str());		}
+			return 0; 
 		}
 				
-		if ((globaldata->Groups.size() == 0) && (SharedList->getNumSeqs() != groupMap->getNumSeqs())) {  //if the user has not specified any groups and their files don't match exit with error
+		if ((m->Groups.size() == 0) && (SharedList->getNumSeqs() != groupMap->getNumSeqs())) {  //if the user has not specified any groups and their files don't match exit with error
 			m->mothurOut("Your group file contains " + toString(groupMap->getNumSeqs()) + " sequences and list file contains " + toString(SharedList->getNumSeqs()) + " sequences. Please correct."); m->mothurOutEndLine(); 
 			
 			out.close();
@@ -158,22 +254,22 @@ int SharedCommand::execute(){
 			for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {
 				delete it3->second;
 			}
-			delete input;
-			globaldata->ginput = NULL;
-			delete SharedList;
-			globaldata->gSharedList = NULL;
+		
+			delete input; delete SharedList; delete groupMap; 
 			
-			return 1; 
+			return 0; 
 		}
 		
 		//if user has specified groups make new groupfile for them
-		if (globaldata->Groups.size() != 0) { //make new group file
+		if (m->Groups.size() != 0) { //make new group file
 			string groups = "";
-			for (int i = 0; i < globaldata->Groups.size(); i++) {
-				groups += globaldata->Groups[i] + ".";
-			}
+			if (m->Groups.size() < 4) {
+				for (int i = 0; i < m->Groups.size(); i++) {
+					groups += m->Groups[i] + ".";
+				}
+			}else { groups = "merge"; }
 		
-			string newGroupFile = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName)) + groups + "groups";
+			string newGroupFile = outputDir + m->getRootName(m->getSimpleName(listfile)) + groups + "groups";
 			ofstream outGroups;
 			m->openOutputFile(newGroupFile, outGroups);
 		
@@ -181,7 +277,7 @@ int SharedCommand::execute(){
 			string groupName;
 			for (int i = 0; i < names.size(); i++) {
 				groupName = groupMap->getGroup(names[i]);
-				if (isValidGroup(groupName, globaldata->Groups)) {
+				if (isValidGroup(groupName, m->Groups)) {
 					outGroups << names[i] << '\t' << groupName << endl;
 				}
 			}
@@ -190,18 +286,18 @@ int SharedCommand::execute(){
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
-		set<string> userLabels = globaldata->labels;	
+		set<string> userLabels = labels;	
 	
-		while((SharedList != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0))) {
+		while((SharedList != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			if (m->control_pressed) { 
-				delete input; delete SharedList; globaldata->ginput = NULL; globaldata->gSharedList = NULL; 
+				delete input; delete SharedList; delete groupMap;
 				for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {  delete it3->second;  }
 				out.close(); remove(filename.c_str()); 
-				for (int i=0; i<groups.size(); i++) {  remove((fileroot + groups[i] + ".rabund").c_str());		}
-				return 1; 
+				for (int i=0; i<Groups.size(); i++) {  remove((fileroot + Groups[i] + ".rabund").c_str());		}
+				return 0; 
 			}
 		
-			if(globaldata->allLines == 1 || globaldata->labels.count(SharedList->getLabel()) == 1){
+			if(allLines == 1 || labels.count(SharedList->getLabel()) == 1){
 					
 					lookup = SharedList->getSharedRAbundVector();
 					
@@ -211,12 +307,12 @@ int SharedCommand::execute(){
 					}
 					
 					if (m->control_pressed) { 
-						delete input; delete SharedList; globaldata->ginput = NULL; globaldata->gSharedList = NULL; 
+						delete input; delete SharedList; delete groupMap; 
 						for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
 						for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {  delete it3->second;  }
 						out.close(); remove(filename.c_str()); 
-						for (int i=0; i<groups.size(); i++) {  remove((fileroot + groups[i] + ".rabund").c_str());		}
-						return 1; 
+						for (int i=0; i<Groups.size(); i++) {  remove((fileroot + Groups[i] + ".rabund").c_str());		}
+						return 0; 
 					}
 					
 					printSharedData(lookup); //prints info to the .shared file
@@ -240,12 +336,12 @@ int SharedCommand::execute(){
 					
 					
 					if (m->control_pressed) { 
-						delete input; delete SharedList; globaldata->ginput = NULL; globaldata->gSharedList = NULL; 
+						delete input; delete SharedList; delete groupMap; 
 						for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
 						for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {  delete it3->second;  }
 						out.close(); remove(filename.c_str()); 
-						for (int i=0; i<groups.size(); i++) {  remove((fileroot + groups[i] + ".rabund").c_str());		}
-						return 1; 
+						for (int i=0; i<Groups.size(); i++) {  remove((fileroot + Groups[i] + ".rabund").c_str());		}
+						return 0; 
 					}
 					
 					printSharedData(lookup); //prints info to the .shared file
@@ -286,11 +382,11 @@ int SharedCommand::execute(){
 			}
 			
 			if (m->control_pressed) { 
-					delete input;  globaldata->ginput = NULL; 
+				delete input;  delete groupMap;
 					for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {  delete it3->second;   }
 					out.close(); remove(filename.c_str()); 
-					for (int i=0; i<groups.size(); i++) {  remove((fileroot + groups[i] + ".rabund").c_str());		}
-					return 1; 
+					for (int i=0; i<Groups.size(); i++) {  remove((fileroot + Groups[i] + ".rabund").c_str());		}
+					return 0; 
 			}
 			
 			printSharedData(lookup); //prints info to the .shared file
@@ -298,27 +394,18 @@ int SharedCommand::execute(){
 			delete SharedList;
 		}
 		
-		globaldata->gSharedList = NULL;
-		
 		out.close();
 		
 		for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {
 			delete it3->second;
 		}
 
-		
-		//change format to shared  to speed up commands
-		globaldata->setFormat("sharedfile");
-		globaldata->setListFile("");
-		globaldata->setGroupFile("");
-		globaldata->setSharedFile(filename);
-		
+		delete input; delete groupMap;
 		
 		if (m->control_pressed) { 
-				delete input;  globaldata->ginput = NULL; 
 				remove(filename.c_str()); 
-				for (int i=0; i<groups.size(); i++) {  remove((fileroot + groups[i] + ".rabund").c_str());		}
-				return 1; 
+				for (int i=0; i<Groups.size(); i++) {  remove((fileroot + Groups[i] + ".rabund").c_str());		}
+				return 0; 
 		}
 		
 		//set rabund file as new current rabundfile
@@ -353,14 +440,14 @@ void SharedCommand::printSharedData(vector<SharedRAbundVector*> thislookup) {
 		if (order.size() == 0) { //user has not specified an order so do aplabetically
 			sort(thislookup.begin(), thislookup.end(), compareSharedRabunds);
 			
-			globaldata->Groups.clear();
+			m->Groups.clear();
 			
 			//initialize bin values
 			for (int i = 0; i < thislookup.size(); i++) {
 				out << thislookup[i]->getLabel() << '\t' << thislookup[i]->getGroup() << '\t';
 				thislookup[i]->print(out);
 				
-				globaldata->Groups.push_back(thislookup[i]->getGroup());
+				m->Groups.push_back(thislookup[i]->getGroup());
 				
 				RAbundVector rav = thislookup[i]->getRAbundVector();
 				m->openOutputFileAppend(fileroot + thislookup[i]->getGroup() + ".rabund", *(filehandles[thislookup[i]->getGroup()]));
@@ -376,7 +463,7 @@ void SharedCommand::printSharedData(vector<SharedRAbundVector*> thislookup) {
 				myMap[thislookup[i]->getGroup()] = thislookup[i];
 			}
 			
-			globaldata->Groups.clear();
+			m->Groups.clear();
 			
 			//loop through ordered list and print the rabund
 			for (int i = 0; i < order.size(); i++) {
@@ -386,7 +473,7 @@ void SharedCommand::printSharedData(vector<SharedRAbundVector*> thislookup) {
 					out << (myIt->second)->getLabel() << '\t' << (myIt->second)->getGroup() << '\t';
 					(myIt->second)->print(out);
 					
-					globaldata->Groups.push_back((myIt->second)->getGroup());
+					m->Groups.push_back((myIt->second)->getGroup());
 				
 					RAbundVector rav = (myIt->second)->getRAbundVector();
 					m->openOutputFileAppend(fileroot + (myIt->second)->getGroup() + ".rabund", *(filehandles[(myIt->second)->getGroup()]));
@@ -451,7 +538,7 @@ int SharedCommand::eliminateZeroOTUS(vector<SharedRAbundVector*>& thislookup) {
 int SharedCommand::createMisMatchFile() {
 	try {
 		ofstream outMisMatch;
-		string outputMisMatchName = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName));
+		string outputMisMatchName = outputDir + m->getRootName(m->getSimpleName(listfile));
 		
 		//you have sequences in your list file that are not in your group file
 		if (SharedList->getNumSeqs() > groupMap->getNumSeqs()) { 
@@ -570,7 +657,7 @@ int SharedCommand::readOrderFile() {
 		order.clear();
 		
 		ifstream in;
-		m->openInputFile(globaldata->getOrderGroupFile(), in);
+		m->openInputFile(ordergroupfile, in);
 		string thisGroup;
 		
 		while(!in.eof()){

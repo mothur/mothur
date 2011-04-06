@@ -10,49 +10,48 @@
 #include "mergefilecommand.h"
 
 //**********************************************************************************************************************
-vector<string> MergeFileCommand::getValidParameters(){	
+vector<string> MergeFileCommand::setParameters(){	
 	try {
-		string Array[] =  {"input", "output","outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter pinput("input", "String", "", "", "", "", "",false,true); parameters.push_back(pinput);
+		CommandParameter poutput("output", "String", "", "", "", "", "",false,true); parameters.push_back(poutput);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "MergeFileCommand", "getValidParameters");
+		m->errorOut(e, "MergeFileCommand", "setParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
+string MergeFileCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The merge.file command takes a list of files separated by dashes and merges them into one file."; 
+		helpString += "The merge.file command parameters are input and output."; 
+		helpString += "Example merge.file(input=small.fasta-large.fasta, output=all.fasta).";
+		helpString += "Note: No spaces between parameter labels (i.e. output), '=' and parameters (i.e.yourOutputFileName).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "MergeFileCommand", "getHelpString");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
 MergeFileCommand::MergeFileCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["merge"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "MergeFileCommand", "MergeFileCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> MergeFileCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"input","output"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "MergeFileCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> MergeFileCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "MergeFileCommand", "getRequiredFiles");
 		exit(1);
 	}
 }
@@ -67,9 +66,7 @@ MergeFileCommand::MergeFileCommand(string option)  {
 			abort = true; calledHelp = true;
 		}
 		else {
-			//valid paramters for this command
-			string Array[] =  {"input", "output","outputdir","inputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
@@ -127,11 +124,6 @@ MergeFileCommand::MergeFileCommand(string option)  {
 		exit(1);
 	}
 }
-
-//**********************************************************************************************************************
-
-MergeFileCommand::~MergeFileCommand()	{	/*	do nothing	*/	}
-
 //**********************************************************************************************************************
 
 int MergeFileCommand::execute(){
@@ -174,17 +166,4 @@ int MergeFileCommand::execute(){
 		exit(1);
 	}
 }
-
-//**********************************************************************************************************************
-
-void MergeFileCommand::help(){
-	try {
-		m->mothurOut("The merge.file command..."); m->mothurOutEndLine();
-	}
-	catch(exception& e) {
-		m->errorOut(e, "MergeFileCommand", "help");
-		exit(1);
-	}
-}
-
 //**********************************************************************************************************************

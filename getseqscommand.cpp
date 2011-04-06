@@ -12,21 +12,53 @@
 #include "listvector.hpp"
 
 //**********************************************************************************************************************
-vector<string> GetSeqsCommand::getValidParameters(){	
+vector<string> GetSeqsCommand::setParameters(){	
 	try {
-		string Array[] =  {"fasta","name", "group", "qfile","alignreport", "accnos", "accnos2","dups", "list","taxonomy","outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pfasta);
+		CommandParameter pname("name", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pname);
+		CommandParameter pgroup("group", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pgroup);
+		CommandParameter plist("list", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(plist);
+		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(ptaxonomy);
+		CommandParameter palignreport("alignreport", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(palignreport);
+		CommandParameter pqfile("qfile", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pqfile);
+		CommandParameter paccnos("accnos", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(paccnos);
+		CommandParameter pdups("dups", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pdups);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "GetSeqsCommand", "getValidParameters");
+		m->errorOut(e, "GetSeqsCommand", "setParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
+string GetSeqsCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The get.seqs command reads an .accnos file and any of the following file types: fasta, name, group, list, taxonomy, quality or alignreport file.\n";
+		helpString += "It outputs a file containing only the sequences in the .accnos file.\n";
+		helpString += "The get.seqs command parameters are accnos, fasta, name, group, list, taxonomy, qfile, alignreport and dups.  You must provide accnos unless you have a valid current accnos file, and at least one of the other parameters.\n";
+		helpString += "The dups parameter allows you to add the entire line from a name file if you add any name from the line. default=false. \n";
+		helpString += "The get.seqs command should be in the following format: get.seqs(accnos=yourAccnos, fasta=yourFasta).\n";
+		helpString += "Example get.seqs(accnos=amazon.accnos, fasta=amazon.fasta).\n";
+		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetSeqsCommand", "getHelpString");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
 GetSeqsCommand::GetSeqsCommand(){	
 	try {
-		abort = true; calledHelp = true; 
+		abort = true; calledHelp = true;
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
 		outputTypes["taxonomy"] = tempOutNames;
@@ -43,29 +75,6 @@ GetSeqsCommand::GetSeqsCommand(){
 	}
 }
 //**********************************************************************************************************************
-vector<string> GetSeqsCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"accnos"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetSeqsCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> GetSeqsCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetSeqsCommand", "getRequiredFiles");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 GetSeqsCommand::GetSeqsCommand(string option)  {
 	try {
 		abort = false; calledHelp = false;   
@@ -74,9 +83,7 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"fasta","name", "group", "alignreport", "qfile", "accnos", "accnos2","dups", "list","taxonomy","outputdir","inputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
@@ -185,7 +192,14 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 			//check for required parameters
 			accnosfile = validParameter.validFile(parameters, "accnos", true);
 			if (accnosfile == "not open") { abort = true; }
-			else if (accnosfile == "not found") {  accnosfile = "";  m->mothurOut("You must provide an accnos file."); m->mothurOutEndLine(); abort = true; }	
+			else if (accnosfile == "not found") {  
+				accnosfile = m->getAccnosFile(); 
+				if (accnosfile != "") {  m->mothurOut("Using " + accnosfile + " as input file for the accnos parameter."); m->mothurOutEndLine(); }
+				else { 
+					m->mothurOut("You have no valid accnos file and accnos is required."); m->mothurOutEndLine(); 
+					abort = true;
+				} 
+			}	
 			
 			if (accnosfile2 == "not found") { accnosfile2 = ""; }
 			
@@ -222,9 +236,6 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 			dups = m->isTrue(temp);
 			
 			if ((fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == "") && (taxfile == "") && (qualfile == "") && (accnosfile2 == ""))  { m->mothurOut("You must provide one of the following: fasta, name, group, alignreport, taxonomy, quality or listfile."); m->mothurOutEndLine(); abort = true; }
-		
-			if ((usedDups != "") && (namefile == "")) {  m->mothurOut("You may only use dups with the name option."); m->mothurOutEndLine();  abort = true; }			
-
 		}
 
 	}
@@ -233,24 +244,6 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-
-void GetSeqsCommand::help(){
-	try {
-		m->mothurOut("The get.seqs command reads an .accnos file and any of the following file types: fasta, name, group, list, taxonomy, quality or alignreport file.\n");
-		m->mothurOut("It outputs a file containing only the sequences in the .accnos file.\n");
-		m->mothurOut("The get.seqs command parameters are accnos, fasta, name, group, list, taxonomy, qfile, alignreport and dups.  You must provide accnos and at least one of the other parameters.\n");
-		m->mothurOut("The dups parameter allows you to add the entire line from a name file if you add any name from the line. default=false. \n");
-		m->mothurOut("The get.seqs command should be in the following format: get.seqs(accnos=yourAccnos, fasta=yourFasta).\n");
-		m->mothurOut("Example get.seqs(accnos=amazon.accnos, fasta=amazon.fasta).\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetSeqsCommand", "help");
-		exit(1);
-	}
-}
-
 //**********************************************************************************************************************
 
 int GetSeqsCommand::execute(){

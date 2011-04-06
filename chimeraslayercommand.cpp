@@ -12,15 +12,83 @@
 #include "deconvolutecommand.h"
 
 //**********************************************************************************************************************
-vector<string> ChimeraSlayerCommand::getValidParameters(){	
+vector<string> ChimeraSlayerCommand::setParameters(){	
 	try {
-		string AlignArray[] =  {"fasta", "processors","trim","split", "name","window", "include","template","numwanted", "ksize", "match","mismatch", 
-			"divergence", "minsim","mincov","minbs", "minsnp","parents", "iters","outputdir","inputdir", "search","realign" };
-		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+		CommandParameter ptemplate("reference", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(ptemplate);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
+		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
+		CommandParameter pwindow("window", "Number", "", "50", "", "", "",false,false); parameters.push_back(pwindow);
+		CommandParameter pksize("ksize", "Number", "", "7", "", "", "",false,false); parameters.push_back(pksize);
+		CommandParameter pmatch("match", "Number", "", "5.0", "", "", "",false,false); parameters.push_back(pmatch);
+		CommandParameter pmismatch("mismatch", "Number", "", "-4.0", "", "", "",false,false); parameters.push_back(pmismatch);
+		CommandParameter pminsim("minsim", "Number", "", "90", "", "", "",false,false); parameters.push_back(pminsim);
+		CommandParameter pmincov("mincov", "Number", "", "70", "", "", "",false,false); parameters.push_back(pmincov);
+		CommandParameter pminsnp("minsnp", "Number", "", "100", "", "", "",false,false); parameters.push_back(pminsnp);
+		CommandParameter pminbs("minbs", "Number", "", "90", "", "", "",false,false); parameters.push_back(pminbs);
+		CommandParameter psearch("search", "Multiple", "kmer-blast-distance", "distance", "", "", "",false,false); parameters.push_back(psearch);
+		CommandParameter pinclude("include", "Multiple", "greater-greaterequal-all", "greater", "", "", "",false,false); parameters.push_back(pinclude);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
+		CommandParameter prealign("realign", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(prealign);
+		CommandParameter ptrim("trim", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(ptrim);
+		CommandParameter psplit("split", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(psplit);
+		CommandParameter pnumwanted("numwanted", "Number", "", "15", "", "", "",false,false); parameters.push_back(pnumwanted);
+		CommandParameter piters("iters", "Number", "", "100", "", "", "",false,false); parameters.push_back(piters);
+		CommandParameter pdivergence("divergence", "Number", "", "1.007", "", "", "",false,false); parameters.push_back(pdivergence);
+		CommandParameter pparents("parents", "Number", "", "3", "", "", "",false,false); parameters.push_back(pparents);
+		CommandParameter pincrement("increment", "Number", "", "5", "", "", "",false,false); parameters.push_back(pincrement);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ChimeraSlayerCommand", "getValidParameters");
+		m->errorOut(e, "ChimeraSlayerCommand", "setParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string ChimeraSlayerCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The chimera.slayer command reads a fastafile and referencefile and outputs potentially chimeric sequences.\n";
+		helpString += "This command was modeled after the chimeraSlayer written by the Broad Institute.\n";
+		helpString += "The chimera.slayer command parameters are fasta, name, template, processors, trim, ksize, window, match, mismatch, divergence. minsim, mincov, minbs, minsnp, parents, search, iters, increment and numwanted.\n"; //realign,
+		helpString += "The fasta parameter allows you to enter the fasta file containing your potentially chimeric sequences, and is required, unless you have a valid current fasta file. \n";
+		helpString += "The name parameter allows you to provide a name file, if you are using template=self. \n";
+		helpString += "You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amazon.fasta \n";
+		helpString += "The reference parameter allows you to enter a reference file containing known non-chimeric sequences, and is required. You may also set template=self, in this case the abundant sequences will be used as potential parents. \n";
+		helpString += "The include parameter is used when template=self and allows you to choose which sequences will make up the \"template\". Options are greater, greaterequal and all, default=greater, meaning sequences with greater abundance than the query sequence. \n";
+		helpString += "The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n";
+#ifdef USE_MPI
+		helpString += "When using MPI, the processors parameter is set to the number of MPI processes running. \n";
+#endif
+		helpString += "The trim parameter allows you to output a new fasta file containing your sequences with the chimeric ones trimmed to include only their longest piece, default=F. \n";
+		helpString += "The split parameter allows you to check both pieces of non-chimeric sequence for chimeras, thus looking for trimeras and quadmeras. default=F. \n";
+		helpString += "The window parameter allows you to specify the window size for searching for chimeras, default=50. \n";
+		helpString += "The increment parameter allows you to specify how far you move each window while finding chimeric sequences, default=5.\n";
+		helpString += "The numwanted parameter allows you to specify how many sequences you would each query sequence compared with, default=15.\n";
+		helpString += "The ksize parameter allows you to input kmersize, default is 7, used if search is kmer. \n";
+		helpString += "The match parameter allows you to reward matched bases in blast search, default is 5. \n";
+		helpString += "The parents parameter allows you to select the number of potential parents to investigate from the numwanted best matches after rating them, default is 3. \n";
+		helpString += "The mismatch parameter allows you to penalize mismatched bases in blast search, default is -4. \n";
+		helpString += "The divergence parameter allows you to set a cutoff for chimera determination, default is 1.007. \n";
+		helpString += "The iters parameter allows you to specify the number of bootstrap iters to do with the chimeraslayer method, default=100.\n";
+		helpString += "The minsim parameter allows you to specify a minimum similarity with the parent fragments, default=90. \n";
+		helpString += "The mincov parameter allows you to specify minimum coverage by closest matches found in template. Default is 70, meaning 70%. \n";
+		helpString += "The minbs parameter allows you to specify minimum bootstrap support for calling a sequence chimeric. Default is 90, meaning 90%. \n";
+		helpString += "The minsnp parameter allows you to specify percent of SNPs to sample on each side of breakpoint for computing bootstrap support (default: 100) \n";
+		helpString += "The search parameter allows you to specify search method for finding the closest parent. Choices are distance, blast, and kmer, default distance. \n";
+		helpString += "The realign parameter allows you to realign the query to the potential parents. Choices are true or false, default false.  \n";
+		helpString += "The chimera.slayer command should be in the following format: \n";
+		helpString += "chimera.slayer(fasta=yourFastaFile, reference=yourTemplate, search=yourSearch) \n";
+		helpString += "Example: chimera.slayer(fasta=AD.align, reference=core_set_aligned.imputed.fasta, search=kmer) \n";
+		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n";	
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChimeraSlayerCommand", "getHelpString");
 		exit(1);
 	}
 }
@@ -28,6 +96,7 @@ vector<string> ChimeraSlayerCommand::getValidParameters(){
 ChimeraSlayerCommand::ChimeraSlayerCommand(){	
 	try {
 		abort = true; calledHelp = true;
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["chimera"] = tempOutNames;
 		outputTypes["accnos"] = tempOutNames;
@@ -35,29 +104,6 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ChimeraSlayerCommand", "ChimeraSlayerCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> ChimeraSlayerCommand::getRequiredParameters(){	
-	try {
-		string AlignArray[] =  {"template","fasta"};
-		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChimeraSlayerCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> ChimeraSlayerCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChimeraSlayerCommand", "getRequiredFiles");
 		exit(1);
 	}
 }
@@ -70,10 +116,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"fasta", "processors","name", "include","trim", "split","window", "template","numwanted", "ksize", "match","mismatch", 
-			"divergence", "minsim","mincov","minbs", "minsnp","parents", "iters","outputdir","inputdir", "search","realign" };
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
@@ -97,8 +140,12 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 						
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", false);
-			if (fastafile == "not found") { fastafile = ""; m->mothurOut("[ERROR]: fasta is a required parameter for the chimera.slayer command."); m->mothurOutEndLine(); abort = true;  }
-			else { 
+			if (fastafile == "not found") { 				
+				//if there is a current fasta file, use it
+				string filename = m->getFastaFile(); 
+				if (filename != "") { fastaFileNames.push_back(filename); m->mothurOut("Using " + filename + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}else { 
 				m->splitAtDash(fastafile, fastaFileNames);
 				
 				//go through files and make sure they are good, if not, then disregard them
@@ -216,22 +263,23 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 			
 			
 			string path;
-			it = parameters.find("template");
+			it = parameters.find("reference");
 			//user has given a template file
 			if(it != parameters.end()){ 
 				if (it->second == "self") { templatefile = "self"; }
 				else {
 					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["template"] = inputDir + it->second;		}
+					if (path == "") {	parameters["reference"] = inputDir + it->second;		}
 					
-					templatefile = validParameter.validFile(parameters, "template", true);
+					templatefile = validParameter.validFile(parameters, "reference", true);
 					if (templatefile == "not open") { abort = true; }
-					else if (templatefile == "not found") { templatefile = "";  m->mothurOut("template is a required parameter for the chimera.slayer command."); m->mothurOutEndLine(); abort = true;  }	
+					else if (templatefile == "not found") { templatefile = "";  m->mothurOut("reference is a required parameter for the chimera.slayer command."); m->mothurOutEndLine(); abort = true;  }	
 				}
 			}
 			
-			string temp = validParameter.validFile(parameters, "processors", false);		if (temp == "not found") { temp = "1"; }
+			string temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
+			m->setProcessors(temp);
 			convert(temp, processors);
 			
 			includeAbunds = validParameter.validFile(parameters, "include", false);		if (includeAbunds == "not found") { includeAbunds = "greater"; }
@@ -295,54 +343,6 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-
-void ChimeraSlayerCommand::help(){
-	try {
-	
-		m->mothurOut("The chimera.slayer command reads a fastafile and templatefile and outputs potentially chimeric sequences.\n");
-		m->mothurOut("This command was modeled after the chimeraSlayer written by the Broad Institute.\n");
-		m->mothurOut("The chimera.slayer command parameters are fasta, name, template, processors, trim, ksize, window, match, mismatch, divergence. minsim, mincov, minbs, minsnp, parents, search, iters, increment and numwanted.\n"); //realign,
-		m->mothurOut("The fasta parameter allows you to enter the fasta file containing your potentially chimeric sequences, and is required. \n");
-		m->mothurOut("The name parameter allows you to provide a name file, if you are using template=self. \n");
-		m->mothurOut("You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amazon.fasta \n");
-		m->mothurOut("The template parameter allows you to enter a template file containing known non-chimeric sequences, and is required. You may also set template=self, in this case the abundant sequences will be used as potential parents. \n");
-		m->mothurOut("The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n");
-		#ifdef USE_MPI
-		m->mothurOut("When using MPI, the processors parameter is set to the number of MPI processes running. \n");
-		#endif
-		m->mothurOut("The trim parameter allows you to output a new fasta file containing your sequences with the chimeric ones trimmed to include only their longest piece, default=F. \n");
-		m->mothurOut("The split parameter allows you to check both pieces of non-chimeric sequence for chimeras, thus looking for trimeras and quadmeras. default=F. \n");
-		m->mothurOut("The window parameter allows you to specify the window size for searching for chimeras, default=50. \n");
-		m->mothurOut("The increment parameter allows you to specify how far you move each window while finding chimeric sequences, default=5.\n");
-		m->mothurOut("The numwanted parameter allows you to specify how many sequences you would each query sequence compared with, default=15.\n");
-		m->mothurOut("The ksize parameter allows you to input kmersize, default is 7, used if search is kmer. \n");
-		m->mothurOut("The match parameter allows you to reward matched bases in blast search, default is 5. \n");
-		m->mothurOut("The parents parameter allows you to select the number of potential parents to investigate from the numwanted best matches after rating them, default is 3. \n");
-		m->mothurOut("The mismatch parameter allows you to penalize mismatched bases in blast search, default is -4. \n");
-		m->mothurOut("The divergence parameter allows you to set a cutoff for chimera determination, default is 1.007. \n");
-		m->mothurOut("The iters parameter allows you to specify the number of bootstrap iters to do with the chimeraslayer method, default=100.\n");
-		m->mothurOut("The minsim parameter allows you to specify a minimum similarity with the parent fragments, default=90. \n");
-		m->mothurOut("The mincov parameter allows you to specify minimum coverage by closest matches found in template. Default is 70, meaning 70%. \n");
-		m->mothurOut("The minbs parameter allows you to specify minimum bootstrap support for calling a sequence chimeric. Default is 90, meaning 90%. \n");
-		m->mothurOut("The minsnp parameter allows you to specify percent of SNPs to sample on each side of breakpoint for computing bootstrap support (default: 100) \n");
-		m->mothurOut("The search parameter allows you to specify search method for finding the closest parent. Choices are distance, blast, and kmer, default distance. \n");
-		m->mothurOut("The realign parameter allows you to realign the query to the potential parents. Choices are true or false, default false.  \n");
-		m->mothurOut("The chimera.slayer command should be in the following format: \n");
-		m->mothurOut("chimera.slayer(fasta=yourFastaFile, template=yourTemplate, search=yourSearch) \n");
-		m->mothurOut("Example: chimera.slayer(fasta=AD.align, template=core_set_aligned.imputed.fasta, search=kmer) \n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n");	
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChimeraSlayerCommand", "help");
-		exit(1);
-	}
-}
-
-//***************************************************************************************************************
-
-ChimeraSlayerCommand::~ChimeraSlayerCommand(){	/*	do nothing	*/	}
-
 //***************************************************************************************************************
 
 int ChimeraSlayerCommand::execute(){

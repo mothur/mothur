@@ -35,21 +35,56 @@
 #include "shen.h"
 
 //**********************************************************************************************************************
-vector<string> SummaryCommand::getValidParameters(){	
+vector<string> SummaryCommand::setParameters(){	
 	try {
-		string Array[] =  {"label","calc","abund","size","outputdir","groupmode","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter plist("list", "InputTypes", "", "", "LRSS", "LRSS", "none",false,false); parameters.push_back(plist);
+		CommandParameter prabund("rabund", "InputTypes", "", "", "LRSS", "LRSS", "none",false,false); parameters.push_back(prabund);
+		CommandParameter psabund("sabund", "InputTypes", "", "", "LRSS", "LRSS", "none",false,false); parameters.push_back(psabund);
+		CommandParameter pshared("shared", "InputTypes", "", "", "LRSS", "LRSS", "none",false,false); parameters.push_back(pshared);
+		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
+		CommandParameter pcalc("calc", "Multiple", "sobs-chao-nseqs-coverage-ace-jack-shannon-shannoneven-np_shannon-heip-smithwilson-simpson-simpsoneven-invsimpson-bootstrap-geometric-qstat-logseries-bergerparker-bstick-goodscoverage-efron-boneh-solow-shen", "sobs-chao-ace-jack-shannon-npshannon-simpson", "", "", "",true,false); parameters.push_back(pcalc);
+		CommandParameter pabund("abund", "Number", "", "10", "", "", "",false,false); parameters.push_back(pabund);
+		CommandParameter psize("size", "Number", "", "0", "", "", "",false,false); parameters.push_back(psize);
+		CommandParameter pgroupmode("groupmode", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pgroupmode);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "SummaryCommand", "getValidParameters");
+		m->errorOut(e, "SummaryCommand", "setParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
+string SummaryCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		ValidCalculators validCalculator;
+		helpString += "The summary.single command parameters are list, sabund, rabund, shared, label, calc, abund and groupmode.  list, sabund, rabund or shared is required unless you have a valid current file.\n";
+		helpString += "The summary.single command should be in the following format: \n";
+		helpString += "summary.single(label=yourLabel, calc=yourEstimators).\n";
+		helpString += "Example summary.single(label=unique-.01-.03, calc=sobs-chao-ace-jack-bootstrap-shannon-npshannon-simpson).\n";
+		helpString += validCalculator.printCalc("summary");
+		helpString += "The default value calc is sobs-chao-ace-jack-shannon-npshannon-simpson\n";
+		helpString += "If you are running summary.single with a shared file and would like your summary results collated in one file, set groupmode=t. (Default=true).\n";
+		helpString += "The label parameter is used to analyze specific labels in your input.\n";
+		helpString += "Note: No spaces between parameter labels (i.e. label), '=' and parameters (i.e.yourLabels).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SummaryCommand", "getHelpString");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
 SummaryCommand::SummaryCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["summary"] = tempOutNames;
 	}
@@ -59,48 +94,21 @@ SummaryCommand::SummaryCommand(){
 	}
 }
 //**********************************************************************************************************************
-vector<string> SummaryCommand::getRequiredParameters(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SummaryCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> SummaryCommand::getRequiredFiles(){	
-	try {
-		string AlignArray[] =  {"shared","list","rabund","sabund","or"};
-		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SummaryCommand", "getRequiredFiles");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 
 SummaryCommand::SummaryCommand(string option)  {
 	try {
-		globaldata = GlobalData::getInstance();
 		abort = false; calledHelp = false;   
 		allLines = 1;
-		labels.clear();
-		Estimators.clear();
-		
+				
 		//allow user to run help
-		if(option == "help") { validCalculator = new ValidCalculators(); help(); delete validCalculator; abort = true; calledHelp = true; }
+		if(option == "help") {  help();  abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"label","calc","abund","size","outputdir","groupmode","inputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
+			map<string,string>::iterator it;
 			
 			ValidParameters validParameter;
 			
@@ -113,14 +121,91 @@ SummaryCommand::SummaryCommand(string option)  {
 			vector<string> tempOutNames;
 			outputTypes["summary"] = tempOutNames;
 			
-			//make sure the user has already run the read.otu command
-			if ((globaldata->getSharedFile() == "") && (globaldata->getListFile() == "") && (globaldata->getRabundFile() == "") && (globaldata->getSabundFile() == "")) { m->mothurOut("You must read a list, sabund, rabund or shared file before you can use the summary.single command."); m->mothurOutEndLine(); abort = true; }
+			//if the user changes the input directory command factory will send this info to us in the output parameter 
+			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			if (inputDir == "not found"){	inputDir = "";		}
+			else {
+				string path;
+				it = parameters.find("shared");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("rabund");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["rabund"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("sabund");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["sabund"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("list");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["list"] = inputDir + it->second;		}
+				}
+			}
+			
+			//check for required parameters
+			listfile = validParameter.validFile(parameters, "list", true);
+			if (listfile == "not open") { listfile = ""; abort = true; }
+			else if (listfile == "not found") { listfile = ""; }
+			else {  format = "list"; inputfile = listfile; }
+			
+			sabundfile = validParameter.validFile(parameters, "sabund", true);
+			if (sabundfile == "not open") { sabundfile = ""; abort = true; }	
+			else if (sabundfile == "not found") { sabundfile = ""; }
+			else {  format = "sabund"; inputfile = sabundfile; }
+			
+			rabundfile = validParameter.validFile(parameters, "rabund", true);
+			if (rabundfile == "not open") { rabundfile = ""; abort = true; }	
+			else if (rabundfile == "not found") { rabundfile = ""; }
+			else {  format = "rabund"; inputfile = rabundfile; }
+			
+			sharedfile = validParameter.validFile(parameters, "shared", true);
+			if (sharedfile == "not open") { sharedfile = ""; abort = true; }	
+			else if (sharedfile == "not found") { sharedfile = ""; }
+			else {  format = "sharedfile"; inputfile = sharedfile; }
+			
+			if ((sharedfile == "") && (listfile == "") && (rabundfile == "") && (sabundfile == "")) { 
+				//is there are current file available for any of these?
+				//give priority to shared, then list, then rabund, then sabund
+				//if there is a current shared file, use it
+				sharedfile = m->getSharedFile(); 
+				if (sharedfile != "") { inputfile = sharedfile; format = "sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+				else { 
+					listfile = m->getListFile(); 
+					if (listfile != "") { inputfile = listfile; format = "list"; m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
+					else { 
+						rabundfile = m->getRabundFile(); 
+						if (rabundfile != "") { inputfile = rabundfile; format = "rabund"; m->mothurOut("Using " + rabundfile + " as input file for the rabund parameter."); m->mothurOutEndLine(); }
+						else { 
+							sabundfile = m->getSabundFile(); 
+							if (sabundfile != "") { inputfile = sabundfile; format = "sabund"; m->mothurOut("Using " + sabundfile + " as input file for the sabund parameter."); m->mothurOutEndLine(); }
+							else { 
+								m->mothurOut("No valid current files. You must provide a list, sabund, rabund or shared file before you can use the collect.single command."); m->mothurOutEndLine(); 
+								abort = true;
+							}
+						}
+					}
+				}
+			}
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
-				outputDir = "";	
-				outputDir += m->hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
-			}
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(inputfile);		}
 
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -129,12 +214,6 @@ SummaryCommand::SummaryCommand(string option)  {
 			else { 
 				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
-			}
-			
-			//if the user has not specified any labels use the ones from read.otu
-			if(label == "") {  
-				allLines = globaldata->allLines; 
-				labels = globaldata->labels; 
 			}
 				
 			calc = validParameter.validFile(parameters, "calc", false);			
@@ -164,42 +243,15 @@ SummaryCommand::SummaryCommand(string option)  {
 }
 //**********************************************************************************************************************
 
-void SummaryCommand::help(){
-	try {
-		m->mothurOut("The summary.single command can only be executed after a successful read.otu WTIH ONE EXECEPTION.\n");
-		m->mothurOut("The summary.single command can be executed after a successful cluster command.  It will use the .list file from the output of the cluster.\n");
-		m->mothurOut("The summary.single command parameters are label, calc, abund and groupmode.  No parameters are required.\n");
-		m->mothurOut("The summary.single command should be in the following format: \n");
-		m->mothurOut("summary.single(label=yourLabel, calc=yourEstimators).\n");
-		m->mothurOut("Example summary.single(label=unique-.01-.03, calc=sobs-chao-ace-jack-bootstrap-shannon-npshannon-simpson).\n");
-		validCalculator->printCalc("summary", cout);
-		m->mothurOut("The default value calc is sobs-chao-ace-jack-shannon-npshannon-simpson\n");
-		m->mothurOut("If you are running summary.single with a shared file and would like your summary results collated in one file, set groupmode=t. (Default=true).\n");
-		m->mothurOut("The label parameter is used to analyze specific labels in your input.\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. label), '=' and parameters (i.e.yourLabels).\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SummaryCommand", "help");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
-SummaryCommand::~SummaryCommand(){}
-
-//**********************************************************************************************************************
-
 int SummaryCommand::execute(){
 	try {
 	
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
-		string hadShared = "";
-		if ((globaldata->getFormat() != "sharedfile")) { inputFileNames.push_back(globaldata->inputFileName);  }
-		else { hadShared = globaldata->getSharedFile(); inputFileNames = parseSharedFile(globaldata->getSharedFile());  globaldata->setFormat("rabund");  }
+		if ((format != "sharedfile")) { inputFileNames.push_back(inputfile);  }
+		else {  inputFileNames = parseSharedFile(sharedfile);  format = "rabund"; }
 		
-		if (m->control_pressed) { if (hadShared != "") {  globaldata->setSharedFile(hadShared); globaldata->setFormat("sharedfile");  } return 0; }
+		if (m->control_pressed) { return 0; }
 		
 		int numLines = 0;
 		int numCols = 0;
@@ -210,7 +262,6 @@ int SummaryCommand::execute(){
 			numCols = 0;
 			
 			string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(inputFileNames[p])) + "summary";
-			globaldata->inputFileName = inputFileNames[p];
 			outputNames.push_back(fileNameRoot); outputTypes["summary"].push_back(fileNameRoot);
 			
 			if (inputFileNames.size() > 1) {
@@ -219,10 +270,10 @@ int SummaryCommand::execute(){
 			
 			sumCalculators.clear();
 			
-			validCalculator = new ValidCalculators();
+			ValidCalculators validCalculator;
 			
 			for (int i=0; i<Estimators.size(); i++) {
-				if (validCalculator->isValidCalculator("summary", Estimators[i]) == true) { 
+				if (validCalculator.isValidCalculator("summary", Estimators[i]) == true) { 
 					if(Estimators[i] == "sobs"){
 						sumCalculators.push_back(new Sobs());
 					}else if(Estimators[i] == "chao"){
@@ -280,19 +331,16 @@ int SummaryCommand::execute(){
 			}
 			
 			//if the users entered no valid calculators don't execute command
-			if (sumCalculators.size() == 0) { if (hadShared != "") {  globaldata->setSharedFile(hadShared); globaldata->setFormat("sharedfile");  } return 0; }
+			if (sumCalculators.size() == 0) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0; }
 			
 			ofstream outputFileHandle;
 			m->openOutputFile(fileNameRoot, outputFileHandle);
 			outputFileHandle << "label";
-			
-			read = new ReadOTUFile(globaldata->inputFileName);	
-			read->read(&*globaldata); 
-			
-			sabund = globaldata->sabund;
+		
+			input = new InputData(inputFileNames[p], format);
+			sabund = input->getSAbundVector();
 			string lastLabel = sabund->getLabel();
-			input = globaldata->ginput;
-			
+		
 			for(int i=0;i<sumCalculators.size();i++){
 				if(sumCalculators[i]->getCols() == 1){
 					outputFileHandle << '\t' << sumCalculators[i]->getName();
@@ -309,11 +357,11 @@ int SummaryCommand::execute(){
 			set<string> processedLabels;
 			set<string> userLabels = labels;
 			
-			if (m->control_pressed) { if (hadShared != "") {  globaldata->setSharedFile(hadShared); globaldata->setFormat("sharedfile");  }  outputFileHandle.close(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; } delete validCalculator; delete read; delete sabund; globaldata->sabund = NULL; delete input; globaldata->ginput = NULL; return 0;  }
+			if (m->control_pressed) {  outputFileHandle.close(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;  delete input;  return 0;  }
 			
 			while((sabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 				
-				if (m->control_pressed) { if (hadShared != "") {  globaldata->setSharedFile(hadShared); globaldata->setFormat("sharedfile");  } outputFileHandle.close(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; } delete validCalculator; delete read; delete sabund; globaldata->sabund = NULL; delete input; globaldata->ginput = NULL; return 0;  }
+				if (m->control_pressed) { outputFileHandle.close(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;  delete input;  return 0;  }
 				
 				if(allLines == 1 || labels.count(sabund->getLabel()) == 1){			
 					
@@ -325,7 +373,7 @@ int SummaryCommand::execute(){
 					for(int i=0;i<sumCalculators.size();i++){
 						vector<double> data = sumCalculators[i]->getValues(sabund);
 						
-						if (m->control_pressed) { if (hadShared != "") {  globaldata->setSharedFile(hadShared); globaldata->setFormat("sharedfile");  } outputFileHandle.close(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; } delete validCalculator; delete read; delete sabund; globaldata->sabund = NULL; delete input; globaldata->ginput = NULL; return 0;  }
+						if (m->control_pressed) { outputFileHandle.close(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;  delete input;  return 0;  }
 
 						outputFileHandle << '\t';
 						sumCalculators[i]->print(outputFileHandle);
@@ -348,7 +396,7 @@ int SummaryCommand::execute(){
 					for(int i=0;i<sumCalculators.size();i++){
 						vector<double> data = sumCalculators[i]->getValues(sabund);
 						
-						if (m->control_pressed) { if (hadShared != "") {  globaldata->setSharedFile(hadShared); globaldata->setFormat("sharedfile");  } outputFileHandle.close(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; } delete validCalculator; delete read; delete sabund; globaldata->sabund = NULL; delete input; globaldata->ginput = NULL; return 0;  }
+						if (m->control_pressed) {  outputFileHandle.close(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; } delete sabund;  delete input;  return 0;  }
 						
 						outputFileHandle << '\t';
 						sumCalculators[i]->print(outputFileHandle);
@@ -366,7 +414,7 @@ int SummaryCommand::execute(){
 				sabund = input->getSAbundVector();
 			}
 			
-			if (m->control_pressed) { if (hadShared != "") {  globaldata->setSharedFile(hadShared); globaldata->setFormat("sharedfile");  } outputFileHandle.close(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; } delete validCalculator; delete read;  delete input; globaldata->ginput = NULL; return 0;  }
+			if (m->control_pressed) {  outputFileHandle.close(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }   delete input;  return 0;  }
 
 			//output error messages about any remaining user labels
 			set<string>::iterator it;
@@ -391,7 +439,7 @@ int SummaryCommand::execute(){
 				for(int i=0;i<sumCalculators.size();i++){
 					vector<double> data = sumCalculators[i]->getValues(sabund);
 					
-					if (m->control_pressed) { if (hadShared != "") {  globaldata->setSharedFile(hadShared); globaldata->setFormat("sharedfile");  } outputFileHandle.close(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; } delete validCalculator; delete read; delete sabund; globaldata->sabund = NULL; delete input; globaldata->ginput = NULL; return 0;  }
+					if (m->control_pressed) {  outputFileHandle.close(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;  delete input; return 0;  }
 
 					outputFileHandle << '\t';
 					sumCalculators[i]->print(outputFileHandle);
@@ -403,22 +451,17 @@ int SummaryCommand::execute(){
 			
 			outputFileHandle.close();
 			
-			if (m->control_pressed) { if (hadShared != "") {  globaldata->setSharedFile(hadShared); globaldata->setFormat("sharedfile");  } for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; } delete validCalculator; delete read;  delete input; globaldata->ginput = NULL; return 0;  }
+			if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }   delete input;  return 0;  }
 
 			
-			delete input;  globaldata->ginput = NULL;
-			delete read;
-			delete validCalculator;
-			globaldata->sabund = NULL;
+			delete input;  
 			for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }
 		}
-		
-		if (hadShared != "") {  globaldata->setSharedFile(hadShared); globaldata->setFormat("sharedfile");  }
 		
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }  return 0;  }
 		
 		//create summary file containing all the groups data for each label - this function just combines the info from the files already created.
-		if ((hadShared != "") && (groupMode)) {   outputNames.push_back(createGroupSummaryFile(numLines, numCols, outputNames));  }
+		if ((sharedfile != "") && (groupMode)) {   outputNames.push_back(createGroupSummaryFile(numLines, numCols, outputNames));  }
 		
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }  return 0;  }
 		
@@ -442,12 +485,7 @@ vector<string> SummaryCommand::parseSharedFile(string filename) {
 		map<string, ofstream*> filehandles;
 		map<string, ofstream*>::iterator it3;
 		
-				
-		//read first line
-		read = new ReadOTUFile(filename);	
-		read->read(&*globaldata); 
-			
-		input = globaldata->ginput;
+		input = new InputData(filename, "sharedfile");
 		vector<SharedRAbundVector*> lookup = input->getSharedRAbundVectors();
 		
 		string sharedFileRoot = m->getRootName(filename);
@@ -482,9 +520,8 @@ vector<string> SummaryCommand::parseSharedFile(string filename) {
 		for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {
 			delete it3->second;
 		}
-		delete read;
+		
 		delete input;
-		globaldata->ginput = NULL;
 
 		return filenames;
 	}
@@ -498,7 +535,7 @@ string SummaryCommand::createGroupSummaryFile(int numLines, int numCols, vector<
 	try {
 		
 		ofstream out;
-		string combineFileName = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName)) + "groups.summary";
+		string combineFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + "groups.summary";
 		
 		//open combined file
 		m->openOutputFile(combineFileName, out);

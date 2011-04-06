@@ -19,16 +19,18 @@ class ListSeqsCommand : public Command {
 		ListSeqsCommand(string);
 		ListSeqsCommand();	
 		~ListSeqsCommand(){}
-		vector<string> getRequiredParameters();
-		vector<string> getValidParameters();
-		vector<string> getRequiredFiles();
-		map<string, vector<string> > getOutputFiles() { return outputTypes; }
-		int execute();
-		void help();	
-		
+	
+		vector<string> setParameters();
+		string getCommandName()			{ return "get.seqs";				}
+		string getCommandCategory()		{ return "Sequence Processing";		}
+		string getHelpString();	
+	
+		int execute(); 
+		void help() { m->mothurOut(getHelpString()); }	
+	
+	
 	private:
 		vector<string> names, outputNames;
-		map<string, vector<string> > outputTypes;
 		string fastafile, namefile, groupfile, alignfile, inputFileName, outputDir, listfile, taxfile;
 		bool abort;
 		

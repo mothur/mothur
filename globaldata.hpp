@@ -1,6 +1,6 @@
 #ifndef GLOBALDATA_HPP
 #define GLOBALDATA_HPP
-
+/*
 #include "mothur.h"
 #include "groupmap.h"
 #include "treemap.h"
@@ -29,8 +29,8 @@ class SequenceDB;
 class GlobalData {
 public:
 	static GlobalData* getInstance();
-	ListVector* gListVector;
-	SparseMatrix* gSparseMatrix;
+	/*ListVector* gListVector;
+	//SparseMatrix* gSparseMatrix;
 	InputData* ginput;
 	OrderVector* gorder;
 	ListVector* glist;
@@ -38,20 +38,21 @@ public:
 	SharedListVector* gSharedList;
 	SAbundVector* sabund;
 	RAbundVector* rabund;
-	GroupMap* gGroupmap;
+	//GroupMap* gGroupmap;
 	FullMatrix* gMatrix;
 	TreeMap* gTreemap;
 	SequenceDB* gSequenceDB;
-	string inputFileName, argv;
-	bool allLines, runParse, jumble, sim;
-	vector<string>  Estimators, Groups; //holds estimators to be used
-	set<string> labels; //holds labels to be used
+	NameAssignment* nameMap;
+	string argv; //inputFileName,
+	bool runParse, jumble, sim; //allLines, 
+	vector<string>  Estimators;//, Groups; //holds estimators to be used
+	//set<string> labels; //holds labels to be used
 	vector<string> Treenames;
 	map<string, string> names;
 	string saveNextLabel;
 	
 	
-	string getPhylipFile();
+	/*string getPhylipFile();
 	string getColumnFile();
 	string getListFile();
 	string getRabundFile();
@@ -78,19 +79,19 @@ public:
 	void setRelAbundFile(string);
 	void setOrderFile(string file);
 	void setOrderGroupFile(string file);
-	void setFormat(string);	//do we need this?
+	void setFormat(string);	//do we need this?*/
 	
-	NameAssignment* nameMap;
 	
-	void clear(); 
-	void clearLabels();
-	void clearAbund();
 	
-	void newRead();
+	//void clear(); 
+	//void clearLabels();
+	//void clearAbund();
 	
+	//void newRead();
+	/*
 private:
 	MothurOut* m;
-	string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, treefile, sharedfile, format, distfile, ordergroup, relAbundfile;
+	//string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, treefile, sharedfile, format, distfile, ordergroup, relAbundfile;
 
 	static GlobalData* _uniqueInstance;
 	GlobalData( const GlobalData& ); // Disable copy constructor
@@ -99,6 +100,6 @@ private:
 	~GlobalData();
 	
 	
-};
+};*/
 
 #endif

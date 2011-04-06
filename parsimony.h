@@ -13,7 +13,6 @@
 
 #include "treecalculator.h"
 #include "treemap.h"
-#include "globaldata.hpp"
 
 /***********************************************************************/
 
@@ -33,7 +32,6 @@ class Parsimony : public TreeCalculator  {
 		};
 		vector<linePair> lines;
 	
-		GlobalData* globaldata;
 		EstOutput data;
 		TreeMap* tmap;
 		int processors;

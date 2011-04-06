@@ -51,14 +51,54 @@
 #include "mempearson.h"
 
 //**********************************************************************************************************************
-vector<string> TreeGroupCommand::getValidParameters(){	
+vector<string> TreeGroupCommand::setParameters(){	
 	try {
-		string Array[] =  {"label","calc","groups", "phylip", "column", "name", "precision","cutoff","outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter pshared("shared", "InputTypes", "", "", "PhylipColumnShared", "PhylipColumnShared", "none",false,false); parameters.push_back(pshared);
+		CommandParameter pphylip("phylip", "InputTypes", "", "", "PhylipColumnShared", "PhylipColumnShared", "none",false,false); parameters.push_back(pphylip);
+		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "ColumnName",false,false); parameters.push_back(pname);
+		CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumnShared", "PhylipColumnShared", "ColumnName",false,false); parameters.push_back(pcolumn);		
+		CommandParameter pcutoff("cutoff", "Number", "", "10", "", "", "",false,false); parameters.push_back(pcutoff);
+		CommandParameter pprecision("precision", "Number", "", "100", "", "", "",false,false); parameters.push_back(pprecision);		
+		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
+		CommandParameter pcalc("calc", "Multiple", "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan-kstest-sharednseqs-ochiai-anderberg-kulczynski-kulczynskicody-lennon-morisitahorn-braycurtis-whittaker-odum-canberra-structeuclidean-structchord-hellinger-manhattan-structpearson-soergel-spearman-structkulczynski-speciesprofile-hamming-structchi2-gower-memchi2-memchord-memeuclidean-mempearson", "jclass-thetayc", "", "", "",true,false); parameters.push_back(pcalc);
+		CommandParameter poutput("output", "Multiple", "lt-square", "lt", "", "", "",false,false); parameters.push_back(poutput);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "TreeGroupCommand", "getValidParameters");
+		m->errorOut(e, "TreeGroupCommand", "setParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string TreeGroupCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		ValidCalculators validCalculator;
+		helpString += "The tree.shared command creates a .tre to represent the similiarity between groups or sequences.\n";
+		helpString += "The tree.shared command parameters are shared, groups, calc, phylip, column, name, cutoff, precision and label.\n";
+		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like included used.\n";
+		helpString += "The group names are separated by dashes. The label allow you to select what distance levels you would like trees created for, and are also separated by dashes.\n";
+		helpString += "The phylip or column parameter are required if you do not provide a sharedfile, and only one may be used.  If you use a column file the name filename is required. \n";
+		helpString += "If you do not provide a cutoff value 10.00 is assumed. If you do not provide a precision value then 100 is assumed.\n";
+		helpString += "The tree.shared command should be in the following format: tree.shared(groups=yourGroups, calc=yourCalcs, label=yourLabels).\n";
+		helpString += "Example tree.shared(groups=A-B-C, calc=jabund-sorabund).\n";
+		helpString += "The default value for groups is all the groups in your groupfile.\n";
+		helpString += "The default value for calc is jclass-thetayc.\n";
+		helpString += "The tree.shared command outputs a .tre file for each calculator you specify at each distance you choose.\n";
+		helpString += validCalculator.printCalc("treegroup");
+		helpString += "Or the tree.shared command can be in the following format: tree.shared(phylip=yourPhylipFile).\n";
+		helpString += "Example tree.shared(phylip=abrecovery.dist).\n";
+		helpString += "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "TreeGroupCommand", "getHelpString");
 		exit(1);
 	}
 }
@@ -66,7 +106,7 @@ vector<string> TreeGroupCommand::getValidParameters(){
 TreeGroupCommand::TreeGroupCommand(){	
 	try {
 		abort = true; calledHelp = true;
-		globaldata = GlobalData::getInstance();
+		setParameters();
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["tree"] = tempOutNames;
@@ -77,46 +117,17 @@ TreeGroupCommand::TreeGroupCommand(){
 	}
 }
 //**********************************************************************************************************************
-vector<string> TreeGroupCommand::getRequiredParameters(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "TreeGroupCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> TreeGroupCommand::getRequiredFiles(){	
-	try {
-		string Array[] =  {"phylip","column","shared","or"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "TreeGroupCommand", "getRequiredFiles");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 
 TreeGroupCommand::TreeGroupCommand(string option)  {
 	try {
-		globaldata = GlobalData::getInstance();
 		abort = false; calledHelp = false;   
 		allLines = 1;
-		labels.clear();
-		Groups.clear();
-		Estimators.clear();
 		
 		//allow user to run help
-		if(option == "help") { validCalculator = new ValidCalculators(); help(); abort = true; calledHelp = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"label","calc","groups", "phylip", "column", "name", "precision","cutoff","outputdir","inputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string, string> parameters = parser. getParameters();
@@ -163,32 +174,57 @@ TreeGroupCommand::TreeGroupCommand(string option)  {
 				}
 			}
 			
-			format = globaldata->getFormat();
-			
-			//required parameters
+			//check for required parameters
 			phylipfile = validParameter.validFile(parameters, "phylip", true);
-			if (phylipfile == "not open") { abort = true; }
+			if (phylipfile == "not open") { phylipfile = ""; abort = true; }
 			else if (phylipfile == "not found") { phylipfile = ""; }	
-			else {  globaldata->newRead(); format = "phylip";  globaldata->setPhylipFile(phylipfile);	}
+			else {  inputfile = phylipfile;  format = "phylip"; 	}
 			
 			columnfile = validParameter.validFile(parameters, "column", true);
-			if (columnfile == "not open") { abort = true; }	
+			if (columnfile == "not open") { columnfile = ""; abort = true; }	
 			else if (columnfile == "not found") { columnfile = ""; }
-			else {  globaldata->newRead(); format = "column"; globaldata->setColumnFile(columnfile);	}
+			else {  inputfile = columnfile; format = "column";	}
+			
+			sharedfile = validParameter.validFile(parameters, "shared", true);
+			if (sharedfile == "not open") { sharedfile = ""; abort = true; }	
+			else if (sharedfile == "not found") { sharedfile = ""; }
+			else {  inputfile = sharedfile; format = "sharedfile";	}
 			
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not open") { abort = true; }	
 			else if (namefile == "not found") { namefile = ""; }
-			else {  globaldata->setNameFile(namefile);	}
 			
-			//error checking on files			
-			if ((globaldata->getSharedFile() == "") && ((phylipfile == "") && (columnfile == "")))	{ m->mothurOut("You must run the read.otu command or provide a distance file before running the tree.shared command."); m->mothurOutEndLine(); abort = true; }
+			if ((phylipfile == "") && (columnfile == "") && (sharedfile == "")) { 
+				//is there are current file available for either of these?
+				//give priority to shared, then column, then phylip
+				sharedfile = m->getSharedFile(); 
+				if (sharedfile != "") {  inputfile = sharedfile; format = "sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+				else { 
+					columnfile = m->getColumnFile(); 
+					if (columnfile != "") { inputfile = columnfile; format = "column";  m->mothurOut("Using " + columnfile + " as input file for the column parameter."); m->mothurOutEndLine(); }
+					else { 
+						phylipfile = m->getPhylipFile(); 
+						if (phylipfile != "") { inputfile = phylipfile;  format = "phylip";  m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
+						else { 
+							m->mothurOut("No valid current files. You must provide a shared, phylip or column file."); m->mothurOutEndLine(); 
+							abort = true;
+						}
+					}
+				}
+			}
 			else if ((phylipfile != "") && (columnfile != "")) { m->mothurOut("When running the tree.shared command with a distance file you may not use both the column and the phylip parameters."); m->mothurOutEndLine(); abort = true; }
 			
 			if (columnfile != "") {
-				if (namefile == "") {  m->mothurOut("You need to provide a namefile if you are going to use the column format."); m->mothurOutEndLine(); abort = true; }
+				if (namefile == "") { 
+					namefile = m->getNameFile(); 
+					if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
+					else { 
+						m->mothurOut("You need to provide a namefile if you are going to use the column format."); m->mothurOutEndLine(); 
+						abort = true; 
+					}	
+				}
 			}
-
+			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			label = validParameter.validFile(parameters, "label", false);			
@@ -198,17 +234,11 @@ TreeGroupCommand::TreeGroupCommand(string option)  {
 				else { allLines = 1;  }
 			}
 			
-			//if the user has not specified any labels use the ones from read.otu
-			if(label == "") {  
-				allLines = globaldata->allLines; 
-				labels = globaldata->labels; 
-			}
-				
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = ""; }
 			else { 
 				m->splitAtDash(groups, Groups);
-				globaldata->Groups = Groups;
+				m->Groups = Groups;
 			}
 				
 			calc = validParameter.validFile(parameters, "calc", false);			
@@ -229,101 +259,8 @@ TreeGroupCommand::TreeGroupCommand(string option)  {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += m->hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
+				outputDir += m->hasPath(inputfile); //if user entered a file with a path then preserve it	
 			}
-
-				
-			if (abort == false) {
-			
-				validCalculator = new ValidCalculators();
-				
-				if (format == "sharedfile") {
-					int i;
-					for (i=0; i<Estimators.size(); i++) {
-						if (validCalculator->isValidCalculator("treegroup", Estimators[i]) == true) { 
-							if (Estimators[i] == "sharedsobs") { 
-								treeCalculators.push_back(new SharedSobsCS());
-							}else if (Estimators[i] == "sharedchao") { 
-								treeCalculators.push_back(new SharedChao1());
-							}else if (Estimators[i] == "sharedace") { 
-								treeCalculators.push_back(new SharedAce());
-							}else if (Estimators[i] == "jabund") { 	
-								treeCalculators.push_back(new JAbund());
-							}else if (Estimators[i] == "sorabund") { 
-								treeCalculators.push_back(new SorAbund());
-							}else if (Estimators[i] == "jclass") { 
-								treeCalculators.push_back(new Jclass());
-							}else if (Estimators[i] == "sorclass") { 
-								treeCalculators.push_back(new SorClass());
-							}else if (Estimators[i] == "jest") { 
-								treeCalculators.push_back(new Jest());
-							}else if (Estimators[i] == "sorest") { 
-								treeCalculators.push_back(new SorEst());
-							}else if (Estimators[i] == "thetayc") { 
-								treeCalculators.push_back(new ThetaYC());
-							}else if (Estimators[i] == "thetan") { 
-								treeCalculators.push_back(new ThetaN());
-							}else if (Estimators[i] == "kstest") { 
-								treeCalculators.push_back(new KSTest());
-							}else if (Estimators[i] == "sharednseqs") { 
-								treeCalculators.push_back(new SharedNSeqs());
-							}else if (Estimators[i] == "ochiai") { 
-								treeCalculators.push_back(new Ochiai());
-							}else if (Estimators[i] == "anderberg") { 
-								treeCalculators.push_back(new Anderberg());
-							}else if (Estimators[i] == "kulczynski") { 
-								treeCalculators.push_back(new Kulczynski());
-							}else if (Estimators[i] == "kulczynskicody") { 
-								treeCalculators.push_back(new KulczynskiCody());
-							}else if (Estimators[i] == "lennon") { 
-								treeCalculators.push_back(new Lennon());
-							}else if (Estimators[i] == "morisitahorn") { 
-								treeCalculators.push_back(new MorHorn());
-							}else if (Estimators[i] == "braycurtis") { 
-								treeCalculators.push_back(new BrayCurtis());
-							}else if (Estimators[i] == "whittaker") { 
-								treeCalculators.push_back(new Whittaker());
-							}else if (Estimators[i] == "odum") { 
-								treeCalculators.push_back(new Odum());
-							}else if (Estimators[i] == "canberra") { 
-								treeCalculators.push_back(new Canberra());
-							}else if (Estimators[i] == "structeuclidean") { 
-								treeCalculators.push_back(new StructEuclidean());
-							}else if (Estimators[i] == "structchord") { 
-								treeCalculators.push_back(new StructChord());
-							}else if (Estimators[i] == "hellinger") { 
-								treeCalculators.push_back(new Hellinger());
-							}else if (Estimators[i] == "manhattan") { 
-								treeCalculators.push_back(new Manhattan());
-							}else if (Estimators[i] == "structpearson") { 
-								treeCalculators.push_back(new StructPearson());
-							}else if (Estimators[i] == "soergel") { 
-								treeCalculators.push_back(new Soergel());
-							}else if (Estimators[i] == "spearman") { 
-								treeCalculators.push_back(new Spearman());
-							}else if (Estimators[i] == "structkulczynski") { 
-								treeCalculators.push_back(new StructKulczynski());
-							}else if (Estimators[i] == "speciesprofile") { 
-								treeCalculators.push_back(new SpeciesProfile());
-							}else if (Estimators[i] == "hamming") { 
-								treeCalculators.push_back(new Hamming());
-							}else if (Estimators[i] == "structchi2") { 
-								treeCalculators.push_back(new StructChi2());
-							}else if (Estimators[i] == "gower") { 
-								treeCalculators.push_back(new Gower());
-							}else if (Estimators[i] == "memchi2") { 
-								treeCalculators.push_back(new MemChi2());
-							}else if (Estimators[i] == "memchord") { 
-								treeCalculators.push_back(new MemChord());
-							}else if (Estimators[i] == "memeuclidean") { 
-								treeCalculators.push_back(new MemEuclidean());
-							}else if (Estimators[i] == "mempearson") { 
-								treeCalculators.push_back(new MemPearson());
-							}
-						}
-					}
-				}
-			}	
 		}
 
 	}
@@ -332,45 +269,13 @@ TreeGroupCommand::TreeGroupCommand(string option)  {
 		exit(1);
 	}
 }
-
-//**********************************************************************************************************************
-
-void TreeGroupCommand::help(){
-	try {
-		m->mothurOut("The tree.shared command creates a .tre to represent the similiarity between groups or sequences.\n");
-		m->mothurOut("The tree.shared command can only be executed after a successful read.otu command or by providing a distance file.\n");
-		m->mothurOut("The tree.shared command parameters are groups, calc, phylip, column, name, cutoff, precision and label.\n");
-		m->mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like included used.\n");
-		m->mothurOut("The group names are separated by dashes. The label allow you to select what distance levels you would like trees created for, and are also separated by dashes.\n");
-		m->mothurOut("The phylip or column parameter are required if you do not run the read.otu command first, and only one may be used.  If you use a column file the name filename is required. \n");
-		m->mothurOut("If you do not provide a cutoff value 10.00 is assumed. If you do not provide a precision value then 100 is assumed.\n");
-		m->mothurOut("The tree.shared command should be in the following format: tree.shared(groups=yourGroups, calc=yourCalcs, label=yourLabels).\n");
-		m->mothurOut("Example tree.shared(groups=A-B-C, calc=jabund-sorabund).\n");
-		m->mothurOut("The default value for groups is all the groups in your groupfile.\n");
-		m->mothurOut("The default value for calc is jclass-thetayc.\n");
-		m->mothurOut("The tree.shared command outputs a .tre file for each calculator you specify at each distance you choose.\n");
-		validCalculator->printCalc("treegroup", cout);
-		m->mothurOut("Or the tree.shared command can be in the following format: tree.shared(phylip=yourPhylipFile).\n");
-		m->mothurOut("Example tree.shared(phylip=abrecovery.dist).\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "TreeGroupCommand", "help");
-		exit(1);
-	}
-}
-
-
 //**********************************************************************************************************************
 
 TreeGroupCommand::~TreeGroupCommand(){
-	globaldata->Groups.clear();  
 	if (abort == false) {
-		
-		if (format == "sharedfile") { delete read;  delete input; globaldata->ginput = NULL; }
+		if (format == "sharedfile") {  delete input; }
 		else { delete readMatrix;  delete matrix; delete list; }
-		delete tmap;  globaldata->gTreemap = NULL;
-		delete validCalculator;
+		delete tmap;  
 	}
 	
 }
@@ -383,33 +288,114 @@ int TreeGroupCommand::execute(){
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		if (format == "sharedfile") {
+			
+			ValidCalculators validCalculator;
+		
+			for (int i=0; i<Estimators.size(); i++) {
+				if (validCalculator.isValidCalculator("treegroup", Estimators[i]) == true) { 
+					if (Estimators[i] == "sharedsobs") { 
+						treeCalculators.push_back(new SharedSobsCS());
+					}else if (Estimators[i] == "sharedchao") { 
+						treeCalculators.push_back(new SharedChao1());
+					}else if (Estimators[i] == "sharedace") { 
+						treeCalculators.push_back(new SharedAce());
+					}else if (Estimators[i] == "jabund") { 	
+						treeCalculators.push_back(new JAbund());
+					}else if (Estimators[i] == "sorabund") { 
+						treeCalculators.push_back(new SorAbund());
+					}else if (Estimators[i] == "jclass") { 
+						treeCalculators.push_back(new Jclass());
+					}else if (Estimators[i] == "sorclass") { 
+						treeCalculators.push_back(new SorClass());
+					}else if (Estimators[i] == "jest") { 
+						treeCalculators.push_back(new Jest());
+					}else if (Estimators[i] == "sorest") { 
+						treeCalculators.push_back(new SorEst());
+					}else if (Estimators[i] == "thetayc") { 
+						treeCalculators.push_back(new ThetaYC());
+					}else if (Estimators[i] == "thetan") { 
+						treeCalculators.push_back(new ThetaN());
+					}else if (Estimators[i] == "kstest") { 
+						treeCalculators.push_back(new KSTest());
+					}else if (Estimators[i] == "sharednseqs") { 
+						treeCalculators.push_back(new SharedNSeqs());
+					}else if (Estimators[i] == "ochiai") { 
+						treeCalculators.push_back(new Ochiai());
+					}else if (Estimators[i] == "anderberg") { 
+						treeCalculators.push_back(new Anderberg());
+					}else if (Estimators[i] == "kulczynski") { 
+						treeCalculators.push_back(new Kulczynski());
+					}else if (Estimators[i] == "kulczynskicody") { 
+						treeCalculators.push_back(new KulczynskiCody());
+					}else if (Estimators[i] == "lennon") { 
+						treeCalculators.push_back(new Lennon());
+					}else if (Estimators[i] == "morisitahorn") { 
+						treeCalculators.push_back(new MorHorn());
+					}else if (Estimators[i] == "braycurtis") { 
+						treeCalculators.push_back(new BrayCurtis());
+					}else if (Estimators[i] == "whittaker") { 
+						treeCalculators.push_back(new Whittaker());
+					}else if (Estimators[i] == "odum") { 
+						treeCalculators.push_back(new Odum());
+					}else if (Estimators[i] == "canberra") { 
+						treeCalculators.push_back(new Canberra());
+					}else if (Estimators[i] == "structeuclidean") { 
+						treeCalculators.push_back(new StructEuclidean());
+					}else if (Estimators[i] == "structchord") { 
+						treeCalculators.push_back(new StructChord());
+					}else if (Estimators[i] == "hellinger") { 
+						treeCalculators.push_back(new Hellinger());
+					}else if (Estimators[i] == "manhattan") { 
+						treeCalculators.push_back(new Manhattan());
+					}else if (Estimators[i] == "structpearson") { 
+						treeCalculators.push_back(new StructPearson());
+					}else if (Estimators[i] == "soergel") { 
+						treeCalculators.push_back(new Soergel());
+					}else if (Estimators[i] == "spearman") { 
+						treeCalculators.push_back(new Spearman());
+					}else if (Estimators[i] == "structkulczynski") { 
+						treeCalculators.push_back(new StructKulczynski());
+					}else if (Estimators[i] == "speciesprofile") { 
+						treeCalculators.push_back(new SpeciesProfile());
+					}else if (Estimators[i] == "hamming") { 
+						treeCalculators.push_back(new Hamming());
+					}else if (Estimators[i] == "structchi2") { 
+						treeCalculators.push_back(new StructChi2());
+					}else if (Estimators[i] == "gower") { 
+						treeCalculators.push_back(new Gower());
+					}else if (Estimators[i] == "memchi2") { 
+						treeCalculators.push_back(new MemChi2());
+					}else if (Estimators[i] == "memchord") { 
+						treeCalculators.push_back(new MemChord());
+					}else if (Estimators[i] == "memeuclidean") { 
+						treeCalculators.push_back(new MemEuclidean());
+					}else if (Estimators[i] == "mempearson") { 
+						treeCalculators.push_back(new MemPearson());
+					}
+				}
+			}
+			
 			//if the users entered no valid calculators don't execute command
 			if (treeCalculators.size() == 0) { m->mothurOut("You have given no valid calculators."); m->mothurOutEndLine(); return 0; }
 			
-			if (globaldata->gGroupmap != NULL) {  delete globaldata->gGroupmap;   globaldata->gGroupmap = NULL;  }
-			//you have groups
-			read = new ReadOTUFile(globaldata->inputFileName);	
-			read->read(&*globaldata); 
-			
-			input = globaldata->ginput;
+			input = new InputData(sharedfile, "sharedfile");
 			lookup = input->getSharedRAbundVectors();
 			lastLabel = lookup[0]->getLabel();
 			
 			if (lookup.size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); return 0; }
 			
 			//used in tree constructor 
-			globaldata->runParse = false;
+			m->runParse = false;
 			
 			//create treemap class from groupmap for tree class to use
 			tmap = new TreeMap();
-			tmap->makeSim(globaldata->gGroupmap);
-			globaldata->gTreemap = tmap;
+			tmap->makeSim(m->namesOfGroups);
 			
 			//clear globaldatas old tree names if any
-			globaldata->Treenames.clear();
+			m->Treenames.clear();
 			
 			//fills globaldatas tree names
-			globaldata->Treenames = globaldata->Groups;
+			m->Treenames = m->Groups;
 		
 			if (m->control_pressed) { return 0; }
 			
@@ -419,7 +405,7 @@ int TreeGroupCommand::execute(){
 			if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0; }
 		}else{
 			//read in dist file
-			filename = globaldata->inputFileName;
+			filename = inputfile;
 		
 			if (format == "column") { readMatrix = new ReadColumnMatrix(filename); }	
 			else if (format == "phylip") { readMatrix = new ReadPhylipMatrix(filename); }
@@ -444,18 +430,17 @@ int TreeGroupCommand::execute(){
 			if (m->control_pressed) { return 0; }
 			
 			tmap->makeSim(list);
-			globaldata->gTreemap = tmap;
 			
-			globaldata->Groups = tmap->namesOfGroups;
+			m->Groups = tmap->namesOfGroups;
 		
 			//clear globaldatas old tree names if any
-			globaldata->Treenames.clear();
+			m->Treenames.clear();
 		
 			//fills globaldatas tree names
-			globaldata->Treenames = globaldata->Groups;
+			m->Treenames = m->Groups;
 			
 			//used in tree constructor 
-			globaldata->runParse = false;
+			m->runParse = false;
 			
 			if (m->control_pressed) { return 0; }
 			
@@ -464,7 +449,7 @@ int TreeGroupCommand::execute(){
 			if (m->control_pressed) { return 0; }
 
 			//create a new filename
-			outputFile = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName)) + "tre";	
+			outputFile = outputDir + m->getRootName(m->getSimpleName(inputfile)) + "tre";	
 			outputNames.push_back(outputFile); outputTypes["tree"].push_back(outputFile);
 				
 			createTree();
@@ -476,7 +461,7 @@ int TreeGroupCommand::execute(){
 		}
 				
 		//reset groups parameter
-		globaldata->Groups.clear(); 
+		m->Groups.clear(); 
 		
 		//set tree file as new current treefile
 		string current = "";
@@ -502,7 +487,7 @@ int TreeGroupCommand::execute(){
 int TreeGroupCommand::createTree(){
 	try {
 		//create tree
-		t = new Tree();
+		t = new Tree(tmap);
 		
 		//do merges and create tree structure by setting parents and children
 		//there are numGroups - 1 merges to do
@@ -742,7 +727,7 @@ int TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
 					for (int g = 0; g < numGroups; g++) {	index[g] = g;	}
 		
 					//create a new filename
-					outputFile = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName)) + treeCalculators[i]->getName() + "." + thisLookup[0]->getLabel() + ".tre";				
+					outputFile = outputDir + m->getRootName(m->getSimpleName(inputfile)) + treeCalculators[i]->getName() + "." + thisLookup[0]->getLabel() + ".tre";				
 					outputNames.push_back(outputFile); outputTypes["tree"].push_back(outputFile); 
 												
 					for (int k = 0; k < thisLookup.size(); k++) { 

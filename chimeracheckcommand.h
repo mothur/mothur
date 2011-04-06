@@ -22,15 +22,17 @@ class ChimeraCheckCommand : public Command {
 public:
 	ChimeraCheckCommand(string);
 	ChimeraCheckCommand();
-	~ChimeraCheckCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();
+	~ChimeraCheckCommand(){}
 	
-		
+	vector<string> setParameters();
+	string getCommandName()			{ return "chimera.check";		}
+	string getCommandCategory()		{ return "Sequence Processing"; }
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
+	
+	
 private:
 
 	struct linePair {
@@ -56,8 +58,6 @@ private:
 	vector<string> fastaFileNames;
 	vector<string> nameFileNames;
 	vector<string> outputNames;
-	map<string, vector<string> > outputTypes;
-		
 };
 
 /***********************************************************/

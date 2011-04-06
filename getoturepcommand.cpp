@@ -35,10 +35,70 @@ inline bool compareSize(repStruct left, repStruct right){
 inline bool compareGroup(repStruct left, repStruct right){
 	return (left.group < right.group);	
 }
+
+//**********************************************************************************************************************
+vector<string> GetOTURepCommand::setParameters(){	
+	try {
+		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(plist);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
+		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pgroup);
+		CommandParameter pphylip("phylip", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "none",false,false); parameters.push_back(pphylip);
+		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "ColumnName",false,false); parameters.push_back(pname);
+		CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "ColumnName",false,false); parameters.push_back(pcolumn);
+		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
+		CommandParameter pcutoff("cutoff", "Number", "", "10", "", "", "",false,false); parameters.push_back(pcutoff);
+		CommandParameter pprecision("precision", "Number", "", "100", "", "", "",false,false); parameters.push_back(pprecision);
+		CommandParameter pweighted("weighted", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pweighted);
+		CommandParameter psorted("sorted", "Multiple", "none-name-bin-size-group", "none", "", "", "",false,false); parameters.push_back(psorted);
+		CommandParameter plarge("large", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(plarge);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetOTURepCommand", "setParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string GetOTURepCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The get.oturep command parameters are phylip, column, list, fasta, name, group, large, weighted, cutoff, precision, groups, sorted and label.  The fasta and list parameters are required, as well as phylip or column and name, unless you have valid current files.\n";
+		helpString += "The label parameter allows you to select what distance levels you would like a output files created for, and is separated by dashes.\n";
+		helpString += "The phylip or column parameter is required, but only one may be used.  If you use a column file the name filename is required. \n";
+		helpString += "If you do not provide a cutoff value 10.00 is assumed. If you do not provide a precision value then 100 is assumed.\n";
+		helpString += "The get.oturep command should be in the following format: get.oturep(phylip=yourDistanceMatrix, fasta=yourFastaFile, list=yourListFile, name=yourNamesFile, group=yourGroupFile, label=yourLabels).\n";
+		helpString += "Example get.oturep(phylip=amazon.dist, fasta=amazon.fasta, list=amazon.fn.list, group=amazon.groups).\n";
+		helpString += "The default value for label is all labels in your inputfile.\n";
+		helpString += "The sorted parameter allows you to indicate you want the output sorted. You can sort by sequence name, bin number, bin size or group. The default is no sorting, but your options are name, number, size, or group.\n";
+		helpString += "The large parameter allows you to indicate that your distance matrix is too large to fit in RAM.  The default value is false.\n";
+		helpString += "The weighted parameter allows you to indicate that want to find the weighted representative. You must provide a namesfile to set weighted to true.  The default value is false.\n";
+		helpString += "The representative is found by selecting the sequence that has the smallest total distance to all other sequences in the OTU. If a tie occurs the smallest average distance is used.\n";
+		helpString += "For weighted = false, mothur assumes the distance file contains only unique sequences, the list file may contain all sequences, but only the uniques are considered to become the representative. If your distance file contains all the sequences it would become weighted=true.\n";
+		helpString += "For weighted = true, mothur assumes the distance file contains only unique sequences, the list file must contain all sequences, all sequences are considered to become the representative, but unique name will be used in the output for consistency.\n";
+		helpString += "If your distance file contains all the sequence and you do not provide a name file, the weighted representative will be given, unless your listfile is unique. If you provide a namefile, then you can select weighted or unweighted.\n";
+		helpString += "The group parameter allows you provide a group file.\n";
+		helpString += "The groups parameter allows you to indicate that you want representative sequences for each group specified for each OTU, group name should be separated by dashes. ex. groups=A-B-C.\n";
+		helpString += "The get.oturep command outputs a .fastarep and .rep.names file for each distance you specify, selecting one OTU representative for each bin.\n";
+		helpString += "If you provide a groupfile, then it also appends the names of the groups present in that bin.\n";
+		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetOTURepCommand", "getHelpString");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 GetOTURepCommand::GetOTURepCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
 		outputTypes["name"] = tempOutNames;
@@ -49,55 +109,16 @@ GetOTURepCommand::GetOTURepCommand(){
 	}
 }
 //**********************************************************************************************************************
-vector<string> GetOTURepCommand::getValidParameters(){	
-	try {
-		string Array[] =  {"fasta","list","label","name", "group", "weighted","sorted", "phylip","column","large","cutoff","precision","groups","outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetOTURepCommand", "getValidParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> GetOTURepCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"fasta","list"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetOTURepCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> GetOTURepCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetOTURepCommand", "getRequiredFiles");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 GetOTURepCommand::GetOTURepCommand(string option)  {
 	try{
-		globaldata = GlobalData::getInstance();
 		abort = false; calledHelp = false;   
 		allLines = 1;
-		labels.clear();
 				
 		//allow user to run help
 		if (option == "help") { 
 			help(); abort = true; calledHelp = true;
 		} else {
-			//valid paramters for this command
-			string Array[] =  {"fasta","list","label","name","weighted", "group", "sorted", "phylip","column","large","cutoff","precision","groups","outputdir","inputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string, string> parameters = parser.getParameters();
@@ -175,11 +196,19 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 			
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", true);
-			if (fastafile == "not found") { m->mothurOut("fasta is a required parameter for the get.oturep command."); m->mothurOutEndLine(); abort = true; }
+			if (fastafile == "not found") { 				
+				fastafile = m->getFastaFile(); 
+				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}
 			else if (fastafile == "not open") { abort = true; }	
 		
 			listfile = validParameter.validFile(parameters, "list", true);
-			if (listfile == "not found") { m->mothurOut("list is a required parameter for the get.oturep command."); m->mothurOutEndLine(); abort = true; }
+			if (listfile == "not found") { 			
+				listfile = m->getListFile(); 
+				if (listfile != "") { m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current list file and the list parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}
 			else if (listfile == "not open") { abort = true; }	
 			
 			phylipfile = validParameter.validFile(parameters, "phylip", true);
@@ -196,10 +225,30 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 			if (namefile == "not open") { abort = true; }	
 			else if (namefile == "not found") { namefile = ""; }
 			
-			if ((phylipfile == "") && (columnfile == "")) { m->mothurOut("When executing a get.oturep command you must enter a phylip or a column."); m->mothurOutEndLine(); abort = true; }
-			else if ((phylipfile != "") && (columnfile != "")) { m->mothurOut("When executing a get.oturep command you must enter ONLY ONE of the following: phylip or column."); m->mothurOutEndLine(); abort = true; }
+			if ((phylipfile == "") && (columnfile == "")) { //is there are current file available for either of these?
+				//give priority to column, then phylip
+				columnfile = m->getColumnFile(); 
+				if (columnfile != "") {  m->mothurOut("Using " + columnfile + " as input file for the column parameter."); m->mothurOutEndLine(); }
+				else { 
+					phylipfile = m->getPhylipFile(); 
+					if (phylipfile != "") {  m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
+					else { 
+						m->mothurOut("No valid current files. You must provide a phylip or column file before you can use the get.oturep command."); m->mothurOutEndLine(); 
+						abort = true;
+					}
+				}
+			}else if ((phylipfile != "") && (columnfile != "")) { m->mothurOut("When executing a get.oturep command you must enter ONLY ONE of the following: phylip or column."); m->mothurOutEndLine(); abort = true; }
 		
-			if (columnfile != "") {  if (namefile == "") {  cout << "You need to provide a namefile if you are going to use the column format." << endl; abort = true; }  }
+			if (columnfile != "") {  
+				if (namefile == "") {  
+					namefile = m->getNameFile(); 
+					if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
+					else { 
+						m->mothurOut("You need to provide a namefile if you are going to use the column format."); m->mothurOutEndLine(); 
+						abort = true; 
+					}	
+				} 
+			}
 
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -215,6 +264,7 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 			else if (groupfile == "not found") { groupfile = ""; }
 						
 			sorted = validParameter.validFile(parameters, "sorted", false);		if (sorted == "not found"){	sorted = "";	}
+			if (sorted == "none") { sorted=""; }
 			if ((sorted != "") && (sorted != "name") && (sorted != "bin") && (sorted != "size") && (sorted != "group")) {
 				m->mothurOut(sorted + " is not a valid option for the sorted parameter. The only options are: name, bin, size and group. I will not sort."); m->mothurOutEndLine();
 				sorted = "";
@@ -235,12 +285,12 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 					m->splitAtDash(groups, Groups);
 				}
 			}
-			globaldata->Groups = Groups;
+			m->Groups = Groups;
 			
 			string temp = validParameter.validFile(parameters, "large", false);		if (temp == "not found") {	temp = "F";	}
 			large = m->isTrue(temp);
 			
-			temp = validParameter.validFile(parameters, "weighted", false);		if (temp == "not found") {	if (namefile == "") { temp = "F"; } else { temp = "t"; }	}
+			temp = validParameter.validFile(parameters, "weighted", false);		if (temp == "not found") {	 temp = "f"; 	}
 			weighted = m->isTrue(temp);
 			
 			if ((weighted) && (namefile == "")) { m->mothurOut("You cannot set weighted to true unless you provide a namesfile."); m->mothurOutEndLine(); abort = true; }
@@ -261,45 +311,12 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 
 //**********************************************************************************************************************
 
-void GetOTURepCommand::help(){
-	try {
-		m->mothurOut("The get.oturep command parameters are phylip, column, list, fasta, name, group, large, weighted, cutoff, precision, groups, sorted and label.  The fasta and list parameters are required, as well as phylip or column and name.\n");
-		m->mothurOut("The label parameter allows you to select what distance levels you would like a output files created for, and is separated by dashes.\n");
-		m->mothurOut("The phylip or column parameter is required, but only one may be used.  If you use a column file the name filename is required. \n");
-		m->mothurOut("If you do not provide a cutoff value 10.00 is assumed. If you do not provide a precision value then 100 is assumed.\n");
-		m->mothurOut("The get.oturep command should be in the following format: get.oturep(phylip=yourDistanceMatrix, fasta=yourFastaFile, list=yourListFile, name=yourNamesFile, group=yourGroupFile, label=yourLabels).\n");
-		m->mothurOut("Example get.oturep(phylip=amazon.dist, fasta=amazon.fasta, list=amazon.fn.list, group=amazon.groups).\n");
-		m->mothurOut("The default value for label is all labels in your inputfile.\n");
-		m->mothurOut("The sorted parameter allows you to indicate you want the output sorted. You can sort by sequence name, bin number, bin size or group. The default is no sorting, but your options are name, number, size, or group.\n");
-		m->mothurOut("The large parameter allows you to indicate that your distance matrix is too large to fit in RAM.  The default value is false.\n");
-		m->mothurOut("The weighted parameter allows you to indicate that want to find the weighted representative. You must provide a namesfile to set weighted to true.  The default value is false with no namesfile and true when a name file is provided.\n");
-		m->mothurOut("The representative is found by selecting the sequence that has the smallest total distance to all other sequences in the OTU. If a tie occurs the smallest average distance is used.\n");
-		m->mothurOut("For weighted = false, mothur assumes the distance file contains only unique sequences, the list file may contain all sequences, but only the uniques are considered to become the representative. If your distance file contains all the sequences it would become weighted=true.\n");
-		m->mothurOut("For weighted = true, mothur assumes the distance file contains only unique sequences, the list file must contain all sequences, all sequences are considered to become the representative, but unique name will be used in the output for consistency.\n");
-		m->mothurOut("If your distance file contains all the sequence and you do not provide a name file, the weighted representative will be given, unless your listfile is unique. If you provide a namefile, then you can select weighted or unweighted.\n");
-		m->mothurOut("The group parameter allows you provide a group file.\n");
-		m->mothurOut("The groups parameter allows you to indicate that you want representative sequences for each group specified for each OTU, group name should be separated by dashes. ex. groups=A-B-C.\n");
-		m->mothurOut("The get.oturep command outputs a .fastarep and .rep.names file for each distance you specify, selecting one OTU representative for each bin.\n");
-		m->mothurOut("If you provide a groupfile, then it also appends the names of the groups present in that bin.\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetOTURepCommand", "help");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
-GetOTURepCommand::~GetOTURepCommand(){}
-
-//**********************************************************************************************************************
-
 int GetOTURepCommand::execute(){
 	try {
 	
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		int error;
+		list = NULL;
 		
 		if (!large) {
 			//read distance files
@@ -318,9 +335,7 @@ int GetOTURepCommand::execute(){
 			
 			if (m->control_pressed) { delete readMatrix; return 0; }
 
-			//get matrix
-			if (globaldata->gListVector != NULL) {  delete globaldata->gListVector;  }
-			globaldata->gListVector = readMatrix->getListVector();
+			list = readMatrix->getListVector();
 
 			SparseMatrix* matrix = readMatrix->getMatrix();
 			
@@ -328,7 +343,7 @@ int GetOTURepCommand::execute(){
 			// It consists of a vector of distance maps, where each map contains
 			// all distances of a certain sequence. Vector and maps are accessed
 			// via the index of a sequence in the distance matrix
-			seqVec = vector<SeqMap>(globaldata->gListVector->size()); 
+			seqVec = vector<SeqMap>(list->size()); 
 			for (MatData currentCell = matrix->begin(); currentCell != matrix->end(); currentCell++) {
 				if (m->control_pressed) { delete readMatrix; return 0; }
 				seqVec[currentCell->row][currentCell->column] = currentCell->dist;
@@ -359,9 +374,7 @@ int GetOTURepCommand::execute(){
 			
 			if (m->control_pressed) { delete formatMatrix;  return 0; }
 
-			//get matrix
-			if (globaldata->gListVector != NULL) {  delete globaldata->gListVector;  }
-			globaldata->gListVector = formatMatrix->getListVector();
+			list = formatMatrix->getListVector();
 			
 			distFile = formatMatrix->getFormattedFileName();
 			
@@ -380,14 +393,14 @@ int GetOTURepCommand::execute(){
 		}
 		
 		
-		//globaldata->gListVector bin 0 = first name read in distance matrix, globaldata->gListVector bin 1 = second name read in distance matrix
-		if (globaldata->gListVector != NULL) {
+		//list bin 0 = first name read in distance matrix, list bin 1 = second name read in distance matrix
+		if (list != NULL) {
 			vector<string> names;
 			string binnames;
 			//map names to rows in sparsematrix
-			for (int i = 0; i < globaldata->gListVector->size(); i++) {
+			for (int i = 0; i < list->size(); i++) {
 				names.clear();
-				binnames = globaldata->gListVector->get(i);
+				binnames = list->get(i);
 				
 				m->splitAtComma(binnames, names);
 				
@@ -415,16 +428,12 @@ int GetOTURepCommand::execute(){
 				delete util;
 			}
 		}
-								
-		//set format to list so input can get listvector
-		globaldata->setFormat("list");
-	
-		//read list file
-		read = new ReadOTUFile(listfile);
-		read->read(&*globaldata); 
 		
-		input = globaldata->ginput;
-		list = globaldata->gListVector;
+		//done with listvector from matrix
+		if (list != NULL) { delete list; }
+		
+		input = new InputData(listfile, "list");
+		list = input->getListVector();
 		string lastLabel = list->getLabel();
 
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
@@ -433,7 +442,7 @@ int GetOTURepCommand::execute(){
 		
 		if (m->control_pressed) { 
 			if (large) {  inRow.close(); remove(distFile.c_str());  }
-			delete read; delete input; delete list; globaldata->gListVector = NULL; return 0; 
+			delete input; delete list; return 0; 
 		}
 		
 		if ((!weighted) && (namefile != "")) { readNamesFile(weighted); }
@@ -448,7 +457,7 @@ int GetOTURepCommand::execute(){
 					if (m->control_pressed) { 
 						if (large) {  inRow.close(); remove(distFile.c_str());  }
 						for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } outputTypes.clear();
-						delete read; delete input; delete list; globaldata->gListVector = NULL; return 0; 
+						delete input; delete list; return 0; 
 					}
 					
 					processedLabels.insert(list->getLabel());
@@ -467,7 +476,7 @@ int GetOTURepCommand::execute(){
 					if (m->control_pressed) { 
 						if (large) {  inRow.close(); remove(distFile.c_str());  }
 						for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } outputTypes.clear();
-						delete read; delete input; delete list; globaldata->gListVector = NULL; return 0; 
+						delete input; delete list; return 0; 
 					}
 					
 					processedLabels.insert(list->getLabel());
@@ -507,7 +516,7 @@ int GetOTURepCommand::execute(){
 			if (m->control_pressed) { 
 					if (large) {  inRow.close(); remove(distFile.c_str());  }
 					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } outputTypes.clear();
-					delete read; delete input; delete list; globaldata->gListVector = NULL; return 0; 
+					delete input; delete list; return 0; 
 			}
 		}
 		
@@ -517,9 +526,7 @@ int GetOTURepCommand::execute(){
 			remove(distFile.c_str());
 		}
 		
-		globaldata->gListVector = NULL;
-		delete input;  globaldata->ginput = NULL;
-		delete read;
+		delete input;  
 		
 		if (!weighted) { nameFileMap.clear(); }
 		
@@ -537,9 +544,7 @@ int GetOTURepCommand::execute(){
 		}
 		
 		delete fasta;
-		if (groupfile != "") {
-			delete groupMap;  globaldata->gGroupmap = NULL;
-		}
+		if (groupfile != "") { delete groupMap;  }
 		
 		if (m->control_pressed) {  return 0; }
 		

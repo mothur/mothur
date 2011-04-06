@@ -10,14 +10,41 @@
 #include "getrelabundcommand.h"
 
 //**********************************************************************************************************************
-vector<string> GetRelAbundCommand::getValidParameters(){	
+vector<string> GetRelAbundCommand::setParameters(){	
 	try {
-		string Array[] =  {"groups","label","scale","outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pshared);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
+		CommandParameter pscale("scale", "Multiple", "totalgroup-totalotu-averagegroup-averageotu", "totalgroup", "", "", "",false,false); parameters.push_back(pscale);
+		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "GetRelAbundCommand", "getValidParameters");
+		m->errorOut(e, "GetRelAbundCommand", "setParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string GetRelAbundCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The get.relabund command parameters are shared, groups, scale and label.  shared is required, unless you have a valid current file.\n";
+		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like included. The group names are separated by dashes.\n";
+		helpString += "The label parameter allows you to select what distance levels you would like, and are also separated by dashes.\n";
+		helpString += "The scale parameter allows you to select what scale you would like to use. Choices are totalgroup, totalotu, averagegroup, averageotu, default is totalgroup.\n";
+		helpString += "The get.relabund command should be in the following format: get.relabund(groups=yourGroups, label=yourLabels).\n";
+		helpString += "Example get.relabund(groups=A-B-C, scale=averagegroup).\n";
+		helpString += "The default value for groups is all the groups in your groupfile, and all labels in your inputfile will be used.\n";
+		helpString += "The get.relabund command outputs a .relabund file.\n";
+		helpString += "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetRelAbundCommand", "getHelpString");
 		exit(1);
 	}
 }
@@ -25,6 +52,7 @@ vector<string> GetRelAbundCommand::getValidParameters(){
 GetRelAbundCommand::GetRelAbundCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["relabund"] = tempOutNames;
 	}
@@ -34,68 +62,59 @@ GetRelAbundCommand::GetRelAbundCommand(){
 	}
 }
 //**********************************************************************************************************************
-vector<string> GetRelAbundCommand::getRequiredParameters(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetRelAbundCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> GetRelAbundCommand::getRequiredFiles(){	
-	try {
-		string Array[] =  {"shared"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetRelAbundCommand", "getRequiredFiles");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 GetRelAbundCommand::GetRelAbundCommand(string option) {
 	try {
-		globaldata = GlobalData::getInstance();
 		abort = false; calledHelp = false;   
 		allLines = 1;
-		labels.clear();
-		
+				
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string AlignArray[] =  {"groups","label","scale","outputdir","inputdir"};
-			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
+			map<string,string>::iterator it;
 			
 			ValidParameters validParameter;
 			
 			//check to make sure all parameters are valid for command
-			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
 			//initialize outputTypes
 			vector<string> tempOutNames;
 			outputTypes["relabund"] = tempOutNames;
+			
+			//if the user changes the input directory command factory will send this info to us in the output parameter 
+			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			if (inputDir == "not found"){	inputDir = "";		}
+			else {
+				string path;
+				it = parameters.find("shared");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
+				}
+			}
 		
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
-				outputDir = "";	
-				outputDir += m->hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
+			//get shared file
+			sharedfile = validParameter.validFile(parameters, "shared", true);
+			if (sharedfile == "not open") { sharedfile = ""; abort = true; }	
+			else if (sharedfile == "not found") { 
+				//if there is a current shared file, use it
+				sharedfile = m->getSharedFile(); 
+				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}
 			
-			//make sure the user has already run the read.otu command
-			if ((globaldata->getSharedFile() == "")) {
-				 m->mothurOut("You must read a list and a group, or a shared file before you can use the get.relabund command."); m->mothurOutEndLine(); abort = true; 
-			}
+			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(sharedfile);		}
 
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -106,18 +125,12 @@ GetRelAbundCommand::GetRelAbundCommand(string option) {
 				else { allLines = 1;  }
 			}
 			
-			//if the user has not specified any labels use the ones from read.otu
-			if (label == "") {  
-				allLines = globaldata->allLines; 
-				labels = globaldata->labels; 
-			}
-			
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = ""; pickedGroups = false; }
 			else { 
 				pickedGroups = true;
 				m->splitAtDash(groups, Groups);
-				globaldata->Groups = Groups;
+				m->Groups = Groups;
 			}
 			
 			scale = validParameter.validFile(parameters, "scale", false);				if (scale == "not found") { scale = "totalgroup"; }
@@ -133,34 +146,6 @@ GetRelAbundCommand::GetRelAbundCommand(string option) {
 		exit(1);
 	}
 }
-
-//**********************************************************************************************************************
-
-void GetRelAbundCommand::help(){
-	try {
-		m->mothurOut("The get.relabund command can only be executed after a successful read.otu command of a list and group or shared file.\n");
-		m->mothurOut("The get.relabund command parameters are groups, scale and label.  No parameters are required.\n");
-		m->mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like included. The group names are separated by dashes.\n");
-		m->mothurOut("The label parameter allows you to select what distance levels you would like, and are also separated by dashes.\n");
-		m->mothurOut("The scale parameter allows you to select what scale you would like to use. Choices are totalgroup, totalotu, averagegroup, averageotu, default is totalgroup.\n");
-		m->mothurOut("The get.relabund command should be in the following format: get.relabund(groups=yourGroups, label=yourLabels).\n");
-		m->mothurOut("Example get.relabund(groups=A-B-C, scale=averagegroup).\n");
-		m->mothurOut("The default value for groups is all the groups in your groupfile, and all labels in your inputfile will be used.\n");
-		m->mothurOut("The get.relabund command outputs a .relabund file.\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n");
-
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetRelAbundCommand", "help");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
-GetRelAbundCommand::~GetRelAbundCommand(){
-}
-
 //**********************************************************************************************************************
 
 int GetRelAbundCommand::execute(){
@@ -168,14 +153,12 @@ int GetRelAbundCommand::execute(){
 	
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName)) + "relabund";
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + "relabund";
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
 		
-		read = new ReadOTUFile(globaldata->inputFileName);	
-		read->read(&*globaldata); 
-		input = globaldata->ginput;
+		input = new InputData(sharedfile, "sharedfile");
 		lookup = input->getSharedRAbundVectors();
 		string lastLabel = lookup[0]->getLabel();
 		
@@ -186,7 +169,7 @@ int GetRelAbundCommand::execute(){
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-			if (m->control_pressed) {  outputTypes.clear();  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } globaldata->Groups.clear(); delete read;  out.close(); remove(outputFileName.c_str()); return 0; }
+			if (m->control_pressed) {  outputTypes.clear();  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } m->Groups.clear(); delete input;  out.close(); remove(outputFileName.c_str()); return 0; }
 	
 			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
 
@@ -217,13 +200,13 @@ int GetRelAbundCommand::execute(){
 			//prevent memory leak
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
 			
-			if (m->control_pressed) {  outputTypes.clear();  globaldata->Groups.clear(); delete read;  out.close(); remove(outputFileName.c_str()); return 0; }
+			if (m->control_pressed) {  outputTypes.clear();  m->Groups.clear(); delete input;  out.close(); remove(outputFileName.c_str()); return 0; }
 
 			//get next line to process
 			lookup = input->getSharedRAbundVectors();				
 		}
 		
-		if (m->control_pressed) { outputTypes.clear(); globaldata->Groups.clear(); delete read;  out.close(); remove(outputFileName.c_str());  return 0; }
+		if (m->control_pressed) { outputTypes.clear(); m->Groups.clear(); delete input;  out.close(); remove(outputFileName.c_str());  return 0; }
 
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -251,9 +234,8 @@ int GetRelAbundCommand::execute(){
 		}
 	
 		//reset groups parameter
-		globaldata->Groups.clear();  
-		delete input; globaldata->ginput = NULL;
-		delete read;
+		m->Groups.clear();  
+		delete input; 
 		out.close();
 		
 		if (m->control_pressed) { outputTypes.clear(); remove(outputFileName.c_str()); return 0;}

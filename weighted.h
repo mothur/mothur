@@ -33,7 +33,6 @@ class Weighted : public TreeCalculator  {
 		};
 		vector<linePair> lines;
 
-		GlobalData* globaldata;
 		EstOutput data;
 		TreeMap* tmap;
 		map<string, int>::iterator it;

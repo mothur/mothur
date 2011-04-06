@@ -11,27 +11,91 @@
 #include "needlemanoverlap.hpp"
 
 //**********************************************************************************************************************
-
-vector<string> TrimSeqsCommand::getValidParameters(){	
+vector<string> TrimSeqsCommand::setParameters(){	
 	try {
-		string Array[] =  {"fasta", "flip", "oligos", "maxambig", "maxhomop","minlength", "maxlength", "qfile", 
-									"qthreshold", "qwindowaverage", "qstepsize", "qwindowsize", "qaverage", "rollaverage",
-									"keepfirst", "removelast",
-									"allfiles", "qtrim","tdiffs", "pdiffs", "bdiffs", "processors", "outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
+		CommandParameter poligos("oligos", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(poligos);
+		CommandParameter pqfile("qfile", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pqfile);
+		CommandParameter pflip("flip", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pflip);
+		CommandParameter pmaxambig("maxambig", "Number", "", "-1", "", "", "",false,false); parameters.push_back(pmaxambig);
+		CommandParameter pmaxhomop("maxhomop", "Number", "", "0", "", "", "",false,false); parameters.push_back(pmaxhomop);
+		CommandParameter pminlength("minlength", "Number", "", "0", "", "", "",false,false); parameters.push_back(pminlength);
+		CommandParameter pmaxlength("maxlength", "Number", "", "0", "", "", "",false,false); parameters.push_back(pmaxlength);
+		CommandParameter ppdiffs("pdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(ppdiffs);
+		CommandParameter pbdiffs("bdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(pbdiffs);
+		CommandParameter ptdiffs("tdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(ptdiffs);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
+		CommandParameter pallfiles("allfiles", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pallfiles);
+		CommandParameter pqtrim("qtrim", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pqtrim);
+		CommandParameter pqthreshold("qthreshold", "Number", "", "0", "", "", "",false,false); parameters.push_back(pqthreshold);
+		CommandParameter pqaverage("qaverage", "Number", "", "0", "", "", "",false,false); parameters.push_back(pqaverage);
+		CommandParameter prollaverage("rollaverage", "Number", "", "0", "", "", "",false,false); parameters.push_back(prollaverage);
+		CommandParameter pqwindowaverage("qwindowaverage", "Number", "", "0", "", "", "",false,false); parameters.push_back(pqwindowaverage);
+		CommandParameter pqstepsize("qstepsize", "Number", "", "1", "", "", "",false,false); parameters.push_back(pqstepsize);
+		CommandParameter pqwindowsize("qwindowsize", "Number", "", "50", "", "", "",false,false); parameters.push_back(pqwindowsize);
+		CommandParameter pkeepfirst("keepfirst", "Number", "", "0", "", "", "",false,false); parameters.push_back(pkeepfirst);
+		CommandParameter premovelast("removelast", "Number", "", "0", "", "", "",false,false); parameters.push_back(premovelast);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+			
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "TrimSeqsCommand", "getValidParameters");
+		m->errorOut(e, "TrimSeqsCommand", "setParameters");
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
+string TrimSeqsCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The trim.seqs command reads a fastaFile and creates 2 new fasta files, .trim.fasta and scrap.fasta, as well as group files if you provide and oligos file.\n";
+		helpString += "The .trim.fasta contains sequences that meet your requirements, and the .scrap.fasta contains those which don't.\n";
+		helpString += "The trim.seqs command parameters are fasta, flip, oligos, maxambig, maxhomop, minlength, maxlength, qfile, qthreshold, qaverage, diffs, qtrim, keepfirst, removelast and allfiles.\n";
+		helpString += "The fasta parameter is required.\n";
+		helpString += "The flip parameter will output the reverse compliment of your trimmed sequence. The default is false.\n";
+		helpString += "The oligos parameter allows you to provide an oligos file.\n";
+		helpString += "The maxambig parameter allows you to set the maximum number of ambigious bases allowed. The default is -1.\n";
+		helpString += "The maxhomop parameter allows you to set a maximum homopolymer length. \n";
+		helpString += "The minlength parameter allows you to set and minimum sequence length. \n";
+		helpString += "The maxlength parameter allows you to set and maximum sequence length. \n";
+		helpString += "The tdiffs parameter is used to specify the total number of differences allowed in the sequence. The default is pdiffs + bdiffs.\n";
+		helpString += "The bdiffs parameter is used to specify the number of differences allowed in the barcode. The default is 0.\n";
+		helpString += "The pdiffs parameter is used to specify the number of differences allowed in the primer. The default is 0.\n";
+		helpString += "The qfile parameter allows you to provide a quality file.\n";
+		helpString += "The qthreshold parameter allows you to set a minimum quality score allowed. \n";
+		helpString += "The qaverage parameter allows you to set a minimum average quality score allowed. \n";
+		helpString += "The qwindowsize parameter allows you to set a number of bases in a window. Default=50.\n";
+		helpString += "The qwindowaverage parameter allows you to set a minimum average quality score allowed over a window. \n";
+		helpString += "The rollaverage parameter allows you to set a minimum rolling average quality score allowed over a window. \n";
+		helpString += "The qstepsize parameter allows you to set a number of bases to move the window over. Default=1.\n";
+		helpString += "The allfiles parameter will create separate group and fasta file for each grouping. The default is F.\n";
+		helpString += "The qtrim parameter will trim sequence from the point that they fall below the qthreshold and put it in the .trim file if set to true. The default is T.\n";
+		helpString += "The keepfirst parameter trims the sequence to the first keepfirst number of bases after the barcode or primers are removed, before the sequence is checked to see if it meets the other requirements. \n";
+		helpString += "The removelast removes the last removelast number of bases after the barcode or primers are removed, before the sequence is checked to see if it meets the other requirements.\n";
+		helpString += "The trim.seqs command should be in the following format: \n";
+		helpString += "trim.seqs(fasta=yourFastaFile, flip=yourFlip, oligos=yourOligos, maxambig=yourMaxambig,  \n";
+		helpString += "maxhomop=yourMaxhomop, minlength=youMinlength, maxlength=yourMaxlength)  \n";	
+		helpString += "Example trim.seqs(fasta=abrecovery.fasta, flip=..., oligos=..., maxambig=..., maxhomop=..., minlength=..., maxlength=...).\n";
+		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n";
+		helpString += "For more details please check out the wiki http://www.mothur.org/wiki/Trim.seqs .\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "TrimSeqsCommand", "getHelpString");
+		exit(1);
+	}
+}
+
 
 //**********************************************************************************************************************
 
 TrimSeqsCommand::TrimSeqsCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
 		outputTypes["qfile"] = tempOutNames;
@@ -42,34 +106,6 @@ TrimSeqsCommand::TrimSeqsCommand(){
 		exit(1);
 	}
 }
-
-//**********************************************************************************************************************
-
-vector<string> TrimSeqsCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"fasta"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "TrimSeqsCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
-vector<string> TrimSeqsCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "TrimSeqsCommand", "getRequiredFiles");
-		exit(1);
-	}
-}
-
 //***************************************************************************************************************
 
 TrimSeqsCommand::TrimSeqsCommand(string option)  {
@@ -82,13 +118,7 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string AlignArray[] =  {	"fasta", "flip", "oligos", "maxambig", "maxhomop", "minlength", "maxlength", "qfile", 
-								"qthreshold", "qwindowaverage", "qstepsize", "qwindowsize", "qaverage", "rollaverage",
-								"keepfirst", "removelast",
-								"allfiles", "qtrim","tdiffs", "pdiffs", "bdiffs", "processors", "outputdir","inputdir"};
-			
-			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
@@ -141,8 +171,11 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 			
 			//check for required parameters
 			fastaFile = validParameter.validFile(parameters, "fasta", true);
-			if (fastaFile == "not found") { m->mothurOut("fasta is a required parameter for the trim.seqs command."); m->mothurOutEndLine(); abort = true; }
-			else if (fastaFile == "not open") { abort = true; }	
+			if (fastaFile == "not found") { 				
+				fastaFile = m->getFastaFile(); 
+				if (fastaFile != "") { m->mothurOut("Using " + fastaFile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}else if (fastaFile == "not open") { abort = true; }	
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
@@ -222,7 +255,8 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 			temp = validParameter.validFile(parameters, "allfiles", false);		if (temp == "not found") { temp = "F"; }
 			allFiles = m->isTrue(temp);
 			
-			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found") { temp = "1"; }
+			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
+			m->setProcessors(temp);
 			convert(temp, processors); 
 			
 			
@@ -246,54 +280,6 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 		exit(1);
 	}
 }
-
-//**********************************************************************************************************************
-
-void TrimSeqsCommand::help(){
-	try {
-		m->mothurOut("The trim.seqs command reads a fastaFile and creates 2 new fasta files, .trim.fasta and scrap.fasta, as well as group files if you provide and oligos file.\n");
-		m->mothurOut("The .trim.fasta contains sequences that meet your requirements, and the .scrap.fasta contains those which don't.\n");
-		m->mothurOut("The trim.seqs command parameters are fasta, flip, oligos, maxambig, maxhomop, minlength, maxlength, qfile, qthreshold, qaverage, diffs, qtrim, keepfirst, removelast and allfiles.\n");
-		m->mothurOut("The fasta parameter is required.\n");
-		m->mothurOut("The flip parameter will output the reverse compliment of your trimmed sequence. The default is false.\n");
-		m->mothurOut("The oligos parameter allows you to provide an oligos file.\n");
-		m->mothurOut("The maxambig parameter allows you to set the maximum number of ambigious bases allowed. The default is -1.\n");
-		m->mothurOut("The maxhomop parameter allows you to set a maximum homopolymer length. \n");
-		m->mothurOut("The minlength parameter allows you to set and minimum sequence length. \n");
-		m->mothurOut("The maxlength parameter allows you to set and maximum sequence length. \n");
-		m->mothurOut("The tdiffs parameter is used to specify the total number of differences allowed in the sequence. The default is pdiffs + bdiffs.\n");
-		m->mothurOut("The bdiffs parameter is used to specify the number of differences allowed in the barcode. The default is 0.\n");
-		m->mothurOut("The pdiffs parameter is used to specify the number of differences allowed in the primer. The default is 0.\n");
-		m->mothurOut("The qfile parameter allows you to provide a quality file.\n");
-		m->mothurOut("The qthreshold parameter allows you to set a minimum quality score allowed. \n");
-		m->mothurOut("The qaverage parameter allows you to set a minimum average quality score allowed. \n");
-		m->mothurOut("The qwindowsize parameter allows you to set a number of bases in a window. Default=50.\n");
-		m->mothurOut("The qwindowaverage parameter allows you to set a minimum average quality score allowed over a window. \n");
-		m->mothurOut("The rollaverage parameter allows you to set a minimum rolling average quality score allowed over a window. \n");
-		m->mothurOut("The qstepsize parameter allows you to set a number of bases to move the window over. Default=1.\n");
-		m->mothurOut("The allfiles parameter will create separate group and fasta file for each grouping. The default is F.\n");
-		m->mothurOut("The qtrim parameter will trim sequence from the point that they fall below the qthreshold and put it in the .trim file if set to true. The default is T.\n");
-		m->mothurOut("The keepfirst parameter trims the sequence to the first keepfirst number of bases after the barcode or primers are removed, before the sequence is checked to see if it meets the other requirements. \n");
-		m->mothurOut("The removelast removes the last removelast number of bases after the barcode or primers are removed, before the sequence is checked to see if it meets the other requirements.\n");
-		m->mothurOut("The trim.seqs command should be in the following format: \n");
-		m->mothurOut("trim.seqs(fasta=yourFastaFile, flip=yourFlip, oligos=yourOligos, maxambig=yourMaxambig,  \n");
-		m->mothurOut("maxhomop=yourMaxhomop, minlength=youMinlength, maxlength=yourMaxlength)  \n");	
-		m->mothurOut("Example trim.seqs(fasta=abrecovery.fasta, flip=..., oligos=..., maxambig=..., maxhomop=..., minlength=..., maxlength=...).\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n");
-		m->mothurOut("For more details please check out the wiki http://www.mothur.org/wiki/Trim.seqs .\n\n");
-
-	}
-	catch(exception& e) {
-		m->errorOut(e, "TrimSeqsCommand", "help");
-		exit(1);
-	}
-}
-
-
-//***************************************************************************************************************
-
-TrimSeqsCommand::~TrimSeqsCommand(){	/*	do nothing	*/	}
-
 //***************************************************************************************************************
 
 int TrimSeqsCommand::execute(){

@@ -15,22 +15,21 @@
 #include "groupmap.h"
 #include "sharedcommand.h"
 
-class GlobalData;
-
 class ReadOtuCommand : public Command {
 public:
 	ReadOtuCommand(string);
 	ReadOtuCommand();
-	~ReadOtuCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();
+	~ReadOtuCommand() {}
+	
+	vector<string> setParameters() {  return outputNames; } //dummy doesn't really do anything
+	string getCommandName()			{ return "read.otu";	}
+	string getCommandCategory()		{ return "Hidden";	}
+	string getHelpString() { return "This command is no longer available. You can provide your files directly to the downstream commands like collect.shared."; }	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	GlobalData* globaldata;
 	InputData* input;
 	Command* shared;
 	GroupMap* groupMap;

@@ -19,21 +19,20 @@ class HelpCommand : public Command {
 public:
 	HelpCommand(string);
 	HelpCommand() {}
-	~HelpCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help() {};
+	~HelpCommand(){}
+	
+	vector<string> setParameters()	{ return outputNames;	} //dummy, doesn't really do anything	
+	string getCommandName()			{ return "help";		}
+	string getCommandCategory()		{ return "General";		}
+	string getHelpString() { return "For more information about a specific command type 'commandName(help)' i.e. 'read.dist(help)'"; }	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
+	
 	
 private:
 	CommandFactory* validCommands;
-	vector<string> outputNames;
-	map<string, vector<string> > outputTypes;
-	
-	
-private:
+	vector<string> outputNames;	
 		
 };
  

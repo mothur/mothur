@@ -35,6 +35,11 @@ class MothurOut {
 		void setReleaseDate(string r) { releaseDate = r; }
 		string getVersion() { return version; }
 		void setVersion(string r) { version = r; }
+		vector<string> Groups;
+		vector<string> Treenames;
+		map<string, string> names;
+		vector<string> namesOfGroups;
+		string saveNextLabel, argv;
 		
 		//functions from mothur.h
 		//file operations
@@ -89,7 +94,7 @@ class MothurOut {
 		unsigned int fromBase36(string);
 
 		int control_pressed;
-		bool executing;
+		bool executing, runParse, jumble;
 		
 		//current files - if you add a new type you must edit optionParser->getParameters, get.current command and mothurOut->printCurrentFiles/clearCurrentFiles.
 		string getPhylipFile()		{ return phylipfile;		}
@@ -111,6 +116,7 @@ class MothurOut {
 		string getOligosFile()		{ return oligosfile;		}
 		string getAccnosFile()		{ return accnosfile;		}
 		string getTaxonomyFile()	{ return taxonomyfile;		}
+		string getProcessors()		{ return processors;		}
 		
 		void setListFile(string f)			{ listfile = getFullPathName(f);			}
 		void setTreeFile(string f)			{ treefile = getFullPathName(f);			}
@@ -131,6 +137,7 @@ class MothurOut {
 		void setOligosFile(string f)		{ oligosfile = getFullPathName(f);			}
 		void setAccnosFile(string f)		{ accnosfile = getFullPathName(f);			}
 		void setTaxonomyFile(string f)		{ taxonomyfile = getFullPathName(f);		}
+		void setProcessors(string p)		{ processors = p;							}
 		
 		void printCurrentFiles();
 		void clearCurrentFiles();
@@ -160,6 +167,7 @@ class MothurOut {
 			oligosfile = "";
 			accnosfile = "";
 			taxonomyfile = "";
+			processors = "1";
 		};
 		~MothurOut();
 
@@ -168,7 +176,7 @@ class MothurOut {
 		string releaseDate, version;
 	
 		string accnosfile, phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, designfile, taxonomyfile;
-		string orderfile, treefile, sharedfile, ordergroupfile, relabundfile, fastafile, qualfile, sfffile, oligosfile;
+		string orderfile, treefile, sharedfile, ordergroupfile, relabundfile, fastafile, qualfile, sfffile, oligosfile, processors;
 
 	
 		ofstream out;

@@ -11,26 +11,26 @@
  */
 
 #include "command.hpp"
-#include "globaldata.hpp"
 
 class GetgroupCommand : public Command {
 public:
 	GetgroupCommand(string);
 	GetgroupCommand();
-	~GetgroupCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();
+	~GetgroupCommand() {}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "get.group";				}
+	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
+	
 	
 private:
-	GlobalData* globaldata;
-	GroupMap* groupMap;
-	string outputFile, sharedfile;
+	
+	string outputFile, sharedfile, outputDir;
 	vector<string> outputNames;
-	map<string, vector<string> > outputTypes;
 	ofstream out;
 	ifstream in;
 	bool abort;

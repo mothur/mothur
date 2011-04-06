@@ -15,7 +15,15 @@
 ReadColumnMatrix::ReadColumnMatrix(string df) : distFile(df){
 	
 	successOpen = m->openInputFile(distFile, fileHandle);
+	sim = false;
 	
+}
+/***********************************************************************/
+
+ReadColumnMatrix::ReadColumnMatrix(string df, bool s) : distFile(df){
+	
+	successOpen = m->openInputFile(distFile, fileHandle);
+	sim = s;
 }
 
 /***********************************************************************/
@@ -56,7 +64,7 @@ int ReadColumnMatrix::read(NameAssignment* nameMap){
 //if (((itA->second == 8) && (itB->second == 1588)) || ((itA->second == 1588) && (itB->second == 8))) { cout << "found it" << endl; }
 
 			if (distance == -1) { distance = 1000000; }
-			else if (globaldata->sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
+			else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
 			
 			if(distance < cutoff && itA != itB){
 				if(itA->second > itB->second){
@@ -117,7 +125,7 @@ int ReadColumnMatrix::read(NameAssignment* nameMap){
 				}
 				
 				if (distance == -1) { distance = 1000000; }
-				else if (globaldata->sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
+				else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
 				
 				if(distance < cutoff && itA->second > itB->second){
 					PCell value(itA->second, itB->second, distance);

@@ -14,12 +14,8 @@
 #include "command.hpp"
 #include "inputdata.h"
 #include "listvector.hpp"
-#include "readotu.h"
 #include "fastamap.h"
 #include "groupmap.h"
-
-
-class GlobalData;
 
 class BinSeqCommand : public Command {
 	
@@ -27,27 +23,27 @@ public:
 	BinSeqCommand(string);	
 	BinSeqCommand();
 	~BinSeqCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();	
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "bin.seqs";			}
+	string getCommandCategory()		{ return "Sequence Processing"; }
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }		
 	
 private:
-	GlobalData* globaldata;
+	
 	ListVector* list;
-	ReadOTUFile* read;
 	InputData* input;
 	FastaMap* fasta;
 	GroupMap* groupMap;
 	bool abort, allLines;
 	set<string> labels; //holds labels to be used
-	string filename, fastafile, namesfile, groupfile, label, outputDir;
+	string filename, fastafile, listfile, namesfile, groupfile, label, outputDir;
 	ofstream out;
 	ifstream in, inNames;
 	vector<string> outputNames;
-	map<string, vector<string> > outputTypes;
 	
 	void readNamesFile();
 	int process(ListVector*);

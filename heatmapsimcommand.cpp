@@ -19,15 +19,53 @@
 #include "sharedmorisitahorn.h"
 #include "sharedbraycurtis.h"
 
+
 //**********************************************************************************************************************
-vector<string> HeatMapSimCommand::getValidParameters(){	
+vector<string> HeatMapSimCommand::setParameters(){	
 	try {
-		string Array[] =  {"groups","label", "calc","phylip","column","name","outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter pshared("shared", "InputTypes", "", "", "LRSS", "LRSS", "none",false,false); parameters.push_back(pshared);	
+		CommandParameter pphylip("phylip", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "none",false,false); parameters.push_back(pphylip);
+		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "ColumnName",false,false); parameters.push_back(pname);
+		CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "ColumnName",false,false); parameters.push_back(pcolumn);		
+		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
+		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
+		CommandParameter pcalc("calc", "Multiple", "jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan-morisitahorn-braycurtis", "jest-thetayc", "", "", "",true,false); parameters.push_back(pcalc);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "HeatMapSimCommand", "getValidParameters");
+		m->errorOut(e, "HeatMapSimCommand", "setParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string HeatMapSimCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The heatmap.sim command parameters are shared, phylip, column, name, groups, calc and label.  shared or phylip or column and name are required unless valid current files exist.\n";
+		helpString += "There are two ways to use the heatmap.sim command. The first is with the read.otu command. \n";
+		helpString += "With the read.otu command you may use the groups, label and calc parameters. \n";
+		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like included in your heatmap.\n";
+		helpString += "The group names are separated by dashes. The label parameter allows you to select what distance levels you would like a heatmap created for, and is also separated by dashes.\n";
+		helpString += "The heatmap.sim command should be in the following format: heatmap.sim(groups=yourGroups, calc=yourCalc, label=yourLabels).\n";
+		helpString += "Example heatmap.sim(groups=A-B-C, calc=jabund).\n";
+		helpString += "The default value for groups is all the groups in your groupfile, and all labels in your inputfile will be used.\n";
+		helpString +=  validCalculator->printCalc("heat");
+		helpString += "The default value for calc is jclass-thetayc.\n";
+		helpString += "The heatmap.sim command outputs a .svg file for each calculator you choose at each label you specify.\n";
+		helpString += "The second way to use the heatmap.sim command is with a distance file representing the distance bewteen your groups. \n";
+		helpString += "Using the command this way, the phylip or column parameter are required, and only one may be used.  If you use a column file the name filename is required. \n";
+		helpString += "The heatmap.sim command should be in the following format: heatmap.sim(phylip=yourDistanceFile).\n";
+		helpString += "Example heatmap.sim(phylip=amazonGroups.dist).\n";
+		helpString += "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "HeatMapSimCommand", "getHelpString");
 		exit(1);
 	}
 }
@@ -35,6 +73,7 @@ vector<string> HeatMapSimCommand::getValidParameters(){
 HeatMapSimCommand::HeatMapSimCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["svg"] = tempOutNames;
 	}
@@ -44,45 +83,17 @@ HeatMapSimCommand::HeatMapSimCommand(){
 	}
 }
 //**********************************************************************************************************************
-vector<string> HeatMapSimCommand::getRequiredParameters(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "HeatMapSimCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> HeatMapSimCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "HeatMapSimCommand", "getRequiredFiles");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 
 HeatMapSimCommand::HeatMapSimCommand(string option)  {
 	try {
-		globaldata = GlobalData::getInstance();
 		abort = false; calledHelp = false;   
 		allLines = 1;
-		labels.clear();
-		Groups.clear();
-		Estimators.clear();
 			
 		//allow user to run help
 		if(option == "help") { validCalculator = new ValidCalculators(); help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string AlignArray[] =  {"groups","label", "calc","phylip","column","name","outputdir","inputdir"};
-			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
@@ -131,18 +142,31 @@ HeatMapSimCommand::HeatMapSimCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
+				
+				it = parameters.find("shared");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
+				}
 			}
 
 			//required parameters
 			phylipfile = validParameter.validFile(parameters, "phylip", true);
 			if (phylipfile == "not open") { abort = true; }
 			else if (phylipfile == "not found") { phylipfile = ""; }	
-			else {  format = "phylip"; 	if (outputDir == "") { outputDir += m->hasPath(phylipfile); }  }
+			else {  format = "phylip"; 	inputfile = phylipfile; if (outputDir == "") { outputDir += m->hasPath(phylipfile); }  }
 			
 			columnfile = validParameter.validFile(parameters, "column", true);
 			if (columnfile == "not open") { abort = true; }	
 			else if (columnfile == "not found") { columnfile = ""; }
-			else {  format = "column";	if (outputDir == "") { outputDir += m->hasPath(columnfile); } }
+			else {  format = "column";	inputfile = columnfile; if (outputDir == "") { outputDir += m->hasPath(columnfile); } }
+			
+			sharedfile = validParameter.validFile(parameters, "shared", true);
+			if (sharedfile == "not open") { abort = true; }	
+			else if (sharedfile == "not found") { sharedfile = ""; }
+			else {  format = "shared";	inputfile = sharedfile;  if (outputDir == "") { outputDir += m->hasPath(sharedfile); } }
 			
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not open") { abort = true; }	
@@ -150,47 +174,61 @@ HeatMapSimCommand::HeatMapSimCommand(string option)  {
 			
 			
 			//error checking on files			
-			if ((globaldata->getSharedFile() == "") && ((phylipfile == "") && (columnfile == "")))	{ m->mothurOut("You must run the read.otu command or provide a distance file before running the heatmap.sim command."); m->mothurOutEndLine(); abort = true; }
+			if ((sharedfile == "") && ((phylipfile == "") && (columnfile == "")))	{ 
+				sharedfile = m->getSharedFile(); 
+				if (sharedfile != "") { format = "shared"; inputfile = sharedfile; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+				else { 
+					//is there are current file available for either of these?
+					//give priority to column, then phylip
+					columnfile = m->getColumnFile(); 
+					if (columnfile != "") {  format = "column"; inputfile = columnfile; m->mothurOut("Using " + columnfile + " as input file for the column parameter."); m->mothurOutEndLine(); }
+					else { 
+						phylipfile = m->getPhylipFile(); 
+						if (phylipfile != "") { format = "phylip";  inputfile = phylipfile; m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
+						else { 
+							m->mothurOut("No valid current files. You must provide a shared or phylip or column file."); m->mothurOutEndLine(); 
+							abort = true;
+						}
+					}
+				}
+			}
 			else if ((phylipfile != "") && (columnfile != "")) { m->mothurOut("When running the heatmap.sim command with a distance file you may not use both the column and the phylip parameters."); m->mothurOutEndLine(); abort = true; }
 			
 			if (columnfile != "") {
-				if (namefile == "") {  m->mothurOut("You need to provide a namefile if you are going to use the column format."); m->mothurOutEndLine(); abort = true; }
+				if (namefile == "") { 
+					namefile = m->getNameFile(); 
+					if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
+					else { 
+						m->mothurOut("You need to provide a namefile if you are going to use the column format."); m->mothurOutEndLine(); 
+						abort = true; 
+					}	
+				}
 			}
-			
-			if (format == "") { format = "shared"; }
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			if (format == "shared") {
-				if (outputDir == "") { outputDir += m->hasPath(globaldata->getSharedFile()); }
-				
-				label = validParameter.validFile(parameters, "label", false);			
-				if (label == "not found") { label = ""; }
-				else { 
-					if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
-					else { allLines = 1;  }
-				}
-				
-				//if the user has not specified any labels use the ones from read.otu
-				if (label == "") {  
-					allLines = globaldata->allLines; 
-					labels = globaldata->labels; 
-				}
-				
-				calc = validParameter.validFile(parameters, "calc", false);			
-				if (calc == "not found") { calc = "jest-thetayc";  }
-				else { 
-					if (calc == "default")  {  calc = "jest-thetayc";  }
-				}
-				m->splitAtDash(calc, Estimators);
-				
-				groups = validParameter.validFile(parameters, "groups", false);			
-				if (groups == "not found") { groups = ""; }
-				else { 
-					m->splitAtDash(groups, Groups);
-					globaldata->Groups = Groups;
-				}
+							
+			label = validParameter.validFile(parameters, "label", false);			
+			if (label == "not found") { label = ""; }
+			else { 
+				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
+				else { allLines = 1;  }
 			}
+				
+			calc = validParameter.validFile(parameters, "calc", false);			
+			if (calc == "not found") { calc = "jest-thetayc";  }
+			else { 
+				if (calc == "default")  {  calc = "jest-thetayc";  }
+			}
+			m->splitAtDash(calc, Estimators);
+				
+			groups = validParameter.validFile(parameters, "groups", false);			
+			if (groups == "not found") { groups = ""; }
+			else { 
+				m->splitAtDash(groups, Groups);
+				m->Groups = Groups;
+			}
+			
 			
 			if (abort == false) {
 				validCalculator = new ValidCalculators();
@@ -233,40 +271,6 @@ HeatMapSimCommand::HeatMapSimCommand(string option)  {
 		exit(1);
 	}
 }
-
-//**********************************************************************************************************************
-
-void HeatMapSimCommand::help(){
-	try {
-		m->mothurOut("The heatmap.sim command can only be executed after a successful read.otu command, or by providing a distance file.\n");
-		m->mothurOut("The heatmap.sim command parameters are phylip, column, name, groups, calc and label.  No parameters are required.\n");
-		m->mothurOut("There are two ways to use the heatmap.sim command. The first is with the read.otu command. \n");
-		m->mothurOut("With the read.otu command you may use the groups, label and calc parameters. \n");
-		m->mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like included in your heatmap.\n");
-		m->mothurOut("The group names are separated by dashes. The label parameter allows you to select what distance levels you would like a heatmap created for, and is also separated by dashes.\n");
-		m->mothurOut("The heatmap.sim command should be in the following format: heatmap.sim(groups=yourGroups, calc=yourCalc, label=yourLabels).\n");
-		m->mothurOut("Example heatmap.sim(groups=A-B-C, calc=jabund).\n");
-		m->mothurOut("The default value for groups is all the groups in your groupfile, and all labels in your inputfile will be used.\n");
-		validCalculator->printCalc("heat", cout);
-		m->mothurOut("The default value for calc is jclass-thetayc.\n");
-		m->mothurOut("The heatmap.sim command outputs a .svg file for each calculator you choose at each label you specify.\n");
-		m->mothurOut("The second way to use the heatmap.sim command is with a distance file representing the distance bewteen your groups. \n");
-		m->mothurOut("Using the command this way, the phylip or column parameter are required, and only one may be used.  If you use a column file the name filename is required. \n");
-		m->mothurOut("The heatmap.sim command should be in the following format: heatmap.sim(phylip=yourDistanceFile).\n");
-		m->mothurOut("Example heatmap.sim(phylip=amazonGroups.dist).\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n");
-
-	}
-	catch(exception& e) {
-		m->errorOut(e, "HeatMapSimCommand", "help");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
-HeatMapSimCommand::~HeatMapSimCommand(){}
-
 //**********************************************************************************************************************
 
 int HeatMapSimCommand::execute(){
@@ -274,17 +278,11 @@ int HeatMapSimCommand::execute(){
 	
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
-		heatmap = new HeatMapSim(outputDir);
+		heatmap = new HeatMapSim(outputDir, inputfile);
 		
 		if (format == "shared") {
 			runCommandShared();
-		}else if (format == "phylip") {
-			globaldata->inputFileName = phylipfile;
-			runCommandDist();
-		}else if (format == "column") {
-			globaldata->inputFileName = columnfile;
-			runCommandDist();
-		}
+		}else{	runCommandDist();	}
 		
 		delete heatmap;
 		delete validCalculator;
@@ -310,11 +308,7 @@ int HeatMapSimCommand::runCommandShared() {
 		//if the users entered no valid calculators don't execute command
 		if (heatCalculators.size() == 0) { m->mothurOut("No valid calculators."); m->mothurOutEndLine(); return 0; }
 		
-		//you have groups
-		read = new ReadOTUFile(globaldata->inputFileName);	
-		read->read(&*globaldata); 
-				
-		input = globaldata->ginput;
+		input = new InputData(sharedfile, "sharedfile");
 		lookup = input->getSharedRAbundVectors();
 		string lastLabel = lookup[0]->getLabel();
 			
@@ -324,12 +318,12 @@ int HeatMapSimCommand::runCommandShared() {
 		set<string> processedLabels;
 		set<string> userLabels = labels;
 		
-		if (m->control_pressed) { delete read; delete input; globaldata->ginput = NULL; for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  globaldata->Groups.clear(); return 0; }
+		if (m->control_pressed) {  delete input;  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  m->Groups.clear(); return 0; }
 		
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-			if (m->control_pressed) { delete read; delete input; globaldata->ginput = NULL; for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } globaldata->Groups.clear(); return 0; }
+			if (m->control_pressed) { delete input;  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } m->Groups.clear(); return 0; }
 
 			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
 	
@@ -369,7 +363,7 @@ int HeatMapSimCommand::runCommandShared() {
 		}
 		
 			
-		if (m->control_pressed) { delete read; delete input; globaldata->ginput = NULL; globaldata->Groups.clear();  return 0; }
+		if (m->control_pressed) {  delete input;  m->Groups.clear();  return 0; }
 
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -384,7 +378,7 @@ int HeatMapSimCommand::runCommandShared() {
 			}
 		}
 		
-		if (m->control_pressed) { delete read; delete input; globaldata->ginput = NULL;  globaldata->Groups.clear(); return 0; }
+		if (m->control_pressed) {  delete input;  m->Groups.clear(); return 0; }
 		
 		//run last label if you need to
 		if (needToRun == true)  {
@@ -398,13 +392,12 @@ int HeatMapSimCommand::runCommandShared() {
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 		}
 		
-		if (m->control_pressed) { delete read; delete input; globaldata->ginput = NULL;  globaldata->Groups.clear(); return 0; }
+		if (m->control_pressed) {  delete input;  m->Groups.clear(); return 0; }
 			
 		//reset groups parameter
-		globaldata->Groups.clear();  
+		m->Groups.clear();  
 			
-		delete input;  globaldata->ginput = NULL;
-		delete read;
+		delete input;  
 	
 		return 0;
 	}

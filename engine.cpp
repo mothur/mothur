@@ -95,14 +95,13 @@ string Engine::findMothursPath(){
 
 InteractEngine::InteractEngine(string path){
 
-	globaldata = GlobalData::getInstance();
 	
 	string temppath = path.substr(0, (path.find_last_of("othur")-5));
 	
 	//this will happen if you set the path variable to contain mothur's exe location
 	if (temppath == "") { path = findMothursPath(); }
 	
-	globaldata->argv = path;
+	mout->argv = path;
 }
 
 /***********************************************************************/
@@ -250,7 +249,6 @@ string Engine::getCommand()  {
 //This function opens the batchfile to be used by BatchEngine::getInput.
 BatchEngine::BatchEngine(string path, string batchFileName){
 	try {
-		globaldata = GlobalData::getInstance();
 	
 		openedBatch = mout->openInputFile(batchFileName, inputBatchFile);
 		
@@ -259,7 +257,7 @@ BatchEngine::BatchEngine(string path, string batchFileName){
 		//this will happen if you set the path variable to contain mothur's exe location
 		if (temppath == "") { path = findMothursPath(); }
 		
-		globaldata->argv = path;
+		mout->argv = path;
 				
 	}
 	catch(exception& e) {
@@ -406,7 +404,6 @@ string BatchEngine::getNextCommand(ifstream& inputBatchFile) {
 //This function opens the batchfile to be used by BatchEngine::getInput.
 ScriptEngine::ScriptEngine(string path, string commandString){
 	try {
-		globaldata = GlobalData::getInstance();
 		
 		//remove quotes
 		listOfCommands = commandString.substr(1, (commandString.length()-1));
@@ -416,7 +413,7 @@ ScriptEngine::ScriptEngine(string path, string commandString){
 		//this will happen if you set the path variable to contain mothur's exe location
 		if (temppath == "") { path = findMothursPath(); }
 		
-		globaldata->argv = path;
+		mout->argv = path;
 				
 	}
 	catch(exception& e) {

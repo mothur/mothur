@@ -14,16 +14,52 @@
 #include "onegapdist.h"
 #include "onegapignore.h"
 
-
 //**********************************************************************************************************************
-vector<string> DistanceCommand::getValidParameters(){	
+vector<string> DistanceCommand::setParameters(){	
 	try {
-		string Array[] =  {"fasta","oldfasta","column", "output", "calc", "countends", "cutoff", "processors", "outputdir","inputdir","compress"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter pcolumn("column", "InputTypes", "", "", "none", "none", "OldFastaColumn",false,false); parameters.push_back(pcolumn);
+		CommandParameter poldfasta("oldfasta", "InputTypes", "", "", "none", "none", "OldFastaColumn",false,false); parameters.push_back(poldfasta);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
+		CommandParameter poutput("output", "Multiple", "column-lt-square", "column", "", "", "",false,false); parameters.push_back(poutput);
+		CommandParameter pcalc("calc", "Multiple", "nogaps-eachgap-onegap", "onegap", "", "", "",false,false); parameters.push_back(pcalc);
+		CommandParameter pcountends("countends", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pcountends);
+		CommandParameter pcompress("compress", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pcompress);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
+		CommandParameter pcutoff("cutoff", "Number", "", "1.0", "", "", "",false,false); parameters.push_back(pcutoff);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "DistanceCommand", "getValidParameters");
+		m->errorOut(e, "DistanceCommand", "setParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string DistanceCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The dist.seqs command reads a file containing sequences and creates a distance file.\n";
+		helpString += "The dist.seqs command parameters are fasta, oldfasta, column, calc, countends, output, compress, cutoff and processors.  \n";
+		helpString += "The fasta parameter is required, unless you have a valid current fasta file.\n";
+		helpString += "The oldfasta and column parameters allow you to append the distances calculated to the column file.\n";
+		helpString += "The calc parameter allows you to specify the method of calculating the distances.  Your options are: nogaps, onegap or eachgap. The default is onegap.\n";
+		helpString += "The countends parameter allows you to specify whether to include terminal gaps in distance.  Your options are: T or F. The default is T.\n";
+		helpString += "The cutoff parameter allows you to specify maximum distance to keep. The default is 1.0.\n";
+		helpString += "The output parameter allows you to specify format of your distance matrix. Options are column, lt, and square. The default is column.\n";
+		helpString += "The processors parameter allows you to specify number of processors to use.  The default is 1.\n";
+		helpString += "The compress parameter allows you to indicate that you want the resulting distance file compressed.  The default is false.\n";
+		helpString += "The dist.seqs command should be in the following format: \n";
+		helpString += "dist.seqs(fasta=yourFastaFile, calc=yourCalc, countends=yourEnds, cutoff= yourCutOff, processors=yourProcessors) \n";
+		helpString += "Example dist.seqs(fasta=amazon.fasta, calc=eachgap, countends=F, cutoff= 2.0, processors=3).\n";
+		helpString += "Note: No spaces between parameter labels (i.e. calc), '=' and parameters (i.e.yourCalc).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "DistanceCommand", "getHelpString");
 		exit(1);
 	}
 }
@@ -31,35 +67,13 @@ vector<string> DistanceCommand::getValidParameters(){
 DistanceCommand::DistanceCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["phylip"] = tempOutNames;
 		outputTypes["column"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "DistanceCommand", "DistanceCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> DistanceCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"fasta"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "DistanceCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> DistanceCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "DistanceCommand", "getRequiredFiles");
 		exit(1);
 	}
 }
@@ -73,10 +87,7 @@ DistanceCommand::DistanceCommand(string option) {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"fasta","oldfasta","column", "output", "calc", "countends", "cutoff", "processors", "outputdir","inputdir","compress"};
-
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string, string> parameters = parser.getParameters();
@@ -126,8 +137,15 @@ DistanceCommand::DistanceCommand(string option) {
 
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", true);
-			if (fastafile == "not found") { m->mothurOut("fasta is a required parameter for the dist.seqs command."); m->mothurOutEndLine(); abort = true; }
-			else if (fastafile == "not open") { abort = true; }	
+			if (fastafile == "not found") { 				
+				fastafile = m->getFastaFile(); 
+				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); 
+					ifstream inFASTA;
+					m->openInputFile(fastafile, inFASTA);
+					alignDB = SequenceDB(inFASTA); 
+					inFASTA.close();
+				}else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}else if (fastafile == "not open") { abort = true; }	
 			else{
 				ifstream inFASTA;
 				m->openInputFile(fastafile, inFASTA);
@@ -165,8 +183,9 @@ DistanceCommand::DistanceCommand(string option) {
 			temp = validParameter.validFile(parameters, "cutoff", false);		if(temp == "not found"){	temp = "1.0"; }
 			convert(temp, cutoff); 
 			
-			temp = validParameter.validFile(parameters, "processors", false);	if(temp == "not found"){	temp = "1"; }
-			convert(temp, processors); 
+			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
+			m->setProcessors(temp);
+			convert(temp, processors);
 			
 			temp = validParameter.validFile(parameters, "compress", false);		if(temp == "not found"){  temp = "F"; }
 			convert(temp, compress);
@@ -204,35 +223,6 @@ DistanceCommand::DistanceCommand(string option) {
 	}
 	catch(exception& e) {
 		m->errorOut(e, "DistanceCommand", "DistanceCommand");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
-DistanceCommand::~DistanceCommand(){}
-	
-//**********************************************************************************************************************
-
-void DistanceCommand::help(){
-	try {
-		m->mothurOut("The dist.seqs command reads a file containing sequences and creates a distance file.\n");
-		m->mothurOut("The dist.seqs command parameters are fasta, oldfasta, column, calc, countends, output, compress, cutoff and processors.  \n");
-		m->mothurOut("The fasta parameter is required.\n");
-		m->mothurOut("The oldfasta and column parameters allow you to append the distances calculated to the column file.\n");
-		m->mothurOut("The calc parameter allows you to specify the method of calculating the distances.  Your options are: nogaps, onegap or eachgap. The default is onegap.\n");
-		m->mothurOut("The countends parameter allows you to specify whether to include terminal gaps in distance.  Your options are: T or F. The default is T.\n");
-		m->mothurOut("The cutoff parameter allows you to specify maximum distance to keep. The default is 1.0.\n");
-		m->mothurOut("The output parameter allows you to specify format of your distance matrix. Options are column, lt, and square. The default is column.\n");
-		m->mothurOut("The processors parameter allows you to specify number of processors to use.  The default is 1.\n");
-		m->mothurOut("The compress parameter allows you to indicate that you want the resulting distance file compressed.  The default is false.\n");
-		m->mothurOut("The dist.seqs command should be in the following format: \n");
-		m->mothurOut("dist.seqs(fasta=yourFastaFile, calc=yourCalc, countends=yourEnds, cutoff= yourCutOff, processors=yourProcessors) \n");
-		m->mothurOut("Example dist.seqs(fasta=amazon.fasta, calc=eachgap, countends=F, cutoff= 2.0, processors=3).\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. calc), '=' and parameters (i.e.yourCalc).\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "DistanceCommand", "help");
 		exit(1);
 	}
 }

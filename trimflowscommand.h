@@ -20,13 +20,15 @@ class TrimFlowsCommand : public Command {
 public:
 	TrimFlowsCommand(string);
 	TrimFlowsCommand();
-	~TrimFlowsCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();
+	~TrimFlowsCommand() {}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "trim.flows";	}
+	string getCommandCategory()		{ return "Hidden";		}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
 	bool abort;
@@ -44,12 +46,8 @@ private:
 	int createProcessesCreateTrim(string, string, string, string, vector<vector<string> >); 
 	int driverCreateTrim(string, string, string, string, vector<vector<string> >, linePair*);
 
-	
-	map<string, vector<string> > outputTypes;
 	vector<string> outputNames;
 	set<string> filesToRemove;
-	
-	
 	
 	void getOligos(vector<vector<string> >&);		//a rewrite of what is in trimseqscommand.h
 	int stripBarcode(Sequence&, int&);				//largely redundant with trimseqscommand.h

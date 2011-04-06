@@ -12,10 +12,8 @@
  /* The get.oturep command outputs a .fastarep file for each distance you specify, selecting one OTU representative for each bin. */
 
 #include "command.hpp"
-#include "globaldata.hpp"
 #include "listvector.hpp"
 #include "inputdata.h"
-#include "readotu.h"
 #include "fastamap.h"
 #include "groupmap.h"
 #include "readmatrix.hpp"
@@ -40,18 +38,19 @@ class GetOTURepCommand : public Command {
 public:
 	GetOTURepCommand(string);
 	GetOTURepCommand();
-	~GetOTURepCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();
-
+	~GetOTURepCommand(){}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "get.oturep";				}
+	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
+	
+	
 private:
-	GlobalData* globaldata;
 	ListVector* list;
-	ReadOTUFile* read;
 	InputData* input;
 	FastaMap* fasta;
 	GroupMap* groupMap;
@@ -72,7 +71,6 @@ private:
 	vector<SeqMap> seqVec;			// contains maps with sequence index and distance
 									// for all distances related to a certain sequence
 	vector<int> rowPositions;
-	map<string, vector<string> > outputTypes;
 
 	void readNamesFile();
 	void readNamesFile(bool);
@@ -80,8 +78,6 @@ private:
 	SeqMap getMap(int);
 	string findRep(vector<string>); 	// returns the name of the "representative" sequence of given bin or subset of a bin, for groups
 	int processNames(string, string);
-												
-
 };
 
 #endif

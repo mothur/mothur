@@ -17,20 +17,20 @@ class SeqSummaryCommand : public Command {
 public:
 	SeqSummaryCommand(string);
 	SeqSummaryCommand();
-	~SeqSummaryCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();
+	~SeqSummaryCommand(){}
 	
+	vector<string> setParameters();
+	string getCommandName()			{ return "summary.seqs";			}
+	string getCommandCategory()		{ return "Sequence Processing";		}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }		
 private:
 	bool abort;
 	string fastafile, outputDir, namefile;
 	int processors;
 	vector<string> outputNames;
-	map<string, vector<string> > outputTypes;
 	map<string, int> nameMap;
 	
 	struct linePair {

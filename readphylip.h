@@ -17,6 +17,7 @@ class ReadPhylipMatrix : public ReadMatrix {
 	
 public:
 	ReadPhylipMatrix(string);
+	ReadPhylipMatrix(string, bool);
 	~ReadPhylipMatrix();
 	int read(NameAssignment*);
 private:

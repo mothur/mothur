@@ -20,8 +20,7 @@
 #include "sharedbraycurtis.h"
 
 //**********************************************************************************************************************
-HeatMapSim::HeatMapSim(string dir) : outputDir(dir) {
-		globaldata = GlobalData::getInstance();
+HeatMapSim::HeatMapSim(string dir, string i) : outputDir(dir), inputfile(i) {
 		m = MothurOut::getInstance();
 }
 //**********************************************************************************************************************
@@ -36,7 +35,7 @@ vector<string> HeatMapSim::getPic(vector<SharedRAbundVector*> lookup, vector<Cal
 		
 			if (m->control_pressed) { return outputNames; }
 		
-			string filenamesvg = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName)) + lookup[0]->getLabel() + calcs[k]->getName() + ".heatmap.sim.svg";
+			string filenamesvg = outputDir + m->getRootName(m->getSimpleName(inputfile)) + lookup[0]->getLabel() + calcs[k]->getName() + ".heatmap.sim.svg";
 			m->openOutputFile(filenamesvg, outsvg);
 			outputNames.push_back(filenamesvg);
 			
@@ -114,7 +113,7 @@ string HeatMapSim::getPic(vector< vector<double> > dists, vector<string> groups)
 		
 		vector<double> sims;
 		
-		string filenamesvg = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName)) + "heatmap.sim.svg";
+		string filenamesvg = outputDir + m->getRootName(m->getSimpleName(inputfile)) + "heatmap.sim.svg";
 		m->openOutputFile(filenamesvg, outsvg);
 			
 		//svg image
@@ -123,7 +122,7 @@ string HeatMapSim::getPic(vector< vector<double> > dists, vector<string> groups)
 		
 		//white backround
 		outsvg << "<rect fill=\"white\" stroke=\"white\" x=\"0\" y=\"0\" width=\"" + toString((dists.size() * 150) + 160) + "\" height=\"" + toString((dists.size() * 150) + 160)  + "\"/>"; 
-		outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString((dists.size() * 75) - 40) + "\" y=\"25\">Heatmap for " + globaldata->inputFileName + "</text>\n";
+		outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString((dists.size() * 75) - 40) + "\" y=\"25\">Heatmap for " + inputfile + "</text>\n";
 		
 		//column labels
 		for (int h = 0; h < groups.size(); h++) {

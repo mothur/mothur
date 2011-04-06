@@ -12,21 +12,43 @@
 #include "qualityscores.h"
 
 //**********************************************************************************************************************
-vector<string> ReverseSeqsCommand::getValidParameters(){	
+vector<string> ReverseSeqsCommand::setParameters(){	
 	try {
-		string Array[] =  {"fasta", "qfile", "outputdir", "inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "fastaQual", "none",false,false); parameters.push_back(pfasta);
+		CommandParameter pqfile("qfile", "InputTypes", "", "", "none", "fastaQual", "none",false,false); parameters.push_back(pqfile);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ReverseSeqsCommand", "getValidParameters");
+		m->errorOut(e, "ReverseSeqsCommand", "setParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
+string ReverseSeqsCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The reverse.seqs command reads a fastafile and outputs a fasta file containing the reverse compliment.\n";
+		helpString += "The reverse.seqs command parameters fasta or qfile are required.\n";
+		helpString += "The reverse.seqs command should be in the following format: \n";
+		helpString += "reverse.seqs(fasta=yourFastaFile) \n";	
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ReverseSeqsCommand", "getHelpString");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
 ReverseSeqsCommand::ReverseSeqsCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
 		outputTypes["qfile"] = tempOutNames;
@@ -36,32 +58,7 @@ ReverseSeqsCommand::ReverseSeqsCommand(){
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-
-vector<string> ReverseSeqsCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"fasta", "qfile"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ReverseSeqsCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
-vector<string> ReverseSeqsCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ReverseSeqsCommand", "getRequiredFiles");
-		exit(1);
-	}
-}//***************************************************************************************************************
+//***************************************************************************************************************
 
 ReverseSeqsCommand::ReverseSeqsCommand(string option)  {
 	try {
@@ -71,9 +68,7 @@ ReverseSeqsCommand::ReverseSeqsCommand(string option)  {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"fasta", "qfile", "outputdir","inputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
@@ -103,6 +98,14 @@ ReverseSeqsCommand::ReverseSeqsCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
+				
+				it = parameters.find("qfile");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["qfile"] = inputDir + it->second;		}
+				}
 			}
 
 			//check for required parameters
@@ -114,16 +117,22 @@ ReverseSeqsCommand::ReverseSeqsCommand(string option)  {
 			if (qualFileName == "not open") { abort = true; }
 			else if (qualFileName == "not found") { qualFileName = ""; }//m->mothurOut("fasta is a required parameter for the reverse.seqs command."); m->mothurOutEndLine(); abort = true;  }	
 
-			if(fastaFileName == "not open" && qualFileName == "not open"){
-				m->mothurOut("fasta or qfile is a required parameter for the reverse.seqs command.");
-				m->mothurOutEndLine();
-				abort = true;
+			if((fastaFileName == "") && (qualFileName == "")){
+				fastaFileName = m->getFastaFile(); 
+				if (fastaFileName != "") {  m->mothurOut("Using " + fastaFileName + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+				else { 
+					qualFileName = m->getQualFile(); 
+					if (qualFileName != "") {  m->mothurOut("Using " + qualFileName + " as input file for the qfile parameter."); m->mothurOutEndLine(); }
+					else { 
+						m->mothurOut("You have no current files for fasta or qfile, and fasta or qfile is a required parameter for the reverse.seqs command."); m->mothurOutEndLine();
+						abort = true;
+					}
+				}
 			}
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += m->hasPath(fastaFileName); //if user entered a file with a path then preserve it	
 			}
 
 		}
@@ -133,25 +142,6 @@ ReverseSeqsCommand::ReverseSeqsCommand(string option)  {
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-
-void ReverseSeqsCommand::help(){
-	try {
-		m->mothurOut("The reverse.seqs command reads a fastafile and outputs a fasta file containing the reverse compliment.\n");
-		m->mothurOut("The reverse.seqs command parameters fasta or qfile are required.\n");
-		m->mothurOut("The reverse.seqs command should be in the following format: \n");
-		m->mothurOut("reverse.seqs(fasta=yourFastaFile) \n");	
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ReverseSeqsCommand", "help");
-		exit(1);
-	}
-}
-
-//***************************************************************************************************************
-
-ReverseSeqsCommand::~ReverseSeqsCommand(){	/*	do nothing	*/	}
-
 //***************************************************************************************************************
 
 
@@ -167,7 +157,9 @@ int ReverseSeqsCommand::execute(){
 			m->openInputFile(fastaFileName, inFASTA);
 			
 			ofstream outFASTA;
-			fastaReverseFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileName)) + "rc" + m->getExtension(fastaFileName);
+			string tempOutputDir = outputDir;
+			if (outputDir == "") { tempOutputDir += m->hasPath(fastaFileName); } //if user entered a file with a path then preserve it
+			fastaReverseFileName = tempOutputDir + m->getRootName(m->getSimpleName(fastaFileName)) + "rc" + m->getExtension(fastaFileName);
 			m->openOutputFile(fastaReverseFileName, outFASTA);
 			
 			while(!inFASTA.eof()){
@@ -193,7 +185,9 @@ int ReverseSeqsCommand::execute(){
 			m->openInputFile(qualFileName, inQual);
 			
 			ofstream outQual;
-			string qualReverseFileName = outputDir + m->getRootName(m->getSimpleName(qualFileName)) + "rc" + m->getExtension(qualFileName);
+			string tempOutputDir = outputDir;
+			if (outputDir == "") { tempOutputDir += m->hasPath(qualFileName); } //if user entered a file with a path then preserve it
+			string qualReverseFileName = tempOutputDir + m->getRootName(m->getSimpleName(qualFileName)) + "rc" + m->getExtension(qualFileName);
 			m->openOutputFile(qualReverseFileName, outQual);
 
 			while(!inQual.eof()){

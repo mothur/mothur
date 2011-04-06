@@ -16,7 +16,6 @@
 #include "listvector.hpp"
 #include "cluster.hpp"
 #include "sparsematrix.hpp"
-#include "globaldata.hpp"
 
 
 class ClusterSplitCommand : public Command {
@@ -24,20 +23,20 @@ class ClusterSplitCommand : public Command {
 public:
 	ClusterSplitCommand(string);
 	ClusterSplitCommand();
-	~ClusterSplitCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();	
-	void help();
+	~ClusterSplitCommand() {}
 	
+	vector<string> setParameters();
+	string getCommandName()			{ return "cluster.split";			}
+	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
+
 private:
-	GlobalData* globaldata;
 	vector<int> processIDS;   //processid
 	vector<string> outputNames;
-	map<string, vector<string> > outputTypes;
-
+	
 	string method, fileroot, tag, outputDir, phylipfile, columnfile, namefile, distfile, format, showabund, timing, splitmethod, taxFile, fastafile;
 	double cutoff, splitcutoff;
 	int precision, length, processors, taxLevelCutoff;

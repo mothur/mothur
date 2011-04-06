@@ -17,6 +17,7 @@ class SharedOrderVector;
 class SharedSAbundVector;
 class SharedRAbundVector;
 class SharedRAbundFloatVector;
+class GroupMap;
 
 class DataVector {
 	
@@ -25,6 +26,7 @@ public:
 	DataVector(string l) : label(l) {};
 	DataVector(const DataVector& dv) : label(dv.label){};//, maxRank(dv.maxRank), numBins(dv.numBins), numSeqs(dv.numSeqs) {};
 	DataVector(ifstream&);
+	DataVector(ifstream&, GroupMap*);
 	virtual ~DataVector(){};
 	
 //	virtual int getNumBins()	{	return numBins;		}

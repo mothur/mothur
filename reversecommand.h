@@ -16,20 +16,21 @@ class ReverseSeqsCommand : public Command {
 public:
 	ReverseSeqsCommand(string);
 	ReverseSeqsCommand();
-	~ReverseSeqsCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();
+	~ReverseSeqsCommand() {}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "reverse.seqs";			}
+	string getCommandCategory()		{ return "Sequence Processing";		}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
 
 	bool abort;
 	string fastaFileName, qualFileName, outputDir;
 	vector<string> outputNames;
-	map<string, vector<string> > outputTypes;
 	
 };
 

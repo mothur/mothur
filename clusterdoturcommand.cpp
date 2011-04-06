@@ -11,21 +11,48 @@
 #include "clusterclassic.h"
 
 //**********************************************************************************************************************
-vector<string> ClusterDoturCommand::getValidParameters(){	
+vector<string> ClusterDoturCommand::setParameters(){	
 	try {
-		string AlignArray[] =  {"phylip","name","hard","cutoff","precision","method","outputdir","inputdir"};
-		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+		CommandParameter pphylip("phylip", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pphylip);
+		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
+		CommandParameter pcutoff("cutoff", "Number", "", "10", "", "", "",false,false); parameters.push_back(pcutoff);
+		CommandParameter pprecision("precision", "Number", "", "100", "", "", "",false,false); parameters.push_back(pprecision);
+		CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted", "furthest", "", "", "",false,false); parameters.push_back(pmethod);
+		CommandParameter phard("hard", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(phard);
+		CommandParameter psim("sim", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(psim);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ClusterDoturCommand", "getValidParameters");
+		m->errorOut(e, "ClusterDoturCommand", "setParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string ClusterDoturCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The cluster.classic command clusters using the algorithm from dotur. \n";
+		helpString += "The cluster.classic command parameter options are phylip, name, method, cuttoff, hard, sim, precision. Phylip is required, unless you have a valid current file.\n";
+		helpString += "The cluster.classic command should be in the following format: \n";
+		helpString += "cluster.classic(phylip=yourDistanceMatrix, method=yourMethod, cutoff=yourCutoff, precision=yourPrecision) \n";
+		helpString += "The acceptable cluster methods are furthest, nearest, weighted and average.  If no method is provided then furthest is assumed.\n\n";	
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClusterDoturCommand", "getHelpString");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
 ClusterDoturCommand::ClusterDoturCommand(){	
 	try {
-		abort = true; calledHelp = true; 
+		abort = true; calledHelp = true;
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["list"] = tempOutNames;
 		outputTypes["rabund"] = tempOutNames;
@@ -33,29 +60,6 @@ ClusterDoturCommand::ClusterDoturCommand(){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClusterDoturCommand", "ClusterCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> ClusterDoturCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"phylip"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClusterDoturCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> ClusterDoturCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray; 
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClusterDoturCommand", "getRequiredFiles");
 		exit(1);
 	}
 }
@@ -70,9 +74,7 @@ ClusterDoturCommand::ClusterDoturCommand(string option)  {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"phylip","name","cutoff","hard","precision","method","outputdir","inputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
@@ -122,7 +124,14 @@ ClusterDoturCommand::ClusterDoturCommand(string option)  {
 			//check for required parameters
 			phylipfile = validParameter.validFile(parameters, "phylip", true);
 			if (phylipfile == "not open") { abort = true; }
-			else if (phylipfile == "not found") { phylipfile = ""; m->mothurOut("When executing the cluster.dotur command you must enter a phylip file."); m->mothurOutEndLine(); abort = true; }	
+			else if (phylipfile == "not found") { 
+				phylipfile = m->getPhylipFile(); 
+				if (phylipfile != "") {  m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
+				else { 
+					m->mothurOut("You need to provide a phylip file with the cluster.classic command."); m->mothurOutEndLine(); 
+					abort = true; 
+				}	
+			}	
 
 		
 			//check for optional parameter and set defaults
@@ -145,6 +154,9 @@ ClusterDoturCommand::ClusterDoturCommand(string option)  {
 			temp = validParameter.validFile(parameters, "hard", false);			if (temp == "not found") { temp = "F"; }
 			hard = m->isTrue(temp);
 			
+			temp = validParameter.validFile(parameters, "sim", false);				if (temp == "not found") { temp = "F"; }
+			sim = m->isTrue(temp); 
+			
 			method = validParameter.validFile(parameters, "method", false);
 			if (method == "not found") { method = "furthest"; }
 			
@@ -161,28 +173,6 @@ ClusterDoturCommand::ClusterDoturCommand(string option)  {
 		exit(1);
 	}
 }
-
-//**********************************************************************************************************************
-
-void ClusterDoturCommand::help(){
-	try {
-		m->mothurOut("The cluster.classic command clusters using the algorithm from dotur. \n");
-		m->mothurOut("The cluster.classic command parameter options are phylip, name, method, cuttoff, hard, precision. Phylip is required.\n");
-		m->mothurOut("The cluster.classic command should be in the following format: \n");
-		m->mothurOut("cluster.classic(phylip=yourDistanceMatrix, method=yourMethod, cutoff=yourCutoff, precision=yourPrecision) \n");
-		m->mothurOut("The acceptable cluster methods are furthest, nearest, weighted and average.  If no method is provided then furthest is assumed.\n\n");	
-
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClusterDoturCommand", "help");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
-ClusterDoturCommand::~ClusterDoturCommand(){}
-
 //**********************************************************************************************************************
 
 int ClusterDoturCommand::execute(){
@@ -198,7 +188,7 @@ int ClusterDoturCommand::execute(){
 		}
 		
 		//reads phylip file storing data in 2D vector, also fills list and rabund
-		ClusterClassic* cluster = new ClusterClassic(cutoff, method);
+		ClusterClassic* cluster = new ClusterClassic(cutoff, method, sim);
 		cluster->readPhylipFile(phylipfile, nameMap);
 		
 		if (m->control_pressed) { delete cluster; delete list; delete rabund; return 0; }

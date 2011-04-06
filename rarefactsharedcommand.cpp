@@ -12,21 +12,57 @@
 #include "sharednseqs.h"
 
 //**********************************************************************************************************************
-vector<string> RareFactSharedCommand::getValidParameters(){	
+vector<string> RareFactSharedCommand::setParameters(){	
 	try {
-		string Array[] =  {"iters","freq","label","calc","groups", "jumble","outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pshared);
+		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
+		CommandParameter pfreq("freq", "Number", "", "100", "", "", "",false,false); parameters.push_back(pfreq);
+		CommandParameter piters("iters", "Number", "", "1000", "", "", "",false,false); parameters.push_back(piters);
+		CommandParameter pcalc("calc", "Multiple", "sharednseqs-sharedobserved", "sharedobserved", "", "", "",true,false); parameters.push_back(pcalc);
+		CommandParameter pjumble("jumble", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pjumble);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "RareFactSharedCommand", "getValidParameters");
+		m->errorOut(e, "RareFactSharedCommand", "setParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
+string RareFactSharedCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		ValidCalculators validCalculator;
+		helpString += "The collect.shared command parameters are shared, label, freq, calc and groups.  shared is required if there is no current sharedfile. \n";
+		helpString += "The rarefaction.shared command parameters are shared, label, iters, groups, jumble and calc.  shared is required if there is no current sharedfile. \n";
+		helpString += "The rarefaction command should be in the following format: \n";
+		helpString += "rarefaction.shared(label=yourLabel, iters=yourIters, calc=yourEstimators, jumble=yourJumble, groups=yourGroups).\n";
+		helpString += "The freq parameter is used indicate when to output your data, by default it is set to 100. But you can set it to a percentage of the number of sequence. For example freq=0.10, means 10%. \n";
+		helpString += "Example rarefaction.shared(label=unique-0.01-0.03,  iters=10000, groups=B-C, jumble=T, calc=sharedobserved).\n";
+		helpString += "The default values for iters is 1000, freq is 100, and calc is sharedobserved which calculates the shared rarefaction curve for the observed richness.\n";
+		helpString += "The default value for groups is all the groups in your groupfile, and jumble is true.\n";
+		helpString += validCalculator.printCalc("sharedrarefaction");
+		helpString += "The label parameter is used to analyze specific labels in your input.\n";
+		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups.\n";
+		helpString += "Note: No spaces between parameter labels (i.e. freq), '=' and parameters (i.e.yourFreq).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "RareFactSharedCommand", "getHelpString");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
 RareFactSharedCommand::RareFactSharedCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["sharedrarefaction"] = tempOutNames;
 		outputTypes["sharedr_nseqs"] = tempOutNames;
@@ -37,55 +73,26 @@ RareFactSharedCommand::RareFactSharedCommand(){
 	}
 }
 //**********************************************************************************************************************
-vector<string> RareFactSharedCommand::getRequiredParameters(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "RareFactSharedCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> RareFactSharedCommand::getRequiredFiles(){	
-	try {
-		string Array[] =  {"shared"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "RareFactSharedCommand", "getRequiredFiles");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 
 RareFactSharedCommand::RareFactSharedCommand(string option)  {
 	try {
-		globaldata = GlobalData::getInstance();
-		
 		abort = false; calledHelp = false;   
 		allLines = 1;
-		labels.clear();
-		Estimators.clear();
-		Groups.clear();
 				
 		//allow user to run help
-		if(option == "help") { validCalculator = new ValidCalculators(); help(); abort = true; calledHelp = true; }
+		if(option == "help") {  help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"iters","freq","label","calc","groups", "jumble","outputdir","inputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
+			map<string,string>::iterator it;
 			
 			ValidParameters validParameter;
 			
 			//check to make sure all parameters are valid for command
-			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
@@ -94,18 +101,34 @@ RareFactSharedCommand::RareFactSharedCommand(string option)  {
 			outputTypes["sharedrarefaction"] = tempOutNames;
 			outputTypes["sharedr_nseqs"] = tempOutNames;
 			
-			//make sure the user has already run the read.otu command
-			if (globaldata->getSharedFile() == "") {
-				if (globaldata->getListFile() == "") { m->mothurOut("You must read a list and a group, or a shared before you can use the collect.shared command."); m->mothurOutEndLine(); abort = true; }
-				else if (globaldata->getGroupFile() == "") { m->mothurOut("You must read a list and a group, or a shared before you can use the collect.shared command."); m->mothurOutEndLine(); abort = true; }
+			//if the user changes the input directory command factory will send this info to us in the output parameter 
+			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			if (inputDir == "not found"){	inputDir = "";		}
+			else {
+				string path;
+				it = parameters.find("shared");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
+				}
 			}
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
-				outputDir = "";	
-				outputDir += m->hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
+			//get shared file
+			sharedfile = validParameter.validFile(parameters, "shared", true);
+			if (sharedfile == "not open") { sharedfile = ""; abort = true; }	
+			else if (sharedfile == "not found") { 
+				//if there is a current shared file, use it
+				sharedfile = m->getSharedFile(); 
+				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}
-
+			
+			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(sharedfile);		}
+			
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -116,11 +139,6 @@ RareFactSharedCommand::RareFactSharedCommand(string option)  {
 				else { allLines = 1;  }
 			}
 			
-			//if the user has not specified any labels use the ones from read.otu
-			if(label == "") {  
-				allLines = globaldata->allLines; 
-				labels = globaldata->labels; 
-			}
 				
 			calc = validParameter.validFile(parameters, "calc", false);			
 			if (calc == "not found") { calc = "sharedobserved";  }
@@ -134,7 +152,7 @@ RareFactSharedCommand::RareFactSharedCommand(string option)  {
 			else { 
 				m->splitAtDash(groups, Groups);
 			}
-			globaldata->Groups = Groups;
+			m->Groups = Groups;
 			
 			string temp;
 			temp = validParameter.validFile(parameters, "freq", false);			if (temp == "not found") { temp = "100"; }
@@ -146,28 +164,7 @@ RareFactSharedCommand::RareFactSharedCommand(string option)  {
 			temp = validParameter.validFile(parameters, "jumble", false);			if (temp == "not found") { temp = "T"; }
 			if (m->isTrue(temp)) { jumble = true; }
 			else { jumble = false; }
-			globaldata->jumble = jumble;
-			
-			if (abort == false) {
-			
-				string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName));
-//				format = globaldata->getFormat();
-
-				
-				validCalculator = new ValidCalculators();
-				
-				for (int i=0; i<Estimators.size(); i++) {
-					if (validCalculator->isValidCalculator("sharedrarefaction", Estimators[i]) == true) { 
-						if (Estimators[i] == "sharedobserved") { 
-							rDisplays.push_back(new RareDisplay(new SharedSobs(), new SharedThreeColumnFile(fileNameRoot+"shared.rarefaction", "")));
-							outputNames.push_back(fileNameRoot+"shared.rarefaction"); outputTypes["sharedrarefaction"].push_back(fileNameRoot+"shared.rarefaction");
-						}else if (Estimators[i] == "sharednseqs") { 
-							rDisplays.push_back(new RareDisplay(new SharedNSeqs(), new SharedThreeColumnFile(fileNameRoot+"shared.r_nseqs", "")));
-							outputNames.push_back(fileNameRoot+"shared.r_nseqs"); outputTypes["sharedr_nseqs"].push_back(fileNameRoot+"shared.r_nseqs");
-						}
-					}
-				}
-			}
+			m->jumble = jumble;
 				
 		}
 
@@ -177,59 +174,39 @@ RareFactSharedCommand::RareFactSharedCommand(string option)  {
 		exit(1);
 	}
 }
-
-//**********************************************************************************************************************
-
-void RareFactSharedCommand::help(){
-	try {
-		m->mothurOut("The rarefaction.shared command can only be executed after a successful read.otu command.\n");
-		m->mothurOut("The rarefaction.shared command parameters are label, iters, groups, jumble and calc.  No parameters are required.\n");
-		m->mothurOut("The rarefaction command should be in the following format: \n");
-		m->mothurOut("rarefaction.shared(label=yourLabel, iters=yourIters, calc=yourEstimators, jumble=yourJumble, groups=yourGroups).\n");
-		m->mothurOut("The freq parameter is used indicate when to output your data, by default it is set to 100. But you can set it to a percentage of the number of sequence. For example freq=0.10, means 10%. \n");
-		m->mothurOut("Example rarefaction.shared(label=unique-0.01-0.03,  iters=10000, groups=B-C, jumble=T, calc=sharedobserved).\n");
-		m->mothurOut("The default values for iters is 1000, freq is 100, and calc is sharedobserved which calculates the shared rarefaction curve for the observed richness.\n");
-		m->mothurOut("The default value for groups is all the groups in your groupfile, and jumble is true.\n");
-		validCalculator->printCalc("sharedrarefaction", cout);
-		m->mothurOut("The label parameter is used to analyze specific labels in your input.\n");
-		m->mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups.\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. freq), '=' and parameters (i.e.yourFreq).\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "RareFactSharedCommand", "help");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
-RareFactSharedCommand::~RareFactSharedCommand(){
-	if (abort == false) {
-		delete input;   globaldata->ginput = NULL;
-		delete read;
-		delete validCalculator;
-	}
-}
-
 //**********************************************************************************************************************
 
 int RareFactSharedCommand::execute(){
 	try {
 	
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+	
+		string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(sharedfile));
+		
+		ValidCalculators validCalculator;
+			
+		for (int i=0; i<Estimators.size(); i++) {
+			if (validCalculator.isValidCalculator("sharedrarefaction", Estimators[i]) == true) { 
+				if (Estimators[i] == "sharedobserved") { 
+					rDisplays.push_back(new RareDisplay(new SharedSobs(), new SharedThreeColumnFile(fileNameRoot+"shared.rarefaction", "")));
+					outputNames.push_back(fileNameRoot+"shared.rarefaction"); outputTypes["sharedrarefaction"].push_back(fileNameRoot+"shared.rarefaction");
+				}else if (Estimators[i] == "sharednseqs") { 
+					rDisplays.push_back(new RareDisplay(new SharedNSeqs(), new SharedThreeColumnFile(fileNameRoot+"shared.r_nseqs", "")));
+					outputNames.push_back(fileNameRoot+"shared.r_nseqs"); outputTypes["sharedr_nseqs"].push_back(fileNameRoot+"shared.r_nseqs");
+				}
+			}
+		}
 		
 		//if the users entered no valid calculators don't execute command
 		if (rDisplays.size() == 0) { return 0; }
-
-		read = new ReadOTUFile(globaldata->inputFileName);	
-		read->read(&*globaldata); 
 			
-		input = globaldata->ginput;
+		input = new InputData(sharedfile, "sharedfile");
 		lookup = input->getSharedRAbundVectors();
 		string lastLabel = lookup[0]->getLabel();
 		
 		if (m->control_pressed) { 
-			globaldata->Groups.clear(); 
+			m->Groups.clear(); 
+			delete input;
 			for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
 			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
@@ -250,7 +227,8 @@ int RareFactSharedCommand::execute(){
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			if (m->control_pressed) { 
-				globaldata->Groups.clear(); 
+				m->Groups.clear(); 
+				delete input;
 				for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
 				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}
 				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
@@ -294,10 +272,11 @@ int RareFactSharedCommand::execute(){
 		}
 		
 		if (m->control_pressed) { 
-				globaldata->Groups.clear(); 
-				for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
-				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}
-				return 0;
+			m->Groups.clear(); 
+			delete input;
+			for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
+			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}
+			return 0;
 		}
 		
 		//output error messages about any remaining user labels
@@ -314,10 +293,11 @@ int RareFactSharedCommand::execute(){
 		}
 		
 		if (m->control_pressed) { 
-				globaldata->Groups.clear(); 
-				for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
-				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}
-				return 0;
+			m->Groups.clear(); 
+			delete input; 
+			for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
+			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}
+			return 0;
 		}
 		
 		//run last label if you need to
@@ -333,14 +313,10 @@ int RareFactSharedCommand::execute(){
 		}
 		
 		for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}	
+		m->Groups.clear(); 
+		delete input;
 		
-		//reset groups parameter
-		globaldata->Groups.clear();  
-		
-		if (m->control_pressed) { 
-				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}
-				return 0;
-		}
+		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();

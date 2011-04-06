@@ -64,13 +64,15 @@ class SffInfoCommand : public Command {
 public:
 	SffInfoCommand(string);
 	SffInfoCommand();
-	~SffInfoCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();
+	~SffInfoCommand(){}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "sffinfo";					}
+	string getCommandCategory()		{ return "Sequence Processing";		}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
 	string sffFilename, sfftxtFilename, outputDir, accnosName;
@@ -78,7 +80,6 @@ private:
 	bool abort, fasta, qual, trim, flow, sfftxt, hasAccnos;
 	int mycount;
 	set<string> seqNames;
-	map<string, vector<string> > outputTypes;
 	
 	//extract sff file functions
 	int extractSffInfo(string, string);

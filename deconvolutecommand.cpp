@@ -10,14 +10,36 @@
 #include "deconvolutecommand.h"
 
 //**********************************************************************************************************************
-vector<string> DeconvoluteCommand::getValidParameters(){	
+vector<string> DeconvoluteCommand::setParameters(){	
 	try {
-		string Array[] =  {"fasta", "name","outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
+		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "DeconvoluteCommand", "getValidParameters");
+		m->errorOut(e, "DeconvoluteCommand", "setParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string DeconvoluteCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The unique.seqs command reads a fastafile and creates a namesfile.\n";
+		helpString += "It creates a file where the first column is the groupname and the second column is a list of sequence names who have the same sequence. \n";
+		helpString += "If the sequence is unique the second column will just contain its name. \n";
+		helpString += "The unique.seqs command parameters are fasta and name.  fasta is required, unless there is a valid current fasta file.\n";
+		helpString += "The unique.seqs command should be in the following format: \n";
+		helpString += "unique.seqs(fasta=yourFastaFile) \n";	
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "DeconvoluteCommand", "getHelpString");
 		exit(1);
 	}
 }
@@ -25,35 +47,13 @@ vector<string> DeconvoluteCommand::getValidParameters(){
 DeconvoluteCommand::DeconvoluteCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
 		outputTypes["name"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "DeconvoluteCommand", "DeconvoluteCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> DeconvoluteCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"fasta"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "DeconvoluteCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> DeconvoluteCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "DeconvoluteCommand", "getRequiredFiles");
 		exit(1);
 	}
 }
@@ -66,9 +66,7 @@ DeconvoluteCommand::DeconvoluteCommand(string option)  {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"fasta", "name","outputdir","inputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
@@ -112,7 +110,11 @@ DeconvoluteCommand::DeconvoluteCommand(string option)  {
 			//check for required parameters
 			inFastaName = validParameter.validFile(parameters, "fasta", true);
 			if (inFastaName == "not open") { abort = true; }
-			else if (inFastaName == "not found") { inFastaName = ""; m->mothurOut("fasta is a required parameter for the unique.seqs command."); m->mothurOutEndLine(); abort = true;  }	
+			else if (inFastaName == "not found") { 				
+				inFastaName = m->getFastaFile(); 
+				if (inFastaName != "") { m->mothurOut("Using " + inFastaName + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}	
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
@@ -131,23 +133,6 @@ DeconvoluteCommand::DeconvoluteCommand(string option)  {
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-
-void DeconvoluteCommand::help(){
-	try {
-		m->mothurOut("The unique.seqs command reads a fastafile and creates a namesfile.\n");
-		m->mothurOut("It creates a file where the first column is the groupname and the second column is a list of sequence names who have the same sequence. \n");
-		m->mothurOut("If the sequence is unique the second column will just contain its name. \n");
-		m->mothurOut("The unique.seqs command parameter is fasta and it is required.\n");
-		m->mothurOut("The unique.seqs command should be in the following format: \n");
-		m->mothurOut("unique.seqs(fasta=yourFastaFile) \n");	
-	}
-	catch(exception& e) {
-		m->errorOut(e, "DeconvoluteCommand", "help");
-		exit(1);
-	}
-}
-
 /**************************************************************************************/
 int DeconvoluteCommand::execute() {	
 	try {

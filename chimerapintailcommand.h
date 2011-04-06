@@ -23,14 +23,15 @@ public:
 
 	ChimeraPintailCommand(string);
 	ChimeraPintailCommand();
-	~ChimeraPintailCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();
+	~ChimeraPintailCommand(){}
 	
+	vector<string> setParameters();
+	string getCommandName()			{ return "chimera.pintail";		}
+	string getCommandCategory()		{ return "Sequence Processing"; }
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }		
 private:
 
 	struct linePair {
@@ -54,10 +55,7 @@ private:
 	int processors, window, increment, numSeqs, templateSeqsLength;
 	Chimera* chimera;
 	vector<string> outputNames;
-	map<string, vector<string> > outputTypes;
 	vector<string> fastaFileNames;
-	
-	
 };
 
 /***********************************************************/

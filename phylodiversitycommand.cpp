@@ -10,21 +10,63 @@
 #include "phylodiversitycommand.h"
 
 //**********************************************************************************************************************
-vector<string> PhyloDiversityCommand::getValidParameters(){	
+vector<string> PhyloDiversityCommand::setParameters(){	
 	try {
-		string Array[] =  {"freq","rarefy","iters","groups","processors","summary","collect","scale","outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+
+		CommandParameter ptree("tree", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(ptree);
+		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pgroup);
+		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
+		CommandParameter piters("iters", "Number", "", "1000", "", "", "",false,false); parameters.push_back(piters);
+		CommandParameter pfreq("freq", "Number", "", "100", "", "", "",false,false); parameters.push_back(pfreq);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
+		CommandParameter prarefy("rarefy", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(prarefy);
+		CommandParameter psummary("summary", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(psummary);
+		CommandParameter pcollect("collect", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pcollect);
+		CommandParameter pscale("scale", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pscale);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "PhyloDiversityCommand", "getValidParameters");
+		m->errorOut(e, "PhyloDiversityCommand", "setParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
+string PhyloDiversityCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The phylo.diversity command parameters are tree, group, name, groups, iters, freq, processors, scale, rarefy, collect and summary.  tree and group are required, unless you have valid current files.\n";
+		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed. The group names are separated by dashes. By default all groups are used.\n";
+		helpString += "The iters parameter allows you to specify the number of randomizations to preform, by default iters=1000, if you set rarefy to true.\n";
+		helpString += "The freq parameter is used indicate when to output your data, by default it is set to 100. But you can set it to a percentage of the number of sequence. For example freq=0.10, means 10%. \n";
+		helpString += "The scale parameter is used indicate that you want your output scaled to the number of sequences sampled, default = false. \n";
+		helpString += "The rarefy parameter allows you to create a rarefaction curve. The default is false.\n";
+		helpString += "The collect parameter allows you to create a collectors curve. The default is false.\n";
+		helpString += "The summary parameter allows you to create a .summary file. The default is true.\n";
+		helpString += "The processors parameter allows you to specify the number of processors to use. The default is 1.\n";
+		helpString += "The phylo.diversity command should be in the following format: phylo.diversity(groups=yourGroups, rarefy=yourRarefy, iters=yourIters).\n";
+		helpString += "Example phylo.diversity(groups=A-B-C, rarefy=T, iters=500).\n";
+		helpString += "The phylo.diversity command output two files: .phylo.diversity and if rarefy=T, .rarefaction.\n";
+		helpString += "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PhyloDiversityCommand", "getHelpString");
+		exit(1);
+	}
+}
+
+
+//**********************************************************************************************************************
 PhyloDiversityCommand::PhyloDiversityCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["phylodiv"] = tempOutNames;
 		outputTypes["rarefy"] = tempOutNames;
@@ -36,44 +78,19 @@ PhyloDiversityCommand::PhyloDiversityCommand(){
 	}
 }
 //**********************************************************************************************************************
-vector<string> PhyloDiversityCommand::getRequiredParameters(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PhyloDiversityCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> PhyloDiversityCommand::getRequiredFiles(){	
-	try {
-		string Array[] =  {"tree","group"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PhyloDiversityCommand", "getRequiredFiles");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 	try {
-		globaldata = GlobalData::getInstance();
 		abort = false; calledHelp = false;   
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"freq","rarefy","iters","groups","processors","summary","collect","scale","outputdir","inputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();;
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
+			map<string,string>::iterator it;
 			
 			ValidParameters validParameter;
 		
@@ -88,12 +105,64 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 			outputTypes["rarefy"] = tempOutNames;
 			outputTypes["summary"] = tempOutNames;
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(globaldata->getTreeFile());		}
+			//if the user changes the input directory command factory will send this info to us in the output parameter 
+			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			if (inputDir == "not found"){	inputDir = "";		}
+			else {
+				string path;
+				it = parameters.find("tree");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["tree"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("group");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["group"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("name");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["name"] = inputDir + it->second;		}
+				}
+			}
 			
-			if (globaldata->gTree.size() == 0) {//no trees were read
-				m->mothurOut("You must execute the read.tree command, before you may execute the phylo.diversity command."); m->mothurOutEndLine(); abort = true;  }
-
+			m->runParse = true;
+			
+			//check for required parameters
+			treefile = validParameter.validFile(parameters, "tree", true);
+			if (treefile == "not open") { abort = true; }
+			else if (treefile == "not found") { 				
+				//if there is a current design file, use it
+				treefile = m->getTreeFile(); 
+				if (treefile != "") { m->mothurOut("Using " + treefile + " as input file for the tree parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current tree file and the tree parameter is required."); m->mothurOutEndLine(); abort = true; }								
+			}	
+			
+			//check for required parameters
+			groupfile = validParameter.validFile(parameters, "group", true);
+			if (groupfile == "not open") { abort = true; }
+			else if (groupfile == "not found") { 
+				//if there is a current design file, use it
+				groupfile = m->getGroupFile(); 
+				if (groupfile != "") { m->mothurOut("Using " + groupfile + " as input file for the group parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current group file and the group parameter is required."); m->mothurOutEndLine(); abort = true; }								
+			}
+			
+			namefile = validParameter.validFile(parameters, "name", true);
+			if (namefile == "not open") { abort = true; }
+			else if (namefile == "not found") { namefile = ""; }
+			
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(treefile);	}
+			
 			string temp;
 			temp = validParameter.validFile(parameters, "freq", false);			if (temp == "not found") { temp = "100"; }
 			convert(temp, freq); 
@@ -114,14 +183,15 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 			temp = validParameter.validFile(parameters, "collect", false);			if (temp == "not found") { temp = "F"; }
 			collect = m->isTrue(temp);
 			
-			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = "1";				}
+			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
+			m->setProcessors(temp);
 			convert(temp, processors); 
 			
 			groups = validParameter.validFile(parameters, "groups", false);			
-			if (groups == "not found") { groups = ""; Groups = globaldata->gTreemap->namesOfGroups;  globaldata->Groups = Groups;  }
+			if (groups == "not found") { groups = "";  }
 			else { 
 				m->splitAtDash(groups, Groups);
-				globaldata->Groups = Groups;
+				m->Groups = Groups;
 			}
 			
 			if ((!collect) && (!rarefy) && (!summary)) { m->mothurOut("No outputs selected. You must set either collect, rarefy or summary to true, summary=T by default."); m->mothurOutEndLine(); abort=true; }
@@ -135,57 +205,84 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 }
 //**********************************************************************************************************************
 
-void PhyloDiversityCommand::help(){
-	try {
-		m->mothurOut("The phylo.diversity command can only be executed after a successful read.tree command.\n");
-		m->mothurOut("The phylo.diversity command parameters are groups, iters, freq, processors, scale, rarefy, collect and summary.  No parameters are required.\n");
-		m->mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed. The group names are separated by dashes. By default all groups are used.\n");
-		m->mothurOut("The iters parameter allows you to specify the number of randomizations to preform, by default iters=1000, if you set rarefy to true.\n");
-		m->mothurOut("The freq parameter is used indicate when to output your data, by default it is set to 100. But you can set it to a percentage of the number of sequence. For example freq=0.10, means 10%. \n");
-		m->mothurOut("The scale parameter is used indicate that you want your ouptut scaled to the number of sequences sampled, default = false. \n");
-		m->mothurOut("The rarefy parameter allows you to create a rarefaction curve. The default is false.\n");
-		m->mothurOut("The collect parameter allows you to create a collectors curve. The default is false.\n");
-		m->mothurOut("The summary parameter allows you to create a .summary file. The default is true.\n");
-		m->mothurOut("The processors parameter allows you to specify the number of processors to use. The default is 1.\n");
-		m->mothurOut("The phylo.diversity command should be in the following format: phylo.diversity(groups=yourGroups, rarefy=yourRarefy, iters=yourIters).\n");
-		m->mothurOut("Example phylo.diversity(groups=A-B-C, rarefy=T, iters=500).\n");
-		m->mothurOut("The phylo.diversity command output two files: .phylo.diversity and if rarefy=T, .rarefaction.\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n");
-
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PhyloDiversityCommand", "help");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
-PhyloDiversityCommand::~PhyloDiversityCommand(){}
-
-//**********************************************************************************************************************
-
 int PhyloDiversityCommand::execute(){
 	try {
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
+		//read in group map info.
+		tmap = new TreeMap(groupfile);
+		tmap->readMap();
+		
+		if (namefile != "") { readNamesFile(); }
+		
+		read = new ReadNewickTree(treefile);
+		int readOk = read->read(tmap); 
+		
+		if (readOk != 0) { m->mothurOut("Read Terminated."); m->mothurOutEndLine(); delete tmap; delete read; return 0; }
+		
+		read->AssembleTrees();
+		vector<Tree*> trees = read->getTrees();
+		delete read;
+		
+		//make sure all files match
+		//if you provide a namefile we will use the numNames in the namefile as long as the number of unique match the tree names size.
+		int numNamesInTree;
+		if (namefile != "")  {  
+			if (numUniquesInName == m->Treenames.size()) {  numNamesInTree = nameMap.size();  }
+			else {   numNamesInTree = m->Treenames.size();  }
+		}else {  numNamesInTree = m->Treenames.size();  }
+		
+		
+		//output any names that are in group file but not in tree
+		if (numNamesInTree < tmap->getNumSeqs()) {
+			for (int i = 0; i < tmap->namesOfSeqs.size(); i++) {
+				//is that name in the tree?
+				int count = 0;
+				for (int j = 0; j < m->Treenames.size(); j++) {
+					if (tmap->namesOfSeqs[i] == m->Treenames[j]) { break; } //found it
+					count++;
+				}
+				
+				if (m->control_pressed) { 
+					delete tmap; for (int i = 0; i < trees.size(); i++) { delete trees[i]; }
+					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } outputTypes.clear();
+					m->Groups.clear();
+					return 0;
+				}
+				
+				//then you did not find it so report it 
+				if (count == m->Treenames.size()) { 
+					//if it is in your namefile then don't remove
+					map<string, string>::iterator it = nameMap.find(tmap->namesOfSeqs[i]);
+					
+					if (it == nameMap.end()) {
+						m->mothurOut(tmap->namesOfSeqs[i] + " is in your groupfile and not in your tree. It will be disregarded."); m->mothurOutEndLine();
+						tmap->removeSeq(tmap->namesOfSeqs[i]);
+						i--; //need this because removeSeq removes name from namesOfSeqs
+					}
+				}
+			}
+		}
+		
+		SharedUtil* util = new SharedUtil();
+		util->setGroups(m->Groups, tmap->namesOfGroups, "treegroup");	//sets the groups the user wants to analyze
+		delete util;
+		
 		//incase the user had some mismatches between the tree and group files we don't want group xxx to be analyzed
-		for (int i = 0; i < globaldata->Groups.size(); i++) { if (globaldata->Groups[i] == "xxx") { globaldata->Groups.erase(globaldata->Groups.begin()+i);  break; }  }
+		for (int i = 0; i < m->Groups.size(); i++) { if (m->Groups[i] == "xxx") { m->Groups.erase(m->Groups.begin()+i);  break; }  }
 		 
 		vector<string> outputNames;
-			
-		vector<Tree*> trees = globaldata->gTree;
 		
 		//for each of the users trees
 		for(int i = 0; i < trees.size(); i++) {
 		
-			if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	} return 0; }
+			if (m->control_pressed) { delete tmap; for (int j = 0; j < trees.size(); j++) { delete trees[j]; } for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str()); 	} return 0; }
 			
 			ofstream outSum, outRare, outCollect;
-			string outSumFile = outputDir + m->getRootName(m->getSimpleName(globaldata->getTreeFile()))  + toString(i+1) + ".phylodiv.summary";
-			string outRareFile = outputDir + m->getRootName(m->getSimpleName(globaldata->getTreeFile()))  + toString(i+1) + ".phylodiv.rarefaction";
-			string outCollectFile = outputDir + m->getRootName(m->getSimpleName(globaldata->getTreeFile()))  + toString(i+1) + ".phylodiv";
+			string outSumFile = outputDir + m->getRootName(m->getSimpleName(treefile))  + toString(i+1) + ".phylodiv.summary";
+			string outRareFile = outputDir + m->getRootName(m->getSimpleName(treefile))  + toString(i+1) + ".phylodiv.rarefaction";
+			string outCollectFile = outputDir + m->getRootName(m->getSimpleName(treefile))  + toString(i+1) + ".phylodiv";
 			
 			if (summary)	{ m->openOutputFile(outSumFile, outSum); outputNames.push_back(outSumFile);		outputTypes["summary"].push_back(outSumFile);			}
 			if (rarefy)		{ m->openOutputFile(outRareFile, outRare); outputNames.push_back(outRareFile);	outputTypes["rarefy"].push_back(outRareFile);			}
@@ -196,7 +293,7 @@ int PhyloDiversityCommand::execute(){
 			//create a vector containing indexes of leaf nodes, randomize it, select nodes to send to calculator
 			vector<int> randomLeaf;
 			for (int j = 0; j < numLeafNodes; j++) {  
-				if (m->inUsersGroups(trees[i]->tree[j].getGroup(), globaldata->Groups) == true) { //is this a node from the group the user selected.
+				if (m->inUsersGroups(trees[i]->tree[j].getGroup(), m->Groups) == true) { //is this a node from the group the user selected.
 					randomLeaf.push_back(j); 
 				}
 			}
@@ -211,15 +308,15 @@ int PhyloDiversityCommand::execute(){
 			
 			//find largest group total 
 			int largestGroup = 0;
-			for (int j = 0; j < globaldata->Groups.size(); j++) {  
-				if (globaldata->gTreemap->seqsPerGroup[globaldata->Groups[j]] > largestGroup) { largestGroup = globaldata->gTreemap->seqsPerGroup[globaldata->Groups[j]]; }
+			for (int j = 0; j < m->Groups.size(); j++) {  
+				if (tmap->seqsPerGroup[m->Groups[j]] > largestGroup) { largestGroup = tmap->seqsPerGroup[m->Groups[j]]; }
 				
 				//initialize diversity
-				diversity[globaldata->Groups[j]].resize(globaldata->gTreemap->seqsPerGroup[globaldata->Groups[j]]+1, 0.0);		//numSampled
+				diversity[m->Groups[j]].resize(tmap->seqsPerGroup[m->Groups[j]]+1, 0.0);		//numSampled
 																											//groupA		0.0			0.0
 																											
 				//initialize sumDiversity
-				sumDiversity[globaldata->Groups[j]].resize(globaldata->gTreemap->seqsPerGroup[globaldata->Groups[j]]+1, 0.0);
+				sumDiversity[m->Groups[j]].resize(tmap->seqsPerGroup[m->Groups[j]]+1, 0.0);
 			}	
 
 			//convert freq percentage to number
@@ -233,8 +330,8 @@ int PhyloDiversityCommand::execute(){
 			if(largestGroup % increment != 0){	numSampledList.insert(largestGroup);   }
 			
 			//add other groups ending points
-			for (int j = 0; j < globaldata->Groups.size(); j++) {  
-				if (numSampledList.count(diversity[globaldata->Groups[j]].size()-1) == 0) {  numSampledList.insert(diversity[globaldata->Groups[j]].size()-1); }
+			for (int j = 0; j < m->Groups.size(); j++) {  
+				if (numSampledList.count(diversity[m->Groups[j]].size()-1) == 0) {  numSampledList.insert(diversity[m->Groups[j]].size()-1); }
 			}
 			
 			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
@@ -292,8 +389,6 @@ int PhyloDiversityCommand::createProcesses(vector<int>& procIters, Tree* t, map<
 		
 		vector<int> processIDS;
 		map< string, vector<float> >::iterator itSum;
-		
-		EstOutput results;
 		
 		//loop through and create all the processes you want
 		while (process != processors) {
@@ -385,7 +480,7 @@ int PhyloDiversityCommand::driver(Tree* t, map< string, vector<float> >& div, ma
 				//initialize counts
 				map<string, int> counts;
 				map< string, set<int> > countedBranch;  
-				for (int j = 0; j < globaldata->Groups.size(); j++) {  counts[globaldata->Groups[j]] = 0; countedBranch[globaldata->Groups[j]].insert(-2);  }  //add dummy index to initialize countedBranch sets
+				for (int j = 0; j < m->Groups.size(); j++) {  counts[m->Groups[j]] = 0; countedBranch[m->Groups[j]].insert(-2);  }  //add dummy index to initialize countedBranch sets
 				
 				for(int k = 0; k < numLeafNodes; k++){
 						
@@ -416,9 +511,9 @@ int PhyloDiversityCommand::driver(Tree* t, map< string, vector<float> >& div, ma
 				
 				if (rarefy) {
 					//add this diversity to the sum
-					for (int j = 0; j < globaldata->Groups.size(); j++) {  
-						for (int g = 0; g < div[globaldata->Groups[j]].size(); g++) {
-							sumDiv[globaldata->Groups[j]][g] += div[globaldata->Groups[j]][g];
+					for (int j = 0; j < m->Groups.size(); j++) {  
+						for (int g = 0; g < div[m->Groups[j]].size(); g++) {
+							sumDiv[m->Groups[j]][g] += div[m->Groups[j]][g];
 						}
 					}
 				}
@@ -445,14 +540,14 @@ void PhyloDiversityCommand::printSumData(map< string, vector<float> >& div, ofst
 		
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
 			
-		for (int j = 0; j < globaldata->Groups.size(); j++) {
-			int numSampled = (div[globaldata->Groups[j]].size()-1);
-			out << globaldata->Groups[j] << '\t' << numSampled << '\t';
+		for (int j = 0; j < m->Groups.size(); j++) {
+			int numSampled = (div[m->Groups[j]].size()-1);
+			out << m->Groups[j] << '\t' << numSampled << '\t';
 		
 			 
 			float score;
-			if (scale)	{  score = (div[globaldata->Groups[j]][numSampled] / (float)numIters) / (float)numSampled;	}
-			else		{	score = div[globaldata->Groups[j]][numSampled] / (float)numIters;	}
+			if (scale)	{  score = (div[m->Groups[j]][numSampled] / (float)numIters) / (float)numSampled;	}
+			else		{	score = div[m->Groups[j]][numSampled] / (float)numIters;	}
 				
 			out << setprecision(4) << score << endl;
 		}
@@ -471,7 +566,7 @@ void PhyloDiversityCommand::printData(set<int>& num, map< string, vector<float> 
 	try {
 		
 		out << "numSampled\t";
-		for (int i = 0; i < globaldata->Groups.size(); i++) { out << globaldata->Groups[i] << '\t';  }
+		for (int i = 0; i < m->Groups.size(); i++) { out << m->Groups[i] << '\t';  }
 		out << endl;
 		
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
@@ -481,11 +576,11 @@ void PhyloDiversityCommand::printData(set<int>& num, map< string, vector<float> 
 			
 			out << numSampled << '\t';  
 			
-			for (int j = 0; j < globaldata->Groups.size(); j++) {
-				if (numSampled < div[globaldata->Groups[j]].size()) { 
+			for (int j = 0; j < m->Groups.size(); j++) {
+				if (numSampled < div[m->Groups[j]].size()) { 
 					float score;
-					if (scale)	{  score = (div[globaldata->Groups[j]][numSampled] / (float)numIters) / (float)numSampled;	}
-					else		{	score = div[globaldata->Groups[j]][numSampled] / (float)numIters;	}
+					if (scale)	{  score = (div[m->Groups[j]][numSampled] / (float)numIters) / (float)numSampled;	}
+					else		{	score = div[m->Groups[j]][numSampled] / (float)numIters;	}
 
 					out << setprecision(4) << score << '\t';
 				}else { out << "NA" << '\t'; }
@@ -594,6 +689,47 @@ vector<float> PhyloDiversityCommand::calcBranchLength(Tree* t, int leaf, map< st
 		exit(1);
 	}
 }
+/*****************************************************************/
+int PhyloDiversityCommand::readNamesFile() {
+	try {
+		m->names.clear();
+		numUniquesInName = 0;
+		
+		ifstream in;
+		m->openInputFile(namefile, in);
+		
+		string first, second;
+		map<string, string>::iterator itNames;
+		
+		while(!in.eof()) {
+			in >> first >> second; m->gobble(in);
+			
+			numUniquesInName++;
+			
+			itNames = m->names.find(first);
+			if (itNames == m->names.end()) {  
+				m->names[first] = second; 
+				
+				//we need a list of names in your namefile to use above when removing extra seqs above so we don't remove them
+				vector<string> dupNames;
+				m->splitAtComma(second, dupNames);
+				
+				for (int i = 0; i < dupNames.size(); i++) {	
+					nameMap[dupNames[i]] = dupNames[i]; 
+					if ((groupfile == "") && (i != 0)) { tmap->addSeq(dupNames[i], "Group1"); } 
+				}
+			}else {  m->mothurOut(first + " has already been seen in namefile, disregarding names file."); m->mothurOutEndLine(); in.close(); m->names.clear(); namefile = ""; return 1; }			
+		}
+		in.close();
+		
+		return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PhyloDiversityCommand", "readNamesFile");
+		exit(1);
+	}
+}
+
 //**********************************************************************************************************************
 
 

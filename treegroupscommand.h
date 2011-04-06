@@ -13,7 +13,6 @@
 #include "command.hpp"
 #include "inputdata.h"
 #include "groupmap.h"
-#include "readotu.h"
 #include "validcalculator.h"
 #include "tree.h"
 #include "treemap.h"
@@ -27,7 +26,6 @@
 	The user can select the lines or labels they wish to use as well as the groups they would like included.
 	They can also use as many or as few calculators as they wish. */
 	
-class GlobalData;
 
 typedef list<PCell>::iterator MatData;
 
@@ -37,12 +35,14 @@ public:
 	TreeGroupCommand(string);	
 	TreeGroupCommand();
 	~TreeGroupCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();	
-	void help();
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "tree.shared";				}
+	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
 	int createTree();
@@ -50,8 +50,6 @@ private:
 	int makeSimsShared();
 	int makeSimsDist();
 	
-	GlobalData* globaldata;
-	ReadOTUFile* read;
 	ReadMatrix* readMatrix;
 	SparseMatrix* matrix;
 	NameAssignment* nameMap;
@@ -62,14 +60,12 @@ private:
 	vector< vector<float> > simMatrix;
 	map<int, int> index;  //maps row in simMatrix to vector index in the tree	
 	InputData* input;
-	ValidCalculators* validCalculator;
 	vector<SharedRAbundVector*> lookup;
 	string lastLabel;
-	string format, outputFile, groupNames, filename;
+	string format, outputFile, groupNames, filename, sharedfile, inputfile;
 	int numGroups;
 	ofstream out;
 	float precision, cutoff;
-	map<string, vector<string> > outputTypes;
 
 	bool abort, allLines;
 	set<string> labels; //holds labels to be used

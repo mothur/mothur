@@ -12,7 +12,6 @@
 #include "command.hpp"
 #include "inputdata.h"
 #include "groupmap.h"
-#include "readotu.h"
 #include "validcalculator.h"
 
 // aka. dist.shared()
@@ -21,7 +20,6 @@
 	The user can select the labels they wish to use as well as the groups they would like included.
 	They can also use as many or as few calculators as they wish. */
 	
-class GlobalData;
 
 class MatrixOutputCommand : public Command {
 	
@@ -29,25 +27,25 @@ public:
 	MatrixOutputCommand(string);
 	MatrixOutputCommand();	
 	~MatrixOutputCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();	
-	void help();
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "dist.shared";				}
+	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
 	void printSims(ostream&);
 	int process(vector<SharedRAbundVector*>);
 	
-	GlobalData* globaldata;
-	ReadOTUFile* read;
 	vector<Calculator*> matrixCalculators;
 	vector< vector<float> > simMatrix;
 	InputData* input;
 	ValidCalculators* validCalculator;
 	vector<SharedRAbundVector*> lookup;
-	string exportFileName, output;
+	string exportFileName, output, sharedfile;
 	int numGroups;
 	ofstream out;
 
@@ -55,9 +53,6 @@ private:
 	set<string> labels; //holds labels to be used
 	string outputFile, calc, groups, label, outputDir;
 	vector<string>  Estimators, Groups, outputNames; //holds estimators to be used
-	map<string, vector<string> > outputTypes;
-	
-
 };
 	
 	

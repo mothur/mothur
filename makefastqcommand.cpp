@@ -12,14 +12,36 @@
 #include "qualityscores.h"
 
 //**********************************************************************************************************************
-vector<string> MakeFastQCommand::getValidParameters(){	
+vector<string> MakeFastQCommand::setParameters(){	
 	try {
-		string Array[] =  {"fasta","qfile","outputdir","inputdir" };
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
+		CommandParameter pqfile("qfile", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pqfile);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "MakeFastQCommand", "getValidParameters");
+		m->errorOut(e, "MakeFastQCommand", "setParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string MakeFastQCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The make.fastq command read a fasta and quality file and creates a fastq file.\n";
+		helpString += "The make.fastq command parameters are fasta and qfile, both are required.\n";
+		helpString += "You must also provide an accnos containing the list of groups to get or set the groups parameter to the groups you wish to select.\n";
+		helpString += "The make.fastq command should be in the following format: make.fastq(qfile=yourQualityFile, fasta=yourFasta).\n";
+		helpString += "Example make.fastq(fasta=amazon.fasta, qfile=amazon.qual).\n";
+		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "MakeFastQCommand", "getHelpString");
 		exit(1);
 	}
 }
@@ -27,34 +49,12 @@ vector<string> MakeFastQCommand::getValidParameters(){
 MakeFastQCommand::MakeFastQCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["fastq"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "MakeFastQCommand", "MakeFastQCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> MakeFastQCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"fasta","qfile"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "MakeFastQCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> MakeFastQCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "MakeFastQCommand", "getRequiredFiles");
 		exit(1);
 	}
 }
@@ -67,9 +67,7 @@ MakeFastQCommand::MakeFastQCommand(string option)  {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"fasta","qfile", "outputdir","inputdir" };
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
@@ -107,25 +105,25 @@ MakeFastQCommand::MakeFastQCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["qfile"] = inputDir + it->second;		}
 				}
-				
-				it = parameters.find("list");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["list"] = inputDir + it->second;		}
-				}
 			}
 			
 			
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not open") { abort = true; fastafile = ""; }
-			else if (fastafile == "not found") {  fastafile = "";  m->mothurOut("You must provide a fasta file."); m->mothurOutEndLine(); abort = true; }	
+			else if (fastafile == "not found") {  		
+				fastafile = m->getFastaFile(); 
+				if (fastafile != "") {  m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}	
 			
 			qualfile = validParameter.validFile(parameters, "qfile", true);
 			if (qualfile == "not open") { abort = true; qualfile = ""; }
-			else if (qualfile == "not found") {  qualfile = "";  m->mothurOut("You must provide a quality file."); m->mothurOutEndLine(); abort = true; }	
+			else if (qualfile == "not found") {  			
+				qualfile = m->getQualFile(); 
+				if (qualfile != "") {  m->mothurOut("Using " + qualfile + " as input file for the qfile parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current qualfile and the qfile parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}	
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(fastafile);		}
@@ -138,23 +136,6 @@ MakeFastQCommand::MakeFastQCommand(string option)  {
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-
-void MakeFastQCommand::help(){
-	try {
-		m->mothurOut("The make.fastq command read a fasta and quality file and creates a fastq file.\n");
-		m->mothurOut("The make.fastq command parameters are fasta and qfile, both are required.\n");
-		m->mothurOut("You must also provide an accnos containing the list of groups to get or set the groups parameter to the groups you wish to select.\n");
-		m->mothurOut("The make.fastq command should be in the following format: make.fastq(qfile=yourQualityFile, fasta=yourFasta).\n");
-		m->mothurOut("Example make.fastq(fasta=amazon.fasta, qfile=amazon.qual).\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "MakeFastQCommand", "help");
-		exit(1);
-	}
-}
-
 //**********************************************************************************************************************
 
 int MakeFastQCommand::execute(){

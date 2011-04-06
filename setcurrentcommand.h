@@ -18,18 +18,19 @@ class SetCurrentCommand : public Command {
 public:
 	SetCurrentCommand(string);
 	SetCurrentCommand();
-	~SetCurrentCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();
+	~SetCurrentCommand() {}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "set.current";	}
+	string getCommandCategory()		{ return "General";		}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
 	
 	vector<string> outputNames;
-	map<string, vector<string> > outputTypes;
 	bool abort;
 	
 	string clearTypes;

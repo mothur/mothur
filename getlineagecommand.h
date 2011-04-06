@@ -18,20 +18,22 @@ class GetLineageCommand : public Command {
 	
 		GetLineageCommand(string);
 		GetLineageCommand();
-		~GetLineageCommand(){};
-		vector<string> getRequiredParameters();
-		vector<string> getValidParameters();
-		vector<string> getRequiredFiles();
-		map<string, vector<string> > getOutputFiles() { return outputTypes; }
-		int execute();
-		void help();	
-		
+		~GetLineageCommand(){}
+	
+		vector<string> setParameters();
+		string getCommandName()			{ return "get.lineage";				}
+		string getCommandCategory()		{ return "Phylotype Analysis";		}
+		string getHelpString();	
+	
+		int execute(); 
+		void help() { m->mothurOut(getHelpString()); }	
+	
+	
 	private:
 		set<string> names;
 		vector<string> outputNames;
 		string fastafile, namefile, groupfile, alignfile, listfile, taxfile, outputDir, taxons;
 		bool abort, dups;
-		map<string, vector<string> > outputTypes;
 		
 		int readFasta();
 		int readName();

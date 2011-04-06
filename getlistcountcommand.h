@@ -12,9 +12,6 @@
 #include "command.hpp"
 #include "inputdata.h"
 #include "listvector.hpp"
-#include "readotu.h"
-
-class GlobalData;
 
 /**********************************************************/
 
@@ -23,18 +20,20 @@ class GetListCountCommand : public Command {
 public:
 	GetListCountCommand(string);
 	GetListCountCommand();	
-	~GetListCountCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();	
+	~GetListCountCommand(){}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "get.otulist";				}
+	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
+	
 	
 private:
-	GlobalData* globaldata;
 	ListVector* list;
-	ReadOTUFile* read;
 	InputData* input;
 	
 	bool abort, allLines;
@@ -42,8 +41,7 @@ private:
 	string label, listfile, outputDir, sort;
 	ofstream out;
 	vector<string> outputNames;
-	map<string, vector<string> > outputTypes;
-	
+		
 	void process(ListVector*);
 };
 /**********************************************************/

@@ -305,7 +305,7 @@ bool SharedUtil::isValidGroup(string groupname, vector<string> groups) {
 	}
 }
 
-/**************************************************************************************/
+/**************************************************************************************
 void SharedUtil::updateGroupIndex(vector<string>& userGroups, map<string, int>& index) {
 	try {
 		index.clear();
@@ -318,3 +318,6 @@ void SharedUtil::updateGroupIndex(vector<string>& userGroups, map<string, int>& 
 		exit(1);
 	}
 }
+/**************************************************************************************/
+
+

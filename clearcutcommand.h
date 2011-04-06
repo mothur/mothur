@@ -26,20 +26,22 @@ class ClearcutCommand : public Command {
 public:
 	ClearcutCommand(string);
 	ClearcutCommand();
-	~ClearcutCommand() {};
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();	
+	~ClearcutCommand() {}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "clearcut";			}
+	string getCommandCategory()		{ return "Hypothesis Testing";	}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
 	string outputDir, phylipfile, fastafile, matrixout, inputFile, seed, ntrees;
 	bool version, verbose, quiet, norandom, shuffle, neighbor, expblen, expdist, stdoutWanted, kimura, jukes, protein, DNA;
 	bool abort;
 	vector<string> outputNames;
-	map<string, vector<string> > outputTypes;
+	
 };
 
 /****************************************************************************/

@@ -15,7 +15,7 @@
 #include "sharedordervector.h"
 #include "sharedsabundvector.h"
 #include "rabundvector.hpp"
-#include "groupmap.h"
+//#include "groupmap.h"
 
 /* This class is a child to datavector.  It represents OTU information at a certain distance. 
 	It is similiar to an rabundvector except each member of data knows which group it belongs to.
@@ -68,8 +68,8 @@ public:
 private:
 	vector<individualFloat>  data; 
 	vector<SharedRAbundFloatVector*> lookup;
-	GlobalData* globaldata;
-	GroupMap* groupmap;
+	//GlobalData* globaldata;
+	//GroupMap* groupmap;
 	float maxRank;
 	int numBins;
 	float numSeqs;

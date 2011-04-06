@@ -12,21 +12,51 @@
 #include "inputdata.h"
 
 //**********************************************************************************************************************
-vector<string> ConsensusSeqsCommand::getValidParameters(){	
+vector<string> ConsensusSeqsCommand::setParameters(){	
 	try {
-		string Array[] =  {"fasta", "list", "name", "label","outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
+		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
+		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(plist);
+		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ConsensusSeqsCommand", "getValidParameters");
+		m->errorOut(e, "ConsensusSeqsCommand", "setParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
+string ConsensusSeqsCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The consensus.seqs command can be used in 2 ways: create a consensus sequence from a fastafile, or with a listfile create a consensus sequence for each otu. Sequences must be aligned.\n";
+		helpString += "The consensus.seqs command parameters are fasta, list, name and label.\n";
+		helpString += "The fasta parameter allows you to enter the fasta file containing your sequences, and is required, unless you have a valid current fasta file. \n";
+		helpString += "The list parameter allows you to enter a your list file. \n";
+		helpString += "The name parameter allows you to enter a names file associated with the fasta file. \n";
+		helpString += "The label parameter allows you to select what distance levels you would like output files for, and are separated by dashes.\n";
+		helpString += "The consensus.seqs command should be in the following format: \n";
+		helpString += "consensus.seqs(fasta=yourFastaFile, list=yourListFile) \n";	
+		helpString += "Example: consensus.seqs(fasta=abrecovery.align, list=abrecovery.fn.list) \n";
+		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n";	
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ConsensusSeqsCommand", "getHelpString");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
 ConsensusSeqsCommand::ConsensusSeqsCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
 		outputTypes["name"] = tempOutNames;
@@ -34,29 +64,6 @@ ConsensusSeqsCommand::ConsensusSeqsCommand(){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ConsensusSeqsCommand", "ConsensusSeqsCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> ConsensusSeqsCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"fasta", "list"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ConsensusSeqsCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> ConsensusSeqsCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "DegapSeqsCommand", "getRequiredFiles");
 		exit(1);
 	}
 }
@@ -70,9 +77,8 @@ ConsensusSeqsCommand::ConsensusSeqsCommand(string option)  {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"fasta","list","name","label", "outputdir","inputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
@@ -126,7 +132,11 @@ ConsensusSeqsCommand::ConsensusSeqsCommand(string option)  {
 			//check for parameters
 			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not open") { abort = true; }
-			else if (fastafile == "not found") { fastafile = ""; m->mothurOut("fasta is a required parameter for the consensus.seqs command."); m->mothurOutEndLine(); abort = true;  }	
+			else if (fastafile == "not found") { 			
+				fastafile = m->getFastaFile(); 
+				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}	
 			
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not open") { abort = true; }
@@ -153,31 +163,6 @@ ConsensusSeqsCommand::ConsensusSeqsCommand(string option)  {
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-
-void ConsensusSeqsCommand::help(){
-	try {
-		m->mothurOut("The consensus.seqs command can be used in 2 ways: create a consensus sequence from a fastafile, or with a listfile create a consensus sequence for each otu. Sequences must be aligned.\n");
-		m->mothurOut("The consensus.seqs command parameters are fasta, list, name and label.\n");
-		m->mothurOut("The fasta parameter allows you to enter the fasta file containing your sequences, and is required. \n");
-		m->mothurOut("The list parameter allows you to enter a your list file. \n");
-		m->mothurOut("The name parameter allows you to enter a names file associated with the fasta file. \n");
-		m->mothurOut("The label parameter allows you to select what distance levels you would like output files for, and are separated by dashes.\n");
-		m->mothurOut("The consensus.seqs command should be in the following format: \n");
-		m->mothurOut("consensus.seqs(fasta=yourFastaFile, list=yourListFile) \n");	
-		m->mothurOut("Example: consensus.seqs(fasta=abrecovery.align, list=abrecovery.fn.list) \n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n");	
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ConsensusSeqsCommand", "help");
-		exit(1);
-	}
-}
-
-//***************************************************************************************************************
-
-ConsensusSeqsCommand::~ConsensusSeqsCommand(){	/*	do nothing	*/	}
-
 //***************************************************************************************************************
 
 int ConsensusSeqsCommand::execute(){

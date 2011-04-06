@@ -9,48 +9,46 @@
 
 #include "getcurrentcommand.h"
 
-
 //**********************************************************************************************************************
-vector<string> GetCurrentCommand::getValidParameters(){	
+vector<string> GetCurrentCommand::setParameters(){	
 	try {
-		string Array[] =  {"outputdir","inputdir","clear"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter pclear("clear", "String", "", "", "", "", "",false,false); parameters.push_back(pclear);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "GetCurrentCommand", "getValidParameters");
+		m->errorOut(e, "GetCurrentCommand", "setParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string GetCurrentCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The get.current command outputs the current files saved by mothur.\n";
+		helpString += "The get.current command has one parameter: clear.\n";
+		helpString += "The clear paramter is used to indicate which file types you would like to clear values for, multiple types can be separated by dashes.\n";
+		helpString += "The get.current command should be in the following format: \n";
+		helpString += "get.current() or get.current(clear=fasta-name-accnos)\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetCurrentCommand", "getHelpString");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
 GetCurrentCommand::GetCurrentCommand(){	
 	try {
-		abort = true; calledHelp = true; 
+		abort = true; calledHelp = true;
+		setParameters();
 	}
 	catch(exception& e) {
 		m->errorOut(e, "GetCurrentCommand", "GetCurrentCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> GetCurrentCommand::getRequiredParameters(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetCurrentCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> GetCurrentCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetCurrentCommand", "getRequiredFiles");
 		exit(1);
 	}
 }
@@ -63,9 +61,7 @@ GetCurrentCommand::GetCurrentCommand(string option)  {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"outputdir","inputdir","clear"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
@@ -87,25 +83,6 @@ GetCurrentCommand::GetCurrentCommand(string option)  {
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-
-void GetCurrentCommand::help(){
-	try {
-		m->mothurOut("The get.current command outputs the current files saved by mothur.\n");
-		m->mothurOut("The get.current command has one parameter: clear.\n");
-		m->mothurOut("The clear paramter is used to indicate which file types you would like to clear values for, multiple types can be separated by dashes.\n");
-		m->mothurOut("The get.current command should be in the following format: \n");
-		m->mothurOut("get.current() or get.current(clear=fasta-name-accnos)\n");
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetCurrentCommand", "help");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-GetCurrentCommand::~GetCurrentCommand(){}
 //**********************************************************************************************************************
 
 int GetCurrentCommand::execute(){

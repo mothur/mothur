@@ -11,50 +11,58 @@
 #include "sequence.hpp"
 
 //**********************************************************************************************************************
-vector<string> ChopSeqsCommand::getValidParameters(){	
+vector<string> ChopSeqsCommand::setParameters(){	
 	try {
-		string AlignArray[] =  {"fasta","short","numbases","countgaps","keep","outputdir","inputdir"};
-		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
+		CommandParameter pnumbases("numbases", "Number", "", "0", "", "", "",false,true); parameters.push_back(pnumbases);
+		CommandParameter pcountgaps("countgaps", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pcountgaps);
+		CommandParameter pshort("short", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pshort);
+		CommandParameter pkeep("keep", "Multiple", "front-back", "front", "", "", "",false,false); parameters.push_back(pkeep);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ChopSeqsCommand", "getValidParameters");
+		m->errorOut(e, "ChopSeqsCommand", "setParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
+string ChopSeqsCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The chop.seqs command reads a fasta file and outputs a .chop.fasta containing the trimmed sequences. Note: If a sequence is completely 'chopped', an accnos file will be created with the names of the sequences removed. \n";
+		helpString += "The chop.seqs command parameters are fasta, numbases, countgaps and keep. fasta is required unless you have a valid current fasta file. numbases is required.\n";
+		helpString += "The chop.seqs command should be in the following format: chop.seqs(fasta=yourFasta, numbases=yourNum, keep=yourKeep).\n";
+		helpString += "The numbases parameter allows you to specify the number of bases you want to keep.\n";
+		helpString += "The keep parameter allows you to specify whether you want to keep the front or the back of your sequence, default=front.\n";
+		helpString += "The countgaps parameter allows you to specify whether you want to count gaps as bases, default=false.\n";
+		helpString += "The short parameter allows you to specify you want to keep sequences that are too short to chop, default=false.\n";
+		helpString += "For example, if you ran chop.seqs with numbases=200 and short=t, if a sequence had 100 bases mothur would keep the sequence rather than eliminate it.\n";
+		helpString += "Example chop.seqs(fasta=amazon.fasta, numbases=200, keep=front).\n";
+		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChopSeqsCommand", "getHelpString");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
 ChopSeqsCommand::ChopSeqsCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
 		outputTypes["accnos"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ChopSeqsCommand", "ChopSeqsCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> ChopSeqsCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"fasta","numbases"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChopSeqsCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> ChopSeqsCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChopSeqsCommand", "getRequiredFiles");
 		exit(1);
 	}
 }
@@ -67,9 +75,7 @@ ChopSeqsCommand::ChopSeqsCommand(string option)  {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"fasta","numbases","countgaps","keep","short","outputdir","inputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
@@ -104,7 +110,11 @@ ChopSeqsCommand::ChopSeqsCommand(string option)  {
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not open") { abort = true; }
-			else if (fastafile == "not found") {  m->mothurOut("You must provide a fasta file."); m->mothurOutEndLine(); abort = true; }  	
+			else if (fastafile == "not found") {  				//if there is a current fasta file, use it
+				fastafile = m->getFastaFile(); 
+				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}  	
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(fastafile);	}
@@ -129,27 +139,6 @@ ChopSeqsCommand::ChopSeqsCommand(string option)  {
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-
-void ChopSeqsCommand::help(){
-	try {
-		m->mothurOut("The chop.seqs command reads a fasta file and outputs a .chop.fasta containing the trimmed sequences. Note: If a sequence is completely 'chopped', an accnos file will be created with the names of the sequences removed. \n");
-		m->mothurOut("The chop.seqs command parameters are fasta, numbases, countgaps and keep. fasta and numbases are required required.\n");
-		m->mothurOut("The chop.seqs command should be in the following format: chop.seqs(fasta=yourFasta, numbases=yourNum, keep=yourKeep).\n");
-		m->mothurOut("The numbases parameter allows you to specify the number of bases you want to keep.\n");
-		m->mothurOut("The keep parameter allows you to specify whether you want to keep the front or the back of your sequence, default=front.\n");
-		m->mothurOut("The countgaps parameter allows you to specify whether you want to count gaps as bases, default=false.\n");
-		m->mothurOut("The short parameter allows you to specify you want to keep sequences that are too short to chop, default=false.\n");
-		m->mothurOut("For example, if you ran chop.seqs with numbases=200 and short=t, if a sequence had 100 bases mothur would keep the sequence rather than eliminate it.\n");
-		m->mothurOut("Example chop.seqs(fasta=amazon.fasta, numbases=200, keep=front).\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChopSeqsCommand", "help");
-		exit(1);
-	}
-}
-
 //**********************************************************************************************************************
 
 int ChopSeqsCommand::execute(){

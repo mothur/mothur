@@ -17,20 +17,21 @@ class MakeGroupCommand : public Command {
 public:
 	MakeGroupCommand(string);
 	MakeGroupCommand();	
-	~MakeGroupCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
+	~MakeGroupCommand(){}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "make.group";	}
+	string getCommandCategory()		{ return "General";		}
+	string getHelpString();	
+	
 	int execute(); 
-	void help();	
+	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
 		
 	string fastaFileName, groups, outputDir, filename, output;
 	vector<string> fastaFileNames;
 	vector<string> groupsNames, outputNames;
-	map<string, vector<string> > outputTypes;
 	
 	bool abort;
 };

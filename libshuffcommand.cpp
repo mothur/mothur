@@ -18,15 +18,49 @@
 #include "slibshuff.h"
 #include "dlibshuff.h"
 
+
+
 //**********************************************************************************************************************
-vector<string> LibShuffCommand::getValidParameters(){	
+vector<string> LibShuffCommand::setParameters(){	
 	try {
-		string Array[] =  {"iters","groups","step","form","cutoff","outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter pphylip("phylip", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pphylip);
+		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pgroup);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
+		CommandParameter piters("iters", "Number", "", "10000", "", "", "",false,false); parameters.push_back(piters);
+		CommandParameter pstep("step", "Number", "", "0.01", "", "", "",false,false); parameters.push_back(pstep);
+		CommandParameter pcutoff("cutoff", "Number", "", "1.0", "", "", "",false,false); parameters.push_back(pcutoff);
+		CommandParameter pform("form", "Multiple", "discrete-integral", "integral", "", "", "",false,false); parameters.push_back(pform);
+		CommandParameter psim("sim", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(psim);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "LibShuffCommand", "getValidParameters");
+		m->errorOut(e, "LibShuffCommand", "setParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string LibShuffCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The libshuff command parameters are phylip, group, sim, groups, iters, step, form and cutoff.  phylip and group parameters are required, unless you have valid current files.\n";
+		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups.\n";
+		helpString += "The group names are separated by dashes.  The iters parameter allows you to specify how many random matrices you would like compared to your matrix.\n";
+		helpString += "The step parameter allows you to specify change in distance you would like between each output if you are using the discrete form.\n";
+		helpString += "The form parameter allows you to specify if you would like to analyze your matrix using the discrete or integral form. Your options are integral or discrete.\n";
+		helpString += "The libshuff command should be in the following format: libshuff(groups=yourGroups, iters=yourIters, cutOff=yourCutOff, form=yourForm, step=yourStep).\n";
+		helpString += "Example libshuff(groups=A-B-C, iters=500, form=discrete, step=0.01, cutOff=2.0).\n";
+		helpString += "The default value for groups is all the groups in your groupfile, iters is 10000, cutoff is 1.0, form is integral and step is 0.01.\n";
+		helpString += "The libshuff command output two files: .coverage and .slsummary their descriptions are in the manual.\n";
+		helpString += "Note: No spaces between parameter labels (i.e. iters), '=' and parameters (i.e.yourIters).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "LibShuffCommand", "getHelpString");
 		exit(1);
 	}
 }
@@ -34,6 +68,7 @@ vector<string> LibShuffCommand::getValidParameters(){
 LibShuffCommand::LibShuffCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["coverage"] = tempOutNames;
 		outputTypes["libshuffsummary"] = tempOutNames;
@@ -43,52 +78,26 @@ LibShuffCommand::LibShuffCommand(){
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-vector<string> LibShuffCommand::getRequiredParameters(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "LibShuffCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> LibShuffCommand::getRequiredFiles(){	
-	try {
-		string Array[] =  {"phylip","group"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "LibShuffCommand", "getRequiredFiles");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 
+//**********************************************************************************************************************
 LibShuffCommand::LibShuffCommand(string option)  {
 	try {
-		globaldata = GlobalData::getInstance();
 		abort = false; calledHelp = false;   
-		Groups.clear();
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"iters","groups","step","form","cutoff","outputdir","inputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string, string> parameters = parser.getParameters();
+			map<string,string>::iterator it;
 			
 			ValidParameters validParameter;
 		
 			//check to make sure all parameters are valid for command
-			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
@@ -97,15 +106,55 @@ LibShuffCommand::LibShuffCommand(string option)  {
 			outputTypes["coverage"] = tempOutNames;
 			outputTypes["libshuffsummary"] = tempOutNames;
 			
+			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			if (inputDir == "not found"){	inputDir = "";		}
+			else {
+				string path;
+				it = parameters.find("phylip");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("group");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["group"] = inputDir + it->second;		}
+				}
+			}
+			
+			//check for required parameters
+			phylipfile = validParameter.validFile(parameters, "phylip", true);
+			if (phylipfile == "not open") { phylipfile = ""; abort = true; }
+			else if (phylipfile == "not found") { 
+				phylipfile = m->getPhylipFile(); 
+				if (phylipfile != "") {  m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
+				else { 
+					m->mothurOut("You must provide a phylip file."); m->mothurOutEndLine(); 
+					abort = true;
+				} 
+			}	
+			
+			//check for required parameters
+			groupfile = validParameter.validFile(parameters, "group", true);
+			if (groupfile == "not open") { groupfile = ""; abort = true; }
+			else if (groupfile == "not found") { 
+				groupfile = m->getGroupFile(); 
+				if (groupfile != "") {  m->mothurOut("Using " + groupfile + " as input file for the group parameter."); m->mothurOutEndLine(); }
+				else { 
+					m->mothurOut("You must provide a group file."); m->mothurOutEndLine(); 
+					abort = true;
+				} 
+			}	
+			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += m->hasPath(globaldata->getPhylipFile()); //if user entered a file with a path then preserve it	
-			}
-			
-			//make sure the user has already run the read.dist command
-			if ((globaldata->gMatrix == NULL) || (globaldata->gGroupmap == NULL)) {
-				m->mothurOut("You must read in a matrix and groupfile using the read.dist command, before you use the libshuff command. "); m->mothurOutEndLine(); abort = true;; 
+				outputDir += m->hasPath(phylipfile); //if user entered a file with a path then preserve it	
 			}
 						
 			//check for optional parameter and set defaults
@@ -115,7 +164,7 @@ LibShuffCommand::LibShuffCommand(string option)  {
 			else { 
 				savegroups = groups;
 				m->splitAtDash(groups, Groups);
-				globaldata->Groups = Groups;
+				m->Groups = Groups;
 			}
 				
 			string temp;
@@ -127,31 +176,11 @@ LibShuffCommand::LibShuffCommand(string option)  {
 			
 			temp = validParameter.validFile(parameters, "step", false);				if (temp == "not found") { temp = "0.01"; }
 			convert(temp, step); 
-	
+			
+			temp = validParameter.validFile(parameters, "sim", false);				if (temp == "not found") { temp = "F"; }
+			sim = m->isTrue(temp); 
+			
 			userform = validParameter.validFile(parameters, "form", false);			if (userform == "not found") { userform = "integral"; }
-			
-			if (abort == false) {
-		
-				matrix = globaldata->gMatrix;				//get the distance matrix
-				setGroups();								//set the groups to be analyzed and sorts them
-	
-				/********************************************************************************************/
-				//this is needed because when we read the matrix we sort it into groups in alphabetical order
-				//the rest of the command and the classes used in this command assume specific order
-				/********************************************************************************************/
-				matrix->setGroups(globaldata->gGroupmap->namesOfGroups);
-				vector<int> sizes;
-				for (int i = 0; i < globaldata->gGroupmap->namesOfGroups.size(); i++) {   sizes.push_back(globaldata->gGroupmap->getNumSeqs(globaldata->gGroupmap->namesOfGroups[i]));  }
-				matrix->setSizes(sizes);
-			
-
-				if(userform == "discrete"){
-					form = new DLibshuff(matrix, iters, step, cutOff);
-				}
-				else{
-					form = new SLibshuff(matrix, iters, cutOff);
-				}
-			}
 			
 		}
 		
@@ -163,65 +192,106 @@ LibShuffCommand::LibShuffCommand(string option)  {
 }
 //**********************************************************************************************************************
 
-void LibShuffCommand::help(){
-	try {
-		m->mothurOut("The libshuff command can only be executed after a successful read.dist command including a groupfile.\n");
-		m->mothurOut("The libshuff command parameters are groups, iters, step, form and cutoff.  No parameters are required.\n");
-		m->mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups.\n");
-		m->mothurOut("The group names are separated by dashes.  The iters parameter allows you to specify how many random matrices you would like compared to your matrix.\n");
-		m->mothurOut("The step parameter allows you to specify change in distance you would like between each output if you are using the discrete form.\n");
-		m->mothurOut("The form parameter allows you to specify if you would like to analyze your matrix using the discrete or integral form. Your options are integral or discrete.\n");
-		m->mothurOut("The libshuff command should be in the following format: libshuff(groups=yourGroups, iters=yourIters, cutOff=yourCutOff, form=yourForm, step=yourStep).\n");
-		m->mothurOut("Example libshuff(groups=A-B-C, iters=500, form=discrete, step=0.01, cutOff=2.0).\n");
-		m->mothurOut("The default value for groups is all the groups in your groupfile, iters is 10000, cutoff is 1.0, form is integral and step is 0.01.\n");
-		m->mothurOut("The libshuff command output two files: .coverage and .slsummary their descriptions are in the manual.\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. iters), '=' and parameters (i.e.yourIters).\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "LibShuffCommand", "help");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
 int LibShuffCommand::execute(){
 	try {
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		
+		//read files
+		groupMap = new GroupMap(groupfile);
+		int error = groupMap->readMap();
+		if (error == 1) { delete groupMap; return 0; }
+		
+		ifstream in;
+		m->openInputFile(phylipfile, in);
+		matrix = new FullMatrix(in, groupMap, sim); //reads the matrix file
+		in.close();
+		
+		if (m->control_pressed) { delete groupMap; delete matrix; return 0; }
+		
+		//if files don't match...
+		if (matrix->getNumSeqs() < groupMap->getNumSeqs()) {  
+			m->mothurOut("Your distance file contains " + toString(matrix->getNumSeqs()) + " sequences, and your group file contains " + toString(groupMap->getNumSeqs()) + " sequences.");  m->mothurOutEndLine();				
+			//create new group file
+			if(outputDir == "") { outputDir += m->hasPath(groupfile); }
+			
+			string newGroupFile = outputDir + m->getRootName(m->getSimpleName(groupfile)) + "editted.groups";
+			outputNames.push_back(newGroupFile);
+			ofstream outGroups;
+			m->openOutputFile(newGroupFile, outGroups);
+			
+			for (int i = 0; i < matrix->getNumSeqs(); i++) {
+				if (m->control_pressed) { delete groupMap; delete matrix; outGroups.close(); remove(newGroupFile.c_str()); return 0; }
+				
+				Names temp = matrix->getRowInfo(i);
+				outGroups << temp.seqName << '\t' << temp.groupName << endl;
+			}
+			outGroups.close();
+			
+			m->mothurOut(newGroupFile + " is a new group file containing only the sequence that are in your distance file. I will read this file instead."); m->mothurOutEndLine();
+			
+			//read new groupfile
+			delete groupMap; 
+			groupfile = newGroupFile;
+			
+			groupMap = new GroupMap(groupfile);
+			groupMap->readMap();
+			
+			if (m->control_pressed) { delete groupMap; delete matrix; remove(newGroupFile.c_str()); return 0; }
+		}
+		
+			
+		setGroups();								//set the groups to be analyzed and sorts them
+			
+		/********************************************************************************************/
+		//this is needed because when we read the matrix we sort it into groups in alphabetical order
+		//the rest of the command and the classes used in this command assume specific order
+		/********************************************************************************************/
+		matrix->setGroups(groupMap->namesOfGroups);
+		vector<int> sizes;
+		for (int i = 0; i < groupMap->namesOfGroups.size(); i++) {   sizes.push_back(groupMap->getNumSeqs(groupMap->namesOfGroups[i]));  }
+		matrix->setSizes(sizes);
+			
+			
+		if(userform == "discrete"){
+			form = new DLibshuff(matrix, iters, step, cutOff);
+		}
+		else{
+			form = new SLibshuff(matrix, iters, cutOff);
+		}
 	
 		savedDXYValues = form->evaluateAll();
 		savedMinValues = form->getSavedMins();
 		
-		if (m->control_pressed) {  delete form; globaldata->Groups.clear(); delete globaldata->gMatrix;  globaldata->gMatrix = NULL; return 0; }
+		if (m->control_pressed) {  delete form; m->Groups.clear(); delete matrix; delete groupMap; return 0; }
 	
 		pValueCounts.resize(numGroups);
 		for(int i=0;i<numGroups;i++){
 			pValueCounts[i].assign(numGroups, 0);
 		}
 	
-		if (m->control_pressed) {  outputTypes.clear(); delete form; globaldata->Groups.clear(); delete globaldata->gMatrix;  globaldata->gMatrix = NULL; return 0; }
+		if (m->control_pressed) {  outputTypes.clear(); delete form; m->Groups.clear(); delete matrix; delete groupMap; return 0; }
 				
 		Progress* reading = new Progress();
 		
 		for(int i=0;i<numGroups-1;i++) {
 			for(int j=i+1;j<numGroups;j++) {
 				
-				if (m->control_pressed) {  outputTypes.clear();  delete form; globaldata->Groups.clear(); delete globaldata->gMatrix;  globaldata->gMatrix = NULL; delete reading; return 0; }
+				if (m->control_pressed) {  outputTypes.clear();  delete form; m->Groups.clear(); delete matrix; delete groupMap; delete reading; return 0; }
 
 				reading->newLine(groupNames[i]+'-'+groupNames[j], iters);
-				int spoti = globaldata->gGroupmap->groupIndex[groupNames[i]]; //neccessary in case user selects groups so you know where they are in the matrix
-				int spotj = globaldata->gGroupmap->groupIndex[groupNames[j]];
+				int spoti = groupMap->groupIndex[groupNames[i]]; //neccessary in case user selects groups so you know where they are in the matrix
+				int spotj = groupMap->groupIndex[groupNames[j]];
 	
 				for(int p=0;p<iters;p++) {	
 					
-					if (m->control_pressed) {  outputTypes.clear(); delete form; globaldata->Groups.clear(); delete globaldata->gMatrix;  globaldata->gMatrix = NULL; delete reading; return 0; }
+					if (m->control_pressed) {  outputTypes.clear(); delete form; m->Groups.clear(); delete matrix; delete groupMap; delete reading; return 0; }
 					
 					form->randomizeGroups(spoti,spotj); 
 					if(form->evaluatePair(spoti,spotj) >= savedDXYValues[spoti][spotj])	{	pValueCounts[i][j]++;	}
 					if(form->evaluatePair(spotj,spoti) >= savedDXYValues[spotj][spoti])	{	pValueCounts[j][i]++;	}
 					
-					if (m->control_pressed) {  outputTypes.clear(); delete form; globaldata->Groups.clear(); delete globaldata->gMatrix;  globaldata->gMatrix = NULL; delete reading; return 0; }
+					if (m->control_pressed) {  outputTypes.clear(); delete form; m->Groups.clear(); delete matrix; delete groupMap; delete reading; return 0; }
 					
 					reading->update(p);			
 				}
@@ -230,7 +300,7 @@ int LibShuffCommand::execute(){
 			}
 		}
 		
-		if (m->control_pressed) { outputTypes.clear();  delete form; globaldata->Groups.clear(); delete globaldata->gMatrix;  globaldata->gMatrix = NULL; delete reading; return 0; }
+		if (m->control_pressed) { outputTypes.clear();  delete form; m->Groups.clear(); delete matrix; delete groupMap; delete reading; return 0; }
 	
 		reading->finish();
 		delete reading;
@@ -240,15 +310,13 @@ int LibShuffCommand::execute(){
 		printCoverageFile();
 				
 		//clear out users groups
-		globaldata->Groups.clear();
+		m->Groups.clear();
 		delete form;
 		
-		//delete globaldata's copy of the gmatrix to free up memory
-		delete globaldata->gMatrix;  globaldata->gMatrix = NULL;
+		delete matrix; delete groupMap;
 		
 		if (m->control_pressed) {  outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
 
-		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
@@ -268,7 +336,7 @@ int LibShuffCommand::printCoverageFile() {
 	try {
 
 		ofstream outCov;
-		summaryFile = outputDir + m->getRootName(m->getSimpleName(globaldata->getPhylipFile())) + "libshuff.coverage";
+		summaryFile = outputDir + m->getRootName(m->getSimpleName(phylipfile)) + "libshuff.coverage";
 		m->openOutputFile(summaryFile, outCov);
 		outputNames.push_back(summaryFile); outputTypes["coverage"].push_back(summaryFile);
 		outCov.setf(ios::fixed, ios::floatfield); outCov.setf(ios::showpoint);
@@ -286,8 +354,8 @@ int LibShuffCommand::printCoverageFile() {
 			for(int j=0;j<numGroups;j++){
 				indices[i][j] = index++;
 				
-				int spoti = globaldata->gGroupmap->groupIndex[groupNames[i]]; //neccessary in case user selects groups so you know where they are in the matrix
-				int spotj = globaldata->gGroupmap->groupIndex[groupNames[j]];
+				int spoti = groupMap->groupIndex[groupNames[i]]; //neccessary in case user selects groups so you know where they are in the matrix
+				int spotj = groupMap->groupIndex[groupNames[j]];
 				
 				for(int k=0;k<savedMinValues[spoti][spotj].size();k++){
 					
@@ -364,7 +432,7 @@ int LibShuffCommand::printSummaryFile() {
 	try {
 
 		ofstream outSum;
-		summaryFile = outputDir + m->getRootName(m->getSimpleName(globaldata->getPhylipFile())) + "libshuff.summary";
+		summaryFile = outputDir + m->getRootName(m->getSimpleName(phylipfile)) + "libshuff.summary";
 		m->openOutputFile(summaryFile, outSum);
 		outputNames.push_back(summaryFile); outputTypes["libshuffsummary"].push_back(summaryFile);
 
@@ -380,8 +448,8 @@ int LibShuffCommand::printSummaryFile() {
 			for(int j=i+1;j<numGroups;j++){
 				if(m->control_pressed)  { outSum.close(); return 0; }
 				
-				int spoti = globaldata->gGroupmap->groupIndex[groupNames[i]]; //neccessary in case user selects groups so you know where they are in the matrix
-				int spotj = globaldata->gGroupmap->groupIndex[groupNames[j]];
+				int spoti = groupMap->groupIndex[groupNames[i]]; //neccessary in case user selects groups so you know where they are in the matrix
+				int spotj = groupMap->groupIndex[groupNames[j]];
 				
 				if(pValueCounts[i][j]){
 					cout << setw(20) << left << groupNames[i]+'-'+groupNames[j] << '\t' << setprecision(8) << savedDXYValues[spoti][spotj] << '\t' << setprecision(precision) << pValueCounts[i][j]/(float)iters << endl;
@@ -420,48 +488,48 @@ int LibShuffCommand::printSummaryFile() {
 void LibShuffCommand::setGroups() {
 	try {
 		//if the user has not entered specific groups to analyze then do them all
-		if (globaldata->Groups.size() == 0) {
-			numGroups = globaldata->gGroupmap->getNumGroups();
+		if (m->Groups.size() == 0) {
+			numGroups = groupMap->getNumGroups();
 			for (int i=0; i < numGroups; i++) { 
-				globaldata->Groups.push_back(globaldata->gGroupmap->namesOfGroups[i]);
+				m->Groups.push_back(groupMap->namesOfGroups[i]);
 			}
 		} else {
 			if (savegroups != "all") {
 				//check that groups are valid
-				for (int i = 0; i < globaldata->Groups.size(); i++) {
-					if (globaldata->gGroupmap->isValidGroup(globaldata->Groups[i]) != true) {
-						m->mothurOut(globaldata->Groups[i] + " is not a valid group, and will be disregarded."); m->mothurOutEndLine();
+				for (int i = 0; i < m->Groups.size(); i++) {
+					if (groupMap->isValidGroup(m->Groups[i]) != true) {
+						m->mothurOut(m->Groups[i] + " is not a valid group, and will be disregarded."); m->mothurOutEndLine();
 						// erase the invalid group from globaldata->Groups
-						globaldata->Groups.erase(globaldata->Groups.begin()+i);
+						m->Groups.erase(m->Groups.begin()+i);
 					}
 				}
 			
 				//if the user only entered invalid groups
-				if ((globaldata->Groups.size() == 0) || (globaldata->Groups.size() == 1)) { 
-					numGroups = globaldata->gGroupmap->getNumGroups();
+				if ((m->Groups.size() == 0) || (m->Groups.size() == 1)) { 
+					numGroups = groupMap->getNumGroups();
 					for (int i=0; i < numGroups; i++) { 
-						globaldata->Groups.push_back(globaldata->gGroupmap->namesOfGroups[i]);
+						m->Groups.push_back(groupMap->namesOfGroups[i]);
 					}
 					m->mothurOut("When using the groups parameter you must have at least 2 valid groups. I will run the command using all the groups in your groupfile."); m->mothurOutEndLine();
-				} else { numGroups = globaldata->Groups.size(); }
+				} else { numGroups = m->Groups.size(); }
 			} else { //users wants all groups
-				numGroups = globaldata->gGroupmap->getNumGroups();
-				globaldata->Groups.clear();
+				numGroups = groupMap->getNumGroups();
+				m->Groups.clear();
 				for (int i=0; i < numGroups; i++) { 
-					globaldata->Groups.push_back(globaldata->gGroupmap->namesOfGroups[i]);
+					m->Groups.push_back(groupMap->namesOfGroups[i]);
 				}
 			}
 		}
 
 		//sort so labels match
-		sort(globaldata->Groups.begin(), globaldata->Groups.end());
+		sort(m->Groups.begin(), m->Groups.end());
 		
 		//sort
-		sort(globaldata->gGroupmap->namesOfGroups.begin(), globaldata->gGroupmap->namesOfGroups.end());
+		sort(groupMap->namesOfGroups.begin(), groupMap->namesOfGroups.end());
 		
-		for (int i = 0; i < globaldata->gGroupmap->namesOfGroups.size(); i++) {  globaldata->gGroupmap->groupIndex[globaldata->gGroupmap->namesOfGroups[i]] = i;  }
+		for (int i = 0; i < groupMap->namesOfGroups.size(); i++) {  groupMap->groupIndex[groupMap->namesOfGroups[i]] = i;  }
 
-		groupNames = globaldata->Groups;
+		groupNames = m->Groups;
 
 	}
 	catch(exception& e) {

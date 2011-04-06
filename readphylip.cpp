@@ -15,8 +15,17 @@
 ReadPhylipMatrix::ReadPhylipMatrix(string distFile){
         
         successOpen = m->openInputFile(distFile, fileHandle);
+		sim=false;
         
 }
+/***********************************************************************/
+
+ReadPhylipMatrix::ReadPhylipMatrix(string distFile, bool s){
+	
+	successOpen = m->openInputFile(distFile, fileHandle);
+	sim=s;
+}
+
 
 /***********************************************************************/
 
@@ -85,7 +94,7 @@ int ReadPhylipMatrix::read(NameAssignment* nameMap){
 											
                                                 
                                                         if (distance == -1) { distance = 1000000; }
-														else if (globaldata->sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
+														else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                                                 
                                                         if(distance < cutoff){
                                                                 PCell value(i, j, distance);
@@ -105,7 +114,7 @@ int ReadPhylipMatrix::read(NameAssignment* nameMap){
 														if (m->control_pressed) { delete reading; fileHandle.close(); return 0;  }
                                 
                                                         if (distance == -1) { distance = 1000000; }
-														else if (globaldata->sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
+														else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                                                         
                                                         if(distance < cutoff){
                                                                 PCell value(nameMap->get(matrixNames[i]), nameMap->get(matrixNames[j]), distance);
@@ -137,7 +146,7 @@ int ReadPhylipMatrix::read(NameAssignment* nameMap){
 														if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
 														
                                                         if (distance == -1) { distance = 1000000; }
-														else if (globaldata->sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
+														else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                                                         
                                                         if(distance < cutoff && j < i){
                                                                 PCell value(i, j, distance);
@@ -157,7 +166,7 @@ int ReadPhylipMatrix::read(NameAssignment* nameMap){
 														if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
 														
                                                        if (distance == -1) { distance = 1000000; }
-														else if (globaldata->sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.                                                        
+														else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.                                                        
                                                         
 														if(distance < cutoff && j < i){
                                                                 PCell value(nameMap->get(matrixNames[i]), nameMap->get(matrixNames[j]), distance);

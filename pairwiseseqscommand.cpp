@@ -23,44 +23,66 @@
 
 
 //**********************************************************************************************************************
-vector<string> PairwiseSeqsCommand::getValidParameters(){	
+vector<string> PairwiseSeqsCommand::setParameters(){	
 	try {
-		string AlignArray[] =  {"fasta","align","match","mismatch","gapopen","gapextend", "processors","calc","compress","cutoff","countends","output","outputdir","inputdir"};
-		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PairwiseSeqsCommand", "getValidParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> PairwiseSeqsCommand::getRequiredParameters(){	
-	try {
-		string AlignArray[] =  {"fasta"};
-		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PairwiseSeqsCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> PairwiseSeqsCommand::getRequiredFiles(){	
-	try {
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
+		CommandParameter palign("align", "Multiple", "needleman-gotoh-blast-noalign", "needleman", "", "", "",false,false); parameters.push_back(palign);
+		CommandParameter pmatch("match", "Number", "", "1.0", "", "", "",false,false); parameters.push_back(pmatch);
+		CommandParameter pmismatch("mismatch", "Number", "", "-1.0", "", "", "",false,false); parameters.push_back(pmismatch);
+		CommandParameter pgapopen("gapopen", "Number", "", "-2.0", "", "", "",false,false); parameters.push_back(pgapopen);
+		CommandParameter pgapextend("gapextend", "Number", "", "-1.0", "", "", "",false,false); parameters.push_back(pgapextend);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
+		CommandParameter poutput("output", "Multiple", "column-lt-square", "column", "", "", "",false,false); parameters.push_back(poutput);
+		CommandParameter pcalc("calc", "Multiple", "nogaps-eachgap-onegap", "onegap", "", "", "",false,false); parameters.push_back(pcalc);
+		CommandParameter pcountends("countends", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pcountends);
+		CommandParameter pcompress("compress", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pcompress);
+		CommandParameter pcutoff("cutoff", "Number", "", "1.0", "", "", "",false,false); parameters.push_back(pcutoff);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
 		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "PairwiseSeqsCommand", "getRequiredFiles");
+		m->errorOut(e, "PairwiseSeqsCommand", "setParameters");
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
+string PairwiseSeqsCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The pairwise.seqs command reads a fasta file and creates distance matrix.\n";
+		helpString += "The pairwise.seqs command parameters are fasta, align, match, mismatch, gapopen, gapextend, calc, output, cutoff and processors.\n";
+		helpString += "The fasta parameter is required. You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amzon.fasta \n";
+		helpString += "The align parameter allows you to specify the alignment method to use.  Your options are: gotoh, needleman, blast and noalign. The default is needleman.\n";
+		helpString += "The match parameter allows you to specify the bonus for having the same base. The default is 1.0.\n";
+		helpString += "The mistmatch parameter allows you to specify the penalty for having different bases.  The default is -1.0.\n";
+		helpString += "The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -2.0.\n";
+		helpString += "The gapextend parameter allows you to specify the penalty for extending a gap in an alignment.  The default is -1.0.\n";
+		helpString += "The calc parameter allows you to specify the method of calculating the distances.  Your options are: nogaps, onegap or eachgap. The default is onegap.\n";
+		helpString += "The countends parameter allows you to specify whether to include terminal gaps in distance.  Your options are: T or F. The default is T.\n";
+		helpString += "The cutoff parameter allows you to specify maximum distance to keep. The default is 1.0.\n";
+		helpString += "The output parameter allows you to specify format of your distance matrix. Options are column, lt, and square. The default is column.\n";
+		helpString += "The compress parameter allows you to indicate that you want the resulting distance file compressed.  The default is false.\n";
+		helpString += "The pairwise.seqs command should be in the following format: \n";
+		helpString += "pairwise.seqs(fasta=yourfastaFile, align=yourAlignmentMethod) \n";
+		helpString += "Example pairwise.seqs(fasta=candidate.fasta, align=blast)\n";
+		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PairwiseSeqsCommand", "getHelpString");
+		exit(1);
+	}
+}
+
 //**********************************************************************************************************************
 PairwiseSeqsCommand::PairwiseSeqsCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["phylip"] = tempOutNames;
 		outputTypes["column"] = tempOutNames;
@@ -79,10 +101,7 @@ PairwiseSeqsCommand::PairwiseSeqsCommand(string option)  {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			
-			//valid paramters for this command
-			string AlignArray[] =  {"fasta","align","match","mismatch","gapopen","gapextend", "processors","cutoff","compress","calc","countends","output","outputdir","inputdir"};
-			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string, string> parameters = parser.getParameters(); 
@@ -110,7 +129,12 @@ PairwiseSeqsCommand::PairwiseSeqsCommand(string option)  {
 			if (inputDir == "not found"){	inputDir = "";		}
 
 			fastaFileName = validParameter.validFile(parameters, "fasta", false);
-			if (fastaFileName == "not found") { m->mothurOut("fasta is a required parameter for the pairwise.seqs command."); m->mothurOutEndLine(); abort = true;  }
+			if (fastaFileName == "not found") { 				
+				//if there is a current fasta file, use it
+				string filename = m->getFastaFile(); 
+				if (filename != "") { fastaFileNames.push_back(filename); m->mothurOut("Using " + filename + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}
 			else { 
 				m->splitAtDash(fastaFileName, fastaFileNames);
 				
@@ -181,8 +205,9 @@ PairwiseSeqsCommand::PairwiseSeqsCommand(string option)  {
 			temp = validParameter.validFile(parameters, "gapextend", false);	if (temp == "not found"){	temp = "-1.0";			}
 			convert(temp, gapExtend); 
 			
-			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = "1";				}
-			convert(temp, processors); 
+			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
+			m->setProcessors(temp);
+			convert(temp, processors);
 			
 			temp = validParameter.validFile(parameters, "cutoff", false);		if(temp == "not found"){	temp = "1.0"; }
 			convert(temp, cutoff); 
@@ -231,37 +256,6 @@ PairwiseSeqsCommand::PairwiseSeqsCommand(string option)  {
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-PairwiseSeqsCommand::~PairwiseSeqsCommand(){}
-//**********************************************************************************************************************
-
-void PairwiseSeqsCommand::help(){
-	try {
-		m->mothurOut("The pairwise.seqs command reads a fasta file and creates distance matrix.\n");
-		m->mothurOut("The pairwise.seqs command parameters are fasta, align, match, mismatch, gapopen, gapextend, calc, output, cutoff and processors.\n");
-		m->mothurOut("The fasta parameter is required. You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amzon.fasta \n");
-		m->mothurOut("The align parameter allows you to specify the alignment method to use.  Your options are: gotoh, needleman, blast and noalign. The default is needleman.\n");
-		m->mothurOut("The match parameter allows you to specify the bonus for having the same base. The default is 1.0.\n");
-		m->mothurOut("The mistmatch parameter allows you to specify the penalty for having different bases.  The default is -1.0.\n");
-		m->mothurOut("The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -2.0.\n");
-		m->mothurOut("The gapextend parameter allows you to specify the penalty for extending a gap in an alignment.  The default is -1.0.\n");
-		m->mothurOut("The calc parameter allows you to specify the method of calculating the distances.  Your options are: nogaps, onegap or eachgap. The default is onegap.\n");
-		m->mothurOut("The countends parameter allows you to specify whether to include terminal gaps in distance.  Your options are: T or F. The default is T.\n");
-		m->mothurOut("The cutoff parameter allows you to specify maximum distance to keep. The default is 1.0.\n");
-		m->mothurOut("The output parameter allows you to specify format of your distance matrix. Options are column, lt, and square. The default is column.\n");
-		m->mothurOut("The compress parameter allows you to indicate that you want the resulting distance file compressed.  The default is false.\n");
-		m->mothurOut("The pairwise.seqs command should be in the following format: \n");
-		m->mothurOut("pairwise.seqs(fasta=yourfastaFile, align=yourAlignmentMethod) \n");
-		m->mothurOut("Example pairwise.seqs(fasta=candidate.fasta, align=blast)\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PairwiseSeqsCommand", "help");
-		exit(1);
-	}
-}
-
-
 //**********************************************************************************************************************
 
 int PairwiseSeqsCommand::execute(){

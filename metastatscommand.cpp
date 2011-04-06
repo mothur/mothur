@@ -12,21 +12,59 @@
 #include "sharedutilities.h"
 
 //**********************************************************************************************************************
-vector<string> MetaStatsCommand::getValidParameters(){	
+vector<string> MetaStatsCommand::setParameters(){	
 	try {
-		string Array[] =  {"groups","label","outputdir","iters","threshold","g","design","sets","processors","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pshared);
+		CommandParameter pdesign("design", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pdesign);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
+		CommandParameter piters("iters", "Number", "", "1000", "", "", "",false,false); parameters.push_back(piters);
+		CommandParameter pthreshold("threshold", "Number", "", "0.05", "", "", "",false,false); parameters.push_back(pthreshold);
+		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
+		CommandParameter psets("sets", "String", "", "", "", "", "",false,false); parameters.push_back(psets);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "MetaStatsCommand", "getValidParameters");
+		m->errorOut(e, "MetaStatsCommand", "setParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string MetaStatsCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "This command is based on the Metastats program, White, J.R., Nagarajan, N. & Pop, M. Statistical methods for detecting differentially abundant features in clinical metagenomic samples. PLoS Comput Biol 5, e1000352 (2009).\n";
+		helpString += "The metastats command outputs a .metastats file. \n";
+		helpString += "The metastats command parameters are shared, iters, threshold, groups, label, design, sets and processors.  The shared and design parameters are required, unless you have valid current files.\n";
+		helpString += "The design parameter allows you to assign your groups to sets when you are running metastat. mothur will run all pairwise comparisons of the sets. It is required. \n";
+		helpString += "The design file looks like the group file.  It is a 2 column tab delimited file, where the first column is the group name and the second column is the set the group belongs to.\n";
+		helpString += "The sets parameter allows you to specify which of the sets in your designfile you would like to analyze. The set names are separated by dashes. THe default is all sets in the designfile.\n";
+		helpString += "The iters parameter allows you to set number of bootstrap permutations for estimating null distribution of t statistic.  The default is 1000. \n";
+		helpString += "The threshold parameter allows you to set the significance level to reject null hypotheses (default 0.05).\n";
+		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like included. The group names are separated by dashes.\n";
+		helpString += "The label parameter allows you to select what distance levels you would like, and are also separated by dashes.\n";
+		helpString += "The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n";
+		helpString += "The metastats command should be in the following format: metastats(design=yourDesignFile).\n";
+		helpString += "Example metastats(design=temp.design, groups=A-B-C).\n";
+		helpString += "The default value for groups is all the groups in your groupfile, and all labels in your inputfile will be used.\n";
+		helpString += "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "MetaStatsCommand", "getHelpString");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
 MetaStatsCommand::MetaStatsCommand(){	
 	try {
-		abort = true; calledHelp = true; 
+		abort = true; calledHelp = true;
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["metastats"] = tempOutNames;
 	}
@@ -36,45 +74,18 @@ MetaStatsCommand::MetaStatsCommand(){
 	}
 }
 //**********************************************************************************************************************
-vector<string> MetaStatsCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"design"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "MetaStatsCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> MetaStatsCommand::getRequiredFiles(){	
-	try {
-		string Array[] =  {"shared"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "MetaStatsCommand", "getRequiredFiles");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 
 MetaStatsCommand::MetaStatsCommand(string option) {
 	try {
-		globaldata = GlobalData::getInstance();
 		abort = false; calledHelp = false;   
 		allLines = 1;
-		labels.clear();
+		
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string AlignArray[] =  {"groups","label","outputdir","iters","threshold","g","design","sets","processors","inputdir"};
-			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
@@ -91,11 +102,6 @@ MetaStatsCommand::MetaStatsCommand(string option) {
 			vector<string> tempOutNames;
 			outputTypes["metastats"] = tempOutNames;
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
-				outputDir = "";	
-				outputDir += m->hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
-			}
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -109,16 +115,40 @@ MetaStatsCommand::MetaStatsCommand(string option) {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["design"] = inputDir + it->second;		}
 				}
+				
+				it = parameters.find("shared");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
+				}
+				
+			}
+			
+			//check for required parameters
+			sharedfile = validParameter.validFile(parameters, "shared", true);
+			if (sharedfile == "not open") { abort = true; }
+			else if (sharedfile == "not found") {  				//if there is a current shared file, use it
+				sharedfile = m->getSharedFile(); 
+				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}
 			
 			//check for required parameters
 			designfile = validParameter.validFile(parameters, "design", true);
 			if (designfile == "not open") { abort = true; }
-			else if (designfile == "not found") {  designfile = "";  m->mothurOut("You must provide an design file."); m->mothurOutEndLine(); abort = true; }	
+			else if (designfile == "not found") {  				
+				//if there is a current design file, use it
+				designfile = m->getDesignFile(); 
+				if (designfile != "") { m->mothurOut("Using " + designfile + " as input file for the design parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current designfile and the design parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}
 			
-			//make sure the user has already run the read.otu command
-			if ((globaldata->getSharedFile() == "")) {
-				 m->mothurOut("You must read a list and a group, or a shared file before you can use the metastats command."); m->mothurOutEndLine(); abort = true; 
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+				outputDir = "";	
+				outputDir += m->hasPath(sharedfile); //if user entered a file with a path then preserve it	
 			}
 
 			//check for optional parameter and set defaults
@@ -130,18 +160,12 @@ MetaStatsCommand::MetaStatsCommand(string option) {
 				else { allLines = 1;  }
 			}
 			
-			//if the user has not specified any labels use the ones from read.otu
-			if (label == "") {  
-				allLines = globaldata->allLines; 
-				labels = globaldata->labels; 
-			}
-			
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = ""; pickedGroups = false; }
 			else { 
 				pickedGroups = true;
 				m->splitAtDash(groups, Groups);
-				globaldata->Groups = Groups;
+				m->Groups = Groups;
 			}
 			
 			sets = validParameter.validFile(parameters, "sets", false);			
@@ -157,8 +181,9 @@ MetaStatsCommand::MetaStatsCommand(string option) {
 			temp = validParameter.validFile(parameters, "threshold", false);			if (temp == "not found") { temp = "0.05"; }
 			convert(temp, threshold); 
 			
-			temp = validParameter.validFile(parameters, "processors", false);			if (temp == "not found"){	temp = "1";	}
-			convert(temp, processors); 
+			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
+			m->setProcessors(temp);
+			convert(temp, processors);
 		}
 
 	}
@@ -167,39 +192,6 @@ MetaStatsCommand::MetaStatsCommand(string option) {
 		exit(1);
 	}
 }
-
-//**********************************************************************************************************************
-
-void MetaStatsCommand::help(){
-	try {
-		m->mothurOut("This command is based on the Metastats program, White, J.R., Nagarajan, N. & Pop, M. Statistical methods for detecting differentially abundant features in clinical metagenomic samples. PLoS Comput Biol 5, e1000352 (2009).\n");
-		m->mothurOut("The metastats command can only be executed after a successful read.otu command of a list and group or shared file.\n");
-		m->mothurOut("The metastats command outputs a .metastats file. \n");
-		m->mothurOut("The metastats command parameters are iters, threshold, groups, label, design, sets and processors.  The design parameter is required.\n");
-		m->mothurOut("The design parameter allows you to assign your groups to sets when you are running metastat. mothur will run all pairwise comparisons of the sets. It is required. \n");
-		m->mothurOut("The design file looks like the group file.  It is a 2 column tab delimited file, where the first column is the group name and the second column is the set the group belongs to.\n");
-		m->mothurOut("The sets parameter allows you to specify which of the sets in your designfile you would like to analyze. The set names are separated by dashes. THe default is all sets in the designfile.\n");
-		m->mothurOut("The iters parameter allows you to set number of bootstrap permutations for estimating null distribution of t statistic.  The default is 1000. \n");
-		m->mothurOut("The threshold parameter allows you to set the significance level to reject null hypotheses (default 0.05).\n");
-		m->mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like included. The group names are separated by dashes.\n");
-		m->mothurOut("The label parameter allows you to select what distance levels you would like, and are also separated by dashes.\n");
-		m->mothurOut("The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n");
-		m->mothurOut("The metastats command should be in the following format: metastats(design=yourDesignFile).\n");
-		m->mothurOut("Example metastats(design=temp.design, groups=A-B-C).\n");
-		m->mothurOut("The default value for groups is all the groups in your groupfile, and all labels in your inputfile will be used.\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n");
-
-	}
-	catch(exception& e) {
-		m->errorOut(e, "MetaStatsCommand", "help");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
-MetaStatsCommand::~MetaStatsCommand(){}
-
 //**********************************************************************************************************************
 
 int MetaStatsCommand::execute(){
@@ -209,10 +201,8 @@ int MetaStatsCommand::execute(){
 		
 		designMap = new GroupMap(designfile);
 		designMap->readDesignMap();
-		
-		read = new ReadOTUFile(globaldata->inputFileName);	
-		read->read(&*globaldata); 
-		input = globaldata->ginput;
+	
+		input = new InputData(sharedfile, "sharedfile");
 		lookup = input->getSharedRAbundVectors();
 		string lastLabel = lookup[0]->getLabel();
 		
@@ -258,7 +248,7 @@ int MetaStatsCommand::execute(){
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-			if (m->control_pressed) {  outputTypes.clear(); for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } globaldata->Groups.clear(); delete read;  delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
+			if (m->control_pressed) {  outputTypes.clear(); for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } m->Groups.clear(); delete input; delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
 	
 			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
 
@@ -289,13 +279,13 @@ int MetaStatsCommand::execute(){
 			//prevent memory leak
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
 			
-			if (m->control_pressed) {  outputTypes.clear(); globaldata->Groups.clear(); delete read;  delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
+			if (m->control_pressed) {  outputTypes.clear(); m->Groups.clear(); delete input;  delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
 
 			//get next line to process
 			lookup = input->getSharedRAbundVectors();				
 		}
 		
-		if (m->control_pressed) { outputTypes.clear(); globaldata->Groups.clear(); delete read; delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }  return 0; }
+		if (m->control_pressed) { outputTypes.clear(); m->Groups.clear(); delete input; delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }  return 0; }
 
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -323,9 +313,8 @@ int MetaStatsCommand::execute(){
 		}
 	
 		//reset groups parameter
-		globaldata->Groups.clear();  
-		delete input; globaldata->ginput = NULL;
-		delete read;
+		m->Groups.clear();  
+		delete input; 
 		delete designMap;
 		
 		if (m->control_pressed) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0;}
@@ -404,7 +393,7 @@ int MetaStatsCommand::driver(int start, int num, vector<SharedRAbundVector*>& th
 			string setB = namesOfGroupCombos[c][1];
 			
 			//get filename
-			string outputFileName = outputDir +  m->getRootName(m->getSimpleName(globaldata->inputFileName)) + thisLookUp[0]->getLabel() + "." + setA + "-" + setB + ".metastats";
+			string outputFileName = outputDir +  m->getRootName(m->getSimpleName(sharedfile)) + thisLookUp[0]->getLabel() + "." + setA + "-" + setB + ".metastats";
 			outputNames.push_back(outputFileName); outputTypes["metastats"].push_back(outputFileName);
 			int nameLength = outputFileName.length();
 			char * output = new char[nameLength];

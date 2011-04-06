@@ -5,8 +5,8 @@
 #include "mothur.h"
 #include "mothurout.h"
 #include "listvector.hpp"
-#include "globaldata.hpp"
 #include "rabundvector.hpp"
+#include "nameassignment.hpp"
 
 /*
  *  clusterclassic.h
@@ -21,7 +21,7 @@
 class ClusterClassic {
 	
 public:
-	ClusterClassic(float, string);
+	ClusterClassic(float, string, bool);
 	int readPhylipFile(string, NameAssignment*);
 	void update(double&);
 	double getSmallDist() { return smallDist; }	
@@ -54,13 +54,12 @@ private:
 	int smallRow;
 	int smallCol, nseqs;
 	double smallDist;
-	bool mapWanted;
+	bool mapWanted, sim;
 	double cutoff, aboveCutoff;
 	map<string, int> seq2Bin;
 	string method;
 	
 	MothurOut* m;
-	GlobalData* globaldata;
 };
 
 #endif

@@ -11,8 +11,6 @@
  */
 
 #include "command.hpp"
-
-//class GlobalData;
 class GroupMap;
 
 class AmovaCommand : public Command {
@@ -20,13 +18,15 @@ class AmovaCommand : public Command {
 public:
 	AmovaCommand(string);
 	AmovaCommand();
-	~AmovaCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
+	~AmovaCommand() {}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "amova";					}
+	string getCommandCategory()		{ return "Hypothesis Testing";		}
+	string getHelpString();	
+	
 	int execute();
-	void help();
+	void help() { m->mothurOut(getHelpString()); }
 	
 private:
 	double runAMOVA(ofstream&, map<string, vector<int> >, double);
@@ -34,9 +34,7 @@ private:
 	double calcSSTotal(map<string, vector<int> >&);
 	map<string, vector<int> > getRandomizedGroups(map<string, vector<int> >);
 
-	
 	bool abort;
-	map<string, vector<string> > outputTypes;
 	vector<string> outputNames;
 
 	string outputDir, inputDir, designFileName, phylipFileName;

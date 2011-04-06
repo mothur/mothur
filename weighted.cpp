@@ -13,15 +13,13 @@
 
 EstOutput Weighted::getValues(Tree* t, int p, string o) {
     try {
-		globaldata = GlobalData::getInstance();
-		
 		data.clear(); //clear out old values
 		int numGroups;
 		vector<double> D;
 		processors = p;
 		outputDir = o;
 		
-		numGroups = globaldata->Groups.size();
+		numGroups = m->Groups.size();
 		
 		if (m->control_pressed) { return data; }
 		
@@ -31,7 +29,7 @@ EstOutput Weighted::getValues(Tree* t, int p, string o) {
 			for (int l = 0; l < i; l++) {	
 				//initialize weighted scores
 				//WScore[globaldata->Groups[i]+globaldata->Groups[l]] = 0.0;
-				vector<string> groups; groups.push_back(globaldata->Groups[i]); groups.push_back(globaldata->Groups[l]);
+				vector<string> groups; groups.push_back(m->Groups[i]); groups.push_back(m->Groups[l]);
 				namesOfGroupCombos.push_back(groups);
 			}
 		}
@@ -267,7 +265,6 @@ EstOutput Weighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombos,
 /**************************************************************************************************/
 EstOutput Weighted::getValues(Tree* t, string groupA, string groupB) { 
  try {
-		globaldata = GlobalData::getInstance();
 		
 		data.clear(); //clear out old values
 		

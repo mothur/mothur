@@ -19,13 +19,15 @@ class SensSpecCommand : public Command {
 public:
 	SensSpecCommand(string);
 	SensSpecCommand();
-	~SensSpecCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();
+	~SensSpecCommand(){}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "sens.spec";				}
+	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
 	void processPhylip();
@@ -33,11 +35,10 @@ private:
 	void setUpOutput();
 	void outputStatistics(string, string);
 	
-	string listFile, distFile, nameFile, sensSpecFileName;
+	string listFile, distFile, nameFile, sensSpecFileName, phylipfile, columnfile;
 	string outputDir;
 	string format;
 	vector<string> outputNames;
-	map<string, vector<string> > outputTypes;
 
 	long int truePositives, falsePositives, trueNegatives, falseNegatives;
 	bool abort;

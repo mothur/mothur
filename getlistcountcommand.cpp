@@ -10,14 +10,41 @@
 #include "getlistcountcommand.h"
 
 //**********************************************************************************************************************
-vector<string> GetListCountCommand::getValidParameters(){	
+vector<string> GetListCountCommand::setParameters(){	
 	try {
-		string Array[] =  {"list","label","sort","outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(plist);
+		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
+		CommandParameter parasort("sort", "Multiple", "name-otu", "otu", "", "", "",false,false); parameters.push_back(parasort);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "GetListCountCommand", "getValidParameters");
+		m->errorOut(e, "GetListCountCommand", "setParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string GetListCountCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The get.otulist command parameters are list, sort and label.  list is required, unless you have a valid current list file.\n";
+		helpString += "The label parameter allows you to select what distance levels you would like a output files created for, and are separated by dashes.\n";
+		helpString += "The sort parameter allows you to select how you want the output displayed. Options are otu and name.\n";
+		helpString += "If otu is selected the output will be otu number followed by the list of names in that otu.\n";
+		helpString += "If name is selected the output will be a sequence name followed by its otu number.\n";
+		helpString += "The get.otulist command should be in the following format: get.otulist(list=yourlistFile, label=yourLabels).\n";
+		helpString += "Example get.otulist(list=amazon.fn.list, label=0.10).\n";
+		helpString += "The default value for label is all lines in your inputfile.\n";
+		helpString += "The get.otulist command outputs a .otu file for each distance you specify listing the bin number and the names of the sequences in that bin.\n";
+		helpString += "Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListFile).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetListCountCommand", "getHelpString");
 		exit(1);
 	}
 }
@@ -25,6 +52,7 @@ vector<string> GetListCountCommand::getValidParameters(){
 GetListCountCommand::GetListCountCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["otu"] = tempOutNames;
 	}
@@ -34,43 +62,16 @@ GetListCountCommand::GetListCountCommand(){
 	}
 }
 //**********************************************************************************************************************
-vector<string> GetListCountCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"list"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetListCountCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> GetListCountCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetListCountCommand", "getRequiredFiles");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 GetListCountCommand::GetListCountCommand(string option)  {
 	try {
-		globaldata = GlobalData::getInstance();
 		abort = false; calledHelp = false;   
 		allLines = 1;
-		labels.clear();
 				
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string AlignArray[] =  {"list","label","sort","outputdir","inputdir"};
-			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string, string> parameters = parser.getParameters();
@@ -86,8 +87,6 @@ GetListCountCommand::GetListCountCommand(string option)  {
 			//initialize outputTypes
 			vector<string> tempOutNames;
 			outputTypes["otu"] = tempOutNames;
-		
-			string ranRead = globaldata->getListFile();
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -108,10 +107,13 @@ GetListCountCommand::GetListCountCommand(string option)  {
 			
 			//check for required parameters
 			listfile = validParameter.validFile(parameters, "list", true);
-			if ((listfile == "not found") && (globaldata->getListFile() == ""))  { m->mothurOut("You must read a listfile before running the get.listcount command.");  m->mothurOutEndLine(); abort = true; }
-			else if ((listfile == "not found") && (globaldata->getListFile() != "")) { listfile = globaldata->getListFile(); }
+			if (listfile == "not found")  { 				
+				listfile = m->getListFile(); 
+				if (listfile != "") { m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current list file and the list parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}
 			else if (listfile == "not open") { abort = true; }	
-			else { globaldata->setListFile(listfile); }
+			
 		
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -124,12 +126,6 @@ GetListCountCommand::GetListCountCommand(string option)  {
 				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
-			
-			//if the user has not specified any labels use the ones from read.otu
-			if ((label == "") && (ranRead != "")) {  
-				allLines = globaldata->allLines; 
-				labels = globaldata->labels; 
-			}
 		}
 	}
 	catch(exception& e) {
@@ -139,58 +135,19 @@ GetListCountCommand::GetListCountCommand(string option)  {
 }
 //**********************************************************************************************************************
 
-void GetListCountCommand::help(){
-	try {
-		m->mothurOut("The get.otulist command can only be executed after a successful read.otu command of a listfile or providing a list file using the list parameter.\n");
-		m->mothurOut("The get.otulist command parameters are list, sort and label.  No parameters are required.\n");
-		m->mothurOut("The label parameter allows you to select what distance levels you would like a output files created for, and are separated by dashes.\n");
-		m->mothurOut("The sort parameter allows you to select how you want the output displayed. Options are otu and name.\n");
-		m->mothurOut("If otu is selected the output will be otu number followed by the list of names in that otu.\n");
-		m->mothurOut("If name is selected the output will be a sequence name followed by its otu number.\n");
-		m->mothurOut("The get.otulist command should be in the following format: get.otulist(list=yourlistFile, label=yourLabels).\n");
-		m->mothurOut("Example get.otulist(list=amazon.fn.list, label=0.10).\n");
-		m->mothurOut("The default value for label is all lines in your inputfile.\n");
-		m->mothurOut("The get.otulist command outputs a .otu file for each distance you specify listing the bin number and the names of the sequences in that bin.\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListFile).\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetListCountCommand", "help");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
-GetListCountCommand::~GetListCountCommand(){}
-
-//**********************************************************************************************************************
-
 int GetListCountCommand::execute(){
 	try {
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
-
-		globaldata->setFormat("list");
 		
-		//read list file
-		read = new ReadOTUFile(listfile);	
-		read->read(&*globaldata); 
-		
-		input = globaldata->ginput;
-		list = globaldata->gListVector;
+		input = new InputData(listfile, "list");
+		list = input->getListVector();
 		string lastLabel = list->getLabel();
 
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = labels;
 		
-		if (m->control_pressed) { 
-			delete read;
-			delete input;
-			delete list;
-			globaldata->gListVector = NULL;  
-			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	}
-			return 0; 
-		}
+		if (m->control_pressed) { delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} return 0;  }
 		
 		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
@@ -198,14 +155,7 @@ int GetListCountCommand::execute(){
 			
 				process(list);
 				
-				if (m->control_pressed) { 
-					delete read;
-					delete input;
-					delete list;
-					globaldata->gListVector = NULL;  
-					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} outputTypes.clear();
-					return 0; 
-				}
+				if (m->control_pressed) { delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} return 0;  }
 							
 				processedLabels.insert(list->getLabel());
 				userLabels.erase(list->getLabel());
@@ -219,14 +169,8 @@ int GetListCountCommand::execute(){
 				
 				process(list);
 				
-				if (m->control_pressed) { 
-					delete read;
-					delete input;
-					delete list;
-					globaldata->gListVector = NULL;  
-					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} outputTypes.clear();
-					return 0; 
-				}
+				if (m->control_pressed) { delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} return 0;  }
+
 													
 				processedLabels.insert(list->getLabel());
 				userLabels.erase(list->getLabel());
@@ -262,21 +206,12 @@ int GetListCountCommand::execute(){
 				
 			process(list);	
 			
-			if (m->control_pressed) { 
-					delete read;
-					delete input;
-					delete list;
-					globaldata->gListVector = NULL;  
-					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} outputTypes.clear();
-					return 0; 
-			}
+			if (m->control_pressed) { delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} return 0;  }
 			
 			delete list;  
 		}
 		
-		delete read;
 		delete input;
-		globaldata->gListVector = NULL;
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();

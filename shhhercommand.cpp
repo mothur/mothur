@@ -26,29 +26,48 @@
 #define MIN_WEIGHT 0.1
 #define MIN_TAU 0.0001
 #define MIN_ITER 10
-
 //**********************************************************************************************************************
-
-vector<string> ShhherCommand::getValidParameters(){	
+vector<string> ShhherCommand::setParameters(){	
 	try {
-		string Array[] =  {	
-			"file", "flow", "lookup", "cutoff", "sigma", "outputdir","inputdir", "processors", "maxiter", "mindelta", "order"	
-		};
+		CommandParameter pflow("flow", "InputTypes", "", "", "none", "fileflow", "none",false,false); parameters.push_back(pflow);
+		CommandParameter pfile("file", "InputTypes", "", "", "none", "fileflow", "none",false,false); parameters.push_back(pfile);
+		CommandParameter plookup("lookup", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(plookup);
+		CommandParameter pcutoff("cutoff", "Number", "", "0.01", "", "", "",false,false); parameters.push_back(pcutoff);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
+		CommandParameter pmaxiter("maxiter", "Number", "", "1000", "", "", "",false,false); parameters.push_back(pmaxiter);
+		CommandParameter psigma("sigma", "Number", "", "60", "", "", "",false,false); parameters.push_back(psigma);
+		CommandParameter pmindelta("mindelta", "Number", "", "0.000001", "", "", "",false,false); parameters.push_back(pmindelta);
+		CommandParameter porder("order", "String", "", "", "", "", "",false,false); parameters.push_back(porder);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
 		
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ShhherCommand", "getValidParameters");
+		m->errorOut(e, "ShhherCommand", "setParameters");
 		exit(1);
 	}
 }
-
+//**********************************************************************************************************************
+string ShhherCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The shhh.seqs command reads a file containing flowgrams and creates a file of corrected sequences.\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ShhherCommand", "getHelpString");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 
 ShhherCommand::ShhherCommand(){	
 	try {
 		abort = true; calledHelp = true;
+		setParameters();
 		
 		//initialize outputTypes
 		vector<string> tempOutNames;
@@ -57,33 +76,6 @@ ShhherCommand::ShhherCommand(){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ShhherCommand", "ShhherCommand");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
-vector<string> ShhherCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"flow"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ShhherCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
-vector<string> ShhherCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ShhherCommand", "getRequiredFiles");
 		exit(1);
 	}
 }
@@ -108,13 +100,7 @@ ShhherCommand::ShhherCommand(string option) {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			
-			//valid paramters for this command
-			string AlignArray[] =  {
-				"file", "flow", "lookup", "cutoff", "sigma", "outputdir","inputdir", "processors", "maxiter", "mindelta", "order"	
-			};
-			
-			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
@@ -196,8 +182,9 @@ ShhherCommand::ShhherCommand(string option) {
 			else if(temp == "not open")	{	abort = true;			} 
 			else						{	lookupFileName = temp;	}
 			
-			temp = validParameter.validFile(parameters, "processors", false);if (temp == "not found"){	temp = "1";			}
-			convert(temp, processors); 
+			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
+			m->setProcessors(temp);
+			convert(temp, processors);
 
 			temp = validParameter.validFile(parameters, "cutoff", false);	if (temp == "not found"){	temp = "0.01";		}
 			convert(temp, cutoff); 
@@ -217,7 +204,6 @@ ShhherCommand::ShhherCommand(string option) {
 				m->mothurOut("The value of the order option must be four bases long\n");
 			}
 			
-			globaldata = GlobalData::getInstance();
 		}
 			
 #ifdef USE_MPI
@@ -230,23 +216,6 @@ ShhherCommand::ShhherCommand(string option) {
 		exit(1);
 	}
 }
-
-//**********************************************************************************************************************
-
-ShhherCommand::~ShhherCommand(){}
-
-//**********************************************************************************************************************
-
-void ShhherCommand::help(){
-	try {
-		m->mothurOut("The shhher command reads a file containing flowgrams and creates a file of corrected sequences.\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ShhherCommand", "help");
-		exit(1);
-	}
-}
-
 //**********************************************************************************************************************
 #ifdef USE_MPI
 int ShhherCommand::execute(){
@@ -1153,11 +1122,6 @@ string ShhherCommand::createNamesFile(){
 
 string ShhherCommand::cluster(string distFileName, string namesFileName){
 	try {
-		
-		
-		globaldata->setNameFile(namesFileName);
-		globaldata->setColumnFile(distFileName);
-		globaldata->setFormat("column");
 		
 		ReadMatrix* read = new ReadColumnMatrix(distFileName); 	
 		read->setCutoff(cutoff);

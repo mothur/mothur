@@ -12,7 +12,6 @@
 /***********************************************************************/
 
 ReadCluster::ReadCluster(string distfile, float c, string o, bool s){
-		globaldata = GlobalData::getInstance();
 		m = MothurOut::getInstance();
         distFile = distfile;
 		cutoff = c;
@@ -183,7 +182,6 @@ int ReadCluster::convertPhylip2Column(NameAssignment* nameMap){
 			for(int i=0;i<matrixNames.size();i++){
 				nameMap->push_back(matrixNames[i]);
 			}
-			globaldata->nameMap = nameMap;
 		}
 		
 	

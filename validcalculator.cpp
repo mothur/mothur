@@ -666,4 +666,79 @@ void ValidCalculators::printCalc(string parameter, ostream& out) {
 	}
 }
 /********************************************************************/
+string ValidCalculators::printCalc(string parameter) {
+	try{
+		string output = "The available estimators for calc are ";
+		//are you looking for a calculator for a single parameter
+		if (parameter == "single") {
+			for (it = single.begin(); it != single.end(); it++) {
+				output += it->first + ", ";
+			}
+			//are you looking for a calculator for a shared parameter
+		}else if (parameter == "shared") {
+			for (it = shared.begin(); it != shared.end(); it++) {
+				output += it->first + ", ";
+			}
+			//are you looking for a calculator for a rarefaction parameter
+		}else if (parameter == "rarefaction") {
+			for (it = rarefaction.begin(); it != rarefaction.end(); it++) {
+				output += it->first + ", ";
+			}
+			//are you looking for a calculator for a summary parameter
+		}else if (parameter == "summary") {
+			for (it = summary.begin(); it != summary.end(); it++) {
+				output += it->first + ", ";
+			}
+			//are you looking for a calculator for a sharedsummary parameter
+		}else if (parameter == "sharedsummary") {
+			for (it = sharedsummary.begin(); it != sharedsummary.end(); it++) {
+				output += it->first + ", ";
+			}
+		}else if (parameter == "sharedrarefaction") {
+			for (it = sharedrarefaction.begin(); it != sharedrarefaction.end(); it++) {
+				output += it->first + ", ";
+			}
+		}else if (parameter == "vennsingle") {
+			for (it = vennsingle.begin(); it != vennsingle.end(); it++) {
+				output += it->first + ", ";
+			}
+		}else if (parameter == "vennshared") {
+			for (it = vennshared.begin(); it != vennshared.end(); it++) {
+				output += it->first + ", ";
+			}
+		}else if (parameter == "treegroup") {
+			for (it = treegroup.begin(); it != treegroup.end(); it++) {
+				output += it->first + ", ";
+			}
+		}else if (parameter == "matrix") {
+			for (it = matrix.begin(); it != matrix.end(); it++) {
+				output += it->first + ", ";
+			}
+		}else if (parameter == "heat") {
+			for (it = heat.begin(); it != heat.end(); it++) {
+				output += it->first + ", ";
+			}
+		}else if (parameter == "boot") {
+			for (it = boot.begin(); it != boot.end(); it++) {
+				output += it->first + ", ";
+			}
+		}else if (parameter == "distance") {
+			for (it = distance.begin(); it != distance.end(); it++) {
+				output += it->first + ", ";
+			}
+		}
+		
+		//rip off comma
+		output = output.substr(0, output.length()-1);
+		output += "\n";
+		
+		return output;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ValidCalculator", "printCalc");
+		exit(1);
+	}
+}
+/********************************************************************/
+
 

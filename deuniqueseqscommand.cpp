@@ -11,14 +11,36 @@
 #include "sequence.hpp"
 
 //**********************************************************************************************************************
-vector<string> DeUniqueSeqsCommand::getValidParameters(){	
+vector<string> DeUniqueSeqsCommand::setParameters(){	
 	try {
-		string Array[] =  {"fasta", "name","outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
+		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pname);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "DeUniqueSeqsCommand", "getValidParameters");
+		m->errorOut(e, "DeUniqueSeqsCommand", "setParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string DeUniqueSeqsCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The deunique.seqs command reads a fastafile and namefile, and creates a fastafile containing all the sequences.\n";
+		helpString += "The deunique.seqs command parameters are fasta and name, both are required, unless you have valid current name and fasta files.\n";
+		helpString += "The deunique.seqs command should be in the following format: \n";
+		helpString += "deunique.seqs(fasta=yourFastaFile, name=yourNameFile) \n";	
+		helpString += "Example deunique.seqs(fasta=abrecovery.unique.fasta, name=abrecovery.names).\n";
+		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "DeUniqueSeqsCommand", "getHelpString");
 		exit(1);
 	}
 }
@@ -26,34 +48,12 @@ vector<string> DeUniqueSeqsCommand::getValidParameters(){
 DeUniqueSeqsCommand::DeUniqueSeqsCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "DeUniqueSeqsCommand", "DeconvoluteCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> DeUniqueSeqsCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"fasta","name"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "DeUniqueSeqsCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> DeUniqueSeqsCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "DeUniqueSeqsCommand", "getRequiredFiles");
 		exit(1);
 	}
 }
@@ -66,9 +66,7 @@ DeUniqueSeqsCommand::DeUniqueSeqsCommand(string option)  {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"fasta", "name","outputdir","inputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
@@ -111,7 +109,11 @@ DeUniqueSeqsCommand::DeUniqueSeqsCommand(string option)  {
 			//check for required parameters
 			fastaFile = validParameter.validFile(parameters, "fasta", true);
 			if (fastaFile == "not open") { abort = true; }
-			else if (fastaFile == "not found") { fastaFile = ""; m->mothurOut("fasta is a required parameter for the deunique.seqs command."); m->mothurOutEndLine(); abort = true;  }	
+			else if (fastaFile == "not found") { 				
+				fastaFile = m->getFastaFile(); 
+				if (fastaFile != "") { m->mothurOut("Using " + fastaFile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}	
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
@@ -121,7 +123,11 @@ DeUniqueSeqsCommand::DeUniqueSeqsCommand(string option)  {
 			
 			nameFile = validParameter.validFile(parameters, "name", true);
 			if (nameFile == "not open") { abort = true; }
-			else if (nameFile == "not found"){	nameFile = "";	m->mothurOut("name is a required parameter for the deunique.seqs command."); m->mothurOutEndLine(); abort = true;  }
+			else if (nameFile == "not found"){					
+				nameFile = m->getNameFile(); 
+				if (nameFile != "") { m->mothurOut("Using " + nameFile + " as input file for the name parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current namefile and the name parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}
 		}
 
 	}
@@ -130,24 +136,6 @@ DeUniqueSeqsCommand::DeUniqueSeqsCommand(string option)  {
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-
-void DeUniqueSeqsCommand::help(){
-	try {
-		m->mothurOut("The deunique.seqs command reads a fastafile and namefile, and creates a fastafile containing all the sequences.\n");
-		m->mothurOut("The deunique.seqs command parameters are fasta and name, both are required.\n");
-		m->mothurOut("The deunique.seqs command should be in the following format: \n");
-		m->mothurOut("deunique.seqs(fasta=yourFastaFile, name=yourNameFile) \n");	
-		m->mothurOut("Example deunique.seqs(fasta=abrecovery.unique.fasta, name=abrecovery.names).\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
-
-	}
-	catch(exception& e) {
-		m->errorOut(e, "DeUniqueSeqsCommand", "help");
-		exit(1);
-	}
-}
-
 /**************************************************************************************/
 int DeUniqueSeqsCommand::execute() {	
 	try {

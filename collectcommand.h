@@ -12,16 +12,12 @@
 #include "command.hpp"
 #include "ordervector.hpp"
 #include "inputdata.h"
-#include "groupmap.h"
 #include "collect.h"
 #include "display.h"
-#include "readotu.h"
 #include "validcalculator.h"
 
 /*The collect() command:
 	The collect command generates a collector's curve from the given file.  
-	The collect command can only be executed after a successful read.list, read.sabund or read.rabund command, with one exception. 
-	The collect command can be executed after a successful cluster command.  It will use the .list file from the output of the cluster.  
 	The collect command outputs a file for each estimator you choose to use.  The collect command parameters are label, freq, single, abund.  
 	No parameters are required.  
 	The collect command should be in the following format: collect(label=yourLabel, freq=yourFreq, single=yourEstimators, abund=yourAbund). 
@@ -31,25 +27,23 @@
 	The label parameter is used to analyze specific labels in your input. */
 
 
-
-class GlobalData;
-
 class CollectCommand : public Command {
 	
 public:
 	CollectCommand(string);	
 	CollectCommand();
-	~CollectCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();	
-	void help();
+	~CollectCommand(){}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "collect.single";			}
+	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
+	
 	
 private:
-	GlobalData* globaldata;
-	ReadOTUFile* read;
 	OrderVector* order;
 	InputData* input;
 	Collect* cCurve;
@@ -58,11 +52,10 @@ private:
 	int abund, size;
 	float freq;
 	vector<string> outputNames;
-	map<string, vector<string> > outputTypes;
 
 	bool abort, allLines;
 	set<string> labels; //holds labels to be used
-	string label, calc, outputDir;
+	string label, calc, outputDir, sharedfile, listfile, rabundfile, sabundfile, format, inputfile;
 	vector<string>  Estimators;
 	vector<string> inputFileNames;
 	vector<string> groups;

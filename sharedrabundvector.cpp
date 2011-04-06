@@ -14,8 +14,7 @@
 
 
 /***********************************************************************/
-
-SharedRAbundVector::SharedRAbundVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0) {globaldata = GlobalData::getInstance();}
+SharedRAbundVector::SharedRAbundVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0) {} 
 /***********************************************************************/
 
 SharedRAbundVector::~SharedRAbundVector() {
@@ -26,7 +25,6 @@ SharedRAbundVector::~SharedRAbundVector() {
 /***********************************************************************/
 
 SharedRAbundVector::SharedRAbundVector(int n) : DataVector(), maxRank(0), numBins(n), numSeqs(0) {
-		globaldata = GlobalData::getInstance();
 		individual newGuy;
 		//initialize data
 		for (int i=0; i< n; i++) {
@@ -61,9 +59,7 @@ SharedRAbundVector::SharedRAbundVector(string id, vector<individual> rav) : Data
 //reads a shared file
 SharedRAbundVector::SharedRAbundVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), numSeqs(0) {
 	try {
-		globaldata = GlobalData::getInstance();
-		
-		if (globaldata->gGroupmap == NULL) {  groupmap = new GroupMap(); }
+		m->namesOfGroups.clear();
 		
 		int num, inputData, count;
 		count = 0;  
@@ -72,8 +68,8 @@ SharedRAbundVector::SharedRAbundVector(ifstream& f) : DataVector(), maxRank(0), 
 		
 		for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }  lookup.clear();
 		
-		if (globaldata->saveNextLabel == "") {  f >> label;  }
-		else { label = globaldata->saveNextLabel; }
+		if (m->saveNextLabel == "") {  f >> label;  }
+		else { label = m->saveNextLabel; }
 		
 		//read in first row since you know there is at least 1 group.
 		f >> groupN >> num;
@@ -86,11 +82,7 @@ SharedRAbundVector::SharedRAbundVector(ifstream& f) : DataVector(), maxRank(0), 
 		lookup[0]->setLabel(label);
 		lookup[0]->setGroup(groupN);
 		
-		if (globaldata->gGroupmap == NULL) { 
-			//save group in groupmap
-			groupmap->namesOfGroups.push_back(groupN);
-			groupmap->groupIndex[groupN] = 0;
-		}
+		m->namesOfGroups.push_back(groupN);
 		
 		//fill vector.  data = first sharedrabund in file
 		for(int i=0;i<num;i++){
@@ -112,12 +104,7 @@ SharedRAbundVector::SharedRAbundVector(ifstream& f) : DataVector(), maxRank(0), 
 			f >> groupN >> num;
 			count++;
 			
-			if (globaldata->gGroupmap == NULL) { 
-				//save group in groupmap
-	
-				groupmap->namesOfGroups.push_back(groupN);
-				groupmap->groupIndex[groupN] = count;
-			}
+			m->namesOfGroups.push_back(groupN);
 			
 			//add new vector to lookup
 			temp = new SharedRAbundVector();
@@ -136,9 +123,7 @@ SharedRAbundVector::SharedRAbundVector(ifstream& f) : DataVector(), maxRank(0), 
 			if (f.eof() != true) { f >> nextLabel; }
 		}
 	
-		globaldata->saveNextLabel = nextLabel;
-	
-		if (globaldata->gGroupmap == NULL) { globaldata->gGroupmap = groupmap;  }
+		m->saveNextLabel = nextLabel;
 		
 	}
 	catch(exception& e) {
@@ -370,12 +355,12 @@ vector<SharedRAbundVector*> SharedRAbundVector::getSharedRAbundVectors(){
 		SharedUtil* util;
 		util = new SharedUtil();
 		
-		util->setGroups(globaldata->Groups, globaldata->gGroupmap->namesOfGroups);
+		util->setGroups(m->Groups, m->namesOfGroups);
 		
 		bool remove = false;
 		for (int i = 0; i < lookup.size(); i++) {
 			//if this sharedrabund is not from a group the user wants then delete it.
-			if (util->isValidGroup(lookup[i]->getGroup(), globaldata->Groups) == false) { 
+			if (util->isValidGroup(lookup[i]->getGroup(), m->Groups) == false) { 
 				remove = true;
 				delete lookup[i]; lookup[i] = NULL;
 				lookup.erase(lookup.begin()+i); 

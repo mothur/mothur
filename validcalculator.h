@@ -24,6 +24,7 @@ class ValidCalculators {
 		~ValidCalculators();
 		bool isValidCalculator(string, string);
 		void printCalc(string, ostream&);
+		string printCalc(string);
 		
 	private:
 		map<string, string> single;

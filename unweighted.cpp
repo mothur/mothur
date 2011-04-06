@@ -13,12 +13,11 @@
 
 EstOutput Unweighted::getValues(Tree* t, int p, string o) {
 	try {
-		globaldata = GlobalData::getInstance();
 		processors = p;
 		outputDir = o;
 			
 		//if the users enters no groups then give them the score of all groups
-		int numGroups = globaldata->Groups.size();
+		int numGroups = m->Groups.size();
 		
 		//calculate number of comparsions
 		int numComp = 0;
@@ -26,7 +25,7 @@ EstOutput Unweighted::getValues(Tree* t, int p, string o) {
 		for (int r=0; r<numGroups; r++) { 
 			for (int l = 0; l < r; l++) {
 				numComp++;
-				vector<string> groups; groups.push_back(globaldata->Groups[r]); groups.push_back(globaldata->Groups[l]);
+				vector<string> groups; groups.push_back(m->Groups[r]); groups.push_back(m->Groups[l]);
 				namesOfGroupCombos.push_back(groups);
 			}
 		}
@@ -42,8 +41,8 @@ EstOutput Unweighted::getValues(Tree* t, int p, string o) {
 				}
 				namesOfGroupCombos.push_back(groups);
 			}else {
-				for (int i = 0; i < globaldata->Groups.size(); i++) {
-					groups.push_back(globaldata->Groups[i]);
+				for (int i = 0; i < m->Groups.size(); i++) {
+					groups.push_back(m->Groups[i]);
 				}
 				namesOfGroupCombos.push_back(groups);
 			}
@@ -257,12 +256,11 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 
 EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB, int p, string o) { 
  try {
-		globaldata = GlobalData::getInstance();
 		processors = p;
 		outputDir = o;
 		
 		//if the users enters no groups then give them the score of all groups
-		int numGroups = globaldata->Groups.size();
+		int numGroups = m->Groups.size();
 		
 		//calculate number of comparsions
 		int numComp = 0;
@@ -270,7 +268,7 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB, int p, st
 		for (int r=0; r<numGroups; r++) { 
 			for (int l = 0; l < r; l++) {
 				numComp++;
-				vector<string> groups; groups.push_back(globaldata->Groups[r]); groups.push_back(globaldata->Groups[l]);
+				vector<string> groups; groups.push_back(m->Groups[r]); groups.push_back(m->Groups[l]);
 				namesOfGroupCombos.push_back(groups);
 			}
 		}
@@ -286,8 +284,8 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB, int p, st
 				}
 				namesOfGroupCombos.push_back(groups);
 			}else {
-				for (int i = 0; i < globaldata->Groups.size(); i++) {
-					groups.push_back(globaldata->Groups[i]);
+				for (int i = 0; i < m->Groups.size(); i++) {
+					groups.push_back(m->Groups[i]);
 				}
 				namesOfGroupCombos.push_back(groups);
 			}
@@ -414,7 +412,7 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 		
 		int count = 0;
 		
-		Tree* copyTree = new Tree;
+		Tree* copyTree = new Tree(tmap);
 		
 		for (int h = start; h < (start+num); h++) {
 		

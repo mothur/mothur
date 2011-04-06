@@ -11,14 +11,37 @@
 #include "sequence.hpp"
 
 //**********************************************************************************************************************
-vector<string> DegapSeqsCommand::getValidParameters(){	
+vector<string> DegapSeqsCommand::setParameters(){	
 	try {
-		string Array[] =  {"fasta", "outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "DegapSeqsCommand", "getValidParameters");
+		m->errorOut(e, "DegapSeqsCommand", "setParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string DegapSeqsCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The degap.seqs command reads a fastafile and removes all gap characters.\n";
+		helpString += "The degap.seqs command parameter is fasta.\n";
+		helpString += "The fasta parameter allows you to enter the fasta file containing your sequences, and is required unless you have a valid current fasta file. \n";
+		helpString += "You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amzon.fasta \n";
+		helpString += "The degap.seqs command should be in the following format: \n";
+		helpString += "degap.seqs(fasta=yourFastaFile) \n";	
+		helpString += "Example: degap.seqs(fasta=abrecovery.align) \n";
+		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n";	
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "DegapSeqsCommand", "getHelpString");
 		exit(1);
 	}
 }
@@ -26,34 +49,12 @@ vector<string> DegapSeqsCommand::getValidParameters(){
 DegapSeqsCommand::DegapSeqsCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "DegapSeqsCommand", "DegapSeqsCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> DegapSeqsCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"fasta"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "DegapSeqsCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> DegapSeqsCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "DegapSeqsCommand", "getRequiredFiles");
 		exit(1);
 	}
 }
@@ -66,9 +67,7 @@ DegapSeqsCommand::DegapSeqsCommand(string option)  {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"fasta", "outputdir","inputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
@@ -92,7 +91,11 @@ DegapSeqsCommand::DegapSeqsCommand(string option)  {
 			
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", false);
-			if (fastafile == "not found") { fastafile = ""; m->mothurOut("fasta is a required parameter for the degap.seqs command."); m->mothurOutEndLine(); abort = true;  }
+			if (fastafile == "not found") { 				
+				fastafile = m->getFastaFile(); 
+				if (fastafile != "") { fastaFileNames.push_back(fastafile); m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}
 			else { 
 				m->splitAtDash(fastafile, fastaFileNames);
 				
@@ -159,32 +162,7 @@ DegapSeqsCommand::DegapSeqsCommand(string option)  {
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-
-void DegapSeqsCommand::help(){
-	try {
-		m->mothurOut("The degap.seqs command reads a fastafile and removes all gap characters.\n");
-		m->mothurOut("The degap.seqs command parameter is fasta.\n");
-		m->mothurOut("The fasta parameter allows you to enter the fasta file containing your sequences, and is required. \n");
-		m->mothurOut("You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amzon.fasta \n");
-		m->mothurOut("The degap.seqs command should be in the following format: \n");
-		m->mothurOut("degap.seqs(fasta=yourFastaFile) \n");	
-		m->mothurOut("Example: degap.seqs(fasta=abrecovery.align) \n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n");	
-	}
-	catch(exception& e) {
-		m->errorOut(e, "DegapSeqsCommand", "help");
-		exit(1);
-	}
-}
-
 //***************************************************************************************************************
-
-DegapSeqsCommand::~DegapSeqsCommand(){	/*	do nothing	*/	}
-
-//***************************************************************************************************************
-
-
 int DegapSeqsCommand::execute(){
 	try{
 		

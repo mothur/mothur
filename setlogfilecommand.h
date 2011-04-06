@@ -20,20 +20,21 @@ class SetLogFileCommand : public Command {
 public:
 	SetLogFileCommand(string);
 	SetLogFileCommand() { abort = true; calledHelp = true; }
-	~SetLogFileCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();
+	~SetLogFileCommand(){}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "set.logfile";		}
+	string getCommandCategory()		{ return "General";			}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
 	CommandFactory* commandFactory;
 	string name;
 	bool abort, append;
 	vector<string> outputNames;
-	map<string, vector<string> > outputTypes;
 		
 };
 

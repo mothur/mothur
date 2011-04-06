@@ -19,25 +19,23 @@ class CorrAxesCommand : public Command {
 public:
 	CorrAxesCommand(string);
 	CorrAxesCommand();
-	~CorrAxesCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
+	~CorrAxesCommand(){}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "corr.axes";				}
+	string getCommandCategory()		{ return "Hypothesis Testing";		}
+	string getHelpString();	
+	
 	int execute();
-	void help();
-	
+	void help() { m->mothurOut(getHelpString()); }	
 private:
-	
-	
-	GlobalData* globaldata;
+
 	string axesfile, sharedfile, relabundfile, metadatafile, groups, label, inputFileName, outputDir, method;
 	bool abort, pickedGroups;
 	int numaxes;
 	set<string> names;
 	
 	vector<string> outputNames, Groups;
-	map<string, vector<string> > outputTypes;
 	vector<SharedRAbundFloatVector*> lookupFloat;
 	vector<string> metadataLabels;
 	

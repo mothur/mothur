@@ -15,51 +15,89 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
+
 //**********************************************************************************************************************
-vector<string> ClearcutCommand::getValidParameters(){	
+vector<string> ClearcutCommand::setParameters(){	
 	try {
-		string AlignArray[] =  {"fasta","phylip","version","verbose","quiet","seed","norandom","shuffle","neighbor","expblen",
-								"expdist","ntrees","matrixout","stdout","kimura","jukes","protein","DNA","outputdir","inputdir"};
-		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+		CommandParameter pphylip("phylip", "InputTypes", "", "", "FastaPhylip", "FastaPhylip", "none",false,false); parameters.push_back(pphylip);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "FastaPhylip", "FastaPhylip", "none",false,false); parameters.push_back(pfasta);
+		CommandParameter pverbose("verbose", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pverbose);
+		CommandParameter pquiet("quiet", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pquiet);
+		CommandParameter pversion("version", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pversion);
+		CommandParameter pseed("seed", "String", "", "", "*", "", "",false,false); parameters.push_back(pseed);
+		CommandParameter pnorandom("norandom", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pnorandom);
+		CommandParameter pshuffle("shuffle", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pshuffle);
+		CommandParameter pneighbor("neighbor", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pneighbor);
+		CommandParameter pexpblen("expblen", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pexpblen);
+		CommandParameter pexpdist("expdist", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pexpdist);
+		CommandParameter pDNA("DNA", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pDNA);
+		CommandParameter pprotein("protein", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pprotein);
+		CommandParameter pjukes("jukes", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pjukes);
+		CommandParameter pkimura("kimura", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pkimura);
+		CommandParameter pstdout("stdout", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pstdout);
+		CommandParameter pntrees("ntrees", "Number", "", "1", "", "", "",false,false); parameters.push_back(pntrees);
+		CommandParameter pmatrixout("matrixout", "String", "", "", "", "", "",false,false); parameters.push_back(pmatrixout);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ClearcutCommand", "getValidParameters");
+		m->errorOut(e, "ClearcutCommand", "setParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
+string ClearcutCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The clearcut command interfaces mothur with the clearcut program written by Initiative for Bioinformatics and Evolutionary Studies (IBEST) at the University of Idaho.\n";
+		helpString += "For more information about clearcut refer to http://bioinformatics.hungry.com/clearcut/ \n";
+		helpString += "The clearcut command parameters are phylip, fasta, version, verbose, quiet, seed, norandom, shuffle, neighbor, expblen, expdist, ntrees, matrixout, stdout, kimura, jukes, protein, DNA. \n";
+		helpString += "The phylip parameter allows you to enter your phylip formatted distance matrix. \n";
+		helpString += "The fasta parameter allows you to enter your aligned fasta file, if you enter a fastafile you specify if the sequences are DNA or protein using the DNA or protein parameters. \n";
+		
+		helpString += "The version parameter prints out the version of clearcut you are using, default=F. \n";
+		helpString += "The verbose parameter prints out more output from clearcut, default=F. \n";
+		helpString += "The quiet parameter turns on silent operation mode, default=F. \n";
+		helpString += "The seed parameter allows you to explicitly set the PRNG seed to a specific value. \n";
+		helpString += "The norandom parameter allows you to attempt joins deterministically, default=F. \n";
+		helpString += "The shuffle parameter allows you to randomly shuffle the distance matrix, default=F. \n";
+		helpString += "The neighbor parameter allows you to use traditional Neighbor-Joining algorithm, default=T. \n";
+		
+		helpString += "The DNA parameter allows you to indicate your fasta file contains DNA sequences, default=F. \n";
+		helpString += "The protein parameter allows you to indicate your fasta file contains protein sequences, default=F. \n";
+		
+		helpString += "The stdout parameter outputs your tree to STDOUT, default=F. \n";
+		helpString += "The matrixout parameter allows you to specify a filename to output a distance matrix to. \n";
+		helpString += "The ntrees parameter allows you to specify the number of output trees, default=1. \n";
+		helpString += "The expblen parameter allows you to use exponential notation for branch lengths, default=F. \n";
+		helpString += "The expdist parameter allows you to use exponential notation for distance outputs, default=F. \n";
+		
+		helpString += "The clearcut command should be in the following format: \n";
+		helpString += "clearcut(phylip=yourDistanceFile) \n";
+		helpString += "Example: clearcut(phylip=abrecovery.phylip.dist) \n";	
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClearcutCommand", "getHelpString");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
 ClearcutCommand::ClearcutCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["tree"] = tempOutNames;
 		outputTypes["matrixout"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClearcutCommand", "ClearcutCommand");
-		exit(1);
-	}
-}//**********************************************************************************************************************
-vector<string> ClearcutCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"fasta","phylip","or"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClearcutCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> ClearcutCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClearcutCommand", "getRequiredFiles");
 		exit(1);
 	}
 }
@@ -72,10 +110,7 @@ ClearcutCommand::ClearcutCommand(string option)  {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"fasta","phylip","version","verbose","quiet","seed","norandom","shuffle","neighbor","expblen",
-								"expdist","ntrees","matrixout","stdout","kimura","jukes","protein","DNA","outputdir","inputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
@@ -126,7 +161,20 @@ ClearcutCommand::ClearcutCommand(string option)  {
 			else if (phylipfile == "not found") { phylipfile = ""; }
 			else { inputFile = phylipfile;  }
 				
-			if ((phylipfile == "") && (fastafile == "")) {  m->mothurOut("You must provide either a phylip formatted distance matrix or an aligned fasta file."); m->mothurOutEndLine(); abort=true; }
+			if ((phylipfile == "") && (fastafile == "")) {  
+				//is there are current file available for either of these?
+				//give priority to phylip, then fasta
+				phylipfile = m->getPhylipFile(); 
+				if (phylipfile != "") {  m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
+				else { 
+					fastafile = m->getFastaFile(); 
+					if (fastafile != "") {  m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+					else { 
+						m->mothurOut("No valid current files. You must provide a phylip or fasta file before you can use the clearcut command."); m->mothurOutEndLine(); 
+						abort = true;
+					}
+				}
+			}
 			if ((phylipfile != "") && (fastafile != "")) {  m->mothurOut("You must provide either a phylip formatted distance matrix or an aligned fasta file, not BOTH."); m->mothurOutEndLine(); abort=true; }
 
 			
@@ -188,44 +236,6 @@ ClearcutCommand::ClearcutCommand(string option)  {
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-
-void ClearcutCommand::help(){
-	try {
-		m->mothurOut("The clearcut command interfaces mothur with the clearcut program written by Initiative for Bioinformatics and Evolutionary Studies (IBEST) at the University of Idaho.\n");
-		m->mothurOut("For more information about clearcut refer to http://bioinformatics.hungry.com/clearcut/ \n");
-		m->mothurOut("The clearcut command parameters are phylip, fasta, version, verbose, quiet, seed, norandom, shuffle, neighbor, expblen, expdist, ntrees, matrixout, stdout, kimura, jukes, protein, DNA. \n");
-		m->mothurOut("The phylip parameter allows you to enter your phylip formatted distance matrix. \n");
-		m->mothurOut("The fasta parameter allows you to enter your aligned fasta file, if you enter a fastafile you specify if the sequences are DNA or protein using the DNA or protein parameters. \n");
-		
-		m->mothurOut("The version parameter prints out the version of clearcut you are using, default=F. \n");
-		m->mothurOut("The verbose parameter prints out more output from clearcut, default=F. \n");
-		m->mothurOut("The quiet parameter turns on silent operation mode, default=F. \n");
-		m->mothurOut("The seed parameter allows you to explicitly set the PRNG seed to a specific value. \n");
-		m->mothurOut("The norandom parameter allows you to attempt joins deterministically, default=F. \n");
-		m->mothurOut("The shuffle parameter allows you to randomly shuffle the distance matrix, default=F. \n");
-		m->mothurOut("The neighbor parameter allows you to use traditional Neighbor-Joining algorithm, default=T. \n");
-		
-		m->mothurOut("The DNA parameter allows you to indicate your fasta file contains DNA sequences, default=F. \n");
-		m->mothurOut("The protein parameter allows you to indicate your fasta file contains protein sequences, default=F. \n");
-		
-		m->mothurOut("The stdout parameter outputs your tree to STDOUT, default=F. \n");
-		m->mothurOut("The matrixout parameter allows you to specify a filename to output a distance matrix to. \n");
-		m->mothurOut("The ntrees parameter allows you to specify the number of output trees, default=1. \n");
-		m->mothurOut("The expblen parameter allows you to use exponential notation for branch lengths, default=F. \n");
-		m->mothurOut("The expdist parameter allows you to use exponential notation for distance outputs, default=F. \n");
-
-		m->mothurOut("The clearcut command should be in the following format: \n");
-		m->mothurOut("clearcut(phylip=yourDistanceFile) \n");
-		m->mothurOut("Example: clearcut(phylip=abrecovery.phylip.dist) \n");	
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClearcutCommand", "help");
-		exit(1);
-	}
-}
-
 /**************************************************************************************/
 int ClearcutCommand::execute() {	
 	try {

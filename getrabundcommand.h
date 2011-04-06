@@ -13,33 +13,31 @@
 
 #include "command.hpp"
 #include "inputdata.h"
-#include "readotu.h"
 #include "listvector.hpp"
 
-class GlobalData;
 
 class GetRAbundCommand : public Command {
 public:
 	GetRAbundCommand(string);
 	GetRAbundCommand();
-	~GetRAbundCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();
+	~GetRAbundCommand(){}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "get.rabund";				}
+	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
+	
 	
 private:
-	GlobalData* globaldata;
-	string filename;
+	
+	string filename, listfile, sabundfile, inputfile, format, outputDir;
 	ofstream out;
-	ReadOTUFile* read;
 	InputData* input;
-	ListVector* list;
 	RAbundVector* rabund;
 	vector<string> outputNames;
-	map<string, vector<string> > outputTypes;
 
 	bool abort, allLines, sorted;
 	set<string> labels; //holds labels to be used

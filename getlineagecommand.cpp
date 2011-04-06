@@ -11,23 +11,58 @@
 #include "sequence.hpp"
 #include "listvector.hpp"
 
-
 //**********************************************************************************************************************
-vector<string> GetLineageCommand::getValidParameters(){	
+vector<string> GetLineageCommand::setParameters(){	
 	try {
-		string Array[] =  {"fasta","name", "group", "alignreport", "taxon", "dups", "list","taxonomy","outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pfasta);
+		CommandParameter pname("name", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pname);
+		CommandParameter pgroup("group", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pgroup);
+		CommandParameter plist("list", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(plist);
+		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "FNGLT", "none",false,true); parameters.push_back(ptaxonomy);
+		CommandParameter palignreport("alignreport", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(palignreport);
+		CommandParameter ptaxon("taxon", "String", "", "", "", "", "",false,true); parameters.push_back(ptaxon);
+		CommandParameter pdups("dups", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pdups);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "GetLineageCommand", "getValidParameters");
+		m->errorOut(e, "GetLineageCommand", "setParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
+string GetLineageCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The get.lineage command reads a taxonomy file and any of the following file types: fasta, name, group, list or alignreport file.\n";
+		helpString += "It outputs a file containing only the sequences from the taxonomy file that are from the taxon requested.\n";
+		helpString += "The get.lineage command parameters are taxon, fasta, name, group, list, taxonomy, alignreport and dups.  You must provide taxonomy unless you have a valid current taxonomy file.\n";
+		helpString += "The dups parameter allows you to add the entire line from a name file if you add any name from the line. default=false. \n";
+		helpString += "The taxon parameter allows you to select the taxons you would like to get and is required.\n";
+		helpString += "You may enter your taxons with confidence scores, doing so will get only those sequences that belong to the taxonomy and whose cofidence scores is above the scores you give.\n";
+		helpString += "If they belong to the taxonomy and have confidences below those you provide the sequence will not be selected.\n";
+		helpString += "The get.lineage command should be in the following format: get.lineage(taxonomy=yourTaxonomyFile, taxon=yourTaxons).\n";
+		helpString += "Example get.lineage(taxonomy=amazon.silva.taxonomy, taxon=Bacteria;Firmicutes;Bacilli;Lactobacillales;).\n";
+		helpString += "Note: If you are running mothur in script mode you must wrap the taxon in ' characters so mothur will ignore the ; in the taxon.\n";
+		helpString += "Example get.lineage(taxonomy=amazon.silva.taxonomy, taxon='Bacteria;Firmicutes;Bacilli;Lactobacillales;').\n";
+		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetLineageCommand", "getHelpString");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
 GetLineageCommand::GetLineageCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
 		outputTypes["taxonomy"] = tempOutNames;
@@ -42,29 +77,6 @@ GetLineageCommand::GetLineageCommand(){
 	}
 }
 //**********************************************************************************************************************
-vector<string> GetLineageCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"taxonomy","taxon"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetLineageCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> GetLineageCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetLineageCommand", "getRequiredFiles");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 GetLineageCommand::GetLineageCommand(string option)  {
 	try {
 		abort = false; calledHelp = false;   
@@ -73,9 +85,7 @@ GetLineageCommand::GetLineageCommand(string option)  {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"fasta","name", "group", "alignreport", "taxon", "dups", "list","taxonomy","outputdir","inputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
@@ -178,7 +188,11 @@ GetLineageCommand::GetLineageCommand(string option)  {
 			
 			taxfile = validParameter.validFile(parameters, "taxonomy", true);
 			if (taxfile == "not open") { abort = true; }
-			else if (taxfile == "not found") {  taxfile = ""; m->mothurOut("The taxonomy parameter is required for the get.lineage command."); m->mothurOutEndLine();  abort = true; }
+			else if (taxfile == "not found") {  				
+				taxfile = m->getTaxonomyFile(); 
+				if (taxfile != "") { m->mothurOut("Using " + taxfile + " as input file for the taxonomy parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current taxonomy file and the taxonomy parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}
 			
 			string usedDups = "true";
 			string temp = validParameter.validFile(parameters, "dups", false);	
@@ -198,9 +212,6 @@ GetLineageCommand::GetLineageCommand(string option)  {
 			
 			
 			if ((fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == "") && (taxfile == ""))  { m->mothurOut("You must provide one of the following: fasta, name, group, alignreport, taxonomy or listfile."); m->mothurOutEndLine(); abort = true; }
-		
-			if ((usedDups != "") && (namefile == "")) {  m->mothurOut("You may only use dups with the name option."); m->mothurOutEndLine();  abort = true; }			
-
 		}
 
 	}
@@ -209,29 +220,6 @@ GetLineageCommand::GetLineageCommand(string option)  {
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-
-void GetLineageCommand::help(){
-	try {
-		m->mothurOut("The get.lineage command reads a taxonomy file and any of the following file types: fasta, name, group, list or alignreport file.\n");
-		m->mothurOut("It outputs a file containing only the sequences from the taxonomy file that are from the taxon requested.\n");
-		m->mothurOut("The get.lineage command parameters are taxon, fasta, name, group, list, taxonomy, alignreport and dups.  You must provide taxonomy and taxon.\n");
-		m->mothurOut("The dups parameter allows you to add the entire line from a name file if you add any name from the line. default=false. \n");
-		m->mothurOut("The taxon parameter allows you to select the taxons you would like to get.\n");
-		m->mothurOut("You may enter your taxons with confidence scores, doing so will get only those sequences that belong to the taxonomy and whose cofidence scores is above the scores you give.\n");
-		m->mothurOut("If they belong to the taxonomy and have confidences below those you provide the sequence will not be selected.\n");
-		m->mothurOut("The get.lineage command should be in the following format: get.lineage(taxonomy=yourTaxonomyFile, taxon=yourTaxons).\n");
-		m->mothurOut("Example get.lineage(taxonomy=amazon.silva.taxonomy, taxon=Bacteria;Firmicutes;Bacilli;Lactobacillales;).\n");
-		m->mothurOut("Note: If you are running mothur in script mode you must wrap the taxon in ' characters so mothur will ignore the ; in the taxon.\n");
-		m->mothurOut("Example get.lineage(taxonomy=amazon.silva.taxonomy, taxon='Bacteria;Firmicutes;Bacilli;Lactobacillales;').\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetLineageCommand", "help");
-		exit(1);
-	}
-}
-
 //**********************************************************************************************************************
 
 int GetLineageCommand::execute(){

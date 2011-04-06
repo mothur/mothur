@@ -20,18 +20,20 @@ class SystemCommand : public Command {
 		SystemCommand(string);	
 		SystemCommand() { abort = true; calledHelp = true; }
 		~SystemCommand(){}
-		vector<string> getRequiredParameters();
-		vector<string> getValidParameters();
-		vector<string> getRequiredFiles();
-		map<string, vector<string> > getOutputFiles() { return outputTypes; }
-		int execute();
-		void help();	
-		
+	
+		vector<string> setParameters() { return outputNames; } //dummy does not do anything
+		string getCommandName()			{ return "system";		}
+		string getCommandCategory()		{ return "General";		}
+		string getHelpString();	
+	
+		int execute(); 
+		void help() { m->mothurOut(getHelpString()); }	
+	
 	private:
 		string command;
 		bool abort;
 		vector<string> outputNames;
-		map<string, vector<string> > outputTypes;
+		
 		
 };
 

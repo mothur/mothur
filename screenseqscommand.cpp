@@ -11,15 +11,59 @@
 #include "sequence.hpp"
 
 //**********************************************************************************************************************
-vector<string> ScreenSeqsCommand::getValidParameters(){	
+vector<string> ScreenSeqsCommand::setParameters(){	
 	try {
-		string Array[] =  {"fasta", "start", "end", "maxambig", "maxhomop","optimize","criteria", "minlength", "maxlength",
-									"name", "group", "alignreport","processors","outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
+		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
+		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pgroup);
+		CommandParameter palignreport("alignreport", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(palignreport);
+		CommandParameter pstart("start", "Number", "", "-1", "", "", "",false,false); parameters.push_back(pstart);
+		CommandParameter pend("end", "Number", "", "-1", "", "", "",false,false); parameters.push_back(pend);
+		CommandParameter pmaxambig("maxambig", "Number", "", "-1", "", "", "",false,false); parameters.push_back(pmaxambig);
+		CommandParameter pmaxhomop("maxhomop", "Number", "", "-1", "", "", "",false,false); parameters.push_back(pmaxhomop);
+		CommandParameter pminlength("minlength", "Number", "", "-1", "", "", "",false,false); parameters.push_back(pminlength);
+		CommandParameter pmaxlength("maxlength", "Number", "", "-1", "", "", "",false,false); parameters.push_back(pmaxlength);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
+		CommandParameter pcriteria("criteria", "Number", "", "90", "", "", "",false,false); parameters.push_back(pcriteria);
+		CommandParameter poptimize("optimize", "Multiple", "none-start-end-maxambig-maxhomop-minlength-maxlength", "none", "", "", "",true,false); parameters.push_back(poptimize);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ScreenSeqsCommand", "getValidParameters");
+		m->errorOut(e, "ScreenSeqsCommand", "setParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string ScreenSeqsCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The screen.seqs command reads a fastafile and creates .....\n";
+		helpString += "The screen.seqs command parameters are fasta, start, end, maxambig, maxhomop, minlength, maxlength, name, group, optimize, criteria and processors.\n";
+		helpString += "The fasta parameter is required.\n";
+		helpString += "The start parameter .... The default is -1.\n";
+		helpString += "The end parameter .... The default is -1.\n";
+		helpString += "The maxambig parameter allows you to set the maximum number of ambigious bases allowed. The default is -1.\n";
+		helpString += "The maxhomop parameter allows you to set a maximum homopolymer length. \n";
+		helpString += "The minlength parameter allows you to set and minimum sequence length. \n";
+		helpString += "The maxlength parameter allows you to set and maximum sequence length. \n";
+		helpString += "The processors parameter allows you to specify the number of processors to use while running the command. The default is 1.\n";
+		helpString += "The optimize and criteria parameters allow you set the start, end, maxabig, maxhomop, minlength and maxlength parameters relative to your set of sequences .\n";
+		helpString += "For example optimize=start-end, criteria=90, would set the start and end values to the position 90% of your sequences started and ended.\n";
+		helpString += "The name parameter allows you to provide a namesfile, and the group parameter allows you to provide a groupfile.\n";
+		helpString += "The screen.seqs command should be in the following format: \n";
+		helpString += "screen.seqs(fasta=yourFastaFile, name=youNameFile, group=yourGroupFIle, start=yourStart, end=yourEnd, maxambig=yourMaxambig,  \n";
+		helpString += "maxhomop=yourMaxhomop, minlength=youMinlength, maxlength=yourMaxlength)  \n";	
+		helpString += "Example screen.seqs(fasta=abrecovery.fasta, name=abrecovery.names, group=abrecovery.groups, start=..., end=..., maxambig=..., maxhomop=..., minlength=..., maxlength=...).\n";
+		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ScreenSeqsCommand", "getHelpString");
 		exit(1);
 	}
 }
@@ -27,6 +71,7 @@ vector<string> ScreenSeqsCommand::getValidParameters(){
 ScreenSeqsCommand::ScreenSeqsCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
 		outputTypes["name"] = tempOutNames;
@@ -36,29 +81,6 @@ ScreenSeqsCommand::ScreenSeqsCommand(){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ScreenSeqsCommand", "ScreenSeqsCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> ScreenSeqsCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"fasta"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ScreenSeqsCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> ScreenSeqsCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ScreenSeqsCommand", "getRequiredFiles");
 		exit(1);
 	}
 }
@@ -72,10 +94,7 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string AlignArray[] =  {"fasta", "start", "end", "maxambig", "maxhomop","optimize","criteria", "minlength", "maxlength",
-									"name", "group", "alignreport","processors","outputdir","inputdir"};
-			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
@@ -136,7 +155,11 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", true);
-			if (fastafile == "not found") { m->mothurOut("fasta is a required parameter for the screen.seqs command."); m->mothurOutEndLine(); abort = true; }
+			if (fastafile == "not found") { 			
+				fastafile = m->getFastaFile(); 
+				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}
 			else if (fastafile == "not open") { abort = true; }	
 	
 			groupfile = validParameter.validFile(parameters, "group", true);
@@ -178,17 +201,17 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 			temp = validParameter.validFile(parameters, "maxlength", false);	if (temp == "not found") { temp = "-1"; }
 			convert(temp, maxLength); 
 			
-			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = "1";				}
-			convert(temp, processors); 
+			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
+			m->setProcessors(temp);
+			convert(temp, processors);
 			
 			temp = validParameter.validFile(parameters, "optimize", false);	//optimizing trumps the optimized values original value
-			if (temp == "not found"){	temp = "";		}
-			else {  m->splitAtDash(temp, optimize);		}
+			if (temp == "not found"){	temp = "none";		}
+			m->splitAtDash(temp, optimize);		
 			
 			//check for invalid optimize options
 			set<string> validOptimizers;
-			validOptimizers.insert("start"); validOptimizers.insert("end"); validOptimizers.insert("maxambig"); validOptimizers.insert("maxhomop"); validOptimizers.insert("minlength"); validOptimizers.insert("maxlength");
-			
+			validOptimizers.insert("none"); validOptimizers.insert("start"); validOptimizers.insert("end"); validOptimizers.insert("maxambig"); validOptimizers.insert("maxhomop"); validOptimizers.insert("minlength"); validOptimizers.insert("maxlength");
 			for (int i = 0; i < optimize.size(); i++) { 
 				if (validOptimizers.count(optimize[i]) == 0) { 
 					m->mothurOut(optimize[i] + " is not a valid optimizer. Valid options are start, end, maxambig, maxhomop, minlength and maxlength."); m->mothurOutEndLine();
@@ -196,6 +219,8 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 					i--;
 				}
 			}
+			
+			if (optimize.size() == 1) { if (optimize[0] == "none") { optimize.clear(); } }
 			
 			temp = validParameter.validFile(parameters, "criteria", false);	if (temp == "not found"){	temp = "90";				}
 			convert(temp, criteria); 
@@ -207,40 +232,6 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-
-void ScreenSeqsCommand::help(){
-	try {
-		m->mothurOut("The screen.seqs command reads a fastafile and creates .....\n");
-		m->mothurOut("The screen.seqs command parameters are fasta, start, end, maxambig, maxhomop, minlength, maxlength, name, group, optimize, criteria and processors.\n");
-		m->mothurOut("The fasta parameter is required.\n");
-		m->mothurOut("The start parameter .... The default is -1.\n");
-		m->mothurOut("The end parameter .... The default is -1.\n");
-		m->mothurOut("The maxambig parameter .... The default is -1.\n");
-		m->mothurOut("The maxhomop parameter .... The default is -1.\n");
-		m->mothurOut("The minlength parameter .... The default is -1.\n");
-		m->mothurOut("The maxlength parameter .... The default is -1.\n");
-		m->mothurOut("The processors parameter allows you to specify the number of processors to use while running the command. The default is 1.\n");
-		m->mothurOut("The optimize and criteria parameters allow you set the start, end, maxabig, maxhomop, minlength and maxlength parameters relative to your set of sequences .\n");
-		m->mothurOut("For example optimize=start-end, criteria=90, would set the start and end values to the position 90% of your sequences started and ended.\n");
-		m->mothurOut("The name parameter allows you to provide a namesfile, and the group parameter allows you to provide a groupfile.\n");
-		m->mothurOut("The screen.seqs command should be in the following format: \n");
-		m->mothurOut("screen.seqs(fasta=yourFastaFile, name=youNameFile, group=yourGroupFIle, start=yourStart, end=yourEnd, maxambig=yourMaxambig,  \n");
-		m->mothurOut("maxhomop=yourMaxhomop, minlength=youMinlength, maxlength=yourMaxlength)  \n");	
-		m->mothurOut("Example screen.seqs(fasta=abrecovery.fasta, name=abrecovery.names, group=abrecovery.groups, start=..., end=..., maxambig=..., maxhomop=..., minlength=..., maxlength=...).\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
-
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ScreenSeqsCommand", "help");
-		exit(1);
-	}
-}
-
-//***************************************************************************************************************
-
-ScreenSeqsCommand::~ScreenSeqsCommand(){	/*	do nothing	*/	}
-
 //***************************************************************************************************************
 
 int ScreenSeqsCommand::execute(){

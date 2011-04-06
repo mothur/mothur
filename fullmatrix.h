@@ -11,7 +11,6 @@
 
 #include "mothur.h"
 #include "groupmap.h"
-#include "globaldata.hpp"
 #include "progress.hpp"
 
 
@@ -23,8 +22,8 @@ struct Names {
 class FullMatrix {
 	
 public:
-	FullMatrix(){ m = MothurOut::getInstance(); }
-	FullMatrix(ifstream&);
+	//FullMatrix(){ m = MothurOut::getInstance(); }
+	FullMatrix(ifstream&, GroupMap*, bool);
 	~FullMatrix(){};
 	
 	int getNumSeqs();
@@ -52,7 +51,7 @@ private:
 	int numSeqs;
 	int numGroups;
 	int numUserGroups;
-	GlobalData* globaldata;
+	bool sim;
 	MothurOut* m;
 };
 

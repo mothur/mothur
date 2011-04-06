@@ -19,19 +19,21 @@ class RemoveSeqsCommand : public Command {
 		RemoveSeqsCommand(string);	
 		RemoveSeqsCommand();
 		~RemoveSeqsCommand(){}
-		vector<string> getRequiredParameters();
-		vector<string> getValidParameters();
-		vector<string> getRequiredFiles();
-		map<string, vector<string> > getOutputFiles() { return outputTypes; }
-		int execute();
-		void help();	
-		
+	
+		vector<string> setParameters();
+		string getCommandName()			{ return "remove.seqs";				}
+		string getCommandCategory()		{ return "Sequence Processing";		}
+		string getHelpString();	
+	
+		int execute(); 
+		void help() { m->mothurOut(getHelpString()); }	
+	
+	
 	private:
 		set<string> names;
 		string accnosfile, fastafile, namefile, groupfile, alignfile, listfile, taxfile, qualfile, outputDir;
 		bool abort, dups;
 		vector<string> outputNames;
-		map<string, vector<string> > outputTypes;
 		
 		int readFasta();
 		int readName();

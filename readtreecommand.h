@@ -14,29 +14,28 @@
 #include "readtree.h"
 #include "treemap.h"
 
-class GlobalData;
 
 class ReadTreeCommand : public Command {
 public:
 	ReadTreeCommand(string);
 	ReadTreeCommand() { abort = true; calledHelp = true; }
-	~ReadTreeCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();
-	void help();
+	~ReadTreeCommand() {}
+	
+	vector<string> setParameters() {  return outputNames; } //dummy doesn't really do anything
+	string getCommandName()			{ return "read.tree";	}
+	string getCommandCategory()		{ return "Hidden";	}
+	string getHelpString() { return "This command is no longer available. You can provide your files directly to the downstream commands like unifrac.unweighted."; }	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	GlobalData* globaldata;
 	ReadTree* read;
 	TreeMap* treeMap;
 	string filename, treefile, groupfile, namefile;
 	bool abort;
 	map<string, string> nameMap;
 	vector<string> outputNames;
-	map<string, vector<string> > outputTypes;
 	
 	int readNamesFile();
 	int numUniquesInName;

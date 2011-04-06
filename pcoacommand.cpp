@@ -11,51 +11,53 @@
 #include "pcoacommand.h"
 #include "readphylipvector.h"
 
+
 //**********************************************************************************************************************
-vector<string> PCOACommand::getValidParameters(){	
+vector<string> PCOACommand::setParameters(){	
 	try {
-		string Array[] =  {"phylip", "metric","outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter pphylip("phylip", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pphylip);
+		CommandParameter pmetric("metric", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pmetric);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "PCOACommand", "getValidParameters");
+		m->errorOut(e, "PCOACommand", "setParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
+string PCOACommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The pcoa command parameters are phylip and metric"; 
+		helpString += "The phylip parameter allows you to enter your distance file.";
+		helpString += "The metric parameter allows indicate you if would like the pearson correlation coefficient calculated. Default=True"; 
+		helpString += "Example pcoa(phylip=yourDistanceFile).\n";
+		helpString += "Note: No spaces between parameter labels (i.e. phylip), '=' and parameters (i.e.yourDistanceFile).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PCOACommand", "getHelpString");
+		exit(1);
+	}
+}
+
+
+//**********************************************************************************************************************
 PCOACommand::PCOACommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["pcoa"] = tempOutNames;
 		outputTypes["loadings"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PCOACommand", "PCOACommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> PCOACommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"phylip"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PCOACommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> PCOACommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PCOACommand", "getRequiredFiles");
 		exit(1);
 	}
 }
@@ -69,9 +71,7 @@ PCOACommand::PCOACommand(string option)  {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"phylip","metric","outputdir", "inputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string, string> parameters = parser. getParameters();
@@ -105,8 +105,14 @@ PCOACommand::PCOACommand(string option)  {
 			//required parameters
 			phylipfile = validParameter.validFile(parameters, "phylip", true);
 			if (phylipfile == "not open") { abort = true; }
-			else if (phylipfile == "not found") { phylipfile = ""; abort = true; }	
-			else {	filename = phylipfile;  }
+			else if (phylipfile == "not found") { 			
+				//if there is a current phylip file, use it
+				phylipfile = m->getPhylipFile(); 
+				if (phylipfile != "") { m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current phylip file and the phylip parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}	
+			
+			filename = phylipfile;  
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
@@ -114,9 +120,6 @@ PCOACommand::PCOACommand(string option)  {
 				outputDir += m->hasPath(phylipfile); //if user entered a file with a path then preserve it	
 			}
 			
-			//error checking on files	
-			if (phylipfile == "")	{ m->mothurOut("You must provide a distance file before running the pcoa command."); m->mothurOutEndLine(); abort = true; }		
-		
 			string temp = validParameter.validFile(parameters, "metric", false);	if (temp == "not found"){	temp = "T";				}
 			metric = m->isTrue(temp); 
 		}
@@ -127,23 +130,6 @@ PCOACommand::PCOACommand(string option)  {
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-void PCOACommand::help(){
-	try {
-	
-		m->mothurOut("The pcoa command parameters are phylip and metric"); m->mothurOutEndLine();
-		m->mothurOut("The phylip parameter allows you to enter your distance file."); m->mothurOutEndLine();
-		m->mothurOut("The metric parameter allows indicate you if would like the pearson correlation coefficient calculated. Default=True"); m->mothurOutEndLine();
-		m->mothurOut("Example pcoa(phylip=yourDistanceFile).\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. phylip), '=' and parameters (i.e.yourDistanceFile).\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PCOACommand", "help");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-PCOACommand::~PCOACommand(){}
 //**********************************************************************************************************************
 int PCOACommand::execute(){
 	try {

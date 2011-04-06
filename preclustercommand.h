@@ -32,13 +32,15 @@ class PreClusterCommand : public Command {
 public:
 	PreClusterCommand(string);
 	PreClusterCommand();
-	~PreClusterCommand();
-	vector<string> getRequiredParameters();
-	vector<string> getValidParameters();
-	vector<string> getRequiredFiles();
-	map<string, vector<string> > getOutputFiles() { return outputTypes; }
-	int execute();	
-	void help();
+	~PreClusterCommand(){}
+	
+	vector<string> setParameters();
+	string getCommandName()			{ return "pre.cluster";				}
+	string getCommandCategory()		{ return "Sequence Processing";		}
+	string getHelpString();	
+	
+	int execute(); 
+	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
 	int diffs, length;

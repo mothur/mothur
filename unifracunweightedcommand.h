@@ -15,25 +15,26 @@
 #include "treemap.h"
 #include "sharedutilities.h"
 #include "fileoutput.h"
-
-
-class GlobalData;
+#include "readtree.h"
 
 class UnifracUnweightedCommand : public Command {
 	
 	public:
 		UnifracUnweightedCommand(string);	
 		UnifracUnweightedCommand();
-		~UnifracUnweightedCommand() { globaldata->Groups.clear();  if (abort == false) { delete unweighted; delete util; } }
-		vector<string> getRequiredParameters();
-		vector<string> getValidParameters();
-		vector<string> getRequiredFiles();
-		map<string, vector<string> > getOutputFiles() { return outputTypes; }
+		~UnifracUnweightedCommand() {}
+	
+		vector<string> setParameters();
+		string getCommandName()			{ return "unifrac.unweighted";		}
+		string getCommandCategory()		{ return "Hypothesis Testing";		}
+		string getHelpString();	
+	
 		int execute();
-		void help();	
+		void help() { m->mothurOut(getHelpString()); }
+	
 	
 	private:
-		GlobalData* globaldata;
+		ReadTree* read;
 		SharedUtil* util;
 		FileOutput* output;
 		vector<Tree*> T;	   //user trees
@@ -41,7 +42,7 @@ class UnifracUnweightedCommand : public Command {
 		Unweighted* unweighted;
 		string sumFile, allGroups;
 		vector<string> groupComb; // AB. AC, BC...
-		int iters, numGroups, numComp, counter, processors;
+		int iters, numGroups, numComp, counter, processors, numUniquesInName;
 		EstOutput userData;			//unweighted score info for user tree
 		EstOutput randomData;		//unweighted score info for random trees
 		vector< vector<float> > utreeScores; //scores for users trees for each comb.
@@ -51,16 +52,17 @@ class UnifracUnweightedCommand : public Command {
 		vector< map<float, float> > rCumul;  //map <unweighted score, cumulative percentage of number of random trees with that score or higher.> -vector entry for each combination.
 		
 		bool abort, phylip, random, includeRoot;
-		string groups, itersString, outputDir, outputForm;
+		string groups, itersString, outputDir, outputForm, treefile, groupfile, namefile;
 		vector<string> Groups, outputNames; //holds groups to be used
-		map<string, vector<string> > outputTypes;
 
 		ofstream outSum, out;
 		ifstream inFile;
+		map<string, string> nameMap;
 		
 		void printUWSummaryFile(int);
 		void printUnweightedFile();
 		void createPhylipFile(int);
+		int readNamesFile();
 		 
 		
 };

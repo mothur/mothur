@@ -10,51 +10,55 @@
 #include "mantelcommand.h"
 #include "readphylipvector.h"
 
+
 //**********************************************************************************************************************
-vector<string> MantelCommand::getValidParameters(){	
+vector<string> MantelCommand::setParameters(){	
 	try {
-		string Array[] =  {"phylip1","phylip2","method","iters","outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter pphylip1("phylip1", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pphylip1);
+		CommandParameter pphylip2("phylip2", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pphylip2);
+		CommandParameter piters("iters", "Number", "", "1000", "", "", "",false,false); parameters.push_back(piters);
+		CommandParameter pmethod("method", "Multiple", "pearson-spearman-kendall", "pearson", "", "", "",false,false); parameters.push_back(pmethod);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "MantelCommand", "getValidParameters");
+		m->errorOut(e, "MantelCommand", "setParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-vector<string> MantelCommand::getRequiredParameters(){	
+string MantelCommand::getHelpString(){	
 	try {
-		string Array[] =  {"phylip1", "phylip2"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
+		string helpString = "";
+		helpString += "Sokal, R. R., & Rohlf, F. J. (1995). Biometry, 3rd edn. New York: Freeman.\n";
+		helpString += "The mantel command reads two distance matrices and calculates the mantel correlation coefficient.\n";
+		helpString += "The mantel command parameters are phylip1, phylip2, iters and method.  The phylip1 and phylip2 parameters are required.  Matrices must be the same size and contain the same names.\n";
+		helpString += "The method parameter allows you to select what method you would like to use. Options are pearson, spearman and kendall. Default=pearson.\n";
+		helpString += "The iters parameter allows you to set number of randomization for the P value.  The default is 1000. \n";
+		helpString += "The mantel command should be in the following format: mantel(phylip1=veg.dist, phylip2=env.dist).\n";
+		helpString += "The mantel command outputs a .mantel file.\n";
+		helpString += "Note: No spaces between parameter labels (i.e. phylip1), '=' and parameters (i.e. veg.dist).\n\n";
+		return helpString;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "MantelCommand", "getRequiredParameters");
+		m->errorOut(e, "MantelCommand", "getHelpString");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
 MantelCommand::MantelCommand(){	
 	try {
-		abort = true; calledHelp = true; 
+		abort = true; calledHelp = true;
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["mantel"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "MantelCommand", "MantelCommand");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-vector<string> MantelCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "MantelCommand", "getRequiredFiles");
 		exit(1);
 	}
 }
@@ -67,9 +71,7 @@ MantelCommand::MantelCommand(string option)  {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"phylip1","phylip2","method","iters","outputdir","inputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string, string> parameters = parser.getParameters();
@@ -132,29 +134,6 @@ MantelCommand::MantelCommand(string option)  {
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-
-void MantelCommand::help(){
-	try {
-		m->mothurOut("Sokal, R. R., & Rohlf, F. J. (1995). Biometry, 3rd edn. New York: Freeman.\n");
-		m->mothurOut("The mantel command reads two distance matrices and calculates the mantel correlation coefficient.\n");
-		m->mothurOut("The mantel command parameters are phylip1, phylip2, iters and method.  The phylip1 and phylip2 parameters are required.  Matrices must be the same size and contain the same names.\n");
-		m->mothurOut("The method parameter allows you to select what method you would like to use. Options are pearson, spearman and kendall. Default=pearson.\n");
-		m->mothurOut("The iters parameter allows you to set number of randomization for the P value.  The default is 1000. \n");
-		m->mothurOut("The mantel command should be in the following format: mantel(phylip1=veg.dist, phylip2=env.dist).\n");
-		m->mothurOut("The mantel command outputs a .mantel file.\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. phylip1), '=' and parameters (i.e. veg.dist).\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "MantelCommand", "help");	
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
-MantelCommand::~MantelCommand(){}
-
 //**********************************************************************************************************************
 
 int MantelCommand::execute(){

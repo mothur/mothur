@@ -11,14 +11,46 @@
 #include "readphylipvector.h"
 
 //**********************************************************************************************************************
-vector<string> NMDSCommand::getValidParameters(){	
+vector<string> NMDSCommand::setParameters(){	
 	try {
-		string Array[] =  {"phylip","axes","mindim","maxdim","iters","maxiters","epsilon","outputdir","inputdir"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		CommandParameter paxes("axes", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(paxes);
+		CommandParameter pphylip("phylip", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pphylip);
+		CommandParameter pmaxdim("maxdim", "Number", "", "2", "", "", "",false,false); parameters.push_back(pmaxdim);
+		CommandParameter pmindim("mindim", "Number", "", "2", "", "", "",false,false); parameters.push_back(pmindim);
+		CommandParameter piters("iters", "Number", "", "10", "", "", "",false,false); parameters.push_back(piters);
+		CommandParameter pmaxiters("maxiters", "Number", "", "500", "", "", "",false,false); parameters.push_back(pmaxiters);
+		CommandParameter pepsilon("epsilon", "Number", "", "0.000000000001", "", "", "",false,false); parameters.push_back(pepsilon);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "NMDSCommand", "getValidParameters");
+		m->errorOut(e, "NMDSCommand", "setParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string NMDSCommand::getHelpString(){	
+	try {
+		string helpString = "";
+		helpString += "The nmds command is modelled after the nmds code written in R by Sarah Goslee, using Non-metric multidimensional scaling function using the majorization algorithm from Borg & Groenen 1997, Modern Multidimensional Scaling.\n";
+		helpString += "The nmds command parameters are phylip, axes, mindim, maxdim, maxiters, iters and epsilon.\n"; 
+		helpString += "The phylip parameter allows you to enter your distance file.\n"; 
+		helpString += "The axes parameter allows you to enter a file containing a starting configuration.\n";
+		helpString += "The maxdim parameter allows you to select the maximum dimensions to use. Default=2\n"; 
+		helpString += "The mindim parameter allows you to select the minimum dimensions to use. Default=2\n";
+		helpString += "The maxiters parameter allows you to select the maximum number of iters to try with each random configuration. Default=500\n"; 
+		helpString += "The iters parameter allows you to select the number of random configuration to try. Default=10\n"; 
+		helpString += "The epsilon parameter allows you to select set an acceptable stopping point. Default=1e-12.\n"; 
+		helpString += "Example nmds(phylip=yourDistanceFile).\n";
+		helpString += "Note: No spaces between parameter labels (i.e. phylip), '=' and parameters (i.e.yourDistanceFile).\n\n";
+		return helpString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "NMDSCommand", "getHelpString");
 		exit(1);
 	}
 }
@@ -26,6 +58,7 @@ vector<string> NMDSCommand::getValidParameters(){
 NMDSCommand::NMDSCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["nmds"] = tempOutNames;
 		outputTypes["stress"] = tempOutNames;
@@ -33,29 +66,6 @@ NMDSCommand::NMDSCommand(){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "NMDSCommand", "NMDSCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> NMDSCommand::getRequiredParameters(){	
-	try {
-		string Array[] =  {"phylip"};
-		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "NMDSCommand", "getRequiredParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-vector<string> NMDSCommand::getRequiredFiles(){	
-	try {
-		vector<string> myArray;
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "NMDSCommand", "getRequiredFiles");
 		exit(1);
 	}
 }
@@ -69,9 +79,7 @@ NMDSCommand::NMDSCommand(string option)  {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"phylip","axes","mindim","maxdim","iters","maxiters","epsilon","outputdir", "inputdir"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string, string> parameters = parser. getParameters();
@@ -114,7 +122,12 @@ NMDSCommand::NMDSCommand(string option)  {
 			//required parameters
 			phylipfile = validParameter.validFile(parameters, "phylip", true);
 			if (phylipfile == "not open") { phylipfile = ""; abort = true; }
-			else if (phylipfile == "not found") { phylipfile = ""; m->mothurOut("You must provide a distance file before running the nmds command."); m->mothurOutEndLine(); abort = true; }	
+			else if (phylipfile == "not found") { 				
+				//if there is a current phylip file, use it
+				phylipfile = m->getPhylipFile(); 
+				if (phylipfile != "") { m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current phylip file and the phylip parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}	
 			
 			axesfile = validParameter.validFile(parameters, "axes", true);
 			if (axesfile == "not open") { axesfile = ""; abort = true; }
@@ -151,28 +164,6 @@ NMDSCommand::NMDSCommand(string option)  {
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-void NMDSCommand::help(){
-	try {
-		m->mothurOut("The nmds command is modelled after the nmds code written in R by Sarah Goslee, using Non-metric multidimensional scaling function using the majorization algorithm from Borg & Groenen 1997, Modern Multidimensional Scaling."); m->mothurOutEndLine();
-		m->mothurOut("The nmds command parameters are phylip, axes, mindim, maxdim, maxiters, iters and epsilon."); m->mothurOutEndLine();
-		m->mothurOut("The phylip parameter allows you to enter your distance file."); m->mothurOutEndLine();
-		m->mothurOut("The axes parameter allows you to enter a file containing a starting configuration."); m->mothurOutEndLine();
-		m->mothurOut("The maxdim parameter allows you to select the maximum dimensions to use. Default=2"); m->mothurOutEndLine();
-		m->mothurOut("The mindim parameter allows you to select the minimum dimensions to use. Default=2"); m->mothurOutEndLine();
-		m->mothurOut("The maxiters parameter allows you to select the maximum number of iters to try with each random configuration. Default=500"); m->mothurOutEndLine();
-		m->mothurOut("The iters parameter allows you to select the number of random configuration to try. Default=10"); m->mothurOutEndLine();
-		m->mothurOut("The epsilon parameter allows you to select set an acceptable stopping point. Default=1e-12."); m->mothurOutEndLine();
-		m->mothurOut("Example nmds(phylip=yourDistanceFile).\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. phylip), '=' and parameters (i.e.yourDistanceFile).\n\n");
-	}
-	catch(exception& e) {
-		m->errorOut(e, "NMDSCommand", "help");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-NMDSCommand::~NMDSCommand(){}
 //**********************************************************************************************************************
 int NMDSCommand::execute(){
 	try {
