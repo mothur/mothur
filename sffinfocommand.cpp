@@ -47,7 +47,7 @@ string SffInfoCommand::getHelpString(){
 		helpString += "The trim parameter allows you to indicate if you would like a sequences and quality scores trimmed to the clipQualLeft and clipQualRight values.  Default=True. \n";
 		helpString += "The accnos parameter allows you to provide a accnos file containing the names of the sequences you would like extracted. You may enter multiple files by separating them by -'s. \n";
 		helpString += "Example sffinfo(sff=mySffFile.sff, trim=F).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. sff), '=' and parameters (i.e.yourSffFileName).\n\n";
+		helpString += "Note: No spaces between parameter labels (i.e. sff), '=' and parameters (i.e.yourSffFileName).\n";
 		return helpString;
 	}
 	catch(exception& e) {

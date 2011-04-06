@@ -43,7 +43,6 @@ private:
 	vector<Calculator*> matrixCalculators;
 	vector< vector<float> > simMatrix;
 	InputData* input;
-	ValidCalculators* validCalculator;
 	vector<SharedRAbundVector*> lookup;
 	string exportFileName, output, sharedfile;
 	int numGroups;

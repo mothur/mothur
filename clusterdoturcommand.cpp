@@ -40,7 +40,7 @@ string ClusterDoturCommand::getHelpString(){
 		helpString += "The cluster.classic command parameter options are phylip, name, method, cuttoff, hard, sim, precision. Phylip is required, unless you have a valid current file.\n";
 		helpString += "The cluster.classic command should be in the following format: \n";
 		helpString += "cluster.classic(phylip=yourDistanceMatrix, method=yourMethod, cutoff=yourCutoff, precision=yourPrecision) \n";
-		helpString += "The acceptable cluster methods are furthest, nearest, weighted and average.  If no method is provided then furthest is assumed.\n\n";	
+		helpString += "The acceptable cluster methods are furthest, nearest, weighted and average.  If no method is provided then furthest is assumed.\n";	
 		return helpString;
 	}
 	catch(exception& e) {

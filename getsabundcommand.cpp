@@ -37,7 +37,7 @@ string GetSAbundCommand::getHelpString(){
 		helpString += "Example get.sabund().\n";
 		helpString += "The default value for label is all labels in your inputfile.\n";
 		helpString += "The get.sabund command outputs a .sabund file containing the labels you selected.\n";
-		helpString += "Note: No spaces between parameter labels (i.e. label), '=' and parameters (i.e.yourLabel).\n\n";
+		helpString += "Note: No spaces between parameter labels (i.e. label), '=' and parameters (i.e.yourLabel).\n";
 		return helpString;
 	}
 	catch(exception& e) {

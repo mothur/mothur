@@ -43,7 +43,7 @@ string ParsimonyCommand::getHelpString(){
 		helpString += "Example parsimony(random=out, iters=500).\n";
 		helpString += "The default value for random is "" (meaning you want to use the trees in your inputfile, randomtree=out means you just want the random distribution of trees outputted to out.rd_parsimony),\n";
 		helpString += "and iters is 1000.  The parsimony command output two files: .parsimony and .psummary their descriptions are in the manual.\n";
-		helpString += "Note: No spaces between parameter labels (i.e. random), '=' and parameters (i.e.yourOutputFilename).\n\n";
+		helpString += "Note: No spaces between parameter labels (i.e. random), '=' and parameters (i.e.yourOutputFilename).\n";
 		return helpString;
 	}
 	catch(exception& e) {

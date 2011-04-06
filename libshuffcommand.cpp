@@ -56,7 +56,7 @@ string LibShuffCommand::getHelpString(){
 		helpString += "Example libshuff(groups=A-B-C, iters=500, form=discrete, step=0.01, cutOff=2.0).\n";
 		helpString += "The default value for groups is all the groups in your groupfile, iters is 10000, cutoff is 1.0, form is integral and step is 0.01.\n";
 		helpString += "The libshuff command output two files: .coverage and .slsummary their descriptions are in the manual.\n";
-		helpString += "Note: No spaces between parameter labels (i.e. iters), '=' and parameters (i.e.yourIters).\n\n";
+		helpString += "Note: No spaces between parameter labels (i.e. iters), '=' and parameters (i.e.yourIters).\n";
 		return helpString;
 	}
 	catch(exception& e) {

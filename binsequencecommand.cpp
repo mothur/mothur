@@ -41,7 +41,7 @@ string BinSeqCommand::getHelpString(){
 		helpString += "The default value for label is all lines in your inputfile.\n";
 		helpString += "The bin.seqs command outputs a .fasta file for each distance you specify appending the OTU number to each name.\n";
 		helpString += "If you provide a groupfile, then it also appends the sequences group to the name.\n";
-		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n";
+		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n";
 		return helpString;
 	}
 	catch(exception& e) {

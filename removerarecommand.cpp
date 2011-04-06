@@ -50,7 +50,7 @@ string RemoveRareCommand::getHelpString(){
 		helpString += "The nseqs parameter allows you to set the cutoff for an otu to be deemed rare. It is required.\n";
 		helpString += "The remove.rare command should be in the following format: remove.rare(shared=yourSharedFile, nseqs=yourRareCutoff).\n";
 		helpString += "Example remove.rare(shared=amazon.fn.shared, nseqs=2).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. shared), '=' and parameters (i.e.yourSharedFile).\n\n";
+		helpString += "Note: No spaces between parameter labels (i.e. shared), '=' and parameters (i.e.yourSharedFile).\n";
 		return helpString;
 	}
 	catch(exception& e) {

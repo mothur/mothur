@@ -52,7 +52,7 @@ string PhyloDiversityCommand::getHelpString(){
 		helpString += "The phylo.diversity command should be in the following format: phylo.diversity(groups=yourGroups, rarefy=yourRarefy, iters=yourIters).\n";
 		helpString += "Example phylo.diversity(groups=A-B-C, rarefy=T, iters=500).\n";
 		helpString += "The phylo.diversity command output two files: .phylo.diversity and if rarefy=T, .rarefaction.\n";
-		helpString += "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n";
+		helpString += "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n";
 		return helpString;
 	}
 	catch(exception& e) {

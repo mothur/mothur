@@ -44,7 +44,7 @@ string ClusterCommand::getHelpString(){
 		helpString += "The cluster command parameter options are phylip, column, name, method, cuttoff, hard, precision, sim, showabund and timing. Phylip or column and name are required, unless you have a valid current file.\n";
 		helpString += "The cluster command should be in the following format: \n";
 		helpString += "cluster(method=yourMethod, cutoff=yourCutoff, precision=yourPrecision) \n";
-		helpString += "The acceptable cluster methods are furthest, nearest, average and weighted.  If no method is provided then furthest is assumed.\n\n";	
+		helpString += "The acceptable cluster methods are furthest, nearest, average and weighted.  If no method is provided then furthest is assumed.\n";	
 		return helpString;
 	}
 	catch(exception& e) {

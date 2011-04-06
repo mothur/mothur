@@ -41,7 +41,7 @@ string ListSeqsCommand::getHelpString(){
 		helpString += "The list.seqs command parameters are fasta, name, group, list, taxonomy and alignreport.  You must provide one of these parameters.\n";
 		helpString += "The list.seqs command should be in the following format: list.seqs(fasta=yourFasta).\n";
 		helpString += "Example list.seqs(fasta=amazon.fasta).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n";
+		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n";
 		return helpString;
 	}
 	catch(exception& e) {

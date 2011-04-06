@@ -52,7 +52,7 @@ string HeatMapCommand::getHelpString(){
 		helpString += "The default value for groups is all the groups in your groupfile, and all labels in your inputfile will be used.\n";
 		helpString += "The default value for scale is log10; your other options are log2 and linear.\n";
 		helpString += "The heatmap.bin command outputs a .svg file for each label you specify.\n";
-		helpString += "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n";
+		helpString += "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n";
 		return helpString;
 	}
 	catch(exception& e) {

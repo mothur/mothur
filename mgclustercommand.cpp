@@ -44,7 +44,7 @@ string MGClusterCommand::getHelpString(){
 		helpString += "This command outputs a .list, .rabund and .sabund file that can be used with mothur other commands to estimate richness.\n";
 		helpString += "The cutoff parameter is used to specify the maximum distance you would like to cluster to. The default is 0.70.\n";
 		helpString += "The precision parameter's default value is 100. \n";
-		helpString += "The acceptable mgcluster methods are furthest, nearest and average.  If no method is provided then furthest is assumed.\n\n";	
+		helpString += "The acceptable mgcluster methods are furthest, nearest and average.  If no method is provided then furthest is assumed.\n";	
 		helpString += "The min parameter allows you to specify is you want the minimum or maximum blast score ratio used in calculating the distance. The default is true, meaning you want the minimum.\n";
 		helpString += "The length parameter is used to specify the minimum overlap required.  The default is 5.\n";
 		helpString += "The penalty parameter is used to adjust the error rate.  The default is 0.10.\n";
@@ -52,7 +52,7 @@ string MGClusterCommand::getHelpString(){
 		helpString += "The hcluster parameter allows you to use the hcluster algorithm when clustering.  This may be neccessary if your file is too large to fit into RAM. The default is false.\n";
 		helpString += "The mgcluster command should be in the following format: \n";
 		helpString += "mgcluster(blast=yourBlastfile, name=yourNameFile, cutoff=yourCutOff).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. balst), '=' and parameters (i.e.yourBlastfile).\n\n";
+		helpString += "Note: No spaces between parameter labels (i.e. balst), '=' and parameters (i.e.yourBlastfile).\n";
 		return helpString;
 	}
 	catch(exception& e) {

@@ -49,7 +49,7 @@ string RareFactSharedCommand::getHelpString(){
 		helpString += validCalculator.printCalc("sharedrarefaction");
 		helpString += "The label parameter is used to analyze specific labels in your input.\n";
 		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups.\n";
-		helpString += "Note: No spaces between parameter labels (i.e. freq), '=' and parameters (i.e.yourFreq).\n\n";
+		helpString += "Note: No spaces between parameter labels (i.e. freq), '=' and parameters (i.e.yourFreq).\n";
 		return helpString;
 	}
 	catch(exception& e) {

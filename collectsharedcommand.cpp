@@ -89,7 +89,7 @@ string CollectSharedCommand::getHelpString(){
 		helpString += "The all parameter is used to specify if you want the estimate of all your groups together.  This estimate can only be made for sharedsobs and sharedchao calculators. The default is false.\n";
 		helpString += "If you use sharedchao and run into memory issues, set all to false. \n";
 		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups.\n";
-		helpString += "Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListfile).\n\n";
+		helpString += "Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListfile).\n";
 		return helpString;
 	}
 	catch(exception& e) {

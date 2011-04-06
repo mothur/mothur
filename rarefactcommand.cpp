@@ -64,7 +64,7 @@ string RareFactCommand::getHelpString(){
 		helpString += "The default values for iters is 1000, freq is 100, and calc is rarefaction which calculates the rarefaction curve for the observed richness.\n";
 		validCalculator.printCalc("rarefaction");
 		helpString += "The label parameter is used to analyze specific labels in your input.\n";
-		helpString += "Note: No spaces between parameter labels (i.e. freq), '=' and parameters (i.e.yourFreq).\n\n";
+		helpString += "Note: No spaces between parameter labels (i.e. freq), '=' and parameters (i.e.yourFreq).\n";
 		return helpString;
 	}
 	catch(exception& e) {

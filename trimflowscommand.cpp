@@ -47,7 +47,7 @@ string TrimFlowsCommand::getHelpString(){
 		string helpString = "";
 		helpString += "The trim.flows command reads a flowgram file and creates .....\n";
 		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n";
-		helpString += "For more details please check out the wiki http://www.mothur.org/wiki/Trim.flows.\n\n";
+		helpString += "For more details please check out the wiki http://www.mothur.org/wiki/Trim.flows.\n";
 		return helpString;
 	}
 	catch(exception& e) {

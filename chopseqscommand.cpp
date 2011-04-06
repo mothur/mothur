@@ -43,7 +43,7 @@ string ChopSeqsCommand::getHelpString(){
 		helpString += "The short parameter allows you to specify you want to keep sequences that are too short to chop, default=false.\n";
 		helpString += "For example, if you ran chop.seqs with numbases=200 and short=t, if a sequence had 100 bases mothur would keep the sequence rather than eliminate it.\n";
 		helpString += "Example chop.seqs(fasta=amazon.fasta, numbases=200, keep=front).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n";
+		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n";
 		return helpString;
 	}
 	catch(exception& e) {

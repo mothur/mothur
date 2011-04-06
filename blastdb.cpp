@@ -150,7 +150,7 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n) {
 		m8FileHandle.close();
 		remove((queryFileName+seq->getName()).c_str());
 		remove((blastFileName+seq->getName()).c_str());
-//cout << "\n\n" ;		
+//cout << "\n" ;		
 		return topMatches;
 	}
 	catch(exception& e) {

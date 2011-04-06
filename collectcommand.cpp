@@ -63,15 +63,16 @@ vector<string> CollectCommand::setParameters(){
 string CollectCommand::getHelpString(){	
 	try {
 		string helpString = "";
+		ValidCalculators validCalculator;
 		helpString += "The collect.single command parameters are list, sabund, rabund, shared, label, freq, calc and abund.  list, sabund, rabund or shared is required unless you have a valid current file. \n";
 		helpString += "The collect.single command should be in the following format: \n";
 		helpString += "The freq parameter is used indicate when to output your data, by default it is set to 100. But you can set it to a percentage of the number of sequence. For example freq=0.10, means 10%. \n";
 		helpString += "collect.single(label=yourLabel, iters=yourIters, freq=yourFreq, calc=yourEstimators).\n";
 		helpString += "Example collect(label=unique-.01-.03, iters=10000, freq=10, calc=sobs-chao-ace-jack).\n";
 		helpString += "The default values for freq is 100, and calc are sobs-chao-ace-jack-shannon-npshannon-simpson.\n";
-		helpString += validCalculator->printCalc("single");
+		helpString += validCalculator.printCalc("single");
 		helpString += "The label parameter is used to analyze specific labels in your input.\n";
-		helpString += "Note: No spaces between parameter labels (i.e. freq), '=' and parameters (i.e.yourFreq).\n\n";
+		helpString += "Note: No spaces between parameter labels (i.e. freq), '=' and parameters (i.e.yourFreq).\n";
 		return helpString;
 	}
 	catch(exception& e) {
@@ -123,7 +124,7 @@ CollectCommand::CollectCommand(string option)  {
 		allLines = 1;
 		
 		//allow user to run help
-		if(option == "help") { validCalculator = new ValidCalculators(); help(); delete validCalculator; abort = true; }
+		if(option == "help") { help(); abort = true; }
 		
 		else {
 			vector<string> myArray = setParameters();
@@ -310,10 +311,10 @@ int CollectCommand::execute(){
 				m->mothurOutEndLine(); m->mothurOut("Processing group " + groups[p]); m->mothurOutEndLine(); m->mothurOutEndLine();
 			}
 		
-			validCalculator = new ValidCalculators();
+			ValidCalculators validCalculator;
 			
 			for (int i=0; i<Estimators.size(); i++) {
-				if (validCalculator->isValidCalculator("single", Estimators[i]) == true) { 
+				if (validCalculator.isValidCalculator("single", Estimators[i]) == true) { 
 					if (Estimators[i] == "sobs") { 
 						cDisplays.push_back(new CollectDisplay(new Sobs(), new OneColumnFile(fileNameRoot+"sobs")));
 						outputNames.push_back(fileNameRoot+"sobs"); outputTypes["sobs"].push_back(fileNameRoot+"sobs");
@@ -409,7 +410,6 @@ int CollectCommand::execute(){
 				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	} outputTypes.clear(); 
 				delete input;  
 				delete order; 
-				delete validCalculator;
 				m->Groups.clear();
 				return 0;
 			}
@@ -422,7 +422,6 @@ int CollectCommand::execute(){
 					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	} outputTypes.clear(); 
 					delete input;  
 					delete order; 
-					delete validCalculator;
 					m->Groups.clear();
 					return 0;
 				}
@@ -471,7 +470,6 @@ int CollectCommand::execute(){
 					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
 					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	} outputTypes.clear(); 
 					delete input;  
-					delete validCalculator;
 					m->Groups.clear();
 					return 0;
 			}
@@ -504,8 +502,7 @@ int CollectCommand::execute(){
 					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
 					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	} outputTypes.clear(); 
 					delete input;  
-					delete order; 
-					delete validCalculator;
+					delete order;
 					m->Groups.clear();
 					return 0;
 				}
@@ -515,7 +512,6 @@ int CollectCommand::execute(){
 			for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
 			cDisplays.clear();
 			delete input;  
-			delete validCalculator;
 		}
 		
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	} return 0; }

@@ -44,7 +44,7 @@ string RemoveOtusCommand::getHelpString(){
 		helpString += "The remove.otus command should be in the following format: remove.otus(accnos=yourAccnos, list=yourListFile, group=yourGroupFile, label=yourLabel).\n";
 		helpString += "Example remove.otus(accnos=amazon.accnos, list=amazon.fn.list, group=amazon.groups, label=0.03).\n";
 		helpString += "or remove.otus(groups=pasture, list=amazon.fn.list, amazon.groups, label=0.03).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListFile).\n\n";
+		helpString += "Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListFile).\n";
 		return helpString;
 	}
 	catch(exception& e) {

@@ -37,7 +37,7 @@ string MakeFastQCommand::getHelpString(){
 		helpString += "You must also provide an accnos containing the list of groups to get or set the groups parameter to the groups you wish to select.\n";
 		helpString += "The make.fastq command should be in the following format: make.fastq(qfile=yourQualityFile, fasta=yourFasta).\n";
 		helpString += "Example make.fastq(fasta=amazon.fasta, qfile=amazon.qual).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n";
+		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n";
 		return helpString;
 	}
 	catch(exception& e) {

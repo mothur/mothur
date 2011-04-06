@@ -56,7 +56,7 @@ string VennCommand::getHelpString(){
 		helpString += "If you have more than 4 groups, the permute parameter will find all possible combos of 4 of your groups and create pictures for them, default=F.\n";
 		helpString += "The only estimators available four 4 groups are sharedsobs and sharedchao.\n";
 		helpString += "The venn command outputs a .svg file for each calculator you specify at each distance you choose.\n";
-		helpString += "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n";
+		helpString += "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n";
 		return helpString;
 	}
 	catch(exception& e) {

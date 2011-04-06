@@ -36,7 +36,6 @@ private:
 	InputData* input;
 	vector<SharedRAbundVector*> lookup;
 	vector<Calculator*> heatCalculators;
-	ValidCalculators* validCalculator;
 	HeatMapSim* heatmap;
 	OptionParser* parser;
 	bool abort, allLines;

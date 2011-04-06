@@ -46,6 +46,7 @@ vector<string> HeatMapSimCommand::setParameters(){
 string HeatMapSimCommand::getHelpString(){	
 	try {
 		string helpString = "";
+		ValidCalculators validCalculator;
 		helpString += "The heatmap.sim command parameters are shared, phylip, column, name, groups, calc and label.  shared or phylip or column and name are required unless valid current files exist.\n";
 		helpString += "There are two ways to use the heatmap.sim command. The first is with the read.otu command. \n";
 		helpString += "With the read.otu command you may use the groups, label and calc parameters. \n";
@@ -54,14 +55,14 @@ string HeatMapSimCommand::getHelpString(){
 		helpString += "The heatmap.sim command should be in the following format: heatmap.sim(groups=yourGroups, calc=yourCalc, label=yourLabels).\n";
 		helpString += "Example heatmap.sim(groups=A-B-C, calc=jabund).\n";
 		helpString += "The default value for groups is all the groups in your groupfile, and all labels in your inputfile will be used.\n";
-		helpString +=  validCalculator->printCalc("heat");
+		helpString +=  validCalculator.printCalc("heat");
 		helpString += "The default value for calc is jclass-thetayc.\n";
 		helpString += "The heatmap.sim command outputs a .svg file for each calculator you choose at each label you specify.\n";
 		helpString += "The second way to use the heatmap.sim command is with a distance file representing the distance bewteen your groups. \n";
 		helpString += "Using the command this way, the phylip or column parameter are required, and only one may be used.  If you use a column file the name filename is required. \n";
 		helpString += "The heatmap.sim command should be in the following format: heatmap.sim(phylip=yourDistanceFile).\n";
 		helpString += "Example heatmap.sim(phylip=amazonGroups.dist).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n";
+		helpString += "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n";
 		return helpString;
 	}
 	catch(exception& e) {
@@ -90,7 +91,7 @@ HeatMapSimCommand::HeatMapSimCommand(string option)  {
 		allLines = 1;
 			
 		//allow user to run help
-		if(option == "help") { validCalculator = new ValidCalculators(); help(); abort = true; calledHelp = true; }
+		if(option == "help") {  help(); abort = true; calledHelp = true; }
 		
 		else {
 			vector<string> myArray = setParameters();
@@ -231,11 +232,11 @@ HeatMapSimCommand::HeatMapSimCommand(string option)  {
 			
 			
 			if (abort == false) {
-				validCalculator = new ValidCalculators();
+				ValidCalculators validCalculator;
 			
 				int i;
 				for (i=0; i<Estimators.size(); i++) {
-					if (validCalculator->isValidCalculator("heat", Estimators[i]) == true) { 
+					if (validCalculator.isValidCalculator("heat", Estimators[i]) == true) { 
 						if (Estimators[i] == "jabund") { 	
 							heatCalculators.push_back(new JAbund());
 						}else if (Estimators[i] == "sorabund") { 
@@ -285,7 +286,6 @@ int HeatMapSimCommand::execute(){
 		}else{	runCommandDist();	}
 		
 		delete heatmap;
-		delete validCalculator;
 		
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } outputTypes.clear(); return 0; }
 		

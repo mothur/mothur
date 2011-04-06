@@ -45,7 +45,7 @@ string GetOtusCommand::getHelpString(){
 		helpString += "The get.otus command should be in the following format: get.otus(accnos=yourAccnos, list=yourListFile, group=yourGroupFile, label=yourLabel).\n";
 		helpString += "Example get.otus(accnos=amazon.accnos, list=amazon.fn.list, group=amazon.groups, label=0.03).\n";
 		helpString += "or get.otus(groups=pasture, list=amazon.fn.list, amazon.groups, label=0.03).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListFile).\n\n";
+		helpString += "Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListFile).\n";
 		return helpString;
 	}
 	catch(exception& e) {

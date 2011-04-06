@@ -42,7 +42,7 @@ string PreClusterCommand::getHelpString(){
 		helpString += "The pre.cluster command should be in the following format: \n";
 		helpString += "pre.cluster(fasta=yourFastaFile, names=yourNamesFile, diffs=yourMaxDiffs) \n";
 		helpString += "Example pre.cluster(fasta=amazon.fasta, diffs=2).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n";
+		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n";
 		return helpString;
 	}
 	catch(exception& e) {

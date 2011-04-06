@@ -43,7 +43,7 @@ string HClusterCommand::getHelpString(){
 		helpString += "The name parameter allows you to enter your name file and is required if your distance file is in column format. \n";
 		helpString += "The hcluster command should be in the following format: \n";
 		helpString += "hcluster(column=youDistanceFile, name=yourNameFile, method=yourMethod, cutoff=yourCutoff, precision=yourPrecision) \n";
-		helpString += "The acceptable hcluster methods are furthest, nearest, weighted and average.\n\n";	
+		helpString += "The acceptable hcluster methods are furthest, nearest, weighted and average.\n";	
 		return helpString;
 	}
 	catch(exception& e) {

@@ -1443,11 +1443,11 @@ NJ_print_distance_matrix(DMAT *dmat) {
 	}
       }
       
-      printf("\n\n");
+      printf("\n");
     }
   }
   
-  printf("\n");
+  printf("\n\n");
   
   return;
 }
