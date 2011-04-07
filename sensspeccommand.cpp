@@ -208,6 +208,11 @@ int SensSpecCommand::execute(){
 		if(format == "phylip")		{	processPhylip();	}
 		else if(format == "column")	{	processColumn();	}
 		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
+		m->mothurOut(sensSpecFileName); m->mothurOutEndLine();	
+		m->mothurOutEndLine();
+		
 		
 		return 0;	
 	}

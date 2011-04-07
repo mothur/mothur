@@ -36,8 +36,8 @@ public:
 	~HClusterCommand(){}
 	
 	vector<string> setParameters();
-	string getCommandName()			{ return "hcluster";				}
-	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getCommandName()			{ return "hcluster";	}
+	string getCommandCategory()		{ return "Clustering";	}
 	string getHelpString();	
 	
 	int execute(); 

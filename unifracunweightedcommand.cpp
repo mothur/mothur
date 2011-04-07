@@ -133,6 +133,10 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option)  {
 			}
 			
 			m->runParse = true;
+			m->Groups.clear();
+			m->namesOfGroups.clear();
+			m->Treenames.clear();
+			m->names.clear();
 			
 			//check for required parameters
 			treefile = validParameter.validFile(parameters, "tree", true);
@@ -205,6 +209,8 @@ int UnifracUnweightedCommand::execute() {
 	try {
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		
+		m->setTreeFile(treefile);
 		
 		if (groupfile != "") {
 			//read in group map info.

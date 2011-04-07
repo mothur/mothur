@@ -25,8 +25,8 @@ public:
 	~ClusterDoturCommand(){}
 	
 	vector<string> setParameters();
-	string getCommandName()			{ return "cluster.classic";			}
-	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getCommandName()			{ return "cluster.classic";		}
+	string getCommandCategory()		{ return "Clustering";			}
 	string getHelpString();	
 	
 	int execute(); 

@@ -26,8 +26,8 @@ public:
 	~ClusterSplitCommand() {}
 	
 	vector<string> setParameters();
-	string getCommandName()			{ return "cluster.split";			}
-	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getCommandName()			{ return "cluster.split";		}
+	string getCommandCategory()		{ return "Clustering";			}
 	string getHelpString();	
 	
 	int execute(); 

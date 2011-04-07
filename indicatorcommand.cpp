@@ -90,6 +90,10 @@ IndicatorCommand::IndicatorCommand(string option)  {
 			}
 			
 			m->runParse = true;
+			m->Groups.clear();
+			m->namesOfGroups.clear();
+			m->Treenames.clear();
+			m->names.clear();
 			
 			vector<string> tempOutNames;
 			outputTypes["tree"] = tempOutNames;
@@ -231,6 +235,7 @@ int IndicatorCommand::execute(){
 		//    reading tree info							   //
 		/***************************************************/
 		string groupfile = ""; 
+		m->setTreeFile(treefile);
 		Tree* tree = new Tree(treefile); delete tree;  //extracts names from tree to make faked out groupmap
 		treeMap = new TreeMap();
 		bool mismatch = false;

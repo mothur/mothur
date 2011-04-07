@@ -32,8 +32,8 @@ public:
 	~ClusterCommand();
 	
 	vector<string> setParameters();
-	string getCommandName()			{ return "cluster";					}
-	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getCommandName()			{ return "cluster";		}
+	string getCommandCategory()		{ return "Clustering";	}
 	string getHelpString();	
 	
 	int execute(); 
