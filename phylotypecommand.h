@@ -24,8 +24,8 @@ public:
 	~PhylotypeCommand(){}
 	
 	vector<string> setParameters();
-	string getCommandName()			{ return "phylotype";				}
-	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getCommandName()			{ return "phylotype";		}
+	string getCommandCategory()		{ return "Clustering";		}
 	string getHelpString();	
 	
 	int execute();

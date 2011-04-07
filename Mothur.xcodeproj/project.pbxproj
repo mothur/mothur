@@ -1992,8 +1992,8 @@
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"../release\\\"\"",
-					"VERSION=\"\\\"1.17.3\\\"\"",
-					"RELEASE_DATE=\"\\\"3/07/2011\\\"\"",
+					"VERSION=\"\\\"1.18.0\\\"\"",
+					"RELEASE_DATE=\"\\\"4/11/2011\\\"\"",
 				);
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -2025,9 +2025,8 @@
 				GCC_MODEL_TUNING = "";
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"MOTHUR_FILES=\"\\\"../release\\\"\"",
-					"VERSION=\"\\\"1.15.0\\\"\"",
-					"RELEASE_DATE=\"\\\"12/10/2010\\\"\"",
+					"VERSION=\"\\\"1.18.0\\\"\"",
+					"RELEASE_DATE=\"\\\"4/11/2011\\\"\"",
 				);
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;

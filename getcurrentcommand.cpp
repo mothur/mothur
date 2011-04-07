@@ -134,7 +134,7 @@ int GetCurrentCommand::execute(){
 				}else if (types[i] == "accnos") {
 					m->setAccnosFile("");
 				}else if (types[i] == "taxonomy") {
-						m->setTaxonomyFile("");
+					m->setTaxonomyFile("");
 				}else if (types[i] == "all") {
 					m->clearCurrentFiles();
 				}else {

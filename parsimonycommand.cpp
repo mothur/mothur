@@ -125,6 +125,10 @@ ParsimonyCommand::ParsimonyCommand(string option)  {
 			}
 			
 			m->runParse = true;
+			m->Groups.clear();
+			m->namesOfGroups.clear();
+			m->Treenames.clear();
+			m->names.clear();
 			
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
 			
@@ -188,6 +192,9 @@ int ParsimonyCommand::execute() {
 		//randomtree will tell us if user had their own treefile or if they just want the random distribution
 		//user has entered their own tree
 		if (randomtree == "") { 
+			
+			m->setTreeFile(treefile);
+			
 			if (groupfile != "") {
 				//read in group map info.
 				tmap = new TreeMap(groupfile);

@@ -29,8 +29,8 @@ public:
 	~MGClusterCommand(){}
 	
 	vector<string> setParameters();
-	string getCommandName()			{ return "mgcluster";				}
-	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getCommandName()			{ return "mgcluster";	}
+	string getCommandCategory()		{ return "Clustering";	}
 	string getHelpString();	
 	
 	int execute(); 
