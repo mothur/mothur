@@ -512,8 +512,8 @@ int HeatMapSimCommand::runCommandDist() {
 				map<string, int>::iterator itA = nameMap->find(first);
 				map<string, int>::iterator itB = nameMap->find(second);
 				
-				if(itA == nameMap->end()){  cerr << "AAError: Sequence '" << first << "' was not found in the names file, please correct\n"; exit(1);  }
-				if(itB == nameMap->end()){  cerr << "ABError: Sequence '" << second << "' was not found in the names file, please correct\n"; exit(1);  }
+				if(itA == nameMap->end()){  m->mothurOut("AAError: Sequence '" + first + "' was not found in the names file, please correct\n"); exit(1);  }
+				if(itB == nameMap->end()){  m->mothurOut("ABError: Sequence '" + second + "' was not found in the names file, please correct\n"); exit(1);  }
 				
 				//save distance
 				matrix[itA->second][itB->second] = dist;

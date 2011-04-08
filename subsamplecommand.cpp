@@ -356,13 +356,6 @@ int SubSampleCommand::getSubSampleFasta() {
 		
 		if (m->control_pressed) { return 0; }
 		
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(fastafile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(fastafile)) + "subsample" + m->getExtension(fastafile);
-		
-		ofstream out;
-		m->openOutputFile(outputFileName, out);
-		outputTypes["fasta"].push_back(outputFileName);  outputNames.push_back(outputFileName);
 		
 		//make sure that if your picked groups size is not too big
 		int thisSize = names.size();
@@ -375,13 +368,14 @@ int SubSampleCommand::getSubSampleFasta() {
 					if (thisSize < size) {	size = thisSize;	}
 				}
 			}else { //make sure size is not too large
-				int smallestSize = groupMap->getNumSeqs(Groups[0]);
-				for (int i = 1; i < Groups.size(); i++) {
+				vector<string> newGroups;
+				for (int i = 0; i < Groups.size(); i++) {
 					int thisSize = groupMap->getNumSeqs(Groups[i]);
 					
-					if (thisSize < smallestSize) {	smallestSize = thisSize;	}
+					if (thisSize >= size) {	newGroups.push_back(Groups[i]);	}
+					else {  m->mothurOut("You have selected a size that is larger than " + Groups[i] + " number of sequences, removing " + Groups[i] + "."); m->mothurOutEndLine(); }
 				}
-				if (smallestSize < size) { size = smallestSize; m->mothurOut("You have selected a size that is larger than your smallest sample, using your samllest sample size, " + toString(smallestSize) + "."); m->mothurOutEndLine(); }
+				Groups = newGroups;
 			}
 			
 			m->mothurOut("Sampling " + toString(size) + " from each group."); m->mothurOutEndLine();			
@@ -477,6 +471,17 @@ int SubSampleCommand::getSubSampleFasta() {
 				}
 			}	
 		}
+		
+		if (subset.size() == 0) {  m->mothurOut("The size you selected is too large, skipping fasta file."); m->mothurOutEndLine();  return 0; }
+		
+		string thisOutputDir = outputDir;
+		if (outputDir == "") {  thisOutputDir += m->hasPath(fastafile);  }
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(fastafile)) + "subsample" + m->getExtension(fastafile);
+		
+		ofstream out;
+		m->openOutputFile(outputFileName, out);
+		outputTypes["fasta"].push_back(outputFileName);  outputNames.push_back(outputFileName);
+		
 		//read through fasta file outputting only the names on the subsample list
 		ifstream in;
 		m->openInputFile(fastafile, in);
@@ -644,14 +649,6 @@ int SubSampleCommand::readNames() {
 int SubSampleCommand::getSubSampleShared() {
 	try {
 		
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(sharedfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(sharedfile)) + "subsample" + m->getExtension(sharedfile);
-		
-		ofstream out;
-		m->openOutputFile(outputFileName, out);
-		outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
-		
 		InputData* input = new InputData(sharedfile, "sharedfile");
 		vector<SharedRAbundVector*> lookup = input->getSharedRAbundVectors();
 		string lastLabel = lookup[0]->getLabel();
@@ -667,9 +664,34 @@ int SubSampleCommand::getSubSampleShared() {
 				
 				if (thisSize < size) {	size = thisSize;	}
 			}
+		}else {
+			m->Groups.clear();
+			vector<SharedRAbundVector*> temp;
+			for (int i = 0; i < lookup.size(); i++) {
+				if (lookup[i]->getNumSeqs() < size) { 
+					m->mothurOut(lookup[i]->getGroup() + " contains " + toString(lookup[i]->getNumSeqs()) + ". Eliminating."); m->mothurOutEndLine();
+					delete lookup[i];
+				}else { 
+					m->Groups.push_back(lookup[i]->getGroup()); 
+					temp.push_back(lookup[i]);
+				}
+			} 
+			lookup = temp;
+			Groups = m->Groups;
 		}
 		
-		m->mothurOut("Sampling " + toString(size) + " from " + toString(lookup[0]->getNumSeqs()) + "."); m->mothurOutEndLine();
+		if (lookup.size() == 0) {  m->mothurOut("The size you selected is too large, skipping shared file."); m->mothurOutEndLine(); delete input; return 0; }
+		
+		string thisOutputDir = outputDir;
+		if (outputDir == "") {  thisOutputDir += m->hasPath(sharedfile);  }
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(sharedfile)) + "subsample" + m->getExtension(sharedfile);
+		
+		ofstream out;
+		m->openOutputFile(outputFileName, out);
+		outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
+		
+		
+		m->mothurOut("Sampling " + toString(size) + " from each group."); m->mothurOutEndLine();
 		
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
@@ -874,13 +896,14 @@ int SubSampleCommand::getSubSampleList() {
 					if (thisSize < size) {	size = thisSize;	}
 				}
 			}else { //make sure size is not too large
-				int smallestSize = groupMap->getNumSeqs(Groups[0]);
-				for (int i = 1; i < Groups.size(); i++) {
+				vector<string> newGroups;
+				for (int i = 0; i < Groups.size(); i++) {
 					int thisSize = groupMap->getNumSeqs(Groups[i]);
 					
-					if (thisSize < smallestSize) {	smallestSize = thisSize;	}
+					if (thisSize >= size) {	newGroups.push_back(Groups[i]);	}
+					else {  m->mothurOut("You have selected a size that is larger than " + Groups[i] + " number of sequences, removing " + Groups[i] + "."); m->mothurOutEndLine(); }
 				}
-				if (smallestSize < size) { size = smallestSize; m->mothurOut("You have selected a size that is larger than your smallest sample, using your samllest sample size, " + toString(smallestSize) + "."); m->mothurOutEndLine(); }
+				Groups = newGroups;
 			}
 			
 			m->mothurOut("Sampling " + toString(size) + " from each group."); m->mothurOutEndLine();	
@@ -1151,15 +1174,6 @@ int SubSampleCommand::processList(ListVector*& list, ofstream& out, set<string>&
 //**********************************************************************************************************************
 int SubSampleCommand::getSubSampleRabund() {
 	try {
-		
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(rabundfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(rabundfile)) + "subsample" + m->getExtension(rabundfile);
-		
-		ofstream out;
-		m->openOutputFile(outputFileName, out);
-		outputTypes["rabund"].push_back(outputFileName);  outputNames.push_back(outputFileName);
-		
 		InputData* input = new InputData(rabundfile, "rabund");
 		RAbundVector* rabund = input->getRAbundVector();
 		string lastLabel = rabund->getLabel();
@@ -1170,9 +1184,17 @@ int SubSampleCommand::getSubSampleRabund() {
 		
 		if (size == 0) { //user has not set size, set size = 10%
 			size = int((rabund->getNumSeqs()) * 0.10);
-		}
+		}else if (size > rabund->getNumSeqs()) { m->mothurOut("The size you selected is too large, skipping rabund file."); m->mothurOutEndLine(); delete input; delete rabund; return 0; }
 		
 		m->mothurOut("Sampling " + toString(size) + " from " + toString(rabund->getNumSeqs()) + "."); m->mothurOutEndLine();
+		
+		string thisOutputDir = outputDir;
+		if (outputDir == "") {  thisOutputDir += m->hasPath(rabundfile);  }
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(rabundfile)) + "subsample" + m->getExtension(rabundfile);
+		
+		ofstream out;
+		m->openOutputFile(outputFileName, out);
+		outputTypes["rabund"].push_back(outputFileName);  outputNames.push_back(outputFileName);
 		
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((rabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
@@ -1308,15 +1330,7 @@ int SubSampleCommand::processRabund(RAbundVector*& rabund, ofstream& out) {
 //**********************************************************************************************************************
 int SubSampleCommand::getSubSampleSabund() {
 	try {
-		
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(sabundfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(sabundfile)) + "subsample" + m->getExtension(sabundfile);
-		
-		ofstream out;
-		m->openOutputFile(outputFileName, out);
-		outputTypes["sabund"].push_back(outputFileName);  outputNames.push_back(outputFileName);
-		
+				
 		InputData* input = new InputData(sabundfile, "sabund");
 		SAbundVector* sabund = input->getSAbundVector();
 		string lastLabel = sabund->getLabel();
@@ -1327,9 +1341,19 @@ int SubSampleCommand::getSubSampleSabund() {
 		
 		if (size == 0) { //user has not set size, set size = 10%
 			size = int((sabund->getNumSeqs()) * 0.10);
-		}
+		}else if (size > sabund->getNumSeqs()) { m->mothurOut("The size you selected is too large, skipping sabund file."); m->mothurOutEndLine(); delete input; delete sabund; return 0; }
+		
 		
 		m->mothurOut("Sampling " + toString(size) + " from " + toString(sabund->getNumSeqs()) + "."); m->mothurOutEndLine();
+		
+		string thisOutputDir = outputDir;
+		if (outputDir == "") {  thisOutputDir += m->hasPath(sabundfile);  }
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(sabundfile)) + "subsample" + m->getExtension(sabundfile);
+		
+		ofstream out;
+		m->openOutputFile(outputFileName, out);
+		outputTypes["sabund"].push_back(outputFileName);  outputNames.push_back(outputFileName);
+		
 		
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((sabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {

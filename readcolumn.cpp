@@ -55,13 +55,8 @@ int ReadColumnMatrix::read(NameAssignment* nameMap){
 			map<string,int>::iterator itA = nameMap->find(firstName);
 			map<string,int>::iterator itB = nameMap->find(secondName);
 				
-			if(itA == nameMap->end()){
-				cerr << "AAError: Sequence '" << firstName << "' was not found in the names file, please correct\n"; exit(1);
-			}
-			if(itB == nameMap->end()){
-				cerr << "ABError: Sequence '" << secondName << "' was not found in the names file, please correct\n"; exit(1);
-			}
-//if (((itA->second == 8) && (itB->second == 1588)) || ((itA->second == 1588) && (itB->second == 8))) { cout << "found it" << endl; }
+			if(itA == nameMap->end()){  m->mothurOut("AAError: Sequence '" + firstName + "' was not found in the names file, please correct\n"); exit(1);  }
+			if(itB == nameMap->end()){  m->mothurOut("ABError: Sequence '" + secondName + "' was not found in the names file, please correct\n"); exit(1);  }
 
 			if (distance == -1) { distance = 1000000; }
 			else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
@@ -117,12 +112,8 @@ int ReadColumnMatrix::read(NameAssignment* nameMap){
 				map<string,int>::iterator itA = nameMap->find(firstName);
 				map<string,int>::iterator itB = nameMap->find(secondName);
 				
-				if(itA == nameMap->end()){
-					cerr << "BError: Sequence '" << firstName << "' was not found in the names file, please correct\n";
-				}
-				if(itB == nameMap->end()){
-					cerr << "BError: Sequence '" << secondName << "' was not found in the names file, please correct\n";
-				}
+				if(itA == nameMap->end()){  m->mothurOut("AAError: Sequence '" + firstName + "' was not found in the names file, please correct\n"); exit(1);  }
+				if(itB == nameMap->end()){  m->mothurOut("ABError: Sequence '" + secondName + "' was not found in the names file, please correct\n"); exit(1);  }
 				
 				if (distance == -1) { distance = 1000000; }
 				else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
