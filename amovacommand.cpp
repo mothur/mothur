@@ -282,7 +282,7 @@ double AmovaCommand::runAMOVA(ofstream& AMOVAFile, map<string, vector<int> > gro
 		m->mothurOut("df\t" + toString(dfAmong) + '\t' + toString(dfWithin) + '\t' + toString(dfTotal) + '\n');
 
 		AMOVAFile << "MS\t" << MSAmong << '\t' << MSWithin << endl << endl;
-		m->mothurOut("MS\t" + toString(MSAmong) + '\t' + toString(MSWithin) + "\n");
+		m->mothurOut("MS\t" + toString(MSAmong) + '\t' + toString(MSWithin) + "\n\n");
 
 		AMOVAFile << "Fs:\t" << Fs << endl;
 		m->mothurOut("Fs:\t" + toString(Fs) + '\n');

@@ -60,8 +60,13 @@ int ReadCluster::convertPhylip2Column(NameAssignment* nameMap){
 		int square, nseqs;
 		string name;
 		vector<string> matrixNames;
-        
-		in >> nseqs >> name;
+		
+		string numTest;
+		in >> numTest >> name;
+		
+		if (!m->isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
+		else { convert(numTest, nseqs); }
+		
 		rowToName[0] = name;
 		matrixNames.push_back(name);
 		

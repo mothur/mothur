@@ -36,9 +36,13 @@ int ReadPhylipMatrix::read(NameAssignment* nameMap){
                         int square, nseqs;
                         string name;
                         vector<string> matrixNames;
-        
-                        fileHandle >> nseqs >> name;
-
+						
+						string numTest;
+						fileHandle >> numTest >> name;
+			
+						if (!m->isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
+						else { convert(numTest, nseqs); }
+			
                         matrixNames.push_back(name);
 
                         if(nameMap == NULL){

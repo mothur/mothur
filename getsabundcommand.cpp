@@ -186,7 +186,6 @@ int GetSAbundCommand::execute(){
 					m->mothurOut(sabund->getLabel());  m->mothurOutEndLine();
 					
 					sabund->print(out);
-					delete sabund;
 					
 				if (m->control_pressed) { outputTypes.clear();  out.close(); remove(filename.c_str());  delete sabund; delete input;  return 0; }
 
@@ -202,7 +201,6 @@ int GetSAbundCommand::execute(){
 					
 					m->mothurOut(sabund->getLabel());  m->mothurOutEndLine();
 					sabund->print(out);
-					delete sabund;
 					
 					if (m->control_pressed) {  outputTypes.clear(); out.close(); remove(filename.c_str());  delete sabund; delete input;  return 0; }
 

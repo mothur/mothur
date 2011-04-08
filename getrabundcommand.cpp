@@ -194,8 +194,6 @@ int GetRAbundCommand::execute(){
 					
 					if(sorted)	{   rabund->print(out);				}
 					else		{	rabund->nonSortedPrint(out);	}
-					
-					delete rabund;
 															
 					processedLabels.insert(rabund->getLabel());
 					userLabels.erase(rabund->getLabel());
@@ -213,8 +211,6 @@ int GetRAbundCommand::execute(){
 					
 					if(sorted)	{   rabund->print(out);				}
 					else		{	rabund->nonSortedPrint(out);	}
-
-					delete rabund;
 
 					processedLabels.insert(rabund->getLabel());
 					userLabels.erase(rabund->getLabel());

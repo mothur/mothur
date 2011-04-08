@@ -75,6 +75,7 @@ class MothurOut {
 		int getNumSeqs(ifstream&);
 		int getNumNames(string);
 		bool isTrue(string);
+		bool isContainingOnlyDigits(string);
 	
 		
 		//string manipulation
