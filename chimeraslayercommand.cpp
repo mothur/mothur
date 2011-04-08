@@ -321,7 +321,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 			temp = validParameter.validFile(parameters, "trim", false);				if (temp == "not found") { temp = "f"; }
 			trim = m->isTrue(temp); 
 			
-			temp = validParameter.validFile(parameters, "split", false);				if (temp == "not found") { temp = "f"; }
+			temp = validParameter.validFile(parameters, "split", false);			if (temp == "not found") { temp = "f"; }
 			trimera = m->isTrue(temp); 
 			
 			search = validParameter.validFile(parameters, "search", false);			if (search == "not found") { search = "distance"; }

@@ -357,7 +357,7 @@ int Bayesian::getMostProbableTaxonomy(vector<int> queryKmer) {
 				maxProbability = prob;
 			}
 		}
-
+//		cout << phyloTree->get(indexofGenus).name << '\t' << maxProbability << endl;
 		return indexofGenus;
 	}
 	catch(exception& e) {
