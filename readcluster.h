@@ -23,7 +23,7 @@ class ReadCluster {
 public:
 	ReadCluster(string, float, string, bool);
 	~ReadCluster();
-	int read(NameAssignment*);
+	int read(NameAssignment*&);
 	string getOutputFile() { return OutPutFile; }
 	void setFormat(string f) { format = f;	}
 	ListVector* getListVector()		{	return list;	}
@@ -36,7 +36,7 @@ private:
 	MothurOut* m;
 	bool sortWanted;
 	
-	int convertPhylip2Column(NameAssignment*);
+	int convertPhylip2Column(NameAssignment*&);
 };
 
 /******************************************************/

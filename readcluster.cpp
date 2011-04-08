@@ -22,7 +22,7 @@ ReadCluster::ReadCluster(string distfile, float c, string o, bool s){
 
 /***********************************************************************/
 
-int ReadCluster::read(NameAssignment* nameMap){
+int ReadCluster::read(NameAssignment*& nameMap){
 	try {
         
 		if (format == "phylip") { convertPhylip2Column(nameMap); }
@@ -43,7 +43,7 @@ int ReadCluster::read(NameAssignment* nameMap){
 }
 /***********************************************************************/
 
-int ReadCluster::convertPhylip2Column(NameAssignment* nameMap){
+int ReadCluster::convertPhylip2Column(NameAssignment*& nameMap){
 	try {	
 		//convert phylip file to column file
 		map<int, string> rowToName;

@@ -396,8 +396,8 @@ vector<seqDist> HCluster::getSeqsFNNN(){
 			
 			map<string,int>::iterator itA = nameMap->find(firstName);
 			map<string,int>::iterator itB = nameMap->find(secondName);
-			if(itA == nameMap->end()){  cerr << "AAError: Sequence '" << firstName << "' was not found in the names file, please correct\n"; exit(1);  }
-			if(itB == nameMap->end()){  cerr << "ABError: Sequence '" << secondName << "' was not found in the names file, please correct\n"; exit(1);  }
+			if(itA == nameMap->end()){  m->mothurOut("AAError: Sequence '" + firstName + "' was not found in the names file, please correct\n"); exit(1);  }
+			if(itB == nameMap->end()){  m->mothurOut("ABError: Sequence '" + secondName + "' was not found in the names file, please correct\n"); exit(1);  }
 		
 			//using cutoff
 			if (distance > cutoff) { break; }
@@ -760,8 +760,8 @@ int HCluster::processFile() {
 			
 			map<string,int>::iterator itA = nameMap->find(firstName);
 			map<string,int>::iterator itB = nameMap->find(secondName);
-			if(itA == nameMap->end()){  cerr << "AAError: Sequence '" << firstName << "' was not found in the names file, please correct\n"; exit(1);  }
-			if(itB == nameMap->end()){  cerr << "ABError: Sequence '" << secondName << "' was not found in the names file, please correct\n"; exit(1);  }
+			if(itA == nameMap->end()){  m->mothurOut("AAError: Sequence '" + firstName + "' was not found in the names file, please correct\n"); exit(1);  }
+			if(itB == nameMap->end()){  m->mothurOut("ABError: Sequence '" + secondName + "' was not found in the names file, please correct\n"); exit(1);  }
 		
 			//using cutoff
 			if (distance > cutoff) { break; }
