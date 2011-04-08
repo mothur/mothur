@@ -1731,6 +1731,23 @@ bool MothurOut::checkReleaseVersion(ifstream& file, string version) {
 	}
 }
 /**************************************************************************************************/
+bool MothurOut::isContainingOnlyDigits(string input) {
+	try{
+		
+		//are you a digit in ascii code
+		for (int i = 0;i < input.length(); i++){
+			if( input[i]>47 && input[i]<58){}
+			else { return false; }
+		}
+		
+		return true;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "isContainingOnlyDigits");		
+		exit(1);
+	}
+}
+/**************************************************************************************************/
 
 
 

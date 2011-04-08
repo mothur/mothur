@@ -16,7 +16,6 @@ vector<string> GetlabelCommand::setParameters(){
 		CommandParameter plist("list", "InputTypes", "", "", "LRSS", "LRSS", "none",false,false); parameters.push_back(plist);
 		CommandParameter prabund("rabund", "InputTypes", "", "", "LRSS", "LRSS", "none",false,false); parameters.push_back(prabund);
 		CommandParameter psabund("sabund", "InputTypes", "", "", "LRSS", "LRSS", "none",false,false); parameters.push_back(psabund);
-		CommandParameter pshared("shared", "InputTypes", "", "", "LRSS", "LRSS", "none",false,false); parameters.push_back(pshared);		
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
 		
@@ -44,7 +43,7 @@ GetlabelCommand::GetlabelCommand(){
 string GetlabelCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The get.label command parameters are list, sabund, rabund and shared file. \n";
+		helpString += "The get.label command parameters are list, sabund and rabund file. \n";
 		helpString += "The get.label command should be in the following format: \n";
 		helpString += "get.label()\n";
 		helpString += "Example get.label().\n";
@@ -83,13 +82,6 @@ GetlabelCommand::GetlabelCommand(string option)  {
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
-				it = parameters.find("shared");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
-				}
 				
 				it = parameters.find("rabund");
 				//user has given a template file
@@ -132,35 +124,26 @@ GetlabelCommand::GetlabelCommand(string option)  {
 			else if (rabundfile == "not found") { rabundfile = ""; }
 			else {  format = "rabund"; inputfile = rabundfile; }
 			
-			sharedfile = validParameter.validFile(parameters, "shared", true);
-			if (sharedfile == "not open") { sharedfile = ""; abort = true; }	
-			else if (sharedfile == "not found") { sharedfile = ""; }
-			else {  format = "sharedfile"; inputfile = sharedfile; }
-			
-			if ((sharedfile == "") && (listfile == "") && (rabundfile == "") && (sabundfile == "")) { 
+			if ((listfile == "") && (rabundfile == "") && (sabundfile == "")) { 
 				//is there are current file available for any of these?
-				//give priority to shared, then list, then rabund, then sabund
+				//give priority to list, then rabund, then sabund
 				//if there is a current shared file, use it
-				sharedfile = m->getSharedFile(); 
-				if (sharedfile != "") { inputfile = sharedfile; format = "sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+				
+				listfile = m->getListFile(); 
+				if (listfile != "") { inputfile = listfile; format = "list"; m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
 				else { 
-					listfile = m->getListFile(); 
-					if (listfile != "") { inputfile = listfile; format = "list"; m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
+					rabundfile = m->getRabundFile(); 
+					if (rabundfile != "") { inputfile = rabundfile; format = "rabund"; m->mothurOut("Using " + rabundfile + " as input file for the rabund parameter."); m->mothurOutEndLine(); }
 					else { 
-						rabundfile = m->getRabundFile(); 
-						if (rabundfile != "") { inputfile = rabundfile; format = "rabund"; m->mothurOut("Using " + rabundfile + " as input file for the rabund parameter."); m->mothurOutEndLine(); }
+						sabundfile = m->getSabundFile(); 
+						if (sabundfile != "") { inputfile = sabundfile; format = "sabund"; m->mothurOut("Using " + sabundfile + " as input file for the sabund parameter."); m->mothurOutEndLine(); }
 						else { 
-							sabundfile = m->getSabundFile(); 
-							if (sabundfile != "") { inputfile = sabundfile; format = "sabund"; m->mothurOut("Using " + sabundfile + " as input file for the sabund parameter."); m->mothurOutEndLine(); }
-							else { 
-								m->mothurOut("No valid current files. You must provide a list, sabund, rabund or shared file before you can use the collect.single command."); m->mothurOutEndLine(); 
-								abort = true;
-							}
+							m->mothurOut("No valid current files. You must provide a list, sabund or rabund file."); m->mothurOutEndLine(); 
+							abort = true;
 						}
 					}
 				}
 			}
-			
 		}
 
 	}
@@ -184,9 +167,9 @@ int GetlabelCommand::execute(){
 			
 			if (m->control_pressed) { delete input;  delete order; return 0; }
 			
-			m->mothurOut(label); m->mothurOutEndLine();
-			
 			label = order->getLabel();	
+			
+			m->mothurOut(label); m->mothurOutEndLine();
 			
 			delete order;		
 			order = input->getOrderVector();

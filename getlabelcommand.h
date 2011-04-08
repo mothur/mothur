@@ -31,7 +31,7 @@ public:
 	
 	
 private:
-	string inputfile, listfile, rabundfile, sabundfile, sharedfile, format;
+	string inputfile, listfile, rabundfile, sabundfile, format;
 	bool abort;
 	vector<string> outputNames;
 };

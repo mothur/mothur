@@ -292,7 +292,7 @@ OrderVector* InputData::getOrderVector(){
 			else if(format == "sabund"){
 				input = new SAbundVector(fileHandle);
 			}
-			
+						
 			m->gobble(fileHandle);
 			
 			output = new OrderVector();	
@@ -394,7 +394,7 @@ OrderVector* InputData::getOrderVector(string label){
 				}
 
 			}
-			
+						
 			in.close();		
 
 			output = new OrderVector();
@@ -622,8 +622,7 @@ SAbundVector* InputData::getSAbundVector(){
 			}
 			else if(format == "sabund"){
 				input = new SAbundVector(fileHandle);
-			}
-					
+			}					
 			m->gobble(fileHandle);
 
 			sabund = new SAbundVector();
@@ -762,7 +761,7 @@ RAbundVector* InputData::getRAbundVector(){
 			else if(format == "sabund"){
 				input = new SAbundVector(fileHandle);
 			}
-					
+			
 			m->gobble(fileHandle);
 
 			rabund = new RAbundVector();
@@ -862,7 +861,8 @@ RAbundVector* InputData::getRAbundVector(string label){
 					
 				}
 
-			}
+			}			
+			
 			
 			in.close();		
 

@@ -24,7 +24,12 @@ int FormatPhylipMatrix::read(NameAssignment* nameMap){
 			string name;
 			ofstream out;
 			
-			fileHandle >> nseqs >> name;
+			string numTest;
+			fileHandle >> numTest >> name;
+			
+			if (!m->isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
+			else { convert(numTest, nseqs); }
+		
 						
 			list = new ListVector(nseqs);
 			list->set(0, name);

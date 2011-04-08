@@ -291,6 +291,18 @@ string ValidParameters::validFile(map<string, string>& container, string paramet
 					m->mothurOut("Unable to open " + container[parameter]); m->mothurOutEndLine();
 					return "not open"; 
 				}
+				
+				//check phylip file to make sure its really phylip and not column
+				if ((it->first == "phylip") && (ableToOpen != 1)) {
+					ifstream inPhylip;
+					m->openInputFile(it->second, inPhylip);
+										
+					string numTest, name;
+					inPhylip >> numTest >> name;
+					inPhylip.close();
+					
+					if (!m->isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ". I suspect you entered a column formatted file as a phylip file, aborting."); m->mothurOutEndLine(); return "not found"; }
+				}
 			}
 		}else { return "not found"; }
 		
