@@ -189,7 +189,7 @@ SensSpecCommand::SensSpecCommand(string option)  {
 			
 			lineLabel = validParameter.validFile(parameters, "label", false);	if (lineLabel == "not found") { lineLabel = ""; }
 			
-			sensSpecFileName = listFile.substr(0,listFile.find_last_of('.')) + ".sensspec";
+			sensSpecFileName = outputDir + m->getRootName(m->getSimpleName(listFile)) + ".sensspec";
 		}
 	}
 	catch(exception& e) {

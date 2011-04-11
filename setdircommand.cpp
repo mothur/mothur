@@ -100,13 +100,15 @@ int SetDirectoryCommand::execute(){
 		
 		commandFactory = CommandFactory::getInstance();
 		
+		m->mothurOut("Mothur's directories:"); m->mothurOutEndLine();
+		
 		//redirect output
 		if ((output == "clear") || (output == "")) {  output = "";  commandFactory->setOutputDirectory(output);  }
 		else if (output == "default") { 
 			string exepath = m->argv;
 			output = exepath.substr(0, (exepath.find_last_of('m')));
 			
-			m->mothurOut("Changing output directory to " + output); m->mothurOutEndLine();  
+			m->mothurOut("outputDir=" + output); m->mothurOutEndLine();  
 			commandFactory->setOutputDirectory(output);
 		}else {
 			//add / to name if needed
@@ -127,7 +129,7 @@ int SetDirectoryCommand::execute(){
 			}else{
 				out.close();
 				remove(outTemp.c_str());
-				m->mothurOut("Changing output directory to " + output); m->mothurOutEndLine();  
+				m->mothurOut("outputDir=" + output); m->mothurOutEndLine();  
 				commandFactory->setOutputDirectory(output);
 			}
 		}
@@ -138,7 +140,7 @@ int SetDirectoryCommand::execute(){
 			string exepath = m->argv;
 			input = exepath.substr(0, (exepath.find_last_of('m')));
 			
-			m->mothurOut("Changing input directory to " + input); m->mothurOutEndLine();  
+			m->mothurOut("inputDir=" + input); m->mothurOutEndLine();  
 			commandFactory->setInputDirectory(input);
 		}else {
 			//add / to name if needed
@@ -159,7 +161,7 @@ int SetDirectoryCommand::execute(){
 			}else{
 				in.close();
 				remove(inTemp.c_str());
-				m->mothurOut("Changing input directory to " + input); m->mothurOutEndLine();  
+				m->mothurOut("inputDir=" + input); m->mothurOutEndLine();  
 				commandFactory->setInputDirectory(input); 
 			}
 		}
@@ -168,7 +170,7 @@ int SetDirectoryCommand::execute(){
 		if (tempdefault == "clear") {  
 			#ifdef MOTHUR_FILES
 				string temp = MOTHUR_FILES; 
-				m->mothurOut("Resetting default directory to " + temp); m->mothurOutEndLine();  
+				m->mothurOut("tempDefault=" + temp); m->mothurOutEndLine();  
 				m->setDefaultPath(temp);
 			#else
 				string temp = ""; 
@@ -180,7 +182,7 @@ int SetDirectoryCommand::execute(){
 			string exepath = m->argv;
 			tempdefault = exepath.substr(0, (exepath.find_last_of('m')));
 			
-			m->mothurOut("Changing default directory to " + tempdefault); m->mothurOutEndLine();  
+			m->mothurOut("tempDefault=" + tempdefault); m->mothurOutEndLine();  
 			m->setDefaultPath(tempdefault);
 		}else {
 			//add / to name if needed
@@ -191,7 +193,7 @@ int SetDirectoryCommand::execute(){
 				if (lastChar != "\\") { tempdefault += "\\"; }	
 			#endif
 			
-			m->mothurOut("Changing default directory to " + tempdefault); m->mothurOutEndLine();  
+			m->mothurOut("tempDefault=" + tempdefault); m->mothurOutEndLine();  
 			m->setDefaultPath(tempdefault);
 		}
 

@@ -9,7 +9,20 @@
 
 #include "systemcommand.h"
 
-
+//**********************************************************************************************************************
+vector<string> SystemCommand::setParameters(){	
+	try {
+		CommandParameter pcommand("command", "String", "", "", "", "", "",false,false); parameters.push_back(pcommand);
+				
+		vector<string> myArray;
+		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SystemCommand", "setParameters");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 SystemCommand::SystemCommand(string option)  {
 	try {
@@ -19,8 +32,22 @@ SystemCommand::SystemCommand(string option)  {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			if (option == "") { m->mothurOut("You must enter a command to run."); m->mothurOutEndLine(); abort = true; }
-			else { 
+			vector<string> myArray = setParameters();
+			
+			OptionParser parser(option);
+			map<string, string> parameters = parser.getParameters();
+			map<string, string>::iterator it;
+			
+			ValidParameters validParameter;
+			
+			//check for optional parameter and set defaults
+			// ...at some point should added some additional type checking...
+			string commandOption = validParameter.validFile(parameters, "command", false);			
+			if (commandOption == "not found") { commandOption = ""; }
+			else { command = commandOption; }
+			
+			if ((option == "") && (commandOption == "")) { m->mothurOut("You must enter a command to run."); m->mothurOutEndLine(); abort = true; }
+			else if (commandOption == "") { 
 				//check for outputdir and inputdir parameters
 				int commaPos = option.find_first_of(',');
 				
