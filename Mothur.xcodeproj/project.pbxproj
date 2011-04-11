@@ -2018,7 +2018,7 @@
 		1DEB928B08733DD80010E9CD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				DEPLOYMENT_LOCATION = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
@@ -2048,7 +2048,7 @@
 					"-lreadline",
 				);
 				PREBINDING = NO;
-				SDKROOT = "";
+				SDKROOT = macosx10.5;
 			};
 			name = Release;
 		};

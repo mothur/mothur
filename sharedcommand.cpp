@@ -124,7 +124,7 @@ SharedCommand::SharedCommand(string option)  {
 			 
 			 //check for required parameters
 			 listfile = validParameter.validFile(parameters, "list", true);
-			 if (listfile == "not open") { abort = true; }
+			 if (listfile == "not open") { listfile = ""; abort = true; }
 			 else if (listfile == "not found") { 
 				 listfile = m->getListFile(); 
 				 if (listfile != "") { m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
@@ -176,11 +176,11 @@ SharedCommand::SharedCommand(string option)  {
 			//getting output filename
 			filename = listfile;
 			if (outputDir == "") { outputDir += m->hasPath(filename); }
-			
+					
 			filename = outputDir + m->getRootName(m->getSimpleName(filename));
 			filename = filename + "shared";
 			outputTypes["shared"].push_back(filename);
-			
+				
 			m->openOutputFile(filename, out);
 			pickedGroups = false;
 						
@@ -196,10 +196,10 @@ SharedCommand::SharedCommand(string option)  {
 				temp = new ofstream;
 				filehandles[Groups[i]] = temp;
 			}
-			
+				
 			//set fileroot
 			fileroot = outputDir + m->getRootName(m->getSimpleName(listfile));
-			
+				
 			//clears file before we start to write to it below
 			for (int i=0; i<Groups.size(); i++) {
 				remove((fileroot + Groups[i] + ".rabund").c_str());
@@ -219,6 +219,8 @@ SharedCommand::SharedCommand(string option)  {
 
 int SharedCommand::execute(){
 	try {
+		
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//lookup.clear();
 		string errorOff = "no error";
