@@ -95,7 +95,7 @@ class MothurOut {
 		unsigned int fromBase36(string);
 
 		int control_pressed;
-		bool executing, runParse, jumble;
+		bool executing, runParse, jumble, gui;
 		
 		//current files - if you add a new type you must edit optionParser->getParameters, get.current command and mothurOut->printCurrentFiles/clearCurrentFiles.
 		string getPhylipFile()		{ return phylipfile;		}
@@ -169,6 +169,7 @@ class MothurOut {
 			accnosfile = "";
 			taxonomyfile = "";
 			processors = "1";
+			gui = false;
 		};
 		~MothurOut();
 

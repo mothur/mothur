@@ -30,7 +30,7 @@ public:
 	
 	vector<string> setParameters();
 	string getCommandName()			{ return "catchall";			}
-	string getCommandCategory()		{ return "Hypothesis Testing";	}
+	string getCommandCategory()		{ return "OTU-Based Approaches";	}
 	string getHelpString();	
 	
 	int execute(); 

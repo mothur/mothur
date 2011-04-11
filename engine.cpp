@@ -179,6 +179,13 @@ bool InteractEngine::getInput(){
 					//cout << pid << " is in execute " << commandName << endl;
 					#endif
 					//executes valid command
+					mout->runParse = true;
+					mout->Groups.clear();
+					mout->namesOfGroups.clear();
+					mout->Treenames.clear();
+					mout->names.clear();
+					mout->saveNextLabel = "";
+							
 					Command* command = cFactory->getCommand(commandName, options);
 					quitCommandCalled = command->execute();
 							
@@ -353,6 +360,13 @@ bool BatchEngine::getInput(){
 						if ((cFactory->MPIEnabled(commandName)) || (pid == 0)) {
 					#endif
 					//executes valid command
+					mout->runParse = true;
+					mout->Groups.clear();
+					mout->namesOfGroups.clear();
+					mout->Treenames.clear();
+					mout->names.clear();
+					mout->saveNextLabel = "";
+							
 					Command* command = cFactory->getCommand(commandName, options);
 					quitCommandCalled = command->execute();
 							
@@ -455,9 +469,11 @@ bool ScriptEngine::getInput(){
 			
 			if (input == "") { input = "quit()"; }
 			
-			mout->mothurOutEndLine();
-			mout->mothurOut("mothur > " + input);
-			mout->mothurOutEndLine();
+			if ((!mout->gui) || (input != "quit()")) {
+				mout->mothurOutEndLine();
+				mout->mothurOut("mothur > " + input);
+				mout->mothurOutEndLine();
+			}
 			
 			#ifdef USE_MPI
 				//send commandName
@@ -505,6 +521,13 @@ bool ScriptEngine::getInput(){
 							//cout << pid << " is in execute" << endl;	
 					#endif
 					//executes valid command
+					mout->runParse = true;
+					mout->Groups.clear();
+					mout->namesOfGroups.clear();
+					mout->Treenames.clear();
+					mout->names.clear();
+					mout->saveNextLabel = "";
+							
 					Command* command = cFactory->getCommand(commandName, options);
 					quitCommandCalled = command->execute();
 					
