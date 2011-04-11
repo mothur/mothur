@@ -696,4 +696,30 @@ double LinearAlgebra::calcKendall(vector< vector<double> >& euclidDists, vector<
 
 /*********************************************************************************************************************************/
 
+vector<vector<double> > LinearAlgebra::getObservedEuclideanDistance(vector<vector<double> >& relAbundData){
 
+	int numSamples = relAbundData.size();
+	int numOTUs = relAbundData[0].size();
+	
+	vector<vector<double> > dMatrix(numSamples);
+	for(int i=0;i<numSamples;i++){
+		dMatrix[i].resize(numSamples);
+	}
+	
+	for(int i=0;i<numSamples;i++){
+		for(int j=0;j<numSamples;j++){
+			
+			double d = 0;
+			for(int k=0;k<numOTUs;k++){
+				d += pow((relAbundData[i][k] - relAbundData[j][k]), 2.0000);
+			}
+			dMatrix[i][j] = pow(d, 0.50000);
+			dMatrix[j][i] = dMatrix[i][j];
+			
+		}
+	}
+	return dMatrix;
+	
+}
+
+/*********************************************************************************************************************************/
