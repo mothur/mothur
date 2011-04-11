@@ -17,8 +17,8 @@ vector<string> HClusterCommand::setParameters(){
 		CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "ColumnName",false,false); parameters.push_back(pcolumn);
 		CommandParameter pcutoff("cutoff", "Number", "", "10", "", "", "",false,false); parameters.push_back(pcutoff);
 		CommandParameter pprecision("precision", "Number", "", "100", "", "", "",false,false); parameters.push_back(pprecision);
-		CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted", "furthest", "", "", "",false,false); parameters.push_back(pmethod);
-		CommandParameter phard("hard", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(phard);
+		CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted", "average", "", "", "",false,false); parameters.push_back(pmethod);
+		CommandParameter phard("hard", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(phard);
 		CommandParameter psorted("sorted", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(psorted);
 		CommandParameter pshowabund("showabund", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pshowabund);
 		CommandParameter ptiming("timing", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(ptiming);		
@@ -182,7 +182,7 @@ HClusterCommand::HClusterCommand(string option)  {
 			length = temp.length();
 			convert(temp, precision); 
 			
-			temp = validParameter.validFile(parameters, "hard", false);			if (temp == "not found") { temp = "F"; }
+			temp = validParameter.validFile(parameters, "hard", false);			if (temp == "not found") { temp = "T"; }
 			hard = m->isTrue(temp);
 			
 			temp = validParameter.validFile(parameters, "cutoff", false);
@@ -191,7 +191,7 @@ HClusterCommand::HClusterCommand(string option)  {
 			cutoff += (5 / (precision * 10.0)); 
 			
 			method = validParameter.validFile(parameters, "method", false);
-			if (method == "not found") { method = "furthest"; }
+			if (method == "not found") { method = "average"; }
 			
 			if ((method == "furthest") || (method == "nearest") || (method == "average") || (method == "weighted")) { }
 			else { m->mothurOut("Not a valid clustering method.  Valid clustering algorithms are furthest, nearest, average or weighted."); m->mothurOutEndLine(); abort = true; }

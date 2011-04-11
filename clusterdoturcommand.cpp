@@ -17,8 +17,8 @@ vector<string> ClusterDoturCommand::setParameters(){
 		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
 		CommandParameter pcutoff("cutoff", "Number", "", "10", "", "", "",false,false); parameters.push_back(pcutoff);
 		CommandParameter pprecision("precision", "Number", "", "100", "", "", "",false,false); parameters.push_back(pprecision);
-		CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted", "furthest", "", "", "",false,false); parameters.push_back(pmethod);
-		CommandParameter phard("hard", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(phard);
+		CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted", "average", "", "", "",false,false); parameters.push_back(pmethod);
+		CommandParameter phard("hard", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(phard);
 		CommandParameter psim("sim", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(psim);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
@@ -40,7 +40,7 @@ string ClusterDoturCommand::getHelpString(){
 		helpString += "The cluster.classic command parameter options are phylip, name, method, cuttoff, hard, sim, precision. Phylip is required, unless you have a valid current file.\n";
 		helpString += "The cluster.classic command should be in the following format: \n";
 		helpString += "cluster.classic(phylip=yourDistanceMatrix, method=yourMethod, cutoff=yourCutoff, precision=yourPrecision) \n";
-		helpString += "The acceptable cluster methods are furthest, nearest, weighted and average.  If no method is provided then furthest is assumed.\n";	
+		helpString += "The acceptable cluster methods are furthest, nearest, weighted and average.  If no method is provided then average is assumed.\n";	
 		return helpString;
 	}
 	catch(exception& e) {
@@ -151,14 +151,14 @@ ClusterDoturCommand::ClusterDoturCommand(string option)  {
 			convert(temp, cutoff); 
 			cutoff += (5 / (precision * 10.0));  
 			
-			temp = validParameter.validFile(parameters, "hard", false);			if (temp == "not found") { temp = "F"; }
+			temp = validParameter.validFile(parameters, "hard", false);			if (temp == "not found") { temp = "T"; }
 			hard = m->isTrue(temp);
 			
 			temp = validParameter.validFile(parameters, "sim", false);				if (temp == "not found") { temp = "F"; }
 			sim = m->isTrue(temp); 
 			
 			method = validParameter.validFile(parameters, "method", false);
-			if (method == "not found") { method = "furthest"; }
+			if (method == "not found") { method = "average"; }
 			
 			if ((method == "furthest") || (method == "nearest") || (method == "average") || (method == "weighted")) { 
 				if (method == "furthest") { tag = "fn"; }

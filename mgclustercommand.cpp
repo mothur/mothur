@@ -18,8 +18,8 @@ vector<string> MGClusterCommand::setParameters(){
 		CommandParameter ppenalty("penalty", "Number", "", "0.10", "", "", "",false,false); parameters.push_back(ppenalty);
 		CommandParameter pcutoff("cutoff", "Number", "", "0.70", "", "", "",false,false); parameters.push_back(pcutoff);
 		CommandParameter pprecision("precision", "Number", "", "100", "", "", "",false,false); parameters.push_back(pprecision);
-		CommandParameter pmethod("method", "Multiple", "furthest-nearest-average", "furthest", "", "", "",false,false); parameters.push_back(pmethod);
-		CommandParameter phard("hard", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(phard);
+		CommandParameter pmethod("method", "Multiple", "furthest-nearest-average", "average", "", "", "",false,false); parameters.push_back(pmethod);
+		CommandParameter phard("hard", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(phard);
 		CommandParameter pmin("min", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pmin);
 		CommandParameter pmerge("merge", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pmerge);
 		CommandParameter phcluster("hcluster", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(phcluster);
@@ -44,7 +44,7 @@ string MGClusterCommand::getHelpString(){
 		helpString += "This command outputs a .list, .rabund and .sabund file that can be used with mothur other commands to estimate richness.\n";
 		helpString += "The cutoff parameter is used to specify the maximum distance you would like to cluster to. The default is 0.70.\n";
 		helpString += "The precision parameter's default value is 100. \n";
-		helpString += "The acceptable mgcluster methods are furthest, nearest and average.  If no method is provided then furthest is assumed.\n";	
+		helpString += "The acceptable mgcluster methods are furthest, nearest and average.  If no method is provided then average is assumed.\n";	
 		helpString += "The min parameter allows you to specify is you want the minimum or maximum blast score ratio used in calculating the distance. The default is true, meaning you want the minimum.\n";
 		helpString += "The length parameter is used to specify the minimum overlap required.  The default is 5.\n";
 		helpString += "The penalty parameter is used to adjust the error rate.  The default is 0.10.\n";
@@ -154,7 +154,7 @@ MGClusterCommand::MGClusterCommand(string option) {
 			cutoff += (5 / (precision * 10.0));
 			
 			method = validParameter.validFile(parameters, "method", false);
-			if (method == "not found") { method = "furthest"; }
+			if (method == "not found") { method = "average"; }
 			
 			if ((method == "furthest") || (method == "nearest") || (method == "average")) { }
 			else { m->mothurOut("Not a valid clustering method.  Valid clustering algorithms are furthest, nearest or average."); m->mothurOutEndLine(); abort = true; }
@@ -174,7 +174,7 @@ MGClusterCommand::MGClusterCommand(string option) {
 			temp = validParameter.validFile(parameters, "hcluster", false);			if (temp == "not found") { temp = "false"; }
 			hclusterWanted = m->isTrue(temp); 
 			
-			temp = validParameter.validFile(parameters, "hard", false);			if (temp == "not found") { temp = "F"; }
+			temp = validParameter.validFile(parameters, "hard", false);			if (temp == "not found") { temp = "T"; }
 			hard = m->isTrue(temp);
 		}
 
