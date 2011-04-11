@@ -37,7 +37,7 @@ string PCACommand::getHelpString(){
 		helpString += "The pca command parameters are shared, relabund, label, groups and metric.  shared or relabund is required unless you have a valid current file."; 
 		helpString += "The label parameter is used to analyze specific labels in your input. Default is the first label in your shared or relabund file. Multiple labels may be separated by dashes.\n";
 		helpString += "The groups parameter allows you to specify which groups you would like analyzed. Groupnames are separated by dashes.\n";
-		helpString += "The metric parameter allows indicate you if would like the pearson correlation coefficient calculated. Default=True";
+		helpString += "The metric parameter allows you to indicate if would like the pearson correlation coefficient calculated. Default=True";
 		helpString += "Example pca(groups=yourGroups).\n";
 		helpString += "Example pca(groups=A-B-C).\n";
 		helpString += "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n";
@@ -180,7 +180,7 @@ int PCACommand::execute(){
 		//get first line of shared file
 		vector< vector<double> > matrix;
 		InputData* input;
-		if (mode == "shared")			{  
+		if (mode == "sharedfile")			{  
 			input = new InputData(inputFile, "sharedfile");
 		}else if (mode == "relabund")	{ 
 			input = new InputData(inputFile, "relabund");
@@ -277,6 +277,7 @@ int PCACommand::execute(){
 		exit(1);
 	}
 }
+
 /**********************************************************************************************************************
 vector< vector<double> > PCACommand::createMatrix(vector<SharedRAbundFloatVector*> lookupFloat){
 	try {
@@ -306,79 +307,78 @@ vector< vector<double> > PCACommand::createMatrix(vector<SharedRAbundFloatVector
 	}
 }*/
 //**********************************************************************************************************************
+
 int PCACommand::process(vector<SharedRAbundFloatVector*>& lookupFloat){
 	try {
 		m->mothurOut("\nProcessing " + lookupFloat[0]->getLabel()); m->mothurOutEndLine();
+	
+		int numOTUs = lookupFloat[0]->getNumBins();
+		int numSamples = lookupFloat.size();
 		
-		vector< vector<double> > matrix; matrix.resize(lookupFloat.size());
+		vector< vector<double> > matrix(numSamples);
+		vector<double> colMeans(numOTUs);
 		
-		ofstream out;
-		string temp = outputDir + "matrix.transpose.out";
-		m->openOutputFile(temp, out);
-		out << "matrix" << endl;
-		
-		//fill matrix with shared files relative abundances
+				
+		//fill matrix with shared relative abundances, re-center
 		for (int i = 0; i < lookupFloat.size(); i++) {
-			for (int j = 0; j < lookupFloat[i]->getNumBins(); j++) {
-				matrix[i].push_back(lookupFloat[i]->getAbundance(j));
-				out << lookupFloat[i]->getAbundance(j) << '\t';
-			}
-			out << endl;
-		}
-		out << endl << endl << "transpose" << endl;
-		vector< vector<double> > transposeMatrix; transposeMatrix.resize(matrix[0].size());
-		for (int i = 0; i < transposeMatrix.size(); i++) {
-			for (int j = 0; j < matrix.size(); j++) {
-				transposeMatrix[i].push_back(matrix[j][i]);
-				out << matrix[j][i] << '\t';
-			}
-			out << endl;
-		}
-		
-		matrix = linearCalc.matrix_mult(matrix, transposeMatrix);	
-		
-		out << endl << endl << "matrix mult" << endl;
-		for (int i = 0; i < matrix.size(); i++) {
-			for (int j = 0; j < matrix[i].size(); j++) {
-				out << matrix[i][j] << '\t';
-			}
-		    out << endl;
-		}
-		out.close();
+			matrix[i].resize(numOTUs, 0);
 			
+			for (int j = 0; j < numOTUs; j++) {
+				matrix[i][j] = lookupFloat[i]->getAbundance(j);
+				colMeans[j] += matrix[i][j];
+			}
+		}
 		
-		double offset = 0.0000;
+
+		for(int j=0;j<numOTUs;j++){
+			colMeans[j] = colMeans[j] / (double)numSamples;
+		}
+		
+		vector<vector<double> > centered = matrix;
+		for(int i=0;i<numSamples;i++){
+			for(int j=0;j<numOTUs;j++){
+				centered[i][j] = centered[i][j] - colMeans[j];				
+			}
+		}
+
+		
+		vector< vector<double> > transpose(numOTUs);
+		for (int i = 0; i < numOTUs; i++) {
+			transpose[i].resize(numSamples, 0);
+			
+			for (int j = 0; j < numSamples; j++) {
+				transpose[i][j] = centered[j][i];
+			}
+		}
+
+		vector<vector<double> > crossProduct = linearCalc.matrix_mult(transpose, centered);	
+		
 		vector<double> d;
 		vector<double> e;
-		vector<vector<double> > G = matrix;
-		//vector<vector<double> > copy_G;
-			
-		for(int count=0;count<2;count++){
-			linearCalc.recenter(offset, matrix, G);		if (m->control_pressed) { return 0; }
-			linearCalc.tred2(G, d, e);					if (m->control_pressed) { return 0; }
-			linearCalc.qtli(d, e, G);					if (m->control_pressed) { return 0; }
-			offset = d[d.size()-1];
-			if(offset > 0.0) break;
-		} 
+
+		linearCalc.tred2(crossProduct, d, e);		if (m->control_pressed) { return 0; }
+		linearCalc.qtli(d, e, crossProduct);		if (m->control_pressed) { return 0; }
+		
+		vector<vector<double> > X = linearCalc.matrix_mult(centered, crossProduct);
 		
 		if (m->control_pressed) { return 0; }
 		
 		string fbase = outputDir + m->getRootName(m->getSimpleName(inputFile));
 		string outputFileName = fbase + lookupFloat[0]->getLabel();
-		output(outputFileName, m->Groups, G, d);
+		output(outputFileName, m->Groups, X, d);
 		
 		if (metric) {   
 			
+			vector<vector<double> > observedEuclideanDistance = linearCalc.getObservedEuclideanDistance(centered);
+			
 			for (int i = 1; i < 4; i++) {
 				
-				vector< vector<double> > EuclidDists = linearCalc.calculateEuclidianDistance(G, i); //G is the pca file
+				vector< vector<double> > PCAEuclidDists = linearCalc.calculateEuclidianDistance(X, i); //G is the pca file
 				
 				if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0; }
-				
-				double corr = linearCalc.calcPearson(EuclidDists, matrix); //G is the pca file, D is the users distance matrix
-				
-				m->mothurOut("Pearson's coefficient using " + toString(i) + " axis: " + toString(corr)); m->mothurOutEndLine();
-				
+
+				double corr = linearCalc.calcPearson(PCAEuclidDists, observedEuclideanDistance);
+								
 				m->mothurOut("Rsq " + toString(i) + " axis: " + toString(corr * corr)); m->mothurOutEndLine();
 				
 				if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0; }
@@ -396,14 +396,11 @@ int PCACommand::process(vector<SharedRAbundFloatVector*>& lookupFloat){
 
 void PCACommand::output(string fnameRoot, vector<string> name_list, vector<vector<double> >& G, vector<double> d) {
 	try {
-		int rank = name_list.size();
+
+		int numEigenValues = d.size();
 		double dsum = 0.0000;
-		for(int i=0;i<rank;i++){
+		for(int i=0;i<numEigenValues;i++){
 			dsum += d[i];
-			for(int j=0;j<rank;j++){
-				if(d[j] >= 0)	{	G[i][j] *= pow(d[j],0.5);	}
-				else			{	G[i][j] = 0.00000;			}
-			}
 		}
 		
 		ofstream pcaData((fnameRoot+".pca.axes").c_str(), ios::trunc);
@@ -419,19 +416,19 @@ void PCACommand::output(string fnameRoot, vector<string> name_list, vector<vecto
 		outputTypes["loadings"].push_back(fnameRoot+".pca.loadings");	
 		
 		pcaLoadings << "axis\tloading\n";
-		for(int i=0;i<rank;i++){
+		for(int i=0;i<numEigenValues;i++){
 			pcaLoadings << i+1 << '\t' << d[i] * 100.0 / dsum << endl;
 		}
 		
 		pcaData << "group";
-		for(int i=0;i<rank;i++){
+		for(int i=0;i<numEigenValues;i++){
 			pcaData << '\t' << "axis" << i+1;
 		}
 		pcaData << endl;
 		
-		for(int i=0;i<rank;i++){
+		for(int i=0;i<numEigenValues;i++){
 			pcaData << name_list[i] << '\t';
-			for(int j=0;j<rank;j++){
+			for(int j=0;j<numEigenValues;j++){
 				pcaData << G[i][j] << '\t';
 			}
 			pcaData << endl;
