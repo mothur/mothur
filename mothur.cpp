@@ -46,32 +46,15 @@ int main(int argc, char *argv[]){
 
 		m->setFileName(logFileName);
 		
-				
-		//version
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 			system("clear");
-			#if defined (__APPLE__) || (__MACH__)
-				m->mothurOutJustToLog("Mac version");
-				m->mothurOutEndLine(); m->mothurOutEndLine();
-			#else
-				m->mothurOutJustToLog("Linux version");
-				m->mothurOutEndLine(); m->mothurOutEndLine();
-			#endif
-
 		#else
 			system("CLS");
-			m->mothurOutJustToLog("Windows version");
-			m->mothurOutEndLine(); m->mothurOutEndLine();
-		#endif		
-		
-		#ifdef USE_READLINE
-			m->mothurOutJustToLog("Using ReadLine");
-			m->mothurOutEndLine(); m->mothurOutEndLine();
 		#endif
 		
 		#ifdef MOTHUR_FILES
 			string temp = MOTHUR_FILES; 
-			
+		
 			//add / to name if needed
 			string lastChar = temp.substr(temp.length()-1);
 			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
@@ -79,20 +62,14 @@ int main(int argc, char *argv[]){
 			#else
 				if (lastChar != "\\") { temp += "\\"; }	
 			#endif
-			
+		
 			temp = m->getFullPathName(temp);
 			m->setDefaultPath(temp);
-			
-			m->mothurOutJustToLog("Using default file location " + temp);
-			m->mothurOutEndLine(); m->mothurOutEndLine();
 		#endif
 		
-		#ifdef BIT_VERSION
-			m->mothurOutJustToLog("Running 64Bit Version");
-			m->mothurOutEndLine(); m->mothurOutEndLine();
-		#else
-			m->mothurOutJustToLog("Running 32Bit Version");
-			m->mothurOutEndLine(); m->mothurOutEndLine();
+		#ifdef USE_MPI
+			int version, subversion;
+			MPI_Get_version(&version, &subversion);
 		#endif
 		
 		//get releaseDate from Make
@@ -101,46 +78,86 @@ int main(int argc, char *argv[]){
 		m->setReleaseDate(releaseDate);
 		m->setVersion(mothurVersion);
 		
-		//header
-		m->mothurOut("mothur v." + mothurVersion);
-		m->mothurOutEndLine();		
-		m->mothurOut("Last updated: " + releaseDate);
-		m->mothurOutEndLine();	
-		m->mothurOutEndLine();		
-		m->mothurOut("by");
-		m->mothurOutEndLine();		
-		m->mothurOut("Patrick D. Schloss");
-		m->mothurOutEndLine();
-		m->mothurOutEndLine();			
-		m->mothurOut("Department of Microbiology & Immunology");
-		m->mothurOutEndLine();	
-		m->mothurOut("University of Michigan");
-		m->mothurOutEndLine();			
-		m->mothurOut("pschloss@umich.edu");
-		m->mothurOutEndLine();		
-		m->mothurOut("http://www.mothur.org");
-		m->mothurOutEndLine();
-		m->mothurOutEndLine();
-		m->mothurOut("When using, please cite:");
-		m->mothurOutEndLine();
-		m->mothurOut("Schloss, P.D., et al., Introducing mothur: Open-source, platform-independent, community-supported software for describing and comparing microbial communities. Appl Environ Microbiol, 2009. 75(23):7537-41.");
-		m->mothurOutEndLine();	
-		m->mothurOutEndLine();		
-		m->mothurOut("Distributed under the GNU General Public License");
-		m->mothurOutEndLine();
-		m->mothurOutEndLine();			
-		m->mothurOut("Type 'help()' for information on the commands that are available");
-		m->mothurOutEndLine();
-		m->mothurOutEndLine();			
-		m->mothurOut("Type 'quit()' to exit program");
-		m->mothurOutEndLine();	
+		//will make the gui output "pretty"
+		bool guiMode = false;
+		if (argc>1) {
+			string guiInput = argv[1];
+			if (guiInput[0] == '+') { guiMode = true; }
+		}
 		
-		#ifdef USE_MPI
-			m->mothurOutJustToLog("Using MPI\tversion ");
-			int version, subversion;
-			MPI_Get_version(&version, &subversion);
-			m->mothurOutJustToLog(toString(version) + "." + toString(subversion) + "\n");
-		#endif
+		if (!guiMode) {
+			//version
+			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+				#if defined (__APPLE__) || (__MACH__)
+					m->mothurOutJustToLog("Mac version");
+					m->mothurOutEndLine(); m->mothurOutEndLine();
+				#else
+					m->mothurOutJustToLog("Linux version");
+					m->mothurOutEndLine(); m->mothurOutEndLine();
+				#endif
+
+			#else
+				m->mothurOutJustToLog("Windows version");
+				m->mothurOutEndLine(); m->mothurOutEndLine();
+			#endif		
+			
+			#ifdef USE_READLINE
+				m->mothurOutJustToLog("Using ReadLine");
+				m->mothurOutEndLine(); m->mothurOutEndLine();
+			#endif
+			
+			#ifdef MOTHUR_FILES
+				m->mothurOutJustToLog("Using default file location " + temp);
+				m->mothurOutEndLine(); m->mothurOutEndLine();
+			#endif
+			
+			#ifdef BIT_VERSION
+				m->mothurOutJustToLog("Running 64Bit Version");
+				m->mothurOutEndLine(); m->mothurOutEndLine();
+			#else
+				m->mothurOutJustToLog("Running 32Bit Version");
+				m->mothurOutEndLine(); m->mothurOutEndLine();
+			#endif
+			
+			//header
+			m->mothurOut("mothur v." + mothurVersion);
+			m->mothurOutEndLine();		
+			m->mothurOut("Last updated: " + releaseDate);
+			m->mothurOutEndLine();	
+			m->mothurOutEndLine();		
+			m->mothurOut("by");
+			m->mothurOutEndLine();		
+			m->mothurOut("Patrick D. Schloss");
+			m->mothurOutEndLine();
+			m->mothurOutEndLine();			
+			m->mothurOut("Department of Microbiology & Immunology");
+			m->mothurOutEndLine();	
+			m->mothurOut("University of Michigan");
+			m->mothurOutEndLine();			
+			m->mothurOut("pschloss@umich.edu");
+			m->mothurOutEndLine();		
+			m->mothurOut("http://www.mothur.org");
+			m->mothurOutEndLine();
+			m->mothurOutEndLine();
+			m->mothurOut("When using, please cite:");
+			m->mothurOutEndLine();
+			m->mothurOut("Schloss, P.D., et al., Introducing mothur: Open-source, platform-independent, community-supported software for describing and comparing microbial communities. Appl Environ Microbiol, 2009. 75(23):7537-41.");
+			m->mothurOutEndLine();	
+			m->mothurOutEndLine();		
+			m->mothurOut("Distributed under the GNU General Public License");
+			m->mothurOutEndLine();
+			m->mothurOutEndLine();			
+			m->mothurOut("Type 'help()' for information on the commands that are available");
+			m->mothurOutEndLine();
+			m->mothurOutEndLine();			
+			m->mothurOut("Type 'quit()' to exit program");
+			m->mothurOutEndLine();	
+			
+			#ifdef USE_MPI
+				m->mothurOutJustToLog("Using MPI\tversion ");
+				m->mothurOutJustToLog(toString(version) + "." + toString(subversion) + "\n");
+			#endif
+		}
 		
 		//srand(54321);
 		srand( (unsigned)time( NULL ) );
@@ -151,12 +168,16 @@ int main(int argc, char *argv[]){
  
 		if(argc>1){
 			input = argv[1];
+			//m->mothurOut("input = " + input); m->mothurOutEndLine();
 
 			if (input[0] == '#') {
 				m->mothurOutJustToLog("Script Mode");
 				m->mothurOutEndLine(); m->mothurOutEndLine();
 
 				mothur = new ScriptEngine(argv[0], argv[1]);
+			}else if (input[0] == '+') {
+					mothur = new ScriptEngine(argv[0], argv[1]);
+					m->gui = true;
 			}else{
 				m->mothurOutJustToLog("Batch Mode");
 				m->mothurOutEndLine(); m->mothurOutEndLine();
@@ -191,7 +212,10 @@ int main(int argc, char *argv[]){
 			}else {
 				ofstream outNewLog;
 				m->openOutputFileAppend(newlogFileName, outNewLog);
-				outNewLog << endl << endl << "*********************************************************************************" << endl << endl;
+				
+				if (!m->gui) {
+					outNewLog << endl << endl << "*********************************************************************************" << endl << endl;
+				}
 				outNewLog.close();
 				
 				m->appendFiles(logFileName, newlogFileName);
