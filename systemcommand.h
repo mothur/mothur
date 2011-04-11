@@ -18,10 +18,10 @@ class SystemCommand : public Command {
 	public:
 	
 		SystemCommand(string);	
-		SystemCommand() { abort = true; calledHelp = true; }
+		SystemCommand() { setParameters(); abort = true; calledHelp = true; }
 		~SystemCommand(){}
 	
-		vector<string> setParameters() { return outputNames; } //dummy does not do anything
+		vector<string> setParameters();
 		string getCommandName()			{ return "system";		}
 		string getCommandCategory()		{ return "General";		}
 		string getHelpString();	
