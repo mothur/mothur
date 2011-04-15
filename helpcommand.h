@@ -23,8 +23,8 @@ public:
 	
 	vector<string> setParameters()	{ return outputNames;	} //dummy, doesn't really do anything	
 	string getCommandName()			{ return "help";		}
-	string getCommandCategory()		{ return "General";		}
-	string getHelpString() { return "For more information about a specific command type 'commandName(help)' i.e. 'read.dist(help)'"; }	
+	string getCommandCategory()		{ return "Hidden";		}
+	string getHelpString() { return "For more information about a specific command type 'commandName(help)' i.e. 'cluster(help)'"; }	
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

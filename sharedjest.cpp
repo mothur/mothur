@@ -38,7 +38,7 @@ EstOutput Jest::getValues(vector<SharedRAbundVector*> shared) {
 		S12 = sharedChao->getValues(shared);
 		S1 = chaoS1->getValues(chaoS1Sabund);
 		S2 = chaoS2->getValues(chaoS2Sabund);
-				
+		
 		data[0] = S12[0] / (float)(S1[0] + S2[0] - S12[0]);
 		
 		if (isnan(data[0]) || isinf(data[0])) { data[0] = 0; }

@@ -80,7 +80,7 @@ try {
                         temp->setGroup(m->Groups[i]);
 						lookup.push_back(temp);
                 }
-
+	
                 SharedCollectorsCurveData* ccd = new SharedCollectorsCurveData();
         
                 //initialize labels for output
@@ -114,7 +114,7 @@ try {
                         //get first sample
                         individual chosen = sharedorder->get(i);
                         int abundance; 
-                                        
+					             
                         //set info for sharedvector in chosens group
                         for (int j = 0; j < lookup.size(); j++) { 
 							if (chosen.group == lookup[j]->getGroup()) {
@@ -141,14 +141,16 @@ try {
 												for (int w = 0; w < lookup.size(); w++) {
 													if ((w != k) && (w != l)) { subset.push_back(lookup[w]); }
 												}
-											
+						
                                                 ccd->updateSharedData(subset, i+1, m->Groups.size(), pair);
                                         }
                                         n++;
                                 }
+							
 								//if this is a calculator that can do multiples then do them
 								pair = false;
 								ccd->updateSharedData(lookup, i+1, m->Groups.size(), pair); 
+							
                         }
                         totalNumSeq = i+1;
                 }
@@ -177,7 +179,7 @@ try {
 						pair = false;
 						ccd->updateSharedData(lookup, totalNumSeq, m->Groups.size(), pair); 
                 }
-                
+	 
                 //resets output files
                 for(int i=0;i<displays.size();i++){
                         displays[i]->reset();

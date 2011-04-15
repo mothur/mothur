@@ -13,7 +13,6 @@
 #include "mothur.h"
 #include "nameassignment.hpp"
 #include "listvector.hpp"
-#include "globaldata.hpp"
 
 
 /******************************************************/
