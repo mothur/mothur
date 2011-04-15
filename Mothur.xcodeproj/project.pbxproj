@@ -107,7 +107,6 @@
 		A7E9B8D712D37EC400DA6239 /* getsabundcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B70612D37EC400DA6239 /* getsabundcommand.cpp */; };
 		A7E9B8D812D37EC400DA6239 /* getseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B70812D37EC400DA6239 /* getseqscommand.cpp */; };
 		A7E9B8D912D37EC400DA6239 /* getsharedotucommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B70A12D37EC400DA6239 /* getsharedotucommand.cpp */; };
-		A7E9B8DA12D37EC400DA6239 /* globaldata.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B70C12D37EC400DA6239 /* globaldata.cpp */; };
 		A7E9B8DB12D37EC400DA6239 /* goodscoverage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B70E12D37EC400DA6239 /* goodscoverage.cpp */; };
 		A7E9B8DC12D37EC400DA6239 /* gotohoverlap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B71012D37EC400DA6239 /* gotohoverlap.cpp */; };
 		A7E9B8DD12D37EC400DA6239 /* gower.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B71212D37EC400DA6239 /* gower.cpp */; };
@@ -190,7 +189,6 @@
 		A7E9B92A12D37EC400DA6239 /* readcluster.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7B212D37EC400DA6239 /* readcluster.cpp */; };
 		A7E9B92B12D37EC400DA6239 /* readcolumn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7B412D37EC400DA6239 /* readcolumn.cpp */; };
 		A7E9B92C12D37EC400DA6239 /* readdistcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7B612D37EC400DA6239 /* readdistcommand.cpp */; };
-		A7E9B92D12D37EC400DA6239 /* readotu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7B912D37EC400DA6239 /* readotu.cpp */; };
 		A7E9B92E12D37EC400DA6239 /* readotucommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7BB12D37EC400DA6239 /* readotucommand.cpp */; };
 		A7E9B92F12D37EC400DA6239 /* readphylip.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7BD12D37EC400DA6239 /* readphylip.cpp */; };
 		A7E9B93012D37EC400DA6239 /* readtree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7BF12D37EC400DA6239 /* readtree.cpp */; };
@@ -522,8 +520,6 @@
 		A7E9B70912D37EC400DA6239 /* getseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getseqscommand.h; sourceTree = "<group>"; };
 		A7E9B70A12D37EC400DA6239 /* getsharedotucommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getsharedotucommand.cpp; sourceTree = "<group>"; };
 		A7E9B70B12D37EC400DA6239 /* getsharedotucommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getsharedotucommand.h; sourceTree = "<group>"; };
-		A7E9B70C12D37EC400DA6239 /* globaldata.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = globaldata.cpp; sourceTree = SOURCE_ROOT; };
-		A7E9B70D12D37EC400DA6239 /* globaldata.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = globaldata.hpp; sourceTree = SOURCE_ROOT; };
 		A7E9B70E12D37EC400DA6239 /* goodscoverage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = goodscoverage.cpp; sourceTree = "<group>"; };
 		A7E9B70F12D37EC400DA6239 /* goodscoverage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = goodscoverage.h; sourceTree = "<group>"; };
 		A7E9B71012D37EC400DA6239 /* gotohoverlap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = gotohoverlap.cpp; sourceTree = SOURCE_ROOT; };
@@ -695,8 +691,6 @@
 		A7E9B7B612D37EC400DA6239 /* readdistcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readdistcommand.cpp; sourceTree = "<group>"; };
 		A7E9B7B712D37EC400DA6239 /* readdistcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readdistcommand.h; sourceTree = "<group>"; };
 		A7E9B7B812D37EC400DA6239 /* readmatrix.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = readmatrix.hpp; sourceTree = "<group>"; };
-		A7E9B7B912D37EC400DA6239 /* readotu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readotu.cpp; sourceTree = "<group>"; };
-		A7E9B7BA12D37EC400DA6239 /* readotu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readotu.h; sourceTree = "<group>"; };
 		A7E9B7BB12D37EC400DA6239 /* readotucommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readotucommand.cpp; sourceTree = "<group>"; };
 		A7E9B7BC12D37EC400DA6239 /* readotucommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readotucommand.h; sourceTree = "<group>"; };
 		A7E9B7BD12D37EC400DA6239 /* readphylip.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readphylip.cpp; sourceTree = "<group>"; };
@@ -964,8 +958,6 @@
 				A7E9B6DB12D37EC400DA6239 /* engine.hpp */,
 				A7E9B6E012D37EC400DA6239 /* fileoutput.cpp */,
 				A7E9B6E112D37EC400DA6239 /* fileoutput.h */,
-				A7E9B70C12D37EC400DA6239 /* globaldata.cpp */,
-				A7E9B70D12D37EC400DA6239 /* globaldata.hpp */,
 				A7E9B71112D37EC400DA6239 /* gotohoverlap.hpp */,
 				A7E9B71012D37EC400DA6239 /* gotohoverlap.cpp */,
 				A7E9B71812D37EC400DA6239 /* hcluster.cpp */,
@@ -1579,8 +1571,6 @@
 				A7E9B7B412D37EC400DA6239 /* readcolumn.cpp */,
 				A7E9B7B512D37EC400DA6239 /* readcolumn.h */,
 				A7E9B7B812D37EC400DA6239 /* readmatrix.hpp */,
-				A7E9B7BA12D37EC400DA6239 /* readotu.h */,
-				A7E9B7B912D37EC400DA6239 /* readotu.cpp */,
 				A7E9B7BD12D37EC400DA6239 /* readphylip.cpp */,
 				A7E9B7BE12D37EC400DA6239 /* readphylip.h */,
 				A7E9B7BF12D37EC400DA6239 /* readtree.cpp */,
@@ -1751,7 +1741,6 @@
 				A7E9B8D712D37EC400DA6239 /* getsabundcommand.cpp in Sources */,
 				A7E9B8D812D37EC400DA6239 /* getseqscommand.cpp in Sources */,
 				A7E9B8D912D37EC400DA6239 /* getsharedotucommand.cpp in Sources */,
-				A7E9B8DA12D37EC400DA6239 /* globaldata.cpp in Sources */,
 				A7E9B8DB12D37EC400DA6239 /* goodscoverage.cpp in Sources */,
 				A7E9B8DC12D37EC400DA6239 /* gotohoverlap.cpp in Sources */,
 				A7E9B8DD12D37EC400DA6239 /* gower.cpp in Sources */,
@@ -1834,7 +1823,6 @@
 				A7E9B92A12D37EC400DA6239 /* readcluster.cpp in Sources */,
 				A7E9B92B12D37EC400DA6239 /* readcolumn.cpp in Sources */,
 				A7E9B92C12D37EC400DA6239 /* readdistcommand.cpp in Sources */,
-				A7E9B92D12D37EC400DA6239 /* readotu.cpp in Sources */,
 				A7E9B92E12D37EC400DA6239 /* readotucommand.cpp in Sources */,
 				A7E9B92F12D37EC400DA6239 /* readphylip.cpp in Sources */,
 				A7E9B93012D37EC400DA6239 /* readtree.cpp in Sources */,

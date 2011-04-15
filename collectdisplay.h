@@ -30,8 +30,11 @@ public:
 		//figure out what groups are being compared in getValues
 		//because we randomizes the order we need to put the results in the correct column in the output file
 		int group1Index, group2Index, pos;
-		group1Index = shared[0]->getGroupIndex();
-		group2Index = shared[1]->getGroupIndex();
+		
+		for (int i = 0; i < m->Groups.size(); i++) {
+			if (shared[0]->getGroup() == m->Groups[i]) { group1Index = i; }
+			if (shared[1]->getGroup() == m->Groups[i]) { group2Index = i; }
+		}
 		
 		numGroupComb = 0;
 		int n = 1;
@@ -46,7 +49,7 @@ public:
 			}
 			n++;
 		}
-		
+			
 		if ((estimate->getMultiple() == true) && all) { 
 			numGroupComb++; 
 			groupData.resize((numGroupComb*data.size()), 0);

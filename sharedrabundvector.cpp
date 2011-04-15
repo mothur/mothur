@@ -60,7 +60,7 @@ SharedRAbundVector::SharedRAbundVector(string id, vector<individual> rav) : Data
 SharedRAbundVector::SharedRAbundVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), numSeqs(0) {
 	try {
 		m->namesOfGroups.clear();
-		
+				
 		int num, inputData, count;
 		count = 0;  
 		string holdLabel, nextLabel, groupN;
@@ -122,8 +122,7 @@ SharedRAbundVector::SharedRAbundVector(ifstream& f) : DataVector(), maxRank(0), 
 				
 			if (f.eof() != true) { f >> nextLabel; }
 		}
-	
-		m->saveNextLabel = nextLabel;
+			m->saveNextLabel = nextLabel;
 		
 	}
 	catch(exception& e) {

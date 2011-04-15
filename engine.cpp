@@ -469,10 +469,12 @@ bool ScriptEngine::getInput(){
 			
 			if (input == "") { input = "quit()"; }
 			
-			if ((!mout->gui) || (input != "quit()")) {
-				mout->mothurOutEndLine();
-				mout->mothurOut("mothur > " + input);
-				mout->mothurOutEndLine();
+			if (mout->gui) {
+				if ((input.find("quit") != string::npos) || (input.find("set.logfile") != string::npos)) {}
+				else if ((input.find("get.current") != string::npos) && (!mout->hasCurrentFiles())) {}
+				else { mout->mothurOutEndLine(); mout->mothurOut("mothur > " + input); mout->mothurOutEndLine(); }
+			}else{
+				mout->mothurOutEndLine(); mout->mothurOut("mothur > " + input); mout->mothurOutEndLine();
 			}
 			
 			#ifdef USE_MPI

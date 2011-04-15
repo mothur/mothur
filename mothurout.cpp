@@ -47,6 +47,40 @@ void MothurOut::printCurrentFiles()  {
 	}
 }
 /*********************************************************************************************/
+bool MothurOut::hasCurrentFiles()  {
+	try {
+		bool hasCurrent = false;
+		
+		if (accnosfile != "")		{  return true;			}
+		if (columnfile != "")		{  return true;			}
+		if (designfile != "")		{  return true;			}
+		if (fastafile != "")		{  return true;			}
+		if (groupfile != "")		{  return true;			}
+		if (listfile != "")			{  return true;			}
+		if (namefile != "")			{  return true;			}
+		if (oligosfile != "")		{  return true;			}
+		if (orderfile != "")		{  return true;			}
+		if (ordergroupfile != "")	{  return true;			}
+		if (phylipfile != "")		{  return true;			}
+		if (qualfile != "")			{  return true;			}
+		if (rabundfile != "")		{  return true;			}
+		if (relabundfile != "")		{  return true;			}
+		if (sabundfile != "")		{  return true;			}
+		if (sfffile != "")			{  return true;			}
+		if (sharedfile != "")		{  return true;			}
+		if (taxonomyfile != "")		{  return true;			}
+		if (treefile != "")			{  return true;			}
+		
+		return hasCurrent;
+		
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "hasCurrentFiles");
+		exit(1);
+	}
+}
+
+/*********************************************************************************************/
 void MothurOut::clearCurrentFiles()  {
 	try {
 		phylipfile = "";

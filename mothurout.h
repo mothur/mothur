@@ -141,6 +141,7 @@ class MothurOut {
 		void setProcessors(string p)		{ processors = p;							}
 		
 		void printCurrentFiles();
+		bool hasCurrentFiles();
 		void clearCurrentFiles();
 		
 	private:

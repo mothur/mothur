@@ -143,8 +143,10 @@ int GetCurrentCommand::execute(){
 			}
 		}
 		
-		m->mothurOutEndLine(); m->mothurOut("Current files saved by mothur:"); m->mothurOutEndLine();
-		m->printCurrentFiles();
+		if (m->hasCurrentFiles()) {
+			m->mothurOutEndLine(); m->mothurOut("Current files saved by mothur:"); m->mothurOutEndLine();
+			m->printCurrentFiles();
+		}
 		
 		return 0;	
 	}

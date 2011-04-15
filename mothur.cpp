@@ -9,7 +9,6 @@
  
 #include "mothur.h"
 #include "engine.hpp"
-#include "globaldata.hpp"
 #include "mothurout.h"
 
 /**************************************************************************************************/
@@ -168,7 +167,7 @@ int main(int argc, char *argv[]){
  
 		if(argc>1){
 			input = argv[1];
-			m->mothurOut("input = " + input); m->mothurOutEndLine();
+			//m->mothurOut("input = " + input); m->mothurOutEndLine();
 
 			if (input[0] == '#') {
 				m->mothurOutJustToLog("Script Mode");
@@ -215,6 +214,8 @@ int main(int argc, char *argv[]){
 				
 				if (!m->gui) {
 					outNewLog << endl << endl << "*********************************************************************************" << endl << endl;
+				}else {
+					outNewLog << endl;
 				}
 				outNewLog.close();
 				

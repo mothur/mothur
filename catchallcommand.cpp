@@ -8,7 +8,6 @@
  */
 
 #include "catchallcommand.h"
-#include "globaldata.hpp"
 
 //**********************************************************************************************************************
 vector<string> CatchAllCommand::setParameters(){	

@@ -8,7 +8,6 @@
  */
 
 
-#include "globaldata.hpp"
 #include "commandoptionparser.hpp"
 
 

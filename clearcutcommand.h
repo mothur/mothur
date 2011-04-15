@@ -11,7 +11,6 @@
  */
 
 #include "command.hpp"
-#include "globaldata.hpp"
 
 /* 
   Evans, J., L. Sheneman, and J.A. Foster (2006) Relaxed Neighbor-Joining: 
