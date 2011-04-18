@@ -60,7 +60,7 @@ int RefChimeraTest::analyzeQuery(string queryName, string querySeq){
 	int nMera = 0;
 	string chimeraRefSeq = "";
 	
-	if(bestSequenceMismatch - minMismatchToChimera > 3 || (minMismatchToChimera == 0 && bestSequenceMismatch != 0)){
+	if(bestSequenceMismatch - minMismatchToChimera >= 3){// || (minMismatchToChimera == 0 && bestSequenceMismatch != 0)){
 	
 		nMera = 2;
 		chimeraRefSeq = stitchBimera(leftParentBi, rightParentBi, breakPointBi);
