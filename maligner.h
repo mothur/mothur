@@ -47,9 +47,10 @@ class Maligner {
 		
 		vector< vector<score_struct> > buildScoreMatrix(int, int);
 		void fillScoreMatrix(vector<vector<score_struct> >&, vector<Sequence*>, int);
-		vector<score_struct> extractHighestPath(vector<vector<score_struct> >);
+		vector<trace_struct> extractHighestPath(vector<vector<score_struct> >);
 		vector<trace_struct> mapTraceRegionsToAlignment(vector<score_struct>, vector<Sequence*>);
 		string constructChimericSeq(vector<trace_struct>, vector<Sequence*>);
+		string constructAntiChimericSeq(vector<trace_struct>, vector<Sequence*>);
 		float computePercentID(string, string);
 		string chimeraMaligner(int, DeCalculator*);
 		vector<Sequence*> getBlastSeqs(Sequence*, int);

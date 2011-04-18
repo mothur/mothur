@@ -780,7 +780,7 @@ vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*
 		//sort by smallest distance
 		sort(distsRight.begin(), distsRight.end(), compareSeqDist);
 		sort(distsLeft.begin(), distsLeft.end(), compareSeqDist);
-		
+				
 		//merge results		
 		map<string, string> seen;
 		map<string, string>::iterator it;
@@ -827,12 +827,15 @@ vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*
 
 		if (numWanted > dists.size()) { 
 			//m->mothurOut("numwanted is larger than the number of template sequences, adjusting numwanted."); m->mothurOutEndLine(); 
-			numWanted = dists.size(); }
+			numWanted = dists.size();
+		}
 
 //cout << numWanted << endl;
 		for (int i = 0; i < numWanted; i++) {
 //cout << dists[i].seq->getName() << '\t' << dists[i].dist << endl;
+
 			Sequence* temp = new Sequence(db[dists[i].index]->getName(), db[dists[i].index]->getAligned()); //have to make a copy so you can trim and filter without stepping on eachother.
+			
 			seqsMatches.push_back(temp);
 			indexes.push_back(dists[i].index);
 		}
