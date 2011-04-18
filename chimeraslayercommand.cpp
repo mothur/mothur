@@ -26,7 +26,6 @@ vector<string> ChimeraSlayerCommand::setParameters(){
 		CommandParameter pminsnp("minsnp", "Number", "", "100", "", "", "",false,false); parameters.push_back(pminsnp);
 		CommandParameter pminbs("minbs", "Number", "", "90", "", "", "",false,false); parameters.push_back(pminbs);
 		CommandParameter psearch("search", "Multiple", "kmer-blast-distance", "distance", "", "", "",false,false); parameters.push_back(psearch);
-		CommandParameter pinclude("include", "Multiple", "greater-greaterequal-all", "greater", "", "", "",false,false); parameters.push_back(pinclude);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
 		CommandParameter prealign("realign", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(prealign);
 		CommandParameter ptrim("trim", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(ptrim);
@@ -59,7 +58,6 @@ string ChimeraSlayerCommand::getHelpString(){
 		helpString += "The name parameter allows you to provide a name file, if you are using template=self. \n";
 		helpString += "You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amazon.fasta \n";
 		helpString += "The reference parameter allows you to enter a reference file containing known non-chimeric sequences, and is required. You may also set template=self, in this case the abundant sequences will be used as potential parents. \n";
-		helpString += "The include parameter is used when template=self and allows you to choose which sequences will make up the \"template\". Options are greater, greaterequal and all, default=greater, meaning sequences with greater abundance than the query sequence. \n";
 		helpString += "The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n";
 #ifdef USE_MPI
 		helpString += "When using MPI, the processors parameter is set to the number of MPI processes running. \n";
@@ -282,9 +280,6 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 			m->setProcessors(temp);
 			convert(temp, processors);
 			
-			includeAbunds = validParameter.validFile(parameters, "include", false);		if (includeAbunds == "not found") { includeAbunds = "greater"; }
-			if ((includeAbunds != "greater") && (includeAbunds != "greaterequal") && (includeAbunds != "all")) { includeAbunds = "greater"; m->mothurOut("Invalid include setting. options are greater, greaterequal or all. using greater."); m->mothurOutEndLine(); }
-			
 			temp = validParameter.validFile(parameters, "ksize", false);			if (temp == "not found") { temp = "7"; }
 			convert(temp, ksize);
 						
@@ -359,10 +354,11 @@ int ChimeraSlayerCommand::execute(){
 			if (templatefile != "self") { //you want to run slayer with a refernce template
 				chimera = new ChimeraSlayer(fastaFileNames[s], templatefile, trim, search, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign);	
 			}else {
+				if (processors != 1) { m->mothurOut("When using template=self, mothur can only use 1 processor, continuing."); m->mothurOutEndLine(); processors = 1; }
+				string nameFile = "";
 				if (nameFileNames.size() != 0) { //you provided a namefile and we don't need to create one
-					chimera = new ChimeraSlayer(fastaFileNames[s], templatefile, trim, nameFileNames[s], search, includeAbunds, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign);	
+					nameFile = nameFileNames[s];
 				}else {
-					
 					m->mothurOutEndLine(); m->mothurOut("No namesfile given, running unique.seqs command to generate one."); m->mothurOutEndLine(); m->mothurOutEndLine();
 					
 					//use unique.seqs to create new name and fastafile
@@ -379,11 +375,18 @@ int ChimeraSlayerCommand::execute(){
 					
 					m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
 					
-					string nameFile = filenames["name"][0];
+					nameFile = filenames["name"][0];
 					fastaFileNames[s] = filenames["fasta"][0];
-			
-					chimera = new ChimeraSlayer(fastaFileNames[s], templatefile, trim, nameFile, search, includeAbunds, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign);	
 				}
+				
+				//sort fastafile by abundance, returns new sorted fastafile name
+				m->mothurOut("Sorting fastafile according to abundance..."); cout.flush(); 
+				fastaFileNames[s] = sortFastaFile(fastaFileNames[s], nameFile);
+				m->mothurOut("Done."); m->mothurOutEndLine();
+				
+				if (m->control_pressed) {  for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}  return 0;	}
+
+				chimera = new ChimeraSlayer(fastaFileNames[s], templatefile, trim, nameFile, search, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign);	
 			}
 				
 			if (outputDir == "") { outputDir = m->hasPath(fastaFileNames[s]);  }//if user entered a file with a path then preserve it				
@@ -932,6 +935,57 @@ int ChimeraSlayerCommand::divideInHalf(Sequence querySeq, string& leftQuery, str
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ChimeraSlayerCommand", "divideInHalf");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+
+string ChimeraSlayerCommand::sortFastaFile(string fastaFile, string nameFile) {
+	try {
+		
+		//read through fastafile and store info
+		map<string, string> seqs;
+		ifstream in;
+		m->openInputFile(fastaFile, in);
+		
+		while (!in.eof()) {
+			
+			if (m->control_pressed) { in.close(); return ""; }
+			
+			Sequence seq(in); m->gobble(in);
+			seqs[seq.getName()] = seq.getAligned();
+		}
+		
+		in.close();
+		
+		//read namefile
+		vector<seqPriorityNode> nameMapCount;
+		int error = m->readNames(nameFile, nameMapCount, seqs);
+		
+		if (m->control_pressed) { return ""; }
+		
+		if (error == 1) { m->control_pressed = true; return ""; }
+		if (seqs.size() != nameMapCount.size()) { m->mothurOut( "The number of sequences in your fastafile does not match the number of sequences in your namefile, aborting."); m->mothurOutEndLine(); m->control_pressed = true; return ""; }
+
+		sort(nameMapCount.begin(), nameMapCount.end(), compareSeqPriorityNodes);
+		
+		string newFasta = fastaFile + ".temp";
+		ofstream out;
+		m->openOutputFile(newFasta, out);
+		
+		//print new file in order of
+		for (int i = 0; i < nameMapCount.size(); i++) {
+			out << ">" << nameMapCount[i].name << endl << nameMapCount[i].seq << endl;
+		}
+		out.close();
+		
+		rename(newFasta.c_str(), fastaFile.c_str());
+				
+		return fastaFile;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChimeraSlayerCommand", "sortFastaFile");
 		exit(1);
 	}
 }

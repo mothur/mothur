@@ -14,7 +14,6 @@
 #include "command.hpp"
 #include "chimera.h"
 
-
 /***********************************************************/
 
 class ChimeraSlayerCommand : public Command {
@@ -45,13 +44,14 @@ private:
 	int driver(linePair*, string, string, string, string);
 	int createProcesses(string, string, string, string);
 	int divideInHalf(Sequence, string&, string&);
+	string sortFastaFile(string, string);
 		
 	#ifdef USE_MPI
 	int driverMPI(int, int, MPI_File&, MPI_File&, MPI_File&, MPI_File&, vector<unsigned long int>&);
 	#endif
 
 	bool abort, realign, trim, trimera;
-	string fastafile, templatefile, outputDir, search, namefile, includeAbunds;
+	string fastafile, templatefile, outputDir, search, namefile;
 	int processors, window, iters, increment, numwanted, ksize, match, mismatch, parents, minSimilarity, minCoverage, minBS, minSNP, numSeqs, templateSeqsLength;
 	float divR;
 	Chimera* chimera;

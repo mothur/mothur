@@ -23,7 +23,7 @@ class ChimeraSlayer : public Chimera {
 	
 	public:
 		ChimeraSlayer(string, string, bool, string, int, int, int, int, float, int, int, int, int, int, int, int, int, bool);
-		ChimeraSlayer(string, string, bool, string, string, string, int, int, int, int, float, int, int, int, int, int, int, int, int, bool);
+		ChimeraSlayer(string, string, bool, string, string, int, int, int, int, float, int, int, int, int, int, int, int, int, bool);
 
 		~ChimeraSlayer();
 		
@@ -41,16 +41,18 @@ class ChimeraSlayer : public Chimera {
 		
 	private:
 		Sequence* querySeq;
-		Sequence* trimQuery;
+		Sequence trimQuery;
 		DeCalculator* decalc;
 		map<int, int>  spotMap;
 		Database* databaseRight;
 		Database* databaseLeft;
-		map<string, vector<string> > nameMapRank;  //sequence name to rank so you can construct a template of the abundant sequences if the user uses itself as template
+		vector<Sequence*> userTemplate;  //when template=self, the query file is sorted from most abundance to least abundant
+										 //userTemplate grows as the query file is processed by adding sequences that are not chimeric
+		set<string> namesOfChimericSeqs; //only used when template=self
 		
 		vector<data_struct>  chimeraResults;
 		data_results printResults;
-		string chimeraFlags, searchMethod, fastafile, includeAbunds;
+		string chimeraFlags, searchMethod, fastafile;
 		bool realign, trimChimera;
 		int window, numWanted, kmerSize, match, misMatch, minSim, minCov, minBS, minSNP, parents, iters, increment;
 		float divR;
@@ -59,8 +61,8 @@ class ChimeraSlayer : public Chimera {
 		void printBlock(data_results, data_results, bool, bool, string, ostream&);
 		string getBlock(data_struct, string);
 		string getBlock(data_results, data_results, bool, bool, string);
-		int readNameFile(string);
-		vector<Sequence*> getTemplate(Sequence*);
+		//int readNameFile(string);
+		int getTemplate(Sequence*);
 		
 };
 
