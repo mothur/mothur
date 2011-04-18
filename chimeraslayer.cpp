@@ -780,7 +780,10 @@ Sequence* ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc) {
 //***************************************************************************************************************
 int ChimeraSlayer::getChimeras(Sequence* query) {
 	try {
-		if (trimChimera) { trimQuery = new Sequence(query->getName(), query->getAligned()); printResults.trimQuery = *trimQuery; }
+		if (trimChimera) {
+			trimQuery = new Sequence(query->getName(), query->getAligned());
+			printResults.trimQuery = *trimQuery; 
+		}
 		
 		chimeraFlags = "no";
 		printResults.flag = "no";
@@ -794,7 +797,7 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 		//you must create a template
 		vector<Sequence*> thisTemplate;
 		if (templateFileName != "self") { thisTemplate = templateSeqs; }
-		else { thisTemplate = getTemplate(query); } //fills thistemplate and creates the databases
+		else { thisTemplate = getTemplate(query); } //fills this template and creates the databases
 		
 		if (m->control_pressed) {  return 0;  }
 		
@@ -812,10 +815,11 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 		if (m->control_pressed) {  return 0;  }
 
 		string chimeraFlag = maligner.getResults(query, decalc);
+		
 		if (m->control_pressed) {  return 0;  }
+		
 		vector<results> Results = maligner.getOutput();
 	
-		//found in testing realigning only made things worse
 		if (realign) {
 			ChimeraReAligner realigner(thisTemplate, match, misMatch);
 			realigner.reAlign(query, Results);

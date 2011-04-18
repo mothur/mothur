@@ -77,6 +77,7 @@ struct score_struct {
 	int score;
 	int row;
 	int col;
+//	int mismatches;
 };
 /***********************************************************************/
 struct trace_struct {
