@@ -45,7 +45,7 @@ int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int num
 	}
 }
 //***************************************************************************************************************
-ChimeraSlayer::ChimeraSlayer(string file, string temp, bool trim, string name, string mode, string abunds, int k, int ms, int mms, int win, float div, 
+ChimeraSlayer::ChimeraSlayer(string file, string temp, bool trim, string name, string mode, int k, int ms, int mms, int win, float div, 
 							 int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int numw, bool r) : Chimera()  {  	
 	try {
 		fastafile = file; templateSeqs = readSeqs(fastafile);
@@ -65,78 +65,21 @@ ChimeraSlayer::ChimeraSlayer(string file, string temp, bool trim, string name, s
 		increment = inc;
 		numWanted = numw;
 		realign = r; 
-		includeAbunds = abunds;
 		trimChimera = trim;
-		
-		//read name file and create nameMapRank
-		readNameFile(name);
 		
 		decalc = new DeCalculator();	
 		
 		createFilter(templateSeqs, 0.0); //just removed columns where all seqs have a gap
 		
 		//run filter on template
-		for (int i = 0; i < templateSeqs.size(); i++) { runFilter(templateSeqs[i]);  }
-		
+		for (int i = 0; i < templateSeqs.size(); i++) { delete templateSeqs[i];  } templateSeqs.clear();
+		 
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ChimeraSlayer", "ChimeraSlayer");
 		exit(1);
 	}
 }
-//***************************************************************************************************************
-int ChimeraSlayer::readNameFile(string name) {
-	try {
-		ifstream in;
-		m->openInputFile(name, in);
-		
-		int maxRank = 0;
-		int minRank = 10000000;
-		
-		while(!in.eof()){
-			
-			if (m->control_pressed) { in.close(); return 0; }
-			
-			string thisname, repnames;
-			
-			in >> thisname;		m->gobble(in);		//read from first column
-			in >> repnames;			//read from second column
-			
-			map<string, vector<string> >::iterator it = nameMapRank.find(thisname);
-			if (it == nameMapRank.end()) {
-				
-				vector<string> splitRepNames;
-				m->splitAtComma(repnames, splitRepNames);
-				
-				nameMapRank[thisname] = splitRepNames;	
-				
-				if (splitRepNames.size() > maxRank) { maxRank = splitRepNames.size(); }
-				if (splitRepNames.size() < minRank) { minRank = splitRepNames.size(); }
-				
-			}else{	m->mothurOut(thisname + " is already in namesfile. I will use first definition."); m->mothurOutEndLine();  }
-			
-			m->gobble(in);
-		}
-		in.close();	
-		
-		//sanity check to make sure files match
-		for (int i = 0; i < templateSeqs.size(); i++) {
-			map<string, vector<string> >::iterator it = nameMapRank.find(templateSeqs[i]->getName());
-			
-			if (it == nameMapRank.end()) { m->mothurOut("[ERROR]: " + templateSeqs[i]->getName() + " is not in namesfile, but is in fastafile. Every name in fasta file must be in first column of names file."); m->mothurOutEndLine(); m->control_pressed = true;  }
-		}
-		
-		if (maxRank == minRank) { m->mothurOut("[ERROR]: all sequences in namesfile have the same abundance, aborting."); m->mothurOutEndLine(); m->control_pressed = true;  }
-		
-		return 0;
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChimeraSlayer", "readNameFile");
-		exit(1);
-	}
-}
-
 //***************************************************************************************************************
 int ChimeraSlayer::doPrep() {
 	try {
@@ -274,48 +217,8 @@ int ChimeraSlayer::doPrep() {
 	}
 }
 //***************************************************************************************************************
-vector<Sequence*> ChimeraSlayer::getTemplate(Sequence* q) {
+int ChimeraSlayer::getTemplate(Sequence* q) {
 	try {
-		
-		vector<Sequence*> thisTemplate;
-		
-		int thisRank;
-		string thisName = q->getName();
-		map<string, vector<string> >::iterator itRank = nameMapRank.find(thisName); // you will find it because we already sanity checked
-		thisRank = (itRank->second).size();
-		
-		//create list of names we want to put into the template
-		set<string> namesToAdd;
-		for (itRank = nameMapRank.begin(); itRank != nameMapRank.end(); itRank++) {
-			if (itRank->first != thisName) {
-				if (includeAbunds == "greaterequal") {
-					if ((itRank->second).size() >= thisRank) {
-						//you are more abundant than me or equal to my abundance
-						for (int i = 0; i < (itRank->second).size(); i++) {
-							namesToAdd.insert((itRank->second)[i]);
-						}
-					}
-				}else if (includeAbunds == "greater") {
-					if ((itRank->second).size() > thisRank) {
-						//you are more abundant than me
-						for (int i = 0; i < (itRank->second).size(); i++) {
-							namesToAdd.insert((itRank->second)[i]);
-						}
-					}
-				}else if (includeAbunds == "all") {
-					//add everyone
-					for (int i = 0; i < (itRank->second).size(); i++) {
-						namesToAdd.insert((itRank->second)[i]);
-					}
-				}
-			}
-		}
-		
-		for (int i = 0; i < templateSeqs.size(); i++) {  
-			if (namesToAdd.count(templateSeqs[i]->getName()) != 0) { 
-				thisTemplate.push_back(templateSeqs[i]);
-			}
-		}
 		
 		string 	kmerDBNameLeft;
 		string 	kmerDBNameRight;
@@ -329,70 +232,70 @@ vector<Sequence*> ChimeraSlayer::getTemplate(Sequence* q) {
 			string leftTemplateFileName = templatePath + "left." + m->getRootName(m->getSimpleName(templateFileName));
 			databaseLeft = new KmerDB(leftTemplateFileName, kmerSize);	
 #ifdef USE_MPI
-			for (int i = 0; i < thisTemplate.size(); i++) {
+			for (int i = 0; i < userTemplate.size(); i++) {
 				
-				if (m->control_pressed) { return thisTemplate; } 
+				if (m->control_pressed) { return 0; } 
 				
-				string leftFrag = thisTemplate[i]->getUnaligned();
+				string leftFrag = userTemplate[i]->getUnaligned();
 				leftFrag = leftFrag.substr(0, int(leftFrag.length() * 0.33));
 				
-				Sequence leftTemp(thisTemplate[i]->getName(), leftFrag);
+				Sequence leftTemp(userTemplate[i]->getName(), leftFrag);
 				databaseLeft->addSequence(leftTemp);	
 			}
 			databaseLeft->generateDB();
-			databaseLeft->setNumSeqs(thisTemplate.size());
+			databaseLeft->setNumSeqs(userTemplate.size());
 			
-			for (int i = 0; i < thisTemplate.size(); i++) {
-				if (m->control_pressed) { return thisTemplate;  } 
+			for (int i = 0; i < userTemplate.size(); i++) {
+				if (m->control_pressed) { return 0;  } 
 				
-				string rightFrag = thisTemplate[i]->getUnaligned();
+				string rightFrag = userTemplate[i]->getUnaligned();
 				rightFrag = rightFrag.substr(int(rightFrag.length() * 0.66));
 				
-				Sequence rightTemp(thisTemplate[i]->getName(), rightFrag);
+				Sequence rightTemp(userTemplate[i]->getName(), rightFrag);
 				databaseRight->addSequence(rightTemp);	
 			}
 			databaseRight->generateDB();
-			databaseRight->setNumSeqs(thisTemplate.size());
+			databaseRight->setNumSeqs(userTemplate.size());
 			
 #else	
 			
 			
-			for (int i = 0; i < thisTemplate.size(); i++) {
+			for (int i = 0; i < userTemplate.size(); i++) {
 				
-				if (m->control_pressed) { return thisTemplate; } 
+				if (m->control_pressed) { return 0; } 
 				
-				string leftFrag = thisTemplate[i]->getUnaligned();
+				string leftFrag = userTemplate[i]->getUnaligned();
 				leftFrag = leftFrag.substr(0, int(leftFrag.length() * 0.33));
 				
-				Sequence leftTemp(thisTemplate[i]->getName(), leftFrag);
+				Sequence leftTemp(userTemplate[i]->getName(), leftFrag);
 				databaseLeft->addSequence(leftTemp);	
 			}
 			databaseLeft->generateDB();
-			databaseLeft->setNumSeqs(thisTemplate.size());
+			databaseLeft->setNumSeqs(userTemplate.size());
 				
-			for (int i = 0; i < thisTemplate.size(); i++) {
-				if (m->control_pressed) { return thisTemplate; } 
+			for (int i = 0; i < userTemplate.size(); i++) {
+				if (m->control_pressed) { return 0; } 
 					
-				string rightFrag = thisTemplate[i]->getUnaligned();
+				string rightFrag = userTemplate[i]->getUnaligned();
 				rightFrag = rightFrag.substr(int(rightFrag.length() * 0.66));
 					
-				Sequence rightTemp(thisTemplate[i]->getName(), rightFrag);
+				Sequence rightTemp(userTemplate[i]->getName(), rightFrag);
 				databaseRight->addSequence(rightTemp);	
 			}
 			databaseRight->generateDB();
-			databaseRight->setNumSeqs(thisTemplate.size());
+			databaseRight->setNumSeqs(userTemplate.size());
 #endif	
 		}else if (searchMethod == "blast") {
 			
 			//generate blastdb
 			databaseLeft = new BlastDB(-1.0, -1.0, 1, -3);
 
-			for (int i = 0; i < thisTemplate.size(); i++) { if (m->control_pressed) { return thisTemplate; }  databaseLeft->addSequence(*thisTemplate[i]);	}
+			for (int i = 0; i < userTemplate.size(); i++) { if (m->control_pressed) { return 0; }  databaseLeft->addSequence(*userTemplate[i]);	}
 			databaseLeft->generateDB();
-			databaseLeft->setNumSeqs(thisTemplate.size());
+			databaseLeft->setNumSeqs(userTemplate.size());
 		}
 		
-		return thisTemplate;
+		return 0;
 		
 	}
 	catch(exception& e) {
@@ -407,6 +310,12 @@ ChimeraSlayer::~ChimeraSlayer() {
 	if (templateFileName != "self") {
 		if (searchMethod == "kmer") {  delete databaseRight;  delete databaseLeft;  }	
 		else if (searchMethod == "blast") {  delete databaseLeft; }
+	}else {
+		//delete userTemplate
+		for (int i = 0; i < userTemplate.size(); i++) {
+			delete userTemplate[i];
+		}
+		userTemplate.clear();
 	}
 }
 //***************************************************************************************************************
@@ -421,7 +330,7 @@ void ChimeraSlayer::printHeader(ostream& out) {
 Sequence* ChimeraSlayer::print(ostream& out, ostream& outAcc) {
 	try {
 		Sequence* trim = NULL;
-		if (trimChimera) { trim = trimQuery; }
+		if (trimChimera) { trim = new Sequence(trimQuery.getName(), trimQuery.getAligned()); }
 		
 		if (chimeraFlags == "yes") {
 			string chimeraFlag = "no";
@@ -448,13 +357,19 @@ Sequence* ChimeraSlayer::print(ostream& out, ostream& outAcc) {
 						}
 						trim->setAligned(newAligned);
 					}
-						
 				}
 			}
 			
 			printBlock(chimeraResults[0], chimeraFlag, out);
 			out << endl;
-		}else {  out << querySeq->getName() << "\tno" << endl;  }
+		}else {  
+			out << querySeq->getName() << "\tno" << endl; 
+			if (templateFileName == "self") {  
+				Sequence* temp = new Sequence(trimQuery.getName(), trimQuery.getAligned());
+				runFilter(temp);
+				userTemplate.push_back(temp);
+			}
+		}
 		
 		return trim;
 		
@@ -553,7 +468,14 @@ Sequence* ChimeraSlayer::print(ostream& out, ostream& outAcc, data_results leftP
 			
 			printBlock(leftPiece, rightPiece, leftChimeric, rightChimeric, chimeraFlag, out);
 			out << endl;
-		}else {  out << querySeq->getName() << "\tno" << endl;  }
+		}else {  
+			out << querySeq->getName() << "\tno" << endl;  
+			if (templateFileName == "self") {  
+				Sequence* temp = new Sequence(trimQuery.getName(), trimQuery.getAligned());
+				runFilter(temp);
+				userTemplate.push_back(temp);
+			}
+		}
 		
 		return trim;
 		
@@ -688,6 +610,12 @@ Sequence* ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc, data_results lef
 				
 			MPI_File_write_shared(out, buf, length, MPI_CHAR, &status);
 			delete buf;
+			
+			if (template == "self") {  
+				Sequence temp = new Sequence(trimQuery.getName(), trimQuery.getAligned());
+				runFilter(temp);
+				userTemplate.push_back(temp);
+			}
 		}
 		
 		
@@ -707,7 +635,7 @@ Sequence* ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc) {
 		string outputString = "";
 		
 		Sequence* trim = NULL;
-		if (trimChimera) { trim = trimQuery; }
+		if (trimChimera) { trim = new Sequence(trimQuery.getName(), trimQuery.getAligned()); }
 		
 		if (chimeraFlags == "yes") {
 			string chimeraFlag = "no";
@@ -766,6 +694,12 @@ Sequence* ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc) {
 			
 			MPI_File_write_shared(out, buf, length, MPI_CHAR, &status);
 			delete buf;
+			
+			if (template == "self") {  
+				Sequence temp = new Sequence(trimQuery.getName(), trimQuery.getAligned());
+				runFilter(temp);
+				userTemplate.push_back(temp);
+			}
 		}
 		
 		return trim;
@@ -780,10 +714,9 @@ Sequence* ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc) {
 //***************************************************************************************************************
 int ChimeraSlayer::getChimeras(Sequence* query) {
 	try {
-		if (trimChimera) {
-			trimQuery = new Sequence(query->getName(), query->getAligned());
-			printResults.trimQuery = *trimQuery; 
-		}
+		
+		trimQuery.setName(query->getName()); trimQuery.setAligned(query->getAligned());
+		printResults.trimQuery = trimQuery; 
 		
 		chimeraFlags = "no";
 		printResults.flag = "no";
@@ -797,7 +730,7 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 		//you must create a template
 		vector<Sequence*> thisTemplate;
 		if (templateFileName != "self") { thisTemplate = templateSeqs; }
-		else { thisTemplate = getTemplate(query); } //fills this template and creates the databases
+		else { getTemplate(query);  thisTemplate = userTemplate; } //fills this template and creates the databases
 		
 		if (m->control_pressed) {  return 0;  }
 		

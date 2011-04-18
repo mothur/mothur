@@ -1217,6 +1217,42 @@ map<string, int> MothurOut::readNames(string namefile) {
 		exit(1);
 	}
 }
+/**********************************************************************************************************************/
+int MothurOut::readNames(string namefile, vector<seqPriorityNode>& nameVector, map<string, string>& fastamap) { 
+	try {
+		int error = 0;
+		
+		//open input file
+		ifstream in;
+		openInputFile(namefile, in);
+		
+		while (!in.eof()) {
+			if (control_pressed) { break; }
+			
+			string firstCol, secondCol;
+			in >> firstCol >> secondCol; gobble(in);
+			
+			int num = getNumNames(secondCol);
+			
+			map<string, string>::iterator it = fastamap.find(firstCol);
+			if (it == fastamap.end()) {
+				error = 1;
+				mothurOut("[ERROR]: " + firstCol + " is not in your fastafile, but is in your namesfile, please correct."); mothurOutEndLine();
+			}else {
+				seqPriorityNode temp(num, it->second, firstCol);
+				nameVector.push_back(temp);
+			}
+		}
+		in.close();
+		
+		return error;
+		
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "readNames");
+		exit(1);
+	}
+}
 
 /***********************************************************************/
 

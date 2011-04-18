@@ -125,6 +125,15 @@ struct distlinePair {
 	int end;
 	
 };
+/************************************************************/
+struct seqPriorityNode {
+	int numIdentical;
+	string seq;
+	string name;
+	seqPriorityNode() {}
+	seqPriorityNode(int n, string s, string nm) : numIdentical(n), seq(s), name(nm) {}
+	~seqPriorityNode() {}
+};
 /***************************************************************/
 struct spearmanRank {
 	string name;
@@ -136,6 +145,11 @@ struct spearmanRank {
 //sorts highest to lowest
 inline bool compareSpearman(spearmanRank left, spearmanRank right){
 	return (left.score > right.score);	
+} 
+//********************************************************************************************************************
+//sorts highest to lowest
+inline bool compareSeqPriorityNodes(seqPriorityNode left, seqPriorityNode right){
+	return (left.numIdentical > right.numIdentical);	
 } 
 //********************************************************************************************************************
 //sorts lowest to highest
