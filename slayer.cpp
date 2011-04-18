@@ -38,6 +38,7 @@ string Slayer::getResults(Sequence* query, vector<Sequence*> refSeqs) {
 					return "no"; 
 				}
 					
+//				cout << divs.size() << endl;
 				vector<data_struct> selectedDivs;
 				for (int k = 0; k < divs.size(); k++) {
 					
@@ -275,6 +276,7 @@ vector<snps> Slayer::getSNPS(string parentA, string query, string parentB, int l
 					data.push_back(member);
 				}
 			}
+//			cout << i << '\t' << data.size() << endl;
 		}
 		
 		return data;
