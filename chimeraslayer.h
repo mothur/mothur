@@ -23,7 +23,7 @@ class ChimeraSlayer : public Chimera {
 	
 	public:
 		ChimeraSlayer(string, string, bool, string, int, int, int, int, float, int, int, int, int, int, int, int, int, bool);
-		ChimeraSlayer(string, string, bool, string, string, int, int, int, int, float, int, int, int, int, int, int, int, int, bool);
+		ChimeraSlayer(string, string, bool, map<string, int>&, string,  int, int, int, int, float, int, int, int, int, int, int, int, int, bool);
 
 		~ChimeraSlayer();
 		
@@ -46,9 +46,8 @@ class ChimeraSlayer : public Chimera {
 		map<int, int>  spotMap;
 		Database* databaseRight;
 		Database* databaseLeft;
-		vector<Sequence*> userTemplate;  //when template=self, the query file is sorted from most abundance to least abundant
-										 //userTemplate grows as the query file is processed by adding sequences that are not chimeric
-		set<string> namesOfChimericSeqs; //only used when template=self
+		map<string, int> priority; //for template=self, seqname, seqAligned, abundance
+		set<string> chimericSeqs; //for template=self, so we don't add chimeric sequences to the userTemplate set
 		
 		vector<data_struct>  chimeraResults;
 		data_results printResults;
@@ -62,7 +61,7 @@ class ChimeraSlayer : public Chimera {
 		string getBlock(data_struct, string);
 		string getBlock(data_results, data_results, bool, bool, string);
 		//int readNameFile(string);
-		int getTemplate(Sequence*);
+		vector<Sequence*> getTemplate(Sequence*);
 		
 };
 

@@ -381,12 +381,12 @@ int ChimeraSlayerCommand::execute(){
 				
 				//sort fastafile by abundance, returns new sorted fastafile name
 				m->mothurOut("Sorting fastafile according to abundance..."); cout.flush(); 
-				fastaFileNames[s] = sortFastaFile(fastaFileNames[s], nameFile);
+				map<string, int> priority = sortFastaFile(fastaFileNames[s], nameFile);
 				m->mothurOut("Done."); m->mothurOutEndLine();
 				
 				if (m->control_pressed) {  for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}  return 0;	}
 
-				chimera = new ChimeraSlayer(fastaFileNames[s], templatefile, trim, nameFile, search, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign);	
+				chimera = new ChimeraSlayer(fastaFileNames[s], templatefile, trim, priority, search, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign);	
 			}
 				
 			if (outputDir == "") { outputDir = m->hasPath(fastaFileNames[s]);  }//if user entered a file with a path then preserve it				
@@ -456,36 +456,45 @@ int ChimeraSlayerCommand::execute(){
 
 					MPIPos = m->setFilePosFasta(fastaFileNames[s], numSeqs); //fills MPIPos, returns numSeqs
 					
-					//send file positions to all processes
-					for(int i = 1; i < processors; i++) { 
-						MPI_Send(&numSeqs, 1, MPI_INT, i, tag, MPI_COMM_WORLD);
-						MPI_Send(&MPIPos[0], (numSeqs+1), MPI_LONG, i, tag, MPI_COMM_WORLD);
+					if (templatefile != "self") { //if template=self we can only use 1 processor
+						//send file positions to all processes
+						for(int i = 1; i < processors; i++) { 
+							MPI_Send(&numSeqs, 1, MPI_INT, i, tag, MPI_COMM_WORLD);
+							MPI_Send(&MPIPos[0], (numSeqs+1), MPI_LONG, i, tag, MPI_COMM_WORLD);
+						}
 					}
-					
 					//figure out how many sequences you have to align
 					numSeqsPerProcessor = numSeqs / processors;
 					int startIndex =  pid * numSeqsPerProcessor;
 					if(pid == (processors - 1)){	numSeqsPerProcessor = numSeqs - pid * numSeqsPerProcessor; 	}
-				
+					
+					if (templatefile == "self") { //if template=self we can only use 1 processor
+						startIndex = 0;
+						numSeqsPerProcessor = numSeqs;
+					}
+					
 					//do your part
 					driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPI, outMPIAccnos, outMPIFasta, MPIPos);
 					
 					if (m->control_pressed) { outputTypes.clear();  MPI_File_close(&inMPI);  MPI_File_close(&outMPI); if (trim) { MPI_File_close(&outMPIFasta); }  MPI_File_close(&outMPIAccnos);  for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}  remove(outputFileName.c_str());  remove(accnosFileName.c_str());  delete chimera; return 0;  }
 
 				}else{ //you are a child process
-					MPI_Recv(&numSeqs, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
-					MPIPos.resize(numSeqs+1);
-					MPI_Recv(&MPIPos[0], (numSeqs+1), MPI_LONG, 0, tag, MPI_COMM_WORLD, &status);
+					if (templatefile != "self") { //if template=self we can only use 1 processor
+						MPI_Recv(&numSeqs, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
+						MPIPos.resize(numSeqs+1);
+						MPI_Recv(&MPIPos[0], (numSeqs+1), MPI_LONG, 0, tag, MPI_COMM_WORLD, &status);
 					
-					//figure out how many sequences you have to align
-					numSeqsPerProcessor = numSeqs / processors;
-					int startIndex =  pid * numSeqsPerProcessor;
-					if(pid == (processors - 1)){	numSeqsPerProcessor = numSeqs - pid * numSeqsPerProcessor; 	}
+						//figure out how many sequences you have to align
+						numSeqsPerProcessor = numSeqs / processors;
+						int startIndex =  pid * numSeqsPerProcessor;
+						if(pid == (processors - 1)){	numSeqsPerProcessor = numSeqs - pid * numSeqsPerProcessor; 	}
 					
-					//do your part
-					driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPI, outMPIAccnos, outMPIFasta, MPIPos);
+						//do your part
+						driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPI, outMPIAccnos, outMPIFasta, MPIPos);
 					
-					if (m->control_pressed) { outputTypes.clear();  MPI_File_close(&inMPI);  MPI_File_close(&outMPI); if (trim) { MPI_File_close(&outMPIFasta); }  MPI_File_close(&outMPIAccnos);  for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}  delete chimera; return 0;  }
+						if (m->control_pressed) { outputTypes.clear();  MPI_File_close(&inMPI);  MPI_File_close(&outMPI); if (trim) { MPI_File_close(&outMPIFasta); }  MPI_File_close(&outMPIAccnos);  for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}  delete chimera; return 0;  }
+				
+					}
 				}
 				
 				//close files 
@@ -939,9 +948,9 @@ int ChimeraSlayerCommand::divideInHalf(Sequence querySeq, string& leftQuery, str
 	}
 }
 /**************************************************************************************************/
-
-string ChimeraSlayerCommand::sortFastaFile(string fastaFile, string nameFile) {
+map<string, int> ChimeraSlayerCommand::sortFastaFile(string fastaFile, string nameFile) {
 	try {
+		map<string, int> nameAbund;
 		
 		//read through fastafile and store info
 		map<string, string> seqs;
@@ -950,7 +959,7 @@ string ChimeraSlayerCommand::sortFastaFile(string fastaFile, string nameFile) {
 		
 		while (!in.eof()) {
 			
-			if (m->control_pressed) { in.close(); return ""; }
+			if (m->control_pressed) { in.close(); return nameAbund; }
 			
 			Sequence seq(in); m->gobble(in);
 			seqs[seq.getName()] = seq.getAligned();
@@ -962,10 +971,10 @@ string ChimeraSlayerCommand::sortFastaFile(string fastaFile, string nameFile) {
 		vector<seqPriorityNode> nameMapCount;
 		int error = m->readNames(nameFile, nameMapCount, seqs);
 		
-		if (m->control_pressed) { return ""; }
+		if (m->control_pressed) { return nameAbund; }
 		
-		if (error == 1) { m->control_pressed = true; return ""; }
-		if (seqs.size() != nameMapCount.size()) { m->mothurOut( "The number of sequences in your fastafile does not match the number of sequences in your namefile, aborting."); m->mothurOutEndLine(); m->control_pressed = true; return ""; }
+		if (error == 1) { m->control_pressed = true; return nameAbund; }
+		if (seqs.size() != nameMapCount.size()) { m->mothurOut( "The number of sequences in your fastafile does not match the number of sequences in your namefile, aborting."); m->mothurOutEndLine(); m->control_pressed = true; return nameAbund; }
 
 		sort(nameMapCount.begin(), nameMapCount.end(), compareSeqPriorityNodes);
 		
@@ -976,12 +985,13 @@ string ChimeraSlayerCommand::sortFastaFile(string fastaFile, string nameFile) {
 		//print new file in order of
 		for (int i = 0; i < nameMapCount.size(); i++) {
 			out << ">" << nameMapCount[i].name << endl << nameMapCount[i].seq << endl;
+			nameAbund[nameMapCount[i].name] = nameMapCount[i].numIdentical;
 		}
 		out.close();
 		
 		rename(newFasta.c_str(), fastaFile.c_str());
 				
-		return fastaFile;
+		return nameAbund;
 		
 	}
 	catch(exception& e) {

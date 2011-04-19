@@ -44,7 +44,7 @@ private:
 	int driver(linePair*, string, string, string, string);
 	int createProcesses(string, string, string, string);
 	int divideInHalf(Sequence, string&, string&);
-	string sortFastaFile(string, string);
+	map<string, int> sortFastaFile(string, string);
 		
 	#ifdef USE_MPI
 	int driverMPI(int, int, MPI_File&, MPI_File&, MPI_File&, MPI_File&, vector<unsigned long int>&);

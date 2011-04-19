@@ -45,7 +45,7 @@ int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int num
 	}
 }
 //***************************************************************************************************************
-ChimeraSlayer::ChimeraSlayer(string file, string temp, bool trim, string name, string mode, int k, int ms, int mms, int win, float div, 
+ChimeraSlayer::ChimeraSlayer(string file, string temp, bool trim, map<string, int>& prior, string mode, int k, int ms, int mms, int win, float div, 
 							 int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int numw, bool r) : Chimera()  {  	
 	try {
 		fastafile = file; templateSeqs = readSeqs(fastafile);
@@ -66,14 +66,16 @@ ChimeraSlayer::ChimeraSlayer(string file, string temp, bool trim, string name, s
 		numWanted = numw;
 		realign = r; 
 		trimChimera = trim;
+		priority = prior;
 		
 		decalc = new DeCalculator();	
 		
 		createFilter(templateSeqs, 0.0); //just removed columns where all seqs have a gap
 		
 		//run filter on template
-		for (int i = 0; i < templateSeqs.size(); i++) { delete templateSeqs[i];  } templateSeqs.clear();
-		 
+		for (int i = 0; i < templateSeqs.size(); i++) {  if (m->control_pressed) {  break; }  runFilter(templateSeqs[i]);  }
+
+		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ChimeraSlayer", "ChimeraSlayer");
@@ -217,8 +219,25 @@ int ChimeraSlayer::doPrep() {
 	}
 }
 //***************************************************************************************************************
-int ChimeraSlayer::getTemplate(Sequence* q) {
+vector<Sequence*> ChimeraSlayer::getTemplate(Sequence* q) {
 	try {
+		
+		//when template=self, the query file is sorted from most abundance to least abundant
+		//userTemplate grows as the query file is processed by adding sequences that are not chimeric and more abundant
+		vector<Sequence*> userTemplate;
+		
+		int myAbund = priority[q->getName()];
+		
+		for (int i = 0; i < templateSeqs.size(); i++) {
+			
+			if (m->control_pressed) { return userTemplate; } 
+			
+			//have I reached a sequence with the same abundance as myself?
+			if (!(priority[templateSeqs[i]->getName()] > myAbund)) { break; }
+			
+			//if its am not chimeric add it
+			if (chimericSeqs.count(templateSeqs[i]->getName()) == 0) { userTemplate.push_back(templateSeqs[i]); }
+		}
 		
 		string 	kmerDBNameLeft;
 		string 	kmerDBNameRight;
@@ -234,7 +253,7 @@ int ChimeraSlayer::getTemplate(Sequence* q) {
 #ifdef USE_MPI
 			for (int i = 0; i < userTemplate.size(); i++) {
 				
-				if (m->control_pressed) { return 0; } 
+				if (m->control_pressed) { return userTemplate; } 
 				
 				string leftFrag = userTemplate[i]->getUnaligned();
 				leftFrag = leftFrag.substr(0, int(leftFrag.length() * 0.33));
@@ -246,7 +265,7 @@ int ChimeraSlayer::getTemplate(Sequence* q) {
 			databaseLeft->setNumSeqs(userTemplate.size());
 			
 			for (int i = 0; i < userTemplate.size(); i++) {
-				if (m->control_pressed) { return 0;  } 
+				if (m->control_pressed) { return userTemplate; } 
 				
 				string rightFrag = userTemplate[i]->getUnaligned();
 				rightFrag = rightFrag.substr(int(rightFrag.length() * 0.66));
@@ -262,7 +281,7 @@ int ChimeraSlayer::getTemplate(Sequence* q) {
 			
 			for (int i = 0; i < userTemplate.size(); i++) {
 				
-				if (m->control_pressed) { return 0; } 
+				if (m->control_pressed) { return userTemplate; } 
 				
 				string leftFrag = userTemplate[i]->getUnaligned();
 				leftFrag = leftFrag.substr(0, int(leftFrag.length() * 0.33));
@@ -274,7 +293,7 @@ int ChimeraSlayer::getTemplate(Sequence* q) {
 			databaseLeft->setNumSeqs(userTemplate.size());
 				
 			for (int i = 0; i < userTemplate.size(); i++) {
-				if (m->control_pressed) { return 0; } 
+				if (m->control_pressed) { return userTemplate; }  
 					
 				string rightFrag = userTemplate[i]->getUnaligned();
 				rightFrag = rightFrag.substr(int(rightFrag.length() * 0.66));
@@ -290,12 +309,12 @@ int ChimeraSlayer::getTemplate(Sequence* q) {
 			//generate blastdb
 			databaseLeft = new BlastDB(-1.0, -1.0, 1, -3);
 
-			for (int i = 0; i < userTemplate.size(); i++) { if (m->control_pressed) { return 0; }  databaseLeft->addSequence(*userTemplate[i]);	}
+			for (int i = 0; i < userTemplate.size(); i++) { if (m->control_pressed) { return userTemplate; }   databaseLeft->addSequence(*userTemplate[i]);	}
 			databaseLeft->generateDB();
 			databaseLeft->setNumSeqs(userTemplate.size());
 		}
 		
-		return 0;
+		return userTemplate;
 		
 	}
 	catch(exception& e) {
@@ -310,12 +329,6 @@ ChimeraSlayer::~ChimeraSlayer() {
 	if (templateFileName != "self") {
 		if (searchMethod == "kmer") {  delete databaseRight;  delete databaseLeft;  }	
 		else if (searchMethod == "blast") {  delete databaseLeft; }
-	}else {
-		//delete userTemplate
-		for (int i = 0; i < userTemplate.size(); i++) {
-			delete userTemplate[i];
-		}
-		userTemplate.clear();
 	}
 }
 //***************************************************************************************************************
@@ -344,6 +357,8 @@ Sequence* ChimeraSlayer::print(ostream& out, ostream& outAcc) {
 					m->mothurOut(querySeq->getName() + "\tyes"); m->mothurOutEndLine();
 					outAcc << querySeq->getName() << endl;
 					
+					if (templateFileName == "self") {  chimericSeqs.insert(querySeq->getName()); }
+					
 					if (trimChimera) {  
 						int lengthLeft = spotMap[chimeraResults[0].winLEnd] - spotMap[chimeraResults[0].winLStart];
 						int lengthRight = spotMap[chimeraResults[0].winREnd] - spotMap[chimeraResults[0].winRStart];
@@ -364,11 +379,6 @@ Sequence* ChimeraSlayer::print(ostream& out, ostream& outAcc) {
 			out << endl;
 		}else {  
 			out << querySeq->getName() << "\tno" << endl; 
-			if (templateFileName == "self") {  
-				Sequence* temp = new Sequence(trimQuery.getName(), trimQuery.getAligned());
-				runFilter(temp);
-				userTemplate.push_back(temp);
-			}
 		}
 		
 		return trim;
@@ -416,6 +426,8 @@ Sequence* ChimeraSlayer::print(ostream& out, ostream& outAcc, data_results leftP
 				if (rightChimeric || leftChimeric) {
 					m->mothurOut(querySeq->getName() + "\tyes"); m->mothurOutEndLine();
 					outAcc << querySeq->getName() << endl;
+					
+					if (templateFileName == "self") {  chimericSeqs.insert(querySeq->getName()); }
 					
 					if (trimChimera) {  
 						string newAligned = trim->getAligned();
@@ -470,11 +482,6 @@ Sequence* ChimeraSlayer::print(ostream& out, ostream& outAcc, data_results leftP
 			out << endl;
 		}else {  
 			out << querySeq->getName() << "\tno" << endl;  
-			if (templateFileName == "self") {  
-				Sequence* temp = new Sequence(trimQuery.getName(), trimQuery.getAligned());
-				runFilter(temp);
-				userTemplate.push_back(temp);
-			}
 		}
 		
 		return trim;
@@ -531,6 +538,8 @@ Sequence* ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc, data_results lef
 					cout << querySeq->getName() <<  "\tyes" << endl;
 					outAccString += querySeq->getName() + "\n";
 					results = true;
+					
+					if (templateFileName == "self") {  chimericSeqs.insert(querySeq->getName()); }
 					
 					//write to accnos file
 					int length = outAccString.length();
@@ -610,12 +619,6 @@ Sequence* ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc, data_results lef
 				
 			MPI_File_write_shared(out, buf, length, MPI_CHAR, &status);
 			delete buf;
-			
-			if (template == "self") {  
-				Sequence temp = new Sequence(trimQuery.getName(), trimQuery.getAligned());
-				runFilter(temp);
-				userTemplate.push_back(temp);
-			}
 		}
 		
 		
@@ -649,6 +652,8 @@ Sequence* ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc) {
 					cout << querySeq->getName() <<  "\tyes" << endl;
 					outAccString += querySeq->getName() + "\n";
 					results = true;
+					
+					if (templateFileName == "self") {  chimericSeqs.insert(querySeq->getName()); }
 					
 					//write to accnos file
 					int length = outAccString.length();
@@ -694,12 +699,6 @@ Sequence* ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc) {
 			
 			MPI_File_write_shared(out, buf, length, MPI_CHAR, &status);
 			delete buf;
-			
-			if (template == "self") {  
-				Sequence temp = new Sequence(trimQuery.getName(), trimQuery.getAligned());
-				runFilter(temp);
-				userTemplate.push_back(temp);
-			}
 		}
 		
 		return trim;
@@ -730,7 +729,7 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 		//you must create a template
 		vector<Sequence*> thisTemplate;
 		if (templateFileName != "self") { thisTemplate = templateSeqs; }
-		else { getTemplate(query);  thisTemplate = userTemplate; } //fills this template and creates the databases
+		else {  thisTemplate = getTemplate(query);  } //fills this template and creates the databases
 		
 		if (m->control_pressed) {  return 0;  }
 		
