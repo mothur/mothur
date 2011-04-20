@@ -27,7 +27,7 @@ vector<string> ChimeraSlayerCommand::setParameters(){
 		CommandParameter pminbs("minbs", "Number", "", "90", "", "", "",false,false); parameters.push_back(pminbs);
 		CommandParameter psearch("search", "Multiple", "kmer-blast-distance", "distance", "", "", "",false,false); parameters.push_back(psearch);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
-		CommandParameter prealign("realign", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(prealign);
+		CommandParameter prealign("realign", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(prealign);
 		CommandParameter ptrim("trim", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(ptrim);
 		CommandParameter psplit("split", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(psplit);
 		CommandParameter pnumwanted("numwanted", "Number", "", "15", "", "", "",false,false); parameters.push_back(pnumwanted);
@@ -53,7 +53,7 @@ string ChimeraSlayerCommand::getHelpString(){
 		string helpString = "";
 		helpString += "The chimera.slayer command reads a fastafile and referencefile and outputs potentially chimeric sequences.\n";
 		helpString += "This command was modeled after the chimeraSlayer written by the Broad Institute.\n";
-		helpString += "The chimera.slayer command parameters are fasta, name, template, processors, trim, ksize, window, match, mismatch, divergence. minsim, mincov, minbs, minsnp, parents, search, iters, increment and numwanted.\n"; //realign,
+		helpString += "The chimera.slayer command parameters are fasta, name, template, processors, trim, ksize, window, match, mismatch, divergence. minsim, mincov, minbs, minsnp, parents, search, iters, increment, numwanted, and realign.\n";
 		helpString += "The fasta parameter allows you to enter the fasta file containing your potentially chimeric sequences, and is required, unless you have a valid current fasta file. \n";
 		helpString += "The name parameter allows you to provide a name file, if you are using template=self. \n";
 		helpString += "You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amazon.fasta \n";
@@ -78,7 +78,7 @@ string ChimeraSlayerCommand::getHelpString(){
 		helpString += "The minbs parameter allows you to specify minimum bootstrap support for calling a sequence chimeric. Default is 90, meaning 90%. \n";
 		helpString += "The minsnp parameter allows you to specify percent of SNPs to sample on each side of breakpoint for computing bootstrap support (default: 100) \n";
 		helpString += "The search parameter allows you to specify search method for finding the closest parent. Choices are distance, blast, and kmer, default distance. \n";
-		helpString += "The realign parameter allows you to realign the query to the potential parents. Choices are true or false, default false.  \n";
+		helpString += "The realign parameter allows you to realign the query to the potential parents. Choices are true or false, default true.  \n";
 		helpString += "The chimera.slayer command should be in the following format: \n";
 		helpString += "chimera.slayer(fasta=yourFastaFile, reference=yourTemplate, search=yourSearch) \n";
 		helpString += "Example: chimera.slayer(fasta=AD.align, reference=core_set_aligned.imputed.fasta, search=kmer) \n";

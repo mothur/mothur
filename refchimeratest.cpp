@@ -112,9 +112,11 @@ int RefChimeraTest::getMismatches(string& querySeq, vector<vector<int> >& left, 
 	for(int i=0;i<numRefSeqs;i++){
 		
 		int lDiffs = 0;
+		
 		for(int l=0;l<alignLength;l++){
 //			if(querySeq[l] != '.' && querySeq[l] != referenceSeqs[i][l]){
-			if(querySeq[l] != '.' && referenceSeqs[i][l] != '.' && querySeq[l] != referenceSeqs[i][l]){
+						
+			if(querySeq[l] != '.' && referenceSeqs[i][l] != '.' && querySeq[l] != referenceSeqs[i][l] && referenceSeqs[i][l] != 'N'){
 				lDiffs++;
 			}
 			left[i][l] = lDiffs;
@@ -124,11 +126,12 @@ int RefChimeraTest::getMismatches(string& querySeq, vector<vector<int> >& left, 
 		int index = 0;
 		for(int l=alignLength-1;l>=0;l--){
 //			if(querySeq[l] != '.' && querySeq[l] != referenceSeqs[i][l]){
-			if(querySeq[l] != '.' && referenceSeqs[i][l] != '.' && querySeq[l] != referenceSeqs[i][l]){
+			if(querySeq[l] != '.' && referenceSeqs[i][l] != '.' && querySeq[l] != referenceSeqs[i][l] && referenceSeqs[i][l] != 'N'){
 				rDiffs++;
 			}			
 			right[i][index++] = rDiffs;
 		}
+		
 		if(lDiffs < bestSequenceMismatch){
 			bestSequenceMismatch = lDiffs;
 			bestRefSeq = i;
@@ -259,8 +262,8 @@ double RefChimeraTest::calcDistToChimera(string& querySeq, string& chimeraRefSeq
 	
 	for(int i=0;i<alignLength;i++){
 //		if(querySeq[i] != '.' && chimeraRefSeq[i] != '.'){
-		if(chimeraRefSeq[i] != '.'){
-			if(querySeq[i] == '-' && chimeraRefSeq[i] == '-'){	/*	do nothing	*/	}
+		if(chimeraRefSeq[i] != '.' && querySeq[i] != '.'){
+			if(querySeq[i] == '-' && chimeraRefSeq[i] == '-' && chimeraRefSeq[i] != 'N'){	/*	do nothing	*/	}
 			else if(querySeq[i] == chimeraRefSeq[i]){
 				match++;
 			}

@@ -12,7 +12,7 @@
 #include "dist.h"
 #include "eachgapdist.h"
 #include "ignoregaps.h"
-
+#include "eachgapdistignorens.h"
 
 //***************************************************************************************************************
 void DeCalculator::setMask(string ms) { 
@@ -692,7 +692,7 @@ vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*
 		vector<SeqDist> distsLeft;
 		vector<SeqDist> distsRight;
 		
-		Dist* distcalculator = new eachGapDist();
+		Dist* distcalculator = new eachGapDistIgnoreNs();
 		
 		string queryUnAligned = querySeq->getUnaligned();
 		int numBases = int(queryUnAligned.length() * 0.33);
@@ -780,7 +780,15 @@ vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*
 		//sort by smallest distance
 		sort(distsRight.begin(), distsRight.end(), compareSeqDist);
 		sort(distsLeft.begin(), distsLeft.end(), compareSeqDist);
-				
+//		cout << distsLeft.size() << '\t' << distsRight.size() << endl;
+//		for(int i=0;i<15;i++){
+//			cout << "left\t" << db[distsLeft[i].index]->getName() << '\t' << distsLeft[i].dist << endl;
+//		}
+//		for(int i=0;i<15;i++){
+//			cout << "right\t" << db[distsLeft[i].index]->getName() << '\t' << distsRight[i].dist << endl;
+//		}
+		
+		
 		//merge results		
 		map<string, string> seen;
 		map<string, string>::iterator it;
@@ -796,6 +804,7 @@ vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*
 				dists.push_back(distsLeft[i]);
 				seen[db[distsLeft[i].index]->getName()] = db[distsLeft[i].index]->getName();
 				lastLeft =  distsLeft[i].dist;
+//				cout << "loop-left\t" << db[distsLeft[i].index]->getName() << '\t' << distsLeft[i].dist << endl;
 			}
 
 			//add right if you havent already
@@ -804,27 +813,52 @@ vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*
 				dists.push_back(distsRight[i]);
 				seen[db[distsRight[i].index]->getName()] = db[distsRight[i].index]->getName();
 				lastRight =  distsRight[i].dist;
+//				cout << "loop-right\t" << db[distsRight[i].index]->getName() << '\t' << distsRight[i].dist << endl;
 			}
 			
 			if (dists.size() > numWanted) { lasti = i; break; } //you have enough results
 		}
 		
+//		cout << "lastLeft\t" << lastLeft << endl;
+		
 		//add in dups
 		lasti++;
 		int i = lasti;
 		while (i < distsLeft.size()) {  
-			if (distsLeft[i].dist == lastLeft) {  dists.push_back(distsLeft[i]);  numWanted++; }
+			if (distsLeft[i].dist == lastLeft) {
+				it = seen.find(db[distsLeft[i].index]->getName());
+
+				if (it == seen.end()) {  
+//					cout << "newLoop-left\t" << db[distsLeft[i].index]->getName() << '\t' << distsLeft[i].dist <<  endl;
+					dists.push_back(distsLeft[i]);
+					seen[db[distsRight[i].index]->getName()] = db[distsLeft[i].index]->getName();
+//					numWanted++; 
+				}
+			}
 			else { break; }
 			i++;
 		}
 		
+//		cout << "lastRight\t" << lastRight << endl;
+
 		i = lasti;
 		while (i < distsRight.size()) {  
-			if (distsRight[i].dist == lastRight) {  dists.push_back(distsRight[i]);  numWanted++; }
+			if (distsRight[i].dist == lastRight) {
+				it = seen.find(db[distsRight[i].index]->getName());
+				
+				if (it == seen.end()) {  
+//					cout << "newLoop-right\t" << db[distsRight[i].index]->getName() << '\t' << distsRight[i].dist << endl;
+					dists.push_back(distsRight[i]);
+					seen[db[distsRight[i].index]->getName()] = db[distsRight[i].index]->getName();
+//					numWanted++; 
+				}
+			}
 			else { break; }
 			i++;
 		}
 
+		numWanted = seen.size();
+		
 		if (numWanted > dists.size()) { 
 			//m->mothurOut("numwanted is larger than the number of template sequences, adjusting numwanted."); m->mothurOutEndLine(); 
 			numWanted = dists.size();
@@ -832,7 +866,7 @@ vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*
 
 //cout << numWanted << endl;
 		for (int i = 0; i < numWanted; i++) {
-//cout << dists[i].seq->getName() << '\t' << dists[i].dist << endl;
+//			cout << db[dists[i].index]->getName() << '\t' << dists[i].dist << endl;
 
 			Sequence* temp = new Sequence(db[dists[i].index]->getName(), db[dists[i].index]->getAligned()); //have to make a copy so you can trim and filter without stepping on eachother.
 			
@@ -853,7 +887,7 @@ Sequence* DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*> db) {
 		
 		Sequence* seqsMatch;  
 		
-		Dist* distcalculator = new eachGapDist();
+		Dist* distcalculator = new eachGapDistIgnoreNs();
 		int index = 0;
 		int smallest = 1000000;
 		

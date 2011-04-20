@@ -88,7 +88,8 @@ string Maligner::chimeraMaligner(int chimeraPenalty, DeCalculator* decalc) {
 
 		vector<Sequence*> temp = refSeqs;
 		temp.push_back(query);
-		
+			
+			
 		verticalFilter(temp);
 
 		vector< vector<score_struct> > matrix = buildScoreMatrix(query->getAligned().length(), refSeqs.size()); //builds and initializes
@@ -204,7 +205,7 @@ int Maligner::computeChimeraPenalty() {
 		
 		int numAllowable = ((1.0 - (1.0/minDivR)) * query->getNumBases());
 
-//		if(numAllowable < 2){	numAllowable = 2;	}
+//		if(numAllowable < 1){	numAllowable = 1;	}
 		
 		int penalty = int(numAllowable + 1) * misMatchPenalty;
 
@@ -314,7 +315,7 @@ void Maligner::fillScoreMatrix(vector<vector<score_struct> >& ms, vector<Sequenc
 			if ((!isalpha(queryAligned[0])) && (!isalpha(subjectAligned[0]))) {
 				ms[i][0].score = 0;
 //				ms[i][0].mismatches = 0;
-			}else if (queryAligned[0] == subjectAligned[0]) {
+			}else if (queryAligned[0] == subjectAligned[0] || subjectAligned[0] == 'N') {
 				ms[i][0].score = matchScore;
 //				ms[i][0].mismatches = 0;
 			}else{
@@ -335,6 +336,7 @@ void Maligner::fillScoreMatrix(vector<vector<score_struct> >& ms, vector<Sequenc
 				if ((!isalpha(queryAligned[j])) && (!isalpha(subjectAligned[j]))) {
 					//leave the same
 				}else if ((toupper(queryAligned[j]) == 'N') || (toupper(subjectAligned[j]) == 'N')) {
+					matchMisMatchScore = matchScore;
 					//leave the same
 				}else if (queryAligned[j] == subjectAligned[j]) {
 					matchMisMatchScore = matchScore;
@@ -421,11 +423,10 @@ vector<trace_struct> Maligner::extractHighestPath(vector<vector<score_struct> > 
 			}
 		}
 			
-//		cout << highestScore << '\t' << highestStruct.size() << endl;	
+//		cout << endl << highestScore << '\t' << highestStruct.size() << '\t' << highestStruct[0].row << endl;	
 		
 		vector<trace_struct> maxTrace;
 		double maxPercentIdenticalQueryAntiChimera = 0;
-		int maxIndex = -1;
 		
 		for(int i=0;i<highestStruct.size();i++){
 			
@@ -453,11 +454,7 @@ vector<trace_struct> Maligner::extractHighestPath(vector<vector<score_struct> > 
 //			for(int j=0;j<trace.size();j++){
 //				cout << trace[j].col << '\t' << trace[j].oldCol << '\t' << refSeqs[trace[j].row]->getName() << endl;
 //			}
-			
-//			Need to do something with this in a bit...
-//			if (trace.size() > 1) {		chimera = "yes";	}
-//			else { chimera = "no";	}
-			
+						
 			int traceStart = path[0].col;
 			int traceEnd = path[path.size()-1].col;	
 //			cout << "traceStart/End\t" << traceStart << '\t' << traceEnd << endl;
@@ -475,10 +472,9 @@ vector<trace_struct> Maligner::extractHighestPath(vector<vector<score_struct> > 
 			if(percentIdenticalQueryAntiChimera > maxPercentIdenticalQueryAntiChimera){
 				maxPercentIdenticalQueryAntiChimera = percentIdenticalQueryAntiChimera;
 				maxTrace = trace;
-				maxIndex = i;
 			}
 		}
-//		cout << maxPercentIdenticalQueryAntiChimera << '\t' << maxIndex << endl;
+//		cout << maxPercentIdenticalQueryAntiChimera << endl;
 		return maxTrace;
 		
 	}

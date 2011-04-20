@@ -313,10 +313,10 @@ int SeqErrorCommand::execute(){
 			else{	minCompare.weight = 1;	}
 
 			printErrorData(minCompare, numParentSeqs);
-
+		
 			if(!ignoreSeq){
-				
-				for(int i=0;i<minCompare.total;i++){
+
+				for(int i=0;i<minCompare.sequence.length();i++){
 					char letter = minCompare.sequence[i];
 
 					errorForward[letter][i] += minCompare.weight;
@@ -429,12 +429,13 @@ void SeqErrorCommand::getReferences(){
 			int numAmbigs = currentSeq.getAmbigBases();
 			if(numAmbigs > 0){	numAmbigSeqs++;	}
 			
-			int startPos = currentSeq.getStartPos();
-			if(startPos > maxStartPos)	{	maxStartPos = startPos;	}
-
-			int endPos = currentSeq.getEndPos();
-			if(endPos < minEndPos)		{	minEndPos = endPos;		}
+//			int startPos = currentSeq.getStartPos();
+//			if(startPos > maxStartPos)	{	maxStartPos = startPos;	}
+//
+//			int endPos = currentSeq.getEndPos();
+//			if(endPos < minEndPos)		{	minEndPos = endPos;		}
 			referenceSeqs.push_back(currentSeq);
+				
 			m->gobble(referenceFile);
 		}
 		referenceFile.close();

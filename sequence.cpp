@@ -233,6 +233,9 @@ string Sequence::getSequenceString(ifstream& fastaFile) {
 			else if(isprint(letter)){
 				letter = toupper(letter);
 				if(letter == 'U'){letter = 'T';}
+				if(letter != '.' && letter != '-' && letter != 'A' && letter != 'T' && letter != 'G'  && letter != 'C'){
+					letter = 'N';
+				}
 				sequence += letter;
 			}
 		}
