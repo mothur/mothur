@@ -310,6 +310,7 @@
 /* Begin PBXFileReference section */
 		7E6BE10812F710D8007ADDBE /* refchimeratest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = refchimeratest.h; sourceTree = "<group>"; };
 		7E6BE10912F710D8007ADDBE /* refchimeratest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = refchimeratest.cpp; sourceTree = "<group>"; };
+		7E78911B135F3E8600E725D2 /* eachgapdistignorens.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = eachgapdistignorens.h; sourceTree = "<group>"; };
 		8DD76FB20486AB0100D96B5E /* Mothur */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Mothur; sourceTree = BUILT_PRODUCTS_DIR; };
 		A70332B512D3A13400761E33 /* makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = makefile; sourceTree = "<group>"; };
 		A713EBAA12DC7613000092AC /* readphylipvector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readphylipvector.h; sourceTree = "<group>"; };
@@ -1259,6 +1260,7 @@
 		A7E9BA3F12D395F700DA6239 /* calculators */ = {
 			isa = PBXGroup;
 			children = (
+				7E78911B135F3E8600E725D2 /* eachgapdistignorens.h */,
 				A7E9B64F12D37EC300DA6239 /* ace.cpp */,
 				A7E9B65012D37EC300DA6239 /* ace.h */,
 				A7E9B65E12D37EC300DA6239 /* bergerparker.cpp */,
