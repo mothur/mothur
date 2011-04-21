@@ -116,6 +116,7 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n) {
 		vector<int> topMatches;
 		
 		ofstream queryFile;
+
 		m->openOutputFile((queryFileName+seq->getName()), queryFile);
 		queryFile << '>' << seq->getName() << endl;
 		queryFile << seq->getUnaligned() << endl;
@@ -154,7 +155,7 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n) {
 		return topMatches;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "BlastDB", "findClosest");
+		m->errorOut(e, "BlastDB", "findClosestMegaBlast");
 		exit(1);
 	}
 }
