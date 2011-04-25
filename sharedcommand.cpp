@@ -58,6 +58,7 @@ SharedCommand::SharedCommand(){
 		vector<string> tempOutNames;
 		outputTypes["rabund"] = tempOutNames;
 		outputTypes["shared"] = tempOutNames;
+		outputTypes["group"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SharedCommand", "SharedCommand");
@@ -136,7 +137,7 @@ SharedCommand::SharedCommand(string option)  {
 			 else if (ordergroupfile == "not found") { ordergroupfile = ""; }
 			 			 
 			 groupfile = validParameter.validFile(parameters, "group", true);
-			 if (groupfile == "not open") { abort = true; }	
+			 if (groupfile == "not open") { groupfile = ""; abort = true; }	
 			 else if (groupfile == "not found") { 
 				 groupfile = m->getGroupFile(); 
 				 if (groupfile != "") { 
@@ -172,41 +173,6 @@ SharedCommand::SharedCommand(string option)  {
 				 if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
 				 else { allLines = 1;  }
 			 }
-			
-			//getting output filename
-			filename = listfile;
-			if (outputDir == "") { outputDir += m->hasPath(filename); }
-					
-			filename = outputDir + m->getRootName(m->getSimpleName(filename));
-			filename = filename + "shared";
-			outputTypes["shared"].push_back(filename);
-				
-			m->openOutputFile(filename, out);
-			pickedGroups = false;
-						
-			//if hte user has not specified any groups then use them all
-			if (Groups.size() == 0) {
-				Groups = groupMap->namesOfGroups; m->Groups = Groups;
-			}
-			
-			//fill filehandles with neccessary ofstreams
-			int i;
-			ofstream* temp;
-			for (i=0; i<Groups.size(); i++) {
-				temp = new ofstream;
-				filehandles[Groups[i]] = temp;
-			}
-				
-			//set fileroot
-			fileroot = outputDir + m->getRootName(m->getSimpleName(listfile));
-				
-			//clears file before we start to write to it below
-			for (int i=0; i<Groups.size(); i++) {
-				remove((fileroot + Groups[i] + ".rabund").c_str());
-				outputNames.push_back((fileroot + Groups[i] + ".rabund"));
-				outputTypes["rabund"].push_back((fileroot + Groups[i] + ".rabund"));
-			}
-			
 		}
 		
 	}
@@ -221,6 +187,41 @@ int SharedCommand::execute(){
 	try {
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		
+		//getting output filename
+		filename = listfile;
+		
+		if (outputDir == "") { outputDir += m->hasPath(filename); }
+		
+		filename = outputDir + m->getRootName(m->getSimpleName(filename));
+		filename = filename + "shared";
+		outputTypes["shared"].push_back(filename);
+		
+		m->openOutputFile(filename, out);
+		pickedGroups = false;
+		
+		//if hte user has not specified any groups then use them all
+		if (Groups.size() == 0) {
+			Groups = groupMap->namesOfGroups; m->Groups = Groups;
+		}else { pickedGroups = true; }
+		
+		//fill filehandles with neccessary ofstreams
+		int i;
+		ofstream* temp;
+		for (i=0; i<Groups.size(); i++) {
+			temp = new ofstream;
+			filehandles[Groups[i]] = temp;
+		}
+		
+		//set fileroot
+		fileroot = outputDir + m->getRootName(m->getSimpleName(listfile));
+		
+		//clears file before we start to write to it below
+		for (int i=0; i<Groups.size(); i++) {
+			remove((fileroot + Groups[i] + ".rabund").c_str());
+			outputNames.push_back((fileroot + Groups[i] + ".rabund"));
+			outputTypes["rabund"].push_back((fileroot + Groups[i] + ".rabund"));
+		}
 		
 		//lookup.clear();
 		string errorOff = "no error";
@@ -261,7 +262,7 @@ int SharedCommand::execute(){
 		}
 		
 		//if user has specified groups make new groupfile for them
-		if (m->Groups.size() != 0) { //make new group file
+		if (pickedGroups) { //make new group file
 			string groups = "";
 			if (m->Groups.size() < 4) {
 				for (int i = 0; i < m->Groups.size(); i++) {
@@ -270,6 +271,8 @@ int SharedCommand::execute(){
 			}else { groups = "merge"; }
 		
 			string newGroupFile = outputDir + m->getRootName(m->getSimpleName(listfile)) + groups + "groups";
+			outputTypes["group"].push_back(newGroupFile); 
+			outputNames.push_back(newGroupFile);
 			ofstream outGroups;
 			m->openOutputFile(newGroupFile, outGroups);
 		
@@ -419,6 +422,11 @@ int SharedCommand::execute(){
 		if (itTypes != outputTypes.end()) {
 			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setSharedFile(current); }
 		}	
+		
+		itTypes = outputTypes.find("group");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setGroupFile(current); }
+		}
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();

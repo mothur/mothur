@@ -106,7 +106,7 @@ string Maligner::chimeraMaligner(int chimeraPenalty, DeCalculator* decalc) {
 //		}
 		
 		if (trace.size() > 1) {		chimera = "yes";	}
-		else { chimera = "no";	}
+		else { chimera = "no";	return chimera; }
 		
 		int traceStart = trace[0].col;
 		int traceEnd = trace[trace.size()-1].oldCol;	

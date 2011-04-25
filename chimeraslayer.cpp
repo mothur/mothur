@@ -751,13 +751,13 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 		if (m->control_pressed) {  return 0;  }
 		
 		vector<results> Results = maligner.getOutput();
-	
-		if (realign) {
-			ChimeraReAligner realigner(thisTemplate, match, misMatch);
-			realigner.reAlign(query, Results);
-		}
 
 		if (chimeraFlag == "yes") {
+			
+			if (realign) {
+				ChimeraReAligner realigner(thisTemplate, match, misMatch);
+				realigner.reAlign(query, Results);
+			}
 			
 			//get sequence that were given from maligner results
 			vector<SeqDist> seqs;

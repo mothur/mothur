@@ -635,7 +635,7 @@ int ChimeraSlayerCommand::driver(linePair* filePos, string outputFName, string f
 		
 			Sequence* candidateSeq = new Sequence(inFASTA);  m->gobble(inFASTA);
 			string candidateAligned = candidateSeq->getAligned();
-				
+			
 			if (candidateSeq->getName() != "") { //incase there is a commented sequence at the end of a file
 				
 				if (candidateSeq->getAligned().length() != templateSeqsLength) {  
@@ -698,15 +698,16 @@ int ChimeraSlayerCommand::driver(linePair* filePos, string outputFName, string f
 				}
 				count++;
 			}
-			delete candidateSeq;
 			
 			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 				unsigned long int pos = inFASTA.tellg();
+			//cout << candidateSeq->getName() << '\t' << pos << endl;
 				if ((pos == -1) || (pos >= filePos->end)) { break; }
 			#else
 				if (inFASTA.eof()) { break; }
 			#endif
 			
+			delete candidateSeq;
 			//report progress
 			if((count) % 100 == 0){	m->mothurOut("Processing sequence: " + toString(count)); m->mothurOutEndLine();		}
 		}
