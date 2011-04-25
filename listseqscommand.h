@@ -21,7 +21,7 @@ class ListSeqsCommand : public Command {
 		~ListSeqsCommand(){}
 	
 		vector<string> setParameters();
-		string getCommandName()			{ return "get.seqs";				}
+		string getCommandName()			{ return "list.seqs";				}
 		string getCommandCategory()		{ return "Sequence Processing";		}
 		string getHelpString();	
 	

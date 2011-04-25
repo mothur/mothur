@@ -633,20 +633,30 @@ vector<Sequence*> Maligner::getBlastSeqs(Sequence* q, int num) {
 		Sequence* queryRight = new Sequence(q->getName()+"right", rightQuery);
 
 		vector<int> tempIndexesLeft = databaseLeft->findClosestMegaBlast(queryLeft, num+1);
+		vector<float> leftScores = databaseLeft->getMegaBlastSearchScores();
 		vector<int> tempIndexesRight = databaseLeft->findClosestMegaBlast(queryRight, num+1);
+		vector<float> rightScores = databaseLeft->getMegaBlastSearchScores();
 
 		//if ((tempIndexesRight.size() == 0) && (tempIndexesLeft.size() == 0))  {  m->mothurOut("megablast returned " + toString(tempIndexesRight.size()) + " results for the right end, and " + toString(tempIndexesLeft.size()) + " for the left end. Needed " + toString(num+1) + ". Unable to process sequence " + q->getName()); m->mothurOutEndLine(); return refResults; }
 		
 		vector<int> smaller;
+		vector<float> smallerScores;
 		vector<int> larger;
+		vector<float> largerScores;
 		
-		if (tempIndexesRight.size() < tempIndexesLeft.size()) { smaller = tempIndexesRight;  larger = tempIndexesLeft; }
-		else { smaller = tempIndexesLeft; larger = tempIndexesRight; } 
+		if (tempIndexesRight.size() < tempIndexesLeft.size()) { smaller = tempIndexesRight; smallerScores = rightScores; larger = tempIndexesLeft; largerScores = leftScores; }
+		else { smaller = tempIndexesLeft; smallerScores = leftScores; larger = tempIndexesRight; largerScores = rightScores; } 
+		
+		//for (int i = 0; i < smaller.size(); i++) { cout << "smaller = " << smaller[i] << '\t' << smallerScores[i] << endl; }
+		//cout << endl;
+		//for (int i = 0; i < larger.size(); i++) { cout << "larger = " << larger[i] << '\t' << largerScores[i] << endl; }
 		
 		//merge results		
 		map<int, int> seen;
 		map<int, int>::iterator it;
-		
+		float lastSmaller = smallerScores[0];
+		float lastLarger = largerScores[0];
+		int lasti = 0;
 		vector<int> mergedResults;
 		for (int i = 0; i < smaller.size(); i++) {
 			//add left if you havent already
@@ -654,6 +664,7 @@ vector<Sequence*> Maligner::getBlastSeqs(Sequence* q, int num) {
 			if (it == seen.end()) {  
 				mergedResults.push_back(smaller[i]);
 				seen[smaller[i]] = smaller[i];
+				lastSmaller = smallerScores[i];
 			}
 
 			//add right if you havent already
@@ -661,16 +672,62 @@ vector<Sequence*> Maligner::getBlastSeqs(Sequence* q, int num) {
 			if (it == seen.end()) {  
 				mergedResults.push_back(larger[i]);
 				seen[larger[i]] = larger[i];
+				lastLarger = largerScores[i];
+			}
+			
+			lasti = i;
+			if (mergedResults.size() > num) { break; }
+		}
+		
+		//save lasti for smaller ties below
+		lasti++;
+		int iSmaller = lasti;
+		
+		if (!(mergedResults.size() > num)) { //if we still need more results.  
+			for (int i = smaller.size(); i < larger.size(); i++) {
+				it = seen.find(larger[i]);
+				if (it == seen.end()) {  
+					mergedResults.push_back(larger[i]);
+					seen[larger[i]] = larger[i];
+					lastLarger = largerScores[i];
+				}
+				
+				lasti = i;
+				if (mergedResults.size() > num) {  break; }
 			}
 		}
 		
-		for (int i = smaller.size(); i < larger.size(); i++) {
-			it = seen.find(larger[i]);
-			if (it == seen.end()) {  
-				mergedResults.push_back(larger[i]);
-				seen[larger[i]] = larger[i];
+		
+		//add in any ties from smaller
+		while (iSmaller < smaller.size()) {
+			if (smallerScores[iSmaller] == lastSmaller) {
+				it = seen.find(smaller[iSmaller]);
+				
+				if (it == seen.end()) {  
+					mergedResults.push_back(smaller[iSmaller]);
+					seen[smaller[iSmaller]] = smaller[iSmaller];
+				}
 			}
+			else { break; }
+			iSmaller++;			
 		}
+		
+		lasti++;
+		//add in any ties from larger
+		while (lasti < larger.size()) {
+			if (largerScores[lasti] == lastLarger) { //is it a tie
+				it = seen.find(larger[lasti]);
+				
+				if (it == seen.end()) {  //we haven't already seen it
+					mergedResults.push_back(larger[lasti]);
+					seen[larger[lasti]] = larger[lasti];
+				}
+			}
+			else { break; }
+			lasti++;			
+		}
+		
+		numWanted = seen.size();
 		
 		if (mergedResults.size() < numWanted) { numWanted = mergedResults.size(); }
 //cout << q->getName() << " merged results size = " << mergedResults.size() << '\t' << "numwanted = " << numWanted <<  endl;		
