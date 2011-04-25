@@ -78,13 +78,14 @@ int main(int argc, char *argv[]){
 		m->setVersion(mothurVersion);
 		
 		//will make the gui output "pretty"
-		bool guiMode = false;
+		bool outputHeader = true;
 		if (argc>1) {
 			string guiInput = argv[1];
-			if (guiInput[0] == '+') { guiMode = true; }
+			if (guiInput[0] == '+') { outputHeader = false; }
+			if (guiInput[0] == '-') { outputHeader = false; }
 		}
 		
-		if (!guiMode) {
+		if (outputHeader)  {
 			//version
 			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 				#if defined (__APPLE__) || (__MACH__)
@@ -161,7 +162,7 @@ int main(int argc, char *argv[]){
 		//srand(54321);
 		srand( (unsigned)time( NULL ) );
 		
-		Engine* mothur;
+		Engine* mothur = NULL;
 		bool bail = 0;
 		string input;
  
@@ -177,6 +178,12 @@ int main(int argc, char *argv[]){
 			}else if (input[0] == '+') {
 					mothur = new ScriptEngine(argv[0], argv[1]);
 					m->gui = true;
+			}else if (input == "-version") {
+				m->mothurOut("Mothur version=" + mothurVersion + "\nRelease Date=" + releaseDate); m->mothurOutEndLine(); m->mothurOutEndLine(); m->closeLog();
+				#ifdef USE_MPI
+					MPI_Finalize();
+				#endif
+				return 0;
 			}else{
 				m->mothurOutJustToLog("Batch Mode");
 				m->mothurOutEndLine(); m->mothurOutEndLine();
@@ -229,7 +236,7 @@ int main(int argc, char *argv[]){
 		}
 		
 				
-		delete mothur;
+		if (mothur != NULL) { delete mothur; }
 		
 		#ifdef USE_MPI
 			MPI_Finalize();
