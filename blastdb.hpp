@@ -36,6 +36,7 @@ private:
 	float gapExtend;
 	float match;
 	float misMatch;
+	
 };
 
 #endif

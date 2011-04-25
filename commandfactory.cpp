@@ -184,7 +184,7 @@ CommandFactory::CommandFactory(){
 	commands["trim.flows"]			= "trim.flows";
 	commands["list.seqs"]			= "list.seqs";
 	commands["get.seqs"]			= "get.seqs";
-	commands["remove.seqs"]			= "get.seqs";
+	commands["remove.seqs"]			= "remove.seqs";
 	commands["system"]				= "system";
 	commands["align.check"]			= "align.check";
 	commands["get.sharedseqs"]		= "get.sharedseqs";

@@ -821,7 +821,7 @@ vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*
 		
 //		cout << "lastLeft\t" << lastLeft << endl;
 		
-		//add in dups
+		//add in sequences with same distance as last sequence added
 		lasti++;
 		int i = lasti;
 		while (i < distsLeft.size()) {  
@@ -840,7 +840,7 @@ vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*
 		}
 		
 //		cout << "lastRight\t" << lastRight << endl;
-
+		//add in sequences with same distance as last sequence added
 		i = lasti;
 		while (i < distsRight.size()) {  
 			if (distsRight[i].dist == lastRight) {
