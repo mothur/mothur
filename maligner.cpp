@@ -727,7 +727,7 @@ vector<Sequence*> Maligner::getBlastSeqs(Sequence* q, int num) {
 			lasti++;			
 		}
 		
-		numWanted = seen.size();
+		numWanted = mergedResults.size();
 		
 		if (mergedResults.size() < numWanted) { numWanted = mergedResults.size(); }
 //cout << q->getName() << " merged results size = " << mergedResults.size() << '\t' << "numwanted = " << numWanted <<  endl;		
