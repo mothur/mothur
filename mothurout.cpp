@@ -39,6 +39,8 @@ void MothurOut::printCurrentFiles()  {
 		if (sharedfile != "")		{  mothurOut("shared=" + sharedfile); mothurOutEndLine();			}
 		if (taxonomyfile != "")		{  mothurOut("taxonomy=" + taxonomyfile); mothurOutEndLine();		}
 		if (treefile != "")			{  mothurOut("tree=" + treefile); mothurOutEndLine();				}
+		if (flowfile != "")			{  mothurOut("flow=" + flowfile); mothurOutEndLine();				}
+		if (processors != "1")		{  mothurOut("processors=" + processors); mothurOutEndLine();		}
 		
 	}
 	catch(exception& e) {
@@ -70,6 +72,8 @@ bool MothurOut::hasCurrentFiles()  {
 		if (sharedfile != "")		{  return true;			}
 		if (taxonomyfile != "")		{  return true;			}
 		if (treefile != "")			{  return true;			}
+		if (flowfile != "")			{  return true;			}
+		if (processors != "1")		{  return true;			}
 		
 		return hasCurrent;
 		
@@ -101,7 +105,9 @@ void MothurOut::clearCurrentFiles()  {
 		sfffile = "";
 		oligosfile = "";
 		accnosfile = "";
-		taxonomyfile = "";		
+		taxonomyfile = "";	
+		flowfile = "";
+		processors = "1";
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "clearCurrentFiles");

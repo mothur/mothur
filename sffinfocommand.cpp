@@ -116,46 +116,60 @@ SffInfoCommand::SffInfoCommand(string option)  {
 				
 				//go through files and make sure they are good, if not, then disregard them
 				for (int i = 0; i < filenames.size(); i++) {
-					if (inputDir != "") {
-						string path = m->hasPath(filenames[i]);
-						//if the user has not given a path then, add inputdir. else leave path alone.
-						if (path == "") {	filenames[i] = inputDir + filenames[i];		}
-					}
-	
-					ifstream in;
-					int ableToOpen = m->openInputFile(filenames[i], in, "noerror");
-				
-					//if you can't open it, try default location
-					if (ableToOpen == 1) {
-						if (m->getDefaultPath() != "") { //default path is set
-							string tryPath = m->getDefaultPath() + m->getSimpleName(filenames[i]);
-							m->mothurOut("Unable to open " + filenames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-							ifstream in2;
-							ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-							in2.close();
-							filenames[i] = tryPath;
+					bool ignore = false;
+					if (filenames[i] == "current") { 
+						filenames[i] = m->getSFFFile(); 
+						if (filenames[i] != "") {  m->mothurOut("Using " + filenames[i] + " as input file for the sff parameter where you had given current."); m->mothurOutEndLine(); }
+						else { 	
+							m->mothurOut("You have no current sfffile, ignoring current."); m->mothurOutEndLine(); ignore=true; 
+							//erase from file list
+							filenames.erase(filenames.begin()+i);
+							i--;
 						}
 					}
 					
-					//if you can't open it, try default location
-					if (ableToOpen == 1) {
-						if (m->getOutputDir() != "") { //default path is set
-							string tryPath = m->getOutputDir() + m->getSimpleName(filenames[i]);
-							m->mothurOut("Unable to open " + filenames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-							ifstream in2;
-							ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-							in2.close();
-							filenames[i] = tryPath;
+					if (!ignore) {
+						if (inputDir != "") {
+							string path = m->hasPath(filenames[i]);
+							//if the user has not given a path then, add inputdir. else leave path alone.
+							if (path == "") {	filenames[i] = inputDir + filenames[i];		}
 						}
-					}
+		
+						ifstream in;
+						int ableToOpen = m->openInputFile(filenames[i], in, "noerror");
 					
-					in.close();
-					
-					if (ableToOpen == 1) { 
-						m->mothurOut("Unable to open " + filenames[i] + ". It will be disregarded."); m->mothurOutEndLine();
-						//erase from file list
-						filenames.erase(filenames.begin()+i);
-						i--;
+						//if you can't open it, try default location
+						if (ableToOpen == 1) {
+							if (m->getDefaultPath() != "") { //default path is set
+								string tryPath = m->getDefaultPath() + m->getSimpleName(filenames[i]);
+								m->mothurOut("Unable to open " + filenames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
+								ifstream in2;
+								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+								in2.close();
+								filenames[i] = tryPath;
+							}
+						}
+						
+						//if you can't open it, try default location
+						if (ableToOpen == 1) {
+							if (m->getOutputDir() != "") { //default path is set
+								string tryPath = m->getOutputDir() + m->getSimpleName(filenames[i]);
+								m->mothurOut("Unable to open " + filenames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
+								ifstream in2;
+								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+								in2.close();
+								filenames[i] = tryPath;
+							}
+						}
+						
+						in.close();
+						
+						if (ableToOpen == 1) { 
+							m->mothurOut("Unable to open " + filenames[i] + ". It will be disregarded."); m->mothurOutEndLine();
+							//erase from file list
+							filenames.erase(filenames.begin()+i);
+							i--;
+						}
 					}
 				}
 				
@@ -171,44 +185,59 @@ SffInfoCommand::SffInfoCommand(string option)  {
 				
 				//go through files and make sure they are good, if not, then disregard them
 				for (int i = 0; i < accnosFileNames.size(); i++) {
-					if (inputDir != "") {
-						string path = m->hasPath(accnosFileNames[i]);
-						//if the user has not given a path then, add inputdir. else leave path alone.
-						if (path == "") {	accnosFileNames[i] = inputDir + accnosFileNames[i];		}
-					}
-	
-					ifstream in;
-					int ableToOpen = m->openInputFile(accnosFileNames[i], in, "noerror");
-				
-					//if you can't open it, try default location
-					if (ableToOpen == 1) {
-						if (m->getDefaultPath() != "") { //default path is set
-							string tryPath = m->getDefaultPath() + m->getSimpleName(accnosFileNames[i]);
-							m->mothurOut("Unable to open " + accnosFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-							ifstream in2;
-							ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-							in2.close();
-							accnosFileNames[i] = tryPath;
+					bool ignore = false;
+					if (accnosFileNames[i] == "current") { 
+						accnosFileNames[i] = m->getAccnosFile(); 
+						if (accnosFileNames[i] != "") {  m->mothurOut("Using " + accnosFileNames[i] + " as input file for the accnos parameter where you had given current."); m->mothurOutEndLine(); }
+						else { 	
+							m->mothurOut("You have no current accnosfile, ignoring current."); m->mothurOutEndLine(); ignore=true; 
+							//erase from file list
+							accnosFileNames.erase(accnosFileNames.begin()+i);
+							i--;
 						}
 					}
-					//if you can't open it, try default location
-					if (ableToOpen == 1) {
-						if (m->getOutputDir() != "") { //default path is set
-							string tryPath = m->getOutputDir() + m->getSimpleName(accnosFileNames[i]);
-							m->mothurOut("Unable to open " + accnosFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-							ifstream in2;
-							ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-							in2.close();
-							accnosFileNames[i] = tryPath;
-						}
-					}
-					in.close();
 					
-					if (ableToOpen == 1) { 
-						m->mothurOut("Unable to open " + accnosFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine();
-						//erase from file list
-						accnosFileNames.erase(accnosFileNames.begin()+i);
-						i--;
+					if (!ignore) {
+					
+						if (inputDir != "") {
+							string path = m->hasPath(accnosFileNames[i]);
+							//if the user has not given a path then, add inputdir. else leave path alone.
+							if (path == "") {	accnosFileNames[i] = inputDir + accnosFileNames[i];		}
+						}
+		
+						ifstream in;
+						int ableToOpen = m->openInputFile(accnosFileNames[i], in, "noerror");
+					
+						//if you can't open it, try default location
+						if (ableToOpen == 1) {
+							if (m->getDefaultPath() != "") { //default path is set
+								string tryPath = m->getDefaultPath() + m->getSimpleName(accnosFileNames[i]);
+								m->mothurOut("Unable to open " + accnosFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
+								ifstream in2;
+								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+								in2.close();
+								accnosFileNames[i] = tryPath;
+							}
+						}
+						//if you can't open it, try default location
+						if (ableToOpen == 1) {
+							if (m->getOutputDir() != "") { //default path is set
+								string tryPath = m->getOutputDir() + m->getSimpleName(accnosFileNames[i]);
+								m->mothurOut("Unable to open " + accnosFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
+								ifstream in2;
+								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+								in2.close();
+								accnosFileNames[i] = tryPath;
+							}
+						}
+						in.close();
+						
+						if (ableToOpen == 1) { 
+							m->mothurOut("Unable to open " + accnosFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine();
+							//erase from file list
+							accnosFileNames.erase(accnosFileNames.begin()+i);
+							i--;
+						}
 					}
 				}
 				
@@ -301,7 +330,12 @@ int SffInfoCommand::execute(){
 		itTypes = outputTypes.find("qfile");
 		if (itTypes != outputTypes.end()) {
 			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setQualFile(current); }
-		}	
+		}
+		
+		itTypes = outputTypes.find("flow");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setFlowFile(current); }
+		}
 		
 		//report output filenames
 		m->mothurOutEndLine();

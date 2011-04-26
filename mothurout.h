@@ -118,6 +118,7 @@ class MothurOut {
 		string getOligosFile()		{ return oligosfile;		}
 		string getAccnosFile()		{ return accnosfile;		}
 		string getTaxonomyFile()	{ return taxonomyfile;		}
+		string getFlowFile()		{ return flowfile;			}
 		string getProcessors()		{ return processors;		}
 		
 		void setListFile(string f)			{ listfile = getFullPathName(f);			}
@@ -139,6 +140,7 @@ class MothurOut {
 		void setOligosFile(string f)		{ oligosfile = getFullPathName(f);			}
 		void setAccnosFile(string f)		{ accnosfile = getFullPathName(f);			}
 		void setTaxonomyFile(string f)		{ taxonomyfile = getFullPathName(f);		}
+		void setFlowFile(string f)			{ flowfile = getFullPathName(f);			}
 		void setProcessors(string p)		{ processors = p;							}
 		
 		void printCurrentFiles();
@@ -171,6 +173,7 @@ class MothurOut {
 			accnosfile = "";
 			taxonomyfile = "";
 			processors = "1";
+			flowfile = "";
 			gui = false;
 		};
 		~MothurOut();
@@ -180,7 +183,7 @@ class MothurOut {
 		string releaseDate, version;
 	
 		string accnosfile, phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, designfile, taxonomyfile;
-		string orderfile, treefile, sharedfile, ordergroupfile, relabundfile, fastafile, qualfile, sfffile, oligosfile, processors;
+		string orderfile, treefile, sharedfile, ordergroupfile, relabundfile, fastafile, qualfile, sfffile, oligosfile, processors, flowfile;
 
 	
 		ofstream out;

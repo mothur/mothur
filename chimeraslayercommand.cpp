@@ -27,7 +27,7 @@ vector<string> ChimeraSlayerCommand::setParameters(){
 		CommandParameter pminbs("minbs", "Number", "", "90", "", "", "",false,false); parameters.push_back(pminbs);
 		CommandParameter psearch("search", "Multiple", "kmer-blast-distance", "distance", "", "", "",false,false); parameters.push_back(psearch);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
-		CommandParameter prealign("realign", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(prealign);
+		CommandParameter prealign("realign", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(prealign);
 		CommandParameter ptrim("trim", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(ptrim);
 		CommandParameter psplit("split", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(psplit);
 		CommandParameter pnumwanted("numwanted", "Number", "", "15", "", "", "",false,false); parameters.push_back(pnumwanted);
@@ -148,47 +148,63 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 				
 				//go through files and make sure they are good, if not, then disregard them
 				for (int i = 0; i < fastaFileNames.size(); i++) {
-					if (inputDir != "") {
-						string path = m->hasPath(fastaFileNames[i]);
-						//if the user has not given a path then, add inputdir. else leave path alone.
-						if (path == "") {	fastaFileNames[i] = inputDir + fastaFileNames[i];		}
-					}
-	
-					int ableToOpen;
-					ifstream in;
 					
-					ableToOpen = m->openInputFile(fastaFileNames[i], in, "noerror");
-				
-					//if you can't open it, try default location
-					if (ableToOpen == 1) {
-						if (m->getDefaultPath() != "") { //default path is set
-							string tryPath = m->getDefaultPath() + m->getSimpleName(fastaFileNames[i]);
-							m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-							ifstream in2;
-							ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-							in2.close();
-							fastaFileNames[i] = tryPath;
+					bool ignore = false;
+					if (fastaFileNames[i] == "current") { 
+						fastaFileNames[i] = m->getFastaFile(); 
+						if (fastaFileNames[i] != "") {  m->mothurOut("Using " + fastaFileNames[i] + " as input file for the fasta parameter where you had given current."); m->mothurOutEndLine(); }
+						else { 	
+							m->mothurOut("You have no current fastafile, ignoring current."); m->mothurOutEndLine(); ignore=true; 
+							//erase from file list
+							fastaFileNames.erase(fastaFileNames.begin()+i);
+							i--;
 						}
 					}
 					
-					if (ableToOpen == 1) {
-						if (m->getOutputDir() != "") { //default path is set
-							string tryPath = m->getOutputDir() + m->getSimpleName(fastaFileNames[i]);
-							m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-							ifstream in2;
-							ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-							in2.close();
-							fastaFileNames[i] = tryPath;
+					if (!ignore) {
+						
+						if (inputDir != "") {
+							string path = m->hasPath(fastaFileNames[i]);
+							//if the user has not given a path then, add inputdir. else leave path alone.
+							if (path == "") {	fastaFileNames[i] = inputDir + fastaFileNames[i];		}
 						}
-					}
+		
+						int ableToOpen;
+						ifstream in;
+						
+						ableToOpen = m->openInputFile(fastaFileNames[i], in, "noerror");
 					
-					in.close();
-					
-					if (ableToOpen == 1) { 
-						m->mothurOut("Unable to open " + fastaFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine(); 
-						//erase from file list
-						fastaFileNames.erase(fastaFileNames.begin()+i);
-						i--;
+						//if you can't open it, try default location
+						if (ableToOpen == 1) {
+							if (m->getDefaultPath() != "") { //default path is set
+								string tryPath = m->getDefaultPath() + m->getSimpleName(fastaFileNames[i]);
+								m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
+								ifstream in2;
+								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+								in2.close();
+								fastaFileNames[i] = tryPath;
+							}
+						}
+						
+						if (ableToOpen == 1) {
+							if (m->getOutputDir() != "") { //default path is set
+								string tryPath = m->getOutputDir() + m->getSimpleName(fastaFileNames[i]);
+								m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
+								ifstream in2;
+								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+								in2.close();
+								fastaFileNames[i] = tryPath;
+							}
+						}
+						
+						in.close();
+						
+						if (ableToOpen == 1) { 
+							m->mothurOut("Unable to open " + fastaFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine(); 
+							//erase from file list
+							fastaFileNames.erase(fastaFileNames.begin()+i);
+							i--;
+						}
 					}
 				}
 				
@@ -206,47 +222,63 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 				
 				//go through files and make sure they are good, if not, then disregard them
 				for (int i = 0; i < nameFileNames.size(); i++) {
-					if (inputDir != "") {
-						string path = m->hasPath(nameFileNames[i]);
-						//if the user has not given a path then, add inputdir. else leave path alone.
-						if (path == "") {	nameFileNames[i] = inputDir + nameFileNames[i];		}
-					}
 					
-					int ableToOpen;
-					ifstream in;
-					
-					ableToOpen = m->openInputFile(nameFileNames[i], in, "noerror");
-					
-					//if you can't open it, try default location
-					if (ableToOpen == 1) {
-						if (m->getDefaultPath() != "") { //default path is set
-							string tryPath = m->getDefaultPath() + m->getSimpleName(nameFileNames[i]);
-							m->mothurOut("Unable to open " + nameFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-							ifstream in2;
-							ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-							in2.close();
-							nameFileNames[i] = tryPath;
+					bool ignore = false;
+					if (nameFileNames[i] == "current") { 
+						nameFileNames[i] = m->getNameFile(); 
+						if (nameFileNames[i] != "") {  m->mothurOut("Using " + nameFileNames[i] + " as input file for the name parameter where you had given current."); m->mothurOutEndLine(); }
+						else { 	
+							m->mothurOut("You have no current namefile, ignoring current."); m->mothurOutEndLine(); ignore=true; 
+							//erase from file list
+							nameFileNames.erase(nameFileNames.begin()+i);
+							i--;
 						}
 					}
 					
-					if (ableToOpen == 1) {
-						if (m->getOutputDir() != "") { //default path is set
-							string tryPath = m->getOutputDir() + m->getSimpleName(nameFileNames[i]);
-							m->mothurOut("Unable to open " + nameFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-							ifstream in2;
-							ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-							in2.close();
-							nameFileNames[i] = tryPath;
+					if (!ignore) {
+						
+						if (inputDir != "") {
+							string path = m->hasPath(nameFileNames[i]);
+							//if the user has not given a path then, add inputdir. else leave path alone.
+							if (path == "") {	nameFileNames[i] = inputDir + nameFileNames[i];		}
 						}
-					}
-					
-					in.close();
-					
-					if (ableToOpen == 1) { 
-						m->mothurOut("Unable to open " + nameFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine(); 
-						//erase from file list
-						nameFileNames.erase(nameFileNames.begin()+i);
-						i--;
+						
+						int ableToOpen;
+						ifstream in;
+						
+						ableToOpen = m->openInputFile(nameFileNames[i], in, "noerror");
+						
+						//if you can't open it, try default location
+						if (ableToOpen == 1) {
+							if (m->getDefaultPath() != "") { //default path is set
+								string tryPath = m->getDefaultPath() + m->getSimpleName(nameFileNames[i]);
+								m->mothurOut("Unable to open " + nameFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
+								ifstream in2;
+								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+								in2.close();
+								nameFileNames[i] = tryPath;
+							}
+						}
+						
+						if (ableToOpen == 1) {
+							if (m->getOutputDir() != "") { //default path is set
+								string tryPath = m->getOutputDir() + m->getSimpleName(nameFileNames[i]);
+								m->mothurOut("Unable to open " + nameFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
+								ifstream in2;
+								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+								in2.close();
+								nameFileNames[i] = tryPath;
+							}
+						}
+						
+						in.close();
+						
+						if (ableToOpen == 1) { 
+							m->mothurOut("Unable to open " + nameFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine(); 
+							//erase from file list
+							nameFileNames.erase(nameFileNames.begin()+i);
+							i--;
+						}
 					}
 				}
 				

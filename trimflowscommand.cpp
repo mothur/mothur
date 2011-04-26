@@ -136,8 +136,14 @@ TrimFlowsCommand::TrimFlowsCommand(string option)  {
 			
 			//check for required parameters
 			flowFileName = validParameter.validFile(parameters, "flow", true);
-			if (flowFileName == "not found") { m->mothurOut("flow is a required parameter for the trim.flows command."); m->mothurOutEndLine(); abort = true; }
-			else if (flowFileName == "not open") { abort = true; }	
+			if (flowFileName == "not found") { 
+				flowFileName = m->getFlowFile(); 
+				if (flowFileName != "") {  m->mothurOut("Using " + flowFileName + " as input file for the flow parameter."); m->mothurOutEndLine(); }
+				else { 
+					m->mothurOut("No valid current flow file. You must provide a flow file."); m->mothurOutEndLine(); 
+					abort = true;
+				} 
+			}else if (flowFileName == "not open") { flowFileName = ""; abort = true; }	
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	

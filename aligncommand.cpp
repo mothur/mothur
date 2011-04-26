@@ -167,50 +167,64 @@ AlignCommand::AlignCommand(string option)  {
 				for (int i = 0; i < candidateFileNames.size(); i++) {
 					//candidateFileNames[i] = m->getFullPathName(candidateFileNames[i]);
 					
-					if (inputDir != "") {
-						string path = m->hasPath(candidateFileNames[i]);
-						//if the user has not given a path then, add inputdir. else leave path alone.
-						if (path == "") {	candidateFileNames[i] = inputDir + candidateFileNames[i];		}
-					}
-	
-					int ableToOpen;
-					ifstream in;
-					ableToOpen = m->openInputFile(candidateFileNames[i], in, "noerror");
-					in.close();	
-					
-					//if you can't open it, try default location
-					if (ableToOpen == 1) {
-						if (m->getDefaultPath() != "") { //default path is set
-							string tryPath = m->getDefaultPath() + m->getSimpleName(candidateFileNames[i]);
-							m->mothurOut("Unable to open " + candidateFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-							ifstream in2;
-							ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-							in2.close();
-							candidateFileNames[i] = tryPath;
+					bool ignore = false;
+					if (candidateFileNames[i] == "current") { 
+						candidateFileNames[i] = m->getFastaFile(); 
+						if (candidateFileNames[i] != "") {  m->mothurOut("Using " + candidateFileNames[i] + " as input file for the fasta parameter where you had given current."); m->mothurOutEndLine(); }
+						else { 	
+							m->mothurOut("You have no current fastafile, ignoring current."); m->mothurOutEndLine(); ignore=true; 
+							//erase from file list
+							candidateFileNames.erase(candidateFileNames.begin()+i);
+							i--;
 						}
 					}
 					
-					//if you can't open it, try output location
-					if (ableToOpen == 1) {
-						if (m->getOutputDir() != "") { //default path is set
-							string tryPath = m->getOutputDir() + m->getSimpleName(candidateFileNames[i]);
-							m->mothurOut("Unable to open " + candidateFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-							ifstream in2;
-							ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-							in2.close();
-							candidateFileNames[i] = tryPath;
-						}
-					}
+					if (!ignore) {
 					
-									
+						if (inputDir != "") {
+							string path = m->hasPath(candidateFileNames[i]);
+							//if the user has not given a path then, add inputdir. else leave path alone.
+							if (path == "") {	candidateFileNames[i] = inputDir + candidateFileNames[i];		}
+						}
+		
+						int ableToOpen;
+						ifstream in;
+						ableToOpen = m->openInputFile(candidateFileNames[i], in, "noerror");
+						in.close();	
+						
+						//if you can't open it, try default location
+						if (ableToOpen == 1) {
+							if (m->getDefaultPath() != "") { //default path is set
+								string tryPath = m->getDefaultPath() + m->getSimpleName(candidateFileNames[i]);
+								m->mothurOut("Unable to open " + candidateFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
+								ifstream in2;
+								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+								in2.close();
+								candidateFileNames[i] = tryPath;
+							}
+						}
+						
+						//if you can't open it, try output location
+						if (ableToOpen == 1) {
+							if (m->getOutputDir() != "") { //default path is set
+								string tryPath = m->getOutputDir() + m->getSimpleName(candidateFileNames[i]);
+								m->mothurOut("Unable to open " + candidateFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
+								ifstream in2;
+								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+								in2.close();
+								candidateFileNames[i] = tryPath;
+							}
+						}
+						
+										
 
-					if (ableToOpen == 1) { 
-						m->mothurOut("Unable to open " + candidateFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine(); 
-						//erase from file list
-						candidateFileNames.erase(candidateFileNames.begin()+i);
-						i--;
+						if (ableToOpen == 1) { 
+							m->mothurOut("Unable to open " + candidateFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine(); 
+							//erase from file list
+							candidateFileNames.erase(candidateFileNames.begin()+i);
+							i--;
+						}
 					}
-					
 				}
 				
 				//make sure there is at least one valid file left
