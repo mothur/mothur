@@ -102,46 +102,64 @@ MakeGroupCommand::MakeGroupCommand(string option)  {
 				
 				//go through files and make sure they are good, if not, then disregard them
 				for (int i = 0; i < fastaFileNames.size(); i++) {
-					if (inputDir != "") {
-						string path = m->hasPath(fastaFileNames[i]);
-						//if the user has not given a path then, add inputdir. else leave path alone.
-						if (path == "") {	fastaFileNames[i] = inputDir + fastaFileNames[i];		}
-					}
-	
-					ifstream in;
-					int ableToOpen = m->openInputFile(fastaFileNames[i], in, "noerror");
-				
-					//if you can't open it, try default location
-					if (ableToOpen == 1) {
-						if (m->getDefaultPath() != "") { //default path is set
-							string tryPath = m->getDefaultPath() + m->getSimpleName(fastaFileNames[i]);
-							m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-							ifstream in2;
-							ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-							in2.close();
-							fastaFileNames[i] = tryPath;
+					
+					bool ignore = false;
+					if (fastaFileNames[i] == "current") { 
+						fastaFileNames[i] = m->getFastaFile(); 
+						if (fastaFileNames[i] != "") {  
+							m->mothurOut("Using " + fastaFileNames[i] + " as input file for the fasta parameter where you had given current."); m->mothurOutEndLine(); 
+							filename += m->getRootName(m->getSimpleName(fastaFileNames[i]));
+						}
+						else { 	
+							m->mothurOut("You have no current fastafile, ignoring current."); m->mothurOutEndLine(); ignore=true; 
+							//erase from file list
+							fastaFileNames.erase(fastaFileNames.begin()+i);
+							i--;
 						}
 					}
 					
-					//if you can't open it, try default location
-					if (ableToOpen == 1) {
-						if (m->getOutputDir() != "") { //default path is set
-							string tryPath = m->getOutputDir() + m->getSimpleName(fastaFileNames[i]);
-							m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-							ifstream in2;
-							ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-							in2.close();
-							fastaFileNames[i] = tryPath;
+					if (!ignore) {
+						if (inputDir != "") {
+							string path = m->hasPath(fastaFileNames[i]);
+							//if the user has not given a path then, add inputdir. else leave path alone.
+							if (path == "") {	fastaFileNames[i] = inputDir + fastaFileNames[i];		}
 						}
-					}
-					in.close();
+		
+						ifstream in;
+						int ableToOpen = m->openInputFile(fastaFileNames[i], in, "noerror");
 					
-					if (ableToOpen == 1) { 
-						m->mothurOut("Unable to open " + fastaFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine();
-						//erase from file list
-						fastaFileNames.erase(fastaFileNames.begin()+i);
-						i--;
-					}else{  filename += m->getRootName(m->getSimpleName(fastaFileNames[i]));  }
+						//if you can't open it, try default location
+						if (ableToOpen == 1) {
+							if (m->getDefaultPath() != "") { //default path is set
+								string tryPath = m->getDefaultPath() + m->getSimpleName(fastaFileNames[i]);
+								m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
+								ifstream in2;
+								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+								in2.close();
+								fastaFileNames[i] = tryPath;
+							}
+						}
+						
+						//if you can't open it, try default location
+						if (ableToOpen == 1) {
+							if (m->getOutputDir() != "") { //default path is set
+								string tryPath = m->getOutputDir() + m->getSimpleName(fastaFileNames[i]);
+								m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
+								ifstream in2;
+								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+								in2.close();
+								fastaFileNames[i] = tryPath;
+							}
+						}
+						in.close();
+						
+						if (ableToOpen == 1) { 
+							m->mothurOut("Unable to open " + fastaFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine();
+							//erase from file list
+							fastaFileNames.erase(fastaFileNames.begin()+i);
+							i--;
+						}else{  filename += m->getRootName(m->getSimpleName(fastaFileNames[i]));  }
+					}
 				}
 				
 				//prevent giantic file name

@@ -135,6 +135,10 @@ int GetCurrentCommand::execute(){
 					m->setAccnosFile("");
 				}else if (types[i] == "taxonomy") {
 					m->setTaxonomyFile("");
+				}else if (types[i] == "flow") {
+					m->setFlowFile("");
+				}else if (types[i] == "processors") {
+					m->setProcessors("1");
 				}else if (types[i] == "all") {
 					m->clearCurrentFiles();
 				}else {

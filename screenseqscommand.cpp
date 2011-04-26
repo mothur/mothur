@@ -16,6 +16,7 @@ vector<string> ScreenSeqsCommand::setParameters(){
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
 		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
 		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pgroup);
+		CommandParameter pqfile("qfile", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pqfile);
 		CommandParameter palignreport("alignreport", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(palignreport);
 		CommandParameter pstart("start", "Number", "", "-1", "", "", "",false,false); parameters.push_back(pstart);
 		CommandParameter pend("end", "Number", "", "-1", "", "", "",false,false); parameters.push_back(pend);
@@ -43,7 +44,7 @@ string ScreenSeqsCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The screen.seqs command reads a fastafile and creates .....\n";
-		helpString += "The screen.seqs command parameters are fasta, start, end, maxambig, maxhomop, minlength, maxlength, name, group, optimize, criteria and processors.\n";
+		helpString += "The screen.seqs command parameters are fasta, start, end, maxambig, maxhomop, minlength, maxlength, name, group, qfile, optimize, criteria and processors.\n";
 		helpString += "The fasta parameter is required.\n";
 		helpString += "The start parameter .... The default is -1.\n";
 		helpString += "The end parameter .... The default is -1.\n";
@@ -78,6 +79,7 @@ ScreenSeqsCommand::ScreenSeqsCommand(){
 		outputTypes["group"] = tempOutNames;
 		outputTypes["alignreport"] = tempOutNames;
 		outputTypes["accnos"] = tempOutNames;
+		outputTypes["qfile"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ScreenSeqsCommand", "ScreenSeqsCommand");
@@ -114,6 +116,7 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 			outputTypes["group"] = tempOutNames;
 			outputTypes["alignreport"] = tempOutNames;
 			outputTypes["accnos"] = tempOutNames;
+			outputTypes["qfile"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -151,6 +154,15 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["alignreport"] = inputDir + it->second;		}
 				}
+				
+				it = parameters.find("qfile");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["qfile"] = inputDir + it->second;		}
+				}
+				
 			}
 
 			//check for required parameters
@@ -165,6 +177,10 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") { abort = true; }	
 			else if (groupfile == "not found") { groupfile = ""; }
+			
+			qualfile = validParameter.validFile(parameters, "qfile", true);
+			if (qualfile == "not open") { abort = true; }	
+			else if (qualfile == "not found") { qualfile = ""; }
 			
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not open") { namefile = ""; abort = true; }
@@ -461,6 +477,7 @@ int ScreenSeqsCommand::execute(){
 		if (m->control_pressed) { remove(goodSeqFile.c_str());  return 0; }
 
 		if(alignreport != "")					{	screenAlignReport(badSeqNames);		}
+		if(qualfile != "")						{	screenQual(badSeqNames);			}
 		
 		if (m->control_pressed) { remove(goodSeqFile.c_str());  return 0; }
 		
@@ -491,6 +508,11 @@ int ScreenSeqsCommand::execute(){
 		itTypes = outputTypes.find("group");
 		if (itTypes != outputTypes.end()) {
 			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setGroupFile(current); }
+		}
+		
+		itTypes = outputTypes.find("qfile");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setQualFile(current); }
 		}
 
 		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to screen " + toString(numFastaSeqs) + " sequences.");
@@ -903,6 +925,79 @@ int ScreenSeqsCommand::screenAlignReport(set<string> badSeqNames){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ScreenSeqsCommand", "screenAlignReport");
+		exit(1);
+	}
+	
+}
+//***************************************************************************************************************
+
+int ScreenSeqsCommand::screenQual(set<string> badSeqNames){
+	try {
+		ifstream in;
+		m->openInputFile(qualfile, in);
+		set<string>::iterator it;
+		
+		string goodQualFile = outputDir + m->getRootName(m->getSimpleName(qualfile)) + "good" + m->getExtension(qualfile);
+		outputNames.push_back(goodQualFile);  outputTypes["qfile"].push_back(goodQualFile);
+		ofstream goodQual;	m->openOutputFile(goodQualFile, goodQual);
+		
+		while(!in.eof()){	
+			
+			if (m->control_pressed) { goodQual.close(); in.close(); remove(goodQualFile.c_str()); return 0; }
+
+			string saveName = "";
+			string name = "";
+			string scores = "";
+			
+			in >> name; 
+			
+			if (name.length() != 0) { 
+				saveName = name.substr(1);
+				while (!in.eof())	{	
+					char c = in.get(); 
+					if (c == 10 || c == 13){	break;	}
+					else { name += c; }	
+				} 
+				m->gobble(in);
+			}
+			
+			while(in){
+				char letter= in.get();
+				if(letter == '>'){	in.putback(letter);	break;	}
+				else{ scores += letter; }
+			}
+			
+			m->gobble(in);
+			
+			it = badSeqNames.find(saveName);
+			
+			if(it != badSeqNames.end()){
+				badSeqNames.erase(it);
+			}else{				
+				goodQual << name << endl << scores;
+			}
+			
+			m->gobble(in);
+		}
+		
+		in.close();
+		goodQual.close();
+		
+		//we were unable to remove some of the bad sequences
+		if (badSeqNames.size() != 0) {
+			for (it = badSeqNames.begin(); it != badSeqNames.end(); it++) {  
+				m->mothurOut("Your qual file does not include the sequence " + *it + " please correct."); 
+				m->mothurOutEndLine();
+			}
+		}
+		
+		if (m->control_pressed) {  remove(goodQualFile.c_str());  return 0; }
+		
+		return 0;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ScreenSeqsCommand", "screenQual");
 		exit(1);
 	}
 	

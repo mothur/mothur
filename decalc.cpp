@@ -867,11 +867,12 @@ vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*
 //cout << numWanted << endl;
 		for (int i = 0; i < numWanted; i++) {
 //			cout << db[dists[i].index]->getName() << '\t' << dists[i].dist << endl;
-
-			Sequence* temp = new Sequence(db[dists[i].index]->getName(), db[dists[i].index]->getAligned()); //have to make a copy so you can trim and filter without stepping on eachother.
+			if (db[dists[i].index]->getName() != querySeq->getName()) {
+				Sequence* temp = new Sequence(db[dists[i].index]->getName(), db[dists[i].index]->getAligned()); //have to make a copy so you can trim and filter without stepping on eachother.
 			
-			seqsMatches.push_back(temp);
-			indexes.push_back(dists[i].index);
+				seqsMatches.push_back(temp);
+				indexes.push_back(dists[i].index);
+			}
 		}
 		
 		return seqsMatches;
