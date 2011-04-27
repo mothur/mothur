@@ -297,8 +297,8 @@ int Slayer::bootstrapSNPS(vector<snps> left, vector<snps> right, float& BSA, flo
 		int count_A = 0; // sceneario QLA,QRB supported
 		int count_B = 0; // sceneario QLB,QRA supported
 	
-		int numLeft = max(1, int(left.size() * (percentSNPSample/(float)100) + 0.5));
-		int numRight = max(1, int(right.size() * (percentSNPSample/(float)100) + 0.5));
+		int numLeft = max(1, int(left.size() * percentSNPSample/(float)100 + 0.5));
+		int numRight = max(1, int(right.size() * percentSNPSample/(float)100 + 0.5));
 
 		for (int i = 0; i < iters; i++) {
 			//random sampling with replacement.
@@ -365,8 +365,8 @@ int Slayer::bootstrapSNPS(vector<snps> left, vector<snps> right, float& BSA, flo
 
 
 
-		BSA = ((float) count_A / (float) iters) * 100;
-		BSB = ((float) count_B / (float) iters) * 100;
+		BSA = (float) count_A / (float) iters * 100;
+		BSB = (float) count_B / (float) iters * 100;
 //cout << "bsa = " << BSA << " bsb = " << BSB << endl;
 
 		return 0;

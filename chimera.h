@@ -136,7 +136,7 @@ class Chimera {
 
 	public:
 	
-		Chimera(){ m = MothurOut::getInstance(); length = 0; unaligned = false; }
+		Chimera(){ m = MothurOut::getInstance(); length = 0; unaligned = false;  }
 		virtual ~Chimera(){	for (int i = 0; i < templateSeqs.size(); i++) { delete templateSeqs[i];  } };
 		virtual bool getUnaligned()				{	return unaligned;			}
 		virtual int getLength()					{   return length;	}

@@ -186,6 +186,8 @@ vector<Sequence*> Chimera::readSeqs(string file) {
 	
 		m->mothurOut("Done."); m->mothurOutEndLine();
 		
+		filterString = (string(container[0]->getAligned().length(), '1'));
+		
 		return container;
 	}
 	catch(exception& e) {

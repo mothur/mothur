@@ -60,6 +60,7 @@ vector<int> KmerDB::findClosestSequences(Sequence* candidateSeq, int num){
 		vector<int> topMatches;
 		Kmer kmer(kmerSize);
 		searchScore = 0;
+		Scores.clear();
 		
 		vector<int> matches(numSeqs, 0);						//	a record of the sequences with shared kmers
 		vector<int> timesKmerFound(kmerLocations.size()+1, 0);	//	a record of the kmers that we have already found
@@ -92,6 +93,8 @@ vector<int> KmerDB::findClosestSequences(Sequence* candidateSeq, int num){
 			//save top matches
 			for (int i = 0; i < num; i++) {
 				topMatches.push_back(seqMatches[i].seq);
+				float thisScore = 100 * seqMatches[i].match / (float) numKmers;
+				Scores.push_back(thisScore);
 			}
 		}else{
 			int bestIndex = 0;
@@ -107,6 +110,7 @@ vector<int> KmerDB::findClosestSequences(Sequence* candidateSeq, int num){
 			searchScore = bestMatch;
 			searchScore = 100 * searchScore / (float) numKmers;		//	return the Sequence object corresponding to the db
 			topMatches.push_back(bestIndex);
+			Scores.push_back(searchScore);
 		}
 		return topMatches;		
 	}

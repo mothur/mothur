@@ -214,6 +214,7 @@ void Cluster::update(double& cutOFF){
 		// The vector has to be traversed in reverse order to preserve the index
 		// for faster removal in removeCell()
 		for (int i=nRowCells-1;i>=0;i--) {
+			//if you are not the smallCell
 			if (!((rowCells[i]->row == smallRow) && (rowCells[i]->column == smallCol))) {
 				if (rowCells[i]->row == smallRow) {
 					search = rowCells[i]->column;
