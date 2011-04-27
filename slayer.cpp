@@ -56,7 +56,8 @@ string Slayer::getResults(Sequence* query, vector<Sequence*> refSeqs) {
 					int numSNPSRight = snpsRight.size();
 					
 					//require at least 3 SNPs on each side of the break
-					if ((numSNPSLeft >= 3) && (numSNPSRight >= 3)) {
+//					if ((numSNPSLeft >= 3) && (numSNPSRight >= 3)) {
+					if ((numSNPSLeft >= 4) && (numSNPSRight >= 4)) {
 					
 						//removed in 12/09 version of chimeraSlayer
 						//int winSizeLeft = divs[k].winLEnd - divs[k].winLStart + 1;
