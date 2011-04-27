@@ -27,7 +27,7 @@ vector<string> ChimeraSlayerCommand::setParameters(){
 		CommandParameter pminbs("minbs", "Number", "", "90", "", "", "",false,false); parameters.push_back(pminbs);
 		CommandParameter psearch("search", "Multiple", "kmer-blast-distance", "distance", "", "", "",false,false); parameters.push_back(psearch);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
-		CommandParameter prealign("realign", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(prealign);
+		CommandParameter prealign("realign", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(prealign);
 		CommandParameter ptrim("trim", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(ptrim);
 		CommandParameter psplit("split", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(psplit);
 		CommandParameter pnumwanted("numwanted", "Number", "", "15", "", "", "",false,false); parameters.push_back(pnumwanted);
@@ -342,7 +342,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 			temp = validParameter.validFile(parameters, "parents", false);			if (temp == "not found") { temp = "3"; }
 			convert(temp, parents); 
 			
-			temp = validParameter.validFile(parameters, "realign", false);			if (temp == "not found") { temp = "f"; }
+			temp = validParameter.validFile(parameters, "realign", true);			if (temp == "not found") { temp = "t"; }
 			realign = m->isTrue(temp); 
 			
 			temp = validParameter.validFile(parameters, "trim", false);				if (temp == "not found") { temp = "f"; }
