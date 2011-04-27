@@ -52,7 +52,7 @@ public:
 	virtual vector<int> findClosestSequences(Sequence*, int) = 0;  // returns indexes of n closest sequences to query
 	virtual vector<int> findClosestMegaBlast(Sequence*, int){return results;}
 	virtual float getSearchScore();
-	virtual vector<float> getMegaBlastSearchScores() { return megaScores; } //assumes you already called findClosestMegaBlast
+	virtual vector<float> getSearchScores() { return Scores; } //assumes you already called findClosestMegaBlast
 	virtual int getLongestBase(); 
 	virtual void readKmerDB(ifstream&){};
 	virtual void setNumSeqs(int i) {	numSeqs = i; 	}
@@ -64,7 +64,7 @@ protected:
 	int numSeqs, longest;
 	float searchScore;
 	vector<int> results;
-	vector<float> megaScores;
+	vector<float> Scores;
 };
 /**************************************************************************************************/
 #endif

@@ -796,8 +796,8 @@ vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*
 		vector<SeqDist> dists;
 		float lastRight = distsRight[0].dist;
 		float lastLeft = distsLeft[0].dist;
-		int lasti = 0;
-		for (int i = 0; i < distsLeft.size(); i++) {
+		//int lasti = 0;
+		for (int i = 0; i < numWanted+1; i++) {
 			//add left if you havent already
 			it = seen.find(db[distsLeft[i].index]->getName());
 			if (it == seen.end()) {  
@@ -816,13 +816,13 @@ vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*
 //				cout << "loop-right\t" << db[distsRight[i].index]->getName() << '\t' << distsRight[i].dist << endl;
 			}
 			
-			if (dists.size() > numWanted) { lasti = i; break; } //you have enough results
+			//if (dists.size() > numWanted) { lasti = i; break; } //you have enough results
 		}
 		
 //		cout << "lastLeft\t" << lastLeft << endl;
 		
 		//add in sequences with same distance as last sequence added
-		lasti++;
+	/*	lasti++;
 		int i = lasti;
 		while (i < distsLeft.size()) {  
 			if (distsLeft[i].dist == lastLeft) {
@@ -856,8 +856,8 @@ vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*
 			else { break; }
 			i++;
 		}
-
-		numWanted = seen.size();
+*/
+		numWanted = dists.size();
 		
 		if (numWanted > dists.size()) { 
 			//m->mothurOut("numwanted is larger than the number of template sequences, adjusting numwanted."); m->mothurOutEndLine(); 

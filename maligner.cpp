@@ -48,7 +48,9 @@ string Maligner::getResults(Sequence* q, DeCalculator* decalc) {
 		if (m->control_pressed) { return chimera;  }
 		
 		refSeqs = minCoverageFilter(refSeqs);
-
+		
+		
+		
 		if (refSeqs.size() < 2)  { 
 			for (int i = 0; i < refSeqs.size(); i++) {  delete refSeqs[i];	}
 			percentIdenticalQueryChimera = 0.0;
@@ -56,7 +58,7 @@ string Maligner::getResults(Sequence* q, DeCalculator* decalc) {
 		}
 		
 		int chimeraPenalty = computeChimeraPenalty();
-
+		//cout << "chimeraPenalty = " << chimeraPenalty << endl;
 		//fills outputResults
 		chimera = chimeraMaligner(chimeraPenalty, decalc);
 		
@@ -89,8 +91,9 @@ string Maligner::chimeraMaligner(int chimeraPenalty, DeCalculator* decalc) {
 		vector<Sequence*> temp = refSeqs;
 		temp.push_back(query);
 			
-			
 		verticalFilter(temp);
+		
+		//for (int i = 0; i < refSeqs.size(); i++) { cout << refSeqs[i]->getName() << endl << refSeqs[i]->getAligned() << endl; }
 
 		vector< vector<score_struct> > matrix = buildScoreMatrix(query->getAligned().length(), refSeqs.size()); //builds and initializes
 		
@@ -100,10 +103,10 @@ string Maligner::chimeraMaligner(int chimeraPenalty, DeCalculator* decalc) {
 	
 		vector<trace_struct> trace = extractHighestPath(matrix);
 				
-//		cout << "traces\n";
-//		for(int i=0;i<trace.size();i++){
-//			cout << trace[i].col << '\t' << trace[i].oldCol << '\t' << refSeqs[trace[i].row]->getName() << endl;
-//		}
+		//cout << "traces\n";
+		//for(int i=0;i<trace.size();i++){
+		//	cout << trace[i].col << '\t' << trace[i].oldCol << '\t' << refSeqs[trace[i].row]->getName() << endl;
+		//}
 		
 		if (trace.size() > 1) {		chimera = "yes";	}
 		else { chimera = "no";	return chimera; }
@@ -315,7 +318,7 @@ void Maligner::fillScoreMatrix(vector<vector<score_struct> >& ms, vector<Sequenc
 			if ((!isalpha(queryAligned[0])) && (!isalpha(subjectAligned[0]))) {
 				ms[i][0].score = 0;
 //				ms[i][0].mismatches = 0;
-			}else if (queryAligned[0] == subjectAligned[0] || subjectAligned[0] == 'N') {
+			}else if (queryAligned[0] == subjectAligned[0])  { //|| subjectAligned[0] == 'N')
 				ms[i][0].score = matchScore;
 //				ms[i][0].mismatches = 0;
 			}else{
@@ -336,7 +339,7 @@ void Maligner::fillScoreMatrix(vector<vector<score_struct> >& ms, vector<Sequenc
 				if ((!isalpha(queryAligned[j])) && (!isalpha(subjectAligned[j]))) {
 					//leave the same
 				}else if ((toupper(queryAligned[j]) == 'N') || (toupper(subjectAligned[j]) == 'N')) {
-					matchMisMatchScore = matchScore;
+					//matchMisMatchScore = matchScore;
 					//leave the same
 				}else if (queryAligned[j] == subjectAligned[j]) {
 					matchMisMatchScore = matchScore;
@@ -363,29 +366,32 @@ void Maligner::fillScoreMatrix(vector<vector<score_struct> >& ms, vector<Sequenc
 			}
 		}
 		
-//		for(int i=0;i<numRows;i++){
-//			cout << seqs[i]->getName();
-//			for(int j=0;j<numCols;j++){
-//				cout << '\t' << ms[i][j].mismatches;
-//			}
-//			cout << endl;
-//		}
-//		cout << endl;
-//		for(int i=0;i<numRows;i++){
-//			cout << seqs[i]->getName();
-//			for(int j=0;j<numCols;j++){
-//				cout << '\t' << ms[i][j].score;
-//			}
-//			cout << endl;
-//		}
-//		cout << endl;
-//		for(int i=0;i<numRows;i++){
-//			cout << seqs[i]->getName();
-//			for(int j=0;j<numCols;j++){
-//				cout << '\t' << ms[i][j].prev;
-//			}
-//			cout << endl;
-//		}
+	/*	for(int i=0;i<numRows;i++){
+			cout << seqs[i]->getName();
+			for(int j=0;j<numCols;j++){
+				cout << '\t' << ms[i][j].mismatches;
+			}
+			cout << endl;
+		}
+		cout << endl;*/
+		/*cout << numRows << '\t' << numCols << endl;
+		for(int i=0;i<numRows;i++){
+			cout << seqs[i]->getName() << endl << seqs[i]->getAligned() << endl << endl;
+			if ((seqs[i]->getName() == "S000003470") || (seqs[i]->getName() == "S000383265") || (seqs[i]->getName() == "7000004128191054")) {
+			for(int j=0;j<numCols;j++){
+				cout << '\t' << ms[i][j].score;
+			}
+			cout << endl;
+			}
+		}
+		cout << endl;*/
+		/*for(int i=0;i<numRows;i++){
+			cout << seqs[i]->getName();
+			for(int j=0;j<numCols;j++){
+				cout << '\t' << ms[i][j].prev;
+			}
+			cout << endl;
+		}*/
 		
 		
 	}
@@ -423,7 +429,7 @@ vector<trace_struct> Maligner::extractHighestPath(vector<vector<score_struct> > 
 			}
 		}
 			
-//		cout << endl << highestScore << '\t' << highestStruct.size() << '\t' << highestStruct[0].row << endl;	
+		//cout << endl << highestScore << '\t' << highestStruct.size() << '\t' << highestStruct[0].row << endl;	
 		
 		vector<trace_struct> maxTrace;
 		double maxPercentIdenticalQueryAntiChimera = 0;
@@ -450,10 +456,10 @@ vector<trace_struct> Maligner::extractHighestPath(vector<vector<score_struct> > 
 
 			vector<trace_struct> trace = mapTraceRegionsToAlignment(path, refSeqs);
 		
-//			cout << "traces\n";
-//			for(int j=0;j<trace.size();j++){
-//				cout << trace[j].col << '\t' << trace[j].oldCol << '\t' << refSeqs[trace[j].row]->getName() << endl;
-//			}
+			//cout << "traces\n";
+			//for(int j=0;j<trace.size();j++){
+			//	cout << trace[j].col << '\t' << trace[j].oldCol << '\t' << refSeqs[trace[j].row]->getName() << endl;
+			//}
 						
 			int traceStart = path[0].col;
 			int traceEnd = path[path.size()-1].col;	
@@ -476,6 +482,7 @@ vector<trace_struct> Maligner::extractHighestPath(vector<vector<score_struct> > 
 		}
 //		cout << maxPercentIdenticalQueryAntiChimera << endl;
 		return maxTrace;
+	
 		
 	}
 	catch(exception& e) {
@@ -633,9 +640,9 @@ vector<Sequence*> Maligner::getBlastSeqs(Sequence* q, int num) {
 		Sequence* queryRight = new Sequence(q->getName()+"right", rightQuery);
 
 		vector<int> tempIndexesLeft = databaseLeft->findClosestMegaBlast(queryLeft, num+1);
-		vector<float> leftScores = databaseLeft->getMegaBlastSearchScores();
+		vector<float> leftScores = databaseLeft->getSearchScores();
 		vector<int> tempIndexesRight = databaseLeft->findClosestMegaBlast(queryRight, num+1);
-		vector<float> rightScores = databaseLeft->getMegaBlastSearchScores();
+		vector<float> rightScores = databaseLeft->getSearchScores();
 
 		//if ((tempIndexesRight.size() == 0) && (tempIndexesLeft.size() == 0))  {  m->mothurOut("megablast returned " + toString(tempIndexesRight.size()) + " results for the right end, and " + toString(tempIndexesLeft.size()) + " for the left end. Needed " + toString(num+1) + ". Unable to process sequence " + q->getName()); m->mothurOutEndLine(); return refResults; }
 		
@@ -676,11 +683,11 @@ vector<Sequence*> Maligner::getBlastSeqs(Sequence* q, int num) {
 			}
 			
 			lasti = i;
-			if (mergedResults.size() > num) { break; }
+			//if (mergedResults.size() > num) { break; }
 		}
 		
 		//save lasti for smaller ties below
-		lasti++;
+		/*lasti++;
 		int iSmaller = lasti;
 		
 		if (!(mergedResults.size() > num)) { //if we still need more results.  
@@ -726,7 +733,17 @@ vector<Sequence*> Maligner::getBlastSeqs(Sequence* q, int num) {
 			else { break; }
 			lasti++;			
 		}
+		*/
 		
+		for (int i = smaller.size(); i < larger.size(); i++) {
+			//add right if you havent already
+			it = seen.find(larger[i]);
+			if (it == seen.end()) {  
+				mergedResults.push_back(larger[i]);
+				seen[larger[i]] = larger[i];
+				lastLarger = largerScores[i];
+			}
+		}
 		numWanted = mergedResults.size();
 		
 		if (mergedResults.size() < numWanted) { numWanted = mergedResults.size(); }
@@ -738,6 +755,7 @@ vector<Sequence*> Maligner::getBlastSeqs(Sequence* q, int num) {
 				Sequence* temp = new Sequence(db[mergedResults[i]]->getName(), db[mergedResults[i]]->getAligned());
 				refResults.push_back(temp);
 				indexes.push_back(mergedResults[i]);
+				//cout << db[mergedResults[i]]->getName() << endl;
 			}
 			
 //cout << mergedResults[i] << endl;
@@ -768,11 +786,15 @@ vector<Sequence*> Maligner::getKmerSeqs(Sequence* q, int num) {
 		
 		vector<int> tempIndexesLeft = databaseLeft->findClosestSequences(queryLeft, numWanted);
 		vector<int> tempIndexesRight = databaseRight->findClosestSequences(queryRight, numWanted);
+		vector<float> scoresLeft = databaseLeft->getSearchScores();
+		vector<float> scoresRight = databaseRight->getSearchScores();
 		
 		//merge results		
 		map<int, int> seen;
 		map<int, int>::iterator it;
-		
+		float lastRight = scoresRight[0];
+		float lastLeft = scoresLeft[0];
+		//int lasti = 0;
 		vector<int> mergedResults;
 		for (int i = 0; i < tempIndexesLeft.size(); i++) {
 			//add left if you havent already
@@ -780,6 +802,7 @@ vector<Sequence*> Maligner::getKmerSeqs(Sequence* q, int num) {
 			if (it == seen.end()) {  
 				mergedResults.push_back(tempIndexesLeft[i]);
 				seen[tempIndexesLeft[i]] = tempIndexesLeft[i];
+				lastLeft = scoresLeft[i];
 			}
 
 			//add right if you havent already
@@ -787,16 +810,61 @@ vector<Sequence*> Maligner::getKmerSeqs(Sequence* q, int num) {
 			if (it == seen.end()) {  
 				mergedResults.push_back(tempIndexesRight[i]);
 				seen[tempIndexesRight[i]] = tempIndexesRight[i];
+				lastRight = scoresRight[i];
 			}
+			
+			//if (mergedResults.size() > numWanted) { lasti = i; break; } //you have enough results
 		}
+		
+		//add in sequences with same distance as last sequence added
+		/*lasti++;
+		int i = lasti;
+		while (i < tempIndexesLeft.size()) {  
+			if (scoresLeft[i] == lastLeft) {
+				it = seen.find(tempIndexesLeft[i]);
+				
+				if (it == seen.end()) {  
+					mergedResults.push_back(tempIndexesLeft[i]);
+					seen[tempIndexesLeft[i]] = tempIndexesLeft[i];
+				}
+			}
+			else { break; }
+			i++;
+		}
+		
+		//		cout << "lastRight\t" << lastRight << endl;
+		//add in sequences with same distance as last sequence added
+		i = lasti;
+		while (i < tempIndexesRight.size()) {  
+			if (scoresRight[i] == lastRight) {
+				it = seen.find(tempIndexesRight[i]);
+				
+				if (it == seen.end()) {  
+					mergedResults.push_back(tempIndexesRight[i]);
+					seen[tempIndexesRight[i]] = tempIndexesRight[i];
+				}
+			}
+			else { break; }
+			i++;
+		}*/
+		
+		numWanted = mergedResults.size();
+		
+		if (numWanted > mergedResults.size()) { 
+			//m->mothurOut("numwanted is larger than the number of template sequences, adjusting numwanted."); m->mothurOutEndLine(); 
+			numWanted = mergedResults.size();
+		}
+		
 		
 //cout << q->getName() << endl;		
 		vector<Sequence*> refResults;
 		for (int i = 0; i < numWanted; i++) {
 //cout << db[mergedResults[i]]->getName() << endl;	
-			Sequence* temp = new Sequence(db[mergedResults[i]]->getName(), db[mergedResults[i]]->getAligned());
-			refResults.push_back(temp);
-			indexes.push_back(mergedResults[i]);
+			if (db[mergedResults[i]]->getName() != q->getName()) { 
+				Sequence* temp = new Sequence(db[mergedResults[i]]->getName(), db[mergedResults[i]]->getAligned());
+				refResults.push_back(temp);
+				indexes.push_back(mergedResults[i]);
+			}
 		}
 //cout << endl;		
 		delete queryRight;

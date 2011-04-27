@@ -85,22 +85,22 @@ ChimeraSlayer::ChimeraSlayer(string file, string temp, bool trim, map<string, in
 //***************************************************************************************************************
 int ChimeraSlayer::doPrep() {
 	try {
+		if (searchMethod == "distance") { 
+			//read in all query seqs
+			vector<Sequence*> tempQuerySeqs = readSeqs(fastafile);
 		
-		//read in all query seqs
-		vector<Sequence*> tempQuerySeqs = readSeqs(fastafile);
+			vector<Sequence*> temp = templateSeqs;
+			for (int i = 0; i < tempQuerySeqs.size(); i++) {  temp.push_back(tempQuerySeqs[i]);  }
 		
-		vector<Sequence*> temp = templateSeqs;
-		for (int i = 0; i < tempQuerySeqs.size(); i++) {  temp.push_back(tempQuerySeqs[i]);  }
+			createFilter(temp, 0.0); //just removed columns where all seqs have a gap
 		
-		createFilter(temp, 0.0); //just removed columns where all seqs have a gap
+			for (int i = 0; i < tempQuerySeqs.size(); i++) { delete tempQuerySeqs[i];  }
 		
-		for (int i = 0; i < tempQuerySeqs.size(); i++) { delete tempQuerySeqs[i];  }
+			if (m->control_pressed) {  return 0; } 
 		
-		if (m->control_pressed) {  return 0; } 
-		
-		//run filter on template
-		for (int i = 0; i < templateSeqs.size(); i++) {  if (m->control_pressed) {  return 0; }  runFilter(templateSeqs[i]);  }
-		
+			//run filter on template
+			for (int i = 0; i < templateSeqs.size(); i++) {  if (m->control_pressed) {  return 0; }  runFilter(templateSeqs[i]);  }
+		}
 		string 	kmerDBNameLeft;
 		string 	kmerDBNameRight;
 	
@@ -751,7 +751,12 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 		if (m->control_pressed) {  return 0;  }
 		
 		vector<results> Results = maligner.getOutput();
-
+		
+		//cout << query->getName() << endl;
+		//for (int i = 0; i < Results.size(); i++) {
+			//cout << Results[i].parent << '\t' << Results[i].regionStart << '\t' << Results[i].regionEnd << '\t' << Results[i].nastRegionStart << '\t' << Results[i].nastRegionEnd << '\t' << Results[i].queryToParent << '\t' << Results[i].queryToParentLocal << endl;
+		//}
+		//cout << "done\n" << endl;
 		if (chimeraFlag == "yes") {
 			
 			if (realign) {

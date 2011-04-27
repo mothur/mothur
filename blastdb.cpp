@@ -114,6 +114,7 @@ vector<int> BlastDB::findClosestSequences(Sequence* seq, int n) {
 vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n) {
 	try{
 		vector<int> topMatches;
+		Scores.clear();
 		
 		ofstream queryFile;
 
@@ -146,7 +147,7 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n) {
 			
 			m->gobble(m8FileHandle);
 			topMatches.push_back(templateAccession);
-			megaScores.push_back(searchScore);
+			Scores.push_back(searchScore);
 //cout << templateAccession << endl;
 		}
 		m8FileHandle.close();

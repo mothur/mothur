@@ -49,6 +49,7 @@ void DistanceDB::addSequence(Sequence seq) {
 vector<int> DistanceDB::findClosestSequences(Sequence* query, int numWanted){
 	try {
 		vector<int> topMatches;
+		Scores.clear();
 		bool templateSameLength = true;
 		string sequence = query->getAligned();
 		vector<seqDist> dists; 
@@ -87,6 +88,7 @@ vector<int> DistanceDB::findClosestSequences(Sequence* query, int numWanted){
 				//fill topmatches with numwanted closest sequences indexes
 				for (int i = 0; i < numWanted; i++) {
 					topMatches.push_back(dists[i].seq2);
+					Scores.push_back(dists[i].dist);
 				}
 			}else {
 				int bestIndex = 0;
@@ -103,6 +105,7 @@ vector<int> DistanceDB::findClosestSequences(Sequence* query, int numWanted){
 				}
 				searchScore = smallDist;
 				topMatches.push_back(bestIndex);
+				Scores.push_back(smallDist);
 			}
 		
 		}else{
