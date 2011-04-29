@@ -45,10 +45,10 @@ struct data_struct {
 struct data_results {
 	vector<data_struct> results;
 	string flag;
-	map<int, int> spotMap;
 	Sequence trimQuery;
+	//results malignerResults;
 	
-	data_results(vector<data_struct> d, string f, map<int, int> s, Sequence t) : results(d), flag(f), spotMap(s), trimQuery(t) {}
+	data_results(vector<data_struct> d, string f, map<int, int> s, Sequence t) : results(d), flag(f), trimQuery(t) {}
 	data_results() {}
 };
 /***********************************************************************/
@@ -137,7 +137,7 @@ class Chimera {
 	public:
 	
 		Chimera(){ m = MothurOut::getInstance(); length = 0; unaligned = false;  }
-		virtual ~Chimera(){	for (int i = 0; i < templateSeqs.size(); i++) { delete templateSeqs[i];  } };
+		virtual ~Chimera(){	for (int i = 0; i < templateSeqs.size(); i++) { delete templateSeqs[i];  } for (int i = 0; i < filteredTemplateSeqs.size(); i++) { delete filteredTemplateSeqs[i];  } };
 		virtual bool getUnaligned()				{	return unaligned;			}
 		virtual int getLength()					{   return length;	}
 		virtual vector<Sequence*> readSeqs(string);
@@ -162,6 +162,7 @@ class Chimera {
 	protected:
 		
 		vector<Sequence*> templateSeqs;
+		vector<Sequence*> filteredTemplateSeqs;
 		bool filter, unaligned; 
 		int length; 
 		string seqMask, filterString, outputDir, templateFileName; 

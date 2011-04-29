@@ -20,7 +20,7 @@ class Maligner {
 
 	public:
 		
-		Maligner(vector<Sequence*>, int, int, int, float, int, int, string, Database*, Database*);
+		Maligner(vector<Sequence*>, int, int, float, int, int); //int, int, int, , string, Database*, Database*
 		~Maligner() {};
 		
 		string getResults(Sequence*, DeCalculator*);
@@ -32,14 +32,10 @@ class Maligner {
 		Sequence* query;
 		vector<Sequence*> refSeqs;
 		vector<Sequence*> db;
-		int numWanted, matchScore, misMatchPenalty, minCoverage, minSimilarity;
-		string searchMethod;
+		int minCoverage, minSimilarity, matchScore, misMatchPenalty;
 		float minDivR, percentIdenticalQueryChimera;
 		vector<results> outputResults;
-		vector<int> indexes;  //stores index into template seqs of the refSeqs, so we can return the whole sequence rather than the trimmed and filtered one
 		map<int, int> spotMap;
-		Database* databaseLeft;
-		Database* databaseRight;
 		
 		vector<Sequence*> minCoverageFilter(vector<Sequence*>);  //removes top matches that do not have minimum coverage with query.
 		int computeChimeraPenalty();
@@ -53,8 +49,6 @@ class Maligner {
 		string constructAntiChimericSeq(vector<trace_struct>, vector<Sequence*>);
 		float computePercentID(string, string);
 		string chimeraMaligner(int, DeCalculator*);
-		vector<Sequence*> getBlastSeqs(Sequence*, int);
-		vector<Sequence*> getKmerSeqs(Sequence*, int);
 		MothurOut* m;
 		
 };

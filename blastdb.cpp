@@ -187,7 +187,9 @@ void BlastDB::generateDB() {
 		//m->mothurOut("Generating the temporary BLAST database...\t");	cout.flush();
 		
 		path = m->argv;
-		path = path.substr(0, (path.find_last_of('m')));
+		string tempPath = path;
+		for (int i = 0; i < path.length(); i++) { tempPath[i] = tolower(path[i]); }
+		path = path.substr(0, (tempPath.find_last_of('m')));
 	
 		string formatdbCommand = path + "blast/bin/formatdb -p F -o T -i " + dbFileName;	//	format the database, -o option gives us the ability
 		system(formatdbCommand.c_str());								//	to get the right sequence names, i think. -p F

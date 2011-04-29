@@ -82,7 +82,6 @@ void ChimeraReAligner::reAlign(Sequence* query, vector<results> parents) {
 			//make sure you don't cutoff end of query 
 			if (parents[parents.size()-1].nastRegionEnd < (qAligned.length()-1)) {  newQuery += qAligned.substr(parents[parents.size()-1].nastRegionEnd+1);  }
 			
-			//set query to new aligned string
 			query->setAligned(newQuery);
 
 			//free memory
