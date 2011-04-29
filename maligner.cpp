@@ -8,23 +8,14 @@
  */
 
 #include "maligner.h"
-#include "kmerdb.hpp"
-#include "blastdb.hpp"
 
-/***********************************************************************/
-Maligner::Maligner(vector<Sequence*> temp, int num, int match, int misMatch, float div, int ms, int minCov, string mode, Database* dataLeft, Database* dataRight) :
-		db(temp), numWanted(num), matchScore(match), misMatchPenalty(misMatch), minDivR(div), minSimilarity(ms), minCoverage(minCov), searchMethod(mode), databaseLeft(dataLeft), databaseRight(dataRight) { 
-			
+/***********************************************************************/ //int num, int match, int misMatch, , string mode, Database* dataLeft, Database* dataRight
+Maligner::Maligner(vector<Sequence*> temp, int match, int misMatch, float div, int ms, int minCov) : db(temp), matchScore(match), misMatchPenalty(misMatch), minDivR(div), minSimilarity(ms), minCoverage(minCov) { 
+			//numWanted(num),  , searchMethod(mode), databaseLeft(dataLeft), databaseRight(dataRight)
 			
 			m = MothurOut::getInstance(); 
 			
-//			cout << matchScore << '\t' << misMatchPenalty << endl;
-//			
-//			matchScore = 1;
-//			misMatchPenalty = -1;
-			
-		}
-
+}
 /***********************************************************************/
 string Maligner::getResults(Sequence* q, DeCalculator* decalc) {
 	try {
@@ -36,20 +27,13 @@ string Maligner::getResults(Sequence* q, DeCalculator* decalc) {
 		
 		string chimera;
 		
-		if (searchMethod == "distance") {
-			//find closest seqs to query in template - returns copies of seqs so trim does not destroy - remember to deallocate
-			refSeqs = decalc->findClosest(query, db, numWanted, indexes);
-		}else if (searchMethod == "blast")  {
-			refSeqs = getBlastSeqs(query, numWanted); //fills indexes
-		}else if (searchMethod == "kmer") {
-			refSeqs = getKmerSeqs(query, numWanted); //fills indexes
-		}else { m->mothurOut("not valid search."); exit(1);  } //should never get here
-		
-		if (m->control_pressed) { return chimera;  }
+		//copy refSeqs so that filter does not effect original
+		for(int i = 0; i < db.size(); i++) {  
+			Sequence* newSeq = new Sequence(db[i]->getName(), db[i]->getAligned());
+			refSeqs.push_back(newSeq);
+		}
 		
 		refSeqs = minCoverageFilter(refSeqs);
-		
-		
 		
 		if (refSeqs.size() < 2)  { 
 			for (int i = 0; i < refSeqs.size(); i++) {  delete refSeqs[i];	}
@@ -58,7 +42,7 @@ string Maligner::getResults(Sequence* q, DeCalculator* decalc) {
 		}
 		
 		int chimeraPenalty = computeChimeraPenalty();
-		//cout << "chimeraPenalty = " << chimeraPenalty << endl;
+		
 		//fills outputResults
 		chimera = chimeraMaligner(chimeraPenalty, decalc);
 		
@@ -127,7 +111,7 @@ string Maligner::chimeraMaligner(int chimeraPenalty, DeCalculator* decalc) {
 			results temp;
 			
 			temp.parent = refSeqs[seqIndex]->getName();
-			temp.parentAligned = db[indexes[seqIndex]]->getAligned();
+			temp.parentAligned = db[seqIndex]->getAligned();
 			temp.nastRegionStart = spotMap[regionStart];
 			temp.nastRegionEnd = spotMap[regionEnd];
 			temp.regionStart = regionStart;
@@ -146,7 +130,8 @@ string Maligner::chimeraMaligner(int chimeraPenalty, DeCalculator* decalc) {
 			parentInRegion = parentInRegion.substr(regionStart, (regionEnd-regionStart+1));
 			
 			temp.queryToParentLocal = computePercentID(queryInRegion, parentInRegion);
-		
+			
+			//cout << temp.parent << '\t' << "NAST:" << temp.nastRegionStart << '-' << temp.nastRegionEnd << " G:" << temp.queryToParent << " L:" << temp.queryToParentLocal << endl;
 			outputResults.push_back(temp);
 		}
 		
@@ -626,256 +611,3 @@ float Maligner::computePercentID(string queryAlign, string chimera) {
 	}
 }
 //***************************************************************************************************************
-vector<Sequence*> Maligner::getBlastSeqs(Sequence* q, int num) {
-	try {	
-		indexes.clear();
-		vector<Sequence*> refResults;
-				
-		//get parts of query
-		string queryUnAligned = q->getUnaligned();
-		string leftQuery = queryUnAligned.substr(0, int(queryUnAligned.length() * 0.33)); //first 1/3 of the sequence
-		string rightQuery = queryUnAligned.substr(int(queryUnAligned.length() * 0.66)); //last 1/3 of the sequence
-		
-		Sequence* queryLeft = new Sequence(q->getName()+"left", leftQuery);
-		Sequence* queryRight = new Sequence(q->getName()+"right", rightQuery);
-
-		vector<int> tempIndexesLeft = databaseLeft->findClosestMegaBlast(queryLeft, num+1);
-		vector<float> leftScores = databaseLeft->getSearchScores();
-		vector<int> tempIndexesRight = databaseLeft->findClosestMegaBlast(queryRight, num+1);
-		vector<float> rightScores = databaseLeft->getSearchScores();
-
-		//if ((tempIndexesRight.size() == 0) && (tempIndexesLeft.size() == 0))  {  m->mothurOut("megablast returned " + toString(tempIndexesRight.size()) + " results for the right end, and " + toString(tempIndexesLeft.size()) + " for the left end. Needed " + toString(num+1) + ". Unable to process sequence " + q->getName()); m->mothurOutEndLine(); return refResults; }
-		
-		vector<int> smaller;
-		vector<float> smallerScores;
-		vector<int> larger;
-		vector<float> largerScores;
-		
-		if (tempIndexesRight.size() < tempIndexesLeft.size()) { smaller = tempIndexesRight; smallerScores = rightScores; larger = tempIndexesLeft; largerScores = leftScores; }
-		else { smaller = tempIndexesLeft; smallerScores = leftScores; larger = tempIndexesRight; largerScores = rightScores; } 
-		
-		//for (int i = 0; i < smaller.size(); i++) { cout << "smaller = " << smaller[i] << '\t' << smallerScores[i] << endl; }
-		//cout << endl;
-		//for (int i = 0; i < larger.size(); i++) { cout << "larger = " << larger[i] << '\t' << largerScores[i] << endl; }
-		
-		//merge results		
-		map<int, int> seen;
-		map<int, int>::iterator it;
-		float lastSmaller = smallerScores[0];
-		float lastLarger = largerScores[0];
-		int lasti = 0;
-		vector<int> mergedResults;
-		for (int i = 0; i < smaller.size(); i++) {
-			//add left if you havent already
-			it = seen.find(smaller[i]);
-			if (it == seen.end()) {  
-				mergedResults.push_back(smaller[i]);
-				seen[smaller[i]] = smaller[i];
-				lastSmaller = smallerScores[i];
-			}
-
-			//add right if you havent already
-			it = seen.find(larger[i]);
-			if (it == seen.end()) {  
-				mergedResults.push_back(larger[i]);
-				seen[larger[i]] = larger[i];
-				lastLarger = largerScores[i];
-			}
-			
-			lasti = i;
-			//if (mergedResults.size() > num) { break; }
-		}
-		
-		//save lasti for smaller ties below
-		/*lasti++;
-		int iSmaller = lasti;
-		
-		if (!(mergedResults.size() > num)) { //if we still need more results.  
-			for (int i = smaller.size(); i < larger.size(); i++) {
-				it = seen.find(larger[i]);
-				if (it == seen.end()) {  
-					mergedResults.push_back(larger[i]);
-					seen[larger[i]] = larger[i];
-					lastLarger = largerScores[i];
-				}
-				
-				lasti = i;
-				if (mergedResults.size() > num) {  break; }
-			}
-		}
-		
-		
-		//add in any ties from smaller
-		while (iSmaller < smaller.size()) {
-			if (smallerScores[iSmaller] == lastSmaller) {
-				it = seen.find(smaller[iSmaller]);
-				
-				if (it == seen.end()) {  
-					mergedResults.push_back(smaller[iSmaller]);
-					seen[smaller[iSmaller]] = smaller[iSmaller];
-				}
-			}
-			else { break; }
-			iSmaller++;			
-		}
-		
-		lasti++;
-		//add in any ties from larger
-		while (lasti < larger.size()) {
-			if (largerScores[lasti] == lastLarger) { //is it a tie
-				it = seen.find(larger[lasti]);
-				
-				if (it == seen.end()) {  //we haven't already seen it
-					mergedResults.push_back(larger[lasti]);
-					seen[larger[lasti]] = larger[lasti];
-				}
-			}
-			else { break; }
-			lasti++;			
-		}
-		*/
-		
-		for (int i = smaller.size(); i < larger.size(); i++) {
-			//add right if you havent already
-			it = seen.find(larger[i]);
-			if (it == seen.end()) {  
-				mergedResults.push_back(larger[i]);
-				seen[larger[i]] = larger[i];
-				lastLarger = largerScores[i];
-			}
-		}
-		numWanted = mergedResults.size();
-		
-		if (mergedResults.size() < numWanted) { numWanted = mergedResults.size(); }
-//cout << q->getName() << " merged results size = " << mergedResults.size() << '\t' << "numwanted = " << numWanted <<  endl;		
-		for (int i = 0; i < numWanted; i++) {
-//cout << db[mergedResults[i]]->getName()  << '\t' << mergedResults[i] << endl;	
-			
-			if (db[mergedResults[i]]->getName() != q->getName()) { 
-				Sequence* temp = new Sequence(db[mergedResults[i]]->getName(), db[mergedResults[i]]->getAligned());
-				refResults.push_back(temp);
-				indexes.push_back(mergedResults[i]);
-				//cout << db[mergedResults[i]]->getName() << endl;
-			}
-			
-//cout << mergedResults[i] << endl;
-		}
-//cout << "done " << q->getName()  << endl;		
-		delete queryRight;
-		delete queryLeft;
-			
-		return refResults;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "Maligner", "getBlastSeqs");
-		exit(1);
-	}
-}
-//***************************************************************************************************************
-vector<Sequence*> Maligner::getKmerSeqs(Sequence* q, int num) {
-	try {	
-		indexes.clear();
-		
-		//get parts of query
-		string queryUnAligned = q->getUnaligned();
-		string leftQuery = queryUnAligned.substr(0, int(queryUnAligned.length() * 0.33)); //first 1/3 of the sequence
-		string rightQuery = queryUnAligned.substr(int(queryUnAligned.length() * 0.66)); //last 1/3 of the sequence
-
-		Sequence* queryLeft = new Sequence(q->getName(), leftQuery);
-		Sequence* queryRight = new Sequence(q->getName(), rightQuery);
-		
-		vector<int> tempIndexesLeft = databaseLeft->findClosestSequences(queryLeft, numWanted);
-		vector<int> tempIndexesRight = databaseRight->findClosestSequences(queryRight, numWanted);
-		vector<float> scoresLeft = databaseLeft->getSearchScores();
-		vector<float> scoresRight = databaseRight->getSearchScores();
-		
-		//merge results		
-		map<int, int> seen;
-		map<int, int>::iterator it;
-		float lastRight = scoresRight[0];
-		float lastLeft = scoresLeft[0];
-		//int lasti = 0;
-		vector<int> mergedResults;
-		for (int i = 0; i < tempIndexesLeft.size(); i++) {
-			//add left if you havent already
-			it = seen.find(tempIndexesLeft[i]);
-			if (it == seen.end()) {  
-				mergedResults.push_back(tempIndexesLeft[i]);
-				seen[tempIndexesLeft[i]] = tempIndexesLeft[i];
-				lastLeft = scoresLeft[i];
-			}
-
-			//add right if you havent already
-			it = seen.find(tempIndexesRight[i]);
-			if (it == seen.end()) {  
-				mergedResults.push_back(tempIndexesRight[i]);
-				seen[tempIndexesRight[i]] = tempIndexesRight[i];
-				lastRight = scoresRight[i];
-			}
-			
-			//if (mergedResults.size() > numWanted) { lasti = i; break; } //you have enough results
-		}
-		
-		//add in sequences with same distance as last sequence added
-		/*lasti++;
-		int i = lasti;
-		while (i < tempIndexesLeft.size()) {  
-			if (scoresLeft[i] == lastLeft) {
-				it = seen.find(tempIndexesLeft[i]);
-				
-				if (it == seen.end()) {  
-					mergedResults.push_back(tempIndexesLeft[i]);
-					seen[tempIndexesLeft[i]] = tempIndexesLeft[i];
-				}
-			}
-			else { break; }
-			i++;
-		}
-		
-		//		cout << "lastRight\t" << lastRight << endl;
-		//add in sequences with same distance as last sequence added
-		i = lasti;
-		while (i < tempIndexesRight.size()) {  
-			if (scoresRight[i] == lastRight) {
-				it = seen.find(tempIndexesRight[i]);
-				
-				if (it == seen.end()) {  
-					mergedResults.push_back(tempIndexesRight[i]);
-					seen[tempIndexesRight[i]] = tempIndexesRight[i];
-				}
-			}
-			else { break; }
-			i++;
-		}*/
-		
-		numWanted = mergedResults.size();
-		
-		if (numWanted > mergedResults.size()) { 
-			//m->mothurOut("numwanted is larger than the number of template sequences, adjusting numwanted."); m->mothurOutEndLine(); 
-			numWanted = mergedResults.size();
-		}
-		
-		
-//cout << q->getName() << endl;		
-		vector<Sequence*> refResults;
-		for (int i = 0; i < numWanted; i++) {
-//cout << db[mergedResults[i]]->getName() << endl;	
-			if (db[mergedResults[i]]->getName() != q->getName()) { 
-				Sequence* temp = new Sequence(db[mergedResults[i]]->getName(), db[mergedResults[i]]->getAligned());
-				refResults.push_back(temp);
-				indexes.push_back(mergedResults[i]);
-			}
-		}
-//cout << endl;		
-		delete queryRight;
-		delete queryLeft;
-		
-		return refResults;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "Maligner", "getKmerSeqs");
-		exit(1);
-	}
-}
-//***************************************************************************************************************
-

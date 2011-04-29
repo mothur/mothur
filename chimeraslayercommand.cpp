@@ -342,7 +342,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 			temp = validParameter.validFile(parameters, "parents", false);			if (temp == "not found") { temp = "3"; }
 			convert(temp, parents); 
 			
-			temp = validParameter.validFile(parameters, "realign", true);			if (temp == "not found") { temp = "t"; }
+			temp = validParameter.validFile(parameters, "realign", false);			if (temp == "not found") { temp = "t"; }
 			realign = m->isTrue(temp); 
 			
 			temp = validParameter.validFile(parameters, "trim", false);				if (temp == "not found") { temp = "f"; }
@@ -374,7 +374,6 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 
 int ChimeraSlayerCommand::execute(){
 	try{
-		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		for (int s = 0; s < fastaFileNames.size(); s++) {

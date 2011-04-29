@@ -43,12 +43,11 @@ class ChimeraSlayer : public Chimera {
 		Sequence* querySeq;
 		Sequence trimQuery;
 		DeCalculator* decalc;
-		map<int, int>  spotMap;
 		Database* databaseRight;
 		Database* databaseLeft;
 		map<string, int> priority; //for template=self, seqname, seqAligned, abundance
 		set<string> chimericSeqs; //for template=self, so we don't add chimeric sequences to the userTemplate set
-		
+	
 		vector<data_struct>  chimeraResults;
 		data_results printResults;
 		string chimeraFlags, searchMethod, fastafile;
@@ -61,7 +60,10 @@ class ChimeraSlayer : public Chimera {
 		string getBlock(data_struct, string);
 		string getBlock(data_results, data_results, bool, bool, string);
 		//int readNameFile(string);
-		vector<Sequence*> getTemplate(Sequence*);
+		vector<Sequence*> getTemplate(Sequence*, vector<Sequence*>&);
+		vector<Sequence*> getRefSeqs(Sequence*, vector<Sequence*>&, vector<Sequence*>&);
+		vector<Sequence*> getBlastSeqs(Sequence*, vector<Sequence*>&, int);
+		vector<Sequence*> getKmerSeqs(Sequence*, vector<Sequence*>&, int);
 		
 };
 
