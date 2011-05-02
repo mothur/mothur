@@ -67,26 +67,14 @@ string Slayer::getResults(Sequence* query, vector<Sequence*> refSeqs) {
 						
 						//are we within 10 points of the bootstrap cutoff?
 						if ((divs[k].bsMax >= (minBS-10)) && (iters < 1000)) {
-							snpsLeft = getSNPS(divs[k].parentA.getAligned(), divs[k].querySeq.getAligned(), divs[k].parentB.getAligned(), divs[k].winLStart, divs[k].winLEnd);
-							snpsRight = getSNPS(divs[k].parentA.getAligned(), divs[k].querySeq.getAligned(), divs[k].parentB.getAligned(), divs[k].winRStart, divs[k].winREnd);
-							
+							bootstrapSNPS(snpsLeft, snpsRight, BS_A, BS_B, 1000);
+								
 							if (m->control_pressed) { delete q; delete leftParent; delete rightParent; return "no"; }
-							
-							numSNPSLeft = snpsLeft.size();
-							numSNPSRight = snpsRight.size();
-							
-							//require at least 4 SNPs on each side of the break
-							if ((numSNPSLeft >= 4) && (numSNPSRight >= 4)) {
-								float BS_A, BS_B;
-								bootstrapSNPS(snpsLeft, snpsRight, BS_A, BS_B, 1000);
 								
-								if (m->control_pressed) { return "no"; }
-								
-								divs[k].bsa = BS_A;
-								divs[k].bsb = BS_B;
-								divs[k].bsMax = max(BS_A, BS_B);
-								divs[k].chimeraMax = max(divs[k].qla_qrb, divs[k].qlb_qra);
-							}
+							divs[k].bsa = BS_A;
+							divs[k].bsb = BS_B;
+							divs[k].bsMax = max(BS_A, BS_B);
+							divs[k].chimeraMax = max(divs[k].qla_qrb, divs[k].qlb_qra);
 						}
 						
 						//so results reflect orignal alignment
