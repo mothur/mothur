@@ -66,7 +66,7 @@ string Slayer::getResults(Sequence* query, vector<Sequence*> refSeqs) {
 						
 						
 						//are we within 10 points of the bootstrap cutoff?
-						if (divs[k].bsMax >= (minBS-10)) {
+						if ((divs[k].bsMax >= (minBS-10)) && (iters < 1000)) {
 							snpsLeft = getSNPS(divs[k].parentA.getAligned(), divs[k].querySeq.getAligned(), divs[k].parentB.getAligned(), divs[k].winLStart, divs[k].winLEnd);
 							snpsRight = getSNPS(divs[k].parentA.getAligned(), divs[k].querySeq.getAligned(), divs[k].parentB.getAligned(), divs[k].winRStart, divs[k].winREnd);
 							
