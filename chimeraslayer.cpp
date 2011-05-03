@@ -763,22 +763,18 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 		for (int i = 0; i < refSeqs.size(); i++) {  delete refSeqs[i];	}
 		
 		if (chimeraFlag == "yes") {
-		
+
 			if (realign) {
-				vector<Sequence*> parents;
+				vector<string> parents;
 				for (int i = 0; i < Results.size(); i++) {
-cout << Results[i].parent  << '\t' << Results[i].nastRegionStart << '\t' << Results[i].nastRegionEnd  << endl;
-					Sequence* parent = new Sequence(Results[i].parent, Results[i].parentAligned);
-					
-					parents.push_back(parent);
+					parents.push_back(Results[i].parentAligned);
 				}
 				
-				ChimeraReAligner realigner;
-				//realigner.reAlign(query, parents);
-				
-				for (int i = 0; i < parents.size(); i++) { delete parents[i]; }
+				ChimeraReAligner realigner;		
+				realigner.reAlign(query, parents);
+
 			}
-	//query->printSequence(cout);
+
 			//get sequence that were given from maligner results
 			vector<SeqDist> seqs;
 			map<string, float> removeDups;

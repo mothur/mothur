@@ -15,18 +15,44 @@
 
 /***********************************************************/
 
+struct AlignCell {
+	int score;
+	char direction;
+	AlignCell() : score(0), direction('x') {};
+};
+
+/***********************************************************/
+
+struct  bases {
+	int A, T, G, C, Gap, Chars;
+	bases() : A(0), T(0), G(0), C(0), Gap(0), Chars(0){};
+};
+
+/***********************************************************/
+
+
 class ChimeraReAligner  {
 	
-	public:
-		ChimeraReAligner();	 
-		~ChimeraReAligner();
-		
-		void reAlign(Sequence*, vector<results>);
+public:
+	ChimeraReAligner();	 
+	~ChimeraReAligner();
+	
+	void reAlign(Sequence*, vector<string>);
 				
-	private:
-		Sequence* querySeq;
-		MothurOut* m;
+private:
+	void buildTemplateProfile(vector<string>);
+	void createAlignMatrix(int, int);
+	void fillAlignMatrix(string);
+	int calcMatchScore(bases, char);
+	string getNewAlignment(string);
+
+	int alignmentLength;
+	vector<bases> profile;
+	vector<vector<AlignCell> > alignMatrix;
+
+	MothurOut* m;
 };
+
 /***********************************************************/
 
 #endif
