@@ -1146,7 +1146,7 @@ int SubSampleCommand::processList(ListVector*& list, ofstream& out, set<string>&
 					individual += binnames[j];
 				}
 			}
-			if (subset.count(individual) != 0) {  newNames += individual;  }
+			if (subset.count(individual) != 0) {  newNames += individual + ",";  }
 			
 			
 			//if there are names in this bin add to new list

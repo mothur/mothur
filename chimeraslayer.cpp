@@ -765,10 +765,20 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 		if (chimeraFlag == "yes") {
 		
 			if (realign) {
+				vector<Sequence*> parents;
+				for (int i = 0; i < Results.size(); i++) {
+cout << Results[i].parent  << '\t' << Results[i].nastRegionStart << '\t' << Results[i].nastRegionEnd  << endl;
+					Sequence* parent = new Sequence(Results[i].parent, Results[i].parentAligned);
+					
+					parents.push_back(parent);
+				}
+				
 				ChimeraReAligner realigner;
-				realigner.reAlign(query, Results);
+				//realigner.reAlign(query, parents);
+				
+				for (int i = 0; i < parents.size(); i++) { delete parents[i]; }
 			}
-		
+	//query->printSequence(cout);
 			//get sequence that were given from maligner results
 			vector<SeqDist> seqs;
 			map<string, float> removeDups;
@@ -1037,7 +1047,7 @@ vector<Sequence*> ChimeraSlayer::getBlastSeqs(Sequence* q, vector<Sequence*>& db
 		vector<int> mergedResults;
 		for (int i = 0; i < smaller.size(); i++) {
 			if (m->control_pressed) { delete queryRight; delete queryLeft; return refResults; }
-			
+	
 			//add left if you havent already
 			it = seen.find(smaller[i]);
 			if (it == seen.end()) {  
@@ -1065,7 +1075,7 @@ vector<Sequence*> ChimeraSlayer::getBlastSeqs(Sequence* q, vector<Sequence*>& db
 		}
 
 		for (int i = 0; i < mergedResults.size(); i++) {
-			
+			//cout << mergedResults[i]  << '\t' << db[mergedResults[i]]->getName() << endl;	
 			if (db[mergedResults[i]]->getName() != q->getName()) { 
 				Sequence* temp = new Sequence(db[mergedResults[i]]->getName(), db[mergedResults[i]]->getAligned());
 				refResults.push_back(temp);

@@ -25,8 +25,6 @@ class ChimeraReAligner  {
 				
 	private:
 		Sequence* querySeq;
-		
-		//Sequence* getSequence(string);  //find sequence from name
 		MothurOut* m;
 };
 /***********************************************************/
