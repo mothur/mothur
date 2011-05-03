@@ -18,17 +18,15 @@
 class ChimeraReAligner  {
 	
 	public:
-		ChimeraReAligner(vector<Sequence*>, int, int);	 
+		ChimeraReAligner();	 
 		~ChimeraReAligner();
 		
 		void reAlign(Sequence*, vector<results>);
 				
 	private:
 		Sequence* querySeq;
-		vector<Sequence*> templateSeqs;
-		int match, misMatch;
 		
-		Sequence* getSequence(string);  //find sequence from name
+		//Sequence* getSequence(string);  //find sequence from name
 		MothurOut* m;
 };
 /***********************************************************/
