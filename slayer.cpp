@@ -28,24 +28,18 @@ string Slayer::getResults(Sequence* query, vector<Sequence*> refSeqs) {
 				Sequence* q = new Sequence(query->getName(), query->getAligned());
 				Sequence* leftParent = new Sequence(refSeqs[i]->getName(), refSeqs[i]->getAligned());
 				Sequence* rightParent = new Sequence(refSeqs[j]->getName(), refSeqs[j]->getAligned());
-		//cout << "parents: (" << refSeqs[i]->getName() << ", " << refSeqs[j]->getName() << ")\n";
+	
 				map<int, int> spots;  //map from spot in original sequence to spot in filtered sequence for query and both parents
 				vector<data_struct> divs = runBellerophon(q, leftParent, rightParent, spots);
-				//cout << divs.size() << endl;
-				if (m->control_pressed) { 
-					delete q;
-					delete leftParent;
-					delete rightParent;
-					return "no"; 
-				}
+	
+				if (m->control_pressed) { delete q; delete leftParent; delete rightParent; return "no"; }
 					
-//				cout << divs.size() << endl;
 				vector<data_struct> selectedDivs;
 				for (int k = 0; k < divs.size(); k++) {
 					
 					vector<snps> snpsLeft = getSNPS(divs[k].parentA.getAligned(), divs[k].querySeq.getAligned(), divs[k].parentB.getAligned(), divs[k].winLStart, divs[k].winLEnd);
 					vector<snps> snpsRight = getSNPS(divs[k].parentA.getAligned(), divs[k].querySeq.getAligned(), divs[k].parentB.getAligned(), divs[k].winRStart, divs[k].winREnd);
-					//cout << refSeqs[i]->getName() << '\t' << refSeqs[j]->getName() << '\t' << k << divs[k].parentA.getAligned() << endl << divs[k].parentB.getAligned() << endl;	
+	
 					if (m->control_pressed) { delete q; delete leftParent; delete rightParent; return "no"; }
 					
 					int numSNPSLeft = snpsLeft.size();

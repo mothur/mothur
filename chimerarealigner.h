@@ -25,7 +25,6 @@ class ChimeraReAligner  {
 				
 	private:
 		Sequence* querySeq;
-		Alignment* alignment;
 		vector<Sequence*> templateSeqs;
 		int match, misMatch;
 		

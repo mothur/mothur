@@ -683,7 +683,7 @@ float DeCalculator::getCoef(vector<float> obs, vector<float> qav) {
 }
 //***************************************************************************************************************
 //gets closest matches to each end, since chimeras will most likely have different parents on each end
-vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*>& thisTemplate, vector<Sequence*>& thisFilteredTemplate, int& numWanted) {
+vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*>& thisTemplate, vector<Sequence*>& thisFilteredTemplate, int numWanted) {
 	try {
 		//indexes.clear();
 		
@@ -790,6 +790,9 @@ vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*
 		float lastLeft = distsLeft[0].dist;
 		//int lasti = 0;
 		for (int i = 0; i < numWanted+1; i++) {
+			
+			if (m->control_pressed) { return seqsMatches; }
+			
 			//add left if you havent already
 			it = seen.find(thisTemplate[distsLeft[i].index]->getName());
 			if (it == seen.end()) {  

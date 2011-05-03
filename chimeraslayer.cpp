@@ -811,7 +811,7 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 					seqs.pop_back();	
 				}
 			}
-	cout << "got parents" << endl;	
+		
 			//put seqs into vector to send to slayer
 			vector<Sequence*> seqsForSlayer;
 			for (int k = 0; k < seqs.size(); k++) {  seqsForSlayer.push_back(seqs[k].seq);	}

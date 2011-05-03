@@ -39,7 +39,7 @@ class DeCalculator {
 		DeCalculator() { m = MothurOut::getInstance(); }
 		~DeCalculator() {};
 		
-		vector<Sequence*> findClosest(Sequence*, vector<Sequence*>&, vector<Sequence*>&, int&);  //takes querySeq, a reference db, filteredRefDB, numWanted 
+		vector<Sequence*> findClosest(Sequence*, vector<Sequence*>&, vector<Sequence*>&, int);  //takes querySeq, a reference db, filteredRefDB, numWanted 
 		Sequence* findClosest(Sequence*, vector<Sequence*>);
 		set<int> getPos() {  return h;  }
 		void setMask(string); 

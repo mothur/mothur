@@ -49,15 +49,15 @@ void ChimeraReAligner::reAlign(Sequence* query, vector<results> parents) {
 				
 				parentParts.push_back(parent);
 
-				if (q.length() > longest)	{ longest = q.length(); }
-				if (p.length() > longest)	{ longest = p.length();	}
+				if (queryFrag->getUnaligned().length() > longest)	{ longest = queryFrag->getUnaligned().length(); }
+				if (parent->getUnaligned().length() > longest)	{ longest = parent->getUnaligned().length();	}
 			}
 
 			//align each peice to correct parent from results
 			for (int i = 0; i < queryParts.size(); i++) {
 				if ((queryParts[i]->getUnaligned() == "") || (parentParts[i]->getUnaligned() == "")) {;}
 				else {
-					alignment = new NeedlemanOverlap(-2.0, match, misMatch, longest+1); //default gapopen, match, mismatch, longestbase
+					Alignment* alignment = new NeedlemanOverlap(-2.0, 1.0, -1.0, longest+1); //default gapopen, match, mismatch, longestbase
 				
 					Nast nast(alignment, queryParts[i], parentParts[i]);
 					delete alignment;
