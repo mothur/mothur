@@ -98,7 +98,7 @@ string Maligner::chimeraMaligner(int chimeraPenalty, DeCalculator* decalc) {
 		int traceStart = trace[0].col;
 		int traceEnd = trace[trace.size()-1].oldCol;	
 		string queryInRange = query->getAligned();
-		queryInRange = queryInRange.substr(traceStart, (traceEnd-traceStart+1));
+		queryInRange = queryInRange.substr(traceStart, (traceEnd-traceStart));
 		
 		if (m->control_pressed) { return chimera;  }
 		
@@ -118,20 +118,20 @@ string Maligner::chimeraMaligner(int chimeraPenalty, DeCalculator* decalc) {
 			temp.regionEnd = regionEnd;
 			
 			string parentInRange = refSeqs[seqIndex]->getAligned();
-			parentInRange = parentInRange.substr(traceStart, (traceEnd-traceStart+1));
+			parentInRange = parentInRange.substr(traceStart, (traceEnd-traceStart));
 			
 			temp.queryToParent = computePercentID(queryInRange, parentInRange);
 			temp.divR = (percentIdenticalQueryChimera / temp.queryToParent);
 
 			string queryInRegion = query->getAligned();
-			queryInRegion = queryInRegion.substr(regionStart, (regionEnd-regionStart+1));
+			queryInRegion = queryInRegion.substr(regionStart, (regionEnd-regionStart));
 			
 			string parentInRegion = refSeqs[seqIndex]->getAligned();
-			parentInRegion = parentInRegion.substr(regionStart, (regionEnd-regionStart+1));
+			parentInRegion = parentInRegion.substr(regionStart, (regionEnd-regionStart));
 			
 			temp.queryToParentLocal = computePercentID(queryInRegion, parentInRegion);
 			
-			//cout << temp.parent << '\t' << "NAST:" << temp.nastRegionStart << '-' << temp.nastRegionEnd << " G:" << temp.queryToParent << " L:" << temp.queryToParentLocal << endl;
+			cout << temp.parent << '\t' << "NAST:" << temp.nastRegionStart << '-' << temp.nastRegionEnd << " G:" << temp.queryToParent << " L:" << temp.queryToParentLocal << endl;
 			outputResults.push_back(temp);
 		}
 		
@@ -585,19 +585,32 @@ float Maligner::computePercentID(string queryAlign, string chimera) {
 			return -1.0;
 		}
 
-	
-		int numBases = 0;
 		int numIdentical = 0;
-	
+		int countA = 0;
+		int countB = 0;
 		for (int i = 0; i < queryAlign.length(); i++) {
-			if ((isalpha(queryAlign[i])) || (isalpha(chimera[i])))  {
-				numBases++;		
-				if (queryAlign[i] == chimera[i]) {
-					numIdentical++;
+			if (((queryAlign[i] != 'G') && (queryAlign[i] != 'T') && (queryAlign[i] != 'A') && (queryAlign[i] != 'C')&& (queryAlign[i] != '.') && (queryAlign[i] != '-')) ||
+				((chimera[i] != 'G') && (chimera[i] != 'T') && (chimera[i] != 'A') && (chimera[i] != 'C')&& (chimera[i] != '.') && (chimera[i] != '-'))) {}
+			else {
+
+				bool charA = false; bool charB = false;
+				if ((queryAlign[i] == 'G') || (queryAlign[i] == 'T') || (queryAlign[i] == 'A') || (queryAlign[i] == 'C')) { charA = true; }
+				if ((chimera[i] == 'G') || (chimera[i] == 'T') || (chimera[i] == 'A') || (chimera[i] == 'C')) { charB = true; }
+					
+				if (charA || charB) {
+						
+					if (charA) { countA++; }
+					if (charB) { countB++; }
+						
+					if (queryAlign[i] == chimera[i]) {
+						numIdentical++;
+					}
 				}
 			}
 		}
-	
+		
+		float numBases = (countA + countB) /(float) 2;
+		
 		if (numBases == 0) { return 0; }
 	
 		float percentIdentical = (numIdentical/(float)numBases) * 100;
