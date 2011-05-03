@@ -336,7 +336,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 			temp = validParameter.validFile(parameters, "minbs", false);			if (temp == "not found") { temp = "90"; }
 			convert(temp, minBS);
 			
-			temp = validParameter.validFile(parameters, "minsnp", false);			if (temp == "not found") { temp = "100"; }
+			temp = validParameter.validFile(parameters, "minsnp", false);			if (temp == "not found") { temp = "10"; }
 			convert(temp, minSNP);
 
 			temp = validParameter.validFile(parameters, "parents", false);			if (temp == "not found") { temp = "3"; }
