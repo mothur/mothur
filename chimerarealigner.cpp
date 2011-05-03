@@ -12,7 +12,7 @@
 #include "nast.hpp"
 
 //***************************************************************************************************************
-ChimeraReAligner::ChimeraReAligner(vector<Sequence*> t, int ms, int mm) : match(ms), misMatch(mm) {  templateSeqs = t;   m = MothurOut::getInstance(); }
+ChimeraReAligner::ChimeraReAligner()  {  m = MothurOut::getInstance(); }
 //***************************************************************************************************************
 ChimeraReAligner::~ChimeraReAligner() {}	
 //***************************************************************************************************************
@@ -38,15 +38,11 @@ void ChimeraReAligner::reAlign(Sequence* query, vector<results> parents) {
 				string q = qAligned.substr(parents[i].nastRegionStart, length);
 	
 				Sequence* queryFrag = new Sequence(query->getName(), q);
-
 				queryParts.push_back(queryFrag);
-			
-				Sequence* parent = getSequence(parents[i].parent);
-				string p = parent->getAligned();
 		
+				string p = parents[i].parentAligned;
 				p = p.substr(parents[i].nastRegionStart, length);
-				parent->setAligned(p);
-				
+				Sequence* parent = new Sequence(parents[i].parent, p);
 				parentParts.push_back(parent);
 
 				if (queryFrag->getUnaligned().length() > longest)	{ longest = queryFrag->getUnaligned().length(); }
@@ -96,7 +92,7 @@ void ChimeraReAligner::reAlign(Sequence* query, vector<results> parents) {
 		exit(1);
 	}
 }
-//***************************************************************************************************************
+/***************************************************************************************************************
 Sequence* ChimeraReAligner::getSequence(string name) {
 	try{
 		Sequence* temp;
@@ -121,4 +117,4 @@ Sequence* ChimeraReAligner::getSequence(string name) {
 		exit(1);
 	}
 }
-//***************************************************************************************************************
+//***************************************************************************************************************/

@@ -765,7 +765,7 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 		if (chimeraFlag == "yes") {
 		
 			if (realign) {
-				ChimeraReAligner realigner(thisTemplate, match, misMatch);
+				ChimeraReAligner realigner;
 				realigner.reAlign(query, Results);
 			}
 		
