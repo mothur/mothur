@@ -426,21 +426,41 @@ float Slayer::snpAB(vector<snps> data) {
 	}
 }
 /***********************************************************************/
-float Slayer::computePercentID(string queryFrag, string parent, int left, int right) {
+float Slayer::computePercentID(string queryAlign, string chimera, int left, int right) {
 	try {
-		int total = 0;
-		int matches = 0;
-
+				
+		int numIdentical = 0;
+		int countA = 0;
+		int countB = 0;
 		for (int i = left; i <= right; i++) {
-			total++;
-			if (queryFrag[i] == parent[i]) {
-				matches++;
+			if (((queryAlign[i] != 'G') && (queryAlign[i] != 'T') && (queryAlign[i] != 'A') && (queryAlign[i] != 'C')&& (queryAlign[i] != '.') && (queryAlign[i] != '-')) ||
+				((chimera[i] != 'G') && (chimera[i] != 'T') && (chimera[i] != 'A') && (chimera[i] != 'C')&& (chimera[i] != '.') && (chimera[i] != '-'))) {}
+			else {
+				
+				bool charA = false; bool charB = false;
+				if ((queryAlign[i] == 'G') || (queryAlign[i] == 'T') || (queryAlign[i] == 'A') || (queryAlign[i] == 'C')) { charA = true; }
+				if ((chimera[i] == 'G') || (chimera[i] == 'T') || (chimera[i] == 'A') || (chimera[i] == 'C')) { charB = true; }
+				
+				if (charA || charB) {
+					
+					if (charA) { countA++; }
+					if (charB) { countB++; }
+					
+					if (queryAlign[i] == chimera[i]) {
+						numIdentical++;
+					}
+				}
 			}
 		}
-
-		float percentID =( matches/(float)total) * 100;
 		
-		return percentID;
+		float numBases = (countA + countB) /(float) 2;
+		
+		if (numBases == 0) { return 0; }
+		
+		float percentIdentical = (numIdentical/(float)numBases) * 100;
+		
+		return percentIdentical;
+		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Slayer", "computePercentID");

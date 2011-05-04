@@ -50,7 +50,7 @@ public:
 	virtual void addSequence(Sequence) = 0;  //add sequence to search engine
 	virtual string getName(int) { return ""; }  
 	virtual vector<int> findClosestSequences(Sequence*, int) = 0;  // returns indexes of n closest sequences to query
-	virtual vector<int> findClosestMegaBlast(Sequence*, int){return results;}
+	virtual vector<int> findClosestMegaBlast(Sequence*, int, int){return results;}
 	virtual float getSearchScore();
 	virtual vector<float> getSearchScores() { return Scores; } //assumes you already called findClosestMegaBlast
 	virtual int getLongestBase(); 

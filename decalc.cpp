@@ -12,7 +12,7 @@
 #include "dist.h"
 #include "eachgapdist.h"
 #include "ignoregaps.h"
-#include "eachgapdistignorens.h"
+#include "eachgapdist.h"
 
 //***************************************************************************************************************
 void DeCalculator::setMask(string ms) { 
@@ -683,7 +683,7 @@ float DeCalculator::getCoef(vector<float> obs, vector<float> qav) {
 }
 //***************************************************************************************************************
 //gets closest matches to each end, since chimeras will most likely have different parents on each end
-vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*>& thisTemplate, vector<Sequence*>& thisFilteredTemplate, int numWanted) {
+vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*>& thisTemplate, vector<Sequence*>& thisFilteredTemplate, int numWanted, int minSim) {
 	try {
 		//indexes.clear();
 		
@@ -692,7 +692,7 @@ vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*
 		vector<SeqDist> distsLeft;
 		vector<SeqDist> distsRight;
 		
-		Dist* distcalculator = new eachGapDistIgnoreNs();
+		Dist* distcalculator = new eachGapDist();
 		
 		string queryUnAligned = querySeq->getUnaligned();
 		int numBases = int(queryUnAligned.length() * 0.33);
@@ -813,14 +813,32 @@ vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*
 			
 		}
 		
+		//are we still above the minimum similarity cutoff
+		if ((lastLeft >= minSim) || (lastRight >= minSim)) {
+			//add in ties from left
+			int i = numWanted;
+			while (i < distsLeft.size()) {  
+				if (distsLeft[i].dist == lastLeft) {  dists.push_back(distsLeft[i]);  }
+				else { break; }
+				i++;
+			}
+			
+			//add in ties from right
+			i = numWanted;
+			while (i < distsRight.size()) {  
+				if (distsRight[i].dist == lastRight) {  dists.push_back(distsRight[i]);  }
+				else { break; }
+				i++;
+			}
+		}
+		
 
-		//numWanted = dists.size();
 
 		//cout << numWanted << endl;
 		for (int i = 0; i < dists.size(); i++) {
 //			cout << db[dists[i].index]->getName() << '\t' << dists[i].dist << endl;
 
-			if (thisTemplate[dists[i].index]->getName() != querySeq->getName()) {
+			if ((thisTemplate[dists[i].index]->getName() != querySeq->getName()) && (dists[i].dist >= minSim)) {
 				Sequence* temp = new Sequence(thisTemplate[dists[i].index]->getName(), thisTemplate[dists[i].index]->getAligned()); //have to make a copy so you can trim and filter without stepping on eachother.
 			
 				seqsMatches.push_back(temp);
@@ -841,7 +859,7 @@ Sequence* DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*> db) {
 		
 		Sequence* seqsMatch;  
 		
-		Dist* distcalculator = new eachGapDistIgnoreNs();
+		Dist* distcalculator = new eachGapDist();
 		int index = 0;
 		int smallest = 1000000;
 		

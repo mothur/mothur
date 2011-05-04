@@ -151,6 +151,7 @@ string Maligner::chimeraMaligner(int chimeraPenalty, DeCalculator* decalc) {
 			temp.queryToParentLocal = computePercentID(queryInRegion, parentInRegion);
 			
 //			cout << temp.parent << '\t' << "NAST:" << temp.nastRegionStart << '-' << temp.nastRegionEnd << " G:" << temp.queryToParent << " L:" << temp.queryToParentLocal << endl;
+
 			outputResults.push_back(temp);
 		}
 		
