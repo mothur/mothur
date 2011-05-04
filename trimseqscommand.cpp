@@ -893,12 +893,14 @@ void TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
 		
 		while(!inOligos.eof()){
 
-			inOligos >> type; m->gobble(inOligos);
+			inOligos >> type; 
 		 			
 			if(type[0] == '#'){
-				while (!inOligos.eof())	{	char c = inOligos.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
+				while (!inOligos.eof())	{	char c = inOligos.get();  if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
+				m->gobble(inOligos);
 			}
 			else{
+				m->gobble(inOligos);
 				//make type case insensitive
 				for(int i=0;i<type.length();i++){	type[i] = toupper(type[i]);  }
 				
