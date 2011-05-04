@@ -1030,7 +1030,7 @@ vector<Sequence*> ChimeraSlayer::getBlastSeqs(Sequence* q, vector<Sequence*>& db
 		
 		vector<int> tempIndexesLeft = databaseLeft->findClosestMegaBlast(queryLeft, num+1, minSim);
 		vector<int> tempIndexesRight = databaseLeft->findClosestMegaBlast(queryRight, num+1, minSim);
-		cout << q->getName() << '\t' << leftQuery << '\t' << "leftMatches = " << tempIndexesLeft.size() << '\t' << rightQuery	<< " rightMatches = " << tempIndexesRight.size() << endl;
+		//cout << q->getName() << '\t' << leftQuery << '\t' << "leftMatches = " << tempIndexesLeft.size() << '\t' << rightQuery	<< " rightMatches = " << tempIndexesRight.size() << endl;
 		vector<int> smaller;
 		vector<int> larger;
 		
