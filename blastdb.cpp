@@ -141,7 +141,7 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n, int minPerID) {
 		
 		while(!m8FileHandle.eof()){
 			m8FileHandle >> dummy >> templateAccession >> searchScore >> numBases >> mismatch >> gap >> startQuery >> endQuery >> startRef >> endRef >> eScore >> score;
-			//cout << dummy << '\t' << templateAccession << '\t' << searchScore << '\t';
+			//cout << dummy << '\t' << templateAccession << '\t' << searchScore << '\t' << numBases << '\t' << mismatch << '\t' << gap << '\t' << startQuery << '\t' << endQuery << '\t' << startRef << '\t' << endRef << '\t' << eScore << '\t' << score << endl; 
 			
 			//get rest of junk in line
 			//while (!m8FileHandle.eof())	{	char c = m8FileHandle.get(); if (c == 10 || c == 13){	break;	}else{ cout << c; }	} //
