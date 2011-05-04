@@ -147,7 +147,7 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n, int minPerID) {
 			//while (!m8FileHandle.eof())	{	char c = m8FileHandle.get(); if (c == 10 || c == 13){	break;	}else{ cout << c; }	} //
 				//cout << endl;
 			m->gobble(m8FileHandle);
-			if (score >= minPerID) { //this follows broads CS, but probably should be searchScore...
+			if (searchScore >= minPerID) { 
 				topMatches.push_back(templateAccession);
 				Scores.push_back(searchScore);
 			}
