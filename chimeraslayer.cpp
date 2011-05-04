@@ -72,10 +72,18 @@ ChimeraSlayer::ChimeraSlayer(string file, string temp, bool trim, map<string, in
 		
 		createFilter(templateSeqs, 0.0); //just removed columns where all seqs have a gap
 		
-		//run filter on template
-		for (int i = 0; i < templateSeqs.size(); i++) {  if (m->control_pressed) {  break; }  runFilter(templateSeqs[i]);  }
-
-		
+		if (searchMethod == "distance") { 
+			createFilter(templateSeqs, 0.0); //just removed columns where all seqs have a gap
+			
+			//run filter on template copying templateSeqs into filteredTemplateSeqs
+			for (int i = 0; i < templateSeqs.size(); i++) {  
+				if (m->control_pressed) {  break; }
+				
+				Sequence* newSeq = new Sequence(templateSeqs[i]->getName(), templateSeqs[i]->getAligned());
+				runFilter(newSeq);  
+				filteredTemplateSeqs.push_back(newSeq);
+			}
+		}
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ChimeraSlayer", "ChimeraSlayer");
@@ -835,7 +843,7 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 			//free memory
 			for (int k = 0; k < seqs.size(); k++) {  delete seqs[k].seq;   }
 		}
-		
+		//cout << endl << endl;
 		return 0;
 	}
 	catch(exception& e) {
@@ -1024,7 +1032,7 @@ vector<Sequence*> ChimeraSlayer::getBlastSeqs(Sequence* q, vector<Sequence*>& db
 		string queryUnAligned = q->getUnaligned();
 		string leftQuery = queryUnAligned.substr(0, int(queryUnAligned.length() * 0.33)); //first 1/3 of the sequence
 		string rightQuery = queryUnAligned.substr(int(queryUnAligned.length() * 0.66)); //last 1/3 of the sequence
-		
+//cout << "whole length = " << queryUnAligned.length() << '\t' << "left length = " << leftQuery.length() << '\t' << "right length = "<< rightQuery.length() << endl;	
 		Sequence* queryLeft = new Sequence(q->getName(), leftQuery);
 		Sequence* queryRight = new Sequence(q->getName(), rightQuery);
 		

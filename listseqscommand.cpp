@@ -257,18 +257,32 @@ int ListSeqsCommand::readFasta(){
 		m->openInputFile(fastafile, in);
 		string name;
 		
+		ofstream out;
+		string newFastaName = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "numsAdded.fasta";
+		m->openOutputFile(newFastaName, out);
+		int count = 1;
+		string lastName = "";
+		
 		while(!in.eof()){
 			
 			if (m->control_pressed) { in.close(); return 0; }
 			
 			Sequence currSeq(in);
 			name = currSeq.getName();
+			if (lastName == "") { lastName = name; }
+			if (name != lastName) { count = 1; }
+			lastName = name;
+			
+			Sequence newSeq(name+"_"+toString(count), currSeq.getAligned());
+			newSeq.printSequence(out);
 			
 			if (name != "") {  names.push_back(name);  }
 			
 			m->gobble(in);
+			count++;
 		}
 		in.close();	
+		out.close();
 		
 		return 0;
 

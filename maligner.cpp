@@ -77,7 +77,7 @@ string Maligner::chimeraMaligner(int chimeraPenalty, DeCalculator* decalc) {
 			
 		verticalFilter(temp);
 		
-		//for (int i = 0; i < refSeqs.size(); i++) { cout << refSeqs[i]->getName() << endl << refSeqs[i]->getAligned() << endl; }
+		//for (int i = 0; i < refSeqs.size(); i++) { cout << refSeqs[i]->getName() << endl ; }//<< refSeqs[i]->getAligned() << endl
 
 		vector< vector<score_struct> > matrix = buildScoreMatrix(query->getAligned().length(), refSeqs.size()); //builds and initializes
 		
@@ -150,7 +150,7 @@ string Maligner::chimeraMaligner(int chimeraPenalty, DeCalculator* decalc) {
 			
 			temp.queryToParentLocal = computePercentID(queryInRegion, parentInRegion);
 			
-//			cout << temp.parent << '\t' << "NAST:" << temp.nastRegionStart << '-' << temp.nastRegionEnd << " G:" << temp.queryToParent << " L:" << temp.queryToParentLocal << endl;
+			//cout << query->getName() << '\t' << temp.parent << '\t' << "NAST:" << temp.nastRegionStart << '-' << temp.nastRegionEnd << " G:" << temp.queryToParent << " L:" << temp.queryToParentLocal << ", " <<  temp.divR << endl;
 
 			outputResults.push_back(temp);
 		}
