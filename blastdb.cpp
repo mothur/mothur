@@ -111,9 +111,10 @@ vector<int> BlastDB::findClosestSequences(Sequence* seq, int n) {
 }
 /**************************************************************************************************/
 //assumes you have added all the template sequences using the addSequence function and run generateDB.
-vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n) {
+vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n, int minPerID) {
 	try{
 		vector<int> topMatches;
+		float numBases, mismatch, gap, startQuery, endQuery, startRef, endRef, score;
 		Scores.clear();
 		
 		ofstream queryFile;
@@ -126,7 +127,7 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n) {
 		//	the goal here is to quickly survey the database to find the closest match.  To do this we are using the default
 		//	wordsize used in megablast.  I'm sure we're sacrificing accuracy for speed, but anyother way would take way too
 		//	long.  With this setting, it seems comparable in speed to the suffix tree approach.
-	
+//7000004128189528left	0	100		66	0	0	1	66	61	126	1e-31	 131	
 		string blastCommand = path + "blast/bin/megablast -e 1e-10 -d " + dbFileName + " -m 8 -b " + toString(n) + " -v " + toString(n); //-W 28 -p blastn
 		blastCommand += (" -i " + (queryFileName+seq->getName()) + " -o " + blastFileName+seq->getName());
 		system(blastCommand.c_str());
@@ -134,20 +135,22 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n) {
 		ifstream m8FileHandle;
 		m->openInputFile(blastFileName+seq->getName(), m8FileHandle, "no error");
 	
-		string dummy;
+		string dummy, eScore;
 		int templateAccession;
 		m->gobble(m8FileHandle);
 		
 		while(!m8FileHandle.eof()){
-			m8FileHandle >> dummy >> templateAccession >> searchScore;
-			//cout << templateAccession << '\t' << searchScore << endl;
+			m8FileHandle >> dummy >> templateAccession >> searchScore >> numBases >> mismatch >> gap >> startQuery >> endQuery >> startRef >> endRef >> eScore >> score;
+			//cout << dummy << '\t' << templateAccession << '\t' << searchScore << '\t';
 			
 			//get rest of junk in line
-			while (!m8FileHandle.eof())	{	char c = m8FileHandle.get(); if (c == 10 || c == 13){	break;	}	} 
-			
+			//while (!m8FileHandle.eof())	{	char c = m8FileHandle.get(); if (c == 10 || c == 13){	break;	}else{ cout << c; }	} //
+				//cout << endl;
 			m->gobble(m8FileHandle);
-			topMatches.push_back(templateAccession);
-			Scores.push_back(searchScore);
+			if (score >= minPerID) {
+				topMatches.push_back(templateAccession);
+				Scores.push_back(searchScore);
+			}
 //cout << templateAccession << endl;
 		}
 		m8FileHandle.close();

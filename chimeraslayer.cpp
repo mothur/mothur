@@ -999,7 +999,7 @@ vector<Sequence*> ChimeraSlayer::getRefSeqs(Sequence* q, vector<Sequence*>& this
 			//find closest seqs to query in template - returns copies of seqs so trim does not destroy - remember to deallocate
 			Sequence* newSeq = new Sequence(q->getName(), q->getAligned());
 			runFilter(newSeq);
-			refSeqs = decalc->findClosest(newSeq, thisTemplate, thisFilteredTemplate, numWanted);
+			refSeqs = decalc->findClosest(newSeq, thisTemplate, thisFilteredTemplate, numWanted, minSim);
 			delete newSeq;
 		}else if (searchMethod == "blast")  {
 			refSeqs = getBlastSeqs(q, thisTemplate, numWanted); //fills indexes
@@ -1025,12 +1025,12 @@ vector<Sequence*> ChimeraSlayer::getBlastSeqs(Sequence* q, vector<Sequence*>& db
 		string leftQuery = queryUnAligned.substr(0, int(queryUnAligned.length() * 0.33)); //first 1/3 of the sequence
 		string rightQuery = queryUnAligned.substr(int(queryUnAligned.length() * 0.66)); //last 1/3 of the sequence
 		
-		Sequence* queryLeft = new Sequence(q->getName()+"left", leftQuery);
-		Sequence* queryRight = new Sequence(q->getName()+"right", rightQuery);
+		Sequence* queryLeft = new Sequence(q->getName(), leftQuery);
+		Sequence* queryRight = new Sequence(q->getName(), rightQuery);
 		
-		vector<int> tempIndexesLeft = databaseLeft->findClosestMegaBlast(queryLeft, num+1);
-		vector<int> tempIndexesRight = databaseLeft->findClosestMegaBlast(queryRight, num+1);
-		
+		vector<int> tempIndexesLeft = databaseLeft->findClosestMegaBlast(queryLeft, num+1, minSim);
+		vector<int> tempIndexesRight = databaseLeft->findClosestMegaBlast(queryRight, num+1, minSim);
+		cout << q->getName() << '\t' << leftQuery << '\t' << "leftMatches = " << tempIndexesLeft.size() << '\t' << rightQuery	<< " rightMatches = " << tempIndexesRight.size() << endl;
 		vector<int> smaller;
 		vector<int> larger;
 		

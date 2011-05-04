@@ -23,7 +23,7 @@ vector<string> ChimeraSlayerCommand::setParameters(){
 		CommandParameter pmismatch("mismatch", "Number", "", "-4.0", "", "", "",false,false); parameters.push_back(pmismatch);
 		CommandParameter pminsim("minsim", "Number", "", "90", "", "", "",false,false); parameters.push_back(pminsim);
 		CommandParameter pmincov("mincov", "Number", "", "70", "", "", "",false,false); parameters.push_back(pmincov);
-		CommandParameter pminsnp("minsnp", "Number", "", "100", "", "", "",false,false); parameters.push_back(pminsnp);
+		CommandParameter pminsnp("minsnp", "Number", "", "10", "", "", "",false,false); parameters.push_back(pminsnp);
 		CommandParameter pminbs("minbs", "Number", "", "90", "", "", "",false,false); parameters.push_back(pminbs);
 		CommandParameter psearch("search", "Multiple", "kmer-blast-distance", "distance", "", "", "",false,false); parameters.push_back(psearch);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
@@ -31,7 +31,7 @@ vector<string> ChimeraSlayerCommand::setParameters(){
 		CommandParameter ptrim("trim", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(ptrim);
 		CommandParameter psplit("split", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(psplit);
 		CommandParameter pnumwanted("numwanted", "Number", "", "15", "", "", "",false,false); parameters.push_back(pnumwanted);
-		CommandParameter piters("iters", "Number", "", "100", "", "", "",false,false); parameters.push_back(piters);
+		CommandParameter piters("iters", "Number", "", "1000", "", "", "",false,false); parameters.push_back(piters);
 		CommandParameter pdivergence("divergence", "Number", "", "1.007", "", "", "",false,false); parameters.push_back(pdivergence);
 		CommandParameter pparents("parents", "Number", "", "3", "", "", "",false,false); parameters.push_back(pparents);
 		CommandParameter pincrement("increment", "Number", "", "5", "", "", "",false,false); parameters.push_back(pincrement);
@@ -72,11 +72,11 @@ string ChimeraSlayerCommand::getHelpString(){
 		helpString += "The parents parameter allows you to select the number of potential parents to investigate from the numwanted best matches after rating them, default is 3. \n";
 		helpString += "The mismatch parameter allows you to penalize mismatched bases in blast search, default is -4. \n";
 		helpString += "The divergence parameter allows you to set a cutoff for chimera determination, default is 1.007. \n";
-		helpString += "The iters parameter allows you to specify the number of bootstrap iters to do with the chimeraslayer method, default=100.\n";
+		helpString += "The iters parameter allows you to specify the number of bootstrap iters to do with the chimeraslayer method, default=1000.\n";
 		helpString += "The minsim parameter allows you to specify a minimum similarity with the parent fragments, default=90. \n";
 		helpString += "The mincov parameter allows you to specify minimum coverage by closest matches found in template. Default is 70, meaning 70%. \n";
 		helpString += "The minbs parameter allows you to specify minimum bootstrap support for calling a sequence chimeric. Default is 90, meaning 90%. \n";
-		helpString += "The minsnp parameter allows you to specify percent of SNPs to sample on each side of breakpoint for computing bootstrap support (default: 100) \n";
+		helpString += "The minsnp parameter allows you to specify percent of SNPs to sample on each side of breakpoint for computing bootstrap support (default: 10) \n";
 		helpString += "The search parameter allows you to specify search method for finding the closest parent. Choices are distance, blast, and kmer, default distance. \n";
 		helpString += "The realign parameter allows you to realign the query to the potential parents. Choices are true or false, default true.  \n";
 		helpString += "The chimera.slayer command should be in the following format: \n";
@@ -353,7 +353,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 			
 			search = validParameter.validFile(parameters, "search", false);			if (search == "not found") { search = "distance"; }
 			
-			temp = validParameter.validFile(parameters, "iters", false);			if (temp == "not found") { temp = "100"; }		
+			temp = validParameter.validFile(parameters, "iters", false);			if (temp == "not found") { temp = "1000"; }		
 			convert(temp, iters); 
 			 
 			temp = validParameter.validFile(parameters, "increment", false);		if (temp == "not found") { temp = "5"; }
