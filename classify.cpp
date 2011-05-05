@@ -114,7 +114,7 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
 			}
 		}
 		else if(method == "suffix")		{	database = new SuffixDB(numSeqs);								}
-		else if(method == "blast")		{	database = new BlastDB(gapOpen, gapExtend, match, misMatch);	}
+		else if(method == "blast")		{	database = new BlastDB(tempFile.substr(0,tempFile.find_last_of(".")+1), gapOpen, gapExtend, match, misMatch);	}
 		else if(method == "distance")	{	database = new DistanceDB();	}
 		else {
 			m->mothurOut(method + " is not a valid search option. I will run the command using kmer, ksize=8.");

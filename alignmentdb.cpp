@@ -129,7 +129,7 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
 			#endif
 		}
 		else if(method == "suffix")		{	search = new SuffixDB(numSeqs);								}
-		else if(method == "blast")		{	search = new BlastDB(gapOpen, gapExtend, match, misMatch);	}
+		else if(method == "blast")		{	search = new BlastDB(fastaFileName.substr(0,fastaFileName.find_last_of(".")+1), gapOpen, gapExtend, match, misMatch);	}
 		else {
 			m->mothurOut(method + " is not a valid search option. I will run the command using kmer, ksize=8.");
 			m->mothurOutEndLine();
