@@ -782,7 +782,7 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 				realigner.reAlign(query, parents);
 
 			}
-
+			
 			//get sequence that were given from maligner results
 			vector<SeqDist> seqs;
 			map<string, float> removeDups;
@@ -792,14 +792,20 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 			for (int j = 0; j < Results.size(); j++) {
 				float dist = (Results[j].regionEnd - Results[j].regionStart + 1) * Results[j].queryToParentLocal;
 				//only add if you are not a duplicate
-				itDup = removeDups.find(Results[j].parent);
-				if (itDup == removeDups.end()) { //this is not duplicate
-					removeDups[Results[j].parent] = dist;
-					parentNameSeq[Results[j].parent] = Results[j].parentAligned;
-				}else if (dist > itDup->second) { //is this a stronger number for this parent
-					removeDups[Results[j].parent] = dist;
-					parentNameSeq[Results[j].parent] = Results[j].parentAligned;
+
+				if(Results[j].queryToParentLocal >= 90){	//local match has to be over 90% similarity
+				
+					itDup = removeDups.find(Results[j].parent);
+					if (itDup == removeDups.end()) { //this is not duplicate
+						removeDups[Results[j].parent] = dist;
+						parentNameSeq[Results[j].parent] = Results[j].parentAligned;
+					}else if (dist > itDup->second) { //is this a stronger number for this parent
+						removeDups[Results[j].parent] = dist;
+						parentNameSeq[Results[j].parent] = Results[j].parentAligned;
+					}
+				
 				}
+				
 			}
 			
 			for (itDup = removeDups.begin(); itDup != removeDups.end(); itDup++) {
@@ -809,7 +815,6 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 				SeqDist member;
 				member.seq = seq;
 				member.dist = itDup->second;
-				
 				seqs.push_back(member);
 			}
 			
