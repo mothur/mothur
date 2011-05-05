@@ -217,7 +217,7 @@ int ChimeraSlayer::doPrep() {
 		}else if (searchMethod == "blast") {
 		
 			//generate blastdb
-			databaseLeft = new BlastDB(m->getRootName(m->getSimpleName(templateFileName)), -1.0, -1.0, 1, -3);
+			databaseLeft = new BlastDB(m->getRootName(m->getSimpleName(fastafile)), -1.0, -1.0, 1, -3);
 
 			for (int i = 0; i < templateSeqs.size(); i++) { 	databaseLeft->addSequence(*templateSeqs[i]);	}
 			databaseLeft->generateDB();
