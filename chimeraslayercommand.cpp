@@ -25,7 +25,7 @@ vector<string> ChimeraSlayerCommand::setParameters(){
 		CommandParameter pmincov("mincov", "Number", "", "70", "", "", "",false,false); parameters.push_back(pmincov);
 		CommandParameter pminsnp("minsnp", "Number", "", "10", "", "", "",false,false); parameters.push_back(pminsnp);
 		CommandParameter pminbs("minbs", "Number", "", "90", "", "", "",false,false); parameters.push_back(pminbs);
-		CommandParameter psearch("search", "Multiple", "kmer-blast-distance", "distance", "", "", "",false,false); parameters.push_back(psearch);
+		CommandParameter psearch("search", "Multiple", "kmer-blast-distance", "blast", "", "", "",false,false); parameters.push_back(psearch);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
 		CommandParameter prealign("realign", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(prealign);
 		CommandParameter ptrim("trim", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(ptrim);

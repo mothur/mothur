@@ -552,7 +552,7 @@ Sequence* ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc, data_results lef
 				if (leftPiece.flag == "yes") { if ((leftPiece.results[0].bsa >= minBS) || (leftPiece.results[0].bsb >= minBS))	{ leftChimeric = true;	} }
 				
 				if (rightChimeric || leftChimeric) {
-					cout << querySeq->getName() <<  "\tyes" << endl;
+//					cout << querySeq->getName() <<  "\tyes" << endl;
 					outAccString += querySeq->getName() + "\n";
 					results = true;
 					
@@ -827,8 +827,14 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 			}
 		
 			//put seqs into vector to send to slayer
+			
+//			cout << query->getAligned() << endl;
 			vector<Sequence*> seqsForSlayer;
-			for (int k = 0; k < seqs.size(); k++) {  seqsForSlayer.push_back(seqs[k].seq);	}
+			for (int k = 0; k < seqs.size(); k++) {  
+//				cout << seqs[k].seq->getAligned() << endl;
+				seqsForSlayer.push_back(seqs[k].seq);	
+			
+			}
 			
 			if (m->control_pressed) {  for (int k = 0; k < seqs.size(); k++) {  delete seqs[k].seq;   }  return 0;  }
 
@@ -1086,6 +1092,11 @@ vector<Sequence*> ChimeraSlayer::getBlastSeqs(Sequence* q, vector<Sequence*>& db
 				
 			}
 		}
+		
+		
+//		for(int i=0;i<refResults.size();i++){
+//			cout << refResults[i]->getName() << endl;
+//		}
 			
 		delete queryRight;
 		delete queryLeft;

@@ -80,7 +80,7 @@ string Slayer::getResults(Sequence* query, vector<Sequence*> refSeqs) {
 						selectedDivs.push_back(divs[k]);
 					}
 				}
-				
+
 				//save selected
 				for (int mi = 0; mi < selectedDivs.size(); mi++) {  all.push_back(selectedDivs[mi]);	}
 				
@@ -90,6 +90,7 @@ string Slayer::getResults(Sequence* query, vector<Sequence*> refSeqs) {
 			}
 		}
 		
+
 		// compute bootstrap support
 		if (all.size() > 0) {
 			//sort them
@@ -144,16 +145,16 @@ vector<data_struct> Slayer::runBellerophon(Sequence* q, Sequence* pA, Sequence* 
 			int breakpoint = i;
 			int leftLength = breakpoint + 1;
 			int rightLength = length - leftLength;
-			
+				
 			float QLA = computePercentID(query, parentA, 0, breakpoint);
-			float QRB = computePercentID(query, parentB, breakpoint+1, length - 1);
+			float QRB = computePercentID(query, parentB, breakpoint+1, length);
 		
 			float QLB = computePercentID(query, parentB, 0, breakpoint);
-			float QRA = computePercentID(query, parentA, breakpoint+1, length - 1);
+			float QRA = computePercentID(query, parentA, breakpoint+1, length);
 		
 			float LAB = computePercentID(parentA, parentB, 0, breakpoint);
-			float RAB = computePercentID(parentA, parentB, breakpoint+1, length - 1);
-		
+			float RAB = computePercentID(parentA, parentB, breakpoint+1, length);
+					
 			float AB = ((LAB*leftLength) + (RAB*rightLength)) / (float) length;
 			float QA = ((QLA*leftLength) + (QRA*rightLength)) / (float) length;
 			float QB = ((QLB*leftLength) + (QRB*rightLength)) / (float) length;
@@ -166,6 +167,7 @@ vector<data_struct> Slayer::runBellerophon(Sequence* q, Sequence* pA, Sequence* 
 		
 			float divR_QLA_QRB = min((QLA_QRB/QA), (QLA_QRB/QB));
 			float divR_QLB_QRA = min((QLB_QRA/QA), (QLB_QRA/QB));
+			
 			//cout << q->getName() << '\t';
 			//cout << pA->getName() << '\t';
 			//cout << pB->getName() << '\t';
@@ -200,7 +202,7 @@ vector<data_struct> Slayer::runBellerophon(Sequence* q, Sequence* pA, Sequence* 
 					member.winLEnd = breakpoint;  
 					member.winRStart = breakpoint+1; 
 					member.winREnd = length-1; 
-					member.querySeq = *(q); 
+					member.querySeq = *(q);
 					member.parentA = *(pA);
 					member.parentB = *(pB);
 					member.bsa = 0;
@@ -227,7 +229,7 @@ vector<snps> Slayer::getSNPS(string parentA, string query, string parentB, int l
 	try {
 	
 		vector<snps> data;
-//cout << left << '\t' << right << endl;
+
 		for (int i = left; i <= right; i++) {
 			
 			char A = parentA[i];
@@ -235,33 +237,31 @@ vector<snps> Slayer::getSNPS(string parentA, string query, string parentB, int l
 			char B = parentB[i];
 			
 			if ((A != Q) || (B != Q)) {
-//cout << "not equal " << Q << '\t' << A << '\t' << B << endl;
-			
+
 				//ensure not neighboring a gap. change to 12/09 release of chimeraSlayer - not sure what this adds, but it eliminates alot of SNPS
+
+				
 				if (
 					//did query loose a base here during filter??
 					( i == 0 || abs (baseSpots[0][i] - baseSpots[0][i-1]) == 1) &&
-					( i == query.length() || abs (baseSpots[0][i] - baseSpots[0][i+1]) == 1)
+					( i == query.length()-1 || abs (baseSpots[0][i] - baseSpots[0][i+1]) == 1)
 					&&
 					//did parentA loose a base here during filter??
 					( i == 0 || abs (baseSpots[1][i] - baseSpots[1][i-1]) == 1) &&
-					( i == parentA.length() || abs (baseSpots[1][i] - baseSpots[1][i+1]) == 1) 
+					( i == parentA.length()-1 || abs (baseSpots[1][i] - baseSpots[1][i+1]) == 1) 
 					&&
 					//did parentB loose a base here during filter??
 					( i == 0 || abs (baseSpots[2][i] - baseSpots[2][i-1]) == 1) &&
-					( i == parentB.length() || abs (baseSpots[2][i] - baseSpots[2][i+1]) == 1)
+					( i == parentB.length()-1 || abs (baseSpots[2][i] - baseSpots[2][i+1]) == 1)
 					) 
 				{ 
-				
 					snps member;
 					member.queryChar = Q;
 					member.parentAChar = A;
 					member.parentBChar = B;
-//cout << "not neighboring a gap " << Q << '\t' << A << '\t' << B << '\t' << baseSpots[0][i] << '\t' << baseSpots[0][i+1] << '\t' << baseSpots[0][i-1] << '\t' << baseSpots[1][i] << '\t' << baseSpots[1][i+1] << '\t' << baseSpots[1][i-1] << '\t' << baseSpots[2][i] << '\t' << baseSpots[2][i+1] << '\t' << baseSpots[2][i-1] << endl;				
 					data.push_back(member);
 				}
 			}
-//			cout << i << '\t' << data.size() << endl;
 		}
 		
 		return data;
@@ -283,7 +283,7 @@ int Slayer::bootstrapSNPS(vector<snps> left, vector<snps> right, float& BSA, flo
 	
 		int numLeft = max(1, int(left.size() * percentSNPSample/(float)100 + 0.5));
 		int numRight = max(1, int(right.size() * percentSNPSample/(float)100 + 0.5));
-		//cout << numLeft << '\t' << numRight << endl;
+
 		for (int i = 0; i < numIters; i++) {
 			//random sampling with replacement.
 		
@@ -451,6 +451,7 @@ float Slayer::computePercentID(string queryAlign, string chimera, int left, int 
 					}
 				}
 			}
+			
 		}
 		
 		float numBases = (countA + countB) /(float) 2;
@@ -458,7 +459,7 @@ float Slayer::computePercentID(string queryAlign, string chimera, int left, int 
 		if (numBases == 0) { return 0; }
 		
 		float percentIdentical = (numIdentical/(float)numBases) * 100;
-		
+
 		return percentIdentical;
 		
 	}

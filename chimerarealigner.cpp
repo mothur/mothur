@@ -310,7 +310,7 @@ string ChimeraReAligner::getNewAlignment(string query){
 		for(int i=alignmentLength-1;i>=0;i--){
 			flipSeq += queryAlignment[i];			
 		}
-		
+
 		return flipSeq;
 	}
 	catch(exception& e) {
