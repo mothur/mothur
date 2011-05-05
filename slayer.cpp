@@ -18,6 +18,7 @@ string Slayer::getResults(Sequence* query, vector<Sequence*> refSeqs) {
 		vector<data_struct> all; all.clear();
 		myQuery = *query;
 		
+				
 		for (int i = 0; i < refSeqs.size(); i++) {
 		
 			for (int j = i+1; j < refSeqs.size(); j++) {
@@ -153,8 +154,8 @@ vector<data_struct> Slayer::runBellerophon(Sequence* q, Sequence* pA, Sequence* 
 			float QRA = computePercentID(query, parentA, breakpoint+1, length);
 		
 			float LAB = computePercentID(parentA, parentB, 0, breakpoint);
-			float RAB = computePercentID(parentA, parentB, breakpoint+1, length);
-					
+			float RAB = computePercentID(parentA, parentB, breakpoint+1, length);	
+			
 			float AB = ((LAB*leftLength) + (RAB*rightLength)) / (float) length;
 			float QA = ((QLA*leftLength) + (QRA*rightLength)) / (float) length;
 			float QB = ((QLB*leftLength) + (QRB*rightLength)) / (float) length;
@@ -167,6 +168,7 @@ vector<data_struct> Slayer::runBellerophon(Sequence* q, Sequence* pA, Sequence* 
 		
 			float divR_QLA_QRB = min((QLA_QRB/QA), (QLA_QRB/QB));
 			float divR_QLB_QRA = min((QLB_QRA/QA), (QLB_QRA/QB));
+			
 			
 			//cout << q->getName() << '\t';
 			//cout << pA->getName() << '\t';
@@ -215,6 +217,7 @@ vector<data_struct> Slayer::runBellerophon(Sequence* q, Sequence* pA, Sequence* 
 				}//if
 			}//if
 		}//for
+		
 		
 		return data;
 		
