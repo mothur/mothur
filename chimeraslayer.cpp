@@ -217,7 +217,7 @@ int ChimeraSlayer::doPrep() {
 		}else if (searchMethod == "blast") {
 		
 			//generate blastdb
-			databaseLeft = new BlastDB(-1.0, -1.0, 1, -3);
+			databaseLeft = new BlastDB(m->getRootName(m->getSimpleName(templateFileName)), -1.0, -1.0, 1, -3);
 
 			for (int i = 0; i < templateSeqs.size(); i++) { 	databaseLeft->addSequence(*templateSeqs[i]);	}
 			databaseLeft->generateDB();
@@ -324,7 +324,7 @@ vector<Sequence*> ChimeraSlayer::getTemplate(Sequence* q, vector<Sequence*>& use
 		}else if (searchMethod == "blast") {
 			
 			//generate blastdb
-			databaseLeft = new BlastDB(-1.0, -1.0, 1, -3);
+			databaseLeft = new BlastDB(m->getRootName(m->getSimpleName(templateFileName)), -1.0, -1.0, 1, -3);
 
 			for (int i = 0; i < userTemplate.size(); i++) { if (m->control_pressed) { return userTemplate; }   databaseLeft->addSequence(*userTemplate[i]);	}
 			databaseLeft->generateDB();

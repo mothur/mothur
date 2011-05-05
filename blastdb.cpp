@@ -14,15 +14,15 @@
 
 /**************************************************************************************************/
 
-BlastDB::BlastDB(float gO, float gE, float m, float mM) : Database(), 
+BlastDB::BlastDB(string tag, float gO, float gE, float m, float mM) : Database(), 
 gapOpen(gO), gapExtend(gE), match(m), misMatch(mM) {
 	
 	count = 0;
 
 	int randNumber = rand();
-	dbFileName = toString(randNumber) + ".template.unaligned.fasta";
-	queryFileName = toString(randNumber) + ".candidate.unaligned.fasta";
-	blastFileName = toString(randNumber) + ".blast";
+	dbFileName = tag + toString(randNumber) + ".template.unaligned.fasta";
+	queryFileName = tag + toString(randNumber) + ".candidate.unaligned.fasta";
+	blastFileName = tag + toString(randNumber) + ".blast";
 
 }
 /**************************************************************************************************/

@@ -16,7 +16,7 @@
 class BlastDB : public Database {
 
 public:
-	BlastDB(float, float, float, float);
+	BlastDB(string, float, float, float, float);
 	BlastDB();
 	~BlastDB();
 	
