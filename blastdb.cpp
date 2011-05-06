@@ -128,6 +128,7 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n, int minPerID) {
 		//	wordsize used in megablast.  I'm sure we're sacrificing accuracy for speed, but anyother way would take way too
 		//	long.  With this setting, it seems comparable in speed to the suffix tree approach.
 //7000004128189528left	0	100		66	0	0	1	66	61	126	1e-31	 131	
+		
 		string blastCommand = path + "blast/bin/megablast -e 1e-10 -d " + dbFileName + " -m 8 -b " + toString(n) + " -v " + toString(n); //-W 28 -p blastn
 		blastCommand += (" -i " + (queryFileName+seq->getName()) + " -o " + blastFileName+seq->getName());
 		system(blastCommand.c_str());
