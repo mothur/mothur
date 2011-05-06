@@ -61,16 +61,16 @@ string Slayer::getResults(Sequence* query, vector<Sequence*> refSeqs) {
 						
 						
 						//are we within 10 points of the bootstrap cutoff?
-						if ((divs[k].bsMax >= (minBS-10)) && (iters < 1000)) {
-							bootstrapSNPS(snpsLeft, snpsRight, BS_A, BS_B, 1000);
-								
-							if (m->control_pressed) { delete q; delete leftParent; delete rightParent; return "no"; }
-								
-							divs[k].bsa = BS_A;
-							divs[k].bsb = BS_B;
-							divs[k].bsMax = max(BS_A, BS_B);
-							divs[k].chimeraMax = max(divs[k].qla_qrb, divs[k].qlb_qra);
-						}
+//						if ((divs[k].bsMax >= (minBS-10)) && (iters < 1000)) {
+//							bootstrapSNPS(snpsLeft, snpsRight, BS_A, BS_B, 1000);
+//								
+//							if (m->control_pressed) { delete q; delete leftParent; delete rightParent; return "no"; }
+//								
+//							divs[k].bsa = BS_A;
+//							divs[k].bsb = BS_B;
+//							divs[k].bsMax = max(BS_A, BS_B);
+//							divs[k].chimeraMax = max(divs[k].qla_qrb, divs[k].qlb_qra);
+//						}
 						
 						//so results reflect orignal alignment
 						divs[k].winLStart = spots[divs[k].winLStart];
