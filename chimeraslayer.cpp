@@ -545,6 +545,8 @@ Sequence* ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc, data_results lef
 			
 			bool rightChimeric = false;
 			bool leftChimeric = false;
+
+			cout << endl;
 			
 			if (chimeraFlag == "yes") {	
 				//which peice is chimeric or are both
@@ -552,7 +554,7 @@ Sequence* ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc, data_results lef
 				if (leftPiece.flag == "yes") { if ((leftPiece.results[0].bsa >= minBS) || (leftPiece.results[0].bsb >= minBS))	{ leftChimeric = true;	} }
 				
 				if (rightChimeric || leftChimeric) {
-//					cout << querySeq->getName() <<  "\tyes" << endl;
+					cout << querySeq->getName() <<  "\tyes" << endl;
 					outAccString += querySeq->getName() + "\n";
 					results = true;
 					
@@ -1049,46 +1051,66 @@ vector<Sequence*> ChimeraSlayer::getBlastSeqs(Sequence* q, vector<Sequence*>& db
 		
 		vector<int> tempIndexesLeft = databaseLeft->findClosestMegaBlast(queryLeft, num+1, minSim);
 		vector<int> tempIndexesRight = databaseLeft->findClosestMegaBlast(queryRight, num+1, minSim);
-		//cout << q->getName() << '\t' << leftQuery << '\t' << "leftMatches = " << tempIndexesLeft.size() << '\t' << rightQuery	<< " rightMatches = " << tempIndexesRight.size() << endl;
-		vector<int> smaller;
-		vector<int> larger;
+				
 		
-		if (tempIndexesRight.size() < tempIndexesLeft.size()) { smaller = tempIndexesRight;  larger = tempIndexesLeft;  }
-		else { smaller = tempIndexesLeft;  larger = tempIndexesRight;  } 
+		//cout << q->getName() << '\t' << leftQuery << '\t' << "leftMatches = " << tempIndexesLeft.size() << '\t' << rightQuery	<< " rightMatches = " << tempIndexesRight.size() << endl;
+//		vector<int> smaller;
+//		vector<int> larger;
+//		
+//		if (tempIndexesRight.size() < tempIndexesLeft.size()) { smaller = tempIndexesRight;  larger = tempIndexesLeft;  }
+//		else { smaller = tempIndexesLeft;  larger = tempIndexesRight;  } 
 		
 		//merge results		
 		map<int, int> seen;
 		map<int, int>::iterator it;
 		vector<int> mergedResults;
-		for (int i = 0; i < smaller.size(); i++) {
+		
+		int index = 0;
+//		for (int i = 0; i < smaller.size(); i++) {
+		while(index < tempIndexesLeft.size() && index < tempIndexesRight.size()){
+			
 			if (m->control_pressed) { delete queryRight; delete queryLeft; return refResults; }
 	
 			//add left if you havent already
-			it = seen.find(smaller[i]);
+			it = seen.find(tempIndexesLeft[index]);
 			if (it == seen.end()) {  
-				mergedResults.push_back(smaller[i]);
-				seen[smaller[i]] = smaller[i];
+				mergedResults.push_back(tempIndexesLeft[index]);
+				seen[tempIndexesLeft[index]] = tempIndexesLeft[index];
 			}
 			
 			//add right if you havent already
-			it = seen.find(larger[i]);
+			it = seen.find(tempIndexesRight[index]);
 			if (it == seen.end()) {  
-				mergedResults.push_back(larger[i]);
-				seen[larger[i]] = larger[i];
+				mergedResults.push_back(tempIndexesRight[index]);
+				seen[tempIndexesRight[index]] = tempIndexesRight[index];
 			}
+			index++;
 		}
+
 		
-		for (int i = smaller.size(); i < larger.size(); i++) {
+		for (int i = index; i < tempIndexesLeft.size(); i++) {
 			if (m->control_pressed) { delete queryRight; delete queryLeft; return refResults; }
 			
 			//add right if you havent already
-			it = seen.find(larger[i]);
+			it = seen.find(tempIndexesLeft[i]);
 			if (it == seen.end()) {  
-				mergedResults.push_back(larger[i]);
-				seen[larger[i]] = larger[i];
+				mergedResults.push_back(tempIndexesLeft[i]);
+				seen[tempIndexesLeft[i]] = tempIndexesLeft[i];
 			}
 		}
 
+		for (int i = index; i < tempIndexesRight.size(); i++) {
+			if (m->control_pressed) { delete queryRight; delete queryLeft; return refResults; }
+			
+			//add right if you havent already
+			it = seen.find(tempIndexesRight[i]);
+			if (it == seen.end()) {  
+				mergedResults.push_back(tempIndexesRight[i]);
+				seen[tempIndexesRight[i]] = tempIndexesRight[i];
+			}
+		}
+		
+		
 		for (int i = 0; i < mergedResults.size(); i++) {
 			//cout << mergedResults[i]  << '\t' << db[mergedResults[i]]->getName() << endl;	
 			if (db[mergedResults[i]]->getName() != q->getName()) { 
@@ -1098,11 +1120,7 @@ vector<Sequence*> ChimeraSlayer::getBlastSeqs(Sequence* q, vector<Sequence*>& db
 			}
 		}
 		
-		
-//		for(int i=0;i<refResults.size();i++){
-//			cout << refResults[i]->getName() << endl;
-//		}
-			
+
 		delete queryRight;
 		delete queryLeft;
 		
