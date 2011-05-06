@@ -789,7 +789,7 @@ vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*
 		float lastRight = distsRight[0].dist;
 		float lastLeft = distsLeft[0].dist;
 		//int lasti = 0;
-		for (int i = 0; i < numWanted+1; i++) {
+		for (int i = 0; i < distsLeft.size(); i++) {
 			
 			if (m->control_pressed) { return seqsMatches; }
 			
@@ -810,6 +810,8 @@ vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*
 				lastRight =  distsRight[i].dist;
 //				cout << "loop-right\t" << db[distsRight[i].index]->getName() << '\t' << distsRight[i].dist << endl;
 			}
+			
+			if (i == numWanted) { break; }
 			
 		}
 		
