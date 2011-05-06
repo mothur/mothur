@@ -1150,17 +1150,44 @@ vector<Sequence*> ChimeraSlayer::getKmerSeqs(Sequence* q, vector<Sequence*>& db,
 		//merge results		
 		map<int, int> seen;
 		map<int, int>::iterator it;
-			vector<int> mergedResults;
-		for (int i = 0; i < tempIndexesLeft.size(); i++) {
+		vector<int> mergedResults;
+		
+		int index = 0;
+		//		for (int i = 0; i < smaller.size(); i++) {
+		while(index < tempIndexesLeft.size() && index < tempIndexesRight.size()){
 			
 			if (m->control_pressed) { delete queryRight; delete queryLeft; return refResults; }
 			
 			//add left if you havent already
+			it = seen.find(tempIndexesLeft[index]);
+			if (it == seen.end()) {  
+				mergedResults.push_back(tempIndexesLeft[index]);
+				seen[tempIndexesLeft[index]] = tempIndexesLeft[index];
+			}
+			
+			//add right if you havent already
+			it = seen.find(tempIndexesRight[index]);
+			if (it == seen.end()) {  
+				mergedResults.push_back(tempIndexesRight[index]);
+				seen[tempIndexesRight[index]] = tempIndexesRight[index];
+			}
+			index++;
+		}
+		
+		
+		for (int i = index; i < tempIndexesLeft.size(); i++) {
+			if (m->control_pressed) { delete queryRight; delete queryLeft; return refResults; }
+			
+			//add right if you havent already
 			it = seen.find(tempIndexesLeft[i]);
 			if (it == seen.end()) {  
 				mergedResults.push_back(tempIndexesLeft[i]);
 				seen[tempIndexesLeft[i]] = tempIndexesLeft[i];
 			}
+		}
+		
+		for (int i = index; i < tempIndexesRight.size(); i++) {
+			if (m->control_pressed) { delete queryRight; delete queryLeft; return refResults; }
 			
 			//add right if you havent already
 			it = seen.find(tempIndexesRight[i]);
@@ -1170,17 +1197,16 @@ vector<Sequence*> ChimeraSlayer::getKmerSeqs(Sequence* q, vector<Sequence*>& db,
 			}
 		}
 		
-		//numWanted = mergedResults.size();
-			
-		//cout << q->getName() << endl;		
 		
 		for (int i = 0; i < mergedResults.size(); i++) {
-			//cout << db[mergedResults[i]]->getName() << endl;	
+			//cout << mergedResults[i]  << '\t' << db[mergedResults[i]]->getName() << endl;	
 			if (db[mergedResults[i]]->getName() != q->getName()) { 
 				Sequence* temp = new Sequence(db[mergedResults[i]]->getName(), db[mergedResults[i]]->getAligned());
 				refResults.push_back(temp);
+				
 			}
 		}
+
 		//cout << endl;		
 		delete queryRight;
 		delete queryLeft;
