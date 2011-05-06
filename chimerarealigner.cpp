@@ -93,7 +93,6 @@ void ChimeraReAligner::reAlign(Sequence* query, vector<string> parents) {
 			alignmentLength = query->getAlignLength();	//x
 			int queryUnalignedLength = query->getNumBases();	//y
 			
-			
 			buildTemplateProfile(parents);
 			
 			createAlignMatrix(queryUnalignedLength, alignmentLength);
@@ -127,7 +126,7 @@ void ChimeraReAligner::buildTemplateProfile(vector<string> parents) {
 				else if(seq[j] == 'C')	{	profile[j].C++;		}
 				else if(seq[j] == '-')	{	profile[j].Gap++;	}
 				else if(seq[j] == '.')	{	profile[j].Gap++;	}
-				else					{	profile[j].A++;		}
+//				else					{	profile[j].A++;		}
 				
 			}
 		}
