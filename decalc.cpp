@@ -726,7 +726,7 @@ vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*
 			//if you are a base
 			if (isalpha(queryAligned[i])) {		baseCount++;	}
 			//if you have 1/3
-			if (baseCount >= numBases) { rightSpot = i;  break; } //last 1/3
+			if (baseCount > numBases + 1) { rightSpot = i;  break; } //last 1/3
 		}
 		
 		//trim end
@@ -738,18 +738,19 @@ vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*
 				break;
 			}
 		}
-		rightQuery = queryAligned.substr(rightSpot, (lastBaseSpot-rightSpot)); //sequence from pos spot to end
+		rightQuery = queryAligned.substr(rightSpot, (lastBaseSpot-rightSpot+1)); //sequence from pos spot to end
 		
 		Sequence queryLeft(querySeq->getName(), leftQuery);
 		Sequence queryRight(querySeq->getName(), rightQuery);
+		
 //cout << querySeq->getName() << '\t' << leftSpot << '\t' << rightSpot << '\t' << firstBaseSpot << '\t' << lastBaseSpot << endl;
 //cout << queryUnAligned.length() << '\t' << queryLeft.getUnaligned().length() << '\t' << queryRight.getUnaligned().length() << endl;
 		for(int j = 0; j < thisFilteredTemplate.size(); j++){
 			
 			string dbAligned = thisFilteredTemplate[j]->getAligned();
 			string leftDB = dbAligned.substr(firstBaseSpot, (leftSpot-firstBaseSpot+1)); //first 1/3 of the sequence
-			string rightDB = dbAligned.substr(rightSpot, (lastBaseSpot-rightSpot)); //last 1/3 of the sequence
-			
+			string rightDB = dbAligned.substr(rightSpot, (lastBaseSpot-rightSpot+1)); //last 1/3 of the sequence
+
 			Sequence dbLeft(thisFilteredTemplate[j]->getName(), leftDB);
 			Sequence dbRight(thisFilteredTemplate[j]->getName(), rightDB);
 
@@ -758,7 +759,7 @@ vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*
 			
 			distcalculator->calcDist(queryRight, dbRight);
 			float distRight = distcalculator->getDist();
-			
+
 			SeqDist subjectLeft;
 			subjectLeft.seq = NULL;
 			subjectLeft.dist = distLeft;
@@ -780,6 +781,7 @@ vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*
 		//sort by smallest distance
 		sort(distsRight.begin(), distsRight.end(), compareSeqDist);
 		sort(distsLeft.begin(), distsLeft.end(), compareSeqDist);
+
 		
 		//merge results		
 		map<string, string> seen;
@@ -788,14 +790,15 @@ vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*
 		vector<SeqDist> dists;
 		float lastRight = distsRight[0].dist;
 		float lastLeft = distsLeft[0].dist;
-		//int lasti = 0;
-		for (int i = 0; i < distsLeft.size(); i++) {
-			
+
+		float maxDist = 1.0 - (minSim / 100.0);
+
+		for (int i = 0; i < numWanted+1; i++) {
 			if (m->control_pressed) { return seqsMatches; }
 			
 			//add left if you havent already
 			it = seen.find(thisTemplate[distsLeft[i].index]->getName());
-			if (it == seen.end()) {  
+			if (it == seen.end() && distsLeft[i].dist <= maxDist) {  
 				dists.push_back(distsLeft[i]);
 				seen[thisTemplate[distsLeft[i].index]->getName()] = thisTemplate[distsLeft[i].index]->getName();
 				lastLeft =  distsLeft[i].dist;
@@ -804,7 +807,7 @@ vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*
 
 			//add right if you havent already
 			it = seen.find(thisTemplate[distsRight[i].index]->getName());
-			if (it == seen.end()) {  
+			if (it == seen.end() && distsRight[i].dist <= maxDist) {  
 				dists.push_back(distsRight[i]);
 				seen[thisTemplate[distsRight[i].index]->getName()] = thisTemplate[distsRight[i].index]->getName();
 				lastRight =  distsRight[i].dist;
@@ -834,8 +837,6 @@ vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*
 			}
 		}
 		
-
-
 		//cout << numWanted << endl;
 		for (int i = 0; i < dists.size(); i++) {
 //			cout << db[dists[i].index]->getName() << '\t' << dists[i].dist << endl;
