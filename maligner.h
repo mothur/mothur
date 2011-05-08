@@ -36,7 +36,7 @@ class Maligner {
 		float minDivR, percentIdenticalQueryChimera;
 		vector<results> outputResults;
 		map<int, int> spotMap;
-		
+		vector<int> unalignedMap;
 		vector<Sequence*> minCoverageFilter(vector<Sequence*>);  //removes top matches that do not have minimum coverage with query.
 		int computeChimeraPenalty();
 		void verticalFilter(vector<Sequence*>);

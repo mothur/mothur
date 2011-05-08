@@ -785,6 +785,7 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 
 			}
 			
+//			cout << query->getAligned() << endl;
 			//get sequence that were given from maligner results
 			vector<SeqDist> seqs;
 			map<string, float> removeDups;
@@ -792,9 +793,12 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 			map<string, string> parentNameSeq;
 			map<string, string>::iterator itSeq;
 			for (int j = 0; j < Results.size(); j++) {
+
 				float dist = (Results[j].regionEnd - Results[j].regionStart + 1) * Results[j].queryToParentLocal;
 				//only add if you are not a duplicate
-
+//				cout << Results[j].parent << '\t' << Results[j].regionEnd << '\t' << Results[j].regionStart << '\t' << Results[j].regionEnd - Results[j].regionStart +1 << '\t' << Results[j].queryToParentLocal << '\t' << dist << endl;
+				
+				
 				if(Results[j].queryToParentLocal >= 90){	//local match has to be over 90% similarity
 				
 					itDup = removeDups.find(Results[j].parent);
@@ -840,7 +844,7 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 			for (int k = 0; k < seqs.size(); k++) {  
 //				cout << seqs[k].seq->getAligned() << endl;
 				seqsForSlayer.push_back(seqs[k].seq);	
-			
+//				cout << seqs[k].seq->getName() << endl;
 			}
 			
 			if (m->control_pressed) {  for (int k = 0; k < seqs.size(); k++) {  delete seqs[k].seq;   }  return 0;  }
