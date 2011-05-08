@@ -144,8 +144,8 @@ string Maligner::chimeraMaligner(int chimeraPenalty, DeCalculator* decalc) {
 			temp.parentAligned = db[seqIndex]->getAligned();
 			temp.nastRegionStart = spotMap[regionStart];
 			temp.nastRegionEnd = spotMap[regionEnd];
-			temp.regionStart = regionStart;
-			temp.regionEnd = regionEnd;
+			temp.regionStart = unalignedMap[regionStart];
+			temp.regionEnd = unalignedMap[regionEnd];
 			
 			string parentInRange = refSeqs[seqIndex]->getAligned();
 			parentInRange = parentInRange.substr(traceStart, (traceEnd-traceStart+1));
@@ -280,7 +280,22 @@ void Maligner::verticalFilter(vector<Sequence*> seqs) {
 			
 			seqs[i]->setAligned(newAligned);
 		}
-
+		
+		string query = seqs[seqs.size()-1]->getAligned();
+		int queryLength = query.length();
+		
+		unalignedMap.resize(queryLength, 0);
+		
+		
+		for(int i=1;i<queryLength;i++){
+			if(query[i] != '.' && query[i] != '-'){
+				unalignedMap[i] = unalignedMap[i-1] + 1;
+			}
+			else{
+				unalignedMap[i] = unalignedMap[i-1];
+			}
+		}
+		
 		spotMap = newMap;
 	}
 	catch(exception& e) {
@@ -436,12 +451,13 @@ vector<score_struct> Maligner::extractHighestPath(vector<vector<score_struct> > 
 			}
 		}
 		
-//		cout << highestScore << endl;
 		vector<score_struct> path;
 		
 		int rowIndex = highestStruct.row;
 		int pos = highestStruct.col;
 		int score = highestStruct.score;
+
+//		cout << rowIndex << '\t' << pos << '\t' << score << endl;
 		
 		while (pos >= 0 && score > 0) {
 			score_struct temp = ms[rowIndex][pos];

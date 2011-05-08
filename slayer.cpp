@@ -34,7 +34,7 @@ string Slayer::getResults(Sequence* query, vector<Sequence*> refSeqs) {
 				vector<data_struct> divs = runBellerophon(q, leftParent, rightParent, spots);
 	
 				if (m->control_pressed) { delete q; delete leftParent; delete rightParent; return "no"; }
-					
+//				cout << "examining:\t" << refSeqs[i]->getName() << '\t' << refSeqs[j]->getName() << endl;
 				vector<data_struct> selectedDivs;
 				for (int k = 0; k < divs.size(); k++) {
 					
@@ -46,6 +46,7 @@ string Slayer::getResults(Sequence* query, vector<Sequence*> refSeqs) {
 					int numSNPSLeft = snpsLeft.size();
 					int numSNPSRight = snpsRight.size();
 					
+//					cout << numSNPSLeft << '\t' << numSNPSRight << endl;
 					//require at least 4 SNPs on each side of the break
 					if ((numSNPSLeft >= 4) && (numSNPSRight >= 4)) {
 							
