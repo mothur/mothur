@@ -25,7 +25,7 @@ vector<string> ChimeraSlayerCommand::setParameters(){
 		CommandParameter pmincov("mincov", "Number", "", "70", "", "", "",false,false); parameters.push_back(pmincov);
 		CommandParameter pminsnp("minsnp", "Number", "", "10", "", "", "",false,false); parameters.push_back(pminsnp);
 		CommandParameter pminbs("minbs", "Number", "", "90", "", "", "",false,false); parameters.push_back(pminbs);
-		CommandParameter psearch("search", "Multiple", "kmer-blast-distance", "blast", "", "", "",false,false); parameters.push_back(psearch);
+		CommandParameter psearch("search", "Multiple", "kmer-blast", "blast", "", "", "",false,false); parameters.push_back(psearch);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
 		CommandParameter prealign("realign", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(prealign);
 		CommandParameter ptrim("trim", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(ptrim);
@@ -77,7 +77,7 @@ string ChimeraSlayerCommand::getHelpString(){
 		helpString += "The mincov parameter allows you to specify minimum coverage by closest matches found in template. Default is 70, meaning 70%. \n";
 		helpString += "The minbs parameter allows you to specify minimum bootstrap support for calling a sequence chimeric. Default is 90, meaning 90%. \n";
 		helpString += "The minsnp parameter allows you to specify percent of SNPs to sample on each side of breakpoint for computing bootstrap support (default: 10) \n";
-		helpString += "The search parameter allows you to specify search method for finding the closest parent. Choices are distance, blast, and kmer, default distance. \n";
+		helpString += "The search parameter allows you to specify search method for finding the closest parent. Choices are blast, and kmer, default blast. \n";
 		helpString += "The realign parameter allows you to realign the query to the potential parents. Choices are true or false, default true.  \n";
 		helpString += "The chimera.slayer command should be in the following format: \n";
 		helpString += "chimera.slayer(fasta=yourFastaFile, reference=yourTemplate, search=yourSearch) \n";
@@ -351,7 +351,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 			temp = validParameter.validFile(parameters, "split", false);			if (temp == "not found") { temp = "f"; }
 			trimera = m->isTrue(temp); 
 			
-			search = validParameter.validFile(parameters, "search", false);			if (search == "not found") { search = "distance"; }
+			search = validParameter.validFile(parameters, "search", false);			if (search == "not found") { search = "blast"; }
 			
 			temp = validParameter.validFile(parameters, "iters", false);			if (temp == "not found") { temp = "1000"; }		
 			convert(temp, iters); 
@@ -362,7 +362,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 			temp = validParameter.validFile(parameters, "numwanted", false);		if (temp == "not found") { temp = "15"; }		
 			convert(temp, numwanted);
 
-			if ((search != "distance") && (search != "blast") && (search != "kmer")) { m->mothurOut(search + " is not a valid search."); m->mothurOutEndLine(); abort = true;  }
+			if ((search != "blast") && (search != "kmer")) { m->mothurOut(search + " is not a valid search."); m->mothurOutEndLine(); abort = true;  }
 		}
 	}
 	catch(exception& e) {
@@ -732,7 +732,6 @@ int ChimeraSlayerCommand::driver(linePair* filePos, string outputFName, string f
 			
 			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 				unsigned long int pos = inFASTA.tellg();
-			//cout << candidateSeq->getName() << '\t' << pos << endl;
 				if ((pos == -1) || (pos >= filePos->end)) { break; }
 			#else
 				if (inFASTA.eof()) { break; }

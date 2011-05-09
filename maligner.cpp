@@ -42,7 +42,7 @@ string Maligner::getResults(Sequence* q, DeCalculator* decalc) {
 		}
 		
 		int chimeraPenalty = computeChimeraPenalty();
-		
+	
 		//fills outputResults
 		chimera = chimeraMaligner(chimeraPenalty, decalc);
 		
@@ -95,7 +95,7 @@ string Maligner::chimeraMaligner(int chimeraPenalty, DeCalculator* decalc) {
 		if (m->control_pressed) { return chimera;  }
 		
 		vector<trace_struct> trace = mapTraceRegionsToAlignment(path, refSeqs);
-			
+				
 		if (trace.size() > 1) {		chimera = "yes";	}
 		else { chimera = "no";	return chimera; }
 		
@@ -161,7 +161,7 @@ string Maligner::chimeraMaligner(int chimeraPenalty, DeCalculator* decalc) {
 			
 			temp.queryToParentLocal = computePercentID(queryInRegion, parentInRegion);
 			
-//			cout << query->getName() << '\t' << temp.parent << '\t' << "NAST:" << temp.nastRegionStart << '-' << temp.nastRegionEnd << " G:" << temp.queryToParent << " L:" << temp.queryToParentLocal << ", " <<  temp.divR << endl;
+			//cout << query->getName() << '\t' << temp.parent << '\t' << "NAST:" << temp.nastRegionStart << '-' << temp.nastRegionEnd << " G:" << temp.queryToParent << " L:" << temp.queryToParentLocal << ", " <<  temp.divR << endl;
 
 			outputResults.push_back(temp);
 		}
@@ -490,7 +490,7 @@ vector<trace_struct> Maligner::mapTraceRegionsToAlignment(vector<score_struct> p
 		for (int i = 1; i < path.size(); i++) {
 			
 			int next_region_index = path[i].row;
-//			cout << i << '\t' << next_region_index << endl;
+			//cout << i << '\t' << next_region_index << endl;
 
 			if (next_region_index != region_index) {
 				
