@@ -186,6 +186,7 @@ int SplitMatrix::createDistanceFilesFromTax(map<string, int>& seqGroup, int numG
 		for (int i = 0; i < numGroups; i++) { 
 			
 			string options = "fasta=" + (fastafile + "." + toString(i) + ".temp") + ", processors=" + toString(processors) + ", cutoff=" + toString(distCutoff);
+			if (outputDir != "") { options += ", outputdir=" + outputDir; }
 			
 			Command* command = new DistanceCommand(options);
 			
