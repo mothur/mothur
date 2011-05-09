@@ -645,7 +645,7 @@ string GetOTURepCommand::findRep(vector<string> names) {
 	try{
 		// if only 1 sequence in bin or processing the "unique" label, then 
 		// the first sequence of the OTU is the representative one
-		if ((names.size() == 1) || (list->getLabel() == "unique")) {
+		if ((names.size() == 1)) {
 			return names[0];
 		}else{
 			vector<int> seqIndex(names.size());

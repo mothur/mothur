@@ -17,8 +17,7 @@ string Slayer::getResults(Sequence* query, vector<Sequence*> refSeqs) {
 	try {
 		vector<data_struct> all; all.clear();
 		myQuery = *query;
-		
-				
+
 		for (int i = 0; i < refSeqs.size(); i++) {
 		
 			for (int j = i+1; j < refSeqs.size(); j++) {
@@ -29,6 +28,11 @@ string Slayer::getResults(Sequence* query, vector<Sequence*> refSeqs) {
 				Sequence* q = new Sequence(query->getName(), query->getAligned());
 				Sequence* leftParent = new Sequence(refSeqs[i]->getName(), refSeqs[i]->getAligned());
 				Sequence* rightParent = new Sequence(refSeqs[j]->getName(), refSeqs[j]->getAligned());
+				
+				//cout << q->getName() << endl << q->getAligned() << endl << endl;	
+				//cout << leftParent->getName() << endl << leftParent->getAligned() << endl << endl;		
+				//cout << rightParent->getName() << endl << rightParent->getAligned() << endl << endl;	
+				//cout << " length = " << rightParent->getAligned().length() << endl;
 	
 				map<int, int> spots;  //map from spot in original sequence to spot in filtered sequence for query and both parents
 				vector<data_struct> divs = runBellerophon(q, leftParent, rightParent, spots);
@@ -149,13 +153,13 @@ vector<data_struct> Slayer::runBellerophon(Sequence* q, Sequence* pA, Sequence* 
 			int rightLength = length - leftLength;
 				
 			float QLA = computePercentID(query, parentA, 0, breakpoint);
-			float QRB = computePercentID(query, parentB, breakpoint+1, length);
+			float QRB = computePercentID(query, parentB, breakpoint+1, length-1);
 		
 			float QLB = computePercentID(query, parentB, 0, breakpoint);
-			float QRA = computePercentID(query, parentA, breakpoint+1, length);
+			float QRA = computePercentID(query, parentA, breakpoint+1, length-1);
 		
 			float LAB = computePercentID(parentA, parentB, 0, breakpoint);
-			float RAB = computePercentID(parentA, parentB, breakpoint+1, length);	
+			float RAB = computePercentID(parentA, parentB, breakpoint+1, length-1);	
 			
 			float AB = ((LAB*leftLength) + (RAB*rightLength)) / (float) length;
 			float QA = ((QLA*leftLength) + (QRA*rightLength)) / (float) length;
@@ -174,7 +178,7 @@ vector<data_struct> Slayer::runBellerophon(Sequence* q, Sequence* pA, Sequence* 
 			//cout << q->getName() << '\t';
 			//cout << pA->getName() << '\t';
 			//cout << pB->getName() << '\t';
-		   // cout << "bp: " << breakpoint << " CHIM_TYPE_A\t" << divR_QLA_QRB << "\tQLA: " << QLA << "\tQRB: " << QRB << "\tQLA_QRB: " << QLA_QRB;
+		    //cout << "bp: " << breakpoint << " CHIM_TYPE_A\t" << divR_QLA_QRB << "\tQLA: " << QLA << "\tQRB: " << QRB << "\tQLA_QRB: " << QLA_QRB;
 			//cout << "\tCHIM_TYPE_B\t" << divR_QLB_QRA << "\tQLB: " << QLB << "\tQRA: " << QRA << "\tQLB_QRA: " << QLB_QRA << endl;
 //cout << leftLength << '\t' << rightLength << '\t' << QLA << '\t' << QRB << '\t' << QLB << '\t' << QRA  << '\t' << LAB << '\t' << RAB << '\t' << AB << '\t' << QA << '\t' << QB << '\t' << QLA_QRB << '\t' <<  QLB_QRA <<    endl;    		
 

@@ -773,7 +773,7 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 		for (int i = 0; i < refSeqs.size(); i++) {  delete refSeqs[i];	}
 		
 		if (chimeraFlag == "yes") {
-
+			
 			if (realign) {
 				vector<string> parents;
 				for (int i = 0; i < Results.size(); i++) {
@@ -1113,7 +1113,8 @@ vector<Sequence*> ChimeraSlayer::getBlastSeqs(Sequence* q, vector<Sequence*>& db
 				seen[tempIndexesRight[i]] = tempIndexesRight[i];
 			}
 		}
-		
+		//string qname = q->getName().substr(0, q->getName().find_last_of('_'));	
+		//cout << qname << endl;	
 		
 		for (int i = 0; i < mergedResults.size(); i++) {
 			//cout << mergedResults[i]  << '\t' << db[mergedResults[i]]->getName() << endl;	
@@ -1200,7 +1201,6 @@ vector<Sequence*> ChimeraSlayer::getKmerSeqs(Sequence* q, vector<Sequence*>& db,
 				seen[tempIndexesRight[i]] = tempIndexesRight[i];
 			}
 		}
-		
 		
 		for (int i = 0; i < mergedResults.size(); i++) {
 			//cout << mergedResults[i]  << '\t' << db[mergedResults[i]]->getName() << endl;	
