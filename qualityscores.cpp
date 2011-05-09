@@ -278,7 +278,7 @@ bool QualityScores::stripQualWindowAverage(Sequence& sequence, int stepSize, int
 		
 		int end = windowSize;
 		int start = 0;
-		
+
 		if(seqLength < windowSize) {	return 0;	}
 			
 		while(start < seqLength){
@@ -300,6 +300,9 @@ bool QualityScores::stripQualWindowAverage(Sequence& sequence, int stepSize, int
 		
 		if(end == -1){	end = seqLength;	}
 		
+		//failed first window
+		if (end < windowSize) { return 0; }
+			
 		sequence.setUnaligned(rawSequence.substr(0,end));
 		trimQScores(-1, end);
 		

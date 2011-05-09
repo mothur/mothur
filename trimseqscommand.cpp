@@ -497,7 +497,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 			int currentSeqsDiffs = 0;
 
 			Sequence currSeq(inFASTA); m->gobble(inFASTA);
-
+			
 			QualityScores currQual;
 			if(qFileName != ""){
 				currQual = QualityScores(qFile);  m->gobble(qFile);
@@ -546,7 +546,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 					else if(qRollAverage != 0)	{	success = currQual.stripQualRollingAverage(currSeq, qRollAverage);	}
 					else if(qWindowAverage != 0){	success = currQual.stripQualWindowAverage(currSeq, qWindowStep, qWindowSize, qWindowAverage);	}
 					else						{	success = 1;				}
-					
+				
 					//you don't want to trim, if it fails above then scrap it
 					if ((!qtrim) && (origLength != currSeq.getNumBases())) {  success = 0; }
 					

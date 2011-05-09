@@ -438,12 +438,12 @@ string MothurOut::getline(ifstream& fileHandle) {
 	
 		string line = "";
 		
-		while (!fileHandle.eof())	{
+		while (fileHandle)	{
 			//get next character
 			char c = fileHandle.get(); 
 			
 			//are you at the end of the line
-			if ((c == '\n') || (c == '\r') || (c == '\f')){  break;	}	
+			if ((c == '\n') || (c == '\r') || (c == '\f') || (c == EOF)){  break;	}	
 			else {		line += c;		}
 		}
 		
