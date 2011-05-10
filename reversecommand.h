@@ -22,6 +22,7 @@ public:
 	string getCommandName()			{ return "reverse.seqs";			}
 	string getCommandCategory()		{ return "Sequence Processing";		}
 	string getHelpString();	
+	string getCitation() { return "http://www.mothur.org/wiki/Reverse.seqs"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

@@ -23,6 +23,7 @@ class GetCurrentCommand : public Command {
 		string getCommandName()			{ return "get.current";	}
 		string getCommandCategory()		{ return "General";		}
 		string getHelpString();	
+		string getCitation() { return "http://www.mothur.org/wiki/Get.current"; }
 	
 		int execute(); 
 		void help() { m->mothurOut(getHelpString()); }	

@@ -27,6 +27,7 @@ public:
 	string getCommandName()			{ return "chimera.ccode";		}
 	string getCommandCategory()		{ return "Sequence Processing"; }
 	string getHelpString();	
+	string getCitation() { return "Evaluating putative chimeric sequences from PCR-amplified products' paper by Juan M. Gonzalez, Johannes Zimmerman and Cesareo Saiz-Jimenez. http://www.mothur.org/wiki/Chimera.ccode"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

@@ -26,6 +26,8 @@ public:
 	string getCommandName()			{ return "classify.otu";		}
 	string getCommandCategory()		{ return "Phylotype Analysis";	}
 	string getHelpString();	
+	string getCitation() { return "http://www.mothur.org/wiki/Classify.otu"; }
+
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

@@ -26,6 +26,7 @@ public:
 	string getCommandName()			{ return "summary.single";			}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
 	string getHelpString();	
+	string getCitation() { return "http://www.mothur.org/wiki/Summary.single"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

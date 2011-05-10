@@ -29,6 +29,8 @@ public:
 	string getCommandName()			{ return "chimera.pintail";		}
 	string getCommandCategory()		{ return "Sequence Processing"; }
 	string getHelpString();	
+	string getCitation() { return "At Least 1 in 20 16S rRNA Sequence Records Currently Held in the Public Repositories is Estimated To Contain Substantial Anomalies' paper by Kevin E. Ashelford 1, Nadia A. Chuzhanova 3, John C. Fry 1, Antonia J. Jones 2 and Andrew J. Weightman 1. http://www.mothur.org/wiki/Chimera.pintail"; }
+
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }		

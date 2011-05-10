@@ -32,7 +32,8 @@ public:
 	string getCommandName()			{ return "catchall";			}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
 	string getHelpString();	
-	
+	string getCitation() { return "http://www.northeastern.edu/catchall/index.html http://www.mothur.org/wiki/Catchall"; }
+
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	
 	

@@ -107,7 +107,8 @@ RareFactCommand::RareFactCommand(string option)  {
 		allLines = 1;
 						
 		//allow user to run help
-		if(option == "help") { abort = true; calledHelp = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
+		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
 		
 		else {
 			vector<string> myArray = setParameters();

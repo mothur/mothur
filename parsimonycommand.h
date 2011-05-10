@@ -29,6 +29,7 @@ public:
 	string getCommandName()			{ return "parsimony";				}
 	string getCommandCategory()		{ return "Hypothesis Testing";		}
 	string getHelpString();	
+	string getCitation() { return "http://www.mothur.org/wiki/Parsimony"; }
 	
 	int execute();
 	void help() { m->mothurOut(getHelpString()); }

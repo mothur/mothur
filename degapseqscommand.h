@@ -23,6 +23,7 @@ public:
 	string getCommandName()			{ return "degap.seqs";		}
 	string getCommandCategory()		{ return "Sequence Processing";		}
 	string getHelpString();	
+	string getCitation() { return "http://www.mothur.org/wiki/Degap.seqs"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

@@ -25,6 +25,7 @@ public:
 	string getCommandName()			{ return "sens.spec";				}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
 	string getHelpString();	
+	string getCitation() { return "http://www.mothur.org/wiki/Sens.spec"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

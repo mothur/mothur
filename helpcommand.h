@@ -25,6 +25,7 @@ public:
 	string getCommandName()			{ return "help";		}
 	string getCommandCategory()		{ return "Hidden";		}
 	string getHelpString() { return "For more information about a specific command type 'commandName(help)' i.e. 'cluster(help)'"; }	
+	string getCitation() { return "no citation"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

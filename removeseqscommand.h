@@ -24,6 +24,7 @@ class RemoveSeqsCommand : public Command {
 		string getCommandName()			{ return "remove.seqs";				}
 		string getCommandCategory()		{ return "Sequence Processing";		}
 		string getHelpString();	
+		string getCitation() { return "http://www.mothur.org/wiki/Remove.seqs"; }
 	
 		int execute(); 
 		void help() { m->mothurOut(getHelpString()); }	

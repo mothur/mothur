@@ -28,6 +28,7 @@ class UnifracUnweightedCommand : public Command {
 		string getCommandName()			{ return "unifrac.unweighted";		}
 		string getCommandCategory()		{ return "Hypothesis Testing";		}
 		string getHelpString();	
+		string getCitation() { return "http://www.mothur.org/wiki/Unifrac.unweighted"; }
 	
 		int execute();
 		void help() { m->mothurOut(getHelpString()); }

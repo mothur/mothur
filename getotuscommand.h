@@ -28,6 +28,7 @@ public:
 	string getCommandName()			{ return "get.otus";				}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
 	string getHelpString();	
+	string getCitation() { return "http://www.mothur.org/wiki/Get.otus"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

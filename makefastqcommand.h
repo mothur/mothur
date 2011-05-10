@@ -25,6 +25,7 @@ public:
 	string getCommandName()			{ return "make.fastq";				}
 	string getCommandCategory()		{ return "Sequence Processing";		}
 	string getHelpString();	
+	string getCitation() { return "http://www.mothur.org/wiki/Make.fastq"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

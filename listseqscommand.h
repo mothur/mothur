@@ -24,6 +24,7 @@ class ListSeqsCommand : public Command {
 		string getCommandName()			{ return "list.seqs";				}
 		string getCommandCategory()		{ return "Sequence Processing";		}
 		string getHelpString();	
+		string getCitation() { return "http://www.mothur.org/wiki/List.seqs"; }
 	
 		int execute(); 
 		void help() { m->mothurOut(getHelpString()); }	

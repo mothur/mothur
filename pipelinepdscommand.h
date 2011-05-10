@@ -27,6 +27,7 @@ public:
 	string getCommandName()			{ return "pipeline.pds";	}
 	string getCommandCategory()		{ return "Hidden";			}
 	string getHelpString();	
+	string getCitation() { return "http://www.mothur.org/wiki/Pipeline.pds"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

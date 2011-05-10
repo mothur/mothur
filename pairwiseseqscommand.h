@@ -29,6 +29,7 @@ public:
 	string getCommandName()			{ return "pairwise.seqs";		}
 	string getCommandCategory()		{ return "Sequence Processing"; }
 	string getHelpString();	
+	string getCitation() { return "http://www.mothur.org/wiki/Pairwise.seqs"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

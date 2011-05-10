@@ -26,6 +26,7 @@ public:
 	string getCommandName()			{ return "set.dir";		}
 	string getCommandCategory()		{ return "General";		}
 	string getHelpString();	
+	string getCitation() { return "http://www.mothur.org/wiki/Set.dir"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

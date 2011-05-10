@@ -27,6 +27,7 @@ class PhyloDiversityCommand : public Command {
 		string getCommandName()			{ return "phylo.diversity";			}
 		string getCommandCategory()		{ return "Hypothesis Testing";		}
 		string getHelpString();	
+		string getCitation() { return "http://www.mothur.org/wiki/Phylo.diversity"; }
 	
 		int execute();
 		void help() { m->mothurOut(getHelpString()); }

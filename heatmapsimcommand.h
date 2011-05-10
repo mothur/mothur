@@ -27,6 +27,7 @@ public:
 	string getCommandName()			{ return "heatmap.sim";				}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
 	string getHelpString();	
+	string getCitation() { return "http://www.mothur.org/wiki/Heatmap.sim"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

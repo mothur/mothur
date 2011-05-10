@@ -29,6 +29,7 @@ class Command {
 		virtual string getCommandName() = 0;
 		virtual string getCommandCategory() = 0;
 		virtual string getHelpString() = 0;
+		virtual string getCitation() = 0;
 		
 		virtual map<string, vector<string> > getOutputFiles() { return outputTypes; }
 		virtual vector<string> setParameters() = 0; //to fill parameters
@@ -36,6 +37,7 @@ class Command {
 	
 		virtual int execute() = 0;
 		virtual void help() = 0;
+		void citation() { m->mothurOut(getCitation()); }
 		virtual ~Command() { }
 	
 	protected:

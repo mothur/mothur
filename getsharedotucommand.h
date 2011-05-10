@@ -29,6 +29,7 @@ class GetSharedOTUCommand : public Command {
 		string getCommandCategory()		{ return "OTU-Based Approaches";	}
 		string getRequiredCommand()		{ return "none";					}
 		string getHelpString();	
+		string getCitation() { return "http://www.mothur.org/wiki/Get.sharedseqs"; }
 	
 		int execute(); 
 		void help() { m->mothurOut(getHelpString()); }	
