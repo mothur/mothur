@@ -37,7 +37,7 @@ class Command {
 	
 		virtual int execute() = 0;
 		virtual void help() = 0;
-		void citation() { m->mothurOut(getCitation()); }
+		void citation() { m->mothurOutEndLine(); m->mothurOut(getCitation()); m->mothurOutEndLine(); }
 		virtual ~Command() { }
 	
 	protected:
