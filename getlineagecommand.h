@@ -24,6 +24,7 @@ class GetLineageCommand : public Command {
 		string getCommandName()			{ return "get.lineage";				}
 		string getCommandCategory()		{ return "Phylotype Analysis";		}
 		string getHelpString();	
+		string getCitation() { return "http://www.mothur.org/wiki/Get.lineage"; }
 	
 		int execute(); 
 		void help() { m->mothurOut(getHelpString()); }	

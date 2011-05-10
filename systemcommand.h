@@ -25,6 +25,7 @@ class SystemCommand : public Command {
 		string getCommandName()			{ return "system";		}
 		string getCommandCategory()		{ return "General";		}
 		string getHelpString();	
+		string getCitation() { return "http://www.mothur.org/wiki/System"; }
 	
 		int execute(); 
 		void help() { m->mothurOut(getHelpString()); }	

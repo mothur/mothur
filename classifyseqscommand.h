@@ -35,6 +35,8 @@ public:
 	string getCommandName()			{ return "classify.seqs";		}
 	string getCommandCategory()		{ return "Phylotype Analysis";	}
 	string getHelpString();	
+	string getCitation() { return "http://www.mothur.org/wiki/Classify.seqs"; }
+
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

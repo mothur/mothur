@@ -31,6 +31,7 @@ public:
 	string getCommandName()			{ return "clearcut";			}
 	string getCommandCategory()		{ return "Hypothesis Testing";	}
 	string getHelpString();	
+	string getCitation() { return "The clearcut program written by Initiative for Bioinformatics and Evolutionary Studies (IBEST) at the University of Idaho. http://www.mothur.org/wiki/Clearcut"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

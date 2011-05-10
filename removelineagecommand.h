@@ -24,6 +24,7 @@ class RemoveLineageCommand : public Command {
 		string getCommandName()			{ return "remove.lineage";			}
 		string getCommandCategory()		{ return "Phylotype Analysis";		}
 		string getHelpString();	
+		string getCitation() { return "http://www.mothur.org/wiki/Remove.lineage"; }
 	
 		int execute(); 
 		void help() { m->mothurOut(getHelpString()); }	

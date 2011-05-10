@@ -82,6 +82,7 @@ int ConcensusCommand::execute(){
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
+		
 		m->mothurOut("This command is not currently in use."); m->mothurOutEndLine();
 	/*	
 		t = globaldata->gTree;

@@ -23,6 +23,7 @@ public:
 	string getCommandName()			{ return "make.group";	}
 	string getCommandCategory()		{ return "General";		}
 	string getHelpString();	
+	string getCitation() { return "http://www.mothur.org/wiki/Make.group"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

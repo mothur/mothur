@@ -40,6 +40,7 @@ class AlignCheckCommand : public Command {
 		string getCommandName()			{ return "align.check";				}
 		string getCommandCategory()		{ return "Sequence Processing";		}
 		string getHelpString();	
+		string getCitation() { return "http://www.mothur.org/wiki/Align.check"; }
 	
 		int execute(); 
 		void help() { m->mothurOut(getHelpString()); }	

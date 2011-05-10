@@ -124,7 +124,8 @@ CollectCommand::CollectCommand(string option)  {
 		allLines = 1;
 		
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); calledHelp = true; abort = true; }
+		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
 		
 		else {
 			vector<string> myArray = setParameters();

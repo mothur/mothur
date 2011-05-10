@@ -27,6 +27,7 @@ public:
 	string getCommandName()			{ return "remove.rare";				}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
 	string getHelpString();	
+	string getCitation() { return "http://www.mothur.org/wiki/Remove.rare"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

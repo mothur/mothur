@@ -26,7 +26,8 @@ class ChopSeqsCommand : public Command {
 		string getCommandName()			{ return "chop.seqs";		}
 		string getCommandCategory()		{ return "Sequence Processing"; }
 		string getHelpString();	
-	
+		string getCitation() { return "http://www.mothur.org/wiki/Chops.seqs"; }
+
 		int execute(); 
 		void help() { m->mothurOut(getHelpString()); }		
 	

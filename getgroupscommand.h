@@ -26,6 +26,7 @@ public:
 	string getCommandName()			{ return "get.groups";				}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
 	string getHelpString();	
+	string getCitation() { return "http://www.mothur.org/wiki/Get.groups"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

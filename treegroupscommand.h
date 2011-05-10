@@ -40,6 +40,7 @@ public:
 	string getCommandName()			{ return "tree.shared";				}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
 	string getHelpString();	
+	string getCitation() { return "http://www.mothur.org/wiki/Tree.shared"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

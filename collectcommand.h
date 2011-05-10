@@ -37,6 +37,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "collect.single";			}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getCitation() { return "http://www.mothur.org/wiki/Collect.single"; }
 	string getHelpString();	
 	
 	int execute(); 

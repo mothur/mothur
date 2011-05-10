@@ -28,6 +28,7 @@ public:
 	string getCommandName()			{ return "dist.seqs";			}
 	string getCommandCategory()		{ return "Sequence Processing";	}
 	string getHelpString();	
+	string getCitation() { return "http://www.mothur.org/wiki/Dist.seqs"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

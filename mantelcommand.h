@@ -23,6 +23,7 @@ public:
 	string getCommandName()			{ return "mantel";					}
 	string getCommandCategory()		{ return "Hypothesis Testing";		}
 	string getHelpString();	
+	string getCitation() { return "Sokal, R. R., & Rohlf, F. J. (1995). Biometry, 3rd edn. New York: Freeman. http://www.mothur.org/wiki/Mantel"; }
 	
 	int execute();
 	void help() { m->mothurOut(getHelpString()); }

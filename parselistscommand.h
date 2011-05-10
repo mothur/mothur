@@ -27,6 +27,7 @@ public:
 	string getCommandName()			{ return "parse.list";				}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
 	string getHelpString();	
+	string getCitation() { return "http://www.mothur.org/wiki/Parse.list"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

@@ -31,6 +31,7 @@ public:
 	string getCommandName()			{ return "make.shared";				}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
 	string getHelpString();	
+	string getCitation() { return "http://www.mothur.org/wiki/Make.shared"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

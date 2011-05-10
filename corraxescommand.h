@@ -25,6 +25,7 @@ public:
 	string getCommandName()			{ return "corr.axes";				}
 	string getCommandCategory()		{ return "Hypothesis Testing";		}
 	string getHelpString();	
+	string getCitation() { return "http://www.mothur.org/wiki/Corr.axes"; }
 	
 	int execute();
 	void help() { m->mothurOut(getHelpString()); }	

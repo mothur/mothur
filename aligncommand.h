@@ -27,6 +27,7 @@ public:
 	string getCommandName()			{ return "align.seqs";			}
 	string getCommandCategory()		{ return "Sequence Processing"; }
 	string getHelpString();	
+	string getCitation() { return "http://www.mothur.org/wiki/Align.seqs"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

@@ -24,6 +24,7 @@ public:
 	string getCommandName()			{ return "read.otu";	}
 	string getCommandCategory()		{ return "Hidden";	}
 	string getHelpString() { return "This command is no longer available. You can provide your files directly to the downstream commands like collect.shared."; }	
+	string getCitation() { return "http://www.mothur.org/wiki/Read.otu"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

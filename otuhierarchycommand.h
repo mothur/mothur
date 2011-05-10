@@ -25,6 +25,7 @@ public:
 	string getCommandName()			{ return "otu.hierarchy";			}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
 	string getHelpString();	
+	string getCitation() { return "http://www.mothur.org/wiki/Otu.hierarchy"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

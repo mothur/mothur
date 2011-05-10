@@ -26,6 +26,7 @@ public:
 	string getCommandName()			{ return "pcoa";					}
 	string getCommandCategory()		{ return "Hypothesis Testing";		}
 	string getHelpString();	
+	string getCitation() { return "http://www.mothur.org/wiki/Pcoa"; }
 	
 	int execute();
 	void help() { m->mothurOut(getHelpString()); }

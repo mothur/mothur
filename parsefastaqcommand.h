@@ -24,6 +24,7 @@ public:
 	string getCommandName()			{ return "parse.fastq";		}
 	string getCommandCategory()		{ return "Sequence Processing"; }
 	string getHelpString();	
+	string getCitation() { return "http://www.mothur.org/wiki/Parse.fastq"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }		

@@ -27,6 +27,8 @@ public:
 	string getCommandName()			{ return "chimera.bellerophon";	}
 	string getCommandCategory()		{ return "Sequence Processing"; }
 	string getHelpString();	
+	string getCitation() { return "http://www.mothur.org/wiki/Chimera.bellerophon"; }
+
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

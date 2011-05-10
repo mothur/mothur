@@ -24,6 +24,7 @@ public:
 	string getCommandName()			{ return "consensus.seqs";		}
 	string getCommandCategory()		{ return "Sequence Processing"; }
 	string getHelpString();	
+	string getCitation() { return "http://www.mothur.org/wiki/Consensus.seqs"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

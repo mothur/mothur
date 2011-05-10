@@ -25,7 +25,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "get.otulist";				}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
-	
+	string getCitation() { return "http://www.mothur.org/wiki/Get.otulist"; }
 	string getHelpString();	
 	
 	int execute(); 

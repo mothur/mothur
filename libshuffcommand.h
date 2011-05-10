@@ -27,6 +27,7 @@ public:
 	string getCommandName()			{ return "libshuff";				}
 	string getCommandCategory()		{ return "Hypothesis Testing";		}
 	string getHelpString();	
+	string getCitation() { return "http://www.mothur.org/wiki/Libshuff"; }
 	
 	int execute();
 	void help() { m->mothurOut(getHelpString()); }	

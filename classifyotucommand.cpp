@@ -87,7 +87,8 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 		//allow user to run help
 		if (option == "help") { 
 			help(); abort = true; calledHelp = true;
-		} else {
+		}else if(option == "citation") { citation(); abort = true; calledHelp = true;} 
+		else {
 			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);

@@ -25,6 +25,7 @@ public:
 	string getCommandName()			{ return "shhh.seqs";	}
 	string getCommandCategory()		{ return "Hidden";		}
 	string getHelpString();	
+	string getCitation() { return "no citation"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }		

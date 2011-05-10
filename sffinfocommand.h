@@ -70,6 +70,7 @@ public:
 	string getCommandName()			{ return "sffinfo";					}
 	string getCommandCategory()		{ return "Sequence Processing";		}
 	string getHelpString();	
+	string getCitation() { return "http://www.mothur.org/wiki/Sffinfo"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

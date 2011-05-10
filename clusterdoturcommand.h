@@ -28,6 +28,7 @@ public:
 	string getCommandName()			{ return "cluster.classic";		}
 	string getCommandCategory()		{ return "Clustering";			}
 	string getHelpString();	
+	string getCitation() { return "http://www.mothur.org/wiki/Cluster.classic"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	
