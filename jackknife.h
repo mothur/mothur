@@ -23,6 +23,7 @@ public:
 	Jackknife() : Calculator("jackknife", 3, false) {	getAMatrix(); };
 	EstOutput getValues(SAbundVector*);
 	EstOutput getValues(vector<SharedRAbundVector*>) {return data;};
+	string getCitation() { return "http://www.mothur.org/wiki/Jackknife"; }
 
 private:
 	static const int maxOrder = 30;

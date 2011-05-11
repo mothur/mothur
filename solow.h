@@ -23,6 +23,7 @@ public:
 	Solow(int size) : f(size), Calculator("solow", 1, false) {};
 	EstOutput getValues(SAbundVector*);	
 	EstOutput getValues(vector<SharedRAbundVector*>) {return data;};
+	string getCitation() { return "http://www.mothur.org/wiki/Solow"; }
 private:
 	int f;
 };

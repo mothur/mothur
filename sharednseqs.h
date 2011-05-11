@@ -23,6 +23,7 @@ public:
 		data[0] = (double)shared[0]->getNumSeqs() + (double)shared[1]->getNumSeqs();
 		return data;
 	}
+	string getCitation() { return "http://www.mothur.org/wiki/Sharednseqs"; }
 };
 
 /***********************************************************************/

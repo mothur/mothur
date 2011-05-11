@@ -740,7 +740,6 @@
 		A7E9B7E812D37EC400DA6239 /* shannoneven.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shannoneven.h; sourceTree = "<group>"; };
 		A7E9B7E912D37EC400DA6239 /* sharedace.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedace.cpp; sourceTree = "<group>"; };
 		A7E9B7EA12D37EC400DA6239 /* sharedace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedace.h; sourceTree = "<group>"; };
-		A7E9B7EB12D37EC400DA6239 /* sharedanderberg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedanderberg.h; sourceTree = "<group>"; };
 		A7E9B7EC12D37EC400DA6239 /* sharedanderbergs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedanderbergs.cpp; sourceTree = "<group>"; };
 		A7E9B7ED12D37EC400DA6239 /* sharedanderbergs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedanderbergs.h; sourceTree = "<group>"; };
 		A7E9B7EE12D37EC400DA6239 /* sharedbraycurtis.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedbraycurtis.cpp; sourceTree = "<group>"; };
@@ -1338,7 +1337,6 @@
 				A7E9B7E812D37EC400DA6239 /* shannoneven.h */,
 				A7E9B7E912D37EC400DA6239 /* sharedace.cpp */,
 				A7E9B7EA12D37EC400DA6239 /* sharedace.h */,
-				A7E9B7EB12D37EC400DA6239 /* sharedanderberg.h */,
 				A7E9B7EC12D37EC400DA6239 /* sharedanderbergs.cpp */,
 				A7E9B7ED12D37EC400DA6239 /* sharedanderbergs.h */,
 				A7E9B7EE12D37EC400DA6239 /* sharedbraycurtis.cpp */,

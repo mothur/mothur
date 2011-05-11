@@ -28,7 +28,7 @@ public:
 	string getCommandName()			{ return "dist.seqs";			}
 	string getCommandCategory()		{ return "Sequence Processing";	}
 	string getHelpString();	
-	string getCitation() { return "http://www.mothur.org/wiki/Dist.seqs"; }
+	string getCitation() { return "Schloss PD (2010). The effects of alignment quality, distance calculation method, sequence filtering, and region on the analysis of 16S rRNA gene-based studies. PLoS Comput Biol 6: e1000844. \nhttp://www.mothur.org/wiki/Dist.seqs"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

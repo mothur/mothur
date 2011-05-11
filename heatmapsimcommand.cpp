@@ -223,6 +223,11 @@ HeatMapSimCommand::HeatMapSimCommand(string option)  {
 				if (calc == "default")  {  calc = "jest-thetayc";  }
 			}
 			m->splitAtDash(calc, Estimators);
+			if (m->inUsersGroups("citation", Estimators)) { 
+				ValidCalculators validCalc; validCalc.printCitations(Estimators); 
+				//remove citation from list of calcs
+				for (int i = 0; i < Estimators.size(); i++) { if (Estimators[i] == "citation") {  Estimators.erase(Estimators.begin()+i); break; } }
+			}
 				
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = ""; }

@@ -17,6 +17,7 @@
 class eachGapDist : public Dist {
 	
 public:
+	
 	void calcDist(Sequence A, Sequence B){		
 		int diff = 0;
 		int length = 0;

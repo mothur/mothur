@@ -44,6 +44,7 @@ public:
 
 		return data;
 	}
+	string getCitation() { return "http://www.mothur.org/wiki/Nseqs"; }
 };
 
 /***********************************************************************/

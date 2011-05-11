@@ -21,6 +21,7 @@ public:
 	virtual ~Dist() {}
 	virtual void calcDist(Sequence, Sequence) = 0;
 	double getDist()	{	return dist;	}
+
 protected:
 	double dist;
 	MothurOut* m;

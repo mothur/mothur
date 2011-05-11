@@ -28,7 +28,7 @@ public:
 	string getCommandName()			{ return "chimera.check";		}
 	string getCommandCategory()		{ return "Sequence Processing"; }
 	string getHelpString();	
-	string getCitation() { return "CHIMERA_CHECK version 2.7 written by Niels Larsen. http://www.mothur.org/wiki/Chimera.check"; }
+	string getCitation() { return "CHIMERA_CHECK version 2.7 written by Niels Larsen (http://wdcm.nig.ac.jp/RDP/docs/chimera_doc.html) \nhttp://www.mothur.org/wiki/Chimera.check"; }
 
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

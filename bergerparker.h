@@ -22,6 +22,7 @@ public:
 	BergerParker() : Calculator("bergerparker", 1, false) {};
 	EstOutput getValues(SAbundVector*);
 	EstOutput getValues(vector<SharedRAbundVector*>) {return data;};
+	string getCitation() { return "http://www.mothur.org/wiki/Bergerparker"; }
 
 private:
 };

@@ -30,7 +30,7 @@ public:
 	string getCommandName()			{ return "collect.shared";			}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
 	string getHelpString();	
-	string getCitation() { return "http://www.mothur.org/wiki/Collect.shared"; }
+	string getCitation() { return "Schloss PD, Handelsman J (2006). Introducing SONS, A tool that compares the membership of microbial communities. Appl Environ Microbiol 72: 6773-9. \nhttp://www.mothur.org/wiki/Collect.shared"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

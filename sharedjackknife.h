@@ -23,6 +23,7 @@ public:
 	SharedJackknife() : numGroups(-1), callCount(0), count(0), currentCallDone(true), Calculator("sharedjackknife", 3, false) {};
 	EstOutput getValues(SAbundVector*) {return data;};
 	EstOutput getValues(vector<SharedRAbundVector*>);
+	string getCitation() { return "http://www.mothur.org/wiki/Sharedjackknife"; }
 	
 private:
 	int numGroups, callCount, count;

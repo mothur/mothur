@@ -27,7 +27,7 @@ public:
 	string getCommandName()			{ return "chimera.bellerophon";	}
 	string getCommandCategory()		{ return "Sequence Processing"; }
 	string getHelpString();	
-	string getCitation() { return "http://www.mothur.org/wiki/Chimera.bellerophon"; }
+	string getCitation() { return "Huber T, Faulkner G, Hugenholtz P (2004). Bellerophon: a program to detect chimeric sequences in multiple sequence alignments. Bioinformatics 20: 2317-9. \nhttp://www.mothur.org/wiki/Chimera.bellerophon"; }
 
 	
 	int execute(); 

@@ -23,6 +23,7 @@ public:
 	LogSD() : Calculator("logseries", 3, false) {};
 	EstOutput getValues(SAbundVector*);
 	EstOutput getValues(vector<SharedRAbundVector*>) {return data;};
+	string getCitation() { return "http://www.mothur.org/wiki/LogSeries"; }
 
 private:
 	double logS(double);

@@ -29,9 +29,8 @@ public:
 	string getCommandName()			{ return "chimera.pintail";		}
 	string getCommandCategory()		{ return "Sequence Processing"; }
 	string getHelpString();	
-	string getCitation() { return "At Least 1 in 20 16S rRNA Sequence Records Currently Held in the Public Repositories is Estimated To Contain Substantial Anomalies' paper by Kevin E. Ashelford 1, Nadia A. Chuzhanova 3, John C. Fry 1, Antonia J. Jones 2 and Andrew J. Weightman 1. http://www.mothur.org/wiki/Chimera.pintail"; }
+	string getCitation() { return "Ashelford KE, Chuzhanova NA, Fry JC, Jones AJ, Weightman AJ (2005). At least 1 in 20 16S rRNA sequence records currently held in public repositories is estimated to contain substantial anomalies. Appl Environ Microbiol 71: 7724-36. \nAshelford KE, Chuzhanova NA, Fry JC, Jones AJ, Weightman AJ (2006). New screening software shows that most recent large 16S rRNA gene clone libraries contain chimeras. Appl Environ Microbiol 72: 5734-41. \nhttp://www.mothur.org/wiki/Chimera.pintail"; }
 
-	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }		
 private:

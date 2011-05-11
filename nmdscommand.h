@@ -38,7 +38,7 @@ public:
 	string getCommandName()			{ return "nmds";					}
 	string getCommandCategory()		{ return "Hypothesis Testing";		}
 	string getHelpString();	
-	string getCitation() { return "Non-metric multidimensional scaling function using the majorization algorithm from Borg & Groenen 1997, Modern Multidimensional Scaling. http://www.mothur.org/wiki/Nmds"; }
+	string getCitation() { return "Borg, Groenen (1997). Non-metric multidimensional scaling function using the majorization algorithm, in Modern Multidimensional Scaling. Ed. T.F. Cox and M.A.A. Cox. Chapman and Hall. \nhttp://www.mothur.org/wiki/Nmds"; }
 	
 	int execute();
 	void help() { m->mothurOut(getHelpString()); }
