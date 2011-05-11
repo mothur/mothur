@@ -18,6 +18,7 @@ public:
 	BrayCurtis() :  Calculator("braycurtis", 1, false) {};
 	EstOutput getValues(SAbundVector*) {return data;};
 	EstOutput getValues(vector<SharedRAbundVector*>);
+	string getCitation() { return "http://www.mothur.org/wiki/Braycurtis"; }
 private:
 	
 };

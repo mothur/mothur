@@ -23,6 +23,7 @@ public:
 	Shannon() : Calculator("shannon", 3, false) {};
 	EstOutput getValues(SAbundVector* rank);
 	EstOutput getValues(vector<SharedRAbundVector*>) {return data;};
+	string getCitation() { return "http://www.mothur.org/wiki/Shannon"; }
 private:
 	
 };

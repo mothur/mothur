@@ -25,7 +25,7 @@ public:
 	string getCommandName()			{ return "metastats";				}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
 	string getHelpString();	
-	string getCitation() { return "White, J.R., Nagarajan, N. & Pop, M. Statistical methods for detecting differentially abundant features in clinical metagenomic samples. PLoS Comput Biol 5, e1000352 (2009). http://www.mothur.org/wiki/Metastats"; }
+	string getCitation() { return "White JR, Nagarajan N, Pop M (2009). Statistical methods for detecting differentially abundant features in clinical metagenomic samples. PLoS Comput Biol 5: e1000352. \nhttp://www.mothur.org/wiki/Metastats"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

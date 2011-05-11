@@ -32,7 +32,7 @@ public:
 	string getCommandName()			{ return "mgcluster";	}
 	string getCommandCategory()		{ return "Clustering";	}
 	string getHelpString();	
-	string getCitation() { return "http://www.mothur.org/wiki/Mgcluster"; }
+	string getCitation() { return "Schloss PD, Handelsman J (2008). A statistical toolbox for metagenomics. BMC Bioinformatics 9: 34. \nhttp://www.mothur.org/wiki/Mgcluster"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

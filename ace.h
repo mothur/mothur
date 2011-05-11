@@ -23,6 +23,7 @@ public:
 	Ace(int n) : abund(n), Calculator("ace", 3, false) {};
 	EstOutput getValues(SAbundVector*);
 	EstOutput getValues(vector<SharedRAbundVector*>) {return data;};
+	string getCitation() { return "http://www.mothur.org/wiki/Ace"; }
 private:
 	int abund;
 };

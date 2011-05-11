@@ -144,6 +144,11 @@ BootSharedCommand::BootSharedCommand(string option) {
 				 if (calc == "default")  {  calc = "jclass-thetayc";  }
 			}
 			m->splitAtDash(calc, Estimators);
+			if (m->inUsersGroups("citation", Estimators)) { 
+				ValidCalculators validCalc; validCalc.printCitations(Estimators); 
+				//remove citation from list of calcs
+				for (int i = 0; i < Estimators.size(); i++) { if (Estimators[i] == "citation") {  Estimators.erase(Estimators.begin()+i); break; } }
+			}
 
 			string temp;
 			temp = validParameter.validFile(parameters, "iters", false);  if (temp == "not found") { temp = "1000"; }

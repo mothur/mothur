@@ -21,6 +21,7 @@ public:
 	KSTest() : Calculator("kstest", 3, false) {};
 	EstOutput getValues(SAbundVector*) {return data;};
 	EstOutput getValues(vector<SharedRAbundVector*>);
+	string getCitation() { return "http://www.mothur.org/wiki/Kstest"; }
 private:
 };
 

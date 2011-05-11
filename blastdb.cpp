@@ -128,9 +128,15 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n, int minPerID) {
 		//	wordsize used in megablast.  I'm sure we're sacrificing accuracy for speed, but anyother way would take way too
 		//	long.  With this setting, it seems comparable in speed to the suffix tree approach.
 //7000004128189528left	0	100		66	0	0	1	66	61	126	1e-31	 131	
+		string blastCommand;
+		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			blastCommand = path + "blast/bin/megablast -e 1e-10 -d " + dbFileName + " -m 8 -b " + toString(n) + " -v " + toString(n); //-W 28 -p blastn
+			blastCommand += (" -i " + (queryFileName+seq->getName()) + " -o " + blastFileName+seq->getName());
+		#else
+			blastCommand = path + "blast\\bin\\megablast -e 1e-10 -d " + dbFileName + " -m 8 -b " + toString(n) + " -v " + toString(n); //-W 28 -p blastn
+			blastCommand += (" -i " + (queryFileName+seq->getName()) + " -o " + blastFileName+seq->getName());
+		#endif
 		
-		string blastCommand = path + "blast/bin/megablast -e 1e-10 -d " + dbFileName + " -m 8 -b " + toString(n) + " -v " + toString(n); //-W 28 -p blastn
-		blastCommand += (" -i " + (queryFileName+seq->getName()) + " -o " + blastFileName+seq->getName());
 		system(blastCommand.c_str());
 
 		ifstream m8FileHandle;
@@ -195,7 +201,13 @@ void BlastDB::generateDB() {
 		for (int i = 0; i < path.length(); i++) { tempPath[i] = tolower(path[i]); }
 		path = path.substr(0, (tempPath.find_last_of('m')));
 	
-		string formatdbCommand = path + "blast/bin/formatdb -p F -o T -i " + dbFileName;	//	format the database, -o option gives us the ability
+		string formatdbCommand;
+		
+		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			formatdbCommand = path + "blast/bin/formatdb -p F -o T -i " + dbFileName;	//	format the database, -o option gives us the ability
+		#else
+			formatdbCommand = path + "blast\\bin\\formatdb -p F -o T -i " + dbFileName;
+		#endif
 		system(formatdbCommand.c_str());								//	to get the right sequence names, i think. -p F
 																	//	option tells formatdb that seqs are DNA, not prot
 		//m->mothurOut("DONE."); m->mothurOutEndLine();	m->mothurOutEndLine(); cout.flush();

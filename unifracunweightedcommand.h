@@ -28,7 +28,7 @@ class UnifracUnweightedCommand : public Command {
 		string getCommandName()			{ return "unifrac.unweighted";		}
 		string getCommandCategory()		{ return "Hypothesis Testing";		}
 		string getHelpString();	
-		string getCitation() { return "http://www.mothur.org/wiki/Unifrac.unweighted"; }
+		string getCitation() { return "Lozupone C, Knight R (2005). UniFrac: a new phylogenetic method for comparing microbial communities. Appl Environ Microbiol 71: 8228-35. \nhttp://www.mothur.org/wiki/Unifrac.unweighted"; }
 	
 		int execute();
 		void help() { m->mothurOut(getHelpString()); }

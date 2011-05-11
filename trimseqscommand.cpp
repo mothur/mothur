@@ -798,7 +798,7 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
 
 int TrimSeqsCommand::setLines(string filename, string qfilename, vector<unsigned long int>& fastaFilePos, vector<unsigned long int>& qfileFilePos) {
 	try {
-		
+		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		//set file positions for fasta file
 		fastaFilePos = m->divideFile(filename, processors);
 		
@@ -871,6 +871,40 @@ int TrimSeqsCommand::setLines(string filename, string qfilename, vector<unsigned
 		qfileFilePos.push_back(size);
 		
 		return processors;
+		
+		#else
+		
+			fastaFilePos.push_back(0); qfileFilePos.push_back(0);
+			//get last file position of fastafile
+			FILE * pFile;
+			unsigned long int size;
+			
+			//get num bytes in file
+			pFile = fopen (filename.c_str(),"rb");
+			if (pFile==NULL) perror ("Error opening file");
+			else{
+				fseek (pFile, 0, SEEK_END);
+				size=ftell (pFile);
+				fclose (pFile);
+			}
+			fastaFilePos.push_back(size);
+			
+			//get last file position of fastafile
+			FILE * qFile;
+			
+			//get num bytes in file
+			qFile = fopen (qfilename.c_str(),"rb");
+			if (qFile==NULL) perror ("Error opening file");
+			else{
+				fseek (qFile, 0, SEEK_END);
+				size=ftell (qFile);
+				fclose (qFile);
+			}
+			qfileFilePos.push_back(size);
+		
+			return 1;
+		
+		#endif
 	}
 	catch(exception& e) {
 		m->errorOut(e, "TrimSeqsCommand", "setLines");

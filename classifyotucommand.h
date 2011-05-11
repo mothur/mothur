@@ -26,7 +26,7 @@ public:
 	string getCommandName()			{ return "classify.otu";		}
 	string getCommandCategory()		{ return "Phylotype Analysis";	}
 	string getHelpString();	
-	string getCitation() { return "http://www.mothur.org/wiki/Classify.otu"; }
+	string getCitation() { return "Schloss PD, Westcott SL (2011). Assessing and improving methods used in OTU-based approaches for 16S rRNA gene sequence analysis. Appl Environ Microbiol. \nhttp://www.mothur.org/wiki/Classify.otu"; }
 
 	
 	int execute(); 

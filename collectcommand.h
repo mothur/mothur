@@ -37,7 +37,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "collect.single";			}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
-	string getCitation() { return "http://www.mothur.org/wiki/Collect.single"; }
+	string getCitation() { return "Schloss PD, Handelsman J (2006). Introducing SONS, A tool that compares the membership of microbial communities. Appl Environ Microbiol 72: 6773-9. \nhttp://www.mothur.org/wiki/Collect.single"; }
 	string getHelpString();	
 	
 	int execute(); 

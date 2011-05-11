@@ -8,36 +8,214 @@
  */
 
 #include "validcalculator.h"
+#include "ace.h"
+#include "sobs.h"
+#include "nseqs.h"
+#include "chao1.h"
+#include "bootstrap.h"
+#include "simpson.h"
+#include "simpsoneven.h"
+#include "invsimpson.h"
+#include "npshannon.h"
+#include "shannon.h"
+#include "smithwilson.h"
+#include "heip.h"
+#include "shannoneven.h"
+#include "jackknife.h"
+#include "geom.h"
+#include "qstat.h"
+#include "logsd.h"
+#include "bergerparker.h"
+#include "bstick.h"
+#include "goodscoverage.h"
+#include "efron.h"
+#include "boneh.h"
+#include "solow.h"
+#include "shen.h"
+#include "coverage.h"
+#include "sharedsobscollectsummary.h"
+#include "sharedchao1.h"
+#include "sharedace.h"
+#include "sharedjabund.h"
+#include "sharedsorabund.h"
+#include "sharedjclass.h"
+#include "sharedsorclass.h"
+#include "sharedjest.h"
+#include "sharedsorest.h"
+#include "sharedthetayc.h"
+#include "sharedthetan.h"
+#include "sharedkstest.h"
+#include "whittaker.h"
+#include "sharednseqs.h"
+#include "sharedochiai.h"
+#include "sharedanderbergs.h"
+#include "sharedkulczynski.h"
+#include "sharedkulczynskicody.h"
+#include "sharedlennon.h"
+#include "sharedmorisitahorn.h"
+#include "sharedbraycurtis.h"
+#include "sharedjackknife.h"
+#include "whittaker.h"
+#include "odum.h"
+#include "canberra.h"
+#include "structeuclidean.h"
+#include "structchord.h"
+#include "hellinger.h"
+#include "manhattan.h"
+#include "structpearson.h"
+#include "soergel.h"
+#include "spearman.h"
+#include "structkulczynski.h"
+#include "structchi2.h"
+#include "speciesprofile.h"
+#include "hamming.h"
+#include "gower.h"
+#include "memchi2.h"
+#include "memchord.h"
+#include "memeuclidean.h"
+#include "mempearson.h"
+#include "sharedsobs.h"
+#include "sharednseqs.h"
+
 
 /********************************************************************/
 ValidCalculators::ValidCalculators() {
 	try {
-		 m = MothurOut::getInstance();
+		m = MothurOut::getInstance();
 		
-		 initialSingle();
-		 initialShared();
-		 initialRarefaction();
-		 initialSharedRarefact();
-		 initialSummary();
-		 initialSharedSummary();
-		 initialVennSingle();
-		 initialVennShared();
-		 initialTreeGroups();
-		 initialBoot();
-		 initialDistance();
-		 initialMatrix();
-		 initialHeat();
+		initialSingle();  
+		initialShared();
+		initialRarefaction();
+		initialSharedRarefact();
+		initialSummary();
+		initialSharedSummary();
+		initialVennSingle();
+		initialVennShared();
+		initialTreeGroups();
+		initialBoot();
+		initialDistance();
+		initialMatrix();
+		initialHeat();
+		
+		for(it = single.begin(); it != single.end(); it++) { allCalcs.insert(it->first); } 
+		for(it = shared.begin(); it != shared.end(); it++) { allCalcs.insert(it->first); } 
+		for(it = rarefaction.begin(); it != rarefaction.end(); it++) { allCalcs.insert(it->first); } 
+		for(it = summary.begin(); it != summary.end(); it++) { allCalcs.insert(it->first); } 
+		for(it = sharedrarefaction.begin(); it != sharedrarefaction.end(); it++) { allCalcs.insert(it->first); } 
+		for(it = sharedsummary.begin(); it != sharedsummary.end(); it++) { allCalcs.insert(it->first); } 
+		for(it = vennsingle.begin(); it != vennsingle.end(); it++) { allCalcs.insert(it->first); } 
+		for(it = vennshared.begin(); it != vennshared.end(); it++) { allCalcs.insert(it->first); } 
+		for(it = treegroup.begin(); it != treegroup.end(); it++) { allCalcs.insert(it->first); } 
+		for(it = matrix.begin(); it != matrix.end(); it++) { allCalcs.insert(it->first); } 
+		for(it = heat.begin(); it != heat.end(); it++) { allCalcs.insert(it->first); } 
+		for(it = boot.begin(); it != boot.end(); it++) { allCalcs.insert(it->first); } 
+		for(it = distance.begin(); it != distance.end(); it++) { allCalcs.insert(it->first); } 
+		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ValidCalculator", "ValidCalculator");
 		exit(1);
 	}
 }
-
 /********************************************************************/
-
 ValidCalculators::~ValidCalculators() {}
-
+/********************************************************************/
+void ValidCalculators::printCitations(vector<string> Estimators) {
+	try {
+		
+		for (int i = 0; i < Estimators.size(); i++) {
+			//is this citation, do nothing
+			if ((Estimators[i] == "citation") || (Estimators[i] == "default") || (Estimators[i] == "eachgap") || (Estimators[i] == "nogaps") || (Estimators[i] == "onegap")) {}
+			//is this a valid calculator
+			else if (allCalcs.count(Estimators[i]) != 0) {
+				if (Estimators[i] == "sobs") { Calculator* temp = new Sobs(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
+				}else if (Estimators[i] == "chao") { Calculator* temp = new Chao1(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
+				}else if (Estimators[i] == "nseqs") { Calculator* temp = new NSeqs(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
+				}else if (Estimators[i] == "coverage") { Calculator* temp = new Coverage(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
+				}else if (Estimators[i] == "ace") { Calculator* temp = new Ace(10); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
+				
+				}else if (Estimators[i] == "jack") { Calculator* temp = new Jackknife(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
+				}else if (Estimators[i] == "shannon") { Calculator* temp = new Shannon(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
+				}else if (Estimators[i] == "shannoneven") { Calculator* temp = new ShannonEven(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
+				}else if (Estimators[i] == "npshannon") { Calculator* temp = new NPShannon(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
+				}else if (Estimators[i] == "heip") { Calculator* temp = new Heip(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp; 
+				
+				}else if (Estimators[i] == "smithwilson") { Calculator* temp = new SmithWilson(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp; 
+				}else if (Estimators[i] == "simpson") { Calculator* temp = new Simpson(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp; 
+				}else if (Estimators[i] == "simpsoneven") { Calculator* temp = new SimpsonEven(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp; 
+				}else if (Estimators[i] == "invsimpson") { Calculator* temp = new InvSimpson(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp; 
+				}else if (Estimators[i] == "bootstrap") { Calculator* temp = new Bootstrap(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp; 
+				
+				}else if (Estimators[i] == "geometric") { Calculator* temp = new Geom(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp; 
+				}else if (Estimators[i] == "qstat") { Calculator* temp = new QStat(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp; 
+				}else if (Estimators[i] == "logseries") { Calculator* temp = new LogSD(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp; 
+				}else if (Estimators[i] == "bergerparker") { Calculator* temp = new BergerParker(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp; 
+				}else if (Estimators[i] == "bstick") { Calculator* temp = new BStick(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp; 
+				
+				}else if (Estimators[i] == "goodscoverage") { Calculator* temp = new GoodsCoverage(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp; 
+				}else if (Estimators[i] == "efron") { Calculator* temp = new Efron(10); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp; 
+				}else if (Estimators[i] == "boneh") { Calculator* temp = new Boneh(10); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;  
+				}else if (Estimators[i] == "solow") { Calculator* temp = new Solow(10); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp; 
+				}else if (Estimators[i] == "shen") { Calculator* temp = new Shen(10, 10); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp; 
+				
+				}else if (Estimators[i] == "sharedchao") { Calculator* temp = new SharedChao1(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp; 
+				}else if (Estimators[i] == "sharedsobs") { Calculator* temp = new SharedSobsCS(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp; 
+				}else if (Estimators[i] == "sharedace") { Calculator* temp = new SharedAce(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp; 
+				}else if (Estimators[i] == "jabund") { 	Calculator* temp = new JAbund(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp; 
+				}else if (Estimators[i] == "sorabund") { Calculator* temp = new SorAbund(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp; 
+				
+				}else if (Estimators[i] == "jclass") { Calculator* temp = new Jclass(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp; 
+				}else if (Estimators[i] == "sorclass") { Calculator* temp = new SorClass(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;  
+				}else if (Estimators[i] == "jest") { Calculator* temp = new Jest(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp; 
+				}else if (Estimators[i] == "sorest") { Calculator* temp = new SorEst(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp; 
+				}else if (Estimators[i] == "thetayc") { Calculator* temp = new ThetaYC(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp; 
+				
+				}else if (Estimators[i] == "thetan") { Calculator* temp = new ThetaN(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp; 
+				}else if (Estimators[i] == "kstest") { Calculator* temp = new KSTest(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp; 
+				}else if (Estimators[i] == "whittaker") { Calculator* temp = new Whittaker(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp; 
+				}else if (Estimators[i] == "sharednseqs") { Calculator* temp = new SharedNSeqs(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;  
+				}else if (Estimators[i] == "ochiai") { Calculator* temp = new Ochiai(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp; 
+				
+				}else if (Estimators[i] == "anderberg") { Calculator* temp = new Anderberg(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp; 
+				}else if (Estimators[i] == "skulczynski") { Calculator* temp = new Kulczynski(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp; 
+				}else if (Estimators[i] == "kulczynskicody") { Calculator* temp = new KulczynskiCody(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp; 
+				}else if (Estimators[i] == "lennon") { Calculator* temp = new Lennon(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
+				}else if (Estimators[i] == "morisitahorn") { Calculator* temp = new MorHorn(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
+				
+				}else if (Estimators[i] == "braycurtis") { Calculator* temp = new BrayCurtis(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
+				}else if (Estimators[i] == "odum") { Calculator* temp = new Odum(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
+				}else if (Estimators[i] == "canberra") { Calculator* temp = new Canberra(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
+				}else if (Estimators[i] == "structeuclidean") { Calculator* temp = new StructEuclidean(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
+				}else if (Estimators[i] == "structchord") { Calculator* temp = new StructChord(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
+				
+				}else if (Estimators[i] == "hellinger") { Calculator* temp = new Hellinger(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
+				}else if (Estimators[i] == "manhattan") { Calculator* temp = new Manhattan(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
+				}else if (Estimators[i] == "structpearson") { Calculator* temp = new StructPearson(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
+				}else if (Estimators[i] == "soergel") { Calculator* temp = new Soergel(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
+				}else if (Estimators[i] == "spearman") { Calculator* temp = new Spearman(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
+				
+				}else if (Estimators[i] == "structkulczynski") { Calculator* temp = new StructKulczynski(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
+				}else if (Estimators[i] == "speciesprofile") { Calculator* temp = new SpeciesProfile(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
+				}else if (Estimators[i] == "hamming") { Calculator* temp = new Hamming(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
+				}else if (Estimators[i] == "structchi2") { Calculator* temp = new StructChi2(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
+				}else if (Estimators[i] == "gower") { Calculator* temp = new Gower(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
+				
+				}else if (Estimators[i] == "memchi2") { Calculator* temp = new MemChi2(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
+				}else if (Estimators[i] == "memchord") { Calculator* temp = new MemChord(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
+				}else if (Estimators[i] == "memeuclidean") { Calculator* temp = new MemEuclidean(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
+				}else if (Estimators[i] == "mempearson") { Calculator* temp = new MemPearson(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
+				}else if (Estimators[i] == "sharedobserved") { Calculator* temp = new SharedSobs(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
+				}else if (Estimators[i] == "kulczynski") { Calculator* temp = new Kulczynski(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
+				}else { m->mothurOut("[ERROR]: Missing else if for " + Estimators[i] + " in printCitations."); m->mothurOutEndLine(); }
+			}else { m->mothurOut(Estimators[i] + " is not a valid calculator, no citation will be given."); m->mothurOutEndLine(); }
+		}
+			
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ValidCalculator", "printCitations");
+		exit(1);
+	}
+}
 /********************************************************************/
 
 bool ValidCalculators::isValidCalculator(string parameter, string calculator) {

@@ -183,6 +183,11 @@ VennCommand::VennCommand(string option)  {
 				}
 			}
 			m->splitAtDash(calc, Estimators);
+			if (m->inUsersGroups("citation", Estimators)) { 
+				ValidCalculators validCalc; validCalc.printCitations(Estimators); 
+				//remove citation from list of calcs
+				for (int i = 0; i < Estimators.size(); i++) { if (Estimators[i] == "citation") {  Estimators.erase(Estimators.begin()+i); break; } }
+			}
 			
 			string temp;
 			temp = validParameter.validFile(parameters, "abund", false);		if (temp == "not found") { temp = "10"; }

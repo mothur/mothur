@@ -24,6 +24,7 @@ class SharedChao1 : public Calculator  {
 		SharedChao1() : Calculator("sharedchao", 1, true) {};
 		EstOutput getValues(SAbundVector*) {return data;};
 		EstOutput getValues(vector<SharedRAbundVector*>);
+		string getCitation() { return "http://www.mothur.org/wiki/Sharedchao"; }
 	private:
 		IntNode* f1root;
 		IntNode* f2root;

@@ -102,6 +102,7 @@ int GetCommandInfoCommand::execute(){
 				
 				//general info
 				out << "commandName=" << thisCommand->getCommandName() << endl;
+				//cout << thisCommand->getCommandName() << " current citation = " << thisCommand->getCitation() << endl;
 				out << "commandCategory=" << thisCommand->getCommandCategory() << endl;
 				
 				//remove /n from help string since gui reads line by line

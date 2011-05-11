@@ -33,6 +33,8 @@ public:
 	virtual int getCols()		{	return cols;	}
 	virtual bool getMultiple()  {   return multiple;   }
 	virtual bool getNeedsAll()  {   return needsAll;   }
+	virtual string getCitation() = 0;
+	void citation() { m->mothurOut(getCitation()); m->mothurOutEndLine(); }
 protected:
 	MothurOut* m;
 	EstOutput data;

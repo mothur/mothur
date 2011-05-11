@@ -25,6 +25,7 @@ class ValidCalculators {
 		bool isValidCalculator(string, string);
 		void printCalc(string, ostream&);
 		string printCalc(string);
+		void printCitations(vector<string>);
 		
 	private:
 		map<string, string> single;
@@ -41,6 +42,7 @@ class ValidCalculators {
 		map<string, string> boot;
 		map<string, string> distance;
 		map<string, string>::iterator it;
+		set<string> allCalcs;
 		
 		void initialSingle();
 		void initialShared();

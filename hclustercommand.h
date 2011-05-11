@@ -39,7 +39,7 @@ public:
 	string getCommandName()			{ return "hcluster";	}
 	string getCommandCategory()		{ return "Clustering";	}
 	string getHelpString();	
-	string getCitation() { return "http://www.mothur.org/wiki/Hcluster"; }
+	string getCitation() { return "Sun Y, Cai Y, Liu L, Yu F, Farrell ML, Mckendree W, Farmerie W (2009). ESPRIT: estimating species richness using large collections of 16S rRNA pyrosequences. Nucleic Acids Res 37: e76. \nhttp://www.mothur.org/wiki/Hcluster"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

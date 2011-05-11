@@ -27,7 +27,7 @@ public:
 	string getCommandName()			{ return "rarefaction.single";		}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
 	string getHelpString();	
-	string getCitation() { return "http://www.mothur.org/wiki/Rarefaction.single"; }
+	string getCitation() { return "Magurran AE (2004). Measuring biological diversity. Blackwell Pub.: Malden, Ma. \nhttp://www.mothur.org/wiki/Rarefaction.single"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

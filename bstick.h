@@ -21,7 +21,7 @@ public:
 	BStick() : Calculator("bstick", 3, false) {};
 	EstOutput getValues(SAbundVector*);
 	EstOutput getValues(vector<SharedRAbundVector*>) {return data;};
-
+	string getCitation() { return "http://www.mothur.org/wiki/Bstick"; }
 private:
 	double invSum(int, double);
 	RAbundVector getRAbundVector(SAbundVector*);
