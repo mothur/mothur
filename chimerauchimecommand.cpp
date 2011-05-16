@@ -380,11 +380,12 @@ int ChimeraUchimeCommand::execute(){
 			
 			if (m->control_pressed) {  for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}  return 0;	}
 			
+			int numSeqs = 0;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-			if(processors == 1){ driver(outputFileName, fastaFileNames[s], accnosFileName); }
-			else{	createProcesses(outputFileName, fastaFileNames[s], accnosFileName); }
+			if(processors == 1){ numSeqs = driver(outputFileName, fastaFileNames[s], accnosFileName); }
+			else{	numSeqs = createProcesses(outputFileName, fastaFileNames[s], accnosFileName); }
 #else
-			driver(outputFileName, fastaFileNames[s], accnosFileName);
+			numSeqs = driver(outputFileName, fastaFileNames[s], accnosFileName);
 #endif
 			if (m->control_pressed) { for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} return 0; }
 
@@ -392,7 +393,7 @@ int ChimeraUchimeCommand::execute(){
 			outputNames.push_back(outputFileName); outputTypes["chimera"].push_back(outputFileName);
 			outputNames.push_back(accnosFileName); outputTypes["accnos"].push_back(accnosFileName);
 			
-			m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check your sequences.");	m->mothurOutEndLine();
+			m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.");	m->mothurOutEndLine();
 		}
 		
 		//set accnos file as new current accnosfile
@@ -454,7 +455,7 @@ int ChimeraUchimeCommand::driver(string outputFName, string filename, string acc
 		
 		char** uchimeParameters;
 		uchimeParameters = new char*[cPara.size()];
-		for (int i = 0; i < cPara.size(); i++) {  uchimeParameters[i] = cPara[i]; cout << cPara[i]; } cout << endl;
+		for (int i = 0; i < cPara.size(); i++) {  uchimeParameters[i] = cPara[i];  } 
 		int numArgs = cPara.size();
 		
 		uchime_main(numArgs, uchimeParameters); 
