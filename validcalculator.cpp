@@ -177,7 +177,7 @@ void ValidCalculators::printCitations(vector<string> Estimators) {
 				}else if (Estimators[i] == "ochiai") { Calculator* temp = new Ochiai(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp; 
 				
 				}else if (Estimators[i] == "anderberg") { Calculator* temp = new Anderberg(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp; 
-				}else if (Estimators[i] == "skulczynski") { Calculator* temp = new Kulczynski(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp; 
+				}else if (Estimators[i] == "kulczynski") { Calculator* temp = new Kulczynski(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp; 
 				}else if (Estimators[i] == "kulczynskicody") { Calculator* temp = new KulczynskiCody(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp; 
 				}else if (Estimators[i] == "lennon") { Calculator* temp = new Lennon(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
 				}else if (Estimators[i] == "morisitahorn") { Calculator* temp = new MorHorn(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;

@@ -605,6 +605,9 @@ int ChimeraUchimeCommand::createProcesses(string outputFileName, string filename
 			remove((accnos + toString(processIDS[i]) + ".temp").c_str());
 		}
 #endif		
+		//get rid of the file pieces.
+		for (int i = 0; i < files.size(); i++) { remove(files[i].c_str()); }
+		
 		return num;	
 	}
 	catch(exception& e) {

@@ -15,6 +15,29 @@
 		A71CB160130B04A2001E7287 /* anosimcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A71CB15E130B04A2001E7287 /* anosimcommand.cpp */; };
 		A71FE12C12EDF72400963CA7 /* mergegroupscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A71FE12B12EDF72400963CA7 /* mergegroupscommand.cpp */; };
 		A727864412E9E28C00F86ABA /* removerarecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A727864312E9E28C00F86ABA /* removerarecommand.cpp */; };
+		A74D3687137DAB8300332B0C /* addtargets2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D3655137DAB8300332B0C /* addtargets2.cpp */; };
+		A74D3688137DAB8400332B0C /* alignchime.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D3656137DAB8300332B0C /* alignchime.cpp */; };
+		A74D3689137DAB8400332B0C /* alignchimel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D3657137DAB8300332B0C /* alignchimel.cpp */; };
+		A74D368A137DAB8400332B0C /* alnparams.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D365A137DAB8300332B0C /* alnparams.cpp */; };
+		A74D368B137DAB8400332B0C /* alpha.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D365C137DAB8300332B0C /* alpha.cpp */; };
+		A74D368C137DAB8400332B0C /* alpha2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D365E137DAB8300332B0C /* alpha2.cpp */; };
+		A74D368D137DAB8400332B0C /* fractid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D3664137DAB8300332B0C /* fractid.cpp */; };
+		A74D368E137DAB8400332B0C /* getparents.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D3665137DAB8300332B0C /* getparents.cpp */; };
+		A74D368F137DAB8400332B0C /* globalalign2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D3666137DAB8300332B0C /* globalalign2.cpp */; };
+		A74D3690137DAB8400332B0C /* make3way.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D366A137DAB8300332B0C /* make3way.cpp */; };
+		A74D3691137DAB8400332B0C /* mx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D366B137DAB8300332B0C /* mx.cpp */; };
+		A74D3692137DAB8400332B0C /* myutils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D366E137DAB8300332B0C /* myutils.cpp */; };
+		A74D3693137DAB8400332B0C /* path.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D3672137DAB8300332B0C /* path.cpp */; };
+		A74D3694137DAB8400332B0C /* searchchime.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D3674137DAB8300332B0C /* searchchime.cpp */; };
+		A74D3695137DAB8400332B0C /* seqdb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D3676137DAB8300332B0C /* seqdb.cpp */; };
+		A74D3696137DAB8400332B0C /* setnucmx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D3678137DAB8300332B0C /* setnucmx.cpp */; };
+		A74D3697137DAB8400332B0C /* sfasta.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D3679137DAB8300332B0C /* sfasta.cpp */; };
+		A74D3698137DAB8400332B0C /* tracebackbit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D367F137DAB8300332B0C /* tracebackbit.cpp */; };
+		A74D3699137DAB8400332B0C /* uchime_main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D3681137DAB8300332B0C /* uchime_main.cpp */; };
+		A74D369A137DAB8400332B0C /* usort.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D3683137DAB8300332B0C /* usort.cpp */; };
+		A74D369B137DAB8400332B0C /* viterbifast.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D3684137DAB8300332B0C /* viterbifast.cpp */; };
+		A74D369C137DAB8400332B0C /* writechhit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D3686137DAB8300332B0C /* writechhit.cpp */; };
+		A74D36B8137DAFAA00332B0C /* chimerauchimecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D36B7137DAFAA00332B0C /* chimerauchimecommand.cpp */; };
 		A75790591301749D00A30DAB /* homovacommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A75790581301749D00A30DAB /* homovacommand.cpp */; };
 		A778FE6B134CA6CA00C0BA33 /* getcommandinfocommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A778FE6A134CA6CA00C0BA33 /* getcommandinfocommand.cpp */; };
 		A799F5B91309A3E000AEEFA0 /* makefastqcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A799F5B81309A3E000AEEFA0 /* makefastqcommand.cpp */; };
@@ -323,6 +346,58 @@
 		A71FE12B12EDF72400963CA7 /* mergegroupscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mergegroupscommand.cpp; sourceTree = "<group>"; };
 		A727864212E9E28C00F86ABA /* removerarecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = removerarecommand.h; sourceTree = "<group>"; };
 		A727864312E9E28C00F86ABA /* removerarecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = removerarecommand.cpp; sourceTree = "<group>"; };
+		A74D3655137DAB8300332B0C /* addtargets2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = addtargets2.cpp; sourceTree = "<group>"; };
+		A74D3656137DAB8300332B0C /* alignchime.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = alignchime.cpp; sourceTree = "<group>"; };
+		A74D3657137DAB8300332B0C /* alignchimel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = alignchimel.cpp; sourceTree = "<group>"; };
+		A74D3658137DAB8300332B0C /* allocs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = allocs.h; sourceTree = "<group>"; };
+		A74D3659137DAB8300332B0C /* alnheuristics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alnheuristics.h; sourceTree = "<group>"; };
+		A74D365A137DAB8300332B0C /* alnparams.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = alnparams.cpp; sourceTree = "<group>"; };
+		A74D365B137DAB8300332B0C /* alnparams.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alnparams.h; sourceTree = "<group>"; };
+		A74D365C137DAB8300332B0C /* alpha.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = alpha.cpp; sourceTree = "<group>"; };
+		A74D365D137DAB8300332B0C /* alpha.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alpha.h; sourceTree = "<group>"; };
+		A74D365E137DAB8300332B0C /* alpha2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = alpha2.cpp; sourceTree = "<group>"; };
+		A74D365F137DAB8300332B0C /* chainer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chainer.h; sourceTree = "<group>"; };
+		A74D3660137DAB8300332B0C /* chime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chime.h; sourceTree = "<group>"; };
+		A74D3661137DAB8300332B0C /* diagbox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = diagbox.h; sourceTree = "<group>"; };
+		A74D3662137DAB8300332B0C /* dp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dp.h; sourceTree = "<group>"; };
+		A74D3663137DAB8300332B0C /* evalue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = evalue.h; sourceTree = "<group>"; };
+		A74D3664137DAB8300332B0C /* fractid.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = fractid.cpp; sourceTree = "<group>"; };
+		A74D3665137DAB8300332B0C /* getparents.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getparents.cpp; sourceTree = "<group>"; };
+		A74D3666137DAB8300332B0C /* globalalign2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = globalalign2.cpp; sourceTree = "<group>"; };
+		A74D3667137DAB8300332B0C /* help.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = help.h; sourceTree = "<group>"; };
+		A74D3668137DAB8300332B0C /* hsp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hsp.h; sourceTree = "<group>"; };
+		A74D3669137DAB8300332B0C /* hspfinder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hspfinder.h; sourceTree = "<group>"; };
+		A74D366A137DAB8300332B0C /* make3way.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = make3way.cpp; sourceTree = "<group>"; };
+		A74D366B137DAB8300332B0C /* mx.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mx.cpp; sourceTree = "<group>"; };
+		A74D366C137DAB8300332B0C /* mx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mx.h; sourceTree = "<group>"; };
+		A74D366D137DAB8300332B0C /* myopts.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = myopts.h; sourceTree = "<group>"; };
+		A74D366E137DAB8300332B0C /* myutils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = myutils.cpp; sourceTree = "<group>"; };
+		A74D366F137DAB8300332B0C /* myutils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = myutils.h; sourceTree = "<group>"; };
+		A74D3670137DAB8300332B0C /* orf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = orf.h; sourceTree = "<group>"; };
+		A74D3671137DAB8300332B0C /* out.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = out.h; sourceTree = "<group>"; };
+		A74D3672137DAB8300332B0C /* path.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = path.cpp; sourceTree = "<group>"; };
+		A74D3673137DAB8300332B0C /* path.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = path.h; sourceTree = "<group>"; };
+		A74D3674137DAB8300332B0C /* searchchime.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = searchchime.cpp; sourceTree = "<group>"; };
+		A74D3675137DAB8300332B0C /* seq.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = seq.h; sourceTree = "<group>"; };
+		A74D3676137DAB8300332B0C /* seqdb.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = seqdb.cpp; sourceTree = "<group>"; };
+		A74D3677137DAB8300332B0C /* seqdb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = seqdb.h; sourceTree = "<group>"; };
+		A74D3678137DAB8300332B0C /* setnucmx.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = setnucmx.cpp; sourceTree = "<group>"; };
+		A74D3679137DAB8300332B0C /* sfasta.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sfasta.cpp; sourceTree = "<group>"; };
+		A74D367A137DAB8300332B0C /* sfasta.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sfasta.h; sourceTree = "<group>"; };
+		A74D367B137DAB8300332B0C /* svnmods.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = svnmods.h; sourceTree = "<group>"; };
+		A74D367C137DAB8300332B0C /* svnversion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = svnversion.h; sourceTree = "<group>"; };
+		A74D367D137DAB8300332B0C /* timers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = timers.h; sourceTree = "<group>"; };
+		A74D367E137DAB8300332B0C /* timing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = timing.h; sourceTree = "<group>"; };
+		A74D367F137DAB8300332B0C /* tracebackbit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tracebackbit.cpp; sourceTree = "<group>"; };
+		A74D3680137DAB8300332B0C /* uc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uc.h; sourceTree = "<group>"; };
+		A74D3681137DAB8300332B0C /* uchime_main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uchime_main.cpp; sourceTree = "<group>"; };
+		A74D3682137DAB8300332B0C /* ultra.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ultra.h; sourceTree = "<group>"; };
+		A74D3683137DAB8300332B0C /* usort.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = usort.cpp; sourceTree = "<group>"; };
+		A74D3684137DAB8300332B0C /* viterbifast.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = viterbifast.cpp; sourceTree = "<group>"; };
+		A74D3685137DAB8300332B0C /* windex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = windex.h; sourceTree = "<group>"; };
+		A74D3686137DAB8300332B0C /* writechhit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = writechhit.cpp; sourceTree = "<group>"; };
+		A74D36B6137DAFAA00332B0C /* chimerauchimecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimerauchimecommand.h; sourceTree = "<group>"; };
+		A74D36B7137DAFAA00332B0C /* chimerauchimecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimerauchimecommand.cpp; sourceTree = "<group>"; };
 		A75790571301749D00A30DAB /* homovacommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = homovacommand.h; sourceTree = "<group>"; };
 		A75790581301749D00A30DAB /* homovacommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = homovacommand.cpp; sourceTree = "<group>"; };
 		A778FE69134CA6CA00C0BA33 /* getcommandinfocommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getcommandinfocommand.h; sourceTree = "<group>"; };
@@ -1032,6 +1107,63 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		A74D3644137DA7CE00332B0C /* uchime */ = {
+			isa = PBXGroup;
+			children = (
+				A74D3655137DAB8300332B0C /* addtargets2.cpp */,
+				A74D3656137DAB8300332B0C /* alignchime.cpp */,
+				A74D3657137DAB8300332B0C /* alignchimel.cpp */,
+				A74D3658137DAB8300332B0C /* allocs.h */,
+				A74D3659137DAB8300332B0C /* alnheuristics.h */,
+				A74D365A137DAB8300332B0C /* alnparams.cpp */,
+				A74D365B137DAB8300332B0C /* alnparams.h */,
+				A74D365C137DAB8300332B0C /* alpha.cpp */,
+				A74D365D137DAB8300332B0C /* alpha.h */,
+				A74D365E137DAB8300332B0C /* alpha2.cpp */,
+				A74D365F137DAB8300332B0C /* chainer.h */,
+				A74D3660137DAB8300332B0C /* chime.h */,
+				A74D3661137DAB8300332B0C /* diagbox.h */,
+				A74D3662137DAB8300332B0C /* dp.h */,
+				A74D3663137DAB8300332B0C /* evalue.h */,
+				A74D3664137DAB8300332B0C /* fractid.cpp */,
+				A74D3665137DAB8300332B0C /* getparents.cpp */,
+				A74D3666137DAB8300332B0C /* globalalign2.cpp */,
+				A74D3667137DAB8300332B0C /* help.h */,
+				A74D3668137DAB8300332B0C /* hsp.h */,
+				A74D3669137DAB8300332B0C /* hspfinder.h */,
+				A74D366A137DAB8300332B0C /* make3way.cpp */,
+				A74D366B137DAB8300332B0C /* mx.cpp */,
+				A74D366C137DAB8300332B0C /* mx.h */,
+				A74D366D137DAB8300332B0C /* myopts.h */,
+				A74D366E137DAB8300332B0C /* myutils.cpp */,
+				A74D366F137DAB8300332B0C /* myutils.h */,
+				A74D3670137DAB8300332B0C /* orf.h */,
+				A74D3671137DAB8300332B0C /* out.h */,
+				A74D3672137DAB8300332B0C /* path.cpp */,
+				A74D3673137DAB8300332B0C /* path.h */,
+				A74D3674137DAB8300332B0C /* searchchime.cpp */,
+				A74D3675137DAB8300332B0C /* seq.h */,
+				A74D3676137DAB8300332B0C /* seqdb.cpp */,
+				A74D3677137DAB8300332B0C /* seqdb.h */,
+				A74D3678137DAB8300332B0C /* setnucmx.cpp */,
+				A74D3679137DAB8300332B0C /* sfasta.cpp */,
+				A74D367A137DAB8300332B0C /* sfasta.h */,
+				A74D367B137DAB8300332B0C /* svnmods.h */,
+				A74D367C137DAB8300332B0C /* svnversion.h */,
+				A74D367D137DAB8300332B0C /* timers.h */,
+				A74D367E137DAB8300332B0C /* timing.h */,
+				A74D367F137DAB8300332B0C /* tracebackbit.cpp */,
+				A74D3680137DAB8300332B0C /* uc.h */,
+				A74D3681137DAB8300332B0C /* uchime_main.cpp */,
+				A74D3682137DAB8300332B0C /* ultra.h */,
+				A74D3683137DAB8300332B0C /* usort.cpp */,
+				A74D3684137DAB8300332B0C /* viterbifast.cpp */,
+				A74D3685137DAB8300332B0C /* windex.h */,
+				A74D3686137DAB8300332B0C /* writechhit.cpp */,
+			);
+			name = uchime;
+			sourceTree = "<group>";
+		};
 		A7E9BA3812D3956100DA6239 /* commands */ = {
 			isa = PBXGroup;
 			children = (
@@ -1058,6 +1190,8 @@
 				A7E9B68212D37EC400DA6239 /* chimerapintailcommand.cpp */,
 				A7E9B68B12D37EC400DA6239 /* chimeraslayercommand.h */,
 				A7E9B68A12D37EC400DA6239 /* chimeraslayercommand.cpp */,
+				A74D36B6137DAFAA00332B0C /* chimerauchimecommand.h */,
+				A74D36B7137DAFAA00332B0C /* chimerauchimecommand.cpp */,
 				A7E9B68D12D37EC400DA6239 /* chopseqscommand.h */,
 				A7E9B68C12D37EC400DA6239 /* chopseqscommand.cpp */,
 				A7E9B69112D37EC400DA6239 /* classifyotucommand.h */,
@@ -1493,6 +1627,7 @@
 		A7E9BA4512D3965600DA6239 /* chimera */ = {
 			isa = PBXGroup;
 			children = (
+				A74D3644137DA7CE00332B0C /* uchime */,
 				A7E9B65C12D37EC300DA6239 /* bellerophon.cpp */,
 				A7E9B65D12D37EC300DA6239 /* bellerophon.h */,
 				A7E9B67412D37EC400DA6239 /* ccode.cpp */,
@@ -1937,6 +2072,29 @@
 				A7FE7C401330EA1000F7B327 /* getcurrentcommand.cpp in Sources */,
 				A7FE7E6D13311EA400F7B327 /* setcurrentcommand.cpp in Sources */,
 				A778FE6B134CA6CA00C0BA33 /* getcommandinfocommand.cpp in Sources */,
+				A74D3687137DAB8300332B0C /* addtargets2.cpp in Sources */,
+				A74D3688137DAB8400332B0C /* alignchime.cpp in Sources */,
+				A74D3689137DAB8400332B0C /* alignchimel.cpp in Sources */,
+				A74D368A137DAB8400332B0C /* alnparams.cpp in Sources */,
+				A74D368B137DAB8400332B0C /* alpha.cpp in Sources */,
+				A74D368C137DAB8400332B0C /* alpha2.cpp in Sources */,
+				A74D368D137DAB8400332B0C /* fractid.cpp in Sources */,
+				A74D368E137DAB8400332B0C /* getparents.cpp in Sources */,
+				A74D368F137DAB8400332B0C /* globalalign2.cpp in Sources */,
+				A74D3690137DAB8400332B0C /* make3way.cpp in Sources */,
+				A74D3691137DAB8400332B0C /* mx.cpp in Sources */,
+				A74D3692137DAB8400332B0C /* myutils.cpp in Sources */,
+				A74D3693137DAB8400332B0C /* path.cpp in Sources */,
+				A74D3694137DAB8400332B0C /* searchchime.cpp in Sources */,
+				A74D3695137DAB8400332B0C /* seqdb.cpp in Sources */,
+				A74D3696137DAB8400332B0C /* setnucmx.cpp in Sources */,
+				A74D3697137DAB8400332B0C /* sfasta.cpp in Sources */,
+				A74D3698137DAB8400332B0C /* tracebackbit.cpp in Sources */,
+				A74D3699137DAB8400332B0C /* uchime_main.cpp in Sources */,
+				A74D369A137DAB8400332B0C /* usort.cpp in Sources */,
+				A74D369B137DAB8400332B0C /* viterbifast.cpp in Sources */,
+				A74D369C137DAB8400332B0C /* writechhit.cpp in Sources */,
+				A74D36B8137DAFAA00332B0C /* chimerauchimecommand.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1977,6 +2135,9 @@
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				DEPLOYMENT_LOCATION = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_SSE3_EXTENSIONS = NO;
+				GCC_ENABLE_SSE41_EXTENSIONS = NO;
+				GCC_ENABLE_SSE42_EXTENSIONS = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"../release\\\"\"",
