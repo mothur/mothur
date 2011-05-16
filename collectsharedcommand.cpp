@@ -57,7 +57,7 @@ vector<string> CollectSharedCommand::setParameters(){
 		CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pshared);
 		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
 		CommandParameter pfreq("freq", "Number", "", "100", "", "", "",false,false); parameters.push_back(pfreq);
-		CommandParameter pcalc("calc", "Multiple", "sharedchao-sharedsobs-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan-kstest-whittaker-sharednseqs-ochiai-anderberg-skulczynski-kulczynskicody-lennon-morisitahorn-braycurtis-odum-canberra-structeuclidean-structchord-hellinger-manhattan-structpearson-soergel-spearman-structkulczynski-speciesprofile-structchi2-hamming-gower-memchi2-memchord-memeuclidean-mempearson", "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan", "", "", "",true,false); parameters.push_back(pcalc);
+		CommandParameter pcalc("calc", "Multiple", "sharedchao-sharedsobs-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan-kstest-whittaker-sharednseqs-ochiai-anderberg-kulczynski-kulczynskicody-lennon-morisitahorn-braycurtis-odum-canberra-structeuclidean-structchord-hellinger-manhattan-structpearson-soergel-spearman-structkulczynski-speciesprofile-structchi2-hamming-gower-memchi2-memchord-memeuclidean-mempearson", "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan", "", "", "",true,false); parameters.push_back(pcalc);
 		CommandParameter pall("all", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pall);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
@@ -119,7 +119,7 @@ CollectSharedCommand::CollectSharedCommand(){
 		outputTypes["sharednseqs"] = tempOutNames;
 		outputTypes["ochiai"] = tempOutNames;
 		outputTypes["anderberg"] = tempOutNames;
-		outputTypes["skulczynski"] = tempOutNames;
+		outputTypes["kulczynski"] = tempOutNames;
 		outputTypes["kulczynskicody"] = tempOutNames;
 		outputTypes["lennon"] = tempOutNames;
 		outputTypes["morisitahorn"] = tempOutNames;
@@ -191,7 +191,7 @@ CollectSharedCommand::CollectSharedCommand(string option)  {
 			outputTypes["sharednseqs"] = tempOutNames;
 			outputTypes["ochiai"] = tempOutNames;
 			outputTypes["anderberg"] = tempOutNames;
-			outputTypes["skulczynski"] = tempOutNames;
+			outputTypes["kulczynski"] = tempOutNames;
 			outputTypes["kulczynskicody"] = tempOutNames;
 			outputTypes["lennon"] = tempOutNames;
 			outputTypes["morisitahorn"] = tempOutNames;
@@ -335,7 +335,7 @@ CollectSharedCommand::CollectSharedCommand(string option)  {
 						}else if (Estimators[i] == "anderberg") { 
 							cDisplays.push_back(new CollectDisplay(new Anderberg(), new SharedOneColumnFile(fileNameRoot+"anderberg")));
 							outputNames.push_back(fileNameRoot+"anderberg"); outputTypes["anderberg"].push_back(fileNameRoot+"anderberg");
-						}else if (Estimators[i] == "skulczynski") { 
+						}else if (Estimators[i] == "kulczynski") { 
 							cDisplays.push_back(new CollectDisplay(new Kulczynski(), new SharedOneColumnFile(fileNameRoot+"kulczynski")));
 							outputNames.push_back(fileNameRoot+"kulczynski"); outputTypes["kulczynski"].push_back(fileNameRoot+"kulczynski");
 						}else if (Estimators[i] == "kulczynskicody") { 

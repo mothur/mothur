@@ -69,6 +69,7 @@
 #include "chimeraslayercommand.h"
 #include "chimerapintailcommand.h"
 #include "chimerabellerophoncommand.h"
+#include "chimerauchimecommand.h"
 #include "setlogfilecommand.h"
 #include "phylodiversitycommand.h"
 #include "makegroupcommand.h"
@@ -247,6 +248,7 @@ CommandFactory::CommandFactory(){
 	commands["chimera.ccode"]		= "MPIEnabled";
 	commands["chimera.check"]		= "MPIEnabled";
 	commands["chimera.slayer"]		= "MPIEnabled";
+	commands["chimera.uchime"]		= "MPIEnabled";
 	commands["chimera.pintail"]		= "MPIEnabled";
 	commands["chimera.bellerophon"]	= "MPIEnabled";
 	commands["screen.seqs"]			= "MPIEnabled";
@@ -351,6 +353,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "chimera.ccode")			{	command = new ChimeraCcodeCommand(optionString);			}
 		else if(commandName == "chimera.check")			{	command = new ChimeraCheckCommand(optionString);			}
 		else if(commandName == "chimera.slayer")		{	command = new ChimeraSlayerCommand(optionString);			}
+		else if(commandName == "chimera.uchime")		{	command = new ChimeraUchimeCommand(optionString);			}
 		else if(commandName == "chimera.pintail")		{	command = new ChimeraPintailCommand(optionString);			}
 		else if(commandName == "chimera.bellerophon")	{	command = new ChimeraBellerophonCommand(optionString);		}
 		else if(commandName == "phylotype")				{	command = new PhylotypeCommand(optionString);				}
@@ -486,6 +489,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "classify.seqs")			{	pipecommand = new ClassifySeqsCommand(optionString);			}
 		else if(commandName == "chimera.ccode")			{	pipecommand = new ChimeraCcodeCommand(optionString);			}
 		else if(commandName == "chimera.check")			{	pipecommand = new ChimeraCheckCommand(optionString);			}
+		else if(commandName == "chimera.uchime")		{	pipecommand = new ChimeraUchimeCommand(optionString);			}
 		else if(commandName == "chimera.slayer")		{	pipecommand = new ChimeraSlayerCommand(optionString);			}
 		else if(commandName == "chimera.pintail")		{	pipecommand = new ChimeraPintailCommand(optionString);			}
 		else if(commandName == "chimera.bellerophon")	{	pipecommand = new ChimeraBellerophonCommand(optionString);		}
@@ -610,6 +614,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "chimera.ccode")			{	shellcommand = new ChimeraCcodeCommand();			}
 		else if(commandName == "chimera.check")			{	shellcommand = new ChimeraCheckCommand();			}
 		else if(commandName == "chimera.slayer")		{	shellcommand = new ChimeraSlayerCommand();			}
+		else if(commandName == "chimera.uchime")		{	shellcommand = new ChimeraUchimeCommand();			}
 		else if(commandName == "chimera.pintail")		{	shellcommand = new ChimeraPintailCommand();			}
 		else if(commandName == "chimera.bellerophon")	{	shellcommand = new ChimeraBellerophonCommand();		}
 		else if(commandName == "phylotype")				{	shellcommand = new PhylotypeCommand();				}

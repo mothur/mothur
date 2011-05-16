@@ -1154,7 +1154,43 @@ vector<unsigned long int> MothurOut::divideFile(string filename, int& proc) {
 		exit(1);
 	}
 }
-
+/**************************************************************************************************/
+int MothurOut::divideFile(string filename, int& proc, vector<string>& files) {
+	try{
+		
+		vector<unsigned long int> filePos = divideFile(filename, proc);
+		
+		for (int i = 0; i < (filePos.size()-1); i++) {
+			
+			//read file chunk
+			ifstream in;
+			openInputFile(filename, in);
+			in.seekg(filePos[i]);
+			unsigned long int size = filePos[(i+1)] - filePos[i];
+			char* chunk = new char[size];
+			in.read(chunk, size);
+			in.close();
+			
+			//open new file
+			string fileChunkName = filename + "." + toString(i) + ".tmp";
+			ofstream out; 
+			openOutputFile(fileChunkName, out);
+			
+			out << chunk << endl;
+			out.close();
+			delete[] chunk;
+			
+			//save name
+			files.push_back(fileChunkName);
+		}
+				
+		return 0;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "divideFile");
+		exit(1);
+	}
+}
 /***********************************************************************/
 
 bool MothurOut::isTrue(string f){
