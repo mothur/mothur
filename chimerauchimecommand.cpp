@@ -22,6 +22,24 @@ vector<string> ChimeraUchimeCommand::setParameters(){
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pabskew("abskew", "Number", "", "1.9", "", "", "",false,false); parameters.push_back(pabskew);
+		CommandParameter pchimealns("chimealns", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pchimealns);
+		CommandParameter pminh("minh", "Number", "", "0.3", "", "", "",false,false); parameters.push_back(pminh);
+		CommandParameter pmindiv("mindiv", "Number", "", "0.5", "", "", "",false,false); parameters.push_back(pmindiv);
+		CommandParameter pxn("xn", "Number", "", "8.0", "", "", "",false,false); parameters.push_back(pxn);
+		CommandParameter pdn("dn", "Number", "", "1.4", "", "", "",false,false); parameters.push_back(pdn);
+		CommandParameter pxa("xa", "Number", "", "1", "", "", "",false,false); parameters.push_back(pxa);
+		CommandParameter pchunks("chunks", "Number", "", "4", "", "", "",false,false); parameters.push_back(pchunks);
+		CommandParameter pminchunk("minchunk", "Number", "", "64", "", "", "",false,false); parameters.push_back(pminchunk);
+		CommandParameter pidsmoothwindow("idsmoothwindow", "Number", "", "32", "", "", "",false,false); parameters.push_back(pidsmoothwindow);
+		CommandParameter pminsmoothid("minsmoothid", "Number", "", "0.95", "", "", "",false,false); parameters.push_back(pminsmoothid);
+		CommandParameter pmaxp("maxp", "Number", "", "2", "", "", "",false,false); parameters.push_back(pmaxp);
+		CommandParameter pskipgaps("skipgaps", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pskipgaps);
+		CommandParameter pskipgaps2("skipgaps2", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pskipgaps2);
+		CommandParameter pminlen("minlen", "Number", "", "10", "", "", "",false,false); parameters.push_back(pminlen);
+		CommandParameter pmaxlen("maxlen", "Number", "", "10000", "", "", "",false,false); parameters.push_back(pmaxlen);
+		CommandParameter pucl("ucl", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pucl);
+		CommandParameter pqueryfract("queryfract", "Number", "", "0.5", "", "", "",false,false); parameters.push_back(pqueryfract);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -38,12 +56,30 @@ string ChimeraUchimeCommand::getHelpString(){
 		string helpString = "";
 		helpString += "The chimera.uchime command reads a fastafile and referencefile and outputs potentially chimeric sequences.\n";
 		helpString += "This command is a wrapper for uchime written by Robert C. Edgar.\n";
-		helpString += "The chimera.uchime command parameters are fasta, name, reference and processors.\n";
+		helpString += "The chimera.uchime command parameters are fasta, name, reference, processors, abskew, chimealns, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, skipgaps, skipgaps2, minlen, maxlen, ucl and queryfact.\n";
 		helpString += "The fasta parameter allows you to enter the fasta file containing your potentially chimeric sequences, and is required, unless you have a valid current fasta file. \n";
 		helpString += "The name parameter allows you to provide a name file, if you are using template=self. \n";
 		helpString += "You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amazon.fasta \n";
 		helpString += "The reference parameter allows you to enter a reference file containing known non-chimeric sequences, and is required. You may also set template=self, in this case the abundant sequences will be used as potential parents. \n";
 		helpString += "The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n";
+		helpString += "The abskew parameter can only be used with template=self. Minimum abundance skew. Default 1.9. Abundance skew is: min [ abund(parent1), abund(parent2) ] / abund(query).\n";
+		helpString += "The chimealns parameter allows you to indicate you would like a file containing multiple alignments of query sequences to parents in human readable format. Alignments show columns with differences that support or contradict a chimeric model.\n";
+		helpString += "The minh parameter - mininum score to report chimera. Default 0.3. Values from 0.1 to 5 might be reasonable. Lower values increase sensitivity but may report more false positives. If you decrease xn you may need to increase minh, and vice versa.\n";
+		helpString += "The mindiv parameter - minimum divergence ratio, default 0.5. Div ratio is 100%% - %%identity between query sequence and the closest candidate for being a parent. If you don't care about very close chimeras, then you could increase mindiv to, say, 1.0 or 2.0, and also decrease --min h, say to 0.1, to increase sensitivity. How well this works will depend on your data. Best is to tune parameters on a good benchmark.\n";
+		helpString += "The xn parameter - weight of a no vote. Default 8.0. Decreasing this weight to around 3 or 4 may give better performance on denoised data.\n";
+		helpString += "The dn parameter - pseudo-count prior on number of no votes. Default 1.4. Probably no good reason to change this unless you can retune to a good benchmark for your data. Reasonable values are probably in the range from 0.2 to 2.\n";
+		helpString += "The xa parameter - weight of an abstain vote. Default 1. So far, results do not seem to be very sensitive to this parameter, but if you have a good training set might be worth trying. Reasonable values might range from 0.1 to 2.\n";
+		helpString += "The chunks parameter is the number of chunks to extract from the query sequence when searching for parents. Default 4.\n";
+		helpString += "The minchunk parameter is the minimum length of a chunk. Default 64.\n";
+		helpString += "The idsmoothwindow parameter is the length of id smoothing window. Default 32.\n";
+		helpString += "The minsmoothid parameter - minimum factional identity over smoothed window of candidate parent. Default 0.95.\n";
+		helpString += "The maxp parameter - maximum number of candidate parents to consider. Default 2. In tests so far, increasing maxp gives only a very small improvement in sensivity but tends to increase the error rate quite a bit.\n";
+		helpString += "The skipgaps parameter controls how gapped columns affect counting of diffs. If skipgaps is set to T, columns containing gaps do not found as diffs. Default = T.\n";
+		helpString += "The skipgaps2 parameter controls how gapped columns affect counting of diffs. If skipgaps2 is set to T, if column is immediately adjacent to a column containing a gap, it is not counted as a diff. Default = T.\n";
+		helpString += "The minlen parameter is the minimum unaligned sequence length. Defaults 10. Applies to both query and reference sequences.\n";
+		helpString += "The maxlen parameter is the maximum unaligned sequence length. Defaults 10000. Applies to both query and reference sequences.\n";
+		helpString += "The ucl parameter - use local-X alignments. Default is global-X or false. On tests so far, global-X is always better; this option is retained because it just might work well on some future type of data.\n";
+		helpString += "The queryfract parameter - minimum fraction of the query sequence that must be covered by a local-X alignment. Default 0.5. Applies only when ucl is true.\n";
 #ifdef USE_MPI
 		helpString += "When using MPI, the processors parameter is set to the number of MPI processes running. \n";
 #endif
@@ -66,6 +102,7 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(){
 		vector<string> tempOutNames;
 		outputTypes["chimera"] = tempOutNames;
 		outputTypes["accnos"] = tempOutNames;
+		outputTypes["alns"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ChimeraUchimeCommand", "ChimeraUchimeCommand");
@@ -98,6 +135,7 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 			vector<string> tempOutNames;
 			outputTypes["chimera"] = tempOutNames;
 			outputTypes["accnos"] = tempOutNames;
+			outputTypes["alns"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -278,6 +316,38 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 			string temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
 			convert(temp, processors);
+			
+			abskew = validParameter.validFile(parameters, "abskew", false);	if (abskew == "not found"){	useAbskew = false;  abskew = "1.9";	}else{  useAbskew = true;  }
+			if (useAbskew && templatefile != "self") { m->mothurOut("The abskew parameter is only valid with template=self, ignoring."); m->mothurOutEndLine(); useAbskew = false; }
+			
+			temp = validParameter.validFile(parameters, "chimealns", false);			if (temp == "not found") { temp = "f"; }
+			chimealns = m->isTrue(temp); 
+			
+			minh = validParameter.validFile(parameters, "minh", false);						if (minh == "not found")			{ useMinH = false; minh = "0.3";					}	else{ useMinH = true;			}
+			mindiv = validParameter.validFile(parameters, "mindiv", false);					if (mindiv == "not found")			{ useMindiv = false; mindiv = "0.5";				}	else{ useMindiv = true;			}
+			xn = validParameter.validFile(parameters, "xn", false);							if (xn == "not found")				{ useXn = false; xn = "8.0";						}	else{ useXn = true;				}
+			dn = validParameter.validFile(parameters, "dn", false);							if (dn == "not found")				{ useDn = false; dn = "1.4";						}	else{ useDn = true;				}
+			xa = validParameter.validFile(parameters, "xa", false);							if (xa == "not found")				{ useXa = false; xa = "1";							}	else{ useXa = true;				}
+			chunks = validParameter.validFile(parameters, "chunks", false);					if (chunks == "not found")			{ useChunks = false; chunks = "4";					}	else{ useChunks = true;			}
+			minchunk = validParameter.validFile(parameters, "minchunk", false);				if (minchunk == "not found")		{ useMinchunk = false; minchunk = "64";				}	else{ useMinchunk = true;		}
+			idsmoothwindow = validParameter.validFile(parameters, "idsmoothwindow", false);	if (idsmoothwindow == "not found")	{ useIdsmoothwindow = false; idsmoothwindow = "32";	}	else{ useIdsmoothwindow = true;	}
+			minsmoothid = validParameter.validFile(parameters, "minsmoothid", false);		if (minsmoothid == "not found")		{ useMinsmoothid = false; minsmoothid = "0.95";		}	else{ useMinsmoothid = true;	}
+			maxp = validParameter.validFile(parameters, "maxp", false);						if (maxp == "not found")			{ useMaxp = false; maxp = "2";						}	else{ useMaxp = true;			}
+			minlen = validParameter.validFile(parameters, "minlen", false);					if (minlen == "not found")			{ useMinlen = false; minlen = "10";					}	else{ useMinlen = true;			}
+			maxlen = validParameter.validFile(parameters, "maxlen", false);					if (maxlen == "not found")			{ useMaxlen = false; maxlen = "10000";				}	else{ useMaxlen = true;			}
+			
+			temp = validParameter.validFile(parameters, "ucl", false);						if (temp == "not found") { temp = "f"; }
+			ucl = m->isTrue(temp);
+			
+			queryfract = validParameter.validFile(parameters, "queryfract", false);			if (queryfract == "not found")		{ useQueryfract = false; queryfract = "0.5";		}	else{ useQueryfract = true;		}
+			if (!ucl && useQueryfract) { m->mothurOut("queryfact may only be used when ucl=t, ignoring."); m->mothurOutEndLine(); useQueryfract = false; }
+			
+			temp = validParameter.validFile(parameters, "skipgaps", false);					if (temp == "not found") { temp = "t"; }
+			skipgaps = m->isTrue(temp); 
+
+			temp = validParameter.validFile(parameters, "skipgaps2", false);				if (temp == "not found") { temp = "t"; }
+			skipgaps2 = m->isTrue(temp); 
+
 		}
 	}
 	catch(exception& e) {
@@ -290,6 +360,8 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 int ChimeraUchimeCommand::execute(){
 	try{
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		
+		m->mothurOut("\nuchime by Robert C. Edgar\nhttp://drive5.com/uchime\nThis code is donated to the public domain.\n\n");
 		
 		for (int s = 0; s < fastaFileNames.size(); s++) {
 			
@@ -375,23 +447,27 @@ int ChimeraUchimeCommand::execute(){
 			}
 			
 			if (outputDir == "") { outputDir = m->hasPath(fastaFileNames[s]);  }//if user entered a file with a path then preserve it				
-			string outputFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + "slayer.chimera";
-			string accnosFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]))  + "slayer.accnos";
+			string outputFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + "uchime.chimera";
+			string accnosFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]))  + "uchime.accnos";
+			string alnsFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]))  + "uchime.alns";
 			
 			if (m->control_pressed) {  for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}  return 0;	}
 			
 			int numSeqs = 0;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-			if(processors == 1){ numSeqs = driver(outputFileName, fastaFileNames[s], accnosFileName); }
-			else{	numSeqs = createProcesses(outputFileName, fastaFileNames[s], accnosFileName); }
+			if(processors == 1){ numSeqs = driver(outputFileName, fastaFileNames[s], accnosFileName, alnsFileName); }
+			else{	numSeqs = createProcesses(outputFileName, fastaFileNames[s], accnosFileName, alnsFileName); }
 #else
-			numSeqs = driver(outputFileName, fastaFileNames[s], accnosFileName);
+			numSeqs = driver(outputFileName, fastaFileNames[s], accnosFileName, alnsFileName);
 #endif
 			if (m->control_pressed) { for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} return 0; }
-
+			
+			//remove file made for uchime
+			if (templatefile == "self") {  remove(fastaFileNames[s].c_str()); }
 			
 			outputNames.push_back(outputFileName); outputTypes["chimera"].push_back(outputFileName);
 			outputNames.push_back(accnosFileName); outputTypes["accnos"].push_back(accnosFileName);
+			if (chimealns) { outputNames.push_back(alnsFileName); outputTypes["alns"].push_back(alnsFileName); }
 			
 			m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.");	m->mothurOutEndLine();
 		}
@@ -418,7 +494,7 @@ int ChimeraUchimeCommand::execute(){
 }
 //**********************************************************************************************************************
 
-int ChimeraUchimeCommand::driver(string outputFName, string filename, string accnos){
+int ChimeraUchimeCommand::driver(string outputFName, string filename, string accnos, string alns){
 	try {
 		
 		vector<char*> cPara;
@@ -452,6 +528,160 @@ int ChimeraUchimeCommand::driver(string outputFName, string filename, string acc
 		char* tempout = new char[outputFName.length()];
 		strcpy(tempout, outputFName.c_str());
 		cPara.push_back(tempout);
+		
+		if (chimealns) {
+			char* tempA = new char[12]; 
+			strcpy(tempA, "--uchimealns"); 
+			cPara.push_back(tempA);
+			char* tempa = new char[alns.length()];
+			strcpy(tempa, alns.c_str());
+			cPara.push_back(tempa);
+		}
+		
+		if (useAbskew) {
+			char* tempskew = new char[8]; 
+			strcpy(tempskew, "--abskew"); 
+			cPara.push_back(tempskew);
+			char* tempSkew = new char[abskew.length()];
+			strcpy(tempSkew, abskew.c_str());
+			cPara.push_back(tempSkew);
+		}
+		
+		if (useMinH) {
+			char* tempminh = new char[6]; 
+			strcpy(tempminh, "--minh"); 
+			cPara.push_back(tempminh);
+			char* tempMinH = new char[minh.length()];
+			strcpy(tempMinH, minh.c_str());
+			cPara.push_back(tempMinH);
+		}
+		
+		if (useMindiv) {
+			char* tempmindiv = new char[8]; 
+			strcpy(tempmindiv, "--mindiv"); 
+			cPara.push_back(tempmindiv);
+			char* tempMindiv = new char[mindiv.length()];
+			strcpy(tempMindiv, mindiv.c_str());
+			cPara.push_back(tempMindiv);
+		}
+		
+		if (useXn) {
+			char* tempxn = new char[4]; 
+			strcpy(tempxn, "--xn"); 
+			cPara.push_back(tempxn);
+			char* tempXn = new char[xn.length()];
+			strcpy(tempXn, xn.c_str());
+			cPara.push_back(tempXn);
+		}
+		
+		if (useDn) {
+			char* tempdn = new char[4]; 
+			strcpy(tempdn, "--dn"); 
+			cPara.push_back(tempdn);
+			char* tempDn = new char[dn.length()];
+			strcpy(tempDn, dn.c_str());
+			cPara.push_back(tempDn);
+		}
+		
+		if (useXa) {
+			char* tempxa = new char[4]; 
+			strcpy(tempxa, "--xa"); 
+			cPara.push_back(tempxa);
+			char* tempXa = new char[xa.length()];
+			strcpy(tempXa, xa.c_str());
+			cPara.push_back(tempXa);
+		}
+		
+		if (useChunks) {
+			char* tempchunks = new char[8]; 
+			strcpy(tempchunks, "--chunks"); 
+			cPara.push_back(tempchunks);
+			char* tempChunks = new char[chunks.length()];
+			strcpy(tempChunks, chunks.c_str());
+			cPara.push_back(tempChunks);
+		}
+		
+		if (useMinchunk) {
+			char* tempminchunk = new char[10]; 
+			strcpy(tempminchunk, "--minchunk"); 
+			cPara.push_back(tempminchunk);
+			char* tempMinchunk = new char[minchunk.length()];
+			strcpy(tempMinchunk, minchunk.c_str());
+			cPara.push_back(tempMinchunk);
+		}
+		
+		if (useIdsmoothwindow) {
+			char* tempidsmoothwindow = new char[16]; 
+			strcpy(tempidsmoothwindow, "--idsmoothwindow"); 
+			cPara.push_back(tempidsmoothwindow);
+			char* tempIdsmoothwindow = new char[idsmoothwindow.length()];
+			strcpy(tempIdsmoothwindow, idsmoothwindow.c_str());
+			cPara.push_back(tempIdsmoothwindow);
+		}
+		
+		if (useMinsmoothid) {
+			char* tempminsmoothid = new char[13]; 
+			strcpy(tempminsmoothid, "--minsmoothid"); 
+			cPara.push_back(tempminsmoothid);
+			char* tempMinsmoothid = new char[minsmoothid.length()];
+			strcpy(tempMinsmoothid, minsmoothid.c_str());
+			cPara.push_back(tempMinsmoothid);
+		}
+		
+		if (useMaxp) {
+			char* tempmaxp = new char[6]; 
+			strcpy(tempmaxp, "--maxp"); 
+			cPara.push_back(tempmaxp);
+			char* tempMaxp = new char[maxp.length()];
+			strcpy(tempMaxp, maxp.c_str());
+			cPara.push_back(tempMaxp);
+		}
+		
+		if (!skipgaps) {
+			char* tempskipgaps = new char[14]; 
+			strcpy(tempskipgaps, "--[no]skipgaps"); 
+			cPara.push_back(tempskipgaps);
+		}
+		
+		if (!skipgaps2) {
+			char* tempskipgaps2 = new char[15]; 
+			strcpy(tempskipgaps2, "--[no]skipgaps2"); 
+			cPara.push_back(tempskipgaps2);
+		}
+		
+		if (useMinlen) {
+			char* tempminlen = new char[8]; 
+			strcpy(tempminlen, "--minlen"); 
+			cPara.push_back(tempminlen);
+			char* tempMinlen = new char[minlen.length()];
+			strcpy(tempMinlen, minlen.c_str());
+			cPara.push_back(tempMinlen);
+		}
+		
+		if (useMaxlen) {
+			char* tempmaxlen = new char[8]; 
+			strcpy(tempmaxlen, "--maxlen"); 
+			cPara.push_back(tempmaxlen);
+			char* tempMaxlen = new char[maxlen.length()];
+			strcpy(tempMaxlen, maxlen.c_str());
+			cPara.push_back(tempMaxlen);
+		}
+		
+		if (ucl) {
+			char* tempucl = new char[5]; 
+			strcpy(tempucl, "--ucl"); 
+			cPara.push_back(tempucl);
+		}
+		
+		if (useQueryfract) {
+			char* tempqueryfract = new char[12]; 
+			strcpy(tempqueryfract, "--queryfract"); 
+			cPara.push_back(tempqueryfract);
+			char* tempQueryfract = new char[queryfract.length()];
+			strcpy(tempQueryfract, queryfract.c_str());
+			cPara.push_back(tempQueryfract);
+		}
+		
 		
 		char** uchimeParameters;
 		uchimeParameters = new char*[cPara.size()];
@@ -504,7 +734,7 @@ int ChimeraUchimeCommand::driver(string outputFName, string filename, string acc
 }
 /**************************************************************************************************/
 
-int ChimeraUchimeCommand::createProcesses(string outputFileName, string filename, string accnos) {
+int ChimeraUchimeCommand::createProcesses(string outputFileName, string filename, string accnos, string alns) {
 	try {
 		
 		processIDS.clear();
@@ -526,7 +756,7 @@ int ChimeraUchimeCommand::createProcesses(string outputFileName, string filename
 		MPI_Comm_size(MPI_COMM_WORLD, &processors); 
 				
 		if (pid == 0) { //you are the root process 
-			num = driver(outputFileName, files[0], accnos);
+			num = driver(outputFileName, files[0], accnos, alns);
 			
 			if (templatefile != "self") {
 				//wait on chidren
@@ -540,11 +770,16 @@ int ChimeraUchimeCommand::createProcesses(string outputFileName, string filename
 					
 					m->appendFiles((accnos + toString(j) + ".temp"), accnos);
 					remove((accnos + toString(j) + ".temp").c_str());
+					
+					if (chimealns) {
+						m->appendFiles((alns + toString(j) + ".temp"), alns);
+						remove((alns + toString(j) + ".temp").c_str());
+					}
 				}
 			}
 		}else{ //you are a child process
 			if (templatefile != "self") { //if template=self we can only use 1 processor
-				num = driver(outputFileName+toString(pid) + ".temp", files[pid], accnos+toString(pid) + ".temp");	
+				num = driver(outputFileName+toString(pid) + ".temp", files[pid], accnos+toString(pid) + ".temp", alns+toString(pid) + ".temp");	
 				
 				//send numSeqs to parent
 				MPI_Send(&num, 1, MPI_INT, 0, tag, MPI_COMM_WORLD);
@@ -562,7 +797,7 @@ int ChimeraUchimeCommand::createProcesses(string outputFileName, string filename
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				num = driver(outputFileName + toString(getpid()) + ".temp", files[process], accnos + toString(getpid()) + ".temp");
+				num = driver(outputFileName + toString(getpid()) + ".temp", files[process], accnos + toString(getpid()) + ".temp", alns + toString(getpid()) + ".temp");
 				
 				//pass numSeqs to parent
 				ofstream out;
@@ -580,7 +815,7 @@ int ChimeraUchimeCommand::createProcesses(string outputFileName, string filename
 		}
 		
 		//do my part
-		num = driver(outputFileName, files[0], accnos);
+		num = driver(outputFileName, files[0], accnos, alns);
 		
 		//force parent to wait until all the processes are done
 		for (int i=0;i<processIDS.size();i++) { 
@@ -604,6 +839,11 @@ int ChimeraUchimeCommand::createProcesses(string outputFileName, string filename
 			
 			m->appendFiles((accnos + toString(processIDS[i]) + ".temp"), accnos);
 			remove((accnos + toString(processIDS[i]) + ".temp").c_str());
+			
+			if (chimealns) {
+				m->appendFiles((alns + toString(processIDS[i]) + ".temp"), alns);
+				remove((alns + toString(processIDS[i]) + ".temp").c_str());
+			}
 		}
 #endif		
 		//get rid of the file pieces.

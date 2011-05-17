@@ -1,3 +1,5 @@
+//uchime by Robert C. Edgar http://drive5.com/uchime This code is donated to the public domain.
+
 #define TIMING 0
 #ifndef timing_h
 #define timing_h
