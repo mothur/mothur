@@ -83,8 +83,10 @@ vector<int> BlastDB::findClosestSequences(Sequence* seq, int n) {
 			blastCommand = path + "blast/bin/blastall -p blastn -d " + dbFileName + " -m 8 -W 28 -v " + toString(n) + " -b " + toString(n);;
 			blastCommand += (" -i " + (queryFileName+seq->getName()) + " -o " + blastFileName+seq->getName());
 		#else
-			blastCommand =  "\"" + path + "blast\\bin\\blastall\" -p blastn -d " + dbFileName + " -m 8 -W 28 -v " + toString(n) + " -b " + toString(n);;
+			blastCommand =  "\"" + path + "blast\\bin\\blastall\" -p blastn -d " + "\"" + dbFileName + "\"" + " -m 8 -W 28 -v " + toString(n) + " -b " + toString(n);
 			blastCommand += (" -i " + (queryFileName+seq->getName()) + " -o " + blastFileName+seq->getName());
+			//wrap entire string in ""
+			blastCommand = "\"" + blastCommand + "\"";
 		#endif
 		system(blastCommand.c_str());
 		
@@ -140,8 +142,11 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n, int minPerID) {
 			blastCommand = path + "blast/bin/megablast -e 1e-10 -d " + dbFileName + " -m 8 -b " + toString(n) + " -v " + toString(n); //-W 28 -p blastn
 			blastCommand += (" -i " + (queryFileName+seq->getName()) + " -o " + blastFileName+seq->getName());
 		#else
-			blastCommand =  "\"" + path + "blast\\bin\\megablast\" -e 1e-10 -d " + dbFileName + " -m 8 -b " + toString(n) + " -v " + toString(n); //-W 28 -p blastn
+			blastCommand =  "\"" + path + "blast\\bin\\megablast\" -e 1e-10 -d " + "\"" + dbFileName + "\"" + " -m 8 -b " + toString(n) + " -v " + toString(n); //-W 28 -p blastn
 			blastCommand += (" -i " + (queryFileName+seq->getName()) + " -o " + blastFileName+seq->getName());
+			//wrap entire string in ""
+			blastCommand = "\"" + blastCommand + "\"";
+
 		#endif
 		
 		system(blastCommand.c_str());
@@ -213,7 +218,9 @@ void BlastDB::generateDB() {
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 			formatdbCommand = path + "blast/bin/formatdb -p F -o T -i " + dbFileName;	//	format the database, -o option gives us the ability
 		#else
-			formatdbCommand = "\"" + path + "blast\\bin\\formatdb\" -p F -o T -i " + dbFileName;
+			formatdbCommand = "\"" + path + "blast\\bin\\formatdb\" -p F -o T -i " + "\"" +  dbFileName + "\"";
+			//wrap entire string in ""
+			formatdbCommand = "\"" + formatdbCommand + "\"";
 		#endif
 		system(formatdbCommand.c_str());								//	to get the right sequence names, i think. -p F
 																	//	option tells formatdb that seqs are DNA, not prot

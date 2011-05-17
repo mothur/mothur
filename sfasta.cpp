@@ -1,3 +1,5 @@
+//uchime by Robert C. Edgar http://drive5.com/uchime This code is donated to the public domain.
+
 #include "sfasta.h"
 #include "orf.h"
 #include "alpha.h"
@@ -225,8 +227,9 @@ const byte *SFasta::GetNextSeqLo()
 			if (!WarningDone)
 				{
 				if (isgap(c))
-					Warning("Ignoring gaps in FASTA file '%s'",
-						m_FileName.c_str());
+					//Warning("Ignoring gaps in FASTA file '%s'",
+						//m_FileName.c_str());
+					;
 				else if (isprint(c))
 					Warning("Invalid FASTA file '%s', non-letter '%c' in sequence >%s",
 					  m_FileName.c_str(), c, Label);

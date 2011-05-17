@@ -1,3 +1,5 @@
+//uchime by Robert C. Edgar http://drive5.com/uchime This code is donated to the public domain.
+
 #ifndef seqdb_h
 #define seqdb_h
 

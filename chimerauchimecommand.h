@@ -26,7 +26,7 @@ public:
 	string getCommandName()			{ return "chimera.uchime";		}
 	string getCommandCategory()		{ return "Sequence Processing"; }
 	string getHelpString();	
-	string getCitation() { return "http://drive5.com/uchime/ \nhttp://www.mothur.org/wiki/Chimera.uchime"; }
+	string getCitation() { return "uchime by Robert C. Edgar\nhttp://drive5.com/uchime\nThis code is donated to the public domain.\nhttp://www.mothur.org/wiki/Chimera.uchime"; }
 	
 	
 	int execute(); 
@@ -34,15 +34,11 @@ public:
 	
 private:
 	vector<int> processIDS;   //processid
-	int driver(string, string, string);
-	int createProcesses(string, string, string);
-	
-#ifdef USE_MPI
-	int driverMPI(int, int, MPI_File&, MPI_File&, MPI_File&, MPI_File&, vector<unsigned long int>&);
-#endif
-	
-	bool abort;
-	string fastafile, templatefile, outputDir, namefile;
+	int driver(string, string, string, string);
+	int createProcesses(string, string, string, string);
+		
+	bool abort, useAbskew, chimealns, useMinH, useMindiv, useXn, useDn, useXa, useChunks, useMinchunk, useIdsmoothwindow, useMinsmoothid, useMaxp, skipgaps, skipgaps2, useMinlen, useMaxlen, ucl, useQueryfract;
+	string fastafile, templatefile, outputDir, namefile, abskew, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, minlen, maxlen, queryfract;
 	int processors;
 	
 	vector<string> outputNames;

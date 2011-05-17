@@ -1,3 +1,5 @@
+//uchime by Robert C. Edgar http://drive5.com/uchime This code is donated to the public domain.
+
 #include "myutils.h"
 #include "chime.h"
 #include "seqdb.h"
@@ -107,11 +109,7 @@ int uchime_main(int argc, char *argv[])
 		return 0;
 		}
 
-	//printf("uchime v" MY_VERSION ".%s\n", SVN_VERSION);
-	//printf("by Robert C. Edgar\n");
-	//printf("http://drive5.com/uchime\n");
-	//printf("This code is donated to the public domain.\n");
-	//printf("\n");
+		
 	if (!optset_w)
 		opt_w = 8;
 	
@@ -203,9 +201,15 @@ int uchime_main(int argc, char *argv[])
 
 		WriteChimeHit(g_fUChime, Hit);
 
-		ProgressStep(i, QuerySeqCount, "%u/%u chimeras found (%.1f%%)", HitCount, i, Pct(HitCount, i+1));
-		
+		//ProgressStep(i, QuerySeqCount, "%u/%u chimeras found (%.1f%%)", HitCount, i, Pct(HitCount, i+1));
+			//report progress
+			if((i+1) % 100 == 0){	m->mothurOut("Processing sequence: " + toString(i+1) + ", " + toString(HitCount) + " chimeras found."); m->mothurOutEndLine();		}
 		}
+		if (!m->control_pressed) { 
+			//report progress
+			if((QuerySeqCount) % 100 != 0){	m->mothurOut("Processing sequence: " + toString(QuerySeqCount) + ", " + toString(HitCount) + " chimeras found."); m->mothurOutEndLine();		}
+		}
+
 
 	Log("\n");
 	Log("%s: %u/%u chimeras found (%.1f%%)\n",
