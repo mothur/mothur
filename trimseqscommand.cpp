@@ -314,7 +314,7 @@ int TrimSeqsCommand::execute(){
 			outputNames.push_back(outputGroupFileName); outputTypes["group"].push_back(outputGroupFileName);
 			getOligos(fastaFileNames, qualFileNames);
 		}
-
+		
 		vector<unsigned long int> fastaFilePos;
 		vector<unsigned long int> qFilePos;
 		
@@ -337,7 +337,7 @@ int TrimSeqsCommand::execute(){
 		#endif
 		
 		if (m->control_pressed) {  return 0; }			
-			
+	
 		if(allFiles){
 			map<string, string> uniqueFastaNames;// so we don't add the same groupfile multiple times
 			map<string, string>::iterator it;
@@ -345,19 +345,21 @@ int TrimSeqsCommand::execute(){
 			for(int i=0;i<fastaFileNames.size();i++){
 				for(int j=0;j<fastaFileNames[0].size();j++){
 					if (fastaFileNames[i][j] != "") {
-						if(m->isBlank(fastaFileNames[i][j])){
-							remove(fastaFileNames[i][j].c_str());
-							namesToRemove.insert(fastaFileNames[i][j]);
+						if (namesToRemove.count(fastaFileNames[i][j]) == 0) {
+							if(m->isBlank(fastaFileNames[i][j])){
+								remove(fastaFileNames[i][j].c_str());
+								namesToRemove.insert(fastaFileNames[i][j]);
 							
-							if(qFileName != ""){
-								remove(qualFileNames[i][j].c_str());
-								namesToRemove.insert(qualFileNames[i][j]);
+								if(qFileName != ""){
+									remove(qualFileNames[i][j].c_str());
+									namesToRemove.insert(qualFileNames[i][j]);
+								}
+							}else{	
+								it = uniqueFastaNames.find(fastaFileNames[i][j]);
+								if (it == uniqueFastaNames.end()) {	
+									uniqueFastaNames[fastaFileNames[i][j]] = barcodeNameVector[i];	
+								}	
 							}
-						}else{	
-							it = uniqueFastaNames.find(fastaFileNames[i][j]);
-							if (it == uniqueFastaNames.end()) {	
-								uniqueFastaNames[fastaFileNames[i][j]] = barcodeNameVector[i];	
-							}	
 						}
 					}
 				}
@@ -1027,27 +1029,30 @@ void TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
 							comboGroupName = barcodeNameVector[itBar->second] + "." + primerNameVector[itPrimer->second];
 						}
 					}
-
-					ofstream temp;
-					fastaFileName = outputDir + m->getRootName(m->getSimpleName(fastaFile)) + comboGroupName + ".fasta";
-					if (uniqueNames.count(fastaFileName) == 0) {
-						outputNames.push_back(fastaFileName);
-						outputTypes["fasta"].push_back(fastaFileName);
-						uniqueNames.insert(fastaFileName);
-					}
 					
-					fastaFileNames[itBar->second][itPrimer->second] = fastaFileName;
-					m->openOutputFile(fastaFileName, temp);		temp.close();
-
-					if(qFileName != ""){
-						qualFileName = outputDir + m->getRootName(m->getSimpleName(qFileName)) + comboGroupName + ".qual";
+					if ((comboGroupName == "") || (comboGroupName == ".")) {}
+					else {
+						ofstream temp;
+						fastaFileName = outputDir + m->getRootName(m->getSimpleName(fastaFile)) + comboGroupName + ".fasta";
 						if (uniqueNames.count(fastaFileName) == 0) {
-							outputNames.push_back(qualFileName);
-							outputTypes["qfile"].push_back(qualFileName);
+							outputNames.push_back(fastaFileName);
+							outputTypes["fasta"].push_back(fastaFileName);
+							uniqueNames.insert(fastaFileName);
 						}
 						
-						qualFileNames[itBar->second][itPrimer->second] = qualFileName;
-						m->openOutputFile(qualFileName, temp);		temp.close();
+						fastaFileNames[itBar->second][itPrimer->second] = fastaFileName;
+						m->openOutputFile(fastaFileName, temp);		temp.close();
+						
+						if(qFileName != ""){
+							qualFileName = outputDir + m->getRootName(m->getSimpleName(qFileName)) + comboGroupName + ".qual";
+							if (uniqueNames.count(fastaFileName) == 0) {
+								outputNames.push_back(qualFileName);
+								outputTypes["qfile"].push_back(qualFileName);
+							}
+							
+							qualFileNames[itBar->second][itPrimer->second] = qualFileName;
+							m->openOutputFile(qualFileName, temp);		temp.close();
+						}
 					}
 				}
 			}
