@@ -309,9 +309,11 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 					
 					templatefile = validParameter.validFile(parameters, "reference", true);
 					if (templatefile == "not open") { abort = true; }
-					else if (templatefile == "not found") { templatefile = "";  m->mothurOut("reference is a required parameter for the chimera.slayer command."); m->mothurOutEndLine(); abort = true;  }	
+					else if (templatefile == "not found") { templatefile = "";  m->mothurOut("reference is a required parameter for the chimera.uchime command."); m->mothurOutEndLine(); abort = true;  }	
 				}
-			}
+			}else if (hasName) {  templatefile = "self"; }
+			else { templatefile = "";  m->mothurOut("reference is a required parameter for the chimera.uchime command, unless you have a namefile."); m->mothurOutEndLine(); abort = true;  }	
+
 			
 			string temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
@@ -370,7 +372,7 @@ int ChimeraUchimeCommand::execute(){
 			int start = time(NULL);	
 			string nameFile = "";
 			
-			if (templatefile == "self") { //you want to run slayer with a refernce template
+			if (templatefile == "self") { //you want to run uchime with a refernce template
 				
 				#ifdef USE_MPI	
 					int pid; 
@@ -693,6 +695,8 @@ int ChimeraUchimeCommand::driver(string outputFName, string filename, string acc
 		//free memory
 		for(int i = 0; i < cPara.size(); i++)  {  delete[] cPara[i];  }
 		delete[] uchimeParameters; 
+		
+		if (m->control_pressed) { return 0; }
 		
 		//create accnos file from uchime results
 		ifstream in; 

@@ -305,9 +305,10 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 					
 					templatefile = validParameter.validFile(parameters, "reference", true);
 					if (templatefile == "not open") { abort = true; }
-					else if (templatefile == "not found") { templatefile = "";  m->mothurOut("reference is a required parameter for the chimera.slayer command."); m->mothurOutEndLine(); abort = true;  }	
+					else if (templatefile == "not found") { templatefile = "";  m->mothurOut("reference is a required parameter for the chimera.slayer command, unless and namefile is given."); m->mothurOutEndLine(); abort = true;  }	
 				}
-			}
+			}else if (hasName) {  templatefile = "self"; }
+			else { templatefile = "";  m->mothurOut("reference is a required parameter for the chimera.slayer command."); m->mothurOutEndLine(); abort = true;  }	
 			
 			string temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
