@@ -70,8 +70,8 @@ ShhherCommand::ShhherCommand(){
 		setParameters();
 		
 		//initialize outputTypes
-		vector<string> tempOutNames;
-		outputTypes["pn.dist"] = tempOutNames;
+//		vector<string> tempOutNames;
+//		outputTypes["pn.dist"] = tempOutNames;
 
 	}
 	catch(exception& e) {
@@ -116,7 +116,7 @@ ShhherCommand::ShhherCommand(string option) {
 			
 			//initialize outputTypes
 			vector<string> tempOutNames;
-			outputTypes["pn.dist"] = tempOutNames;
+//			outputTypes["pn.dist"] = tempOutNames;
 			//			outputTypes["fasta"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
@@ -160,11 +160,19 @@ ShhherCommand::ShhherCommand(string option) {
 			}
 			else if (flowFileName == "not open" || flowFilesFileName == "not open") { abort = true; }
 			
-			if(flowFileName != "not found"){	compositeFASTAFileName = "";	}
+			if(flowFileName != "not found"){
+				compositeFASTAFileName = "";	
+				compositeNamesFileName = "";	
+			}
 			else{
-				compositeFASTAFileName = flowFilesFileName.substr(0, flowFilesFileName.length()-10) + "pn.fasta";
 				ofstream temp;
+
+				compositeFASTAFileName = flowFilesFileName.substr(0, flowFilesFileName.length()-10) + "shhh.fasta";
 				m->openOutputFile(compositeFASTAFileName, temp);
+				temp.close();
+				
+				compositeNamesFileName = flowFilesFileName.substr(0, flowFilesFileName.length()-10) + "shhh.names";
+				m->openOutputFile(compositeNamesFileName, temp);
 				temp.close();
 			}
 			
@@ -308,6 +316,11 @@ int ShhherCommand::execute(){
 				string listFileName = cluster(distFileName, namesFileName);
 
 				getOTUData(listFileName);
+
+				remove(distFileName.c_str());
+				remove(namesFileName.c_str());
+				remove(listFileName.c_str());
+				
 				initPyroCluster();
 
 				for(int i=1;i<ncpus;i++){
@@ -445,18 +458,17 @@ int ShhherCommand::execute(){
 				m->mothurOut("\nFinalizing...\n");
 				fill();
 				setOTUs();
+				
 				vector<int> otuCounts(numOTUs, 0);
 				for(int i=0;i<numSeqs;i++)	{	otuCounts[otuData[i]]++;	}
 				calcCentroidsDriver(0, numOTUs);
+				
 				writeQualities(otuCounts);
 				writeSequences(otuCounts);
 				writeNames(otuCounts);
 				writeClusters(otuCounts);
 				writeGroups();
 				
-				remove(distFileName.c_str());
-				remove(namesFileName.c_str());
-				remove(listFileName.c_str());
 								 
 				m->mothurOut("Total time to process " + toString(flowFileName) + ":\t" + toString(time(NULL) - begTime) + '\t' + toString((clock() - begClock)/(double)CLOCKS_PER_SEC) + '\n');			
 			}
@@ -568,6 +580,17 @@ int ShhherCommand::execute(){
 		}		
 		MPI_Barrier(MPI_COMM_WORLD);
 
+		
+		if(compositeFASTAFileName != ""){
+			outputNames.push_back(compositeFASTAFileName);
+			outputNames.push_back(compositeNamesFileName);
+		}
+
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+		m->mothurOutEndLine();
+		
 		return 0;
 
 	}
@@ -608,7 +631,7 @@ string ShhherCommand::flowDistMPI(int startSeq, int stopSeq){
 		
 		m->mothurOut(toString(stopSeq) + '\t' + toString(time(NULL) - begTime) + '\t' + toString((clock()-begClock)/CLOCKS_PER_SEC) + '\n');
 		
-		string fDistFileName = flowFileName.substr(0,flowFileName.find_last_of('.')) + ".pn.dist";
+		string fDistFileName = flowFileName.substr(0,flowFileName.find_last_of('.')) + ".shhh.dist";
 		if(pid != 0){	fDistFileName += ".temp." + toString(pid);	}
 
 		ofstream distFile(fDistFileName.c_str());
@@ -670,6 +693,10 @@ int ShhherCommand::execute(){
 			string listFileName = cluster(distFileName, namesFileName);
 			getOTUData(listFileName);
 			
+			remove(distFileName.c_str());
+			remove(namesFileName.c_str());
+			remove(listFileName.c_str());
+			
 			initPyroCluster();
 			
 			double maxDelta = 0;
@@ -715,12 +742,19 @@ int ShhherCommand::execute(){
 			writeClusters(otuCounts);
 			writeGroups();
 			
-			remove(distFileName.c_str());
-			remove(namesFileName.c_str());
-			remove(listFileName.c_str());
-			
 			m->mothurOut("Total time to process " + flowFileName + ":\t" + toString(time(NULL) - begTime) + '\t' + toString((clock() - begClock)/(double)CLOCKS_PER_SEC) + '\n');
 		}
+		
+		if(compositeFASTAFileName != ""){
+			outputNames.push_back(compositeFASTAFileName);
+			outputNames.push_back(compositeNamesFileName);
+		}
+
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+		m->mothurOutEndLine();
+		
 		return 0;
 	}
 	catch(exception& e) {
@@ -1012,7 +1046,7 @@ void ShhherCommand::flowDistParentFork(string distFileName, int startSeq, int st
 
 string ShhherCommand::createDistFile(int processors){
 	try{
-		string fDistFileName = flowFileName.substr(0,flowFileName.find_last_of('.')) + ".pn.dist";
+		string fDistFileName = flowFileName.substr(0,flowFileName.find_last_of('.')) + ".shhh.dist";
 				
 		unsigned long int begTime = time(NULL);
 		double begClock = clock();
@@ -1100,7 +1134,7 @@ string ShhherCommand::createNamesFile(){
 			duplicateNames[mapSeqToUnique[i]] += seqNameVector[i] + ',';
 		}
 		
-		string nameFileName = flowFileName.substr(0,flowFileName.find_last_of('.')) + ".pn.names";
+		string nameFileName = flowFileName.substr(0,flowFileName.find_last_of('.')) + ".shhh.names";
 		
 		ofstream nameFile;
 		m->openOutputFile(nameFileName, nameFile);
@@ -1149,7 +1183,7 @@ string ShhherCommand::cluster(string distFileName, string namesFileName){
 		
 		list->setLabel(toString(cutoff));
 		
-		string listFileName = flowFileName.substr(0,flowFileName.find_last_of('.')) + ".pn.list";
+		string listFileName = flowFileName.substr(0,flowFileName.find_last_of('.')) + ".shhh.list";
 		ofstream listFile;
 		m->openOutputFile(listFileName, listFile);
 		list->print(listFile);
@@ -1880,7 +1914,7 @@ void ShhherCommand::setOTUs(){
 void ShhherCommand::writeQualities(vector<int> otuCounts){
 	
 	try {
-		string qualityFileName = flowFileName.substr(0,flowFileName.find_last_of('.')) + ".pn.qual";
+		string qualityFileName = flowFileName.substr(0,flowFileName.find_last_of('.')) + ".shhh.qual";
 
 		ofstream qualityFile;
 		m->openOutputFile(qualityFileName, qualityFile);
@@ -1969,7 +2003,8 @@ void ShhherCommand::writeQualities(vector<int> otuCounts){
 			}
 		}
 		qualityFile.close();
-		
+		outputNames.push_back(qualityFileName);
+
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ShhherCommand", "writeQualities");
@@ -1982,7 +2017,7 @@ void ShhherCommand::writeQualities(vector<int> otuCounts){
 void ShhherCommand::writeSequences(vector<int> otuCounts){
 	try {
 		
-		string fastaFileName = flowFileName.substr(0,flowFileName.find_last_of('.')) + ".pn.fasta";
+		string fastaFileName = flowFileName.substr(0,flowFileName.find_last_of('.')) + ".shhh.fasta";
 		ofstream fastaFile;
 		m->openOutputFile(fastaFileName, fastaFile);
 		
@@ -2008,7 +2043,9 @@ void ShhherCommand::writeSequences(vector<int> otuCounts){
 			}
 		}
 		fastaFile.close();
-		
+
+		outputNames.push_back(fastaFileName);
+
 		if(compositeFASTAFileName != ""){
 			m->appendFiles(fastaFileName, compositeFASTAFileName);
 		}
@@ -2023,7 +2060,7 @@ void ShhherCommand::writeSequences(vector<int> otuCounts){
 
 void ShhherCommand::writeNames(vector<int> otuCounts){
 	try {
-		string nameFileName = flowFileName.substr(0,flowFileName.find_last_of('.')) + ".pn.final.names";
+		string nameFileName = flowFileName.substr(0,flowFileName.find_last_of('.')) + ".shhh.names";
 		ofstream nameFile;
 		m->openOutputFile(nameFileName, nameFile);
 		
@@ -2039,6 +2076,12 @@ void ShhherCommand::writeNames(vector<int> otuCounts){
 			}
 		}
 		nameFile.close();
+		outputNames.push_back(nameFileName);
+		
+		
+		if(compositeNamesFileName != ""){
+			m->appendFiles(nameFileName, compositeNamesFileName);
+		}		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ShhherCommand", "writeNames");
@@ -2051,7 +2094,7 @@ void ShhherCommand::writeNames(vector<int> otuCounts){
 void ShhherCommand::writeGroups(){
 	try {
 		string fileRoot = flowFileName.substr(0,flowFileName.find_last_of('.'));
-		string groupFileName = fileRoot + ".pn.groups";
+		string groupFileName = fileRoot + ".shhh.groups";
 		ofstream groupFile;
 		m->openOutputFile(groupFileName, groupFile);
 		
@@ -2059,6 +2102,8 @@ void ShhherCommand::writeGroups(){
 			groupFile << seqNameVector[i] << '\t' << fileRoot << endl;
 		}
 		groupFile.close();
+		outputNames.push_back(groupFileName);
+
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ShhherCommand", "writeGroups");
@@ -2070,7 +2115,7 @@ void ShhherCommand::writeGroups(){
 
 void ShhherCommand::writeClusters(vector<int> otuCounts){
 	try {
-		string otuCountsFileName = flowFileName.substr(0,flowFileName.find_last_of('.')) + ".pn.counts";
+		string otuCountsFileName = flowFileName.substr(0,flowFileName.find_last_of('.')) + ".shhh.counts";
 		ofstream otuCountsFile;
 		m->openOutputFile(otuCountsFileName, otuCountsFile);
 		
@@ -2111,6 +2156,8 @@ void ShhherCommand::writeClusters(vector<int> otuCounts){
 			}
 		}
 		otuCountsFile.close();
+		outputNames.push_back(otuCountsFileName);
+
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ShhherCommand", "writeClusters");

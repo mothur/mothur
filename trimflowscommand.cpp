@@ -124,14 +124,6 @@ TrimFlowsCommand::TrimFlowsCommand(string option)  {
 					if (path == "") {	parameters["oligos"] = inputDir + it->second;		}
 				}
 				
-				
-//				it = parameters.find("group");
-//				//user has given a template file
-//				if(it != parameters.end()){ 
-//					path = m->hasPath(it->second);
-//					//if the user has not given a path then, add inputdir. else leave path alone.
-//					if (path == "") {	parameters["group"] = inputDir + it->second;		}
-//				}
 			}
 			
 			
@@ -157,10 +149,10 @@ TrimFlowsCommand::TrimFlowsCommand(string option)  {
 			// ...at some point should added some additional type checking...
 			
 			string temp;
-			temp = validParameter.validFile(parameters, "minflows", false);	if (temp == "not found") { temp = "360"; }
+			temp = validParameter.validFile(parameters, "minflows", false);	if (temp == "not found") { temp = "450"; }
 			convert(temp, minFlows);  
 
-			temp = validParameter.validFile(parameters, "maxflows", false);	if (temp == "not found") { temp = "720"; }
+			temp = validParameter.validFile(parameters, "maxflows", false);	if (temp == "not found") { temp = "450"; }
 			convert(temp, maxFlows);  
 			
 			
@@ -283,7 +275,7 @@ int TrimFlowsCommand::execute(){
 					if (pFile==NULL) perror ("Error opening file");
 					else{
 						fseek (pFile, 0, SEEK_END);
-						size=ftell (pFile);
+						size=ftell(pFile);
 						fclose (pFile);
 					}
 
@@ -292,6 +284,8 @@ int TrimFlowsCommand::execute(){
 					}
 					else{
 						output << barcodePrimerComboFileNames[i][j] << endl;
+						outputNames.push_back(barcodePrimerComboFileNames[i][j]);
+						outputTypes["flow"].push_back(barcodePrimerComboFileNames[i][j]);
 					}
 				}
 			}
@@ -306,14 +300,14 @@ int TrimFlowsCommand::execute(){
 			output.close();
 		}
 		outputTypes["flow.files"].push_back(flowFilesFileName);
-		outputNames.push_back(flowFileName);
+		outputNames.push_back(flowFilesFileName);
 		
-		//set fasta file as new current fastafile
-		string current = "";
-		itTypes = outputTypes.find("fasta");
-		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setFastaFile(current); }
-		}
+//		set fasta file as new current fastafile
+//		string current = "";
+//		itTypes = outputTypes.find("fasta");
+//		if (itTypes != outputTypes.end()) {
+//			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setFastaFile(current); }
+//		}
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -581,8 +575,6 @@ void TrimFlowsCommand::getOligos(vector<vector<string> >& outFlowFileNames){
 						fileName = outputDir + m->getRootName(m->getSimpleName(flowFileName)) + comboGroupName + ".flow";
 					}
 					
-					outputNames.push_back(fileName);
-					outputTypes["flow"].push_back(fileName);
 					outFlowFileNames[itBar->second][itPrimer->second] = fileName;
 					
 					ofstream temp;
