@@ -369,7 +369,7 @@ int TrimSeqsCommand::execute(){
 		#endif
 		
 		if (m->control_pressed) {  return 0; }			
-	
+ 	
 		if(allFiles){
 			map<string, string> uniqueFastaNames;// so we don't add the same groupfile multiple times
 			map<string, string>::iterator it;
@@ -680,17 +680,17 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 					}
 				}
 				else{
+					if(nameFile != ""){ //needs to be before the currSeq name is changed
+						map<string, string>::iterator itName = nameMap.find(currSeq.getName());
+						if (itName != nameMap.end()) {  scrapNameFile << itName->first << '\t' << itName->second << endl; }
+						else { m->mothurOut("[ERROR]: " + currSeq.getName() + " is not in your namefile, please correct."); m->mothurOutEndLine(); }
+					}
 					currSeq.setName(currSeq.getName() + '|' + trashCode);
 					currSeq.setUnaligned(origSeq);
 					currSeq.setAligned(origSeq);
 					currSeq.printSequence(scrapFASTAFile);
 					if(qFileName != ""){
 						currQual.printQScores(scrapQualFile);
-					}
-					if(nameFile != ""){
-						map<string, string>::iterator itName = nameMap.find(currSeq.getName());
-						if (itName != nameMap.end()) {  scrapNameFile << itName->first << '\t' << itName->second << endl; }
-							else { m->mothurOut("[ERROR]: " + currSeq.getName() + " is not in your namefile, please correct."); m->mothurOutEndLine(); }
 					}
 				}
 				count++;
@@ -1143,7 +1143,7 @@ void TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
 					
 					if(qFileName != ""){
 						qualFileName = outputDir + m->getRootName(m->getSimpleName(qFileName)) + comboGroupName + ".qual";
-						if (uniqueNames.count(fastaFileName) == 0) {
+						if (uniqueNames.count(qualFileName) == 0) {
 							outputNames.push_back(qualFileName);
 							outputTypes["qfile"].push_back(qualFileName);
 						}
@@ -1154,7 +1154,7 @@ void TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
 					
 					if(nameFile != ""){
 						nameFileName = outputDir + m->getRootName(m->getSimpleName(nameFile)) + comboGroupName + ".names";
-						if (uniqueNames.count(fastaFileName) == 0) {
+						if (uniqueNames.count(nameFileName) == 0) {
 							outputNames.push_back(nameFileName);
 							outputTypes["name"].push_back(nameFileName);
 						}
