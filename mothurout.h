@@ -66,6 +66,7 @@ class MothurOut {
 		void gobble(istream&);
 		void gobble(istringstream&);
 		map<string, int> readNames(string);
+		int readNames(string, map<string, string>&);
 		int readNames(string, vector<seqPriorityNode>&, map<string, string>&);
 		
 		//searchs and checks
