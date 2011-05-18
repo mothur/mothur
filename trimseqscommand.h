@@ -41,7 +41,7 @@ private:
 		linePair(unsigned long int i, unsigned long int j) : start(i), end(j) {}
 	};
 	
-	void getOligos(vector<vector<string> >&, vector<vector<string> >&);
+	void getOligos(vector<vector<string> >&, vector<vector<string> >&, vector<vector<string> >&);
 	int stripBarcode(Sequence&, QualityScores&, int&);
 	int stripForward(Sequence&, QualityScores&, int&);
 	bool stripReverse(Sequence&, QualityScores&);
@@ -56,7 +56,7 @@ private:
 	int countDiffs(string, string);
 
 	bool abort;
-	string fastaFile, oligoFile, qFileName, groupfile, outputDir;
+	string fastaFile, oligoFile, qFileName, groupfile, nameFile, outputDir;
 	
 	bool flip, allFiles, qtrim;
 	int numFPrimers, numRPrimers, maxAmbig, maxHomoP, minLength, maxLength, processors, tdiffs, bdiffs, pdiffs, comboStarts;
@@ -72,13 +72,14 @@ private:
 	vector<string> primerNameVector;	//needed here?
 	vector<string> barcodeNameVector;	//needed here?
 	map<string, int> groupCounts;  
+	map<string, string> nameMap;
 
 	vector<int> processIDS;   //processid
 	vector<linePair*> lines;
 	vector<linePair*> qLines;
 	
-	int driverCreateTrim(string, string, string, string, string, string, string, vector<vector<string> >, vector<vector<string> >, linePair*, linePair*);	
-	int createProcessesCreateTrim(string, string, string, string, string, string, string, vector<vector<string> >, vector<vector<string> >);
+	int driverCreateTrim(string, string, string, string, string, string, string, string, string, vector<vector<string> >, vector<vector<string> >, vector<vector<string> >, linePair*, linePair*);	
+	int createProcessesCreateTrim(string, string, string, string, string, string, string, string, string, vector<vector<string> >, vector<vector<string> >, vector<vector<string> >);
 	int setLines(string, string, vector<unsigned long int>&, vector<unsigned long int>&);
 };
 
