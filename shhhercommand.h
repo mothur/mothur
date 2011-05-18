@@ -33,7 +33,7 @@ private:
 	
 	int abort;
 	
-	string outputDir, flowFileName, flowFilesFileName, lookupFileName, compositeFASTAFileName;
+	string outputDir, flowFileName, flowFilesFileName, lookupFileName, compositeFASTAFileName, compositeNamesFileName;
 
 	int processors, maxIters;
 	float cutoff, sigma, minDelta;
@@ -66,7 +66,9 @@ private:
 	vector<int> mapSeqToUnique;
 	vector<int> mapUniqueToSeq;
 	vector<int> uniqueLengths;
-	
+
+	vector<string> outputNames;
+
 	int numSeqs, numUniques, numOTUs, numFlowCells;
 	
 	void getSingleLookUp();
