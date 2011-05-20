@@ -154,13 +154,8 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 			
 			//check for required parameters
 			groupfile = validParameter.validFile(parameters, "group", true);
-			if (groupfile == "not open") { abort = true; }
-			else if (groupfile == "not found") { 
-				//if there is a current design file, use it
-				groupfile = m->getGroupFile(); 
-				if (groupfile != "") { m->mothurOut("Using " + groupfile + " as input file for the group parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current group file and the group parameter is required."); m->mothurOutEndLine(); abort = true; }								
-			}
+			if (groupfile == "not open") { groupfile = ""; abort = true; }
+			else if (groupfile == "not found") { groupfile = ""; }
 			
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not open") { abort = true; }
@@ -217,9 +212,16 @@ int PhyloDiversityCommand::execute(){
 		
 		m->setTreeFile(treefile);
 		
-		//read in group map info.
-		tmap = new TreeMap(groupfile);
-		tmap->readMap();
+		if (groupfile != "") {
+			//read in group map info.
+			tmap = new TreeMap(groupfile);
+			tmap->readMap();
+		}else{ //fake out by putting everyone in one group
+			Tree* tree = new Tree(treefile); delete tree;  //extracts names from tree to make faked out groupmap
+			tmap = new TreeMap();
+			
+			for (int i = 0; i < m->Treenames.size(); i++) { tmap->addSeq(m->Treenames[i], "Group1"); }
+		}
 		
 		if (namefile != "") { readNamesFile(); }
 		
@@ -273,7 +275,7 @@ int PhyloDiversityCommand::execute(){
 		}
 		
 		SharedUtil* util = new SharedUtil();
-		util->setGroups(m->Groups, tmap->namesOfGroups, "treegroup");	//sets the groups the user wants to analyze
+		util->setGroups(m->Groups, tmap->namesOfGroups, "phylo.diversity");	//sets the groups the user wants to analyze
 		delete util;
 		
 		//incase the user had some mismatches between the tree and group files we don't want group xxx to be analyzed
