@@ -22,6 +22,7 @@ vector<string> SeqErrorCommand::setParameters(){
 		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
 		CommandParameter pignorechimeras("ignorechimeras", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pignorechimeras);
 		CommandParameter pthreshold("threshold", "Number", "", "1.0", "", "", "",false,false); parameters.push_back(pthreshold);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
 		
@@ -200,6 +201,10 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 			
 			temp = validParameter.validFile(parameters, "ignorechimeras", false);	if (temp == "not found") { temp = "1"; }
 			convert(temp, ignoreChimeras);  
+			
+			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
+			m->setProcessors(temp);
+			convert(temp, processors); 
 
 			substitutionMatrix.resize(6);
 			for(int i=0;i<6;i++){	substitutionMatrix[i].resize(6,0);	}

@@ -70,7 +70,7 @@ private:
 	string queryFileName, referenceFileName, qualFileName, reportFileName, namesFileName, outputDir;
 	double threshold;
 	bool ignoreChimeras;
-	int numRefs;
+	int numRefs, processors;
 	int maxLength;
 	ofstream errorSummaryFile, errorSeqFile;
 	vector<string> outputNames;
