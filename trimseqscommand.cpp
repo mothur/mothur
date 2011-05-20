@@ -432,8 +432,9 @@ int TrimSeqsCommand::execute(){
 		//output group counts
 		m->mothurOutEndLine();
 		int total = 0;
+		if (groupCounts.size() != 0) {  m->mothurOut("Group count: \n");  }
 		for (map<string, int>::iterator it = groupCounts.begin(); it != groupCounts.end(); it++) {
-			 total += it->second; m->mothurOut("Group " + it->first + " contains " + toString(it->second) + " sequences."); m->mothurOutEndLine(); 
+			 total += it->second; m->mothurOut(it->first + "\t" + toString(it->second)); m->mothurOutEndLine(); 
 		}
 		if (total != 0) { m->mothurOut("Total of all groups is " + toString(total)); m->mothurOutEndLine(); }
 		
@@ -649,6 +650,17 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 						if (primers.size() != 0) { if (primerNameVector[primerIndex] != "") { thisGroup += "." + primerNameVector[primerIndex]; } }
 						
 						outGroupsFile << currSeq.getName() << '\t' << thisGroup << endl;
+						
+						if (nameFile != "") {
+							map<string, string>::iterator itName = nameMap.find(currSeq.getName());
+							if (itName != nameMap.end()) { 
+								vector<string> thisSeqsNames; 
+								m->splitAtChar(itName->second, thisSeqsNames, ',');
+								for (int k = 1; k < thisSeqsNames.size(); k++) { //start at 1 to skip self
+									outGroupsFile << thisSeqsNames[k] << '\t' << thisGroup << endl;
+								}
+							}else { m->mothurOut("[ERROR]: " + currSeq.getName() + " is not in your namefile, please correct."); m->mothurOutEndLine(); }							
+						}
 						
 						map<string, int>::iterator it = groupCounts.find(thisGroup);
 						if (it == groupCounts.end()) {	groupCounts[thisGroup] = 1; }
