@@ -31,7 +31,7 @@ vector<string> ShhherCommand::setParameters(){
 	try {
 		CommandParameter pflow("flow", "InputTypes", "", "", "none", "fileflow", "none",false,false); parameters.push_back(pflow);
 		CommandParameter pfile("file", "InputTypes", "", "", "none", "fileflow", "none",false,false); parameters.push_back(pfile);
-		CommandParameter plookup("lookup", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(plookup);
+		CommandParameter plookup("lookup", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(plookup);
 		CommandParameter pcutoff("cutoff", "Number", "", "0.01", "", "", "",false,false); parameters.push_back(pcutoff);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
 		CommandParameter pmaxiter("maxiter", "Number", "", "1000", "", "", "",false,false); parameters.push_back(pmaxiter);
@@ -187,9 +187,74 @@ ShhherCommand::ShhherCommand(string option) {
 			// ...at some point should added some additional type checking...
 			string temp;
 			temp = validParameter.validFile(parameters, "lookup", true);
-			if (temp == "not found")	{	lookupFileName = "LookUp_Titanium.pat";	}
-			else if(temp == "not open")	{	abort = true;			} 
-			else						{	lookupFileName = temp;	}
+			if (temp == "not found")	{	
+				lookupFileName = "LookUp_Titanium.pat";	
+				
+				int ableToOpen;
+				ifstream in;
+				ableToOpen = m->openInputFile(lookupFileName, in, "noerror");
+				in.close();	
+				
+				//if you can't open it, try input location
+				if (ableToOpen == 1) {
+					if (inputDir != "") { //default path is set
+						string tryPath = inputDir + lookupFileName;
+						m->mothurOut("Unable to open " + lookupFileName + ". Trying input directory " + tryPath); m->mothurOutEndLine();
+						ifstream in2;
+						ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+						in2.close();
+						lookupFileName = tryPath;
+					}
+				}
+				
+				//if you can't open it, try default location
+				if (ableToOpen == 1) {
+					if (m->getDefaultPath() != "") { //default path is set
+						string tryPath = m->getDefaultPath() + m->getSimpleName(lookupFileName);
+						m->mothurOut("Unable to open " + lookupFileName + ". Trying default " + tryPath); m->mothurOutEndLine();
+						ifstream in2;
+						ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+						in2.close();
+						lookupFileName = tryPath;
+					}
+				}
+				
+				//if you can't open it its not in current working directory or inputDir, try mothur excutable location
+				if (ableToOpen == 1) {
+					string exepath = m->argv;
+					string tempPath = exepath;
+					for (int i = 0; i < exepath.length(); i++) { tempPath[i] = tolower(exepath[i]); }
+					exepath = exepath.substr(0, (tempPath.find_last_of('m')));
+					
+					string tryPath = m->getFullPathName(exepath) + m->getSimpleName(lookupFileName);
+					m->mothurOut("Unable to open " + lookupFileName + ". Trying mothur's executable location " + tryPath); m->mothurOutEndLine();
+					ifstream in2;
+					ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+					in2.close();
+					lookupFileName = tryPath;
+				}
+				
+				if (ableToOpen == 1) {  m->mothurOut("Unable to open " + lookupFileName + "."); m->mothurOutEndLine(); abort=true;  }
+			}
+			else if(temp == "not open")	{	
+				
+				lookupFileName = validParameter.validFile(parameters, "lookup", false);
+				
+				//if you can't open it its not inputDir, try mothur excutable location
+				string exepath = m->argv;
+				string tempPath = exepath;
+				for (int i = 0; i < exepath.length(); i++) { tempPath[i] = tolower(exepath[i]); }
+				exepath = exepath.substr(0, (tempPath.find_last_of('m')));
+					
+				string tryPath = m->getFullPathName(exepath) + lookupFileName;
+				m->mothurOut("Unable to open " + lookupFileName + ". Trying mothur's executable location " + tryPath); m->mothurOutEndLine();
+				ifstream in2;
+				int ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+				in2.close();
+				lookupFileName = tryPath;
+				
+				if (ableToOpen == 1) {  m->mothurOut("Unable to open " + lookupFileName + "."); m->mothurOutEndLine(); abort=true;  }
+			}else						{	lookupFileName = temp;	}
 			
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
