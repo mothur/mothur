@@ -16,8 +16,9 @@
 class RefChimeraTest {
 	
 public:
-	RefChimeraTest(vector<Sequence>&, string);
-	int analyzeQuery(string, string);
+	RefChimeraTest(vector<Sequence>&);
+	int printHeader(ofstream&);
+	int analyzeQuery(string, string, ofstream&);
 	int getClosestRefIndex();
 private:
 	int getMismatches(string&, vector<vector<int> >&, vector<vector<int> >&, int&);
@@ -32,7 +33,7 @@ private:
 	int numRefSeqs;
 	int alignLength;
 	int bestMatch;
-	ofstream chimeraReportFile;
+	//ofstream chimeraReportFile;
 	
 	MothurOut* m;
 };

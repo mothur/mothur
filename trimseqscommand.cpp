@@ -240,7 +240,7 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 			
 			temp = validParameter.validFile(parameters, "name", true);	
 			if (temp == "not found")	{	nameFile = "";		}
-			else if(temp == "not open")	{	abort = true;		}
+			else if(temp == "not open")	{	nameFile = "";	abort = true;		}
 			else						{	nameFile = temp;	}
 			
 			temp = validParameter.validFile(parameters, "qthreshold", false);	if (temp == "not found") { temp = "0"; }
@@ -818,10 +818,14 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
 		ofstream temp;
 		m->openOutputFile(trimFASTAFileName, temp);		temp.close();
 		m->openOutputFile(scrapFASTAFileName, temp);	temp.close();
-		m->openOutputFile(trimQualFileName, temp);		temp.close();
-		m->openOutputFile(scrapQualFileName, temp);		temp.close();
-		m->openOutputFile(trimNameFileName, temp);		temp.close();
-		m->openOutputFile(scrapNameFileName, temp);		temp.close();
+		if(qFileName != ""){
+			m->openOutputFile(trimQualFileName, temp);		temp.close();
+			m->openOutputFile(scrapQualFileName, temp);		temp.close();
+		}
+		if (nameFile != "") {
+			m->openOutputFile(trimNameFileName, temp);		temp.close();
+			m->openOutputFile(scrapNameFileName, temp);		temp.close();
+		}
 
 		driverCreateTrim(filename, qFileName, trimFASTAFileName, scrapFASTAFileName, trimQualFileName, scrapQualFileName, trimNameFileName, scrapNameFileName, groupFile, fastaFileNames, qualFileNames, nameFileNames, lines[0], qLines[0]);
 		

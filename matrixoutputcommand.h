@@ -38,21 +38,30 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	void printSims(ostream&);
+	struct linePair {
+		int start;
+		int end;
+	};
+	vector<linePair> lines;
+	
+	void printSims(ostream&, vector< vector<float> >&);
 	int process(vector<SharedRAbundVector*>);
 	
 	vector<Calculator*> matrixCalculators;
-	vector< vector<float> > simMatrix;
+	//vector< vector<float> > simMatrix;
 	InputData* input;
 	vector<SharedRAbundVector*> lookup;
 	string exportFileName, output, sharedfile;
-	int numGroups;
+	int numGroups, processors;
 	ofstream out;
 
 	bool abort, allLines;
 	set<string> labels; //holds labels to be used
 	string outputFile, calc, groups, label, outputDir;
 	vector<string>  Estimators, Groups, outputNames; //holds estimators to be used
+	int process(vector<SharedRAbundVector*>, string, string);
+	int driver(vector<SharedRAbundVector*>, int, int, vector< vector<seqDist> >&);
+
 };
 	
 	

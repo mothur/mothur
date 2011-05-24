@@ -15,7 +15,7 @@
 
 /***********************************************************************/
 
-SequenceDB::SequenceDB() {  m = MothurOut::getInstance();  }
+SequenceDB::SequenceDB() {  m = MothurOut::getInstance();  length = 0; samelength = true; }
 /***********************************************************************/
 //the clear function free's the memory
 SequenceDB::~SequenceDB() { clear(); }
@@ -24,19 +24,25 @@ SequenceDB::~SequenceDB() { clear(); }
 
 SequenceDB::SequenceDB(int newSize) {
 	data.resize(newSize, Sequence());
+	length = 0; samelength = true;
 }
 
 /***********************************************************************/
 
 SequenceDB::SequenceDB(ifstream& filehandle) {
 	try{
+		length = 0; samelength = true;
 				
 		//read through file
 		while (!filehandle.eof()) {
 			//input sequence info into sequencedb
 			Sequence newSequence(filehandle);
 			
-			if (newSequence.getName() != "") {   data.push_back(newSequence);  }
+			if (newSequence.getName() != "") {   
+				if (length == 0) { length = newSequence.getAligned().length(); }
+				if (length != newSequence.getAligned().length()) { samelength = false; }
+				data.push_back(newSequence);  
+			}
 			
 			//takes care of white space
 			m->gobble(filehandle);
@@ -92,7 +98,10 @@ string SequenceDB::readSequence(ifstream& in) {
 				break;
 			}else {  sequence += line;	}
 		}
-			
+		
+		if (length == 0) { length = sequence.length(); }
+		if (length != sequence.length()) { samelength = false; }
+		
 		return sequence;
 	}
 	catch(exception& e) {
@@ -111,6 +120,9 @@ int SequenceDB::getNumSeqs() {
 
 void SequenceDB::set(int index, string newUnaligned) {
 	try {
+		if (length == 0) { length = newUnaligned.length(); }
+		if (length != newUnaligned.length()) { samelength = false; }
+		
 		data[index] = Sequence(data[index].getName(), newUnaligned);
 	}
 	catch(exception& e) {
@@ -123,6 +135,9 @@ void SequenceDB::set(int index, string newUnaligned) {
 
 void SequenceDB::set(int index, Sequence newSeq) {
 	try {
+		if (length == 0) { length = newSeq.getAligned().length(); }
+		if (length != newSeq.getAligned().length()) { samelength = false; }
+
 		data[index] = newSeq;
 	}
 	catch(exception& e) {
@@ -185,6 +200,9 @@ void SequenceDB::print(ostream& out) {
 
 void SequenceDB::push_back(Sequence newSequence) {
 	try {
+		if (length == 0) { length = newSequence.getAligned().length(); }
+		if (length != newSequence.getAligned().length()) { samelength = false; }
+
 		data.push_back(newSequence);
 	}
 	catch(exception& e) {

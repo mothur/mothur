@@ -211,7 +211,7 @@ RemoveLineageCommand::RemoveLineageCommand(string option)  {
 				if (taxons[0] == '\'') {  taxons = taxons.substr(1); }
 				if (taxons[(taxons.length()-1)] == '\'') {  taxons = taxons.substr(0, (taxons.length()-1)); }
 			}
-			
+			m->splitAtChar(taxons, listOfTaxons, '-');
 			
 			if ((fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == "") && (taxfile == ""))  { m->mothurOut("You must provide one of the following: fasta, name, group, alignreport, taxonomy or listfile."); m->mothurOutEndLine(); abort = true; }
 		
@@ -541,14 +541,18 @@ int RemoveLineageCommand::readTax(){
 		
 		bool wroteSomething = false;
 		
-		bool taxonsHasConfidence = false;
-		vector< map<string, float> > searchTaxons;
-		string noConfidenceTaxons = taxons;
-		int hasConPos = taxons.find_first_of('(');
-		if (hasConPos != string::npos) {  
-			taxonsHasConfidence = true; 
-			searchTaxons = getTaxons(taxons); 
-			noConfidenceTaxons = removeConfidences(taxons);
+		vector<bool> taxonsHasConfidence; taxonsHasConfidence.resize(listOfTaxons.size(), false);
+		vector< vector< map<string, float> > > searchTaxons; searchTaxons.resize(listOfTaxons.size());
+		vector<string> noConfidenceTaxons; noConfidenceTaxons.resize(listOfTaxons.size(), "");
+		
+		for (int i = 0; i < listOfTaxons.size(); i++) {
+			noConfidenceTaxons[i] = listOfTaxons[i];
+			int hasConPos = listOfTaxons[i].find_first_of('(');
+			if (hasConPos != string::npos) {  
+				taxonsHasConfidence[i] = true; 
+				searchTaxons[i] = getTaxons(listOfTaxons[i]); 
+				noConfidenceTaxons[i] = removeConfidences(listOfTaxons[i]);
+			}
 		}
 		
 		
@@ -559,102 +563,107 @@ int RemoveLineageCommand::readTax(){
 			in >> name;				//read from first column
 			in >> tax;			//read from second column
 			
-			string newtax = tax;
+			bool remove = false;
 			
-			//if the users file contains confidence scores we want to ignore them when searching for the taxons, unless the taxon has them
-			if (!taxonsHasConfidence) {
+			for (int j = 0; j < listOfTaxons.size(); j++) {
+				string newtax = tax;
 				
-				int hasConfidences = tax.find_first_of('(');
-				if (hasConfidences != string::npos) { 
-					newtax = removeConfidences(tax);
-				}
-				
-				int pos = newtax.find(taxons);
-				
-				if (pos == string::npos) { 
-					wroteSomething = true;
-					out << name << '\t' << tax << endl;
-				}else{ //this sequence contains the taxon the user wants to remove
-					names.insert(name);
-				}
-				
-			}else{//if taxons has them and you don't them remove taxons
-				int hasConfidences = tax.find_first_of('(');
-				if (hasConfidences == string::npos) { 
-				
-					int pos = newtax.find(noConfidenceTaxons);
+				//if the users file contains confidence scores we want to ignore them when searching for the taxons, unless the taxon has them
+				if (!taxonsHasConfidence[j]) {
 					
-					if (pos == string::npos) { 
-						wroteSomething = true;
-						out << name << '\t' << tax << endl;
-					}else{ //this sequence contains the taxon the user wants to remove
-						names.insert(name);
-					}
-				}else { //both have confidences so we want to make sure the users confidences are greater then or equal to the taxons
-					//first remove confidences from both and see if the taxonomy exists
-				
-					string noNewTax = tax;
 					int hasConfidences = tax.find_first_of('(');
 					if (hasConfidences != string::npos) { 
-						noNewTax = removeConfidences(tax);
+						newtax = removeConfidences(tax);
 					}
 					
-					int pos = noNewTax.find(noConfidenceTaxons);
+					int pos = newtax.find(noConfidenceTaxons[j]);
 					
-					if (pos != string::npos) { //if yes, then are the confidences okay
+					if (pos == string::npos) { 
+						//wroteSomething = true;
+						//out << name << '\t' << tax << endl;
+					}else{ //this sequence contains the taxon the user wants to remove
+						names.insert(name);
+						remove=true; break;
+					}
+					
+				}else{//if taxons has them and you don't them remove taxons
+					int hasConfidences = tax.find_first_of('(');
+					if (hasConfidences == string::npos) { 
 						
-						bool remove = false;
-						vector< map<string, float> > usersTaxon = getTaxons(newtax);
+						int pos = newtax.find(noConfidenceTaxons[j]);
 						
-						//the usersTaxon is most likely longer than the searchTaxons, and searchTaxon[0] may relate to userTaxon[4]
-						//we want to "line them up", so we will find the the index where the searchstring starts
-						int index = 0;
-						for (int i = 0; i < usersTaxon.size(); i++) {
-							
-							if (usersTaxon[i].begin()->first == searchTaxons[0].begin()->first) { 
-								index = i;  
-								int spot = 0;
-								bool goodspot = true;
-								//is this really the start, or are we dealing with a taxon of the same name?
-								while ((spot < searchTaxons.size()) && ((i+spot) < usersTaxon.size())) {
-									if (usersTaxon[i+spot].begin()->first != searchTaxons[spot].begin()->first) { goodspot = false; break; }
-									else { spot++; }
-								}
-								
-								if (goodspot) { break; }
-							}
+						if (pos == string::npos) { 
+							//wroteSomething = true;
+							//out << name << '\t' << tax << endl;
+						}else{ //this sequence contains the taxon the user wants to remove
+							names.insert(name);
+							remove=true; break;
+						}
+					}else { //both have confidences so we want to make sure the users confidences are greater then or equal to the taxons
+						//first remove confidences from both and see if the taxonomy exists
+						
+						string noNewTax = tax;
+						int hasConfidences = tax.find_first_of('(');
+						if (hasConfidences != string::npos) { 
+							noNewTax = removeConfidences(tax);
 						}
 						
-						for (int i = 0; i < searchTaxons.size(); i++) {
+						int pos = noNewTax.find(noConfidenceTaxons[j]);
+						
+						if (pos != string::npos) { //if yes, then are the confidences okay
 							
-							if ((i+index) < usersTaxon.size()) { //just in case, should never be false
-								if (usersTaxon[i+index].begin()->second < searchTaxons[i].begin()->second) { //is the users cutoff less than the search taxons
+							vector< map<string, float> > usersTaxon = getTaxons(newtax);
+							
+							//the usersTaxon is most likely longer than the searchTaxons, and searchTaxon[0] may relate to userTaxon[4]
+							//we want to "line them up", so we will find the the index where the searchstring starts
+							int index = 0;
+							for (int i = 0; i < usersTaxon.size(); i++) {
+								
+								if (usersTaxon[i].begin()->first == searchTaxons[j][0].begin()->first) { 
+									index = i;  
+									int spot = 0;
+									bool goodspot = true;
+									//is this really the start, or are we dealing with a taxon of the same name?
+									while ((spot < searchTaxons[j].size()) && ((i+spot) < usersTaxon.size())) {
+										if (usersTaxon[i+spot].begin()->first != searchTaxons[j][spot].begin()->first) { goodspot = false; break; }
+										else { spot++; }
+									}
+									
+									if (goodspot) { break; }
+								}
+							}
+							
+							for (int i = 0; i < searchTaxons[j].size(); i++) {
+								
+								if ((i+index) < usersTaxon.size()) { //just in case, should never be false
+									if (usersTaxon[i+index].begin()->second < searchTaxons[j][i].begin()->second) { //is the users cutoff less than the search taxons
+										remove = true;
+										break;
+									}
+								}else {
 									remove = true;
 									break;
 								}
-							}else {
-								remove = true;
-								break;
 							}
-						}
-						
-						//passed the test so remove you
-						if (remove) {
-							names.insert(name);
+							
+							//passed the test so remove you
+							if (remove) {
+								names.insert(name);
+								remove=true; break;
+							}else {
+								//wroteSomething = true;
+								//out << name << '\t' << tax << endl;
+							}
 						}else {
-							wroteSomething = true;
-							out << name << '\t' << tax << endl;
+							//wroteSomething = true;
+							//out << name << '\t' << tax << endl;
 						}
-					}else {
-						wroteSomething = true;
-						out << name << '\t' << tax << endl;
 					}
 				}
+				
 			}
 			
-			
-			
-			
+			if (!remove) {  wroteSomething = true; out << name << '\t' << tax << endl; }
 			m->gobble(in);
 		}
 		in.close();

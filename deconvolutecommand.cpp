@@ -8,6 +8,7 @@
  */
 
 #include "deconvolutecommand.h"
+#include "sequence.hpp"
 
 //**********************************************************************************************************************
 vector<string> DeconvoluteCommand::setParameters(){	
@@ -144,15 +145,95 @@ int DeconvoluteCommand::execute() {
 		string outNameFile = outputDir + m->getRootName(m->getSimpleName(inFastaName)) + "names";
 		string outFastaFile = outputDir + m->getRootName(m->getSimpleName(inFastaName)) + "unique" + m->getExtension(inFastaName);
 		
-		FastaMap fastamap;
-	
-		if(oldNameMapFName == "")	{	fastamap.readFastaFile(inFastaName);					}
-		else						{	fastamap.readFastaFile(inFastaName, oldNameMapFName);	}
+		map<string, string> nameMap;
+		map<string, string>::iterator itNames;
+		if (oldNameMapFName != "")  {  m->readNames(oldNameMapFName, nameMap); }
 		
 		if (m->control_pressed) { return 0; }
 		
-		fastamap.printCondensedFasta(outFastaFile);
-		fastamap.printNamesFile(outNameFile);
+		ifstream in; 
+		m->openInputFile(inFastaName, in);
+		
+		ofstream outFasta;
+		m->openOutputFile(outFastaFile, outFasta);
+		
+		map<string, string> sequenceStrings; //sequenceString -> list of names.  "atgc...." -> seq1,seq2,seq3.
+		map<string, string>::iterator itStrings;
+		set<string> nameInFastaFile; //for sanity checking
+		set<string>::iterator itname;
+		int count = 0;
+		while (!in.eof()) {
+			
+			if (m->control_pressed) { in.close(); outFasta.close(); remove(outFastaFile.c_str()); return 0; }
+			
+			Sequence seq(in);
+			
+			if (seq.getName() != "") {
+				
+				//sanity checks
+				itname = nameInFastaFile.find(seq.getName());
+				if (itname == nameInFastaFile.end()) { nameInFastaFile.insert(seq.getName());  }
+				else { m->mothurOut("[ERROR]: You already have a sequence named " + seq.getName() + " in your fasta file, sequence names must be unique, please correct."); m->mothurOutEndLine(); }
+
+				itStrings = sequenceStrings.find(seq.getAligned());
+				
+				if (itStrings == sequenceStrings.end()) { //this is a new unique sequence
+					//output to unique fasta file
+					seq.printSequence(outFasta);
+					
+					if (oldNameMapFName != "") {
+						itNames = nameMap.find(seq.getName());
+						
+						if (itNames == nameMap.end()) { //namefile and fastafile do not match
+							m->mothurOut("[ERROR]: " + seq.getName() + " is in your fasta file, and not in your namefile, please correct."); m->mothurOutEndLine();
+						}else {
+							sequenceStrings[seq.getAligned()] = itNames->second;
+						}
+					}else {	sequenceStrings[seq.getAligned()] = seq.getName();	}
+				}else { //this is a dup
+					if (oldNameMapFName != "") {
+						itNames = nameMap.find(seq.getName());
+						
+						if (itNames == nameMap.end()) { //namefile and fastafile do not match
+							m->mothurOut("[ERROR]: " + seq.getName() + " is in your fasta file, and not in your namefile, please correct."); m->mothurOutEndLine();
+						}else {
+							sequenceStrings[seq.getAligned()] += "," + itNames->second;
+						}
+					}else {	sequenceStrings[seq.getAligned()] += "," + seq.getName();	}
+				}
+				
+				count++;
+			}
+			
+			m->gobble(in);
+			
+			if(count % 1000 == 0)	{ m->mothurOut(toString(count) + "\t" + toString(sequenceStrings.size())); m->mothurOutEndLine();	}
+		}
+		
+		if(count % 1000 != 0)	{ m->mothurOut(toString(count) + "\t" + toString(sequenceStrings.size())); m->mothurOutEndLine();	}
+		
+		in.close();
+		outFasta.close();
+		
+		if (m->control_pressed) { remove(outFastaFile.c_str()); return 0; }
+		
+		//print new names file
+		ofstream outNames;
+		m->openOutputFile(outNameFile, outNames);
+		
+		for (itStrings = sequenceStrings.begin(); itStrings != sequenceStrings.end(); itStrings++) {
+			if (m->control_pressed) { outputTypes.clear(); remove(outFastaFile.c_str()); outNames.close(); remove(outNameFile.c_str()); return 0; }
+			
+			//get rep name
+			int pos = (itStrings->second).find_first_of(',');
+			
+			if (pos == string::npos) { // only reps itself
+				outNames << itStrings->second << '\t' << itStrings->second << endl;
+			}else {
+				outNames << (itStrings->second).substr(0, pos) << '\t' << itStrings->second << endl;
+			}
+		}
+		outNames.close();
 		
 		if (m->control_pressed) { outputTypes.clear(); remove(outFastaFile.c_str()); remove(outNameFile.c_str()); return 0; }
 		

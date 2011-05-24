@@ -21,8 +21,10 @@ class MothurOut {
 		static MothurOut* getInstance();
 		void setFileName(string);
 		
-		void mothurOut(string);
-		void mothurOutEndLine();
+		void mothurOut(string); //writes to cout and the logfile
+		void mothurOutEndLine(); //writes to cout and the logfile
+		void mothurOut(string, ofstream&); //writes to the ofstream, cout and the logfile
+		void mothurOutEndLine(ofstream&); //writes to the ofstream, cout and the logfile
 		void mothurOutJustToLog(string);
 		void errorOut(exception&, string, string);
 		void closeLog();
