@@ -58,6 +58,7 @@ vector<string> MatrixOutputCommand::setParameters(){
 		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
 		CommandParameter pcalc("calc", "Multiple", "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan-kstest-sharednseqs-ochiai-anderberg-kulczynski-kulczynskicody-lennon-morisitahorn-braycurtis-whittaker-odum-canberra-structeuclidean-structchord-hellinger-manhattan-structpearson-soergel-spearman-structkulczynski-speciesprofile-hamming-structchi2-gower-memchi2-memchord-memeuclidean-mempearson", "jclass-thetayc", "", "", "",true,false); parameters.push_back(pcalc);
 		CommandParameter poutput("output", "Multiple", "lt-square", "lt", "", "", "",false,false); parameters.push_back(poutput);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
 		
@@ -75,7 +76,7 @@ string MatrixOutputCommand::getHelpString(){
 	try {
 		string helpString = "";
 		ValidCalculators validCalculator;
-		helpString += "The dist.shared command parameters are shared, groups, calc, output and label.  shared is a required, unless you have a valid current file.\n";
+		helpString += "The dist.shared command parameters are shared, groups, calc, output, processors and label.  shared is a required, unless you have a valid current file.\n";
 		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like included used.\n";
 		helpString += "The group names are separated by dashes. The label parameter allows you to select what distance levels you would like distance matrices created for, and is also separated by dashes.\n";
 		helpString += "The dist.shared command should be in the following format: dist.shared(groups=yourGroups, calc=yourCalcs, label=yourLabels).\n";
@@ -181,6 +182,10 @@ MatrixOutputCommand::MatrixOutputCommand(string option)  {
 				m->splitAtDash(groups, Groups);
 				m->Groups = Groups;
 			}
+			
+			string temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
+			m->setProcessors(temp);
+			convert(temp, processors); 
 				
 			calc = validParameter.validFile(parameters, "calc", false);			
 			if (calc == "not found") { calc = "jclass-thetayc";  }
@@ -318,6 +323,12 @@ int MatrixOutputCommand::execute(){
 		if (lookup.size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); delete input; for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } return 0;}
 		
 		numGroups = lookup.size();
+		lines.resize(processors);
+		for (int i = 0; i < processors; i++) {
+			lines[i].start = int (sqrt(float(i)/float(processors)) * numGroups);
+			lines[i].end = int (sqrt(float(i+1)/float(processors)) * numGroups);
+			cout << i << '\t' << lines[i].start << '\t' << lines[i].end << endl;
+		}	
 		
 		if (m->control_pressed) { delete input; for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } m->Groups.clear(); return 0;  }
 				
@@ -410,7 +421,7 @@ int MatrixOutputCommand::execute(){
 	}
 }
 /***********************************************************/
-void MatrixOutputCommand::printSims(ostream& out) {
+void MatrixOutputCommand::printSims(ostream& out, vector< vector<float> >& simMatrix) {
 	try {
 		
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
@@ -444,63 +455,160 @@ void MatrixOutputCommand::printSims(ostream& out) {
 /***********************************************************/
 int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
 	try {
-	
-				EstOutput data;
-				vector<SharedRAbundVector*> subset;
-
-				//for each calculator												
-				for(int i = 0 ; i < matrixCalculators.size(); i++) {
-					
-					//initialize simMatrix
-					simMatrix.clear();
-					simMatrix.resize(numGroups);
-					for (int p = 0; p < simMatrix.size(); p++)	{
-						for (int j = 0; j < simMatrix.size(); j++)	{
-							simMatrix[p].push_back(0.0);
-						}
-					}
-				
-					for (int k = 0; k < thisLookup.size(); k++) { 
-						for (int l = k; l < thisLookup.size(); l++) {
-							if (k != l) { //we dont need to similiarity of a groups to itself
-								//get estimated similarity between 2 groups
-								
-								if (m->control_pressed) { return 0; }
-								
-								subset.clear(); //clear out old pair of sharedrabunds
-								//add new pair of sharedrabunds
-								subset.push_back(thisLookup[k]); subset.push_back(thisLookup[l]); 
-								
-								//if this calc needs all groups to calculate the pair load all groups
-								if (matrixCalculators[i]->getNeedsAll()) { 
-									//load subset with rest of lookup for those calcs that need everyone to calc for a pair
-									for (int w = 0; w < thisLookup.size(); w++) {
-										if ((w != k) && (w != l)) { subset.push_back(thisLookup[w]); }
-									}
-								}
-								
-								data = matrixCalculators[i]->getValues(subset); //saves the calculator outputs
-								//save values in similarity matrix
-								simMatrix[k][l] = 1.0 - data[0];  //convert similiarity to distance
-								simMatrix[l][k] = 1.0 - data[0];  //convert similiarity to distance
-							}
-						}
-					}
-					
-					exportFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + matrixCalculators[i]->getName() + "." + thisLookup[0]->getLabel() + "." + output + ".dist";
-					m->openOutputFile(exportFileName, out);
-					outputNames.push_back(exportFileName); outputTypes["phylip"].push_back(exportFileName);
-					
-					printSims(out);
-					out.close();
-					
-				}
-
-				return 0;
+		EstOutput data;
+		vector<SharedRAbundVector*> subset;
+		vector< vector<seqDist> > calcDists; calcDists.resize(matrixCalculators.size()); //one for each calc, this will be used to make .dist files
 		
+	#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		if(processors == 1){
+			driver(thisLookup, 0, numGroups, calcDists);
+		}else{
+			int process = 1;
+			vector<int> processIDS;
+			
+			//loop through and create all the processes you want
+			while (process != processors) {
+				int pid = fork();
+				
+				if (pid > 0) {
+					processIDS.push_back(pid); 
+					process++;
+				}else if (pid == 0){
+					driver(thisLookup, lines[process].start, lines[process].end, calcDists);   
+					
+					string tempdistFileName = m->getRootName(m->getSimpleName(sharedfile)) + toString(getpid()) + ".dist";
+					ofstream outtemp;
+					m->openOutputFile(tempdistFileName, outtemp);
+						
+					for (int i = 0; i < calcDists.size(); i++) {
+						outtemp << calcDists[i].size() << endl;
+							
+						for (int j = 0; j < calcDists[i].size(); j++) {
+							outtemp << calcDists[i][j].seq1 << '\t' << calcDists[i][j].seq2 << '\t' << calcDists[i][j].dist << endl;
+						}
+					}
+					outtemp.close();
+									
+					exit(0);
+				}else { 
+					m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
+					for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+					exit(0);
+				}
+			}
+			
+			//parent do your part
+			driver(thisLookup, lines[0].start, lines[0].end, calcDists);   
+						
+			//force parent to wait until all the processes are done
+			for (int i = 0; i < processIDS.size(); i++) {
+				int temp = processIDS[i];
+				wait(&temp);
+			}
+			
+			for (int i = 0; i < processIDS.size(); i++) {
+				string tempdistFileName = m->getRootName(m->getSimpleName(sharedfile)) + toString(processIDS[i]) +  ".dist";
+				ifstream intemp;
+				m->openInputFile(tempdistFileName, intemp);
+					
+				for (int k = 0; k < calcDists.size(); k++) {
+					int size = 0;
+					intemp >> size; m->gobble(intemp);
+						
+					for (int j = 0; j < size; j++) {
+						int seq1 = 0;
+						int seq2 = 0;
+						float dist = 1.0;
+							
+						intemp >> seq1 >> seq2 >> dist;   m->gobble(intemp);
+							
+						seqDist tempDist(seq1, seq2, dist);
+						calcDists[k].push_back(tempDist);
+					}
+				}
+				intemp.close();
+				remove(tempdistFileName.c_str());
+			}
+			
+		}
+#else
+		driver(thisLookup, 0, numGroups, calcDists);
+#endif
+		
+		for (int i = 0; i < calcDists.size(); i++) {
+			if (m->control_pressed) { break; }
+				
+			//initialize matrix
+			vector< vector<float> > matrix; //square matrix to represent the distance
+			matrix.resize(thisLookup.size());
+			for (int k = 0; k < thisLookup.size(); k++) {  matrix[k].resize(thisLookup.size(), 0.0); }
+				
+			for (int j = 0; j < calcDists[i].size(); j++) {
+				int row = calcDists[i][j].seq1;
+				int column = calcDists[i][j].seq2;
+				float dist = calcDists[i][j].dist;
+					
+				matrix[row][column] = dist;
+				matrix[column][row] = dist;
+			}
+			
+			string distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + matrixCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + ".dist";
+			outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
+			ofstream outDist;
+			m->openOutputFile(distFileName, outDist);
+			outDist.setf(ios::fixed, ios::floatfield); outDist.setf(ios::showpoint);
+			
+			printSims(outDist, matrix);
+			
+			outDist.close();
+		}
+		
+		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "MatrixOutputCommand", "process");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+int MatrixOutputCommand::driver(vector<SharedRAbundVector*> thisLookup, int start, int end, vector< vector<seqDist> >& calcDists) { 
+	try {
+		
+		vector<SharedRAbundVector*> subset;
+		for (int k = start; k < end; k++) { // pass cdd each set of groups to compare
+			
+			for (int l = 0; l < k; l++) {
+				
+				if (k != l) { //we dont need to similiarity of a groups to itself
+					subset.clear(); //clear out old pair of sharedrabunds
+					//add new pair of sharedrabunds
+					subset.push_back(thisLookup[k]); subset.push_back(thisLookup[l]); 
+					
+					for(int i=0;i<matrixCalculators.size();i++) {
+						
+						//if this calc needs all groups to calculate the pair load all groups
+						if (matrixCalculators[i]->getNeedsAll()) { 
+							//load subset with rest of lookup for those calcs that need everyone to calc for a pair
+							for (int w = 0; w < thisLookup.size(); w++) {
+								if ((w != k) && (w != l)) { subset.push_back(thisLookup[w]); }
+							}
+						}
+						
+						vector<double> tempdata = matrixCalculators[i]->getValues(subset); //saves the calculator outputs
+						
+						if (m->control_pressed) { return 1; }
+						
+						seqDist temp(l, k, (1.0 - tempdata[0]));
+						calcDists[i].push_back(temp);
+					}
+				}
+			}
+		}
+		
+		return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "MatrixOutputCommand", "driver");
 		exit(1);
 	}
 }
