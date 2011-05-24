@@ -580,7 +580,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
 							ifstream intemp;
 							m->openInputFile(tempdistFileName, intemp);
 							
-							for (int i = 0; i < calcDists.size(); i++) {
+							for (int k = 0; k < calcDists.size(); k++) {
 								int size = 0;
 								intemp >> size; m->gobble(intemp);
 									
@@ -592,7 +592,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
 									intemp >> seq1 >> seq2 >> dist;   m->gobble(intemp);
 									
 									seqDist tempDist(seq1, seq2, dist);
-									calcDists[i].push_back(tempDist);
+									calcDists[k].push_back(tempDist);
 								}
 							}
 							intemp.close();

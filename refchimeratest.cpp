@@ -14,11 +14,10 @@ int MAXINT = numeric_limits<int>::max();
 
 //***************************************************************************************************************
 
-RefChimeraTest::RefChimeraTest(vector<Sequence>& refs, string chimeraReportFileName){
+RefChimeraTest::RefChimeraTest(vector<Sequence>& refs){
 
 	m = MothurOut::getInstance();
 
-	m->openOutputFile(chimeraReportFileName, chimeraReportFile);
 	numRefSeqs = refs.size();
 
 	referenceSeqs.resize(numRefSeqs);
@@ -30,14 +29,22 @@ RefChimeraTest::RefChimeraTest(vector<Sequence>& refs, string chimeraReportFileN
 	
 	alignLength = referenceSeqs[0].length();
 
-	chimeraReportFile << "queryName\tbestRef\tbestSequenceMismatch\tleftParentChi,rightParentChi\tbreakPointChi\tminMismatchToChimera\tdistToBestMera\tnumParents" << endl;
-//	chimeraReportFile << "leftParentTri,middleParentTri,rightParentTri\tbreakPointTriA,breakPointTriB\tminMismatchToTrimera\tdistToBestMera\tnMera" << endl;
 
 }
-
 //***************************************************************************************************************
 
-int RefChimeraTest::analyzeQuery(string queryName, string querySeq){
+int RefChimeraTest::printHeader(ofstream& chimeraReportFile){
+	try {
+		chimeraReportFile << "queryName\tbestRef\tbestSequenceMismatch\tleftParentChi,rightParentChi\tbreakPointChi\tminMismatchToChimera\tdistToBestMera\tnumParents" << endl;
+		return 0; 
+	}catch(exception& e) {
+		m->errorOut(e, "RefChimeraTest", "execute");
+		exit(1);
+	}
+}
+//***************************************************************************************************************
+
+int RefChimeraTest::analyzeQuery(string queryName, string querySeq, ofstream& chimeraReportFile){
 	
 	vector<vector<int> > left(numRefSeqs);
 	vector<int> singleLeft, bestLeft;

@@ -32,7 +32,7 @@ class GetLineageCommand : public Command {
 	
 	private:
 		set<string> names;
-		vector<string> outputNames;
+		vector<string> outputNames, listOfTaxons;
 		string fastafile, namefile, groupfile, alignfile, listfile, taxfile, outputDir, taxons;
 		bool abort, dups;
 		

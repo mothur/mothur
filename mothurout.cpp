@@ -247,6 +247,53 @@ void MothurOut::mothurOutEndLine() {
 	}
 }
 /*********************************************************************************************/
+void MothurOut::mothurOut(string output, ofstream& outputFile) {
+	try {
+		
+#ifdef USE_MPI
+		int pid;
+		MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
+		
+		if (pid == 0) { //only one process should output to screen
+#endif
+			
+			cout << output;
+			out << output;
+			outputFile << output;
+			
+#ifdef USE_MPI
+		}
+#endif
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "MothurOut");
+		exit(1);
+	}
+}
+/*********************************************************************************************/
+void MothurOut::mothurOutEndLine(ofstream& outputFile) {
+	try {
+#ifdef USE_MPI
+		int pid;
+		MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
+		
+		if (pid == 0) { //only one process should output to screen
+#endif
+			
+			cout << endl;
+			out << endl;
+			outputFile << endl;
+			
+#ifdef USE_MPI
+		}
+#endif
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "MothurOutEndLine");
+		exit(1);
+	}
+}
+/*********************************************************************************************/
 void MothurOut::mothurOutJustToLog(string output) {
 	try {
 		#ifdef USE_MPI

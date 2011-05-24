@@ -11,6 +11,7 @@
 #include "reportfile.h"
 #include "qualityscores.h"
 #include "refchimeratest.h"
+#include "filterseqscommand.h"
 
 //**********************************************************************************************************************
 vector<string> SeqErrorCommand::setParameters(){	
@@ -23,6 +24,7 @@ vector<string> SeqErrorCommand::setParameters(){
 		CommandParameter pignorechimeras("ignorechimeras", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pignorechimeras);
 		CommandParameter pthreshold("threshold", "Number", "", "1.0", "", "", "",false,false); parameters.push_back(pthreshold);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
+		CommandParameter pfilter("filter", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pfilter);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
 		
@@ -199,8 +201,11 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 			temp = validParameter.validFile(parameters, "threshold", false);	if (temp == "not found") { temp = "1.00"; }
 			convert(temp, threshold);  
 			
-			temp = validParameter.validFile(parameters, "ignorechimeras", false);	if (temp == "not found") { temp = "1"; }
-			convert(temp, ignoreChimeras);  
+			temp = validParameter.validFile(parameters, "ignorechimeras", false);	if (temp == "not found") { temp = "T"; }
+			ignoreChimeras = m->isTrue(temp);
+			
+			temp = validParameter.validFile(parameters, "filter", false);	if (temp == "not found") { temp = "T"; }
+			filter = m->isTrue(temp);  
 			
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
@@ -220,153 +225,70 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 int SeqErrorCommand::execute(){
 	try{
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
-
+		
+		int start = time(NULL);
 		maxLength = 2000;
+		totalBases = 0;
+		totalMatches = 0;
+
+		//run vertical filter on query and reference files.
+		if (filter) {
+			string inputString = "fasta=" + queryFileName + "-" + referenceFileName;
+			m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
+			m->mothurOut("Running command: filter.seqs(" + inputString + ") to improve processing time."); m->mothurOutEndLine(); 
+			
+			Command* filterCommand = new FilterSeqsCommand(inputString);
+			filterCommand->execute();
+			
+			map<string, vector<string> > filenames = filterCommand->getOutputFiles();
+			
+			delete filterCommand;
+			
+			m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
+			
+			queryFileName = filenames["fasta"][0];
+			referenceFileName = filenames["fasta"][1];
+		}
 		
 		string errorSummaryFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".error.summary";
-		m->openOutputFile(errorSummaryFileName, errorSummaryFile);
 		outputNames.push_back(errorSummaryFileName); outputTypes["error.summary"].push_back(errorSummaryFileName);
-		printErrorHeader();
-		
-		string errorSeqFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".error.seq";
-		m->openOutputFile(errorSeqFileName, errorSeqFile);
-		outputNames.push_back(errorSeqFileName); outputTypes["error.seq"].push_back(errorSeqFileName);
-
-		getReferences();	//read in reference sequences - make sure there's no ambiguous bases
-
-		map<string, int> weights;
-		if(namesFileName != ""){	weights = getWeights();	}
-		
-		ifstream queryFile;
-		m->openInputFile(queryFileName, queryFile);
-		
-		ifstream reportFile;
-		ifstream qualFile;
-
-		ReportFile report;
-		QualityScores quality;
-		vector<vector<int> > qualForwardMap;
-		vector<vector<int> > qualReverseMap;
-		
-		if(qualFileName != "" && reportFileName != ""){
-			m->openInputFile(qualFileName, qualFile);
-			report = ReportFile(reportFile, reportFileName);
 			
-			qualForwardMap.resize(maxLength);
-			qualReverseMap.resize(maxLength);
-			for(int i=0;i<maxLength;i++){
-				qualForwardMap[i].assign(41,0);
-				qualReverseMap[i].assign(41,0);
-			}				
-		}
+		string errorSeqFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".error.seq";
+		outputNames.push_back(errorSeqFileName); outputTypes["error.seq"].push_back(errorSeqFileName);
 		
-		int totalBases = 0;
-		int totalMatches = 0;
-		
-		vector<int> misMatchCounts(11, 0);
-		int maxMismatch = 0;
-		int numSeqs = 0;
-		
-		map<string, int>::iterator it;
-		map<char, vector<int> > qScoreErrorMap;
-		qScoreErrorMap['m'].assign(41, 0);
-		qScoreErrorMap['s'].assign(41, 0);
-		qScoreErrorMap['i'].assign(41, 0);
-		qScoreErrorMap['a'].assign(41, 0);
-		
-		map<char, vector<int> > errorForward;
-		errorForward['m'].assign(maxLength,0);
-		errorForward['s'].assign(maxLength,0);
-		errorForward['i'].assign(maxLength,0);
-		errorForward['d'].assign(maxLength,0);
-		errorForward['a'].assign(maxLength,0);
-		
-		map<char, vector<int> > errorReverse;
-		errorReverse['m'].assign(maxLength,0);
-		errorReverse['s'].assign(maxLength,0);
-		errorReverse['i'].assign(maxLength,0);
-		errorReverse['d'].assign(maxLength,0);
-		errorReverse['a'].assign(maxLength,0);	
-		
-
 		string errorChimeraFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".error.chimera";
-		RefChimeraTest chimeraTest(referenceSeqs, errorChimeraFileName);
 		outputNames.push_back(errorChimeraFileName); outputTypes["error.chimera"].push_back(errorChimeraFileName);
 		
-		vector<string> megaAlignVector(numRefs, "");
+		getReferences();	//read in reference sequences - make sure there's no ambiguous bases
 
-		int index = 0;
-		bool ignoreSeq = 0;
+		if(namesFileName != ""){	weights = getWeights();	}
 		
-		while(queryFile){
-
-			if (m->control_pressed) { errorSummaryFile.close();	errorSeqFile.close(); for (int i = 0; i < outputNames.size(); i++) { remove(outputNames[i].c_str()); } return 0; }
+		vector<unsigned long int> fastaFilePos;
+		vector<unsigned long int> qFilePos;
+		vector<unsigned long int> reportFilePos;
 		
-			Sequence query(queryFile);
-			
-			int numParentSeqs = chimeraTest.analyzeQuery(query.getName(), query.getAligned());
-			int closestRefIndex = chimeraTest.getClosestRefIndex();
-
-			if(numParentSeqs > 1 && ignoreChimeras == 1)	{	ignoreSeq = 1;	}
-			else											{	ignoreSeq = 0;	}
-
-			Compare minCompare = getErrors(query, referenceSeqs[closestRefIndex]);
-			
-			if(namesFileName != ""){
-				it = weights.find(query.getName());
-				minCompare.weight = it->second;
-			}
-			else{	minCompare.weight = 1;	}
-
-			printErrorData(minCompare, numParentSeqs);
+		setLines(queryFileName, qualFileName, reportFileName, fastaFilePos, qFilePos, reportFilePos);
 		
-			if(!ignoreSeq){
-
-				for(int i=0;i<minCompare.sequence.length();i++){
-					char letter = minCompare.sequence[i];
-
-					errorForward[letter][i] += minCompare.weight;
-					errorReverse[letter][minCompare.total-i-1] += minCompare.weight;				
-				}
-			}
-
-			if(qualFileName != "" && reportFileName != ""){
-				report = ReportFile(reportFile);
-				
-//				int origLength = report.getQueryLength();
-				int startBase = report.getQueryStart();
-				int endBase = report.getQueryEnd();
-
-				quality = QualityScores(qualFile);
-
-				if(!ignoreSeq){
-					quality.updateQScoreErrorMap(qScoreErrorMap, minCompare.sequence, startBase, endBase, minCompare.weight);
-					quality.updateForwardMap(qualForwardMap, startBase, endBase, minCompare.weight);
-					quality.updateReverseMap(qualReverseMap, startBase, endBase, minCompare.weight);
-				}
-			}			
-
-			if(minCompare.errorRate < threshold && !ignoreSeq){
-				totalBases += (minCompare.total * minCompare.weight);
-				totalMatches += minCompare.matches * minCompare.weight;
-				if(minCompare.mismatches > maxMismatch){
-					maxMismatch = minCompare.mismatches;
-					misMatchCounts.resize(maxMismatch + 1, 0);
-				}				
-				misMatchCounts[minCompare.mismatches] += minCompare.weight;
-				numSeqs++;
-				
-				megaAlignVector[closestRefIndex] += query.getInlineSeq() + '\n';
-			}
-
-			index++;
-			
-			if(index % 1000 == 0){	m->mothurOut(toString(index) + '\n');	}
-		}
-		queryFile.close();
-		errorSummaryFile.close();	
-		errorSeqFile.close();
-
+		if (m->control_pressed) { return 0; }
+		
+		for (int i = 0; i < (fastaFilePos.size()-1); i++) {
+			lines.push_back(linePair(fastaFilePos[i], fastaFilePos[(i+1)]));
+			if (qualFileName != "") {  qLines.push_back(linePair(qFilePos[i], qFilePos[(i+1)]));  }
+			if (reportFileName != "") {  rLines.push_back(linePair(reportFilePos[i], reportFilePos[(i+1)]));  }
+		}	
+		if(qualFileName == "")	{	qLines = lines;	rLines = lines; } //fills with duds
+		
+		int numSeqs = 0;
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		if(processors == 1){
+			numSeqs = driver(queryFileName, qualFileName, reportFileName, errorSummaryFileName, errorSeqFileName, errorChimeraFileName, lines[0], qLines[0], rLines[0]);
+		}else{
+			numSeqs = createProcesses(queryFileName, qualFileName, reportFileName, errorSummaryFileName, errorSeqFileName, errorChimeraFileName);
+		}	
+#else
+		numSeqs = driver(queryFileName, qualFileName, reportFileName, errorSummaryFileName, errorSeqFileName, errorChimeraFileName, lines[0], qLines[0], rLines[0]);
+#endif
+		
 		if(qualFileName != "" && reportFileName != ""){		
 			printErrorQuality(qScoreErrorMap);
 			printQualityFR(qualForwardMap, qualReverseMap);
@@ -403,6 +325,8 @@ int SeqErrorCommand::execute(){
 			megAlignmentFile << megaAlignVector[i] << endl;
 		}
 		
+		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.");
+		m->mothurOutEndLine();
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -416,7 +340,403 @@ int SeqErrorCommand::execute(){
 		exit(1);
 	}
 }
-
+//**********************************************************************************************************************
+int SeqErrorCommand::createProcesses(string filename, string qFileName, string rFileName, string summaryFileName, string errorOutputFileName, string chimeraOutputFileName) {	
+	try {
+		int process = 1;
+		processIDS.clear();
+		map<char, vector<int> >::iterator it;
+		int num = 0;
+		
+		//loop through and create all the processes you want
+		while (process != processors) {
+			int pid = fork();
+			
+			if (pid > 0) {
+				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+				process++;
+			}else if (pid == 0){
+				
+				num = driver(filename, qFileName, rFileName, summaryFileName + toString(getpid()) + ".temp", errorOutputFileName+ toString(getpid()) + ".temp", chimeraOutputFileName + toString(getpid()) + ".temp", lines[process], qLines[process], rLines[process]);
+				
+				//pass groupCounts to parent
+				ofstream out;
+				string tempFile = filename + toString(getpid()) + ".info.temp";
+				m->openOutputFile(tempFile, out);
+				
+				//output totalBases and totalMatches
+				out << num << '\t' << totalBases << '\t' << totalMatches << endl << endl;
+				
+				//output substitutionMatrix
+				for(int i = 0; i < substitutionMatrix.size(); i++) {
+					for (int j = 0; j < substitutionMatrix[i].size(); j++) {
+						out << substitutionMatrix[i][j] << '\t';
+					}
+					out << endl;
+				}
+				out << endl;
+				
+				//output qScoreErrorMap
+				for (it = qScoreErrorMap.begin(); it != qScoreErrorMap.end(); it++) {
+					vector<int> thisScoreErrorMap = it->second;
+					out << it->first << '\t';
+					for (int i = 0; i < thisScoreErrorMap.size(); i++) {
+						out << thisScoreErrorMap[i] << '\t';
+					}
+					out << endl;
+				}
+				out << endl;
+				
+				//output qualForwardMap
+				for(int i = 0; i < qualForwardMap.size(); i++) {
+					for (int j = 0; j < qualForwardMap[i].size(); j++) {
+						out << qualForwardMap[i][j] << '\t';
+					}
+					out << endl;
+				}
+				out << endl;
+				
+				//output qualReverseMap
+				for(int i = 0; i < qualReverseMap.size(); i++) {
+					for (int j = 0; j < qualReverseMap[i].size(); j++) {
+						out << qualReverseMap[i][j] << '\t';
+					}
+					out << endl;
+				}
+				out << endl;
+				
+				
+				//output errorForward
+				for (it = errorForward.begin(); it != errorForward.end(); it++) {
+					vector<int> thisErrorForward = it->second;
+					out << it->first << '\t';
+					for (int i = 0; i < thisErrorForward.size(); i++) {
+						out << thisErrorForward[i] << '\t';
+					}
+					out << endl;
+				}
+				out << endl;
+				
+				//output errorReverse
+				for (it = errorReverse.begin(); it != errorReverse.end(); it++) {
+					vector<int> thisErrorReverse = it->second;
+					out << it->first << '\t';
+					for (int i = 0; i < thisErrorReverse.size(); i++) {
+						out << thisErrorReverse[i] << '\t';
+					}
+					out << endl;
+				}
+				out << endl;
+				
+				//output misMatchCounts
+				out << misMatchCounts.size() << endl;
+				for (int j = 0; j < misMatchCounts.size(); j++) {
+					out << misMatchCounts[j] << '\t';
+				}
+				out << endl;
+				
+				
+				//output megaAlignVector
+				for (int j = 0; j < megaAlignVector.size(); j++) {
+					out << megaAlignVector[j] << endl;
+				}
+				out << endl;
+				
+				out.close();
+				
+				exit(0);
+			}else { 
+				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
+				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+				exit(0);
+			}
+		}
+		
+		//do my part
+		num = driver(filename, qFileName, rFileName, summaryFileName, errorOutputFileName, chimeraOutputFileName, lines[0], qLines[0], rLines[0]);
+		
+		//force parent to wait until all the processes are done
+		for (int i=0;i<processIDS.size();i++) { 
+			int temp = processIDS[i];
+			wait(&temp);
+		}
+		
+		//append files
+		for(int i=0;i<processIDS.size();i++){
+			
+			m->mothurOut("Appending files from process " + toString(processIDS[i])); m->mothurOutEndLine();
+			
+			m->appendFiles((summaryFileName + toString(processIDS[i]) + ".temp"), summaryFileName);
+			remove((summaryFileName + toString(processIDS[i]) + ".temp").c_str());
+			m->appendFiles((errorOutputFileName + toString(processIDS[i]) + ".temp"), errorOutputFileName);
+			remove((errorOutputFileName + toString(processIDS[i]) + ".temp").c_str());
+			m->appendFiles((chimeraOutputFileName + toString(processIDS[i]) + ".temp"), chimeraOutputFileName);
+			remove((chimeraOutputFileName + toString(processIDS[i]) + ".temp").c_str());
+			
+			ifstream in;
+			string tempFile =  filename + toString(processIDS[i]) + ".info.temp";
+			m->openInputFile(tempFile, in);
+			
+			//input totalBases and totalMatches
+			int tempBases, tempMatches, tempNumSeqs;
+			in >> tempNumSeqs >> tempBases >> tempMatches; m->gobble(in);
+			totalBases += tempBases; totalMatches += tempMatches; num += tempNumSeqs;
+			
+			//input substitutionMatrix
+			int tempNum;
+			for(int i = 0; i < substitutionMatrix.size(); i++) {
+				for (int j = 0; j < substitutionMatrix[i].size(); j++) {
+					in >> tempNum; substitutionMatrix[i][j] += tempNum;
+				}
+				m->gobble(in);
+			}
+			m->gobble(in);
+			
+			//input qScoreErrorMap
+			char first;
+			for (int i = 0; i < qScoreErrorMap.size(); i++) {
+				in >> first;
+				vector<int> thisScoreErrorMap = qScoreErrorMap[first];
+				
+				for (int i = 0; i < thisScoreErrorMap.size(); i++) {
+					in >> tempNum; thisScoreErrorMap[i] += tempNum;
+				}
+				qScoreErrorMap[first] = thisScoreErrorMap;
+				m->gobble(in);
+			}
+			m->gobble(in);
+			
+			//input qualForwardMap
+			for(int i = 0; i < qualForwardMap.size(); i++) {
+				for (int j = 0; j < qualForwardMap[i].size(); j++) {
+					in >> tempNum; qualForwardMap[i][j] += tempNum;
+				}
+				m->gobble(in);
+			}
+			m->gobble(in);
+			
+			//input qualReverseMap
+			for(int i = 0; i < qualReverseMap.size(); i++) {
+				for (int j = 0; j < qualReverseMap[i].size(); j++) {
+					in >> tempNum; qualReverseMap[i][j] += tempNum;
+				}
+				m->gobble(in);
+			}
+			m->gobble(in);
+			
+			//input errorForward
+			for (int i = 0; i < errorForward.size(); i++) {
+				in >> first;
+				vector<int> thisErrorForward = errorForward[first];
+				
+				for (int i = 0; i < thisErrorForward.size(); i++) {
+					in >> tempNum; thisErrorForward[i] += tempNum;
+				}
+				errorForward[first] = thisErrorForward;
+				m->gobble(in);
+			}
+			m->gobble(in);
+			
+			//input errorReverse
+			for (int i = 0; i < errorReverse.size(); i++) {
+				in >> first;
+				vector<int> thisErrorReverse = errorReverse[first];
+				
+				for (int i = 0; i < thisErrorReverse.size(); i++) {
+					in >> tempNum; thisErrorReverse[i] += tempNum;
+				}
+				errorReverse[first] = thisErrorReverse;
+				m->gobble(in);
+			}
+			m->gobble(in);
+			
+			//input misMatchCounts
+			int misMatchSize;
+			in >> misMatchSize; m->gobble(in);
+			if (misMatchSize > misMatchCounts.size()) {	misMatchCounts.resize(misMatchSize, 0);	}
+			for (int j = 0; j < misMatchCounts.size(); j++) {
+				in >> tempNum; misMatchCounts[j] += tempNum;
+			}
+			m->gobble(in);
+			
+			//input megaAlignVector
+			string thisLine;
+			for (int j = 0; j < megaAlignVector.size(); j++) {
+				thisLine = m->getline(in); m->gobble(in); megaAlignVector[j] += thisLine + '\n';
+			}
+			m->gobble(in);
+			
+			in.close(); remove(tempFile.c_str());
+			
+		}
+		
+		return num;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SeqErrorCommand", "createProcesses");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+int SeqErrorCommand::driver(string filename, string qFileName, string rFileName, string summaryFileName, string errorOutputFileName, string chimeraOutputFileName, linePair line, linePair qline, linePair rline) {	
+	
+	try {
+		ReportFile report;
+		QualityScores quality;
+		
+		misMatchCounts.resize(11, 0);
+		int maxMismatch = 0;
+		int numSeqs = 0;
+		
+		map<string, int>::iterator it;
+		qScoreErrorMap['m'].assign(41, 0);
+		qScoreErrorMap['s'].assign(41, 0);
+		qScoreErrorMap['i'].assign(41, 0);
+		qScoreErrorMap['a'].assign(41, 0);
+		
+		errorForward['m'].assign(maxLength,0);
+		errorForward['s'].assign(maxLength,0);
+		errorForward['i'].assign(maxLength,0);
+		errorForward['d'].assign(maxLength,0);
+		errorForward['a'].assign(maxLength,0);
+		
+		errorReverse['m'].assign(maxLength,0);
+		errorReverse['s'].assign(maxLength,0);
+		errorReverse['i'].assign(maxLength,0);
+		errorReverse['d'].assign(maxLength,0);
+		errorReverse['a'].assign(maxLength,0);	
+		
+		//open inputfiles and go to beginning place for this processor
+		ifstream queryFile;
+		m->openInputFile(filename, queryFile);
+		queryFile.seekg(line.start);
+		
+		ifstream reportFile;
+		ifstream qualFile;
+		if(qFileName != "" && rFileName != ""){
+			m->openInputFile(qFileName, qualFile);
+			qualFile.seekg(qline.start);  
+			
+			//gobble headers
+			if (rline.start == 0) {  report = ReportFile(reportFile, rFileName); } 
+			else{
+				m->openInputFile(rFileName, reportFile);
+				reportFile.seekg(rline.start); 
+			}
+			
+			qualForwardMap.resize(maxLength);
+			qualReverseMap.resize(maxLength);
+			for(int i=0;i<maxLength;i++){
+				qualForwardMap[i].assign(41,0);
+				qualReverseMap[i].assign(41,0);
+			}	
+		}
+		
+		ofstream outChimeraReport;
+		m->openOutputFile(chimeraOutputFileName, outChimeraReport);
+		RefChimeraTest chimeraTest(referenceSeqs);
+		if (line.start == 0) { chimeraTest.printHeader(outChimeraReport); }
+		
+		ofstream errorSummaryFile;
+		m->openOutputFile(summaryFileName, errorSummaryFile);
+		if (line.start == 0) { printErrorHeader(errorSummaryFile); }
+		
+		ofstream errorSeqFile;
+		m->openOutputFile(errorOutputFileName, errorSeqFile);
+		
+		megaAlignVector.resize(numRefs, "");
+		
+		int index = 0;
+		bool ignoreSeq = 0;
+		
+		bool moreSeqs = 1;
+		while (moreSeqs) {
+			
+			if (m->control_pressed) { queryFile.close(); if(qFileName != "" && rFileName != ""){  reportFile.close(); qualFile.close(); } outChimeraReport.close(); errorSummaryFile.close();errorSeqFile.close(); return 0; }
+			
+			Sequence query(queryFile);
+			
+			int numParentSeqs = chimeraTest.analyzeQuery(query.getName(), query.getAligned(), outChimeraReport);
+			int closestRefIndex = chimeraTest.getClosestRefIndex();
+			
+			if(numParentSeqs > 1 && ignoreChimeras == 1)	{	ignoreSeq = 1;	}
+			else											{	ignoreSeq = 0;	}
+			
+			Compare minCompare = getErrors(query, referenceSeqs[closestRefIndex]);
+			
+			if(namesFileName != ""){
+				it = weights.find(query.getName());
+				minCompare.weight = it->second;
+			}
+			else{	minCompare.weight = 1;	}
+			
+			printErrorData(minCompare, numParentSeqs, errorSummaryFile, errorSeqFile);
+			
+			if(!ignoreSeq){
+				
+				for(int i=0;i<minCompare.sequence.length();i++){
+					char letter = minCompare.sequence[i];
+					
+					errorForward[letter][i] += minCompare.weight;
+					errorReverse[letter][minCompare.total-i-1] += minCompare.weight;				
+				}
+			}
+			
+			if(qualFileName != "" && reportFileName != ""){
+				report = ReportFile(reportFile);
+				
+				//				int origLength = report.getQueryLength();
+				int startBase = report.getQueryStart();
+				int endBase = report.getQueryEnd();
+				
+				quality = QualityScores(qualFile);
+				
+				if(!ignoreSeq){
+					quality.updateQScoreErrorMap(qScoreErrorMap, minCompare.sequence, startBase, endBase, minCompare.weight);
+					quality.updateForwardMap(qualForwardMap, startBase, endBase, minCompare.weight);
+					quality.updateReverseMap(qualReverseMap, startBase, endBase, minCompare.weight);
+				}
+			}			
+			
+			if(minCompare.errorRate < threshold && !ignoreSeq){
+				totalBases += (minCompare.total * minCompare.weight);
+				totalMatches += minCompare.matches * minCompare.weight;
+				if(minCompare.mismatches > maxMismatch){
+					maxMismatch = minCompare.mismatches;
+					misMatchCounts.resize(maxMismatch + 1, 0);
+				}				
+				misMatchCounts[minCompare.mismatches] += minCompare.weight;
+				numSeqs++;
+				
+				megaAlignVector[closestRefIndex] += query.getInlineSeq() + '\n';
+			}
+			
+			index++;
+			
+			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+				unsigned long int pos = queryFile.tellg();
+				if ((pos == -1) || (pos >= line.end)) { break; }
+			#else
+				if (queryFile.eof()) { break; }
+			#endif
+			
+			if(index % 100 == 0){	m->mothurOut(toString(index) + '\n');	}
+		}
+		queryFile.close();
+		if(qFileName != "" && rFileName != ""){  reportFile.close(); qualFile.close(); }
+		errorSummaryFile.close();	
+		errorSeqFile.close();
+		
+		//report progress
+		if(index % 100 != 0){	m->mothurOut(toString(index) + '\n');	}
+		
+		return index;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SeqErrorCommand", "driver");
+		exit(1);
+	}
+}
 //***************************************************************************************************************
 
 void SeqErrorCommand::getReferences(){
@@ -572,7 +892,7 @@ map<string, int> SeqErrorCommand::getWeights(){
 
 //***************************************************************************************************************
 
-void SeqErrorCommand::printErrorHeader(){
+void SeqErrorCommand::printErrorHeader(ofstream& errorSummaryFile){
 	try {
 		errorSummaryFile << "query\treference\tweight\t";
 		errorSummaryFile << "AA\tAT\tAG\tAC\tTA\tTT\tTG\tTC\tGA\tGT\tGG\tGC\tCA\tCT\tCG\tCC\tNA\tNT\tNG\tNC\tAi\tTi\tGi\tCi\tNi\tdA\tdT\tdG\tdC\t";
@@ -589,7 +909,7 @@ void SeqErrorCommand::printErrorHeader(){
 
 //***************************************************************************************************************
 
-void SeqErrorCommand::printErrorData(Compare error, int numParentSeqs){
+void SeqErrorCommand::printErrorData(Compare error, int numParentSeqs, ofstream& errorSummaryFile, ofstream& errorSeqFile){
 	try {
 
 		errorSummaryFile << error.queryName << '\t' << error.refName << '\t' << error.weight << '\t';
@@ -825,5 +1145,182 @@ void SeqErrorCommand::printQualityFR(vector<vector<int> > qualForwardMap, vector
 	}
 	
 }
+/**************************************************************************************************/
 
+int SeqErrorCommand::setLines(string filename, string qfilename, string rfilename, vector<unsigned long int>& fastaFilePos, vector<unsigned long int>& qfileFilePos, vector<unsigned long int>& rfileFilePos) {
+	try {
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		//set file positions for fasta file
+		fastaFilePos = m->divideFile(filename, processors);
+		
+		if (qfilename == "") { return processors; }
+		
+		//get name of first sequence in each chunk
+		map<string, int> firstSeqNames;
+		for (int i = 0; i < (fastaFilePos.size()-1); i++) {
+			ifstream in;
+			m->openInputFile(filename, in);
+			in.seekg(fastaFilePos[i]);
+			
+			Sequence temp(in); 
+			firstSeqNames[temp.getName()] = i;
+			
+			in.close();
+		}
+		
+		//make copy to use below
+		map<string, int> firstSeqNamesReport = firstSeqNames;
+		
+		//seach for filePos of each first name in the qfile and save in qfileFilePos
+		ifstream inQual;
+		m->openInputFile(qfilename, inQual);
+		
+		string input;
+		while(!inQual.eof()){	
+			input = m->getline(inQual);
+			
+			if (input.length() != 0) {
+				if(input[0] == '>'){ //this is a sequence name line
+					istringstream nameStream(input);
+					
+					string sname = "";  nameStream >> sname;
+					sname = sname.substr(1);
+					
+					map<string, int>::iterator it = firstSeqNames.find(sname);
+					
+					if(it != firstSeqNames.end()) { //this is the start of a new chunk
+						unsigned long int pos = inQual.tellg(); 
+						qfileFilePos.push_back(pos - input.length() - 1);	
+						firstSeqNames.erase(it);
+					}
+				}
+			}
+			
+			if (firstSeqNames.size() == 0) { break; }
+		}
+		inQual.close();
+		
+		if (firstSeqNames.size() != 0) { 
+			for (map<string, int>::iterator it = firstSeqNames.begin(); it != firstSeqNames.end(); it++) {
+				m->mothurOut(it->first + " is in your fasta file and not in your quality file, aborting."); m->mothurOutEndLine();
+			}
+			m->control_pressed = true;
+			return processors;
+		}
+		
+		//get last file position of qfile
+		FILE * pFile;
+		unsigned long int size;
+		
+		//get num bytes in file
+		pFile = fopen (qfilename.c_str(),"rb");
+		if (pFile==NULL) perror ("Error opening file");
+		else{
+			fseek (pFile, 0, SEEK_END);
+			size=ftell (pFile);
+			fclose (pFile);
+		}
+		
+		qfileFilePos.push_back(size);
+		
+		//seach for filePos of each first name in the rfile and save in rfileFilePos
+		string junk;
+		ifstream inR;
+		m->openInputFile(rfilename, inR);
+		
+		//read column headers
+		for (int i = 0; i < 16; i++) {  
+			if (!inR.eof())	{	inR >> junk;	}
+			else			{	break;			}
+		}
+		
+		while(!inR.eof()){
+			
+			if (m->control_pressed) { inR.close();  return processors; }
+			
+			input = m->getline(inR);	
+			
+			if (input.length() != 0) {
+				
+				istringstream nameStream(input);
+				string sname = "";  nameStream >> sname;
+				
+				map<string, int>::iterator it = firstSeqNamesReport.find(sname);
+			
+				if(it != firstSeqNamesReport.end()) { //this is the start of a new chunk
+					unsigned long int pos = inR.tellg(); 
+					rfileFilePos.push_back(pos - input.length() - 1);	
+					firstSeqNamesReport.erase(it);
+				}
+			}
+			
+			if (firstSeqNamesReport.size() == 0) { break; }
+			m->gobble(inR);
+		}
+		inR.close();
+		
+		if (firstSeqNamesReport.size() != 0) { 
+			for (map<string, int>::iterator it = firstSeqNamesReport.begin(); it != firstSeqNamesReport.end(); it++) {
+				m->mothurOut(it->first + " is in your fasta file and not in your report file, aborting."); m->mothurOutEndLine();
+			}
+			m->control_pressed = true;
+			return processors;
+		}
+		
+		//get last file position of qfile
+		FILE * rFile;
+		unsigned long int sizeR;
+		
+		//get num bytes in file
+		rFile = fopen (rfilename.c_str(),"rb");
+		if (rFile==NULL) perror ("Error opening file");
+		else{
+			fseek (rFile, 0, SEEK_END);
+			sizeR=ftell (rFile);
+			fclose (rFile);
+		}
+		
+		rfileFilePos.push_back(sizeR);
+		
+		return processors;
+		
+#else
+		
+		fastaFilePos.push_back(0); qfileFilePos.push_back(0);
+		//get last file position of fastafile
+		FILE * pFile;
+		unsigned long int size;
+		
+		//get num bytes in file
+		pFile = fopen (filename.c_str(),"rb");
+		if (pFile==NULL) perror ("Error opening file");
+		else{
+			fseek (pFile, 0, SEEK_END);
+			size=ftell (pFile);
+			fclose (pFile);
+		}
+		fastaFilePos.push_back(size);
+		
+		//get last file position of fastafile
+		FILE * qFile;
+		
+		//get num bytes in file
+		qFile = fopen (qfilename.c_str(),"rb");
+		if (qFile==NULL) perror ("Error opening file");
+		else{
+			fseek (qFile, 0, SEEK_END);
+			size=ftell (qFile);
+			fclose (qFile);
+		}
+		qfileFilePos.push_back(size);
+		
+		return 1;
+		
+#endif
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SeqErrorCommand", "setLines");
+		exit(1);
+	}
+}
 //***************************************************************************************************************

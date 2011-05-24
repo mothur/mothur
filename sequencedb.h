@@ -37,12 +37,15 @@ public:
 	void clear();              //clears data - remeber to loop through and delete the sequences inside or you will have a memory leak
 	int size();                //returns datas size
 	void print(ostream&);      //loops through data using sequence class print
+	bool sameLength() { return samelength; }
 		
 private:
 	vector<Sequence> data;
 	string readName(ifstream&);
 	string readSequence(ifstream&);
 	MothurOut* m;
+	bool samelength;
+	int length;
 
 };
 

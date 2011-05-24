@@ -25,7 +25,8 @@ vector<string> GetSeqsCommand::setParameters(){
 		CommandParameter pdups("dups", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pdups);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
-		
+		CommandParameter paccnos2("accnos2", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(paccnos2);
+
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
@@ -231,6 +232,11 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 			qualfile = validParameter.validFile(parameters, "qfile", true);
 			if (qualfile == "not open") { abort = true; }
 			else if (qualfile == "not found") {  qualfile = "";  }
+			
+			accnosfile2 = validParameter.validFile(parameters, "accnos2", true);
+			if (accnosfile2 == "not open") { abort = true; }
+			else if (accnosfile2 == "not found") {  accnosfile2 = "";  }
+			
 			
 			string usedDups = "true";
 			string temp = validParameter.validFile(parameters, "dups", false);	if (temp == "not found") { temp = "true"; usedDups = ""; }
@@ -824,7 +830,15 @@ int GetSeqsCommand::compareAccnos(){
 			in >> name;
 			
 			if (namesAccnos.count(name) == 0){ //name unique to accnos2
-				namesAccnos2.insert(name);
+				int pos = name.find_last_of('_');
+				string tempName = name;
+				if (pos != string::npos) {  tempName = tempName.substr(pos+1); cout << tempName << endl; }
+				if (namesAccnos.count(tempName) == 0){
+					namesAccnos2.insert(name);
+				}else { //you are in both so erase
+					namesAccnos.erase(name);
+					namesDups.insert(name);
+				}
 			}else { //you are in both so erase
 				namesAccnos.erase(name);
 				namesDups.insert(name);

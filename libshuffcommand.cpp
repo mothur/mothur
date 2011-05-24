@@ -243,7 +243,11 @@ int LibShuffCommand::execute(){
 		
 			
 		setGroups();								//set the groups to be analyzed and sorts them
-			
+		
+		if (numGroups < 2) { m->mothurOut("[ERROR]: libshuff requires at least 2 groups, you only have " + toString(numGroups) + ", aborting."); m->mothurOutEndLine(); m->control_pressed = true; }
+		
+		if (m->control_pressed) { delete groupMap; delete matrix; return 0; }
+		
 		/********************************************************************************************/
 		//this is needed because when we read the matrix we sort it into groups in alphabetical order
 		//the rest of the command and the classes used in this command assume specific order

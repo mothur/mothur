@@ -56,27 +56,51 @@ public:
 	
 private:
 	bool abort;
+	
+	struct linePair {
+		unsigned long int start;
+		unsigned long int end;
+		linePair(unsigned long int i, unsigned long int j) : start(i), end(j) {}
+	};
+	
+	vector<int> processIDS;   //processid
+	vector<linePair> lines;
+	vector<linePair> qLines;
+	vector<linePair> rLines;
 
 	void getReferences();
 	map<string,int> getWeights();
 	Compare getErrors(Sequence, Sequence);
-	void printErrorHeader();
-	void printErrorData(Compare, int);
+	void printErrorHeader(ofstream&);
+	void printErrorData(Compare, int, ofstream&, ofstream&);
 	void printSubMatrix();
 	void printErrorFRFile(map<char, vector<int> >, map<char, vector<int> >);
 	void printErrorQuality(map<char, vector<int> >);
 	void printQualityFR(vector<vector<int> >, vector<vector<int> >);
+	
+	int setLines(string, string, string, vector<unsigned long int>&, vector<unsigned long int>&, vector<unsigned long int>&);
+	int driver(string, string, string, string, string, string, linePair, linePair, linePair);
+	int createProcesses(string, string, string, string, string, string);
 
 	string queryFileName, referenceFileName, qualFileName, reportFileName, namesFileName, outputDir;
 	double threshold;
-	bool ignoreChimeras;
+	bool ignoreChimeras, filter;
 	int numRefs, processors;
-	int maxLength;
-	ofstream errorSummaryFile, errorSeqFile;
+	int maxLength, totalBases, totalMatches;
+	//ofstream errorSummaryFile, errorSeqFile;
 	vector<string> outputNames;
 	
 	vector<Sequence> referenceSeqs;
 	vector<vector<int> > substitutionMatrix;
+	vector<vector<int> > qualForwardMap;
+	vector<vector<int> > qualReverseMap;
+	vector<int> misMatchCounts;
+	map<char, vector<int> > qScoreErrorMap;
+	map<char, vector<int> > errorForward;
+	map<char, vector<int> > errorReverse;
+	map<string, int> weights;
+	vector<string> megaAlignVector;
+
 };
 
 #endif

@@ -327,7 +327,6 @@ int MatrixOutputCommand::execute(){
 		for (int i = 0; i < processors; i++) {
 			lines[i].start = int (sqrt(float(i)/float(processors)) * numGroups);
 			lines[i].end = int (sqrt(float(i+1)/float(processors)) * numGroups);
-			cout << i << '\t' << lines[i].start << '\t' << lines[i].end << endl;
 		}	
 		
 		if (m->control_pressed) { delete input; for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } m->Groups.clear(); return 0;  }

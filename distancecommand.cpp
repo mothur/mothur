@@ -247,6 +247,8 @@ int DistanceCommand::execute(){
 		int numSeqs = alignDB.getNumSeqs();
 		cutoff += 0.005;
 		
+		if (!alignDB.sameLength()) {  m->mothurOut("[ERROR]: your sequences are not the same length, aborting."); m->mothurOutEndLine(); return 0; }
+		
 		string outputFile;
 				
 		if (output == "lt") { //does the user want lower triangle phylip formatted file 
