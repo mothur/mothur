@@ -20,6 +20,7 @@ gapOpen(gO), gapExtend(gE), match(m), misMatch(mM) {
 	count = 0;
 
 	int randNumber = rand();
+	//int randNumber = 12345;
 	dbFileName = tag + toString(randNumber) + ".template.unaligned.fasta";
 	queryFileName = tag + toString(randNumber) + ".candidate.unaligned.fasta";
 	blastFileName = tag + toString(randNumber) + ".blast";
@@ -32,6 +33,7 @@ BlastDB::BlastDB() : Database() {
 		count = 0;
 
 		int randNumber = rand();
+		//int randNumber = 12345;
 		dbFileName = toString(randNumber) + ".template.unaligned.fasta";
 		queryFileName = toString(randNumber) + ".candidate.unaligned.fasta";
 		blastFileName = toString(randNumber) + ".blast";
@@ -89,6 +91,7 @@ vector<int> BlastDB::findClosestSequences(Sequence* seq, int n) {
 			//wrap entire string in ""
 			blastCommand = "\"" + blastCommand + "\"";
 		#endif
+		
 		system(blastCommand.c_str());
 		
 		ifstream m8FileHandle;
@@ -129,6 +132,7 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n, int minPerID) {
 		
 		ofstream queryFile;
 		int randNumber = rand();
+		//int randNumber = 12345;
 		m->openOutputFile((queryFileName+toString(randNumber)), queryFile);
 		queryFile << '>' << seq->getName() << endl;
 		queryFile << seq->getUnaligned() << endl;
@@ -143,13 +147,16 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n, int minPerID) {
 			blastCommand = path + "blast/bin/megablast -e 1e-10 -d " + dbFileName + " -m 8 -b " + toString(n) + " -v " + toString(n); //-W 28 -p blastn
 			blastCommand += (" -i " + (queryFileName+toString(randNumber)) + " -o " + blastFileName+toString(randNumber));
 		#else
+		//blastCommand = path + "blast\\bin\\megablast -e 1e-10 -d " + dbFileName + " -m 8 -b " + toString(n) + " -v " + toString(n); //-W 28 -p blastn
+		//blastCommand += (" -i " + (queryFileName+toString(randNumber)) + " -o " + blastFileName+toString(randNumber));
+
 			blastCommand =  "\"" + path + "blast\\bin\\megablast\" -e 1e-10 -d " + "\"" + dbFileName + "\"" + " -m 8 -b " + toString(n) + " -v " + toString(n); //-W 28 -p blastn
 			blastCommand += (" -i " + (queryFileName+toString(randNumber)) + " -o " + blastFileName+toString(randNumber));
 			//wrap entire string in ""
 			blastCommand = "\"" + blastCommand + "\"";
 
 		#endif
-		
+		//cout << blastCommand << endl;
 		system(blastCommand.c_str());
 
 		ifstream m8FileHandle;
@@ -219,10 +226,13 @@ void BlastDB::generateDB() {
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 			formatdbCommand = path + "blast/bin/formatdb -p F -o T -i " + dbFileName;	//	format the database, -o option gives us the ability
 		#else
+			//formatdbCommand = path + "blast\\bin\\formatdb -p F -o T -i " + dbFileName;	//	format the database, -o option gives us the ability
+
 			formatdbCommand = "\"" + path + "blast\\bin\\formatdb\" -p F -o T -i " + "\"" +  dbFileName + "\"";
 			//wrap entire string in ""
 			formatdbCommand = "\"" + formatdbCommand + "\"";
 		#endif
+		//cout << formatdbCommand << endl;
 		system(formatdbCommand.c_str());								//	to get the right sequence names, i think. -p F
 																	//	option tells formatdb that seqs are DNA, not prot
 		//m->mothurOut("DONE."); m->mothurOutEndLine();	m->mothurOutEndLine(); cout.flush();

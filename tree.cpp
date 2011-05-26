@@ -808,7 +808,7 @@ void Tree::print(ostream& out, string mode) {
 void Tree::createNewickFile(string f) {
 	try {
 		int root = findRoot();
-		//filename = m->getRootName(globaldata->getTreeFile()) + "newick";
+	
 		filename = f;
 
 		m->openOutputFile(filename, out);

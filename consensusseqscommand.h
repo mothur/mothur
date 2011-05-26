@@ -38,12 +38,13 @@ private:
 	map<string, string> fastaMap;
 	map<string, string> nameMap;
 	map<string, string> nameFileMap;
+	int cutoff;
 	
 	int readFasta();
 	int readNames();
 	int processList(ListVector*&);
 	string getConsSeq(string, ofstream&, string&, int);
-	char getBase(vector<int>);
+	char getBase(vector<int>, int);
 };
 
 #endif

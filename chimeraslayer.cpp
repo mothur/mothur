@@ -1117,17 +1117,19 @@ vector<Sequence*> ChimeraSlayer::getBlastSeqs(Sequence* q, vector<Sequence*>& db
 		//cout << qname << endl;	
 		
 		for (int i = 0; i < mergedResults.size(); i++) {
-			//cout << mergedResults[i]  << '\t' << db[mergedResults[i]]->getName() << endl;	
+			//cout << q->getName() << mergedResults[i]  << '\t' << db[mergedResults[i]]->getName() << endl;	
 			if (db[mergedResults[i]]->getName() != q->getName()) { 
 				Sequence* temp = new Sequence(db[mergedResults[i]]->getName(), db[mergedResults[i]]->getAligned());
 				refResults.push_back(temp);
 				
 			}
 		}
-		
+		//cout << endl << endl;
 
 		delete queryRight;
 		delete queryLeft;
+		
+		if (refResults.size() == 0) { m->mothurOut("[WARNING]: mothur found 0 potential parents, so we are not able to check " + q->getName() + ". This could be due to formatdb.exe not being setup properly, please check formatdb.log for errors."); m->mothurOutEndLine(); }
 		
 		return refResults;
 	}
