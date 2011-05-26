@@ -18,6 +18,7 @@ vector<string> ConsensusSeqsCommand::setParameters(){
 		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
 		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(plist);
 		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
+		CommandParameter pcutoff("cutoff", "Number", "", "100", "", "", "",false,false); parameters.push_back(pcutoff);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
 		
@@ -35,11 +36,12 @@ string ConsensusSeqsCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The consensus.seqs command can be used in 2 ways: create a consensus sequence from a fastafile, or with a listfile create a consensus sequence for each otu. Sequences must be aligned.\n";
-		helpString += "The consensus.seqs command parameters are fasta, list, name and label.\n";
+		helpString += "The consensus.seqs command parameters are fasta, list, name, cutoff and label.\n";
 		helpString += "The fasta parameter allows you to enter the fasta file containing your sequences, and is required, unless you have a valid current fasta file. \n";
 		helpString += "The list parameter allows you to enter a your list file. \n";
 		helpString += "The name parameter allows you to enter a names file associated with the fasta file. \n";
 		helpString += "The label parameter allows you to select what distance levels you would like output files for, and are separated by dashes.\n";
+		helpString += "The cutoff parameter allows you set a percentage of sequences that support the base. For example: cutoff=97 would only return a sequence that only showed ambiguities for bases that were not supported by at least 97% of sequences.\n";
 		helpString += "The consensus.seqs command should be in the following format: \n";
 		helpString += "consensus.seqs(fasta=yourFastaFile, list=yourListFile) \n";	
 		helpString += "Example: consensus.seqs(fasta=abrecovery.align, list=abrecovery.fn.list) \n";
@@ -154,6 +156,9 @@ ConsensusSeqsCommand::ConsensusSeqsCommand(string option)  {
 				else { allLines = 1;  }
 			}
 			
+			string temp = validParameter.validFile(parameters, "cutoff", false);  if (temp == "not found") { temp = "100"; }
+			convert(temp, cutoff); 
+			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(fastafile);	}
 
@@ -234,7 +239,7 @@ int ConsensusSeqsCommand::execute(){
 				}
 				
 				char conBase = '.';
-				if (numDots != seqs.size()) { conBase = getBase(counts); }
+				if (numDots != seqs.size()) { conBase = getBase(counts, seqs.size()); }
 				
 				consSeq += conBase;
 				
@@ -477,7 +482,7 @@ string ConsensusSeqsCommand::getConsSeq(string bin, ofstream& outSummary, string
 			}
 			
 			char conBase = '.';
-			if (numDots != seqs.size()) { conBase = getBase(counts); }
+			if (numDots != seqs.size()) { conBase = getBase(counts, seqs.size()); }
 			
 			consSeq += conBase;
 			
@@ -503,7 +508,7 @@ string ConsensusSeqsCommand::getConsSeq(string bin, ofstream& outSummary, string
 }
 //***************************************************************************************************************
 
-char ConsensusSeqsCommand::getBase(vector<int> counts){  //A,T,G,C,Gap
+char ConsensusSeqsCommand::getBase(vector<int> counts, int size){  //A,T,G,C,Gap
 	try{
 		/* A = adenine
 		* C = cytosine
@@ -522,6 +527,15 @@ char ConsensusSeqsCommand::getBase(vector<int> counts){  //A,T,G,C,Gap
 		* N = A G C T (any) */
 		
 		char conBase = 'N';
+		
+		//zero out counts that don't make the cutoff
+		float percentage = (100.0 - cutoff) / 100.0;
+		int zeroCutoff = percentage * size;
+		
+		for (int i = 0; i < counts.size(); i++) {
+			if (counts[i] < zeroCutoff) { counts[i] = 0; }
+		}
+		
 		
 		//any
 		if ((counts[0] != 0) && (counts[1] != 0) && (counts[2] != 0) && (counts[3] != 0) && (counts[4] != 0)) {  conBase = 'n'; }
@@ -585,6 +599,8 @@ char ConsensusSeqsCommand::getBase(vector<int> counts){  //A,T,G,C,Gap
 		else if ((counts[0] == 0) && (counts[1] == 0) && (counts[2] == 0) && (counts[3] != 0) && (counts[4] == 0)) {  conBase = 'C'; }	
 		//only gap
 		else if ((counts[0] == 0) && (counts[1] == 0) && (counts[2] == 0) && (counts[3] == 0) && (counts[4] != 0)) {  conBase = '-'; }
+		//cutoff removed all counts
+		else if ((counts[0] == 0) && (counts[1] == 0) && (counts[2] == 0) && (counts[3] == 0) && (counts[4] == 0)) {  m->mothurOut("cutoff ...."); m->mothurOutEndLine(); }
 		else{ m->mothurOut("[ERROR]: cannot find consensus base."); m->mothurOutEndLine(); }
 		
 		return conBase;
