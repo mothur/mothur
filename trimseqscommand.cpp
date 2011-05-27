@@ -555,7 +555,6 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 			int currentSeqsDiffs = 0;
 
 			Sequence currSeq(inFASTA); m->gobble(inFASTA);
-			
 			QualityScores currQual;
 			if(qFileName != ""){
 				currQual = QualityScores(qFile);  m->gobble(qFile);
@@ -711,17 +710,18 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 				unsigned long int pos = inFASTA.tellg();
 				if ((pos == -1) || (pos >= line->end)) { break; }
+			
 			#else
 				if (inFASTA.eof()) { break; }
 			#endif
-				
+			
 			//report progress
 			if((count) % 1000 == 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
 			
 		}
 		//report progress
 		if((count) % 1000 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
-
+		
 		
 		inFASTA.close();
 		trimFASTAFile.close();
@@ -798,14 +798,18 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
 								 qLines[process]);
 				
 				//pass groupCounts to parent
-				ofstream out;
-				string tempFile = filename + toString(getpid()) + ".num.temp";
-				m->openOutputFile(tempFile, out);
-				for (map<string, int>::iterator it = groupCounts.begin(); it != groupCounts.end(); it++) {
-					out << it->first << '\t' << it->second << endl;
+				if(oligoFile != ""){
+					ofstream out;
+					string tempFile = filename + toString(getpid()) + ".num.temp";
+					m->openOutputFile(tempFile, out);
+					
+					out << groupCounts.size() << endl;
+					
+					for (map<string, int>::iterator it = groupCounts.begin(); it != groupCounts.end(); it++) {
+						out << it->first << '\t' << it->second << endl;
+					}
+					out.close();
 				}
-				out.close();
-				
 				exit(0);
 			}else { 
 				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
@@ -859,8 +863,10 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
 				remove((scrapNameFileName + toString(processIDS[i]) + ".temp").c_str());
 			}
 			
-			m->appendFiles((groupFile + toString(processIDS[i]) + ".temp"), groupFile);
-			remove((groupFile + toString(processIDS[i]) + ".temp").c_str());
+			if(oligoFile != ""){
+				m->appendFiles((groupFile + toString(processIDS[i]) + ".temp"), groupFile);
+				remove((groupFile + toString(processIDS[i]) + ".temp").c_str());
+			}
 			
 			
 			if(allFiles){
@@ -884,19 +890,26 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
 				}
 			}
 			
-			ifstream in;
-			string tempFile =  filename + toString(processIDS[i]) + ".num.temp";
-			m->openInputFile(tempFile, in);
-			int tempNum;
-			string group;
-			while (!in.eof()) { 
-				in >> group >> tempNum; m->gobble(in);
+			if(oligoFile != ""){
+				ifstream in;
+				string tempFile =  filename + toString(processIDS[i]) + ".num.temp";
+				m->openInputFile(tempFile, in);
+				int tempNum;
+				string group;
 				
-				map<string, int>::iterator it = groupCounts.find(group);
-				if (it == groupCounts.end()) {	groupCounts[group] = tempNum; }
-				else { groupCounts[it->first] += tempNum; }
+				in >> tempNum; m->gobble(in);
+				
+				if (tempNum != 0) {
+					while (!in.eof()) { 
+						in >> group >> tempNum; m->gobble(in);
+				
+						map<string, int>::iterator it = groupCounts.find(group);
+						if (it == groupCounts.end()) {	groupCounts[group] = tempNum; }
+						else { groupCounts[it->first] += tempNum; }
+					}
+				}
+				in.close(); remove(tempFile.c_str());
 			}
-			in.close(); remove(tempFile.c_str());
 			
 		}
 	
