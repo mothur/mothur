@@ -91,7 +91,19 @@ int SystemCommand::execute(){
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
-		system(command.c_str());
+		//system(command.c_str());
+		FILE *lsofFile_p = popen(command.c_str(), "r");
+		
+		if (!lsofFile_p) { return 0; }
+		
+		char buffer[1024];
+		while ( fgets(buffer, 1024, lsofFile_p) != NULL ) {
+			string temp = buffer;
+			m->mothurOut(temp); 
+		}
+		m->mothurOutEndLine();
+		
+		pclose(lsofFile_p);
 		
 		return 0;		
 	}
