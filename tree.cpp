@@ -872,6 +872,11 @@ try {
 				if (tree[node].getBranchLength() != -1) {
 					out << ":" << tree[node].getBranchLength();
 				}
+			}else if (mode == "deunique") {
+				//if there is a branch length then print it
+				if (tree[node].getBranchLength() != -1) {
+					out << ":" << tree[node].getBranchLength();
+				}
 			}
 		}else { //you are a leaf
 			string leafGroup = tmap->getGroup(tree[node].getName());
@@ -897,6 +902,53 @@ try {
 				if (tree[node].getBranchLength() != -1) {
 					out << ":" << tree[node].getBranchLength();
 				}
+			}else if (mode == "deunique") {
+				map<string, string>::iterator itNames = m->names.find(tree[node].getName());
+				
+				string outputString = "";
+				if (itNames != m->names.end()) { 
+					
+					vector<string> dupNames;
+					m->splitAtComma((itNames->second), dupNames);
+					
+					if (dupNames.size() == 1) {
+						outputString += tree[node].getName();
+						if (tree[node].getBranchLength() != -1) {
+							outputString += ":" + toString(tree[node].getBranchLength());
+						}
+					}else {
+						outputString += "(";
+						
+						for (int u = 0; u < dupNames.size()-1; u++) {
+							outputString += dupNames[u];
+							
+							if (tree[node].getBranchLength() != -1) {
+								outputString += ":" + toString(0.0);
+							}
+							outputString += ",";
+						}
+						
+						outputString += dupNames[dupNames.size()-1];
+						if (tree[node].getBranchLength() != -1) {
+							outputString += ":" + toString(0.0);
+						}
+						
+						outputString += ")";
+						if (tree[node].getBranchLength() != -1) {
+							outputString += ":" + toString(tree[node].getBranchLength());
+						}
+					}
+				}else { 
+					outputString = tree[node].getName();
+					//if there is a branch length then print it
+					if (tree[node].getBranchLength() != -1) {
+						outputString += ":" + toString(tree[node].getBranchLength());
+					}
+					
+					m->mothurOut("[ERROR]: " + tree[node].getName() + " is not in your namefile, please correct."); m->mothurOutEndLine(); 
+				}
+					
+				out << outputString;
 			}
 		}
 		

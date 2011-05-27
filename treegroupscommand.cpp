@@ -758,8 +758,8 @@ int TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
 								if (m->control_pressed) { return 1; }
 								
 								//save values in similarity matrix
-								simMatrix[k][l] = data[0];
-								simMatrix[l][k] = data[0];
+								simMatrix[k][l] = -(data[0]-1.0);
+								simMatrix[l][k] = -(data[0]-1.0);
 							}
 						}
 					}
