@@ -536,7 +536,6 @@ char ConsensusSeqsCommand::getBase(vector<int> counts, int size){  //A,T,G,C,Gap
 			if (counts[i] < zeroCutoff) { counts[i] = 0; }
 		}
 		
-		
 		//any
 		if ((counts[0] != 0) && (counts[1] != 0) && (counts[2] != 0) && (counts[3] != 0) && (counts[4] != 0)) {  conBase = 'n'; }
 		//any no gap
@@ -600,7 +599,7 @@ char ConsensusSeqsCommand::getBase(vector<int> counts, int size){  //A,T,G,C,Gap
 		//only gap
 		else if ((counts[0] == 0) && (counts[1] == 0) && (counts[2] == 0) && (counts[3] == 0) && (counts[4] != 0)) {  conBase = '-'; }
 		//cutoff removed all counts
-		else if ((counts[0] == 0) && (counts[1] == 0) && (counts[2] == 0) && (counts[3] == 0) && (counts[4] == 0)) {  m->mothurOut("cutoff ...."); m->mothurOutEndLine(); }
+		else if ((counts[0] == 0) && (counts[1] == 0) && (counts[2] == 0) && (counts[3] == 0) && (counts[4] == 0)) {  conBase = 'N'; }
 		else{ m->mothurOut("[ERROR]: cannot find consensus base."); m->mothurOutEndLine(); }
 		
 		return conBase;
