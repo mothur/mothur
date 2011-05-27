@@ -118,6 +118,7 @@
 #include "setcurrentcommand.h"
 #include "sharedcommand.h"
 #include "getcommandinfocommand.h"
+#include "deuniquetreecommand.h"
 
 /*******************************************************/
 
@@ -239,6 +240,7 @@ CommandFactory::CommandFactory(){
 	commands["get.current"]			= "get.current";
 	commands["set.current"]			= "set.current";
 	commands["get.commandinfo"]		= "get.commandinfo";
+	commands["deunique.tree"]		= "deunique.tree";
 	commands["pairwise.seqs"]		= "MPIEnabled";
 	commands["pipeline.pds"]		= "MPIEnabled";
 	commands["classify.seqs"]		= "MPIEnabled"; 
@@ -409,6 +411,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "anosim")				{	command = new AnosimCommand(optionString);					}
 		else if(commandName == "make.shared")			{	command = new SharedCommand(optionString);					}
 		else if(commandName == "get.commandinfo")		{	command = new GetCommandInfoCommand(optionString);			}
+		else if(commandName == "deunique.tree")			{	command = new DeuniqueTreeCommand(optionString);			}
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -545,6 +548,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "set.current")			{	pipecommand = new SetCurrentCommand(optionString);				}
 		else if(commandName == "make.shared")			{	pipecommand = new SharedCommand(optionString);					}
 		else if(commandName == "get.commandinfo")		{	pipecommand = new GetCommandInfoCommand(optionString);			}
+		else if(commandName == "deunique.tree")			{	pipecommand = new DeuniqueTreeCommand(optionString);			}
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -669,6 +673,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "set.current")			{	shellcommand = new SetCurrentCommand();				}
 		else if(commandName == "make.shared")			{	shellcommand = new SharedCommand();					}
 		else if(commandName == "get.commandinfo")		{	shellcommand = new GetCommandInfoCommand();			}
+		else if(commandName == "deunique.tree")			{	shellcommand = new DeuniqueTreeCommand();			}
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;
