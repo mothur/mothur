@@ -10,33 +10,33 @@
 #include "maligner.h"
 
 /***********************************************************************/ //int num, int match, int misMatch, , string mode, Database* dataLeft, Database* dataRight
-Maligner::Maligner(vector<Sequence*> temp, int match, int misMatch, float div, int ms, int minCov) : db(temp), matchScore(match), misMatchPenalty(misMatch), minDivR(div), minSimilarity(ms), minCoverage(minCov) { 
+Maligner::Maligner(vector<Sequence> temp, int match, int misMatch, float div, int ms, int minCov) : db(temp), matchScore(match), misMatchPenalty(misMatch), minDivR(div), minSimilarity(ms), minCoverage(minCov) { 
 			//numWanted(num),  , searchMethod(mode), databaseLeft(dataLeft), databaseRight(dataRight)
 			
 			m = MothurOut::getInstance(); 
 			
 }
 /***********************************************************************/
-string Maligner::getResults(Sequence* q, DeCalculator* decalc) {
+string Maligner::getResults(Sequence q, DeCalculator decalc) {
 	try {
 		
 		outputResults.clear();
 		
 		//make copy so trimming doesn't destroy query from calling class - remember to deallocate
-		query = new Sequence(q->getName(), q->getAligned());
+		query.setName(q.getName()); query.setAligned(q.getAligned());
 		
 		string chimera;
 		
 		//copy refSeqs so that filter does not effect original
 		for(int i = 0; i < db.size(); i++) {  
-			Sequence* newSeq = new Sequence(db[i]->getName(), db[i]->getAligned());
+			Sequence newSeq(db[i].getName(), db[i].getAligned());
 			refSeqs.push_back(newSeq);
 		}
 		
 		refSeqs = minCoverageFilter(refSeqs);
 		
 		if (refSeqs.size() < 2)  { 
-			for (int i = 0; i < refSeqs.size(); i++) {  delete refSeqs[i];	}
+			//for (int i = 0; i < refSeqs.size(); i++) {  delete refSeqs[i];	}
 			percentIdenticalQueryChimera = 0.0;
 			return "unknown"; 
 		}
@@ -49,9 +49,9 @@ string Maligner::getResults(Sequence* q, DeCalculator* decalc) {
 		if (m->control_pressed) { return chimera;  }
 				
 		//free memory
-		delete query;
+		//delete query;
 
-		for (int i = 0; i < refSeqs.size(); i++) {  delete refSeqs[i];	}
+		//for (int i = 0; i < refSeqs.size(); i++) {  delete refSeqs[i];	}
 		
 		return chimera;
 	}
@@ -61,30 +61,26 @@ string Maligner::getResults(Sequence* q, DeCalculator* decalc) {
 	}
 }
 /***********************************************************************/
-string Maligner::chimeraMaligner(int chimeraPenalty, DeCalculator* decalc) {
+string Maligner::chimeraMaligner(int chimeraPenalty, DeCalculator decalc) {
 	try {
 		
 		string chimera;
-		
 		//trims seqs to first non gap char in all seqs and last non gap char in all seqs
-		spotMap = decalc->trimSeqs(query, refSeqs);
-		
-		//you trimmed the whole sequence, skip
-		if (query->getAligned() == "") { return "no"; }
+		spotMap = decalc.trimSeqs(query, refSeqs);
 
-		vector<Sequence*> temp = refSeqs;
-		
-//		for(int i=0;i<refSeqs.size();i++){
-//			cout << refSeqs[i]->getName() << endl;
-//		}
-		
+		//you trimmed the whole sequence, skip
+		if (query.getAligned() == "") { return "no"; }
+
+		vector<Sequence> temp = refSeqs;
 		temp.push_back(query);
 			
-		verticalFilter(temp);
+		temp = verticalFilter(temp);
+		query = temp[temp.size()-1];
+		for (int i = 0; i < temp.size()-1; i++) {  refSeqs[i] = temp[i]; }
 		
 		//for (int i = 0; i < refSeqs.size(); i++) { cout << refSeqs[i]->getName() << endl ; }//<< refSeqs[i]->getAligned() << endl
 
-		vector< vector<score_struct> > matrix = buildScoreMatrix(query->getAligned().length(), refSeqs.size()); //builds and initializes
+		vector< vector<score_struct> > matrix = buildScoreMatrix(query.getAligned().length(), refSeqs.size()); //builds and initializes
 		
 		if (m->control_pressed) { return chimera;  }
 		
@@ -94,14 +90,14 @@ string Maligner::chimeraMaligner(int chimeraPenalty, DeCalculator* decalc) {
 		
 		if (m->control_pressed) { return chimera;  }
 		
-		vector<trace_struct> trace = mapTraceRegionsToAlignment(path, refSeqs);
+		vector<trace_struct> trace = mapTraceRegionsToAlignment(path);
 				
 		if (trace.size() > 1) {		chimera = "yes";	}
 		else { chimera = "no";	return chimera; }
 		
 		int traceStart = path[0].col;
 		int traceEnd = path[path.size()-1].col;	
-		string queryInRange = query->getAligned();
+		string queryInRange = query.getAligned();
 		queryInRange = queryInRange.substr(traceStart, (traceEnd-traceStart+1));
 //		cout << queryInRange << endl;
 		string chimeraSeq = constructChimericSeq(trace, refSeqs);
@@ -140,23 +136,23 @@ string Maligner::chimeraMaligner(int chimeraPenalty, DeCalculator* decalc) {
 //			cout << regionStart << '\t' << regionEnd << '\t' << seqIndex << endl;
 			results temp;
 			
-			temp.parent = refSeqs[seqIndex]->getName();
-			temp.parentAligned = db[seqIndex]->getAligned();
+			temp.parent = refSeqs[seqIndex].getName();
+			temp.parentAligned = db[seqIndex].getAligned();
 			temp.nastRegionStart = spotMap[regionStart];
 			temp.nastRegionEnd = spotMap[regionEnd];
 			temp.regionStart = unalignedMap[regionStart];
 			temp.regionEnd = unalignedMap[regionEnd];
 			
-			string parentInRange = refSeqs[seqIndex]->getAligned();
+			string parentInRange = refSeqs[seqIndex].getAligned();
 			parentInRange = parentInRange.substr(traceStart, (traceEnd-traceStart+1));
 			
 			temp.queryToParent = computePercentID(queryInRange, parentInRange);
 			temp.divR = (percentIdenticalQueryChimera / temp.queryToParent);
 
-			string queryInRegion = query->getAligned();
+			string queryInRegion = query.getAligned();
 			queryInRegion = queryInRegion.substr(regionStart, (regionEnd-regionStart+1));
 			
-			string parentInRegion = refSeqs[seqIndex]->getAligned();
+			string parentInRegion = refSeqs[seqIndex].getAligned();
 			parentInRegion = parentInRegion.substr(regionStart, (regionEnd-regionStart+1));
 			
 			temp.queryToParentLocal = computePercentID(queryInRegion, parentInRegion);
@@ -175,15 +171,15 @@ string Maligner::chimeraMaligner(int chimeraPenalty, DeCalculator* decalc) {
 }
 /***********************************************************************/
 //removes top matches that do not have minimum coverage with query.
-vector<Sequence*> Maligner::minCoverageFilter(vector<Sequence*> ref){  
+vector<Sequence> Maligner::minCoverageFilter(vector<Sequence> ref){  
 	try {
-		vector<Sequence*> newRefs;
+		vector<Sequence> newRefs;
 		
-		string queryAligned = query->getAligned();
+		string queryAligned = query.getAligned();
 		
 		for (int i = 0; i < ref.size(); i++) {
 			
-			string refAligned = ref[i]->getAligned();
+			string refAligned = ref[i].getAligned();
 			
 			int numBases = 0;
 			int numCovered = 0;
@@ -205,9 +201,9 @@ vector<Sequence*> Maligner::minCoverageFilter(vector<Sequence*> ref){
 			//if coverage above minimum
 			if (coverage > minCoverage) {
 				newRefs.push_back(ref[i]);
-			}else {
-				delete ref[i];
-			}
+			}//else {
+				//delete ref[i];
+			//}
 		}
 		
 		return newRefs;
@@ -222,7 +218,7 @@ vector<Sequence*> Maligner::minCoverageFilter(vector<Sequence*> ref){
 int Maligner::computeChimeraPenalty() {
 	try {
 		
-		int numAllowable = ((1.0 - (1.0/minDivR)) * query->getNumBases());
+		int numAllowable = ((1.0 - (1.0/minDivR)) * query.getNumBases());
 
 //		if(numAllowable < 1){	numAllowable = 1;	}
 		
@@ -238,16 +234,16 @@ int Maligner::computeChimeraPenalty() {
 }
 /***********************************************************************/
 //this is a vertical filter
-void Maligner::verticalFilter(vector<Sequence*> seqs) {
+vector<Sequence> Maligner::verticalFilter(vector<Sequence> seqs) {
 	try {
-		vector<int> gaps;	gaps.resize(query->getAligned().length(), 0);
+		vector<int> gaps;	gaps.resize(query.getAligned().length(), 0);
 		
-		string filterString = (string(query->getAligned().length(), '1'));
+		string filterString = (string(query.getAligned().length(), '1'));
 		
 		//for each sequence
 		for (int i = 0; i < seqs.size(); i++) {
 		
-			string seqAligned = seqs[i]->getAligned();
+			string seqAligned = seqs[i].getAligned();
 			
 			for (int j = 0; j < seqAligned.length(); j++) {
 				//if this spot is a gap
@@ -257,7 +253,7 @@ void Maligner::verticalFilter(vector<Sequence*> seqs) {
 		
 		//zero out spot where all sequences have blanks
 		int numColRemoved = 0;
-		for(int i = 0; i < seqs[0]->getAligned().length(); i++){
+		for(int i = 0; i < seqs[0].getAligned().length(); i++){
 			if(gaps[i] == seqs.size())	{	filterString[i] = '0'; 	numColRemoved++;  }
 		}
 		
@@ -265,7 +261,7 @@ void Maligner::verticalFilter(vector<Sequence*> seqs) {
 		//for each sequence
 		for (int i = 0; i < seqs.size(); i++) {
 		
-			string seqAligned = seqs[i]->getAligned();
+			string seqAligned = seqs[i].getAligned();
 			string newAligned = "";
 			int count = 0;
 			
@@ -278,10 +274,10 @@ void Maligner::verticalFilter(vector<Sequence*> seqs) {
 				}
 			}
 			
-			seqs[i]->setAligned(newAligned);
+			seqs[i].setAligned(newAligned);
 		}
 		
-		string query = seqs[seqs.size()-1]->getAligned();
+		string query = seqs[seqs.size()-1].getAligned();
 		int queryLength = query.length();
 		
 		unalignedMap.resize(queryLength, 0);
@@ -297,6 +293,8 @@ void Maligner::verticalFilter(vector<Sequence*> seqs) {
 		}
 		
 		spotMap = newMap;
+		
+		return seqs;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Maligner", "verticalFilter");
@@ -333,19 +331,19 @@ vector< vector<score_struct> > Maligner::buildScoreMatrix(int cols, int rows) {
 
 //***************************************************************************************************************
 
-void Maligner::fillScoreMatrix(vector<vector<score_struct> >& ms, vector<Sequence*> seqs, int penalty) {
+void Maligner::fillScoreMatrix(vector<vector<score_struct> >& ms, vector<Sequence> seqs, int penalty) {
 	try{
 		
 		//get matrix dimensions
-		int numCols = query->getAligned().length();
+		int numCols = query.getAligned().length();
 		int numRows = seqs.size();
 		
 //		cout << numRows << endl;
 		
 		//initialize first col
-		string queryAligned = query->getAligned();
+		string queryAligned = query.getAligned();
 		for (int i = 0; i < numRows; i++) {
-			string subjectAligned = seqs[i]->getAligned();
+			string subjectAligned = seqs[i].getAligned();
 			
 			//are you both gaps?
 			if ((!isalpha(queryAligned[0])) && (!isalpha(subjectAligned[0]))) {
@@ -366,7 +364,7 @@ void Maligner::fillScoreMatrix(vector<vector<score_struct> >& ms, vector<Sequenc
 //			for (int i = 0; i < 1; i++) {  //iterate through matrix rows
 			for (int i = 0; i < numRows; i++) {  //iterate through matrix rows
 				
-				string subjectAligned = seqs[i]->getAligned();
+				string subjectAligned = seqs[i].getAligned();
 				
 				int matchMisMatchScore = 0;
 				//are you both gaps?
@@ -434,7 +432,7 @@ vector<score_struct> Maligner::extractHighestPath(vector<vector<score_struct> > 
 	try {
 		
 		//get matrix dimensions
-		int numCols = query->getAligned().length();
+		int numCols = query.getAligned().length();
 		int numRows = ms.size();
 		
 		
@@ -480,7 +478,7 @@ vector<score_struct> Maligner::extractHighestPath(vector<vector<score_struct> > 
 	}
 }
 //***************************************************************************************************************
-vector<trace_struct> Maligner::mapTraceRegionsToAlignment(vector<score_struct> path, vector<Sequence*> seqs) {
+vector<trace_struct> Maligner::mapTraceRegionsToAlignment(vector<score_struct> path) {
 	try {
 		vector<trace_struct> trace;
 		
@@ -668,14 +666,14 @@ vector<trace_struct> Maligner::mapTraceRegionsToAlignment(vector<score_struct> p
 */
 //***************************************************************************************************************
 
-string Maligner::constructChimericSeq(vector<trace_struct> trace, vector<Sequence*> seqs) {
+string Maligner::constructChimericSeq(vector<trace_struct> trace, vector<Sequence> seqs) {
 	try {
 		string chimera = "";
 		
 		for (int i = 0; i < trace.size(); i++) {
 //			cout << i << '\t' << trace[i].row << '\t' << trace[i].col << '\t' << trace[i].oldCol << endl;
 			
-			string seqAlign = seqs[trace[i].row]->getAligned();
+			string seqAlign = seqs[trace[i].row].getAligned();
 			seqAlign = seqAlign.substr(trace[i].col, (trace[i].oldCol-trace[i].col+1));
 			chimera += seqAlign;
 		}
@@ -692,7 +690,7 @@ string Maligner::constructChimericSeq(vector<trace_struct> trace, vector<Sequenc
 
 //***************************************************************************************************************
 
-string Maligner::constructAntiChimericSeq(vector<trace_struct> trace, vector<Sequence*> seqs) {
+string Maligner::constructAntiChimericSeq(vector<trace_struct> trace, vector<Sequence> seqs) {
 	try {
 		string antiChimera = "";
 		
@@ -701,7 +699,7 @@ string Maligner::constructAntiChimericSeq(vector<trace_struct> trace, vector<Seq
 			
 			int oppositeIndex = trace.size() - i - 1;
 			
-			string seqAlign = seqs[trace[oppositeIndex].row]->getAligned();
+			string seqAlign = seqs[trace[oppositeIndex].row].getAligned();
 			seqAlign = seqAlign.substr(trace[i].col, (trace[i].oldCol-trace[i].col+1));
 			antiChimera += seqAlign;
 		}

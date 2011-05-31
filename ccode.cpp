@@ -74,7 +74,7 @@ Ccode::~Ccode() {
 	#endif
 }	
 //***************************************************************************************************************
-Sequence* Ccode::print(ostream& out, ostream& outAcc) {
+Sequence Ccode::print(ostream& out, ostream& outAcc) {
 	try {
 		
 		ofstream out2;
@@ -155,7 +155,7 @@ Sequence* Ccode::print(ostream& out, ostream& outAcc) {
 		//free memory
 		for (int i = 0; i < closest.size(); i++) {  delete closest[i].seq;  }
 
-		return NULL;
+		return *querySeq;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Ccode", "print");
@@ -164,7 +164,7 @@ Sequence* Ccode::print(ostream& out, ostream& outAcc) {
 }
 #ifdef USE_MPI
 //***************************************************************************************************************
-Sequence* Ccode::print(MPI_File& out, MPI_File& outAcc) {
+Sequence Ccode::print(MPI_File& out, MPI_File& outAcc) {
 	try {
 		
 		string outMapString = "";
@@ -263,7 +263,7 @@ Sequence* Ccode::print(MPI_File& out, MPI_File& outAcc) {
 		//free memory
 		for (int i = 0; i < closest.size(); i++) {  delete closest[i].seq;  }
 
-		return NULL;
+		return *querySeq;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Ccode", "print");

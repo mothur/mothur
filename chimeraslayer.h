@@ -15,6 +15,8 @@
 #include "maligner.h"
 #include "slayer.h"
 
+
+
 //***********************************************************************/
 //This class was modeled after the chimeraSlayer written by the Broad Institute
 /***********************************************************************/
@@ -28,21 +30,21 @@ class ChimeraSlayer : public Chimera {
 		~ChimeraSlayer();
 		
 		int getChimeras(Sequence*);
-		Sequence* print(ostream&, ostream&);
-		Sequence* print(ostream&, ostream&, data_results, data_results);
+		Sequence print(ostream&, ostream&);
+		Sequence print(ostream&, ostream&, data_results, data_results);
 		void printHeader(ostream&);
 		int doPrep();
 		data_results getResults() { return printResults; }
 		
 		#ifdef USE_MPI
-		Sequence* print(MPI_File&, MPI_File&);
-		Sequence* print(MPI_File&, MPI_File&, data_results, data_results);
+		Sequence print(MPI_File&, MPI_File&);
+		Sequence print(MPI_File&, MPI_File&, data_results, data_results);
 		#endif
 		
 	private:
-		Sequence* querySeq;
+		Sequence querySeq;
 		Sequence trimQuery;
-		DeCalculator* decalc;
+		DeCalculator decalc;
 		Database* databaseRight;
 		Database* databaseLeft;
 		map<string, int> priority; //for template=self, seqname, seqAligned, abundance
@@ -60,10 +62,10 @@ class ChimeraSlayer : public Chimera {
 		string getBlock(data_struct, string);
 		string getBlock(data_results, data_results, bool, bool, string);
 		//int readNameFile(string);
-		vector<Sequence*> getTemplate(Sequence*, vector<Sequence*>&);
-		vector<Sequence*> getRefSeqs(Sequence*, vector<Sequence*>&, vector<Sequence*>&);
-		vector<Sequence*> getBlastSeqs(Sequence*, vector<Sequence*>&, int);
-		vector<Sequence*> getKmerSeqs(Sequence*, vector<Sequence*>&, int);
+		vector<Sequence*> getTemplate(Sequence, vector<Sequence*>&);
+		vector<Sequence> getRefSeqs(Sequence, vector<Sequence*>&, vector<Sequence*>&);
+		vector<Sequence> getBlastSeqs(Sequence, vector<Sequence*>&, int);
+		vector<Sequence> getKmerSeqs(Sequence, vector<Sequence*>&, int);
 		
 };
 

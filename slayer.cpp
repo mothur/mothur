@@ -13,10 +13,10 @@
 Slayer::Slayer(int win, int increment, int parentThreshold, float div, int i, int snp, int mi) :
 		minBS(mi), windowSize(win), windowStep(increment), parentFragmentThreshold(parentThreshold), divRThreshold(div), iters(i), percentSNPSample(snp){ m = MothurOut::getInstance(); }
 /***********************************************************************/
-string Slayer::getResults(Sequence* query, vector<Sequence*> refSeqs) {
+string Slayer::getResults(Sequence query, vector<Sequence> refSeqs) {
 	try {
 		vector<data_struct> all; all.clear();
-		myQuery = *query;
+		myQuery = query;
 
 		for (int i = 0; i < refSeqs.size(); i++) {
 		
@@ -25,19 +25,21 @@ string Slayer::getResults(Sequence* query, vector<Sequence*> refSeqs) {
 				if (m->control_pressed) { return "no";  }
 	
 				//make copies of query and each parent because runBellerophon removes gaps and messes them up
-				Sequence* q = new Sequence(query->getName(), query->getAligned());
-				Sequence* leftParent = new Sequence(refSeqs[i]->getName(), refSeqs[i]->getAligned());
-				Sequence* rightParent = new Sequence(refSeqs[j]->getName(), refSeqs[j]->getAligned());
+				Sequence q(query.getName(), query.getAligned());
+				Sequence leftParent(refSeqs[i].getName(), refSeqs[i].getAligned());
+				Sequence rightParent(refSeqs[j].getName(), refSeqs[j].getAligned());
 				
 				//cout << q->getName() << endl << q->getAligned() << endl << endl;	
-				//cout << leftParent->getName() << endl << leftParent->getAligned() << endl << endl;		
+				//cout << leftParent.getName() << '\t' << leftParent.getAligned().length() << endl << endl;
+				//cout << rightParent.getName() << '\t' << rightParent.getAligned().length() << endl << endl;
+				//cout << q.getName() << '\t' << q.getAligned().length() << endl << endl;
 				//cout << rightParent->getName() << endl << rightParent->getAligned() << endl << endl;	
 				//cout << " length = " << rightParent->getAligned().length() << endl;
 	
 				map<int, int> spots;  //map from spot in original sequence to spot in filtered sequence for query and both parents
 				vector<data_struct> divs = runBellerophon(q, leftParent, rightParent, spots);
 	
-				if (m->control_pressed) { delete q; delete leftParent; delete rightParent; return "no"; }
+				if (m->control_pressed) { return "no"; }
 //				cout << "examining:\t" << refSeqs[i]->getName() << '\t' << refSeqs[j]->getName() << endl;
 				vector<data_struct> selectedDivs;
 				for (int k = 0; k < divs.size(); k++) {
@@ -45,7 +47,7 @@ string Slayer::getResults(Sequence* query, vector<Sequence*> refSeqs) {
 					vector<snps> snpsLeft = getSNPS(divs[k].parentA.getAligned(), divs[k].querySeq.getAligned(), divs[k].parentB.getAligned(), divs[k].winLStart, divs[k].winLEnd);
 					vector<snps> snpsRight = getSNPS(divs[k].parentA.getAligned(), divs[k].querySeq.getAligned(), divs[k].parentB.getAligned(), divs[k].winRStart, divs[k].winREnd);
 	
-					if (m->control_pressed) { delete q; delete leftParent; delete rightParent; return "no"; }
+					if (m->control_pressed) {  return "no"; }
 					
 					int numSNPSLeft = snpsLeft.size();
 					int numSNPSRight = snpsRight.size();
@@ -57,7 +59,7 @@ string Slayer::getResults(Sequence* query, vector<Sequence*> refSeqs) {
 						float BS_A, BS_B;
 						bootstrapSNPS(snpsLeft, snpsRight, BS_A, BS_B, iters);
 						
-						if (m->control_pressed) { delete q; delete leftParent; delete rightParent; return "no"; }
+						if (m->control_pressed) { return "no"; }
 
 						divs[k].bsa = BS_A;
 						divs[k].bsb = BS_B;
@@ -89,10 +91,6 @@ string Slayer::getResults(Sequence* query, vector<Sequence*> refSeqs) {
 
 				//save selected
 				for (int mi = 0; mi < selectedDivs.size(); mi++) {  all.push_back(selectedDivs[mi]);	}
-				
-				delete q;
-				delete leftParent;
-				delete rightParent;
 			}
 		}
 		
@@ -116,26 +114,27 @@ string Slayer::getResults(Sequence* query, vector<Sequence*> refSeqs) {
 	}
 }
 /***********************************************************************/
-vector<data_struct> Slayer::runBellerophon(Sequence* q, Sequence* pA, Sequence* pB, map<int, int>& spots) {
+vector<data_struct> Slayer::runBellerophon(Sequence q, Sequence pA, Sequence pB, map<int, int>& spots) {
 	try{
 		
 		vector<data_struct> data;
 		
 		//vertical filter
-		vector<Sequence*> temp;
-		temp.push_back(q); temp.push_back(pA); temp.push_back(pB);
+		//cout << q.getName() << endl << q.getAligned() << endl << endl;	
+		//cout << pA.getName() << endl << pA.getUnaligned() << endl << endl;		
+		//cout << pB.getName() << endl << pB.getUnaligned() << endl << endl;	
 		
 		//maps spot in new alignment to spot in alignment before filter
-		spots = verticalFilter(temp);  //fills baseSpots
+		spots = verticalFilter(q, pA, pB);  //fills baseSpots
 		
 		//get these to avoid numerous function calls
-		string query = q->getAligned();
-		string parentA = pA->getAligned();
-		string parentB = pB->getAligned();
+		string query = q.getAligned();
+		string parentA = pA.getAligned();
+		string parentB = pB.getAligned();
 		int length = query.length();
-//cout << q->getName() << endl << q->getAligned() << endl << endl;	
-//cout << pA->getName() << endl << pA->getUnaligned() << endl << endl;		
-//cout << pB->getName() << endl << pB->getUnaligned() << endl << endl;	
+//cout << q.getName() << endl << q.getAligned() << endl << endl;	
+//cout << pA.getName() << endl << pA.getUnaligned() << endl << endl;		
+//cout << pB.getName() << endl << pB.getUnaligned() << endl << endl;	
 //cout << " length = " << length << endl;
 	
 		//check window size
@@ -209,9 +208,9 @@ vector<data_struct> Slayer::runBellerophon(Sequence* q, Sequence* pA, Sequence* 
 					member.winLEnd = breakpoint;  
 					member.winRStart = breakpoint+1; 
 					member.winREnd = length-1; 
-					member.querySeq = *(q);
-					member.parentA = *(pA);
-					member.parentB = *(pB);
+					member.querySeq = q;
+					member.parentA = pA;
+					member.parentB = pB;
 					member.bsa = 0;
 					member.bsb = 0;
 					member.bsMax = 0;
@@ -478,33 +477,41 @@ float Slayer::computePercentID(string queryAlign, string chimera, int left, int 
 }
 /***********************************************************************/
 //remove columns that contain any gaps
-map<int, int> Slayer::verticalFilter(vector<Sequence*> seqs) {
+map<int, int> Slayer::verticalFilter(Sequence& q, Sequence& pA, Sequence& pB) {
 	try {
 		//find baseSpots
 		baseSpots.clear(); 
 		baseSpots.resize(3);  //query, parentA, parentB
 	
-		vector<int> gaps;	gaps.resize(seqs[0]->getAligned().length(), 0);
+		vector<int> gaps;	gaps.resize(q.getAligned().length(), 0);
 		
-		string filterString = (string(seqs[0]->getAligned().length(), '1'));
+		string filterString = (string(q.getAligned().length(), '1'));
 		
-		//for each sequence
-		for (int i = 0; i < seqs.size(); i++) {
-		
-			string seqAligned = seqs[i]->getAligned();
-			
-			for (int j = 0; j < seqAligned.length(); j++) {
-				//if this spot is a gap
-				if ((seqAligned[j] == '-') || (seqAligned[j] == '.') || (toupper(seqAligned[j]) == 'N'))	{   gaps[j]++;	}
-			}
+		string seqAligned = q.getAligned();
+		for (int j = 0; j < seqAligned.length(); j++) {
+			//if this spot is a gap
+			if ((seqAligned[j] == '-') || (seqAligned[j] == '.') || (toupper(seqAligned[j]) == 'N'))	{   gaps[j]++;	}
 		}
+		
+		seqAligned = pA.getAligned();
+		for (int j = 0; j < seqAligned.length(); j++) {
+			//if this spot is a gap
+			if ((seqAligned[j] == '-') || (seqAligned[j] == '.') || (toupper(seqAligned[j]) == 'N'))	{   gaps[j]++;	}
+		}
+		
+		seqAligned = pB.getAligned();
+		for (int j = 0; j < seqAligned.length(); j++) {
+			//if this spot is a gap
+			if ((seqAligned[j] == '-') || (seqAligned[j] == '.') || (toupper(seqAligned[j]) == 'N'))	{   gaps[j]++;	}
+		}
+		
 		
 		//zero out spot where any sequences have blanks
 		int numColRemoved = 0;
 		int count = 0;
 		map<int, int> maskMap; maskMap.clear();
 
-		for(int i = 0; i < seqs[0]->getAligned().length(); i++){
+		for(int i = 0; i < q.getAligned().length(); i++){
 			if(gaps[i] != 0)	{	filterString[i] = '0'; 	numColRemoved++;  }
 			else {
 				maskMap[count] = i;
@@ -512,28 +519,63 @@ map<int, int> Slayer::verticalFilter(vector<Sequence*> seqs) {
 			}
 		}
 
-		//for each sequence
-		for (int i = 0; i < seqs.size(); i++) {
-		
-			string seqAligned = seqs[i]->getAligned();
-			string newAligned = "";
+		seqAligned = q.getAligned();
+		string newAligned = "";
 			
-			int baseCount = 0;
-			int count = 0;
-			for (int j = 0; j < seqAligned.length(); j++) {
-				//are you a base
-				if ((seqAligned[j] != '-') && (seqAligned[j] != '.') && (toupper(seqAligned[j]) != 'N'))	{ baseCount++; }
+		int baseCount = 0;
+		count = 0;
+		for (int j = 0; j < seqAligned.length(); j++) {
+			//are you a base
+			if ((seqAligned[j] != '-') && (seqAligned[j] != '.') && (toupper(seqAligned[j]) != 'N'))	{ baseCount++; }
 			
-				//if this spot is not a gap
-				if (filterString[j] == '1') { 
-					newAligned += seqAligned[j]; 
-					baseSpots[i][count] = baseCount;
-					count++;
-				}
+			//if this spot is not a gap
+			if (filterString[j] == '1') { 
+				newAligned += seqAligned[j]; 
+				baseSpots[0][count] = baseCount;
+				count++;
 			}
-			
-			seqs[i]->setAligned(newAligned);
 		}
+			
+		q.setAligned(newAligned);
+		
+		seqAligned = pA.getAligned();
+		newAligned = "";
+		
+		baseCount = 0;
+		count = 0;
+		for (int j = 0; j < seqAligned.length(); j++) {
+			//are you a base
+			if ((seqAligned[j] != '-') && (seqAligned[j] != '.') && (toupper(seqAligned[j]) != 'N'))	{ baseCount++; }
+			
+			//if this spot is not a gap
+			if (filterString[j] == '1') { 
+				newAligned += seqAligned[j]; 
+				baseSpots[1][count] = baseCount;
+				count++;
+			}
+		}
+		
+		pA.setAligned(newAligned);
+		
+		seqAligned = pB.getAligned();
+		newAligned = "";
+		
+		baseCount = 0;
+		count = 0;
+		for (int j = 0; j < seqAligned.length(); j++) {
+			//are you a base
+			if ((seqAligned[j] != '-') && (seqAligned[j] != '.') && (toupper(seqAligned[j]) != 'N'))	{ baseCount++; }
+			
+			//if this spot is not a gap
+			if (filterString[j] == '1') { 
+				newAligned += seqAligned[j]; 
+				baseSpots[2][count] = baseCount;
+				count++;
+			}
+		}
+		
+		pB.setAligned(newAligned);
+		
 		
 		return maskMap;
 	}

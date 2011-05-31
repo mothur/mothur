@@ -35,8 +35,6 @@ int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int num
 		realign = r; 
 		trimChimera = trim;
 	
-		decalc = new DeCalculator();	
-		
 		doPrep();
 	}
 	catch(exception& e) {
@@ -67,8 +65,6 @@ ChimeraSlayer::ChimeraSlayer(string file, string temp, bool trim, map<string, in
 		realign = r; 
 		trimChimera = trim;
 		priority = prior;
-		
-		decalc = new DeCalculator();	
 		
 		createFilter(templateSeqs, 0.0); //just removed columns where all seqs have a gap
 		
@@ -235,14 +231,14 @@ int ChimeraSlayer::doPrep() {
 	}
 }
 //***************************************************************************************************************
-vector<Sequence*> ChimeraSlayer::getTemplate(Sequence* q, vector<Sequence*>& userTemplateFiltered) {
+vector<Sequence*> ChimeraSlayer::getTemplate(Sequence q, vector<Sequence*>& userTemplateFiltered) {
 	try {
 		
 		//when template=self, the query file is sorted from most abundance to least abundant
 		//userTemplate grows as the query file is processed by adding sequences that are not chimeric and more abundant
 		vector<Sequence*> userTemplate;
 		
-		int myAbund = priority[q->getName()];
+		int myAbund = priority[q.getName()];
 		
 		for (int i = 0; i < templateSeqs.size(); i++) {
 			
@@ -346,7 +342,6 @@ vector<Sequence*> ChimeraSlayer::getTemplate(Sequence* q, vector<Sequence*>& use
 
 //***************************************************************************************************************
 ChimeraSlayer::~ChimeraSlayer() { 	
-	delete decalc;  
 	if (templateFileName != "self") {
 		if (searchMethod == "kmer") {  delete databaseRight;  delete databaseLeft;  }	
 		else if (searchMethod == "blast") {  delete databaseLeft; }
@@ -361,10 +356,10 @@ void ChimeraSlayer::printHeader(ostream& out) {
 	out << "Name\tLeftParent\tRightParent\tDivQLAQRB\tPerIDQLAQRB\tBootStrapA\tDivQLBQRA\tPerIDQLBQRA\tBootStrapB\tFlag\tLeftWindow\tRightWindow\n";
 }
 //***************************************************************************************************************
-Sequence* ChimeraSlayer::print(ostream& out, ostream& outAcc) {
+Sequence ChimeraSlayer::print(ostream& out, ostream& outAcc) {
 	try {
-		Sequence* trim = NULL;
-		if (trimChimera) { trim = new Sequence(trimQuery.getName(), trimQuery.getAligned()); }
+		Sequence trim;
+		if (trimChimera) { trim.setName(trimQuery.getName()); trim.setAligned(trimQuery.getAligned()); }
 		
 		if (chimeraFlags == "yes") {
 			string chimeraFlag = "no";
@@ -375,23 +370,23 @@ Sequence* ChimeraSlayer::print(ostream& out, ostream& outAcc) {
 			
 			if (chimeraFlag == "yes") {	
 				if ((chimeraResults[0].bsa >= minBS) || (chimeraResults[0].bsb >= minBS)) {
-					m->mothurOut(querySeq->getName() + "\tyes"); m->mothurOutEndLine();
-					outAcc << querySeq->getName() << endl;
+					m->mothurOut(querySeq.getName() + "\tyes"); m->mothurOutEndLine();
+					outAcc << querySeq.getName() << endl;
 					
-					if (templateFileName == "self") {  chimericSeqs.insert(querySeq->getName()); }
+					if (templateFileName == "self") {  chimericSeqs.insert(querySeq.getName()); }
 					
 					if (trimChimera) {  
 						int lengthLeft = chimeraResults[0].winLEnd - chimeraResults[0].winLStart;
 						int lengthRight = chimeraResults[0].winREnd - chimeraResults[0].winRStart;
 						
-						string newAligned = trim->getAligned();
+						string newAligned = trim.getAligned();
 
 						if (lengthLeft > lengthRight) { //trim right
 							for (int i = (chimeraResults[0].winRStart-1); i < newAligned.length(); i++) { newAligned[i] = '.'; }
 						}else { //trim left
 							for (int i = 0; i < chimeraResults[0].winLEnd; i++) { newAligned[i] = '.'; }
 						}
-						trim->setAligned(newAligned);
+						trim.setAligned(newAligned);
 					}
 				}
 			}
@@ -399,7 +394,7 @@ Sequence* ChimeraSlayer::print(ostream& out, ostream& outAcc) {
 			printBlock(chimeraResults[0], chimeraFlag, out);
 			out << endl;
 		}else {  
-			out << querySeq->getName() << "\tno" << endl; 
+			out << querySeq.getName() << "\tno" << endl; 
 		}
 		
 		return trim;
@@ -411,13 +406,13 @@ Sequence* ChimeraSlayer::print(ostream& out, ostream& outAcc) {
 	}
 }
 //***************************************************************************************************************
-Sequence* ChimeraSlayer::print(ostream& out, ostream& outAcc, data_results leftPiece, data_results rightPiece) {
+Sequence ChimeraSlayer::print(ostream& out, ostream& outAcc, data_results leftPiece, data_results rightPiece) {
 	try {
-		Sequence* trim = NULL;
+		Sequence trim;
 				
 		if (trimChimera) { 
 			string aligned = leftPiece.trimQuery.getAligned() + rightPiece.trimQuery.getAligned();
-			trim = new Sequence(leftPiece.trimQuery.getName(), aligned); 
+			trim.setName(leftPiece.trimQuery.getName()); trim.setAligned(aligned); 
 		}
 		
 		if ((leftPiece.flag == "yes") || (rightPiece.flag == "yes")) {
@@ -445,13 +440,13 @@ Sequence* ChimeraSlayer::print(ostream& out, ostream& outAcc, data_results leftP
 				if (leftPiece.flag == "yes") { if ((leftPiece.results[0].bsa >= minBS) || (leftPiece.results[0].bsb >= minBS))	{ leftChimeric = true;	} }
 				
 				if (rightChimeric || leftChimeric) {
-					m->mothurOut(querySeq->getName() + "\tyes"); m->mothurOutEndLine();
-					outAcc << querySeq->getName() << endl;
+					m->mothurOut(querySeq.getName() + "\tyes"); m->mothurOutEndLine();
+					outAcc << querySeq.getName() << endl;
 					
-					if (templateFileName == "self") {  chimericSeqs.insert(querySeq->getName()); }
+					if (templateFileName == "self") {  chimericSeqs.insert(querySeq.getName()); }
 					
 					if (trimChimera) {  
-						string newAligned = trim->getAligned();
+						string newAligned = trim.getAligned();
 												
 						//right side is fine so keep that
 						if ((leftChimeric) && (!rightChimeric)) {
@@ -493,7 +488,7 @@ Sequence* ChimeraSlayer::print(ostream& out, ostream& outAcc, data_results leftP
 							}
 						}
 							
-						trim->setAligned(newAligned);
+						trim.setAligned(newAligned);
 					}
 					
 				}
@@ -502,7 +497,7 @@ Sequence* ChimeraSlayer::print(ostream& out, ostream& outAcc, data_results leftP
 			printBlock(leftPiece, rightPiece, leftChimeric, rightChimeric, chimeraFlag, out);
 			out << endl;
 		}else {  
-			out << querySeq->getName() << "\tno" << endl;  
+			out << querySeq.getName() << "\tno" << endl;  
 		}
 		
 		return trim;
@@ -516,18 +511,18 @@ Sequence* ChimeraSlayer::print(ostream& out, ostream& outAcc, data_results leftP
 
 #ifdef USE_MPI
 //***************************************************************************************************************
-Sequence* ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc, data_results leftPiece, data_results rightPiece) {
+Sequence ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc, data_results leftPiece, data_results rightPiece) {
 	try {
 		MPI_Status status;
 		bool results = false;
 		string outAccString = "";
 		string outputString = "";
 		
-		Sequence* trim = NULL;
+		Sequence trim;
 		
 		if (trimChimera) { 
 			string aligned = leftPiece.trimQuery.getAligned() + rightPiece.trimQuery.getAligned();
-			trim = new Sequence(leftPiece.trimQuery.getName(), aligned); 
+			trim.setName(leftPiece.trimQuery.getName());  trim.setAligned(aligned);
 		}
 		
 		
@@ -558,11 +553,11 @@ Sequence* ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc, data_results lef
 				if (leftPiece.flag == "yes") { if ((leftPiece.results[0].bsa >= minBS) || (leftPiece.results[0].bsb >= minBS))	{ leftChimeric = true;	} }
 				
 				if (rightChimeric || leftChimeric) {
-					cout << querySeq->getName() <<  "\tyes" << endl;
-					outAccString += querySeq->getName() + "\n";
+					cout << querySeq.getName() <<  "\tyes" << endl;
+					outAccString += querySeq.getName() + "\n";
 					results = true;
 					
-					if (templateFileName == "self") {  chimericSeqs.insert(querySeq->getName()); }
+					if (templateFileName == "self") {  chimericSeqs.insert(querySeq.getName()); }
 					
 					//write to accnos file
 					int length = outAccString.length();
@@ -573,7 +568,7 @@ Sequence* ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc, data_results lef
 					delete buf2;
 					
 					if (trimChimera) {  
-						string newAligned = trim->getAligned();
+						string newAligned = trim.getAligned();
 						
 						//right side is fine so keep that
 						if ((leftChimeric) && (!rightChimeric)) {
@@ -615,7 +610,7 @@ Sequence* ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc, data_results lef
 							}
 						}
 						
-						trim->setAligned(newAligned);
+						trim.setAligned(newAligned);
 					}
 					
 				}
@@ -633,7 +628,7 @@ Sequence* ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc, data_results lef
 			delete buf;
 
 		}else {  
-			outputString += querySeq->getName() + "\tno\n";  
+			outputString += querySeq.getName() + "\tno\n";  
 	
 			//write to output file
 			int length = outputString.length();
@@ -653,15 +648,15 @@ Sequence* ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc, data_results lef
 	}
 }
 //***************************************************************************************************************
-Sequence* ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc) {
+Sequence ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc) {
 	try {
 		MPI_Status status;
 		bool results = false;
 		string outAccString = "";
 		string outputString = "";
 		
-		Sequence* trim = NULL;
-		if (trimChimera) { trim = new Sequence(trimQuery.getName(), trimQuery.getAligned()); }
+		Sequence trim;
+		if (trimChimera) { trim.setName(trimQuery.getName()); trim.setAligned(trimQuery.getAligned()); }
 		
 		if (chimeraFlags == "yes") {
 			string chimeraFlag = "no";
@@ -672,11 +667,11 @@ Sequence* ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc) {
 			
 			if (chimeraFlag == "yes") {	
 				if ((chimeraResults[0].bsa >= minBS) || (chimeraResults[0].bsb >= minBS)) {
-					cout << querySeq->getName() <<  "\tyes" << endl;
-					outAccString += querySeq->getName() + "\n";
+					cout << querySeq.getName() <<  "\tyes" << endl;
+					outAccString += querySeq.getName() + "\n";
 					results = true;
 					
-					if (templateFileName == "self") {  chimericSeqs.insert(querySeq->getName()); }
+					if (templateFileName == "self") {  chimericSeqs.insert(querySeq.getName()); }
 					
 					//write to accnos file
 					int length = outAccString.length();
@@ -690,13 +685,13 @@ Sequence* ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc) {
 						int lengthLeft = chimeraResults[0].winLEnd - chimeraResults[0].winLStart;
 						int lengthRight = chimeraResults[0].winREnd - chimeraResults[0].winRStart;
 						
-						string newAligned = trim->getAligned();
+						string newAligned = trim.getAligned();
 						if (lengthLeft > lengthRight) { //trim right
 							for (int i = (chimeraResults[0].winRStart-1); i < newAligned.length(); i++) { newAligned[i] = '.'; }
 						}else { //trim left
 							for (int i = 0; i < (chimeraResults[0].winLEnd-1); i++) { newAligned[i] = '.'; }
 						}
-						trim->setAligned(newAligned);	
+						trim.setAligned(newAligned);	
 					}
 				}
 			}
@@ -713,7 +708,7 @@ Sequence* ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc) {
 			delete buf;
 			
 		}else {  
-			outputString += querySeq->getName() + "\tno\n";  
+			outputString += querySeq.getName() + "\tno\n";  
 			
 			//write to output file
 			int length = outputString.length();
@@ -743,20 +738,20 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 		chimeraFlags = "no";
 		printResults.flag = "no";
 		
-		querySeq = query;
+		querySeq = *query;
 		
 		//you must create a template
 		vector<Sequence*> thisTemplate;
 		vector<Sequence*> thisFilteredTemplate;
 		if (templateFileName != "self") { thisTemplate = templateSeqs; thisFilteredTemplate = filteredTemplateSeqs; }
-		else {  thisTemplate = getTemplate(query, thisFilteredTemplate);  } //fills this template and creates the databases
+		else {  thisTemplate = getTemplate(*query, thisFilteredTemplate);  } //fills this template and creates the databases
 		
 		if (m->control_pressed) {  return 0;  }
 		
 		if (thisTemplate.size() == 0) {  return 0; } //not chimeric
 		
 		//moved this out of maligner - 4/29/11
-		vector<Sequence*> refSeqs = getRefSeqs(query, thisTemplate, thisFilteredTemplate);
+		vector<Sequence> refSeqs = getRefSeqs(*query, thisTemplate, thisFilteredTemplate);
 		
 		Maligner maligner(refSeqs, match, misMatch, divR, minSim, minCov); 
 		Slayer slayer(window, increment, minSim, divR, iters, minSNP, minBS);
@@ -768,13 +763,13 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 	
 		if (m->control_pressed) {  return 0;  }
 
-		string chimeraFlag = maligner.getResults(query, decalc);
+		string chimeraFlag = maligner.getResults(*query, decalc);
 
 		if (m->control_pressed) {  return 0;  }
 		
 		vector<results> Results = maligner.getOutput();
 		
-		for (int i = 0; i < refSeqs.size(); i++) {  delete refSeqs[i];	}
+		//for (int i = 0; i < refSeqs.size(); i++) {  delete refSeqs[i];	}
 		
 		if (chimeraFlag == "yes") {
 			
@@ -791,7 +786,7 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 			
 //			cout << query->getAligned() << endl;
 			//get sequence that were given from maligner results
-			vector<SeqDist> seqs;
+			vector<SeqCompare> seqs;
 			map<string, float> removeDups;
 			map<string, float>::iterator itDup;
 			map<string, string> parentNameSeq;
@@ -820,9 +815,9 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 			
 			for (itDup = removeDups.begin(); itDup != removeDups.end(); itDup++) {
 				itSeq = parentNameSeq.find(itDup->first);
-				Sequence* seq = new Sequence(itDup->first, itSeq->second);
+				Sequence seq(itDup->first, itSeq->second);
 				
-				SeqDist member;
+				SeqCompare member;
 				member.seq = seq;
 				member.dist = itDup->second;
 				seqs.push_back(member);
@@ -831,30 +826,30 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 			//limit number of parents to explore - default 3
 			if (Results.size() > parents) {
 				//sort by distance
-				sort(seqs.begin(), seqs.end(), compareSeqDist);
+				sort(seqs.begin(), seqs.end(), compareSeqCompare);
 				//prioritize larger more similiar sequence fragments
 				reverse(seqs.begin(), seqs.end());
 				
-				for (int k = seqs.size()-1; k > (parents-1); k--)  {  
-					delete seqs[k].seq;
-					seqs.pop_back();	
-				}
+				//for (int k = seqs.size()-1; k > (parents-1); k--)  {  
+				//	delete seqs[k].seq;
+					//seqs.pop_back();	
+				//}
 			}
 		
 			//put seqs into vector to send to slayer
 			
 //			cout << query->getAligned() << endl;
-			vector<Sequence*> seqsForSlayer;
+			vector<Sequence> seqsForSlayer;
 			for (int k = 0; k < seqs.size(); k++) {  
 //				cout << seqs[k].seq->getAligned() << endl;
 				seqsForSlayer.push_back(seqs[k].seq);	
 //				cout << seqs[k].seq->getName() << endl;
 			}
 			
-			if (m->control_pressed) {  for (int k = 0; k < seqs.size(); k++) {  delete seqs[k].seq;   }  return 0;  }
+			if (m->control_pressed) {  return 0;  }
 
 			//send to slayer
-			chimeraFlags = slayer.getResults(query, seqsForSlayer);
+			chimeraFlags = slayer.getResults(*query, seqsForSlayer);
 			if (m->control_pressed) {  return 0;  }
 			chimeraResults = slayer.getOutput();
 			
@@ -862,7 +857,7 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 			printResults.results = chimeraResults;
 			
 			//free memory
-			for (int k = 0; k < seqs.size(); k++) {  delete seqs[k].seq;   }
+			//for (int k = 0; k < seqs.size(); k++) {  delete seqs[k].seq;   }
 		}
 		//cout << endl << endl;
 		return 0;
@@ -875,7 +870,7 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 //***************************************************************************************************************
 void ChimeraSlayer::printBlock(data_struct data, string flag, ostream& out){
 	try {
-		out << querySeq->getName() << '\t';
+		out << querySeq.getName() << '\t';
 		out << data.parentA.getName() << "\t" << data.parentB.getName()  << '\t';
 	
 		out << data.divr_qla_qrb << '\t' << data.qla_qrb << '\t' << data.bsa << '\t';
@@ -894,7 +889,7 @@ void ChimeraSlayer::printBlock(data_results leftdata, data_results rightdata, bo
 	try {
 		
 		if ((leftChimeric) && (!rightChimeric)) { //print left
-			out << querySeq->getName() << '\t';
+			out << querySeq.getName() << '\t';
 			out << leftdata.results[0].parentA.getName() << "\t" << leftdata.results[0].parentB.getName()  << '\t';
 			
 			out << leftdata.results[0].divr_qla_qrb << '\t' << leftdata.results[0].qla_qrb << '\t' << leftdata.results[0].bsa << '\t';
@@ -903,7 +898,7 @@ void ChimeraSlayer::printBlock(data_results leftdata, data_results rightdata, bo
 			out << flag << '\t' << leftdata.results[0].winLStart << "-" << leftdata.results[0].winLEnd << '\t' << leftdata.results[0].winRStart << "-" << leftdata.results[0].winREnd << '\t';
 		
 		}else if ((!leftChimeric) && (rightChimeric)) {  //print right
-			out << querySeq->getName() << '\t';
+			out << querySeq.getName() << '\t';
 			out << rightdata.results[0].parentA.getName() << "\t" << rightdata.results[0].parentB.getName()  << '\t';
 			
 			out << rightdata.results[0].divr_qla_qrb << '\t' << rightdata.results[0].qla_qrb << '\t' << rightdata.results[0].bsa << '\t';
@@ -913,7 +908,7 @@ void ChimeraSlayer::printBlock(data_results leftdata, data_results rightdata, bo
 			
 		}else  { //print both results
 			if (leftdata.flag == "yes") {
-				out << querySeq->getName() + "_LEFT" << '\t';
+				out << querySeq.getName() + "_LEFT" << '\t';
 				out << leftdata.results[0].parentA.getName() << "\t" << leftdata.results[0].parentB.getName()  << '\t';
 				
 				out << leftdata.results[0].divr_qla_qrb << '\t' << leftdata.results[0].qla_qrb << '\t' << leftdata.results[0].bsa << '\t';
@@ -925,7 +920,7 @@ void ChimeraSlayer::printBlock(data_results leftdata, data_results rightdata, bo
 			if (rightdata.flag == "yes") {
 				if (leftdata.flag == "yes") { out << endl; }
 				
-				out << querySeq->getName() + "_RIGHT"<< '\t';
+				out << querySeq.getName() + "_RIGHT"<< '\t';
 				out << rightdata.results[0].parentA.getName() << "\t" << rightdata.results[0].parentB.getName()  << '\t';
 				
 				out << rightdata.results[0].divr_qla_qrb << '\t' << rightdata.results[0].qla_qrb << '\t' << rightdata.results[0].bsa << '\t';
@@ -948,7 +943,7 @@ string ChimeraSlayer::getBlock(data_results leftdata, data_results rightdata, bo
 		string out = "";
 		
 		if ((leftChimeric) && (!rightChimeric)) { //get left
-			out += querySeq->getName() + "\t";
+			out += querySeq.getName() + "\t";
 			out += leftdata.results[0].parentA.getName() + "\t" + leftdata.results[0].parentB.getName() + "\t";
 			
 			out += toString(leftdata.results[0].divr_qla_qrb) + "\t" + toString(leftdata.results[0].qla_qrb) + "\t" + toString(leftdata.results[0].bsa) + "\t";
@@ -957,7 +952,7 @@ string ChimeraSlayer::getBlock(data_results leftdata, data_results rightdata, bo
 			out += flag + "\t" + toString(leftdata.results[0].winLStart) + "-" + toString(leftdata.results[0].winLEnd) + "\t" + toString(leftdata.results[0].winRStart) + "-" + toString(leftdata.results[0].winREnd) + "\t";
 			
 		}else if ((!leftChimeric) && (rightChimeric)) {  //print right
-			out += querySeq->getName() + "\t";
+			out += querySeq.getName() + "\t";
 			out += rightdata.results[0].parentA.getName() + "\t" + rightdata.results[0].parentB.getName()  + "\t";
 			
 			out += toString(rightdata.results[0].divr_qla_qrb) + "\t" + toString(rightdata.results[0].qla_qrb) + "\t" + toString(rightdata.results[0].bsa) + "\t";
@@ -968,7 +963,7 @@ string ChimeraSlayer::getBlock(data_results leftdata, data_results rightdata, bo
 		}else  { //print both results
 			
 			if (leftdata.flag == "yes") {
-				out += querySeq->getName() + "_LEFT\t";
+				out += querySeq.getName() + "_LEFT\t";
 				out += leftdata.results[0].parentA.getName() + "\t" + leftdata.results[0].parentB.getName() + "\t";
 				
 				out += toString(leftdata.results[0].divr_qla_qrb) + "\t" + toString(leftdata.results[0].qla_qrb) + "\t" + toString(leftdata.results[0].bsa) + "\t";
@@ -979,7 +974,7 @@ string ChimeraSlayer::getBlock(data_results leftdata, data_results rightdata, bo
 			
 			if (rightdata.flag == "yes") {
 				if (leftdata.flag == "yes") { out += "\n"; }
-				out +=  querySeq->getName() + "_RIGHT\t";
+				out +=  querySeq.getName() + "_RIGHT\t";
 				out += rightdata.results[0].parentA.getName() + "\t" + rightdata.results[0].parentB.getName()  + "\t";
 				
 				out += toString(rightdata.results[0].divr_qla_qrb) + "\t" + toString(rightdata.results[0].qla_qrb) + "\t" + toString(rightdata.results[0].bsa) + "\t";
@@ -1003,7 +998,7 @@ string ChimeraSlayer::getBlock(data_struct data, string flag){
 		
 		string outputString = "";
 		
-		outputString += querySeq->getName() + "\t";
+		outputString += querySeq.getName() + "\t";
 		outputString += data.parentA.getName() + "\t" + data.parentB.getName()  + "\t";
 			
 		outputString += toString(data.divr_qla_qrb) + "\t" + toString(data.qla_qrb) + "\t" + toString(data.bsa) + "\t";
@@ -1019,16 +1014,16 @@ string ChimeraSlayer::getBlock(data_struct data, string flag){
 	}
 }
 //***************************************************************************************************************
-vector<Sequence*> ChimeraSlayer::getRefSeqs(Sequence* q, vector<Sequence*>& thisTemplate, vector<Sequence*>& thisFilteredTemplate){
+vector<Sequence> ChimeraSlayer::getRefSeqs(Sequence q, vector<Sequence*>& thisTemplate, vector<Sequence*>& thisFilteredTemplate){
 	try {
 		
-		vector<Sequence*> refSeqs;
+		vector<Sequence> refSeqs;
 		
 		if (searchMethod == "distance") {
 			//find closest seqs to query in template - returns copies of seqs so trim does not destroy - remember to deallocate
-			Sequence* newSeq = new Sequence(q->getName(), q->getAligned());
+			Sequence* newSeq = new Sequence(q.getName(), q.getAligned());
 			runFilter(newSeq);
-			refSeqs = decalc->findClosest(newSeq, thisTemplate, thisFilteredTemplate, numWanted, minSim);
+			refSeqs = decalc.findClosest(*newSeq, thisTemplate, thisFilteredTemplate, numWanted, minSim);
 			delete newSeq;
 		}else if (searchMethod == "blast")  {
 			refSeqs = getBlastSeqs(q, thisTemplate, numWanted); //fills indexes
@@ -1044,18 +1039,18 @@ vector<Sequence*> ChimeraSlayer::getRefSeqs(Sequence* q, vector<Sequence*>& this
 	}
 }
 //***************************************************************************************************************/
-vector<Sequence*> ChimeraSlayer::getBlastSeqs(Sequence* q, vector<Sequence*>& db, int num) {
+vector<Sequence> ChimeraSlayer::getBlastSeqs(Sequence q, vector<Sequence*>& db, int num) {
 	try {	
 		
-		vector<Sequence*> refResults;
+		vector<Sequence> refResults;
 		
 		//get parts of query
-		string queryUnAligned = q->getUnaligned();
+		string queryUnAligned = q.getUnaligned();
 		string leftQuery = queryUnAligned.substr(0, int(queryUnAligned.length() * 0.33)); //first 1/3 of the sequence
 		string rightQuery = queryUnAligned.substr(int(queryUnAligned.length() * 0.66)); //last 1/3 of the sequence
 //cout << "whole length = " << queryUnAligned.length() << '\t' << "left length = " << leftQuery.length() << '\t' << "right length = "<< rightQuery.length() << endl;	
-		Sequence* queryLeft = new Sequence(q->getName(), leftQuery);
-		Sequence* queryRight = new Sequence(q->getName(), rightQuery);
+		Sequence* queryLeft = new Sequence(q.getName(), leftQuery);
+		Sequence* queryRight = new Sequence(q.getName(), rightQuery);
 		
 		vector<int> tempIndexesLeft = databaseLeft->findClosestMegaBlast(queryLeft, num+1, minSim);
 		vector<int> tempIndexesRight = databaseLeft->findClosestMegaBlast(queryRight, num+1, minSim);
@@ -1122,10 +1117,9 @@ vector<Sequence*> ChimeraSlayer::getBlastSeqs(Sequence* q, vector<Sequence*>& db
 		
 		for (int i = 0; i < mergedResults.size(); i++) {
 			//cout << q->getName() << mergedResults[i]  << '\t' << db[mergedResults[i]]->getName() << endl;	
-			if (db[mergedResults[i]]->getName() != q->getName()) { 
-				Sequence* temp = new Sequence(db[mergedResults[i]]->getName(), db[mergedResults[i]]->getAligned());
+			if (db[mergedResults[i]]->getName() != q.getName()) { 
+				Sequence temp(db[mergedResults[i]]->getName(), db[mergedResults[i]]->getAligned());
 				refResults.push_back(temp);
-				
 			}
 		}
 		//cout << endl << endl;
@@ -1133,7 +1127,7 @@ vector<Sequence*> ChimeraSlayer::getBlastSeqs(Sequence* q, vector<Sequence*>& db
 		delete queryRight;
 		delete queryLeft;
 		
-		if (refResults.size() == 0) { m->mothurOut("[WARNING]: mothur found 0 potential parents, so we are not able to check " + q->getName() + ". This could be due to formatdb.exe not being setup properly, please check formatdb.log for errors."); m->mothurOutEndLine(); }
+		if (refResults.size() == 0) { m->mothurOut("[WARNING]: megablast found 0 potential parents, so we are not able to check " + q.getName() + ". This could be due to formatdb.exe not being setup properly, please check formatdb.log for errors."); m->mothurOutEndLine(); }
 		
 		return refResults;
 	}
@@ -1143,17 +1137,17 @@ vector<Sequence*> ChimeraSlayer::getBlastSeqs(Sequence* q, vector<Sequence*>& db
 	}
 }
 //***************************************************************************************************************
-vector<Sequence*> ChimeraSlayer::getKmerSeqs(Sequence* q, vector<Sequence*>& db, int num) {
+vector<Sequence> ChimeraSlayer::getKmerSeqs(Sequence q, vector<Sequence*>& db, int num) {
 	try {	
-		vector<Sequence*> refResults;
+		vector<Sequence> refResults;
 		
 		//get parts of query
-		string queryUnAligned = q->getUnaligned();
+		string queryUnAligned = q.getUnaligned();
 		string leftQuery = queryUnAligned.substr(0, int(queryUnAligned.length() * 0.33)); //first 1/3 of the sequence
 		string rightQuery = queryUnAligned.substr(int(queryUnAligned.length() * 0.66)); //last 1/3 of the sequence
 		
-		Sequence* queryLeft = new Sequence(q->getName(), leftQuery);
-		Sequence* queryRight = new Sequence(q->getName(), rightQuery);
+		Sequence* queryLeft = new Sequence(q.getName(), leftQuery);
+		Sequence* queryRight = new Sequence(q.getName(), rightQuery);
 		
 		vector<int> tempIndexesLeft = databaseLeft->findClosestSequences(queryLeft, num);
 		vector<int> tempIndexesRight = databaseRight->findClosestSequences(queryRight, num);
@@ -1210,8 +1204,8 @@ vector<Sequence*> ChimeraSlayer::getKmerSeqs(Sequence* q, vector<Sequence*>& db,
 		
 		for (int i = 0; i < mergedResults.size(); i++) {
 			//cout << mergedResults[i]  << '\t' << db[mergedResults[i]]->getName() << endl;	
-			if (db[mergedResults[i]]->getName() != q->getName()) { 
-				Sequence* temp = new Sequence(db[mergedResults[i]]->getName(), db[mergedResults[i]]->getAligned());
+			if (db[mergedResults[i]]->getName() != q.getName()) { 
+				Sequence temp(db[mergedResults[i]]->getName(), db[mergedResults[i]]->getAligned());
 				refResults.push_back(temp);
 				
 			}
