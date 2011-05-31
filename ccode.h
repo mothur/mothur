@@ -28,10 +28,10 @@ class Ccode : public Chimera {
 		~Ccode();
 		
 		int getChimeras(Sequence* query);
-		Sequence* print(ostream&, ostream&);
+		Sequence print(ostream&, ostream&);
 		
 		#ifdef USE_MPI
-		Sequence* print(MPI_File&, MPI_File&);
+		Sequence print(MPI_File&, MPI_File&);
 		#endif
 	private:
 	

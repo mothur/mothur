@@ -683,23 +683,23 @@ float DeCalculator::getCoef(vector<float> obs, vector<float> qav) {
 }
 //***************************************************************************************************************
 //gets closest matches to each end, since chimeras will most likely have different parents on each end
-vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*>& thisTemplate, vector<Sequence*>& thisFilteredTemplate, int numWanted, int minSim) {
+vector<Sequence> DeCalculator::findClosest(Sequence querySeq, vector<Sequence*>& thisTemplate, vector<Sequence*>& thisFilteredTemplate, int numWanted, int minSim) {
 	try {
 		//indexes.clear();
 		
-		vector<Sequence*> seqsMatches;  
+		vector<Sequence> seqsMatches;  
 		
 		vector<SeqDist> distsLeft;
 		vector<SeqDist> distsRight;
 		
 		Dist* distcalculator = new eachGapDist();
 		
-		string queryUnAligned = querySeq->getUnaligned();
+		string queryUnAligned = querySeq.getUnaligned();
 		int numBases = int(queryUnAligned.length() * 0.33);
 		
 		string leftQuery = ""; //first 1/3 of the sequence
 		string rightQuery = ""; //last 1/3 of the sequence
-		string queryAligned = querySeq->getAligned();
+		string queryAligned = querySeq.getAligned();
 		
 		//left side
 		bool foundFirstBase = false;
@@ -740,8 +740,8 @@ vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*
 		}
 		rightQuery = queryAligned.substr(rightSpot, (lastBaseSpot-rightSpot+1)); //sequence from pos spot to end
 		
-		Sequence queryLeft(querySeq->getName(), leftQuery);
-		Sequence queryRight(querySeq->getName(), rightQuery);
+		Sequence queryLeft(querySeq.getName(), leftQuery);
+		Sequence queryRight(querySeq.getName(), rightQuery);
 		
 //cout << querySeq->getName() << '\t' << leftSpot << '\t' << rightSpot << '\t' << firstBaseSpot << '\t' << lastBaseSpot << endl;
 //cout << queryUnAligned.length() << '\t' << queryLeft.getUnaligned().length() << '\t' << queryRight.getUnaligned().length() << endl;
@@ -841,8 +841,8 @@ vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*
 		for (int i = 0; i < dists.size(); i++) {
 //			cout << db[dists[i].index]->getName() << '\t' << dists[i].dist << endl;
 
-			if ((thisTemplate[dists[i].index]->getName() != querySeq->getName()) && (((1.0-dists[i].dist)*100) >= minSim)) {
-				Sequence* temp = new Sequence(thisTemplate[dists[i].index]->getName(), thisTemplate[dists[i].index]->getAligned()); //have to make a copy so you can trim and filter without stepping on eachother.
+			if ((thisTemplate[dists[i].index]->getName() != querySeq.getName()) && (((1.0-dists[i].dist)*100) >= minSim)) {
+				Sequence temp(thisTemplate[dists[i].index]->getName(), thisTemplate[dists[i].index]->getAligned()); //have to make a copy so you can trim and filter without stepping on eachother.
 				//cout << querySeq->getName() << '\t' << thisTemplate[dists[i].index]->getName()  << '\t' << dists[i].dist << endl;
 				seqsMatches.push_back(temp);
 			}
@@ -889,17 +889,17 @@ Sequence* DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*> db) {
 	}
 }
 /***************************************************************************************************************/
-map<int, int> DeCalculator::trimSeqs(Sequence* query, vector<Sequence*> topMatches) {
+map<int, int> DeCalculator::trimSeqs(Sequence& query, vector<Sequence>& topMatches) {
 	try {
 		
 		int frontPos = 0;  //should contain first position in all seqs that is not a gap character
-		int rearPos = query->getAligned().length();
+		int rearPos = query.getAligned().length();
 		
 		//********find first position in topMatches that is a non gap character***********//
 		//find first position all query seqs that is a non gap character
 		for (int i = 0; i < topMatches.size(); i++) {
 			
-			string aligned = topMatches[i]->getAligned();
+			string aligned = topMatches[i].getAligned();
 			int pos = 0;
 			
 			//find first spot in this seq
@@ -915,7 +915,7 @@ map<int, int> DeCalculator::trimSeqs(Sequence* query, vector<Sequence*> topMatch
 		}
 		
 		
-		string aligned = query->getAligned();
+		string aligned = query.getAligned();
 		int pos = 0;
 			
 		//find first position in query that is a non gap character
@@ -933,7 +933,7 @@ map<int, int> DeCalculator::trimSeqs(Sequence* query, vector<Sequence*> topMatch
 		//********find last position in topMatches that is a non gap character***********//
 		for (int i = 0; i < topMatches.size(); i++) {
 			
-			string aligned = topMatches[i]->getAligned();
+			string aligned = topMatches[i].getAligned();
 			int pos = aligned.length();
 			
 			//find first spot in this seq
@@ -949,7 +949,7 @@ map<int, int> DeCalculator::trimSeqs(Sequence* query, vector<Sequence*> topMatch
 		}
 		
 		
-		aligned = query->getAligned();
+		aligned = query.getAligned();
 		pos = aligned.length();
 		
 		//find last position in query that is a non gap character
@@ -966,24 +966,24 @@ map<int, int> DeCalculator::trimSeqs(Sequence* query, vector<Sequence*> topMatch
 		map<int, int> trimmedPos;
 		//check to make sure that is not whole seq
 		if ((rearPos - frontPos - 1) <= 0) {  
-			query->setAligned("");
+			query.setAligned("");
 			//trim topMatches
 			for (int i = 0; i < topMatches.size(); i++) {
-				topMatches[i]->setAligned("");
+				topMatches[i].setAligned("");
 			}
 			
 		}else {
 
 			//trim query
-			string newAligned = query->getAligned();
+			string newAligned = query.getAligned();
 			newAligned = newAligned.substr(frontPos, (rearPos-frontPos+1));
-			query->setAligned(newAligned);
+			query.setAligned(newAligned);
 			
 			//trim topMatches
 			for (int i = 0; i < topMatches.size(); i++) {
-				newAligned = topMatches[i]->getAligned();
+				newAligned = topMatches[i].getAligned();
 				newAligned = newAligned.substr(frontPos, (rearPos-frontPos+1));
-				topMatches[i]->setAligned(newAligned);
+				topMatches[i].setAligned(newAligned);
 			}
 			
 			for (int i = 0; i < newAligned.length(); i++) {

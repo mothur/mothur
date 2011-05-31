@@ -39,14 +39,14 @@ class DeCalculator {
 		DeCalculator() { m = MothurOut::getInstance(); }
 		~DeCalculator() {};
 		
-		vector<Sequence*> findClosest(Sequence*, vector<Sequence*>&, vector<Sequence*>&, int, int);  //takes querySeq, a reference db, filteredRefDB, numWanted, minSim 
+		vector<Sequence> findClosest(Sequence, vector<Sequence*>&, vector<Sequence*>&, int, int);  //takes querySeq, a reference db, filteredRefDB, numWanted, minSim 
 		Sequence* findClosest(Sequence*, vector<Sequence*>);
 		set<int> getPos() {  return h;  }
 		void setMask(string); 
 		void setAlignmentLength(int l) {  alignLength = l;  }
 		void runMask(Sequence*);
 		void trimSeqs(Sequence*, Sequence*, map<int, int>&);
-		map<int, int> trimSeqs(Sequence*, vector<Sequence*>);
+		map<int, int> trimSeqs(Sequence&, vector<Sequence>&);
 		void removeObviousOutliers(vector< vector<float> >&, int);
 		vector<float> calcFreq(vector<Sequence*>, string);
 		vector<int> findWindows(Sequence*, int, int, int&, int);

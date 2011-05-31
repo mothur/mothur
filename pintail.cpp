@@ -249,7 +249,7 @@ int Pintail::doPrep() {
 	}
 }
 //***************************************************************************************************************
-Sequence* Pintail::print(ostream& out, ostream& outAcc) {
+Sequence Pintail::print(ostream& out, ostream& outAcc) {
 	try {
 		
 		int index = ceil(deviation);
@@ -280,7 +280,7 @@ Sequence* Pintail::print(ostream& out, ostream& outAcc) {
 		for (int m = 0; m < expectedDistance.size(); m++) {  out << expectedDistance[m] << '\t';  }
 		out << endl;
 		
-		return NULL;
+		return *querySeq;
 		
 	}
 	catch(exception& e) {

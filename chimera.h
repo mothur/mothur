@@ -103,6 +103,12 @@ struct SeqDist {
 	float dist;
 	int index;
 };
+/***********************************************************************/
+struct SeqCompare {
+	Sequence seq;
+	float dist;
+	int index;
+};
 //********************************************************************************************************************
 //sorts lowest to highest
 inline bool compareRegionStart(results left, results right){
@@ -114,7 +120,11 @@ inline bool compareSeqDist(SeqDist left, SeqDist right){
 	return (left.dist < right.dist);	
 } 
 //********************************************************************************************************************
-
+//sorts lowest to highest
+inline bool compareSeqCompare(SeqCompare left, SeqCompare right){
+	return (left.dist < right.dist);	
+} 
+//********************************************************************************************************************
 struct sim {
 		string leftParent;
 		string rightParent; 
@@ -147,14 +157,14 @@ class Chimera {
 		virtual void printHeader(ostream&){};
 		virtual int getChimeras(Sequence*){ return 0; }
 		virtual int getChimeras(){ return 0; }
-		virtual Sequence* print(ostream&, ostream&){  return NULL; }
-		virtual Sequence* print(ostream&, ostream&, data_results, data_results) { return NULL; }
+		virtual Sequence print(ostream&, ostream&){  Sequence temp; return temp; }
+		virtual Sequence print(ostream&, ostream&, data_results, data_results) { Sequence temp; return temp; }
 		virtual int print(ostream&, ostream&, string){  return 0; }
 		virtual data_results getResults() { data_results results; return results; }
 		
 		#ifdef USE_MPI
-		virtual Sequence* print(MPI_File&, MPI_File&){  return 0; }
-		virtual Sequence* print(MPI_File&, MPI_File&, data_results, data_results){  return NULL; }
+		virtual Sequence print(MPI_File&, MPI_File&){  Sequence temp; return temp; }
+		virtual Sequence print(MPI_File&, MPI_File&, data_results, data_results){  Sequence temp; return temp; }
 		virtual int print(MPI_File&, MPI_File&, string){  return 0; }
 		#endif
 		

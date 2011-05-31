@@ -716,15 +716,15 @@ int ChimeraSlayerCommand::driver(linePair* filePos, string outputFName, string f
 						data_results rightResults = chimera->getResults();
 						
 						//if either piece is chimeric then report
-						Sequence* trimmed = chimera->print(out, out2, leftResults, rightResults);
-						if (trim) { trimmed->printSequence(out3); delete trimmed; }
+						Sequence trimmed = chimera->print(out, out2, leftResults, rightResults);
+						if (trim) { trimmed.printSequence(out3);  }
 						
 						delete left; delete right;
 						
 					}else { //already chimeric
 						//print results
-						Sequence* trimmed = chimera->print(out, out2);
-						if (trim) { trimmed->printSequence(out3); delete trimmed; }
+						Sequence trimmed = chimera->print(out, out2);
+						if (trim) { trimmed.printSequence(out3);  }
 					}
 					
 					
@@ -832,10 +832,9 @@ int ChimeraSlayerCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_Fil
 						data_results rightResults = chimera->getResults();
 						
 						//if either piece is chimeric then report
-						Sequence* trimmed = chimera->print(outMPI, outAccMPI, leftResults, rightResults);
+						Sequence trimmed = chimera->print(outMPI, outAccMPI, leftResults, rightResults);
 						if (trim) {  
-							string outputString = ">" + trimmed->getName() + "\n" + trimmed->getAligned() + "\n";
-							delete trimmed;
+							string outputString = ">" + trimmed.getName() + "\n" + trimmed.getAligned() + "\n";
 							
 							//write to accnos file
 							int length = outputString.length();
@@ -850,11 +849,10 @@ int ChimeraSlayerCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_Fil
 						
 					}else { 
 						//print results
-						Sequence* trimmed = chimera->print(outMPI, outAccMPI);
+						Sequence trimmed = chimera->print(outMPI, outAccMPI);
 						
 						if (trim) {  
-							string outputString = ">" + trimmed->getName() + "\n" + trimmed->getAligned() + "\n";
-							delete trimmed;
+							string outputString = ">" + trimmed.getName() + "\n" + trimmed.getAligned() + "\n";
 							
 							//write to accnos file
 							int length = outputString.length();
