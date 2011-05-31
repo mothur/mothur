@@ -20,8 +20,8 @@ EstOutput JAbund::getValues(vector<SharedRAbundVector*> shared) {
 		UVest = uv->getUVest(shared);
 		
 		//UVest[0] is Uest UVest[1] is Vest
-		data[0] = (UVest[0] * UVest[1]) / ((float)(UVest[0] + UVest[1] - (UVest[0] * UVest[1])));
-		if(data[0] > 1){data[0] = 1;	}
+		data[0] = 1.0-(UVest[0] * UVest[1]) / ((float)(UVest[0] + UVest[1] - (UVest[0] * UVest[1])));
+		if(data[0] > 1){data[0] = 0;	}
 		if (isnan(data[0]) || isinf(data[0])) { data[0] = 0; }
 		
 		return data;

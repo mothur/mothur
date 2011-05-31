@@ -23,6 +23,7 @@ EstOutput SorAbund::getValues(vector<SharedRAbundVector*> shared) {
 		data[0] = (2 * UVest[0] * UVest[1]) / ((float)(UVest[0] + UVest[1]));
 		
 		if (isnan(data[0]) || isinf(data[0])) { data[0] = 0; }
+		data[0] = 1-data[0];
 		
 		return data;
 	}

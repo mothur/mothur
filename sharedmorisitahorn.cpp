@@ -39,9 +39,9 @@ EstOutput MorHorn::getValues(vector<SharedRAbundVector*> shared) {
 			d += relA * relB;
 		}
 
-		morhorn = (2 * d) / (a + b);
+		morhorn = 1- (2 * d) / (a + b);
 
-		if (isnan(morhorn) || isinf(morhorn)) { morhorn = 0; }
+		if (isnan(morhorn) || isinf(morhorn)) { morhorn = 1; }
 		
 		data[0] = morhorn;
 		

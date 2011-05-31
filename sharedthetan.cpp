@@ -46,7 +46,7 @@ EstOutput ThetaN::getValues(vector<SharedRAbundVector*> shared) {
 		
 		if (isnan(thetaN) || isinf(thetaN)) { thetaN = 0; }
 		
-		data[0] = thetaN;
+		data[0] = 1.0 - thetaN;
 		
 		return data;
 	}
