@@ -37,7 +37,7 @@ EstOutput StructPearson::getValues(vector<SharedRAbundVector*> shared) {
 		
 		double denom = denomTerm1 * denomTerm2;
 		
-		data[0] = 1.0 - (numTerm / denom);
+		data[0] = (numTerm / denom);
 		
 		if (isnan(data[0]) || isinf(data[0])) { data[0] = 0; }
 		

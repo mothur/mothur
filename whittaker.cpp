@@ -23,7 +23,7 @@ EstOutput Whittaker::getValues(vector<SharedRAbundVector*> shared){
 			if(shared[1]->getAbundance(i) != 0){	countB++;	}		
 		}
 		
-		data[0] = 2*sTotal/(float)(countA+countB)-1;
+		data[0] = 2-2*sTotal/(float)(countA+countB);
 		return data;
 	}
 	catch(exception& e) {

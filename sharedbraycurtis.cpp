@@ -37,7 +37,7 @@ EstOutput BrayCurtis::getValues(vector<SharedRAbundVector*> shared) {
 			else  { sumSharedAB += tempB; }				
 		}
 		
-		data[0] = (2 * sumSharedAB) / (float)( sumSharedA + sumSharedB);
+		data[0] = 1.0 - (2 * sumSharedAB) / (float)( sumSharedA + sumSharedB);
 		
 		if (isnan(data[0]) || isinf(data[0])) { data[0] = 0; }
 				

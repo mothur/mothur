@@ -25,7 +25,6 @@ EstOutput MemChi2::getValues(vector<SharedRAbundVector*> shared) {
 			if (shared[1]->getAbundance(i) != 0) { nonZeroB++; }
 		}
 		
-		double totalTerm = 1 / (float) totalGroups;
 		double sum = 0.0;
 		for (int i = 0; i < shared[0]->getNumBins(); i++) {
 			int A = shared[0]->getAbundance(i);
@@ -36,11 +35,18 @@ EstOutput MemChi2::getValues(vector<SharedRAbundVector*> shared) {
 			
 			double Aterm = A / (float) nonZeroA;
 			double Bterm = B / (float) nonZeroB;
+
+			int incidence = 0;
+			for(int j=0;j<shared.size();j++){
+				if(shared[j]->getAbundance(i) != 0){	incidence++;	}
+			}
 			
-			sum += (totalTerm * ((Aterm-Bterm)*(Aterm-Bterm)));
+			if(incidence != 0){
+				sum += (((Aterm-Bterm)*(Aterm-Bterm))/incidence);
+			}
 		}
 		
-		data[0] = sqrt((totalOtus * sum));
+		data[0] = sqrt(totalOtus * sum);
 		
 		if (isnan(data[0]) || isinf(data[0])) { data[0] = 0; }
 		

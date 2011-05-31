@@ -38,7 +38,7 @@ EstOutput SorEst::getValues(vector<SharedRAbundVector*> shared) {
 		S1 = chaoS1->getValues(chaoS1Sabund);
 		S2 = chaoS2->getValues(chaoS2Sabund);
 		
-		data[0] = (2 * S12[0]) / (float)(S1[0] + S2[0]);
+		data[0] = 1.0-(2 * S12[0]) / (float)(S1[0] + S2[0]);
 		 
 		if (isnan(data[0]) || isinf(data[0])) { data[0] = 0; }
 		

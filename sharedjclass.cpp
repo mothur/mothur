@@ -34,7 +34,7 @@ EstOutput Jclass::getValues(vector<SharedRAbundVector*> shared) {
 			if ((tempA != 0) && (tempB != 0)) {	S12++; }
 		}
 		
-		data[0] = S12 / (float)(S1 + S2 - S12);
+		data[0] = 1.0 - S12 / (float)(S1 + S2 - S12);
 		
 		if (isnan(data[0]) || isinf(data[0])) { data[0] = 0; }
 		

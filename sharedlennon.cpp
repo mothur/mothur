@@ -39,7 +39,7 @@ EstOutput Lennon::getValues(vector<SharedRAbundVector*> shared) {
 		if (tempA < tempB) { min = tempA; }
 		else { min = tempB; }
 		
-		data[0] = S12 / (float)(S12 + min);
+		data[0] = 1.0 - S12 / (float)(S12 + min);
 		
 		if (isnan(data[0]) || isinf(data[0])) { data[0] = 0; }
 		
