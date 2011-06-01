@@ -744,7 +744,7 @@ int ChimeraUchimeCommand::createProcesses(string outputFileName, string filename
 		processIDS.clear();
 		int process = 1;
 		int num = 0;
-		
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)		
 		//break up file into multiple files
 		vector<string> files;
 		m->divideFile(filename, processors, files);
@@ -852,7 +852,7 @@ int ChimeraUchimeCommand::createProcesses(string outputFileName, string filename
 #endif		
 		//get rid of the file pieces.
 		for (int i = 0; i < files.size(); i++) { remove(files[i].c_str()); }
-		
+#endif		
 		return num;	
 	}
 	catch(exception& e) {

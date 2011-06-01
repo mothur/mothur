@@ -119,6 +119,7 @@
 #include "sharedcommand.h"
 #include "getcommandinfocommand.h"
 #include "deuniquetreecommand.h"
+#include "countseqscommand.h"
 
 /*******************************************************/
 
@@ -241,6 +242,7 @@ CommandFactory::CommandFactory(){
 	commands["set.current"]			= "set.current";
 	commands["get.commandinfo"]		= "get.commandinfo";
 	commands["deunique.tree"]		= "deunique.tree";
+	commands["count.seqs"]			= "count.seqs";
 	commands["pairwise.seqs"]		= "MPIEnabled";
 	commands["pipeline.pds"]		= "MPIEnabled";
 	commands["classify.seqs"]		= "MPIEnabled"; 
@@ -412,6 +414,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "make.shared")			{	command = new SharedCommand(optionString);					}
 		else if(commandName == "get.commandinfo")		{	command = new GetCommandInfoCommand(optionString);			}
 		else if(commandName == "deunique.tree")			{	command = new DeuniqueTreeCommand(optionString);			}
+		else if(commandName == "count.seqs")			{	command = new CountSeqsCommand(optionString);				}
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -549,6 +552,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "make.shared")			{	pipecommand = new SharedCommand(optionString);					}
 		else if(commandName == "get.commandinfo")		{	pipecommand = new GetCommandInfoCommand(optionString);			}
 		else if(commandName == "deunique.tree")			{	pipecommand = new DeuniqueTreeCommand(optionString);			}
+		else if(commandName == "count.seqs")			{	pipecommand = new CountSeqsCommand(optionString);				}
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -674,6 +678,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "make.shared")			{	shellcommand = new SharedCommand();					}
 		else if(commandName == "get.commandinfo")		{	shellcommand = new GetCommandInfoCommand();			}
 		else if(commandName == "deunique.tree")			{	shellcommand = new DeuniqueTreeCommand();			}
+		else if(commandName == "count.seqs")			{	shellcommand = new CountSeqsCommand();				}
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;
