@@ -59,30 +59,29 @@ const unsigned AllocerCount =
 #undef A
 	;
 
-#ifdef _MSC_VER
-
-typedef unsigned __int64 TICKS;
-
-#pragma warning(disable:4035)
-inline TICKS GetClockTicks()
-	{
-	_asm
-		{
-		_emit	0x0f
-		_emit	0x31
-		}
-	}
-
-#else	// ifdef _MSC_VER
-
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 typedef uint64_t TICKS;
 __inline__ uint64_t GetClockTicks()
-	{
+{
 	uint32_t lo, hi;
 	/* We cannot use "=A", since this would use %rax on x86_64 */
 	__asm__ __volatile__ ("rdtsc" : "=a" (lo), "=d" (hi));
 	return (uint64_t)hi << 32 | lo;
+}
+
+
+#else	// ifdef _MSC_VER
+typedef unsigned __int64 TICKS;
+
+#pragma warning(disable:4035)
+inline TICKS GetClockTicks()
+{
+	_asm
+	{
+		_emit	0x0f
+		_emit	0x31
 	}
+}
 
 #endif	// ifdef _MSC_VER
 

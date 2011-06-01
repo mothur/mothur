@@ -13,19 +13,19 @@
 #include <signal.h>
 #include <float.h>
 
-#ifdef _MSC_VER
-#include <crtdbg.h>
-#include <process.h>
-#include <windows.h>
-#include <psapi.h>
-#include <io.h>
-#else
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <unistd.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <stdlib.h>
+#else
+//#include <crtdbg.h>
+#include <process.h>
+#include <windows.h>
+#include <psapi.h>
+#include <io.h>
 #endif
 
 #include "myutils.h"
@@ -141,7 +141,9 @@ bool myisatty(int fd)
 	return isatty(fd) != 0;
 	}
 
-#ifdef _MSC_VER
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#else
+#ifdef BIT_VERSION
 #include <io.h>
 int fseeko(FILE *stream, off_t offset, int whence)
 	{
@@ -149,6 +151,14 @@ int fseeko(FILE *stream, off_t offset, int whence)
 	return (FilePos == -1L) ? -1 : 0;
 	}
 #define ftello(fm) (off_t) _ftelli64(fm)
+#else 
+int fseeko(FILE *stream, off_t offset, int whence)
+{
+	off_t FilePos = fseek(stream, offset, whence);
+	return (FilePos == -1L) ? -1 : 0;
+}
+#define ftello(fm) (off_t) ftell(fm)
+#endif
 #endif
 
 void LogStdioFileState(FILE *f)
@@ -168,9 +178,16 @@ void LogStdioFileState(FILE *f)
 	Log("fpos       %ld (retval %d)\n", (long) fpos, fgetpos_retval);
 //	Log("eof        %d\n", _eof(fd));
 #endif
-#ifdef _MSC_VER
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#else
+#ifdef BIT_VERSION
 	__int64 pos64 = _ftelli64(f);
 	Log("_ftelli64  %lld\n", pos64);
+#else
+	__int32 pos32 = ftell(f);
+	Log("ftell  %lld\n", pos32);
+		
+#endif
 #endif
 	}
 
@@ -596,10 +613,11 @@ void Die(const char *Format, ...)
 	fprintf(stderr, "\n---Fatal error---\n%s\n", szStr);
 	Log("\n---Fatal error---\n%s\n", szStr);
 
-#ifdef _MSC_VER
-	if (IsDebuggerPresent())
- 		__debugbreak();
-	_CrtSetDbgFlag(0);
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#else
+	//if (IsDebuggerPresent())
+ 	//	__debugbreak();
+	//_CrtSetDbgFlag(0);
 #endif
 
 	exit(1);
@@ -624,20 +642,7 @@ void Warning(const char *Format, ...)
 		}
 	}
 
-#ifdef _MSC_VER
-double GetMemUseBytes()
-	{
-	HANDLE hProc = GetCurrentProcess();
-	PROCESS_MEMORY_COUNTERS PMC;
-	BOOL bOk = GetProcessMemoryInfo(hProc, &PMC, sizeof(PMC));
-	if (!bOk)
-		return 1000000;
-	double Bytes = (double) PMC.WorkingSetSize;
-	if (Bytes > g_PeakMemUseBytes)
-		g_PeakMemUseBytes = Bytes;
-	return Bytes;
-	}
-#elif	linux || __linux__
+#if defined linux || __linux__
 double GetMemUseBytes()
 	{
 	static char statm[64];
@@ -668,7 +673,7 @@ double GetMemUseBytes()
 		g_PeakMemUseBytes = Bytes;
 	return Bytes;
 	}
-#elif defined(__MACH__)
+#elif defined(__APPLE__) || (__MACH__)
 #include <memory.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -709,9 +714,9 @@ double GetMemUseBytes()
 	}
 #else
 double GetMemUseBytes()
-	{
+{
 	return 0;
-	}
+}
 #endif
 
 double GetPeakMemUseBytes()
@@ -1201,7 +1206,8 @@ static void AddOpt(const OptInfo &Opt)
 	g_Opts.insert(Opt);
 	}
 
-#ifdef _MSC_VER
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#else
 #pragma warning(disable: 4505) // unreferenced local function
 #endif
 

@@ -91,20 +91,23 @@ int SystemCommand::execute(){
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
-		//system(command.c_str());
-		FILE *lsofFile_p = popen(command.c_str(), "r");
+		command += " > ./commandScreen.output 2>&1";
+		system(command.c_str());
 		
-		if (!lsofFile_p) { return 0; }
+		ifstream in;
+		string filename = "./commandScreen.output";
+		m->openInputFile(filename, in);
 		
-		char buffer[1024];
-		while ( fgets(buffer, 1024, lsofFile_p) != NULL ) {
-			string temp = buffer;
-			m->mothurOut(temp); 
+		string output = "";
+		while(char c = in.get()){
+			if(in.eof())		{	break;			}
+			else				{	output += c;	}
 		}
-		m->mothurOutEndLine();
+		in.close();
 		
-		pclose(lsofFile_p);
-		
+		m->mothurOut(output); m->mothurOutEndLine();
+		remove(filename.c_str());
+				
 		return 0;		
 	}
 

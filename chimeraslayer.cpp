@@ -1127,7 +1127,7 @@ vector<Sequence> ChimeraSlayer::getBlastSeqs(Sequence q, vector<Sequence*>& db, 
 		delete queryRight;
 		delete queryLeft;
 		
-		if (refResults.size() == 0) { m->mothurOut("[WARNING]: megablast found 0 potential parents, so we are not able to check " + q.getName() + ". This could be due to formatdb.exe not being setup properly, please check formatdb.log for errors."); m->mothurOutEndLine(); }
+		if (refResults.size() == 0) { m->mothurOut("[WARNING]: megablast returned 0 potential parents, so we are not able to check " + q.getName() + ". This could be due to formatdb.exe not being setup properly, please check formatdb.log for errors."); m->mothurOutEndLine(); }
 		
 		return refResults;
 	}

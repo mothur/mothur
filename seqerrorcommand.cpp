@@ -347,6 +347,7 @@ int SeqErrorCommand::createProcesses(string filename, string qFileName, string r
 		processIDS.clear();
 		map<char, vector<int> >::iterator it;
 		int num = 0;
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		
 		//loop through and create all the processes you want
 		while (process != processors) {
@@ -569,7 +570,7 @@ int SeqErrorCommand::createProcesses(string filename, string qFileName, string r
 			in.close(); remove(tempFile.c_str());
 			
 		}
-		
+#endif		
 		return num;
 	}
 	catch(exception& e) {

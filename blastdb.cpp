@@ -35,9 +35,9 @@ gapOpen(gO), gapExtend(gE), match(mm), misMatch(mM) {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		formatdbCommand = path + "blast/bin/formatdb";	//	format the database, -o option gives us the ability
 #else
-		formatdbCommand = path + "blast\\bin\\formatdb";
+		formatdbCommand = path + "blast\\bin\\formatdb.exe";
 		//wrap entire string in ""
-		formatdbCommand = "\"" + formatdbCommand + "\"";
+		//formatdbCommand = "\"" + formatdbCommand + "\"";
 #endif
 		
 		//test to make sure formatdb exists
@@ -50,9 +50,9 @@ gapOpen(gO), gapExtend(gE), match(mm), misMatch(mM) {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		blastCommand = path + "blast/bin/blastall";	//	format the database, -o option gives us the ability
 #else
-		blastCommand = path + "blast\\bin\\blastall";
+		blastCommand = path + "blast\\bin\\blastall.exe";
 		//wrap entire string in ""
-		blastCommand = "\"" + blastCommand + "\"";
+		//blastCommand = "\"" + blastCommand + "\"";
 #endif
 		
 		//test to make sure formatdb exists
@@ -66,9 +66,9 @@ gapOpen(gO), gapExtend(gE), match(mm), misMatch(mM) {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		megablastCommand = path + "blast/bin/megablast";	//	format the database, -o option gives us the ability
 #else
-		megablastCommand = path + "blast\\bin\\megablast";
+		megablastCommand = path + "blast\\bin\\megablast.exe";
 		//wrap entire string in ""
-		megablastCommand = "\"" + blastCommmegablastCommandand + "\"";
+		//megablastCommand = "\"" + megablastCommand + "\"";
 #endif
 		
 		//test to make sure formatdb exists
@@ -105,9 +105,9 @@ BlastDB::BlastDB() : Database() {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		formatdbCommand = path + "blast/bin/formatdb";	//	format the database, -o option gives us the ability
 #else
-		formatdbCommand = path + "blast\\bin\\formatdb";
+		formatdbCommand = path + "blast\\bin\\formatdb.exe";
 		//wrap entire string in ""
-		formatdbCommand = "\"" + formatdbCommand + "\"";
+		//formatdbCommand = "\"" + formatdbCommand + "\"";
 #endif
 		
 		//test to make sure formatdb exists
@@ -120,9 +120,9 @@ BlastDB::BlastDB() : Database() {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		blastCommand = path + "blast/bin/blastall";	//	format the database, -o option gives us the ability
 #else
-		blastCommand = path + "blast\\bin\\blastall";
+		blastCommand = path + "blast\\bin\\blastall.exe";
 		//wrap entire string in ""
-		blastCommand = "\"" + blastCommand + "\"";
+		//blastCommand = "\"" + blastCommand + "\"";
 #endif
 		
 		//test to make sure formatdb exists
@@ -136,9 +136,9 @@ BlastDB::BlastDB() : Database() {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		megablastCommand = path + "blast/bin/megablast";	//	format the database, -o option gives us the ability
 #else
-		megablastCommand = path + "blast\\bin\\megablast";
+		megablastCommand = path + "blast\\bin\\megablast.exe";
 		//wrap entire string in ""
-		megablastCommand = "\"" + blastCommmegablastCommandand + "\"";
+		//megablastCommand = "\"" + megablastCommand + "\"";
 #endif
 		
 		//test to make sure formatdb exists

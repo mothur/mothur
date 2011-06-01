@@ -33,7 +33,7 @@ vector<string> CountSeqsCommand::setParameters(){
 string CountSeqsCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The count.seqs command reads a name file and outputs a .count.summary file.  You may also provide a group file to get the counts broken down by group.\n";
+		helpString += "The count.seqs command reads a name file and outputs a .seq.count file.  You may also provide a group file to get the counts broken down by group.\n";
 		helpString += "The groups parameter allows you to indicate which groups you want to include in the counts, by default all groups in your groupfile are used.\n";
 		helpString += "When you use the groups parameter and a sequence does not represent any sequences from the groups you specify it is not included in the .count.summary file.\n";
 		helpString += "The count.seqs command should be in the following format: count.seqs(name=yourNameFile).\n";
@@ -146,7 +146,7 @@ int CountSeqsCommand::execute(){
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		ofstream out;
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(namefile)) + "count.summary";
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(namefile)) + ".seq.count";
 		m->openOutputFile(outputFileName, out); outputTypes["summary"].push_back(outputFileName);
 		out << "Representative Sequence\t total\t";
 		
