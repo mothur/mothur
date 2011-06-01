@@ -41,7 +41,8 @@ class MothurOut {
 		vector<string> Treenames;
 		map<string, string> names;
 		vector<string> namesOfGroups;
-		string saveNextLabel, argv;
+		string saveNextLabel, argv, sharedHeaderMode;
+		bool printedHeaders;
 		
 		//functions from mothur.h
 		//file operations
@@ -179,6 +180,8 @@ class MothurOut {
 			processors = "1";
 			flowfile = "";
 			gui = false;
+			printedHeaders = false;
+			sharedHeaderMode = "";
 		};
 		~MothurOut();
 

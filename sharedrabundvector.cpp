@@ -68,8 +68,17 @@ SharedRAbundVector::SharedRAbundVector(ifstream& f) : DataVector(), maxRank(0), 
 		
 		for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }  lookup.clear();
 		
-		if (m->saveNextLabel == "") {  f >> label;  }
-		else { label = m->saveNextLabel; }
+		//are we at the beginning of the file??
+		if (m->saveNextLabel == "") {  
+			f >> label; 
+			
+			//is this a shared file that has headers
+			if (label == "label") { 
+				//eat rest of line
+				label = m->getline(f); m->gobble(f);
+				f >> label;
+			}
+		}else { label = m->saveNextLabel; }
 		
 		//read in first row since you know there is at least 1 group.
 		f >> groupN >> num;
@@ -300,8 +309,27 @@ int SharedRAbundVector::size(){
 	return data.size();
 }
 
+
 /***********************************************************************/
-void SharedRAbundVector::print(ostream& output){
+void SharedRAbundVector::printHeaders(ostream& output){
+	try {
+		output << "label\tGroup\tnumOtus\t";
+		if (m->sharedHeaderMode == "tax") {
+			for (int i = 0; i < numBins; i++) {  output << "PhyloType" << (i+1) << '\t'; }
+			output << endl;
+		}else {
+			for (int i = 0; i < numBins; i++) {  output << "Otu" << (i+1) << '\t'; }
+			output << endl;
+		}
+		m->printedHeaders = true;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SharedRAbundVector", "printHeaders");
+		exit(1);
+	}
+}
+/***********************************************************************/
+void SharedRAbundVector::print(ostream& output) {
 	try {
 		output << numBins << '\t';
 	

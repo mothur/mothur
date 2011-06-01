@@ -20,12 +20,14 @@ InputData::InputData(string fName, string f) : format(f){
 	filename = fName;
 	m->saveNextLabel = "";
 	
+	
 }
 /***********************************************************************/
 
 InputData::~InputData(){
 	fileHandle.close();
 	m->saveNextLabel = "";
+	
 }
 
 /***********************************************************************/
@@ -48,6 +50,7 @@ InputData::InputData(string fName, string orderFileName, string f) : format(f){
 		ofHandle.close();
 	
 		m->openInputFile(fName, fileHandle);
+		m->saveNextLabel = "";
 	}
 	catch(exception& e) {
 		m->errorOut(e, "InputData", "InputData");

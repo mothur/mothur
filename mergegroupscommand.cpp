@@ -192,6 +192,8 @@ int MergeGroupsCommand::execute(){
 			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
 				
 				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+				
+				if (!m->printedHeaders) { lookup[0]->printHeaders(out); }
 				process(lookup, out);
 				
 				processedLabels.insert(lookup[0]->getLabel());
@@ -205,6 +207,7 @@ int MergeGroupsCommand::execute(){
 				lookup = input.getSharedRAbundVectors(lastLabel);
 				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 				
+				if (!m->printedHeaders) { lookup[0]->printHeaders(out); }
 				process(lookup, out);
 				
 				processedLabels.insert(lookup[0]->getLabel());
@@ -246,6 +249,7 @@ int MergeGroupsCommand::execute(){
 			
 			m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 			
+			if (!m->printedHeaders) { lookup[0]->printHeaders(out); }
 			process(lookup, out);
 			
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }

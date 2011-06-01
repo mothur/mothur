@@ -646,6 +646,7 @@ int RemoveRareCommand::processShared(){
 				processedLabels.insert(lookup[0]->getLabel());
 				userLabels.erase(lookup[0]->getLabel());
 				
+				if (!m->printedHeaders) { lookup[0]->printHeaders(out); }
 				processLookup(lookup, out);
 			}
 			
@@ -659,6 +660,7 @@ int RemoveRareCommand::processShared(){
 				processedLabels.insert(lookup[0]->getLabel());
 				userLabels.erase(lookup[0]->getLabel());
 				
+				if (!m->printedHeaders) { lookup[0]->printHeaders(out); }
 				processLookup(lookup, out);			
 				
 				//restore real lastlabel to save below
@@ -693,6 +695,7 @@ int RemoveRareCommand::processShared(){
 			
 			m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 			
+			if (!m->printedHeaders) { lookup[0]->printHeaders(out); }
 			processLookup(lookup, out);	
 			
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
