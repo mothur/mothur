@@ -702,6 +702,7 @@ int SubSampleCommand::getSubSampleShared() {
 				
 				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 				
+				if (!m->printedHeaders) { lookup[0]->printHeaders(out); }
 				processShared(lookup, out);
 				
 				processedLabels.insert(lookup[0]->getLabel());
@@ -716,6 +717,7 @@ int SubSampleCommand::getSubSampleShared() {
 				lookup = input->getSharedRAbundVectors(lastLabel);
 				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 				
+				if (!m->printedHeaders) { lookup[0]->printHeaders(out); }
 				processShared(lookup, out);
 				
 				processedLabels.insert(lookup[0]->getLabel());
@@ -756,6 +758,7 @@ int SubSampleCommand::getSubSampleShared() {
 			
 			m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 			
+			if (!m->printedHeaders) { lookup[0]->printHeaders(out); }
 			processShared(lookup, out);
 			
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }

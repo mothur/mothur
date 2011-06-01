@@ -319,6 +319,7 @@ int SharedCommand::execute(){
 						return 0; 
 					}
 					
+					if (!m->printedHeaders) { lookup[0]->printHeaders(out); }
 					printSharedData(lookup); //prints info to the .shared file
 					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
 				
@@ -348,6 +349,7 @@ int SharedCommand::execute(){
 						return 0; 
 					}
 					
+					if (!m->printedHeaders) { lookup[0]->printHeaders(out); }
 					printSharedData(lookup); //prints info to the .shared file
 					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
 					
@@ -393,6 +395,7 @@ int SharedCommand::execute(){
 					return 0; 
 			}
 			
+			if (!m->printedHeaders) { lookup[0]->printHeaders(out); }
 			printSharedData(lookup); //prints info to the .shared file
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
 			delete SharedList;

@@ -55,6 +55,7 @@ public:
 	int size();
 	
 	void print(ostream&);
+	void printHeaders(ostream&);
 		
 	RAbundVector getRAbundVector();
 	SAbundVector getSAbundVector();

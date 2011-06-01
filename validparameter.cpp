@@ -221,6 +221,10 @@ string ValidParameters::validFile(map<string, string>& container, string paramet
 		if(it != container.end()){ //no parameter given
 
 			if(isFile == true) {
+				
+				int pos = (it->second).find(".tx.");
+				if (pos != string::npos) { m->sharedHeaderMode = "tax"; }
+				else { m->sharedHeaderMode = "otu"; }
 			
 			#ifdef USE_MPI	
 				int pid, processors;

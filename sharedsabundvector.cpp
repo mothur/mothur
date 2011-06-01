@@ -13,7 +13,7 @@
 
 /***********************************************************************/
 
-SharedSAbundVector::SharedSAbundVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0){}
+SharedSAbundVector::SharedSAbundVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0){  }
 
 /***********************************************************************/
 

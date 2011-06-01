@@ -240,6 +240,7 @@ int NormalizeSharedCommand::execute(){
 				m->mothurOut("Normalizing to " + toString(norm) + "."); m->mothurOutEndLine();
 			}
 			
+			
 			//as long as you are not at the end of the file or done wih the lines you want
 			while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 				
@@ -248,6 +249,7 @@ int NormalizeSharedCommand::execute(){
 				if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
 					
 					m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+					if (!m->printedHeaders) { lookup[0]->printHeaders(out); }
 					normalize(lookup, out);
 					
 					processedLabels.insert(lookup[0]->getLabel());
@@ -260,7 +262,7 @@ int NormalizeSharedCommand::execute(){
 					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  
 					lookup = input->getSharedRAbundVectors(lastLabel);
 					m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
-					
+					if (!m->printedHeaders) { lookup[0]->printHeaders(out); }
 					normalize(lookup, out);
 					
 					processedLabels.insert(lookup[0]->getLabel());
@@ -301,7 +303,7 @@ int NormalizeSharedCommand::execute(){
 				lookup = input->getSharedRAbundVectors(lastLabel);
 				
 				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
-				
+				if (!m->printedHeaders) { lookup[0]->printHeaders(out); }
 				normalize(lookup, out);
 				
 				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
@@ -351,6 +353,8 @@ int NormalizeSharedCommand::execute(){
 				if(allLines == 1 || labels.count(lookupFloat[0]->getLabel()) == 1){			
 					
 					m->mothurOut(lookupFloat[0]->getLabel()); m->mothurOutEndLine();
+					
+					if (!m->printedHeaders) { lookupFloat[0]->printHeaders(out); }
 					normalize(lookupFloat, out);
 					
 					processedLabels.insert(lookupFloat[0]->getLabel());
@@ -362,8 +366,9 @@ int NormalizeSharedCommand::execute(){
 					
 					for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  }  
 					lookupFloat = input->getSharedRAbundFloatVectors(lastLabel);
-					m->mothurOut(lookupFloat[0]->getLabel()); m->mothurOutEndLine();
 					
+					m->mothurOut(lookupFloat[0]->getLabel()); m->mothurOutEndLine();
+					if (!m->printedHeaders) { lookupFloat[0]->printHeaders(out); }
 					normalize(lookupFloat, out);
 					
 					processedLabels.insert(lookupFloat[0]->getLabel());
@@ -405,6 +410,7 @@ int NormalizeSharedCommand::execute(){
 				
 				m->mothurOut(lookupFloat[0]->getLabel()); m->mothurOutEndLine();
 				
+				if (!m->printedHeaders) { lookupFloat[0]->printHeaders(out); }
 				normalize(lookupFloat, out);
 				
 				for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  }

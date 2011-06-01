@@ -61,6 +61,7 @@ public:
 	vector<individual>::reverse_iterator rend();
 	
 	void print(ostream&);
+	void printHeaders(ostream&);
 		
 	RAbundVector getRAbundVector();
 	RAbundVector getRAbundVector2();
