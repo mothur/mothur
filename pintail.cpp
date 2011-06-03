@@ -290,7 +290,7 @@ Sequence Pintail::print(ostream& out, ostream& outAcc) {
 }
 #ifdef USE_MPI
 //***************************************************************************************************************
-Sequence* Pintail::print(MPI_File& out, MPI_File& outAcc) {
+Sequence Pintail::print(MPI_File& out, MPI_File& outAcc) {
 	try {
 		
 		string outputString = "";
@@ -320,7 +320,7 @@ Sequence* Pintail::print(MPI_File& out, MPI_File& outAcc) {
 			MPI_File_write_shared(outAcc, buf, length, MPI_CHAR, &statusAcc);
 			delete buf;
 
-			return NULL;
+			return *querySeq;
 		}
 		outputString += "Observed\t";
 		
@@ -340,7 +340,7 @@ Sequence* Pintail::print(MPI_File& out, MPI_File& outAcc) {
 		MPI_File_write_shared(out, buf2, length, MPI_CHAR, &status);
 		delete buf2;
 		
-		return NULL;
+		return *querySeq;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Pintail", "print");

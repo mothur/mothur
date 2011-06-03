@@ -34,6 +34,7 @@ class ChimeraSlayer : public Chimera {
 		Sequence print(ostream&, ostream&, data_results, data_results);
 		void printHeader(ostream&);
 		int doPrep();
+		int getNumNoParents() { return numNoParents; }
 		data_results getResults() { return printResults; }
 		
 		#ifdef USE_MPI
@@ -49,6 +50,7 @@ class ChimeraSlayer : public Chimera {
 		Database* databaseLeft;
 		map<string, int> priority; //for template=self, seqname, seqAligned, abundance
 		set<string> chimericSeqs; //for template=self, so we don't add chimeric sequences to the userTemplate set
+		int numNoParents;
 	
 		vector<data_struct>  chimeraResults;
 		data_results printResults;

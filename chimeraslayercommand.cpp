@@ -509,6 +509,16 @@ int ChimeraSlayerCommand::execute(){
 					//do your part
 					driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPI, outMPIAccnos, outMPIFasta, MPIPos);
 					
+					int numNoParents = chimera->getNumNoParents();
+					int temp;
+					for(int i = 1; i < processors; i++) { 
+						MPI_Recv(&temp, 1, MPI_INT, 1, tag, MPI_COMM_WORLD, &status);
+						numNoParents += temp;
+					}
+					
+					
+					if (numSeqs == numNoParents) {  m->mothurOut("[WARNING]: megablast returned 0 potential parents for all your sequences. This could be due to formatdb.exe not being setup properly, please check formatdb.log for errors."); m->mothurOutEndLine(); }
+					
 					if (m->control_pressed) { outputTypes.clear();  MPI_File_close(&inMPI);  MPI_File_close(&outMPI); if (trim) { MPI_File_close(&outMPIFasta); }  MPI_File_close(&outMPIAccnos);  for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}  remove(outputFileName.c_str());  remove(accnosFileName.c_str());  delete chimera; return 0;  }
 
 				}else{ //you are a child process
@@ -524,6 +534,9 @@ int ChimeraSlayerCommand::execute(){
 					
 						//do your part
 						driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPI, outMPIAccnos, outMPIFasta, MPIPos);
+						
+						int numNoParents = chimera->getNumNoParents();
+						MPI_Send(&numNoParents, 1, MPI_INT, 0, tag, MPI_COMM_WORLD);
 					
 						if (m->control_pressed) { outputTypes.clear();  MPI_File_close(&inMPI);  MPI_File_close(&outMPI); if (trim) { MPI_File_close(&outMPIFasta); }  MPI_File_close(&outMPIAccnos);  for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}  delete chimera; return 0;  }
 				
@@ -555,6 +568,9 @@ int ChimeraSlayerCommand::execute(){
 			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 				if(processors == 1){
 					numSeqs = driver(lines[0], outputFileName, fastaFileNames[s], accnosFileName, trimFastaFileName);
+					
+					int numNoParents = chimera->getNumNoParents();
+					if (numNoParents == numSeqs) { m->mothurOut("[WARNING]: megablast returned 0 potential parents for all your sequences. This could be due to formatdb.exe not being setup properly, please check formatdb.log for errors."); m->mothurOutEndLine(); }
 					
 					if (m->control_pressed) { outputTypes.clear(); if (trim) { remove(trimFastaFileName.c_str()); } remove(outputFileName.c_str()); remove(tempHeader.c_str()); remove(accnosFileName.c_str()); for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear(); delete chimera; return 0; }
 					
@@ -591,6 +607,10 @@ int ChimeraSlayerCommand::execute(){
 
 			#else
 				numSeqs = driver(lines[0], outputFileName, fastaFileNames[s], accnosFileName, trimFastaFileName);
+				
+				int numNoParents = chimera->getNumNoParents();
+				if (numNoParents == numSeqs) { m->mothurOut("[WARNING]: megablast returned 0 potential parents for all your sequences. This could be due to formatdb.exe not being setup properly, please check formatdb.log for errors."); m->mothurOutEndLine(); }
+
 				
 				if (m->control_pressed) { outputTypes.clear(); if (trim) { remove(trimFastaFileName.c_str()); } remove(outputFileName.c_str()); remove(tempHeader.c_str()); remove(accnosFileName.c_str()); for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear(); delete chimera; return 0; }
 				
@@ -670,7 +690,6 @@ int ChimeraSlayerCommand::driver(linePair* filePos, string outputFName, string f
 			string candidateAligned = candidateSeq->getAligned();
 			
 			if (candidateSeq->getName() != "") { //incase there is a commented sequence at the end of a file
-				
 				if (candidateSeq->getAligned().length() != templateSeqsLength) {  
 					m->mothurOut(candidateSeq->getName() + " is not the same length as the template sequences. Skipping."); m->mothurOutEndLine();
 				}else{
@@ -906,9 +925,8 @@ int ChimeraSlayerCommand::createProcesses(string outputFileName, string filename
 				ofstream out;
 				string tempFile = outputFileName + toString(getpid()) + ".num.temp";
 				m->openOutputFile(tempFile, out);
-				out << num << endl;
+				out << num << '\t' << chimera->getNumNoParents() << endl;
 				out.close();
-				
 				exit(0);
 			}else { 
 				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
@@ -923,13 +941,16 @@ int ChimeraSlayerCommand::createProcesses(string outputFileName, string filename
 			wait(&temp);
 		}
 		
+		int numNoParents = 0;
 		for (int i = 0; i < processIDS.size(); i++) {
 			ifstream in;
 			string tempFile =  outputFileName + toString(processIDS[i]) + ".num.temp";
 			m->openInputFile(tempFile, in);
-			if (!in.eof()) { int tempNum = 0; in >> tempNum; num += tempNum; }
+			if (!in.eof()) { int tempNum = 0; int tempNumParents = 0; in >> tempNum >> tempNumParents; num += tempNum; numNoParents += tempNumParents; }
 			in.close(); remove(tempFile.c_str());
 		}
+		
+		if (num == numNoParents) {  m->mothurOut("[WARNING]: megablast returned 0 potential parents for all your sequences. This could be due to formatdb.exe not being setup properly, please check formatdb.log for errors."); m->mothurOutEndLine(); }
 		
 		return num;
 #endif		
