@@ -160,6 +160,7 @@ class Chimera {
 		virtual Sequence print(ostream&, ostream&){  Sequence temp; return temp; }
 		virtual Sequence print(ostream&, ostream&, data_results, data_results) { Sequence temp; return temp; }
 		virtual int print(ostream&, ostream&, string){  return 0; }
+		virtual int getNumNoParents(){  return 0; }
 		virtual data_results getResults() { data_results results; return results; }
 		
 		#ifdef USE_MPI

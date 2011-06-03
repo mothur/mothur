@@ -34,6 +34,7 @@ int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int num
 		numWanted = numw;
 		realign = r; 
 		trimChimera = trim;
+		numNoParents = 0;
 	
 		doPrep();
 	}
@@ -65,6 +66,7 @@ ChimeraSlayer::ChimeraSlayer(string file, string temp, bool trim, map<string, in
 		realign = r; 
 		trimChimera = trim;
 		priority = prior;
+		numNoParents = 0;
 		
 		createFilter(templateSeqs, 0.0); //just removed columns where all seqs have a gap
 		
@@ -1115,6 +1117,8 @@ vector<Sequence> ChimeraSlayer::getBlastSeqs(Sequence q, vector<Sequence*>& db, 
 		//string qname = q->getName().substr(0, q->getName().find_last_of('_'));	
 		//cout << qname << endl;	
 		
+		if (mergedResults.size() == 0) { numNoParents++; }
+		
 		for (int i = 0; i < mergedResults.size(); i++) {
 			//cout << q->getName() << mergedResults[i]  << '\t' << db[mergedResults[i]]->getName() << endl;	
 			if (db[mergedResults[i]]->getName() != q.getName()) { 
@@ -1126,8 +1130,6 @@ vector<Sequence> ChimeraSlayer::getBlastSeqs(Sequence q, vector<Sequence*>& db, 
 
 		delete queryRight;
 		delete queryLeft;
-		
-		if (refResults.size() == 0) { m->mothurOut("[WARNING]: megablast returned 0 potential parents, so we are not able to check " + q.getName() + ". This could be due to formatdb.exe not being setup properly, please check formatdb.log for errors."); m->mothurOutEndLine(); }
 		
 		return refResults;
 	}

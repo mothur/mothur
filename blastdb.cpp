@@ -21,9 +21,9 @@ gapOpen(gO), gapExtend(gE), match(mm), misMatch(mM) {
 
 		int randNumber = rand();
 		//int randNumber = 12345;
-		dbFileName = tag + toString(randNumber) + ".template.unaligned.fasta";
-		queryFileName = tag + toString(randNumber) + ".candidate.unaligned.fasta";
-		blastFileName = tag + toString(randNumber) + ".blast";
+		dbFileName = tag + toString(getpid()) + toString(randNumber) + ".template.unaligned.fasta";
+		queryFileName = tag + toString(getpid()) + toString(randNumber) + ".candidate.unaligned.fasta";
+		blastFileName = tag + toString(getpid()) + toString(randNumber) + ".blast";
 		
 		//make sure blast exists in the write place
 		path = m->argv;
@@ -91,9 +91,9 @@ BlastDB::BlastDB() : Database() {
 
 		int randNumber = rand();
 		//int randNumber = 12345;
-		dbFileName = toString(randNumber) + ".template.unaligned.fasta";
-		queryFileName = toString(randNumber) + ".candidate.unaligned.fasta";
-		blastFileName = toString(randNumber) + ".blast";
+		dbFileName = toString(randNumber) + toString(getpid()) + ".template.unaligned.fasta";
+		queryFileName = toString(randNumber) + toString(getpid()) + ".candidate.unaligned.fasta";
+		blastFileName = toString(randNumber) + toString(getpid()) + ".blast";
 		
 		//make sure blast exists in the write place
 		path = m->argv;
@@ -181,7 +181,7 @@ vector<int> BlastDB::findClosestSequences(Sequence* seq, int n) {
 		
 		ofstream queryFile;
 		int randNumber = rand();
-		m->openOutputFile((queryFileName+toString(randNumber)), queryFile);
+		m->openOutputFile((queryFileName+toString(getpid())+toString(randNumber)), queryFile);
 		queryFile << '>' << seq->getName() << endl;
 		queryFile << seq->getUnaligned() << endl;
 		queryFile.close();
@@ -195,10 +195,10 @@ vector<int> BlastDB::findClosestSequences(Sequence* seq, int n) {
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		
 			blastCommand = path + "blast/bin/blastall -p blastn -d " + dbFileName + " -m 8 -W 28 -v " + toString(n) + " -b " + toString(n);
-			blastCommand += (" -i " + (queryFileName+toString(randNumber)) + " -o " + blastFileName+toString(randNumber));
+			blastCommand += (" -i " + (queryFileName+toString(getpid())+toString(randNumber)) + " -o " + blastFileName+toString(getpid())+toString(randNumber));
 		#else
 			blastCommand =  "\"" + path + "blast\\bin\\blastall\" -p blastn -d " + "\"" + dbFileName + "\"" + " -m 8 -W 28 -v " + toString(n) + " -b " + toString(n);
-			blastCommand += (" -i " + (queryFileName+toString(randNumber)) + " -o " + blastFileName+toString(randNumber));
+			blastCommand += (" -i " + (queryFileName+toString(getpid())+toString(randNumber)) + " -o " + blastFileName+toString(getpid())+toString(randNumber));
 			//wrap entire string in ""
 			blastCommand = "\"" + blastCommand + "\"";
 		#endif
@@ -206,7 +206,7 @@ vector<int> BlastDB::findClosestSequences(Sequence* seq, int n) {
 		system(blastCommand.c_str());
 		
 		ifstream m8FileHandle;
-		m->openInputFile(blastFileName+toString(randNumber), m8FileHandle, "no error");
+		m->openInputFile(blastFileName+toString(getpid())+toString(randNumber), m8FileHandle, "no error");
 		
 		string dummy;
 		int templateAccession;
@@ -222,8 +222,8 @@ vector<int> BlastDB::findClosestSequences(Sequence* seq, int n) {
 			topMatches.push_back(templateAccession);
 		}
 		m8FileHandle.close();
-		remove((queryFileName+toString(randNumber)).c_str());
-		remove((blastFileName+toString(randNumber)).c_str());
+		remove((queryFileName+toString(getpid())+toString(randNumber)).c_str());
+		remove((blastFileName+toString(getpid())+toString(randNumber)).c_str());
 
 		return topMatches;
 	}
@@ -244,7 +244,7 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n, int minPerID) {
 		ofstream queryFile;
 		int randNumber = rand();
 		//int randNumber = 12345;
-		m->openOutputFile((queryFileName+toString(randNumber)), queryFile);
+		m->openOutputFile((queryFileName+toString(getpid())+toString(randNumber)), queryFile);
 		queryFile << '>' << seq->getName() << endl;
 		queryFile << seq->getUnaligned() << endl;
 		queryFile.close();
@@ -256,22 +256,21 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n, int minPerID) {
 		string blastCommand;
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 			blastCommand = path + "blast/bin/megablast -e 1e-10 -d " + dbFileName + " -m 8 -b " + toString(n) + " -v " + toString(n); //-W 28 -p blastn
-			blastCommand += (" -i " + (queryFileName+toString(randNumber)) + " -o " + blastFileName+toString(randNumber));
+			blastCommand += (" -i " + (queryFileName+toString(getpid())+toString(randNumber)) + " -o " + blastFileName+toString(getpid())+toString(randNumber));
 		#else
 		//blastCommand = path + "blast\\bin\\megablast -e 1e-10 -d " + dbFileName + " -m 8 -b " + toString(n) + " -v " + toString(n); //-W 28 -p blastn
 		//blastCommand += (" -i " + (queryFileName+toString(randNumber)) + " -o " + blastFileName+toString(randNumber));
 
 			blastCommand =  "\"" + path + "blast\\bin\\megablast\" -e 1e-10 -d " + "\"" + dbFileName + "\"" + " -m 8 -b " + toString(n) + " -v " + toString(n); //-W 28 -p blastn
-			blastCommand += (" -i " + (queryFileName+toString(randNumber)) + " -o " + blastFileName+toString(randNumber));
+			blastCommand += (" -i " + (queryFileName+toString(getpid())+toString(randNumber)) + " -o " + blastFileName+toString(getpid())+toString(randNumber));
 			//wrap entire string in ""
 			blastCommand = "\"" + blastCommand + "\"";
 
 		#endif
-		//cout << blastCommand << endl;
 		system(blastCommand.c_str());
 
 		ifstream m8FileHandle;
-		m->openInputFile(blastFileName+toString(randNumber), m8FileHandle, "no error");
+		m->openInputFile(blastFileName+toString(getpid())+toString(randNumber), m8FileHandle, "no error");
 	
 		string dummy, eScore;
 		int templateAccession;
@@ -292,8 +291,8 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n, int minPerID) {
 //cout << templateAccession << endl;
 		}
 		m8FileHandle.close();
-		remove((queryFileName+toString(randNumber)).c_str());
-		remove((blastFileName+toString(randNumber)).c_str());
+		remove((queryFileName+toString(getpid())+toString(randNumber)).c_str());
+		remove((blastFileName+toString(getpid())+toString(randNumber)).c_str());
 //cout << "\n" ;		
 		return topMatches;
 	}
