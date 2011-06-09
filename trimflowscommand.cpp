@@ -612,7 +612,7 @@ int TrimFlowsCommand::stripBarcode(Sequence& seq, int& group){
 			if (barcodes.size() > 0) {
 				map<string,int>::iterator it=barcodes.begin();
 				
-				for(it;it!=barcodes.end();it++){
+				for(map<string,int>::iterator it=barcodes.begin();it!=barcodes.end();it++){
 					if(it->first.length() > maxLength){
 						maxLength = it->first.length();
 					}
