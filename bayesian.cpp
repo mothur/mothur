@@ -134,13 +134,16 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 						count[temp]++;  //increment count of seq in this genus who have this word
 					}
 					
-					//probabilityInTemplate = (# of seqs with that word in template + 0.05) / (total number of seqs in template + 1);
+					//probabilityInTemplate = (# of seqs with that word in template + 0.50) / (total number of seqs in template + 1);
 					float probabilityInTemplate = (seqsWithWordi.size() + 0.50) / (float) (names.size() + 1);
 					
 					int numNotZero = 0;
 					for (int k = 0; k < genusNodes.size(); k++) {
 						//probabilityInThisTaxonomy = (# of seqs with that word in this taxonomy + probabilityInTemplate) / (total number of seqs in this taxonomy + 1);
+						
+						
 						wordGenusProb[i][k] = log((count[genusNodes[k]] + probabilityInTemplate) / (float) (genusTotals[k] + 1));  
+									
 						if (count[genusNodes[k]] != 0) { 
 							#ifdef USE_MPI
 								int pid;
@@ -228,7 +231,7 @@ string Bayesian::getTaxonomy(Sequence* seq) {
 		string queryKmerString = kmer.getKmerString(seq->getUnaligned()); 
 
 		vector<int> queryKmers;
-		for (int i = 0; i < queryKmerString.length(); i++) {
+		for (int i = 0; i < queryKmerString.length()-1; i++) {	// the -1 is to ignore any kmer with an N in it
 			if (queryKmerString[i] != '!') { //this kmer is in the query
 				queryKmers.push_back(i);
 			}
@@ -244,7 +247,7 @@ string Bayesian::getTaxonomy(Sequence* seq) {
 		//bootstrap - to set confidenceScore
 		int numToSelect = queryKmers.size() / 8;
 	
-		tax = bootstrapResults(queryKmers, index, numToSelect);
+//		tax = bootstrapResults(queryKmers, index, numToSelect);
 				
 		return tax;	
 	}
@@ -273,7 +276,7 @@ string Bayesian::bootstrapResults(vector<int> kmers, int tax, int numToSelect) {
 		map<int, int>::iterator itBoot;
 		map<int, int>::iterator itBoot2;
 		map<int, int>::iterator itConvert;
-		
+			
 		for (int i = 0; i < iters; i++) {
 			if (m->control_pressed) { return "control"; }
 			
@@ -344,20 +347,29 @@ int Bayesian::getMostProbableTaxonomy(vector<int> queryKmer) {
 		
 		double maxProbability = -1000000.0;
 		//find taxonomy with highest probability that this sequence is from it
+		
+		
+		cout << genusNodes.size() << endl;
+		
+		
 		for (int k = 0; k < genusNodes.size(); k++) {
 			//for each taxonomy calc its probability
-			double prob = 1.0;
+			
+			double prob = 0.0000;
 			for (int i = 0; i < queryKmer.size(); i++) {
 				prob += wordGenusProb[queryKmer[i]][k];
 			}
 			
+			cout << phyloTree->get(genusNodes[k]).name << '\t' << prob << endl;
+
 			//is this the taxonomy with the greatest probability?
 			if (prob > maxProbability) { 
 				indexofGenus = genusNodes[k];
 				maxProbability = prob;
 			}
 		}
-//		cout << phyloTree->get(indexofGenus).name << '\t' << maxProbability << endl;
+		
+			
 		return indexofGenus;
 	}
 	catch(exception& e) {

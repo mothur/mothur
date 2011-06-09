@@ -18,8 +18,6 @@ vector<string> TrimFlowsCommand::setParameters(){
 		CommandParameter pmaxhomop("maxhomop", "Number", "", "9", "", "", "",false,false); parameters.push_back(pmaxhomop);
 		CommandParameter pmaxflows("maxflows", "Number", "", "720", "", "", "",false,false); parameters.push_back(pmaxflows);
 		CommandParameter pminflows("minflows", "Number", "", "360", "", "", "",false,false); parameters.push_back(pminflows);
-		CommandParameter pminlength("minlength", "Number", "", "0", "", "", "",false,false); parameters.push_back(pminlength);
-		CommandParameter pmaxlength("maxlength", "Number", "", "0", "", "", "",false,false); parameters.push_back(pmaxlength);
 		CommandParameter ppdiffs("pdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(ppdiffs);
 		CommandParameter pbdiffs("bdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(pbdiffs);
 		CommandParameter ptdiffs("tdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(ptdiffs);
@@ -172,13 +170,7 @@ TrimFlowsCommand::TrimFlowsCommand(string option)  {
 
 			temp = validParameter.validFile(parameters, "noise", false);		if (temp == "not found"){	temp = "0.70";	}
 			convert(temp, noise);  
-
-			temp = validParameter.validFile(parameters, "minlength", false);	if (temp == "not found"){	temp = "0";		}
-			convert(temp, minLength); 
-			
-			temp = validParameter.validFile(parameters, "maxlength", false);	if (temp == "not found"){	temp = "0";		}
-			convert(temp, maxLength);
-			
+	
 			temp = validParameter.validFile(parameters, "bdiffs", false);		if (temp == "not found"){	temp = "0";		}
 			convert(temp, bdiffs);
 			
@@ -190,9 +182,6 @@ TrimFlowsCommand::TrimFlowsCommand(string option)  {
 			convert(temp, tdiffs);
 			if(tdiffs == 0){	tdiffs = bdiffs + pdiffs;	}
 			
-			temp = validParameter.validFile(parameters, "allfiles", false);		if (temp == "not found"){ temp = "T";		}
-			allFiles = m->isTrue(temp);
-			
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
 			convert(temp, processors);
@@ -203,7 +192,8 @@ TrimFlowsCommand::TrimFlowsCommand(string option)  {
 				m->mothurOut("The value of the order option must be four bases long\n");
 			}
 
-			if(oligoFileName == ""){	allFiles = 0;		}
+			if(oligoFileName == "")	{	allFiles = 0;		}
+			else					{	allFiles = 1;		}
 
 			numFPrimers = 0;
 			numRPrimers = 0;
@@ -378,14 +368,6 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
 			if(!flowData.hasMinFlows(minFlows)){	//screen to see if sequence is of a minimum number of flows
 				success = 0;
 				trashCode += 'l';
-			}
-			
-			if(minLength > 0 || maxLength > 0){	//screen to see if sequence is above and below a specific number of bases
-				int seqLength = currSeq.getNumBases();
-				if(seqLength < minLength || seqLength > maxLength){
-					success = 0;
-					trashCode += 'l';
-				}
 			}
 			
 			int primerIndex = 0;
