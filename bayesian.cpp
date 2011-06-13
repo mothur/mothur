@@ -247,7 +247,7 @@ string Bayesian::getTaxonomy(Sequence* seq) {
 		//bootstrap - to set confidenceScore
 		int numToSelect = queryKmers.size() / 8;
 	
-//		tax = bootstrapResults(queryKmers, index, numToSelect);
+		tax = bootstrapResults(queryKmers, index, numToSelect);
 				
 		return tax;	
 	}
@@ -349,7 +349,7 @@ int Bayesian::getMostProbableTaxonomy(vector<int> queryKmer) {
 		//find taxonomy with highest probability that this sequence is from it
 		
 		
-		cout << genusNodes.size() << endl;
+//		cout << genusNodes.size() << endl;
 		
 		
 		for (int k = 0; k < genusNodes.size(); k++) {
@@ -360,7 +360,7 @@ int Bayesian::getMostProbableTaxonomy(vector<int> queryKmer) {
 				prob += wordGenusProb[queryKmer[i]][k];
 			}
 			
-			cout << phyloTree->get(genusNodes[k]).name << '\t' << prob << endl;
+//			cout << phyloTree->get(genusNodes[k]).name << '\t' << prob << endl;
 
 			//is this the taxonomy with the greatest probability?
 			if (prob > maxProbability) { 
