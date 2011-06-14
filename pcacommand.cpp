@@ -117,12 +117,12 @@ PCACommand::PCACommand(string option)  {
 			sharedfile = validParameter.validFile(parameters, "shared", true);
 			if (sharedfile == "not open") { sharedfile = ""; abort = true; }	
 			else if (sharedfile == "not found") { sharedfile = ""; }
-			else {  mode = "sharedfile"; inputFile = sharedfile; }
+			else {  mode = "sharedfile"; inputFile = sharedfile; m->setSharedFile(sharedfile); }
 			
 			relabundfile = validParameter.validFile(parameters, "relabund", true);
 			if (relabundfile == "not open") { relabundfile = ""; abort = true; }	
 			else if (relabundfile == "not found") { relabundfile = ""; }
-			else {  mode = "relabund"; inputFile = relabundfile; }
+			else {  mode = "relabund"; inputFile = relabundfile; m->setRelAbundFile(relabundfile); }
 			
 			
 			if ((sharedfile == "") && (relabundfile == "")) { 

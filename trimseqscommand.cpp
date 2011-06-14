@@ -189,6 +189,7 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 				if (fastaFile != "") { m->mothurOut("Using " + fastaFile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}else if (fastaFile == "not open") { abort = true; }	
+			else { m->setFastaFile(fastaFile); }
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
@@ -207,7 +208,7 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 			temp = validParameter.validFile(parameters, "oligos", true);
 			if (temp == "not found"){	oligoFile = "";		}
 			else if(temp == "not open"){	abort = true;	} 
-			else					{	oligoFile = temp;		}
+			else					{	oligoFile = temp; m->setOligosFile(oligoFile);		}
 			
 			
 			temp = validParameter.validFile(parameters, "maxambig", false);		if (temp == "not found") { temp = "-1"; }
@@ -236,12 +237,12 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 			temp = validParameter.validFile(parameters, "qfile", true);	
 			if (temp == "not found")	{	qFileName = "";		}
 			else if(temp == "not open")	{	abort = true;		}
-			else						{	qFileName = temp;	}
+			else						{	qFileName = temp;	m->setQualFile(qFileName); }
 			
 			temp = validParameter.validFile(parameters, "name", true);	
 			if (temp == "not found")	{	nameFile = "";		}
 			else if(temp == "not open")	{	nameFile = "";	abort = true;		}
-			else						{	nameFile = temp;	}
+			else						{	nameFile = temp;	m->setNameFile(nameFile); }
 			
 			temp = validParameter.validFile(parameters, "qthreshold", false);	if (temp == "not found") { temp = "0"; }
 			convert(temp, qThreshold);

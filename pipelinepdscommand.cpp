@@ -188,6 +188,7 @@ PipelineCommand::PipelineCommand(string option) {
 				sffFile = validParameter.validFile(parameters, "sff", true);
 				if (sffFile == "not found") { m->mothurOut("sff is a required parameter for the pipeline command."); m->mothurOutEndLine(); abort = true;  }
 				else if (sffFile == "not open") { sffFile = ""; abort = true; }
+				else { m->setSFFFile(sffFile); }
 					
 				oligosFile = validParameter.validFile(parameters, "oligos", true);
 				if (oligosFile == "not found") { m->mothurOut("oligos is a required parameter for the pipeline command."); m->mothurOutEndLine(); abort = true;  }

@@ -123,7 +123,7 @@ ParseListCommand::ParseListCommand(string option)  {
 					abort = true;
 						
 				}
-			}	
+			}else { m->setListFile(listfile); }	
 			
 			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") { abort = true; }	
@@ -137,6 +137,7 @@ ParseListCommand::ParseListCommand(string option)  {
 					if (error == 1) { abort = true; }
 				}else { m->mothurOut("No valid current group file. You must provide a group file."); m->mothurOutEndLine();  abort = true; } 
 			}else {  
+				m->setGroupFile(groupfile);
 				groupMap = new GroupMap(groupfile);
 				
 				int error = groupMap->readMap();

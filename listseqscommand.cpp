@@ -150,15 +150,18 @@ ListSeqsCommand::ListSeqsCommand(string option)  {
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not open") { abort = true; }
-			else if (fastafile == "not found") {  fastafile = "";  }	
+			else if (fastafile == "not found") {  fastafile = "";  }
+			else { m->setFastaFile(fastafile); }
 			
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not open") { abort = true; }
 			else if (namefile == "not found") {  namefile = "";  }	
+			else { m->setNameFile(namefile); }
 			
 			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") { abort = true; }
 			else if (groupfile == "not found") {  groupfile = "";  }	
+			else { m->setGroupFile(groupfile); }
 			
 			alignfile = validParameter.validFile(parameters, "alignreport", true);
 			if (alignfile == "not open") { abort = true; }
@@ -167,10 +170,12 @@ ListSeqsCommand::ListSeqsCommand(string option)  {
 			listfile = validParameter.validFile(parameters, "list", true);
 			if (listfile == "not open") { abort = true; }
 			else if (listfile == "not found") {  listfile = "";  }
-
+			else { m->setListFile(listfile); }
+			
 			taxfile = validParameter.validFile(parameters, "taxonomy", true);
 			if (taxfile == "not open") { abort = true; }
 			else if (taxfile == "not found") {  taxfile = "";  }
+			else { m->setTaxonomyFile(taxfile); }
 			
 			if ((fastafile == "") && (namefile == "") && (listfile == "") && (groupfile == "") && (alignfile == "") && (taxfile == ""))  { m->mothurOut("You must provide a file."); m->mothurOutEndLine(); abort = true; }
 			

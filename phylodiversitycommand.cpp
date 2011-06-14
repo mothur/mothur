@@ -150,16 +150,18 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 				treefile = m->getTreeFile(); 
 				if (treefile != "") { m->mothurOut("Using " + treefile + " as input file for the tree parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current tree file and the tree parameter is required."); m->mothurOutEndLine(); abort = true; }								
-			}	
+			}else { m->setTreeFile(treefile); }	
 			
 			//check for required parameters
 			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") { groupfile = ""; abort = true; }
 			else if (groupfile == "not found") { groupfile = ""; }
+			else { m->setGroupFile(groupfile); }
 			
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not open") { abort = true; }
 			else if (namefile == "not found") { namefile = ""; }
+			else { m->setNameFile(namefile); }
 			
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(treefile);	}
 			

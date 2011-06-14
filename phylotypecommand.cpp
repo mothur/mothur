@@ -129,11 +129,12 @@ PhylotypeCommand::PhylotypeCommand(string option)  {
 					abort = true; 
 				}
 			}else if (taxonomyFileName == "not open") { abort = true; }	
+			else { m->setTaxonomyFile(taxonomyFileName); }
 			
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not open") { abort = true; }
 			else if (namefile == "not found") { namefile = ""; }
-			else { readNamesFile(); }	
+			else { readNamesFile(); m->setNameFile(namefile); }	
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	

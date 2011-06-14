@@ -157,7 +157,7 @@ TrimFlowsCommand::TrimFlowsCommand(string option)  {
 			temp = validParameter.validFile(parameters, "oligos", true);
 			if (temp == "not found")	{	oligoFileName = "";		}
 			else if(temp == "not open")	{	abort = true;			} 
-			else						{	oligoFileName = temp;	}
+			else						{	oligoFileName = temp;	m->setOligosFile(oligoFileName); }
 			
 			temp = validParameter.validFile(parameters, "fasta", false);		if (temp == "not found"){	fasta = 0;		}
 			else if(m->isTrue(temp))	{	fasta = 1;	}

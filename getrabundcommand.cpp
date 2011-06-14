@@ -116,12 +116,12 @@ GetRAbundCommand::GetRAbundCommand(string option)  {
 			listfile = validParameter.validFile(parameters, "list", true);
 			if (listfile == "not open") { listfile = ""; abort = true; }
 			else if (listfile == "not found") { listfile = ""; }
-			else {  format = "list"; inputfile = listfile; }
+			else {  format = "list"; inputfile = listfile; m->setListFile(listfile); }
 			
 			sabundfile = validParameter.validFile(parameters, "sabund", true);
 			if (sabundfile == "not open") { sabundfile = ""; abort = true; }	
 			else if (sabundfile == "not found") { sabundfile = ""; }
-			else {  format = "sabund"; inputfile = sabundfile; }
+			else {  format = "sabund"; inputfile = sabundfile; m->setSabundFile(sabundfile); }
 			
 			
 			//check for optional parameter and set defaults

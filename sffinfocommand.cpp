@@ -170,7 +170,7 @@ SffInfoCommand::SffInfoCommand(string option)  {
 							//erase from file list
 							filenames.erase(filenames.begin()+i);
 							i--;
-						}
+						}else { m->setSFFFile(filenames[i]); }
 					}
 				}
 				

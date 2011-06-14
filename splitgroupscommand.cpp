@@ -126,6 +126,7 @@ SplitGroupCommand::SplitGroupCommand(string option)  {
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not open") { abort = true; }
 			else if (namefile == "not found") { namefile = ""; }	
+			else { m->setNameFile(namefile); }
 		
 			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not open") { abort = true; }
@@ -133,7 +134,7 @@ SplitGroupCommand::SplitGroupCommand(string option)  {
 				fastafile = m->getFastaFile(); 
 				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}	
+			}else { m->setFastaFile(fastafile); }	
 			
 			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") {  groupfile = ""; abort = true; }	
@@ -141,7 +142,7 @@ SplitGroupCommand::SplitGroupCommand(string option)  {
 				groupfile = m->getGroupFile(); 
 				if (groupfile != "") { m->mothurOut("Using " + groupfile + " as input file for the group parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current groupfile and the group parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}
+			}else {  m->setGroupFile(groupfile); }
 			
 			groups = validParameter.validFile(parameters, "groups", false);		
 			if (groups == "not found") { groups = ""; }

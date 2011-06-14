@@ -126,7 +126,7 @@ MergeGroupsCommand::MergeGroupsCommand(string option) {
 				designfile = m->getDesignFile(); 
 				if (designfile != "") { m->mothurOut("Using " + designfile + " as input file for the design parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current designfile and the design parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}	
+			}else { m->setDesignFile(designfile); }	
 			
 			//make sure the user has already run the read.otu command
 			sharedfile = validParameter.validFile(parameters, "shared", true);
@@ -136,7 +136,7 @@ MergeGroupsCommand::MergeGroupsCommand(string option) {
 				sharedfile = m->getSharedFile(); 
 				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}	
+			}else { m->setSharedFile(sharedfile); }	
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...

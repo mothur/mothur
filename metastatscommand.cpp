@@ -134,7 +134,7 @@ MetaStatsCommand::MetaStatsCommand(string option) {
 				sharedfile = m->getSharedFile(); 
 				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}
+			}else { m->setSharedFile(sharedfile); }
 			
 			//check for required parameters
 			designfile = validParameter.validFile(parameters, "design", true);
@@ -144,7 +144,7 @@ MetaStatsCommand::MetaStatsCommand(string option) {
 				designfile = m->getDesignFile(); 
 				if (designfile != "") { m->mothurOut("Using " + designfile + " as input file for the design parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current designfile and the design parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}
+			}else { m->setDesignFile(designfile); }
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	

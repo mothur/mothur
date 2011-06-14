@@ -116,7 +116,7 @@ MakeFastQCommand::MakeFastQCommand(string option)  {
 				fastafile = m->getFastaFile(); 
 				if (fastafile != "") {  m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}	
+			}else { m->setFastaFile(fastafile); }	
 			
 			qualfile = validParameter.validFile(parameters, "qfile", true);
 			if (qualfile == "not open") { abort = true; qualfile = ""; }
@@ -124,7 +124,7 @@ MakeFastQCommand::MakeFastQCommand(string option)  {
 				qualfile = m->getQualFile(); 
 				if (qualfile != "") {  m->mothurOut("Using " + qualfile + " as input file for the qfile parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current qualfile and the qfile parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}	
+			}else { m->setQualFile(qualfile); }	
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(fastafile);		}
