@@ -152,12 +152,12 @@ SplitAbundCommand::SplitAbundCommand(string option)  {
 			listfile = validParameter.validFile(parameters, "list", true);
 			if (listfile == "not open") { abort = true; }
 			else if (listfile == "not found") { listfile = ""; }
-			else{ inputFile = listfile; }	
+			else{ inputFile = listfile; m->setListFile(listfile); }	
 			
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not open") { abort = true; }
 			else if (namefile == "not found") { namefile = ""; }	
-			else{ inputFile = namefile; }	
+			else{ inputFile = namefile; m->setNameFile(namefile); }	
 		
 			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not open") { abort = true; }
@@ -165,7 +165,7 @@ SplitAbundCommand::SplitAbundCommand(string option)  {
 				fastafile = m->getFastaFile(); 
 				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}	
+			}else { m->setFastaFile(fastafile); }	
 			
 			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") {  groupfile = ""; abort = true; }	
@@ -175,7 +175,7 @@ SplitAbundCommand::SplitAbundCommand(string option)  {
 				
 				int error = groupMap->readMap();
 				if (error == 1) { abort = true; }
-	
+				m->setGroupFile(groupfile);
 			}
 			
 			groups = validParameter.validFile(parameters, "groups", false);		

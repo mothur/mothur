@@ -159,7 +159,7 @@ MakeGroupCommand::MakeGroupCommand(string option)  {
 							//erase from file list
 							fastaFileNames.erase(fastaFileNames.begin()+i);
 							i--;
-						}else{  filename += m->getRootName(m->getSimpleName(fastaFileNames[i]));  }
+						}else{  filename += m->getRootName(m->getSimpleName(fastaFileNames[i]));  m->setFastaFile(fastaFileNames[i]); }
 					}
 				}
 				

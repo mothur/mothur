@@ -134,7 +134,8 @@ RemoveOtusCommand::RemoveOtusCommand(string option)  {
 			//check for required parameters
 			accnosfile = validParameter.validFile(parameters, "accnos", true);
 			if (accnosfile == "not open") { abort = true; }
-			else if (accnosfile == "not found") {  accnosfile = ""; }	
+			else if (accnosfile == "not found") {  accnosfile = ""; }
+			else { m->setAccnosFile(accnosfile); }
 			
 			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") { abort = true; }
@@ -142,7 +143,7 @@ RemoveOtusCommand::RemoveOtusCommand(string option)  {
 				groupfile = m->getGroupFile(); 
 				if (groupfile != "") { m->mothurOut("Using " + groupfile + " as input file for the group parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current group file and the group parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}	
+			}else { m->setGroupFile(groupfile); }	
 			
 			listfile = validParameter.validFile(parameters, "list", true);
 			if (listfile == "not open") { abort = true; }
@@ -150,7 +151,7 @@ RemoveOtusCommand::RemoveOtusCommand(string option)  {
 				listfile = m->getListFile(); 
 				if (listfile != "") { m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current list file and the list parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}	
+			}else { m->setListFile(listfile); }	
 			
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = ""; }

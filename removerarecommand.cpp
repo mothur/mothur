@@ -160,23 +160,28 @@ RemoveRareCommand::RemoveRareCommand(string option)  {
 			//check for file parameters
 			listfile = validParameter.validFile(parameters, "list", true);
 			if (listfile == "not open") { abort = true; }
-			else if (listfile == "not found") {  listfile = "";  }	
+			else if (listfile == "not found") {  listfile = "";  }
+			else { m->setListFile(listfile); }
 			
 			sabundfile = validParameter.validFile(parameters, "sabund", true);
 			if (sabundfile == "not open") { abort = true; }
 			else if (sabundfile == "not found") {  sabundfile = "";  }	
+			else { m->setSabundFile(sabundfile); }
 			
 			rabundfile = validParameter.validFile(parameters, "rabund", true);
 			if (rabundfile == "not open") { abort = true; }
 			else if (rabundfile == "not found") {  rabundfile = "";  }				
+			else { m->setRabundFile(rabundfile); }
 			
 			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") { groupfile = ""; abort = true; }
 			else if (groupfile == "not found") {  groupfile = "";  }	
+			else { m->setGroupFile(groupfile); }
 			
 			sharedfile = validParameter.validFile(parameters, "shared", true);
 			if (sharedfile == "not open") { sharedfile = "";  abort = true; }
 			else if (sharedfile == "not found") {  sharedfile = "";  }
+			else { m->setSharedFile(sharedfile); }
 			
 			if ((sharedfile == "") && (listfile == "") && (rabundfile == "") && (sabundfile == "")) { 
 				//is there are current file available for any of these?

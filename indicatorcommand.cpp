@@ -147,21 +147,22 @@ IndicatorCommand::IndicatorCommand(string option)  {
 				treefile = m->getTreeFile(); 
 				if (treefile != "") { m->mothurOut("Using " + treefile + " as input file for the tree parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current tree file and the tree parameter is required."); m->mothurOutEndLine(); abort = true; }								
-			}	
+			}else { m->setTreeFile(treefile); }	
 			
 			sharedfile = validParameter.validFile(parameters, "shared", true);
 			if (sharedfile == "not open") { abort = true; }
 			else if (sharedfile == "not found") { sharedfile = ""; }
-			else { inputFileName = sharedfile; }
+			else { inputFileName = sharedfile; m->setSharedFile(sharedfile); }
 			
 			relabundfile = validParameter.validFile(parameters, "relabund", true);
 			if (relabundfile == "not open") { abort = true; }
 			else if (relabundfile == "not found") { relabundfile = ""; }
-			else { inputFileName = relabundfile; }
+			else { inputFileName = relabundfile; m->setRelAbundFile(relabundfile); }
 			
 			designfile = validParameter.validFile(parameters, "design", true);
 			if (designfile == "not open") { abort = true; }
 			else if (designfile == "not found") { designfile = ""; }
+			else { m->setDesignFile(designfile); }
 			
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = "";  Groups.push_back("all"); }

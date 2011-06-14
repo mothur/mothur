@@ -138,7 +138,7 @@ LibShuffCommand::LibShuffCommand(string option)  {
 					m->mothurOut("You must provide a phylip file."); m->mothurOutEndLine(); 
 					abort = true;
 				} 
-			}	
+			}else { m->setPhylipFile(phylipfile); }	
 			
 			//check for required parameters
 			groupfile = validParameter.validFile(parameters, "group", true);
@@ -150,7 +150,7 @@ LibShuffCommand::LibShuffCommand(string option)  {
 					m->mothurOut("You must provide a group file."); m->mothurOutEndLine(); 
 					abort = true;
 				} 
-			}	
+			}else { m->setGroupFile(groupfile); }	
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	

@@ -129,12 +129,12 @@ VennCommand::VennCommand(string option)  {
 			listfile = validParameter.validFile(parameters, "list", true);
 			if (listfile == "not open") { listfile = ""; abort = true; }
 			else if (listfile == "not found") { listfile = ""; }
-			else {  format = "list"; inputfile = listfile; }
+			else {  format = "list"; inputfile = listfile; m->setListFile(listfile); }
 			
 			sharedfile = validParameter.validFile(parameters, "shared", true);
 			if (sharedfile == "not open") { sharedfile = ""; abort = true; }	
 			else if (sharedfile == "not found") { sharedfile = ""; }
-			else {  format = "sharedfile"; inputfile = sharedfile; }
+			else {  format = "sharedfile"; inputfile = sharedfile; m->setSharedFile(sharedfile); }
 			
 			if ((sharedfile == "") && (listfile == "")) { 
 				//is there are current file available for any of these?

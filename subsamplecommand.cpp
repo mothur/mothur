@@ -182,32 +182,38 @@ SubSampleCommand::SubSampleCommand(string option) {
 			//check for required parameters
 			listfile = validParameter.validFile(parameters, "list", true);
 			if (listfile == "not open") { listfile = ""; abort = true; }
-			else if (listfile == "not found") { listfile = ""; }	
+			else if (listfile == "not found") { listfile = ""; }
+			else { m->setListFile(listfile); }
 			
 			sabundfile = validParameter.validFile(parameters, "sabund", true);
 			if (sabundfile == "not open") { sabundfile = ""; abort = true; }	
 			else if (sabundfile == "not found") { sabundfile = ""; }
+			else { m->setSabundFile(sabundfile); }
 			
 			rabundfile = validParameter.validFile(parameters, "rabund", true);
 			if (rabundfile == "not open") { rabundfile = ""; abort = true; }	
 			else if (rabundfile == "not found") { rabundfile = ""; }
+			else { m->setRabundFile(rabundfile); }
 			
 			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not open") { fastafile = ""; abort = true; }	
 			else if (fastafile == "not found") { fastafile = ""; }
+			else { m->setFastaFile(fastafile); }
 			
 			sharedfile = validParameter.validFile(parameters, "shared", true);
 			if (sharedfile == "not open") { sharedfile = ""; abort = true; }	
 			else if (sharedfile == "not found") { sharedfile = ""; }
+			else { m->setSharedFile(sharedfile); }
 			
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not open") { namefile = ""; abort = true; }	
 			else if (namefile == "not found") { namefile = ""; }
+			else { m->setNameFile(namefile); }
 			
 			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") { groupfile = ""; abort = true; }	
 			else if (groupfile == "not found") { groupfile = ""; }
-			
+			else { m->setGroupFile(groupfile); }
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...

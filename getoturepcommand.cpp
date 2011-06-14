@@ -203,6 +203,7 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}
 			else if (fastafile == "not open") { abort = true; }	
+			else { m->setFastaFile(fastafile); }
 		
 			listfile = validParameter.validFile(parameters, "list", true);
 			if (listfile == "not found") { 			
@@ -211,20 +212,22 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 				else { 	m->mothurOut("You have no current list file and the list parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}
 			else if (listfile == "not open") { abort = true; }	
+			else { m->setListFile(listfile); }
 			
 			phylipfile = validParameter.validFile(parameters, "phylip", true);
 			if (phylipfile == "not found") { phylipfile = "";  }
 			else if (phylipfile == "not open") { abort = true; }	
-			else { distFile = phylipfile; format = "phylip";   }
+			else { distFile = phylipfile; format = "phylip"; m->setPhylipFile(phylipfile);   }
 			
 			columnfile = validParameter.validFile(parameters, "column", true);
 			if (columnfile == "not found") { columnfile = ""; }
 			else if (columnfile == "not open") { abort = true; }	
-			else { distFile = columnfile; format = "column";   }
+			else { distFile = columnfile; format = "column";  m->setColumnFile(columnfile); }
 			
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not open") { abort = true; }	
 			else if (namefile == "not found") { namefile = ""; }
+			else { m->setNameFile(namefile); }
 			
 			if ((phylipfile == "") && (columnfile == "")) { //is there are current file available for either of these?
 				//give priority to column, then phylip
@@ -263,7 +266,8 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") { groupfile = ""; abort = true; }
 			else if (groupfile == "not found") { groupfile = ""; }
-						
+			else { m->setGroupFile(groupfile); }
+			
 			sorted = validParameter.validFile(parameters, "sorted", false);		if (sorted == "not found"){	sorted = "";	}
 			if (sorted == "none") { sorted=""; }
 			if ((sorted != "") && (sorted != "name") && (sorted != "bin") && (sorted != "size") && (sorted != "group")) {

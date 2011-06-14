@@ -131,7 +131,7 @@ SharedCommand::SharedCommand(string option)  {
 				 listfile = m->getListFile(); 
 				 if (listfile != "") { m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
 				 else { 	m->mothurOut("You have no current list file and the list parameter is required."); m->mothurOutEndLine(); abort = true; }
-			 }	
+			 }else { m->setListFile(listfile); }	
 							
 			 ordergroupfile = validParameter.validFile(parameters, "ordergroup", true);
 			 if (ordergroupfile == "not open") { abort = true; }	

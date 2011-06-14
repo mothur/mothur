@@ -128,7 +128,7 @@ NMDSCommand::NMDSCommand(string option)  {
 				phylipfile = m->getPhylipFile(); 
 				if (phylipfile != "") { m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current phylip file and the phylip parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}	
+			}else { m->setPhylipFile(phylipfile); }	
 			
 			axesfile = validParameter.validFile(parameters, "axes", true);
 			if (axesfile == "not open") { axesfile = ""; abort = true; }

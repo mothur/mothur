@@ -113,11 +113,13 @@ ReverseSeqsCommand::ReverseSeqsCommand(string option)  {
 			fastaFileName = validParameter.validFile(parameters, "fasta", true);
 			if (fastaFileName == "not open") { abort = true; }
 			else if (fastaFileName == "not found") { fastaFileName = "";}// m->mothurOut("fasta is a required parameter for the reverse.seqs command."); m->mothurOutEndLine(); abort = true;  }	
+			else { m->setFastaFile(fastaFileName); }
 			
 			qualFileName = validParameter.validFile(parameters, "qfile", true);
 			if (qualFileName == "not open") { abort = true; }
 			else if (qualFileName == "not found") { qualFileName = ""; }//m->mothurOut("fasta is a required parameter for the reverse.seqs command."); m->mothurOutEndLine(); abort = true;  }	
-
+			else { m->setQualFile(qualFileName); }
+			
 			if((fastaFileName == "") && (qualFileName == "")){
 				fastaFileName = m->getFastaFile(); 
 				if (fastaFileName != "") {  m->mothurOut("Using " + fastaFileName + " as input file for the fasta parameter."); m->mothurOutEndLine(); }

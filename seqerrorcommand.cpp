@@ -164,6 +164,7 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 				else { 	m->mothurOut("You have no current fasta file and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}
 			else if (queryFileName == "not open") { abort = true; }	
+			else { m->setFastaFile(queryFileName); }
 			
 			referenceFileName = validParameter.validFile(parameters, "reference", true);
 			if (referenceFileName == "not found") { m->mothurOut("reference is a required parameter for the seq.error command."); m->mothurOutEndLine(); abort = true; }
@@ -174,11 +175,13 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 			namesFileName = validParameter.validFile(parameters, "name", true);
 			if(namesFileName == "not found"){	namesFileName = "";	}
 			else if (namesFileName == "not open") { namesFileName = ""; abort = true; }	
+			else { m->setNameFile(namesFileName); }
 			
 			qualFileName = validParameter.validFile(parameters, "qfile", true);
 			if(qualFileName == "not found"){	qualFileName = "";	}
 			else if (qualFileName == "not open") { qualFileName = ""; abort = true; }	
-
+			else { m->setQualFile(qualFileName); }
+			
 			reportFileName = validParameter.validFile(parameters, "report", true);
 			if(reportFileName == "not found"){	reportFileName = "";	}
 			else if (reportFileName == "not open") { reportFileName = ""; abort = true; }	

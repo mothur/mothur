@@ -179,21 +179,22 @@ TreeGroupCommand::TreeGroupCommand(string option)  {
 			phylipfile = validParameter.validFile(parameters, "phylip", true);
 			if (phylipfile == "not open") { phylipfile = ""; abort = true; }
 			else if (phylipfile == "not found") { phylipfile = ""; }	
-			else {  inputfile = phylipfile;  format = "phylip"; 	}
+			else {  inputfile = phylipfile;  format = "phylip"; m->setPhylipFile(phylipfile);	}
 			
 			columnfile = validParameter.validFile(parameters, "column", true);
 			if (columnfile == "not open") { columnfile = ""; abort = true; }	
 			else if (columnfile == "not found") { columnfile = ""; }
-			else {  inputfile = columnfile; format = "column";	}
+			else {  inputfile = columnfile; format = "column";	m->setColumnFile(columnfile); }
 			
 			sharedfile = validParameter.validFile(parameters, "shared", true);
 			if (sharedfile == "not open") { sharedfile = ""; abort = true; }	
 			else if (sharedfile == "not found") { sharedfile = ""; }
-			else {  inputfile = sharedfile; format = "sharedfile";	}
+			else {  inputfile = sharedfile; format = "sharedfile";	m->setSharedFile(sharedfile); }
 			
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not open") { abort = true; }	
 			else if (namefile == "not found") { namefile = ""; }
+			else { m->setNameFile(namefile); }
 			
 			if ((phylipfile == "") && (columnfile == "") && (sharedfile == "")) { 
 				//is there are current file available for either of these?

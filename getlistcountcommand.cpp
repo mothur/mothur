@@ -114,6 +114,7 @@ GetListCountCommand::GetListCountCommand(string option)  {
 				else { 	m->mothurOut("You have no current list file and the list parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}
 			else if (listfile == "not open") { abort = true; }	
+			else { m->setListFile(listfile); }
 			
 		
 			//check for optional parameter and set defaults

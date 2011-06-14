@@ -134,16 +134,17 @@ SensSpecCommand::SensSpecCommand(string option)  {
 				else { 	m->mothurOut("You have no current list file and the list parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}
 			else if (listFile == "not open") { abort = true; }	
+			else { m->setListFile(listFile); }
 			
 			phylipfile = validParameter.validFile(parameters, "phylip", true);
 			if (phylipfile == "not found") { phylipfile = "";  }
 			else if (phylipfile == "not open") { abort = true; }	
-			else { distFile = phylipfile; format = "phylip";   }
+			else { distFile = phylipfile; format = "phylip"; m->setPhylipFile(phylipfile);  }
 			
 			columnfile = validParameter.validFile(parameters, "column", true);
 			if (columnfile == "not found") { columnfile = ""; }
 			else if (columnfile == "not open") { abort = true; }	
-			else { distFile = columnfile; format = "column";   }
+			else { distFile = columnfile; format = "column";   m->setColumnFile(columnfile); }
 			
 			if ((phylipfile == "") && (columnfile == "")) { //is there are current file available for either of these?
 				//give priority to column, then phylip

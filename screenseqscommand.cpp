@@ -173,20 +173,24 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}
-			else if (fastafile == "not open") { abort = true; }	
+			else if (fastafile == "not open") { abort = true; }
+			else { m->setFastaFile(fastafile); }
 	
 			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") { abort = true; }	
 			else if (groupfile == "not found") { groupfile = ""; }
+			else { m->setGroupFile(groupfile); }
 			
 			qualfile = validParameter.validFile(parameters, "qfile", true);
 			if (qualfile == "not open") { abort = true; }	
 			else if (qualfile == "not found") { qualfile = ""; }
+			else { m->setQualFile(qualfile); }
 			
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not open") { namefile = ""; abort = true; }
 			else if (namefile == "not found") { namefile = ""; }	
-
+			else { m->setNameFile(namefile); }
+			
 			alignreport = validParameter.validFile(parameters, "alignreport", true);
 			if (alignreport == "not open") { abort = true; }
 			else if (alignreport == "not found") { alignreport = ""; }	

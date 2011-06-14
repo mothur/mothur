@@ -110,6 +110,7 @@ OtuHierarchyCommand::OtuHierarchyCommand(string option) {
 					abort = true;
 				}
 			}else if (listFile == "not open") { abort = true; }	
+			else { m->setListFile(listFile); }
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	

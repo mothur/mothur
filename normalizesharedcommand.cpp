@@ -122,12 +122,12 @@ NormalizeSharedCommand::NormalizeSharedCommand(string option) {
 			sharedfile = validParameter.validFile(parameters, "shared", true);
 			if (sharedfile == "not open") { sharedfile = ""; abort = true; }	
 			else if (sharedfile == "not found") { sharedfile = ""; }
-			else {  format = "sharedfile"; inputfile = sharedfile; }
+			else {  format = "sharedfile"; inputfile = sharedfile; m->setSharedFile(sharedfile); }
 			
 			relabundfile = validParameter.validFile(parameters, "relabund", true);
 			if (relabundfile == "not open") { relabundfile = ""; abort = true; }	
 			else if (relabundfile == "not found") { relabundfile = ""; }
-			else {  format = "relabund"; inputfile = relabundfile; }
+			else {  format = "relabund"; inputfile = relabundfile; m->setRelAbundFile(relabundfile); }
 			
 			
 			if ((sharedfile == "") && (relabundfile == "")) { 

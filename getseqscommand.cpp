@@ -201,21 +201,24 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 					m->mothurOut("You have no valid accnos file and accnos is required."); m->mothurOutEndLine(); 
 					abort = true;
 				} 
-			}	
+			}else { m->setAccnosFile(accnosfile); }	
 			
 			if (accnosfile2 == "not found") { accnosfile2 = ""; }
 			
 			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not open") { abort = true; }
-			else if (fastafile == "not found") {  fastafile = "";  }	
+			else if (fastafile == "not found") {  fastafile = "";  }
+			else { m->setFastaFile(fastafile); }
 			
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not open") { abort = true; }
 			else if (namefile == "not found") {  namefile = "";  }	
+			else { m->setNameFile(namefile); }
 			
 			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") { abort = true; }
 			else if (groupfile == "not found") {  groupfile = "";  }	
+			else { m->setGroupFile(groupfile); }
 			
 			alignfile = validParameter.validFile(parameters, "alignreport", true);
 			if (alignfile == "not open") { abort = true; }
@@ -224,14 +227,17 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 			listfile = validParameter.validFile(parameters, "list", true);
 			if (listfile == "not open") { abort = true; }
 			else if (listfile == "not found") {  listfile = "";  }
+			else { m->setListFile(listfile); }
 			
 			taxfile = validParameter.validFile(parameters, "taxonomy", true);
 			if (taxfile == "not open") { abort = true; }
 			else if (taxfile == "not found") {  taxfile = "";  }
+			else { m->setTaxonomyFile(taxfile); }
 			
 			qualfile = validParameter.validFile(parameters, "qfile", true);
 			if (qualfile == "not open") { abort = true; }
 			else if (qualfile == "not found") {  qualfile = "";  }
+			else { m->setQualFile(qualfile); }
 			
 			accnosfile2 = validParameter.validFile(parameters, "accnos2", true);
 			if (accnosfile2 == "not open") { abort = true; }

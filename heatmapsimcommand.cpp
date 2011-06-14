@@ -158,21 +158,22 @@ HeatMapSimCommand::HeatMapSimCommand(string option)  {
 			phylipfile = validParameter.validFile(parameters, "phylip", true);
 			if (phylipfile == "not open") { abort = true; }
 			else if (phylipfile == "not found") { phylipfile = ""; }	
-			else {  format = "phylip"; 	inputfile = phylipfile; if (outputDir == "") { outputDir += m->hasPath(phylipfile); }  }
+			else {  format = "phylip"; 	inputfile = phylipfile; m-> setPhylipFile(phylipfile); if (outputDir == "") { outputDir += m->hasPath(phylipfile); }  }
 			
 			columnfile = validParameter.validFile(parameters, "column", true);
 			if (columnfile == "not open") { abort = true; }	
 			else if (columnfile == "not found") { columnfile = ""; }
-			else {  format = "column";	inputfile = columnfile; if (outputDir == "") { outputDir += m->hasPath(columnfile); } }
+			else {  format = "column";	inputfile = columnfile; m->setColumnFile(columnfile); if (outputDir == "") { outputDir += m->hasPath(columnfile); } }
 			
 			sharedfile = validParameter.validFile(parameters, "shared", true);
 			if (sharedfile == "not open") { abort = true; }	
 			else if (sharedfile == "not found") { sharedfile = ""; }
-			else {  format = "shared";	inputfile = sharedfile;  if (outputDir == "") { outputDir += m->hasPath(sharedfile); } }
+			else {  format = "shared";	inputfile = sharedfile; m->setSharedFile(sharedfile); if (outputDir == "") { outputDir += m->hasPath(sharedfile); } }
 			
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not open") { abort = true; }	
 			else if (namefile == "not found") { namefile = ""; }
+			else { m->setNameFile(namefile); }
 			
 			
 			//error checking on files			

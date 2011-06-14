@@ -124,6 +124,7 @@ PreClusterCommand::PreClusterCommand(string option) {
 				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}
 			else if (fastafile == "not open") { abort = true; }	
+			else { m->setFastaFile(fastafile); }
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
@@ -136,7 +137,7 @@ PreClusterCommand::PreClusterCommand(string option) {
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not found") { namefile =  "";  }
 			else if (namefile == "not open") { abort = true; }	
-			else {  readNameFile();  }
+			else {  readNameFile();  m->setNameFile(namefile); }
 			
 			string temp	= validParameter.validFile(parameters, "diffs", false);				if(temp == "not found"){	temp = "1"; }
 			convert(temp, diffs); 

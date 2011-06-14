@@ -148,7 +148,7 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
 					m->mothurOut("No valid current list file. You must provide a list file."); m->mothurOutEndLine(); 
 					abort = true;
 				}
-			}else {  format = "list"; 	}
+			}else {  format = "list"; 	m->setListFile(listfile); }
 			
 			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") { abort = true; }	
@@ -159,7 +159,7 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
 					m->mothurOut("No valid current group file. You must provide a group file."); m->mothurOutEndLine(); 
 					abort = true;
 				}
-			}
+			}else { m->setGroupFile(groupfile); }
 						
 			if ((listfile == "") || (groupfile == "")) { m->mothurOut("The list and group parameters are required."); m->mothurOutEndLine(); abort = true; }
 			
@@ -197,7 +197,7 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
 			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not open") { abort = true; }
 			else if (fastafile == "not found") {  fastafile = "";  }	
-				
+			else { m->setFastaFile(fastafile); }
 		}
 
 	}

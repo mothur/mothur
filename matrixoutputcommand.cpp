@@ -157,6 +157,7 @@ MatrixOutputCommand::MatrixOutputCommand(string option)  {
 				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}else if (sharedfile == "not open") { sharedfile = ""; abort = true; }
+			else { m->setSharedFile(sharedfile); }
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	

@@ -166,14 +166,17 @@ RemoveGroupsCommand::RemoveGroupsCommand(string option)  {
 			accnosfile = validParameter.validFile(parameters, "accnos", true);
 			if (accnosfile == "not open") { abort = true; }
 			else if (accnosfile == "not found") {  accnosfile = ""; }	
+			else { m->setAccnosFile(accnosfile); }
 			
 			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not open") { abort = true; }
 			else if (fastafile == "not found") {  fastafile = "";  }	
+			else { m->setFastaFile(fastafile); }
 			
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not open") { abort = true; }
 			else if (namefile == "not found") {  namefile = "";  }	
+			else { m->setNameFile(namefile); }
 			
 			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") { abort = true; }
@@ -182,15 +185,17 @@ RemoveGroupsCommand::RemoveGroupsCommand(string option)  {
 				groupfile = m->getGroupFile(); 
 				if (groupfile != "") { m->mothurOut("Using " + groupfile + " as input file for the group parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current groupfile and the group parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}	
+			}else { m->setGroupFile(groupfile); }	
 			
 			listfile = validParameter.validFile(parameters, "list", true);
 			if (listfile == "not open") { abort = true; }
 			else if (listfile == "not found") {  listfile = "";  }
+			else { m->setListFile(listfile); }
 			
 			taxfile = validParameter.validFile(parameters, "taxonomy", true);
 			if (taxfile == "not open") { abort = true; }
 			else if (taxfile == "not found") {  taxfile = "";  }
+			else { m->setTaxonomyFile(taxfile); }
 			
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = ""; }
