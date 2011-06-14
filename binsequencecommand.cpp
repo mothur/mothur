@@ -138,6 +138,7 @@ BinSeqCommand::BinSeqCommand(string option) {
 				else { 	m->mothurOut("You have no current fasta file and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}
 			else if (fastafile == "not open") { abort = true; }	
+			else { m->setFastaFile(fastafile); }
 			
 			listfile = validParameter.validFile(parameters, "list", true);
 			if (listfile == "not found") { 			
@@ -146,6 +147,7 @@ BinSeqCommand::BinSeqCommand(string option) {
 				else { 	m->mothurOut("You have no current list file and the list parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}
 			else if (listfile == "not open") { listfile = ""; abort = true; }	
+			else { m->setListFile(listfile); }
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
@@ -167,10 +169,12 @@ BinSeqCommand::BinSeqCommand(string option) {
 			namesfile = validParameter.validFile(parameters, "name", true);
 			if (namesfile == "not open") { abort = true; }	
 			else if (namesfile == "not found") { namesfile = ""; }
+			else {  m->setNameFile(namesfile); }
 
 			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") { abort = true; }
 			else if (groupfile == "not found") { groupfile = ""; }
+			else { m->setGroupFile(groupfile); }
 			
 		}
 	}

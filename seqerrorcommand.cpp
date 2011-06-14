@@ -24,7 +24,6 @@ vector<string> SeqErrorCommand::setParameters(){
 		CommandParameter pignorechimeras("ignorechimeras", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pignorechimeras);
 		CommandParameter pthreshold("threshold", "Number", "", "1.0", "", "", "",false,false); parameters.push_back(pthreshold);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
-		CommandParameter pfilter("filter", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pfilter);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
 		
@@ -204,9 +203,6 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 			temp = validParameter.validFile(parameters, "ignorechimeras", false);	if (temp == "not found") { temp = "T"; }
 			ignoreChimeras = m->isTrue(temp);
 			
-			temp = validParameter.validFile(parameters, "filter", false);	if (temp == "not found") { temp = "T"; }
-			filter = m->isTrue(temp);  
-			
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
 			convert(temp, processors); 
@@ -230,25 +226,6 @@ int SeqErrorCommand::execute(){
 		maxLength = 2000;
 		totalBases = 0;
 		totalMatches = 0;
-
-		//run vertical filter on query and reference files.
-		if (filter) {
-			string inputString = "fasta=" + queryFileName + "-" + referenceFileName;
-			m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
-			m->mothurOut("Running command: filter.seqs(" + inputString + ") to improve processing time."); m->mothurOutEndLine(); 
-			
-			Command* filterCommand = new FilterSeqsCommand(inputString);
-			filterCommand->execute();
-			
-			map<string, vector<string> > filenames = filterCommand->getOutputFiles();
-			
-			delete filterCommand;
-			
-			m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
-			
-			queryFileName = filenames["fasta"][0];
-			referenceFileName = filenames["fasta"][1];
-		}
 		
 		string errorSummaryFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".error.summary";
 		outputNames.push_back(errorSummaryFileName); outputTypes["error.summary"].push_back(errorSummaryFileName);

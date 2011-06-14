@@ -155,12 +155,12 @@ ClearcutCommand::ClearcutCommand(string option)  {
 			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not open") { fastafile = ""; abort = true; }
 			else if (fastafile == "not found") { fastafile = ""; }	
-			else { inputFile = fastafile;  }
+			else { inputFile = fastafile;  m->setFastaFile(fastafile); }
 			
 			phylipfile = validParameter.validFile(parameters, "phylip", true);
 			if (phylipfile == "not open") { phylipfile = ""; abort = true; }
 			else if (phylipfile == "not found") { phylipfile = ""; }
-			else { inputFile = phylipfile;  }
+			else { inputFile = phylipfile;  m->setPhylipFile(phylipfile); }
 				
 			if ((phylipfile == "") && (fastafile == "")) {  
 				//is there are current file available for either of these?

@@ -190,6 +190,7 @@ FilterSeqsCommand::FilterSeqsCommand(string option)  {
 						}else{  
 							string simpleName = m->getSimpleName(fastafileNames[i]);
 							filterFileName += simpleName.substr(0, simpleName.find_first_of('.'));
+							m->setFastaFile(fastafileNames[i]);
 						}
 						in.close();
 					}

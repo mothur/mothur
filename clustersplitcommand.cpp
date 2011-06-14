@@ -183,25 +183,27 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			phylipfile = validParameter.validFile(parameters, "phylip", true);
 			if (phylipfile == "not open") { abort = true; }
 			else if (phylipfile == "not found") { phylipfile = ""; }	
-			else {  distfile = phylipfile;  format = "phylip"; 	}
+			else {  distfile = phylipfile;  format = "phylip"; 	m->setPhylipFile(phylipfile); }
 			
 			columnfile = validParameter.validFile(parameters, "column", true);
 			if (columnfile == "not open") { abort = true; }	
 			else if (columnfile == "not found") { columnfile = ""; }
-			else {  distfile = columnfile; format = "column";	}
+			else {  distfile = columnfile; format = "column";	m->setColumnFile(columnfile); }
 			
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not open") { abort = true; }	
-			else if (namefile == "not found") { namefile = ""; }
+			else if (namefile == "not found") { namefile = "";  }
+			else { m->setNameFile(namefile); }
 			
 			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not open") { abort = true; }	
 			else if (fastafile == "not found") { fastafile = ""; }
-			else { distfile = fastafile;  splitmethod = "fasta";  }
+			else { distfile = fastafile;  splitmethod = "fasta";  m->setFastaFile(fastafile); }
 			
 			taxFile = validParameter.validFile(parameters, "taxonomy", true);
 			if (taxFile == "not open") { abort = true; }	
 			else if (taxFile == "not found") { taxFile = ""; }
+			else {  m->setTaxonomyFile(taxFile); }
 			
 			if ((phylipfile == "") && (columnfile == "") && (fastafile == "")) { 
 				//is there are current file available for either of these?

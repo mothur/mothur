@@ -114,7 +114,7 @@ DeUniqueSeqsCommand::DeUniqueSeqsCommand(string option)  {
 				fastaFile = m->getFastaFile(); 
 				if (fastaFile != "") { m->mothurOut("Using " + fastaFile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}	
+			}else { m->setFastaFile(fastaFile); }	
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
@@ -128,7 +128,7 @@ DeUniqueSeqsCommand::DeUniqueSeqsCommand(string option)  {
 				nameFile = m->getNameFile(); 
 				if (nameFile != "") { m->mothurOut("Using " + nameFile + " as input file for the name parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current namefile and the name parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}
+			}else { m->setNameFile(nameFile); }
 		}
 
 	}

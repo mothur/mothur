@@ -113,6 +113,14 @@ int GetCommandInfoCommand::execute(){
 				}
 				out << "help=" << newHelpString << endl;
 				
+				//remove /n from citation string since gui reads line by line
+				string mycitationString = thisCommand->getCitation();
+				string newCitationString = "";
+				for (int i = 0; i < mycitationString.length(); i++) { 
+					if (mycitationString[i] != '\n') { newCitationString += mycitationString[i]; }
+				}
+				out << "citation=" << newCitationString << endl;
+				
 				//outputTypes - makes something like outputTypes=fasta-name-qfile
 				map<string, vector<string> > thisOutputTypes = thisCommand->getOutputFiles();
 				map<string, vector<string> >::iterator itTypes;

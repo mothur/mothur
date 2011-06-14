@@ -119,10 +119,12 @@ CatchAllCommand::CatchAllCommand(string option)  {
 			sabundfile = validParameter.validFile(parameters, "sabund", true);
 			if (sabundfile == "not open") { sabundfile = ""; abort = true; }
 			else if (sabundfile == "not found") { sabundfile = "";  }
+			else { m->setSabundFile(sabundfile); }
 			
 			sharedfile = validParameter.validFile(parameters, "shared", true);
 			if (sharedfile == "not open") { sharedfile = ""; abort = true; }
 			else if (sharedfile == "not found") { sharedfile = "";   }
+			else { m->setSharedFile(sharedfile); }
 			
 			string label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }

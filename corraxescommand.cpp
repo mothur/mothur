@@ -140,12 +140,12 @@ CorrAxesCommand::CorrAxesCommand(string option)  {
 			sharedfile = validParameter.validFile(parameters, "shared", true);
 			if (sharedfile == "not open") { abort = true; }
 			else if (sharedfile == "not found") { sharedfile = ""; }
-			else { inputFileName = sharedfile; }
+			else { inputFileName = sharedfile; m->setSharedFile(sharedfile); }
 			
 			relabundfile = validParameter.validFile(parameters, "relabund", true);
 			if (relabundfile == "not open") { abort = true; }
 			else if (relabundfile == "not found") { relabundfile = ""; }
-			else { inputFileName = relabundfile; }
+			else { inputFileName = relabundfile; m->setRelAbundFile(relabundfile); }
 			
 			metadatafile = validParameter.validFile(parameters, "metadata", true);
 			if (metadatafile == "not open") { abort = true; }

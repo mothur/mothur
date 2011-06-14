@@ -283,7 +283,7 @@ SffInfoCommand::SffInfoCommand(string option)  {
 			}
 			
 			if ((sfftxtFilename == "") && (filenames.size() == 0)) {  
-				//if there is a current fasta file, use it
+				//if there is a current sff file, use it
 				string filename = m->getSFFFile(); 
 				if (filename != "") { filenames.push_back(filename); m->mothurOut("Using " + filename + " as input file for the sff parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("[ERROR]: you must provide a valid sff or sfftxt file."); m->mothurOutEndLine(); abort=true;  }
@@ -901,13 +901,20 @@ int SffInfoCommand::parseSffTxt() {
 		//output file names
 		ofstream outFasta, outQual, outFlow;
 		string outFastaFileName, outQualFileName;
-		string outFlowFileName = outputDir + m->getRootName(m->getSimpleName(sfftxtFilename)) + "flow";
+		string fileRoot = m->getRootName(m->getSimpleName(sfftxtFilename));
+		if (fileRoot.length() > 0) {
+			//rip off last .
+			fileRoot = fileRoot.substr(0, fileRoot.length()-1);
+			fileRoot = m->getRootName(fileRoot);
+		}
+		
+		string outFlowFileName = outputDir + fileRoot + "flow";
 		if (trim) {
-			outFastaFileName = outputDir + m->getRootName(m->getSimpleName(sfftxtFilename)) + "fasta";
-			outQualFileName = outputDir + m->getRootName(m->getSimpleName(sfftxtFilename)) + "qual";
+			outFastaFileName = outputDir + fileRoot + "fasta";
+			outQualFileName = outputDir + fileRoot + "qual";
 		}else{
-			outFastaFileName = outputDir + m->getRootName(m->getSimpleName(sfftxtFilename)) + "raw.fasta";
-			outQualFileName = outputDir + m->getRootName(m->getSimpleName(sfftxtFilename)) + "raw.qual";
+			outFastaFileName = outputDir + fileRoot + "raw.fasta";
+			outQualFileName = outputDir + fileRoot + "raw.qual";
 		}
 		
 		if (fasta)	{ m->openOutputFile(outFastaFileName, outFasta);	outputNames.push_back(outFastaFileName); outputTypes["fasta"].push_back(outFastaFileName); }
