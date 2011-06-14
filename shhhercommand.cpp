@@ -168,11 +168,11 @@ ShhherCommand::ShhherCommand(string option) {
 				ofstream temp;
 
 				//flow.files = 9 character offset
-				compositeFASTAFileName = flowFilesFileName.substr(0, flowFilesFileName.length()-9) + "shhh.fasta";
+				compositeFASTAFileName = flowFilesFileName.substr(0, flowFilesFileName.length()-10) + "shhh.fasta";
 				m->openOutputFile(compositeFASTAFileName, temp);
 				temp.close();
 				
-				compositeNamesFileName = flowFilesFileName.substr(0, flowFilesFileName.length()-9) + "shhh.names";
+				compositeNamesFileName = flowFilesFileName.substr(0, flowFilesFileName.length()-10) + "shhh.names";
 				m->openOutputFile(compositeNamesFileName, temp);
 				temp.close();
 			}
