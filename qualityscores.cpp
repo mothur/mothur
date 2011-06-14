@@ -44,20 +44,22 @@ QualityScores::QualityScores(ifstream& qFile){
 		else{
 			seqName = seqName.substr(1);
 		}
+		
 		string qScoreString = m->getline(qFile);
 		while(qFile.peek() != '>' && qFile.peek() != EOF){
-			qScoreString += ' ' + m->getline(qFile);
+			qScoreString +=  ' ' + m->getline(qFile);
 		}
 		
 		istringstream qScoreStringStream(qScoreString);
 		int count = 0;
 		while(!qScoreStringStream.eof()){
 			if (m->control_pressed) { break; }
-			qScoreStringStream >> score;
+			qScoreStringStream >> score;  m->gobble(qScoreStringStream);
+
 			qScores.push_back(score);
 			count++;
 		}
-		qScores.pop_back();
+		//qScores.pop_back();
 		
 //		string scores = "";
 //		
@@ -102,7 +104,7 @@ QualityScores::QualityScores(ifstream& qFile){
 //		qScores.pop_back();
 
 		seqLength = qScores.size();
-		
+		//cout << "seqlenght = " << 	seqLength << '\t' << count << endl;
 		
 	}
 	catch(exception& e) {
@@ -151,7 +153,10 @@ void QualityScores::printQScores(ofstream& qFile){
 void QualityScores::trimQScores(int start, int end){
 	try {
 		vector<int> hold;
-			
+		
+
+		//cout << seqName << '\t' << start << '\t' << end << '\t' << qScores.size() << endl;
+		//for (int i = 0; i < qScores.size(); i++) { cout << qScores[i] << end; }
 		if(end == -1){		
 			hold = vector<int>(qScores.begin()+start, qScores.end());
 			qScores = hold;		

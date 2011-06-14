@@ -117,11 +117,12 @@ CountSeqsCommand::CountSeqsCommand(string option)  {
 				namefile = m->getNameFile(); 
 				if (namefile != "") { m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current namefile and the name parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}
+			}else { m->setNameFile(namefile); }
 			
 			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") { abort = true; }
 			else if (groupfile == "not found") {  groupfile = "";  }	
+			else { m->setGroupFile(groupfile); }
 			
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = "all"; }

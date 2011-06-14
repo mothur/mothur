@@ -84,7 +84,7 @@ private:
 
 	string queryFileName, referenceFileName, qualFileName, reportFileName, namesFileName, outputDir;
 	double threshold;
-	bool ignoreChimeras, filter;
+	bool ignoreChimeras;
 	int numRefs, processors;
 	int maxLength, totalBases, totalMatches;
 	//ofstream errorSummaryFile, errorSeqFile;

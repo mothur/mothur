@@ -211,22 +211,22 @@ CollectCommand::CollectCommand(string option)  {
 			listfile = validParameter.validFile(parameters, "list", true);
 			if (listfile == "not open") { listfile = ""; abort = true; }
 			else if (listfile == "not found") { listfile = ""; }
-			else {  format = "list"; inputfile = listfile; }
+			else {  format = "list"; inputfile = listfile; m->setListFile(listfile); }
 			
 			sabundfile = validParameter.validFile(parameters, "sabund", true);
 			if (sabundfile == "not open") { sabundfile = ""; abort = true; }	
 			else if (sabundfile == "not found") { sabundfile = ""; }
-			else {  format = "sabund"; inputfile = sabundfile; }
+			else {  format = "sabund"; inputfile = sabundfile; m->setSabundFile(sabundfile); }
 			
 			rabundfile = validParameter.validFile(parameters, "rabund", true);
 			if (rabundfile == "not open") { rabundfile = ""; abort = true; }	
 			else if (rabundfile == "not found") { rabundfile = ""; }
-			else {  format = "rabund"; inputfile = rabundfile; }
+			else {  format = "rabund"; inputfile = rabundfile; m->setRabundFile(rabundfile); }
 			
 			sharedfile = validParameter.validFile(parameters, "shared", true);
 			if (sharedfile == "not open") { sharedfile = ""; abort = true; }	
 			else if (sharedfile == "not found") { sharedfile = ""; }
-			else {  format = "sharedfile"; inputfile = sharedfile; }
+			else {  format = "sharedfile"; inputfile = sharedfile; m->setSharedFile(sharedfile); }
 			
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 

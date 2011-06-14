@@ -224,6 +224,8 @@ AlignCommand::AlignCommand(string option)  {
 							//erase from file list
 							candidateFileNames.erase(candidateFileNames.begin()+i);
 							i--;
+						}else {
+							m->setFastaFile(candidateFileNames[i]);
 						}
 					}
 				}

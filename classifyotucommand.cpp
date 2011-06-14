@@ -166,6 +166,7 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 				else { 	m->mothurOut("You have no current listfile and the list parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}
 			else if (listfile == "not open") { abort = true; }	
+			else { m->setListFile(listfile); }
 			
 			taxfile = validParameter.validFile(parameters, "taxonomy", true);
 			if (taxfile == "not found") {  //if there is a current list file, use it
@@ -174,6 +175,7 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 				else { 	m->mothurOut("You have no current taxonomy file and the taxonomy parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}
 			else if (taxfile == "not open") { abort = true; }
+			else { m->setTaxonomyFile(taxfile); }
 			
 			refTaxonomy = validParameter.validFile(parameters, "reftaxonomy", true);
 			if (refTaxonomy == "not found") { refTaxonomy = ""; m->mothurOut("reftaxonomy is not required, but if given will keep the rankIDs in the summary file static."); m->mothurOutEndLine(); }
@@ -182,10 +184,12 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not open") { abort = true; }	
 			else if (namefile == "not found") { namefile = ""; }
+			else { m->setNameFile(namefile); }
 			
 			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") { abort = true; }	
 			else if (groupfile == "not found") { groupfile = ""; }
+			else { m->setGroupFile(groupfile); }
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...

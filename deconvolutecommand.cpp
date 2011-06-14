@@ -116,7 +116,7 @@ DeconvoluteCommand::DeconvoluteCommand(string option)  {
 				inFastaName = m->getFastaFile(); 
 				if (inFastaName != "") { m->mothurOut("Using " + inFastaName + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}	
+			}else { m->setFastaFile(inFastaName); }	
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
@@ -127,6 +127,7 @@ DeconvoluteCommand::DeconvoluteCommand(string option)  {
 			oldNameMapFName = validParameter.validFile(parameters, "name", true);
 			if (oldNameMapFName == "not open") { abort = true; }
 			else if (oldNameMapFName == "not found"){	oldNameMapFName = "";	}
+			else { m->setNameFile(oldNameMapFName); }
 		}
 
 	}

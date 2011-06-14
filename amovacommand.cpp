@@ -122,17 +122,17 @@ AmovaCommand::AmovaCommand(string option) {
 				phylipFileName = m->getPhylipFile(); 
 				if (phylipFileName != "") { m->mothurOut("Using " + phylipFileName + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current phylip file and the phylip parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}	
+			}else { m->setPhylipFile(phylipFileName); }
 			
 			//check for required parameters
 			designFileName = validParameter.validFile(parameters, "design", true);
-			if (designFileName == "not open") { abort = true; }
+			if (designFileName == "not open") { designFileName = ""; abort = true; }
 			else if (designFileName == "not found") {
 				//if there is a current design file, use it
 				designFileName = m->getDesignFile(); 
 				if (designFileName != "") { m->mothurOut("Using " + designFileName + " as input file for the design parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current design file and the design parameter is required."); m->mothurOutEndLine(); abort = true; }				
-			}	
+			}else { m->setDesignFile(designFileName); }	
 
 			string temp = validParameter.validFile(parameters, "iters", false);
 			if (temp == "not found") { temp = "1000"; }

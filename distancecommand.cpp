@@ -152,6 +152,7 @@ DistanceCommand::DistanceCommand(string option) {
 				m->openInputFile(fastafile, inFASTA);
 				alignDB = SequenceDB(inFASTA); 
 				inFASTA.close();
+				m->setFastaFile(fastafile);
 			}
 			
 			oldfastafile = validParameter.validFile(parameters, "oldfasta", true);
@@ -161,6 +162,7 @@ DistanceCommand::DistanceCommand(string option) {
 			column = validParameter.validFile(parameters, "column", true);
 			if (column == "not found") { column = ""; }
 			else if (column == "not open") { abort = true; }	
+			else { m->setColumnFile(column); }
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	

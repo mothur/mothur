@@ -156,7 +156,7 @@ DegapSeqsCommand::DegapSeqsCommand(string option)  {
 							//erase from file list
 							fastaFileNames.erase(fastaFileNames.begin()+i);
 							i--;
-						}
+						}else { m->setFastaFile(fastaFileNames[i]); }
 					}
 				}
 				

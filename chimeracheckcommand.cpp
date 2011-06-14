@@ -183,6 +183,8 @@ ChimeraCheckCommand::ChimeraCheckCommand(string option)  {
 							//erase from file list
 							fastaFileNames.erase(fastaFileNames.begin()+i);
 							i--;
+						}else {
+							m->setFastaFile(fastaFileNames[i]);
 						}
 					}
 				}
@@ -262,6 +264,8 @@ ChimeraCheckCommand::ChimeraCheckCommand(string option)  {
 							//erase from file list
 							nameFileNames.erase(nameFileNames.begin()+i);
 							i--;
+						}else {
+							m->setNameFile(nameFileNames[i]);
 						}
 					}
 				}

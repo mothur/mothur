@@ -239,6 +239,8 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 							//erase from file list
 							fastaFileNames.erase(fastaFileNames.begin()+i);
 							i--;
+						}else {
+							m->setFastaFile(fastaFileNames[i]);
 						}
 					}
 					
@@ -319,6 +321,8 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 							//erase from file list
 							namefileNames.erase(namefileNames.begin()+i);
 							i--;
+						}else {
+							m->setNameFile(namefileNames[i]);
 						}
 					}
 				}
@@ -375,6 +379,8 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 						//erase from file list
 						groupfileNames.erase(groupfileNames.begin()+i);
 						i--;
+					}else {
+						m->setGroupFile(groupfileNames[i]);
 					}
 				}
 			}

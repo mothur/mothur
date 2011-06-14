@@ -559,7 +559,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 			if(qFileName != ""){
 				currQual = QualityScores(qFile);  m->gobble(qFile);
 			}
-
+			//cout << currSeq.getName() << '\t' << currSeq.getUnaligned().length() << endl;
 			string origSeq = currSeq.getUnaligned();
 			if (origSeq != "") {
 				
@@ -1316,7 +1316,7 @@ int TrimSeqsCommand::stripBarcode(Sequence& seq, QualityScores& qual, int& group
 			if (alignment != NULL) {  delete alignment;  }
 			
 		}
-		
+	
 		return success;
 		
 	}

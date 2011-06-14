@@ -132,13 +132,14 @@ ClusterDoturCommand::ClusterDoturCommand(string option)  {
 					m->mothurOut("You need to provide a phylip file with the cluster.classic command."); m->mothurOutEndLine(); 
 					abort = true; 
 				}	
-			}	
+			}else { m->setPhylipFile(phylipfile); }	
 
 		
 			//check for optional parameter and set defaults
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not open") { abort = true; }	
 			else if (namefile == "not found") { namefile = ""; }
+			else { m->setNameFile(namefile); }
 			
 			string temp;
 			temp = validParameter.validFile(parameters, "precision", false);

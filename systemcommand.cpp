@@ -96,7 +96,7 @@ int SystemCommand::execute(){
 		
 		ifstream in;
 		string filename = "./commandScreen.output";
-		m->openInputFile(filename, in);
+		m->openInputFile(filename, in, "no error");
 		
 		string output = "";
 		while(char c = in.get()){

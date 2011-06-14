@@ -113,8 +113,13 @@ BootSharedCommand::BootSharedCommand(string option) {
 			}
 			
 			sharedfile = validParameter.validFile(parameters, "shared", true);
-			if (sharedfile == "not found") { m->mothurOut("shared is a required parameter.");  m->mothurOutEndLine(); sharedfile = ""; abort = true; }
+			if (sharedfile == "not found") { 
+				sharedfile = m->getSharedFile(); 
+				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current shared file and the shared parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}	
 			else if (sharedfile == "not open") { sharedfile = ""; abort = true; }
+			else { m->setSharedFile(sharedfile); }
 		
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
