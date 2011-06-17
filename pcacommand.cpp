@@ -319,7 +319,6 @@ int PCACommand::process(vector<SharedRAbundFloatVector*>& lookupFloat){
 		vector< vector<double> > matrix(numSamples);
 		vector<double> colMeans(numOTUs);
 		
-				
 		//fill matrix with shared relative abundances, re-center
 		for (int i = 0; i < lookupFloat.size(); i++) {
 			matrix[i].resize(numOTUs, 0);
@@ -427,7 +426,7 @@ void PCACommand::output(string fnameRoot, vector<string> name_list, vector<vecto
 		}
 		pcaData << endl;
 		
-		for(int i=0;i<numEigenValues;i++){
+		for(int i=0;i<name_list.size();i++){
 			pcaData << name_list[i] << '\t';
 			for(int j=0;j<numEigenValues;j++){
 				pcaData << G[i][j] << '\t';
