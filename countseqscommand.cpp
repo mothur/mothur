@@ -147,9 +147,9 @@ int CountSeqsCommand::execute(){
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		ofstream out;
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(namefile)) + ".seq.count";
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(namefile)) + "seq.count";
 		m->openOutputFile(outputFileName, out); outputTypes["summary"].push_back(outputFileName);
-		out << "Representative Sequence\t total\t";
+		out << "Representative_Sequence\ttotal\t";
 		
 		GroupMap* groupMap;
 		if (groupfile != "") { 
