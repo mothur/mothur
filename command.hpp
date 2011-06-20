@@ -30,6 +30,7 @@ class Command {
 		virtual string getCommandCategory() = 0;
 		virtual string getHelpString() = 0;
 		virtual string getCitation() = 0;
+		virtual string getDescription() = 0;
 		
 		virtual map<string, vector<string> > getOutputFiles() { return outputTypes; }
 		virtual vector<string> setParameters() = 0; //to fill parameters

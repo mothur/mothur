@@ -28,7 +28,8 @@ public:
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Summary.shared"; }
-	
+	string getDescription()		{ return "generate a summary file containing calculator values for each line in the OTU data and for all possible comparisons between groups"; }
+
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	
 	

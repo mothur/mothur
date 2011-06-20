@@ -30,7 +30,8 @@ public:
 	string getCommandCategory()		{ return "General";		}
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Sub.sample"; }
-	
+	string getDescription()		{ return "get a sampling of sequences from a list, shared, rabund, sabund or fasta file"; }
+
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	
 	

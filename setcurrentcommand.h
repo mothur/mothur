@@ -25,7 +25,8 @@ public:
 	string getCommandCategory()		{ return "General";		}
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Set.current"; }
-	
+	string getDescription()		{ return "set current files for mothur"; }
+
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	
 	

@@ -25,7 +25,8 @@ class RemoveSeqsCommand : public Command {
 		string getCommandCategory()		{ return "Sequence Processing";		}
 		string getHelpString();	
 		string getCitation() { return "http://www.mothur.org/wiki/Remove.seqs"; }
-	
+		string getDescription()		{ return "removes sequences from a list, fasta, name, group, alignreport, quality or taxonomy file"; }
+
 		int execute(); 
 		void help() { m->mothurOut(getHelpString()); }	
 	

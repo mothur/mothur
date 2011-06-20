@@ -26,6 +26,8 @@ public:
 	string getCommandName()			{ return "get.otulist";				}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
 	string getCitation() { return "http://www.mothur.org/wiki/Get.otulist"; }
+	string getDescription()		{ return "lists each OTU number and the sequence contained in that OTU"; }
+
 	string getHelpString();	
 	
 	int execute(); 

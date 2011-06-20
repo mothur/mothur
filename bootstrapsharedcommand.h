@@ -32,6 +32,7 @@ public:
 	string getCommandCategory()		{ return "Hidden";				}
 	string getHelpString();	
 	string getCitation() { return "no citation"; }
+	string getDescription()		{ return "bootstrap.shared"; }
 
 	
 	int execute(); 

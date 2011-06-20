@@ -22,11 +22,12 @@ public:
 	~ConcensusCommand() {}
 	
 	vector<string> setParameters();
-	string getCommandName()			{ return "concensus";	}
+	string getCommandName()			{ return "consensus";	}
 	string getCommandCategory()		{ return "Hidden";		}
 	string getHelpString();	
 	string getCitation() { return "no citation"; }
-	
+	string getDescription()		{ return "consensus"; }
+
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	
 	

@@ -24,7 +24,8 @@ public:
 	string getCommandCategory()		{ return "Sequence Processing";		}
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Screen.seqs"; }
-	
+	string getDescription()		{ return "enables you to keep sequences that fulfill certain user defined criteria"; }
+
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	
 	

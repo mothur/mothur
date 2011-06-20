@@ -30,6 +30,8 @@ public:
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Heatmap.bin"; }
+	string getDescription()		{ return "generate a heatmap where the color represents the relative abundanceof an OTU"; }
+
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

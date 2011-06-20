@@ -30,6 +30,7 @@ public:
 	string getCommandCategory()		{ return "Clustering";			}
 	string getHelpString();	
 	string getCitation() { return "Schloss PD, Westcott SL (2011). Assessing and improving methods used in OTU-based approaches for 16S rRNA gene sequence analysis. Appl Environ Microbiol. \nhttp://www.mothur.org/wiki/Cluster.split"; }
+	string getDescription()		{ return "splits your sequences by distance or taxonomy then clusters into OTUs"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

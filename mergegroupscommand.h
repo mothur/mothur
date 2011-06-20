@@ -26,6 +26,8 @@ public:
 	string getCommandCategory()		{ return "General";			}
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Merge.groups"; }
+	string getDescription()		{ return "reads shared file and a design file and merges the groups in the shared file that are in the same grouping in the design file"; }
+
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

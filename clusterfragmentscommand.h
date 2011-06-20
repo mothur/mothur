@@ -39,6 +39,7 @@ public:
 	string getCommandCategory()		{ return "Sequence Processing";		}
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Cluster.fragments"; }
+	string getDescription()		{ return "creates a namesfile with sequences that are a fragment of a larger sequence"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

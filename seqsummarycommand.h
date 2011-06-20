@@ -24,6 +24,7 @@ public:
 	string getCommandCategory()		{ return "Sequence Processing";		}
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Summary.seqs"; }
+	string getDescription()		{ return "summarize the quality of sequences in an unaligned or aligned fasta file"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }		

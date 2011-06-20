@@ -28,7 +28,8 @@ public:
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
 	string getHelpString();	
 	string getCitation() { return "Magurran AE (2004). Measuring biological diversity. Blackwell Pub.: Malden, Ma. \nhttp://www.mothur.org/wiki/Rarefaction.single"; }
-	
+	string getDescription()		{ return "generate intra-sample rarefaction curves using a re-sampling without replacement approach"; }
+
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	
 	

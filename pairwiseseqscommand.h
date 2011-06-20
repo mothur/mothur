@@ -30,7 +30,8 @@ public:
 	string getCommandCategory()		{ return "Sequence Processing"; }
 	string getHelpString();	
 	string getCitation() { return "Needleman SB, Wunsch CD (1970). A general method applicable to the search for similarities in the amino acid sequence of two proteins. J Mol Biol 48: 443-53. [ for needleman ]\nGotoh O (1982). An improved algorithm for matching biological sequences. J Mol Biol 162: 705-8. [ for gotoh ] \nhttp://www.mothur.org/wiki/Pairwise.seqs"; }
-	
+	string getDescription()		{ return "calculates pairwise distances from an unaligned fasta file"; }
+
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	
 	

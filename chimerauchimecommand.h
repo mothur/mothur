@@ -27,7 +27,7 @@ public:
 	string getCommandCategory()		{ return "Sequence Processing"; }
 	string getHelpString();	
 	string getCitation() { return "uchime by Robert C. Edgar\nhttp://drive5.com/uchime\nThis code is donated to the public domain.\nhttp://www.mothur.org/wiki/Chimera.uchime"; }
-	
+	string getDescription()		{ return "detect chimeric sequences"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }		

@@ -121,6 +121,8 @@ int GetCommandInfoCommand::execute(){
 				}
 				out << "citation=" << newCitationString << endl;
 				
+				out << "description=" << thisCommand->getDescription() << endl;
+				
 				//outputTypes - makes something like outputTypes=fasta-name-qfile
 				map<string, vector<string> > thisOutputTypes = thisCommand->getOutputFiles();
 				map<string, vector<string> >::iterator itTypes;

@@ -32,6 +32,8 @@ public:
 	string getCommandCategory()		{ return "Sequence Processing";		}
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Split.group"; }
+	string getDescription()		{ return "split a name or fasta file by group"; }
+
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

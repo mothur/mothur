@@ -26,6 +26,8 @@ public:
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Get.label"; }
+	string getDescription()		{ return "outputs labels"; }
+
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

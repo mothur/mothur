@@ -27,7 +27,8 @@ public:
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Venn"; }
-	
+	string getDescription()		{ return "generates a Venn diagram from data provided in a shared file"; }
+
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	
 	

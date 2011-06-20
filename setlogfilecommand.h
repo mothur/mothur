@@ -27,7 +27,8 @@ public:
 	string getCommandCategory()		{ return "General";			}
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Set.logfile"; }
-	
+	string getDescription()		{ return "set logfile name"; }
+
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	
 	

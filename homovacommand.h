@@ -28,7 +28,8 @@ public:
 	string getCommandCategory()		{ return "Hypothesis Testing";		}
 	string getHelpString();	
 	string getCitation() { return "Stewart CN, Excoffier L (1996). Assessing population genetic structure and variability with RAPD data: Application to Vaccinium macrocarpon (American Cranberry). J Evol Biol 9: 153-71. \nhttp://www.mothur.org/wiki/Homova"; }
-	
+	string getDescription()		{ return "homova"; }
+
 	int execute();
 	void help() { m->mothurOut(getHelpString()); }	
 	

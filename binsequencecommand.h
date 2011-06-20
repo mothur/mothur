@@ -29,7 +29,7 @@ public:
 	string getCommandCategory()		{ return "Sequence Processing"; }
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Bin.seqs"; }
-
+	string getDescription()		{ return "maps sequences to otus"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }		

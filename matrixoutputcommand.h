@@ -33,6 +33,8 @@ public:
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Dist.shared"; }
+	string getDescription()		{ return "generate a distance matrix that describes the dissimilarity among multiple groups"; }
+
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	
