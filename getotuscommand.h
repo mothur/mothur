@@ -29,6 +29,8 @@ public:
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Get.otus"; }
+	string getDescription()		{ return "outputs a new list file containing the otus containing sequences from the groups specified"; }
+
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

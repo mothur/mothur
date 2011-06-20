@@ -28,7 +28,8 @@ public:
 	string getCommandCategory()		{ return "Clustering";		}
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Phylotype"; }
-	
+	string getDescription()		{ return "cluster your sequences into OTUs based on their classifications"; }
+
 	int execute();
 	void help() { m->mothurOut(getHelpString()); }
 	

@@ -37,6 +37,7 @@ public:
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Split.abund"; }
+	string getDescription()		{ return "split a list, name, group or fasta file based on abundance"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

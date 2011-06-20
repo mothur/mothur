@@ -50,6 +50,8 @@ public:
 	string getCommandCategory()		{ return "Sequence Processing";		}
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Seq.error"; }
+	string getDescription()		{ return "seq.error"; }
+
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

@@ -27,6 +27,8 @@ public:
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Get.groups"; }
+	string getDescription()		{ return "gets sequences from a list, fasta, name, group or taxonomy file from a given group or set of groups"; }
+
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

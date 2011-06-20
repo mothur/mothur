@@ -41,6 +41,8 @@ class AlignCheckCommand : public Command {
 		string getCommandCategory()		{ return "Sequence Processing";		}
 		string getHelpString();	
 		string getCitation() { return "http://www.mothur.org/wiki/Align.check"; }
+		string getDescription()		{ return "calculate the number of potentially misaligned bases in a 16S rRNA gene sequence alignment"; }
+
 	
 		int execute(); 
 		void help() { m->mothurOut(getHelpString()); }	

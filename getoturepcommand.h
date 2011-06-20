@@ -45,6 +45,8 @@ public:
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Get.oturep"; }
+	string getDescription()		{ return "gets a representative sequence for each OTU"; }
+
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

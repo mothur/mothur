@@ -28,7 +28,8 @@ public:
 	string getCommandCategory()		{ return "Hidden";		}
 	string getHelpString() { return "The quit command will terminate mothur and should be in the following format: quit() or quit. \n"; }	
 	string getCitation() { return "no citation"; }
-	
+	string getDescription()		{ return "quit"; }
+
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	
 	

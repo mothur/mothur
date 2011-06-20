@@ -27,7 +27,7 @@ public:
 	string getCommandCategory()		{ return "Sequence Processing"; }
 	string getHelpString();	
 	string getCitation() { return "Haas BJ, Gevers D, Earl A, Feldgarden M, Ward DV, Giannokous G, Ciulla D, Tabbaa D, Highlander SK, Sodergren E, Methe B, Desantis TZ, Petrosino JF, Knight R, Birren BW (2011). Chimeric 16S rRNA sequence formation and detection in Sanger and 454-pyrosequenced PCR amplicons. Genome Res. \nhttp://www.mothur.org/wiki/Chimera.slayer"; }
-
+	string getDescription()		{ return "detect chimeric sequences"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }		

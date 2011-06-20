@@ -25,7 +25,8 @@ class RemoveLineageCommand : public Command {
 		string getCommandCategory()		{ return "Phylotype Analysis";		}
 		string getHelpString();	
 		string getCitation() { return "http://www.mothur.org/wiki/Remove.lineage"; }
-	
+		string getDescription()		{ return "removes sequences from a list, fasta, name, group, alignreport or taxonomy file from a given taxonomy or set of taxonomies"; }
+
 		int execute(); 
 		void help() { m->mothurOut(getHelpString()); }	
 	

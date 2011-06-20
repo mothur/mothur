@@ -30,7 +30,8 @@ class GetSharedOTUCommand : public Command {
 		string getRequiredCommand()		{ return "none";					}
 		string getHelpString();	
 		string getCitation() { return "http://www.mothur.org/wiki/Get.sharedseqs"; }
-	
+		string getDescription()		{ return "identifies sequences that are either unique or shared by specific groups"; }
+
 		int execute(); 
 		void help() { m->mothurOut(getHelpString()); }	
 	

@@ -27,7 +27,8 @@ class ChopSeqsCommand : public Command {
 		string getCommandCategory()		{ return "Sequence Processing"; }
 		string getHelpString();	
 		string getCitation() { return "http://www.mothur.org/wiki/Chops.seqs"; }
-
+		string getDescription()		{ return "trim sequence length"; }
+	
 		int execute(); 
 		void help() { m->mothurOut(getHelpString()); }		
 	

@@ -23,6 +23,8 @@ public:
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Get.group"; }
+	string getDescription()		{ return "outputs group names"; }
+
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

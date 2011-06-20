@@ -29,6 +29,8 @@ public:
 	string getCommandCategory()		{ return "Hidden";				}
 	string getHelpString();	
 	string getCitation() { return "no citation"; }
+	string getDescription()		{ return "get.commandinfo"; }
+	
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

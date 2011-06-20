@@ -28,6 +28,7 @@ public:
 	string getCommandCategory()		{ return "Hypothesis Testing";		}
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Deunique.tree"; }
+	string getDescription()		{ return "add the redundant sequence names back into a tree of unique sequences"; }
 	
 	int execute();
 	void help() { m->mothurOut(getHelpString()); }

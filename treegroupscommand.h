@@ -41,6 +41,8 @@ public:
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Tree.shared"; }
+	string getDescription()		{ return "generate a tree file that describes the dissimilarity among groups"; }
+
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

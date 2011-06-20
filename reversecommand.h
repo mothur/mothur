@@ -23,6 +23,8 @@ public:
 	string getCommandCategory()		{ return "Sequence Processing";		}
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Reverse.seqs"; }
+	string getDescription()		{ return "outputs a fasta file containing the reverse-complements"; }
+
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

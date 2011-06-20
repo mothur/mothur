@@ -24,7 +24,8 @@ public:
 	string getCommandCategory()		{ return "Sequence Processing";		}
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Degap.seqs"; }
-	
+	string getDescription()		{ return "removes gap characters from sequences"; }
+
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	
 	

@@ -30,7 +30,8 @@ class UnifracWeightedCommand : public Command {
 		string getCommandCategory()		{ return "Hypothesis Testing";		}
 		string getHelpString();	
 		string getCitation() { return "Lozupone CA, Hamady M, Kelley ST, Knight R (2007). Quantitative and qualitative beta diversity measures lead to different insights into factors that structure microbial communities. Appl Environ Microbiol 73: 1576-85. \nhttp://www.mothur.org/wiki/Unifrac.weighted"; }
-	
+		string getDescription()		{ return "generic tests that describes whether two or more communities have the same structure"; }
+
 		int execute();
 		void help() { m->mothurOut(getHelpString()); }
 	

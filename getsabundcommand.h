@@ -26,7 +26,8 @@ public:
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Get.sabund"; }
-	
+	string getDescription()		{ return "creates a sabund file"; }
+
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	
 	

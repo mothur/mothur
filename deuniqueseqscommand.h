@@ -25,6 +25,8 @@ public:
 	string getCommandCategory()		{ return "Sequence Processing";		}
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Deunique.seqs"; }
+	string getDescription()		{ return "reverse of the unique.seqs command, and creates a fasta file from a fasta and name file"; }
+
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

@@ -25,7 +25,8 @@ public:
 	string getCommandCategory()		{ return "Sequence Processing";		}
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Count.seqs"; }
-	
+	string getDescription()		{ return "counts the number of sequences represented by each unique sequence in a namesfile"; }
+
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	
 	

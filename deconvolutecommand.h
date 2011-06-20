@@ -28,6 +28,8 @@ public:
 	string getCommandCategory()		{ return "Sequence Processing";		}
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Unique.seqs"; }
+	string getDescription()		{ return "creates a fasta containing the unique sequences as well as a namesfile with the names each sequence represents"; }
+
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

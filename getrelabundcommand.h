@@ -27,6 +27,8 @@ public:
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Get.relabund"; }
+	string getDescription()		{ return "calculates the relative abundance of each OTU in a sample"; }
+
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

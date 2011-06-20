@@ -26,7 +26,8 @@ public:
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
 	string getHelpString();	
 	string getCitation() { return "Schloss PD, Westcott SL (2011). Assessing and improving methods used in OTU-based approaches for 16S rRNA gene sequence analysis. Appl Environ Microbiol. \nhttp://www.mothur.org/wiki/Sens.spec"; }
-	
+	string getDescription()		{ return "sens.spec"; }
+
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	
 	

@@ -71,7 +71,8 @@ public:
 	string getCommandCategory()		{ return "Sequence Processing";		}
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Sffinfo"; }
-	
+	string getDescription()		{ return "extract sequences reads from a .sff file"; }
+
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	
 	

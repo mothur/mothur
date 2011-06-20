@@ -26,6 +26,8 @@ public:
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Normalize.shared"; }
+	string getDescription()		{ return "normalize samples in a shared or relabund file"; }
+
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	
