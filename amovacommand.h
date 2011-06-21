@@ -25,7 +25,7 @@ public:
 	string getCommandCategory()		{ return "Hypothesis Testing";		}
 	string getHelpString();	
 	string getCitation() { return "Anderson MJ (2001). A new method for non-parametric multivariate analysis of variance. Austral Ecol 26: 32-46.\nhttp://www.mothur.org/wiki/Amova"; }
-	string getDescription()		{ return "calculate AMOVA statistic"; }
+	string getDescription()		{ return "analysis of molecular variance"; }
 	
 	int execute();
 	void help() { m->mothurOut(getHelpString()); }

@@ -26,7 +26,7 @@ class SystemCommand : public Command {
 		string getCommandCategory()		{ return "General";		}
 		string getHelpString();	
 		string getCitation() { return "http://www.mothur.org/wiki/System"; }
-		string getDescription()		{ return "excute system commands from within mothur"; }
+		string getDescription()		{ return "execute system commands from within mothur"; }
 
 		int execute(); 
 		void help() { m->mothurOut(getHelpString()); }	

@@ -27,7 +27,7 @@ public:
 	string getCommandCategory()		{ return "Hypothesis Testing";		}
 	string getHelpString();	
 	string getCitation() { return "Clarke, K. R. (1993). Non-parametric multivariate analysis of changes in community structure. _Australian Journal of Ecology_ 18, 117-143.\nhttp://www.mothur.org/wiki/Anosim"; }
-	string getDescription()		{ return "anosim"; }
+	string getDescription()		{ return "analysis of similarity"; }
 	
 	int execute();
 	void help() { m->mothurOut(getHelpString()); }
