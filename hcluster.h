@@ -23,7 +23,7 @@ class HCluster {
 public:
 	HCluster(RAbundVector*, ListVector*, string, string, NameAssignment*, float);
 	~HCluster(){};
-    bool update(int, int, float);
+    double update(int, int, float);
 	void setMapWanted(bool m); 
 	map<string, int> getSeqtoBin()  {  return seq2Bin;	}
 	vector<seqDist> getSeqs();

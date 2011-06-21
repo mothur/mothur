@@ -259,7 +259,7 @@ void HCluster::updateArrayandLinkTable() {
 	}
 }
 /***********************************************************************/
-bool HCluster::update(int row, int col, float distance){
+double HCluster::update(int row, int col, float distance){
 	try {
 		bool cluster = false;
 		smallRow = row;
@@ -296,7 +296,7 @@ bool HCluster::update(int row, int col, float distance){
 			}
 		}
 		
-		return cluster;
+		return cutoff;
 		//printInfo();
 	}
 	catch(exception& e) {
@@ -430,7 +430,6 @@ vector<seqDist> HCluster::getSeqsFNNN(){
 	}
 }
 //**********************************************************************************************************************
-//don't need cutoff since processFile removes all distance above cutoff and changes names to indexes
 vector<seqDist> HCluster::getSeqsAN(){
 	try {
 		int firstName, secondName;
@@ -572,7 +571,9 @@ int HCluster::combineFile() {
 							smallRowColValues[0][mergedMin[count].seq1] = mergedMin[count].dist;
 						}else { //if no, write to temp file
 							//outputString += toString(mergedMin[count].seq1) + '\t' + toString(mergedMin[count].seq2) + '\t' + toString(mergedMin[count].dist) + '\n';
-							out << mergedMin[count].seq1 << '\t' << mergedMin[count].seq2 << '\t' << mergedMin[count].dist << endl;
+							//if (mergedMin[count].dist < cutoff) { 
+								out << mergedMin[count].seq1 << '\t' << mergedMin[count].seq2 << '\t' << mergedMin[count].dist << endl;
+							//}
 						}
 						count++;
 					}else{   break;	}
@@ -592,7 +593,9 @@ int HCluster::combineFile() {
 			   
 			   }else { //if no, write to temp file
 					//outputString += toString(first) + '\t' + toString(second) + '\t' + toString(dist) + '\n';
-					out << first << '\t' << second << '\t' << dist << endl;
+				   //if (dist < cutoff) {
+					   out << first << '\t' << second << '\t' << dist << endl;
+				   //}
 			   }
 			}
 			
@@ -617,7 +620,9 @@ int HCluster::combineFile() {
 				smallRowColValues[0][mergedMin[count].seq1] = mergedMin[count].dist;
 				
 			}else { //if no, write to temp file
-				out << mergedMin[count].seq1 << '\t' << mergedMin[count].seq2 << '\t' << mergedMin[count].dist << endl;
+				//if (mergedMin[count].dist < cutoff) {
+					out << mergedMin[count].seq1 << '\t' << mergedMin[count].seq2 << '\t' << mergedMin[count].dist << endl;
+				//}
 			}
 			count++;
 		}
@@ -650,9 +655,17 @@ int HCluster::combineFile() {
 				
 				seqDist temp(clusterArray[smallRow].parent, itMerge->first, average);
 				mergedMin.push_back(temp);
+			}else {  
+				//can't find value so update cutoff
+				if (cutoff > itMerge->second) { cutoff = itMerge->second; }
 			}
 		}
-
+		
+		//update cutoff
+		for(itMerge = smallRowColValues[1].begin(); itMerge != smallRowColValues[1].end(); itMerge++) {	
+			if (cutoff > itMerge->second) { cutoff = itMerge->second; }
+		}
+		
 		//sort merged values
 		sort(mergedMin.begin(), mergedMin.end(), compareSequenceDistance);	
 		

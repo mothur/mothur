@@ -310,10 +310,16 @@ int HClusterCommand::execute(){
 				return 0;  
 		}
 
+		float saveCutoff = cutoff;
 		
 		while (seqs.size() != 0){
 		
 			seqs = cluster->getSeqs();
+			
+			//to account for cutoff change in average neighbor
+			if (seqs.size() != 0) {
+				if (seqs[0].dist > cutoff) { break; }
+			}
 			
 			if (m->control_pressed) {  
 				delete cluster;
@@ -327,7 +333,7 @@ int HClusterCommand::execute(){
 			for (int i = 0; i < seqs.size(); i++) {  //-1 means skip me
 				
 				if (seqs[i].seq1 != seqs[i].seq2) {
-					cluster->update(seqs[i].seq1, seqs[i].seq2, seqs[i].dist);
+					cutoff = cluster->update(seqs[i].seq1, seqs[i].seq2, seqs[i].dist);
 					
 					if (m->control_pressed) {  
 						delete cluster;
@@ -386,6 +392,14 @@ int HClusterCommand::execute(){
 		if (m->control_pressed) {  
 			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } outputTypes.clear();
 			return 0;  
+		}
+		
+		
+		if (saveCutoff != cutoff) { 
+			if (hard)	{  saveCutoff = m->ceilDist(saveCutoff, precision);	}
+			else		{	saveCutoff = m->roundDist(saveCutoff, precision);  }
+			
+			m->mothurOut("changed cutoff to " + toString(cutoff)); m->mothurOutEndLine(); 
 		}
 		
 		//set list file as new current listfile

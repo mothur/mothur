@@ -509,167 +509,202 @@ int ChimeraUchimeCommand::driver(string outputFName, string filename, string acc
 		strcpy(tempUchime, "./uchime "); 
 		cPara.push_back(tempUchime);
 		
-		char* tempIn = new char[7];  
-		strcpy(tempIn, "--input"); 
+		char* tempIn = new char[8]; 
+		*tempIn = '\0'; strncat(tempIn, "--input", 7);
+		//strcpy(tempIn, "--input"); 
 		cPara.push_back(tempIn);
-		char* temp = new char[filename.length()];
-		strcpy(temp, filename.c_str());
+		char* temp = new char[filename.length()+1];
+		*temp = '\0'; strncat(temp, filename.c_str(), filename.length());
+		//strcpy(temp, filename.c_str());
 		cPara.push_back(temp);
 		
 		//are you using a reference file
 		if (templatefile != "self") {
-						
 			//add reference file
-			char* tempRef = new char[4]; 
-			strcpy(tempRef, "--db"); 
+			char* tempRef = new char[5]; 
+			//strcpy(tempRef, "--db"); 
+			*tempRef = '\0'; strncat(tempRef, "--db", 4);
 			cPara.push_back(tempRef);  
-			char* tempR = new char[templatefile.length()];
-			strcpy(tempR, templatefile.c_str());
+			char* tempR = new char[templatefile.length()+1];
+			//strcpy(tempR, templatefile.c_str());
+			*tempR = '\0'; strncat(tempR, templatefile.c_str(), templatefile.length());
 			cPara.push_back(tempR);
 		}
 		
-		char* tempO = new char[11]; 
-		strcpy(tempO, "--uchimeout"); 
+		char* tempO = new char[12]; 
+		*tempO = '\0'; strncat(tempO, "--uchimeout", 11);
+		//strcpy(tempO, "--uchimeout"); 
 		cPara.push_back(tempO);
-		char* tempout = new char[outputFName.length()];
-		strcpy(tempout, outputFName.c_str());
+		char* tempout = new char[outputFName.length()+1];
+		//strcpy(tempout, outputFName.c_str());
+		*tempout = '\0'; strncat(tempout, outputFName.c_str(), outputFName.length());
 		cPara.push_back(tempout);
 		
 		if (chimealns) {
-			char* tempA = new char[12]; 
-			strcpy(tempA, "--uchimealns"); 
+			char* tempA = new char[13]; 
+			*tempA = '\0'; strncat(tempA, "--uchimealns", 12);
+			//strcpy(tempA, "--uchimealns"); 
 			cPara.push_back(tempA);
-			char* tempa = new char[alns.length()];
-			strcpy(tempa, alns.c_str());
+			char* tempa = new char[alns.length()+1];
+			//strcpy(tempa, alns.c_str());
+			*tempa = '\0'; strncat(tempa, alns.c_str(), alns.length());
 			cPara.push_back(tempa);
 		}
 		
 		if (useAbskew) {
-			char* tempskew = new char[8]; 
-			strcpy(tempskew, "--abskew"); 
+			char* tempskew = new char[9];
+			*tempskew = '\0'; strncat(tempskew, "--abskew", 8);
+			//strcpy(tempskew, "--abskew"); 
 			cPara.push_back(tempskew);
-			char* tempSkew = new char[abskew.length()];
-			strcpy(tempSkew, abskew.c_str());
+			char* tempSkew = new char[abskew.length()+1];
+			//strcpy(tempSkew, abskew.c_str());
+			*tempSkew = '\0'; strncat(tempSkew, abskew.c_str(), abskew.length());
 			cPara.push_back(tempSkew);
 		}
 		
 		if (useMinH) {
-			char* tempminh = new char[6]; 
-			strcpy(tempminh, "--minh"); 
+			char* tempminh = new char[7]; 
+			*tempminh = '\0'; strncat(tempminh, "--minh", 6);
+			//strcpy(tempminh, "--minh"); 
 			cPara.push_back(tempminh);
-			char* tempMinH = new char[minh.length()];
-			strcpy(tempMinH, minh.c_str());
+			char* tempMinH = new char[minh.length()+1];
+			*tempMinH = '\0'; strncat(tempMinH, minh.c_str(), minh.length());
+			//strcpy(tempMinH, minh.c_str());
 			cPara.push_back(tempMinH);
 		}
 		
 		if (useMindiv) {
-			char* tempmindiv = new char[8]; 
-			strcpy(tempmindiv, "--mindiv"); 
+			char* tempmindiv = new char[9]; 
+			*tempmindiv = '\0'; strncat(tempmindiv, "--mindiv", 8);
+			//strcpy(tempmindiv, "--mindiv"); 
 			cPara.push_back(tempmindiv);
-			char* tempMindiv = new char[mindiv.length()];
-			strcpy(tempMindiv, mindiv.c_str());
+			char* tempMindiv = new char[mindiv.length()+1];
+			*tempMindiv = '\0'; strncat(tempMindiv, mindiv.c_str(), mindiv.length());
+			//strcpy(tempMindiv, mindiv.c_str());
 			cPara.push_back(tempMindiv);
 		}
 		
 		if (useXn) {
-			char* tempxn = new char[4]; 
-			strcpy(tempxn, "--xn"); 
+			char* tempxn = new char[5]; 
+			//strcpy(tempxn, "--xn"); 
+			*tempxn = '\0'; strncat(tempxn, "--xn", 4);
 			cPara.push_back(tempxn);
-			char* tempXn = new char[xn.length()];
-			strcpy(tempXn, xn.c_str());
+			char* tempXn = new char[xn.length()+1];
+			//strcpy(tempXn, xn.c_str());
+			*tempXn = '\0'; strncat(tempXn, xn.c_str(), xn.length());
 			cPara.push_back(tempXn);
 		}
 		
 		if (useDn) {
-			char* tempdn = new char[4]; 
-			strcpy(tempdn, "--dn"); 
+			char* tempdn = new char[5]; 
+			//strcpy(tempdn, "--dn"); 
+			*tempdn = '\0'; strncat(tempdn, "--dn", 4);
 			cPara.push_back(tempdn);
-			char* tempDn = new char[dn.length()];
-			strcpy(tempDn, dn.c_str());
+			char* tempDn = new char[dn.length()+1];
+			*tempDn = '\0'; strncat(tempDn, dn.c_str(), dn.length());
+			//strcpy(tempDn, dn.c_str());
 			cPara.push_back(tempDn);
 		}
 		
 		if (useXa) {
-			char* tempxa = new char[4]; 
-			strcpy(tempxa, "--xa"); 
+			char* tempxa = new char[5]; 
+			//strcpy(tempxa, "--xa"); 
+			*tempxa = '\0'; strncat(tempxa, "--xa", 4);
 			cPara.push_back(tempxa);
-			char* tempXa = new char[xa.length()];
-			strcpy(tempXa, xa.c_str());
+			char* tempXa = new char[xa.length()+1];
+			*tempXa = '\0'; strncat(tempXa, xa.c_str(), xa.length());
+			//strcpy(tempXa, xa.c_str());
 			cPara.push_back(tempXa);
 		}
 		
 		if (useChunks) {
-			char* tempchunks = new char[8]; 
-			strcpy(tempchunks, "--chunks"); 
+			char* tempchunks = new char[9]; 
+			//strcpy(tempchunks, "--chunks"); 
+			*tempchunks = '\0'; strncat(tempchunks, "--chunks", 8);
 			cPara.push_back(tempchunks);
-			char* tempChunks = new char[chunks.length()];
-			strcpy(tempChunks, chunks.c_str());
+			char* tempChunks = new char[chunks.length()+1];
+			*tempChunks = '\0'; strncat(tempChunks, chunks.c_str(), chunks.length());
+			//strcpy(tempChunks, chunks.c_str());
 			cPara.push_back(tempChunks);
 		}
 		
 		if (useMinchunk) {
-			char* tempminchunk = new char[10]; 
-			strcpy(tempminchunk, "--minchunk"); 
+			char* tempminchunk = new char[11]; 
+			//strcpy(tempminchunk, "--minchunk"); 
+			*tempminchunk = '\0'; strncat(tempminchunk, "--minchunk", 10);
 			cPara.push_back(tempminchunk);
-			char* tempMinchunk = new char[minchunk.length()];
-			strcpy(tempMinchunk, minchunk.c_str());
+			char* tempMinchunk = new char[minchunk.length()+1];
+			*tempMinchunk = '\0'; strncat(tempMinchunk, minchunk.c_str(), minchunk.length());
+			//strcpy(tempMinchunk, minchunk.c_str());
 			cPara.push_back(tempMinchunk);
 		}
 		
 		if (useIdsmoothwindow) {
-			char* tempidsmoothwindow = new char[16]; 
-			strcpy(tempidsmoothwindow, "--idsmoothwindow"); 
+			char* tempidsmoothwindow = new char[17]; 
+			*tempidsmoothwindow = '\0'; strncat(tempidsmoothwindow, "--idsmoothwindow", 16);
+			//strcpy(tempidsmoothwindow, "--idsmoothwindow"); 
 			cPara.push_back(tempidsmoothwindow);
-			char* tempIdsmoothwindow = new char[idsmoothwindow.length()];
-			strcpy(tempIdsmoothwindow, idsmoothwindow.c_str());
+			char* tempIdsmoothwindow = new char[idsmoothwindow.length()+1];
+			*tempIdsmoothwindow = '\0'; strncat(tempIdsmoothwindow, idsmoothwindow.c_str(), idsmoothwindow.length());
+			//strcpy(tempIdsmoothwindow, idsmoothwindow.c_str());
 			cPara.push_back(tempIdsmoothwindow);
 		}
 		
 		if (useMinsmoothid) {
-			char* tempminsmoothid = new char[13]; 
-			strcpy(tempminsmoothid, "--minsmoothid"); 
+			char* tempminsmoothid = new char[14]; 
+			//strcpy(tempminsmoothid, "--minsmoothid"); 
+			*tempminsmoothid = '\0'; strncat(tempminsmoothid, "--minsmoothid", 13);
 			cPara.push_back(tempminsmoothid);
-			char* tempMinsmoothid = new char[minsmoothid.length()];
-			strcpy(tempMinsmoothid, minsmoothid.c_str());
+			char* tempMinsmoothid = new char[minsmoothid.length()+1];
+			*tempMinsmoothid = '\0'; strncat(tempMinsmoothid, minsmoothid.c_str(), minsmoothid.length());
+			//strcpy(tempMinsmoothid, minsmoothid.c_str());
 			cPara.push_back(tempMinsmoothid);
 		}
 		
 		if (useMaxp) {
-			char* tempmaxp = new char[6]; 
-			strcpy(tempmaxp, "--maxp"); 
+			char* tempmaxp = new char[7]; 
+			//strcpy(tempmaxp, "--maxp"); 
+			*tempmaxp = '\0'; strncat(tempmaxp, "--maxp", 6);
 			cPara.push_back(tempmaxp);
-			char* tempMaxp = new char[maxp.length()];
-			strcpy(tempMaxp, maxp.c_str());
+			char* tempMaxp = new char[maxp.length()+1];
+			*tempMaxp = '\0'; strncat(tempMaxp, maxp.c_str(), maxp.length());
+			//strcpy(tempMaxp, maxp.c_str());
 			cPara.push_back(tempMaxp);
 		}
 		
 		if (!skipgaps) {
-			char* tempskipgaps = new char[14]; 
-			strcpy(tempskipgaps, "--[no]skipgaps"); 
+			char* tempskipgaps = new char[15]; 
+			//strcpy(tempskipgaps, "--[no]skipgaps");
+			*tempskipgaps = '\0'; strncat(tempskipgaps, "--[no]skipgaps", 14);
 			cPara.push_back(tempskipgaps);
 		}
 		
 		if (!skipgaps2) {
-			char* tempskipgaps2 = new char[15]; 
-			strcpy(tempskipgaps2, "--[no]skipgaps2"); 
+			char* tempskipgaps2 = new char[16]; 
+			//strcpy(tempskipgaps2, "--[no]skipgaps2"); 
+			*tempskipgaps2 = '\0'; strncat(tempskipgaps2, "--[no]skipgaps2", 15);
 			cPara.push_back(tempskipgaps2);
 		}
 		
 		if (useMinlen) {
-			char* tempminlen = new char[8]; 
-			strcpy(tempminlen, "--minlen"); 
+			char* tempminlen = new char[9]; 
+			*tempminlen = '\0'; strncat(tempminlen, "--minlen", 8);
+			//strcpy(tempminlen, "--minlen"); 
 			cPara.push_back(tempminlen);
-			char* tempMinlen = new char[minlen.length()];
-			strcpy(tempMinlen, minlen.c_str());
+			char* tempMinlen = new char[minlen.length()+1];
+			//strcpy(tempMinlen, minlen.c_str());
+			*tempMinlen = '\0'; strncat(tempMinlen, minlen.c_str(), minlen.length());
 			cPara.push_back(tempMinlen);
 		}
 		
 		if (useMaxlen) {
-			char* tempmaxlen = new char[8]; 
-			strcpy(tempmaxlen, "--maxlen"); 
+			char* tempmaxlen = new char[9]; 
+			//strcpy(tempmaxlen, "--maxlen"); 
+			*tempmaxlen = '\0'; strncat(tempmaxlen, "--maxlen", 8);
 			cPara.push_back(tempmaxlen);
-			char* tempMaxlen = new char[maxlen.length()];
-			strcpy(tempMaxlen, maxlen.c_str());
+			char* tempMaxlen = new char[maxlen.length()+1];
+			*tempMaxlen = '\0'; strncat(tempMaxlen, maxlen.c_str(), maxlen.length());
+			//strcpy(tempMaxlen, maxlen.c_str());
 			cPara.push_back(tempMaxlen);
 		}
 		
@@ -680,11 +715,13 @@ int ChimeraUchimeCommand::driver(string outputFName, string filename, string acc
 		}
 		
 		if (useQueryfract) {
-			char* tempqueryfract = new char[12]; 
-			strcpy(tempqueryfract, "--queryfract"); 
+			char* tempqueryfract = new char[13]; 
+			*tempqueryfract = '\0'; strncat(tempqueryfract, "--queryfract", 12);
+			//strcpy(tempqueryfract, "--queryfract"); 
 			cPara.push_back(tempqueryfract);
-			char* tempQueryfract = new char[queryfract.length()];
-			strcpy(tempQueryfract, queryfract.c_str());
+			char* tempQueryfract = new char[queryfract.length()+1];
+			*tempQueryfract = '\0'; strncat(tempQueryfract, queryfract.c_str(), queryfract.length());
+			//strcpy(tempQueryfract, queryfract.c_str());
 			cPara.push_back(tempQueryfract);
 		}
 		
