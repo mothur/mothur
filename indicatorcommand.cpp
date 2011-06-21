@@ -544,6 +544,7 @@ vector<float> IndicatorCommand::getValues(vector< vector<SharedRAbundFloatVector
 			vector<float> terms; 
 			float AijDenominator = 0.0;
 			vector<float> Bij;
+			
 			//get overall abundance of each grouping
 			for (int j = 0; j < groupings.size(); j++) {
 				
@@ -554,6 +555,7 @@ vector<float> IndicatorCommand::getValues(vector< vector<SharedRAbundFloatVector
 					if (groupings[j][k]->getAbundance(i) != 0) { numNotZero++; }
 				}
 				
+				//mean abundance
 				float Aij = (totalAbund / (float) groupings[j].size());
 				terms.push_back(Aij);
 				
@@ -565,7 +567,7 @@ vector<float> IndicatorCommand::getValues(vector< vector<SharedRAbundFloatVector
 			
 			float maxIndVal = 0.0;
 			for (int j = 0; j < terms.size(); j++) { 
-				float thisAij = (terms[j] / AijDenominator); 
+				float thisAij = (terms[j] / AijDenominator); //relative abundance
 				float thisValue = thisAij * Bij[j] * 100.0;
 				
 				//save largest
@@ -609,7 +611,8 @@ vector<float> IndicatorCommand::getValues(vector< vector<SharedRAbundVector*> >&
 					if (groupings[j][k]->getAbundance(i) != 0.0) { numNotZero++; }
 					
 				}
-					
+				
+				//mean abundance	
 				float Aij = (totalAbund / (float) groupings[j].size());
 				terms.push_back(Aij);
 				
@@ -621,7 +624,7 @@ vector<float> IndicatorCommand::getValues(vector< vector<SharedRAbundVector*> >&
 			
 			float maxIndVal = 0.0;
 			for (int j = 0; j < terms.size(); j++) { 
-				float thisAij = (terms[j] / AijDenominator); 
+				float thisAij = (terms[j] / AijDenominator); //relative abundance
 				float thisValue = thisAij * Bij[j] * 100.0;
 					
 				//save largest

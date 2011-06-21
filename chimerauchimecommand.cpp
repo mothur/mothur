@@ -376,7 +376,7 @@ int ChimeraUchimeCommand::execute(){
 			int start = time(NULL);	
 			string nameFile = "";
 			
-			if (templatefile == "self") { //you want to run uchime with a refernce template
+			if (templatefile == "self") { //you want to run uchime with a reference template
 				
 				#ifdef USE_MPI	
 					int pid; 
@@ -434,7 +434,7 @@ int ChimeraUchimeCommand::execute(){
 				
 				sort(nameMapCount.begin(), nameMapCount.end(), compareSeqPriorityNodes);
 				
-				string newFasta = fastaFileNames[s] + ".temp";
+				string newFasta = m->getRootName(fastaFileNames[s]) + "temp";
 				ofstream out;
 				m->openOutputFile(newFasta, out);
 				
