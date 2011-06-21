@@ -235,6 +235,8 @@ int MGClusterCommand::execute(){
 			return 0; 
 		}
 		
+		double saveCutoff = cutoff;
+		
 		if (!hclusterWanted) {
 			//get distmatrix and overlap
 			SparseMatrix* distMatrix = read->getDistMatrix();
@@ -373,6 +375,11 @@ int MGClusterCommand::execute(){
 		
 				seqs = hcluster->getSeqs();
 				
+				//to account for cutoff change in average neighbor
+				if (seqs.size() != 0) {
+					if (seqs[0].dist > cutoff) { break; }
+				}
+				
 				if (m->control_pressed) { 
 					delete nameMap;  delete list; delete rabund; delete hcluster;
 					listFile.close(); rabundFile.close(); sabundFile.close(); remove((fileroot+ tag + ".list").c_str()); remove((fileroot+ tag + ".rabund").c_str()); remove((fileroot+ tag + ".sabund").c_str());
@@ -386,7 +393,7 @@ int MGClusterCommand::execute(){
 					
 					if (seqs[i].seq1 != seqs[i].seq2) {
 		
-						hcluster->update(seqs[i].seq1, seqs[i].seq2, seqs[i].dist);
+						cutoff = hcluster->update(seqs[i].seq1, seqs[i].seq2, seqs[i].dist);
 						
 						if (m->control_pressed) { 
 							delete nameMap;  delete list; delete rabund; delete hcluster;
@@ -490,6 +497,13 @@ int MGClusterCommand::execute(){
 		m->mothurOut(fileroot+ tag + ".rabund"); m->mothurOutEndLine();	outputNames.push_back(fileroot+ tag + ".rabund"); outputTypes["rabund"].push_back(fileroot+ tag + ".rabund");
 		m->mothurOut(fileroot+ tag + ".sabund"); m->mothurOutEndLine();	outputNames.push_back(fileroot+ tag + ".sabund"); outputTypes["sabund"].push_back(fileroot+ tag + ".sabund");
 		m->mothurOutEndLine();
+		
+		if (saveCutoff != cutoff) { 
+			if (hard)	{  saveCutoff = m->ceilDist(saveCutoff, precision);	}
+			else		{	saveCutoff = m->roundDist(saveCutoff, precision);  }
+			
+			m->mothurOut("changed cutoff to " + toString(cutoff)); m->mothurOutEndLine(); 
+		}
 		
 		//set list file as new current listfile
 		string current = "";
