@@ -282,7 +282,7 @@ int IndicatorCommand::execute(){
 				}
 			}
 			
-			if ((designfile != "") && (m->Treenames.size() != Groups.size())) { m->mothurOut("[ERROR]: You design file does not match your tree, aborting."); m->mothurOutEndLine(); mismatch = true; }
+			if ((designfile != "") && (m->Treenames.size() != Groups.size())) { cout << Groups.size() << '\t' << m->Treenames.size() << endl; m->mothurOut("[ERROR]: You design file does not match your tree, aborting."); m->mothurOutEndLine(); mismatch = true; }
 					
 			if (mismatch) { //cleanup and exit
 				if (designfile != "") { delete designMap; }
