@@ -1531,6 +1531,7 @@ static void GetArgsFromFile(const string &FileName, vector<string> &Args)
 
 void MyCmdLine(int argc, char **argv)
 	{
+	g_Opts.clear();
 	static unsigned RecurseDepth = 0;
 	++RecurseDepth;
 

@@ -1431,8 +1431,6 @@
 				A7E9B6D712D37EC400DA6239 /* efron.cpp */,
 				A7E9B6D812D37EC400DA6239 /* efron.h */,
 				A7E9B6E212D37EC400DA6239 /* filters.h */,
-				A7E9B6E512D37EC400DA6239 /* fisher2.c */,
-				A7E9B6E612D37EC400DA6239 /* fisher2.h */,
 				A7E9B6F012D37EC400DA6239 /* geom.cpp */,
 				A7E9B6F112D37EC400DA6239 /* geom.h */,
 				A7E9B70E12D37EC400DA6239 /* goodscoverage.cpp */,
@@ -1731,6 +1729,8 @@
 		A7E9BA5612D39BD800DA6239 /* metastats */ = {
 			isa = PBXGroup;
 			children = (
+				A7E9B6E512D37EC400DA6239 /* fisher2.c */,
+				A7E9B6E612D37EC400DA6239 /* fisher2.h */,
 				A7E9B75512D37EC400DA6239 /* metastats.h */,
 				A7E9B75612D37EC400DA6239 /* metastats2.c */,
 			);

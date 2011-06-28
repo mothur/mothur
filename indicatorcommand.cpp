@@ -14,12 +14,13 @@
 //**********************************************************************************************************************
 vector<string> IndicatorCommand::setParameters(){	
 	try {
-		CommandParameter pdesign("design", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pdesign);
+		CommandParameter piters("iters", "Number", "", "1000", "", "", "",false,false); parameters.push_back(piters);
+		CommandParameter pdesign("design", "InputTypes", "", "", "TreeDesign", "TreeDesign", "none",false,false); parameters.push_back(pdesign);
 		CommandParameter pshared("shared", "InputTypes", "", "", "SharedRel", "SharedRel", "none",false,false); parameters.push_back(pshared);	
 		CommandParameter prelabund("relabund", "InputTypes", "", "", "SharedRel", "SharedRel", "none",false,false); parameters.push_back(prelabund);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
 		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
-		CommandParameter ptree("tree", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(ptree);
+		CommandParameter ptree("tree", "InputTypes", "", "", "TreeDesign", "TreeDesign", "none",false,false); parameters.push_back(ptree);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
 		
@@ -36,13 +37,14 @@ vector<string> IndicatorCommand::setParameters(){
 string IndicatorCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The indicator command reads a shared or relabund file and a tree file, and outputs a .indicator.tre and .indicator.summary file. \n";
+		helpString += "The indicator command reads a shared or relabund file and a tree or design file, and outputs a .indicator.tre and .indicator.summary file. \n";
 		helpString += "The new tree contains labels at each internal node.  The label is the node number so you can relate the tree to the summary file.\n";
 		helpString += "The summary file lists the indicator value for each OTU for each node.\n";
 		helpString += "The indicator command parameters are tree, groups, shared, relabund, design and label. The tree parameter is required as well as either shared or relabund.\n";
 		helpString += "The design parameter allows you to provide a design file to relate the tree to the shared or relabund file.\n";		
 		helpString += "The groups parameter allows you to specify which of the groups in your shared or relabund you would like analyzed, or if you provide a design file the groups in your design file.  The groups may be entered separated by dashes.\n";
 		helpString += "The label parameter indicates at what distance your tree relates to the shared or relabund.\n";
+		helpString += "The iters parameter allows you to set number of randomization for the P value.  The default is 1000.";
 		helpString += "The indicator command should be used in the following format: indicator(tree=test.tre, shared=test.shared, label=0.03)\n";
 		helpString += "Note: No spaces between parameter labels (i.e. tree), '=' and parameters (i.e.yourTreefile).\n"; 
 		return helpString;
@@ -142,12 +144,9 @@ IndicatorCommand::IndicatorCommand(string option)  {
 
 			//check for required parameters
 			treefile = validParameter.validFile(parameters, "tree", true);
-			if (treefile == "not open") { abort = true; }
-			else if (treefile == "not found") { 				//if there is a current design file, use it
-				treefile = m->getTreeFile(); 
-				if (treefile != "") { m->mothurOut("Using " + treefile + " as input file for the tree parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current tree file and the tree parameter is required."); m->mothurOutEndLine(); abort = true; }								
-			}else { m->setTreeFile(treefile); }	
+			if (treefile == "not open") { treefile = ""; abort = true; }
+			else if (treefile == "not found") { treefile = ""; 	}		
+			else { m->setTreeFile(treefile); }	
 			
 			sharedfile = validParameter.validFile(parameters, "shared", true);
 			if (sharedfile == "not open") { abort = true; }
@@ -160,7 +159,7 @@ IndicatorCommand::IndicatorCommand(string option)  {
 			else { inputFileName = relabundfile; m->setRelAbundFile(relabundfile); }
 			
 			designfile = validParameter.validFile(parameters, "design", true);
-			if (designfile == "not open") { abort = true; }
+			if (designfile == "not open") { designfile = ""; abort = true; }
 			else if (designfile == "not found") { designfile = ""; }
 			else { m->setDesignFile(designfile); }
 			
@@ -171,6 +170,9 @@ IndicatorCommand::IndicatorCommand(string option)  {
 			
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; m->mothurOut("You did not provide a label, I will use the first label in your inputfile."); m->mothurOutEndLine(); label=""; }	
+			
+			string temp = validParameter.validFile(parameters, "iters", false);		if (temp == "not found") { temp = "1000"; }
+			convert(temp, iters); 
 			
 			if ((relabundfile == "") && (sharedfile == "")) { 
 				//is there are current file available for either of these?
@@ -187,7 +189,20 @@ IndicatorCommand::IndicatorCommand(string option)  {
 				}
 			}
 			
-			if ((relabundfile != "") && (sharedfile != "")) { m->mothurOut("You may not use both a shared and relabund file."); m->mothurOutEndLine(); abort = true;  }
+			
+			if ((designfile == "") && (treefile == "")) { 
+				treefile = m->getTreeFile(); 
+				if (treefile != "") {  m->mothurOut("Using " + treefile + " as input file for the tree parameter."); m->mothurOutEndLine(); }
+				else { 
+					designfile = m->getDesignFile(); 
+					if (designfile != "") {  m->mothurOut("Using " + designfile + " as input file for the design parameter."); m->mothurOutEndLine(); }
+					else { 
+						m->mothurOut("[ERROR]: You must provide either a tree or design file."); m->mothurOutEndLine(); abort = true; 
+					}
+				}
+			}
+			
+			if ((relabundfile != "") && (sharedfile != "")) { m->mothurOut("[ERROR]: You may not use both a shared and relabund file."); m->mothurOutEndLine(); abort = true;  }
 			
 		}
 	}
@@ -202,6 +217,8 @@ int IndicatorCommand::execute(){
 	try {
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		
+		cout.setf(ios::fixed, ios::floatfield); cout.setf(ios::showpoint);
 	
 		//read designfile if given and set up globaldatas groups for read of sharedfiles
 		if (designfile != "") {
@@ -236,101 +253,107 @@ int IndicatorCommand::execute(){
 		/***************************************************/
 		//    reading tree info							   //
 		/***************************************************/
-		string groupfile = ""; 
-		m->setTreeFile(treefile);
-		Tree* tree = new Tree(treefile); delete tree;  //extracts names from tree to make faked out groupmap
-		treeMap = new TreeMap();
-		bool mismatch = false;
-			
-		for (int i = 0; i < m->Treenames.size(); i++) { 
-			//sanity check - is this a group that is not in the sharedfile?
-			if (designfile == "") {
-				if (!(m->inUsersGroups(m->Treenames[i], m->namesOfGroups))) {
-					m->mothurOut("[ERROR]: " + m->Treenames[i] + " is not a group in your shared or relabund file."); m->mothurOutEndLine();
-					mismatch = true;
-				}
-				treeMap->addSeq(m->Treenames[i], "Group1"); 
-			}else{
-				vector<string> myGroups; myGroups.push_back(m->Treenames[i]);
-				vector<string> myNames = designMap->getNamesSeqs(myGroups);
+		if (treefile != "") {
+			string groupfile = ""; 
+			m->setTreeFile(treefile);
+			Tree* tree = new Tree(treefile); delete tree;  //extracts names from tree to make faked out groupmap
+			treeMap = new TreeMap();
+			bool mismatch = false;
 				
-				for(int k = 0; k < myNames.size(); k++) {
-					if (!(m->inUsersGroups(myNames[k], m->namesOfGroups))) {
-						m->mothurOut("[ERROR]: " + myNames[k] + " is not a group in your shared or relabund file."); m->mothurOutEndLine();
+			for (int i = 0; i < m->Treenames.size(); i++) { 
+				//sanity check - is this a group that is not in the sharedfile?
+				if (designfile == "") {
+					if (!(m->inUsersGroups(m->Treenames[i], m->namesOfGroups))) {
+						m->mothurOut("[ERROR]: " + m->Treenames[i] + " is not a group in your shared or relabund file."); m->mothurOutEndLine();
 						mismatch = true;
 					}
+					treeMap->addSeq(m->Treenames[i], "Group1"); 
+				}else{
+					vector<string> myGroups; myGroups.push_back(m->Treenames[i]);
+					vector<string> myNames = designMap->getNamesSeqs(myGroups);
+					
+					for(int k = 0; k < myNames.size(); k++) {
+						if (!(m->inUsersGroups(myNames[k], m->namesOfGroups))) {
+							m->mothurOut("[ERROR]: " + myNames[k] + " is not a group in your shared or relabund file."); m->mothurOutEndLine();
+							mismatch = true;
+						}
+					}
+					treeMap->addSeq(m->Treenames[i], "Group1");
 				}
-				treeMap->addSeq(m->Treenames[i], "Group1");
 			}
-		}
-		
-		if ((designfile != "") && (m->Treenames.size() != Groups.size())) { m->mothurOut("[ERROR]: You design file does not match your tree, aborting."); m->mothurOutEndLine(); mismatch = true; }
-				
-		if (mismatch) { //cleanup and exit
-			if (designfile != "") { delete designMap; }
-			if (sharedfile != "") {  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } }
-			else { for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  } }
-			delete treeMap;
-			return 0;
-		}
-	 
-		read = new ReadNewickTree(treefile);
-		int readOk = read->read(treeMap); 
-		
-		if (readOk != 0) { m->mothurOut("Read Terminated."); m->mothurOutEndLine(); delete treeMap; delete read; return 0; }
-		
-		vector<Tree*> T = read->getTrees();
-		
-		delete read;
-		
-		if (m->control_pressed) { 
-			if (designfile != "") { delete designMap; }
-			if (sharedfile != "") {  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } }
-			else { for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  } }
-			for (int i = 0; i < T.size(); i++) {  delete T[i];  }  delete treeMap; return 0; 
-		}
 			
-		T[0]->assembleTree();
-				
-		/***************************************************/
-		//    create ouptut tree - respecting pickedGroups //
-		/***************************************************/
-		Tree* outputTree = new Tree(m->Groups.size(), treeMap); 
-		
-		outputTree->getSubTree(T[0], m->Groups);
-		outputTree->assembleTree();
+			if ((designfile != "") && (m->Treenames.size() != Groups.size())) { m->mothurOut("[ERROR]: You design file does not match your tree, aborting."); m->mothurOutEndLine(); mismatch = true; }
+					
+			if (mismatch) { //cleanup and exit
+				if (designfile != "") { delete designMap; }
+				if (sharedfile != "") {  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } }
+				else { for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  } }
+				delete treeMap;
+				return 0;
+			}
+		 
+			read = new ReadNewickTree(treefile);
+			int readOk = read->read(treeMap); 
 			
-		//no longer need original tree, we have output tree to use and label
-		for (int i = 0; i < T.size(); i++) {  delete T[i];  } 
-		
+			if (readOk != 0) { m->mothurOut("Read Terminated."); m->mothurOutEndLine(); delete treeMap; delete read; return 0; }
+			
+			vector<Tree*> T = read->getTrees();
+			
+			delete read;
+			
+			if (m->control_pressed) { 
+				if (designfile != "") { delete designMap; }
+				if (sharedfile != "") {  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } }
+				else { for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  } }
+				for (int i = 0; i < T.size(); i++) {  delete T[i];  }  delete treeMap; return 0; 
+			}
 				
-		if (m->control_pressed) { 
-			if (designfile != "") { delete designMap; }
-			if (sharedfile != "") {  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } }
-			else { for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  } }
-			delete outputTree; delete treeMap;  return 0; 
+			T[0]->assembleTree();
+					
+			/***************************************************/
+			//    create ouptut tree - respecting pickedGroups //
+			/***************************************************/
+			Tree* outputTree = new Tree(m->Groups.size(), treeMap); 
+			
+			outputTree->getSubTree(T[0], m->Groups);
+			outputTree->assembleTree();
+				
+			//no longer need original tree, we have output tree to use and label
+			for (int i = 0; i < T.size(); i++) {  delete T[i];  } 
+			
+					
+			if (m->control_pressed) { 
+				if (designfile != "") { delete designMap; }
+				if (sharedfile != "") {  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } }
+				else { for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  } }
+				delete outputTree; delete treeMap;  return 0; 
+			}
+			
+			/***************************************************/
+			//		get indicator species values			   //
+			/***************************************************/
+			GetIndicatorSpecies(outputTree);
+			delete outputTree; delete treeMap;
+			
+		}else { //run with design file only
+			//get indicator species
+			GetIndicatorSpecies();
 		}
-		
-		/***************************************************/
-		//		get indicator species values			   //
-		/***************************************************/
-		GetIndicatorSpecies(outputTree);
 		
 		if (designfile != "") { delete designMap; }
 		if (sharedfile != "") {  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } }
 		else { for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  } }
-		delete outputTree; delete treeMap;
-		
 		
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} return 0; }
 		
 		//set tree file as new current treefile
-		string current = "";
-		itTypes = outputTypes.find("tree");
-		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setTreeFile(current); }
+		if (treefile != "") {
+			string current = "";
+			itTypes = outputTypes.find("tree");
+			if (itTypes != outputTypes.end()) {
+				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setTreeFile(current); }
+			}
 		}
-		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
@@ -340,6 +363,147 @@ int IndicatorCommand::execute(){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "IndicatorCommand", "execute");	
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+//divide shared or relabund file by groupings in the design file
+//report all otu values to file
+int IndicatorCommand::GetIndicatorSpecies(){
+	try {
+		string thisOutputDir = outputDir;
+		if (outputDir == "") {  thisOutputDir += m->hasPath(inputFileName);  }
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(inputFileName)) + "indicator.summary";
+		outputNames.push_back(outputFileName); outputTypes["summary"].push_back(outputFileName);
+		
+		ofstream out;
+		m->openOutputFile(outputFileName, out);
+		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
+		
+		int numBins = 0;
+		if (sharedfile != "") { numBins = lookup[0]->getNumBins(); }
+		else { numBins = lookupFloat[0]->getNumBins(); }
+		
+		if (m->control_pressed) { out.close(); return 0; }
+			
+		/*****************************************************/
+		//create vectors containing rabund info				 //
+		/*****************************************************/
+			
+		vector<float> indicatorValues; //size of numBins
+		vector<float> pValues;
+		map< vector<int>, vector<int> > randomGroupingsMap; //maps location in groupings to location in groupings, ie, [0][0] -> [1][2]. This is so we don't have to actually move the sharedRabundVectors.
+			
+		if (sharedfile != "") {
+			vector< vector<SharedRAbundVector*> > groupings;
+			set<string> groupsAlreadyAdded;
+			vector<SharedRAbundVector*> subset;
+			
+			//for each grouping
+			for (int i = 0; i < designMap->namesOfGroups.size(); i++) {
+				
+				for (int k = 0; k < lookup.size(); k++) {
+					//are you from this grouping?
+					if (designMap->getGroup(lookup[k]->getGroup()) == designMap->namesOfGroups[i]) {
+						subset.push_back(lookup[k]);
+						groupsAlreadyAdded.insert(lookup[k]->getGroup());
+					}
+				}
+				if (subset.size() != 0) { groupings.push_back(subset); }
+				subset.clear();
+			}
+				
+			if (groupsAlreadyAdded.size() != lookup.size()) {  m->mothurOut("[ERROR]: could not make proper groupings."); m->mothurOutEndLine(); }
+				
+			indicatorValues = getValues(groupings, randomGroupingsMap);
+			
+			pValues.resize(indicatorValues.size(), 0);
+			for(int i=0;i<iters;i++){
+				if (m->control_pressed) { break; }
+				randomGroupingsMap = randomizeGroupings(groupings, lookup.size());
+				vector<float> randomIndicatorValues = getValues(groupings, randomGroupingsMap);
+				
+				for (int j = 0; j < indicatorValues.size(); j++) {
+					if (randomIndicatorValues[j] >= indicatorValues[j]) { pValues[j]++; }
+				}
+			}
+			
+			for (int i = 0; i < pValues.size(); i++) { pValues[i] /= (double)iters; }
+				
+		}else {
+			vector< vector<SharedRAbundFloatVector*> > groupings;
+			set<string> groupsAlreadyAdded;
+			vector<SharedRAbundFloatVector*> subset;
+			
+			//for each grouping
+			for (int i = 0; i < designMap->namesOfGroups.size(); i++) {
+				for (int k = 0; k < lookupFloat.size(); k++) {
+					//are you from this grouping?
+					if (designMap->getGroup(lookupFloat[k]->getGroup()) == designMap->namesOfGroups[i]) {
+						subset.push_back(lookupFloat[k]);
+						groupsAlreadyAdded.insert(lookupFloat[k]->getGroup());
+					}
+				}
+				if (subset.size() != 0) { groupings.push_back(subset); }
+				subset.clear();
+			}
+			
+			if (groupsAlreadyAdded.size() != lookupFloat.size()) {  m->mothurOut("[ERROR]: could not make proper groupings."); m->mothurOutEndLine(); }
+			
+			indicatorValues = getValues(groupings, randomGroupingsMap);
+			
+			pValues.resize(indicatorValues.size(), 0);
+			for(int i=0;i<iters;i++){
+				if (m->control_pressed) { break; }
+				randomGroupingsMap = randomizeGroupings(groupings, lookupFloat.size());
+				vector<float> randomIndicatorValues = getValues(groupings, randomGroupingsMap);
+				
+				for (int j = 0; j < indicatorValues.size(); j++) {
+					if (randomIndicatorValues[j] >= indicatorValues[j]) { pValues[j]++; }
+				}
+			}
+			
+			for (int i = 0; i < pValues.size(); i++) { pValues[i] /= (double)iters; }
+		}
+			
+		if (m->control_pressed) { out.close(); return 0; }
+			
+			
+		/******************************************************/
+		//output indicator values to table form               //
+		/*****************************************************/
+		int indicatorOTU;
+		double maxValue, pvalue; maxValue=0.0; pvalue=0.0;
+		out << "OTU\tIndicator_Value\tpValue" << endl;
+		for (int j = 0; j < indicatorValues.size(); j++) {
+				
+			if (m->control_pressed) { out.close(); return 0; }
+			
+			out << (j+1) << '\t' << indicatorValues[j] << '\t'; 
+			
+			if (pValues[j] > (1/(float)iters)) { out << pValues[j] << endl; } 
+			else { out << "<" << (1/(float)iters) << endl; }
+			
+			if (maxValue < indicatorValues[j]) { 
+				maxValue = indicatorValues[j];
+				indicatorOTU = j;
+			}
+		}
+		
+		m->mothurOutEndLine(); m->mothurOut("Species\tIndicatorValue\tpValue\n");
+		cout << "OTU" << indicatorOTU+1 << '\t' << maxValue << '\t';
+		string pValueString = "<" + toString((1/(float)iters)); 
+		if (pValues[indicatorOTU] > (1/(float)iters)) { pValueString = toString(pValues[indicatorOTU]); cout << pValues[indicatorOTU];} 
+		else { cout << "<" << (1/(float)iters); }
+		m->mothurOutJustToLog("OTU" + toString(indicatorOTU+1) + "\t" + toString(maxValue) + "\t" + pValueString); 
+		m->mothurOutEndLine(); 
+		
+		out.close();
+		
+		return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "IndicatorCommand", "GetIndicatorSpecies");	
 		exit(1);
 	}
 }
@@ -365,8 +529,10 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 		
 		//print headings
 		out << "TreeNode\t";
-		for (int i = 0; i < numBins; i++) { out << "OTU-" << (i+1) << '\t'; }
+		for (int i = 0; i < numBins; i++) { out << "OTU" << (i+1) << "_IndValue" << '\t' << "pValue" << '\t'; }
 		out << endl;
+		
+		m->mothurOutEndLine(); m->mothurOut("Node\tSpecies\tIndicatorValue\tpValue\n");
 		
 		string treeOutputDir = outputDir;
 		if (outputDir == "") {  treeOutputDir += m->hasPath(treefile);  }
@@ -396,6 +562,8 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 			/*****************************************************/
 			
 			vector<float> indicatorValues; //size of numBins
+			vector<float> pValues;
+			map< vector<int>, vector<int> > randomGroupingsMap; //maps location in groupings to location in groupings, ie, [0][0] -> [1][2]. This is so we don't have to actually move the sharedRabundVectors.
 			
 			if (sharedfile != "") {
 				vector< vector<SharedRAbundVector*> > groupings;
@@ -446,7 +614,20 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 				
 				if (groupsAlreadyAdded.size() != lookup.size()) {  m->mothurOut("[ERROR]: could not make proper groupings."); m->mothurOutEndLine(); }
 								
-				indicatorValues = getValues(groupings);
+				indicatorValues = getValues(groupings, randomGroupingsMap);
+				
+				pValues.resize(indicatorValues.size(), 0);
+				for(int i=0;i<iters;i++){
+					if (m->control_pressed) { break; }
+					randomGroupingsMap = randomizeGroupings(groupings, lookup.size());
+					vector<float> randomIndicatorValues = getValues(groupings, randomGroupingsMap);
+					
+					for (int j = 0; j < indicatorValues.size(); j++) {
+						if (randomIndicatorValues[j] >= indicatorValues[j]) { pValues[j]++; }
+					}
+				}
+				
+				for (int i = 0; i < pValues.size(); i++) { pValues[i] /= (double)iters; }
 				
 			}else {
 				vector< vector<SharedRAbundFloatVector*> > groupings;
@@ -494,7 +675,21 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 				
 				if (groupsAlreadyAdded.size() != lookupFloat.size()) { m->mothurOut("[ERROR]: could not make proper groupings."); m->mothurOutEndLine(); }
 				
-				indicatorValues = getValues(groupings);
+				indicatorValues = getValues(groupings, randomGroupingsMap);
+				
+				pValues.resize(indicatorValues.size(), 0);
+				for(int i=0;i<iters;i++){
+					
+					if (m->control_pressed) { break; }
+					randomGroupingsMap = randomizeGroupings(groupings, lookup.size());
+					vector<float> randomIndicatorValues = getValues(groupings, randomGroupingsMap);
+					
+					for (int j = 0; j < indicatorValues.size(); j++) {
+						if (randomIndicatorValues[j] >= indicatorValues[j]) { pValues[j]++; }
+					}
+				}
+				
+				for (int i = 0; i < pValues.size(); i++) { pValues[i] /= (double)iters; }
 			}
 			
 			if (m->control_pressed) { out.close(); return 0; }
@@ -504,15 +699,34 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 			//output indicator values to table form + label tree  //
 			/*****************************************************/
 			out << (i+1) << '\t';
+			int indicatorOTU;
+			double maxValue, pvalue; maxValue=0.0; pvalue=0.0;
 			for (int j = 0; j < indicatorValues.size(); j++) {
 				
 				if (m->control_pressed) { out.close(); return 0; }
 				
-				out << indicatorValues[j] << '\t';
+				if (pValues[j] < (1/(float)iters)) {
+					out << indicatorValues[j] << '\t' << '<' << (1/(float)iters) << '\t';
+				}else {
+					out << indicatorValues[j] << '\t' << pValues[j] << '\t';
+				}
+				
+				if (maxValue < indicatorValues[j]) { 
+					maxValue = indicatorValues[j];
+					indicatorOTU = j;
+				}
 			}
 			out << endl;
 			
 			T->tree[i].setLabel((i+1));
+			
+			cout << i+1 << "\tOTU" << indicatorOTU+1 << '\t' << maxValue << '\t';
+			string pValueString = "<" + toString((1/(float)iters)); 
+			if (pValues[indicatorOTU] > (1/(float)iters)) { pValueString = toString(pValues[indicatorOTU]); cout << pValues[indicatorOTU];} 
+			else { cout << "<" << (1/(float)iters); }
+			m->mothurOutJustToLog(toString(i) + "\tOTU" + toString(indicatorOTU+1) + "\t" + toString(maxValue) + "\t" + pValueString); 
+			m->mothurOutEndLine(); 
+			
 			
 		}
 		out.close();
@@ -532,9 +746,10 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 	}
 }
 //**********************************************************************************************************************
-vector<float> IndicatorCommand::getValues(vector< vector<SharedRAbundFloatVector*> >& groupings){
+vector<float> IndicatorCommand::getValues(vector< vector<SharedRAbundFloatVector*> >& groupings, map< vector<int>, vector<int> > groupingsMap){
 	try {
 		vector<float> values;
+		map< vector<int>, vector<int> >::iterator it;
 		
 		//for each otu
 		for (int i = 0; i < groupings[0][0]->getNumBins(); i++) {
@@ -551,8 +766,17 @@ vector<float> IndicatorCommand::getValues(vector< vector<SharedRAbundFloatVector
 				float totalAbund = 0;
 				int numNotZero = 0;
 				for (int k = 0; k < groupings[j].size(); k++) { 
-					totalAbund += groupings[j][k]->getAbundance(i); 
-					if (groupings[j][k]->getAbundance(i) != 0) { numNotZero++; }
+					vector<int> temp; temp.push_back(j); temp.push_back(k);
+					it = groupingsMap.find(temp);
+					
+					if (it == groupingsMap.end()) { //this one didnt get moved
+						totalAbund += groupings[j][k]->getAbundance(i); 
+						if (groupings[j][k]->getAbundance(i) != 0.0) { numNotZero++; }
+					}else {
+						totalAbund += groupings[(it->second)[0]][(it->second)[1]]->getAbundance(i); 
+						if (groupings[(it->second)[0]][(it->second)[1]]->getAbundance(i) != 0.0) { numNotZero++; }
+					}
+					
 				}
 				
 				//mean abundance
@@ -586,7 +810,7 @@ vector<float> IndicatorCommand::getValues(vector< vector<SharedRAbundFloatVector
 }
 //**********************************************************************************************************************
 //same as above, just data type difference
-vector<float> IndicatorCommand::getValues(vector< vector<SharedRAbundVector*> >& groupings){
+vector<float> IndicatorCommand::getValues(vector< vector<SharedRAbundVector*> >& groupings, map< vector<int>, vector<int> > groupingsMap){
 	try {
 		vector<float> values;
 		
@@ -596,6 +820,8 @@ vector<float> IndicatorCommand::getValues(vector< vector<SharedRAbundVector*> >&
 			cout << groupings[j][k]->getGroup() << endl;
 		}
 	}*/
+		map< vector<int>, vector<int> >::iterator it;
+		
 		//for each otu
 		for (int i = 0; i < groupings[0][0]->getNumBins(); i++) {
 			vector<float> terms; 
@@ -607,8 +833,16 @@ vector<float> IndicatorCommand::getValues(vector< vector<SharedRAbundVector*> >&
 				int totalAbund = 0.0;
 				int numNotZero = 0;
 				for (int k = 0; k < groupings[j].size(); k++) { 
-					totalAbund += groupings[j][k]->getAbundance(i); 
-					if (groupings[j][k]->getAbundance(i) != 0.0) { numNotZero++; }
+					vector<int> temp; temp.push_back(j); temp.push_back(k);
+					it = groupingsMap.find(temp);
+					
+					if (it == groupingsMap.end()) { //this one didnt get moved
+						totalAbund += groupings[j][k]->getAbundance(i); 
+						if (groupings[j][k]->getAbundance(i) != 0.0) { numNotZero++; }
+					}else {
+						totalAbund += groupings[(it->second)[0]][(it->second)[1]]->getAbundance(i); 
+						if (groupings[(it->second)[0]][(it->second)[1]]->getAbundance(i) != 0.0) { numNotZero++; }
+					}
 					
 				}
 				
@@ -901,7 +1135,76 @@ int IndicatorCommand::getSharedFloat(){
 		m->errorOut(e, "IndicatorCommand", "getShared");	
 	exit(1);
 	}
-}		
+}	
+//**********************************************************************************************************************
+//swap groups between groupings, in essence randomizing the second column of the design file
+map< vector<int>, vector<int> > IndicatorCommand::randomizeGroupings(vector< vector<SharedRAbundVector*> >& groupings, int numLookupGroups){
+	try {
+		
+		map< vector<int>, vector<int> > randomGroupings; 
+		
+		for (int i = 0; i < numLookupGroups; i++) {
+			if (m->control_pressed) {break;}
+			
+			//get random groups to swap to switch with
+			//generate random int between 0 and groupings.size()-1
+			int z = m->getRandomIndex(groupings.size()-1);
+			int x = m->getRandomIndex(groupings.size()-1);
+			int a = m->getRandomIndex(groupings[z].size()-1);
+			int b = m->getRandomIndex(groupings[x].size()-1);
+			//cout << i << '\t' << z << '\t' << x << '\t' << a << '\t' << b << endl;	
+			//if ((z < 0) || (z > 1) || x<0 || x>1 || a <0 || a>groupings[z].size()-1 || b<0 || b>groupings[x].size()-1) { cout << "probelm" << i << '\t' << z << '\t' << x << '\t' << a << '\t' << b << endl;	}
+			
+			vector<int> from;
+			vector<int> to;
+			
+			from.push_back(z); from.push_back(a);
+			to.push_back(x); to.push_back(b);
+			
+			randomGroupings[from] = to;
+		}
+		//cout << "done" << endl;	
+		return randomGroupings;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "IndicatorCommand", "randomizeGroupings");	
+		exit(1);
+	}
+}	
+//**********************************************************************************************************************
+//swap groups between groupings, in essence randomizing the second column of the design file
+map< vector<int>, vector<int> > IndicatorCommand::randomizeGroupings(vector< vector<SharedRAbundFloatVector*> >& groupings, int numLookupGroups){
+	try {
+		
+		map< vector<int>, vector<int> > randomGroupings; 
+		
+		for (int i = 0; i < numLookupGroups; i++) {
+			
+			//get random groups to swap to switch with
+			//generate random int between 0 and groupings.size()-1
+			int z = m->getRandomIndex(groupings.size()-1);
+			int x = m->getRandomIndex(groupings.size()-1);
+			int a = m->getRandomIndex(groupings[z].size()-1);
+			int b = m->getRandomIndex(groupings[x].size()-1);
+			//cout << i << '\t' << z << '\t' << x << '\t' << a << '\t' << b << endl;		
+			
+			vector<int> from;
+			vector<int> to;
+			
+			from.push_back(z); from.push_back(a);
+			to.push_back(x); to.push_back(b);
+			
+			randomGroupings[from] = to;
+		}
+		
+		return randomGroupings;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "IndicatorCommand", "randomizeGroupings");	
+		exit(1);
+	}
+}			
+								
 /*****************************************************************/
 
 
