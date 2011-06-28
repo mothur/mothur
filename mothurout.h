@@ -99,6 +99,7 @@ class MothurOut {
 		float ceilDist(float, int);
 		float roundDist(float, int);
 		unsigned int fromBase36(string);
+		int getRandomIndex(int); //highest
 
 		int control_pressed;
 		bool executing, runParse, jumble, gui;

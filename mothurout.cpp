@@ -562,6 +562,21 @@ string MothurOut::getSimpleName(string longName){
 
 /***********************************************************************/
 
+int MothurOut::getRandomIndex(int highest){
+	try {
+		
+		int random = (int) ((float)(highest+1) * (float)(rand()) / ((float)RAND_MAX+1.0));
+		
+		return random;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "getRandomIndex");
+		exit(1);
+	}	
+	
+}
+/**********************************************************************/
+
 string MothurOut::getPathName(string longName){
 	try {
 		string rootPathName = longName;

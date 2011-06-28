@@ -32,7 +32,7 @@ vector<string> ChimeraUchimeCommand::setParameters(){
 		CommandParameter pchunks("chunks", "Number", "", "4", "", "", "",false,false); parameters.push_back(pchunks);
 		CommandParameter pminchunk("minchunk", "Number", "", "64", "", "", "",false,false); parameters.push_back(pminchunk);
 		CommandParameter pidsmoothwindow("idsmoothwindow", "Number", "", "32", "", "", "",false,false); parameters.push_back(pidsmoothwindow);
-		CommandParameter pminsmoothid("minsmoothid", "Number", "", "0.95", "", "", "",false,false); parameters.push_back(pminsmoothid);
+		//CommandParameter pminsmoothid("minsmoothid", "Number", "", "0.95", "", "", "",false,false); parameters.push_back(pminsmoothid);
 		CommandParameter pmaxp("maxp", "Number", "", "2", "", "", "",false,false); parameters.push_back(pmaxp);
 		CommandParameter pskipgaps("skipgaps", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pskipgaps);
 		CommandParameter pskipgaps2("skipgaps2", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pskipgaps2);
@@ -72,7 +72,7 @@ string ChimeraUchimeCommand::getHelpString(){
 		helpString += "The chunks parameter is the number of chunks to extract from the query sequence when searching for parents. Default 4.\n";
 		helpString += "The minchunk parameter is the minimum length of a chunk. Default 64.\n";
 		helpString += "The idsmoothwindow parameter is the length of id smoothing window. Default 32.\n";
-		helpString += "The minsmoothid parameter - minimum factional identity over smoothed window of candidate parent. Default 0.95.\n";
+		//helpString += "The minsmoothid parameter - minimum factional identity over smoothed window of candidate parent. Default 0.95.\n";
 		helpString += "The maxp parameter - maximum number of candidate parents to consider. Default 2. In tests so far, increasing maxp gives only a very small improvement in sensivity but tends to increase the error rate quite a bit.\n";
 		helpString += "The skipgaps parameter controls how gapped columns affect counting of diffs. If skipgaps is set to T, columns containing gaps do not found as diffs. Default = T.\n";
 		helpString += "The skipgaps2 parameter controls how gapped columns affect counting of diffs. If skipgaps2 is set to T, if column is immediately adjacent to a column containing a gap, it is not counted as a diff. Default = T.\n";
@@ -337,7 +337,7 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 			chunks = validParameter.validFile(parameters, "chunks", false);					if (chunks == "not found")			{ useChunks = false; chunks = "4";					}	else{ useChunks = true;			}
 			minchunk = validParameter.validFile(parameters, "minchunk", false);				if (minchunk == "not found")		{ useMinchunk = false; minchunk = "64";				}	else{ useMinchunk = true;		}
 			idsmoothwindow = validParameter.validFile(parameters, "idsmoothwindow", false);	if (idsmoothwindow == "not found")	{ useIdsmoothwindow = false; idsmoothwindow = "32";	}	else{ useIdsmoothwindow = true;	}
-			minsmoothid = validParameter.validFile(parameters, "minsmoothid", false);		if (minsmoothid == "not found")		{ useMinsmoothid = false; minsmoothid = "0.95";		}	else{ useMinsmoothid = true;	}
+			//minsmoothid = validParameter.validFile(parameters, "minsmoothid", false);		if (minsmoothid == "not found")		{ useMinsmoothid = false; minsmoothid = "0.95";		}	else{ useMinsmoothid = true;	}
 			maxp = validParameter.validFile(parameters, "maxp", false);						if (maxp == "not found")			{ useMaxp = false; maxp = "2";						}	else{ useMaxp = true;			}
 			minlen = validParameter.validFile(parameters, "minlen", false);					if (minlen == "not found")			{ useMinlen = false; minlen = "10";					}	else{ useMinlen = true;			}
 			maxlen = validParameter.validFile(parameters, "maxlen", false);					if (maxlen == "not found")			{ useMaxlen = false; maxlen = "10000";				}	else{ useMaxlen = true;			}
@@ -650,7 +650,7 @@ int ChimeraUchimeCommand::driver(string outputFName, string filename, string acc
 			cPara.push_back(tempIdsmoothwindow);
 		}
 		
-		if (useMinsmoothid) {
+		/*if (useMinsmoothid) {
 			char* tempminsmoothid = new char[14]; 
 			//strcpy(tempminsmoothid, "--minsmoothid"); 
 			*tempminsmoothid = '\0'; strncat(tempminsmoothid, "--minsmoothid", 13);
@@ -659,7 +659,7 @@ int ChimeraUchimeCommand::driver(string outputFName, string filename, string acc
 			*tempMinsmoothid = '\0'; strncat(tempMinsmoothid, minsmoothid.c_str(), minsmoothid.length());
 			//strcpy(tempMinsmoothid, minsmoothid.c_str());
 			cPara.push_back(tempMinsmoothid);
-		}
+		}*/
 		
 		if (useMaxp) {
 			char* tempmaxp = new char[7]; 
@@ -673,16 +673,16 @@ int ChimeraUchimeCommand::driver(string outputFName, string filename, string acc
 		}
 		
 		if (!skipgaps) {
-			char* tempskipgaps = new char[15]; 
+			char* tempskipgaps = new char[13]; 
 			//strcpy(tempskipgaps, "--[no]skipgaps");
-			*tempskipgaps = '\0'; strncat(tempskipgaps, "--[no]skipgaps", 14);
+			*tempskipgaps = '\0'; strncat(tempskipgaps, "--noskipgaps", 12);
 			cPara.push_back(tempskipgaps);
 		}
 		
 		if (!skipgaps2) {
-			char* tempskipgaps2 = new char[16]; 
+			char* tempskipgaps2 = new char[14]; 
 			//strcpy(tempskipgaps2, "--[no]skipgaps2"); 
-			*tempskipgaps2 = '\0'; strncat(tempskipgaps2, "--[no]skipgaps2", 15);
+			*tempskipgaps2 = '\0'; strncat(tempskipgaps2, "--noskipgaps2", 13);
 			cPara.push_back(tempskipgaps2);
 		}
 		
