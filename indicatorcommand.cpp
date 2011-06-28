@@ -41,7 +41,7 @@ string IndicatorCommand::getHelpString(){
 		helpString += "The new tree contains labels at each internal node.  The label is the node number so you can relate the tree to the summary file.\n";
 		helpString += "The summary file lists the indicator value for each OTU for each node.\n";
 		helpString += "The indicator command parameters are tree, groups, shared, relabund, design and label. The tree parameter is required as well as either shared or relabund.\n";
-		helpString += "The design parameter allows you to provide a design file to relate the tree to the shared or relabund file.\n";		
+		helpString += "The design parameter allows you to relate the tree to the shared or relabund file, if your tree contains the grouping names, or if no tree is provided to group your groups into groupings.\n";			
 		helpString += "The groups parameter allows you to specify which of the groups in your shared or relabund you would like analyzed, or if you provide a design file the groups in your design file.  The groups may be entered separated by dashes.\n";
 		helpString += "The label parameter indicates at what distance your tree relates to the shared or relabund.\n";
 		helpString += "The iters parameter allows you to set number of randomization for the P value.  The default is 1000.";
@@ -379,6 +379,7 @@ int IndicatorCommand::GetIndicatorSpecies(){
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
+		m->mothurOutEndLine(); m->mothurOut("Species\tIndicatorValue\tpValue\n");
 		
 		int numBins = 0;
 		if (sharedfile != "") { numBins = lookup[0]->getNumBins(); }
@@ -472,8 +473,6 @@ int IndicatorCommand::GetIndicatorSpecies(){
 		/******************************************************/
 		//output indicator values to table form               //
 		/*****************************************************/
-		int indicatorOTU;
-		double maxValue, pvalue; maxValue=0.0; pvalue=0.0;
 		out << "OTU\tIndicator_Value\tpValue" << endl;
 		for (int j = 0; j < indicatorValues.size(); j++) {
 				
@@ -484,19 +483,15 @@ int IndicatorCommand::GetIndicatorSpecies(){
 			if (pValues[j] > (1/(float)iters)) { out << pValues[j] << endl; } 
 			else { out << "<" << (1/(float)iters) << endl; }
 			
-			if (maxValue < indicatorValues[j]) { 
-				maxValue = indicatorValues[j];
-				indicatorOTU = j;
+			if (pValues[j] <= 0.05) {
+				cout << "OTU" << j+1 << '\t' << indicatorValues[j]  << '\t';
+				string pValueString = "<" + toString((1/(float)iters)); 
+				if (pValues[j] > (1/(float)iters)) { pValueString = toString(pValues[j]); cout << pValues[j];} 
+				else { cout << "<" << (1/(float)iters); }
+				m->mothurOutJustToLog("OTU" + toString(j+1) + "\t" + toString(indicatorValues[j]) + "\t" + pValueString); 
+				m->mothurOutEndLine(); 
 			}
 		}
-		
-		m->mothurOutEndLine(); m->mothurOut("Species\tIndicatorValue\tpValue\n");
-		cout << "OTU" << indicatorOTU+1 << '\t' << maxValue << '\t';
-		string pValueString = "<" + toString((1/(float)iters)); 
-		if (pValues[indicatorOTU] > (1/(float)iters)) { pValueString = toString(pValues[indicatorOTU]); cout << pValues[indicatorOTU];} 
-		else { cout << "<" << (1/(float)iters); }
-		m->mothurOutJustToLog("OTU" + toString(indicatorOTU+1) + "\t" + toString(maxValue) + "\t" + pValueString); 
-		m->mothurOutEndLine(); 
 		
 		out.close();
 		
@@ -554,7 +549,7 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 			
 		//for each node
 		for (int i = T->getNumLeaves(); i < T->getNumNodes(); i++) {
-				
+			//cout << endl << i+1 << endl;	
 			if (m->control_pressed) { out.close(); return 0; }
 			
 			/*****************************************************/
@@ -699,8 +694,6 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 			//output indicator values to table form + label tree  //
 			/*****************************************************/
 			out << (i+1) << '\t';
-			int indicatorOTU;
-			double maxValue, pvalue; maxValue=0.0; pvalue=0.0;
 			for (int j = 0; j < indicatorValues.size(); j++) {
 				
 				if (m->control_pressed) { out.close(); return 0; }
@@ -711,23 +704,18 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 					out << indicatorValues[j] << '\t' << pValues[j] << '\t';
 				}
 				
-				if (maxValue < indicatorValues[j]) { 
-					maxValue = indicatorValues[j];
-					indicatorOTU = j;
+				if (pValues[j] <= 0.05) {
+					cout << i+1 << "\tOTU" << j+1 << '\t' << indicatorValues[j]  << '\t';
+					string pValueString = "<" + toString((1/(float)iters)); 
+					if (pValues[j] > (1/(float)iters)) { pValueString = toString(pValues[j]); cout << pValues[j];} 
+					else { cout << "<" << (1/(float)iters); }
+					m->mothurOutJustToLog(toString(i) + "\tOTU" + toString(j+1) + "\t" + toString(indicatorValues[j]) + "\t" + pValueString); 
+					m->mothurOutEndLine(); 
 				}
 			}
 			out << endl;
 			
 			T->tree[i].setLabel((i+1));
-			
-			cout << i+1 << "\tOTU" << indicatorOTU+1 << '\t' << maxValue << '\t';
-			string pValueString = "<" + toString((1/(float)iters)); 
-			if (pValues[indicatorOTU] > (1/(float)iters)) { pValueString = toString(pValues[indicatorOTU]); cout << pValues[indicatorOTU];} 
-			else { cout << "<" << (1/(float)iters); }
-			m->mothurOutJustToLog(toString(i) + "\tOTU" + toString(indicatorOTU+1) + "\t" + toString(maxValue) + "\t" + pValueString); 
-			m->mothurOutEndLine(); 
-			
-			
 		}
 		out.close();
 	

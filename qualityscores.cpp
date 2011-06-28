@@ -286,23 +286,26 @@ bool QualityScores::stripQualWindowAverage(Sequence& sequence, int stepSize, int
 
 		if(seqLength < windowSize) {	return 0;	}
 			
-		while(start < seqLength){
+		while((start+windowSize) < seqLength){
 			double windowSum = 0.0000;
 
 			for(int i=start;i<end;i++){
 				windowSum += qScores[i];
 			}
 			double windowAverage = windowSum / (double)(end-start);
-			
+				
 			if(windowAverage < qThreshold){
 				end = end - stepSize;
 				break;
 			}
+			
 			start += stepSize;
 			end = start + windowSize;
-			if(end >= seqLength){	end = seqLength - 1;	}
+				
+			if(end >= seqLength){	end = seqLength;	}
+				
 		}
-		
+	
 		if(end == -1){	end = seqLength;	}
 		
 		//failed first window
