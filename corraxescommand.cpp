@@ -863,14 +863,14 @@ int CorrAxesCommand::getMetadata(){
 		//read the first label, because it refers to the groups
 		string columnLabel;
 		iss >> columnLabel; m->gobble(iss); 
-
+		
 		//save names of columns you are reading
 		while (!iss.eof()) {
 			iss >> columnLabel; m->gobble(iss);
 			metadataLabels.push_back(columnLabel);
 		}
 		int count = metadataLabels.size();
-		
+			
 		//read rest of file
 		while (!in.eof()) {
 			
@@ -879,7 +879,7 @@ int CorrAxesCommand::getMetadata(){
 			string group = "";
 			in >> group; m->gobble(in);
 			groupNames.push_back(group);
-			
+				
 			SharedRAbundFloatVector* tempLookup = new SharedRAbundFloatVector();
 			tempLookup->setGroup(group);
 			tempLookup->setLabel("1");
@@ -887,7 +887,6 @@ int CorrAxesCommand::getMetadata(){
 			for (int i = 0; i < count; i++) {
 				float temp = 0.0;
 				in >> temp; 
-				
 				tempLookup->push_back(temp, group);
 			}
 			

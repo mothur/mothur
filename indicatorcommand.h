@@ -39,7 +39,7 @@ private:
 	GroupMap* designMap;
 	string treefile, sharedfile, relabundfile, groups, label, inputFileName, outputDir, designfile;
 	bool abort;
-	int iters;
+	int iters, processors;
 	vector<string> outputNames, Groups;
 	vector<SharedRAbundVector*> lookup;
 	vector<SharedRAbundFloatVector*> lookupFloat;
@@ -54,6 +54,11 @@ private:
 	map<int, float> getDistToRoot(Tree*&);
 	map< vector<int>, vector<int> > randomizeGroupings(vector< vector<SharedRAbundVector*> >&, int);
 	map< vector<int>, vector<int> > randomizeGroupings(vector< vector<SharedRAbundFloatVector*> >&, int);
+	vector<float> driver(vector< vector<SharedRAbundFloatVector*> >&, map< vector<int>, vector<int> >, int, vector<float>, int);
+	vector<float> driver(vector< vector<SharedRAbundVector*> >&, map< vector<int>, vector<int> >, int, vector<float>, int);
+	vector<float> getPValues(vector< vector<SharedRAbundFloatVector*> >&, map< vector<int>, vector<int> >, int, vector<float>);
+	vector<float> getPValues(vector< vector<SharedRAbundVector*> >&, map< vector<int>, vector<int> >, int, vector<float>);
+
 	
 };
 
