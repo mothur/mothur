@@ -658,8 +658,10 @@ int SeqErrorCommand::driver(string filename, string qFileName, string rFileName,
 				for(int i=0;i<minCompare.sequence.length();i++){
 					char letter = minCompare.sequence[i];
 					
-					errorForward[letter][i] += minCompare.weight;
-					errorReverse[letter][minCompare.total-i-1] += minCompare.weight;				
+					if(letter != 'r'){
+						errorForward[letter][i] += minCompare.weight;
+						errorReverse[letter][minCompare.total-i-1] += minCompare.weight;				
+					}
 				}
 			}
 			
@@ -673,9 +675,13 @@ int SeqErrorCommand::driver(string filename, string qFileName, string rFileName,
 				quality = QualityScores(qualFile);
 				
 				if(!ignoreSeq){
+//					cout << query.getName() << '\t';
+					
 					quality.updateQScoreErrorMap(qScoreErrorMap, minCompare.sequence, startBase, endBase, minCompare.weight);
 					quality.updateForwardMap(qualForwardMap, startBase, endBase, minCompare.weight);
 					quality.updateReverseMap(qualReverseMap, startBase, endBase, minCompare.weight);
+
+//					cout << endl;
 				}
 			}			
 			
@@ -781,53 +787,65 @@ Compare SeqErrorCommand::getErrors(Sequence query, Sequence reference){
 		Compare errors;
 
 		for(int i=0;i<alignLength;i++){
-			if(r[i] != 'N' && q[i] != '.' && r[i] != '.' && (q[i] != '-' || r[i] != '-')){			//	no missing data and no double gaps
-				started = 1;
-				
-				if(q[i] == 'A'){
-					if(r[i] == 'A'){	errors.AA++;	errors.matches++;	errors.sequence += 'm';	}
-					if(r[i] == 'T'){	errors.AT++;	errors.sequence += 's';	}
-					if(r[i] == 'G'){	errors.AG++;	errors.sequence += 's';	}
-					if(r[i] == 'C'){	errors.AC++;	errors.sequence += 's';	}
-					if(r[i] == '-'){	errors.Ai++;	errors.sequence += 'i';	}
+//			cout << r[i] << '\t' << q[i] << '\t';
+			if(q[i] != '.' && r[i] != '.' && (q[i] != '-' || r[i] != '-')){			//	no missing data and no double gaps
+				if(r[i] != 'N'){
+					started = 1;
+					
+					if(q[i] == 'A'){
+						if(r[i] == 'A'){	errors.AA++;	errors.matches++;	errors.sequence += 'm';	}
+						if(r[i] == 'T'){	errors.AT++;	errors.sequence += 's';	}
+						if(r[i] == 'G'){	errors.AG++;	errors.sequence += 's';	}
+						if(r[i] == 'C'){	errors.AC++;	errors.sequence += 's';	}
+						if(r[i] == '-'){	errors.Ai++;	errors.sequence += 'i';	}
+					}
+					else if(q[i] == 'T'){
+						if(r[i] == 'A'){	errors.TA++;	errors.sequence += 's';	}
+						if(r[i] == 'T'){	errors.TT++;	errors.matches++;	errors.sequence += 'm';	}
+						if(r[i] == 'G'){	errors.TG++;	errors.sequence += 's';	}
+						if(r[i] == 'C'){	errors.TC++;	errors.sequence += 's';	}
+						if(r[i] == '-'){	errors.Ti++;	errors.sequence += 'i';	}
+					}
+					else if(q[i] == 'G'){
+						if(r[i] == 'A'){	errors.GA++;	errors.sequence += 's';	}
+						if(r[i] == 'T'){	errors.GT++;	errors.sequence += 's';	}
+						if(r[i] == 'G'){	errors.GG++;	errors.matches++;	errors.sequence += 'm';	}
+						if(r[i] == 'C'){	errors.GC++;	errors.sequence += 's';	}
+						if(r[i] == '-'){	errors.Gi++;	errors.sequence += 'i';	}
+					}
+					else if(q[i] == 'C'){
+						if(r[i] == 'A'){	errors.CA++;	errors.sequence += 's';	}
+						if(r[i] == 'T'){	errors.CT++;	errors.sequence += 's';	}
+						if(r[i] == 'G'){	errors.CG++;	errors.sequence += 's';	}
+						if(r[i] == 'C'){	errors.CC++;	errors.matches++;	errors.sequence += 'm';	}
+						if(r[i] == '-'){	errors.Ci++;	errors.sequence += 'i';	}
+					}
+					else if(q[i] == 'N'){
+						if(r[i] == 'A'){	errors.NA++;	errors.sequence += 'a';	}
+						if(r[i] == 'T'){	errors.NT++;	errors.sequence += 'a';	}
+						if(r[i] == 'G'){	errors.NG++;	errors.sequence += 'a';	}
+						if(r[i] == 'C'){	errors.NC++;	errors.sequence += 'a';	}
+						if(r[i] == '-'){	errors.Ni++;	errors.sequence += 'a';	}
+					}
+					else if(q[i] == '-' && r[i] != '-'){
+						if(r[i] == 'A'){	errors.dA++;	errors.sequence += 'd';	}
+						if(r[i] == 'T'){	errors.dT++;	errors.sequence += 'd';	}
+						if(r[i] == 'G'){	errors.dG++;	errors.sequence += 'd';	}
+						if(r[i] == 'C'){	errors.dC++;	errors.sequence += 'd';	}
+					}
+					errors.total++;	
 				}
-				else if(q[i] == 'T'){
-					if(r[i] == 'A'){	errors.TA++;	errors.sequence += 's';	}
-					if(r[i] == 'T'){	errors.TT++;	errors.matches++;	errors.sequence += 'm';	}
-					if(r[i] == 'G'){	errors.TG++;	errors.sequence += 's';	}
-					if(r[i] == 'C'){	errors.TC++;	errors.sequence += 's';	}
-					if(r[i] == '-'){	errors.Ti++;	errors.sequence += 'i';	}
+				else{
+					
+					if(q[i] == '-'){
+						errors.sequence += 'd';	errors.total++;
+					}						
+					else{
+						errors.sequence += 'r';
+					}
 				}
-				else if(q[i] == 'G'){
-					if(r[i] == 'A'){	errors.GA++;	errors.sequence += 's';	}
-					if(r[i] == 'T'){	errors.GT++;	errors.sequence += 's';	}
-					if(r[i] == 'G'){	errors.GG++;	errors.matches++;	errors.sequence += 'm';	}
-					if(r[i] == 'C'){	errors.GC++;	errors.sequence += 's';	}
-					if(r[i] == '-'){	errors.Gi++;	errors.sequence += 'i';	}
-				}
-				else if(q[i] == 'C'){
-					if(r[i] == 'A'){	errors.CA++;	errors.sequence += 's';	}
-					if(r[i] == 'T'){	errors.CT++;	errors.sequence += 's';	}
-					if(r[i] == 'G'){	errors.CG++;	errors.sequence += 's';	}
-					if(r[i] == 'C'){	errors.CC++;	errors.matches++;	errors.sequence += 'm';	}
-					if(r[i] == '-'){	errors.Ci++;	errors.sequence += 'i';	}
-				}
-				else if(q[i] == 'N'){
-					if(r[i] == 'A'){	errors.NA++;	errors.sequence += 'a';	}
-					if(r[i] == 'T'){	errors.NT++;	errors.sequence += 'a';	}
-					if(r[i] == 'G'){	errors.NG++;	errors.sequence += 'a';	}
-					if(r[i] == 'C'){	errors.NC++;	errors.sequence += 'a';	}
-					if(r[i] == '-'){	errors.Ni++;	errors.sequence += 'a';	}
-				}
-				else if(q[i] == '-' && r[i] != '-'){
-					if(r[i] == 'A'){	errors.dA++;	errors.sequence += 'd';	}
-					if(r[i] == 'T'){	errors.dT++;	errors.sequence += 'd';	}
-					if(r[i] == 'G'){	errors.dG++;	errors.sequence += 'd';	}
-					if(r[i] == 'C'){	errors.dC++;	errors.sequence += 'd';	}
-				}
-				errors.total++;	
-				
 			}
+				
 			else if(q[i] == '.' && r[i] != '.'){		//	reference extends beyond query
 				if(started == 1){	break;	}
 			}
@@ -837,8 +855,9 @@ Compare SeqErrorCommand::getErrors(Sequence query, Sequence reference){
 			else if(q[i] == '.' && r[i] == '.'){		//	both are missing data
 				if(started == 1){	break;	}			
 			}
-			
+//			cout << errors.sequence[errors.sequence.length()-1] << endl;
 		}
+//		cout << errors.sequence << endl;
 		errors.mismatches = errors.total-errors.matches;
 		errors.errorRate = (double)(errors.total-errors.matches) / (double)errors.total;
 		errors.queryName = query.getName();
