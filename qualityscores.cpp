@@ -376,10 +376,11 @@ void QualityScores::updateQScoreErrorMap(map<char, vector<int> >& qualErrorMap, 
 			if(errorSeq[i] == 'm')		{	qualErrorMap['m'][qScores[qIndex]] += weight;	}
 			else if(errorSeq[i] == 's')	{	qualErrorMap['s'][qScores[qIndex]] += weight;	}
 			else if(errorSeq[i] == 'i')	{	qualErrorMap['i'][qScores[qIndex]] += weight;	}
-			else if(errorSeq[i] == 'a')	{	qualErrorMap['a'][qScores[qIndex]] += weight;	}
+			else if(errorSeq[i] == 'a')	{	qualErrorMap['a'][qScores[qIndex]] += weight;	/*if(qScores[qIndex] != 0){	cout << qIndex << '\t';		}*/	}
 			else if(errorSeq[i] == 'd')	{	/*	there are no qScores for deletions	*/		}
 
 			if(errorSeq[i] != 'd')		{	qIndex++;	}
+						
 			if(qIndex > stop){	break;	}
 		}	
 	}
