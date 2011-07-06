@@ -14,7 +14,9 @@
 		A713EBED12DC7C5E000092AC /* nmdscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A713EBEC12DC7C5E000092AC /* nmdscommand.cpp */; };
 		A71CB160130B04A2001E7287 /* anosimcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A71CB15E130B04A2001E7287 /* anosimcommand.cpp */; };
 		A71FE12C12EDF72400963CA7 /* mergegroupscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A71FE12B12EDF72400963CA7 /* mergegroupscommand.cpp */; };
+		A721765713BB9F7D0014DAAE /* referencedb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A721765613BB9F7D0014DAAE /* referencedb.cpp */; };
 		A727864412E9E28C00F86ABA /* removerarecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A727864312E9E28C00F86ABA /* removerarecommand.cpp */; };
+		A73DDBBA13C4A0D1006AAE38 /* clearmemorycommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A73DDBB913C4A0D1006AAE38 /* clearmemorycommand.cpp */; };
 		A74D3687137DAB8300332B0C /* addtargets2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D3655137DAB8300332B0C /* addtargets2.cpp */; };
 		A74D3688137DAB8400332B0C /* alignchime.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D3656137DAB8300332B0C /* alignchime.cpp */; };
 		A74D3689137DAB8400332B0C /* alignchimel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D3657137DAB8300332B0C /* alignchimel.cpp */; };
@@ -346,8 +348,12 @@
 		A71CB15F130B04A2001E7287 /* anosimcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = anosimcommand.h; sourceTree = "<group>"; };
 		A71FE12A12EDF72400963CA7 /* mergegroupscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mergegroupscommand.h; sourceTree = "<group>"; };
 		A71FE12B12EDF72400963CA7 /* mergegroupscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mergegroupscommand.cpp; sourceTree = "<group>"; };
+		A721765513BB9F7D0014DAAE /* referencedb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = referencedb.h; sourceTree = "<group>"; };
+		A721765613BB9F7D0014DAAE /* referencedb.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = referencedb.cpp; sourceTree = "<group>"; };
 		A727864212E9E28C00F86ABA /* removerarecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = removerarecommand.h; sourceTree = "<group>"; };
 		A727864312E9E28C00F86ABA /* removerarecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = removerarecommand.cpp; sourceTree = "<group>"; };
+		A73DDBB813C4A0D1006AAE38 /* clearmemorycommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = clearmemorycommand.h; sourceTree = "<group>"; };
+		A73DDBB913C4A0D1006AAE38 /* clearmemorycommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = clearmemorycommand.cpp; sourceTree = "<group>"; };
 		A74D3655137DAB8300332B0C /* addtargets2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = addtargets2.cpp; sourceTree = "<group>"; };
 		A74D3656137DAB8300332B0C /* alignchime.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = alignchime.cpp; sourceTree = "<group>"; };
 		A74D3657137DAB8300332B0C /* alignchimel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = alignchimel.cpp; sourceTree = "<group>"; };
@@ -1206,6 +1212,8 @@
 				A7E9B69212D37EC400DA6239 /* classifyseqscommand.cpp */,
 				A7E9B69712D37EC400DA6239 /* clearcutcommand.h */,
 				A7E9B69612D37EC400DA6239 /* clearcutcommand.cpp */,
+				A73DDBB813C4A0D1006AAE38 /* clearmemorycommand.h */,
+				A73DDBB913C4A0D1006AAE38 /* clearmemorycommand.cpp */,
 				A7E9B69D12D37EC400DA6239 /* clustercommand.h */,
 				A7E9B69C12D37EC400DA6239 /* clustercommand.cpp */,
 				A7E9B69F12D37EC400DA6239 /* clusterdoturcommand.h */,
@@ -1602,6 +1610,8 @@
 				A7E9B7A012D37EC400DA6239 /* qualityscores.h */,
 				A7E9B7A312D37EC400DA6239 /* rabundvector.cpp */,
 				A7E9B7A412D37EC400DA6239 /* rabundvector.hpp */,
+				A721765513BB9F7D0014DAAE /* referencedb.h */,
+				A721765613BB9F7D0014DAAE /* referencedb.cpp */,
 				A7E9B7CB12D37EC400DA6239 /* reportfile.cpp */,
 				A7E9B7CC12D37EC400DA6239 /* reportfile.h */,
 				A7E9B7CF12D37EC400DA6239 /* sabundvector.cpp */,
@@ -2107,6 +2117,8 @@
 				A74D36B8137DAFAA00332B0C /* chimerauchimecommand.cpp in Sources */,
 				A77A221F139001B600B0BE70 /* deuniquetreecommand.cpp in Sources */,
 				A7730EFF13967241007433A3 /* countseqscommand.cpp in Sources */,
+				A721765713BB9F7D0014DAAE /* referencedb.cpp in Sources */,
+				A73DDBBA13C4A0D1006AAE38 /* clearmemorycommand.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2153,8 +2165,8 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"../release\\\"\"",
-					"VERSION=\"\\\"1.20.0\\\"\"",
-					"RELEASE_DATE=\"\\\"6/20/2011\\\"\"",
+					"VERSION=\"\\\"1.20.2\\\"\"",
+					"RELEASE_DATE=\"\\\"7/05/2011\\\"\"",
 				);
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;

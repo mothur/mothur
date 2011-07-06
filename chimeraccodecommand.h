@@ -50,7 +50,7 @@ private:
 	int driverMPI(int, int, MPI_File&, MPI_File&, MPI_File&, vector<unsigned long int>&);
 	#endif
 
-	bool abort, filter;
+	bool abort, filter, save;
 	string fastafile, templatefile, outputDir, maskfile;
 	int processors, window, numwanted, numSeqs, templateSeqsLength;
 	Chimera* chimera;

@@ -24,6 +24,7 @@
 
 #include "nast.hpp"
 #include "nastreport.hpp"
+#include "referencedb.h"
 
 //**********************************************************************************************************************
 vector<string> AlignCommand::setParameters(){	
@@ -39,6 +40,7 @@ vector<string> AlignCommand::setParameters(){
 		CommandParameter pgapextend("gapextend", "Number", "", "-1.0", "", "", "",false,false); parameters.push_back(pgapextend);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
 		CommandParameter pflip("flip", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pflip);
+		CommandParameter psave("save", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(psave);
 		CommandParameter pthreshold("threshold", "Number", "", "0.50", "", "", "",false,false); parameters.push_back(pthreshold);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
@@ -69,6 +71,7 @@ string AlignCommand::getHelpString(){
 		helpString += "The flip parameter is used to specify whether or not you want mothur to try the reverse complement if a sequence falls below the threshold.  The default is false.";
 		helpString += "The threshold is used to specify a cutoff at which an alignment is deemed 'bad' and the reverse complement may be tried. The default threshold is 0.50, meaning 50% of the bases are removed in the alignment.";
 		helpString += "If the flip parameter is set to true the reverse complement of the sequence is aligned and the better alignment is reported.";
+		helpString += "If the save parameter is set to true the reference sequences will be saved in memory, to clear them later you can use the clear.memory command. Default=f.";
 		helpString += "The default for the threshold parameter is 0.50, meaning at least 50% of the bases must remain or the sequence is reported as potentially reversed.";
 		helpString += "The align.seqs command should be in the following format:";
 		helpString += "align.seqs(reference=yourTemplateFile, fasta=yourCandidateFile, align=yourAlignmentMethod, search=yourSearchmethod, ksize=yourKmerSize, match=yourMatchBonus, mismatch=yourMismatchpenalty, gapopen=yourGapopenPenalty, gapextend=yourGapExtendPenalty)";
@@ -99,8 +102,9 @@ AlignCommand::AlignCommand(){
 //**********************************************************************************************************************
 AlignCommand::AlignCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
-	
+		abort = false; calledHelp = false;  
+		ReferenceDB* rdb = ReferenceDB::getInstance();
+		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true;}
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
@@ -146,15 +150,6 @@ AlignCommand::AlignCommand(string option)  {
 				}
 			}
 
-			//check for required parameters
-			templateFileName = validParameter.validFile(parameters, "reference", true);
-			
-			if (templateFileName == "not found") { 
-				m->mothurOut("reference is a required parameter for the align.seqs command."); 
-				m->mothurOutEndLine();
-				abort = true; 
-			}else if (templateFileName == "not open") { abort = true; }	
-			
 			candidateFileName = validParameter.validFile(parameters, "fasta", false);
 			if (candidateFileName == "not found") { 
 				//if there is a current fasta file, use it
@@ -258,6 +253,27 @@ AlignCommand::AlignCommand(string option)  {
 			
 			temp = validParameter.validFile(parameters, "flip", false);			if (temp == "not found"){	temp = "f";				}
 			flip = m->isTrue(temp); 
+			
+			temp = validParameter.validFile(parameters, "save", false);			if (temp == "not found"){	temp = "f";				}
+			save = m->isTrue(temp); 
+			rdb->save = save; 
+			if (save) { //clear out old references
+				rdb->clearMemory();
+			}
+			
+			//this has to go after save so that if the user sets save=t and provides no reference we abort
+			templateFileName = validParameter.validFile(parameters, "reference", true);
+			if (templateFileName == "not found") { 
+				//check for saved reference sequences
+				if (rdb->referenceSeqs.size() != 0) {
+					templateFileName = "saved";
+				}else {
+					m->mothurOut("[ERROR]: You don't have any saved reference sequences and the reference parameter is a required for the align.seqs command."); 
+					m->mothurOutEndLine();
+					abort = true; 
+				}
+			}else if (templateFileName == "not open") { abort = true; }	
+			else {	if (save) {	rdb->setSavedReference(templateFileName);	}	}
 			
 			temp = validParameter.validFile(parameters, "threshold", false);	if (temp == "not found"){	temp = "0.50";			}
 			convert(temp, threshold); 

@@ -15,6 +15,7 @@
 #include "knn.h"
 
 
+
 //**********************************************************************************************************************
 vector<string> ClassifySeqsCommand::setParameters(){	
 	try {
@@ -34,6 +35,7 @@ vector<string> ClassifySeqsCommand::setParameters(){
 		CommandParameter pcutoff("cutoff", "Number", "", "0", "", "", "",false,true); parameters.push_back(pcutoff);
 		CommandParameter pprobs("probs", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pprobs);
 		CommandParameter piters("iters", "Number", "", "100", "", "", "",false,true); parameters.push_back(piters);
+		CommandParameter psave("save", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(psave);
 		CommandParameter pnumwanted("numwanted", "Number", "", "10", "", "", "",false,true); parameters.push_back(pnumwanted);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
@@ -63,6 +65,7 @@ string ClassifySeqsCommand::getHelpString(){
 #ifdef USE_MPI
 		helpString += "When using MPI, the processors parameter is set to the number of MPI processes running. \n";
 #endif
+		helpString += "If the save parameter is set to true the reference sequences will be saved in memory, to clear them later you can use the clear.memory command. Default=f.";
 		helpString += "The match parameter allows you to specify the bonus for having the same base. The default is 1.0.\n";
 		helpString += "The mistmatch parameter allows you to specify the penalty for having different bases.  The default is -1.0.\n";
 		helpString += "The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -2.0.\n";
@@ -103,6 +106,7 @@ ClassifySeqsCommand::ClassifySeqsCommand(){
 ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 	try {
 		abort = false; calledHelp = false;   
+		rdb = ReferenceDB::getInstance();
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
@@ -161,16 +165,6 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 				}
 			}
 
-			//check for required parameters
-			templateFileName = validParameter.validFile(parameters, "reference", true);
-			if (templateFileName == "not found") { 
-				m->mothurOut("reference is a required parameter for the classify.seqs command."); 
-				m->mothurOutEndLine();
-				abort = true; 
-			}
-			else if (templateFileName == "not open") { abort = true; }	
-			
-						
 			fastaFileName = validParameter.validFile(parameters, "fasta", false);
 			if (fastaFileName == "not found") { 				
 				//if there is a current fasta file, use it
@@ -250,16 +244,6 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 				if (fastaFileNames.size() == 0) { m->mothurOut("no valid files."); m->mothurOutEndLine(); abort = true; }
 			}
 
-			
-			taxonomyFileName = validParameter.validFile(parameters, "taxonomy", true);
-			if (taxonomyFileName == "not found") { 
-				m->mothurOut("taxonomy is a required parameter for the classify.seqs command."); 
-				m->mothurOutEndLine();
-				abort = true; 
-			}
-			else if (taxonomyFileName == "not open") { abort = true; }	
-			
-			
 			namefile = validParameter.validFile(parameters, "name", false);
 			if (namefile == "not found") { namefile = "";  }
 
@@ -397,6 +381,41 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 			temp = validParameter.validFile(parameters, "ksize", false);		if (temp == "not found"){	temp = "8";				}
 			convert(temp, kmerSize); 
 			
+			temp = validParameter.validFile(parameters, "save", false);			if (temp == "not found"){	temp = "f";				}
+			save = m->isTrue(temp); 
+			rdb->save = save; 
+			if (save) { //clear out old references
+				rdb->clearMemory();	
+			}
+			
+			//this has to go after save so that if the user sets save=t and provides no reference we abort
+			templateFileName = validParameter.validFile(parameters, "reference", true);
+			if (templateFileName == "not found") { 
+				//check for saved reference sequences
+				if (rdb->referenceSeqs.size() != 0) {
+					templateFileName = "saved";
+				}else {
+					m->mothurOut("[ERROR]: You don't have any saved reference sequences and the reference parameter is a required for the classify.seqs command."); 
+					m->mothurOutEndLine();
+					abort = true; 
+				}
+			}else if (templateFileName == "not open") { abort = true; }	
+			else {	if (save) {	rdb->setSavedReference(templateFileName);	}	}
+			
+			//this has to go after save so that if the user sets save=t and provides no reference we abort
+			taxonomyFileName = validParameter.validFile(parameters, "taxonomy", true);
+			if (taxonomyFileName == "not found") { 
+				//check for saved reference sequences
+				if (rdb->wordGenusProb.size() != 0) {
+					taxonomyFileName = "saved";
+				}else {
+					m->mothurOut("[ERROR]: You don't have any saved taxonomy information and the taxonomy parameter is a required for the classify.seqs command."); 
+					m->mothurOutEndLine();
+					abort = true; 
+				}
+			}else if (taxonomyFileName == "not open") { abort = true; }	
+			else {	if (save) {	rdb->setSavedTaxonomy(taxonomyFileName);	}	}
+			
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
 			convert(temp, processors); 
@@ -471,7 +490,10 @@ int ClassifySeqsCommand::execute(){
 		
 			m->mothurOut("Classifying sequences from " + fastaFileNames[s] + " ..." ); m->mothurOutEndLine();
 			
-			string RippedTaxName = m->getRootName(m->getSimpleName(taxonomyFileName));
+			string baseTName = taxonomyFileName;
+			if (taxonomyFileName == "saved") {baseTName = rdb->getSavedTaxonomy();	}
+			
+			string RippedTaxName = m->getRootName(m->getSimpleName(baseTName));
 			RippedTaxName = m->getExtension(RippedTaxName.substr(0, RippedTaxName.length()-1));
 			if (RippedTaxName[0] == '.') { RippedTaxName = RippedTaxName.substr(1, RippedTaxName.length()); }
 			RippedTaxName +=  "."; 
@@ -636,7 +658,7 @@ int ClassifySeqsCommand::execute(){
 			string group = "";
 			if (groupfile != "") {  group = groupfileNames[s]; }
 			
-			PhyloSummary taxaSum(taxonomyFileName, group);
+			PhyloSummary taxaSum(baseTName, group);
 			
 			if (m->control_pressed) { outputTypes.clear();  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} delete classify; return 0; }
 		

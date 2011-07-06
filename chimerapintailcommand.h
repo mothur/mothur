@@ -13,7 +13,7 @@
 #include "mothur.h"
 #include "command.hpp"
 #include "chimera.h"
-
+#include "referencedb.h"
 
 /***********************************************************/
 
@@ -35,7 +35,8 @@ public:
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }		
 private:
-
+	ReferenceDB* rdb;
+	
 	struct linePair {
 		unsigned long int start;
 		unsigned long int end;
@@ -52,7 +53,7 @@ private:
 	int driverMPI(int, int, MPI_File&, MPI_File&, MPI_File&, vector<unsigned long int>&);
 	#endif
 
-	bool abort, filter;
+	bool abort, filter, save;
 	string fastafile, templatefile, consfile, quanfile, maskfile, outputDir, inputDir;
 	int processors, window, increment, numSeqs, templateSeqsLength;
 	Chimera* chimera;

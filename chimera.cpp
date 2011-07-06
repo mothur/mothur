@@ -8,6 +8,7 @@
  */
 
 #include "chimera.h"
+#include "referencedb.h"
 
 //***************************************************************************************************************
 //this is a vertical soft filter
@@ -94,99 +95,123 @@ map<int, int> Chimera::runFilter(Sequence* seq) {
 //***************************************************************************************************************
 vector<Sequence*> Chimera::readSeqs(string file) {
 	try {
-	
+		
 		vector<Sequence*> container;
 		int count = 0;
 		length = 0;
 		unaligned = false;
-
-		m->mothurOut("Reading sequences from " + file + "..."); cout.flush();
+		ReferenceDB* rdb = ReferenceDB::getInstance();
 		
-		#ifdef USE_MPI	
-			int pid, processors;
-			vector<unsigned long int> positions;
-			int numSeqs;
-			int tag = 2001;
-		
-			MPI_Status status; 
-			MPI_File inMPI;
-			MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-			MPI_Comm_size(MPI_COMM_WORLD, &processors);
-
-			//char* inFileName = new char[file.length()];
-			//memcpy(inFileName, file.c_str(), file.length());
+		if (file == "saved") {
 			
-			char inFileName[1024];
-			strcpy(inFileName, file.c_str());
-	
-			MPI_File_open(MPI_COMM_WORLD, inFileName, MPI_MODE_RDONLY, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
-			//delete inFileName;
-
-			if (pid == 0) {
-				positions = m->setFilePosFasta(file, numSeqs); //fills MPIPos, returns numSeqs
-
-				//send file positions to all processes
-				for(int i = 1; i < processors; i++) { 
-					MPI_Send(&numSeqs, 1, MPI_INT, i, tag, MPI_COMM_WORLD);
-					MPI_Send(&positions[0], (numSeqs+1), MPI_LONG, i, tag, MPI_COMM_WORLD);
-				}
-			}else{
-				MPI_Recv(&numSeqs, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
-				positions.resize(numSeqs+1);
-				MPI_Recv(&positions[0], (numSeqs+1), MPI_LONG, 0, tag, MPI_COMM_WORLD, &status);
-			}
 			
-			//read file 
-			for(int i=0;i<numSeqs;i++){
+			m->mothurOutEndLine();  m->mothurOut("Using sequences from " + rdb->getSavedReference() + " that are saved in memory.");	m->mothurOutEndLine();
 			
-				if (m->control_pressed) { MPI_File_close(&inMPI); return container; }
-	
-				//read next sequence
-				int seqlength = positions[i+1] - positions[i];
-				char* buf4 = new char[seqlength];
-
-				MPI_File_read_at(inMPI, positions[i], buf4, seqlength, MPI_CHAR, &status);
+			for (int i = 0; i < rdb->referenceSeqs.size(); i++) {
+				Sequence* temp = new Sequence(rdb->referenceSeqs[i].getName(), rdb->referenceSeqs[i].getAligned());
 				
-				string tempBuf = buf4;
-				if (tempBuf.length() > seqlength) { tempBuf = tempBuf.substr(0, seqlength); }
-				delete buf4;
-
-				istringstream iss (tempBuf,istringstream::in);
-		
-				Sequence* current = new Sequence(iss);   
-				if (current->getName() != "") {
-					if (count == 0) {  length = current->getAligned().length();  count++;  } //gets first seqs length
-					else if (length != current->getAligned().length()) {	unaligned = true;	}
-			
-					container.push_back(current);  
-				}
+				if (count == 0) {  length = temp->getAligned().length();  count++;  } //gets first seqs length
+				else if (length != temp->getAligned().length()) {	unaligned = true;	}
+				
+				if (temp->getName() != "") {  container.push_back(temp);  }
 			}
 			
-			MPI_File_close(&inMPI);
-			MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
-	#else
+			templateFileName = rdb->getSavedReference();
+			
+		}else {
+			
+			m->mothurOut("Reading sequences from " + file + "..."); cout.flush();
+			
+			#ifdef USE_MPI	
+				int pid, processors;
+				vector<unsigned long int> positions;
+				int numSeqs;
+				int tag = 2001;
+			
+				MPI_Status status; 
+				MPI_File inMPI;
+				MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
+				MPI_Comm_size(MPI_COMM_WORLD, &processors);
 
-		ifstream in;
-		m->openInputFile(file, in);
+				//char* inFileName = new char[file.length()];
+				//memcpy(inFileName, file.c_str(), file.length());
+				
+				char inFileName[1024];
+				strcpy(inFileName, file.c_str());
 		
-		//read in seqs and store in vector
-		while(!in.eof()){
+				MPI_File_open(MPI_COMM_WORLD, inFileName, MPI_MODE_RDONLY, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
+				//delete inFileName;
+
+				if (pid == 0) {
+					positions = m->setFilePosFasta(file, numSeqs); //fills MPIPos, returns numSeqs
+
+					//send file positions to all processes
+					for(int i = 1; i < processors; i++) { 
+						MPI_Send(&numSeqs, 1, MPI_INT, i, tag, MPI_COMM_WORLD);
+						MPI_Send(&positions[0], (numSeqs+1), MPI_LONG, i, tag, MPI_COMM_WORLD);
+					}
+				}else{
+					MPI_Recv(&numSeqs, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
+					positions.resize(numSeqs+1);
+					MPI_Recv(&positions[0], (numSeqs+1), MPI_LONG, 0, tag, MPI_COMM_WORLD, &status);
+				}
+				
+				//read file 
+				for(int i=0;i<numSeqs;i++){
+				
+					if (m->control_pressed) { MPI_File_close(&inMPI); return container; }
+		
+					//read next sequence
+					int seqlength = positions[i+1] - positions[i];
+					char* buf4 = new char[seqlength];
+
+					MPI_File_read_at(inMPI, positions[i], buf4, seqlength, MPI_CHAR, &status);
+					
+					string tempBuf = buf4;
+					if (tempBuf.length() > seqlength) { tempBuf = tempBuf.substr(0, seqlength); }
+					delete buf4;
+
+					istringstream iss (tempBuf,istringstream::in);
 			
-			if (m->control_pressed) { return container; }
+					Sequence* current = new Sequence(iss);   
+					if (current->getName() != "") {
+						if (count == 0) {  length = current->getAligned().length();  count++;  } //gets first seqs length
+						else if (length != current->getAligned().length()) {	unaligned = true;	}
+				
+						container.push_back(current);  
+						if (rdb->save) { rdb->referenceSeqs.push_back(*current); }
+					}
+				}
+				
+				MPI_File_close(&inMPI);
+				MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
+		#else
+
+			ifstream in;
+			m->openInputFile(file, in);
 			
-			Sequence* current = new Sequence(in);  m->gobble(in);
+			//read in seqs and store in vector
+			while(!in.eof()){
+				
+				if (m->control_pressed) { return container; }
+				
+				Sequence* current = new Sequence(in);  m->gobble(in);
+				
+				if (count == 0) {  length = current->getAligned().length();  count++;  } //gets first seqs length
+				else if (length != current->getAligned().length()) {	unaligned = true;	}
+							
+				if (current->getName() != "") {  
+					container.push_back(current);  
+					if (rdb->save) { rdb->referenceSeqs.push_back(*current); }
+				}
+			}
+			in.close();
+		#endif
+		
+			m->mothurOut("Done."); m->mothurOutEndLine();
 			
-			if (count == 0) {  length = current->getAligned().length();  count++;  } //gets first seqs length
-			else if (length != current->getAligned().length()) {	unaligned = true;	}
-						
-			if (current->getName() != "") {  container.push_back(current);  }
+			filterString = (string(container[0]->getAligned().length(), '1'));
 		}
-		in.close();
-	#endif
-	
-		m->mothurOut("Done."); m->mothurOutEndLine();
-		
-		filterString = (string(container[0]->getAligned().length(), '1'));
 		
 		return container;
 	}

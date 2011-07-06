@@ -61,7 +61,7 @@ private:
 	vector<string> candidateFileNames;
 	vector<string> outputNames;
 	
-	bool abort, flip, calledHelp;
+	bool abort, flip, calledHelp, save;
 
 };
 

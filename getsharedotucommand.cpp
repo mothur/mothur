@@ -8,6 +8,7 @@
  */
 
 #include "getsharedotucommand.h"
+#include "sharedutilities.h"
 
 //**********************************************************************************************************************
 vector<string> GetSharedOTUCommand::setParameters(){	
@@ -226,6 +227,10 @@ int GetSharedOTUCommand::execute(){
 			userGroups = "unique.";
 			for(int i = 0; i < Groups.size(); i++) {  userGroups += Groups[i] + "-";  }
 			userGroups = userGroups.substr(0, userGroups.length()-1);
+		}else{
+			//sanity check for group names
+			SharedUtil util;
+			util.setGroups(Groups, groupMap->namesOfGroups);
 		}
 	
 		//put groups in map to find easier

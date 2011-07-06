@@ -954,7 +954,7 @@ void ProgressExit()
 // Skip exit(), which can be very slow in DEBUG build
 // VERY DANGEROUS practice, because it skips global destructors.
 // But if you know the rules, you can break 'em, right?
-	ExitProcess(0);
+	//ExitProcess(0);
 #endif
 	}
 
@@ -1531,7 +1531,7 @@ static void GetArgsFromFile(const string &FileName, vector<string> &Args)
 
 void MyCmdLine(int argc, char **argv)
 	{
-	g_Opts.clear();
+	g_Opts.clear(); g_Argv.clear();
 	static unsigned RecurseDepth = 0;
 	++RecurseDepth;
 

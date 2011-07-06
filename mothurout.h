@@ -12,7 +12,6 @@
 
 #include "mothur.h"
 
-
 /***********************************************/
 
 class MothurOut {
@@ -183,7 +182,7 @@ class MothurOut {
 			gui = false;
 			printedHeaders = false;
 			sharedHeaderMode = "";
-		};
+		}
 		~MothurOut();
 
 		string logFileName;

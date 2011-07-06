@@ -11,6 +11,7 @@
 #include "deconvolutecommand.h"
 #include "uc.h"
 #include "sequence.hpp"
+#include "referencedb.h"
 
 
 //**********************************************************************************************************************
@@ -40,7 +41,7 @@ vector<string> ChimeraUchimeCommand::setParameters(){
 		CommandParameter pmaxlen("maxlen", "Number", "", "10000", "", "", "",false,false); parameters.push_back(pmaxlen);
 		CommandParameter pucl("ucl", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pucl);
 		CommandParameter pqueryfract("queryfract", "Number", "", "0.5", "", "", "",false,false); parameters.push_back(pqueryfract);
-		
+
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
@@ -112,7 +113,8 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(){
 //***************************************************************************************************************
 ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
+		abort = false; calledHelp = false; 
+		ReferenceDB* rdb = ReferenceDB::getInstance();
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
@@ -300,7 +302,6 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
 			
-			
 			string path;
 			it = parameters.find("reference");
 			//user has given a template file
@@ -313,12 +314,29 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 					
 					templatefile = validParameter.validFile(parameters, "reference", true);
 					if (templatefile == "not open") { abort = true; }
-					else if (templatefile == "not found") { templatefile = "";  m->mothurOut("reference is a required parameter for the chimera.uchime command."); m->mothurOutEndLine(); abort = true;  }	
+					else if (templatefile == "not found") { //check for saved reference sequences
+						if (rdb->getSavedReference() != "") {
+							templatefile = rdb->getSavedReference();
+							m->mothurOutEndLine();  m->mothurOut("Using sequences from " + rdb->getSavedReference() + ".");	m->mothurOutEndLine();
+						}else {
+							m->mothurOut("[ERROR]: You don't have any saved reference sequences and the reference parameter is a required."); 
+							m->mothurOutEndLine();
+							abort = true; 
+						}
+					}
 				}
 			}else if (hasName) {  templatefile = "self"; }
-			else { templatefile = "";  m->mothurOut("reference is a required parameter for the chimera.uchime command, unless you have a namefile."); m->mothurOutEndLine(); abort = true;  }	
-
-			
+			else { 
+				if (rdb->getSavedReference() != "") {
+					templatefile = rdb->getSavedReference();
+					m->mothurOutEndLine();  m->mothurOut("Using sequences from " + rdb->getSavedReference() + ".");	m->mothurOutEndLine();
+				}else {
+					m->mothurOut("[ERROR]: You don't have any saved reference sequences and the reference parameter is a required."); 
+					m->mothurOutEndLine();
+					templatefile = ""; abort = true; 
+				} 
+			}
+				
 			string temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
 			convert(temp, processors);
@@ -353,7 +371,8 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 
 			temp = validParameter.validFile(parameters, "skipgaps2", false);				if (temp == "not found") { temp = "t"; }
 			skipgaps2 = m->isTrue(temp); 
-
+			
+			if (hasName && (templatefile != "self")) { m->mothurOut("You have provided a namefile and the reference parameter is not set to self. I am not sure what reference you are trying to use, aborting."); m->mothurOutEndLine(); abort=true; }
 		}
 	}
 	catch(exception& e) {

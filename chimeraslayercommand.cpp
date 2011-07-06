@@ -10,6 +10,7 @@
 #include "chimeraslayercommand.h"
 #include "chimeraslayer.h"
 #include "deconvolutecommand.h"
+#include "referencedb.h"
 
 //**********************************************************************************************************************
 vector<string> ChimeraSlayerCommand::setParameters(){	
@@ -37,7 +38,8 @@ vector<string> ChimeraSlayerCommand::setParameters(){
 		CommandParameter pincrement("increment", "Number", "", "5", "", "", "",false,false); parameters.push_back(pincrement);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
-		
+		CommandParameter psave("save", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(psave);
+
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
@@ -55,7 +57,7 @@ string ChimeraSlayerCommand::getHelpString(){
 		helpString += "This command was modeled after the chimeraSlayer written by the Broad Institute.\n";
 		helpString += "The chimera.slayer command parameters are fasta, name, template, processors, trim, ksize, window, match, mismatch, divergence. minsim, mincov, minbs, minsnp, parents, search, iters, increment, numwanted, and realign.\n";
 		helpString += "The fasta parameter allows you to enter the fasta file containing your potentially chimeric sequences, and is required, unless you have a valid current fasta file. \n";
-		helpString += "The name parameter allows you to provide a name file, if you are using template=self. \n";
+		helpString += "The name parameter allows you to provide a name file, if you are using reference=self. \n";
 		helpString += "You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amazon.fasta \n";
 		helpString += "The reference parameter allows you to enter a reference file containing known non-chimeric sequences, and is required. You may also set template=self, in this case the abundant sequences will be used as potential parents. \n";
 		helpString += "The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n";
@@ -79,6 +81,7 @@ string ChimeraSlayerCommand::getHelpString(){
 		helpString += "The minsnp parameter allows you to specify percent of SNPs to sample on each side of breakpoint for computing bootstrap support (default: 10) \n";
 		helpString += "The search parameter allows you to specify search method for finding the closest parent. Choices are blast, and kmer, default blast. \n";
 		helpString += "The realign parameter allows you to realign the query to the potential parents. Choices are true or false, default true.  \n";
+		helpString += "If the save parameter is set to true the reference sequences will be saved in memory, to clear them later you can use the clear.memory command. Default=f.";
 		helpString += "The chimera.slayer command should be in the following format: \n";
 		helpString += "chimera.slayer(fasta=yourFastaFile, reference=yourTemplate, search=yourSearch) \n";
 		helpString += "Example: chimera.slayer(fasta=AD.align, reference=core_set_aligned.imputed.fasta, search=kmer) \n";
@@ -109,6 +112,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(){
 ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 	try {
 		abort = false; calledHelp = false;   
+		ReferenceDB* rdb = ReferenceDB::getInstance();
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
@@ -296,12 +300,29 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
 			
+			string temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
+			m->setProcessors(temp);
+			convert(temp, processors);
+			
+			temp = validParameter.validFile(parameters, "save", false);			if (temp == "not found"){	temp = "f";				}
+			save = m->isTrue(temp); 
+			rdb->save = save; 
+			if (save) { //clear out old references
+				rdb->clearMemory();	
+			}
 			
 			string path;
 			it = parameters.find("reference");
 			//user has given a template file
 			if(it != parameters.end()){ 
-				if (it->second == "self") { templatefile = "self"; }
+				if (it->second == "self") { 
+					templatefile = "self"; 
+					if (save) {
+						m->mothurOut("[WARNING]: You can't save reference=self, ignoring save."); 
+						m->mothurOutEndLine();
+						save = false;
+					}
+				}
 				else {
 					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
@@ -309,14 +330,34 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 					
 					templatefile = validParameter.validFile(parameters, "reference", true);
 					if (templatefile == "not open") { abort = true; }
-					else if (templatefile == "not found") { templatefile = "";  m->mothurOut("reference is a required parameter for the chimera.slayer command, unless and namefile is given."); m->mothurOutEndLine(); abort = true;  }	
+					else if (templatefile == "not found") { //check for saved reference sequences
+						if (rdb->referenceSeqs.size() != 0) {
+							templatefile = "saved";
+						}else {
+							m->mothurOut("[ERROR]: You don't have any saved reference sequences and the reference parameter is a required."); 
+							m->mothurOutEndLine();
+							abort = true; 
+						}
+					}else {	if (save) {	rdb->setSavedReference(templatefile);	}	}	
 				}
-			}else if (hasName) {  templatefile = "self"; }
-			else { templatefile = "";  m->mothurOut("reference is a required parameter for the chimera.slayer command."); m->mothurOutEndLine(); abort = true;  }	
+			}else if (hasName) {  templatefile = "self"; 
+				if (save) {
+					m->mothurOut("[WARNING]: You can't save reference=self, ignoring save."); 
+					m->mothurOutEndLine();
+					save = false;
+				}
+			}
+			else { 
+				if (rdb->referenceSeqs.size() != 0) {
+					templatefile = "saved";
+				}else {
+					m->mothurOut("[ERROR]: You don't have any saved reference sequences and the reference parameter is a required."); 
+					m->mothurOutEndLine();
+					templatefile = ""; abort = true; 
+				} 
+			}
 			
-			string temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
-			m->setProcessors(temp);
-			convert(temp, processors);
+			
 			
 			temp = validParameter.validFile(parameters, "ksize", false);			if (temp == "not found") { temp = "7"; }
 			convert(temp, ksize);
@@ -369,6 +410,8 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 			convert(temp, numwanted);
 
 			if ((search != "blast") && (search != "kmer")) { m->mothurOut(search + " is not a valid search."); m->mothurOutEndLine(); abort = true;  }
+			
+			if (hasName && (templatefile != "self")) { m->mothurOut("You have provided a namefile and the reference parameter is not set to self. I am not sure what reference you are trying to use, aborting."); m->mothurOutEndLine(); abort=true; }
 		}
 	}
 	catch(exception& e) {
@@ -381,7 +424,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 int ChimeraSlayerCommand::execute(){
 	try{
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
-		
+			
 		for (int s = 0; s < fastaFileNames.size(); s++) {
 				
 			m->mothurOut("Checking sequences from " + fastaFileNames[s] + " ..." ); m->mothurOutEndLine();

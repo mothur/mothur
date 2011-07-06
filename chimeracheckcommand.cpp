@@ -8,6 +8,7 @@
  */
 
 #include "chimeracheckcommand.h"
+#include "referencedb.h"
 
 //**********************************************************************************************************************
 vector<string> ChimeraCheckCommand::setParameters(){	
@@ -21,7 +22,8 @@ vector<string> ChimeraCheckCommand::setParameters(){
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
-		
+		CommandParameter psave("save", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(psave);
+
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
@@ -50,6 +52,7 @@ string ChimeraCheckCommand::getHelpString(){
 		helpString += "The svg parameter allows you to specify whether or not you would like a svg file outputted for each query sequence, default is False.\n";
 		helpString += "The name parameter allows you to enter a file containing names of sequences you would like .svg files for.\n";
 		helpString += "You may enter multiple name files by separating their names with dashes. ie. fasta=abrecovery.svg.names-amzon.svg.names \n";
+		helpString += "If the save parameter is set to true the reference sequences will be saved in memory, to clear them later you can use the clear.memory command. Default=f.";
 		helpString += "The chimera.check command should be in the following format: \n";
 		helpString += "chimera.check(fasta=yourFastaFile, reference=yourTemplateFile, processors=yourProcessors, ksize=yourKmerSize) \n";
 		helpString += "Example: chimera.check(fasta=AD.fasta, reference=core_set_aligned,imputed.fasta, processors=4, ksize=8) \n";
@@ -77,7 +80,8 @@ ChimeraCheckCommand::ChimeraCheckCommand(){
 //***************************************************************************************************************
 ChimeraCheckCommand::ChimeraCheckCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
+		abort = false; calledHelp = false;  
+		ReferenceDB* rdb = ReferenceDB::getInstance();
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
@@ -195,10 +199,6 @@ ChimeraCheckCommand::ChimeraCheckCommand(string option)  {
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
-
-			templatefile = validParameter.validFile(parameters, "reference", true);
-			if (templatefile == "not open") { abort = true; }
-			else if (templatefile == "not found") { templatefile = "";  m->mothurOut("reference is a required parameter for the chimera.check command."); m->mothurOutEndLine(); abort = true;  }	
 			
 			namefile = validParameter.validFile(parameters, "name", false);
 			if (namefile == "not found") { namefile = ""; }
@@ -282,6 +282,28 @@ ChimeraCheckCommand::ChimeraCheckCommand(string option)  {
 			string temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
 			convert(temp, processors);
+			
+			temp = validParameter.validFile(parameters, "save", false);			if (temp == "not found"){	temp = "f";				}
+			save = m->isTrue(temp); 
+			rdb->save = save; 
+			if (save) { //clear out old references
+				rdb->clearMemory();	
+			}
+			
+			//this has to go after save so that if the user sets save=t and provides no reference we abort
+			templatefile = validParameter.validFile(parameters, "reference", true);
+			if (templatefile == "not found") { 
+				//check for saved reference sequences
+				if (rdb->referenceSeqs.size() != 0) {
+					templatefile = "saved";
+				}else {
+					m->mothurOut("[ERROR]: You don't have any saved reference sequences and the reference parameter is a required."); 
+					m->mothurOutEndLine();
+					abort = true; 
+				}
+			}else if (templatefile == "not open") { abort = true; }	
+			else {	if (save) {	rdb->setSavedReference(templatefile);	}	}
+			
 			
 			temp = validParameter.validFile(parameters, "ksize", false);			if (temp == "not found") { temp = "7"; }
 			convert(temp, ksize);

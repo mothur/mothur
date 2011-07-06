@@ -10,6 +10,7 @@
 #include "chimerapintailcommand.h"
 #include "pintail.h"
 
+
 //**********************************************************************************************************************
 vector<string> ChimeraPintailCommand::setParameters(){	
 	try {
@@ -24,7 +25,8 @@ vector<string> ChimeraPintailCommand::setParameters(){
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
-		
+		CommandParameter psave("save", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(psave);
+
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
@@ -50,6 +52,7 @@ string ChimeraPintailCommand::getHelpString(){
 #ifdef USE_MPI
 		helpString += "When using MPI, the processors parameter is set to the number of MPI processes running. \n";
 #endif
+		helpString += "If the save parameter is set to true the reference sequences will be saved in memory, to clear them later you can use the clear.memory command. Default=f.";
 		helpString += "The window parameter allows you to specify the window size for searching for chimeras, default=300. \n";
 		helpString += "The increment parameter allows you to specify how far you move each window while finding chimeric sequences, default=25.\n";
 		helpString += "The conservation parameter allows you to enter a frequency file containing the highest bases frequency at each place in the alignment.\n";
@@ -83,6 +86,7 @@ ChimeraPintailCommand::ChimeraPintailCommand(){
 ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
 	try {
 		abort = false; calledHelp = false;   
+		rdb = ReferenceDB::getInstance();
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
@@ -229,6 +233,28 @@ ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
 			temp = validParameter.validFile(parameters, "increment", false);		if (temp == "not found") { temp = "25"; }
 			convert(temp, increment);
 			
+			temp = validParameter.validFile(parameters, "save", false);			if (temp == "not found"){	temp = "f";				}
+			save = m->isTrue(temp); 
+			rdb->save = save; 
+			if (save) { //clear out old references
+				rdb->clearMemory();	
+			}
+			
+			//this has to go after save so that if the user sets save=t and provides no reference we abort
+			templatefile = validParameter.validFile(parameters, "reference", true);
+			if (templatefile == "not found") { 
+				//check for saved reference sequences
+				if (rdb->referenceSeqs.size() != 0) {
+					templatefile = "saved";
+				}else {
+					m->mothurOut("[ERROR]: You don't have any saved reference sequences and the reference parameter is a required."); 
+					m->mothurOutEndLine();
+					abort = true; 
+				}
+			}else if (templatefile == "not open") { abort = true; }	
+			else {	if (save) {	rdb->setSavedReference(templatefile);	}	}
+			
+			
 			maskfile = validParameter.validFile(parameters, "mask", false);
 			if (maskfile == "not found") { maskfile = "";  }	
 			else if (maskfile != "default")  { 
@@ -274,10 +300,6 @@ ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
 		
-			templatefile = validParameter.validFile(parameters, "reference", true);
-			if (templatefile == "not open") { abort = true; }
-			else if (templatefile == "not found") { templatefile = "";  m->mothurOut("reference is a required parameter for the chimera.pintail command."); m->mothurOutEndLine(); abort = true;  }
-			
 			consfile = validParameter.validFile(parameters, "conservation", true);
 			if (consfile == "not open") { abort = true; }
 			else if (consfile == "not found") { 
@@ -329,15 +351,18 @@ int ChimeraPintailCommand::execute(){
 			if (maskfile == "default") { m->mothurOut("I am using the default 236627 EU009184.1 Shigella dysenteriae str. FBD013."); m->mothurOutEndLine();  }
 			
 			//check for quantile to save the time
+			string baseName = templatefile;
+			if (templatefile == "saved") { baseName = rdb->getSavedReference(); }
+			
 			string tempQuan = "";
 			if ((!filter) && (maskfile == "")) {
-				tempQuan = inputDir + m->getRootName(m->getSimpleName(templatefile)) + "pintail.quan";
+				tempQuan = inputDir + m->getRootName(m->getSimpleName(baseName)) + "pintail.quan";
 			}else if ((!filter) && (maskfile != "")) { 
-				tempQuan = inputDir + m->getRootName(m->getSimpleName(templatefile)) + "pintail.masked.quan";
+				tempQuan = inputDir + m->getRootName(m->getSimpleName(baseName)) + "pintail.masked.quan";
 			}else if ((filter) && (maskfile != "")) { 
-				tempQuan = inputDir + m->getRootName(m->getSimpleName(templatefile)) + "pintail.filtered." + m->getSimpleName(m->getRootName(fastaFileNames[s])) + "masked.quan";
+				tempQuan = inputDir + m->getRootName(m->getSimpleName(baseName)) + "pintail.filtered." + m->getSimpleName(m->getRootName(fastaFileNames[s])) + "masked.quan";
 			}else if ((filter) && (maskfile == "")) { 
-				tempQuan = inputDir + m->getRootName(m->getSimpleName(templatefile)) + "pintail.filtered." + m->getSimpleName(m->getRootName(fastaFileNames[s])) + "quan";
+				tempQuan = inputDir + m->getRootName(m->getSimpleName(baseName)) + "pintail.filtered." + m->getSimpleName(m->getRootName(fastaFileNames[s])) + "quan";
 			}
 			
 			ifstream FileTest(tempQuan.c_str());
@@ -350,13 +375,13 @@ int ChimeraPintailCommand::execute(){
 				string tryPath = m->getDefaultPath();
 				string tempQuan = "";
 				if ((!filter) && (maskfile == "")) {
-					tempQuan = tryPath + m->getRootName(m->getSimpleName(templatefile)) + "pintail.quan";
+					tempQuan = tryPath + m->getRootName(m->getSimpleName(baseName)) + "pintail.quan";
 				}else if ((!filter) && (maskfile != "")) { 
-					tempQuan = tryPath + m->getRootName(m->getSimpleName(templatefile)) + "pintail.masked.quan";
+					tempQuan = tryPath + m->getRootName(m->getSimpleName(baseName)) + "pintail.masked.quan";
 				}else if ((filter) && (maskfile != "")) { 
-					tempQuan = tryPath + m->getRootName(m->getSimpleName(templatefile)) + "pintail.filtered." + m->getSimpleName(m->getRootName(fastaFileNames[s])) + "masked.quan";
+					tempQuan = tryPath + m->getRootName(m->getSimpleName(baseName)) + "pintail.filtered." + m->getSimpleName(m->getRootName(fastaFileNames[s])) + "masked.quan";
 				}else if ((filter) && (maskfile == "")) { 
-					tempQuan = tryPath + m->getRootName(m->getSimpleName(templatefile)) + "pintail.filtered." + m->getSimpleName(m->getRootName(fastaFileNames[s])) + "quan";
+					tempQuan = tryPath + m->getRootName(m->getSimpleName(baseName)) + "pintail.filtered." + m->getSimpleName(m->getRootName(fastaFileNames[s])) + "quan";
 				}
 				
 				ifstream FileTest2(tempQuan.c_str());
