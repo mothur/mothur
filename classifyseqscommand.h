@@ -13,6 +13,7 @@
 #include "mothur.h"
 #include "command.hpp"
 #include "classify.h"
+#include "referencedb.h"
 
 //KNN and Bayesian methods modeled from algorithms in
 //Naı¨ve Bayesian Classiﬁer for Rapid Assignment of rRNA Sequences 
@@ -60,11 +61,12 @@ private:
 	map<string,  vector<string> >::iterator itNames;
 	
 	Classify* classify;
+	ReferenceDB* rdb;
 	
 	string fastaFileName, templateFileName, distanceFileName, namefile, search, method, taxonomyFileName, outputDir, groupfile;
 	int processors, kmerSize, numWanted, cutoff, iters;
 	float match, misMatch, gapOpen, gapExtend;
-	bool abort, probs;
+	bool abort, probs, save;
 	
 	int driver(linePair*, string, string, string);
 	void appendTaxFiles(string, string);

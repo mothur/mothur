@@ -10,15 +10,22 @@
 #include "bayesian.h"
 #include "kmer.hpp"
 #include "phylosummary.h"
-
+#include "referencedb.h"
 /**************************************************************************************************/
 Bayesian::Bayesian(string tfile, string tempFile, string method, int ksize, int cutoff, int i) : 
 Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 	try {
+		ReferenceDB* rdb = ReferenceDB::getInstance();
+		
+		string baseName = tempFile;
+		if (baseName == "saved") { baseName = rdb->getSavedReference(); }
+		
+		string baseTName = tfile;
+		if (baseTName == "saved") { baseTName = rdb->getSavedTaxonomy(); }
 		
 		/************calculate the probablity that each word will be in a specific taxonomy*************/
-		string tfileroot = tfile.substr(0,tfile.find_last_of(".")+1);
-		string tempfileroot = m->getRootName(m->getSimpleName(tempFile));
+		string tfileroot = baseTName.substr(0,baseTName.find_last_of(".")+1);
+		string tempfileroot = m->getRootName(m->getSimpleName(baseName));
 		string phyloTreeName = tfileroot + "tree.train";
 		string phyloTreeSumName = tfileroot + "tree.sum";
 		string probFileName = tfileroot + tempfileroot + char('0'+ kmerSize) + "mer.prob";
@@ -40,7 +47,23 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 			FilesGood = checkReleaseDate(probFileTest, probFileTest2, phyloTreeTest, probFileTest3);
 		}
 		
+		//if you want to save, but you dont need to calculate then just read
+		if (rdb->save && probFileTest && probFileTest2 && phyloTreeTest && probFileTest3 && FilesGood) {  
+			ifstream saveIn;
+			m->openInputFile(tempFile, saveIn);
+			
+			while (!saveIn.eof()) {
+				Sequence temp(saveIn);
+				m->gobble(saveIn);
+				
+				rdb->referenceSeqs.push_back(temp); 
+			}
+			saveIn.close();			
+		}
+		
 		if(probFileTest && probFileTest2 && phyloTreeTest && probFileTest3 && FilesGood){	
+			if (tempFile == "saved") { m->mothurOutEndLine();  m->mothurOut("Using sequences from " + rdb->getSavedReference() + " that are saved in memory.");	m->mothurOutEndLine(); }
+			
 			m->mothurOut("Reading template taxonomy...     "); cout.flush();
 			
 			phyloTree = new PhyloTree(phyloTreeTest, phyloTreeName);
@@ -49,10 +72,17 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 			
 			genusNodes = phyloTree->getGenusNodes(); 
 			genusTotals = phyloTree->getGenusTotals();
-		
-			m->mothurOut("Reading template probabilities...     "); cout.flush();
-			readProbFile(probFileTest, probFileTest2, probFileName, probFileName2);	
 			
+			if (tfile == "saved") { 
+				m->mothurOutEndLine();  m->mothurOut("Using probabilties from " + rdb->getSavedTaxonomy() + " that are saved in memory...    ");	cout.flush();; 
+				wordGenusProb = rdb->wordGenusProb;
+			}else {
+				m->mothurOut("Reading template probabilities...     "); cout.flush();
+				readProbFile(probFileTest, probFileTest2, probFileName, probFileName2);
+			}	
+			
+			//save probabilities
+			if (rdb->save) { rdb->wordGenusProb = wordGenusProb; }
 		}else{
 		
 			//create search database and names vector
@@ -194,6 +224,9 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 				delete phyloTree;
 				
 				phyloTree = new PhyloTree(phyloTreeTest, phyloTreeName);
+				
+				//save probabilities
+				if (rdb->save) { rdb->wordGenusProb = wordGenusProb; }
 			}
 		}
 	

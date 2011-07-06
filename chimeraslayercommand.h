@@ -52,7 +52,7 @@ private:
 	int driverMPI(int, int, MPI_File&, MPI_File&, MPI_File&, MPI_File&, vector<unsigned long int>&);
 	#endif
 
-	bool abort, realign, trim, trimera;
+	bool abort, realign, trim, trimera, save;
 	string fastafile, templatefile, outputDir, search, namefile;
 	int processors, window, iters, increment, numwanted, ksize, match, mismatch, parents, minSimilarity, minCoverage, minBS, minSNP, numSeqs, templateSeqsLength;
 	float divR;

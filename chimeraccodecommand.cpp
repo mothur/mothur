@@ -9,6 +9,7 @@
 
 #include "chimeraccodecommand.h"
 #include "ccode.h"
+#include "referencedb.h"
 //**********************************************************************************************************************
 vector<string> ChimeraCcodeCommand::setParameters(){	
 	try {
@@ -21,6 +22,7 @@ vector<string> ChimeraCcodeCommand::setParameters(){
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter psave("save", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(psave);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -49,6 +51,7 @@ string ChimeraCcodeCommand::getHelpString(){
 		helpString += "The mask parameter allows you to specify a file containing one sequence you wish to use as a mask for the your sequences. \n";
 		helpString += "The window parameter allows you to specify the window size for searching for chimeras. \n";
 		helpString += "The numwanted parameter allows you to specify how many sequences you would each query sequence compared with.\n";
+		helpString += "If the save parameter is set to true the reference sequences will be saved in memory, to clear them later you can use the clear.memory command. Default=f.";
 		helpString += "The chimera.ccode command should be in the following format: \n";
 		helpString += "chimera.ccode(fasta=yourFastaFile, reference=yourTemplate) \n";
 		helpString += "Example: chimera.ccode(fasta=AD.align, reference=core_set_aligned.imputed.fasta) \n";
@@ -79,6 +82,7 @@ ChimeraCcodeCommand::ChimeraCcodeCommand(){
 ChimeraCcodeCommand::ChimeraCcodeCommand(string option)  {
 	try {
 		abort = false; calledHelp = false;   
+		ReferenceDB* rdb = ReferenceDB::getInstance();
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
@@ -197,10 +201,6 @@ ChimeraCcodeCommand::ChimeraCcodeCommand(string option)  {
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
-
-			templatefile = validParameter.validFile(parameters, "reference", true);
-			if (templatefile == "not open") { abort = true; }
-			else if (templatefile == "not found") { templatefile = ""; m->mothurOut("reference is a required parameter for the chimera.ccode command."); m->mothurOutEndLine(); abort = true;  }		
 			
 			maskfile = validParameter.validFile(parameters, "mask", false);
 			if (maskfile == "not found") { maskfile = "";  }	
@@ -230,6 +230,28 @@ ChimeraCcodeCommand::ChimeraCcodeCommand(string option)  {
 			
 			temp = validParameter.validFile(parameters, "numwanted", false);		if (temp == "not found") { temp = "20"; }
 			convert(temp, numwanted);
+			
+			temp = validParameter.validFile(parameters, "save", false);			if (temp == "not found"){	temp = "f";				}
+			save = m->isTrue(temp); 
+			rdb->save = save; 
+			if (save) { //clear out old references
+				rdb->clearMemory();	
+			}
+			
+			//this has to go after save so that if the user sets save=t and provides no reference we abort
+			templatefile = validParameter.validFile(parameters, "reference", true);
+			if (templatefile == "not found") { 
+				//check for saved reference sequences
+				if (rdb->referenceSeqs.size() != 0) {
+					templatefile = "saved";
+				}else {
+					m->mothurOut("[ERROR]: You don't have any saved reference sequences and the reference parameter is a required."); 
+					m->mothurOutEndLine();
+					abort = true; 
+				}
+			}else if (templatefile == "not open") { abort = true; }	
+			else {	if (save) {	rdb->setSavedReference(templatefile);	}	}
+			
 
 		}
 	}

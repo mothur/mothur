@@ -210,7 +210,6 @@ int uchime_main(int argc, char *argv[])
 			if((QuerySeqCount) % 100 != 0){	m->mothurOut("Processing sequence: " + toString(QuerySeqCount) + ", " + toString(HitCount) + " chimeras found."); m->mothurOutEndLine();		}
 		}
 
-
 	Log("\n");
 	Log("%s: %u/%u chimeras found (%.1f%%)\n",
 	  opt_input.c_str(), HitCount, QuerySeqCount, Pct(HitCount, QuerySeqCount));

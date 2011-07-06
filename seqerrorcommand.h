@@ -13,6 +13,7 @@
 #include "mothur.h"
 #include "command.hpp"
 #include "sequence.hpp"
+#include "referencedb.h"
 
 struct Compare {
 	int AA, AT, AG, AC,	TA, TT, TG, TC,	GA, GT, GG, GC,	CA, CT, CG, CC,	NA, NT, NG, NC, Ai, Ti, Gi, Ci, Ni, dA, dT, dG, dC;
@@ -58,6 +59,7 @@ public:
 	
 private:
 	bool abort;
+	ReferenceDB* rdb;
 	
 	struct linePair {
 		unsigned long int start;
@@ -86,7 +88,7 @@ private:
 
 	string queryFileName, referenceFileName, qualFileName, reportFileName, namesFileName, outputDir;
 	double threshold;
-	bool ignoreChimeras;
+	bool ignoreChimeras, save;
 	int numRefs, processors;
 	int maxLength, totalBases, totalMatches;
 	//ofstream errorSummaryFile, errorSeqFile;

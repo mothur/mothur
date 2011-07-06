@@ -53,7 +53,7 @@ private:
 	int driverMPI(int, int, MPI_File&, MPI_File&, vector<unsigned long int>&);
 	#endif
 
-	bool abort, svg;
+	bool abort, svg, save;
 	string fastafile, templatefile, namefile, outputDir;
 	int processors, increment, ksize, numSeqs, templateSeqsLength;
 	Chimera* chimera;

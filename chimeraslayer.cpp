@@ -44,6 +44,7 @@ int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int num
 	}
 }
 //***************************************************************************************************************
+//template=self
 ChimeraSlayer::ChimeraSlayer(string file, string temp, bool trim, map<string, int>& prior, string mode, int k, int ms, int mms, int win, float div, 
 							 int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int numw, bool r) : Chimera()  {  	
 	try {
@@ -254,6 +255,11 @@ vector<Sequence*> ChimeraSlayer::getTemplate(Sequence q, vector<Sequence*>& user
 				userTemplate.push_back(templateSeqs[i]); 
 				if (searchMethod == "distance") { userTemplateFiltered.push_back(filteredTemplateSeqs[i]); }
 			}
+		}
+		
+		//avoids nuisance error from formatdb for making blank blast database
+		if (userTemplate.size() == 0) {
+			return userTemplate;
 		}
 		
 		string 	kmerDBNameLeft;
@@ -749,7 +755,6 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 		else {  thisTemplate = getTemplate(*query, thisFilteredTemplate);  } //fills this template and creates the databases
 		
 		if (m->control_pressed) {  return 0;  }
-		
 		if (thisTemplate.size() == 0) {  return 0; } //not chimeric
 		
 		//moved this out of maligner - 4/29/11

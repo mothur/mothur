@@ -11,12 +11,13 @@
 #include "ignoregaps.h"
 #include "eachgapdist.h"
 
-
 //***************************************************************************************************************
 Ccode::Ccode(string filename, string temp, bool f, string mask, int win, int numW, string o) : Chimera() {  
+ try {	
+	
 	fastafile = filename;  
 	outputDir = o; 
-	templateFileName = temp;  templateSeqs = readSeqs(temp);
+	templateFileName = temp;  templateSeqs = readSeqs(temp); 
 	setMask(mask);
 	filter = f;
 	window = win;
@@ -63,6 +64,11 @@ Ccode::Ccode(string filename, string temp, bool f, string mask, int win, int num
 		out2 << "Place in masked, filtered and trimmed sequence\tPlace in original alignment" << endl;
 		out2.close();
 	#endif
+	}
+	catch(exception& e) {
+		m->errorOut(e, "Ccode", "Ccode");
+		exit(1);
+	}
 }
 //***************************************************************************************************************
 Ccode::~Ccode() {

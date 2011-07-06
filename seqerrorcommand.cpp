@@ -13,6 +13,7 @@
 #include "refchimeratest.h"
 #include "filterseqscommand.h"
 
+
 //**********************************************************************************************************************
 vector<string> SeqErrorCommand::setParameters(){	
 	try {
@@ -24,6 +25,7 @@ vector<string> SeqErrorCommand::setParameters(){
 		CommandParameter pignorechimeras("ignorechimeras", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pignorechimeras);
 		CommandParameter pthreshold("threshold", "Number", "", "1.0", "", "", "",false,false); parameters.push_back(pthreshold);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
+		CommandParameter psave("save", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(psave);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
 		
@@ -41,6 +43,15 @@ string SeqErrorCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The seq.error command reads a query alignment file and a reference alignment file and creates .....\n";
+		helpString += "The fasta parameter...\n";
+		helpString += "The reference parameter...\n";
+		helpString += "The qfile parameter...\n";
+		helpString += "The report parameter...\n";
+		helpString += "The name parameter...\n";
+		helpString += "The ignorechimeras parameter...\n";
+		helpString += "The threshold parameter...\n";
+		helpString += "The processors parameter...\n";
+		helpString += "If the save parameter is set to true the reference sequences will be saved in memory, to clear them later you can use the clear.memory command. Default=f.";
 		helpString += "Example seq.error(...).\n";
 		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n";
 		helpString += "For more details please check out the wiki http://www.mothur.org/wiki/seq.error .\n";
@@ -55,6 +66,7 @@ string SeqErrorCommand::getHelpString(){
 SeqErrorCommand::SeqErrorCommand(){	
 	try {
 		abort = true; calledHelp = true; 
+		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["error.summary"] = tempOutNames;
 		outputTypes["error.seq"] = tempOutNames;
@@ -77,6 +89,7 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 	try {
 		
 		abort = false; calledHelp = false;   
+		rdb = ReferenceDB::getInstance();
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
@@ -165,11 +178,6 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 			}
 			else if (queryFileName == "not open") { abort = true; }	
 			else { m->setFastaFile(queryFileName); }
-			
-			referenceFileName = validParameter.validFile(parameters, "reference", true);
-			if (referenceFileName == "not found") { m->mothurOut("reference is a required parameter for the seq.error command."); m->mothurOutEndLine(); abort = true; }
-			else if (referenceFileName == "not open") { abort = true; }	
-			
 
 			//check for optional parameters
 			namesFileName = validParameter.validFile(parameters, "name", true);
@@ -202,6 +210,28 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 			// ...at some point should added some additional type checking...
 			temp = validParameter.validFile(parameters, "threshold", false);	if (temp == "not found") { temp = "1.00"; }
 			convert(temp, threshold);  
+			
+			temp = validParameter.validFile(parameters, "save", false);			if (temp == "not found"){	temp = "f";				}
+			save = m->isTrue(temp); 
+			rdb->save = save; 
+			if (save) { //clear out old references
+				rdb->clearMemory();	
+			}
+			
+			//this has to go after save so that if the user sets save=t and provides no reference we abort
+			referenceFileName = validParameter.validFile(parameters, "reference", true);
+			if (referenceFileName == "not found") { 
+				//check for saved reference sequences
+				if (rdb->referenceSeqs.size() != 0) {
+					referenceFileName = "saved";
+				}else {
+					m->mothurOut("[ERROR]: You don't have any saved reference sequences and the reference parameter is a required."); 
+					m->mothurOutEndLine();
+					abort = true; 
+				}
+			}else if (referenceFileName == "not open") { abort = true; }	
+			else {	if (save) {	rdb->setSavedReference(referenceFileName);	}	}
+			
 			
 			temp = validParameter.validFile(parameters, "ignorechimeras", false);	if (temp == "not found") { temp = "T"; }
 			ignoreChimeras = m->isTrue(temp);
@@ -728,32 +758,59 @@ int SeqErrorCommand::driver(string filename, string qFileName, string rFileName,
 
 void SeqErrorCommand::getReferences(){
 	try {
-		
-		ifstream referenceFile;
-		m->openInputFile(referenceFileName, referenceFile);
-		
 		int numAmbigSeqs = 0;
 		
 		int maxStartPos = 0;
 		int minEndPos = 100000;
 		
-		while(referenceFile){
-			Sequence currentSeq(referenceFile);
-			int numAmbigs = currentSeq.getAmbigBases();
-			if(numAmbigs > 0){	numAmbigSeqs++;	}
+		if (referenceFileName == "saved") {
+			int start = time(NULL);
+			m->mothurOutEndLine();  m->mothurOut("Using sequences from " + rdb->getSavedReference() + " that are saved in memory.");	m->mothurOutEndLine();
 			
-//			int startPos = currentSeq.getStartPos();
-//			if(startPos > maxStartPos)	{	maxStartPos = startPos;	}
-//
-//			int endPos = currentSeq.getEndPos();
-//			if(endPos < minEndPos)		{	minEndPos = endPos;		}
-			referenceSeqs.push_back(currentSeq);
+			for (int i = 0; i < rdb->referenceSeqs.size(); i++) {
+				int numAmbigs = rdb->referenceSeqs[i].getAmbigBases();
+				if(numAmbigs > 0){	numAmbigSeqs++;	}
 				
-			m->gobble(referenceFile);
-		}
-		referenceFile.close();
-		numRefs = referenceSeqs.size();
+				//			int startPos = rdb->referenceSeqs[i].getStartPos();
+				//			if(startPos > maxStartPos)	{	maxStartPos = startPos;	}
+				//
+				//			int endPos = rdb->referenceSeqs[i].getEndPos();
+				//			if(endPos < minEndPos)		{	minEndPos = endPos;		}				
+				
+				referenceSeqs.push_back(rdb->referenceSeqs[i]);
+			}
+			referenceFileName = rdb->getSavedReference();
+			
+			m->mothurOut("It took " + toString(time(NULL) - start) + " to load " + toString(rdb->referenceSeqs.size()) + " sequences.");m->mothurOutEndLine();  
+		
+		}else {
+			int start = time(NULL);
 
+			ifstream referenceFile;
+			m->openInputFile(referenceFileName, referenceFile);
+			
+			while(referenceFile){
+				Sequence currentSeq(referenceFile);
+				int numAmbigs = currentSeq.getAmbigBases();
+				if(numAmbigs > 0){	numAmbigSeqs++;	}
+				
+	//			int startPos = currentSeq.getStartPos();
+	//			if(startPos > maxStartPos)	{	maxStartPos = startPos;	}
+	//
+	//			int endPos = currentSeq.getEndPos();
+	//			if(endPos < minEndPos)		{	minEndPos = endPos;		}
+				referenceSeqs.push_back(currentSeq);
+				
+				if (rdb->save) { rdb->referenceSeqs.push_back(currentSeq); }
+					
+				m->gobble(referenceFile);
+			}
+			referenceFile.close();
+			
+			m->mothurOut("It took " + toString(time(NULL) - start) + " to read " + toString(referenceSeqs.size()) + " sequences.");m->mothurOutEndLine();  
+		}
+		
+		numRefs = referenceSeqs.size();
 		
 		for(int i=0;i<numRefs;i++){
 			referenceSeqs[i].padToPos(maxStartPos);
@@ -762,7 +819,7 @@ void SeqErrorCommand::getReferences(){
 		
 		if(numAmbigSeqs != 0){
 			m->mothurOut("Warning: " + toString(numAmbigSeqs) + " reference sequences have ambiguous bases, these bases will be ignored\n");
-		}		
+		}	
 		
 	}
 	catch(exception& e) {

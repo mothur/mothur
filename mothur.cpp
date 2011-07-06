@@ -10,12 +10,13 @@
 #include "mothur.h"
 #include "engine.hpp"
 #include "mothurout.h"
+#include "referencedb.h"
 
 /**************************************************************************************************/
 
 CommandFactory* CommandFactory::_uniqueInstance = 0;
 MothurOut* MothurOut::_uniqueInstance = 0;
-
+ReferenceDB* ReferenceDB::myInstance = 0;
 /***********************************************************************/
 volatile int ctrlc_pressed = 0;
 void ctrlc_handler ( int sig ) {
