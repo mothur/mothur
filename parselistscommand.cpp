@@ -195,7 +195,7 @@ int ParseListCommand::execute(){
 		if (m->control_pressed) { 
 			delete input; delete list; delete groupMap;
 			for (i=0; i<groupMap->namesOfGroups.size(); i++) {  (*(filehandles[groupMap->namesOfGroups[i]])).close();  delete filehandles[groupMap->namesOfGroups[i]]; } 
-			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } outputTypes.clear();
+			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
 			return 0;
 		}
 		
@@ -204,7 +204,7 @@ int ParseListCommand::execute(){
 			if (m->control_pressed) { 
 				delete input; delete list; delete groupMap;
 				for (i=0; i<groupMap->namesOfGroups.size(); i++) {  (*(filehandles[groupMap->namesOfGroups[i]])).close();  delete filehandles[groupMap->namesOfGroups[i]]; } 
-				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } outputTypes.clear();
+				for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
 				return 0;
 			}
 			
@@ -243,7 +243,7 @@ int ParseListCommand::execute(){
 		if (m->control_pressed) { 
 				delete input; delete groupMap;
 				for (i=0; i<groupMap->namesOfGroups.size(); i++) { (*(filehandles[groupMap->namesOfGroups[i]])).close();  delete filehandles[groupMap->namesOfGroups[i]]; } 
-				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } outputTypes.clear();
+				for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
 				return 0;
 		}
 		
@@ -264,7 +264,7 @@ int ParseListCommand::execute(){
 		if (m->control_pressed) { 
 				delete input; delete groupMap;
 				for (i=0; i<groupMap->namesOfGroups.size(); i++) {  (*(filehandles[groupMap->namesOfGroups[i]])).close();  delete filehandles[groupMap->namesOfGroups[i]]; } 
-				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } outputTypes.clear();
+				for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
 				return 0;
 		}
 		
@@ -289,7 +289,7 @@ int ParseListCommand::execute(){
 		delete input;
 		
 		if (m->control_pressed) { 
-			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } outputTypes.clear();
+			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
 			return 0;
 		}
 		

@@ -10,6 +10,7 @@
 #include "metastatscommand.h"
 #include "metastats.h"
 #include "sharedutilities.h"
+#include "mothurmetastats.h"
 
 //**********************************************************************************************************************
 vector<string> MetaStatsCommand::setParameters(){	
@@ -249,7 +250,7 @@ int MetaStatsCommand::execute(){
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-			if (m->control_pressed) {  outputTypes.clear(); for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } m->Groups.clear(); delete input; delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
+			if (m->control_pressed) {  outputTypes.clear(); for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } m->Groups.clear(); delete input; delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 	
 			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
 
@@ -280,13 +281,13 @@ int MetaStatsCommand::execute(){
 			//prevent memory leak
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
 			
-			if (m->control_pressed) {  outputTypes.clear(); m->Groups.clear(); delete input;  delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
+			if (m->control_pressed) {  outputTypes.clear(); m->Groups.clear(); delete input;  delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 
 			//get next line to process
 			lookup = input->getSharedRAbundVectors();				
 		}
 		
-		if (m->control_pressed) { outputTypes.clear(); m->Groups.clear(); delete input; delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }  return 0; }
+		if (m->control_pressed) { outputTypes.clear(); m->Groups.clear(); delete input; delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  return 0; }
 
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -318,7 +319,7 @@ int MetaStatsCommand::execute(){
 		delete input; 
 		delete designMap;
 		
-		if (m->control_pressed) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0;}
+		if (m->control_pressed) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0;}
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -404,6 +405,8 @@ int MetaStatsCommand::driver(int start, int num, vector<SharedRAbundVector*>& th
 			double** data;
 			data = new double*[thisLookUp[0]->getNumBins()];
 			
+			vector< vector<double> > data2; data2.resize(thisLookUp[0]->getNumBins());
+			
 			vector<SharedRAbundVector*> subset;
 			int setACount = 0;
 			int setBCount = 0;
@@ -428,13 +431,20 @@ int MetaStatsCommand::driver(int start, int num, vector<SharedRAbundVector*>& th
 				//fill data
 				for (int j = 0; j < thisLookUp[0]->getNumBins(); j++) {
 					data[j] = new double[subset.size()];
+					data2[j].resize(subset.size(), 0.0);
 					for (int i = 0; i < subset.size(); i++) {
 						data[j][i] = (subset[i]->getAbundance(j));
+						data2[j][i] = (subset[i]->getAbundance(j));
 					}
 				}
 				
 				m->mothurOut("Comparing " + setA + " and " + setB + "..."); m->mothurOutEndLine(); 
 				metastat_main(output, thisLookUp[0]->getNumBins(), subset.size(), threshold, iters, data, setACount);
+				
+				m->mothurOutEndLine();
+				MothurMetastats mothurMeta(threshold, iters);
+				mothurMeta.runMetastats(outputFileName+".myVersion" , data2, setACount);
+				m->mothurOutEndLine();
 				
 				m->mothurOutEndLine(); 
 			}

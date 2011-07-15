@@ -445,7 +445,7 @@ int CollectSharedCommand::execute(){
 
 		while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			if (m->control_pressed) { 
-					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}  outputTypes.clear();
+					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}  outputTypes.clear();
 					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
 					delete order; delete input;
 					m->Groups.clear();
@@ -493,7 +493,7 @@ int CollectSharedCommand::execute(){
 		}
 		
 		if (m->control_pressed) { 
-					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}   outputTypes.clear();
+					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}   outputTypes.clear();
 					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
 					m->Groups.clear();
 					delete input;
@@ -524,7 +524,7 @@ int CollectSharedCommand::execute(){
 			delete cCurve;
 			
 			if (m->control_pressed) { 
-				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}  outputTypes.clear();
+				for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}  outputTypes.clear();
 				for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
 				delete order; 
 				delete input;

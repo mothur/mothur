@@ -70,6 +70,7 @@ class MothurOut {
 		map<string, int> readNames(string);
 		int readNames(string, map<string, string>&);
 		int readNames(string, vector<seqPriorityNode>&, map<string, string>&);
+		void mothurRemove(string);
 		
 		//searchs and checks
 		bool checkReleaseVersion(ifstream&, string);

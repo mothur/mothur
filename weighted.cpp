@@ -139,7 +139,7 @@ EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGro
 				m->gobble(in);
 			}
 			in.close();
-			remove(s.c_str());
+			m->mothurRemove(s);
 		}
 		
 		m->mothurOut("DONE."); m->mothurOutEndLine(); m->mothurOutEndLine();

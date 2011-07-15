@@ -195,7 +195,7 @@ int RemoveOtusCommand::execute(){
 		//read through the list file keeping any otus that contain any sequence from the groups selected
 		readListGroup();
 		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
+		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 		
 		if (outputNames.size() != 0) {
 			m->mothurOutEndLine();
@@ -258,7 +258,7 @@ int RemoveOtusCommand::readListGroup(){
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((list != NULL) && (userLabels.size() != 0)) {
 			
-			if (m->control_pressed) {  delete list; delete input; out.close();  outGroup.close(); remove(outputFileName.c_str());  remove(outputGroupFileName.c_str());return 0;  }
+			if (m->control_pressed) {  delete list; delete input; out.close();  outGroup.close(); m->mothurRemove(outputFileName);  m->mothurRemove(outputGroupFileName);return 0;  }
 			
 			if(labels.count(list->getLabel()) == 1){
 				processList(list, groupMap, out, outGroup, wroteSomething);
@@ -292,7 +292,7 @@ int RemoveOtusCommand::readListGroup(){
 		}
 		
 		
-		if (m->control_pressed) {  if (list != NULL) { delete list; } delete input; out.close(); outGroup.close(); remove(outputFileName.c_str());  remove(outputGroupFileName.c_str()); return 0;  }
+		if (m->control_pressed) {  if (list != NULL) { delete list; } delete input; out.close(); outGroup.close(); m->mothurRemove(outputFileName);  m->mothurRemove(outputGroupFileName); return 0;  }
 		
 		//output error messages about any remaining user labels
 		set<string>::iterator it;

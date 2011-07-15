@@ -266,10 +266,8 @@ int RemoveSeqsCommand::execute(){
 		if (taxfile != "")			{		readTax();		}
 		if (qualfile != "")			{		readQual();		}
 		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
-		
-		m->mothurOut("Removed " + toString(names.size()) + " sequences."); m->mothurOutEndLine();
-		
+		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+	
 		if (outputNames.size() != 0) {
 			m->mothurOutEndLine();
 			m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -333,9 +331,10 @@ int RemoveSeqsCommand::readFasta(){
 		string name;
 		
 		bool wroteSomething = false;
+		int removedCount = 0;
 		
 		while(!in.eof()){
-			if (m->control_pressed) { in.close();  out.close();  remove(outputFileName.c_str());  return 0; }
+			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 			
 			Sequence currSeq(in);
 			name = currSeq.getName();
@@ -346,7 +345,7 @@ int RemoveSeqsCommand::readFasta(){
 					wroteSomething = true;
 					
 					currSeq.printSequence(out);
-				}
+				}else {  removedCount++;  }
 			}
 			m->gobble(in);
 		}
@@ -355,6 +354,8 @@ int RemoveSeqsCommand::readFasta(){
 		
 		if (wroteSomething == false) {  m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();  }
 		outputTypes["fasta"].push_back(outputFileName);  outputNames.push_back(outputFileName);
+		
+		m->mothurOut("Removed " + toString(removedCount) + " sequences from your fasta file."); m->mothurOutEndLine();
 		
 		return 0;
 		
@@ -379,6 +380,7 @@ int RemoveSeqsCommand::readQual(){
 		string name;
 		
 		bool wroteSomething = false;
+		int removedCount = 0;
 		
 		
 		while(!in.eof()){	
@@ -410,7 +412,7 @@ int RemoveSeqsCommand::readQual(){
 				wroteSomething = true;
 				
 				out << name << endl << scores;
-			}
+			}else {  removedCount++;  }
 			
 			m->gobble(in);
 		}
@@ -420,6 +422,8 @@ int RemoveSeqsCommand::readQual(){
 		
 		if (wroteSomething == false) { m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();  }
 		outputNames.push_back(outputFileName);  outputTypes["qfile"].push_back(outputFileName); 
+		
+		m->mothurOut("Removed " + toString(removedCount) + " sequences from your quality file."); m->mothurOutEndLine();
 		
 		return 0;
 		
@@ -443,6 +447,7 @@ int RemoveSeqsCommand::readList(){
 		m->openInputFile(listfile, in);
 		
 		bool wroteSomething = false;
+		int removedCount = 0;
 		
 		while(!in.eof()){
 			//read in list vector
@@ -454,7 +459,7 @@ int RemoveSeqsCommand::readList(){
 			
 			//for each bin
 			for (int i = 0; i < list.getNumBins(); i++) {
-				if (m->control_pressed) { in.close();  out.close();  remove(outputFileName.c_str());  return 0; }
+				if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 			
 				//parse out names that are in accnos file
 				string binnames = list.get(i);
@@ -466,10 +471,12 @@ int RemoveSeqsCommand::readList(){
 					
 					//if that name is in the .accnos file, add it
 					if (names.count(name) == 0) {  newNames += name + ",";  }
+					else {  removedCount++;  }
 				}
 			
 				//get last name
 				if (names.count(binnames) == 0) {  newNames += binnames + ",";  }
+				else {  removedCount++;  }
 
 				//if there are names in this bin add to new list
 				if (newNames != "") {  
@@ -491,7 +498,9 @@ int RemoveSeqsCommand::readList(){
 		
 		if (wroteSomething == false) {  m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();  }
 		outputTypes["list"].push_back(outputFileName); outputNames.push_back(outputFileName);
-				
+		
+		m->mothurOut("Removed " + toString(removedCount) + " sequences from your list file."); m->mothurOutEndLine();
+		
 		return 0;
 
 	}
@@ -515,10 +524,10 @@ int RemoveSeqsCommand::readName(){
 		string name, firstCol, secondCol;
 		
 		bool wroteSomething = false;
-				
+		int removedCount = 0;
 		
 		while(!in.eof()){
-			if (m->control_pressed) { in.close();  out.close();  remove(outputFileName.c_str());  return 0; }
+			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 			
 			in >> firstCol;		m->gobble(in);		
 			in >> secondCol;			
@@ -535,7 +544,9 @@ int RemoveSeqsCommand::readName(){
 			
 			if ((dups) && (validSecond.size() != parsedNames.size())) {  //if dups is true and we want to get rid of anyone, get rid of everyone
 				for (int i = 0; i < parsedNames.size(); i++) {  names.insert(parsedNames[i]);  }
+				removedCount += parsedNames.size();
 			}else {
+				removedCount += parsedNames.size()-validSecond.size();
 				//if the name in the first column is in the set then print it and any other names in second column also in set
 				if (names.count(firstCol) == 0) {
 					
@@ -571,6 +582,8 @@ int RemoveSeqsCommand::readName(){
 		if (wroteSomething == false) {  m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();  }
 		outputTypes["name"].push_back(outputFileName); outputNames.push_back(outputFileName);
 		
+		m->mothurOut("Removed " + toString(removedCount) + " sequences from your name file."); m->mothurOutEndLine();
+		
 		return 0;
 	}
 	catch(exception& e) {
@@ -594,9 +607,10 @@ int RemoveSeqsCommand::readGroup(){
 		string name, group;
 		
 		bool wroteSomething = false;
+		int removedCount = 0;
 		
 		while(!in.eof()){
-			if (m->control_pressed) { in.close();  out.close();  remove(outputFileName.c_str());  return 0; }
+			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 			
 			in >> name;				//read from first column
 			in >> group;			//read from second column
@@ -605,7 +619,7 @@ int RemoveSeqsCommand::readGroup(){
 			if (names.count(name) == 0) {
 				wroteSomething = true;
 				out << name << '\t' << group << endl;
-			}
+			}else {  removedCount++;  }
 					
 			m->gobble(in);
 		}
@@ -614,6 +628,9 @@ int RemoveSeqsCommand::readGroup(){
 		
 		if (wroteSomething == false) {  m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();  }
 		outputTypes["group"].push_back(outputFileName); outputNames.push_back(outputFileName);
+		
+		m->mothurOut("Removed " + toString(removedCount) + " sequences from your group file."); m->mothurOutEndLine();
+
 		
 		return 0;
 	}
@@ -636,9 +653,10 @@ int RemoveSeqsCommand::readTax(){
 		string name, tax;
 		
 		bool wroteSomething = false;
+		int removedCount = 0;
 		
 		while(!in.eof()){
-			if (m->control_pressed) { in.close();  out.close();  remove(outputFileName.c_str());  return 0; }
+			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 			
 			in >> name;				//read from first column
 			in >> tax;			//read from second column
@@ -647,7 +665,7 @@ int RemoveSeqsCommand::readTax(){
 			if (names.count(name) == 0) {
 				wroteSomething = true;
 				out << name << '\t' << tax << endl;
-			}
+			}else {  removedCount++;  }
 					
 			m->gobble(in);
 		}
@@ -656,6 +674,8 @@ int RemoveSeqsCommand::readTax(){
 		
 		if (wroteSomething == false) {  m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();  }
 		outputTypes["taxonomy"].push_back(outputFileName); outputNames.push_back(outputFileName);
+		
+		m->mothurOut("Removed " + toString(removedCount) + " sequences from your taxonomy file."); m->mothurOutEndLine();
 		
 		return 0;
 	}
@@ -680,6 +700,7 @@ int RemoveSeqsCommand::readAlign(){
 		string name, junk;
 		
 		bool wroteSomething = false;
+		int removedCount = 0;
 		
 		//read column headers
 		for (int i = 0; i < 16; i++) {  
@@ -689,7 +710,7 @@ int RemoveSeqsCommand::readAlign(){
 		out << endl;
 		
 		while(!in.eof()){
-			if (m->control_pressed) { in.close();  out.close();  remove(outputFileName.c_str());  return 0; }
+			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 			
 			in >> name;				//read from first column
 			
@@ -707,6 +728,7 @@ int RemoveSeqsCommand::readAlign(){
 				out << endl;
 				
 			}else {//still read just don't do anything with it
+				removedCount++;  
 				
 				//read rest
 				for (int i = 0; i < 15; i++) {  
@@ -722,6 +744,9 @@ int RemoveSeqsCommand::readAlign(){
 		
 		if (wroteSomething == false) {  m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();  }
 		outputTypes["alignreport"].push_back(outputFileName); outputNames.push_back(outputFileName);
+		
+		m->mothurOut("Removed " + toString(removedCount) + " sequences from your alignreport file."); m->mothurOutEndLine();
+
 		
 		return 0;
 		

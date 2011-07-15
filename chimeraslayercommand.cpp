@@ -464,7 +464,7 @@ int ChimeraSlayerCommand::execute(){
 				map<string, int> priority = sortFastaFile(fastaFileNames[s], nameFile);
 				m->mothurOut("Done."); m->mothurOutEndLine();
 				
-				if (m->control_pressed) {  for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}  return 0;	}
+				if (m->control_pressed) {  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}
 
 				chimera = new ChimeraSlayer(fastaFileNames[s], templatefile, trim, priority, search, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign);	
 			}
@@ -474,7 +474,7 @@ int ChimeraSlayerCommand::execute(){
 			string accnosFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]))  + "slayer.accnos";
 			string trimFastaFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]))  + "slayer.fasta";
 			
-			if (m->control_pressed) { delete chimera; for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}  return 0;	}
+			if (m->control_pressed) { delete chimera; for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}
 			
 			if (chimera->getUnaligned()) { 
 				m->mothurOut("Your template sequences are different lengths, please correct."); m->mothurOutEndLine(); 
@@ -517,7 +517,7 @@ int ChimeraSlayerCommand::execute(){
 				MPI_File_open(MPI_COMM_WORLD, outAccnosFilename, outMode, MPI_INFO_NULL, &outMPIAccnos);
 				if (trim) { MPI_File_open(MPI_COMM_WORLD, outFastaFilename, outMode, MPI_INFO_NULL, &outMPIFasta); }
 
-			if (m->control_pressed) { outputTypes.clear();  MPI_File_close(&inMPI);  MPI_File_close(&outMPI); if (trim) {  MPI_File_close(&outMPIFasta);  } MPI_File_close(&outMPIAccnos); for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}   delete chimera; return 0;  }
+			if (m->control_pressed) { outputTypes.clear();  MPI_File_close(&inMPI);  MPI_File_close(&outMPI); if (trim) {  MPI_File_close(&outMPIFasta);  } MPI_File_close(&outMPIAccnos); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}   delete chimera; return 0;  }
 			
 				if (pid == 0) { //you are the root process 
 					m->mothurOutEndLine();
@@ -566,7 +566,7 @@ int ChimeraSlayerCommand::execute(){
 					
 					if (numSeqs == numNoParents) {  m->mothurOut("[WARNING]: megablast returned 0 potential parents for all your sequences. This could be due to formatdb.exe not being setup properly, please check formatdb.log for errors."); m->mothurOutEndLine(); }
 					
-					if (m->control_pressed) { outputTypes.clear();  MPI_File_close(&inMPI);  MPI_File_close(&outMPI); if (trim) { MPI_File_close(&outMPIFasta); }  MPI_File_close(&outMPIAccnos);  for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}  remove(outputFileName.c_str());  remove(accnosFileName.c_str());  delete chimera; return 0;  }
+					if (m->control_pressed) { outputTypes.clear();  MPI_File_close(&inMPI);  MPI_File_close(&outMPI); if (trim) { MPI_File_close(&outMPIFasta); }  MPI_File_close(&outMPIAccnos);  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  m->mothurRemove(outputFileName);  m->mothurRemove(accnosFileName);  delete chimera; return 0;  }
 
 				}else{ //you are a child process
 					if (templatefile != "self") { //if template=self we can only use 1 processor
@@ -585,7 +585,7 @@ int ChimeraSlayerCommand::execute(){
 						int numNoParents = chimera->getNumNoParents();
 						MPI_Send(&numNoParents, 1, MPI_INT, 0, tag, MPI_COMM_WORLD);
 					
-						if (m->control_pressed) { outputTypes.clear();  MPI_File_close(&inMPI);  MPI_File_close(&outMPI); if (trim) { MPI_File_close(&outMPIFasta); }  MPI_File_close(&outMPIAccnos);  for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}  delete chimera; return 0;  }
+						if (m->control_pressed) { outputTypes.clear();  MPI_File_close(&inMPI);  MPI_File_close(&outMPI); if (trim) { MPI_File_close(&outMPIFasta); }  MPI_File_close(&outMPIAccnos);  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  delete chimera; return 0;  }
 				
 					}
 				}
@@ -619,7 +619,7 @@ int ChimeraSlayerCommand::execute(){
 					int numNoParents = chimera->getNumNoParents();
 					if (numNoParents == numSeqs) { m->mothurOut("[WARNING]: megablast returned 0 potential parents for all your sequences. This could be due to formatdb.exe not being setup properly, please check formatdb.log for errors."); m->mothurOutEndLine(); }
 					
-					if (m->control_pressed) { outputTypes.clear(); if (trim) { remove(trimFastaFileName.c_str()); } remove(outputFileName.c_str()); remove(tempHeader.c_str()); remove(accnosFileName.c_str()); for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear(); delete chimera; return 0; }
+					if (m->control_pressed) { outputTypes.clear(); if (trim) { m->mothurRemove(trimFastaFileName); } m->mothurRemove(outputFileName); m->mothurRemove(tempHeader); m->mothurRemove(accnosFileName); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear(); delete chimera; return 0; }
 					
 				}else{
 					processIDS.resize(0);
@@ -633,23 +633,23 @@ int ChimeraSlayerCommand::execute(){
 					//append output files
 					for(int i=1;i<processors;i++){
 						m->appendFiles((outputFileName + toString(processIDS[i]) + ".temp"), outputFileName);
-						remove((outputFileName + toString(processIDS[i]) + ".temp").c_str());
+						m->mothurRemove((outputFileName + toString(processIDS[i]) + ".temp"));
 					}
 					
 					//append output files
 					for(int i=1;i<processors;i++){
 						m->appendFiles((accnosFileName + toString(processIDS[i]) + ".temp"), accnosFileName);
-						remove((accnosFileName + toString(processIDS[i]) + ".temp").c_str());
+						m->mothurRemove((accnosFileName + toString(processIDS[i]) + ".temp"));
 					}
 					
 					if (trim) {
 						for(int i=1;i<processors;i++){
 							m->appendFiles((trimFastaFileName + toString(processIDS[i]) + ".temp"), trimFastaFileName);
-							remove((trimFastaFileName + toString(processIDS[i]) + ".temp").c_str());
+							m->mothurRemove((trimFastaFileName + toString(processIDS[i]) + ".temp"));
 						}
 					}
 					
-					if (m->control_pressed) { outputTypes.clear(); if (trim) { remove(trimFastaFileName.c_str()); } remove(outputFileName.c_str()); remove(accnosFileName.c_str()); for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear(); delete chimera; return 0; }
+					if (m->control_pressed) { outputTypes.clear(); if (trim) { m->mothurRemove(trimFastaFileName); } m->mothurRemove(outputFileName); m->mothurRemove(accnosFileName); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear(); delete chimera; return 0; }
 				}
 
 			#else
@@ -659,13 +659,13 @@ int ChimeraSlayerCommand::execute(){
 				if (numNoParents == numSeqs) { m->mothurOut("[WARNING]: megablast returned 0 potential parents for all your sequences. This could be due to formatdb.exe not being setup properly, please check formatdb.log for errors."); m->mothurOutEndLine(); }
 
 				
-				if (m->control_pressed) { outputTypes.clear(); if (trim) { remove(trimFastaFileName.c_str()); } remove(outputFileName.c_str()); remove(tempHeader.c_str()); remove(accnosFileName.c_str()); for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear(); delete chimera; return 0; }
+				if (m->control_pressed) { outputTypes.clear(); if (trim) { m->mothurRemove(trimFastaFileName); } m->mothurRemove(outputFileName); m->mothurRemove(tempHeader); m->mothurRemove(accnosFileName); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear(); delete chimera; return 0; }
 				
 			#endif
 			
 			m->appendFiles(outputFileName, tempHeader);
 		
-			remove(outputFileName.c_str());
+			m->mothurRemove(outputFileName);
 			rename(tempHeader.c_str(), outputFileName.c_str());
 			
 		#endif
@@ -994,7 +994,7 @@ int ChimeraSlayerCommand::createProcesses(string outputFileName, string filename
 			string tempFile =  outputFileName + toString(processIDS[i]) + ".num.temp";
 			m->openInputFile(tempFile, in);
 			if (!in.eof()) { int tempNum = 0; int tempNumParents = 0; in >> tempNum >> tempNumParents; num += tempNum; numNoParents += tempNumParents; }
-			in.close(); remove(tempFile.c_str());
+			in.close(); m->mothurRemove(tempFile);
 		}
 		
 		if (num == numNoParents) {  m->mothurOut("[WARNING]: megablast returned 0 potential parents for all your sequences. This could be due to formatdb.exe not being setup properly, please check formatdb.log for errors."); m->mothurOutEndLine(); }

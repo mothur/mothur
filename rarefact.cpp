@@ -157,7 +157,7 @@ int Rarefact::createProcesses(vector<int>& procIters, RarefactionCurveData* rcd,
 			for(int j=0;j<displays.size();j++){
 				string s = toString(processIDS[i]) + toString(j) + ".rarefact.temp";
 				displays[j]->inputTempFiles(s);
-				remove(s.c_str());
+				m->mothurRemove(s);
 			}
 		}
 		

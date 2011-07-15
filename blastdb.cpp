@@ -168,14 +168,14 @@ BlastDB::BlastDB() : Database() {
 
 BlastDB::~BlastDB(){
 	try{
-		remove(queryFileName.c_str());				//	let's clean stuff up and remove the temp files
-		remove(dbFileName.c_str());					//	let's clean stuff up and remove the temp files
-		remove((dbFileName+".nsq").c_str());					//	let's clean stuff up and remove the temp files
-		remove((dbFileName+".nsi").c_str());					//	let's clean stuff up and remove the temp files
-		remove((dbFileName+".nsd").c_str());					//	let's clean stuff up and remove the temp files
-		remove((dbFileName+".nin").c_str());					//	let's clean stuff up and remove the temp files
-		remove((dbFileName+".nhr").c_str());					//	let's clean stuff up and remove the temp files
-		remove(blastFileName.c_str());				//	let's clean stuff up and remove the temp files
+		m->mothurRemove(queryFileName);				//	let's clean stuff up and remove the temp files
+		m->mothurRemove(dbFileName);					//	let's clean stuff up and remove the temp files
+		m->mothurRemove((dbFileName+".nsq"));					//	let's clean stuff up and remove the temp files
+		m->mothurRemove((dbFileName+".nsi"));					//	let's clean stuff up and remove the temp files
+		m->mothurRemove((dbFileName+".nsd"));					//	let's clean stuff up and remove the temp files
+		m->mothurRemove((dbFileName+".nin"));					//	let's clean stuff up and remove the temp files
+		m->mothurRemove((dbFileName+".nhr"));					//	let's clean stuff up and remove the temp files
+		m->mothurRemove(blastFileName.c_str());				//	let's clean stuff up and remove the temp files
 	}
 	catch(exception& e) {
 		m->errorOut(e, "BlastDB", "~BlastDB");
@@ -236,8 +236,8 @@ vector<int> BlastDB::findClosestSequences(Sequence* seq, int n) {
 			topMatches.push_back(templateAccession);
 		}
 		m8FileHandle.close();
-		remove((queryFileName+pid+toString(randNumber)).c_str());
-		remove((blastFileName+pid+toString(randNumber)).c_str());
+		m->mothurRemove((queryFileName+pid+toString(randNumber)));
+		m->mothurRemove((blastFileName+pid+toString(randNumber)));
 
 		return topMatches;
 	}
@@ -309,8 +309,8 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n, int minPerID) {
 //cout << templateAccession << endl;
 		}
 		m8FileHandle.close();
-		remove((queryFileName+pid+toString(randNumber)).c_str());
-		remove((blastFileName+pid+toString(randNumber)).c_str());
+		m->mothurRemove((queryFileName+pid+toString(randNumber)));
+		m->mothurRemove((blastFileName+pid+toString(randNumber)));
 //cout << "\n" ;		
 		return topMatches;
 	}

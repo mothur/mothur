@@ -270,7 +270,7 @@ int TrimFlowsCommand::execute(){
 					}
 
 					if(size < 10){
-						remove(barcodePrimerComboFileNames[i][j].c_str());
+						m->mothurRemove(barcodePrimerComboFileNames[i][j]);
 					}
 					else{
 						output << barcodePrimerComboFileNames[i][j] << endl;
@@ -1058,23 +1058,23 @@ int TrimFlowsCommand::createProcessesCreateTrim(string flowFileName, string trim
 			m->mothurOut("Appending files from process " + toString(processIDS[i])); m->mothurOutEndLine();
 			
 			m->appendFiles((trimFlowFileName + toString(processIDS[i]) + ".temp"), trimFlowFileName);
-			remove((trimFlowFileName + toString(processIDS[i]) + ".temp").c_str());
+			m->mothurRemove((trimFlowFileName + toString(processIDS[i]) + ".temp"));
 //			m->mothurOut("\tDone with trim.flow file"); m->mothurOutEndLine();
 
 			m->appendFiles((scrapFlowFileName + toString(processIDS[i]) + ".temp"), scrapFlowFileName);
-			remove((scrapFlowFileName + toString(processIDS[i]) + ".temp").c_str());
+			m->mothurRemove((scrapFlowFileName + toString(processIDS[i]) + ".temp"));
 //			m->mothurOut("\tDone with scrap.flow file"); m->mothurOutEndLine();
 
 			if(fasta){
 				m->appendFiles((fastaFileName + toString(processIDS[i]) + ".temp"), fastaFileName);
-				remove((fastaFileName + toString(processIDS[i]) + ".temp").c_str());
+				m->mothurRemove((fastaFileName + toString(processIDS[i]) + ".temp"));
 //				m->mothurOut("\tDone with flow.fasta file"); m->mothurOutEndLine();
 			}
 			if(allFiles){						
 				for (int j = 0; j < barcodePrimerComboFileNames.size(); j++) {
 					for (int k = 0; k < barcodePrimerComboFileNames[0].size(); k++) {
 						m->appendFiles((barcodePrimerComboFileNames[j][k] + toString(processIDS[i]) + ".temp"), barcodePrimerComboFileNames[j][k]);
-						remove((barcodePrimerComboFileNames[j][k] + toString(processIDS[i]) + ".temp").c_str());
+						m->mothurRemove((barcodePrimerComboFileNames[j][k] + toString(processIDS[i]) + ".temp"));
 					}
 				}
 			}

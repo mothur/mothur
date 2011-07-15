@@ -244,7 +244,7 @@ int ClusterCommand::execute(){
 		if (m->control_pressed) { //clean up
 			delete list; delete matrix; delete rabund;
 			sabundFile.close();rabundFile.close();listFile.close();
-			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	} outputTypes.clear();
+			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} outputTypes.clear();
 			return 0;
 		}
 		
@@ -283,7 +283,7 @@ int ClusterCommand::execute(){
 			if (m->control_pressed) { //clean up
 				delete list; delete matrix; delete rabund; delete cluster;
 				sabundFile.close();rabundFile.close();listFile.close();
-				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	} outputTypes.clear();
+				for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} outputTypes.clear();
 				return 0;
 			}
 		

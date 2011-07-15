@@ -596,7 +596,7 @@ int ClusterSplitCommand::execute(){
 							listFileNames.push_back(tempName);
 						}
 						in.close();
-						remove((toString(processIDS[i]) + ".temp").c_str());
+						m->mothurRemove((toString(processIDS[i]) + ".temp"));
 						
 						//get labels
 						filename = toString(processIDS[i]) + ".temp.labels";
@@ -613,14 +613,14 @@ int ClusterSplitCommand::execute(){
 							if (labels.count(tempName) == 0) { labels.insert(tempName); }
 						}
 						in2.close();
-						remove((toString(processIDS[i]) + ".temp.labels").c_str());
+						m->mothurRemove((toString(processIDS[i]) + ".temp.labels"));
 					}
 				}
 		#else
 				listFileNames = cluster(distName, labels); //clusters individual files and returns names of list files
 		#endif
 	#endif	
-		if (m->control_pressed) { for (int i = 0; i < listFileNames.size(); i++) { remove(listFileNames[i].c_str()); } return 0; }
+		if (m->control_pressed) { for (int i = 0; i < listFileNames.size(); i++) { m->mothurRemove(listFileNames[i]); } return 0; }
 		
 		if (saveCutoff != cutoff) { m->mothurOut("Cutoff was " + toString(saveCutoff) + " changed cutoff to " + toString(cutoff)); m->mothurOutEndLine();  }
 		
@@ -637,11 +637,11 @@ int ClusterSplitCommand::execute(){
 		ListVector* listSingle;
 		map<float, int> labelBins = completeListFile(listFileNames, singletonName, labels, listSingle); //returns map of label to numBins
 		
-		if (m->control_pressed) { if (listSingle != NULL) { delete listSingle; } for (int i = 0; i < outputNames.size(); i++) { remove(outputNames[i].c_str()); } return 0; }
+		if (m->control_pressed) { if (listSingle != NULL) { delete listSingle; } for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
 		
 		mergeLists(listFileNames, labelBins, listSingle);
 
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { remove(outputNames[i].c_str()); } return 0; }
+		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
 		
 		m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to merge."); m->mothurOutEndLine();
 		
@@ -703,7 +703,7 @@ map<float, int> ClusterSplitCommand::completeListFile(vector<string> listNames, 
 				listSingle->push_back(secondCol);
 			}
 			in.close();
-			remove(singleton.c_str());
+			m->mothurRemove(singleton);
 			
 			numSingleBins = listSingle->getNumBins();
 		}else{  listSingle = NULL; numSingleBins = 0;  }
@@ -729,8 +729,8 @@ map<float, int> ClusterSplitCommand::completeListFile(vector<string> listNames, 
 		for (int k = 0; k < listNames.size(); k++) {
 	
 			if (m->control_pressed) {  
-				if (listSingle != NULL) { delete listSingle; listSingle = NULL; remove(singleton.c_str());  }
-				for (int i = 0; i < listNames.size(); i++) {   remove(listNames[i].c_str());  }
+				if (listSingle != NULL) { delete listSingle; listSingle = NULL; m->mothurRemove(singleton);  }
+				for (int i = 0; i < listNames.size(); i++) {   m->mothurRemove(listNames[i]);  }
 				return labelBin;
 			}
 			
@@ -783,7 +783,7 @@ map<float, int> ClusterSplitCommand::completeListFile(vector<string> listNames, 
 			delete input;
 			
 			outFilled.close();
-			remove(listNames[k].c_str());
+			m->mothurRemove(listNames[k]);
 			rename(filledInList.c_str(), listNames[k].c_str());
 		}
 		
@@ -833,7 +833,7 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, map<float, int> us
 			//get the list info from each file
 			for (int k = 0; k < listNames.size(); k++) {
 	
-				if (m->control_pressed) {  if (listSingle != NULL) { delete listSingle;   } for (int i = 0; i < listNames.size(); i++) { remove(listNames[i].c_str());  } delete rabund; return 0; }
+				if (m->control_pressed) {  if (listSingle != NULL) { delete listSingle;   } for (int i = 0; i < listNames.size(); i++) { m->mothurRemove(listNames[i]);  } delete rabund; return 0; }
 				
 				InputData* input = new InputData(listNames[k], "list");
 				ListVector* list = input->getListVector(thisLabel);
@@ -865,7 +865,7 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, map<float, int> us
 		
 		if (listSingle != NULL) { delete listSingle;  }
 		
-		for (int i = 0; i < listNames.size(); i++) {  remove(listNames[i].c_str());  }
+		for (int i = 0; i < listNames.size(); i++) {  m->mothurRemove(listNames[i]);  }
 		
 		return 0;
 	}
@@ -1047,7 +1047,7 @@ vector<string> ClusterSplitCommand::cluster(vector< map<string, string> > distNa
 				if (m->control_pressed) { //clean up
 					delete matrix; delete list;	delete cluster; delete rabund;
 					listFile.close();
-					for (int i = 0; i < listFileNames.size(); i++) {	remove(listFileNames[i].c_str()); 	}
+					for (int i = 0; i < listFileNames.size(); i++) {	m->mothurRemove(listFileNames[i]); 	}
 					listFileNames.clear(); return listFileNames;
 				}
 		
@@ -1093,12 +1093,12 @@ vector<string> ClusterSplitCommand::cluster(vector< map<string, string> > distNa
 			listFile.close();
 			
 			if (m->control_pressed) { //clean up
-				for (int i = 0; i < listFileNames.size(); i++) {	remove(listFileNames[i].c_str()); 	}
+				for (int i = 0; i < listFileNames.size(); i++) {	m->mothurRemove(listFileNames[i]); 	}
 				listFileNames.clear(); return listFileNames;
 			}
 			
-			remove(thisDistFile.c_str());
-			remove(thisNamefile.c_str());
+			m->mothurRemove(thisDistFile);
+			m->mothurRemove(thisNamefile);
 			
 			if (saveCutoff != cutoff) { 
 				if (hard)	{  saveCutoff = m->ceilDist(saveCutoff, precision);	}
@@ -1137,7 +1137,7 @@ int ClusterSplitCommand::createMergedDistanceFile(vector< map<string, string> > 
 		string thisOutputDir = outputDir;
 		if (outputDir == "") { thisOutputDir = m->hasPath(fastafile); }
 		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(fastafile)) + "dist";
-		remove(outputFileName.c_str());
+		m->mothurRemove(outputFileName);
 		
 		
 		for (int i = 0; i < distNames.size(); i++) {

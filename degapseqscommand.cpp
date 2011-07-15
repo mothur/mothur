@@ -197,7 +197,7 @@ int DegapSeqsCommand::execute(){
 			m->openOutputFile(degapFile, outFASTA);
 			
 			while(!inFASTA.eof()){
-				if (m->control_pressed) {   outputTypes.clear(); inFASTA.close();  outFASTA.close(); remove(degapFile.c_str()); for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} return 0; }
+				if (m->control_pressed) {   outputTypes.clear(); inFASTA.close();  outFASTA.close(); m->mothurRemove(degapFile); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
 				 
 				Sequence currSeq(inFASTA);  m->gobble(inFASTA);
 				if (currSeq.getName() != "") {
@@ -210,7 +210,7 @@ int DegapSeqsCommand::execute(){
 			
 			outputNames.push_back(degapFile); outputTypes["fasta"].push_back(degapFile);
 			
-			if (m->control_pressed) {  outputTypes.clear(); remove(degapFile.c_str()); for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} return 0; }
+			if (m->control_pressed) {  outputTypes.clear(); m->mothurRemove(degapFile); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
 		}
 		
 		//set fasta file as new current fastafile

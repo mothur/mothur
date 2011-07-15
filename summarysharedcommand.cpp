@@ -364,19 +364,19 @@ int SummarySharedCommand::execute(){
 			for (int i = 0; i < lookup.size(); i++) { delete lookup[i]; }
 			
 			//close files and clean up
-			remove(outputFileName.c_str());
-			if (mult == true) { remove(outAllFileName.c_str());  }
+			m->mothurRemove(outputFileName);
+			if (mult == true) { m->mothurRemove(outAllFileName);  }
 			return 0;
 		//if you only have 2 groups you don't need a .sharedmultiple file
 		}else if ((lookup.size() == 2) && (mult == true)) { 
 			mult = false;
-			remove(outAllFileName.c_str());
+			m->mothurRemove(outAllFileName);
 			outputNames.pop_back();
 		}
 		
 		if (m->control_pressed) {
-			if (mult) {  remove(outAllFileName.c_str());  }
-			remove(outputFileName.c_str()); 
+			if (mult) {  m->mothurRemove(outAllFileName);  }
+			m->mothurRemove(outputFileName); 
 			delete input;
 			for (int i = 0; i < lookup.size(); i++) { delete lookup[i]; }
 			for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }
@@ -403,8 +403,8 @@ int SummarySharedCommand::execute(){
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			if (m->control_pressed) {
-				if (mult) {  remove(outAllFileName.c_str());  }
-				remove(outputFileName.c_str()); 
+				if (mult) {  m->mothurRemove(outAllFileName);  }
+				m->mothurRemove(outputFileName); 
 				delete input; 
 				for (int i = 0; i < lookup.size(); i++) { delete lookup[i]; }
 				for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }
@@ -446,8 +446,8 @@ int SummarySharedCommand::execute(){
 		}
 		
 		if (m->control_pressed) {
-			if (mult) { remove(outAllFileName.c_str());  }
-			remove(outputFileName.c_str()); 
+			if (mult) { m->mothurRemove(outAllFileName);  }
+			m->mothurRemove(outputFileName); 
 			delete input; 
 			for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }
 			m->Groups.clear(); 
@@ -485,8 +485,8 @@ int SummarySharedCommand::execute(){
 		delete input;  
 		
 		if (m->control_pressed) {
-			remove(outAllFileName.c_str());  
-			remove(outputFileName.c_str()); 
+			m->mothurRemove(outAllFileName);  
+			m->mothurRemove(outputFileName); 
 			return 0;
 		}
 		
@@ -515,10 +515,10 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
 				if(processors == 1){
 					driver(thisLookup, 0, numGroups, sumFileName+".temp", sumAllFileName+".temp", calcDists);
 					m->appendFiles((sumFileName + ".temp"), sumFileName);
-					remove((sumFileName + ".temp").c_str());
+					m->mothurRemove((sumFileName + ".temp"));
 					if (mult) {
 						m->appendFiles((sumAllFileName + ".temp"), sumAllFileName);
-						remove((sumAllFileName + ".temp").c_str());
+						m->mothurRemove((sumAllFileName + ".temp"));
 					}
 				}else{
 					int process = 1;
@@ -561,7 +561,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
 					//parent do your part
 					driver(thisLookup, lines[0].start, lines[0].end, sumFileName + toString(getpid()) + ".temp", sumAllFileName + toString(getpid()) + ".temp", calcDists);   
 					m->appendFiles((sumFileName + toString(getpid()) + ".temp"), sumFileName);
-					remove((sumFileName + toString(getpid()) + ".temp").c_str());
+					m->mothurRemove((sumFileName + toString(getpid()) + ".temp"));
 					if (mult) { m->appendFiles((sumAllFileName + toString(getpid()) + ".temp"), sumAllFileName); }
 						
 					//force parent to wait until all the processes are done
@@ -572,8 +572,8 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
 					
 					for (int i = 0; i < processIDS.size(); i++) {
 						m->appendFiles((sumFileName + toString(processIDS[i]) + ".temp"), sumFileName);
-						remove((sumFileName + toString(processIDS[i]) + ".temp").c_str());
-						if (mult) {	remove((sumAllFileName + toString(processIDS[i]) + ".temp").c_str());	}
+						m->mothurRemove((sumFileName + toString(processIDS[i]) + ".temp"));
+						if (mult) {	m->mothurRemove((sumAllFileName + toString(processIDS[i]) + ".temp"));	}
 						
 						if (createPhylip) {
 							string tempdistFileName = m->getRootName(m->getSimpleName(sumFileName)) + toString(processIDS[i]) +  ".dist";
@@ -596,7 +596,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
 								}
 							}
 							intemp.close();
-							remove(tempdistFileName.c_str());
+							m->mothurRemove(tempdistFileName);
 						}
 					}
 
@@ -604,10 +604,10 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
 			#else
 				driver(thisLookup, 0, numGroups, (sumFileName + ".temp"), (sumAllFileName + ".temp"), calcDists);
 				m->appendFiles((sumFileName + ".temp"), sumFileName);
-				remove((sumFileName + ".temp").c_str());
+				m->mothurRemove((sumFileName + ".temp"));
 				if (mult) {
 					m->appendFiles((sumAllFileName + ".temp"), sumAllFileName);
-					remove((sumAllFileName + ".temp").c_str());
+					m->mothurRemove((sumAllFileName + ".temp"));
 				}
 			#endif
 			

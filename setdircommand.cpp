@@ -129,7 +129,7 @@ int SetDirectoryCommand::execute(){
 				m->mothurOut(output + " directory does not exist or is not writable."); m->mothurOutEndLine(); 
 			}else{
 				out.close();
-				remove(outTemp.c_str());
+				m->mothurRemove(outTemp);
 				m->mothurOut("outputDir=" + output); m->mothurOutEndLine();  
 				commandFactory->setOutputDirectory(output);
 			}
@@ -161,7 +161,7 @@ int SetDirectoryCommand::execute(){
 				m->mothurOut(input + " directory does not exist or is not writable."); m->mothurOutEndLine(); 
 			}else{
 				in.close();
-				remove(inTemp.c_str());
+				m->mothurRemove(inTemp);
 				m->mothurOut("inputDir=" + input); m->mothurOutEndLine();  
 				commandFactory->setInputDirectory(input); 
 			}

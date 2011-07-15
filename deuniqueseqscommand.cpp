@@ -155,14 +155,14 @@ int DeUniqueSeqsCommand::execute() {
 		m->openOutputFile(outFastaFile, out);
 		
 		readNamesFile();
-		if (m->control_pressed) {  out.close(); outputTypes.clear(); remove(outFastaFile.c_str()); return 0; }
+		if (m->control_pressed) {  out.close(); outputTypes.clear(); m->mothurRemove(outFastaFile); return 0; }
 		
 		ifstream in;
 		m->openInputFile(fastaFile, in);
 		
 		while (!in.eof()) {
 		
-			if (m->control_pressed) { in.close(); out.close(); outputTypes.clear(); remove(outFastaFile.c_str()); return 0; }
+			if (m->control_pressed) { in.close(); out.close(); outputTypes.clear(); m->mothurRemove(outFastaFile); return 0; }
 			
 			Sequence seq(in); m->gobble(in);
 			
@@ -196,7 +196,7 @@ int DeUniqueSeqsCommand::execute() {
 			}
 		}
 				
-		if (m->control_pressed) { outputTypes.clear(); remove(outFastaFile.c_str()); return 0; }
+		if (m->control_pressed) { outputTypes.clear(); m->mothurRemove(outFastaFile); return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();

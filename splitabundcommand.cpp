@@ -250,11 +250,11 @@ int SplitAbundCommand::execute(){
 			if (namefile != "") {  readNamesFile();		}
 			else				{ createNameMap(list);	}
 			
-			if (m->control_pressed) { delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
+			if (m->control_pressed) { delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 			
 			while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-				if (m->control_pressed) { delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
+				if (m->control_pressed) { delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 				
 				if(allLines == 1 || labels.count(list->getLabel()) == 1){
 						
@@ -288,7 +288,7 @@ int SplitAbundCommand::execute(){
 				list = input->getListVector(); //get new list vector to process
 			}
 			
-			if (m->control_pressed) { delete input;  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
+			if (m->control_pressed) { delete input;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 			
 			//output error messages about any remaining user labels
 			set<string>::iterator it;
@@ -304,7 +304,7 @@ int SplitAbundCommand::execute(){
 
 			}
 			
-			if (m->control_pressed) { delete input;  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
+			if (m->control_pressed) { delete input;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 			
 			//run last label if you need to
 			if (needToRun == true)  {
@@ -319,7 +319,7 @@ int SplitAbundCommand::execute(){
 			
 			delete input;
 			
-			if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }	return 0;	}
+			if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }	return 0;	}
 									
 		}else { //you are using the namefile to determine abundance
 			if (outputDir == "") { outputDir = m->hasPath(namefile); }

@@ -186,7 +186,7 @@ int OtuHierarchyCommand::execute(){
 		//go through each bin in "big" otu and output the bins in "little" otu which created it
 		for (int i = 0; i < lists[1].getNumBins(); i++) {
 		
-			if (m->control_pressed) { outputTypes.clear(); out.close(); remove(outputFileName.c_str()); return 0; }
+			if (m->control_pressed) { outputTypes.clear(); out.close(); m->mothurRemove(outputFileName); return 0; }
 			
 			string names = lists[1].get(i);
 			
@@ -219,7 +219,7 @@ int OtuHierarchyCommand::execute(){
 		
 		out.close();
 		
-		if (m->control_pressed) { outputTypes.clear(); remove(outputFileName.c_str()); return 0; }
+		if (m->control_pressed) { outputTypes.clear(); m->mothurRemove(outputFileName); return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Name: "); m->mothurOutEndLine();

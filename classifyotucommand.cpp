@@ -244,7 +244,7 @@ int ClassifyOtuCommand::execute(){
 		set<string> processedLabels;
 		set<string> userLabels = labels;
 		
-		if (m->control_pressed) { outputTypes.clear(); delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }  return 0; }
+		if (m->control_pressed) { outputTypes.clear(); delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }  return 0; }
 	
 		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
@@ -252,7 +252,7 @@ int ClassifyOtuCommand::execute(){
 			
 					m->mothurOut(list->getLabel() + "\t" + toString(list->size())); m->mothurOutEndLine();
 					process(list);
-					if (m->control_pressed) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } delete input; delete list; return 0; }
+					if (m->control_pressed) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } delete input; delete list; return 0; }
 										
 					processedLabels.insert(list->getLabel());
 					userLabels.erase(list->getLabel());
@@ -267,7 +267,7 @@ int ClassifyOtuCommand::execute(){
 					process(list);
 				
 					
-					if (m->control_pressed) { outputTypes.clear();  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } delete input; delete list; return 0; }
+					if (m->control_pressed) { outputTypes.clear();  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } delete input; delete list; return 0; }
 										
 					processedLabels.insert(list->getLabel());
 					userLabels.erase(list->getLabel());
@@ -303,12 +303,12 @@ int ClassifyOtuCommand::execute(){
 			process(list);
 			delete list;
 			
-			if (m->control_pressed) { outputTypes.clear();  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } delete input; delete list; return 0; }
+			if (m->control_pressed) { outputTypes.clear();  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } delete input; delete list; return 0; }
 		}
 		
 		delete input;  
 				
-		if (m->control_pressed) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0; }
+		if (m->control_pressed) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -451,7 +451,7 @@ vector<string> ClassifyOtuCommand::findConsensusTaxonomy(int bin, ListVector* th
 		phylo->assignHeirarchyIDs(0);
 		
 		TaxNode currentNode = phylo->get(0);
-		
+		int myLevel = 0; 	
 		//at each level
 		while (currentNode.children.size() != 0) { //you still have more to explore
 		
@@ -480,6 +480,7 @@ vector<string> ClassifyOtuCommand::findConsensusTaxonomy(int bin, ListVector* th
 				}else{
 					conTax += bestChild.name + ";";
 				}
+				myLevel++;
 			}else{ //if no, quit
 				break;
 			}
@@ -488,7 +489,12 @@ vector<string> ClassifyOtuCommand::findConsensusTaxonomy(int bin, ListVector* th
 			currentNode = bestChild;
 		}
 		
-				
+		if (myLevel != phylo->getMaxLevel()) {
+			while (myLevel != phylo->getMaxLevel()) {
+				conTax += "unclassified;";
+				myLevel++;
+			}
+		}		
 		if (conTax == "") {  conTax = "no_consensus;";  }
 		
 		delete phylo;	
@@ -570,6 +576,35 @@ int ClassifyOtuCommand::process(ListVector* processList) {
 		exit(1);
 	}
 }
+/**************************************************************************************************/
+string ClassifyOtuCommand::addUnclassifieds(string tax, int maxlevel) {
+	try{
+		string newTax, taxon;
+		int level = 0;
+		
+		//keep what you have counting the levels
+		while (tax.find_first_of(';') != -1) {
+			//get taxon
+			taxon = tax.substr(0,tax.find_first_of(';'))+';';
+			tax = tax.substr(tax.find_first_of(';')+1, tax.length());
+			newTax += taxon;
+			level++;
+		}
+		
+		//add "unclassified" until you reach maxLevel
+		while (level < maxlevel) {
+			newTax += "unclassified;";
+			level++;
+		}
+		
+		return newTax;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClassifyOtuCommand", "addUnclassifieds");
+		exit(1);
+	}
+}
+
 /**************************************************************************************************/
 void ClassifyOtuCommand::removeConfidences(string& tax) {
 	try {

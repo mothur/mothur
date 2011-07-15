@@ -373,7 +373,7 @@ int ShhherCommand::execute(){
 					MPI_Recv(&done, 1, MPI_INT, i, tag, MPI_COMM_WORLD, &status);
 					
 					m->appendFiles((distFileName + ".temp." + toString(i)), distFileName);
-					remove((distFileName + ".temp." + toString(i)).c_str());
+					m->mothurRemove((distFileName + ".temp." + toString(i)));
 				}
 
 				string namesFileName = createNamesFile();
@@ -383,9 +383,9 @@ int ShhherCommand::execute(){
 
 				getOTUData(listFileName);
 
-				remove(distFileName.c_str());
-				remove(namesFileName.c_str());
-				remove(listFileName.c_str());
+				m->mothurRemove(distFileName);
+				m->mothurRemove(namesFileName);
+				m->mothurRemove(listFileName);
 				
 				initPyroCluster();
 
@@ -759,9 +759,9 @@ int ShhherCommand::execute(){
 			string listFileName = cluster(distFileName, namesFileName);
 			getOTUData(listFileName);
 			
-			remove(distFileName.c_str());
-			remove(namesFileName.c_str());
-			remove(listFileName.c_str());
+			m->mothurRemove(distFileName);
+			m->mothurRemove(namesFileName);
+			m->mothurRemove(listFileName);
 			
 			initPyroCluster();
 			
@@ -1167,7 +1167,7 @@ string ShhherCommand::createDistFile(int processors){
 			//append and remove temp files
 			for (int i=0;i<processIDs.size();i++) { 
 				m->appendFiles((fDistFileName + toString(processIDs[i]) + ".temp"), fDistFileName);
-				remove((fDistFileName + toString(processIDs[i]) + ".temp").c_str());
+				m->mothurRemove((fDistFileName + toString(processIDs[i]) + ".temp"));
 			}
 			
 		}

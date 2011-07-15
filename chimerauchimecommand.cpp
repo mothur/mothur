@@ -435,7 +435,7 @@ int ChimeraUchimeCommand::execute(){
 				
 				while (!in.eof()) {
 					
-					if (m->control_pressed) { in.close(); for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}  return 0; }
+					if (m->control_pressed) { in.close(); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
 					
 					Sequence seq(in); m->gobble(in);
 					seqs[seq.getName()] = seq.getAligned();
@@ -446,10 +446,10 @@ int ChimeraUchimeCommand::execute(){
 				vector<seqPriorityNode> nameMapCount;
 				int error = m->readNames(nameFile, nameMapCount, seqs);
 				
-				if (m->control_pressed) { for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}  return 0; }
+				if (m->control_pressed) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
 				
-				if (error == 1) { for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}  return 0; }
-				if (seqs.size() != nameMapCount.size()) { m->mothurOut( "The number of sequences in your fastafile does not match the number of sequences in your namefile, aborting."); m->mothurOutEndLine(); for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}  return 0; }
+				if (error == 1) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
+				if (seqs.size() != nameMapCount.size()) { m->mothurOut( "The number of sequences in your fastafile does not match the number of sequences in your namefile, aborting."); m->mothurOutEndLine(); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
 				
 				sort(nameMapCount.begin(), nameMapCount.end(), compareSeqPriorityNodes);
 				
@@ -468,7 +468,7 @@ int ChimeraUchimeCommand::execute(){
 				#ifdef USE_MPI	
 					}
 				#endif
-				if (m->control_pressed) {  for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}  return 0;	}				
+				if (m->control_pressed) {  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}				
 			}
 			
 			if (outputDir == "") { outputDir = m->hasPath(fastaFileNames[s]);  }//if user entered a file with a path then preserve it				
@@ -476,7 +476,7 @@ int ChimeraUchimeCommand::execute(){
 			string accnosFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]))  + "uchime.accnos";
 			string alnsFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]))  + "uchime.alns";
 			
-			if (m->control_pressed) {  for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}  return 0;	}
+			if (m->control_pressed) {  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}
 			
 			int numSeqs = 0;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
@@ -485,10 +485,10 @@ int ChimeraUchimeCommand::execute(){
 #else
 			numSeqs = driver(outputFileName, fastaFileNames[s], accnosFileName, alnsFileName);
 #endif
-			if (m->control_pressed) { for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} return 0; }
+			if (m->control_pressed) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
 			
 			//remove file made for uchime
-			if (templatefile == "self") {  remove(fastaFileNames[s].c_str()); }
+			if (templatefile == "self") {  m->mothurRemove(fastaFileNames[s]); }
 			
 			outputNames.push_back(outputFileName); outputTypes["chimera"].push_back(outputFileName);
 			outputNames.push_back(accnosFileName); outputTypes["accnos"].push_back(accnosFileName);
@@ -830,14 +830,14 @@ int ChimeraUchimeCommand::createProcesses(string outputFileName, string filename
 					num += temp;
 					
 					m->appendFiles((outputFileName + toString(j) + ".temp"), outputFileName);
-					remove((outputFileName + toString(j) + ".temp").c_str());
+					m->mothurRemove((outputFileName + toString(j) + ".temp"));
 					
 					m->appendFiles((accnos + toString(j) + ".temp"), accnos);
-					remove((accnos + toString(j) + ".temp").c_str());
+					m->mothurRemove((accnos + toString(j) + ".temp"));
 					
 					if (chimealns) {
 						m->appendFiles((alns + toString(j) + ".temp"), alns);
-						remove((alns + toString(j) + ".temp").c_str());
+						m->mothurRemove((alns + toString(j) + ".temp"));
 					}
 				}
 			}
@@ -892,26 +892,26 @@ int ChimeraUchimeCommand::createProcesses(string outputFileName, string filename
 			string tempFile =  outputFileName + toString(processIDS[i]) + ".num.temp";
 			m->openInputFile(tempFile, in);
 			if (!in.eof()) { int tempNum = 0; in >> tempNum; num += tempNum; }
-			in.close(); remove(tempFile.c_str());
+			in.close(); m->mothurRemove(tempFile);
 		}
 		
 		
 		//append output files
 		for(int i=0;i<processIDS[i];i++){
 			m->appendFiles((outputFileName + toString(processIDS[i]) + ".temp"), outputFileName);
-			remove((outputFileName + toString(processIDS[i]) + ".temp").c_str());
+			m->mothurRemove((outputFileName + toString(processIDS[i]) + ".temp"));
 			
 			m->appendFiles((accnos + toString(processIDS[i]) + ".temp"), accnos);
-			remove((accnos + toString(processIDS[i]) + ".temp").c_str());
+			m->mothurRemove((accnos + toString(processIDS[i]) + ".temp"));
 			
 			if (chimealns) {
 				m->appendFiles((alns + toString(processIDS[i]) + ".temp"), alns);
-				remove((alns + toString(processIDS[i]) + ".temp").c_str());
+				m->mothurRemove((alns + toString(processIDS[i]) + ".temp"));
 			}
 		}
 #endif		
 		//get rid of the file pieces.
-		for (int i = 0; i < files.size(); i++) { remove(files[i].c_str()); }
+		for (int i = 0; i < files.size(); i++) { m->mothurRemove(files[i]); }
 #endif		
 		return num;	
 	}

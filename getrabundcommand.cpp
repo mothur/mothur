@@ -184,14 +184,14 @@ int GetRAbundCommand::execute(){
 		set<string> processedLabels;
 		set<string> userLabels = labels;
 		
-		if (m->control_pressed) {  outputTypes.clear();  out.close(); remove(filename.c_str()); delete rabund; delete input; return 0; }
+		if (m->control_pressed) {  outputTypes.clear();  out.close(); m->mothurRemove(filename); delete rabund; delete input; return 0; }
 		
 		while((rabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
 			if(allLines == 1 || labels.count(rabund->getLabel()) == 1){
 					m->mothurOut(rabund->getLabel()); m->mothurOutEndLine();
 					
-					if (m->control_pressed) {   outputTypes.clear(); out.close(); remove(filename.c_str());  delete input; delete rabund;  return 0;  }
+					if (m->control_pressed) {   outputTypes.clear(); out.close(); m->mothurRemove(filename);  delete input; delete rabund;  return 0;  }
 					
 					if(sorted)	{   rabund->print(out);				}
 					else		{	rabund->nonSortedPrint(out);	}
@@ -208,7 +208,7 @@ int GetRAbundCommand::execute(){
 					
 					m->mothurOut(rabund->getLabel()); m->mothurOutEndLine();
 					
-					if (m->control_pressed) {   outputTypes.clear(); out.close(); remove(filename.c_str());  delete input; delete rabund;  return 0;  }
+					if (m->control_pressed) {   outputTypes.clear(); out.close(); m->mothurRemove(filename);  delete input; delete rabund;  return 0;  }
 					
 					if(sorted)	{   rabund->print(out);				}
 					else		{	rabund->nonSortedPrint(out);	}
@@ -246,7 +246,7 @@ int GetRAbundCommand::execute(){
 			
 			m->mothurOut(rabund->getLabel()); m->mothurOutEndLine();
 					
-			if (m->control_pressed) {  outputTypes.clear(); out.close(); remove(filename.c_str());  delete input; delete rabund;  return 0; }
+			if (m->control_pressed) {  outputTypes.clear(); out.close(); m->mothurRemove(filename);  delete input; delete rabund;  return 0; }
 			
 			if(sorted)	{   rabund->print(out);				}
 			else		{	rabund->nonSortedPrint(out);	}

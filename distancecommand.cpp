@@ -255,7 +255,7 @@ int DistanceCommand::execute(){
 				
 		if (output == "lt") { //does the user want lower triangle phylip formatted file 
 			outputFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "phylip.dist";
-			remove(outputFile.c_str()); outputTypes["phylip"].push_back(outputFile);
+			m->mothurRemove(outputFile); outputTypes["phylip"].push_back(outputFile);
 			
 			//output numSeqs to phylip formatted dist file
 		}else if (output == "column") { //user wants column format
@@ -268,10 +268,10 @@ int DistanceCommand::execute(){
 				rename(column.c_str(), tempcolumn.c_str());
 			}
 			
-			remove(outputFile.c_str());
+			m->mothurRemove(outputFile);
 		}else { //assume square
 			outputFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "square.dist";
-			remove(outputFile.c_str());
+			m->mothurRemove(outputFile);
 			outputTypes["phylip"].push_back(outputFile);
 		}
 		
@@ -449,7 +449,7 @@ int DistanceCommand::execute(){
 	#endif
 	
 #endif
-		if (m->control_pressed) { outputTypes.clear();  delete distCalculator; remove(outputFile.c_str()); return 0; }
+		if (m->control_pressed) { outputTypes.clear();  delete distCalculator; m->mothurRemove(outputFile); return 0; }
 		
 		#ifdef USE_MPI
 			MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
@@ -472,17 +472,17 @@ int DistanceCommand::execute(){
 			if (outputFile == column) { 
 				string tempcolumn = column + ".old";
 				m->appendFiles(tempcolumn, outputFile);
-				remove(tempcolumn.c_str());
+				m->mothurRemove(tempcolumn);
 			}else{
 				m->appendFiles(outputFile, column);
-				remove(outputFile.c_str());
+				m->mothurRemove(outputFile);
 				outputFile = column;
 			}
 			
 			if (outputDir != "") { 
 				string newOutputName = outputDir + m->getSimpleName(outputFile);
 				rename(outputFile.c_str(), newOutputName.c_str());
-				remove(outputFile.c_str());
+				m->mothurRemove(outputFile);
 				outputFile = newOutputName;
 			}
 		}
@@ -492,7 +492,7 @@ int DistanceCommand::execute(){
 			}
 		#endif
 		
-		if (m->control_pressed) { outputTypes.clear();  delete distCalculator; remove(outputFile.c_str()); return 0; }
+		if (m->control_pressed) { outputTypes.clear();  delete distCalculator; m->mothurRemove(outputFile); return 0; }
 		
 		delete distCalculator;
 		
@@ -571,7 +571,7 @@ void DistanceCommand::createProcesses(string filename) {
 		//append and remove temp files
 		for (int i=0;i<processIDS.size();i++) { 
 			m->appendFiles((filename + toString(processIDS[i]) + ".temp"), filename);
-			remove((filename + toString(processIDS[i]) + ".temp").c_str());
+			m->mothurRemove((filename + toString(processIDS[i]) + ".temp"));
 		}
 #endif
 	}
@@ -935,7 +935,7 @@ int DistanceCommand::convertMatrix(string outputFile) {
 		//m->openInputFile(outfile, in);
 		
 		while(!in.eof()) {
-			if (m->control_pressed) { in.close(); remove(outfile.c_str()); out.close(); return 0; }
+			if (m->control_pressed) { in.close(); m->mothurRemove(outfile); out.close(); return 0; }
 			
 			in >> first >> second >> dist; m->gobble(in);
 				
@@ -970,7 +970,7 @@ int DistanceCommand::convertMatrix(string outputFile) {
 		in.close();
 		out.close();
 		
-		remove(outfile.c_str());
+		m->mothurRemove(outfile);
 		
 		return 1;
 		
@@ -1025,7 +1025,7 @@ int DistanceCommand::convertToLowerTriangle(string outputFile) {
 		//m->openInputFile(outfile, in);
 		
 		while(!in.eof()) {
-			if (m->control_pressed) { in.close(); remove(outfile.c_str()); out.close(); return 0; }
+			if (m->control_pressed) { in.close(); m->mothurRemove(outfile); out.close(); return 0; }
 			
 			in >> first >> second >> dist; m->gobble(in);
 				
@@ -1064,7 +1064,7 @@ int DistanceCommand::convertToLowerTriangle(string outputFile) {
 		in.close();
 		out.close();
 		
-		remove(outfile.c_str());
+		m->mothurRemove(outfile);
 		
 		return 1;
 		
@@ -1135,7 +1135,7 @@ bool DistanceCommand::sanityCheck() {
 		string name1, name2;
 		float dist;
 		while (!inDist.eof()) {
-			if (m->control_pressed) {  inDist.close(); outDist.close(); remove(outputFile.c_str()); return good;  }
+			if (m->control_pressed) {  inDist.close(); outDist.close(); m->mothurRemove(outputFile); return good;  }
 		
 			inDist >> name1 >> name2 >> dist; m->gobble(inDist);
 			
@@ -1152,10 +1152,10 @@ bool DistanceCommand::sanityCheck() {
 		outDist.close();
 		
 		if (good) {
-			remove(column.c_str());
+			m->mothurRemove(column);
 			rename(outputFile.c_str(), column.c_str());
 		}else{
-			remove(outputFile.c_str()); //temp file is bad because file mismatch above
+			m->mothurRemove(outputFile); //temp file is bad because file mismatch above
 		}
 		
 		return good;

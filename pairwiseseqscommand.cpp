@@ -312,14 +312,14 @@ int PairwiseSeqsCommand::execute(){
 				
 			if (output == "lt") { //does the user want lower triangle phylip formatted file 
 				outputFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + "phylip.dist";
-				remove(outputFile.c_str()); outputTypes["phylip"].push_back(outputFile);
+				m->mothurRemove(outputFile); outputTypes["phylip"].push_back(outputFile);
 			}else if (output == "column") { //user wants column format
 				outputFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + "dist";
 				outputTypes["column"].push_back(outputFile);
-				remove(outputFile.c_str());
+				m->mothurRemove(outputFile);
 			}else { //assume square
 				outputFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + "square.dist";
-				remove(outputFile.c_str());
+				m->mothurRemove(outputFile);
 				outputTypes["phylip"].push_back(outputFile);
 			}
 			
@@ -357,11 +357,11 @@ int PairwiseSeqsCommand::execute(){
 					
 					driverMPI(start, end, outMPI, cutoff); 
 					
-					if (m->control_pressed) { outputTypes.clear(); MPI_File_close(&outMPI);  remove(outputFile.c_str()); delete distCalculator;  return 0; }
+					if (m->control_pressed) { outputTypes.clear(); MPI_File_close(&outMPI);  m->mothurRemove(outputFile); delete distCalculator;  return 0; }
 				
 					//wait on chidren
 					for(int i = 1; i < processors; i++) { 
-						if (m->control_pressed) { outputTypes.clear();  MPI_File_close(&outMPI);   remove(outputFile.c_str()); delete distCalculator;  return 0; }
+						if (m->control_pressed) { outputTypes.clear();  MPI_File_close(&outMPI);   m->mothurRemove(outputFile); delete distCalculator;  return 0; }
 						
 						char buf[5];
 						MPI_Recv(buf, 5, MPI_CHAR, i, tag, MPI_COMM_WORLD, &status); 
@@ -370,7 +370,7 @@ int PairwiseSeqsCommand::execute(){
 					//do your part
 					driverMPI(start, end, outMPI, cutoff); 
 					
-					if (m->control_pressed) { outputTypes.clear();  MPI_File_close(&outMPI);  remove(outputFile.c_str()); delete distCalculator;  return 0; }
+					if (m->control_pressed) { outputTypes.clear();  MPI_File_close(&outMPI);  m->mothurRemove(outputFile); delete distCalculator;  return 0; }
 				
 					char buf[5];
 					strcpy(buf, "done"); 
@@ -390,7 +390,7 @@ int PairwiseSeqsCommand::execute(){
 					if (output != "square"){ driverMPI(start, end, outputFile, mySize); }
 					else { driverMPI(start, end, outputFile, mySize, output); }
 		
-					if (m->control_pressed) {  outputTypes.clear();   remove(outputFile.c_str()); delete distCalculator;  return 0; }
+					if (m->control_pressed) {  outputTypes.clear();   m->mothurRemove(outputFile); delete distCalculator;  return 0; }
 					
 					int amode=MPI_MODE_APPEND|MPI_MODE_WRONLY|MPI_MODE_CREATE; //
 					MPI_File outMPI;
@@ -405,7 +405,7 @@ int PairwiseSeqsCommand::execute(){
 					for(int b = 1; b < processors; b++) { 
 						unsigned long int fileSize;
 						
-						if (m->control_pressed) { outputTypes.clear();  MPI_File_close(&outMPI);  remove(outputFile.c_str());  delete distCalculator;  return 0; }
+						if (m->control_pressed) { outputTypes.clear();  MPI_File_close(&outMPI);  m->mothurRemove(outputFile);  delete distCalculator;  return 0; }
 						
 						MPI_Recv(&fileSize, 1, MPI_LONG, b, tag, MPI_COMM_WORLD, &status); 
 						
@@ -472,7 +472,7 @@ int PairwiseSeqsCommand::execute(){
 		#endif
 		
 	#endif
-			if (m->control_pressed) { outputTypes.clear();  delete distCalculator; remove(outputFile.c_str()); return 0; }
+			if (m->control_pressed) { outputTypes.clear();  delete distCalculator; m->mothurRemove(outputFile); return 0; }
 			
 			#ifdef USE_MPI
 				MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
@@ -500,7 +500,7 @@ int PairwiseSeqsCommand::execute(){
 			
 			m->mothurOut("It took " + toString(time(NULL) - startTime) + " to calculate the distances for " + toString(numSeqs) + " sequences."); m->mothurOutEndLine();
 			
-			if (m->control_pressed) { outputTypes.clear();  delete distCalculator; remove(outputFile.c_str()); return 0; }
+			if (m->control_pressed) { outputTypes.clear();  delete distCalculator; m->mothurRemove(outputFile); return 0; }
 		}
 			
 		delete distCalculator;
@@ -571,7 +571,7 @@ void PairwiseSeqsCommand::createProcesses(string filename) {
 		//append and remove temp files
 		for (int i=0;i<processIDS.size();i++) { 
 			m->appendFiles((filename + toString(processIDS[i]) + ".temp"), filename);
-			remove((filename + toString(processIDS[i]) + ".temp").c_str());
+			m->mothurRemove((filename + toString(processIDS[i]) + ".temp"));
 		}
 #endif
 	}

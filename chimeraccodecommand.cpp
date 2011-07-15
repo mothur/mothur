@@ -293,7 +293,7 @@ int ChimeraCcodeCommand::execute(){
 
 			string mapInfo = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + "mapinfo";
 			
-			if (m->control_pressed) { delete chimera;  for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} outputTypes.clear(); return 0;	}
+			if (m->control_pressed) { delete chimera;  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} outputTypes.clear(); return 0;	}
 			
 		#ifdef USE_MPI
 		
@@ -325,7 +325,7 @@ int ChimeraCcodeCommand::execute(){
 				MPI_File_open(MPI_COMM_WORLD, outFilename, outMode, MPI_INFO_NULL, &outMPI);
 				MPI_File_open(MPI_COMM_WORLD, outAccnosFilename, outMode, MPI_INFO_NULL, &outMPIAccnos);
 
-				if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);   MPI_File_close(&outMPIAccnos);  for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} outputTypes.clear();  delete chimera; return 0;  }
+				if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);   MPI_File_close(&outMPIAccnos);  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} outputTypes.clear();  delete chimera; return 0;  }
 			
 				if (pid == 0) { //you are the root process 
 					string outTemp = "For full window mapping info refer to " + mapInfo + "\n";
@@ -355,7 +355,7 @@ int ChimeraCcodeCommand::execute(){
 					//align your part
 					driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPI, outMPIAccnos, MPIPos);
 					
-					if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);   MPI_File_close(&outMPIAccnos);  remove(outputFileName.c_str());  remove(accnosFileName.c_str());  for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} outputTypes.clear();  delete chimera; return 0;  }
+					if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);   MPI_File_close(&outMPIAccnos);  m->mothurRemove(outputFileName);  m->mothurRemove(accnosFileName);  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} outputTypes.clear();  delete chimera; return 0;  }
 
 				}else{ //you are a child process
 					MPI_Recv(&numSeqs, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
@@ -371,7 +371,7 @@ int ChimeraCcodeCommand::execute(){
 					//align your part
 					driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPI, outMPIAccnos, MPIPos);
 					
-					if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);   MPI_File_close(&outMPIAccnos);  for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}  outputTypes.clear(); delete chimera; return 0;  }
+					if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);   MPI_File_close(&outMPIAccnos);  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  outputTypes.clear(); delete chimera; return 0;  }
 				}
 				
 				//close files 
@@ -402,7 +402,7 @@ int ChimeraCcodeCommand::execute(){
 										
 					numSeqs = driver(lines[0], outputFileName, fastaFileNames[s], accnosFileName);
 					
-					if (m->control_pressed) { remove(outputFileName.c_str()); remove(tempHeader.c_str()); remove(accnosFileName.c_str()); for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} for (int i = 0; i < lines.size(); i++) {  delete lines[i];  } outputTypes.clear();  lines.clear(); delete chimera; return 0; }
+					if (m->control_pressed) { m->mothurRemove(outputFileName); m->mothurRemove(tempHeader); m->mothurRemove(accnosFileName); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} for (int i = 0; i < lines.size(); i++) {  delete lines[i];  } outputTypes.clear();  lines.clear(); delete chimera; return 0; }
 					
 				}else{
 					processIDS.resize(0);
@@ -415,19 +415,19 @@ int ChimeraCcodeCommand::execute(){
 					//append output files
 					for(int i=1;i<processors;i++){
 						m->appendFiles((outputFileName + toString(processIDS[i]) + ".temp"), outputFileName);
-						remove((outputFileName + toString(processIDS[i]) + ".temp").c_str());
+						m->mothurRemove((outputFileName + toString(processIDS[i]) + ".temp"));
 					}
 					
 					//append output files
 					for(int i=1;i<processors;i++){
 						m->appendFiles((accnosFileName + toString(processIDS[i]) + ".temp"), accnosFileName);
-						remove((accnosFileName + toString(processIDS[i]) + ".temp").c_str());
+						m->mothurRemove((accnosFileName + toString(processIDS[i]) + ".temp"));
 					}
 					
 					if (m->control_pressed) { 
-						remove(outputFileName.c_str()); 
-						remove(accnosFileName.c_str());
-						for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} outputTypes.clear();
+						m->mothurRemove(outputFileName); 
+						m->mothurRemove(accnosFileName);
+						for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} outputTypes.clear();
 						for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
 						delete chimera;
 						return 0;
@@ -438,13 +438,13 @@ int ChimeraCcodeCommand::execute(){
 			#else
 				numSeqs = driver(lines[0], outputFileName, fastaFileNames[s], accnosFileName);
 				
-				if (m->control_pressed) { remove(outputFileName.c_str()); remove(tempHeader.c_str()); remove(accnosFileName.c_str()); for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} for (int i = 0; i < lines.size(); i++) {  delete lines[i];  } outputTypes.clear();  lines.clear(); delete chimera; return 0; }
+				if (m->control_pressed) { m->mothurRemove(outputFileName); m->mothurRemove(tempHeader); m->mothurRemove(accnosFileName); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} for (int i = 0; i < lines.size(); i++) {  delete lines[i];  } outputTypes.clear();  lines.clear(); delete chimera; return 0; }
 				
 			#endif
 	
 			m->appendFiles(outputFileName, tempHeader);
 		
-			remove(outputFileName.c_str());
+			m->mothurRemove(outputFileName);
 			rename(tempHeader.c_str(), outputFileName.c_str());
 		#endif
 		
@@ -648,7 +648,7 @@ int ChimeraCcodeCommand::createProcesses(string outputFileName, string filename,
 			string tempFile =  outputFileName + toString(processIDS[i]) + ".num.temp";
 			m->openInputFile(tempFile, in);
 			if (!in.eof()) { int tempNum = 0; in >> tempNum; num += tempNum; }
-			in.close(); remove(tempFile.c_str());
+			in.close(); m->mothurRemove(tempFile);
 		}
 		
 		return num;

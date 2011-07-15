@@ -245,7 +245,7 @@ int RemoveGroupsCommand::execute(){
 		if (listfile != "")			{		readList();		}
 		if (taxfile != "")			{		readTax();		}
 		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
+		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 		
 		m->mothurOut("Removed " + toString(names.size()) + " sequences. From the groups: "); m->mothurOutEndLine();
 		for (int i = 0; i < Groups.size(); i++) {	m->mothurOut(Groups[i]); m->mothurOut("\t" + toString(groupMap->getNumSeqs(Groups[i]))); m->mothurOutEndLine();	}
@@ -311,7 +311,7 @@ int RemoveGroupsCommand::readFasta(){
 		bool wroteSomething = false;
 		
 		while(!in.eof()){
-			if (m->control_pressed) { in.close();  out.close();  remove(outputFileName.c_str());  return 0; }
+			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 			
 			Sequence currSeq(in);
 			name = currSeq.getName();
@@ -366,7 +366,7 @@ int RemoveGroupsCommand::readList(){
 			
 			//for each bin
 			for (int i = 0; i < list.getNumBins(); i++) {
-				if (m->control_pressed) { in.close();  out.close();  remove(outputFileName.c_str());  return 0; }
+				if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 				
 				//parse out names that are in accnos file
 				string binnames = list.get(i);
@@ -429,7 +429,7 @@ int RemoveGroupsCommand::readName(){
 		bool wroteSomething = false;
 		
 		while(!in.eof()){
-			if (m->control_pressed) { in.close();  out.close();  remove(outputFileName.c_str());  return 0; }
+			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 			
 			in >> firstCol;		m->gobble(in);		
 			in >> secondCol;			
@@ -505,7 +505,7 @@ int RemoveGroupsCommand::readGroup(){
 		bool wroteSomething = false;
 		
 		while(!in.eof()){
-			if (m->control_pressed) { in.close();  out.close();  remove(outputFileName.c_str());  return 0; }
+			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 			
 			in >> name;				//read from first column
 			in >> group;			//read from second column
@@ -547,7 +547,7 @@ int RemoveGroupsCommand::readTax(){
 		bool wroteSomething = false;
 		
 		while(!in.eof()){
-			if (m->control_pressed) { in.close();  out.close();  remove(outputFileName.c_str());  return 0; }
+			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 			
 			in >> name;				//read from first column
 			in >> tax;			//read from second column

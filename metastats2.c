@@ -86,7 +86,7 @@ int metastat_main (char* outputFileName, int numRows, int numCols, double thresh
 		ratio[i]=total[i]/min;
 	}
 	
-	// Change matrix into an array as received by R for compatibility.
+	//Change matrix into an array as received by R for compatibility.
 	
 	c=0;
 	for(i=0;i<col;i++){
@@ -187,11 +187,16 @@ int metastat_main (char* outputFileName, int numRows, int numCols, double thresh
 			prt=&prt1;
 			pre=&pre1;
 			
+			//MothurFisher fishtere;
+			//double mothurFex = fishtere.fexact(f11, f12, f21, f22);
+			
 			fexact(nr,nc,data, ldtabl,expect,prc,emin,prt,pre,work);
 			
 			if (*pre>.999999999){
 				*pre=1;
 			}
+			
+			//printf("feaxt = %f\t%f\t%f\t%f\t%f\t%f\n", *expect, *pre, f11, f12, f21, f22);
 			storage[i][8] = *pre;
 			pvalues[i]=*pre;
 		}

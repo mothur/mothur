@@ -215,7 +215,7 @@ int PhylotypeCommand::execute(){
 			
 			if (m->control_pressed) { 
 				outRabund.close(); outSabund.close(); outList.close();
-				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+				for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }
 				delete tree; return 0; 
 			}
 			
@@ -286,7 +286,7 @@ int PhylotypeCommand::execute(){
 		delete tree;
 		
 		if (m->control_pressed) { 
-			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }
 			return 0; 
 		}
 		

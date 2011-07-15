@@ -279,9 +279,8 @@ int GetSeqsCommand::execute(){
 		if (qualfile != "")			{		readQual();			}
 		if (accnosfile2 != "")		{		compareAccnos();	}
 		
-		if (m->control_pressed) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0; }
+		if (m->control_pressed) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
 		
-		m->mothurOut("Selected " + toString(names.size()) + " sequences."); m->mothurOutEndLine();
 		
 		if (outputNames.size() != 0) {
 			m->mothurOutEndLine();
@@ -347,10 +346,11 @@ int GetSeqsCommand::readFasta(){
 		string name;
 		
 		bool wroteSomething = false;
+		int selectedCount = 0;
 		
 		while(!in.eof()){
 		
-			if (m->control_pressed) { in.close(); out.close(); remove(outputFileName.c_str());  return 0; }
+			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
 			
 			Sequence currSeq(in);
 			name = currSeq.getName();
@@ -361,6 +361,7 @@ int GetSeqsCommand::readFasta(){
 					wroteSomething = true;
 					
 					currSeq.printSequence(out);
+					selectedCount++;
 				}
 			}
 			m->gobble(in);
@@ -371,6 +372,8 @@ int GetSeqsCommand::readFasta(){
 		
 		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();  }
 		outputNames.push_back(outputFileName);  outputTypes["fasta"].push_back(outputFileName); 
+		
+		m->mothurOut("Selected " + toString(selectedCount) + " sequences from your fasta file."); m->mothurOutEndLine();
 		
 		return 0;
 
@@ -395,6 +398,7 @@ int GetSeqsCommand::readQual(){
 		string name;
 		
 		bool wroteSomething = false;
+		int selectedCount = 0;
 		
 		
 		while(!in.eof()){	
@@ -426,6 +430,7 @@ int GetSeqsCommand::readQual(){
 				wroteSomething = true;
 						
 				out << name << endl << scores;
+				selectedCount++;
 			}
 			
 			m->gobble(in);
@@ -436,6 +441,9 @@ int GetSeqsCommand::readQual(){
 		
 		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();  }
 		outputNames.push_back(outputFileName);  outputTypes["qfile"].push_back(outputFileName); 
+		
+		m->mothurOut("Selected " + toString(selectedCount) + " sequences from your quality file."); m->mothurOutEndLine();
+
 		
 		return 0;
 		
@@ -458,10 +466,11 @@ int GetSeqsCommand::readList(){
 		m->openInputFile(listfile, in);
 		
 		bool wroteSomething = false;
+		int selectedCount = 0;
 		
 		while(!in.eof()){
 			
-			if (m->control_pressed) { in.close(); out.close(); remove(outputFileName.c_str());  return 0; }
+			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
 
 			//read in list vector
 			ListVector list(in);
@@ -482,11 +491,11 @@ int GetSeqsCommand::readList(){
 					binnames = binnames.substr(binnames.find_first_of(',')+1, binnames.length());
 					
 					//if that name is in the .accnos file, add it
-					if (names.count(name) != 0) {  newNames += name + ",";  }
+					if (names.count(name) != 0) {  newNames += name + ",";  selectedCount++; }
 				}
 			
 				//get last name
-				if (names.count(binnames) != 0) {  newNames += binnames + ",";  }
+				if (names.count(binnames) != 0) {  newNames += binnames + ",";  selectedCount++; }
 
 				//if there are names in this bin add to new list
 				if (newNames != "") { 
@@ -508,6 +517,8 @@ int GetSeqsCommand::readList(){
 		
 		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();  }
 		outputNames.push_back(outputFileName); outputTypes["list"].push_back(outputFileName);
+		
+		m->mothurOut("Selected " + toString(selectedCount) + " sequences from your list file."); m->mothurOutEndLine();
 		
 		return 0;
 
@@ -532,11 +543,11 @@ int GetSeqsCommand::readName(){
 		string name, firstCol, secondCol;
 		
 		bool wroteSomething = false;
-		
+		int selectedCount = 0;
 		
 		while(!in.eof()){
 		
-			if (m->control_pressed) { in.close(); out.close(); remove(outputFileName.c_str());  return 0; }
+			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
 
 			in >> firstCol;				
 			in >> secondCol;
@@ -558,7 +569,10 @@ int GetSeqsCommand::readName(){
 				for (int i = 0; i < parsedNames.size(); i++) {  names.insert(parsedNames[i]);  }
 				out << firstCol << '\t' << hold << endl;
 				wroteSomething = true;
+				selectedCount += parsedNames.size();
 			}else {
+				selectedCount += validSecond.size();
+				
 				//if the name in the first column is in the set then print it and any other names in second column also in set
 				if (names.count(firstCol) != 0) {
 				
@@ -594,6 +608,8 @@ int GetSeqsCommand::readName(){
 		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();  }
 		outputNames.push_back(outputFileName); outputTypes["name"].push_back(outputFileName);
 		
+		m->mothurOut("Selected " + toString(selectedCount) + " sequences from your name file."); m->mothurOutEndLine();
+		
 		return 0;
 		
 	}
@@ -618,10 +634,11 @@ int GetSeqsCommand::readGroup(){
 		string name, group;
 		
 		bool wroteSomething = false;
+		int selectedCount = 0;
 		
 		while(!in.eof()){
 
-			if (m->control_pressed) { in.close(); out.close(); remove(outputFileName.c_str());  return 0; }
+			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
 
 
 			in >> name;				//read from first column
@@ -632,6 +649,7 @@ int GetSeqsCommand::readGroup(){
 				wroteSomething = true;
 				
 				out << name << '\t' << group << endl;
+				selectedCount++;
 			}
 					
 			m->gobble(in);
@@ -641,6 +659,9 @@ int GetSeqsCommand::readGroup(){
 		
 		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();  }
 		outputNames.push_back(outputFileName);  outputTypes["group"].push_back(outputFileName);
+		
+		m->mothurOut("Selected " + toString(selectedCount) + " sequences from your group file."); m->mothurOutEndLine();
+
 		
 		return 0;
 
@@ -664,10 +685,11 @@ int GetSeqsCommand::readTax(){
 		string name, tax;
 		
 		bool wroteSomething = false;
+		int selectedCount = 0;
 		
 		while(!in.eof()){
 
-			if (m->control_pressed) { in.close(); out.close(); remove(outputFileName.c_str());  return 0; }
+			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
 
 			in >> name;				//read from first column
 			in >> tax;			//read from second column
@@ -677,6 +699,7 @@ int GetSeqsCommand::readTax(){
 				wroteSomething = true;
 				
 				out << name << '\t' << tax << endl;
+				selectedCount++;
 			}
 					
 			m->gobble(in);
@@ -686,6 +709,8 @@ int GetSeqsCommand::readTax(){
 		
 		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();  }
 		outputNames.push_back(outputFileName);  outputTypes["taxonomy"].push_back(outputFileName);
+		
+		m->mothurOut("Selected " + toString(selectedCount) + " sequences from your taxonomy file."); m->mothurOutEndLine();
 			
 		return 0;
 
@@ -711,6 +736,7 @@ int GetSeqsCommand::readAlign(){
 		string name, junk;
 		
 		bool wroteSomething = false;
+		int selectedCount = 0;
 		
 		//read column headers
 		for (int i = 0; i < 16; i++) {  
@@ -721,7 +747,7 @@ int GetSeqsCommand::readAlign(){
 		
 		while(!in.eof()){
 		
-			if (m->control_pressed) { in.close(); out.close(); remove(outputFileName.c_str());  return 0; }
+			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
 
 
 			in >> name;				//read from first column
@@ -729,6 +755,7 @@ int GetSeqsCommand::readAlign(){
 			//if this name is in the accnos file
 			if (names.count(name) != 0) {
 				wroteSomething = true;
+				selectedCount++;
 				
 				out << name << '\t';
 				
@@ -754,6 +781,8 @@ int GetSeqsCommand::readAlign(){
 		
 		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();  }
 		outputNames.push_back(outputFileName);  outputTypes["alignreport"].push_back(outputFileName);
+		
+		m->mothurOut("Selected " + toString(selectedCount) + " sequences from your alignreport file."); m->mothurOutEndLine();
 		
 		return 0;
 		

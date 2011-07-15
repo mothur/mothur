@@ -169,7 +169,7 @@ int ParseFastaQCommand::execute(){
 		outFasta.close();
 		outQual.close();
 		
-		if (m->control_pressed) { outputTypes.clear(); remove(fastaFile.c_str()); remove(qualFile.c_str()); return 0; }
+		if (m->control_pressed) { outputTypes.clear(); m->mothurRemove(fastaFile); m->mothurRemove(qualFile); return 0; }
 		
 		//set fasta file as new current fastafile
 		string current = "";

@@ -228,7 +228,7 @@ int main(int argc, char *argv[]){
 				outNewLog.close();
 				
 				m->appendFiles(logFileName, newlogFileName);
-				remove(logFileName.c_str());
+				m->mothurRemove(logFileName);
 			}
 		}else{  
 			newlogFileName = outputDir + logFileName;

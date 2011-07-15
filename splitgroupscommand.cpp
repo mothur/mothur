@@ -174,7 +174,7 @@ int SplitGroupCommand::execute(){
 		
 		delete groupMap;
 		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} return 0; }
+		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} return 0; }
 		
 		string current = "";
 		itTypes = outputTypes.find("fasta");
@@ -328,7 +328,7 @@ int SplitGroupCommand::splitFasta() {
 		//remove blank files
 		for (int i = 0; i < outputNames.size(); i++) {
 			if (m->isBlank(outputNames[i])) {
-				remove(outputNames[i].c_str());
+				m->mothurRemove(outputNames[i]);
 			}else { newOutputNames.push_back(outputNames[i]); }
 		}
 		outputNames = newOutputNames;

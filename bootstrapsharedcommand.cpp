@@ -256,13 +256,13 @@ int BootSharedCommand::execute(){
 		globaldata->gTreemap = tmap;
 			
 		while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-			if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } globaldata->Groups.clear(); delete input;delete util; return 0;	} 
+			if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } globaldata->Groups.clear(); delete input;delete util; return 0;	} 
 	
 			if(allLines == 1 || labels.count(order->getLabel()) == 1){			
 				
 				m->mothurOut(order->getLabel()); m->mothurOutEndLine();
 				int error = process(order);
-				if (error == 1) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } globaldata->Groups.clear(); delete input;delete util; return 0;	} 
+				if (error == 1) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } globaldata->Groups.clear(); delete input;delete util; return 0;	} 
 				
 				processedLabels.insert(order->getLabel());
 				userLabels.erase(order->getLabel());
@@ -276,7 +276,7 @@ int BootSharedCommand::execute(){
 				order = input->getSharedOrderVector(lastLabel);													
 				m->mothurOut(order->getLabel()); m->mothurOutEndLine();
 				int error = process(order);
-				if (error == 1) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } globaldata->Groups.clear(); delete input;delete util; return 0;	} 
+				if (error == 1) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } globaldata->Groups.clear(); delete input;delete util; return 0;	} 
 
 				processedLabels.insert(order->getLabel());
 				userLabels.erase(order->getLabel());
@@ -294,7 +294,7 @@ int BootSharedCommand::execute(){
 		}
 		
 		
-		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } globaldata->Groups.clear(); delete input; delete util;  return 0;	} 
+		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } globaldata->Groups.clear(); delete input; delete util;  return 0;	} 
 
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -309,7 +309,7 @@ int BootSharedCommand::execute(){
 			}
 		}
 		
-		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } globaldata->Groups.clear(); delete input; delete util; return 0;	} 
+		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } globaldata->Groups.clear(); delete input; delete util; return 0;	} 
 
 		//run last line if you need to
 		if (needToRun == true)  {
@@ -317,13 +317,13 @@ int BootSharedCommand::execute(){
 				order = input->getSharedOrderVector(lastLabel);													
 				m->mothurOut(order->getLabel()); m->mothurOutEndLine();
 				int error = process(order);
-				if (error == 1) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } globaldata->Groups.clear(); delete input; delete util; return 0;	} 
+				if (error == 1) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } globaldata->Groups.clear(); delete input; delete util; return 0;	} 
 				
 				delete order;
 
 		}
 		
-		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } globaldata->Groups.clear();delete input; delete util; return 0;	} 
+		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } globaldata->Groups.clear();delete input; delete util; return 0;	} 
 
 		//reset groups parameter
 		globaldata->Groups.clear();  

@@ -241,7 +241,7 @@ int ParsimonyCommand::execute() {
 					
 					if (m->control_pressed) { 
 						delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; }
-						for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } outputTypes.clear();
+						for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
 						m->Groups.clear();
 						return 0;
 					}
@@ -296,7 +296,7 @@ int ParsimonyCommand::execute() {
 			delete reading; delete pars; delete output;
 			delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; }
 			if (randomtree == "") {  outSum.close();  }
-			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } outputTypes.clear();
+			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
 			m->Groups.clear();
 			return 0;
 		}
@@ -321,7 +321,7 @@ int ParsimonyCommand::execute() {
 					delete reading; delete pars; delete output;
 					delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; }
 					if (randomtree == "") {  outSum.close();  }
-					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } outputTypes.clear();
+					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
 					m->Groups.clear();
 					return 0;
 				}
@@ -359,7 +359,7 @@ int ParsimonyCommand::execute() {
 				if (m->control_pressed) { 
 					delete reading; delete pars; delete output; delete randT;
 					if (randomtree == "") {  outSum.close();  }
-					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } outputTypes.clear();
+					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
 					delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; }
 					m->Groups.clear();
 					return 0;
@@ -397,7 +397,7 @@ int ParsimonyCommand::execute() {
 				if (m->control_pressed) { 
 					delete reading; delete pars; delete output; delete randT;
 					delete tmap; 
-					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } outputTypes.clear();
+					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
 					m->Groups.clear();
 					return 0;
 				}
@@ -409,7 +409,7 @@ int ParsimonyCommand::execute() {
 				if (m->control_pressed) { 
 					delete reading; delete pars;  delete output; delete randT;
 					delete tmap; 
-					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } outputTypes.clear();
+					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
 					m->Groups.clear();
 					return 0;
 				}
@@ -466,7 +466,7 @@ int ParsimonyCommand::execute() {
 				delete reading; delete pars; delete output;
 				delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; }
 				if (randomtree == "") {  outSum.close();  }
-				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } outputTypes.clear();
+				for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
 				m->Groups.clear();
 				return 0;
 		}
@@ -485,7 +485,7 @@ int ParsimonyCommand::execute() {
 		delete pars; delete output; 
 		delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; }
 		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } outputTypes.clear(); return 0;}
+		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear(); return 0;}
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();

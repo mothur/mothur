@@ -217,21 +217,21 @@ int NMDSCommand::execute(){
 				vector< vector<double> > thisConfig;
 				if (axesfile == "") {	thisConfig = generateStartingConfiguration(names.size(), i);		}
 				else				{	thisConfig = getConfiguration(axes, i);								}
-				if (m->control_pressed) { out.close(); out2.close(); for (int k = 0; k < outputNames.size(); k++) {	remove(outputNames[k].c_str());	} return 0; }
+				if (m->control_pressed) { out.close(); out2.close(); for (int k = 0; k < outputNames.size(); k++) {	m->mothurRemove(outputNames[k]);	} return 0; }
 				
 				//calc nmds for this dimension
 				double stress;
 				vector< vector<double> > endConfig = nmdsCalc(matrix, thisConfig, stress);
-				if (m->control_pressed) { out.close(); out2.close(); for (int k = 0; k < outputNames.size(); k++) {	remove(outputNames[k].c_str());	} return 0; }
+				if (m->control_pressed) { out.close(); out2.close(); for (int k = 0; k < outputNames.size(); k++) {	m->mothurRemove(outputNames[k]);	} return 0; }
 				
 				//calc euclid distances for new config
 				vector< vector<double> > newEuclid = linearCalc.calculateEuclidianDistance(endConfig);
-				if (m->control_pressed) { out.close(); out2.close(); for (int k = 0; k < outputNames.size(); k++) {	remove(outputNames[k].c_str());	} return 0; }
+				if (m->control_pressed) { out.close(); out2.close(); for (int k = 0; k < outputNames.size(); k++) {	m->mothurRemove(outputNames[k]);	} return 0; }
 				
 				//calc correlation between original distances and euclidean distances from this config
 				double rsquared = linearCalc.calcPearson(newEuclid, matrix);
 				rsquared *= rsquared;
-				if (m->control_pressed) { out.close(); out2.close(); for (int k = 0; k < outputNames.size(); k++) {	remove(outputNames[k].c_str());	} return 0; }
+				if (m->control_pressed) { out.close(); out2.close(); for (int k = 0; k < outputNames.size(); k++) {	m->mothurRemove(outputNames[k]);	} return 0; }
 				
 				//output results
 				out << "Config" << (j+1) << '\t';
@@ -249,7 +249,7 @@ int NMDSCommand::execute(){
 					bestConfig = endConfig;
 				}
 				
-				if (m->control_pressed) { out.close(); out2.close(); for (int k = 0; k < outputNames.size(); k++) {	remove(outputNames[k].c_str());	} return 0; }
+				if (m->control_pressed) { out.close(); out2.close(); for (int k = 0; k < outputNames.size(); k++) {	m->mothurRemove(outputNames[k]);	} return 0; }
 			}
 		}
 		
@@ -276,7 +276,7 @@ int NMDSCommand::execute(){
 		
 		outBest.close();
 		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} return 0; }
+		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();

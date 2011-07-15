@@ -394,7 +394,7 @@ int GetOTURepCommand::execute(){
 			//openfile for getMap to use
 			m->openInputFile(distFile, inRow);
 			
-			if (m->control_pressed) { inRow.close(); remove(distFile.c_str()); return 0; }
+			if (m->control_pressed) { inRow.close(); m->mothurRemove(distFile); return 0; }
 		}
 		
 		
@@ -417,7 +417,7 @@ int GetOTURepCommand::execute(){
 		
 				
 		if (m->control_pressed) { 
-			if (large) {  inRow.close(); remove(distFile.c_str());  }
+			if (large) {  inRow.close(); m->mothurRemove(distFile);  }
 			return 0; 
 		}
 		
@@ -446,7 +446,7 @@ int GetOTURepCommand::execute(){
 		set<string> userLabels = labels;
 		
 		if (m->control_pressed) { 
-			if (large) {  inRow.close(); remove(distFile.c_str());  }
+			if (large) {  inRow.close(); m->mothurRemove(distFile);  }
 			delete input; delete list; return 0; 
 		}
 		
@@ -460,8 +460,8 @@ int GetOTURepCommand::execute(){
 					if (error == 1) { return 0; } //there is an error in hte input files, abort command
 					
 					if (m->control_pressed) { 
-						if (large) {  inRow.close(); remove(distFile.c_str());  }
-						for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } outputTypes.clear();
+						if (large) {  inRow.close(); m->mothurRemove(distFile);  }
+						for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } outputTypes.clear();
 						delete input; delete list; return 0; 
 					}
 					
@@ -479,8 +479,8 @@ int GetOTURepCommand::execute(){
 					if (error == 1) { return 0; } //there is an error in hte input files, abort command
 					
 					if (m->control_pressed) { 
-						if (large) {  inRow.close(); remove(distFile.c_str());  }
-						for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } outputTypes.clear();
+						if (large) {  inRow.close(); m->mothurRemove(distFile);  }
+						for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } outputTypes.clear();
 						delete input; delete list; return 0; 
 					}
 					
@@ -519,8 +519,8 @@ int GetOTURepCommand::execute(){
 			if (error == 1) { return 0; } //there is an error in hte input files, abort command
 			
 			if (m->control_pressed) { 
-					if (large) {  inRow.close(); remove(distFile.c_str());  }
-					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } outputTypes.clear();
+					if (large) {  inRow.close(); m->mothurRemove(distFile);  }
+					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } outputTypes.clear();
 					delete input; delete list; return 0; 
 			}
 		}
@@ -528,7 +528,7 @@ int GetOTURepCommand::execute(){
 		//close and remove formatted matrix file
 		if (large) {
 			inRow.close();
-			remove(distFile.c_str());
+			m->mothurRemove(distFile);
 		}
 		
 		delete input;  
@@ -954,7 +954,7 @@ int GetOTURepCommand::processNames(string filename, string label) {
 		out.close();
 		out2.close();
 		
-		remove(filename.c_str());
+		m->mothurRemove(filename);
 		rename(tempNameFile.c_str(), filename.c_str());
 		
 		return 0;

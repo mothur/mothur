@@ -247,7 +247,7 @@ int RemoveLineageCommand::execute(){
 		if (listfile != "")			{		readList();		}
 		
 		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0; }
+		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
 		
 		if (outputNames.size() != 0) {
 			m->mothurOutEndLine();
@@ -309,7 +309,7 @@ int RemoveLineageCommand::readFasta(){
 		bool wroteSomething = false;
 		
 		while(!in.eof()){
-			if (m->control_pressed) { in.close();  out.close();  remove(outputFileName.c_str());  return 0; }
+			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 			
 			Sequence currSeq(in);
 			name = currSeq.getName();
@@ -363,7 +363,7 @@ int RemoveLineageCommand::readList(){
 			
 			//for each bin
 			for (int i = 0; i < list.getNumBins(); i++) {
-				if (m->control_pressed) { in.close();  out.close();  remove(outputFileName.c_str());  return 0; }
+				if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 			
 				//parse out names that are in accnos file
 				string binnames = list.get(i);
@@ -426,7 +426,7 @@ int RemoveLineageCommand::readName(){
 		bool wroteSomething = false;
 		
 		while(!in.eof()){
-			if (m->control_pressed) { in.close();  out.close();  remove(outputFileName.c_str());  return 0; }
+			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 
 			in >> firstCol;				
 			in >> secondCol;			
@@ -504,7 +504,7 @@ int RemoveLineageCommand::readGroup(){
 		bool wroteSomething = false;
 		
 		while(!in.eof()){
-			if (m->control_pressed) { in.close();  out.close();  remove(outputFileName.c_str());  return 0; }
+			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 			
 			in >> name;				//read from first column
 			in >> group;			//read from second column
@@ -562,7 +562,7 @@ int RemoveLineageCommand::readTax(){
 		
 		while(!in.eof()){
 
-			if (m->control_pressed) { in.close(); out.close(); remove(outputFileName.c_str());  return 0; }
+			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
 
 			in >> name;				//read from first column
 			in >> tax;			//read from second column
@@ -774,7 +774,7 @@ int RemoveLineageCommand::readAlign(){
 		out << endl;
 		
 		while(!in.eof()){
-			if (m->control_pressed) { in.close();  out.close();  remove(outputFileName.c_str());  return 0; }
+			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 			
 			in >> name;				//read from first column
 			

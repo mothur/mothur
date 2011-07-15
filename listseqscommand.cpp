@@ -223,13 +223,13 @@ int ListSeqsCommand::execute(){
 		//output to .accnos file
 		for (int i = 0; i < names.size(); i++) {
 			
-			if (m->control_pressed) { outputTypes.clear(); out.close(); remove(outputFileName.c_str()); return 0; }
+			if (m->control_pressed) { outputTypes.clear(); out.close(); m->mothurRemove(outputFileName); return 0; }
 			
 			out << names[i] << endl;
 		}
 		out.close();
 		
-		if (m->control_pressed) { outputTypes.clear();  remove(outputFileName.c_str()); return 0; }
+		if (m->control_pressed) { outputTypes.clear();  m->mothurRemove(outputFileName); return 0; }
 		
 		m->setAccnosFile(outputFileName);
 		

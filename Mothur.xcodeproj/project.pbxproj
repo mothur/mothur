@@ -17,6 +17,7 @@
 		A721765713BB9F7D0014DAAE /* referencedb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A721765613BB9F7D0014DAAE /* referencedb.cpp */; };
 		A727864412E9E28C00F86ABA /* removerarecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A727864312E9E28C00F86ABA /* removerarecommand.cpp */; };
 		A73DDBBA13C4A0D1006AAE38 /* clearmemorycommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A73DDBB913C4A0D1006AAE38 /* clearmemorycommand.cpp */; };
+		A73DDC3813C4BF64006AAE38 /* mothurmetastats.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A73DDC3713C4BF64006AAE38 /* mothurmetastats.cpp */; };
 		A74D3687137DAB8300332B0C /* addtargets2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D3655137DAB8300332B0C /* addtargets2.cpp */; };
 		A74D3688137DAB8400332B0C /* alignchime.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D3656137DAB8300332B0C /* alignchime.cpp */; };
 		A74D3689137DAB8400332B0C /* alignchimel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D3657137DAB8300332B0C /* alignchimel.cpp */; };
@@ -44,6 +45,7 @@
 		A7730EFF13967241007433A3 /* countseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7730EFE13967241007433A3 /* countseqscommand.cpp */; };
 		A778FE6B134CA6CA00C0BA33 /* getcommandinfocommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A778FE6A134CA6CA00C0BA33 /* getcommandinfocommand.cpp */; };
 		A77A221F139001B600B0BE70 /* deuniquetreecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A77A221E139001B600B0BE70 /* deuniquetreecommand.cpp */; };
+		A79234D713C74BF6002B08E2 /* mothurfisher.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A79234D613C74BF6002B08E2 /* mothurfisher.cpp */; };
 		A799F5B91309A3E000AEEFA0 /* makefastqcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A799F5B81309A3E000AEEFA0 /* makefastqcommand.cpp */; };
 		A7A61F2D130062E000E05B6B /* amovacommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7A61F2C130062E000E05B6B /* amovacommand.cpp */; };
 		A7E9B88112D37EC400DA6239 /* ace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B64F12D37EC300DA6239 /* ace.cpp */; };
@@ -354,6 +356,8 @@
 		A727864312E9E28C00F86ABA /* removerarecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = removerarecommand.cpp; sourceTree = "<group>"; };
 		A73DDBB813C4A0D1006AAE38 /* clearmemorycommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = clearmemorycommand.h; sourceTree = "<group>"; };
 		A73DDBB913C4A0D1006AAE38 /* clearmemorycommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = clearmemorycommand.cpp; sourceTree = "<group>"; };
+		A73DDC3613C4BF64006AAE38 /* mothurmetastats.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mothurmetastats.h; sourceTree = "<group>"; };
+		A73DDC3713C4BF64006AAE38 /* mothurmetastats.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mothurmetastats.cpp; sourceTree = "<group>"; };
 		A74D3655137DAB8300332B0C /* addtargets2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = addtargets2.cpp; sourceTree = "<group>"; };
 		A74D3656137DAB8300332B0C /* alignchime.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = alignchime.cpp; sourceTree = "<group>"; };
 		A74D3657137DAB8300332B0C /* alignchimel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = alignchimel.cpp; sourceTree = "<group>"; };
@@ -414,6 +418,8 @@
 		A778FE6A134CA6CA00C0BA33 /* getcommandinfocommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getcommandinfocommand.cpp; sourceTree = "<group>"; };
 		A77A221D139001B600B0BE70 /* deuniquetreecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = deuniquetreecommand.h; sourceTree = "<group>"; };
 		A77A221E139001B600B0BE70 /* deuniquetreecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = deuniquetreecommand.cpp; sourceTree = "<group>"; };
+		A79234D513C74BF6002B08E2 /* mothurfisher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mothurfisher.h; sourceTree = "<group>"; };
+		A79234D613C74BF6002B08E2 /* mothurfisher.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mothurfisher.cpp; sourceTree = "<group>"; };
 		A799F5B71309A3E000AEEFA0 /* makefastqcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = makefastqcommand.h; sourceTree = "<group>"; };
 		A799F5B81309A3E000AEEFA0 /* makefastqcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = makefastqcommand.cpp; sourceTree = "<group>"; };
 		A7A61F1A130035C800E05B6B /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
@@ -1743,6 +1749,10 @@
 				A7E9B6E612D37EC400DA6239 /* fisher2.h */,
 				A7E9B75512D37EC400DA6239 /* metastats.h */,
 				A7E9B75612D37EC400DA6239 /* metastats2.c */,
+				A79234D513C74BF6002B08E2 /* mothurfisher.h */,
+				A79234D613C74BF6002B08E2 /* mothurfisher.cpp */,
+				A73DDC3613C4BF64006AAE38 /* mothurmetastats.h */,
+				A73DDC3713C4BF64006AAE38 /* mothurmetastats.cpp */,
 			);
 			name = metastats;
 			sourceTree = "<group>";
@@ -2119,6 +2129,8 @@
 				A7730EFF13967241007433A3 /* countseqscommand.cpp in Sources */,
 				A721765713BB9F7D0014DAAE /* referencedb.cpp in Sources */,
 				A73DDBBA13C4A0D1006AAE38 /* clearmemorycommand.cpp in Sources */,
+				A73DDC3813C4BF64006AAE38 /* mothurmetastats.cpp in Sources */,
+				A79234D713C74BF6002B08E2 /* mothurfisher.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

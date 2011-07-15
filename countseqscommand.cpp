@@ -222,7 +222,7 @@ int CountSeqsCommand::execute(){
 		
 		if (groupfile != "") { delete groupMap; }
 		
-		if (m->control_pressed) { remove(outputFileName.c_str()); return 0; }
+		if (m->control_pressed) { m->mothurRemove(outputFileName); return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Name: "); m->mothurOutEndLine();

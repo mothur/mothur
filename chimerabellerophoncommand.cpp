@@ -227,7 +227,7 @@ int ChimeraBellerophonCommand::execute(){
 			
 			chimera->getChimeras();
 			
-			if (m->control_pressed) { delete chimera; for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} outputTypes.clear(); return 0;	}
+			if (m->control_pressed) { delete chimera; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear(); return 0;	}
 			
 		#ifdef USE_MPI
 			MPI_File outMPI;
@@ -263,7 +263,7 @@ int ChimeraBellerophonCommand::execute(){
 			
 		#endif
 			
-			if (m->control_pressed) { remove(accnosFileName.c_str()); remove(outputFileName.c_str()); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} outputTypes.clear(); delete chimera;	return 0;	}
+			if (m->control_pressed) { m->mothurRemove(accnosFileName); m->mothurRemove(outputFileName); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} outputTypes.clear(); delete chimera;	return 0;	}
 			
 			m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.");	m->mothurOutEndLine(); m->mothurOutEndLine();
 			

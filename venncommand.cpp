@@ -275,7 +275,7 @@ int VennCommand::execute(){
 					for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
 					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 					m->Groups.clear(); delete venn; delete input;
-					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }
 					return 0;
 				}
 
@@ -358,7 +358,7 @@ int VennCommand::execute(){
 			if (m->control_pressed) {
 					for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
 					m->Groups.clear(); delete venn; delete input; 
-					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }
 					return 0;
 			}
 
@@ -419,7 +419,7 @@ int VennCommand::execute(){
 			if (m->control_pressed) {
 					m->Groups.clear(); delete venn; delete input;
 					for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
-					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }
 					return 0;
 			}
 
@@ -431,7 +431,7 @@ int VennCommand::execute(){
 				if (m->control_pressed) {
 					for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
 					delete sabund; delete venn; delete input;
-					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }
 					return 0;
 				}
 		
@@ -472,7 +472,7 @@ int VennCommand::execute(){
 			
 			if (m->control_pressed) {
 					for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
-					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }
 					delete venn; delete input;
 					return 0;
 			}
@@ -506,7 +506,7 @@ int VennCommand::execute(){
 			if (m->control_pressed) {
 					delete venn; delete input;
 					for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
-					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }
 					return 0;
 			}
 		}
