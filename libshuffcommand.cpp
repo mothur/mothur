@@ -222,7 +222,7 @@ int LibShuffCommand::execute(){
 			m->openOutputFile(newGroupFile, outGroups);
 			
 			for (int i = 0; i < matrix->getNumSeqs(); i++) {
-				if (m->control_pressed) { delete groupMap; delete matrix; outGroups.close(); remove(newGroupFile.c_str()); return 0; }
+				if (m->control_pressed) { delete groupMap; delete matrix; outGroups.close(); m->mothurRemove(newGroupFile); return 0; }
 				
 				Names temp = matrix->getRowInfo(i);
 				outGroups << temp.seqName << '\t' << temp.groupName << endl;
@@ -238,7 +238,7 @@ int LibShuffCommand::execute(){
 			groupMap = new GroupMap(groupfile);
 			groupMap->readMap();
 			
-			if (m->control_pressed) { delete groupMap; delete matrix; remove(newGroupFile.c_str()); return 0; }
+			if (m->control_pressed) { delete groupMap; delete matrix; m->mothurRemove(newGroupFile); return 0; }
 		}
 		
 			
@@ -320,7 +320,7 @@ int LibShuffCommand::execute(){
 		
 		delete matrix; delete groupMap;
 		
-		if (m->control_pressed) {  outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
+		if (m->control_pressed) {  outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();

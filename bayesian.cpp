@@ -89,7 +89,7 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 			generateDatabaseAndNames(tfile, tempFile, method, ksize, 0.0, 0.0, 0.0, 0.0);
 			
 			//prevents errors caused by creating shortcut files if you had an error in the sanity check.
-			if (m->control_pressed) {  remove(phyloTreeName.c_str());  remove(probFileName.c_str()); remove(probFileName2.c_str()); }
+			if (m->control_pressed) {  m->mothurRemove(phyloTreeName);  m->mothurRemove(probFileName); m->mothurRemove(probFileName2); }
 			else{ 
 				genusNodes = phyloTree->getGenusNodes(); 
 				genusTotals = phyloTree->getGenusTotals();

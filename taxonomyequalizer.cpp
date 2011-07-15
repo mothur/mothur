@@ -61,7 +61,7 @@ TaxEqualizer::TaxEqualizer(string tfile, int c, string o) : cutoff(c), outputDir
 			in.close();
 			out.close();
 			
-			if (m->control_pressed) { remove(equalizedFile.c_str());  }
+			if (m->control_pressed) { m->mothurRemove(equalizedFile);  }
 		}else { inTax.close(); }
 		
 	}

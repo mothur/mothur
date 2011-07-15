@@ -811,7 +811,7 @@ int MothurOut::openInputFile(string fileName, ifstream& fileHandle, string m){
           cerr << "Decompressing " << completeFileName << " via temporary named pipe " << tempName << "\n";
           system(command.c_str());
           cerr << "Done decompressing " << completeFileName << "\n";
-          remove(tempName.c_str());
+          mothurRemove(tempName);
           exit(EXIT_SUCCESS);
         } else {
           cerr << "waiting on child process " << fork_result << "\n";
@@ -857,7 +857,7 @@ int MothurOut::openInputFile(string fileName, ifstream& fileHandle){
       cerr << "Decompressing " << completeFileName << " via temporary named pipe " << tempName << "\n";
       system(command.c_str());
       cerr << "Done decompressing " << completeFileName << "\n";
-      remove(tempName.c_str());
+      mothurRemove(tempName);
       exit(EXIT_SUCCESS);
     } else {
       cerr << "waiting on child process " << fork_result << "\n";
@@ -902,7 +902,7 @@ int MothurOut::renameFile(string oldName, string newName){
 		string command = "mv " + oldName + " " + newName;
 		system(command.c_str());
 	#else
-		remove(newName.c_str());
+		m->mothurRemove(newName);
 		int renameOk = rename(oldName.c_str(), newName.c_str());
 	#endif
 		return 0;
@@ -1038,8 +1038,8 @@ string MothurOut::sortFile(string distFile, string outputDir){
 			output.close();
 		
 			//remove temp files
-			remove(tempDistFile.c_str());
-			remove(tempOutfile.c_str());
+			mothurRemove(tempDistFile);
+			mothurRemove(tempOutfile);
 		#endif
 		
 		return outfile;
@@ -1407,7 +1407,18 @@ int MothurOut::getNumNames(string names){
 		exit(1);
 	}
 }
+/***********************************************************************/
 
+void MothurOut::mothurRemove(string filename){
+	try {
+		filename = getFullPathName(filename);
+		remove(filename.c_str());
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "mothurRemove");
+		exit(1);
+	}
+}
 /**************************************************************************************************/
 
 vector<vector<double> > MothurOut::binomial(int maxOrder){

@@ -165,7 +165,7 @@ int DeconvoluteCommand::execute() {
 		int count = 0;
 		while (!in.eof()) {
 			
-			if (m->control_pressed) { in.close(); outFasta.close(); remove(outFastaFile.c_str()); return 0; }
+			if (m->control_pressed) { in.close(); outFasta.close(); m->mothurRemove(outFastaFile); return 0; }
 			
 			Sequence seq(in);
 			
@@ -216,14 +216,14 @@ int DeconvoluteCommand::execute() {
 		in.close();
 		outFasta.close();
 		
-		if (m->control_pressed) { remove(outFastaFile.c_str()); return 0; }
+		if (m->control_pressed) { m->mothurRemove(outFastaFile); return 0; }
 		
 		//print new names file
 		ofstream outNames;
 		m->openOutputFile(outNameFile, outNames);
 		
 		for (itStrings = sequenceStrings.begin(); itStrings != sequenceStrings.end(); itStrings++) {
-			if (m->control_pressed) { outputTypes.clear(); remove(outFastaFile.c_str()); outNames.close(); remove(outNameFile.c_str()); return 0; }
+			if (m->control_pressed) { outputTypes.clear(); m->mothurRemove(outFastaFile); outNames.close(); m->mothurRemove(outNameFile); return 0; }
 			
 			//get rep name
 			int pos = (itStrings->second).find_first_of(',');
@@ -236,7 +236,7 @@ int DeconvoluteCommand::execute() {
 		}
 		outNames.close();
 		
-		if (m->control_pressed) { outputTypes.clear(); remove(outFastaFile.c_str()); remove(outNameFile.c_str()); return 0; }
+		if (m->control_pressed) { outputTypes.clear(); m->mothurRemove(outFastaFile); m->mothurRemove(outNameFile); return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();

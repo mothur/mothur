@@ -165,7 +165,7 @@ int ChopSeqsCommand::execute(){
 			
 			Sequence seq(in);
 			
-			if (m->control_pressed) { outputTypes.clear(); in.close(); out.close(); outAcc.close(); remove(outputFileName.c_str()); remove(outputFileNameAccnos.c_str()); return 0;  }
+			if (m->control_pressed) { outputTypes.clear(); in.close(); out.close(); outAcc.close(); m->mothurRemove(outputFileName); m->mothurRemove(outputFileNameAccnos); return 0;  }
 			
 			if (seq.getName() != "") {
 				string newSeqString = getChopped(seq);
@@ -188,7 +188,7 @@ int ChopSeqsCommand::execute(){
 		m->mothurOut(outputFileName); m->mothurOutEndLine();	outputNames.push_back(outputFileName); outputTypes["fasta"].push_back(outputFileName);
 		
 		if (wroteAccnos) { m->mothurOut(outputFileNameAccnos); m->mothurOutEndLine(); outputNames.push_back(outputFileNameAccnos); outputTypes["accnos"].push_back(outputFileNameAccnos); }
-		else {  remove(outputFileNameAccnos.c_str());  }
+		else {  m->mothurRemove(outputFileNameAccnos);  }
 		
 		m->mothurOutEndLine();
 		

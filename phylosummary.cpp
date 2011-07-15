@@ -343,7 +343,7 @@ void PhyloSummary::print(ofstream& out){
 	try {
 		
 		if (ignore) { assignRank(0); }
-		
+	
 		//print labels
 		out << "taxlevel\t rankID\t taxon\t daughterlevels\t total\t";
 		if (groupmap != NULL) {
@@ -412,6 +412,7 @@ void PhyloSummary::print(int i, ofstream& out){
 					for (int i = 0; i < groupmap->namesOfGroups.size(); i++) {  out << tree[it->second].groupCount[groupmap->namesOfGroups[i]] << '\t'; } 
 				}
 				out << endl;
+				
 			}
 			
 			print(it->second, out);

@@ -15,7 +15,7 @@ ThreeColumnFile::~ThreeColumnFile(){
 	
 	inFile.close();
 	outFile.close();
-	remove(outName.c_str());
+	m->mothurRemove(outName);
 }
 
 /***********************************************************************/
@@ -78,7 +78,7 @@ void ThreeColumnFile::resetFile(){
 		}
 		counter = 1;
 		
-		remove(inName.c_str());
+		m->mothurRemove(inName);
 		renameOk = rename(outName.c_str(), inName.c_str());
 		
 		//renameFile(outName, inName);
@@ -102,7 +102,7 @@ ColumnFile::~ColumnFile(){
 	
 	inFile.close();
 	outFile.close();
-	remove(outName.c_str());
+	m->mothurRemove(outName);
 }
 
 /***********************************************************************/
@@ -182,7 +182,7 @@ void ColumnFile::resetFile(){
 		}
 		counter = 1;
 		
-		remove(inName.c_str());
+		m->mothurRemove(inName);
 		renameOk = rename(outName.c_str(), inName.c_str());
 		
 		//renameFile(outName, inName);
@@ -206,7 +206,7 @@ SharedThreeColumnFile::~SharedThreeColumnFile(){
 	
 	inFile.close();
 	outFile.close();
-	remove(outName.c_str());
+	m->mothurRemove(outName);
 }
 
 /***********************************************************************/
@@ -270,7 +270,7 @@ void SharedThreeColumnFile::resetFile(){
 		}
 		counter = 1;
 		
-		remove(inName.c_str());
+		m->mothurRemove(inName);
 		renameOk = rename(outName.c_str(), inName.c_str());
 		
 		//renameFile(outName, inName);
@@ -295,7 +295,7 @@ OneColumnFile::~OneColumnFile(){
 	
 	inFile.close();
 	outFile.close();
-	remove(outName.c_str());	
+	m->mothurRemove(outName);	
 }
 
 /***********************************************************************/
@@ -357,7 +357,7 @@ void OneColumnFile::resetFile(){
 		}	
 		counter = 1;
 		
-		remove(inName.c_str());
+		m->mothurRemove(inName);
 		renameOk = rename(outName.c_str(), inName.c_str());
 		
 		//renameFile(outName, inName);
@@ -382,7 +382,7 @@ SharedOneColumnFile::~SharedOneColumnFile(){
 	
 	inFile.close();
 	outFile.close();
-	remove(outName.c_str());	
+	m->mothurRemove(outName);	
 }
 
 /***********************************************************************/
@@ -454,7 +454,7 @@ void SharedOneColumnFile::resetFile(){
 		}	
 		counter = 1;
 
-		remove(inName.c_str());
+		m->mothurRemove(inName);
 		renameOk = rename(outName.c_str(), inName.c_str());
 		
 		//renameFile(outName, inName);

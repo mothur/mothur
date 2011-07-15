@@ -409,7 +409,7 @@ int TreeGroupCommand::execute(){
 			//create tree file
 			makeSimsShared();
 			
-			if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0; }
+			if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
 		}else{
 			//read in dist file
 			filename = inputfile;
@@ -564,7 +564,7 @@ int TreeGroupCommand::createTree(){
 		//delete tree
 		delete t;
 		
-		if (m->control_pressed) { remove(outputFile.c_str()); outputNames.pop_back(); return 1; }
+		if (m->control_pressed) { m->mothurRemove(outputFile); outputNames.pop_back(); return 1; }
 		
 		return 0;
 	

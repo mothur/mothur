@@ -243,7 +243,7 @@ int GetLineageCommand::execute(){
 		if (listfile != "")			{		readList();		}
 		
 		
-		if (m->control_pressed) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0; }
+		if (m->control_pressed) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
 		
 		if (outputNames.size() != 0) {
 			m->mothurOutEndLine();
@@ -306,7 +306,7 @@ int GetLineageCommand::readFasta(){
 		
 		while(!in.eof()){
 		
-			if (m->control_pressed) { in.close(); out.close(); remove(outputFileName.c_str());  return 0; }
+			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
 			
 			Sequence currSeq(in);
 			name = currSeq.getName();
@@ -351,7 +351,7 @@ int GetLineageCommand::readList(){
 		
 		while(!in.eof()){
 			
-			if (m->control_pressed) { in.close(); out.close(); remove(outputFileName.c_str());  return 0; }
+			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
 
 			//read in list vector
 			ListVector list(in);
@@ -426,7 +426,7 @@ int GetLineageCommand::readName(){
 		
 		while(!in.eof()){
 		
-			if (m->control_pressed) { in.close(); out.close(); remove(outputFileName.c_str());  return 0; }
+			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
 
 			in >> firstCol;				
 			in >> secondCol;
@@ -511,7 +511,7 @@ int GetLineageCommand::readGroup(){
 		
 		while(!in.eof()){
 
-			if (m->control_pressed) { in.close(); out.close(); remove(outputFileName.c_str());  return 0; }
+			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
 
 
 			in >> name;				//read from first column
@@ -571,7 +571,7 @@ int GetLineageCommand::readTax(){
 		
 		while(!in.eof()){
 
-			if (m->control_pressed) { in.close(); out.close(); remove(outputFileName.c_str());  return 0; }
+			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
 
 			in >> name;				//read from first column
 			in >> tax;			//read from second column
@@ -774,7 +774,7 @@ int GetLineageCommand::readAlign(){
 		
 		while(!in.eof()){
 		
-			if (m->control_pressed) { in.close(); out.close(); remove(outputFileName.c_str());  return 0; }
+			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
 
 
 			in >> name;				//read from first column

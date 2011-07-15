@@ -219,7 +219,7 @@ int SharedCommand::execute(){
 		
 		//clears file before we start to write to it below
 		for (int i=0; i<Groups.size(); i++) {
-			remove((fileroot + Groups[i] + ".rabund").c_str());
+			m->mothurRemove((fileroot + Groups[i] + ".rabund"));
 			outputNames.push_back((fileroot + Groups[i] + ".rabund"));
 			outputTypes["rabund"].push_back((fileroot + Groups[i] + ".rabund"));
 		}
@@ -239,8 +239,8 @@ int SharedCommand::execute(){
 		if (m->control_pressed) { 
 			delete input; delete SharedList; delete groupMap; 
 			for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {  delete it3->second;  }
-			out.close(); remove(filename.c_str()); 
-			for (int i=0; i<Groups.size(); i++) {  remove((fileroot + Groups[i] + ".rabund").c_str());		}
+			out.close(); m->mothurRemove(filename); 
+			for (int i=0; i<Groups.size(); i++) {  m->mothurRemove((fileroot + Groups[i] + ".rabund"));		}
 			return 0; 
 		}
 				
@@ -248,7 +248,7 @@ int SharedCommand::execute(){
 			m->mothurOut("Your group file contains " + toString(groupMap->getNumSeqs()) + " sequences and list file contains " + toString(SharedList->getNumSeqs()) + " sequences. Please correct."); m->mothurOutEndLine(); 
 			
 			out.close();
-			remove(filename.c_str()); //remove blank shared file you made
+			m->mothurRemove(filename); //remove blank shared file you made
 			
 			createMisMatchFile();
 			
@@ -296,8 +296,8 @@ int SharedCommand::execute(){
 			if (m->control_pressed) { 
 				delete input; delete SharedList; delete groupMap;
 				for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {  delete it3->second;  }
-				out.close(); remove(filename.c_str()); 
-				for (int i=0; i<Groups.size(); i++) {  remove((fileroot + Groups[i] + ".rabund").c_str());		}
+				out.close(); m->mothurRemove(filename); 
+				for (int i=0; i<Groups.size(); i++) {  m->mothurRemove((fileroot + Groups[i] + ".rabund"));		}
 				return 0; 
 			}
 		
@@ -314,8 +314,8 @@ int SharedCommand::execute(){
 						delete input; delete SharedList; delete groupMap; 
 						for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
 						for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {  delete it3->second;  }
-						out.close(); remove(filename.c_str()); 
-						for (int i=0; i<Groups.size(); i++) {  remove((fileroot + Groups[i] + ".rabund").c_str());		}
+						out.close(); m->mothurRemove(filename); 
+						for (int i=0; i<Groups.size(); i++) {  m->mothurRemove((fileroot + Groups[i] + ".rabund"));		}
 						return 0; 
 					}
 					
@@ -344,8 +344,8 @@ int SharedCommand::execute(){
 						delete input; delete SharedList; delete groupMap; 
 						for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
 						for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {  delete it3->second;  }
-						out.close(); remove(filename.c_str()); 
-						for (int i=0; i<Groups.size(); i++) {  remove((fileroot + Groups[i] + ".rabund").c_str());		}
+						out.close(); m->mothurRemove(filename); 
+						for (int i=0; i<Groups.size(); i++) {  m->mothurRemove((fileroot + Groups[i] + ".rabund"));		}
 						return 0; 
 					}
 					
@@ -390,8 +390,8 @@ int SharedCommand::execute(){
 			if (m->control_pressed) { 
 				delete input;  delete groupMap;
 					for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {  delete it3->second;   }
-					out.close(); remove(filename.c_str()); 
-					for (int i=0; i<Groups.size(); i++) {  remove((fileroot + Groups[i] + ".rabund").c_str());		}
+					out.close(); m->mothurRemove(filename); 
+					for (int i=0; i<Groups.size(); i++) {  m->mothurRemove((fileroot + Groups[i] + ".rabund"));		}
 					return 0; 
 			}
 			
@@ -410,8 +410,8 @@ int SharedCommand::execute(){
 		delete input; delete groupMap;
 		
 		if (m->control_pressed) { 
-				remove(filename.c_str()); 
-				for (int i=0; i<Groups.size(); i++) {  remove((fileroot + Groups[i] + ".rabund").c_str());		}
+				m->mothurRemove(filename); 
+				for (int i=0; i<Groups.size(); i++) {  m->mothurRemove((fileroot + Groups[i] + ".rabund"));		}
 				return 0; 
 		}
 		
@@ -564,7 +564,7 @@ int SharedCommand::createMisMatchFile() {
 			
 			//go through list and if group returns "not found" output it
 			for (int i = 0; i < SharedList->getNumBins(); i++) {
-				if (m->control_pressed) { outMisMatch.close(); remove(outputMisMatchName.c_str()); return 0; } 
+				if (m->control_pressed) { outMisMatch.close(); m->mothurRemove(outputMisMatchName); return 0; } 
 			
 				string names = SharedList->get(i); 
 				
@@ -635,7 +635,7 @@ int SharedCommand::createMisMatchFile() {
 			
 			//loop through names in seqNames and if they aren't in namesIn list output them
 			for (int i = 0; i < seqNames.size(); i++) {
-				if (m->control_pressed) { outMisMatch.close(); remove(outputMisMatchName.c_str()); return 0; } 
+				if (m->control_pressed) { outMisMatch.close(); m->mothurRemove(outputMisMatchName); return 0; } 
 				
 				itMatch = namesInList.find(seqNames[i]);
 				

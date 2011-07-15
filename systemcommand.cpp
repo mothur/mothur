@@ -106,7 +106,7 @@ int SystemCommand::execute(){
 		in.close();
 		
 		m->mothurOut(output); m->mothurOutEndLine();
-		remove(filename.c_str());
+		m->mothurRemove(filename);
 				
 		return 0;		
 	}

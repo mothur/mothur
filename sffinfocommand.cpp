@@ -303,7 +303,7 @@ int SffInfoCommand::execute(){
 		
 		for (int s = 0; s < filenames.size(); s++) {
 			
-			if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	} return 0; }
+			if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} return 0; }
 			
 			int start = time(NULL);
 			
@@ -319,7 +319,7 @@ int SffInfoCommand::execute(){
 		
 		if (sfftxtFilename != "") {  parseSffTxt(); }
 		
-		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	} return 0; }
+		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} return 0; }
 		
 		//set fasta file as new current fastafile
 		string current = "";

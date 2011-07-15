@@ -394,7 +394,7 @@ int ScreenSeqsCommand::execute(){
 			if(processors == 1){
 				numFastaSeqs = driver(lines[0], goodSeqFile, badAccnosFile, fastafile, badSeqNames);
 				
-				if (m->control_pressed) { remove(goodSeqFile.c_str()); return 0; }
+				if (m->control_pressed) { m->mothurRemove(goodSeqFile); return 0; }
 				
 			}else{
 				processIDS.resize(0);
@@ -407,13 +407,13 @@ int ScreenSeqsCommand::execute(){
 				//append alignment and report files
 				for(int i=1;i<processors;i++){
 					m->appendFiles((goodSeqFile + toString(processIDS[i]) + ".temp"), goodSeqFile);
-					remove((goodSeqFile + toString(processIDS[i]) + ".temp").c_str());
+					m->mothurRemove((goodSeqFile + toString(processIDS[i]) + ".temp"));
 			
 					m->appendFiles((badAccnosFile + toString(processIDS[i]) + ".temp"), badAccnosFile);
-					remove((badAccnosFile + toString(processIDS[i]) + ".temp").c_str());
+					m->mothurRemove((badAccnosFile + toString(processIDS[i]) + ".temp"));
 				}
 				
-				if (m->control_pressed) { remove(goodSeqFile.c_str()); return 0; }
+				if (m->control_pressed) { m->mothurRemove(goodSeqFile); return 0; }
 				
 				//read badSeqs in because root process doesnt know what other "bad" seqs the children found
 				ifstream inBad;
@@ -432,7 +432,7 @@ int ScreenSeqsCommand::execute(){
 	#else
 			numFastaSeqs = driver(lines[0], goodSeqFile, badAccnosFile, fastafile, badSeqNames);
 			
-			if (m->control_pressed) { remove(goodSeqFile.c_str()); return 0; }
+			if (m->control_pressed) { m->mothurRemove(goodSeqFile); return 0; }
 			
 	#endif
 
@@ -473,18 +473,18 @@ int ScreenSeqsCommand::execute(){
 																					
 		if(namefile != "" && groupfile != "")	{	
 			screenNameGroupFile(badSeqNames);	
-			if (m->control_pressed) {  remove(goodSeqFile.c_str()); return 0; }
+			if (m->control_pressed) {  m->mothurRemove(goodSeqFile); return 0; }
 		}else if(namefile != "")	{	
 			screenNameGroupFile(badSeqNames);
-			if (m->control_pressed) {  remove(goodSeqFile.c_str());  return 0; }	
+			if (m->control_pressed) {  m->mothurRemove(goodSeqFile);  return 0; }	
 		}else if(groupfile != "")				{	screenGroupFile(badSeqNames);		}	// this screens just the group
 		
-		if (m->control_pressed) { remove(goodSeqFile.c_str());  return 0; }
+		if (m->control_pressed) { m->mothurRemove(goodSeqFile);  return 0; }
 
 		if(alignreport != "")					{	screenAlignReport(badSeqNames);		}
 		if(qualfile != "")						{	screenQual(badSeqNames);			}
 		
-		if (m->control_pressed) { remove(goodSeqFile.c_str());  return 0; }
+		if (m->control_pressed) { m->mothurRemove(goodSeqFile);  return 0; }
 		
 		#ifdef USE_MPI
 			}
@@ -547,7 +547,7 @@ int ScreenSeqsCommand::screenNameGroupFile(set<string> badSeqNames){
 		ofstream goodNameOut;	m->openOutputFile(goodNameFile, goodNameOut);
 		
 		while(!inputNames.eof()){
-			if (m->control_pressed) { goodNameOut.close();  inputNames.close(); remove(goodNameFile.c_str());  return 0; }
+			if (m->control_pressed) { goodNameOut.close();  inputNames.close(); m->mothurRemove(goodNameFile);  return 0; }
 
 			inputNames >> seqName >> seqList;
 			it = badSeqNames.find(seqName);
@@ -593,7 +593,7 @@ int ScreenSeqsCommand::screenNameGroupFile(set<string> badSeqNames){
 			ofstream goodGroupOut;	m->openOutputFile(goodGroupFile, goodGroupOut);
 			
 			while(!inputGroups.eof()){
-				if (m->control_pressed) { goodGroupOut.close(); inputGroups.close(); remove(goodNameFile.c_str());  remove(goodGroupFile.c_str()); return 0; }
+				if (m->control_pressed) { goodGroupOut.close(); inputGroups.close(); m->mothurRemove(goodNameFile);  m->mothurRemove(goodGroupFile); return 0; }
 
 				inputGroups >> seqName >> group;
 				
@@ -806,7 +806,7 @@ int ScreenSeqsCommand::createProcessesCreateSummary(vector<int>& startPosition, 
 			for (int k = 0; k < tempNum; k++)			{		in >> temp; longHomoPolymer.push_back(temp);	}		m->gobble(in);
 				
 			in.close();
-			remove(tempFilename.c_str());
+			m->mothurRemove(tempFilename);
 		}
 		
 		return num;
@@ -832,7 +832,7 @@ int ScreenSeqsCommand::screenGroupFile(set<string> badSeqNames){
 		ofstream goodGroupOut;	m->openOutputFile(goodGroupFile, goodGroupOut);
 		
 		while(!inputGroups.eof()){
-			if (m->control_pressed) { goodGroupOut.close(); inputGroups.close(); remove(goodGroupFile.c_str()); return 0; }
+			if (m->control_pressed) { goodGroupOut.close(); inputGroups.close(); m->mothurRemove(goodGroupFile); return 0; }
 
 			inputGroups >> seqName >> group;
 			it = badSeqNames.find(seqName);
@@ -846,7 +846,7 @@ int ScreenSeqsCommand::screenGroupFile(set<string> badSeqNames){
 			m->gobble(inputGroups);
 		}
 		
-		if (m->control_pressed) { goodGroupOut.close();  inputGroups.close(); remove(goodGroupFile.c_str());  return 0; }
+		if (m->control_pressed) { goodGroupOut.close();  inputGroups.close(); m->mothurRemove(goodGroupFile);  return 0; }
 
 		//we were unable to remove some of the bad sequences
 		if (badSeqNames.size() != 0) {
@@ -859,7 +859,7 @@ int ScreenSeqsCommand::screenGroupFile(set<string> badSeqNames){
 		inputGroups.close();
 		goodGroupOut.close();
 		
-		if (m->control_pressed) { remove(goodGroupFile.c_str());   }
+		if (m->control_pressed) { m->mothurRemove(goodGroupFile);   }
 		
 		return 0;
 	
@@ -890,7 +890,7 @@ int ScreenSeqsCommand::screenAlignReport(set<string> badSeqNames){
 		}
 
 		while(!inputAlignReport.eof()){
-			if (m->control_pressed) { goodAlignReportOut.close(); inputAlignReport.close(); remove(goodAlignReportFile.c_str()); return 0; }
+			if (m->control_pressed) { goodAlignReportOut.close(); inputAlignReport.close(); m->mothurRemove(goodAlignReportFile); return 0; }
 
 			inputAlignReport >> seqName;
 			it = badSeqNames.find(seqName);
@@ -910,7 +910,7 @@ int ScreenSeqsCommand::screenAlignReport(set<string> badSeqNames){
 			m->gobble(inputAlignReport);
 		}
 		
-		if (m->control_pressed) { goodAlignReportOut.close();  inputAlignReport.close(); remove(goodAlignReportFile.c_str());  return 0; }
+		if (m->control_pressed) { goodAlignReportOut.close();  inputAlignReport.close(); m->mothurRemove(goodAlignReportFile);  return 0; }
 
 		//we were unable to remove some of the bad sequences
 		if (badSeqNames.size() != 0) {
@@ -923,7 +923,7 @@ int ScreenSeqsCommand::screenAlignReport(set<string> badSeqNames){
 		inputAlignReport.close();
 		goodAlignReportOut.close();
 				
-		if (m->control_pressed) {  remove(goodAlignReportFile.c_str());  return 0; }
+		if (m->control_pressed) {  m->mothurRemove(goodAlignReportFile);  return 0; }
 		
 		return 0;
 	
@@ -948,7 +948,7 @@ int ScreenSeqsCommand::screenQual(set<string> badSeqNames){
 		
 		while(!in.eof()){	
 			
-			if (m->control_pressed) { goodQual.close(); in.close(); remove(goodQualFile.c_str()); return 0; }
+			if (m->control_pressed) { goodQual.close(); in.close(); m->mothurRemove(goodQualFile); return 0; }
 
 			string saveName = "";
 			string name = "";
@@ -996,7 +996,7 @@ int ScreenSeqsCommand::screenQual(set<string> badSeqNames){
 			}
 		}
 		
-		if (m->control_pressed) {  remove(goodQualFile.c_str());  return 0; }
+		if (m->control_pressed) {  m->mothurRemove(goodQualFile);  return 0; }
 		
 		return 0;
 		
@@ -1196,7 +1196,7 @@ int ScreenSeqsCommand::createProcesses(string goodFileName, string badAccnos, st
 			string tempFile =  filename + toString(processIDS[i]) + ".num.temp";
 			m->openInputFile(tempFile, in);
 			if (!in.eof()) { int tempNum = 0; in >> tempNum; num += tempNum; }
-			in.close(); remove(tempFile.c_str());
+			in.close(); m->mothurRemove(tempFile);
 		}
 		
 		return num;

@@ -41,8 +41,6 @@ static int iwork(int iwkmax, int *iwkpt, int number, int itype);
  static double alogam(double *x, int *ifault);
 
 
-
-
 /* The only public function : */
 void fexact(int *nrow, int *ncol, double *table, int *ldtabl,
        double *expect, double *percnt, double *emin, double *prt,
@@ -319,7 +317,7 @@ f2xact(int *nrow, int *ncol, double *table, int *ldtabl,
     /* AMISS is a missing value indicator which is returned when the
        probability is not defined. */
     const double amiss = -12345.;
-
+	
     /* TOL is chosen as the square root of the smallest relative spacing. */
 #ifndef Macintosh
     const  static double tol = 3.45254e-7;
@@ -2117,7 +2115,7 @@ L10:
 double alogam(double *x, int *ifault)
 {
     /* Initialized data */
-
+	//printf("alogam x = %f\t%d\n",*x,*ifault);
     static double a1 = .918938533204673;
     static double a2 = 5.95238095238e-4;
     static double a3 = 7.93650793651e-4;
@@ -2149,6 +2147,8 @@ L20:
     f = -log(f);
 L30:
     z = 1. / (y * y);
+	
+	//printf("returning %f\n",(f + (y - .5) * log(y) - y + a1 + (((-a2 * z + a3) * z - a4) * z + a5) / y));
     return(f + (y - .5) * log(y) - y + a1 +
 	   (((-a2 * z + a3) * z - a4) * z + a5) / y);
 }

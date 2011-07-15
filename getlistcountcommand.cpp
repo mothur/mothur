@@ -149,7 +149,7 @@ int GetListCountCommand::execute(){
 		set<string> processedLabels;
 		set<string> userLabels = labels;
 		
-		if (m->control_pressed) { delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} return 0;  }
+		if (m->control_pressed) { delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} return 0;  }
 		
 		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
@@ -157,7 +157,7 @@ int GetListCountCommand::execute(){
 			
 				process(list);
 				
-				if (m->control_pressed) { delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} return 0;  }
+				if (m->control_pressed) { delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} return 0;  }
 							
 				processedLabels.insert(list->getLabel());
 				userLabels.erase(list->getLabel());
@@ -171,7 +171,7 @@ int GetListCountCommand::execute(){
 				
 				process(list);
 				
-				if (m->control_pressed) { delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} return 0;  }
+				if (m->control_pressed) { delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} return 0;  }
 
 													
 				processedLabels.insert(list->getLabel());
@@ -208,7 +208,7 @@ int GetListCountCommand::execute(){
 				
 			process(list);	
 			
-			if (m->control_pressed) { delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} return 0;  }
+			if (m->control_pressed) { delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} return 0;  }
 			
 			delete list;  
 		}

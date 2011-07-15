@@ -612,7 +612,7 @@ void Pintail::createProcessesQuan() {
 			}
 					
 			in.close();
-			remove(s.c_str());
+			m->mothurRemove(s);
 		}
 
 #else

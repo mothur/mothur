@@ -306,7 +306,7 @@ int SeqErrorCommand::execute(){
 		
 		printErrorFRFile(errorForward, errorReverse);
 		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { remove(outputNames[i].c_str()); } return 0; }
+		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
 
 		string errorCountFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".error.count";
 		ofstream errorCountFile;
@@ -321,7 +321,7 @@ int SeqErrorCommand::execute(){
 		}
 		errorCountFile.close();
 		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { remove(outputNames[i].c_str()); } return 0; }
+		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
 
 		printSubMatrix();
 				
@@ -478,11 +478,11 @@ int SeqErrorCommand::createProcesses(string filename, string qFileName, string r
 			m->mothurOut("Appending files from process " + toString(processIDS[i])); m->mothurOutEndLine();
 			
 			m->appendFiles((summaryFileName + toString(processIDS[i]) + ".temp"), summaryFileName);
-			remove((summaryFileName + toString(processIDS[i]) + ".temp").c_str());
+			m->mothurRemove((summaryFileName + toString(processIDS[i]) + ".temp"));
 			m->appendFiles((errorOutputFileName + toString(processIDS[i]) + ".temp"), errorOutputFileName);
-			remove((errorOutputFileName + toString(processIDS[i]) + ".temp").c_str());
+			m->mothurRemove((errorOutputFileName + toString(processIDS[i]) + ".temp"));
 			m->appendFiles((chimeraOutputFileName + toString(processIDS[i]) + ".temp"), chimeraOutputFileName);
-			remove((chimeraOutputFileName + toString(processIDS[i]) + ".temp").c_str());
+			m->mothurRemove((chimeraOutputFileName + toString(processIDS[i]) + ".temp"));
 			
 			ifstream in;
 			string tempFile =  filename + toString(processIDS[i]) + ".info.temp";
@@ -577,7 +577,7 @@ int SeqErrorCommand::createProcesses(string filename, string qFileName, string r
 			}
 			m->gobble(in);
 			
-			in.close(); remove(tempFile.c_str());
+			in.close(); m->mothurRemove(tempFile);
 			
 		}
 #endif		

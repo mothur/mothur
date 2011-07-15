@@ -244,7 +244,7 @@ int NormalizeSharedCommand::execute(){
 			//as long as you are not at the end of the file or done wih the lines you want
 			while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 				
-				if (m->control_pressed) { outputTypes.clear();  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } m->Groups.clear();   out.close(); remove(outputFileName.c_str()); return 0; }
+				if (m->control_pressed) { outputTypes.clear();  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } m->Groups.clear();   out.close(); m->mothurRemove(outputFileName); return 0; }
 				
 				if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
 					
@@ -276,13 +276,13 @@ int NormalizeSharedCommand::execute(){
 				//prevent memory leak
 				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
 				
-				if (m->control_pressed) {  outputTypes.clear(); m->Groups.clear();  out.close(); remove(outputFileName.c_str()); return 0; }
+				if (m->control_pressed) {  outputTypes.clear(); m->Groups.clear();  out.close(); m->mothurRemove(outputFileName); return 0; }
 				
 				//get next line to process
 				lookup = input->getSharedRAbundVectors();				
 			}
 			
-			if (m->control_pressed) { outputTypes.clear(); m->Groups.clear();  out.close(); remove(outputFileName.c_str());  return 0; }
+			if (m->control_pressed) { outputTypes.clear(); m->Groups.clear();  out.close(); m->mothurRemove(outputFileName);  return 0; }
 			
 			//output error messages about any remaining user labels
 			set<string>::iterator it;
@@ -348,7 +348,7 @@ int NormalizeSharedCommand::execute(){
 			//as long as you are not at the end of the file or done wih the lines you want
 			while((lookupFloat[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 				
-				if (m->control_pressed) { outputTypes.clear();  for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  } m->Groups.clear();   out.close(); remove(outputFileName.c_str()); return 0; }
+				if (m->control_pressed) { outputTypes.clear();  for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  } m->Groups.clear();   out.close(); m->mothurRemove(outputFileName); return 0; }
 				
 				if(allLines == 1 || labels.count(lookupFloat[0]->getLabel()) == 1){			
 					
@@ -382,13 +382,13 @@ int NormalizeSharedCommand::execute(){
 				//prevent memory leak
 				for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i]; lookupFloat[i] = NULL; }
 				
-				if (m->control_pressed) {  outputTypes.clear(); m->Groups.clear();  out.close(); remove(outputFileName.c_str()); return 0; }
+				if (m->control_pressed) {  outputTypes.clear(); m->Groups.clear();  out.close(); m->mothurRemove(outputFileName); return 0; }
 				
 				//get next line to process
 				lookupFloat = input->getSharedRAbundFloatVectors();				
 			}
 			
-			if (m->control_pressed) { outputTypes.clear(); m->Groups.clear();  out.close(); remove(outputFileName.c_str());  return 0; }
+			if (m->control_pressed) { outputTypes.clear(); m->Groups.clear();  out.close(); m->mothurRemove(outputFileName);  return 0; }
 			
 			//output error messages about any remaining user labels
 			set<string>::iterator it;
@@ -422,7 +422,7 @@ int NormalizeSharedCommand::execute(){
 		delete input;
 		out.close();
 		
-		if (m->control_pressed) { outputTypes.clear(); remove(outputFileName.c_str()); return 0;}
+		if (m->control_pressed) { outputTypes.clear(); m->mothurRemove(outputFileName); return 0;}
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -450,6 +450,10 @@ int NormalizeSharedCommand::normalize(vector<SharedRAbundVector*>& thisLookUp, o
 		if (pickedGroups) { eliminateZeroOTUS(thisLookUp); }
 				
 		if (method == "totalgroup") { 
+			
+			//save numSeqs since they will change as the data is normalized
+			vector<int> sizes;
+			for (int i = 0; i < thisLookUp.size(); i++) {  sizes.push_back(thisLookUp[i]->getNumSeqs()); }
 					
 			for (int j = 0; j < thisLookUp[0]->getNumBins(); j++) {
 						
@@ -459,7 +463,7 @@ int NormalizeSharedCommand::normalize(vector<SharedRAbundVector*>& thisLookUp, o
 							
 						int abund = thisLookUp[i]->getAbundance(j);
 							
-						float relabund = abund / (float) thisLookUp[i]->getNumSeqs();
+						float relabund = abund / (float) sizes[i];
 						float newNorm = relabund * norm;
 						
 						//round to nearest int
@@ -525,6 +529,10 @@ int NormalizeSharedCommand::normalize(vector<SharedRAbundFloatVector*>& thisLook
 		
 		if (method == "totalgroup") { 
 			
+			//save numSeqs since they will change as the data is normalized
+			vector<float> sizes;
+			for (int i = 0; i < thisLookUp.size(); i++) {  sizes.push_back(thisLookUp[i]->getNumSeqs()); }
+			
 			for (int j = 0; j < thisLookUp[0]->getNumBins(); j++) {
 				
 				for (int i = 0; i < thisLookUp.size(); i++) {
@@ -533,7 +541,7 @@ int NormalizeSharedCommand::normalize(vector<SharedRAbundFloatVector*>& thisLook
 					
 					float abund = thisLookUp[i]->getAbundance(j);
 					
-					float relabund = abund / (float) thisLookUp[i]->getNumSeqs();
+					float relabund = abund / (float) sizes[i];
 					float newNorm = relabund * norm;
 					
 					thisLookUp[i]->set(j, newNorm, thisLookUp[i]->getGroup());

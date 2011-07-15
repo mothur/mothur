@@ -286,7 +286,7 @@ int HeatMapCommand::execute(){
 			while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 				if (m->control_pressed) {
 					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
-					for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  remove(outputNames[i].c_str());  } } outputTypes.clear();
+					for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  m->mothurRemove(outputNames[i]);  } } outputTypes.clear();
 					m->Groups.clear(); 
 					delete input; delete heatmap; return 0;
 				}
@@ -329,7 +329,7 @@ int HeatMapCommand::execute(){
 			
 			
 			if (m->control_pressed) {
-				for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  remove(outputNames[i].c_str());  } } outputTypes.clear();
+				for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  m->mothurRemove(outputNames[i]);  } } outputTypes.clear();
 				m->Groups.clear(); 
 				delete input; delete heatmap; return 0;
 			}
@@ -365,7 +365,7 @@ int HeatMapCommand::execute(){
 	
 			while((rabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 				if (m->control_pressed) {   
-					for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  remove(outputNames[i].c_str());  } } outputTypes.clear();
+					for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  m->mothurRemove(outputNames[i]);  } } outputTypes.clear();
 					delete rabund;  delete input; delete heatmap; return 0;	
 				}
 
@@ -404,7 +404,7 @@ int HeatMapCommand::execute(){
 			}
 			
 			if (m->control_pressed) {
-				for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  remove(outputNames[i].c_str());  } } outputTypes.clear();
+				for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  m->mothurRemove(outputNames[i]);  } } outputTypes.clear();
 				delete input; delete heatmap; return 0;
 			}
 
@@ -439,7 +439,7 @@ int HeatMapCommand::execute(){
 			while((lookupFloat[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 				if (m->control_pressed) {
 					for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  }
-					for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  remove(outputNames[i].c_str());  } } outputTypes.clear();
+					for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  m->mothurRemove(outputNames[i]);  } } outputTypes.clear();
 					m->Groups.clear(); 
 					delete input; delete heatmap; return 0;
 				}
@@ -481,7 +481,7 @@ int HeatMapCommand::execute(){
 			
 			
 			if (m->control_pressed) {
-				for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  remove(outputNames[i].c_str());  } } outputTypes.clear();
+				for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  m->mothurRemove(outputNames[i]);  } } outputTypes.clear();
 				m->Groups.clear(); 
 				delete input; delete heatmap; return 0;
 			}
@@ -519,7 +519,7 @@ int HeatMapCommand::execute(){
 		delete heatmap;
 		
 		if (m->control_pressed) {
-			for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  remove(outputNames[i].c_str());  } } outputTypes.clear(); return 0;
+			for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  m->mothurRemove(outputNames[i]);  } } outputTypes.clear(); return 0;
 		}
 		
 		m->mothurOutEndLine();

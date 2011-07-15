@@ -140,7 +140,7 @@ int MergeFileCommand::execute(){
 			m->openInputFile(fileNames[i], inputFile);
 			
 			while(!inputFile.eof()){	
-				if (m->control_pressed) { outputTypes.clear(); inputFile.close(); outputFile.close(); remove(outputFileName.c_str()); return 0;  }
+				if (m->control_pressed) { outputTypes.clear(); inputFile.close(); outputFile.close(); m->mothurRemove(outputFileName); return 0;  }
 			
 				c = inputFile.get(); 
 				//-1 is eof char
@@ -152,7 +152,7 @@ int MergeFileCommand::execute(){
 		
 		outputFile.close();
 		
-		if (m->control_pressed) { outputTypes.clear();  remove(outputFileName.c_str()); return 0;  }
+		if (m->control_pressed) { outputTypes.clear();  m->mothurRemove(outputFileName); return 0;  }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Name: "); m->mothurOutEndLine();

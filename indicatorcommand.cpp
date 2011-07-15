@@ -353,7 +353,7 @@ int IndicatorCommand::execute(){
 		if (sharedfile != "") {  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } }
 		else { for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  } }
 		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} return 0; }
+		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} return 0; }
 		
 		//set tree file as new current treefile
 		if (treefile != "") {
@@ -1183,7 +1183,7 @@ vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundFloatVecto
 					in >> numTemp; m->gobble(in);
 					pvalues[j] += numTemp;
 				}
-				in.close(); remove(tempFile.c_str());
+				in.close(); m->mothurRemove(tempFile);
 			}
 			for (int i = 0; i < pvalues.size(); i++) { pvalues[i] /= (double)iters; } 
 		}
@@ -1296,7 +1296,7 @@ vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundVector*> >
 					in >> numTemp; m->gobble(in);
 					pvalues[j] += numTemp;
 				}
-				in.close(); remove(tempFile.c_str());
+				in.close(); m->mothurRemove(tempFile);
 			}
 			for (int i = 0; i < pvalues.size(); i++) { pvalues[i] /= (double)iters; } 
 		}

@@ -266,7 +266,7 @@ int GetSharedOTUCommand::execute(){
 			
 			if (m->control_pressed) { 
 				if (lastlist != NULL) {		delete lastlist;	}
-				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }  outputTypes.clear();
+				for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  outputTypes.clear();
 				delete groupMap; return 0;
 			}
 			
@@ -329,7 +329,7 @@ int GetSharedOTUCommand::execute(){
 		
 		if (lastlist != NULL) {		delete lastlist;	}
 		
-		if (m->control_pressed) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }  delete groupMap; return 0; } 
+		if (m->control_pressed) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  delete groupMap; return 0; } 
 		
 		//set fasta file as new current fastafile
 		string current = "";
@@ -381,7 +381,7 @@ int GetSharedOTUCommand::process(ListVector* shared) {
 				
 		//go through each bin, find out if shared
 		for (int i = 0; i < shared->getNumBins(); i++) {
-			if (m->control_pressed) { outNames.close(); remove(outputFileNames.c_str()); return 0; }
+			if (m->control_pressed) { outNames.close(); m->mothurRemove(outputFileNames); return 0; }
 			
 			bool uniqueOTU = true;
 			
@@ -459,7 +459,7 @@ int GetSharedOTUCommand::process(ListVector* shared) {
 		outNames.close();
 		
 		if (!wroteSomething) {
-			remove(outputFileNames.c_str());
+			m->mothurRemove(outputFileNames);
 			string outputString = "\t" + toString(num) + " - No otus shared by groups";
 			
 			string groupString = "";

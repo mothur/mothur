@@ -181,7 +181,7 @@ int DeuniqueTreeCommand::execute() {
 				
 				if (m->control_pressed) { 
 					delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; }
-					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } outputTypes.clear();
+					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
 					m->Groups.clear();
 					return 0;
 				}

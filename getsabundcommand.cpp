@@ -178,7 +178,7 @@ int GetSAbundCommand::execute(){
 		set<string> processedLabels;
 		set<string> userLabels = labels;
 		
-		if (m->control_pressed) {  outputTypes.clear(); out.close(); remove(filename.c_str());  delete sabund; delete input; return 0; }
+		if (m->control_pressed) {  outputTypes.clear(); out.close(); m->mothurRemove(filename);  delete sabund; delete input; return 0; }
 
 		
 		while((sabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
@@ -188,7 +188,7 @@ int GetSAbundCommand::execute(){
 					
 					sabund->print(out);
 					
-				if (m->control_pressed) { outputTypes.clear();  out.close(); remove(filename.c_str());  delete sabund; delete input;  return 0; }
+				if (m->control_pressed) { outputTypes.clear();  out.close(); m->mothurRemove(filename);  delete sabund; delete input;  return 0; }
 
 					processedLabels.insert(sabund->getLabel());
 					userLabels.erase(sabund->getLabel());
@@ -203,7 +203,7 @@ int GetSAbundCommand::execute(){
 					m->mothurOut(sabund->getLabel());  m->mothurOutEndLine();
 					sabund->print(out);
 					
-					if (m->control_pressed) {  outputTypes.clear(); out.close(); remove(filename.c_str());  delete sabund; delete input;  return 0; }
+					if (m->control_pressed) {  outputTypes.clear(); out.close(); m->mothurRemove(filename);  delete sabund; delete input;  return 0; }
 
 					processedLabels.insert(sabund->getLabel());
 					userLabels.erase(sabund->getLabel());
@@ -241,7 +241,7 @@ int GetSAbundCommand::execute(){
 			sabund->print(out);
 			delete sabund;
 			
-			if (m->control_pressed) {  outputTypes.clear(); out.close(); remove(filename.c_str());  delete input; return 0; }
+			if (m->control_pressed) {  outputTypes.clear(); out.close(); m->mothurRemove(filename);  delete input; return 0; }
 			
 		}
 		

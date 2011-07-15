@@ -436,7 +436,7 @@ int AlignCommand::execute(){
 						//MPI_Info info;
 						//MPI_File_delete(outAccnosFilename, info);
 						hasAccnos = false;	
-						remove(accnosFileName.c_str()); 
+						m->mothurRemove(accnosFileName); 
 					}
 				}
 				
@@ -456,10 +456,10 @@ int AlignCommand::execute(){
 			numFastaSeqs = driver(lines[0], alignFileName, reportFileName, accnosFileName, candidateFileNames[s]);
 	#endif
 			
-			if (m->control_pressed) { remove(accnosFileName.c_str()); remove(alignFileName.c_str()); remove(reportFileName.c_str()); outputTypes.clear();  return 0; }
+			if (m->control_pressed) { m->mothurRemove(accnosFileName); m->mothurRemove(alignFileName); m->mothurRemove(reportFileName); outputTypes.clear();  return 0; }
 			
 			//delete accnos file if its blank else report to user
-			if (m->isBlank(accnosFileName)) {  remove(accnosFileName.c_str());  hasAccnos = false; }
+			if (m->isBlank(accnosFileName)) {  m->mothurRemove(accnosFileName);  hasAccnos = false; }
 			else { 
 				m->mothurOut("Some of you sequences generated alignments that eliminated too many bases, a list is provided in " + accnosFileName + ".");
 				if (!flip) {
@@ -849,24 +849,24 @@ int AlignCommand::createProcesses(string alignFileName, string reportFileName, s
 		
 		vector<string> nonBlankAccnosFiles;
 		if (!(m->isBlank(accnosFName))) { nonBlankAccnosFiles.push_back(accnosFName); }
-		else { remove(accnosFName.c_str()); } //remove so other files can be renamed to it
+		else { m->mothurRemove(accnosFName); } //remove so other files can be renamed to it
 			
 		for (int i = 0; i < processIDS.size(); i++) {
 			ifstream in;
 			string tempFile =  alignFileName + toString(processIDS[i]) + ".num.temp";
 			m->openInputFile(tempFile, in);
 			if (!in.eof()) { int tempNum = 0; in >> tempNum; num += tempNum; }
-			in.close(); remove(tempFile.c_str());
+			in.close(); m->mothurRemove(tempFile);
 			
 			appendAlignFiles((alignFileName + toString(processIDS[i]) + ".temp"), alignFileName);
-			remove((alignFileName + toString(processIDS[i]) + ".temp").c_str());
+			m->mothurRemove((alignFileName + toString(processIDS[i]) + ".temp"));
 			
 			appendReportFiles((reportFileName + toString(processIDS[i]) + ".temp"), reportFileName);
-			remove((reportFileName + toString(processIDS[i]) + ".temp").c_str());
+			m->mothurRemove((reportFileName + toString(processIDS[i]) + ".temp"));
 			
 			if (!(m->isBlank(accnosFName + toString(processIDS[i]) + ".temp"))) {
 				nonBlankAccnosFiles.push_back(accnosFName + toString(processIDS[i]) + ".temp");
-			}else { remove((accnosFName + toString(processIDS[i]) + ".temp").c_str());  }
+			}else { m->mothurRemove((accnosFName + toString(processIDS[i]) + ".temp"));  }
 			
 		}
 		
@@ -876,7 +876,7 @@ int AlignCommand::createProcesses(string alignFileName, string reportFileName, s
 			
 			for (int h=1; h < nonBlankAccnosFiles.size(); h++) {
 				appendAlignFiles(nonBlankAccnosFiles[h], accnosFName);
-				remove(nonBlankAccnosFiles[h].c_str());
+				m->mothurRemove(nonBlankAccnosFiles[h]);
 			}
 		}else { //recreate the accnosfile if needed
 			ofstream out;

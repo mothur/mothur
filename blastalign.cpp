@@ -37,9 +37,9 @@ BlastAlignment::BlastAlignment(float go, float ge, float ma, float mm) :
 //**************************************************************************************************/
 
 BlastAlignment::~BlastAlignment(){		//	The desctructor should clean up by removing the temporary 
-	remove(candidateFileName.c_str());	//	files used to run bl2seq
-	remove(templateFileName.c_str());
-	remove(blastFileName.c_str());
+	m->mothurRemove(candidateFileName);	//	files used to run bl2seq
+	m->mothurRemove(templateFileName);
+	m->mothurRemove(blastFileName);
 }
 
 //**************************************************************************************************/

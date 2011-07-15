@@ -155,7 +155,7 @@ EstOutput Parsimony::createProcesses(Tree* t, vector< vector<string> > namesOfGr
 				m->gobble(in);
 			}
 			in.close();
-			remove(s.c_str());
+			m->mothurRemove(s);
 		}
 		
 		return results;

@@ -677,7 +677,7 @@ int Bellerophon::writePrefs(string file, linePair tempLine) {
 			
 			for (int j = 0; j < numSeqs; j++) {
 				
-				if (m->control_pressed) { outTemp.close(); remove(file.c_str()); return 0; }
+				if (m->control_pressed) { outTemp.close(); m->mothurRemove(file); return 0; }
 				
 				outTemp << pref[i][j].name << '\t' << pref[i][j].leftParent << '\t' << pref[i][j].rightParent << '\t';
 				outTemp << pref[i][j].score << '\t' << pref[i][j].closestLeft << '\t' << pref[i][j].closestRight << '\t' << pref[i][j].midpoint <<  endl;
@@ -709,7 +709,7 @@ int Bellerophon::readPrefs(string file) {
 			
 			for (int j = 0; j < numSeqs; j++) {
 				
-				if (m->control_pressed) { inTemp.close(); remove(file.c_str()); return 0; }
+				if (m->control_pressed) { inTemp.close(); m->mothurRemove(file); return 0; }
 			
 				inTemp >> pref[i][j].name >> pref[i][j].leftParent >> pref[i][j].rightParent;
 				inTemp >> pref[i][j].score >> pref[i][j].closestLeft >> pref[i][j].closestRight >> pref[i][j].midpoint;
@@ -719,7 +719,7 @@ int Bellerophon::readPrefs(string file) {
 		
 		inTemp.close();
 		
-		remove(file.c_str());
+		m->mothurRemove(file);
 		
 		return 0;
 	}

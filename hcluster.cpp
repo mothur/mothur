@@ -551,7 +551,7 @@ int HCluster::combineFile() {
 			   
 			   in >> first >> second >> dist; m->gobble(in);
 			   
-			   if (m->control_pressed) { in.close(); out.close(); remove(tempDistFile.c_str()); return 0; }
+			   if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(tempDistFile); return 0; }
 			   
 			   //while there are still values in mergedMin that are smaller than the distance read from file
 			   while (count < mergedMin.size())  {
@@ -630,7 +630,7 @@ int HCluster::combineFile() {
 		mergedMin.clear();
 			
 		//rename tempfile to distfile
-		remove(distfile.c_str());
+		m->mothurRemove(distfile);
 		rename(tempDistFile.c_str(), distfile.c_str());
 //cout << "remove = "<< renameOK << " rename = " << ok << endl;	
 
@@ -767,7 +767,7 @@ int HCluster::processFile() {
 	
 		//get entry
 		while (!in.eof()) {
-			if (m->control_pressed) { in.close(); out.close(); remove(outTemp.c_str()); return 0; }
+			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outTemp); return 0; }
 			
 			in >> firstName >> secondName >> distance;    m->gobble(in);		
 			
@@ -787,7 +787,7 @@ int HCluster::processFile() {
 		in.close();
 		out.close();
 		
-		remove(distfile.c_str());
+		m->mothurRemove(distfile);
 		rename(outTemp.c_str(), distfile.c_str());
 		
 		return 0;

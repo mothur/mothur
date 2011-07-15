@@ -151,7 +151,7 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
 				m->gobble(in);
 			}
 			in.close();
-			remove(s.c_str());
+			m->mothurRemove(s);
 		}
 		
 		m->mothurOut("DONE."); m->mothurOutEndLine(); m->mothurOutEndLine();
@@ -393,7 +393,7 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
 				m->gobble(in);
 			}
 			in.close();
-			remove(s.c_str());
+			m->mothurRemove(s);
 		}
 		
 		return results;

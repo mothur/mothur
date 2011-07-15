@@ -75,7 +75,7 @@ int FormatPhylipMatrix::read(NameAssignment* nameMap){
 					
 					for(int j=0;j<i;j++){
 					
-						if (m->control_pressed) { outTemp.close(); remove(tempFile.c_str()); fileHandle.close();  delete reading; return 0; }
+						if (m->control_pressed) { outTemp.close(); m->mothurRemove(tempFile); fileHandle.close();  delete reading; return 0; }
 											
 						fileHandle >> distance;
 						
@@ -104,7 +104,7 @@ int FormatPhylipMatrix::read(NameAssignment* nameMap){
 					system(command.c_str());
 				#endif
 				
-				if (m->control_pressed) { remove(tempFile.c_str()); remove(outfile.c_str());  delete reading; return 0; }
+				if (m->control_pressed) { m->mothurRemove(tempFile); m->mothurRemove(outfile);  delete reading; return 0; }
 
 				//output to new file distance for each row and save positions in file where new row begins
 				ifstream in;
@@ -128,7 +128,7 @@ int FormatPhylipMatrix::read(NameAssignment* nameMap){
 				for(int k = 0; k < firstString.length(); k++)  {   in.putback(firstString[k]);  }
 				
 				while(!in.eof()) {
-					if (m->control_pressed) { in.close(); out.close(); remove(tempFile.c_str()); remove(distFile.c_str()); remove(outfile.c_str());  delete reading; return 0; }
+					if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(tempFile); m->mothurRemove(distFile); m->mothurRemove(outfile);  delete reading; return 0; }
 
 					in >> first >> second >> dist; m->gobble(in);
 					
@@ -170,10 +170,10 @@ int FormatPhylipMatrix::read(NameAssignment* nameMap){
 				in.close();
 				out.close();
 				
-				remove(tempFile.c_str());
-				remove(outfile.c_str());
+				m->mothurRemove(tempFile);
+				m->mothurRemove(outfile);
 				
-				if (m->control_pressed) {  remove(distFile.c_str());   delete reading; return 0; }
+				if (m->control_pressed) {  m->mothurRemove(distFile);   delete reading; return 0; }
 
 			}
 			else{ //square matrix convert directly to formatted row file
@@ -188,7 +188,7 @@ int FormatPhylipMatrix::read(NameAssignment* nameMap){
 					list->set(i, name);
 					
 					for(int j=0;j<nseqs;j++){
-						if (m->control_pressed) {  fileHandle.close(); out.close(); remove(distFile.c_str());   delete reading; return 0; }
+						if (m->control_pressed) {  fileHandle.close(); out.close(); m->mothurRemove(distFile);   delete reading; return 0; }
 						
 						fileHandle >> distance;
 					
@@ -222,7 +222,7 @@ int FormatPhylipMatrix::read(NameAssignment* nameMap){
 			fileHandle.close();
 			out.close();
 			
-			if (m->control_pressed) { remove(distFile.c_str());  return 0; }
+			if (m->control_pressed) { m->mothurRemove(distFile);  return 0; }
 			
 			list->setLabel("0");
 			

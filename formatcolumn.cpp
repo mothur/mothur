@@ -39,7 +39,7 @@ int FormatColumnMatrix::read(NameAssignment* nameMap){
 	
 		while(fileHandle && lt == 1){  //let's assume it's a triangular matrix...
 		
-			if (m->control_pressed) { out.close(); remove(tempOutFile.c_str()); fileHandle.close();  delete reading; return 0; }
+			if (m->control_pressed) { out.close();  m->mothurRemove(tempOutFile); fileHandle.close();  delete reading; return 0; }
 		
 			fileHandle >> firstName >> secondName >> distance;	// get the row and column names and distance
 	
@@ -90,7 +90,7 @@ int FormatColumnMatrix::read(NameAssignment* nameMap){
 			system(command.c_str());
 		#endif
 		
-		if (m->control_pressed) { remove(tempOutFile.c_str()); remove(outfile.c_str()); delete reading; return 0; }
+		if (m->control_pressed) { m->mothurRemove(tempOutFile); m->mothurRemove(outfile); delete reading; return 0; }
 
 		//output to new file distance for each row and save positions in file where new row begins
 		ifstream in;
@@ -115,7 +115,7 @@ int FormatColumnMatrix::read(NameAssignment* nameMap){
 		
 		while(!in.eof()) {
 			
-			if (m->control_pressed) { in.close(); out.close(); remove(distFile.c_str()); remove(tempOutFile.c_str()); remove(outfile.c_str()); delete reading; return 0; }
+			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(distFile); m->mothurRemove(tempOutFile); m->mothurRemove(outfile); delete reading; return 0; }
 			
 			in >> first >> second >> dist; m->gobble(in);
 			
@@ -159,17 +159,17 @@ int FormatColumnMatrix::read(NameAssignment* nameMap){
 		in.close();
 		out.close();
 		
-		if (m->control_pressed) {  remove(distFile.c_str()); remove(tempOutFile.c_str()); remove(outfile.c_str());  delete reading; return 0; }
+		if (m->control_pressed) {  m->mothurRemove(distFile); m->mothurRemove(tempOutFile); m->mothurRemove(outfile);  delete reading; return 0; }
 		
-		remove(tempOutFile.c_str());
-		remove(outfile.c_str());
+		m->mothurRemove(tempOutFile);
+		m->mothurRemove(outfile);
 		
 		reading->finish();
 		
 		delete reading;
 		list->setLabel("0");
 		
-		if (m->control_pressed) {  remove(distFile.c_str());  return 0; }
+		if (m->control_pressed) {  m->mothurRemove(distFile);  return 0; }
 
 		return 1;
 

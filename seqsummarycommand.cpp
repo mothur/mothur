@@ -297,7 +297,7 @@ int SeqSummaryCommand::execute(){
 					//append files
 					for(int i=1;i<processors;i++){
 						m->appendFiles((summaryFile + toString(processIDS[i]) + ".temp"), summaryFile);
-						remove((summaryFile + toString(processIDS[i]) + ".temp").c_str());
+						m->mothurRemove((summaryFile + toString(processIDS[i]) + ".temp"));
 					}
 				}
 				
@@ -330,7 +330,7 @@ int SeqSummaryCommand::execute(){
 		if (startPosition[0] == -1) {  startPosition[0] = 0;	}
 		if (endPosition[0] == -1)	{  endPosition[0] = 0;		}
 		
-		if (m->control_pressed) {  remove(summaryFile.c_str()); return 0; }
+		if (m->control_pressed) {  m->mothurRemove(summaryFile); return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("\t\tStart\tEnd\tNBases\tAmbigs\tPolymer"); m->mothurOutEndLine();
@@ -344,7 +344,7 @@ int SeqSummaryCommand::execute(){
 		if (namefile == "") {  m->mothurOut("# of Seqs:\t" + toString(numSeqs)); m->mothurOutEndLine(); }
 		else { m->mothurOut("# of unique seqs:\t" + toString(numSeqs)); m->mothurOutEndLine(); m->mothurOut("total # of seqs:\t" + toString(startPosition.size())); m->mothurOutEndLine(); }
 		
-		if (m->control_pressed) {  remove(summaryFile.c_str()); return 0; }
+		if (m->control_pressed) {  m->mothurRemove(summaryFile); return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
@@ -567,7 +567,7 @@ int SeqSummaryCommand::createProcessesCreateSummary(vector<int>& startPosition, 
 			for (int k = 0; k < tempNum; k++)			{		in >> temp; longHomoPolymer.push_back(temp);	}		m->gobble(in);
 				
 			in.close();
-			remove(tempFilename.c_str());
+			m->mothurRemove(tempFilename);
 		}
 		
 		return num;

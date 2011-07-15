@@ -251,7 +251,7 @@ int RemoveRareCommand::execute(){
 		if (listfile != "")			{		processList();		}
 		if (sharedfile != "")		{		processShared();	}
 		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
+		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 			
 		if (outputNames.size() != 0) {
 			m->mothurOutEndLine();
@@ -365,7 +365,7 @@ int RemoveRareCommand::processList(){
 			
 			//for each bin
 			for (int i = 0; i < list->getNumBins(); i++) {
-				if (m->control_pressed) {  if (groupfile != "") { delete groupMap; outGroup.close(); remove(outputGroupFileName.c_str()); } out.close();  remove(outputFileName.c_str());  return 0; }
+				if (m->control_pressed) {  if (groupfile != "") { delete groupMap; outGroup.close(); m->mothurRemove(outputGroupFileName); } out.close();  m->mothurRemove(outputFileName);  return 0; }
 				
 				//parse out names that are in accnos file
 				string binnames = list->get(i);

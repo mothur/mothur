@@ -257,7 +257,7 @@ int PhyloDiversityCommand::execute(){
 				
 				if (m->control_pressed) { 
 					delete tmap; for (int i = 0; i < trees.size(); i++) { delete trees[i]; }
-					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } outputTypes.clear();
+					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
 					m->Groups.clear();
 					return 0;
 				}
@@ -288,7 +288,7 @@ int PhyloDiversityCommand::execute(){
 		//for each of the users trees
 		for(int i = 0; i < trees.size(); i++) {
 		
-			if (m->control_pressed) { delete tmap; for (int j = 0; j < trees.size(); j++) { delete trees[j]; } for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str()); 	} return 0; }
+			if (m->control_pressed) { delete tmap; for (int j = 0; j < trees.size(); j++) { delete trees[j]; } for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]); 	} return 0; }
 			
 			ofstream outSum, outRare, outCollect;
 			string outSumFile = outputDir + m->getRootName(m->getSimpleName(treefile))  + toString(i+1) + ".phylodiv.summary";
@@ -377,7 +377,7 @@ int PhyloDiversityCommand::execute(){
 		}
 		
 	
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	} return 0; }
+		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} return 0; }
 
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -467,7 +467,7 @@ int PhyloDiversityCommand::createProcesses(vector<int>& procIters, Tree* t, map<
 			}
 				
 			in.close();
-			remove(inTemp.c_str());
+			m->mothurRemove(inTemp);
 		}
 		
 #endif

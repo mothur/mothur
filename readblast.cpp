@@ -66,7 +66,7 @@ int ReadBlast::read(NameAssignment* nameMap) {
 		if (m->control_pressed) { 
 			fileHandle.close();
 			if (!hclusterWanted) {  delete matrix; }
-			else { outOverlap.close(); remove(overlapFile.c_str()); outDist.close(); remove(distFile.c_str());  }
+			else { outOverlap.close(); m->mothurRemove(overlapFile); outDist.close(); m->mothurRemove(distFile);  }
 			return 0;
 		}
 		
@@ -117,7 +117,7 @@ int ReadBlast::read(NameAssignment* nameMap) {
 			if (m->control_pressed) { 
 				fileHandle.close();
 				if (!hclusterWanted) {  delete matrix; }
-				else { outOverlap.close(); remove(overlapFile.c_str()); outDist.close(); remove(distFile.c_str());  }
+				else { outOverlap.close(); m->mothurRemove(overlapFile); outDist.close(); m->mothurRemove(distFile);  }
 				delete reading;
 				return 0;
 			}
@@ -271,7 +271,7 @@ int ReadBlast::read(NameAssignment* nameMap) {
 		if (m->control_pressed) { 
 				fileHandle.close();
 				if (!hclusterWanted) {  delete matrix; }
-				else { outOverlap.close(); remove(overlapFile.c_str()); outDist.close(); remove(distFile.c_str());  }
+				else { outOverlap.close(); m->mothurRemove(overlapFile); outDist.close(); m->mothurRemove(distFile);  }
 				delete reading;
 				return 0;
 		}
@@ -286,7 +286,7 @@ int ReadBlast::read(NameAssignment* nameMap) {
 		if (m->control_pressed) { 
 				fileHandle.close();
 				if (!hclusterWanted) {  delete matrix; }
-				else {  remove(overlapFile.c_str());  remove(distFile.c_str());  }
+				else {  m->mothurRemove(overlapFile);  m->mothurRemove(distFile);  }
 				delete reading;
 				return 0;
 		}

@@ -307,7 +307,7 @@ int CollectCommand::execute(){
 	
 		for (int p = 0; p < inputFileNames.size(); p++) {
 			
-			if (m->control_pressed) {  outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}  m->Groups.clear();  return 0; }
+			if (m->control_pressed) {  outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}  m->Groups.clear();  return 0; }
 			
 			if (outputDir == "") { outputDir += m->hasPath(inputFileNames[p]); }
 			string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(inputFileNames[p]));
@@ -413,7 +413,7 @@ int CollectCommand::execute(){
 			
 			if (m->control_pressed) {  
 				for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
-				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	} outputTypes.clear(); 
+				for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} outputTypes.clear(); 
 				delete input;  
 				delete order; 
 				m->Groups.clear();
@@ -425,7 +425,7 @@ int CollectCommand::execute(){
 			
 				if (m->control_pressed) { 
 					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
-					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	} outputTypes.clear(); 
+					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} outputTypes.clear(); 
 					delete input;  
 					delete order; 
 					m->Groups.clear();
@@ -474,7 +474,7 @@ int CollectCommand::execute(){
 			
 			if (m->control_pressed) { 
 					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
-					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	} outputTypes.clear(); 
+					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} outputTypes.clear(); 
 					delete input;  
 					m->Groups.clear();
 					return 0;
@@ -506,7 +506,7 @@ int CollectCommand::execute(){
 				
 				if (m->control_pressed) { 
 					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
-					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	} outputTypes.clear(); 
+					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} outputTypes.clear(); 
 					delete input;  
 					delete order;
 					m->Groups.clear();
@@ -520,7 +520,7 @@ int CollectCommand::execute(){
 			delete input;  
 		}
 		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	} return 0; }
+		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} return 0; }
 				
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -551,7 +551,7 @@ vector<string> CollectCommand::parseSharedFile(string filename) {
 		
 		//clears file before we start to write to it below
 		for (int i=0; i<lookup.size(); i++) {
-			remove((sharedFileRoot + lookup[i]->getGroup() + ".rabund").c_str());
+			m->mothurRemove((sharedFileRoot + lookup[i]->getGroup() + ".rabund"));
 			filenames.push_back((sharedFileRoot + lookup[i]->getGroup() + ".rabund"));
 		}
 		

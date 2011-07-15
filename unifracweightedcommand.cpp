@@ -252,7 +252,7 @@ int UnifracWeightedCommand::execute() {
 				
 				if (m->control_pressed) { 
 					delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; }
-					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } outputTypes.clear();
+					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
 					m->Groups.clear();
 					return 0;
 				}
@@ -295,7 +295,7 @@ int UnifracWeightedCommand::execute() {
 		for (int i = 0; i < T.size(); i++) {
 			
 			if (m->control_pressed) { delete tmap; delete weighted;
-				for (int i = 0; i < T.size(); i++) { delete T[i]; } outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0; }
+				for (int i = 0; i < T.size(); i++) { delete T[i]; } outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
 
 			counter = 0;
 			rScores.resize(numComp);  //data[0] = weightedscore AB, data[1] = weightedscore AC...
@@ -310,7 +310,7 @@ int UnifracWeightedCommand::execute() {
 			userData = weighted->getValues(T[i], processors, outputDir);  //userData[0] = weightedscore
 			
 			if (m->control_pressed) { delete tmap; delete weighted;
-				for (int i = 0; i < T.size(); i++) { delete T[i]; } if (random) { delete output; } outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0; }
+				for (int i = 0; i < T.size(); i++) { delete T[i]; } if (random) { delete output; } outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
 			
 			//save users score
 			for (int s=0; s<numComp; s++) {
@@ -364,7 +364,7 @@ int UnifracWeightedCommand::execute() {
 					#endif
 					
 					if (m->control_pressed) { delete tmap; delete weighted;
-						for (int i = 0; i < T.size(); i++) { delete T[i]; } delete output; outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0; }
+						for (int i = 0; i < T.size(); i++) { delete T[i]; } delete output; outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
 					
 					//report progress
 //					m->mothurOut("Iter: " + toString(j+1)); m->mothurOutEndLine();		
@@ -402,7 +402,7 @@ int UnifracWeightedCommand::execute() {
 		
 		
 		if (m->control_pressed) { delete tmap; delete weighted;
-			for (int i = 0; i < T.size(); i++) { delete T[i]; } outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0;  }
+			for (int i = 0; i < T.size(); i++) { delete T[i]; } outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0;  }
 		
 		printWSummaryFile();
 		
@@ -415,7 +415,7 @@ int UnifracWeightedCommand::execute() {
 		
 		
 		if (m->control_pressed) { 
-			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }
 			return 0; 
 		}
 		
@@ -500,7 +500,7 @@ int UnifracWeightedCommand::createProcesses(Tree* t, vector< vector<string> > na
 			double tempScore;
 			for (int j = lines[(i+1)].start; j < (lines[(i+1)].start + lines[(i+1)].num); j++) { in >> tempScore; scores[j].push_back(tempScore); }
 			in.close();
-			remove(s.c_str());
+			m->mothurRemove(s);
 		}
 		
 		return 0;

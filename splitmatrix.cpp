@@ -146,7 +146,7 @@ int SplitMatrix::createDistanceFilesFromTax(map<string, int>& seqGroup, int numG
 		set<string> names;
 				
 		for (int i = 0; i < numGroups; i++) { //remove old temp files, just in case
-			remove((fastafile + "." + toString(i) + ".temp").c_str());
+			m->mothurRemove((fastafile + "." + toString(i) + ".temp"));
 		}
 			
 		ifstream in;
@@ -193,10 +193,10 @@ int SplitMatrix::createDistanceFilesFromTax(map<string, int>& seqGroup, int numG
 			command->execute();
 			delete command;
 			
-			remove((fastafile + "." + toString(i) + ".temp").c_str());
+			m->mothurRemove((fastafile + "." + toString(i) + ".temp"));
 			
 			//remove old names files just in case
-			remove((namefile + "." + toString(i) + ".temp").c_str());
+			m->mothurRemove((namefile + "." + toString(i) + ".temp"));
 		}
 			
 		singleton = namefile + ".extra.temp";
@@ -250,7 +250,7 @@ int SplitMatrix::createDistanceFilesFromTax(map<string, int>& seqGroup, int numG
 						remainingNames << name << '\t' << nameList << endl;
 					}
 					in.close();
-					remove(tempNameFile.c_str());
+					m->mothurRemove(tempNameFile);
 				}
 			}
 			fileHandle.close();
@@ -258,11 +258,11 @@ int SplitMatrix::createDistanceFilesFromTax(map<string, int>& seqGroup, int numG
 		
 		remainingNames.close();
 		if (!wroteExtra) { 
-			remove(singleton.c_str());
+			m->mothurRemove(singleton);
 			singleton = "none";
 		}
 
-		if (m->control_pressed)	 {  for (int i = 0; i < dists.size(); i++) { remove((dists[i].begin()->first).c_str()); remove((dists[i].begin()->second).c_str()); } dists.clear(); }
+		if (m->control_pressed)	 {  for (int i = 0; i < dists.size(); i++) { m->mothurRemove((dists[i].begin()->first)); m->mothurRemove((dists[i].begin()->second)); } dists.clear(); }
 		
 		return 0;
 	}
@@ -282,7 +282,7 @@ int SplitMatrix::splitDistanceFileByTax(map<string, int>& seqGroup, int numGroup
 		ofstream outFile;
 		
 		for (int i = 0; i < numGroups; i++) { //remove old temp files, just in case
-			remove((distFile + "." + toString(i) + ".temp").c_str());
+			m->mothurRemove((distFile + "." + toString(i) + ".temp"));
 		}
 		
 		//for buffering the io to improve speed
@@ -299,7 +299,7 @@ int SplitMatrix::splitDistanceFileByTax(map<string, int>& seqGroup, int numGroup
 			string seqA, seqB;
 			float dist;
 			
-			if (m->control_pressed) { dFile.close(); for (int i = 0; i < numGroups; i++) { remove((distFile + "." + toString(i) + ".temp").c_str());	} }
+			if (m->control_pressed) { dFile.close(); for (int i = 0; i < numGroups; i++) { m->mothurRemove((distFile + "." + toString(i) + ".temp"));	} }
 			
 			dFile >> seqA >> seqB >> dist;  m->gobble(dFile);
 			
@@ -326,7 +326,7 @@ int SplitMatrix::splitDistanceFileByTax(map<string, int>& seqGroup, int numGroup
 		dFile.close();
 	
 		for (int i = 0; i < numGroups; i++) { //remove old temp files, just in case
-			remove((namefile + "." + toString(i) + ".temp").c_str());
+			m->mothurRemove((namefile + "." + toString(i) + ".temp"));
 			
 			//write out any remaining buffers
 			if (numOutputs[i] > 0) {
@@ -385,21 +385,21 @@ int SplitMatrix::splitDistanceFileByTax(map<string, int>& seqGroup, int numGroup
 					remainingNames << name << '\t' << nameList << endl;
 				}
 				in.close();
-				remove(tempNameFile.c_str());
+				m->mothurRemove(tempNameFile);
 			}
 		}
 		
 		remainingNames.close();
 		
 		if (!wroteExtra) { 
-			remove(singleton.c_str());
+			m->mothurRemove(singleton);
 			singleton = "none";
 		}
 
 		if (m->control_pressed)	 {  
 			for (int i = 0; i < dists.size(); i++) { 
-				remove((dists[i].begin()->first).c_str());
-				remove((dists[i].begin()->second).c_str());
+				m->mothurRemove((dists[i].begin()->first));
+				m->mothurRemove((dists[i].begin()->second));
 			}
 			dists.clear();
 		}
@@ -434,7 +434,7 @@ int SplitMatrix::splitDistanceLarge(){
 
 			dFile >> seqA >> seqB >> dist;
 			
-			if (m->control_pressed) {   dFile.close();  for(int i=0;i<numGroups;i++){	if(groups[i].size() > 0){  remove((distFile + "." + toString(i) + ".temp").c_str()); }  } return 0; }
+			if (m->control_pressed) {   dFile.close();  for(int i=0;i<numGroups;i++){	if(groups[i].size() > 0){  m->mothurRemove((distFile + "." + toString(i) + ".temp")); }  } return 0; }
 					
 			if(dist < cutoff){
 				//cout << "in cutoff: " << dist << endl;
@@ -562,7 +562,7 @@ int SplitMatrix::splitDistanceLarge(){
 								delete memblock;
 								
 								fileB.close();
-								remove(fileName2.c_str());
+								m->mothurRemove(fileName2);
 								
 								//write out the merged memory
 								if (numOutputs[groupID] > 60) {
@@ -622,7 +622,7 @@ int SplitMatrix::splitDistanceLarge(){
 								delete memblock;
 								
 								fileB.close();
-								remove(fileName2.c_str());
+								m->mothurRemove(fileName2);
 								
 								//write out the merged memory
 								if (numOutputs[groupID] > 60) {
@@ -725,8 +725,8 @@ int SplitMatrix::splitNames(vector<set<string> >& groups){
 		
 		if (m->control_pressed)	 {  
 			for (int i = 0; i < dists.size(); i++) { 
-				remove((dists[i].begin()->first).c_str());
-				remove((dists[i].begin()->second).c_str());
+				m->mothurRemove((dists[i].begin()->first));
+				m->mothurRemove((dists[i].begin()->second));
 			}
 			dists.clear();
 		}
@@ -755,7 +755,7 @@ int SplitMatrix::splitDistanceRAM(){
 
 			dFile >> seqA >> seqB >> dist;
 			
-			if (m->control_pressed) {   dFile.close();  for(int i=0;i<numGroups;i++){	if(groups[i].size() > 0){  remove((distFile + "." + toString(i) + ".temp").c_str()); }  } return 0; }
+			if (m->control_pressed) {   dFile.close();  for(int i=0;i<numGroups;i++){	if(groups[i].size() > 0){  m->mothurRemove((distFile + "." + toString(i) + ".temp")); }  } return 0; }
 					
 			if(dist < cutoff){
 				//cout << "in cutoff: " << dist << endl;

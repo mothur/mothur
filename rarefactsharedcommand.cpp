@@ -214,7 +214,7 @@ int RareFactSharedCommand::execute(){
 			m->Groups.clear(); 
 			delete input;
 			for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
-			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}
+			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 			return 0;
 		}
@@ -236,7 +236,7 @@ int RareFactSharedCommand::execute(){
 				m->Groups.clear(); 
 				delete input;
 				for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
-				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}
+				for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}
 				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 				return 0;
 			}
@@ -281,7 +281,7 @@ int RareFactSharedCommand::execute(){
 			m->Groups.clear(); 
 			delete input;
 			for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
-			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}
+			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}
 			return 0;
 		}
 		
@@ -302,7 +302,7 @@ int RareFactSharedCommand::execute(){
 			m->Groups.clear(); 
 			delete input; 
 			for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
-			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}
+			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}
 			return 0;
 		}
 		
@@ -322,7 +322,7 @@ int RareFactSharedCommand::execute(){
 		m->Groups.clear(); 
 		delete input;
 		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
+		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();

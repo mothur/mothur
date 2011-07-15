@@ -565,7 +565,7 @@ int ClassifySeqsCommand::execute(){
 					//align your part
 					driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPINewTax, outMPITempTax, MPIPos);
 					
-					if (m->control_pressed) {  outputTypes.clear(); MPI_File_close(&inMPI);  MPI_File_close(&outMPINewTax);   MPI_File_close(&outMPITempTax);  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} delete classify; return 0;  }
+					if (m->control_pressed) {  outputTypes.clear(); MPI_File_close(&inMPI);  MPI_File_close(&outMPINewTax);   MPI_File_close(&outMPITempTax);  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} delete classify; return 0;  }
 					
 					for (int i = 1; i < processors; i++) {
 						int done;
@@ -660,7 +660,7 @@ int ClassifySeqsCommand::execute(){
 			
 			PhyloSummary taxaSum(baseTName, group);
 			
-			if (m->control_pressed) { outputTypes.clear();  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} delete classify; return 0; }
+			if (m->control_pressed) { outputTypes.clear();  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} delete classify; return 0; }
 		
 			if (namefile == "") {  taxaSum.summarize(tempTaxonomyFile);  }
 			else {
@@ -687,9 +687,9 @@ int ClassifySeqsCommand::execute(){
 				}
 				in.close();
 			}
-			remove(tempTaxonomyFile.c_str());
+			m->mothurRemove(tempTaxonomyFile);
 			
-			if (m->control_pressed) {  outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} delete classify; return 0; }
+			if (m->control_pressed) {  outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} delete classify; return 0; }
 			
 			//print summary file
 			ofstream outTaxTree;
@@ -711,7 +711,7 @@ int ClassifySeqsCommand::execute(){
 			//read taxfile - this reading and rewriting is done to preserve the confidence scores.
 			string name, taxon;
 			while (!inTax.eof()) {
-				if (m->control_pressed) { outputTypes.clear();  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} remove(unclass.c_str()); delete classify; return 0; }
+				if (m->control_pressed) { outputTypes.clear();  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} m->mothurRemove(unclass); delete classify; return 0; }
 
 				inTax >> name >> taxon; m->gobble(inTax);
 				
@@ -722,7 +722,7 @@ int ClassifySeqsCommand::execute(){
 			inTax.close();	
 			outTax.close();
 			
-			remove(newTaxonomyFile.c_str());
+			m->mothurRemove(newTaxonomyFile);
 			rename(unclass.c_str(), newTaxonomyFile.c_str());
 			
 			m->mothurOutEndLine();
@@ -800,7 +800,7 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
 				process++;
 			}else if (pid == 0){
 				num = driver(lines[process], taxFileName + toString(getpid()) + ".temp", tempTaxFile + toString(getpid()) + ".temp", filename);
-				
+
 				//pass numSeqs to parent
 				ofstream out;
 				string tempFile = filename + toString(getpid()) + ".num.temp";
@@ -830,14 +830,14 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
 			string tempFile =  filename + toString(processIDS[i]) + ".num.temp";
 			m->openInputFile(tempFile, in);
 			if (!in.eof()) { int tempNum = 0; in >> tempNum; num += tempNum; }
-			in.close(); remove(tempFile.c_str());
+			in.close(); m->mothurRemove(m->getFullPathName(tempFile));
 		}
 		
 		for(int i=0;i<processIDS.size();i++){
 			appendTaxFiles((taxFileName + toString(processIDS[i]) + ".temp"), taxFileName);
 			appendTaxFiles((tempTaxFile + toString(processIDS[i]) + ".temp"), tempTaxFile);
-			remove((taxFileName + toString(processIDS[i]) + ".temp").c_str());
-			remove((tempTaxFile + toString(processIDS[i]) + ".temp").c_str());
+			m->mothurRemove((m->getFullPathName(taxFileName) + toString(processIDS[i]) + ".temp"));
+			m->mothurRemove((m->getFullPathName(tempTaxFile) + toString(processIDS[i]) + ".temp"));
 		}
 		
 		return num;

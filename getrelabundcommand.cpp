@@ -170,7 +170,7 @@ int GetRelAbundCommand::execute(){
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-			if (m->control_pressed) {  outputTypes.clear();  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } m->Groups.clear(); delete input;  out.close(); remove(outputFileName.c_str()); return 0; }
+			if (m->control_pressed) {  outputTypes.clear();  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } m->Groups.clear(); delete input;  out.close(); m->mothurRemove(outputFileName); return 0; }
 	
 			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
 
@@ -202,13 +202,13 @@ int GetRelAbundCommand::execute(){
 			//prevent memory leak
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
 			
-			if (m->control_pressed) {  outputTypes.clear();  m->Groups.clear(); delete input;  out.close(); remove(outputFileName.c_str()); return 0; }
+			if (m->control_pressed) {  outputTypes.clear();  m->Groups.clear(); delete input;  out.close(); m->mothurRemove(outputFileName); return 0; }
 
 			//get next line to process
 			lookup = input->getSharedRAbundVectors();				
 		}
 		
-		if (m->control_pressed) { outputTypes.clear(); m->Groups.clear(); delete input;  out.close(); remove(outputFileName.c_str());  return 0; }
+		if (m->control_pressed) { outputTypes.clear(); m->Groups.clear(); delete input;  out.close(); m->mothurRemove(outputFileName);  return 0; }
 
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -240,7 +240,7 @@ int GetRelAbundCommand::execute(){
 		delete input; 
 		out.close();
 		
-		if (m->control_pressed) { outputTypes.clear(); remove(outputFileName.c_str()); return 0;}
+		if (m->control_pressed) { outputTypes.clear(); m->mothurRemove(outputFileName); return 0;}
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();

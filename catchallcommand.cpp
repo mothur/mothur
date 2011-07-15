@@ -236,7 +236,7 @@ int CatchAllCommand::execute() {
 						//run catchall
 						system(catchAllCommand.c_str());
 					
-						remove(filename.c_str());
+						m->mothurRemove(filename);
 					
 						filename = m->getRootName(filename); filename = filename.substr(0, filename.length()-1); //rip off extra .
 						if (savedOutputDir == "") { filename = m->getSimpleName(filename); }
@@ -248,7 +248,7 @@ int CatchAllCommand::execute() {
 					
 						createSummaryFile(filename + "_BestModelsAnalysis.csv", sabund->getLabel(), out);
 											
-						if (m->control_pressed) { out.close(); for (int i = 0; i < outputNames.size(); i++) {remove(outputNames[i].c_str());	}  delete input;  delete sabund;  return 0; }
+						if (m->control_pressed) { out.close(); for (int i = 0; i < outputNames.size(); i++) {m->mothurRemove(outputNames[i]);	}  delete input;  delete sabund;  return 0; }
 
 						processedLabels.insert(sabund->getLabel());
 						userLabels.erase(sabund->getLabel());
@@ -280,7 +280,7 @@ int CatchAllCommand::execute() {
 						//run catchall
 						system(catchAllCommand.c_str());
 					
-						remove(filename.c_str());
+						m->mothurRemove(filename);
 					
 						filename = m->getRootName(filename); filename = filename.substr(0, filename.length()-1); //rip off extra .
 						if (savedOutputDir == "") { filename = m->getSimpleName(filename); }
@@ -292,7 +292,7 @@ int CatchAllCommand::execute() {
 					
 						createSummaryFile(filename + "_BestModelsAnalysis.csv", sabund->getLabel(), out);
 					
-						if (m->control_pressed) { out.close(); for (int i = 0; i < outputNames.size(); i++) {remove(outputNames[i].c_str());	}  delete input;  delete sabund;  return 0; }
+						if (m->control_pressed) { out.close(); for (int i = 0; i < outputNames.size(); i++) {m->mothurRemove(outputNames[i]);	}  delete input;  delete sabund;  return 0; }
 
 						processedLabels.insert(sabund->getLabel());
 						userLabels.erase(sabund->getLabel());
@@ -345,7 +345,7 @@ int CatchAllCommand::execute() {
 				//run catchall
 				system(catchAllCommand.c_str());
 				
-				remove(filename.c_str());
+				m->mothurRemove(filename);
 				
 				filename = m->getRootName(filename); filename = filename.substr(0, filename.length()-1); //rip off extra .
 				if (savedOutputDir == "") { filename = m->getSimpleName(filename); }
@@ -363,7 +363,7 @@ int CatchAllCommand::execute() {
 			out.close();
 			delete input; 
 			
-			if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {remove(outputNames[i].c_str());	} return 0; }
+			if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {m->mothurRemove(outputNames[i]);	} return 0; }
 				
 		}
 		
@@ -471,7 +471,7 @@ string CatchAllCommand::combineSummmary(vector<string>& outputNames) {
 			numLines = thisFilesLines.size();
 			
 			temp.close();
-			remove(outputNames[i].c_str());
+			m->mothurRemove(outputNames[i]);
 		}
 		
 		//for each label
@@ -579,7 +579,7 @@ vector<string> CatchAllCommand::parseSharedFile(string filename) {
 		
 		//clears file before we start to write to it below
 		for (int i=0; i<lookup.size(); i++) {
-			remove((sharedFileRoot + lookup[i]->getGroup() + ".sabund").c_str());
+			m->mothurRemove((sharedFileRoot + lookup[i]->getGroup() + ".sabund"));
 			filenames.push_back((sharedFileRoot + lookup[i]->getGroup() + ".sabund"));
 			groups.push_back(lookup[i]->getGroup());
 		}

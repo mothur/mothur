@@ -298,7 +298,7 @@ int FilterSeqsCommand::execute() {
 			if(filter[i] == '1'){	filteredLength++;	}
 		}
 		
-		if (m->control_pressed) {  outputTypes.clear(); for(int i = 0; i < outputNames.size(); i++) { remove(outputNames[i].c_str()); }  return 0; }
+		if (m->control_pressed) {  outputTypes.clear(); for(int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); }  return 0; }
 
 		
 		m->mothurOutEndLine();
@@ -438,7 +438,7 @@ int FilterSeqsCommand::filterSequences() {
 					//append fasta files
 					for(int i=1;i<processors;i++){
 						m->appendFiles((fastafileNames[s] + toString(processIDS[i]) + ".temp"), filteredFasta);
-						remove((fastafileNames[s] + toString(processIDS[i]) + ".temp").c_str());
+						m->mothurRemove((fastafileNames[s] + toString(processIDS[i]) + ".temp"));
 					}
 				}
 				
@@ -637,7 +637,7 @@ int FilterSeqsCommand::createProcessesRunFilter(string F, string filename) {
 			string tempFile =  filename + toString(processIDS[i]) + ".num.temp";
 			m->openInputFile(tempFile, in);
 			if (!in.eof()) { int tempNum = 0; in >> tempNum; num += tempNum; }
-			in.close(); remove(tempFile.c_str());
+			in.close(); m->mothurRemove(tempFile);
 		}
 
 		
@@ -1024,7 +1024,7 @@ int FilterSeqsCommand::createProcessesCreateFilter(Filters& F, string filename) 
 			for (int k = 0; k < alignmentLength; k++) {		in >> temp; F.gap[k] += temp; }	m->gobble(in);
 				
 			in.close();
-			remove(tempFilename.c_str());
+			m->mothurRemove(tempFilename);
 		}
 		
 		return num;

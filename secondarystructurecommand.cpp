@@ -183,7 +183,7 @@ int AlignCheckCommand::execute(){
 		
 		int count = 0;
 		while(!in.eof()){
-			if (m->control_pressed) { in.close(); out.close(); remove(outfile.c_str()); return 0; }
+			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outfile); return 0; }
 			
 			Sequence seq(in);  m->gobble(in);
 			if (seq.getName() != "") {
@@ -220,7 +220,7 @@ int AlignCheckCommand::execute(){
 		in.close();
 		out.close();
 		
-		if (m->control_pressed) {  remove(outfile.c_str()); return 0; }
+		if (m->control_pressed) {  m->mothurRemove(outfile); return 0; }
 		
 		sort(pound.begin(), pound.end());
 		sort(dash.begin(), dash.end());
@@ -238,7 +238,7 @@ int AlignCheckCommand::execute(){
 		int ptile97_5	= int(size * 0.975);
 		int ptile100	= size - 1;
 		
-		if (m->control_pressed) {  remove(outfile.c_str()); return 0; }
+		if (m->control_pressed) {  m->mothurRemove(outfile); return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("\t\tPound\tDash\tPlus\tEqual\tLoop\tTilde\tTotal"); m->mothurOutEndLine();

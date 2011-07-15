@@ -206,7 +206,7 @@ int ConsensusSeqsCommand::execute(){
 			int seqLength = 0;
 			for (map<string, string>::iterator it = nameMap.begin(); it != nameMap.end(); it++) {
 				
-				if (m->control_pressed) { outSummary.close(); outFasta.close(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
+				if (m->control_pressed) { outSummary.close(); outFasta.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 				
 				string seq = fastaMap[it->second];
 				seqs.push_back(seq);
@@ -223,7 +223,7 @@ int ConsensusSeqsCommand::execute(){
 			//get counts
 			for (int j = 0; j < seqLength; j++) {
 				
-				if (m->control_pressed) { outSummary.close(); outFasta.close(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
+				if (m->control_pressed) { outSummary.close(); outFasta.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 				
 				vector<int> counts; counts.resize(5, 0); //A,T,G,C,Gap
 				int numDots = 0;
@@ -276,7 +276,7 @@ int ConsensusSeqsCommand::execute(){
 			//as long as you are not at the end of the file or done wih the lines you want
 			while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 				
-				if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } delete list; delete input;  return 0;  }
+				if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } delete list; delete input;  return 0;  }
 				
 				if(allLines == 1 || labels.count(list->getLabel()) == 1){			
 					
@@ -314,7 +314,7 @@ int ConsensusSeqsCommand::execute(){
 			}
 			
 			
-			if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } if (list != NULL) { delete list; } delete input; return 0;  }
+			if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } if (list != NULL) { delete list; } delete input; return 0;  }
 			
 			//output error messages about any remaining user labels
 			set<string>::iterator it;

@@ -380,16 +380,16 @@ int TrimSeqsCommand::execute(){
 					if (fastaFileNames[i][j] != "") {
 						if (namesToRemove.count(fastaFileNames[i][j]) == 0) {
 							if(m->isBlank(fastaFileNames[i][j])){
-								remove(fastaFileNames[i][j].c_str());
+								m->mothurRemove(fastaFileNames[i][j]);
 								namesToRemove.insert(fastaFileNames[i][j]);
 							
 								if(qFileName != ""){
-									remove(qualFileNames[i][j].c_str());
+									m->mothurRemove(qualFileNames[i][j]);
 									namesToRemove.insert(qualFileNames[i][j]);
 								}
 								
 								if(nameFile != ""){
-									remove(nameFileNames[i][j].c_str());
+									m->mothurRemove(nameFileNames[i][j]);
 									namesToRemove.insert(nameFileNames[i][j]);
 								}
 							}else{	
@@ -428,7 +428,7 @@ int TrimSeqsCommand::execute(){
 			}
 		}
 		
-		if (m->control_pressed) {	for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0;	}
+		if (m->control_pressed) {	for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0;	}
 
 		//output group counts
 		m->mothurOutEndLine();
@@ -439,7 +439,7 @@ int TrimSeqsCommand::execute(){
 		}
 		if (total != 0) { m->mothurOut("Total of all groups is " + toString(total)); m->mothurOutEndLine(); }
 		
-		if (m->control_pressed) {	for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0;	}
+		if (m->control_pressed) {	for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0;	}
 
 		//set fasta file as new current fastafile
 		string current = "";
@@ -546,7 +546,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 				if(qFileName != ""){
 					qFile.close();
 				}
-				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }
+				for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }
 
 				return 0;
 			}
@@ -556,11 +556,12 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 			int currentSeqsDiffs = 0;
 
 			Sequence currSeq(inFASTA); m->gobble(inFASTA);
+			//cout << currSeq.getName() << '\t' << currSeq.getUnaligned().length() << endl;
 			QualityScores currQual;
 			if(qFileName != ""){
 				currQual = QualityScores(qFile);  m->gobble(qFile);
 			}
-			//cout << currSeq.getName() << '\t' << currSeq.getUnaligned().length() << endl;
+			
 			string origSeq = currSeq.getUnaligned();
 			if (origSeq != "") {
 				
@@ -846,27 +847,27 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
 			m->mothurOut("Appending files from process " + toString(processIDS[i])); m->mothurOutEndLine();
 			
 			m->appendFiles((trimFASTAFileName + toString(processIDS[i]) + ".temp"), trimFASTAFileName);
-			remove((trimFASTAFileName + toString(processIDS[i]) + ".temp").c_str());
+			m->mothurRemove((trimFASTAFileName + toString(processIDS[i]) + ".temp"));
 			m->appendFiles((scrapFASTAFileName + toString(processIDS[i]) + ".temp"), scrapFASTAFileName);
-			remove((scrapFASTAFileName + toString(processIDS[i]) + ".temp").c_str());
+			m->mothurRemove((scrapFASTAFileName + toString(processIDS[i]) + ".temp"));
 			
 			if(qFileName != ""){
 				m->appendFiles((trimQualFileName + toString(processIDS[i]) + ".temp"), trimQualFileName);
-				remove((trimQualFileName + toString(processIDS[i]) + ".temp").c_str());
+				m->mothurRemove((trimQualFileName + toString(processIDS[i]) + ".temp"));
 				m->appendFiles((scrapQualFileName + toString(processIDS[i]) + ".temp"), scrapQualFileName);
-				remove((scrapQualFileName + toString(processIDS[i]) + ".temp").c_str());
+				m->mothurRemove((scrapQualFileName + toString(processIDS[i]) + ".temp"));
 			}
 			
 			if(nameFile != ""){
 				m->appendFiles((trimNameFileName + toString(processIDS[i]) + ".temp"), trimNameFileName);
-				remove((trimNameFileName + toString(processIDS[i]) + ".temp").c_str());
+				m->mothurRemove((trimNameFileName + toString(processIDS[i]) + ".temp"));
 				m->appendFiles((scrapNameFileName + toString(processIDS[i]) + ".temp"), scrapNameFileName);
-				remove((scrapNameFileName + toString(processIDS[i]) + ".temp").c_str());
+				m->mothurRemove((scrapNameFileName + toString(processIDS[i]) + ".temp"));
 			}
 			
 			if(oligoFile != ""){
 				m->appendFiles((groupFile + toString(processIDS[i]) + ".temp"), groupFile);
-				remove((groupFile + toString(processIDS[i]) + ".temp").c_str());
+				m->mothurRemove((groupFile + toString(processIDS[i]) + ".temp"));
 			}
 			
 			
@@ -875,16 +876,16 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
 					for(int k=0;k<fastaFileNames[j].size();k++){
 						if (fastaFileNames[j][k] != "") {
 							m->appendFiles((fastaFileNames[j][k] + toString(processIDS[i]) + ".temp"), fastaFileNames[j][k]);
-							remove((fastaFileNames[j][k] + toString(processIDS[i]) + ".temp").c_str());
+							m->mothurRemove((fastaFileNames[j][k] + toString(processIDS[i]) + ".temp"));
 							
 							if(qFileName != ""){
 								m->appendFiles((qualFileNames[j][k] + toString(processIDS[i]) + ".temp"), qualFileNames[j][k]);
-								remove((qualFileNames[j][k] + toString(processIDS[i]) + ".temp").c_str());
+								m->mothurRemove((qualFileNames[j][k] + toString(processIDS[i]) + ".temp"));
 							}
 							
 							if(nameFile != ""){
 								m->appendFiles((nameFileNames[j][k] + toString(processIDS[i]) + ".temp"), nameFileNames[j][k]);
-								remove((nameFileNames[j][k] + toString(processIDS[i]) + ".temp").c_str());
+								m->mothurRemove((nameFileNames[j][k] + toString(processIDS[i]) + ".temp"));
 							}
 						}
 					}
@@ -909,7 +910,7 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
 						else { groupCounts[it->first] += tempNum; }
 					}
 				}
-				in.close(); remove(tempFile.c_str());
+				in.close(); m->mothurRemove(tempFile);
 			}
 			
 		}
