@@ -44,8 +44,8 @@ private:
 	int norm;
 	vector<string> Groups, outputNames;
 		
-	int normalize(vector<SharedRAbundVector*>&, ofstream&);
-	int normalize(vector<SharedRAbundFloatVector*>&, ofstream&);
+	int normalize(vector<SharedRAbundVector*>&);
+	int normalize(vector<SharedRAbundFloatVector*>&);
 	int eliminateZeroOTUS(vector<SharedRAbundVector*>&);
 	int eliminateZeroOTUS(vector<SharedRAbundFloatVector*>&);
 

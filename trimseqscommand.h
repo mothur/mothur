@@ -42,7 +42,7 @@ private:
 		linePair(unsigned long int i, unsigned long int j) : start(i), end(j) {}
 	};
 	
-	void getOligos(vector<vector<string> >&, vector<vector<string> >&, vector<vector<string> >&);
+	bool getOligos(vector<vector<string> >&, vector<vector<string> >&, vector<vector<string> >&);
 	int stripBarcode(Sequence&, QualityScores&, int&);
 	int stripForward(Sequence&, QualityScores&, int&);
 	bool stripReverse(Sequence&, QualityScores&);
@@ -56,7 +56,7 @@ private:
 	bool compareDNASeq(string, string);
 	int countDiffs(string, string);
 
-	bool abort;
+	bool abort, createGroup;
 	string fastaFile, oligoFile, qFileName, groupfile, nameFile, outputDir;
 	
 	bool flip, allFiles, qtrim;

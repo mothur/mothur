@@ -40,6 +40,8 @@ public:
 	int getMaxRank();
 	string getGroup();
 	void setGroup(string);
+	string getBinLabel();
+	void setBinLabel(string);
 	int getGroupIndex();
 	void setGroupIndex(int);								
 

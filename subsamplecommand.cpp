@@ -689,27 +689,17 @@ int SubSampleCommand::getSubSampleShared() {
 		
 		if (lookup.size() == 0) {  m->mothurOut("The size you selected is too large, skipping shared file."); m->mothurOutEndLine(); delete input; return 0; }
 		
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(sharedfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(sharedfile)) + "subsample" + m->getExtension(sharedfile);
-		
-		ofstream out;
-		m->openOutputFile(outputFileName, out);
-		outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
-		
-		
 		m->mothurOut("Sampling " + toString(size) + " from each group."); m->mothurOutEndLine();
 		
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-			if (m->control_pressed) {  delete input; for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; } out.close(); return 0;  }
+			if (m->control_pressed) {  delete input; for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }  return 0;  }
 			
 			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
 				
 				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 				
-				if (!m->printedHeaders) { lookup[0]->printHeaders(out); }
-				processShared(lookup, out);
+				processShared(lookup);
 				
 				processedLabels.insert(lookup[0]->getLabel());
 				userLabels.erase(lookup[0]->getLabel());
@@ -723,8 +713,7 @@ int SubSampleCommand::getSubSampleShared() {
 				lookup = input->getSharedRAbundVectors(lastLabel);
 				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 				
-				if (!m->printedHeaders) { lookup[0]->printHeaders(out); }
-				processShared(lookup, out);
+				processShared(lookup);
 				
 				processedLabels.insert(lookup[0]->getLabel());
 				userLabels.erase(lookup[0]->getLabel());
@@ -742,7 +731,7 @@ int SubSampleCommand::getSubSampleShared() {
 		}
 		
 		
-		if (m->control_pressed) {  out.close(); return 0;  }
+		if (m->control_pressed) {   return 0;  }
 		
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -764,14 +753,12 @@ int SubSampleCommand::getSubSampleShared() {
 			
 			m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 			
-			if (!m->printedHeaders) { lookup[0]->printHeaders(out); }
-			processShared(lookup, out);
+			processShared(lookup);
 			
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
 		}
 		
 		delete input;
-		out.close();  
 		
 		return 0;
 		
@@ -782,8 +769,20 @@ int SubSampleCommand::getSubSampleShared() {
 	}
 }
 //**********************************************************************************************************************
-int SubSampleCommand::processShared(vector<SharedRAbundVector*>& thislookup, ofstream& out) {
+int SubSampleCommand::processShared(vector<SharedRAbundVector*>& thislookup) {
 	try {
+		
+		//save mothurOut's binLabels to restore for next label
+		vector<string> saveBinLabels = m->currentBinLabels;
+		
+		string thisOutputDir = outputDir;
+		if (outputDir == "") {  thisOutputDir += m->hasPath(sharedfile);  }
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(sharedfile)) + thislookup[0]->getLabel() + ".subsample" + m->getExtension(sharedfile);
+		
+		
+		ofstream out;
+		m->openOutputFile(outputFileName, out);
+		outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
 		
 		int numBins = thislookup[0]->getNumBins();
 		for (int i = 0; i < thislookup.size(); i++) {		
@@ -811,7 +810,7 @@ int SubSampleCommand::processShared(vector<SharedRAbundVector*>& thislookup, ofs
 				
 				for (int j = 0; j < size; j++) {
 					
-					if (m->control_pressed) { delete order; return 0; }
+					if (m->control_pressed) { delete order; out.close(); return 0; }
 					
 					//get random number to sample from order between 0 and thisSize-1.
 					int myrand = int((float)(thisSize) * (float)(rand()) / ((float)RAND_MAX+1.0));
@@ -828,12 +827,19 @@ int SubSampleCommand::processShared(vector<SharedRAbundVector*>& thislookup, ofs
 		//subsampling may have created some otus with no sequences in them
 		eliminateZeroOTUS(thislookup);
 		
-		if (m->control_pressed) { return 0; }
+		if (m->control_pressed) { out.close(); return 0; }
+		
+		thislookup[0]->printHeaders(out);
 		
 		for (int i = 0; i < thislookup.size(); i++) {
 			out << thislookup[i]->getLabel() << '\t' << thislookup[i]->getGroup() << '\t';
 			thislookup[i]->print(out);
 		}
+		
+		out.close();
+		
+		//save mothurOut's binLabels to restore for next label
+		m->currentBinLabels = saveBinLabels;
 		
 		return 0;
 		
@@ -1517,6 +1523,7 @@ int SubSampleCommand::eliminateZeroOTUS(vector<SharedRAbundVector*>& thislookup)
 		}
 		
 		//for each bin
+		vector<string> newBinLabels;
 		for (int i = 0; i < thislookup[0]->getNumBins(); i++) {
 			if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) {  delete newLookup[j];  } return 0; }
 			
@@ -1531,6 +1538,11 @@ int SubSampleCommand::eliminateZeroOTUS(vector<SharedRAbundVector*>& thislookup)
 				for (int j = 0; j < thislookup.size(); j++) {
 					newLookup[j]->push_back(thislookup[j]->getAbundance(i), thislookup[j]->getGroup());
 				}
+				//if there is a bin label use it otherwise make one
+				string binLabel = "Otu" + (i+1);
+				if (i < m->currentBinLabels.size()) {  binLabel = m->currentBinLabels[i]; }
+				
+				newBinLabels.push_back(binLabel);
 			}
 		}
 		
@@ -1538,6 +1550,7 @@ int SubSampleCommand::eliminateZeroOTUS(vector<SharedRAbundVector*>& thislookup)
 		thislookup.clear();
 		
 		thislookup = newLookup;
+		m->currentBinLabels = newBinLabels;
 		
 		return 0;
 		

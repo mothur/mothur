@@ -186,6 +186,8 @@ bool InteractEngine::getInput(){
 					mout->names.clear();
 					mout->saveNextLabel = "";
 					mout->printedHeaders = false;
+					mout->currentBinLabels.clear();
+					mout->binLabelsInFile.clear();
 							
 					Command* command = cFactory->getCommand(commandName, options);
 					quitCommandCalled = command->execute();
@@ -368,6 +370,9 @@ bool BatchEngine::getInput(){
 					mout->names.clear();
 					mout->saveNextLabel = "";
 					mout->printedHeaders = false;
+					mout->currentBinLabels.clear();
+					mout->binLabelsInFile.clear();
+
 							
 					Command* command = cFactory->getCommand(commandName, options);
 					quitCommandCalled = command->execute();
@@ -532,6 +537,9 @@ bool ScriptEngine::getInput(){
 					mout->names.clear();
 					mout->saveNextLabel = "";
 					mout->printedHeaders = false;
+					mout->currentBinLabels.clear();
+					mout->binLabelsInFile.clear();
+
 							
 					Command* command = cFactory->getCommand(commandName, options);
 					quitCommandCalled = command->execute();

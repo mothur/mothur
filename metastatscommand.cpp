@@ -397,13 +397,13 @@ int MetaStatsCommand::driver(int start, int num, vector<SharedRAbundVector*>& th
 			//get filename
 			string outputFileName = outputDir +  m->getRootName(m->getSimpleName(sharedfile)) + thisLookUp[0]->getLabel() + "." + setA + "-" + setB + ".metastats";
 			outputNames.push_back(outputFileName); outputTypes["metastats"].push_back(outputFileName);
-			int nameLength = outputFileName.length();
-			char * output = new char[nameLength];
-			strcpy(output, outputFileName.c_str());
+			//int nameLength = outputFileName.length();
+			//char * output = new char[nameLength];
+			//strcpy(output, outputFileName.c_str());
 	
 			//build matrix from shared rabunds
-			double** data;
-			data = new double*[thisLookUp[0]->getNumBins()];
+			//double** data;
+			//data = new double*[thisLookUp[0]->getNumBins()];
 			
 			vector< vector<double> > data2; data2.resize(thisLookUp[0]->getNumBins());
 			
@@ -430,29 +430,29 @@ int MetaStatsCommand::driver(int start, int num, vector<SharedRAbundVector*>& th
 			}else {
 				//fill data
 				for (int j = 0; j < thisLookUp[0]->getNumBins(); j++) {
-					data[j] = new double[subset.size()];
+					//data[j] = new double[subset.size()];
 					data2[j].resize(subset.size(), 0.0);
 					for (int i = 0; i < subset.size(); i++) {
-						data[j][i] = (subset[i]->getAbundance(j));
+						//data[j][i] = (subset[i]->getAbundance(j));
 						data2[j][i] = (subset[i]->getAbundance(j));
 					}
 				}
 				
 				m->mothurOut("Comparing " + setA + " and " + setB + "..."); m->mothurOutEndLine(); 
-				metastat_main(output, thisLookUp[0]->getNumBins(), subset.size(), threshold, iters, data, setACount);
+				//metastat_main(output, thisLookUp[0]->getNumBins(), subset.size(), threshold, iters, data, setACount);
 				
 				m->mothurOutEndLine();
 				MothurMetastats mothurMeta(threshold, iters);
-				mothurMeta.runMetastats(outputFileName+".myVersion" , data2, setACount);
+				mothurMeta.runMetastats(outputFileName , data2, setACount);
 				m->mothurOutEndLine();
 				
 				m->mothurOutEndLine(); 
 			}
 			
 			//free memory
-			delete output;
-			for(int i = 0; i < thisLookUp[0]->getNumBins(); i++)  {  delete[] data[i];  }
-			delete[] data; 
+			//delete output;
+			//for(int i = 0; i < thisLookUp[0]->getNumBins(); i++)  {  delete[] data[i];  }
+			//delete[] data; 
 		}
 		
 		return 0;
