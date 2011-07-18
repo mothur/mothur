@@ -24,7 +24,7 @@ struct individual {
 		bool operator()(const individual& i1, const individual& i2) {
 		return (i1.abundance > i2.abundance);
 		}
-	individual() { group = ""; bin = 0; abundance = 0; }
+	individual() {  group = ""; bin = 0; abundance = 0; }
 };
 
 struct individualFloat {

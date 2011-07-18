@@ -308,6 +308,7 @@ int TrimSeqsCommand::execute(){
 		
 		numFPrimers = 0;  //this needs to be initialized
 		numRPrimers = 0;
+		createGroup = false;
 		vector<vector<string> > fastaFileNames;
 		vector<vector<string> > qualFileNames;
 		vector<vector<string> > nameFileNames;
@@ -343,9 +344,11 @@ int TrimSeqsCommand::execute(){
 		
 		string outputGroupFileName;
 		if(oligoFile != ""){
-			outputGroupFileName = outputDir + m->getRootName(m->getSimpleName(fastaFile)) + "groups";
-			outputNames.push_back(outputGroupFileName); outputTypes["group"].push_back(outputGroupFileName);
-			getOligos(fastaFileNames, qualFileNames, nameFileNames);
+			createGroup = getOligos(fastaFileNames, qualFileNames, nameFileNames);
+			if (createGroup) {
+				outputGroupFileName = outputDir + m->getRootName(m->getSimpleName(fastaFile)) + "groups";
+				outputNames.push_back(outputGroupFileName); outputTypes["group"].push_back(outputGroupFileName);
+			}
 		}
 		
 		vector<unsigned long int> fastaFilePos;
@@ -505,7 +508,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 		
 		
 		ofstream outGroupsFile;
-		if (oligoFile != ""){	m->openOutputFile(groupFileName, outGroupsFile);   }
+		if (createGroup){	m->openOutputFile(groupFileName, outGroupsFile);   }
 		if(allFiles){
 			for (int i = 0; i < fastaFileNames.size(); i++) { //clears old file
 				for (int j = 0; j < fastaFileNames[i].size(); j++) { //clears old file
@@ -541,7 +544,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 				
 			if (m->control_pressed) { 
 				inFASTA.close(); trimFASTAFile.close(); scrapFASTAFile.close();
-				if (oligoFile != "") {	 outGroupsFile.close();   }
+				if (createGroup) {	 outGroupsFile.close();   }
 
 				if(qFileName != ""){
 					qFile.close();
@@ -646,29 +649,38 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 						else { m->mothurOut("[ERROR]: " + currSeq.getName() + " is not in your namefile, please correct."); m->mothurOutEndLine(); }
 					}
 					
-					if(barcodes.size() != 0){
-						string thisGroup = barcodeNameVector[barcodeIndex];
-						if (primers.size() != 0) { if (primerNameVector[primerIndex] != "") { thisGroup += "." + primerNameVector[primerIndex]; } }
-						
-						outGroupsFile << currSeq.getName() << '\t' << thisGroup << endl;
-						
-						if (nameFile != "") {
-							map<string, string>::iterator itName = nameMap.find(currSeq.getName());
-							if (itName != nameMap.end()) { 
-								vector<string> thisSeqsNames; 
-								m->splitAtChar(itName->second, thisSeqsNames, ',');
-								for (int k = 1; k < thisSeqsNames.size(); k++) { //start at 1 to skip self
-									outGroupsFile << thisSeqsNames[k] << '\t' << thisGroup << endl;
-								}
-							}else { m->mothurOut("[ERROR]: " + currSeq.getName() + " is not in your namefile, please correct."); m->mothurOutEndLine(); }							
-						}
-						
-						map<string, int>::iterator it = groupCounts.find(thisGroup);
-						if (it == groupCounts.end()) {	groupCounts[thisGroup] = 1; }
-						else { groupCounts[it->first]++; }
+					if (createGroup) {
+						if(barcodes.size() != 0){
+							string thisGroup = barcodeNameVector[barcodeIndex];
+							if (primers.size() != 0) { 
+								if (primerNameVector[primerIndex] != "") { 
+									if(thisGroup != "") {
+										thisGroup += "." + primerNameVector[primerIndex]; 
+									}else {
+										thisGroup = primerNameVector[primerIndex]; 
+									}
+								} 
+							}
 							
+							outGroupsFile << currSeq.getName() << '\t' << thisGroup << endl;
+							
+							if (nameFile != "") {
+								map<string, string>::iterator itName = nameMap.find(currSeq.getName());
+								if (itName != nameMap.end()) { 
+									vector<string> thisSeqsNames; 
+									m->splitAtChar(itName->second, thisSeqsNames, ',');
+									for (int k = 1; k < thisSeqsNames.size(); k++) { //start at 1 to skip self
+										outGroupsFile << thisSeqsNames[k] << '\t' << thisGroup << endl;
+									}
+								}else { m->mothurOut("[ERROR]: " + currSeq.getName() + " is not in your namefile, please correct."); m->mothurOutEndLine(); }							
+							}
+							
+							map<string, int>::iterator it = groupCounts.find(thisGroup);
+							if (it == groupCounts.end()) {	groupCounts[thisGroup] = 1; }
+							else { groupCounts[it->first]++; }
+								
+						}
 					}
-					
 					
 					if(allFiles){
 						ofstream output;
@@ -728,7 +740,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 		inFASTA.close();
 		trimFASTAFile.close();
 		scrapFASTAFile.close();
-		if (oligoFile != "") {	 outGroupsFile.close();   }
+		if (createGroup) {	 outGroupsFile.close();   }
 		if(qFileName != "")	{	qFile.close();	scrapQualFile.close(); trimQualFile.close();	}
 		if(nameFile != "")	{	scrapNameFile.close(); trimNameFile.close();	}
 		
@@ -800,7 +812,7 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
 								 qLines[process]);
 				
 				//pass groupCounts to parent
-				if(oligoFile != ""){
+				if(createGroup){
 					ofstream out;
 					string tempFile = filename + toString(getpid()) + ".num.temp";
 					m->openOutputFile(tempFile, out);
@@ -865,7 +877,7 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
 				m->mothurRemove((scrapNameFileName + toString(processIDS[i]) + ".temp"));
 			}
 			
-			if(oligoFile != ""){
+			if(createGroup){
 				m->appendFiles((groupFile + toString(processIDS[i]) + ".temp"), groupFile);
 				m->mothurRemove((groupFile + toString(processIDS[i]) + ".temp"));
 			}
@@ -892,7 +904,7 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
 				}
 			}
 			
-			if(oligoFile != ""){
+			if(createGroup){
 				ifstream in;
 				string tempFile =  filename + toString(processIDS[i]) + ".num.temp";
 				m->openInputFile(tempFile, in);
@@ -1044,7 +1056,7 @@ int TrimSeqsCommand::setLines(string filename, string qfilename, vector<unsigned
 
 //***************************************************************************************************************
 
-void TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<vector<string> >& qualFileNames, vector<vector<string> >& nameFileNames){
+bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<vector<string> >& qualFileNames, vector<vector<string> >& nameFileNames){
 	try {
 		ifstream inOligos;
 		m->openInputFile(oligoFile, inOligos);
@@ -1199,7 +1211,29 @@ void TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
 		}
 		numFPrimers = primers.size();
 		numRPrimers = revPrimer.size();
-
+		
+		bool allBlank = true;
+		for (int i = 0; i < barcodeNameVector.size(); i++) {
+			if (barcodeNameVector[i] != "") {
+				allBlank = false;
+				break;
+			}
+		}
+		for (int i = 0; i < primerNameVector.size(); i++) {
+			if (primerNameVector[i] != "") {
+				allBlank = false;
+				break;
+			}
+		}
+		
+		if (allBlank) {
+			m->mothurOut("[WARNING]: your oligos file does not contain any group names.  mothur will not create a groupfile."); m->mothurOutEndLine();
+			allFiles = false;
+			return false;
+		}
+		
+		return true;
+		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "TrimSeqsCommand", "getOligos");

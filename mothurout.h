@@ -40,6 +40,8 @@ class MothurOut {
 		vector<string> Treenames;
 		map<string, string> names;
 		vector<string> namesOfGroups;
+		vector<string> binLabelsInFile;
+		vector<string> currentBinLabels;
 		string saveNextLabel, argv, sharedHeaderMode;
 		bool printedHeaders;
 		

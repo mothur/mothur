@@ -74,11 +74,32 @@ SharedRAbundVector::SharedRAbundVector(ifstream& f) : DataVector(), maxRank(0), 
 			
 			//is this a shared file that has headers
 			if (label == "label") { 
+				//gets "group"
+				f >> label; m->gobble(f);
+				
+				//gets "numOtus"
+				f >> label; m->gobble(f);
+				
 				//eat rest of line
 				label = m->getline(f); m->gobble(f);
+				
+				//parse labels to save
+				istringstream iStringStream(label);
+				m->binLabelsInFile.clear();
+				while(!iStringStream.eof()){
+					if (m->control_pressed) { break; }
+					string temp;
+					iStringStream >> temp;  m->gobble(iStringStream);
+		
+					m->binLabelsInFile.push_back(temp);
+				}
+				
 				f >> label;
 			}
 		}else { label = m->saveNextLabel; }
+		
+		//reset labels, currentLabels may have gotten changed as otus were eliminated because of group choices or sampling
+		m->currentBinLabels = m->binLabelsInFile;
 		
 		//read in first row since you know there is at least 1 group.
 		f >> groupN >> num;
@@ -99,8 +120,7 @@ SharedRAbundVector::SharedRAbundVector(ifstream& f) : DataVector(), maxRank(0), 
 			
 			lookup[0]->push_back(inputData, groupN); //abundance, bin, group
 			push_back(inputData, groupN);
-			//numSeqs += inputData;
-			//numBins++;
+			
 			if (inputData > maxRank) { maxRank = inputData; }
 		}
 		
@@ -124,6 +144,7 @@ SharedRAbundVector::SharedRAbundVector(ifstream& f) : DataVector(), maxRank(0), 
 			//fill vector.  
 			for(int i=0;i<num;i++){
 				f >> inputData;
+				
 				lookup[count]->push_back(inputData, groupN); //abundance, bin, group
 			}
 			
@@ -313,12 +334,27 @@ int SharedRAbundVector::size(){
 /***********************************************************************/
 void SharedRAbundVector::printHeaders(ostream& output){
 	try {
+		
 		output << "label\tGroup\tnumOtus\t";
 		if (m->sharedHeaderMode == "tax") {
-			for (int i = 0; i < numBins; i++) {  output << "PhyloType" << (i+1) << '\t'; }
+			for (int i = 0; i < numBins; i++) {  
+				
+				//if there is a bin label use it otherwise make one
+				string binLabel = "PhyloType" + toString(i+1);
+				if (i < m->currentBinLabels.size()) {  binLabel = m->currentBinLabels[i]; }
+				
+				output << binLabel << '\t'; 
+			}
 			output << endl;
 		}else {
-			for (int i = 0; i < numBins; i++) {  output << "Otu" << (i+1) << '\t'; }
+			for (int i = 0; i < numBins; i++) {  
+				//if there is a bin label use it otherwise make one
+				string mybinLabel = "Otu" + toString(i+1);
+				if (i < m->currentBinLabels.size()) {  mybinLabel = m->currentBinLabels[i]; }
+				
+				output << mybinLabel << '\t'; 
+			}
+			
 			output << endl;
 		}
 		m->printedHeaders = true;
@@ -419,6 +455,7 @@ int SharedRAbundVector::eliminateZeroOTUS(vector<SharedRAbundVector*>& thislooku
 			}
 			
 			//for each bin
+			vector<string> newBinLabels;
 			for (int i = 0; i < thislookup[0]->getNumBins(); i++) {
 				if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) {  delete newLookup[j];  } return 0; }
 				
@@ -433,12 +470,19 @@ int SharedRAbundVector::eliminateZeroOTUS(vector<SharedRAbundVector*>& thislooku
 					for (int j = 0; j < thislookup.size(); j++) {
 						newLookup[j]->push_back(thislookup[j]->getAbundance(i), thislookup[j]->getGroup());
 					}
+					
+					//if there is a bin label use it otherwise make one
+					string binLabel = "Otu" + (i+1);
+					if (i < m->currentBinLabels.size()) {  binLabel = m->currentBinLabels[i]; }
+					
+					newBinLabels.push_back(binLabel);
 				}
 			}
 			
 			for (int j = 0; j < thislookup.size(); j++) {  delete thislookup[j];  }
 			
 			thislookup = newLookup;
+			m->currentBinLabels = newBinLabels;
 			
 			return 0;
 			

@@ -531,6 +531,7 @@ int SharedCommand::eliminateZeroOTUS(vector<SharedRAbundVector*>& thislookup) {
 				for (int j = 0; j < thislookup.size(); j++) {
 					newLookup[j]->push_back(thislookup[j]->getAbundance(i), thislookup[j]->getGroup());
 				}
+				//if there is a bin label use it otherwise make one
 			}
 			//else{  cout << "bin # " << i << " is all zeros" << endl;  }
 		}

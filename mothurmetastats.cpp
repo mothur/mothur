@@ -452,8 +452,8 @@ int MothurMetastats::calc_twosample_ts(vector<double>& Pmatrix, int secondGroupi
 		for (int i = 0; i < C1.size(); i++) { C1[i].resize(3, 0.0); }
 		vector< vector<double> > C2; C2.resize(row);
 		for (int i = 0; i < C2.size(); i++) { C2[i].resize(3, 0.0); }
-		vector<double> storage; storage.resize(row, 0.0);
-		vector<double> tool;	tool.resize(row, 0.0);
+		vector<double> storage; storage.resize(a, 0.0);
+		vector<double> tool;	tool.resize(a, 0.0);
 		double xbardiff = 0.0; double denom = 0.0;
 		
 		meanvar(Pmatrix, secondGroupingStart, storage);
