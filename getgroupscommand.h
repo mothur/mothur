@@ -36,7 +36,7 @@ public:
 	
 private:
 	set<string> names;
-	string accnosfile, fastafile, namefile, groupfile, listfile, taxfile, outputDir, groups;
+	string accnosfile, fastafile, namefile, groupfile, listfile, taxfile, outputDir, groups, sharedfile;
 	bool abort;
 	vector<string> outputNames, Groups;
 	GroupMap* groupMap;
@@ -48,6 +48,7 @@ private:
 	int readList();
 	int readTax();
 	int fillNames();
+	int readShared();
 	
 };
 
