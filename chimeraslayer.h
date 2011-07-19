@@ -24,8 +24,8 @@
 class ChimeraSlayer : public Chimera {
 	
 	public:
-		ChimeraSlayer(string, string, bool, string, int, int, int, int, float, int, int, int, int, int, int, int, int, bool);
-		ChimeraSlayer(string, string, bool, map<string, int>&, string,  int, int, int, int, float, int, int, int, int, int, int, int, int, bool);
+		ChimeraSlayer(string, string, bool, string, int, int, int, int, float, int, int, int, int, int, int, int, int, bool, string);
+		ChimeraSlayer(string, string, bool, map<string, int>&, string,  int, int, int, int, float, int, int, int, int, int, int, int, int, bool, string);
 
 		~ChimeraSlayer();
 		
@@ -54,7 +54,7 @@ class ChimeraSlayer : public Chimera {
 	
 		vector<data_struct>  chimeraResults;
 		data_results printResults;
-		string chimeraFlags, searchMethod, fastafile;
+		string chimeraFlags, searchMethod, fastafile, blastlocation;
 		bool realign, trimChimera;
 		int window, numWanted, kmerSize, match, misMatch, minSim, minCov, minBS, minSNP, parents, iters, increment;
 		float divR;

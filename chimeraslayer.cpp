@@ -14,7 +14,7 @@
 
 //***************************************************************************************************************
 ChimeraSlayer::ChimeraSlayer(string file, string temp, bool trim, string mode, int k, int ms, int mms, int win, float div, 
-int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int numw, bool r) : Chimera()  {  	
+int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int numw, bool r, string blas) : Chimera()  {  	
 	try {
 		fastafile = file;
 		templateFileName = temp; templateSeqs = readSeqs(temp);
@@ -35,6 +35,7 @@ int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int num
 		realign = r; 
 		trimChimera = trim;
 		numNoParents = 0;
+		blastlocation = blas;
 	
 		doPrep();
 	}
@@ -46,7 +47,7 @@ int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int num
 //***************************************************************************************************************
 //template=self
 ChimeraSlayer::ChimeraSlayer(string file, string temp, bool trim, map<string, int>& prior, string mode, int k, int ms, int mms, int win, float div, 
-							 int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int numw, bool r) : Chimera()  {  	
+							 int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int numw, bool r, string blas) : Chimera()  {  	
 	try {
 		fastafile = file; templateSeqs = readSeqs(fastafile);
 		templateFileName = temp; 
@@ -68,6 +69,7 @@ ChimeraSlayer::ChimeraSlayer(string file, string temp, bool trim, map<string, in
 		trimChimera = trim;
 		priority = prior;
 		numNoParents = 0;
+		blastlocation = blas;
 		
 		createFilter(templateSeqs, 0.0); //just removed columns where all seqs have a gap
 		
@@ -216,7 +218,7 @@ int ChimeraSlayer::doPrep() {
 		}else if (searchMethod == "blast") {
 		
 			//generate blastdb
-			databaseLeft = new BlastDB(m->getRootName(m->getSimpleName(fastafile)), -1.0, -1.0, 1, -3);
+			databaseLeft = new BlastDB(m->getRootName(m->getSimpleName(fastafile)), -1.0, -1.0, 1, -3, blastlocation);
 			
 			if (m->control_pressed) { return 0; }
 
@@ -330,7 +332,7 @@ vector<Sequence*> ChimeraSlayer::getTemplate(Sequence q, vector<Sequence*>& user
 		}else if (searchMethod == "blast") {
 			
 			//generate blastdb
-			databaseLeft = new BlastDB(m->getRootName(m->getSimpleName(templateFileName)), -1.0, -1.0, 1, -3);
+			databaseLeft = new BlastDB(m->getRootName(m->getSimpleName(templateFileName)), -1.0, -1.0, 1, -3, blastlocation);
 			
 			if (m->control_pressed) { return userTemplate; }
 
