@@ -470,6 +470,8 @@ int GetSeqsCommand::readList(){
 		
 		while(!in.eof()){
 			
+			selectedCount = 0;
+			
 			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
 
 			//read in list vector

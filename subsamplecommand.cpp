@@ -1539,7 +1539,7 @@ int SubSampleCommand::eliminateZeroOTUS(vector<SharedRAbundVector*>& thislookup)
 					newLookup[j]->push_back(thislookup[j]->getAbundance(i), thislookup[j]->getGroup());
 				}
 				//if there is a bin label use it otherwise make one
-				string binLabel = "Otu" + (i+1);
+				string binLabel = "Otu" + toString(i+1);
 				if (i < m->currentBinLabels.size()) {  binLabel = m->currentBinLabels[i]; }
 				
 				newBinLabels.push_back(binLabel);

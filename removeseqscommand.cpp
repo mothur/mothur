@@ -450,6 +450,9 @@ int RemoveSeqsCommand::readList(){
 		int removedCount = 0;
 		
 		while(!in.eof()){
+			
+			removedCount = 0;
+			
 			//read in list vector
 			ListVector list(in);
 			

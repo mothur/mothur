@@ -472,7 +472,7 @@ int SharedRAbundVector::eliminateZeroOTUS(vector<SharedRAbundVector*>& thislooku
 					}
 					
 					//if there is a bin label use it otherwise make one
-					string binLabel = "Otu" + (i+1);
+					string binLabel = "Otu" + toString(i+1);
 					if (i < m->currentBinLabels.size()) {  binLabel = m->currentBinLabels[i]; }
 					
 					newBinLabels.push_back(binLabel);

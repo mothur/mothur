@@ -11,13 +11,15 @@
 #include "sequence.hpp"
 #include "listvector.hpp"
 #include "sharedutilities.h"
+#include "inputdata.h"
 
 //**********************************************************************************************************************
 vector<string> GetGroupsCommand::setParameters(){	
 	try {
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pfasta);
+		CommandParameter pshared("shared", "InputTypes", "", "", "none", "FNGLT-sharedGroup", "none",false,false); parameters.push_back(pshared);
 		CommandParameter pname("name", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pname);
-		CommandParameter pgroup("group", "InputTypes", "", "", "none", "FNGLT", "none",false,true); parameters.push_back(pgroup);
+		CommandParameter pgroup("group", "InputTypes", "", "", "none", "FNGLT-sharedGroup", "none",false,false); parameters.push_back(pgroup);
 		CommandParameter plist("list", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(plist);
 		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(ptaxonomy);
 		CommandParameter paccnos("accnos", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(paccnos);
@@ -38,9 +40,9 @@ vector<string> GetGroupsCommand::setParameters(){
 string GetGroupsCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The get.groups command selects sequences from a specfic group or set of groups from the following file types: fasta, name, group, list, taxonomy.\n";
-		helpString += "It outputs a file containing the sequences in the those specified groups.\n";
-		helpString += "The get.groups command parameters are accnos, fasta, name, group, list, taxonomy and groups. The group parameter is required, unless you have a current group file.\n";
+		helpString += "The get.groups command selects sequences from a specfic group or set of groups from the following file types: fasta, name, group, list, taxonomy or shared file.\n";
+		helpString += "It outputs a file containing the sequences in the those specified groups, or a sharedfile containing only those groups.\n";
+		helpString += "The get.groups command parameters are accnos, fasta, name, group, list, taxonomy, shared and groups. The group parameter is required, unless you have a current group file, or are using a shared file.\n";
 		helpString += "You must also provide an accnos containing the list of groups to get or set the groups parameter to the groups you wish to select.\n";
 		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like.  You can separate group names with dashes.\n";
 		helpString += "The get.groups command should be in the following format: get.groups(accnos=yourAccnos, fasta=yourFasta, group=yourGroupFile).\n";
@@ -65,6 +67,7 @@ GetGroupsCommand::GetGroupsCommand(){
 		outputTypes["name"] = tempOutNames;
 		outputTypes["group"] = tempOutNames;
 		outputTypes["list"] = tempOutNames;
+		outputTypes["shared"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "GetGroupsCommand", "GetGroupsCommand");
@@ -101,6 +104,7 @@ GetGroupsCommand::GetGroupsCommand(string option)  {
 			outputTypes["name"] = tempOutNames;
 			outputTypes["group"] = tempOutNames;
 			outputTypes["list"] = tempOutNames;
+			outputTypes["shared"] = tempOutNames;
 			
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
@@ -158,6 +162,14 @@ GetGroupsCommand::GetGroupsCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
 				}
+				
+				it = parameters.find("shared");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
+				}
 			}
 			
 			
@@ -177,15 +189,6 @@ GetGroupsCommand::GetGroupsCommand(string option)  {
 			else if (namefile == "not found") {  namefile = "";  }	
 			else { m->setNameFile(namefile); }
 			
-			groupfile = validParameter.validFile(parameters, "group", true);
-			if (groupfile == "not open") { abort = true; }
-			else if (groupfile == "not found") {  
-				//if there is a current group file, use it
-				groupfile = m->getGroupFile(); 
-				if (groupfile != "") { m->mothurOut("Using " + groupfile + " as input file for the group parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current groupfile and the group parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { m->setGroupFile(groupfile); }	
-			
 			listfile = validParameter.validFile(parameters, "list", true);
 			if (listfile == "not open") { abort = true; }
 			else if (listfile == "not found") {  listfile = "";  }
@@ -197,13 +200,54 @@ GetGroupsCommand::GetGroupsCommand(string option)  {
 			else { m->setTaxonomyFile(taxfile); }
 			
 			groups = validParameter.validFile(parameters, "groups", false);			
-			if (groups == "not found") { groups = "all"; }
-			m->splitAtDash(groups, Groups);
+			if (groups == "not found") { groups = ""; }
+			else {
+				m->splitAtDash(groups, Groups);
+				m->Groups = Groups;
+			}
 			
+			sharedfile = validParameter.validFile(parameters, "shared", true);
+			if (sharedfile == "not open") { sharedfile = ""; abort = true; }
+			else if (sharedfile == "not found") {  sharedfile = "";  }
+			else { m->setSharedFile(sharedfile); }
+			
+			groupfile = validParameter.validFile(parameters, "group", true);
+			if (groupfile == "not open") { groupfile = ""; abort = true; }
+			else if (groupfile == "not found") {  	groupfile = "";	}
+			else { m->setGroupFile(groupfile); }	
+			
+			if ((sharedfile == "") && (groupfile == "")) { 
+				//is there are current file available for any of these?
+				if ((namefile != "") || (fastafile != "") || (listfile != "") || (taxfile != "")) {
+					//give priority to group, then shared
+					groupfile = m->getGroupFile(); 
+					if (groupfile != "") {  m->mothurOut("Using " + groupfile + " as input file for the group parameter."); m->mothurOutEndLine(); }
+					else { 
+						sharedfile = m->getSharedFile(); 
+						if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+						else { 
+							m->mothurOut("You have no current groupfile or sharedfile and one is required."); m->mothurOutEndLine(); abort = true;
+						}
+					}
+				}else {
+					//give priority to shared, then group
+					sharedfile = m->getSharedFile(); 
+					if (sharedfile != "") {  m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+					else { 
+						groupfile = m->getGroupFile(); 
+						if (groupfile != "") { m->mothurOut("Using " + groupfile + " as input file for the group parameter."); m->mothurOutEndLine(); }
+						else { 
+							m->mothurOut("You have no current groupfile or sharedfile and one is required."); m->mothurOutEndLine(); abort = true;
+						}
+					}
+				}
+			}
 			
 			if ((accnosfile == "") && (Groups.size() == 0)) { m->mothurOut("You must provide an accnos file or specify groups using the groups parameter."); m->mothurOutEndLine(); abort = true; }
 			
-			if ((fastafile == "") && (namefile == "") && (groupfile == "")  && (listfile == "") && (taxfile == ""))  { m->mothurOut("You must provide at least one of the following: fasta, name, taxonomy, group or list."); m->mothurOutEndLine(); abort = true; }
+			if ((fastafile == "") && (namefile == "") && (groupfile == "")  && (sharedfile == "") && (listfile == "") && (taxfile == ""))  { m->mothurOut("You must provide at least one of the following: fasta, name, taxonomy, group, shared or list."); m->mothurOutEndLine(); abort = true; }
+			if ((groupfile == "") && ((namefile != "") || (fastafile != "") || (listfile != "") || (taxfile != "")))  { m->mothurOut("If using a fasta, name, taxonomy, group or list, then you must provide a group file."); m->mothurOutEndLine(); abort = true; }
+
 		}
 		
 	}
@@ -219,22 +263,26 @@ int GetGroupsCommand::execute(){
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
-		groupMap = new GroupMap(groupfile);
-		groupMap->readMap();
-		
 		//get groups you want to remove
 		if (accnosfile != "") { readAccnos(); }
 		
-		//make sure groups are valid
-		//takes care of user setting groupNames that are invalid or setting groups=all
-		SharedUtil* util = new SharedUtil();
-		util->setGroups(Groups, groupMap->namesOfGroups);
-		delete util;
+		if (groupfile != "") {
+			groupMap = new GroupMap(groupfile);
+			groupMap->readMap();
+			
+			//make sure groups are valid
+			//takes care of user setting groupNames that are invalid or setting groups=all
+			SharedUtil* util = new SharedUtil();
+			util->setGroups(Groups, groupMap->namesOfGroups);
+			delete util;
+			
+			//fill names with names of sequences that are from the groups we want to remove 
+			fillNames();
+			
+			delete groupMap;
+		}
 		
-		//fill names with names of sequences that are from the groups we want to remove 
-		fillNames();
-		
-		if (m->control_pressed) { delete groupMap; return 0; }
+		if (m->control_pressed) { return 0; }
 		
 		//read through the correct file and output lines you want to keep
 		if (namefile != "")			{		readName();		}
@@ -242,12 +290,10 @@ int GetGroupsCommand::execute(){
 		if (groupfile != "")		{		readGroup();	}
 		if (listfile != "")			{		readList();		}
 		if (taxfile != "")			{		readTax();		}
+		if (sharedfile != "")		{		readShared();	}
 		
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 		
-		m->mothurOut("Selected " + toString(names.size()) + " sequences. From the groups: "); m->mothurOutEndLine();
-		for (int i = 0; i < Groups.size(); i++) {	m->mothurOut(Groups[i]); m->mothurOut("\t" + toString(groupMap->getNumSeqs(Groups[i]))); m->mothurOutEndLine();	}
-		m->mothurOutEndLine();
 		
 		if (outputNames.size() != 0) {
 			m->mothurOutEndLine();
@@ -281,6 +327,11 @@ int GetGroupsCommand::execute(){
 			if (itTypes != outputTypes.end()) {
 				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setTaxonomyFile(current); }
 			}
+			
+			itTypes = outputTypes.find("shared");
+			if (itTypes != outputTypes.end()) {
+				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setSharedFile(current); }
+			}
 		}
 		
 		return 0;		
@@ -307,6 +358,7 @@ int GetGroupsCommand::readFasta(){
 		string name;
 		
 		bool wroteSomething = false;
+		int selectedCount = 0;
 		
 		while(!in.eof()){
 			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
@@ -320,6 +372,7 @@ int GetGroupsCommand::readFasta(){
 					wroteSomething = true;
 					
 					currSeq.printSequence(out);
+					selectedCount++;
 				}
 			}
 			m->gobble(in);
@@ -330,6 +383,9 @@ int GetGroupsCommand::readFasta(){
 		if (wroteSomething == false) {  m->mothurOut("Your file does NOT contain sequences from the groups you wish to get."); m->mothurOutEndLine();  }
 		outputTypes["fasta"].push_back(outputFileName);  outputNames.push_back(outputFileName);
 		
+		m->mothurOut("Selected " + toString(selectedCount) + " sequences from your fasta file."); m->mothurOutEndLine();
+
+		
 		return 0;
 		
 	}
@@ -338,7 +394,59 @@ int GetGroupsCommand::readFasta(){
 		exit(1);
 	}
 }
-
+//**********************************************************************************************************************
+int GetGroupsCommand::readShared(){
+	try {
+		string thisOutputDir = outputDir;
+		if (outputDir == "") {  thisOutputDir += m->hasPath(sharedfile);  }
+		
+		InputData input(sharedfile, "sharedfile");
+		vector<SharedRAbundVector*> lookup = input.getSharedRAbundVectors();
+		
+		bool wroteSomething = false;
+		
+		while(lookup[0] != NULL) {
+			
+			string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(sharedfile)) + lookup[0]->getLabel() + ".pick" + m->getExtension(sharedfile);
+			ofstream out;
+			m->openOutputFile(outputFileName, out);
+			outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
+			
+			if (m->control_pressed) { out.close();  m->mothurRemove(outputFileName);  for (int i = 0; i < lookup.size(); i++) { delete lookup[i]; } return 0; }
+			
+			lookup[0]->printHeaders(out); 
+			
+			for (int i = 0; i < lookup.size(); i++) {
+				out << lookup[i]->getLabel() << '\t' << lookup[i]->getGroup() << '\t';
+				lookup[i]->print(out);
+				wroteSomething = true;
+				
+			}			
+			
+			//get next line to process
+			//prevent memory leak
+			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
+			lookup = input.getSharedRAbundVectors();
+			
+			out.close();
+		}
+		
+		if (wroteSomething == false) {  m->mothurOut("Your file contains only the groups you wish to remove."); m->mothurOutEndLine();  }
+		
+		string groupsString = "";
+		for (int i = 0; i < Groups.size()-1; i++) {	groupsString += Groups[i] + ", "; }
+		groupsString += Groups[Groups.size()-1];
+		
+		m->mothurOut("Selected groups: " + groupsString + " from your shared file."); m->mothurOutEndLine();
+		
+		return 0;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetGroupsCommand", "readShared");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 int GetGroupsCommand::readList(){
 	try {
@@ -353,8 +461,12 @@ int GetGroupsCommand::readList(){
 		m->openInputFile(listfile, in);
 		
 		bool wroteSomething = false;
+		int selectedCount = 0;
 		
 		while(!in.eof()){
+			
+			selectedCount = 0;
+			
 			//read in list vector
 			ListVector list(in);
 			
@@ -375,11 +487,11 @@ int GetGroupsCommand::readList(){
 					binnames = binnames.substr(binnames.find_first_of(',')+1, binnames.length());
 					
 					//if that name is in the .accnos file, add it
-					if (names.count(name) != 0) {  newNames += name + ",";  }
+					if (names.count(name) != 0) {  newNames += name + ",";  selectedCount++;  }
 				}
 				
 				//get last name
-				if (names.count(binnames) != 0) {  newNames += binnames + ",";  }
+				if (names.count(binnames) != 0) {  newNames += binnames + ",";  selectedCount++;  }
 				
 				//if there are names in this bin add to new list
 				if (newNames != "") {  
@@ -401,6 +513,8 @@ int GetGroupsCommand::readList(){
 		
 		if (wroteSomething == false) {  m->mothurOut("Your file does NOT contain sequences from the groups you wish to get."); m->mothurOutEndLine();  }
 		outputTypes["list"].push_back(outputFileName); outputNames.push_back(outputFileName);
+		
+		m->mothurOut("Selected " + toString(selectedCount) + " sequences from your list file."); m->mothurOutEndLine();
 		
 		return 0;
 		
@@ -425,6 +539,7 @@ int GetGroupsCommand::readName(){
 		string name, firstCol, secondCol;
 		
 		bool wroteSomething = false;
+		int selectedCount = 0;
 		
 		while(!in.eof()){
 			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
@@ -441,6 +556,8 @@ int GetGroupsCommand::readName(){
 					validSecond.push_back(parsedNames[i]);
 				}
 			}
+			
+			selectedCount += validSecond.size();
 			
 			//if the name in the first column is in the set then print it and any other names in second column also in set
 			if (names.count(firstCol) != 0) {
@@ -477,6 +594,8 @@ int GetGroupsCommand::readName(){
 		if (wroteSomething == false) {  m->mothurOut("Your file does NOT contain sequences from the groups you wish to get."); m->mothurOutEndLine();  }
 		outputTypes["name"].push_back(outputFileName); outputNames.push_back(outputFileName);
 		
+		m->mothurOut("Selected " + toString(selectedCount) + " sequences from your name file."); m->mothurOutEndLine();
+
 		return 0;
 	}
 	catch(exception& e) {
@@ -500,6 +619,7 @@ int GetGroupsCommand::readGroup(){
 		string name, group;
 		
 		bool wroteSomething = false;
+		int selectedCount = 0;
 		
 		while(!in.eof()){
 			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
@@ -511,6 +631,7 @@ int GetGroupsCommand::readGroup(){
 			if (names.count(name) != 0) {
 				wroteSomething = true;
 				out << name << '\t' << group << endl;
+				selectedCount++;
 			}
 			
 			m->gobble(in);
@@ -521,6 +642,8 @@ int GetGroupsCommand::readGroup(){
 		if (wroteSomething == false) {  m->mothurOut("Your file does NOT contain sequences from the groups you wish to get."); m->mothurOutEndLine();  }
 		outputTypes["group"].push_back(outputFileName); outputNames.push_back(outputFileName);
 		
+		m->mothurOut("Selected " + toString(selectedCount) + " sequences from your group file."); m->mothurOutEndLine();
+
 		return 0;
 	}
 	catch(exception& e) {
@@ -587,6 +710,8 @@ void GetGroupsCommand::readAccnos(){
 			m->gobble(in);
 		}
 		in.close();		
+		
+		m->Groups = Groups;
 		
 	}
 	catch(exception& e) {
