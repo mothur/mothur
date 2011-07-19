@@ -36,6 +36,7 @@ vector<string> ChimeraSlayerCommand::setParameters(){
 		CommandParameter pdivergence("divergence", "Number", "", "1.007", "", "", "",false,false); parameters.push_back(pdivergence);
 		CommandParameter pparents("parents", "Number", "", "3", "", "", "",false,false); parameters.push_back(pparents);
 		CommandParameter pincrement("increment", "Number", "", "5", "", "", "",false,false); parameters.push_back(pincrement);
+		CommandParameter pblastlocation("blastlocation", "String", "", "", "", "", "",false,false); parameters.push_back(pblastlocation);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
 		CommandParameter psave("save", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(psave);
@@ -55,7 +56,7 @@ string ChimeraSlayerCommand::getHelpString(){
 		string helpString = "";
 		helpString += "The chimera.slayer command reads a fastafile and referencefile and outputs potentially chimeric sequences.\n";
 		helpString += "This command was modeled after the chimeraSlayer written by the Broad Institute.\n";
-		helpString += "The chimera.slayer command parameters are fasta, name, template, processors, trim, ksize, window, match, mismatch, divergence. minsim, mincov, minbs, minsnp, parents, search, iters, increment, numwanted, and realign.\n";
+		helpString += "The chimera.slayer command parameters are fasta, name, template, processors, trim, ksize, window, match, mismatch, divergence. minsim, mincov, minbs, minsnp, parents, search, iters, increment, numwanted, blastlocation and realign.\n";
 		helpString += "The fasta parameter allows you to enter the fasta file containing your potentially chimeric sequences, and is required, unless you have a valid current fasta file. \n";
 		helpString += "The name parameter allows you to provide a name file, if you are using reference=self. \n";
 		helpString += "You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amazon.fasta \n";
@@ -81,6 +82,7 @@ string ChimeraSlayerCommand::getHelpString(){
 		helpString += "The minsnp parameter allows you to specify percent of SNPs to sample on each side of breakpoint for computing bootstrap support (default: 10) \n";
 		helpString += "The search parameter allows you to specify search method for finding the closest parent. Choices are blast, and kmer, default blast. \n";
 		helpString += "The realign parameter allows you to realign the query to the potential parents. Choices are true or false, default true.  \n";
+		helpString += "The blastlocation parameter allows you to specify the location of your blast executable. By default mothur will look in ./blast/bin relative to mothur's executable.  \n";
 		helpString += "If the save parameter is set to true the reference sequences will be saved in memory, to clear them later you can use the clear.memory command. Default=f.";
 		helpString += "The chimera.slayer command should be in the following format: \n";
 		helpString += "chimera.slayer(fasta=yourFastaFile, reference=yourTemplate, search=yourSearch) \n";
@@ -408,6 +410,43 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 			
 			temp = validParameter.validFile(parameters, "numwanted", false);		if (temp == "not found") { temp = "15"; }		
 			convert(temp, numwanted);
+			
+			blastlocation = validParameter.validFile(parameters, "blastlocation", false);	
+			if (blastlocation == "not found") { blastlocation = ""; }
+			else {
+				//add / to name if needed
+				string lastChar = blastlocation.substr(blastlocation.length()-1);
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+				if (lastChar != "/") { blastlocation += "/"; }
+#else
+				if (lastChar != "\\") { blastlocation += "\\"; }	
+#endif
+				blastlocation = m->getFullPathName(blastlocation);
+				string formatdbCommand = "";
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+				formatdbCommand = blastlocation + "formatdb";	
+#else
+				formatdbCommand = blastlocation + "formatdb.exe";
+#endif
+				
+				//test to make sure formatdb exists
+				ifstream in;
+				formatdbCommand = m->getFullPathName(formatdbCommand);
+				int ableToOpen = m->openInputFile(formatdbCommand, in, "no error"); in.close();
+				if(ableToOpen == 1) {	m->mothurOut("[ERROR]: " + formatdbCommand + " file does not exist. mothur requires formatdb.exe to run chimera.slayer."); m->mothurOutEndLine(); abort = true; }
+				
+				string blastCommand = "";
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+				blastCommand = blastlocation + "megablast";	
+#else
+				blastCommand = blastlocation + "megablast.exe";
+#endif
+				//test to make sure formatdb exists
+				ifstream in2;
+				blastCommand = m->getFullPathName(blastCommand);
+				ableToOpen = m->openInputFile(blastCommand, in2, "no error"); in2.close();
+				if(ableToOpen == 1) {	m->mothurOut("[ERROR]: " + blastCommand + " file does not exist. mothur requires blastall.exe to run chimera.slayer."); m->mothurOutEndLine(); abort = true; }
+			}
 
 			if ((search != "blast") && (search != "kmer")) { m->mothurOut(search + " is not a valid search."); m->mothurOutEndLine(); abort = true;  }
 			
@@ -432,7 +471,7 @@ int ChimeraSlayerCommand::execute(){
 			int start = time(NULL);	
 			
 			if (templatefile != "self") { //you want to run slayer with a refernce template
-				chimera = new ChimeraSlayer(fastaFileNames[s], templatefile, trim, search, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign);	
+				chimera = new ChimeraSlayer(fastaFileNames[s], templatefile, trim, search, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign, blastlocation);	
 			}else {
 				if (processors != 1) { m->mothurOut("When using template=self, mothur can only use 1 processor, continuing."); m->mothurOutEndLine(); processors = 1; }
 				string nameFile = "";
@@ -466,7 +505,7 @@ int ChimeraSlayerCommand::execute(){
 				
 				if (m->control_pressed) {  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}
 
-				chimera = new ChimeraSlayer(fastaFileNames[s], templatefile, trim, priority, search, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign);	
+				chimera = new ChimeraSlayer(fastaFileNames[s], templatefile, trim, priority, search, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign, blastlocation);	
 			}
 				
 			if (outputDir == "") { outputDir = m->hasPath(fastaFileNames[s]);  }//if user entered a file with a path then preserve it				

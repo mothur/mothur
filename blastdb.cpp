@@ -14,10 +14,11 @@
 
 /**************************************************************************************************/
 
-BlastDB::BlastDB(string tag, float gO, float gE, float mm, float mM) : Database(), 
+BlastDB::BlastDB(string tag, float gO, float gE, float mm, float mM, string b) : Database(), 
 gapOpen(gO), gapExtend(gE), match(mm), misMatch(mM) {
 	try {
 		count = 0;
+		path = b;
 
 		int randNumber = rand();
 		//int randNumber = 12345;
@@ -31,31 +32,38 @@ gapOpen(gO), gapExtend(gE), match(mm), misMatch(mM) {
 		blastFileName = tag + pid + toString(randNumber) + ".blast";
 		
 		//make sure blast exists in the write place
-		path = m->argv;
-		string tempPath = path;
-		for (int i = 0; i < path.length(); i++) { tempPath[i] = tolower(path[i]); }
-		path = path.substr(0, (tempPath.find_last_of('m')));
+		if (path == "") {
+			path = m->argv;
+			string tempPath = path;
+			for (int i = 0; i < path.length(); i++) { tempPath[i] = tolower(path[i]); }
+			path = path.substr(0, (tempPath.find_last_of('m')));
+			
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			path += "blast/bin/";	
+#else
+			path += "blast\\bin\\";
+#endif			
+		}
+		
 		
 		string formatdbCommand;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-		formatdbCommand = path + "blast/bin/formatdb";	//	format the database, -o option gives us the ability
+		formatdbCommand = path + "formatdb";	//	format the database, -o option gives us the ability
 #else
-		formatdbCommand = path + "blast\\bin\\formatdb.exe";
-		//wrap entire string in ""
-		//formatdbCommand = "\"" + formatdbCommand + "\"";
+		formatdbCommand = path + "formatdb.exe";
 #endif
 		
 		//test to make sure formatdb exists
 		ifstream in;
 		formatdbCommand = m->getFullPathName(formatdbCommand);
 		int ableToOpen = m->openInputFile(formatdbCommand, in, "no error"); in.close();
-		if(ableToOpen == 1) {	m->mothurOut("[ERROR]: " + formatdbCommand + " file does not exist. mothur requires formatdb.exe to be in the ./blast/bin folder relative to the mothur.exe location."); m->mothurOutEndLine(); m->control_pressed = true; }
+		if(ableToOpen == 1) {	m->mothurOut("[ERROR]: " + formatdbCommand + " file does not exist. mothur requires formatdb.exe."); m->mothurOutEndLine(); m->control_pressed = true; }
 		
 		string blastCommand;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-		blastCommand = path + "blast/bin/blastall";	//	format the database, -o option gives us the ability
+		blastCommand = path + "blastall";	//	format the database, -o option gives us the ability
 #else
-		blastCommand = path + "blast\\bin\\blastall.exe";
+		blastCommand = path + "blastall.exe";
 		//wrap entire string in ""
 		//blastCommand = "\"" + blastCommand + "\"";
 #endif
@@ -64,23 +72,21 @@ gapOpen(gO), gapExtend(gE), match(mm), misMatch(mM) {
 		ifstream in2;
 		blastCommand = m->getFullPathName(blastCommand);
 		ableToOpen = m->openInputFile(blastCommand, in2, "no error"); in2.close();
-		if(ableToOpen == 1) {	m->mothurOut("[ERROR]: " + blastCommand + " file does not exist. mothur requires blastall.exe to be in the ./blast/bin folder relative to the mothur.exe location."); m->mothurOutEndLine(); m->control_pressed = true; }
+		if(ableToOpen == 1) {	m->mothurOut("[ERROR]: " + blastCommand + " file does not exist. mothur requires blastall.exe."); m->mothurOutEndLine(); m->control_pressed = true; }
 		
 		
 		string megablastCommand;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-		megablastCommand = path + "blast/bin/megablast";	//	format the database, -o option gives us the ability
+		megablastCommand = path + "megablast";	//	format the database, -o option gives us the ability
 #else
-		megablastCommand = path + "blast\\bin\\megablast.exe";
-		//wrap entire string in ""
-		//megablastCommand = "\"" + megablastCommand + "\"";
+		megablastCommand = path + "megablast.exe";
 #endif
 		
 		//test to make sure formatdb exists
 		ifstream in3;
 		megablastCommand = m->getFullPathName(megablastCommand);
 		ableToOpen = m->openInputFile(megablastCommand, in3, "no error"); in3.close();
-		if(ableToOpen == 1) {	m->mothurOut("[ERROR]: " +  megablastCommand + " file does not exist. mothur requires megablast.exe to be in the ./blast/bin folder relative to the mothur.exe location."); m->mothurOutEndLine(); m->control_pressed = true; }
+		if(ableToOpen == 1) {	m->mothurOut("[ERROR]: " +  megablastCommand + " file does not exist. mothur requires megablast.exe."); m->mothurOutEndLine(); m->control_pressed = true; }
 		
 	}
 	catch(exception& e) {
@@ -90,10 +96,26 @@ gapOpen(gO), gapExtend(gE), match(mm), misMatch(mM) {
 }
 /**************************************************************************************************/
 
-BlastDB::BlastDB() : Database() {
+BlastDB::BlastDB(string b) : Database() {
 	try {
 		count = 0;
-
+		
+		path = b;
+		
+		//make sure blast exists in the write place
+		if (path == "") {
+			path = m->argv;
+			string tempPath = path;
+			for (int i = 0; i < path.length(); i++) { tempPath[i] = tolower(path[i]); }
+			path = path.substr(0, (tempPath.find_last_of('m')));
+			
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			path += "blast/bin/";	
+#else
+			path += "blast\\bin\\";
+#endif			
+		}
+		
 		int randNumber = rand();
 		string pid = "";
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
@@ -104,17 +126,11 @@ BlastDB::BlastDB() : Database() {
 		queryFileName = pid + toString(randNumber) + ".candidate.unaligned.fasta";
 		blastFileName = pid + toString(randNumber) + ".blast";
 		
-		//make sure blast exists in the write place
-		path = m->argv;
-		string tempPath = path;
-		for (int i = 0; i < path.length(); i++) { tempPath[i] = tolower(path[i]); }
-		path = path.substr(0, (tempPath.find_last_of('m')));
-		
 		string formatdbCommand;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-		formatdbCommand = path + "blast/bin/formatdb";	//	format the database, -o option gives us the ability
+		formatdbCommand = path + "formatdb";	//	format the database, -o option gives us the ability
 #else
-		formatdbCommand = path + "blast\\bin\\formatdb.exe";
+		formatdbCommand = path + "formatdb.exe";
 		//wrap entire string in ""
 		//formatdbCommand = "\"" + formatdbCommand + "\"";
 #endif
@@ -123,13 +139,13 @@ BlastDB::BlastDB() : Database() {
 		ifstream in;
 		formatdbCommand = m->getFullPathName(formatdbCommand);
 		int ableToOpen = m->openInputFile(formatdbCommand, in, "no error"); in.close();
-		if(ableToOpen == 1) {	m->mothurOut("[ERROR]: " +  formatdbCommand + " file does not exist. mothur requires formatdb.exe to be in the ./blast/bin folder relative to the mothur.exe location."); m->mothurOutEndLine(); m->control_pressed = true; }
+		if(ableToOpen == 1) {	m->mothurOut("[ERROR]: " +  formatdbCommand + " file does not exist. mothur requires formatdb.exe."); m->mothurOutEndLine(); m->control_pressed = true; }
 		
 		string blastCommand;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-		blastCommand = path + "blast/bin/blastall";	//	format the database, -o option gives us the ability
+		blastCommand = path + "blastall";	//	format the database, -o option gives us the ability
 #else
-		blastCommand = path + "blast\\bin\\blastall.exe";
+		blastCommand = path + "blastall.exe";
 		//wrap entire string in ""
 		//blastCommand = "\"" + blastCommand + "\"";
 #endif
@@ -138,14 +154,14 @@ BlastDB::BlastDB() : Database() {
 		ifstream in2;
 		blastCommand = m->getFullPathName(blastCommand);
 		ableToOpen = m->openInputFile(blastCommand, in2, "no error"); in2.close();
-		if(ableToOpen == 1) {	m->mothurOut("[ERROR]: " + blastCommand + " file does not exist. mothur requires blastall.exe to be in the ./blast/bin folder relative to the mothur.exe location."); m->mothurOutEndLine(); m->control_pressed = true; }
+		if(ableToOpen == 1) {	m->mothurOut("[ERROR]: " + blastCommand + " file does not exist. mothur requires blastall.exe."); m->mothurOutEndLine(); m->control_pressed = true; }
 		
 		
 		string megablastCommand;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-		megablastCommand = path + "blast/bin/megablast";	//	format the database, -o option gives us the ability
+		megablastCommand = path + "megablast";	//	format the database, -o option gives us the ability
 #else
-		megablastCommand = path + "blast\\bin\\megablast.exe";
+		megablastCommand = path + "megablast.exe";
 		//wrap entire string in ""
 		//megablastCommand = "\"" + megablastCommand + "\"";
 #endif
@@ -154,7 +170,7 @@ BlastDB::BlastDB() : Database() {
 		ifstream in3;
 		megablastCommand = m->getFullPathName(megablastCommand);
 		ableToOpen = m->openInputFile(megablastCommand, in3, "no error"); in3.close();
-		if(ableToOpen == 1) {	m->mothurOut("[ERROR]: " + megablastCommand + " file does not exist. mothur requires megablast.exe to be in the ./blast/bin folder relative to the mothur.exe location."); m->mothurOutEndLine(); m->control_pressed = true; }
+		if(ableToOpen == 1) {	m->mothurOut("[ERROR]: " + megablastCommand + " file does not exist. mothur requires megablast.exe."); m->mothurOutEndLine(); m->control_pressed = true; }
 		
 		
 	}
@@ -208,10 +224,10 @@ vector<int> BlastDB::findClosestSequences(Sequence* seq, int n) {
 		string blastCommand;
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		
-			blastCommand = path + "blast/bin/blastall -p blastn -d " + dbFileName + " -m 8 -W 28 -v " + toString(n) + " -b " + toString(n);
+			blastCommand = path + "blastall -p blastn -d " + dbFileName + " -m 8 -W 28 -v " + toString(n) + " -b " + toString(n);
 			blastCommand += (" -i " + (queryFileName+pid+toString(randNumber)) + " -o " + blastFileName+pid+toString(randNumber));
 		#else
-			blastCommand =  "\"" + path + "blast\\bin\\blastall\" -p blastn -d " + "\"" + dbFileName + "\"" + " -m 8 -W 28 -v " + toString(n) + " -b " + toString(n);
+			blastCommand =  "\"" + path + "blastall\" -p blastn -d " + "\"" + dbFileName + "\"" + " -m 8 -W 28 -v " + toString(n) + " -b " + toString(n);
 			blastCommand += (" -i " + (queryFileName+pid+toString(randNumber)) + " -o " + blastFileName+pid+toString(randNumber));
 			//wrap entire string in ""
 			blastCommand = "\"" + blastCommand + "\"";
@@ -273,13 +289,13 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n, int minPerID) {
 //7000004128189528left	0	100		66	0	0	1	66	61	126	1e-31	 131	
 		string blastCommand;
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-			blastCommand = path + "blast/bin/megablast -e 1e-10 -d " + dbFileName + " -m 8 -b " + toString(n) + " -v " + toString(n); //-W 28 -p blastn
+			blastCommand = path + "megablast -e 1e-10 -d " + dbFileName + " -m 8 -b " + toString(n) + " -v " + toString(n); //-W 28 -p blastn
 			blastCommand += (" -i " + (queryFileName+pid+toString(randNumber)) + " -o " + blastFileName+pid+toString(randNumber));
 		#else
 		//blastCommand = path + "blast\\bin\\megablast -e 1e-10 -d " + dbFileName + " -m 8 -b " + toString(n) + " -v " + toString(n); //-W 28 -p blastn
 		//blastCommand += (" -i " + (queryFileName+toString(randNumber)) + " -o " + blastFileName+toString(randNumber));
 
-			blastCommand =  "\"" + path + "blast\\bin\\megablast\" -e 1e-10 -d " + "\"" + dbFileName + "\"" + " -m 8 -b " + toString(n) + " -v " + toString(n); //-W 28 -p blastn
+			blastCommand =  "\"" + path + "megablast\" -e 1e-10 -d " + "\"" + dbFileName + "\"" + " -m 8 -b " + toString(n) + " -v " + toString(n); //-W 28 -p blastn
 			blastCommand += (" -i " + (queryFileName+pid+toString(randNumber)) + " -o " + blastFileName+pid+toString(randNumber));
 			//wrap entire string in ""
 			blastCommand = "\"" + blastCommand + "\"";
@@ -343,20 +359,15 @@ void BlastDB::generateDB() {
 	try {
 	
 		//m->mothurOut("Generating the temporary BLAST database...\t");	cout.flush();
-		
-		path = m->argv;
-		string tempPath = path;
-		for (int i = 0; i < path.length(); i++) { tempPath[i] = tolower(path[i]); }
-		path = path.substr(0, (tempPath.find_last_of('m')));
-	
+			
 		string formatdbCommand;
 		
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-			formatdbCommand = path + "blast/bin/formatdb -p F -o T -i " + dbFileName;	//	format the database, -o option gives us the ability
+			formatdbCommand = path + "formatdb -p F -o T -i " + dbFileName;	//	format the database, -o option gives us the ability
 		#else
 			//formatdbCommand = path + "blast\\bin\\formatdb -p F -o T -i " + dbFileName;	//	format the database, -o option gives us the ability
 
-			formatdbCommand = "\"" + path + "blast\\bin\\formatdb\" -p F -o T -i " + "\"" +  dbFileName + "\"";
+			formatdbCommand = "\"" + path + "formatdb\" -p F -o T -i " + "\"" +  dbFileName + "\"";
 			//wrap entire string in ""
 			formatdbCommand = "\"" + formatdbCommand + "\"";
 		#endif
