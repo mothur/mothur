@@ -38,7 +38,8 @@ vector<string> IndicatorCommand::setParameters(){
 string IndicatorCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The indicator command reads a shared or relabund file and a tree or design file, and outputs a .indicator.tre and .indicator.summary file. \n";
+		helpString += "The indicator command can be run in 3 ways: with a shared or relabund file and a design file, or with a shared or relabund file and a tree file, or with a shared or relabund file, tree file and design file. \n";
+		helpString += "The indicator command outputs a .indicator.summary file and a .indicator.tre if a tree is given. \n";
 		helpString += "The new tree contains labels at each internal node.  The label is the node number so you can relate the tree to the summary file.\n";
 		helpString += "The summary file lists the indicator value for each OTU for each node.\n";
 		helpString += "The indicator command parameters are tree, groups, shared, relabund, design and label. The tree parameter is required as well as either shared or relabund.\n";
@@ -229,7 +230,7 @@ int IndicatorCommand::execute(){
 		
 		int start = time(NULL);
 	
-		//read designfile if given and set up globaldatas groups for read of sharedfiles
+		//read designfile if given and set up groups for read of sharedfiles
 		if (designfile != "") {
 			designMap = new GroupMap(designfile);
 			designMap->readDesignMap();
@@ -256,7 +257,7 @@ int IndicatorCommand::execute(){
 			if (lookupFloat[0] == NULL) { m->mothurOut("[ERROR] reading relabund file."); m->mothurOutEndLine(); return 0; }
 		}
 		
-		//reset Globaldatas groups if needed
+		//reset groups if needed
 		if (designfile != "") { m->Groups = Groups; }
 			
 		/***************************************************/

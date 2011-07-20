@@ -2177,8 +2177,8 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"../release\\\"\"",
-					"VERSION=\"\\\"1.20.2\\\"\"",
-					"RELEASE_DATE=\"\\\"7/05/2011\\\"\"",
+					"VERSION=\"\\\"1.21.0\\\"\"",
+					"RELEASE_DATE=\"\\\"7/25/2011\\\"\"",
 				);
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;

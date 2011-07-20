@@ -15,8 +15,8 @@ USEREADLINE ?= yes
 CYGWIN_BUILD ?= no
 USECOMPRESSION ?= no
 MOTHUR_FILES="\"Enter_your_default_path_here\""
-RELEASE_DATE = "\"7/5/2011\""
-VERSION = "\"1.20.0\""
+RELEASE_DATE = "\"7/25/2011\""
+VERSION = "\"1.21.0\""
 
 # Optimize to level 3:
 CXXFLAGS += -O3
