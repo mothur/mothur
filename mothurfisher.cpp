@@ -90,7 +90,6 @@ double MothurFisher::hyper_323(double n11, double n1_, double n_1, double n){
 	}
 }
 /***********************************************************/
-//var sn11,sn1_,sn_1,sn,sprob;
 double MothurFisher::hyper(double n11){
 	try {
 		return(hyper0(n11,0,0,0));

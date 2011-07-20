@@ -129,7 +129,7 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
 			
 			m->mothurOut("DONE.");
 			m->mothurOutEndLine();	cout.flush();
-			m->mothurOut("It took " + toString(time(NULL) - start) + " to read  " + toString(rdb->referenceSeqs.size()) + " sequences."); m->mothurOutEndLine();  
+			m->mothurOut("It took " + toString(time(NULL) - start) + " to read  " + toString(templateSequences.size()) + " sequences."); m->mothurOutEndLine();  
 
 		}
 		

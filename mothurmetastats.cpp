@@ -23,15 +23,7 @@ MothurMetastats::MothurMetastats(double t, int n) {
 	}	
 }
 /***********************************************************/
-MothurMetastats::~MothurMetastats() {
-	try {
-		
-		
-	}catch(exception& e) {
-		m->errorOut(e, "MothurMetastats", "~MothurMetastats");
-		exit(1);
-	}	
-}
+MothurMetastats::~MothurMetastats() {}
 /***********************************************************/
 //main metastats function
 int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> >& data, int secondGroupingStart) {
