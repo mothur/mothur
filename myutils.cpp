@@ -143,22 +143,22 @@ bool myisatty(int fd)
 
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 #else
-#ifdef BIT_VERSION
-#include <io.h>
-int fseeko(FILE *stream, off_t offset, int whence)
-	{
-	off_t FilePos = _fseeki64(stream, offset, whence);
-	return (FilePos == -1L) ? -1 : 0;
-	}
-#define ftello(fm) (off_t) _ftelli64(fm)
-#else 
+//#ifdef BIT_VERSION
+//#include <io.h>
+//int fseeko(FILE *stream, off_t offset, int whence)
+////	{
+//	off_t FilePos = _fseeki64(stream, offset, whence);
+//	return (FilePos == -1L) ? -1 : 0;
+//	}
+//#define ftello(fm) (off_t) _ftelli64(fm)
+//#else 
 int fseeko(FILE *stream, off_t offset, int whence)
 {
 	off_t FilePos = fseek(stream, offset, whence);
 	return (FilePos == -1L) ? -1 : 0;
 }
 #define ftello(fm) (off_t) ftell(fm)
-#endif
+//#endif
 #endif
 
 void LogStdioFileState(FILE *f)
@@ -513,7 +513,8 @@ off_t GetStdioFilePos(FILE *f)
 off_t GetStdioFileSize(FILE *f)
 	{
 	off_t CurrentPos = GetStdioFilePos(f);
-	int Ok = fseeko(f, 0, SEEK_END);
+	off_t zeroPos = 0;
+	int Ok = fseeko(f, zeroPos, SEEK_END);
 	if (Ok < 0)
 		Die("fseek in GetFileSize");
 

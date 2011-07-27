@@ -29,7 +29,7 @@ private:
 	double lnfact(double);
 	double lnbico(double, double);
 	double hyper_323(double, double, double, double);
-	double hyper(double);
+	double myhyper(double);
 	double hyper0(double, double, double, double);
 	double exact(double, double, double, double);
 };
