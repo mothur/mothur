@@ -170,13 +170,13 @@ int Pintail::doPrep() {
 			string noOutliers, outliers;
 			
 			if ((!filter) && (seqMask == "")) {
-				noOutliers = templateFileName + "pintail.quan";
+				noOutliers = m->getRootName(m->getSimpleName(templateFileName)) + "pintail.quan";
 			}else if ((!filter) && (seqMask != "")) { 
-				noOutliers =templateFileName + "pintail.masked.quan";
+				noOutliers =m->getRootName(m->getSimpleName(templateFileName)) + "pintail.masked.quan";
 			}else if ((filter) && (seqMask != "")) { 
-				noOutliers = templateFileName + "pintail.filtered." + m->getSimpleName(m->getRootName(fastafile)) + "masked.quan";
+				noOutliers = m->getRootName(m->getSimpleName(templateFileName)) + "pintail.filtered." + m->getSimpleName(m->getRootName(fastafile)) + "masked.quan";
 			}else if ((filter) && (seqMask == "")) { 
-				noOutliers = templateFileName + "pintail.filtered." + m->getSimpleName(m->getRootName(fastafile)) + "quan";
+				noOutliers = m->getRootName(m->getSimpleName(templateFileName)) + "pintail.filtered." + m->getSimpleName(m->getRootName(fastafile)) + "quan";
 			}
 
 			decalc->removeObviousOutliers(quantilesMembers, templateSeqs.size());

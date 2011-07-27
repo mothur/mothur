@@ -902,7 +902,7 @@ int MothurOut::renameFile(string oldName, string newName){
 		string command = "mv " + oldName + " " + newName;
 		system(command.c_str());
 	#else
-		m->mothurRemove(newName);
+		mothurRemove(newName);
 		int renameOk = rename(oldName.c_str(), newName.c_str());
 	#endif
 		return 0;

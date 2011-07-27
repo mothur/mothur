@@ -392,7 +392,6 @@ int ChimeraPintailCommand::execute(){
 					}
 				}
 			}
-			
 			chimera = new Pintail(fastaFileNames[s], templatefile, filter, processors, maskfile, consfile, quanfile, window, increment, outputDir);
 			
 			if (outputDir == "") { outputDir = m->hasPath(fastaFileNames[s]);  }//if user entered a file with a path then preserve it

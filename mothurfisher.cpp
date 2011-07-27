@@ -90,11 +90,12 @@ double MothurFisher::hyper_323(double n11, double n1_, double n_1, double n){
 	}
 }
 /***********************************************************/
-double MothurFisher::hyper(double n11){
+double MothurFisher::myhyper(double n11){
 	try {
-		return(hyper0(n11,0,0,0));
+		double hyper0Result = hyper0(n11,0,0,0);
+		return hyper0Result;
 	}catch(exception& e) {
-		m->errorOut(e, "MothurFisher", "hyper");
+		m->errorOut(e, "MothurFisher", "myhyper");
 		exit(1);
 	}
 }
@@ -150,21 +151,21 @@ double MothurFisher::exact(double n11, double n1_, double n_1, double n){
 		}
 		prob=hyper0(n11,n1_,n_1,n);
 		sleft=0;
-		p=hyper(min);
+		p=myhyper(min);
 		for(i=min+1; p<0.99999999*prob; i++)
 		{
 			sleft += p;
-			p=hyper(i);
+			p=myhyper(i);
 		}
 		i--;
 		if(p<1.00000001*prob) sleft += p;
 		else i--;
 		sright=0;
-		p=hyper(max);
+		p=myhyper(max);
 		for(j=max-1; p<0.99999999*prob; j--)
 		{
 			sright += p;
-			p=hyper(j);
+			p=myhyper(j);
 		}
 		j++;
 		if(p<1.00000001*prob) sright += p;
@@ -182,7 +183,7 @@ double MothurFisher::exact(double n11, double n1_, double n_1, double n){
 		return prob;
 		
 	}catch(exception& e) {
-		m->errorOut(e, "MothurFisher", "hyper0");
+		m->errorOut(e, "MothurFisher", "exact");
 		exit(1);
 	}
 }
