@@ -42,7 +42,7 @@ string IndicatorCommand::getHelpString(){
 		helpString += "The indicator command outputs a .indicator.summary file and a .indicator.tre if a tree is given. \n";
 		helpString += "The new tree contains labels at each internal node.  The label is the node number so you can relate the tree to the summary file.\n";
 		helpString += "The summary file lists the indicator value for each OTU for each node.\n";
-		helpString += "The indicator command parameters are tree, groups, shared, relabund, design and label. The tree parameter is required as well as either shared or relabund.\n";
+		helpString += "The indicator command parameters are tree, groups, shared, relabund, design and label. \n";
 		helpString += "The design parameter allows you to relate the tree to the shared or relabund file, if your tree contains the grouping names, or if no tree is provided to group your groups into groupings.\n";			
 		helpString += "The groups parameter allows you to specify which of the groups in your shared or relabund you would like analyzed, or if you provide a design file the groups in your design file.  The groups may be entered separated by dashes.\n";
 		helpString += "The label parameter indicates at what distance your tree relates to the shared or relabund.\n";

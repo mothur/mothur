@@ -581,8 +581,10 @@ void UnifracWeightedCommand::printWeightedFile() {
 void UnifracWeightedCommand::printWSummaryFile() {
 	try {
 		//column headers
-		outSum << "Tree#" << '\t' << "Groups" << '\t' << "WScore" << '\t' << "WSig" <<  endl;
-		m->mothurOut("Tree#\tGroups\tWScore\tWSig"); m->mothurOutEndLine(); 
+		outSum << "Tree#" << '\t' << "Groups" << '\t' << "WScore" << '\t';
+		m->mothurOut("Tree#\tGroups\tWScore\t");
+		if (random) { outSum << "WSig"; m->mothurOut("WSig"); }
+		outSum << endl; m->mothurOutEndLine();
 		
 		//format output
 		outSum.setf(ios::fixed, ios::floatfield); outSum.setf(ios::showpoint);
@@ -602,9 +604,9 @@ void UnifracWeightedCommand::printWSummaryFile() {
 						m->mothurOutJustToLog(toString(i+1) +"\t" + groupComb[j] +"\t" + toString(utreeScores[count]) +"\t<" +  toString((1/float(iters))) + "\n");  
 					}
 				}else{
-					outSum << setprecision(6) << i+1 << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << "0.00" << endl; 
-					cout << setprecision(6) << i+1 << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << "0.00" << endl; 
-					m->mothurOutJustToLog(toString(i+1) +"\t" + groupComb[j] +"\t" + toString(utreeScores[count]) +"\t0.00\n"); 
+					outSum << setprecision(6) << i+1 << '\t' << groupComb[j] << '\t' << utreeScores[count] << endl; 
+					cout << setprecision(6) << i+1 << '\t' << groupComb[j] << '\t' << utreeScores[count]  << endl; 
+					m->mothurOutJustToLog(toString(i+1) +"\t" + groupComb[j] +"\t" + toString(utreeScores[count]) +"\n"); 
 				}
 				count++;
 			}

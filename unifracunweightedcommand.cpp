@@ -298,8 +298,10 @@ int UnifracUnweightedCommand::execute() {
 		
 		if (numComp < processors) { processors = numComp;  }
 		
-		outSum << "Tree#" << '\t' << "Groups" << '\t'  <<  "UWScore" <<'\t' << "UWSig" <<  endl;
-		m->mothurOut("Tree#\tGroups\tUWScore\tUWSig"); m->mothurOutEndLine();
+		outSum << "Tree#" << '\t' << "Groups" << '\t'  <<  "UWScore" <<'\t';
+		m->mothurOut("Tree#\tGroups\tUWScore\t");
+		if (random) { outSum << "UWSig"; m->mothurOut("UWSig"); }
+		outSum << endl; m->mothurOutEndLine();
 	 
 		//get pscores for users trees
 		for (int i = 0; i < T.size(); i++) {
@@ -485,9 +487,9 @@ void UnifracUnweightedCommand::printUWSummaryFile(int i) {
 					m->mothurOutJustToLog(groupComb[a]  + "\t" + toString(utreeScores[a][0])  + "\t<" + toString((1/float(iters))) + "\n"); 
 				}
 			}else{
-				outSum << setprecision(6) << groupComb[a]  << '\t' << utreeScores[a][0] << '\t' << "0.00" << endl;
-				cout << setprecision(6)  << groupComb[a]  << '\t' << utreeScores[a][0] << '\t' << "0.00" << endl; 
-				m->mothurOutJustToLog(groupComb[a]  + "\t" + toString(utreeScores[a][0])  + "\t0.00\n");
+				outSum << setprecision(6) << groupComb[a]  << '\t' << utreeScores[a][0]  << endl;
+				cout << setprecision(6)  << groupComb[a]  << '\t' << utreeScores[a][0]  << endl; 
+				m->mothurOutJustToLog(groupComb[a]  + "\t" + toString(utreeScores[a][0]) + "\n");
 			}
 		}
 		
