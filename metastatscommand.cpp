@@ -393,7 +393,7 @@ int MetaStatsCommand::driver(int start, int num, vector<SharedRAbundVector*>& th
 			//get set names
 			string setA = namesOfGroupCombos[c][0]; 
 			string setB = namesOfGroupCombos[c][1];
-			
+		
 			//get filename
 			string outputFileName = outputDir +  m->getRootName(m->getSimpleName(sharedfile)) + thisLookUp[0]->getLabel() + "." + setA + "-" + setB + ".metastats";
 			outputNames.push_back(outputFileName); outputTypes["metastats"].push_back(outputFileName);
@@ -423,7 +423,9 @@ int MetaStatsCommand::driver(int start, int num, vector<SharedRAbundVector*>& th
 					setACount++;
 				}
 			}
-						
+			
+			//for (int i = 0; i < subset.size(); i++) { cout << subset[i]->getGroup() << endl; }
+			
 			if ((setACount == 0) || (setBCount == 0))  { 
 				m->mothurOut("Missing shared info for " + setA + " or " + setB + ". Skipping comparison."); m->mothurOutEndLine(); 
 				outputNames.pop_back();
