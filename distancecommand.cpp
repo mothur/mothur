@@ -8,11 +8,6 @@
  */
 
 #include "distancecommand.h"
-#include "ignoregaps.h"
-#include "eachgapdist.h"
-#include "eachgapignore.h"
-#include "onegapdist.h"
-#include "onegapignore.h"
 
 //**********************************************************************************************************************
 vector<string> DistanceCommand::setParameters(){	
@@ -200,26 +195,6 @@ DistanceCommand::DistanceCommand(string option) {
 			if ((column != "") && (oldfastafile != "") && (output != "column")) { m->mothurOut("You have provided column and oldfasta, indicating you want to append distances to your column file. Your output must be in column format to do so."); m->mothurOutEndLine(); abort=true; }
 			
 			if ((output != "column") && (output != "lt") && (output != "square")) { m->mothurOut(output + " is not a valid output form. Options are column, lt and square. I will use column."); m->mothurOutEndLine(); output = "column"; }
-			
-			ValidCalculators validCalculator;
-			
-			if (m->isTrue(countends) == true) {
-				for (int i=0; i<Estimators.size(); i++) {
-					if (validCalculator.isValidCalculator("distance", Estimators[i]) == true) { 
-						if (Estimators[i] == "nogaps")			{	distCalculator = new ignoreGaps();	}
-						else if (Estimators[i] == "eachgap")	{	distCalculator = new eachGapDist();	}
-						else if (Estimators[i] == "onegap")		{	distCalculator = new oneGapDist();	}
-					}
-				}
-			}else {
-				for (int i=0; i<Estimators.size(); i++) {
-					if (validCalculator.isValidCalculator("distance", Estimators[i]) == true) { 
-						if (Estimators[i] == "nogaps")		{	distCalculator = new ignoreGaps();					}
-						else if (Estimators[i] == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
-						else if (Estimators[i] == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
-					}
-				}
-			}
 
 		}
 				
@@ -405,7 +380,7 @@ int DistanceCommand::execute(){
 		MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 #else		
 				
-	#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+	//#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		//if you don't need to fork anything
 		if(processors == 1){
 			if (output != "square") {  driver(0, numSeqs, outputFile, cutoff); }
@@ -442,14 +417,14 @@ int DistanceCommand::execute(){
 			
 			createProcesses(outputFile); 
 		}
-	#else
+	//#else
 		//ifstream inFASTA;
-		if (output != "square") {  driver(0, numSeqs, outputFile, cutoff); }
-		else { driver(0, numSeqs, outputFile, "square");  }
-	#endif
+		//if (output != "square") {  driver(0, numSeqs, outputFile, cutoff); }
+		//else { driver(0, numSeqs, outputFile, "square");  }
+	//#endif
 	
 #endif
-		if (m->control_pressed) { outputTypes.clear();  delete distCalculator; m->mothurRemove(outputFile); return 0; }
+		if (m->control_pressed) { outputTypes.clear();  m->mothurRemove(outputFile); return 0; }
 		
 		#ifdef USE_MPI
 			MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
@@ -492,9 +467,7 @@ int DistanceCommand::execute(){
 			}
 		#endif
 		
-		if (m->control_pressed) { outputTypes.clear();  delete distCalculator; m->mothurRemove(outputFile); return 0; }
-		
-		delete distCalculator;
+		if (m->control_pressed) { outputTypes.clear();  m->mothurRemove(outputFile); return 0; }
 		
 		//set phylip file as new current phylipfile
 		string current = "";
@@ -567,25 +540,80 @@ void DistanceCommand::createProcesses(string filename) {
 			int temp = processIDS[i];
 			wait(&temp);
 		}
+#else
+		//////////////////////////////////////////////////////////////////////////////////////////////////////
+		//Windows version shared memory, so be careful when passing variables through the distanceData struct. 
+		//Above fork() will clone, so memory is separate, but that's not the case with windows, 
+		//that's why the distance calculator was moved inside of the driver to make separate copies.
+		//////////////////////////////////////////////////////////////////////////////////////////////////////
+		
+		vector<distanceData*> pDataArray; //[processors-1];
+		DWORD   dwThreadIdArray[processors-1];
+		HANDLE  hThreadArray[processors-1]; 
+		
+		//Create processor-1 worker threads.
+		for( int i=0; i<processors-1; i++ ){
+			
+			// Allocate memory for thread data.
+			distanceData* tempDist = new distanceData(lines[i+1].start, lines[i+1].end, (filename + toString(i) + ".temp"), cutoff, alignDB, Estimators, m, output, numNewFasta, countends);
+			pDataArray.push_back(tempDist);
+			processIDS.push_back(i);
+			
+			//MyDistThreadFunction is in header. It must be global or static to work with the threads.
+			//default security attributes, thread function name, argument to thread function, use default creation flags, returns the thread identifier
+			hThreadArray[i] = CreateThread(NULL, 0, MyDistThreadFunction, pDataArray[i], 0, &dwThreadIdArray[i]);   
+		}
+		
+		//do your part
+		if (output != "square") {  driver(lines[0].start, lines[0].end, filename, cutoff); }
+		else { driver(lines[0].start, lines[0].end, filename, "square"); }
+		
+		//Wait until all threads have terminated.
+		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
+		
+		//Close all thread handles and free memory allocations.
+		for(int i=0; i < pDataArray.size(); i++){
+			CloseHandle(hThreadArray[i]);
+			delete pDataArray[i];
+		}
+#endif
 		
 		//append and remove temp files
 		for (int i=0;i<processIDS.size();i++) { 
 			m->appendFiles((filename + toString(processIDS[i]) + ".temp"), filename);
 			m->mothurRemove((filename + toString(processIDS[i]) + ".temp"));
 		}
-#endif
+		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "DistanceCommand", "createProcesses");
 		exit(1);
 	}
 }
-
 /**************************************************************************************************/
 /////// need to fix to work with calcs and sequencedb
 int DistanceCommand::driver(int startLine, int endLine, string dFileName, float cutoff){
 	try {
-
+		ValidCalculators validCalculator;
+		Dist* distCalculator;
+		if (m->isTrue(countends) == true) {
+			for (int i=0; i<Estimators.size(); i++) {
+				if (validCalculator.isValidCalculator("distance", Estimators[i]) == true) { 
+					if (Estimators[i] == "nogaps")			{	distCalculator = new ignoreGaps();	}
+					else if (Estimators[i] == "eachgap")	{	distCalculator = new eachGapDist();	}
+					else if (Estimators[i] == "onegap")		{	distCalculator = new oneGapDist();	}
+				}
+			}
+		}else {
+			for (int i=0; i<Estimators.size(); i++) {
+				if (validCalculator.isValidCalculator("distance", Estimators[i]) == true) { 
+					if (Estimators[i] == "nogaps")		{	distCalculator = new ignoreGaps();					}
+					else if (Estimators[i] == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
+					else if (Estimators[i] == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
+				}
+			}
+		}
+		
 		int startTime = time(NULL);
 		
 		//column file
@@ -605,7 +633,7 @@ int DistanceCommand::driver(int startLine, int endLine, string dFileName, float 
 			}
 			for(int j=0;j<i;j++){
 				
-				if (m->control_pressed) { outFile.close(); return 0;  }
+				if (m->control_pressed) { delete distCalculator; outFile.close(); return 0;  }
 				
 				//if there was a column file given and we are appending, we don't want to calculate the distances that are already in the column file
 				//the alignDB contains the new sequences and then the old, so if i an oldsequence and j is an old sequence then break out of this loop
@@ -630,6 +658,7 @@ int DistanceCommand::driver(int startLine, int endLine, string dFileName, float 
 		m->mothurOut(toString(endLine-1) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
 		
 		outFile.close();
+		delete distCalculator;
 		
 		return 1;
 	}
@@ -642,7 +671,26 @@ int DistanceCommand::driver(int startLine, int endLine, string dFileName, float 
 /////// need to fix to work with calcs and sequencedb
 int DistanceCommand::driver(int startLine, int endLine, string dFileName, string square){
 	try {
-
+		ValidCalculators validCalculator;
+		Dist* distCalculator;
+		if (m->isTrue(countends) == true) {
+			for (int i=0; i<Estimators.size(); i++) {
+				if (validCalculator.isValidCalculator("distance", Estimators[i]) == true) { 
+					if (Estimators[i] == "nogaps")			{	distCalculator = new ignoreGaps();	}
+					else if (Estimators[i] == "eachgap")	{	distCalculator = new eachGapDist();	}
+					else if (Estimators[i] == "onegap")		{	distCalculator = new oneGapDist();	}
+				}
+			}
+		}else {
+			for (int i=0; i<Estimators.size(); i++) {
+				if (validCalculator.isValidCalculator("distance", Estimators[i]) == true) { 
+					if (Estimators[i] == "nogaps")		{	distCalculator = new ignoreGaps();					}
+					else if (Estimators[i] == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
+					else if (Estimators[i] == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
+				}
+			}
+		}
+		
 		int startTime = time(NULL);
 		
 		//column file
@@ -662,7 +710,7 @@ int DistanceCommand::driver(int startLine, int endLine, string dFileName, string
 			
 			for(int j=0;j<alignDB.getNumSeqs();j++){
 				
-				if (m->control_pressed) { outFile.close(); return 0;  }
+				if (m->control_pressed) { delete distCalculator; outFile.close(); return 0;  }
 				
 				distCalculator->calcDist(alignDB.get(i), alignDB.get(j));
 				double dist = distCalculator->getDist();
@@ -680,6 +728,7 @@ int DistanceCommand::driver(int startLine, int endLine, string dFileName, string
 		m->mothurOut(toString(endLine-1) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
 		
 		outFile.close();
+		delete distCalculator;
 		
 		return 1;
 	}
@@ -693,6 +742,28 @@ int DistanceCommand::driver(int startLine, int endLine, string dFileName, string
 /////// need to fix to work with calcs and sequencedb
 int DistanceCommand::driverMPI(int startLine, int endLine, MPI_File& outMPI, float cutoff){
 	try {
+		
+		ValidCalculators validCalculator;
+		Dist* distCalculator;
+		if (m->isTrue(countends) == true) {
+			for (int i=0; i<Estimators.size(); i++) {
+				if (validCalculator.isValidCalculator("distance", Estimators[i]) == true) { 
+					if (Estimators[i] == "nogaps")			{	distCalculator = new ignoreGaps();	}
+					else if (Estimators[i] == "eachgap")	{	distCalculator = new eachGapDist();	}
+					else if (Estimators[i] == "onegap")		{	distCalculator = new oneGapDist();	}
+				}
+			}
+		}else {
+			for (int i=0; i<Estimators.size(); i++) {
+				if (validCalculator.isValidCalculator("distance", Estimators[i]) == true) { 
+					if (Estimators[i] == "nogaps")		{	distCalculator = new ignoreGaps();					}
+					else if (Estimators[i] == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
+					else if (Estimators[i] == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
+				}
+			}
+		}
+		
+		
 		MPI_Status status;
 		int startTime = time(NULL);
 		
@@ -702,7 +773,7 @@ int DistanceCommand::driverMPI(int startLine, int endLine, MPI_File& outMPI, flo
 	
 			for(int j=0;j<i;j++){
 				
-				if (m->control_pressed) {  return 0;  }
+				if (m->control_pressed) {  delete distCalculator; return 0;  }
 				
 				//if there was a column file given and we are appending, we don't want to calculate the distances that are already in the column file
 				//the alignDB contains the new sequences and then the old, so if i an oldsequence and j is an old sequence then break out of this loop
@@ -735,7 +806,8 @@ int DistanceCommand::driverMPI(int startLine, int endLine, MPI_File& outMPI, flo
 		}
 		
 		//m->mothurOut(toString(endLine-1) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
-		cout << (endLine-1) << '\t' << (time(NULL) - startTime) << endl;		
+		cout << (endLine-1) << '\t' << (time(NULL) - startTime) << endl;	
+		delete distCalculator;
 		return 1;
 	}
 	catch(exception& e) {
@@ -747,6 +819,27 @@ int DistanceCommand::driverMPI(int startLine, int endLine, MPI_File& outMPI, flo
 /////// need to fix to work with calcs and sequencedb
 int DistanceCommand::driverMPI(int startLine, int endLine, string file, unsigned long int& size){
 	try {
+		ValidCalculators validCalculator;
+		Dist* distCalculator;
+		if (m->isTrue(countends) == true) {
+			for (int i=0; i<Estimators.size(); i++) {
+				if (validCalculator.isValidCalculator("distance", Estimators[i]) == true) { 
+					if (Estimators[i] == "nogaps")			{	distCalculator = new ignoreGaps();	}
+					else if (Estimators[i] == "eachgap")	{	distCalculator = new eachGapDist();	}
+					else if (Estimators[i] == "onegap")		{	distCalculator = new oneGapDist();	}
+				}
+			}
+		}else {
+			for (int i=0; i<Estimators.size(); i++) {
+				if (validCalculator.isValidCalculator("distance", Estimators[i]) == true) { 
+					if (Estimators[i] == "nogaps")		{	distCalculator = new ignoreGaps();					}
+					else if (Estimators[i] == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
+					else if (Estimators[i] == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
+				}
+			}
+		}
+		
+		
 		MPI_Status status;
 		
 		MPI_File outMPI;
@@ -778,7 +871,7 @@ int DistanceCommand::driverMPI(int startLine, int endLine, string file, unsigned
 			
 			for(int j=0;j<i;j++){
 				
-				if (m->control_pressed) {  return 0;  }
+				if (m->control_pressed) { delete distCalculator; return 0;  }
 				
 				distCalculator->calcDist(alignDB.get(i), alignDB.get(j));
 				double dist = distCalculator->getDist();
@@ -809,6 +902,7 @@ int DistanceCommand::driverMPI(int startLine, int endLine, string file, unsigned
 		//m->mothurOut(toString(endLine-1) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
 		cout << (endLine-1) << '\t' << (time(NULL) - startTime) << endl;
 		MPI_File_close(&outMPI);
+		delete distCalculator;
 		
 		return 1;
 	}
@@ -821,6 +915,26 @@ int DistanceCommand::driverMPI(int startLine, int endLine, string file, unsigned
 /////// need to fix to work with calcs and sequencedb
 int DistanceCommand::driverMPI(int startLine, int endLine, string file, unsigned long int& size, string square){
 	try {
+		ValidCalculators validCalculator;
+		Dist* distCalculator;
+		if (m->isTrue(countends) == true) {
+			for (int i=0; i<Estimators.size(); i++) {
+				if (validCalculator.isValidCalculator("distance", Estimators[i]) == true) { 
+					if (Estimators[i] == "nogaps")			{	distCalculator = new ignoreGaps();	}
+					else if (Estimators[i] == "eachgap")	{	distCalculator = new eachGapDist();	}
+					else if (Estimators[i] == "onegap")		{	distCalculator = new oneGapDist();	}
+				}
+			}
+		}else {
+			for (int i=0; i<Estimators.size(); i++) {
+				if (validCalculator.isValidCalculator("distance", Estimators[i]) == true) { 
+					if (Estimators[i] == "nogaps")		{	distCalculator = new ignoreGaps();					}
+					else if (Estimators[i] == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
+					else if (Estimators[i] == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
+				}
+			}
+		}
+		
 		MPI_Status status;
 		
 		MPI_File outMPI;
@@ -852,7 +966,7 @@ int DistanceCommand::driverMPI(int startLine, int endLine, string file, unsigned
 			
 			for(int j=0;j<alignDB.getNumSeqs();j++){
 				
-				if (m->control_pressed) {  return 0;  }
+				if (m->control_pressed) { delete distCalculator; return 0;  }
 				
 				distCalculator->calcDist(alignDB.get(i), alignDB.get(j));
 				double dist = distCalculator->getDist();
@@ -883,7 +997,7 @@ int DistanceCommand::driverMPI(int startLine, int endLine, string file, unsigned
 		//m->mothurOut(toString(endLine-1) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
 		cout << (endLine-1) << '\t' << (time(NULL) - startTime) << endl;
 		MPI_File_close(&outMPI);
-		
+		delete distCalculator;
 		return 1;
 	}
 	catch(exception& e) {
