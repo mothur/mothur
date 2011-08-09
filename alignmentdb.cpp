@@ -13,7 +13,33 @@
 #include "blastdb.hpp"
 #include "referencedb.h"
 
-
+/**************************************************************************************************/
+//deep copy
+AlignmentDB::AlignmentDB(const AlignmentDB& adb) : numSeqs(adb.numSeqs), longest(adb.longest), method(adb.method), emptySequence(adb.emptySequence) {
+	try {
+		
+		m = MothurOut::getInstance();
+		if (adb.method == "blast") {
+			search = new BlastDB(*((BlastDB*)adb.search));
+		}else if(adb.method == "kmer") {
+			search = new KmerDB(*((KmerDB*)adb.search));
+		}else if(adb.method == "suffix") {
+			search = new SuffixDB(*((SuffixDB*)adb.search));
+		}else {
+			m->mothurOut("[ERROR]: cannot create copy of alignment database, unrecognized method - " + adb.method); m->mothurOutEndLine();
+		}
+		
+		for (int i = 0; i < adb.templateSequences.size(); i++) {
+			Sequence temp(adb.templateSequences[i]);
+			templateSequences.push_back(temp);
+		}
+	}
+	catch(exception& e) {
+		m->errorOut(e, "AlignmentDB", "AlignmentDB");
+		exit(1);
+	}
+	
+}
 /**************************************************************************************************/
 AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gapOpen, float gapExtend, float match, float misMatch){		//	This assumes that the template database is in fasta format, may 
 	try {											//	need to alter this in the future?
@@ -22,10 +48,16 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
 		method = s;
 		bool needToGenerate = true;
 		ReferenceDB* rdb = ReferenceDB::getInstance();
+		bool silent = false;
+		
+		if (fastaFileName == "saved-silent") {
+			fastaFileName = "saved"; silent = true;
+		}
 		
 		if (fastaFileName == "saved") {
 			int start = time(NULL);
-			m->mothurOutEndLine();  m->mothurOut("Using sequences from " + rdb->getSavedReference() + " that are saved in memory.");	m->mothurOutEndLine();
+			
+			if (!silent) { m->mothurOutEndLine();  m->mothurOut("Using sequences from " + rdb->getSavedReference() + " that are saved in memory.");	m->mothurOutEndLine(); }
 
 			for (int i = 0; i < rdb->referenceSeqs.size(); i++) {
 				templateSequences.push_back(rdb->referenceSeqs[i]);
@@ -35,7 +67,7 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
 			fastaFileName = rdb->getSavedReference();
 			
 			numSeqs = templateSequences.size();
-			m->mothurOut("It took " + toString(time(NULL) - start) + " to load " + toString(rdb->referenceSeqs.size()) + " sequences.");m->mothurOutEndLine();  
+			if (!silent) { m->mothurOut("It took " + toString(time(NULL) - start) + " to load " + toString(rdb->referenceSeqs.size()) + " sequences.");m->mothurOutEndLine();  }
 
 		}else {
 			int start = time(NULL);
@@ -159,6 +191,7 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
 		else if(method == "suffix")		{	search = new SuffixDB(numSeqs);								}
 		else if(method == "blast")		{	search = new BlastDB(fastaFileName.substr(0,fastaFileName.find_last_of(".")+1), gapOpen, gapExtend, match, misMatch, "");	}
 		else {
+			method = "kmer";
 			m->mothurOut(method + " is not a valid search option. I will run the command using kmer, ksize=8.");
 			m->mothurOutEndLine();
 			search = new KmerDB(fastaFileName, 8);

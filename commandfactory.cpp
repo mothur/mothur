@@ -120,6 +120,7 @@
 #include "getcommandinfocommand.h"
 #include "deuniquetreecommand.h"
 #include "countseqscommand.h"
+#include "countgroupscommand.h"
 #include "clearmemorycommand.h"
 
 /*******************************************************/
@@ -244,6 +245,7 @@ CommandFactory::CommandFactory(){
 	commands["get.commandinfo"]		= "get.commandinfo";
 	commands["deunique.tree"]		= "deunique.tree";
 	commands["count.seqs"]			= "count.seqs";
+	commands["count.groups"]		= "count.groups";
 	commands["clear.memory"]		= "clear.memory";
 	commands["pairwise.seqs"]		= "MPIEnabled";
 	commands["pipeline.pds"]		= "MPIEnabled";
@@ -417,6 +419,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "get.commandinfo")		{	command = new GetCommandInfoCommand(optionString);			}
 		else if(commandName == "deunique.tree")			{	command = new DeuniqueTreeCommand(optionString);			}
 		else if(commandName == "count.seqs")			{	command = new CountSeqsCommand(optionString);				}
+		else if(commandName == "count.groups")			{	command = new CountGroupsCommand(optionString);				}
 		else if(commandName == "clear.memory")			{	command = new ClearMemoryCommand(optionString);				}
 		else											{	command = new NoCommand(optionString);						}
 
@@ -556,6 +559,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "get.commandinfo")		{	pipecommand = new GetCommandInfoCommand(optionString);			}
 		else if(commandName == "deunique.tree")			{	pipecommand = new DeuniqueTreeCommand(optionString);			}
 		else if(commandName == "count.seqs")			{	pipecommand = new CountSeqsCommand(optionString);				}
+		else if(commandName == "count.groups")			{	pipecommand = new CountGroupsCommand(optionString);				}
 		else if(commandName == "clear.memory")			{	pipecommand = new ClearMemoryCommand(optionString);				}
 		else											{	pipecommand = new NoCommand(optionString);						}
 
@@ -683,6 +687,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "get.commandinfo")		{	shellcommand = new GetCommandInfoCommand();			}
 		else if(commandName == "deunique.tree")			{	shellcommand = new DeuniqueTreeCommand();			}
 		else if(commandName == "count.seqs")			{	shellcommand = new CountSeqsCommand();				}
+		else if(commandName == "count.groups")			{	shellcommand = new CountGroupsCommand();			}
 		else if(commandName == "clear.memory")			{	shellcommand = new ClearMemoryCommand();			}
 		else											{	shellcommand = new NoCommand();						}
 

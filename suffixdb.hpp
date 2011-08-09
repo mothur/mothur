@@ -20,14 +20,20 @@
 
 #include "mothur.h"
 #include "database.hpp"
-
-class SuffixTree;
+#include "suffixtree.hpp"
+//class SuffixTree;
 
 class SuffixDB : public Database {
 	
 public:
 	SuffixDB(int);
 	SuffixDB();
+	SuffixDB(const SuffixDB& sdb) : count(sdb.count), Database(sdb) {
+		for (int i = 0; i < sdb.suffixForest.size(); i++) {
+			SuffixTree temp(sdb.suffixForest[i]);
+			suffixForest.push_back(temp);
+		}
+	}
 	~SuffixDB();
 	
 	void generateDB() {}; //adding sequences generates the db

@@ -22,6 +22,7 @@ public:
 
 	AlignmentDB(string, string, int, float, float, float, float);  //reads fastafile passed in and stores sequences
 	AlignmentDB(string);
+	AlignmentDB(const AlignmentDB& adb);
 	~AlignmentDB();
 	
 	Sequence findClosestSequence(Sequence*);

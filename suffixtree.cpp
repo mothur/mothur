@@ -34,6 +34,25 @@ inline bool compareParents(SuffixNode* left, SuffixNode* right){//	this is neces
 }
 
 //********************************************************************************************************************
+ 
+SuffixTree::SuffixTree(const SuffixTree& st) : root(st.root), activeEndPosition(st.activeEndPosition), activeStartPosition(st.activeStartPosition), activeNode(st.activeNode),
+												nodeCounter(st.nodeCounter), seqName(st.seqName), sequence(st.sequence) { 
+	try {
+		m = MothurOut::getInstance(); 
+		
+		for (int i = 0; i < st.nodeVector.size(); i++) {
+			SuffixNode* temp = new SuffixBranch(*((SuffixBranch*)st.nodeVector[i]));
+			nodeVector.push_back(temp);
+		}
+		
+		
+	}catch(exception& e) {
+		m->errorOut(e, "SuffixTree", "SuffixTree");
+		exit(1);
+	}
+}
+ 
+//********************************************************************************************************************
 
 SuffixTree::SuffixTree(){ m = MothurOut::getInstance(); }
 

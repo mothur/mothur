@@ -46,6 +46,7 @@
 		A778FE6B134CA6CA00C0BA33 /* getcommandinfocommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A778FE6A134CA6CA00C0BA33 /* getcommandinfocommand.cpp */; };
 		A77A221F139001B600B0BE70 /* deuniquetreecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A77A221E139001B600B0BE70 /* deuniquetreecommand.cpp */; };
 		A79234D713C74BF6002B08E2 /* mothurfisher.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A79234D613C74BF6002B08E2 /* mothurfisher.cpp */; };
+		A795840D13F13CD900F201D5 /* countgroupscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A795840C13F13CD900F201D5 /* countgroupscommand.cpp */; };
 		A799F5B91309A3E000AEEFA0 /* makefastqcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A799F5B81309A3E000AEEFA0 /* makefastqcommand.cpp */; };
 		A7A61F2D130062E000E05B6B /* amovacommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7A61F2C130062E000E05B6B /* amovacommand.cpp */; };
 		A7E9B88112D37EC400DA6239 /* ace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B64F12D37EC300DA6239 /* ace.cpp */; };
@@ -420,6 +421,8 @@
 		A77A221E139001B600B0BE70 /* deuniquetreecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = deuniquetreecommand.cpp; sourceTree = "<group>"; };
 		A79234D513C74BF6002B08E2 /* mothurfisher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mothurfisher.h; sourceTree = "<group>"; };
 		A79234D613C74BF6002B08E2 /* mothurfisher.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mothurfisher.cpp; sourceTree = "<group>"; };
+		A795840B13F13CD900F201D5 /* countgroupscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = countgroupscommand.h; sourceTree = "<group>"; };
+		A795840C13F13CD900F201D5 /* countgroupscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = countgroupscommand.cpp; sourceTree = "<group>"; };
 		A799F5B71309A3E000AEEFA0 /* makefastqcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = makefastqcommand.h; sourceTree = "<group>"; };
 		A799F5B81309A3E000AEEFA0 /* makefastqcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = makefastqcommand.cpp; sourceTree = "<group>"; };
 		A7A61F1A130035C800E05B6B /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
@@ -934,12 +937,12 @@
 		A7E9B84E12D37EC400DA6239 /* structpearson.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = structpearson.h; sourceTree = "<group>"; };
 		A7E9B84F12D37EC400DA6239 /* subsamplecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = subsamplecommand.cpp; sourceTree = "<group>"; };
 		A7E9B85012D37EC400DA6239 /* subsamplecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = subsamplecommand.h; sourceTree = "<group>"; };
-		A7E9B85112D37EC400DA6239 /* suffixdb.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = suffixdb.cpp; sourceTree = SOURCE_ROOT; };
-		A7E9B85212D37EC400DA6239 /* suffixdb.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = suffixdb.hpp; sourceTree = SOURCE_ROOT; };
-		A7E9B85312D37EC400DA6239 /* suffixnodes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = suffixnodes.cpp; sourceTree = SOURCE_ROOT; };
-		A7E9B85412D37EC400DA6239 /* suffixnodes.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = suffixnodes.hpp; sourceTree = SOURCE_ROOT; };
-		A7E9B85512D37EC400DA6239 /* suffixtree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = suffixtree.cpp; sourceTree = SOURCE_ROOT; };
-		A7E9B85612D37EC400DA6239 /* suffixtree.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = suffixtree.hpp; sourceTree = SOURCE_ROOT; };
+		A7E9B85112D37EC400DA6239 /* suffixdb.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = suffixdb.cpp; sourceTree = "<group>"; };
+		A7E9B85212D37EC400DA6239 /* suffixdb.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = suffixdb.hpp; sourceTree = "<group>"; };
+		A7E9B85312D37EC400DA6239 /* suffixnodes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = suffixnodes.cpp; sourceTree = "<group>"; };
+		A7E9B85412D37EC400DA6239 /* suffixnodes.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = suffixnodes.hpp; sourceTree = "<group>"; };
+		A7E9B85512D37EC400DA6239 /* suffixtree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = suffixtree.cpp; sourceTree = "<group>"; };
+		A7E9B85612D37EC400DA6239 /* suffixtree.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = suffixtree.hpp; sourceTree = "<group>"; };
 		A7E9B85712D37EC400DA6239 /* summarycommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = summarycommand.cpp; sourceTree = "<group>"; };
 		A7E9B85812D37EC400DA6239 /* summarycommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = summarycommand.h; sourceTree = "<group>"; };
 		A7E9B85912D37EC400DA6239 /* summarysharedcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = summarysharedcommand.cpp; sourceTree = "<group>"; };
@@ -1099,13 +1102,7 @@
 				A7E9B82412D37EC400DA6239 /* sharedutilities.h */,
 				A7E9B82D12D37EC400DA6239 /* singlelinkage.cpp */,
 				A7E9B83012D37EC400DA6239 /* slibshuff.cpp */,
-				A7E9B85112D37EC400DA6239 /* suffixdb.cpp */,
 				A7E9B83112D37EC400DA6239 /* slibshuff.h */,
-				A7E9B85212D37EC400DA6239 /* suffixdb.hpp */,
-				A7E9B85312D37EC400DA6239 /* suffixnodes.cpp */,
-				A7E9B85412D37EC400DA6239 /* suffixnodes.hpp */,
-				A7E9B85512D37EC400DA6239 /* suffixtree.cpp */,
-				A7E9B85612D37EC400DA6239 /* suffixtree.hpp */,
 				A7E9B87412D37EC400DA6239 /* validcalculator.cpp */,
 				A7E9B87512D37EC400DA6239 /* validcalculator.h */,
 				A7E9B87612D37EC400DA6239 /* validparameter.cpp */,
@@ -1238,6 +1235,8 @@
 				A7E9B6B712D37EC400DA6239 /* consensusseqscommand.cpp */,
 				A7E9B6BA12D37EC400DA6239 /* corraxescommand.h */,
 				A7E9B6B912D37EC400DA6239 /* corraxescommand.cpp */,
+				A795840B13F13CD900F201D5 /* countgroupscommand.h */,
+				A795840C13F13CD900F201D5 /* countgroupscommand.cpp */,
 				A7730EFD13967241007433A3 /* countseqscommand.h */,
 				A7730EFE13967241007433A3 /* countseqscommand.cpp */,
 				A7E9B6C412D37EC400DA6239 /* deconvolutecommand.h */,
@@ -1638,6 +1637,12 @@
 				A7E9B81412D37EC400DA6239 /* sharedsabundvector.h */,
 				A7E9B83912D37EC400DA6239 /* sparsematrix.cpp */,
 				A7E9B83A12D37EC400DA6239 /* sparsematrix.hpp */,
+				A7E9B85112D37EC400DA6239 /* suffixdb.cpp */,
+				A7E9B85212D37EC400DA6239 /* suffixdb.hpp */,
+				A7E9B85312D37EC400DA6239 /* suffixnodes.cpp */,
+				A7E9B85412D37EC400DA6239 /* suffixnodes.hpp */,
+				A7E9B85512D37EC400DA6239 /* suffixtree.cpp */,
+				A7E9B85612D37EC400DA6239 /* suffixtree.hpp */,
 				A7E9B85F12D37EC400DA6239 /* tree.cpp */,
 				A7E9B86012D37EC400DA6239 /* tree.h */,
 				A7E9B86412D37EC400DA6239 /* treemap.cpp */,
@@ -2131,6 +2136,7 @@
 				A73DDBBA13C4A0D1006AAE38 /* clearmemorycommand.cpp in Sources */,
 				A73DDC3813C4BF64006AAE38 /* mothurmetastats.cpp in Sources */,
 				A79234D713C74BF6002B08E2 /* mothurfisher.cpp in Sources */,
+				A795840D13F13CD900F201D5 /* countgroupscommand.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

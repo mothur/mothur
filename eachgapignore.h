@@ -17,6 +17,8 @@
 class eachGapIgnoreTermGapDist : public Dist {
 	
 public:
+	eachGapIgnoreTermGapDist() {}
+	eachGapIgnoreTermGapDist(const eachGapIgnoreTermGapDist& ddb) {}
 	
 	void calcDist(Sequence A, Sequence B){		
 		int diff = 0;
