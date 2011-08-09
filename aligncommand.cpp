@@ -934,7 +934,7 @@ int AlignCommand::createProcesses(string alignFileName, string reportFileName, s
 		inFASTA.seekg(lines[processors-1]->start-1);
 		char c = inFASTA.peek();
 		
-		if (c == '>') { //we need to move back
+		if (c != '>') { //we need to move back
 			lines[processors-1]->start--; 
 		}
 		
