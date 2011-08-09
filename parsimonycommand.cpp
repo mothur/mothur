@@ -219,7 +219,7 @@ int ParsimonyCommand::execute() {
 			read->AssembleTrees();
 			T = read->getTrees();
 			delete read;
-			
+
 			//make sure all files match
 			//if you provide a namefile we will use the numNames in the namefile as long as the number of unique match the tree names size.
 			int numNamesInTree;

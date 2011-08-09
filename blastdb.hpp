@@ -18,6 +18,8 @@ class BlastDB : public Database {
 public:
 	BlastDB(string, float, float, float, float, string);
 	BlastDB(string);
+	BlastDB(const BlastDB& bdb) : dbFileName(bdb.dbFileName), queryFileName(bdb.queryFileName), blastFileName(bdb.blastFileName), path(bdb.path),
+									count(bdb.count), gapOpen(bdb.gapOpen), gapExtend(bdb.gapExtend), match(bdb.match), misMatch(bdb.misMatch), Database(bdb) {}
 	~BlastDB();
 	
 	void generateDB();

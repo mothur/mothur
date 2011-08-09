@@ -17,6 +17,10 @@
 class oneGapDist : public Dist {
 	
 public:
+	
+	oneGapDist() {}
+	oneGapDist(const oneGapDist& ddb) {}
+	
 	void calcDist(Sequence A, Sequence B){
 		
 		int difference = 0;

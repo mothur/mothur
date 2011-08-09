@@ -28,7 +28,7 @@ public:
 	TreeMap() { m = MothurOut::getInstance(); }
 	TreeMap(string);
 	~TreeMap();
-	void readMap();
+	int readMap();
 	int getNumGroups();
 	int getNumSeqs();
 	void setIndex(string, int);  //sequencename, index

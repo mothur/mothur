@@ -45,6 +45,7 @@ class Database {
 
 public:
 	Database();
+	Database(const Database& db) : numSeqs(db.numSeqs), longest(db.longest), searchScore(db.searchScore), results(db.results), Scores(db.Scores) { m = MothurOut::getInstance(); }
 	virtual ~Database();
 	virtual void generateDB() = 0; 
 	virtual void addSequence(Sequence) = 0;  //add sequence to search engine
@@ -57,7 +58,7 @@ public:
 	virtual void readKmerDB(ifstream&){};
 	virtual void setNumSeqs(int i) {	numSeqs = i; 	}
 	virtual vector<int> getSequencesWithKmer(int){ vector<int> filler; return filler; };  
-	virtual int getMaxKmer(){	return 1;	};
+	virtual int getMaxKmer(){	return 1;	}
 	
 protected:
 	MothurOut* m;

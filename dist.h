@@ -17,7 +17,8 @@
 class Dist {
 	
 public:
-	Dist(){dist = 0; m = MothurOut::getInstance(); }
+	Dist(){ dist = 0; m = MothurOut::getInstance(); }
+	Dist(const Dist& d) : dist(d.dist) { m = MothurOut::getInstance(); }
 	virtual ~Dist() {}
 	virtual void calcDist(Sequence, Sequence) = 0;
 	double getDist()	{	return dist;	}
