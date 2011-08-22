@@ -167,7 +167,7 @@ MetaStatsCommand::MetaStatsCommand(string option) {
 			else { 
 				pickedGroups = true;
 				m->splitAtDash(groups, Groups);
-				m->Groups = Groups;
+				m->setGroups(Groups);
 			}
 			
 			sets = validParameter.validFile(parameters, "sets", false);			
@@ -215,8 +215,9 @@ int MetaStatsCommand::execute(){
 		//setup the pairwise comparions of sets for metastats
 		//calculate number of comparisons i.e. with groups A,B,C = AB, AC, BC = 3;
 		//make sure sets are all in designMap
-		SharedUtil* util = new SharedUtil();  
-		util->setGroups(Sets, designMap->namesOfGroups);  
+		SharedUtil* util = new SharedUtil(); 
+		vector<string> dGroups = designMap->getNamesOfGroups();
+		util->setGroups(Sets, dGroups);  
 		delete util;
 		
 		int numGroups = Sets.size();
@@ -250,7 +251,7 @@ int MetaStatsCommand::execute(){
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-			if (m->control_pressed) {  outputTypes.clear(); for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } m->Groups.clear(); delete input; delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+			if (m->control_pressed) {  outputTypes.clear(); for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } m->clearGroups(); delete input; delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 	
 			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
 
@@ -281,13 +282,13 @@ int MetaStatsCommand::execute(){
 			//prevent memory leak
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
 			
-			if (m->control_pressed) {  outputTypes.clear(); m->Groups.clear(); delete input;  delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+			if (m->control_pressed) {  outputTypes.clear(); m->clearGroups(); delete input;  delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 
 			//get next line to process
 			lookup = input->getSharedRAbundVectors();				
 		}
 		
-		if (m->control_pressed) { outputTypes.clear(); m->Groups.clear(); delete input; delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  return 0; }
+		if (m->control_pressed) { outputTypes.clear(); m->clearGroups(); delete input; delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  return 0; }
 
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -315,7 +316,7 @@ int MetaStatsCommand::execute(){
 		}
 	
 		//reset groups parameter
-		m->Groups.clear();  
+		m->clearGroups();  
 		delete input; 
 		delete designMap;
 		

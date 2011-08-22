@@ -203,7 +203,7 @@ GetGroupsCommand::GetGroupsCommand(string option)  {
 			if (groups == "not found") { groups = ""; }
 			else {
 				m->splitAtDash(groups, Groups);
-				m->Groups = Groups;
+				m->setGroups(Groups);
 			}
 			
 			sharedfile = validParameter.validFile(parameters, "shared", true);
@@ -273,7 +273,9 @@ int GetGroupsCommand::execute(){
 			//make sure groups are valid
 			//takes care of user setting groupNames that are invalid or setting groups=all
 			SharedUtil* util = new SharedUtil();
-			util->setGroups(Groups, groupMap->namesOfGroups);
+			vector<string> gNamesOfGroups = groupMap->getNamesOfGroups();
+			util->setGroups(Groups, gNamesOfGroups);
+			groupMap->setNamesOfGroups(gNamesOfGroups);
 			delete util;
 			
 			//fill names with names of sequences that are from the groups we want to remove 
@@ -711,7 +713,7 @@ void GetGroupsCommand::readAccnos(){
 		}
 		in.close();		
 		
-		m->Groups = Groups;
+		m->setGroups(Groups);
 		
 	}
 	catch(exception& e) {

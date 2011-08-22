@@ -26,7 +26,13 @@ public:
 	bool isValidGroup(string);  //return true if string is a valid group
 	string getGroup(string);
 	void setGroup(string, string);
-	vector<string> namesOfGroups;
+	vector<string> getNamesOfGroups() {
+		sort(namesOfGroups.begin(), namesOfGroups.end());
+		groupIndex.clear();
+		for (int i = 0; i < namesOfGroups.size(); i++) { groupIndex[namesOfGroups[i]] = i; }
+		return namesOfGroups;
+	}
+	void setNamesOfGroups(vector<string> sn) { namesOfGroups = sn; }
 	map<string, int> groupIndex;  //groupname, vectorIndex in namesOfGroups. - used by collectdisplays and libshuff commands.
 	int getNumSeqs()  {  return groupmap.size();  }
 	vector<string> getNamesSeqs();
@@ -34,6 +40,7 @@ public:
 	int getNumSeqs(string); //return the number of seqs in a given group
 			
 private:
+	vector<string> namesOfGroups;
 	MothurOut* m;
 	ifstream fileHandle;
 	string groupFileName;

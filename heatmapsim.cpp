@@ -69,7 +69,7 @@ vector<string> HeatMapSim::getPic(vector<SharedRAbundVector*> lookup, vector<Cal
 					
 						//get similairity between groups
 						data = calcs[k]->getValues(subset);
-						sims.push_back(data[0]);
+						sims.push_back(1.0 - data[0]);
 					
 						//save biggest similairity to set relative sim
 //						if (data[0] > biggest) { biggest = data[0]; }

@@ -37,7 +37,11 @@ public:
 	void removeSeq(string);  //removes a sequence, this is to accomadate trees that do not contain all the seqs in your groupfile
 	string getGroup(string);
 	void addSeq(string, string);
-	vector<string> namesOfGroups;
+	void addGroup(string s) { setNamesOfGroups(s); }
+	vector<string> getNamesOfGroups() {
+		sort(namesOfGroups.begin(), namesOfGroups.end());
+		return namesOfGroups;
+	}
 	vector<string> namesOfSeqs;
     map<string,int> seqsPerGroup;	//groupname, number of seqs in that group.
 	map<string, GroupIndex> treemap; //sequence name and <groupname, vector index>
@@ -46,6 +50,7 @@ public:
 	void makeSim(ListVector*);  //takes listvector info and fills treemap for use by tree.shared command.	
 	
 private:
+	vector<string> namesOfGroups;
 	ifstream fileHandle;
 	string groupFileName;
 	int numGroups;

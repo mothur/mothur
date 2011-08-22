@@ -266,17 +266,20 @@ vector<SharedRAbundVector*> SharedListVector::getSharedRAbundVector() {
 		vector<SharedRAbundVector*> lookup;  //contains just the groups the user selected
 		map<string, SharedRAbundVector*> finder;  //contains all groups in groupmap
 		string group, names, name;
-	
-		util->setGroups(m->Groups, groupmap->namesOfGroups);
+		
+		vector<string> Groups = m->getGroups();
+		vector<string> allGroups = groupmap->getNamesOfGroups();
+		util->setGroups(Groups, allGroups);
+		m->setGroups(Groups);
 		delete util;
 
-		for (int i = 0; i < groupmap->namesOfGroups.size(); i++) {
+		for (int i = 0; i < allGroups.size(); i++) {
 			SharedRAbundVector* temp = new SharedRAbundVector(data.size());
-			finder[groupmap->namesOfGroups[i]] = temp;
-			finder[groupmap->namesOfGroups[i]]->setLabel(label);
-			finder[groupmap->namesOfGroups[i]]->setGroup(groupmap->namesOfGroups[i]);
-			if (m->inUsersGroups(groupmap->namesOfGroups[i], m->Groups)) {  //if this group is in user groups
-				lookup.push_back(finder[groupmap->namesOfGroups[i]]);
+			finder[allGroups[i]] = temp;
+			finder[allGroups[i]]->setLabel(label);
+			finder[allGroups[i]]->setGroup(allGroups[i]);
+			if (m->inUsersGroups(allGroups[i], m->getGroups())) {  //if this group is in user groups
+				lookup.push_back(finder[allGroups[i]]);
 			}
 		}
 	

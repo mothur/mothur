@@ -15,7 +15,7 @@
 
 /**************************************************************************************************/
 //deep copy
-AlignmentDB::AlignmentDB(const AlignmentDB& adb) : numSeqs(adb.numSeqs), longest(adb.longest), method(adb.method), emptySequence(adb.emptySequence) {
+AlignmentDB::AlignmentDB(const AlignmentDB& adb) : numSeqs(adb.numSeqs), longest(adb.longest), method(adb.method), emptySequence(adb.emptySequence), threadID(adb.threadID) {
 	try {
 		
 		m = MothurOut::getInstance();
@@ -41,7 +41,7 @@ AlignmentDB::AlignmentDB(const AlignmentDB& adb) : numSeqs(adb.numSeqs), longest
 	
 }
 /**************************************************************************************************/
-AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gapOpen, float gapExtend, float match, float misMatch){		//	This assumes that the template database is in fasta format, may 
+AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gapOpen, float gapExtend, float match, float misMatch, int tid){		//	This assumes that the template database is in fasta format, may 
 	try {											//	need to alter this in the future?
 		m = MothurOut::getInstance();
 		longest = 0;
@@ -49,6 +49,7 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
 		bool needToGenerate = true;
 		ReferenceDB* rdb = ReferenceDB::getInstance();
 		bool silent = false;
+		threadID = tid;
 		
 		if (fastaFileName == "saved-silent") {
 			fastaFileName = "saved"; silent = true;
@@ -189,7 +190,7 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
 			#endif
 		}
 		else if(method == "suffix")		{	search = new SuffixDB(numSeqs);								}
-		else if(method == "blast")		{	search = new BlastDB(fastaFileName.substr(0,fastaFileName.find_last_of(".")+1), gapOpen, gapExtend, match, misMatch, "");	}
+		else if(method == "blast")		{	search = new BlastDB(fastaFileName.substr(0,fastaFileName.find_last_of(".")+1), gapOpen, gapExtend, match, misMatch, "", threadID);	}
 		else {
 			method = "kmer";
 			m->mothurOut(method + " is not a valid search option. I will run the command using kmer, ksize=8.");
@@ -231,7 +232,7 @@ AlignmentDB::AlignmentDB(string s){
 		method = s;
 		
 		if(method == "suffix")		{	search = new SuffixDB();	}
-		else if(method == "blast")	{	search = new BlastDB("");		}
+		else if(method == "blast")	{	search = new BlastDB("", 0);		}
 		else						{	search = new KmerDB();		}
 
 				

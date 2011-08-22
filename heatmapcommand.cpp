@@ -222,7 +222,7 @@ HeatMapCommand::HeatMapCommand(string option) {
 			if (groups == "not found") { groups = ""; }
 			else { 
 				m->splitAtDash(groups, Groups);
-				m->Groups = Groups;
+				m->setGroups(Groups);
 			}
 			
 			string temp = validParameter.validFile(parameters, "numotu", false);		if (temp == "not found") { temp = "0"; }
@@ -287,7 +287,7 @@ int HeatMapCommand::execute(){
 				if (m->control_pressed) {
 					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
 					for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  m->mothurRemove(outputNames[i]);  } } outputTypes.clear();
-					m->Groups.clear(); 
+					m->clearGroups(); 
 					delete input; delete heatmap; return 0;
 				}
 		
@@ -330,7 +330,7 @@ int HeatMapCommand::execute(){
 			
 			if (m->control_pressed) {
 				for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  m->mothurRemove(outputNames[i]);  } } outputTypes.clear();
-				m->Groups.clear(); 
+				m->clearGroups(); 
 				delete input; delete heatmap; return 0;
 			}
 
@@ -359,7 +359,7 @@ int HeatMapCommand::execute(){
 			}
 		
 			//reset groups parameter
-			m->Groups.clear();  
+			m->clearGroups();  
 			
 		}else if ((format == "list") || (format == "rabund") || (format == "sabund")) {
 	
@@ -440,7 +440,7 @@ int HeatMapCommand::execute(){
 				if (m->control_pressed) {
 					for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  }
 					for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  m->mothurRemove(outputNames[i]);  } } outputTypes.clear();
-					m->Groups.clear(); 
+					m->clearGroups(); 
 					delete input; delete heatmap; return 0;
 				}
 		
@@ -482,7 +482,7 @@ int HeatMapCommand::execute(){
 			
 			if (m->control_pressed) {
 				for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  m->mothurRemove(outputNames[i]);  } } outputTypes.clear();
-				m->Groups.clear(); 
+				m->clearGroups(); 
 				delete input; delete heatmap; return 0;
 			}
 
@@ -511,7 +511,7 @@ int HeatMapCommand::execute(){
 			}
 		
 			//reset groups parameter
-			m->Groups.clear();  
+			m->clearGroups();  
 
 		}
 		

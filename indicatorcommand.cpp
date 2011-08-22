@@ -96,8 +96,8 @@ IndicatorCommand::IndicatorCommand(string option)  {
 			}
 			
 			m->runParse = true;
-			m->Groups.clear();
-			m->namesOfGroups.clear();
+			m->clearGroups();
+			m->clearAllGroups();
 			m->Treenames.clear();
 			m->names.clear();
 			
@@ -169,7 +169,7 @@ IndicatorCommand::IndicatorCommand(string option)  {
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = "";  Groups.push_back("all"); }
 			else { m->splitAtDash(groups, Groups);	}			
-			m->Groups = Groups;
+			m->setGroups(Groups);
 			
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; m->mothurOut("You did not provide a label, I will use the first label in your inputfile."); m->mothurOutEndLine(); label=""; }	
@@ -237,11 +237,14 @@ int IndicatorCommand::execute(){
 			
 			//fill Groups - checks for "all" and for any typo groups
 			SharedUtil* util = new SharedUtil();
-			util->setGroups(Groups, designMap->namesOfGroups);
+			vector<string> nameGroups = designMap->getNamesOfGroups();
+			util->setGroups(Groups, nameGroups);
+			designMap->setNamesOfGroups(nameGroups);
 			delete util;
 			
 			//loop through the Groups and fill Globaldata's Groups with the design file info
-			m->Groups = designMap->getNamesSeqs(Groups);
+			vector<string> namesSeqs = designMap->getNamesSeqs(Groups);
+			m->setGroups(namesSeqs);
 		}
 	
 		/***************************************************/
@@ -258,7 +261,7 @@ int IndicatorCommand::execute(){
 		}
 		
 		//reset groups if needed
-		if (designfile != "") { m->Groups = Groups; }
+		if (designfile != "") { m->setGroups(Groups); }
 			
 		/***************************************************/
 		//    reading tree info							   //
@@ -273,7 +276,7 @@ int IndicatorCommand::execute(){
 			for (int i = 0; i < m->Treenames.size(); i++) { 
 				//sanity check - is this a group that is not in the sharedfile?
 				if (designfile == "") {
-					if (!(m->inUsersGroups(m->Treenames[i], m->namesOfGroups))) {
+					if (!(m->inUsersGroups(m->Treenames[i], m->getAllGroups()))) {
 						m->mothurOut("[ERROR]: " + m->Treenames[i] + " is not a group in your shared or relabund file."); m->mothurOutEndLine();
 						mismatch = true;
 					}
@@ -283,7 +286,7 @@ int IndicatorCommand::execute(){
 					vector<string> myNames = designMap->getNamesSeqs(myGroups);
 					
 					for(int k = 0; k < myNames.size(); k++) {
-						if (!(m->inUsersGroups(myNames[k], m->namesOfGroups))) {
+						if (!(m->inUsersGroups(myNames[k], m->getAllGroups()))) {
 							m->mothurOut("[ERROR]: " + myNames[k] + " is not a group in your shared or relabund file."); m->mothurOutEndLine();
 							mismatch = true;
 						}
@@ -323,9 +326,9 @@ int IndicatorCommand::execute(){
 			/***************************************************/
 			//    create ouptut tree - respecting pickedGroups //
 			/***************************************************/
-			Tree* outputTree = new Tree(m->Groups.size(), treeMap); 
+			Tree* outputTree = new Tree(m->getNumGroups(), treeMap); 
 			
-			outputTree->getSubTree(T[0], m->Groups);
+			outputTree->getSubTree(T[0], m->getGroups());
 			outputTree->assembleTree();
 				
 			//no longer need original tree, we have output tree to use and label
@@ -413,11 +416,11 @@ int IndicatorCommand::GetIndicatorSpecies(){
 			vector<SharedRAbundVector*> subset;
 			
 			//for each grouping
-			for (int i = 0; i < designMap->namesOfGroups.size(); i++) {
+			for (int i = 0; i < (designMap->getNamesOfGroups()).size(); i++) {
 				
 				for (int k = 0; k < lookup.size(); k++) {
 					//are you from this grouping?
-					if (designMap->getGroup(lookup[k]->getGroup()) == designMap->namesOfGroups[i]) {
+					if (designMap->getGroup(lookup[k]->getGroup()) == (designMap->getNamesOfGroups())[i]) {
 						subset.push_back(lookup[k]);
 						groupsAlreadyAdded.insert(lookup[k]->getGroup());
 					}
@@ -437,10 +440,10 @@ int IndicatorCommand::GetIndicatorSpecies(){
 			vector<SharedRAbundFloatVector*> subset;
 			
 			//for each grouping
-			for (int i = 0; i < designMap->namesOfGroups.size(); i++) {
+			for (int i = 0; i < (designMap->getNamesOfGroups()).size(); i++) {
 				for (int k = 0; k < lookupFloat.size(); k++) {
 					//are you from this grouping?
-					if (designMap->getGroup(lookupFloat[k]->getGroup()) == designMap->namesOfGroups[i]) {
+					if (designMap->getGroup(lookupFloat[k]->getGroup()) == (designMap->getNamesOfGroups())[i]) {
 						subset.push_back(lookupFloat[k]);
 						groupsAlreadyAdded.insert(lookupFloat[k]->getGroup());
 					}

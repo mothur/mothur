@@ -8,7 +8,6 @@
  */
 
 #include "chimeraslayercommand.h"
-#include "chimeraslayer.h"
 #include "deconvolutecommand.h"
 #include "referencedb.h"
 
@@ -470,9 +469,7 @@ int ChimeraSlayerCommand::execute(){
 		
 			int start = time(NULL);	
 			
-			if (templatefile != "self") { //you want to run slayer with a refernce template
-				chimera = new ChimeraSlayer(fastaFileNames[s], templatefile, trim, search, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign, blastlocation);	
-			}else {
+			if (templatefile == "self") { 
 				if (processors != 1) { m->mothurOut("When using template=self, mothur can only use 1 processor, continuing."); m->mothurOutEndLine(); processors = 1; }
 				string nameFile = "";
 				if (nameFileNames.size() != 0) { //you provided a namefile and we don't need to create one
@@ -484,7 +481,7 @@ int ChimeraSlayerCommand::execute(){
 					string inputString = "fasta=" + fastaFileNames[s];
 					m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
 					m->mothurOut("Running command: unique.seqs(" + inputString + ")"); m->mothurOutEndLine(); 
-								 
+					
 					Command* uniqueCommand = new DeconvoluteCommand(inputString);
 					uniqueCommand->execute();
 					
@@ -500,18 +497,24 @@ int ChimeraSlayerCommand::execute(){
 				
 				//sort fastafile by abundance, returns new sorted fastafile name
 				m->mothurOut("Sorting fastafile according to abundance..."); cout.flush(); 
-				map<string, int> priority = sortFastaFile(fastaFileNames[s], nameFile);
+				priority = sortFastaFile(fastaFileNames[s], nameFile);
 				m->mothurOut("Done."); m->mothurOutEndLine();
 				
 				if (m->control_pressed) {  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}
-
-				chimera = new ChimeraSlayer(fastaFileNames[s], templatefile, trim, priority, search, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign, blastlocation);	
 			}
-				
+			
 			if (outputDir == "") { outputDir = m->hasPath(fastaFileNames[s]);  }//if user entered a file with a path then preserve it				
 			string outputFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + "slayer.chimera";
 			string accnosFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]))  + "slayer.accnos";
 			string trimFastaFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]))  + "slayer.fasta";
+			
+			//create chimera here if you are mac or linux because fork will copy for you. Create in create processes instead if you are windows.
+			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			if (templatefile != "self") { //you want to run slayer with a reference template
+				chimera = new ChimeraSlayer(fastaFileNames[s], templatefile, trim, search, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign, blastlocation, rand());	
+			}else {
+				chimera = new ChimeraSlayer(fastaFileNames[s], templatefile, trim, priority, search, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign, blastlocation, rand());	
+			}
 			
 			if (m->control_pressed) { delete chimera; for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}
 			
@@ -521,6 +524,24 @@ int ChimeraSlayerCommand::execute(){
 				return 0; 
 			}
 			templateSeqsLength = chimera->getLength();
+			#else
+			if (processors == 1) {
+				if (templatefile != "self") { //you want to run slayer with a reference template
+					chimera = new ChimeraSlayer(fastaFileNames[s], templatefile, trim, search, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign, blastlocation, rand());	
+				}else {
+					chimera = new ChimeraSlayer(fastaFileNames[s], templatefile, trim, priority, search, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign, blastlocation, rand());	
+				}
+				
+				if (m->control_pressed) { delete chimera; for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}
+				
+				if (chimera->getUnaligned()) { 
+					m->mothurOut("Your template sequences are different lengths, please correct."); m->mothurOutEndLine(); 
+					delete chimera;
+					return 0; 
+				}
+				templateSeqsLength = chimera->getLength();
+			}
+			#endif
 			
 		#ifdef USE_MPI	
 			int pid, numSeqsPerProcessor; 
@@ -637,79 +658,67 @@ int ChimeraSlayerCommand::execute(){
 				MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 				
 		#else
-			ofstream outHeader;
-			string tempHeader = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + "slayer.chimeras.tempHeader";
-			m->openOutputFile(tempHeader, outHeader);
-			
-			chimera->printHeader(outHeader);
-			outHeader.close();
-			
-			vector<unsigned long int> positions = m->divideFile(fastaFileNames[s], processors);
-				
-			for (int i = 0; i < (positions.size()-1); i++) {
-				lines.push_back(new linePair(positions[i], positions[(i+1)]));
-			}	
-
 			//break up file
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-				if(processors == 1){
-					numSeqs = driver(lines[0], outputFileName, fastaFileNames[s], accnosFileName, trimFastaFileName);
-					
-					int numNoParents = chimera->getNumNoParents();
-					if (numNoParents == numSeqs) { m->mothurOut("[WARNING]: megablast returned 0 potential parents for all your sequences. This could be due to formatdb.exe not being setup properly, please check formatdb.log for errors."); m->mothurOutEndLine(); }
-					
-					if (m->control_pressed) { outputTypes.clear(); if (trim) { m->mothurRemove(trimFastaFileName); } m->mothurRemove(outputFileName); m->mothurRemove(tempHeader); m->mothurRemove(accnosFileName); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear(); delete chimera; return 0; }
-					
-				}else{
-					processIDS.resize(0);
-					
-					numSeqs = createProcesses(outputFileName, fastaFileNames[s], accnosFileName, trimFastaFileName); 
+			vector<unsigned long int> positions; 
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			positions = m->divideFile(fastaFileNames[s], processors);
+			for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(new linePair(positions[i], positions[(i+1)]));	}
+#else
+			if (processors == 1) {
+				lines.push_back(new linePair(0, 1000));
+			}else {
+				positions = m->setFilePosFasta(fastaFileNames[s], numSeqs); 
 				
-					rename((outputFileName + toString(processIDS[0]) + ".temp").c_str(), outputFileName.c_str());
-					rename((accnosFileName + toString(processIDS[0]) + ".temp").c_str(), accnosFileName.c_str());
-					if (trim) {  rename((trimFastaFileName + toString(processIDS[0]) + ".temp").c_str(), trimFastaFileName.c_str()); }
-						
-					//append output files
-					for(int i=1;i<processors;i++){
-						m->appendFiles((outputFileName + toString(processIDS[i]) + ".temp"), outputFileName);
-						m->mothurRemove((outputFileName + toString(processIDS[i]) + ".temp"));
-					}
-					
-					//append output files
-					for(int i=1;i<processors;i++){
-						m->appendFiles((accnosFileName + toString(processIDS[i]) + ".temp"), accnosFileName);
-						m->mothurRemove((accnosFileName + toString(processIDS[i]) + ".temp"));
-					}
-					
-					if (trim) {
-						for(int i=1;i<processors;i++){
-							m->appendFiles((trimFastaFileName + toString(processIDS[i]) + ".temp"), trimFastaFileName);
-							m->mothurRemove((trimFastaFileName + toString(processIDS[i]) + ".temp"));
-						}
-					}
-					
-					if (m->control_pressed) { outputTypes.clear(); if (trim) { m->mothurRemove(trimFastaFileName); } m->mothurRemove(outputFileName); m->mothurRemove(accnosFileName); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear(); delete chimera; return 0; }
+				//figure out how many sequences you have to process
+				int numSeqsPerProcessor = numSeqs / processors;
+				for (int i = 0; i < processors; i++) {
+					int startIndex =  i * numSeqsPerProcessor;
+					if(i == (processors - 1)){	numSeqsPerProcessor = numSeqs - i * numSeqsPerProcessor; 	}
+					lines.push_back(new linePair(positions[startIndex], numSeqsPerProcessor));
 				}
-
-			#else
+			}
+#endif
+			
+			if(processors == 1){
 				numSeqs = driver(lines[0], outputFileName, fastaFileNames[s], accnosFileName, trimFastaFileName);
 				
 				int numNoParents = chimera->getNumNoParents();
 				if (numNoParents == numSeqs) { m->mothurOut("[WARNING]: megablast returned 0 potential parents for all your sequences. This could be due to formatdb.exe not being setup properly, please check formatdb.log for errors."); m->mothurOutEndLine(); }
-
 				
-				if (m->control_pressed) { outputTypes.clear(); if (trim) { m->mothurRemove(trimFastaFileName); } m->mothurRemove(outputFileName); m->mothurRemove(tempHeader); m->mothurRemove(accnosFileName); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear(); delete chimera; return 0; }
+				if (m->control_pressed) { outputTypes.clear(); if (trim) { m->mothurRemove(trimFastaFileName); } m->mothurRemove(outputFileName);  m->mothurRemove(accnosFileName); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear(); delete chimera; return 0; }
 				
-			#endif
+			}else{
+				processIDS.resize(0);
+				
+				numSeqs = createProcesses(outputFileName, fastaFileNames[s], accnosFileName, trimFastaFileName); 
 			
-			m->appendFiles(outputFileName, tempHeader);
-		
-			m->mothurRemove(outputFileName);
-			rename(tempHeader.c_str(), outputFileName.c_str());
+				rename((outputFileName + toString(processIDS[0]) + ".temp").c_str(), outputFileName.c_str());
+				rename((accnosFileName + toString(processIDS[0]) + ".temp").c_str(), accnosFileName.c_str());
+				if (trim) {  rename((trimFastaFileName + toString(processIDS[0]) + ".temp").c_str(), trimFastaFileName.c_str()); }
+					
+				//append output files
+				for(int i=1;i<processIDS.size();i++){
+					m->appendFiles((outputFileName + toString(processIDS[i]) + ".temp"), outputFileName);
+					m->mothurRemove((outputFileName + toString(processIDS[i]) + ".temp"));
+					
+					m->appendFiles((accnosFileName + toString(processIDS[i]) + ".temp"), accnosFileName);
+					m->mothurRemove((accnosFileName + toString(processIDS[i]) + ".temp"));
+					
+					if (trim) {
+						m->appendFiles((trimFastaFileName + toString(processIDS[i]) + ".temp"), trimFastaFileName);
+						m->mothurRemove((trimFastaFileName + toString(processIDS[i]) + ".temp"));
+					}
+				}
+				
+				if (m->control_pressed) { outputTypes.clear(); if (trim) { m->mothurRemove(trimFastaFileName); } m->mothurRemove(outputFileName); m->mothurRemove(accnosFileName); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear(); delete chimera; return 0; }
+			}
+
 			
 		#endif
-			delete chimera;
 			
+			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			delete chimera;
+			#endif
 			
 			for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
 			
@@ -764,6 +773,8 @@ int ChimeraSlayerCommand::driver(linePair* filePos, string outputFName, string f
 		m->openInputFile(filename, inFASTA);
 
 		inFASTA.seekg(filePos->start);
+		
+		if (filePos->start == 0) { chimera->printHeader(out); }
 
 		bool done = false;
 		int count = 0;
@@ -993,10 +1004,11 @@ int ChimeraSlayerCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_Fil
 
 int ChimeraSlayerCommand::createProcesses(string outputFileName, string filename, string accnos, string fasta) {
 	try {
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		int process = 0;
 		int num = 0;
+		int numNoParents = 0;
 		
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		//loop through and create all the processes you want
 		while (process != processors) {
 			int pid = fork();
@@ -1027,7 +1039,6 @@ int ChimeraSlayerCommand::createProcesses(string outputFileName, string filename
 			wait(&temp);
 		}
 		
-		int numNoParents = 0;
 		for (int i = 0; i < processIDS.size(); i++) {
 			ifstream in;
 			string tempFile =  outputFileName + toString(processIDS[i]) + ".num.temp";
@@ -1035,11 +1046,42 @@ int ChimeraSlayerCommand::createProcesses(string outputFileName, string filename
 			if (!in.eof()) { int tempNum = 0; int tempNumParents = 0; in >> tempNum >> tempNumParents; num += tempNum; numNoParents += tempNumParents; }
 			in.close(); m->mothurRemove(tempFile);
 		}
+#else
 		
+		//////////////////////////////////////////////////////////////////////////////////////////////////////
+		//Windows version shared memory, so be careful when passing variables through the slayerData struct. 
+		//Above fork() will clone, so memory is separate, but that's not the case with windows, 
+		//////////////////////////////////////////////////////////////////////////////////////////////////////
+		
+		vector<slayerData*> pDataArray; 
+		DWORD   dwThreadIdArray[processors];
+		HANDLE  hThreadArray[processors]; 
+		
+		//Create processor worker threads.
+		for( int i=0; i<processors; i++ ){
+			string extension = toString(i) + ".temp";
+			slayerData* tempslayer = new slayerData((outputFileName + extension), (fasta + extension), (accnos + extension), filename, templatefile, search, blastlocation, trimera, trim, realign, m, lines[i]->start, lines[i]->end, ksize, match, mismatch, window, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, divR, priority, i);
+			pDataArray.push_back(tempslayer);
+			processIDS.push_back(i);
+			
+			//MySeqSumThreadFunction is in header. It must be global or static to work with the threads.
+			//default security attributes, thread function name, argument to thread function, use default creation flags, returns the thread identifier
+			hThreadArray[i] = CreateThread(NULL, 0, MySlayerThreadFunction, pDataArray[i], 0, &dwThreadIdArray[i]);   
+		}
+				
+		//Wait until all threads have terminated.
+		WaitForMultipleObjects(processors, hThreadArray, TRUE, INFINITE);
+		
+		//Close all thread handles and free memory allocations.
+		for(int i=0; i < pDataArray.size(); i++){
+			num += pDataArray[i]->count;
+			numNoParents += pDataArray[i]->numNoParents;
+			CloseHandle(hThreadArray[i]);
+			delete pDataArray[i];
+		}
+#endif	
 		if (num == numNoParents) {  m->mothurOut("[WARNING]: megablast returned 0 potential parents for all your sequences. This could be due to formatdb.exe not being setup properly, please check formatdb.log for errors."); m->mothurOutEndLine(); }
-		
 		return num;
-#endif		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ChimeraSlayerCommand", "createProcesses");

@@ -150,7 +150,7 @@ MergeGroupsCommand::MergeGroupsCommand(string option) {
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = "all";  }
 			m->splitAtDash(groups, Groups);
-			m->Groups = Groups;
+			m->setGroups(Groups);
 		}
 		
 	}
@@ -187,7 +187,7 @@ int MergeGroupsCommand::execute(){
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-			if (m->control_pressed) {  out.close(); for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } m->Groups.clear();  delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+			if (m->control_pressed) {  out.close(); for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } m->clearGroups();  delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 			
 			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
 				
@@ -221,13 +221,13 @@ int MergeGroupsCommand::execute(){
 			//prevent memory leak
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
 			
-			if (m->control_pressed) {  out.close(); m->Groups.clear();   delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+			if (m->control_pressed) {  out.close(); m->clearGroups();   delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 			
 			//get next line to process
 			lookup = input.getSharedRAbundVectors();				
 		}
 		
-		if (m->control_pressed) { out.close(); m->Groups.clear();  delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  return 0; }
+		if (m->control_pressed) { out.close(); m->clearGroups();  delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  return 0; }
 		
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -257,7 +257,7 @@ int MergeGroupsCommand::execute(){
 		
 		out.close();
 		//reset groups parameter
-		m->Groups.clear();  
+		m->clearGroups();  
 		delete designMap;
 		
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0;}

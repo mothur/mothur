@@ -41,9 +41,9 @@ SharedOrderVector::SharedOrderVector(ifstream& f) : DataVector() {  //reads in a
 		f >> label >> groupN >> num;
 		holdLabel = label;
 		
-		
+		vector<string> allGroups;
 		//save group in groupmap
-		groupmap->namesOfGroups.push_back(groupN);
+		allGroups.push_back(groupN);
 		groupmap->groupIndex[groupN] = 0;
 		
 		
@@ -67,7 +67,7 @@ SharedOrderVector::SharedOrderVector(ifstream& f) : DataVector() {  //reads in a
 			
 			
 			//save group in groupmap
-			groupmap->namesOfGroups.push_back(groupN);
+			allGroups.push_back(groupN);
 			groupmap->groupIndex[groupN] = count;
 			
 			
@@ -88,8 +88,9 @@ SharedOrderVector::SharedOrderVector(ifstream& f) : DataVector() {  //reads in a
 		
 		//put file pointer back since you are now at a new distance label
 		for (int i = 0; i < nextLabel.length(); i++) { f.unget();  }
-	
-		m->namesOfGroups = groupmap->namesOfGroups;
+		
+		groupmap->setNamesOfGroups(allGroups);
+		m->setAllGroups(allGroups);
 		
 		updateStats();
 		
@@ -285,8 +286,12 @@ vector<SharedRAbundVector*> SharedOrderVector::getSharedRAbundVector() {
 		util = new SharedUtil();
 		vector<SharedRAbundVector*> lookup;
 		
-		util->setGroups(m->Groups, m->namesOfGroups);
-		util->getSharedVectors(m->Groups, lookup, this);
+		vector<string> Groups = m->getGroups();
+		vector<string> allGroups = m->getAllGroups();
+		util->setGroups(Groups, allGroups);
+		util->getSharedVectors(Groups, lookup, this);
+		m->setGroups(Groups);
+		m->setAllGroups(allGroups);
 		
 		return lookup;
 	}

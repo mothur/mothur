@@ -14,18 +14,22 @@
 
 /**************************************************************************************************/
 
-BlastDB::BlastDB(string tag, float gO, float gE, float mm, float mM, string b) : Database(), 
+BlastDB::BlastDB(string tag, float gO, float gE, float mm, float mM, string b, int tid) : Database(), 
 gapOpen(gO), gapExtend(gE), match(mm), misMatch(mM) {
 	try {
 		count = 0;
 		path = b;
+		threadID = tid;
 
 		int randNumber = rand();
 		//int randNumber = 12345;
 		string pid = "";
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-		pid +=  toString(getpid());
+		pid += getpid();	
+#else
+		pid += toString(threadID);	
 #endif
+		
 		
 		dbFileName = tag + pid + toString(randNumber) + ".template.unaligned.fasta";
 		queryFileName = tag + pid + toString(randNumber) + ".candidate.unaligned.fasta";
@@ -96,11 +100,12 @@ gapOpen(gO), gapExtend(gE), match(mm), misMatch(mM) {
 }
 /**************************************************************************************************/
 
-BlastDB::BlastDB(string b) : Database() {
+BlastDB::BlastDB(string b, int tid) : Database() {
 	try {
 		count = 0;
 		
 		path = b;
+		threadID = tid;
 		
 		//make sure blast exists in the write place
 		if (path == "") {
@@ -119,7 +124,9 @@ BlastDB::BlastDB(string b) : Database() {
 		int randNumber = rand();
 		string pid = "";
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-		pid +=  toString(getpid());
+		pid += getpid();	
+#else
+		pid += toString(threadID);	
 #endif
 		
 		dbFileName = pid + toString(randNumber) + ".template.unaligned.fasta";
@@ -206,10 +213,7 @@ vector<int> BlastDB::findClosestSequences(Sequence* seq, int n) {
 		
 		ofstream queryFile;
 		int randNumber = rand();
-		string pid = "";
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-		pid +=  toString(getpid());
-#endif
+		string pid = scrubName(seq->getName());
 		
 		m->openOutputFile((queryFileName+pid+toString(randNumber)), queryFile);
 		queryFile << '>' << seq->getName() << endl;
@@ -273,10 +277,7 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n, int minPerID) {
 		
 		ofstream queryFile;
 		int randNumber = rand();
-		string pid = "";
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-		pid += toString(getpid());
-#endif
+		string pid = scrubName(seq->getName());
 		
 		m->openOutputFile((queryFileName+pid+toString(randNumber)), queryFile);
 		queryFile << '>' << seq->getName() << endl;
@@ -378,6 +379,24 @@ void BlastDB::generateDB() {
 	}
 	catch(exception& e) {
 		m->errorOut(e, "BlastDB", "generateDB");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+string BlastDB::scrubName(string seqName) {
+	try {
+		
+		string cleanName = "";
+		
+		for (int i = 0; i < seqName.length(); i++) {
+			if (isalnum(seqName[i])) { cleanName += seqName[i]; }
+			else { cleanName += "_";  }
+		}
+		
+		return cleanName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "BlastDB", "scrubName");
 		exit(1);
 	}
 }

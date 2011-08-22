@@ -181,7 +181,7 @@ MatrixOutputCommand::MatrixOutputCommand(string option)  {
 			if (groups == "not found") { groups = ""; }
 			else { 
 				m->splitAtDash(groups, Groups);
-				m->Groups = Groups;
+				m->setGroups(Groups);
 			}
 			
 			string temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
@@ -330,12 +330,12 @@ int MatrixOutputCommand::execute(){
 			lines[i].end = int (sqrt(float(i+1)/float(processors)) * numGroups);
 		}	
 		
-		if (m->control_pressed) { delete input; for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } m->Groups.clear(); return 0;  }
+		if (m->control_pressed) { delete input; for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } m->clearGroups(); return 0;  }
 				
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 		
-			if (m->control_pressed) { outputTypes.clear(); delete input; for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } m->Groups.clear(); return 0;  }
+			if (m->control_pressed) { outputTypes.clear(); delete input; for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } m->clearGroups(); return 0;  }
 		
 			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
 				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
@@ -368,7 +368,7 @@ int MatrixOutputCommand::execute(){
 			lookup = input->getSharedRAbundVectors();
 		}
 		
-		if (m->control_pressed) { outputTypes.clear(); delete input; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } m->Groups.clear(); return 0;  }
+		if (m->control_pressed) { outputTypes.clear(); delete input; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } m->clearGroups(); return 0;  }
 
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -383,7 +383,7 @@ int MatrixOutputCommand::execute(){
 			}
 		}
 		
-		if (m->control_pressed) { outputTypes.clear(); delete input;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } m->Groups.clear(); return 0;  }
+		if (m->control_pressed) { outputTypes.clear(); delete input;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } m->clearGroups(); return 0;  }
 
 		//run last label if you need to
 		if (needToRun == true)  {
@@ -395,10 +395,10 @@ int MatrixOutputCommand::execute(){
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 		}
 		
-		if (m->control_pressed) { outputTypes.clear();  delete input;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } m->Groups.clear(); return 0;  }
+		if (m->control_pressed) { outputTypes.clear();  delete input;  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } m->clearGroups(); return 0;  }
 		
 		//reset groups parameter
-		m->Groups.clear();  
+		m->clearGroups();  
 		
 		//set phylip file as new current phylipfile
 		string current = "";

@@ -240,7 +240,7 @@ TreeGroupCommand::TreeGroupCommand(string option)  {
 			if (groups == "not found") { groups = ""; }
 			else { 
 				m->splitAtDash(groups, Groups);
-				m->Groups = Groups;
+				m->setGroups(Groups);
 			}
 				
 			calc = validParameter.validFile(parameters, "calc", false);			
@@ -396,13 +396,13 @@ int TreeGroupCommand::execute(){
 			
 			//create treemap class from groupmap for tree class to use
 			tmap = new TreeMap();
-			tmap->makeSim(m->namesOfGroups);
+			tmap->makeSim(m->getAllGroups());
 			
 			//clear globaldatas old tree names if any
 			m->Treenames.clear();
 			
 			//fills globaldatas tree names
-			m->Treenames = m->Groups;
+			m->Treenames = m->getGroups();
 		
 			if (m->control_pressed) { return 0; }
 			
@@ -438,13 +438,14 @@ int TreeGroupCommand::execute(){
 			
 			tmap->makeSim(list);
 			
-			m->Groups = tmap->namesOfGroups;
+			vector<string> namesGroups = tmap->getNamesOfGroups();
+			m->setGroups(namesGroups);
 		
 			//clear globaldatas old tree names if any
 			m->Treenames.clear();
 		
 			//fills globaldatas tree names
-			m->Treenames = m->Groups;
+			m->Treenames = m->getGroups();
 			
 			//used in tree constructor 
 			m->runParse = false;
@@ -468,7 +469,7 @@ int TreeGroupCommand::execute(){
 		}
 				
 		//reset groups parameter
-		m->Groups.clear(); 
+		m->clearGroups(); 
 		
 		//set tree file as new current treefile
 		string current = "";

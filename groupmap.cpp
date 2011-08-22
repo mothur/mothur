@@ -44,7 +44,7 @@ int GroupMap::readMap() {
 			m->gobble(fileHandle);
 		}
 		fileHandle.close();
-		m->namesOfGroups = namesOfGroups;
+		m->setAllGroups(namesOfGroups);
 		return error;
 }
 /************************************************************/
@@ -70,7 +70,7 @@ int GroupMap::readDesignMap() {
 			m->gobble(fileHandle);
 		}
 		fileHandle.close();
-		m->namesOfGroups = namesOfGroups;
+		m->setAllGroups(namesOfGroups);
 		return error;
 }
 
@@ -91,7 +91,15 @@ string GroupMap::getGroup(string sequenceName) {
 /************************************************************/
 
 void GroupMap::setGroup(string sequenceName, string groupN) {
-	groupmap[sequenceName] = groupN;
+	setNamesOfGroups(groupN);
+	
+	it = groupmap.find(sequenceName);
+	
+	if (it != groupmap.end()) {  m->mothurOut("Your groupfile contains more than 1 sequence named " + sequenceName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine();  }
+	else {
+		groupmap[sequenceName] = groupN;	//store data in map
+		seqsPerGroup[groupN]++;  //increment number of seqs in that group
+	}
 }
 
 /************************************************************/

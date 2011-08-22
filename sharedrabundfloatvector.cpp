@@ -33,7 +33,8 @@ SharedRAbundFloatVector::SharedRAbundFloatVector(int n) : DataVector(), maxRank(
 SharedRAbundFloatVector::SharedRAbundFloatVector(ifstream& f) : DataVector(), maxRank(0.0), numBins(0), numSeqs(0.0) {
 	try {
 		
-		m->namesOfGroups.clear();
+		m->clearAllGroups();
+		vector<string> allGroups;
 		
 		int num, count;
 		float inputData;
@@ -88,7 +89,7 @@ SharedRAbundFloatVector::SharedRAbundFloatVector(ifstream& f) : DataVector(), ma
 		lookup[0]->setLabel(label);
 		lookup[0]->setGroup(groupN);
 		
-		m->namesOfGroups.push_back(groupN);
+		allGroups.push_back(groupN);
 		
 		//fill vector.  data = first sharedrabund in file
 		for(int i=0;i<num;i++){
@@ -109,7 +110,7 @@ SharedRAbundFloatVector::SharedRAbundFloatVector(ifstream& f) : DataVector(), ma
 			f >> groupN >> num;
 			count++;
 			
-			m->namesOfGroups.push_back(groupN);
+			allGroups.push_back(groupN);
 			
 			//add new vector to lookup
 			temp = new SharedRAbundFloatVector();
@@ -129,6 +130,7 @@ SharedRAbundFloatVector::SharedRAbundFloatVector(ifstream& f) : DataVector(), ma
 		}
 		
 		m->saveNextLabel = nextLabel;
+		m->setAllGroups(allGroups);
 	
 	}
 	catch(exception& e) {
@@ -339,12 +341,15 @@ vector<SharedRAbundFloatVector*> SharedRAbundFloatVector::getSharedRAbundFloatVe
 		SharedUtil* util;
 		util = new SharedUtil();
 		
-		util->setGroups(m->Groups, m->namesOfGroups);
+		vector<string> Groups = m->getGroups();
+		vector<string> allGroups = m->getAllGroups();
+		util->setGroups(Groups, allGroups);
+		m->setGroups(Groups);
 		
 		bool remove = false;
 		for (int i = 0; i < lookup.size(); i++) {
 			//if this sharedrabund is not from a group the user wants then delete it.
-			if (util->isValidGroup(lookup[i]->getGroup(), m->Groups) == false) { 
+			if (util->isValidGroup(lookup[i]->getGroup(), m->getGroups()) == false) { 
 				delete lookup[i]; lookup[i] = NULL;
 				lookup.erase(lookup.begin()+i); 
 				i--; 

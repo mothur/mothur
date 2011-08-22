@@ -102,6 +102,10 @@ void SharedUtil::getSharedVectorswithReplacement(vector<string> Groups, vector<S
 //need to have mode because different commands require different number of valid groups
 void SharedUtil::setGroups(vector<string>& userGroups, vector<string>& allGroups) {
 	try {
+		
+		sort(userGroups.begin(), userGroups.end());
+		sort(allGroups.begin(), allGroups.end());
+		
 		if (userGroups.size() != 0) {
 			if (userGroups[0] != "all") {
 				//check that groups are valid
@@ -144,6 +148,10 @@ void SharedUtil::setGroups(vector<string>& userGroups, vector<string>& allGroups
 //need to have mode because different commands require different number of valid groups
 void SharedUtil::setGroups(vector<string>& userGroups, vector<string>& allGroups, string mode) {
 	try {
+		
+		sort(userGroups.begin(), userGroups.end());
+		sort(allGroups.begin(), allGroups.end());
+		
 		if (userGroups.size() != 0) {
 			if (userGroups[0] != "all") {
 				//check that groups are valid
@@ -190,6 +198,9 @@ void SharedUtil::setGroups(vector<string>& userGroups, vector<string>& allGroups
 //for parsimony and unifrac commands you set pairwise groups as well as an allgroups in calc
 void SharedUtil::setGroups(vector<string>& userGroups, vector<string>& allGroups, string& label, int& numGroups, string mode){  //globaldata->Groups, your tree or group map, allgroups, mode
 	try {
+		sort(userGroups.begin(), userGroups.end());
+		sort(allGroups.begin(), allGroups.end());
+		
 		numGroups = 0;
 		label = "";
 
@@ -271,6 +282,7 @@ void SharedUtil::setGroups(vector<string>& userGroups, vector<string>& allGroups
 /**************************************************************************************/
 void SharedUtil::getCombos(vector<string>& groupComb, vector<string> userGroups, int& numComp) { //groupcomb, globaldata->Groups, numcomb
 	try {
+		sort(userGroups.begin(), userGroups.end());
 		//calculate number of comparisons i.e. with groups A,B,C = AB, AC, BC = 3;
 		numComp = 0;
 		for (int i=0; i< userGroups.size(); i++) { 

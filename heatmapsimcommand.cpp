@@ -234,7 +234,7 @@ HeatMapSimCommand::HeatMapSimCommand(string option)  {
 			if (groups == "not found") { groups = ""; }
 			else { 
 				m->splitAtDash(groups, Groups);
-				m->Groups = Groups;
+				m->setGroups(Groups);
 			}
 			
 			
@@ -325,12 +325,12 @@ int HeatMapSimCommand::runCommandShared() {
 		set<string> processedLabels;
 		set<string> userLabels = labels;
 		
-		if (m->control_pressed) {  delete input;  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  m->Groups.clear(); return 0; }
+		if (m->control_pressed) {  delete input;  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  m->clearGroups(); return 0; }
 		
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-			if (m->control_pressed) { delete input;  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } m->Groups.clear(); return 0; }
+			if (m->control_pressed) { delete input;  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } m->clearGroups(); return 0; }
 
 			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
 	
@@ -370,7 +370,7 @@ int HeatMapSimCommand::runCommandShared() {
 		}
 		
 			
-		if (m->control_pressed) {  delete input;  m->Groups.clear();  return 0; }
+		if (m->control_pressed) {  delete input;  m->clearGroups();  return 0; }
 
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -385,7 +385,7 @@ int HeatMapSimCommand::runCommandShared() {
 			}
 		}
 		
-		if (m->control_pressed) {  delete input;  m->Groups.clear(); return 0; }
+		if (m->control_pressed) {  delete input;  m->clearGroups(); return 0; }
 		
 		//run last label if you need to
 		if (needToRun == true)  {
@@ -399,10 +399,10 @@ int HeatMapSimCommand::runCommandShared() {
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 		}
 		
-		if (m->control_pressed) {  delete input;  m->Groups.clear(); return 0; }
+		if (m->control_pressed) {  delete input;  m->clearGroups(); return 0; }
 			
 		//reset groups parameter
-		m->Groups.clear();  
+		m->clearGroups();  
 			
 		delete input;  
 	

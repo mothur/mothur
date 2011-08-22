@@ -24,8 +24,8 @@
 class ChimeraSlayer : public Chimera {
 	
 	public:
-		ChimeraSlayer(string, string, bool, string, int, int, int, int, float, int, int, int, int, int, int, int, int, bool, string);
-		ChimeraSlayer(string, string, bool, map<string, int>&, string,  int, int, int, int, float, int, int, int, int, int, int, int, int, bool, string);
+		ChimeraSlayer(string, string, bool, string, int, int, int, int, float, int, int, int, int, int, int, int, int, bool, string, int);
+		ChimeraSlayer(string, string, bool, map<string, int>&, string,  int, int, int, int, float, int, int, int, int, int, int, int, int, bool, string, int);
 
 		~ChimeraSlayer();
 		
@@ -50,7 +50,7 @@ class ChimeraSlayer : public Chimera {
 		Database* databaseLeft;
 		map<string, int> priority; //for template=self, seqname, seqAligned, abundance
 		set<string> chimericSeqs; //for template=self, so we don't add chimeric sequences to the userTemplate set
-		int numNoParents;
+		int numNoParents, threadID;
 	
 		vector<data_struct>  chimeraResults;
 		data_results printResults;

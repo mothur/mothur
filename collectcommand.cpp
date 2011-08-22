@@ -307,7 +307,7 @@ int CollectCommand::execute(){
 	
 		for (int p = 0; p < inputFileNames.size(); p++) {
 			
-			if (m->control_pressed) {  outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}  m->Groups.clear();  return 0; }
+			if (m->control_pressed) {  outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}  m->clearGroups();  return 0; }
 			
 			if (outputDir == "") { outputDir += m->hasPath(inputFileNames[p]); }
 			string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(inputFileNames[p]));
@@ -416,7 +416,7 @@ int CollectCommand::execute(){
 				for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} outputTypes.clear(); 
 				delete input;  
 				delete order; 
-				m->Groups.clear();
+				m->clearGroups();
 				return 0;
 			}
 
@@ -428,7 +428,7 @@ int CollectCommand::execute(){
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} outputTypes.clear(); 
 					delete input;  
 					delete order; 
-					m->Groups.clear();
+					m->clearGroups();
 					return 0;
 				}
 
@@ -476,7 +476,7 @@ int CollectCommand::execute(){
 					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} outputTypes.clear(); 
 					delete input;  
-					m->Groups.clear();
+					m->clearGroups();
 					return 0;
 			}
 				
@@ -509,7 +509,7 @@ int CollectCommand::execute(){
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} outputTypes.clear(); 
 					delete input;  
 					delete order;
-					m->Groups.clear();
+					m->clearGroups();
 					return 0;
 				}
 				delete order;

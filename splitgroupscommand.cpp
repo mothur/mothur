@@ -167,7 +167,8 @@ int SplitGroupCommand::execute(){
 		groupMap = new GroupMap(groupfile);
 		groupMap->readMap();
 		
-		SharedUtil util;  util.setGroups(Groups, groupMap->namesOfGroups);  
+		vector<string> namesGroups = groupMap->getNamesOfGroups();
+		SharedUtil util;  util.setGroups(Groups, namesGroups);  
 		
 		if (namefile != "") {  readNames();  }
 		splitFasta();

@@ -180,8 +180,8 @@ bool InteractEngine::getInput(){
 					#endif
 					//executes valid command
 					mout->runParse = true;
-					mout->Groups.clear();
-					mout->namesOfGroups.clear();
+					mout->clearGroups();
+					mout->clearAllGroups();
 					mout->Treenames.clear();
 					mout->names.clear();
 					mout->saveNextLabel = "";
@@ -364,8 +364,8 @@ bool BatchEngine::getInput(){
 					#endif
 					//executes valid command
 					mout->runParse = true;
-					mout->Groups.clear();
-					mout->namesOfGroups.clear();
+					mout->clearGroups();
+					mout->clearAllGroups();
 					mout->Treenames.clear();
 					mout->names.clear();
 					mout->saveNextLabel = "";
@@ -531,8 +531,8 @@ bool ScriptEngine::getInput(){
 					#endif
 					//executes valid command
 					mout->runParse = true;
-					mout->Groups.clear();
-					mout->namesOfGroups.clear();
+					mout->clearGroups();
+					mout->clearAllGroups();
 					mout->Treenames.clear();
 					mout->names.clear();
 					mout->saveNextLabel = "";

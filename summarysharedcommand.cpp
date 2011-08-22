@@ -194,7 +194,7 @@ SummarySharedCommand::SummarySharedCommand(string option)  {
 			if (groups == "not found") { groups = ""; }
 			else { 
 				m->splitAtDash(groups, Groups);
-				m->Groups = Groups;
+				m->setGroups(Groups);
 			}
 			
 			string temp = validParameter.validFile(parameters, "all", false);				if (temp == "not found") { temp = "false"; }
@@ -380,7 +380,7 @@ int SummarySharedCommand::execute(){
 			delete input;
 			for (int i = 0; i < lookup.size(); i++) { delete lookup[i]; }
 			for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }
-			m->Groups.clear(); 
+			m->clearGroups(); 
 			return 0;
 		}
 		/******************************************************/
@@ -388,7 +388,7 @@ int SummarySharedCommand::execute(){
 		
 		/******************************************************/
 		//comparison breakup to be used by different processes later
-		numGroups = m->Groups.size();
+		numGroups = m->getNumGroups();
 		lines.resize(processors);
 		for (int i = 0; i < processors; i++) {
 			lines[i].start = int (sqrt(float(i)/float(processors)) * numGroups);
@@ -408,7 +408,7 @@ int SummarySharedCommand::execute(){
 				delete input; 
 				for (int i = 0; i < lookup.size(); i++) { delete lookup[i]; }
 				for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }
-				m->Groups.clear(); 
+				m->clearGroups(); 
 				return 0;
 			}
 
@@ -450,7 +450,7 @@ int SummarySharedCommand::execute(){
 			m->mothurRemove(outputFileName); 
 			delete input; 
 			for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }
-			m->Groups.clear(); 
+			m->clearGroups(); 
 			return 0;
 		}
 
@@ -479,7 +479,7 @@ int SummarySharedCommand::execute(){
 		
 				
 		//reset groups parameter
-		m->Groups.clear();  
+		m->clearGroups();  
 		
 		for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }
 		delete input;  

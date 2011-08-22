@@ -555,17 +555,23 @@ int ClusterSplitCommand::execute(){
 		MPI_Barrier(MPI_COMM_WORLD);
 		
 	#else
-
+		
+		//sanity check
+		if (processors > distName.size()) { processors = distName.size(); }
+		
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 				if(processors == 1){
 					listFileNames = cluster(distName, labels); //clusters individual files and returns names of list files
 				}else{
+					
+					cout << processors << '\t' << distName.size() << endl;
 					vector < vector < map<string, string> > > dividedNames; //distNames[1] = vector of filenames for process 1...
 					dividedNames.resize(processors);
 					
 					//for each file group figure out which process will complete it
 					//want to divide the load intelligently so the big files are spread between processes
 					for (int i = 0; i < distName.size(); i++) { 
+						cout << i << endl;
 						int processToAssign = (i+1) % processors; 
 						if (processToAssign == 0) { processToAssign = processors; }
 						
@@ -574,6 +580,7 @@ int ClusterSplitCommand::execute(){
 					
 					//not lets reverse the order of ever other process, so we balance big files running with little ones
 					for (int i = 0; i < processors; i++) {
+						cout << i << endl;
 						int remainder = ((i+1) % processors);
 						if (remainder) {  reverse(dividedNames[i].begin(), dividedNames[i].end());  }
 					}

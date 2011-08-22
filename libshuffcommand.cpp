@@ -165,7 +165,7 @@ LibShuffCommand::LibShuffCommand(string option)  {
 			else { 
 				savegroups = groups;
 				m->splitAtDash(groups, Groups);
-				m->Groups = Groups;
+				m->setGroups(Groups);
 			}
 				
 			string temp;
@@ -252,9 +252,9 @@ int LibShuffCommand::execute(){
 		//this is needed because when we read the matrix we sort it into groups in alphabetical order
 		//the rest of the command and the classes used in this command assume specific order
 		/********************************************************************************************/
-		matrix->setGroups(groupMap->namesOfGroups);
+		matrix->setGroups(groupMap->getNamesOfGroups());
 		vector<int> sizes;
-		for (int i = 0; i < groupMap->namesOfGroups.size(); i++) {   sizes.push_back(groupMap->getNumSeqs(groupMap->namesOfGroups[i]));  }
+		for (int i = 0; i < (groupMap->getNamesOfGroups()).size(); i++) {   sizes.push_back(groupMap->getNumSeqs((groupMap->getNamesOfGroups())[i]));  }
 		matrix->setSizes(sizes);
 			
 			
@@ -268,21 +268,21 @@ int LibShuffCommand::execute(){
 		savedDXYValues = form->evaluateAll();
 		savedMinValues = form->getSavedMins();
 		
-		if (m->control_pressed) {  delete form; m->Groups.clear(); delete matrix; delete groupMap; return 0; }
+		if (m->control_pressed) {  delete form; m->clearGroups(); delete matrix; delete groupMap; return 0; }
 	
 		pValueCounts.resize(numGroups);
 		for(int i=0;i<numGroups;i++){
 			pValueCounts[i].assign(numGroups, 0);
 		}
 	
-		if (m->control_pressed) {  outputTypes.clear(); delete form; m->Groups.clear(); delete matrix; delete groupMap; return 0; }
+		if (m->control_pressed) {  outputTypes.clear(); delete form; m->clearGroups(); delete matrix; delete groupMap; return 0; }
 				
 		Progress* reading = new Progress();
 		
 		for(int i=0;i<numGroups-1;i++) {
 			for(int j=i+1;j<numGroups;j++) {
 				
-				if (m->control_pressed) {  outputTypes.clear();  delete form; m->Groups.clear(); delete matrix; delete groupMap; delete reading; return 0; }
+				if (m->control_pressed) {  outputTypes.clear();  delete form; m->clearGroups(); delete matrix; delete groupMap; delete reading; return 0; }
 
 				reading->newLine(groupNames[i]+'-'+groupNames[j], iters);
 				int spoti = groupMap->groupIndex[groupNames[i]]; //neccessary in case user selects groups so you know where they are in the matrix
@@ -290,13 +290,13 @@ int LibShuffCommand::execute(){
 	
 				for(int p=0;p<iters;p++) {	
 					
-					if (m->control_pressed) {  outputTypes.clear(); delete form; m->Groups.clear(); delete matrix; delete groupMap; delete reading; return 0; }
+					if (m->control_pressed) {  outputTypes.clear(); delete form; m->clearGroups(); delete matrix; delete groupMap; delete reading; return 0; }
 					
 					form->randomizeGroups(spoti,spotj); 
 					if(form->evaluatePair(spoti,spotj) >= savedDXYValues[spoti][spotj])	{	pValueCounts[i][j]++;	}
 					if(form->evaluatePair(spotj,spoti) >= savedDXYValues[spotj][spoti])	{	pValueCounts[j][i]++;	}
 					
-					if (m->control_pressed) {  outputTypes.clear(); delete form; m->Groups.clear(); delete matrix; delete groupMap; delete reading; return 0; }
+					if (m->control_pressed) {  outputTypes.clear(); delete form; m->clearGroups(); delete matrix; delete groupMap; delete reading; return 0; }
 					
 					reading->update(p);			
 				}
@@ -305,7 +305,7 @@ int LibShuffCommand::execute(){
 			}
 		}
 		
-		if (m->control_pressed) { outputTypes.clear();  delete form; m->Groups.clear(); delete matrix; delete groupMap; delete reading; return 0; }
+		if (m->control_pressed) { outputTypes.clear();  delete form; m->clearGroups(); delete matrix; delete groupMap; delete reading; return 0; }
 	
 		reading->finish();
 		delete reading;
@@ -315,7 +315,7 @@ int LibShuffCommand::execute(){
 		printCoverageFile();
 				
 		//clear out users groups
-		m->Groups.clear();
+		m->clearGroups();
 		delete form;
 		
 		delete matrix; delete groupMap;
@@ -492,49 +492,51 @@ int LibShuffCommand::printSummaryFile() {
 
 void LibShuffCommand::setGroups() {
 	try {
+		vector<string> myGroups = m->getGroups();
 		//if the user has not entered specific groups to analyze then do them all
-		if (m->Groups.size() == 0) {
+		if (m->getNumGroups() == 0) {
 			numGroups = groupMap->getNumGroups();
 			for (int i=0; i < numGroups; i++) { 
-				m->Groups.push_back(groupMap->namesOfGroups[i]);
+				myGroups.push_back((groupMap->getNamesOfGroups())[i]);
 			}
 		} else {
 			if (savegroups != "all") {
 				//check that groups are valid
-				for (int i = 0; i < m->Groups.size(); i++) {
-					if (groupMap->isValidGroup(m->Groups[i]) != true) {
-						m->mothurOut(m->Groups[i] + " is not a valid group, and will be disregarded."); m->mothurOutEndLine();
+				for (int i = 0; i < myGroups.size(); i++) {
+					if (groupMap->isValidGroup(myGroups[i]) != true) {
+						m->mothurOut(myGroups[i] + " is not a valid group, and will be disregarded."); m->mothurOutEndLine();
 						// erase the invalid group from globaldata->Groups
-						m->Groups.erase(m->Groups.begin()+i);
+						myGroups.erase(myGroups.begin()+i);
 					}
 				}
 			
 				//if the user only entered invalid groups
-				if ((m->Groups.size() == 0) || (m->Groups.size() == 1)) { 
+				if ((myGroups.size() == 0) || (myGroups.size() == 1)) { 
 					numGroups = groupMap->getNumGroups();
 					for (int i=0; i < numGroups; i++) { 
-						m->Groups.push_back(groupMap->namesOfGroups[i]);
+						myGroups.push_back((groupMap->getNamesOfGroups())[i]);
 					}
 					m->mothurOut("When using the groups parameter you must have at least 2 valid groups. I will run the command using all the groups in your groupfile."); m->mothurOutEndLine();
-				} else { numGroups = m->Groups.size(); }
+				} else { numGroups = myGroups.size(); }
 			} else { //users wants all groups
 				numGroups = groupMap->getNumGroups();
-				m->Groups.clear();
+				myGroups.clear();
 				for (int i=0; i < numGroups; i++) { 
-					m->Groups.push_back(groupMap->namesOfGroups[i]);
+					myGroups.push_back((groupMap->getNamesOfGroups())[i]);
 				}
 			}
 		}
 
 		//sort so labels match
-		sort(m->Groups.begin(), m->Groups.end());
+		sort(myGroups.begin(), myGroups.end());
 		
 		//sort
-		sort(groupMap->namesOfGroups.begin(), groupMap->namesOfGroups.end());
+		//sort(groupMap->namesOfGroups.begin(), groupMap->namesOfGroups.end());
 		
-		for (int i = 0; i < groupMap->namesOfGroups.size(); i++) {  groupMap->groupIndex[groupMap->namesOfGroups[i]] = i;  }
+		for (int i = 0; i < (groupMap->getNamesOfGroups()).size(); i++) {  groupMap->groupIndex[(groupMap->getNamesOfGroups())[i]] = i;  }
 
-		groupNames = m->Groups;
+		groupNames = myGroups;
+		m->setGroups(myGroups);
 
 	}
 	catch(exception& e) {

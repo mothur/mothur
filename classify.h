@@ -44,6 +44,7 @@ protected:
 	
 	string taxFile, templateFile, simpleTax;
 	vector<string> names;
+	int threadID;
 	
 	int readTaxonomy(string);
 	vector<string> parseTax(string);

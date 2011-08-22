@@ -270,7 +270,7 @@ CollectSharedCommand::CollectSharedCommand(string option)  {
 			else { 
 				m->splitAtDash(groups, Groups);
 			}
-			m->Groups = Groups;
+			m->setGroups(Groups);
 			
 			string temp;
 			temp = validParameter.validFile(parameters, "freq", false);			if (temp == "not found") { temp = "100"; }
@@ -440,7 +440,11 @@ int CollectSharedCommand::execute(){
 			
 		//set users groups
 		SharedUtil* util = new SharedUtil();
-		util->setGroups(m->Groups, m->namesOfGroups, "collect");
+		Groups = m->getGroups();
+		vector<string> allGroups = m->getAllGroups();
+		util->setGroups(Groups, allGroups, "collect");
+		m->setGroups(Groups);
+		m->setAllGroups(allGroups);
 		delete util;
 
 		while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
@@ -448,7 +452,7 @@ int CollectSharedCommand::execute(){
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}  outputTypes.clear();
 					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
 					delete order; delete input;
-					m->Groups.clear();
+					m->clearGroups();
 					return 0;
 			}
 
@@ -495,7 +499,7 @@ int CollectSharedCommand::execute(){
 		if (m->control_pressed) { 
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}   outputTypes.clear();
 					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
-					m->Groups.clear();
+					m->clearGroups();
 					delete input;
 					return 0;
 		}
@@ -528,7 +532,7 @@ int CollectSharedCommand::execute(){
 				for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
 				delete order; 
 				delete input;
-				m->Groups.clear();
+				m->clearGroups();
 				return 0;
 			}
 
@@ -538,7 +542,7 @@ int CollectSharedCommand::execute(){
 		for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}	
 		
 		//reset groups parameter
-		m->Groups.clear(); 
+		m->clearGroups(); 
 		delete input;
 		
 		m->mothurOutEndLine();

@@ -140,7 +140,7 @@ BootSharedCommand::BootSharedCommand(string option) {
 			if (groups == "not found") { groups = ""; }
 			else { 
 				m->splitAtDash(groups, Groups);
-				m->Groups = Groups;
+				m->setGroups(Groups);
 			}
 				
 			calc = validParameter.validFile(parameters, "calc", false);			

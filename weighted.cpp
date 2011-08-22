@@ -19,7 +19,7 @@ EstOutput Weighted::getValues(Tree* t, int p, string o) {
 		processors = p;
 		outputDir = o;
 		
-		numGroups = m->Groups.size();
+		numGroups = m->getNumGroups();
 		
 		if (m->control_pressed) { return data; }
 		
@@ -29,7 +29,7 @@ EstOutput Weighted::getValues(Tree* t, int p, string o) {
 			for (int l = 0; l < i; l++) {	
 				//initialize weighted scores
 				//WScore[globaldata->Groups[i]+globaldata->Groups[l]] = 0.0;
-				vector<string> groups; groups.push_back(m->Groups[i]); groups.push_back(m->Groups[l]);
+				vector<string> groups; groups.push_back((m->getGroups())[i]); groups.push_back((m->getGroups())[l]);
 				namesOfGroupCombos.push_back(groups);
 			}
 		}
