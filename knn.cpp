@@ -10,9 +10,11 @@
 #include "knn.h"
 
 /**************************************************************************************************/
-Knn::Knn(string tfile, string tempFile, string method, int kmerSize, float gapOpen, float gapExtend, float match, float misMatch, int n) 
+Knn::Knn(string tfile, string tempFile, string method, int kmerSize, float gapOpen, float gapExtend, float match, float misMatch, int n, int tid) 
 : Classify(), num(n), search(method) {
 	try {
+		threadID = tid;
+		
 		//create search database and names vector
 		generateDatabaseAndNames(tfile, tempFile, method, kmerSize, gapOpen, gapExtend, match, misMatch);
 	}

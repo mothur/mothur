@@ -36,10 +36,20 @@ class MothurOut {
 		void setReleaseDate(string r) { releaseDate = r; }
 		string getVersion() { return version; }
 		void setVersion(string r) { version = r; }
-		vector<string> Groups;
+	
+		void addGroup(string g) { Groups.push_back(g); }
+		void setGroups(vector<string>& g) { sort(g.begin(), g.end()); Groups = g; }
+		void clearGroups() { Groups.clear(); }
+	    int getNumGroups() { return Groups.size(); }
+		vector<string> getGroups() { sort(Groups.begin(), Groups.end()); return Groups; }
+		void addAllGroup(string g) { namesOfGroups.push_back(g); }
+		void setAllGroups(vector<string>& g) { sort(g.begin(), g.end()); namesOfGroups = g; }
+		void clearAllGroups() { namesOfGroups.clear(); }
+		int getNumAllGroups() { return namesOfGroups.size(); }
+	
+		vector<string> getAllGroups() { sort(namesOfGroups.begin(), namesOfGroups.end()); return namesOfGroups; }
 		vector<string> Treenames;
 		map<string, string> names;
-		vector<string> namesOfGroups;
 		vector<string> binLabelsInFile;
 		vector<string> currentBinLabels;
 		string saveNextLabel, argv, sharedHeaderMode;
@@ -195,7 +205,8 @@ class MothurOut {
 		string accnosfile, phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, designfile, taxonomyfile;
 		string orderfile, treefile, sharedfile, ordergroupfile, relabundfile, fastafile, qualfile, sfffile, oligosfile, processors, flowfile;
 
-	
+		vector<string> Groups;
+		vector<string> namesOfGroups;
 		ofstream out;
 		
 		int mem_usage(double&, double&);

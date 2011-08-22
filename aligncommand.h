@@ -91,10 +91,10 @@ typedef struct alignData {
 	MothurOut* m;
 	//AlignmentDB* templateDB;
 	float match, misMatch, gapOpen, gapExtend, threshold;
-	int count, kmerSize;
+	int count, kmerSize, threadID;
 	
 	alignData(){}
-	alignData(string a, string r, string ac, string f, string al, string se, int ks, MothurOut* mout, unsigned long int st, unsigned long int en, bool fl, float ma, float misMa, float gapO, float gapE, float thr) {
+	alignData(string a, string r, string ac, string f, string al, string se, int ks, MothurOut* mout, unsigned long int st, unsigned long int en, bool fl, float ma, float misMa, float gapO, float gapE, float thr, int tid) {
 		alignFName = a;
 		reportFName = r;
 		accnosFName = ac;
@@ -113,6 +113,7 @@ typedef struct alignData {
 		search = se;
 		count = 0;
 		kmerSize = ks;
+		threadID = tid;
 	}
 };
 
@@ -144,7 +145,7 @@ static DWORD WINAPI MyAlignThreadFunction(LPVOID lpParam){
 		
 		pDataArray->count = pDataArray->end;
 		
-		AlignmentDB* templateDB = new AlignmentDB("saved-silent", pDataArray->search, pDataArray->kmerSize, pDataArray->gapOpen, pDataArray->gapExtend, pDataArray->match, pDataArray->misMatch);
+		AlignmentDB* templateDB = new AlignmentDB("saved-silent", pDataArray->search, pDataArray->kmerSize, pDataArray->gapOpen, pDataArray->gapExtend, pDataArray->match, pDataArray->misMatch, pDataArray->threadID);
 		
 		//moved this into driver to avoid deep copies in windows paralellized version
 		Alignment* alignment;

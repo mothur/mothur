@@ -290,7 +290,7 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 					m->splitAtDash(groups, Groups);
 				}
 			}
-			m->Groups = Groups;
+			m->setGroups(Groups);
 			
 			string temp = validParameter.validFile(parameters, "large", false);		if (temp == "not found") {	temp = "F";	}
 			large = m->isTrue(temp);
@@ -429,7 +429,9 @@ int GetOTURepCommand::execute(){
 			
 			if (Groups.size() != 0) {
 				SharedUtil* util = new SharedUtil();
-				util->setGroups(Groups, groupMap->namesOfGroups, "getoturep");
+				vector<string> gNamesOfGroups = groupMap->getNamesOfGroups();
+				util->setGroups(Groups, gNamesOfGroups, "getoturep");
+				groupMap->setNamesOfGroups(gNamesOfGroups);
 				delete util;
 			}
 		}

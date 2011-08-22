@@ -182,7 +182,7 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
 			else { 
 				userGroups = "unique." + groups;
 				m->splitAtDash(groups, Groups);
-				m->Groups = Groups;
+				m->setGroups(Groups);
 				
 			}
 			
@@ -191,7 +191,7 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
 			else { 
 				userGroups = groups;
 				m->splitAtDash(groups, Groups);
-				m->Groups = Groups;
+				m->setGroups(Groups);
 				unique = false;
 			}
 			
@@ -221,7 +221,7 @@ int GetSharedOTUCommand::execute(){
 		if (m->control_pressed) { delete groupMap; return 0; }
 		
 		if (Groups.size() == 0) {
-			Groups = groupMap->namesOfGroups;
+			Groups = groupMap->getNamesOfGroups();
 			
 			//make string for outputfile name
 			userGroups = "unique.";
@@ -230,7 +230,9 @@ int GetSharedOTUCommand::execute(){
 		}else{
 			//sanity check for group names
 			SharedUtil util;
-			util.setGroups(Groups, groupMap->namesOfGroups);
+			vector<string> namesOfGroups = groupMap->getNamesOfGroups(); 
+			util.setGroups(Groups, namesOfGroups);
+			groupMap->setNamesOfGroups(namesOfGroups);
 		}
 	
 		//put groups in map to find easier
@@ -325,7 +327,7 @@ int GetSharedOTUCommand::execute(){
 		
 
 		//reset groups parameter
-		m->Groups.clear();  
+		m->clearGroups();  
 		
 		if (lastlist != NULL) {		delete lastlist;	}
 		

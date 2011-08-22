@@ -229,7 +229,7 @@ SubSampleCommand::SubSampleCommand(string option) {
 			else { 
 				pickedGroups = true;
 				m->splitAtDash(groups, Groups);
-				m->Groups = Groups;
+				m->setGroups(Groups);
 			}
 			
 			string temp = validParameter.validFile(parameters, "size", false);		if (temp == "not found"){	temp = "0";		}
@@ -349,7 +349,8 @@ int SubSampleCommand::getSubSampleFasta() {
 			
 			//takes care of user setting groupNames that are invalid or setting groups=all
 			SharedUtil* util = new SharedUtil();
-			util->setGroups(Groups, groupMap->namesOfGroups);
+			vector<string> namesGroups = groupMap->getNamesOfGroups();
+			util->setGroups(Groups, namesGroups);
 			delete util;
 			
 			//file mismatch quit
@@ -672,19 +673,20 @@ int SubSampleCommand::getSubSampleShared() {
 				if (thisSize < size) {	size = thisSize;	}
 			}
 		}else {
-			m->Groups.clear();
+			m->clearGroups();
+			Groups.clear();
 			vector<SharedRAbundVector*> temp;
 			for (int i = 0; i < lookup.size(); i++) {
 				if (lookup[i]->getNumSeqs() < size) { 
 					m->mothurOut(lookup[i]->getGroup() + " contains " + toString(lookup[i]->getNumSeqs()) + ". Eliminating."); m->mothurOutEndLine();
 					delete lookup[i];
 				}else { 
-					m->Groups.push_back(lookup[i]->getGroup()); 
+					Groups.push_back(lookup[i]->getGroup()); 
 					temp.push_back(lookup[i]);
 				}
 			} 
 			lookup = temp;
-			Groups = m->Groups;
+			m->setGroups(Groups);
 		}
 		
 		if (lookup.size() == 0) {  m->mothurOut("The size you selected is too large, skipping shared file."); m->mothurOutEndLine(); delete input; return 0; }
@@ -878,7 +880,8 @@ int SubSampleCommand::getSubSampleList() {
 			
 			//takes care of user setting groupNames that are invalid or setting groups=all
 			SharedUtil* util = new SharedUtil();
-			util->setGroups(Groups, groupMap->namesOfGroups);
+			vector<string> namesGroups = groupMap->getNamesOfGroups();
+			util->setGroups(Groups, namesGroups);
 			delete util;
 			
 			//create outputfiles

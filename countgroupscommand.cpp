@@ -127,7 +127,7 @@ CountGroupsCommand::CountGroupsCommand(string option)  {
 			if (groups == "not found") { groups = ""; }
 			else {
 				m->splitAtDash(groups, Groups);
-				m->Groups = Groups;
+				m->setGroups(Groups);
 			}
 			
 			sharedfile = validParameter.validFile(parameters, "shared", true);
@@ -153,7 +153,7 @@ CountGroupsCommand::CountGroupsCommand(string option)  {
 				}
 			}
 			
-			if ((accnosfile == "") && (Groups.size() == 0)) { Groups.push_back("all"); m->Groups = Groups; }
+			if ((accnosfile == "") && (Groups.size() == 0)) { Groups.push_back("all"); m->setGroups(Groups); }
 		}
 		
 	}
@@ -179,7 +179,8 @@ int CountGroupsCommand::execute(){
 			//make sure groups are valid
 			//takes care of user setting groupNames that are invalid or setting groups=all
 			SharedUtil util;
-			util.setGroups(Groups, groupMap.namesOfGroups);
+			vector<string> nameGroups = groupMap.getNamesOfGroups();
+			util.setGroups(Groups, nameGroups);
 			
 			for (int i = 0; i < Groups.size(); i++) {
 				m->mothurOut(Groups[i] + " contains " + toString(groupMap.getNumSeqs(Groups[i])) + "."); m->mothurOutEndLine();
@@ -224,7 +225,7 @@ void CountGroupsCommand::readAccnos(){
 		}
 		in.close();		
 		
-		m->Groups = Groups;
+		m->setGroups(Groups);
 		
 	}
 	catch(exception& e) {

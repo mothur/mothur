@@ -204,7 +204,7 @@ RemoveGroupsCommand::RemoveGroupsCommand(string option)  {
 			if (groups == "not found") { groups = ""; }
 			else { 
 				m->splitAtDash(groups, Groups);
-				m->Groups = Groups;
+				m->setGroups(Groups);
 			}
 			
 			sharedfile = validParameter.validFile(parameters, "shared", true);
@@ -273,7 +273,8 @@ int RemoveGroupsCommand::execute(){
 			//make sure groups are valid
 			//takes care of user setting groupNames that are invalid or setting groups=all
 			SharedUtil* util = new SharedUtil();
-			util->setGroups(Groups, groupMap->namesOfGroups);
+			vector<string> namesGroups = groupMap->getNamesOfGroups();
+			util->setGroups(Groups, namesGroups);
 			delete util;
 			
 			//fill names with names of sequences that are from the groups we want to remove 
@@ -403,23 +404,23 @@ int RemoveGroupsCommand::readShared(){
 		vector<SharedRAbundVector*> lookup = tempInput->getSharedRAbundVectors();
 	
 		//save m->Groups
-		vector<string> allGroupsNames = m->namesOfGroups;
-		vector<string> mothurOutGroups = m->Groups;
+		vector<string> allGroupsNames = m->getAllGroups();
+		vector<string> mothurOutGroups = m->getGroups();
 		
 		vector<string> groupsToKeep;
 		for (int i = 0; i < allGroupsNames.size(); i++) {
-			if (!m->inUsersGroups(allGroupsNames[i], m->Groups)) {
+			if (!m->inUsersGroups(allGroupsNames[i], m->getGroups())) {
 				groupsToKeep.push_back(allGroupsNames[i]);
 			}
 		}
 		
-		if (allGroupsNames.size() == groupsToKeep.size()) { m->mothurOut("Your file does not contain any groups you wish to remove."); m->mothurOutEndLine(); m->Groups = mothurOutGroups; delete tempInput; for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  return 0; }
+		if (allGroupsNames.size() == groupsToKeep.size()) { m->mothurOut("Your file does not contain any groups you wish to remove."); m->mothurOutEndLine(); m->setGroups(mothurOutGroups); delete tempInput; for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  return 0; }
 		
 		//reset read 
 		for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 		delete tempInput;
-		m->Groups = groupsToKeep;
-		m->namesOfGroups.clear();
+		m->setGroups(groupsToKeep);
+		m->clearAllGroups();
 		m->names.clear();
 		m->saveNextLabel = "";
 		m->printedHeaders = false;
@@ -458,7 +459,7 @@ int RemoveGroupsCommand::readShared(){
 		}
 		
 		
-		m->Groups = mothurOutGroups;
+		m->setGroups(mothurOutGroups);
 		
 		if (wroteSomething == false) {  m->mothurOut("Your file contains only the groups you wish to remove."); m->mothurOutEndLine();  }
 		
@@ -745,7 +746,7 @@ void RemoveGroupsCommand::readAccnos(){
 		}
 		in.close();	
 		
-		m->Groups = Groups;
+		m->setGroups(Groups);
 		
 	}
 	catch(exception& e) {

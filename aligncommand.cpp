@@ -302,7 +302,7 @@ int AlignCommand::execute(){
 	try {
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 
-		templateDB = new AlignmentDB(templateFileName, search, kmerSize, gapOpen, gapExtend, match, misMatch);
+		templateDB = new AlignmentDB(templateFileName, search, kmerSize, gapOpen, gapExtend, match, misMatch, rand());
 		
 		for (int s = 0; s < candidateFileNames.size(); s++) {
 			if (m->control_pressed) { outputTypes.clear(); return 0; }
@@ -431,14 +431,18 @@ int AlignCommand::execute(){
 			positions = m->divideFile(candidateFileNames[s], processors);
 			for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(new linePair(positions[i], positions[(i+1)]));	}
 		#else
-			positions = m->setFilePosFasta(candidateFileNames[s], numFastaSeqs); 
-			
-			//figure out how many sequences you have to process
-			int numSeqsPerProcessor = numFastaSeqs / processors;
-			for (int i = 0; i < processors; i++) {
-				int startIndex =  i * numSeqsPerProcessor;
-				if(i == (processors - 1)){	numSeqsPerProcessor = numFastaSeqs - i * numSeqsPerProcessor; 	}
-				lines.push_back(new linePair(positions[startIndex], numSeqsPerProcessor));
+			if (processors == 1) {
+				lines.push_back(new linePair(0, 1000));
+			}else {
+				positions = m->setFilePosFasta(candidateFileNames[s], numFastaSeqs); 
+				
+				//figure out how many sequences you have to process
+				int numSeqsPerProcessor = numFastaSeqs / processors;
+				for (int i = 0; i < processors; i++) {
+					int startIndex =  i * numSeqsPerProcessor;
+					if(i == (processors - 1)){	numSeqsPerProcessor = numFastaSeqs - i * numSeqsPerProcessor; 	}
+					lines.push_back(new linePair(positions[startIndex], numSeqsPerProcessor));
+				}
 			}
 		#endif
 			
@@ -919,7 +923,7 @@ int AlignCommand::createProcesses(string alignFileName, string reportFileName, s
 			string extension = "";
 			if (i != 0) { extension = toString(i) + ".temp"; }
 			
-			alignData* tempalign = new alignData((alignFileName + extension), (reportFileName + extension), (accnosFName + extension), filename, align, search, kmerSize, m, lines[i]->start, lines[i]->end, flip, match, misMatch, gapOpen, gapExtend, threshold);
+			alignData* tempalign = new alignData((alignFileName + extension), (reportFileName + extension), (accnosFName + extension), filename, align, search, kmerSize, m, lines[i]->start, lines[i]->end, flip, match, misMatch, gapOpen, gapExtend, threshold, i);
 			pDataArray.push_back(tempalign);
 			processIDS.push_back(i);
 				

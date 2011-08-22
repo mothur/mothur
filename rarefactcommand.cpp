@@ -286,7 +286,7 @@ int RareFactCommand::execute(){
 			
 			string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(inputFileNames[p]));
 						
-			if (m->control_pressed) {  outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}  m->Groups.clear();  return 0; }
+			if (m->control_pressed) {  outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}  m->clearGroups();  return 0; }
 			
 			if (inputFileNames.size() > 1) {
 				m->mothurOutEndLine(); m->mothurOut("Processing group " + groups[p]); m->mothurOutEndLine(); m->mothurOutEndLine();
@@ -499,7 +499,7 @@ vector<string> RareFactCommand::parseSharedFile(string filename) {
 		}
 		
 		delete input;
-		m->Groups.clear();
+		m->clearGroups();
 
 		return filenames;
 	}

@@ -43,6 +43,7 @@ private:
 	int readOrderFile();
 	bool isValidGroup(string, vector<string>);
 	int eliminateZeroOTUS(vector<SharedRAbundVector*>&);
+	int ListGroupSameSeqs();
 	
 	SharedListVector* SharedList;
 	InputData* input;

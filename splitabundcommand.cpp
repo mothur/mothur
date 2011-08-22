@@ -181,7 +181,7 @@ SplitAbundCommand::SplitAbundCommand(string option)  {
 			groups = validParameter.validFile(parameters, "groups", false);		
 			if (groups == "not found") { groups = ""; }
 			else if (groups == "all") { 
-				if (groupfile != "") {  Groups = groupMap->namesOfGroups;  } 
+				if (groupfile != "") {  Groups = groupMap->getNamesOfGroups();  } 
 				else {  m->mothurOut("You cannot select groups without a valid groupfile, I will disregard your groups selection. "); m->mothurOutEndLine(); groups = "";   }
 			}else { 
 				m->splitAtDash(groups, Groups);

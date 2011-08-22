@@ -17,7 +17,7 @@ EstOutput Unweighted::getValues(Tree* t, int p, string o) {
 		outputDir = o;
 			
 		//if the users enters no groups then give them the score of all groups
-		int numGroups = m->Groups.size();
+		int numGroups = m->getNumGroups();
 		
 		//calculate number of comparsions
 		int numComp = 0;
@@ -25,7 +25,7 @@ EstOutput Unweighted::getValues(Tree* t, int p, string o) {
 		for (int r=0; r<numGroups; r++) { 
 			for (int l = 0; l < r; l++) {
 				numComp++;
-				vector<string> groups; groups.push_back(m->Groups[r]); groups.push_back(m->Groups[l]);
+				vector<string> groups; groups.push_back((m->getGroups())[r]); groups.push_back((m->getGroups())[l]);
 				namesOfGroupCombos.push_back(groups);
 			}
 		}
@@ -34,15 +34,15 @@ EstOutput Unweighted::getValues(Tree* t, int p, string o) {
 			vector<string> groups;
 			if (numGroups == 0) {
 				//get score for all users groups
-				for (int i = 0; i < tmap->namesOfGroups.size(); i++) {
-					if (tmap->namesOfGroups[i] != "xxx") {
-						groups.push_back(tmap->namesOfGroups[i]);
+				for (int i = 0; i < (tmap->getNamesOfGroups()).size(); i++) {
+					if ((tmap->getNamesOfGroups())[i] != "xxx") {
+						groups.push_back((tmap->getNamesOfGroups())[i]);
 					}
 				}
 				namesOfGroupCombos.push_back(groups);
 			}else {
-				for (int i = 0; i < m->Groups.size(); i++) {
-					groups.push_back(m->Groups[i]);
+				for (int i = 0; i < m->getNumGroups(); i++) {
+					groups.push_back((m->getGroups())[i]);
 				}
 				namesOfGroupCombos.push_back(groups);
 			}
@@ -260,7 +260,7 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB, int p, st
 		outputDir = o;
 		
 		//if the users enters no groups then give them the score of all groups
-		int numGroups = m->Groups.size();
+		int numGroups = m->getNumGroups();
 		
 		//calculate number of comparsions
 		int numComp = 0;
@@ -268,7 +268,7 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB, int p, st
 		for (int r=0; r<numGroups; r++) { 
 			for (int l = 0; l < r; l++) {
 				numComp++;
-				vector<string> groups; groups.push_back(m->Groups[r]); groups.push_back(m->Groups[l]);
+				vector<string> groups; groups.push_back((m->getGroups())[r]); groups.push_back((m->getGroups())[l]);
 				namesOfGroupCombos.push_back(groups);
 			}
 		}
@@ -277,15 +277,15 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB, int p, st
 			vector<string> groups;
 			if (numGroups == 0) {
 				//get score for all users groups
-				for (int i = 0; i < tmap->namesOfGroups.size(); i++) {
-					if (tmap->namesOfGroups[i] != "xxx") {
-						groups.push_back(tmap->namesOfGroups[i]);
+				for (int i = 0; i < (tmap->getNamesOfGroups()).size(); i++) {
+					if ((tmap->getNamesOfGroups())[i] != "xxx") {
+						groups.push_back((tmap->getNamesOfGroups())[i]);
 					}
 				}
 				namesOfGroupCombos.push_back(groups);
 			}else {
-				for (int i = 0; i < m->Groups.size(); i++) {
-					groups.push_back(m->Groups[i]);
+				for (int i = 0; i < m->getNumGroups(); i++) {
+					groups.push_back((m->getGroups())[i]);
 				}
 				namesOfGroupCombos.push_back(groups);
 			}

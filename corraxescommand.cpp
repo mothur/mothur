@@ -158,7 +158,7 @@ CorrAxesCommand::CorrAxesCommand(string option)  {
 				pickedGroups = true;
 				m->splitAtDash(groups, Groups);	
 			}			
-			m->Groups = Groups;
+			m->setGroups(Groups);
 			
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(inputFileName);	}
 			
@@ -907,12 +907,13 @@ int CorrAxesCommand::getMetadata(){
 		//remove any groups the user does not want, and set globaldata->groups with only valid groups
 		SharedUtil* util;
 		util = new SharedUtil();
-		
-		util->setGroups(m->Groups, groupNames);
+		Groups = m->getGroups();
+		util->setGroups(Groups, groupNames);
+		m->setGroups(Groups);
 		
 		for (int i = 0; i < lookupFloat.size(); i++) {
 			//if this sharedrabund is not from a group the user wants then delete it.
-			if (util->isValidGroup(lookupFloat[i]->getGroup(), m->Groups) == false) { 
+			if (util->isValidGroup(lookupFloat[i]->getGroup(), m->getGroups()) == false) { 
 				delete lookupFloat[i]; lookupFloat[i] = NULL;
 				lookupFloat.erase(lookupFloat.begin()+i); 
 				i--; 

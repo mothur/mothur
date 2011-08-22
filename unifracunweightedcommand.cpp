@@ -134,8 +134,8 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option)  {
 			}
 			
 			m->runParse = true;
-			m->Groups.clear();
-			m->namesOfGroups.clear();
+			m->clearGroups();
+			m->clearAllGroups();
 			m->Treenames.clear();
 			m->names.clear();
 			
@@ -167,7 +167,7 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option)  {
 			if (groups == "not found") { groups = ""; }
 			else { 
 				m->splitAtDash(groups, Groups);
-				m->Groups = Groups;
+				m->setGroups(Groups);
 			}
 				
 			itersString = validParameter.validFile(parameters, "iters", false);				if (itersString == "not found") { itersString = "1000"; }
@@ -196,7 +196,7 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option)  {
 			if ((phylip) && (Groups.size() == 0)) {
 				groups = "all";
 				m->splitAtDash(groups, Groups);
-				m->Groups = Groups;
+				m->setGroups(Groups);
 			}
 		}
 		
@@ -259,7 +259,7 @@ int UnifracUnweightedCommand::execute() {
 				if (m->control_pressed) { 
 					delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; }
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
-					m->Groups.clear();
+					m->clearGroups();
 					return 0;
 				}
 				
@@ -282,8 +282,10 @@ int UnifracUnweightedCommand::execute() {
 		m->openOutputFile(sumFile, outSum);
 		
 		util = new SharedUtil();
-		util->setGroups(m->Groups, tmap->namesOfGroups, allGroups, numGroups, "unweighted");	//sets the groups the user wants to analyze
-		util->getCombos(groupComb, m->Groups, numComp);
+		vector<string> Groups = m->getGroups();
+		vector<string> namesGroups = tmap->getNamesOfGroups();
+		util->setGroups(Groups, namesGroups, allGroups, numGroups, "unweighted");	//sets the groups the user wants to analyze
+		util->getCombos(groupComb, Groups, numComp);
 		delete util;
 	
 		if (numGroups == 1) { numComp++; groupComb.push_back(allGroups); }
@@ -403,7 +405,7 @@ int UnifracUnweightedCommand::execute() {
 		
 
 		outSum.close();
-		m->Groups.clear();
+		m->clearGroups();
 		delete tmap; delete unweighted;
 		for (int i = 0; i < T.size(); i++) { delete T[i]; }
 		
@@ -516,18 +518,18 @@ void UnifracUnweightedCommand::createPhylipFile(int i) {
 		
 		if ((outputForm == "lt") || (outputForm == "square")) {
 			//output numSeqs
-			out << m->Groups.size() << endl;
+			out << m->getNumGroups() << endl;
 		}
 		
 		//make matrix with scores in it
-		vector< vector<float> > dists;	dists.resize(m->Groups.size());
-		for (int i = 0; i < m->Groups.size(); i++) {
-			dists[i].resize(m->Groups.size(), 0.0);
+		vector< vector<float> > dists;	dists.resize(m->getNumGroups());
+		for (int i = 0; i < m->getNumGroups(); i++) {
+			dists[i].resize(m->getNumGroups(), 0.0);
 		}
 		
 		//flip it so you can print it
 		int count = 0;
-		for (int r=0; r<m->Groups.size(); r++) { 
+		for (int r=0; r<m->getNumGroups(); r++) { 
 			for (int l = 0; l < r; l++) {
 				dists[r][l] = utreeScores[count][0];
 				dists[l][r] = utreeScores[count][0];
@@ -536,9 +538,9 @@ void UnifracUnweightedCommand::createPhylipFile(int i) {
 		}
 		
 		//output to file
-		for (int r=0; r<m->Groups.size(); r++) { 
+		for (int r=0; r<m->getNumGroups(); r++) { 
 			//output name
-			string name = m->Groups[r];
+			string name = (m->getGroups())[r];
 			if (name.length() < 10) { //pad with spaces to make compatible
 				while (name.length() < 10) {  name += " ";  }
 			}
@@ -553,12 +555,12 @@ void UnifracUnweightedCommand::createPhylipFile(int i) {
 				out << name << '\t';
 				
 				//output distances
-				for (int l = 0; l < m->Groups.size(); l++) {	out << dists[r][l] << '\t';  }
+				for (int l = 0; l < m->getNumGroups(); l++) {	out << dists[r][l] << '\t';  }
 				out << endl;
 			}else{
 				//output distances
 				for (int l = 0; l < r; l++) {	
-					string otherName = m->Groups[l];
+					string otherName = (m->getGroups())[l];
 					if (otherName.length() < 10) { //pad with spaces to make compatible
 						while (otherName.length() < 10) {  otherName += " ";  }
 					}

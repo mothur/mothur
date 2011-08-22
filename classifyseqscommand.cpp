@@ -475,12 +475,12 @@ int ClassifySeqsCommand::execute(){
 	try {
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
-		if(method == "bayesian"){	classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, iters);		}
-		else if(method == "knn"){	classify = new Knn(taxonomyFileName, templateFileName, search, kmerSize, gapOpen, gapExtend, match, misMatch, numWanted);				}
+		if(method == "bayesian"){	classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, iters, rand());		}
+		else if(method == "knn"){	classify = new Knn(taxonomyFileName, templateFileName, search, kmerSize, gapOpen, gapExtend, match, misMatch, numWanted, rand());				}
 		else {
 			m->mothurOut(search + " is not a valid method option. I will run the command using bayesian.");
 			m->mothurOutEndLine();
-			classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, iters);	
+			classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, iters, rand());	
 		}
 		
 		if (m->control_pressed) { delete classify; return 0; }

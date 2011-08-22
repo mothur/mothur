@@ -353,7 +353,8 @@ int RemoveRareCommand::processList(){
 		if (groupfile != "") { 
 			groupMap = new GroupMap(groupfile); groupMap->readMap(); 
 			SharedUtil util;
-			util.setGroups(Groups, groupMap->namesOfGroups);
+			vector<string> namesGroups = groupMap->getNamesOfGroups();
+			util.setGroups(Groups, namesGroups);
 			m->openOutputFile(outputGroupFileName, outGroup);
 		}
 		
@@ -624,7 +625,7 @@ int RemoveRareCommand::processRabund(){
 //**********************************************************************************************************************
 int RemoveRareCommand::processShared(){
 	try {
-		m->Groups = Groups;
+		m->setGroups(Groups);
 		
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(sharedfile);  }

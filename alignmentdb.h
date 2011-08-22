@@ -20,7 +20,7 @@ class AlignmentDB {
 
 public:
 
-	AlignmentDB(string, string, int, float, float, float, float);  //reads fastafile passed in and stores sequences
+	AlignmentDB(string, string, int, float, float, float, float, int);  //reads fastafile passed in and stores sequences
 	AlignmentDB(string);
 	AlignmentDB(const AlignmentDB& adb);
 	~AlignmentDB();
@@ -30,7 +30,7 @@ public:
 	int getLongestBase()	{  return longest;  }
 	
 private:
-	int numSeqs, longest;
+	int numSeqs, longest, threadID;
 	string method;
 	
 	Database* search;

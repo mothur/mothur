@@ -74,10 +74,11 @@ try {
 				vector<SharedRAbundVector*> subset;
 
                 //create and initialize vector of sharedvectors, one for each group
-                for (int i = 0; i < m->Groups.size(); i++) { 
+				vector<string> mGroups = m->getGroups();
+                for (int i = 0; i < mGroups.size(); i++) { 
                         SharedRAbundVector* temp = new SharedRAbundVector(sharedorder->getNumBins());
                         temp->setLabel(sharedorder->getLabel());
-                        temp->setGroup(m->Groups[i]);
+                        temp->setGroup(mGroups[i]);
 						lookup.push_back(temp);
                 }
 	
@@ -142,14 +143,14 @@ try {
 													if ((w != k) && (w != l)) { subset.push_back(lookup[w]); }
 												}
 						
-                                                ccd->updateSharedData(subset, i+1, m->Groups.size(), pair);
+                                                ccd->updateSharedData(subset, i+1, m->getNumGroups(), pair);
                                         }
                                         n++;
                                 }
 							
 								//if this is a calculator that can do multiples then do them
 								pair = false;
-								ccd->updateSharedData(lookup, i+1, m->Groups.size(), pair); 
+								ccd->updateSharedData(lookup, i+1, m->getNumGroups(), pair); 
 							
                         }
                         totalNumSeq = i+1;
@@ -171,13 +172,13 @@ try {
 											if ((w != k) && (w != l)) { subset.push_back(lookup[w]); }
 										}
 									
-										ccd->updateSharedData(subset, totalNumSeq, m->Groups.size(), pair);
+										ccd->updateSharedData(subset, totalNumSeq, m->getNumGroups(), pair);
                                 }
                                 n++;
                         }
 						//if this is a calculator that can do multiples then do them
 						pair = false;
-						ccd->updateSharedData(lookup, totalNumSeq, m->Groups.size(), pair); 
+						ccd->updateSharedData(lookup, totalNumSeq, m->getNumGroups(), pair); 
                 }
 	 
                 //resets output files
@@ -208,9 +209,10 @@ void Collect::getGroupComb() {
 	numGroupComb = 0;
                 
 	int n = 1;
-	for (int i = 0; i < (m->Groups.size() - 1); i++) {
-		for (int l = n; l < m->Groups.size(); l++) {
-			group = m->Groups[i] + m->Groups[l];
+	vector<string> mGroups = m->getGroups();
+	for (int i = 0; i < (m->getNumGroups() - 1); i++) {
+		for (int l = n; l < m->getNumGroups(); l++) {
+			group = mGroups[i] + mGroups[l];
 			groupComb.push_back(group);        
 			numGroupComb++;
 		}

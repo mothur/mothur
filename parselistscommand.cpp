@@ -175,11 +175,12 @@ int ParseListCommand::execute(){
 		//fill filehandles with neccessary ofstreams
 		int i;
 		ofstream* temp;
-		for (i=0; i<groupMap->namesOfGroups.size(); i++) {
+		vector<string> gGroups = groupMap->getNamesOfGroups();
+		for (i=0; i<gGroups.size(); i++) {
 			temp = new ofstream;
-			filehandles[groupMap->namesOfGroups[i]] = temp;
+			filehandles[gGroups[i]] = temp;
 			
-			string filename = fileroot +  groupMap->namesOfGroups[i] + ".list";
+			string filename = fileroot +  gGroups[i] + ".list";
 			outputNames.push_back(filename); outputTypes["list"].push_back(filename);
 			m->openOutputFile(filename, *temp);
 		}
@@ -194,7 +195,8 @@ int ParseListCommand::execute(){
 		
 		if (m->control_pressed) { 
 			delete input; delete list; delete groupMap;
-			for (i=0; i<groupMap->namesOfGroups.size(); i++) {  (*(filehandles[groupMap->namesOfGroups[i]])).close();  delete filehandles[groupMap->namesOfGroups[i]]; } 
+			vector<string> gGroups = groupMap->getNamesOfGroups();
+			for (i=0; i<gGroups.size(); i++) {  (*(filehandles[gGroups[i]])).close();  delete filehandles[gGroups[i]]; } 
 			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
 			return 0;
 		}
@@ -203,7 +205,7 @@ int ParseListCommand::execute(){
 		
 			if (m->control_pressed) { 
 				delete input; delete list; delete groupMap;
-				for (i=0; i<groupMap->namesOfGroups.size(); i++) {  (*(filehandles[groupMap->namesOfGroups[i]])).close();  delete filehandles[groupMap->namesOfGroups[i]]; } 
+				for (i=0; i<gGroups.size(); i++) {  (*(filehandles[gGroups[i]])).close();  delete filehandles[gGroups[i]]; } 
 				for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
 				return 0;
 			}
@@ -241,10 +243,10 @@ int ParseListCommand::execute(){
 		}
 		
 		if (m->control_pressed) { 
-				delete input; delete groupMap;
-				for (i=0; i<groupMap->namesOfGroups.size(); i++) { (*(filehandles[groupMap->namesOfGroups[i]])).close();  delete filehandles[groupMap->namesOfGroups[i]]; } 
-				for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
-				return 0;
+			delete input; delete groupMap;
+			for (i=0; i<gGroups.size(); i++) {  (*(filehandles[gGroups[i]])).close();  delete filehandles[gGroups[i]]; } 
+			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
+			return 0;
 		}
 		
 		//output error messages about any remaining user labels
@@ -262,10 +264,10 @@ int ParseListCommand::execute(){
 		}
 		
 		if (m->control_pressed) { 
-				delete input; delete groupMap;
-				for (i=0; i<groupMap->namesOfGroups.size(); i++) {  (*(filehandles[groupMap->namesOfGroups[i]])).close();  delete filehandles[groupMap->namesOfGroups[i]]; } 
-				for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
-				return 0;
+			delete input; delete groupMap;
+			for (i=0; i<gGroups.size(); i++) {  (*(filehandles[gGroups[i]])).close();  delete filehandles[gGroups[i]]; } 
+			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
+			return 0;
 		}
 		
 		//run last label if you need to

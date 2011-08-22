@@ -126,8 +126,8 @@ ParsimonyCommand::ParsimonyCommand(string option)  {
 			}
 			
 			m->runParse = true;
-			m->Groups.clear();
-			m->namesOfGroups.clear();
+			m->clearGroups();
+			m->clearAllGroups();
 			m->Treenames.clear();
 			m->names.clear();
 			
@@ -164,10 +164,10 @@ ParsimonyCommand::ParsimonyCommand(string option)  {
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			groups = validParameter.validFile(parameters, "groups", false);			
-			if (groups == "not found") { groups = ""; m->Groups.clear(); }
+			if (groups == "not found") { groups = ""; m->clearGroups(); }
 			else { 
 				m->splitAtDash(groups, Groups);
-				m->Groups = Groups;
+				m->setGroups(Groups);
 			}
 				
 			itersString = validParameter.validFile(parameters, "iters", false);			if (itersString == "not found") { itersString = "1000"; }
@@ -242,7 +242,7 @@ int ParsimonyCommand::execute() {
 					if (m->control_pressed) { 
 						delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; }
 						for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
-						m->Groups.clear();
+						m->clearGroups();
 						return 0;
 					}
 					
@@ -280,8 +280,11 @@ int ParsimonyCommand::execute() {
 			
 		//set users groups to analyze
 		util = new SharedUtil();
-		util->setGroups(m->Groups, tmap->namesOfGroups, allGroups, numGroups, "parsimony");	//sets the groups the user wants to analyze
-		util->getCombos(groupComb, m->Groups, numComp);
+		vector<string> mGroups = m->getGroups();
+		vector<string> tGroups = tmap->getNamesOfGroups();
+		util->setGroups(mGroups, tGroups, allGroups, numGroups, "parsimony");	//sets the groups the user wants to analyze
+		util->getCombos(groupComb, mGroups, numComp);
+		m->setGroups(mGroups);
 		delete util;
 			
 		if (numGroups == 1) { numComp++; groupComb.push_back(allGroups); }
@@ -297,7 +300,7 @@ int ParsimonyCommand::execute() {
 			delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; }
 			if (randomtree == "") {  outSum.close();  }
 			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
-			m->Groups.clear();
+			m->clearGroups();
 			return 0;
 		}
 			
@@ -322,7 +325,7 @@ int ParsimonyCommand::execute() {
 					delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; }
 					if (randomtree == "") {  outSum.close();  }
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
-					m->Groups.clear();
+					m->clearGroups();
 					return 0;
 				}
 
@@ -361,7 +364,7 @@ int ParsimonyCommand::execute() {
 					if (randomtree == "") {  outSum.close();  }
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
 					delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; }
-					m->Groups.clear();
+					m->clearGroups();
 					return 0;
 				}
 					
@@ -398,7 +401,7 @@ int ParsimonyCommand::execute() {
 					delete reading; delete pars; delete output; delete randT;
 					delete tmap; 
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
-					m->Groups.clear();
+					m->clearGroups();
 					return 0;
 				}
 
@@ -410,7 +413,7 @@ int ParsimonyCommand::execute() {
 					delete reading; delete pars;  delete output; delete randT;
 					delete tmap; 
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
-					m->Groups.clear();
+					m->clearGroups();
 					return 0;
 				}
 			
@@ -467,7 +470,7 @@ int ParsimonyCommand::execute() {
 				delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; }
 				if (randomtree == "") {  outSum.close();  }
 				for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
-				m->Groups.clear();
+				m->clearGroups();
 				return 0;
 		}
 		
@@ -480,7 +483,7 @@ int ParsimonyCommand::execute() {
 		if (randomtree == "") { printUSummaryFile(); }
 		
 		//reset groups parameter
-		m->Groups.clear(); 
+		m->clearGroups(); 
 		
 		delete pars; delete output; 
 		delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; }
@@ -585,6 +588,7 @@ void ParsimonyCommand::getUserInput() {
 		count = 1;
 		numEachGroup.resize(numGroups, 0);  
 		
+		
 		for (int i = 1; i <= numGroups; i++) {
 			m->mothurOut("Please enter the number of sequences in group " + toString(i) +  ": ");
 			cin >> num;
@@ -592,7 +596,7 @@ void ParsimonyCommand::getUserInput() {
 				
 			//set tmaps seqsPerGroup
 			tmap->seqsPerGroup[toString(i)] = num;
-			tmap->namesOfGroups.push_back(toString(i));
+			tmap->addGroup(toString(i));
 			
 			//set tmaps namesOfSeqs
 			for (int j = 0; j < num; j++) {

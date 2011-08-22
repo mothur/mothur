@@ -31,9 +31,10 @@ public:
 		//because we randomizes the order we need to put the results in the correct column in the output file
 		int group1Index, group2Index, pos;
 		
-		for (int i = 0; i < m->Groups.size(); i++) {
-			if (shared[0]->getGroup() == m->Groups[i]) { group1Index = i; }
-			if (shared[1]->getGroup() == m->Groups[i]) { group2Index = i; }
+		vector<string> mGroups = m->getGroups();
+		for (int i = 0; i < mGroups.size(); i++) {
+			if (shared[0]->getGroup() == mGroups[i]) { group1Index = i; }
+			if (shared[1]->getGroup() == mGroups[i]) { group2Index = i; }
 		}
 		
 		numGroupComb = 0;

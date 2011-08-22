@@ -137,8 +137,8 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 			}
 			
 			m->runParse = true;
-			m->Groups.clear();
-			m->namesOfGroups.clear();
+			m->clearGroups();
+			m->clearAllGroups();
 			m->Treenames.clear();
 			m->names.clear();
 			
@@ -193,7 +193,7 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 			if (groups == "not found") { groups = "";  }
 			else { 
 				m->splitAtDash(groups, Groups);
-				m->Groups = Groups;
+				m->setGroups(Groups);
 			}
 			
 			if ((!collect) && (!rarefy) && (!summary)) { m->mothurOut("No outputs selected. You must set either collect, rarefy or summary to true, summary=T by default."); m->mothurOutEndLine(); abort=true; }
@@ -258,7 +258,7 @@ int PhyloDiversityCommand::execute(){
 				if (m->control_pressed) { 
 					delete tmap; for (int i = 0; i < trees.size(); i++) { delete trees[i]; }
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
-					m->Groups.clear();
+					m->clearGroups();
 					return 0;
 				}
 				
@@ -277,11 +277,14 @@ int PhyloDiversityCommand::execute(){
 		}
 		
 		SharedUtil* util = new SharedUtil();
-		util->setGroups(m->Groups, tmap->namesOfGroups, "phylo.diversity");	//sets the groups the user wants to analyze
+		vector<string> mGroups = m->getGroups();
+		vector<string> tGroups = tmap->getNamesOfGroups();
+		util->setGroups(mGroups, tGroups, "phylo.diversity");	//sets the groups the user wants to analyze
 		delete util;
 		
 		//incase the user had some mismatches between the tree and group files we don't want group xxx to be analyzed
-		for (int i = 0; i < m->Groups.size(); i++) { if (m->Groups[i] == "xxx") { m->Groups.erase(m->Groups.begin()+i);  break; }  }
+		for (int i = 0; i < mGroups.size(); i++) { if (mGroups[i] == "xxx") { mGroups.erase(mGroups.begin()+i);  break; }  }
+		m->setGroups(mGroups);
 		 
 		vector<string> outputNames;
 		
@@ -304,7 +307,7 @@ int PhyloDiversityCommand::execute(){
 			//create a vector containing indexes of leaf nodes, randomize it, select nodes to send to calculator
 			vector<int> randomLeaf;
 			for (int j = 0; j < numLeafNodes; j++) {  
-				if (m->inUsersGroups(trees[i]->tree[j].getGroup(), m->Groups) == true) { //is this a node from the group the user selected.
+				if (m->inUsersGroups(trees[i]->tree[j].getGroup(), mGroups) == true) { //is this a node from the group the user selected.
 					randomLeaf.push_back(j); 
 				}
 			}
@@ -319,15 +322,15 @@ int PhyloDiversityCommand::execute(){
 			
 			//find largest group total 
 			int largestGroup = 0;
-			for (int j = 0; j < m->Groups.size(); j++) {  
-				if (tmap->seqsPerGroup[m->Groups[j]] > largestGroup) { largestGroup = tmap->seqsPerGroup[m->Groups[j]]; }
+			for (int j = 0; j < mGroups.size(); j++) {  
+				if (tmap->seqsPerGroup[mGroups[j]] > largestGroup) { largestGroup = tmap->seqsPerGroup[mGroups[j]]; }
 				
 				//initialize diversity
-				diversity[m->Groups[j]].resize(tmap->seqsPerGroup[m->Groups[j]]+1, 0.0);		//numSampled
+				diversity[mGroups[j]].resize(tmap->seqsPerGroup[mGroups[j]]+1, 0.0);		//numSampled
 																											//groupA		0.0			0.0
 																											
 				//initialize sumDiversity
-				sumDiversity[m->Groups[j]].resize(tmap->seqsPerGroup[m->Groups[j]]+1, 0.0);
+				sumDiversity[mGroups[j]].resize(tmap->seqsPerGroup[mGroups[j]]+1, 0.0);
 			}	
 
 			//convert freq percentage to number
@@ -341,8 +344,8 @@ int PhyloDiversityCommand::execute(){
 			if(largestGroup % increment != 0){	numSampledList.insert(largestGroup);   }
 			
 			//add other groups ending points
-			for (int j = 0; j < m->Groups.size(); j++) {  
-				if (numSampledList.count(diversity[m->Groups[j]].size()-1) == 0) {  numSampledList.insert(diversity[m->Groups[j]].size()-1); }
+			for (int j = 0; j < mGroups.size(); j++) {  
+				if (numSampledList.count(diversity[mGroups[j]].size()-1) == 0) {  numSampledList.insert(diversity[mGroups[j]].size()-1); }
 			}
 			
 			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
@@ -484,6 +487,7 @@ int PhyloDiversityCommand::createProcesses(vector<int>& procIters, Tree* t, map<
 int PhyloDiversityCommand::driver(Tree* t, map< string, vector<float> >& div, map<string, vector<float> >& sumDiv, int numIters, int increment, vector<int>& randomLeaf, set<int>& numSampledList, ofstream& outCollect, ofstream& outSum, bool doSumCollect){
 	try {
 		int numLeafNodes = randomLeaf.size();
+		vector<string> mGroups = m->getGroups();
 	
 		for (int l = 0; l < numIters; l++) {
 				random_shuffle(randomLeaf.begin(), randomLeaf.end());
@@ -491,7 +495,7 @@ int PhyloDiversityCommand::driver(Tree* t, map< string, vector<float> >& div, ma
 				//initialize counts
 				map<string, int> counts;
 				map< string, set<int> > countedBranch;  
-				for (int j = 0; j < m->Groups.size(); j++) {  counts[m->Groups[j]] = 0; countedBranch[m->Groups[j]].insert(-2);  }  //add dummy index to initialize countedBranch sets
+				for (int j = 0; j < mGroups.size(); j++) {  counts[mGroups[j]] = 0; countedBranch[mGroups[j]].insert(-2);  }  //add dummy index to initialize countedBranch sets
 				
 				for(int k = 0; k < numLeafNodes; k++){
 						
@@ -522,9 +526,9 @@ int PhyloDiversityCommand::driver(Tree* t, map< string, vector<float> >& div, ma
 				
 				if (rarefy) {
 					//add this diversity to the sum
-					for (int j = 0; j < m->Groups.size(); j++) {  
-						for (int g = 0; g < div[m->Groups[j]].size(); g++) {
-							sumDiv[m->Groups[j]][g] += div[m->Groups[j]][g];
+					for (int j = 0; j < mGroups.size(); j++) {  
+						for (int g = 0; g < div[mGroups[j]].size(); g++) {
+							sumDiv[mGroups[j]][g] += div[mGroups[j]][g];
 						}
 					}
 				}
@@ -550,15 +554,16 @@ void PhyloDiversityCommand::printSumData(map< string, vector<float> >& div, ofst
 		out << "Groups\tnumSampled\tphyloDiversity" << endl;
 		
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
-			
-		for (int j = 0; j < m->Groups.size(); j++) {
-			int numSampled = (div[m->Groups[j]].size()-1);
-			out << m->Groups[j] << '\t' << numSampled << '\t';
+		
+		vector<string> mGroups = m->getGroups();
+		for (int j = 0; j < mGroups.size(); j++) {
+			int numSampled = (div[mGroups[j]].size()-1);
+			out << mGroups[j] << '\t' << numSampled << '\t';
 		
 			 
 			float score;
-			if (scale)	{  score = (div[m->Groups[j]][numSampled] / (float)numIters) / (float)numSampled;	}
-			else		{	score = div[m->Groups[j]][numSampled] / (float)numIters;	}
+			if (scale)	{  score = (div[mGroups[j]][numSampled] / (float)numIters) / (float)numSampled;	}
+			else		{	score = div[mGroups[j]][numSampled] / (float)numIters;	}
 				
 			out << setprecision(4) << score << endl;
 		}
@@ -577,7 +582,8 @@ void PhyloDiversityCommand::printData(set<int>& num, map< string, vector<float> 
 	try {
 		
 		out << "numSampled\t";
-		for (int i = 0; i < m->Groups.size(); i++) { out << m->Groups[i] << '\t';  }
+		vector<string> mGroups = m->getGroups();
+		for (int i = 0; i < mGroups.size(); i++) { out << mGroups[i] << '\t';  }
 		out << endl;
 		
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
@@ -586,12 +592,12 @@ void PhyloDiversityCommand::printData(set<int>& num, map< string, vector<float> 
 			int numSampled = *it;
 			
 			out << numSampled << '\t';  
-			
-			for (int j = 0; j < m->Groups.size(); j++) {
-				if (numSampled < div[m->Groups[j]].size()) { 
+		
+			for (int j = 0; j < mGroups.size(); j++) {
+				if (numSampled < div[mGroups[j]].size()) { 
 					float score;
-					if (scale)	{  score = (div[m->Groups[j]][numSampled] / (float)numIters) / (float)numSampled;	}
-					else		{	score = div[m->Groups[j]][numSampled] / (float)numIters;	}
+					if (scale)	{  score = (div[mGroups[j]][numSampled] / (float)numIters) / (float)numSampled;	}
+					else		{	score = div[mGroups[j]][numSampled] / (float)numIters;	}
 
 					out << setprecision(4) << score << '\t';
 				}else { out << "NA" << '\t'; }

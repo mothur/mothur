@@ -16,8 +16,8 @@
 class BlastDB : public Database {
 
 public:
-	BlastDB(string, float, float, float, float, string);
-	BlastDB(string);
+	BlastDB(string, float, float, float, float, string, int);
+	BlastDB(string, int);
 	BlastDB(const BlastDB& bdb) : dbFileName(bdb.dbFileName), queryFileName(bdb.queryFileName), blastFileName(bdb.blastFileName), path(bdb.path),
 									count(bdb.count), gapOpen(bdb.gapOpen), gapExtend(bdb.gapExtend), match(bdb.match), misMatch(bdb.misMatch), Database(bdb) {}
 	~BlastDB();
@@ -28,12 +28,15 @@ public:
 	vector<int> findClosestMegaBlast(Sequence*, int, int);
 	
 private:
+	
+	string scrubName(string);
+	
 	string dbFileName;
 	string queryFileName;
 	string blastFileName;
 	string path;
 	
-	int count;
+	int count, threadID;
 	float gapOpen;
 	float gapExtend;
 	float match;

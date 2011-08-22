@@ -104,8 +104,8 @@ DeuniqueTreeCommand::DeuniqueTreeCommand(string option)  {
 			}
 			
 			m->runParse = true;
-			m->Groups.clear();
-			m->namesOfGroups.clear();
+			m->clearGroups();
+			m->clearAllGroups();
 			m->Treenames.clear();
 			m->names.clear();
 			
@@ -182,7 +182,7 @@ int DeuniqueTreeCommand::execute() {
 				if (m->control_pressed) { 
 					delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; }
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
-					m->Groups.clear();
+					m->clearGroups();
 					return 0;
 				}
 				

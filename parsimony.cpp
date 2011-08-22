@@ -17,15 +17,16 @@ EstOutput Parsimony::getValues(Tree* t, int p, string o) {
 		outputDir = o;
 		
 		//if the users enters no groups then give them the score of all groups
-		int numGroups = m->Groups.size();
+		vector<string> mGroups = m->getGroups();
+		int numGroups = mGroups.size();
 		
 		//calculate number of comparsions
 		int numComp = 0;
 		vector< vector<string> > namesOfGroupCombos;
 		for (int r=0; r<numGroups; r++) { 
-			for (int l = r+1; l < numGroups; l++) {
+			for (int l = 0; l < r; l++) {
 				numComp++;
-				vector<string> groups; groups.push_back(m->Groups[r]); groups.push_back(m->Groups[l]);
+				vector<string> groups; groups.push_back(mGroups[r]); groups.push_back(mGroups[l]);
 				//cout << globaldata->Groups[r] << '\t' << globaldata->Groups[l] << endl;
 				namesOfGroupCombos.push_back(groups);
 			}
@@ -36,16 +37,17 @@ EstOutput Parsimony::getValues(Tree* t, int p, string o) {
 			vector<string> groups;
 			if (numGroups == 0) {
 				//get score for all users groups
-				for (int i = 0; i < tmap->namesOfGroups.size(); i++) {
-					if (tmap->namesOfGroups[i] != "xxx") {
-						groups.push_back(tmap->namesOfGroups[i]);
+				vector<string> tGroups = tmap->getNamesOfGroups();
+				for (int i = 0; i < tGroups.size(); i++) {
+					if (tGroups[i] != "xxx") {
+						groups.push_back(tGroups[i]);
 						//cout << tmap->namesOfGroups[i] << endl;
 					}
 				}
 				namesOfGroupCombos.push_back(groups);
 			}else {
-				for (int i = 0; i < m->Groups.size(); i++) {
-					groups.push_back(m->Groups[i]);
+				for (int i = 0; i < mGroups.size(); i++) {
+					groups.push_back(mGroups[i]);
 					//cout << globaldata->Groups[i] << endl;
 				}
 				namesOfGroupCombos.push_back(groups);

@@ -425,7 +425,7 @@ int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T, TreeMap* tmap) {
 				map<string, int>::iterator it;
 				it = tmap->seqsPerGroup.find("xxx");
 				if (it == tmap->seqsPerGroup.end()) { //its a new group
-					tmap->namesOfGroups.push_back("xxx");
+					tmap->addGroup("xxx");
 					tmap->seqsPerGroup["xxx"] = 1;
 				}else {
 					tmap->seqsPerGroup["xxx"]++;

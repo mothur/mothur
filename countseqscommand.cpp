@@ -157,7 +157,8 @@ int CountSeqsCommand::execute(){
 			
 			//make sure groups are valid. takes care of user setting groupNames that are invalid or setting groups=all
 			SharedUtil* util = new SharedUtil();
-			util->setGroups(Groups, groupMap->namesOfGroups);
+			vector<string> nameGroups = groupMap->getNamesOfGroups();
+			util->setGroups(Groups, nameGroups);
 			delete util;
 			
 			//sort groupNames so that the group title match the counts below, this is needed because the map object automatically sorts

@@ -158,7 +158,7 @@ RareFactSharedCommand::RareFactSharedCommand(string option)  {
 			else { 
 				m->splitAtDash(groups, Groups);
 			}
-			m->Groups = Groups;
+			m->setGroups(Groups);
 			
 			string temp;
 			temp = validParameter.validFile(parameters, "freq", false);			if (temp == "not found") { temp = "100"; }
@@ -211,7 +211,7 @@ int RareFactSharedCommand::execute(){
 		string lastLabel = lookup[0]->getLabel();
 		
 		if (m->control_pressed) { 
-			m->Groups.clear(); 
+			m->clearGroups(); 
 			delete input;
 			for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
 			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}
@@ -233,7 +233,7 @@ int RareFactSharedCommand::execute(){
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			if (m->control_pressed) { 
-				m->Groups.clear(); 
+				m->clearGroups(); 
 				delete input;
 				for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
 				for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}
@@ -278,7 +278,7 @@ int RareFactSharedCommand::execute(){
 		}
 		
 		if (m->control_pressed) { 
-			m->Groups.clear(); 
+			m->clearGroups(); 
 			delete input;
 			for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
 			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}
@@ -299,7 +299,7 @@ int RareFactSharedCommand::execute(){
 		}
 		
 		if (m->control_pressed) { 
-			m->Groups.clear(); 
+			m->clearGroups(); 
 			delete input; 
 			for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
 			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}
@@ -319,7 +319,7 @@ int RareFactSharedCommand::execute(){
 		}
 		
 		for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}	
-		m->Groups.clear(); 
+		m->clearGroups(); 
 		delete input;
 		
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }

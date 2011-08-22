@@ -187,7 +187,9 @@ int GetOtusCommand::execute(){
 		//make sure groups are valid
 		//takes care of user setting groupNames that are invalid or setting groups=all
 		SharedUtil* util = new SharedUtil();
-		util->setGroups(Groups, groupMap->namesOfGroups);
+		vector<string> gNamesOfGroups = groupMap->getNamesOfGroups();
+		util->setGroups(Groups, gNamesOfGroups);
+		groupMap->setNamesOfGroups(gNamesOfGroups);
 		delete util;
 		
 		if (m->control_pressed) { delete groupMap; return 0; }

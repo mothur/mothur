@@ -12,11 +12,12 @@
 #include "phylosummary.h"
 #include "referencedb.h"
 /**************************************************************************************************/
-Bayesian::Bayesian(string tfile, string tempFile, string method, int ksize, int cutoff, int i) : 
+Bayesian::Bayesian(string tfile, string tempFile, string method, int ksize, int cutoff, int i, int tid) : 
 Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 	try {
 		ReferenceDB* rdb = ReferenceDB::getInstance();
 		
+		threadID = tid;
 		string baseName = tempFile;
 		if (baseName == "saved") { baseName = rdb->getSavedReference(); }
 		

@@ -51,8 +51,8 @@ Tree::Tree(TreeMap* t) : tmap(t) {
 		tree.resize(numNodes);
 			
 		//initialize groupNodeInfo
-		for (int i = 0; i < tmap->namesOfGroups.size(); i++) {
-			groupNodeInfo[tmap->namesOfGroups[i]].resize(0);
+		for (int i = 0; i < (tmap->getNamesOfGroups()).size(); i++) {
+			groupNodeInfo[(tmap->getNamesOfGroups())[i]].resize(0);
 		}
 		
 		//initialize tree with correct number of nodes, name and group info.
@@ -632,8 +632,8 @@ void Tree::randomLabels(vector<string> g) {
 	try {
 	
 		//initialize groupNodeInfo
-		for (int i = 0; i < tmap->namesOfGroups.size(); i++) {
-			groupNodeInfo[tmap->namesOfGroups[i]].resize(0);
+		for (int i = 0; i < (tmap->getNamesOfGroups()).size(); i++) {
+			groupNodeInfo[(tmap->getNamesOfGroups())[i]].resize(0);
 		}
 		
 		for(int i = 0; i < numLeaves; i++){

@@ -157,7 +157,7 @@ PCACommand::PCACommand(string option)  {
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = "";  }
 			else { m->splitAtDash(groups, Groups);	}			
-			m->Groups = Groups;			
+			m->setGroups(Groups);			
 			
 		}
 		
@@ -365,7 +365,7 @@ int PCACommand::process(vector<SharedRAbundFloatVector*>& lookupFloat){
 		
 		string fbase = outputDir + m->getRootName(m->getSimpleName(inputFile));
 		string outputFileName = fbase + lookupFloat[0]->getLabel();
-		output(outputFileName, m->Groups, X, d);
+		output(outputFileName, m->getGroups(), X, d);
 		
 		if (metric) {   
 			
