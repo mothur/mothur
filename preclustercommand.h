@@ -47,8 +47,8 @@ public:
 	
 private:
 	int diffs, length;
-	bool abort;
-	string fastafile, namefile, outputDir;
+	bool abort, bygroup;
+	string fastafile, namefile, outputDir, groupfile;
 	vector<seqPNode> alignSeqs; //maps the number of identical seqs to a sequence
 	map<string, string> names; //represents the names file first column maps to second column
 	map<string, int> sizes;  //this map a seq name to the number of identical seqs in the names file
@@ -62,6 +62,8 @@ private:
 	//int readNamesFASTA();
 	int calcMisMatches(string, string);
 	void printData(string, string); //fasta filename, names file name
+	int process();
+	int loadSeqs(map<string, string>&, vector<Sequence>&);
 };
 
 /************************************************************/

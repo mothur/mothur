@@ -317,11 +317,13 @@
 		A7E9B98D12D37EC400DA6239 /* weighted.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B87C12D37EC400DA6239 /* weighted.cpp */; };
 		A7E9B98E12D37EC400DA6239 /* weightedlinkage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B87E12D37EC400DA6239 /* weightedlinkage.cpp */; };
 		A7E9B98F12D37EC400DA6239 /* whittaker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B87F12D37EC400DA6239 /* whittaker.cpp */; };
+		A7F9F5CF141A5E500032F693 /* sequenceparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7F9F5CE141A5E500032F693 /* sequenceparser.cpp */; };
 		A7FA10021302E097003860FE /* mantelcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7FA10011302E096003860FE /* mantelcommand.cpp */; };
 		A7FC480E12D788F20055BC5C /* linearalgebra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7FC480D12D788F20055BC5C /* linearalgebra.cpp */; };
 		A7FC486712D795D60055BC5C /* pcacommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7FC486612D795D60055BC5C /* pcacommand.cpp */; };
 		A7FE7C401330EA1000F7B327 /* getcurrentcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7FE7C3F1330EA1000F7B327 /* getcurrentcommand.cpp */; };
 		A7FE7E6D13311EA400F7B327 /* setcurrentcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7FE7E6C13311EA400F7B327 /* setcurrentcommand.cpp */; };
+		A7FF19F2140FFDA500AD216D /* trimoligos.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7FF19F1140FFDA500AD216D /* trimoligos.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -985,6 +987,8 @@
 		A7E9B87E12D37EC400DA6239 /* weightedlinkage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = weightedlinkage.cpp; sourceTree = SOURCE_ROOT; };
 		A7E9B87F12D37EC400DA6239 /* whittaker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = whittaker.cpp; sourceTree = "<group>"; };
 		A7E9B88012D37EC400DA6239 /* whittaker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = whittaker.h; sourceTree = "<group>"; };
+		A7F9F5CD141A5E500032F693 /* sequenceparser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sequenceparser.h; sourceTree = "<group>"; };
+		A7F9F5CE141A5E500032F693 /* sequenceparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sequenceparser.cpp; sourceTree = "<group>"; };
 		A7FA10001302E096003860FE /* mantelcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mantelcommand.h; sourceTree = "<group>"; };
 		A7FA10011302E096003860FE /* mantelcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mantelcommand.cpp; sourceTree = "<group>"; };
 		A7FC480C12D788F20055BC5C /* linearalgebra.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = linearalgebra.h; sourceTree = "<group>"; };
@@ -995,6 +999,8 @@
 		A7FE7C3F1330EA1000F7B327 /* getcurrentcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getcurrentcommand.cpp; sourceTree = "<group>"; };
 		A7FE7E6B13311EA400F7B327 /* setcurrentcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = setcurrentcommand.h; sourceTree = "<group>"; };
 		A7FE7E6C13311EA400F7B327 /* setcurrentcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = setcurrentcommand.cpp; sourceTree = "<group>"; };
+		A7FF19F0140FFDA500AD216D /* trimoligos.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = trimoligos.h; sourceTree = "<group>"; };
+		A7FF19F1140FFDA500AD216D /* trimoligos.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = trimoligos.cpp; sourceTree = "<group>"; };
 		C6A0FF2C0290799A04C91782 /* mothur.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = mothur.1; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -1103,6 +1109,8 @@
 				A7E9B82D12D37EC400DA6239 /* singlelinkage.cpp */,
 				A7E9B83012D37EC400DA6239 /* slibshuff.cpp */,
 				A7E9B83112D37EC400DA6239 /* slibshuff.h */,
+				A7FF19F0140FFDA500AD216D /* trimoligos.h */,
+				A7FF19F1140FFDA500AD216D /* trimoligos.cpp */,
 				A7E9B87412D37EC400DA6239 /* validcalculator.cpp */,
 				A7E9B87512D37EC400DA6239 /* validcalculator.h */,
 				A7E9B87612D37EC400DA6239 /* validparameter.cpp */,
@@ -1382,9 +1390,9 @@
 				A7E9B7E412D37EC400DA6239 /* sffinfocommand.h */,
 				A7E9B7E312D37EC400DA6239 /* sffinfocommand.cpp */,
 				A7E9B7F312D37EC400DA6239 /* sharedcommand.h */,
-				A7E9B7F212D37EC400DA6239 /* sharedcommand.cpp */,
 				A7E9B82812D37EC400DA6239 /* shhhercommand.h */,
 				A7E9B82712D37EC400DA6239 /* shhhercommand.cpp */,
+				A7E9B7F212D37EC400DA6239 /* sharedcommand.cpp */,
 				A7E9B84012D37EC400DA6239 /* splitabundcommand.h */,
 				A7E9B83F12D37EC400DA6239 /* splitabundcommand.cpp */,
 				A7E9B84212D37EC400DA6239 /* splitgroupscommand.h */,
@@ -1625,6 +1633,8 @@
 				A7E9B7DC12D37EC400DA6239 /* sequence.hpp */,
 				A7E9B7DD12D37EC400DA6239 /* sequencedb.cpp */,
 				A7E9B7DE12D37EC400DA6239 /* sequencedb.h */,
+				A7F9F5CD141A5E500032F693 /* sequenceparser.h */,
+				A7F9F5CE141A5E500032F693 /* sequenceparser.cpp */,
 				A7E9B80412D37EC400DA6239 /* sharedlistvector.cpp */,
 				A7E9B80512D37EC400DA6239 /* sharedlistvector.h */,
 				A7E9B80E12D37EC400DA6239 /* sharedordervector.h */,
@@ -2137,6 +2147,8 @@
 				A73DDC3813C4BF64006AAE38 /* mothurmetastats.cpp in Sources */,
 				A79234D713C74BF6002B08E2 /* mothurfisher.cpp in Sources */,
 				A795840D13F13CD900F201D5 /* countgroupscommand.cpp in Sources */,
+				A7FF19F2140FFDA500AD216D /* trimoligos.cpp in Sources */,
+				A7F9F5CF141A5E500032F693 /* sequenceparser.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

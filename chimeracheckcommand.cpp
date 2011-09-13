@@ -349,7 +349,7 @@ int ChimeraCheckCommand::execute(){
 		
 				int pid, numSeqsPerProcessor; 
 				int tag = 2001;
-				vector<unsigned long int> MPIPos;
+				vector<unsigned long long> MPIPos;
 				
 				MPI_Status status; 
 				MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
@@ -424,7 +424,7 @@ int ChimeraCheckCommand::execute(){
 				MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 		#else
 			
-			vector<unsigned long int> positions = m->divideFile(fastaFileNames[i], processors);
+			vector<unsigned long long> positions = m->divideFile(fastaFileNames[i], processors);
 				
 			for (int s = 0; s < (positions.size()-1); s++) {
 				lines.push_back(new linePair(positions[s], positions[(s+1)]));
@@ -520,7 +520,7 @@ int ChimeraCheckCommand::driver(linePair* filePos, string outputFName, string fi
 			delete candidateSeq;
 			
 			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-				unsigned long int pos = inFASTA.tellg();
+				unsigned long long pos = inFASTA.tellg();
 				if ((pos == -1) || (pos >= filePos->end)) { break; }
 			#else
 				if (inFASTA.eof()) { break; }
@@ -544,7 +544,7 @@ int ChimeraCheckCommand::driver(linePair* filePos, string outputFName, string fi
 }
 //**********************************************************************************************************************
 #ifdef USE_MPI
-int ChimeraCheckCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& outMPI, vector<unsigned long int>& MPIPos){
+int ChimeraCheckCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& outMPI, vector<unsigned long long>& MPIPos){
 	try {
 		MPI_File outAccMPI;
 		MPI_Status status; 

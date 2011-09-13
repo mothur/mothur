@@ -261,7 +261,7 @@ int ScreenSeqsCommand::execute(){
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//if the user want to optimize we need to know the 90% mark
-		vector<unsigned long int> positions;
+		vector<unsigned long long> positions;
 		if (optimize.size() != 0) {  //get summary is paralellized so we need to divideFile, no need to do this step twice so I moved it here
 			//use the namefile to optimize correctly
 			if (namefile != "") { nameMap = m->readNames(namefile); }
@@ -284,7 +284,7 @@ int ScreenSeqsCommand::execute(){
 #ifdef USE_MPI	
 			int pid, numSeqsPerProcessor; 
 			int tag = 2001;
-			vector<unsigned long int> MPIPos;
+			vector<unsigned long long> MPIPos;
 			
 			MPI_Status status; 
 			MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
@@ -629,7 +629,7 @@ int ScreenSeqsCommand::screenNameGroupFile(set<string> badSeqNames){
 	}
 }
 //***************************************************************************************************************
-int ScreenSeqsCommand::getSummary(vector<unsigned long int>& positions){
+int ScreenSeqsCommand::getSummary(vector<unsigned long long>& positions){
 	try {
 		
 		vector<int> startPosition;
@@ -638,7 +638,7 @@ int ScreenSeqsCommand::getSummary(vector<unsigned long int>& positions){
 		vector<int> ambigBases;
 		vector<int> longHomoPolymer;
 		
-		vector<unsigned long int> positions = m->divideFile(fastafile, processors);
+		vector<unsigned long long> positions = m->divideFile(fastafile, processors);
 				
 		for (int i = 0; i < (positions.size()-1); i++) {
 			lines.push_back(new linePair(positions[i], positions[(i+1)]));
@@ -724,7 +724,7 @@ int ScreenSeqsCommand::driverCreateSummary(vector<int>& startPosition, vector<in
 			}
 			
 			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-				unsigned long int pos = in.tellg();
+				unsigned long long pos = in.tellg();
 				if ((pos == -1) || (pos >= filePos->end)) { break; }
 			#else
 				if (in.eof()) { break; }
@@ -1050,7 +1050,7 @@ int ScreenSeqsCommand::driver(linePair* filePos, string goodFName, string badAcc
 			}
 			
 			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-				unsigned long int pos = inFASTA.tellg();
+				unsigned long long pos = inFASTA.tellg();
 				if ((pos == -1) || (pos >= filePos->end)) { break; }
 			#else
 				if (inFASTA.eof()) { break; }
@@ -1076,7 +1076,7 @@ int ScreenSeqsCommand::driver(linePair* filePos, string goodFName, string badAcc
 }
 //**********************************************************************************************************************
 #ifdef USE_MPI
-int ScreenSeqsCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& goodFile, MPI_File& badAccnosFile, vector<unsigned long int>& MPIPos, set<string>& badSeqNames){
+int ScreenSeqsCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& goodFile, MPI_File& badAccnosFile, vector<unsigned long long>& MPIPos, set<string>& badSeqNames){
 	try {
 		string outputString = "";
 		MPI_Status statusGood; 

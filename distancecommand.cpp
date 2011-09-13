@@ -317,7 +317,7 @@ int DistanceCommand::execute(){
 			
 				//do your part
 				string outputMyPart;
-				unsigned long int mySize;
+				unsigned long long mySize;
 				
 				if (output != "square"){ driverMPI(start, end, outputFile, mySize); }
 				else { driverMPI(start, end, outputFile, mySize, output); }
@@ -339,7 +339,7 @@ int DistanceCommand::execute(){
 
 				//wait on chidren
 				for(int b = 1; b < processors; b++) { 
-					unsigned long int fileSize;
+					unsigned long long fileSize;
 					
 					if (m->control_pressed) { outputTypes.clear();  MPI_File_close(&outMPI);  delete distCalculator;  return 0; }
 					
@@ -367,7 +367,7 @@ int DistanceCommand::execute(){
 				MPI_File_close(&outMPI);
 			}else { //you are a child process
 				//do your part
-				unsigned long int size;
+				unsigned long long size;
 				if (output != "square"){ driverMPI(start, end, (outputFile + toString(pid) + ".temp"), size); }
 				else { driverMPI(start, end, (outputFile + toString(pid) + ".temp"), size, output); }
 				
@@ -387,7 +387,7 @@ int DistanceCommand::execute(){
 			else { driver(0, numSeqs, outputFile, "square");  }
 		}else{ //you have multiple processors
 			
-			unsigned long int numDists = 0;
+			unsigned long long numDists = 0;
 			
 			if (output == "square") {
 				 numDists = numSeqs * numSeqs;
@@ -817,7 +817,7 @@ int DistanceCommand::driverMPI(int startLine, int endLine, MPI_File& outMPI, flo
 }
 /**************************************************************************************************/
 /////// need to fix to work with calcs and sequencedb
-int DistanceCommand::driverMPI(int startLine, int endLine, string file, unsigned long int& size){
+int DistanceCommand::driverMPI(int startLine, int endLine, string file, unsigned long long& size){
 	try {
 		ValidCalculators validCalculator;
 		Dist* distCalculator;
@@ -913,7 +913,7 @@ int DistanceCommand::driverMPI(int startLine, int endLine, string file, unsigned
 }
 /**************************************************************************************************/
 /////// need to fix to work with calcs and sequencedb
-int DistanceCommand::driverMPI(int startLine, int endLine, string file, unsigned long int& size, string square){
+int DistanceCommand::driverMPI(int startLine, int endLine, string file, unsigned long long& size, string square){
 	try {
 		ValidCalculators validCalculator;
 		Dist* distCalculator;

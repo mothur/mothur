@@ -273,9 +273,9 @@ int SeqErrorCommand::execute(){
 
 		if(namesFileName != ""){	weights = getWeights();	}
 		
-		vector<unsigned long int> fastaFilePos;
-		vector<unsigned long int> qFilePos;
-		vector<unsigned long int> reportFilePos;
+		vector<unsigned long long> fastaFilePos;
+		vector<unsigned long long> qFilePos;
+		vector<unsigned long long> reportFilePos;
 		
 		setLines(queryFileName, qualFileName, reportFileName, fastaFilePos, qFilePos, reportFilePos);
 		
@@ -731,7 +731,7 @@ int SeqErrorCommand::driver(string filename, string qFileName, string rFileName,
 			index++;
 			
 			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-				unsigned long int pos = queryFile.tellg();
+				unsigned long long pos = queryFile.tellg();
 				if ((pos == -1) || (pos >= line.end)) { break; }
 			#else
 				if (queryFile.eof()) { break; }
@@ -1204,7 +1204,7 @@ void SeqErrorCommand::printQualityFR(vector<vector<int> > qualForwardMap, vector
 }
 /**************************************************************************************************/
 
-int SeqErrorCommand::setLines(string filename, string qfilename, string rfilename, vector<unsigned long int>& fastaFilePos, vector<unsigned long int>& qfileFilePos, vector<unsigned long int>& rfileFilePos) {
+int SeqErrorCommand::setLines(string filename, string qfilename, string rfilename, vector<unsigned long long>& fastaFilePos, vector<unsigned long long>& qfileFilePos, vector<unsigned long long>& rfileFilePos) {
 	try {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		//set file positions for fasta file
@@ -1246,7 +1246,7 @@ int SeqErrorCommand::setLines(string filename, string qfilename, string rfilenam
 					map<string, int>::iterator it = firstSeqNames.find(sname);
 					
 					if(it != firstSeqNames.end()) { //this is the start of a new chunk
-						unsigned long int pos = inQual.tellg(); 
+						unsigned long long pos = inQual.tellg(); 
 						qfileFilePos.push_back(pos - input.length() - 1);	
 						firstSeqNames.erase(it);
 					}
@@ -1267,7 +1267,7 @@ int SeqErrorCommand::setLines(string filename, string qfilename, string rfilenam
 		
 		//get last file position of qfile
 		FILE * pFile;
-		unsigned long int size;
+		unsigned long long size;
 		
 		//get num bytes in file
 		pFile = fopen (qfilename.c_str(),"rb");
@@ -1305,7 +1305,7 @@ int SeqErrorCommand::setLines(string filename, string qfilename, string rfilenam
 				map<string, int>::iterator it = firstSeqNamesReport.find(sname);
 			
 				if(it != firstSeqNamesReport.end()) { //this is the start of a new chunk
-					unsigned long int pos = inR.tellg(); 
+					unsigned long long pos = inR.tellg(); 
 					rfileFilePos.push_back(pos - input.length() - 1);	
 					firstSeqNamesReport.erase(it);
 				}
@@ -1326,7 +1326,7 @@ int SeqErrorCommand::setLines(string filename, string qfilename, string rfilenam
 		
 		//get last file position of qfile
 		FILE * rFile;
-		unsigned long int sizeR;
+		unsigned long long sizeR;
 		
 		//get num bytes in file
 		rFile = fopen (rfilename.c_str(),"rb");
@@ -1346,7 +1346,7 @@ int SeqErrorCommand::setLines(string filename, string qfilename, string rfilenam
 		fastaFilePos.push_back(0); qfileFilePos.push_back(0);
 		//get last file position of fastafile
 		FILE * pFile;
-		unsigned long int size;
+		unsigned long long size;
 		
 		//get num bytes in file
 		pFile = fopen (filename.c_str(),"rb");

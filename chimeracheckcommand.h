@@ -38,9 +38,9 @@ public:
 private:
 
 	struct linePair {
-		unsigned long int start;
-		unsigned long int end;
-		linePair(unsigned long int i, unsigned long int j) : start(i), end(j) {}
+		unsigned long long start;
+		unsigned long long end;
+		linePair(unsigned long long i, unsigned long long j) : start(i), end(j) {}
 	};
 
 	vector<int> processIDS;   //processid
@@ -50,7 +50,7 @@ private:
 	int createProcesses(string, string);
 		
 	#ifdef USE_MPI
-	int driverMPI(int, int, MPI_File&, MPI_File&, vector<unsigned long int>&);
+	int driverMPI(int, int, MPI_File&, MPI_File&, vector<unsigned long long>&);
 	#endif
 
 	bool abort, svg, save;

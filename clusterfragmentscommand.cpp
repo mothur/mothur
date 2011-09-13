@@ -226,7 +226,7 @@ int ClusterFragmentsCommand::execute(){
 		string fileroot = outputDir + m->getRootName(m->getSimpleName(fastafile));
 		
 		string newFastaFile = fileroot + "fragclust.fasta";
-		string newNamesFile = fileroot + "names";
+		string newNamesFile = fileroot + "fragclust.names";
 		
 		if (m->control_pressed) { return 0; }
 		

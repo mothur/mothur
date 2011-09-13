@@ -54,8 +54,8 @@ private:
 	
 	#ifdef USE_MPI 
 	int driverMPI(int, int, MPI_File&, float);
-	int driverMPI(int, int, string, unsigned long int&);
-	int driverMPI(int, int, string, unsigned long int&, string);
+	int driverMPI(int, int, string, unsigned long long&);
+	int driverMPI(int, int, string, unsigned long long&, string);
 	#endif
 	
 	string fastaFileName, align, calc, outputDir, output;

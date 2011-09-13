@@ -341,7 +341,7 @@ int FilterSeqsCommand::filterSequences() {
 #ifdef USE_MPI	
 				int pid, numSeqsPerProcessor, num; 
 				int tag = 2001;
-				vector<unsigned long int>MPIPos;
+				vector<unsigned long long>MPIPos;
 						
 				MPI_Status status; 
 				MPI_Comm_size(MPI_COMM_WORLD, &processors); //set processors to the number of mpi processes running
@@ -420,7 +420,7 @@ int FilterSeqsCommand::filterSequences() {
 				MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 				
 #else
-			vector<unsigned long int> positions = m->divideFile(fastafileNames[s], processors);
+			vector<unsigned long long> positions = m->divideFile(fastafileNames[s], processors);
 				
 			for (int i = 0; i < (positions.size()-1); i++) {
 				lines.push_back(new linePair(positions[i], positions[(i+1)]));
@@ -462,7 +462,7 @@ int FilterSeqsCommand::filterSequences() {
 }
 #ifdef USE_MPI
 /**************************************************************************************/
-int FilterSeqsCommand::driverMPIRun(int start, int num, MPI_File& inMPI, MPI_File& outMPI, vector<unsigned long int>& MPIPos) {	
+int FilterSeqsCommand::driverMPIRun(int start, int num, MPI_File& inMPI, MPI_File& outMPI, vector<unsigned long long>& MPIPos) {	
 	try {
 		string outputString = "";
 		int count = 0;
@@ -568,7 +568,7 @@ int FilterSeqsCommand::driverRunFilter(string F, string outputFilename, string i
 			}
 			
 			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-				unsigned long int pos = in.tellg();
+				unsigned long long pos = in.tellg();
 				if ((pos == -1) || (pos >= filePos->end)) { break; }
 			#else
 				if (in.eof()) { break; }
@@ -676,7 +676,7 @@ string FilterSeqsCommand::createFilter() {
 #ifdef USE_MPI	
 				int pid, numSeqsPerProcessor, num; 
 				int tag = 2001;
-				vector<unsigned long int> MPIPos;
+				vector<unsigned long long> MPIPos;
 				
 				MPI_Status status; 
 				MPI_File inMPI; 
@@ -736,7 +736,7 @@ string FilterSeqsCommand::createFilter() {
 				MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 				
 #else
-		vector<unsigned long int> positions = m->divideFile(fastafileNames[s], processors);
+		vector<unsigned long long> positions = m->divideFile(fastafileNames[s], processors);
 				
 		for (int i = 0; i < (positions.size()-1); i++) {
 			lines.push_back(new linePair(positions[i], positions[(i+1)]));
@@ -877,7 +877,7 @@ int FilterSeqsCommand::driverCreateFilter(Filters& F, string filename, linePair*
 			}
 			
 			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-				unsigned long int pos = in.tellg();
+				unsigned long long pos = in.tellg();
 				if ((pos == -1) || (pos >= filePos->end)) { break; }
 			#else
 				if (in.eof()) { break; }
@@ -899,7 +899,7 @@ int FilterSeqsCommand::driverCreateFilter(Filters& F, string filename, linePair*
 }
 #ifdef USE_MPI
 /**************************************************************************************/
-int FilterSeqsCommand::MPICreateFilter(int start, int num, Filters& F, MPI_File& inMPI, vector<unsigned long int>& MPIPos) {	
+int FilterSeqsCommand::MPICreateFilter(int start, int num, Filters& F, MPI_File& inMPI, vector<unsigned long long>& MPIPos) {	
 	try {
 		
 		MPI_Status status; 

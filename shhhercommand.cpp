@@ -19,14 +19,6 @@
 #include <cfloat>
 
 //**********************************************************************************************************************
-
-#define NUMBINS 1000
-#define HOMOPS 10
-#define MIN_COUNT 0.1
-#define MIN_WEIGHT 0.1
-#define MIN_TAU 0.0001
-#define MIN_ITER 10
-//**********************************************************************************************************************
 vector<string> ShhherCommand::setParameters(){	
 	try {
 		CommandParameter pflow("flow", "InputTypes", "", "", "none", "fileflow", "none",false,false); parameters.push_back(pflow);
@@ -310,8 +302,8 @@ int ShhherCommand::execute(){
 			processors = ncpus;
 			
 			m->mothurOut("\nGetting preliminary data...\n");
-			getSingleLookUp();
-			getJointLookUp();
+			getSingleLookUp();	if (m->control_pressed) { return 0; }
+			getJointLookUp();	if (m->control_pressed) { return 0; }
 			
 			vector<string> flowFileVector;
 			if(flowFilesFileName != "not found"){
@@ -320,7 +312,7 @@ int ShhherCommand::execute(){
 				ifstream flowFilesFile;
 				m->openInputFile(flowFilesFileName, flowFilesFile);
 				while(flowFilesFile){
-					flowFilesFile >> fName;
+					fName = m->getline(flowFilesFile);
 					flowFileVector.push_back(fName);
 					m->gobble(flowFilesFile);
 				}
@@ -335,17 +327,24 @@ int ShhherCommand::execute(){
 			}
 			
 			for(int i=0;i<numFiles;i++){
+				
+				if (m->control_pressed) { break; }
+				
 				double begClock = clock();
-				unsigned long int begTime = time(NULL);
+				unsigned long long begTime = time(NULL);
 
 				flowFileName = flowFileVector[i];
 				
 				m->mothurOut("\n>>>>>\tProcessing " + flowFileName + " (file " + toString(i+1) + " of " + toString(numFiles) + ")\t<<<<<\n");
 				m->mothurOut("Reading flowgrams...\n");
 				getFlowData();
+				
+				if (m->control_pressed) { break; }
 
 				m->mothurOut("Identifying unique flowgrams...\n");
 				getUniques();
+				
+				if (m->control_pressed) { break; }
 
 				m->mothurOut("Calculating distances between flowgrams...\n");
 				char fileName[1024];
@@ -368,6 +367,8 @@ int ShhherCommand::execute(){
 							
 				string distFileName = flowDistMPI(0, int(sqrt(1.0/float(ncpus)) * numUniques));
 				
+				if (m->control_pressed) { break; }
+				
 				int done;
 				for(int i=1;i<ncpus;i++){
 					MPI_Recv(&done, 1, MPI_INT, i, tag, MPI_COMM_WORLD, &status);
@@ -378,17 +379,25 @@ int ShhherCommand::execute(){
 
 				string namesFileName = createNamesFile();
 				
+				if (m->control_pressed) { break; }
+				
 				m->mothurOut("\nClustering flowgrams...\n");
 				string listFileName = cluster(distFileName, namesFileName);
-
+				
+				if (m->control_pressed) { break; }
+				
 				getOTUData(listFileName);
 
 				m->mothurRemove(distFileName);
 				m->mothurRemove(namesFileName);
 				m->mothurRemove(listFileName);
 				
+				if (m->control_pressed) { break; }
+				
 				initPyroCluster();
 
+				if (m->control_pressed) { break; }
+				
 				for(int i=1;i<ncpus;i++){
 					MPI_Send(&numOTUs, 1, MPI_INT, i, tag, MPI_COMM_WORLD);
 					MPI_Send(&singleLookUp[0], singleLookUp.size(), MPI_DOUBLE, i, tag, MPI_COMM_WORLD);
@@ -396,6 +405,7 @@ int ShhherCommand::execute(){
 					MPI_Send(&sigma, 1, MPI_DOUBLE, i, tag, MPI_COMM_WORLD);
 				}
 				
+				if (m->control_pressed) { break; }
 				
 				double maxDelta = 0;
 				int iter = 0;
@@ -406,10 +416,12 @@ int ShhherCommand::execute(){
 				m->mothurOut("iter\tmaxDelta\tnLL\t\tcycletime\n");
 				
 				while((maxIters == 0 && maxDelta > minDelta) || iter < MIN_ITER || (maxDelta > minDelta && iter < maxIters)){
-
+					
 					double cycClock = clock();
-					unsigned long int cycTime = time(NULL);
+					unsigned long long cycTime = time(NULL);
 					fill();
+					
+					if (m->control_pressed) { break; }
 
 					int total = singleTau.size();
 					for(int i=1;i<ncpus;i++){
@@ -442,9 +454,9 @@ int ShhherCommand::execute(){
 						}
 					}
 									
-					maxDelta = getNewWeights();
-					double nLL = getLikelihood();
-					checkCentroids();
+					maxDelta = getNewWeights(); if (m->control_pressed) { break; }
+					double nLL = getLikelihood(); if (m->control_pressed) { break; }
+					checkCentroids(); if (m->control_pressed) { break; }
 					
 					for(int i=1;i<ncpus;i++){
 						MPI_Send(&centroids[0], numOTUs, MPI_INT, i, tag, MPI_COMM_WORLD);
@@ -521,19 +533,26 @@ int ShhherCommand::execute(){
 					
 				}	
 				
+				if (m->control_pressed) { break; }
+				
 				m->mothurOut("\nFinalizing...\n");
 				fill();
+				
+				if (m->control_pressed) { break; }
+				
 				setOTUs();
 				
 				vector<int> otuCounts(numOTUs, 0);
 				for(int i=0;i<numSeqs;i++)	{	otuCounts[otuData[i]]++;	}
 				calcCentroidsDriver(0, numOTUs);
 				
-				writeQualities(otuCounts);
-				writeSequences(otuCounts);
-				writeNames(otuCounts);
-				writeClusters(otuCounts);
-				writeGroups();
+				if (m->control_pressed) { break; }
+				
+				writeQualities(otuCounts);	if (m->control_pressed) { break; }
+				writeSequences(otuCounts);	if (m->control_pressed) { break; }
+				writeNames(otuCounts);		if (m->control_pressed) { break; }
+				writeClusters(otuCounts);	if (m->control_pressed) { break; }
+				writeGroups();				if (m->control_pressed) { break; }
 				
 								 
 				m->mothurOut("Total time to process " + toString(flowFileName) + ":\t" + toString(time(NULL) - begTime) + '\t' + toString((clock() - begClock)/(double)CLOCKS_PER_SEC) + '\n');			
@@ -549,6 +568,9 @@ int ShhherCommand::execute(){
 			MPI_Recv(&numFiles, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
 
 			for(int i=0;i<numFiles;i++){
+				
+				if (m->control_pressed) { break; }
+				
 				//Now into the pyrodist part
 				bool live = 1;
 
@@ -578,7 +600,9 @@ int ShhherCommand::execute(){
 				int flowDistEnd = int(sqrt(float(pid+1)/float(ncpus)) * numUniques);
 				
 				string distanceStringChild = flowDistMPI(flowDistStart, flowDistEnd);
-
+				
+				if (m->control_pressed) { break; }
+				
 				int done = 1;
 				MPI_Send(&done, 1, MPI_INT, 0, tag, MPI_COMM_WORLD);
 
@@ -607,6 +631,8 @@ int ShhherCommand::execute(){
 				int total;
 
 				while(live){
+					
+					if (m->control_pressed) { break; }
 					
 					MPI_Recv(&total, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
 					singleTau.assign(total, 0.0000);
@@ -643,7 +669,10 @@ int ShhherCommand::execute(){
 					MPI_Recv(&live, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
 				}
 			}
-		}		
+		}
+		
+		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
+		
 		MPI_Barrier(MPI_COMM_WORLD);
 
 		
@@ -680,6 +709,9 @@ string ShhherCommand::flowDistMPI(int startSeq, int stopSeq){
 		double begClock = clock();
 		
 		for(int i=startSeq;i<stopSeq;i++){
+			
+			if (m->control_pressed) { break; }
+			
 			for(int j=0;j<i;j++){
 				float flowDistance = calcPairwiseDist(mapUniqueToSeq[i], mapUniqueToSeq[j]);
 				
@@ -695,10 +727,12 @@ string ShhherCommand::flowDistMPI(int startSeq, int stopSeq){
 			}
 		}
 		
-		m->mothurOut(toString(stopSeq) + '\t' + toString(time(NULL) - begTime) + '\t' + toString((clock()-begClock)/CLOCKS_PER_SEC) + '\n');
-		
 		string fDistFileName = flowFileName.substr(0,flowFileName.find_last_of('.')) + ".shhh.dist";
 		if(pid != 0){	fDistFileName += ".temp." + toString(pid);	}
+		
+		if (m->control_pressed) { return fDistFileName; }
+		
+		m->mothurOut(toString(stopSeq) + '\t' + toString(time(NULL) - begTime) + '\t' + toString((clock()-begClock)/CLOCKS_PER_SEC) + '\n');
 
 		ofstream distFile(fDistFileName.c_str());
 		distFile << outStream.str();		
@@ -719,9 +753,10 @@ int ShhherCommand::execute(){
 	try {
 		if (abort == true) { return 0; }
 		
-		getSingleLookUp();
-		getJointLookUp();
+		getSingleLookUp();	if (m->control_pressed) { return 0; }
+		getJointLookUp();	if (m->control_pressed) { return 0; }
 				
+		
 		vector<string> flowFileVector;
 		if(flowFilesFileName != "not found"){
 			string fName;
@@ -729,7 +764,7 @@ int ShhherCommand::execute(){
 			ifstream flowFilesFile;
 			m->openInputFile(flowFilesFileName, flowFilesFile);
 			while(flowFilesFile){
-				flowFilesFile >> fName;
+				fName = m->getline(flowFilesFile);
 				flowFileVector.push_back(fName);
 				m->gobble(flowFilesFile);
 			}
@@ -741,23 +776,36 @@ int ShhherCommand::execute(){
 		
 		
 		for(int i=0;i<numFiles;i++){
+			
+			if (m->control_pressed) { break; }
+			
 			flowFileName = flowFileVector[i];
 
 			m->mothurOut("\n>>>>>\tProcessing " + flowFileName + " (file " + toString(i+1) + " of " + toString(numFiles) + ")\t<<<<<\n");
 			m->mothurOut("Reading flowgrams...\n");
 			getFlowData();
 			
+			if (m->control_pressed) { break; }
+			
 			m->mothurOut("Identifying unique flowgrams...\n");
 			getUniques();
 			
+			if (m->control_pressed) { break; }
 			
 			m->mothurOut("Calculating distances between flowgrams...\n");
 			string distFileName = createDistFile(processors);
 			string namesFileName = createNamesFile();
-				
+			
+			if (m->control_pressed) { break; }
+			
 			m->mothurOut("\nClustering flowgrams...\n");
 			string listFileName = cluster(distFileName, namesFileName);
+			
+			if (m->control_pressed) { break; }
+			
 			getOTUData(listFileName);
+			
+			if (m->control_pressed) { break; }
 			
 			m->mothurRemove(distFileName);
 			m->mothurRemove(namesFileName);
@@ -765,51 +813,73 @@ int ShhherCommand::execute(){
 			
 			initPyroCluster();
 			
+			if (m->control_pressed) { break; }
+			
 			double maxDelta = 0;
 			int iter = 0;
 			
 			double begClock = clock();
-			unsigned long int begTime = time(NULL);
+			unsigned long long begTime = time(NULL);
 
 			m->mothurOut("\nDenoising flowgrams...\n");
 			m->mothurOut("iter\tmaxDelta\tnLL\t\tcycletime\n");
 			
 			while((maxIters == 0 && maxDelta > minDelta) || iter < MIN_ITER || (maxDelta > minDelta && iter < maxIters)){
 				
+				if (m->control_pressed) { break; }
+				
 				double cycClock = clock();
-				unsigned long int cycTime = time(NULL);
+				unsigned long long cycTime = time(NULL);
 				fill();
 				
+				if (m->control_pressed) { break; }
+
 				calcCentroids();
 				
-				maxDelta = getNewWeights();
-				double nLL = getLikelihood();
+				if (m->control_pressed) { break; }
+
+				maxDelta = getNewWeights();  if (m->control_pressed) { break; }
+				double nLL = getLikelihood(); if (m->control_pressed) { break; }
 				checkCentroids();
 				
+				if (m->control_pressed) { break; }
+				
 				calcNewDistances();
-
+				
+				if (m->control_pressed) { break; }
+				
 				iter++;
 				
 				m->mothurOut(toString(iter) + '\t' + toString(maxDelta) + '\t' + toString(nLL) + '\t' + toString(time(NULL) - cycTime) + '\t' + toString((clock() - cycClock)/(double)CLOCKS_PER_SEC) + '\n');
 
 			}	
 			
+			if (m->control_pressed) { break; }
+			
 			m->mothurOut("\nFinalizing...\n");
 			fill();
+			
+			if (m->control_pressed) { break; }
+			
 			setOTUs();
+			
+			if (m->control_pressed) { break; }
 			
 			vector<int> otuCounts(numOTUs, 0);
 			for(int i=0;i<numSeqs;i++)	{	otuCounts[otuData[i]]++;	}
 			
-			calcCentroidsDriver(0, numOTUs);
-			writeQualities(otuCounts);
-			writeSequences(otuCounts);
-			writeNames(otuCounts);
-			writeClusters(otuCounts);
-			writeGroups();
+			calcCentroidsDriver(0, numOTUs);	if (m->control_pressed) { break; }
+			writeQualities(otuCounts);			if (m->control_pressed) { break; }
+			writeSequences(otuCounts);			if (m->control_pressed) { break; }
+			writeNames(otuCounts);				if (m->control_pressed) { break; }
+			writeClusters(otuCounts);			if (m->control_pressed) { break; }
+			writeGroups();						if (m->control_pressed) { break; }
 			
 			m->mothurOut("Total time to process " + flowFileName + ":\t" + toString(time(NULL) - begTime) + '\t' + toString((clock() - begClock)/(double)CLOCKS_PER_SEC) + '\n');
 		}
+		
+		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
+
 		
 		if(compositeFASTAFileName != ""){
 			outputNames.push_back(compositeFASTAFileName);
@@ -850,6 +920,9 @@ void ShhherCommand::getFlowData(){
 		flowFile >> numFlowCells;
 		int index = 0;//pcluster
 		while(!flowFile.eof()){
+			
+			if (m->control_pressed) { break; }
+			
 			flowFile >> seqName >> currentNumFlowCells;
 			lengths.push_back(currentNumFlowCells);
 
@@ -869,6 +942,9 @@ void ShhherCommand::getFlowData(){
 		numSeqs = seqNameVector.size();		
 		
 		for(int i=0;i<numSeqs;i++){
+			
+			if (m->control_pressed) { break; }
+			
 			int iNumFlowCells = i * numFlowCells;
 			for(int j=lengths[i];j<numFlowCells;j++){
 				flowDataIntI[iNumFlowCells + j] = 0;
@@ -894,6 +970,9 @@ void ShhherCommand::getSingleLookUp(){
 		m->openInputFile(lookupFileName, lookUpFile);
 		
 		for(int i=0;i<HOMOPS;i++){
+			
+			if (m->control_pressed) { break; }
+			
 			float logFracFreq;
 			lookUpFile >> logFracFreq;
 			
@@ -919,6 +998,9 @@ void ShhherCommand::getJointLookUp(){
 		jointLookUp.resize(NUMBINS * NUMBINS, 0);
 		
 		for(int i=0;i<NUMBINS;i++){
+			
+			if (m->control_pressed) { break; }
+			
 			for(int j=0;j<NUMBINS;j++){		
 				
 				double minSum = 100000000;
@@ -947,6 +1029,9 @@ double ShhherCommand::getProbIntensity(int intIntensity){
 
 		
 		for(int i=0;i<HOMOPS;i++){//loop signal strength
+			
+			if (m->control_pressed) { break; }
+			
 			float negLogProb = singleLookUp[i * NUMBINS + intIntensity];
 			if(negLogProb < minNegLogProb)	{	minNegLogProb = negLogProb; }
 		}
@@ -975,6 +1060,9 @@ void ShhherCommand::getUniques(){
 		vector<short> uniqueFlowDataIntI(numFlowCells * numSeqs, -1);
 		
 		for(int i=0;i<numSeqs;i++){
+			
+			if (m->control_pressed) { break; }
+			
 			int index = 0;
 			
 			vector<short> current(numFlowCells);
@@ -1025,7 +1113,7 @@ void ShhherCommand::getUniques(){
 		uniqueLengths.resize(numUniques);	
 		
 		flowDataPrI.resize(numSeqs * numFlowCells, 0);
-		for(int i=0;i<flowDataPrI.size();i++)	{	flowDataPrI[i] = getProbIntensity(flowDataIntI[i]);		}
+		for(int i=0;i<flowDataPrI.size();i++)	{	if (m->control_pressed) { break; } flowDataPrI[i] = getProbIntensity(flowDataIntI[i]);		}
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ShhherCommand", "getUniques");
@@ -1046,6 +1134,9 @@ float ShhherCommand::calcPairwiseDist(int seqA, int seqB){
 		float dist = 0;
 		
 		for(int i=0;i<minLength;i++){
+			
+			if (m->control_pressed) { break; }
+			
 			int flowAIntI = flowDataIntI[ANumFlowCells + i];
 			float flowAPrI = flowDataPrI[ANumFlowCells + i];
 			
@@ -1078,6 +1169,9 @@ void ShhherCommand::flowDistParentFork(string distFileName, int startSeq, int st
 		double begClock = clock();
 
 		for(int i=startSeq;i<stopSeq;i++){
+			
+			if (m->control_pressed) { break; }
+			
 			for(int j=0;j<i;j++){
 				float flowDistance = calcPairwiseDist(mapUniqueToSeq[i], mapUniqueToSeq[j]);
 
@@ -1094,13 +1188,17 @@ void ShhherCommand::flowDistParentFork(string distFileName, int startSeq, int st
 				m->mothurOutEndLine();
 			}
 		}
-		m->mothurOut(toString(stopSeq-1) + "\t" + toString(time(NULL) - begTime));
-		m->mothurOut("\t" + toString((clock()-begClock)/CLOCKS_PER_SEC));
-		m->mothurOutEndLine();
 		
 		ofstream distFile(distFileName.c_str());
 		distFile << outStream.str();		
 		distFile.close();
+		
+		if (m->control_pressed) {}
+		else {
+			m->mothurOut(toString(stopSeq-1) + "\t" + toString(time(NULL) - begTime));
+			m->mothurOut("\t" + toString((clock()-begClock)/CLOCKS_PER_SEC));
+			m->mothurOutEndLine();
+		}
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ShhherCommand", "flowDistParentFork");
@@ -1112,31 +1210,37 @@ void ShhherCommand::flowDistParentFork(string distFileName, int startSeq, int st
 
 string ShhherCommand::createDistFile(int processors){
 	try{
+//////////////////////// until I figure out the shared memory issue //////////////////////		
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#else
+		processors=1;
+#endif
+//////////////////////// until I figure out the shared memory issue //////////////////////		
+		
 		string fDistFileName = flowFileName.substr(0,flowFileName.find_last_of('.')) + ".shhh.dist";
 				
-		unsigned long int begTime = time(NULL);
+		unsigned long long begTime = time(NULL);
 		double begClock = clock();
-
-		vector<int> start;
-		vector<int> end;
 		
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		if (numSeqs < processors){	processors = 1;	}
+		
 		if(processors == 1)	{	flowDistParentFork(fDistFileName, 0, numUniques);		}
+		
 		else{ //you have multiple processors
-			
-			if (numSeqs < processors){	processors = 1;	}
 			
 			vector<int> start(processors, 0);
 			vector<int> end(processors, 0);
+			
+			int process = 1;
+			vector<int> processIDs;
 			
 			for (int i = 0; i < processors; i++) {
 				start[i] = int(sqrt(float(i)/float(processors)) * numUniques);
 				end[i] = int(sqrt(float(i+1)/float(processors)) * numUniques);
 			}
 			
-			int process = 1;
-			vector<int> processIDs;
-			
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		
 			//loop through and create all the processes you want
 			while (process != processors) {
 				int pid = fork();
@@ -1163,6 +1267,43 @@ string ShhherCommand::createDistFile(int processors){
 				int temp = processIDs[i];
 				wait(&temp);
 			}
+#else
+			//////////////////////////////////////////////////////////////////////////////////////////////////////
+			//Windows version shared memory, so be careful when passing variables through the flowDistParentForkData struct. 
+			//Above fork() will clone, so memory is separate, but that's not the case with windows, 
+			//////////////////////////////////////////////////////////////////////////////////////////////////////
+			
+			vector<flowDistParentForkData*> pDataArray; 
+			DWORD   dwThreadIdArray[processors-1];
+			HANDLE  hThreadArray[processors-1]; 
+			
+			//Create processor worker threads.
+			for(int i = 0; i < processors-1; i++){
+				// Allocate memory for thread data.
+				string extension = extension = toString(i) + ".temp"; 
+				
+				flowDistParentForkData* tempdist = new flowDistParentForkData((fDistFileName + extension), mapUniqueToSeq, mapSeqToUnique, lengths, flowDataIntI, flowDataPrI, jointLookUp, m, start[i+1], end[i+1], numFlowCells, cutoff, i);
+				pDataArray.push_back(tempdist);
+				processIDs.push_back(i);
+				
+				//MySeqSumThreadFunction is in header. It must be global or static to work with the threads.
+				//default security attributes, thread function name, argument to thread function, use default creation flags, returns the thread identifier
+				hThreadArray[i] = CreateThread(NULL, 0, MyflowDistParentForkThreadFunction, pDataArray[i], 0, &dwThreadIdArray[i]);   
+			}
+			
+			//parent does its part
+			flowDistParentFork(fDistFileName, start[0], end[0]);
+			
+			//Wait until all threads have terminated.
+			WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
+			
+			//Close all thread handles and free memory allocations.
+			for(int i=0; i < pDataArray.size(); i++){
+				CloseHandle(hThreadArray[i]);
+				delete pDataArray[i];
+			}
+			
+#endif
 			
 			//append and remove temp files
 			for (int i=0;i<processIDs.size();i++) { 
@@ -1172,15 +1313,9 @@ string ShhherCommand::createDistFile(int processors){
 			
 		}
 		
-#else
-		flowDistParentFork(fDistFileName, 0, numUniques);
-#endif
-
 		m->mothurOutEndLine();
-		
 		m->mothurOut("Total time: " + toString(time(NULL) - begTime) + '\t' + toString((clock() - begClock)/CLOCKS_PER_SEC) + '\n');
 		
-
 		return fDistFileName;
 	}
 	catch(exception& e) {
@@ -1206,6 +1341,9 @@ string ShhherCommand::createNamesFile(){
 		m->openOutputFile(nameFileName, nameFile);
 		
 		for(int i=0;i<numUniques;i++){
+			
+			if (m->control_pressed) { break; }
+			
 //			nameFile << seqNameVector[mapUniqueToSeq[i]] << '\t' << duplicateNames[i].substr(0, duplicateNames[i].find_last_of(',')) << endl;
 			nameFile << mapUniqueToSeq[i] << '\t' << duplicateNames[i].substr(0, duplicateNames[i].find_last_of(',')) << endl;
 		}
@@ -1244,6 +1382,9 @@ string ShhherCommand::cluster(string distFileName, string namesFileName){
 		
 		double clusterCutoff = cutoff;
 		while (matrix->getSmallDist() <= clusterCutoff && matrix->getNNodes() > 0){
+			
+			if (m->control_pressed) { break; }
+			
 			cluster->update(clusterCutoff);
 		}
 		
@@ -1288,6 +1429,8 @@ void ShhherCommand::getOTUData(string listFileName){
 		string singleOTU = "";
 		
 		for(int i=0;i<numOTUs;i++){
+			
+			if (m->control_pressed) { break; }
 
 			listFile >> singleOTU;
 			
@@ -1358,6 +1501,9 @@ void ShhherCommand::getOTUData(string listFileName){
 
 void ShhherCommand::initPyroCluster(){                          
 	try{
+		
+		if (numOTUs < processors) { processors = 1; }
+		
 		dist.assign(numSeqs * numOTUs, 0);
 		change.assign(numOTUs, 1);
 		centroids.assign(numOTUs, -1);
@@ -1387,6 +1533,9 @@ void ShhherCommand::fill(){
 	try {
 		int index = 0;
 		for(int i=0;i<numOTUs;i++){
+			
+			if (m->control_pressed) { break; }
+			
 			cumNumSeqs[i] = index;
 			for(int j=0;j<nSeqsPerOTU[i];j++){
 				seqNumber[index] = aaP[i][j];
@@ -1408,7 +1557,7 @@ void ShhherCommand::calcCentroids(){
 	try{
 		
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-
+		
 		if(processors == 1)	{
 			calcCentroidsDriver(0, numOTUs);		
 		}
@@ -1465,8 +1614,9 @@ void ShhherCommand::calcCentroidsDriver(int start, int finish){
 	
 	try{
 		
-	
 		for(int i=start;i<finish;i++){
+			
+			if (m->control_pressed) { break; }
 			
 			double count = 0;
 			int position = 0;
@@ -1545,7 +1695,7 @@ double ShhherCommand::getDistToCentroid(int cent, int flow, int length){
 		int flowBValue = flow * numFlowCells;
 		
 		double dist = 0;
-		
+
 		for(int i=0;i<length;i++){
 			dist += singleLookUp[uniqueFlowgrams[flowAValue] * NUMBINS + flowDataIntI[flowBValue]];
 			flowAValue++;
@@ -1568,6 +1718,8 @@ double ShhherCommand::getNewWeights(){
 		double maxChange = 0;
 		
 		for(int i=0;i<numOTUs;i++){
+			
+			if (m->control_pressed) { break; }
 			
 			double difference = weight[i];
 			weight[i] = 0;
@@ -1606,6 +1758,9 @@ double ShhherCommand::getLikelihood(){
 		
 		string hold;
 		for(int i=0;i<numOTUs;i++){
+			
+			if (m->control_pressed) { break; }
+			
 			for(int j=0;j<nSeqsPerOTU[i];j++){
 				int index = cumNumSeqs[i] + j;
 				int nI = seqIndex[index];
@@ -1644,6 +1799,9 @@ void ShhherCommand::checkCentroids(){
 		}
 		
 		for(int i=0;i<numOTUs;i++){
+			
+			if (m->control_pressed) { break; }
+			
 			if(unique[i] == 1){
 				for(int j=i+1;j<numOTUs;j++){
 					if(unique[j] == 1){
@@ -1672,7 +1830,7 @@ void ShhherCommand::calcNewDistances(){
 	try{
 		
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-		
+
 		if(processors == 1)	{
 			calcNewDistancesParent(0, numSeqs);		
 		}
@@ -1706,7 +1864,7 @@ void ShhherCommand::calcNewDistances(){
 					exit(0);
 				}
 			}
-			
+				
 			//parent does its part
 			calcNewDistancesParent(nSeqsBreaks[0], nSeqsBreaks[1]);
 			int total = seqIndex.size();
@@ -1761,9 +1919,10 @@ void ShhherCommand::calcNewDistancesChildMPI(int startSeq, int stopSeq, vector<i
 		seqIndex.clear();
 		singleTau.clear();
 		
-		
-		
 		for(int i=startSeq;i<stopSeq;i++){
+			
+			if (m->control_pressed) { break; }
+			
 			double offset = 1e8;
 			int indexOffset = i * numOTUs;
 			
@@ -1818,6 +1977,9 @@ void ShhherCommand::calcNewDistancesChild(int startSeq, int stopSeq, vector<int>
 		child_singleTau.resize(0);
 		
 		for(int i=startSeq;i<stopSeq;i++){
+			
+			if (m->control_pressed) { break; }
+			
 			double offset = 1e8;
 			int indexOffset = i * numOTUs;
 			
@@ -1869,22 +2031,26 @@ void ShhherCommand::calcNewDistancesParent(int startSeq, int stopSeq){
 		vector<double> newTau(numOTUs,0);
 		vector<double> norms(numSeqs, 0);
 		nSeqsPerOTU.assign(numOTUs, 0);
-		
+
 		for(int i=startSeq;i<stopSeq;i++){
-			int indexOffset = i * numOTUs;
 			
+			if (m->control_pressed) { break; }
+			
+			int indexOffset = i * numOTUs;
+
 			double offset = 1e8;
 			
 			for(int j=0;j<numOTUs;j++){
+
 				if(weight[j] > MIN_WEIGHT && change[j] == 1){
 					dist[indexOffset + j] = getDistToCentroid(centroids[j], i, lengths[i]);
 				}
-				
+	
 				if(weight[j] > MIN_WEIGHT && dist[indexOffset + j] < offset){
 					offset = dist[indexOffset + j];
 				}
 			}
-			
+
 			for(int j=0;j<numOTUs;j++){
 				if(weight[j] > MIN_WEIGHT){
 					newTau[j] = exp(sigma * (-dist[indexOffset + j] + offset)) * weight[j];
@@ -1894,11 +2060,11 @@ void ShhherCommand::calcNewDistancesParent(int startSeq, int stopSeq){
 					newTau[j] = 0.0;
 				}
 			}
-			
+
 			for(int j=0;j<numOTUs;j++){
 				newTau[j] /= norms[i];
 			}
-			
+	
 			for(int j=0;j<numOTUs;j++){
 				if(newTau[j] > MIN_TAU){
 					
@@ -1917,7 +2083,9 @@ void ShhherCommand::calcNewDistancesParent(int startSeq, int stopSeq){
 					nSeqsPerOTU[j]++;
 				}
 			}
+
 		}
+
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ShhherCommand", "calcNewDistancesParent");
@@ -1933,6 +2101,9 @@ void ShhherCommand::setOTUs(){
 		vector<double> bigTauMatrix(numOTUs * numSeqs, 0.0000);
 		
 		for(int i=0;i<numOTUs;i++){
+			
+			if (m->control_pressed) { break; }
+			
 			for(int j=0;j<nSeqsPerOTU[i];j++){
 				int index = cumNumSeqs[i] + j;
 				double tauValue = singleTau[seqNumber[index]];
@@ -1994,6 +2165,9 @@ void ShhherCommand::writeQualities(vector<int> otuCounts){
 		
 		
 		for(int i=0;i<numOTUs;i++){
+			
+			if (m->control_pressed) { break; }
+			
 			int index = 0;
 			int base = 0;
 			
@@ -2090,6 +2264,9 @@ void ShhherCommand::writeSequences(vector<int> otuCounts){
 		vector<string> names(numOTUs, "");
 		
 		for(int i=0;i<numOTUs;i++){
+			
+			if (m->control_pressed) { break; }
+			
 			int index = centroids[i];
 			
 			if(otuCounts[i] > 0){
@@ -2131,6 +2308,9 @@ void ShhherCommand::writeNames(vector<int> otuCounts){
 		m->openOutputFile(nameFileName, nameFile);
 		
 		for(int i=0;i<numOTUs;i++){
+			
+			if (m->control_pressed) { break; }
+			
 			if(otuCounts[i] > 0){
 				nameFile << seqNameVector[aaI[i][0]] << '\t' << seqNameVector[aaI[i][0]];
 				
@@ -2165,6 +2345,7 @@ void ShhherCommand::writeGroups(){
 		m->openOutputFile(groupFileName, groupFile);
 		
 		for(int i=0;i<numSeqs;i++){
+			if (m->control_pressed) { break; }
 			groupFile << seqNameVector[i] << '\t' << fileRoot << endl;
 		}
 		groupFile.close();
@@ -2188,6 +2369,10 @@ void ShhherCommand::writeClusters(vector<int> otuCounts){
 		string bases = flowOrder;
 		
 		for(int i=0;i<numOTUs;i++){
+			
+			if (m->control_pressed) {
+				break;
+			}
 			//output the translated version of the centroid sequence for the otu
 			if(otuCounts[i] > 0){
 				int index = centroids[i];

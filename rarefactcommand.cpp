@@ -38,6 +38,7 @@ vector<string> RareFactCommand::setParameters(){
 		CommandParameter pcalc("calc", "Multiple", "sobs-chao-nseqs-coverage-ace-jack-shannon-shannoneven-npshannon-heip-smithwilson-simpson-simpsoneven-invsimpson-bootstrap", "sobs", "", "", "",true,false); parameters.push_back(pcalc);
 		CommandParameter pabund("abund", "Number", "", "10", "", "", "",false,false); parameters.push_back(pabund);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
+		CommandParameter pgroupmode("groupmode", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pgroupmode);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
 		
@@ -63,6 +64,7 @@ string RareFactCommand::getHelpString(){
 		helpString += "Example rarefaction.single(label=unique-.01-.03, iters=10000, freq=10, calc=sobs-rchao-race-rjack-rbootstrap-rshannon-rnpshannon-rsimpson).\n";
 		helpString += "The default values for iters is 1000, freq is 100, and calc is rarefaction which calculates the rarefaction curve for the observed richness.\n";
 		validCalculator.printCalc("rarefaction");
+		helpString += "If you are running rarefaction.single with a shared file and would like your results collated in one file, set groupmode=t. (Default=true).\n";
 		helpString += "The label parameter is used to analyze specific labels in your input.\n";
 		helpString += "Note: No spaces between parameter labels (i.e. freq), '=' and parameters (i.e.yourFreq).\n";
 		return helpString;
@@ -262,6 +264,9 @@ RareFactCommand::RareFactCommand(string option)  {
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
 			convert(temp, processors);
+			
+			temp = validParameter.validFile(parameters, "groupmode", false);		if (temp == "not found") { temp = "T"; }
+			groupMode = m->isTrue(temp);
 		}
 		
 	}
@@ -442,6 +447,11 @@ int RareFactCommand::execute(){
 		
 		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 
+		//create summary file containing all the groups data for each label - this function just combines the info from the files already created.
+		if ((sharedfile != "") && (groupMode)) {   outputNames = createGroupFile(outputNames);  }
+
+		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
@@ -451,6 +461,114 @@ int RareFactCommand::execute(){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "RareFactCommand", "execute");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames) {
+	try {
+		
+		vector<string> newFileNames;
+		
+		//find different types of files
+		map<string, vector<string> > typesFiles;
+		for (int i = 0; i < outputNames.size(); i++) {
+			string extension = m->getExtension(outputNames[i]);
+			
+			ifstream in;
+			m->openInputFile(outputNames[i], in);
+			
+			string labels = m->getline(in);
+			string newLine = labels.substr(0, labels.find_first_of('\t'));
+			
+			newLine += "\tGroup" + labels.substr(labels.find_first_of('\t'));
+			
+			typesFiles[extension].push_back(outputNames[i]);
+			
+			string combineFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + "groups" + extension;
+			
+			//print headers
+			ofstream out;
+			m->openOutputFile(combineFileName, out);
+			out << newLine << endl;
+			out.close();
+			
+		}
+		
+		//for each type create a combo file
+		for (map<string, vector<string> >::iterator it = typesFiles.begin(); it != typesFiles.end(); it++) {
+			
+			ofstream out;
+			string combineFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + "groups" + it->first;
+			m->openOutputFileAppend(combineFileName, out);
+			newFileNames.push_back(combineFileName);
+			
+			vector<string> thisTypesFiles = it->second;
+		
+			//open each type summary file
+			map<string, vector<string> > files; //maps file name to lines in file
+			int maxLines = 0;
+			for (int i=0; i<thisTypesFiles.size(); i++) {
+								
+				ifstream temp;
+				m->openInputFile(thisTypesFiles[i], temp);
+				
+				//read through first line - labels
+				m->getline(temp);	m->gobble(temp);
+				
+				vector<string> thisFilesLines;
+				string group = m->getRootName(thisTypesFiles[i]);
+				group = group.substr(0, group.length()-1);
+				group = group.substr(group.find_last_of('.')+1);
+				
+				thisFilesLines.push_back(group);
+				while (!temp.eof()){
+				
+					string thisLine = m->getline(temp);
+										
+					thisFilesLines.push_back(thisLine);
+					
+					m->gobble(temp);
+				}
+				
+				files[thisTypesFiles[i]] = thisFilesLines;
+				
+				//save longest file for below
+				if (maxLines < thisFilesLines.size()) { maxLines = thisFilesLines.size(); }
+				
+				temp.close();
+				m->mothurRemove(thisTypesFiles[i]);
+			}
+			
+			
+			//for each label
+			for (int k = 1; k < maxLines; k++) {
+				
+				//grab data for each group
+				for (int i=0; i<thisTypesFiles.size(); i++) {
+					
+					string output = "NA\t";
+					if (k < files[thisTypesFiles[i]].size()) {
+						string line = files[thisTypesFiles[i]][k];
+						output = line.substr(0, line.find_first_of('\t'));
+						output += '\t' + files[thisTypesFiles[i]][0] + '\t' + line.substr(line.find_first_of('\t'));
+					}else{
+						output += '\t' + files[thisTypesFiles[i]][0] + '\t';
+					}
+					out << output << endl;
+				}
+			}	
+			
+			out.close();
+			
+		}
+		
+		//return combine file name
+		return newFileNames;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "RareFactCommand", "createGroupFile");
 		exit(1);
 	}
 }

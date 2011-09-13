@@ -36,9 +36,9 @@ public:
 private:
 
 	struct linePair {
-		unsigned long int start;
-		unsigned long int end;
-		linePair(unsigned long int i, unsigned long int j) : start(i), end(j) {}
+		unsigned long long start;
+		unsigned long long end;
+		linePair(unsigned long long i, unsigned long long j) : start(i), end(j) {}
 	};
 
 	vector<int> processIDS;   //processid
@@ -51,7 +51,7 @@ private:
 	map<string, int> sortFastaFile(string, string);
 		
 	#ifdef USE_MPI
-	int driverMPI(int, int, MPI_File&, MPI_File&, MPI_File&, MPI_File&, vector<unsigned long int>&);
+	int driverMPI(int, int, MPI_File&, MPI_File&, MPI_File&, MPI_File&, vector<unsigned long long>&);
 	#endif
 
 	bool abort, realign, trim, trimera, save;
@@ -81,8 +81,8 @@ typedef struct slayerData {
 	string blastlocation;
 	bool trimera;
 	bool trim, realign;
-	unsigned long int start;
-	unsigned long int end;
+	unsigned long long start;
+	unsigned long long end;
 	int ksize, match, mismatch, window, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted;
 	MothurOut* m;
 	float divR;
@@ -92,7 +92,7 @@ typedef struct slayerData {
 	int threadId;
 	
 	slayerData(){}
-	slayerData(string o, string fa, string ac, string f, string te, string se, string bl, bool tri, bool trm, bool re, MothurOut* mout, unsigned long int st, unsigned long int en, int ks, int ma, int mis, int win, int minS, int minC, int miBS, int minSN, int par, int it, int inc, int numw, float div, map<string, int> prior, int tid) {
+	slayerData(string o, string fa, string ac, string f, string te, string se, string bl, bool tri, bool trm, bool re, MothurOut* mout, unsigned long long st, unsigned long long en, int ks, int ma, int mis, int win, int minS, int minC, int miBS, int minSN, int par, int it, int inc, int numw, float div, map<string, int> prior, int tid) {
 		outputFName = o;
 		fasta = fa;
 		accnos = ac;

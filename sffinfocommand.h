@@ -17,7 +17,7 @@
 struct CommonHeader {
 	unsigned int magicNumber;
 	string version;
-	unsigned long int indexOffset;
+	unsigned long long indexOffset;
 	unsigned int indexLength;
 	unsigned int numReads;
 	unsigned short headerLength;

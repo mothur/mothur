@@ -9,6 +9,7 @@
 
 #include "subsamplecommand.h"
 #include "sharedutilities.h"
+#include "deconvolutecommand.h"
 
 //**********************************************************************************************************************
 vector<string> SubSampleCommand::setParameters(){	
@@ -423,60 +424,45 @@ int SubSampleCommand::getSubSampleFasta() {
 		
 		set<string> subset; //dont want repeat sequence names added
 		if (persample) {
-			for (int i = 0; i < Groups.size(); i++) {
-				
-				//randomly select a subset of those names from this group to include in the subsample
-				for (int j = 0; j < size; j++) {
+			//initialize counts
+			map<string, int> groupCounts;
+			for (int i = 0; i < Groups.size(); i++) { groupCounts[Groups[i]] = 0; }
+			
+			for (int j = 0; j < names.size(); j++) {
 					
-					if (m->control_pressed) { return 0; }
-					
-					//get random sequence to add, making sure we have not already added it
-					bool done = false;
-					int myrand;
-					while (!done) {
-						myrand = int((float)(thisSize) * (float)(rand()) / ((float)RAND_MAX+1.0));
-						
-						if (subset.count(names[myrand]) == 0)  { 
-							
-							string group = groupMap->getGroup(names[myrand]);
-							if (group == "not found") { m->mothurOut("[ERROR]: " + names[myrand] + " is not in your groupfile. please correct."); m->mothurOutEndLine(); group = "NOTFOUND"; }
-								
-							if (group == Groups[i]) {	subset.insert(names[myrand]); break;	}
-						}
-					}
-				}
+				if (m->control_pressed) { return 0; }
+												
+				string group = groupMap->getGroup(names[j]);
+				if (group == "not found") { m->mothurOut("[ERROR]: " + names[j] + " is not in your groupfile. please correct."); m->mothurOutEndLine(); group = "NOTFOUND"; }
+				else{
+					if (groupCounts[group] < size) {	subset.insert(names[j]); 	}
+				}				
 			}
 		}else {
 			
 			//randomly select a subset of those names to include in the subsample
-			for (int j = 0; j < size; j++) {
+			//since names was randomly shuffled just grab the next one
+			for (int j = 0; j < names.size(); j++) {
 				
 				if (m->control_pressed) { return 0; }
 				
-				//get random sequence to add, making sure we have not already added it
-				bool done = false;
-				int myrand;
-				while (!done) {
-					myrand = int((float)(thisSize) * (float)(rand()) / ((float)RAND_MAX+1.0));
+				if (groupfile != "") { //if there is a groupfile given fill in group info
+					string group = groupMap->getGroup(names[j]);
+					if (group == "not found") { m->mothurOut("[ERROR]: " + names[j] + " is not in your groupfile. please correct."); m->mothurOutEndLine(); group = "NOTFOUND"; }
 					
-					if (subset.count(names[myrand]) == 0)  { 
-						
-						if (groupfile != "") { //if there is a groupfile given fill in group info
-							string group = groupMap->getGroup(names[myrand]);
-							if (group == "not found") { m->mothurOut("[ERROR]: " + names[myrand] + " is not in your groupfile. please correct."); m->mothurOutEndLine(); group = "NOTFOUND"; }
-							
-							if (pickedGroups) { //if hte user picked groups, we only want to keep the names of sequences from those groups
-								if (m->inUsersGroups(group, Groups)) {
-									subset.insert(names[myrand]); break;
-								}
-							}else{
-								subset.insert(names[myrand]); break;
-							}
-						}else{ //save everyone, group
-							subset.insert(names[myrand]); break;
-						}					
+					if (pickedGroups) { //if hte user picked groups, we only want to keep the names of sequences from those groups
+						if (m->inUsersGroups(group, Groups)) {
+							subset.insert(names[j]); 
+						}
+					}else{
+						subset.insert(names[j]); 
 					}
-				}
+				}else{ //save everyone, group
+					subset.insert(names[j]); 
+				}					
+			
+				//do we have enough??
+				if (subset.size() == size) { break; }
 			}	
 		}
 		
@@ -488,7 +474,6 @@ int SubSampleCommand::getSubSampleFasta() {
 		
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
-		outputTypes["fasta"].push_back(outputFileName);  outputNames.push_back(outputFileName);
 		
 		//read through fasta file outputting only the names on the subsample list
 		ifstream in;
@@ -530,6 +515,32 @@ int SubSampleCommand::getSubSampleFasta() {
 		if (count != subset.size()) {
 			m->mothurOut("[ERROR]: The subset selected contained " + toString(subset.size()) + " sequences, but I only found " + toString(count) + " of those in the fastafile."); m->mothurOutEndLine();
 		}
+		
+		if (namefile != "") {
+			m->mothurOut("Deconvoluting subsampled fasta file... "); m->mothurOutEndLine();
+			
+			//use unique.seqs to create new name and fastafile
+			string inputString = "fasta=" + outputFileName;
+			m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
+			m->mothurOut("Running command: unique.seqs(" + inputString + ")"); m->mothurOutEndLine(); 
+			
+			Command* uniqueCommand = new DeconvoluteCommand(inputString);
+			uniqueCommand->execute();
+			
+			map<string, vector<string> > filenames = uniqueCommand->getOutputFiles();
+			
+			delete uniqueCommand;
+			
+			outputTypes["name"].push_back(filenames["name"][0]);  outputNames.push_back(filenames["name"][0]);
+			m->mothurRemove(outputFileName);
+			outputFileName = filenames["fasta"][0];
+			
+			m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
+			
+			m->mothurOut("Done."); m->mothurOutEndLine();
+		}
+		
+		outputTypes["fasta"].push_back(outputFileName);  outputNames.push_back(outputFileName);
 		
 		//if a groupfile is provided read through the group file only outputting the names on the subsample list
 		if (groupfile != "") {
@@ -815,9 +826,10 @@ int SubSampleCommand::processShared(vector<SharedRAbundVector*>& thislookup) {
 					if (m->control_pressed) { delete order; out.close(); return 0; }
 					
 					//get random number to sample from order between 0 and thisSize-1.
-					int myrand = int((float)(thisSize) * (float)(rand()) / ((float)RAND_MAX+1.0));
+					//don't need this because of the random shuffle above
+					//int myrand = int((float)(thisSize) * (float)(rand()) / ((float)RAND_MAX+1.0));
 					
-					int bin = order->get(myrand);
+					int bin = order->get(j);
 					
 					int abund = thislookup[i]->getAbundance(bin);
 					thislookup[i]->set(bin, (abund+1), thisgroup);
@@ -1011,37 +1023,26 @@ int SubSampleCommand::getSubSampleList() {
 		//randomly select a subset of those names to include in the subsample
 		set<string> subset; //dont want repeat sequence names added
 		if (persample) {
-			for (int i = 0; i < Groups.size(); i++) {
+			//initialize counts
+			map<string, int> groupCounts;
+			for (int i = 0; i < Groups.size(); i++) { groupCounts[Groups[i]] = 0; }
+			
+			for (int j = 0; j < names.size(); j++) {
 				
-				for (int j = 0; j < size; j++) {
-					
-					if (m->control_pressed) { break; }
-					
-					//get random sequence to add, making sure we have not already added it
-					bool done = false;
-					int myrand;
-					while (!done) {
-						myrand = int((float)(names.size()) * (float)(rand()) / ((float)RAND_MAX+1.0));
-						
-						if (subset.count(names[myrand]) == 0) { //you are not already added
-							if (groupMap->getGroup(names[myrand]) == Groups[i])  { subset.insert(names[myrand]); break;	}
-						}
-					}
-				}
+				if (m->control_pressed) { return 0; }
+				
+				string group = groupMap->getGroup(names[j]);
+				if (group == "not found") { m->mothurOut("[ERROR]: " + names[j] + " is not in your groupfile. please correct."); m->mothurOutEndLine(); group = "NOTFOUND"; }
+				else{
+					if (groupCounts[group] < size) {	subset.insert(names[j]); 	}
+				}				
 			}
 		}else{
 			for (int j = 0; j < size; j++) {
 				
 				if (m->control_pressed) { break; }
 				
-				//get random sequence to add, making sure we have not already added it
-				bool done = false;
-				int myrand;
-				while (!done) {
-					myrand = int((float)(names.size()) * (float)(rand()) / ((float)RAND_MAX+1.0));
-					
-					if (subset.count(names[myrand]) == 0)  { subset.insert(names[myrand]); break;	}
-				}
+				subset.insert(names[j]); 
 			}	
 		}
 		
@@ -1322,10 +1323,7 @@ int SubSampleCommand::processRabund(RAbundVector*& rabund, ofstream& out) {
 				
 				if (m->control_pressed) { delete order; return 0; }
 				
-				//get random number to sample from order between 0 and thisSize-1.
-				int myrand = int((float)(thisSize) * (float)(rand()) / ((float)RAND_MAX+1.0));
-				
-				int bin = order->get(myrand);
+				int bin = order->get(j);
 				
 				int abund = rabund->get(bin);
 				rabund->set(bin, (abund+1));
@@ -1484,10 +1482,7 @@ int SubSampleCommand::processSabund(SAbundVector*& sabund, ofstream& out) {
 	
 				if (m->control_pressed) { delete order; return 0; }
 				
-				//get random number to sample from order between 0 and thisSize-1.
-				int myrand = int((float)(thisSize) * (float)(rand()) / ((float)RAND_MAX+1.0));
-				
-				int bin = order->get(myrand);
+				int bin = order->get(j);
 				
 				int abund = rabund->get(bin);
 				rabund->set(bin, (abund+1));

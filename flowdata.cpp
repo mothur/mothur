@@ -42,14 +42,11 @@ FlowData::FlowData(int numFlows, float signal, float noise, int maxHomoP, string
 bool FlowData::getNext(ifstream& flowFile){
 	
 	try {
-		
-		string lengthString;
-		string flowString;
-		
-		flowFile >> seqName >> endFlow;		
-		for(int i=0;i<numFlows;i++)	{	flowFile >> flowData[i];	}
-		
-		updateEndFlow();
+		flowFile >> seqName >> endFlow;	
+		//cout << "in Flowdata " + seqName << endl;
+		for(int i=0;i<numFlows;i++)	{	flowFile >> flowData[i]; 	}
+		//cout << "in Flowdata read " << seqName + " done" << endl;
+		updateEndFlow(); 
 		translateFlow();
 		
 		m->gobble(flowFile);

@@ -509,7 +509,7 @@ int ChimeraSlayerCommand::execute(){
 			string trimFastaFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]))  + "slayer.fasta";
 			
 			//create chimera here if you are mac or linux because fork will copy for you. Create in create processes instead if you are windows.
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || USE_MPI
 			if (templatefile != "self") { //you want to run slayer with a reference template
 				chimera = new ChimeraSlayer(fastaFileNames[s], templatefile, trim, search, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign, blastlocation, rand());	
 			}else {
@@ -546,7 +546,7 @@ int ChimeraSlayerCommand::execute(){
 		#ifdef USE_MPI	
 			int pid, numSeqsPerProcessor; 
 				int tag = 2001;
-				vector<unsigned long int> MPIPos;
+				vector<unsigned long long> MPIPos;
 				
 				MPI_Status status; 
 				MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
@@ -659,7 +659,7 @@ int ChimeraSlayerCommand::execute(){
 				
 		#else
 			//break up file
-			vector<unsigned long int> positions; 
+			vector<unsigned long long> positions; 
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 			positions = m->divideFile(fastaFileNames[s], processors);
 			for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(new linePair(positions[i], positions[(i+1)]));	}
@@ -716,7 +716,7 @@ int ChimeraSlayerCommand::execute(){
 			
 		#endif
 			
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || USE_MPI
 			delete chimera;
 			#endif
 			
@@ -849,7 +849,7 @@ int ChimeraSlayerCommand::driver(linePair* filePos, string outputFName, string f
 			}
 			
 			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-				unsigned long int pos = inFASTA.tellg();
+				unsigned long long pos = inFASTA.tellg();
 				if ((pos == -1) || (pos >= filePos->end)) { break; }
 			#else
 				if (inFASTA.eof()) { break; }
@@ -876,7 +876,7 @@ int ChimeraSlayerCommand::driver(linePair* filePos, string outputFName, string f
 }
 //**********************************************************************************************************************
 #ifdef USE_MPI
-int ChimeraSlayerCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& outMPI, MPI_File& outAccMPI, MPI_File& outFastaMPI, vector<unsigned long int>& MPIPos){
+int ChimeraSlayerCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& outMPI, MPI_File& outAccMPI, MPI_File& outFastaMPI, vector<unsigned long long>& MPIPos){
 	try {				
 		MPI_Status status; 
 		int pid;

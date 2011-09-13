@@ -91,23 +91,31 @@ int SystemCommand::execute(){
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
-		command += " > ./commandScreen.output 2>&1";
+		//if command contains a redirect don't add the redirect
+		bool usedRedirect = false;
+		if ((command.find('>')) == string::npos) {
+			command += " > ./commandScreen.output 2>&1";
+			usedRedirect = true;
+		}
+		
 		system(command.c_str());
 		
-		ifstream in;
-		string filename = "./commandScreen.output";
-		m->openInputFile(filename, in, "no error");
-		
-		string output = "";
-		while(char c = in.get()){
-			if(in.eof())		{	break;			}
-			else				{	output += c;	}
+		if (usedRedirect) {
+			ifstream in;
+			string filename = "./commandScreen.output";
+			m->openInputFile(filename, in, "no error");
+			
+			string output = "";
+			while(char c = in.get()){
+				if(in.eof())		{	break;			}
+				else				{	output += c;	}
+			}
+			in.close();
+			
+			m->mothurOut(output); m->mothurOutEndLine();
+			m->mothurRemove(filename);
 		}
-		in.close();
 		
-		m->mothurOut(output); m->mothurOutEndLine();
-		m->mothurRemove(filename);
-				
 		return 0;		
 	}
 

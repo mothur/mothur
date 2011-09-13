@@ -62,9 +62,9 @@ private:
 	ReferenceDB* rdb;
 	
 	struct linePair {
-		unsigned long int start;
-		unsigned long int end;
-		linePair(unsigned long int i, unsigned long int j) : start(i), end(j) {}
+		unsigned long long start;
+		unsigned long long end;
+		linePair(unsigned long long i, unsigned long long j) : start(i), end(j) {}
 	};
 	
 	vector<int> processIDS;   //processid
@@ -82,7 +82,7 @@ private:
 	void printErrorQuality(map<char, vector<int> >);
 	void printQualityFR(vector<vector<int> >, vector<vector<int> >);
 	
-	int setLines(string, string, string, vector<unsigned long int>&, vector<unsigned long int>&, vector<unsigned long int>&);
+	int setLines(string, string, string, vector<unsigned long long>&, vector<unsigned long long>&, vector<unsigned long long>&);
 	int driver(string, string, string, string, string, string, linePair, linePair, linePair);
 	int createProcesses(string, string, string, string, string, string);
 

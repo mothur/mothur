@@ -131,7 +131,7 @@ PhyloTree::PhyloTree(string tfile){
 		
 		#ifdef USE_MPI
 			int pid, num, processors;
-			vector<unsigned long int> positions;
+			vector<unsigned long long> positions;
 			
 			MPI_Status status; 
 			MPI_File inMPI;

@@ -14,12 +14,12 @@ USEMPI ?= no
 USEREADLINE ?= yes
 CYGWIN_BUILD ?= no
 USECOMPRESSION ?= no
-MOTHUR_FILES="\"Enter_your_default_path_here\""
+MOTHUR_FILES="\"/Users/Sarahswork/desktop/release\""
 RELEASE_DATE = "\"7/25/2011\""
 VERSION = "\"1.21.0\""
 
 # Optimize to level 3:
-CXXFLAGS += -O3
+CXXFLAGS += -03 -g
 
 ifeq  ($(strip $(64BIT_VERSION)),yes)
 	#if you are using centos uncomment the following lines

@@ -45,9 +45,9 @@ public:
 	
 private:
 	struct linePair {
-		unsigned long int start;
-		unsigned long int end;
-		linePair(unsigned long int i, unsigned long int j) : start(i), end(j) {}
+		unsigned long long start;
+		unsigned long long end;
+		linePair(unsigned long long i, unsigned long long j) : start(i), end(j) {}
 	};
 	vector<int> processIDS;   //processid
 	vector<linePair*> lines;
@@ -61,7 +61,7 @@ private:
 	void appendReportFiles(string, string);
 	
 	#ifdef USE_MPI
-	int driverMPI(int, int, MPI_File&, MPI_File&, MPI_File&, MPI_File&, vector<unsigned long int>&);
+	int driverMPI(int, int, MPI_File&, MPI_File&, MPI_File&, MPI_File&, vector<unsigned long long>&);
 	#endif
 	
 	string candidateFileName, templateFileName, distanceFileName, search, align, outputDir;
@@ -86,15 +86,15 @@ typedef struct alignData {
 	string align;
 	string search;
 	bool flip;
-	unsigned long int start;
-	unsigned long int end;
+	unsigned long long start;
+	unsigned long long end;
 	MothurOut* m;
 	//AlignmentDB* templateDB;
 	float match, misMatch, gapOpen, gapExtend, threshold;
 	int count, kmerSize, threadID;
 	
 	alignData(){}
-	alignData(string a, string r, string ac, string f, string al, string se, int ks, MothurOut* mout, unsigned long int st, unsigned long int en, bool fl, float ma, float misMa, float gapO, float gapE, float thr, int tid) {
+	alignData(string a, string r, string ac, string f, string al, string se, int ks, MothurOut* mout, unsigned long long st, unsigned long long en, bool fl, float ma, float misMa, float gapO, float gapE, float thr, int tid) {
 		alignFName = a;
 		reportFName = r;
 		accnosFName = ac;

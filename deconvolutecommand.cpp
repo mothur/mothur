@@ -162,6 +162,7 @@ int DeconvoluteCommand::execute() {
 		map<string, string>::iterator itStrings;
 		set<string> nameInFastaFile; //for sanity checking
 		set<string>::iterator itname;
+		vector<string> nameFileOrder;
 		int count = 0;
 		while (!in.eof()) {
 			
@@ -189,8 +190,9 @@ int DeconvoluteCommand::execute() {
 							m->mothurOut("[ERROR]: " + seq.getName() + " is in your fasta file, and not in your namefile, please correct."); m->mothurOutEndLine();
 						}else {
 							sequenceStrings[seq.getAligned()] = itNames->second;
+							nameFileOrder.push_back(seq.getAligned());
 						}
-					}else {	sequenceStrings[seq.getAligned()] = seq.getName();	}
+					}else {	sequenceStrings[seq.getAligned()] = seq.getName();	nameFileOrder.push_back(seq.getAligned()); }
 				}else { //this is a dup
 					if (oldNameMapFName != "") {
 						itNames = nameMap.find(seq.getName());
@@ -222,17 +224,22 @@ int DeconvoluteCommand::execute() {
 		ofstream outNames;
 		m->openOutputFile(outNameFile, outNames);
 		
-		for (itStrings = sequenceStrings.begin(); itStrings != sequenceStrings.end(); itStrings++) {
+		for (int i = 0; i < nameFileOrder.size(); i++) {
+		//for (itStrings = sequenceStrings.begin(); itStrings != sequenceStrings.end(); itStrings++) {
 			if (m->control_pressed) { outputTypes.clear(); m->mothurRemove(outFastaFile); outNames.close(); m->mothurRemove(outNameFile); return 0; }
 			
-			//get rep name
-			int pos = (itStrings->second).find_first_of(',');
+			itStrings = sequenceStrings.find(nameFileOrder[i]);
 			
-			if (pos == string::npos) { // only reps itself
-				outNames << itStrings->second << '\t' << itStrings->second << endl;
-			}else {
-				outNames << (itStrings->second).substr(0, pos) << '\t' << itStrings->second << endl;
-			}
+			if (itStrings != sequenceStrings.end()) {
+				//get rep name
+				int pos = (itStrings->second).find_first_of(',');
+			
+				if (pos == string::npos) { // only reps itself
+					outNames << itStrings->second << '\t' << itStrings->second << endl;
+				}else {
+					outNames << (itStrings->second).substr(0, pos) << '\t' << itStrings->second << endl;
+				}
+			}else{ m->mothurOut("[ERROR]: mismatch in namefile print."); m->mothurOutEndLine(); m->control_pressed = true; }
 		}
 		outNames.close();
 		

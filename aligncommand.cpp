@@ -322,7 +322,7 @@ int AlignCommand::execute(){
 #ifdef USE_MPI	
 				int pid, numSeqsPerProcessor; 
 				int tag = 2001;
-				vector<unsigned long int> MPIPos;
+				vector<unsigned long long> MPIPos;
 				MPIWroteAccnos = false;
 			
 				MPI_Status status; 
@@ -426,7 +426,7 @@ int AlignCommand::execute(){
 				
 #else
 
-			vector<unsigned long int> positions; 
+			vector<unsigned long long> positions; 
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 			positions = m->divideFile(candidateFileNames[s], processors);
 			for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(new linePair(positions[i], positions[(i+1)]));	}
@@ -623,7 +623,7 @@ int AlignCommand::driver(linePair* filePos, string alignFName, string reportFNam
 			delete candidateSeq;
 			
 			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-				unsigned long int pos = inFASTA.tellg();
+				unsigned long long pos = inFASTA.tellg();
 				if ((pos == -1) || (pos >= filePos->end)) { break; }
 			#else
 				if (inFASTA.eof()) { break; }
@@ -650,7 +650,7 @@ int AlignCommand::driver(linePair* filePos, string alignFName, string reportFNam
 }
 //**********************************************************************************************************************
 #ifdef USE_MPI
-int AlignCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& alignFile, MPI_File& reportFile, MPI_File& accnosFile, vector<unsigned long int>& MPIPos){
+int AlignCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& alignFile, MPI_File& reportFile, MPI_File& accnosFile, vector<unsigned long long>& MPIPos){
 	try {
 		string outputString = "";
 		MPI_Status statusReport; 
