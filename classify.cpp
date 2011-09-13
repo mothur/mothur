@@ -89,7 +89,7 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
 			m->mothurOut("Generating search database...    "); cout.flush();
 	#ifdef USE_MPI	
 				int pid, processors;
-				vector<unsigned long int> positions;
+				vector<unsigned long long> positions;
 				int tag = 2001;
 			
 				MPI_Status status; 
@@ -252,7 +252,7 @@ int Classify::readTaxonomy(string file) {
 
 #ifdef USE_MPI	
 		int pid, num, processors;
-		vector<unsigned long int> positions;
+		vector<unsigned long long> positions;
 		int tag = 2001;
 		
 		MPI_Status status; 

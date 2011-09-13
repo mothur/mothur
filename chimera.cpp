@@ -124,7 +124,7 @@ vector<Sequence*> Chimera::readSeqs(string file) {
 			
 			#ifdef USE_MPI	
 				int pid, processors;
-				vector<unsigned long int> positions;
+				vector<unsigned long long> positions;
 				int numSeqs;
 				int tag = 2001;
 			

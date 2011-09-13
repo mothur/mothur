@@ -174,9 +174,16 @@ int AmovaCommand::execute(){
 		//link designMap to rows/columns in distance matrix
 		map<string, vector<int> > origGroupSampleMap;
 		for(int i=0;i<sampleNames.size();i++){
-			origGroupSampleMap[designMap->getGroup(sampleNames[i])].push_back(i);
+			string group = designMap->getGroup(sampleNames[i]);
+			
+			if (group == "not found") {
+				m->mothurOut("[ERROR]: " + sampleNames[i] + " is not in your design file, please correct."); m->mothurOutEndLine(); m->control_pressed = true;
+			}else { origGroupSampleMap[group].push_back(i); }
+			
 		}
 		int numGroups = origGroupSampleMap.size();
+		
+		if (m->control_pressed) { delete designMap; return 0; }
 		
 		//create a new filename
 		ofstream AMOVAFile;

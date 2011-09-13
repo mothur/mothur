@@ -19,6 +19,7 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 		
 		threadID = tid;
 		string baseName = tempFile;
+			
 		if (baseName == "saved") { baseName = rdb->getSavedReference(); }
 		
 		string baseTName = tfile;
@@ -49,7 +50,7 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 		}
 		
 		//if you want to save, but you dont need to calculate then just read
-		if (rdb->save && probFileTest && probFileTest2 && phyloTreeTest && probFileTest3 && FilesGood) {  
+		if (rdb->save && probFileTest && probFileTest2 && phyloTreeTest && probFileTest3 && FilesGood && (tempFile != "saved")) {  
 			ifstream saveIn;
 			m->openInputFile(tempFile, saveIn);
 			
@@ -445,8 +446,8 @@ void Bayesian::readProbFile(ifstream& in, ifstream& inNum, string inName, string
 		#ifdef USE_MPI
 			
 			int pid, num, num2, processors;
-			vector<unsigned long int> positions;
-			vector<unsigned long int> positions2;
+			vector<unsigned long long> positions;
+			vector<unsigned long long> positions2;
 			
 			MPI_Status status; 
 			MPI_File inMPI;
@@ -575,7 +576,7 @@ void Bayesian::readProbFile(ifstream& in, ifstream& inNum, string inName, string
 			string line = m->getline(in); m->gobble(in);
 			
 			in >> numKmers; m->gobble(in);
-			
+			//cout << threadID << '\t' << line << '\t' << numKmers << &in << '\t' << &inNum << '\t' << genusNodes.size() << endl;
 			//initialze probabilities
 			wordGenusProb.resize(numKmers);
 			
@@ -588,22 +589,25 @@ void Bayesian::readProbFile(ifstream& in, ifstream& inNum, string inName, string
 			
 			//read version
 			string line2 = m->getline(inNum); m->gobble(inNum);
-			
+		//cout << threadID << '\t' << line2 << '\t' << this << endl;	
 			while (inNum) {
 				inNum >> zeroCountProb[count] >> num[count];  
 				count++;
 				m->gobble(inNum);
+				//cout << threadID << '\t' << count << endl;
 			}
 			inNum.close();
-		
+		//cout << threadID << '\t' << "here1 " << &wordGenusProb << '\t' << &num << endl; //
+		//cout << threadID << '\t' << &genusTotals << '\t' << endl; 
+		//cout << threadID << '\t' << genusNodes.size() << endl;
 			while(in) {
 				in >> kmer;
-				
+			//cout << threadID << '\t' << kmer << endl;
 				//set them all to zero value
 				for (int i = 0; i < genusNodes.size(); i++) {
 					wordGenusProb[kmer][i] = log(zeroCountProb[kmer] / (float) (genusTotals[i]+1));
 				}
-				
+			//cout << threadID << '\t' << num[kmer] << "here" << endl;	
 				//get probs for nonzero values
 				for (int i = 0; i < num[kmer]; i++) {
 					in >> name >> prob;
@@ -613,7 +617,7 @@ void Bayesian::readProbFile(ifstream& in, ifstream& inNum, string inName, string
 				m->gobble(in);
 			}
 			in.close();
-			
+		//cout << threadID << '\t' << "here" << endl;	
 		#endif
 	}
 	catch(exception& e) {

@@ -14,6 +14,12 @@
 #include "command.hpp"
 #include "classify.h"
 #include "referencedb.h"
+#include "sequence.hpp"
+#include "bayesian.h"
+#include "phylotree.h"
+#include "phylosummary.h"
+#include "knn.h"
+
 
 //KNN and Bayesian methods modeled from algorithms in
 //Naı¨ve Bayesian Classiﬁer for Rapid Assignment of rRNA Sequences 
@@ -46,9 +52,9 @@ public:
 	
 private:
 	struct linePair {
-		unsigned long int start;
-		unsigned long int end;
-		linePair(unsigned long int i, unsigned long int j) : start(i), end(j) {}
+		unsigned long long start;
+		unsigned long long end;
+		linePair(unsigned long long i, unsigned long long j) : start(i), end(j) {}
 	};
 
 	vector<int> processIDS;   //processid
@@ -75,9 +81,140 @@ private:
 	
 	int MPIReadNamesFile(string);
 	#ifdef USE_MPI
-	int driverMPI(int, int, MPI_File&, MPI_File&, MPI_File&, vector<unsigned long int>&);
+	int driverMPI(int, int, MPI_File&, MPI_File&, MPI_File&, vector<unsigned long long>&);
 	#endif
 };
+
+/**************************************************************************************************/
+//custom data structure for threads to use.
+// This is passed by void pointer so it can be any data type
+// that can be passed using a single void pointer (LPVOID).
+typedef struct classifyData {
+	string taxFName; 
+	string tempTFName; 
+	string filename;
+	string search, taxonomyFileName, templateFileName, method;
+	unsigned long long start;
+	unsigned long long end;
+	MothurOut* m;
+	float match, misMatch, gapOpen, gapExtend;
+	int count, kmerSize, threadID, cutoff, iters, numWanted;
+	bool probs;
+	 
+	classifyData(){}
+	classifyData(bool p, string me, string te, string tx, string a, string r, string f, string se, int ks, int i, int numW, MothurOut* mout, unsigned long long st, unsigned long long en, float ma, float misMa, float gapO, float gapE, int cut, int tid) {
+		taxonomyFileName = tx;
+		templateFileName = te;
+		taxFName = a;
+		tempTFName = r;
+		filename = f;
+		search = se;
+		method = me;
+		m = mout;
+		start = st;
+		end = en;
+		match = ma; 
+		misMatch = misMa;
+		gapOpen = gapO; 
+		gapExtend = gapE; 
+		kmerSize = ks;
+		cutoff = cut;
+		iters = i;
+		numWanted = numW;
+		threadID = tid;
+		probs = p;
+		count = 0;
+	}
+};
+
+/**************************************************************************************************/
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#else
+static DWORD WINAPI MyClassThreadFunction(LPVOID lpParam){ 
+	classifyData* pDataArray;
+	pDataArray = (classifyData*)lpParam;
+	
+	try {
+		ofstream outTax;
+		pDataArray->m->openOutputFile(pDataArray->taxFName, outTax);
+		
+		ofstream outTaxSimple;
+		pDataArray->m->openOutputFile(pDataArray->tempTFName, outTaxSimple);
+		
+		ifstream inFASTA;
+		pDataArray->m->openInputFile(pDataArray->filename, inFASTA);
+		
+		string taxonomy;
+				
+		//print header if you are process 0
+		if ((pDataArray->start == 0) || (pDataArray->start == 1)) {
+			inFASTA.seekg(0);
+		}else { //this accounts for the difference in line endings. 
+			inFASTA.seekg(pDataArray->start-1); pDataArray->m->gobble(inFASTA); 
+		}
+		
+		pDataArray->count = pDataArray->end;
+		
+		//make classify
+		Classify* myclassify;
+		if(pDataArray->method == "bayesian"){	myclassify = new Bayesian("saved", "saved", pDataArray->search, pDataArray->kmerSize, pDataArray->cutoff, pDataArray->iters, pDataArray->threadID);		}
+		else if(pDataArray->method == "knn"){	myclassify = new Knn("saved", "saved", pDataArray->search, pDataArray->kmerSize, pDataArray->gapOpen, pDataArray->gapExtend, pDataArray->match, pDataArray->misMatch, pDataArray->numWanted, pDataArray->threadID);				}
+		else {
+			pDataArray->m->mothurOut(pDataArray->search + " is not a valid method option. I will run the command using bayesian.");
+			pDataArray->m->mothurOutEndLine();
+			myclassify = new Bayesian(pDataArray->taxonomyFileName, pDataArray->templateFileName, pDataArray->search, pDataArray->kmerSize, pDataArray->cutoff, pDataArray->iters, pDataArray->threadID);	
+		}
+		
+		if (pDataArray->m->control_pressed) { delete myclassify; return 0; }
+		
+		int count = 0;
+		for(int i = 0; i < pDataArray->end; i++){ //end is the number of sequences to process
+			
+			if (pDataArray->m->control_pressed) { delete myclassify; return 0; }
+			
+			Sequence* candidateSeq = new Sequence(inFASTA); pDataArray->m->gobble(inFASTA);
+			
+			if (candidateSeq->getName() != "") {
+				
+				taxonomy = myclassify->getTaxonomy(candidateSeq);
+				
+				if (pDataArray->m->control_pressed) { delete candidateSeq; return 0; }
+				
+				if (taxonomy != "bad seq") {
+					//output confidence scores or not
+					if (pDataArray->probs) {
+						outTax << candidateSeq->getName() << '\t' << taxonomy << endl;
+					}else{
+						outTax << candidateSeq->getName() << '\t' << myclassify->getSimpleTax() << endl;
+					}
+					
+					outTaxSimple << candidateSeq->getName() << '\t' << myclassify->getSimpleTax() << endl;
+				}
+				count++;
+			}
+			delete candidateSeq;
+			//report progress
+			if((count) % 100 == 0){	pDataArray->m->mothurOut("Processing sequence: " + toString(count)); pDataArray->m->mothurOutEndLine();		}
+			
+		}
+		//report progress
+		if((count) % 100 != 0){	pDataArray->m->mothurOut("Processing sequence: " + toString(count)); pDataArray->m->mothurOutEndLine();		}
+		
+		delete myclassify;
+		inFASTA.close();
+		outTax.close();
+		outTaxSimple.close();
+		
+	}
+	catch(exception& e) {
+		pDataArray->m->errorOut(e, "ClassifySeqsCommand", "MyClassThreadFunction");
+		exit(1);
+	}
+} 
+#endif
+
+
+
 
 #endif
 

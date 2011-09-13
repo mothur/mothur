@@ -42,7 +42,7 @@ private:
 	int nIters, abund, processors;
 	float freq;
 	
-	bool abort, allLines;
+	bool abort, allLines, groupMode;
 	set<string> labels; //holds labels to be used
 	string label, calc, sharedfile, listfile, rabundfile, sabundfile, format, inputfile;
 	vector<string>  Estimators;
@@ -51,6 +51,7 @@ private:
 	string outputDir;
 	
 	vector<string> parseSharedFile(string);
+	vector<string> createGroupFile(vector<string>&);
 };
 
 #endif

@@ -77,7 +77,7 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
 			
 			#ifdef USE_MPI	
 				int pid, processors;
-				vector<unsigned long int> positions;
+				vector<unsigned long long> positions;
 			
 				MPI_Status status; 
 				MPI_File inMPI;

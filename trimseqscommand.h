@@ -37,24 +37,17 @@ private:
 	GroupMap* groupMap;
 	
 	struct linePair {
-		unsigned long int start;
-		unsigned long int end;
-		linePair(unsigned long int i, unsigned long int j) : start(i), end(j) {}
+		unsigned long long start;
+		unsigned long long end;
+		linePair(unsigned long long i, unsigned long long j) : start(i), end(j) {}
 	};
 	
 	bool getOligos(vector<vector<string> >&, vector<vector<string> >&, vector<vector<string> >&);
-	int stripBarcode(Sequence&, QualityScores&, int&);
-	int stripForward(Sequence&, QualityScores&, int&);
-	bool stripReverse(Sequence&, QualityScores&);
-	
 	bool keepFirstTrim(Sequence&, QualityScores&);
 	bool removeLastTrim(Sequence&, QualityScores&);
-
 	bool cullLength(Sequence&);
 	bool cullHomoP(Sequence&);
 	bool cullAmbigs(Sequence&);
-	bool compareDNASeq(string, string);
-	int countDiffs(string, string);
 
 	bool abort, createGroup;
 	string fastaFile, oligoFile, qFileName, groupfile, nameFile, outputDir;
@@ -81,7 +74,7 @@ private:
 	
 	int driverCreateTrim(string, string, string, string, string, string, string, string, string, vector<vector<string> >, vector<vector<string> >, vector<vector<string> >, linePair*, linePair*);	
 	int createProcessesCreateTrim(string, string, string, string, string, string, string, string, string, vector<vector<string> >, vector<vector<string> >, vector<vector<string> >);
-	int setLines(string, string, vector<unsigned long int>&, vector<unsigned long int>&);
+	int setLines(string, string, vector<unsigned long long>&, vector<unsigned long long>&);
 };
 
 #endif

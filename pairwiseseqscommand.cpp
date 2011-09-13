@@ -385,7 +385,7 @@ int PairwiseSeqsCommand::execute(){
 				
 					//do your part
 					string outputMyPart;
-					unsigned long int mySize;
+					unsigned long long mySize;
 					
 					if (output != "square"){ driverMPI(start, end, outputFile, mySize); }
 					else { driverMPI(start, end, outputFile, mySize, output); }
@@ -403,7 +403,7 @@ int PairwiseSeqsCommand::execute(){
 
 					//wait on chidren
 					for(int b = 1; b < processors; b++) { 
-						unsigned long int fileSize;
+						unsigned long long fileSize;
 						
 						if (m->control_pressed) { outputTypes.clear();  MPI_File_close(&outMPI);  m->mothurRemove(outputFile);  delete distCalculator;  return 0; }
 						
@@ -431,7 +431,7 @@ int PairwiseSeqsCommand::execute(){
 					MPI_File_close(&outMPI);
 				}else { //you are a child process
 					//do your part
-					unsigned long int size;
+					unsigned long long size;
 					if (output != "square"){ driverMPI(start, end, (outputFile + toString(pid) + ".temp"), size); }
 					else { driverMPI(start, end, (outputFile + toString(pid) + ".temp"), size, output); }
 					
@@ -782,7 +782,7 @@ int PairwiseSeqsCommand::driverMPI(int startLine, int endLine, MPI_File& outMPI,
 }
 /**************************************************************************************************/
 /////// need to fix to work with calcs and sequencedb
-int PairwiseSeqsCommand::driverMPI(int startLine, int endLine, string file, unsigned long int& size){
+int PairwiseSeqsCommand::driverMPI(int startLine, int endLine, string file, unsigned long long& size){
 	try {
 		MPI_Status status;
 		
@@ -858,7 +858,7 @@ int PairwiseSeqsCommand::driverMPI(int startLine, int endLine, string file, unsi
 }
 /**************************************************************************************************/
 /////// need to fix to work with calcs and sequencedb
-int PairwiseSeqsCommand::driverMPI(int startLine, int endLine, string file, unsigned long int& size, string square){
+int PairwiseSeqsCommand::driverMPI(int startLine, int endLine, string file, unsigned long long& size, string square){
 	try {
 		MPI_Status status;
 		

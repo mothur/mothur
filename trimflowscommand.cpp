@@ -10,6 +10,7 @@
 #include "trimflowscommand.h"
 #include "needlemanoverlap.hpp"
 
+
 //**********************************************************************************************************************
 vector<string> TrimFlowsCommand::setParameters(){	
 	try {
@@ -224,25 +225,46 @@ int TrimFlowsCommand::execute(){
 			outputNames.push_back(fastaFileName); outputTypes["fasta"].push_back(fastaFileName);
 		}
 		
-		vector<unsigned long int> flowFilePos = getFlowFileBreaks();
+		vector<unsigned long long> flowFilePos;
+	#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		flowFilePos = getFlowFileBreaks();
 		for (int i = 0; i < (flowFilePos.size()-1); i++) {
 			lines.push_back(new linePair(flowFilePos[i], flowFilePos[(i+1)]));
 		}	
-
+	#else
+		ifstream in; m->openInputFile(flowFileName, in); in >> numFlows; in.close();
+	///////////////////////////////////////// until I fix multiple processors for windows //////////////////	
+		processors = 1;
+	///////////////////////////////////////// until I fix multiple processors for windows //////////////////		
+		if (processors == 1) {
+			lines.push_back(new linePair(0, 1000));
+		}else {
+			int numFlowLines;
+			flowFilePos = m->setFilePosEachLine(flowFileName, numFlowLines);
+			flowFilePos.erase(flowFilePos.begin() + 1); numFlowLines--;
+			
+			//figure out how many sequences you have to process
+			int numSeqsPerProcessor = numFlowLines / processors;
+			cout << numSeqsPerProcessor << '\t' << numFlowLines << endl;
+			for (int i = 0; i < processors; i++) {
+				int startIndex =  i * numSeqsPerProcessor;
+				if(i == (processors - 1)){	numSeqsPerProcessor = numFlowLines - i * numSeqsPerProcessor; 	}
+				lines.push_back(new linePair(flowFilePos[startIndex], numSeqsPerProcessor));
+				cout << flowFilePos[startIndex] << '\t' << numSeqsPerProcessor << endl;
+			}
+		}
+	#endif
+		
 		vector<vector<string> > barcodePrimerComboFileNames;
 		if(oligoFileName != ""){
 			getOligos(barcodePrimerComboFileNames);	
 		}
 		
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		if(processors == 1){
 			driverCreateTrim(flowFileName, trimFlowFileName, scrapFlowFileName, fastaFileName, barcodePrimerComboFileNames, lines[0]);
 		}else{
 			createProcessesCreateTrim(flowFileName, trimFlowFileName, scrapFlowFileName, fastaFileName, barcodePrimerComboFileNames); 
 		}	
-#else
-		driverCreateTrim(flowFileName, trimFlowFileName, scrapFlowFileName, fastaFileName, barcodePrimerComboFileNames, lines[0]);
-#endif
 		
 		if (m->control_pressed) {  return 0; }			
 		
@@ -258,7 +280,7 @@ int TrimFlowsCommand::execute(){
 				for(int j=0;j<barcodePrimerComboFileNames[0].size();j++){
 					
 					FILE * pFile;
-					unsigned long int size;
+					unsigned long long size;
 					
 					//get num bytes in file
 					pFile = fopen (barcodePrimerComboFileNames[i][j].c_str(),"rb");
@@ -314,10 +336,9 @@ int TrimFlowsCommand::execute(){
 
 //***************************************************************************************************************
 
-int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileName, string scrapFlowFileName, string fastaFileName, vector<vector<string> > barcodePrimerComboFileNames, linePair* line){
+int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileName, string scrapFlowFileName, string fastaFileName, vector<vector<string> > thisBarcodePrimerComboFileNames, linePair* line){
 	
 	try {
-		
 		ofstream trimFlowFile;
 		m->openOutputFile(trimFlowFileName, trimFlowFile);
 		trimFlowFile.setf(ios::fixed, ios::floatfield); trimFlowFile.setf(ios::showpoint);
@@ -325,24 +346,6 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
 		ofstream scrapFlowFile;
 		m->openOutputFile(scrapFlowFileName, scrapFlowFile);
 		scrapFlowFile.setf(ios::fixed, ios::floatfield); scrapFlowFile.setf(ios::showpoint);
-
-		if(line->start == 4){
-			scrapFlowFile << maxFlows << endl;
-			trimFlowFile << maxFlows << endl;
-			if(allFiles){
-				for(int i=0;i<barcodePrimerComboFileNames.size();i++){
-					for(int j=0;j<barcodePrimerComboFileNames[0].size();j++){
-						//				barcodePrimerComboFileNames[i][j] += toString(getpid()) + ".temp";
-						ofstream temp;
-						m->openOutputFile(barcodePrimerComboFileNames[i][j], temp);
-						temp << maxFlows << endl;
-						temp.close();
-					}
-				}			
-			}
-		}
-		
-		FlowData flowData(numFlows, signal, noise, maxHomoP, flowOrder);
 		
 		ofstream fastaFile;
 		if(fasta){	m->openOutputFile(fastaFileName, fastaFile);	}
@@ -351,20 +354,46 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
 		m->openInputFile(flowFileName, flowFile);
 		
 		flowFile.seekg(line->start);
-
+		
+		if(line->start == 0){
+			flowFile >> numFlows; m->gobble(flowFile);
+			scrapFlowFile << maxFlows << endl;
+			trimFlowFile << maxFlows << endl;
+			if(allFiles){
+				for(int i=0;i<thisBarcodePrimerComboFileNames.size();i++){
+					for(int j=0;j<thisBarcodePrimerComboFileNames[0].size();j++){
+						ofstream temp;
+						m->openOutputFile(thisBarcodePrimerComboFileNames[i][j], temp);
+						temp << maxFlows << endl;
+						temp.close();
+					}
+				}			
+			}
+		}
+		
+		FlowData flowData(numFlows, signal, noise, maxHomoP, flowOrder);
+		//cout << " driver flowdata address " <<  &flowData  << &flowFile << endl;	
 		int count = 0;
 		bool moreSeqs = 1;
-			
+		
+		TrimOligos trimOligos(pdiffs, bdiffs, primers, barcodes, revPrimer);
+		
 		while(moreSeqs) {
+			//cout << "driver " << count << endl;
+			
+	
+			if (m->control_pressed) { break; }
 			
 			int success = 1;
 			int currentSeqDiffs = 0;
 			string trashCode = "";
 			
-			flowData.getNext(flowFile);
+			flowData.getNext(flowFile); 
+			//cout << "driver good bit " << flowFile.good() << endl;	
 			flowData.capFlows(maxFlows);	
 			
 			Sequence currSeq = flowData.getSequence();
+			
 			if(!flowData.hasMinFlows(minFlows)){	//screen to see if sequence is of a minimum number of flows
 				success = 0;
 				trashCode += 'l';
@@ -374,13 +403,13 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
 			int barcodeIndex = 0;
 			
 			if(barcodes.size() != 0){
-				success = stripBarcode(currSeq, barcodeIndex);
+				success = trimOligos.stripBarcode(currSeq, barcodeIndex);
 				if(success > bdiffs)		{	trashCode += 'b';	}
 				else{ currentSeqDiffs += success;  }
 			}
 			
 			if(numFPrimers != 0){
-				success = stripForward(currSeq, primerIndex);
+				success = trimOligos.stripForward(currSeq, primerIndex);
 				if(success > pdiffs)		{	trashCode += 'f';	}
 				else{ currentSeqDiffs += success;  }
 			}
@@ -388,10 +417,10 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
 			if (currentSeqDiffs > tdiffs)	{	trashCode += 't';   }
 			
 			if(numRPrimers != 0){
-				success = stripReverse(currSeq);
+				success = trimOligos.stripReverse(currSeq);
 				if(!success)				{	trashCode += 'r';	}
 			}
-
+			
 			if(trashCode.length() == 0){
 							
 				flowData.printFlows(trimFlowFile);
@@ -400,7 +429,7 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
 				
 				if(allFiles){
 					ofstream output;
-					m->openOutputFileAppend(barcodePrimerComboFileNames[barcodeIndex][primerIndex], output);
+					m->openOutputFileAppend(thisBarcodePrimerComboFileNames[barcodeIndex][primerIndex], output);
 					output.setf(ios::fixed, ios::floatfield); trimFlowFile.setf(ios::showpoint);
 					
 					flowData.printFlows(output);
@@ -412,12 +441,12 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
 			}
 				
 			count++;
-						
+			//cout << "driver" << '\t' << currSeq.getName() << endl;			
 			//report progress
 			if((count) % 10000 == 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
 
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-			unsigned long int pos = flowFile.tellg();
+			unsigned long long pos = flowFile.tellg();
 
 			if ((pos == -1) || (pos >= line->end)) { break; }
 #else
@@ -575,352 +604,16 @@ void TrimFlowsCommand::getOligos(vector<vector<string> >& outFlowFileNames){
 		exit(1);
 	}
 }
-
-//***************************************************************************************************************
-
-int TrimFlowsCommand::stripBarcode(Sequence& seq, int& group){
-	try {
-		
-		string rawSequence = seq.getUnaligned();
-		int success = bdiffs + 1;	//guilty until proven innocent
-		
-		//can you find the barcode
-		for(map<string,int>::iterator it=barcodes.begin();it!=barcodes.end();it++){
-			string oligo = it->first;
-			if(rawSequence.length() < oligo.length()){	//let's just assume that the barcodes are the same length
-				success = bdiffs + 10;					//if the sequence is shorter than the barcode then bail out
-				break;	
-			}
-			
-			if(compareDNASeq(oligo, rawSequence.substr(0,oligo.length()))){
-				group = it->second;
-				seq.setUnaligned(rawSequence.substr(oligo.length()));
-				
-				success = 0;
-				break;
-			}
-		}
-		
-		//if you found the barcode or if you don't want to allow for diffs
-		if ((bdiffs == 0) || (success == 0)) { return success;  }
-		
-		else { //try aligning and see if you can find it
-			
-			int maxLength = 0;
-			
-			Alignment* alignment;
-			if (barcodes.size() > 0) {
-				map<string,int>::iterator it=barcodes.begin();
-				
-				for(map<string,int>::iterator it=barcodes.begin();it!=barcodes.end();it++){
-					if(it->first.length() > maxLength){
-						maxLength = it->first.length();
-					}
-				}
-				alignment = new NeedlemanOverlap(-1.0, 1.0, -1.0, (maxLength+bdiffs+1));  
-				
-			}else{ alignment = NULL; } 
-			
-			//can you find the barcode
-			int minDiff = 1e6;
-			int minCount = 1;
-			int minGroup = -1;
-			int minPos = 0;
-			
-			for(map<string,int>::iterator it=barcodes.begin();it!=barcodes.end();it++){
-				string oligo = it->first;
-				//				int length = oligo.length();
-				
-				if(rawSequence.length() < maxLength){	//let's just assume that the barcodes are the same length
-					success = bdiffs + 10;
-					break;
-				}
-				
-				//use needleman to align first barcode.length()+numdiffs of sequence to each barcode
-				alignment->align(oligo, rawSequence.substr(0,oligo.length()+bdiffs));
-				oligo = alignment->getSeqAAln();
-				string temp = alignment->getSeqBAln();
-				
-				int alnLength = oligo.length();
-				
-				for(int i=oligo.length()-1;i>=0;i--){
-					if(oligo[i] != '-'){	alnLength = i+1;	break;	}
-				}
-				oligo = oligo.substr(0,alnLength);
-				temp = temp.substr(0,alnLength);
-				
-				int numDiff = countDiffs(oligo, temp);
-				
-				if(numDiff < minDiff){
-					minDiff = numDiff;
-					minCount = 1;
-					minGroup = it->second;
-					minPos = 0;
-					for(int i=0;i<alnLength;i++){
-						if(temp[i] != '-'){
-							minPos++;
-						}
-					}
-				}
-				else if(numDiff == minDiff){
-					minCount++;
-				}
-				
-			}
-			
-			if(minDiff > bdiffs)	{	success = minDiff;		}	//no good matches
-			else if(minCount > 1)	{	success = bdiffs + 100;	}	//can't tell the difference between multiple barcodes
-			else{													//use the best match
-				group = minGroup;
-				seq.setUnaligned(rawSequence.substr(minPos));
-				success = minDiff;
-			}
-			
-			if (alignment != NULL) {  delete alignment;  }
-			
-		}
-		
-		return success;
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "TrimFlowsCommand", "stripBarcode");
-		exit(1);
-	}
-	
-}
-
-//***************************************************************************************************************
-
-int TrimFlowsCommand::stripForward(Sequence& seq, int& group){
-	try {
-		
-		string rawSequence = seq.getUnaligned();
-		int success = pdiffs + 1;	//guilty until proven innocent
-
-		//can you find the primer
-		for(map<string,int>::iterator it=primers.begin();it!=primers.end();it++){
-			string oligo = it->first;
-			if(rawSequence.length() < oligo.length()){	//let's just assume that the primers are the same length
-				success = pdiffs + 10;					//if the sequence is shorter than the barcode then bail out
-				break;	
-			}
-			
-			if(compareDNASeq(oligo, rawSequence.substr(0,oligo.length()))){
-				group = it->second;
-				seq.setUnaligned(rawSequence.substr(oligo.length()));
-				success = 0;
-				break;
-			}
-		}
-		
-		//if you found the barcode or if you don't want to allow for diffs
-		if ((pdiffs == 0) || (success == 0)) {	return success;  }
-		
-		else { //try aligning and see if you can find it
-			
-			int maxLength = 0;
-			
-			Alignment* alignment;
-			if (primers.size() > 0) {
-				map<string,int>::iterator it=primers.begin();
-				
-				for(it;it!=primers.end();it++){
-					if(it->first.length() > maxLength){
-						maxLength = it->first.length();
-					}
-				}
-				alignment = new NeedlemanOverlap(-1.0, 1.0, -1.0, (maxLength+pdiffs+1));  
-				
-			}else{ alignment = NULL; } 
-			
-			//can you find the barcode
-			int minDiff = 1e6;
-			int minCount = 1;
-			int minGroup = -1;
-			int minPos = 0;
-			
-			for(map<string,int>::iterator it=primers.begin();it!=primers.end();it++){
-				string oligo = it->first;
-				//				int length = oligo.length();
-				
-				if(rawSequence.length() < maxLength){	
-					success = pdiffs + 100;
-					break;
-				}
-				
-				//use needleman to align first barcode.length()+numdiffs of sequence to each barcode
-				alignment->align(oligo, rawSequence.substr(0,oligo.length()+pdiffs));
-				oligo = alignment->getSeqAAln();
-				string temp = alignment->getSeqBAln();
-				
-				int alnLength = oligo.length();
-				
-				for(int i=oligo.length()-1;i>=0;i--){
-					if(oligo[i] != '-'){	alnLength = i+1;	break;	}
-				}
-				oligo = oligo.substr(0,alnLength);
-				temp = temp.substr(0,alnLength);
-				
-				int numDiff = countDiffs(oligo, temp);
-				
-				if(numDiff < minDiff){
-					minDiff = numDiff;
-					minCount = 1;
-					minGroup = it->second;
-					minPos = 0;
-					for(int i=0;i<alnLength;i++){
-						if(temp[i] != '-'){
-							minPos++;
-						}
-					}
-				}
-				else if(numDiff == minDiff){
-					minCount++;
-				}
-				
-			}
-			
-			if(minDiff > pdiffs)	{	success = minDiff;		}	//no good matches
-			else if(minCount > 1)	{	success = pdiffs + 10;	}	//can't tell the difference between multiple primers
-			else{													//use the best match
-				group = minGroup;
-				seq.setUnaligned(rawSequence.substr(minPos));
-				success = minDiff;
-			}
-			
-			if (alignment != NULL) {  delete alignment;  }
-			
-		}
-		
-		return success;
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "TrimFlowsCommand", "stripForward");
-		exit(1);
-	}
-}
-
-//***************************************************************************************************************
-
-bool TrimFlowsCommand::stripReverse(Sequence& seq){
-	try {
-
-		string rawSequence = seq.getUnaligned();
-		bool success = 0;	//guilty until proven innocent
-		
-		for(int i=0;i<numRPrimers;i++){
-			string oligo = revPrimer[i];
-			
-			if(rawSequence.length() < oligo.length()){
-				success = 0;
-				break;
-			}
-			
-			if(compareDNASeq(oligo, rawSequence.substr(rawSequence.length()-oligo.length(),oligo.length()))){
-				seq.setUnaligned(rawSequence.substr(0,rawSequence.length()-oligo.length()));
-				success = 1;
-				break;
-			}
-		}	
-
-		return success;
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "TrimFlowsCommand", "stripReverse");
-		exit(1);
-	}
-}
-
-
-//***************************************************************************************************************
-
-bool TrimFlowsCommand::compareDNASeq(string oligo, string seq){
-	try {
-		bool success = 1;
-		int length = oligo.length();
-		
-		for(int i=0;i<length;i++){
-			
-			if(oligo[i] != seq[i]){
-				if(oligo[i] == 'A' || oligo[i] == 'T' || oligo[i] == 'G' || oligo[i] == 'C')	{	success = 0; 	}
-				else if((oligo[i] == 'N' || oligo[i] == 'I') && (seq[i] == 'N'))				{	success = 0;	}
-				else if(oligo[i] == 'R' && (seq[i] != 'A' && seq[i] != 'G'))					{	success = 0;	}
-				else if(oligo[i] == 'Y' && (seq[i] != 'C' && seq[i] != 'T'))					{	success = 0;	}
-				else if(oligo[i] == 'M' && (seq[i] != 'C' && seq[i] != 'A'))					{	success = 0;	}
-				else if(oligo[i] == 'K' && (seq[i] != 'T' && seq[i] != 'G'))					{	success = 0;	}
-				else if(oligo[i] == 'W' && (seq[i] != 'T' && seq[i] != 'A'))					{	success = 0;	}
-				else if(oligo[i] == 'S' && (seq[i] != 'C' && seq[i] != 'G'))					{	success = 0;	}
-				else if(oligo[i] == 'B' && (seq[i] != 'C' && seq[i] != 'T' && seq[i] != 'G'))	{	success = 0;	}
-				else if(oligo[i] == 'D' && (seq[i] != 'A' && seq[i] != 'T' && seq[i] != 'G'))	{	success = 0;	}
-				else if(oligo[i] == 'H' && (seq[i] != 'A' && seq[i] != 'T' && seq[i] != 'C'))	{	success = 0;	}
-				else if(oligo[i] == 'V' && (seq[i] != 'A' && seq[i] != 'C' && seq[i] != 'G'))	{	success = 0;	}			
-				
-				if(success == 0)	{	break;	 }
-			}
-			else{
-				success = 1;
-			}
-		}
-		
-		return success;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "TrimFlowsCommand", "compareDNASeq");
-		exit(1);
-	}
-	
-}
-
-//***************************************************************************************************************
-
-int TrimFlowsCommand::countDiffs(string oligo, string seq){
-	try {
-		
-		int length = oligo.length();
-		int countDiffs = 0;
-		
-		for(int i=0;i<length;i++){
-			
-			if(oligo[i] != seq[i]){
-				if(oligo[i] == 'A' || oligo[i] == 'T' || oligo[i] == 'G' || oligo[i] == 'C' || oligo[i] == '-' || oligo[i] == '.')	{	countDiffs++; 	}
-				else if((oligo[i] == 'N' || oligo[i] == 'I') && (seq[i] == 'N'))				{	countDiffs++;	}
-				else if(oligo[i] == 'R' && (seq[i] != 'A' && seq[i] != 'G'))					{	countDiffs++;	}
-				else if(oligo[i] == 'Y' && (seq[i] != 'C' && seq[i] != 'T'))					{	countDiffs++;	}
-				else if(oligo[i] == 'M' && (seq[i] != 'C' && seq[i] != 'A'))					{	countDiffs++;	}
-				else if(oligo[i] == 'K' && (seq[i] != 'T' && seq[i] != 'G'))					{	countDiffs++;	}
-				else if(oligo[i] == 'W' && (seq[i] != 'T' && seq[i] != 'A'))					{	countDiffs++;	}
-				else if(oligo[i] == 'S' && (seq[i] != 'C' && seq[i] != 'G'))					{	countDiffs++;	}
-				else if(oligo[i] == 'B' && (seq[i] != 'C' && seq[i] != 'T' && seq[i] != 'G'))	{	countDiffs++;	}
-				else if(oligo[i] == 'D' && (seq[i] != 'A' && seq[i] != 'T' && seq[i] != 'G'))	{	countDiffs++;	}
-				else if(oligo[i] == 'H' && (seq[i] != 'A' && seq[i] != 'T' && seq[i] != 'C'))	{	countDiffs++;	}
-				else if(oligo[i] == 'V' && (seq[i] != 'A' && seq[i] != 'C' && seq[i] != 'G'))	{	countDiffs++;	}	
-			}
-			
-		}
-		
-		return countDiffs;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "TrimFlowsCommand", "countDiffs");
-		exit(1);
-	}
-	
-}
-
 /**************************************************************************************************/
-
-vector<unsigned long int> TrimFlowsCommand::getFlowFileBreaks() {
+vector<unsigned long long> TrimFlowsCommand::getFlowFileBreaks() {
 
 	try{
 			
-		vector<unsigned long int> filePos;
+		vector<unsigned long long> filePos;
 		filePos.push_back(0);
 					
 		FILE * pFile;
-		unsigned long int size;
+		unsigned long long size;
 		
 		//get num bytes in file
 		pFile = fopen (flowFileName.c_str(),"rb");
@@ -932,7 +625,7 @@ vector<unsigned long int> TrimFlowsCommand::getFlowFileBreaks() {
 		}
 				
 		//estimate file breaks
-		unsigned long int chunkSize = 0;
+		unsigned long long chunkSize = 0;
 		chunkSize = size / processors;
 
 		//file too small to divide by processors
@@ -940,7 +633,7 @@ vector<unsigned long int> TrimFlowsCommand::getFlowFileBreaks() {
 		
 		//for each process seekg to closest file break and search for next '>' char. make that the filebreak
 		for (int i = 0; i < processors; i++) {
-			unsigned long int spot = (i+1) * chunkSize;
+			unsigned long long spot = (i+1) * chunkSize;
 			
 			ifstream in;
 			m->openInputFile(flowFileName, in);
@@ -949,7 +642,7 @@ vector<unsigned long int> TrimFlowsCommand::getFlowFileBreaks() {
 			string dummy = m->getline(in);
 			
 			//there was not another sequence before the end of the file
-			unsigned long int sanityPos = in.tellg();
+			unsigned long long sanityPos = in.tellg();
 			
 //			if (sanityPos == -1) {	break;  }
 //			else {  filePos.push_back(newSpot);  }
@@ -971,8 +664,8 @@ vector<unsigned long int> TrimFlowsCommand::getFlowFileBreaks() {
 		m->openInputFile(flowFileName, in);
 		in >> numFlows;
 		m->gobble(in);
-		unsigned long int spot = in.tellg();
-		filePos[0] = spot;
+		//unsigned long long spot = in.tellg();
+		//filePos[0] = spot;
 		in.close();
 		
 		processors = (filePos.size() - 1);
@@ -990,10 +683,11 @@ vector<unsigned long int> TrimFlowsCommand::getFlowFileBreaks() {
 int TrimFlowsCommand::createProcessesCreateTrim(string flowFileName, string trimFlowFileName, string scrapFlowFileName, string fastaFileName, vector<vector<string> > barcodePrimerComboFileNames){
 
 	try {
+		processIDS.clear();
+		int exitCommand = 1;
+		
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		int process = 1;
-		int exitCommand = 1;
-		processIDS.clear();
 		
 		//loop through and create all the processes you want
 		while (process != processors) {
@@ -1050,7 +744,85 @@ int TrimFlowsCommand::createProcessesCreateTrim(string flowFileName, string trim
 			int temp = processIDS[i];
 			wait(&temp);
 		}
+#else
+		//////////////////////////////////////////////////////////////////////////////////////////////////////
+		//Windows version shared memory, so be careful when passing variables through the trimFlowData struct. 
+		//Above fork() will clone, so memory is separate, but that's not the case with windows, 
+		//////////////////////////////////////////////////////////////////////////////////////////////////////
 		
+		vector<trimFlowData*> pDataArray; 
+		DWORD   dwThreadIdArray[processors-1];
+		HANDLE  hThreadArray[processors-1]; 
+		
+		//Create processor worker threads.
+		for( int i=0; i<processors-1; i++ ){
+			// Allocate memory for thread data.
+			string extension = "";
+			if (i != 0) { extension = toString(i) + ".temp"; processIDS.push_back(i); }
+			
+			vector<vector<string> > tempBarcodePrimerComboFileNames = barcodePrimerComboFileNames;
+			if(allFiles){
+				for(int i=0;i<tempBarcodePrimerComboFileNames.size();i++){
+					for(int j=0;j<tempBarcodePrimerComboFileNames[0].size();j++){
+						tempBarcodePrimerComboFileNames[i][j] += extension;
+						ofstream temp;
+						m->openOutputFile(tempBarcodePrimerComboFileNames[i][j], temp);
+						temp.close();
+						
+					}
+				}
+			}
+			
+			trimFlowData* tempflow = new trimFlowData(flowFileName, (trimFlowFileName + extension), (scrapFlowFileName + extension), fastaFileName, flowOrder, tempBarcodePrimerComboFileNames, barcodes, primers, revPrimer, fasta, allFiles, lines[i]->start, lines[i]->end, m, signal, noise, numFlows, maxFlows, minFlows, maxHomoP, tdiffs, bdiffs, pdiffs, i);
+			pDataArray.push_back(tempflow);
+			
+			//MyTrimFlowThreadFunction is in header. It must be global or static to work with the threads.
+			//default security attributes, thread function name, argument to thread function, use default creation flags, returns the thread identifier
+			hThreadArray[i] = CreateThread(NULL, 0, MyTrimFlowThreadFunction, pDataArray[i], 0, &dwThreadIdArray[i]);   
+		}
+		
+		//using the main process as a worker saves time and memory
+		ofstream temp;
+		m->openOutputFile(trimFlowFileName, temp);
+		temp.close();
+		
+		m->openOutputFile(scrapFlowFileName, temp);
+		temp.close();
+		
+		if(fasta){
+			m->openOutputFile(fastaFileName, temp);
+			temp.close();
+		}
+		
+		vector<vector<string> > tempBarcodePrimerComboFileNames = barcodePrimerComboFileNames;
+		if(allFiles){
+			for(int i=0;i<tempBarcodePrimerComboFileNames.size();i++){
+				for(int j=0;j<tempBarcodePrimerComboFileNames[0].size();j++){
+					tempBarcodePrimerComboFileNames[i][j] += toString(processors-1) + ".temp";
+					ofstream temp;
+					m->openOutputFile(tempBarcodePrimerComboFileNames[i][j], temp);
+					temp.close();
+					
+				}
+			}
+		}
+		
+		//do my part - do last piece because windows is looking for eof
+		int num = driverCreateTrim(flowFileName, (trimFlowFileName  + toString(processors-1) + ".temp"), (scrapFlowFileName  + toString(processors-1) + ".temp"), (fastaFileName + toString(processors-1) + ".temp"), tempBarcodePrimerComboFileNames, lines[processors-1]);
+		processIDS.push_back((processors-1)); 
+		
+		//Wait until all threads have terminated.
+		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
+		
+		//Close all thread handles and free memory allocations.
+		for(int i=0; i < pDataArray.size(); i++){
+			num += pDataArray[i]->count;
+			CloseHandle(hThreadArray[i]);
+			delete pDataArray[i];
+		}
+		
+		
+#endif	
 		//append files
 		m->mothurOutEndLine();
 		for(int i=0;i<processIDS.size();i++){
@@ -1081,7 +853,7 @@ int TrimFlowsCommand::createProcessesCreateTrim(string flowFileName, string trim
 		}
 		
 		return exitCommand;
-#endif		
+	
 	}
 	catch(exception& e) {
 		m->errorOut(e, "TrimFlowsCommand", "createProcessesCreateTrim");

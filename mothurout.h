@@ -57,10 +57,10 @@ class MothurOut {
 		
 		//functions from mothur.h
 		//file operations
-		vector<unsigned long int> divideFile(string, int&);
+		vector<unsigned long long> divideFile(string, int&);
 		int divideFile(string, int&, vector<string>&);
-		vector<unsigned long int> setFilePosEachLine(string, int&);
-		vector<unsigned long int> setFilePosFasta(string, int&);
+		vector<unsigned long long> setFilePosEachLine(string, int&);
+		vector<unsigned long long> setFilePosFasta(string, int&);
 		string sortFile(string, string);
 		void appendFiles(string, string);
 		int renameFile(string, string); //oldname, newname

@@ -39,9 +39,9 @@ private:
 	map<string, int> nameMap;
 	
 	struct linePair {
-		unsigned long int start;
-		unsigned long int end;
-		linePair(unsigned long int i, unsigned long int j) : start(i), end(j) {}
+		unsigned long long start;
+		unsigned long long end;
+		linePair(unsigned long long i, unsigned long long j) : start(i), end(j) {}
 	};
 
 	vector<linePair*> lines;
@@ -51,7 +51,7 @@ private:
 	int driverCreateSummary(vector<int>&, vector<int>&, vector<int>&, vector<int>&, vector<int>&, string, string, linePair*);	
 
 	#ifdef USE_MPI
-	int MPICreateSummary(int, int, vector<int>&, vector<int>&, vector<int>&, vector<int>&, vector<int>&, MPI_File&, MPI_File&, vector<unsigned long int>&);	
+	int MPICreateSummary(int, int, vector<int>&, vector<int>&, vector<int>&, vector<int>&, vector<int>&, MPI_File&, MPI_File&, vector<unsigned long long>&);	
 	#endif
 
 
@@ -69,8 +69,8 @@ typedef struct seqSumData {
 	vector<int>* longHomoPolymer; 
 	string filename; 
 	string sumFile; 
-	unsigned long int start;
-	unsigned long int end;
+	unsigned long long start;
+	unsigned long long end;
 	int count;
 	MothurOut* m;
 	string namefile;
@@ -78,7 +78,7 @@ typedef struct seqSumData {
 	
 	
 	seqSumData(){}
-	seqSumData(vector<int>* s, vector<int>* e, vector<int>* l, vector<int>* a, vector<int>* h, string f, string sf, MothurOut* mout, unsigned long int st, unsigned long int en, string na, map<string, int> nam) {
+	seqSumData(vector<int>* s, vector<int>* e, vector<int>* l, vector<int>* a, vector<int>* h, string f, string sf, MothurOut* mout, unsigned long long st, unsigned long long en, string na, map<string, int> nam) {
 		startPosition = s;
 		endPosition = e;
 		seqLength = l;

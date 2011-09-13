@@ -395,7 +395,7 @@ int SharedRAbundVector::getGroupIndex()  { return index; }
 void SharedRAbundVector::setGroupIndex(int vIndex)	{ index = vIndex; }
 /***********************************************************************/
 int SharedRAbundVector::getNumBins(){
-	return numBins;
+		return numBins;
 }
 
 /***********************************************************************/
@@ -423,6 +423,7 @@ vector<SharedRAbundVector*> SharedRAbundVector::getSharedRAbundVectors(){
 		vector<string> Groups = m->getGroups();
 		vector<string> allGroups = m->getAllGroups();
 		util->setGroups(Groups, allGroups);
+		m->setGroups(Groups);
 		
 		bool remove = false;
 		for (int i = 0; i < lookup.size(); i++) {

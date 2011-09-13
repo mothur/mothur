@@ -1050,19 +1050,27 @@ string MothurOut::sortFile(string distFile, string outputDir){
 	}	
 }
 /**************************************************************************************************/
-vector<unsigned long int> MothurOut::setFilePosFasta(string filename, int& num) {
+vector<unsigned long long> MothurOut::setFilePosFasta(string filename, int& num) {
 	try {
-			vector<unsigned long int> positions;
+			vector<unsigned long long> positions;
 			ifstream inFASTA;
-			openInputFile(filename, inFASTA);
+			//openInputFile(filename, inFASTA);
+			inFASTA.open(filename.c_str(), ios::binary);
 						
 			string input;
+			unsigned long long count = 0;
 			while(!inFASTA.eof()){
-				input = getline(inFASTA); 
-				if (input.length() != 0) {
-					if(input[0] == '>'){	unsigned long int pos = inFASTA.tellg(); positions.push_back(pos - input.length() - 1);	}
+				//input = getline(inFASTA); 
+				//cout << input << '\t' << inFASTA.tellg() << endl;
+				//if (input.length() != 0) {
+				//	if(input[0] == '>'){	unsigned long int pos = inFASTA.tellg(); positions.push_back(pos - input.length() - 1);	 cout << (pos - input.length() - 1) << endl; }
+				//}
+				//gobble(inFASTA); //has to be here since windows line endings are 2 characters and mess up the positions
+				char c = inFASTA.get(); count++;
+				if (c == '>') {
+					positions.push_back(count-1);
+					//cout << count << endl;
 				}
-				gobble(inFASTA); //has to be here since windows line endings are 2 characters and mess up the positions
 			}
 			inFASTA.close();
 		
@@ -1080,7 +1088,7 @@ vector<unsigned long int> MothurOut::setFilePosFasta(string filename, int& num) 
 				fclose (pFile);
 			}*/
 			
-			unsigned long int size = positions[(positions.size()-1)];
+			unsigned long long size = positions[(positions.size()-1)];
 			ifstream in;
 			openInputFile(filename, in);
 			
@@ -1093,6 +1101,7 @@ vector<unsigned long int> MothurOut::setFilePosFasta(string filename, int& num) 
 			in.close();
 		
 			positions.push_back(size);
+			positions[0] = 0;
 		
 			return positions;
 	}
@@ -1102,31 +1111,51 @@ vector<unsigned long int> MothurOut::setFilePosFasta(string filename, int& num) 
 	}
 }
 /**************************************************************************************************/
-vector<unsigned long int> MothurOut::setFilePosEachLine(string filename, int& num) {
+vector<unsigned long long> MothurOut::setFilePosEachLine(string filename, int& num) {
 	try {
 			filename = getFullPathName(filename);
 			
-			vector<unsigned long int> positions;
+			vector<unsigned long long> positions;
 			ifstream in;
-			openInputFile(filename, in);
-				
+			//openInputFile(filename, in);
+			in.open(filename.c_str(), ios::binary);
+		
 			string input;
+			unsigned long long count = 0;
+			positions.push_back(0);
+		
 			while(!in.eof()){
-				unsigned long int lastpos = in.tellg();
-				input = getline(in); 
-				if (input.length() != 0) {
-					unsigned long int pos = in.tellg(); 
-					if (pos != -1) { positions.push_back(pos - input.length() - 1);	}
-					else {  positions.push_back(lastpos);  }
+				//unsigned long long lastpos = in.tellg();
+				//input = getline(in); 
+				//if (input.length() != 0) {
+					//unsigned long long pos = in.tellg(); 
+					//if (pos != -1) { positions.push_back(pos - input.length() - 1);	}
+					//else {  positions.push_back(lastpos);  }
+				//}
+				//gobble(in); //has to be here since windows line endings are 2 characters and mess up the positions
+				
+				
+				//getline counting reads
+				char d = in.get(); count++;
+				while ((d != '\n') && (d != '\r') && (d != '\f') && (d != in.eof()))	{
+					//get next character
+					d = in.get(); 
+					count++;
 				}
-				gobble(in); //has to be here since windows line endings are 2 characters and mess up the positions
+				
+				if (!in.eof()) {
+					d=in.get(); count++;
+					while(isspace(d) && (d != in.eof()))		{ d=in.get(); count++;}
+				}
+				positions.push_back(count-1);
+				cout << count-1 << endl;
 			}
 			in.close();
 		
-			num = positions.size();
+			num = positions.size()-1;
 		
 			FILE * pFile;
-			unsigned long int size;
+			unsigned long long size;
 			
 			//get num bytes in file
 			pFile = fopen (filename.c_str(),"rb");
@@ -1137,7 +1166,7 @@ vector<unsigned long int> MothurOut::setFilePosEachLine(string filename, int& nu
 				fclose (pFile);
 			}
 		
-			positions.push_back(size);
+			positions[(positions.size()-1)] = size;
 		
 			return positions;
 	}
@@ -1148,14 +1177,14 @@ vector<unsigned long int> MothurOut::setFilePosEachLine(string filename, int& nu
 }
 /**************************************************************************************************/
 
-vector<unsigned long int> MothurOut::divideFile(string filename, int& proc) {
+vector<unsigned long long> MothurOut::divideFile(string filename, int& proc) {
 	try{
 	
-		vector<unsigned long int> filePos;
+		vector<unsigned long long> filePos;
 		filePos.push_back(0);
 		
 		FILE * pFile;
-		unsigned long int size;
+		unsigned long long size;
 		
 		filename = getFullPathName(filename);
 		
@@ -1169,7 +1198,7 @@ vector<unsigned long int> MothurOut::divideFile(string filename, int& proc) {
 		}
 	
 		//estimate file breaks
-		unsigned long int chunkSize = 0;
+		unsigned long long chunkSize = 0;
 		chunkSize = size / proc;
 
 		//file to small to divide by processors
@@ -1177,21 +1206,21 @@ vector<unsigned long int> MothurOut::divideFile(string filename, int& proc) {
 	
 		//for each process seekg to closest file break and search for next '>' char. make that the filebreak
 		for (int i = 0; i < proc; i++) {
-			unsigned long int spot = (i+1) * chunkSize;
+			unsigned long long spot = (i+1) * chunkSize;
 			
 			ifstream in;
 			openInputFile(filename, in);
 			in.seekg(spot);
 			
 			//look for next '>'
-			unsigned long int newSpot = spot;
+			unsigned long long newSpot = spot;
 			while (!in.eof()) {
 			   char c = in.get();
 			   if (c == '>') {   in.putback(c); newSpot = in.tellg(); break;  }
 			}
 		
 			//there was not another sequence before the end of the file
-			unsigned long int sanityPos = in.tellg();
+			unsigned long long sanityPos = in.tellg();
 
 			if (sanityPos == -1) {	break;  }
 			else {  filePos.push_back(newSpot);  }
@@ -1220,7 +1249,7 @@ vector<unsigned long int> MothurOut::divideFile(string filename, int& proc) {
 int MothurOut::divideFile(string filename, int& proc, vector<string>& files) {
 	try{
 		
-		vector<unsigned long int> filePos = divideFile(filename, proc);
+		vector<unsigned long long> filePos = divideFile(filename, proc);
 		
 		for (int i = 0; i < (filePos.size()-1); i++) {
 			
@@ -1228,7 +1257,7 @@ int MothurOut::divideFile(string filename, int& proc, vector<string>& files) {
 			ifstream in;
 			openInputFile(filename, in);
 			in.seekg(filePos[i]);
-			unsigned long int size = filePos[(i+1)] - filePos[i];
+			unsigned long long size = filePos[(i+1)] - filePos[i];
 			char* chunk = new char[size];
 			in.read(chunk, size);
 			in.close();

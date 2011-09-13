@@ -466,7 +466,7 @@ int SffInfoCommand::readCommonHeader(ifstream& in, CommonHeader& header){
 			//read offset
 			char buffer2 [8];
 			in.read(buffer2, 8);
-			header.indexOffset =  be_int8(*(unsigned long int *)(&buffer2));
+			header.indexOffset =  be_int8(*(unsigned long long *)(&buffer2));
 			
 			//read index length
 			char buffer3 [4];
@@ -513,8 +513,8 @@ int SffInfoCommand::readCommonHeader(ifstream& in, CommonHeader& header){
 			delete[] tempBuffer2;
 				
 			/* Pad to 8 chars */
-			unsigned long int spotInFile = in.tellg();
-			unsigned long int spot = (spotInFile + 7)& ~7;  // ~ inverts
+			unsigned long long spotInFile = in.tellg();
+			unsigned long long spot = (spotInFile + 7)& ~7;  // ~ inverts
 			in.seekg(spot);
 			
 		}else{
@@ -581,8 +581,8 @@ int SffInfoCommand::readHeader(ifstream& in, Header& header){
 			decodeName(header.timestamp, header.region, header.xy, header.name);
 			
 			/* Pad to 8 chars */
-			unsigned long int spotInFile = in.tellg();
-			unsigned long int spot = (spotInFile + 7)& ~7;
+			unsigned long long spotInFile = in.tellg();
+			unsigned long long spot = (spotInFile + 7)& ~7;
 			in.seekg(spot);
 			
 		}else{
@@ -634,8 +634,8 @@ int SffInfoCommand::readSeqData(ifstream& in, seqRead& read, int numFlowReads, i
 			}
 	
 			/* Pad to 8 chars */
-			unsigned long int spotInFile = in.tellg();
-			unsigned long int spot = (spotInFile + 7)& ~7;
+			unsigned long long spotInFile = in.tellg();
+			unsigned long long spot = (spotInFile + 7)& ~7;
 			in.seekg(spot);
 			
 		}else{

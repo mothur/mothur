@@ -33,9 +33,9 @@ public:
 	
 private:
 	struct linePair {
-		unsigned long int start;
-		unsigned long int end;
-		linePair(unsigned long int i, unsigned long int j) : start(i), end(j) {}
+		unsigned long long start;
+		unsigned long long end;
+		linePair(unsigned long long i, unsigned long long j) : start(i), end(j) {}
 	};
 
 	vector<linePair*> lines;
@@ -59,8 +59,8 @@ private:
 	int driverRunFilter(string, string, string, linePair*);
 	int driverCreateFilter(Filters& F, string filename, linePair* line);
 	#ifdef USE_MPI
-	int driverMPIRun(int, int, MPI_File&, MPI_File&, vector<unsigned long int>&);
-	int MPICreateFilter(int, int, Filters&, MPI_File&, vector<unsigned long int>&);	
+	int driverMPIRun(int, int, MPI_File&, MPI_File&, vector<unsigned long long>&);
+	int MPICreateFilter(int, int, Filters&, MPI_File&, vector<unsigned long long>&);	
 	#endif
 	
 };

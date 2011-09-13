@@ -326,7 +326,7 @@ int ClusterCommand::execute(){
 			cout.flush();
 	 		print_start = false;
 		}
-	
+		
 		if(previousDist <= 0.0000){
 			printData("unique");
 		}
