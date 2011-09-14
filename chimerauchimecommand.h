@@ -13,6 +13,7 @@
 
 #include "mothur.h"
 #include "command.hpp"
+#include "sequenceparser.h"
 
 /***********************************************************/
 
@@ -33,18 +34,33 @@ public:
 	void help() { m->mothurOut(getHelpString()); }		
 	
 private:
+	struct linePair {
+		int start;
+		int end;
+		linePair(int i, int j) : start(i), end(j) {}
+	};
+	
 	vector<int> processIDS;   //processid
-	int driver(string, string, string, string);
-	int createProcesses(string, string, string, string);
+	int driver(string, string, string, string, int&);
+	int createProcesses(string, string, string, string, int&);
 		
 	bool abort, useAbskew, chimealns, useMinH, useMindiv, useXn, useDn, useXa, useChunks, useMinchunk, useIdsmoothwindow, useMinsmoothid, useMaxp, skipgaps, skipgaps2, useMinlen, useMaxlen, ucl, useQueryfract;
-	string fastafile, templatefile, outputDir, namefile, abskew, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, minlen, maxlen, queryfract;
+	string fastafile, groupfile, templatefile, outputDir, namefile, abskew, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, minlen, maxlen, queryfract;
 	int processors;
 	
 	vector<string> outputNames;
 	vector<string> fastaFileNames;
 	vector<string> nameFileNames;
+	vector<string> groupFileNames;
 	
+	string getNamesFile(string&);
+	int readFasta(string, map<string, string>&);
+	int printFile(vector<seqPriorityNode>&, string);
+	int deconvoluteResults(SequenceParser&, string, string, string);
+	int driverGroups(SequenceParser&, string, string, string, string, int, int, vector<string>);
+	int createProcessesGroups(SequenceParser&, string, string, string, string, vector<string>);
+
+
 };
 
 /***********************************************************/

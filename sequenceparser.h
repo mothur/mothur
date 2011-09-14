@@ -42,12 +42,17 @@ class SequenceParser {
 		vector<Sequence> getSeqs(string); //returns unique sequences in a specific group
 		map<string, string> getNameMap(string); //returns seqName -> namesOfRedundantSeqs separated by commas for a specific group - the name file format, but each line is parsed by group.
 		
+		int getSeqs(string, string, bool); //prints unique sequences in a specific group to a file - group, filename, uchimeFormat=false
+		int getNameMap(string, string); //print seqName -> namesOfRedundantSeqs separated by commas for a specific group - group, filename
+		
+		map<string, string> getAllSeqsMap(){ return allSeqsMap; }  //returns map where the key=sequenceName and the value=representativeSequence - helps us remove duplicates after group by group processing
 	private:
 	
 		GroupMap* groupMap;
 		MothurOut* m;
 	
 		int numSeqs;
+		map<string, string> allSeqsMap;
 		map<string, vector<Sequence> > seqs; //a vector for each group
 		map<string, map<string, string> > nameMapPerGroup; //nameMap for each group
 };
