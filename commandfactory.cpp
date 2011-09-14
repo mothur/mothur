@@ -256,7 +256,7 @@ CommandFactory::CommandFactory(){
 	commands["chimera.ccode"]		= "MPIEnabled";
 	commands["chimera.check"]		= "MPIEnabled";
 	commands["chimera.slayer"]		= "MPIEnabled";
-	commands["chimera.uchime"]		= "MPIEnabled";
+	commands["chimera.uchime"]		= "chimera.uchime";
 	commands["chimera.pintail"]		= "MPIEnabled";
 	commands["chimera.bellerophon"]	= "MPIEnabled";
 	commands["screen.seqs"]			= "MPIEnabled";

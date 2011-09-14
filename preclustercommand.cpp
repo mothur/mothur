@@ -235,6 +235,8 @@ int PreClusterCommand::execute(){
 				
 			}
 			
+			delete parser;
+			
 			//run unique.seqs for deconvolute results
 			string inputString = "fasta=" + newFastaFile;
 			if (namefile != "") { inputString += ", name=" + newNamesFile; }
