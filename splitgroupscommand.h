@@ -39,14 +39,8 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	int readNames(); 
-	int splitFasta(); 
-	
 	vector<string> outputNames;
-	map<string, vector<string> > nameMap;
-	map<string, vector<string> >::iterator itNames;
-	GroupMap* groupMap;
-	
+		
 	string outputDir, namefile, groupfile, groups, fastafile;
 	vector<string> Groups;
 	bool abort;

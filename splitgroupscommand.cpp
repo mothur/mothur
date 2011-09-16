@@ -9,6 +9,7 @@
 
 #include "splitgroupscommand.h"
 #include "sharedutilities.h"
+#include "sequenceparser.h"
 
 //**********************************************************************************************************************
 vector<string> SplitGroupCommand::setParameters(){	
@@ -164,16 +165,40 @@ int SplitGroupCommand::execute(){
 	
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
-		groupMap = new GroupMap(groupfile);
-		groupMap->readMap();
+		SequenceParser* parser;
 		
-		vector<string> namesGroups = groupMap->getNamesOfGroups();
+		if (namefile == "") {	parser = new SequenceParser(groupfile, fastafile);				}
+		else				{	parser = new SequenceParser(groupfile, fastafile, namefile);	}
+		
+		if (m->control_pressed) { delete parser; return 0; }
+
+		vector<string> namesGroups = parser->getNamesOfGroups();
 		SharedUtil util;  util.setGroups(Groups, namesGroups);  
 		
-		if (namefile != "") {  readNames();  }
-		splitFasta();
+		string fastafileRoot = outputDir + m->getRootName(m->getSimpleName(fastafile));
+		string namefileRoot = outputDir + m->getRootName(m->getSimpleName(namefile));
 		
-		delete groupMap;
+		m->mothurOutEndLine();
+		for (int i = 0; i < Groups.size(); i++) {
+			
+			m->mothurOut("Processing group: " + Groups[i]); m->mothurOutEndLine();
+			
+			string newFasta = fastafileRoot + Groups[i] + ".fasta";
+			string newName = namefileRoot + Groups[i] + ".names";
+			
+			parser->getSeqs(Groups[i], newFasta, false);
+			outputNames.push_back(newFasta); outputTypes["fasta"].push_back(newFasta);
+			if (m->control_pressed) { delete parser; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} return 0; }
+
+			if (namefile != "") { 
+				parser->getNameMap(Groups[i], newName); 
+				outputNames.push_back(newName); outputTypes["name"].push_back(newName);
+			}
+			
+			if (m->control_pressed) { delete parser; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} return 0; }
+		}
+		
+		delete parser;
 		
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} return 0; }
 		
@@ -200,147 +225,6 @@ int SplitGroupCommand::execute(){
 		exit(1);
 	}
 }
-/**********************************************************************************************************************/
-int SplitGroupCommand::readNames() { 
-	try {
-		//open input file
-		ifstream in;
-		m->openInputFile(namefile, in);
-		
-		while (!in.eof()) {
-			if (m->control_pressed) { break; }
-			
-			string firstCol, secondCol;
-			in >> firstCol >> secondCol; m->gobble(in);
-			
-			vector<string> names;
-			m->splitAtComma(secondCol, names);
-			
-			nameMap[firstCol] = names;
-		}
-		in.close();
-				
-		return 0;
+//**********************************************************************************************************************
 
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SplitGroupCommand", "readNames");
-		exit(1);
-	}
-}
-
-/**********************************************************************************************************************/
-int SplitGroupCommand::splitFasta() { 
-	try {
-		
-		string filerootFasta =  outputDir + m->getRootName(m->getSimpleName(fastafile));
-		string filerootName =  outputDir + m->getRootName(m->getSimpleName(namefile));
-		ofstream* temp;
-		ofstream* temp2;
-		map<string, ofstream*> filehandles;
-		map<string, ofstream*>::iterator it3;
-
-		for (int i=0; i<Groups.size(); i++) {
-			temp = new ofstream;
-			filehandles[Groups[i]+"fasta"] = temp;
-			m->openOutputFile(filerootFasta + Groups[i] + ".fasta", *(filehandles[Groups[i]+"fasta"]));
-			outputNames.push_back(filerootFasta + Groups[i] + ".fasta"); outputTypes["fasta"].push_back(filerootFasta + Groups[i] + ".fasta");
-			
-			if (namefile != "") {
-				temp2 = new ofstream;
-				filehandles[Groups[i]+"name"] = temp2;
-				m->openOutputFile(filerootName + Groups[i] + ".names", *(filehandles[Groups[i]+"name"]));
-				outputNames.push_back(filerootName + Groups[i] + ".names"); outputTypes["name"].push_back(filerootFasta + Groups[i] + ".names");
-			}
-		}
-			
-		//open input file
-		ifstream in;
-		m->openInputFile(fastafile, in);
-	
-		while (!in.eof()) {
-			if (m->control_pressed) { break; }
-		
-			Sequence seq(in); m->gobble(in);
-				
-			if (seq.getName() != "") { 
-				
-				itNames = nameMap.find(seq.getName());
-				
-				if (itNames == nameMap.end()) {
-					if (namefile != "") {  m->mothurOut(seq.getName() + " is not in your namesfile, ignoring."); m->mothurOutEndLine();  }
-					else { //no names file given
-						string group = groupMap->getGroup(seq.getName());
-						
-						if (m->inUsersGroups(group, Groups)) { //only add if this is in a group we want
-							seq.printSequence(*(filehandles[group+"fasta"]));
-						}else if(group == "not found") {
-							m->mothurOut(seq.getName() + " is not in your groupfile. Ignoring."); m->mothurOutEndLine();
-						}
-					}
-				}else{
-					vector<string> names = itNames->second;
-					map<string, string> group2Names;
-					map<string, string>::iterator it;
-					
-					for (int i = 0; i < names.size(); i++) {  //build strings for new group names file, will select rep below
-						string group = groupMap->getGroup(names[i]);
-						
-						if (m->inUsersGroups(group, Groups)) { //only add if this is in a group we want
-							it = group2Names.find(group);
-							if (it == group2Names.end()) {
-								group2Names[group] = names[i] + ",";
-							}else{
-								group2Names[group] += names[i] + ",";
-							}
-						}else if(group == "not found") {
-							m->mothurOut(names[i] + " is not in your groupfile. Ignoring."); m->mothurOutEndLine();
-						}
-					}
-				
-					for (map<string, string>::iterator itGroups = group2Names.begin(); itGroups != group2Names.end(); itGroups++) {
-						//edit names string, by grabbing the first guy as the rep and removing the last comma
-						string newNames = itGroups->second;
-						newNames = newNames.substr(0, newNames.length()-1); 
-						string repName = "";
-						
-						int pos = newNames.find_first_of(',');
-						if (pos == newNames.npos) { //only one sequence so it represents itself
-							repName = newNames;
-						}else{
-							repName = newNames.substr(0, pos);
-						}
-						
-						*(filehandles[itGroups->first+"name"]) << repName << '\t' << newNames << endl;
-						*(filehandles[itGroups->first+"fasta"]) << ">" << repName << endl << seq.getAligned() << endl;
-					}
-				}
-			}
-		}
-			
-		in.close();
-			
-		for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) { 
-			(*(filehandles[it3->first])).close();
-			delete it3->second;
-		}
-		
-		vector<string> newOutputNames;
-		//remove blank files
-		for (int i = 0; i < outputNames.size(); i++) {
-			if (m->isBlank(outputNames[i])) {
-				m->mothurRemove(outputNames[i]);
-			}else { newOutputNames.push_back(outputNames[i]); }
-		}
-		outputNames = newOutputNames;
-				
-		return 0;
-
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SplitGroupCommand", "splitFasta");
-		exit(1);
-	}
-}
-/**********************************************************************************************************************/
 
