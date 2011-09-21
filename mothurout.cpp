@@ -958,7 +958,7 @@ int MothurOut::openOutputFile(string fileName, ofstream& fileHandle){
 }
 
 /**************************************************************************************************/
-void MothurOut::appendFiles(string temp, string filename) {
+int MothurOut::appendFiles(string temp, string filename) {
 	try{
 		ofstream output;
 		ifstream input;
@@ -968,15 +968,18 @@ void MothurOut::appendFiles(string temp, string filename) {
 		int ableToOpen = openInputFile(temp, input, "no error");
 		//int ableToOpen = openInputFile(temp, input);
 		
+		int numLines = 0;
 		if (ableToOpen == 0) { //you opened it
 			while(char c = input.get()){
 				if(input.eof())		{	break;			}
-				else				{	output << c;	}
+				else				{	output << c;	if (c == '\n') {numLines++;} }
 			}
 			input.close();
 		}
 		
 		output.close();
+		
+		return numLines;
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "appendFiles");
