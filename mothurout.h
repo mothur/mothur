@@ -62,7 +62,7 @@ class MothurOut {
 		vector<unsigned long long> setFilePosEachLine(string, int&);
 		vector<unsigned long long> setFilePosFasta(string, int&);
 		string sortFile(string, string);
-		void appendFiles(string, string);
+		int appendFiles(string, string);
 		int renameFile(string, string); //oldname, newname
 		string getFullPathName(string);
 		string hasPath(string);

@@ -14,6 +14,7 @@
 #include "command.hpp"
 #include "chimera.h"
 #include "chimeraslayer.h"
+#include "sequenceparser.h"
 
 /***********************************************************/
 
@@ -43,19 +44,25 @@ private:
 
 	vector<int> processIDS;   //processid
 	vector<linePair*> lines;
-	map<string, int> priority;
 	
 	int driver(linePair*, string, string, string, string);
 	int createProcesses(string, string, string, string);
 	int divideInHalf(Sequence, string&, string&);
 	map<string, int> sortFastaFile(string, string);
+	map<string, int> sortFastaFile(vector<Sequence>&, map<string, string>&, string newFile);
+	string getNamesFile(string&);
+	int setupChimera(string, map<string, int>&);
+	int MPIExecute(string, string, string, string);
+	int deconvoluteResults(SequenceParser*, string, string, string);
+	
+
 		
 	#ifdef USE_MPI
 	int driverMPI(int, int, MPI_File&, MPI_File&, MPI_File&, MPI_File&, vector<unsigned long long>&);
 	#endif
 
 	bool abort, realign, trim, trimera, save;
-	string fastafile, templatefile, outputDir, search, namefile, blastlocation;
+	string fastafile, groupfile, templatefile, outputDir, search, namefile, blastlocation;
 	int processors, window, iters, increment, numwanted, ksize, match, mismatch, parents, minSimilarity, minCoverage, minBS, minSNP, numSeqs, templateSeqsLength;
 	float divR;
 	Chimera* chimera;
@@ -63,6 +70,7 @@ private:
 	vector<string> outputNames;
 	vector<string> fastaFileNames;
 	vector<string> nameFileNames;
+	vector<string> groupFileNames;
 	
 };
 

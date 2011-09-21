@@ -327,7 +327,7 @@ bool QualityScores::stripQualWindowAverage(Sequence& sequence, int stepSize, int
 		return 1;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "QualityScores", "flipQScores");
+		m->errorOut(e, "QualityScores", "stripQualWindowAverage");
 		exit(1);
 	}							
 	

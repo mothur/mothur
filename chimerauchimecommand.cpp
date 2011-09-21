@@ -591,6 +591,47 @@ int ChimeraUchimeCommand::deconvoluteResults(SequenceParser& parser, string outp
 		map<string, string>::iterator itUnique;
 		int total = 0;
 		
+		//edit accnos file
+		ifstream in2; 
+		m->openInputFile(accnosFileName, in2);
+		
+		ofstream out2;
+		m->openOutputFile(accnosFileName+".temp", out2);
+		
+		string name;
+		set<string> namesInFile; //this is so if a sequence is found to be chimera in several samples we dont write it to the results file more than once
+		set<string>::iterator itNames;
+		set<string> chimerasInFile;
+		set<string>::iterator itChimeras;
+
+		
+		while (!in2.eof()) {
+			if (m->control_pressed) { in2.close(); out2.close(); m->mothurRemove(outputFileName); m->mothurRemove((accnosFileName+".temp")); return 0; }
+			
+			in2 >> name; m->gobble(in2);
+			
+			//find unique name
+			itUnique = uniqueNames.find(name);
+			
+			if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing accnos results. Cannot find "+ name + "."); m->mothurOutEndLine(); m->control_pressed = true; }
+			else {
+				itChimeras = chimerasInFile.find((itUnique->second));
+				
+				if (itChimeras == chimerasInFile.end()) {
+					out2 << itUnique->second << endl;
+					chimerasInFile.insert((itUnique->second));
+					total++;
+				}
+			}
+		}
+		in2.close();
+		out2.close();
+		
+		m->mothurRemove(accnosFileName);
+		rename((accnosFileName+".temp").c_str(), accnosFileName.c_str());
+		
+		
+		
 		//edit chimera file
 		ifstream in; 
 		m->openInputFile(outputFileName, in);
@@ -599,12 +640,11 @@ int ChimeraUchimeCommand::deconvoluteResults(SequenceParser& parser, string outp
 		m->openOutputFile(outputFileName+".temp", out); out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
 		
 		float temp1;
-		string name, rest, parent1, parent2;
-		set<string> namesInFile; //this is so if a sequence is found to be chimera in several samples we dont write it to the results file more than once
-		set<string>::iterator itNames;
-		
+		string parent1, parent2, temp2, temp3, temp4, temp5, temp6, temp7, temp8, temp9, temp10, temp11, temp12, temp13, flag;
+		name = "";
+		namesInFile.clear();	
 		//assumptions - in file each read will always look like - if uchime source is updated, revisit this code.
-		/*
+		/*										1	2	3	4	5	6	7	8	9	10	11	12	13	14	15
 		 0.000000	F11Fcsw_33372/ab=18/		*	*	*	*	*	*	*	*	*	*	*	*	*	*	N
 		 0.018300	F11Fcsw_14980/ab=16/		F11Fcsw_1915/ab=35/	F11Fcsw_6032/ab=42/	79.9	78.7	78.2	78.7	79.2	3	0	5	11	10	20	1.46	N
 		*/
@@ -613,11 +653,13 @@ int ChimeraUchimeCommand::deconvoluteResults(SequenceParser& parser, string outp
 			
 			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove((outputFileName+".temp")); return 0; }
 			
+			bool print = false;
 			in >> temp1;	m->gobble(in);
 			in >> name;		m->gobble(in);
 			in >> parent1;	m->gobble(in);
 			in >> parent2;	m->gobble(in);
-			rest = m->getline(in); m->gobble(in);
+			in >> temp2 >> temp3 >> temp4 >> temp5 >> temp6 >> temp7 >> temp8 >> temp9 >> temp10 >> temp11 >> temp12 >> temp13 >> flag;
+			m->gobble(in);
 			
 			//parse name - name will look like U68590/ab=1/
 			string restOfName = "";
@@ -632,46 +674,54 @@ int ChimeraUchimeCommand::deconvoluteResults(SequenceParser& parser, string outp
 			
 			if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing chimera results. Cannot find "+ name + "."); m->mothurOutEndLine(); m->control_pressed = true; }
 			else {
-				itNames = namesInFile.find((itUnique->second));
+				name = itUnique->second;
+				//is this name already in the file
+				itNames = namesInFile.find((name));
 				
-				if (itNames == namesInFile.end()) {
-					out << temp1 << '\t' << itUnique->second << restOfName << '\t';
-					namesInFile.insert((itUnique->second));
-					
-					//parse parent1 names
-					if (parent1 != "*") {
-						restOfName = "";
-						pos = parent1.find_first_of('/');
-						if (pos != string::npos) {
-							restOfName = parent1.substr(pos);
-							parent1 = parent1.substr(0, pos);
-						}
+				if (itNames == namesInFile.end()) { //no not in file
+					if (flag == "N") { //are you really a no??
+						//is this sequence really not chimeric??
+						itChimeras = chimerasInFile.find(name);
 						
-						itUnique = uniqueNames.find(parent1);
-						if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing chimera results. Cannot find parentA "+ parent1 + "."); m->mothurOutEndLine(); m->control_pressed = true; }
-						else {
-							out << itUnique->second << restOfName << '\t';
-						}
-					}else { out << parent1 << '\t'; }
-					
-					//parse parent2 names
-					if (parent2 != "*") {
-						restOfName = "";
-						pos = parent2.find_first_of('/');
-						if (pos != string::npos) {
-							restOfName = parent2.substr(pos);
-							parent2 = parent2.substr(0, pos);
-						}
-						
-						itUnique = uniqueNames.find(parent2);
-						if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing chimera results. Cannot find parentB "+ parent2 + "."); m->mothurOutEndLine(); m->control_pressed = true; }
-						else {
-							out << itUnique->second << restOfName << '\t';
-						}
-					}else { out << parent2 << '\t'; }
-					
-					out  << rest << endl;
+						//then you really are a no so print, otherwise skip
+						if (itChimeras == chimerasInFile.end()) { print = true; }
+					}else{ print = true; }
 				}
+			}
+			
+			if (print) {
+				out << temp1 << '\t' << name << restOfName << '\t';
+				namesInFile.insert(name);
+				
+				//parse parent1 names
+				if (parent1 != "*") {
+					restOfName = "";
+					pos = parent1.find_first_of('/');
+					if (pos != string::npos) {
+						restOfName = parent1.substr(pos);
+						parent1 = parent1.substr(0, pos);
+					}
+					
+					itUnique = uniqueNames.find(parent1);
+					if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing chimera results. Cannot find parentA "+ parent1 + "."); m->mothurOutEndLine(); m->control_pressed = true; }
+					else {	out << itUnique->second << restOfName << '\t';	}
+				}else { out << parent1 << '\t'; }
+				
+				//parse parent2 names
+				if (parent2 != "*") {
+					restOfName = "";
+					pos = parent2.find_first_of('/');
+					if (pos != string::npos) {
+						restOfName = parent2.substr(pos);
+						parent2 = parent2.substr(0, pos);
+					}
+					
+					itUnique = uniqueNames.find(parent2);
+					if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing chimera results. Cannot find parentB "+ parent2 + "."); m->mothurOutEndLine(); m->control_pressed = true; }
+					else {	out << itUnique->second << restOfName << '\t';	}
+				}else { out << parent2 << '\t'; }
+				
+				out << temp2 << '\t' << temp3 << '\t' << temp4 << '\t' << temp5 << '\t' << temp6 << '\t' << temp7 << '\t' << temp8 << '\t' << temp9 << '\t' << temp10 << '\t' << temp11 << '\t' << temp12 << temp13 << '\t' << flag << endl;	
 			}
 		}
 		in.close();
@@ -680,41 +730,7 @@ int ChimeraUchimeCommand::deconvoluteResults(SequenceParser& parser, string outp
 		m->mothurRemove(outputFileName);
 		rename((outputFileName+".temp").c_str(), outputFileName.c_str());
 		
-		//edit accnos file
-		ifstream in2; 
-		m->openInputFile(accnosFileName, in2);
-		
-		ofstream out2;
-		m->openOutputFile(accnosFileName+".temp", out2);
-		
-		name = "";
-		namesInFile.clear();
-		
-		while (!in2.eof()) {
-			if (m->control_pressed) { in2.close(); out2.close(); m->mothurRemove(outputFileName); m->mothurRemove((accnosFileName+".temp")); return 0; }
-			
-			in2 >> name; m->gobble(in2);
-			
-			//find unique name
-			itUnique = uniqueNames.find(name);
-			
-			if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing accnos results. Cannot find "+ name + "."); m->mothurOutEndLine(); m->control_pressed = true; }
-			else {
-				itNames = namesInFile.find((itUnique->second));
-	
-				if (itNames == namesInFile.end()) {
-					out2 << itUnique->second << endl;
-					namesInFile.insert((itUnique->second));
-					total++;
-				}
-			}
-		}
-		in2.close();
-		out2.close();
-		
-		m->mothurRemove(accnosFileName);
-		rename((accnosFileName+".temp").c_str(), accnosFileName.c_str());
-		
+				
 		//edit anls file
 		//assumptions - in file each read will always look like - if uchime source is updated, revisit this code.
 		/*
