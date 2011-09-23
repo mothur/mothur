@@ -324,6 +324,7 @@
 		A7FE7C401330EA1000F7B327 /* getcurrentcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7FE7C3F1330EA1000F7B327 /* getcurrentcommand.cpp */; };
 		A7FE7E6D13311EA400F7B327 /* setcurrentcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7FE7E6C13311EA400F7B327 /* setcurrentcommand.cpp */; };
 		A7FF19F2140FFDA500AD216D /* trimoligos.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7FF19F1140FFDA500AD216D /* trimoligos.cpp */; };
+		A7FFB558142CA02C004884F2 /* summarytaxcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7FFB557142CA02C004884F2 /* summarytaxcommand.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -1001,6 +1002,8 @@
 		A7FE7E6C13311EA400F7B327 /* setcurrentcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = setcurrentcommand.cpp; sourceTree = "<group>"; };
 		A7FF19F0140FFDA500AD216D /* trimoligos.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = trimoligos.h; sourceTree = "<group>"; };
 		A7FF19F1140FFDA500AD216D /* trimoligos.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = trimoligos.cpp; sourceTree = "<group>"; };
+		A7FFB556142CA02C004884F2 /* summarytaxcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = summarytaxcommand.h; sourceTree = "<group>"; };
+		A7FFB557142CA02C004884F2 /* summarytaxcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = summarytaxcommand.cpp; sourceTree = "<group>"; };
 		C6A0FF2C0290799A04C91782 /* mothur.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = mothur.1; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -1390,9 +1393,9 @@
 				A7E9B7E412D37EC400DA6239 /* sffinfocommand.h */,
 				A7E9B7E312D37EC400DA6239 /* sffinfocommand.cpp */,
 				A7E9B7F312D37EC400DA6239 /* sharedcommand.h */,
+				A7E9B7F212D37EC400DA6239 /* sharedcommand.cpp */,
 				A7E9B82812D37EC400DA6239 /* shhhercommand.h */,
 				A7E9B82712D37EC400DA6239 /* shhhercommand.cpp */,
-				A7E9B7F212D37EC400DA6239 /* sharedcommand.cpp */,
 				A7E9B84012D37EC400DA6239 /* splitabundcommand.h */,
 				A7E9B83F12D37EC400DA6239 /* splitabundcommand.cpp */,
 				A7E9B84212D37EC400DA6239 /* splitgroupscommand.h */,
@@ -1403,6 +1406,8 @@
 				A7E9B85712D37EC400DA6239 /* summarycommand.cpp */,
 				A7E9B85A12D37EC400DA6239 /* summarysharedcommand.h */,
 				A7E9B85912D37EC400DA6239 /* summarysharedcommand.cpp */,
+				A7FFB556142CA02C004884F2 /* summarytaxcommand.h */,
+				A7FFB557142CA02C004884F2 /* summarytaxcommand.cpp */,
 				A7E9B85C12D37EC400DA6239 /* systemcommand.h */,
 				A7E9B85B12D37EC400DA6239 /* systemcommand.cpp */,
 				A7E9B86312D37EC400DA6239 /* treegroupscommand.h */,
@@ -2149,6 +2154,7 @@
 				A795840D13F13CD900F201D5 /* countgroupscommand.cpp in Sources */,
 				A7FF19F2140FFDA500AD216D /* trimoligos.cpp in Sources */,
 				A7F9F5CF141A5E500032F693 /* sequenceparser.cpp in Sources */,
+				A7FFB558142CA02C004884F2 /* summarytaxcommand.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

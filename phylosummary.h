@@ -36,7 +36,7 @@ public:
 	PhyloSummary(string, string);
 	~PhyloSummary() { if (groupmap != NULL)  {  delete groupmap;  }  }
 	
-	void summarize(string);  //pass it a taxonomy file and a group file and it makes the tree
+	int summarize(string);  //pass it a taxonomy file and a group file and it makes the tree
 	int addSeqToTree(string, string);
 	int addSeqToTree(string, vector<string>);
 	void print(ofstream&);
@@ -55,6 +55,8 @@ private:
 	int numSeqs;
 	int maxLevel;
 	MothurOut* m;
+	
+	void removeConfidences(string&);
 };
 
 /**************************************************************************************************/

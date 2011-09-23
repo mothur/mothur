@@ -1349,7 +1349,35 @@ int MothurOut::readNames(string namefile, map<string, string>& nameMap) {
 		exit(1);
 	}
 }
-
+/**********************************************************************************************************************/
+int MothurOut::readNames(string namefile, map<string, vector<string> >& nameMap) { 
+	try {
+		
+		//open input file
+		ifstream in;
+		openInputFile(namefile, in);
+		
+		while (!in.eof()) {
+			if (control_pressed) { break; }
+			
+			string firstCol, secondCol;
+			in >> firstCol >> secondCol; gobble(in);
+			
+			vector<string> temp;
+			splitAtComma(secondCol, temp);
+			
+			nameMap[firstCol] = temp;
+		}
+		in.close();
+		
+		return 0;
+		
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "readNames");
+		exit(1);
+	}
+}
 /**********************************************************************************************************************/
 map<string, int> MothurOut::readNames(string namefile) { 
 	try {
