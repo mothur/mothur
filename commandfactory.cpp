@@ -122,6 +122,7 @@
 #include "countseqscommand.h"
 #include "countgroupscommand.h"
 #include "clearmemorycommand.h"
+#include "summarytaxcommand.h"
 
 /*******************************************************/
 
@@ -265,6 +266,7 @@ CommandFactory::CommandFactory(){
 	commands["shhh.seqs"]			= "MPIEnabled";
 	commands["sens.spec"]			= "sens.spec";
 	commands["seq.error"]			= "seq.error";
+	commands["seq.error"]			= "summary.tax";
 	commands["quit"]				= "MPIEnabled"; 
 
 }
@@ -421,6 +423,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "count.seqs")			{	command = new CountSeqsCommand(optionString);				}
 		else if(commandName == "count.groups")			{	command = new CountGroupsCommand(optionString);				}
 		else if(commandName == "clear.memory")			{	command = new ClearMemoryCommand(optionString);				}
+		else if(commandName == "summary.tax")			{	command = new SummaryTaxCommand(optionString);				}
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -561,6 +564,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "count.seqs")			{	pipecommand = new CountSeqsCommand(optionString);				}
 		else if(commandName == "count.groups")			{	pipecommand = new CountGroupsCommand(optionString);				}
 		else if(commandName == "clear.memory")			{	pipecommand = new ClearMemoryCommand(optionString);				}
+		else if(commandName == "summary.tax")			{	pipecommand = new SummaryTaxCommand(optionString);				}
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -689,6 +693,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "count.seqs")			{	shellcommand = new CountSeqsCommand();				}
 		else if(commandName == "count.groups")			{	shellcommand = new CountGroupsCommand();			}
 		else if(commandName == "clear.memory")			{	shellcommand = new ClearMemoryCommand();			}
+		else if(commandName == "summary.tax")			{	shellcommand = new SummaryTaxCommand();				}
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;

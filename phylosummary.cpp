@@ -71,7 +71,7 @@ PhyloSummary::PhyloSummary(string groupFile){
 }
 /**************************************************************************************************/
 
-void PhyloSummary::summarize(string userTfile){
+int PhyloSummary::summarize(string userTfile){
 	try {
 		
 		ifstream in;
@@ -79,14 +79,18 @@ void PhyloSummary::summarize(string userTfile){
 		
 		//read in users taxonomy file and add sequences to tree
 		string name, tax;
+		int numSeqs = 0;
 		while(!in.eof()){
 			in >> name >> tax; m->gobble(in);
 			
 			addSeqToTree(name, tax);
+			numSeqs++;
 			
 			if (m->control_pressed) { break;  }
 		}
 		in.close();
+		
+		return numSeqs;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PhyloSummary", "summarize");
@@ -125,6 +129,9 @@ int PhyloSummary::addSeqToTree(string seqName, string seqTaxonomy){
 		string taxon;
 		
 		int level = 0;
+		
+		//are there confidence scores, if so remove them
+		if (seqTaxonomy.find_first_of('(') != -1) {  removeConfidences(seqTaxonomy);	}
 		
 		while (seqTaxonomy != "") {
 			
@@ -220,6 +227,9 @@ int PhyloSummary::addSeqToTree(string seqTaxonomy, vector<string> names){
 		string taxon;
 		
 		int level = 0;
+		
+		//are there confidence scores, if so remove them
+		if (seqTaxonomy.find_first_of('(') != -1) {  removeConfidences(seqTaxonomy);	}
 		
 		while (seqTaxonomy != "") {
 			
@@ -361,16 +371,25 @@ void PhyloSummary::print(ofstream& out){
 		out << endl;
 		
 		int totalChildrenInTree = 0;
+		map<string, int>::iterator itGroup;
 		
 		map<string,int>::iterator it;
 		for(it=tree[0].children.begin();it!=tree[0].children.end();it++){   
-			if (tree[it->second].total != 0)  {   totalChildrenInTree++; }
+			if (tree[it->second].total != 0)  {   
+				totalChildrenInTree++; 
+				tree[0].total += tree[it->second].total;
+				
+				if (groupmap != NULL) {
+					vector<string> mGroups = groupmap->getNamesOfGroups();
+					for (int i = 0; i < mGroups.size(); i++) { tree[0].groupCount[mGroups[i]] += tree[it->second].groupCount[mGroups[i]]; } 
+				}
+			}
 		}
 		
 		//print root
 		out << tree[0].level << "\t" << tree[0].rank << "\t" << tree[0].name << "\t" << totalChildrenInTree << "\t" << tree[0].total << "\t";
 		
-		map<string, int>::iterator itGroup;
+		
 		if (groupmap != NULL) {
 			//for (itGroup = tree[0].groupCount.begin(); itGroup != tree[0].groupCount.end(); itGroup++) {
 			//	out << itGroup->second << '\t';
@@ -472,11 +491,39 @@ void PhyloSummary::readTreeStruct(ifstream& in){
 
 	}
 	catch(exception& e) {
-		m->errorOut(e, "PhyloSummary", "print");
+		m->errorOut(e, "PhyloSummary", "readTreeStruct");
 		exit(1);
 	}
 }
-
+/**************************************************************************************************/
+void PhyloSummary::removeConfidences(string& tax) {
+	try {
+		
+		string taxon;
+		string newTax = "";
+		
+		while (tax.find_first_of(';') != -1) {
+			//get taxon
+			taxon = tax.substr(0,tax.find_first_of(';'));
+			
+			int pos = taxon.find_first_of('(');
+			if (pos != -1) {
+				taxon = taxon.substr(0, pos); //rip off confidence 
+			}
+			
+			taxon += ";";
+			
+			tax = tax.substr(tax.find_first_of(';')+1, tax.length());
+			newTax += taxon;
+		}
+		
+		tax = newTax;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PhyloSummary", "removeConfidences");
+		exit(1);
+	}
+}
 /**************************************************************************************************/
 
 
