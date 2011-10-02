@@ -37,4 +37,7 @@ class SummaryTaxCommand : public Command {
 		map<string, int> nameMap;
 };
 
+/**************************************************************************************************/
+
+
 #endif
