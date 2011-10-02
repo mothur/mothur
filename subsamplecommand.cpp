@@ -1522,6 +1522,7 @@ int SubSampleCommand::eliminateZeroOTUS(vector<SharedRAbundVector*>& thislookup)
 		
 		//for each bin
 		vector<string> newBinLabels;
+		string snumBins = toString(thislookup[0]->getNumBins());
 		for (int i = 0; i < thislookup[0]->getNumBins(); i++) {
 			if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) {  delete newLookup[j];  } return 0; }
 			
@@ -1537,7 +1538,13 @@ int SubSampleCommand::eliminateZeroOTUS(vector<SharedRAbundVector*>& thislookup)
 					newLookup[j]->push_back(thislookup[j]->getAbundance(i), thislookup[j]->getGroup());
 				}
 				//if there is a bin label use it otherwise make one
-				string binLabel = "Otu" + toString(i+1);
+				string binLabel = "Otu";
+				string sbinNumber = toString(i+1);
+				if (sbinNumber.length() < snumBins.length()) { 
+					int diff = snumBins.length() - sbinNumber.length();
+					for (int h = 0; h < diff; h++) { binLabel += "0"; }
+				}
+				binLabel += sbinNumber; 
 				if (i < m->currentBinLabels.size()) {  binLabel = m->currentBinLabels[i]; }
 				
 				newBinLabels.push_back(binLabel);

@@ -336,13 +336,19 @@ int SharedRAbundVector::size(){
 /***********************************************************************/
 void SharedRAbundVector::printHeaders(ostream& output){
 	try {
-		
+		string snumBins = toString(numBins);
 		output << "label\tGroup\tnumOtus\t";
 		if (m->sharedHeaderMode == "tax") {
 			for (int i = 0; i < numBins; i++) {  
 				
 				//if there is a bin label use it otherwise make one
-				string binLabel = "PhyloType" + toString(i+1);
+				string binLabel = "PhyloType";
+				string sbinNumber = toString(i+1);
+				if (sbinNumber.length() < snumBins.length()) { 
+					int diff = snumBins.length() - sbinNumber.length();
+					for (int h = 0; h < diff; h++) { binLabel += "0"; }
+				}
+				binLabel += sbinNumber;
 				if (i < m->currentBinLabels.size()) {  binLabel = m->currentBinLabels[i]; }
 				
 				output << binLabel << '\t'; 
@@ -351,10 +357,16 @@ void SharedRAbundVector::printHeaders(ostream& output){
 		}else {
 			for (int i = 0; i < numBins; i++) {  
 				//if there is a bin label use it otherwise make one
-				string mybinLabel = "Otu" + toString(i+1);
-				if (i < m->currentBinLabels.size()) {  mybinLabel = m->currentBinLabels[i]; }
+				string binLabel = "Otu";
+				string sbinNumber = toString(i+1);
+				if (sbinNumber.length() < snumBins.length()) { 
+					int diff = snumBins.length() - sbinNumber.length();
+					for (int h = 0; h < diff; h++) { binLabel += "0"; }
+				}
+				binLabel += sbinNumber;
+				if (i < m->currentBinLabels.size()) {  binLabel = m->currentBinLabels[i]; }
 				
-				output << mybinLabel << '\t'; 
+				output << binLabel << '\t'; 
 			}
 			
 			output << endl;
@@ -461,6 +473,7 @@ int SharedRAbundVector::eliminateZeroOTUS(vector<SharedRAbundVector*>& thislooku
 			
 			//for each bin
 			vector<string> newBinLabels;
+			string snumBins = toString(thislookup[0]->getNumBins());
 			for (int i = 0; i < thislookup[0]->getNumBins(); i++) {
 				if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) {  delete newLookup[j];  } return 0; }
 				
@@ -477,7 +490,13 @@ int SharedRAbundVector::eliminateZeroOTUS(vector<SharedRAbundVector*>& thislooku
 					}
 					
 					//if there is a bin label use it otherwise make one
-					string binLabel = "Otu" + toString(i+1);
+					string binLabel = "Otu";
+					string sbinNumber = toString(i+1);
+					if (sbinNumber.length() < snumBins.length()) { 
+						int diff = snumBins.length() - sbinNumber.length();
+						for (int h = 0; h < diff; h++) { binLabel += "0"; }
+					}
+					binLabel += sbinNumber; 
 					if (i < m->currentBinLabels.size()) {  binLabel = m->currentBinLabels[i]; }
 					
 					newBinLabels.push_back(binLabel);
