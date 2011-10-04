@@ -178,7 +178,11 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 			}
 			else if (queryFileName == "not open") { abort = true; }	
 			else { m->setFastaFile(queryFileName); }
-
+			
+			referenceFileName = validParameter.validFile(parameters, "reference", true);
+			if (referenceFileName == "not found") { m->mothurOut("reference is a required parameter for the seq.error command."); m->mothurOutEndLine(); abort = true; }
+			else if (referenceFileName == "not open") { abort = true; }	
+			
 			//check for optional parameters
 			namesFileName = validParameter.validFile(parameters, "name", true);
 			if(namesFileName == "not found"){	namesFileName = "";	}
