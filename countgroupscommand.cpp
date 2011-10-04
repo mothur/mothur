@@ -34,7 +34,7 @@ vector<string> CountGroupsCommand::setParameters(){
 string CountGroupsCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The count.groups command counts sequences from a specfic group or set of groups from the following file types: group or shared file.\n";
+		helpString += "The count.groups command counts sequences from a specific group or set of groups from the following file types: group or shared file.\n";
 		helpString += "The count.groups command parameters are accnos, group, shared and groups. You must provide a group or shared file.\n";
 		helpString += "The accnos parameter allows you to provide a file containing the list of groups.\n";
 		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like.  You can separate group names with dashes.\n";

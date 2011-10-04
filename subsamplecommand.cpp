@@ -426,6 +426,7 @@ int SubSampleCommand::getSubSampleFasta() {
 		if (persample) {
 			//initialize counts
 			map<string, int> groupCounts;
+			map<string, int>::iterator itGroupCounts;
 			for (int i = 0; i < Groups.size(); i++) { groupCounts[Groups[i]] = 0; }
 			
 			for (int j = 0; j < names.size(); j++) {
@@ -435,7 +436,10 @@ int SubSampleCommand::getSubSampleFasta() {
 				string group = groupMap->getGroup(names[j]);
 				if (group == "not found") { m->mothurOut("[ERROR]: " + names[j] + " is not in your groupfile. please correct."); m->mothurOutEndLine(); group = "NOTFOUND"; }
 				else{
-					if (groupCounts[group] < size) {	subset.insert(names[j]); 	}
+					itGroupCounts = groupCounts.find(group);
+					if (itGroupCounts != groupCounts.end()) {
+						if (groupCounts[group] < size) {	subset.insert(names[j]); 	groupCounts[group]++; }
+					}
 				}				
 			}
 		}else {
@@ -1025,6 +1029,7 @@ int SubSampleCommand::getSubSampleList() {
 		if (persample) {
 			//initialize counts
 			map<string, int> groupCounts;
+			map<string, int>::iterator itGroupCounts;
 			for (int i = 0; i < Groups.size(); i++) { groupCounts[Groups[i]] = 0; }
 			
 			for (int j = 0; j < names.size(); j++) {
@@ -1034,7 +1039,10 @@ int SubSampleCommand::getSubSampleList() {
 				string group = groupMap->getGroup(names[j]);
 				if (group == "not found") { m->mothurOut("[ERROR]: " + names[j] + " is not in your groupfile. please correct."); m->mothurOutEndLine(); group = "NOTFOUND"; }
 				else{
-					if (groupCounts[group] < size) {	subset.insert(names[j]); 	}
+					itGroupCounts = groupCounts.find(group);
+					if (itGroupCounts != groupCounts.end()) {
+						if (groupCounts[group] < size) {	subset.insert(names[j]); 	groupCounts[group]++; }
+					}
 				}				
 			}
 		}else{
