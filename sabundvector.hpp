@@ -7,7 +7,8 @@
 #include "calculator.h"
 
 
-/* This class is a child to datavector.  It represents OTU information at a certain distance. 
+/*  Data Structure for a sabund file.
+    This class is a child to datavector.  It represents OTU information at a certain distance. 
 	A sabundvector can be converted into and ordervector, listvector or rabundvector.
 	Each member of the internal container "data" represents the number of OTU's with that many members, but staring at 1.
 	So data[1] = 2, because there are two OTUs with 1 member.

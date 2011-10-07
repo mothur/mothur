@@ -227,7 +227,7 @@ int PreClusterCommand::execute(){
 				
 				if (m->control_pressed) {  delete parser; m->mothurRemove(newFastaFile); m->mothurRemove(newNamesFile); return 0; }
 
-				m->mothurOut("Total number of sequences before precluster was " + toString(alignSeqs.size()) + "."); m->mothurOutEndLine();
+				m->mothurOut("Total number of sequences before pre.cluster was " + toString(alignSeqs.size()) + "."); m->mothurOutEndLine();
 				m->mothurOut("pre.cluster removed " + toString(count) + " sequences."); m->mothurOutEndLine(); m->mothurOutEndLine(); 
 				printData(newFastaFile, newNamesFile);
 				
@@ -253,9 +253,8 @@ int PreClusterCommand::execute(){
 			
 			m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
 			
-			newNamesFile = filenames["name"][0];
-			newFastaFile = filenames["fasta"][0];
-			
+			m->renameFile(filenames["fasta"][0], newFastaFile);
+				
 		}else {
 			if (namefile != "") { readNameFile(); }
 		
@@ -436,7 +435,7 @@ int PreClusterCommand::loadSeqs(map<string, string>& thisName, vector<Sequence>&
 				if (it == thisName.end()) { m->mothurOut(thisSeqs[i].getName() + " is not in your names file, please correct."); m->mothurOutEndLine(); error = true; }
 				else{
 					//get number of reps
-					int numReps = 0;
+					int numReps = 1;
 					for(int j=0;j<(it->second).length();j++){
 						if((it->second)[j] == ','){	numReps++;	}
 					}

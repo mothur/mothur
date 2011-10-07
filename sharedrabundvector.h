@@ -17,7 +17,8 @@
 #include "rabundvector.hpp"
 //#include "groupmap.h"
 
-/* This class is a child to datavector.  It represents OTU information at a certain distance. 
+/*  DataStructure for a shared file.
+	This class is a child to datavector.  It represents OTU information at a certain distance. 
 	It is similiar to an rabundvector except each member of data knows which group it belongs to.
 	Each member of the internal container "data" is a struct of type individual. 
 	An individual which knows the OTU from which it came, 

@@ -25,9 +25,9 @@ public:
 	
 	vector<string> setParameters();
 	string getCommandName()			{ return "trim.flows";	}
-	string getCommandCategory()		{ return "Hidden";		}
+	string getCommandCategory()		{ return "Sequence Processing";		}
 	string getHelpString();	
-	string getCitation() { return "no citation"; }
+	string getCitation() { return "http://www.mothur.org/wiki/Trim.flows"; }
 	string getDescription()		{ return "trim.flows"; }
 
 	

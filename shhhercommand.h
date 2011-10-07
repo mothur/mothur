@@ -31,11 +31,11 @@ public:
 	~ShhherCommand() {}
 	
 	vector<string> setParameters();
-	string getCommandName()			{ return "shhh.seqs";	}
-	string getCommandCategory()		{ return "Hidden";		}
+	string getCommandName()			{ return "shhh.flows";	}
+	string getCommandCategory()		{ return "Sequence Processing";		}
 	string getHelpString();	
-	string getCitation() { return "no citation"; }
-	string getDescription()		{ return "shhh.seqs"; }
+	string getCitation() { return "http://www.mothur.org/wiki/Shhh.flows"; }
+	string getDescription()		{ return "shhh.flows"; }
 
 	
 	int execute(); 
