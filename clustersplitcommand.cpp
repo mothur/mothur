@@ -24,13 +24,13 @@ vector<string> ClusterSplitCommand::setParameters(){
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "PhylipColumnFasta", "PhylipColumnFasta", "FastaTaxName",false,false); parameters.push_back(pfasta);
 		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "ColumnName-FastaTaxName",false,false); parameters.push_back(pname);
 		CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumnFasta", "PhylipColumnFasta", "ColumnName",false,false); parameters.push_back(pcolumn);
-		CommandParameter ptaxlevel("taxlevel", "Number", "", "1", "", "", "",false,false); parameters.push_back(ptaxlevel);
+		CommandParameter ptaxlevel("taxlevel", "Number", "", "3", "", "", "",false,false); parameters.push_back(ptaxlevel);
 		CommandParameter psplitmethod("splitmethod", "Multiple", "classify-fasta-distance", "distance", "", "", "",false,false); parameters.push_back(psplitmethod);
 		CommandParameter plarge("large", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(plarge);
 		CommandParameter pshowabund("showabund", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pshowabund);
 		CommandParameter ptiming("timing", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(ptiming);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
-		CommandParameter pcutoff("cutoff", "Number", "", "10", "", "", "",false,false); parameters.push_back(pcutoff);
+		CommandParameter pcutoff("cutoff", "Number", "", "0.25", "", "", "",false,false); parameters.push_back(pcutoff);
 		CommandParameter pprecision("precision", "Number", "", "100", "", "", "",false,false); parameters.push_back(pprecision);
 		CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted", "average", "", "", "",false,false); parameters.push_back(pmethod);
 		CommandParameter phard("hard", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(phard);
@@ -60,12 +60,12 @@ string ClusterSplitCommand::getHelpString(){
 		helpString += "The phylip and column parameter allow you to enter your distance file. \n";
 		helpString += "The fasta parameter allows you to enter your aligned fasta file. \n";
 		helpString += "The name parameter allows you to enter your name file and is required if your distance file is in column format. \n";
-		helpString += "The cutoff parameter allow you to set the distance you want to cluster to, default is 10.0. \n";
+		helpString += "The cutoff parameter allow you to set the distance you want to cluster to, default is 0.25. \n";
 		helpString += "The precision parameter allows you specify the precision of the precision of the distances outputted, default=100, meaning 2 decimal places. \n";
 		helpString += "The method allows you to specify what clustering algorythm you want to use, default=average, option furthest, nearest, or average. \n";
 		helpString += "The splitmethod parameter allows you to specify how you want to split your distance file before you cluster, default=distance, options distance, classify or fasta. \n";
 		helpString += "The taxonomy parameter allows you to enter the taxonomy file for your sequences, this is only valid if you are using splitmethod=classify. Be sure your taxonomy file does not include the probability scores. \n";
-		helpString += "The taxlevel parameter allows you to specify the taxonomy level you want to use to split the distance file, default=1, meaning use the first taxon in each list. \n";
+		helpString += "The taxlevel parameter allows you to specify the taxonomy level you want to use to split the distance file, default=3, meaning use the first taxon in each list. \n";
 		helpString += "The large parameter allows you to indicate that your distance matrix is too large to fit in RAM.  The default value is false.\n";
 #ifdef USE_MPI
 		helpString += "When using MPI, the processors parameter is set to the number of MPI processes running. \n";
@@ -282,11 +282,11 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 				else {  splitmethod = temp; }
 			}
 			
-			temp = validParameter.validFile(parameters, "cutoff", false);		if (temp == "not found")  { temp = "10"; }
+			temp = validParameter.validFile(parameters, "cutoff", false);		if (temp == "not found")  { temp = "0.25"; }
 			convert(temp, cutoff); 
 			cutoff += (5 / (precision * 10.0));  
 			
-			temp = validParameter.validFile(parameters, "taxlevel", false);		if (temp == "not found")  { temp = "1"; }
+			temp = validParameter.validFile(parameters, "taxlevel", false);		if (temp == "not found")  { temp = "3"; }
 			convert(temp, taxLevelCutoff); 
 			
 			method = validParameter.validFile(parameters, "method", false);		if (method == "not found") { method = "average"; }

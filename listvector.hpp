@@ -3,7 +3,8 @@
 
 #include "datavector.hpp"
 
-/* This class is a child to datavector.  It represents OTU information at a certain distance. 
+/*	DataStructure for a list file.
+	This class is a child to datavector.  It represents OTU information at a certain distance. 
 	A list vector can be converted into and ordervector, rabundvector or sabundvector.
 	Each member of the internal container "data" represents an individual OTU.
 	So data[0] = "a,b,c,d,e,f".

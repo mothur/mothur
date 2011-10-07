@@ -3,7 +3,8 @@
 
 #include "datavector.hpp"
 
-/* This class is a child to datavector.  It represents OTU information at a certain distance. 
+/*  Data Structure for a rabund file.
+    This class is a child to datavector.  It represents OTU information at a certain distance. 
 	A rabundvector can be converted into and ordervector, listvector or sabundvector.
 	Each member of the internal container "data" represents an individual OTU.
 	So data[0] = 6, because there are six member in that OTU.

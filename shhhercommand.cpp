@@ -46,7 +46,7 @@ vector<string> ShhherCommand::setParameters(){
 string ShhherCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The shhh.seqs command reads a file containing flowgrams and creates a file of corrected sequences.\n";
+		helpString += "The shhh.flows command reads a file containing flowgrams and creates a file of corrected sequences.\n";
 		return helpString;
 	}
 	catch(exception& e) {

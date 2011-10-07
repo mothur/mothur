@@ -63,6 +63,7 @@ SequenceParser::SequenceParser(string groupFile, string fastaFile, string nameFi
 		
 		string first, second;
 		int countName = 0;
+		set<string> thisnames1;
 		while(!inName.eof()) {
 			
 			if (m->control_pressed) { break; }
@@ -94,10 +95,12 @@ SequenceParser::SequenceParser(string groupFile, string fastaFile, string nameFi
 					it = splitMap.find(group);
 					if (it != splitMap.end()) { //adding seqs to this group
 						(it->second) += "," + names[i];
+						thisnames1.insert(names[i]);
 						countName++;
 					}else { //first sighting of this group
 						splitMap[group] = names[i];
 						countName++;
+						thisnames1.insert(names[i]);
 						
 						//is this seq in the fasta file?
 						if (i != 0) { //if not then we need to add a duplicate sequence to the seqs for this group so the new "fasta" and "name" files will match
@@ -131,6 +134,13 @@ SequenceParser::SequenceParser(string groupFile, string fastaFile, string nameFi
 		if (error == 1) { m->control_pressed = true; }
 		
 		if (countName != (groupMap->getNumSeqs())) {
+			vector<string> groupseqsnames = groupMap->getNamesSeqs();
+			for (int i = 0; i < groupseqsnames.size(); i++) {
+				set<string>::iterator itnamesfile = thisnames1.find(groupseqsnames[i]);
+				if (itnamesfile == thisnames1.end()){
+					cout << "missing name " + groupseqsnames[i] << '\t' << allSeqsMap[groupseqsnames[i]] << endl;
+				}
+			}
 			m->mothurOutEndLine();
 			m->mothurOut("[ERROR]: Your name file contains " + toString(countName) + " valid sequences, and your groupfile contains " + toString(groupMap->getNumSeqs()) + ", please correct.");
 			m->mothurOutEndLine();

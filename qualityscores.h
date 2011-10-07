@@ -10,6 +10,8 @@
  *
  */
 
+//DataStructure for a quality file.
+
 
 #include "mothur.h"
 #include "mothurout.h"
