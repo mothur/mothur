@@ -32,7 +32,7 @@ EstOutput Canberra::getValues(vector<SharedRAbundVector*> shared) {
 			}
 		}
 		
-		data[0] = (1 / (float) numSharedOTUS) * sum;
+		data[0] = (1 / (float) shared[0]->getNumBins()) * sum;
 		
 		if (isnan(data[0]) || isinf(data[0])) { data[0] = 0; }
 		
