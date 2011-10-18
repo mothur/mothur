@@ -277,10 +277,11 @@ int UnifracWeightedCommand::execute() {
 			
 		util = new SharedUtil();
 		string s; //to make work with setgroups
-		vector<string> Groups = m->getGroups();
+		Groups = m->getGroups();
 		vector<string> nameGroups = tmap->getNamesOfGroups();
 		util->setGroups(Groups, nameGroups, s, numGroups, "weighted");	//sets the groups the user wants to analyze
 		util->getCombos(groupComb, Groups, numComp);
+		m->setGroups(Groups);
 		delete util;
 		
 		weighted = new Weighted(tmap, includeRoot);

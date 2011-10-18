@@ -282,10 +282,11 @@ int UnifracUnweightedCommand::execute() {
 		m->openOutputFile(sumFile, outSum);
 		
 		util = new SharedUtil();
-		vector<string> Groups = m->getGroups();
+		Groups = m->getGroups();
 		vector<string> namesGroups = tmap->getNamesOfGroups();
 		util->setGroups(Groups, namesGroups, allGroups, numGroups, "unweighted");	//sets the groups the user wants to analyze
 		util->getCombos(groupComb, Groups, numComp);
+		m->setGroups(Groups);
 		delete util;
 	
 		if (numGroups == 1) { numComp++; groupComb.push_back(allGroups); }

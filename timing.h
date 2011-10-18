@@ -1,5 +1,3 @@
-//uchime by Robert C. Edgar http://drive5.com/uchime This code is donated to the public domain.
-
 #define TIMING 0
 #ifndef timing_h
 #define timing_h
@@ -11,10 +9,10 @@
 #define BG_TIMING	0
 #endif
 
-//#if	UCHIMES
+#if	UCHIMES
 #undef TIMING
 #define TIMING	0
-//#endif
+#endif
 
 #if TIMING
 
@@ -59,29 +57,30 @@ const unsigned AllocerCount =
 #undef A
 	;
 
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-typedef uint64_t TICKS;
-__inline__ uint64_t GetClockTicks()
-{
-	uint32_t lo, hi;
-	/* We cannot use "=A", since this would use %rax on x86_64 */
-	__asm__ __volatile__ ("rdtsc" : "=a" (lo), "=d" (hi));
-	return (uint64_t)hi << 32 | lo;
-}
+#ifdef _MSC_VER
 
-
-#else	// ifdef _MSC_VER
 typedef unsigned __int64 TICKS;
 
 #pragma warning(disable:4035)
 inline TICKS GetClockTicks()
-{
-	_asm
 	{
+	_asm
+		{
 		_emit	0x0f
 		_emit	0x31
+		}
 	}
-}
+
+#else	// ifdef _MSC_VER
+
+typedef uint64_t TICKS;
+__inline__ uint64_t GetClockTicks()
+	{
+	uint32_t lo, hi;
+	/* We cannot use "=A", since this would use %rax on x86_64 */
+	__asm__ __volatile__ ("rdtsc" : "=a" (lo), "=d" (hi));
+	return (uint64_t)hi << 32 | lo;
+	}
 
 #endif	// ifdef _MSC_VER
 

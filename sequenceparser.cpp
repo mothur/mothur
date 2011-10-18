@@ -7,7 +7,7 @@
  *
  */
 
-#include "sequenceParser.h"
+#include "sequenceparser.h"
 
 
 /************************************************************/

@@ -76,7 +76,7 @@ ChimeraSlayer::ChimeraSlayer(string file, string temp, bool trim, map<string, in
 		createFilter(templateSeqs, 0.0); //just removed columns where all seqs have a gap
 		
 		if (searchMethod == "distance") { 
-			createFilter(templateSeqs, 0.0); //just removed columns where all seqs have a gap
+			//createFilter(templateSeqs, 0.0); //just removed columns where all seqs have a gap
 			
 			//run filter on template copying templateSeqs into filteredTemplateSeqs
 			for (int i = 0; i < templateSeqs.size(); i++) {  
@@ -382,7 +382,7 @@ Sequence ChimeraSlayer::print(ostream& out, ostream& outAcc) {
 			
 			if (chimeraFlag == "yes") {	
 				if ((chimeraResults[0].bsa >= minBS) || (chimeraResults[0].bsb >= minBS)) {
-					m->mothurOut(querySeq.getName() + "\tyes"); m->mothurOutEndLine();
+					m->mothurOut(toString(threadID) +"\t"+ querySeq.getName() + "\tyes"); m->mothurOutEndLine();
 					outAcc << querySeq.getName() << endl;
 					
 					if (templateFileName == "self") {  chimericSeqs.insert(querySeq.getName()); }

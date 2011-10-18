@@ -148,7 +148,7 @@ int PhyloSummary::addSeqToTree(string seqName, string seqTaxonomy){
 					//find out the sequences group
 					string group = groupmap->getGroup(seqName);
 					
-					if (group == "not found") {  m->mothurOut(seqName + " is not in your groupfile, and will be included in the overall total, but not any group total."); m->mothurOutEndLine();  }
+					if (group == "not found") {  m->mothurOut("[WARNING]: " + seqName + " is not in your groupfile, and will be included in the overall total, but not any group total."); m->mothurOutEndLine();  }
 					
 					//do you have a count for this group?
 					map<string, int>::iterator itGroup = tree[childPointer->second].groupCount.find(group);
@@ -183,7 +183,7 @@ int PhyloSummary::addSeqToTree(string seqName, string seqTaxonomy){
 						//find out the sequences group
 						string group = groupmap->getGroup(seqName);
 						
-						if (group == "not found") {  m->mothurOut(seqName + " is not in your groupfile, and will be included in the overall total, but not any group total."); m->mothurOutEndLine();  }
+						if (group == "not found") {  m->mothurOut("[WARNING]: " + seqName + " is not in your groupfile, and will be included in the overall total, but not any group total."); m->mothurOutEndLine();  }
 						
 						//do you have a count for this group?
 						map<string, int>::iterator itGroup = tree[index].groupCount.find(group);
@@ -254,7 +254,7 @@ int PhyloSummary::addSeqToTree(string seqTaxonomy, vector<string> names){
 						//find out the sequences group
 						string group = groupmap->getGroup(names[k]);
 					
-						if (group == "not found") {  m->mothurOut(names[k] + " is not in your groupfile, and will be included in the overall total, but not any group total."); m->mothurOutEndLine();  }
+						if (group == "not found") {  m->mothurOut("[WARNING]: " + names[k] + " is not in your groupfile, and will be included in the overall total, but not any group total."); m->mothurOutEndLine();  }
 						else {
 							containsGroup[group] = true;
 						}
@@ -296,7 +296,7 @@ int PhyloSummary::addSeqToTree(string seqTaxonomy, vector<string> names){
 							//find out the sequences group
 							string group = groupmap->getGroup(names[k]);
 							
-							if (group == "not found") {  m->mothurOut(names[k] + " is not in your groupfile, and will be included in the overall total, but not any group total."); m->mothurOutEndLine();  }
+							if (group == "not found") {  m->mothurOut("[WARNING]: " + names[k] + " is not in your groupfile, and will be included in the overall total, but not any group total."); m->mothurOutEndLine();  }
 							else {
 								containsGroup[group] = true;
 							}

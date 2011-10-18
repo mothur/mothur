@@ -313,13 +313,7 @@ int ListSeqsCommand::readList(){
 				
 				if (m->control_pressed) { in.close(); return 0; }
 				
-				while (binnames.find_first_of(',') != -1) { 
-					string name = binnames.substr(0,binnames.find_first_of(','));
-					binnames = binnames.substr(binnames.find_first_of(',')+1, binnames.length());
-					names.push_back(name);
-				}
-			
-				names.push_back(binnames);
+				m->splitAtComma(binnames, names);
 			}
 		}
 		in.close();	
@@ -349,14 +343,7 @@ int ListSeqsCommand::readName(){
 			in >> secondCol;			
 			
 			//parse second column saving each name
-			while (secondCol.find_first_of(',') != -1) { 
-				name = secondCol.substr(0,secondCol.find_first_of(','));
-				secondCol = secondCol.substr(secondCol.find_first_of(',')+1, secondCol.length());
-				names.push_back(name);
-			}
-			
-			//get name after last ,
-			names.push_back(secondCol);
+			m->splitAtComma(secondCol, names);
 			
 			m->gobble(in);
 		}

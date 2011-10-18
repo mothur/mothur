@@ -1,5 +1,3 @@
-//uchime by Robert C. Edgar http://drive5.com/uchime This code is donated to the public domain.
-
 #ifndef out_h
 #define out_h
 

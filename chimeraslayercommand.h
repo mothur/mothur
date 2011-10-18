@@ -54,7 +54,7 @@ private:
 	int setupChimera(string, map<string, int>&);
 	int MPIExecute(string, string, string, string);
 	int deconvoluteResults(SequenceParser*, string, string, string);
-	
+	map<string, int> priority;
 
 		
 	#ifdef USE_MPI

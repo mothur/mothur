@@ -9,7 +9,7 @@
 
 #include "chimerauchimecommand.h"
 #include "deconvolutecommand.h"
-#include "uc.h"
+//#include "uc.h"
 #include "sequence.hpp"
 #include "referencedb.h"
 
@@ -453,7 +453,25 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 			
 			if (hasName && (templatefile != "self")) { m->mothurOut("You have provided a namefile and the reference parameter is not set to self. I am not sure what reference you are trying to use, aborting."); m->mothurOutEndLine(); abort=true; }
 			if (hasGroup && (templatefile != "self")) { m->mothurOut("You have provided a group file and the reference parameter is not set to self. I am not sure what reference you are trying to use, aborting."); m->mothurOutEndLine(); abort=true; }
-
+			
+			//look for uchime exe
+			path = m->argv;
+			string tempPath = path;
+			for (int i = 0; i < path.length(); i++) { tempPath[i] = tolower(path[i]); }
+			path = path.substr(0, (tempPath.find_last_of('m')));
+			
+			string uchimeCommand;
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			uchimeCommand = path + "uchime";	//	format the database, -o option gives us the ability
+#else
+			uchimeCommand = path + "uchime.exe";
+#endif
+			
+			//test to make sure uchime exists
+			ifstream in;
+			uchimeCommand = m->getFullPathName(uchimeCommand);
+			int ableToOpen = m->openInputFile(uchimeCommand, in, "no error"); in.close();
+			if(ableToOpen == 1) {	m->mothurOut("[ERROR]: " + uchimeCommand + " file does not exist. mothur requires the uchime executable."); m->mothurOutEndLine(); abort = true; }
 		}
 	}
 	catch(exception& e) {
@@ -964,11 +982,23 @@ int ChimeraUchimeCommand::driverGroups(SequenceParser& parser, string outputFNam
 
 int ChimeraUchimeCommand::driver(string outputFName, string filename, string accnos, string alns, int& numChimeras){
 	try {
-		
+		//to allow for spaces in the path
+		outputFName = "\"" + outputFName + "\"";
+		filename = "\"" + filename + "\"";
+		alns = "\"" + alns + "\"";
+				
 		vector<char*> cPara;
-		
-		char* tempUchime = new char[8];  
-		strcpy(tempUchime, "./uchime "); 
+	
+		char* tempUchime;
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		tempUchime= new char[10];  
+		*tempUchime = '\0';
+		strncat(tempUchime, "./uchime ", 9); 
+#else
+		tempUchime= new char[8]; 
+		*tempUchime = '\0';
+		strncat(tempUchime, "uchime ", 7); 
+#endif
 		cPara.push_back(tempUchime);
 		
 		char* tempIn = new char[8]; 
@@ -1190,14 +1220,22 @@ int ChimeraUchimeCommand::driver(string outputFName, string filename, string acc
 		
 		char** uchimeParameters;
 		uchimeParameters = new char*[cPara.size()];
-		for (int i = 0; i < cPara.size(); i++) {  uchimeParameters[i] = cPara[i];  } 
-		int numArgs = cPara.size();
+		string commandString = "";
+		for (int i = 0; i < cPara.size(); i++) {  uchimeParameters[i] = cPara[i];  commandString += toString(cPara[i]) + " "; } 
+		//int numArgs = cPara.size();
 		
-		uchime_main(numArgs, uchimeParameters); 
+		//uchime_main(numArgs, uchimeParameters); 
+		//cout << "commandString = " << commandString << endl;
+		system(commandString.c_str());
 		
 		//free memory
-		for(int i = 0; i < cPara.size(); i++)  {  delete[] cPara[i];  }
+		for(int i = 0; i < cPara.size(); i++)  {  delete cPara[i];  }
 		delete[] uchimeParameters; 
+		
+		//remove "" from filenames
+		outputFName = outputFName.substr(1, outputFName.length()-2);
+		filename = filename.substr(1, filename.length()-2);
+		alns = alns.substr(1, alns.length()-2);
 		
 		if (m->control_pressed) { return 0; }
 		

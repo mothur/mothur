@@ -14,12 +14,12 @@ USEMPI ?= no
 USEREADLINE ?= yes
 CYGWIN_BUILD ?= no
 USECOMPRESSION ?= no
-MOTHUR_FILES="\"/Users/Sarahswork/desktop/release\""
-RELEASE_DATE = "\"7/25/2011\""
-VERSION = "\"1.21.0\""
+MOTHUR_FILES="\"Enter_your_default_path_here\""
+RELEASE_DATE = "\"10/18/2011\""
+VERSION = "\"1.22.0\""
 
 # Optimize to level 3:
-CXXFLAGS += -03 -g
+CXXFLAGS += -O3
 
 ifeq  ($(strip $(64BIT_VERSION)),yes)
 	#if you are using centos uncomment the following lines
@@ -90,10 +90,13 @@ endif
 OBJECTS=$(patsubst %.cpp,%.o,$(wildcard *.cpp))
 OBJECTS+=$(patsubst %.c,%.o,$(wildcard *.c))
 
-mothur : $(OBJECTS)
+mothur : $(OBJECTS) uchime
 	$(CXX) $(LDFLAGS) $(TARGET_ARCH) -o $@ $(OBJECTS) $(LIBS)
 	
 	strip mothur
+
+uchime:
+	cd uchime_src && ./mk && mv uchime .. && cd ..
 
 install : mothur
 #	cp mothur ../Release/mothur
@@ -108,4 +111,5 @@ install : mothur
 
 clean :
 	@rm -f $(OBJECTS)
+	@rm -f uchime
 
