@@ -1,4 +1,4 @@
-#if	UCHIMES
+//#if	UCHIMES
 
 #include "dp.h"
 #include "seq.h"
@@ -42,4 +42,4 @@ bool GlobalAlign(const SeqData &Query, const SeqData &Target, const AlnParams &/
 	return true;
 	}
 
-#endif // UCHIMES
+//#endif // UCHIMES
