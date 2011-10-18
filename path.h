@@ -1,5 +1,3 @@
-//uchime by Robert C. Edgar http://drive5.com/uchime This code is donated to the public domain.
-
 #ifndef path_h
 #define path_h
 

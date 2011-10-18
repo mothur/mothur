@@ -1,5 +1,3 @@
-//uchime by Robert C. Edgar http://drive5.com/uchime This code is donated to the public domain.
-
 #include <time.h>
 #include <stdarg.h>
 #include <sys/stat.h>
@@ -13,19 +11,19 @@
 #include <signal.h>
 #include <float.h>
 
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#ifdef _MSC_VER
+#include <crtdbg.h>
+#include <process.h>
+#include <windows.h>
+#include <psapi.h>
+#include <io.h>
+#else
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <unistd.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <stdlib.h>
-#else
-//#include <crtdbg.h>
-#include <process.h>
-#include <windows.h>
-#include <psapi.h>
-#include <io.h>
 #endif
 
 #include "myutils.h"
@@ -141,24 +139,14 @@ bool myisatty(int fd)
 	return isatty(fd) != 0;
 	}
 
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-#else
-//#ifdef BIT_VERSION
-//#include <io.h>
-//int fseeko(FILE *stream, off_t offset, int whence)
-////	{
-//	off_t FilePos = _fseeki64(stream, offset, whence);
-//	return (FilePos == -1L) ? -1 : 0;
-//	}
-//#define ftello(fm) (off_t) _ftelli64(fm)
-//#else 
+#ifdef _MSC_VER
+#include <io.h>
 int fseeko(FILE *stream, off_t offset, int whence)
-{
-	off_t FilePos = fseek(stream, offset, whence);
+	{
+	off_t FilePos = _fseeki64(stream, offset, whence);
 	return (FilePos == -1L) ? -1 : 0;
-}
-#define ftello(fm) (off_t) ftell(fm)
-//#endif
+	}
+#define ftello(fm) (off_t) _ftelli64(fm)
 #endif
 
 void LogStdioFileState(FILE *f)
@@ -178,16 +166,9 @@ void LogStdioFileState(FILE *f)
 	Log("fpos       %ld (retval %d)\n", (long) fpos, fgetpos_retval);
 //	Log("eof        %d\n", _eof(fd));
 #endif
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-#else
-#ifdef BIT_VERSION
+#ifdef _MSC_VER
 	__int64 pos64 = _ftelli64(f);
 	Log("_ftelli64  %lld\n", pos64);
-#else
-	__int32 pos32 = ftell(f);
-	Log("ftell  %lld\n", pos32);
-		
-#endif
 #endif
 	}
 
@@ -513,8 +494,7 @@ off_t GetStdioFilePos(FILE *f)
 off_t GetStdioFileSize(FILE *f)
 	{
 	off_t CurrentPos = GetStdioFilePos(f);
-	off_t zeroPos = 0;
-	int Ok = fseeko(f, zeroPos, SEEK_END);
+	int Ok = fseeko(f, 0, SEEK_END);
 	if (Ok < 0)
 		Die("fseek in GetFileSize");
 
@@ -614,11 +594,10 @@ void Die(const char *Format, ...)
 	fprintf(stderr, "\n---Fatal error---\n%s\n", szStr);
 	Log("\n---Fatal error---\n%s\n", szStr);
 
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-#else
-	//if (IsDebuggerPresent())
- 	//	__debugbreak();
-	//_CrtSetDbgFlag(0);
+#ifdef _MSC_VER
+	if (IsDebuggerPresent())
+ 		__debugbreak();
+	_CrtSetDbgFlag(0);
 #endif
 
 	exit(1);
@@ -643,7 +622,20 @@ void Warning(const char *Format, ...)
 		}
 	}
 
-#if defined linux || __linux__
+#ifdef _MSC_VER
+double GetMemUseBytes()
+	{
+	HANDLE hProc = GetCurrentProcess();
+	PROCESS_MEMORY_COUNTERS PMC;
+	BOOL bOk = GetProcessMemoryInfo(hProc, &PMC, sizeof(PMC));
+	if (!bOk)
+		return 1000000;
+	double Bytes = (double) PMC.WorkingSetSize;
+	if (Bytes > g_PeakMemUseBytes)
+		g_PeakMemUseBytes = Bytes;
+	return Bytes;
+	}
+#elif	linux || __linux__
 double GetMemUseBytes()
 	{
 	static char statm[64];
@@ -674,7 +666,7 @@ double GetMemUseBytes()
 		g_PeakMemUseBytes = Bytes;
 	return Bytes;
 	}
-#elif defined(__APPLE__) || (__MACH__)
+#elif defined(__MACH__)
 #include <memory.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -715,9 +707,9 @@ double GetMemUseBytes()
 	}
 #else
 double GetMemUseBytes()
-{
+	{
 	return 0;
-}
+	}
 #endif
 
 double GetPeakMemUseBytes()
@@ -955,7 +947,7 @@ void ProgressExit()
 // Skip exit(), which can be very slow in DEBUG build
 // VERY DANGEROUS practice, because it skips global destructors.
 // But if you know the rules, you can break 'em, right?
-	//ExitProcess(0);
+	ExitProcess(0);
 #endif
 	}
 
@@ -1207,8 +1199,7 @@ static void AddOpt(const OptInfo &Opt)
 	g_Opts.insert(Opt);
 	}
 
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-#else
+#ifdef _MSC_VER
 #pragma warning(disable: 4505) // unreferenced local function
 #endif
 
@@ -1532,7 +1523,6 @@ static void GetArgsFromFile(const string &FileName, vector<string> &Args)
 
 void MyCmdLine(int argc, char **argv)
 	{
-	g_Opts.clear(); g_Argv.clear();
 	static unsigned RecurseDepth = 0;
 	++RecurseDepth;
 
@@ -1563,9 +1553,9 @@ void MyCmdLine(int argc, char **argv)
 	if (RecurseDepth == 0)
 		g_Argv.clear();
 
-	for (int i = 0; i < argc; ++i) 
+	for (int i = 0; i < argc; ++i) {
 		g_Argv.push_back(string(argv[i]));
-	
+	}
 
 	int i = 1;
 	for (;;)
@@ -1573,7 +1563,7 @@ void MyCmdLine(int argc, char **argv)
 		if (i >= argc)
 			break;
 		const string &Arg = g_Argv[i];
-		
+			
 		if (Arg.empty())
 			continue;
 		else if (Arg == "file:" && i + 1 < argc)

@@ -1,5 +1,3 @@
-//uchime by Robert C. Edgar http://drive5.com/uchime This code is donated to the public domain.
-
 #ifndef myutils_h
 #define myutils_h
 
@@ -16,32 +14,30 @@
 #include <cstdlib>
 #include <climits>
 
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-#else
+#ifndef _MSC_VER
 #include <inttypes.h>
 #endif
 
 using namespace std;
 
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-#else
-//#include <crtdbg.h>
+#ifdef _MSC_VER
+#include <crtdbg.h>
 #pragma warning(disable: 4996)	// deprecated functions
 #define _CRT_SECURE_NO_DEPRECATE	1
 #endif
 
-//#if defined(_DEBUG) && !defined(DEBUG)
+#if defined(_DEBUG) && !defined(DEBUG)
 #define DEBUG	1
-//#endif
+#endif
 
-//#if defined(DEBUG) && !defined(_DEBUG)
+#if defined(DEBUG) && !defined(_DEBUG)
 #define _DEBUG	1
-//#endif
+#endif
 
-//#ifndef NDEBUG
+#ifndef NDEBUG
 #define	DEBUG	1
 #define	_DEBUG	1
-//#endif
+#endif
 
 typedef unsigned char byte;
 typedef unsigned short uint16;
@@ -51,10 +47,10 @@ typedef double float32;
 typedef signed char int8;
 typedef unsigned char uint8;
 
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#ifdef _MSC_VER
 
-typedef long long int64;
-typedef unsigned long long uint64;
+typedef __int64 int64;
+typedef unsigned __int64 uint64;
 
 #define INT64_PRINTF		"lld"
 #define UINT64_PRINTF		"llu"
@@ -67,7 +63,6 @@ typedef unsigned long long uint64;
 
 #define SIZE_T_PRINTFX		"x"
 #define OFF64_T_PRINTFX		"llx"
-
 
 #elif defined(__x86_64__)
 
@@ -88,8 +83,8 @@ typedef unsigned long uint64;
 
 #else
 
-typedef __int64 int64;
-typedef unsigned __int64 uint64;
+typedef long long int64;
+typedef unsigned long long uint64;
 
 #define INT64_PRINTF		"lld"
 #define UINT64_PRINTF		"llu"
@@ -102,7 +97,6 @@ typedef unsigned __int64 uint64;
 
 #define SIZE_T_PRINTFX		"x"
 #define OFF64_T_PRINTFX		"llx"
-
 #endif
 
 #define d64		INT64_PRINTF
@@ -164,8 +158,7 @@ void myfree(void *p);
 
 bool myisatty(int fd);
 
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-#else
+#ifdef _MSC_VER
 #define off_t	__int64
 #endif
 

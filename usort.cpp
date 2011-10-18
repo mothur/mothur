@@ -1,5 +1,5 @@
-//#if	UCHIMES
-//uchime by Robert C. Edgar http://drive5.com/uchime This code is donated to the public domain.
+#if	UCHIMES
+
 #include "myutils.h"
 #include "seqdb.h"
 #include "seq.h"
@@ -83,4 +83,4 @@ void USort(const SeqData &Query, const SeqDB &DB, vector<float> &WordCounts,
 	SortDescending(WordCounts, Order);
 	}
 
-//#endif // UCHIMES
+#endif // UCHIMES

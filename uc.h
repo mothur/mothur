@@ -1,5 +1,3 @@
-//uchime by Robert C. Edgar http://drive5.com/uchime This code is donated to the public domain.
-
 #ifndef uc_h
 #define uc_h
 
@@ -9,7 +7,7 @@
 
 struct AlnData;
 
-int uchime_main(int, char**);  
+int uchime_main(int, char**); 
 
 class UCFile
 	{
@@ -29,9 +27,6 @@ public:
 	vector<unsigned> m_SeedLos;
 
 public:
-	/* some function prototypes */
-	
-		
 	UCFile();
 	void Clear(bool ctor = false);
 	void Close();

@@ -376,12 +376,16 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 			temp = validParameter.validFile(parameters, "ksize", false);		if (temp == "not found"){	temp = "8";				}
 			convert(temp, kmerSize); 
 			
+			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
+			m->setProcessors(temp);
+			convert(temp, processors); 
+			
 			temp = validParameter.validFile(parameters, "save", false);			if (temp == "not found"){	temp = "f";				}
 			save = m->isTrue(temp); 
 			//this is so the threads can quickly load the reference data
 			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 			#else
-			if (processors != 1) { save = true; }
+			if ((processors != 1) && (rdb->referenceSeqs.size() == 0)) { save = true; }
 			#endif
 			rdb->save = save; 
 			if (save) { //clear out old references
@@ -415,10 +419,6 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 				}
 			}else if (taxonomyFileName == "not open") { abort = true; }	
 			else {	if (save) {	rdb->setSavedTaxonomy(taxonomyFileName);	}	}
-			
-			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
-			m->setProcessors(temp);
-			convert(temp, processors); 
 			
 			search = validParameter.validFile(parameters, "search", false);		if (search == "not found"){	search = "kmer";		}
 			

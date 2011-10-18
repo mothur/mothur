@@ -1,5 +1,3 @@
-//uchime by Robert C. Edgar http://drive5.com/uchime This code is donated to the public domain.
-
 #ifndef MY_VERSION
 #define MY_VERSION	"4.2"
 #endif

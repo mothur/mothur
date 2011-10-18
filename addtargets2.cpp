@@ -1,5 +1,5 @@
-//#if	UCHIMES
-//uchime by Robert C. Edgar http://drive5.com/uchime This code is donated to the public domain.
+#if	UCHIMES
+
 #include "myutils.h"
 #include "chime.h"
 #include "ultra.h"
@@ -35,4 +35,4 @@ void AddTargets(SeqDB &DB, const SeqData &Query, set<unsigned> &TargetIndexes)
 		}
 	}
 
-//#endif
+#endif

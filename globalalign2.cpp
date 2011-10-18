@@ -1,5 +1,5 @@
-//#if	UCHIMES
-//uchime by Robert C. Edgar http://drive5.com/uchime This code is donated to the public domain.
+#if	UCHIMES
+
 #include "dp.h"
 #include "seq.h"
 
@@ -42,4 +42,4 @@ bool GlobalAlign(const SeqData &Query, const SeqData &Target, const AlnParams &/
 	return true;
 	}
 
-//#endif // UCHIMES
+#endif // UCHIMES

@@ -532,6 +532,11 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 			if (hasName && (templatefile != "self")) { m->mothurOut("You have provided a namefile and the reference parameter is not set to self. I am not sure what reference you are trying to use, aborting."); m->mothurOutEndLine(); abort=true; }
 			if (hasGroup && (templatefile != "self")) { m->mothurOut("You have provided a group file and the reference parameter is not set to self. I am not sure what reference you are trying to use, aborting."); m->mothurOutEndLine(); abort=true; }
 
+			//until we resolve the issue 10-18-11
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#else
+			processors=1;
+#endif
 		}
 	}
 	catch(exception& e) {
@@ -561,7 +566,6 @@ int ChimeraSlayerCommand::execute(){
 			map<string, map<string, int> > fileToPriority; 
 			map<string, map<string, int> >::iterator itFile;
 			map<string, string> fileGroup;
-			map<string, int> priority;
 			fileToPriority[fastaFileNames[s]] = priority; //default
 			fileGroup[fastaFileNames[s]] = "noGroup";
 			SequenceParser* parser = NULL;
@@ -582,11 +586,15 @@ int ChimeraSlayerCommand::execute(){
 				priority = sortFastaFile(fastaFileNames[s], nameFile);
 				m->mothurOut("Done."); m->mothurOutEndLine();
 				
+				fileToPriority.clear();
+				fileGroup.clear();
 				fileToPriority[fastaFileNames[s]] = priority;
+				fileGroup[fastaFileNames[s]] = "noGroup";
 				if (m->control_pressed) {  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}
 			}else if ((templatefile == "self") && (groupFile != "")) {
 				fileGroup.clear();
 				fileToPriority.clear();
+				if (processors != 1) { m->mothurOut("When using template=self, mothur can only use 1 processor, continuing."); m->mothurOutEndLine(); processors = 1; }
 				string nameFile = "";
 				if (nameFileNames.size() != 0) { //you provided a namefile and we don't need to create one
 					nameFile = nameFileNames[s];
@@ -978,7 +986,7 @@ int ChimeraSlayerCommand::deconvoluteResults(SequenceParser* parser, string outp
 					
 					if (print) {
 						out << name << '\t';
-						cout << name<< endl;
+						
 						namesInFile.insert(name);
 
 						//output parent1's name
@@ -1406,7 +1414,7 @@ int ChimeraSlayerCommand::createProcesses(string outputFileName, string filename
 			pDataArray.push_back(tempslayer);
 			processIDS.push_back(i);
 			
-			//MySeqSumThreadFunction is in header. It must be global or static to work with the threads.
+			//MySlayerThreadFunction is in header. It must be global or static to work with the threads.
 			//default security attributes, thread function name, argument to thread function, use default creation flags, returns the thread identifier
 			hThreadArray[i] = CreateThread(NULL, 0, MySlayerThreadFunction, pDataArray[i], 0, &dwThreadIdArray[i]);   
 		}
