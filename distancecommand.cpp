@@ -289,11 +289,11 @@ int DistanceCommand::execute(){
 				
 				driverMPI(start, end, outMPI, cutoff); 
 				
-				if (m->control_pressed) { outputTypes.clear(); MPI_File_close(&outMPI); delete distCalculator;  return 0; }
+				if (m->control_pressed) { outputTypes.clear(); MPI_File_close(&outMPI);   return 0; }
 			
 				//wait on chidren
 				for(int i = 1; i < processors; i++) { 
-					if (m->control_pressed) { outputTypes.clear();  MPI_File_close(&outMPI);  delete distCalculator;  return 0; }
+					if (m->control_pressed) { outputTypes.clear();  MPI_File_close(&outMPI);    return 0; }
 					
 					char buf[5];
 					MPI_Recv(buf, 5, MPI_CHAR, i, tag, MPI_COMM_WORLD, &status); 
@@ -302,7 +302,7 @@ int DistanceCommand::execute(){
 				//do your part
 				driverMPI(start, end, outMPI, cutoff); 
 				
-				if (m->control_pressed) { outputTypes.clear();  MPI_File_close(&outMPI);  delete distCalculator;  return 0; }
+				if (m->control_pressed) { outputTypes.clear();  MPI_File_close(&outMPI);   return 0; }
 			
 				char buf[5];
 				strcpy(buf, "done"); 
@@ -322,7 +322,7 @@ int DistanceCommand::execute(){
 				if (output != "square"){ driverMPI(start, end, outputFile, mySize); }
 				else { driverMPI(start, end, outputFile, mySize, output); }
 	
-				if (m->control_pressed) {  outputTypes.clear();  delete distCalculator;  return 0; }
+				if (m->control_pressed) {  outputTypes.clear();   return 0; }
 				
 				int amode=MPI_MODE_APPEND|MPI_MODE_WRONLY|MPI_MODE_CREATE; //
 				MPI_File outMPI;
@@ -341,7 +341,7 @@ int DistanceCommand::execute(){
 				for(int b = 1; b < processors; b++) { 
 					unsigned long long fileSize;
 					
-					if (m->control_pressed) { outputTypes.clear();  MPI_File_close(&outMPI);  delete distCalculator;  return 0; }
+					if (m->control_pressed) { outputTypes.clear();  MPI_File_close(&outMPI);   return 0; }
 					
 					MPI_Recv(&fileSize, 1, MPI_LONG, b, tag, MPI_COMM_WORLD, &status); 
 					
@@ -371,7 +371,7 @@ int DistanceCommand::execute(){
 				if (output != "square"){ driverMPI(start, end, (outputFile + toString(pid) + ".temp"), size); }
 				else { driverMPI(start, end, (outputFile + toString(pid) + ".temp"), size, output); }
 				
-				if (m->control_pressed) { delete distCalculator;  return 0; }
+				if (m->control_pressed) {  return 0; }
 			
 				//tell parent you are done.
 				MPI_Send(&size, 1, MPI_LONG, 0, tag, MPI_COMM_WORLD);
