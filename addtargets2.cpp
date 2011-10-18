@@ -1,4 +1,4 @@
-#if	UCHIMES
+//#if	UCHIMES
 
 #include "myutils.h"
 #include "chime.h"
@@ -35,4 +35,4 @@ void AddTargets(SeqDB &DB, const SeqData &Query, set<unsigned> &TargetIndexes)
 		}
 	}
 
-#endif
+//#endif

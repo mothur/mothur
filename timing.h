@@ -9,10 +9,10 @@
 #define BG_TIMING	0
 #endif
 
-#if	UCHIMES
+//#if	UCHIMES
 #undef TIMING
 #define TIMING	0
-#endif
+//#endif
 
 #if TIMING
 
