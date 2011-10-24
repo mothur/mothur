@@ -891,10 +891,10 @@ int MothurOut::renameFile(string oldName, string newName){
 	try {
 		ifstream inTest;
 		int exist = openInputFile(newName, inTest, "");
+		inTest.close();
 		
 	#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)		
 		if (exist == 0) { //you could open it so you want to delete it
-			inTest.close();
 			string command = "rm " + newName;
 			system(command.c_str());
 		}
