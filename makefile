@@ -31,7 +31,7 @@ ifeq  ($(strip $(64BIT_VERSION)),yes)
 	#if you using cygwin to build Windows the following line
 	#CXX = x86_64-w64-mingw32-g++
 	#CC = x86_64-w64-mingw32-g++
- 	#TARGET_ARCH += -m64
+ 	#TARGET_ARCH += -m64 -static
 
 	#if you are a linux user use the following line
 	#CXXFLAGS += -mtune=native -march=native -m64

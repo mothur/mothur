@@ -1344,7 +1344,7 @@ int ChimeraUchimeCommand::createProcesses(string outputFileName, string filename
 		
 		
 		//append output files
-		for(int i=0;i<processIDS[i];i++){
+		for(int i=0;i<processIDS.size();i++){
 			m->appendFiles((outputFileName + toString(processIDS[i]) + ".temp"), outputFileName);
 			m->mothurRemove((outputFileName + toString(processIDS[i]) + ".temp"));
 			
@@ -1436,7 +1436,7 @@ int ChimeraUchimeCommand::createProcessesGroups(SequenceParser& parser, string o
 		
 		
 		//append output files
-		for(int i=0;i<processIDS[i];i++){
+		for(int i=0;i<processIDS.size();i++){
 			m->appendFiles((outputFName + toString(processIDS[i]) + ".temp"), outputFName);
 			m->mothurRemove((outputFName + toString(processIDS[i]) + ".temp"));
 			

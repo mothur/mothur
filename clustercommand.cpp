@@ -11,6 +11,7 @@
 #include "readphylip.h"
 #include "readcolumn.h"
 #include "readmatrix.hpp"
+#include "clusterdoturcommand.h"
 
 //**********************************************************************************************************************
 vector<string> ClusterCommand::setParameters(){	
@@ -207,7 +208,7 @@ ClusterCommand::ClusterCommand(string option)  {
 			timing = validParameter.validFile(parameters, "timing", false);
 			if (timing == "not found") { timing = "F"; }
 			
-			}
+		}
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClusterCommand", "ClusterCommand");
@@ -222,6 +223,34 @@ int ClusterCommand::execute(){
 	try {
 	
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		
+		//phylip file given and cutoff not given - use cluster.classic because it uses less memory and is faster
+		if ((format == "phylip") && (cutoff > 10.0)) {
+			m->mothurOutEndLine(); m->mothurOut("You are using a phylip file and no cutoff.  I will run cluster.classic to save memory and time."); m->mothurOutEndLine();
+			
+			//run unique.seqs for deconvolute results
+			string inputString = "phylip=" + distfile;
+			if (namefile != "") { inputString += ", name=" + namefile; }
+			inputString += ", precision=" + toString(precision);
+			inputString += ", method=" + method;
+			if (hard)	{ inputString += ", hard=T";	}
+			else		{ inputString += ", hard=F";	}
+			if (sim)	{ inputString += ", sim=T";		}
+			else		{ inputString += ", sim=F";		}
+
+			
+			m->mothurOutEndLine(); 
+			m->mothurOut("/------------------------------------------------------------/"); m->mothurOutEndLine(); 
+			m->mothurOut("Running command: cluster.classic(" + inputString + ")"); m->mothurOutEndLine(); 
+			
+			Command* clusterClassicCommand = new ClusterDoturCommand(inputString);
+			clusterClassicCommand->execute();
+			delete clusterClassicCommand;
+			
+			m->mothurOut("/------------------------------------------------------------/"); m->mothurOutEndLine();  
+
+			return 0;
+		}
 		
 		ReadMatrix* read;
 		if (format == "column") { read = new ReadColumnMatrix(columnfile, sim); }	//sim indicates whether its a similarity matrix
