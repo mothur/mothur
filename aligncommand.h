@@ -78,7 +78,7 @@ private:
 //custom data structure for threads to use.
 // This is passed by void pointer so it can be any data type
 // that can be passed using a single void pointer (LPVOID).
-typedef struct alignData {
+struct alignData {
 	string alignFName; 
 	string reportFName; 
 	string accnosFName;

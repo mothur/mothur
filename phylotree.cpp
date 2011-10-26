@@ -618,9 +618,10 @@ bool PhyloTree::ErrorCheck(vector<string> templateFileNames){
 				okay = false;
 			}
 			
-			templateFileNames.erase(templateFileNames.begin()+i);
-			i--;
+			//templateFileNames.erase(templateFileNames.begin()+i);
+			//i--;
 		}
+		templateFileNames.clear();
 		
 		if (taxonomyFileNames.size() > 0) { //there are names in tax file that are not in template
 			okay = false;

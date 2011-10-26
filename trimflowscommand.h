@@ -83,7 +83,7 @@ private:
 //custom data structure for threads to use.
 // This is passed by void pointer so it can be any data type
 // that can be passed using a single void pointer (LPVOID).
-typedef struct trimFlowData {
+struct trimFlowData {
 	string flowFileName; 
 	string trimFlowFileName; 
 	string scrapFlowFileName;

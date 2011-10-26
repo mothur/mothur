@@ -82,7 +82,7 @@ private:
 //custom data structure for threads to use.
 // This is passed by void pointer so it can be any data type
 // that can be passed using a single void pointer (LPVOID).
-typedef struct preClusterData {
+struct preClusterData {
 	string fastafile; 
 	string namefile; 
 	string groupfile;
@@ -277,7 +277,7 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
 
 	}
 	catch(exception& e) {
-		pDataArray->m->errorOut(e, "AlignCommand", "MyPreclusterThreadFunction");
+		pDataArray->m->errorOut(e, "PreClusterCommand", "MyPreclusterThreadFunction");
 		exit(1);
 	}
 } 

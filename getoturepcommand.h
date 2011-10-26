@@ -81,6 +81,7 @@ private:
 	SeqMap getMap(int);
 	string findRep(vector<string>); 	// returns the name of the "representative" sequence of given bin or subset of a bin, for groups
 	int processNames(string, string);
+	int processFastaNames(string, string);
 };
 
 #endif
