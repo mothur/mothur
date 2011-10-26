@@ -40,7 +40,7 @@ inline bool compareGroup(repStruct left, repStruct right){
 vector<string> GetOTURepCommand::setParameters(){	
 	try {
 		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(plist);
-		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pfasta);
 		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pgroup);
 		CommandParameter pphylip("phylip", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "none",false,false); parameters.push_back(pphylip);
 		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "ColumnName",false,false); parameters.push_back(pname);
@@ -68,7 +68,7 @@ vector<string> GetOTURepCommand::setParameters(){
 string GetOTURepCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The get.oturep command parameters are phylip, column, list, fasta, name, group, large, weighted, cutoff, precision, groups, sorted and label.  The fasta and list parameters are required, as well as phylip or column and name, unless you have valid current files.\n";
+		helpString += "The get.oturep command parameters are phylip, column, list, fasta, name, group, large, weighted, cutoff, precision, groups, sorted and label.  The list parameter is required, as well as phylip or column and name, unless you have valid current files.\n";
 		helpString += "The label parameter allows you to select what distance levels you would like a output files created for, and is separated by dashes.\n";
 		helpString += "The phylip or column parameter is required, but only one may be used.  If you use a column file the name filename is required. \n";
 		helpString += "If you do not provide a cutoff value 10.00 is assumed. If you do not provide a precision value then 100 is assumed.\n";
@@ -197,11 +197,7 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 			
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", true);
-			if (fastafile == "not found") { 				
-				fastafile = m->getFastaFile(); 
-				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}
+			if (fastafile == "not found") { fastafile = ""; }
 			else if (fastafile == "not open") { abort = true; }	
 			else { m->setFastaFile(fastafile); }
 		
@@ -537,21 +533,30 @@ int GetOTURepCommand::execute(){
 		
 		if (!weighted) { nameFileMap.clear(); }
 		
-		//read fastafile
-		fasta = new FastaMap();
-		fasta->readFastaFile(fastafile);
-		
-		//if user gave a namesfile then use it
-		if (namefile != "") {	readNamesFile();	}
-		
-		//output create and output the .rep.fasta files
-		map<string, string>::iterator itNameFile;
-		for (itNameFile = outputNameFiles.begin(); itNameFile != outputNameFiles.end(); itNameFile++) {
-			processNames(itNameFile->first, itNameFile->second);
+				
+		if (fastafile != "") {
+			//read fastafile
+			fasta = new FastaMap();
+			fasta->readFastaFile(fastafile);
+			
+			//if user gave a namesfile then use it
+			if (namefile != "") {	readNamesFile();	}
+			
+			//output create and output the .rep.fasta files
+			map<string, string>::iterator itNameFile;
+			for (itNameFile = outputNameFiles.begin(); itNameFile != outputNameFiles.end(); itNameFile++) {
+				processFastaNames(itNameFile->first, itNameFile->second);
+			}
+		}else {
+			//output create and output the .rep.fasta files
+			map<string, string>::iterator itNameFile;
+			for (itNameFile = outputNameFiles.begin(); itNameFile != outputNameFiles.end(); itNameFile++) {
+				processNames(itNameFile->first, itNameFile->second);
+			}
 		}
 		
-		delete fasta;
-		if (groupfile != "") { delete groupMap;  }
+				
+		if (groupfile != "") { delete groupMap; }
 		
 		if (m->control_pressed) {  return 0; }
 		
@@ -858,7 +863,7 @@ int GetOTURepCommand::process(ListVector* processList) {
 	}
 }
 //**********************************************************************************************************************
-int GetOTURepCommand::processNames(string filename, string label) {
+int GetOTURepCommand::processFastaNames(string filename, string label) {
 	try{
 
 		//create output file
@@ -961,6 +966,40 @@ int GetOTURepCommand::processNames(string filename, string label) {
 		
 		return 0;
 
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetOTURepCommand", "processFastaNames");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+int GetOTURepCommand::processNames(string filename, string label) {
+	try{
+		
+		//create output file
+		if (outputDir == "") { outputDir += m->hasPath(listfile); }
+		
+		ofstream out2;
+		string tempNameFile = filename + ".temp";
+		m->openOutputFile(tempNameFile, out2);
+		
+		ifstream in;
+		m->openInputFile(filename, in);
+		
+		int i = 0;
+		string rep, binnames;
+		while (!in.eof()) {
+			if (m->control_pressed) { break; }
+			in >> i >> rep >> binnames; m->gobble(in);
+			out2 << rep << '\t' << binnames << endl;
+		}
+		in.close();
+		out2.close();
+		
+		m->mothurRemove(filename);
+		rename(tempNameFile.c_str(), filename.c_str());
+		
+		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "GetOTURepCommand", "processNames");

@@ -434,7 +434,7 @@ void MothurOut::gobble(istream& f){
 		
 		char d;
 		while(isspace(d=f.get()))		{ ;}
-		f.putback(d);
+		if(!f.eof()) { f.putback(d); }
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "gobble");
@@ -446,7 +446,7 @@ void MothurOut::gobble(istringstream& f){
 	try {
 		char d;
 		while(isspace(d=f.get()))		{;}
-		f.putback(d);
+		if(!f.eof()) { f.putback(d); }
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "gobble");

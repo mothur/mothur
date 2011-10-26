@@ -543,12 +543,9 @@ int ChimeraUchimeCommand::execute(){
 				if (chimealns) { m->openOutputFile(alnsFileName, out2); out2.close(); }
 				int totalSeqs = 0;
 				
-	#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 				if(processors == 1)	{	totalSeqs = driverGroups(parser, outputFileName, newFasta, accnosFileName, alnsFileName, 0, groups.size(), groups);	}
 				else				{	totalSeqs = createProcessesGroups(parser, outputFileName, newFasta, accnosFileName, alnsFileName, groups);			}
-	#else
-				totalSeqs = driverGroups(parser, outputFileName, newFasta, accnosFileName, alnsFileName, 0, groups.size(), groups);
-	#endif
+
 				if (m->control_pressed) {  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}				
 
 				int totalChimeras = deconvoluteResults(parser, outputFileName, accnosFileName, alnsFileName);
@@ -563,12 +560,12 @@ int ChimeraUchimeCommand::execute(){
 			
 				int numSeqs = 0;
 				int numChimeras = 0;
-	#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+	//#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 				if(processors == 1){ numSeqs = driver(outputFileName, fastaFileNames[s], accnosFileName, alnsFileName, numChimeras); }
 				else{	numSeqs = createProcesses(outputFileName, fastaFileNames[s], accnosFileName, alnsFileName, numChimeras); }
-	#else
-				numSeqs = driver(outputFileName, fastaFileNames[s], accnosFileName, alnsFileName, numChimeras);
-	#endif
+	//#else
+	//			numSeqs = driver(outputFileName, fastaFileNames[s], accnosFileName, alnsFileName, numChimeras);
+	//#endif
 				if (m->control_pressed) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
 			
 				//remove file made for uchime
@@ -1286,9 +1283,10 @@ int ChimeraUchimeCommand::createProcesses(string outputFileName, string filename
 		processIDS.clear();
 		int process = 1;
 		int num = 0;
+		vector<string> files;
+		
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)		
 		//break up file into multiple files
-		vector<string> files;
 		m->divideFile(filename, processors, files);
 		
 		if (m->control_pressed) {  return 0;  }
@@ -1341,7 +1339,89 @@ int ChimeraUchimeCommand::createProcesses(string outputFileName, string filename
 			}
 			in.close(); m->mothurRemove(tempFile);
 		}
+#else
+		//////////////////////////////////////////////////////////////////////////////////////////////////////
+		//Windows version shared memory, so be careful when passing variables through the preClusterData struct. 
+		//Above fork() will clone, so memory is separate, but that's not the case with windows, 
+		//////////////////////////////////////////////////////////////////////////////////////////////////////
 		
+		//divide file
+		int count = 0;
+		int spot = 0;
+		map<int, ofstream*> filehandles;
+		map<int, ofstream*>::iterator it3;
+		
+		ofstream* temp;
+		for (int i = 0; i < processors; i++) {
+			temp = new ofstream;
+			filehandles[i] = temp;
+			m->openOutputFile(filename+toString(i)+".temp", *(temp));
+			files.push_back(filename+toString(i)+".temp");
+		}
+		
+		ifstream in;
+		m->openInputFile(filename, in);
+		
+		while(!in.eof()) {
+			
+			if (m->control_pressed) { in.close(); for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) { (*(it3->second)).close(); delete it3->second; } return 0; }
+			
+			Sequence tempSeq(in); m->gobble(in); 
+			
+			if (tempSeq.getName() != "") {
+				tempSeq.printSequence(*(filehandles[spot])); 
+				spot++; count++;
+				if (spot == processors) { spot = 0; }
+			}
+		}
+		in.close();
+		
+		//delete memory
+		for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {
+			(*(it3->second)).close();
+			delete it3->second;
+		}
+		
+		//sanity check for number of processors
+		if (count < processors) { processors = count; }
+		
+		vector<uchimeData*> pDataArray; 
+		DWORD   dwThreadIdArray[processors-1];
+		HANDLE  hThreadArray[processors-1]; 
+		vector<string> dummy; //used so that we can use the same struct for MyUchimeSeqsThreadFunction and MyUchimeThreadFunction
+		
+		//Create processor worker threads.
+		for( int i=1; i<processors; i++ ){
+			// Allocate memory for thread data.
+			string extension = toString(i) + ".temp";
+			
+			uchimeData* tempUchime = new uchimeData(outputFileName+extension, templatefile, files[i], "", "", "", accnos+extension, alns+extension, dummy, m, 0, 0,  i);
+			tempUchime->setBooleans(useAbskew, chimealns, useMinH, useMindiv, useXn, useDn, useXa, useChunks, useMinchunk, useIdsmoothwindow, useMinsmoothid, useMaxp, skipgaps, skipgaps2, useMinlen, useMaxlen, ucl, useQueryfract);
+			tempUchime->setVariables(abskew, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, minlen, maxlen, queryfract);
+			
+			pDataArray.push_back(tempUchime);
+			processIDS.push_back(i);
+			
+			//MySeqSumThreadFunction is in header. It must be global or static to work with the threads.
+			//default security attributes, thread function name, argument to thread function, use default creation flags, returns the thread identifier
+			hThreadArray[i-1] = CreateThread(NULL, 0, MyUchimeSeqsThreadFunction, pDataArray[i-1], 0, &dwThreadIdArray[i-1]);   
+		}
+		
+		
+		//using the main process as a worker saves time and memory
+		num = driver(outputFileName, files[0], accnos, alns, numChimeras);
+		
+		//Wait until all threads have terminated.
+		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
+		
+		//Close all thread handles and free memory allocations.
+		for(int i=0; i < pDataArray.size(); i++){
+			num += pDataArray[i]->count;
+			numChimeras += pDataArray[i]->numChimeras;
+			CloseHandle(hThreadArray[i]);
+			delete pDataArray[i];
+		}
+#endif		
 		
 		//append output files
 		for(int i=0;i<processIDS.size();i++){
@@ -1359,7 +1439,6 @@ int ChimeraUchimeCommand::createProcesses(string outputFileName, string filename
 		
 		//get rid of the file pieces.
 		for (int i = 0; i < files.size(); i++) { m->mothurRemove(files[i]); }
-#endif		
 		return num;	
 	}
 	catch(exception& e) {
@@ -1424,7 +1503,6 @@ int ChimeraUchimeCommand::createProcessesGroups(SequenceParser& parser, string o
 			int temp = processIDS[i];
 			wait(&temp);
 		}
-#endif		
 		
 		for (int i = 0; i < processIDS.size(); i++) {
 			ifstream in;
@@ -1433,8 +1511,50 @@ int ChimeraUchimeCommand::createProcessesGroups(SequenceParser& parser, string o
 			if (!in.eof()) { int tempNum = 0; in >> tempNum; num += tempNum; }
 			in.close(); m->mothurRemove(tempFile);
 		}
+				
+#else
+		//////////////////////////////////////////////////////////////////////////////////////////////////////
+		//Windows version shared memory, so be careful when passing variables through the preClusterData struct. 
+		//Above fork() will clone, so memory is separate, but that's not the case with windows, 
+		//////////////////////////////////////////////////////////////////////////////////////////////////////
+		
+		vector<uchimeData*> pDataArray; 
+		DWORD   dwThreadIdArray[processors-1];
+		HANDLE  hThreadArray[processors-1]; 
+		
+		//Create processor worker threads.
+		for( int i=1; i<processors; i++ ){
+			// Allocate memory for thread data.
+			string extension = toString(i) + ".temp";
+			
+			uchimeData* tempUchime = new uchimeData(outputFName+extension, templatefile, filename+extension, fastafile, namefile, groupfile, accnos+extension, alns+extension, groups, m, lines[i].start, lines[i].end,  i);
+			tempUchime->setBooleans(useAbskew, chimealns, useMinH, useMindiv, useXn, useDn, useXa, useChunks, useMinchunk, useIdsmoothwindow, useMinsmoothid, useMaxp, skipgaps, skipgaps2, useMinlen, useMaxlen, ucl, useQueryfract);
+			tempUchime->setVariables(abskew, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, minlen, maxlen, queryfract);
+			
+			pDataArray.push_back(tempUchime);
+			processIDS.push_back(i);
+			
+			//MySeqSumThreadFunction is in header. It must be global or static to work with the threads.
+			//default security attributes, thread function name, argument to thread function, use default creation flags, returns the thread identifier
+			hThreadArray[i-1] = CreateThread(NULL, 0, MyUchimeThreadFunction, pDataArray[i-1], 0, &dwThreadIdArray[i-1]);   
+		}
 		
 		
+		//using the main process as a worker saves time and memory
+		num = driverGroups(parser, outputFName, filename, accnos, alns, lines[0].start, lines[0].end, groups);
+		
+		//Wait until all threads have terminated.
+		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
+		
+		//Close all thread handles and free memory allocations.
+		for(int i=0; i < pDataArray.size(); i++){
+			num += pDataArray[i]->count;
+			CloseHandle(hThreadArray[i]);
+			delete pDataArray[i];
+		}
+#endif		
+		
+				
 		//append output files
 		for(int i=0;i<processIDS.size();i++){
 			m->appendFiles((outputFName + toString(processIDS[i]) + ".temp"), outputFName);
