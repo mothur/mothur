@@ -123,6 +123,7 @@
 #include "countgroupscommand.h"
 #include "clearmemorycommand.h"
 #include "summarytaxcommand.h"
+#include "chimeraperseuscommand.h"
 
 /*******************************************************/
 
@@ -258,6 +259,7 @@ CommandFactory::CommandFactory(){
 	commands["chimera.check"]		= "MPIEnabled";
 	commands["chimera.slayer"]		= "MPIEnabled";
 	commands["chimera.uchime"]		= "chimera.uchime";
+	commands["chimera.perseus"]		= "chimera.perseus";
 	commands["chimera.pintail"]		= "MPIEnabled";
 	commands["chimera.bellerophon"]	= "MPIEnabled";
 	commands["screen.seqs"]			= "MPIEnabled";
@@ -267,6 +269,7 @@ CommandFactory::CommandFactory(){
 	commands["sens.spec"]			= "sens.spec";
 	commands["seq.error"]			= "seq.error";
 	commands["seq.error"]			= "summary.tax";
+	
 	commands["quit"]				= "MPIEnabled"; 
 
 }
@@ -424,6 +427,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "count.groups")			{	command = new CountGroupsCommand(optionString);				}
 		else if(commandName == "clear.memory")			{	command = new ClearMemoryCommand(optionString);				}
 		else if(commandName == "summary.tax")			{	command = new SummaryTaxCommand(optionString);				}
+		else if(commandName == "chimera.perseus")		{	command = new ChimeraPerseusCommand(optionString);			}
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -565,6 +569,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "count.groups")			{	pipecommand = new CountGroupsCommand(optionString);				}
 		else if(commandName == "clear.memory")			{	pipecommand = new ClearMemoryCommand(optionString);				}
 		else if(commandName == "summary.tax")			{	pipecommand = new SummaryTaxCommand(optionString);				}
+		else if(commandName == "chimera.perseus")		{	pipecommand = new ChimeraPerseusCommand(optionString);			}
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -694,6 +699,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "count.groups")			{	shellcommand = new CountGroupsCommand();			}
 		else if(commandName == "clear.memory")			{	shellcommand = new ClearMemoryCommand();			}
 		else if(commandName == "summary.tax")			{	shellcommand = new SummaryTaxCommand();				}
+		else if(commandName == "chimera.perseus")		{	shellcommand = new ChimeraPerseusCommand();			}
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;

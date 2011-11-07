@@ -1514,7 +1514,7 @@ int ChimeraUchimeCommand::createProcessesGroups(SequenceParser& parser, string o
 				
 #else
 		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		//Windows version shared memory, so be careful when passing variables through the preClusterData struct. 
+		//Windows version shared memory, so be careful when passing variables through the uchimeData struct. 
 		//Above fork() will clone, so memory is separate, but that's not the case with windows, 
 		//////////////////////////////////////////////////////////////////////////////////////////////////////
 		
@@ -1534,7 +1534,7 @@ int ChimeraUchimeCommand::createProcessesGroups(SequenceParser& parser, string o
 			pDataArray.push_back(tempUchime);
 			processIDS.push_back(i);
 			
-			//MySeqSumThreadFunction is in header. It must be global or static to work with the threads.
+			//MyUchimeThreadFunction is in header. It must be global or static to work with the threads.
 			//default security attributes, thread function name, argument to thread function, use default creation flags, returns the thread identifier
 			hThreadArray[i-1] = CreateThread(NULL, 0, MyUchimeThreadFunction, pDataArray[i-1], 0, &dwThreadIdArray[i-1]);   
 		}

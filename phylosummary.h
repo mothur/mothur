@@ -55,8 +55,6 @@ private:
 	int numSeqs;
 	int maxLevel;
 	MothurOut* m;
-	
-	void removeConfidences(string&);
 };
 
 /**************************************************************************************************/

@@ -49,6 +49,8 @@
 		A795840D13F13CD900F201D5 /* countgroupscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A795840C13F13CD900F201D5 /* countgroupscommand.cpp */; };
 		A799F5B91309A3E000AEEFA0 /* makefastqcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A799F5B81309A3E000AEEFA0 /* makefastqcommand.cpp */; };
 		A7A61F2D130062E000E05B6B /* amovacommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7A61F2C130062E000E05B6B /* amovacommand.cpp */; };
+		A7BF221414587886000AD524 /* myPerseus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7BF221214587886000AD524 /* myPerseus.cpp */; };
+		A7BF2232145879B2000AD524 /* chimeraperseuscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7BF2231145879B2000AD524 /* chimeraperseuscommand.cpp */; };
 		A7E9B88112D37EC400DA6239 /* ace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B64F12D37EC300DA6239 /* ace.cpp */; };
 		A7E9B88212D37EC400DA6239 /* aligncommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B65112D37EC300DA6239 /* aligncommand.cpp */; };
 		A7E9B88312D37EC400DA6239 /* alignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B65312D37EC300DA6239 /* alignment.cpp */; };
@@ -432,6 +434,10 @@
 		A7A61F2B130062E000E05B6B /* amovacommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = amovacommand.h; sourceTree = "<group>"; };
 		A7A61F2C130062E000E05B6B /* amovacommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = amovacommand.cpp; sourceTree = "<group>"; };
 		A7AACFBA132FE008003D6C4D /* currentfile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = currentfile.h; sourceTree = "<group>"; };
+		A7BF221214587886000AD524 /* myPerseus.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = myPerseus.cpp; sourceTree = "<group>"; };
+		A7BF221314587886000AD524 /* myPerseus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = myPerseus.h; sourceTree = "<group>"; };
+		A7BF2230145879B2000AD524 /* chimeraperseuscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimeraperseuscommand.h; sourceTree = "<group>"; };
+		A7BF2231145879B2000AD524 /* chimeraperseuscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimeraperseuscommand.cpp; sourceTree = "<group>"; };
 		A7DAAFA3133A254E003956EB /* commandparameter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = commandparameter.h; sourceTree = "<group>"; };
 		A7E9B64F12D37EC300DA6239 /* ace.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ace.cpp; sourceTree = "<group>"; };
 		A7E9B65012D37EC300DA6239 /* ace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ace.h; sourceTree = "<group>"; };
@@ -1214,6 +1220,8 @@
 				A7E9B67E12D37EC400DA6239 /* chimeracheckcommand.cpp */,
 				A7E9B68312D37EC400DA6239 /* chimerapintailcommand.h */,
 				A7E9B68212D37EC400DA6239 /* chimerapintailcommand.cpp */,
+				A7BF2230145879B2000AD524 /* chimeraperseuscommand.h */,
+				A7BF2231145879B2000AD524 /* chimeraperseuscommand.cpp */,
 				A7E9B68B12D37EC400DA6239 /* chimeraslayercommand.h */,
 				A7E9B68A12D37EC400DA6239 /* chimeraslayercommand.cpp */,
 				A74D36B6137DAFAA00332B0C /* chimerauchimecommand.h */,
@@ -1688,6 +1696,8 @@
 				A7E9B68912D37EC400DA6239 /* chimeraslayer.h */,
 				A7E9B74612D37EC400DA6239 /* maligner.h */,
 				A7E9B74512D37EC400DA6239 /* maligner.cpp */,
+				A7BF221314587886000AD524 /* myPerseus.h */,
+				A7BF221214587886000AD524 /* myPerseus.cpp */,
 				A7E9B79312D37EC400DA6239 /* pintail.cpp */,
 				A7E9B79412D37EC400DA6239 /* pintail.h */,
 				A7E9B82E12D37EC400DA6239 /* slayer.cpp */,
@@ -2155,6 +2165,8 @@
 				A7FF19F2140FFDA500AD216D /* trimoligos.cpp in Sources */,
 				A7F9F5CF141A5E500032F693 /* sequenceparser.cpp in Sources */,
 				A7FFB558142CA02C004884F2 /* summarytaxcommand.cpp in Sources */,
+				A7BF221414587886000AD524 /* myPerseus.cpp in Sources */,
+				A7BF2232145879B2000AD524 /* chimeraperseuscommand.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

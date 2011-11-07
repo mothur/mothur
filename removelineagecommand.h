@@ -42,7 +42,6 @@ class RemoveLineageCommand : public Command {
 		int readAlign();
 		int readList();
 		int readTax();	
-		string removeConfidences(string);
 		vector< map<string, float> > getTaxons(string);
 };
 

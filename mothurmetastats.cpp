@@ -55,10 +55,10 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
 		}
 		
 		//total for first grouping
-		for (int i = 0; i < (secondGroupingStart-1); i++) { total1 += total[i]; }
+		for (int i = 0; i < secondGroupingStart; i++) { total1 += total[i]; }
 		
 		//total for second grouping
-		for (int i = (secondGroupingStart-1); i < column; i++) { total2 += total[i]; }
+		for (int i = secondGroupingStart; i < column; i++) { total2 += total[i]; }
 		
 		//Creates the ratios by first finding the minimum of totals
 		double min = total[0];
@@ -105,15 +105,15 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
 		if (m->control_pressed) { return 1; }
 		
 		// Start the calculations.
-		if ( (column == 2) || ((secondGroupingStart-1) < 8) || ((column-secondGroupingStart+1) < 8) ){ 
+		if ( (column == 2) || (secondGroupingStart < 8) || ((column-secondGroupingStart) < 8) ){ 
 			
 			vector<double> fish;	fish.resize(row, 0.0);
 			vector<double> fish2;	fish2.resize(row, 0.0);
 			
 			for(int i = 0; i < row; i++){
 				
-				for(int j = 0; j < (secondGroupingStart-1); j++)		{ fish[i] += data[i][j];	}
-				for(int j = (secondGroupingStart-1); j < column; j++)	{ fish2[i] += data[i][j];	}
+				for(int j = 0; j < secondGroupingStart; j++)		{ fish[i] += data[i][j];	}
+				for(int j = secondGroupingStart; j < column; j++)	{ fish2[i] += data[i][j];	}
 				
 				//vector<double> tempData; tempData.resize(4, 0.0);
 				double f11, f12, f21, f22;
@@ -148,12 +148,12 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
 			
 			for(int i = 0; i < row; i++){
 				
-				for(int j = 0; j < (secondGroupingStart-1); j++){	sparse[i] += data[i][j]; }
-				if(sparse[i] < (double)(secondGroupingStart-1)){	c++; }
+				for(int j = 0; j < secondGroupingStart; j++)	{	sparse[i] += data[i][j];	}
+				if(sparse[i] < (double)secondGroupingStart)		{	c++;						}
 				
 				// ?<= for col
-				for(int j = (secondGroupingStart-1); j < column; j++){  sparse2[i] += data[i][j]; }
-				if( (sparse2[i] < (double)(column-secondGroupingStart+1))) { c++; }
+				for(int j = secondGroupingStart; j < column; j++)		{  sparse2[i] += data[i][j]; }
+				if( (sparse2[i] < (double)(column-secondGroupingStart)))	{ c++;						 }
 				
 				if (c == 2) {
 					c=0;
@@ -190,11 +190,11 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
 		for (int j = 0; j < row; j++){
 			if (m->control_pressed) { return 1; }
 			
-			for (int i = 1; i <= (secondGroupingStart-1); i++){ temp[j][0] += data[j][i-1]; }
-			temp[j][0] /= (double)(secondGroupingStart-1);
+			for (int i = 0; i < secondGroupingStart; i++){ temp[j][0] += data[j][i]; }
+			temp[j][0] /= (double)secondGroupingStart;
 			
-			for(int i = secondGroupingStart; i <= column; i++){ temp[j][1] += data[j][i-1]; }
-			temp[j][1] /= (double)(column-secondGroupingStart+1);
+			for(int i = secondGroupingStart; i < column; i++){ temp[j][1] += data[j][i]; }
+			temp[j][1] /= (double)(column-secondGroupingStart);
 		}
 		
 		for(int i = 0; i < row; i++){
@@ -280,14 +280,14 @@ int MothurMetastats::start(vector<double>& Imatrix, int secondGroupingStart, vec
 			storage[i][0]=C1[i][0];
 			C1[i][1]=tool[i+row+row]; // var group 1
 			storage[i][1]=C1[i][1];
-			C1[i][2]=C1[i][1]/(secondGroupingStart-1);
+			C1[i][2]=C1[i][1]/(secondGroupingStart);
 			storage[i][2]=sqrt(C1[i][2]);
 			
 			C2[i][0]=tool[i+row]; // mean group 2
 			storage[i][4]=C2[i][0];    
 			C2[i][1]=tool[i+row+row+row]; // var group 2 
 			storage[i][5]=C2[i][1];        
-			C2[i][2]=C2[i][1]/(column-secondGroupingStart+1);
+			C2[i][2]=C2[i][1]/(column-secondGroupingStart);
 			storage[i][6]=sqrt(C2[i][2]);   
 		}
 		
@@ -314,7 +314,7 @@ int MothurMetastats::meanvar(vector<double>& pmatrix, int secondGroupingStart, v
 		vector<double> var;		var.resize(row, 0.0);
 		vector<double> var2;	var2.resize(row, 0.0);
 		
-		double a = secondGroupingStart-1;
+		double a = secondGroupingStart;
 		double b = column - a;
 		int m = a * row;
 		int n = row * column;
@@ -459,11 +459,11 @@ int MothurMetastats::calc_twosample_ts(vector<double>& Pmatrix, int secondGroupi
 			if (m->control_pressed) { return 0; }
 			C1[i][0]=tool[i];
 			C1[i][1]=tool[i+row+row];
-			C1[i][2]=C1[i][1]/(secondGroupingStart-1);
+			C1[i][2]=C1[i][1]/(secondGroupingStart);
 			
 			C2[i][0]=tool[i+row];
 			C2[i][1]=tool[i+row+row+row]; // var group 2 
-			C2[i][2]=C2[i][1]/(column-secondGroupingStart+1);
+			C2[i][2]=C2[i][1]/(column-secondGroupingStart);
 		}
 		
 		for (int i = 0; i < row; i++){

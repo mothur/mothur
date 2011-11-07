@@ -46,7 +46,6 @@ private:
 
 	int readNamesFile();
 	int readTaxonomyFile();
-	void removeConfidences(string&);
 	int process(ListVector*);
 	string addUnclassifieds(string, int);
 	vector<string> findConsensusTaxonomy(int, ListVector*, int&, string&); 	// returns the name of the "representative" taxonomy of given bin
