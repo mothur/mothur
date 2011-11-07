@@ -564,7 +564,8 @@ int GetLineageCommand::readTax(){
 			if (hasConPos != string::npos) {  
 				taxonsHasConfidence[i] = true; 
 				searchTaxons[i] = getTaxons(listOfTaxons[i]); 
-				noConfidenceTaxons[i] = removeConfidences(listOfTaxons[i]);
+				noConfidenceTaxons[i] = listOfTaxons[i];
+				m->removeConfidences(noConfidenceTaxons[i]);
 			}
 		}
 		
@@ -584,7 +585,8 @@ int GetLineageCommand::readTax(){
 				if (!taxonsHasConfidence[j]) {
 					int hasConfidences = tax.find_first_of('(');
 					if (hasConfidences != string::npos) { 
-						newtax = removeConfidences(tax);
+						newtax = tax;
+						m->removeConfidences(newtax);
 					}
 				
 					int pos = newtax.find(noConfidenceTaxons[j]);
@@ -613,7 +615,8 @@ int GetLineageCommand::readTax(){
 						string noNewTax = tax;
 						int hasConfidences = tax.find_first_of('(');
 						if (hasConfidences != string::npos) { 
-							noNewTax = removeConfidences(tax);
+							noNewTax = tax;
+							m->removeConfidences(noNewTax);
 						}
 					
 						int pos = noNewTax.find(noConfidenceTaxons[j]);
@@ -722,29 +725,6 @@ vector< map<string, float> > GetLineageCommand::getTaxons(string tax) {
 	}
 	catch(exception& e) {
 		m->errorOut(e, "GetLineageCommand", "getTaxons");
-		exit(1);
-	}
-}
-/**************************************************************************************************/
-string GetLineageCommand::removeConfidences(string tax) {
-	try {
-		
-		string taxon = "";
-		int taxLength = tax.length();
-		for(int i=0;i<taxLength;i++){
-			if(tax[i] == ';'){
-				taxon = taxon.substr(0, taxon.find_first_of('(')); //rip off confidence
-				taxon += ";";
-			}
-			else{
-				taxon += tax[i];
-			}
-		}
-				
-		return taxon;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetLineageCommand", "removeConfidences");
 		exit(1);
 	}
 }

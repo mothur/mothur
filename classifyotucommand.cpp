@@ -368,7 +368,7 @@ int ClassifyOtuCommand::readTaxonomyFile() {
 			m->gobble(in);
 			
 			//are there confidence scores, if so remove them
-			if (tax.find_first_of('(') != -1) {  removeConfidences(tax);	}
+			if (tax.find_first_of('(') != -1) {  m->removeConfidences(tax);	}
 			
 			taxMap[name] = tax;
 			
@@ -550,7 +550,7 @@ int ClassifyOtuCommand::process(ListVector* processList) {
 			out << (i+1) << '\t' << size << '\t' << conTax << endl;
 			
 			string noConfidenceConTax = conTax;
-			removeConfidences(noConfidenceConTax);
+			m->removeConfidences(noConfidenceConTax);
 			
 			//add this bins taxonomy to summary
 			if (basis == "sequence") {
@@ -601,36 +601,6 @@ string ClassifyOtuCommand::addUnclassifieds(string tax, int maxlevel) {
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClassifyOtuCommand", "addUnclassifieds");
-		exit(1);
-	}
-}
-
-/**************************************************************************************************/
-void ClassifyOtuCommand::removeConfidences(string& tax) {
-	try {
-		
-		string taxon;
-		string newTax = "";
-		
-		while (tax.find_first_of(';') != -1) {
-			//get taxon
-			taxon = tax.substr(0,tax.find_first_of(';'));
-			
-			int pos = taxon.find_first_of('(');
-			if (pos != -1) {
-				taxon = taxon.substr(0, pos); //rip off confidence 
-			}
-			
-			taxon += ";";
-			
-			tax = tax.substr(tax.find_first_of(';')+1, tax.length());
-			newTax += taxon;
-		}
-		
-		tax = newTax;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClassifyOtuCommand", "removeConfidences");
 		exit(1);
 	}
 }

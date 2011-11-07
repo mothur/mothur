@@ -84,6 +84,7 @@ class MothurOut {
 		int readNames(string, map<string, vector<string> >&);
 		int readNames(string, vector<seqPriorityNode>&, map<string, string>&);
 		void mothurRemove(string);
+	
 		
 		//searchs and checks
 		bool checkReleaseVersion(ifstream&, string);
@@ -105,6 +106,7 @@ class MothurOut {
 		void splitAtDash(string&, set<string>&);
 		void splitAtDash(string&, vector<string>&);
 		void splitAtChar(string&, vector<string>&, char);
+		int removeConfidences(string&);
 		
 		//math operation
 		int factorial(int num);

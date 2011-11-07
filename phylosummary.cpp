@@ -131,7 +131,7 @@ int PhyloSummary::addSeqToTree(string seqName, string seqTaxonomy){
 		int level = 0;
 		
 		//are there confidence scores, if so remove them
-		if (seqTaxonomy.find_first_of('(') != -1) {  removeConfidences(seqTaxonomy);	}
+		if (seqTaxonomy.find_first_of('(') != -1) {  m->removeConfidences(seqTaxonomy);	}
 		
 		while (seqTaxonomy != "") {
 			
@@ -229,7 +229,7 @@ int PhyloSummary::addSeqToTree(string seqTaxonomy, vector<string> names){
 		int level = 0;
 		
 		//are there confidence scores, if so remove them
-		if (seqTaxonomy.find_first_of('(') != -1) {  removeConfidences(seqTaxonomy);	}
+		if (seqTaxonomy.find_first_of('(') != -1) {  m->removeConfidences(seqTaxonomy);	}
 		
 		while (seqTaxonomy != "") {
 			
@@ -492,35 +492,6 @@ void PhyloSummary::readTreeStruct(ifstream& in){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PhyloSummary", "readTreeStruct");
-		exit(1);
-	}
-}
-/**************************************************************************************************/
-void PhyloSummary::removeConfidences(string& tax) {
-	try {
-		
-		string taxon;
-		string newTax = "";
-		
-		while (tax.find_first_of(';') != -1) {
-			//get taxon
-			taxon = tax.substr(0,tax.find_first_of(';'));
-			
-			int pos = taxon.find_first_of('(');
-			if (pos != -1) {
-				taxon = taxon.substr(0, pos); //rip off confidence 
-			}
-			
-			taxon += ";";
-			
-			tax = tax.substr(tax.find_first_of(';')+1, tax.length());
-			newTax += taxon;
-		}
-		
-		tax = newTax;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PhyloSummary", "removeConfidences");
 		exit(1);
 	}
 }

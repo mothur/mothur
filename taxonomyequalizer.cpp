@@ -46,7 +46,7 @@ TaxEqualizer::TaxEqualizer(string tfile, int c, string o) : cutoff(c), outputDir
 				
 				in >> name >> tax;   m->gobble(in);
 				
-				if (containsConfidence) {  removeConfidences(tax);	}
+				if (containsConfidence) {  m->removeConfidences(tax);	}
 				
 				//is this a taxonomy that needs to be extended?
 				if (seqLevels[name] < highestLevel) {
@@ -151,30 +151,5 @@ void TaxEqualizer::truncateTaxonomy(string name, string& tax, int desiredLevel) 
 		exit(1);
 	}
 }
-/**************************************************************************************************/
-void TaxEqualizer::removeConfidences(string& tax) {
-	try {
-		
-		string taxon;
-		string newTax = "";
-		
-		while (tax.find_first_of(';') != -1) {
-			//get taxon
-			taxon = tax.substr(0,tax.find_first_of(';'));
-			taxon = taxon.substr(0, taxon.find_first_of('(')); //rip off confidence
-			taxon += ";";
-			
-			tax = tax.substr(tax.find_first_of(';')+1, tax.length());
-			newTax += taxon;
-		}
-		
-		tax = newTax;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "TaxEqualizer", "removeConfidences");
-		exit(1);
-	}
-}
-
 /**************************************************************************************************/
 
