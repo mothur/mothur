@@ -272,32 +272,34 @@ int TrimFlowsCommand::execute(){
 		ofstream output;
 		
 		if(allFiles){
-			
+			set<string> namesAlreadyProcessed;
 			flowFilesFileName = outputDir + m->getRootName(m->getSimpleName(flowFileName)) + "flow.files";
 			m->openOutputFile(flowFilesFileName, output);
 
 			for(int i=0;i<barcodePrimerComboFileNames.size();i++){
 				for(int j=0;j<barcodePrimerComboFileNames[0].size();j++){
-					
-					FILE * pFile;
-					unsigned long long size;
-					
-					//get num bytes in file
-					pFile = fopen (barcodePrimerComboFileNames[i][j].c_str(),"rb");
-					if (pFile==NULL) perror ("Error opening file");
-					else{
-						fseek (pFile, 0, SEEK_END);
-						size=ftell(pFile);
-						fclose (pFile);
-					}
-
-					if(size < 10){
-						m->mothurRemove(barcodePrimerComboFileNames[i][j]);
-					}
-					else{
-						output << barcodePrimerComboFileNames[i][j] << endl;
-						outputNames.push_back(barcodePrimerComboFileNames[i][j]);
-						outputTypes["flow"].push_back(barcodePrimerComboFileNames[i][j]);
+					if (namesAlreadyProcessed.count(barcodePrimerComboFileNames[i][j]) == 0) {
+						FILE * pFile;
+						unsigned long long size;
+						
+						//get num bytes in file
+						pFile = fopen (barcodePrimerComboFileNames[i][j].c_str(),"rb");
+						if (pFile==NULL) perror ("Error opening file");
+						else{
+							fseek (pFile, 0, SEEK_END);
+							size=ftell(pFile);
+							fclose (pFile);
+						}
+						
+						if(size < 10){
+							m->mothurRemove(barcodePrimerComboFileNames[i][j]);
+						}
+						else{
+							output << barcodePrimerComboFileNames[i][j] << endl;
+							outputNames.push_back(barcodePrimerComboFileNames[i][j]);
+							outputTypes["flow"].push_back(barcodePrimerComboFileNames[i][j]);
+						}
+						namesAlreadyProcessed.insert(barcodePrimerComboFileNames[i][j]);
 					}
 				}
 			}

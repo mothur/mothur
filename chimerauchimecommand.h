@@ -48,6 +48,7 @@ private:
 	string fastafile, groupfile, templatefile, outputDir, namefile, abskew, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, minlen, maxlen, queryfract;
 	int processors;
 	
+	
 	vector<string> outputNames;
 	vector<string> fastaFileNames;
 	vector<string> nameFileNames;
@@ -178,10 +179,23 @@ static DWORD WINAPI MyUchimeThreadFunction(LPVOID lpParam){
 			
 			vector<char*> cPara;
 			
+			string path = pDataArray->m->argv;
+			string tempPath = path;
+			for (int i = 0; i < path.length(); i++) { tempPath[i] = tolower(path[i]); }
+			path = path.substr(0, (tempPath.find_last_of('m')));
+			
+			string uchimeCommand = path;
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			uchimeCommand += "uchime ";
+#else
+			uchimeCommand += "uchime";
+			uchimeCommand = "\"" + uchimeCommand + "\"";
+#endif			
+			
 			char* tempUchime;
-			tempUchime= new char[8]; 
+			tempUchime= new char[uchimeCommand.length()+1]; 
 			*tempUchime = '\0';
-			strncat(tempUchime, "uchime ", 7); 
+			strncat(tempUchime, uchimeCommand.c_str(), uchimeCommand.length());
 			cPara.push_back(tempUchime);
 			
 			char* tempIn = new char[8]; 
@@ -396,6 +410,10 @@ static DWORD WINAPI MyUchimeThreadFunction(LPVOID lpParam){
 			
 			//uchime_main(numArgs, uchimeParameters); 
 			//cout << "commandString = " << commandString << endl;
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#else
+			commandString = "\"" + commandString + "\"";
+#endif
 			system(commandString.c_str());
 			
 			//free memory
