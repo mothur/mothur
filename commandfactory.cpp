@@ -124,6 +124,7 @@
 #include "clearmemorycommand.h"
 #include "summarytaxcommand.h"
 #include "chimeraperseuscommand.h"
+#include "shhhseqscommand.h"
 
 /*******************************************************/
 
@@ -268,7 +269,8 @@ CommandFactory::CommandFactory(){
 	commands["shhh.flows"]			= "MPIEnabled";
 	commands["sens.spec"]			= "sens.spec";
 	commands["seq.error"]			= "seq.error";
-	commands["seq.error"]			= "summary.tax";
+	commands["summary.tax"]			= "summary.tax";
+	commands["shhh.seqs"]			= "shhh.seqs";
 	
 	commands["quit"]				= "MPIEnabled"; 
 
@@ -428,6 +430,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "clear.memory")			{	command = new ClearMemoryCommand(optionString);				}
 		else if(commandName == "summary.tax")			{	command = new SummaryTaxCommand(optionString);				}
 		else if(commandName == "chimera.perseus")		{	command = new ChimeraPerseusCommand(optionString);			}
+		else if(commandName == "shhh.seqs")				{	command = new ShhhSeqsCommand(optionString);				}
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -570,6 +573,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "clear.memory")			{	pipecommand = new ClearMemoryCommand(optionString);				}
 		else if(commandName == "summary.tax")			{	pipecommand = new SummaryTaxCommand(optionString);				}
 		else if(commandName == "chimera.perseus")		{	pipecommand = new ChimeraPerseusCommand(optionString);			}
+		else if(commandName == "shhh.seqs")				{	pipecommand = new ShhhSeqsCommand(optionString);				}
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -700,6 +704,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "clear.memory")			{	shellcommand = new ClearMemoryCommand();			}
 		else if(commandName == "summary.tax")			{	shellcommand = new SummaryTaxCommand();				}
 		else if(commandName == "chimera.perseus")		{	shellcommand = new ChimeraPerseusCommand();			}
+		else if(commandName == "shhh.seqs")				{	shellcommand = new ShhhSeqsCommand();				}
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;

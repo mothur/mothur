@@ -39,7 +39,7 @@ string ChimeraPerseusCommand::getHelpString(){
 		helpString += "The chimera.perseus command reads a fastafile and namefile and outputs potentially chimeric sequences.\n";
 		helpString += "The chimera.perseus command parameters are fasta, name, group, cutoff, processors, alpha and beta.\n";
 		helpString += "The fasta parameter allows you to enter the fasta file containing your potentially chimeric sequences, and is required, unless you have a valid current fasta file. \n";
-		helpString += "The name parameter allows you to provide a name file associated with your fasta file. If none is given unique.seqs will be run to generate one. \n";
+		helpString += "The name parameter allows you to provide a name file associated with your fasta file. It is required. \n";
 		helpString += "You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amazon.fasta \n";
 		helpString += "The group parameter allows you to provide a group file.  When checking sequences, only sequences from the same group as the query sequence will be used as the reference. \n";
 		helpString += "The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n";
@@ -640,7 +640,6 @@ int ChimeraPerseusCommand::driver(string chimeraFileName, vector<seqData>& seque
 		vector<bool> chimeras(numSeqs, 0);
 		
 		for(int i=0;i<numSeqs;i++){	
-			cout << sequences[i].seqName << endl << sequences[i].sequence << endl << sequences[i].frequency << endl;
 			if (m->control_pressed) { chimeraFile.close(); m->mothurRemove(chimeraFileName); accnosFile.close(); m->mothurRemove(accnosFileName); return 0; }
 			
 			vector<bool> restricted = chimeras;
@@ -657,7 +656,6 @@ int ChimeraPerseusCommand::driver(string chimeraFileName, vector<seqData>& seque
 			vector<pwAlign> alignments(numSeqs);
 			
 			int comparisons = myPerseus.getAlignments(i, sequences, alignments, leftDiffs, leftMaps, rightDiffs, rightMaps, bestSingleIndex, bestSingleDiff, restricted);
-			cout << "comparisons = " << comparisons << endl;
 			if (m->control_pressed) { chimeraFile.close(); m->mothurRemove(chimeraFileName); accnosFile.close(); m->mothurRemove(accnosFileName); return 0; }
 
 			int minMismatchToChimera, leftParentBi, rightParentBi, breakPointBi;
@@ -666,7 +664,6 @@ int ChimeraPerseusCommand::driver(string chimeraFileName, vector<seqData>& seque
 			
 			if(comparisons >= 2){	
 				minMismatchToChimera = myPerseus.getChimera(sequences, leftDiffs, rightDiffs, leftParentBi, rightParentBi, breakPointBi, singleLeft, bestLeft, singleRight, bestRight, restricted);
-				cout << "minMismatchToChimera = " << minMismatchToChimera << endl;
 				if (m->control_pressed) { chimeraFile.close(); m->mothurRemove(chimeraFileName); accnosFile.close(); m->mothurRemove(accnosFileName); return 0; }
 
 				int minMismatchToTrimera = numeric_limits<int>::max();
@@ -674,12 +671,11 @@ int ChimeraPerseusCommand::driver(string chimeraFileName, vector<seqData>& seque
 				
 				if(minMismatchToChimera >= 3 && comparisons >= 3){
 					minMismatchToTrimera = myPerseus.getTrimera(sequences, leftDiffs, leftParentTri, middleParentTri, rightParentTri, breakPointTriA, breakPointTriB, singleLeft, bestLeft, singleRight, bestRight, restricted);
-					cout << "minMismatchToTrimera = " << minMismatchToTrimera << endl;
 					if (m->control_pressed) { chimeraFile.close(); m->mothurRemove(chimeraFileName); accnosFile.close(); m->mothurRemove(accnosFileName); return 0; }
 				}
 				
 				double singleDist = myPerseus.modeledPairwiseAlignSeqs(sequences[i].sequence, sequences[bestSingleIndex].sequence, dummyA, dummyB, correctModel);
-				cout << "singleDist = " << singleDist << endl;
+				
 				if (m->control_pressed) { chimeraFile.close(); m->mothurRemove(chimeraFileName); accnosFile.close(); m->mothurRemove(accnosFileName); return 0; }
 
 				string type;
@@ -693,16 +689,16 @@ int ChimeraPerseusCommand::driver(string chimeraFileName, vector<seqData>& seque
 					type = "chimera";
 					chimeraRefSeq = myPerseus.stitchBimera(alignments, leftParentBi, rightParentBi, breakPointBi, leftMaps, rightMaps);
 				}
-				cout << "chimeraRefSeq = " << chimeraRefSeq << endl;
+				;
 				if (m->control_pressed) { chimeraFile.close(); m->mothurRemove(chimeraFileName); accnosFile.close(); m->mothurRemove(accnosFileName); return 0; }
 				
 				double chimeraDist = myPerseus.modeledPairwiseAlignSeqs(sequences[i].sequence, chimeraRefSeq, dummyA, dummyB, correctModel);
-				cout << "chimeraDist = " << chimeraDist << endl;
+				
 				if (m->control_pressed) { chimeraFile.close(); m->mothurRemove(chimeraFileName); accnosFile.close(); m->mothurRemove(accnosFileName); return 0; }
 
 				double cIndex = chimeraDist;//modeledPairwiseAlignSeqs(sequences[i].sequence, chimeraRefSeq);
 				double loonIndex = myPerseus.calcLoonIndex(sequences[i].sequence, sequences[leftParentBi].sequence, sequences[rightParentBi].sequence, breakPointBi, binMatrix);		
-				cout << "loonIndex = " << loonIndex << endl;
+				
 				if (m->control_pressed) { chimeraFile.close(); m->mothurRemove(chimeraFileName); accnosFile.close(); m->mothurRemove(accnosFileName); return 0; }
 
 				chimeraFile << i << '\t' << sequences[i].seqName << '\t' << bestSingleDiff << '\t' << bestSingleIndex << '\t' << sequences[bestSingleIndex].seqName << '\t';
@@ -841,7 +837,7 @@ int ChimeraPerseusCommand::createProcessesGroups(SequenceParser& parser, string 
 		
 		//Wait until all threads have terminated.
 		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
-		cout << "here" << endl;	
+			
 		//Close all thread handles and free memory allocations.
 		for(int i=0; i < pDataArray.size(); i++){
 			num += pDataArray[i]->count;

@@ -43,6 +43,9 @@
 		A74D36B8137DAFAA00332B0C /* chimerauchimecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D36B7137DAFAA00332B0C /* chimerauchimecommand.cpp */; };
 		A75790591301749D00A30DAB /* homovacommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A75790581301749D00A30DAB /* homovacommand.cpp */; };
 		A7730EFF13967241007433A3 /* countseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7730EFE13967241007433A3 /* countseqscommand.cpp */; };
+		A774101414695AF60098E6AC /* shhhseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A774101314695AF60098E6AC /* shhhseqscommand.cpp */; };
+		A774104814696F320098E6AC /* myseqdist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A774104614696F320098E6AC /* myseqdist.cpp */; };
+		A77410F614697C300098E6AC /* seqnoise.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A77410F414697C300098E6AC /* seqnoise.cpp */; };
 		A778FE6B134CA6CA00C0BA33 /* getcommandinfocommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A778FE6A134CA6CA00C0BA33 /* getcommandinfocommand.cpp */; };
 		A77A221F139001B600B0BE70 /* deuniquetreecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A77A221E139001B600B0BE70 /* deuniquetreecommand.cpp */; };
 		A79234D713C74BF6002B08E2 /* mothurfisher.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A79234D613C74BF6002B08E2 /* mothurfisher.cpp */; };
@@ -420,6 +423,12 @@
 		A75790581301749D00A30DAB /* homovacommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = homovacommand.cpp; sourceTree = "<group>"; };
 		A7730EFD13967241007433A3 /* countseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = countseqscommand.h; sourceTree = "<group>"; };
 		A7730EFE13967241007433A3 /* countseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = countseqscommand.cpp; sourceTree = "<group>"; };
+		A774101214695AF60098E6AC /* shhhseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shhhseqscommand.h; sourceTree = "<group>"; };
+		A774101314695AF60098E6AC /* shhhseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = shhhseqscommand.cpp; sourceTree = "<group>"; };
+		A774104614696F320098E6AC /* myseqdist.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = myseqdist.cpp; sourceTree = "<group>"; };
+		A774104714696F320098E6AC /* myseqdist.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = myseqdist.h; sourceTree = "<group>"; };
+		A77410F414697C300098E6AC /* seqnoise.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = seqnoise.cpp; sourceTree = "<group>"; };
+		A77410F514697C300098E6AC /* seqnoise.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = seqnoise.h; sourceTree = "<group>"; };
 		A778FE69134CA6CA00C0BA33 /* getcommandinfocommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getcommandinfocommand.h; sourceTree = "<group>"; };
 		A778FE6A134CA6CA00C0BA33 /* getcommandinfocommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getcommandinfocommand.cpp; sourceTree = "<group>"; };
 		A77A221D139001B600B0BE70 /* deuniquetreecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = deuniquetreecommand.h; sourceTree = "<group>"; };
@@ -1088,6 +1097,8 @@
 				A7E9B75C12D37EC400DA6239 /* mothur.h */,
 				A7E9B75D12D37EC400DA6239 /* mothurout.cpp */,
 				A7E9B75E12D37EC400DA6239 /* mothurout.h */,
+				A774104714696F320098E6AC /* myseqdist.h */,
+				A774104614696F320098E6AC /* myseqdist.cpp */,
 				A7E9B76112D37EC400DA6239 /* nast.cpp */,
 				A7E9B76212D37EC400DA6239 /* nast.hpp */,
 				A7E9B76312D37EC400DA6239 /* nastreport.cpp */,
@@ -1112,6 +1123,8 @@
 				A7E9B7AD12D37EC400DA6239 /* rarefactioncurvedata.h */,
 				7E6BE10812F710D8007ADDBE /* refchimeratest.h */,
 				7E6BE10912F710D8007ADDBE /* refchimeratest.cpp */,
+				A77410F514697C300098E6AC /* seqnoise.h */,
+				A77410F414697C300098E6AC /* seqnoise.cpp */,
 				A7E9BA5312D39A5E00DA6239 /* read */,
 				A7E9B82312D37EC400DA6239 /* sharedutilities.cpp */,
 				A7E9B82412D37EC400DA6239 /* sharedutilities.h */,
@@ -1404,6 +1417,8 @@
 				A7E9B7F212D37EC400DA6239 /* sharedcommand.cpp */,
 				A7E9B82812D37EC400DA6239 /* shhhercommand.h */,
 				A7E9B82712D37EC400DA6239 /* shhhercommand.cpp */,
+				A774101214695AF60098E6AC /* shhhseqscommand.h */,
+				A774101314695AF60098E6AC /* shhhseqscommand.cpp */,
 				A7E9B84012D37EC400DA6239 /* splitabundcommand.h */,
 				A7E9B83F12D37EC400DA6239 /* splitabundcommand.cpp */,
 				A7E9B84212D37EC400DA6239 /* splitgroupscommand.h */,
@@ -2167,6 +2182,9 @@
 				A7FFB558142CA02C004884F2 /* summarytaxcommand.cpp in Sources */,
 				A7BF221414587886000AD524 /* myPerseus.cpp in Sources */,
 				A7BF2232145879B2000AD524 /* chimeraperseuscommand.cpp in Sources */,
+				A774101414695AF60098E6AC /* shhhseqscommand.cpp in Sources */,
+				A774104814696F320098E6AC /* myseqdist.cpp in Sources */,
+				A77410F614697C300098E6AC /* seqnoise.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

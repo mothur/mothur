@@ -560,12 +560,19 @@ int ChimeraUchimeCommand::execute(){
 			
 				int numSeqs = 0;
 				int numChimeras = 0;
-	//#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+
 				if(processors == 1){ numSeqs = driver(outputFileName, fastaFileNames[s], accnosFileName, alnsFileName, numChimeras); }
 				else{	numSeqs = createProcesses(outputFileName, fastaFileNames[s], accnosFileName, alnsFileName, numChimeras); }
-	//#else
-	//			numSeqs = driver(outputFileName, fastaFileNames[s], accnosFileName, alnsFileName, numChimeras);
-	//#endif
+				
+				//add headings
+				ofstream out;
+				m->openOutputFile(outputFileName+".temp", out); 
+				out << "Score\tQuery\tParentA\tParentB\tIdQM\tIdQA\tIdQB\tIdAB\tIdQT\tLY\tLN\tLA\tRY\tRN\tRA\tDiv\tYN\n";
+				out.close();
+				
+				m->appendFiles(outputFileName, outputFileName+".temp");
+				m->mothurRemove(outputFileName); rename((outputFileName+".temp").c_str(), outputFileName.c_str());
+				
 				if (m->control_pressed) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} return 0; }
 			
 				//remove file made for uchime
@@ -653,6 +660,7 @@ int ChimeraUchimeCommand::deconvoluteResults(SequenceParser& parser, string outp
 		
 		ofstream out;
 		m->openOutputFile(outputFileName+".temp", out); out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
+		out << "Score\tQuery\tParentA\tParentB\tIdQM\tIdQA\tIdQB\tIdAB\tIdQT\tLY\tLN\tLA\tRY\tRN\tRA\tDiv\tYN\n";
 		
 		float temp1;
 		string parent1, parent2, temp2, temp3, temp4, temp5, temp6, temp7, temp8, temp9, temp10, temp11, temp12, temp13, flag;
@@ -985,17 +993,24 @@ int ChimeraUchimeCommand::driver(string outputFName, string filename, string acc
 		alns = "\"" + alns + "\"";
 				
 		vector<char*> cPara;
-	
-		char* tempUchime;
+		
+		string path = m->argv;
+		string tempPath = path;
+		for (int i = 0; i < path.length(); i++) { tempPath[i] = tolower(path[i]); }
+		path = path.substr(0, (tempPath.find_last_of('m')));
+		
+		string uchimeCommand = path;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-		tempUchime= new char[10];  
-		*tempUchime = '\0';
-		strncat(tempUchime, "./uchime ", 9); 
+		uchimeCommand += "uchime ";
 #else
-		tempUchime= new char[8]; 
-		*tempUchime = '\0';
-		strncat(tempUchime, "uchime ", 7); 
+		uchimeCommand += "uchime";
+		uchimeCommand = "\"" + uchimeCommand + "\"";
 #endif
+		
+		char* tempUchime;
+		tempUchime= new char[uchimeCommand.length()+1]; 
+		*tempUchime = '\0';
+		strncat(tempUchime, uchimeCommand.c_str(), uchimeCommand.length());
 		cPara.push_back(tempUchime);
 		
 		char* tempIn = new char[8]; 
@@ -1223,6 +1238,10 @@ int ChimeraUchimeCommand::driver(string outputFName, string filename, string acc
 		
 		//uchime_main(numArgs, uchimeParameters); 
 		//cout << "commandString = " << commandString << endl;
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#else
+		commandString = "\"" + commandString + "\"";
+#endif
 		system(commandString.c_str());
 		
 		//free memory

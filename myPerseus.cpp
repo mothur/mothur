@@ -548,7 +548,7 @@ int Perseus::getChimera(vector<seqData> sequences,
 		rightParent = -1;
 		breakPoint = -1;
 		
-		for(int l=0;l<seqLength;l++){
+		for(int l=0;l<seqLength-1;l++){
 			
 			if (m->control_pressed) { return 0; }
 			
