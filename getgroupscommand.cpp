@@ -384,6 +384,15 @@ int GetGroupsCommand::readFasta(){
 					
 					currSeq.printSequence(out);
 					selectedCount++;
+				}else{
+					//if you are not in the accnos file check if you are a name that needs to be changed
+					map<string, string>::iterator it = uniqueToRedundant.find(name);
+					if (it != uniqueToRedundant.end()) {
+						wroteSomething = true;
+						currSeq.setName(it->second);
+						currSeq.printSequence(out);
+						selectedCount++;
+					}
 				}
 			}
 			m->gobble(in);
@@ -499,10 +508,26 @@ int GetGroupsCommand::readList(){
 					
 					//if that name is in the .accnos file, add it
 					if (names.count(name) != 0) {  newNames += name + ",";  selectedCount++;  }
+					else{
+						//if you are not in the accnos file check if you are a name that needs to be changed
+						map<string, string>::iterator it = uniqueToRedundant.find(name);
+						if (it != uniqueToRedundant.end()) {
+							newNames += it->second + ",";
+							selectedCount++;
+						}
+					}
 				}
 				
 				//get last name
 				if (names.count(binnames) != 0) {  newNames += binnames + ",";  selectedCount++;  }
+				else{
+					//if you are not in the accnos file check if you are a name that needs to be changed
+					map<string, string>::iterator it = uniqueToRedundant.find(binnames);
+					if (it != uniqueToRedundant.end()) {
+						newNames += it->second + ",";
+						selectedCount++;
+					}
+				}
 				
 				//if there are names in this bin add to new list
 				if (newNames != "") {  
@@ -594,6 +619,7 @@ int GetGroupsCommand::readName(){
 					//you know you have at least one valid second since first column is valid
 					for (int i = 0; i < validSecond.size()-1; i++) {  out << validSecond[i] << ',';  }
 					out << validSecond[validSecond.size()-1] << endl;
+					uniqueToRedundant[firstCol] = validSecond[0];
 				}
 			}
 			
@@ -687,6 +713,13 @@ int GetGroupsCommand::readTax(){
 			if (names.count(name) != 0) {
 				wroteSomething = true;
 				out << name << '\t' << tax << endl;
+			}else{
+				//if you are not in the accnos file check if you are a name that needs to be changed
+				map<string, string>::iterator it = uniqueToRedundant.find(name);
+				if (it != uniqueToRedundant.end()) {
+					wroteSomething = true;
+					out << it->second << '\t' << tax << endl;
+				}
 			}
 			
 			m->gobble(in);

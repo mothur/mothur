@@ -76,10 +76,15 @@ Sequence::Sequence(istringstream& fastaString){
 			
 			while (!fastaString.eof())	{	char c = fastaString.get();  if (c == 10 || c == 13){ break;	}	} // get rest of line if there's any crap there
 			
-			sequence = getSequenceString(fastaString);		
+			int numAmbig = 0;
+			sequence = getSequenceString(fastaString, numAmbig);
+			
 			setAligned(sequence);	
 			//setUnaligned removes any gap characters for us						
-			setUnaligned(sequence);		
+			setUnaligned(sequence);	
+			
+			if ((numAmbig / (float) numBases) > 0.25) { m->mothurOut("[WARNING]: We found more than 25% of the bases in sequence " + name + " to be ambiguous. Mothur is not setup to process protein sequences."); m->mothurOutEndLine(); }
+		
 		}else{ m->mothurOut("Error in reading your fastafile, at position " + toString(fastaString.tellg()) + ". Blank name."); m->mothurOutEndLine(); }
 		
 	}
@@ -118,10 +123,14 @@ Sequence::Sequence(istringstream& fastaString, string JustUnaligned){
 			
 			while (!fastaString.eof())	{	char c = fastaString.get();  if (c == 10 || c == 13){ break;	}	} // get rest of line if there's any crap there
 			
-			sequence = getSequenceString(fastaString);		
+			int numAmbig = 0;
+			sequence = getSequenceString(fastaString, numAmbig);
 			
 			//setUnaligned removes any gap characters for us						
-			setUnaligned(sequence);		
+			setUnaligned(sequence);	
+			
+			if ((numAmbig / (float) numBases) > 0.25) { m->mothurOut("[WARNING]: We found more than 25% of the bases in sequence " + name + " to be ambiguous. Mothur is not setup to process protein sequences."); m->mothurOutEndLine(); }
+			
 		}else{ m->mothurOut("Error in reading your fastafile, at position " + toString(fastaString.tellg()) + ". Blank name."); m->mothurOutEndLine(); }
 		
 	}
@@ -163,11 +172,15 @@ Sequence::Sequence(ifstream& fastaFile){
 			//read real sequence
 			while (!fastaFile.eof())	{	char c = fastaFile.get(); if (c == 10 || c == 13){  break;	}	} // get rest of line if there's any crap there
 			
-			sequence = getSequenceString(fastaFile);		
-	
+			int numAmbig = 0;
+			sequence = getSequenceString(fastaFile, numAmbig);
+			
 			setAligned(sequence);	
 			//setUnaligned removes any gap characters for us						
 			setUnaligned(sequence);	
+			
+			if ((numAmbig / (float) numBases) > 0.25) { m->mothurOut("[WARNING]: We found more than 25% of the bases in sequence " + name + " to be ambiguous. Mothur is not setup to process protein sequences."); m->mothurOutEndLine(); }
+			
 		}else{ m->mothurOut("Error in reading your fastafile, at position " + toString(fastaFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); }
 
 	}
@@ -205,10 +218,14 @@ Sequence::Sequence(ifstream& fastaFile, string JustUnaligned){
 			//read real sequence
 			while (!fastaFile.eof())	{	char c = fastaFile.get(); if (c == 10 || c == 13){	 break;	}	} // get rest of line if there's any crap there
 			
-			sequence = getSequenceString(fastaFile);		
+			int numAmbig = 0;
+			sequence = getSequenceString(fastaFile, numAmbig);
 			
 			//setUnaligned removes any gap characters for us						
 			setUnaligned(sequence);	
+			
+			if ((numAmbig / (float) numBases) > 0.25) { m->mothurOut("[WARNING]: We found more than 25% of the bases in sequence " + name + " to be ambiguous. Mothur is not setup to process protein sequences."); m->mothurOutEndLine(); }
+			
 		}else{ m->mothurOut("Error in reading your fastafile, at position " + toString(fastaFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); }
 		
 	}
@@ -219,10 +236,11 @@ Sequence::Sequence(ifstream& fastaFile, string JustUnaligned){
 }
 
 //********************************************************************************************************************
-string Sequence::getSequenceString(ifstream& fastaFile) {
+string Sequence::getSequenceString(ifstream& fastaFile, int& numAmbig) {
 	try {
 		char letter;
 		string sequence = "";	
+		numAmbig = 0;
 		
 		while(fastaFile){
 			letter= fastaFile.get();
@@ -233,8 +251,9 @@ string Sequence::getSequenceString(ifstream& fastaFile) {
 			else if(isprint(letter)){
 				letter = toupper(letter);
 				if(letter == 'U'){letter = 'T';}
-				if(letter != '.' && letter != '-' && letter != 'A' && letter != 'T' && letter != 'G'  && letter != 'C'){
+				if(letter != '.' && letter != '-' && letter != 'A' && letter != 'T' && letter != 'G'  && letter != 'C' && letter != 'N'){
 					letter = 'N';
+					numAmbig++;
 				}
 				sequence += letter;
 			}
@@ -270,10 +289,11 @@ string Sequence::getCommentString(ifstream& fastaFile) {
 	}
 }
 //********************************************************************************************************************
-string Sequence::getSequenceString(istringstream& fastaFile) {
+string Sequence::getSequenceString(istringstream& fastaFile, int& numAmbig) {
 	try {
 		char letter;
-		string sequence = "";	
+		string sequence = "";
+		numAmbig = 0;
 		
 		while(!fastaFile.eof()){
 			letter= fastaFile.get();
@@ -285,6 +305,10 @@ string Sequence::getSequenceString(istringstream& fastaFile) {
 			else if(isprint(letter)){
 				letter = toupper(letter);
 				if(letter == 'U'){letter = 'T';}
+				if(letter != '.' && letter != '-' && letter != 'A' && letter != 'T' && letter != 'G'  && letter != 'C' && letter != 'N'){
+					letter = 'N';
+					numAmbig++;
+				}
 				sequence += letter;
 			}
 		}

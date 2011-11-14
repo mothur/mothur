@@ -45,6 +45,7 @@ private:
 	int screenGroupFile(set<string>);
 	int screenAlignReport(set<string>);
 	int screenQual(set<string>);
+	int screenTaxonomy(set<string>);
 	
 	int driver(linePair*, string, string, string, set<string>&);
 	int createProcesses(string, string, string, set<string>&);
@@ -54,7 +55,7 @@ private:
 	#endif
 
 	bool abort;
-	string fastafile, namefile, groupfile, alignreport, outputDir, qualfile;
+	string fastafile, namefile, groupfile, alignreport, outputDir, qualfile, taxonomy;
 	int startPos, endPos, maxAmbig, maxHomoP, minLength, maxLength, processors, criteria;
 	vector<string> outputNames;
 	vector<string> optimize;

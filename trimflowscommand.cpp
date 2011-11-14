@@ -17,8 +17,8 @@ vector<string> TrimFlowsCommand::setParameters(){
 		CommandParameter pflow("flow", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pflow);
 		CommandParameter poligos("oligos", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(poligos);
 		CommandParameter pmaxhomop("maxhomop", "Number", "", "9", "", "", "",false,false); parameters.push_back(pmaxhomop);
-		CommandParameter pmaxflows("maxflows", "Number", "", "720", "", "", "",false,false); parameters.push_back(pmaxflows);
-		CommandParameter pminflows("minflows", "Number", "", "360", "", "", "",false,false); parameters.push_back(pminflows);
+		CommandParameter pmaxflows("maxflows", "Number", "", "450", "", "", "",false,false); parameters.push_back(pmaxflows);
+		CommandParameter pminflows("minflows", "Number", "", "450", "", "", "",false,false); parameters.push_back(pminflows);
 		CommandParameter ppdiffs("pdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(ppdiffs);
 		CommandParameter pbdiffs("bdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(pbdiffs);
 		CommandParameter ptdiffs("tdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(ptdiffs);
