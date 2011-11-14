@@ -18,6 +18,7 @@ vector<string> ScreenSeqsCommand::setParameters(){
 		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pgroup);
 		CommandParameter pqfile("qfile", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pqfile);
 		CommandParameter palignreport("alignreport", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(palignreport);
+		CommandParameter ptax("taxonomy", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(ptax);
 		CommandParameter pstart("start", "Number", "", "-1", "", "", "",false,false); parameters.push_back(pstart);
 		CommandParameter pend("end", "Number", "", "-1", "", "", "",false,false); parameters.push_back(pend);
 		CommandParameter pmaxambig("maxambig", "Number", "", "-1", "", "", "",false,false); parameters.push_back(pmaxambig);
@@ -44,8 +45,9 @@ string ScreenSeqsCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The screen.seqs command reads a fastafile and creates .....\n";
-		helpString += "The screen.seqs command parameters are fasta, start, end, maxambig, maxhomop, minlength, maxlength, name, group, qfile, optimize, criteria and processors.\n";
+		helpString += "The screen.seqs command parameters are fasta, start, end, maxambig, maxhomop, minlength, maxlength, name, group, qfile, alignreport, taxonomy, optimize, criteria and processors.\n";
 		helpString += "The fasta parameter is required.\n";
+		helpString += "The alignreport and taxonomy parameters allow you to remove bad seqs from taxonomy and alignreport files.\n";
 		helpString += "The start parameter .... The default is -1.\n";
 		helpString += "The end parameter .... The default is -1.\n";
 		helpString += "The maxambig parameter allows you to set the maximum number of ambigious bases allowed. The default is -1.\n";
@@ -80,6 +82,7 @@ ScreenSeqsCommand::ScreenSeqsCommand(){
 		outputTypes["alignreport"] = tempOutNames;
 		outputTypes["accnos"] = tempOutNames;
 		outputTypes["qfile"] = tempOutNames;
+		outputTypes["taxonomy"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ScreenSeqsCommand", "ScreenSeqsCommand");
@@ -118,6 +121,7 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 			outputTypes["alignreport"] = tempOutNames;
 			outputTypes["accnos"] = tempOutNames;
 			outputTypes["qfile"] = tempOutNames;
+			outputTypes["taxonomy"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -164,6 +168,13 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 					if (path == "") {	parameters["qfile"] = inputDir + it->second;		}
 				}
 				
+				it = parameters.find("taxonomy");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
+				}
 			}
 
 			//check for required parameters
@@ -193,7 +204,11 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 			
 			alignreport = validParameter.validFile(parameters, "alignreport", true);
 			if (alignreport == "not open") { abort = true; }
-			else if (alignreport == "not found") { alignreport = ""; }	
+			else if (alignreport == "not found") { alignreport = ""; }
+			
+			taxonomy = validParameter.validFile(parameters, "taxonomy", true);
+			if (taxonomy == "not open") { abort = true; }
+			else if (taxonomy == "not found") { taxonomy = ""; }	
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
@@ -483,6 +498,7 @@ int ScreenSeqsCommand::execute(){
 
 		if(alignreport != "")					{	screenAlignReport(badSeqNames);		}
 		if(qualfile != "")						{	screenQual(badSeqNames);			}
+		if(taxonomy != "")						{	screenTaxonomy(badSeqNames);		}
 		
 		if (m->control_pressed) { m->mothurRemove(goodSeqFile);  return 0; }
 		
@@ -518,6 +534,11 @@ int ScreenSeqsCommand::execute(){
 		itTypes = outputTypes.find("qfile");
 		if (itTypes != outputTypes.end()) {
 			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setQualFile(current); }
+		}
+		
+		itTypes = outputTypes.find("taxonomy");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setTaxonomyFile(current); }
 		}
 
 		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to screen " + toString(numFastaSeqs) + " sequences.");
@@ -644,6 +665,16 @@ int ScreenSeqsCommand::getSummary(vector<unsigned long long>& positions){
 			lines.push_back(new linePair(positions[i], positions[(i+1)]));
 		}	
 		
+		
+#ifdef USE_MPI
+		MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
+		
+		if (pid == 0) { //only one process should fix files
+			driverCreateSummary(startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, fastafile, lines[0]);
+		}
+		
+		MPI_Barrier(MPI_COMM_WORLD); //make everyone wait
+#else
 		int numSeqs = 0;
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 			if(processors == 1){
@@ -657,7 +688,7 @@ int ScreenSeqsCommand::getSummary(vector<unsigned long long>& positions){
 			numSeqs = driverCreateSummary(startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, fastafile, lines[0]);
 			if (m->control_pressed) {  return 0; }
 		#endif
-
+#endif
 		sort(startPosition.begin(), startPosition.end());
 		sort(endPosition.begin(), endPosition.end());
 		sort(seqLength.begin(), seqLength.end());
@@ -930,6 +961,56 @@ int ScreenSeqsCommand::screenAlignReport(set<string> badSeqNames){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ScreenSeqsCommand", "screenAlignReport");
+		exit(1);
+	}
+	
+}
+//***************************************************************************************************************
+
+int ScreenSeqsCommand::screenTaxonomy(set<string> badSeqNames){
+	try {
+		ifstream input;
+		m->openInputFile(taxonomy, input);
+		string seqName, tax;
+		set<string>::iterator it;
+		
+		string goodTaxFile = outputDir + m->getRootName(m->getSimpleName(taxonomy)) + "good" + m->getExtension(taxonomy);
+		outputNames.push_back(goodTaxFile);  outputTypes["taxonomy"].push_back(goodTaxFile);
+		ofstream goodTaxOut;	m->openOutputFile(goodTaxFile, goodTaxOut);
+				
+		while(!input.eof()){
+			if (m->control_pressed) { goodTaxOut.close(); input.close(); m->mothurRemove(goodTaxFile); return 0; }
+			
+			input >> seqName >> tax;
+			it = badSeqNames.find(seqName);
+			
+			if(it != badSeqNames.end()){ badSeqNames.erase(it); }
+			else{
+				goodTaxOut << seqName << '\t' << tax << endl;
+			}
+			m->gobble(input);
+		}
+		
+		if (m->control_pressed) { goodTaxOut.close(); input.close(); m->mothurRemove(goodTaxFile); return 0; }
+		
+		//we were unable to remove some of the bad sequences
+		if (badSeqNames.size() != 0) {
+			for (it = badSeqNames.begin(); it != badSeqNames.end(); it++) {  
+				m->mothurOut("Your taxonomy file does not include the sequence " + *it + " please correct."); 
+				m->mothurOutEndLine();
+			}
+		}
+		
+		input.close();
+		goodTaxOut.close();
+		
+		if (m->control_pressed) {  m->mothurRemove(goodTaxFile);  return 0; }
+		
+		return 0;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ScreenSeqsCommand", "screenTaxonomy");
 		exit(1);
 	}
 	

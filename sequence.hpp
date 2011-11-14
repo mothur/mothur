@@ -65,9 +65,9 @@ public:
 private:
 	MothurOut* m;
 	void initialize();
-	string getSequenceString(ifstream&);
+	string getSequenceString(ifstream&, int&);
 	string getCommentString(ifstream&);
-	string getSequenceString(istringstream&);
+	string getSequenceString(istringstream&, int&);
 	string getCommentString(istringstream&);
 	string name;
 	string unaligned;

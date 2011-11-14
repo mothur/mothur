@@ -181,7 +181,7 @@ static DWORD WINAPI MyUchimeThreadFunction(LPVOID lpParam){
 			
 			string path = pDataArray->m->argv;
 			string tempPath = path;
-			for (int i = 0; i < path.length(); i++) { tempPath[i] = tolower(path[i]); }
+			for (int j = 0; j < path.length(); j++) { tempPath[j] = tolower(path[j]); }
 			path = path.substr(0, (tempPath.find_last_of('m')));
 			
 			string uchimeCommand = path;

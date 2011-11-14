@@ -379,9 +379,16 @@ int RemoveGroupsCommand::readFasta(){
 				//if this name is in the accnos file
 				if (names.count(name) == 0) {
 					wroteSomething = true;
-					
-					currSeq.printSequence(out);
-				}else { removedCount++; }
+					currSeq.printSequence(out); 
+				}else { 
+					//if you are not in the accnos file check if you are a name that needs to be changed
+					map<string, string>::iterator it = uniqueToRedundant.find(name);
+					if (it != uniqueToRedundant.end()) {
+						wroteSomething = true;
+						currSeq.setName(it->second);
+						currSeq.printSequence(out);
+					}else { removedCount++; }
+				}
 			}
 			m->gobble(in);
 		}
@@ -527,12 +534,23 @@ int RemoveGroupsCommand::readList(){
 					
 					//if that name is in the .accnos file, add it
 					if (names.count(name) == 0) {  newNames += name + ",";  }
-					else { removedCount++; }
+					else {
+						//if you are not in the accnos file check if you are a name that needs to be changed
+						map<string, string>::iterator it = uniqueToRedundant.find(name);
+						if (it != uniqueToRedundant.end()) {
+							newNames += it->second + ",";
+						}else { removedCount++; }
+					}
 				}
 				
 				//get last name
 				if (names.count(binnames) == 0) {  newNames += binnames + ",";  }
-				else { removedCount++; }
+				else { //if you are not in the accnos file check if you are a name that needs to be changed
+					map<string, string>::iterator it = uniqueToRedundant.find(binnames);
+					if (it != uniqueToRedundant.end()) {
+						newNames += it->second + ",";
+					}else { removedCount++; }
+				}
 				
 				//if there are names in this bin add to new list
 				if (newNames != "") {  
@@ -624,6 +642,7 @@ int RemoveGroupsCommand::readName(){
 					//you know you have at least one valid second since first column is valid
 					for (int i = 0; i < validSecond.size()-1; i++) {  out << validSecond[i] << ',';  }
 					out << validSecond[validSecond.size()-1] << endl;
+					uniqueToRedundant[firstCol] = validSecond[0];
 				}
 			}
 			
@@ -718,7 +737,12 @@ int RemoveGroupsCommand::readTax(){
 			if (names.count(name) == 0) {
 				wroteSomething = true;
 				out << name << '\t' << tax << endl;
-			}else {  removedCount++;  }
+			}else {  //if you are not in the accnos file check if you are a name that needs to be changed
+				map<string, string>::iterator it = uniqueToRedundant.find(name);
+				if (it != uniqueToRedundant.end()) {
+					wroteSomething = true;
+					out << it->second << '\t' << tax << endl;
+				}else { removedCount++; }  }
 			
 			m->gobble(in);
 		}

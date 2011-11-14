@@ -55,8 +55,8 @@ private:
 	int loadData(correctDist*, seqNoise&, vector<string>&, vector<string>&, vector<string>&, vector<int>&, map<string, string>&, vector<Sequence>&);
 
 	int driver(seqNoise&, vector<string>&, vector<string>&, vector<string>&, vector<int>&, string, string, string, string);
-	int driverGroups(SequenceParser&, string, string, string, int, int, vector<string>);
-	int createProcessesGroups(SequenceParser&, string, string, string, vector<string>);
+	vector<string> driverGroups(SequenceParser&, string, string, string, int, int, vector<string>);
+	vector<string> createProcessesGroups(SequenceParser&, string, string, string, vector<string>);
 	int deconvoluteResults(string, string);
 
 
@@ -77,6 +77,7 @@ struct shhhseqsData {
 	int end;
 	int sigma, threadID;
 	vector<string> groups;
+	vector<string> mapfileNames;
 	
 	shhhseqsData(){}
 	shhhseqsData(string f, string n, string g, string nff,  string nnf, string nmf, vector<string> gr, MothurOut* mout, int st, int en, int s, int tid) {
@@ -85,7 +86,7 @@ struct shhhseqsData {
 		groupfile = g;
 		newFName = nff;
 		newNName = nnf;
-		newNName = nmf;
+		newMName = nmf;
 		m = mout;
 		start = st;
 		end = en;
@@ -115,7 +116,7 @@ static DWORD WINAPI MyShhhSeqsThreadFunction(LPVOID lpParam){
 			if (pDataArray->m->control_pressed) {  return 0; }
 			
 			pDataArray->m->mothurOutEndLine(); pDataArray->m->mothurOut("Processing group " + pDataArray->groups[k] + ":"); pDataArray->m->mothurOutEndLine();
-			
+
 			map<string, string> thisNameMap;
 			thisNameMap = parser.getNameMap(pDataArray->groups[k]); 
 			vector<Sequence> thisSeqs = parser.getSeqs(pDataArray->groups[k]);
@@ -311,10 +312,9 @@ static DWORD WINAPI MyShhhSeqsThreadFunction(LPVOID lpParam){
 			
 			pDataArray->m->appendFiles(pDataArray->newFName+pDataArray->groups[k], pDataArray->newFName); pDataArray->m->mothurRemove(pDataArray->newFName+pDataArray->groups[k]);
 			pDataArray->m->appendFiles(pDataArray->newNName+pDataArray->groups[k], pDataArray->newNName); pDataArray->m->mothurRemove(pDataArray->newNName+pDataArray->groups[k]);
+			pDataArray->mapfileNames.push_back(pDataArray->newMName+pDataArray->groups[k]+".map");
 			
 			pDataArray->m->mothurOut("It took " + toString(time(NULL) - start) + " secs to process group " + pDataArray->groups[k] + "."); pDataArray->m->mothurOutEndLine(); 
-			
-							
 		}
 		
 		return 0;
@@ -322,7 +322,7 @@ static DWORD WINAPI MyShhhSeqsThreadFunction(LPVOID lpParam){
 		
 	}
 	catch(exception& e) {
-		pDataArray->m->errorOut(e, "PreClusterCommand", "MyPreclusterThreadFunction");
+		pDataArray->m->errorOut(e, "ShhhSeqsCommand", "MyShhhSeqsThreadFunction");
 		exit(1);
 	}
 } 
