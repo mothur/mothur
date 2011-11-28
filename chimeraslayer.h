@@ -26,6 +26,7 @@ class ChimeraSlayer : public Chimera {
 	public:
 		ChimeraSlayer(string, string, bool, string, int, int, int, int, float, int, int, int, int, int, int, int, int, bool, string, int);
 		ChimeraSlayer(string, string, bool, map<string, int>&, string,  int, int, int, int, float, int, int, int, int, int, int, int, int, bool, string, int);
+		ChimeraSlayer(string, string, bool, map<string, int>&, string,  int, int, int, int, float, int, int, int, int, int, int, int, int, bool, string, int, bool);
 
 		~ChimeraSlayer();
 		

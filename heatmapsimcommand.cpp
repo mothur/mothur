@@ -30,6 +30,7 @@ vector<string> HeatMapSimCommand::setParameters(){
 		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
 		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
 		CommandParameter pcalc("calc", "Multiple", "jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan-morisitahorn-braycurtis", "jest-thetayc", "", "", "",true,false); parameters.push_back(pcalc);
+		CommandParameter pfontsize("fontsize", "Number", "", "24", "", "", "",false,false); parameters.push_back(pfontsize);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
 		
@@ -47,11 +48,12 @@ string HeatMapSimCommand::getHelpString(){
 	try {
 		string helpString = "";
 		ValidCalculators validCalculator;
-		helpString += "The heatmap.sim command parameters are shared, phylip, column, name, groups, calc and label.  shared or phylip or column and name are required unless valid current files exist.\n";
+		helpString += "The heatmap.sim command parameters are shared, phylip, column, name, groups, calc, fontsize and label.  shared or phylip or column and name are required unless valid current files exist.\n";
 		helpString += "There are two ways to use the heatmap.sim command. The first is with the read.otu command. \n";
 		helpString += "With the read.otu command you may use the groups, label and calc parameters. \n";
 		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like included in your heatmap.\n";
 		helpString += "The group names are separated by dashes. The label parameter allows you to select what distance levels you would like a heatmap created for, and is also separated by dashes.\n";
+		helpString += "The fontsize parameter allows you to adjust the font size of the picture created, default=24.\n";
 		helpString += "The heatmap.sim command should be in the following format: heatmap.sim(groups=yourGroups, calc=yourCalc, label=yourLabels).\n";
 		helpString += "Example heatmap.sim(groups=A-B-C, calc=jabund).\n";
 		helpString += "The default value for groups is all the groups in your groupfile, and all labels in your inputfile will be used.\n";
@@ -113,9 +115,7 @@ HeatMapSimCommand::HeatMapSimCommand(string option)  {
 			outputTypes["svg"] = tempOutNames;
 			
 			format = "";
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
-			
+				
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
 			if (inputDir == "not found"){	inputDir = "";		}
@@ -208,6 +208,10 @@ HeatMapSimCommand::HeatMapSimCommand(string option)  {
 				}
 			}
 			
+			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(inputfile);		}
+
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 							
@@ -237,6 +241,8 @@ HeatMapSimCommand::HeatMapSimCommand(string option)  {
 				m->setGroups(Groups);
 			}
 			
+			string temp = validParameter.validFile(parameters, "fontsize", false);				if (temp == "not found") { temp = "24"; }
+			convert(temp, fontsize);
 			
 			if (abort == false) {
 				ValidCalculators validCalculator;
@@ -286,7 +292,7 @@ int HeatMapSimCommand::execute(){
 	
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
-		heatmap = new HeatMapSim(outputDir, inputfile);
+		heatmap = new HeatMapSim(outputDir, inputfile, fontsize);
 		
 		if (format == "shared") {
 			runCommandShared();

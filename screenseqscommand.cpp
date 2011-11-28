@@ -295,7 +295,7 @@ int ScreenSeqsCommand::execute(){
 		int numFastaSeqs = 0;
 		set<string> badSeqNames;
 		int start = time(NULL);
-		
+	
 #ifdef USE_MPI	
 			int pid, numSeqsPerProcessor; 
 			int tag = 2001;
@@ -304,7 +304,7 @@ int ScreenSeqsCommand::execute(){
 			MPI_Status status; 
 			MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
 			MPI_Comm_size(MPI_COMM_WORLD, &processors); 
-
+	
 			MPI_File inMPI;
 			MPI_File outMPIGood;
 			MPI_File outMPIBadAccnos;
@@ -667,13 +667,11 @@ int ScreenSeqsCommand::getSummary(vector<unsigned long long>& positions){
 		
 		
 #ifdef USE_MPI
+		int pid;
 		MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
 		
-		if (pid == 0) { //only one process should fix files
+		if (pid == 0) { 
 			driverCreateSummary(startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, fastafile, lines[0]);
-		}
-		
-		MPI_Barrier(MPI_COMM_WORLD); //make everyone wait
 #else
 		int numSeqs = 0;
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
@@ -707,6 +705,33 @@ int ScreenSeqsCommand::getSummary(vector<unsigned long long>& positions){
 			else if (optimize[i] == "maxlength") { maxLength = seqLength[criteriaPercentile]; m->mothurOut("Optimizing maxlength to " + toString(maxLength) + "."); m->mothurOutEndLine(); }
 		}
 
+#ifdef USE_MPI
+		}
+		
+		MPI_Status status; 
+		MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
+		MPI_Comm_size(MPI_COMM_WORLD, &processors); 
+			
+		if (pid == 0) { 
+			//send file positions to all processes
+			for(int i = 1; i < processors; i++) { 
+				MPI_Send(&startPos, 1, MPI_INT, i, 2001, MPI_COMM_WORLD);
+				MPI_Send(&endPos, 1, MPI_INT, i, 2001, MPI_COMM_WORLD);
+				MPI_Send(&maxAmbig, 1, MPI_INT, i, 2001, MPI_COMM_WORLD);
+				MPI_Send(&maxHomoP, 1, MPI_INT, i, 2001, MPI_COMM_WORLD);
+				MPI_Send(&minLength, 1, MPI_INT, i, 2001, MPI_COMM_WORLD);
+				MPI_Send(&maxLength, 1, MPI_INT, i, 2001, MPI_COMM_WORLD);
+			}
+		}else {
+			MPI_Recv(&startPos, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
+			MPI_Recv(&endPos, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
+			MPI_Recv(&maxAmbig, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
+			MPI_Recv(&maxHomoP, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
+			MPI_Recv(&minLength, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
+			MPI_Recv(&maxLength, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
+		}
+		MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
+#endif
 		return 0;
 	}
 	catch(exception& e) {

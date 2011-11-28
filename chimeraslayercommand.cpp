@@ -535,7 +535,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 			//until we resolve the issue 10-18-11
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 #else
-			processors=1;
+			//processors=1;
 #endif
 		}
 	}
@@ -549,16 +549,25 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 int ChimeraSlayerCommand::execute(){
 	try{
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
-			
+
 		for (int s = 0; s < fastaFileNames.size(); s++) {
 				
 			m->mothurOut("Checking sequences from " + fastaFileNames[s] + " ..." ); m->mothurOutEndLine();
 		
 			int start = time(NULL);	
+			if (outputDir == "") { outputDir = m->hasPath(fastaFileNames[s]);  }//if user entered a file with a path then preserve it				
+			string outputFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + "slayer.chimera";
+			string accnosFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]))  + "slayer.accnos";
+			string trimFastaFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]))  + "slayer.fasta";		
 			
-			//you provided a groupfile
-			string groupFile = "";
-			if (groupFileNames.size() != 0) { groupFile = groupFileNames[s]; }
+			//clears files
+			ofstream out, out1, out2;
+			m->openOutputFile(outputFileName, out); out.close(); 
+			m->openOutputFile(accnosFileName, out1); out1.close();
+			if (trim) { m->openOutputFile(trimFastaFileName, out2); out2.close(); }
+			outputNames.push_back(outputFileName); outputTypes["chimera"].push_back(outputFileName);
+			outputNames.push_back(accnosFileName); outputTypes["accnos"].push_back(accnosFileName);
+			if (trim) {  outputNames.push_back(trimFastaFileName); outputTypes["fasta"].push_back(trimFastaFileName); }			
 			
 			//maps a filename to priority map. 
 			//if no groupfile this is fastafileNames[s] -> prioirity
@@ -569,143 +578,69 @@ int ChimeraSlayerCommand::execute(){
 			fileToPriority[fastaFileNames[s]] = priority; //default
 			fileGroup[fastaFileNames[s]] = "noGroup";
 			SequenceParser* parser = NULL;
-			int totalSeqs = 0;
 			int totalChimeras = 0;
+			lines.clear();
 			
-			if ((templatefile == "self") && (groupFile == "")) { 
-				fileGroup.clear();
-				fileToPriority.clear();
-				if (processors != 1) { m->mothurOut("When using template=self, mothur can only use 1 processor, continuing."); m->mothurOutEndLine(); processors = 1; }
-				string nameFile = "";
-				if (nameFileNames.size() != 0) { //you provided a namefile and we don't need to create one
-					nameFile = nameFileNames[s];
-				}else {  nameFile = getNamesFile(fastaFileNames[s]); }
-				
-				//sort fastafile by abundance, returns new sorted fastafile name
-				m->mothurOut("Sorting fastafile according to abundance..."); cout.flush(); 
-				priority = sortFastaFile(fastaFileNames[s], nameFile);
-				m->mothurOut("Done."); m->mothurOutEndLine();
-				
-				fileToPriority.clear();
-				fileGroup.clear();
-				fileToPriority[fastaFileNames[s]] = priority;
-				fileGroup[fastaFileNames[s]] = "noGroup";
-				if (m->control_pressed) {  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}
-			}else if ((templatefile == "self") && (groupFile != "")) {
-				fileGroup.clear();
-				fileToPriority.clear();
-				if (processors != 1) { m->mothurOut("When using template=self, mothur can only use 1 processor, continuing."); m->mothurOutEndLine(); processors = 1; }
-				string nameFile = "";
-				if (nameFileNames.size() != 0) { //you provided a namefile and we don't need to create one
-					nameFile = nameFileNames[s];
-				}else { nameFile = getNamesFile(fastaFileNames[s]); }
-				
-				//Parse sequences by group
-				parser = new SequenceParser(groupFile, fastaFileNames[s], nameFile);
-				vector<string> groups = parser->getNamesOfGroups();
-				
-				for (int i = 0; i < groups.size(); i++) {
-					vector<Sequence> thisGroupsSeqs = parser->getSeqs(groups[i]);
-					map<string, string> thisGroupsMap = parser->getNameMap(groups[i]);
-					string newFastaFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + groups[i] + "-sortedTemp.fasta";
-					priority = sortFastaFile(thisGroupsSeqs, thisGroupsMap, newFastaFile); 
-					fileToPriority[newFastaFile] = priority;
-					fileGroup[newFastaFile] = groups[i];
-				}
-			}
+			if (templatefile == "self") { setUpForSelfReference(parser, fileGroup, fileToPriority, s); }
 			
-			if (outputDir == "") { outputDir = m->hasPath(fastaFileNames[s]);  }//if user entered a file with a path then preserve it				
-			string outputFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + "slayer.chimera";
-			string accnosFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]))  + "slayer.accnos";
-			string trimFastaFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]))  + "slayer.fasta";
-			
-			//clears files
-			ofstream out, out1, out2;
-			m->openOutputFile(outputFileName, out); out.close(); 
-			m->openOutputFile(accnosFileName, out1); out1.close();
-			if (trim) { m->openOutputFile(trimFastaFileName, out2); out2.close(); }
-			outputNames.push_back(outputFileName); outputTypes["chimera"].push_back(outputFileName);
-			outputNames.push_back(accnosFileName); outputTypes["accnos"].push_back(accnosFileName);
-			if (trim) {  outputNames.push_back(trimFastaFileName); outputTypes["fasta"].push_back(trimFastaFileName); }
-			
-			
-			for (itFile = fileToPriority.begin(); itFile != fileToPriority.end(); itFile++) {
-				
+			if (m->control_pressed) {  if (parser != NULL) { delete parser; } for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}
+
+			if (fileToPriority.size() == 1) { //you running without a groupfile
+				itFile = fileToPriority.begin();
 				string thisFastaName = itFile->first;
 				map<string, int> thisPriority = itFile->second;
-				
-				//this is true when you have parsed by groups
-				if (fileToPriority.size() > 1) { m->mothurOutEndLine(); m->mothurOut("Checking sequences from group: " + fileGroup[thisFastaName] + "."); m->mothurOutEndLine();  }
-				
-				string thisoutputFileName = outputDir + m->getRootName(m->getSimpleName(thisFastaName)) + fileGroup[thisFastaName] + "slayer.chimera";
-				string thisaccnosFileName = outputDir + m->getRootName(m->getSimpleName(thisFastaName)) + fileGroup[thisFastaName] + "slayer.accnos";
-				string thistrimFastaFileName = outputDir + m->getRootName(m->getSimpleName(thisFastaName)) + fileGroup[thisFastaName] + "slayer.fasta";
-				
-				//create chimera here if you are mac or linux because fork will copy for you. Create in create processes instead if you are windows.
-				if (processors == 1) { templateSeqsLength = setupChimera(thisFastaName, thisPriority); }
+#ifdef USE_MPI	
+				MPIExecute(thisFastaName, outputFileName, accnosFileName, trimFastaFileName, thisPriority);
+#else
+				//break up file
+				vector<unsigned long long> positions; 
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+				positions = m->divideFile(thisFastaName, processors);
+				for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
+#else
+				if (processors == 1) {	lines.push_back(linePair(0, 1000)); }
 				else {
-					#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || USE_MPI
-						templateSeqsLength = setupChimera(thisFastaName, thisPriority);
-					#endif
-				}
-				
-				if (m->control_pressed) {  if (parser != NULL) { delete parser; } for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}
-				
-			#ifdef USE_MPI	
-				MPIExecute(thisFastaName, thisoutputFileName, thisaccnosFileName, thistrimFastaFileName);
-				if (m->control_pressed) { outputTypes.clear();  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;  }
-			#else
-					//break up file
-					vector<unsigned long long> positions; 
-				#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-					positions = m->divideFile(thisFastaName, processors);
-					for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(new linePair(positions[i], positions[(i+1)]));	}
-				#else
-					if (processors == 1) {	lines.push_back(new linePair(0, 1000)); }
-					else {
-						positions = m->setFilePosFasta(thisFastaName, numSeqs); 
+					positions = m->setFilePosFasta(thisFastaName, numSeqs); 
 					
-						//figure out how many sequences you have to process
-						int numSeqsPerProcessor = numSeqs / processors;
-						for (int i = 0; i < processors; i++) {
-							int startIndex =  i * numSeqsPerProcessor;
-							if(i == (processors - 1)){	numSeqsPerProcessor = numSeqs - i * numSeqsPerProcessor; 	}
-							lines.push_back(new linePair(positions[startIndex], numSeqsPerProcessor));
-						}
+					//figure out how many sequences you have to process
+					int numSeqsPerProcessor = numSeqs / processors;
+					for (int i = 0; i < processors; i++) {
+						int startIndex =  i * numSeqsPerProcessor;
+						if(i == (processors - 1)){	numSeqsPerProcessor = numSeqs - i * numSeqsPerProcessor; 	}
+						lines.push_back(linePair(positions[startIndex], numSeqsPerProcessor));
 					}
-				#endif
+				}
+#endif
+				if(processors == 1){ numSeqs = driver(lines[0], outputFileName, thisFastaName, accnosFileName, trimFastaFileName, thisPriority);  }
+				else{ numSeqs = createProcesses(outputFileName, thisFastaName, accnosFileName, trimFastaFileName, thisPriority); }
 				
-				if(processors == 1){
-					numSeqs = driver(lines[0], thisoutputFileName, thisFastaName, thisaccnosFileName, thistrimFastaFileName);
-					
-					int numNoParents = chimera->getNumNoParents();
-					if (numNoParents == numSeqs) { m->mothurOut("[WARNING]: megablast returned 0 potential parents for all your sequences. This could be due to formatdb.exe not being setup properly, please check formatdb.log for errors."); m->mothurOutEndLine(); }
-					
-				}else{ numSeqs = createProcesses(thisoutputFileName, thisFastaName, thisaccnosFileName, thistrimFastaFileName); }
+				if (m->control_pressed) { if (parser != NULL) { delete parser; }  outputTypes.clear(); if (trim) { m->mothurRemove(trimFastaFileName); } m->mothurRemove(outputFileName); m->mothurRemove(accnosFileName); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }				
+#endif
+			}else { //you have provided a groupfile
+#ifdef USE_MPI	
+				MPIExecuteGroups(outputFileName, accnosFileName, trimFastaFileName, fileToPriority, fileGroup);
+#else
+				if (processors == 1) { numSeqs = driverGroups(outputFileName, accnosFileName, trimFastaFileName, fileToPriority, fileGroup);	}
+				else {  numSeqs = createProcessesGroups(outputFileName, accnosFileName, trimFastaFileName, fileToPriority, fileGroup); 		} //destroys fileToPriority
+#endif
+
+#ifdef USE_MPI	
+				int pid; 
+				MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
 				
-				if (m->control_pressed) { if (parser != NULL) { delete parser; }  outputTypes.clear(); if (trim) { m->mothurRemove(trimFastaFileName); } m->mothurRemove(outputFileName); m->mothurRemove(accnosFileName); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear(); delete chimera; return 0; }
+				if (pid == 0) {
+#endif
 				
-			#endif
-				
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || USE_MPI
-				delete chimera;
-			#endif
-				
-				for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
-				
-				//append files
-				m->appendFiles(thisoutputFileName, outputFileName); m->mothurRemove(thisoutputFileName); 
-				totalChimeras = m->appendFiles(thisaccnosFileName, accnosFileName); m->mothurRemove(thisaccnosFileName);
-				if (trim) { m->appendFiles(thistrimFastaFileName, trimFastaFileName); m->mothurRemove(thistrimFastaFileName); }
-				
-				totalSeqs += numSeqs;
+				totalChimeras = deconvoluteResults(parser, outputFileName, accnosFileName, trimFastaFileName);
+#ifdef USE_MPI	
+				}
+				MPI_Barrier(MPI_COMM_WORLD); //make everyone wait
+#endif
 			}
-			
-			if (fileToPriority.size() > 1) { totalChimeras = deconvoluteResults(parser, outputFileName, accnosFileName, trimFastaFileName); }
-			
+	
 			if (parser != NULL) { delete parser; } 
 			
-			m->mothurOutEndLine(); m->mothurOut(toString(totalChimeras) + " chimera found."); m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(totalSeqs) + " sequences.");	m->mothurOutEndLine();
+			m->mothurOutEndLine(); m->mothurOut(toString(totalChimeras) + " chimera found."); m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.");	m->mothurOutEndLine();
 		}
 		
 		//set accnos file as new current accnosfile
@@ -736,7 +671,117 @@ int ChimeraSlayerCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-int ChimeraSlayerCommand::MPIExecute(string inputFile, string outputFileName, string accnosFileName, string trimFastaFileName){
+int ChimeraSlayerCommand::MPIExecuteGroups(string outputFileName, string accnosFileName, string trimFastaFileName, map<string, map<string, int> >& fileToPriority, map<string, string>& fileGroup){
+	try {
+#ifdef USE_MPI	
+		int pid; 
+		int tag = 2001;
+		
+		MPI_Status status; 
+		MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
+		MPI_Comm_size(MPI_COMM_WORLD, &processors); 
+	
+		//put filenames in a vector, then pass each process a starting and ending point in the vector
+		//all processes already have the fileToPriority and fileGroup, they just need to know which files to process
+		map<string, map<string, int> >::iterator itFile;
+		vector<string> filenames;
+		for(itFile = fileToPriority.begin(); itFile != fileToPriority.end(); itFile++) { filenames.push_back(itFile->first); }
+		
+		int numGroupsPerProcessor = filenames.size() / processors;
+		int startIndex =  pid * numGroupsPerProcessor;
+		int endIndex = (pid+1) * numGroupsPerProcessor;
+		if(pid == (processors - 1)){	endIndex = filenames.size(); 	}
+		
+		vector<unsigned long long> MPIPos;
+		
+		MPI_File outMPI;
+		MPI_File outMPIAccnos;
+		MPI_File outMPIFasta;
+		
+		int outMode=MPI_MODE_CREATE|MPI_MODE_WRONLY; 
+		int inMode=MPI_MODE_RDONLY; 
+		
+		char outFilename[1024];
+		strcpy(outFilename, outputFileName.c_str());
+		
+		char outAccnosFilename[1024];
+		strcpy(outAccnosFilename, accnosFileName.c_str());
+		
+		char outFastaFilename[1024];
+		strcpy(outFastaFilename, trimFastaFileName.c_str());
+		
+		MPI_File_open(MPI_COMM_WORLD, outFilename, outMode, MPI_INFO_NULL, &outMPI);
+		MPI_File_open(MPI_COMM_WORLD, outAccnosFilename, outMode, MPI_INFO_NULL, &outMPIAccnos);
+		if (trim) { MPI_File_open(MPI_COMM_WORLD, outFastaFilename, outMode, MPI_INFO_NULL, &outMPIFasta); }
+		
+		if (m->control_pressed) {   MPI_File_close(&outMPI); if (trim) {  MPI_File_close(&outMPIFasta);  } MPI_File_close(&outMPIAccnos);  return 0;  }
+		
+		//print headers
+		if (pid == 0) { //you are the root process 
+			m->mothurOutEndLine();
+			m->mothurOut("Only reporting sequence supported by " + toString(minBS) + "% of bootstrapped results.");
+			m->mothurOutEndLine();
+			
+			string outTemp = "Name\tLeftParent\tRightParent\tDivQLAQRB\tPerIDQLAQRB\tBootStrapA\tDivQLBQRA\tPerIDQLBQRA\tBootStrapB\tFlag\tLeftWindow\tRightWindow\n";
+			
+			//print header
+			int length = outTemp.length();
+			char* buf2 = new char[length];
+			memcpy(buf2, outTemp.c_str(), length);
+			
+			MPI_File_write_shared(outMPI, buf2, length, MPI_CHAR, &status);
+			delete buf2;
+		}
+		MPI_Barrier(MPI_COMM_WORLD); //make everyone wait
+		
+		for (int i = startIndex; i < endIndex; i++) {
+			
+			int start = time(NULL);
+			int num = 0;
+			string thisFastaName = filenames[i];
+			map<string, int> thisPriority = fileToPriority[thisFastaName];
+			
+			char inFileName[1024];
+			strcpy(inFileName, thisFastaName.c_str());
+			MPI_File inMPI;
+			MPI_File_open(MPI_COMM_SELF, inFileName, inMode, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
+			
+			MPIPos = m->setFilePosFasta(thisFastaName, num); //fills MPIPos, returns numSeqs
+			
+			cout << endl << "Checking sequences from group: " << fileGroup[thisFastaName] << "." << endl; 
+			
+			driverMPI(0, num, inMPI, outMPI, outMPIAccnos, outMPIFasta, MPIPos, thisFastaName, thisPriority, true);
+			numSeqs += num;
+			
+			MPI_File_close(&inMPI);
+			m->mothurRemove(thisFastaName);
+						
+			cout << endl << "It took " << toString(time(NULL) - start) << " secs to check " + toString(num) + " sequences from group " << fileGroup[thisFastaName] << "." << endl;
+		}
+		
+		if (pid == 0) {
+			for(int i = 1; i < processors; i++) { 
+				int temp = 0;
+				MPI_Recv(&temp, 1, MPI_INT, i, 2001, MPI_COMM_WORLD, &status);
+				numSeqs += temp;
+			}
+		}else{ MPI_Send(&numSeqs, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD); }
+		
+		MPI_File_close(&outMPI);
+		MPI_File_close(&outMPIAccnos); 
+		if (trim) { MPI_File_close(&outMPIFasta); }
+		
+		MPI_Barrier(MPI_COMM_WORLD); //make everyone wait
+#endif
+		return 0;
+		
+	}catch(exception& e) {
+		m->errorOut(e, "ChimeraSlayerCommand", "MPIExecuteGroups");
+		exit(1);
+	}
+}		
+//**********************************************************************************************************************
+int ChimeraSlayerCommand::MPIExecute(string inputFile, string outputFileName, string accnosFileName, string trimFastaFileName, map<string, int>& priority){
 	try {
 		
 #ifdef USE_MPI	
@@ -773,7 +818,7 @@ int ChimeraSlayerCommand::MPIExecute(string inputFile, string outputFileName, st
 		MPI_File_open(MPI_COMM_WORLD, outAccnosFilename, outMode, MPI_INFO_NULL, &outMPIAccnos);
 		if (trim) { MPI_File_open(MPI_COMM_WORLD, outFastaFilename, outMode, MPI_INFO_NULL, &outMPIFasta); }
 		
-		if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI); if (trim) {  MPI_File_close(&outMPIFasta);  } MPI_File_close(&outMPIAccnos);  delete chimera; return 0;  }
+		if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI); if (trim) {  MPI_File_close(&outMPIFasta);  } MPI_File_close(&outMPIAccnos);  return 0;  }
 		
 		if (pid == 0) { //you are the root process 
 			m->mothurOutEndLine();
@@ -810,19 +855,9 @@ int ChimeraSlayerCommand::MPIExecute(string inputFile, string outputFileName, st
 			}
 			
 			//do your part
-			driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPI, outMPIAccnos, outMPIFasta, MPIPos);
-			
-			int numNoParents = chimera->getNumNoParents();
-			int temp;
-			for(int i = 1; i < processors; i++) { 
-				MPI_Recv(&temp, 1, MPI_INT, 1, tag, MPI_COMM_WORLD, &status);
-				numNoParents += temp;
-			}
-			
-			
-			if (numSeqs == numNoParents) {  m->mothurOut("[WARNING]: megablast returned 0 potential parents for all your sequences. This could be due to formatdb.exe not being setup properly, please check formatdb.log for errors."); m->mothurOutEndLine(); }
-			
-			if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI); if (trim) { MPI_File_close(&outMPIFasta); }  MPI_File_close(&outMPIAccnos);  delete chimera; return 0;  }
+			driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPI, outMPIAccnos, outMPIFasta, MPIPos, inputFile, priority, false);
+						
+			if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI); if (trim) { MPI_File_close(&outMPIFasta); }  MPI_File_close(&outMPIAccnos);   return 0;  }
 			
 		}else{ //you are a child process
 			if (templatefile != "self") { //if template=self we can only use 1 processor
@@ -836,12 +871,9 @@ int ChimeraSlayerCommand::MPIExecute(string inputFile, string outputFileName, st
 				if(pid == (processors - 1)){	numSeqsPerProcessor = numSeqs - pid * numSeqsPerProcessor; 	}
 				
 				//do your part
-				driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPI, outMPIAccnos, outMPIFasta, MPIPos);
+				driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPI, outMPIAccnos, outMPIFasta, MPIPos, inputFile, priority, false);
 				
-				int numNoParents = chimera->getNumNoParents();
-				MPI_Send(&numNoParents, 1, MPI_INT, 0, tag, MPI_COMM_WORLD);
-				
-				if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI); if (trim) { MPI_File_close(&outMPIFasta); }  MPI_File_close(&outMPIAccnos);  delete chimera; return 0;  }
+				if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI); if (trim) { MPI_File_close(&outMPIFasta); }  MPI_File_close(&outMPIAccnos);  return 0;  }
 				
 			}
 		}
@@ -855,7 +887,7 @@ int ChimeraSlayerCommand::MPIExecute(string inputFile, string outputFileName, st
 		
 		
 #endif		
-		return 0;
+		return numSeqs;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ChimeraSlayerCommand", "MPIExecute");
@@ -953,9 +985,10 @@ int ChimeraSlayerCommand::deconvoluteResults(SequenceParser* parser, string outp
 						itChimeras = chimerasInFile.find(itUnique->second);
 						
 						if (itChimeras == chimerasInFile.end()) {
+							//is this sequence not already in the file
 							itNames = namesInFile.find((itUnique->second));
 							
-							if (itNames == namesInFile.end()) {cout << itUnique->second << endl; out << itUnique->second << '\t' << "no" << endl; namesInFile.insert(itUnique->second); }
+							if (itNames == namesInFile.end()) { out << itUnique->second << '\t' << "no" << endl; namesInFile.insert(itUnique->second); }
 						}
 					}
 				}else { //read the rest of the line
@@ -980,6 +1013,7 @@ int ChimeraSlayerCommand::deconvoluteResults(SequenceParser* parser, string outp
 								
 								//then you really are a no so print, otherwise skip
 								if (itChimeras == chimerasInFile.end()) { print = true; }
+								
 							}else{ print = true; }
 						}
 					}
@@ -1052,29 +1086,57 @@ int ChimeraSlayerCommand::deconvoluteResults(SequenceParser* parser, string outp
 		m->errorOut(e, "ChimeraSlayerCommand", "deconvoluteResults");
 		exit(1);
 	}
-}	
+}
 //**********************************************************************************************************************
-int ChimeraSlayerCommand::setupChimera(string inputFile, map<string, int>& priority){
+int ChimeraSlayerCommand::setUpForSelfReference(SequenceParser*& parser, map<string, string>& fileGroup, map<string, map<string, int> >& fileToPriority, int s){
 	try {
-		if (templatefile != "self") { //you want to run slayer with a reference template
-			chimera = new ChimeraSlayer(inputFile, templatefile, trim, search, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign, blastlocation, rand());	
+		fileGroup.clear();
+		fileToPriority.clear();
+		
+		string nameFile = "";
+		if (nameFileNames.size() != 0) { //you provided a namefile and we don't need to create one
+			nameFile = nameFileNames[s];
+		}else {  nameFile = getNamesFile(fastaFileNames[s]); }
+		
+		//you provided a groupfile
+		string groupFile = "";
+		if (groupFileNames.size() != 0) { groupFile = groupFileNames[s]; }
+		
+		if (groupFile == "") { 
+			if (processors != 1) { m->mothurOut("When using template=self, mothur can only use 1 processor, continuing."); m->mothurOutEndLine(); processors = 1; }
+						
+			//sort fastafile by abundance, returns new sorted fastafile name
+			m->mothurOut("Sorting fastafile according to abundance..."); cout.flush(); 
+			priority = sortFastaFile(fastaFileNames[s], nameFile);
+			m->mothurOut("Done."); m->mothurOutEndLine();
+			
+			fileToPriority[fastaFileNames[s]] = priority;
+			fileGroup[fastaFileNames[s]] = "noGroup";
 		}else {
-			chimera = new ChimeraSlayer(inputFile, templatefile, trim, priority, search, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign, blastlocation, rand());	
+			//Parse sequences by group
+			parser = new SequenceParser(groupFile, fastaFileNames[s], nameFile);
+			vector<string> groups = parser->getNamesOfGroups();
+			
+			for (int i = 0; i < groups.size(); i++) {
+				vector<Sequence> thisGroupsSeqs = parser->getSeqs(groups[i]);
+				map<string, string> thisGroupsMap = parser->getNameMap(groups[i]);
+				string newFastaFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + groups[i] + "-sortedTemp.fasta";
+				priority = sortFastaFile(thisGroupsSeqs, thisGroupsMap, newFastaFile); 
+				fileToPriority[newFastaFile] = priority;
+				fileGroup[newFastaFile] = groups[i];
+			}
 		}
 		
-		if (m->control_pressed) { delete chimera; return 0; }
 		
-		if (chimera->getUnaligned()) { delete chimera; m->mothurOut("Your template sequences are different lengths, please correct."); m->mothurOutEndLine(); m->control_pressed = true; return 0; }
-		
-		return (chimera->getLength());
+		return 0;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ChimeraSlayerCommand", "setupChimera");
+		m->errorOut(e, "ChimeraSlayerCommand", "setUpForSelfReference");
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
 
+//**********************************************************************************************************************
 string ChimeraSlayerCommand::getNamesFile(string& inputFile){
 	try {
 		string nameFile = "";
@@ -1107,8 +1169,196 @@ string ChimeraSlayerCommand::getNamesFile(string& inputFile){
 }
 //**********************************************************************************************************************
 
-int ChimeraSlayerCommand::driver(linePair* filePos, string outputFName, string filename, string accnos, string fasta){
+int ChimeraSlayerCommand::driverGroups(string outputFName, string accnos, string fasta, map<string, map<string, int> >& fileToPriority, map<string, string>& fileGroup){
 	try {
+		int totalSeqs = 0;
+		
+		for (map<string, map<string, int> >::iterator itFile = fileToPriority.begin(); itFile != fileToPriority.end(); itFile++) {
+			
+			if (m->control_pressed) {  return 0;  }
+			
+			int start = time(NULL);
+			string thisFastaName = itFile->first;
+			map<string, int> thisPriority = itFile->second;
+			string thisoutputFileName = outputDir + m->getRootName(m->getSimpleName(thisFastaName)) + fileGroup[thisFastaName] + "slayer.chimera";
+			string thisaccnosFileName = outputDir + m->getRootName(m->getSimpleName(thisFastaName)) + fileGroup[thisFastaName] + "slayer.accnos";
+			string thistrimFastaFileName = outputDir + m->getRootName(m->getSimpleName(thisFastaName)) + fileGroup[thisFastaName] + "slayer.fasta";
+			
+			m->mothurOutEndLine(); m->mothurOut("Checking sequences from group: " + fileGroup[thisFastaName] + "."); m->mothurOutEndLine(); 
+			
+			lines.clear();
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			int proc = 1;
+			vector<unsigned long long> positions = m->divideFile(thisFastaName, proc);
+			lines.push_back(linePair(positions[0], positions[1]));	
+#else
+			lines.push_back(linePair(0, 1000)); 
+#endif			
+			int numSeqs = driver(lines[0], thisoutputFileName, thisFastaName, thisaccnosFileName, thistrimFastaFileName, thisPriority);
+			
+			//append files
+			m->appendFiles(thisoutputFileName, outputFName); m->mothurRemove(thisoutputFileName); 
+			m->appendFiles(thisaccnosFileName, accnos); m->mothurRemove(thisaccnosFileName);
+			if (trim) { m->appendFiles(thistrimFastaFileName, fasta); m->mothurRemove(thistrimFastaFileName); }
+			m->mothurRemove(thisFastaName);
+			
+			totalSeqs += numSeqs;
+			
+			m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences from group " + fileGroup[thisFastaName] + ".");	m->mothurOutEndLine();
+		}
+		
+		return totalSeqs;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChimeraSlayerCommand", "driverGroups");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+int ChimeraSlayerCommand::createProcessesGroups(string outputFName, string accnos, string fasta, map<string, map<string, int> >& fileToPriority, map<string, string>& fileGroup) {
+	try {
+		int process = 1;
+		int num = 0;
+		processIDS.clear();
+		
+		if (fileToPriority.size() < processors) { processors = fileToPriority.size(); }
+		
+		int groupsPerProcessor = fileToPriority.size() / processors;
+		int remainder = fileToPriority.size() % processors;
+		
+		vector< map<string, map<string, int> > > breakUp;
+		
+		for (int i = 0; i < processors; i++) {
+			map<string, map<string, int> > thisFileToPriority;
+			map<string, map<string, int> >::iterator itFile;
+			int count = 0;
+			int enough = groupsPerProcessor;
+			if (i == 0) { enough = groupsPerProcessor + remainder; }
+			
+			for (itFile = fileToPriority.begin(); itFile != fileToPriority.end();) {
+				thisFileToPriority[itFile->first] = itFile->second;
+				fileToPriority.erase(itFile++);
+				count++;
+				if (count == enough) { break; }
+			}	
+			breakUp.push_back(thisFileToPriority);
+		}
+				
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		//loop through and create all the processes you want
+		while (process != processors) {
+			int pid = fork();
+			
+			if (pid > 0) {
+				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+				process++;
+			}else if (pid == 0){
+				num = driverGroups(outputFName + toString(getpid()) + ".temp", accnos + toString(getpid()) + ".temp", fasta + toString(getpid()) + ".temp", breakUp[process], fileGroup);
+				
+				//pass numSeqs to parent
+				ofstream out;
+				string tempFile = outputFName + toString(getpid()) + ".num.temp";
+				m->openOutputFile(tempFile, out);
+				out << num << endl;
+				out.close();
+				exit(0);
+			}else { 
+				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
+				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+				exit(0);
+			}
+		}
+		
+		num = driverGroups(outputFName, accnos, fasta, breakUp[0], fileGroup);
+
+		//force parent to wait until all the processes are done
+		for (int i=0;i<processors;i++) { 
+			int temp = processIDS[i];
+			wait(&temp);
+		}
+		
+		for (int i = 0; i < processIDS.size(); i++) {
+			ifstream in;
+			string tempFile =  outputFName + toString(processIDS[i]) + ".num.temp";
+			m->openInputFile(tempFile, in);
+			if (!in.eof()) { int tempNum = 0;  in >> tempNum; num += tempNum; }
+			in.close(); m->mothurRemove(tempFile);
+		}
+#else
+		
+		//////////////////////////////////////////////////////////////////////////////////////////////////////
+		//Windows version shared memory, so be careful when passing variables through the slayerData struct. 
+		//Above fork() will clone, so memory is separate, but that's not the case with windows, 
+		//////////////////////////////////////////////////////////////////////////////////////////////////////
+		
+		vector<slayerData*> pDataArray; 
+		DWORD   dwThreadIdArray[processors-1];
+		HANDLE  hThreadArray[processors-1]; 
+		
+		//Create processor worker threads.
+		for(int i=1; i<processors; i++ ){
+			string extension = toString(i) + ".temp";
+			slayerData* tempslayer = new slayerData((outputFName + extension), (fasta + extension), (accnos + extension), templatefile, search, blastlocation, trimera, trim, realign, m, breakUp[i], fileGroup, ksize, match, mismatch, window, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, divR, priority, i);
+			pDataArray.push_back(tempslayer);
+			processIDS.push_back(i);
+			
+			//MySlayerThreadFunction is in header. It must be global or static to work with the threads.
+			//default security attributes, thread function name, argument to thread function, use default creation flags, returns the thread identifier
+			hThreadArray[i-1] = CreateThread(NULL, 0, MySlayerGroupThreadFunction, pDataArray[i-1], 0, &dwThreadIdArray[i-1]);   
+		}
+		
+		num = driverGroups(outputFName, accnos, fasta, breakUp[0], fileGroup);
+		
+		//Wait until all threads have terminated.
+		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
+		
+		//Close all thread handles and free memory allocations.
+		for(int i=0; i < pDataArray.size(); i++){
+			num += pDataArray[i]->count;
+			CloseHandle(hThreadArray[i]);
+			delete pDataArray[i];
+		}
+#endif	
+		
+		//append output files
+		for(int i=0;i<processIDS.size();i++){
+			m->appendFiles((outputFName + toString(processIDS[i]) + ".temp"), outputFName);
+			m->mothurRemove((outputFName + toString(processIDS[i]) + ".temp"));
+			
+			m->appendFiles((accnos + toString(processIDS[i]) + ".temp"), accnos);
+			m->mothurRemove((accnos + toString(processIDS[i]) + ".temp"));
+			
+			if (trim) {
+				m->appendFiles((fasta + toString(processIDS[i]) + ".temp"), fasta);
+				m->mothurRemove((fasta + toString(processIDS[i]) + ".temp"));
+			}
+		}
+		
+		
+		return num;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChimeraSlayerCommand", "createProcessesGroups");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+
+int ChimeraSlayerCommand::driver(linePair filePos, string outputFName, string filename, string accnos, string fasta, map<string, int>& priority){
+	try {
+		
+		Chimera* chimera;
+		if (templatefile != "self") { //you want to run slayer with a reference template
+			chimera = new ChimeraSlayer(filename, templatefile, trim, search, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign, blastlocation, rand());	
+		}else {
+			chimera = new ChimeraSlayer(filename, templatefile, trim, priority, search, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign, blastlocation, rand());	
+		}
+		
+		if (m->control_pressed) { delete chimera; return 0; }
+		
+		if (chimera->getUnaligned()) { delete chimera; m->mothurOut("Your template sequences are different lengths, please correct."); m->mothurOutEndLine(); m->control_pressed = true; return 0; }
+		templateSeqsLength = chimera->getLength();
+		
 		ofstream out;
 		m->openOutputFile(outputFName, out);
 		
@@ -1121,16 +1371,16 @@ int ChimeraSlayerCommand::driver(linePair* filePos, string outputFName, string f
 		ifstream inFASTA;
 		m->openInputFile(filename, inFASTA);
 
-		inFASTA.seekg(filePos->start);
+		inFASTA.seekg(filePos.start);
 		
-		if (filePos->start == 0) { chimera->printHeader(out); }
+		if (filePos.start == 0) { chimera->printHeader(out); }
 
 		bool done = false;
 		int count = 0;
 	
 		while (!done) {
 		
-			if (m->control_pressed) {	out.close(); out2.close(); if (trim) { out3.close(); } inFASTA.close(); return 1;	}
+			if (m->control_pressed) {	delete chimera; out.close(); out2.close(); if (trim) { out3.close(); } inFASTA.close(); return 1;	}
 		
 			Sequence* candidateSeq = new Sequence(inFASTA);  m->gobble(inFASTA);
 			string candidateAligned = candidateSeq->getAligned();
@@ -1142,7 +1392,7 @@ int ChimeraSlayerCommand::driver(linePair* filePos, string outputFName, string f
 					//find chimeras
 					chimera->getChimeras(candidateSeq);
 					
-					if (m->control_pressed) {	delete candidateSeq; return 1;	}
+					if (m->control_pressed) {	delete chimera; delete candidateSeq; return 1;	}
 						
 					//if you are not chimeric, then check each half
 					data_results wholeResults = chimera->getResults();
@@ -1199,7 +1449,7 @@ int ChimeraSlayerCommand::driver(linePair* filePos, string outputFName, string f
 			
 			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 				unsigned long long pos = inFASTA.tellg();
-				if ((pos == -1) || (pos >= filePos->end)) { break; }
+				if ((pos == -1) || (pos >= filePos.end)) { break; }
 			#else
 				if (inFASTA.eof()) { break; }
 			#endif
@@ -1211,12 +1461,18 @@ int ChimeraSlayerCommand::driver(linePair* filePos, string outputFName, string f
 		//report progress
 		if((count) % 100 != 0){	m->mothurOut("Processing sequence: " + toString(count)); m->mothurOutEndLine();		}
 		
+		int numNoParents = chimera->getNumNoParents();
+		if (numNoParents == count) { m->mothurOut("[WARNING]: megablast returned 0 potential parents for all your sequences. This could be due to formatdb.exe not being setup properly, please check formatdb.log for errors."); m->mothurOutEndLine(); } 
+		
 		out.close();
 		out2.close();
 		if (trim) { out3.close(); }
 		inFASTA.close();
+		delete chimera;
 				
 		return count;
+		
+		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ChimeraSlayerCommand", "driver");
@@ -1225,15 +1481,27 @@ int ChimeraSlayerCommand::driver(linePair* filePos, string outputFName, string f
 }
 //**********************************************************************************************************************
 #ifdef USE_MPI
-int ChimeraSlayerCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& outMPI, MPI_File& outAccMPI, MPI_File& outFastaMPI, vector<unsigned long long>& MPIPos){
-	try {				
+int ChimeraSlayerCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& outMPI, MPI_File& outAccMPI, MPI_File& outFastaMPI, vector<unsigned long long>& MPIPos, string filename, map<string, int>& priority, bool byGroup){
+	try {
 		MPI_Status status; 
 		int pid;
 		MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
 		
+		Chimera* chimera;
+		if (templatefile != "self") { //you want to run slayer with a reference template
+			chimera = new ChimeraSlayer(filename, templatefile, trim, search, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign, blastlocation, rand());	
+		}else {
+			chimera = new ChimeraSlayer(filename, templatefile, trim, priority, search, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign, blastlocation, rand(), byGroup);	
+		}
+		
+		if (m->control_pressed) { delete chimera; return 0; }
+		
+		if (chimera->getUnaligned()) { delete chimera; m->mothurOut("Your template sequences are different lengths, please correct."); m->mothurOutEndLine(); m->control_pressed = true; return 0; }
+		templateSeqsLength = chimera->getLength();
+		
 		for(int i=0;i<num;i++){
 			
-			if (m->control_pressed) {	return 1;	}
+			if (m->control_pressed) {	delete chimera; return 1;	}
 			
 			//read next sequence
 			int length = MPIPos[start+i+1] - MPIPos[start+i];
@@ -1259,7 +1527,7 @@ int ChimeraSlayerCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_Fil
 					//find chimeras
 					chimera->getChimeras(candidateSeq);
 			
-					if (m->control_pressed) {	delete candidateSeq; return 1;	}
+					if (m->control_pressed) {	delete chimera; delete candidateSeq; return 1;	}
 					
 					//if you are not chimeric, then check each half
 					data_results wholeResults = chimera->getResults();
@@ -1339,7 +1607,10 @@ int ChimeraSlayerCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_Fil
 		//report progress
 		if(num % 100 != 0){		cout << "Processing sequence: " << num << endl;	m->mothurOutJustToLog("Processing sequence: " + toString(num) + "\n"); 	}
 		
-				
+		int numNoParents = chimera->getNumNoParents();
+		if (numNoParents == num) { cout << "[WARNING]: megablast returned 0 potential parents for all your sequences. This could be due to formatdb.exe not being setup properly, please check formatdb.log for errors." << endl; }
+		
+		delete chimera;		
 		return 0;
 	}
 	catch(exception& e) {
@@ -1351,11 +1622,10 @@ int ChimeraSlayerCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_Fil
 
 /**************************************************************************************************/
 
-int ChimeraSlayerCommand::createProcesses(string outputFileName, string filename, string accnos, string fasta) {
+int ChimeraSlayerCommand::createProcesses(string outputFileName, string filename, string accnos, string fasta, map<string, int>& thisPriority) {
 	try {
 		int process = 0;
 		int num = 0;
-		int numNoParents = 0;
 		processIDS.clear();
 		
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
@@ -1367,13 +1637,13 @@ int ChimeraSlayerCommand::createProcesses(string outputFileName, string filename
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				num = driver(lines[process], outputFileName + toString(getpid()) + ".temp", filename, accnos + toString(getpid()) + ".temp", fasta + toString(getpid()) + ".temp");
+				num = driver(lines[process], outputFileName + toString(getpid()) + ".temp", filename, accnos + toString(getpid()) + ".temp", fasta + toString(getpid()) + ".temp", thisPriority);
 				
 				//pass numSeqs to parent
 				ofstream out;
 				string tempFile = outputFileName + toString(getpid()) + ".num.temp";
 				m->openOutputFile(tempFile, out);
-				out << num << '\t' << chimera->getNumNoParents() << endl;
+				out << num << endl;
 				out.close();
 				exit(0);
 			}else { 
@@ -1393,7 +1663,7 @@ int ChimeraSlayerCommand::createProcesses(string outputFileName, string filename
 			ifstream in;
 			string tempFile =  outputFileName + toString(processIDS[i]) + ".num.temp";
 			m->openInputFile(tempFile, in);
-			if (!in.eof()) { int tempNum = 0; int tempNumParents = 0; in >> tempNum >> tempNumParents; num += tempNum; numNoParents += tempNumParents; }
+			if (!in.eof()) { int tempNum = 0;  in >> tempNum; num += tempNum; }
 			in.close(); m->mothurRemove(tempFile);
 		}
 #else
@@ -1410,7 +1680,7 @@ int ChimeraSlayerCommand::createProcesses(string outputFileName, string filename
 		//Create processor worker threads.
 		for( int i=0; i<processors; i++ ){
 			string extension = toString(i) + ".temp";
-			slayerData* tempslayer = new slayerData((outputFileName + extension), (fasta + extension), (accnos + extension), filename, templatefile, search, blastlocation, trimera, trim, realign, m, lines[i]->start, lines[i]->end, ksize, match, mismatch, window, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, divR, priority, i);
+			slayerData* tempslayer = new slayerData((outputFileName + extension), (fasta + extension), (accnos + extension), filename, templatefile, search, blastlocation, trimera, trim, realign, m, lines[i].start, lines[i].end, ksize, match, mismatch, window, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, divR, priority, i);
 			pDataArray.push_back(tempslayer);
 			processIDS.push_back(i);
 			
@@ -1425,12 +1695,10 @@ int ChimeraSlayerCommand::createProcesses(string outputFileName, string filename
 		//Close all thread handles and free memory allocations.
 		for(int i=0; i < pDataArray.size(); i++){
 			num += pDataArray[i]->count;
-			numNoParents += pDataArray[i]->numNoParents;
 			CloseHandle(hThreadArray[i]);
 			delete pDataArray[i];
 		}
 #endif	
-		if (num == numNoParents) {  m->mothurOut("[WARNING]: megablast returned 0 potential parents for all your sequences. This could be due to formatdb.exe not being setup properly, please check formatdb.log for errors."); m->mothurOutEndLine(); }
 		
 		rename((outputFileName + toString(processIDS[0]) + ".temp").c_str(), outputFileName.c_str());
 		rename((accnos + toString(processIDS[0]) + ".temp").c_str(), accnos.c_str());

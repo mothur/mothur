@@ -83,7 +83,7 @@ class MothurOut {
 		int readNames(string, map<string, string>&);
 		int readNames(string, map<string, vector<string> >&);
 		int readNames(string, vector<seqPriorityNode>&, map<string, string>&);
-		void mothurRemove(string);
+		int mothurRemove(string);
 	
 		
 		//searchs and checks

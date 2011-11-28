@@ -146,7 +146,7 @@ class Chimera {
 
 	public:
 	
-		Chimera(){ m = MothurOut::getInstance(); length = 0; unaligned = false;  }
+		Chimera(){ m = MothurOut::getInstance(); length = 0; unaligned = false;  byGroup = false; }
 		virtual ~Chimera(){	for (int i = 0; i < templateSeqs.size(); i++) { delete templateSeqs[i];  } for (int i = 0; i < filteredTemplateSeqs.size(); i++) { delete filteredTemplateSeqs[i];  } };
 		virtual bool getUnaligned()				{	return unaligned;			}
 		virtual int getLength()					{   return length;	}
@@ -174,7 +174,7 @@ class Chimera {
 		
 		vector<Sequence*> templateSeqs;
 		vector<Sequence*> filteredTemplateSeqs;
-		bool filter, unaligned; 
+		bool filter, unaligned, byGroup; 
 		int length; 
 		string seqMask, filterString, outputDir, templateFileName; 
 		Sequence* getSequence(string);  //find sequence from name	

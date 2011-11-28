@@ -509,7 +509,7 @@ int ChimeraUchimeCommand::execute(){
 				if (nameFileNames.size() != 0) { //you provided a namefile and we don't need to create one
 					nameFile = nameFileNames[s];
 				}else { nameFile = getNamesFile(fastaFileNames[s]); }
-									
+										
 				map<string, string> seqs;  
 				readFasta(fastaFileNames[s], seqs);  if (m->control_pressed) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
 

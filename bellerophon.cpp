@@ -274,7 +274,7 @@ int Bellerophon::getChimeras() {
 					MPI_Recv(&length, 1, MPI_INT, j, 2001, MPI_COMM_WORLD, &status);
 					
 					char* buf = new char[length];
-					MPI_Recv(&buf, length, MPI_CHAR, j, 2001, MPI_COMM_WORLD, &status);
+					MPI_Recv(&buf[0], length, MPI_CHAR, j, 2001, MPI_COMM_WORLD, &status);
 					
 					string temp = buf;
 					if (temp.length() > length) { temp = temp.substr(0, length); }
@@ -293,7 +293,7 @@ int Bellerophon::getChimeras() {
 			//played with this a bit, but it may be better to try user-defined datatypes with set string lengths??
 			vector<string> MPIBestSend = getBestWindow(lines[0]);
 			pref.clear();
-			
+				
 			//send your result to parent
 			for (int i = 0; i < numSeqs; i++) {
 				
