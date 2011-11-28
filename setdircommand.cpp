@@ -101,6 +101,14 @@ int SetDirectoryCommand::execute(){
 		
 		commandFactory = CommandFactory::getInstance();
 		
+		string tag = "";
+#ifdef USE_MPI
+		int pid; 
+		MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
+		
+		tag = toString(pid);
+#endif
+		
 		m->mothurOut("Mothur's directories:"); m->mothurOutEndLine();
 		
 		//redirect output
@@ -122,7 +130,7 @@ int SetDirectoryCommand::execute(){
 			
 			//test to make sure directory exists
 			output = m->getFullPathName(output);
-			string outTemp = output + "temp";
+			string outTemp = output + tag + "temp";
 			ofstream out;
 			out.open(outTemp.c_str(), ios::trunc);
 			if(!out) {
@@ -154,7 +162,7 @@ int SetDirectoryCommand::execute(){
 			
 			//test to make sure directory exists
 			input = m->getFullPathName(input);
-			string inTemp = input + "temp";
+			string inTemp = input + tag + "temp";
 			ofstream in;
 			in.open(inTemp.c_str(), ios::trunc);
 			if(!in) {

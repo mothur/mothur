@@ -1233,7 +1233,7 @@ vector<unsigned long long> MothurOut::divideFile(string filename, int& proc) {
 		
 		//save end pos
 		filePos.push_back(size);
-
+		
 		//sanity check filePos
 		for (int i = 0; i < (filePos.size()-1); i++) {
 			if (filePos[(i+1)] <= filePos[i]) {  filePos.erase(filePos.begin()+(i+1)); i--; }
@@ -1469,10 +1469,17 @@ int MothurOut::getNumNames(string names){
 }
 /***********************************************************************/
 
-void MothurOut::mothurRemove(string filename){
+int MothurOut::mothurRemove(string filename){
 	try {
 		filename = getFullPathName(filename);
-		remove(filename.c_str());
+		int error = remove(filename.c_str());
+		//if (error != 0) { 
+		//	if (errno != ENOENT) { //ENOENT == file does not exist
+		//		string message = "Error deleting file " + filename;
+		//		perror(message.c_str()); 
+		//	}
+		//}
+		return error;
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "mothurRemove");

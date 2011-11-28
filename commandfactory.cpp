@@ -203,7 +203,7 @@ CommandFactory::CommandFactory(){
 	commands["pre.cluster"]			= "pre.cluster";
 	commands["pcoa"]				= "pcoa";
 	commands["otu.hierarchy"]		= "otu.hierarchy";
-	commands["set.dir"]				= "set.dir";
+	commands["set.dir"]				= "MPIEnabled";
 	commands["merge.files"]			= "merge.files";
 	commands["parse.list"]			= "parse.list";
 	commands["set.logfile"]			= "set.logfile";
@@ -243,8 +243,8 @@ CommandFactory::CommandFactory(){
 	commands["anosim"]				= "anosim";
 	commands["make.fastq"]			= "make.fastq";
 	commands["merge.groups"]		= "merge.groups";
-	commands["get.current"]			= "get.current";
-	commands["set.current"]			= "set.current";
+	commands["get.current"]			= "MPIEnabled";
+	commands["set.current"]			= "MPIEnabled";
 	commands["get.commandinfo"]		= "get.commandinfo";
 	commands["deunique.tree"]		= "deunique.tree";
 	commands["count.seqs"]			= "count.seqs";

@@ -20,7 +20,7 @@
 #include "sharedbraycurtis.h"
 
 //**********************************************************************************************************************
-HeatMapSim::HeatMapSim(string dir, string i) : outputDir(dir), inputfile(i) {
+HeatMapSim::HeatMapSim(string dir, string i, int f) : outputDir(dir), inputfile(i), fontSize(f) {
 		m = MothurOut::getInstance();
 }
 //**********************************************************************************************************************
@@ -35,7 +35,7 @@ vector<string> HeatMapSim::getPic(vector<SharedRAbundVector*> lookup, vector<Cal
 		
 			if (m->control_pressed) { return outputNames; }
 		
-			string filenamesvg = outputDir + m->getRootName(m->getSimpleName(inputfile)) + lookup[0]->getLabel() + calcs[k]->getName() + ".heatmap.sim.svg";
+			string filenamesvg = outputDir + m->getRootName(m->getSimpleName(inputfile)) + lookup[0]->getLabel() + "." + calcs[k]->getName() + ".heatmap.sim.svg";
 			m->openOutputFile(filenamesvg, outsvg);
 			outputNames.push_back(filenamesvg);
 			
@@ -45,12 +45,12 @@ vector<string> HeatMapSim::getPic(vector<SharedRAbundVector*> lookup, vector<Cal
 		
 			//white backround
 			outsvg << "<rect fill=\"white\" stroke=\"white\" x=\"0\" y=\"0\" width=\"" + toString((lookup.size() * 150) + 160) + "\" height=\"" + toString((lookup.size() * 150) + 160)  + "\"/>"; 
-			outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString((lookup.size() * 75) - 40) + "\" y=\"25\">Heatmap at distance " + lookup[0]->getLabel() + "</text>\n";
+			outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\"  x=\"" + toString((lookup.size() * 75) - 40) + "\" y=\"25\">Heatmap at distance " + lookup[0]->getLabel() + "</text>\n";
 		
 			//column labels
 			for (int h = 0; h < lookup.size(); h++) {
-				outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(((150 * (h+1)) ) - ((int)lookup[h]->getGroup().length() / 2)) + "\" y=\"50\">" + lookup[h]->getGroup() + "</text>\n"; 
-				outsvg << "<text fill=\"black\" class=\"seri\" y=\"" + toString(((150 * (h+1)) ) - ((int)lookup[h]->getGroup().length() / 2)) + "\" x=\"50\">" + lookup[h]->getGroup() + "</text>\n";
+				outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(((150 * (h+1)) ) - ((int)lookup[h]->getGroup().length() / 2)) + "\" y=\"50\">" + lookup[h]->getGroup() + "</text>\n"; 
+				outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" y=\"" + toString(((150 * (h+1)) ) - ((int)lookup[h]->getGroup().length() / 2)) + "\" x=\"50\">" + lookup[h]->getGroup() + "</text>\n";
 			}
 			
 			sims.clear();
@@ -122,12 +122,12 @@ string HeatMapSim::getPic(vector< vector<double> > dists, vector<string> groups)
 		
 		//white backround
 		outsvg << "<rect fill=\"white\" stroke=\"white\" x=\"0\" y=\"0\" width=\"" + toString((dists.size() * 150) + 160) + "\" height=\"" + toString((dists.size() * 150) + 160)  + "\"/>"; 
-		outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString((dists.size() * 75) - 40) + "\" y=\"25\">Heatmap for " + inputfile + "</text>\n";
+		outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString((dists.size() * 75) - 40) + "\" y=\"25\">Heatmap for " + inputfile + "</text>\n";
 		
 		//column labels
 		for (int h = 0; h < groups.size(); h++) {
-			outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(((150 * (h+1)) ) - ((int)groups[h].length() / 2)) + "\" y=\"50\">" + groups[h] + "</text>\n"; 
-			outsvg << "<text fill=\"black\" class=\"seri\" y=\"" + toString(((150 * (h+1)) ) - ((int)groups[h].length() / 2)) + "\" x=\"50\">" + groups[h] + "</text>\n";
+			outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(((150 * (h+1)) ) - ((int)groups[h].length() / 2)) + "\" y=\"50\">" + groups[h] + "</text>\n"; 
+			outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" y=\"" + toString(((150 * (h+1)) ) - ((int)groups[h].length() / 2)) + "\" x=\"50\">" + groups[h] + "</text>\n";
 		}
 			
 		double biggest = -1;
@@ -206,7 +206,7 @@ void HeatMapSim::printLegend(int y, float maxSim) {
 			label /= 1000.0;
 			string text = toString(label, 1);
 			
-			outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(x) + "\" y=\"" + toString(y-3) + "\">" + text + "</text>\n";
+			outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(x) + "\" y=\"" + toString(y-3) + "\">" + text + "</text>\n";
 			x += 153;
 		}
 	}

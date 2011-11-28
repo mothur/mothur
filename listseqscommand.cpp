@@ -400,14 +400,14 @@ int ListSeqsCommand::readAlign(){
 			if (!in.eof())	{	in >> junk;		}
 			else			{	break;			}
 		}
-		
+		//m->getline(in);
 		
 		while(!in.eof()){
 		
 			if (m->control_pressed) { in.close(); return 0; }
 
 			in >> name;				//read from first column
-			
+			//m->getline(in);
 			//read rest
 			for (int i = 0; i < 15; i++) {  
 				if (!in.eof())	{	in >> junk;		}

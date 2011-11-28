@@ -213,7 +213,7 @@ int CatchAllCommand::execute() {
 			
 			//for each label the user selected
 			while((sabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-
+				
 						
 				if(allLines == 1 || labels.count(sabund->getLabel()) == 1){
 						m->mothurOut(sabund->getLabel());  m->mothurOutEndLine();
@@ -221,7 +221,7 @@ int CatchAllCommand::execute() {
 						//create catchall input file from mothur's inputfile
 						string filename = process(sabund, inputFileNames[p]);
 						string outputPath = m->getPathName(filename);
-					
+											
 						//create system command
 						string catchAllCommand = "";
 						#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
@@ -266,7 +266,7 @@ int CatchAllCommand::execute() {
 						//create catchall input file from mothur's inputfile
 						string filename = process(sabund, inputFileNames[p]);
 						string outputPath = m->getPathName(filename);
-						
+											
 						//create system command
 						string catchAllCommand = "";
 						#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)

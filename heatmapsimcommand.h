@@ -44,6 +44,7 @@ private:
 	set<string> labels; //holds labels to be used
 	string format, groups, label, calc, sharedfile, phylipfile, columnfile, namefile, outputDir, inputfile;
 	vector<string> Estimators, Groups, outputNames;
+	int fontsize;
 	
 	int runCommandShared();
 	int runCommandDist();

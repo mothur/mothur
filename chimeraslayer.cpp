@@ -46,6 +46,56 @@ int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int num
 	}
 }
 //***************************************************************************************************************
+//template=self, byGroup parameter used for mpienabled version to read the template as MPI_COMM_SELF instead of MPI_COMM_WORLD
+ChimeraSlayer::ChimeraSlayer(string file, string temp, bool trim, map<string, int>& prior, string mode, int k, int ms, int mms, int win, float div, 
+							 int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int numw, bool r, string blas, int tid, bool bg) : Chimera()  {  	
+	try {
+		byGroup = bg;
+		fastafile = file; templateSeqs = readSeqs(fastafile);
+		templateFileName = temp; 
+		searchMethod = mode;
+		kmerSize = k;
+		match = ms;
+		misMatch = mms;
+		window = win;
+		divR = div;
+		minSim = minsim;
+		minCov = mincov;
+		minBS = minbs;
+		minSNP = minsnp;
+		parents = par;
+		iters = it;
+		increment = inc;
+		numWanted = numw;
+		realign = r; 
+		trimChimera = trim;
+		priority = prior;
+		numNoParents = 0;
+		blastlocation = blas;
+		threadID = tid;
+		
+		
+		createFilter(templateSeqs, 0.0); //just removed columns where all seqs have a gap
+		
+		if (searchMethod == "distance") { 
+			//createFilter(templateSeqs, 0.0); //just removed columns where all seqs have a gap
+			
+			//run filter on template copying templateSeqs into filteredTemplateSeqs
+			for (int i = 0; i < templateSeqs.size(); i++) {  
+				if (m->control_pressed) {  break; }
+				
+				Sequence* newSeq = new Sequence(templateSeqs[i]->getName(), templateSeqs[i]->getAligned());
+				runFilter(newSeq);  
+				filteredTemplateSeqs.push_back(newSeq);
+			}
+		}
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChimeraSlayer", "ChimeraSlayer");
+		exit(1);
+	}
+}
+//***************************************************************************************************************
 //template=self
 ChimeraSlayer::ChimeraSlayer(string file, string temp, bool trim, map<string, int>& prior, string mode, int k, int ms, int mms, int win, float div, 
 							 int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int numw, bool r, string blas, int tid) : Chimera()  {  	
@@ -72,6 +122,7 @@ ChimeraSlayer::ChimeraSlayer(string file, string temp, bool trim, map<string, in
 		numNoParents = 0;
 		blastlocation = blas;
 		threadID = tid;
+		
 		
 		createFilter(templateSeqs, 0.0); //just removed columns where all seqs have a gap
 		
@@ -382,7 +433,7 @@ Sequence ChimeraSlayer::print(ostream& out, ostream& outAcc) {
 			
 			if (chimeraFlag == "yes") {	
 				if ((chimeraResults[0].bsa >= minBS) || (chimeraResults[0].bsb >= minBS)) {
-					m->mothurOut(toString(threadID) +"\t"+ querySeq.getName() + "\tyes"); m->mothurOutEndLine();
+					m->mothurOut(querySeq.getName() + "\tyes"); m->mothurOutEndLine();
 					outAcc << querySeq.getName() << endl;
 					
 					if (templateFileName == "self") {  chimericSeqs.insert(querySeq.getName()); }
