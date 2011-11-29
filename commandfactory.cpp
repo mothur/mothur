@@ -125,6 +125,7 @@
 #include "summarytaxcommand.h"
 #include "chimeraperseuscommand.h"
 #include "shhhseqscommand.h"
+#include "summaryqualcommand.h"
 
 /*******************************************************/
 
@@ -270,8 +271,8 @@ CommandFactory::CommandFactory(){
 	commands["sens.spec"]			= "sens.spec";
 	commands["seq.error"]			= "seq.error";
 	commands["summary.tax"]			= "summary.tax";
+	commands["summary.qual"]		= "summary.qual";
 	commands["shhh.seqs"]			= "shhh.seqs";
-	
 	commands["quit"]				= "MPIEnabled"; 
 
 }
@@ -429,6 +430,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "count.groups")			{	command = new CountGroupsCommand(optionString);				}
 		else if(commandName == "clear.memory")			{	command = new ClearMemoryCommand(optionString);				}
 		else if(commandName == "summary.tax")			{	command = new SummaryTaxCommand(optionString);				}
+		else if(commandName == "summary.qual")			{	command = new SummaryQualCommand(optionString);				}
 		else if(commandName == "chimera.perseus")		{	command = new ChimeraPerseusCommand(optionString);			}
 		else if(commandName == "shhh.seqs")				{	command = new ShhhSeqsCommand(optionString);				}
 		else											{	command = new NoCommand(optionString);						}
@@ -572,6 +574,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "count.groups")			{	pipecommand = new CountGroupsCommand(optionString);				}
 		else if(commandName == "clear.memory")			{	pipecommand = new ClearMemoryCommand(optionString);				}
 		else if(commandName == "summary.tax")			{	pipecommand = new SummaryTaxCommand(optionString);				}
+		else if(commandName == "summary.qual")			{	pipecommand = new SummaryQualCommand(optionString);				}
 		else if(commandName == "chimera.perseus")		{	pipecommand = new ChimeraPerseusCommand(optionString);			}
 		else if(commandName == "shhh.seqs")				{	pipecommand = new ShhhSeqsCommand(optionString);				}
 		else											{	pipecommand = new NoCommand(optionString);						}
@@ -703,6 +706,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "count.groups")			{	shellcommand = new CountGroupsCommand();			}
 		else if(commandName == "clear.memory")			{	shellcommand = new ClearMemoryCommand();			}
 		else if(commandName == "summary.tax")			{	shellcommand = new SummaryTaxCommand();				}
+		else if(commandName == "summary.qual")			{	shellcommand = new SummaryQualCommand();			}
 		else if(commandName == "chimera.perseus")		{	shellcommand = new ChimeraPerseusCommand();			}
 		else if(commandName == "shhh.seqs")				{	shellcommand = new ShhhSeqsCommand();				}
 		else											{	shellcommand = new NoCommand();						}
