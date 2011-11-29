@@ -40,7 +40,7 @@ private:
 	vector<SharedRAbundVector*> lookup;
 	set< set<int> > combosOfFour;
 	SAbundVector* sabund;
-	int abund;
+	int abund, fontsize;
 	
 	bool abort, allLines, nseqs, perm;
 	set<string> labels; //holds labels to be used

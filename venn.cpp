@@ -17,7 +17,7 @@
 
 
 //**********************************************************************************************************************
-Venn::Venn(string o, bool n, string f) : outputDir(o), nseqs(n), inputfile(f) {
+Venn::Venn(string o, bool n, string f, int fs) : outputDir(o), nseqs(n), inputfile(f), fontSize(fs) {
 	try {
 		m = MothurOut::getInstance();
 	}
@@ -49,17 +49,17 @@ vector<string> Venn::getPic(SAbundVector* sabund, vector<Calculator*> vCalcs) {
 			outsvg << "<g>\n";
 				
 			outsvg << "<rect fill=\"white\" stroke=\"white\" x=\"0\" y=\"0\" width=\"" +  toString(width) +  "\" height=\"" +  toString(height) +  "\"/>"; 
-			outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.40 * width)) +  "\" y=\"" +  toString(int(0.05 * height)) +  "\">Venn Diagram at distance " + sabund->getLabel() + "</text>\n";
+			outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.40 * width)) +  "\" y=\"" +  toString(int(0.05 * height)) +  "\">Venn Diagram at distance " + sabund->getLabel() + "</text>\n";
 			outsvg << "<circle fill=\"red\" opacity=\".5\" stroke=\"black\" cx=\"" +  toString(int(0.50 * width)) +  "\" cy=\"" +  toString(int(0.29 * height)) +  "\" r=\"" +  toString(int(0.22 * width)) +  "\"/>"; 
-			outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" + toString((width / 2) - ((int)toString(data[0]).length() / 2)) + "\" y=\"" +  toString(int(0.28 * height)) +  "\">" + toString(data[0]) + "</text>\n";  
+			outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" + toString((width / 2) - ((int)toString(data[0]).length() / 2)) + "\" y=\"" +  toString(int(0.28 * height)) +  "\">" + toString(data[0]) + "</text>\n";  
 			
 			if (data.size() == 3) { 
-				outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.35 * width)) +  "\" y=\"" +  toString(int(0.60 * height)) +  "\">The lower bound of the confidence interval is " + toString(data[1]) + "</text>\n";
-				outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.35 * width)) +  "\" y=\"" +  toString(int(0.645 * height)) +  "\">The upper bound of the confidence interval is " + toString(data[2]) + "</text>\n";
+				outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.35 * width)) +  "\" y=\"" +  toString(int(0.60 * height)) +  "\">The lower bound of the confidence interval is " + toString(data[1]) + "</text>\n";
+				outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.35 * width)) +  "\" y=\"" +  toString(int(0.645 * height)) +  "\">The upper bound of the confidence interval is " + toString(data[2]) + "</text>\n";
 			}
 			
 			if (nseqs) {
-				outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.35 * width)) +  "\" y=\"" +  toString(int(0.70 * height)) +  "\">The number of sequences represented is " + toString(sabund->getNumSeqs()) + "</text>\n";
+				outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.35 * width)) +  "\" y=\"" +  toString(int(0.70 * height)) +  "\">The number of sequences represented is " + toString(sabund->getNumSeqs()) + "</text>\n";
 			}
 			
 			outsvg << "</g>\n</svg>\n";
@@ -113,18 +113,18 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 				outsvg << "<g>\n";
 				
 				outsvg << "<rect fill=\"white\" stroke=\"white\" x=\"0\" y=\"0\" width=\"" +  toString(width) +  "\" height=\"" +  toString(height) +  "\"/>"; 
-				outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" +  toString(int(0.40 * width)) +  "\" y=\"" +  toString(int(0.05 * height)) +  "\">Venn Diagram at distance " + lookup[0]->getLabel() + "</text>\n";
+				outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.40 * width)) +  "\" y=\"" +  toString(int(0.05 * height)) +  "\">Venn Diagram at distance " + lookup[0]->getLabel() + "</text>\n";
 				outsvg << "<circle fill=\"red\" opacity=\".5\" stroke=\"black\" cx=\"" +  toString(int(0.50 * width)) +  "\" cy=\"" +  toString(int(0.29 * height)) +  "\" r=\"" +  toString(int(0.22 * width)) +  "\"/>"; 
-				outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" + toString(int(0.50 * width) - ((int)lookup[0]->getGroup().length() / 2)) + "\" y=\"" +  toString(int(0.24 * height)) +  "\">" + lookup[0]->getGroup() + "</text>\n";
-				outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" + toString(int(0.50 * width) - ((int)toString(data[0]).length() / 2)) + "\" y=\"" +  toString(int(0.28 * height)) +  "\">" + toString(data[0]) + "</text>\n";  
+				outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(int(0.50 * width) - ((int)lookup[0]->getGroup().length() / 2)) + "\" y=\"" +  toString(int(0.24 * height)) +  "\">" + lookup[0]->getGroup() + "</text>\n";
+				outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(int(0.50 * width) - ((int)toString(data[0]).length() / 2)) + "\" y=\"" +  toString(int(0.28 * height)) +  "\">" + toString(data[0]) + "</text>\n";  
 			
 				if (data.size() == 3) { 
-					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" +  toString(int(0.35 * width)) +  "\" y=\"" +  toString(int(0.60 * height)) +  "\" >The lower bound of the confidence interval is " + toString(data[1]) + "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" +  toString(int(0.35 * width)) +  "\" y=\"" +  toString(int(0.645 * height)) +  "\">The upper bound of the confidence interval is " + toString(data[2]) + "</text>\n";
+					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.35 * width)) +  "\" y=\"" +  toString(int(0.60 * height)) +  "\" >The lower bound of the confidence interval is " + toString(data[1]) + "</text>\n";
+					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.35 * width)) +  "\" y=\"" +  toString(int(0.645 * height)) +  "\">The upper bound of the confidence interval is " + toString(data[2]) + "</text>\n";
 				}
 				
 				if (nseqs) {
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.35 * width)) +  "\" y=\"" +  toString(int(0.70 * height)) +  "\">The number of sequences represented is " + toString(sabund->getNumSeqs()) + "</text>\n";
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.35 * width)) +  "\" y=\"" +  toString(int(0.70 * height)) +  "\">The number of sequences represented is " + toString(sabund->getNumSeqs()) + "</text>\n";
 				}
 				
 				outsvg << "</g>\n</svg>\n";
@@ -193,35 +193,35 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 
 				//draw circles
 				outsvg << "<rect fill=\"white\" stroke=\"white\" x=\"0\" y=\"0\" width=\"" +  toString(width) +  "\" height=\"" +  toString(height) +  "\"/>"; 
-				outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.40 * width)) +  "\" y=\"" +  toString(int(0.05 * height)) +  "\">Venn Diagram at distance " + lookup[0]->getLabel() + "</text>\n";
+				outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.40 * width)) +  "\" y=\"" +  toString(int(0.05 * height)) +  "\">Venn Diagram at distance " + lookup[0]->getLabel() + "</text>\n";
 				outsvg << "<circle fill=\"rgb(255,0,0)\" opacity=\".3\" stroke=\"black\" cx=\"" +  toString(int(0.36 * width)) +  "\" cy=\"" +  toString(int(0.29 * height)) +  "\" r=\"" +  toString(int(0.22 * width)) +  "\"/>"; 
 				outsvg << "<circle fill=\"rgb(0,255,0)\" opacity=\".3\" stroke=\"black\" cx=\"" +  toString(int(0.62 * width)) +  "\" cy=\"" +  toString(int(0.29 * height)) +  "\" r=\"" +  toString(int(0.22 * width)) +  "\"/>"; 
-				outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" + toString(int(0.29 * width) - ((int)toString(numA[0]).length() / 2)) + "\" y=\"" +  toString(int(0.28 * height)) +  "\">" + toString(numA[0] - shared[0]) + "</text>\n";
-				outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" + toString(int(0.7 * width) - ((int)toString(numB[0]).length() / 2)) + "\" y=\"" +  toString(int(0.28 * height)) +  "\">" + toString(numB[0] - shared[0]) + "</text>\n"; 
-				outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" + toString(int(0.29 * width) - ((int)lookup[0]->getGroup().length() / 2)) + "\" y=\"" +  toString(int(0.25 * height)) +  "\">" + lookup[0]->getGroup() + "</text>\n";
-				outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" + toString(int(0.7 * width) - ((int)lookup[1]->getGroup().length() / 2)) + "\" y=\"" +  toString(int(0.25 * height)) +  "\">" + lookup[1]->getGroup() + "</text>\n"; 
-				outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" + toString(int(0.5 * width) - ((int)toString(shared[0]).length() / 2)) + "\" y=\"" +  toString(int(0.28 * height)) +  "\">" + toString(shared[0]) + "</text>\n";  
-				outsvg << "<text fill=\"black\" class=\"seri\"   font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.66 * height)) +  "\">The number of species in group " + lookup[0]->getGroup() + " is " + toString(numA[0]);
+				outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(int(0.29 * width) - ((int)toString(numA[0]).length() / 2)) + "\" y=\"" +  toString(int(0.28 * height)) +  "\">" + toString(numA[0] - shared[0]) + "</text>\n";
+				outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(int(0.7 * width) - ((int)toString(numB[0]).length() / 2)) + "\" y=\"" +  toString(int(0.28 * height)) +  "\">" + toString(numB[0] - shared[0]) + "</text>\n"; 
+				outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(int(0.29 * width) - ((int)lookup[0]->getGroup().length() / 2)) + "\" y=\"" +  toString(int(0.25 * height)) +  "\">" + lookup[0]->getGroup() + "</text>\n";
+				outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(int(0.7 * width) - ((int)lookup[1]->getGroup().length() / 2)) + "\" y=\"" +  toString(int(0.25 * height)) +  "\">" + lookup[1]->getGroup() + "</text>\n"; 
+				outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(int(0.5 * width) - ((int)toString(shared[0]).length() / 2)) + "\" y=\"" +  toString(int(0.28 * height)) +  "\">" + toString(shared[0]) + "</text>\n";  
+				outsvg << "<text fill=\"black\" class=\"seri\"   font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.66 * height)) +  "\">The number of species in group " + lookup[0]->getGroup() + " is " + toString(numA[0]);
 				if (numA.size() == 3) { 
 					outsvg << " the lci is " + toString(numA[1]) + " and the hci is " + toString(numA[2]);
 				}
 				if (nseqs) {  outsvg << ", and the number of squences is " + toString(numSeqsA) + "; " + toString(uniqSeqsToA) + " sequences are not shared";  }  
 				outsvg << "</text>\n";
 		
-				outsvg << "<text fill=\"black\" class=\"seri\"   font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.69 * height)) +  "\">The number of species in group " + lookup[1]->getGroup() + " is " + toString(numB[0]);
+				outsvg << "<text fill=\"black\" class=\"seri\"   font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.69 * height)) +  "\">The number of species in group " + lookup[1]->getGroup() + " is " + toString(numB[0]);
 				if (numB.size() == 3) { 
 					outsvg << " the lci is " + toString(numB[1]) + " and the hci is " + toString(numB[2]);
 				}
 				if (nseqs) {  outsvg << ", and the number of squences is " + toString(numSeqsB) + "; " + toString(uniqSeqsToB) + " sequences are not shared";  }  
 				outsvg << "</text>\n";
 
-				outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.72 * height)) +  "\">The number of sepecies shared between groups " + lookup[0]->getGroup() + " and " + lookup[1]->getGroup() + " is " + toString(shared[0]);
+				outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.72 * height)) +  "\">The number of sepecies shared between groups " + lookup[0]->getGroup() + " and " + lookup[1]->getGroup() + " is " + toString(shared[0]);
 				if (nseqs) {  outsvg << ", and the number of squences is " + toString(sharedVal) + "; " + toString((sharedVal / (float)(numSeqsA + numSeqsB))*100) + "% of these sequences are shared";  }  
 				outsvg << "</text>\n";
 				
-				outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.75 * height)) +  "\">Percentage of species that are shared in groups " + lookup[0]->getGroup() + " and " + lookup[1]->getGroup() + " is " + toString((shared[0] / (float)(numA[0] + numB[0] - shared[0]))*100) + "</text>\n";
+				outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.75 * height)) +  "\">Percentage of species that are shared in groups " + lookup[0]->getGroup() + " and " + lookup[1]->getGroup() + " is " + toString((shared[0] / (float)(numA[0] + numB[0] - shared[0]))*100) + "</text>\n";
 				
-				outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.78 * height)) +  "\">The total richness for all groups is " + toString((float)(numA[0] + numB[0] - shared[0]))+ "</text>\n";;
+				outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.78 * height)) +  "\">The total richness for all groups is " + toString((float)(numA[0] + numB[0] - shared[0]))+ "</text>\n";;
 				
 				
 				//close file
@@ -380,58 +380,58 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 
 					//draw circles
 					outsvg << "<rect fill=\"white\" stroke=\"white\" x=\"0\" y=\"0\" width=\"" +  toString(width) +  "\" height=\"" +  toString(height) +  "\"/>"; 
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.40 * width)) +  "\" y=\"" +  toString(int(0.44 * height)) +  "\">Venn Diagram at distance " + lookup[0]->getLabel() + "</text>\n";
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.40 * width)) +  "\" y=\"" +  toString(int(0.44 * height)) +  "\">Venn Diagram at distance " + lookup[0]->getLabel() + "</text>\n";
 					outsvg << "<circle fill=\"rgb(255,0,0)\" opacity=\".3\" stroke=\"black\" cx=\"" +  toString(int(0.33 * width)) +  "\" cy=\"" +  toString(int(0.25 * height)) +  "\" r=\"" +  toString(int(0.22 * width)) +  "\"/>"; 
 					outsvg << "<circle fill=\"rgb(0,255,0)\" opacity=\".3\" stroke=\"black\" cx=\"" +  toString(int(0.65 * width)) +  "\" cy=\"" +  toString(int(0.25 * height)) +  "\" r=\"" +  toString(int(0.22 * width)) +  "\"/>"; 
 					outsvg << "<circle fill=\"rgb(0,0,255)\" opacity=\".3\" stroke=\"black\" cx=\"" +  toString(int(0.5 * width)) +  "\" cy=\"" +  toString(int(0.5 * height)) +  "\" r=\"" +  toString(int(0.22 * width)) +  "\"/>"; 
 
 					//place labels within overlaps
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" + toString(int(0.33 * width) - ((int)toString(numA[0]-sharedAwithBC[0]).length() / 2)) + "\" y=\"" +  toString(int(0.22 * height)) +  "\">" + toString(numA[0]-sharedAwithBC[0]) + "</text>\n"; 
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" + toString(int(0.33 * width) - ((int)lookup[0]->getGroup().length() / 2)) + "\" y=\"" +  toString(int(0.19 * height)) +  "\">" + lookup[0]->getGroup() + "</text>\n";  
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" + toString(int(0.5 * width) - ((int)toString(sharedAB[0] - sharedABC).length() / 2)) + "\"  y=\"" +  toString(int(0.22 * height)) +  "\">" + toString(sharedAB[0] - sharedABC) + "</text>\n";  
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" + toString(int(0.7 * width) - ((int)toString(numB[0]-sharedBwithAC[0]).length() / 2)) + "\"  y=\"" +  toString(int(0.22 * height)) +  "\">" + toString(numB[0]-sharedBwithAC[0]) + "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" + toString(int(0.7 * width) - ((int)lookup[1]->getGroup().length() / 2)) + "\"  y=\"" +  toString(int(0.19 * height)) +  "\">" + lookup[1]->getGroup() + "</text>\n";  
-					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" + toString(int(0.38 * width) - ((int)toString(sharedAC[0] - sharedABC).length() / 2)) + "\"  y=\"" +  toString(int(0.38 * height)) +  "\">" + toString(sharedAC[0] - sharedABC) + "</text>\n";  
-					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\"  x=\"" + toString(int(0.5 * width) - ((int)toString(numC[0]-sharedCwithAB[0]).length() / 2)) + "\"   y=\"" +  toString(int(0.54 * height)) +  "\">" + toString(numC[0]-sharedCwithAB[0]) + "</text>\n"; 
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\"  x=\"" + toString(int(0.5 * width) - ((int)lookup[2]->getGroup().length() / 2)) + "\"   y=\"" +  toString(int(0.52 * height)) +  "\">" + lookup[2]->getGroup() + "</text>\n"; 
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" + toString(int(0.58 * width) - ((int)toString(sharedBC[0] - sharedABC).length() / 2)) + "\" y=\"" +  toString(int(0.38 * height)) +  "\">" + toString(sharedBC[0] - sharedABC) + "</text>\n";  
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" + toString(int(0.5 * width) - ((int)toString(sharedABC).length() / 2)) + "\"  y=\"" +  toString(int(0.34 * height)) +  "\">" + toString(sharedABC) + "</text>\n"; 
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" + toString(int(0.33 * width) - ((int)toString(numA[0]-sharedAwithBC[0]).length() / 2)) + "\" y=\"" +  toString(int(0.22 * height)) +  "\">" + toString(numA[0]-sharedAwithBC[0]) + "</text>\n"; 
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" + toString(int(0.33 * width) - ((int)lookup[0]->getGroup().length() / 2)) + "\" y=\"" +  toString(int(0.19 * height)) +  "\">" + lookup[0]->getGroup() + "</text>\n";  
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" + toString(int(0.5 * width) - ((int)toString(sharedAB[0] - sharedABC).length() / 2)) + "\"  y=\"" +  toString(int(0.22 * height)) +  "\">" + toString(sharedAB[0] - sharedABC) + "</text>\n";  
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" + toString(int(0.7 * width) - ((int)toString(numB[0]-sharedBwithAC[0]).length() / 2)) + "\"  y=\"" +  toString(int(0.22 * height)) +  "\">" + toString(numB[0]-sharedBwithAC[0]) + "</text>\n";
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" + toString(int(0.7 * width) - ((int)lookup[1]->getGroup().length() / 2)) + "\"  y=\"" +  toString(int(0.19 * height)) +  "\">" + lookup[1]->getGroup() + "</text>\n";  
+					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(int(0.38 * width) - ((int)toString(sharedAC[0] - sharedABC).length() / 2)) + "\"  y=\"" +  toString(int(0.38 * height)) +  "\">" + toString(sharedAC[0] - sharedABC) + "</text>\n";  
+					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\"  x=\"" + toString(int(0.5 * width) - ((int)toString(numC[0]-sharedCwithAB[0]).length() / 2)) + "\"   y=\"" +  toString(int(0.54 * height)) +  "\">" + toString(numC[0]-sharedCwithAB[0]) + "</text>\n"; 
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\"  x=\"" + toString(int(0.5 * width) - ((int)lookup[2]->getGroup().length() / 2)) + "\"   y=\"" +  toString(int(0.52 * height)) +  "\">" + lookup[2]->getGroup() + "</text>\n"; 
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" + toString(int(0.58 * width) - ((int)toString(sharedBC[0] - sharedABC).length() / 2)) + "\" y=\"" +  toString(int(0.38 * height)) +  "\">" + toString(sharedBC[0] - sharedABC) + "</text>\n";  
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" + toString(int(0.5 * width) - ((int)toString(sharedABC).length() / 2)) + "\"  y=\"" +  toString(int(0.34 * height)) +  "\">" + toString(sharedABC) + "</text>\n"; 
 				
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.825 * height)) +  "\">The number of species shared between groups " + lookup[0]->getGroup() + " and " + lookup[1]->getGroup() + " is " + toString(sharedAB[0]);
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.825 * height)) +  "\">The number of species shared between groups " + lookup[0]->getGroup() + " and " + lookup[1]->getGroup() + " is " + toString(sharedAB[0]);
 					if (nseqs) {  outsvg << ", and the number of squences is " + toString(sharedABVal);  }  
 					outsvg << "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.85 * height)) +  "\">The number of species shared between groups " + lookup[0]->getGroup() + " and " + lookup[2]->getGroup() + " is " + toString(sharedAC[0]);
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.85 * height)) +  "\">The number of species shared between groups " + lookup[0]->getGroup() + " and " + lookup[2]->getGroup() + " is " + toString(sharedAC[0]);
 					if (nseqs) {  outsvg << ", and the number of squences is " + toString(sharedACVal);  }  
 					outsvg << "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.875 * height)) +  "\">The number of species shared between groups " + lookup[1]->getGroup() + " and " + lookup[2]->getGroup() + " is " + toString(sharedBC[0]);
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.875 * height)) +  "\">The number of species shared between groups " + lookup[1]->getGroup() + " and " + lookup[2]->getGroup() + " is " + toString(sharedBC[0]);
 					if (nseqs) {  outsvg << ", and the number of squences is " + toString(sharedBCVal);  }  
 					outsvg << "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.9 * height)) +  "\">The number of species shared between groups " + lookup[0]->getGroup() + " and combined groups " + lookup[1]->getGroup() + lookup[2]->getGroup() + " is " + toString(sharedAwithBC[0]) + "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.925 * height)) +  "\">The number of species shared between groups " + lookup[1]->getGroup() + " and combined groups " + lookup[0]->getGroup() + lookup[2]->getGroup() + " is " + toString(sharedBwithAC[0]) + "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.95 * height)) +  "\">The number of species shared between groups " + lookup[2]->getGroup() + " and combined groups " + lookup[0]->getGroup() + lookup[1]->getGroup() + " is " + toString(sharedCwithAB[0]) + "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.725 * height)) +  "\">The number of species in group " + lookup[0]->getGroup() + " is " + toString(numA[0]);
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.9 * height)) +  "\">The number of species shared between groups " + lookup[0]->getGroup() + " and combined groups " + lookup[1]->getGroup() + lookup[2]->getGroup() + " is " + toString(sharedAwithBC[0]) + "</text>\n";
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.925 * height)) +  "\">The number of species shared between groups " + lookup[1]->getGroup() + " and combined groups " + lookup[0]->getGroup() + lookup[2]->getGroup() + " is " + toString(sharedBwithAC[0]) + "</text>\n";
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.95 * height)) +  "\">The number of species shared between groups " + lookup[2]->getGroup() + " and combined groups " + lookup[0]->getGroup() + lookup[1]->getGroup() + " is " + toString(sharedCwithAB[0]) + "</text>\n";
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.725 * height)) +  "\">The number of species in group " + lookup[0]->getGroup() + " is " + toString(numA[0]);
 					if (numA.size() == 3) { 
 						outsvg << " the lci is " + toString(numA[1]) + " and the hci is " + toString(numA[2]);
 					} 
 					if (nseqs) {  outsvg << ", and the number of squences is " + toString(numSeqsA) + "; " + toString(uniqSeqsToA) + " sequences are not shared";  }  
 					outsvg << "</text>\n";
 			
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.75 * height)) +  "\">The number of species in group " + lookup[1]->getGroup() + " is " + toString(numB[0]);
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.75 * height)) +  "\">The number of species in group " + lookup[1]->getGroup() + " is " + toString(numB[0]);
 					if (numB.size() == 3) { 
 						outsvg << " the lci is " + toString(numB[1]) + " and the hci is " + toString(numB[2]);
 					}
 					if (nseqs) {  outsvg << ", and the number of squences is " + toString(numSeqsB) + "; " + toString(uniqSeqsToB) + " sequences are not shared";  }  
 					outsvg << "</text>\n";
 					
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.775 * height)) +  "\">The number of species in group " + lookup[2]->getGroup() + " is " + toString(numC[0]);
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.775 * height)) +  "\">The number of species in group " + lookup[2]->getGroup() + " is " + toString(numC[0]);
 					if (numC.size() == 3) { 
 						outsvg << " the lci is " + toString(numC[1]) + " and the hci is " + toString(numC[2]);
 					}
 					if (nseqs) {  outsvg << ", and the number of squences is " + toString(numSeqsC) + "; " + toString(uniqSeqsToC) + " sequences are not shared";  }  
 					outsvg << "</text>\n";
 
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.80 * height)) +  "\">The total richness of all the groups is " + toString(numA[0] + numB[0] + numC[0] - sharedAB[0] - sharedAC[0] - sharedBC[0] + sharedABC) + "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.975 * height)) +  "\">The total shared richness is " + toString(sharedABC);
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.80 * height)) +  "\">The total richness of all the groups is " + toString(numA[0] + numB[0] + numC[0] - sharedAB[0] - sharedAC[0] - sharedBC[0] + sharedABC) + "</text>\n";
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.975 * height)) +  "\">The total shared richness is " + toString(sharedABC);
 					if (nseqs) {  outsvg << ", and the number of squences is " + toString(sharedVal);  }  
 					outsvg << "</text>\n";
 					
@@ -477,56 +477,56 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 
 					//draw circles
 					outsvg << "<rect fill=\"white\" stroke=\"white\" x=\"0\" y=\"0\" width=\"" +  toString(width) +  "\" height=\"" +  toString(height) +  "\"/>"; 
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.40 * width)) +  "\" y=\"" +  toString(int(0.05 * height)) +  "\">Venn Diagram at distance " + lookup[0]->getLabel() + "</text>\n";
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.40 * width)) +  "\" y=\"" +  toString(int(0.05 * height)) +  "\">Venn Diagram at distance " + lookup[0]->getLabel() + "</text>\n";
 					outsvg << "<circle fill=\"rgb(255,0,0)\" opacity=\".3\" stroke=\"black\" cx=\"" +  toString(int(0.33 * width)) +  "\" cy=\"" +  toString(int(0.25 * height)) +  "\" r=\"" +  toString(int(0.22 * width)) +  "\"/>"; 
 					outsvg << "<circle fill=\"rgb(0,255,0)\" opacity=\".3\" stroke=\"black\" cx=\"" +  toString(int(0.65 * width)) +  "\" cy=\"" +  toString(int(0.25 * height)) +  "\" r=\"" +  toString(int(0.22 * width)) +  "\"/>"; 
 					outsvg << "<circle fill=\"rgb(0,0,255)\" opacity=\".3\" stroke=\"black\" cx=\"" +  toString(int(0.5 * width)) +  "\" cy=\"" +  toString(int(0.5 * height)) +  "\" r=\"" +  toString(int(0.22 * width)) +  "\"/>"; 
 
 					//place labels within overlaps
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" + toString(int(0.29 * width) - ((int)toString(numA[0]-sharedab[0]-sharedac[0]+sharedabc[0]).length() / 2)) + "\" y=\"" +  toString(int(0.22 * height)) +  "\">" + toString(numA[0]-sharedab[0]-sharedac[0]+sharedabc[0]) + "</text>\n"; 
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" + toString(int(0.29 * width) - ((int)lookup[0]->getGroup().length() / 2)) + "\" y=\"" +  toString(int(0.19 * height)) +  "\">" + lookup[0]->getGroup() + "</text>\n";  
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" + toString(int(0.5 * width) - ((int)toString(sharedab[0] - sharedabc[0]).length() / 2)) + "\"  y=\"" +  toString(int(0.22 * height)) +  "\">" + toString(sharedab[0] - sharedabc[0]) + "</text>\n";  
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" + toString(int(0.68 * width) - ((int)toString(numB[0]-sharedab[0]-sharedbc[0]+sharedabc[0]).length() / 2)) + "\"  y=\"" +  toString(int(0.22 * height)) +  "\">" + toString(numB[0]-sharedab[0]-sharedbc[0]+sharedabc[0]) + "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" + toString(int(0.68 * width) - ((int)lookup[1]->getGroup().length() / 2)) + "\"  y=\"" +  toString(int(0.19 * height)) +  "\">" + lookup[1]->getGroup() + "</text>\n";  
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" + toString(int(0.38 * width) - ((int)toString(sharedac[0] - sharedabc[0]).length() / 2)) + "\"  y=\"" +  toString(int(0.38 * height)) +  "\">" + toString(sharedac[0] - sharedabc[0]) + "</text>\n";  
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\"  x=\"" + toString(int(0.5 * width) - ((int)toString(numC[0]-sharedac[0]-sharedbc[0]+sharedabc[0]).length() / 2)) + "\"   y=\"" +  toString(int(0.54 * height)) +  "\">" + toString(numC[0]-sharedac[0]-sharedbc[0]+sharedabc[0]) + "</text>\n"; 
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\"  x=\"" + toString(int(0.5 * width) - ((int)lookup[2]->getGroup().length() / 2)) + "\"   y=\"" +  toString(int(0.51 * height)) +  "\">" + lookup[2]->getGroup() + "</text>\n"; 
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" + toString(int(0.59 * width) - ((int)toString(sharedbc[0] - sharedabc[0]).length() / 2)) + "\" y=\"" +  toString(int(0.38 * height)) +  "\">" + toString(sharedbc[0] - sharedabc[0]) + "</text>\n";  
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" + toString(int(0.5 * width) - ((int)toString(sharedabc[0]).length() / 2)) + "\"  y=\"" +  toString(int(0.35 * height)) +  "\">" + toString(sharedabc[0]) + "</text>\n"; 
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" + toString(int(0.29 * width) - ((int)toString(numA[0]-sharedab[0]-sharedac[0]+sharedabc[0]).length() / 2)) + "\" y=\"" +  toString(int(0.22 * height)) +  "\">" + toString(numA[0]-sharedab[0]-sharedac[0]+sharedabc[0]) + "</text>\n"; 
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" + toString(int(0.29 * width) - ((int)lookup[0]->getGroup().length() / 2)) + "\" y=\"" +  toString(int(0.19 * height)) +  "\">" + lookup[0]->getGroup() + "</text>\n";  
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" + toString(int(0.5 * width) - ((int)toString(sharedab[0] - sharedabc[0]).length() / 2)) + "\"  y=\"" +  toString(int(0.22 * height)) +  "\">" + toString(sharedab[0] - sharedabc[0]) + "</text>\n";  
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" + toString(int(0.68 * width) - ((int)toString(numB[0]-sharedab[0]-sharedbc[0]+sharedabc[0]).length() / 2)) + "\"  y=\"" +  toString(int(0.22 * height)) +  "\">" + toString(numB[0]-sharedab[0]-sharedbc[0]+sharedabc[0]) + "</text>\n";
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" + toString(int(0.68 * width) - ((int)lookup[1]->getGroup().length() / 2)) + "\"  y=\"" +  toString(int(0.19 * height)) +  "\">" + lookup[1]->getGroup() + "</text>\n";  
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" + toString(int(0.38 * width) - ((int)toString(sharedac[0] - sharedabc[0]).length() / 2)) + "\"  y=\"" +  toString(int(0.38 * height)) +  "\">" + toString(sharedac[0] - sharedabc[0]) + "</text>\n";  
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\"  x=\"" + toString(int(0.5 * width) - ((int)toString(numC[0]-sharedac[0]-sharedbc[0]+sharedabc[0]).length() / 2)) + "\"   y=\"" +  toString(int(0.54 * height)) +  "\">" + toString(numC[0]-sharedac[0]-sharedbc[0]+sharedabc[0]) + "</text>\n"; 
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\"  x=\"" + toString(int(0.5 * width) - ((int)lookup[2]->getGroup().length() / 2)) + "\"   y=\"" +  toString(int(0.51 * height)) +  "\">" + lookup[2]->getGroup() + "</text>\n"; 
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" + toString(int(0.59 * width) - ((int)toString(sharedbc[0] - sharedabc[0]).length() / 2)) + "\" y=\"" +  toString(int(0.38 * height)) +  "\">" + toString(sharedbc[0] - sharedabc[0]) + "</text>\n";  
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" + toString(int(0.5 * width) - ((int)toString(sharedabc[0]).length() / 2)) + "\"  y=\"" +  toString(int(0.35 * height)) +  "\">" + toString(sharedabc[0]) + "</text>\n"; 
 				
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.825 * height)) +  "\">The number of species shared between groups " + lookup[0]->getGroup() + " and " + lookup[1]->getGroup() + " is " + toString(sharedab[0]);
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.825 * height)) +  "\">The number of species shared between groups " + lookup[0]->getGroup() + " and " + lookup[1]->getGroup() + " is " + toString(sharedab[0]);
 					if (nseqs) {  outsvg << ", and the number of squences is " + toString(sharedABVal);  }  
 					outsvg << "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.85 * height)) +  "\">The number of species shared between groups " + lookup[0]->getGroup() + " and " + lookup[2]->getGroup() + " is " + toString(sharedac[0]);
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.85 * height)) +  "\">The number of species shared between groups " + lookup[0]->getGroup() + " and " + lookup[2]->getGroup() + " is " + toString(sharedac[0]);
 					if (nseqs) {  outsvg << ", and the number of squences is " + toString(sharedACVal);  }  
 					outsvg << "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.875 * height)) +  "\">The number of species shared between groups " + lookup[1]->getGroup() + " and " + lookup[2]->getGroup() + " is " + toString(sharedbc[0]);
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.875 * height)) +  "\">The number of species shared between groups " + lookup[1]->getGroup() + " and " + lookup[2]->getGroup() + " is " + toString(sharedbc[0]);
 					if (nseqs) {  outsvg << ", and the number of squences is " + toString(sharedBCVal);  }  
 					outsvg << "</text>\n";
 					
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.725 * height)) +  "\">The number of species in group " + lookup[0]->getGroup() + " is " + toString(numA[0]);
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.725 * height)) +  "\">The number of species in group " + lookup[0]->getGroup() + " is " + toString(numA[0]);
 					if (numA.size() == 3) { 
 						outsvg << " the lci is " + toString(numA[1]) + " and the hci is " + toString(numA[2]);
 					}
 					if (nseqs) {  outsvg << ", and the number of squences is " + toString(numSeqsA);  }  
 					outsvg << "</text>\n";
 			
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.75 * height)) +  "\">The number of species in group " + lookup[1]->getGroup() + " is " + toString(numB[0]);
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.75 * height)) +  "\">The number of species in group " + lookup[1]->getGroup() + " is " + toString(numB[0]);
 					if (numB.size() == 3) { 
 						outsvg << " the lci is " + toString(numB[1]) + " and the hci is " + toString(numB[2]);
 					}
 					if (nseqs) {  outsvg << ", and the number of squences is " + toString(numSeqsB);  }  
 					outsvg << "</text>\n";
 										
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.775 * height)) +  "\">The number of species in group " + lookup[2]->getGroup() + " is " + toString(numC[0]);
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.775 * height)) +  "\">The number of species in group " + lookup[2]->getGroup() + " is " + toString(numC[0]);
 					if (numC.size() == 3) { 
 						outsvg << " the lci is " + toString(numC[1]) + " and the hci is " + toString(numC[2]);
 					}
 					if (nseqs) {  outsvg << ", and the number of squences is " + toString(numSeqsC);  }  
 					outsvg << "</text>\n";
 
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.8 * height)) +  "\">The total richness of all the groups is " + toString(numA[0] + numB[0] + numC[0] - sharedab[0] - sharedac[0] - sharedbc[0] + sharedabc[0]) + "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.9 * height)) +  "\">The total shared richness is " + toString(sharedabc[0]);
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.8 * height)) +  "\">The total richness of all the groups is " + toString(numA[0] + numB[0] + numC[0] - sharedab[0] - sharedac[0] - sharedbc[0] + sharedabc[0]) + "</text>\n";
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.9 * height)) +  "\">The total shared richness is " + toString(sharedabc[0]);
 					if (nseqs) {  outsvg << ", and the number of squences is " + toString(sharedVal);  }  
 					outsvg << "</text>\n";
 
@@ -717,50 +717,50 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 					outsvg << "<svg xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" height=\"100%\" viewBox=\"0 0 " +  toString(width) + " " + toString(windowSize) + " \" >\n";
 					outsvg << "<g>\n";
 					outsvg << "<rect fill=\"white\" stroke=\"white\" x=\"0\" y=\"0\" width=\"" +  toString(width) +  "\" height=\"" +  toString(windowSize) +  "\"/>"; 
-					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" +  toString(int(0.40 * width)) +  "\" y=\"" +  toString(int(0.05 * height)) +  "\" >Venn Diagram at distance " + lookup[0]->getLabel() + "</text>\n";
+					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.40 * width)) +  "\" y=\"" +  toString(int(0.05 * height)) +  "\" >Venn Diagram at distance " + lookup[0]->getLabel() + "</text>\n";
 
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\"  y=\"" +  toString(int(0.625 * height)) +  "\">The number of species in group " + lookup[0]->getGroup() + " is " + toString(numA); 
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.25 * width)) +  "\"  y=\"" +  toString(int(0.625 * height)) +  "\">The number of species in group " + lookup[0]->getGroup() + " is " + toString(numA); 
 					if (nseqs) {  outsvg << ", and the number of squences is " + toString(numSeqsA);  }  
 					outsvg << "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.65 * height)) +  "\">The number of species in group " + lookup[1]->getGroup() + " is " + toString(numB);
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.65 * height)) +  "\">The number of species in group " + lookup[1]->getGroup() + " is " + toString(numB);
 					if (nseqs) {  outsvg << ", and the number of squences is " + toString(numSeqsB);  }  
 					outsvg << "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.675 * height)) +  "\">The number of species in group " + lookup[2]->getGroup() + " is " + toString(numC);
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.675 * height)) +  "\">The number of species in group " + lookup[2]->getGroup() + " is " + toString(numC);
 					if (nseqs) {  outsvg << ", and the number of squences is " + toString(numSeqsC);  }  
 					outsvg << "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.7 * height)) +  "\">The number of species in group " + lookup[3]->getGroup() + " is " + toString(numD);
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.7 * height)) +  "\">The number of species in group " + lookup[3]->getGroup() + " is " + toString(numD);
 					if (nseqs) {  outsvg << ", and the number of squences is " + toString(numSeqsD);  }  
 					outsvg << "</text>\n";
 					
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.725 * height)) +  "\">The number of species shared between groups " + lookup[0]->getGroup() + " and " + lookup[1]->getGroup() + " is " + toString(sharedAB);
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.725 * height)) +  "\">The number of species shared between groups " + lookup[0]->getGroup() + " and " + lookup[1]->getGroup() + " is " + toString(sharedAB);
 					if (nseqs) {  outsvg << ", and the number of squences is " + toString(sharedABVal);  }  
 					outsvg << "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.75 * height)) +  "\">The number of species shared between groups " + lookup[0]->getGroup() + " and " + lookup[2]->getGroup() + " is " + toString(sharedAC);
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.75 * height)) +  "\">The number of species shared between groups " + lookup[0]->getGroup() + " and " + lookup[2]->getGroup() + " is " + toString(sharedAC);
 					if (nseqs) {  outsvg << ", and the number of squences is " + toString(sharedACVal);  }  
 					outsvg << "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.775 * height)) +  "\">The number of species shared between groups " + lookup[0]->getGroup() + " and " + lookup[3]->getGroup() + " is " + toString(sharedAD);
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.775 * height)) +  "\">The number of species shared between groups " + lookup[0]->getGroup() + " and " + lookup[3]->getGroup() + " is " + toString(sharedAD);
 					if (nseqs) {  outsvg << ", and the number of squences is " + toString(sharedADVal);  }  
 					outsvg << "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.8 * height)) +  "\">The number of species shared between groups " + lookup[1]->getGroup() + " and " + lookup[2]->getGroup() + " is " + toString(sharedBC);
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.8 * height)) +  "\">The number of species shared between groups " + lookup[1]->getGroup() + " and " + lookup[2]->getGroup() + " is " + toString(sharedBC);
 					if (nseqs) {  outsvg << ", and the number of squences is " + toString(sharedBCVal);  }  
 					outsvg << "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.825 * height)) +  "\">The number of species shared between groups " + lookup[1]->getGroup() + " and " + lookup[3]->getGroup() + " is " + toString(sharedBD);
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.825 * height)) +  "\">The number of species shared between groups " + lookup[1]->getGroup() + " and " + lookup[3]->getGroup() + " is " + toString(sharedBD);
 					if (nseqs) {  outsvg << ", and the number of squences is " + toString(sharedBDVal);  }  
 					outsvg << "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.85 * height)) +  "\">The number of species shared between groups " + lookup[2]->getGroup() + " and " + lookup[3]->getGroup() + " is " + toString(sharedCD);
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.85 * height)) +  "\">The number of species shared between groups " + lookup[2]->getGroup() + " and " + lookup[3]->getGroup() + " is " + toString(sharedCD);
 					if (nseqs) {  outsvg << ", and the number of squences is " + toString(sharedCDVal);  }  
 					outsvg << "</text>\n";
 					
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.875 * height)) +  "\">The number of species shared between groups " + lookup[0]->getGroup() + ", " + lookup[1]->getGroup() + " and " + lookup[2]->getGroup() + " is " + toString(sharedABC);
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.875 * height)) +  "\">The number of species shared between groups " + lookup[0]->getGroup() + ", " + lookup[1]->getGroup() + " and " + lookup[2]->getGroup() + " is " + toString(sharedABC);
 					if (nseqs) {  outsvg << ", and the number of squences is " + toString(sharedABCVal);  }  
 					outsvg << "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.9 * height)) +  "\">The number of species shared between groups " + lookup[0]->getGroup() + ", " + lookup[1]->getGroup() + " and " + lookup[3]->getGroup() + " is " + toString(sharedABD);
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.9 * height)) +  "\">The number of species shared between groups " + lookup[0]->getGroup() + ", " + lookup[1]->getGroup() + " and " + lookup[3]->getGroup() + " is " + toString(sharedABD);
 					if (nseqs) {  outsvg << ", and the number of squences is " + toString(sharedABDVal);  }  
 					outsvg << "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.925 * height)) +  "\">The number of species shared between groups " + lookup[0]->getGroup() + ", " + lookup[2]->getGroup() + " and " + lookup[3]->getGroup() + " is " + toString(sharedACD);
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.925 * height)) +  "\">The number of species shared between groups " + lookup[0]->getGroup() + ", " + lookup[2]->getGroup() + " and " + lookup[3]->getGroup() + " is " + toString(sharedACD);
 					if (nseqs) {  outsvg << ", and the number of squences is " + toString(sharedACDVal);  }  
 					outsvg << "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.95 * height)) +  "\">The number of species shared between groups " + lookup[1]->getGroup() + ", " + lookup[2]->getGroup() + " and " + lookup[3]->getGroup() + " is " + toString(sharedBCD);
+					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.95 * height)) +  "\">The number of species shared between groups " + lookup[1]->getGroup() + ", " + lookup[2]->getGroup() + " and " + lookup[3]->getGroup() + " is " + toString(sharedBCD);
 					if (nseqs) {  outsvg << ", and the number of squences is " + toString(sharedBCDVal);  }  
 					outsvg << "</text>\n";
 									
@@ -799,27 +799,27 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 					//A = red, B = green, C = blue, D = yellow
 			
 					//place labels within overlaps
-					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" + toString(int(0.66 * width) - ((int)toString(numA).length() / 2)) + "\" y=\"" +  toString(int(0.14 * height)) +  "\">" + toString(numA)  + "</text>\n"; 
-					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" + toString(int(0.66 * width) - ((int)lookup[0]->getGroup().length() / 2)) + "\" y=\"" +  toString(int(0.11 * height)) +  "\">" + lookup[0]->getGroup() + "</text>\n";  
-					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" + toString(int(0.5 * width) - ((int)toString(sharedAB).length() / 2)) + "\"  y=\"" +  toString(int(0.2 * height)) +  "\">" + toString(sharedAB) + "</text>\n";  
-					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" + toString(int(0.36 * width) - ((int)toString(numB).length() / 2)) + "\"  y=\"" +  toString(int(0.14 * height)) +  "\">" + toString(numB)  + "</text>\n";  
-					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" + toString(int(0.36 * width) - ((int)lookup[1]->getGroup().length() / 2)) + "\"  y=\"" +  toString(int(0.11 * height)) +  "\">" + lookup[1]->getGroup() + "</text>\n"; 
-					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" + toString(int(0.7 * width) - ((int)toString(sharedAC).length() / 2)) + "\"  y=\"" +  toString(int(0.24 * height)) +  "\">" + toString(sharedAC) + "</text>\n";  
-					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\"  x=\"" + toString(int(0.785 * width) - ((int)toString(numC).length() / 2)) + "\"   y=\"" +  toString(int(0.29 * height)) +  "\">" + toString(numC) + "</text>\n";  
-					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\"  x=\"" + toString(int(0.785 * width) - ((int)lookup[2]->getGroup().length() / 2)) + "\"   y=\"" +  toString(int(0.26 * height)) +  "\">" + lookup[2]->getGroup() + "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" + toString(int(0.31 * width) - ((int)toString(sharedBD).length() / 2)) + "\" y=\"" +  toString(int(0.24 * height)) +  "\">" + toString(sharedBD) + "</text>\n";  
-					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\"  x=\"" + toString(int(0.22 * width) - ((int)toString(numD).length() / 2)) + "\"   y=\"" +  toString(int(0.29 * height)) +  "\">" + toString(numD) + "</text>\n";  
-					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\"  x=\"" + toString(int(0.22 * width) - ((int)lookup[3]->getGroup().length() / 2)) + "\"   y=\"" +  toString(int(0.26 * height)) +  "\">" + lookup[3]->getGroup() + "</text>\n"; 
-					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" + toString(int(0.34 * width) - ((int)toString(sharedAD).length() / 2)) + "\" y=\"" +  toString(int(0.41 * height)) +  "\">" + toString(sharedAD) + "</text>\n"; 
-					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" + toString(int(0.675 * width) - ((int)toString(sharedBC).length() / 2)) + "\" y=\"" +  toString(int(0.41 * height)) +  "\">" + toString(sharedBC) + "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" + toString(int(0.5 * width) - ((int)toString(sharedCD).length() / 2)) + "\" y=\"" +  toString(int(0.54 * height)) +  "\">" + toString(sharedCD) + "</text>\n"; 
-					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" + toString(int(0.39 * width) - ((int)toString(sharedABD).length() / 2)) + "\" y=\"" +  toString(int(0.3 * height)) +  "\">" + toString(sharedABD) + "</text>\n"; 
-					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" + toString(int(0.57 * width) - ((int)toString(sharedBCD).length() / 2)) + "\" y=\"" +  toString(int(0.45 * height)) +  "\">" + toString(sharedBCD) + "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" + toString(int(0.435 * width) - ((int)toString(sharedACD).length() / 2)) + "\" y=\"" +  toString(int(0.45 * height)) +  "\">" + toString(sharedACD) + "</text>\n"; 
-					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" + toString(int(0.63 * width) - ((int)toString(sharedABC).length() / 2)) + "\"  y=\"" +  toString(int(0.3 * height)) +  "\">" + toString(sharedABC) + "</text>\n"; 
-					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" + toString(int(0.5 * width) - ((int)toString(sharedABCD).length() / 2)) + "\"  y=\"" +  toString(int(0.4 * height)) +  "\">" + toString(sharedABCD) + "</text>\n"; 
+					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(int(0.66 * width) - ((int)toString(numA).length() / 2)) + "\" y=\"" +  toString(int(0.14 * height)) +  "\">" + toString(numA)  + "</text>\n"; 
+					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(int(0.66 * width) - ((int)lookup[0]->getGroup().length() / 2)) + "\" y=\"" +  toString(int(0.11 * height)) +  "\">" + lookup[0]->getGroup() + "</text>\n";  
+					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(int(0.5 * width) - ((int)toString(sharedAB).length() / 2)) + "\"  y=\"" +  toString(int(0.2 * height)) +  "\">" + toString(sharedAB) + "</text>\n";  
+					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(int(0.36 * width) - ((int)toString(numB).length() / 2)) + "\"  y=\"" +  toString(int(0.14 * height)) +  "\">" + toString(numB)  + "</text>\n";  
+					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(int(0.36 * width) - ((int)lookup[1]->getGroup().length() / 2)) + "\"  y=\"" +  toString(int(0.11 * height)) +  "\">" + lookup[1]->getGroup() + "</text>\n"; 
+					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(int(0.7 * width) - ((int)toString(sharedAC).length() / 2)) + "\"  y=\"" +  toString(int(0.24 * height)) +  "\">" + toString(sharedAC) + "</text>\n";  
+					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\"  x=\"" + toString(int(0.785 * width) - ((int)toString(numC).length() / 2)) + "\"   y=\"" +  toString(int(0.29 * height)) +  "\">" + toString(numC) + "</text>\n";  
+					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\"  x=\"" + toString(int(0.785 * width) - ((int)lookup[2]->getGroup().length() / 2)) + "\"   y=\"" +  toString(int(0.26 * height)) +  "\">" + lookup[2]->getGroup() + "</text>\n";
+					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(int(0.31 * width) - ((int)toString(sharedBD).length() / 2)) + "\" y=\"" +  toString(int(0.24 * height)) +  "\">" + toString(sharedBD) + "</text>\n";  
+					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\"  x=\"" + toString(int(0.22 * width) - ((int)toString(numD).length() / 2)) + "\"   y=\"" +  toString(int(0.29 * height)) +  "\">" + toString(numD) + "</text>\n";  
+					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\"  x=\"" + toString(int(0.22 * width) - ((int)lookup[3]->getGroup().length() / 2)) + "\"   y=\"" +  toString(int(0.26 * height)) +  "\">" + lookup[3]->getGroup() + "</text>\n"; 
+					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(int(0.34 * width) - ((int)toString(sharedAD).length() / 2)) + "\" y=\"" +  toString(int(0.41 * height)) +  "\">" + toString(sharedAD) + "</text>\n"; 
+					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(int(0.675 * width) - ((int)toString(sharedBC).length() / 2)) + "\" y=\"" +  toString(int(0.41 * height)) +  "\">" + toString(sharedBC) + "</text>\n";
+					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(int(0.5 * width) - ((int)toString(sharedCD).length() / 2)) + "\" y=\"" +  toString(int(0.54 * height)) +  "\">" + toString(sharedCD) + "</text>\n"; 
+					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(int(0.39 * width) - ((int)toString(sharedABD).length() / 2)) + "\" y=\"" +  toString(int(0.3 * height)) +  "\">" + toString(sharedABD) + "</text>\n"; 
+					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(int(0.57 * width) - ((int)toString(sharedBCD).length() / 2)) + "\" y=\"" +  toString(int(0.45 * height)) +  "\">" + toString(sharedBCD) + "</text>\n";
+					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(int(0.435 * width) - ((int)toString(sharedACD).length() / 2)) + "\" y=\"" +  toString(int(0.45 * height)) +  "\">" + toString(sharedACD) + "</text>\n"; 
+					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(int(0.63 * width) - ((int)toString(sharedABC).length() / 2)) + "\"  y=\"" +  toString(int(0.3 * height)) +  "\">" + toString(sharedABC) + "</text>\n"; 
+					outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(int(0.5 * width) - ((int)toString(sharedABCD).length() / 2)) + "\"  y=\"" +  toString(int(0.4 * height)) +  "\">" + toString(sharedABCD) + "</text>\n"; 
 					
-					outsvg << "<text fill=\"black\"  class=\"seri\" font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.975 * height)) +  "\">The total richness of all the groups is " + toString((float)(numA + numB + numC + numD + sharedAB + sharedAC + sharedAD + sharedBC + sharedBD + sharedCD + sharedABC + sharedABD + sharedACD + sharedBCD + sharedABCD));
+					outsvg << "<text fill=\"black\"  class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.975 * height)) +  "\">The total richness of all the groups is " + toString((float)(numA + numB + numC + numD + sharedAB + sharedAC + sharedAD + sharedBC + sharedBD + sharedCD + sharedABC + sharedABD + sharedACD + sharedBCD + sharedABCD));
 					if (nseqs) {  outsvg << ", and the number of squences in the otus shared by all groups is " + toString(sharedVal);  }  
 					outsvg << "</text>\n";
 					

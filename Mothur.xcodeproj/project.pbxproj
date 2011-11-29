@@ -41,6 +41,7 @@
 		A74D369B137DAB8400332B0C /* viterbifast.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D3684137DAB8300332B0C /* viterbifast.cpp */; };
 		A74D369C137DAB8400332B0C /* writechhit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D3686137DAB8300332B0C /* writechhit.cpp */; };
 		A74D36B8137DAFAA00332B0C /* chimerauchimecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D36B7137DAFAA00332B0C /* chimerauchimecommand.cpp */; };
+		A754149714840CF7005850D1 /* summaryqualcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A754149614840CF7005850D1 /* summaryqualcommand.cpp */; };
 		A75790591301749D00A30DAB /* homovacommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A75790581301749D00A30DAB /* homovacommand.cpp */; };
 		A7730EFF13967241007433A3 /* countseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7730EFE13967241007433A3 /* countseqscommand.cpp */; };
 		A774101414695AF60098E6AC /* shhhseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A774101314695AF60098E6AC /* shhhseqscommand.cpp */; };
@@ -419,6 +420,8 @@
 		A74D3686137DAB8300332B0C /* writechhit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = writechhit.cpp; sourceTree = "<group>"; };
 		A74D36B6137DAFAA00332B0C /* chimerauchimecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimerauchimecommand.h; sourceTree = "<group>"; };
 		A74D36B7137DAFAA00332B0C /* chimerauchimecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimerauchimecommand.cpp; sourceTree = "<group>"; };
+		A754149514840CF7005850D1 /* summaryqualcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = summaryqualcommand.h; sourceTree = "<group>"; };
+		A754149614840CF7005850D1 /* summaryqualcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = summaryqualcommand.cpp; sourceTree = "<group>"; };
 		A75790571301749D00A30DAB /* homovacommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = homovacommand.h; sourceTree = "<group>"; };
 		A75790581301749D00A30DAB /* homovacommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = homovacommand.cpp; sourceTree = "<group>"; };
 		A7730EFD13967241007433A3 /* countseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = countseqscommand.h; sourceTree = "<group>"; };
@@ -1427,6 +1430,8 @@
 				A7E9B84F12D37EC400DA6239 /* subsamplecommand.cpp */,
 				A7E9B85812D37EC400DA6239 /* summarycommand.h */,
 				A7E9B85712D37EC400DA6239 /* summarycommand.cpp */,
+				A754149514840CF7005850D1 /* summaryqualcommand.h */,
+				A754149614840CF7005850D1 /* summaryqualcommand.cpp */,
 				A7E9B85A12D37EC400DA6239 /* summarysharedcommand.h */,
 				A7E9B85912D37EC400DA6239 /* summarysharedcommand.cpp */,
 				A7FFB556142CA02C004884F2 /* summarytaxcommand.h */,
@@ -2185,6 +2190,7 @@
 				A774101414695AF60098E6AC /* shhhseqscommand.cpp in Sources */,
 				A774104814696F320098E6AC /* myseqdist.cpp in Sources */,
 				A77410F614697C300098E6AC /* seqnoise.cpp in Sources */,
+				A754149714840CF7005850D1 /* summaryqualcommand.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

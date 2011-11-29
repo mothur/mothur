@@ -27,6 +27,7 @@ vector<string> VennCommand::setParameters(){
 		CommandParameter pcalc("calc", "String", "", "", "", "", "",false,false); parameters.push_back(pcalc);
 		CommandParameter pabund("abund", "Number", "", "10", "", "", "",false,false); parameters.push_back(pabund);
 		CommandParameter pnseqs("nseqs", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pnseqs);
+		CommandParameter pfontsize("fontsize", "Number", "", "24", "", "", "",false,false); parameters.push_back(pfontsize);
 		CommandParameter ppermute("permute", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(ppermute);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
@@ -44,9 +45,10 @@ vector<string> VennCommand::setParameters(){
 string VennCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The venn command parameters are list, shared, groups, calc, abund, nseqs, permute and label.   shared, relabund, list, rabund or sabund is required unless you have a valid current file.\n";
+		helpString += "The venn command parameters are list, shared, groups, calc, abund, nseqs, permute, fontsize and label.   shared, relabund, list, rabund or sabund is required unless you have a valid current file.\n";
 		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like included in your venn diagram, you may only use a maximum of 4 groups.\n";
 		helpString += "The group names are separated by dashes. The label allows you to select what distance levels you would like a venn diagram created for, and are also separated by dashes.\n";
+		helpString += "The fontsize parameter allows you to adjust the font size of the picture created, default=24.\n";
 		helpString += "The venn command should be in the following format: venn(groups=yourGroups, calc=yourCalcs, label=yourLabels, abund=yourAbund).\n";
 		helpString += "Example venn(groups=A-B-C, calc=sharedsobs-sharedchao, abund=20).\n";
 		helpString += "The default value for groups is all the groups in your groupfile up to 4, and all labels in your inputfile will be used.\n";
@@ -196,8 +198,11 @@ VennCommand::VennCommand(string option)  {
 			temp = validParameter.validFile(parameters, "nseqs", false);		if (temp == "not found"){	temp = "f";				}
 			nseqs = m->isTrue(temp); 
 
-			temp = validParameter.validFile(parameters, "permute", false);			if (temp == "not found"){	temp = "f";				}
+			temp = validParameter.validFile(parameters, "permute", false);		if (temp == "not found"){	temp = "f";				}
 			perm = m->isTrue(temp); 
+			
+			temp = validParameter.validFile(parameters, "fontsize", false);		if (temp == "not found") { temp = "24"; }
+			convert(temp, fontsize);
 
 		}
 				
@@ -247,7 +252,7 @@ int VennCommand::execute(){
 		//if the users entered no valid calculators don't execute command
 		if (vennCalculators.size() == 0) { m->mothurOut("No valid calculators given, please correct."); m->mothurOutEndLine(); return 0;  }
 		
-		venn = new Venn(outputDir, nseqs, inputfile); 
+		venn = new Venn(outputDir, nseqs, inputfile, fontsize); 
 		input = new InputData(inputfile, format);
 		
 		string lastLabel;
