@@ -62,7 +62,8 @@ SensSpecCommand::SensSpecCommand(){
 SensSpecCommand::SensSpecCommand(string option)  {
 	try {
 		
-		abort = false; calledHelp = false;   
+		abort = false; calledHelp = false;  
+		allLines = 1;
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
@@ -189,9 +190,14 @@ SensSpecCommand::SensSpecCommand(string option)  {
 			convert(temp, precision);  
 //			cout << precision << endl;
 			
-			lineLabel = validParameter.validFile(parameters, "label", false);	if (lineLabel == "not found") { lineLabel = ""; }
+			string label = validParameter.validFile(parameters, "label", false);			
+			if (label == "not found") { label = ""; }
+			else { 
+				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
+				else { allLines = 1;  }
+			}
 			
-			sensSpecFileName = outputDir + m->getRootName(m->getSimpleName(listFile)) + ".sensspec";
+			sensSpecFileName = outputDir + m->getRootName(m->getSimpleName(listFile)) + "sensspec";
 		}
 	}
 	catch(exception& e) {
@@ -210,6 +216,8 @@ int SensSpecCommand::execute(){
 		if(format == "phylip")		{	processPhylip();	}
 		else if(format == "column")	{	processColumn();	}
 		
+		if (m->control_pressed) { m->mothurRemove(sensSpecFileName); return 0; }
+		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
 		m->mothurOut(sensSpecFileName); m->mothurOutEndLine();	
@@ -226,216 +234,379 @@ int SensSpecCommand::execute(){
 
 //***************************************************************************************************************
 
-void SensSpecCommand::processPhylip(){
+int SensSpecCommand::processPhylip(){
 	try{
 		//probably need some checking to confirm that the names in the distance matrix are the same as those in the list file
-		
-		ifstream inputListFile;
-		m->openInputFile(listFile, inputListFile);
-		
 		string origCutoff = "";
 		bool getCutoff = 0;
 		if(cutoff == -1.00)	{	getCutoff = 1;															}
-		else				{	origCutoff = toString(cutoff);	cutoff += (0.49 / double(precision));	}
+		else				{	origCutoff = toString(cutoff);	cutoff += (0.49 / double(precision));	}		
 		
-		string label;
-		int numOTUs;
-
 		map<string, int> seqMap;
 		string seqList;
 		
-		while(inputListFile){
-			inputListFile >> label >> numOTUs;
-			for(int i=0;i<numOTUs;i++){
-				inputListFile >> seqList;
-				int seqListLength = seqList.length();
-				string seqName = "";
-				for(int j=0;j<seqListLength;j++){
-					
-					if(seqList[j] == ','){
-						seqMap[seqName] = i;
-						seqName = "";
-					}
-					else{
-						seqName += seqList[j];
-					}
-					
-				}
-				seqMap[seqName] = i;
-			}
-			m->gobble(inputListFile);
+		InputData input(listFile, "list");
+		ListVector* list = input.getListVector();
+		string lastLabel = list->getLabel();
 		
-			int lNumSeqs = seqMap.size();
-			int pNumSeqs = 0;
-
-			ifstream phylipFile;
-			m->openInputFile(distFile, phylipFile);
-			phylipFile >> pNumSeqs;
-			if(pNumSeqs != lNumSeqs){	cout << "numSeq mismatch!" << endl;	}
+		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
+		set<string> processedLabels;
+		set<string> userLabels = labels;
+		
+		
+		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-			string seqName;
-			double distance;
-			vector<int> otuIndices(lNumSeqs, -1);
+			if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }  delete list;  return 0;  }
+			
+			if(allLines == 1 || labels.count(list->getLabel()) == 1){			
 				
-			truePositives = 0;
-			falsePositives = 0;
-			trueNegatives = 0;
-			falseNegatives = 0;
-			
-			if(getCutoff == 1){
-				if(label != "unique"){
-					origCutoff = label;
-					convert(label, cutoff);
-					if(hard == 0){	cutoff += (0.49 / double(precision));	}		
-				}
-				else{
-					origCutoff = "unique";
-					cutoff = 0.0000;
-				}
-			}
-				   
-			cout << label << endl;
-			
-			for(int i=0;i<lNumSeqs;i++){
-				phylipFile >> seqName;
-				otuIndices[i] = seqMap[seqName];
+				processedLabels.insert(list->getLabel());
+				userLabels.erase(list->getLabel());
 				
-				for(int j=0;j<i;j++){
-					phylipFile >> distance;
-					
-					if(distance <= cutoff){
-						if(otuIndices[i] == otuIndices[j])	{	truePositives++;	}
-						else								{	falseNegatives++;	}
-					}
-					else{
-						if(otuIndices[i] == otuIndices[j])	{	falsePositives++;	}
-						else								{	trueNegatives++;	}
-					}
-				}
+				//process
+				fillSeqMap(seqMap, list);
+				process(seqMap, list->getLabel(), getCutoff, origCutoff);
 			}
-			phylipFile.close();
 			
-			outputStatistics(label, origCutoff);
+			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				string saveLabel = list->getLabel();
+				
+				delete list;
+				list = input.getListVector(lastLabel);
+				
+				processedLabels.insert(list->getLabel());
+				userLabels.erase(list->getLabel());
+				
+				//process
+				fillSeqMap(seqMap, list);
+				process(seqMap, list->getLabel(), getCutoff, origCutoff);
+				
+				//restore real lastlabel to save below
+				list->setLabel(saveLabel);
+			}		
+			
+			lastLabel = list->getLabel();			
+			
+			delete list;
+			list = input.getListVector();
 		}
-		inputListFile.close();
-
+		
+		
+		//output error messages about any remaining user labels
+		set<string>::iterator it;
+		bool needToRun = false;
+		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
+			m->mothurOut("Your file does not include the label " + *it); 
+			if (processedLabels.count(lastLabel) != 1) {
+				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
+				needToRun = true;
+			}else {
+				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
+			}
+		}
+		
+		//run last label if you need to
+		if (needToRun == true)  {
+			if (list != NULL) {	delete list;	}
+			list = input.getListVector(lastLabel);
+			
+			//process
+			fillSeqMap(seqMap, list);
+			process(seqMap, list->getLabel(), getCutoff, origCutoff);
+			
+			delete list;
+		}
+		
+		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SensSpecCommand", "processPhylip");
 		exit(1);
 	}
 }
-
+//***************************************************************************************************************
+int SensSpecCommand::fillSeqMap(map<string, int>& seqMap, ListVector*& list){
+	try {
+		//for each otu
+		for(int i=0;i<list->getNumBins();i++){
+			
+			if (m->control_pressed) { return 0; }
+			
+			string seqList = list->get(i);
+			int seqListLength = seqList.length();
+			string seqName = "";
+			
+			//parse bin by name, mapping each name to its otu number
+			for(int j=0;j<seqListLength;j++){
+				
+				if(seqList[j] == ','){
+					seqMap[seqName] = i;
+					seqName = "";
+				}
+				else{
+					seqName += seqList[j];
+				}
+				
+			}
+			seqMap[seqName] = i;
+		}
+		
+		return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SensSpecCommand", "fillSeqMap");
+		exit(1);
+	}
+}
+//***************************************************************************************************************
+int SensSpecCommand::fillSeqPairSet(set<string>& seqPairSet, ListVector*& list){
+	try {
+		int numSeqs = 0;
+		
+		//for each otu
+		for(int i=0;i<list->getNumBins();i++){
+			
+			if (m->control_pressed) { return 0; }
+			
+			vector<string> seqNameVector;
+			string bin = list->get(i);
+			m->splitAtComma(bin, seqNameVector);
+			
+			numSeqs += seqNameVector.size();
+			
+			for(int j=0;j<seqNameVector.size();j++){
+				string seqPairString = "";				
+				for(int k=0;k<j;k++){
+					if(seqNameVector[j] < seqNameVector[k])	{	seqPairString = seqNameVector[j] + '\t' + seqNameVector[k];	}
+					else									{	seqPairString = seqNameVector[k] + '\t' + seqNameVector[j];	}
+					seqPairSet.insert(seqPairString);
+				}
+			}
+		}
+		
+		return numSeqs;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SensSpecCommand", "fillSeqMap");
+		exit(1);
+	}
+}
+//***************************************************************************************************************
+int SensSpecCommand::process(map<string, int>& seqMap, string label, bool& getCutoff, string& origCutoff){
+	try {
+						
+		int lNumSeqs = seqMap.size();
+		int pNumSeqs = 0;
+		
+		ifstream phylipFile;
+		m->openInputFile(distFile, phylipFile);
+		phylipFile >> pNumSeqs;
+		if(pNumSeqs != lNumSeqs){	m->mothurOut("numSeq mismatch!\n"); m->control_pressed = true; }
+		
+		string seqName;
+		double distance;
+		vector<int> otuIndices(lNumSeqs, -1);
+		
+		truePositives = 0;
+		falsePositives = 0;
+		trueNegatives = 0;
+		falseNegatives = 0;
+		
+		if(getCutoff == 1){
+			if(label != "unique"){
+				origCutoff = label;
+				convert(label, cutoff);
+				if(hard == 0){	cutoff += (0.49 / double(precision));	}		
+			}
+			else{
+				origCutoff = "unique";
+				cutoff = 0.0000;
+			}
+		}
+		
+		m->mothurOut(label); m->mothurOutEndLine();
+		
+		for(int i=0;i<lNumSeqs;i++){
+			
+			if (m->control_pressed) { return 0; }
+			
+			phylipFile >> seqName;
+			otuIndices[i] = seqMap[seqName];
+			
+			for(int j=0;j<i;j++){
+				phylipFile >> distance;
+				
+				if(distance <= cutoff){
+					if(otuIndices[i] == otuIndices[j])	{	truePositives++;	}
+					else								{	falseNegatives++;	}
+				}
+				else{
+					if(otuIndices[i] == otuIndices[j])	{	falsePositives++;	}
+					else								{	trueNegatives++;	}
+				}
+			}
+		}
+		phylipFile.close();
+		
+		outputStatistics(label, origCutoff);
+		
+		return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SensSpecCommand", "process");
+		exit(1);
+	}
+}
+//***************************************************************************************************************
+int SensSpecCommand::process(set<string>& seqPairSet, string label, bool& getCutoff, string& origCutoff, int numSeqs){
+	try {
+		int numDists = (numSeqs * (numSeqs-1) / 2);
+		
+		ifstream columnFile;
+		m->openInputFile(distFile, columnFile);
+		string seqNameA, seqNameB, seqPairString;
+		double distance;
+		
+		truePositives = 0;
+		falsePositives = 0;
+		trueNegatives = numDists;
+		falseNegatives = 0;
+		
+		if(getCutoff == 1){
+			if(label != "unique"){
+				origCutoff = label;
+				convert(label, cutoff);
+				if(hard == 0){	cutoff += (0.49 / double(precision));	}		
+			}
+			else{
+				origCutoff = "unique";
+				cutoff = 0.0000;
+			}
+		}
+		
+		m->mothurOut(label); m->mothurOutEndLine();
+		
+		while(columnFile){
+			columnFile >> seqNameA >> seqNameB >> distance;
+			if(seqNameA < seqNameB)	{	seqPairString = seqNameA + '\t' + seqNameB;	}
+			else					{	seqPairString = seqNameB + '\t' + seqNameA;	}
+			
+			set<string>::iterator it = seqPairSet.find(seqPairString);
+			
+			if(distance <= cutoff){
+				if(it != seqPairSet.end()){
+					truePositives++;
+					seqPairSet.erase(it);	
+				}
+				else{
+					falseNegatives++;
+				}
+				trueNegatives--;
+			}
+			else if(it != seqPairSet.end()){	
+				falsePositives++;
+				trueNegatives--;
+				seqPairSet.erase(it);	
+			}
+			
+			m->gobble(columnFile);
+		}
+		falsePositives += seqPairSet.size();
+		
+		outputStatistics(label, origCutoff);
+		
+				
+		return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SensSpecCommand", "process");
+		exit(1);
+	}
+}
 //***************************************************************************************************************
 
-void SensSpecCommand::processColumn(){
+int SensSpecCommand::processColumn(){
 	try{		
-		ifstream inputListFile;
-		m->openInputFile(listFile, inputListFile);
-		
 		string origCutoff = "";
 		bool getCutoff = 0;
 		if(cutoff == -1.00)	{	getCutoff = 1;															}
 		else				{	origCutoff = toString(cutoff);	cutoff += (0.49 / double(precision));	}
 		
 		set<string> seqPairSet;
+		int numSeqs = 0;
 		
-		string label, seqList;
-		int numOTUs;
-		int numSeqs;
+		InputData input(listFile, "list");
+		ListVector* list = input.getListVector();
+		string lastLabel = list->getLabel();
 		
-		while(inputListFile){
-			numSeqs = 0;
+		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
+		set<string> processedLabels;
+		set<string> userLabels = labels;
+		
+		
+		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-			inputListFile >> label >> numOTUs;
-			for(int i=0;i<numOTUs;i++){
+			if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }  delete list;  return 0;  }
+			
+			if(allLines == 1 || labels.count(list->getLabel()) == 1){			
 				
-				vector<string> seqNameVector;
+				processedLabels.insert(list->getLabel());
+				userLabels.erase(list->getLabel());
 				
-				inputListFile >> seqList;
-				int seqListLength = seqList.length();
-				string seqName = "";
-				for(int j=0;j<seqListLength;j++){
-					
-					if(seqList[j] == ','){
-						seqNameVector.push_back(seqName);
-						seqName = "";
-					}
-					else{
-						seqName += seqList[j];
-					}
-				}
-				seqNameVector.push_back(seqName);
-
-				numSeqs += seqNameVector.size();
-				
-				int numSeqsInOTU = seqNameVector.size();
-				for(int j=0;j<numSeqsInOTU;j++){
-					string seqPairString = "";				
-					for(int k=0;k<j;k++){
-						if(seqNameVector[j] < seqNameVector[k])	{	seqPairString = seqNameVector[j] + '\t' + seqNameVector[k];	}
-						else									{	seqPairString = seqNameVector[k] + '\t' + seqNameVector[j];	}
-						seqPairSet.insert(seqPairString);
-					}
-				}
-			}
-			m->gobble(inputListFile);
-			
-			int numDists = (numSeqs * (numSeqs-1) / 2);
-
-			ifstream columnFile;
-			m->openInputFile(distFile, columnFile);
-			string seqNameA, seqNameB, seqPairString;
-			double distance;
-			
-			truePositives = 0;
-			falsePositives = 0;
-			trueNegatives = numDists;
-			falseNegatives = 0;
-			
-			if(getCutoff == 1){
-				if(label != "unique"){
-					origCutoff = label;
-					convert(label, cutoff);
-					if(hard == 0){	cutoff += (0.49 / double(precision));	}		
-				}
-				else{
-					origCutoff = "unique";
-					cutoff = 0.0000;
-				}
+				//process
+				numSeqs = fillSeqPairSet(seqPairSet, list);
+				process(seqPairSet, list->getLabel(), getCutoff, origCutoff, numSeqs);
 			}
 			
-			cout << label << endl;
-			
-			while(columnFile){
-				columnFile >> seqNameA >> seqNameB >> distance;
-				if(seqNameA < seqNameB)	{	seqPairString = seqNameA + '\t' + seqNameB;	}
-				else					{	seqPairString = seqNameB + '\t' + seqNameA;	}
-
-				set<string>::iterator it = seqPairSet.find(seqPairString);
-			
-				if(distance <= cutoff){
-					if(it != seqPairSet.end()){
-						truePositives++;
-						seqPairSet.erase(it);	
-					}
-					else{
-						falseNegatives++;
-					}
-					trueNegatives--;
-				}
-				else if(it != seqPairSet.end()){	
-					falsePositives++;
-					trueNegatives--;
-					seqPairSet.erase(it);	
-				}
+			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				string saveLabel = list->getLabel();
 				
-				m->gobble(columnFile);
-			}
-			falsePositives += seqPairSet.size();
+				delete list;
+				list = input.getListVector(lastLabel);
+				
+				processedLabels.insert(list->getLabel());
+				userLabels.erase(list->getLabel());
+				
+				//process
+				numSeqs = fillSeqPairSet(seqPairSet, list);
+				process(seqPairSet, list->getLabel(), getCutoff, origCutoff, numSeqs);
+				
+				//restore real lastlabel to save below
+				list->setLabel(saveLabel);
+			}		
 			
-			outputStatistics(label, origCutoff);
+			lastLabel = list->getLabel();			
+			
+			delete list;
+			list = input.getListVector();
 		}
+		
+		
+		//output error messages about any remaining user labels
+		set<string>::iterator it;
+		bool needToRun = false;
+		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
+			m->mothurOut("Your file does not include the label " + *it); 
+			if (processedLabels.count(lastLabel) != 1) {
+				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
+				needToRun = true;
+			}else {
+				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
+			}
+		}
+		
+		//run last label if you need to
+		if (needToRun == true)  {
+			if (list != NULL) {	delete list;	}
+			list = input.getListVector(lastLabel);
+			
+			//process
+			numSeqs = fillSeqPairSet(seqPairSet, list);
+			delete list;
+			process(seqPairSet, list->getLabel(), getCutoff, origCutoff, numSeqs);
+		}
+		
+		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SensSpecCommand", "processColumn");

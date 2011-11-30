@@ -64,6 +64,7 @@ SequenceParser::SequenceParser(string groupFile, string fastaFile, string nameFi
 		string first, second;
 		int countName = 0;
 		set<string> thisnames1;
+		
 		while(!inName.eof()) {
 			
 			if (m->control_pressed) { break; }
@@ -135,12 +136,14 @@ SequenceParser::SequenceParser(string groupFile, string fastaFile, string nameFi
 		
 		if (countName != (groupMap->getNumSeqs())) {
 			vector<string> groupseqsnames = groupMap->getNamesSeqs();
+			
 			for (int i = 0; i < groupseqsnames.size(); i++) {
 				set<string>::iterator itnamesfile = thisnames1.find(groupseqsnames[i]);
 				if (itnamesfile == thisnames1.end()){
 					cout << "missing name " + groupseqsnames[i] << '\t' << allSeqsMap[groupseqsnames[i]] << endl;
 				}
 			}
+			
 			m->mothurOutEndLine();
 			m->mothurOut("[ERROR]: Your name file contains " + toString(countName) + " valid sequences, and your groupfile contains " + toString(groupMap->getNumSeqs()) + ", please correct.");
 			m->mothurOutEndLine();

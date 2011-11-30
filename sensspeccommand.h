@@ -13,6 +13,8 @@
 
 #include "mothur.h"
 #include "command.hpp"
+#include "listvector.hpp"
+#include "inputdata.h"
 
 class SensSpecCommand : public Command {
 	
@@ -32,8 +34,8 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	void processPhylip();
-	void processColumn();
+	int processPhylip();
+	int processColumn();
 	void setUpOutput();
 	void outputStatistics(string, string);
 	
@@ -41,13 +43,20 @@ private:
 	string outputDir;
 	string format;
 	vector<string> outputNames;
+	set<string> labels; //holds labels to be used
 
 	long int truePositives, falsePositives, trueNegatives, falseNegatives;
-	bool abort;
+	bool abort, allLines;
 	bool hard;
-	string lineLabel;
+	//string lineLabel;
 	double cutoff;
 	int precision;
+	
+	int fillSeqMap(map<string, int>&, ListVector*&);
+	int fillSeqPairSet(set<string>&, ListVector*&);
+	int process(map<string, int>&, string, bool&, string&);
+	int process(set<string>&, string, bool&, string&, int);
+
 };
 
 #endif
