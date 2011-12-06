@@ -283,10 +283,15 @@ int ScreenSeqsCommand::execute(){
 			getSummary(positions); 
 		} 
 		else { 
+			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 			positions = m->divideFile(fastafile, processors);
 			for (int i = 0; i < (positions.size()-1); i++) {
 				lines.push_back(new linePair(positions[i], positions[(i+1)]));
-			}	
+			}
+			#else 
+				positions.push_back(0); positions.push_back(1000);
+				lines.push_back(new linePair(0, 1000));
+			#endif
 		}
 				
 		string goodSeqFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "good" + m->getExtension(fastafile);
@@ -659,12 +664,15 @@ int ScreenSeqsCommand::getSummary(vector<unsigned long long>& positions){
 		vector<int> ambigBases;
 		vector<int> longHomoPolymer;
 		
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		vector<unsigned long long> positions = m->divideFile(fastafile, processors);
-				
+		
 		for (int i = 0; i < (positions.size()-1); i++) {
 			lines.push_back(new linePair(positions[i], positions[(i+1)]));
 		}	
-		
+#else
+		lines.push_back(new linePair(0, 1000));
+#endif
 		
 #ifdef USE_MPI
 		int pid;
@@ -778,7 +786,7 @@ int ScreenSeqsCommand::driverCreateSummary(vector<int>& startPosition, vector<in
 				
 				count++;
 			}
-			
+			//if((count) % 100 == 0){	m->mothurOut("Optimizing sequence: " + toString(count)); m->mothurOutEndLine();		}
 			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 				unsigned long long pos = in.tellg();
 				if ((pos == -1) || (pos >= filePos->end)) { break; }

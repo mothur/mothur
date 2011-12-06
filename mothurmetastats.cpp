@@ -512,6 +512,7 @@ vector<double> MothurMetastats::calc_qvalues(vector<double>& pValues) {
 			}
 		}
 		
+		//from R code - replacing with spline and splint below
 		//vector<double> f_spline = smoothSpline(lambdas, pi0_hat, 3);
 		//double pi0 = f_spline[(f_spline.size()-1)];   // this is the essential pi0_hat value
 		

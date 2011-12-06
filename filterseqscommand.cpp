@@ -420,12 +420,14 @@ int FilterSeqsCommand::filterSequences() {
 				MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 				
 #else
+			
+		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 			vector<unsigned long long> positions = m->divideFile(fastafileNames[s], processors);
-				
+			
 			for (int i = 0; i < (positions.size()-1); i++) {
 				lines.push_back(new linePair(positions[i], positions[(i+1)]));
 			}	
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			
 				if(processors == 1){
 					int numFastaSeqs = driverRunFilter(filter, filteredFasta, fastafileNames[s], lines[0]);
 					numSeqs += numFastaSeqs;
@@ -444,6 +446,7 @@ int FilterSeqsCommand::filterSequences() {
 				
 				if (m->control_pressed) {  return 1; }
 		#else
+				lines.push_back(new linePair(0, 1000));
 				int numFastaSeqs = driverRunFilter(filter, filteredFasta, fastafileNames[s], lines[0]);
 				numSeqs += numFastaSeqs;
 
@@ -736,12 +739,14 @@ string FilterSeqsCommand::createFilter() {
 				MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 				
 #else
-		vector<unsigned long long> positions = m->divideFile(fastafileNames[s], processors);
 				
-		for (int i = 0; i < (positions.size()-1); i++) {
-			lines.push_back(new linePair(positions[i], positions[(i+1)]));
-		}	
+		
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+				vector<unsigned long long> positions = m->divideFile(fastafileNames[s], processors);
+				for (int i = 0; i < (positions.size()-1); i++) {
+					lines.push_back(new linePair(positions[i], positions[(i+1)]));
+				}	
+				
 				if(processors == 1){
 					int numFastaSeqs = driverCreateFilter(F, fastafileNames[s], lines[0]);
 					numSeqs += numFastaSeqs;
@@ -752,6 +757,7 @@ string FilterSeqsCommand::createFilter() {
 				
 				if (m->control_pressed) {  return filterString; }
 		#else
+				lines.push_back(new linePair(0, 1000));
 				int numFastaSeqs = driverCreateFilter(F, fastafileNames[s], lines[0]);
 				numSeqs += numFastaSeqs;
 				if (m->control_pressed) {  return filterString; }

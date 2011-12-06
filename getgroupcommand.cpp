@@ -8,6 +8,7 @@
  */
 
 #include "getgroupcommand.h"
+#include "inputdata.h"
 
 //**********************************************************************************************************************
 vector<string> GetgroupCommand::setParameters(){	
@@ -121,55 +122,20 @@ int GetgroupCommand::execute(){
 	try {
 	
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
-		
-		//open shared file
-		m->openInputFile(sharedfile, in);
 			
 		//open output file
 		outputFile = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + "bootGroups";
 		m->openOutputFile(outputFile, out);
-			
-		int num, inputData, count;
-		count = 0;  
-		string holdLabel, nextLabel, groupN, label;
 		
-		//read in first row since you know there is at least 1 group.
-		in >> label >> groupN >> num;
-		holdLabel = label;
+		InputData input(sharedfile, "sharedfile");
+		vector<SharedRAbundVector*> lookup = input.getSharedRAbundVectors();
 		
-		//output first group
-		m->mothurOut(groupN); m->mothurOutEndLine();
-		out << groupN << '\t' << groupN << endl;	
-			
-		//get rest of line
-		for(int i=0;i<num;i++){
-			in >> inputData;
+		for (int i = 0; i < lookup.size(); i++) {
+			out << lookup[i]->getGroup() << '\t' << lookup[i]->getGroup() << endl;
+			m->mothurOut(lookup[i]->getGroup()); m->mothurOutEndLine();
+			delete lookup[i];
 		}
 		
-		if (m->control_pressed) { outputTypes.clear(); in.close();  out.close(); m->mothurRemove(outputFile);   return 0; }
-
-		if (in.eof() != true) { in >> nextLabel; }
-		
-		//read the rest of the groups info in
-		while ((nextLabel == holdLabel) && (in.eof() != true)) {
-			if (m->control_pressed) {  outputTypes.clear(); in.close();  out.close(); m->mothurRemove(outputFile);   return 0; }
-			
-			in >> groupN >> num;
-			count++;
-			
-			//output next group
-			m->mothurOut(groupN); m->mothurOutEndLine();
-			out << groupN << '\t' << groupN << endl;				
-			
-			//fill vector.  
-			for(int i=0;i<num;i++){
-				in >> inputData;
-			}
-			
-			if (in.eof() != true) { in >> nextLabel; }
-		}
-		
-		in.close();
 		out.close();
 		
 		if (m->control_pressed) {  m->mothurRemove(outputFile);   return 0; }

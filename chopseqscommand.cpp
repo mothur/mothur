@@ -241,7 +241,7 @@ string ChopSeqsCommand::getChopped(Sequence seq) {
 					}
 					
 					if (stopSpot == 0) { temp = ""; }
-					else {  temp = temp.substr(0, stopSpot);  }
+					else {  temp = temp.substr(0, stopSpot+1);  }
 							
 				}else { 
 					if (!Short) { temp = ""; } //sequence too short
@@ -294,7 +294,7 @@ string ChopSeqsCommand::getChopped(Sequence seq) {
 					}
 					
 					if (stopSpot == 0) { temp = ""; }
-					else {  temp = temp.substr(0, stopSpot);  }
+					else {  temp = temp.substr(0, stopSpot+1);  }
 							
 				}else { 
 					if (!Short) { temp = ""; } //sequence too short
@@ -320,7 +320,7 @@ string ChopSeqsCommand::getChopped(Sequence seq) {
 					}
 				
 					if (stopSpot == 0) { temp = ""; }
-					else {  temp = temp.substr(stopSpot+1);  }
+					else {  temp = temp.substr(stopSpot);  }
 				}else { 
 					if (!Short) { temp = ""; } //sequence too short
 				}
