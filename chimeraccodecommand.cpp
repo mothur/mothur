@@ -390,14 +390,16 @@ int ChimeraCcodeCommand::execute(){
 
 			outHeader.close();
 			
-			vector<unsigned long long> positions = m->divideFile(fastaFileNames[s], processors);
-				
-			for (int i = 0; i < (positions.size()-1); i++) {
-				lines.push_back(new linePair(positions[i], positions[(i+1)]));
-			}	
+			
 			
 			//break up file
 			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+				vector<unsigned long long> positions = m->divideFile(fastaFileNames[s], processors);
+			
+				for (int i = 0; i < (positions.size()-1); i++) {
+					lines.push_back(new linePair(positions[i], positions[(i+1)]));
+				}	
+			
 				if(processors == 1){
 										
 					numSeqs = driver(lines[0], outputFileName, fastaFileNames[s], accnosFileName);
@@ -436,6 +438,7 @@ int ChimeraCcodeCommand::execute(){
 				}
 
 			#else
+				lines.push_back(new linePair(0, 1000));
 				numSeqs = driver(lines[0], outputFileName, fastaFileNames[s], accnosFileName);
 				
 				if (m->control_pressed) { m->mothurRemove(outputFileName); m->mothurRemove(tempHeader); m->mothurRemove(accnosFileName); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} for (int i = 0; i < lines.size(); i++) {  delete lines[i];  } outputTypes.clear();  lines.clear(); delete chimera; return 0; }

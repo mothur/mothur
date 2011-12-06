@@ -22,8 +22,9 @@ struct seqPNode {
 	Sequence seq;
 	string names;
 	bool active;
+	int diffs;
 	seqPNode() {}
-	seqPNode(int n, Sequence s, string nm) : numIdentical(n), seq(s), names(nm), active(1) {}
+	seqPNode(int n, Sequence s, string nm) : numIdentical(n), seq(s), names(nm), active(1) { diffs = 0; }
 	~seqPNode() {}
 };
 /************************************************************/
@@ -72,10 +73,10 @@ private:
 	//int readNamesFASTA();
 	int calcMisMatches(string, string);
 	void printData(string, string); //fasta filename, names file name
-	int process();
+	int process(string);
 	int loadSeqs(map<string, string>&, vector<Sequence>&);
-	int driverGroups(SequenceParser*, string, string, int, int, vector<string> groups);
-	int createProcessesGroups(SequenceParser*, string, string, vector<string>);
+	int driverGroups(SequenceParser*, string, string, string, int, int, vector<string> groups);
+	int createProcessesGroups(SequenceParser*, string, string, string, vector<string>);
 };
 
 /**************************************************************************************************/
@@ -86,20 +87,22 @@ struct preClusterData {
 	string fastafile; 
 	string namefile; 
 	string groupfile;
-	string newFName, newNName;
+	string newFName, newNName, newMName;
 	MothurOut* m;
 	int start;
 	int end;
 	int diffs, threadID;
 	vector<string> groups;
+	vector<string> mapFileNames;
 	
 	preClusterData(){}
-	preClusterData(string f, string n, string g, string nff,  string nnf, vector<string> gr, MothurOut* mout, int st, int en, int d, int tid) {
+	preClusterData(string f, string n, string g, string nff,  string nnf, string nmf, vector<string> gr, MothurOut* mout, int st, int en, int d, int tid) {
 		fastafile = f;
 		namefile = n;
 		groupfile = g;
 		newFName = nff;
 		newNName = nnf;
+		newMName = nmf;
 		m = mout;
 		start = st;
 		end = en;
@@ -193,6 +196,10 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
 			////////////////////////////////////////////////////
 			//int count = process(); - same function below
 			
+			ofstream out;
+			pDataArray->m->openOutputFile(pDataArray->newMName+pDataArray->groups[k]+".map", out);
+			pDataArray->mapFileNames.push_back(pDataArray->newMName+pDataArray->groups[k]+".map");
+			
 			//sort seqs by number of identical seqs
 			sort(alignSeqs.begin(), alignSeqs.end(), comparePriority);
 			
@@ -206,6 +213,8 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
 				
 				if (alignSeqs[i].active) {  //this sequence has not been merged yet
 					
+					string chunk = alignSeqs[i].seq.getName() + "\t" + toString(alignSeqs[i].numIdentical) + "\t" + toString(0) + "\t" + alignSeqs[i].seq.getAligned() + "\n";
+
 					//try to merge it with all smaller seqs
 					for (int j = i+1; j < numSeqs; j++) {
 						
@@ -229,18 +238,22 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
 								
 								alignSeqs[j].active = 0;
 								alignSeqs[j].numIdentical = 0;
+								alignSeqs[j].diffs = mismatch;
 								count++;
+								chunk += alignSeqs[j].seq.getName() + "\t" + toString(alignSeqs[j].numIdentical) + "\t" + toString(mismatch) + "\t" + alignSeqs[j].seq.getAligned() + "\n";
 							}
 						}//end if j active
-					}//end if i != j
+					}//end for loop j
 					
 					//remove from active list 
 					alignSeqs[i].active = 0;
 					
+					out << "ideal_seq_" << (i+1) << '\t' << alignSeqs[i].numIdentical << endl << chunk << endl;
+					
 				}//end if active i
 				if(i % 100 == 0)	{ pDataArray->m->mothurOut(toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)); pDataArray->m->mothurOutEndLine();	}
 			}
-			
+			out.close();
 			if(numSeqs % 100 != 0)	{ pDataArray->m->mothurOut(toString(numSeqs) + "\t" + toString(numSeqs - count) + "\t" + toString(count)); pDataArray->m->mothurOutEndLine();	}	
 			////////////////////////////////////////////////////
 			

@@ -1182,7 +1182,6 @@ vector<unsigned long long> MothurOut::setFilePosEachLine(string filename, int& n
 
 vector<unsigned long long> MothurOut::divideFile(string filename, int& proc) {
 	try{
-	
 		vector<unsigned long long> filePos;
 		filePos.push_back(0);
 		
@@ -1190,7 +1189,7 @@ vector<unsigned long long> MothurOut::divideFile(string filename, int& proc) {
 		unsigned long long size;
 		
 		filename = getFullPathName(filename);
-		
+	
 		//get num bytes in file
 		pFile = fopen (filename.c_str(),"rb");
 		if (pFile==NULL) perror ("Error opening file");
@@ -1199,7 +1198,9 @@ vector<unsigned long long> MothurOut::divideFile(string filename, int& proc) {
 			size=ftell (pFile);
 			fclose (pFile);
 		}
-	
+		
+	#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+				
 		//estimate file breaks
 		unsigned long long chunkSize = 0;
 		chunkSize = size / proc;
@@ -1219,7 +1220,10 @@ vector<unsigned long long> MothurOut::divideFile(string filename, int& proc) {
 			unsigned long long newSpot = spot;
 			while (!in.eof()) {
 			   char c = in.get();
+				
 			   if (c == '>') {   in.putback(c); newSpot = in.tellg(); break;  }
+			   else if (int(c) == -1) { break; }
+				
 			}
 		
 			//there was not another sequence before the end of the file
@@ -1240,7 +1244,11 @@ vector<unsigned long long> MothurOut::divideFile(string filename, int& proc) {
 		}
 
 		proc = (filePos.size() - 1);
-		
+#else
+		mothurOut("[ERROR]: Windows version should not be calling the divideFile function."); mothurOutEndLine();
+		proc=1;
+		filePos.push_back(size);
+#endif
 		return filePos;
 	}
 	catch(exception& e) {

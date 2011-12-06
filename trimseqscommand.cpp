@@ -203,8 +203,8 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 			// ...at some point should added some additional type checking...
 			string temp;
 			temp = validParameter.validFile(parameters, "flip", false);
-			if (temp == "not found"){	flip = 0;	}
-			else if(m->isTrue(temp))	{	flip = 1;	}
+			if (temp == "not found")    {	flip = 0;	}
+			else {  flip = m->isTrue(temp);		}
 		
 			temp = validParameter.validFile(parameters, "oligos", true);
 			if (temp == "not found"){	oligoFile = "";		}

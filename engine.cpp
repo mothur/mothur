@@ -406,7 +406,7 @@ bool BatchEngine::getInput(){
 /***********************************************************************/
 string BatchEngine::getNextCommand(ifstream& inputBatchFile) {
 	try {
-		
+			
 		string nextcommand = "";
 		
 		if (inputBatchFile.eof()) { nextcommand = "quit()"; }

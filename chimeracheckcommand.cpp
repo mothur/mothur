@@ -424,14 +424,16 @@ int ChimeraCheckCommand::execute(){
 				MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 		#else
 			
-			vector<unsigned long long> positions = m->divideFile(fastaFileNames[i], processors);
-				
-			for (int s = 0; s < (positions.size()-1); s++) {
-				lines.push_back(new linePair(positions[s], positions[(s+1)]));
-			}	
+			
 			
 			//break up file
 			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+				vector<unsigned long long> positions = m->divideFile(fastaFileNames[i], processors);
+			
+				for (int s = 0; s < (positions.size()-1); s++) {
+					lines.push_back(new linePair(positions[s], positions[(s+1)]));
+				}	
+			
 				if(processors == 1){
 					numSeqs = driver(lines[0], outputFileName, fastaFileNames[i]);
 					
@@ -459,6 +461,7 @@ int ChimeraCheckCommand::execute(){
 				}
 
 			#else
+				lines.push_back(new linePair(0, 1000));
 				numSeqs = driver(lines[0], outputFileName, fastaFileNames[i]);
 				
 				if (m->control_pressed) { for (int j = 0; j < lines.size(); j++) {  delete lines[j];  }  lines.clear(); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} outputTypes.clear(); delete chimera; return 0; }
