@@ -15,11 +15,12 @@ USEREADLINE ?= yes
 CYGWIN_BUILD ?= no
 USECOMPRESSION ?= no
 MOTHUR_FILES="\"Enter_your_default_path_here\""
-RELEASE_DATE = "\"10/18/2011\""
+RELEASE_DATE = "\"12/7/2011\""
 VERSION = "\"1.22.0\""
+FORTAN_COMPILER = gfortran
 
 # Optimize to level 3:
-CXXFLAGS += -O3
+CXXFLAGS += -O3 
 
 ifeq  ($(strip $(64BIT_VERSION)),yes)
 	#if you are using centos uncomment the following lines
@@ -89,14 +90,18 @@ endif
 
 OBJECTS=$(patsubst %.cpp,%.o,$(wildcard *.cpp))
 OBJECTS+=$(patsubst %.c,%.o,$(wildcard *.c))
+OBJECTS+=$(patsubst %.f,%.o,$(wildcard *.f))
 
-mothur : $(OBJECTS) uchime
+mothur : fortranSource $(OBJECTS) uchime
 	$(CXX) $(LDFLAGS) $(TARGET_ARCH) -o $@ $(OBJECTS) $(LIBS)
 	
 	strip mothur
 
 uchime:
 	cd uchime_src && ./mk && mv uchime .. && cd ..
+	
+fortranSource:
+	${FORTAN_COMPILER} -c *.f
 
 install : mothur
 #	cp mothur ../Release/mothur
