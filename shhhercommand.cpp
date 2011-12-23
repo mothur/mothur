@@ -1501,9 +1501,8 @@ void ShhherCommand::getOTUData(string listFileName){
 
 void ShhherCommand::initPyroCluster(){                          
 	try{
-		
 		if (numOTUs < processors) { processors = 1; }
-		
+
 		dist.assign(numSeqs * numOTUs, 0);
 		change.assign(numOTUs, 1);
 		centroids.assign(numOTUs, -1);
