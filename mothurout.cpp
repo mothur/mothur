@@ -1477,6 +1477,26 @@ int MothurOut::getNumNames(string names){
 }
 /***********************************************************************/
 
+int MothurOut::getNumChar(string line, char c){
+	try {
+		int count = 0;
+		
+		if(line != ""){
+			for(int i=0;i<line.size();i++){
+				if(line[i] == c){
+					count++;
+				}
+			}
+		}
+		
+		return count;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "getNumChar");
+		exit(1);
+	}
+}
+/***********************************************************************/
 int MothurOut::mothurRemove(string filename){
 	try {
 		filename = getFullPathName(filename);
