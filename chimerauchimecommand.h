@@ -149,6 +149,10 @@ static DWORD WINAPI MyUchimeThreadFunction(LPVOID lpParam){
 	
 	try {
 		
+		pDataArray->outputFName = pDataArray->m->getFullPathName(outputFName);
+		pDataArray->filename = pDataArray->m->getFullPathName(filename);
+		pDataArray->alns = pDataArray->m->getFullPathName(alns);
+		
 		//clears files
 		ofstream out, out1, out2;
 		pDataArray->m->openOutputFile(pDataArray->outputFName, out); out.close(); 
@@ -493,6 +497,10 @@ static DWORD WINAPI MyUchimeSeqsThreadFunction(LPVOID lpParam){
 	pDataArray = (uchimeData*)lpParam;
 	
 	try {
+		
+		pDataArray->outputFName = pDataArray->m->getFullPathName(outputFName);
+		pDataArray->filename = pDataArray->m->getFullPathName(filename);
+		pDataArray->alns = pDataArray->m->getFullPathName(alns);
 		
 		int totalSeqs = 0;
 		int numChimeras = 0;

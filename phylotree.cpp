@@ -241,6 +241,8 @@ int PhyloTree::addSeqToTree(string seqName, string seqTaxonomy){
 		int level = 1;
 		
 		tree[0].accessions.push_back(seqName);
+		m->removeConfidences(seqTaxonomy);
+		
 		string taxon;// = getNextTaxon(seqTaxonomy);
 	
 		while(seqTaxonomy != ""){

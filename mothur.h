@@ -189,7 +189,8 @@ void convert(const string& s, T& x, bool failIfLeftoverChars = true){
 			throw BadConversion(s);
 	
 }
-
+//**********************************************************************************************************************
+template <typename T> int sgn(T val){ return (val > T(0)) - (val < T(0)); }
 //**********************************************************************************************************************
 
 template<typename T>

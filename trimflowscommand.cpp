@@ -202,7 +202,7 @@ TrimFlowsCommand::TrimFlowsCommand(string option)  {
 		
 	}
 	catch(exception& e) {
-		m->errorOut(e, "TrimFlowsCommand", "TrimSeqsCommand");
+		m->errorOut(e, "TrimFlowsCommand", "TrimFlowsCommand");
 		exit(1);
 	}
 }

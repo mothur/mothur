@@ -9,6 +9,7 @@
 
 #include "mothurmetastats.h"
 #include "mothurfisher.h"
+#include "spline.h"
 
 /***********************************************************/
 MothurMetastats::MothurMetastats(double t, int n) {
@@ -204,13 +205,8 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
 			storage[i][7]=temp[i][1];
 			storage[i][8]=pvalues[i];
 		}
-		cout.setf(ios::fixed, ios::floatfield); cout.setf(ios::showpoint);
-		cout << "pvalues" << endl;
-		for (int i = 0; i < row; i++){ if (pvalues[i] < 0.0000001) {
-			pvalues[i] = 0.0;
-		}cout << pvalues[i] << '\t'; }
-		cout << endl;
-		calc_qvalues(pvalues);
+		
+		vector<double> qvalues = calc_qvalues(pvalues);
 		
 		// BACKUP checks
 		cout.setf(ios::fixed, ios::floatfield); cout.setf(ios::showpoint);
@@ -218,9 +214,9 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
 			
 			if (m->control_pressed) { return 1; }
 			
-			if(pvalues[i] < threshold){
-				m->mothurOut("Feature " + toString((i+1)) + " is significant, p = "); 
-				cout << pvalues[i];
+			if(qvalues[i] < threshold){
+				m->mothurOut("Feature " + toString((i+1)) + " is significant, q = "); 
+				cout << qvalues[i];
 				m->mothurOutJustToLog(toString(pvalues[i])); m->mothurOutEndLine();
 			}	
 		}
@@ -240,13 +236,14 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
 		
 		//output column headings - not really sure... documentation labels 9 columns, there are 10 in the output file
 		//storage 0 = meanGroup1 - line 529, 1 = varGroup1 - line 532, 2 = err rate1 - line 534, 3 = mean of counts group1?? - line 291, 4 = meanGroup2 - line 536, 5 = varGroup2 - line 539, 6 = err rate2 - line 541, 7 = mean of counts group2?? - line 292, 8 = pvalues - line 293
-		out << "OTU\tmean(group1)\tvariance(group1)\tstderr(group1)\tmean_of_counts(group1)\tmean(group2)\tvariance(group2)\tstderr(group2)\tmean_of_counts(group1)\tp-value\n";
+		out << "OTU\tmean(group1)\tvariance(group1)\tstderr(group1)\tmean_of_counts(group1)\tmean(group2)\tvariance(group2)\tstderr(group2)\tmean_of_counts(group1)\tp-value\tq-value\n";
 		
 		for(int i = 0; i < row; i++){
 			if (m->control_pressed) { out.close(); return 0; }
 			
 			out << (i+1);
 			for(int j = 0; j < 9; j++){ out << '\t' << storage[i][j]; }
+			out << '\t' << qvalues[i];
 			out << endl;
 		}  
 		
@@ -494,9 +491,10 @@ int MothurMetastats::calc_twosample_ts(vector<double>& Pmatrix, int secondGroupi
 /***********************************************************/
 vector<double> MothurMetastats::calc_qvalues(vector<double>& pValues) {
 	try {
-		vector<double> qvalues;
-		int numRows = pValues.size();
 		
+		int numRows = pValues.size();
+		vector<double> qvalues(numRows, 0.0);
+
 		//fill lambdas with 0.00, 0.01, 0.02... 0.95
 		vector<double> lambdas(96, 0);
 		for (int i = 1; i < lambdas.size(); i++) { lambdas[i] = lambdas[i-1] + 0.01; }
@@ -508,21 +506,11 @@ vector<double> MothurMetastats::calc_qvalues(vector<double>& pValues) {
 			int count = 0;
 			for (int i = 0; i < numRows; i++){ // for each p-value in order
 				if (pValues[i] > lambdas[l]){ count++; }
-				pi0_hat[l] = count/(double)(numRows*(1-lambdas[l]));
 			}
+			pi0_hat[l] = count/(double)(numRows*(1-lambdas[l]));
 		}
 		
-		//from R code - replacing with spline and splint below
-		//vector<double> f_spline = smoothSpline(lambdas, pi0_hat, 3);
-		//double pi0 = f_spline[(f_spline.size()-1)];   // this is the essential pi0_hat value
-		
-		//cubic Spline
-		double pi0, notsure; //this is the essential pi0_hat value
-		int notSure;
-		vector<double> resultsSpline(lambdas.size(), 0.0);
-		spline(pi0_hat, lambdas, notSure, notSure, resultsSpline);
-		//some sort of loop to get best value??
-		splint(pi0_hat, lambdas, notsure, pi0, resultsSpline);
+		double pi0 = smoothSpline(lambdas, pi0_hat, 3);
 		
 		//order p-values
 		vector<double> ordered_qs = qvalues;
@@ -530,14 +518,13 @@ vector<double> MothurMetastats::calc_qvalues(vector<double>& pValues) {
 		for (int i = 1; i < ordered_ps.size(); i++) {  ordered_ps[i] = ordered_ps[i-1] + 1; }
 		vector<double> tempPvalues = pValues;
 		OrderPValues(0, numRows-1, tempPvalues, ordered_ps);
-	
-		ordered_qs[numRows-1] <- min((pValues[ordered_ps[numRows-1]]*pi0), 1.0);
+		
+		ordered_qs[numRows-1] = min((pValues[ordered_ps[numRows-1]]*pi0), 1.0);
 		for (int i = (numRows-2); i >= 0; i--){
 			double p = pValues[ordered_ps[i]];
-			double temp = p*numRows*pi0/(double)i;
-			
+			double temp = p*numRows*pi0/(double)(i+1);
+
 			ordered_qs[i] = min(temp, ordered_qs[i+1]);
-			ordered_qs[i] = min(ordered_qs[i], 1.0);
 		}
 		
 		//re-distribute calculated qvalues to appropriate rows
@@ -612,41 +599,54 @@ int MothurMetastats::swapElements(int i, int j, vector<double>& p, vector<int>& 
 		exit(1);
 	}
 }
-/***********************************************************
-vector<double> MothurMetastats::smoothSpline(vector<double> x, vector<double> y, int df) {
+/***********************************************************/
+double MothurMetastats::smoothSpline(vector<double>& x, vector<double>& y, int df) {
 	try {
-		
-		cout << "lambdas" << endl;
-		for (int l = 0; l < x.size(); l++){ cout << x[l] << '\t'; }
-		cout << endl << "pi0_hat" << endl;
-		for (int l = 0; l < y.size(); l++){ cout << y[l] << '\t'; }
-		cout << endl;
-		
-		//double low = -1.5; double high = 1.5; double tol = 1e-04; double eps = 2e-08; double maxit = 500;
+				
+		double result = 0.0;
 		int n = x.size();
 		vector<double> w(n, 1);
-		
-		//x <- signif(x, 6L) - I think this rounds to 6 decimals places
-		//ux <- unique(sort(x)) //x will be unique and sorted since we created it
-		//ox <- match(x, ux) //since its unique and sort it will match
-		
-		vector<double> wbar(n, 0);
-		vector<double> ybar(n, 0);
-		vector<double> xbar(n, 0.0);
+		double* xb = new double[n];
+		double* yb = new double[n];
+		double* wb = new double[n];
 		double yssw = 0.0;
 		for (int i = 0; i < n; i++) {
-			wbar[i] = w[i];
-			ybar[i] = w[i]*y[i];
-			yssw += (w[i] * y[i] * y[i]) - wbar[i] * (ybar[i] * ybar[i]);
-			xbar[i] = (x[i] - x[0]) / (x[n-1] - x[0]);
+			wb[i] = w[i];
+			yb[i] = w[i]*y[i];
+			yssw += (w[i] * y[i] * y[i]) - wb[i] * (yb[i] * yb[i]);
+			xb[i] = (x[i] - x[0]) / (x[n-1] - x[0]);
 		}
 		
-		vector<double> knot = sknot1(xbar);
+		vector<double> knot = sknot1(xb, n);
 		int nk = knot.size() - 4;
+
+		double low = -1.5; double high = 1.5; double tol = 1e-04; double eps = 2e-08; int maxit = 500;
+		int ispar = 0; int icrit = 3; double dofoff = 3.0;
+		double penalty = 1.0; 
+		int ld4 = 4; int isetup = 0; int ldnk = 1; int ier; double spar = 1.0; double crit;
 		
-		//double ispar = 0.0; double spar = 0.0; double icrit = 3.0; double dofoff = 3.0;
-			
-		return y;
+		double* knotb = new double[knot.size()];
+		double* coef1 = new double[nk];
+		double* lev1 = new double[n];
+		double* sz1 = new double[n];
+		for (int i = 0; i < knot.size(); i++) {	knotb[i] = knot[i];	}
+		
+		Spline spline;
+		spline.sbart(&penalty, &dofoff, &xb[0], &yb[0], &wb[0], &yssw, &n, &knotb[0], &nk, &coef1[0], &sz1[0], &lev1[0], &crit,
+				&icrit, &spar, &ispar, &maxit, &low, &high, &tol, &eps, &isetup, &ld4, &ldnk, &ier);
+		
+		result = coef1[nk-1];
+		
+		//free memory
+		delete [] xb;
+		delete [] yb;
+		delete [] wb;
+		delete [] knotb;
+		delete [] coef1;
+		delete [] lev1;
+		delete [] sz1;
+							
+		return result;
 		
 	}catch(exception& e) {
 		m->errorOut(e, "MothurMetastats", "smoothSpline");
@@ -654,105 +654,21 @@ vector<double> MothurMetastats::smoothSpline(vector<double> x, vector<double> y,
 	}
 }
 /***********************************************************/
-// This function is taken from Numerical Recipes in C++ by Press et al., 2nd edition, pg. 479
-int MothurMetastats::spline(vector<double>& x, vector<double>& y, int yp1, int ypn, vector<double>& y2) {
-	try {
-		
-		cout << "lambdas" << endl;
-		for (int l = 0; l < x.size(); l++){ cout << x[l] << '\t'; }
-		cout << endl << "pi0_hat" << endl;
-		for (int l = 0; l < y.size(); l++){ cout << y[l] << '\t'; }
-		cout << endl;
-		
-		double p, qn, sig, un;
-		
-		int n = y2.size();
-		vector<double> u(n-1, 0.0);
-		
-		if (yp1 > 0.99e30) { y2[0] = u[0] = 0.0; }
-		else {
-			y2[0] = -0.5;
-			u[0] = (3.0 / (x[1] - x[0])) * ((y[1] - y[0]) / (x[1]-x[0]) - yp1);
-		}
-		
-		for (int i = 1; i < n-1; i++) {
-			sig = (x[i]-x[i-1])/(x[i+1]-x[i-1]);
-			p = sig * y2[i-1] + 2.0;
-			y2[i] = (sig - 1.0)/p;
-			u[i] = (y[i+1]-y[i]) / (x[i+1]-x[i]) - (y[i] - y[i-1]) / (x[i]-x[i-1]);
-			u[i] = (6.0*u[i]/(x[i+1]-x[i-1])-sig*u[i-1])/p;
-		}
-		
-		if (ypn > 0.99e30) { qn=un=0.0; }
-		else {
-			qn=0.5;
-			un=(3.0/(x[n-1]-x[n-2]))*(ypn-(y[n-1]-y[n-2])/(x[n-1]-x[n-2]));
-		}
-		
-		y2[n-1]=(un-qn*u[n-2])/(qn*y2[n-2]+1.0);
-		
-		for (int k=n-2; k>=0; k--) {
-			y2[k]=y2[k]*y2[k+1]+u[k];
-		}
-		
-		return 0;
-		
-	}catch(exception& e) {
-		m->errorOut(e, "MothurMetastats", "spline");
-		exit(1);
-	}
-}
-/***********************************************************/
-// This function is taken from Numerical Recipes in C++ by Press et al., 2nd edition, pg. 479
-int MothurMetastats::splint(vector<double>& xa, vector<double>& ya, double& x, double& y, vector<double>& y2a) {
-	try {
-		int k;		
-		double h,b,a;
-		
-		int n = xa.size();
-		
-		int klo=0;
-		int khi=n-1;
-		while (khi-klo > 1) {
-			
-			if (m->control_pressed) { break; }
-			
-			k = (khi+klo) >> 1;
-			if (xa[k] > x) { khi=k; }
-			else { klo=k; }
-		}
-		
-		h=xa[khi]-xa[klo];
-		if (h == 0.0) { m->mothurOut("[ERROR]: Bad xa input to splint routine."); m->mothurOutEndLine(); m->control_pressed = true; return 0; }
-		a=(xa[khi]-x)/h;
-		b=(x - xa[klo])/h;
-		y=a*ya[klo]+b*ya[khi]+((a*a*a-a)*y2a[klo]+(b*b*b-b)*y2a[khi])*(h*h)/6.0;
-		
-		return 0;
-		
-	}catch(exception& e) {
-		m->errorOut(e, "MothurMetastats", "splint");
-		exit(1);
-	}
-}
-/***********************************************************/
-vector<double> MothurMetastats::sknot1(vector<double> x) {
+vector<double> MothurMetastats::sknot1(double* x, int n) {
 	try {
 		vector<double> knots;
-		int n = x.size();
 		int nk = nkn(n);
 		
-		cout << nk << endl;
 		//R equivalent - rep(x[1L], 3L)
 		knots.push_back(x[0]); knots.push_back(x[0]); knots.push_back(x[0]);
 		
 		//generate a sequence of nk equally spaced values from 1 to n. R equivalent = seq.int(1, n, length.out = nk)
 		vector<int> indexes = getSequence(0, n-1, nk);
-		for (int i = 0; i < indexes.size(); i++) { knots.push_back(x[indexes[i]]); }
+		for (int i = 0; i < indexes.size(); i++) { knots.push_back(x[indexes[i]]);  } 
 		
 		//R equivalent - rep(x[n], 3L)
 		knots.push_back(x[n-1]); knots.push_back(x[n-1]); knots.push_back(x[n-1]);
-		
+				
 		return knots;
 		
 	}catch(exception& e) {

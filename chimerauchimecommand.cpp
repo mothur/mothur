@@ -987,6 +987,11 @@ int ChimeraUchimeCommand::driverGroups(SequenceParser& parser, string outputFNam
 
 int ChimeraUchimeCommand::driver(string outputFName, string filename, string accnos, string alns, int& numChimeras){
 	try {
+		
+		outputFName = m->getFullPathName(outputFName);
+		filename = m->getFullPathName(filename);
+		alns = m->getFullPathName(alns);
+		
 		//to allow for spaces in the path
 		outputFName = "\"" + outputFName + "\"";
 		filename = "\"" + filename + "\"";
