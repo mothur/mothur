@@ -190,13 +190,9 @@ GetGroupsCommand::GetGroupsCommand(string option)  {
 			else { m->setNameFile(namefile); }
 			
 			groupfile = validParameter.validFile(parameters, "group", true);
-			if (groupfile == "not open") { abort = true; }
-			else if (groupfile == "not found") {  
-				//if there is a current group file, use it
-				groupfile = m->getGroupFile(); 
-				if (groupfile != "") { m->mothurOut("Using " + groupfile + " as input file for the group parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current groupfile and the group parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { m->setGroupFile(groupfile); }	
+			if (groupfile == "not open") { groupfile = ""; abort = true; }
+			else if (groupfile == "not found") {  groupfile = "";			}
+			else { m->setGroupFile(groupfile); }	
 			
 			listfile = validParameter.validFile(parameters, "list", true);
 			if (listfile == "not open") { abort = true; }

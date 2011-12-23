@@ -94,6 +94,7 @@ class MothurOut {
 		void getNumSeqs(ifstream&, int&);
 		int getNumSeqs(ifstream&);
 		int getNumNames(string);
+		int getNumChar(string, char);
 		bool isTrue(string);
 		bool isContainingOnlyDigits(string);
 	
