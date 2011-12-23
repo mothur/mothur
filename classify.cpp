@@ -61,7 +61,7 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
 					names.push_back(temp.getName());
 					database->addSequence(temp);	
 				}
-				database->generateDB();
+//				database->generateDB();
 			}else if ((method == "kmer") && (!needToGenerate)) {	
 				ifstream kmerFileTest(kmerDBName.c_str());
 				database->readKmerDB(kmerFileTest);	
@@ -150,7 +150,7 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
 					}
 				}
 				
-				database->generateDB();
+//				database->generateDB();
 				MPI_File_close(&inMPI);
 				MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 		#else
@@ -200,7 +200,7 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
 				}
 				fastaFile.close();
 
-				database->generateDB();
+//				database->generateDB();
 				
 			}else if ((method == "kmer") && (!needToGenerate)) {	
 				ifstream kmerFileTest(kmerDBName.c_str());
@@ -223,9 +223,9 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
 			database->setNumSeqs(names.size());
 			
 			//sanity check
-			bool okay = phyloTree->ErrorCheck(names);
+			//bool okay = phyloTree->ErrorCheck(names);
 			
-			if (!okay) { m->control_pressed = true; }
+			//if (!okay) { m->control_pressed = true; }
 			
 			m->mothurOut("DONE."); m->mothurOutEndLine();
 			m->mothurOut("It took " + toString(time(NULL) - start) + " seconds generate search database. "); m->mothurOutEndLine();

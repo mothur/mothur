@@ -111,8 +111,8 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 			//cout << numKmers << '\t' << genusNodes.size() << endl;
 				for (int j = 0; j < wordGenusProb.size(); j++) {	wordGenusProb[j].resize(genusNodes.size());		}
 			//cout << numKmers << '\t' << genusNodes.size() << endl;	
-				ofstream out;
-				ofstream out2;
+				//ofstream out;
+				//ofstream out2;
 				
 				#ifdef USE_MPI
 					int pid;
@@ -122,17 +122,17 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 				#endif
 
 				
-				m->openOutputFile(probFileName, out);
+				//m->openOutputFile(probFileName, out);
 				
 				//output mothur version
-				out << "#" << m->getVersion() << endl;
+				//out << "#" << m->getVersion() << endl;
 				
-				out << numKmers << endl;
+				//out << numKmers << endl;
 				
-				m->openOutputFile(probFileName2, out2);
+				//m->openOutputFile(probFileName2, out2);
 				
 				//output mothur version
-				out2 << "#" << m->getVersion() << endl;
+				//out2 << "#" << m->getVersion() << endl;
 				
 				#ifdef USE_MPI
 					}
@@ -149,7 +149,7 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 						if (pid == 0) {  
 					#endif
 
-					out << i << '\t';
+					//out << i << '\t';
 					
 					#ifdef USE_MPI
 						}
@@ -184,7 +184,7 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 								if (pid == 0) {  
 							#endif
 
-							out << k << '\t' << wordGenusProb[i][k] << '\t'; 
+							//out << k << '\t' << wordGenusProb[i][k] << '\t'; 
 							
 							#ifdef USE_MPI
 								}
@@ -200,8 +200,8 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 						if (pid == 0) {  
 					#endif
 					
-					out << endl;
-					out2 << probabilityInTemplate << '\t' << numNotZero << endl;
+					//out << endl;
+					//out2 << probabilityInTemplate << '\t' << numNotZero << endl;
 					
 					#ifdef USE_MPI
 						}
@@ -214,8 +214,8 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 					if (pid == 0) {  
 				#endif
 				
-				out.close();
-				out2.close();
+				//out.close();
+				//out2.close();
 				
 				#ifdef USE_MPI
 					}
