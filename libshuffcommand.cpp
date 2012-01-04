@@ -170,13 +170,13 @@ LibShuffCommand::LibShuffCommand(string option)  {
 				
 			string temp;
 			temp = validParameter.validFile(parameters, "iters", false);				if (temp == "not found") { temp = "10000"; }
-			convert(temp, iters); 
+			m->mothurConvert(temp, iters); 
 			
 			temp = validParameter.validFile(parameters, "cutoff", false);				if (temp == "not found") { temp = "1.0"; }
-			convert(temp, cutOff); 
+			m->mothurConvert(temp, cutOff); 
 			
 			temp = validParameter.validFile(parameters, "step", false);				if (temp == "not found") { temp = "0.01"; }
-			convert(temp, step); 
+			m->mothurConvert(temp, step); 
 			
 			temp = validParameter.validFile(parameters, "sim", false);				if (temp == "not found") { temp = "F"; }
 			sim = m->isTrue(temp); 

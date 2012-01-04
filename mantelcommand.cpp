@@ -125,7 +125,7 @@ MantelCommand::MantelCommand(string option)  {
 			method = validParameter.validFile(parameters, "method", false);		if (method == "not found"){	method = "pearson";		}
 			
 			string temp = validParameter.validFile(parameters, "iters", false);			if (temp == "not found") { temp = "1000"; }
-			convert(temp, iters);
+			m->mothurConvert(temp, iters);
 			
 			if ((method != "pearson") && (method != "spearman") && (method != "kendall")) { m->mothurOut(method + " is not a valid method. Valid methods are pearson, spearman, and kendall."); m->mothurOutEndLine(); abort = true; }
 		}

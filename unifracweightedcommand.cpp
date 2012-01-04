@@ -172,7 +172,7 @@ UnifracWeightedCommand::UnifracWeightedCommand(string option) {
 			}
 				
 			itersString = validParameter.validFile(parameters, "iters", false);			if (itersString == "not found") { itersString = "1000"; }
-			convert(itersString, iters); 
+			m->mothurConvert(itersString, iters); 
 			
 			string temp = validParameter.validFile(parameters, "distance", false);			
 			if (temp == "not found") { phylip = false; outputForm = ""; }
@@ -189,7 +189,7 @@ UnifracWeightedCommand::UnifracWeightedCommand(string option) {
 			
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
-			convert(temp, processors);
+			m->mothurConvert(temp, processors);
 			
 			if (!random) {  iters = 0;  } //turn off random calcs
 		}

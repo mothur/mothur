@@ -220,26 +220,26 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 			// ...at some point should added some additional type checking...
 			string temp;
 			temp = validParameter.validFile(parameters, "start", false);		if (temp == "not found") { temp = "-1"; }
-			convert(temp, startPos); 
+			m->mothurConvert(temp, startPos); 
 		
 			temp = validParameter.validFile(parameters, "end", false);			if (temp == "not found") { temp = "-1"; }
-			convert(temp, endPos);  
+			m->mothurConvert(temp, endPos);  
 
 			temp = validParameter.validFile(parameters, "maxambig", false);		if (temp == "not found") { temp = "-1"; }
-			convert(temp, maxAmbig);  
+			m->mothurConvert(temp, maxAmbig);  
 
 			temp = validParameter.validFile(parameters, "maxhomop", false);		if (temp == "not found") { temp = "-1"; }
-			convert(temp, maxHomoP);  
+			m->mothurConvert(temp, maxHomoP);  
 
 			temp = validParameter.validFile(parameters, "minlength", false);	if (temp == "not found") { temp = "-1"; }
-			convert(temp, minLength); 
+			m->mothurConvert(temp, minLength); 
 			
 			temp = validParameter.validFile(parameters, "maxlength", false);	if (temp == "not found") { temp = "-1"; }
-			convert(temp, maxLength); 
+			m->mothurConvert(temp, maxLength); 
 			
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
-			convert(temp, processors);
+			m->mothurConvert(temp, processors);
 			
 			temp = validParameter.validFile(parameters, "optimize", false);	//optimizing trumps the optimized values original value
 			if (temp == "not found"){	temp = "none";		}
@@ -259,7 +259,7 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 			if (optimize.size() == 1) { if (optimize[0] == "none") { optimize.clear(); } }
 			
 			temp = validParameter.validFile(parameters, "criteria", false);	if (temp == "not found"){	temp = "90";				}
-			convert(temp, criteria); 
+			m->mothurConvert(temp, criteria); 
 		}
 
 	}

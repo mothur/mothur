@@ -345,16 +345,16 @@ ChimeraPerseusCommand::ChimeraPerseusCommand(string option)  {
 			
 			string temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
-			convert(temp, processors);
+			m->mothurConvert(temp, processors);
 			
 			temp = validParameter.validFile(parameters, "cutoff", false);	if (temp == "not found"){	temp = "0.50";	}
-			convert(temp, cutoff);
+			m->mothurConvert(temp, cutoff);
 			
 			temp = validParameter.validFile(parameters, "alpha", false);	if (temp == "not found"){	temp = "-5.54";	}
-			convert(temp, alpha);
+			m->mothurConvert(temp, alpha);
 			
 			temp = validParameter.validFile(parameters, "cutoff", false);	if (temp == "not found"){	temp = "0.33";	}
-			convert(temp, beta);
+			m->mothurConvert(temp, beta);
 		}
 	}
 	catch(exception& e) {

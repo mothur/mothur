@@ -274,7 +274,7 @@ CollectSharedCommand::CollectSharedCommand(string option)  {
 			
 			string temp;
 			temp = validParameter.validFile(parameters, "freq", false);			if (temp == "not found") { temp = "100"; }
-			convert(temp, freq); 
+			m->mothurConvert(temp, freq); 
 			
 			temp = validParameter.validFile(parameters, "all", false);				if (temp == "not found") { temp = "false"; }
 			all = m->isTrue(temp);

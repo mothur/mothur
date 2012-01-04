@@ -231,10 +231,10 @@ SummaryCommand::SummaryCommand(string option)  {
 
 			string temp;
 			temp = validParameter.validFile(parameters, "abund", false);		if (temp == "not found") { temp = "10"; }
-			convert(temp, abund); 
+			m->mothurConvert(temp, abund); 
 			
 			temp = validParameter.validFile(parameters, "size", false);			if (temp == "not found") { temp = "0"; }
-			convert(temp, size); 
+			m->mothurConvert(temp, size); 
 			
 			temp = validParameter.validFile(parameters, "groupmode", false);		if (temp == "not found") { temp = "T"; }
 			groupMode = m->isTrue(temp);

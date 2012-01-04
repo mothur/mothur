@@ -297,10 +297,10 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 			if ((weighted) && (namefile == "")) { m->mothurOut("You cannot set weighted to true unless you provide a namesfile."); m->mothurOutEndLine(); abort = true; }
 			
 			temp = validParameter.validFile(parameters, "precision", false);			if (temp == "not found") { temp = "100"; }
-			convert(temp, precision); 
+			m->mothurConvert(temp, precision); 
 			
 			temp = validParameter.validFile(parameters, "cutoff", false);			if (temp == "not found") { temp = "10.0"; }
-			convert(temp, cutoff); 
+			m->mothurConvert(temp, cutoff); 
 			cutoff += (5 / (precision * 10.0));
 		}
 	}

@@ -213,7 +213,7 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			temp = validParameter.validFile(parameters, "threshold", false);	if (temp == "not found") { temp = "1.00"; }
-			convert(temp, threshold);  
+			m->mothurConvert(temp, threshold);  
 			
 			temp = validParameter.validFile(parameters, "save", false);			if (temp == "not found"){	temp = "f";				}
 			save = m->isTrue(temp); 
@@ -242,7 +242,7 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 			
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
-			convert(temp, processors); 
+			m->mothurConvert(temp, processors); 
 
 			substitutionMatrix.resize(6);
 			for(int i=0;i<6;i++){	substitutionMatrix[i].resize(6,0);	}

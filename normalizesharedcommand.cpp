@@ -176,7 +176,7 @@ NormalizeSharedCommand::NormalizeSharedCommand(string option) {
 			if (temp == "not found") {  
 				norm = 0;  //once you have read, set norm to smallest group number
 			}else { 
-				convert(temp, norm);
+				m->mothurConvert(temp, norm);
 				if (norm < 0) { m->mothurOut("norm must be positive."); m->mothurOutEndLine(); abort=true; }
 			}
 			

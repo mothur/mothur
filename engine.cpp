@@ -186,11 +186,13 @@ bool InteractEngine::getInput(){
 					mout->names.clear();
 					mout->saveNextLabel = "";
 					mout->printedHeaders = false;
+					mout->commandInputsConvertError = false;
 					mout->currentBinLabels.clear();
 					mout->binLabelsInFile.clear();
 							
 					Command* command = cFactory->getCommand(commandName, options);
-					quitCommandCalled = command->execute();
+					if (mout->commandInputsConvertError) { quitCommandCalled = 2; }
+					else { quitCommandCalled = command->execute(); }
 							
 					//if we aborted command
 					if (quitCommandCalled == 2) {  mout->mothurOut("[ERROR]: did not complete " + commandName + "."); mout->mothurOutEndLine(); }
@@ -370,12 +372,14 @@ bool BatchEngine::getInput(){
 					mout->names.clear();
 					mout->saveNextLabel = "";
 					mout->printedHeaders = false;
+					mout->commandInputsConvertError = false;
 					mout->currentBinLabels.clear();
 					mout->binLabelsInFile.clear();
 
 							
 					Command* command = cFactory->getCommand(commandName, options);
-					quitCommandCalled = command->execute();
+					if (mout->commandInputsConvertError) { quitCommandCalled = 2; }
+					else { quitCommandCalled = command->execute(); }
 							
 					//if we aborted command
 					if (quitCommandCalled == 2) {  mout->mothurOut("[ERROR]: did not complete " + commandName + "."); mout->mothurOutEndLine(); }
@@ -537,12 +541,13 @@ bool ScriptEngine::getInput(){
 					mout->names.clear();
 					mout->saveNextLabel = "";
 					mout->printedHeaders = false;
+					mout->commandInputsConvertError = false;
 					mout->currentBinLabels.clear();
 					mout->binLabelsInFile.clear();
 
-							
 					Command* command = cFactory->getCommand(commandName, options);
-					quitCommandCalled = command->execute();
+					if (mout->commandInputsConvertError) { quitCommandCalled = 2; }
+					else { quitCommandCalled = command->execute(); }
 					
 					//if we aborted command
 					if (quitCommandCalled == 2) {  mout->mothurOut("[ERROR]: did not complete " + commandName + "."); mout->mothurOutEndLine(); }

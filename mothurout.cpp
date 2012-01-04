@@ -1514,6 +1514,84 @@ int MothurOut::mothurRemove(string filename){
 		exit(1);
 	}
 }
+/***********************************************************************/
+bool MothurOut::mothurConvert(string item, int& num){
+	try {
+		bool error = false;
+		
+		if (isNumeric1(item)) {
+			convert(item, num);
+		}else {
+			num = 0;
+			error = true;
+			mothurOut("[ERROR]: cannot convert " + item + " to an integer."); mothurOutEndLine();
+			commandInputsConvertError = true;
+		}
+		
+		return error;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "mothurConvert");
+		exit(1);
+	}
+}
+/***********************************************************************/
+bool MothurOut::isNumeric1(string stringToCheck){
+	try {
+		bool numeric = false;
+		
+		if(stringToCheck.find_first_not_of("0123456789.-") == string::npos) { numeric = true; }
+			
+		return numeric;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "isNumeric1");
+		exit(1);
+	}
+	
+}
+/***********************************************************************/
+bool MothurOut::mothurConvert(string item, float& num){
+	try {
+		bool error = false;
+		
+		if (isNumeric1(item)) {
+			convert(item, num);
+		}else {
+			num = 0;
+			error = true;
+			mothurOut("[ERROR]: cannot convert " + item + " to a float."); mothurOutEndLine();
+			commandInputsConvertError = true;
+		}
+		
+		return error;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "mothurConvert");
+		exit(1);
+	}
+}
+/***********************************************************************/
+bool MothurOut::mothurConvert(string item, double& num){
+	try {
+		bool error = false;
+		
+		if (isNumeric1(item)) {
+			convert(item, num);
+		}else {
+			num = 0;
+			error = true;
+			mothurOut("[ERROR]: cannot convert " + item + " to a double."); mothurOutEndLine();
+			commandInputsConvertError = true;
+		}
+		
+		return error;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "mothurConvert");
+		exit(1);
+	}
+}
 /**************************************************************************************************/
 
 vector<vector<double> > MothurOut::binomial(int maxOrder){

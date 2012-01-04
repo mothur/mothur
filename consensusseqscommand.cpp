@@ -159,7 +159,7 @@ ConsensusSeqsCommand::ConsensusSeqsCommand(string option)  {
 			}
 			
 			string temp = validParameter.validFile(parameters, "cutoff", false);  if (temp == "not found") { temp = "100"; }
-			convert(temp, cutoff); 
+			m->mothurConvert(temp, cutoff); 
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(fastafile);	}

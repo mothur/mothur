@@ -383,7 +383,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 			
 			string temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
-			convert(temp, processors);
+			m->mothurConvert(temp, processors);
 			
 			temp = validParameter.validFile(parameters, "save", false);			if (temp == "not found"){	temp = "f";				}
 			save = m->isTrue(temp); 
@@ -441,34 +441,34 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 			
 			
 			temp = validParameter.validFile(parameters, "ksize", false);			if (temp == "not found") { temp = "7"; }
-			convert(temp, ksize);
+			m->mothurConvert(temp, ksize);
 						
 			temp = validParameter.validFile(parameters, "window", false);			if (temp == "not found") { temp = "50"; }			
-			convert(temp, window);
+			m->mothurConvert(temp, window);
 			
 			temp = validParameter.validFile(parameters, "match", false);			if (temp == "not found") { temp = "5"; }
-			convert(temp, match);
+			m->mothurConvert(temp, match);
 			
 			temp = validParameter.validFile(parameters, "mismatch", false);			if (temp == "not found") { temp = "-4"; }
-			convert(temp, mismatch);
+			m->mothurConvert(temp, mismatch);
 			
 			temp = validParameter.validFile(parameters, "divergence", false);		if (temp == "not found") { temp = "1.007"; }
-			convert(temp, divR);
+			m->mothurConvert(temp, divR);
 			
 			temp = validParameter.validFile(parameters, "minsim", false);			if (temp == "not found") { temp = "90"; }
-			convert(temp, minSimilarity);
+			m->mothurConvert(temp, minSimilarity);
 			
 			temp = validParameter.validFile(parameters, "mincov", false);			if (temp == "not found") { temp = "70"; }
-			convert(temp, minCoverage);
+			m->mothurConvert(temp, minCoverage);
 			
 			temp = validParameter.validFile(parameters, "minbs", false);			if (temp == "not found") { temp = "90"; }
-			convert(temp, minBS);
+			m->mothurConvert(temp, minBS);
 			
 			temp = validParameter.validFile(parameters, "minsnp", false);			if (temp == "not found") { temp = "10"; }
-			convert(temp, minSNP);
+			m->mothurConvert(temp, minSNP);
 
 			temp = validParameter.validFile(parameters, "parents", false);			if (temp == "not found") { temp = "3"; }
-			convert(temp, parents); 
+			m->mothurConvert(temp, parents); 
 			
 			temp = validParameter.validFile(parameters, "realign", false);			if (temp == "not found") { temp = "t"; }
 			realign = m->isTrue(temp); 
@@ -482,13 +482,13 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 			search = validParameter.validFile(parameters, "search", false);			if (search == "not found") { search = "blast"; }
 			
 			temp = validParameter.validFile(parameters, "iters", false);			if (temp == "not found") { temp = "1000"; }		
-			convert(temp, iters); 
+			m->mothurConvert(temp, iters); 
 			 
 			temp = validParameter.validFile(parameters, "increment", false);		if (temp == "not found") { temp = "5"; }
-			convert(temp, increment);
+			m->mothurConvert(temp, increment);
 			
 			temp = validParameter.validFile(parameters, "numwanted", false);		if (temp == "not found") { temp = "15"; }		
-			convert(temp, numwanted);
+			m->mothurConvert(temp, numwanted);
 			
 			blastlocation = validParameter.validFile(parameters, "blastlocation", false);	
 			if (blastlocation == "not found") { blastlocation = ""; }

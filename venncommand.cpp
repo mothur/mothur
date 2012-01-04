@@ -193,7 +193,7 @@ VennCommand::VennCommand(string option)  {
 			
 			string temp;
 			temp = validParameter.validFile(parameters, "abund", false);		if (temp == "not found") { temp = "10"; }
-			convert(temp, abund); 
+			m->mothurConvert(temp, abund); 
 			
 			temp = validParameter.validFile(parameters, "nseqs", false);		if (temp == "not found"){	temp = "f";				}
 			nseqs = m->isTrue(temp); 
@@ -202,7 +202,7 @@ VennCommand::VennCommand(string option)  {
 			perm = m->isTrue(temp); 
 			
 			temp = validParameter.validFile(parameters, "fontsize", false);		if (temp == "not found") { temp = "24"; }
-			convert(temp, fontsize);
+			m->mothurConvert(temp, fontsize);
 
 		}
 				

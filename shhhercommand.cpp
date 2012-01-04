@@ -251,19 +251,19 @@ ShhherCommand::ShhherCommand(string option) {
 			
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
-			convert(temp, processors);
+			m->mothurConvert(temp, processors);
 
 			temp = validParameter.validFile(parameters, "cutoff", false);	if (temp == "not found"){	temp = "0.01";		}
-			convert(temp, cutoff); 
+			m->mothurConvert(temp, cutoff); 
 			
 			temp = validParameter.validFile(parameters, "mindelta", false);	if (temp == "not found"){	temp = "0.000001";	}
-			convert(temp, minDelta); 
+			m->mothurConvert(temp, minDelta); 
 
 			temp = validParameter.validFile(parameters, "maxiter", false);	if (temp == "not found"){	temp = "1000";		}
-			convert(temp, maxIters); 
+			m->mothurConvert(temp, maxIters); 
 
 			temp = validParameter.validFile(parameters, "sigma", false);if (temp == "not found")	{	temp = "60";		}
-			convert(temp, sigma); 
+			m->mothurConvert(temp, sigma); 
 			
 			flowOrder = validParameter.validFile(parameters, "order", false);
 			if (flowOrder == "not found"){ flowOrder = "TACG";		}

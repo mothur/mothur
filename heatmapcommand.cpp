@@ -226,10 +226,10 @@ HeatMapCommand::HeatMapCommand(string option) {
 			}
 			
 			string temp = validParameter.validFile(parameters, "numotu", false);		if (temp == "not found") { temp = "0"; }
-			convert(temp, numOTU);
+			m->mothurConvert(temp, numOTU);
 			
 			temp = validParameter.validFile(parameters, "fontsize", false);				if (temp == "not found") { temp = "24"; }
-			convert(temp, fontSize);
+			m->mothurConvert(temp, fontSize);
 			
 			sorted = validParameter.validFile(parameters, "sorted", false);				
 			if (sorted == "not found") { 

@@ -152,10 +152,10 @@ ClusterFragmentsCommand::ClusterFragmentsCommand(string option) {
 			
 			string temp;
 			temp = validParameter.validFile(parameters, "diffs", false);		if (temp == "not found"){	temp = "0";				}
-			convert(temp, diffs); 
+			m->mothurConvert(temp, diffs); 
 			
 			temp = validParameter.validFile(parameters, "percent", false);		if (temp == "not found"){	temp = "0";				}
-			convert(temp, percent);
+			m->mothurConvert(temp, percent);
 			
 		}
 				

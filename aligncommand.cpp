@@ -224,34 +224,29 @@ AlignCommand::AlignCommand(string option)  {
 			// ...at some point should added some additional type checking...
 			string temp;
 			temp = validParameter.validFile(parameters, "ksize", false);		if (temp == "not found"){	temp = "8";				}
-			convert(temp, kmerSize); 
+			m->mothurConvert(temp, kmerSize); 
 			
 			temp = validParameter.validFile(parameters, "match", false);		if (temp == "not found"){	temp = "1.0";			}
-			convert(temp, match);  
+			m->mothurConvert(temp, match);  
 			
 			temp = validParameter.validFile(parameters, "mismatch", false);		if (temp == "not found"){	temp = "-1.0";			}
-			convert(temp, misMatch);  
+			m->mothurConvert(temp, misMatch);  
 			
 			temp = validParameter.validFile(parameters, "gapopen", false);		if (temp == "not found"){	temp = "-2.0";			}
-			convert(temp, gapOpen);  
+			m->mothurConvert(temp, gapOpen);  
 			
 			temp = validParameter.validFile(parameters, "gapextend", false);	if (temp == "not found"){	temp = "-1.0";			}
-			convert(temp, gapExtend); 
+			m->mothurConvert(temp, gapExtend); 
 			
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
-			convert(temp, processors); 
+			m->mothurConvert(temp, processors); 
 			
 			temp = validParameter.validFile(parameters, "flip", false);			if (temp == "not found"){	temp = "f";				}
 			flip = m->isTrue(temp); 
 			
 			temp = validParameter.validFile(parameters, "save", false);			if (temp == "not found"){	temp = "f";				}
 			save = m->isTrue(temp); 
-			//this is so the threads can quickly load the reference data
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-			#else
-				if (processors != 1) { save = true; }
-			#endif
 			rdb->save = save; 
 			if (save) { //clear out old references
 				rdb->clearMemory();
@@ -272,7 +267,7 @@ AlignCommand::AlignCommand(string option)  {
 			else {	if (save) {	rdb->setSavedReference(templateFileName);	}	}
 			
 			temp = validParameter.validFile(parameters, "threshold", false);	if (temp == "not found"){	temp = "0.50";			}
-			convert(temp, threshold); 
+			m->mothurConvert(temp, threshold); 
 			
 			search = validParameter.validFile(parameters, "search", false);		if (search == "not found"){	search = "kmer";		}
 			if ((search != "suffix") && (search != "kmer") && (search != "blast")) { m->mothurOut("invalid search option: choices are kmer, suffix or blast."); m->mothurOutEndLine(); abort=true; }
@@ -923,7 +918,7 @@ int AlignCommand::createProcesses(string alignFileName, string reportFileName, s
 			string extension = "";
 			if (i != 0) { extension = toString(i) + ".temp"; }
 			
-			alignData* tempalign = new alignData((alignFileName + extension), (reportFileName + extension), (accnosFName + extension), filename, align, search, kmerSize, m, lines[i]->start, lines[i]->end, flip, match, misMatch, gapOpen, gapExtend, threshold, i);
+			alignData* tempalign = new alignData(templateFileName, (alignFileName + extension), (reportFileName + extension), (accnosFName + extension), filename, align, search, kmerSize, m, lines[i]->start, lines[i]->end, flip, match, misMatch, gapOpen, gapExtend, threshold, i);
 			pDataArray.push_back(tempalign);
 			processIDS.push_back(i);
 				

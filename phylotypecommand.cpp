@@ -144,7 +144,7 @@ PhylotypeCommand::PhylotypeCommand(string option)  {
 			
 			string temp = validParameter.validFile(parameters, "cutoff", false);
 			if (temp == "not found") { temp = "-1"; }
-			convert(temp, cutoff); 
+			m->mothurConvert(temp, cutoff); 
 			
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; allLines = 1; }

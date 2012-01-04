@@ -212,23 +212,23 @@ PairwiseSeqsCommand::PairwiseSeqsCommand(string option)  {
 			// ...at some point should added some additional type checking...
 			string temp;
 			temp = validParameter.validFile(parameters, "match", false);		if (temp == "not found"){	temp = "1.0";			}
-			convert(temp, match);  
+			m->mothurConvert(temp, match);  
 			
 			temp = validParameter.validFile(parameters, "mismatch", false);		if (temp == "not found"){	temp = "-1.0";			}
-			convert(temp, misMatch);  
+			m->mothurConvert(temp, misMatch);  
 			
 			temp = validParameter.validFile(parameters, "gapopen", false);		if (temp == "not found"){	temp = "-2.0";			}
-			convert(temp, gapOpen);  
+			m->mothurConvert(temp, gapOpen);  
 			
 			temp = validParameter.validFile(parameters, "gapextend", false);	if (temp == "not found"){	temp = "-1.0";			}
-			convert(temp, gapExtend); 
+			m->mothurConvert(temp, gapExtend); 
 			
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
-			convert(temp, processors);
+			m->mothurConvert(temp, processors);
 			
 			temp = validParameter.validFile(parameters, "cutoff", false);		if(temp == "not found"){	temp = "1.0"; }
-			convert(temp, cutoff); 
+			m->mothurConvert(temp, cutoff); 
 			
 			temp = validParameter.validFile(parameters, "countends", false);	if(temp == "not found"){	temp = "T";	}
 			countends = m->isTrue(temp); 

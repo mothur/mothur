@@ -281,7 +281,7 @@ ChimeraCheckCommand::ChimeraCheckCommand(string option)  {
 
 			string temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
-			convert(temp, processors);
+			m->mothurConvert(temp, processors);
 			
 			temp = validParameter.validFile(parameters, "save", false);			if (temp == "not found"){	temp = "f";				}
 			save = m->isTrue(temp); 
@@ -306,14 +306,14 @@ ChimeraCheckCommand::ChimeraCheckCommand(string option)  {
 			
 			
 			temp = validParameter.validFile(parameters, "ksize", false);			if (temp == "not found") { temp = "7"; }
-			convert(temp, ksize);
+			m->mothurConvert(temp, ksize);
 			
 			temp = validParameter.validFile(parameters, "svg", false);				if (temp == "not found") { temp = "F"; }
 			svg = m->isTrue(temp);
 			if (nameFileNames.size() != 0) { svg = true; }
 			
 			temp = validParameter.validFile(parameters, "increment", false);		if (temp == "not found") { temp = "10"; }
-			convert(temp, increment);			
+			m->mothurConvert(temp, increment);			
 		}
 	}
 	catch(exception& e) {

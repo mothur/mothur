@@ -213,7 +213,7 @@ SplitAbundCommand::SplitAbundCommand(string option)  {
 			accnos = m->isTrue(temp); 
 			
 			temp = validParameter.validFile(parameters, "cutoff", false);				if (temp == "not found") { temp = "0"; }
-			convert(temp, cutoff); 
+			m->mothurConvert(temp, cutoff); 
 
 			if (cutoff == 0) {  m->mothurOut("You must provide a cutoff to qualify what is abundant for the split.abund command. "); m->mothurOutEndLine(); abort = true;  }
 

@@ -149,10 +149,10 @@ TrimFlowsCommand::TrimFlowsCommand(string option)  {
 			
 			string temp;
 			temp = validParameter.validFile(parameters, "minflows", false);	if (temp == "not found") { temp = "450"; }
-			convert(temp, minFlows);  
+			m->mothurConvert(temp, minFlows);  
 
 			temp = validParameter.validFile(parameters, "maxflows", false);	if (temp == "not found") { temp = "450"; }
-			convert(temp, maxFlows);  
+			m->mothurConvert(temp, maxFlows);  
 			
 			
 			temp = validParameter.validFile(parameters, "oligos", true);
@@ -164,28 +164,28 @@ TrimFlowsCommand::TrimFlowsCommand(string option)  {
 			else if(m->isTrue(temp))	{	fasta = 1;	}
 			
 			temp = validParameter.validFile(parameters, "maxhomop", false);		if (temp == "not found"){	temp = "9";		}
-			convert(temp, maxHomoP);  
+			m->mothurConvert(temp, maxHomoP);  
 
 			temp = validParameter.validFile(parameters, "signal", false);		if (temp == "not found"){	temp = "0.50";	}
-			convert(temp, signal);  
+			m->mothurConvert(temp, signal);  
 
 			temp = validParameter.validFile(parameters, "noise", false);		if (temp == "not found"){	temp = "0.70";	}
-			convert(temp, noise);  
+			m->mothurConvert(temp, noise);  
 	
 			temp = validParameter.validFile(parameters, "bdiffs", false);		if (temp == "not found"){	temp = "0";		}
-			convert(temp, bdiffs);
+			m->mothurConvert(temp, bdiffs);
 			
 			temp = validParameter.validFile(parameters, "pdiffs", false);		if (temp == "not found"){	temp = "0";		}
-			convert(temp, pdiffs);
+			m->mothurConvert(temp, pdiffs);
 			
 			temp = validParameter.validFile(parameters, "tdiffs", false);
 			if (temp == "not found"){ int tempTotal = pdiffs + bdiffs;  temp = toString(tempTotal); }
-			convert(temp, tdiffs);
+			m->mothurConvert(temp, tdiffs);
 			if(tdiffs == 0){	tdiffs = bdiffs + pdiffs;	}
 			
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
-			convert(temp, processors);
+			m->mothurConvert(temp, processors);
 	
 			flowOrder = validParameter.validFile(parameters, "order", false);
 			if (flowOrder == "not found"){ flowOrder = "TACG";		}

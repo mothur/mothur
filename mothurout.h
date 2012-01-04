@@ -53,7 +53,7 @@ class MothurOut {
 		vector<string> binLabelsInFile;
 		vector<string> currentBinLabels;
 		string saveNextLabel, argv, sharedHeaderMode;
-		bool printedHeaders;
+		bool printedHeaders, commandInputsConvertError;
 		
 		//functions from mothur.h
 		//file operations
@@ -84,6 +84,9 @@ class MothurOut {
 		int readNames(string, map<string, vector<string> >&);
 		int readNames(string, vector<seqPriorityNode>&, map<string, string>&);
 		int mothurRemove(string);
+		bool mothurConvert(string, int&); //use for converting user inputs. Sets commandInputsConvertError to true if error occurs. Engines check this.
+		bool mothurConvert(string, float&); //use for converting user inputs. Sets commandInputsConvertError to true if error occurs. Engines check this.
+		bool mothurConvert(string, double&); //use for converting user inputs. Sets commandInputsConvertError to true if error occurs. Engines check this.
 	
 		
 		//searchs and checks
@@ -97,6 +100,7 @@ class MothurOut {
 		int getNumChar(string, char);
 		bool isTrue(string);
 		bool isContainingOnlyDigits(string);
+		bool isNumeric1(string);
 	
 		
 		//string manipulation
@@ -198,6 +202,7 @@ class MothurOut {
 			flowfile = "";
 			gui = false;
 			printedHeaders = false;
+			commandInputsConvertError = false;
 			sharedHeaderMode = "";
 		}
 		~MothurOut();

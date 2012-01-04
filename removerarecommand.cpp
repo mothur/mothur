@@ -220,7 +220,7 @@ RemoveRareCommand::RemoveRareCommand(string option)  {
 			
 			string temp = validParameter.validFile(parameters, "nseqs", false);	 
 			if (temp == "not found") { m->mothurOut("nseqs is a required parameter."); m->mothurOutEndLine(); abort = true; }
-			else { convert(temp, nseqs); }
+			else { m->mothurConvert(temp, nseqs); }
 			
 			temp = validParameter.validFile(parameters, "bygroup", false);	 if (temp == "not found") { temp = "f"; }
 			byGroup = m->isTrue(temp);

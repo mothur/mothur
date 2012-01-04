@@ -178,14 +178,14 @@ MetaStatsCommand::MetaStatsCommand(string option) {
 
 			
 			string temp = validParameter.validFile(parameters, "iters", false);			if (temp == "not found") { temp = "1000"; }
-			convert(temp, iters); 
+			m->mothurConvert(temp, iters); 
 			
 			temp = validParameter.validFile(parameters, "threshold", false);			if (temp == "not found") { temp = "0.05"; }
-			convert(temp, threshold); 
+			m->mothurConvert(temp, threshold); 
 			
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
-			convert(temp, processors);
+			m->mothurConvert(temp, processors);
 		}
 
 	}
