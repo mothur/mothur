@@ -156,11 +156,11 @@ PreClusterCommand::PreClusterCommand(string option) {
 			else {   m->setGroupFile(groupfile); bygroup = true;  }
 			
 			string temp	= validParameter.validFile(parameters, "diffs", false);		if(temp == "not found"){	temp = "1"; }
-			convert(temp, diffs); 
+			m->mothurConvert(temp, diffs); 
 			
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
-			convert(temp, processors);
+			m->mothurConvert(temp, processors);
 			
 			
 		}
@@ -372,6 +372,9 @@ int PreClusterCommand::createProcessesGroups(SequenceParser* parser, string newF
 		
 		//append output files
 		for(int i=0;i<processIDS.size();i++){
+			newFName = m->getFullPathName(".\\" + newFName);
+			newNName = m->getFullPathName(".\\" + newNName);
+			cout << newFName << endl;
 			m->appendFiles((newFName + toString(processIDS[i]) + ".temp"), newFName);
 			m->mothurRemove((newFName + toString(processIDS[i]) + ".temp"));
 			

@@ -234,7 +234,7 @@ SubSampleCommand::SubSampleCommand(string option) {
 			}
 			
 			string temp = validParameter.validFile(parameters, "size", false);		if (temp == "not found"){	temp = "0";		}
-			convert(temp, size);  
+			m->mothurConvert(temp, size);  
 			
 			temp = validParameter.validFile(parameters, "persample", false);		if (temp == "not found"){	temp = "f";		}
 			persample = m->isTrue(temp);

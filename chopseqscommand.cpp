@@ -121,7 +121,7 @@ ChopSeqsCommand::ChopSeqsCommand(string option)  {
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(fastafile);	}
 			
 			string temp = validParameter.validFile(parameters, "numbases", false);	if (temp == "not found") { temp = "0"; } 
-			convert(temp, numbases);   
+			m->mothurConvert(temp, numbases);   
 			
 			temp = validParameter.validFile(parameters, "countgaps", false);	if (temp == "not found") { temp = "f"; } 
 			countGaps = m->isTrue(temp);  

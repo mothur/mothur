@@ -37,7 +37,7 @@ string ShhhSeqsCommand::getHelpString(){
 		string helpString = "";
 		helpString += "The shhh.seqs command reads a fasta and name file and ....\n";
 		helpString += "The shhh.seqs command parameters are fasta, name, group, sigma and processors.\n";
-		helpString += "The fasta parameter allows you to enter the fasta file containing your potentially sequences, and is required, unless you have a valid current fasta file. \n";
+		helpString += "The fasta parameter allows you to enter the fasta file containing your sequences, and is required, unless you have a valid current fasta file. \n";
 		helpString += "The name parameter allows you to provide a name file associated with your fasta file. It is required. \n";
 		helpString += "The group parameter allows you to provide a group file.  When checking sequences, only sequences from the same group as the query sequence will be used as the reference. \n";
 		helpString += "The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n";
@@ -160,11 +160,11 @@ ShhhSeqsCommand::ShhhSeqsCommand(string option) {
 			else {   m->setGroupFile(groupfile);  }
 			
 			string temp	= validParameter.validFile(parameters, "sigma", false);		if(temp == "not found"){	temp = "0.01"; }
-			convert(temp, sigma); 
+			m->mothurConvert(temp, sigma); 
 			
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
-			convert(temp, processors);
+			m->mothurConvert(temp, processors);
 		}
 	}
 	catch(exception& e) {

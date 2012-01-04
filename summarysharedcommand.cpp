@@ -205,7 +205,7 @@ SummarySharedCommand::SummarySharedCommand(string option)  {
 			
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
-			convert(temp, processors); 
+			m->mothurConvert(temp, processors); 
 			
 			if (abort == false) {
 			

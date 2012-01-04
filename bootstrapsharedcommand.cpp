@@ -157,7 +157,7 @@ BootSharedCommand::BootSharedCommand(string option) {
 
 			string temp;
 			temp = validParameter.validFile(parameters, "iters", false);  if (temp == "not found") { temp = "1000"; }
-			convert(temp, iters); 
+			m->mothurConvert(temp, iters); 
 				
 			if (abort == false) {
 			

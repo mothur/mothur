@@ -167,10 +167,10 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 			
 			string temp;
 			temp = validParameter.validFile(parameters, "freq", false);			if (temp == "not found") { temp = "100"; }
-			convert(temp, freq); 
+			m->mothurConvert(temp, freq); 
 			
 			temp = validParameter.validFile(parameters, "iters", false);			if (temp == "not found") { temp = "1000"; }
-			convert(temp, iters); 
+			m->mothurConvert(temp, iters); 
 			
 			temp = validParameter.validFile(parameters, "rarefy", false);			if (temp == "not found") { temp = "F"; }
 			rarefy = m->isTrue(temp);
@@ -187,7 +187,7 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 			
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
-			convert(temp, processors); 
+			m->mothurConvert(temp, processors); 
 			
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = "";  }

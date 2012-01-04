@@ -206,7 +206,7 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 			if ((basis != "otu") && (basis != "sequence")) { m->mothurOut("Invalid option for basis. basis options are otu and sequence, using otu."); m->mothurOutEndLine(); }
 			
 			string temp = validParameter.validFile(parameters, "cutoff", false);			if (temp == "not found") { temp = "51"; }
-			convert(temp, cutoff); 
+			m->mothurConvert(temp, cutoff); 
 			
 			temp = validParameter.validFile(parameters, "probs", false);					if (temp == "not found"){	temp = "true";			}
 			probs = m->isTrue(temp);

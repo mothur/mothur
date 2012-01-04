@@ -179,11 +179,11 @@ DistanceCommand::DistanceCommand(string option) {
 			convert(temp, countends); 
 			
 			temp = validParameter.validFile(parameters, "cutoff", false);		if(temp == "not found"){	temp = "1.0"; }
-			convert(temp, cutoff); 
+			m->mothurConvert(temp, cutoff); 
 			
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
-			convert(temp, processors);
+			m->mothurConvert(temp, processors);
 			
 			temp = validParameter.validFile(parameters, "compress", false);		if(temp == "not found"){  temp = "F"; }
 			convert(temp, compress);

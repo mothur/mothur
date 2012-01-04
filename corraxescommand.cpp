@@ -187,7 +187,7 @@ CorrAxesCommand::CorrAxesCommand(string option)  {
 			}
 			string temp;
 			temp = validParameter.validFile(parameters, "numaxes", false);		if (temp == "not found"){	temp = "3";				}
-			convert(temp, numaxes); 
+			m->mothurConvert(temp, numaxes); 
 			
 			method = validParameter.validFile(parameters, "method", false);		if (method == "not found"){	method = "pearson";		}
 			

@@ -213,25 +213,25 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 			
 			
 			temp = validParameter.validFile(parameters, "maxambig", false);		if (temp == "not found") { temp = "-1"; }
-			convert(temp, maxAmbig);  
+			m->mothurConvert(temp, maxAmbig);  
 
 			temp = validParameter.validFile(parameters, "maxhomop", false);		if (temp == "not found") { temp = "0"; }
-			convert(temp, maxHomoP);  
+			m->mothurConvert(temp, maxHomoP);  
 
 			temp = validParameter.validFile(parameters, "minlength", false);	if (temp == "not found") { temp = "0"; }
-			convert(temp, minLength); 
+			m->mothurConvert(temp, minLength); 
 			
 			temp = validParameter.validFile(parameters, "maxlength", false);	if (temp == "not found") { temp = "0"; }
-			convert(temp, maxLength);
+			m->mothurConvert(temp, maxLength);
 			
 			temp = validParameter.validFile(parameters, "bdiffs", false);		if (temp == "not found") { temp = "0"; }
-			convert(temp, bdiffs);
+			m->mothurConvert(temp, bdiffs);
 			
 			temp = validParameter.validFile(parameters, "pdiffs", false);		if (temp == "not found") { temp = "0"; }
-			convert(temp, pdiffs);
+			m->mothurConvert(temp, pdiffs);
 			
 			temp = validParameter.validFile(parameters, "tdiffs", false);		if (temp == "not found") { int tempTotal = pdiffs + bdiffs;  temp = toString(tempTotal); }
-			convert(temp, tdiffs);
+			m->mothurConvert(temp, tdiffs);
 			
 			if(tdiffs == 0){	tdiffs = bdiffs + pdiffs;	}
 			
@@ -246,7 +246,7 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 			else						{	nameFile = temp;	m->setNameFile(nameFile); }
 			
 			temp = validParameter.validFile(parameters, "qthreshold", false);	if (temp == "not found") { temp = "0"; }
-			convert(temp, qThreshold);
+			m->mothurConvert(temp, qThreshold);
 			
 			temp = validParameter.validFile(parameters, "qtrim", false);		if (temp == "not found") { temp = "t"; }
 			qtrim = m->isTrue(temp);
@@ -277,7 +277,7 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 			
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
-			convert(temp, processors); 
+			m->mothurConvert(temp, processors); 
 			
 			
 			if(allFiles && (oligoFile == "")){

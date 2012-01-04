@@ -222,7 +222,7 @@ FilterSeqsCommand::FilterSeqsCommand(string option)  {
 			
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
-			convert(temp, processors); 
+			m->mothurConvert(temp, processors); 
 			
 			vertical = validParameter.validFile(parameters, "vertical", false);		
 			if (vertical == "not found") { 

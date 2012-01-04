@@ -183,11 +183,11 @@ SensSpecCommand::SensSpecCommand(string option)  {
 //			cout << "name:\t" << nameFile << endl;
 
 			temp = validParameter.validFile(parameters, "cutoff", false);		if (temp == "not found") { temp = "-1.00"; }
-			convert(temp, cutoff);  
+			m->mothurConvert(temp, cutoff);  
 //			cout << cutoff << endl;
 			
 			temp = validParameter.validFile(parameters, "precision", false);	if (temp == "not found") { temp = "100"; }
-			convert(temp, precision);  
+			m->mothurConvert(temp, precision);  
 //			cout << precision << endl;
 			
 			string label = validParameter.validFile(parameters, "label", false);			

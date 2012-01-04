@@ -182,14 +182,14 @@ HClusterCommand::HClusterCommand(string option)  {
 			if (temp == "not found") { temp = "100"; }
 			//saves precision legnth for formatting below
 			length = temp.length();
-			convert(temp, precision); 
+			m->mothurConvert(temp, precision); 
 			
 			temp = validParameter.validFile(parameters, "hard", false);			if (temp == "not found") { temp = "T"; }
 			hard = m->isTrue(temp);
 			
 			temp = validParameter.validFile(parameters, "cutoff", false);
 			if (temp == "not found") { temp = "10"; }
-			convert(temp, cutoff); 
+			m->mothurConvert(temp, cutoff); 
 			cutoff += (5 / (precision * 10.0)); 
 			
 			method = validParameter.validFile(parameters, "method", false);

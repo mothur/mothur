@@ -162,10 +162,10 @@ RareFactSharedCommand::RareFactSharedCommand(string option)  {
 			
 			string temp;
 			temp = validParameter.validFile(parameters, "freq", false);			if (temp == "not found") { temp = "100"; }
-			convert(temp, freq); 
+			m->mothurConvert(temp, freq); 
 			
 			temp = validParameter.validFile(parameters, "iters", false);			if (temp == "not found") { temp = "1000"; }
-			convert(temp, nIters); 
+			m->mothurConvert(temp, nIters); 
 			
 			temp = validParameter.validFile(parameters, "jumble", false);			if (temp == "not found") { temp = "T"; }
 			if (m->isTrue(temp)) { jumble = true; }

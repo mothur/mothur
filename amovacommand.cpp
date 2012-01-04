@@ -136,11 +136,11 @@ AmovaCommand::AmovaCommand(string option) {
 
 			string temp = validParameter.validFile(parameters, "iters", false);
 			if (temp == "not found") { temp = "1000"; }
-			convert(temp, iters); 
+			m->mothurConvert(temp, iters); 
 			
 			temp = validParameter.validFile(parameters, "alpha", false);
 			if (temp == "not found") { temp = "0.05"; }
-			convert(temp, experimentwiseAlpha); 
+			m->mothurConvert(temp, experimentwiseAlpha); 
 		}
 	}
 	catch(exception& e) {

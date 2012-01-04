@@ -374,19 +374,14 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 			// ...at some point should added some additional type checking...
 			string temp;
 			temp = validParameter.validFile(parameters, "ksize", false);		if (temp == "not found"){	temp = "8";				}
-			convert(temp, kmerSize); 
+			m->mothurConvert(temp, kmerSize); 
 			
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
-			convert(temp, processors); 
+			m->mothurConvert(temp, processors); 
 			
 			temp = validParameter.validFile(parameters, "save", false);			if (temp == "not found"){	temp = "f";				}
 			save = m->isTrue(temp); 
-			//this is so the threads can quickly load the reference data
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-			#else
-			if ((processors != 1) && (rdb->referenceSeqs.size() == 0)) { save = true; }
-			#endif
 			rdb->save = save; 
 			if (save) { //clear out old references
 				rdb->clearMemory();	
@@ -425,28 +420,28 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 			method = validParameter.validFile(parameters, "method", false);		if (method == "not found"){	method = "bayesian";	}
 			
 			temp = validParameter.validFile(parameters, "match", false);		if (temp == "not found"){	temp = "1.0";			}
-			convert(temp, match);  
+			m->mothurConvert(temp, match);  
 			
 			temp = validParameter.validFile(parameters, "mismatch", false);		if (temp == "not found"){	temp = "-1.0";			}
-			convert(temp, misMatch);  
+			m->mothurConvert(temp, misMatch);  
 			
 			temp = validParameter.validFile(parameters, "gapopen", false);		if (temp == "not found"){	temp = "-2.0";			}
-			convert(temp, gapOpen);  
+			m->mothurConvert(temp, gapOpen);  
 			
 			temp = validParameter.validFile(parameters, "gapextend", false);	if (temp == "not found"){	temp = "-1.0";			}
-			convert(temp, gapExtend); 
+			m->mothurConvert(temp, gapExtend); 
 			
 			temp = validParameter.validFile(parameters, "numwanted", false);	if (temp == "not found"){	temp = "10";			}
-			convert(temp, numWanted);
+			m->mothurConvert(temp, numWanted);
 			
 			temp = validParameter.validFile(parameters, "cutoff", false);		if (temp == "not found"){	temp = "0";				}
-			convert(temp, cutoff);
+			m->mothurConvert(temp, cutoff);
 			
 			temp = validParameter.validFile(parameters, "probs", false);		if (temp == "not found"){	temp = "true";			}
 			probs = m->isTrue(temp);
 			
 			temp = validParameter.validFile(parameters, "iters", false);		if (temp == "not found") { temp = "100";			}
-			convert(temp, iters); 
+			m->mothurConvert(temp, iters); 
 
 
 			

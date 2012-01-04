@@ -242,7 +242,7 @@ HeatMapSimCommand::HeatMapSimCommand(string option)  {
 			}
 			
 			string temp = validParameter.validFile(parameters, "fontsize", false);				if (temp == "not found") { temp = "24"; }
-			convert(temp, fontsize);
+			m->mothurConvert(temp, fontsize);
 			
 			if (abort == false) {
 				ValidCalculators validCalculator;

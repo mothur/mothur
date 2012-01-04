@@ -280,13 +280,13 @@ CollectCommand::CollectCommand(string option)  {
 
 			string temp;
 			temp = validParameter.validFile(parameters, "freq", false);			if (temp == "not found") { temp = "100"; }
-			convert(temp, freq); 
+			m->mothurConvert(temp, freq); 
 			
 			temp = validParameter.validFile(parameters, "abund", false);		if (temp == "not found") { temp = "10"; }
-			convert(temp, abund); 
+			m->mothurConvert(temp, abund); 
 			
 			temp = validParameter.validFile(parameters, "size", false);			if (temp == "not found") { temp = "0"; }
-			convert(temp, size); 
+			m->mothurConvert(temp, size); 
 		}
 		
 	}

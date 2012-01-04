@@ -149,10 +149,10 @@ MGClusterCommand::MGClusterCommand(string option) {
 			string temp;
 			temp = validParameter.validFile(parameters, "precision", false);		if (temp == "not found") { temp = "100"; }
 			precisionLength = temp.length();
-			convert(temp, precision); 
+			m->mothurConvert(temp, precision); 
 			
 			temp = validParameter.validFile(parameters, "cutoff", false);			if (temp == "not found") { temp = "0.70"; }
-			convert(temp, cutoff); 
+			m->mothurConvert(temp, cutoff); 
 			cutoff += (5 / (precision * 10.0));
 			
 			method = validParameter.validFile(parameters, "method", false);
@@ -162,10 +162,10 @@ MGClusterCommand::MGClusterCommand(string option) {
 			else { m->mothurOut("Not a valid clustering method.  Valid clustering algorithms are furthest, nearest or average."); m->mothurOutEndLine(); abort = true; }
 
 			temp = validParameter.validFile(parameters, "length", false);			if (temp == "not found") { temp = "5"; }
-			convert(temp, length); 
+			m->mothurConvert(temp, length); 
 			
 			temp = validParameter.validFile(parameters, "penalty", false);			if (temp == "not found") { temp = "0.10"; }
-			convert(temp, penalty); 
+			m->mothurConvert(temp, penalty); 
 			
 			temp = validParameter.validFile(parameters, "min", false);				if (temp == "not found") { temp = "true"; }
 			minWanted = m->isTrue(temp); 

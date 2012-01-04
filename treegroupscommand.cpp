@@ -257,10 +257,10 @@ TreeGroupCommand::TreeGroupCommand(string option)  {
 
 			string temp;
 			temp = validParameter.validFile(parameters, "precision", false);			if (temp == "not found") { temp = "100"; }
-			convert(temp, precision); 
+			m->mothurConvert(temp, precision); 
 			
 			temp = validParameter.validFile(parameters, "cutoff", false);			if (temp == "not found") { temp = "10"; }
-			convert(temp, cutoff); 
+			m->mothurConvert(temp, cutoff); 
 			cutoff += (5 / (precision * 10.0));
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 

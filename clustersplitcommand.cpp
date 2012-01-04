@@ -264,7 +264,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			if (temp == "not found") { temp = "100"; }
 			//saves precision legnth for formatting below
 			length = temp.length();
-			convert(temp, precision); 
+			m->mothurConvert(temp, precision); 
 			
 			temp = validParameter.validFile(parameters, "hard", false);			if (temp == "not found") { temp = "T"; }
 			hard = m->isTrue(temp);
@@ -274,7 +274,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
-			convert(temp, processors);
+			m->mothurConvert(temp, processors);
 			
 			temp = validParameter.validFile(parameters, "splitmethod", false);	
 			if (splitmethod != "fasta") {
@@ -283,11 +283,11 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			}
 			
 			temp = validParameter.validFile(parameters, "cutoff", false);		if (temp == "not found")  { temp = "0.25"; }
-			convert(temp, cutoff); 
+			m->mothurConvert(temp, cutoff); 
 			cutoff += (5 / (precision * 10.0));  
 			
 			temp = validParameter.validFile(parameters, "taxlevel", false);		if (temp == "not found")  { temp = "3"; }
-			convert(temp, taxLevelCutoff); 
+			m->mothurConvert(temp, taxLevelCutoff); 
 			
 			method = validParameter.validFile(parameters, "method", false);		if (method == "not found") { method = "average"; }
 			

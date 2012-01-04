@@ -186,7 +186,7 @@ MatrixOutputCommand::MatrixOutputCommand(string option)  {
 			
 			string temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
-			convert(temp, processors); 
+			m->mothurConvert(temp, processors); 
 				
 			calc = validParameter.validFile(parameters, "calc", false);			
 			if (calc == "not found") { calc = "jclass-thetayc";  }

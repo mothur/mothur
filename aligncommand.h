@@ -79,6 +79,7 @@ private:
 // This is passed by void pointer so it can be any data type
 // that can be passed using a single void pointer (LPVOID).
 struct alignData {
+	string templateFileName;
 	string alignFName; 
 	string reportFName; 
 	string accnosFName;
@@ -94,7 +95,8 @@ struct alignData {
 	int count, kmerSize, threadID;
 	
 	alignData(){}
-	alignData(string a, string r, string ac, string f, string al, string se, int ks, MothurOut* mout, unsigned long long st, unsigned long long en, bool fl, float ma, float misMa, float gapO, float gapE, float thr, int tid) {
+	alignData(string te, string a, string r, string ac, string f, string al, string se, int ks, MothurOut* mout, unsigned long long st, unsigned long long en, bool fl, float ma, float misMa, float gapO, float gapE, float thr, int tid) {
+		templateFileName = te;
 		alignFName = a;
 		reportFName = r;
 		accnosFName = ac;
@@ -145,7 +147,7 @@ static DWORD WINAPI MyAlignThreadFunction(LPVOID lpParam){
 		
 		pDataArray->count = pDataArray->end;
 		
-		AlignmentDB* templateDB = new AlignmentDB("saved-silent", pDataArray->search, pDataArray->kmerSize, pDataArray->gapOpen, pDataArray->gapExtend, pDataArray->match, pDataArray->misMatch, pDataArray->threadID);
+		AlignmentDB* templateDB = new AlignmentDB(templateFileName, pDataArray->search, pDataArray->kmerSize, pDataArray->gapOpen, pDataArray->gapExtend, pDataArray->match, pDataArray->misMatch, pDataArray->threadID);
 		
 		//moved this into driver to avoid deep copies in windows paralellized version
 		Alignment* alignment;

@@ -225,13 +225,13 @@ ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
 			
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
-			convert(temp, processors);
+			m->mothurConvert(temp, processors);
 			
 			temp = validParameter.validFile(parameters, "window", false);			if (temp == "not found") { temp = "0"; }
-			convert(temp, window);
+			m->mothurConvert(temp, window);
 			
 			temp = validParameter.validFile(parameters, "increment", false);		if (temp == "not found") { temp = "25"; }
-			convert(temp, increment);
+			m->mothurConvert(temp, increment);
 			
 			temp = validParameter.validFile(parameters, "save", false);			if (temp == "not found"){	temp = "f";				}
 			save = m->isTrue(temp); 

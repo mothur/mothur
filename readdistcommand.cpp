@@ -121,7 +121,7 @@ ReadDistCommand::ReadDistCommand(string option) {
 			//get user cutoff and precision or use defaults
 			string temp;
 			temp = validParameter.validFile(parameters, "precision", false);		if (temp == "not found") { temp = "100"; }
-			convert(temp, precision); 
+			m->mothurConvert(temp, precision); 
 			
 			temp = validParameter.validFile(parameters, "sim", false);				if (temp == "not found") { temp = "F"; }
 			sim = m->isTrue(temp); 

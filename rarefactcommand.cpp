@@ -253,17 +253,17 @@ RareFactCommand::RareFactCommand(string option)  {
 
 			string temp;
 			temp = validParameter.validFile(parameters, "freq", false);			if (temp == "not found") { temp = "100"; }
-			convert(temp, freq); 
+			m->mothurConvert(temp, freq); 
 			
 			temp = validParameter.validFile(parameters, "abund", false);			if (temp == "not found") { temp = "10"; }
-			convert(temp, abund); 
+			m->mothurConvert(temp, abund); 
 			
 			temp = validParameter.validFile(parameters, "iters", false);			if (temp == "not found") { temp = "1000"; }
-			convert(temp, nIters); 
+			m->mothurConvert(temp, nIters); 
 			
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
-			convert(temp, processors);
+			m->mothurConvert(temp, processors);
 			
 			temp = validParameter.validFile(parameters, "groupmode", false);		if (temp == "not found") { temp = "T"; }
 			groupMode = m->isTrue(temp);

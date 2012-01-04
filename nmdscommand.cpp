@@ -141,19 +141,19 @@ NMDSCommand::NMDSCommand(string option)  {
 			}
 			
 			string temp = validParameter.validFile(parameters, "mindim", false);	if (temp == "not found") {	temp = "2";	}
-			convert(temp, mindim);
+			m->mothurConvert(temp, mindim);
 			
 			temp = validParameter.validFile(parameters, "maxiters", false);	if (temp == "not found") {	temp = "500";	}
-			convert(temp, maxIters);
+			m->mothurConvert(temp, maxIters);
 			
 			temp = validParameter.validFile(parameters, "iters", false);	if (temp == "not found") {	temp = "10";	}
-			convert(temp, iters);
+			m->mothurConvert(temp, iters);
 			
 			temp = validParameter.validFile(parameters, "maxdim", false);	if (temp == "not found") {	temp = "2";	}
-			convert(temp, maxdim);
+			m->mothurConvert(temp, maxdim);
 			
 			temp = validParameter.validFile(parameters, "epsilon", false);	if (temp == "not found") {	temp = "0.000000000001";	}
-			convert(temp, epsilon); 
+			m->mothurConvert(temp, epsilon); 
 			
 			if (mindim < 1) { m->mothurOut("mindim must be at least 1."); m->mothurOutEndLine(); abort = true; }
 			if (maxdim < mindim) { m->mothurOut("maxdim must be greater than mindim."); m->mothurOutEndLine(); abort = true; }

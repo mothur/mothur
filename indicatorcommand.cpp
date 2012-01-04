@@ -175,11 +175,11 @@ IndicatorCommand::IndicatorCommand(string option)  {
 			if (label == "not found") { label = ""; m->mothurOut("You did not provide a label, I will use the first label in your inputfile."); m->mothurOutEndLine(); label=""; }	
 			
 			string temp = validParameter.validFile(parameters, "iters", false);		if (temp == "not found") { temp = "1000"; }
-			convert(temp, iters); 
+			m->mothurConvert(temp, iters); 
 			
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
-			convert(temp, processors); 
+			m->mothurConvert(temp, processors); 
 			
 			if ((relabundfile == "") && (sharedfile == "")) { 
 				//is there are current file available for either of these?
