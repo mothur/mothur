@@ -372,9 +372,9 @@ int PreClusterCommand::createProcessesGroups(SequenceParser* parser, string newF
 		
 		//append output files
 		for(int i=0;i<processIDS.size();i++){
-			newFName = m->getFullPathName(".\\" + newFName);
-			newNName = m->getFullPathName(".\\" + newNName);
-			cout << newFName << endl;
+			//newFName = m->getFullPathName(".\\" + newFName);
+			//newNName = m->getFullPathName(".\\" + newNName);
+			
 			m->appendFiles((newFName + toString(processIDS[i]) + ".temp"), newFName);
 			m->mothurRemove((newFName + toString(processIDS[i]) + ".temp"));
 			
