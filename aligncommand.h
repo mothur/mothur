@@ -147,7 +147,7 @@ static DWORD WINAPI MyAlignThreadFunction(LPVOID lpParam){
 		
 		pDataArray->count = pDataArray->end;
 		
-		AlignmentDB* templateDB = new AlignmentDB(templateFileName, pDataArray->search, pDataArray->kmerSize, pDataArray->gapOpen, pDataArray->gapExtend, pDataArray->match, pDataArray->misMatch, pDataArray->threadID);
+		AlignmentDB* templateDB = new AlignmentDB(pDataArray->templateFileName, pDataArray->search, pDataArray->kmerSize, pDataArray->gapOpen, pDataArray->gapExtend, pDataArray->match, pDataArray->misMatch, pDataArray->threadID);
 		
 		//moved this into driver to avoid deep copies in windows paralellized version
 		Alignment* alignment;

@@ -104,6 +104,7 @@ SharedRAbundVector::SharedRAbundVector(ifstream& f) : DataVector(), maxRank(0), 
 		
 		//read in first row since you know there is at least 1 group.
 		f >> groupN >> num;
+		
 		holdLabel = label;
 		
 		//add new vector to lookup

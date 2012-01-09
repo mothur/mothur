@@ -149,9 +149,9 @@ static DWORD WINAPI MyUchimeThreadFunction(LPVOID lpParam){
 	
 	try {
 		
-		pDataArray->outputFName = pDataArray->m->getFullPathName(outputFName);
-		pDataArray->filename = pDataArray->m->getFullPathName(filename);
-		pDataArray->alns = pDataArray->m->getFullPathName(alns);
+		pDataArray->outputFName = pDataArray->m->getFullPathName(pDataArray->outputFName);
+		pDataArray->filename = pDataArray->m->getFullPathName(pDataArray->filename);
+		pDataArray->alns = pDataArray->m->getFullPathName(pDataArray->alns);
 		
 		//clears files
 		ofstream out, out1, out2;
@@ -330,17 +330,6 @@ static DWORD WINAPI MyUchimeThreadFunction(LPVOID lpParam){
 				cPara.push_back(tempIdsmoothwindow);
 			}
 			
-			/*if (useMinsmoothid) {
-			 char* tempminsmoothid = new char[14]; 
-			 //strcpy(tempminsmoothid, "--minsmoothid"); 
-			 *tempminsmoothid = '\0'; strncat(tempminsmoothid, "--minsmoothid", 13);
-			 cPara.push_back(tempminsmoothid);
-			 char* tempMinsmoothid = new char[minsmoothid.length()+1];
-			 *tempMinsmoothid = '\0'; strncat(tempMinsmoothid, minsmoothid.c_str(), minsmoothid.length());
-			 //strcpy(tempMinsmoothid, minsmoothid.c_str());
-			 cPara.push_back(tempMinsmoothid);
-			 }*/
-			
 			if (pDataArray->useMaxp) {
 				char* tempmaxp = new char[7]; 
 				//strcpy(tempmaxp, "--maxp"); 
@@ -498,9 +487,9 @@ static DWORD WINAPI MyUchimeSeqsThreadFunction(LPVOID lpParam){
 	
 	try {
 		
-		pDataArray->outputFName = pDataArray->m->getFullPathName(outputFName);
-		pDataArray->filename = pDataArray->m->getFullPathName(filename);
-		pDataArray->alns = pDataArray->m->getFullPathName(alns);
+		pDataArray->outputFName = pDataArray->m->getFullPathName(pDataArray->outputFName);
+		pDataArray->filename = pDataArray->m->getFullPathName(pDataArray->filename);
+		pDataArray->alns = pDataArray->m->getFullPathName(pDataArray->alns);
 		
 		int totalSeqs = 0;
 		int numChimeras = 0;
