@@ -140,6 +140,8 @@ int seqNoise::getListData(string listFileName, double cutOff, vector<int>& otuDa
 		m->openInputFile(listFileName, listFile);
 		double threshold;
 		int numOTUs;
+		string line = "";
+		bool adjustCutoff = true;
 		
 		if(listFile.peek() == 'u'){	m->getline(listFile);	}
 		
@@ -147,9 +149,10 @@ int seqNoise::getListData(string listFileName, double cutOff, vector<int>& otuDa
 			listFile >> threshold;
 			
 			if(threshold < cutOff){
-				m->getline(listFile);	
+				line = m->getline(listFile); m->gobble(listFile);
 			}
 			else{
+				adjustCutoff = false;
 				listFile >> numOTUs;
 				otuFreq.resize(numOTUs, 0);
 				
@@ -201,6 +204,63 @@ int seqNoise::getListData(string listFileName, double cutOff, vector<int>& otuDa
 				break;
 			}
 		}
+		
+		listFile.close();
+		
+		//the listfile does not contain a threshold greater than the cutoff so use highest value
+		if (adjustCutoff) {
+			istringstream iss (line,istringstream::in);
+			
+			iss >> numOTUs;
+			otuFreq.resize(numOTUs, 0);
+			
+			for(int i=0;i<numOTUs;i++){
+				
+				if (m->control_pressed) { return 0; }
+				
+				string otu;
+				iss >> otu;
+				
+				int count = 0;
+				
+				string number = "";
+				
+				for(int j=0;j<otu.size();j++){
+					if(otu[j] != ','){
+						number += otu[j];
+					}
+					else{
+						int index = atoi(number.c_str());
+						otuData[index] = i;
+						count++;
+						number = "";
+					}
+				}
+				
+				int index = atoi(number.c_str());
+				otuData[index] = i;
+				count++;
+				
+				otuFreq[i] = count;
+			}
+			
+			otuBySeqLookUp.resize(numOTUs);
+			
+			int numSeqs = otuData.size();
+			
+			for(int i=0;i<numSeqs;i++){
+				if (m->control_pressed) { return 0; }
+				otuBySeqLookUp[otuData[i]].push_back(i);
+			}
+			for(int i=0;i<numOTUs;i++){
+				if (m->control_pressed) { return 0; }
+				for(int j=otuBySeqLookUp[i].size();j<numSeqs;j++){
+					otuBySeqLookUp[i].push_back(0);
+				}
+			}
+			
+		}
+		
 		return 0;
 	}
 	catch(exception& e) {

@@ -15,8 +15,8 @@ USEREADLINE ?= yes
 CYGWIN_BUILD ?= no
 USECOMPRESSION ?= no
 MOTHUR_FILES="\"Enter_your_default_path_here\""
-RELEASE_DATE = "\"12/7/2011\""
-VERSION = "\"1.22.0\""
+RELEASE_DATE = "\"1/9/2012\""
+VERSION = "\"1.23.0\""
 FORTAN_COMPILER = gfortran
 
 # Optimize to level 3:
@@ -24,10 +24,10 @@ CXXFLAGS += -O3
 
 ifeq  ($(strip $(64BIT_VERSION)),yes)
 	#if you are using centos uncomment the following lines
-	CXX = g++44
+	#CXX = g++44
 	
 	#if you are a mac user use the following line
-#	TARGET_ARCH += -arch x86_64
+	TARGET_ARCH += -arch x86_64
 	
 	#if you using cygwin to build Windows the following line
 	#CXX = x86_64-w64-mingw32-g++
@@ -35,7 +35,7 @@ ifeq  ($(strip $(64BIT_VERSION)),yes)
  	#TARGET_ARCH += -m64 -static
 
 	#if you are a linux user use the following line
-	CXXFLAGS += -mtune=native -march=native -m64
+	#CXXFLAGS += -mtune=native -march=native -m64
 	
 	 CXXFLAGS += -DBIT_VERSION
 endif
