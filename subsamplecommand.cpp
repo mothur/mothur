@@ -255,6 +255,10 @@ SubSampleCommand::SubSampleCommand(string option) {
 			if ((groupfile != "") && ((fastafile != "") && (listfile != ""))) { 
 				m->mothurOut("A new group file can only be made from the subsample of a listfile or fastafile, not both. Please correct."); m->mothurOutEndLine(); abort = true; }
 			
+			if ((fastafile != "") && (namefile == "")) {
+				vector<string> files; files.push_back(fastafile);
+				parser.getNameFile(files);
+			}
 		}
 
 	}

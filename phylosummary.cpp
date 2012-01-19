@@ -121,6 +121,7 @@ string PhyloSummary::getNextTaxon(string& heirarchy){
 
 int PhyloSummary::addSeqToTree(string seqName, string seqTaxonomy){
 	try {
+				
 		numSeqs++;
 		
 		map<string, int>::iterator childPointer;

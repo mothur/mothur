@@ -122,7 +122,7 @@ AlignCheckCommand::AlignCheckCommand(string option)  {
 			else if (mapfile == "not found") {  mapfile = "";  m->mothurOut("You must provide an map file."); m->mothurOutEndLine(); abort = true; }	
 			
 			fastafile = validParameter.validFile(parameters, "fasta", true);
-			if (fastafile == "not open") { abort = true; }
+			if (fastafile == "not open") { fastafile = ""; abort = true; }
 			else if (fastafile == "not found") {  				
 				fastafile = m->getFastaFile(); 
 				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
@@ -139,7 +139,11 @@ AlignCheckCommand::AlignCheckCommand(string option)  {
 				outputDir = "";	
 				outputDir += m->hasPath(fastafile); //if user entered a file with a path then preserve it	
 			}
-
+			
+			if ((namefile == "") && (fastafile != "")){
+				vector<string> files; files.push_back(fastafile); 
+				parser.getNameFile(files);
+			}
 		}
 
 	}

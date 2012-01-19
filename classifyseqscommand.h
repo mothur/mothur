@@ -72,16 +72,16 @@ private:
 	string fastaFileName, templateFileName, distanceFileName, namefile, search, method, taxonomyFileName, outputDir, groupfile;
 	int processors, kmerSize, numWanted, cutoff, iters;
 	float match, misMatch, gapOpen, gapExtend;
-	bool abort, probs, save;
+	bool abort, probs, save, flip;
 	
-	int driver(linePair*, string, string, string);
+	int driver(linePair*, string, string, string, string);
 	void appendTaxFiles(string, string);
-	int createProcesses(string, string, string); 
+	int createProcesses(string, string, string, string); 
 	string addUnclassifieds(string, int);
 	
 	int MPIReadNamesFile(string);
 	#ifdef USE_MPI
-	int driverMPI(int, int, MPI_File&, MPI_File&, MPI_File&, vector<unsigned long long>&);
+	int driverMPI(int, int, MPI_File&, MPI_File&, MPI_File&, MPI_File&, vector<unsigned long long>&);
 	#endif
 };
 
@@ -93,16 +93,17 @@ struct classifyData {
 	string taxFName; 
 	string tempTFName; 
 	string filename;
-	string search, taxonomyFileName, templateFileName, method;
+	string search, taxonomyFileName, templateFileName, method, accnos;
 	unsigned long long start;
 	unsigned long long end;
 	MothurOut* m;
 	float match, misMatch, gapOpen, gapExtend;
 	int count, kmerSize, threadID, cutoff, iters, numWanted;
-	bool probs;
+	bool probs, flip;
 	 
 	classifyData(){}
-	classifyData(bool p, string me, string te, string tx, string a, string r, string f, string se, int ks, int i, int numW, MothurOut* mout, unsigned long long st, unsigned long long en, float ma, float misMa, float gapO, float gapE, int cut, int tid) {
+	classifyData(string acc, bool p, string me, string te, string tx, string a, string r, string f, string se, int ks, int i, int numW, MothurOut* mout, unsigned long long st, unsigned long long en, float ma, float misMa, float gapO, float gapE, int cut, int tid, bool fli) {
+		accnos = acc;
 		taxonomyFileName = tx;
 		templateFileName = te;
 		taxFName = a;
@@ -124,6 +125,7 @@ struct classifyData {
 		threadID = tid;
 		probs = p;
 		count = 0;
+		flip = fli;
 	}
 };
 
@@ -141,6 +143,9 @@ static DWORD WINAPI MyClassThreadFunction(LPVOID lpParam){
 		ofstream outTaxSimple;
 		pDataArray->m->openOutputFile(pDataArray->tempTFName, outTaxSimple);
 		
+		ofstream outAcc;
+		pDataArray->m->openOutputFile(pDataArray->accnos, outAcc);
+		
 		ifstream inFASTA;
 		pDataArray->m->openInputFile(pDataArray->filename, inFASTA);
 		
@@ -157,12 +162,12 @@ static DWORD WINAPI MyClassThreadFunction(LPVOID lpParam){
 		
 		//make classify
 		Classify* myclassify;
-		if(pDataArray->method == "bayesian"){	myclassify = new Bayesian(pDataArray->taxonomyFileName, pDataArray->templateFileName, pDataArray->search, pDataArray->kmerSize, pDataArray->cutoff, pDataArray->iters, pDataArray->threadID);		}
-		else if(pDataArray->method == "knn"){	myclassify = new Knn(pDataArray->taxonomyFileName, pDataArray->templateFileName, pDataArray->search, pDataArray->kmerSize, pDataArray->gapOpen, pDataArray->gapExtend, pDataArray->match, pDataArray->misMatch, pDataArray->numWanted, pDataArray->threadID);				}
+		if(pDataArray->method == "bayesian"){	myclassify = new Bayesian(pDataArray->taxonomyFileName, pDataArray->templateFileName, pDataArray->search, pDataArray->kmerSize, pDataArray->cutoff, pDataArray->iters, pDataArray->threadID, pDataArray->flip);		}
+		else if(pDataArray->method == "knn"){	myclassify = new Knn(pDataArray->taxonomyFileName, pDataArray->templateFileName, pDataArray->search, pDataArray->kmerSize, pDataArray->gapOpen, pDataArray->gapExtend, pDataArray->match, pDataArray->misMatch, pDataArray->numWanted, pDataArray->threadID, pDataArray->flipThreshold);				}
 		else {
 			pDataArray->m->mothurOut(pDataArray->search + " is not a valid method option. I will run the command using bayesian.");
 			pDataArray->m->mothurOutEndLine();
-			myclassify = new Bayesian(pDataArray->taxonomyFileName, pDataArray->templateFileName, pDataArray->search, pDataArray->kmerSize, pDataArray->cutoff, pDataArray->iters, pDataArray->threadID);	
+			myclassify = new Bayesian(pDataArray->taxonomyFileName, pDataArray->templateFileName, pDataArray->search, pDataArray->kmerSize, pDataArray->cutoff, pDataArray->iters, pDataArray->threadID, pDataArray->flip);	
 		}
 		
 		if (pDataArray->m->control_pressed) { delete myclassify; return 0; }
@@ -180,16 +185,19 @@ static DWORD WINAPI MyClassThreadFunction(LPVOID lpParam){
 				
 				if (pDataArray->m->control_pressed) { delete candidateSeq; return 0; }
 				
-				if (taxonomy != "bad seq") {
-					//output confidence scores or not
-					if (pDataArray->probs) {
-						outTax << candidateSeq->getName() << '\t' << taxonomy << endl;
-					}else{
-						outTax << candidateSeq->getName() << '\t' << myclassify->getSimpleTax() << endl;
-					}
-					
-					outTaxSimple << candidateSeq->getName() << '\t' << myclassify->getSimpleTax() << endl;
+				if (taxonomy == "unknown;") { pDataArray->m->mothurOut("[WARNING]: " + candidateSeq->getName() + " could not be classified. You can use the remove.lineage command with taxon=unknown; to remove such sequences."); pDataArray->m->mothurOutEndLine(); }
+
+				//output confidence scores or not
+				if (pDataArray->probs) {
+					outTax << candidateSeq->getName() << '\t' << taxonomy << endl;
+				}else{
+					outTax << candidateSeq->getName() << '\t' << myclassify->getSimpleTax() << endl;
 				}
+					
+				outTaxSimple << candidateSeq->getName() << '\t' << myclassify->getSimpleTax() << endl;
+					
+				if (myclassify->getFlipped()) { outAcc << candidateSeq->getName() << endl; }
+				
 				count++;
 			}
 			delete candidateSeq;

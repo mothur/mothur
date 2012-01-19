@@ -182,7 +182,7 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 			else if (refTaxonomy == "not open") { abort = true; }
 	
 			namefile = validParameter.validFile(parameters, "name", true);
-			if (namefile == "not open") { abort = true; }	
+			if (namefile == "not open") { namefile = ""; abort = true; }	
 			else if (namefile == "not found") { namefile = ""; }
 			else { m->setNameFile(namefile); }
 			
@@ -213,6 +213,11 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 			
 			
 			if ((cutoff < 51) || (cutoff > 100)) { m->mothurOut("cutoff must be above 50, and no greater than 100."); m->mothurOutEndLine(); abort = true;  }
+			
+			if (namefile == ""){
+				vector<string> files; files.push_back(taxfile);
+				parser.getNameFile(files);
+			}
 			
 		}
 	}

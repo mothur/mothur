@@ -34,7 +34,7 @@ private:
 
 	vector<string> outputNames;	
 	string outputDir, fastaQFile;
-	bool abort;
+	bool abort, fasta, qual;
 	
 	vector<int> convertQual(string);
 };

@@ -104,7 +104,7 @@ map<string, string> OptionParser::getParameters() {
 				}
 			}else{ it++; }
 		}
-	
+		
 		return parameters;	
 	}
 	catch(exception& e) {
@@ -113,4 +113,54 @@ map<string, string> OptionParser::getParameters() {
 	}
 }
 
+/***********************************************************************/
+//pass a vector of filenames that may match the current namefile.  
+//this function will look at each one, if the rootnames match, mothur will warn 
+//the user that they may have neglected to provide a namefile.
+//stops when it finds a match.
+bool OptionParser::getNameFile(vector<string> files) {	
+	try {
+		string namefile = m->getNameFile();
+		bool match = false;
+		
+		if (namefile != "") {
+			string temp = m->getRootName(m->getSimpleName(namefile));
+			vector<string> rootName;
+			m->splitAtChar(temp, rootName, '.');
+			
+			for (int i = 0; i < files.size(); i++) {
+				temp = m->getRootName(m->getSimpleName(files[i]));
+				vector<string> root;
+				m->splitAtChar(temp, root, '.');
+				
+				int smallest = rootName.size();
+				if (root.size() < smallest) { smallest = root.size(); }
+				
+				int numMatches = 0;
+				for(int j = 0; j < smallest; j++) {
+					if (root[j] == rootName[j]) { numMatches++; }
+				}
+				
+				if (smallest > 0) {
+					if ((numMatches >= (smallest-2)) && (root[0] == rootName[0])) {
+						m->mothurOut("[WARNING]: This command can take a namefile and you did not provide one. The current namefile is " + namefile + " which seems to match " + files[i] + ".");
+						m->mothurOutEndLine();
+						match = true;
+						break;
+					}
+				}
+			}
+			
+		}
+		
+		
+		return match;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "OptionParser", "getNameFile");
+		exit(1);
+	}
+}
+
+				
 /***********************************************************************/

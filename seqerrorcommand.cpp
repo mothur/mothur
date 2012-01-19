@@ -176,7 +176,7 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 				if (queryFileName != "") { m->mothurOut("Using " + queryFileName + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current fasta file and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}
-			else if (queryFileName == "not open") { abort = true; }	
+			else if (queryFileName == "not open") { queryFileName = ""; abort = true; }	
 			else { m->setFastaFile(queryFileName); }
 			
 			referenceFileName = validParameter.validFile(parameters, "reference", true);
@@ -246,6 +246,11 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 
 			substitutionMatrix.resize(6);
 			for(int i=0;i<6;i++){	substitutionMatrix[i].resize(6,0);	}
+			
+			if ((namesFileName == "") && (queryFileName != "")){
+				vector<string> files; files.push_back(queryFileName); 
+				parser.getNameFile(files);
+			}
 		}
 	}
 	catch(exception& e) {

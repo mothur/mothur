@@ -194,12 +194,12 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
 			}else { m->setAccnosFile(accnosfile); }	
 			
 			fastafile = validParameter.validFile(parameters, "fasta", true);
-			if (fastafile == "not open") { abort = true; }
+			if (fastafile == "not open") { fastafile = ""; abort = true; }
 			else if (fastafile == "not found") {  fastafile = "";  }	
 			else { m->setFastaFile(fastafile); }
 								   
 			namefile = validParameter.validFile(parameters, "name", true);
-			if (namefile == "not open") { abort = true; }
+			if (namefile == "not open") { namefile = ""; abort = true; }
 			else if (namefile == "not found") {  namefile = "";  }	
 			else { m->setNameFile(namefile); } 
 								   
@@ -237,6 +237,10 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
 			
 			if ((fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == "") && (taxfile == "") && (qualfile == ""))  { m->mothurOut("You must provide at least one of the following: fasta, name, group, taxonomy, quality, alignreport or list."); m->mothurOutEndLine(); abort = true; }
 			
+			if ((fastafile != "") && (namefile == "")) {
+				vector<string> files; files.push_back(fastafile);
+				parser.getNameFile(files);
+			}
 		}
 
 	}

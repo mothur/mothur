@@ -26,6 +26,7 @@ class ReferenceDB {
 		bool save;
 		vector<Sequence> referenceSeqs;
 		vector< vector<float> > wordGenusProb;
+		vector<diffPair> WordPairDiffArr;
 	
 		string getSavedReference()			{ return referencefile;		}
 		void setSavedReference(string p)	{ referencefile = p;		}

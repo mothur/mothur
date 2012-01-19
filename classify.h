@@ -30,6 +30,7 @@ public:
 	virtual ~Classify(){};
 	virtual string getTaxonomy(Sequence*) = 0;
 	virtual string getSimpleTax()  { return simpleTax;	}
+	virtual bool getFlipped()  { return flipped;	}
 	virtual void generateDatabaseAndNames(string, string, string, int, float, float, float, float);
 	virtual void setDistName(string s) {} //for knn, so if distance method is selected with knn you can create the smallest distance file in the right place.
 	
@@ -45,6 +46,7 @@ protected:
 	string taxFile, templateFile, simpleTax;
 	vector<string> names;
 	int threadID;
+	bool flip, flipped;
 	
 	int readTaxonomy(string);
 	vector<string> parseTax(string);

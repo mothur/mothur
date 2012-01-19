@@ -14,6 +14,8 @@
 vector<string> ParseFastaQCommand::setParameters(){	
 	try {
 		CommandParameter pfastq("fastq", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfastq);
+		CommandParameter pfasta("fasta", "Bool", "", "T", "", "", "",false,false); parameters.push_back(pfasta);
+		CommandParameter pqual("qfile", "Bool", "", "T", "", "", "",false,false); parameters.push_back(pqual);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
 		
@@ -104,6 +106,15 @@ ParseFastaQCommand::ParseFastaQCommand(string option){
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);	if (outputDir == "not found"){	outputDir = m->hasPath(fastaQFile); 	}
+			
+			string temp;
+			temp = validParameter.validFile(parameters, "fasta", false);	if(temp == "not found"){	temp = "T";	}
+			fasta = m->isTrue(temp); 
+
+			temp = validParameter.validFile(parameters, "qfile", false);	if(temp == "not found"){	temp = "T";	}
+			qual = m->isTrue(temp); 
+			
+			if ((!fasta) && (!qual)) { m->mothurOut("[ERROR]: no outputs selected. Aborting."); m->mothurOutEndLine(); abort=true; }
 
 		}		
 	}
@@ -122,13 +133,16 @@ int ParseFastaQCommand::execute(){
 		string fastaFile = outputDir + m->getRootName(m->getSimpleName(fastaQFile)) + "fasta";
 		string qualFile = outputDir + m->getRootName(m->getSimpleName(fastaQFile)) + "qual";
 		ofstream outFasta, outQual;
-		m->openOutputFile(fastaFile, outFasta);  outputNames.push_back(fastaFile); outputTypes["fasta"].push_back(fastaFile);
-		m->openOutputFile(qualFile, outQual);	outputNames.push_back(qualFile);  outputTypes["qfile"].push_back(qualFile);
+		
+		if (fasta) { m->openOutputFile(fastaFile, outFasta);  outputNames.push_back(fastaFile); outputTypes["fasta"].push_back(fastaFile);	}
+		if (qual) { m->openOutputFile(qualFile, outQual);	outputNames.push_back(qualFile);  outputTypes["qfile"].push_back(qualFile);		}
 		
 		ifstream in;
 		m->openInputFile(fastaQFile, in);
 		
 		while (!in.eof()) {
+			
+			if (m->control_pressed) { break; }
 		
 			//read sequence name
 			string name = m->getline(in); m->gobble(in);
@@ -147,27 +161,27 @@ int ParseFastaQCommand::execute(){
 			else { name2 = name2.substr(1);  }
 			
 			//read quality scores
-			string qual = m->getline(in); m->gobble(in);
-			if (qual == "") {  m->mothurOut("[ERROR]: missing quality for " + name2); m->mothurOutEndLine(); m->control_pressed = true; break; }
+			string quality = m->getline(in); m->gobble(in);
+			if (quality == "") {  m->mothurOut("[ERROR]: missing quality for " + name2); m->mothurOutEndLine(); m->control_pressed = true; break; }
 			
 			//sanity check sequence length and number of quality scores match
 			if (name2 != "") { if (name != name2) { m->mothurOut("[ERROR]: names do not match. read " + name + " for fasta and " + name2 + " for quality."); m->mothurOutEndLine(); m->control_pressed = true; break; } }
-			if (qual.length() != sequence.length()) { m->mothurOut("[ERROR]: lengths do not match. read " + toString(sequence.length()) + " characters for fasta and " + toString(qual.length()) + " characters for quality scores."); m->mothurOutEndLine(); m->control_pressed = true; break; }
-			
-			//convert quality scores
-			vector<int> qualScores = convertQual(qual);
+			if (quality.length() != sequence.length()) { m->mothurOut("[ERROR]: lengths do not match. read " + toString(sequence.length()) + " characters for fasta and " + toString(quality.length()) + " characters for quality scores."); m->mothurOutEndLine(); m->control_pressed = true; break; }
 			
 			//print sequence info to files
-			outFasta << ">" << name << endl << sequence << endl;
+			if (fasta) { outFasta << ">" << name << endl << sequence << endl; }
 			
-			outQual << ">" << name << endl;
-			for (int i = 0; i < qualScores.size(); i++) { outQual << qualScores[i] << " "; }
-			outQual << endl;
+			if (qual) { 
+				vector<int> qualScores = convertQual(quality);
+				outQual << ">" << name << endl;
+				for (int i = 0; i < qualScores.size(); i++) { outQual << qualScores[i] << " "; }
+				outQual << endl;
+			}
 		}
 		
 		in.close();
-		outFasta.close();
-		outQual.close();
+		if (fasta)	{ outFasta.close();	}
+		if (qual)	{ outQual.close();	}
 		
 		if (m->control_pressed) { outputTypes.clear(); m->mothurRemove(fastaFile); m->mothurRemove(qualFile); return 0; }
 		

@@ -106,6 +106,19 @@ struct ThreadNode {
 	IntNode* right;
 };
 
+struct diffPair {
+	float	prob;
+	float	reverseProb;
+	
+	diffPair() {
+		prob = 0; reverseProb = 0;
+	}
+	diffPair(float p, float rp) {
+		prob = p;
+		reverseProb = rp;
+	}
+};
+
 /************************************************************/
 struct clusterNode {
 	int numSeq;

@@ -12,12 +12,13 @@
 #include "phylosummary.h"
 #include "referencedb.h"
 /**************************************************************************************************/
-Bayesian::Bayesian(string tfile, string tempFile, string method, int ksize, int cutoff, int i, int tid) : 
-Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
+Bayesian::Bayesian(string tfile, string tempFile, string method, int ksize, int cutoff, int i, int tid, bool f) : 
+Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 	try {
 		ReferenceDB* rdb = ReferenceDB::getInstance();
 		
 		threadID = tid;
+		flip = f;
 		string baseName = tempFile;
 			
 		if (baseName == "saved") { baseName = rdb->getSavedReference(); }
@@ -78,13 +79,14 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 			if (tfile == "saved") { 
 				m->mothurOutEndLine();  m->mothurOut("Using probabilties from " + rdb->getSavedTaxonomy() + " that are saved in memory...    ");	cout.flush();; 
 				wordGenusProb = rdb->wordGenusProb;
+				WordPairDiffArr = rdb->WordPairDiffArr;
 			}else {
 				m->mothurOut("Reading template probabilities...     "); cout.flush();
 				readProbFile(probFileTest, probFileTest2, probFileName, probFileName2);
 			}	
 			
 			//save probabilities
-			if (rdb->save) { rdb->wordGenusProb = wordGenusProb; }
+			if (rdb->save) { rdb->wordGenusProb = wordGenusProb; rdb->WordPairDiffArr = WordPairDiffArr; }
 		}else{
 		
 			//create search database and names vector
@@ -108,11 +110,12 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 			
 				//initialze probabilities
 				wordGenusProb.resize(numKmers);
+				WordPairDiffArr.resize(numKmers);
 			//cout << numKmers << '\t' << genusNodes.size() << endl;
 				for (int j = 0; j < wordGenusProb.size(); j++) {	wordGenusProb[j].resize(genusNodes.size());		}
 			//cout << numKmers << '\t' << genusNodes.size() << endl;	
-				//ofstream out;
-				//ofstream out2;
+				ofstream out;
+				ofstream out2;
 				
 				#ifdef USE_MPI
 					int pid;
@@ -122,17 +125,17 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 				#endif
 
 				
-				//m->openOutputFile(probFileName, out);
+				m->openOutputFile(probFileName, out);
 				
 				//output mothur version
-				//out << "#" << m->getVersion() << endl;
+				out << "#" << m->getVersion() << endl;
 				
-				//out << numKmers << endl;
+				out << numKmers << endl;
 				
-				//m->openOutputFile(probFileName2, out2);
+				m->openOutputFile(probFileName2, out2);
 				
 				//output mothur version
-				//out2 << "#" << m->getVersion() << endl;
+				out2 << "#" << m->getVersion() << endl;
 				
 				#ifdef USE_MPI
 					}
@@ -149,7 +152,7 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 						if (pid == 0) {  
 					#endif
 
-					//out << i << '\t';
+					out << i << '\t';
 					
 					#ifdef USE_MPI
 						}
@@ -168,7 +171,9 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 					
 					//probabilityInTemplate = (# of seqs with that word in template + 0.50) / (total number of seqs in template + 1);
 					float probabilityInTemplate = (seqsWithWordi.size() + 0.50) / (float) (names.size() + 1);
-					
+					diffPair tempProb(log(probabilityInTemplate), 0.0);
+					WordPairDiffArr[i] = tempProb;
+						
 					int numNotZero = 0;
 					for (int k = 0; k < genusNodes.size(); k++) {
 						//probabilityInThisTaxonomy = (# of seqs with that word in this taxonomy + probabilityInTemplate) / (total number of seqs in this taxonomy + 1);
@@ -184,7 +189,7 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 								if (pid == 0) {  
 							#endif
 
-							//out << k << '\t' << wordGenusProb[i][k] << '\t'; 
+							out << k << '\t' << wordGenusProb[i][k] << '\t' ; 
 							
 							#ifdef USE_MPI
 								}
@@ -200,8 +205,8 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 						if (pid == 0) {  
 					#endif
 					
-					//out << endl;
-					//out2 << probabilityInTemplate << '\t' << numNotZero << endl;
+					out << endl;
+					out2 << probabilityInTemplate << '\t' << numNotZero << '\t' << log(probabilityInTemplate) << endl;
 					
 					#ifdef USE_MPI
 						}
@@ -214,8 +219,8 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 					if (pid == 0) {  
 				#endif
 				
-				//out.close();
-				//out2.close();
+				out.close();
+				out2.close();
 				
 				#ifdef USE_MPI
 					}
@@ -228,10 +233,15 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 				phyloTree = new PhyloTree(phyloTreeTest, phyloTreeName);
 				
 				//save probabilities
-				if (rdb->save) { rdb->wordGenusProb = wordGenusProb; }
+				if (rdb->save) { rdb->wordGenusProb = wordGenusProb; rdb->WordPairDiffArr = WordPairDiffArr; }
 			}
 		}
-	
+		
+		generateWordPairDiffArr();
+		
+		//save probabilities
+		if (rdb->save) { rdb->wordGenusProb = wordGenusProb; rdb->WordPairDiffArr = WordPairDiffArr; }
+		
 		m->mothurOut("DONE."); m->mothurOutEndLine();
 		m->mothurOut("It took " + toString(time(NULL) - start) + " seconds get probabilities. "); m->mothurOutEndLine();
 	}
@@ -258,13 +268,13 @@ string Bayesian::getTaxonomy(Sequence* seq) {
 	try {
 		string tax = "";
 		Kmer kmer(kmerSize);
+		flipped = false;
 		
 		//get words contained in query
 		//getKmerString returns a string where the index in the string is hte kmer number 
 		//and the character at that index can be converted to be the number of times that kmer was seen
-		
 		string queryKmerString = kmer.getKmerString(seq->getUnaligned()); 
-
+		
 		vector<int> queryKmers;
 		for (int i = 0; i < queryKmerString.length()-1; i++) {	// the -1 is to ignore any kmer with an N in it
 			if (queryKmerString[i] != '!') { //this kmer is in the query
@@ -272,7 +282,22 @@ string Bayesian::getTaxonomy(Sequence* seq) {
 			}
 		}
 		
-		if (queryKmers.size() == 0) {  m->mothurOut(seq->getName() + "is bad."); m->mothurOutEndLine(); return "bad seq"; }
+		//if user wants to test reverse compliment and its reversed use that instead
+		if (flip) {	
+			if (isReversed(queryKmers)) { 
+				flipped = true;
+				seq->reverseComplement(); 
+				queryKmerString = kmer.getKmerString(seq->getUnaligned()); 
+				queryKmers.clear();
+				for (int i = 0; i < queryKmerString.length()-1; i++) {	// the -1 is to ignore any kmer with an N in it
+					if (queryKmerString[i] != '!') { //this kmer is in the query
+						queryKmers.push_back(i);
+					}
+				}
+			}  
+		}
+		
+		if (queryKmers.size() == 0) {  m->mothurOut(seq->getName() + "is bad."); m->mothurOutEndLine(); simpleTax = "unknown;";  return "unknown;"; }
 		
 		
 		int index = getMostProbableTaxonomy(queryKmers);
@@ -283,7 +308,7 @@ string Bayesian::getTaxonomy(Sequence* seq) {
 		int numToSelect = queryKmers.size() / 8;
 	
 		tax = bootstrapResults(queryKmers, index, numToSelect);
-				
+		
 		return tax;	
 	}
 	catch(exception& e) {
@@ -366,7 +391,8 @@ string Bayesian::bootstrapResults(vector<int> kmers, int tax, int numToSelect) {
 				seqTax = phyloTree->get(seqTax.parent);
 		}
 		
-		if (confidenceTax == "") { confidenceTax = "unclassified;"; simpleTax = "unclassified;"; }
+		if (confidenceTax == "") { confidenceTax = "unknown;"; simpleTax = "unknown;";  }
+	
 		return confidenceTax;
 		
 	}
@@ -409,6 +435,46 @@ int Bayesian::getMostProbableTaxonomy(vector<int> queryKmer) {
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Bayesian", "getMostProbableTaxonomy");
+		exit(1);
+	}
+}
+//********************************************************************************************************************
+//if it is more probable that the reverse compliment kmers are in the template, then we assume the sequence is reversed.
+bool Bayesian::isReversed(vector<int>& queryKmers){
+	try{
+		bool reversed = false;
+		float prob = 0;
+		float reverseProb = 0;
+		 
+        for (int i = 0; i < queryKmers.size(); i++){
+            int kmer = queryKmers[i];
+            if (kmer >= 0){
+                prob += WordPairDiffArr[kmer].prob;
+				reverseProb += WordPairDiffArr[kmer].reverseProb;
+            }
+        }
+		
+        if (reverseProb > prob){ reversed = true; }
+	
+		return reversed;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "Bayesian", "isReversed");
+		exit(1);
+	}
+}
+//********************************************************************************************************************
+int Bayesian::generateWordPairDiffArr(){
+	try{
+		Kmer kmer(kmerSize);
+		for (int i = 0; i < WordPairDiffArr.size(); i++) {
+			int reversedWord = kmer.getReverseKmerNumber(i);
+			WordPairDiffArr[i].reverseProb = WordPairDiffArr[reversedWord].prob;
+		}
+		
+		return 0;
+	}catch(exception& e) {
+		m->errorOut(e, "Bayesian", "generateWordPairDiffArr");
 		exit(1);
 	}
 }
@@ -515,7 +581,8 @@ void Bayesian::readProbFile(ifstream& in, ifstream& inNum, string inName, string
 			int kmer, name;  
 			vector<int> numbers; numbers.resize(numKmers);
 			float prob;
-			vector<float> zeroCountProb; zeroCountProb.resize(numKmers);	
+			vector<float> zeroCountProb; zeroCountProb.resize(numKmers);
+			WordPairDiffArr.resize(numKmers);
 			
 			//read version
 			length = positions[1] - positions[0];
@@ -537,7 +604,10 @@ void Bayesian::readProbFile(ifstream& in, ifstream& inNum, string inName, string
 				delete buf4;
 
 				istringstream iss (tempBuf,istringstream::in);
-				iss >> zeroCountProb[i] >> numbers[i];  
+				float probTemp;
+				iss >> zeroCountProb[i] >> numbers[i] >> probTemp; 
+				WordPairDiffArr[i].prob = tempProb;
+
 			}
 			
 			MPI_File_close(&inMPI);
@@ -585,13 +655,16 @@ void Bayesian::readProbFile(ifstream& in, ifstream& inNum, string inName, string
 			int kmer, name, count;  count = 0;
 			vector<int> num; num.resize(numKmers);
 			float prob;
-			vector<float> zeroCountProb; zeroCountProb.resize(numKmers);		
+			vector<float> zeroCountProb; zeroCountProb.resize(numKmers);	
+			WordPairDiffArr.resize(numKmers);
 			
 			//read version
 			string line2 = m->getline(inNum); m->gobble(inNum);
+			float probTemp;
 		//cout << threadID << '\t' << line2 << '\t' << this << endl;	
 			while (inNum) {
-				inNum >> zeroCountProb[count] >> num[count];  
+				inNum >> zeroCountProb[count] >> num[count] >> probTemp; 
+				WordPairDiffArr[count].prob = probTemp;
 				count++;
 				m->gobble(inNum);
 				//cout << threadID << '\t' << count << endl;

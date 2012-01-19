@@ -17,7 +17,7 @@ EstOutput MemChi2::getValues(vector<SharedRAbundVector*> shared) {
 		int nonZeroA = 0;
 		int nonZeroB = 0;
 		int totalOtus = shared[0]->getNumBins();
-		int totalGroups = shared.size();
+		//int totalGroups = shared.size();
 		
 		//for each otu
 		for (int i = 0; i < shared[0]->getNumBins(); i++) {

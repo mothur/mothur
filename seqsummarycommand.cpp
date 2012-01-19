@@ -132,8 +132,12 @@ SeqSummaryCommand::SeqSummaryCommand(string option)  {
 			string temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
 			m->mothurConvert(temp, processors);
-
-
+			
+			if (namefile == "") {
+				vector<string> files; files.push_back(fastafile);
+				parser.getNameFile(files);
+			}
+			
 		}
 	}
 	catch(exception& e) {

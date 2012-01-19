@@ -157,6 +157,12 @@ SummaryTaxCommand::SummaryTaxCommand(string option)  {
 				outputDir = "";	
 				outputDir += m->hasPath(taxfile); //if user entered a file with a path then preserve it	
 			}
+			
+			if (namefile == "") {
+				vector<string> files; files.push_back(taxfile);
+				parser.getNameFile(files);
+			}
+			
 		}
 	}
 	catch(exception& e) {

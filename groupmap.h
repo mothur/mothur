@@ -2,7 +2,7 @@
 #define GROUPMAP_H
 /*
  *  groupmap.h
- *  Dotur
+ *  Mothur
  *
  *  Created by Sarah Westcott on 12/1/08.
  *  Copyright 2008 Schloss Lab UMASS Amherst. All rights reserved.

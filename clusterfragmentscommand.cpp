@@ -147,7 +147,7 @@ ClusterFragmentsCommand::ClusterFragmentsCommand(string option) {
 			// ...at some point should added some additional type checking...
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not found") { namefile =  "";  }
-			else if (namefile == "not open") { abort = true; }	
+			else if (namefile == "not open") { namefile = ""; abort = true; }	
 			else {  readNameFile(); m->setNameFile(namefile); }
 			
 			string temp;
@@ -156,6 +156,11 @@ ClusterFragmentsCommand::ClusterFragmentsCommand(string option) {
 			
 			temp = validParameter.validFile(parameters, "percent", false);		if (temp == "not found"){	temp = "0";				}
 			m->mothurConvert(temp, percent);
+			
+			if (namefile == "") {
+				vector<string> files; files.push_back(fastafile);
+				parser.getNameFile(files);
+			}
 			
 		}
 				

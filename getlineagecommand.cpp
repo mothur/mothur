@@ -168,12 +168,12 @@ GetLineageCommand::GetLineageCommand(string option)  {
 			
 			//check for required parameters			
 			fastafile = validParameter.validFile(parameters, "fasta", true);
-			if (fastafile == "not open") { abort = true; }
+			if (fastafile == "not open") { fastafile = ""; abort = true; }
 			else if (fastafile == "not found") {  fastafile = "";  }
 			else { m->setFastaFile(fastafile); }
 			
 			namefile = validParameter.validFile(parameters, "name", true);
-			if (namefile == "not open") { abort = true; }
+			if (namefile == "not open") { namefile = ""; abort = true; }
 			else if (namefile == "not found") {  namefile = "";  }	
 			else { m->setNameFile(namefile); }
 			
@@ -192,7 +192,7 @@ GetLineageCommand::GetLineageCommand(string option)  {
 			else { m->setListFile(listfile); }
 			
 			taxfile = validParameter.validFile(parameters, "taxonomy", true);
-			if (taxfile == "not open") { abort = true; }
+			if (taxfile == "not open") { taxfile = ""; abort = true; }
 			else if (taxfile == "not found") {  				
 				taxfile = m->getTaxonomyFile(); 
 				if (taxfile != "") { m->mothurOut("Using " + taxfile + " as input file for the taxonomy parameter."); m->mothurOutEndLine(); }
@@ -217,6 +217,11 @@ GetLineageCommand::GetLineageCommand(string option)  {
 			m->splitAtChar(taxons, listOfTaxons, '-');
 			
 			if ((fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == "") && (taxfile == ""))  { m->mothurOut("You must provide one of the following: fasta, name, group, alignreport, taxonomy or listfile."); m->mothurOutEndLine(); abort = true; }
+		
+			if ((namefile == "") && ((fastafile != "") || (taxfile != ""))){
+				vector<string> files; files.push_back(fastafile); files.push_back(taxfile);
+				parser.getNameFile(files);
+			}
 		}
 
 	}

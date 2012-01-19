@@ -21,6 +21,7 @@ public:
 	string getKmerString(string);
 	int getKmerNumber(string, int);
 	string getKmerBases(int);
+	int getReverseKmerNumber(int);
 	vector< map<int, int> > getKmerCounts(string sequence);  //for use in chimeraCheck
 	
 private:

@@ -201,7 +201,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			else { distfile = fastafile;  splitmethod = "fasta";  m->setFastaFile(fastafile); }
 			
 			taxFile = validParameter.validFile(parameters, "taxonomy", true);
-			if (taxFile == "not open") { abort = true; }	
+			if (taxFile == "not open") { taxFile = ""; abort = true; }	
 			else if (taxFile == "not found") { taxFile = ""; }
 			else {  m->setTaxonomyFile(taxFile); }
 			

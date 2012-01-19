@@ -144,7 +144,7 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 			
 			//check for required parameters
 			treefile = validParameter.validFile(parameters, "tree", true);
-			if (treefile == "not open") { abort = true; }
+			if (treefile == "not open") { treefile = ""; abort = true; }
 			else if (treefile == "not found") { 				
 				//if there is a current design file, use it
 				treefile = m->getTreeFile(); 
@@ -159,7 +159,7 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 			else { m->setGroupFile(groupfile); }
 			
 			namefile = validParameter.validFile(parameters, "name", true);
-			if (namefile == "not open") { abort = true; }
+			if (namefile == "not open") { namefile = ""; abort = true; }
 			else if (namefile == "not found") { namefile = ""; }
 			else { m->setNameFile(namefile); }
 			
@@ -197,6 +197,11 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 			}
 			
 			if ((!collect) && (!rarefy) && (!summary)) { m->mothurOut("No outputs selected. You must set either collect, rarefy or summary to true, summary=T by default."); m->mothurOutEndLine(); abort=true; }
+			
+			if (namefile == "") {
+				vector<string> files; files.push_back(treefile);
+				parser.getNameFile(files);
+			}
 		}
 		
 	}
