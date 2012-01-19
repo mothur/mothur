@@ -147,7 +147,7 @@ PreClusterCommand::PreClusterCommand(string option) {
 			// ...at some point should added some additional type checking...
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not found") { namefile =  "";  }
-			else if (namefile == "not open") { abort = true; }	
+			else if (namefile == "not open") { namefile = ""; abort = true; }	
 			else {  m->setNameFile(namefile); }
 			
 			groupfile = validParameter.validFile(parameters, "group", true);
@@ -162,7 +162,10 @@ PreClusterCommand::PreClusterCommand(string option) {
 			m->setProcessors(temp);
 			m->mothurConvert(temp, processors);
 			
-			
+			if (namefile == "") {
+				vector<string> files; files.push_back(fastafile);
+				parser.getNameFile(files);
+			}
 		}
 				
 	}

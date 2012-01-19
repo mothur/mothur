@@ -139,7 +139,7 @@ ParsimonyCommand::ParsimonyCommand(string option)  {
 			if (randomtree == "")  {
 				//check for required parameters
 				treefile = validParameter.validFile(parameters, "tree", true);
-				if (treefile == "not open") { abort = true; }
+				if (treefile == "not open") { treefile = ""; abort = true; }
 				else if (treefile == "not found") { 				//if there is a current design file, use it
 					treefile = m->getTreeFile(); 
 					if (treefile != "") { m->mothurOut("Using " + treefile + " as input file for the tree parameter."); m->mothurOutEndLine(); }
@@ -153,7 +153,7 @@ ParsimonyCommand::ParsimonyCommand(string option)  {
 				else { m->setGroupFile(groupfile); }
 				
 				namefile = validParameter.validFile(parameters, "name", true);
-				if (namefile == "not open") { abort = true; }
+				if (namefile == "not open") { namefile = ""; abort = true; }
 				else if (namefile == "not found") { namefile = ""; }
 				else { m->setNameFile(namefile); }
 			}
@@ -176,6 +176,11 @@ ParsimonyCommand::ParsimonyCommand(string option)  {
 			string temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
 			m->mothurConvert(temp, processors);
+			
+			if (namefile == "") {
+				vector<string> files; files.push_back(treefile);
+				parser.getNameFile(files);
+			}
 			
 		}
 

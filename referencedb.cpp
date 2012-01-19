@@ -22,6 +22,7 @@ void ReferenceDB::clearMemory()  {
 	setSavedReference("");
 	for(int i = 0; i < wordGenusProb.size(); i++) { wordGenusProb[i].clear(); }
 	wordGenusProb.clear();
+	WordPairDiffArr.clear();
 	setSavedTaxonomy("");
 }
 /*******************************************************

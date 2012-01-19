@@ -142,7 +142,7 @@ ConsensusSeqsCommand::ConsensusSeqsCommand(string option)  {
 			}else { m->setFastaFile(fastafile); }	
 			
 			namefile = validParameter.validFile(parameters, "name", true);
-			if (namefile == "not open") { abort = true; }
+			if (namefile == "not open") { namefile = ""; abort = true; }
 			else if (namefile == "not found") { namefile = ""; }
 			else { m->setNameFile(namefile); }
 			
@@ -163,7 +163,11 @@ ConsensusSeqsCommand::ConsensusSeqsCommand(string option)  {
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(fastafile);	}
-
+			
+			if (namefile == ""){
+				vector<string> files; files.push_back(fastafile); 
+				parser.getNameFile(files);
+			}
 		}
 	}
 	catch(exception& e) {

@@ -131,6 +131,27 @@ string Kmer::getKmerBases(int kmerNumber){
 	}
 	return kmer;
 }
+/**************************************************************************************************/
+
+int Kmer::getReverseKmerNumber(int kmerNumber){
+		
+	string kmerString = getKmerBases(kmerNumber);
+	
+	//get Reverse
+	string reverse = "";
+	for(int i=kmerString.length()-1;i>=0;i--){
+		if(kmerString[i] == 'A')		{	reverse += 'T';	}
+		else if(kmerString[i] == 'T'){	reverse += 'A';	}
+		else if(kmerString[i] == 'G'){	reverse += 'C';	}
+		else if(kmerString[i] == 'C'){	reverse += 'G';	}
+		else						{	reverse += 'N';	}
+	}
+	
+	int reverseNumber = getKmerNumber(reverse, 0);
+	
+	return reverseNumber;
+	
+}
 
 /**************************************************************************************************/
 

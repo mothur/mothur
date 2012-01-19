@@ -260,6 +260,11 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 			
 			temp = validParameter.validFile(parameters, "criteria", false);	if (temp == "not found"){	temp = "90";				}
 			m->mothurConvert(temp, criteria); 
+			
+			if (namefile == "") {
+				vector<string> files; files.push_back(fastafile);
+				parser.getNameFile(files);
+			}
 		}
 
 	}

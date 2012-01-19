@@ -23,7 +23,7 @@ vector<string> ShhherCommand::setParameters(){
 	try {
 		CommandParameter pflow("flow", "InputTypes", "", "", "none", "fileflow", "none",false,false); parameters.push_back(pflow);
 		CommandParameter pfile("file", "InputTypes", "", "", "none", "fileflow", "none",false,false); parameters.push_back(pfile);
-		CommandParameter plookup("lookup", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(plookup);
+		CommandParameter plookup("lookup", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(plookup);
 		CommandParameter pcutoff("cutoff", "Number", "", "0.01", "", "", "",false,false); parameters.push_back(pcutoff);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
 		CommandParameter pmaxiter("maxiter", "Number", "", "1000", "", "", "",false,false); parameters.push_back(pmaxiter);
@@ -2152,7 +2152,7 @@ void ShhherCommand::writeQualities(vector<int> otuCounts){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(flowFileName);  }
-		string qualityFileName = thisOutputDir + flowFileName.substr(0,flowFileName.find_last_of('.')) + ".shhh.qual";
+		string qualityFileName = thisOutputDir + m->getRootName(m->getSimpleName(flowFileName)) + ".shhh.qual";
 
 		ofstream qualityFile;
 		m->openOutputFile(qualityFileName, qualityFile);
@@ -2259,7 +2259,7 @@ void ShhherCommand::writeSequences(vector<int> otuCounts){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(flowFileName);  }
-		string fastaFileName = thisOutputDir + flowFileName.substr(0,flowFileName.find_last_of('.')) + ".shhh.fasta";
+		string fastaFileName = thisOutputDir + m->getRootName(m->getSimpleName(flowFileName)) + ".shhh.fasta";
 		ofstream fastaFile;
 		m->openOutputFile(fastaFileName, fastaFile);
 		
@@ -2307,7 +2307,7 @@ void ShhherCommand::writeNames(vector<int> otuCounts){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(flowFileName);  }
-		string nameFileName = thisOutputDir + flowFileName.substr(0,flowFileName.find_last_of('.')) + ".shhh.names";
+		string nameFileName = thisOutputDir + m->getRootName(m->getSimpleName(flowFileName)) + ".shhh.names";
 		ofstream nameFile;
 		m->openOutputFile(nameFileName, nameFile);
 		
@@ -2345,7 +2345,7 @@ void ShhherCommand::writeGroups(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(flowFileName);  }
-		string fileRoot = thisOutputDir + flowFileName.substr(0,flowFileName.find_last_of('.'));
+		string fileRoot = thisOutputDir + m->getRootName(m->getSimpleName(flowFileName));
 		string groupFileName = fileRoot + ".shhh.groups";
 		ofstream groupFile;
 		m->openOutputFile(groupFileName, groupFile);
@@ -2370,7 +2370,7 @@ void ShhherCommand::writeClusters(vector<int> otuCounts){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(flowFileName);  }
-		string otuCountsFileName = thisOutputDir + flowFileName.substr(0,flowFileName.find_last_of('.')) + ".shhh.counts";
+		string otuCountsFileName = thisOutputDir + m->getRootName(m->getSimpleName(flowFileName)) + ".shhh.counts";
 		ofstream otuCountsFile;
 		m->openOutputFile(otuCountsFileName, otuCountsFile);
 		

@@ -292,6 +292,11 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 				m->mothurOut("You didn't set any options... quiting command."); m->mothurOutEndLine();
 				abort = true;
 			}
+			
+			if (nameFile == "") {
+				vector<string> files; files.push_back(fastaFile);
+				parser.getNameFile(files);
+			}
 		}
 
 	}

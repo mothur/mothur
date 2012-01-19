@@ -125,7 +125,7 @@ SplitGroupCommand::SplitGroupCommand(string option)  {
 
 			
 			namefile = validParameter.validFile(parameters, "name", true);
-			if (namefile == "not open") { abort = true; }
+			if (namefile == "not open") { namefile = ""; abort = true; }
 			else if (namefile == "not found") { namefile = ""; }	
 			else { m->setNameFile(namefile); }
 		
@@ -151,6 +151,11 @@ SplitGroupCommand::SplitGroupCommand(string option)  {
 						
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(groupfile);	}
+			
+			if (namefile == "") {
+				vector<string> files; files.push_back(fastafile);
+				parser.getNameFile(files);
+			}
 		}
 
 	}

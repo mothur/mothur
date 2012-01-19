@@ -111,7 +111,7 @@ SummaryQualCommand::SummaryQualCommand(string option)  {
 			
 			//check for required parameters
 			qualfile = validParameter.validFile(parameters, "qfile", true);
-			if (qualfile == "not open") { abort = true; }
+			if (qualfile == "not open") { qualfile = ""; abort = true; }
 			else if (qualfile == "not found") { 				
 				qualfile = m->getQualFile(); 
 				if (qualfile != "") { m->mothurOut("Using " + qualfile + " as input file for the qfile parameter."); m->mothurOutEndLine(); }
@@ -131,7 +131,12 @@ SummaryQualCommand::SummaryQualCommand(string option)  {
 			
 			string temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
-			m->mothurConvert(temp, processors);			
+			m->mothurConvert(temp, processors);	
+			
+			if (namefile == "") {
+				vector<string> files; files.push_back(qualfile);
+				parser.getNameFile(files);
+			}
 		}
 	}
 	catch(exception& e) {

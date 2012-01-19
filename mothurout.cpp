@@ -2152,7 +2152,7 @@ int MothurOut::removeConfidences(string& tax) {
 				int pos2 = taxon.find_last_of(')');
 				if (pos2 != -1) {
 					string confidenceScore = taxon.substr(pos+1, (pos2-(pos+1)));
-					if (isContainingOnlyDigits(confidenceScore)) {
+					if (isNumeric1(confidenceScore)) {
 						taxon = taxon.substr(0, pos); //rip off confidence 
 					}
 				}

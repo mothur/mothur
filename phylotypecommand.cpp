@@ -128,11 +128,11 @@ PhylotypeCommand::PhylotypeCommand(string option)  {
 					m->mothurOut("No valid current files. taxonomy is a required parameter."); m->mothurOutEndLine(); 
 					abort = true; 
 				}
-			}else if (taxonomyFileName == "not open") { abort = true; }	
+			}else if (taxonomyFileName == "not open") { taxonomyFileName = ""; abort = true; }	
 			else { m->setTaxonomyFile(taxonomyFileName); }
 			
 			namefile = validParameter.validFile(parameters, "name", true);
-			if (namefile == "not open") { abort = true; }
+			if (namefile == "not open") { namefile = ""; abort = true; }
 			else if (namefile == "not found") { namefile = ""; }
 			else { readNamesFile(); m->setNameFile(namefile); }	
 			
@@ -151,6 +151,11 @@ PhylotypeCommand::PhylotypeCommand(string option)  {
 			else { 
 				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
+			}
+			
+			if (namefile == "") {
+				vector<string> files; files.push_back(taxonomyFileName);
+				parser.getNameFile(files);
 			}
 			
 		}

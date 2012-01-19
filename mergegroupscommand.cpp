@@ -13,7 +13,8 @@
 //**********************************************************************************************************************
 vector<string> MergeGroupsCommand::setParameters(){	
 	try {
-		CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pshared);
+		CommandParameter pshared("shared", "InputTypes", "", "", "none", "sharedGroup", "none",false,false); parameters.push_back(pshared);
+		CommandParameter pgroup("group", "InputTypes", "", "", "none", "sharedGroup", "none",false,false); parameters.push_back(pgroup);
 		CommandParameter pdesign("design", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pdesign);
 		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
@@ -33,12 +34,12 @@ vector<string> MergeGroupsCommand::setParameters(){
 string MergeGroupsCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The merge.groups command reads a shared file and a design file and merges the groups in the shared file that are in the same grouping in the design file.\n";
+		helpString += "The merge.groups command reads a shared or group file and a design file and merges the groups that are in the same grouping in the design file.\n";
 		helpString += "The merge.groups command outputs a .shared file. \n";
-		helpString += "The merge.groups command parameters are shared, groups, label and design.  The design and shared parameter are required.\n";
+		helpString += "The merge.groups command parameters are shared, group, groups, label and design.  The design parameter is required.\n";
 		helpString += "The design parameter allows you to assign your groups to sets. It is required. \n";
 		helpString += "The design file looks like the group file.  It is a 2 column tab delimited file, where the first column is the group name and the second column is the set the group belongs to.\n";
-		helpString += "The groups parameter allows you to specify which of the groups in your shared you would like included. The group names are separated by dashes.\n";
+		helpString += "The groups parameter allows you to specify which of the groups in your shared or group file you would like included. The group names are separated by dashes.\n";
 		helpString += "The label parameter allows you to select what distance levels you would like, and are also separated by dashes.\n";
 		helpString += "The merge.groups command should be in the following format: merge.groups(design=yourDesignFile, shared=yourSharedFile).\n";
 		helpString += "Example merge.groups(design=temp.design, groups=A-B-C, shared=temp.shared).\n";
@@ -58,6 +59,7 @@ MergeGroupsCommand::MergeGroupsCommand(){
 		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["shared"] = tempOutNames;
+		outputTypes["group"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "MergeGroupsCommand", "MetaStatsCommand");
@@ -92,6 +94,7 @@ MergeGroupsCommand::MergeGroupsCommand(string option) {
 			//initialize outputTypes
 			vector<string> tempOutNames;
 			outputTypes["shared"] = tempOutNames;
+			outputTypes["group"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
@@ -116,6 +119,15 @@ MergeGroupsCommand::MergeGroupsCommand(string option) {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
+				
+				it = parameters.find("group");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["group"] = inputDir + it->second;		}
+				}
+				
 			}
 			
 			//check for required parameters
@@ -128,15 +140,15 @@ MergeGroupsCommand::MergeGroupsCommand(string option) {
 				else { 	m->mothurOut("You have no current designfile and the design parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}else { m->setDesignFile(designfile); }	
 			
-			//make sure the user has already run the read.otu command
 			sharedfile = validParameter.validFile(parameters, "shared", true);
-			if (sharedfile == "not open") { abort = true; }
-			else if (sharedfile == "not found") {  				
-				//if there is a current shared file, use it
-				sharedfile = m->getSharedFile(); 
-				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { m->setSharedFile(sharedfile); }	
+			if (sharedfile == "not open") { abort = true; sharedfile = ""; }
+			else if (sharedfile == "not found") {  sharedfile = ""; }
+			else { m->setSharedFile(sharedfile); }	
+			
+			groupfile = validParameter.validFile(parameters, "group", true);
+			if (groupfile == "not open") { abort = true; groupfile = ""; }
+			else if (groupfile == "not found") {  groupfile = ""; }
+			else { m->setGroupFile(groupfile); }	
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -151,6 +163,19 @@ MergeGroupsCommand::MergeGroupsCommand(string option) {
 			if (groups == "not found") { groups = "all";  }
 			m->splitAtDash(groups, Groups);
 			m->setGroups(Groups);
+			
+			if ((sharedfile == "") && (groupfile == "")) { 
+				//give priority to group, then shared
+				groupfile = m->getGroupFile(); 
+				if (groupfile != "") {  m->mothurOut("Using " + groupfile + " as input file for the group parameter."); m->mothurOutEndLine(); }
+				else { 
+					sharedfile = m->getSharedFile(); 
+					if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+					else { 
+						m->mothurOut("You have no current groupfile or sharedfile and one is required."); m->mothurOutEndLine(); abort = true;
+					}
+				}
+			}
 		}
 		
 	}
@@ -165,16 +190,105 @@ int MergeGroupsCommand::execute(){
 	try {
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+	
+		designMap = new GroupMap(designfile);
+		designMap->readDesignMap();
 		
-		if (outputDir == "") {  outputDir += m->hasPath(sharedfile);  }
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + "merge" +  m->getExtension(sharedfile);
+		if (groupfile != "") { processGroupFile(designMap); }
+		if (sharedfile != "") { processSharedFile(designMap); }
+
+		//reset groups parameter
+		m->clearGroups();  
+		delete designMap;
+		
+		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0;}
+		
+		
+		//set shared file as new current sharedfile
+		string current = "";
+		itTypes = outputTypes.find("shared");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setSharedFile(current); }
+		}
+		
+		itTypes = outputTypes.find("group");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setGroupFile(current); }
+		}
+		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+		m->mothurOutEndLine();
+		
+		return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "MergeGroupsCommand", "execute");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+
+int MergeGroupsCommand::process(vector<SharedRAbundVector*>& thisLookUp, ofstream& out){
+	try {
+		
+		map<string, SharedRAbundVector> merged;
+		map<string, SharedRAbundVector>::iterator it;
+		
+		for (int i = 0; i < thisLookUp.size(); i++) {
+			
+			if (m->control_pressed) { return 0; }
+			
+			//what grouping does this group belong to
+			string grouping = designMap->getGroup(thisLookUp[i]->getGroup());
+			if (grouping == "not found") { m->mothurOut("[ERROR]: " + thisLookUp[i]->getGroup() + " is not in your design file. Ignoring!"); m->mothurOutEndLine(); grouping = "NOTFOUND"; }
+			
+			else {
+				//do we already have a member of this grouping?
+				it = merged.find(grouping);
+				
+				if (it == merged.end()) { //nope, so create it
+					merged[grouping] = *thisLookUp[i];
+					merged[grouping].setGroup(grouping);
+				}else { //yes, merge it
+					
+					for (int j = 0; j < thisLookUp[i]->getNumBins(); j++) {
+						int abund = (it->second).getAbundance(j);
+						abund += thisLookUp[i]->getAbundance(j);
+						
+						(it->second).set(j, abund, grouping);
+					}
+				}
+			}
+		}
+		
+		//print new file
+		for (it = merged.begin(); it != merged.end(); it++) {
+			out << (it->second).getLabel() << '\t' << it->first << '\t';
+			(it->second).print(out);
+		}
+		
+		return 0;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "MergeGroupsCommand", "process");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+
+int MergeGroupsCommand::processSharedFile(GroupMap*& designMap){
+	try {
+		
+		string thisOutputDir = outputDir;
+		if (outputDir == "") {  thisOutputDir += m->hasPath(sharedfile);  }
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(sharedfile)) + "merge" +  m->getExtension(sharedfile);
 		outputTypes["shared"].push_back(outputFileName); outputNames.push_back(outputFileName);
 		
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
-		
-		designMap = new GroupMap(designfile);
-		designMap->readDesignMap();
 		
 		InputData input(sharedfile, "sharedfile");
 		lookup = input.getSharedRAbundVectors();
@@ -256,78 +370,68 @@ int MergeGroupsCommand::execute(){
 		}
 		
 		out.close();
-		//reset groups parameter
-		m->clearGroups();  
-		delete designMap;
 		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0;}
-		
-		
-		//set shared file as new current sharedfile
-		string current = "";
-		itTypes = outputTypes.find("shared");
-		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setSharedFile(current); }
-		}
-		
-		m->mothurOutEndLine();
-		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
-		m->mothurOutEndLine();
-		
+				
 		return 0;
+		
 	}
 	catch(exception& e) {
-		m->errorOut(e, "MergeGroupsCommand", "execute");
+		m->errorOut(e, "MergeGroupsCommand", "processSharedFile");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
 
-int MergeGroupsCommand::process(vector<SharedRAbundVector*>& thisLookUp, ofstream& out){
+int MergeGroupsCommand::processGroupFile(GroupMap*& designMap){
 	try {
 		
-		map<string, SharedRAbundVector> merged;
-		map<string, SharedRAbundVector>::iterator it;
+		string thisOutputDir = outputDir;
+		if (outputDir == "") {  thisOutputDir += m->hasPath(groupfile);  }
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(groupfile)) + "merge" +  m->getExtension(groupfile);
+		outputTypes["group"].push_back(outputFileName); outputNames.push_back(outputFileName);
 		
-		for (int i = 0; i < thisLookUp.size(); i++) {
+		ofstream out;
+		m->openOutputFile(outputFileName, out);
+		
+		//read groupfile
+		GroupMap groupMap(groupfile);
+		groupMap.readMap();
+		
+		//fill Groups - checks for "all" and for any typo groups
+		SharedUtil* util = new SharedUtil();
+		vector<string> nameGroups = groupMap.getNamesOfGroups();
+		util->setGroups(Groups, nameGroups);
+		delete util;
+		
+		vector<string> namesOfSeqs = groupMap.getNamesSeqs();
+		bool error = false;
+		
+		for (int i = 0; i < namesOfSeqs.size(); i++) {
 			
-			if (m->control_pressed) { return 0; }
+			if (m->control_pressed) { break; }
 			
-			//what grouping does this group belong to
-			string grouping = designMap->getGroup(thisLookUp[i]->getGroup());
-			if (grouping == "not found") { m->mothurOut("[ERROR]: " + thisLookUp[i]->getGroup() + " is not in your design file. Ignoring!"); m->mothurOutEndLine(); grouping = "NOTFOUND"; }
+			string thisGroup = groupMap.getGroup(namesOfSeqs[i]);
 			
-			else {
-				//do we already have a member of this grouping?
-				it = merged.find(grouping);
+			//are you in a group the user wants
+			if (m->inUsersGroups(thisGroup, Groups)) {
+				string thisGrouping = designMap->getGroup(thisGroup);
 				
-				if (it == merged.end()) { //nope, so create it
-					merged[grouping] = *thisLookUp[i];
-					merged[grouping].setGroup(grouping);
-				}else { //yes, merge it
-					
-					for (int j = 0; j < thisLookUp[i]->getNumBins(); j++) {
-						int abund = (it->second).getAbundance(j);
-						abund += thisLookUp[i]->getAbundance(j);
-						
-						(it->second).set(j, abund, grouping);
-					}
+				if (thisGrouping == "not found") { m->mothurOut("[ERROR]: " + namesOfSeqs[i] + " is from group " + thisGroup + " which is not in your design file, please correct."); m->mothurOutEndLine();  error = true; }
+				else {
+					out << namesOfSeqs[i] << '\t' << thisGrouping << endl;
 				}
 			}
 		}
 		
-		//print new file
-		for (it = merged.begin(); it != merged.end(); it++) {
-			out << (it->second).getLabel() << '\t' << it->first << '\t';
-			(it->second).print(out);
-		}
+		if (error) { m->control_pressed = true; }
+
+		out.close();
 		
 		return 0;
 		
 	}
 	catch(exception& e) {
-		m->errorOut(e, "MergeGroupsCommand", "process");
+		m->errorOut(e, "MergeGroupsCommand", "processGroupFile");
 		exit(1);
 	}
 }

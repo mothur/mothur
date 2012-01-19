@@ -125,9 +125,15 @@ DeconvoluteCommand::DeconvoluteCommand(string option)  {
 			}
 			
 			oldNameMapFName = validParameter.validFile(parameters, "name", true);
-			if (oldNameMapFName == "not open") { abort = true; }
+			if (oldNameMapFName == "not open") { oldNameMapFName = ""; abort = true; }
 			else if (oldNameMapFName == "not found"){	oldNameMapFName = "";	}
 			else { m->setNameFile(oldNameMapFName); }
+			
+			if (oldNameMapFName == "") {
+				vector<string> files; files.push_back(inFastaName);
+				parser.getNameFile(files);
+			}
+			
 		}
 
 	}

@@ -36,6 +36,7 @@ public:
 	void readKmerDB(ifstream&);
 	int getCount(int);  //returns number of sequences with that kmer number
 	vector<int> getSequencesWithKmer(int);  //returns vector of sequences that contain kmer passed in
+	int getReversed(int);  //returns reverse compliment kmerNumber 
 	int getMaxKmer() { return maxKmer; }
 	
 private:

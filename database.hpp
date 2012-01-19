@@ -58,6 +58,7 @@ public:
 	virtual void readKmerDB(ifstream&){};
 	virtual void setNumSeqs(int i) {	numSeqs = i; 	}
 	virtual vector<int> getSequencesWithKmer(int){ vector<int> filler; return filler; };  
+	virtual int getReversed(int) { return 0; } 
 	virtual int getMaxKmer(){	return 1;	}
 	
 protected:

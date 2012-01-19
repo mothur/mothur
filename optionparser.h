@@ -14,7 +14,7 @@
 
 #include "mothur.h"
 #include "mothurout.h"
-
+#include "command.hpp"
 
 /***********************************************************************/
 
@@ -23,6 +23,7 @@ public:
 	OptionParser(string);
 	~OptionParser() {}
 	map<string, string> getParameters();
+	bool getNameFile(vector<string>);
 private:
 	map<string, string> parameters;
 	MothurOut* m;

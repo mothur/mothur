@@ -604,7 +604,6 @@ void Sequence::padFromPos(int end){
 bool Sequence::getIsAligned(){
 	return isAligned;
 }
-
 //********************************************************************************************************************
 
 void Sequence::reverseComplement(){

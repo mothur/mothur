@@ -216,7 +216,6 @@ SplitAbundCommand::SplitAbundCommand(string option)  {
 			m->mothurConvert(temp, cutoff); 
 
 			if (cutoff == 0) {  m->mothurOut("You must provide a cutoff to qualify what is abundant for the split.abund command. "); m->mothurOutEndLine(); abort = true;  }
-
 		}
 
 	}

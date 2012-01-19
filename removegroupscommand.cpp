@@ -16,12 +16,12 @@
 //**********************************************************************************************************************
 vector<string> RemoveGroupsCommand::setParameters(){	
 	try {
-		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pfasta);
-		CommandParameter pshared("shared", "InputTypes", "", "", "none", "FNGLT-sharedGroup", "none",false,false); parameters.push_back(pshared);
-		CommandParameter pname("name", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pname);
-		CommandParameter pgroup("group", "InputTypes", "", "", "none", "FNGLT-sharedGroup", "none",false,false); parameters.push_back(pgroup);
-		CommandParameter plist("list", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(plist);
-		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(ptaxonomy);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "FNGLT",false,false); parameters.push_back(pfasta);
+		CommandParameter pshared("shared", "InputTypes", "", "", "none", "sharedGroup", "none",false,false); parameters.push_back(pshared);
+		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
+		CommandParameter pgroup("group", "InputTypes", "", "", "none", "sharedGroup", "FNGLT",false,false); parameters.push_back(pgroup);
+		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "FNGLT",false,false); parameters.push_back(plist);
+		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "none", "FNGLT",false,false); parameters.push_back(ptaxonomy);
 		CommandParameter paccnos("accnos", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(paccnos);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
@@ -253,6 +253,12 @@ RemoveGroupsCommand::RemoveGroupsCommand(string option)  {
 			
 			if ((fastafile == "") && (namefile == "") && (groupfile == "")  && (sharedfile == "") && (listfile == "") && (taxfile == ""))  { m->mothurOut("You must provide at least one of the following: fasta, name, taxonomy, group, shared or list."); m->mothurOutEndLine(); abort = true; }
 			if ((groupfile == "") && ((namefile != "") || (fastafile != "") || (listfile != "") || (taxfile != "")))  { m->mothurOut("If using a fasta, name, taxonomy, group or list, then you must provide a group file."); m->mothurOutEndLine(); abort = true; }
+			
+			if ((namefile == "") && ((fastafile != "") || (taxfile != ""))){
+				vector<string> files; files.push_back(fastafile); files.push_back(taxfile);
+				parser.getNameFile(files);
+			}
+		
 		}
 		
 	}

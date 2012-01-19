@@ -27,6 +27,7 @@ vector<string> ClassifySeqsCommand::setParameters(){
 		CommandParameter pmismatch("mismatch", "Number", "", "-1.0", "", "", "",false,false); parameters.push_back(pmismatch);
 		CommandParameter pgapopen("gapopen", "Number", "", "-2.0", "", "", "",false,false); parameters.push_back(pgapopen);
 		CommandParameter pgapextend("gapextend", "Number", "", "-1.0", "", "", "",false,false); parameters.push_back(pgapextend);
+		//CommandParameter pflip("flip", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pflip);
 		CommandParameter pcutoff("cutoff", "Number", "", "0", "", "", "",false,true); parameters.push_back(pcutoff);
 		CommandParameter pprobs("probs", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pprobs);
 		CommandParameter piters("iters", "Number", "", "100", "", "", "",false,true); parameters.push_back(piters);
@@ -69,6 +70,7 @@ string ClassifySeqsCommand::getHelpString(){
 		helpString += "The cutoff parameter allows you to specify a bootstrap confidence threshold for your taxonomy.  The default is 0.\n";
 		helpString += "The probs parameter shuts off the bootstrapping results for the bayesian method. The default is true, meaning you want the bootstrapping to be shown.\n";
 		helpString += "The iters parameter allows you to specify how many iterations to do when calculating the bootstrap confidence score for your taxonomy with the bayesian method.  The default is 100.\n";
+		//helpString += "The flip parameter allows you shut off mothur's   The default is T.\n";
 		helpString += "The classify.seqs command should be in the following format: \n";
 		helpString += "classify.seqs(reference=yourTemplateFile, fasta=yourFastaFile, method=yourClassificationMethod, search=yourSearchmethod, ksize=yourKmerSize, taxonomy=yourTaxonomyFile, processors=yourProcessors) \n";
 		helpString += "Example classify.seqs(fasta=amazon.fasta, reference=core.filtered, method=knn, search=gotoh, ksize=8, processors=2)\n";
@@ -89,6 +91,7 @@ ClassifySeqsCommand::ClassifySeqsCommand(){
 		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["taxonomy"] = tempOutNames;
+		outputTypes["accnos"] = tempOutNames;
 		outputTypes["taxsummary"] = tempOutNames;
 		outputTypes["matchdist"] = tempOutNames;
 	}
@@ -126,6 +129,7 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 			outputTypes["taxonomy"] = tempOutNames;
 			outputTypes["taxsummary"] = tempOutNames;
 			outputTypes["matchdist"] = tempOutNames;
+			outputTypes["accnos"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
@@ -440,15 +444,24 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 			temp = validParameter.validFile(parameters, "probs", false);		if (temp == "not found"){	temp = "true";			}
 			probs = m->isTrue(temp);
 			
+			//temp = validParameter.validFile(parameters, "flip", false);			if (temp == "not found"){	temp = "T";				}
+			//flip = m->isTrue(temp); 
+			flip = true;
+			
 			temp = validParameter.validFile(parameters, "iters", false);		if (temp == "not found") { temp = "100";			}
 			m->mothurConvert(temp, iters); 
-
 
 			
 			if ((method == "bayesian") && (search != "kmer"))  { 
 				m->mothurOut("The bayesian method requires the kmer search." + search + "will be disregarded." ); m->mothurOutEndLine();
 				search = "kmer";
 			}
+			
+			if (namefileNames.size() == 0){
+				vector<string> files; files.push_back(fastaFileNames[fastaFileNames.size()-1]); 
+				parser.getNameFile(files);
+			}
+			
 		}
 		
 	}
@@ -470,12 +483,12 @@ int ClassifySeqsCommand::execute(){
 	try {
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
-		if(method == "bayesian"){	classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, iters, rand());		}
+		if(method == "bayesian"){	classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, iters, rand(), flip);		}
 		else if(method == "knn"){	classify = new Knn(taxonomyFileName, templateFileName, search, kmerSize, gapOpen, gapExtend, match, misMatch, numWanted, rand());				}
 		else {
 			m->mothurOut(search + " is not a valid method option. I will run the command using bayesian.");
 			m->mothurOutEndLine();
-			classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, iters, rand());	
+			classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, iters, rand(), flip);	
 		}
 		
 		if (m->control_pressed) { delete classify; return 0; }
@@ -494,6 +507,7 @@ int ClassifySeqsCommand::execute(){
 		
 			if (outputDir == "") { outputDir += m->hasPath(fastaFileNames[s]); }
 			string newTaxonomyFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + RippedTaxName + "taxonomy";
+			string newaccnosFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + RippedTaxName + "flip.accnos";
 			string tempTaxonomyFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + "taxonomy.temp";
 			string taxSummary = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + RippedTaxName + "tax.summary";
 			
@@ -503,6 +517,7 @@ int ClassifySeqsCommand::execute(){
 			}
 			
 			outputNames.push_back(newTaxonomyFile); outputTypes["taxonomy"].push_back(newTaxonomyFile);
+			outputNames.push_back(newaccnosFile); outputTypes["accnos"].push_back(newaccnosFile);
 			outputNames.push_back(taxSummary);	outputTypes["taxsummary"].push_back(taxSummary);
 			
 			int start = time(NULL);
@@ -521,6 +536,7 @@ int ClassifySeqsCommand::execute(){
 				MPI_File inMPI;
 				MPI_File outMPINewTax;
 				MPI_File outMPITempTax;
+				MPI_File outMPIAcc;
 							
 				int outMode=MPI_MODE_CREATE|MPI_MODE_WRONLY; 
 				int inMode=MPI_MODE_RDONLY; 
@@ -530,6 +546,9 @@ int ClassifySeqsCommand::execute(){
 				
 				char outTempTax[1024];
 				strcpy(outTempTax, tempTaxonomyFile.c_str());
+			
+				char outAcc[1024];
+				strcpy(outAcc, newaccnosFile.c_str());
 				
 				char inFileName[1024];
 				strcpy(inFileName, fastaFileNames[s].c_str());
@@ -537,8 +556,9 @@ int ClassifySeqsCommand::execute(){
 				MPI_File_open(MPI_COMM_WORLD, inFileName, inMode, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
 				MPI_File_open(MPI_COMM_WORLD, outNewTax, outMode, MPI_INFO_NULL, &outMPINewTax);
 				MPI_File_open(MPI_COMM_WORLD, outTempTax, outMode, MPI_INFO_NULL, &outMPITempTax);
+				MPI_File_open(MPI_COMM_WORLD, outAcc, outMode, MPI_INFO_NULL, &outMPIAcc);
 				
-				if (m->control_pressed) { outputTypes.clear(); MPI_File_close(&inMPI);  MPI_File_close(&outMPINewTax);   MPI_File_close(&outMPITempTax);  delete classify;  return 0;  }
+				if (m->control_pressed) { outputTypes.clear(); MPI_File_close(&inMPI);  MPI_File_close(&outMPINewTax);  MPI_File_close(&outMPIAcc);   MPI_File_close(&outMPITempTax);  delete classify;  return 0;  }
 				
 				if (pid == 0) { //you are the root process 
 					
@@ -557,9 +577,9 @@ int ClassifySeqsCommand::execute(){
 					
 				
 					//align your part
-					driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPINewTax, outMPITempTax, MPIPos);
+					driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPINewTax, outMPITempTax, outMPIAcc, MPIPos);
 					
-					if (m->control_pressed) {  outputTypes.clear(); MPI_File_close(&inMPI);  MPI_File_close(&outMPINewTax);   MPI_File_close(&outMPITempTax);  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} delete classify; return 0;  }
+					if (m->control_pressed) {  outputTypes.clear(); MPI_File_close(&inMPI);  MPI_File_close(&outMPINewTax); MPI_File_close(&outMPIAcc);   MPI_File_close(&outMPITempTax);  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} delete classify; return 0;  }
 					
 					for (int i = 1; i < processors; i++) {
 						int done;
@@ -577,9 +597,9 @@ int ClassifySeqsCommand::execute(){
 					
 					
 					//align your part
-					driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPINewTax, outMPITempTax, MPIPos);
+					driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPINewTax, outMPITempTax, outMPIAcc, MPIPos);
 					
-					if (m->control_pressed) {  outputTypes.clear(); MPI_File_close(&inMPI);  MPI_File_close(&outMPINewTax);   MPI_File_close(&outMPITempTax);  delete classify; return 0;  }
+					if (m->control_pressed) {  outputTypes.clear(); MPI_File_close(&inMPI);  MPI_File_close(&outMPINewTax);  MPI_File_close(&outMPIAcc);  MPI_File_close(&outMPITempTax);  delete classify; return 0;  }
 
 					int done = 0;
 					MPI_Send(&done, 1, MPI_INT, 0, tag, MPI_COMM_WORLD); 
@@ -589,6 +609,7 @@ int ClassifySeqsCommand::execute(){
 				MPI_File_close(&inMPI);
 				MPI_File_close(&outMPINewTax);
 				MPI_File_close(&outMPITempTax);
+				MPI_File_close(&outMPIAcc); 
 				MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 				
 #else
@@ -613,16 +634,19 @@ int ClassifySeqsCommand::execute(){
 			}
 #endif
 			if(processors == 1){
-				numFastaSeqs = driver(lines[0], newTaxonomyFile, tempTaxonomyFile, fastaFileNames[s]);
+				numFastaSeqs = driver(lines[0], newTaxonomyFile, tempTaxonomyFile, newaccnosFile, fastaFileNames[s]);
 			}else{
-				numFastaSeqs = createProcesses(newTaxonomyFile, tempTaxonomyFile, fastaFileNames[s]); 
+				numFastaSeqs = createProcesses(newTaxonomyFile, tempTaxonomyFile, newaccnosFile, fastaFileNames[s]); 
 			}
 #endif
+			
+			if (!m->isBlank(newaccnosFile)) { m->mothurOutEndLine(); m->mothurOut("[WARNING]: mothur suspects some of your sequences may be reversed, please check " + newaccnosFile + " for the list of the sequences."); m->mothurOutEndLine(); }
 
 		m->mothurOutEndLine();
 		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to classify " + toString(numFastaSeqs) + " sequences."); m->mothurOutEndLine(); m->mothurOutEndLine();
 		start = time(NULL);
-
+		
+		
 
 		#ifdef USE_MPI	
 			if (pid == 0) {  //this part does not need to be paralellized
@@ -744,6 +768,12 @@ int ClassifySeqsCommand::execute(){
 			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setTaxonomyFile(current); }
 		}
 		
+		current = "";
+		itTypes = outputTypes.find("accnos");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setAccnosFile(current); }
+		}
+		
 		delete classify;
 		
 		return 0;
@@ -785,7 +815,7 @@ string ClassifySeqsCommand::addUnclassifieds(string tax, int maxlevel) {
 
 /**************************************************************************************************/
 
-int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile, string filename) {
+int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile, string accnos, string filename) {
 	try {
 		
 		int num = 0;
@@ -802,7 +832,7 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				num = driver(lines[process], taxFileName + toString(getpid()) + ".temp", tempTaxFile + toString(getpid()) + ".temp", filename);
+				num = driver(lines[process], taxFileName + toString(getpid()) + ".temp", tempTaxFile + toString(getpid()) + ".temp", accnos + toString(getpid()) + ".temp", filename);
 
 				//pass numSeqs to parent
 				ofstream out;
@@ -820,7 +850,7 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
 		}
 		
 		//parent does its part
-		num = driver(lines[0], taxFileName, tempTaxFile, filename);
+		num = driver(lines[0], taxFileName, tempTaxFile, accnos, filename);
 		
 		//force parent to wait until all the processes are done
 		for (int i=0;i<processIDS.size();i++) { 
@@ -851,7 +881,7 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
 			string extension = "";
 			if (i != 0) { extension = toString(i) + ".temp"; processIDS.push_back(i); }
 			
-			classifyData* tempclass = new classifyData(probs, method, templateFileName, taxonomyFileName, (taxFileName + extension), (tempTaxFile + extension), filename, search, kmerSize, iters, numWanted, m, lines[i]->start, lines[i]->end, match, misMatch, gapOpen, gapExtend, cutoff, i);
+			classifyData* tempclass = new classifyData((accnos + extension), probs, method, templateFileName, taxonomyFileName, (taxFileName + extension), (tempTaxFile + extension), filename, search, kmerSize, iters, numWanted, m, lines[i]->start, lines[i]->end, match, misMatch, gapOpen, gapExtend, cutoff, i, flipThreshold);
 			pDataArray.push_back(tempclass);
 			
 			//MySeqSumThreadFunction is in header. It must be global or static to work with the threads.
@@ -861,7 +891,7 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
 		}
 		
 		//parent does its part
-		num = driver(lines[processors-1], taxFileName + toString(processors-1) + ".temp", tempTaxFile + toString(processors-1) + ".temp", filename);
+		num = driver(lines[processors-1], taxFileName + toString(processors-1) + ".temp", tempTaxFile + toString(processors-1) + ".temp", accnos + toString(processors-1) + ".temp", filename);
 		processIDS.push_back((processors-1));
 		
 		//Wait until all threads have terminated.
@@ -879,8 +909,10 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
 		for(int i=0;i<processIDS.size();i++){
 			appendTaxFiles((taxFileName + toString(processIDS[i]) + ".temp"), taxFileName);
 			appendTaxFiles((tempTaxFile + toString(processIDS[i]) + ".temp"), tempTaxFile);
+			appendTaxFiles((accnos + toString(processIDS[i]) + ".temp"), accnos);
 			m->mothurRemove((m->getFullPathName(taxFileName) + toString(processIDS[i]) + ".temp"));
 			m->mothurRemove((m->getFullPathName(tempTaxFile) + toString(processIDS[i]) + ".temp"));
+			m->mothurRemove((m->getFullPathName(accnos) + toString(processIDS[i]) + ".temp"));
 		}
 		
 		return num;
@@ -917,13 +949,16 @@ void ClassifySeqsCommand::appendTaxFiles(string temp, string filename) {
 
 //**********************************************************************************************************************
 
-int ClassifySeqsCommand::driver(linePair* filePos, string taxFName, string tempTFName, string filename){
+int ClassifySeqsCommand::driver(linePair* filePos, string taxFName, string tempTFName, string accnos, string filename){
 	try {
 		ofstream outTax;
 		m->openOutputFile(taxFName, outTax);
 		
 		ofstream outTaxSimple;
 		m->openOutputFile(tempTFName, outTaxSimple);
+		
+		ofstream outAcc;
+		m->openOutputFile(accnos, outAcc);
 	
 		ifstream inFASTA;
 		m->openInputFile(filename, inFASTA);
@@ -936,7 +971,11 @@ int ClassifySeqsCommand::driver(linePair* filePos, string taxFName, string tempT
 		int count = 0;
 		
 		while (!done) {
-			if (m->control_pressed) { return 0; }
+			if (m->control_pressed) { 
+				inFASTA.close();
+				outTax.close();
+				outTaxSimple.close();
+				outAcc.close(); return 0; }
 		
 			Sequence* candidateSeq = new Sequence(inFASTA); m->gobble(inFASTA);
 			
@@ -945,17 +984,20 @@ int ClassifySeqsCommand::driver(linePair* filePos, string taxFName, string tempT
 				taxonomy = classify->getTaxonomy(candidateSeq);
 				
 				if (m->control_pressed) { delete candidateSeq; return 0; }
-
-				if (taxonomy != "bad seq") {
-					//output confidence scores or not
-					if (probs) {
-						outTax << candidateSeq->getName() << '\t' << taxonomy << endl;
-					}else{
-						outTax << candidateSeq->getName() << '\t' << classify->getSimpleTax() << endl;
-					}
-					
-					outTaxSimple << candidateSeq->getName() << '\t' << classify->getSimpleTax() << endl;
+				
+				if (taxonomy == "unknown;") { m->mothurOut("[WARNING]: " + candidateSeq->getName() + " could not be classified. You can use the remove.lineage command with taxon=unknown; to remove such sequences."); m->mothurOutEndLine(); }
+				
+				//output confidence scores or not
+				if (probs) {
+					outTax << candidateSeq->getName() << '\t' << taxonomy << endl;
+				}else{
+					outTax << candidateSeq->getName() << '\t' << classify->getSimpleTax() << endl;
 				}
+				
+				if (classify->getFlipped()) { outAcc << candidateSeq->getName() << endl; }
+				
+				outTaxSimple << candidateSeq->getName() << '\t' << classify->getSimpleTax() << endl;
+				
 				count++;
 			}
 			delete candidateSeq;
@@ -977,6 +1019,7 @@ int ClassifySeqsCommand::driver(linePair* filePos, string taxFName, string tempT
 		inFASTA.close();
 		outTax.close();
 		outTaxSimple.close();
+		outAcc.close();
 		
 		return count;
 	}
@@ -987,10 +1030,11 @@ int ClassifySeqsCommand::driver(linePair* filePos, string taxFName, string tempT
 }
 //**********************************************************************************************************************
 #ifdef USE_MPI
-int ClassifySeqsCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& newFile, MPI_File& tempFile, vector<unsigned long long>& MPIPos){
+int ClassifySeqsCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& newFile, MPI_File& tempFile, MPI_File& accFile, vector<unsigned long long>& MPIPos){
 	try {
 		MPI_Status statusNew; 
 		MPI_Status statusTemp; 
+		MPI_Status statusAcc; 
 		MPI_Status status; 
 		
 		int pid;
@@ -1018,29 +1062,40 @@ int ClassifySeqsCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File
 			if (candidateSeq->getName() != "") {
 				taxonomy = classify->getTaxonomy(candidateSeq);
 				
-				if (taxonomy != "bad seq") {
-					//output confidence scores or not
-					if (probs) {
-						outputString =  candidateSeq->getName() + "\t" + taxonomy + "\n";
-					}else{
-						outputString =  candidateSeq->getName() + "\t" + classify->getSimpleTax() + "\n";
-					}
-					
-					int length = outputString.length();
-					char* buf2 = new char[length];
-					memcpy(buf2, outputString.c_str(), length);
+				if (taxonomy == "unknown;") { m->mothurOut("[WARNING]: " + candidateSeq->getName() + " could not be classified. You can use the remove.lineage command with taxon=unknown; to remove such sequences."); m->mothurOutEndLine(); }
 				
-					MPI_File_write_shared(newFile, buf2, length, MPI_CHAR, &statusNew);
-					delete buf2;
-
+				//output confidence scores or not
+				if (probs) {
+					outputString =  candidateSeq->getName() + "\t" + taxonomy + "\n";
+				}else{
 					outputString =  candidateSeq->getName() + "\t" + classify->getSimpleTax() + "\n";
-					length = outputString.length();
-					char* buf = new char[length];
-					memcpy(buf, outputString.c_str(), length);
-				
-					MPI_File_write_shared(tempFile, buf, length, MPI_CHAR, &statusTemp);
-					delete buf;
 				}
+				
+				int length = outputString.length();
+				char* buf2 = new char[length];
+				memcpy(buf2, outputString.c_str(), length);
+				
+				MPI_File_write_shared(newFile, buf2, length, MPI_CHAR, &statusNew);
+				delete buf2;
+				
+				outputString =  candidateSeq->getName() + "\t" + classify->getSimpleTax() + "\n";
+				length = outputString.length();
+				char* buf = new char[length];
+				memcpy(buf, outputString.c_str(), length);
+				
+				MPI_File_write_shared(tempFile, buf, length, MPI_CHAR, &statusTemp);
+				delete buf;
+				
+				if (classify->getFlipped()) { 
+					outputString =  candidateSeq->getName() + "\n";
+					length = outputString.length();
+					char* buf3 = new char[length];
+					memcpy(buf3, outputString.c_str(), length);
+					
+					MPI_File_write_shared(accFile, buf3, length, MPI_CHAR, &statusAcc);
+					delete buf3;
+				}
+				
 			}				
 			delete candidateSeq;
 			

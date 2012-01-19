@@ -20,6 +20,7 @@ PhyloTree::PhyloTree(){
 		tree[0].heirarchyID = "0";
 		maxLevel = 0;
 		calcTotals = true;
+		addSeqToTree("unknown", "unknown;");
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PhyloTree", "PhyloTree");
@@ -127,6 +128,7 @@ PhyloTree::PhyloTree(string tfile){
 		maxLevel = 0;
 		calcTotals = true;
 		string name, tax;
+		addSeqToTree("unknown", "unknown;");
 
 		
 		#ifdef USE_MPI
@@ -232,7 +234,6 @@ string PhyloTree::getNextTaxon(string& heirarchy, string seqname){
 
 int PhyloTree::addSeqToTree(string seqName, string seqTaxonomy){
 	try {
-			
 		numSeqs++;
 		
 		map<string, int>::iterator childPointer;
@@ -375,7 +376,7 @@ void PhyloTree::binUnclassified(string file){
 		map<string, int>::iterator childPointer;
 		
 		vector<TaxNode> copy = tree;
-			
+		
 		//fill out tree
 		fillOutTree(0, copy);
 	
@@ -484,16 +485,16 @@ string PhyloTree::getFullTaxonomy(string seqName) {
 
 void PhyloTree::print(ofstream& out, vector<TaxNode>& copy){
 	try {
-	
+		
 		//output mothur version
 		out << "#" << m->getVersion() << endl;
 		
 		out << copy.size() << endl;
 		
 		out << maxLevel << endl;
-		
+				
 		for (int i = 0; i < copy.size(); i++) {
-	
+				
 			out << copy[i].level << '\t'<< copy[i].name << '\t' << copy[i].children.size() << '\t';
 			
 			map<string,int>::iterator it;
@@ -606,6 +607,7 @@ bool PhyloTree::ErrorCheck(vector<string> templateFileNames){
 	try {
 	
 		bool okay = true;
+		templateFileNames.push_back("unknown");
 		
 		map<string, int>::iterator itFind;
 		map<string, int> taxonomyFileNames = name2Taxonomy;

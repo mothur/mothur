@@ -57,6 +57,8 @@ KmerDB::~KmerDB(){}
 
 vector<int> KmerDB::findClosestSequences(Sequence* candidateSeq, int num){
 	try {
+		if (num > numSeqs) { m->mothurOut("[WARNING]: you requested " + toString(num) + " closest sequences, but the template only contains " + toString(numSeqs) + ", adjusting."); m->mothurOutEndLine(); num = numSeqs; }
+		
 		vector<int> topMatches;
 		Kmer kmer(kmerSize);
 		searchScore = 0;
@@ -211,6 +213,20 @@ int KmerDB::getCount(int kmer) {
 	}
 	catch(exception& e) {
 		m->errorOut(e, "KmerDB", "getCount");
+		exit(1);
+	}	
+}
+/**************************************************************************************************/
+int KmerDB::getReversed(int kmerNumber) {
+	try {
+		Kmer kmer(kmerSize);
+		
+		if (kmerNumber < 0) { return 0; }  //if user gives negative number
+		else if (kmerNumber > maxKmer) {	return 0;	}  //or a kmer that is bigger than maxkmer
+		else {	return kmer.getReverseKmerNumber(kmerNumber);	}  // kmer is in vector range
+	}
+	catch(exception& e) {
+		m->errorOut(e, "KmerDB", "getReversed");
 		exit(1);
 	}	
 }

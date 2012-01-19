@@ -167,7 +167,7 @@ BinSeqCommand::BinSeqCommand(string option) {
 			}
 			
 			namesfile = validParameter.validFile(parameters, "name", true);
-			if (namesfile == "not open") { abort = true; }	
+			if (namesfile == "not open") { namesfile = ""; abort = true; }	
 			else if (namesfile == "not found") { namesfile = ""; }
 			else {  m->setNameFile(namesfile); }
 
@@ -175,6 +175,11 @@ BinSeqCommand::BinSeqCommand(string option) {
 			if (groupfile == "not open") { abort = true; }
 			else if (groupfile == "not found") { groupfile = ""; }
 			else { m->setGroupFile(groupfile); }
+			
+			if (namesfile == ""){
+				vector<string> files; files.push_back(fastafile); 
+				parser.getNameFile(files);
+			}
 			
 		}
 	}

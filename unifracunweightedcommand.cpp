@@ -155,7 +155,7 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option)  {
 			else { m->setGroupFile(groupfile); }
 			
 			namefile = validParameter.validFile(parameters, "name", true);
-			if (namefile == "not open") { abort = true; }
+			if (namefile == "not open") { namefile = ""; abort = true; }
 			else if (namefile == "not found") { namefile = ""; }
 			else { m->setNameFile(namefile); }
 			
@@ -197,6 +197,11 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option)  {
 				groups = "all";
 				m->splitAtDash(groups, Groups);
 				m->setGroups(Groups);
+			}
+			
+			if (namefile == "") {
+				vector<string> files; files.push_back(treefile);
+				parser.getNameFile(files);
 			}
 		}
 		

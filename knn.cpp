@@ -72,11 +72,11 @@ string Knn::getTaxonomy(Sequence* seq) {
 		}
 		
 		if (closestNames.size() == 0) {
-			m->mothurOut("Error: All the matches for sequence " + seq->getName() + " have been eliminated. " + seq->getName() + " will be disregarded."); m->mothurOutEndLine();
-			tax = "bad seq";
+			m->mothurOut("Error: All the matches for sequence " + seq->getName() + " have been eliminated. "); m->mothurOutEndLine();
+			tax = "unknown;";
 		}else{
 			tax = findCommonTaxonomy(closestNames);
-			if (tax == "") { m->mothurOut("There are no common levels for sequence " + seq->getName() + ". " + seq->getName() + " will be disregarded."); m->mothurOutEndLine(); tax = "bad seq"; }
+			if (tax == "") { m->mothurOut("There are no common levels for sequence " + seq->getName() + ". "); m->mothurOutEndLine(); tax = "unknown;"; }
 		}
 		
 		simpleTax = tax;
@@ -90,7 +90,7 @@ string Knn::getTaxonomy(Sequence* seq) {
 /**************************************************************************************************/
 string Knn::findCommonTaxonomy(vector<string> closest)  {
 	try {
-		vector< vector<string> > taxons;  //taxon[0] = vector of taxonomy info for closest[0].
+		/*vector< vector<string> > taxons;  //taxon[0] = vector of taxonomy info for closest[0].
 										//so if closest[0] taxonomy is Bacteria;Alphaproteobacteria;Rhizobiales;Azorhizobium_et_rel.;Methylobacterium_et_rel.;Bosea;
 										//taxon[0][0] = Bacteria, taxon[0][1] = Alphaproteobacteria....
 										
@@ -101,6 +101,7 @@ string Knn::findCommonTaxonomy(vector<string> closest)  {
 			if (m->control_pressed) { return "control"; }
 		
 			string tax = taxonomy[closest[i]];  //we know its there since we checked in getTaxonomy
+			cout << tax << endl;
 		
 			taxons[i] = parseTax(tax);
 		
@@ -128,9 +129,54 @@ string Knn::findCommonTaxonomy(vector<string> closest)  {
 				}
 				break;
 			}
+		}*/
+		
+		string conTax;
+		
+		//create a tree containing sequences from this bin
+		PhyloTree* p = new PhyloTree();
+		
+		for (int i = 0; i < closest.size(); i++) {
+			p->addSeqToTree(closest[i], taxonomy[closest[i]]);
 		}
-	
-		return common;
+		
+		//build tree
+		p->assignHeirarchyIDs(0);
+		
+		TaxNode currentNode = p->get(0);
+		
+		//at each level
+		while (currentNode.children.size() != 0) { //you still have more to explore
+			
+			TaxNode bestChild;
+			int bestChildSize = 0;
+			
+			//go through children
+			for (map<string, int>::iterator itChild = currentNode.children.begin(); itChild != currentNode.children.end(); itChild++) {
+				
+				TaxNode temp = p->get(itChild->second);
+				
+				//select child with largest accessions - most seqs assigned to it
+				if (temp.accessions.size() > bestChildSize) {
+					bestChild = p->get(itChild->second);
+					bestChildSize = temp.accessions.size();
+				}
+				
+			}
+			
+			if (bestChildSize == closest.size()) { //if yes, add it
+				conTax += bestChild.name + ";";
+			}else{ //if no, quit
+				break;
+			}
+			
+			//move down a level
+			currentNode = bestChild;
+		}
+		
+		delete p;	
+		
+		return conTax;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Knn", "findCommonTaxonomy");
