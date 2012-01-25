@@ -29,6 +29,11 @@ public:
 	double calcPearson(vector<vector<double> >&, vector<vector<double> >&);
 	double calcSpearman(vector<vector<double> >&, vector<vector<double> >&);
 	double calcKendall(vector<vector<double> >&, vector<vector<double> >&);
+	
+	double calcPearson(vector<double>&, vector<double>&, double&);
+	double calcSpearman(vector<double>&, vector<double>&, double&);
+	double calcKendall(vector<double>&, vector<double>&, double&);
+	
 
 private:
 	MothurOut* m;

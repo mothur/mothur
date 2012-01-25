@@ -693,7 +693,314 @@ double LinearAlgebra::calcKendall(vector< vector<double> >& euclidDists, vector<
 		exit(1);
 	}
 }
-
+/*********************************************************************************************************************************/
+double LinearAlgebra::calcKendall(vector<double>& x, vector<double>& y, double& sig){
+	try {
+		if (x.size() != y.size()) { m->mothurOut("[ERROR]: vector size mismatch."); m->mothurOutEndLine(); return 0.0; }
+		
+		//format data
+		vector<spearmanRank> xscores; 
+		for (int i = 0; i < x.size(); i++) {
+			spearmanRank member(toString(i), x[i]);
+			xscores.push_back(member);  
+		}
+		
+		//sort xscores
+		sort(xscores.begin(), xscores.end(), compareSpearman);
+		
+		//convert scores to ranks of x
+		vector<spearmanRank*> ties;
+		int rankTotal = 0;
+		for (int j = 0; j < xscores.size(); j++) {
+			rankTotal += (j+1);
+			ties.push_back(&(xscores[j]));
+				
+			if (j != xscores.size()-1) { // you are not the last so you can look ahead
+				if (xscores[j].score != xscores[j+1].score) { // you are done with ties, rank them and continue
+					for (int k = 0; k < ties.size(); k++) {
+						float thisrank = rankTotal / (float) ties.size();
+						(*ties[k]).score = thisrank;
+					}
+					ties.clear();
+					rankTotal = 0;
+				}
+			}else { // you are the last one
+				for (int k = 0; k < ties.size(); k++) {
+					float thisrank = rankTotal / (float) ties.size();
+					(*ties[k]).score = thisrank;
+				}
+			}
+		}
+		
+			
+		//format data
+		vector<spearmanRank> yscores;
+		for (int j = 0; j < y.size(); j++) {
+			spearmanRank member(toString(j), y[j]);
+			yscores.push_back(member);
+		}
+		
+		//sort yscores
+		sort(yscores.begin(), yscores.end(), compareSpearman);
+		
+		//convert to ranks
+		map<string, float> rank;
+		vector<spearmanRank> yties;
+		rankTotal = 0;
+		for (int j = 0; j < yscores.size(); j++) {
+			rankTotal += (j+1);
+			yties.push_back(yscores[j]);
+				
+			if (j != yscores.size()-1) { // you are not the last so you can look ahead
+				if (yscores[j].score != yscores[j+1].score) { // you are done with ties, rank them and continue
+					for (int k = 0; k < yties.size(); k++) {
+						float thisrank = rankTotal / (float) yties.size();
+						rank[yties[k].name] = thisrank;
+					}
+					yties.clear();
+					rankTotal = 0;
+				}
+			}else { // you are the last one
+				for (int k = 0; k < yties.size(); k++) {
+					float thisrank = rankTotal / (float) yties.size();
+					rank[yties[k].name] = thisrank;
+				}
+			}
+		}
+			
+			
+		int numCoor = 0;
+		int numDisCoor = 0;
+		
+		//associate x and y
+		vector<spearmanRank> otus; 
+		for (int l = 0; l < xscores.size(); l++) {   
+			spearmanRank member(xscores[l].name, rank[xscores[l].name]);
+			otus.push_back(member);
+		}
+				
+		int count = 0;
+		for (int l = 0; l < xscores.size(); l++) {
+					
+			int numWithHigherRank = 0;
+			int numWithLowerRank = 0;
+			float thisrank = otus[l].score;
+					
+			for (int u = l+1; u < xscores.size(); u++) {
+				if (otus[u].score > thisrank) { numWithHigherRank++; }
+				else if (otus[u].score < thisrank) { numWithLowerRank++; }
+				count++;
+			}
+					
+			numCoor += numWithHigherRank;
+			numDisCoor += numWithLowerRank;
+		}
+				
+		double p = (numCoor - numDisCoor) / (float) count;
+		
+		//calc signif - zA - http://en.wikipedia.org/wiki/Kendall_tau_rank_correlation_coefficient#Significance_tests
+		double numer = 3.0 * (numCoor - numDisCoor);
+        int n = xscores.size();
+        double denom = n * (n-1) * (2*n + 5) / (double) 2.0;
+        denom = sqrt(denom);
+        sig = numer / denom;
+		
+		if (isnan(sig) || isinf(sig)) { sig = 0.0; }
+		
+		return p;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "LinearAlgebra", "calcKendall");
+		exit(1);
+	}
+}
+/*********************************************************************************************************************************/
+double LinearAlgebra::calcSpearman(vector<double>& x, vector<double>& y, double& sig){
+	try {
+		if (x.size() != y.size()) { m->mothurOut("[ERROR]: vector size mismatch."); m->mothurOutEndLine(); return 0.0; }
+		
+		//format data
+		map<float, int> tableX; 
+		map<float, int>::iterator itTable;
+		vector<spearmanRank> xscores; 
+		
+		for (int i = 0; i < x.size(); i++) {
+			spearmanRank member(toString(i), x[i]);
+			xscores.push_back(member);  
+				
+			//count number of repeats
+			itTable = tableX.find(x[i]);
+			if (itTable == tableX.end()) { 
+				tableX[x[i]] = 1;
+			}else {
+				tableX[x[i]]++;
+			}
+		}
+		
+		
+		//calc LX
+		double Lx = 0.0;
+		for (itTable = tableX.begin(); itTable != tableX.end(); itTable++) {
+			double tx = (double) itTable->second;
+			Lx += ((pow(tx, 3.0) - tx) / 12.0);
+		}
+		
+		
+		//sort x
+		sort(xscores.begin(), xscores.end(), compareSpearman);
+		
+		//convert scores to ranks of x
+		//convert to ranks
+		map<string, float> rankx;
+		vector<spearmanRank> xties;
+		int rankTotal = 0;
+		for (int j = 0; j < xscores.size(); j++) {
+			rankTotal += (j+1);
+			xties.push_back(xscores[j]);
+			
+			if (j != xscores.size()-1) { // you are not the last so you can look ahead
+				if (xscores[j].score != xscores[j+1].score) { // you are done with ties, rank them and continue
+					for (int k = 0; k < xties.size(); k++) {
+						float thisrank = rankTotal / (float) xties.size();
+						rankx[xties[k].name] = thisrank;
+					}
+					xties.clear();
+					rankTotal = 0;
+				}
+			}else { // you are the last one
+				for (int k = 0; k < xties.size(); k++) {
+					float thisrank = rankTotal / (float) xties.size();
+					rankx[xties[k].name] = thisrank;
+				}
+			}
+		}		
+			
+		//format x
+		vector<spearmanRank> yscores;
+		map<float, int> tableY;
+		for (int j = 0; j < y.size(); j++) {
+			spearmanRank member(toString(j), y[j]);
+			yscores.push_back(member);
+				
+			itTable = tableY.find(member.score);
+			if (itTable == tableY.end()) { 
+				tableY[member.score] = 1;
+			}else {
+				tableY[member.score]++;
+			}
+				
+		}
+			
+		//calc Ly
+		double Ly = 0.0;
+		for (itTable = tableY.begin(); itTable != tableY.end(); itTable++) {
+			double ty = (double) itTable->second;
+			Ly += ((pow(ty, 3.0) - ty) / 12.0);
+		}
+			
+		sort(yscores.begin(), yscores.end(), compareSpearman);
+			
+		//convert to ranks
+		map<string, float> rank;
+		vector<spearmanRank> yties;
+		rankTotal = 0;
+		for (int j = 0; j < yscores.size(); j++) {
+			rankTotal += (j+1);
+			yties.push_back(yscores[j]);
+			
+			if (j != yscores.size()-1) { // you are not the last so you can look ahead
+				if (yscores[j].score != yscores[j+1].score) { // you are done with ties, rank them and continue
+					for (int k = 0; k < yties.size(); k++) {
+						float thisrank = rankTotal / (float) yties.size();
+						rank[yties[k].name] = thisrank;
+					}
+					yties.clear();
+					rankTotal = 0;
+				}
+			}else { // you are the last one
+				for (int k = 0; k < yties.size(); k++) {
+					float thisrank = rankTotal / (float) yties.size();
+					rank[yties[k].name] = thisrank;
+				}
+			}
+		}
+		
+		double di = 0.0;
+		for (int k = 0; k < x.size(); k++) {
+					
+			float xi = rankx[toString(k)];
+			float yi = rank[toString(k)];
+					
+			di += ((xi - yi) * (xi - yi));
+		}
+				
+		double p = 0.0;
+				
+		double n = (double) x.size();
+		double SX2 = ((pow(n, 3.0) - n) / 12.0) - Lx;
+		double SY2 = ((pow(n, 3.0) - n) / 12.0) - Ly;
+				
+		p = (SX2 + SY2 - di) / (2.0 * sqrt((SX2*SY2)));
+		
+		//signifigance calc - http://en.wikipedia.org/wiki/Spearman%27s_rank_correlation_coefficient
+		double temp = (x.size()-2) / (double) (1- (p*p));
+		temp = sqrt(temp);
+		sig = p*temp;
+		if (isnan(sig) || isinf(sig)) { sig = 0.0; }
+				
+		return p;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "LinearAlgebra", "calcSpearman");
+		exit(1);
+	}
+}		
+/*********************************************************************************************************************************/
+double LinearAlgebra::calcPearson(vector<double>& x, vector<double>& y, double& sig){
+	try {
+		if (x.size() != y.size()) { m->mothurOut("[ERROR]: vector size mismatch."); m->mothurOutEndLine(); return 0.0; }
+		
+		//find average X
+		float averageX = 0.0; 
+		for (int i = 0; i < x.size(); i++) { averageX += x[i];  }
+		averageX = averageX / (float) x.size(); 
+		
+		//find average Y
+		float sumY = 0.0;
+		for (int j = 0; j < y.size(); j++) { sumY += y[j]; }
+		float Ybar = sumY / (float) y.size();
+			
+		double r = 0.0;
+		double numerator = 0.0;
+		double denomTerm1 = 0.0;
+		double denomTerm2 = 0.0;
+				
+		for (int j = 0; j < x.size(); j++) {
+			float Yi = y[j];
+			float Xi = x[j];
+					
+			numerator += ((Xi - averageX) * (Yi - Ybar));
+			denomTerm1 += ((Xi - averageX) * (Xi - averageX));
+			denomTerm2 += ((Yi - Ybar) * (Yi - Ybar));
+		}
+				
+		double denom = (sqrt(denomTerm1) * sqrt(denomTerm2));
+				
+		r = numerator / denom;
+		
+		//signifigance calc - http://faculty.vassar.edu/lowry/ch4apx.html
+		double temp =  (1- (r*r)) / (double) (x.size()-2);
+		temp = sqrt(temp);
+		sig = r / temp;
+		if (isnan(sig) || isinf(sig)) { sig = 0.0; }
+		
+		return r;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "LinearAlgebra", "calcPearson");
+		exit(1);
+	}
+}			
 /*********************************************************************************************************************************/
 
 vector<vector<double> > LinearAlgebra::getObservedEuclideanDistance(vector<vector<double> >& relAbundData){
