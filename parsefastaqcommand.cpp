@@ -166,7 +166,7 @@ int ParseFastaQCommand::execute(){
 			
 			//sanity check sequence length and number of quality scores match
 			if (name2 != "") { if (name != name2) { m->mothurOut("[ERROR]: names do not match. read " + name + " for fasta and " + name2 + " for quality."); m->mothurOutEndLine(); m->control_pressed = true; break; } }
-			if (quality.length() != sequence.length()) { m->mothurOut("[ERROR]: lengths do not match. read " + toString(sequence.length()) + " characters for fasta and " + toString(quality.length()) + " characters for quality scores."); m->mothurOutEndLine(); m->control_pressed = true; break; }
+			if (quality.length() != sequence.length()) { m->mothurOut("[ERROR]: Lengths do not match for sequence " + name + ". Read " + toString(sequence.length()) + " characters for fasta and " + toString(quality.length()) + " characters for quality scores."); m->mothurOutEndLine(); m->control_pressed = true; break; }
 			
 			//print sequence info to files
 			if (fasta) { outFasta << ">" << name << endl << sequence << endl; }

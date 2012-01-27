@@ -44,7 +44,7 @@ vector<string> CollectCommand::setParameters(){
 		CommandParameter pshared("shared", "InputTypes", "", "", "LRSS", "LRSS", "none",false,false); parameters.push_back(pshared);
 		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
 		CommandParameter pfreq("freq", "Number", "", "100", "", "", "",false,false); parameters.push_back(pfreq);
-		CommandParameter pcalc("calc", "Multiple", "sobs-chao-nseqs-coverage-ace-jack-shannon-shannoneven-np_shannon-heip-smithwilson-simpson-simpsoneven-invsimpson-bootstrap-geometric-qstat-logseries-bergerparker-bstick-goodscoverage-efron-boneh-solow-shen", "sobs-chao-ace-jack-shannon-npshannon-simpson", "", "", "",true,false); parameters.push_back(pcalc);
+		CommandParameter pcalc("calc", "Multiple", "sobs-chao-nseqs-coverage-ace-jack-shannon-shannoneven-npshannon-heip-smithwilson-simpson-simpsoneven-invsimpson-bootstrap-geometric-qstat-logseries-bergerparker-bstick-goodscoverage-efron-boneh-solow-shen", "sobs-chao-ace-jack-shannon-npshannon-simpson", "", "", "",true,false); parameters.push_back(pcalc);
 		CommandParameter pabund("abund", "Number", "", "10", "", "", "",false,false); parameters.push_back(pabund);
 		CommandParameter psize("size", "Number", "", "0", "", "", "",false,false); parameters.push_back(psize);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
@@ -94,7 +94,7 @@ CollectCommand::CollectCommand(){
 		outputTypes["jack"] = tempOutNames;
 		outputTypes["shannon"] = tempOutNames;
 		outputTypes["shannoneven"] = tempOutNames;
-		outputTypes["np_shannon"] = tempOutNames;
+		outputTypes["npshannon"] = tempOutNames;
 		outputTypes["heip"] = tempOutNames;
 		outputTypes["smithwilson"] = tempOutNames;
 		outputTypes["simpson"] = tempOutNames;
@@ -151,7 +151,7 @@ CollectCommand::CollectCommand(string option)  {
 			outputTypes["jack"] = tempOutNames;
 			outputTypes["shannon"] = tempOutNames;
 			outputTypes["shannoneven"] = tempOutNames;
-			outputTypes["np_shannon"] = tempOutNames;
+			outputTypes["npshannon"] = tempOutNames;
 			outputTypes["heip"] = tempOutNames;
 			outputTypes["smithwilson"] = tempOutNames;
 			outputTypes["simpson"] = tempOutNames;
@@ -346,8 +346,8 @@ int CollectCommand::execute(){
 						cDisplays.push_back(new CollectDisplay(new ShannonEven(), new OneColumnFile(fileNameRoot+"shannoneven")));
 						outputNames.push_back(fileNameRoot+"shannoneven"); outputTypes["shannoneven"].push_back(fileNameRoot+"shannoneven");
 					}else if (Estimators[i] == "npshannon") { 
-						cDisplays.push_back(new CollectDisplay(new NPShannon(), new OneColumnFile(fileNameRoot+"np_shannon")));
-						outputNames.push_back(fileNameRoot+"np_shannon"); outputTypes["np_shannon"].push_back(fileNameRoot+"np_shannon");
+						cDisplays.push_back(new CollectDisplay(new NPShannon(), new OneColumnFile(fileNameRoot+"npshannon")));
+						outputNames.push_back(fileNameRoot+"npshannon"); outputTypes["npshannon"].push_back(fileNameRoot+"npshannon");
 					}else if (Estimators[i] == "heip") { 
 						cDisplays.push_back(new CollectDisplay(new Heip(), new OneColumnFile(fileNameRoot+"heip")));
 						outputNames.push_back(fileNameRoot+"heip"); outputTypes["heip"].push_back(fileNameRoot+"heip");
