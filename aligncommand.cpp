@@ -16,7 +16,7 @@
 
 #include "aligncommand.h"
 #include "referencedb.h"
-
+//test comment
 //**********************************************************************************************************************
 vector<string> AlignCommand::setParameters(){	
 	try {
