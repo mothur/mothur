@@ -1,7 +1,7 @@
 #ifndef AVERAGE_H
 #define AVERAGE_H
 
-
+//test
 #include "mothur.h"
 #include "cluster.hpp"
 #include "rabundvector.hpp"
