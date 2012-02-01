@@ -27,7 +27,7 @@ public:
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Get.groups"; }
-	string getDescription()		{ return "gets sequences from a list, fasta, name, group or taxonomy file from a given group or set of groups"; }
+	string getDescription()		{ return "gets sequences from a list, fasta, name, group, shared, design or taxonomy file from a given group or set of groups"; }
 
 	
 	int execute(); 
@@ -39,7 +39,7 @@ private:
 	map<string, string> uniqueToRedundant; //if a namefile is given and the first column name is not selected
 										   //then the other files need to change the unique name in their file to match.
 										   //only add the names that need to be changed to keep the map search quick
-	string accnosfile, fastafile, namefile, groupfile, listfile, taxfile, outputDir, groups, sharedfile;
+	string accnosfile, fastafile, namefile, groupfile, listfile, designfile, taxfile, outputDir, groups, sharedfile;
 	bool abort;
 	vector<string> outputNames, Groups;
 	GroupMap* groupMap;
@@ -52,6 +52,7 @@ private:
 	int readTax();
 	int fillNames();
 	int readShared();
+    int readDesign();
 	
 };
 

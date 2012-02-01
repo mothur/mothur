@@ -27,7 +27,7 @@ public:
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Remove.groups"; }
-	string getDescription()		{ return "removes sequences from a list, fasta, name, group or taxonomy file from a given group or set of groups"; }
+	string getDescription()		{ return "removes sequences from a list, fasta, name, group, shared, design or taxonomy file from a given group or set of groups"; }
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	
@@ -35,7 +35,7 @@ public:
 	
 private:
 	set<string> names;
-	string accnosfile, fastafile, namefile, groupfile, listfile, taxfile, outputDir, groups, sharedfile;
+	string accnosfile, fastafile, namefile, groupfile, designfile, listfile, taxfile, outputDir, groups, sharedfile;
 	bool abort;
 	vector<string> outputNames, Groups;
 	GroupMap* groupMap;
@@ -52,6 +52,7 @@ private:
 	int readList();
 	int readTax();
 	int fillNames();
+    int readDesign();
 	
 };
 

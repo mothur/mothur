@@ -20,6 +20,7 @@ vector<string> RemoveGroupsCommand::setParameters(){
 		CommandParameter pshared("shared", "InputTypes", "", "", "none", "sharedGroup", "none",false,false); parameters.push_back(pshared);
 		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
 		CommandParameter pgroup("group", "InputTypes", "", "", "none", "sharedGroup", "FNGLT",false,false); parameters.push_back(pgroup);
+        CommandParameter pdesign("design", "InputTypes", "", "", "none", "sharedGroup", "FNGLT",false,false); parameters.push_back(pdesign);
 		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "FNGLT",false,false); parameters.push_back(plist);
 		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "none", "FNGLT",false,false); parameters.push_back(ptaxonomy);
 		CommandParameter paccnos("accnos", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(paccnos);
@@ -40,9 +41,9 @@ vector<string> RemoveGroupsCommand::setParameters(){
 string RemoveGroupsCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The remove.groups command removes sequences from a specfic group or set of groups from the following file types: fasta, name, group, list, taxonomy or sharedfile.\n";
+		helpString += "The remove.groups command removes sequences from a specfic group or set of groups from the following file types: fasta, name, group, list, taxonomy, design or sharedfile.\n";
 		helpString += "It outputs a file containing the sequences NOT in the those specified groups, or with a sharedfile eliminates the groups you selected.\n";
-		helpString += "The remove.groups command parameters are accnos, fasta, name, group, list, taxonomy, shared and groups. The group parameter is required, unless you have a current group file or are using a sharedfile.\n";
+		helpString += "The remove.groups command parameters are accnos, fasta, name, group, list, taxonomy, shared, design and groups. The group parameter is required, unless you have a current group file or are using a sharedfile.\n";
 		helpString += "You must also provide an accnos containing the list of groups to remove or set the groups parameter to the groups you wish to remove.\n";
 		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like removed.  You can separate group names with dashes.\n";
 		helpString += "The remove.groups command should be in the following format: remove.groups(accnos=yourAccnos, fasta=yourFasta, group=yourGroupFile).\n";
@@ -69,6 +70,7 @@ RemoveGroupsCommand::RemoveGroupsCommand(){
 		outputTypes["group"] = tempOutNames;
 		outputTypes["list"] = tempOutNames;
 		outputTypes["shared"] = tempOutNames;
+        outputTypes["design"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "RemoveGroupsCommand", "RemoveGroupsCommand");
@@ -106,6 +108,7 @@ RemoveGroupsCommand::RemoveGroupsCommand(string option)  {
 			outputTypes["group"] = tempOutNames;
 			outputTypes["list"] = tempOutNames;
 			outputTypes["shared"] = tempOutNames;
+            outputTypes["design"] = tempOutNames;
 			
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
@@ -171,6 +174,14 @@ RemoveGroupsCommand::RemoveGroupsCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("design");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["design"] = inputDir + it->second;		}
+				}
 			}
 			
 			
@@ -204,6 +215,11 @@ RemoveGroupsCommand::RemoveGroupsCommand(string option)  {
 			if (taxfile == "not open") { taxfile = ""; abort = true; }
 			else if (taxfile == "not found") {  taxfile = "";  }
 			else { m->setTaxonomyFile(taxfile); }
+            
+            designfile = validParameter.validFile(parameters, "design", true);
+			if (designfile == "not open") { designfile = ""; abort = true; }
+			else if (designfile == "not found") {  designfile = "";  }
+			else { m->setDesignFile(designfile); }
 			
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = ""; }
@@ -222,7 +238,7 @@ RemoveGroupsCommand::RemoveGroupsCommand(string option)  {
 			else if (groupfile == "not found") {  	groupfile = "";	}
 			else { m->setGroupFile(groupfile); }	
 			
-			if ((sharedfile == "") && (groupfile == "")) { 
+			if ((sharedfile == "") && (groupfile == "") && (designfile == "")) { 
 				//is there are current file available for any of these?
 				if ((namefile != "") || (fastafile != "") || (listfile != "") || (taxfile != "")) {
 					//give priority to group, then shared
@@ -243,7 +259,11 @@ RemoveGroupsCommand::RemoveGroupsCommand(string option)  {
 						groupfile = m->getGroupFile(); 
 						if (groupfile != "") { m->mothurOut("Using " + groupfile + " as input file for the group parameter."); m->mothurOutEndLine(); }
 						else { 
-							m->mothurOut("You have no current groupfile or sharedfile and one is required."); m->mothurOutEndLine(); abort = true;
+							designfile = m->getDesignFile(); 
+                            if (designfile != "") { m->mothurOut("Using " + designfile + " as input file for the design parameter."); m->mothurOutEndLine(); }
+                            else { 
+                                m->mothurOut("You have no current groupfile or sharedfile or designfile and one is required."); m->mothurOutEndLine(); abort = true;
+                            }
 						}
 					}
 				}
@@ -251,7 +271,7 @@ RemoveGroupsCommand::RemoveGroupsCommand(string option)  {
 			
 			if ((accnosfile == "") && (Groups.size() == 0)) { m->mothurOut("You must provide an accnos file containing group names or specify groups using the groups parameter."); m->mothurOutEndLine(); abort = true; }
 			
-			if ((fastafile == "") && (namefile == "") && (groupfile == "")  && (sharedfile == "") && (listfile == "") && (taxfile == ""))  { m->mothurOut("You must provide at least one of the following: fasta, name, taxonomy, group, shared or list."); m->mothurOutEndLine(); abort = true; }
+			if ((fastafile == "") && (namefile == "") && (groupfile == "")  && (sharedfile == "") && (designfile == "") && (listfile == "") && (taxfile == ""))  { m->mothurOut("You must provide at least one of the following: fasta, name, taxonomy, group, shared, design or list."); m->mothurOutEndLine(); abort = true; }
 			if ((groupfile == "") && ((namefile != "") || (fastafile != "") || (listfile != "") || (taxfile != "")))  { m->mothurOut("If using a fasta, name, taxonomy, group or list, then you must provide a group file."); m->mothurOutEndLine(); abort = true; }
 			
 			if ((namefile == "") && ((fastafile != "") || (taxfile != ""))){
@@ -303,6 +323,7 @@ int RemoveGroupsCommand::execute(){
 		if (listfile != "")			{		readList();		}
 		if (taxfile != "")			{		readTax();		}
 		if (sharedfile != "")		{		readShared();	}
+        if (designfile != "")		{		readDesign();	}
 		
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 				
@@ -342,6 +363,11 @@ int RemoveGroupsCommand::execute(){
 			itTypes = outputTypes.find("shared");
 			if (itTypes != outputTypes.end()) {
 				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setSharedFile(current); }
+			}
+            
+            itTypes = outputTypes.find("design");
+			if (itTypes != outputTypes.end()) {
+				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setDesignFile(current); }
 			}
 		}
 		
@@ -713,6 +739,54 @@ int RemoveGroupsCommand::readGroup(){
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
+int RemoveGroupsCommand::readDesign(){
+	try {
+		string thisOutputDir = outputDir;
+		if (outputDir == "") {  thisOutputDir += m->hasPath(designfile);  }
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(designfile)) + "pick" + m->getExtension(designfile);
+		
+		ofstream out;
+		m->openOutputFile(outputFileName, out);
+		
+		ifstream in;
+		m->openInputFile(designfile, in);
+		string name, group;
+		
+		bool wroteSomething = false;
+		int removedCount = 0;
+		
+		while(!in.eof()){
+			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+			
+			in >> name;				//read from first column
+			in >> group;			//read from second column
+			
+			//if this name is in the accnos file
+			if (!(m->inUsersGroups(name, Groups))) {
+				wroteSomething = true;
+				out << name << '\t' << group << endl;
+			}else {  removedCount++;  }
+			
+			m->gobble(in);
+		}
+		in.close();
+		out.close();
+		
+		if (wroteSomething == false) {  m->mothurOut("Your file contains only groups from the groups you wish to remove."); m->mothurOutEndLine();  }
+		outputTypes["design"].push_back(outputFileName); outputNames.push_back(outputFileName);
+		
+		m->mothurOut("Removed " + toString(removedCount) + " groups from your design file."); m->mothurOutEndLine();
+        
+		
+		return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "RemoveGroupsCommand", "readDesign");
+		exit(1);
+	}
+}
+
 //**********************************************************************************************************************
 int RemoveGroupsCommand::readTax(){
 	try {

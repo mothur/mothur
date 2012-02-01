@@ -275,7 +275,7 @@ int CorrAxesCommand::execute(){
 		if (metadatafile == "") {  out << "OTU";	}
 		else {  out << "Feature";						}
 
-		for (int i = 0; i < numaxes; i++) { out << '\t' << "axis" << (i+1); }
+		for (int i = 0; i < numaxes; i++) { out << '\t' << "axis" << (i+1) << "\tp-value"; }
 		out << "\tlength" << endl;
 		
 		if (method == "pearson")		{  calcPearson(axes, out);	}
@@ -349,8 +349,19 @@ int CorrAxesCommand::calcPearson(map<string, vector<float> >& axes, ofstream& ou
 			   double denom = (sqrt(denomTerm1) * sqrt(denomTerm2));
 			   
 			   r = numerator / denom;
+               
+               if (isnan(r) || isinf(r)) { r = 0.0; }
+               
 			   rValues[k] = r;
 			   out << '\t' << r; 
+               
+               //signifigance calc - http://faculty.vassar.edu/lowry/ch4apx.html
+               double temp =  (1- (r*r)) / (double) (lookupFloat.size()-2);
+               temp = sqrt(temp);
+               double sig = r / temp;
+               if (isnan(sig) || isinf(sig)) { sig = 0.0; }
+               
+               out << '\t' << sig;
 		   }
 		   
 		   double sum = 0;
@@ -515,9 +526,20 @@ int CorrAxesCommand::calcSpearman(map<string, vector<float> >& axes, ofstream& o
 				
 				p = (SX2 + SY2 - di) / (2.0 * sqrt((SX2*SY2)));
 				
+                if (isnan(p) || isinf(p)) { p = 0.0; }
+                
 				out  << '\t' << p;
 				
 				pValues[j] = p;
+                
+                //signifigance calc - http://en.wikipedia.org/wiki/Spearman%27s_rank_correlation_coefficient
+                double temp = (lookupFloat.size()-2) / (double) (1- (p*p));
+                temp = sqrt(temp);
+                double sig = p*temp;
+                if (isnan(sig) || isinf(sig)) { sig = 0.0; }
+                
+                out  << '\t' << sig;
+                
 			}
 
 			double sum = 0;
@@ -651,10 +673,21 @@ int CorrAxesCommand::calcKendall(map<string, vector<float> >& axes, ofstream& ou
 				}
 				
 				double p = (numCoor - numDisCoor) / (float) count;
-
+                 if (isnan(p) || isinf(p)) { p = 0.0; }
+                
 				out << '\t' << p;
 				pValues[j] = p;
-
+                
+                //calc signif - zA - http://en.wikipedia.org/wiki/Kendall_tau_rank_correlation_coefficient#Significance_tests
+                double numer = 3.0 * (numCoor - numDisCoor);
+                int n = scores[j].size();
+                double denom = n * (n-1) * (2*n + 5) / (double) 2.0;
+                denom = sqrt(denom);
+                double sig = numer / denom;
+                
+                if (isnan(sig) || isinf(sig)) { sig = 0.0; }
+                
+                out << '\t' << sig;
 			}
 			
 			double sum = 0;
