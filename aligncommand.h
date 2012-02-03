@@ -25,7 +25,7 @@
 #include "nast.hpp"
 #include "nastreport.hpp"
 
-//test
+
 class AlignCommand : public Command {
 	
 public:
