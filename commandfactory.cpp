@@ -127,6 +127,7 @@
 #include "shhhseqscommand.h"
 #include "summaryqualcommand.h"
 #include "otuassociationcommand.h"
+#include "sortseqscommand.h"
 
 /*******************************************************/
 
@@ -275,6 +276,7 @@ CommandFactory::CommandFactory(){
 	commands["summary.qual"]		= "summary.qual";
 	commands["shhh.seqs"]			= "shhh.seqs";
 	commands["otu.association"]		= "otu.association";
+    commands["sort.seqs"]           = "sort.seqs";
 	commands["quit"]				= "MPIEnabled"; 
 
 }
@@ -436,6 +438,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "chimera.perseus")		{	command = new ChimeraPerseusCommand(optionString);			}
 		else if(commandName == "shhh.seqs")				{	command = new ShhhSeqsCommand(optionString);				}
 		else if(commandName == "otu.association")		{	command = new OTUAssociationCommand(optionString);			}
+        else if(commandName == "sort.seqs")             {	command = new SortSeqsCommand(optionString);                }
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -581,6 +584,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "chimera.perseus")		{	pipecommand = new ChimeraPerseusCommand(optionString);			}
 		else if(commandName == "shhh.seqs")				{	pipecommand = new ShhhSeqsCommand(optionString);				}
 		else if(commandName == "otu.association")		{	pipecommand = new OTUAssociationCommand(optionString);			}
+        else if(commandName == "sort.seqs")             {	pipecommand = new SortSeqsCommand(optionString);                }
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -714,6 +718,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "chimera.perseus")		{	shellcommand = new ChimeraPerseusCommand();			}
 		else if(commandName == "shhh.seqs")				{	shellcommand = new ShhhSeqsCommand();				}
 		else if(commandName == "otu.association")		{	shellcommand = new OTUAssociationCommand();			}
+        else if(commandName == "sort.seqs")             {	shellcommand = new SortSeqsCommand();               }
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;
