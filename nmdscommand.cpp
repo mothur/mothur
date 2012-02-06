@@ -156,7 +156,7 @@ NMDSCommand::NMDSCommand(string option)  {
 			m->mothurConvert(temp, epsilon); 
 			
 			if (mindim < 1) { m->mothurOut("mindim must be at least 1."); m->mothurOutEndLine(); abort = true; }
-			if (maxdim < mindim) { m->mothurOut("maxdim must be greater than mindim."); m->mothurOutEndLine(); abort = true; }
+			if (maxdim < mindim) { maxdim = mindim; }
 		}
 		
 	}

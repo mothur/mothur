@@ -14,6 +14,7 @@
 vector<string> SortSeqsCommand::setParameters(){	
 	try {
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pfasta);
+        CommandParameter pflow("flow", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pflow);
 		CommandParameter pname("name", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pname);
 		CommandParameter pgroup("group", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pgroup);
 		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(ptaxonomy);
@@ -36,8 +37,8 @@ vector<string> SortSeqsCommand::setParameters(){
 string SortSeqsCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The sort.seqs command puts the sequences in the same order for the following file types: accnos fasta, name, group, taxonomy or quality file.\n";
-        helpString += "The sort.seqs command parameters are accnos, fasta, name, group, taxonomy, qfile and large.\n";
+		helpString += "The sort.seqs command puts the sequences in the same order for the following file types: accnos fasta, name, group, taxonomy, flow or quality file.\n";
+        helpString += "The sort.seqs command parameters are accnos, fasta, name, group, taxonomy, flow, qfile and large.\n";
         helpString += "The accnos file allows you to specify the order you want the files in.  If none is provided, mothur will use the order of the first file it reads.\n";
         helpString += "The large parameters is used to indicate your files are too large to fit in RAM.\n";
 		helpString += "The sort.seqs command should be in the following format: sort.seqs(fasta=yourFasta).\n";
@@ -63,6 +64,7 @@ SortSeqsCommand::SortSeqsCommand(){
 		outputTypes["name"] = tempOutNames;
 		outputTypes["group"] = tempOutNames;
 		outputTypes["qfile"] = tempOutNames;
+        outputTypes["flow"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SortSeqsCommand", "SortSeqsCommand");
@@ -99,6 +101,7 @@ SortSeqsCommand::SortSeqsCommand(string option)  {
 			outputTypes["name"] = tempOutNames;
 			outputTypes["group"] = tempOutNames;
 			outputTypes["qfile"] = tempOutNames;
+            outputTypes["flow"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
@@ -155,6 +158,14 @@ SortSeqsCommand::SortSeqsCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["accnos"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("flow");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["flow"] = inputDir + it->second;		}
+				}
 			}
             
 			
@@ -168,6 +179,11 @@ SortSeqsCommand::SortSeqsCommand(string option)  {
 			if (fastafile == "not open") { fastafile = ""; abort = true; }
 			else if (fastafile == "not found") {  fastafile = "";  }	
 			else { m->setFastaFile(fastafile); }
+            
+            flowfile = validParameter.validFile(parameters, "flow", true);
+			if (flowfile == "not open") { flowfile = ""; abort = true; }
+			else if (flowfile == "not found") {  flowfile = "";  }	
+			else { m->setFlowFile(flowfile); }
             
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not open") { namefile = ""; abort = true; }
@@ -192,7 +208,7 @@ SortSeqsCommand::SortSeqsCommand(string option)  {
             string temp = validParameter.validFile(parameters, "large", false);		if (temp == "not found") { temp = "f"; }
 			large = m->isTrue(temp);
             
-			if ((fastafile == "") && (namefile == "") && (groupfile == "") && (taxfile == "") && (qualfile == ""))  { m->mothurOut("You must provide at least one of the following: fasta, name, group, taxonomy or quality."); m->mothurOutEndLine(); abort = true; }
+			if ((fastafile == "") && (namefile == "") && (groupfile == "") && (taxfile == "") && (flowfile == "") && (qualfile == ""))  { m->mothurOut("You must provide at least one of the following: fasta, name, group, taxonomy, flow or quality."); m->mothurOutEndLine(); abort = true; }
 			
 			if ((fastafile != "") && (namefile == "")) {
 				vector<string> files; files.push_back(fastafile);
@@ -216,6 +232,7 @@ int SortSeqsCommand::execute(){
 		//read through the correct file and output lines you want to keep
         if (accnosfile != "")		{		readAccnos();	}
 		if (fastafile != "")		{		readFasta();	}
+        if (flowfile != "")         {		readFlow();	}
         if (qualfile != "")			{		readQual();		}
         if (namefile != "")			{		readName();		}
 		if (groupfile != "")		{		readGroup();	}
@@ -255,7 +272,12 @@ int SortSeqsCommand::execute(){
 			itTypes = outputTypes.find("qfile");
 			if (itTypes != outputTypes.end()) {
 				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setQualFile(current); }
-			}			
+			}	
+            
+            itTypes = outputTypes.find("flow");
+			if (itTypes != outputTypes.end()) {
+				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setFlowFile(current); }
+			}	
 		}
 		
 		return 0;		
@@ -319,6 +341,7 @@ int SortSeqsCommand::readFasta(){
                 int times = 0;
                 
                 vector<Sequence> seqs; seqs.resize(size);
+                for (int i = 0; i < seqs.size(); i++) { seqs[i].setName(""); } //this is so if some of the seqs are missing we dont print out garbage
                 
                 while (numLeft > 0) {
                     
@@ -363,7 +386,7 @@ int SortSeqsCommand::readFasta(){
                     if (numLeft < seqs.size()) { output = numLeft; }
                         
                     for (int i = 0; i < output; i++) {
-                        seqs[i].printSequence(out2);
+                        if (seqs[i].getName() != "") { seqs[i].printSequence(out2); }
                     }
                     out2.close();
                     
@@ -375,6 +398,7 @@ int SortSeqsCommand::readFasta(){
             }else {
                 
                 vector<Sequence> seqs; seqs.resize(names.size());
+                for (int i = 0; i < seqs.size(); i++) { seqs[i].setName(""); } //this is so if some of the seqs are missing we dont print out garbage
                 
                 while(!in.eof()){
                     if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
@@ -396,12 +420,15 @@ int SortSeqsCommand::readFasta(){
                 }
                 in.close();	
                 
+                int count = 0;
                 for (int i = 0; i < seqs.size(); i++) {
-                    seqs[i].printSequence(out);
+                    if (seqs[i].getName() != "") {
+                        seqs[i].printSequence(out); count++;
+                    }
                 }
                 out.close();
                 
-                m->mothurOut("Ordered " + toString(seqs.size()) + " sequences from " + fastafile + ".\n");
+                m->mothurOut("Ordered " + toString(count) + " sequences from " + fastafile + ".\n");
             }
                         
         }else { //read in file to fill names
@@ -435,6 +462,184 @@ int SortSeqsCommand::readFasta(){
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
+int SortSeqsCommand::readFlow(){
+	try {
+		string thisOutputDir = outputDir;
+		if (outputDir == "") {  thisOutputDir += m->hasPath(flowfile);  }
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(flowfile)) + "sorted" + m->getExtension(flowfile);
+		outputTypes["flow"].push_back(outputFileName);  outputNames.push_back(outputFileName);
+        
+		ofstream out;
+		m->openOutputFile(outputFileName, out);
+		
+		ifstream in;
+		m->openInputFile(flowfile, in);
+        int numFlows;
+		string name;
+        
+        in >> numFlows; m->gobble(in);
+		
+        if (names.size() != 0) {//this is not the first file we are reading so we need to use the order we already have
+            
+            if (large) { //if the file is too large to fit in memory we can still process it, but the io will be very time consuming.
+                //read through the file looking for 1000 seqs at a time. Once we find them output them and start looking for the next 1000.
+                //this way we only store 1000 seqs in memory at a time.
+                
+                int numNames = names.size();
+                int numNamesInFile = 0;
+                
+                //to make sure we dont miss any seqs, add any seqs that are not in names but in the file to the end of names
+                while(!in.eof()){
+                    if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+                    
+                    in >> name;	
+                    string rest = m->getline(in);
+                    
+                    if (name != "") {
+                        numNamesInFile++;
+                        map<string, int>::iterator it = names.find(name);
+                        if (it == names.end()) { 
+                            names[name] = numNames; numNames++;
+                            m->mothurOut(name + " was not in the contained the file which determined the order, adding it to the end.\n");
+                        }
+                    }
+                    m->gobble(in);
+                }
+                in.close();
+                out.close();
+                
+                int numLeft = names.size();
+                if (numNamesInFile < numLeft) { numLeft = numNamesInFile; }
+                
+                int size = 1000; //assume that user can hold 1000 seqs in memory
+                if (numLeft < size) { size = numLeft; }
+                int times = 0;
+                
+                vector<string> seqs; seqs.resize(size, "");
+                
+                while (numLeft > 0) {
+                    
+                    ifstream in2;
+                    m->openInputFile(flowfile, in2); in2 >> numFlows; m->gobble(in2);
+                    
+                    if (m->control_pressed) { in2.close();  m->mothurRemove(outputFileName);  return 0; }
+                    
+                    int found = 0;
+                    int needToFind = size;
+                    if (numLeft < size) { needToFind = numLeft; }
+                    
+                    while(!in2.eof()){
+                        if (m->control_pressed) { in2.close();   m->mothurRemove(outputFileName);  return 0; }
+                        
+                        //stop reading if we already found the seqs we are looking for
+                        if (found >= needToFind) { break; }
+                        
+                        in2 >> name;	
+                        string rest = m->getline(in2);
+                        
+                        if (name != "") {
+                            map<string, int>::iterator it = names.find(name);
+                            if (it != names.end()) { //we found it, so put it in the vector in the right place.
+                                //is it in the set of seqs we are looking for this time around
+                                int thisSeqsPlace = it->second;
+                                thisSeqsPlace -= (times * size);
+                                if ((thisSeqsPlace < size) && (thisSeqsPlace >= 0)) {
+                                    seqs[thisSeqsPlace] = (name +'\t' + rest); 
+                                    found++;
+                                }
+                            }else { m->mothurOut("[ERROR]: in logic of readFlow function.\n"); m->control_pressed = true; }
+                        }
+                        m->gobble(in2);
+                    }
+                    in2.close();	
+                    
+                    ofstream out2;
+                    m->openOutputFileAppend(outputFileName, out2);
+                    
+                    int output = seqs.size();
+                    if (numLeft < seqs.size()) { output = numLeft; }
+                    
+                    for (int i = 0; i < output; i++) {
+                        if (seqs[i] != "") {
+                            out2 << seqs[i] << endl;
+                        }
+                    }
+                    out2.close();
+                    
+                    times++;
+                    numLeft -= output;
+                }
+                
+                m->mothurOut("Ordered " + toString(numNamesInFile) + " flows from " + flowfile + ".\n");
+            }else {
+                
+                vector<string> seqs; seqs.resize(names.size(), "");
+                
+                while(!in.eof()){
+                    if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+                    
+                    in >> name;	
+                    string rest = m->getline(in);
+                    
+                    if (name != "") {
+                        map<string, int>::iterator it = names.find(name);
+                        if (it != names.end()) { //we found it, so put it in the vector in the right place.
+                            seqs[it->second] = (name + '\t' + rest);  
+                        }else { //if we cant find it then add it to the end
+                            names[name] = seqs.size();
+                            seqs.push_back((name + '\t' + rest));
+                            m->mothurOut(name + " was not in the contained the file which determined the order, adding it to the end.\n");
+                        }
+                    }
+                    m->gobble(in);
+                }
+                in.close();	
+                
+                int count = 0;
+                for (int i = 0; i < seqs.size(); i++) {
+                    if (seqs[i] != "") {
+                        out << seqs[i] << endl;
+                        count++;
+                    }
+                }
+                out.close();
+                
+                m->mothurOut("Ordered " + toString(count) + " flows from " + flowfile + ".\n");
+            }
+            
+        }else { //read in file to fill names
+            int count = 0;
+            
+            while(!in.eof()){
+                if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+                
+                in >> name;	
+                string rest = m->getline(in);
+                
+                if (name != "") {
+                    //if this name is in the accnos file
+                    names[name] = count;
+                    count++;
+                    out << name << '\t' << rest << endl;
+                }
+                m->gobble(in);
+            }
+            in.close();	
+            out.close();
+            
+            m->mothurOut("\nUsing " + flowfile + " to determine the order. It contains " + toString(count) + " flows.\n");
+        }
+        
+		return 0;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SortSeqsCommand", "readFlow");
+		exit(1);
+	}
+}
+
 //**********************************************************************************************************************
 int SortSeqsCommand::readQual(){
 	try {
@@ -489,6 +694,7 @@ int SortSeqsCommand::readQual(){
 
                 
                 vector<QualityScores> seqs; seqs.resize(size);
+                for (int i = 0; i < seqs.size(); i++) { seqs[i].setName(""); } //this is so if some of the seqs are missing we dont print out garbage
                 
                 while (numLeft > 0) {
                     
@@ -534,7 +740,9 @@ int SortSeqsCommand::readQual(){
                     if (numLeft < seqs.size()) { output = numLeft; }
                     
                     for (int i = 0; i < output; i++) {
-                        seqs[i].printQScores(out2);
+                        if (seqs[i].getName() != "") {
+                            seqs[i].printQScores(out2);
+                        }
                     }
                     out2.close();
                     
@@ -547,6 +755,7 @@ int SortSeqsCommand::readQual(){
             }else {
                 
                 vector<QualityScores> seqs; seqs.resize(names.size());
+                for (int i = 0; i < seqs.size(); i++) { seqs[i].setName(""); } //this is so if some of the seqs are missing we dont print out garbage
                 
                 while(!in.eof()){
                     if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
@@ -569,12 +778,13 @@ int SortSeqsCommand::readQual(){
                 }
                 in.close();	
                 
+                int count = 0;
                 for (int i = 0; i < seqs.size(); i++) {
-                    seqs[i].printQScores(out);
+                    if (seqs[i].getName() != "") { seqs[i].printQScores(out); count++; }
                 }
                 out.close();
                 
-                m->mothurOut("Ordered " + toString(seqs.size()) + " sequences from " + qualfile + ".\n");
+                m->mothurOut("Ordered " + toString(count) + " sequences from " + qualfile + ".\n");
             }
             
         }else { //read in file to fill names
@@ -627,7 +837,7 @@ int SortSeqsCommand::readName(){
 		
         if (names.size() != 0) {//this is not the first file we are reading so we need to use the order we already have
         
-                vector<string> seqs; seqs.resize(names.size());
+                vector<string> seqs; seqs.resize(names.size(), "");
                 
                 while(!in.eof()){
                     if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
@@ -648,12 +858,13 @@ int SortSeqsCommand::readName(){
                 }
                 in.close();	
                 
+                int count = 0;
                 for (int i = 0; i < seqs.size(); i++) {
-                    out << seqs[i] << endl;
+                    if (seqs[i] != "") { out << seqs[i] << endl; count++; }
                 }
                 out.close();
                 
-                m->mothurOut("Ordered " + toString(seqs.size()) + " sequences from " + namefile + ".\n");
+                m->mothurOut("Ordered " + toString(count) + " sequences from " + namefile + ".\n");
             
         }else { //read in file to fill names
             int count = 0;
@@ -703,7 +914,7 @@ int SortSeqsCommand::readGroup(){
 		
 		if (names.size() != 0) {//this is not the first file we are reading so we need to use the order we already have
             
-            vector<string> seqs; seqs.resize(names.size());
+            vector<string> seqs; seqs.resize(names.size(), "");
             
             while(!in.eof()){
                 if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
@@ -724,12 +935,13 @@ int SortSeqsCommand::readGroup(){
             }
             in.close();	
             
+            int count = 0;
             for (int i = 0; i < seqs.size(); i++) {
-                out << seqs[i] << endl;
+                if (seqs[i] != "") { out << seqs[i] << endl; count++; }
             }
             out.close();
             
-            m->mothurOut("Ordered " + toString(seqs.size()) + " sequences from " + groupfile + ".\n");
+            m->mothurOut("Ordered " + toString(count) + " sequences from " + groupfile + ".\n");
             
         }else { //read in file to fill names
             int count = 0;
@@ -778,7 +990,7 @@ int SortSeqsCommand::readTax(){
 		
 		if (names.size() != 0) {//this is not the first file we are reading so we need to use the order we already have
             
-            vector<string> seqs; seqs.resize(names.size());
+            vector<string> seqs; seqs.resize(names.size(), "");
             
             while(!in.eof()){
                 if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
@@ -799,12 +1011,13 @@ int SortSeqsCommand::readTax(){
             }
             in.close();	
             
+            int count = 0;
             for (int i = 0; i < seqs.size(); i++) {
-                out << seqs[i] << endl;
+                if (seqs[i] != "") { out << seqs[i] << endl; count++; }
             }
             out.close();
             
-            m->mothurOut("Ordered " + toString(seqs.size()) + " sequences from " + taxfile + ".\n");
+            m->mothurOut("Ordered " + toString(count) + " sequences from " + taxfile + ".\n");
             
         }else { //read in file to fill names
             int count = 0;

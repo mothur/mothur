@@ -295,7 +295,7 @@ int TrimFlowsCommand::execute(){
 							m->mothurRemove(barcodePrimerComboFileNames[i][j]);
 						}
 						else{
-							output << barcodePrimerComboFileNames[i][j] << endl;
+							output << m->getFullPathName(barcodePrimerComboFileNames[i][j]) << endl;
 							outputNames.push_back(barcodePrimerComboFileNames[i][j]);
 							outputTypes["flow"].push_back(barcodePrimerComboFileNames[i][j]);
 						}
@@ -309,7 +309,7 @@ int TrimFlowsCommand::execute(){
 			flowFilesFileName = outputDir + m->getRootName(m->getSimpleName(flowFileName)) + "flow.files";
 			m->openOutputFile(flowFilesFileName, output);
 			
-			output << trimFlowFileName << endl;
+			output << m->getFullPathName(trimFlowFileName) << endl;
 			
 			output.close();
 		}
