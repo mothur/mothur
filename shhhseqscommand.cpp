@@ -161,7 +161,8 @@ ShhhSeqsCommand::ShhhSeqsCommand(string option) {
 			
 			string temp	= validParameter.validFile(parameters, "sigma", false);		if(temp == "not found"){	temp = "0.01"; }
 			m->mothurConvert(temp, sigma); 
-			
+			sigma = 1/sigma;
+            
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
 			m->mothurConvert(temp, processors);
