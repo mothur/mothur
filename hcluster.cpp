@@ -752,7 +752,7 @@ seqDist HCluster::getNextDist(char* buffer, int& index, int size){
 		exit(1);
 	}
 }
-/***********************************************************************/
+***********************************************************************/
 int HCluster::processFile() {
 	try {
 		string firstName, secondName;

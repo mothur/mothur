@@ -44,7 +44,7 @@ private:
 	
 	bool abort;
 	string fastafile, groupfile, outputDir, namefile;
-	int processors;
+	int processors, alignLength;
 	double cutoff, alpha, beta;
 	
 	vector<string> outputNames;

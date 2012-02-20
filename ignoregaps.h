@@ -21,7 +21,6 @@ class ignoreGaps : public Dist {
 public:
 	
 	ignoreGaps() {}
-	ignoreGaps(const ignoreGaps& ddb) {}
 	
 	void calcDist(Sequence A, Sequence B){		
 		int diff = 0;

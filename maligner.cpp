@@ -612,7 +612,7 @@ vector<trace_struct> Maligner::extractHighestPath(vector<vector<score_struct> > 
 	}
 }
 
-//***************************************************************************************************************
+***************************************************************************************************************
 
 vector<trace_struct> Maligner::mapTraceRegionsToAlignment(vector<score_struct> path, vector<Sequence*> seqs) {
 	try {

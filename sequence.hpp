@@ -28,9 +28,6 @@ public:
 	Sequence(string, string);
 	Sequence(ifstream&);
 	Sequence(istringstream&);
-	Sequence(const Sequence& se) : name(se.name), unaligned(se.unaligned), aligned(se.aligned), pairwise(se.pairwise), numBases(se.numBases), startPos(se.startPos), endPos(se.endPos),
-									alignmentLength(se.alignmentLength), isAligned(se.isAligned), longHomoPolymer(se.longHomoPolymer), ambigBases(se.ambigBases) { m = MothurOut::getInstance(); }
-	
 	//these constructors just set the unaligned string to save space
 	Sequence(string, string, string);  
 	Sequence(ifstream&, string);

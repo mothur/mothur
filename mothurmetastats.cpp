@@ -217,7 +217,7 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
 			if(qvalues[i] < threshold){
 				m->mothurOut("Feature " + toString((i+1)) + " is significant, q = "); 
 				cout << qvalues[i];
-				m->mothurOutJustToLog(toString(pvalues[i])); m->mothurOutEndLine();
+				m->mothurOutJustToLog(toString(qvalues[i])); m->mothurOutEndLine();
 			}	
 		}
 		
@@ -492,6 +492,12 @@ int MothurMetastats::calc_twosample_ts(vector<double>& Pmatrix, int secondGroupi
 vector<double> MothurMetastats::calc_qvalues(vector<double>& pValues) {
 	try {
 		
+       /* cout << "x <- c(" << pValues[0];
+        for (int l = 1; l < pValues.size(); l++){
+            cout << ", " << pValues[l];
+        }
+        cout << ")\n";*/
+        
 		int numRows = pValues.size();
 		vector<double> qvalues(numRows, 0.0);
 

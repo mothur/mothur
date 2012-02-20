@@ -212,8 +212,8 @@ void MothurOut::mothurOut(string output) {
 			if (pid == 0) { //only one process should output to screen
 		#endif
 		
-		cout << output;
 		out << output;
+        logger() << output;
 		
 		#ifdef USE_MPI
 			}
@@ -234,8 +234,8 @@ void MothurOut::mothurOutEndLine() {
 			if (pid == 0) { //only one process should output to screen
 		#endif
 		
-		cout << endl;
 		out << endl;
+        logger() << endl;
 		
 		#ifdef USE_MPI
 			}
@@ -257,13 +257,15 @@ void MothurOut::mothurOut(string output, ofstream& outputFile) {
 		if (pid == 0) { //only one process should output to screen
 #endif
 			
-			cout << output;
+			
 			out << output;
 			outputFile << output;
+            logger() << output;
 			
 #ifdef USE_MPI
 		}
 #endif
+        
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "MothurOut");
@@ -280,9 +282,9 @@ void MothurOut::mothurOutEndLine(ofstream& outputFile) {
 		if (pid == 0) { //only one process should output to screen
 #endif
 			
-			cout << endl;
 			out << endl;
 			outputFile << endl;
+            logger() << endl;
 			
 #ifdef USE_MPI
 		}
@@ -726,7 +728,7 @@ string MothurOut::getFullPathName(string fileName){
 					}else if (path[(pos-1)] == '/') { //you want the current working dir ./
 						path = path.substr(0, pos);
 					}else if (pos == 1) { break;  //you are at the end
-					}else { cout << "cannot resolve path for " <<  fileName << endl; return fileName; }
+					}else { mothurOut("cannot resolve path for " +  fileName + "\n"); return fileName; }
 				}
 			
 				for (int i = index; i >= 0; i--) {
@@ -772,7 +774,7 @@ string MothurOut::getFullPathName(string fileName){
 					}else if (path[(pos-1)] == '\\') { //you want the current working dir ./
 						path = path.substr(0, pos);
 					}else if (pos == 1) { break;  //you are at the end
-					}else { cout << "cannot resolve path for " <<  fileName << endl; return fileName; }
+					}else { mothurOut("cannot resolve path for " +  fileName + "\n"); return fileName; }
 				}
 			
 				for (int i = index; i >= 0; i--) {
@@ -1151,7 +1153,7 @@ vector<unsigned long long> MothurOut::setFilePosEachLine(string filename, int& n
 					while(isspace(d) && (d != in.eof()))		{ d=in.get(); count++;}
 				}
 				positions.push_back(count-1);
-				cout << count-1 << endl;
+				//cout << count-1 << endl;
 			}
 			in.close();
 		

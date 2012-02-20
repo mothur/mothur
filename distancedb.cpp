@@ -15,10 +15,6 @@
 
 
 /**************************************************************************************************/
-DistanceDB::DistanceDB(const DistanceDB& ddb) : data(ddb.data), templateSeqsLength(ddb.templateSeqsLength), templateAligned(ddb.templateAligned), Database(ddb) { 
-	distCalculator = new oneGapIgnoreTermGapDist(); 
-}
-/**************************************************************************************************/
 DistanceDB::DistanceDB() : Database() { 
 	try {
 		templateAligned = true;  

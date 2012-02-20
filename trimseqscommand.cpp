@@ -25,9 +25,12 @@ vector<string> TrimSeqsCommand::setParameters(){
 		CommandParameter pmaxlength("maxlength", "Number", "", "0", "", "", "",false,false); parameters.push_back(pmaxlength);
 		CommandParameter ppdiffs("pdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(ppdiffs);
 		CommandParameter pbdiffs("bdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(pbdiffs);
-		CommandParameter ptdiffs("tdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(ptdiffs);
+        CommandParameter pldiffs("ldiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(pldiffs);
+		CommandParameter psdiffs("sdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(psdiffs);
+        CommandParameter ptdiffs("tdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(ptdiffs);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
 		CommandParameter pallfiles("allfiles", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pallfiles);
+		CommandParameter pkeepforward("keepforward", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pkeepforward);
 		CommandParameter pqtrim("qtrim", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pqtrim);
 		CommandParameter pqthreshold("qthreshold", "Number", "", "0", "", "", "",false,false); parameters.push_back(pqthreshold);
 		CommandParameter pqaverage("qaverage", "Number", "", "0", "", "", "",false,false); parameters.push_back(pqaverage);
@@ -64,9 +67,11 @@ string TrimSeqsCommand::getHelpString(){
 		helpString += "The maxhomop parameter allows you to set a maximum homopolymer length. \n";
 		helpString += "The minlength parameter allows you to set and minimum sequence length. \n";
 		helpString += "The maxlength parameter allows you to set and maximum sequence length. \n";
-		helpString += "The tdiffs parameter is used to specify the total number of differences allowed in the sequence. The default is pdiffs + bdiffs.\n";
+		helpString += "The tdiffs parameter is used to specify the total number of differences allowed in the sequence. The default is pdiffs + bdiffs + sdiffs + ldiffs.\n";
 		helpString += "The bdiffs parameter is used to specify the number of differences allowed in the barcode. The default is 0.\n";
 		helpString += "The pdiffs parameter is used to specify the number of differences allowed in the primer. The default is 0.\n";
+        helpString += "The ldiffs parameter is used to specify the number of differences allowed in the linker. The default is 0.\n";
+		helpString += "The sdiffs parameter is used to specify the number of differences allowed in the spacer. The default is 0.\n";
 		helpString += "The qfile parameter allows you to provide a quality file.\n";
 		helpString += "The qthreshold parameter allows you to set a minimum quality score allowed. \n";
 		helpString += "The qaverage parameter allows you to set a minimum average quality score allowed. \n";
@@ -75,6 +80,7 @@ string TrimSeqsCommand::getHelpString(){
 		helpString += "The rollaverage parameter allows you to set a minimum rolling average quality score allowed over a window. \n";
 		helpString += "The qstepsize parameter allows you to set a number of bases to move the window over. Default=1.\n";
 		helpString += "The allfiles parameter will create separate group and fasta file for each grouping. The default is F.\n";
+		helpString += "The keepforward parameter allows you to indicate whether you want the forward primer removed or not. The default is F, meaning remove the forward primer.\n";
 		helpString += "The qtrim parameter will trim sequence from the point that they fall below the qthreshold and put it in the .trim file if set to true. The default is T.\n";
 		helpString += "The keepfirst parameter trims the sequence to the first keepfirst number of bases after the barcode or primers are removed, before the sequence is checked to see if it meets the other requirements. \n";
 		helpString += "The removelast removes the last removelast number of bases after the barcode or primers are removed, before the sequence is checked to see if it meets the other requirements.\n";
@@ -229,11 +235,17 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 			
 			temp = validParameter.validFile(parameters, "pdiffs", false);		if (temp == "not found") { temp = "0"; }
 			m->mothurConvert(temp, pdiffs);
+            
+            temp = validParameter.validFile(parameters, "ldiffs", false);		if (temp == "not found") { temp = "0"; }
+			m->mothurConvert(temp, ldiffs);
+            
+            temp = validParameter.validFile(parameters, "sdiffs", false);		if (temp == "not found") { temp = "0"; }
+			m->mothurConvert(temp, sdiffs);
 			
-			temp = validParameter.validFile(parameters, "tdiffs", false);		if (temp == "not found") { int tempTotal = pdiffs + bdiffs;  temp = toString(tempTotal); }
+			temp = validParameter.validFile(parameters, "tdiffs", false);		if (temp == "not found") { int tempTotal = pdiffs + bdiffs + ldiffs + sdiffs;  temp = toString(tempTotal); }
 			m->mothurConvert(temp, tdiffs);
 			
-			if(tdiffs == 0){	tdiffs = bdiffs + pdiffs;	}
+			if(tdiffs == 0){	tdiffs = bdiffs + pdiffs + ldiffs + sdiffs;	}
 			
 			temp = validParameter.validFile(parameters, "qfile", true);	
 			if (temp == "not found")	{	qFileName = "";		}
@@ -274,6 +286,9 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 			
 			temp = validParameter.validFile(parameters, "allfiles", false);		if (temp == "not found") { temp = "F"; }
 			allFiles = m->isTrue(temp);
+            
+            temp = validParameter.validFile(parameters, "keepforward", false);		if (temp == "not found") { temp = "F"; }
+			keepforward = m->isTrue(temp);
 			
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
@@ -545,7 +560,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 		
 		int count = 0;
 		bool moreSeqs = 1;
-		TrimOligos trimOligos(pdiffs, bdiffs, primers, barcodes, revPrimer);
+		TrimOligos trimOligos(pdiffs, bdiffs, ldiffs, sdiffs, primers, barcodes, revPrimer, linker, spacer);
 	
 		while (moreSeqs) {
 				
@@ -578,14 +593,24 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 				int barcodeIndex = 0;
 				int primerIndex = 0;
 				
+                if(numLinkers != 0){
+					success = trimOligos.stripLinker(currSeq, currQual);
+					if(!success)				{	trashCode += 'k';	}
+				}
+                
 				if(barcodes.size() != 0){
 					success = trimOligos.stripBarcode(currSeq, currQual, barcodeIndex);
 					if(success > bdiffs)		{	trashCode += 'b';	}
 					else{ currentSeqsDiffs += success;  }
 				}
 				
+                if(numSpacers != 0){
+					success = trimOligos.stripSpacer(currSeq, currQual);
+					if(!success)				{	trashCode += 's';	}
+				}
+                
 				if(numFPrimers != 0){
-					success = trimOligos.stripForward(currSeq, currQual, primerIndex);
+					success = trimOligos.stripForward(currSeq, currQual, primerIndex, keepforward);
 					if(success > pdiffs)		{	trashCode += 'f';	}
 					else{ currentSeqsDiffs += success;  }
 				}
@@ -1101,6 +1126,10 @@ bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
 						
 					barcodes[oligo]=indexBarcode; indexBarcode++;
 					barcodeNameVector.push_back(group);
+				}else if(type == "LINKER"){
+					linker.push_back(oligo);
+				}else if(type == "SPACER"){
+					spacer.push_back(oligo);
 				}
 				else{	m->mothurOut(type + " is not recognized as a valid type. Choices are forward, reverse, and barcode. Ignoring " + oligo + "."); m->mothurOutEndLine();  }
 			}
@@ -1192,6 +1221,8 @@ bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
 		}
 		numFPrimers = primers.size();
 		numRPrimers = revPrimer.size();
+        numLinkers = linker.size();
+        numSpacers = spacer.size();
 		
 		bool allBlank = true;
 		for (int i = 0; i < barcodeNameVector.size(); i++) {

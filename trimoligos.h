@@ -19,25 +19,34 @@
 class TrimOligos {
 	
 	public:
-		TrimOligos(int,int, map<string, int>, map<string, int>, vector<string>); //pdiffs, bdiffs, primers, barcodes, revPrimers
+        TrimOligos(int,int, map<string, int>, map<string, int>, vector<string>); //pdiffs, bdiffs, primers, barcodes, revPrimers
+		TrimOligos(int,int, int, int, map<string, int>, map<string, int>, vector<string>, vector<string>, vector<string>); //pdiffs, bdiffs, ldiffs, sdiffs, primers, barcodes, revPrimers, linker, spacer
 		~TrimOligos();
 	
 		int stripBarcode(Sequence&, int&);	
 		int stripBarcode(Sequence&, QualityScores&, int&);
 	
 		int stripForward(Sequence&, int&);
-		int stripForward(Sequence&, QualityScores&, int&);
+		int stripForward(Sequence&, QualityScores&, int&, bool);
 	
 		bool stripReverse(Sequence&);
 		bool stripReverse(Sequence&, QualityScores&);
+    
+        bool stripLinker(Sequence&);
+        bool stripLinker(Sequence&, QualityScores&);
+    
+        bool stripSpacer(Sequence&);
+        bool stripSpacer(Sequence&, QualityScores&);
 				
 	
 	private:
-		int pdiffs, bdiffs;
+		int pdiffs, bdiffs, ldiffs, sdiffs;
 	
 		map<string, int> barcodes;
 		map<string, int> primers;
 		vector<string> revPrimer;
+        vector<string> linker;
+        vector<string> spacer;
 	
 		MothurOut* m;
 	

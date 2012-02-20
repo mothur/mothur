@@ -326,6 +326,7 @@
 		A7E9B98D12D37EC400DA6239 /* weighted.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B87C12D37EC400DA6239 /* weighted.cpp */; };
 		A7E9B98E12D37EC400DA6239 /* weightedlinkage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B87E12D37EC400DA6239 /* weightedlinkage.cpp */; };
 		A7E9B98F12D37EC400DA6239 /* whittaker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B87F12D37EC400DA6239 /* whittaker.cpp */; };
+		A7EEB0F514F29BFE00344B83 /* classifytreecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7EEB0F414F29BFD00344B83 /* classifytreecommand.cpp */; };
 		A7F9F5CF141A5E500032F693 /* sequenceparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7F9F5CE141A5E500032F693 /* sequenceparser.cpp */; };
 		A7FA10021302E097003860FE /* mantelcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7FA10011302E096003860FE /* mantelcommand.cpp */; };
 		A7FA2AC714A0E881007C09A6 /* bsplvb.f in Sources */ = {isa = PBXBuildFile; fileRef = A7FA2ABC14A0E881007C09A6 /* bsplvb.f */; };
@@ -1041,6 +1042,8 @@
 		A7E9B87E12D37EC400DA6239 /* weightedlinkage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = weightedlinkage.cpp; sourceTree = SOURCE_ROOT; };
 		A7E9B87F12D37EC400DA6239 /* whittaker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = whittaker.cpp; sourceTree = "<group>"; };
 		A7E9B88012D37EC400DA6239 /* whittaker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = whittaker.h; sourceTree = "<group>"; };
+		A7EEB0F414F29BFD00344B83 /* classifytreecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = classifytreecommand.cpp; sourceTree = "<group>"; };
+		A7EEB0F714F29C1B00344B83 /* classifytreecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = classifytreecommand.h; sourceTree = "<group>"; };
 		A7F9F5CD141A5E500032F693 /* sequenceparser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sequenceparser.h; sourceTree = "<group>"; };
 		A7F9F5CE141A5E500032F693 /* sequenceparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sequenceparser.cpp; sourceTree = "<group>"; };
 		A7FA10001302E096003860FE /* mantelcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mantelcommand.h; sourceTree = "<group>"; };
@@ -1316,6 +1319,8 @@
 				A7E9B69012D37EC400DA6239 /* classifyotucommand.cpp */,
 				A7E9B69312D37EC400DA6239 /* classifyseqscommand.h */,
 				A7E9B69212D37EC400DA6239 /* classifyseqscommand.cpp */,
+				A7EEB0F714F29C1B00344B83 /* classifytreecommand.h */,
+				A7EEB0F414F29BFD00344B83 /* classifytreecommand.cpp */,
 				A7E9B69712D37EC400DA6239 /* clearcutcommand.h */,
 				A7E9B69612D37EC400DA6239 /* clearcutcommand.cpp */,
 				A73DDBB813C4A0D1006AAE38 /* clearmemorycommand.h */,
@@ -2283,6 +2288,7 @@
 				A7FA2B5B14A0F0C2007C09A6 /* intrv.f in Sources */,
 				A7A3C8C914D041AD00B1BFBE /* otuassociationcommand.cpp in Sources */,
 				A7A32DAA14DC43B00001D2E5 /* sortseqscommand.cpp in Sources */,
+				A7EEB0F514F29BFE00344B83 /* classifytreecommand.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2297,7 +2303,7 @@
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
 				PRODUCT_NAME = Mothur;
 				SDKROOT = macosx10.6;
@@ -2326,7 +2332,7 @@
 				GCC_ENABLE_SSE3_EXTENSIONS = NO;
 				GCC_ENABLE_SSE41_EXTENSIONS = NO;
 				GCC_ENABLE_SSE42_EXTENSIONS = NO;
-				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"../release\\\"\"",
 					"VERSION=\"\\\"1.23.0\\\"\"",
@@ -2363,7 +2369,7 @@
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = "";
-				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"VERSION=\"\\\"1.19.0\\\"\"",
 					"RELEASE_DATE=\"\\\"5/9/2011\\\"\"",

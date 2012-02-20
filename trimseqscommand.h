@@ -52,8 +52,8 @@ private:
 	bool abort, createGroup;
 	string fastaFile, oligoFile, qFileName, groupfile, nameFile, outputDir;
 	
-	bool flip, allFiles, qtrim;
-	int numFPrimers, numRPrimers, maxAmbig, maxHomoP, minLength, maxLength, processors, tdiffs, bdiffs, pdiffs, comboStarts;
+	bool flip, allFiles, qtrim, keepforward;
+	int numFPrimers, numRPrimers, numLinkers, numSpacers, maxAmbig, maxHomoP, minLength, maxLength, processors, tdiffs, bdiffs, pdiffs, ldiffs, sdiffs, comboStarts;
 	int qWindowSize, qWindowStep, keepFirst, removeLast;
 	double qRollAverage, qThreshold, qWindowAverage, qAverage;
 	vector<string> revPrimer, outputNames;
@@ -61,6 +61,8 @@ private:
 	map<string, int> barcodes;
 	vector<string> groupVector;
 	map<string, int> primers;
+    vector<string>  linker;
+    vector<string>  spacer;
 	map<string, int> combos;
 	map<string, int> groupToIndex;
 	vector<string> primerNameVector;	//needed here?

@@ -599,7 +599,7 @@ cout << largest->second << '\t' << largest->first->score << '\t' << largest->fir
 	}
 }
 
-//***************************************************************************************************************
+***************************************************************************************************************
 //used by removeObviousOutliers which was attempt to increase sensitivity of chimera detection...not currently used...
 int DeCalculator::findLargestContrib(vector<int> seen) {
 	try{
@@ -624,7 +624,7 @@ int DeCalculator::findLargestContrib(vector<int> seen) {
 		exit(1);
 	}
 }
-//***************************************************************************************************************
+***************************************************************************************************************
 void DeCalculator::removeContrib(int bad, vector<quanMember>& quan) {
 	try{
 	

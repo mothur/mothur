@@ -1094,7 +1094,7 @@ int DistanceCommand::convertMatrix(string outputFile) {
 		exit(1);
 	}
 }
-/**************************************************************************************************
+**************************************************************************************************
 int DistanceCommand::convertToLowerTriangle(string outputFile) {
 	try{
 
@@ -1188,7 +1188,7 @@ int DistanceCommand::convertToLowerTriangle(string outputFile) {
 		exit(1);
 	}
 }
-/**************************************************************************************************/
+**************************************************************************************************/
 //its okay if the column file does not contain all the names in the fasta file, since some distance may have been above a cutoff,
 //but no sequences can be in the column file that are not in oldfasta. also, if a distance is above the cutoff given then remove it.
 //also check to make sure the 2 files have the same alignment length.

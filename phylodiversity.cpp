@@ -20,7 +20,7 @@ EstOutput PhyloDiversity::getValues(Tree* t, vector<int> treeNodes, vector< vect
 		//initialize Dscore
 		for (int i=0; i<globaldata->Groups.size(); i++) {		DScore[globaldata->Groups[i]] = 0.0;	}
 	
-		/********************************************************
+		********************************************************
 		//calculate a D value for each group 
 		for(int v=0;v<treeNodes.size();v++){
 				
@@ -75,7 +75,7 @@ EstOutput PhyloDiversity::getValues(Tree* t, vector<int> treeNodes, vector< vect
 		exit(1);
 	}
 }
-/**************************************************************************************************/
+**************************************************************************************************/
 
 
 

@@ -111,10 +111,9 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 				//initialze probabilities
 				wordGenusProb.resize(numKmers);
 				WordPairDiffArr.resize(numKmers);
-			//cout << numKmers << '\t' << genusNodes.size() << endl;
+			
 				for (int j = 0; j < wordGenusProb.size(); j++) {	wordGenusProb[j].resize(genusNodes.size());		}
-			//cout << numKmers << '\t' << genusNodes.size() << endl;	
-				ofstream out;
+                    ofstream out;
 				ofstream out2;
 				
 				#ifdef USE_MPI
@@ -505,7 +504,7 @@ map<string, int> Bayesian::parseTaxMap(string newTax) {
 		exit(1);
 	}
 }
-/**************************************************************************************************/
+**************************************************************************************************/
 void Bayesian::readProbFile(ifstream& in, ifstream& inNum, string inName, string inNumName) {
 	try{
 		

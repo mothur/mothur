@@ -128,6 +128,7 @@
 #include "summaryqualcommand.h"
 #include "otuassociationcommand.h"
 #include "sortseqscommand.h"
+#include "classifytreecommand.h"
 
 /*******************************************************/
 
@@ -277,6 +278,7 @@ CommandFactory::CommandFactory(){
 	commands["shhh.seqs"]			= "shhh.seqs";
 	commands["otu.association"]		= "otu.association";
     commands["sort.seqs"]           = "sort.seqs";
+    commands["classify.tree"]       = "classify.tree";
 	commands["quit"]				= "MPIEnabled"; 
 
 }
@@ -439,6 +441,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "shhh.seqs")				{	command = new ShhhSeqsCommand(optionString);				}
 		else if(commandName == "otu.association")		{	command = new OTUAssociationCommand(optionString);			}
         else if(commandName == "sort.seqs")             {	command = new SortSeqsCommand(optionString);                }
+        else if(commandName == "classify.tree")         {	command = new ClassifyTreeCommand(optionString);            }
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -585,6 +588,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "shhh.seqs")				{	pipecommand = new ShhhSeqsCommand(optionString);				}
 		else if(commandName == "otu.association")		{	pipecommand = new OTUAssociationCommand(optionString);			}
         else if(commandName == "sort.seqs")             {	pipecommand = new SortSeqsCommand(optionString);                }
+        else if(commandName == "classify.tree")         {	pipecommand = new ClassifyTreeCommand(optionString);            }
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -719,6 +723,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "shhh.seqs")				{	shellcommand = new ShhhSeqsCommand();				}
 		else if(commandName == "otu.association")		{	shellcommand = new OTUAssociationCommand();			}
         else if(commandName == "sort.seqs")             {	shellcommand = new SortSeqsCommand();               }
+        else if(commandName == "classify.tree")         {	shellcommand = new ClassifyTreeCommand();           }
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;
@@ -744,7 +749,7 @@ Command* CommandFactory::getCommand(){
 		exit(1);
 	}
 }
-/***********************************************************************/
+***********************************************************************/
 bool CommandFactory::isValidCommand(string command) {
 	try {	
 	

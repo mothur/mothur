@@ -55,7 +55,7 @@ SharedRAbundVector::SharedRAbundVector(string id, vector<individual> rav) : Data
 }
 
 
-/***********************************************************************/
+***********************************************************************/
 //reads a shared file
 SharedRAbundVector::SharedRAbundVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), numSeqs(0) {
 	try {

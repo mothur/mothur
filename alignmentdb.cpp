@@ -14,33 +14,6 @@
 #include "referencedb.h"
 
 /**************************************************************************************************/
-//deep copy
-AlignmentDB::AlignmentDB(const AlignmentDB& adb) : numSeqs(adb.numSeqs), longest(adb.longest), method(adb.method), emptySequence(adb.emptySequence), threadID(adb.threadID) {
-	try {
-		
-		m = MothurOut::getInstance();
-		if (adb.method == "blast") {
-			search = new BlastDB(*((BlastDB*)adb.search));
-		}else if(adb.method == "kmer") {
-			search = new KmerDB(*((KmerDB*)adb.search));
-		}else if(adb.method == "suffix") {
-			search = new SuffixDB(*((SuffixDB*)adb.search));
-		}else {
-			m->mothurOut("[ERROR]: cannot create copy of alignment database, unrecognized method - " + adb.method); m->mothurOutEndLine();
-		}
-		
-		for (int i = 0; i < adb.templateSequences.size(); i++) {
-			Sequence temp(adb.templateSequences[i]);
-			templateSequences.push_back(temp);
-		}
-	}
-	catch(exception& e) {
-		m->errorOut(e, "AlignmentDB", "AlignmentDB");
-		exit(1);
-	}
-	
-}
-/**************************************************************************************************/
 AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gapOpen, float gapExtend, float match, float misMatch, int tid){		//	This assumes that the template database is in fasta format, may 
 	try {											//	need to alter this in the future?
 		m = MothurOut::getInstance();

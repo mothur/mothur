@@ -19,7 +19,6 @@ class eachGapDist : public Dist {
 public:
 	
 	eachGapDist() {}
-	eachGapDist(const eachGapDist& ddb) {}
 	
 	void calcDist(Sequence A, Sequence B){		
 		int diff = 0;

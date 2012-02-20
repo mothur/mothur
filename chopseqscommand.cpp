@@ -233,7 +233,7 @@ string ChopSeqsCommand::getChopped(Sequence seq) {
 					
 					for (int i = 0; i < temp.length(); i++) {
 						//eliminate N's
-						if (toupper(temp[i]) == 'N') { temp[i] == '.'; }
+						if (toupper(temp[i]) == 'N') { temp[i] = '.'; }
 						
 						numBasesCounted++; 
 						
@@ -255,7 +255,7 @@ string ChopSeqsCommand::getChopped(Sequence seq) {
 					
 					for (int i = (temp.length()-1); i >= 0; i--) {
 						//eliminate N's
-						if (toupper(temp[i]) == 'N') { temp[i] == '.'; }
+						if (toupper(temp[i]) == 'N') { temp[i] = '.'; }
 						
 						numBasesCounted++; 
 
@@ -283,7 +283,7 @@ string ChopSeqsCommand::getChopped(Sequence seq) {
 					for (int i = 0; i < temp.length(); i++) {
 						//eliminate N's
 						if (toupper(temp[i]) == 'N') { 
-							temp[i] == '.'; 
+							temp[i] = '.'; 
 							tempLength--;
 							if (tempLength < numbases) { stopSpot = 0; break; }
 						}
@@ -309,7 +309,7 @@ string ChopSeqsCommand::getChopped(Sequence seq) {
 					for (int i = (temp.length()-1); i >= 0; i--) {
 						//eliminate N's
 						if (toupper(temp[i]) == 'N') { 
-							temp[i] == '.'; 
+							temp[i] = '.'; 
 							tempLength--;
 							if (tempLength < numbases) { stopSpot = 0; break; }
 						}

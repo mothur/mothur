@@ -514,7 +514,7 @@ int PreClusterCommand::readFASTA(){
 		m->openInputFile(fastafile, inFasta);
 		
 		//string firstCol, secondCol, nameString;
-		length = 0;
+		set<int> lengths;
 		
 		while (!inFasta.eof()) {
 			
@@ -540,17 +540,20 @@ int PreClusterCommand::readFASTA(){
 					else{
 						seqPNode tempNode(itSize->second, seq, names[seq.getName()]);
 						alignSeqs.push_back(tempNode);
-						if (seq.getAligned().length() > length) {  length = seq.getAligned().length();  }
+						lengths.insert(seq.getAligned().length());
 					}	
 				}else { //no names file, you are identical to yourself 
 					seqPNode tempNode(1, seq, seq.getName());
 					alignSeqs.push_back(tempNode);
-					if (seq.getAligned().length() > length) {  length = seq.getAligned().length();  }
+					lengths.insert(seq.getAligned().length());
 				}
 			}
 		}
 		inFasta.close();
 		//inNames.close();
+        
+        if (lengths.size() > 1) { m->control_pressed = true; m->mothurOut("[ERROR]: your sequences are not all the same length. pre.cluster requires sequences to be aligned."); m->mothurOutEndLine(); }
+        
 		return alignSeqs.size();
 	}
 	
@@ -562,7 +565,7 @@ int PreClusterCommand::readFASTA(){
 /**************************************************************************************************/
 int PreClusterCommand::loadSeqs(map<string, string>& thisName, vector<Sequence>& thisSeqs){
 	try {
-		length = 0;
+		set<int> lengths;
 		alignSeqs.clear();
 		map<string, string>::iterator it;
 		bool error = false;
@@ -585,15 +588,17 @@ int PreClusterCommand::loadSeqs(map<string, string>& thisName, vector<Sequence>&
 					
 					seqPNode tempNode(numReps, thisSeqs[i], it->second);
 					alignSeqs.push_back(tempNode);
-					if (thisSeqs[i].getAligned().length() > length) {  length = thisSeqs[i].getAligned().length();  }
+                    lengths.insert(thisSeqs[i].getAligned().length());
 				}	
 			}else { //no names file, you are identical to yourself 
 				seqPNode tempNode(1, thisSeqs[i], thisSeqs[i].getName());
 				alignSeqs.push_back(tempNode);
-				if (thisSeqs[i].getAligned().length() > length) {  length = thisSeqs[i].getAligned().length();  }
+				lengths.insert(thisSeqs[i].getAligned().length());
 			}
 		}
 		
+        if (lengths.size() > 1) { error = true; m->mothurOut("[ERROR]: your sequences are not all the same length. pre.cluster requires sequences to be aligned."); m->mothurOutEndLine(); }
+        
 		//sanity check
 		if (error) { m->control_pressed = true; }
 		

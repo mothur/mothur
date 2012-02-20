@@ -25,7 +25,6 @@ class SuffixNode {
 	
 public:
 	SuffixNode(int, int, int);
-	SuffixNode(const SuffixNode& sn) : parentNode(sn.parentNode), startCharPosition(sn.startCharPosition), endCharPosition(sn.endCharPosition) {m = MothurOut::getInstance();}
 	virtual ~SuffixNode() {}
 	virtual void print(string, int)	= 0;
 	virtual void setChildren(char, int);
@@ -63,7 +62,6 @@ class SuffixBranch : public SuffixNode {
 	
 public:
 	SuffixBranch(int, int, int);
-	SuffixBranch(const SuffixBranch& sb) : suffixNode(sb.suffixNode), childNodes(sb.childNodes), SuffixNode(sb.parentNode, sb.startCharPosition, sb.endCharPosition) {}
 	~SuffixBranch() {}
 	void print(string, int);		//	need a special method for printing the node because there are children
 	void eraseChild(char);			//	need a special method for erasing the children

@@ -13,6 +13,22 @@
 #include "mothur.h"
 
 /***********************************************/
+struct logger {
+    
+    logger() {}
+    ~logger() {}
+    
+    template< class T >
+    logger& operator <<( const T& o ) {
+        cout << o; return *this;
+    }
+    
+    logger& operator<<(ostream& (*m)(ostream&) ) {
+        cout << m; return *this;
+    }
+    
+}; 
+/***********************************************/
 
 class MothurOut {
 	

@@ -14,6 +14,28 @@
 
 /********************************************************************/
 //strip, pdiffs, bdiffs, primers, barcodes, revPrimers
+TrimOligos::TrimOligos(int p, int b, int l, int s, map<string, int> pr, map<string, int> br, vector<string> r, vector<string> lk, vector<string> sp){
+	try {
+		m = MothurOut::getInstance();
+		
+		pdiffs = p;
+		bdiffs = b;
+        ldiffs = l;
+        sdiffs = s;
+		
+		barcodes = br;
+		primers = pr;
+		revPrimer = r;
+        linker = lk;
+        spacer = sp;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "TrimOligos", "TrimOligos");
+		exit(1);
+	}
+}
+/********************************************************************/
+//strip, pdiffs, bdiffs, primers, barcodes, revPrimers
 TrimOligos::TrimOligos(int p, int b, map<string, int> pr, map<string, int> br, vector<string> r){
 	try {
 		m = MothurOut::getInstance();
@@ -69,9 +91,9 @@ int TrimOligos::stripBarcode(Sequence& seq, QualityScores& qual, int& group){
 			
 			Alignment* alignment;
 			if (barcodes.size() > 0) {
-				map<string,int>::iterator it=barcodes.begin();
+				map<string,int>::iterator it; 
 				
-				for(it;it!=barcodes.end();it++){
+				for(it=barcodes.begin();it!=barcodes.end();it++){
 					if(it->first.length() > maxLength){
 						maxLength = it->first.length();
 					}
@@ -296,9 +318,9 @@ int TrimOligos::stripForward(Sequence& seq, int& group){
 			
 			Alignment* alignment;
 			if (primers.size() > 0) {
-				map<string,int>::iterator it=primers.begin();
+				map<string,int>::iterator it; 
 				
-				for(it;it!=primers.end();it++){
+				for(it=primers.begin();it!=primers.end();it++){
 					if(it->first.length() > maxLength){
 						maxLength = it->first.length();
 					}
@@ -375,7 +397,7 @@ int TrimOligos::stripForward(Sequence& seq, int& group){
 	}
 }
 //*******************************************************************/
-int TrimOligos::stripForward(Sequence& seq, QualityScores& qual, int& group){
+int TrimOligos::stripForward(Sequence& seq, QualityScores& qual, int& group, bool keepForward){
 	try {
 		string rawSequence = seq.getUnaligned();
 		int success = pdiffs + 1;	//guilty until proven innocent
@@ -390,9 +412,9 @@ int TrimOligos::stripForward(Sequence& seq, QualityScores& qual, int& group){
 			
 			if(compareDNASeq(oligo, rawSequence.substr(0,oligo.length()))){
 				group = it->second;
-				seq.setUnaligned(rawSequence.substr(oligo.length()));
+				if (!keepForward) { seq.setUnaligned(rawSequence.substr(oligo.length())); }
 				if(qual.getName() != ""){
-					qual.trimQScores(oligo.length(), -1);
+					if (!keepForward) {  qual.trimQScores(oligo.length(), -1); }
 				}
 				success = 0;
 				break;
@@ -408,9 +430,9 @@ int TrimOligos::stripForward(Sequence& seq, QualityScores& qual, int& group){
 			
 			Alignment* alignment;
 			if (primers.size() > 0) {
-				map<string,int>::iterator it=primers.begin();
+				map<string,int>::iterator it; 
 				
-				for(it;it!=primers.end();it++){
+				for(it=primers.begin();it!=primers.end();it++){
 					if(it->first.length() > maxLength){
 						maxLength = it->first.length();
 					}
@@ -470,9 +492,9 @@ int TrimOligos::stripForward(Sequence& seq, QualityScores& qual, int& group){
 			else if(minCount > 1)	{	success = pdiffs + 10;	}	//can't tell the difference between multiple primers
 			else{													//use the best match
 				group = minGroup;
-				seq.setUnaligned(rawSequence.substr(minPos));
+				if (!keepForward) { seq.setUnaligned(rawSequence.substr(minPos)); }
 				if(qual.getName() != ""){
-					qual.trimQScores(minPos, -1);
+					if (!keepForward) { qual.trimQScores(minPos, -1); }
 				}
 				success = minDiff;
 			}
@@ -547,6 +569,129 @@ bool TrimOligos::stripReverse(Sequence& seq){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "TrimOligos", "stripReverse");
+		exit(1);
+	}
+}
+//******************************************************************/
+bool TrimOligos::stripLinker(Sequence& seq, QualityScores& qual){
+	try {
+		string rawSequence = seq.getUnaligned();
+		bool success = 0;	//guilty until proven innocent
+		
+		for(int i=0;i<linker.size();i++){
+			string oligo = linker[i];
+			
+			if(rawSequence.length() < oligo.length()){
+				success = 0;
+				break;
+			}
+			
+			if(compareDNASeq(oligo, rawSequence.substr(rawSequence.length()-oligo.length(),oligo.length()))){
+				seq.setUnaligned(rawSequence.substr(0,rawSequence.length()-oligo.length()));
+				if(qual.getName() != ""){
+					qual.trimQScores(-1, rawSequence.length()-oligo.length());
+				}
+				success = 1;
+				break;
+			}
+		}	
+		return success;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "TrimOligos", "stripLinker");
+		exit(1);
+	}
+}
+//******************************************************************/
+bool TrimOligos::stripLinker(Sequence& seq){
+	try {
+		
+		string rawSequence = seq.getUnaligned();
+		bool success = 0;	//guilty until proven innocent
+		
+		for(int i=0;i<linker.size();i++){
+			string oligo = linker[i];
+			
+			if(rawSequence.length() < oligo.length()){
+				success = 0;
+				break;
+			}
+			
+			if(compareDNASeq(oligo, rawSequence.substr(rawSequence.length()-oligo.length(),oligo.length()))){
+				seq.setUnaligned(rawSequence.substr(0,rawSequence.length()-oligo.length()));
+				success = 1;
+				break;
+			}
+		}	
+		
+		return success;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "TrimOligos", "stripLinker");
+		exit(1);
+	}
+}
+
+//******************************************************************/
+bool TrimOligos::stripSpacer(Sequence& seq, QualityScores& qual){
+	try {
+		string rawSequence = seq.getUnaligned();
+		bool success = 0;	//guilty until proven innocent
+		
+		for(int i=0;i<spacer.size();i++){
+			string oligo = spacer[i];
+			
+			if(rawSequence.length() < oligo.length()){
+				success = 0;
+				break;
+			}
+			
+			if(compareDNASeq(oligo, rawSequence.substr(rawSequence.length()-oligo.length(),oligo.length()))){
+				seq.setUnaligned(rawSequence.substr(0,rawSequence.length()-oligo.length()));
+				if(qual.getName() != ""){
+					qual.trimQScores(-1, rawSequence.length()-oligo.length());
+				}
+				success = 1;
+				break;
+			}
+		}	
+		return success;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "TrimOligos", "stripSpacer");
+		exit(1);
+	}
+}
+//******************************************************************/
+bool TrimOligos::stripSpacer(Sequence& seq){
+	try {
+		
+		string rawSequence = seq.getUnaligned();
+		bool success = 0;	//guilty until proven innocent
+		
+		for(int i=0;i<spacer.size();i++){
+			string oligo = spacer[i];
+			
+			if(rawSequence.length() < oligo.length()){
+				success = 0;
+				break;
+			}
+			
+			if(compareDNASeq(oligo, rawSequence.substr(rawSequence.length()-oligo.length(),oligo.length()))){
+				seq.setUnaligned(rawSequence.substr(0,rawSequence.length()-oligo.length()));
+				success = 1;
+				break;
+			}
+		}	
+		
+		return success;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "TrimOligos", "stripSpacer");
 		exit(1);
 	}
 }
