@@ -24,7 +24,7 @@ public:
 	string getCommandCategory()		{ return "Phylotype Analysis";          }
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Classify.tree"; }
-	string getDescription()		{ return "Find the concensus taxonomy for the descendant of each tree node"; }
+	string getDescription()		{ return "Find the consensus taxonomy for the descendant of each tree node"; }
     
 	int execute();
 	void help() { m->mothurOut(getHelpString()); }	

@@ -8,19 +8,6 @@
  */
 
 #include "pairwiseseqscommand.h"
-#include "sequence.hpp"
-
-#include "gotohoverlap.hpp"
-#include "needlemanoverlap.hpp"
-#include "blastalign.hpp"
-#include "noalign.hpp"
-
-#include "ignoregaps.h"
-#include "eachgapdist.h"
-#include "eachgapignore.h"
-#include "onegapdist.h"
-#include "onegapignore.h"
-
 
 //**********************************************************************************************************************
 vector<string> PairwiseSeqsCommand::setParameters(){	
@@ -247,25 +234,6 @@ PairwiseSeqsCommand::PairwiseSeqsCommand(string option)  {
 				 if (calc == "default")  {  calc = "onegap";  }
 			}
 			m->splitAtDash(calc, Estimators);
-			
-			ValidCalculators validCalculator;
-			if (countends) {
-				for (int i=0; i<Estimators.size(); i++) {
-					if (validCalculator.isValidCalculator("distance", Estimators[i]) == true) { 
-						if (Estimators[i] == "nogaps")			{	distCalculator = new ignoreGaps();	}
-						else if (Estimators[i] == "eachgap")	{	distCalculator = new eachGapDist();	}
-						else if (Estimators[i] == "onegap")		{	distCalculator = new oneGapDist();	}
-					}
-				}
-			}else {
-				for (int i=0; i<Estimators.size(); i++) {
-					if (validCalculator.isValidCalculator("distance", Estimators[i]) == true) { 
-						if (Estimators[i] == "nogaps")		{	distCalculator = new ignoreGaps();					}
-						else if (Estimators[i] == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
-						else if (Estimators[i] == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
-					}
-				}
-			}
 		}
 		
 	}
@@ -280,17 +248,7 @@ int PairwiseSeqsCommand::execute(){
 	try {
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
-		int longestBase = 2000; //will need to update this in driver if we find sequences with more bases.  hardcoded so we don't have the pre-read user fasta file.
-		
-		if(align == "gotoh")			{	alignment = new GotohOverlap(gapOpen, gapExtend, match, misMatch, longestBase);			}
-		else if(align == "needleman")	{	alignment = new NeedlemanOverlap(gapOpen, match, misMatch, longestBase);				}
-		else if(align == "blast")		{	alignment = new BlastAlignment(gapOpen, gapExtend, match, misMatch);		}
-		else if(align == "noalign")		{	alignment = new NoAlign();													}
-		else {
-			m->mothurOut(align + " is not a valid alignment option. I will run the command using needleman.");
-			m->mothurOutEndLine();
-			alignment = new NeedlemanOverlap(gapOpen, match, misMatch, longestBase);
-		}
+		longestBase = 2000; //will need to update this in driver if we find sequences with more bases.  hardcoded so we don't have the pre-read user fasta file.
 		
 		cutoff += 0.005;
 		
@@ -357,11 +315,11 @@ int PairwiseSeqsCommand::execute(){
 					
 					driverMPI(start, end, outMPI, cutoff); 
 					
-					if (m->control_pressed) { outputTypes.clear(); MPI_File_close(&outMPI);  m->mothurRemove(outputFile); delete distCalculator;  return 0; }
+					if (m->control_pressed) { outputTypes.clear(); MPI_File_close(&outMPI);  m->mothurRemove(outputFile); return 0; }
 				
 					//wait on chidren
 					for(int i = 1; i < processors; i++) { 
-						if (m->control_pressed) { outputTypes.clear();  MPI_File_close(&outMPI);   m->mothurRemove(outputFile); delete distCalculator;  return 0; }
+						if (m->control_pressed) { outputTypes.clear();  MPI_File_close(&outMPI);   m->mothurRemove(outputFile);  return 0; }
 						
 						char buf[5];
 						MPI_Recv(buf, 5, MPI_CHAR, i, tag, MPI_COMM_WORLD, &status); 
@@ -370,7 +328,7 @@ int PairwiseSeqsCommand::execute(){
 					//do your part
 					driverMPI(start, end, outMPI, cutoff); 
 					
-					if (m->control_pressed) { outputTypes.clear();  MPI_File_close(&outMPI);  m->mothurRemove(outputFile); delete distCalculator;  return 0; }
+					if (m->control_pressed) { outputTypes.clear();  MPI_File_close(&outMPI);  m->mothurRemove(outputFile);  return 0; }
 				
 					char buf[5];
 					strcpy(buf, "done"); 
@@ -390,7 +348,7 @@ int PairwiseSeqsCommand::execute(){
 					if (output != "square"){ driverMPI(start, end, outputFile, mySize); }
 					else { driverMPI(start, end, outputFile, mySize, output); }
 		
-					if (m->control_pressed) {  outputTypes.clear();   m->mothurRemove(outputFile); delete distCalculator;  return 0; }
+					if (m->control_pressed) {  outputTypes.clear();   m->mothurRemove(outputFile);   return 0; }
 					
 					int amode=MPI_MODE_APPEND|MPI_MODE_WRONLY|MPI_MODE_CREATE; //
 					MPI_File outMPI;
@@ -405,7 +363,7 @@ int PairwiseSeqsCommand::execute(){
 					for(int b = 1; b < processors; b++) { 
 						unsigned long long fileSize;
 						
-						if (m->control_pressed) { outputTypes.clear();  MPI_File_close(&outMPI);  m->mothurRemove(outputFile);  delete distCalculator;  return 0; }
+						if (m->control_pressed) { outputTypes.clear();  MPI_File_close(&outMPI);  m->mothurRemove(outputFile);   return 0; }
 						
 						MPI_Recv(&fileSize, 1, MPI_LONG, b, tag, MPI_COMM_WORLD, &status); 
 						
@@ -444,7 +402,7 @@ int PairwiseSeqsCommand::execute(){
 			MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 	#else		
 					
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		//#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 			//if you don't need to fork anything
 			if(processors == 1){
 				if (output != "square") {  driver(0, numSeqs, outputFile, cutoff); }
@@ -465,14 +423,14 @@ int PairwiseSeqsCommand::execute(){
 				
 				createProcesses(outputFile); 
 			}
-		#else
+		//#else
 			//ifstream inFASTA;
-			if (output != "square") {  driver(0, numSeqs, outputFile, cutoff); }
-			else { driver(0, numSeqs, outputFile, "square");  }
-		#endif
+			//if (output != "square") {  driver(0, numSeqs, outputFile, cutoff); }
+			//else { driver(0, numSeqs, outputFile, "square");  }
+		//#endif
 		
 	#endif
-			if (m->control_pressed) { outputTypes.clear();  delete distCalculator; m->mothurRemove(outputFile); return 0; }
+			if (m->control_pressed) { outputTypes.clear();   m->mothurRemove(outputFile); return 0; }
 			
 			#ifdef USE_MPI
 				MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
@@ -500,10 +458,8 @@ int PairwiseSeqsCommand::execute(){
 			
 			m->mothurOut("It took " + toString(time(NULL) - startTime) + " to calculate the distances for " + toString(numSeqs) + " sequences."); m->mothurOutEndLine();
 			
-			if (m->control_pressed) { outputTypes.clear();  delete distCalculator; m->mothurRemove(outputFile); return 0; }
+			if (m->control_pressed) { outputTypes.clear(); m->mothurRemove(outputFile); return 0; }
 		}
-			
-		delete distCalculator;
 		
 		//set phylip file as new current phylipfile
 		string current = "";
@@ -535,9 +491,11 @@ int PairwiseSeqsCommand::execute(){
 /**************************************************************************************************/
 void PairwiseSeqsCommand::createProcesses(string filename) {
 	try {
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-		int process = 1;
+        int process = 1;
 		processIDS.clear();
+        
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		
 		
 		//loop through and create all the processes you want
 		while (process != processors) {
@@ -567,13 +525,51 @@ void PairwiseSeqsCommand::createProcesses(string filename) {
 			int temp = processIDS[i];
 			wait(&temp);
 		}
+#else     
+        //////////////////////////////////////////////////////////////////////////////////////////////////////
+		//Windows version shared memory, so be careful when passing variables through the distanceData struct. 
+		//Above fork() will clone, so memory is separate, but that's not the case with windows, 
+		//that's why the distance calculator was moved inside of the driver to make separate copies.
+		//////////////////////////////////////////////////////////////////////////////////////////////////////
 		
-		//append and remove temp files
+		vector<pairwiseData*> pDataArray; //[processors-1];
+		DWORD   dwThreadIdArray[processors-1];
+		HANDLE  hThreadArray[processors-1]; 
+		
+		//Create processor-1 worker threads.
+		for( int i=0; i<processors-1; i++ ){
+			string extension = toString(i) + ".temp";
+
+			// Allocate memory for thread data.
+			pairwiseData* tempDist = new pairwiseData((filename+extension), align, "square", Estimators[0], countends, output, alignDB, m, lines[i+1].start, lines[i+1].end, match, misMatch, gapOpen, gapExtend, longestBase, i);
+			pDataArray.push_back(tempDist);
+			processIDS.push_back(i);
+			
+			if (output != "square") { hThreadArray[i] = CreateThread(NULL, 0, MyPairwiseThreadFunction, pDataArray[i], 0, &dwThreadIdArray[i]);  } 
+            else { hThreadArray[i] = CreateThread(NULL, 0, MyPairwiseSquareThreadFunction, pDataArray[i], 0, &dwThreadIdArray[i]);  }
+		}
+		
+		//do your part
+		if (output != "square") {  driver(lines[0].start, lines[0].end, filename, cutoff); }
+		else { driver(lines[0].start, lines[0].end, filename, "square"); }
+		
+		//Wait until all threads have terminated.
+		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
+		
+		//Close all thread handles and free memory allocations.
+		for(int i=0; i < pDataArray.size(); i++){
+			CloseHandle(hThreadArray[i]);
+			delete pDataArray[i];
+		}
+
+#endif
+        
+        //append and remove temp files
 		for (int i=0;i<processIDS.size();i++) { 
 			m->appendFiles((filename + toString(processIDS[i]) + ".temp"), filename);
 			m->mothurRemove((filename + toString(processIDS[i]) + ".temp"));
 		}
-#endif
+        
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PairwiseSeqsCommand", "createProcesses");
@@ -587,6 +583,33 @@ int PairwiseSeqsCommand::driver(int startLine, int endLine, string dFileName, fl
 	try {
 
 		int startTime = time(NULL);
+        
+        Alignment* alignment;
+        if(align == "gotoh")			{	alignment = new GotohOverlap(gapOpen, gapExtend, match, misMatch, longestBase);			}
+		else if(align == "needleman")	{	alignment = new NeedlemanOverlap(gapOpen, match, misMatch, longestBase);				}
+		else if(align == "blast")		{	alignment = new BlastAlignment(gapOpen, gapExtend, match, misMatch);		}
+		else if(align == "noalign")		{	alignment = new NoAlign();													}
+		else {
+			m->mothurOut(align + " is not a valid alignment option. I will run the command using needleman.");
+			m->mothurOutEndLine();
+			alignment = new NeedlemanOverlap(gapOpen, match, misMatch, longestBase);
+		}
+        
+        ValidCalculators validCalculator;
+        Dist* distCalculator;
+        if (countends) {
+            if (validCalculator.isValidCalculator("distance", Estimators[0]) == true) { 
+                if (Estimators[0] == "nogaps")			{	distCalculator = new ignoreGaps();	}
+                else if (Estimators[0] == "eachgap")	{	distCalculator = new eachGapDist();	}
+                else if (Estimators[0] == "onegap")		{	distCalculator = new oneGapDist();	}
+            }
+        }else {
+            if (validCalculator.isValidCalculator("distance", Estimators[0]) == true) { 
+                if (Estimators[0] == "nogaps")		{	distCalculator = new ignoreGaps();					}
+                else if (Estimators[0] == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
+                else if (Estimators[0] == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
+            }
+        }
 		
 		//column file
 		ofstream outFile(dFileName.c_str(), ios::trunc);
@@ -606,7 +629,7 @@ int PairwiseSeqsCommand::driver(int startLine, int endLine, string dFileName, fl
 			
 			for(int j=0;j<i;j++){
 				
-				if (m->control_pressed) { outFile.close(); return 0;  }
+				if (m->control_pressed) { outFile.close(); delete alignment; delete distCalculator; return 0;  }
 				
 				if (alignDB.get(i).getUnaligned().length() > alignment->getnRows()) {
 					alignment->resize(alignDB.get(i).getUnaligned().length()+1);
@@ -643,6 +666,8 @@ int PairwiseSeqsCommand::driver(int startLine, int endLine, string dFileName, fl
 		m->mothurOut(toString(endLine-1) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
 		
 		outFile.close();
+        delete alignment;
+        delete distCalculator;
 		
 		return 1;
 	}
@@ -657,7 +682,34 @@ int PairwiseSeqsCommand::driver(int startLine, int endLine, string dFileName, st
 	try {
 
 		int startTime = time(NULL);
+        
+        Alignment* alignment;
+        if(align == "gotoh")			{	alignment = new GotohOverlap(gapOpen, gapExtend, match, misMatch, longestBase);			}
+		else if(align == "needleman")	{	alignment = new NeedlemanOverlap(gapOpen, match, misMatch, longestBase);				}
+		else if(align == "blast")		{	alignment = new BlastAlignment(gapOpen, gapExtend, match, misMatch);		}
+		else if(align == "noalign")		{	alignment = new NoAlign();													}
+		else {
+			m->mothurOut(align + " is not a valid alignment option. I will run the command using needleman.");
+			m->mothurOutEndLine();
+			alignment = new NeedlemanOverlap(gapOpen, match, misMatch, longestBase);
+		}
 		
+        ValidCalculators validCalculator;
+        Dist* distCalculator;
+        if (countends) {
+            if (validCalculator.isValidCalculator("distance", Estimators[0]) == true) { 
+                if (Estimators[0] == "nogaps")			{	distCalculator = new ignoreGaps();	}
+                else if (Estimators[0] == "eachgap")	{	distCalculator = new eachGapDist();	}
+                else if (Estimators[0] == "onegap")		{	distCalculator = new oneGapDist();	}
+            }
+        }else {
+            if (validCalculator.isValidCalculator("distance", Estimators[0]) == true) { 
+                if (Estimators[0] == "nogaps")		{	distCalculator = new ignoreGaps();					}
+                else if (Estimators[0] == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
+                else if (Estimators[0] == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
+            }
+        }
+
 		//column file
 		ofstream outFile(dFileName.c_str(), ios::trunc);
 		outFile.setf(ios::fixed, ios::showpoint);
@@ -675,7 +727,7 @@ int PairwiseSeqsCommand::driver(int startLine, int endLine, string dFileName, st
 			
 			for(int j=0;j<alignDB.getNumSeqs();j++){
 				
-				if (m->control_pressed) { outFile.close(); return 0;  }
+				if (m->control_pressed) { outFile.close(); delete alignment; delete distCalculator; return 0;  }
 				
 				if (alignDB.get(i).getUnaligned().length() > alignment->getnRows()) {
 					alignment->resize(alignDB.get(i).getUnaligned().length()+1);
@@ -708,6 +760,8 @@ int PairwiseSeqsCommand::driver(int startLine, int endLine, string dFileName, st
 		m->mothurOut(toString(endLine-1) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
 		
 		outFile.close();
+        delete alignment;
+        delete distCalculator;
 		
 		return 1;
 	}
@@ -723,14 +777,41 @@ int PairwiseSeqsCommand::driverMPI(int startLine, int endLine, MPI_File& outMPI,
 	try {
 		MPI_Status status;
 		int startTime = time(NULL);
+        
+        Alignment* alignment;
+        if(align == "gotoh")			{	alignment = new GotohOverlap(gapOpen, gapExtend, match, misMatch, longestBase);			}
+		else if(align == "needleman")	{	alignment = new NeedlemanOverlap(gapOpen, match, misMatch, longestBase);				}
+		else if(align == "blast")		{	alignment = new BlastAlignment(gapOpen, gapExtend, match, misMatch);		}
+		else if(align == "noalign")		{	alignment = new NoAlign();													}
+		else {
+			m->mothurOut(align + " is not a valid alignment option. I will run the command using needleman.");
+			m->mothurOutEndLine();
+			alignment = new NeedlemanOverlap(gapOpen, match, misMatch, longestBase);
+		}
 		
+        ValidCalculators validCalculator;
+        Dist* distCalculator;
+        if (countends) {
+            if (validCalculator.isValidCalculator("distance", Estimators[0]) == true) { 
+                if (Estimators[0] == "nogaps")			{	distCalculator = new ignoreGaps();	}
+                else if (Estimators[0] == "eachgap")	{	distCalculator = new eachGapDist();	}
+                else if (Estimators[0] == "onegap")		{	distCalculator = new oneGapDist();	}
+            }
+        }else {
+            if (validCalculator.isValidCalculator("distance", Estimators[0]) == true) { 
+                if (Estimators[0] == "nogaps")		{	distCalculator = new ignoreGaps();					}
+                else if (Estimators[0] == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
+                else if (Estimators[0] == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
+            }
+        }
+
 		string outputString = "";
 		
 		for(int i=startLine;i<endLine;i++){
 	
 			for(int j=0;j<i;j++){
 				
-				if (m->control_pressed) {  return 0;  }
+				if (m->control_pressed) { delete alignment; delete distCalculator; return 0;  }
 				
 				if (alignDB.get(i).getUnaligned().length() > alignment->getnRows()) {
 					alignment->resize(alignDB.get(i).getUnaligned().length()+1);
@@ -772,7 +853,8 @@ int PairwiseSeqsCommand::driverMPI(int startLine, int endLine, MPI_File& outMPI,
 			delete buf;
 			
 		}
-		
+		delete alignment;
+        delete distCalculator;
 		return 1;
 	}
 	catch(exception& e) {
@@ -794,7 +876,33 @@ int PairwiseSeqsCommand::driverMPI(int startLine, int endLine, string file, unsi
 
 		MPI_File_open(MPI_COMM_SELF, filename, amode, MPI_INFO_NULL, &outMPI);
 
-		
+		Alignment* alignment;
+        if(align == "gotoh")			{	alignment = new GotohOverlap(gapOpen, gapExtend, match, misMatch, longestBase);			}
+		else if(align == "needleman")	{	alignment = new NeedlemanOverlap(gapOpen, match, misMatch, longestBase);				}
+		else if(align == "blast")		{	alignment = new BlastAlignment(gapOpen, gapExtend, match, misMatch);		}
+		else if(align == "noalign")		{	alignment = new NoAlign();													}
+		else {
+			m->mothurOut(align + " is not a valid alignment option. I will run the command using needleman.");
+			m->mothurOutEndLine();
+			alignment = new NeedlemanOverlap(gapOpen, match, misMatch, longestBase);
+		}
+        
+        ValidCalculators validCalculator;
+        Dist* distCalculator;
+        if (countends) {
+            if (validCalculator.isValidCalculator("distance", Estimators[0]) == true) { 
+                if (Estimators[0] == "nogaps")			{	distCalculator = new ignoreGaps();	}
+                else if (Estimators[0] == "eachgap")	{	distCalculator = new eachGapDist();	}
+                else if (Estimators[0] == "onegap")		{	distCalculator = new oneGapDist();	}
+            }
+        }else {
+            if (validCalculator.isValidCalculator("distance", Estimators[0]) == true) { 
+                if (Estimators[0] == "nogaps")		{	distCalculator = new ignoreGaps();					}
+                else if (Estimators[0] == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
+                else if (Estimators[0] == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
+            }
+        }
+
 		
 		string outputString = "";
 		size = 0;
@@ -811,7 +919,7 @@ int PairwiseSeqsCommand::driverMPI(int startLine, int endLine, string file, unsi
 			
 			for(int j=0;j<i;j++){
 				
-				if (m->control_pressed) {  return 0;  }
+				if (m->control_pressed) { delete alignment; delete distCalculator; return 0;  }
 				
 				if (alignDB.get(i).getUnaligned().length() > alignment->getnRows()) {
 					alignment->resize(alignDB.get(i).getUnaligned().length()+1);
@@ -848,6 +956,8 @@ int PairwiseSeqsCommand::driverMPI(int startLine, int endLine, string file, unsi
 		}
 		
 		MPI_File_close(&outMPI);
+        delete alignment;
+        delete distCalculator;
 		
 		return 1;
 	}
@@ -870,7 +980,16 @@ int PairwiseSeqsCommand::driverMPI(int startLine, int endLine, string file, unsi
 
 		MPI_File_open(MPI_COMM_SELF, filename, amode, MPI_INFO_NULL, &outMPI);
 		
-		
+		Alignment* alignment;
+        if(align == "gotoh")			{	alignment = new GotohOverlap(gapOpen, gapExtend, match, misMatch, longestBase);			}
+		else if(align == "needleman")	{	alignment = new NeedlemanOverlap(gapOpen, match, misMatch, longestBase);				}
+		else if(align == "blast")		{	alignment = new BlastAlignment(gapOpen, gapExtend, match, misMatch);		}
+		else if(align == "noalign")		{	alignment = new NoAlign();													}
+		else {
+			m->mothurOut(align + " is not a valid alignment option. I will run the command using needleman.");
+			m->mothurOutEndLine();
+			alignment = new NeedlemanOverlap(gapOpen, match, misMatch, longestBase);
+		}
 		
 		string outputString = "";
 		size = 0;
@@ -887,7 +1006,7 @@ int PairwiseSeqsCommand::driverMPI(int startLine, int endLine, string file, unsi
 			
 			for(int j=0;j<alignDB.getNumSeqs();j++){
 				
-				if (m->control_pressed) {  return 0;  }
+				if (m->control_pressed) {  delete alignment; return 0;  }
 				
 				if (alignDB.get(i).getUnaligned().length() > alignment->getnRows()) {
 					alignment->resize(alignDB.get(i).getUnaligned().length()+1);
@@ -925,6 +1044,7 @@ int PairwiseSeqsCommand::driverMPI(int startLine, int endLine, string file, unsi
 		
 		MPI_File_close(&outMPI);
 		
+        delete alignment;
 		return 1;
 	}
 	catch(exception& e) {

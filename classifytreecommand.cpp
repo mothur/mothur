@@ -33,7 +33,7 @@ vector<string> ClassifyTreeCommand::setParameters(){
 string ClassifyTreeCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The classify.tree command reads a tree and taxonomy file and output the concensus taxonomy for each node on the tree. \n";
+		helpString += "The classify.tree command reads a tree and taxonomy file and output the consensus taxonomy for each node on the tree. \n";
 		helpString += "If you provide a group file, the concensus for each group will also be provided. \n";
 		helpString += "The new tree contains labels at each internal node.  The label is the node number so you can relate the tree to the summary file.\n";
 		helpString += "The summary file lists the concensus taxonomy for the descendants of each node.\n";

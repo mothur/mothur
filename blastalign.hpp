@@ -1,3 +1,7 @@
+#ifndef BlastAlignment_H
+#define BlastAlignment_H
+
+
 /*
  *  blastalign.hpp
  *  
@@ -35,4 +39,8 @@ private:
 	float gapOpen;
 	float gapExtend;
 };
+
+#endif
+
+
 
