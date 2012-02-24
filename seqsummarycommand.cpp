@@ -603,25 +603,29 @@ int SeqSummaryCommand::createProcessesCreateSummary(vector<int>& startPosition, 
 		//////////////////////////////////////////////////////////////////////////////////////////////////////
 		
 		vector<seqSumData*> pDataArray; 
-		DWORD   dwThreadIdArray[processors];
-		HANDLE  hThreadArray[processors]; 
+		DWORD   dwThreadIdArray[processors-1];
+		HANDLE  hThreadArray[processors-1]; 
 		
 		//Create processor worker threads.
-		for( int i=0; i<processors; i++ ){
-			
-			//cout << i << '\t' << lines[i]->start << '\t' << lines[i]->end << endl;
+		for( int i=0; i<processors-1; i++ ){
+            
+            string extension = "";
+            if (i != 0) { extension = toString(i) + ".temp"; processIDS.push_back(i); }
 			// Allocate memory for thread data.
-			seqSumData* tempSum = new seqSumData(&startPosition, &endPosition, &seqLength, &ambigBases, &longHomoPolymer, filename, (sumFile + toString(i) + ".temp"), m, lines[i]->start, lines[i]->end, namefile, nameMap);
+			seqSumData* tempSum = new seqSumData(&startPosition, &endPosition, &seqLength, &ambigBases, &longHomoPolymer, filename, (sumFile+extension), m, lines[i]->start, lines[i]->end, namefile, nameMap);
 			pDataArray.push_back(tempSum);
-			processIDS.push_back(i);
-				
+			
 			//MySeqSumThreadFunction is in header. It must be global or static to work with the threads.
 			//default security attributes, thread function name, argument to thread function, use default creation flags, returns the thread identifier
 			hThreadArray[i] = CreateThread(NULL, 0, MySeqSumThreadFunction, pDataArray[i], 0, &dwThreadIdArray[i]);   
 		}
-			
+		
+        //do your part
+		num = driverCreateSummary(startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, fastafile, (sumFile+toString(processors-1)+".temp"), lines[processors-1]);
+        processIDS.push_back(processors-1);
+
 		//Wait until all threads have terminated.
-		WaitForMultipleObjects(processors, hThreadArray, TRUE, INFINITE);
+		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
 		
 		//Close all thread handles and free memory allocations.
 		for(int i=0; i < pDataArray.size(); i++){
@@ -629,8 +633,7 @@ int SeqSummaryCommand::createProcessesCreateSummary(vector<int>& startPosition, 
 			CloseHandle(hThreadArray[i]);
 			delete pDataArray[i];
 		}
-		
-		//rename((sumFile + toString(processIDS[0]) + ".temp").c_str(), sumFile.c_str());
+    
 		//append files
 		for(int i=0;i<processIDS.size();i++){
 			m->appendFiles((sumFile + toString(processIDS[i]) + ".temp"), sumFile);
