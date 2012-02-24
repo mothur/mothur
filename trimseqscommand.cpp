@@ -375,15 +375,12 @@ int TrimSeqsCommand::execute(){
         //fills lines and qlines
 		setLines(fastaFile, qFileName);
 		
-		//#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-				if(processors == 1){
-					driverCreateTrim(fastaFile, qFileName, trimSeqFile, scrapSeqFile, trimQualFile, scrapQualFile, trimNameFile, scrapNameFile, outputGroupFileName, fastaFileNames, qualFileNames, nameFileNames, lines[0], qLines[0]);
-				}else{
-					createProcessesCreateTrim(fastaFile, qFileName, trimSeqFile, scrapSeqFile, trimQualFile, scrapQualFile, trimNameFile, scrapNameFile, outputGroupFileName, fastaFileNames, qualFileNames, nameFileNames); 
-				}	
-		//#else
-			//	driverCreateTrim(fastaFile, qFileName, trimSeqFile, scrapSeqFile, trimQualFile, scrapQualFile, trimNameFile, scrapNameFile, outputGroupFileName, fastaFileNames, qualFileNames, nameFileNames, lines[0], qLines[0]);
-		//#endif
+        if(processors == 1){
+            driverCreateTrim(fastaFile, qFileName, trimSeqFile, scrapSeqFile, trimQualFile, scrapQualFile, trimNameFile, scrapNameFile, outputGroupFileName, fastaFileNames, qualFileNames, nameFileNames, lines[0], qLines[0]);
+        }else{
+            createProcessesCreateTrim(fastaFile, qFileName, trimSeqFile, scrapSeqFile, trimQualFile, scrapQualFile, trimNameFile, scrapNameFile, outputGroupFileName, fastaFileNames, qualFileNames, nameFileNames); 
+        }	
+		
 		
 		if (m->control_pressed) {  return 0; }			
  	

@@ -58,7 +58,7 @@ private:
 	bool allFiles;
 	int processors;
 	int numFPrimers, numRPrimers;
-	int maxFlows, minFlows, minLength, maxLength, maxHomoP, tdiffs, bdiffs, pdiffs;
+	int maxFlows, minFlows, minLength, maxLength, maxHomoP, tdiffs, bdiffs, pdiffs, sdiffs, ldiffs, numLinkers, numSpacers;
 	int numFlows;
 	float signal, noise;
 	bool fasta;
@@ -70,6 +70,8 @@ private:
 	map<string, int> barcodes;
 	map<string, int> primers;
 	vector<string> revPrimer;
+    vector<string> linker;
+    vector<string> spacer;
 
 	vector<string> primerNameVector;	//needed here?
 	vector<string> barcodeNameVector;	//needed here?

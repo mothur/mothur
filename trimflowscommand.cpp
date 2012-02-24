@@ -21,7 +21,9 @@ vector<string> TrimFlowsCommand::setParameters(){
 		CommandParameter pminflows("minflows", "Number", "", "450", "", "", "",false,false); parameters.push_back(pminflows);
 		CommandParameter ppdiffs("pdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(ppdiffs);
 		CommandParameter pbdiffs("bdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(pbdiffs);
-		CommandParameter ptdiffs("tdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(ptdiffs);
+        CommandParameter pldiffs("ldiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(pldiffs);
+		CommandParameter psdiffs("sdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(psdiffs);
+        CommandParameter ptdiffs("tdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(ptdiffs);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
 		CommandParameter psignal("signal", "Number", "", "0.50", "", "", "",false,false); parameters.push_back(psignal);
 		CommandParameter pnoise("noise", "Number", "", "0.70", "", "", "",false,false); parameters.push_back(pnoise);
@@ -178,10 +180,17 @@ TrimFlowsCommand::TrimFlowsCommand(string option)  {
 			temp = validParameter.validFile(parameters, "pdiffs", false);		if (temp == "not found"){	temp = "0";		}
 			m->mothurConvert(temp, pdiffs);
 			
-			temp = validParameter.validFile(parameters, "tdiffs", false);
-			if (temp == "not found"){ int tempTotal = pdiffs + bdiffs;  temp = toString(tempTotal); }
+            temp = validParameter.validFile(parameters, "ldiffs", false);		if (temp == "not found") { temp = "0"; }
+			m->mothurConvert(temp, ldiffs);
+            
+            temp = validParameter.validFile(parameters, "sdiffs", false);		if (temp == "not found") { temp = "0"; }
+			m->mothurConvert(temp, sdiffs);
+			
+			temp = validParameter.validFile(parameters, "tdiffs", false);		if (temp == "not found") { int tempTotal = pdiffs + bdiffs + ldiffs + sdiffs;  temp = toString(tempTotal); }
 			m->mothurConvert(temp, tdiffs);
-			if(tdiffs == 0){	tdiffs = bdiffs + pdiffs;	}
+			
+			if(tdiffs == 0){	tdiffs = bdiffs + pdiffs + ldiffs + sdiffs;	}
+
 			
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
@@ -402,12 +411,26 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
 			int primerIndex = 0;
 			int barcodeIndex = 0;
 			
+            if(numLinkers != 0){
+                success = trimOligos.stripLinker(currSeq);
+                if(success > ldiffs)		{	trashCode += 'k';	}
+                else{ currentSeqDiffs += success;  }
+                
+            }
+            
 			if(barcodes.size() != 0){
 				success = trimOligos.stripBarcode(currSeq, barcodeIndex);
 				if(success > bdiffs)		{	trashCode += 'b';	}
 				else{ currentSeqDiffs += success;  }
 			}
 			
+            if(numSpacers != 0){
+                success = trimOligos.stripSpacer(currSeq);
+                if(success > sdiffs)		{	trashCode += 's';	}
+                else{ currentSeqDiffs += success;  }
+                
+            }
+            
 			if(numFPrimers != 0){
 				success = trimOligos.stripForward(currSeq, primerIndex);
 				if(success > pdiffs)		{	trashCode += 'f';	}
@@ -532,6 +555,10 @@ void TrimFlowsCommand::getOligos(vector<vector<string> >& outFlowFileNames){
 
 					barcodes[oligo]=indexBarcode; indexBarcode++;
 					barcodeNameVector.push_back(group);
+				}else if(type == "LINKER"){
+					linker.push_back(oligo);
+				}else if(type == "SPACER"){
+					spacer.push_back(oligo);
 				}
 				else{
 					m->mothurOut(type + " is not recognized as a valid type. Choices are forward, reverse, and barcode. Ignoring " + oligo + "."); m->mothurOutEndLine();  
@@ -597,6 +624,8 @@ void TrimFlowsCommand::getOligos(vector<vector<string> >& outFlowFileNames){
 		
 		numFPrimers = primers.size();
 		numRPrimers = revPrimer.size();
+        numLinkers = linker.size();
+        numSpacers = spacer.size();
 		
 	}
 	catch(exception& e) {
