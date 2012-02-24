@@ -381,9 +381,7 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
 		TrimOligos trimOligos(pdiffs, bdiffs, primers, barcodes, revPrimer);
 		
 		while(moreSeqs) {
-			//cout << "driver " << count << endl;
-			
-	
+				
 			if (m->control_pressed) { break; }
 			
 			int success = 1;

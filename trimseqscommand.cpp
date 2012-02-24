@@ -372,26 +372,18 @@ int TrimSeqsCommand::execute(){
 			}
 		}
 		
-		vector<unsigned long long> fastaFilePos;
-		vector<unsigned long long> qFilePos;
+        //fills lines and qlines
+		setLines(fastaFile, qFileName);
 		
-		setLines(fastaFile, qFileName, fastaFilePos, qFilePos);
-		
-		for (int i = 0; i < (fastaFilePos.size()-1); i++) {
-			lines.push_back(new linePair(fastaFilePos[i], fastaFilePos[(i+1)]));
-			if (qFileName != "") {  qLines.push_back(new linePair(qFilePos[i], qFilePos[(i+1)]));  }
-		}	
-		if(qFileName == "")	{	qLines = lines;	} //files with duds
-		
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		//#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 				if(processors == 1){
 					driverCreateTrim(fastaFile, qFileName, trimSeqFile, scrapSeqFile, trimQualFile, scrapQualFile, trimNameFile, scrapNameFile, outputGroupFileName, fastaFileNames, qualFileNames, nameFileNames, lines[0], qLines[0]);
 				}else{
 					createProcessesCreateTrim(fastaFile, qFileName, trimSeqFile, scrapSeqFile, trimQualFile, scrapQualFile, trimNameFile, scrapNameFile, outputGroupFileName, fastaFileNames, qualFileNames, nameFileNames); 
 				}	
-		#else
-				driverCreateTrim(fastaFile, qFileName, trimSeqFile, scrapSeqFile, trimQualFile, scrapQualFile, trimNameFile, scrapNameFile, outputGroupFileName, fastaFileNames, qualFileNames, nameFileNames, lines[0], qLines[0]);
-		#endif
+		//#else
+			//	driverCreateTrim(fastaFile, qFileName, trimSeqFile, scrapSeqFile, trimQualFile, scrapQualFile, trimNameFile, scrapNameFile, outputGroupFileName, fastaFileNames, qualFileNames, nameFileNames, lines[0], qLines[0]);
+		//#endif
 		
 		if (m->control_pressed) {  return 0; }			
  	
@@ -503,7 +495,7 @@ int TrimSeqsCommand::execute(){
 		
 /**************************************************************************************/
 
-int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string trimFileName, string scrapFileName, string trimQFileName, string scrapQFileName, string trimNFileName, string scrapNFileName, string groupFileName, vector<vector<string> > fastaFileNames, vector<vector<string> > qualFileNames, vector<vector<string> > nameFileNames, linePair* line, linePair* qline) {	
+int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string trimFileName, string scrapFileName, string trimQFileName, string scrapQFileName, string trimNFileName, string scrapNFileName, string groupFileName, vector<vector<string> > fastaFileNames, vector<vector<string> > qualFileNames, vector<vector<string> > nameFileNames, linePair line, linePair qline) {	
 		
 	try {
 		
@@ -550,12 +542,12 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 		
 		ifstream inFASTA;
 		m->openInputFile(filename, inFASTA);
-		inFASTA.seekg(line->start);
+		inFASTA.seekg(line.start);
 		
 		ifstream qFile;
 		if(qFileName != "")	{
 			m->openInputFile(qFileName, qFile);
-			qFile.seekg(qline->start);  
+			qFile.seekg(qline.start);  
 		}
 		
 		int count = 0;
@@ -595,7 +587,9 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 				
                 if(numLinkers != 0){
 					success = trimOligos.stripLinker(currSeq, currQual);
-					if(!success)				{	trashCode += 'k';	}
+					if(success > ldiffs)		{	trashCode += 'k';	}
+					else{ currentSeqsDiffs += success;  }
+
 				}
                 
 				if(barcodes.size() != 0){
@@ -606,7 +600,9 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 				
                 if(numSpacers != 0){
 					success = trimOligos.stripSpacer(currSeq, currQual);
-					if(!success)				{	trashCode += 's';	}
+					if(success > sdiffs)		{	trashCode += 's';	}
+					else{ currentSeqsDiffs += success;  }
+
 				}
                 
 				if(numFPrimers != 0){
@@ -755,7 +751,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 			
 			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 				unsigned long long pos = inFASTA.tellg();
-				if ((pos == -1) || (pos >= line->end)) { break; }
+				if ((pos == -1) || (pos >= line.end)) { break; }
 			
 			#else
 				if (inFASTA.eof()) { break; }
@@ -788,12 +784,13 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 
 int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName, string trimFASTAFileName, string scrapFASTAFileName, string trimQualFileName, string scrapQualFileName, string trimNameFileName, string scrapNameFileName, string groupFile, vector<vector<string> > fastaFileNames, vector<vector<string> > qualFileNames, vector<vector<string> > nameFileNames) {
 	try {
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-		int process = 1;
+        
+        int process = 1;
 		int exitCommand = 1;
 		processIDS.clear();
 		
-		//loop through and create all the processes you want
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+				//loop through and create all the processes you want
 		while (process != processors) {
 			int pid = fork();
 			
@@ -884,8 +881,105 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
 			int temp = processIDS[i];
 			wait(&temp);
 		}
+#else
+        //////////////////////////////////////////////////////////////////////////////////////////////////////
+		//Windows version shared memory, so be careful when passing variables through the trimData struct. 
+		//Above fork() will clone, so memory is separate, but that's not the case with windows, 
+		//////////////////////////////////////////////////////////////////////////////////////////////////////
 		
-		//append files
+		vector<trimData*> pDataArray; 
+		DWORD   dwThreadIdArray[processors-1];
+		HANDLE  hThreadArray[processors-1]; 
+		
+		//Create processor worker threads.
+		for( int i=0; i<processors-1; i++){
+			
+            string extension = "";
+			if (i != 0) { extension = toString(i) + ".temp"; processIDS.push_back(i); }
+            vector<vector<string> > tempFASTAFileNames = fastaFileNames;
+            vector<vector<string> > tempPrimerQualFileNames = qualFileNames;
+            vector<vector<string> > tempNameFileNames = nameFileNames;
+            
+            if(allFiles){
+                ofstream temp;
+                
+                for(int i=0;i<tempFASTAFileNames.size();i++){
+                    for(int j=0;j<tempFASTAFileNames[i].size();j++){
+                        if (tempFASTAFileNames[i][j] != "") {
+                            tempFASTAFileNames[i][j] += extension;
+                            m->openOutputFile(tempFASTAFileNames[i][j], temp);			temp.close();
+                            
+                            if(qFileName != ""){
+                                tempPrimerQualFileNames[i][j] += extension;
+                                m->openOutputFile(tempPrimerQualFileNames[i][j], temp);		temp.close();
+                            }
+                            if(nameFile != ""){
+                                tempNameFileNames[i][j] += extension;
+                                m->openOutputFile(tempNameFileNames[i][j], temp);		temp.close();
+                            }
+                        }
+                    }
+                }
+            }
+
+            
+			trimData* tempTrim = new trimData(filename,
+                                              qFileName, nameFile,
+                                              (trimFASTAFileName+extension),
+                                              (scrapFASTAFileName+extension),
+                                              (trimQualFileName+extension),
+                                              (scrapQualFileName+extension),
+                                              (trimNameFileName+extension),
+                                              (scrapNameFileName+extension),
+                                              (groupFile+extension),
+                                              tempFASTAFileNames,
+                                              tempPrimerQualFileNames,
+                                              tempNameFileNames,
+                                              lines[i].start, lines[i].end, qLines[i].start, qLines[i].end, m,
+                                              pdiffs, bdiffs, ldiffs, sdiffs, tdiffs, primers, barcodes, revPrimer, linker, spacer, 
+                                             primerNameVector, barcodeNameVector, createGroup, allFiles, keepforward, keepFirst, removeLast,
+                                              qWindowStep, qWindowSize, qWindowAverage, qtrim, qThreshold, qAverage, qRollAverage,
+                                             minLength, maxAmbig, maxHomoP, maxLength, flip, nameMap);
+			pDataArray.push_back(tempTrim);
+            
+			hThreadArray[i] = CreateThread(NULL, 0, MyTrimThreadFunction, pDataArray[i], 0, &dwThreadIdArray[i]);   
+		}
+        
+        //parent do my part
+		ofstream temp;
+		m->openOutputFile(trimFASTAFileName, temp);		temp.close();
+		m->openOutputFile(scrapFASTAFileName, temp);	temp.close();
+		if(qFileName != ""){
+			m->openOutputFile(trimQualFileName, temp);		temp.close();
+			m->openOutputFile(scrapQualFileName, temp);		temp.close();
+		}
+		if (nameFile != "") {
+			m->openOutputFile(trimNameFileName, temp);		temp.close();
+			m->openOutputFile(scrapNameFileName, temp);		temp.close();
+		}
+        
+		driverCreateTrim(filename, qFileName, (trimFASTAFileName + toString(processors-1) + ".temp"), (scrapFASTAFileName + toString(processors-1) + ".temp"), (trimQualFileName + toString(processors-1) + ".temp"), (scrapQualFileName + toString(processors-1) + ".temp"), (trimNameFileName + toString(processors-1) + ".temp"), (scrapNameFileName + toString(processors-1) + ".temp"), (groupFile + toString(processors-1) + ".temp"), fastaFileNames, qualFileNames, nameFileNames, lines[processors-1], qLines[processors-1]);
+        processIDS.push_back(processors-1);
+
+        
+		//Wait until all threads have terminated.
+		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
+		
+		//Close all thread handles and free memory allocations.
+		for(int i=0; i < pDataArray.size(); i++){
+			for (map<string, int>::iterator it = pDataArray[i]->groupCounts.begin(); it != pDataArray[i]->groupCounts.end(); it++) {
+                map<string, int>::iterator it2 = groupCounts.find(it->first);
+                if (it2 == groupCounts.end()) {	groupCounts[it->first] = it->second; }
+                else { groupCounts[it->first] += it->second; }
+            }
+            CloseHandle(hThreadArray[i]);
+			delete pDataArray[i];
+		}
+        
+#endif		
+        
+        
+        //append files
 		for(int i=0;i<processIDS.size();i++){
 			
 			m->mothurOut("Appending files from process " + toString(processIDS[i])); m->mothurOutEndLine();
@@ -936,6 +1030,7 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
 				}
 			}
 			
+            #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 			if(createGroup){
 				ifstream in;
 				string tempFile =  filename + toString(processIDS[i]) + ".num.temp";
@@ -948,7 +1043,7 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
 				if (tempNum != 0) {
 					while (!in.eof()) { 
 						in >> group >> tempNum; m->gobble(in);
-				
+                        
 						map<string, int>::iterator it = groupCounts.find(group);
 						if (it == groupCounts.end()) {	groupCounts[group] = tempNum; }
 						else { groupCounts[it->first] += tempNum; }
@@ -956,11 +1051,10 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
 				}
 				in.close(); m->mothurRemove(tempFile);
 			}
-			
+            #endif
 		}
-	
-		return exitCommand;
-#endif		
+
+        return exitCommand;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "TrimSeqsCommand", "createProcessesCreateTrim");
@@ -970,8 +1064,12 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
 
 /**************************************************************************************************/
 
-int TrimSeqsCommand::setLines(string filename, string qfilename, vector<unsigned long long>& fastaFilePos, vector<unsigned long long>& qfileFilePos) {
+int TrimSeqsCommand::setLines(string filename, string qfilename) {
 	try {
+        
+        vector<unsigned long long> fastaFilePos;
+		vector<unsigned long long> qfileFilePos;
+		
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		//set file positions for fasta file
 		fastaFilePos = m->divideFile(filename, processors);
@@ -1043,13 +1141,47 @@ int TrimSeqsCommand::setLines(string filename, string qfilename, vector<unsigned
 		}
 		
 		qfileFilePos.push_back(size);
+        
+        for (int i = 0; i < (fastaFilePos.size()-1); i++) {
+			lines.push_back(linePair(fastaFilePos[i], fastaFilePos[(i+1)]));
+			if (qfilename != "") {  qLines.push_back(linePair(qfileFilePos[i], qfileFilePos[(i+1)]));  }
+		}	
+		if(qfilename == "")	{	qLines = lines;	} //files with duds
 		
 		return processors;
 		
 		#else
-		
-			fastaFilePos.push_back(0); qfileFilePos.push_back(0);
-			fastaFilePos.push_back(1000); qfileFilePos.push_back(1000);
+            
+        if (processors == 1) { //save time
+			//fastaFilePos.push_back(0); qfileFilePos.push_back(0);
+			//fastaFilePos.push_back(1000); qfileFilePos.push_back(1000);
+            lines.push_back(linePair(0, 1000));
+            if (qfilename != "") {  qLines.push_back(linePair(0, 1000)); }
+        }else{
+            int numFastaSeqs = 0;
+            fastaFilePos = m->setFilePosFasta(filename, numFastaSeqs); 
+        
+            if (qfilename != "") { 
+                int numQualSeqs = 0;
+                qfileFilePos = m->setFilePosFasta(qfilename, numQualSeqs); 
+                
+                if (numFastaSeqs != numQualSeqs) {
+                    m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your fasta file, but " + toString(numQualSeqs) + " sequences in your quality file."); m->mothurOutEndLine(); m->control_pressed = true; 
+                }
+            }
+        
+            //figure out how many sequences you have to process
+            int numSeqsPerProcessor = numFastaSeqs / processors;
+            for (int i = 0; i < processors; i++) {
+                int startIndex =  i * numSeqsPerProcessor;
+                if(i == (processors - 1)){	numSeqsPerProcessor = numFastaSeqs - i * numSeqsPerProcessor; 	}
+                lines.push_back(linePair(fastaFilePos[startIndex], numSeqsPerProcessor));
+                cout << fastaFilePos[startIndex] << '\t' << numSeqsPerProcessor << endl;
+                if (qfilename != "") {  qLines.push_back(linePair(qfileFilePos[startIndex], numSeqsPerProcessor)); }
+            }
+        
+            if(qfilename == "")	{	qLines = lines;	} //files with duds
+        }
 			return 1;
 		
 		#endif

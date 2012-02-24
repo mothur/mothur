@@ -576,13 +576,13 @@ bool TrimOligos::stripReverse(Sequence& seq){
 bool TrimOligos::stripLinker(Sequence& seq, QualityScores& qual){
 	try {
 		string rawSequence = seq.getUnaligned();
-		bool success = 0;	//guilty until proven innocent
+		bool success = ldiffs + 1;	//guilty until proven innocent
 		
 		for(int i=0;i<linker.size();i++){
 			string oligo = linker[i];
 			
 			if(rawSequence.length() < oligo.length()){
-				success = 0;
+				success = ldiffs + 10;
 				break;
 			}
 			
@@ -591,7 +591,7 @@ bool TrimOligos::stripLinker(Sequence& seq, QualityScores& qual){
 				if(qual.getName() != ""){
 					qual.trimQScores(oligo.length(), -1);
 				}
-				success = 1;
+				success = 0;
 				break;
 			}
 		}
@@ -688,19 +688,19 @@ bool TrimOligos::stripLinker(Sequence& seq){
 	try {
 		
 		string rawSequence = seq.getUnaligned();
-		bool success = 0;	//guilty until proven innocent
+		bool success = ldiffs +1;	//guilty until proven innocent
 		
 		for(int i=0;i<linker.size();i++){
 			string oligo = linker[i];
 			
 			if(rawSequence.length() < oligo.length()){
-				success = 0;
+				success = ldiffs +10;
 				break;
 			}
 			
 			if(compareDNASeq(oligo, rawSequence.substr(0,oligo.length()))){
 				seq.setUnaligned(rawSequence.substr(oligo.length()));
-				success = 1;
+				success = 0;
 				break;
 			}
 		}	
@@ -792,13 +792,13 @@ bool TrimOligos::stripLinker(Sequence& seq){
 bool TrimOligos::stripSpacer(Sequence& seq, QualityScores& qual){
 	try {
 		string rawSequence = seq.getUnaligned();
-		bool success = 0;	//guilty until proven innocent
+		bool success = sdiffs+1;	//guilty until proven innocent
 		
 		for(int i=0;i<spacer.size();i++){
 			string oligo = spacer[i];
 			
 			if(rawSequence.length() < oligo.length()){
-				success = 0;
+				success = sdiffs+10;
 				break;
 			}
 			
@@ -807,7 +807,7 @@ bool TrimOligos::stripSpacer(Sequence& seq, QualityScores& qual){
 				if(qual.getName() != ""){
 					qual.trimQScores(oligo.length(), -1);
 				}
-				success = 1;
+				success = 0;
 				break;
 			}
 		}
@@ -904,19 +904,19 @@ bool TrimOligos::stripSpacer(Sequence& seq){
 	try {
 		
 		string rawSequence = seq.getUnaligned();
-		bool success = 0;	//guilty until proven innocent
+		bool success = sdiffs+1;	//guilty until proven innocent
 		
 		for(int i=0;i<spacer.size();i++){
 			string oligo = spacer[i];
 			
 			if(rawSequence.length() < oligo.length()){
-				success = 0;
+				success = sdiffs+10;
 				break;
 			}
 			
 			if(compareDNASeq(oligo, rawSequence.substr(0,oligo.length()))){
 				seq.setUnaligned(rawSequence.substr(oligo.length()));
-				success = 1;
+				success = 0;
 				break;
 			}
 		}	
