@@ -8,47 +8,6 @@
  */
 
 #include "matrixoutputcommand.h"
-#include "sharedsobscollectsummary.h"
-#include "sharedchao1.h"
-#include "sharedace.h"
-#include "sharednseqs.h"
-#include "sharedjabund.h"
-#include "sharedsorabund.h"
-#include "sharedjclass.h"
-#include "sharedsorclass.h"
-#include "sharedjest.h"
-#include "sharedsorest.h"
-#include "sharedthetayc.h"
-#include "sharedthetan.h"
-#include "sharedkstest.h"
-#include "whittaker.h"
-#include "sharedochiai.h"
-#include "sharedanderbergs.h"
-#include "sharedkulczynski.h"
-#include "sharedkulczynskicody.h"
-#include "sharedlennon.h"
-#include "sharedmorisitahorn.h"
-#include "sharedbraycurtis.h"
-#include "sharedjackknife.h"
-#include "whittaker.h"
-#include "odum.h"
-#include "canberra.h"
-#include "structeuclidean.h"
-#include "structchord.h"
-#include "hellinger.h"
-#include "manhattan.h"
-#include "structpearson.h"
-#include "soergel.h"
-#include "spearman.h"
-#include "structkulczynski.h"
-#include "structchi2.h"
-#include "speciesprofile.h"
-#include "hamming.h"
-#include "gower.h"
-#include "memchi2.h"
-#include "memchord.h"
-#include "memeuclidean.h"
-#include "mempearson.h"
 
 //**********************************************************************************************************************
 vector<string> MatrixOutputCommand::setParameters(){	
@@ -459,13 +418,14 @@ int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
 		vector<SharedRAbundVector*> subset;
 		vector< vector<seqDist> > calcDists; calcDists.resize(matrixCalculators.size()); //one for each calc, this will be used to make .dist files
 		
-	#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+	
 		if(processors == 1){
 			driver(thisLookup, 0, numGroups, calcDists);
 		}else{
 			int process = 1;
 			vector<int> processIDS;
-			
+            
+			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 			//loop through and create all the processes you want
 			while (process != processors) {
 				int pid = fork();
@@ -529,11 +489,66 @@ int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
 				intemp.close();
 				m->mothurRemove(tempdistFileName);
 			}
-			
+            #else
+            //////////////////////////////////////////////////////////////////////////////////////////////////////
+            //Windows version shared memory, so be careful when passing variables through the distSharedData struct. 
+            //Above fork() will clone, so memory is separate, but that's not the case with windows, 
+            //Taking advantage of shared memory to pass results vectors.
+            //////////////////////////////////////////////////////////////////////////////////////////////////////
+            
+            vector<distSharedData*> pDataArray; 
+            DWORD   dwThreadIdArray[processors-1];
+            HANDLE  hThreadArray[processors-1]; 
+            
+            //Create processor worker threads.
+            for( int i=1; i<processors; i++ ){
+                
+                //make copy of lookup so we don't get access violations
+                vector<SharedRAbundVector*> newLookup;
+                for (int k = 0; k < thisLookup.size(); k++) {
+                    SharedRAbundVector* temp = new SharedRAbundVector();
+                    temp->setLabel(thisLookup[k]->getLabel());
+                    temp->setGroup(thisLookup[k]->getGroup());
+                    newLookup.push_back(temp);
+                }
+                
+                //for each bin
+                for (int k = 0; k < thisLookup[0]->getNumBins(); k++) {
+                    if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) {  delete newLookup[j];  } return 0; }
+                    for (int j = 0; j < thisLookup.size(); j++) { newLookup[j]->push_back(thisLookup[j]->getAbundance(k), thisLookup[j]->getGroup()); }
+                }
+                
+                // Allocate memory for thread data.
+                distSharedData* tempSum = new distSharedData(m, lines[i].start, lines[i].end, Estimators, newLookup);
+                pDataArray.push_back(tempSum);
+                processIDS.push_back(i);
+                
+                hThreadArray[i-1] = CreateThread(NULL, 0, MyDistSharedThreadFunction, pDataArray[i-1], 0, &dwThreadIdArray[i-1]);   
+            }
+            
+            //parent do your part
+            driver(thisLookup, lines[0].start, lines[0].end, calcDists);   
+                       
+            //Wait until all threads have terminated.
+            WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
+            
+            //Close all thread handles and free memory allocations.
+            for(int i=0; i < pDataArray.size(); i++){
+                for (int j = 0; j < pDataArray[i]->thisLookup.size(); j++) {  delete pDataArray[i]->thisLookup[j];  } 
+                
+                for (int k = 0; k < calcDists.size(); k++) {
+                    int size = pDataArray[i]->calcDists[k].size();
+                    for (int j = 0; j < size; j++) {    calcDists[k].push_back(pDataArray[i]->calcDists[k][j]);    }
+                }
+                
+                CloseHandle(hThreadArray[i]);
+                delete pDataArray[i];
+            }
+
+            #endif
 		}
-#else
-		driver(thisLookup, 0, numGroups, calcDists);
-#endif
+
+		
 		
 		for (int i = 0; i < calcDists.size(); i++) {
 			if (m->control_pressed) { break; }
