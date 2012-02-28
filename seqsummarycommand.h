@@ -62,11 +62,11 @@ private:
 // This is passed by void pointer so it can be any data type
 // that can be passed using a single void pointer (LPVOID).
 struct seqSumData {
-	vector<int>* startPosition;
-	vector<int>* endPosition;
-	vector<int>* seqLength; 
-	vector<int>* ambigBases; 
-	vector<int>* longHomoPolymer; 
+	vector<int> startPosition;
+	vector<int> endPosition;
+	vector<int> seqLength; 
+	vector<int> ambigBases; 
+	vector<int> longHomoPolymer; 
 	string filename; 
 	string sumFile; 
 	unsigned long long start;
@@ -78,12 +78,7 @@ struct seqSumData {
 	
 	
 	seqSumData(){}
-	seqSumData(vector<int>* s, vector<int>* e, vector<int>* l, vector<int>* a, vector<int>* h, string f, string sf, MothurOut* mout, unsigned long long st, unsigned long long en, string na, map<string, int> nam) {
-		startPosition = s;
-		endPosition = e;
-		seqLength = l;
-		ambigBases = a;
-		longHomoPolymer = h;
+	seqSumData(string f, string sf, MothurOut* mout, unsigned long long st, unsigned long long en, string na, map<string, int> nam) {
 		filename = f;
 		sumFile = sf;
 		m = mout;
@@ -137,11 +132,11 @@ static DWORD WINAPI MySeqSumThreadFunction(LPVOID lpParam){
 				
 				//for each sequence this sequence represents
 				for (int i = 0; i < num; i++) {
-					pDataArray->startPosition->push_back(current.getStartPos());
-					pDataArray->endPosition->push_back(current.getEndPos());
-					pDataArray->seqLength->push_back(current.getNumBases());
-					pDataArray->ambigBases->push_back(current.getAmbigBases());
-					pDataArray->longHomoPolymer->push_back(current.getLongHomoPolymer());
+					pDataArray->startPosition.push_back(current.getStartPos());
+					pDataArray->endPosition.push_back(current.getEndPos());
+					pDataArray->seqLength.push_back(current.getNumBases());
+					pDataArray->ambigBases.push_back(current.getAmbigBases());
+					pDataArray->longHomoPolymer.push_back(current.getLongHomoPolymer());
 				}
 				
 				outSummary << current.getName() << '\t';

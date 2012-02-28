@@ -58,9 +58,9 @@ private:
 // This is passed by void pointer so it can be any data type
 // that can be passed using a single void pointer (LPVOID).
 struct seqSumQualData {
-	vector<int>* position;
-	vector<int>* averageQ;
-	vector< vector<int> >* scores; 
+	vector<int> position;
+	vector<int> averageQ;
+	vector< vector<int> > scores; 
 	string filename, namefile; 
 	unsigned long long start;
 	unsigned long long end;
@@ -69,10 +69,7 @@ struct seqSumQualData {
 	map<string, int> nameMap;
 	
 	~seqSumQualData(){}
-	seqSumQualData(vector<int>* p, vector<int>* a, vector< vector<int> >* s, string f, MothurOut* mout, unsigned long long st, unsigned long long en, string n, map<string, int> nam) {
-		position = p;
-		averageQ = a;
-		scores = s;
+	seqSumQualData(string f, MothurOut* mout, unsigned long long st, unsigned long long en, string n, map<string, int> nam) {
 		filename = f;
 		m = mout;
 		start = st;
@@ -122,20 +119,20 @@ static DWORD WINAPI MySeqSumQualThreadFunction(LPVOID lpParam){
 				vector<int> thisScores = current.getQualityScores();
 				
 				//resize to num of positions setting number of seqs with that size to 1
-				if (pDataArray->position->size() < thisScores.size()) { pDataArray->position->resize(thisScores.size(), 0); }
-				if (pDataArray->averageQ->size() < thisScores.size()) { pDataArray->averageQ->resize(thisScores.size(), 0); }
-				if (pDataArray->scores->size() < thisScores.size()) { 
-					pDataArray->scores->resize(thisScores.size()); 
-					for (int i = 0; i < pDataArray->scores->size(); i++) { pDataArray->scores->at(i).resize(41, 0); }
+				if (pDataArray->position.size() < thisScores.size()) { pDataArray->position.resize(thisScores.size(), 0); }
+				if (pDataArray->averageQ.size() < thisScores.size()) { pDataArray->averageQ.resize(thisScores.size(), 0); }
+				if (pDataArray->scores.size() < thisScores.size()) { 
+					pDataArray->scores.resize(thisScores.size()); 
+					for (int i = 0; i < pDataArray->scores.size(); i++) { pDataArray->scores.at(i).resize(41, 0); }
 				}
 				
 				//increase counts of number of seqs with this position
 				//average is really the total, we will average in execute
 				for (int i = 0; i < thisScores.size(); i++) { 
-					pDataArray->position->at(i) += num; 
-					pDataArray->averageQ->at(i) += (thisScores[i] * num); //weighting for namesfile
+					pDataArray->position.at(i) += num; 
+					pDataArray->averageQ.at(i) += (thisScores[i] * num); //weighting for namesfile
 					if (thisScores[i] > 40) { pDataArray->m->mothurOut("[ERROR]: " + current.getName() + " has a quality scores of " + toString(thisScores[i]) + ", expecting values to be less than 40."); pDataArray->m->mothurOutEndLine(); pDataArray->m->control_pressed = true; }
-					else { pDataArray->scores->at(i)[thisScores[i]] += num; }  
+					else { pDataArray->scores.at(i)[thisScores[i]] += num; }  
 				}
 				
 				count += num;

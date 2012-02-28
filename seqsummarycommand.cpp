@@ -612,7 +612,7 @@ int SeqSummaryCommand::createProcessesCreateSummary(vector<int>& startPosition, 
             string extension = "";
             if (i != 0) { extension = toString(i) + ".temp"; processIDS.push_back(i); }
 			// Allocate memory for thread data.
-			seqSumData* tempSum = new seqSumData(&startPosition, &endPosition, &seqLength, &ambigBases, &longHomoPolymer, filename, (sumFile+extension), m, lines[i]->start, lines[i]->end, namefile, nameMap);
+			seqSumData* tempSum = new seqSumData(filename, (sumFile+extension), m, lines[i]->start, lines[i]->end, namefile, nameMap);
 			pDataArray.push_back(tempSum);
 			
 			//MySeqSumThreadFunction is in header. It must be global or static to work with the threads.
@@ -630,6 +630,11 @@ int SeqSummaryCommand::createProcessesCreateSummary(vector<int>& startPosition, 
 		//Close all thread handles and free memory allocations.
 		for(int i=0; i < pDataArray.size(); i++){
 			num += pDataArray[i]->count;
+            for (int k = 0; k < pDataArray[i]->startPosition.size(); k++) {	startPosition.push_back(pDataArray[i]->startPosition[k]);       }
+			for (int k = 0; k < pDataArray[i]->endPosition.size(); k++) {	endPosition.push_back(pDataArray[i]->endPosition[k]);       }
+            for (int k = 0; k < pDataArray[i]->seqLength.size(); k++) {	seqLength.push_back(pDataArray[i]->seqLength[k]);       }
+            for (int k = 0; k < pDataArray[i]->ambigBases.size(); k++) {	ambigBases.push_back(pDataArray[i]->ambigBases[k]);       }
+            for (int k = 0; k < pDataArray[i]->longHomoPolymer.size(); k++) {	longHomoPolymer.push_back(pDataArray[i]->longHomoPolymer[k]);       }
 			CloseHandle(hThreadArray[i]);
 			delete pDataArray[i];
 		}

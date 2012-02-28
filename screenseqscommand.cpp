@@ -398,17 +398,10 @@ int ScreenSeqsCommand::execute(){
 			MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 					
 #else
-						
-	//#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-			if(processors == 1){
-				numFastaSeqs = driver(lines[0], goodSeqFile, badAccnosFile, fastafile, badSeqNames);		
-			}else{
-				numFastaSeqs = createProcesses(goodSeqFile, badAccnosFile, fastafile, badSeqNames); 
-            }
-	//#else
-	//		numFastaSeqs = driver(lines[0], goodSeqFile, badAccnosFile, fastafile, badSeqNames);		
-	//#endif
-            if (m->control_pressed) { m->mothurRemove(goodSeqFile); return 0; }
+        if(processors == 1){ numFastaSeqs = driver(lines[0], goodSeqFile, badAccnosFile, fastafile, badSeqNames);	}	
+        else{ numFastaSeqs = createProcesses(goodSeqFile, badAccnosFile, fastafile, badSeqNames); }
+        
+        if (m->control_pressed) { m->mothurRemove(goodSeqFile); return 0; }
 #endif		
 
 		#ifdef USE_MPI
