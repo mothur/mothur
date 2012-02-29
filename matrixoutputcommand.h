@@ -110,7 +110,6 @@ private:
 	
 /**************************************************************************************************/
 //custom data structure for threads to use.
-//main process handling the calcs that can do more than 2 groups
 // This is passed by void pointer so it can be any data type
 // that can be passed using a single void pointer (LPVOID).
 struct distSharedData {
