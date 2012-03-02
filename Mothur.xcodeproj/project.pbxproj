@@ -58,6 +58,8 @@
 		A7A61F2D130062E000E05B6B /* amovacommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7A61F2C130062E000E05B6B /* amovacommand.cpp */; };
 		A7BF221414587886000AD524 /* myPerseus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7BF221214587886000AD524 /* myPerseus.cpp */; };
 		A7BF2232145879B2000AD524 /* chimeraperseuscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7BF2231145879B2000AD524 /* chimeraperseuscommand.cpp */; };
+		A7C3DC0B14FE457500FE1924 /* cooccurrencecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7C3DC0914FE457500FE1924 /* cooccurrencecommand.cpp */; };
+		A7C3DC0F14FE469500FE1924 /* trialSwap2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7C3DC0D14FE469500FE1924 /* trialSwap2.cpp */; };
 		A7E9B88112D37EC400DA6239 /* ace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B64F12D37EC300DA6239 /* ace.cpp */; };
 		A7E9B88212D37EC400DA6239 /* aligncommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B65112D37EC300DA6239 /* aligncommand.cpp */; };
 		A7E9B88312D37EC400DA6239 /* alignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B65312D37EC300DA6239 /* alignment.cpp */; };
@@ -486,6 +488,10 @@
 		A7BF221314587886000AD524 /* myPerseus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = myPerseus.h; sourceTree = "<group>"; };
 		A7BF2230145879B2000AD524 /* chimeraperseuscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimeraperseuscommand.h; sourceTree = "<group>"; };
 		A7BF2231145879B2000AD524 /* chimeraperseuscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimeraperseuscommand.cpp; sourceTree = "<group>"; };
+		A7C3DC0914FE457500FE1924 /* cooccurrencecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cooccurrencecommand.cpp; sourceTree = "<group>"; };
+		A7C3DC0A14FE457500FE1924 /* cooccurrencecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cooccurrencecommand.h; sourceTree = "<group>"; };
+		A7C3DC0D14FE469500FE1924 /* trialSwap2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = trialSwap2.cpp; sourceTree = "<group>"; };
+		A7C3DC0E14FE469500FE1924 /* trialswap2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = trialswap2.h; sourceTree = "<group>"; };
 		A7DAAFA3133A254E003956EB /* commandparameter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = commandparameter.h; sourceTree = "<group>"; };
 		A7E9B64F12D37EC300DA6239 /* ace.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ace.cpp; sourceTree = "<group>"; };
 		A7E9B65012D37EC300DA6239 /* ace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ace.h; sourceTree = "<group>"; };
@@ -1185,6 +1191,8 @@
 				A7E9B82D12D37EC400DA6239 /* singlelinkage.cpp */,
 				A7E9B83012D37EC400DA6239 /* slibshuff.cpp */,
 				A7E9B83112D37EC400DA6239 /* slibshuff.h */,
+				A7C3DC0E14FE469500FE1924 /* trialswap2.h */,
+				A7C3DC0D14FE469500FE1924 /* trialSwap2.cpp */,
 				A7FF19F0140FFDA500AD216D /* trimoligos.h */,
 				A7FF19F1140FFDA500AD216D /* trimoligos.cpp */,
 				A7E9B87412D37EC400DA6239 /* validcalculator.cpp */,
@@ -1341,6 +1349,8 @@
 				A7E9B6B512D37EC400DA6239 /* consensuscommand.cpp */,
 				A7E9B6B812D37EC400DA6239 /* consensusseqscommand.h */,
 				A7E9B6B712D37EC400DA6239 /* consensusseqscommand.cpp */,
+				A7C3DC0A14FE457500FE1924 /* cooccurrencecommand.h */,
+				A7C3DC0914FE457500FE1924 /* cooccurrencecommand.cpp */,
 				A7E9B6BA12D37EC400DA6239 /* corraxescommand.h */,
 				A7E9B6B912D37EC400DA6239 /* corraxescommand.cpp */,
 				A795840B13F13CD900F201D5 /* countgroupscommand.h */,
@@ -2289,6 +2299,8 @@
 				A7A3C8C914D041AD00B1BFBE /* otuassociationcommand.cpp in Sources */,
 				A7A32DAA14DC43B00001D2E5 /* sortseqscommand.cpp in Sources */,
 				A7EEB0F514F29BFE00344B83 /* classifytreecommand.cpp in Sources */,
+				A7C3DC0B14FE457500FE1924 /* cooccurrencecommand.cpp in Sources */,
+				A7C3DC0F14FE469500FE1924 /* trialSwap2.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

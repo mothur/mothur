@@ -232,21 +232,19 @@ int MetaStatsCommand::execute(){
 		//only 1 combo
 		if (numGroups == 2) { processors = 1; }
 		else if (numGroups < 2)	{ m->mothurOut("Not enough sets, I need at least 2 valid sets. Unable to complete command."); m->mothurOutEndLine(); m->control_pressed = true; }
-		
-//		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-			if(processors != 1){
-				int numPairs = namesOfGroupCombos.size();
-				int numPairsPerProcessor = numPairs / processors;
+
+        if(processors != 1){
+            int numPairs = namesOfGroupCombos.size();
+            int numPairsPerProcessor = numPairs / processors;
 			
-				for (int i = 0; i < processors; i++) {
-					int startPos = i * numPairsPerProcessor;
-					if(i == processors - 1){
-						numPairsPerProcessor = numPairs - i * numPairsPerProcessor;
-					}
-					lines.push_back(linePair(startPos, numPairsPerProcessor));
-				}
-			}
-//		#endif
+            for (int i = 0; i < processors; i++) {
+                int startPos = i * numPairsPerProcessor;
+                if(i == processors - 1){
+                    numPairsPerProcessor = numPairs - i * numPairsPerProcessor;
+                }
+                lines.push_back(linePair(startPos, numPairsPerProcessor));
+            }
+        }
 		
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {

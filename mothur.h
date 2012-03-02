@@ -42,6 +42,7 @@
 #include <cmath>
 #include <math.h>
 #include <algorithm>
+#include <numeric>
 
 //misc
 #include <cerrno>
