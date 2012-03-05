@@ -905,16 +905,35 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
 		}
 		
 	#endif	
-		
+        vector<string> nonBlankAccnosFiles;
+		if (!(m->isBlank(accnos))) { nonBlankAccnosFiles.push_back(accnos); }
+		else { m->mothurRemove(accnos); } //remove so other files can be renamed to it
+        
 		for(int i=0;i<processIDS.size();i++){
 			appendTaxFiles((taxFileName + toString(processIDS[i]) + ".temp"), taxFileName);
 			appendTaxFiles((tempTaxFile + toString(processIDS[i]) + ".temp"), tempTaxFile);
-			appendTaxFiles((accnos + toString(processIDS[i]) + ".temp"), accnos);
+            if (!(m->isBlank(accnos + toString(processIDS[i]) + ".temp"))) {
+				nonBlankAccnosFiles.push_back(accnos + toString(processIDS[i]) + ".temp");
+			}else { m->mothurRemove((accnos + toString(processIDS[i]) + ".temp"));  }
+
 			m->mothurRemove((m->getFullPathName(taxFileName) + toString(processIDS[i]) + ".temp"));
 			m->mothurRemove((m->getFullPathName(tempTaxFile) + toString(processIDS[i]) + ".temp"));
-			m->mothurRemove((m->getFullPathName(accnos) + toString(processIDS[i]) + ".temp"));
 		}
 		
+        //append accnos files
+		if (nonBlankAccnosFiles.size() != 0) { 
+			rename(nonBlankAccnosFiles[0].c_str(), accnos.c_str());
+			
+			for (int h=1; h < nonBlankAccnosFiles.size(); h++) {
+				appendTaxFiles(nonBlankAccnosFiles[h], accnos);
+				m->mothurRemove(nonBlankAccnosFiles[h]);
+			}
+		}else { //recreate the accnosfile if needed
+			ofstream out;
+			m->openOutputFile(accnos, out);
+			out.close();
+		}
+
 		return num;
 		
 	}
