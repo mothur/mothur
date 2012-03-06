@@ -420,7 +420,19 @@ int FilterSeqsCommand::filterSequences() {
 				MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 				
 #else
-			vector<unsigned long long> positions = savedPositions[s];
+            
+            vector<unsigned long long> positions;
+            if (savedPositions.size() != 0) { positions = savedPositions[s]; }
+            else {
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+				positions = m->divideFile(fastafileNames[s], processors);
+#else
+                if(processors != 1){
+                    int numFastaSeqs = 0;
+                    positions = m->setFilePosFasta(fastafileNames[s], numFastaSeqs); 
+                }
+#endif
+            }
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 			//vector<unsigned long long> positions = m->divideFile(fastafileNames[s], processors);
 			

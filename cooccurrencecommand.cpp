@@ -33,8 +33,16 @@ vector<string> CooccurrenceCommand::setParameters() {
 //**********************************************************************************************************************
 string CooccurrenceCommand::getHelpString(){	
 	try {
-		string helpString = "help!";
-
+		string helpString = "The cooccurrence command calculates four metrics and tests their significance to assess whether presence-absence patterns are different than what one would expect by chance.";
+        helpString += "The cooccurrence command parameters are shared, metric, matrixmodel, iters, label and groups.";
+        helpString += "The matrixmodel parameter options are sim1, sim2, sim3, sim4, sim5, sim6, sim7, sim8 and sim9. Default=sim2";
+        helpString += "The metric parameter options are cscore, checker, combo and vratio. Default=cscore";
+        helpString += "The label parameter is used to analyze specific labels in your input.\n";
+		helpString += "The groups parameter allows you to specify which of the groups you would like analyzed.\n";
+        helpString += "The cooccurrence command should be in the following format: \n";
+		helpString += "cooccurrence(shared=yourSharedFile) \n";
+		helpString += "Example cooccurrence(shared=final.an.shared).\n";
+		helpString += "Note: No spaces between parameter labels (i.e. shared), '=' and parameters (i.e.yourShared).\n";
 		return helpString;
 	}
 	catch(exception& e) {

@@ -232,7 +232,7 @@ int SortSeqsCommand::execute(){
 		//read through the correct file and output lines you want to keep
         if (accnosfile != "")		{		readAccnos();	}
 		if (fastafile != "")		{		readFasta();	}
-        if (flowfile != "")         {		readFlow();	}
+        if (flowfile != "")         {		readFlow();     }
         if (qualfile != "")			{		readQual();		}
         if (namefile != "")			{		readName();		}
 		if (groupfile != "")		{		readGroup();	}

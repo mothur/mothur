@@ -16,7 +16,7 @@ vector<string> SffInfoCommand::setParameters(){
 		CommandParameter psff("sff", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(psff);
 		CommandParameter paccnos("accnos", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(paccnos);
 		CommandParameter psfftxt("sfftxt", "String", "", "", "", "", "",false,false); parameters.push_back(psfftxt);
-		CommandParameter pflow("flow", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pflow);
+		CommandParameter pflow("flow", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pflow);
 		CommandParameter ptrim("trim", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(ptrim);
 		CommandParameter pfasta("fasta", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pfasta);
 		CommandParameter pqfile("name", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pqfile);
@@ -41,7 +41,7 @@ string SffInfoCommand::getHelpString(){
 		helpString += "The sff parameter allows you to enter the sff file you would like to extract data from.  You may enter multiple files by separating them by -'s.\n";
 		helpString += "The fasta parameter allows you to indicate if you would like a fasta formatted file generated.  Default=True. \n";
 		helpString += "The qfile parameter allows you to indicate if you would like a quality file generated.  Default=True. \n";
-		helpString += "The flow parameter allows you to indicate if you would like a flowgram file generated.  Default=False. \n";
+		helpString += "The flow parameter allows you to indicate if you would like a flowgram file generated.  Default=True. \n";
 		helpString += "The sfftxt parameter allows you to indicate if you would like a sff.txt file generated.  Default=False. \n";
 		helpString += "If you want to parse an existing sfftxt file into flow, fasta and quality file, enter the file name using the sfftxt parameter. \n";
 		helpString += "The trim parameter allows you to indicate if you would like a sequences and quality scores trimmed to the clipQualLeft and clipQualRight values.  Default=True. \n";
@@ -256,7 +256,7 @@ SffInfoCommand::SffInfoCommand(string option)  {
 			temp = validParameter.validFile(parameters, "fasta", false);				if (temp == "not found"){	temp = "T";				}
 			fasta = m->isTrue(temp); 
 			
-			temp = validParameter.validFile(parameters, "flow", false);					if (temp == "not found"){	temp = "F";				}
+			temp = validParameter.validFile(parameters, "flow", false);					if (temp == "not found"){	temp = "T";				}
 			flow = m->isTrue(temp); 
 			
 			temp = validParameter.validFile(parameters, "trim", false);					if (temp == "not found"){	temp = "T";				}

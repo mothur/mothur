@@ -9,6 +9,7 @@
 
 #include "linearalgebra.h"
 
+// This class references functions used from "Numerical Recipes in C++" //
 /*********************************************************************************************************************************/
 
 inline double SIGN(const double a, const double b)

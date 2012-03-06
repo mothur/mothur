@@ -371,7 +371,7 @@ int TrimSeqsCommand::execute(){
 				outputNames.push_back(outputGroupFileName); outputTypes["group"].push_back(outputGroupFileName);
 			}
 		}
-		
+       
         //fills lines and qlines
 		setLines(fastaFile, qFileName);
 		
@@ -1071,8 +1071,6 @@ int TrimSeqsCommand::setLines(string filename, string qfilename) {
 		//set file positions for fasta file
 		fastaFilePos = m->divideFile(filename, processors);
 		
-		if (qfilename == "") { return processors; }
-		
 		//get name of first sequence in each chunk
 		map<string, int> firstSeqNames;
 		for (int i = 0; i < (fastaFilePos.size()-1); i++) {
@@ -1085,59 +1083,61 @@ int TrimSeqsCommand::setLines(string filename, string qfilename) {
 		
 			in.close();
 		}
-				
-		//seach for filePos of each first name in the qfile and save in qfileFilePos
-		ifstream inQual;
-		m->openInputFile(qfilename, inQual);
 		
-		string input;
-		while(!inQual.eof()){	
-			input = m->getline(inQual);
-
-			if (input.length() != 0) {
-				if(input[0] == '>'){ //this is a sequence name line
-					istringstream nameStream(input);
-					
-					string sname = "";  nameStream >> sname;
-					sname = sname.substr(1);
-					
-					map<string, int>::iterator it = firstSeqNames.find(sname);
-					
-					if(it != firstSeqNames.end()) { //this is the start of a new chunk
-						unsigned long long pos = inQual.tellg(); 
-						qfileFilePos.push_back(pos - input.length() - 1);	
-						firstSeqNames.erase(it);
-					}
-				}
-			}
-			
-			if (firstSeqNames.size() == 0) { break; }
-		}
-		inQual.close();
-		
-		
-		if (firstSeqNames.size() != 0) { 
-			for (map<string, int>::iterator it = firstSeqNames.begin(); it != firstSeqNames.end(); it++) {
-				m->mothurOut(it->first + " is in your fasta file and not in your quality file, not using quality file."); m->mothurOutEndLine();
-			}
-			qFileName = "";
-			return processors;
-		}
-
-		//get last file position of qfile
-		FILE * pFile;
-		unsigned long long size;
-		
-		//get num bytes in file
-		pFile = fopen (qfilename.c_str(),"rb");
-		if (pFile==NULL) perror ("Error opening file");
-		else{
-			fseek (pFile, 0, SEEK_END);
-			size=ftell (pFile);
-			fclose (pFile);
-		}
-		
-		qfileFilePos.push_back(size);
+		if(qfilename != "")	{
+            //seach for filePos of each first name in the qfile and save in qfileFilePos
+            ifstream inQual;
+            m->openInputFile(qfilename, inQual);
+            
+            string input;
+            while(!inQual.eof()){	
+                input = m->getline(inQual);
+                
+                if (input.length() != 0) {
+                    if(input[0] == '>'){ //this is a sequence name line
+                        istringstream nameStream(input);
+                        
+                        string sname = "";  nameStream >> sname;
+                        sname = sname.substr(1);
+                        
+                        map<string, int>::iterator it = firstSeqNames.find(sname);
+                        
+                        if(it != firstSeqNames.end()) { //this is the start of a new chunk
+                            unsigned long long pos = inQual.tellg(); 
+                            qfileFilePos.push_back(pos - input.length() - 1);	
+                            firstSeqNames.erase(it);
+                        }
+                    }
+                }
+                
+                if (firstSeqNames.size() == 0) { break; }
+            }
+            inQual.close();
+            
+            
+            if (firstSeqNames.size() != 0) { 
+                for (map<string, int>::iterator it = firstSeqNames.begin(); it != firstSeqNames.end(); it++) {
+                    m->mothurOut(it->first + " is in your fasta file and not in your quality file, not using quality file."); m->mothurOutEndLine();
+                }
+                qFileName = "";
+                return processors;
+            }
+            
+            //get last file position of qfile
+            FILE * pFile;
+            unsigned long long size;
+            
+            //get num bytes in file
+            pFile = fopen (qfilename.c_str(),"rb");
+            if (pFile==NULL) perror ("Error opening file");
+            else{
+                fseek (pFile, 0, SEEK_END);
+                size=ftell (pFile);
+                fclose (pFile);
+            }
+            
+            qfileFilePos.push_back(size);
+        }
         
         for (int i = 0; i < (fastaFilePos.size()-1); i++) {
 			lines.push_back(linePair(fastaFilePos[i], fastaFilePos[(i+1)]));
