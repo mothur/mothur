@@ -9,6 +9,7 @@
 
 #include "corraxescommand.h"
 #include "sharedutilities.h"
+#include "linearalgebra.h"
 
 //**********************************************************************************************************************
 vector<string> CorrAxesCommand::setParameters(){	
@@ -304,6 +305,8 @@ int CorrAxesCommand::execute(){
 int CorrAxesCommand::calcPearson(map<string, vector<float> >& axes, ofstream& out) {
    try {
 	   
+       LinearAlgebra linear;
+       
 	   //find average of each axis - X
 	   vector<float> averageAxes; averageAxes.resize(numaxes, 0.0);
 	   for (map<string, vector<float> >::iterator it = axes.begin(); it != axes.end(); it++) {
@@ -355,11 +358,7 @@ int CorrAxesCommand::calcPearson(map<string, vector<float> >& axes, ofstream& ou
 			   rValues[k] = r;
 			   out << '\t' << r; 
                
-               //signifigance calc - http://faculty.vassar.edu/lowry/ch4apx.html
-               double temp =  (1- (r*r)) / (double) (lookupFloat.size()-2);
-               temp = sqrt(temp);
-               double sig = r / temp;
-               if (isnan(sig) || isinf(sig)) { sig = 0.0; }
+               double sig = linear.calcPearsonSig(lookupFloat.size(), r);
                
                out << '\t' << sig;
 		   }
@@ -382,6 +381,9 @@ int CorrAxesCommand::calcPearson(map<string, vector<float> >& axes, ofstream& ou
 int CorrAxesCommand::calcSpearman(map<string, vector<float> >& axes, ofstream& out) {
 	try {
 		
+        LinearAlgebra linear;
+        vector<double> sf; 
+        
 		//format data
 		vector< map<float, int> > tableX; tableX.resize(numaxes);
 		map<float, int>::iterator itTable;
@@ -421,6 +423,7 @@ int CorrAxesCommand::calcSpearman(map<string, vector<float> >& axes, ofstream& o
 			
 			vector<spearmanRank> ties;
 			int rankTotal = 0;
+            double sfTemp = 0.0;
 			for (int j = 0; j < scores[i].size(); j++) {
 				rankTotal += (j+1);
 				ties.push_back(scores[i][j]);
@@ -432,6 +435,8 @@ int CorrAxesCommand::calcSpearman(map<string, vector<float> >& axes, ofstream& o
 							float thisrank = rankTotal / (float) ties.size();
   							rankAxes[ties[k].name].push_back(thisrank);
 						}
+                        int t = ties.size();
+                        sfTemp += (t*t*t-t);
 						ties.clear();
 						rankTotal = 0;
 					}
@@ -444,6 +449,7 @@ int CorrAxesCommand::calcSpearman(map<string, vector<float> >& axes, ofstream& o
 					}
 				}
 			}
+            sf.push_back(sfTemp);
 		}
 		
 				
@@ -478,6 +484,7 @@ int CorrAxesCommand::calcSpearman(map<string, vector<float> >& axes, ofstream& o
 			
 			sort(otuScores.begin(), otuScores.end(), compareSpearman);
 			
+            double sg = 0.0;
 			map<string, float> rankOtus;
 			vector<spearmanRank> ties;
 			int rankTotal = 0;
@@ -492,6 +499,8 @@ int CorrAxesCommand::calcSpearman(map<string, vector<float> >& axes, ofstream& o
 							float thisrank = rankTotal / (float) ties.size();
   							rankOtus[ties[k].name] = thisrank;
 						}
+                        int t = ties.size();
+                        sg += (t*t*t-t);
 						ties.clear();
 						rankTotal = 0;
 					}
@@ -532,12 +541,7 @@ int CorrAxesCommand::calcSpearman(map<string, vector<float> >& axes, ofstream& o
 				
 				pValues[j] = p;
                 
-                //signifigance calc - http://en.wikipedia.org/wiki/Spearman%27s_rank_correlation_coefficient
-                double temp = (lookupFloat.size()-2) / (double) (1- (p*p));
-                temp = sqrt(temp);
-                double sig = p*temp;
-                if (isnan(sig) || isinf(sig)) { sig = 0.0; }
-                
+                double sig = linear.calcSpearmanSig(n, sf[j], sg, di);            
                 out  << '\t' << sig;
                 
 			}
@@ -560,6 +564,8 @@ int CorrAxesCommand::calcSpearman(map<string, vector<float> >& axes, ofstream& o
 int CorrAxesCommand::calcKendall(map<string, vector<float> >& axes, ofstream& out) {
 	try {
 		
+        LinearAlgebra linear;
+        
 		//format data
 		vector< vector<spearmanRank> > scores; scores.resize(numaxes);
 		for (map<string, vector<float> >::iterator it = axes.begin(); it != axes.end(); it++) {
@@ -678,14 +684,7 @@ int CorrAxesCommand::calcKendall(map<string, vector<float> >& axes, ofstream& ou
 				out << '\t' << p;
 				pValues[j] = p;
                 
-                //calc signif - zA - http://en.wikipedia.org/wiki/Kendall_tau_rank_correlation_coefficient#Significance_tests
-                double numer = 3.0 * (numCoor - numDisCoor);
-                int n = scores[j].size();
-                double denom = n * (n-1) * (2*n + 5) / (double) 2.0;
-                denom = sqrt(denom);
-                double sig = numer / denom;
-                
-                if (isnan(sig) || isinf(sig)) { sig = 0.0; }
+                double sig = linear.calcKendallSig(scores[j].size(), p);
                 
                 out << '\t' << sig;
 			}

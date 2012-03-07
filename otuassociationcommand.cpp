@@ -300,7 +300,19 @@ int OTUAssociationCommand::process(vector<SharedRAbundVector*>& lookup){
 			for (int k = 0; k < i; k++) {
 				
 				if (m->control_pressed) { out.close(); return 0; }
-												
+				
+                /*cout << m->binLabelsInFile[i] << " <- c(" << xy[i][0];
+                for (int l = 1; l < xy[i].size(); l++){
+                    cout << ", " << xy[i][l];
+                }
+                cout << ")\n";
+                
+                cout << m->binLabelsInFile[k] << " <- c(" << xy[k][0];
+                for (int l = 1; l < xy[k].size(); l++){
+                    cout << ", " << xy[k][l];
+                }
+                cout << ")\n";*/
+
 				double coef = 0.0;
 				double sig = 0.0;
 				if (method == "spearman")		{   coef = linear.calcSpearman(xy[i], xy[k], sig);	}
@@ -314,6 +326,7 @@ int OTUAssociationCommand::process(vector<SharedRAbundVector*>& lookup){
 		
 		out.close();
 		
+               
 		return 0;
 		
 	}

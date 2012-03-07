@@ -10,11 +10,246 @@
 #include "linearalgebra.h"
 
 // This class references functions used from "Numerical Recipes in C++" //
+
+/*********************************************************************************************************************************/
+inline double SQR(const double a)
+{
+    return a*a;
+}
 /*********************************************************************************************************************************/
 
 inline double SIGN(const double a, const double b)
 {
     return b>=0 ? (a>=0 ? a:-a) : (a>=0 ? -a:a);
+}
+/*********************************************************************************************************************************/
+//NUmerical recipes pg. 245 - Returns the complementary error function erfc(x) with fractional error everywhere less than 1.2 × 10−7.
+double LinearAlgebra::erfcc(double x){
+    try {
+        double t,z,ans;
+        z=fabs(x);
+        t=1.0/(1.0+0.5*z); 
+        
+        ans=t*exp(-z*z-1.26551223+t*(1.00002368+t*(0.37409196+t*(0.09678418+
+            t*(-0.18628806+t*(0.27886807+t*(-1.13520398+t*(1.48851587+
+            t*(-0.82215223+t*0.17087277))))))))); 
+        
+        //cout << "in erfcc " << t << '\t' << ans<< endl;
+        return (x >= 0.0 ? ans : 2.0 - ans);
+    }
+	catch(exception& e) {
+		m->errorOut(e, "LinearAlgebra", "betai");
+		exit(1);
+	}
+}
+/*********************************************************************************************************************************/
+//Numerical Recipes pg. 232
+double LinearAlgebra::betai(const double a, const double b, const double x) {
+    try {
+        double bt;
+        double result = 0.0;
+        
+        if (x < 0.0 || x > 1.0) { m->mothurOut("[ERROR]: bad x in betai.\n"); m->control_pressed = true; return 0.0; }
+        
+        if (x == 0.0 || x == 1.0)  { bt = 0.0; }
+        else { bt = exp(gammln(a+b)-gammln(a)-gammln(b)+a*log(x)+b*log(1.0-x));  }
+        
+        if (x < (a+1.0) / (a+b+2.0)) { result = bt*betacf(a,b,x)/a; }
+        else { result = 1.0-bt*betacf(b,a,1.0-x)/b; }
+        
+        return result;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "LinearAlgebra", "betai");
+		exit(1);
+	}
+}
+/*********************************************************************************************************************************/
+//Numerical Recipes pg. 219
+double LinearAlgebra::gammln(const double xx) {
+    try {
+        int j;
+        double x,y,tmp,ser;
+        static const double cof[6]={76.18009172947146,-86.50532032941677,24.01409824083091,
+            -1.231739572450155,0.120858003e-2,-0.536382e-5};
+        
+        y=x=xx;
+        tmp=x+5.5;
+        tmp -= (x+0.5)*log(tmp);
+        ser=1.0;
+        for (j=0;j<6;j++) {
+            ser += cof[j]/++y;
+        }
+        return -tmp+log(2.5066282746310005*ser/x);
+    }
+	catch(exception& e) {
+		m->errorOut(e, "LinearAlgebra", "gammln");
+		exit(1);
+	}
+}
+/*********************************************************************************************************************************/
+//Numerical Recipes pg. 223
+double LinearAlgebra::gammp(const double a, const double x) {
+    try {
+        double gamser,gammcf,gln;
+        
+        if (x < 0.0 || a <= 0.0) { m->mothurOut("[ERROR]: Invalid arguments in routine GAMMP\n"); m->control_pressed = true; return 0.0;}
+        if (x < (a+1.0)) {
+            gser(gamser,a,x,gln);
+            return gamser;
+        } else {
+            gcf(gammcf,a,x,gln);
+            return 1.0-gammcf;
+        }
+        
+        return 0;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "LinearAlgebra", "gammp");
+		exit(1);
+	}
+}
+/*********************************************************************************************************************************/
+//Numerical Recipes pg. 223
+double LinearAlgebra::gammq(const double a, const double x) {
+    try {
+        double gamser,gammcf,gln;
+        
+        if (x < 0.0 || a <= 0.0) { m->mothurOut("[ERROR]: Invalid arguments in routine GAMMQ\n"); m->control_pressed = true; return 0.0; }
+        if (x < (a+1.0)) {
+            gser(gamser,a,x,gln);
+            return 1.0-gamser;
+        } else {
+            gcf(gammcf,a,x,gln);
+            return gammcf;
+        }   
+        
+        return 0;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "LinearAlgebra", "gammp");
+		exit(1);
+	}
+}
+/*********************************************************************************************************************************/
+//Numerical Recipes pg. 224
+double LinearAlgebra::gcf(double& gammcf, const double a, const double x, double& gln){
+    try {
+        const int ITMAX=100;
+        const double EPS=numeric_limits<double>::epsilon();
+        const double FPMIN=numeric_limits<double>::min()/EPS;
+        int i;
+        double an,b,c,d,del,h;
+        
+        gln=gammln(a);
+        b=x+1.0-a;
+        c=1.0/FPMIN;
+        d=1.0/b;
+        h=d;
+        for (i=1;i<=ITMAX;i++) {
+            an = -i*(i-a);
+            b += 2.0;
+            d=an*d+b;
+            if (fabs(d) < FPMIN) { d=FPMIN; }
+            c=b+an/c;
+            if (fabs(c) < FPMIN) { c=FPMIN; }
+            d=1.0/d;
+            del=d*c;
+            h *= del;
+            if (fabs(del-1.0) <= EPS) break;
+        }
+        if (i > ITMAX)  { m->mothurOut("[ERROR]: a too large, ITMAX too small in gcf\n"); m->control_pressed = true; }
+        gammcf=exp(-x+a*log(x)-gln)*h;
+        
+        return 0.0;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "LinearAlgebra", "gcf");
+		exit(1);
+	}
+
+}
+/*********************************************************************************************************************************/
+//Numerical Recipes pg. 223
+double LinearAlgebra::gser(double& gamser, const double a, const double x, double& gln) {
+    try {
+        int n;
+        double sum,del,ap;
+        const double EPS = numeric_limits<double>::epsilon();
+        
+        gln=gammln(a);
+        if (x <= 0.0) { 
+            if (x < 0.0) {  m->mothurOut("[ERROR]: x less than 0 in routine GSER\n"); m->control_pressed = true;  }
+            gamser=0.0; return 0.0;
+        } else {
+            ap=a;
+            del=sum=1.0/a;
+            for (n=0;n<100;n++) {
+                ++ap;
+                del *= x/ap;
+                sum += del;
+                if (fabs(del) < fabs(sum)*EPS) {
+                    gamser=sum*exp(-x+a*log(x)-gln);
+                    return 0.0;
+                }
+            }
+            
+            m->mothurOut("[ERROR]: a too large, ITMAX too small in routine GSER\n");
+            return 0.0;
+        }
+        return 0;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "LinearAlgebra", "gser");
+		exit(1);
+	}
+}
+/*********************************************************************************************************************************/
+//Numerical Recipes pg. 233
+double LinearAlgebra::betacf(const double a, const double b, const double x) {
+    try {
+        const int MAXIT = 100;
+        const double EPS = numeric_limits<double>::epsilon();
+        const double FPMIN = numeric_limits<double>::min() / EPS;
+        int m1, m2;
+        double aa, c, d, del, h, qab, qam, qap;
+        
+        qab=a+b;
+        qap=a+1.0;
+        qam=a-1.0;
+        c=1.0;
+        d=1.0-qab*x/qap;
+        if (fabs(d) < FPMIN) d=FPMIN;
+        d=1.0/d;
+        h=d;
+        for (m1=1;m1<=MAXIT;m++) {
+            m2=2*m1;
+            aa=m1*(b-m1)*x/((qam+m2)*(a+m2));
+            d=1.0+aa*d;
+            if (fabs(d) < FPMIN) d=FPMIN;
+            c=1.0+aa/c;
+            if (fabs(c) < FPMIN) c=FPMIN;
+            d=1.0/d;
+            h *= d*c;
+            aa = -(a+m1)*(qab+m1)*x/((a+m2)*(qap+m2));
+            d=1.0+aa*d;
+            if (fabs(d) < FPMIN) d=FPMIN;
+            c=1.0+aa/c;
+            if (fabs(c) < FPMIN) c=FPMIN;
+            d=1.0/d;
+            del=d*c;
+            h *= del;
+            if (fabs(del-1.0) < EPS) break;
+        }
+        
+        if (m1 > MAXIT) { m->mothurOut("[ERROR]: a or b too big or MAXIT too small in betacf."); m->mothurOutEndLine(); m->control_pressed = true; }
+        return h;
+        
+    }
+	catch(exception& e) {
+		m->errorOut(e, "LinearAlgebra", "betacf");
+		exit(1);
+	}
 }
 /*********************************************************************************************************************************/
 
@@ -799,14 +1034,7 @@ double LinearAlgebra::calcKendall(vector<double>& x, vector<double>& y, double& 
 				
 		double p = (numCoor - numDisCoor) / (float) count;
 		
-		//calc signif - zA - http://en.wikipedia.org/wiki/Kendall_tau_rank_correlation_coefficient#Significance_tests
-		double numer = 3.0 * (numCoor - numDisCoor);
-        int n = xscores.size();
-        double denom = n * (n-1) * (2*n + 5) / (double) 2.0;
-        denom = sqrt(denom);
-        sig = numer / denom;
-		
-		if (isnan(sig) || isinf(sig)) { sig = 0.0; }
+		sig = calcKendallSig(x.size(), p);
 		
 		return p;
 	}
@@ -815,12 +1043,200 @@ double LinearAlgebra::calcKendall(vector<double>& x, vector<double>& y, double& 
 		exit(1);
 	}
 }
+double LinearAlgebra::ran0(int& idum)
+{
+    const int IA=16807,IM=2147483647,IQ=127773;
+    const int IR=2836,MASK=123459876;
+    const double AM=1.0/double(IM);
+    int k;
+    double ans;
+    
+    idum ^= MASK;
+    k=idum/IQ;
+    idum=IA*(idum-k*IQ)-IR*k;
+    if (idum < 0) idum += IM;
+    ans=AM*idum;
+    idum ^= MASK;
+    return ans;
+}
+
+double LinearAlgebra::ran1(int &idum)
+{
+	const int IA=16807,IM=2147483647,IQ=127773,IR=2836,NTAB=32;
+	const int NDIV=(1+(IM-1)/NTAB);
+	const double EPS=3.0e-16,AM=1.0/IM,RNMX=(1.0-EPS);
+	static int iy=0;
+	static vector<int> iv(NTAB);
+	int j,k;
+	double temp;
+    
+	if (idum <= 0 || !iy) {
+		if (-idum < 1) idum=1;
+		else idum = -idum;
+		for (j=NTAB+7;j>=0;j--) {
+			k=idum/IQ;
+			idum=IA*(idum-k*IQ)-IR*k;
+			if (idum < 0) idum += IM;
+			if (j < NTAB) iv[j] = idum;
+		}
+		iy=iv[0];
+	}
+	k=idum/IQ;
+	idum=IA*(idum-k*IQ)-IR*k;
+	if (idum < 0) idum += IM;
+	j=iy/NDIV;
+	iy=iv[j];
+	iv[j] = idum;
+	if ((temp=AM*iy) > RNMX) return RNMX;
+	else return temp;
+}
+
+double LinearAlgebra::ran2(int &idum)
+{
+	const int IM1=2147483563,IM2=2147483399;
+	const int IA1=40014,IA2=40692,IQ1=53668,IQ2=52774;
+	const int IR1=12211,IR2=3791,NTAB=32,IMM1=IM1-1;
+	const int NDIV=1+IMM1/NTAB;
+	const double EPS=3.0e-16,RNMX=1.0-EPS,AM=1.0/double(IM1);
+	static int idum2=123456789,iy=0;
+	static vector<int> iv(NTAB);
+	int j,k;
+	double temp;
+    
+	if (idum <= 0) {
+		idum=(idum==0 ? 1 : -idum);
+		idum2=idum;
+		for (j=NTAB+7;j>=0;j--) {
+			k=idum/IQ1;
+			idum=IA1*(idum-k*IQ1)-k*IR1;
+			if (idum < 0) idum += IM1;
+			if (j < NTAB) iv[j] = idum;
+		}
+		iy=iv[0];
+	}
+	k=idum/IQ1;
+	idum=IA1*(idum-k*IQ1)-k*IR1;
+	if (idum < 0) idum += IM1;
+	k=idum2/IQ2;
+	idum2=IA2*(idum2-k*IQ2)-k*IR2;
+	if (idum2 < 0) idum2 += IM2;
+	j=iy/NDIV;
+	iy=iv[j]-idum2;
+	iv[j] = idum;
+	if (iy < 1) iy += IMM1;
+	if ((temp=AM*iy) > RNMX) return RNMX;
+	else return temp;
+}
+
+double LinearAlgebra::ran3(int &idum)
+{
+	static int inext,inextp;
+	static int iff=0;
+	const int MBIG=1000000000,MSEED=161803398,MZ=0;
+	const double FAC=(1.0/MBIG);
+	static vector<int> ma(56);
+	int i,ii,k,mj,mk;
+    
+	if (idum < 0 || iff == 0) {
+		iff=1;
+		mj=labs(MSEED-labs(idum));
+		mj %= MBIG;
+		ma[55]=mj;
+		mk=1;
+		for (i=1;i<=54;i++) {
+			ii=(21*i) % 55;
+			ma[ii]=mk;
+			mk=mj-mk;
+			if (mk < int(MZ)) mk += MBIG;
+			mj=ma[ii];
+		}
+		for (k=0;k<4;k++)
+			for (i=1;i<=55;i++) {
+				ma[i] -= ma[1+(i+30) % 55];
+				if (ma[i] < int(MZ)) ma[i] += MBIG;
+			}
+		inext=0;
+		inextp=31;
+		idum=1;
+	}
+	if (++inext == 56) inext=1;
+	if (++inextp == 56) inextp=1;
+	mj=ma[inext]-ma[inextp];
+	if (mj < int(MZ)) mj += MBIG;
+	ma[inext]=mj;
+	return mj*FAC;
+}
+
+double LinearAlgebra::ran4(int &idum)
+{
+#if defined(vax) || defined(_vax_) || defined(__vax__) || defined(VAX)
+	static const unsigned long jflone = 0x00004080;
+	static const unsigned long jflmsk = 0xffff007f;
+#else
+	static const unsigned long jflone = 0x3f800000;
+	static const unsigned long jflmsk = 0x007fffff;
+#endif
+	unsigned long irword,itemp,lword;
+	static int idums = 0;
+    
+	if (idum < 0) {
+		idums = -idum;
+		idum=1;
+	}
+	irword=idum;
+	lword=idums;
+	psdes(lword,irword);
+	itemp=jflone | (jflmsk & irword);
+	++idum;
+	return (*(float *)&itemp)-1.0;
+}
+
+void LinearAlgebra::psdes(unsigned long &lword, unsigned long &irword)
+{
+	const int NITER=4;
+	static const unsigned long c1[NITER]={
+		0xbaa96887L, 0x1e17d32cL, 0x03bcdc3cL, 0x0f33d1b2L};
+	static const unsigned long c2[NITER]={
+		0x4b0f3b58L, 0xe874f0c3L, 0x6955c5a6L, 0x55a7ca46L};
+	unsigned long i,ia,ib,iswap,itmph=0,itmpl=0;
+    
+	for (i=0;i<NITER;i++) {
+		ia=(iswap=irword) ^ c1[i];
+		itmpl = ia & 0xffff;
+		itmph = ia >> 16;
+		ib=itmpl*itmpl+ ~(itmph*itmph);
+		irword=lword ^ (((ia = (ib >> 16) |
+                          ((ib & 0xffff) << 16)) ^ c2[i])+itmpl*itmph);
+		lword=iswap;
+	}
+}
+/*********************************************************************************************************************************/
+double LinearAlgebra::calcKendallSig(double n, double r){
+    try {
+        
+        double sig = 0.0;
+        double svar=(4.0*n+10.0)/(9.0*n*(n-1.0)); 
+        double z= r/sqrt(svar); 
+        sig=erfcc(fabs(z)/1.4142136);
+
+		if (isnan(sig) || isinf(sig)) { sig = 0.0; }
+        
+        return sig;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "LinearAlgebra", "calcKendallSig");
+		exit(1);
+	}
+}
+
 /*********************************************************************************************************************************/
 double LinearAlgebra::calcSpearman(vector<double>& x, vector<double>& y, double& sig){
 	try {
 		if (x.size() != y.size()) { m->mothurOut("[ERROR]: vector size mismatch."); m->mothurOutEndLine(); return 0.0; }
 		
 		//format data
+        double sf = 0.0; //f^3 - f where f is the number of ties in x;
+        double sg = 0.0; //f^3 - f where f is the number of ties in y;
 		map<float, int> tableX; 
 		map<float, int>::iterator itTable;
 		vector<spearmanRank> xscores; 
@@ -865,6 +1281,8 @@ double LinearAlgebra::calcSpearman(vector<double>& x, vector<double>& y, double&
 						float thisrank = rankTotal / (float) xties.size();
 						rankx[xties[k].name] = thisrank;
 					}
+                    int t = xties.size();
+                    sf += (t*t*t-t);
 					xties.clear();
 					rankTotal = 0;
 				}
@@ -915,6 +1333,8 @@ double LinearAlgebra::calcSpearman(vector<double>& x, vector<double>& y, double&
 						float thisrank = rankTotal / (float) yties.size();
 						rank[yties[k].name] = thisrank;
 					}
+                    int t = yties.size();
+                    sg += (t*t*t-t);
 					yties.clear();
 					rankTotal = 0;
 				}
@@ -943,19 +1363,52 @@ double LinearAlgebra::calcSpearman(vector<double>& x, vector<double>& y, double&
 				
 		p = (SX2 + SY2 - di) / (2.0 * sqrt((SX2*SY2)));
 		
-		//signifigance calc - http://en.wikipedia.org/wiki/Spearman%27s_rank_correlation_coefficient
-		double temp = (x.size()-2) / (double) (1- (p*p));
-		temp = sqrt(temp);
-		sig = p*temp;
-		if (isnan(sig) || isinf(sig)) { sig = 0.0; }
-				
+		//Numerical Recipes 646
+        sig = calcSpearmanSig(n, sf, sg, di);
+		
 		return p;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "LinearAlgebra", "calcSpearman");
 		exit(1);
 	}
-}		
+}
+/*********************************************************************************************************************************/
+double LinearAlgebra::calcSpearmanSig(double n, double sf, double sg, double d){
+    try {
+        
+        double sig = 0.0;
+        double probrs = 0.0;
+        double en=n;
+        double en3n=en*en*en-en;
+        double aved=en3n/6.0-(sf+sg)/12.0;
+        double fac=(1.0-sf/en3n)*(1.0-sg/en3n);
+        double vard=((en-1.0)*en*en*SQR(en+1.0)/36.0)*fac;
+        double zd=(d-aved)/sqrt(vard);
+        double probd=erfcc(fabs(zd)/1.4142136);
+        double rs=(1.0-(6.0/en3n)*(d+(sf+sg)/12.0))/sqrt(fac);
+        fac=(rs+1.0)*(1.0-rs);
+        if (fac > 0.0) {
+            double t=rs*sqrt((en-2.0)/fac);
+            double df=en-2.0;
+            probrs=betai(0.5*df,0.5,df/(df+t*t));
+        }else {
+            probrs = 0.0;
+        }
+        
+        //smaller of probd and probrs is sig
+        sig = probrs;
+        if (probd < probrs) { sig = probd; }
+        
+		if (isnan(sig) || isinf(sig)) { sig = 0.0; }
+		
+        return sig;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "LinearAlgebra", "calcSpearmanSig");
+		exit(1);
+	}
+}
 /*********************************************************************************************************************************/
 double LinearAlgebra::calcPearson(vector<double>& x, vector<double>& y, double& sig){
 	try {
@@ -989,11 +1442,8 @@ double LinearAlgebra::calcPearson(vector<double>& x, vector<double>& y, double& 
 				
 		r = numerator / denom;
 		
-		//signifigance calc - http://faculty.vassar.edu/lowry/ch4apx.html
-		double temp =  (1- (r*r)) / (double) (x.size()-2);
-		temp = sqrt(temp);
-		sig = r / temp;
-		if (isnan(sig) || isinf(sig)) { sig = 0.0; }
+		//Numerical Recipes pg.644
+        sig = calcPearsonSig(x.size(), r);
 		
 		return r;
 	}
@@ -1001,7 +1451,31 @@ double LinearAlgebra::calcPearson(vector<double>& x, vector<double>& y, double& 
 		m->errorOut(e, "LinearAlgebra", "calcPearson");
 		exit(1);
 	}
-}			
+}
+/*********************************************************************************************************************************/
+double LinearAlgebra::calcPearsonSig(double n, double r){
+    try {
+        
+        double sig = 0.0;
+        const double TINY = 1.0e-20;
+        double z = 0.5*log((1.0+r+TINY)/(1.0-r+TINY)); //Fisher's z transformation
+    
+        //code below was giving an error in betacf with sop files
+        //int df = n-2;
+        //double t = r*sqrt(df/((1.0-r+TINY)*(1.0+r+TINY)));
+        //sig = betai(0.5+df, 0.5, df/(df+t*t));
+        
+        //Numerical Recipes says code below gives approximately the same result
+        sig = erfcc(fabs(z*sqrt(n-1.0))/1.4142136);
+		if (isnan(sig) || isinf(sig)) { sig = 0.0; }
+		
+        return sig;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "LinearAlgebra", "calcPearsonSig");
+		exit(1);
+	}
+}
 /*********************************************************************************************************************************/
 
 vector<vector<double> > LinearAlgebra::getObservedEuclideanDistance(vector<vector<double> >& relAbundData){

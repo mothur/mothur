@@ -553,6 +553,7 @@ int PreClusterCommand::readFASTA(){
 		//inNames.close();
         
         if (lengths.size() > 1) { m->control_pressed = true; m->mothurOut("[ERROR]: your sequences are not all the same length. pre.cluster requires sequences to be aligned."); m->mothurOutEndLine(); }
+        else if (lengths.size() == 1) { length = *(lengths.begin()); }
         
 		return alignSeqs.size();
 	}
@@ -598,6 +599,7 @@ int PreClusterCommand::loadSeqs(map<string, string>& thisName, vector<Sequence>&
 		}
 		
         if (lengths.size() > 1) { error = true; m->mothurOut("[ERROR]: your sequences are not all the same length. pre.cluster requires sequences to be aligned."); m->mothurOutEndLine(); }
+        else if (lengths.size() == 1) { length = *(lengths.begin()); }
         
 		//sanity check
 		if (error) { m->control_pressed = true; }
