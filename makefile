@@ -9,15 +9,15 @@
 # Macros
 #
 
-USEMPI ?= yes
+USEMPI ?= no
 64BIT_VERSION ?= yes
 USEREADLINE ?= no
 CYGWIN_BUILD ?= no
 USECOMPRESSION ?= no
 MOTHUR_FILES="\"Enter_your_default_path_here\""
-RELEASE_DATE = "\"3/12/2012\""
-VERSION = "\"1.24.4\""
-FORTAN_COMPILER = /usr/local/gfortran/bin/gfortran
+RELEASE_DATE = "\"3/13/2012\""
+VERSION = "\"1.24.0\""
+FORTAN_COMPILER = gfortran
 
 # Optimize to level 3:
 CXXFLAGS += -O3 

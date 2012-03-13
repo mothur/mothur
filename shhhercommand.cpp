@@ -719,6 +719,36 @@ int ShhherCommand::execute(){
 	}
 }
 /**************************************************************************************************/
+string ShhherCommand::createNamesFile(){
+	try{
+		
+		vector<string> duplicateNames(numUniques, "");
+		for(int i=0;i<numSeqs;i++){
+			duplicateNames[mapSeqToUnique[i]] += seqNameVector[i] + ',';
+		}
+		
+		string nameFileName = flowFileName.substr(0,flowFileName.find_last_of('.')) + ".shhh.names";
+		
+		ofstream nameFile;
+		m->openOutputFile(nameFileName, nameFile);
+		
+		for(int i=0;i<numUniques;i++){
+			
+			if (m->control_pressed) { break; }
+			
+            //			nameFile << seqNameVector[mapUniqueToSeq[i]] << '\t' << duplicateNames[i].substr(0, duplicateNames[i].find_last_of(',')) << endl;
+			nameFile << mapUniqueToSeq[i] << '\t' << duplicateNames[i].substr(0, duplicateNames[i].find_last_of(',')) << endl;
+		}
+		
+		nameFile.close();
+		return  nameFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ShhherCommand", "createNamesFile");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
 
 string ShhherCommand::flowDistMPI(int startSeq, int stopSeq){
 	try{		
