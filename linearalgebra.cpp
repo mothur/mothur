@@ -222,7 +222,7 @@ double LinearAlgebra::betacf(const double a, const double b, const double x) {
         if (fabs(d) < FPMIN) d=FPMIN;
         d=1.0/d;
         h=d;
-        for (m1=1;m1<=MAXIT;m++) {
+        for (m1=1;m1<=MAXIT;m1++) {
             m2=2*m1;
             aa=m1*(b-m1)*x/((qam+m2)*(a+m2));
             d=1.0+aa*d;
