@@ -34,7 +34,7 @@ string Engine::findMothursPath(){
 		
 		//delimiting path char
 		char delim;
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 			delim = ':';
 		#else
 			delim = ';';
@@ -56,7 +56,7 @@ string Engine::findMothursPath(){
 		
 		if (mothurPath != "") {
 			//add mothur so it looks like what argv would look like
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				mothurPath += "/mothur";
 			#else
 				mothurPath += "\\mothur";
@@ -71,7 +71,7 @@ string Engine::findMothursPath(){
 				//is this mothurs path?
 				ifstream in;
 				string tempIn = dirs[i];
-				#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+				#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 					tempIn += "/mothur";
 				#else
 					tempIn += "\\mothur";
@@ -219,7 +219,7 @@ bool InteractEngine::getInput(){
 string Engine::getCommand()  {
 	try {
 	
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 			#ifdef USE_READLINE
 				char* nextCommand = NULL;
 				nextCommand = readline("mothur > ");

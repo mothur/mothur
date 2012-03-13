@@ -34,7 +34,7 @@ EstOutput Weighted::getValues(Tree* t, int p, string o) {
 			}
 		}
 		
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 			if(processors == 1){
 				data = driver(t, namesOfGroupCombos, 0, namesOfGroupCombos.size());
 			}else{
@@ -69,7 +69,7 @@ EstOutput Weighted::getValues(Tree* t, int p, string o) {
 
 EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGroupCombos) {
 	try {
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		int process = 1;
 		vector<int> processIDS;
 		

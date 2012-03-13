@@ -495,14 +495,14 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 			else {
 				//add / to name if needed
 				string lastChar = blastlocation.substr(blastlocation.length()-1);
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				if (lastChar != "/") { blastlocation += "/"; }
 #else
 				if (lastChar != "\\") { blastlocation += "\\"; }	
 #endif
 				blastlocation = m->getFullPathName(blastlocation);
 				string formatdbCommand = "";
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				formatdbCommand = blastlocation + "formatdb";	
 #else
 				formatdbCommand = blastlocation + "formatdb.exe";
@@ -515,7 +515,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 				if(ableToOpen == 1) {	m->mothurOut("[ERROR]: " + formatdbCommand + " file does not exist. mothur requires formatdb.exe to run chimera.slayer."); m->mothurOutEndLine(); abort = true; }
 				
 				string blastCommand = "";
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				blastCommand = blastlocation + "megablast";	
 #else
 				blastCommand = blastlocation + "megablast.exe";
@@ -533,7 +533,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 			if (hasGroup && (templatefile != "self")) { m->mothurOut("You have provided a group file and the reference parameter is not set to self. I am not sure what reference you are trying to use, aborting."); m->mothurOutEndLine(); abort=true; }
 
 			//until we resolve the issue 10-18-11
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 #else
 			//processors=1;
 #endif
@@ -594,13 +594,14 @@ int ChimeraSlayerCommand::execute(){
 #else
 				//break up file
 				vector<unsigned long long> positions; 
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				positions = m->divideFile(thisFastaName, processors);
 				for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
 #else
 				if (processors == 1) {	lines.push_back(linePair(0, 1000)); }
 				else {
 					positions = m->setFilePosFasta(thisFastaName, numSeqs); 
+                    if (positions.size() < processors) { processors = positions.size(); }
 					
 					//figure out how many sequences you have to process
 					int numSeqsPerProcessor = numSeqs / processors;
@@ -900,6 +901,16 @@ int ChimeraSlayerCommand::deconvoluteResults(SequenceParser* parser, string outp
 		map<string, string> uniqueNames = parser->getAllSeqsMap();
 		map<string, string>::iterator itUnique;
 		int total = 0;
+        
+        if (trimera) { //add in more potential uniqueNames
+            map<string, string> newUniqueNames = uniqueNames;
+            for (map<string, string>::iterator it = uniqueNames.begin(); it != uniqueNames.end(); it++) {
+                newUniqueNames[(it->first)+"_LEFT"] = (it->first)+"_LEFT";
+                newUniqueNames[(it->first)+"_RIGHT"] = (it->first)+"_RIGHT";
+            }
+            uniqueNames = newUniqueNames;
+            newUniqueNames.clear();
+        }
 		
 		//edit accnos file
 		ifstream in2; 
@@ -1187,7 +1198,7 @@ int ChimeraSlayerCommand::driverGroups(string outputFName, string accnos, string
 			m->mothurOutEndLine(); m->mothurOut("Checking sequences from group: " + fileGroup[thisFastaName] + "."); m->mothurOutEndLine(); 
 			
 			lines.clear();
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 			int proc = 1;
 			vector<unsigned long long> positions = m->divideFile(thisFastaName, proc);
 			lines.push_back(linePair(positions[0], positions[1]));	
@@ -1244,7 +1255,7 @@ int ChimeraSlayerCommand::createProcessesGroups(string outputFName, string accno
 			breakUp.push_back(thisFileToPriority);
 		}
 				
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		//loop through and create all the processes you want
 		while (process != processors) {
 			int pid = fork();
@@ -1447,7 +1458,7 @@ int ChimeraSlayerCommand::driver(linePair filePos, string outputFName, string fi
 				count++;
 			}
 			
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				unsigned long long pos = inFASTA.tellg();
 				if ((pos == -1) || (pos >= filePos.end)) { break; }
 			#else
@@ -1628,7 +1639,7 @@ int ChimeraSlayerCommand::createProcesses(string outputFileName, string filename
 		int num = 0;
 		processIDS.clear();
 		
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		//loop through and create all the processes you want
 		while (process != processors) {
 			int pid = fork();

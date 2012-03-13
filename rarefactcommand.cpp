@@ -287,7 +287,7 @@ int RareFactCommand::execute(){
 				
 		if (m->control_pressed) { return 0; }
 		
-		map<string, string> nameMap;
+		map<int, string> file2Group; //index in outputNames[i] -> group
 		for (int p = 0; p < inputFileNames.size(); p++) {
 			
 			string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(inputFileNames[p]));
@@ -296,7 +296,6 @@ int RareFactCommand::execute(){
 			
 			if (inputFileNames.size() > 1) {
 				m->mothurOutEndLine(); m->mothurOut("Processing group " + groups[p]); m->mothurOutEndLine(); m->mothurOutEndLine();
-				nameMap[fileNameRoot] = groups[p];
 			}
 			int i;
 			ValidCalculators validCalculator;
@@ -352,6 +351,7 @@ int RareFactCommand::execute(){
 						rDisplays.push_back(new RareDisplay(new NSeqs(), new ThreeColumnFile(fileNameRoot+"r_nseqs")));
 						outputNames.push_back(fileNameRoot+"r_nseqs"); outputTypes["r_nseqs"].push_back(fileNameRoot+"r_nseqs");
 					}
+                    file2Group[outputNames.size()-1] = groups[p];
 				}
 			}
 			
@@ -450,7 +450,7 @@ int RareFactCommand::execute(){
 		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 
 		//create summary file containing all the groups data for each label - this function just combines the info from the files already created.
-		if ((sharedfile != "") && (groupMode)) {   outputNames = createGroupFile(outputNames, nameMap);  }
+		if ((sharedfile != "") && (groupMode)) {   outputNames = createGroupFile(outputNames, file2Group);  }
 
 		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 
@@ -467,7 +467,7 @@ int RareFactCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map<string, string> nameMap) {
+vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map<int, string> file2Group) {
 	try {
 		
 		vector<string> newFileNames;
@@ -485,7 +485,7 @@ vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map
 			
 			newLine += "\tGroup" + labels.substr(labels.find_first_of('\t'));
 			
-			typesFiles[extension].push_back(outputNames[i]);
+			typesFiles[extension].push_back(outputNames[i]+"_"+file2Group[i]);
 			
 			string combineFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + "groups" + extension;
 			
@@ -513,23 +513,26 @@ vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map
 			int maxLines = 0;
 			int numColumns = 0;
 			for (int i=0; i<thisTypesFiles.size(); i++) {
-								
+                
+                string thisfilename = thisTypesFiles[i].substr(0, thisTypesFiles[i].find_last_of('_'));
+                string group = thisTypesFiles[i].substr(thisTypesFiles[i].find_last_of('_')+1);
+                
 				ifstream temp;
-				m->openInputFile(thisTypesFiles[i], temp);
+				m->openInputFile(thisfilename, temp);
 				
 				//read through first line - labels
 				m->getline(temp);	m->gobble(temp);
 				
 				vector<string> thisFilesLines;
-				string fileNameRoot = m->getRootName(thisTypesFiles[i]);
-				map<string, string>::iterator itName = nameMap.find(fileNameRoot);
-				string group = "";
-				if (itName != nameMap.end()) {
-					group = itName->second;
-				}else {
-					group = "not found" + i;
-					m->mothurOut("[ERROR]: can't parse filename."); m->mothurOutEndLine();
-				}
+				//string fileNameRoot = m->getRootName(thisTypesFiles[i]);
+				//map<string, string>::iterator itName = nameMap.find(fileNameRoot);
+				//string group = "";
+				//if (itName != nameMap.end()) {
+				//	group = itName->second;
+				//}else {
+				//	group = "not found" + i;
+				//	m->mothurOut("[ERROR]: can't parse filename."); m->mothurOutEndLine();
+				//}
 				
 				thisFilesLines.push_back(group);
 				int count = 1;
@@ -555,7 +558,7 @@ vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map
 				if (maxLines < thisFilesLines.size()) { maxLines = thisFilesLines.size(); }
 				
 				temp.close();
-				m->mothurRemove(thisTypesFiles[i]);
+				m->mothurRemove(thisfilename);
 			}
 			
 			

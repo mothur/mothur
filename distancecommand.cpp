@@ -380,7 +380,7 @@ int DistanceCommand::execute(){
 		MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 #else		
 				
-	//#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+	//#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		//if you don't need to fork anything
 		if(processors == 1){
 			if (output != "square") {  driver(0, numSeqs, outputFile, cutoff); }
@@ -507,7 +507,7 @@ int DistanceCommand::execute(){
 /**************************************************************************************************/
 void DistanceCommand::createProcesses(string filename) {
 	try {
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		int process = 1;
 		processIDS.clear();
 		
@@ -1014,7 +1014,7 @@ int DistanceCommand::convertMatrix(string outputFile) {
 		string outfile = m->getRootName(outputFile) + "sorted.dist.temp";
 		
 		//use the unix sort 
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 			string command = "sort -n " + outputFile + " -o " + outfile;
 			system(command.c_str());
 		#else //sort using windows sort
@@ -1102,7 +1102,7 @@ int DistanceCommand::convertToLowerTriangle(string outputFile) {
 		string outfile = m->getRootName(outputFile) + "sorted.dist.temp";
 		
 		//use the unix sort 
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 			string command = "sort -n " + outputFile + " -o " + outfile;
 			system(command.c_str());
 		#else //sort using windows sort

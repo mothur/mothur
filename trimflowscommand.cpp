@@ -235,7 +235,7 @@ int TrimFlowsCommand::execute(){
 		}
 		
 		vector<unsigned long long> flowFilePos;
-	#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+	#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		flowFilePos = getFlowFileBreaks();
 		for (int i = 0; i < (flowFilePos.size()-1); i++) {
 			lines.push_back(new linePair(flowFilePos[i], flowFilePos[(i+1)]));
@@ -468,7 +468,7 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
 			//report progress
 			if((count) % 10000 == 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
 
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 			unsigned long long pos = flowFile.tellg();
 
 			if ((pos == -1) || (pos >= line->end)) { break; }
@@ -715,7 +715,7 @@ int TrimFlowsCommand::createProcessesCreateTrim(string flowFileName, string trim
 		processIDS.clear();
 		int exitCommand = 1;
 		
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		int process = 1;
 		
 		//loop through and create all the processes you want

@@ -298,7 +298,6 @@ SffInfoCommand::SffInfoCommand(string option)  {
 //**********************************************************************************************************************
 int SffInfoCommand::execute(){
 	try {
-		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		for (int s = 0; s < filenames.size(); s++) {
@@ -406,7 +405,9 @@ int SffInfoCommand::extractSffInfo(string input, string accnos){
 			//read data
 			seqRead read; 
 			readSeqData(in, read, header.numFlowsPerRead, readheader.numBases);
-				
+            bool okay = sanityCheck(readheader, read);
+            if (!okay) { break; }
+            
 			//if you have provided an accosfile and this seq is not in it, then dont print
 			if (seqNames.size() != 0) {   if (seqNames.count(readheader.name) == 0) { print = false; }  }
 			
@@ -609,7 +610,7 @@ int SffInfoCommand::readSeqData(ifstream& in, seqRead& read, int numFlowReads, i
 				in.read(buffer, 2);
 				read.flowgram[i] = be_int2(*(unsigned short *)(&buffer));
 			}
-	
+            
 			//read flowIndex
 			read.flowIndex.resize(numBases);
 			for (int i = 0; i < numBases; i++) {  
@@ -741,11 +742,39 @@ int SffInfoCommand::printHeader(ofstream& out, Header& header) {
 		exit(1);
 	}
 }
-
+//**********************************************************************************************************************
+bool SffInfoCommand::sanityCheck(Header& header, seqRead& read) {
+	try {
+        bool okay = true;
+        string message = "[WARNING]: Your sff file may be corrupted! Sequence: " + header.name + "\n";
+        
+        if (header.clipQualLeft > read.bases.length()) {
+            okay = false; message += "Clip Qual Left = " + toString(header.clipQualLeft) + ", but we only read " + toString(read.bases.length()) + " bases.\n";
+        }
+        if (header.clipQualRight > read.bases.length()) {
+            okay = false; message += "Clip Qual Right = " + toString(header.clipQualRight) + ", but we only read " + toString(read.bases.length()) + " bases.\n";
+        }
+        if (header.clipQualLeft > read.qualScores.size()) {
+            okay = false; message += "Clip Qual Left = " + toString(header.clipQualLeft) + ", but we only read " + toString(read.qualScores.size()) + " quality scores.\n";
+        }
+        if (header.clipQualRight > read.qualScores.size()) {
+            okay = false; message += "Clip Qual Right = " + toString(header.clipQualRight) + ", but we only read " + toString(read.qualScores.size()) + " quality scores.\n";
+        }
+        
+        if (okay == false) {
+            m->mothurOut(message); m->mothurOutEndLine();
+        }
+        
+		return okay;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SffInfoCommand", "sanityCheck");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 int SffInfoCommand::printSffTxtSeqData(ofstream& out, seqRead& read, Header& header) {
 	try {
-		
 		out << "Flowgram: ";
 		for (int i = 0; i < read.flowgram.size(); i++) { out << setprecision(2) << (read.flowgram[i]/(float)100) << '\t';  }
 		
@@ -775,10 +804,9 @@ int SffInfoCommand::printSffTxtSeqData(ofstream& out, seqRead& read, Header& hea
 //**********************************************************************************************************************
 int SffInfoCommand::printFastaSeqData(ofstream& out, seqRead& read, Header& header) {
 	try {
-		
 		string seq = read.bases;
 		
-		if (trim) {
+        if (trim) {
 			if(header.clipQualRight < header.clipQualLeft){
 				seq = "NNNN";
 			}

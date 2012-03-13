@@ -120,7 +120,7 @@ struct alignData {
 };
 
 /**************************************************************************************************/
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 #else
 static DWORD WINAPI MyAlignThreadFunction(LPVOID lpParam){ 
 	alignData* pDataArray;

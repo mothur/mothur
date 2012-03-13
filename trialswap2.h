@@ -26,9 +26,6 @@ public:
     double calc_vratio (vector<int>, vector<int>);
     int calc_checker (vector<vector<int> > &,vector<int>);
     double calc_c_score (vector<vector<int> > &,vector<int>);
-    int sho(vector<int>,vector<int>,int k);
-    int havel_hakimi(vector<int>,vector<int>,vector<vector<int> > &);
-    int intrand(int);
     
     int sim1 (vector<vector<int> > &);
     void sim2(vector<vector<int> >&);

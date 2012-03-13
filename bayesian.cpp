@@ -605,7 +605,7 @@ void Bayesian::readProbFile(ifstream& in, ifstream& inNum, string inName, string
 				istringstream iss (tempBuf,istringstream::in);
 				float probTemp;
 				iss >> zeroCountProb[i] >> numbers[i] >> probTemp; 
-				WordPairDiffArr[i].prob = tempProb;
+				WordPairDiffArr[i].prob = probTemp;
 
 			}
 			

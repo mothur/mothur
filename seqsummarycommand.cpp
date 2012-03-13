@@ -286,11 +286,12 @@ int SeqSummaryCommand::execute(){
 				MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 #else
 			vector<unsigned long long> positions; 
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				positions = m->divideFile(fastafile, processors);
 				for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(new linePair(positions[i], positions[(i+1)]));	}
 			#else
 				positions = m->setFilePosFasta(fastafile, numSeqs); 
+                if (positions.size() < processors) { processors = positions.size(); }
 		
 				//figure out how many sequences you have to process
 				int numSeqsPerProcessor = numSeqs / processors;
@@ -433,7 +434,7 @@ int SeqSummaryCommand::driverCreateSummary(vector<int>& startPosition, vector<in
 				outSummary << current.getLongHomoPolymer() << '\t' << num << endl;
 			}
 			
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				unsigned long long pos = in.tellg();
 				if ((pos == -1) || (pos >= filePos->end)) { break; }
 			#else
@@ -529,7 +530,7 @@ int SeqSummaryCommand::createProcessesCreateSummary(vector<int>& startPosition, 
 		int num = 0;
 		processIDS.clear();
 		
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		
 		//loop through and create all the processes you want
 		while (process != processors) {

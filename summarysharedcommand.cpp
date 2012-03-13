@@ -484,7 +484,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
             int process = 1;
             vector<int> processIDS;
             
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
             //loop through and create all the processes you want
             while (process != processors) {
                 int pid = fork();

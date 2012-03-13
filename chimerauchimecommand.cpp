@@ -461,7 +461,7 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 			path = path.substr(0, (tempPath.find_last_of('m')));
 			
 			string uchimeCommand;
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 			uchimeCommand = path + "uchime";	//	format the database, -o option gives us the ability
 #else
 			uchimeCommand = path + "uchime.exe";
@@ -1005,7 +1005,7 @@ int ChimeraUchimeCommand::driver(string outputFName, string filename, string acc
 		path = path.substr(0, (tempPath.find_last_of('m')));
 		
 		string uchimeCommand = path;
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		uchimeCommand += "uchime ";
 #else
 		uchimeCommand += "uchime";
@@ -1243,7 +1243,7 @@ int ChimeraUchimeCommand::driver(string outputFName, string filename, string acc
 		
 		//uchime_main(numArgs, uchimeParameters); 
 		//cout << "commandString = " << commandString << endl;
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 #else
 		commandString = "\"" + commandString + "\"";
 #endif
@@ -1309,7 +1309,7 @@ int ChimeraUchimeCommand::createProcesses(string outputFileName, string filename
 		int num = 0;
 		vector<string> files;
 		
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)		
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)		
 		//break up file into multiple files
 		m->divideFile(filename, processors, files);
 		
@@ -1492,7 +1492,7 @@ int ChimeraUchimeCommand::createProcessesGroups(SequenceParser& parser, string o
 			lines.push_back(linePair(startIndex, endIndex));
 		}
 		
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)		
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)		
 				
 		//loop through and create all the processes you want
 		while (process != processors) {

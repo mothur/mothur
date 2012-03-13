@@ -143,7 +143,7 @@ void MothurOut::setDefaultPath(string pathname)  {
 	
 		//add / to name if needed
 		string lastChar = pathname.substr(pathname.length()-1);
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 			if (lastChar != "/") { pathname += "/"; }
 		#else
 			if (lastChar != "\\") { pathname += "\\"; }	
@@ -334,7 +334,7 @@ void MothurOut::errorOut(exception& e, string object, string function) {
 //
 // On failure, returns 0.0, 0.0
 int MothurOut::mem_usage(double& vm_usage, double& resident_set) {
-  #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+  #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
   
 	   vm_usage     = 0.0;
 	   resident_set = 0.0;
@@ -506,7 +506,7 @@ string MothurOut::getline(ifstream& fileHandle) {
 }
 /***********************************************************************/
 
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 #ifdef USE_COMPRESSION
 inline bool endsWith(string s, const char * suffix){
   size_t suffixLength = strlen(suffix);
@@ -520,7 +520,7 @@ string MothurOut::getRootName(string longName){
 	
 		string rootName = longName;
 
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 #ifdef USE_COMPRESSION
     if (endsWith(rootName, ".gz") || endsWith(rootName, ".bz2")) {
       int pos = rootName.find_last_of('.');
@@ -675,7 +675,7 @@ string MothurOut::getFullPathName(string fileName){
 				
 		string cwd;
 		//get current working directory 
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)	
+		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)	
 			
 			if (path.find("~") != -1) { //go to home directory
 				string homeDir;
@@ -798,7 +798,7 @@ int MothurOut::openInputFile(string fileName, ifstream& fileHandle, string m){
 	try {
 			//get full path name
 			string completeFileName = getFullPathName(fileName);
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 #ifdef USE_COMPRESSION
       // check for gzipped or bzipped file
       if (endsWith(completeFileName, ".gz") || endsWith(completeFileName, ".bz2")) {
@@ -844,7 +844,7 @@ int MothurOut::openInputFile(string fileName, ifstream& fileHandle){
 
 		//get full path name
 		string completeFileName = getFullPathName(fileName);
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 #ifdef USE_COMPRESSION
   // check for gzipped or bzipped file
   if (endsWith(completeFileName, ".gz") || endsWith(completeFileName, ".bz2")) {
@@ -895,7 +895,7 @@ int MothurOut::renameFile(string oldName, string newName){
 		int exist = openInputFile(newName, inTest, "");
 		inTest.close();
 		
-	#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)		
+	#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)		
 		if (exist == 0) { //you could open it so you want to delete it
 			string command = "rm " + newName;
 			system(command.c_str());
@@ -922,7 +922,7 @@ int MothurOut::openOutputFile(string fileName, ofstream& fileHandle){
 	try { 
 	
 		string completeFileName = getFullPathName(fileName);
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 #ifdef USE_COMPRESSION
     // check for gzipped file
     if (endsWith(completeFileName, ".gz") || endsWith(completeFileName, ".bz2")) {
@@ -998,7 +998,7 @@ string MothurOut::sortFile(string distFile, string outputDir){
 
 		
 		//if you can, use the unix sort since its been optimized for years
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 			string command = "sort -n -k +3 " + distFile + " -o " + outfile;
 			system(command.c_str());
 		#else //you are stuck with my best attempt...
@@ -1201,7 +1201,7 @@ vector<unsigned long long> MothurOut::divideFile(string filename, int& proc) {
 			fclose (pFile);
 		}
 		
-	#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+	#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				
 		//estimate file breaks
 		unsigned long long chunkSize = 0;

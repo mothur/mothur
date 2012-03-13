@@ -393,7 +393,7 @@ int PairwiseSeqsCommand::execute(){
 					if (output != "square"){ driverMPI(start, end, (outputFile + toString(pid) + ".temp"), size); }
 					else { driverMPI(start, end, (outputFile + toString(pid) + ".temp"), size, output); }
 					
-					if (m->control_pressed) { delete distCalculator;  return 0; }
+					if (m->control_pressed) {  return 0; }
 				
 					//tell parent you are done.
 					MPI_Send(&size, 1, MPI_LONG, 0, tag, MPI_COMM_WORLD);
@@ -402,7 +402,7 @@ int PairwiseSeqsCommand::execute(){
 			MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 	#else		
 					
-		//#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		//#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 			//if you don't need to fork anything
 			if(processors == 1){
 				if (output != "square") {  driver(0, numSeqs, outputFile, cutoff); }
@@ -494,7 +494,7 @@ void PairwiseSeqsCommand::createProcesses(string filename) {
         int process = 1;
 		processIDS.clear();
         
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		
 		
 		//loop through and create all the processes you want
@@ -991,6 +991,22 @@ int PairwiseSeqsCommand::driverMPI(int startLine, int endLine, string file, unsi
 			alignment = new NeedlemanOverlap(gapOpen, match, misMatch, longestBase);
 		}
 		
+        ValidCalculators validCalculator;
+        Dist* distCalculator;
+        if (countends) {
+            if (validCalculator.isValidCalculator("distance", Estimators[0]) == true) { 
+                if (Estimators[0] == "nogaps")			{	distCalculator = new ignoreGaps();	}
+                else if (Estimators[0] == "eachgap")	{	distCalculator = new eachGapDist();	}
+                else if (Estimators[0] == "onegap")		{	distCalculator = new oneGapDist();	}
+            }
+        }else {
+            if (validCalculator.isValidCalculator("distance", Estimators[0]) == true) { 
+                if (Estimators[0] == "nogaps")		{	distCalculator = new ignoreGaps();					}
+                else if (Estimators[0] == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
+                else if (Estimators[0] == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
+            }
+        }
+        
 		string outputString = "";
 		size = 0;
 		

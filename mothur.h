@@ -54,7 +54,7 @@
 #endif
 /***********************************************************************/
 
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 	#include <sys/wait.h>
 	#include <sys/time.h>
 	#include <sys/resource.h>

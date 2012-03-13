@@ -746,7 +746,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 				count++;
 			}
 			
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				unsigned long long pos = inFASTA.tellg();
 				if ((pos == -1) || (pos >= line.end)) { break; }
 			
@@ -786,7 +786,7 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
 		int exitCommand = 1;
 		processIDS.clear();
 		
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				//loop through and create all the processes you want
 		while (process != processors) {
 			int pid = fork();
@@ -1027,7 +1027,7 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
 				}
 			}
 			
-            #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+            #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 			if(createGroup){
 				ifstream in;
 				string tempFile =  filename + toString(processIDS[i]) + ".num.temp";
@@ -1067,7 +1067,7 @@ int TrimSeqsCommand::setLines(string filename, string qfilename) {
         vector<unsigned long long> fastaFilePos;
 		vector<unsigned long long> qfileFilePos;
 		
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		//set file positions for fasta file
 		fastaFilePos = m->divideFile(filename, processors);
 		
@@ -1157,6 +1157,7 @@ int TrimSeqsCommand::setLines(string filename, string qfilename) {
         }else{
             int numFastaSeqs = 0;
             fastaFilePos = m->setFilePosFasta(filename, numFastaSeqs); 
+            if (fastaFilePos.size() < processors) { processors = fastaFilePos.size(); }
         
             if (qfilename != "") { 
                 int numQualSeqs = 0;

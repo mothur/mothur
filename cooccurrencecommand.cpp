@@ -253,6 +253,7 @@ int CooccurrenceCommand::execute(){
         
 		//reset groups parameter 
 		delete input; 
+        m->clearGroups(); 
 
         m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -271,12 +272,12 @@ int CooccurrenceCommand::execute(){
 int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp, ofstream& out){
 	try {
         int numOTUS = thisLookUp[0]->getNumBins();
-        vector< vector<int> > initmatrix (thisLookUp.size());
-        vector< vector<int> > co_matrix (thisLookUp[0]->getNumBins());
+        vector< vector<int> > initmatrix; initmatrix.resize(thisLookUp.size());
+        vector< vector<int> > co_matrix; co_matrix.resize(thisLookUp[0]->getNumBins());
         for (int i = 0; i < thisLookUp[0]->getNumBins(); i++) { co_matrix[i].resize((thisLookUp.size()), 0); }
         for (int i = 0; i < thisLookUp.size(); i++) { initmatrix[i].resize((thisLookUp[i]->getNumBins()), 0); }
-        vector<int> columntotal(thisLookUp.size(), 0);
-        vector<int> rowtotal(numOTUS, 0);
+        vector<int> columntotal; columntotal.resize(thisLookUp.size(), 0);
+        vector<int> rowtotal; rowtotal.resize(numOTUS, 0);
         
         int rowcount = 0;
         for (int i = 0; i < thisLookUp.size(); i++) {
@@ -298,7 +299,7 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
         //nrows is ncols of inital matrix. All the functions need this value. They assume the transposition has already taken place and nrows and ncols refer to that matrix.
         //comatrix and initmatrix are still vectors of vectors of ints as in the original script. The abundancevector is only what was read in ie not a co-occurrence matrix!
         int ncols = numOTUS;//rows of inital matrix
-        int nrows = thisLookUp.size();//OTUs
+        int nrows = thisLookUp.size();//groups
         double initscore = 0.0;
         //transpose matrix
         int newmatrows = ncols;
@@ -308,8 +309,8 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
         nrows = newmatrows;//ncols;
         ncols = newmatcols;//nrows;
         
-        vector<int> initcolumntotal(ncols, 0);
-        vector<int> initrowtotal(nrows, 0);
+        vector<int> initcolumntotal; initcolumntotal.resize(ncols, 0);
+        vector<int> initrowtotal; initrowtotal.resize(nrows, 0);
         vector<double> stats;
                
         TrialSwap2 trial;

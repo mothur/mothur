@@ -615,7 +615,7 @@ int ClassifySeqsCommand::execute(){
 #else
 		
 			vector<unsigned long long> positions; 
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 			positions = m->divideFile(fastaFileNames[s], processors);
 			for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(new linePair(positions[i], positions[(i+1)]));	}
 #else
@@ -623,6 +623,7 @@ int ClassifySeqsCommand::execute(){
 				lines.push_back(new linePair(0, 1000));
 			}else {
 				positions = m->setFilePosFasta(fastaFileNames[s], numFastaSeqs); 
+                if (positions.size() < processors) { processors = positions.size(); }
 				
 				//figure out how many sequences you have to process
 				int numSeqsPerProcessor = numFastaSeqs / processors;
@@ -821,7 +822,7 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
 		int num = 0;
 		processIDS.clear();
 		
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		int process = 1;
 		
 		//loop through and create all the processes you want
@@ -1021,7 +1022,7 @@ int ClassifySeqsCommand::driver(linePair* filePos, string taxFName, string tempT
 			}
 			delete candidateSeq;
 			
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				unsigned long long pos = inFASTA.tellg();
 				if ((pos == -1) || (pos >= filePos->end)) { break; }
 			#else

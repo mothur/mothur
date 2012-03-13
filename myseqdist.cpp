@@ -46,7 +46,7 @@ int correctDist::addSeq(string seqName, string seqSeq){
 /**************************************************************************************************/
 int correctDist::execute(string distanceFileName){
 	try {
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 #else
 		processors = 1;
 #endif
@@ -146,7 +146,7 @@ vector<int> correctDist::fixSequence(string sequence){
 
 int correctDist::createProcess(string distanceFileName){
 	try {
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		int process = 1;
 		vector<int> processIDs;
 		

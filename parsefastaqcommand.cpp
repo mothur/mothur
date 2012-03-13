@@ -33,8 +33,10 @@ string ParseFastaQCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The fastq.info command reads a fastq file and creates a fasta and quality file.\n";
-		helpString += "The fastq.info command parameter is fastq, and it is required.\n";
+		helpString += "The fastq.info command parameters are fastq, fasta and qfile; fastq is required.\n";
 		helpString += "The fastq.info command should be in the following format: fastq.info(fastaq=yourFastaQFile).\n";
+        helpString += "The fasta parameter allows you to indicate whether you want a fasta file generated. Default=T.\n";
+        helpString += "The qfile parameter allows you to indicate whether you want a quality file generated. Default=T.\n";
 		helpString += "Example fastq.info(fastaq=test.fastaq).\n";
 		helpString += "Note: No spaces between parameter labels (i.e. fastq), '=' and yourFastQFile.\n";
 		return helpString;

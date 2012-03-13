@@ -1120,7 +1120,7 @@ vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundFloatVecto
 	try {
 		vector<float> pvalues;
 		
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		if(processors == 1){
 			pvalues = driver(groupings, groupingsMap, num, indicatorValues, iters);
 			for (int i = 0; i < pvalues.size(); i++) { pvalues[i] /= (double)iters; }
@@ -1234,7 +1234,7 @@ vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundVector*> >
 	try {
 		vector<float> pvalues;
 		
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		if(processors == 1){
 			pvalues = driver(groupings, groupingsMap, num, indicatorValues, iters);
 			for (int i = 0; i < pvalues.size(); i++) { pvalues[i] /= (double)iters; }

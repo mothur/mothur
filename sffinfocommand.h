@@ -82,7 +82,7 @@ private:
 	bool abort, fasta, qual, trim, flow, sfftxt, hasAccnos;
 	int mycount;
 	set<string> seqNames;
-	
+    
 	//extract sff file functions
 	int extractSffInfo(string, string);
 	int readCommonHeader(ifstream&, CommonHeader&);
@@ -98,7 +98,8 @@ private:
 	int printQualSeqData(ofstream&, seqRead&, Header&);
 	int readAccnosFile(string);
 	int parseSffTxt();
-	
+	bool sanityCheck(Header&, seqRead&);
+    
 	//parsesfftxt file functions
 	int parseHeaderLineToInt(ifstream&);
 	vector<unsigned short> parseHeaderLineToFloatVector(ifstream&, int);

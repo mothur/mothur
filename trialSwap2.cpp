@@ -4,7 +4,7 @@
 //The sum_of_squares, havel_hakimi and calc_c_score algorithms have been adapted from I. Miklos and J. Podani. 2004. Randomization of presence-absence matrices: comments and new algorithms. Ecology 85:86-92.
 
 
-/**************************************************************************************************/
+/**************************************************************************************************
 int TrialSwap2::intrand(int n){
     try {
         double z;
@@ -644,102 +644,6 @@ int TrialSwap2::sim8(vector<int> columntotal, vector<int> rowtotal, vector<vecto
 	}
 }
 /**************************************************************************************************/
-int TrialSwap2::havel_hakimi(vector<int> rowtotal,vector<int> columntotal,vector<vector<int> > &co_matrix) 
-{
-    try {
-        int nrows = co_matrix.size();
-        int ncols = co_matrix[0].size();
-        int i,j,k;
-        vector<int> r1; r1.resize(nrows,0);
-        vector<int> c;  c.resize(ncols,0);
-        vector<int> c1; c1.resize(ncols,0);
-       
-        
-        for(i=0;i<nrows;i++) {
-            for(j=0;j<ncols;j++) {
-                co_matrix[i][j]=0;
-            }
-        }
-        for(i=0;i<nrows;i++) {
-            r1[i]=1; 
-        }
-           
-        for(i=0;i<ncols;i++)
-        {
-            c[i]=columntotal[i];
-            c1[i]=i;
-        }
-        
-        for(k=0;k<nrows;k++)
-        {
-            if (m->control_pressed) { return 0; }
-            i=intrand(nrows);
-            while(r1[i]==0) {
-                if (m->control_pressed) { return 0; }
-                i=intrand(nrows);
-            }
-            r1[i]=0;
-            sho(c,c1,ncols);
-            for(j=0;j<rowtotal[i];j++)
-            {
-                if (m->control_pressed) { return 0; }
-                co_matrix[i][c1[j]]=1;
-                c[j]--;
-                if(c[j]<0)
-                    m->mothurOut("Uhh! " + toString(c1[j]) + "\n");
-            }
-        }
-        return 0;
-    }
-	catch(exception& e) {
-		m->errorOut(e, "TrialSwap2", "havel_hakimi");
-		exit(1);
-	}
-}
-/**************************************************************************************************/
-int TrialSwap2::sho(vector<int> c, vector<int> c1, int k)
-{
-    try {
-        int i,j,temp;
-        
-        for(j=k-1;j>0;j--)
-        {
-            if (m->control_pressed) { return 0; }
-            for(i=0;i<j;i++)
-            {
-                if(c[i]<c[i+1])
-                {
-                    temp=c[i];
-                    c[i]=c[i+1];
-                    c[i+1]=temp;
-                    temp=c1[i];
-                    c1[i]=c1[i+1];
-                    c1[i+1]=temp;
-                }
-            }
-        }
-        for(j=1;j<1000;j++)
-        {
-            if (m->control_pressed) { return 0; }
-            i=intrand(k-1);
-            if(c[i]==c[i+1])
-            {
-                temp=c[i];
-                c[i]=c[i+1];
-                c[i+1]=temp;
-                temp=c1[i];
-                c1[i]=c1[i+1];
-                c1[i+1]=temp;
-            }
-        }
-        return(0);
-    }
-	catch(exception& e) {
-		m->errorOut(e, "TrialSwap2", "sho");
-		exit(1);
-	}
-}
-/**************************************************************************************************/
 double TrialSwap2::calc_c_score (vector<vector<int> > &co_matrix,vector<int>  rowtotal)
 {
     try {
@@ -749,7 +653,9 @@ double TrialSwap2::calc_c_score (vector<vector<int> > &co_matrix,vector<int>  ro
         double normcscore = 0.0;
         int nonzeros = 0;
         int ncols = co_matrix[0].size(); int nrows = rowtotal.size(); 
-        vector<vector<double> > s(nrows, vector<double>(nrows,0.0)); //only fill half the matrix
+        vector<vector<double> > s; s.resize(nrows);
+        for (int i = 0; i < nrows; i++) { s[i].resize(nrows,0.0); }//only fill half the matrix
+
         
         for(int i=0;i<nrows-1;i++)
         {
@@ -801,7 +707,8 @@ int TrialSwap2::calc_checker (vector<vector<int> > &co_matrix, vector<int>  rowt
         int cunits=0;
         //int s[nrows][ncols];
         int ncols = co_matrix[0].size(); int nrows = rowtotal.size(); 
-        vector<vector<int> > s(nrows, vector<int>(nrows,0)); //only fill half the matrix
+        vector<vector<int> > s; s.resize(nrows);
+        for (int i = 0; i < nrows; i++) { s[i].resize(nrows,0); }//only fill half the matrix
         
         for(int i=0;i<nrows-1;i++)
         {
@@ -915,10 +822,11 @@ int TrialSwap2::swap_checkerboards (vector<vector<int> > &co_matrix)
     try {
         int ncols = co_matrix[0].size(); int nrows = co_matrix.size(); 
         int i, j, k, l;
-        i=intrand(nrows);
-        while((j = intrand(nrows) ) == i ) {;if (m->control_pressed) { return 0; }}
-        k=intrand(ncols);
-        while((l = intrand(ncols) ) == k ) {;if (m->control_pressed) { return 0; }}
+        i = m->getRandomIndex(nrows-1);
+        while((j = m->getRandomIndex(nrows-1) ) == i ) {;if (m->control_pressed) { return 0; }}
+        k = m->getRandomIndex(ncols-1);
+        while((l = m->getRandomIndex(ncols-1)) == k ) {;if (m->control_pressed) { return 0; }}
+                
         //cout << co_matrix[i][k] << " " << co_matrix[j][l] << endl;
         //cout << co_matrix[i][l] << " " << co_matrix[j][k] << endl;
         //cout << co_matrix[i][l] << " " << co_matrix[j][k] << endl;
@@ -1074,8 +982,8 @@ int TrialSwap2::update_row_col_totals(vector<vector<int> > &co_matrix, vector<in
         //generate (columntotal.begin(), columntotal.end(), 0);
         int nrows = co_matrix.size();
         int ncols = co_matrix[0].size();
-        vector<int> tmpcolumntotal(ncols, 0);
-        vector<int> tmprowtotal(nrows, 0);
+        vector<int> tmpcolumntotal; tmpcolumntotal.resize(ncols, 0);
+        vector<int> tmprowtotal; tmprowtotal.resize(nrows, 0);
         
         int rowcount = 0;
         
@@ -1109,431 +1017,8 @@ int TrialSwap2::update_row_col_totals(vector<vector<int> > &co_matrix, vector<in
     }
 }
 /**************************************************************************************************/
-/*int main(int argc, char *argv[])
-{
-    srand (time(0));
-    char* input_filename = argv[1];
-    std::ifstream infile (input_filename);
-   
-    //skip the first line of headers
-    getline(infile, line);
-    //get the first line of data
-    getline(infile, line);
-    
-    nrows = 0;
-    ncols = 0;
-    
-    //int numspaces = 0;
-    char nextChar;
-    
-    for (int i=0; i<int(line.length()); i++)
-    {
-      nextChar = line.at(i); // gets a character
-      if (isspace(line[i]))
-          ncols++;
-    }
-    
-    ncols = ncols-3;
-    
-    cout << "number of OTUs: ";
-    cout << ncols << endl;
-    
-    infile.close();
-    
-    std::ifstream infile2 (input_filename);
-    
-    //skip first line of headers
-    getline(infile2, line);
-    
-    while (!infile2.eof())
-    { 
-        getline(infile2, line);
-        if (!line.empty())
-            nrows++;
-    }
-    
-    cout << "number of sites: ";
-    cout << nrows << endl;
-    
-    infile2.close();
-    
-    std::ifstream infile3 (input_filename);
-    
-    //skip first line
-    getline(infile3, line);
-    
-    //variables that depend on info from initial matrix
-    vector<vector<int> > co_matrix;//[nrows][ncols];
-    vector<vector<int> > initmatrix;
-    vector<int> tmprow;
-    vector<double> stats;
-    int tmpnrows = nrows;
-    
-    for (int row1=0; row1<nrows; row1++) // first line was skipped when counting, so we can start from 0
-    {
-        //ignore first 3 cols in each row, data starts on the 3th col
-        for (int i = 0; i < 3; i++)
-            infile3 >> tmp;
 
-        for (int col=0; col<ncols; col++) 
-        {
-            infile3 >> tmp;
-            //cout << tmp << endl;
-            if (atoi(tmp.c_str()) > 0)
-                tmprow.push_back(1);
-            else
-                tmprow.push_back(0);        
-        }
-        if (accumulate( tmprow.begin(), tmprow.end(), 0 ) == 0)
-        {
-            tmpnrows--;
-        }
-        else
-            initmatrix.push_back(tmprow);
-        //add the row to the matrix
-        //initmatrix.push_back(tmprow);
-        tmprow.clear();
-        //cout << tmprow << endl;
-    }   
-    
-    infile3.close();
-    nrows = tmpnrows;
-    
-    //print init matrix    
-    /* cout << "original matrix:" << endl;
 
-    for (int i = 0; i < nrows; i++)
-    {
-        for (int j = 0; j < ncols; j++)
-        {
-            cout << initmatrix[i][j];            
-        }    
-        cout << endl;
-    } */
-    
-        //for (i=0;i<ncols;i++)
-        //cout << "col "<< i<< ": " << columntotal[i] << endl;
-    
-    //co_matrix is now initmatrix and newmatrix is now co_matrix
-    
-    //remove cols where sum is 0
-    
-    //transpose matrix
-   /* int newmatrows = ncols;
-    int newmatcols = nrows;
-    int initcols = ncols; //for the combo metric
-    int initrows = nrows; //for the combo metric
-    //swap for transposed matrix
-    nrows = newmatrows;//ncols;
-    ncols = newmatcols;//nrows;
-    
-    vector<int> columntotal(ncols, 0);
-    vector<int> initcolumntotal(ncols, 0);
-    vector<int> initrowtotal(nrows, 0);
-    vector<int> rowtotal(nrows, 0);
-    
-    transpose_matrix(initmatrix,co_matrix);
-    //remove degenerate rows and cols
 
-    //cout << "transposed matrix:" << endl;
-    int rowcount = 0;
-    for (int i = 0; i < nrows; i++)
-    {
-        for (int j = 0; j < ncols; j++)
-        {
-            if (co_matrix[i][j] == 1)
-            {
-                rowcount++;
-                columntotal[j]++;
-            }
-            //cout << co_matrix[i][j];            
-        }    
-        //cout << " row total: " << rowcount << endl;
-        //cout << endl;
-        rowtotal[i] = rowcount;
-        rowcount = 0;
-    }
-    
-    initcolumntotal = rowtotal;
-    initrowtotal = columntotal;
-    
-    cout << endl;    
-    
-    runs = atol(argv[2]);    
-    int metric = atol(argv[3]);
-    int nullModel = atol(argv[4]);
-    double initscore;
-    update_row_col_totals(co_matrix, rowtotal, columntotal, ncols, nrows);
-    //do initial metric: checker, c score, v ratio or combo
-    switch(metric) 
-    {
-        case 1:
-            //c score
-            initscore = calc_c_score(co_matrix, rowtotal);
-            cout << "initial c score: " << initscore << endl;
-            //print_matrix(co_matrix, nrows, ncols);
-            break;
-            
-        case 2:
-            //checker
-            initscore = calc_checker(co_matrix, rowtotal);
-            cout << "initial checker score: " << initscore << endl;
-            break;
-            
-        case 3:
-            //v ratio
-            initscore = calc_vratio(nrows, ncols, rowtotal, columntotal);
-            cout << "initial v ratio: " << initscore << endl;
-            break;
-            
-        case 4:
-            //combo
-            initscore = calc_combo(initrows, initcols, initmatrix);
-            cout << "initial combo score: " << initscore << endl;
-            //set co_matrix equal to initmatrix because combo requires row comparisons
-            co_matrix = initmatrix;
-            break;
-            
-        case 5:
-            //test!
-            
-            //print_matrix(co_matrix, nrows, ncols);
-            //sim1(nrows, ncols, co_matrix);
-            //sim2(nrows, ncols, co_matrix);
-            //sim3(initrows, initcols, initmatrix);
-            //sim4(columntotal, rowtotal, co_matrix);
-            //sim5(initcolumntotal, initmatrix);
-            //sim6(columntotal, co_matrix);
-            //sim7(initcolumntotal, initmatrix);          
-            sim8(columntotal, rowtotal, co_matrix);
-            //print_matrix(initmatrix, initrows, initcols);
-            //print_matrix(co_matrix, nrows, ncols);
-            
-            break;
-            
-        default:
-            cout << "no metric selected!" << endl;
-            return 1;
-            
-    }
-      
-    //matrix initialization
-    //havel_hakimi(nrows, ncols, rowtotal, columntotal, co_matrix);
-    //sum_of_square(nrows, ncols, rowtotal, columntotal, co_matrix);
-    //co-matrix is now a random matrix with the same row and column totals as the initial matrix
-    
-    //null matrix burn in
-    cout << "initializing null matrix...";
-    for(int l=0;l<10000;l++)
-    {
-       //swap_checkerboards (co_matrix); 
-       //if(l%10 == 0)        
-        switch(nullModel)
-        {
-            case 1:
-                //
-                sim1(nrows, ncols, co_matrix);
-                break;
-
-            case 2:
-                //sim2
-                sim2(nrows, ncols, co_matrix);
-                //sim2plus(nrows, ncols, initrowtotal, co_matrix);
-                break;
-
-            case 3:
-                //sim3
-                sim3(initrows, initcols, initmatrix);
-                //transpose_matrix(initmatrix,co_matrix);
-                co_matrix = initmatrix;
-                break;
-
-            case 4:
-                //sim4
-                sim4(columntotal, rowtotal, co_matrix);
-                break;
-
-            case 5:
-                //sim5
-                sim5(initcolumntotal, initrowtotal, initmatrix);
-                transpose_matrix(initmatrix,co_matrix);
-                //co_matrix = initmatrix;
-                break;
-
-            case 6:
-                sim6(columntotal, co_matrix);
-                break;
-
-            case 7:
-                //sim7(ncols, nrows, initrowtotal, co_matrix);          
-                //transpose_matrix(initmatrix,co_matrix);
-                //co_matrix = initmatrix;
-                break;
-
-            case 8:
-                sim8(columntotal, rowtotal, co_matrix);
-                break;
-
-            case 9:
-                //swap_checkerboards
-                swap_checkerboards (co_matrix);
-                break;
-
-            default:
-                cout << "no null model selected!" << endl;
-                return 1;
-        }
-    }
-    cout << "done!" << endl;
-      
-    //generate null matrices and calculate the metrics
-    
-    cout << "run: " << endl;
-    for(int trial=0;trial<runs;trial++) //runs
-    {
-        printf("\b\b\b\b\b\b\b%7d",trial+1);
-        fflush(stdout);
-        
-        switch(nullModel)
-        {
-            case 1: 
-                //
-                sim1(nrows, ncols, co_matrix);
-                break;
-
-            case 2:
-                //sim2
-                sim2(nrows, ncols, co_matrix);
-                //for(int i=0;i<nrows;i++)
-                    //cout << rowtotal[i] << " ";
-                //sim2plus(nrows, ncols, initrowtotal, co_matrix);
-                break;
-
-            case 3:
-                //sim3
-                for(int i=0;i<nrows;i++)
-                    cout  << " " << rowtotal[i];
-                sim3(initrows, initcols, initmatrix);
-                transpose_matrix(initmatrix,co_matrix);
-                break;
-
-            case 4:
-                //sim4
-                sim4(columntotal, rowtotal, co_matrix);
-                break;
-
-            case 5:
-                //sim5
-                sim5(initcolumntotal, initrowtotal, initmatrix);
-                transpose_matrix(initmatrix,co_matrix);
-                break;
-
-            case 6:
-                sim6(columntotal, co_matrix);
-                break;
-
-            case 7:
-                sim7(ncols, nrows, initrowtotal, co_matrix);
-                //print_matrix(co_matrix, nrows, ncols);
-                //transpose_matrix(initmatrix,co_matrix);
-                break;
-
-            case 8:
-                //sim8(initcolumntotal, initrowtotal, co_matrix);
-                //initrow and initcol are flipped because of transposition. this is super ugly!
-                sim8(initrowtotal, initcolumntotal, co_matrix);
-                break;
-
-            case 9:
-                //swap_checkerboards
-                swap_checkerboards (co_matrix);
-                break;
-
-            default:
-                cout << "no null model selected!" << endl;
-                return 1;
-        }
-
-        //cout << endl;
-        //print_matrix(co_matrix, nrows, ncols);
-        update_row_col_totals(co_matrix, rowtotal, columntotal, ncols, nrows);
-        //cout << columntotal[1]<<endl;
-        double tmp;
-        switch(metric) 
-        {
-            case 1:
-                //c score
-                //swap_checkerboards(co_matrix);
-                //cout <<  "%" << tmp << " nrows " << nrows << " ncols " << ncols << " rowtotals ";
-                //for(int i = 0; i<nrows; i++) { cout << rowtotal[i]; }
-                //cout << endl;
-                tmp = calc_c_score(co_matrix, rowtotal);
-                //cout << "%" << tmp << " ";
-                stats.push_back(tmp);
-                //cout << "%" << tmp << " ";
-                //print_matrix(co_matrix, nrows, ncols);
-                break;
-                
-            case 2:
-                //checker
-                //swap_checkerboards(co_matrix);
-                //cout <<  "%" << tmp << " nrows " << nrows << " ncols " << ncols << " rowtotals ";
-                //for(int i = 0; i<nrows; i++) { cout << rowtotal[i]; }
-                //cout << endl;
-                tmp = calc_checker(co_matrix, rowtotal);
-                stats.push_back(tmp);
-                //cout << "%" << tmp << endl;
-                break;
-                
-            case 3:
-                //v ratio
-                stats.push_back(calc_vratio(nrows, ncols, rowtotal, columntotal));
-                break;
-                
-            case 4:
-                //combo
-                stats.push_back(calc_combo(nrows, ncols, co_matrix));
-                break;
-                
-            case 5:
-                //test!
-                break;
-                
-            default:
-                cout << "no metric selected!" << endl;
-                return 1;
-                
-        } 
-        
-    //print_matrix(co_matrix, nrows, ncols);
-    //print_matrix(initmatrix, initrows, initcols);
-
-    }
-    
-    cout << endl;
-    
-    double total = 0.0;
-    for (int i=0; i<stats.size();i++)
-    {
-        total+=stats[i];
-    }
-        
-    double nullMean = double (total/stats.size()); 
-
-    cout << '\n' << "average metric score: " << nullMean << endl;
-
-    //cout << "t-test: " << t_test(initscore, runs, nullMean, stats) << endl;
-    
-    if (metric == 1 || metric == 2)
-        cout << "pvalue: " << calc_pvalue_greaterthan (stats, initscore) << endl;
-    else
-        cout << "pvalue: " << calc_pvalue_lessthan (stats, initscore) << endl;
-         
-    //print_matrix(co_matrix, nrows, ncols);
-    
-    return 0;
-    
-}*/
-/**************************************************************************************************/
 
 

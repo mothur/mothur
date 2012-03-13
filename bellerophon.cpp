@@ -314,7 +314,7 @@ int Bellerophon::getChimeras() {
 	#else
 	
 		//divide breakpoints between processors
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 			if(processors == 1){ 
 				lines.push_back(linePair(0, iters));	
 				
@@ -356,7 +356,7 @@ int Bellerophon::getChimeras() {
 
 int Bellerophon::createProcesses(vector<int> mid) {
 	try {
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		int process = 0;
 		int exitCommand = 1;
 		vector<int> processIDS;

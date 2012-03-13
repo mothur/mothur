@@ -424,16 +424,17 @@ int FilterSeqsCommand::filterSequences() {
             vector<unsigned long long> positions;
             if (savedPositions.size() != 0) { positions = savedPositions[s]; }
             else {
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				positions = m->divideFile(fastafileNames[s], processors);
 #else
                 if(processors != 1){
                     int numFastaSeqs = 0;
                     positions = m->setFilePosFasta(fastafileNames[s], numFastaSeqs); 
+                    if (positions.size() < processors) { processors = positions.size(); }
                 }
 #endif
             }
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 			//vector<unsigned long long> positions = m->divideFile(fastafileNames[s], processors);
 			
 			for (int i = 0; i < (positions.size()-1); i++) {
@@ -590,7 +591,7 @@ int FilterSeqsCommand::driverRunFilter(string F, string outputFilename, string i
 				count++;
 			}
 			
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				unsigned long long pos = in.tellg();
 				if ((pos == -1) || (pos >= filePos->end)) { break; }
 			#else
@@ -623,7 +624,7 @@ int FilterSeqsCommand::createProcessesRunFilter(string F, string filename, strin
 		int num = 0;
 		processIDS.clear();
         
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		
 		
 		//loop through and create all the processes you want
@@ -811,7 +812,7 @@ string FilterSeqsCommand::createFilter() {
 #else
 				
                 vector<unsigned long long> positions;
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				positions = m->divideFile(fastafileNames[s], processors);
 				for (int i = 0; i < (positions.size()-1); i++) {
 					lines.push_back(new linePair(positions[i], positions[(i+1)]));
@@ -832,6 +833,7 @@ string FilterSeqsCommand::createFilter() {
 				}else {
                     int numFastaSeqs = 0;
                     positions = m->setFilePosFasta(fastafileNames[s], numFastaSeqs); 
+                    if (positions.size() < processors) { processors = positions.size(); }
                     
                     //figure out how many sequences you have to process
                     int numSeqsPerProcessor = numFastaSeqs / processors;
@@ -969,7 +971,7 @@ int FilterSeqsCommand::driverCreateFilter(Filters& F, string filename, linePair*
 					count++;
 			}
 			
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				unsigned long long pos = in.tellg();
 				if ((pos == -1) || (pos >= filePos->end)) { break; }
 			#else
@@ -1045,7 +1047,7 @@ int FilterSeqsCommand::createProcessesCreateFilter(Filters& F, string filename) 
 		int num = 0;
 		processIDS.clear();
 
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				
 		//loop through and create all the processes you want
 		while (process != processors) {

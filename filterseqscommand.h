@@ -121,7 +121,7 @@ struct filterRunData {
 };
 
 /**************************************************************************************************/
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 #else
 static DWORD WINAPI MyCreateFilterThreadFunction(LPVOID lpParam){ 
 	filterData* pDataArray;

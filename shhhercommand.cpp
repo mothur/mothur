@@ -1823,7 +1823,7 @@ int ShhherCommand::execute(){
 		
         if (numFiles < processors) { processors = numFiles; }
         
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
         if (processors == 1) { driver(flowFileVector, compositeFASTAFileName, compositeNamesFileName, 0, flowFileVector.size()); }
         else { createProcesses(flowFileVector); } //each processor processes one file
 #else
@@ -1869,7 +1869,7 @@ int ShhherCommand::createProcesses(vector<string> filenames){
 			lines.push_back(linePair(startIndex, endIndex));
 		}
 		
-        #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)		
+        #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)		
 		
 		//loop through and create all the processes you want
 		while (process != processors) {

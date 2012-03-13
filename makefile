@@ -9,15 +9,15 @@
 # Macros
 #
 
-USEMPI ?= no
+USEMPI ?= yes
 64BIT_VERSION ?= yes
-USEREADLINE ?= yes
+USEREADLINE ?= no
 CYGWIN_BUILD ?= no
 USECOMPRESSION ?= no
 MOTHUR_FILES="\"Enter_your_default_path_here\""
-RELEASE_DATE = "\"1/9/2012\""
-VERSION = "\"1.23.0\""
-FORTAN_COMPILER = gfortran
+RELEASE_DATE = "\"3/12/2012\""
+VERSION = "\"1.24.4\""
+FORTAN_COMPILER = /usr/local/gfortran/bin/gfortran
 
 # Optimize to level 3:
 CXXFLAGS += -O3 
@@ -38,7 +38,7 @@ ifeq  ($(strip $(64BIT_VERSION)),yes)
 	#if you are a linux user use the following line
 	#CXXFLAGS += -mtune=native -march=native -m64
 	
-	 CXXFLAGS += -DBIT_VERSION
+	CXXFLAGS += -DBIT_VERSION
 endif
 
 
@@ -97,12 +97,12 @@ mothur : fortranSource $(OBJECTS) uchime
 	$(CXX) $(LDFLAGS) $(TARGET_ARCH) -o $@ $(OBJECTS) $(LIBS)
 	
 	strip mothur
-
+ 
 uchime:
 	cd uchime_src && ./mk && mv uchime .. && cd ..
 	
 fortranSource:
-	${FORTAN_COMPILER} -c *.f
+	${FORTAN_COMPILER} -c -m64 *.f
 
 install : mothur
 #	cp mothur ../Release/mothur

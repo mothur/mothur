@@ -162,7 +162,7 @@ int SummaryQualCommand::execute(){
 		if (namefile != "") { nameMap = m->readNames(namefile); }
 		
 		vector<unsigned long long> positions; 
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		positions = m->divideFile(qualfile, processors);
 		for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
 #else	
@@ -170,6 +170,7 @@ int SummaryQualCommand::execute(){
 			lines.push_back(linePair(0, 1000)); 
 		}else {
 			positions = m->setFilePosFasta(qualfile, numSeqs); 
+            if (positions.size() < processors) { processors = positions.size(); }
 			
 			//figure out how many sequences you have to process
 			int numSeqsPerProcessor = numSeqs / processors;
@@ -267,7 +268,7 @@ int SummaryQualCommand::driverCreateSummary(vector<int>& position, vector<int>& 
 				count += num;
 			}
 			
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 			unsigned long long pos = in.tellg();
 			if ((pos == -1) || (pos >= filePos.end)) { break; }
 #else
@@ -291,7 +292,7 @@ int SummaryQualCommand::createProcessesCreateSummary(vector<int>& position, vect
 		int numSeqs = 0;
 		processIDS.clear();
 		
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		
 		//loop through and create all the processes you want
 		while (process != processors) {

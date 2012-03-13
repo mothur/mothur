@@ -288,7 +288,7 @@ int ScreenSeqsCommand::execute(){
 			getSummary(positions); 
 		} 
 		else { 
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
                 positions = m->divideFile(fastafile, processors);
                 for (int i = 0; i < (positions.size()-1); i++) { lines.push_back(linePair(positions[i], positions[(i+1)])); }
 			#else 
@@ -296,6 +296,7 @@ int ScreenSeqsCommand::execute(){
                 else {
                     int numFastaSeqs = 0;
                     positions = m->setFilePosFasta(fastafile, numFastaSeqs); 
+                    if (positions.size() < processors) { processors = positions.size(); }
                 
                     //figure out how many sequences you have to process
                     int numSeqsPerProcessor = numFastaSeqs / processors;
@@ -611,7 +612,7 @@ int ScreenSeqsCommand::getSummary(vector<unsigned long long>& positions){
 		vector<int> longHomoPolymer;
 		
         vector<unsigned long long> positions;
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		positions = m->divideFile(fastafile, processors);
 		for (int i = 0; i < (positions.size()-1); i++) { lines.push_back(linePair(positions[i], positions[(i+1)])); }	
 #else
@@ -619,6 +620,7 @@ int ScreenSeqsCommand::getSummary(vector<unsigned long long>& positions){
         else {
             int numFastaSeqs = 0;
             positions = m->setFilePosFasta(fastafile, numFastaSeqs); 
+            if (positions.size() < processors) { processors = positions.size(); }
             
             //figure out how many sequences you have to process
             int numSeqsPerProcessor = numFastaSeqs / processors;
@@ -638,7 +640,7 @@ int ScreenSeqsCommand::getSummary(vector<unsigned long long>& positions){
 			driverCreateSummary(startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, fastafile, lines[0]);
 #else
 		int numSeqs = 0;
-		//#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		//#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 			if(processors == 1){
 				numSeqs = driverCreateSummary(startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, fastafile, lines[0]);
 			}else{
@@ -743,7 +745,7 @@ int ScreenSeqsCommand::driverCreateSummary(vector<int>& startPosition, vector<in
 				count++;
 			}
 			//if((count) % 100 == 0){	m->mothurOut("Optimizing sequence: " + toString(count)); m->mothurOutEndLine();		}
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				unsigned long long pos = in.tellg();
 				if ((pos == -1) || (pos >= filePos.end)) { break; }
 			#else
@@ -769,7 +771,7 @@ int ScreenSeqsCommand::createProcessesCreateSummary(vector<int>& startPosition, 
 		int num = 0;
 		vector<int> processIDS;
 
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				
 		//loop through and create all the processes you want
 		while (process != processors) {
@@ -1163,7 +1165,7 @@ int ScreenSeqsCommand::driver(linePair filePos, string goodFName, string badAccn
 			count++;
 			}
 			
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				unsigned long long pos = inFASTA.tellg();
 				if ((pos == -1) || (pos >= filePos.end)) { break; }
 			#else
@@ -1275,7 +1277,7 @@ int ScreenSeqsCommand::createProcesses(string goodFileName, string badAccnos, st
         int process = 1;
 		int num = 0;
 
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				
 		//loop through and create all the processes you want
 		while (process != processors) {

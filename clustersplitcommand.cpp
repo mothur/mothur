@@ -554,7 +554,7 @@ int ClusterSplitCommand::execute(){
 		//sanity check
 		if (processors > distName.size()) { processors = distName.size(); }
 		
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				if(processors == 1){
 					listFileNames = cluster(distName, labels); //clusters individual files and returns names of list files
 				}else{
@@ -868,7 +868,7 @@ vector<string>  ClusterSplitCommand::createProcesses(vector< map<string, string>
         
         if (m->control_pressed) { return listFiles; }
 	
-	#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+	#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		int process = 1;
 		processIDS.clear();
 		
