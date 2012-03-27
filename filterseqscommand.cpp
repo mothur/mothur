@@ -125,7 +125,12 @@ FilterSeqsCommand::FilterSeqsCommand(string option)  {
 			fasta = validParameter.validFile(parameters, "fasta", false);
 			if (fasta == "not found") { 				
 				fasta = m->getFastaFile(); 
-				if (fasta != "") { fastafileNames.push_back(fasta);  m->mothurOut("Using " + fasta + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+				if (fasta != "") { 
+                    fastafileNames.push_back(fasta);  
+                    m->mothurOut("Using " + fasta + " as input file for the fasta parameter."); m->mothurOutEndLine();
+                    string simpleName = m->getSimpleName(fasta);
+                    filterFileName += simpleName.substr(0, simpleName.find_first_of('.'));
+                }
 				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}
 			else { 

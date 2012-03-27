@@ -572,8 +572,8 @@ int SharedCommand::createMisMatchFile() {
 			
 			m->openOutputFile(outputMisMatchName, outMisMatch);
 			
-			map<string, string> listNames;
-			map<string, string>::iterator itList;
+			set<string> listNames;
+			set<string>::iterator itList;
 			
 			//go through list and if group returns "not found" output it
 			for (int i = 0; i < SharedList->getNumBins(); i++) {
@@ -581,26 +581,19 @@ int SharedCommand::createMisMatchFile() {
 			
 				string names = SharedList->get(i); 
 				
-				while (names.find_first_of(',') != -1) { 
-					string name = names.substr(0,names.find_first_of(','));
-					names = names.substr(names.find_first_of(',')+1, names.length());
+                vector<string> binNames;
+                m->splitAtComma(names, binNames);
+                
+				for (int j = 0; j < binNames.size(); j++) { 
+					string name = binNames[j];
 					string group = groupMap->getGroup(name);
 					
 					if(group == "not found") {	outMisMatch << name << endl;  }
 					
 					itList = listNames.find(name);
 					if (itList != listNames.end()) {  m->mothurOut(name + " is in your list file more than once.  Sequence names must be unique. please correct."); m->mothurOutEndLine(); }
-					else { listNames[name] = name; }
+					else { listNames.insert(name); }
 				}
-			
-				//get last name
-				string group = groupMap->getGroup(names);
-				if(group == "not found") {	outMisMatch << names << endl;  }	
-				
-				itList = listNames.find(names);
-				if (itList != listNames.end()) {  m->mothurOut(names + " is in your list file more than once.  Sequence names must be unique. please correct."); m->mothurOutEndLine(); }
-				else { listNames[names] = names; }
-
 			}
 			
 			outMisMatch.close();
@@ -621,9 +614,12 @@ int SharedCommand::createMisMatchFile() {
 				
 				string names = SharedList->get(i); 
 		
-				while (names.find_first_of(',') != -1) { 
-					string name = names.substr(0,names.find_first_of(','));
-					names = names.substr(names.find_first_of(',')+1, names.length());
+				vector<string> binNames;
+                m->splitAtComma(names, binNames);
+                
+				for (int j = 0; j < binNames.size(); j++) { 
+
+					string name = binNames[j];
 					
 					itList = namesInList.find(name);
 					if (itList != namesInList.end()) {  m->mothurOut(name + " is in your list file more than once.  Sequence names must be unique. please correct."); m->mothurOutEndLine(); }
@@ -631,12 +627,6 @@ int SharedCommand::createMisMatchFile() {
 					namesInList[name] = name;
 					
 				}
-				
-				itList = namesInList.find(names);
-				if (itList != namesInList.end()) {  m->mothurOut(names + " is in your list file more than once.  Sequence names must be unique. please correct."); m->mothurOutEndLine(); }
-
-				//get last name
-				namesInList[names] = names;				
 			}
 			
 			//get names of sequences in groupfile
@@ -674,12 +664,11 @@ int SharedCommand::ListGroupSameSeqs() {
 		int error = 0; 
 		
 		vector<string> groupMapsSeqs = groupMap->getNamesSeqs();
-		
+       	
 		set<string> groupNamesSeqs;
 		for(int i = 0; i < groupMapsSeqs.size(); i++) {
 			groupNamesSeqs.insert(groupMapsSeqs[i]);
 		}
-		
 		
 		//go through list and if group returns "not found" output it
 		for (int i = 0; i < SharedList->getNumBins(); i++) {

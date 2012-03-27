@@ -138,7 +138,7 @@ class MothurOut {
 		int getRandomIndex(int); //highest
 
 		int control_pressed;
-		bool executing, runParse, jumble, gui;
+		bool executing, runParse, jumble, gui, mothurCalling;
 		
 		//current files - if you add a new type you must edit optionParser->getParameters, get.current command and mothurOut->printCurrentFiles/clearCurrentFiles.
 		string getPhylipFile()		{ return phylipfile;		}
@@ -219,6 +219,7 @@ class MothurOut {
 			gui = false;
 			printedHeaders = false;
 			commandInputsConvertError = false;
+            mothurCalling = false;
 			sharedHeaderMode = "";
 		}
 		~MothurOut();

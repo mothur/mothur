@@ -49,7 +49,8 @@ private:
 	vector<unsigned long long> getFlowFileBreaks();
 	int createProcessesCreateTrim(string, string, string, string, vector<vector<string> >); 
 	int driverCreateTrim(string, string, string, string, vector<vector<string> >, linePair*);
-
+    string reverseOligo(string);
+    
 	vector<string> outputNames;
 	set<string> filesToRemove;
 	

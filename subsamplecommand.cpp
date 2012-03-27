@@ -531,14 +531,16 @@ int SubSampleCommand::getSubSampleFasta() {
 			string inputString = "fasta=" + outputFileName;
 			m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
 			m->mothurOut("Running command: unique.seqs(" + inputString + ")"); m->mothurOutEndLine(); 
-			
+			m->mothurCalling = true;
+            
 			Command* uniqueCommand = new DeconvoluteCommand(inputString);
 			uniqueCommand->execute();
 			
 			map<string, vector<string> > filenames = uniqueCommand->getOutputFiles();
 			
 			delete uniqueCommand;
-			
+			m->mothurCalling = false;
+            
 			outputTypes["name"].push_back(filenames["name"][0]);  outputNames.push_back(filenames["name"][0]);
 			m->mothurRemove(outputFileName);
 			outputFileName = filenames["fasta"][0];

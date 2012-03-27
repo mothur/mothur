@@ -11,13 +11,14 @@
 
 USEMPI ?= no
 64BIT_VERSION ?= yes
-USEREADLINE ?= no
+USEREADLINE ?= yes
 CYGWIN_BUILD ?= no
 USECOMPRESSION ?= no
 MOTHUR_FILES="\"Enter_your_default_path_here\""
-RELEASE_DATE = "\"3/13/2012\""
-VERSION = "\"1.24.0\""
+RELEASE_DATE = "\"3/16/2012\""
+VERSION = "\"1.24.1\""
 FORTAN_COMPILER = gfortran
+FORTRAN_FLAGS = 
 
 # Optimize to level 3:
 CXXFLAGS += -O3 
@@ -39,6 +40,7 @@ ifeq  ($(strip $(64BIT_VERSION)),yes)
 	#CXXFLAGS += -mtune=native -march=native -m64
 	
 	CXXFLAGS += -DBIT_VERSION
+    FORTRAN_FLAGS = -m64
 endif
 
 
@@ -102,7 +104,7 @@ uchime:
 	cd uchime_src && ./mk && mv uchime .. && cd ..
 	
 fortranSource:
-	${FORTAN_COMPILER} -c -m64 *.f
+	${FORTAN_COMPILER} -c $(FORTRAN_FLAGS) *.f
 
 install : mothur
 #	cp mothur ../Release/mothur

@@ -387,7 +387,7 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
 		int count = 0;
 		bool moreSeqs = 1;
 		
-		TrimOligos trimOligos(pdiffs, bdiffs, primers, barcodes, revPrimer);
+		TrimOligos trimOligos(pdiffs, bdiffs, ldiffs, sdiffs, primers, barcodes, revPrimer, linker, spacer);
 		
 		while(moreSeqs) {
 				
@@ -407,7 +407,7 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
 				success = 0;
 				trashCode += 'l';
 			}
-			
+			cout << currSeq.getName() << endl << currSeq.getUnaligned() << endl;
 			int primerIndex = 0;
 			int barcodeIndex = 0;
 			
@@ -542,9 +542,8 @@ void TrimFlowsCommand::getOligos(vector<vector<string> >& outFlowFileNames){
 
 				}
 				else if(type == "REVERSE"){
-					Sequence oligoRC("reverse", oligo);
-					oligoRC.reverseComplement();
-					revPrimer.push_back(oligoRC.getUnaligned());
+					string oligoRC = reverseOligo(oligo);
+					revPrimer.push_back(oligoRC);
 				}
 				else if(type == "BARCODE"){
 					oligosFile >> group;
@@ -633,6 +632,47 @@ void TrimFlowsCommand::getOligos(vector<vector<string> >& outFlowFileNames){
 		exit(1);
 	}
 }
+//********************************************************************/
+string TrimFlowsCommand::reverseOligo(string oligo){
+	try {
+        string reverse = "";
+        
+        for(int i=oligo.length()-1;i>=0;i--){
+            
+            if(oligo[i] == 'A')		{	reverse += 'T';	}
+            else if(oligo[i] == 'T'){	reverse += 'A';	}
+            else if(oligo[i] == 'U'){	reverse += 'A';	}
+            
+            else if(oligo[i] == 'G'){	reverse += 'C';	}
+            else if(oligo[i] == 'C'){	reverse += 'G';	}
+            
+            else if(oligo[i] == 'R'){	reverse += 'Y';	}
+            else if(oligo[i] == 'Y'){	reverse += 'R';	}
+            
+            else if(oligo[i] == 'M'){	reverse += 'K';	}
+            else if(oligo[i] == 'K'){	reverse += 'M';	}
+            
+            else if(oligo[i] == 'W'){	reverse += 'W';	}
+            else if(oligo[i] == 'S'){	reverse += 'S';	}
+            
+            else if(oligo[i] == 'B'){	reverse += 'V';	}
+            else if(oligo[i] == 'V'){	reverse += 'B';	}
+            
+            else if(oligo[i] == 'D'){	reverse += 'H';	}
+            else if(oligo[i] == 'H'){	reverse += 'D';	}
+            
+            else						{	reverse += 'N';	}
+        }
+        
+        
+        return reverse;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "TrimFlowsCommand", "reverseOligo");
+		exit(1);
+	}
+}
+
 /**************************************************************************************************/
 vector<unsigned long long> TrimFlowsCommand::getFlowFileBreaks() {
 

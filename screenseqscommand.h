@@ -107,11 +107,11 @@ struct sumScreenData {
 	int count;
 	MothurOut* m;
 	string goodFName, badAccnosFName, filename;
-    set<string>* badSeqNames;
+    set<string> badSeqNames;
 	
 	
 	sumScreenData(){}
-	sumScreenData(int s, int e, int a, int h, int minl, int maxl, string f, MothurOut* mout, unsigned long long st, unsigned long long en, string gf, string bf, set<string>* bn) {
+	sumScreenData(int s, int e, int a, int h, int minl, int maxl, string f, MothurOut* mout, unsigned long long st, unsigned long long en, string gf, string bf) {
 		startPos = s;
 		endPos = e;
 		minLength = minl;
@@ -124,7 +124,6 @@ struct sumScreenData {
 		m = mout;
 		start = st;
 		end = en;
-		badSeqNames = bn;
 		count = 0;
 	}
 };
@@ -233,7 +232,7 @@ static DWORD WINAPI MySumScreenThreadFunction(LPVOID lpParam){
 				}
 				else{
 					badAccnosFile << currSeq.getName() << endl;
-					pDataArray->badSeqNames->insert(currSeq.getName());
+					pDataArray->badSeqNames.insert(currSeq.getName());
 				}
     
 			}		

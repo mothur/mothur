@@ -67,6 +67,13 @@ ShhherCommand::ShhherCommand(){
 
 ShhherCommand::ShhherCommand(string option) {
 	try {
+        
+#ifdef USE_MPI
+		MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
+		MPI_Comm_size(MPI_COMM_WORLD, &ncpus);
+        
+		if(pid == 0){
+#endif
 		abort = false; calledHelp = false;   
 		
 		//allow user to run help
@@ -314,6 +321,9 @@ ShhherCommand::ShhherCommand(string option) {
 			}
 			
 		}
+#ifdef USE_MPI
+		}				
+#endif
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ShhherCommand", "ShhherCommand");
@@ -328,9 +338,7 @@ int ShhherCommand::execute(){
 		
 		int tag = 1976;
 		MPI_Status status; 
-		MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-		MPI_Comm_size(MPI_COMM_WORLD, &ncpus);
-        
+		        
 		if(pid == 0){
 
 			for(int i=1;i<ncpus;i++){
@@ -344,6 +352,22 @@ int ShhherCommand::execute(){
 			getSingleLookUp();	if (m->control_pressed) { return 0; }
 			getJointLookUp();	if (m->control_pressed) { return 0; }
 			
+            vector<string> flowFileVector;
+			if(flowFilesFileName != "not found"){
+				string fName;
+                
+				ifstream flowFilesFile;
+				m->openInputFile(flowFilesFileName, flowFilesFile);
+				while(flowFilesFile){
+					fName = m->getline(flowFilesFile);
+					flowFileVector.push_back(fName);
+					m->gobble(flowFilesFile);
+				}
+			}
+			else{
+				flowFileVector.push_back(flowFileName);
+			}
+            
 			int numFiles = flowFileVector.size();
 
 			for(int i=1;i<ncpus;i++){
@@ -3042,11 +3066,13 @@ void ShhherCommand::writeQualities(int numOTUs, int numFlowCells, string filenam
 			
 			if(otuCounts[i] > 0){
 				qualityFile << '>' << seqNameVector[mapUniqueToSeq[i]] << endl;
-				
+                	
 				int j=4;	//need to get past the first four bases
 				while(qualities[i][j] != -1){
-					qualityFile << qualities[i][j] << ' ';
-					j++;
+                    //cout << i << '\t' << j << '\t' << qualities[i][j] << endl;
+                    qualityFile << qualities[i][j] << ' ';
+                    j++;
+                    
 				}
 				qualityFile << endl;
 			}

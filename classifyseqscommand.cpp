@@ -457,10 +457,14 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 				search = "kmer";
 			}
 			
-			if (namefileNames.size() == 0){
-				vector<string> files; files.push_back(fastaFileNames[fastaFileNames.size()-1]); 
-				parser.getNameFile(files);
-			}
+            if (!abort) {
+                if (namefileNames.size() == 0){
+                    if (fastaFileNames.size() != 0) {
+                        vector<string> files; files.push_back(fastaFileNames[fastaFileNames.size()-1]); 
+                        parser.getNameFile(files);
+                    }
+                }
+            }
 			
 		}
 		

@@ -51,6 +51,7 @@ private:
 	bool cullLength(Sequence&);
 	bool cullHomoP(Sequence&);
 	bool cullAmbigs(Sequence&);
+    string reverseOligo(string);
 
 	bool abort, createGroup;
 	string fastaFile, oligoFile, qFileName, groupfile, nameFile, outputDir;

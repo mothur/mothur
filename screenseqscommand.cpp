@@ -1358,7 +1358,7 @@ int ScreenSeqsCommand::createProcesses(string goodFileName, string badAccnos, st
             if (i!=0) {extension += toString(i) + ".temp"; processIDS.push_back(i); }
             
 			// Allocate memory for thread data.
-			sumScreenData* tempSum = new sumScreenData(startPos, endPos, maxAmbig, maxHomoP, minLength, maxLength, filename, m, lines[i].start, lines[i].end,goodFileName+extension, badAccnos+extension, &badSeqNames);
+			sumScreenData* tempSum = new sumScreenData(startPos, endPos, maxAmbig, maxHomoP, minLength, maxLength, filename, m, lines[i].start, lines[i].end,goodFileName+extension, badAccnos+extension);
 			pDataArray.push_back(tempSum);
 			
 			//default security attributes, thread function name, argument to thread function, use default creation flags, returns the thread identifier
@@ -1375,6 +1375,7 @@ int ScreenSeqsCommand::createProcesses(string goodFileName, string badAccnos, st
 		//Close all thread handles and free memory allocations.
 		for(int i=0; i < pDataArray.size(); i++){
 			num += pDataArray[i]->count;
+            for (set<string>::iterator it = pDataArray[i]->badSeqNames.begin(); it != pDataArray[i]->badSeqNames.end(); it++) {	badSeqNames.insert(*it);       }
 			CloseHandle(hThreadArray[i]);
 			delete pDataArray[i];
 		}
