@@ -329,6 +329,8 @@ int TrimSeqsCommand::execute(){
 		
 		numFPrimers = 0;  //this needs to be initialized
 		numRPrimers = 0;
+        numSpacers = 0;
+        numLinkers = 0;
 		createGroup = false;
 		vector<vector<string> > fastaFileNames;
 		vector<vector<string> > qualFileNames;

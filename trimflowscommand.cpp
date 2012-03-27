@@ -207,6 +207,8 @@ TrimFlowsCommand::TrimFlowsCommand(string option)  {
 
 			numFPrimers = 0;
 			numRPrimers = 0;
+            numLinkers = 0;
+            numSpacers = 0;
 		}
 		
 	}
