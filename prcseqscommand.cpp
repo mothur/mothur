@@ -266,7 +266,7 @@ int PcrSeqsCommand::execute(){
 		outputNames.push_back(trimSeqFile); outputTypes["fasta"].push_back(trimSeqFile);
         
         string badSeqFile = thisOutputDir + m->getRootName(m->getSimpleName(fastafile)) + "pcr.scrap.fasta";
-		outputNames.push_back(badSeqFile); outputTypes["fasta"].push_back(badSeqFile);
+		
 		
         length = 0;
 		if(oligosfile != ""){    readOligos();     }  if (m->control_pressed) {  return 0; }
@@ -304,6 +304,7 @@ int PcrSeqsCommand::execute(){
         //don't write or keep if blank
         if (badNames.size() != 0)   { writeAccnos(badNames);        }   
         if (m->isBlank(badSeqFile)) { m->mothurRemove(badSeqFile);  }
+        else { outputNames.push_back(badSeqFile); outputTypes["fasta"].push_back(badSeqFile); }
         
         if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
         if (namefile != "")			{		readName(badNames);		}   
@@ -601,7 +602,10 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
                         }
                     }
                 }
-                                    
+                
+                //trimming removed all bases
+                if (currSeq.getUnaligned() == "") { goodSeq = false; }
+                
 				if(goodSeq == 1)    {   currSeq.printSequence(goodFile);        }
 				else {  
                     badSeqNames.insert(currSeq.getName()); 

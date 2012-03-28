@@ -36,7 +36,7 @@ string CreateDatabaseCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The create.database command reads a listfile, *.cons.taxonomy, *.rep.fasta, *.rep.names and optional groupfile, and creates a database file.\n";
-		helpString += "The create.database command parameters are repfasta, list, repname, contaxonomy, group and label. List, repfasta, repnames, and contaxonomy are required.  \n";
+		helpString += "The create.database command parameters are repfasta, list, repname, contaxonomy, group and label. List, repfasta, repnames, and contaxonomy are required.\n";
         
         helpString += "The create.database command should be in the following format: \n";
 		helpString += "create.database(repfasta=yourFastaFileFromGetOTURep, repname=yourNameFileFromGetOTURep, contaxonomy=yourConTaxFileFromClassifyOTU, list=yourListFile) \n";	
