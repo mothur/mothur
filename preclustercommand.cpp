@@ -229,6 +229,7 @@ int PreClusterCommand::execute(){
 			m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
 			
 			m->renameFile(filenames["fasta"][0], newFastaFile);
+            m->renameFile(filenames["name"][0], newNamesFile);
 			
 			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to run pre.cluster."); m->mothurOutEndLine(); 
 				

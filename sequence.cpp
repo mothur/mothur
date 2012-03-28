@@ -581,6 +581,11 @@ int Sequence::filterToPos(int start){
 		aligned[j] = '.';
 	}
 	
+    //things like ......----------AT become ................AT
+    for(int j = start-1; j < aligned.length(); j++) {
+        if (isalpha(aligned[j])) { break; }
+        else { aligned[j] = '.'; }
+    }
     setUnaligned(aligned);
     
     return 0;
@@ -596,6 +601,11 @@ int Sequence::filterFromPos(int end){
 		aligned[j] = '.';
 	}
 	
+    for(int j = aligned.length()-1; j < 0; j--) {
+        if (isalpha(aligned[j])) { break; }
+        else { aligned[j] = '.'; }
+    }
+    
     setUnaligned(aligned);
     
     return 0;

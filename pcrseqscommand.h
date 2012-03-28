@@ -43,7 +43,7 @@ private:
     
     vector<linePair> lines;
 	bool getOligos(vector<vector<string> >&, vector<vector<string> >&, vector<vector<string> >&);
-    bool abort, keepprimer;
+    bool abort, keepprimer, keepdots;
 	string fastafile, oligosfile, taxfile, groupfile, namefile, ecolifile, outputDir, nomatch;
 	int start, end, pdiffs, processors, length;
 	
@@ -79,11 +79,11 @@ struct pcrData {
 	vector<string> primers;
     vector<string> revPrimer;
     set<string> badSeqNames;
-    bool keepprimer;
+    bool keepprimer, keepdots;
 	
 	
 	pcrData(){}
-	pcrData(string f, string gf, string bfn, MothurOut* mout, string ol, string ec, vector<string> pr, vector<string> rpr, string nm, bool kp, int st, int en, int l, unsigned long long fst, unsigned long long fen) {
+	pcrData(string f, string gf, string bfn, MothurOut* mout, string ol, string ec, vector<string> pr, vector<string> rpr, string nm, bool kp, bool kd, int st, int en, int l, unsigned long long fst, unsigned long long fen) {
 		filename = f;
         goodFasta = gf;
         badFasta = bfn;
@@ -94,6 +94,7 @@ struct pcrData {
         revPrimer = rpr;
         nomatch = nm;
         keepprimer = kp;
+        keepdots = kd;
 		start = st;
 		end = en;
         length = l;
@@ -216,8 +217,14 @@ static DWORD WINAPI MyPcrThreadFunction(LPVOID lpParam){
                         else{
                             //are you aligned
                             if (aligned) { 
-                                if (!pDataArray->keepprimer)    {  currSeq.padToPos(mapAligned[primerEnd]); } 
-                                else                {  currSeq.padToPos(mapAligned[primerStart]); }
+                                if (!pDataArray->keepprimer)    {  
+                                    if (pDataArray->keepdots)   { currSeq.filterToPos(mapAligned[primerEnd]);   }
+                                    else            { currSeq.setAligned(currSeq.getAligned().substr(mapAligned[primerEnd]));                                              }
+                                } 
+                                else                {  
+                                    if (pDataArray->keepdots)   { currSeq.filterToPos(mapAligned[primerStart]);  }
+                                    else            { currSeq.setAligned(currSeq.getAligned().substr(mapAligned[primerStart]));                                              }
+                                }
                             }else { 
                                 if (!pDataArray->keepprimer)    { currSeq.setAligned(currSeq.getUnaligned().substr(primerEnd)); } 
                                 else                { currSeq.setAligned(currSeq.getUnaligned().substr(primerStart)); } 
@@ -286,9 +293,14 @@ static DWORD WINAPI MyPcrThreadFunction(LPVOID lpParam){
                         else{ 
                             //are you aligned
                             if (aligned) { 
-                                if (!pDataArray->keepprimer)    {  currSeq.padFromPos(mapAligned[primerStart]); } 
-                                else                {  currSeq.padFromPos(mapAligned[primerEnd]); } 
-                            }
+                                if (!pDataArray->keepprimer)    {  
+                                    if (pDataArray->keepdots)   { currSeq.filterFromPos(mapAligned[primerStart]); }
+                                    else            { currSeq.setAligned(currSeq.getAligned().substr(0, mapAligned[primerStart]));   }
+                                } 
+                                else                {  
+                                    if (pDataArray->keepdots)   { currSeq.filterFromPos(mapAligned[primerEnd]); }
+                                    else            { currSeq.setAligned(currSeq.getAligned().substr(0, mapAligned[primerEnd]));   }
+                                }                             }
                             else { 
                                 if (!pDataArray->keepprimer)    { currSeq.setAligned(currSeq.getUnaligned().substr(0, primerStart));   } 
                                 else                { currSeq.setAligned(currSeq.getUnaligned().substr(0, primerEnd));     }
@@ -302,21 +314,38 @@ static DWORD WINAPI MyPcrThreadFunction(LPVOID lpParam){
                     else if (currSeq.getAligned().length() != pDataArray->length) {
                         pDataArray->m->mothurOut("[ERROR]: seqs are not the same length as ecoli seq. When using ecoli option your sequences must be aligned and the same length as the ecoli sequence.\n"); pDataArray->m->control_pressed = true; break; 
                     }else {
-                        currSeq.padToPos(pDataArray->start); 
-                        currSeq.padFromPos(pDataArray->end);
+                        if (pDataArray->keepdots)   { 
+                            currSeq.filterToPos(start); 
+                            currSeq.filterFromPos(end);
+                        }else {
+                            string seqString = currSeq.getAligned().substr(0, end);
+                            seqString = seqString.substr(start);
+                            currSeq.setAligned(seqString); 
+                        }
                     }
                 }else{ //using start and end to trim
                     //make sure the seqs are aligned
                     lengths.insert(currSeq.getAligned().length());
                     if (lengths.size() > 1) { pDataArray->m->mothurOut("[ERROR]: seqs are not aligned. When using start and end your sequences must be aligned.\n"); pDataArray->m->control_pressed = true; break; }
                     else {
-                        if (pDataArray->start != -1) { currSeq.padToPos(pDataArray->start); }
                         if (pDataArray->end != -1) {
                             if (pDataArray->end > currSeq.getAligned().length()) {  pDataArray->m->mothurOut("[ERROR]: end is longer than your sequence length, aborting.\n"); pDataArray->m->control_pressed = true; break; }
                             else {
-                                currSeq.padFromPos(pDataArray->end);
+                                if (pDataArray->keepdots)   { currSeq.filterFromPos(end); }
+                                else {
+                                    string seqString = currSeq.getAligned().substr(0, end);
+                                    currSeq.setAligned(seqString); 
+                                }
                             }
                         }
+                        if (pDataArray->start != -1) { 
+                            if (pDataArray->keepdots)   {  currSeq.filterToPos(start);  }
+                            else {
+                                string seqString = currSeq.getAligned().substr(start);
+                                currSeq.setAligned(seqString); 
+                            }
+                        }
+                        
                     }
                 }
                 

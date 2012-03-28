@@ -23,6 +23,7 @@ vector<string> PcrSeqsCommand::setParameters(){
 		CommandParameter ppdiffs("pdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(ppdiffs);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
 		CommandParameter pkeepprimer("keepprimer", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pkeepprimer);
+        CommandParameter pkeepdots("keepdots", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pkeepdots);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
         
@@ -177,6 +178,9 @@ PcrSeqsCommand::PcrSeqsCommand(string option)  {
 			temp = validParameter.validFile(parameters, "keepprimer", false);  if (temp == "not found")    {	temp = "f";	}
 			keepprimer = m->isTrue(temp);	
             
+            temp = validParameter.validFile(parameters, "keepdots", false);  if (temp == "not found")    {	temp = "t";	}
+			keepdots = m->isTrue(temp);	
+            
 			temp = validParameter.validFile(parameters, "oligos", true);
 			if (temp == "not found"){	oligosfile = "";		}
 			else if(temp == "not open"){	oligosfile = ""; abort = true;	} 
@@ -297,7 +301,10 @@ int PcrSeqsCommand::execute(){
 		
 		if (m->control_pressed) {  return 0; }		
         
-        writeAccnos(badNames);      
+        //don't write or keep if blank
+        if (badNames.size() != 0)   { writeAccnos(badNames);        }   
+        if (m->isBlank(badSeqFile)) { m->mothurRemove(badSeqFile);  }
+        
         if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
         if (namefile != "")			{		readName(badNames);		}   
         if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
@@ -434,7 +441,7 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
             if (i!=0) {extension += toString(i) + ".temp"; processIDS.push_back(i); }
             
 			// Allocate memory for thread data.
-			pcrData* tempPcr = new pcrData(filename, goodFileName+extension, badFileName+extension, m, oligosfile, ecolifile, primers, revPrimer, nomatch, keepprimer, start, end, length, lines[i].start, lines[i].end);
+			pcrData* tempPcr = new pcrData(filename, goodFileName+extension, badFileName+extension, m, oligosfile, ecolifile, primers, revPrimer, nomatch, keepprimer, keepdots, start, end, length, lines[i].start, lines[i].end);
 			pDataArray.push_back(tempPcr);
 			
 			//default security attributes, thread function name, argument to thread function, use default creation flags, returns the thread identifier
@@ -516,8 +523,14 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
                         else{
                             //are you aligned
                             if (aligned) { 
-                                if (!keepprimer)    {  currSeq.filterToPos(mapAligned[primerEnd]); } 
-                                else                {  currSeq.filterToPos(mapAligned[primerStart]); }
+                                if (!keepprimer)    {  
+                                    if (keepdots)   { currSeq.filterToPos(mapAligned[primerEnd]);   }
+                                    else            { currSeq.setAligned(currSeq.getAligned().substr(mapAligned[primerEnd]));                                              }
+                                } 
+                                else                {  
+                                    if (keepdots)   { currSeq.filterToPos(mapAligned[primerStart]);  }
+                                    else            { currSeq.setAligned(currSeq.getAligned().substr(mapAligned[primerStart]));                                              }
+                                }
                             }else { 
                                 if (!keepprimer)    { currSeq.setAligned(currSeq.getUnaligned().substr(primerEnd)); } 
                                 else                { currSeq.setAligned(currSeq.getUnaligned().substr(primerStart)); } 
@@ -533,8 +546,14 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
                         else{ 
                             //are you aligned
                             if (aligned) { 
-                                if (!keepprimer)    {  currSeq.filterFromPos(mapAligned[primerStart]); } 
-                                else                {  currSeq.filterFromPos(mapAligned[primerEnd]); } 
+                                if (!keepprimer)    {  
+                                    if (keepdots)   { currSeq.filterFromPos(mapAligned[primerStart]); }
+                                    else            { currSeq.setAligned(currSeq.getAligned().substr(0, mapAligned[primerStart]));   }
+                                } 
+                                else                {  
+                                    if (keepdots)   { currSeq.filterFromPos(mapAligned[primerEnd]); }
+                                    else            { currSeq.setAligned(currSeq.getAligned().substr(0, mapAligned[primerEnd]));   }
+                                } 
                             }
                             else { 
                                 if (!keepprimer)    { currSeq.setAligned(currSeq.getUnaligned().substr(0, primerStart));   } 
@@ -549,19 +568,35 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
                     else if (currSeq.getAligned().length() != length) {
                         m->mothurOut("[ERROR]: seqs are not the same length as ecoli seq. When using ecoli option your sequences must be aligned and the same length as the ecoli sequence.\n"); m->control_pressed = true; break; 
                     }else {
-                        currSeq.filterToPos(start); 
-                        currSeq.filterFromPos(end);
+                        if (keepdots)   { 
+                            currSeq.filterToPos(start); 
+                            currSeq.filterFromPos(end);
+                        }else {
+                            string seqString = currSeq.getAligned().substr(0, end);
+                            seqString = seqString.substr(start);
+                            currSeq.setAligned(seqString); 
+                        }
                     }
                 }else{ //using start and end to trim
                     //make sure the seqs are aligned
                     lengths.insert(currSeq.getAligned().length());
                     if (lengths.size() > 1) { m->mothurOut("[ERROR]: seqs are not aligned. When using start and end your sequences must be aligned.\n"); m->control_pressed = true; break; }
                     else {
-                        if (start != -1) { currSeq.filterToPos(start); }
                         if (end != -1) {
                             if (end > currSeq.getAligned().length()) {  m->mothurOut("[ERROR]: end is longer than your sequence length, aborting.\n"); m->control_pressed = true; break; }
                             else {
-                                currSeq.filterFromPos(end);
+                                if (keepdots)   { currSeq.filterFromPos(end); }
+                                else {
+                                    string seqString = currSeq.getAligned().substr(0, end);
+                                    currSeq.setAligned(seqString); 
+                                }
+                            }
+                        }
+                        if (start != -1) { 
+                            if (keepdots)   {  currSeq.filterToPos(start);  }
+                            else {
+                                string seqString = currSeq.getAligned().substr(start);
+                                currSeq.setAligned(seqString); 
                             }
                         }
                     }
