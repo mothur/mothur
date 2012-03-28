@@ -571,7 +571,35 @@ void Sequence::padToPos(int start){
 	startPos = start;
 
 }
+//********************************************************************************************************************
 
+int Sequence::filterToPos(int start){
+    
+    if (start > aligned.length()) { start = aligned.length(); m->mothurOut("[ERROR]: start to large.\n"); }
+    
+	for(int j = 0; j < start-1; j++) {
+		aligned[j] = '.';
+	}
+	
+    setUnaligned(aligned);
+    
+    return 0;
+    
+}
+//********************************************************************************************************************
+
+int Sequence::filterFromPos(int end){
+    
+    if (end > aligned.length()) { end = aligned.length(); m->mothurOut("[ERROR]: end to large.\n"); }
+    
+	for(int j = end; j < aligned.length(); j++) {
+		aligned[j] = '.';
+	}
+	
+    setUnaligned(aligned);
+    
+    return 0;
+}
 //********************************************************************************************************************
 
 int Sequence::getEndPos(){
@@ -591,7 +619,7 @@ int Sequence::getEndPos(){
 //********************************************************************************************************************
 
 void Sequence::padFromPos(int end){
-	
+	cout << end << '\t' << endPos << endl;
 	for(int j = end; j < endPos; j++) {
 		aligned[j] = '.';
 	}

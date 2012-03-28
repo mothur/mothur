@@ -223,7 +223,7 @@ PcrSeqsCommand::PcrSeqsCommand(string option)  {
                 m->mothurOut("[ERROR]: You did not set any options. Please provide an oligos or ecoli file, or set start or end.\n"); abort = true;
             }
             
-            if ((oligosfile == "") && (ecolifile == "") && (start < 0) && (end != -1)) { m->mothurOut("[ERROR]: Invalid start value.\n"); abort = true; }
+            if ((oligosfile == "") && (ecolifile == "") && (start < 0) && (end == -1)) { m->mothurOut("[ERROR]: Invalid start value.\n"); abort = true; }
             
             if ((ecolifile != "") && (start != -1) && (end != -1)) {
                 m->mothurOut("[ERROR]: You provided an ecoli file , but set the start or end parameters. Unsure what you intend.  When you provide the ecoli file, mothur thinks you want to use the start and end of the sequence in the ecoli file.\n"); abort = true;
@@ -516,8 +516,8 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
                         else{
                             //are you aligned
                             if (aligned) { 
-                                if (!keepprimer)    {  currSeq.padToPos(mapAligned[primerEnd]); } 
-                                else                {  currSeq.padToPos(mapAligned[primerStart]); }
+                                if (!keepprimer)    {  currSeq.filterToPos(mapAligned[primerEnd]); } 
+                                else                {  currSeq.filterToPos(mapAligned[primerStart]); }
                             }else { 
                                 if (!keepprimer)    { currSeq.setAligned(currSeq.getUnaligned().substr(primerEnd)); } 
                                 else                { currSeq.setAligned(currSeq.getUnaligned().substr(primerStart)); } 
@@ -533,8 +533,8 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
                         else{ 
                             //are you aligned
                             if (aligned) { 
-                                if (!keepprimer)    {  currSeq.padFromPos(mapAligned[primerStart]); } 
-                                else                {  currSeq.padFromPos(mapAligned[primerEnd]); } 
+                                if (!keepprimer)    {  currSeq.filterFromPos(mapAligned[primerStart]); } 
+                                else                {  currSeq.filterFromPos(mapAligned[primerEnd]); } 
                             }
                             else { 
                                 if (!keepprimer)    { currSeq.setAligned(currSeq.getUnaligned().substr(0, primerStart));   } 
@@ -549,19 +549,19 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
                     else if (currSeq.getAligned().length() != length) {
                         m->mothurOut("[ERROR]: seqs are not the same length as ecoli seq. When using ecoli option your sequences must be aligned and the same length as the ecoli sequence.\n"); m->control_pressed = true; break; 
                     }else {
-                        currSeq.padToPos(start); 
-                        currSeq.padFromPos(end);
+                        currSeq.filterToPos(start); 
+                        currSeq.filterFromPos(end);
                     }
                 }else{ //using start and end to trim
                     //make sure the seqs are aligned
                     lengths.insert(currSeq.getAligned().length());
                     if (lengths.size() > 1) { m->mothurOut("[ERROR]: seqs are not aligned. When using start and end your sequences must be aligned.\n"); m->control_pressed = true; break; }
                     else {
-                        if (start != -1) { currSeq.padToPos(start); }
+                        if (start != -1) { currSeq.filterToPos(start); }
                         if (end != -1) {
                             if (end > currSeq.getAligned().length()) {  m->mothurOut("[ERROR]: end is longer than your sequence length, aborting.\n"); m->control_pressed = true; break; }
                             else {
-                                currSeq.padFromPos(end);
+                                currSeq.filterFromPos(end);
                             }
                         }
                     }

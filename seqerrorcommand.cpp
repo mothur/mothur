@@ -682,7 +682,8 @@ int SeqErrorCommand::driver(string filename, string qFileName, string rFileName,
 			if(numParentSeqs > 1 && ignoreChimeras == 1)	{	ignoreSeq = 1;	}
 			else											{	ignoreSeq = 0;	}
 			
-			Compare minCompare = getErrors(query, referenceSeqs[closestRefIndex]);
+			Compare minCompare;
+            getErrors(query, referenceSeqs[closestRefIndex], minCompare);
 			
 			if(namesFileName != ""){
 				it = weights.find(query.getName());
@@ -839,7 +840,7 @@ void SeqErrorCommand::getReferences(){
 
 //***************************************************************************************************************
 
-Compare SeqErrorCommand::getErrors(Sequence query, Sequence reference){
+int SeqErrorCommand::getErrors(Sequence query, Sequence reference, Compare& errors){
 	try {
 		if(query.getAlignLength() != reference.getAlignLength()){
 			m->mothurOut("Warning: " + toString(query.getName()) + " and " + toString(reference.getName()) + " are different lengths\n");
@@ -850,7 +851,7 @@ Compare SeqErrorCommand::getErrors(Sequence query, Sequence reference){
 		string r = reference.getAligned();
 
 		int started = 0;
-		Compare errors;
+		//Compare errors;
 
 		for(int i=0;i<alignLength;i++){
 //			cout << r[i] << '\t' << q[i] << '\t';
@@ -929,7 +930,8 @@ Compare SeqErrorCommand::getErrors(Sequence query, Sequence reference){
 		errors.queryName = query.getName();
 		errors.refName = reference.getName();
 		
-		return errors;
+		//return errors;
+        return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SeqErrorCommand", "getErrors");

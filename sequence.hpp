@@ -52,6 +52,8 @@ public:
 	int getEndPos();
 	void padToPos(int);
 	void padFromPos(int);
+    int filterToPos(int); //any character before the pos is changed to . and aligned and unaligned strings changed
+    int filterFromPos(int); //any character after the pos is changed to . and aligned and unaligned strings changed
 	int getAlignLength();
 	int getAmbigBases();
 	void removeAmbigBases();

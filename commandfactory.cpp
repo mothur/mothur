@@ -313,6 +313,7 @@ CommandFactory::~CommandFactory(){
 //This function calls the appropriate command fucntions based on user input.
 Command* CommandFactory::getCommand(string commandName, string optionString){
 	try {
+        
 		delete command;   //delete the old command
 		
 		//user has opted to redirect output from dir where input files are located to some other place

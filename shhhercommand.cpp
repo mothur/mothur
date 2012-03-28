@@ -3069,10 +3069,9 @@ void ShhherCommand::writeQualities(int numOTUs, int numFlowCells, string filenam
                 	
 				int j=4;	//need to get past the first four bases
 				while(qualities[i][j] != -1){
-                    //cout << i << '\t' << j << '\t' << qualities[i][j] << endl;
                     qualityFile << qualities[i][j] << ' ';
+                    if (j > qualities[i].size()) { break; }
                     j++;
-                    
 				}
 				qualityFile << endl;
 			}

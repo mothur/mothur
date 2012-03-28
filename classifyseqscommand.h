@@ -10,7 +10,7 @@
  *
  */
 
-#include "mothur.h"
+
 #include "command.hpp"
 #include "classify.h"
 #include "referencedb.h"

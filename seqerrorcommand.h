@@ -10,41 +10,16 @@
  *
  */
 
-#include "mothur.h"
 #include "command.hpp"
 #include "sequence.hpp"
 #include "referencedb.h"
 
-struct Compare {
-	int AA, AT, AG, AC,	TA, TT, TG, TC,	GA, GT, GG, GC,	CA, CT, CG, CC,	NA, NT, NG, NC, Ai, Ti, Gi, Ci, Ni, dA, dT, dG, dC;
-	string refName, queryName, sequence;
-	double errorRate;
-	int weight, matches, mismatches, total;
-	
-	Compare(){
-		AA=0; AT=0; AG=0; AC=0;
-		TA=0; TT=0; TG=0; TC=0;
-		GA=0; GT=0; GG=0; GC=0;
-		CA=0; CT=0; CG=0; CC=0;
-		NA=0; NT=0; NG=0; NC=0;
-		Ai=0; Ti=0; Gi=0; Ci=0; Ni=0;
-		dA=0; dT=0; dG=0; dC=0;
-		refName = "";
-		queryName = "";
-		weight = 1;
-		matches = 0;
-		mismatches = 0;
-		total = 0;
-		errorRate = 1.0000;
-		sequence = "";
-	}
-};
 
 class SeqErrorCommand : public Command {
 public:
 	SeqErrorCommand(string);
 	SeqErrorCommand();
-	~SeqErrorCommand() {}
+	~SeqErrorCommand(){}
 	
 	vector<string> setParameters();
 	string getCommandName()			{ return "seq.error";				}
@@ -65,8 +40,35 @@ private:
 		unsigned long long start;
 		unsigned long long end;
 		linePair(unsigned long long i, unsigned long long j) : start(i), end(j) {}
+        ~linePair(){}
 	};
 	
+    struct Compare {
+        int AA, AT, AG, AC,	TA, TT, TG, TC,	GA, GT, GG, GC,	CA, CT, CG, CC,	NA, NT, NG, NC, Ai, Ti, Gi, Ci, Ni, dA, dT, dG, dC;
+        string refName, queryName, sequence;
+        double errorRate;
+        int weight, matches, mismatches, total;
+        
+        Compare(){
+            AA=0; AT=0; AG=0; AC=0;
+            TA=0; TT=0; TG=0; TC=0;
+            GA=0; GT=0; GG=0; GC=0;
+            CA=0; CT=0; CG=0; CC=0;
+            NA=0; NT=0; NG=0; NC=0;
+            Ai=0; Ti=0; Gi=0; Ci=0; Ni=0;
+            dA=0; dT=0; dG=0; dC=0;
+            refName = "";
+            queryName = "";
+            weight = 1;
+            matches = 0;
+            mismatches = 0;
+            total = 0;
+            errorRate = 1.0000;
+            sequence = "";
+        }
+        ~Compare(){};
+    };
+
 	vector<int> processIDS;   //processid
 	vector<linePair> lines;
 	vector<linePair> qLines;
@@ -74,7 +76,7 @@ private:
 
 	void getReferences();
 	map<string,int> getWeights();
-	Compare getErrors(Sequence, Sequence);
+	int getErrors(Sequence, Sequence, Compare&);
 	void printErrorHeader(ofstream&);
 	void printErrorData(Compare, int, ofstream&, ofstream&);
 	void printSubMatrix();
