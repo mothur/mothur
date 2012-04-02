@@ -1351,7 +1351,7 @@ int MothurOut::readNames(string namefile, map<string, string>& nameMap) {
 		}
 		in.close();
 		
-		return 0;
+		return nameMap.size();
 		
 	}
 	catch(exception& e) {
@@ -1380,7 +1380,7 @@ int MothurOut::readNames(string namefile, map<string, vector<string> >& nameMap)
 		}
 		in.close();
 		
-		return 0;
+		return nameMap.size();
 		
 	}
 	catch(exception& e) {

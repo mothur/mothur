@@ -361,6 +361,9 @@ int SffInfoCommand::extractSffInfo(string input, string accnos){
 
 		ofstream outSfftxt, outFasta, outQual, outFlow;
 		string outFastaFileName, outQualFileName;
+        string rootName = outputDir + m->getRootName(m->getSimpleName(input));
+        if(rootName.find_last_of(".") == rootName.npos){ rootName += "."; }
+        
 		string sfftxtFileName = outputDir + m->getRootName(m->getSimpleName(input)) + "sff.txt";
 		string outFlowFileName = outputDir + m->getRootName(m->getSimpleName(input)) + "flow";
 		if (trim) {

@@ -131,6 +131,7 @@
 #include "classifytreecommand.h"
 #include "cooccurrencecommand.h"
 #include "pcrseqscommand.h"
+#include "createdatabasecommand.h"
 
 /*******************************************************/
 
@@ -283,6 +284,7 @@ CommandFactory::CommandFactory(){
     commands["classify.tree"]       = "classify.tree";
     commands["cooccurrence"]        = "cooccurrence";
     commands["pcr.seqs"]            = "pcr.seqs";
+    commands["create.database"]     = "create.database";
 	commands["quit"]				= "MPIEnabled"; 
 
 }
@@ -449,6 +451,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         else if(commandName == "classify.tree")         {	command = new ClassifyTreeCommand(optionString);            }
         else if(commandName == "cooccurrence")          {	command = new CooccurrenceCommand(optionString);            }
         else if(commandName == "pcr.seqs")              {	command = new PcrSeqsCommand(optionString);                 }
+        else if(commandName == "create.database")       {	command = new CreateDatabaseCommand(optionString);          }
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -598,6 +601,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
         else if(commandName == "classify.tree")         {	pipecommand = new ClassifyTreeCommand(optionString);            }
         else if(commandName == "cooccurrence")          {	pipecommand = new CooccurrenceCommand(optionString);            }
         else if(commandName == "pcr.seqs")              {	pipecommand = new PcrSeqsCommand(optionString);                 }
+        else if(commandName == "create.database")       {	pipecommand = new CreateDatabaseCommand(optionString);          }
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -735,6 +739,7 @@ Command* CommandFactory::getCommand(string commandName){
         else if(commandName == "classify.tree")         {	shellcommand = new ClassifyTreeCommand();           }
         else if(commandName == "cooccurrence")          {	shellcommand = new CooccurrenceCommand();           }
         else if(commandName == "pcr.seqs")              {	shellcommand = new PcrSeqsCommand();                }
+        else if(commandName == "create.database")       {	shellcommand = new CreateDatabaseCommand();         }
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;
