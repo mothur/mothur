@@ -425,7 +425,7 @@ int MatrixOutputCommand::execute(){
 	}
 }
 /***********************************************************/
-void MatrixOutputCommand::printSims(ostream& out, vector< vector<float> >& simMatrix) {
+void MatrixOutputCommand::printSims(ostream& out, vector< vector<double> >& simMatrix) {
 	try {
 		
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
@@ -464,7 +464,7 @@ int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
 		vector< vector< vector<seqDist> > > calcDistsTotals;  //each iter, one for each calc, then each groupCombos dists. this will be used to make .dist files
 
         vector< vector<seqDist>  > calcDists; calcDists.resize(matrixCalculators.size()); 		
-	
+
         for (int thisIter = 0; thisIter < iters; thisIter++) {
             
             vector<SharedRAbundVector*> thisItersLookup = thisLookup;
@@ -472,9 +472,26 @@ int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
             if (subsample) {
                 SubSample sample;
                 vector<string> tempLabels; //dont need since we arent printing the sampled sharedRabunds
-                thisItersLookup = sample.getSamplePreserve(thisLookup, tempLabels, subsampleSize);
+                
+                //make copy of lookup so we don't get access violations
+                vector<SharedRAbundVector*> newLookup;
+                for (int k = 0; k < thisItersLookup.size(); k++) {
+                    SharedRAbundVector* temp = new SharedRAbundVector();
+                    temp->setLabel(thisItersLookup[k]->getLabel());
+                    temp->setGroup(thisItersLookup[k]->getGroup());
+                    newLookup.push_back(temp);
+                }
+                
+                //for each bin
+                for (int k = 0; k < thisItersLookup[0]->getNumBins(); k++) {
+                    if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) {  delete newLookup[j];  } return 0; }
+                    for (int j = 0; j < thisItersLookup.size(); j++) { newLookup[j]->push_back(thisItersLookup[j]->getAbundance(k), thisItersLookup[j]->getGroup()); }
+                }
+                
+                tempLabels = sample.getSample(newLookup, subsampleSize);
+                thisItersLookup = newLookup;
             }
-            cout << thisIter << endl;
+        
             if(processors == 1){
                 driver(thisItersLookup, 0, numGroups, calcDists);
             }else{
@@ -608,9 +625,11 @@ int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
             calcDistsTotals.push_back(calcDists);
             
             if (subsample) {  
+                
                 //clean up memory
-               // for (int i = 0; i < thisItersLookup.size(); i++) { delete thisItersLookup[i]; }
-               // thisItersLookup.clear();
+                for (int i = 0; i < thisItersLookup.size(); i++) { delete thisItersLookup[i]; }
+                thisItersLookup.clear();
+                for (int i = 0; i < calcDists.size(); i++) {  calcDists[i].clear(); }
             }
 		}
 		
@@ -619,7 +638,7 @@ int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
             
             vector< vector<seqDist>  > calcAverages; calcAverages.resize(matrixCalculators.size()); 
             for (int i = 0; i < calcAverages.size(); i++) {  //initialize sums to zero.
-                calcAverages[i].resize(calcDists[i].size());
+                calcAverages[i].resize(calcDistsTotals[0][i].size());
                 
                 for (int j = 0; j < calcAverages[i].size(); j++) {
                     calcAverages[i][j].seq1 = calcDists[i][j].seq1;
@@ -645,7 +664,7 @@ int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
             //find standard deviation
             vector< vector<seqDist>  > stdDev; stdDev.resize(matrixCalculators.size());
             for (int i = 0; i < stdDev.size(); i++) {  //initialize sums to zero.
-                stdDev[i].resize(calcDists[i].size());
+                stdDev[i].resize(calcDistsTotals[0][i].size());
                 
                 for (int j = 0; j < stdDev[i].size(); j++) {
                     stdDev[i][j].seq1 = calcDists[i][j].seq1;
@@ -671,11 +690,11 @@ int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
             
             //print results
             for (int i = 0; i < calcDists.size(); i++) {
-                vector< vector<float> > matrix; //square matrix to represent the distance
+                vector< vector<double> > matrix; //square matrix to represent the distance
                 matrix.resize(thisLookup.size());
                 for (int k = 0; k < thisLookup.size(); k++) {  matrix[k].resize(thisLookup.size(), 0.0); }
                 
-                vector< vector<float> > stdmatrix; //square matrix to represent the stdDev
+                vector< vector<double> > stdmatrix; //square matrix to represent the stdDev
                 stdmatrix.resize(thisLookup.size());
                 for (int k = 0; k < thisLookup.size(); k++) {  stdmatrix[k].resize(thisLookup.size(), 0.0); }
 
@@ -692,54 +711,57 @@ int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
                     stdmatrix[column][row] = stdDist;
                 }
             
-                string distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + matrixCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + ".results";
-                outputNames.push_back(distFileName); outputTypes["subsample"].push_back(distFileName);
+                string distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + matrixCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + ".ave.dist";
+                outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
+                ofstream outAve;
+                m->openOutputFile(distFileName, outAve);
+                outAve.setf(ios::fixed, ios::floatfield); outAve.setf(ios::showpoint);
+                
+                printSims(outAve, matrix);
+                
+                outAve.close();
+                
+                distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + matrixCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + ".std.dist";
+                outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
+                ofstream outSTD;
+                m->openOutputFile(distFileName, outSTD);
+                outSTD.setf(ios::fixed, ios::floatfield); outSTD.setf(ios::showpoint);
+                
+                printSims(outSTD, stdmatrix);
+                
+                outSTD.close();
+
+            }
+        }else {
+        
+            for (int i = 0; i < calcDists.size(); i++) {
+                if (m->control_pressed) { break; }
+                
+                //initialize matrix
+                vector< vector<double> > matrix; //square matrix to represent the distance
+                matrix.resize(thisLookup.size());
+                for (int k = 0; k < thisLookup.size(); k++) {  matrix[k].resize(thisLookup.size(), 0.0); }
+                
+                for (int j = 0; j < calcDists[i].size(); j++) {
+                    int row = calcDists[i][j].seq1;
+                    int column = calcDists[i][j].seq2;
+                    double dist = calcDists[i][j].dist;
+                    
+                    matrix[row][column] = dist;
+                    matrix[column][row] = dist;
+                }
+                
+                string distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + matrixCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + ".dist";
+                outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
                 ofstream outDist;
                 m->openOutputFile(distFileName, outDist);
                 outDist.setf(ios::fixed, ios::floatfield); outDist.setf(ios::showpoint);
                 
-                outDist << "Group1\tGroup2\tAverageDist\tStdDev\n";
-                for (int m = 0; m < matrix.size(); m++)	{
-                    for (int n = 0; n < m; n++)	{
-                        outDist << lookup[m]->getGroup() << '\t' <<  lookup[n]->getGroup() << '\t';
-                        outDist << matrix[m][n] << '\t' << stdmatrix[m][n] << endl; 
-                    }
-                }
+                printSims(outDist, matrix);
+                
                 outDist.close();
             }
-            
-            //output averages as distance matrix
-            calcDists = calcAverages;
         }
-        
-        for (int i = 0; i < calcDists.size(); i++) {
-            if (m->control_pressed) { break; }
-            
-            //initialize matrix
-            vector< vector<float> > matrix; //square matrix to represent the distance
-            matrix.resize(thisLookup.size());
-            for (int k = 0; k < thisLookup.size(); k++) {  matrix[k].resize(thisLookup.size(), 0.0); }
-            
-            for (int j = 0; j < calcDists[i].size(); j++) {
-                int row = calcDists[i][j].seq1;
-                int column = calcDists[i][j].seq2;
-                float dist = calcDists[i][j].dist;
-                
-                matrix[row][column] = dist;
-                matrix[column][row] = dist;
-            }
-            
-            string distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + matrixCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + ".dist";
-            outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
-            ofstream outDist;
-            m->openOutputFile(distFileName, outDist);
-            outDist.setf(ios::fixed, ios::floatfield); outDist.setf(ios::showpoint);
-            
-            printSims(outDist, matrix);
-            
-            outDist.close();
-        }
-
 		
 		return 0;
 	}
@@ -751,7 +773,6 @@ int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
 /**************************************************************************************************/
 int MatrixOutputCommand::driver(vector<SharedRAbundVector*> thisLookup, int start, int end, vector< vector<seqDist> >& calcDists) { 
 	try {
-		
 		vector<SharedRAbundVector*> subset;
 		for (int k = start; k < end; k++) { // pass cdd each set of groups to compare
 			

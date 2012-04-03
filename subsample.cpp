@@ -9,66 +9,6 @@
 #include "subsample.h"
 
 //**********************************************************************************************************************
-vector<SharedRAbundVector*> SubSample::getSamplePreserve(vector<SharedRAbundVector*>& thislookup, vector<string>& newLabels, int size) {
-	try {
-		
-        vector<SharedRAbundVector*> newlookup; newlookup.resize(thislookup.size(), NULL); 
-        
-		//save mothurOut's binLabels to restore for next label
-		vector<string> saveBinLabels = m->currentBinLabels;
-		
-		int numBins = thislookup[0]->getNumBins();
-		for (int i = 0; i < thislookup.size(); i++) {		
-			int thisSize = thislookup[i]->getNumSeqs();
-			
-			if (thisSize != size) {
-				
-				string thisgroup = thislookup[i]->getGroup();
-				
-				OrderVector order;
-				for(int p=0;p<numBins;p++){
-					for(int j=0;j<thislookup[i]->getAbundance(p);j++){
-						order.push_back(p);
-					}
-				}
-				random_shuffle(order.begin(), order.end());
-				
-				SharedRAbundVector* temp = new SharedRAbundVector(numBins);
-				temp->setLabel(thislookup[i]->getLabel());
-				temp->setGroup(thislookup[i]->getGroup());
-				
-				newlookup[i] = temp;
-				
-				for (int j = 0; j < size; j++) {
-					
-					if (m->control_pressed) {  return newlookup; }
-					
-					int bin = order.get(j);
-					
-					int abund = newlookup[i]->getAbundance(bin);
-					newlookup[i]->set(bin, (abund+1), thisgroup);
-				}	
-			}
-		}
-		
-		//subsampling may have created some otus with no sequences in them
-		eliminateZeroOTUS(newlookup);
-		
-		if (m->control_pressed) { return newlookup; }
-		
-		//save mothurOut's binLabels to restore for next label
-        newLabels = m->currentBinLabels;
-		m->currentBinLabels = saveBinLabels;
-		
-		return newlookup;
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SubSample", "getSamplePreserve");
-		exit(1);
-	}
-}	
-//**********************************************************************************************************************
 vector<string> SubSample::getSample(vector<SharedRAbundVector*>& thislookup, int size) {
 	try {
 		

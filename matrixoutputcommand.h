@@ -88,7 +88,7 @@ private:
 	};
 	vector<linePair> lines;
 	
-	void printSims(ostream&, vector< vector<float> >&);
+	void printSims(ostream&, vector< vector<double> >&);
 	int process(vector<SharedRAbundVector*>);
 	
 	vector<Calculator*> matrixCalculators;
