@@ -29,7 +29,7 @@ EstOutput SharedChao1::getValues(vector<SharedRAbundVector*> shared){
 		//create and initialize trees to 0.
 		initialTree(numGroups);
 		
-		for (int i = 0; i < shared[0]->size(); i++) {
+		for (int i = 0; i < shared[0]->getNumBins(); i++) {
 			//get bin values and calc shared 
 			bool sharedByAll = true;
 			temp.clear();

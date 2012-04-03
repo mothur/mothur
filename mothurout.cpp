@@ -621,7 +621,7 @@ string MothurOut::hasPath(string longName){
 
 string MothurOut::getExtension(string longName){
 	try {
-		string extension = longName;
+		string extension = "";
 		
 		if(longName.find_last_of('.') != longName.npos){
 			int pos = longName.find_last_of('.');

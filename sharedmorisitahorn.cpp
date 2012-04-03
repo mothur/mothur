@@ -20,14 +20,14 @@ EstOutput MorHorn::getValues(vector<SharedRAbundVector*> shared) {
 		morhorn = 0.0; sumSharedA = 0.0; sumSharedB = 0.0; a = 0.0; b = 0.0; d = 0.0;
 		
 		//get the total values we need to calculate the theta denominator sums
-		for (int i = 0; i < shared[0]->size(); i++) {
+		for (int i = 0; i < shared[0]->getNumBins(); i++) {
 			//store in temps to avoid multiple repetitive function calls
 			Atotal += shared[0]->getAbundance(i);
 			Btotal += shared[1]->getAbundance(i);
 		}
 		
 		//calculate the denominator sums
-		for (int j = 0; j < shared[0]->size(); j++) {
+		for (int j = 0; j < shared[0]->getNumBins(); j++) {
 			//store in temps to avoid multiple repetitive function calls
 			tempA = shared[0]->getAbundance(j);
 			tempB = shared[1]->getAbundance(j);

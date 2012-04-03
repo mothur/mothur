@@ -52,6 +52,7 @@
 		A778FE6B134CA6CA00C0BA33 /* getcommandinfocommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A778FE6A134CA6CA00C0BA33 /* getcommandinfocommand.cpp */; };
 		A77A221F139001B600B0BE70 /* deuniquetreecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A77A221E139001B600B0BE70 /* deuniquetreecommand.cpp */; };
 		A77EBD2F1523709100ED407C /* createdatabasecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A77EBD2E1523709100ED407C /* createdatabasecommand.cpp */; };
+		A7876A26152A017C00A0AE86 /* subsample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7876A25152A017C00A0AE86 /* subsample.cpp */; };
 		A79234D713C74BF6002B08E2 /* mothurfisher.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A79234D613C74BF6002B08E2 /* mothurfisher.cpp */; };
 		A795840D13F13CD900F201D5 /* countgroupscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A795840C13F13CD900F201D5 /* countgroupscommand.cpp */; };
 		A799F5B91309A3E000AEEFA0 /* makefastqcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A799F5B81309A3E000AEEFA0 /* makefastqcommand.cpp */; };
@@ -474,6 +475,8 @@
 		A77A221E139001B600B0BE70 /* deuniquetreecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = deuniquetreecommand.cpp; sourceTree = "<group>"; };
 		A77EBD2C1523707F00ED407C /* createdatabasecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = createdatabasecommand.h; sourceTree = "<group>"; };
 		A77EBD2E1523709100ED407C /* createdatabasecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = createdatabasecommand.cpp; sourceTree = "<group>"; };
+		A7876A25152A017C00A0AE86 /* subsample.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = subsample.cpp; sourceTree = "<group>"; };
+		A7876A28152A018B00A0AE86 /* subsample.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = subsample.h; sourceTree = "<group>"; };
 		A79234D513C74BF6002B08E2 /* mothurfisher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mothurfisher.h; sourceTree = "<group>"; };
 		A79234D613C74BF6002B08E2 /* mothurfisher.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mothurfisher.cpp; sourceTree = "<group>"; };
 		A795840B13F13CD900F201D5 /* countgroupscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = countgroupscommand.h; sourceTree = "<group>"; };
@@ -1191,6 +1194,8 @@
 				A7E9B82D12D37EC400DA6239 /* singlelinkage.cpp */,
 				A7E9B83012D37EC400DA6239 /* slibshuff.cpp */,
 				A7E9B83112D37EC400DA6239 /* slibshuff.h */,
+				A7876A28152A018B00A0AE86 /* subsample.h */,
+				A7876A25152A017C00A0AE86 /* subsample.cpp */,
 				A7C3DC0E14FE469500FE1924 /* trialswap2.h */,
 				A7C3DC0D14FE469500FE1924 /* trialSwap2.cpp */,
 				A7FF19F0140FFDA500AD216D /* trimoligos.h */,
@@ -2301,6 +2306,7 @@
 				A7C3DC0F14FE469500FE1924 /* trialSwap2.cpp in Sources */,
 				A76CDD821510F143004C8458 /* prcseqscommand.cpp in Sources */,
 				A77EBD2F1523709100ED407C /* createdatabasecommand.cpp in Sources */,
+				A7876A26152A017C00A0AE86 /* subsample.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

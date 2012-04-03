@@ -10,6 +10,7 @@
 #include "subsamplecommand.h"
 #include "sharedutilities.h"
 #include "deconvolutecommand.h"
+#include "subsample.h"
 
 //**********************************************************************************************************************
 vector<string> SubSampleCommand::setParameters(){	
@@ -801,68 +802,28 @@ int SubSampleCommand::processShared(vector<SharedRAbundVector*>& thislookup) {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(sharedfile);  }
 		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(sharedfile)) + thislookup[0]->getLabel() + ".subsample" + m->getExtension(sharedfile);
-		
-		
-		ofstream out;
+        
+        SubSample sample;
+        vector<string> subsampledLabels = sample.getSample(thislookup, size);
+        
+        if (m->control_pressed) {  return 0; }
+        
+        ofstream out;
 		m->openOutputFile(outputFileName, out);
 		outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
 		
-		int numBins = thislookup[0]->getNumBins();
-		for (int i = 0; i < thislookup.size(); i++) {		
-			int thisSize = thislookup[i]->getNumSeqs();
-			
-			if (thisSize != size) {
-				
-				string thisgroup = thislookup[i]->getGroup();
-				
-				OrderVector* order = new OrderVector();
-				for(int p=0;p<numBins;p++){
-					for(int j=0;j<thislookup[i]->getAbundance(p);j++){
-						order->push_back(p);
-					}
-				}
-				random_shuffle(order->begin(), order->end());
-				
-				SharedRAbundVector* temp = new SharedRAbundVector(numBins);
-				temp->setLabel(thislookup[i]->getLabel());
-				temp->setGroup(thislookup[i]->getGroup());
-				
-				delete thislookup[i];
-				thislookup[i] = temp;
-				
-				
-				for (int j = 0; j < size; j++) {
-					
-					if (m->control_pressed) { delete order; out.close(); return 0; }
-					
-					//get random number to sample from order between 0 and thisSize-1.
-					//don't need this because of the random shuffle above
-					//int myrand = int((float)(thisSize) * (float)(rand()) / ((float)RAND_MAX+1.0));
-					
-					int bin = order->get(j);
-					
-					int abund = thislookup[i]->getAbundance(bin);
-					thislookup[i]->set(bin, (abund+1), thisgroup);
-				}	
-				delete order;
-			}
-		}
-		
-		//subsampling may have created some otus with no sequences in them
-		eliminateZeroOTUS(thislookup);
-		
-		if (m->control_pressed) { out.close(); return 0; }
-		
+        m->currentBinLabels = subsampledLabels;
+        
 		thislookup[0]->printHeaders(out);
 		
 		for (int i = 0; i < thislookup.size(); i++) {
 			out << thislookup[i]->getLabel() << '\t' << thislookup[i]->getGroup() << '\t';
 			thislookup[i]->print(out);
 		}
-		
 		out.close();
-		
-		//save mothurOut's binLabels to restore for next label
+        
+        
+        //save mothurOut's binLabels to restore for next label
 		m->currentBinLabels = saveBinLabels;
 		
 		return 0;
@@ -1522,64 +1483,6 @@ int SubSampleCommand::processSabund(SAbundVector*& sabund, ofstream& out) {
 		exit(1);
 	}
 }			
-//**********************************************************************************************************************
-int SubSampleCommand::eliminateZeroOTUS(vector<SharedRAbundVector*>& thislookup) {
-	try {
-		
-		vector<SharedRAbundVector*> newLookup;
-		for (int i = 0; i < thislookup.size(); i++) {
-			SharedRAbundVector* temp = new SharedRAbundVector();
-			temp->setLabel(thislookup[i]->getLabel());
-			temp->setGroup(thislookup[i]->getGroup());
-			newLookup.push_back(temp);
-		}
-		
-		//for each bin
-		vector<string> newBinLabels;
-		string snumBins = toString(thislookup[0]->getNumBins());
-		for (int i = 0; i < thislookup[0]->getNumBins(); i++) {
-			if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) {  delete newLookup[j];  } return 0; }
-			
-			//look at each sharedRabund and make sure they are not all zero
-			bool allZero = true;
-			for (int j = 0; j < thislookup.size(); j++) {
-				if (thislookup[j]->getAbundance(i) != 0) { allZero = false;  break;  }
-			}
-			
-			//if they are not all zero add this bin
-			if (!allZero) {
-				for (int j = 0; j < thislookup.size(); j++) {
-					newLookup[j]->push_back(thislookup[j]->getAbundance(i), thislookup[j]->getGroup());
-				}
-				//if there is a bin label use it otherwise make one
-				string binLabel = "Otu";
-				string sbinNumber = toString(i+1);
-				if (sbinNumber.length() < snumBins.length()) { 
-					int diff = snumBins.length() - sbinNumber.length();
-					for (int h = 0; h < diff; h++) { binLabel += "0"; }
-				}
-				binLabel += sbinNumber; 
-				if (i < m->currentBinLabels.size()) {  binLabel = m->currentBinLabels[i]; }
-				
-				newBinLabels.push_back(binLabel);
-			}
-		}
-		
-		for (int j = 0; j < thislookup.size(); j++) {  delete thislookup[j];  }
-		thislookup.clear();
-		
-		thislookup = newLookup;
-		m->currentBinLabels = newBinLabels;
-		
-		return 0;
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SubSampleCommand", "eliminateZeroOTUS");
-		exit(1);
-	}
-}
-
 //**********************************************************************************************************************
 
 
