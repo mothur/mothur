@@ -386,6 +386,8 @@ int ShhherCommand::execute(){
 				
 				if (m->control_pressed) { break; }
 				
+                
+                
 				getOTUData(listFileName);
 
 				m->mothurRemove(distFileName);
@@ -398,6 +400,7 @@ int ShhherCommand::execute(){
 
 				if (m->control_pressed) { break; }
 				
+            
 				for(int i=1;i<ncpus;i++){
 					MPI_Send(&numOTUs, 1, MPI_INT, i, tag, MPI_COMM_WORLD);
 					MPI_Send(&singleLookUp[0], singleLookUp.size(), MPI_DOUBLE, i, tag, MPI_COMM_WORLD);
@@ -1111,7 +1114,8 @@ void ShhherCommand::getUniques(){
 		}
 		uniqueFlowDataIntI.resize(numFlowCells * numUniques);
 		uniqueLengths.resize(numUniques);	
-		
+		uniqueFlowgrams.resize(numFlowCells * numUniques);
+        
 		flowDataPrI.resize(numSeqs * numFlowCells, 0);
 		for(int i=0;i<flowDataPrI.size();i++)	{	if (m->control_pressed) { break; } flowDataPrI[i] = getProbIntensity(flowDataIntI[i]);		}
 	}
@@ -1368,7 +1372,7 @@ string ShhherCommand::cluster(string distFileName, string namesFileName){
 		NameAssignment* clusterNameMap = new NameAssignment(namesFileName);
 		clusterNameMap->readMap();
 		read->read(clusterNameMap);
-		
+        
 		ListVector* list = read->getListVector();
 		SparseMatrix* matrix = read->getMatrix();
 		

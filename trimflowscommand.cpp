@@ -198,6 +198,8 @@ TrimFlowsCommand::TrimFlowsCommand(string option)  {
 
 			numFPrimers = 0;
 			numRPrimers = 0;
+            numLinkers = 0;
+            numSpacers = 0;
 		}
 		
 	}
@@ -382,7 +384,6 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
 		
 		while(moreSeqs) {
 			//cout << "driver " << count << endl;
-			
 	
 			if (m->control_pressed) { break; }
 			
