@@ -11,7 +11,7 @@
 #include <signal.h>
 #include <float.h>
 
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <unistd.h>
@@ -139,7 +139,7 @@ bool myisatty(int fd)
 	return isatty(fd) != 0;
 }
 
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 #else
 //#ifdef BIT_VERSION
 //#include <io.h>
@@ -176,7 +176,7 @@ void LogStdioFileState(FILE *f)
 	Log("fpos       %ld (retval %d)\n", (long) fpos, fgetpos_retval);
 	//	Log("eof        %d\n", _eof(fd));
 #endif
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 #else
 #ifdef BIT_VERSION
 	__int64 pos64 = _ftelli64(f);
@@ -612,7 +612,7 @@ void Die(const char *Format, ...)
 	fprintf(stderr, "\n---Fatal error---\n%s\n", szStr);
 	Log("\n---Fatal error---\n%s\n", szStr);
 	
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 #else
 	//if (IsDebuggerPresent())
  	//	__debugbreak();
@@ -1205,7 +1205,7 @@ static void AddOpt(const OptInfo &Opt)
 	g_Opts.insert(Opt);
 }
 
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 #else
 #pragma warning(disable: 4505) // unreferenced local function
 #endif

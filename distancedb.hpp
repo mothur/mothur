@@ -19,7 +19,6 @@ class DistanceDB : public Database {
 public:
 	
 	DistanceDB();
-	DistanceDB(const DistanceDB& ddb); 
 	~DistanceDB() { delete distCalculator; }
 	
 	void generateDB() {} //doesn't generate a search db 

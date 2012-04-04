@@ -457,10 +457,14 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 				search = "kmer";
 			}
 			
-			if (namefileNames.size() == 0){
-				vector<string> files; files.push_back(fastaFileNames[fastaFileNames.size()-1]); 
-				parser.getNameFile(files);
-			}
+            if (!abort) {
+                if (namefileNames.size() == 0){
+                    if (fastaFileNames.size() != 0) {
+                        vector<string> files; files.push_back(fastaFileNames[fastaFileNames.size()-1]); 
+                        parser.getNameFile(files);
+                    }
+                }
+            }
 			
 		}
 		
@@ -615,7 +619,7 @@ int ClassifySeqsCommand::execute(){
 #else
 		
 			vector<unsigned long long> positions; 
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 			positions = m->divideFile(fastaFileNames[s], processors);
 			for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(new linePair(positions[i], positions[(i+1)]));	}
 #else
@@ -623,6 +627,7 @@ int ClassifySeqsCommand::execute(){
 				lines.push_back(new linePair(0, 1000));
 			}else {
 				positions = m->setFilePosFasta(fastaFileNames[s], numFastaSeqs); 
+                if (positions.size() < processors) { processors = positions.size(); }
 				
 				//figure out how many sequences you have to process
 				int numSeqsPerProcessor = numFastaSeqs / processors;
@@ -821,7 +826,7 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
 		int num = 0;
 		processIDS.clear();
 		
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		int process = 1;
 		
 		//loop through and create all the processes you want
@@ -881,7 +886,7 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
 			string extension = "";
 			if (i != 0) { extension = toString(i) + ".temp"; processIDS.push_back(i); }
 			
-			classifyData* tempclass = new classifyData((accnos + extension), probs, method, templateFileName, taxonomyFileName, (taxFileName + extension), (tempTaxFile + extension), filename, search, kmerSize, iters, numWanted, m, lines[i]->start, lines[i]->end, match, misMatch, gapOpen, gapExtend, cutoff, i, flipThreshold);
+			classifyData* tempclass = new classifyData((accnos + extension), probs, method, templateFileName, taxonomyFileName, (taxFileName + extension), (tempTaxFile + extension), filename, search, kmerSize, iters, numWanted, m, lines[i]->start, lines[i]->end, match, misMatch, gapOpen, gapExtend, cutoff, i, flip);
 			pDataArray.push_back(tempclass);
 			
 			//MySeqSumThreadFunction is in header. It must be global or static to work with the threads.
@@ -905,16 +910,35 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
 		}
 		
 	#endif	
-		
+        vector<string> nonBlankAccnosFiles;
+		if (!(m->isBlank(accnos))) { nonBlankAccnosFiles.push_back(accnos); }
+		else { m->mothurRemove(accnos); } //remove so other files can be renamed to it
+        
 		for(int i=0;i<processIDS.size();i++){
 			appendTaxFiles((taxFileName + toString(processIDS[i]) + ".temp"), taxFileName);
 			appendTaxFiles((tempTaxFile + toString(processIDS[i]) + ".temp"), tempTaxFile);
-			appendTaxFiles((accnos + toString(processIDS[i]) + ".temp"), accnos);
+            if (!(m->isBlank(accnos + toString(processIDS[i]) + ".temp"))) {
+				nonBlankAccnosFiles.push_back(accnos + toString(processIDS[i]) + ".temp");
+			}else { m->mothurRemove((accnos + toString(processIDS[i]) + ".temp"));  }
+
 			m->mothurRemove((m->getFullPathName(taxFileName) + toString(processIDS[i]) + ".temp"));
 			m->mothurRemove((m->getFullPathName(tempTaxFile) + toString(processIDS[i]) + ".temp"));
-			m->mothurRemove((m->getFullPathName(accnos) + toString(processIDS[i]) + ".temp"));
 		}
 		
+        //append accnos files
+		if (nonBlankAccnosFiles.size() != 0) { 
+			rename(nonBlankAccnosFiles[0].c_str(), accnos.c_str());
+			
+			for (int h=1; h < nonBlankAccnosFiles.size(); h++) {
+				appendTaxFiles(nonBlankAccnosFiles[h], accnos);
+				m->mothurRemove(nonBlankAccnosFiles[h]);
+			}
+		}else { //recreate the accnosfile if needed
+			ofstream out;
+			m->openOutputFile(accnos, out);
+			out.close();
+		}
+
 		return num;
 		
 	}
@@ -1002,7 +1026,7 @@ int ClassifySeqsCommand::driver(linePair* filePos, string taxFName, string tempT
 			}
 			delete candidateSeq;
 			
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				unsigned long long pos = inFASTA.tellg();
 				if ((pos == -1) || (pos >= filePos->end)) { break; }
 			#else

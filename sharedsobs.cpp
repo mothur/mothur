@@ -19,7 +19,7 @@ EstOutput SharedSobs::getValues(vector<SharedRAbundVector*> shared){
 		double observed = 0;
 
 		//loop through the species in each group
-		for (int k = 0; k < shared[0]->size(); k++) {
+		for (int k = 0; k < shared[0]->getNumBins(); k++) {
 			//if you have found a new species
 			if (shared[0]->getAbundance(k) != 0) { observed++; } 
 			else if ((shared[0]->getAbundance(k) == 0) && (shared[1]->getAbundance(k) != 0)) { observed++; }

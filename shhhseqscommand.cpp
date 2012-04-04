@@ -364,7 +364,7 @@ vector<string> ShhhSeqsCommand::createProcessesGroups(SequenceParser& parser, st
 			lines.push_back(linePair(startIndex, endIndex));
 		}
 		
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)		
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)		
 		
 		//loop through and create all the processes you want
 		while (process != processors) {
@@ -695,14 +695,15 @@ int ShhhSeqsCommand::deconvoluteResults(string fastaFile, string nameFile){
 		string inputString = "fasta=" + fastaFile + ", name=" + nameFile;
 		m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
 		m->mothurOut("Running command: unique.seqs(" + inputString + ")"); m->mothurOutEndLine(); 
-		
+		m->mothurCalling = true;
+        
 		Command* uniqueCommand = new DeconvoluteCommand(inputString);
 		uniqueCommand->execute();
 		
 		map<string, vector<string> > filenames = uniqueCommand->getOutputFiles();
 		
 		delete uniqueCommand;
-		
+		m->mothurCalling = false;
 		m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
 		
 		string newnameFile = filenames["name"][0];

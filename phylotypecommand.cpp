@@ -232,6 +232,7 @@ int PhylotypeCommand::execute(){
 				
 				ListVector list;
 				list.setLabel(level);
+                
 				//go through nodes and build listvector 
 				for (itCurrent = currentNodes.begin(); itCurrent != currentNodes.end(); itCurrent++) {
 			
@@ -244,18 +245,20 @@ int PhylotypeCommand::execute(){
 					//make the names compatable with listvector
 					string name = "";
 					for (int i = 0; i < names.size(); i++) {  
-						if (namefile != "") {	
-							map<string, string>::iterator itNames = namemap.find(names[i]);  //make sure this name is in namefile
-		
-							if (itNames != namemap.end()) {  name += namemap[names[i]] + ",";   } //you found it in namefile
-							else { m->mothurOut(names[i] + " is not in your namefile, please correct."); m->mothurOutEndLine(); exit(1);  }
-							
-						}else{   name += names[i] + ",";	}
+                        
+                        if (names[i] != "unknown") {
+                            if (namefile != "") {	
+                                map<string, string>::iterator itNames = namemap.find(names[i]);  //make sure this name is in namefile
+                                
+                                if (itNames != namemap.end()) {  name += namemap[names[i]] + ",";   } //you found it in namefile
+                                else { m->mothurOut(names[i] + " is not in your namefile, please correct."); m->mothurOutEndLine(); exit(1);  }
+                                
+                            }else{   name += names[i] + ",";	}
+                        }
 					}
 					name = name.substr(0, name.length()-1);  //rip off extra ','
-					
 					//add bin to list vector
-					list.push_back(name);
+					if (name != "") { list.push_back(name); } //caused by unknown
 				}	
 				
 				//print listvector

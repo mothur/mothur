@@ -19,7 +19,7 @@ EstOutput SharedSobsCS::getValues(vector<SharedRAbundVector*> shared){
 		double observed = 0;
 		int numGroups = shared.size();
 
-		for (int i = 0; i < shared[0]->size(); i++) {
+		for (int i = 0; i < shared[0]->getNumBins(); i++) {
 			//get bin values and set sharedByAll 
 			bool sharedByAll = true;
 			for (int j = 0; j < numGroups; j++) {

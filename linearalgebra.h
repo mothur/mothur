@@ -33,12 +33,32 @@ public:
 	double calcPearson(vector<double>&, vector<double>&, double&);
 	double calcSpearman(vector<double>&, vector<double>&, double&);
 	double calcKendall(vector<double>&, vector<double>&, double&);
-	
-
+    
+	double calcSpearmanSig(double, double, double, double); //length, f^3 - f where f is the number of ties in x, f^3 - f where f is the number of ties in y, sum of squared diffs in ranks. - designed to find the sif of one score.
+    double calcPearsonSig(double, double); //length, coeff.
+    double calcKendallSig(double, double); //length, coeff.
+    
+    
 private:
 	MothurOut* m;
 	
 	double pythag(double, double);
+    double betacf(const double, const double, const double);
+    double betai(const double, const double, const double);
+    double gammln(const double);
+    double gammp(const double, const double);
+    double gammq(const double, const double);
+    double gser(double&, const double, const double, double&);
+    double gcf(double&, const double, const double, double&);
+    double erfcc(double);
+    
+    double ran0(int&); //for testing 
+    double ran1(int&); //for testing
+    double ran2(int&); //for testing
+    double ran3(int&); //for testing
+    double ran4(int&); //for testing
+    void psdes(unsigned long &, unsigned long &); //for testing
+    
 };
 
 #endif

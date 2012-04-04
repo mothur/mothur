@@ -122,7 +122,7 @@ int SetDirectoryCommand::execute(){
 		}else {
 			//add / to name if needed
 			string lastChar = output.substr(output.length()-1);
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				if (lastChar != "/") { output += "/"; }
 			#else
 				if (lastChar != "\\") { output += "\\"; }	
@@ -154,7 +154,7 @@ int SetDirectoryCommand::execute(){
 		}else {
 			//add / to name if needed
 			string lastChar = input.substr(input.length()-1);
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				if (lastChar != "/") { input += "/"; }
 			#else
 				if (lastChar != "\\") { input += "\\"; }	
@@ -196,7 +196,7 @@ int SetDirectoryCommand::execute(){
 		}else {
 			//add / to name if needed
 			string lastChar = tempdefault.substr(tempdefault.length()-1);
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				if (lastChar != "/") { tempdefault += "/"; }
 			#else
 				if (lastChar != "\\") { tempdefault += "\\"; }	

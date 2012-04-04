@@ -31,7 +31,7 @@ public:
 		int numGroups = shared.size();
 		data.clear(); data.resize(numGroups,0);
 
-		for (int i = 0; i < shared[0]->size(); i++) {
+		for (int i = 0; i < shared[0]->getNumBins(); i++) {
 			//get bin values and set sharedByAll 
 			bool sharedByAll = true;
 			for (int j = 0; j < numGroups; j++) {

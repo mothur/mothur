@@ -300,7 +300,7 @@ int OTUAssociationCommand::process(vector<SharedRAbundVector*>& lookup){
 			for (int k = 0; k < i; k++) {
 				
 				if (m->control_pressed) { out.close(); return 0; }
-												
+
 				double coef = 0.0;
 				double sig = 0.0;
 				if (method == "spearman")		{   coef = linear.calcSpearman(xy[i], xy[k], sig);	}
@@ -314,6 +314,7 @@ int OTUAssociationCommand::process(vector<SharedRAbundVector*>& lookup){
 		
 		out.close();
 		
+               
 		return 0;
 		
 	}

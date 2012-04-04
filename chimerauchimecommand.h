@@ -141,7 +141,7 @@ struct uchimeData {
 };
 
 /**************************************************************************************************/
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 #else
 static DWORD WINAPI MyUchimeThreadFunction(LPVOID lpParam){ 
 	uchimeData* pDataArray;
@@ -189,7 +189,7 @@ static DWORD WINAPI MyUchimeThreadFunction(LPVOID lpParam){
 			path = path.substr(0, (tempPath.find_last_of('m')));
 			
 			string uchimeCommand = path;
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 			uchimeCommand += "uchime ";
 #else
 			uchimeCommand += "uchime";
@@ -403,7 +403,7 @@ static DWORD WINAPI MyUchimeThreadFunction(LPVOID lpParam){
 			
 			//uchime_main(numArgs, uchimeParameters); 
 			//cout << "commandString = " << commandString << endl;
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 #else
 			commandString = "\"" + commandString + "\"";
 #endif

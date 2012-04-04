@@ -16,7 +16,7 @@ vector<string> SffInfoCommand::setParameters(){
 		CommandParameter psff("sff", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(psff);
 		CommandParameter paccnos("accnos", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(paccnos);
 		CommandParameter psfftxt("sfftxt", "String", "", "", "", "", "",false,false); parameters.push_back(psfftxt);
-		CommandParameter pflow("flow", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pflow);
+		CommandParameter pflow("flow", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pflow);
 		CommandParameter ptrim("trim", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(ptrim);
 		CommandParameter pfasta("fasta", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pfasta);
 		CommandParameter pqfile("name", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pqfile);
@@ -41,7 +41,7 @@ string SffInfoCommand::getHelpString(){
 		helpString += "The sff parameter allows you to enter the sff file you would like to extract data from.  You may enter multiple files by separating them by -'s.\n";
 		helpString += "The fasta parameter allows you to indicate if you would like a fasta formatted file generated.  Default=True. \n";
 		helpString += "The qfile parameter allows you to indicate if you would like a quality file generated.  Default=True. \n";
-		helpString += "The flow parameter allows you to indicate if you would like a flowgram file generated.  Default=False. \n";
+		helpString += "The flow parameter allows you to indicate if you would like a flowgram file generated.  Default=True. \n";
 		helpString += "The sfftxt parameter allows you to indicate if you would like a sff.txt file generated.  Default=False. \n";
 		helpString += "If you want to parse an existing sfftxt file into flow, fasta and quality file, enter the file name using the sfftxt parameter. \n";
 		helpString += "The trim parameter allows you to indicate if you would like a sequences and quality scores trimmed to the clipQualLeft and clipQualRight values.  Default=True. \n";
@@ -256,7 +256,7 @@ SffInfoCommand::SffInfoCommand(string option)  {
 			temp = validParameter.validFile(parameters, "fasta", false);				if (temp == "not found"){	temp = "T";				}
 			fasta = m->isTrue(temp); 
 			
-			temp = validParameter.validFile(parameters, "flow", false);					if (temp == "not found"){	temp = "F";				}
+			temp = validParameter.validFile(parameters, "flow", false);					if (temp == "not found"){	temp = "T";				}
 			flow = m->isTrue(temp); 
 			
 			temp = validParameter.validFile(parameters, "trim", false);					if (temp == "not found"){	temp = "T";				}
@@ -298,7 +298,6 @@ SffInfoCommand::SffInfoCommand(string option)  {
 //**********************************************************************************************************************
 int SffInfoCommand::execute(){
 	try {
-		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		for (int s = 0; s < filenames.size(); s++) {
@@ -362,6 +361,9 @@ int SffInfoCommand::extractSffInfo(string input, string accnos){
 
 		ofstream outSfftxt, outFasta, outQual, outFlow;
 		string outFastaFileName, outQualFileName;
+        string rootName = outputDir + m->getRootName(m->getSimpleName(input));
+        if(rootName.find_last_of(".") == rootName.npos){ rootName += "."; }
+        
 		string sfftxtFileName = outputDir + m->getRootName(m->getSimpleName(input)) + "sff.txt";
 		string outFlowFileName = outputDir + m->getRootName(m->getSimpleName(input)) + "flow";
 		if (trim) {
@@ -406,7 +408,9 @@ int SffInfoCommand::extractSffInfo(string input, string accnos){
 			//read data
 			seqRead read; 
 			readSeqData(in, read, header.numFlowsPerRead, readheader.numBases);
-				
+            bool okay = sanityCheck(readheader, read);
+            if (!okay) { break; }
+            
 			//if you have provided an accosfile and this seq is not in it, then dont print
 			if (seqNames.size() != 0) {   if (seqNames.count(readheader.name) == 0) { print = false; }  }
 			
@@ -609,7 +613,7 @@ int SffInfoCommand::readSeqData(ifstream& in, seqRead& read, int numFlowReads, i
 				in.read(buffer, 2);
 				read.flowgram[i] = be_int2(*(unsigned short *)(&buffer));
 			}
-	
+            
 			//read flowIndex
 			read.flowIndex.resize(numBases);
 			for (int i = 0; i < numBases; i++) {  
@@ -741,11 +745,39 @@ int SffInfoCommand::printHeader(ofstream& out, Header& header) {
 		exit(1);
 	}
 }
-
+//**********************************************************************************************************************
+bool SffInfoCommand::sanityCheck(Header& header, seqRead& read) {
+	try {
+        bool okay = true;
+        string message = "[WARNING]: Your sff file may be corrupted! Sequence: " + header.name + "\n";
+        
+        if (header.clipQualLeft > read.bases.length()) {
+            okay = false; message += "Clip Qual Left = " + toString(header.clipQualLeft) + ", but we only read " + toString(read.bases.length()) + " bases.\n";
+        }
+        if (header.clipQualRight > read.bases.length()) {
+            okay = false; message += "Clip Qual Right = " + toString(header.clipQualRight) + ", but we only read " + toString(read.bases.length()) + " bases.\n";
+        }
+        if (header.clipQualLeft > read.qualScores.size()) {
+            okay = false; message += "Clip Qual Left = " + toString(header.clipQualLeft) + ", but we only read " + toString(read.qualScores.size()) + " quality scores.\n";
+        }
+        if (header.clipQualRight > read.qualScores.size()) {
+            okay = false; message += "Clip Qual Right = " + toString(header.clipQualRight) + ", but we only read " + toString(read.qualScores.size()) + " quality scores.\n";
+        }
+        
+        if (okay == false) {
+            m->mothurOut(message); m->mothurOutEndLine();
+        }
+        
+		return okay;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SffInfoCommand", "sanityCheck");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 int SffInfoCommand::printSffTxtSeqData(ofstream& out, seqRead& read, Header& header) {
 	try {
-		
 		out << "Flowgram: ";
 		for (int i = 0; i < read.flowgram.size(); i++) { out << setprecision(2) << (read.flowgram[i]/(float)100) << '\t';  }
 		
@@ -775,10 +807,9 @@ int SffInfoCommand::printSffTxtSeqData(ofstream& out, seqRead& read, Header& hea
 //**********************************************************************************************************************
 int SffInfoCommand::printFastaSeqData(ofstream& out, seqRead& read, Header& header) {
 	try {
-		
 		string seq = read.bases;
 		
-		if (trim) {
+        if (trim) {
 			if(header.clipQualRight < header.clipQualLeft){
 				seq = "NNNN";
 			}

@@ -48,7 +48,7 @@ EstOutput Unweighted::getValues(Tree* t, int p, string o) {
 			}
 		}
 
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 			if(processors == 1){
 				data = driver(t, namesOfGroupCombos, 0, namesOfGroupCombos.size());
 			}else{
@@ -83,7 +83,7 @@ EstOutput Unweighted::getValues(Tree* t, int p, string o) {
 
 EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfGroupCombos) {
 	try {
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		int process = 1;
 		vector<int> processIDS;
 		
@@ -291,7 +291,7 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB, int p, st
 			}
 		}
 
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 			if(processors == 1){
 				data = driver(t, namesOfGroupCombos, 0, namesOfGroupCombos.size(), true);
 			}else{
@@ -326,7 +326,7 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB, int p, st
 
 EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfGroupCombos, bool usingGroups) {
 	try {
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		int process = 1;
 		vector<int> processIDS;
 		

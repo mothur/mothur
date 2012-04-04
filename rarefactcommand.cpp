@@ -287,7 +287,7 @@ int RareFactCommand::execute(){
 				
 		if (m->control_pressed) { return 0; }
 		
-		map<string, string> nameMap;
+		map<int, string> file2Group; //index in outputNames[i] -> group
 		for (int p = 0; p < inputFileNames.size(); p++) {
 			
 			string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(inputFileNames[p]));
@@ -296,7 +296,6 @@ int RareFactCommand::execute(){
 			
 			if (inputFileNames.size() > 1) {
 				m->mothurOutEndLine(); m->mothurOut("Processing group " + groups[p]); m->mothurOutEndLine(); m->mothurOutEndLine();
-				nameMap[fileNameRoot] = groups[p];
 			}
 			int i;
 			ValidCalculators validCalculator;
@@ -352,6 +351,7 @@ int RareFactCommand::execute(){
 						rDisplays.push_back(new RareDisplay(new NSeqs(), new ThreeColumnFile(fileNameRoot+"r_nseqs")));
 						outputNames.push_back(fileNameRoot+"r_nseqs"); outputTypes["r_nseqs"].push_back(fileNameRoot+"r_nseqs");
 					}
+                    if (inputFileNames.size() > 1) { file2Group[outputNames.size()-1] = groups[p]; }
 				}
 			}
 			
@@ -450,7 +450,7 @@ int RareFactCommand::execute(){
 		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 
 		//create summary file containing all the groups data for each label - this function just combines the info from the files already created.
-		if ((sharedfile != "") && (groupMode)) {   outputNames = createGroupFile(outputNames, nameMap);  }
+		if ((sharedfile != "") && (groupMode)) {   outputNames = createGroupFile(outputNames, file2Group);  }
 
 		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 
@@ -467,13 +467,14 @@ int RareFactCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map<string, string> nameMap) {
+vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map<int, string> file2Group) {
 	try {
 		
 		vector<string> newFileNames;
 		
 		//find different types of files
-		map<string, vector<string> > typesFiles;
+		map<string, map<string, string> > typesFiles;
+        map<string, string> temp; 
 		for (int i = 0; i < outputNames.size(); i++) {
 			string extension = m->getExtension(outputNames[i]);
 			
@@ -485,7 +486,8 @@ vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map
 			
 			newLine += "\tGroup" + labels.substr(labels.find_first_of('\t'));
 			
-			typesFiles[extension].push_back(outputNames[i]);
+            temp[outputNames[i]] = file2Group[i];
+			typesFiles[extension] = temp;
 			
 			string combineFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + "groups" + extension;
 			
@@ -499,37 +501,31 @@ vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map
 		
 		//for each type create a combo file
 		map<int, int> lineToNumber; 
-		for (map<string, vector<string> >::iterator it = typesFiles.begin(); it != typesFiles.end(); it++) {
+		for (map<string, map<string, string> >::iterator it = typesFiles.begin(); it != typesFiles.end(); it++) {
 			
 			ofstream out;
 			string combineFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + "groups" + it->first;
 			m->openOutputFileAppend(combineFileName, out);
 			newFileNames.push_back(combineFileName);
 			
-			vector<string> thisTypesFiles = it->second;
+			map<string, string> thisTypesFiles = it->second;
 		
 			//open each type summary file
 			map<string, vector<string> > files; //maps file name to lines in file
 			int maxLines = 0;
 			int numColumns = 0;
-			for (int i=0; i<thisTypesFiles.size(); i++) {
-								
+			for (map<string, string>::iterator itFileNameGroup = thisTypesFiles.begin(); itFileNameGroup != thisTypesFiles.end(); itFileNameGroup++) {
+                
+                string thisfilename = itFileNameGroup->first;
+                string group = itFileNameGroup->second;
+                
 				ifstream temp;
-				m->openInputFile(thisTypesFiles[i], temp);
+				m->openInputFile(thisfilename, temp);
 				
 				//read through first line - labels
 				m->getline(temp);	m->gobble(temp);
 				
 				vector<string> thisFilesLines;
-				string fileNameRoot = m->getRootName(thisTypesFiles[i]);
-				map<string, string>::iterator itName = nameMap.find(fileNameRoot);
-				string group = "";
-				if (itName != nameMap.end()) {
-					group = itName->second;
-				}else {
-					group = "not found" + i;
-					m->mothurOut("[ERROR]: can't parse filename."); m->mothurOutEndLine();
-				}
 				
 				thisFilesLines.push_back(group);
 				int count = 1;
@@ -549,13 +545,13 @@ vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map
 					m->gobble(temp);
 				}
 				
-				files[thisTypesFiles[i]] = thisFilesLines;
+				files[thisfilename] = thisFilesLines;
 				
 				//save longest file for below
 				if (maxLines < thisFilesLines.size()) { maxLines = thisFilesLines.size(); }
 				
 				temp.close();
-				m->mothurRemove(thisTypesFiles[i]);
+				m->mothurRemove(thisfilename);
 			}
 			
 			
@@ -563,17 +559,19 @@ vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map
 			for (int k = 1; k < maxLines; k++) {
 				
 				//grab data for each group
-				for (int i=0; i<thisTypesFiles.size(); i++) {
-					
+				for (map<string, string>::iterator itFileNameGroup = thisTypesFiles.begin(); itFileNameGroup != thisTypesFiles.end(); itFileNameGroup++) {
+                    
+					string thisfilename = itFileNameGroup->first;
+                    
 					map<int, int>::iterator itLine = lineToNumber.find(k);
 					if (itLine != lineToNumber.end()) {
 						string output = toString(itLine->second);
-						if (k < files[thisTypesFiles[i]].size()) {
-							string line = files[thisTypesFiles[i]][k];
+						if (k < files[thisfilename].size()) {
+							string line = files[thisfilename][k];
 							output = line.substr(0, line.find_first_of('\t'));
-							output += '\t' + files[thisTypesFiles[i]][0] + '\t' + line.substr(line.find_first_of('\t'));
+							output += '\t' + files[thisfilename][0] + '\t' + line.substr(line.find_first_of('\t'));
 						}else{
-							output += '\t' + files[thisTypesFiles[i]][0] + '\t';
+							output += '\t' + files[thisfilename][0] + '\t';
 							for (int h = 0; h < numColumns; h++) {
 								output += "NA\t";
 							}

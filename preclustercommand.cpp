@@ -217,17 +217,19 @@ int PreClusterCommand::execute(){
 			m->mothurOutEndLine(); 
 			m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
 			m->mothurOut("Running command: unique.seqs(" + inputString + ")"); m->mothurOutEndLine(); 
-			
+			m->mothurCalling = true;
+            
 			Command* uniqueCommand = new DeconvoluteCommand(inputString);
 			uniqueCommand->execute();
 			
 			map<string, vector<string> > filenames = uniqueCommand->getOutputFiles();
 			
 			delete uniqueCommand;
-			
+			m->mothurCalling = false;
 			m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
 			
 			m->renameFile(filenames["fasta"][0], newFastaFile);
+            m->renameFile(filenames["name"][0], newNamesFile);
 			
 			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to run pre.cluster."); m->mothurOutEndLine(); 
 				
@@ -302,7 +304,7 @@ int PreClusterCommand::createProcessesGroups(SequenceParser* parser, string newF
 			lines.push_back(linePair(startIndex, endIndex));
 		}
 		
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)		
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)		
 		
 		//loop through and create all the processes you want
 		while (process != processors) {
@@ -514,7 +516,7 @@ int PreClusterCommand::readFASTA(){
 		m->openInputFile(fastafile, inFasta);
 		
 		//string firstCol, secondCol, nameString;
-		length = 0;
+		set<int> lengths;
 		
 		while (!inFasta.eof()) {
 			
@@ -540,17 +542,21 @@ int PreClusterCommand::readFASTA(){
 					else{
 						seqPNode tempNode(itSize->second, seq, names[seq.getName()]);
 						alignSeqs.push_back(tempNode);
-						if (seq.getAligned().length() > length) {  length = seq.getAligned().length();  }
+						lengths.insert(seq.getAligned().length());
 					}	
 				}else { //no names file, you are identical to yourself 
 					seqPNode tempNode(1, seq, seq.getName());
 					alignSeqs.push_back(tempNode);
-					if (seq.getAligned().length() > length) {  length = seq.getAligned().length();  }
+					lengths.insert(seq.getAligned().length());
 				}
 			}
 		}
 		inFasta.close();
 		//inNames.close();
+        
+        if (lengths.size() > 1) { m->control_pressed = true; m->mothurOut("[ERROR]: your sequences are not all the same length. pre.cluster requires sequences to be aligned."); m->mothurOutEndLine(); }
+        else if (lengths.size() == 1) { length = *(lengths.begin()); }
+        
 		return alignSeqs.size();
 	}
 	
@@ -562,7 +568,7 @@ int PreClusterCommand::readFASTA(){
 /**************************************************************************************************/
 int PreClusterCommand::loadSeqs(map<string, string>& thisName, vector<Sequence>& thisSeqs){
 	try {
-		length = 0;
+		set<int> lengths;
 		alignSeqs.clear();
 		map<string, string>::iterator it;
 		bool error = false;
@@ -585,15 +591,18 @@ int PreClusterCommand::loadSeqs(map<string, string>& thisName, vector<Sequence>&
 					
 					seqPNode tempNode(numReps, thisSeqs[i], it->second);
 					alignSeqs.push_back(tempNode);
-					if (thisSeqs[i].getAligned().length() > length) {  length = thisSeqs[i].getAligned().length();  }
+                    lengths.insert(thisSeqs[i].getAligned().length());
 				}	
 			}else { //no names file, you are identical to yourself 
 				seqPNode tempNode(1, thisSeqs[i], thisSeqs[i].getName());
 				alignSeqs.push_back(tempNode);
-				if (thisSeqs[i].getAligned().length() > length) {  length = thisSeqs[i].getAligned().length();  }
+				lengths.insert(thisSeqs[i].getAligned().length());
 			}
 		}
 		
+        if (lengths.size() > 1) { error = true; m->mothurOut("[ERROR]: your sequences are not all the same length. pre.cluster requires sequences to be aligned."); m->mothurOutEndLine(); }
+        else if (lengths.size() == 1) { length = *(lengths.begin()); }
+        
 		//sanity check
 		if (error) { m->control_pressed = true; }
 		

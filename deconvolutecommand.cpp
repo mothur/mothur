@@ -154,7 +154,10 @@ int DeconvoluteCommand::execute() {
 		
 		map<string, string> nameMap;
 		map<string, string>::iterator itNames;
-		if (oldNameMapFName != "")  {  m->readNames(oldNameMapFName, nameMap); }
+		if (oldNameMapFName != "")  {  
+            m->readNames(oldNameMapFName, nameMap); 
+            if (oldNameMapFName == outNameFile){ outNameFile = outputDir + m->getRootName(m->getSimpleName(inFastaName)) + "unique.names";   }
+        }
 		
 		if (m->control_pressed) { return 0; }
 		

@@ -174,7 +174,8 @@ int CountSeqsCommand::execute(){
 		//open input file
 		ifstream in;
 		m->openInputFile(namefile, in);
-		
+        
+		int total = 0;
 		while (!in.eof()) {
 			if (m->control_pressed) { break; }
 			
@@ -217,7 +218,7 @@ int CountSeqsCommand::execute(){
 				out << firstCol << '\t' << names.size() << endl;
 			}
 			
-			
+			total += names.size();
 		}
 		in.close();
 		
@@ -225,6 +226,8 @@ int CountSeqsCommand::execute(){
 		
 		if (m->control_pressed) { m->mothurRemove(outputFileName); return 0; }
 		
+        m->mothurOutEndLine();
+		m->mothurOut("Total number of sequences: " + toString(total)); m->mothurOutEndLine();
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
 		m->mothurOut(outputFileName); m->mothurOutEndLine();	

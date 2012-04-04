@@ -21,7 +21,9 @@ vector<string> TrimFlowsCommand::setParameters(){
 		CommandParameter pminflows("minflows", "Number", "", "450", "", "", "",false,false); parameters.push_back(pminflows);
 		CommandParameter ppdiffs("pdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(ppdiffs);
 		CommandParameter pbdiffs("bdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(pbdiffs);
-		CommandParameter ptdiffs("tdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(ptdiffs);
+        CommandParameter pldiffs("ldiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(pldiffs);
+		CommandParameter psdiffs("sdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(psdiffs);
+        CommandParameter ptdiffs("tdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(ptdiffs);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
 		CommandParameter psignal("signal", "Number", "", "0.50", "", "", "",false,false); parameters.push_back(psignal);
 		CommandParameter pnoise("noise", "Number", "", "0.70", "", "", "",false,false); parameters.push_back(pnoise);
@@ -178,10 +180,17 @@ TrimFlowsCommand::TrimFlowsCommand(string option)  {
 			temp = validParameter.validFile(parameters, "pdiffs", false);		if (temp == "not found"){	temp = "0";		}
 			m->mothurConvert(temp, pdiffs);
 			
-			temp = validParameter.validFile(parameters, "tdiffs", false);
-			if (temp == "not found"){ int tempTotal = pdiffs + bdiffs;  temp = toString(tempTotal); }
+            temp = validParameter.validFile(parameters, "ldiffs", false);		if (temp == "not found") { temp = "0"; }
+			m->mothurConvert(temp, ldiffs);
+            
+            temp = validParameter.validFile(parameters, "sdiffs", false);		if (temp == "not found") { temp = "0"; }
+			m->mothurConvert(temp, sdiffs);
+			
+			temp = validParameter.validFile(parameters, "tdiffs", false);		if (temp == "not found") { int tempTotal = pdiffs + bdiffs + ldiffs + sdiffs;  temp = toString(tempTotal); }
 			m->mothurConvert(temp, tdiffs);
-			if(tdiffs == 0){	tdiffs = bdiffs + pdiffs;	}
+			
+			if(tdiffs == 0){	tdiffs = bdiffs + pdiffs + ldiffs + sdiffs;	}
+
 			
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
@@ -228,7 +237,7 @@ int TrimFlowsCommand::execute(){
 		}
 		
 		vector<unsigned long long> flowFilePos;
-	#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+	#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		flowFilePos = getFlowFileBreaks();
 		for (int i = 0; i < (flowFilePos.size()-1); i++) {
 			lines.push_back(new linePair(flowFilePos[i], flowFilePos[(i+1)]));
@@ -297,7 +306,7 @@ int TrimFlowsCommand::execute(){
 							m->mothurRemove(barcodePrimerComboFileNames[i][j]);
 						}
 						else{
-							output << barcodePrimerComboFileNames[i][j] << endl;
+							output << m->getFullPathName(barcodePrimerComboFileNames[i][j]) << endl;
 							outputNames.push_back(barcodePrimerComboFileNames[i][j]);
 							outputTypes["flow"].push_back(barcodePrimerComboFileNames[i][j]);
 						}
@@ -311,7 +320,7 @@ int TrimFlowsCommand::execute(){
 			flowFilesFileName = outputDir + m->getRootName(m->getSimpleName(flowFileName)) + "flow.files";
 			m->openOutputFile(flowFilesFileName, output);
 			
-			output << trimFlowFileName << endl;
+			output << m->getFullPathName(trimFlowFileName) << endl;
 			
 			output.close();
 		}
@@ -380,7 +389,7 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
 		int count = 0;
 		bool moreSeqs = 1;
 		
-		TrimOligos trimOligos(pdiffs, bdiffs, primers, barcodes, revPrimer);
+		TrimOligos trimOligos(pdiffs, bdiffs, ldiffs, sdiffs, primers, barcodes, revPrimer, linker, spacer);
 		
 		while(moreSeqs) {
 			//cout << "driver " << count << endl;
@@ -405,12 +414,26 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
 			int primerIndex = 0;
 			int barcodeIndex = 0;
 			
+            if(numLinkers != 0){
+                success = trimOligos.stripLinker(currSeq);
+                if(success > ldiffs)		{	trashCode += 'k';	}
+                else{ currentSeqDiffs += success;  }
+                
+            }
+            
 			if(barcodes.size() != 0){
 				success = trimOligos.stripBarcode(currSeq, barcodeIndex);
 				if(success > bdiffs)		{	trashCode += 'b';	}
 				else{ currentSeqDiffs += success;  }
 			}
 			
+            if(numSpacers != 0){
+                success = trimOligos.stripSpacer(currSeq);
+                if(success > sdiffs)		{	trashCode += 's';	}
+                else{ currentSeqDiffs += success;  }
+                
+            }
+            
 			if(numFPrimers != 0){
 				success = trimOligos.stripForward(currSeq, primerIndex);
 				if(success > pdiffs)		{	trashCode += 'f';	}
@@ -448,7 +471,7 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
 			//report progress
 			if((count) % 10000 == 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
 
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 			unsigned long long pos = flowFile.tellg();
 
 			if ((pos == -1) || (pos >= line->end)) { break; }
@@ -522,9 +545,8 @@ void TrimFlowsCommand::getOligos(vector<vector<string> >& outFlowFileNames){
 
 				}
 				else if(type == "REVERSE"){
-					Sequence oligoRC("reverse", oligo);
-					oligoRC.reverseComplement();
-					revPrimer.push_back(oligoRC.getUnaligned());
+					string oligoRC = reverseOligo(oligo);
+					revPrimer.push_back(oligoRC);
 				}
 				else if(type == "BARCODE"){
 					oligosFile >> group;
@@ -535,6 +557,10 @@ void TrimFlowsCommand::getOligos(vector<vector<string> >& outFlowFileNames){
 
 					barcodes[oligo]=indexBarcode; indexBarcode++;
 					barcodeNameVector.push_back(group);
+				}else if(type == "LINKER"){
+					linker.push_back(oligo);
+				}else if(type == "SPACER"){
+					spacer.push_back(oligo);
 				}
 				else{
 					m->mothurOut(type + " is not recognized as a valid type. Choices are forward, reverse, and barcode. Ignoring " + oligo + "."); m->mothurOutEndLine();  
@@ -600,6 +626,8 @@ void TrimFlowsCommand::getOligos(vector<vector<string> >& outFlowFileNames){
 		
 		numFPrimers = primers.size();
 		numRPrimers = revPrimer.size();
+        numLinkers = linker.size();
+        numSpacers = spacer.size();
 		
 	}
 	catch(exception& e) {
@@ -607,6 +635,47 @@ void TrimFlowsCommand::getOligos(vector<vector<string> >& outFlowFileNames){
 		exit(1);
 	}
 }
+//********************************************************************/
+string TrimFlowsCommand::reverseOligo(string oligo){
+	try {
+        string reverse = "";
+        
+        for(int i=oligo.length()-1;i>=0;i--){
+            
+            if(oligo[i] == 'A')		{	reverse += 'T';	}
+            else if(oligo[i] == 'T'){	reverse += 'A';	}
+            else if(oligo[i] == 'U'){	reverse += 'A';	}
+            
+            else if(oligo[i] == 'G'){	reverse += 'C';	}
+            else if(oligo[i] == 'C'){	reverse += 'G';	}
+            
+            else if(oligo[i] == 'R'){	reverse += 'Y';	}
+            else if(oligo[i] == 'Y'){	reverse += 'R';	}
+            
+            else if(oligo[i] == 'M'){	reverse += 'K';	}
+            else if(oligo[i] == 'K'){	reverse += 'M';	}
+            
+            else if(oligo[i] == 'W'){	reverse += 'W';	}
+            else if(oligo[i] == 'S'){	reverse += 'S';	}
+            
+            else if(oligo[i] == 'B'){	reverse += 'V';	}
+            else if(oligo[i] == 'V'){	reverse += 'B';	}
+            
+            else if(oligo[i] == 'D'){	reverse += 'H';	}
+            else if(oligo[i] == 'H'){	reverse += 'D';	}
+            
+            else						{	reverse += 'N';	}
+        }
+        
+        
+        return reverse;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "TrimFlowsCommand", "reverseOligo");
+		exit(1);
+	}
+}
+
 /**************************************************************************************************/
 vector<unsigned long long> TrimFlowsCommand::getFlowFileBreaks() {
 
@@ -689,7 +758,7 @@ int TrimFlowsCommand::createProcessesCreateTrim(string flowFileName, string trim
 		processIDS.clear();
 		int exitCommand = 1;
 		
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		int process = 1;
 		
 		//loop through and create all the processes you want

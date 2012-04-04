@@ -26,7 +26,6 @@ class KmerDB : public Database {
 	
 public:
 	KmerDB(string, int);
-	KmerDB(const KmerDB& kdb) : kmerSize(kdb.kmerSize), maxKmer(kdb.maxKmer), count(kdb.count), kmerDBName(kdb.kmerDBName), kmerLocations(kdb.kmerLocations), Database(kdb) {}
 	KmerDB();
 	~KmerDB();
 	

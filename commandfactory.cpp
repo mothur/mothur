@@ -127,6 +127,11 @@
 #include "shhhseqscommand.h"
 #include "summaryqualcommand.h"
 #include "otuassociationcommand.h"
+#include "sortseqscommand.h"
+#include "classifytreecommand.h"
+#include "cooccurrencecommand.h"
+#include "pcrseqscommand.h"
+#include "createdatabasecommand.h"
 
 /*******************************************************/
 
@@ -275,6 +280,11 @@ CommandFactory::CommandFactory(){
 	commands["summary.qual"]		= "summary.qual";
 	commands["shhh.seqs"]			= "shhh.seqs";
 	commands["otu.association"]		= "otu.association";
+    commands["sort.seqs"]           = "sort.seqs";
+    commands["classify.tree"]       = "classify.tree";
+    commands["cooccurrence"]        = "cooccurrence";
+    commands["pcr.seqs"]            = "pcr.seqs";
+    commands["create.database"]     = "create.database";
 	commands["quit"]				= "MPIEnabled"; 
 
 }
@@ -305,6 +315,7 @@ CommandFactory::~CommandFactory(){
 //This function calls the appropriate command fucntions based on user input.
 Command* CommandFactory::getCommand(string commandName, string optionString){
 	try {
+        
 		delete command;   //delete the old command
 		
 		//user has opted to redirect output from dir where input files are located to some other place
@@ -436,6 +447,11 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "chimera.perseus")		{	command = new ChimeraPerseusCommand(optionString);			}
 		else if(commandName == "shhh.seqs")				{	command = new ShhhSeqsCommand(optionString);				}
 		else if(commandName == "otu.association")		{	command = new OTUAssociationCommand(optionString);			}
+        else if(commandName == "sort.seqs")             {	command = new SortSeqsCommand(optionString);                }
+        else if(commandName == "classify.tree")         {	command = new ClassifyTreeCommand(optionString);            }
+        else if(commandName == "cooccurrence")          {	command = new CooccurrenceCommand(optionString);            }
+        else if(commandName == "pcr.seqs")              {	command = new PcrSeqsCommand(optionString);                 }
+        else if(commandName == "create.database")       {	command = new CreateDatabaseCommand(optionString);          }
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -581,6 +597,11 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "chimera.perseus")		{	pipecommand = new ChimeraPerseusCommand(optionString);			}
 		else if(commandName == "shhh.seqs")				{	pipecommand = new ShhhSeqsCommand(optionString);				}
 		else if(commandName == "otu.association")		{	pipecommand = new OTUAssociationCommand(optionString);			}
+        else if(commandName == "sort.seqs")             {	pipecommand = new SortSeqsCommand(optionString);                }
+        else if(commandName == "classify.tree")         {	pipecommand = new ClassifyTreeCommand(optionString);            }
+        else if(commandName == "cooccurrence")          {	pipecommand = new CooccurrenceCommand(optionString);            }
+        else if(commandName == "pcr.seqs")              {	pipecommand = new PcrSeqsCommand(optionString);                 }
+        else if(commandName == "create.database")       {	pipecommand = new CreateDatabaseCommand(optionString);          }
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -714,6 +735,11 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "chimera.perseus")		{	shellcommand = new ChimeraPerseusCommand();			}
 		else if(commandName == "shhh.seqs")				{	shellcommand = new ShhhSeqsCommand();				}
 		else if(commandName == "otu.association")		{	shellcommand = new OTUAssociationCommand();			}
+        else if(commandName == "sort.seqs")             {	shellcommand = new SortSeqsCommand();               }
+        else if(commandName == "classify.tree")         {	shellcommand = new ClassifyTreeCommand();           }
+        else if(commandName == "cooccurrence")          {	shellcommand = new CooccurrenceCommand();           }
+        else if(commandName == "pcr.seqs")              {	shellcommand = new PcrSeqsCommand();                }
+        else if(commandName == "create.database")       {	shellcommand = new CreateDatabaseCommand();         }
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;
@@ -739,7 +765,7 @@ Command* CommandFactory::getCommand(){
 		exit(1);
 	}
 }
-/***********************************************************************/
+***********************************************************************/
 bool CommandFactory::isValidCommand(string command) {
 	try {	
 	

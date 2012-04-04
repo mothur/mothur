@@ -316,6 +316,7 @@ int SequenceParser::getSeqs(string g, string filename, bool uchimeFormat=false){
 				}
 				
 			}else { 
+                //m->mothurOut("Group " + g +  " contains " + toString(seqForThisGroup.size()) + " unique seqs.\n");
 				for (int i = 0; i < seqForThisGroup.size(); i++) {
 					
 					if(m->control_pressed) { out.close(); m->mothurRemove(filename); return 1; }

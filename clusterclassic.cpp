@@ -434,11 +434,11 @@ void ClusterClassic::print() {
 try {
 		//update location of seqs in smallRow since they move to smallCol now
 		for (int i = 0; i < dMatrix.size(); i++) {
-			cout << "row = " << i << '\t';
+			m->mothurOut("row = " + toString(i) + "\t");
 			for (int j = 0; j < dMatrix[i].size(); j++) {
-				cout << dMatrix[i][j] << '\t';
+				m->mothurOut(toString(dMatrix[i][j]) + "\t");
 			}
-			cout << endl;
+			m->mothurOutEndLine();
 		}
 	}
 	catch(exception& e) {

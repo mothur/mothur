@@ -36,8 +36,6 @@ class SuffixTree {
 public:
 	SuffixTree();
 	~SuffixTree();
-//	SuffixTree(string, string);
-	SuffixTree(const SuffixTree&);
 
 	void loadSequence(Sequence);
 	string getSeqName();

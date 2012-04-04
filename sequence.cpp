@@ -191,6 +191,59 @@ Sequence::Sequence(ifstream& fastaFile){
 }
 //********************************************************************************************************************
 //this function will jump over commented out sequences, but if the last sequence in a file is commented out it makes a blank seq
+Sequence::Sequence(ifstream& fastaFile, string& extraInfo, bool getInfo){
+	try {
+		m = MothurOut::getInstance();
+		initialize();
+		fastaFile >> name;
+        extraInfo = "";
+		
+		if (name.length() != 0) { 
+            
+			name = name.substr(1); 
+			
+			string sequence;
+            
+			//read comments
+			while ((name[0] == '#') && fastaFile) { 
+				while (!fastaFile.eof())	{	char c = fastaFile.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
+				sequence = getCommentString(fastaFile);
+				
+				if (fastaFile) {  
+					fastaFile >> name;  
+					name = name.substr(1);	
+				}else { 
+					name = "";
+					break;
+				}
+			}
+			
+			//read info after sequence name
+			while (!fastaFile.eof())	{	
+                char c = fastaFile.get(); 
+                if (c == 10 || c == 13){  break;	}	
+                extraInfo += c;
+            } 
+			
+			int numAmbig = 0;
+			sequence = getSequenceString(fastaFile, numAmbig);
+			
+			setAligned(sequence);	
+			//setUnaligned removes any gap characters for us						
+			setUnaligned(sequence);	
+			
+			if ((numAmbig / (float) numBases) > 0.25) { m->mothurOut("[WARNING]: We found more than 25% of the bases in sequence " + name + " to be ambiguous. Mothur is not setup to process protein sequences."); m->mothurOutEndLine(); }
+			
+		}else{ m->mothurOut("Error in reading your fastafile, at position " + toString(fastaFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); }
+        
+	}
+	catch(exception& e) {
+		m->errorOut(e, "Sequence", "Sequence");
+		exit(1);
+	}							
+}
+//********************************************************************************************************************
+//this function will jump over commented out sequences, but if the last sequence in a file is commented out it makes a blank seq
 Sequence::Sequence(ifstream& fastaFile, string JustUnaligned){
 	try {
 		m = MothurOut::getInstance();
@@ -571,7 +624,45 @@ void Sequence::padToPos(int start){
 	startPos = start;
 
 }
+//********************************************************************************************************************
 
+int Sequence::filterToPos(int start){
+    
+    if (start > aligned.length()) { start = aligned.length(); m->mothurOut("[ERROR]: start to large.\n"); }
+    
+	for(int j = 0; j < start-1; j++) {
+		aligned[j] = '.';
+	}
+	
+    //things like ......----------AT become ................AT
+    for(int j = start-1; j < aligned.length(); j++) {
+        if (isalpha(aligned[j])) { break; }
+        else { aligned[j] = '.'; }
+    }
+    setUnaligned(aligned);
+    
+    return 0;
+    
+}
+//********************************************************************************************************************
+
+int Sequence::filterFromPos(int end){
+    
+    if (end > aligned.length()) { end = aligned.length(); m->mothurOut("[ERROR]: end to large.\n"); }
+    
+	for(int j = end; j < aligned.length(); j++) {
+		aligned[j] = '.';
+	}
+	
+    for(int j = aligned.length()-1; j < 0; j--) {
+        if (isalpha(aligned[j])) { break; }
+        else { aligned[j] = '.'; }
+    }
+    
+    setUnaligned(aligned);
+    
+    return 0;
+}
 //********************************************************************************************************************
 
 int Sequence::getEndPos(){
@@ -591,7 +682,7 @@ int Sequence::getEndPos(){
 //********************************************************************************************************************
 
 void Sequence::padFromPos(int end){
-	
+	cout << end << '\t' << endPos << endl;
 	for(int j = end; j < endPos; j++) {
 		aligned[j] = '.';
 	}

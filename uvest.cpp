@@ -29,7 +29,7 @@ EstOutput UVEst::getUVest(vector<SharedRAbundVector*> shared) {
 		sumSharedA1 = the sum of all shared otus in A where B = 1
 		sumSharedB1 = the sum of all shared otus in B where A = 1 */
 		
-		for (int i = 0; i < shared[0]->size(); i++) {
+		for (int i = 0; i < shared[0]->getNumBins(); i++) {
 			//store in temps to avoid multiple repetitive function calls
 			tempA = shared[0]->getAbundance(i);
 			tempB = shared[1]->getAbundance(i);

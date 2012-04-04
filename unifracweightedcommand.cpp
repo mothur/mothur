@@ -342,7 +342,7 @@ int UnifracWeightedCommand::execute() {
 				
 				lines.clear();
 				
-				#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+				#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 					if(processors != 1){
 						int numPairs = namesOfGroupCombos.size();
 						int numPairsPerProcessor = numPairs / processors;
@@ -361,7 +361,7 @@ int UnifracWeightedCommand::execute() {
 				//get scores for random trees
 				for (int j = 0; j < iters; j++) {
 				
-					#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+					#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 						if(processors == 1){
 							driver(T[i],  namesOfGroupCombos, 0, namesOfGroupCombos.size(),  rScores);
 						}else{
@@ -459,7 +459,7 @@ int UnifracWeightedCommand::execute() {
 
 int UnifracWeightedCommand::createProcesses(Tree* t, vector< vector<string> > namesOfGroupCombos, vector< vector<double> >& scores) {
 	try {
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		int process = 1;
 		vector<int> processIDS;
 		

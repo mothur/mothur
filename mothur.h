@@ -42,6 +42,7 @@
 #include <cmath>
 #include <math.h>
 #include <algorithm>
+#include <numeric>
 
 //misc
 #include <cerrno>
@@ -53,7 +54,7 @@
 #endif
 /***********************************************************************/
 
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 	#include <sys/wait.h>
 	#include <sys/time.h>
 	#include <sys/resource.h>
@@ -130,9 +131,9 @@ struct clusterNode {
 struct seqDist {
 	int seq1;
 	int seq2;
-	float dist;
+	double dist;
 	seqDist() {}
-	seqDist(int s1, int s2, float d) : seq1(s1), seq2(s2), dist(d) {}
+	seqDist(int s1, int s2, double d) : seq1(s1), seq2(s2), dist(d) {}
 	~seqDist() {}
 };
 /************************************************************/

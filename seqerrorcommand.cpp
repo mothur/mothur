@@ -298,7 +298,7 @@ int SeqErrorCommand::execute(){
 		if(qualFileName == "")	{	qLines = lines;	rLines = lines; } //fills with duds
 		
 		int numSeqs = 0;
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		if(processors == 1){
 			numSeqs = driver(queryFileName, qualFileName, reportFileName, errorSummaryFileName, errorSeqFileName, errorChimeraFileName, lines[0], qLines[0], rLines[0]);
 		}else{
@@ -366,7 +366,7 @@ int SeqErrorCommand::createProcesses(string filename, string qFileName, string r
 		processIDS.clear();
 		map<char, vector<int> >::iterator it;
 		int num = 0;
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		
 		//loop through and create all the processes you want
 		while (process != processors) {
@@ -682,7 +682,8 @@ int SeqErrorCommand::driver(string filename, string qFileName, string rFileName,
 			if(numParentSeqs > 1 && ignoreChimeras == 1)	{	ignoreSeq = 1;	}
 			else											{	ignoreSeq = 0;	}
 			
-			Compare minCompare = getErrors(query, referenceSeqs[closestRefIndex]);
+			Compare minCompare;
+            getErrors(query, referenceSeqs[closestRefIndex], minCompare);
 			
 			if(namesFileName != ""){
 				it = weights.find(query.getName());
@@ -739,7 +740,7 @@ int SeqErrorCommand::driver(string filename, string qFileName, string rFileName,
 			
 			index++;
 			
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				unsigned long long pos = queryFile.tellg();
 				if ((pos == -1) || (pos >= line.end)) { break; }
 			#else
@@ -839,7 +840,7 @@ void SeqErrorCommand::getReferences(){
 
 //***************************************************************************************************************
 
-Compare SeqErrorCommand::getErrors(Sequence query, Sequence reference){
+int SeqErrorCommand::getErrors(Sequence query, Sequence reference, Compare& errors){
 	try {
 		if(query.getAlignLength() != reference.getAlignLength()){
 			m->mothurOut("Warning: " + toString(query.getName()) + " and " + toString(reference.getName()) + " are different lengths\n");
@@ -850,7 +851,7 @@ Compare SeqErrorCommand::getErrors(Sequence query, Sequence reference){
 		string r = reference.getAligned();
 
 		int started = 0;
-		Compare errors;
+		//Compare errors;
 
 		for(int i=0;i<alignLength;i++){
 //			cout << r[i] << '\t' << q[i] << '\t';
@@ -929,7 +930,8 @@ Compare SeqErrorCommand::getErrors(Sequence query, Sequence reference){
 		errors.queryName = query.getName();
 		errors.refName = reference.getName();
 		
-		return errors;
+		//return errors;
+        return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SeqErrorCommand", "getErrors");
@@ -1215,7 +1217,7 @@ void SeqErrorCommand::printQualityFR(vector<vector<int> > qualForwardMap, vector
 
 int SeqErrorCommand::setLines(string filename, string qfilename, string rfilename, vector<unsigned long long>& fastaFilePos, vector<unsigned long long>& qfileFilePos, vector<unsigned long long>& rfileFilePos) {
 	try {
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		//set file positions for fasta file
 		fastaFilePos = m->divideFile(filename, processors);
 		

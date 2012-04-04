@@ -176,7 +176,7 @@ int CatchAllCommand::execute() {
 		
 		savedOutputDir = outputDir;
 		string catchAllCommandExe = ""; 
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 			catchAllCommandExe += "mono " + path + "CatchAllcmdL.exe ";
 			if (outputDir == "") { outputDir = "./"; } //force full pathname to be created for catchall, this is necessary because if catchall is in the path it will look for input file whereever the exe is and not the cwd.
 		#else
@@ -224,7 +224,7 @@ int CatchAllCommand::execute() {
 											
 						//create system command
 						string catchAllCommand = "";
-						#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+						#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 							catchAllCommand += catchAllCommandExe + filename + " " + outputPath + " 1";
 						#else
 							if (outputPath.length() > 0) { outputPath = outputPath.substr(0, outputPath.length()-1); }
@@ -269,7 +269,7 @@ int CatchAllCommand::execute() {
 											
 						//create system command
 						string catchAllCommand = "";
-						#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+						#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 							catchAllCommand += catchAllCommandExe + filename + " " + outputPath + " 1";
 						#else
 							if (outputPath.length() > 0) { outputPath = outputPath.substr(0, outputPath.length()-1); }
@@ -334,7 +334,7 @@ int CatchAllCommand::execute() {
 				
 				//create system command
 				string catchAllCommand = "";
-				#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+				#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 					catchAllCommand += catchAllCommandExe + filename + " " + outputPath + " 1";
 				#else
 					if (outputPath.length() > 0) { outputPath = outputPath.substr(0, outputPath.length()-1); }

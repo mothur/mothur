@@ -27,10 +27,8 @@ public:
 	Sequence();
 	Sequence(string, string);
 	Sequence(ifstream&);
+    Sequence(ifstream&, string&, bool);
 	Sequence(istringstream&);
-	Sequence(const Sequence& se) : name(se.name), unaligned(se.unaligned), aligned(se.aligned), pairwise(se.pairwise), numBases(se.numBases), startPos(se.startPos), endPos(se.endPos),
-									alignmentLength(se.alignmentLength), isAligned(se.isAligned), longHomoPolymer(se.longHomoPolymer), ambigBases(se.ambigBases) { m = MothurOut::getInstance(); }
-	
 	//these constructors just set the unaligned string to save space
 	Sequence(string, string, string);  
 	Sequence(ifstream&, string);
@@ -55,6 +53,8 @@ public:
 	int getEndPos();
 	void padToPos(int);
 	void padFromPos(int);
+    int filterToPos(int); //any character before the pos is changed to . and aligned and unaligned strings changed
+    int filterFromPos(int); //any character after the pos is changed to . and aligned and unaligned strings changed
 	int getAlignLength();
 	int getAmbigBases();
 	void removeAmbigBases();

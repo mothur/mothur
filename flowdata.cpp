@@ -135,7 +135,8 @@ void FlowData::capFlows(int mF){
 	try{
 		
 		maxFlows = mF;
-		if(endFlow > maxFlows){	endFlow = maxFlows;	}		
+		if(endFlow > maxFlows){	endFlow = maxFlows;	}	
+        translateFlow();
 		
 	}
 	catch(exception& e) {

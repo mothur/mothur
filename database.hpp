@@ -45,7 +45,6 @@ class Database {
 
 public:
 	Database();
-	Database(const Database& db) : numSeqs(db.numSeqs), longest(db.longest), searchScore(db.searchScore), results(db.results), Scores(db.Scores) { m = MothurOut::getInstance(); }
 	virtual ~Database();
 	virtual void generateDB() = 0; 
 	virtual void addSequence(Sequence) = 0;  //add sequence to search engine

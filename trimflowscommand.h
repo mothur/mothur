@@ -49,7 +49,8 @@ private:
 	vector<unsigned long long> getFlowFileBreaks();
 	int createProcessesCreateTrim(string, string, string, string, vector<vector<string> >); 
 	int driverCreateTrim(string, string, string, string, vector<vector<string> >, linePair*);
-
+    string reverseOligo(string);
+    
 	vector<string> outputNames;
 	set<string> filesToRemove;
 	
@@ -71,6 +72,8 @@ private:
 	map<string, int> barcodes;
 	map<string, int> primers;
 	vector<string> revPrimer;
+    vector<string> linker;
+    vector<string> spacer;
 
 	vector<string> primerNameVector;	//needed here?
 	vector<string> barcodeNameVector;	//needed here?
@@ -131,7 +134,7 @@ struct trimFlowData {
 };
 
 /**************************************************************************************************/
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 #else
 static DWORD WINAPI MyTrimFlowThreadFunction(LPVOID lpParam){ 
 	trimFlowData* pDataArray;

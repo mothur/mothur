@@ -10,7 +10,7 @@
  *
  */
 
-#include "mothur.h"
+
 #include "command.hpp"
 #include "classify.h"
 #include "referencedb.h"
@@ -130,7 +130,7 @@ struct classifyData {
 };
 
 /**************************************************************************************************/
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 #else
 static DWORD WINAPI MyClassThreadFunction(LPVOID lpParam){ 
 	classifyData* pDataArray;
@@ -163,7 +163,7 @@ static DWORD WINAPI MyClassThreadFunction(LPVOID lpParam){
 		//make classify
 		Classify* myclassify;
 		if(pDataArray->method == "bayesian"){	myclassify = new Bayesian(pDataArray->taxonomyFileName, pDataArray->templateFileName, pDataArray->search, pDataArray->kmerSize, pDataArray->cutoff, pDataArray->iters, pDataArray->threadID, pDataArray->flip);		}
-		else if(pDataArray->method == "knn"){	myclassify = new Knn(pDataArray->taxonomyFileName, pDataArray->templateFileName, pDataArray->search, pDataArray->kmerSize, pDataArray->gapOpen, pDataArray->gapExtend, pDataArray->match, pDataArray->misMatch, pDataArray->numWanted, pDataArray->threadID, pDataArray->flipThreshold);				}
+		else if(pDataArray->method == "knn"){	myclassify = new Knn(pDataArray->taxonomyFileName, pDataArray->templateFileName, pDataArray->search, pDataArray->kmerSize, pDataArray->gapOpen, pDataArray->gapExtend, pDataArray->match, pDataArray->misMatch, pDataArray->numWanted, pDataArray->threadID);				}
 		else {
 			pDataArray->m->mothurOut(pDataArray->search + " is not a valid method option. I will run the command using bayesian.");
 			pDataArray->m->mothurOutEndLine();

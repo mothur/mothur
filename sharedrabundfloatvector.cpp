@@ -348,7 +348,7 @@ SharedRAbundVector SharedRAbundFloatVector::getSharedRAbundVector(){
 		exit(1);
 	}		
 }
-/***********************************************************************/
+***********************************************************************/
 vector<SharedRAbundFloatVector*> SharedRAbundFloatVector::getSharedRAbundFloatVectors(){
 	try {
 		SharedUtil* util;
@@ -419,7 +419,7 @@ SharedSAbundVector SharedRAbundVector::getSharedSAbundVector(){
 		exit(1);
 	}
 }
-/***********************************************************************/
+***********************************************************************/
 
 SAbundVector SharedRAbundFloatVector::getSAbundVector() {
 	try {
@@ -461,7 +461,7 @@ SharedOrderVector SharedRAbundFloatVector::getSharedOrderVector() {
 		exit(1);
 	}
 }
-/***********************************************************************/
+***********************************************************************/
 //this is not functional, not sure how to handle it yet, but I need the stub because it is a pure function
 OrderVector SharedRAbundFloatVector::getOrderVector(map<string,int>* nameMap = NULL) {
 	try {

@@ -286,11 +286,12 @@ int SeqSummaryCommand::execute(){
 				MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 #else
 			vector<unsigned long long> positions; 
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				positions = m->divideFile(fastafile, processors);
 				for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(new linePair(positions[i], positions[(i+1)]));	}
 			#else
 				positions = m->setFilePosFasta(fastafile, numSeqs); 
+                if (positions.size() < processors) { processors = positions.size(); }
 		
 				//figure out how many sequences you have to process
 				int numSeqsPerProcessor = numSeqs / processors;
@@ -433,7 +434,7 @@ int SeqSummaryCommand::driverCreateSummary(vector<int>& startPosition, vector<in
 				outSummary << current.getLongHomoPolymer() << '\t' << num << endl;
 			}
 			
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 				unsigned long long pos = in.tellg();
 				if ((pos == -1) || (pos >= filePos->end)) { break; }
 			#else
@@ -529,7 +530,7 @@ int SeqSummaryCommand::createProcessesCreateSummary(vector<int>& startPosition, 
 		int num = 0;
 		processIDS.clear();
 		
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		
 		//loop through and create all the processes you want
 		while (process != processors) {
@@ -603,34 +604,42 @@ int SeqSummaryCommand::createProcessesCreateSummary(vector<int>& startPosition, 
 		//////////////////////////////////////////////////////////////////////////////////////////////////////
 		
 		vector<seqSumData*> pDataArray; 
-		DWORD   dwThreadIdArray[processors];
-		HANDLE  hThreadArray[processors]; 
+		DWORD   dwThreadIdArray[processors-1];
+		HANDLE  hThreadArray[processors-1]; 
 		
 		//Create processor worker threads.
-		for( int i=0; i<processors; i++ ){
-			
-			//cout << i << '\t' << lines[i]->start << '\t' << lines[i]->end << endl;
+		for( int i=0; i<processors-1; i++ ){
+            
+            string extension = "";
+            if (i != 0) { extension = toString(i) + ".temp"; processIDS.push_back(i); }
 			// Allocate memory for thread data.
-			seqSumData* tempSum = new seqSumData(&startPosition, &endPosition, &seqLength, &ambigBases, &longHomoPolymer, filename, (sumFile + toString(i) + ".temp"), m, lines[i]->start, lines[i]->end, namefile, nameMap);
+			seqSumData* tempSum = new seqSumData(filename, (sumFile+extension), m, lines[i]->start, lines[i]->end, namefile, nameMap);
 			pDataArray.push_back(tempSum);
-			processIDS.push_back(i);
-				
+			
 			//MySeqSumThreadFunction is in header. It must be global or static to work with the threads.
 			//default security attributes, thread function name, argument to thread function, use default creation flags, returns the thread identifier
 			hThreadArray[i] = CreateThread(NULL, 0, MySeqSumThreadFunction, pDataArray[i], 0, &dwThreadIdArray[i]);   
 		}
-			
+		
+        //do your part
+		num = driverCreateSummary(startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, fastafile, (sumFile+toString(processors-1)+".temp"), lines[processors-1]);
+        processIDS.push_back(processors-1);
+
 		//Wait until all threads have terminated.
-		WaitForMultipleObjects(processors, hThreadArray, TRUE, INFINITE);
+		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
 		
 		//Close all thread handles and free memory allocations.
 		for(int i=0; i < pDataArray.size(); i++){
 			num += pDataArray[i]->count;
+            for (int k = 0; k < pDataArray[i]->startPosition.size(); k++) {	startPosition.push_back(pDataArray[i]->startPosition[k]);       }
+			for (int k = 0; k < pDataArray[i]->endPosition.size(); k++) {	endPosition.push_back(pDataArray[i]->endPosition[k]);       }
+            for (int k = 0; k < pDataArray[i]->seqLength.size(); k++) {	seqLength.push_back(pDataArray[i]->seqLength[k]);       }
+            for (int k = 0; k < pDataArray[i]->ambigBases.size(); k++) {	ambigBases.push_back(pDataArray[i]->ambigBases[k]);       }
+            for (int k = 0; k < pDataArray[i]->longHomoPolymer.size(); k++) {	longHomoPolymer.push_back(pDataArray[i]->longHomoPolymer[k]);       }
 			CloseHandle(hThreadArray[i]);
 			delete pDataArray[i];
 		}
-		
-		//rename((sumFile + toString(processIDS[0]) + ".temp").c_str(), sumFile.c_str());
+    
 		//append files
 		for(int i=0;i<processIDS.size();i++){
 			m->appendFiles((sumFile + toString(processIDS[i]) + ".temp"), sumFile);

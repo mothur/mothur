@@ -162,7 +162,7 @@ int SummaryQualCommand::execute(){
 		if (namefile != "") { nameMap = m->readNames(namefile); }
 		
 		vector<unsigned long long> positions; 
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		positions = m->divideFile(qualfile, processors);
 		for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
 #else	
@@ -170,6 +170,7 @@ int SummaryQualCommand::execute(){
 			lines.push_back(linePair(0, 1000)); 
 		}else {
 			positions = m->setFilePosFasta(qualfile, numSeqs); 
+            if (positions.size() < processors) { processors = positions.size(); }
 			
 			//figure out how many sequences you have to process
 			int numSeqsPerProcessor = numSeqs / processors;
@@ -267,7 +268,7 @@ int SummaryQualCommand::driverCreateSummary(vector<int>& position, vector<int>& 
 				count += num;
 			}
 			
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 			unsigned long long pos = in.tellg();
 			if ((pos == -1) || (pos >= filePos.end)) { break; }
 #else
@@ -291,7 +292,7 @@ int SummaryQualCommand::createProcessesCreateSummary(vector<int>& position, vect
 		int numSeqs = 0;
 		processIDS.clear();
 		
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		
 		//loop through and create all the processes you want
 		while (process != processors) {
@@ -373,7 +374,7 @@ int SummaryQualCommand::createProcessesCreateSummary(vector<int>& position, vect
 		//////////////////////////////////////////////////////////////////////////////////////////////////////
 		//Windows version shared memory, so be careful when passing variables through the seqSumQualData struct. 
 		//Above fork() will clone, so memory is separate, but that's not the case with windows, 
-		//Taking advantage of shared memory to allow both threads to add info to vectors.
+		//Taking advantage of shared memory to pass results vectors.
 		//////////////////////////////////////////////////////////////////////////////////////////////////////
 		
 		vector<seqSumQualData*> pDataArray; 
@@ -384,12 +385,10 @@ int SummaryQualCommand::createProcessesCreateSummary(vector<int>& position, vect
 		for( int i=0; i<processors; i++ ){
 			
 			// Allocate memory for thread data.
-			seqSumQualData* tempSum = new seqSumQualData(&position, &averageQ, &scores, filename, m, lines[i].start, lines[i].end, namefile, nameMap);
+			seqSumQualData* tempSum = new seqSumQualData(filename, m, lines[i].start, lines[i].end, namefile, nameMap);
 			pDataArray.push_back(tempSum);
 			processIDS.push_back(i);
-			
-			//MySeqSumThreadFunction is in header. It must be global or static to work with the threads.
-			//default security attributes, thread function name, argument to thread function, use default creation flags, returns the thread identifier
+        
 			hThreadArray[i] = CreateThread(NULL, 0, MySeqSumQualThreadFunction, pDataArray[i], 0, &dwThreadIdArray[i]);   
 		}
 		
@@ -399,6 +398,18 @@ int SummaryQualCommand::createProcessesCreateSummary(vector<int>& position, vect
 		//Close all thread handles and free memory allocations.
 		for(int i=0; i < pDataArray.size(); i++){
 			numSeqs += pDataArray[i]->count;
+            int tempNum = pDataArray[i]->position.size();
+            if (position.size() < tempNum) { position.resize(tempNum, 0); }
+			if (averageQ.size() < tempNum) { averageQ.resize(tempNum, 0); }
+			if (scores.size() < tempNum) { 
+				scores.resize(tempNum); 
+				for (int i = 0; i < scores.size(); i++) { scores[i].resize(41, 0); }
+			}
+            
+            for (int k = 0; k < tempNum; k++)			{		 position[k]    +=  pDataArray[i]->position[k];         }		
+			for (int k = 0; k < tempNum; k++)			{		 averageQ[k]    +=  pDataArray[i]->averageQ[k];         }		
+			for (int k = 0; k < tempNum; k++)			{	for (int j = 0; j < 41; j++) {  scores[k][j] += pDataArray[i]->scores[k][j];   }	}
+
 			CloseHandle(hThreadArray[i]);
 			delete pDataArray[i];
 		}
