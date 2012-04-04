@@ -58,14 +58,15 @@ private:
 	bool allFiles;
 	int processors;
 	int numFPrimers, numRPrimers;
-	int maxFlows, minFlows, minLength, maxLength, maxHomoP, tdiffs, bdiffs, pdiffs;
+    int numLinkers, numSpacers;
+
+    int maxFlows, minFlows, minLength, maxLength, maxHomoP, tdiffs, bdiffs, pdiffs;
 	int numFlows;
 	float signal, noise;
 	bool fasta;
 	string flowOrder;	
 	
 	string flowFileName, oligoFileName, outputDir;
-
 
 	map<string, int> barcodes;
 	map<string, int> primers;
