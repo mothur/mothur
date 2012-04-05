@@ -36,8 +36,6 @@
 #include "binsequencecommand.h"
 #include "getoturepcommand.h"
 #include "treegroupscommand.h"
-#include "bootstrapsharedcommand.h"
-//#include "consensuscommand.h"
 #include "distancecommand.h"
 #include "aligncommand.h"
 #include "matrixoutputcommand.h"
@@ -191,8 +189,6 @@ CommandFactory::CommandFactory(){
 	commands["get.label"]           = "get.label";
 	commands["get.sabund"]          = "get.sabund";
 	commands["get.rabund"]          = "get.rabund";
-	commands["bootstrap.shared"]	= "bootstrap.shared";
-	//commands["consensus"]			= "consensus";
 	commands["help"]				= "help";
 	commands["reverse.seqs"]		= "reverse.seqs";
 	commands["trim.seqs"]			= "trim.seqs";
@@ -359,8 +355,6 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "get.oturep")			{   command = new GetOTURepCommand(optionString);				}
 		else if(commandName == "tree.shared")			{   command = new TreeGroupCommand(optionString);				}
 		else if(commandName == "dist.shared")			{   command = new MatrixOutputCommand(optionString);			}
-		else if(commandName == "bootstrap.shared")		{   command = new BootSharedCommand(optionString);				}
-		else if(commandName == "consensus")				{   command = new ConcensusCommand(optionString);				}
 		else if(commandName == "dist.seqs")				{   command = new DistanceCommand(optionString);				}
 		else if(commandName == "align.seqs")			{   command = new AlignCommand(optionString);					}
 		else if(commandName == "summary.seqs")			{	command = new SeqSummaryCommand(optionString);				}
@@ -510,8 +504,6 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "get.oturep")			{   pipecommand = new GetOTURepCommand(optionString);				}
 		else if(commandName == "tree.shared")			{   pipecommand = new TreeGroupCommand(optionString);				}
 		else if(commandName == "dist.shared")			{   pipecommand = new MatrixOutputCommand(optionString);			}
-		else if(commandName == "bootstrap.shared")		{   pipecommand = new BootSharedCommand(optionString);				}
-		else if(commandName == "consensus")				{   pipecommand = new ConcensusCommand(optionString);				}
 		else if(commandName == "dist.seqs")				{   pipecommand = new DistanceCommand(optionString);				}
 		else if(commandName == "align.seqs")			{   pipecommand = new AlignCommand(optionString);					}
 		else if(commandName == "summary.seqs")			{	pipecommand = new SeqSummaryCommand(optionString);				}
@@ -648,8 +640,6 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "get.oturep")			{   shellcommand = new GetOTURepCommand();				}
 		else if(commandName == "tree.shared")			{   shellcommand = new TreeGroupCommand();				}
 		else if(commandName == "dist.shared")			{   shellcommand = new MatrixOutputCommand();			}
-		else if(commandName == "bootstrap.shared")		{   shellcommand = new BootSharedCommand();				}
-		else if(commandName == "consensus")				{   shellcommand = new ConcensusCommand();				}
 		else if(commandName == "dist.seqs")				{   shellcommand = new DistanceCommand();				}
 		else if(commandName == "align.seqs")			{   shellcommand = new AlignCommand();					}
 		else if(commandName == "summary.seqs")			{	shellcommand = new SeqSummaryCommand();				}

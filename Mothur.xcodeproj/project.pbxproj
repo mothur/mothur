@@ -77,7 +77,6 @@
 		A7E9B88C12D37EC400DA6239 /* blastdb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B66412D37EC400DA6239 /* blastdb.cpp */; };
 		A7E9B88D12D37EC400DA6239 /* boneh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B66612D37EC400DA6239 /* boneh.cpp */; };
 		A7E9B88E12D37EC400DA6239 /* bootstrap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B66812D37EC400DA6239 /* bootstrap.cpp */; };
-		A7E9B88F12D37EC400DA6239 /* bootstrapsharedcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B66A12D37EC400DA6239 /* bootstrapsharedcommand.cpp */; };
 		A7E9B89012D37EC400DA6239 /* bstick.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B66C12D37EC400DA6239 /* bstick.cpp */; };
 		A7E9B89112D37EC400DA6239 /* calculator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B66E12D37EC400DA6239 /* calculator.cpp */; };
 		A7E9B89212D37EC400DA6239 /* canberra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B67012D37EC400DA6239 /* canberra.cpp */; };
@@ -112,7 +111,7 @@
 		A7E9B8B012D37EC400DA6239 /* commandfactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6AF12D37EC400DA6239 /* commandfactory.cpp */; };
 		A7E9B8B112D37EC400DA6239 /* commandoptionparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6B112D37EC400DA6239 /* commandoptionparser.cpp */; };
 		A7E9B8B212D37EC400DA6239 /* completelinkage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6B412D37EC400DA6239 /* completelinkage.cpp */; };
-		A7E9B8B312D37EC400DA6239 /* consensuscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6B512D37EC400DA6239 /* consensuscommand.cpp */; };
+		A7E9B8B312D37EC400DA6239 /* consensus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6B512D37EC400DA6239 /* consensus.cpp */; };
 		A7E9B8B412D37EC400DA6239 /* consensusseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6B712D37EC400DA6239 /* consensusseqscommand.cpp */; };
 		A7E9B8B512D37EC400DA6239 /* corraxescommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6B912D37EC400DA6239 /* corraxescommand.cpp */; };
 		A7E9B8B612D37EC400DA6239 /* coverage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6BB12D37EC400DA6239 /* coverage.cpp */; };
@@ -527,8 +526,6 @@
 		A7E9B66712D37EC400DA6239 /* boneh.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = boneh.h; sourceTree = "<group>"; };
 		A7E9B66812D37EC400DA6239 /* bootstrap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = bootstrap.cpp; sourceTree = "<group>"; };
 		A7E9B66912D37EC400DA6239 /* bootstrap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bootstrap.h; sourceTree = "<group>"; };
-		A7E9B66A12D37EC400DA6239 /* bootstrapsharedcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = bootstrapsharedcommand.cpp; sourceTree = "<group>"; };
-		A7E9B66B12D37EC400DA6239 /* bootstrapsharedcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bootstrapsharedcommand.h; sourceTree = "<group>"; };
 		A7E9B66C12D37EC400DA6239 /* bstick.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = bstick.cpp; sourceTree = "<group>"; };
 		A7E9B66D12D37EC400DA6239 /* bstick.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bstick.h; sourceTree = "<group>"; };
 		A7E9B66E12D37EC400DA6239 /* calculator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = calculator.cpp; sourceTree = "<group>"; };
@@ -600,8 +597,8 @@
 		A7E9B6B212D37EC400DA6239 /* commandoptionparser.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = commandoptionparser.hpp; sourceTree = SOURCE_ROOT; };
 		A7E9B6B312D37EC400DA6239 /* common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = common.h; sourceTree = "<group>"; };
 		A7E9B6B412D37EC400DA6239 /* completelinkage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = completelinkage.cpp; sourceTree = SOURCE_ROOT; };
-		A7E9B6B512D37EC400DA6239 /* consensuscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = consensuscommand.cpp; sourceTree = "<group>"; };
-		A7E9B6B612D37EC400DA6239 /* consensuscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = consensuscommand.h; sourceTree = "<group>"; };
+		A7E9B6B512D37EC400DA6239 /* consensus.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = consensus.cpp; sourceTree = "<group>"; };
+		A7E9B6B612D37EC400DA6239 /* consensus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = consensus.h; sourceTree = "<group>"; };
 		A7E9B6B712D37EC400DA6239 /* consensusseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = consensusseqscommand.cpp; sourceTree = "<group>"; };
 		A7E9B6B812D37EC400DA6239 /* consensusseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = consensusseqscommand.h; sourceTree = "<group>"; };
 		A7E9B6B912D37EC400DA6239 /* corraxescommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = corraxescommand.cpp; sourceTree = "<group>"; };
@@ -1132,6 +1129,8 @@
 				A7DAAFA3133A254E003956EB /* commandparameter.h */,
 				A7E9B6B412D37EC400DA6239 /* completelinkage.cpp */,
 				A7E9BA4212D3960D00DA6239 /* containers */,
+				A7E9B6B612D37EC400DA6239 /* consensus.h */,
+				A7E9B6B512D37EC400DA6239 /* consensus.cpp */,
 				A7AACFBA132FE008003D6C4D /* currentfile.h */,
 				A7E9B6C912D37EC400DA6239 /* display.h */,
 				A7E9B6D112D37EC400DA6239 /* dlibshuff.cpp */,
@@ -1308,8 +1307,6 @@
 				A71CB15E130B04A2001E7287 /* anosimcommand.cpp */,
 				A7E9B66112D37EC300DA6239 /* binsequencecommand.h */,
 				A7E9B66012D37EC300DA6239 /* binsequencecommand.cpp */,
-				A7E9B66B12D37EC400DA6239 /* bootstrapsharedcommand.h */,
-				A7E9B66A12D37EC400DA6239 /* bootstrapsharedcommand.cpp */,
 				A7E9B67312D37EC400DA6239 /* catchallcommand.h */,
 				A7E9B67212D37EC400DA6239 /* catchallcommand.cpp */,
 				A7E9B67B12D37EC400DA6239 /* chimerabellerophoncommand.h */,
@@ -1350,8 +1347,6 @@
 				A7E9B6A812D37EC400DA6239 /* collectcommand.cpp */,
 				A7E9B6AD12D37EC400DA6239 /* collectsharedcommand.h */,
 				A7E9B6AC12D37EC400DA6239 /* collectsharedcommand.cpp */,
-				A7E9B6B612D37EC400DA6239 /* consensuscommand.h */,
-				A7E9B6B512D37EC400DA6239 /* consensuscommand.cpp */,
 				A7E9B6B812D37EC400DA6239 /* consensusseqscommand.h */,
 				A7E9B6B712D37EC400DA6239 /* consensusseqscommand.cpp */,
 				A7C3DC0A14FE457500FE1924 /* cooccurrencecommand.h */,
@@ -1979,7 +1974,6 @@
 				A7E9B88C12D37EC400DA6239 /* blastdb.cpp in Sources */,
 				A7E9B88D12D37EC400DA6239 /* boneh.cpp in Sources */,
 				A7E9B88E12D37EC400DA6239 /* bootstrap.cpp in Sources */,
-				A7E9B88F12D37EC400DA6239 /* bootstrapsharedcommand.cpp in Sources */,
 				A7E9B89012D37EC400DA6239 /* bstick.cpp in Sources */,
 				A7E9B89112D37EC400DA6239 /* calculator.cpp in Sources */,
 				A7E9B89212D37EC400DA6239 /* canberra.cpp in Sources */,
@@ -2014,7 +2008,7 @@
 				A7E9B8B012D37EC400DA6239 /* commandfactory.cpp in Sources */,
 				A7E9B8B112D37EC400DA6239 /* commandoptionparser.cpp in Sources */,
 				A7E9B8B212D37EC400DA6239 /* completelinkage.cpp in Sources */,
-				A7E9B8B312D37EC400DA6239 /* consensuscommand.cpp in Sources */,
+				A7E9B8B312D37EC400DA6239 /* consensus.cpp in Sources */,
 				A7E9B8B412D37EC400DA6239 /* consensusseqscommand.cpp in Sources */,
 				A7E9B8B512D37EC400DA6239 /* corraxescommand.cpp in Sources */,
 				A7E9B8B612D37EC400DA6239 /* coverage.cpp in Sources */,
