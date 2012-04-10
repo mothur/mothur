@@ -1734,7 +1734,7 @@ void ShhherCommand::writeSequences(vector<int> otuCounts){
         outputNames.push_back(fastaFileName);
         
         if(compositeFASTAFileName != ""){
-            m->appendFiles(fastaFileName, compositeFASTAFileName);
+            m->appendFiles(fastaFileName, thisOutputDir + compositeFASTAFileName);
         }
     }
     catch(exception& e) {
@@ -1772,7 +1772,7 @@ void ShhherCommand::writeNames(vector<int> otuCounts){
         
         
         if(compositeNamesFileName != ""){
-            m->appendFiles(nameFileName, compositeNamesFileName);
+            m->appendFiles(nameFileName, thisOutputDir + compositeNamesFileName);
         }		
     }
     catch(exception& e) {
