@@ -1772,7 +1772,7 @@ void ShhherCommand::writeNames(vector<int> otuCounts){
         
         
         if(compositeNamesFileName != ""){
-            m->appendFiles(nameFileName, thisOutputDir + compositeNamesFileName);
+            m->appendFiles(nameFileName, thisOutputDir + uchimecompositeNamesFileName);
         }		
     }
     catch(exception& e) {
