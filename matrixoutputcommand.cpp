@@ -65,7 +65,6 @@ MatrixOutputCommand::MatrixOutputCommand(){
 		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["phylip"] = tempOutNames;
-        outputTypes["subsample"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "MatrixOutputCommand", "MatrixOutputCommand");
@@ -100,7 +99,6 @@ MatrixOutputCommand::MatrixOutputCommand(string option)  {
 			//initialize outputTypes
 			vector<string> tempOutNames;
 			outputTypes["phylip"] = tempOutNames;
-            outputTypes["subsample"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -459,10 +457,7 @@ void MatrixOutputCommand::printSims(ostream& out, vector< vector<double> >& simM
 /***********************************************************/
 int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
 	try {
-		EstOutput data;
-		vector<SharedRAbundVector*> subset;
 		vector< vector< vector<seqDist> > > calcDistsTotals;  //each iter, one for each calc, then each groupCombos dists. this will be used to make .dist files
-
         vector< vector<seqDist>  > calcDists; calcDists.resize(matrixCalculators.size()); 		
 
         for (int thisIter = 0; thisIter < iters; thisIter++) {

@@ -7,99 +7,21 @@
  *
  */
 
-#include "consensuscommand.h"
+#include "consensus.h"
 
 //**********************************************************************************************************************
-vector<string> ConcensusCommand::setParameters(){	
+Tree* Consensus::getTree(vector<Tree*>& t, TreeMap* tmap){
 	try {
-		vector<string> myArray;
-		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
-		return myArray;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ConcensusCommand", "setParameters");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-string ConcensusCommand::getHelpString(){	
-	try {
-		string helpString = "";
-		helpString += "The consensus command can only be executed after a successful read.tree command.\n";
-		helpString += "The consensus command has no parameters.\n";
-		helpString += "The consensus command should be in the following format: consensus().\n";
-		helpString += "The consensus command output two files: .consensus.tre and .consensuspairs.\n";
-		helpString += "The .consensus.tre file contains the consensus tree of the trees in your input file.\n";
-		helpString += "The branch lengths are the percentage of trees in your input file that had the given pair.\n";
-		helpString += "The .consensuspairs file contains a list of the internal nodes in your tree.  For each node, the pair that was used in the consensus tree \n";
-		helpString += "is reported with its percentage, as well as the other pairs that were seen for that node but not used and their percentages.\n";		
-		return helpString;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ConcensusCommand", "getHelpString");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-ConcensusCommand::ConcensusCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["tree"] = tempOutNames;
-		outputTypes["nodepairs"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ConcensusCommand", "ConcensusCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-
-ConcensusCommand::ConcensusCommand(string fileroot)  {
-	try {
-		abort = false; calledHelp = false;   
-		
-		setParameters();
-		
-		//initialize outputTypes
-		vector<string> tempOutNames;
-		outputTypes["tree"] = tempOutNames;
-		outputTypes["nodepairs"] = tempOutNames;
-		
-		filename = fileroot;
-	
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ConcensusCommand", "ConcensusCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-
-int ConcensusCommand::execute(){
-	try {
-		
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
-		
-		
-		m->mothurOut("This command is not currently in use."); m->mothurOutEndLine();
-	/*	
-		t = globaldata->gTree;
 		numNodes = t[0]->getNumNodes();
 		numLeaves = t[0]->getNumLeaves();
-		
+        numTrees = t.size();
 		
 		//get the possible pairings
-		getSets();	
+		getSets(t);	
 		
 		if (m->control_pressed) { return 0; }
 		
-		//open file for pairing not included in the tree
-		notIncluded = filename + ".cons.pairs"; outputNames.push_back(notIncluded);  outputTypes["nodepairs"].push_back(notIncluded);
-		m->openOutputFile(notIncluded, out2);
-		
-		consensusTree = new Tree();
+		consensusTree = new Tree(tmap);
 		
 		it2 = nodePairs.find(treeSet);
 		
@@ -111,27 +33,44 @@ int ConcensusCommand::execute(){
 		//set count to numLeaves;
 		count = numLeaves;
 		
-		buildConcensusTree(treeSet);
+		buildConsensusTree(treeSet);
 		
 		if (m->control_pressed) { delete consensusTree; return 0; }
 		
 		consensusTree->assembleTree();
 		
 		if (m->control_pressed) { delete consensusTree; return 0; }
+				
+		return consensusTree; 
 		
-		//output species in order
+		return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "Consensus", "execute");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+int Consensus::printSetsInfo() {
+	try {
+        //open file for pairing not included in the tree
+		string notIncluded = "cons.pairs";  
+		ofstream out2;
+        m->openOutputFile(notIncluded, out2);
+
+        //output species in order
 		out2 << "Species in Order: " << endl << endl;
 		for (int i = 0; i < treeSet.size(); i++) {  out2 << i+1 << ".  " << treeSet[i] << endl; }
 		
 		//output sets included
 		out2 << endl << "Sets included in the consensus tree:" << endl << endl;
 		
-		if (m->control_pressed) { delete consensusTree; return 0; }
+		if (m->control_pressed) {  return 0; }
 		
 		vector<string> temp;
 		for (it2 = nodePairsInTree.begin(); it2 != nodePairsInTree.end(); it2++) {
-		
-			if (m->control_pressed) { delete consensusTree; return 0; }
+            
+			if (m->control_pressed) {  return 0; }
 			
 			//only output pairs not leaves
 			if (it2->first.size() > 1) { 
@@ -158,53 +97,36 @@ int ConcensusCommand::execute(){
 		//output sets not included
 		out2 << endl << "Sets NOT included in the consensus tree:" << endl << endl;
 		for (it2 = nodePairs.begin(); it2 != nodePairs.end(); it2++) {
-		
-			if (m->control_pressed) { delete consensusTree; return 0; }
+            
+			if (m->control_pressed) { return 0; }
 			
 			temp.clear();
 			//initialize temp to all "."
 			temp.resize(treeSet.size(), ".");
-				
+            
 			//set the spot in temp that represents it2->first[i] to a "*" 
 			for (int i = 0; i < it2->first.size(); i++) {
 				//find spot 
 				int index = findSpot(it2->first[i]);
 				temp[index] = "*";
 			}
-				
+            
 			//output temp
 			for (int j = 0; j < temp.size(); j++) { 
 				out2 << temp[j];
 			}
 			out2 << '\t' << it2->second << endl;
 		}
-		
-		outputFile = filename + ".cons.tre";  outputNames.push_back(outputFile); outputTypes["tree"].push_back(outputFile);
-		m->openOutputFile(outputFile, out);
-		
-		consensusTree->print(out, "boot");
-		
-		out.close(); out2.close();
-		
-		delete consensusTree; 
-		
-		//set first tree file as new current treefile
-		string currentTree = "";
-		itTypes = outputTypes.find("tree");
-		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { currentTree = (itTypes->second)[0]; m->setTreeFile(currentTree); }
-		}
-		*/
-		return 0;
-	}
+        
+        return 0;
+    }
 	catch(exception& e) {
-		m->errorOut(e, "ConcensusCommand", "execute");
+		m->errorOut(e, "Consensus", "printSetsInfo");
 		exit(1);
 	}
-}
-
+}      
 //**********************************************************************************************************************
-int ConcensusCommand::buildConcensusTree(vector<string> nodeSet) {
+int Consensus::buildConsensusTree(vector<string> nodeSet) {
 	try {
 		vector<string> leftChildSet;
 		vector<string> rightChildSet;
@@ -220,10 +142,10 @@ int ConcensusCommand::buildConcensusTree(vector<string> nodeSet) {
 		else {
 			//finds best child pair
 			leftChildSet = getNextAvailableSet(nodeSet, rightChildSet);
-			int left = buildConcensusTree(leftChildSet);
-			int right = buildConcensusTree(rightChildSet);
+			int left = buildConsensusTree(leftChildSet);
+			int right = buildConsensusTree(rightChildSet);
 			consensusTree->tree[count].setChildren(left, right);
-			consensusTree->tree[count].setLabel(nodePairsInTree[nodeSet]); 
+			consensusTree->tree[count].setLabel((nodePairsInTree[nodeSet]/(float)numTrees)); 
 			consensusTree->tree[left].setParent(count);
 			consensusTree->tree[right].setParent(count);
 			count++;
@@ -232,13 +154,13 @@ int ConcensusCommand::buildConcensusTree(vector<string> nodeSet) {
 	
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ConcensusCommand", "buildConcensusTree");
+		m->errorOut(e, "Consensus", "buildConcensusTree");
 		exit(1);
 	}
 }
 
 //**********************************************************************************************************************
-int ConcensusCommand::getSets() {
+int Consensus::getSets(vector<Tree*>& t) {
 	try {
 		vector<string> temp;
 		treeSet.clear();
@@ -276,7 +198,7 @@ int ConcensusCommand::getSets() {
 		for (int j = 0; j < numLeaves; j++) {
 		
 			if (m->control_pressed) { return 1; }
-			
+            
 			//only need the first one since leaves have no descendants but themselves
 			it = t[0]->tree[j].pcount.begin(); 
 			temp.clear();  temp.push_back(it->first);
@@ -310,12 +232,12 @@ int ConcensusCommand::getSets() {
 		return 0;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ConcensusCommand", "getSets");
+		m->errorOut(e, "Consensus", "getSets");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-vector<string> ConcensusCommand::getSmallest(map< vector<string>, int> nodes) {
+vector<string> Consensus::getSmallest(map< vector<string>, int> nodes) {
 	try{
 		vector<string> smallest = nodes.begin()->first;
 		int smallsize = smallest.size();
@@ -327,13 +249,13 @@ vector<string> ConcensusCommand::getSmallest(map< vector<string>, int> nodes) {
 		return smallest;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ConcensusCommand", "getSmallest");
+		m->errorOut(e, "Consensus", "getSmallest");
 		exit(1);
 	}
 }
 
 //**********************************************************************************************************************
-vector<string> ConcensusCommand::getNextAvailableSet(vector<string> bigset, vector<string>& rest) {
+vector<string> Consensus::getNextAvailableSet(vector<string> bigset, vector<string>& rest) {
 	try {
 //cout << "new call " << endl << endl << endl;
 		vector<string> largest; largest.clear();
@@ -365,13 +287,13 @@ vector<string> ConcensusCommand::getNextAvailableSet(vector<string> bigset, vect
 	
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ConcensusCommand", "getNextAvailableSet");
+		m->errorOut(e, "Consensus", "getNextAvailableSet");
 		exit(1);
 	}
 }
 
 /**********************************************************************************************************************/
-int ConcensusCommand::getSubgroupRating(vector<string> group) {
+int Consensus::getSubgroupRating(vector<string> group) {
 	try {
 		map< vector<string>, int>::iterator ittemp;
 		map< vector< vector<string> > , int >::iterator it3;
@@ -432,13 +354,13 @@ int ConcensusCommand::getSubgroupRating(vector<string> group) {
 		return rate;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ConcensusCommand", "getSubgroupRating");
+		m->errorOut(e, "Consensus", "getSubgroupRating");
 		exit(1);
 	}
 }
 
 //**********************************************************************************************************************
-vector<string> ConcensusCommand::getRestSet(vector<string> bigset, vector<string> subset) {
+vector<string> Consensus::getRestSet(vector<string> bigset, vector<string> subset) {
 	try {
 		vector<string> rest;
 		
@@ -456,13 +378,13 @@ vector<string> ConcensusCommand::getRestSet(vector<string> bigset, vector<string
 	
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ConcensusCommand", "getRestSet");
+		m->errorOut(e, "Consensus", "getRestSet");
 		exit(1);
 	}
 }
 
 //**********************************************************************************************************************
-bool ConcensusCommand::isSubset(vector<string> bigset, vector<string> subset) {
+bool Consensus::isSubset(vector<string> bigset, vector<string> subset) {
 	try {
 		
 	
@@ -483,12 +405,12 @@ bool ConcensusCommand::isSubset(vector<string> bigset, vector<string> subset) {
 	
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ConcensusCommand", "isSubset");
+		m->errorOut(e, "Consensus", "isSubset");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-int ConcensusCommand::findSpot(string node) {
+int Consensus::findSpot(string node) {
 	try {
 		int spot;
 		
@@ -501,7 +423,7 @@ int ConcensusCommand::findSpot(string node) {
 	
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ConcensusCommand", "findSpot");
+		m->errorOut(e, "Consensus", "findSpot");
 		exit(1);
 	}
 }

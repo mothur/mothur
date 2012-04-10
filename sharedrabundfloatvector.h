@@ -23,7 +23,6 @@
 	An individual which knows the OTU from which it came, 
 	the group it is in and its abundance.  */
 
-class GlobalData;
 
 class SharedRAbundFloatVector : public DataVector {
 	

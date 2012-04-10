@@ -76,7 +76,7 @@ SharedRAbundFloatVector::SharedRAbundFloatVector(ifstream& f) : DataVector(), ma
 		}else { label = m->saveNextLabel; }
 		
 		//reset labels, currentLabels may have gotten changed as otus were eliminated because of group choices or sampling
-		m->currentBinLabels = m-> binLabelsInFile;
+		m->currentBinLabels = m->binLabelsInFile;
 		
 		//read in first row since you know there is at least 1 group.
 		f >> groupN >> num;
@@ -108,6 +108,8 @@ SharedRAbundFloatVector::SharedRAbundFloatVector(ifstream& f) : DataVector(), ma
 		//read the rest of the groups info in
 		while ((nextLabel == holdLabel) && (f.eof() != true)) {
 			f >> groupN >> num;
+            
+            if (num != 1000) { break; }
 			count++;
 			
 			allGroups.push_back(groupN);
