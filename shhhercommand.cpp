@@ -148,11 +148,11 @@ ShhherCommand::ShhherCommand(string option) {
 				ofstream temp;
 
 				//flow.files = 9 character offset
-				compositeFASTAFileName = flowFilesFileName.substr(0, flowFilesFileName.length()-10) + "shhh.fasta";
+				compositeFASTAFileName = outputDir + flowFilesFileName.substr(0, flowFilesFileName.length()-10) + "shhh.fasta";
 				m->openOutputFile(compositeFASTAFileName, temp);
 				temp.close();
 				
-				compositeNamesFileName = flowFilesFileName.substr(0, flowFilesFileName.length()-10) + "shhh.names";
+				compositeNamesFileName = outputDir + flowFilesFileName.substr(0, flowFilesFileName.length()-10) + "shhh.names";
 				m->openOutputFile(compositeNamesFileName, temp);
 				temp.close();
 			}
@@ -1734,7 +1734,7 @@ void ShhherCommand::writeSequences(vector<int> otuCounts){
         outputNames.push_back(fastaFileName);
         
         if(compositeFASTAFileName != ""){
-            m->appendFiles(fastaFileName, thisOutputDir + compositeFASTAFileName);
+            m->appendFiles(fastaFileName, compositeFASTAFileName);
         }
     }
     catch(exception& e) {
@@ -1772,7 +1772,7 @@ void ShhherCommand::writeNames(vector<int> otuCounts){
         
         
         if(compositeNamesFileName != ""){
-            m->appendFiles(nameFileName, thisOutputDir + uchimecompositeNamesFileName);
+            m->appendFiles(nameFileName, uchimecompositeNamesFileName);
         }		
     }
     catch(exception& e) {
