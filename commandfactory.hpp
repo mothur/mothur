@@ -48,6 +48,8 @@ private:
 	string outputDir, inputDir, logFileName;
 	bool append;
 	
+    int checkForRedirects(string);
+    
 	static CommandFactory* _uniqueInstance;
 	CommandFactory( const CommandFactory& ); // Disable copy constructor
 	void operator=( const CommandFactory& ); // Disable assignment operator

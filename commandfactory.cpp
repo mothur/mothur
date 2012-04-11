@@ -304,7 +304,49 @@ CommandFactory::~CommandFactory(){
 	delete shellcommand;
 	delete pipecommand;
 }
+/***********************************************************/
 
+/***********************************************************/
+int CommandFactory::checkForRedirects(string optionString) {
+    try {
+        
+        int pos = optionString.find("outputdir");
+        if (pos != string::npos) { //user has set outputdir in command option string
+            string outputOption = "";
+            bool foundEquals = false;
+            for(int i=pos;i<optionString.length();i++){
+                if(optionString[i] == ',')       { break;               }		
+                else if(optionString[i] == '=')  { foundEquals = true;	}
+                if (foundEquals)       {   outputOption += optionString[i]; }
+            }
+            if(m->dirCheck(outputOption)){ 
+                setOutputDirectory(outputOption); 
+                m->mothurOut("Setting output directory to: " + outputOption); m->mothurOutEndLine();
+            }
+        }
+        
+        pos = optionString.find("inputdir");
+        if (pos != string::npos) { //user has set inputdir in command option string
+            string intputOption = "";
+            bool foundEquals = false;
+            for(int i=pos;i<optionString.length();i++){
+                if(optionString[i] == ',')       { break;               }		
+                else if(optionString[i] == '=')  { foundEquals = true;	}
+                if (foundEquals)       {   intputOption += optionString[i]; }
+            }
+            if(m->dirCheck(intputOption)){ 
+                setInputDirectory(intputOption); 
+                m->mothurOut("Setting input directory to: " + intputOption); m->mothurOutEndLine();
+            }
+        }
+        
+        return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "CommandFactory", "getCommand");
+		exit(1);
+	}
+}
 /***********************************************************/
 
 /***********************************************************/
@@ -313,7 +355,9 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 	try {
         
 		delete command;   //delete the old command
-		
+        
+        checkForRedirects(optionString);
+        		
 		//user has opted to redirect output from dir where input files are located to some other place
 		if (outputDir != "") { 
 			if (optionString != "") { optionString += ", outputdir=" + outputDir; }
@@ -463,6 +507,8 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 	try {
 		delete pipecommand;   //delete the old command
 		
+        checkForRedirects(optionString);
+        
 		//user has opted to redirect output from dir where input files are located to some other place
 		if (outputDir != "") { 
 			if (optionString != "") { optionString += ", outputdir=" + outputDir; }

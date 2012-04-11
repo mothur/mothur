@@ -1190,9 +1190,8 @@ int TrimSeqsCommand::setLines(string filename, string qfilename) {
                 cout << fastaFilePos[startIndex] << '\t' << numSeqsPerProcessor << endl;
                 if (qfilename != "") {  qLines.push_back(linePair(qfileFilePos[startIndex], numSeqsPerProcessor)); }
             }
-        
-            if(qfilename == "")	{	qLines = lines;	} //files with duds
         }
+            if(qfilename == "")	{	qLines = lines;	} //files with duds
 			return 1;
 		
 		#endif

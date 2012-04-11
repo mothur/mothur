@@ -128,8 +128,10 @@ ShhherCommand::ShhherCommand(string option) {
 					if (path == "") {	parameters["file"] = inputDir + it->second;		}
 				}
 			}
-			
-			
+            
+            //if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
+            
 			//check for required parameters
 			flowFileName = validParameter.validFile(parameters, "flow", true);
 			flowFilesFileName = validParameter.validFile(parameters, "file", true);
@@ -146,13 +148,15 @@ ShhherCommand::ShhherCommand(string option) {
 			}
 			else{
 				ofstream temp;
-
+                
+                string thisoutputDir = m->hasPath(flowFilesFileName); //if user entered a file with a path then preserve it
+                
 				//flow.files = 9 character offset
-				compositeFASTAFileName = flowFilesFileName.substr(0, flowFilesFileName.length()-10) + "shhh.fasta";
+				compositeFASTAFileName = thisoutputDir + flowFilesFileName.substr(0, flowFilesFileName.length()-10) + "shhh.fasta";
 				m->openOutputFile(compositeFASTAFileName, temp);
 				temp.close();
 				
-				compositeNamesFileName = flowFilesFileName.substr(0, flowFilesFileName.length()-10) + "shhh.names";
+				compositeNamesFileName = thisoutputDir + flowFilesFileName.substr(0, flowFilesFileName.length()-10) + "shhh.names";
 				m->openOutputFile(compositeNamesFileName, temp);
 				temp.close();
 			}
@@ -214,17 +218,10 @@ ShhherCommand::ShhherCommand(string option) {
                 if (flowFileVector.size() == 0) {  m->mothurOut("[ERROR]: no valid files."); m->mothurOutEndLine(); abort = true; }
             }
             else{
+                outputDir += m->hasPath(flowFileName);
                 flowFileVector.push_back(flowFileName);
             }
-
-			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
-				outputDir = "";	
-				outputDir += m->hasPath(flowFileName); //if user entered a file with a path then preserve it	
-			}
-			
-			
+		
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			string temp;

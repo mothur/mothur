@@ -598,6 +598,48 @@ string MothurOut::getPathName(string longName){
 }
 /***********************************************************************/
 
+bool MothurOut::dirCheck(string& dirName){
+	try {
+        
+        string tag = "";
+        #ifdef USE_MPI
+            int pid; 
+            MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
+		
+            tag = toString(pid);
+        #endif
+
+        //add / to name if needed
+        string lastChar = dirName.substr(dirName.length()-1);
+        #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+        if (lastChar != "/") { dirName += "/"; }
+        #else
+        if (lastChar != "\\") { dirName += "\\"; }	
+        #endif
+
+        //test to make sure directory exists
+        dirName = getFullPathName(dirName);
+        string outTemp = dirName + tag + "temp";
+        ofstream out;
+        out.open(outTemp.c_str(), ios::trunc);
+        if(!out) {
+            mothurOut(dirName + " directory does not exist or is not writable."); mothurOutEndLine(); 
+        }else{
+            out.close();
+            mothurRemove(outTemp);
+            return true;
+        }
+        
+        return false;
+    }
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "dirCheck");
+		exit(1);
+	}	
+    
+}
+/***********************************************************************/
+
 string MothurOut::hasPath(string longName){
 	try {
 		string path = "";
