@@ -89,11 +89,123 @@ Tree::Tree(TreeMap* t) : tmap(t) {
 		exit(1);
 	}
 }
-
+/*****************************************************************/
+Tree::Tree(TreeMap* t, vector< vector<double> >& sims) : tmap(t) {
+	try {
+		m = MothurOut::getInstance();
+		
+		if (m->runParse == true) {  parseTreeFile();  m->runParse = false;  }
+        //for(int i = 0; i < 	globaldata->Treenames.size(); i++) { cout << i << '\t' << globaldata->Treenames[i] << endl;  }	
+		numLeaves = m->Treenames.size();
+		numNodes = 2*numLeaves - 1;
+		
+		tree.resize(numNodes);
+        
+		//initialize groupNodeInfo
+		for (int i = 0; i < (tmap->getNamesOfGroups()).size(); i++) {
+			groupNodeInfo[(tmap->getNamesOfGroups())[i]].resize(0);
+		}
+		
+		//initialize tree with correct number of nodes, name and group info.
+		for (int i = 0; i < numNodes; i++) {
+			//initialize leaf nodes
+			if (i <= (numLeaves-1)) {
+				tree[i].setName(m->Treenames[i]);
+				
+				//save group info
+				string group = tmap->getGroup(m->Treenames[i]);
+				
+				vector<string> tempGroups; tempGroups.push_back(group);
+				tree[i].setGroup(tempGroups);
+				groupNodeInfo[group].push_back(i); 
+				
+				//set pcount and pGroup for groupname to 1.
+				tree[i].pcount[group] = 1;
+				tree[i].pGroups[group] = 1;
+				
+				//Treemap knows name, group and index to speed up search
+				tmap->setIndex(m->Treenames[i], i);
+                
+                //intialize non leaf nodes
+			}else if (i > (numLeaves-1)) {
+				tree[i].setName("");
+				vector<string> tempGroups;
+				tree[i].setGroup(tempGroups);
+			}
+		}
+        
+        //build tree from matrix
+        //initialize indexes
+        map<int, int> indexes;  //maps row in simMatrix to vector index in the tree
+        int numGroups = (tmap->getNamesOfGroups()).size();
+        for (int g = 0; g < numGroups; g++) {	indexes[g] = g;	}
+		
+		//do merges and create tree structure by setting parents and children
+		//there are numGroups - 1 merges to do
+		for (int i = 0; i < (numGroups - 1); i++) {
+			float largest = -1000.0;
+			
+			if (m->control_pressed) { break; }
+			
+			int row, column;
+			//find largest value in sims matrix by searching lower triangle
+			for (int j = 1; j < sims.size(); j++) {
+				for (int k = 0; k < j; k++) {
+					if (sims[j][k] > largest) {  largest = sims[j][k]; row = j; column = k;  }
+				}
+			}
+            
+			//set non-leaf node info and update leaves to know their parents
+			//non-leaf
+			tree[numGroups + i].setChildren(indexes[row], indexes[column]);
+			
+			//parents
+			tree[indexes[row]].setParent(numGroups + i);
+			tree[indexes[column]].setParent(numGroups + i);
+			
+			//blength = distance / 2;
+			float blength = ((1.0 - largest) / 2);
+			
+			//branchlengths
+			tree[indexes[row]].setBranchLength(blength - tree[indexes[row]].getLengthToLeaves());
+			tree[indexes[column]].setBranchLength(blength - tree[indexes[column]].getLengthToLeaves());
+			
+			//set your length to leaves to your childs length plus branchlength
+			tree[numGroups + i].setLengthToLeaves(tree[indexes[row]].getLengthToLeaves() + tree[indexes[row]].getBranchLength());
+			
+			
+			//update index 
+			indexes[row] = numGroups+i;
+			indexes[column] = numGroups+i;
+			
+			//remove highest value that caused the merge.
+			sims[row][column] = -1000.0;
+			sims[column][row] = -1000.0;
+			
+			//merge values in simsMatrix
+			for (int n = 0; n < sims.size(); n++)	{
+				//row becomes merge of 2 groups
+				sims[row][n] = (sims[row][n] + sims[column][n]) / 2;
+				sims[n][row] = sims[row][n];
+				//delete column
+				sims[column][n] = -1000.0;
+				sims[n][column] = -1000.0;
+			}
+		}
+		
+		//adjust tree to make sure root to tip length is .5
+		int root = findRoot();
+		tree[root].setBranchLength((0.5 - tree[root].getLengthToLeaves()));
+	}
+	catch(exception& e) {
+		m->errorOut(e, "Tree", "Tree");
+		exit(1);
+	}
+}
 /*****************************************************************/
 Tree::~Tree() {}
 /*****************************************************************/
-void Tree::addNamesToCounts() {
+void Tree::addNamesToCounts(map<string, string> nameMap) {
 	try {
 		//ex. seq1	seq2,seq3,se4
 		//		seq1 = pasture
@@ -116,12 +228,12 @@ void Tree::addNamesToCounts() {
 
 			string name = tree[i].getName();
 		
-			map<string, string>::iterator itNames = m->names.find(name);
+			map<string, string>::iterator itNames = nameMap.find(name);
 		
-			if (itNames == m->names.end()) { m->mothurOut(name + " is not in your name file, please correct."); m->mothurOutEndLine(); exit(1);  }
+			if (itNames == nameMap.end()) { m->mothurOut(name + " is not in your name file, please correct."); m->mothurOutEndLine(); exit(1);  }
 			else {
 				vector<string> dupNames;
-				m->splitAtComma(m->names[name], dupNames);
+				m->splitAtComma(nameMap[name], dupNames);
 				
 				map<string, int>::iterator itCounts;
 				int maxPars = 1;
@@ -222,7 +334,7 @@ int Tree::assembleTree() {
 		//float A = clock();
 
 		//if user has given a names file we want to include that info in the pgroups and pcount info.
-		if(m->names.size() != 0) {  addNamesToCounts();  }
+		if(m->names.size() != 0) {  addNamesToCounts(m->names);  }
 		
 		//build the pGroups in non leaf nodes to be used in the parsimony calcs.
 		for (int i = numLeaves; i < numNodes; i++) {
@@ -261,9 +373,15 @@ int Tree::assembleTree(string n) {
 	}
 }
 /*****************************************************************/
-void Tree::getSubTree(Tree* copy, vector<string> Groups) {
+//assumes leaf node names are in groups and no names file - used by indicator command
+void Tree::getSubTree(Tree* Ctree, vector<string> Groups) {
 	try {
-			
+        
+        //copy Tree since we are going to destroy it
+        Tree* copy = new Tree(tmap);
+        copy->getCopy(Ctree);
+        copy->assembleTree("nonames");
+        
 		//we want to select some of the leaf nodes to create the output tree
 		//go through the input Tree starting at parents of leaves
 		for (int i = 0; i < numNodes; i++) {
@@ -408,12 +526,40 @@ void Tree::getSubTree(Tree* copy, vector<string> Groups) {
 			//you found the root
 			if (copy->tree[i].getParent() == -1) { root = i; break; }
 		}
-		
+        
 		int nextSpot = numLeaves;
 		populateNewTree(copy->tree, root, nextSpot);
+        
+        delete copy;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "Tree", "getCopy");
+		m->errorOut(e, "Tree", "getSubTree");
+		exit(1);
+	}
+}
+/*****************************************************************/
+//assumes nameMap contains unique names as key or is empty. 
+//assumes numLeaves defined in tree constructor equals size of seqsToInclude and seqsToInclude only contains unique seqs.
+int Tree::getSubTree(Tree* copy, vector<string> seqsToInclude, map<string, string> nameMap) {
+	try {
+        
+        if (numLeaves != seqsToInclude.size()) { m->mothurOut("[ERROR]: numLeaves does not equal numUniques, cannot create subtree.\n"); m->control_pressed = true; return 0; }
+        
+        getSubTree(copy, seqsToInclude);
+        if (nameMap.size() != 0) {  addNamesToCounts(nameMap);  }
+        
+        //build the pGroups in non leaf nodes to be used in the parsimony calcs.
+		for (int i = numLeaves; i < numNodes; i++) {
+			if (m->control_pressed) { return 1; }
+            
+			tree[i].pGroups = (mergeGroups(i));
+			tree[i].pcount = (mergeGcounts(i));
+		}
+        
+        return 0;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "Tree", "getSubTree");
 		exit(1);
 	}
 }
@@ -627,7 +773,6 @@ map<string,int> Tree::mergeGcounts(int position) {
 	}
 }
 /**************************************************************************************************/
-
 void Tree::randomLabels(vector<string> g) {
 	try {
 	
@@ -676,37 +821,7 @@ void Tree::randomLabels(vector<string> g) {
 		exit(1);
 	}
 }
-/**************************************************************************************************
-
-void Tree::randomLabels(string groupA, string groupB) {
-	try {
-		int numSeqsA = globaldata->gTreemap->seqsPerGroup[groupA];
-		int numSeqsB = globaldata->gTreemap->seqsPerGroup[groupB];
-
-		vector<string> randomGroups(numSeqsA+numSeqsB, groupA);
-		for(int i=numSeqsA;i<randomGroups.size();i++){
-			randomGroups[i] = groupB;
-		}
-		random_shuffle(randomGroups.begin(), randomGroups.end());
-				
-		int randomCounter = 0;				
-		for(int i=0;i<numLeaves;i++){
-			if(tree[i].getGroup() == groupA || tree[i].getGroup() == groupB){
-				tree[i].setGroup(randomGroups[randomCounter]);
-				tree[i].pcount.clear();
-				tree[i].pcount[randomGroups[randomCounter]] = 1;
-				tree[i].pGroups.clear();
-				tree[i].pGroups[randomGroups[randomCounter]] = 1;
-				randomCounter++;
-			}
-		}
-	}		
-	catch(exception& e) {
-		m->errorOut(e, "Tree", "randomLabels");
-		exit(1);
-	}
-}
-**************************************************************************************************/
+/**************************************************************************************************/
 void Tree::randomBlengths()  {
 	try {
 		for(int i=numNodes-1;i>=0;i--){

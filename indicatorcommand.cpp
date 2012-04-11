@@ -334,7 +334,6 @@ int IndicatorCommand::execute(){
 			//no longer need original tree, we have output tree to use and label
 			for (int i = 0; i < T.size(); i++) {  delete T[i];  } 
 			
-					
 			if (m->control_pressed) { 
 				if (designfile != "") { delete designMap; }
 				if (sharedfile != "") {  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } }

@@ -437,6 +437,17 @@ int TrimSeqsCommand::execute(){
 					
 					Sequence currSeq(in); m->gobble(in);
 					out << currSeq.getName() << '\t' << it->second << endl;
+                    
+                    if (nameFile != "") {
+                        map<string, string>::iterator itName = nameMap.find(currSeq.getName());
+                        if (itName != nameMap.end()) { 
+                            vector<string> thisSeqsNames; 
+                            m->splitAtChar(itName->second, thisSeqsNames, ',');
+                            for (int k = 1; k < thisSeqsNames.size(); k++) { //start at 1 to skip self
+                                out << thisSeqsNames[k] << '\t' << it->second << endl;
+                            }
+                        }else { m->mothurOut("[ERROR]: " + currSeq.getName() + " is not in your namefile, please correct."); m->mothurOutEndLine(); }							
+                    }
 				}
 				in.close();
 				out.close();

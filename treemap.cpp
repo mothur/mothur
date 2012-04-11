@@ -229,6 +229,60 @@ void TreeMap::makeSim(ListVector* list) {
 		exit(1);
 	}
 }
+/************************************************************/
+int TreeMap::getCopy(TreeMap* copy){
+	try {
+         
+        namesOfGroups = copy->getNamesOfGroups();
+		numGroups = copy->getNumGroups();
+        namesOfSeqs = copy->namesOfSeqs;
+        seqsPerGroup = copy->seqsPerGroup;
+        treemap = copy->treemap;
+        
+        return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "TreeMap", "getCopy");
+		exit(1);
+	}
+}
+/************************************************************/
+vector<string> TreeMap::getNamesSeqs(){
+	try {
+        
+		vector<string> names;
+		
+        for(it = treemap.begin(); it != treemap.end(); it++){
+            names.push_back(it->first);
+		}
+		
+		return names;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "TreeMap", "getNamesSeqs");
+		exit(1);
+	}
+}
+/************************************************************/
+vector<string> TreeMap::getNamesSeqs(vector<string> picked){
+	try {
+		
+		vector<string> names;
+		
+		for(it = treemap.begin(); it != treemap.end(); it++){
+			//if you are belong to one the the groups in the picked vector add you
+			if (m->inUsersGroups(it->second.groupname, picked)) {
+				names.push_back(it->first);
+			}
+		}
+		
+		return names;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "TreeMap", "getNamesSeqs");
+		exit(1);
+	}
+}
 
 /************************************************************/
 

@@ -482,9 +482,9 @@ int TreeGroupCommand::execute(){
 Tree* TreeGroupCommand::createTree(vector< vector<double> >& simMatrix){
 	try {
 		//create tree
-		t = new Tree(tmap);
+		t = new Tree(tmap, simMatrix);
         
-        //initialize index
+       /* //initialize index
         map<int, int> index;  //maps row in simMatrix to vector index in the tree
         for (int g = 0; g < numGroups; g++) {	index[g] = g;	}
 		
@@ -544,7 +544,7 @@ Tree* TreeGroupCommand::createTree(vector< vector<double> >& simMatrix){
 		//adjust tree to make sure root to tip length is .5
 		int root = t->findRoot();
 		t->tree[root].setBranchLength((0.5 - t->tree[root].getLengthToLeaves()));
-		
+		*/
 		//assemble tree
 		t->assembleTree();
 		
@@ -1004,11 +1004,13 @@ int TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
                 if (m->control_pressed) { for (int k = 0; k < trees.size(); k++) { delete trees[k]; } }
                 
                 Consensus consensus;
+                //clear old tree names if any
+                m->Treenames.clear(); m->Treenames = m->getGroups(); //may have changed if subsample eliminated groups
                 Tree* conTree = consensus.getTree(trees, tmap);
                 
                 //create a new filename
                 string conFile = outputDir + m->getRootName(m->getSimpleName(inputfile)) + treeCalculators[i]->getName() + "." + thisLookup[0]->getLabel() + ".cons.tre";				
-                outputNames.push_back(conFile); outputTypes["tree"].push_back(outputFile); 
+                outputNames.push_back(conFile); outputTypes["tree"].push_back(conFile); 
                 ofstream outTree;
                 m->openOutputFile(conFile, outTree);
                 

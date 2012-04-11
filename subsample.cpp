@@ -9,6 +9,114 @@
 #include "subsample.h"
 
 //**********************************************************************************************************************
+Tree* SubSample::getSample(Tree* T, TreeMap* tmap, map<string, string> whole, int size) {
+    try {
+        Tree* newTree = NULL;
+        
+        vector<string> subsampledSeqs = getSample(tmap, size);
+        map<string, string> sampledNameMap = deconvolute(whole, subsampledSeqs); 
+        
+        //remove seqs not in sample from treemap
+        for (int i = 0; i < tmap->namesOfSeqs.size(); i++) {
+            //is that name in the subsample?
+            int count = 0;
+            for (int j = 0; j < subsampledSeqs.size(); j++) {
+                if (tmap->namesOfSeqs[i] == subsampledSeqs[j]) { break; } //found it
+                count++;
+            }
+
+            if (m->control_pressed) { return newTree; }
+            
+            //if you didnt find it, remove it 
+            if (count == subsampledSeqs.size()) { 
+                tmap->removeSeq(tmap->namesOfSeqs[i]);
+                i--; //need this because removeSeq removes name from namesOfSeqs
+            }
+        }
+        
+        //create new tree
+        int numUniques = sampledNameMap.size();
+        if (sampledNameMap.size() == 0) { numUniques = subsampledSeqs.size(); }
+        
+        newTree = new Tree(numUniques, tmap); //numNodes, treemap
+        newTree->getSubTree(T, subsampledSeqs, sampledNameMap);
+        
+        return newTree;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SubSample", "getSample-Tree");
+        exit(1);
+    }
+}	
+//**********************************************************************************************************************
+//assumes whole maps dupName -> uniqueName
+map<string, string> SubSample::deconvolute(map<string, string> whole, vector<string>& wanted) {
+    try {
+        map<string, string> nameMap;
+        
+        //whole will be empty if user gave no name file, so we don't need to make a new one
+        if (whole.size() == 0) { return nameMap; }
+        
+        vector<string> newWanted;
+        for (int i = 0; i < wanted.size(); i++) {
+            
+            if (m->control_pressed) { break; }
+            
+            string dupName = wanted[i];
+            
+            map<string, string>::iterator itWhole = whole.find(dupName);
+            if (itWhole != whole.end()) {
+                string repName = itWhole->second;
+                
+                //do we already have this rep?
+                map<string, string>::iterator itName = nameMap.find(repName);
+                if (itName != nameMap.end()) { //add this seqs to dups list
+                    (itName->second) += "," + dupName;
+                }else { //first sighting of this seq
+                    nameMap[repName] = dupName;
+                    newWanted.push_back(repName);
+                }
+            }else { m->mothurOut("[ERROR]: "+dupName+" is not in your name file, please correct.\n"); m->control_pressed = true; }
+        }
+        
+        wanted = newWanted;
+        return nameMap;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "SubSample", "deconvolute");
+		exit(1);
+	}
+}	
+//**********************************************************************************************************************
+vector<string> SubSample::getSample(TreeMap* tMap, int size) {
+    try {
+        vector<string> sample;
+        
+        vector<string> Groups = tMap->getNamesOfGroups();    
+        for (int i = 0; i < Groups.size(); i++) {
+            
+            if (m->control_pressed) { break; }
+            
+            vector<string> thisGroup; thisGroup.push_back(Groups[i]);
+            vector<string> thisGroupsSeqs = tMap->getNamesSeqs(thisGroup);
+            int thisSize = thisGroupsSeqs.size();
+            
+            if (thisSize >= size) {	
+                
+                random_shuffle(thisGroupsSeqs.begin(), thisGroupsSeqs.end());
+                
+                for (int j = 0; j < size; j++) { sample.push_back(thisGroupsSeqs[j]); }
+            }else {  m->mothurOut("[ERROR]: You have selected a size that is larger than "+Groups[i]+" number of sequences.\n"); m->control_pressed = true; }
+        } 
+        
+        return sample;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "SubSample", "getSample-TreeMap");
+		exit(1);
+	}
+}	
+//**********************************************************************************************************************
 vector<string> SubSample::getSample(vector<SharedRAbundVector*>& thislookup, int size) {
 	try {
 		
@@ -64,7 +172,7 @@ vector<string> SubSample::getSample(vector<SharedRAbundVector*>& thislookup, int
 		
 	}
 	catch(exception& e) {
-		m->errorOut(e, "SubSample", "getSample");
+		m->errorOut(e, "SubSample", "getSample-shared");
 		exit(1);
 	}
 }	

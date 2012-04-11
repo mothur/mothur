@@ -51,21 +51,18 @@ class UnifracWeightedCommand : public Command {
 		vector<double> WScoreSig;  //tree weighted score signifigance when compared to random trees - percentage of random trees with that score or lower.
 		vector<string> groupComb; // AB. AC, BC...
 		TreeMap* tmap;
-		Weighted* weighted;
 		string sumFile, outputDir;
 		int iters, numGroups, numComp, counter;
-		EstOutput userData;			//weighted score info for user tree
-		EstOutput randomData;		//weighted score info for random trees
 		vector< vector<double> > rScores;  //vector<weighted scores for random trees.> each group comb has an entry
 		vector< vector<double> > uScores;  //vector<weighted scores for user trees.> each group comb has an entry
 		vector< map<float, float> > rScoreFreq;  //map <weighted score, number of random trees with that score.> -vector entry for each combination.
 		vector< map<float, float> > rCumul;  //map <weighted score, cumulative percentage of number of random trees with that score or higher.> -vector entry for each c								
 		map<float, float>  validScores;  //map contains scores from random
 		
-		bool abort, phylip, random, includeRoot;
+		bool abort, phylip, random, includeRoot, subsample, consensus;
 		string groups, itersString, outputForm, treefile, groupfile, namefile;
 		vector<string> Groups, outputNames; //holds groups to be used
-		int processors, numUniquesInName;
+		int processors, numUniquesInName, subsampleSize, subsampleIters;
 		ofstream outSum;
 		map<string, string> nameMap;
 		
@@ -78,6 +75,11 @@ class UnifracWeightedCommand : public Command {
 		int createProcesses(Tree*,  vector< vector<string> >,  vector< vector<double> >&);
 		int driver(Tree*, vector< vector<string> >, int, int,  vector< vector<double> >&);
 		int readNamesFile();
+        int runRandomCalcs(Tree*, vector<double>);
+        int readTrees();
+        vector<Tree*> buildTrees(vector< vector<double> >&, int, TreeMap*);
+        int getConsensusTrees(vector< vector<double> >&, int);
+        int getAverageSTDMatrices(vector< vector<double> >&, int);
 		
 };
 

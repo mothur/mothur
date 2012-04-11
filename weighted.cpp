@@ -87,7 +87,7 @@ EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGro
 				EstOutput Myresults;
 				Myresults = driver(t, namesOfGroupCombos, lines[process].start, lines[process].num);
 			
-				m->mothurOut("Merging results."); m->mothurOutEndLine();
+				//m->mothurOut("Merging results."); m->mothurOutEndLine();
 				
 				//pass numSeqs to parent
 				ofstream out;
@@ -142,7 +142,7 @@ EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGro
 			m->mothurRemove(s);
 		}
 		
-		m->mothurOut("DONE."); m->mothurOutEndLine(); m->mothurOutEndLine();
+		//m->mothurOut("DONE."); m->mothurOutEndLine(); m->mothurOutEndLine();
 		
 		return results;
 #endif		

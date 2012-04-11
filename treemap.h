@@ -42,13 +42,19 @@ public:
 		sort(namesOfGroups.begin(), namesOfGroups.end());
 		return namesOfGroups;
 	}
-	vector<string> namesOfSeqs;
-    map<string,int> seqsPerGroup;	//groupname, number of seqs in that group.
-	map<string, GroupIndex> treemap; //sequence name and <groupname, vector index>
-	void print(ostream&);
+    
+    void print(ostream&);
 	void makeSim(vector<string>);  //takes groupmap info and fills treemap for use by tree.shared command.
 	void makeSim(ListVector*);  //takes listvector info and fills treemap for use by tree.shared command.	
-	
+    vector<string> getNamesSeqs();
+	vector<string> getNamesSeqs(vector<string>); //get names of seqs belonging to a group or set of groups
+    int getCopy(TreeMap*);
+    
+    vector<string> namesOfSeqs;
+    map<string,int> seqsPerGroup;	//groupname, number of seqs in that group.
+	map<string, GroupIndex> treemap; //sequence name and <groupname, vector index>
+
+    
 private:
 	vector<string> namesOfGroups;
 	ifstream fileHandle;
