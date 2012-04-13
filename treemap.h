@@ -10,7 +10,6 @@
  */
 
 #include "mothur.h"
-#include "groupmap.h"
 #include "listvector.hpp"
 
 /* This class is used by the read.tree command to build the tree container. */
@@ -20,15 +19,14 @@ struct GroupIndex {
 	int		vectorIndex;
 };
 
-class GroupMap;
-class ListVector;
-
 class TreeMap {
 public:
 	TreeMap() { m = MothurOut::getInstance(); }
 	TreeMap(string);
 	~TreeMap();
+    
 	int readMap();
+    int readMap(string);
 	int getNumGroups();
 	int getNumSeqs();
 	void setIndex(string, int);  //sequencename, index
@@ -48,7 +46,7 @@ public:
 	void makeSim(ListVector*);  //takes listvector info and fills treemap for use by tree.shared command.	
     vector<string> getNamesSeqs();
 	vector<string> getNamesSeqs(vector<string>); //get names of seqs belonging to a group or set of groups
-    int getCopy(TreeMap*);
+    int getCopy(TreeMap&);
     
     vector<string> namesOfSeqs;
     map<string,int> seqsPerGroup;	//groupname, number of seqs in that group.

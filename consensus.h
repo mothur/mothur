@@ -25,7 +25,7 @@ public:
 	Consensus() { m = MothurOut::getInstance(); }	
 	~Consensus() {}
 	
-    Tree* getTree(vector<Tree*>&, TreeMap*);
+    Tree* getTree(vector<Tree*>&);
 		
 private:
     MothurOut* m;

@@ -19,6 +19,43 @@
 
 /************************************************************/
  TreeMap::~TreeMap(){}
+/************************************************************/
+int TreeMap::readMap(string gf) {
+    
+    groupFileName = gf;
+	m->openInputFile(gf, fileHandle);
+    
+    string seqName, seqGroup;
+    int error = 0;
+    
+    while(fileHandle){
+        fileHandle >> seqName;       m->gobble(fileHandle);	//read from first column
+        fileHandle >> seqGroup;			//read from second column
+        
+        if (m->control_pressed) {  fileHandle.close();  return 1; }
+        
+        setNamesOfGroups(seqGroup);
+        
+        map<string, GroupIndex>::iterator itCheck = treemap.find(seqName);
+        if (itCheck != treemap.end()) { error = 1; m->mothurOut("[WARNING]: Your groupfile contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine();  }
+        else {
+            namesOfSeqs.push_back(seqName);
+            treemap[seqName].groupname = seqGroup;	//store data in map
+            
+            it2 = seqsPerGroup.find(seqGroup);
+            if (it2 == seqsPerGroup.end()) { //if it's a new group
+                seqsPerGroup[seqGroup] = 1;
+            }else {//it's a group we already have
+                seqsPerGroup[seqGroup]++;
+            }				
+        }
+        
+        m->gobble(fileHandle);
+    }
+    fileHandle.close();
+    
+    return error;
+}
 
 /************************************************************/
 int TreeMap::readMap() {
@@ -26,7 +63,7 @@ int TreeMap::readMap() {
 		int error = 0;
 		
 		while(fileHandle){
-			fileHandle >> seqName;      	//read from first column
+			fileHandle >> seqName;      	 m->gobble(fileHandle); //read from first column
 			fileHandle >> seqGroup;			//read from second column
 			
 			if (m->control_pressed) {  fileHandle.close();  return 1; }
@@ -230,14 +267,14 @@ void TreeMap::makeSim(ListVector* list) {
 	}
 }
 /************************************************************/
-int TreeMap::getCopy(TreeMap* copy){
+int TreeMap::getCopy(TreeMap& copy){
 	try {
          
-        namesOfGroups = copy->getNamesOfGroups();
-		numGroups = copy->getNumGroups();
-        namesOfSeqs = copy->namesOfSeqs;
-        seqsPerGroup = copy->seqsPerGroup;
-        treemap = copy->treemap;
+        namesOfGroups = copy.getNamesOfGroups();
+		numGroups = copy.getNumGroups();
+        namesOfSeqs = copy.namesOfSeqs;
+        seqsPerGroup = copy.seqsPerGroup;
+        treemap = copy.treemap;
         
         return 0;
 	}

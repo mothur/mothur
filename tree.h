@@ -22,6 +22,7 @@ public:
     Tree(TreeMap*, vector< vector<double> >&); //create tree from sim matrix
 	~Tree();
 	
+    TreeMap* getTreeMap() { return tmap; }
 	void getCopy(Tree*);  //makes tree a copy of the one passed in.
 	void getSubTree(Tree*, vector<string>);  //makes tree a that contains only the names passed in.
     int getSubTree(Tree* originalToCopy, vector<string> seqToInclude, map<string, string> nameMap);  //used with (int, TreeMap) constructor. SeqsToInclude contains subsample wanted - assumes these are unique seqs and size of vector=numLeaves passed into constructor. nameMap is unique -> redundantList can be empty if no namesfile was provided. 
@@ -39,11 +40,11 @@ public:
 	void printTree();
 	void print(ostream&);
 	void print(ostream&, string);
+    void print(ostream&, map<string, string>);
 	int findRoot();  //return index of root node
 	
 	//this function takes the leaf info and populates the non leaf nodes
-	int assembleTree();	
-	int assembleTree(string);	
+	int assembleTree(map<string, string>);	
 	
 	vector<Node> tree;		//the first n nodes are the leaves, where n is the number of sequences.
 	map< string, vector<int> > groupNodeInfo;	//maps group to indexes of leaf nodes with that group, different groups may contain same node because of names file.
@@ -54,6 +55,7 @@ private:
 	ofstream out;
 	string filename;
 	
+    map<string, string> names;
 	map<string, int>::iterator it, it2;
 	map<string, int> mergeGroups(int);  //returns a map with a groupname and the number of times that group was seen in the children
 	map<string,int> mergeGcounts(int);
@@ -63,7 +65,8 @@ private:
 	void randomBlengths();
 	void randomLabels(vector<string>);
 	//void randomLabels(string, string);
-	void printBranch(int, ostream&, string);  //recursively print out tree
+	void printBranch(int, ostream&, map<string, string>);  //recursively print out tree
+    void printBranch(int, ostream&, string);
 	void parseTreeFile();	//parses through tree file to find names of nodes and number of them
 							//this is required in case user has sequences in the names file that are
 							//not included in the tree. 

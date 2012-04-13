@@ -30,7 +30,7 @@ class ReadTree {
 		float readBranchLength(istream& f);
 	
 		vector<Tree*> getTrees() { return Trees; }
-		int AssembleTrees();
+		int AssembleTrees(map<string, string>);
 		
 	protected:
 		vector<Tree*> Trees;

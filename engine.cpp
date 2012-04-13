@@ -183,7 +183,6 @@ bool InteractEngine::getInput(){
 					mout->clearGroups();
 					mout->clearAllGroups();
 					mout->Treenames.clear();
-					mout->names.clear();
 					mout->saveNextLabel = "";
 					mout->printedHeaders = false;
 					mout->commandInputsConvertError = false;
@@ -369,7 +368,6 @@ bool BatchEngine::getInput(){
 					mout->clearGroups();
 					mout->clearAllGroups();
 					mout->Treenames.clear();
-					mout->names.clear();
 					mout->saveNextLabel = "";
 					mout->printedHeaders = false;
 					mout->commandInputsConvertError = false;
@@ -538,7 +536,6 @@ bool ScriptEngine::getInput(){
 					mout->clearGroups();
 					mout->clearAllGroups();
 					mout->Treenames.clear();
-					mout->names.clear();
 					mout->saveNextLabel = "";
 					mout->printedHeaders = false;
 					mout->commandInputsConvertError = false;

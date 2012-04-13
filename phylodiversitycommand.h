@@ -12,9 +12,8 @@
 
 #include "command.hpp"
 #include "treemap.h"
-#include "readtree.h"
 #include "sharedutilities.h"
-
+#include "tree.h"
 
 class PhyloDiversityCommand : public Command {
 	
@@ -33,14 +32,12 @@ class PhyloDiversityCommand : public Command {
 		int execute();
 		void help() { m->mothurOut(getHelpString()); }
 private:
-		ReadTree* read;
 		TreeMap* tmap;
 		float freq;
 		int iters, processors, numUniquesInName;  
 		bool abort, rarefy, summary, collect, scale;
 		string groups, outputDir, treefile, groupfile, namefile;
 		vector<string> Groups, outputNames; //holds groups to be used, and outputFile names
-		map<string, string> nameMap;
 		
 		int readNamesFile();
 		void printData(set<int>&, map< string, vector<float> >&, ofstream&, int);

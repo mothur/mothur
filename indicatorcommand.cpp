@@ -99,7 +99,6 @@ IndicatorCommand::IndicatorCommand(string option)  {
 			m->clearGroups();
 			m->clearAllGroups();
 			m->Treenames.clear();
-			m->names.clear();
 			
 			vector<string> tempOutNames;
 			outputTypes["tree"] = tempOutNames;
@@ -236,11 +235,10 @@ int IndicatorCommand::execute(){
 			designMap->readDesignMap();
 			
 			//fill Groups - checks for "all" and for any typo groups
-			SharedUtil* util = new SharedUtil();
+			SharedUtil util;
 			vector<string> nameGroups = designMap->getNamesOfGroups();
-			util->setGroups(Groups, nameGroups);
+			util.setGroups(Groups, nameGroups);
 			designMap->setNamesOfGroups(nameGroups);
-			delete util;
 			
 			//loop through the Groups and fill Globaldata's Groups with the design file info
 			vector<string> namesSeqs = designMap->getNamesSeqs(Groups);
@@ -320,8 +318,9 @@ int IndicatorCommand::execute(){
 				else { for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  } }
 				for (int i = 0; i < T.size(); i++) {  delete T[i];  }  delete treeMap; return 0; 
 			}
-				
-			T[0]->assembleTree();
+            
+			map<string, string> nameMap;	
+			T[0]->assembleTree(nameMap);
 					
 			/***************************************************/
 			//    create ouptut tree - respecting pickedGroups //
@@ -329,7 +328,7 @@ int IndicatorCommand::execute(){
 			Tree* outputTree = new Tree(m->getNumGroups(), treeMap); 
 			
 			outputTree->getSubTree(T[0], m->getGroups());
-			outputTree->assembleTree();
+			outputTree->assembleTree(nameMap);
 				
 			//no longer need original tree, we have output tree to use and label
 			for (int i = 0; i < T.size(); i++) {  delete T[i];  } 

@@ -65,7 +65,7 @@ class MothurOut {
 	
 		vector<string> getAllGroups() { sort(namesOfGroups.begin(), namesOfGroups.end()); return namesOfGroups; }
 		vector<string> Treenames;
-		map<string, string> names;
+		//map<string, string> names;
 		vector<string> binLabelsInFile;
 		vector<string> currentBinLabels;
 		string saveNextLabel, argv, sharedHeaderMode;

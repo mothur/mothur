@@ -10,6 +10,7 @@
 #include "unifracweightedcommand.h"
 #include "consensus.h"
 #include "subsample.h"
+#include "treereader.h"
 
 //**********************************************************************************************************************
 vector<string> UnifracWeightedCommand::setParameters(){	
@@ -141,12 +142,6 @@ UnifracWeightedCommand::UnifracWeightedCommand(string option) {
 				}
 			}
 			
-			m->runParse = true;
-			m->clearGroups();
-			m->clearAllGroups();
-			m->Treenames.clear();
-			m->names.clear();
-			
 			//check for required parameters
 			treefile = validParameter.validFile(parameters, "tree", true);
 			if (treefile == "not open") { treefile = ""; abort = true; }
@@ -238,7 +233,13 @@ int UnifracWeightedCommand::execute() {
 		
 		m->setTreeFile(treefile);
 		
-        readTrees();  if (m->control_pressed) {  delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; } return 0; }
+        TreeReader* reader = new TreeReader(treefile, groupfile, namefile);
+        T = reader->getTrees();
+        tmap = T[0]->getTreeMap();
+        map<string, string> nameMap = reader->getNames();
+        delete reader;
+    
+        if (m->control_pressed) {  delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; } return 0; }
 				
 		sumFile = outputDir + m->getSimpleName(treefile) + ".wsummary";
 		m->openOutputFile(sumFile, outSum);
@@ -253,7 +254,7 @@ int UnifracWeightedCommand::execute() {
 		
         if (m->control_pressed) {  delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; } return 0; }
         
-		Weighted weighted(tmap, includeRoot);
+		Weighted weighted(includeRoot);
 			
 		int start = time(NULL);
             
@@ -333,16 +334,16 @@ int UnifracWeightedCommand::execute() {
                 
                 if (m->control_pressed) { break; }
                 
-                //copy to preserve old one - would do this in subsample but tree needs it and memory cleanup becomes messy.
+                //copy to preserve old one - would do this in subsample but memory cleanup becomes messy.
                 TreeMap* newTmap = new TreeMap();
-                newTmap->getCopy(tmap);
+                newTmap->getCopy(*tmap);
                 
                 SubSample sample;
                 Tree* subSampleTree = sample.getSample(T[i], newTmap, nameMap, subsampleSize);
                    
                 //call new weighted function
                 vector<double> iterData; iterData.resize(numComp,0);
-                Weighted thisWeighted(newTmap, includeRoot);
+                Weighted thisWeighted(includeRoot);
                 iterData = thisWeighted.getValues(subSampleTree, processors, outputDir); //userData[0] = weightedscore
                 
                 //save data to make ave dist, std dist
@@ -350,6 +351,8 @@ int UnifracWeightedCommand::execute() {
                 
                 delete newTmap;
                 delete subSampleTree;
+                
+                if((thisIter+1) % 100 == 0){	m->mothurOut(toString(thisIter+1)); m->mothurOutEndLine();		}
             }
             
             if (m->control_pressed) { delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; } if (random) { delete output; } outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
@@ -525,8 +528,8 @@ int UnifracWeightedCommand::getConsensusTrees(vector< vector<double> >& dists, i
         m->runParse = false;
         
         //create treemap class from groupmap for tree class to use
-        TreeMap* newTmap = new TreeMap();
-        newTmap->makeSim(m->getGroups());
+        TreeMap newTmap;
+        newTmap.makeSim(m->getGroups());
         
         //clear  old tree names if any
         m->Treenames.clear();
@@ -536,10 +539,10 @@ int UnifracWeightedCommand::getConsensusTrees(vector< vector<double> >& dists, i
         
         vector<Tree*> newTrees = buildTrees(dists, treeNum, newTmap); //also creates .all.tre file containing the trees created
         
-        if (m->control_pressed) { delete newTmap; return 0; }
+        if (m->control_pressed) { return 0; }
         
         Consensus con;
-        Tree* conTree = con.getTree(newTrees, newTmap);
+        Tree* conTree = con.getTree(newTrees);
         
         //create a new filename
         string conFile = outputDir + m->getRootName(m->getSimpleName(treefile)) + toString(treeNum+1) + ".weighted.cons.tre";				
@@ -549,7 +552,6 @@ int UnifracWeightedCommand::getConsensusTrees(vector< vector<double> >& dists, i
         
         if (conTree != NULL) { conTree->print(outTree, "boot"); delete conTree; }
         outTree.close();
-        delete newTmap;
         
         return 0;
 
@@ -561,7 +563,7 @@ int UnifracWeightedCommand::getConsensusTrees(vector< vector<double> >& dists, i
 }
 /**************************************************************************************************/
 
-vector<Tree*> UnifracWeightedCommand::buildTrees(vector< vector<double> >& dists, int treeNum, TreeMap* mytmap) {
+vector<Tree*> UnifracWeightedCommand::buildTrees(vector< vector<double> >& dists, int treeNum, TreeMap& mytmap) {
 	try {
         
         vector<Tree*> trees;
@@ -595,8 +597,9 @@ vector<Tree*> UnifracWeightedCommand::buildTrees(vector< vector<double> >& dists
 			}
 
             //create tree
-            Tree* tempTree = new Tree(mytmap, sims);
-            tempTree->assembleTree();
+            Tree* tempTree = new Tree(&mytmap, sims);
+            map<string, string> empty;
+            tempTree->assembleTree(empty);
             
             trees.push_back(tempTree);
             
@@ -612,80 +615,6 @@ vector<Tree*> UnifracWeightedCommand::buildTrees(vector< vector<double> >& dists
     }
 	catch(exception& e) {
 		m->errorOut(e, "UnifracWeightedCommand", "buildTrees");
-		exit(1);
-	}
-}
-/**************************************************************************************************/
-
-int UnifracWeightedCommand::readTrees() {
-	try {
-        
-        if (groupfile != "") {
-			//read in group map info.
-			tmap = new TreeMap(groupfile);
-			tmap->readMap();
-		}else{ //fake out by putting everyone in one group
-			Tree* tree = new Tree(treefile); delete tree;  //extracts names from tree to make faked out groupmap
-			tmap = new TreeMap();
-			
-			for (int i = 0; i < m->Treenames.size(); i++) { tmap->addSeq(m->Treenames[i], "Group1"); }
-		}
-		
-		if (namefile != "") { readNamesFile(); }
-		
-		read = new ReadNewickTree(treefile);
-		int readOk = read->read(tmap); 
-		
-		if (readOk != 0) { m->mothurOut("Read Terminated."); m->mothurOutEndLine(); delete tmap; delete read; return 0; }
-		
-		read->AssembleTrees();
-		T = read->getTrees();
-		delete read;
-		
-		//make sure all files match
-		//if you provide a namefile we will use the numNames in the namefile as long as the number of unique match the tree names size.
-		int numNamesInTree;
-		if (namefile != "")  {  
-			if (numUniquesInName == m->Treenames.size()) {  numNamesInTree = nameMap.size();  }
-			else {   numNamesInTree = m->Treenames.size();  }
-		}else {  numNamesInTree = m->Treenames.size();  }
-		
-		
-		//output any names that are in group file but not in tree
-		if (numNamesInTree < tmap->getNumSeqs()) {
-			for (int i = 0; i < tmap->namesOfSeqs.size(); i++) {
-				//is that name in the tree?
-				int count = 0;
-				for (int j = 0; j < m->Treenames.size(); j++) {
-					if (tmap->namesOfSeqs[i] == m->Treenames[j]) { break; } //found it
-					count++;
-				}
-				
-				if (m->control_pressed) { 
-					delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; }
-					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
-					m->clearGroups();
-					return 0;
-				}
-				
-				//then you did not find it so report it 
-				if (count == m->Treenames.size()) { 
-					//if it is in your namefile then don't remove
-					map<string, string>::iterator it = nameMap.find(tmap->namesOfSeqs[i]);
-					
-					if (it == nameMap.end()) {
-						m->mothurOut(tmap->namesOfSeqs[i] + " is in your groupfile and not in your tree. It will be disregarded."); m->mothurOutEndLine();
-						tmap->removeSeq(tmap->namesOfSeqs[i]);
-						i--; //need this because removeSeq removes name from namesOfSeqs
-					}
-				}
-			}
-		}
-
-        return 0;
-    }
-	catch(exception& e) {
-		m->errorOut(e, "UnifracWeightedCommand", "readTrees");
 		exit(1);
 	}
 }
@@ -839,7 +768,7 @@ int UnifracWeightedCommand::driver(Tree* t, vector< vector<string> > namesOfGrou
  try {
 		Tree* randT = new Tree(tmap);
      
-        Weighted weighted(tmap, includeRoot);
+        Weighted weighted(includeRoot);
      
 		for (int h = start; h < (start+num); h++) {
 	
@@ -1076,46 +1005,6 @@ void UnifracWeightedCommand::calculateFreqsCumuls() {
 	}
 	catch(exception& e) {
 		m->errorOut(e, "UnifracWeightedCommand", "calculateFreqsCums");
-		exit(1);
-	}
-}
-/*****************************************************************/
-int UnifracWeightedCommand::readNamesFile() {
-	try {
-		m->names.clear();
-		numUniquesInName = 0;
-		
-		ifstream in;
-		m->openInputFile(namefile, in);
-		
-		string first, second;
-		map<string, string>::iterator itNames;
-		
-		while(!in.eof()) {
-			in >> first >> second; m->gobble(in);
-			
-			numUniquesInName++;
-			
-			itNames = m->names.find(first);
-			if (itNames == m->names.end()) {  
-				m->names[first] = second; 
-				
-				//we need a list of names in your namefile to use above when removing extra seqs above so we don't remove them
-				vector<string> dupNames;
-				m->splitAtComma(second, dupNames);
-				
-				for (int i = 0; i < dupNames.size(); i++) {	
-					nameMap[dupNames[i]] = first; 
-					if ((groupfile == "") && (i != 0)) { tmap->addSeq(dupNames[i], "Group1"); } 
-				}
-			}else {  m->mothurOut(first + " has already been seen in namefile, disregarding names file."); m->mothurOutEndLine(); in.close(); m->names.clear(); namefile = ""; return 1; }			
-		}
-		in.close();
-		
-		return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "UnifracWeightedCommand", "readNamesFile");
 		exit(1);
 	}
 }

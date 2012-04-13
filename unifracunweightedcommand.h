@@ -36,12 +36,9 @@ class UnifracUnweightedCommand : public Command {
 	
 	
 	private:
-		ReadTree* read;
-		SharedUtil* util;
 		FileOutput* output;
 		vector<Tree*> T;	   //user trees
 		TreeMap* tmap;
-		Unweighted* unweighted;
 		string sumFile, allGroups;
 		vector<string> groupComb; // AB. AC, BC...
 		int iters, numGroups, numComp, counter, processors, numUniquesInName;
@@ -59,13 +56,10 @@ class UnifracUnweightedCommand : public Command {
 
 		ofstream outSum, out;
 		ifstream inFile;
-		map<string, string> nameMap;
 		
 		void printUWSummaryFile(int);
 		void printUnweightedFile();
 		void createPhylipFile(int);
-		int readNamesFile();
-		 
 		
 };
 

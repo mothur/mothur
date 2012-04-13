@@ -19,7 +19,7 @@
 class Weighted : public TreeCalculator  {
 	
 	public:
-		Weighted(TreeMap* t, bool r) : tmap(t), includeRoot(r) {};
+        Weighted( bool r) : includeRoot(r) {};
 		~Weighted() {};
 		
 		EstOutput getValues(Tree*, string, string);
@@ -34,7 +34,6 @@ class Weighted : public TreeCalculator  {
 		vector<linePair> lines;
 
 		EstOutput data;
-		TreeMap* tmap;
 		map<string, int>::iterator it;
 		map<string, double> WScore; //a score for each group combination i.e. AB, AC, BC.
 		int processors;
@@ -42,8 +41,8 @@ class Weighted : public TreeCalculator  {
 		map< vector<string>, set<int> > rootForGrouping;  //maps a grouping combo to the root for that combo
 		bool includeRoot;
 		
-		EstOutput driver(Tree*, vector< vector<string> >, int, int); 
-		EstOutput createProcesses(Tree*, vector< vector<string> >);
+		EstOutput driver(Tree*, vector< vector<string> >, int, int, TreeMap*); 
+		EstOutput createProcesses(Tree*, vector< vector<string> >, TreeMap*);
 		double getLengthToRoot(Tree*, int, string, string);
 };
 

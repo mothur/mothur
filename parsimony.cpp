@@ -15,6 +15,7 @@ EstOutput Parsimony::getValues(Tree* t, int p, string o) {
 	try {
 		processors = p;
 		outputDir = o;
+        TreeMap* tmap = t->getTreeMap();
 		
 		//if the users enters no groups then give them the score of all groups
 		vector<string> mGroups = m->getGroups();
@@ -56,7 +57,7 @@ EstOutput Parsimony::getValues(Tree* t, int p, string o) {
 		
 	#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		if(processors == 1){
-			data = driver(t, namesOfGroupCombos, 0, namesOfGroupCombos.size());
+			data = driver(t, namesOfGroupCombos, 0, namesOfGroupCombos.size(), tmap);
 		}else{
 			lines.clear();
 			int numPairs = namesOfGroupCombos.size();
@@ -73,7 +74,7 @@ EstOutput Parsimony::getValues(Tree* t, int p, string o) {
 				lines.push_back(linePair(startPos, numPairsPerProcessor));
 			}
 			
-			data = createProcesses(t, namesOfGroupCombos);
+			data = createProcesses(t, namesOfGroupCombos, tmap);
 		}
 	#else
 		data = driver(t, namesOfGroupCombos, 0, namesOfGroupCombos.size());
@@ -89,7 +90,7 @@ EstOutput Parsimony::getValues(Tree* t, int p, string o) {
 }
 /**************************************************************************************************/
 
-EstOutput Parsimony::createProcesses(Tree* t, vector< vector<string> > namesOfGroupCombos) {
+EstOutput Parsimony::createProcesses(Tree* t, vector< vector<string> > namesOfGroupCombos, TreeMap* tmap) {
 	try {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		int process = 1;
@@ -106,7 +107,7 @@ EstOutput Parsimony::createProcesses(Tree* t, vector< vector<string> > namesOfGr
 				process++;
 			}else if (pid == 0){
 				EstOutput myresults;
-				myresults = driver(t, namesOfGroupCombos, lines[process].start, lines[process].num);
+				myresults = driver(t, namesOfGroupCombos, lines[process].start, lines[process].num, tmap);
 				
 				if (m->control_pressed) { exit(0); }
 				
@@ -126,7 +127,7 @@ EstOutput Parsimony::createProcesses(Tree* t, vector< vector<string> > namesOfGr
 			}
 		}
 		
-		results = driver(t, namesOfGroupCombos, lines[0].start, lines[0].num);
+		results = driver(t, namesOfGroupCombos, lines[0].start, lines[0].num, tmap);
 		
 		//force parent to wait until all the processes are done
 		for (int i=0;i<processIDS.size();i++) { 
@@ -169,7 +170,7 @@ EstOutput Parsimony::createProcesses(Tree* t, vector< vector<string> > namesOfGr
 	}
 }
 /**************************************************************************************************/
-EstOutput Parsimony::driver(Tree* t, vector< vector<string> > namesOfGroupCombos, int start, int num) { 
+EstOutput Parsimony::driver(Tree* t, vector< vector<string> > namesOfGroupCombos, int start, int num, TreeMap* tmap) { 
 	try {
 		
 		EstOutput results; results.resize(num);

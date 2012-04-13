@@ -1014,7 +1014,8 @@ int MothurOut::appendFiles(string temp, string filename) {
 		
 		int numLines = 0;
 		if (ableToOpen == 0) { //you opened it
-			while(char c = input.get()){
+			while(!input.eof()){
+                char c = input.get();
 				if(input.eof())		{	break;			}
 				else				{	output << c;	if (c == '\n') {numLines++;} }
 			}

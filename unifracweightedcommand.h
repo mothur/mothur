@@ -42,15 +42,12 @@ class UnifracWeightedCommand : public Command {
 			linePair(int i, int j) : start(i), num(j) {}
 		};
 		vector<linePair> lines;
-		
-		ReadTree* read;
-		SharedUtil* util;
+        TreeMap* tmap;
 		FileOutput* output;
 		vector<Tree*> T;	   //user trees
 		vector<double> utreeScores;  //user tree unweighted scores
 		vector<double> WScoreSig;  //tree weighted score signifigance when compared to random trees - percentage of random trees with that score or lower.
 		vector<string> groupComb; // AB. AC, BC...
-		TreeMap* tmap;
 		string sumFile, outputDir;
 		int iters, numGroups, numComp, counter;
 		vector< vector<double> > rScores;  //vector<weighted scores for random trees.> each group comb has an entry
@@ -74,10 +71,8 @@ class UnifracWeightedCommand : public Command {
 		void calculateFreqsCumuls();
 		int createProcesses(Tree*,  vector< vector<string> >,  vector< vector<double> >&);
 		int driver(Tree*, vector< vector<string> >, int, int,  vector< vector<double> >&);
-		int readNamesFile();
         int runRandomCalcs(Tree*, vector<double>);
-        int readTrees();
-        vector<Tree*> buildTrees(vector< vector<double> >&, int, TreeMap*);
+        vector<Tree*> buildTrees(vector< vector<double> >&, int, TreeMap&);
         int getConsensusTrees(vector< vector<double> >&, int);
         int getAverageSTDMatrices(vector< vector<double> >&, int);
 		
