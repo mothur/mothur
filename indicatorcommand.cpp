@@ -468,17 +468,17 @@ int IndicatorCommand::GetIndicatorSpecies(){
 				
 			if (m->control_pressed) { out.close(); return 0; }
 			
-			out << (j+1) << '\t' << indicatorValues[j] << '\t'; 
+			out << m->currentBinLabels[j] << '\t' << indicatorValues[j] << '\t'; 
 			
 			if (pValues[j] > (1/(float)iters)) { out << pValues[j] << endl; } 
 			else { out << "<" << (1/(float)iters) << endl; }
 			
 			if (pValues[j] <= 0.05) {
-				cout << "OTU" << j+1 << '\t' << indicatorValues[j]  << '\t';
+				cout << m->currentBinLabels[j] << '\t' << indicatorValues[j]  << '\t';
 				string pValueString = "<" + toString((1/(float)iters)); 
 				if (pValues[j] > (1/(float)iters)) { pValueString = toString(pValues[j]); cout << pValues[j];} 
 				else { cout << "<" << (1/(float)iters); }
-				m->mothurOutJustToLog("OTU" + toString(j+1) + "\t" + toString(indicatorValues[j]) + "\t" + pValueString); 
+				m->mothurOutJustToLog(m->currentBinLabels[j] + "\t" + toString(indicatorValues[j]) + "\t" + pValueString); 
 				m->mothurOutEndLine(); 
 			}
 		}
@@ -514,7 +514,7 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 		
 		//print headings
 		out << "TreeNode\t";
-		for (int i = 0; i < numBins; i++) { out << "OTU" << (i+1) << "_IndValue" << '\t' << "pValue" << '\t'; }
+		for (int i = 0; i < numBins; i++) { out << m->currentBinLabels[i] << "_IndValue" << '\t' << "pValue" << '\t'; }
 		out << endl;
 		
 		m->mothurOutEndLine(); m->mothurOut("Node\tSpecies\tIndicatorValue\tpValue\n");
@@ -671,11 +671,11 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 				}
 				
 				if (pValues[j] <= 0.05) {
-					cout << i+1 << "\tOTU" << j+1 << '\t' << indicatorValues[j]  << '\t';
+					cout << i+1 << '\t' << m->currentBinLabels[j] << '\t' << indicatorValues[j]  << '\t';
 					string pValueString = "<" + toString((1/(float)iters)); 
 					if (pValues[j] > (1/(float)iters)) { pValueString = toString(pValues[j]); cout << pValues[j];} 
 					else { cout << "<" << (1/(float)iters); }
-					m->mothurOutJustToLog(toString(i) + "\tOTU" + toString(j+1) + "\t" + toString(indicatorValues[j]) + "\t" + pValueString); 
+					m->mothurOutJustToLog(toString(i) + "\t" + m->currentBinLabels[j] + "\t" + toString(indicatorValues[j]) + "\t" + pValueString); 
 					m->mothurOutEndLine(); 
 				}
 			}
