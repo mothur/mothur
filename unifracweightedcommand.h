@@ -59,7 +59,7 @@ class UnifracWeightedCommand : public Command {
 		bool abort, phylip, random, includeRoot, subsample, consensus;
 		string groups, itersString, outputForm, treefile, groupfile, namefile;
 		vector<string> Groups, outputNames; //holds groups to be used
-		int processors, numUniquesInName, subsampleSize, subsampleIters;
+		int processors, subsampleSize, subsampleIters;
 		ofstream outSum;
 		map<string, string> nameMap;
 		
