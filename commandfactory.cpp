@@ -130,6 +130,7 @@
 #include "cooccurrencecommand.h"
 #include "pcrseqscommand.h"
 #include "createdatabasecommand.h"
+#include "makebiomcommand.h"
 
 /*******************************************************/
 
@@ -281,6 +282,7 @@ CommandFactory::CommandFactory(){
     commands["cooccurrence"]        = "cooccurrence";
     commands["pcr.seqs"]            = "pcr.seqs";
     commands["create.database"]     = "create.database";
+    commands["make.biom"]           = "make.biom";
 	commands["quit"]				= "MPIEnabled"; 
 
 }
@@ -490,6 +492,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         else if(commandName == "cooccurrence")          {	command = new CooccurrenceCommand(optionString);            }
         else if(commandName == "pcr.seqs")              {	command = new PcrSeqsCommand(optionString);                 }
         else if(commandName == "create.database")       {	command = new CreateDatabaseCommand(optionString);          }
+        else if(commandName == "make.biom")             {	command = new MakeBiomCommand(optionString);                }
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -640,6 +643,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
         else if(commandName == "cooccurrence")          {	pipecommand = new CooccurrenceCommand(optionString);            }
         else if(commandName == "pcr.seqs")              {	pipecommand = new PcrSeqsCommand(optionString);                 }
         else if(commandName == "create.database")       {	pipecommand = new CreateDatabaseCommand(optionString);          }
+        else if(commandName == "make.biom")             {	pipecommand = new MakeBiomCommand(optionString);                }
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -776,6 +780,7 @@ Command* CommandFactory::getCommand(string commandName){
         else if(commandName == "cooccurrence")          {	shellcommand = new CooccurrenceCommand();           }
         else if(commandName == "pcr.seqs")              {	shellcommand = new PcrSeqsCommand();                }
         else if(commandName == "create.database")       {	shellcommand = new CreateDatabaseCommand();         }
+        else if(commandName == "make.biom")             {	shellcommand = new MakeBiomCommand();               }
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;
