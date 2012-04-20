@@ -42,6 +42,7 @@ private:
     
     int getBiom(vector<SharedRAbundVector*>&);
     vector<string> getMetaData(vector<SharedRAbundVector*>&);
+    vector<string> parseTax(string tax, vector<string>& scores);
 };
 
 

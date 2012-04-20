@@ -513,7 +513,7 @@ vector<string> MakeBiomCommand::getMetaData(vector<SharedRAbundVector*>& lookup)
             //convert list file bin labels to shared file bin labels
             //parse tax strings
             //save in map
-            map<string, vector<string> > labelTaxMap;
+            map<string, string> labelTaxMap;
             string snumBins = toString(otuLabels.size());
             for (int i = 0; i < otuLabels.size(); i++) {  
                 
@@ -528,11 +528,7 @@ vector<string> MakeBiomCommand::getMetaData(vector<SharedRAbundVector*>& lookup)
                 }
                 binLabel += sbinNumber;
                 
-                vector<string> taxString;
-                m->splitAtChar(taxs[i], taxString, ';');
-                taxString.pop_back(); //adds blank string because taxonomies end in ;
-                
-                labelTaxMap[binLabel] = taxString;
+                labelTaxMap[binLabel] = taxs[i];
             }
             
             
@@ -540,7 +536,7 @@ vector<string> MakeBiomCommand::getMetaData(vector<SharedRAbundVector*>& lookup)
             
             //traverse the binLabels forming the metadata strings and saving them
             //make sure to sanity check
-            map<string, vector<string> >::iterator it;
+            map<string, string>::iterator it;
             for (int i = 0; i < m->currentBinLabels.size(); i++) {
                 
                 if (m->control_pressed) { return metadata; }
@@ -549,37 +545,24 @@ vector<string> MakeBiomCommand::getMetaData(vector<SharedRAbundVector*>& lookup)
                 
                 if (it == labelTaxMap.end()) { m->mothurOut("[ERROR]: can't find taxonomy information for " + m->currentBinLabels[i] + ".\n"); m->control_pressed = true; }
                 else {
+                    vector<string> bootstrapValues;
                     string data = "{\"taxonomy\":[";
-                    for (int j = 0; j < (it->second).size()-1; j ++) {
+            
+                    vector<string> scores;
+                    vector<string> taxonomies = parseTax(it->second, scores);
+                    
+                    for (int j = 0; j < taxonomies.size()-1; j ++) { data += "\"" + taxonomies[j] + "\", "; }
+                    data += "\"" + taxonomies[taxonomies.size()-1] + "\"]";
+                    
+                    //add bootstrap values if available
+                    if (scores[0] != "null") {
+                        data += ", \"bootstrap\":[";
                         
-                        string taxon = (it->second)[j];
-                        
-                        //strip "" if they are there
-                        int pos = taxon.find("\"");
-                        if (pos != string::npos) {
-                            string newTax = "";
-                            for (int k = 0; k < taxon.length(); k++) {
-                                if (taxon[k] != '\"') { newTax += taxon[k]; }
-                            }
-                            taxon = newTax;
-                        }
-                        
-                        data += "\"" + taxon + "\", ";
+                        for (int j = 0; j < scores.size()-1; j ++) { data += scores[j] + ", "; }
+                        data += scores[scores.size()-1] + "]";
+
                     }
-                    
-                    string taxon = (it->second)[(it->second).size()-1];
-                    
-                    //strip "" if they are there
-                    int pos = taxon.find("\"");
-                    if (pos != string::npos) {
-                        string newTax = "";
-                        for (int k = 0; k < taxon.length(); k++) {
-                            if (taxon[k] != '\"') { newTax += taxon[k]; }
-                        }
-                        taxon = newTax;
-                    }
-                    
-                    data += "\"" + taxon + "\"]} ";
+                    data += "}";
                     
                     metadata.push_back(data);
                 }
@@ -594,7 +577,58 @@ vector<string> MakeBiomCommand::getMetaData(vector<SharedRAbundVector*>& lookup)
 		exit(1);
 	}
 
-}        
+}
+/**************************************************************************************************/
+//returns {Bacteria, Bacteroidetes, ..} and scores is filled with {100, 98, ...} or {null, null, null}
+vector<string> MakeBiomCommand::parseTax(string tax, vector<string>& scores) {
+	try {
+		
+		string taxon;
+        vector<string> taxs;
+		
+		while (tax.find_first_of(';') != -1) {
+			
+			if (m->control_pressed) { return taxs; }
+			
+			//get taxon
+			taxon = tax.substr(0,tax.find_first_of(';'));
+            
+			int pos = taxon.find_last_of('(');
+			if (pos != -1) {
+				//is it a number?
+				int pos2 = taxon.find_last_of(')');
+				if (pos2 != -1) {
+					string confidenceScore = taxon.substr(pos+1, (pos2-(pos+1)));
+					if (m->isNumeric1(confidenceScore)) {
+						taxon = taxon.substr(0, pos); //rip off confidence 
+                        scores.push_back(confidenceScore);
+					}else{ scores.push_back("null"); }
+				}
+			}
+			
+            //strip "" if they are there
+            pos = taxon.find("\"");
+            if (pos != string::npos) {
+                string newTax = "";
+                for (int k = 0; k < taxon.length(); k++) {
+                    if (taxon[k] != '\"') { newTax += taxon[k]; }
+                }
+                taxon = newTax;
+            }
+            
+            //look for bootstrap value
+			taxs.push_back(taxon);
+            tax = tax.substr(tax.find_first_of(';')+1, tax.length());
+		}
+		
+		return taxs;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "MakeBiomCommand", "parseTax");
+		exit(1);
+	}
+}
+
 //**********************************************************************************************************************
 
 

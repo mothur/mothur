@@ -40,6 +40,7 @@ void MothurOut::printCurrentFiles()  {
 		if (taxonomyfile != "")		{  mothurOut("taxonomy=" + taxonomyfile); mothurOutEndLine();		}
 		if (treefile != "")			{  mothurOut("tree=" + treefile); mothurOutEndLine();				}
 		if (flowfile != "")			{  mothurOut("flow=" + flowfile); mothurOutEndLine();				}
+        if (biomfile != "")			{  mothurOut("biom=" + biomfile); mothurOutEndLine();				}
 		if (processors != "1")		{  mothurOut("processors=" + processors); mothurOutEndLine();		}
 		
 	}
@@ -73,6 +74,7 @@ bool MothurOut::hasCurrentFiles()  {
 		if (taxonomyfile != "")		{  return true;			}
 		if (treefile != "")			{  return true;			}
 		if (flowfile != "")			{  return true;			}
+        if (biomfile != "")			{  return true;			}
 		if (processors != "1")		{  return true;			}
 		
 		return hasCurrent;
@@ -107,6 +109,7 @@ void MothurOut::clearCurrentFiles()  {
 		accnosfile = "";
 		taxonomyfile = "";	
 		flowfile = "";
+        biomfile = "";
 		processors = "1";
 	}
 	catch(exception& e) {
@@ -1962,6 +1965,25 @@ void MothurOut::splitAtComma(string& estim, vector<string>& container) {
 		exit(1);
 	}	
 }
+/***********************************************************************/
+//This function splits up the various option parameters
+void MothurOut::splitAtChar(string& prefix, string& suffix, char c){
+	try {
+		prefix = suffix.substr(0,suffix.find_first_of(c));
+		if ((suffix.find_first_of(c)+2) <= suffix.length()) {  //checks to make sure you don't have comma at end of string
+			suffix = suffix.substr(suffix.find_first_of(c)+1, suffix.length());
+			string space = " ";
+			while(suffix.at(0) == ' ')
+				suffix = suffix.substr(1, suffix.length());
+		}
+        
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "splitAtComma");
+		exit(1);
+	}	
+}
+
 /***********************************************************************/
 
 //This function splits up the various option parameters

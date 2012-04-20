@@ -28,10 +28,7 @@ CommandOptionParser::CommandOptionParser(string input){
 		}
 		else if (openParen == -1) { m->mothurOut("[ERROR]: You are missing ("); m->mothurOutEndLine(); }
 		else if (closeParen == -1) { m->mothurOut("[ERROR]:You are missing )"); m->mothurOutEndLine(); }
-					
-		//GlobalData* globaldata = GlobalData::getInstance();
-		//globaldata->parseGlobalData(commandString, optionString);			//parser to separate and check options
-	}
+    }
 	catch(exception& e) {
 		m->errorOut(e, "CommandOptionParser", "CommandOptionParser");
 		exit(1);
