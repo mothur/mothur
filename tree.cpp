@@ -92,7 +92,6 @@ Tree::Tree(TreeMap* t, vector< vector<double> >& sims) : tmap(t) {
 		m = MothurOut::getInstance();
 		
 		if (m->runParse == true) {  parseTreeFile();  m->runParse = false;  }
-        //for(int i = 0; i < 	globaldata->Treenames.size(); i++) { cout << i << '\t' << globaldata->Treenames[i] << endl;  }	
 		numLeaves = m->Treenames.size();
 		numNodes = 2*numLeaves - 1;
 		
@@ -134,12 +133,11 @@ Tree::Tree(TreeMap* t, vector< vector<double> >& sims) : tmap(t) {
         //build tree from matrix
         //initialize indexes
         map<int, int> indexes;  //maps row in simMatrix to vector index in the tree
-        int numGroups = (tmap->getNamesOfGroups()).size();
-        for (int g = 0; g < numGroups; g++) {	indexes[g] = g;	}
+        for (int g = 0; g < numLeaves; g++) {	indexes[g] = g;	}
 		
 		//do merges and create tree structure by setting parents and children
 		//there are numGroups - 1 merges to do
-		for (int i = 0; i < (numGroups - 1); i++) {
+		for (int i = 0; i < (numLeaves - 1); i++) {
 			float largest = -1000.0;
 			
 			if (m->control_pressed) { break; }
@@ -154,11 +152,11 @@ Tree::Tree(TreeMap* t, vector< vector<double> >& sims) : tmap(t) {
             
 			//set non-leaf node info and update leaves to know their parents
 			//non-leaf
-			tree[numGroups + i].setChildren(indexes[row], indexes[column]);
+			tree[numLeaves + i].setChildren(indexes[row], indexes[column]);
 			
 			//parents
-			tree[indexes[row]].setParent(numGroups + i);
-			tree[indexes[column]].setParent(numGroups + i);
+			tree[indexes[row]].setParent(numLeaves + i);
+			tree[indexes[column]].setParent(numLeaves + i);
 			
 			//blength = distance / 2;
 			float blength = ((1.0 - largest) / 2);
@@ -168,12 +166,12 @@ Tree::Tree(TreeMap* t, vector< vector<double> >& sims) : tmap(t) {
 			tree[indexes[column]].setBranchLength(blength - tree[indexes[column]].getLengthToLeaves());
 			
 			//set your length to leaves to your childs length plus branchlength
-			tree[numGroups + i].setLengthToLeaves(tree[indexes[row]].getLengthToLeaves() + tree[indexes[row]].getBranchLength());
+			tree[numLeaves + i].setLengthToLeaves(tree[indexes[row]].getLengthToLeaves() + tree[indexes[row]].getBranchLength());
 			
 			
 			//update index 
-			indexes[row] = numGroups+i;
-			indexes[column] = numGroups+i;
+			indexes[row] = numLeaves+i;
+			indexes[column] = numLeaves+i;
 			
 			//remove highest value that caused the merge.
 			sims[row][column] = -1000.0;

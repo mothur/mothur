@@ -112,12 +112,12 @@ vector<string> MakeBiomCommand::setParameters(){
 string MakeBiomCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The make.biom command parameters are shared, groups, matrixtype and label.  shared is required, unless you have a valid current file.\n";
+		helpString += "The make.biom command parameters are shared, contaxonomy, groups, matrixtype and label.  shared is required, unless you have a valid current file.\n";
 		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like included. The group names are separated by dashes.\n";
 		helpString += "The label parameter allows you to select what distance levels you would like, and are also separated by dashes.\n";
 		helpString += "The matrixtype parameter allows you to select what type you would like to make. Choices are sparse and dense, default is sparse.\n";
+        helpString += "The contaxonomy file is the taxonomy file outputted by classify.otu(list=yourListfile, taxonomy=yourTaxonomyFile). Be SURE that the you are the constaxonomy file distance matches the shared file distance.  ie, for *.0.03.cons.taxonomy set label=0.03. Mothur is smart enough to handle shared files that have been subsampled.\n";
 		helpString += "The make.biom command should be in the following format: make.biom(shared=yourShared, groups=yourGroups, label=yourLabels).\n";
-        helpString += "The contaxonomy file is the taxonomy file outputted by classify.otu(list=yourListfile, taxonomy=yourTaxonomyFile). Be SURE that the you are the constaxonomy file distance matches the shared file distance.  ie, for *.0.03.cons.taxonomy set label=0.03. Mothur is smart enough to handle shared files that have been subsampled after the classify.otu command was run on the list and taxonomy file.\n";
 		helpString += "Example make.biom(shared=abrecovery.an.shared, groups=A-B-C).\n";
 		helpString += "The default value for groups is all the groups in your groupfile, and all labels in your inputfile will be used.\n";
 		helpString += "The make.biom command outputs a .biom file.\n";

@@ -1448,7 +1448,8 @@ map<string, int> MothurOut::readNames(string namefile) {
 			if (control_pressed) { break; }
 			
 			string firstCol, secondCol;
-			in >> firstCol >> secondCol; gobble(in);
+			in >> firstCol;  gobble(in);
+            in >> secondCol; gobble(in);
 			
 			int num = getNumNames(secondCol);
 			

@@ -45,7 +45,7 @@ private:
 	bool getOligos(vector<vector<string> >&, vector<vector<string> >&, vector<vector<string> >&);
     bool abort, keepprimer, keepdots;
 	string fastafile, oligosfile, taxfile, groupfile, namefile, ecolifile, outputDir, nomatch;
-	int start, end, pdiffs, processors, length;
+	int start, end, processors, length;
 	
     vector<string> revPrimer, outputNames;
 	vector<string> primers;

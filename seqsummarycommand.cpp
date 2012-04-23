@@ -414,7 +414,7 @@ int SeqSummaryCommand::driverCreateSummary(vector<int>& startPosition, vector<in
 					//make sure this sequence is in the namefile, else error 
 					map<string, int>::iterator it = nameMap.find(current.getName());
 					
-					if (it == nameMap.end()) { m->mothurOut("[ERROR]: " + current.getName() + " is not in your namefile, please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
+					if (it == nameMap.end()) { m->mothurOut("[ERROR]: '" + current.getName() + "' is not in your namefile, please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
 					else { num = it->second; }
 				}
 				

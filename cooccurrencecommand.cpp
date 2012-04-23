@@ -136,7 +136,7 @@ CooccurrenceCommand::CooccurrenceCommand(string option) {
 				m->mothurOut("[ERROR]: " + metric + " is not a valid metric option for the cooccurrence command. Choices are cscore, checker, combo, vratio."); m->mothurOutEndLine(); abort = true; 
 			}
 			
-			matrix = validParameter.validFile(parameters, "matrix", false);				if (matrix == "not found") { matrix = "sim2"; }
+			matrix = validParameter.validFile(parameters, "matrixmodel", false);				if (matrix == "not found") { matrix = "sim2"; }
 			
 			if ((matrix != "sim1") && (matrix != "sim2") && (matrix != "sim3") && (matrix != "sim4") && (matrix != "sim5" ) && (matrix != "sim6" ) && (matrix != "sim7" ) && (matrix != "sim8" ) && (matrix != "sim9" )) {
 				m->mothurOut("[ERROR]: " + matrix + " is not a valid matrix option for the cooccurrence command. Choices are sim1, sim2, sim3, sim4, sim5, sim6, sim7, sim8, sim9."); m->mothurOutEndLine(); abort = true; 
@@ -295,17 +295,10 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
         
         //nrows is ncols of inital matrix. All the functions need this value. They assume the transposition has already taken place and nrows and ncols refer to that matrix.
         //comatrix and initmatrix are still vectors of vectors of ints as in the original script. The abundancevector is only what was read in ie not a co-occurrence matrix!
-        int ncols = numOTUS;//rows of inital matrix
-        int nrows = thisLookUp.size();//groups
+        int nrows = numOTUS;//rows of inital matrix
+        int ncols = thisLookUp.size();//groups
         double initscore = 0.0;
-        //transpose matrix
-        int newmatrows = ncols;
-        int newmatcols = nrows;
-      
-        //swap for transposed matrix
-        nrows = newmatrows;//ncols;
-        ncols = newmatcols;//nrows;
-        
+                
         vector<int> initcolumntotal; initcolumntotal.resize(ncols, 0);
         vector<int> initrowtotal; initrowtotal.resize(nrows, 0);
         vector<double> stats;
