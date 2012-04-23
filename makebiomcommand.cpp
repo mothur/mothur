@@ -168,7 +168,7 @@ MakeBiomCommand::MakeBiomCommand(string option) {
 			
 			//initialize outputTypes
 			vector<string> tempOutNames;
-			outputTypes["relabund"] = tempOutNames;
+			outputTypes["biom"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -328,6 +328,14 @@ int MakeBiomCommand::execute(){
 		
         if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  return 0; }     
 		
+        //set sabund file as new current sabundfile
+        string current = "";
+		itTypes = outputTypes.find("biom");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setBiomFile(current); }
+		}
+
+        
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}

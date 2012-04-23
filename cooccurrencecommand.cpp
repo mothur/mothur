@@ -279,7 +279,6 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
         vector<int> columntotal; columntotal.resize(thisLookUp.size(), 0);
         vector<int> rowtotal; rowtotal.resize(numOTUS, 0);
         
-        int rowcount = 0;
         for (int i = 0; i < thisLookUp.size(); i++) {
 			for (int j = 0; j < thisLookUp[i]->getNumBins(); j++) {
 				if (m->control_pressed) { return 0; }			
@@ -288,12 +287,10 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
 				if(abund > 0) {
 				    initmatrix[i][j] = 1;
                     co_matrix[j][i] = 1;
-                    rowcount++;
-                    columntotal[j]++;
+                    rowtotal[j]++;
+                    columntotal[i]++;
 				}
 			}
-            rowtotal[i] = rowcount;
-            rowcount = 0;
         }
         
         //nrows is ncols of inital matrix. All the functions need this value. They assume the transposition has already taken place and nrows and ncols refer to that matrix.
