@@ -77,7 +77,7 @@ EstOutput Parsimony::getValues(Tree* t, int p, string o) {
 			data = createProcesses(t, namesOfGroupCombos, tmap);
 		}
 	#else
-		data = driver(t, namesOfGroupCombos, 0, namesOfGroupCombos.size());
+		data = driver(t, namesOfGroupCombos, 0, namesOfGroupCombos.size(), tmap);
 	#endif
 		
 		return data;

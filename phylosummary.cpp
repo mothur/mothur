@@ -25,7 +25,7 @@ PhyloSummary::PhyloSummary(string refTfile, string groupFile){
 		}
 				
 		//check for necessary files
-		string taxFileNameTest = refTfile.substr(0,refTfile.find_last_of(".")+1) + "tree.sum";
+		string taxFileNameTest = m->getFullPathName((refTfile.substr(0,refTfile.find_last_of(".")+1) + "tree.sum"));
 		ifstream FileTest(taxFileNameTest.c_str());
 		
 		if (!FileTest) { 

@@ -27,7 +27,7 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 		if (baseTName == "saved") { baseTName = rdb->getSavedTaxonomy(); }
 		
 		/************calculate the probablity that each word will be in a specific taxonomy*************/
-		string tfileroot = baseTName.substr(0,baseTName.find_last_of(".")+1);
+		string tfileroot = m->getFullPathName(baseTName.substr(0,baseTName.find_last_of(".")+1));
 		string tempfileroot = m->getRootName(m->getSimpleName(baseName));
 		string phyloTreeName = tfileroot + "tree.train";
 		string phyloTreeSumName = tfileroot + "tree.sum";
@@ -230,7 +230,7 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 				delete phyloTree;
 				
 				phyloTree = new PhyloTree(phyloTreeTest, phyloTreeName);
-				
+                
 				//save probabilities
 				if (rdb->save) { rdb->wordGenusProb = wordGenusProb; rdb->WordPairDiffArr = WordPairDiffArr; }
 			}

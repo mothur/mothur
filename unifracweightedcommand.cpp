@@ -660,7 +660,7 @@ int UnifracWeightedCommand::runRandomCalcs(Tree* thisTree, vector<double> usersS
                 createProcesses(thisTree,  namesOfGroupCombos, rScores);
             }
 #else
-            driver(T[i], namesOfGroupCombos, 0, namesOfGroupCombos.size(), rScores);
+            driver(thisTree, namesOfGroupCombos, 0, namesOfGroupCombos.size(), rScores);
 #endif
             
             if (m->control_pressed) { delete tmap;  for (int i = 0; i < T.size(); i++) { delete T[i]; } delete output; outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
