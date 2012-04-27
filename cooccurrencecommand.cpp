@@ -378,7 +378,7 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
             }
             //
             //            
-            trial.update_row_col_totals(co_matrix, rowtotal, columntotal); 
+            //trial.update_row_col_totals(co_matrix, rowtotal, columntotal); 
             
             if (metric == "cscore") { 
                 stats.push_back(trial.calc_c_score(co_matrix, rowtotal));
