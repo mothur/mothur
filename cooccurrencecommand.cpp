@@ -385,7 +385,7 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
                 }
             }
         }
-        else if (matrix == "sim9") { }
+        else if (matrix == "sim9" || matrix == "sim2") { }
         else {
             m->mothurOut("[ERROR]: No model selected! \n");
             m->control_pressed = true;
