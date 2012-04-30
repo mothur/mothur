@@ -270,7 +270,7 @@ int CooccurrenceCommand::execute(){
 //**********************************************************************************************************************
 
 int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp, ofstream& out){
-	try {
+    try {
         int numOTUS = thisLookUp[0]->getNumBins();
         vector< vector<int> > initmatrix; initmatrix.resize(thisLookUp.size());
         vector< vector<int> > co_matrix; co_matrix.resize(thisLookUp[0]->getNumBins());
@@ -280,17 +280,17 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
         vector<int> rowtotal; rowtotal.resize(numOTUS, 0);
         
         for (int i = 0; i < thisLookUp.size(); i++) {
-			for (int j = 0; j < thisLookUp[i]->getNumBins(); j++) {
-				if (m->control_pressed) { return 0; }			
-				int abund = thisLookUp[i]->getAbundance(j);
-				
-				if(abund > 0) {
-				    initmatrix[i][j] = 1;
+            for (int j = 0; j < thisLookUp[i]->getNumBins(); j++) {
+                if (m->control_pressed) { return 0; }
+                int abund = thisLookUp[i]->getAbundance(j);
+                
+                if(abund > 0) {
+                    initmatrix[i][j] = 1;
                     co_matrix[j][i] = 1;
                     rowtotal[j]++;
                     columntotal[i]++;
-				}
-			}
+                }
+            }
         }
         
         //nrows is ncols of inital matrix. All the functions need this value. They assume the transposition has already taken place and nrows and ncols refer to that matrix.
@@ -298,26 +298,26 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
         int nrows = numOTUS;//rows of inital matrix
         int ncols = thisLookUp.size();//groups
         double initscore = 0.0;
-                
+        
         vector<int> columntotal; columntotal.resize(ncols, 0);
         vector<int> rowtotal; rowtotal.resize(nrows, 0);
         vector<double> stats;
         double probabilityMatrix[ncols * nrows];
         vector<vector<int> > nullmatrix(nrows, vector<int>(ncols, 0));
-               
+        
         TrialSwap2 trial;
         
-        n = accumulate( columntotal.begin(), columntotal.end(), 0 );
+        int n = accumulate( columntotal.begin(), columntotal.end(), 0 );
         
         //============================================================
         
         //generate a probability matrix. Only do this once.
         float start = 0.0;
-    
+        
         if (matrix == "sim1") {
             for(int i=0;i<nrows;i++) {
                 for(int j=0;j<ncols;j++) {
-                    probabilityMatrix[ncols * i + j] = start + 1/double(nrows*ncols);                    
+                    probabilityMatrix[ncols * i + j] = start + 1/double(nrows*ncols);
                     start = start + 1/double(nrows*ncols);
                 }
             }
@@ -327,83 +327,81 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
                 start = 0.0;
                 for(int j=0;j<ncols;j++) {
                     probabilityMatrix[ncols * i + j] = start + 1/double(ncols);
-                    start = start + 1/double(ncols); 
+                    start = start + 1/double(ncols);
                 }
             }
         }
-
+        
         else if (matrix == "sim3") {
             for(int j=0;j<ncols;j++) {
                 start = 0.0;
                 for(int i=0;i<nrows;i++) {
-                    probabilityMatrix[ncols * i + j] = start + 1/double(nrows);                    
-                    start =  start + 1/double(nrows);
+                    probabilityMatrix[ncols * i + j] = start + 1/double(nrows);
+                    start = start + 1/double(nrows);
                 }
             }
         }
-
+        
         else if (matrix == "sim4") {
             for(int i=0;i<nrows;i++) {
                 start = 0.0;
                 for(int j=0;j<ncols;j++) {
-                    probabilityMatrix[ncols * i + j] = start + columntotal[j]/double(n);                    
-                    start =  start + columntotal[j]/double(n);
+                    probabilityMatrix[ncols * i + j] = start + columntotal[j]/double(n);
+                    start = start + columntotal[j]/double(n);
                 }
             }
         }
-
+        
         else if (matrix == "sim5") {
             for(int j=0;j<ncols;j++) {
                 start = 0.0;
                 for(int i=0;i<nrows;i++) {
-                    probabilityMatrix[ncols * i + j] = start + rowtotal[i]/double(n);                    
-                    start =  start + rowtotal[i]/double(n);
+                    probabilityMatrix[ncols * i + j] = start + rowtotal[i]/double(n);
+                    start = start + rowtotal[i]/double(n);
                 }
             }
         }
-
+        
         else if (matrix == "sim6") {
             for(int i=0;i<nrows;i++) {
                 for(int j=0;j<ncols;j++) {
-                    probabilityMatrix[ncols * i + j] = start + columntotal[j]/double(n*nrows);                    
-                    start =  start + columntotal[j]/double(n*nrows);
+                    probabilityMatrix[ncols * i + j] = start + columntotal[j]/double(n*nrows);
+                    start = start + columntotal[j]/double(n*nrows);
                 }
             }
         }
-
-
+        
+        
         else if (matrix == "sim7") {
             for(int i=0;i<nrows;i++) {
                 for(int j=0;j<ncols;j++) {
-                    probabilityMatrix[ncols * i + j] = start + rowtotal[i]/double(n*ncols);                    
-                    start =  start + rowtotal[i]/double(n*ncols);
+                    probabilityMatrix[ncols * i + j] = start + rowtotal[i]/double(n*ncols);
+                    start = start + rowtotal[i]/double(n*ncols);
                 }
             }
         }
-
+        
         else if (matrix == "sim8") {
             for(int i=0;i<nrows;i++) {
                 for(int j=0;j<ncols;j++) {
-                    probabilityMatrix[ncols * i + j] = start + (rowtotal[i]*columntotal[j])/double(n*n);                    
-                    start =  start + (rowtotal[i]*columntotal[j])/double(n*n);
+                    probabilityMatrix[ncols * i + j] = start + (rowtotal[i]*columntotal[j])/double(n*n);
+                    start = start + (rowtotal[i]*columntotal[j])/double(n*n);
                 }
             }
         }
-
+        else if (matrix == "sim9") { }
         else {
-            if(sim != 9) {
-                m->mothurOut("[ERROR]: No model selected! \n");
-                m->control_pressed = true;
-            }
+            m->mothurOut("[ERROR]: No model selected! \n");
+            m->control_pressed = true;
         }
-
         
-              
-        if (metric == "cscore")         { initscore = trial.calc_c_score(initmatrix, rowtotal, ncols, nrows);    }
-        else if (metric == "checker")   { initscore = trial.calc_checker(initmatrix, rowtotal, ncols, nrows);    }
-        else if (metric == "vratio")    { initscore = trial.calc_vratio(nrows, ncols, rowtotal, columntotal);   }
-        else if (metric == "combo")     { initscore = trial.calc_combo(nrows, ncols, initmatrix);                }
-        else                            {  m->mothurOut("[ERROR]: No metric selected!\n");  m->control_pressed = true; return 1;            }
+        
+        
+        if (metric == "cscore") { initscore = trial.calc_c_score(initmatrix, rowtotal, ncols, nrows); }
+        else if (metric == "checker") { initscore = trial.calc_checker(initmatrix, rowtotal, ncols, nrows); }
+        else if (metric == "vratio") { initscore = trial.calc_vratio(nrows, ncols, rowtotal, columntotal); }
+        else if (metric == "combo") { initscore = trial.calc_combo(nrows, ncols, initmatrix); }
+        else { m->mothurOut("[ERROR]: No metric selected!\n"); m->control_pressed = true; return 1; }
         
         m->mothurOut("Initial c score: " + toString(initscore)); m->mothurOutEndLine();
         
@@ -411,55 +409,55 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
         double current;
         double randnum;
         int count;
-
+        
         //burn-in
-        for(int i=0;i<10000;i++){                
+        for(int i=0;i<10000;i++){
             nullmatrix.clear();
             //zero-fill the null matrix
             nullmatrix.assign(nrows, vector<int>(ncols, 0));
-
+            
             if(matrix == "sim1" || matrix == "sim6" || matrix == "sim8" || matrix == "sim7") {
                 count = 0;
                 while(count < n) {
-                    nextnum:
+                nextnum:
                     previous = 0.0;
                     randnum = rand() / double(RAND_MAX);
                     for(int i=0;i<nrows;i++) {
-                        for(int j=0;j<ncols;j++) { 
-                            current = probabilityMatrix[ncols * i + j];                    
+                        for(int j=0;j<ncols;j++) {
+                            current = probabilityMatrix[ncols * i + j];
                             if(randnum <= current && randnum > previous) {
                                 nullmatrix[i][j] = 1;
                                 count++;
                                 if (count > n) break;
                                 else
-                                goto nextnum;
+                                    goto nextnum;
                             }
                             previous = current;
                         }
                     }
                 }
             }
-
+            
             else if(matrix == "sim2" || matrix == "sim4") {
-                    for(int i=0;i<nrows;i++) {
-                        previous = 0.0;
-                        count = 0;
-                        while(count < rowtotal[i]) {
-                            randnum = rand() / double(RAND_MAX);
-                            for(int j=0;j<ncols;j++) { 
-                                current = probabilityMatrix[ncols * i + j];                       
-                                if(randnum <= current && randnum > previous && nullmatrix[i][j] != 1) {
-                                    nullmatrix[i][j] = 1;
-                                    count++;
-                                    previous = 0.0;
-                                    break;
-                                }
-                                previous = current;
+                for(int i=0;i<nrows;i++) {
+                    previous = 0.0;
+                    count = 0;
+                    while(count < rowtotal[i]) {
+                        randnum = rand() / double(RAND_MAX);
+                        for(int j=0;j<ncols;j++) {
+                            current = probabilityMatrix[ncols * i + j];
+                            if(randnum <= current && randnum > previous && nullmatrix[i][j] != 1) {
+                                nullmatrix[i][j] = 1;
+                                count++;
+                                previous = 0.0;
+                                break;
                             }
+                            previous = current;
                         }
                     }
+                }
             }
-
+            
             else if(matrix == "sim3" || matrix == "sim5") {
                 //columns
                 for(int j=0;j<ncols;j++) {
@@ -482,54 +480,54 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
             
         }
         
-        //populate null matrix from probability matrix, do this a lot.  
-        for(int i=0;i<runs;i++){                
+        //populate null matrix from probability matrix, do this a lot.
+        for(int i=0;i<runs;i++){
             nullmatrix.clear();
             //zero-fill the null matrix
             nullmatrix.assign(nrows, vector<int>(ncols, 0));
-
+            
             if(matrix == "sim1" || matrix == "sim6" || matrix == "sim8" || matrix == "sim7") {
                 count = 0;
                 while(count < n) {
-                    nextnum:
+                nextnum2:
                     previous = 0.0;
                     randnum = rand() / double(RAND_MAX);
                     for(int i=0;i<nrows;i++) {
-                        for(int j=0;j<ncols;j++) { 
-                            current = probabilityMatrix[ncols * i + j];                    
+                        for(int j=0;j<ncols;j++) {
+                            current = probabilityMatrix[ncols * i + j];
                             if(randnum <= current && randnum > previous) {
                                 nullmatrix[i][j] = 1;
                                 count++;
                                 if (count > n) break;
                                 else
-                                goto nextnum;
+                                    goto nextnum2;
                             }
                             previous = current;
                         }
                     }
                 }
             }
-
+            
             else if(matrix == "sim2" || matrix == "sim4") {
-                    for(int i=0;i<nrows;i++) {
-                        previous = 0.0;
-                        count = 0;
-                        while(count < rowtotal[i]) {
-                            randnum = rand() / double(RAND_MAX);
-                            for(int j=0;j<ncols;j++) { 
-                                current = probabilityMatrix[ncols * i + j];                       
-                                if(randnum <= current && randnum > previous && nullmatrix[i][j] != 1) {
-                                    nullmatrix[i][j] = 1;
-                                    count++;
-                                    previous = 0.0;
-                                    break;
-                                }
-                                previous = current;
+                for(int i=0;i<nrows;i++) {
+                    previous = 0.0;
+                    count = 0;
+                    while(count < rowtotal[i]) {
+                        randnum = rand() / double(RAND_MAX);
+                        for(int j=0;j<ncols;j++) {
+                            current = probabilityMatrix[ncols * i + j];
+                            if(randnum <= current && randnum > previous && nullmatrix[i][j] != 1) {
+                                nullmatrix[i][j] = 1;
+                                count++;
+                                previous = 0.0;
+                                break;
                             }
+                            previous = current;
                         }
                     }
+                }
             }
-
+            
             else if(matrix == "sim3" || matrix == "sim5") {
                 //columns
                 for(int j=0;j<ncols;j++) {
@@ -555,13 +553,13 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
                 trial.swap_checkerboards (initmatrix, rowtotal, columntotal, ncols, nrows);
             }
             else {
-                cout << "[ERROR]: No null model selected!\n" << endl;
+                m->mothurOut("[ERROR]: No null model selected!\n\n"); m->control_pressed = true;
                 return 1;
             }
-
+            
             //run metric on null matrix and add score to the stats vector
             if (metric == "cscore"){
-                stats.push_back(trial.calc_c_score(nullmatrix, rowtotal, ncols, nrows));        
+                stats.push_back(trial.calc_c_score(nullmatrix, rowtotal, ncols, nrows));
             }
             else if (metric == "checker") {
                 stats.push_back(trial.calc_checker(nullmatrix, rowtotal, ncols, nrows));
@@ -573,34 +571,34 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
                 stats.push_back(trial.calc_combo(nrows, ncols, nullmatrix));
             }
             else {
-                cout << "[ERROR]: No metric selected!\n" << endl;
+                m->mothurOut("[ERROR]: No metric selected!\n\n"); m->control_pressed = true;
                 return 1;
             }
-
+            
         }
         
-
-
-        double total = 0.0;
-        for (int i=0; i<stats.size();i++)   {   total+=stats[i];   }
         
-        double nullMean = double (total/(double)stats.size()); 
+        
+        double total = 0.0;
+        for (int i=0; i<stats.size();i++) { total+=stats[i]; }
+        
+        double nullMean = double (total/(double)stats.size());
         
         m->mothurOutEndLine(); m->mothurOut("average metric score: " + toString(nullMean)); m->mothurOutEndLine();
         
         double pvalue = 0.0;
-        if (metric == "cscore" || metric == "checker") {    pvalue = trial.calc_pvalue_greaterthan (stats, initscore);   }
-        else{   pvalue = trial.calc_pvalue_lessthan (stats, initscore); }
+        if (metric == "cscore" || metric == "checker") { pvalue = trial.calc_pvalue_greaterthan (stats, initscore); }
+        else{ pvalue = trial.calc_pvalue_lessthan (stats, initscore); }
         
         m->mothurOut("pvalue: " + toString(pvalue)); m->mothurOutEndLine();
         out << metric << '\t' << thisLookUp[0]->getLabel() << '\t' << nullMean << '\t' << pvalue << endl;
         
         return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "CooccurrenceCommand", "Cooccurrence");
-		exit(1);
-	}
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CooccurrenceCommand", "Cooccurrence");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 

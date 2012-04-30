@@ -16,17 +16,17 @@
 class TrialSwap2 {
     
 public:
-	TrialSwap2(){  m = MothurOut::getInstance(); };
+    TrialSwap2(){ m = MothurOut::getInstance(); };
     ~TrialSwap2(){};
     
     double calc_pvalue_lessthan (vector<double>, double);
     double calc_pvalue_greaterthan (vector<double>, double);
-    int swap_checkerboards (vector<vector<int> > &);
-    int calc_combo (vector<vector<int> > &);
+    void swap_checkerboards (vector<vector<int> > &co_matrix, vector<int> rowtotal, vector<int> columntotal, int ncols, int nrows);
+    int calc_combo (int, int, vector<vector<int> > &);
     double calc_vratio (int, int, vector<int>, vector<int>);
     int calc_checker (vector<vector<int> > &, vector<int>, int, int);
     double calc_c_score (vector<vector<int> > &, vector<int>, int, int);
-
+    
     
 private:
     MothurOut* m;
@@ -35,9 +35,8 @@ private:
     int print_matrix(vector<vector<int> > &, int, int);
     
     
-
+    
 };
-
 #endif
 
 
