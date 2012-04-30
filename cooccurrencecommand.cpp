@@ -317,15 +317,16 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
                 }
             }
         }
-        else if (matrix == "sim2") {
-            for(int i=0;i<nrows;i++) {
-                start = 0.0;
-                for(int j=0;j<ncols;j++) {
-                    probabilityMatrix[ncols * i + j] = start + 1/double(ncols);
-                    start = start + 1/double(ncols);
-                }
-            }
-        }
+        //don't need a prob matrix because we just shuffle the rows, may use this in the future
+//        else if (matrix == "sim2") {
+//            for(int i=0;i<nrows;i++) {
+//                start = 0.0;
+//                for(int j=0;j<ncols;j++) {
+//                    probabilityMatrix[ncols * i + j] = start + 1/double(ncols);
+//                    start = start + 1/double(ncols);
+//                }
+//            }
+//        }
         
         else if (matrix == "sim3") {
             for(int j=0;j<ncols;j++) {
@@ -438,7 +439,16 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
                 }
             }
             
-            else if(matrix == "sim2" || matrix == "sim4") {
+            else if (matrix == "sim2") {
+                for(int i=0;i<nrows;i++) {
+                    random_shuffle( co_matrix[i].begin(), co_matrix[i].end() ); 
+                }
+                //do this for the scoring since those all have nullmatrix as a parameter
+                //nullmatrix gets cleared at the begining of each run
+                nullmatrix = co_matrix;
+            }
+            
+            else if(matrix == "sim4") {
                 for(int i=0;i<nrows;i++) {
                     previous = 0.0;
                     count = 0;
