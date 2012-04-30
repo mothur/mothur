@@ -277,8 +277,8 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
         vector<int> columntotal; columntotal.resize(thisLookUp.size(), 0);
         vector<int> rowtotal; rowtotal.resize(numOTUS, 0);
         
-        for (int i = 0; i < thisLookUp.size(); i++) {
-            for (int j = 0; j < thisLookUp[i]->getNumBins(); j++) {
+        for (int i = 0; i < thisLookUp.size(); i++) { //nrows in the shared file
+            for (int j = 0; j < thisLookUp[i]->getNumBins(); j++) { //cols of original shared file
                 if (m->control_pressed) { return 0; }
                 int abund = thisLookUp[i]->getAbundance(j);
                 
@@ -296,8 +296,6 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
         int ncols = thisLookUp.size();//groups
         double initscore = 0.0;
         
-        vector<int> columntotal; columntotal.resize(ncols, 0);
-        vector<int> rowtotal; rowtotal.resize(nrows, 0);
         vector<double> stats;
         double probabilityMatrix[ncols * nrows];
         vector<vector<int> > nullmatrix(nrows, vector<int>(ncols, 0));
