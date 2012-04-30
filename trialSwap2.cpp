@@ -4,28 +4,6 @@
 //The sum_of_squares, havel_hakimi and calc_c_score algorithms have been adapted from I. Miklos and J. Podani. 2004. Randomization of presence-absence matrices: comments and new algorithms. Ecology 85:86-92.
 
 
-/**************************************************************************************************
-int TrialSwap2::intrand(int n){
-    try {
-        double z;
-        
-        z = (double)random() * (double)n / (double)RAND_MAX;
-        if(z>=n)
-            z=n-1;
-        if(z<0)
-            z=0;
-        return((int)floor(z));
-    }
-	catch(exception& e) {
-		m->errorOut(e, "TrialSwap2", "intrand");
-		exit(1);
-	}
-}
-/**************************************************************************************************/
-/* completely random matrix, all column and row totals are variable, matrix size is the same
- *
- *
- */
 /**************************************************************************************************/
 int TrialSwap2::sim1(vector<vector<int> > &co_matrix){ 
     try {
