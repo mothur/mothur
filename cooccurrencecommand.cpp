@@ -272,10 +272,8 @@ int CooccurrenceCommand::execute(){
 int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp, ofstream& out){
     try {
         int numOTUS = thisLookUp[0]->getNumBins();
-        vector< vector<int> > initmatrix; initmatrix.resize(thisLookUp.size());
         vector< vector<int> > co_matrix; co_matrix.resize(thisLookUp[0]->getNumBins());
         for (int i = 0; i < thisLookUp[0]->getNumBins(); i++) { co_matrix[i].resize((thisLookUp.size()), 0); }
-        for (int i = 0; i < thisLookUp.size(); i++) { initmatrix[i].resize((thisLookUp[i]->getNumBins()), 0); }
         vector<int> columntotal; columntotal.resize(thisLookUp.size(), 0);
         vector<int> rowtotal; rowtotal.resize(numOTUS, 0);
         
@@ -285,7 +283,6 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
                 int abund = thisLookUp[i]->getAbundance(j);
                 
                 if(abund > 0) {
-                    initmatrix[i][j] = 1;
                     co_matrix[j][i] = 1;
                     rowtotal[j]++;
                     columntotal[i]++;
@@ -396,11 +393,11 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
         }
         
         
-        
-        if (metric == "cscore") { initscore = trial.calc_c_score(initmatrix, rowtotal, ncols, nrows); }
-        else if (metric == "checker") { initscore = trial.calc_checker(initmatrix, rowtotal, ncols, nrows); }
+        //co_matrix is the transposed shared file, initmatrix is the original shared file
+        if (metric == "cscore") { initscore = trial.calc_c_score(co_matrix, rowtotal, ncols, nrows); }
+        else if (metric == "checker") { initscore = trial.calc_checker(co_matrix, rowtotal, ncols, nrows); }
         else if (metric == "vratio") { initscore = trial.calc_vratio(nrows, ncols, rowtotal, columntotal); }
-        else if (metric == "combo") { initscore = trial.calc_combo(nrows, ncols, initmatrix); }
+        else if (metric == "combo") { initscore = trial.calc_combo(nrows, ncols, co_matrix); }
         else { m->mothurOut("[ERROR]: No metric selected!\n"); m->control_pressed = true; return 1; }
         
         m->mothurOut("Initial c score: " + toString(initscore)); m->mothurOutEndLine();
@@ -550,7 +547,7 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
             
             //swap_checkerboards takes the original matrix and swaps checkerboards
             else if(matrix == "sim9") {
-                trial.swap_checkerboards (initmatrix, rowtotal, columntotal, ncols, nrows);
+                trial.swap_checkerboards (co_matrix, rowtotal, columntotal, ncols, nrows);
             }
             else {
                 m->mothurOut("[ERROR]: No null model selected!\n\n"); m->control_pressed = true;
