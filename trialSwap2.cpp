@@ -527,102 +527,8 @@ int TrialSwap2::sim7(vector<int> initrowtotal, vector<vector<int> > &co_matrix)
             tmprow.clear();
         }
 
-        initmatrix = tmpmatrix;
-     */
-    }
-	catch(exception& e) {
-		m->errorOut(e, "TrialSwap2", "sim7");
-		exit(1);
-	}
-}
 /**************************************************************************************************/
-/*
- *
- *
- *
- */
-/**************************************************************************************************/
-int TrialSwap2::sim8(vector<int> columntotal, vector<int> rowtotal, vector<vector<int> > &co_matrix)
-{   
-    try {
-        double prob; 
-        double start = 0.0;
-        int ncols = columntotal.size(); int nrows = rowtotal.size(); 
-        double probarray[nrows * ncols];
-        double randnum;
-        int grandtotal; 
-        int total = 0;
-        
-        //double colSum = accumulate( columntotal.begin(), columntotal.end(), 0 );
-        double rowSum = accumulate( rowtotal.begin(), rowtotal.end(), 0 );
-        
-        if (m->control_pressed) { return 0; }
-        
-        //cout << "rowsum: " << rowSum << endl;
-        
-        grandtotal = rowSum;
-        
-        //create probability matrix with each site being between 0 and 1
-        for (int i=0;i<nrows;i++) {
-            if (m->control_pressed) { return 0; }
-            for (int j=0;j<ncols;j++) {
-                prob = (rowtotal[i] * columntotal[j])/(rowSum*rowSum);
-                if (prob == 0.0)
-                    probarray[ncols * i + j] = -1;
-                else
-                    probarray[ncols * i + j] = start + prob;
-                //probmatrixrow.pushback(start + prob);
-                start += prob;
-            }
-        }
-        //cout << "prbarray" << endl;
-        //for(int i=0;i<(nrows*ncols);i++)
-        //cout << probarray[i] << " ";
-        //cout << endl;
-        
-        //generate random muber between 0 and 1 and interate through probarray until found
-        while (total < grandtotal)  {
-            if (m->control_pressed) { return 0; }
-            randnum = rand() / double(RAND_MAX);
-            //cout << "rand num: " << randnum << endl;
-            if((randnum <= probarray[0]) && (probarray[0] != 2) ) {
-                probarray[0] = 2;
-                total++;
-                continue;
-            }
-            for(int i=1;i<(nrows*ncols);i++) {
-                if (m->control_pressed) { return 0; }
-                if((randnum <= probarray[i]) && (randnum > probarray[i-1]) && (probarray[i] != 2) ) {
-                    probarray[i] = 2;
-                    total++;
-                    break;
-                }
-                else
-                    continue;
-            }
-        }
-        //cout << "prbarray" << endl;
-        //for(int i=0;i<(nrows*ncols);i++)
-        //cout << probarray[i] << " ";
-        //cout << endl;
-        for(int i=0;i<nrows;i++) {
-            if (m->control_pressed) { return 0; }
-            for(int j=0;j<ncols;j++) {
-                if(probarray[ncols * i + j] == 2)
-                    co_matrix[i][j] = 1;
-                else
-                    co_matrix[i][j] = 0;
-            }
-        }
-        return 0;
-    }
-	catch(exception& e) {
-		m->errorOut(e, "TrialSwap2", "sim8");
-		exit(1);
-	}
-}
-/**************************************************************************************************/
-double TrialSwap2::calc_c_score (vector<vector<int> > &co_matrix,vector<int>  rowtotal)
+double TrialSwap2::calc_c_score (vector<vector<int> > &co_matrix, vector<int>  rowtotal, int ncols, int nrows)
 {
     try {
         double cscore = 0.0;
@@ -630,7 +536,7 @@ double TrialSwap2::calc_c_score (vector<vector<int> > &co_matrix,vector<int>  ro
         double D;
         double normcscore = 0.0;
         int nonzeros = 0;
-        int ncols = co_matrix[0].size(); int nrows = rowtotal.size(); 
+        //int ncols = co_matrix[0].size(); int nrows = rowtotal.size(); 
         vector<vector<double> > s; s.resize(nrows);
         for (int i = 0; i < nrows; i++) { s[i].resize(nrows,0.0); }//only fill half the matrix
 
@@ -679,12 +585,12 @@ double TrialSwap2::calc_c_score (vector<vector<int> > &co_matrix,vector<int>  ro
 	}
 }
 /**************************************************************************************************/
-int TrialSwap2::calc_checker (vector<vector<int> > &co_matrix, vector<int>  rowtotal)
+int TrialSwap2::calc_checker (vector<vector<int> > &co_matrix, vector<int>  rowtotal, int ncols, int nrows)
 {
     try {
         int cunits=0;
         //int s[nrows][ncols];
-        int ncols = co_matrix[0].size(); int nrows = rowtotal.size(); 
+        //int ncols = co_matrix[0].size(); int nrows = rowtotal.size(); 
         vector<vector<int> > s; s.resize(nrows);
         for (int i = 0; i < nrows; i++) { s[i].resize(nrows,0); }//only fill half the matrix
         
@@ -721,11 +627,11 @@ int TrialSwap2::calc_checker (vector<vector<int> > &co_matrix, vector<int>  rowt
 	}
 }
 /**************************************************************************************************/
-double TrialSwap2::calc_vratio (vector<int> rowtotal, vector<int> columntotal)
+double TrialSwap2::calc_vratio (int nrows, int ncols, vector<int> rowtotal, vector<int> columntotal)
 {
     try {
-        int nrows = rowtotal.size();
-        int ncols = columntotal.size();
+        //int nrows = rowtotal.size();
+        //int ncols = columntotal.size();
         int sumCol = accumulate(columntotal.begin(), columntotal.end(), 0 );
        // int sumRow = accumulate(rowtotal.begin(), rowtotal.end(), 0 );
         
@@ -762,32 +668,47 @@ double TrialSwap2::calc_vratio (vector<int> rowtotal, vector<int> columntotal)
          
 }
 /**************************************************************************************************/
-int TrialSwap2::calc_combo (vector<vector<int> > &initmatrix)
+int TrialSwap2::calc_combo (int nrows, int ncols, vector<vector<int> > &nullmatrix)
 {
     try {
-        int initrows = initmatrix.size();
+        //need to transpose so we can compare rows (row-major order)
+        int tmpnrows = nrows;
+        vector<vector<int> > tmpmatrix;
+
+        vector<int> tmprow;
+        if(!tmpmatrix.empty())
+            tmpmatrix.clear();
+        for (int i=0;i<ncols;i++)
+        {       
+            for (int j=0;j<nrows;j++)
+            {
+                tmprow.push_back(nullmatrix[j][i]);
+            }
+
+            tmpmatrix.push_back(tmprow);
+            tmprow.clear();
+        }
+
         int unique = 0;
         int match = 0;
-        int matches = 0;
-        for(int i=0;i<initrows;i++)
+        for(int j=0;j<ncols;j++)
         {
             match = 0;
-            for(int j=i+1;j<=initrows;j++)
+            for(int i=j+1;i<=ncols;i++)
             {
-                if (m->control_pressed) { return 0; }
-                if( (initmatrix[i] == initmatrix[j])) 
+                //comparing matrix rows
+                if( (tmpmatrix[j] == tmpmatrix[i])) 
                 {
                     match++;
-                    matches++;
                     break;
                 }
             }        
-            
+
             //on the last iteration of a previously matched row it will add itself because it doesn't match any following rows, so that combination is counted
             if (match == 0)
                 unique++;
-        }
-        return unique;
+    }
+    return unique;
     }
     catch(exception& e) {
         m->errorOut(e, "TrialSwap2", "calc_combo");
@@ -804,20 +725,16 @@ int TrialSwap2::swap_checkerboards (vector<vector<int> > &co_matrix)
         while((j = m->getRandomIndex(nrows-1) ) == i ) {;if (m->control_pressed) { return 0; }}
         k = m->getRandomIndex(ncols-1);
         while((l = m->getRandomIndex(ncols-1)) == k ) {;if (m->control_pressed) { return 0; }}
-                
-        //cout << co_matrix[i][k] << " " << co_matrix[j][l] << endl;
-        //cout << co_matrix[i][l] << " " << co_matrix[j][k] << endl;
-        //cout << co_matrix[i][l] << " " << co_matrix[j][k] << endl;
-        //cout << co_matrix[i][l] << " " << co_matrix[j][k] << endl;
+
         if((co_matrix[i][k]*co_matrix[j][l]==1 && co_matrix[i][l]+co_matrix[j][k]==0)||(co_matrix[i][k]+co_matrix[j][l]==0 && co_matrix[i][l]*co_matrix[j][k]==1)) //checking for checkerboard value and swap
         {
             co_matrix[i][k]=1-co_matrix[i][k];
             co_matrix[i][l]=1-co_matrix[i][l];
             co_matrix[j][k]=1-co_matrix[j][k];
             co_matrix[j][l]=1-co_matrix[j][l];
-            //cout << "swapped!" << endl;
+
         }
-        //cout << "i: " << i << " j: " << j << " k: " << " l: " << l << endl;
+
         return 0;
     }
     catch(exception& e) {
@@ -918,83 +835,7 @@ int TrialSwap2::print_matrix(vector<vector<int> > &matrix, int nrows, int ncols)
     }
 }
 /**************************************************************************************************/
-int TrialSwap2::transpose_matrix (vector<vector<int> > &initmatrix, vector<vector<int> > &co_matrix)//, int nrows, int nocols)
-{    
-    try {
-        int ncols = initmatrix.size(); int nrows = initmatrix[0].size(); 
-        int tmpnrows = nrows;
-        //vector<vector<int> > tmpvec;
-        vector<int> tmprow;
-        if(!co_matrix.empty())
-            co_matrix.clear();
-        for (int i=0;i<nrows;i++)
-        {       
-            if (m->control_pressed) { return 0; }
-            for (int j=0;j<ncols;j++)
-            {
-                tmprow.push_back(initmatrix[j][i]);
-            }
-            /*if (accumulate( tmprow.begin(), tmprow.end(), 0 ) == 0)
-             {
-             tmpnrows--;
-             }
-             else */
-            co_matrix.push_back(tmprow);
-            tmprow.clear();
-        }
-        nrows = tmpnrows;
-        return 0;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "TrialSwap2", "transpose_matrix");
-        exit(1);
-    }
-}
-/**************************************************************************************************/
-int TrialSwap2::update_row_col_totals(vector<vector<int> > &co_matrix, vector<int> &rowtotal, vector<int> &columntotal)
-{
-    try {
-        //rowtotal.clear();
-        //columntotal.clear();
-        //generate (rowtotal.begin(), rowtotal.end(), 0);
-        //generate (columntotal.begin(), columntotal.end(), 0);
-        int nrows = co_matrix.size();
-        int ncols = co_matrix[0].size();
-        vector<int> tmpcolumntotal; tmpcolumntotal.resize(ncols, 0);
-        vector<int> tmprowtotal; tmprowtotal.resize(nrows, 0);
-        
-        int rowcount = 0;
-        
-        for (int i = 0; i < nrows; i++)
-        {
-            if (m->control_pressed) { return 0; }
-            for (int j = 0; j < ncols; j++)
-            {
-                if (co_matrix[i][j] == 1)
-                {
-                    rowcount++;
-                    tmpcolumntotal[j]++;
-                }           
-            }    
-            tmprowtotal[i] = rowcount;
-            rowcount = 0;
-        }
-        columntotal = tmpcolumntotal;
-        rowtotal = tmprowtotal;
-        /*cout << "rowtotal: ";
-        for(int i = 0; i<nrows; i++) { cout << rowtotal[i]; }
-        cout << "  ";
-        cout << " coltotal: ";
-        for(int i = 0; i<ncols; i++) { cout << columntotal[i]; }
-        cout << endl;*/
-        return 0;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "TrialSwap2", "update_row_col_totals");
-        exit(1);
-    }
-}
-/**************************************************************************************************/
+
 
 
 

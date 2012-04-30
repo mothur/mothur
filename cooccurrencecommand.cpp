@@ -299,102 +299,287 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
         int ncols = thisLookUp.size();//groups
         double initscore = 0.0;
                 
-        vector<int> initcolumntotal; initcolumntotal.resize(ncols, 0);
-        vector<int> initrowtotal; initrowtotal.resize(nrows, 0);
+        vector<int> columntotal; columntotal.resize(ncols, 0);
+        vector<int> rowtotal; rowtotal.resize(nrows, 0);
         vector<double> stats;
+        double probabilityMatrix[ncols * nrows];
+        vector<vector<int> > nullmatrix(nrows, vector<int>(ncols, 0));
                
         TrialSwap2 trial;
         
-        initcolumntotal = rowtotal;
-        initrowtotal = columntotal;
-        trial.update_row_col_totals(co_matrix, rowtotal, columntotal);
+        n = accumulate( columntotal.begin(), columntotal.end(), 0 );
         
-        if (metric == "cscore")         { initscore = trial.calc_c_score(co_matrix, rowtotal);    }
-        else if (metric == "checker")   { initscore = trial.calc_checker(co_matrix, rowtotal);    }
-        else if (metric == "vratio")    { initscore = trial.calc_vratio(rowtotal, columntotal);   }
-        else if (metric == "combo")     { initscore = trial.calc_combo(co_matrix);                }
-        else                            {  m->mothurOut("[ERROR]: No metric selected!\n");  m->control_pressed = true; return 1;            }
+        //============================================================
         
-        m->mothurOut("Initial c score: " + toString(initscore)); m->mothurOutEndLine();
-        
-        //nullmatrix burn in
-        for(int i=0;i<10000;i++) {
-            if (m->control_pressed) { return 0; }
-            if (matrix == "sim1") {
-                trial.sim1(co_matrix);
-            }else if (matrix == "sim2") {
-                trial.sim2(co_matrix);
-            }else if (matrix == "sim3") {
-                trial.sim3(initmatrix);
-                co_matrix = initmatrix;
-            }else if (matrix == "sim4") {
-                trial.sim4(columntotal, rowtotal, co_matrix);
-            }else if (matrix == "sim5") {
-                trial.sim5(initcolumntotal, initrowtotal, initmatrix);
-                trial.transpose_matrix(initmatrix,co_matrix);
-            }else if (matrix == "sim6") {
-                trial.sim6(columntotal, co_matrix);
-            }else if (matrix == "sim7") {
-                trial.sim7(initcolumntotal, initmatrix);          
-                co_matrix = initmatrix;
-            }else if (matrix == "sim8") {
-                trial.sim8(columntotal, rowtotal, co_matrix);
-            }else if (matrix == "sim9") {
-                trial.swap_checkerboards (co_matrix);
-            }else{
+        //generate a probability matrix. Only do this once.
+        float start = 0.0;
+    
+        if (matrix == "sim1") {
+            for(int i=0;i<nrows;i++) {
+                for(int j=0;j<ncols;j++) {
+                    probabilityMatrix[ncols * i + j] = start + 1/double(nrows*ncols);                    
+                    start = start + 1/double(nrows*ncols);
+                }
+            }
+        }
+        else if (matrix == "sim2") {
+            for(int i=0;i<nrows;i++) {
+                start = 0.0;
+                for(int j=0;j<ncols;j++) {
+                    probabilityMatrix[ncols * i + j] = start + 1/double(ncols);
+                    start = start + 1/double(ncols); 
+                }
+            }
+        }
+
+        else if (matrix == "sim3") {
+            for(int j=0;j<ncols;j++) {
+                start = 0.0;
+                for(int i=0;i<nrows;i++) {
+                    probabilityMatrix[ncols * i + j] = start + 1/double(nrows);                    
+                    start =  start + 1/double(nrows);
+                }
+            }
+        }
+
+        else if (matrix == "sim4") {
+            for(int i=0;i<nrows;i++) {
+                start = 0.0;
+                for(int j=0;j<ncols;j++) {
+                    probabilityMatrix[ncols * i + j] = start + columntotal[j]/double(n);                    
+                    start =  start + columntotal[j]/double(n);
+                }
+            }
+        }
+
+        else if (matrix == "sim5") {
+            for(int j=0;j<ncols;j++) {
+                start = 0.0;
+                for(int i=0;i<nrows;i++) {
+                    probabilityMatrix[ncols * i + j] = start + rowtotal[i]/double(n);                    
+                    start =  start + rowtotal[i]/double(n);
+                }
+            }
+        }
+
+        else if (matrix == "sim6") {
+            for(int i=0;i<nrows;i++) {
+                for(int j=0;j<ncols;j++) {
+                    probabilityMatrix[ncols * i + j] = start + columntotal[j]/double(n*nrows);                    
+                    start =  start + columntotal[j]/double(n*nrows);
+                }
+            }
+        }
+
+
+        else if (matrix == "sim7") {
+            for(int i=0;i<nrows;i++) {
+                for(int j=0;j<ncols;j++) {
+                    probabilityMatrix[ncols * i + j] = start + rowtotal[i]/double(n*ncols);                    
+                    start =  start + rowtotal[i]/double(n*ncols);
+                }
+            }
+        }
+
+        else if (matrix == "sim8") {
+            for(int i=0;i<nrows;i++) {
+                for(int j=0;j<ncols;j++) {
+                    probabilityMatrix[ncols * i + j] = start + (rowtotal[i]*columntotal[j])/double(n*n);                    
+                    start =  start + (rowtotal[i]*columntotal[j])/double(n*n);
+                }
+            }
+        }
+
+        else {
+            if(sim != 9) {
                 m->mothurOut("[ERROR]: No model selected! \n");
                 m->control_pressed = true;
             }
         }
-                
-        //run
-        for(int i=0;i<runs;i++) {
-            if (m->control_pressed) { return 0; }
-            //calc metric of nullmatrix
-            if (matrix == "sim1") {
-                trial.sim1(co_matrix);
-            }else if (matrix == "sim2") {
-                trial.sim2(co_matrix);
-            }else if (matrix == "sim3") {
-                trial.sim3(initmatrix);
-                co_matrix = initmatrix;
-            }else if (matrix == "sim4") {
-                trial.sim4(columntotal, rowtotal, co_matrix);
-            }else if (matrix == "sim5") {
-                trial.sim5(initcolumntotal, initrowtotal, initmatrix);
-                trial.transpose_matrix(initmatrix,co_matrix);
-            }else if (matrix == "sim6") {
-                trial.sim6(columntotal, co_matrix);
-            }else if (matrix == "sim7") {
-                trial.sim7(initcolumntotal, initmatrix);          
-                co_matrix = initmatrix;
-            }else if (matrix == "sim8") {
-                trial.sim8(columntotal, rowtotal, co_matrix);
-            }else if (matrix == "sim9") {
-                trial.swap_checkerboards (co_matrix);
-            }else{
-                 m->mothurOut("[ERROR]: No model selected! \n");
-                 m->control_pressed = true;
+
+        
+              
+        if (metric == "cscore")         { initscore = trial.calc_c_score(initmatrix, rowtotal, ncols, nrows);    }
+        else if (metric == "checker")   { initscore = trial.calc_checker(initmatrix, rowtotal, ncols, nrows);    }
+        else if (metric == "vratio")    { initscore = trial.calc_vratio(nrows, ncols, rowtotal, columntotal);   }
+        else if (metric == "combo")     { initscore = trial.calc_combo(nrows, ncols, initmatrix);                }
+        else                            {  m->mothurOut("[ERROR]: No metric selected!\n");  m->control_pressed = true; return 1;            }
+        
+        m->mothurOut("Initial c score: " + toString(initscore)); m->mothurOutEndLine();
+        
+        double previous;
+        double current;
+        double randnum;
+        int count;
+
+        //burn-in
+        for(int i=0;i<10000;i++){                
+            nullmatrix.clear();
+            //zero-fill the null matrix
+            nullmatrix.assign(nrows, vector<int>(ncols, 0));
+
+            if(matrix == "sim1" || matrix == "sim6" || matrix == "sim8" || matrix == "sim7") {
+                count = 0;
+                while(count < n) {
+                    nextnum:
+                    previous = 0.0;
+                    randnum = rand() / double(RAND_MAX);
+                    for(int i=0;i<nrows;i++) {
+                        for(int j=0;j<ncols;j++) { 
+                            current = probabilityMatrix[ncols * i + j];                    
+                            if(randnum <= current && randnum > previous) {
+                                nullmatrix[i][j] = 1;
+                                count++;
+                                if (count > n) break;
+                                else
+                                goto nextnum;
+                            }
+                            previous = current;
+                        }
+                    }
+                }
             }
-            //
-            //            
-            //trial.update_row_col_totals(co_matrix, rowtotal, columntotal); 
-            
-            if (metric == "cscore") { 
-                stats.push_back(trial.calc_c_score(co_matrix, rowtotal));
-            }else if (metric == "checker") { 
-                stats.push_back(trial.calc_checker(co_matrix, rowtotal));
-            }else if (metric == "vratio") { 
-                stats.push_back(trial.calc_vratio(rowtotal, columntotal));
-            }else if (metric == "combo") { 
-                stats.push_back(trial.calc_combo(co_matrix));
-            }else {
-                m->mothurOut("[ERROR]: No metric selected!\n");
-                m->control_pressed = true;
-                return 1;
+
+            else if(matrix == "sim2" || matrix == "sim4") {
+                    for(int i=0;i<nrows;i++) {
+                        previous = 0.0;
+                        count = 0;
+                        while(count < rowtotal[i]) {
+                            randnum = rand() / double(RAND_MAX);
+                            for(int j=0;j<ncols;j++) { 
+                                current = probabilityMatrix[ncols * i + j];                       
+                                if(randnum <= current && randnum > previous && nullmatrix[i][j] != 1) {
+                                    nullmatrix[i][j] = 1;
+                                    count++;
+                                    previous = 0.0;
+                                    break;
+                                }
+                                previous = current;
+                            }
+                        }
+                    }
+            }
+
+            else if(matrix == "sim3" || matrix == "sim5") {
+                //columns
+                for(int j=0;j<ncols;j++) {
+                    count = 0;
+                    while(count < columntotal[j]) {
+                        randnum = rand() / double(RAND_MAX);
+                        for(int i=0;i<nrows;i++) {
+                            current = probabilityMatrix[ncols * i + j];
+                            if(randnum <= current && randnum > previous && nullmatrix[i][j] != 1) {
+                                nullmatrix[i][j] = 1;
+                                count++;
+                                previous = 0.0;
+                                break;
+                            }
+                            previous = current;
+                        }
+                    }
+                }
             }
             
         }
+        
+        //populate null matrix from probability matrix, do this a lot.  
+        for(int i=0;i<runs;i++){                
+            nullmatrix.clear();
+            //zero-fill the null matrix
+            nullmatrix.assign(nrows, vector<int>(ncols, 0));
+
+            if(matrix == "sim1" || matrix == "sim6" || matrix == "sim8" || matrix == "sim7") {
+                count = 0;
+                while(count < n) {
+                    nextnum:
+                    previous = 0.0;
+                    randnum = rand() / double(RAND_MAX);
+                    for(int i=0;i<nrows;i++) {
+                        for(int j=0;j<ncols;j++) { 
+                            current = probabilityMatrix[ncols * i + j];                    
+                            if(randnum <= current && randnum > previous) {
+                                nullmatrix[i][j] = 1;
+                                count++;
+                                if (count > n) break;
+                                else
+                                goto nextnum;
+                            }
+                            previous = current;
+                        }
+                    }
+                }
+            }
+
+            else if(matrix == "sim2" || matrix == "sim4") {
+                    for(int i=0;i<nrows;i++) {
+                        previous = 0.0;
+                        count = 0;
+                        while(count < rowtotal[i]) {
+                            randnum = rand() / double(RAND_MAX);
+                            for(int j=0;j<ncols;j++) { 
+                                current = probabilityMatrix[ncols * i + j];                       
+                                if(randnum <= current && randnum > previous && nullmatrix[i][j] != 1) {
+                                    nullmatrix[i][j] = 1;
+                                    count++;
+                                    previous = 0.0;
+                                    break;
+                                }
+                                previous = current;
+                            }
+                        }
+                    }
+            }
+
+            else if(matrix == "sim3" || matrix == "sim5") {
+                //columns
+                for(int j=0;j<ncols;j++) {
+                    count = 0;
+                    while(count < columntotal[j]) {
+                        randnum = rand() / double(RAND_MAX);
+                        for(int i=0;i<nrows;i++) {
+                            current = probabilityMatrix[ncols * i + j];
+                            if(randnum <= current && randnum > previous && nullmatrix[i][j] != 1) {
+                                nullmatrix[i][j] = 1;
+                                count++;
+                                previous = 0.0;
+                                break;
+                            }
+                            previous = current;
+                        }
+                    }
+                }
+            }
+            
+            //swap_checkerboards takes the original matrix and swaps checkerboards
+            else if(matrix == "sim9") {
+                trial.swap_checkerboards (initmatrix, rowtotal, columntotal, ncols, nrows);
+            }
+            else {
+                cout << "[ERROR]: No null model selected!\n" << endl;
+                return 1;
+            }
+
+            //run metric on null matrix and add score to the stats vector
+            if (metric == "cscore"){
+                stats.push_back(trial.calc_c_score(nullmatrix, rowtotal, ncols, nrows));        
+            }
+            else if (metric == "checker") {
+                stats.push_back(trial.calc_checker(nullmatrix, rowtotal, ncols, nrows));
+            }
+            else if (metric == "vratio") {
+                stats.push_back(trial.calc_vratio(nrows, ncols, rowtotal, columntotal));
+            }
+            else if (metric == "combo") {
+                stats.push_back(trial.calc_combo(nrows, ncols, nullmatrix));
+            }
+            else {
+                cout << "[ERROR]: No metric selected!\n" << endl;
+                return 1;
+            }
+
+        }
+        
+
 
         double total = 0.0;
         for (int i=0; i<stats.size();i++)   {   total+=stats[i];   }
