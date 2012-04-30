@@ -404,77 +404,12 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
         double current;
         double randnum;
         int count;
-        
-        //burn-in
-        for(int i=0;i<10000;i++){
-            nullmatrix.clear();
-            //zero-fill the null matrix
-            nullmatrix.assign(nrows, vector<int>(ncols, 0));
-            
-            if(matrix == "sim1" || matrix == "sim6" || matrix == "sim8" || matrix == "sim7") {
-                count = 0;
-                while(count < n) {
-                nextnum:
-                    previous = 0.0;
-                    randnum = rand() / double(RAND_MAX);
-                    for(int i=0;i<nrows;i++) {
-                        for(int j=0;j<ncols;j++) {
-                            current = probabilityMatrix[ncols * i + j];
-                            if(randnum <= current && randnum > previous) {
-                                nullmatrix[i][j] = 1;
-                                count++;
-                                if (count > n) break;
-                                else
-                                    goto nextnum;
-                            }
-                            previous = current;
-                        }
-                    }
-                }
-            }
-            
-            else if(matrix == "sim2" || matrix == "sim4") {
-                for(int i=0;i<nrows;i++) {
-                    previous = 0.0;
-                    count = 0;
-                    while(count < rowtotal[i]) {
-                        randnum = rand() / double(RAND_MAX);
-                        for(int j=0;j<ncols;j++) {
-                            current = probabilityMatrix[ncols * i + j];
-                            if(randnum <= current && randnum > previous && nullmatrix[i][j] != 1) {
-                                nullmatrix[i][j] = 1;
-                                count++;
-                                previous = 0.0;
-                                break;
-                            }
-                            previous = current;
-                        }
-                    }
-                }
-            }
-            
-            else if(matrix == "sim3" || matrix == "sim5") {
-                //columns
-                for(int j=0;j<ncols;j++) {
-                    count = 0;
-                    while(count < columntotal[j]) {
-                        randnum = rand() / double(RAND_MAX);
-                        for(int i=0;i<nrows;i++) {
-                            current = probabilityMatrix[ncols * i + j];
-                            if(randnum <= current && randnum > previous && nullmatrix[i][j] != 1) {
-                                nullmatrix[i][j] = 1;
-                                count++;
-                                previous = 0.0;
-                                break;
-                            }
-                            previous = current;
-                        }
-                    }
-                }
-            }
-            
+
+        //burn-in for sim9    
+        if(matrix == "sim9") {
+            for(int i=0;i<10000;i++) trial.swap_checkerboards (co_matrix, rowtotal, columntotal, ncols, nrows);
         }
-        
+
         //populate null matrix from probability matrix, do this a lot.
         for(int i=0;i<runs;i++){
             nullmatrix.clear();
