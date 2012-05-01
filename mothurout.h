@@ -65,7 +65,7 @@ class MothurOut {
 	
 		vector<string> getAllGroups() { sort(namesOfGroups.begin(), namesOfGroups.end()); return namesOfGroups; }
 		vector<string> Treenames;
-		map<string, string> names;
+		//map<string, string> names;
 		vector<string> binLabelsInFile;
 		vector<string> currentBinLabels;
 		string saveNextLabel, argv, sharedHeaderMode;
@@ -73,6 +73,7 @@ class MothurOut {
 		
 		//functions from mothur.h
 		//file operations
+        bool dirCheck(string&); //completes path, appends appropriate / or \, makes sure dir is writable.
 		vector<unsigned long long> divideFile(string, int&);
 		int divideFile(string, int&, vector<string>&);
 		vector<unsigned long long> setFilePosEachLine(string, int&);
@@ -127,6 +128,7 @@ class MothurOut {
 		void splitAtDash(string&, set<string>&);
 		void splitAtDash(string&, vector<string>&);
 		void splitAtChar(string&, vector<string>&, char);
+        void splitAtChar(string&, string&, char);
 		int removeConfidences(string&);
 		
 		//math operation
@@ -161,6 +163,7 @@ class MothurOut {
 		string getAccnosFile()		{ return accnosfile;		}
 		string getTaxonomyFile()	{ return taxonomyfile;		}
 		string getFlowFile()		{ return flowfile;			}
+        string getBiomFile()		{ return biomfile;			}
 		string getProcessors()		{ return processors;		}
 		
 		void setListFile(string f)			{ listfile = getFullPathName(f);			}
@@ -183,6 +186,7 @@ class MothurOut {
 		void setAccnosFile(string f)		{ accnosfile = getFullPathName(f);			}
 		void setTaxonomyFile(string f)		{ taxonomyfile = getFullPathName(f);		}
 		void setFlowFile(string f)			{ flowfile = getFullPathName(f);			}
+        void setBiomFile(string f)			{ biomfile = getFullPathName(f);			}
 		void setProcessors(string p)		{ processors = p;							}
 		
 		void printCurrentFiles();
@@ -216,6 +220,7 @@ class MothurOut {
 			taxonomyfile = "";
 			processors = "1";
 			flowfile = "";
+            biomfile = "";
 			gui = false;
 			printedHeaders = false;
 			commandInputsConvertError = false;
@@ -228,7 +233,7 @@ class MothurOut {
 		string defaultPath, outputDir;
 		string releaseDate, version;
 	
-		string accnosfile, phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, designfile, taxonomyfile;
+		string accnosfile, phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, designfile, taxonomyfile, biomfile;
 		string orderfile, treefile, sharedfile, ordergroupfile, relabundfile, fastafile, qualfile, sfffile, oligosfile, processors, flowfile;
 
 		vector<string> Groups;

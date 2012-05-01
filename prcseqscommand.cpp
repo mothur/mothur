@@ -20,7 +20,6 @@ vector<string> PcrSeqsCommand::setParameters(){
 		CommandParameter pstart("start", "Number", "", "-1", "", "", "",false,false); parameters.push_back(pstart);
 		CommandParameter pend("end", "Number", "", "-1", "", "", "",false,false); parameters.push_back(pend);
  		CommandParameter pnomatch("nomatch", "Multiple", "reject-keep", "reject", "", "", "",false,false); parameters.push_back(pnomatch);
-		CommandParameter ppdiffs("pdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(ppdiffs);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
 		CommandParameter pkeepprimer("keepprimer", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pkeepprimer);
         CommandParameter pkeepdots("keepdots", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pkeepdots);
@@ -40,8 +39,15 @@ vector<string> PcrSeqsCommand::setParameters(){
 string PcrSeqsCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The pcr.seqs command reads a fasta file ...\n";
-		
+		helpString += "The pcr.seqs command reads a fasta file.\n";
+        helpString += "The pcr.seqs command parameters are fasta, oligos, name, group, taxonomy, ecoli, start, end, nomatch, processors, keepprimer and keepdots.\n";
+		helpString += "The ecoli parameter is used to provide a fasta file containing a single reference sequence (e.g. for e. coli) this must be aligned. Mothur will trim to the start and end positions of the reference sequence.\n";
+        helpString += "The start parameter allows you to provide a starting position to trim to.\n";
+        helpString += "The end parameter allows you to provide a ending position to trim from.\n";
+        helpString += "The nomatch parameter allows you to decide what to do with sequences where the primer is not found. Default=reject, meaning remove from fasta file.  if nomatch=true, then do nothing to sequence.\n";
+        helpString += "The processors parameter allows you to use multiple processors.\n";
+        helpString += "The keepprimer parameter allows you to keep the primer, default=false.\n";
+        helpString += "The keepdots parameter allows you to keep the leading and trailing .'s, default=true.\n";
 		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n";
 		helpString += "For more details please check out the wiki http://www.mothur.org/wiki/Pcr.seqs .\n";
 		return helpString;
@@ -159,8 +165,6 @@ PcrSeqsCommand::PcrSeqsCommand(string option)  {
 				
 			}
             
-            //if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
 			
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", true);
@@ -171,7 +175,9 @@ PcrSeqsCommand::PcrSeqsCommand(string option)  {
 			}else if (fastafile == "not open") { fastafile = ""; abort = true; }	
 			else { m->setFastaFile(fastafile); }
 			
-            
+            //if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(fastafile);	}
+
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			string temp;
@@ -204,10 +210,7 @@ PcrSeqsCommand::PcrSeqsCommand(string option)  {
 			if (taxfile == "not found"){	taxfile = "";		}
 			else if(taxfile == "not open"){	taxfile = ""; abort = true;	} 
             else { m->setTaxonomyFile(taxfile); }
-			
-			temp = validParameter.validFile(parameters, "pdiffs", false);		if (temp == "not found") { temp = "0"; }
-			m->mothurConvert(temp, pdiffs);
- 			
+			 			
 			temp = validParameter.validFile(parameters, "start", false);	if (temp == "not found") { temp = "-1"; }
 			m->mothurConvert(temp, start);
             

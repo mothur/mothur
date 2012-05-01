@@ -8,6 +8,7 @@
  */
 
 #include "phylodiversitycommand.h"
+#include "treereader.h"
 
 //**********************************************************************************************************************
 vector<string> PhyloDiversityCommand::setParameters(){	
@@ -136,12 +137,6 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 				}
 			}
 			
-			m->runParse = true;
-			m->clearGroups();
-			m->clearAllGroups();
-			m->Treenames.clear();
-			m->names.clear();
-			
 			//check for required parameters
 			treefile = validParameter.validFile(parameters, "tree", true);
 			if (treefile == "not open") { treefile = ""; abort = true; }
@@ -218,74 +213,15 @@ int PhyloDiversityCommand::execute(){
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		m->setTreeFile(treefile);
-		
-		if (groupfile != "") {
-			//read in group map info.
-			tmap = new TreeMap(groupfile);
-			tmap->readMap();
-		}else{ //fake out by putting everyone in one group
-			Tree* tree = new Tree(treefile); delete tree;  //extracts names from tree to make faked out groupmap
-			tmap = new TreeMap();
-			
-			for (int i = 0; i < m->Treenames.size(); i++) { tmap->addSeq(m->Treenames[i], "Group1"); }
-		}
-		
-		if (namefile != "") { readNamesFile(); }
-		
-		read = new ReadNewickTree(treefile);
-		int readOk = read->read(tmap); 
-		
-		if (readOk != 0) { m->mothurOut("Read Terminated."); m->mothurOutEndLine(); delete tmap; delete read; return 0; }
-		
-		read->AssembleTrees();
-		vector<Tree*> trees = read->getTrees();
-		delete read;
-		
-		//make sure all files match
-		//if you provide a namefile we will use the numNames in the namefile as long as the number of unique match the tree names size.
-		int numNamesInTree;
-		if (namefile != "")  {  
-			if (numUniquesInName == m->Treenames.size()) {  numNamesInTree = nameMap.size();  }
-			else {   numNamesInTree = m->Treenames.size();  }
-		}else {  numNamesInTree = m->Treenames.size();  }
-		
-		
-		//output any names that are in group file but not in tree
-		if (numNamesInTree < tmap->getNumSeqs()) {
-			for (int i = 0; i < tmap->namesOfSeqs.size(); i++) {
-				//is that name in the tree?
-				int count = 0;
-				for (int j = 0; j < m->Treenames.size(); j++) {
-					if (tmap->namesOfSeqs[i] == m->Treenames[j]) { break; } //found it
-					count++;
-				}
-				
-				if (m->control_pressed) { 
-					delete tmap; for (int i = 0; i < trees.size(); i++) { delete trees[i]; }
-					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
-					m->clearGroups();
-					return 0;
-				}
-				
-				//then you did not find it so report it 
-				if (count == m->Treenames.size()) { 
-					//if it is in your namefile then don't remove
-					map<string, string>::iterator it = nameMap.find(tmap->namesOfSeqs[i]);
-					
-					if (it == nameMap.end()) {
-						m->mothurOut(tmap->namesOfSeqs[i] + " is in your groupfile and not in your tree. It will be disregarded."); m->mothurOutEndLine();
-						tmap->removeSeq(tmap->namesOfSeqs[i]);
-						i--; //need this because removeSeq removes name from namesOfSeqs
-					}
-				}
-			}
-		}
-		
-		SharedUtil* util = new SharedUtil();
+        TreeReader* reader = new TreeReader(treefile, groupfile, namefile);
+        vector<Tree*> trees = reader->getTrees();
+        tmap = trees[0]->getTreeMap();
+        delete reader;
+
+		SharedUtil util;
 		vector<string> mGroups = m->getGroups();
 		vector<string> tGroups = tmap->getNamesOfGroups();
-		util->setGroups(mGroups, tGroups, "phylo.diversity");	//sets the groups the user wants to analyze
-		delete util;
+		util.setGroups(mGroups, tGroups, "phylo.diversity");	//sets the groups the user wants to analyze
 		
 		//incase the user had some mismatches between the tree and group files we don't want group xxx to be analyzed
 		for (int i = 0; i < mGroups.size(); i++) { if (mGroups[i] == "xxx") { mGroups.erase(mGroups.begin()+i);  break; }  }
@@ -711,47 +647,6 @@ vector<float> PhyloDiversityCommand::calcBranchLength(Tree* t, int leaf, map< st
 		exit(1);
 	}
 }
-/*****************************************************************/
-int PhyloDiversityCommand::readNamesFile() {
-	try {
-		m->names.clear();
-		numUniquesInName = 0;
-		
-		ifstream in;
-		m->openInputFile(namefile, in);
-		
-		string first, second;
-		map<string, string>::iterator itNames;
-		
-		while(!in.eof()) {
-			in >> first >> second; m->gobble(in);
-			
-			numUniquesInName++;
-			
-			itNames = m->names.find(first);
-			if (itNames == m->names.end()) {  
-				m->names[first] = second; 
-				
-				//we need a list of names in your namefile to use above when removing extra seqs above so we don't remove them
-				vector<string> dupNames;
-				m->splitAtComma(second, dupNames);
-				
-				for (int i = 0; i < dupNames.size(); i++) {	
-					nameMap[dupNames[i]] = dupNames[i]; 
-					if ((groupfile == "") && (i != 0)) { tmap->addSeq(dupNames[i], "Group1"); } 
-				}
-			}else {  m->mothurOut(first + " has already been seen in namefile, disregarding names file."); m->mothurOutEndLine(); in.close(); m->names.clear(); namefile = ""; return 1; }			
-		}
-		in.close();
-		
-		return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PhyloDiversityCommand", "readNamesFile");
-		exit(1);
-	}
-}
-
 //**********************************************************************************************************************
 
 

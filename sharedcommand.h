@@ -38,20 +38,22 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	void printSharedData(vector<SharedRAbundVector*>);
-	int createMisMatchFile();
+	void printSharedData(vector<SharedRAbundVector*>, ofstream&);
+	int createMisMatchFile(SharedListVector*, GroupMap*);
 	int readOrderFile();
 	bool isValidGroup(string, vector<string>);
 	int eliminateZeroOTUS(vector<SharedRAbundVector*>&);
-	int ListGroupSameSeqs();
+	int ListGroupSameSeqs(vector<string>&, SharedListVector*);
+    int createSharedFromListGroup(string);
+    int createSharedFromBiom(string);
+    string getTag(string&);
+    vector<string> readRows(string, ifstream&, int&); 
+    int getDims(string, int&, int&);
+    vector<SharedRAbundVector*> readData(string, string, ifstream&, vector<string>&, int);
 	
-	SharedListVector* SharedList;
-	InputData* input;
-	GroupMap* groupMap;
 	vector<string> Groups, outputNames, order;
 	set<string> labels;
-	ofstream out;
-	string filename, fileroot, outputDir, listfile, groupfile, ordergroupfile;
+	string fileroot, outputDir, listfile, groupfile, biomfile, ordergroupfile;
 	bool firsttime, pickedGroups, abort, allLines;
 	map<string, ofstream*> filehandles;
 	map<string, ofstream*>::iterator it3;

@@ -8,6 +8,8 @@
  */
 
 #include "sharedcommand.h"
+#include "sharedutilities.h"
+
 //********************************************************************************************************************
 //sorts lowest to highest
 inline bool compareSharedRabunds(SharedRAbundVector* left, SharedRAbundVector* right){
@@ -16,8 +18,9 @@ inline bool compareSharedRabunds(SharedRAbundVector* left, SharedRAbundVector* r
 //**********************************************************************************************************************
 vector<string> SharedCommand::setParameters(){	
 	try {
-		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(plist);
-		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pgroup);
+        CommandParameter pbiom("biom", "InputTypes", "", "", "BiomListGroup", "BiomListGroup", "none",false,false); parameters.push_back(pbiom);
+		CommandParameter plist("list", "InputTypes", "", "", "BiomListGroup", "BiomListGroup", "ListGroup",false,false); parameters.push_back(plist);
+		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "ListGroup",false,false); parameters.push_back(pgroup);
 		//CommandParameter pordergroup("ordergroup", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pordergroup);
 		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
@@ -37,10 +40,10 @@ vector<string> SharedCommand::setParameters(){
 string SharedCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The make.shared command reads a list and group file and creates a shared file, as well as a rabund file for each group.\n";
-		helpString += "The make.shared command parameters are list, group, ordergroup, groups and label. list and group are required unless a current file is available.\n";
+		helpString += "The make.shared command reads a list and group file or a biom file and creates a shared file. If a list and group are provided a rabund file is created for each group.\n";
+		helpString += "The make.shared command parameters are list, group, biom, groups and label. list and group are required unless a current file is available or you provide a biom file.\n";
 		helpString += "The groups parameter allows you to indicate which groups you want to include, group names should be separated by dashes. ex. groups=A-B-C. Default is all groups in your groupfile.\n";
-		helpString += "The label parameter allows you to indicate which labels you want to include, label names should be separated by dashes. Default is all labels in your list file.\n";
+		helpString += "The label parameter is only valid with the list and group option and allows you to indicate which labels you want to include, label names should be separated by dashes. Default is all labels in your list file.\n";
 		//helpString += "The ordergroup parameter allows you to indicate the order of the groups in the sharedfile, by default the groups are listed alphabetically.\n";
 		return helpString;
 	}
@@ -111,12 +114,20 @@ SharedCommand::SharedCommand(string option)  {
 					 if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				 }
 			 
-				 it = parameters.find("ordergroup");
+				 /*it = parameters.find("ordergroup");
 				 //user has given a template file
 				 if(it != parameters.end()){ 
 					 path = m->hasPath(it->second);
 					 //if the user has not given a path then, add inputdir. else leave path alone.
 					 if (path == "") {	parameters["ordergroup"] = inputDir + it->second;		}
+				 }*/
+                 
+                 it = parameters.find("biom");
+				 //user has given a template file
+				 if(it != parameters.end()){ 
+					 path = m->hasPath(it->second);
+					 //if the user has not given a path then, add inputdir. else leave path alone.
+					 if (path == "") {	parameters["biom"] = inputDir + it->second;		}
 				 }
 			 }
 			 
@@ -127,11 +138,13 @@ SharedCommand::SharedCommand(string option)  {
 			 //check for required parameters
 			 listfile = validParameter.validFile(parameters, "list", true);
 			 if (listfile == "not open") { listfile = ""; abort = true; }
-			 else if (listfile == "not found") { 
-				 listfile = m->getListFile(); 
-				 if (listfile != "") { m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
-				 else { 	m->mothurOut("You have no current list file and the list parameter is required."); m->mothurOutEndLine(); abort = true; }
-			 }else { m->setListFile(listfile); }	
+			 else if (listfile == "not found") { listfile = "";  }
+			 else { m->setListFile(listfile); }	
+            
+             biomfile = validParameter.validFile(parameters, "biom", true);
+             if (biomfile == "not open") { biomfile = ""; abort = true; }
+             else if (biomfile == "not found") { biomfile = "";  }
+             else { m->setBiomFile(biomfile); }		
 							
 			 ordergroupfile = validParameter.validFile(parameters, "ordergroup", true);
 			 if (ordergroupfile == "not open") { abort = true; }	
@@ -139,28 +152,37 @@ SharedCommand::SharedCommand(string option)  {
 			 			 
 			 groupfile = validParameter.validFile(parameters, "group", true);
 			 if (groupfile == "not open") { groupfile = ""; abort = true; }	
-			 else if (groupfile == "not found") { 
-				 groupfile = m->getGroupFile(); 
-				 if (groupfile != "") { 
-					 m->mothurOut("Using " + groupfile + " as input file for the group parameter."); m->mothurOutEndLine();
-					 groupMap = new GroupMap(groupfile);
-					 
-					 int error = groupMap->readMap();
-					 if (error == 1) { abort = true; }
-					 vector<string> allGroups = groupMap->getNamesOfGroups();
-					 m->setAllGroups(allGroups);
-				 }
-				 else { 	m->mothurOut("You have no current group file and the group parameter is required."); m->mothurOutEndLine(); abort = true; }
-			 }else {  
-				 groupMap = new GroupMap(groupfile);
+			 else if (groupfile == "not found") { groupfile = ""; }
+			 else {  m->setGroupFile(groupfile); }
 			 
-				 int error = groupMap->readMap();
-				 if (error == 1) { abort = true; }
-				 vector<string> allGroups = groupMap->getNamesOfGroups();
-				 m->setAllGroups(allGroups);
-				 m->setGroupFile(groupfile);
-			 }
-			 
+            if ((biomfile == "") && (listfile == "")) { 
+				//is there are current file available for either of these?
+				//give priority to list, then biom
+				listfile = m->getListFile(); 
+				if (listfile != "") {  m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
+				else { 
+					biomfile = m->getBiomFile(); 
+					if (biomfile != "") {  m->mothurOut("Using " + biomfile + " as input file for the biom parameter."); m->mothurOutEndLine(); }
+					else { 
+						m->mothurOut("No valid current files. You must provide a list or biom file before you can use the make.shared command."); m->mothurOutEndLine(); 
+						abort = true;
+					}
+				}
+			}
+			else if ((biomfile != "") && (listfile != "")) { m->mothurOut("When executing a make.shared command you must enter ONLY ONE of the following: list or biom."); m->mothurOutEndLine(); abort = true; }
+			
+			if (listfile != "") {
+				if (groupfile == "") { 
+					groupfile = m->getGroupFile(); 
+					if (groupfile != "") {  m->mothurOut("Using " + groupfile + " as input file for the group parameter."); m->mothurOutEndLine(); }
+					else { 
+						m->mothurOut("You need to provide a groupfle if you are going to use the list format."); m->mothurOutEndLine(); 
+						abort = true; 
+					}	
+				}
+			}
+
+                        
 			 string groups = validParameter.validFile(parameters, "groups", false);			
 			 if (groups == "not found") { groups = ""; }
 			 else { 
@@ -190,238 +212,23 @@ int SharedCommand::execute(){
 	try {
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
-		
+        		
 		//getting output filename
-		filename = listfile;
+        string filename = "";
+		if (listfile != "") { filename = listfile; }
+        else { filename = biomfile; }
 		
 		if (outputDir == "") { outputDir += m->hasPath(filename); }
 		
 		filename = outputDir + m->getRootName(m->getSimpleName(filename));
 		filename = filename + "shared";
-		outputTypes["shared"].push_back(filename);
+		outputNames.push_back(filename); outputTypes["shared"].push_back(filename);
 		
-		m->openOutputFile(filename, out);
-		pickedGroups = false;
-		
-		//if hte user has not specified any groups then use them all
-		if (Groups.size() == 0) {
-			Groups = groupMap->getNamesOfGroups(); m->setGroups(Groups);
-		}else { pickedGroups = true; }
-		
-		//fill filehandles with neccessary ofstreams
-		int i;
-		ofstream* temp;
-		for (i=0; i<Groups.size(); i++) {
-			temp = new ofstream;
-			filehandles[Groups[i]] = temp;
-		}
-		
-		//set fileroot
-		fileroot = outputDir + m->getRootName(m->getSimpleName(listfile));
-		
-		//clears file before we start to write to it below
-		for (int i=0; i<Groups.size(); i++) {
-			m->mothurRemove((fileroot + Groups[i] + ".rabund"));
-			outputNames.push_back((fileroot + Groups[i] + ".rabund"));
-			outputTypes["rabund"].push_back((fileroot + Groups[i] + ".rabund"));
-		}
-		
-		//lookup.clear();
-		string errorOff = "no error";
-		//errorOff = "";
-		
-		//if user provided an order file containing the order the shared file should be in read it
-		if (ordergroupfile != "") { readOrderFile(); }
-		
-		input = new InputData(listfile, "shared");
-		SharedList = input->getSharedListVector();
-		string lastLabel = SharedList->getLabel();
-		vector<SharedRAbundVector*> lookup; 
-		
-		if (m->control_pressed) { 
-			delete input; delete SharedList; delete groupMap; 
-			for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {  delete it3->second;  }
-			out.close(); m->mothurRemove(filename); 
-			for (int i=0; i<Groups.size(); i++) {  m->mothurRemove((fileroot + Groups[i] + ".rabund"));		}
-			return 0; 
-		}
-		
-		//sanity check
-		int error = ListGroupSameSeqs();
-		
-		if ((!pickedGroups) && (SharedList->getNumSeqs() != groupMap->getNumSeqs())) {  //if the user has not specified any groups and their files don't match exit with error
-			m->mothurOut("Your group file contains " + toString(groupMap->getNumSeqs()) + " sequences and list file contains " + toString(SharedList->getNumSeqs()) + " sequences. Please correct."); m->mothurOutEndLine(); 
-			
-			out.close();
-			m->mothurRemove(filename); //remove blank shared file you made
-			
-			createMisMatchFile();
-			
-			//delete memory
-			for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {
-				delete it3->second;
-			}
-		
-			delete input; delete SharedList; delete groupMap; 
-			
-			return 0; 
-		}
-		
-		if (error == 1) { m->control_pressed = true; }
-		
-		//if user has specified groups make new groupfile for them
-		if (pickedGroups) { //make new group file
-			string groups = "";
-			if (m->getNumGroups() < 4) {
-				for (int i = 0; i < m->getNumGroups(); i++) {
-					groups += (m->getGroups())[i] + ".";
-				}
-			}else { groups = "merge"; }
-		
-			string newGroupFile = outputDir + m->getRootName(m->getSimpleName(listfile)) + groups + "groups";
-			outputTypes["group"].push_back(newGroupFile); 
-			outputNames.push_back(newGroupFile);
-			ofstream outGroups;
-			m->openOutputFile(newGroupFile, outGroups);
-		
-			vector<string> names = groupMap->getNamesSeqs();
-			string groupName;
-			for (int i = 0; i < names.size(); i++) {
-				groupName = groupMap->getGroup(names[i]);
-				if (isValidGroup(groupName, m->getGroups())) {
-					outGroups << names[i] << '\t' << groupName << endl;
-				}
-			}
-			outGroups.close();
-		}
-		
-		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-		set<string> processedLabels;
-		set<string> userLabels = labels;	
-	
-		while((SharedList != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-			if (m->control_pressed) { 
-				delete input; delete SharedList; delete groupMap;
-				for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {  delete it3->second;  }
-				out.close(); m->mothurRemove(filename); 
-				for (int i=0; i<Groups.size(); i++) {  m->mothurRemove((fileroot + Groups[i] + ".rabund"));		}
-				return 0; 
-			}
-		
-			if(allLines == 1 || labels.count(SharedList->getLabel()) == 1){
-					
-					lookup = SharedList->getSharedRAbundVector();
-					
-					m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
-					if (pickedGroups) { //check for otus with no seqs in them
-						eliminateZeroOTUS(lookup);
-					}
-					
-					if (m->control_pressed) { 
-						delete input; delete SharedList; delete groupMap; 
-						for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
-						for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {  delete it3->second;  }
-						out.close(); m->mothurRemove(filename); 
-						for (int i=0; i<Groups.size(); i++) {  m->mothurRemove((fileroot + Groups[i] + ".rabund"));		}
-						return 0; 
-					}
-					
-					if (!m->printedHeaders) { lookup[0]->printHeaders(out); }
-					printSharedData(lookup); //prints info to the .shared file
-					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
-				
-					processedLabels.insert(SharedList->getLabel());
-					userLabels.erase(SharedList->getLabel());
-			}
-			
-			if ((m->anyLabelsToProcess(SharedList->getLabel(), userLabels, errorOff) == true) && (processedLabels.count(lastLabel) != 1)) {
-					string saveLabel = SharedList->getLabel();
-					
-					delete SharedList;
-					SharedList = input->getSharedListVector(lastLabel); //get new list vector to process
-					
-					lookup = SharedList->getSharedRAbundVector();
-					m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
-					if (pickedGroups) { //check for otus with no seqs in them
-						eliminateZeroOTUS(lookup);
-					}
-					
-					
-					if (m->control_pressed) { 
-						delete input; delete SharedList; delete groupMap; 
-						for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
-						for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {  delete it3->second;  }
-						out.close(); m->mothurRemove(filename); 
-						for (int i=0; i<Groups.size(); i++) {  m->mothurRemove((fileroot + Groups[i] + ".rabund"));		}
-						return 0; 
-					}
-					
-					if (!m->printedHeaders) { lookup[0]->printHeaders(out); }
-					printSharedData(lookup); //prints info to the .shared file
-					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
-					
-					processedLabels.insert(SharedList->getLabel());
-					userLabels.erase(SharedList->getLabel());
-					
-					//restore real lastlabel to save below
-					SharedList->setLabel(saveLabel);
-			}
-			
-		
-			lastLabel = SharedList->getLabel();
-				
-			delete SharedList;
-			SharedList = input->getSharedListVector(); //get new list vector to process
-		}
-		
-		//output error messages about any remaining user labels
-		set<string>::iterator it;
-		bool needToRun = false;
-		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-			if (processedLabels.count(lastLabel) != 1) {
-				needToRun = true;
-			}
-		}
-		
-		//run last label if you need to
-		if (needToRun == true)  {
-			if (SharedList != NULL) {	delete SharedList;	}
-			SharedList = input->getSharedListVector(lastLabel); //get new list vector to process
-					
-			lookup = SharedList->getSharedRAbundVector();
-			m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
-			if (pickedGroups) { //check for otus with no seqs in them
-				eliminateZeroOTUS(lookup);
-			}
-			
-			if (m->control_pressed) { 
-				delete input;  delete groupMap;
-					for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {  delete it3->second;   }
-					out.close(); m->mothurRemove(filename); 
-					for (int i=0; i<Groups.size(); i++) {  m->mothurRemove((fileroot + Groups[i] + ".rabund"));		}
-					return 0; 
-			}
-			
-			if (!m->printedHeaders) { lookup[0]->printHeaders(out); }
-			printSharedData(lookup); //prints info to the .shared file
-			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
-			delete SharedList;
-		}
-		
-		out.close();
-		
-		for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {
-			delete it3->second;
-		}
-
-		delete input; delete groupMap;
-		
-		if (m->control_pressed) { 
-				m->mothurRemove(filename); 
-				for (int i=0; i<Groups.size(); i++) {  m->mothurRemove((fileroot + Groups[i] + ".rabund"));		}
-				return 0; 
-		}
-		
+        if (listfile != "") {  createSharedFromListGroup(filename);  }
+        else {   createSharedFromBiom(filename);  }
+        
+        if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  }
+        
 		//set rabund file as new current rabundfile
 		string current = "";
 		itTypes = outputTypes.find("rabund");
@@ -442,7 +249,6 @@ int SharedCommand::execute(){
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
-		m->mothurOut(filename); m->mothurOutEndLine();
 		m->mothurOutEndLine();
 		
 		return 0;
@@ -453,7 +259,718 @@ int SharedCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-void SharedCommand::printSharedData(vector<SharedRAbundVector*> thislookup) {
+int SharedCommand::createSharedFromBiom(string filename) {
+	try {
+        ofstream out;
+        m->openOutputFile(filename, out);
+        
+        /*{
+            "id":"/Users/SarahsWork/Desktop/release/temp.job2.shared-unique",
+            "format": "Biological Observation Matrix 0.9.1",
+            "format_url": "http://biom-format.org",
+            "type": "OTU table",
+            "generated_by": "mothur1.24.0",
+            "date": "Tue Apr 17 13:12:07 2012", */
+        
+        ifstream in;
+        m->openInputFile(biomfile, in);
+        
+        m->getline(in); m->gobble(in);  //grab first '{'
+        
+        string matrixFormat = "";
+        int numRows = 0;
+        int numCols = 0;
+        int shapeNumRows = 0;
+        int shapeNumCols = 0;
+        vector<string> otuNames;
+        vector<string> groupNames;
+        while (!in.eof()) {
+            
+            if (m->control_pressed) { break; }
+            
+            string line = m->getline(in); m->gobble(in);
+            
+            string tag = getTag(line);
+            
+            if (tag == "type") {
+                //check to make sure this is an OTU table
+                string type = getTag(line);
+                if (type != "OTU table") { m->mothurOut("[ERROR]: " + type + " is not a valid biom type for mothur. Only type allowed is OTU table.\n"); m->control_pressed = true; }
+            }else if (tag == "matrix_type") {
+                //get type and check type
+                matrixFormat = getTag(line);
+                if ((matrixFormat != "sparse") && (matrixFormat != "dense")) { m->mothurOut("[ERROR]: " + matrixFormat + " is not a valid biom matrix_type for mothur. Types allowed are sparse and dense.\n"); m->control_pressed = true; }
+            }else if (tag == "matrix_element_type") {
+                //get type and check type
+                string matrixElementType = getTag(line);
+                if (matrixElementType != "int") { m->mothurOut("[ERROR]: " + matrixElementType + " is not a valid matrix_element_type for mothur. Only type allowed is int.\n"); m->control_pressed = true; }
+            }else if (tag == "rows") {
+                //read otu names
+                otuNames = readRows(line, in, numRows);  
+            }else if (tag == "columns") {
+                //read sample names
+                groupNames = readRows(line, in, numCols); 
+                
+                //if users selected groups, then remove the groups not wanted.
+                SharedUtil util;
+                vector<string> Groups = m->getGroups();
+                vector<string> allGroups = groupNames;
+                util.setGroups(Groups, allGroups);
+                m->setGroups(Groups);
+                
+                //fill filehandles with neccessary ofstreams
+                int i;
+                ofstream* temp;
+                for (i=0; i<Groups.size(); i++) {
+                    temp = new ofstream;
+                    filehandles[Groups[i]] = temp;
+                }
+                
+                //set fileroot
+                fileroot = outputDir + m->getRootName(m->getSimpleName(biomfile));
+                
+                //clears file before we start to write to it below
+                for (int i=0; i<Groups.size(); i++) {
+                    m->mothurRemove((fileroot + Groups[i] + ".rabund"));
+                    outputNames.push_back((fileroot + Groups[i] + ".rabund"));
+                    outputTypes["rabund"].push_back((fileroot + Groups[i] + ".rabund"));
+                }
+
+            }else if (tag == "shape") {
+                getDims(line, shapeNumRows, shapeNumCols);
+                
+                //check shape
+                if (shapeNumCols != numCols) {
+                    m->mothurOut("[ERROR]: shape indicates " + toString(shapeNumCols) + " columns, but I only read " + toString(numCols) + " columns.\n"); m->control_pressed = true;
+                }
+                
+                if (shapeNumRows != numRows) {
+                    m->mothurOut("[ERROR]: shape indicates " + toString(shapeNumRows) + " rows, but I only read " + toString(numRows) + " rows.\n"); m->control_pressed = true;
+                }
+            }else if (tag == "data") {
+                m->currentBinLabels = otuNames;
+                
+                //read data
+                vector<SharedRAbundVector*> lookup = readData(matrixFormat, line, in, groupNames, otuNames.size());
+
+                m->mothurOutEndLine(); m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+                lookup[0]->printHeaders(out); 
+                printSharedData(lookup, out);
+            }
+        }
+        in.close();
+        
+                
+        return 0;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "SharedCommand", "createSharedFromBiom");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<SharedRAbundVector*> SharedCommand::readData(string matrixFormat, string line, ifstream& in, vector<string>& groupNames, int numOTUs) {
+	try {
+        
+        vector<SharedRAbundVector*> lookup; 
+        
+        //creates new sharedRAbunds
+        for (int i = 0; i < groupNames.size(); i++) {
+            SharedRAbundVector* temp = new SharedRAbundVector(numOTUs); //sets all abunds to 0
+            temp->setLabel("dummy");
+            temp->setGroup(groupNames[i]);
+            lookup.push_back(temp);
+        }
+        
+        bool dataStart = false;
+        bool inBrackets = false;
+        string num = "";
+        vector<int> nums;
+        int otuCount = 0;
+        for (int i = 0; i < line.length(); i++) {
+            
+            if (m->control_pressed) { return lookup; }
+            
+            //look for opening [ to indicate data is starting
+            if ((line[i] == '[') && (!dataStart)) { dataStart = true; i++;  if (!(i < line.length())) { break; } }
+            else if ((line[i] == ']') && dataStart && (!inBrackets)) { break; } //we are done reading data
+                
+            if (dataStart) {
+                if ((line[i] == '[') && (!inBrackets)) { inBrackets = true; i++;  if (!(i < line.length())) { break; } }
+                else if ((line[i] == ']') && (inBrackets)) { 
+                    inBrackets = false; 
+                    int temp;
+                    m->mothurConvert(num, temp);
+                    nums.push_back(temp);
+                    num = "";
+                    
+                    //save info to vectors
+                    if (matrixFormat == "dense") {
+                        
+                        //sanity check
+                        if (nums.size() != lookup.size()) { m->mothurOut("[ERROR]: trouble parsing OTU data.  OTU " + toString(otuCount) + " causing errors.\n"); m->control_pressed = true; }
+                        
+                        //set abundances for this otu
+                        //nums contains [abundSample0, abundSample1, abundSample2, ...] for current OTU
+                        for (int j = 0; j < lookup.size(); j++) { lookup[j]->set(otuCount, nums[j], groupNames[j]); }
+                        
+                        otuCount++;
+                    }else {
+                        //sanity check
+                        if (nums.size() != 3) { m->mothurOut("[ERROR]: trouble parsing OTU data.\n"); m->control_pressed = true; }
+                        
+                        //nums contains [otuNum, sampleNum, abundance]
+                        lookup[nums[1]]->set(nums[0], nums[2], groupNames[nums[1]]);
+                    }
+                    nums.clear();
+                }
+                
+                if (inBrackets) {
+                    if (line[i] == ',') {
+                        int temp;
+                        m->mothurConvert(num, temp);
+                        nums.push_back(temp);
+                        num = "";
+                    }else { if (!isspace(line[i])) { num += line[i]; }  }
+                }
+            }
+        }
+        
+        //same as above just reading from file.
+        while (!in.eof()) {
+            
+            char c = in.get(); m->gobble(in);
+            
+            if (m->control_pressed) { return lookup; }
+            
+            //look for opening [ to indicate data is starting
+            if ((c == '[') && (!dataStart)) { dataStart = true; c = in.get();  if (in.eof()) { break; } }
+            else if ((c == ']') && dataStart && (!inBrackets)) { break; } //we are done reading data
+              
+            if (dataStart) {
+                if ((c == '[') && (!inBrackets)) { inBrackets = true; c = in.get();  if (in.eof()) { break; }  }
+                else if ((c == ']') && (inBrackets)) { 
+                    inBrackets = false; 
+                    int temp;
+                    m->mothurConvert(num, temp);
+                    nums.push_back(temp);
+                    num = "";
+                    
+                    //save info to vectors
+                    if (matrixFormat == "dense") {
+                        
+                        //sanity check
+                        if (nums.size() != lookup.size()) { m->mothurOut("[ERROR]: trouble parsing OTU data.  OTU " + toString(otuCount) + " causing errors.\n"); m->control_pressed = true; }
+                        
+                        //set abundances for this otu
+                        //nums contains [abundSample0, abundSample1, abundSample2, ...] for current OTU
+                        for (int j = 0; j < lookup.size(); j++) { lookup[j]->set(otuCount, nums[j], groupNames[j]); }
+                        
+                        otuCount++;
+                    }else {
+                        //sanity check
+                        if (nums.size() != 3) { m->mothurOut("[ERROR]: trouble parsing OTU data.\n"); m->control_pressed = true; }
+                        
+                        //nums contains [otuNum, sampleNum, abundance]
+                        lookup[nums[1]]->set(nums[0], nums[2], groupNames[nums[1]]);
+                    }
+                    nums.clear();
+                }
+                
+                if (inBrackets) {
+                    if (c == ',') {
+                        int temp;
+                        m->mothurConvert(num, temp);
+                        nums.push_back(temp);
+                        num = "";
+                    }else { if (!isspace(c)) { num += c; }  }
+                }
+            }
+        }
+        
+        SharedUtil util;
+        
+		bool remove = false;
+		for (int i = 0; i < lookup.size(); i++) {
+			//if this sharedrabund is not from a group the user wants then delete it.
+			if (util.isValidGroup(lookup[i]->getGroup(), m->getGroups()) == false) { 
+				remove = true;
+				delete lookup[i]; lookup[i] = NULL;
+				lookup.erase(lookup.begin()+i); 
+				i--; 
+			}
+		}
+		
+		if (remove) { eliminateZeroOTUS(lookup); }
+
+        
+        return lookup;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "SharedCommand", "readData");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+int SharedCommand::eliminateZeroOTUS(vector<SharedRAbundVector*>& thislookup) {
+    try {
+        
+        vector<SharedRAbundVector*> newLookup;
+        for (int i = 0; i < thislookup.size(); i++) {
+            SharedRAbundVector* temp = new SharedRAbundVector();
+            temp->setLabel(thislookup[i]->getLabel());
+            temp->setGroup(thislookup[i]->getGroup());
+            newLookup.push_back(temp);
+        }
+        
+        //for each bin
+        vector<string> newBinLabels;
+        string snumBins = toString(thislookup[0]->getNumBins());
+        for (int i = 0; i < thislookup[0]->getNumBins(); i++) {
+            if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) {  delete newLookup[j];  } return 0; }
+            
+            //look at each sharedRabund and make sure they are not all zero
+            bool allZero = true;
+            for (int j = 0; j < thislookup.size(); j++) {
+                if (thislookup[j]->getAbundance(i) != 0) { allZero = false;  break;  }
+            }
+            
+            //if they are not all zero add this bin
+            if (!allZero) {
+                for (int j = 0; j < thislookup.size(); j++) {
+                    newLookup[j]->push_back(thislookup[j]->getAbundance(i), thislookup[j]->getGroup());
+                }
+                
+                //if there is a bin label use it otherwise make one
+                string binLabel = "Otu";
+                string sbinNumber = toString(i+1);
+                if (sbinNumber.length() < snumBins.length()) { 
+                    int diff = snumBins.length() - sbinNumber.length();
+                    for (int h = 0; h < diff; h++) { binLabel += "0"; }
+                }
+                binLabel += sbinNumber; 
+                if (i < m->currentBinLabels.size()) {  binLabel = m->currentBinLabels[i]; }
+                
+                newBinLabels.push_back(binLabel);
+            }
+        }
+        
+        for (int j = 0; j < thislookup.size(); j++) {  delete thislookup[j];  }
+        
+        thislookup = newLookup;
+        m->currentBinLabels = newBinLabels;
+        
+        return 0;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SharedCommand", "eliminateZeroOTUS");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+int SharedCommand::getDims(string line, int& shapeNumRows, int& shapeNumCols) {
+	try {
+        //get shape
+        bool inBar = false;
+        string num = "";
+        
+        for (int i = 0; i < line.length(); i++) {
+            
+            //you want to ignore any ; until you reach the next '
+            if ((line[i] == '[') && (!inBar)) {  inBar = true; i++;  if (!(i < line.length())) { break; } } 
+            else if ((line[i] == ']') && (inBar)) {  
+                inBar= false;  
+                m->mothurConvert(num, shapeNumCols);
+                break;
+            } 
+            
+            if (inBar) {  
+                if (line[i] == ',') {
+                    m->mothurConvert(num, shapeNumRows);
+                    num = "";
+                }else { if (!isspace(line[i])) { num += line[i]; }  }
+            }
+        }
+        
+        return 0;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "SharedCommand", "getDims");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> SharedCommand::readRows(string line, ifstream& in, int& numRows) {
+	try {
+        /*"rows":[
+         {"id":"Otu01", "metadata":{"taxonomy":["Bacteria", "Bacteroidetes", "Bacteroidia", "Bacteroidales", "Porphyromonadaceae", "unclassified"], "bootstrap":[100, 100, 100, 100, 100, 100]}},
+         {"id":"Otu02", "metadata":{"taxonomy":["Bacteria", "Bacteroidetes", "Bacteroidia", "Bacteroidales", "Rikenellaceae", "Alistipes"], "bootstrap":[100, 100, 100, 100, 100, 100]}},
+         ...
+         ],*/
+        vector<string> names;
+        int countOpenBrace = 0;
+        int countClosedBrace = 0;
+        int openParen = 0;
+        int closeParen = 0;
+        string nextRow = "";
+        bool end = false;
+        
+        for (int i = 0; i < line.length(); i++) {
+            
+            if (m->control_pressed) { return names; }
+            
+            if (line[i] == '[')         { countOpenBrace++;     }
+            else if (line[i] == ']')    { countClosedBrace++;   }
+            else if (line[i] == '{')    { openParen++;          }
+            else if (line[i] == '}')    { closeParen++;         }
+            else if (openParen != 0)    { nextRow += line[i];   }  //you are reading the row info
+            
+            //you have reached the end of the rows info
+            if ((countOpenBrace == countClosedBrace) && (countClosedBrace != 0)) { end = true; break; }
+            if ((openParen == closeParen) && (closeParen != 0)) { //process row 
+                numRows++;
+                vector<string> items;
+                m->splitAtChar(nextRow, items, ','); //parse by comma, will return junk for metadata but we aren't using that anyway
+                string part = items[0]; items.clear();
+                m->splitAtChar(part, items, ':'); //split part we want containing the ids
+                string name = items[1];
+                
+                //remove "" if needed
+                int pos = name.find("\"");
+                if (pos != string::npos) {
+                    string newName = "";
+                    for (int k = 0; k < name.length(); k++) {
+                        if (name[k] != '\"') { newName += name[k]; }
+                    }
+                    name = newName;
+                }
+                names.push_back(name);
+                nextRow = "";
+                openParen = 0;
+                closeParen = 0;
+            }
+        }
+        
+        //keep reading
+        if (!end) {
+            while (!in.eof()) {
+                
+                if (m->control_pressed) { break; }
+                
+                char c = in.get(); m->gobble(in);
+                
+                if (c == '[')               { countOpenBrace++;     }
+                else if (c == ']')          { countClosedBrace++;   }
+                else if (c == '{')          { openParen++;          }
+                else if (c == '}')          { closeParen++;         }
+                else if (openParen != 0)    { nextRow += c;         }  //you are reading the row info
+                
+                
+                //you have reached the end of the rows info
+                if ((countOpenBrace == countClosedBrace) && (countClosedBrace != 0)) { end = true; break; }
+                if ((openParen == closeParen) && (closeParen != 0)) { //process row 
+                    numRows++;
+                    vector<string> items;
+                    m->splitAtChar(nextRow, items, ','); //parse by comma, will return junk for metadata but we aren't using that anyway
+                    string part = items[0]; items.clear();
+                    m->splitAtChar(part, items, ':'); //split part we want containing the ids
+                    string name = items[1];
+                    
+                    //remove "" if needed
+                    int pos = name.find("\"");
+                    if (pos != string::npos) {
+                        string newName = "";
+                        for (int k = 0; k < name.length(); k++) {
+                            if (name[k] != '\"') { newName += name[k]; }
+                        }
+                        name = newName;
+                    }
+                    names.push_back(name);
+                    nextRow = "";
+                    openParen = 0;
+                    closeParen = 0;
+                }  
+            }
+        }
+        
+        return names;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "SharedCommand", "readRows");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+//designed for things like "type": "OTU table", returns map type -> OTU table
+string SharedCommand::getTag(string& line) {
+	try {
+        bool inQuotes = false;
+        string tag = "";
+        char c = '\"';
+        
+        for (int i = 0; i < line.length(); i++) {
+        
+            //you want to ignore any ; until you reach the next '
+			if ((line[i] == c) && (!inQuotes)) {  inQuotes = true;  } 
+			else if ((line[i] == c) && (inQuotes)) {  
+                inQuotes= false;  
+                line = line.substr(i+1);
+                return tag;
+            } 
+            
+			if (inQuotes) {  if (line[i] != c) { tag += line[i]; }  }
+        }
+        
+        return tag;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "SharedCommand", "getInfo");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+int SharedCommand::createSharedFromListGroup(string filename) {
+	try {
+        ofstream out;
+        m->openOutputFile(filename, out);
+        
+        GroupMap* groupMap = new GroupMap(groupfile);
+        
+        int groupError = groupMap->readMap();
+        if (groupError == 1) { delete groupMap; return 0; }
+        vector<string> allGroups = groupMap->getNamesOfGroups();
+        m->setAllGroups(allGroups);
+        
+        pickedGroups = false;
+        
+        //if hte user has not specified any groups then use them all
+        if (Groups.size() == 0) {
+            Groups = groupMap->getNamesOfGroups(); m->setGroups(Groups);
+        }else { pickedGroups = true; }
+        
+        //fill filehandles with neccessary ofstreams
+        int i;
+        ofstream* temp;
+        for (i=0; i<Groups.size(); i++) {
+            temp = new ofstream;
+            filehandles[Groups[i]] = temp;
+        }
+        
+        //set fileroot
+        fileroot = outputDir + m->getRootName(m->getSimpleName(listfile));
+        
+        //clears file before we start to write to it below
+        for (int i=0; i<Groups.size(); i++) {
+            m->mothurRemove((fileroot + Groups[i] + ".rabund"));
+            outputNames.push_back((fileroot + Groups[i] + ".rabund"));
+            outputTypes["rabund"].push_back((fileroot + Groups[i] + ".rabund"));
+        }
+        
+        string errorOff = "no error";
+        
+        //if user provided an order file containing the order the shared file should be in read it
+        //if (ordergroupfile != "") { readOrderFile(); }
+        
+        InputData input(listfile, "shared");
+        SharedListVector* SharedList = input.getSharedListVector();
+        string lastLabel = SharedList->getLabel();
+        vector<SharedRAbundVector*> lookup; 
+        
+        if (m->control_pressed) { 
+            delete SharedList; delete groupMap; 
+            for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {  delete it3->second;  }
+            out.close(); m->mothurRemove(filename); 
+            for (int i=0; i<Groups.size(); i++) {  m->mothurRemove((fileroot + Groups[i] + ".rabund"));		}
+            return 0; 
+        }
+        
+        //sanity check
+        vector<string> groupMapNamesSeqs = groupMap->getNamesSeqs();
+        int error = ListGroupSameSeqs(groupMapNamesSeqs, SharedList);
+        
+        if ((!pickedGroups) && (SharedList->getNumSeqs() != groupMap->getNumSeqs())) {  //if the user has not specified any groups and their files don't match exit with error
+            m->mothurOut("Your group file contains " + toString(groupMap->getNumSeqs()) + " sequences and list file contains " + toString(SharedList->getNumSeqs()) + " sequences. Please correct."); m->mothurOutEndLine(); 
+            
+            out.close();
+            m->mothurRemove(filename); //remove blank shared file you made
+            
+            createMisMatchFile(SharedList, groupMap);
+            
+            //delete memory
+            for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {
+                delete it3->second;
+            }
+            
+            delete SharedList; delete groupMap; 
+            
+            return 0; 
+        }
+        
+        if (error == 1) { m->control_pressed = true; }
+        
+        //if user has specified groups make new groupfile for them
+        if (pickedGroups) { //make new group file
+            string groups = "";
+            if (m->getNumGroups() < 4) {
+                for (int i = 0; i < m->getNumGroups(); i++) {
+                    groups += (m->getGroups())[i] + ".";
+                }
+            }else { groups = "merge"; }
+            
+            string newGroupFile = outputDir + m->getRootName(m->getSimpleName(listfile)) + groups + "groups";
+            outputTypes["group"].push_back(newGroupFile); 
+            outputNames.push_back(newGroupFile);
+            ofstream outGroups;
+            m->openOutputFile(newGroupFile, outGroups);
+            
+            vector<string> names = groupMap->getNamesSeqs();
+            string groupName;
+            for (int i = 0; i < names.size(); i++) {
+                groupName = groupMap->getGroup(names[i]);
+                if (isValidGroup(groupName, m->getGroups())) {
+                    outGroups << names[i] << '\t' << groupName << endl;
+                }
+            }
+            outGroups.close();
+        }
+        
+        //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
+        set<string> processedLabels;
+        set<string> userLabels = labels;	
+        
+        while((SharedList != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+            if (m->control_pressed) { 
+                delete SharedList; delete groupMap;
+                for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {  delete it3->second;  }
+                out.close(); m->mothurRemove(filename); 
+                for (int i=0; i<Groups.size(); i++) {  m->mothurRemove((fileroot + Groups[i] + ".rabund"));		}
+                return 0; 
+            }
+            
+            if(allLines == 1 || labels.count(SharedList->getLabel()) == 1){
+                
+                lookup = SharedList->getSharedRAbundVector();
+                
+                m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+                if (pickedGroups) { //check for otus with no seqs in them
+                    eliminateZeroOTUS(lookup);
+                }
+                
+                if (m->control_pressed) { 
+                    delete SharedList; delete groupMap; 
+                    for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+                    for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {  delete it3->second;  }
+                    out.close(); m->mothurRemove(filename); 
+                    for (int i=0; i<Groups.size(); i++) {  m->mothurRemove((fileroot + Groups[i] + ".rabund"));		}
+                    return 0; 
+                }
+                
+                if (!m->printedHeaders) { lookup[0]->printHeaders(out); }
+                printSharedData(lookup, out); //prints info to the .shared file
+                for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+                
+                processedLabels.insert(SharedList->getLabel());
+                userLabels.erase(SharedList->getLabel());
+            }
+            
+            if ((m->anyLabelsToProcess(SharedList->getLabel(), userLabels, errorOff) == true) && (processedLabels.count(lastLabel) != 1)) {
+                string saveLabel = SharedList->getLabel();
+                
+                delete SharedList;
+                SharedList = input.getSharedListVector(lastLabel); //get new list vector to process
+                
+                lookup = SharedList->getSharedRAbundVector();
+                m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+                if (pickedGroups) { //check for otus with no seqs in them
+                    eliminateZeroOTUS(lookup);
+                }
+                
+                
+                if (m->control_pressed) { 
+                    delete SharedList; delete groupMap; 
+                    for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+                    for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {  delete it3->second;  }
+                    out.close(); m->mothurRemove(filename); 
+                    for (int i=0; i<Groups.size(); i++) {  m->mothurRemove((fileroot + Groups[i] + ".rabund"));		}
+                    return 0; 
+                }
+                
+                if (!m->printedHeaders) { lookup[0]->printHeaders(out); }
+                printSharedData(lookup, out); //prints info to the .shared file
+                for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+                
+                processedLabels.insert(SharedList->getLabel());
+                userLabels.erase(SharedList->getLabel());
+                
+                //restore real lastlabel to save below
+                SharedList->setLabel(saveLabel);
+            }
+            
+            
+            lastLabel = SharedList->getLabel();
+            
+            delete SharedList;
+            SharedList = input.getSharedListVector(); //get new list vector to process
+        }
+        
+        //output error messages about any remaining user labels
+        set<string>::iterator it;
+        bool needToRun = false;
+        for (it = userLabels.begin(); it != userLabels.end(); it++) {  
+            if (processedLabels.count(lastLabel) != 1) {
+                needToRun = true;
+            }
+        }
+        
+        //run last label if you need to
+        if (needToRun == true)  {
+            if (SharedList != NULL) {	delete SharedList;	}
+            SharedList = input.getSharedListVector(lastLabel); //get new list vector to process
+            
+            lookup = SharedList->getSharedRAbundVector();
+            m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+            if (pickedGroups) { //check for otus with no seqs in them
+                eliminateZeroOTUS(lookup);
+            }
+            
+            if (m->control_pressed) { 
+                delete groupMap;
+                for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {  delete it3->second;   }
+                out.close(); m->mothurRemove(filename); 
+                for (int i=0; i<Groups.size(); i++) {  m->mothurRemove((fileroot + Groups[i] + ".rabund"));		}
+                return 0; 
+            }
+            
+            if (!m->printedHeaders) { lookup[0]->printHeaders(out); }
+            printSharedData(lookup, out); //prints info to the .shared file
+            for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+            delete SharedList;
+        }
+        
+        out.close();
+        
+        for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {
+            delete it3->second;
+        }
+        
+        delete groupMap;
+		
+        if (m->control_pressed) { 
+            m->mothurRemove(filename); 
+            for (int i=0; i<Groups.size(); i++) {  m->mothurRemove((fileroot + Groups[i] + ".rabund"));		}
+            return 0; 
+        }
+
+        return 0;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "SharedCommand", "createSharedFromListGroup");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+void SharedCommand::printSharedData(vector<SharedRAbundVector*> thislookup, ofstream& out) {
 	try {
 		
 		if (order.size() == 0) { //user has not specified an order so do aplabetically
@@ -517,50 +1034,7 @@ void SharedCommand::printSharedData(vector<SharedRAbundVector*> thislookup) {
 	}
 }
 //**********************************************************************************************************************
-int SharedCommand::eliminateZeroOTUS(vector<SharedRAbundVector*>& thislookup) {
-	try {
-		
-		vector<SharedRAbundVector*> newLookup;
-		for (int i = 0; i < thislookup.size(); i++) {
-			SharedRAbundVector* temp = new SharedRAbundVector();
-			temp->setLabel(thislookup[i]->getLabel());
-			temp->setGroup(thislookup[i]->getGroup());
-			newLookup.push_back(temp);
-		}
-		
-		//for each bin
-		for (int i = 0; i < thislookup[0]->getNumBins(); i++) {
-			if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) {  delete newLookup[j];  } return 0; }
-		
-			//look at each sharedRabund and make sure they are not all zero
-			bool allZero = true;
-			for (int j = 0; j < thislookup.size(); j++) {
-				if (thislookup[j]->getAbundance(i) != 0) { allZero = false;  break;  }
-			}
-			
-			//if they are not all zero add this bin
-			if (!allZero) {
-				for (int j = 0; j < thislookup.size(); j++) {
-					newLookup[j]->push_back(thislookup[j]->getAbundance(i), thislookup[j]->getGroup());
-				}
-				//if there is a bin label use it otherwise make one
-			}
-			//else{  cout << "bin # " << i << " is all zeros" << endl;  }
-		}
-	
-		for (int j = 0; j < thislookup.size(); j++) {  delete thislookup[j];  }
-		thislookup = newLookup;
-		
-		return 0;
- 
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SharedCommand", "eliminateZeroOTUS");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-int SharedCommand::createMisMatchFile() {
+int SharedCommand::createMisMatchFile(SharedListVector* SharedList, GroupMap* groupMap) {
 	try {
 		ofstream outMisMatch;
 		string outputMisMatchName = outputDir + m->getRootName(m->getSimpleName(listfile));
@@ -658,12 +1132,9 @@ int SharedCommand::createMisMatchFile() {
 	}
 }
 //**********************************************************************************************************************
-int SharedCommand::ListGroupSameSeqs() {
+int SharedCommand::ListGroupSameSeqs(vector<string>& groupMapsSeqs, SharedListVector* SharedList) {
 	try {
-		
 		int error = 0; 
-		
-		vector<string> groupMapsSeqs = groupMap->getNamesSeqs();
        	
 		set<string> groupNamesSeqs;
 		for(int i = 0; i < groupMapsSeqs.size(); i++) {

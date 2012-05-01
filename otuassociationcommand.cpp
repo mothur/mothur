@@ -308,8 +308,7 @@ int OTUAssociationCommand::process(vector<SharedRAbundVector*>& lookup){
 				else if (method == "kendall")	{	coef = linear.calcKendall(xy[i], xy[k], sig);	}                   
 				else { m->mothurOut("[ERROR]: invalid method, choices are spearman, pearson or kendall."); m->mothurOutEndLine(); m->control_pressed = true; }
 			
-				if (m->binLabelsInFile.size() != 0) { out << m->binLabelsInFile[i] << '\t' << m->binLabelsInFile[k] << '\t' << coef << '\t' << sig << endl; }
-                else { out << i+1 << '\t' << k+1 << '\t' << coef << '\t' << sig << endl; }
+                out << m->binLabelsInFile[i] << '\t' << m->binLabelsInFile[k] << '\t' << coef << '\t' << sig << endl;
 			}
 		}
 		
@@ -437,8 +436,7 @@ int OTUAssociationCommand::process(vector<SharedRAbundFloatVector*>& lookup){
 				else if (method == "kendall")	{	coef = linear.calcKendall(xy[i], xy[k], sig);	}                   
 				else { m->mothurOut("[ERROR]: invalid method, choices are spearman, pearson or kendall."); m->mothurOutEndLine(); m->control_pressed = true; }
 				
-                if (m->binLabelsInFile.size() != 0) { out << m->binLabelsInFile[i] << '\t' << m->binLabelsInFile[k] << '\t' << coef << '\t' << sig << endl; }
-                else { out << i+1 << '\t' << k+1 << '\t' << coef << '\t' << sig << endl; }
+                out << m->binLabelsInFile[i] << '\t' << m->binLabelsInFile[k] << '\t' << coef << '\t' << sig << endl; 
 			}
 		}
 		

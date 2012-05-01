@@ -27,7 +27,7 @@ vector<string> TreeGroupCommand::setParameters(){
 		CommandParameter pcalc("calc", "Multiple", "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan-kstest-sharednseqs-ochiai-anderberg-kulczynski-kulczynskicody-lennon-morisitahorn-braycurtis-whittaker-odum-canberra-structeuclidean-structchord-hellinger-manhattan-structpearson-soergel-spearman-structkulczynski-speciesprofile-hamming-structchi2-gower-memchi2-memchord-memeuclidean-mempearson", "jclass-thetayc", "", "", "",true,false); parameters.push_back(pcalc);
 		
         CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
-        CommandParameter poutput("output", "Multiple", "lt-square", "lt", "", "", "",false,false); parameters.push_back(poutput);
+//CommandParameter poutput("output", "Multiple", "lt-square", "lt", "", "", "",false,false); parameters.push_back(poutput);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
 		
@@ -482,76 +482,15 @@ int TreeGroupCommand::execute(){
 Tree* TreeGroupCommand::createTree(vector< vector<double> >& simMatrix){
 	try {
 		//create tree
-		t = new Tree(tmap);
+		t = new Tree(tmap, simMatrix);
         
-        //initialize index
-        map<int, int> index;  //maps row in simMatrix to vector index in the tree
-        for (int g = 0; g < numGroups; g++) {	index[g] = g;	}
+        if (m->control_pressed) { delete t; t = NULL; return t; }
 		
-		//do merges and create tree structure by setting parents and children
-		//there are numGroups - 1 merges to do
-		for (int i = 0; i < (numGroups - 1); i++) {
-			float largest = -1000.0;
-			
-			if (m->control_pressed) { delete t; t = NULL; return t; }
-			
-			int row, column;
-			//find largest value in sims matrix by searching lower triangle
-			for (int j = 1; j < simMatrix.size(); j++) {
-				for (int k = 0; k < j; k++) {
-					if (simMatrix[j][k] > largest) {  largest = simMatrix[j][k]; row = j; column = k;  }
-				}
-			}
+        //assemble tree
+        map<string, string> empty;
+		t->assembleTree(empty);
 
-			//set non-leaf node info and update leaves to know their parents
-			//non-leaf
-			t->tree[numGroups + i].setChildren(index[row], index[column]);
-			
-			//parents
-			t->tree[index[row]].setParent(numGroups + i);
-			t->tree[index[column]].setParent(numGroups + i);
-			
-			//blength = distance / 2;
-			float blength = ((1.0 - largest) / 2);
-			
-			//branchlengths
-			t->tree[index[row]].setBranchLength(blength - t->tree[index[row]].getLengthToLeaves());
-			t->tree[index[column]].setBranchLength(blength - t->tree[index[column]].getLengthToLeaves());
-			
-			//set your length to leaves to your childs length plus branchlength
-			t->tree[numGroups + i].setLengthToLeaves(t->tree[index[row]].getLengthToLeaves() + t->tree[index[row]].getBranchLength());
-			
-			
-			//update index 
-			index[row] = numGroups+i;
-			index[column] = numGroups+i;
-			
-			//remove highest value that caused the merge.
-			simMatrix[row][column] = -1000.0;
-			simMatrix[column][row] = -1000.0;
-			
-			//merge values in simsMatrix
-			for (int n = 0; n < simMatrix.size(); n++)	{
-				//row becomes merge of 2 groups
-				simMatrix[row][n] = (simMatrix[row][n] + simMatrix[column][n]) / 2;
-				simMatrix[n][row] = simMatrix[row][n];
-				//delete column
-				simMatrix[column][n] = -1000.0;
-				simMatrix[n][column] = -1000.0;
-			}
-		}
-		
-		//adjust tree to make sure root to tip length is .5
-		int root = t->findRoot();
-		t->tree[root].setBranchLength((0.5 - t->tree[root].getLengthToLeaves()));
-		
-		//assemble tree
-		t->assembleTree();
-		
-		if (m->control_pressed) { delete t; t = NULL; return t; }
-		
 		return t;
-	
 	}
 	catch(exception& e) {
 		m->errorOut(e, "TreeGroupCommand", "createTree");
@@ -1004,11 +943,13 @@ int TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
                 if (m->control_pressed) { for (int k = 0; k < trees.size(); k++) { delete trees[k]; } }
                 
                 Consensus consensus;
-                Tree* conTree = consensus.getTree(trees, tmap);
+                //clear old tree names if any
+                m->Treenames.clear(); m->Treenames = m->getGroups(); //may have changed if subsample eliminated groups
+                Tree* conTree = consensus.getTree(trees);
                 
                 //create a new filename
                 string conFile = outputDir + m->getRootName(m->getSimpleName(inputfile)) + treeCalculators[i]->getName() + "." + thisLookup[0]->getLabel() + ".cons.tre";				
-                outputNames.push_back(conFile); outputTypes["tree"].push_back(outputFile); 
+                outputNames.push_back(conFile); outputTypes["tree"].push_back(conFile); 
                 ofstream outTree;
                 m->openOutputFile(conFile, outTree);
                 

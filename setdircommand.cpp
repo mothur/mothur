@@ -101,14 +101,6 @@ int SetDirectoryCommand::execute(){
 		
 		commandFactory = CommandFactory::getInstance();
 		
-		string tag = "";
-#ifdef USE_MPI
-		int pid; 
-		MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-		
-		tag = toString(pid);
-#endif
-		
 		m->mothurOut("Mothur's directories:"); m->mothurOutEndLine();
 		
 		//redirect output
@@ -120,27 +112,10 @@ int SetDirectoryCommand::execute(){
 			m->mothurOut("outputDir=" + output); m->mothurOutEndLine();  
 			commandFactory->setOutputDirectory(output);
 		}else {
-			//add / to name if needed
-			string lastChar = output.substr(output.length()-1);
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-				if (lastChar != "/") { output += "/"; }
-			#else
-				if (lastChar != "\\") { output += "\\"; }	
-			#endif
-			
-			//test to make sure directory exists
-			output = m->getFullPathName(output);
-			string outTemp = output + tag + "temp";
-			ofstream out;
-			out.open(outTemp.c_str(), ios::trunc);
-			if(!out) {
-				m->mothurOut(output + " directory does not exist or is not writable."); m->mothurOutEndLine(); 
-			}else{
-				out.close();
-				m->mothurRemove(outTemp);
-				m->mothurOut("outputDir=" + output); m->mothurOutEndLine();  
+            if (m->dirCheck(output)) {
+                m->mothurOut("outputDir=" + output); m->mothurOutEndLine();  
 				commandFactory->setOutputDirectory(output);
-			}
+            }
 		}
 		
 		//redirect input
@@ -152,28 +127,11 @@ int SetDirectoryCommand::execute(){
 			m->mothurOut("inputDir=" + input); m->mothurOutEndLine();  
 			commandFactory->setInputDirectory(input);
 		}else {
-			//add / to name if needed
-			string lastChar = input.substr(input.length()-1);
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-				if (lastChar != "/") { input += "/"; }
-			#else
-				if (lastChar != "\\") { input += "\\"; }	
-			#endif
-			
-			//test to make sure directory exists
-			input = m->getFullPathName(input);
-			string inTemp = input + tag + "temp";
-			ofstream in;
-			in.open(inTemp.c_str(), ios::trunc);
-			if(!in) {
-				m->mothurOut(input + " directory does not exist or is not writable."); m->mothurOutEndLine(); 
-			}else{
-				in.close();
-				m->mothurRemove(inTemp);
-				m->mothurOut("inputDir=" + input); m->mothurOutEndLine();  
+            if (m->dirCheck(input)) {
+                m->mothurOut("inputDir=" + input); m->mothurOutEndLine();  
 				commandFactory->setInputDirectory(input); 
-			}
-		}
+            }
+        }
 		
 		//set default
 		if (tempdefault == "clear") {  
@@ -194,28 +152,11 @@ int SetDirectoryCommand::execute(){
 			m->mothurOut("tempDefault=" + tempdefault); m->mothurOutEndLine();  
 			m->setDefaultPath(tempdefault);
 		}else {
-			//add / to name if needed
-			string lastChar = tempdefault.substr(tempdefault.length()-1);
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-				if (lastChar != "/") { tempdefault += "/"; }
-			#else
-				if (lastChar != "\\") { tempdefault += "\\"; }	
-			#endif
-			
-			//test to make sure directory exists
-			tempdefault = m->getFullPathName(tempdefault);
-			string inTemp = tempdefault + tag + "temp";
-			ofstream in;
-			in.open(inTemp.c_str(), ios::trunc);
-			if(!in) {
-				m->mothurOut(tempdefault + " directory does not exist or is not writable."); m->mothurOutEndLine(); 
-			}else{
-				in.close();
-				m->mothurRemove(inTemp);
-				m->mothurOut("tempDefault=" + tempdefault); m->mothurOutEndLine();  
-				m->setDefaultPath(tempdefault);
-			}
-		}
+            if (m->dirCheck(tempdefault)) {
+                m->mothurOut("tempDefault=" + tempdefault); m->mothurOutEndLine();  
+				m->setDefaultPath(tempdefault); 
+            }
+        }
 
 		return 0;
 	}

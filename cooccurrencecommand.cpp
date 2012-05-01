@@ -136,7 +136,7 @@ CooccurrenceCommand::CooccurrenceCommand(string option) {
 				m->mothurOut("[ERROR]: " + metric + " is not a valid metric option for the cooccurrence command. Choices are cscore, checker, combo, vratio."); m->mothurOutEndLine(); abort = true; 
 			}
 			
-			matrix = validParameter.validFile(parameters, "matrix", false);				if (matrix == "not found") { matrix = "sim2"; }
+			matrix = validParameter.validFile(parameters, "matrixmodel", false);				if (matrix == "not found") { matrix = "sim2"; }
 			
 			if ((matrix != "sim1") && (matrix != "sim2") && (matrix != "sim3") && (matrix != "sim4") && (matrix != "sim5" ) && (matrix != "sim6" ) && (matrix != "sim7" ) && (matrix != "sim8" ) && (matrix != "sim9" )) {
 				m->mothurOut("[ERROR]: " + matrix + " is not a valid matrix option for the cooccurrence command. Choices are sim1, sim2, sim3, sim4, sim5, sim6, sim7, sim8, sim9."); m->mothurOutEndLine(); abort = true; 
@@ -270,162 +270,278 @@ int CooccurrenceCommand::execute(){
 //**********************************************************************************************************************
 
 int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp, ofstream& out){
-	try {
+    try {
         int numOTUS = thisLookUp[0]->getNumBins();
-        vector< vector<int> > initmatrix; initmatrix.resize(thisLookUp.size());
         vector< vector<int> > co_matrix; co_matrix.resize(thisLookUp[0]->getNumBins());
         for (int i = 0; i < thisLookUp[0]->getNumBins(); i++) { co_matrix[i].resize((thisLookUp.size()), 0); }
-        for (int i = 0; i < thisLookUp.size(); i++) { initmatrix[i].resize((thisLookUp[i]->getNumBins()), 0); }
         vector<int> columntotal; columntotal.resize(thisLookUp.size(), 0);
         vector<int> rowtotal; rowtotal.resize(numOTUS, 0);
         
-        int rowcount = 0;
-        for (int i = 0; i < thisLookUp.size(); i++) {
-			for (int j = 0; j < thisLookUp[i]->getNumBins(); j++) {
-				if (m->control_pressed) { return 0; }			
-				int abund = thisLookUp[i]->getAbundance(j);
-				
-				if(abund > 0) {
-				    initmatrix[i][j] = 1;
+        for (int i = 0; i < thisLookUp.size(); i++) { //nrows in the shared file
+            for (int j = 0; j < thisLookUp[i]->getNumBins(); j++) { //cols of original shared file
+                if (m->control_pressed) { return 0; }
+                int abund = thisLookUp[i]->getAbundance(j);
+                
+                if(abund > 0) {
                     co_matrix[j][i] = 1;
-                    rowcount++;
-                    columntotal[j]++;
-				}
-			}
-            rowtotal[i] = rowcount;
-            rowcount = 0;
+                    rowtotal[j]++;
+                    columntotal[i]++;
+                }
+            }
         }
         
         //nrows is ncols of inital matrix. All the functions need this value. They assume the transposition has already taken place and nrows and ncols refer to that matrix.
         //comatrix and initmatrix are still vectors of vectors of ints as in the original script. The abundancevector is only what was read in ie not a co-occurrence matrix!
-        int ncols = numOTUS;//rows of inital matrix
-        int nrows = thisLookUp.size();//groups
+        int nrows = numOTUS;//rows of inital matrix
+        int ncols = thisLookUp.size();//groups
         double initscore = 0.0;
-        //transpose matrix
-        int newmatrows = ncols;
-        int newmatcols = nrows;
-      
-        //swap for transposed matrix
-        nrows = newmatrows;//ncols;
-        ncols = newmatcols;//nrows;
         
-        vector<int> initcolumntotal; initcolumntotal.resize(ncols, 0);
-        vector<int> initrowtotal; initrowtotal.resize(nrows, 0);
         vector<double> stats;
-               
+        double probabilityMatrix[ncols * nrows];
+        vector<vector<int> > nullmatrix(nrows, vector<int>(ncols, 0));
+        
         TrialSwap2 trial;
         
-        initcolumntotal = rowtotal;
-        initrowtotal = columntotal;
-        trial.update_row_col_totals(co_matrix, rowtotal, columntotal);
+        int n = accumulate( columntotal.begin(), columntotal.end(), 0 );
         
-        if (metric == "cscore")         { initscore = trial.calc_c_score(co_matrix, rowtotal);    }
-        else if (metric == "checker")   { initscore = trial.calc_checker(co_matrix, rowtotal);    }
-        else if (metric == "vratio")    { initscore = trial.calc_vratio(rowtotal, columntotal);   }
-        else if (metric == "combo")     { initscore = trial.calc_combo(co_matrix);                }
-        else                            {  m->mothurOut("[ERROR]: No metric selected!\n");  m->control_pressed = true; return 1;            }
+        //============================================================
+        
+        //generate a probability matrix. Only do this once.
+        float start = 0.0;
+        
+        if (matrix == "sim1") {
+            for(int i=0;i<nrows;i++) {
+                for(int j=0;j<ncols;j++) {
+                    probabilityMatrix[ncols * i + j] = start + 1/double(nrows*ncols);
+                    start = start + 1/double(nrows*ncols);
+                }
+            }
+        }
+        //don't need a prob matrix because we just shuffle the rows, may use this in the future
+        else if (matrix == "sim2") { }
+//            for(int i=0;i<nrows;i++) {
+//                start = 0.0;
+//                for(int j=0;j<ncols;j++) {
+//                    probabilityMatrix[ncols * i + j] = start + 1/double(ncols);
+//                    start = start + 1/double(ncols);
+//                }
+//            }
+//        }
+        
+        else if (matrix == "sim3") {
+            for(int j=0;j<ncols;j++) {
+                start = 0.0;
+                for(int i=0;i<nrows;i++) {
+                    probabilityMatrix[ncols * i + j] = start + 1/double(nrows);
+                    start = start + 1/double(nrows);
+                }
+            }
+        }
+        
+        else if (matrix == "sim4") {
+            for(int i=0;i<nrows;i++) {
+                start = 0.0;
+                for(int j=0;j<ncols;j++) {
+                    probabilityMatrix[ncols * i + j] = start + columntotal[j]/double(n);
+                    start = start + columntotal[j]/double(n);
+                }
+            }
+        }
+        
+        else if (matrix == "sim5") {
+            for(int j=0;j<ncols;j++) {
+                start = 0.0;
+                for(int i=0;i<nrows;i++) {
+                    probabilityMatrix[ncols * i + j] = start + rowtotal[i]/double(n);
+                    start = start + rowtotal[i]/double(n);
+                }
+            }
+        }
+        
+        else if (matrix == "sim6") {
+            for(int i=0;i<nrows;i++) {
+                for(int j=0;j<ncols;j++) {
+                    probabilityMatrix[ncols * i + j] = start + columntotal[j]/double(n*nrows);
+                    start = start + columntotal[j]/double(n*nrows);
+                }
+            }
+        }
+        
+        
+        else if (matrix == "sim7") {
+            for(int i=0;i<nrows;i++) {
+                for(int j=0;j<ncols;j++) {
+                    probabilityMatrix[ncols * i + j] = start + rowtotal[i]/double(n*ncols);
+                    start = start + rowtotal[i]/double(n*ncols);
+                }
+            }
+        }
+        
+        else if (matrix == "sim8") {
+            for(int i=0;i<nrows;i++) {
+                for(int j=0;j<ncols;j++) {
+                    probabilityMatrix[ncols * i + j] = start + (rowtotal[i]*columntotal[j])/double(n*n);
+                    start = start + (rowtotal[i]*columntotal[j])/double(n*n);
+                }
+            }
+        }
+        else if (matrix == "sim9" || matrix == "sim2") { }
+        else {
+            m->mothurOut("[ERROR]: No model selected! \n");
+            m->control_pressed = true;
+        }
+        
+        
+        //co_matrix is the transposed shared file, initmatrix is the original shared file
+        if (metric == "cscore") { initscore = trial.calc_c_score(co_matrix, rowtotal, ncols, nrows); }
+        else if (metric == "checker") { initscore = trial.calc_checker(co_matrix, rowtotal, ncols, nrows); }
+        else if (metric == "vratio") { initscore = trial.calc_vratio(nrows, ncols, rowtotal, columntotal); }
+        else if (metric == "combo") { initscore = trial.calc_combo(nrows, ncols, co_matrix); }
+        else { m->mothurOut("[ERROR]: No metric selected!\n"); m->control_pressed = true; return 1; }
         
         m->mothurOut("Initial c score: " + toString(initscore)); m->mothurOutEndLine();
         
-        //nullmatrix burn in
-        for(int i=0;i<10000;i++) {
-            if (m->control_pressed) { return 0; }
-            if (matrix == "sim1") {
-                trial.sim1(co_matrix);
-            }else if (matrix == "sim2") {
-                trial.sim2(co_matrix);
-            }else if (matrix == "sim3") {
-                trial.sim3(initmatrix);
-                co_matrix = initmatrix;
-            }else if (matrix == "sim4") {
-                trial.sim4(columntotal, rowtotal, co_matrix);
-            }else if (matrix == "sim5") {
-                trial.sim5(initcolumntotal, initrowtotal, initmatrix);
-                trial.transpose_matrix(initmatrix,co_matrix);
-            }else if (matrix == "sim6") {
-                trial.sim6(columntotal, co_matrix);
-            }else if (matrix == "sim7") {
-                trial.sim7(initcolumntotal, initmatrix);          
-                co_matrix = initmatrix;
-            }else if (matrix == "sim8") {
-                trial.sim8(columntotal, rowtotal, co_matrix);
-            }else if (matrix == "sim9") {
-                trial.swap_checkerboards (co_matrix);
-            }else{
-                m->mothurOut("[ERROR]: No model selected! \n");
-                m->control_pressed = true;
-            }
+        double previous;
+        double current;
+        double randnum;
+        int count;
+
+        //burn-in for sim9    
+        if(matrix == "sim9") {
+            for(int i=0;i<10000;i++) trial.swap_checkerboards (co_matrix, ncols, nrows);
         }
-                
-        //run
-        for(int i=0;i<runs;i++) {
-            if (m->control_pressed) { return 0; }
-            //calc metric of nullmatrix
-            if (matrix == "sim1") {
-                trial.sim1(co_matrix);
-            }else if (matrix == "sim2") {
-                trial.sim2(co_matrix);
-            }else if (matrix == "sim3") {
-                trial.sim3(initmatrix);
-                co_matrix = initmatrix;
-            }else if (matrix == "sim4") {
-                trial.sim4(columntotal, rowtotal, co_matrix);
-            }else if (matrix == "sim5") {
-                trial.sim5(initcolumntotal, initrowtotal, initmatrix);
-                trial.transpose_matrix(initmatrix,co_matrix);
-            }else if (matrix == "sim6") {
-                trial.sim6(columntotal, co_matrix);
-            }else if (matrix == "sim7") {
-                trial.sim7(initcolumntotal, initmatrix);          
-                co_matrix = initmatrix;
-            }else if (matrix == "sim8") {
-                trial.sim8(columntotal, rowtotal, co_matrix);
-            }else if (matrix == "sim9") {
-                trial.swap_checkerboards (co_matrix);
-            }else{
-                 m->mothurOut("[ERROR]: No model selected! \n");
-                 m->control_pressed = true;
-            }
-            //
-            //            
-            trial.update_row_col_totals(co_matrix, rowtotal, columntotal); 
+
+        //populate null matrix from probability matrix, do this a lot.
+        for(int k=0;k<runs;k++){
+            nullmatrix.clear();
+            //zero-fill the null matrix
+            nullmatrix.assign(nrows, vector<int>(ncols, 0));
             
-            if (metric == "cscore") { 
-                stats.push_back(trial.calc_c_score(co_matrix, rowtotal));
-            }else if (metric == "checker") { 
-                stats.push_back(trial.calc_checker(co_matrix, rowtotal));
-            }else if (metric == "vratio") { 
-                stats.push_back(trial.calc_vratio(rowtotal, columntotal));
-            }else if (metric == "combo") { 
-                stats.push_back(trial.calc_combo(co_matrix));
-            }else {
-                m->mothurOut("[ERROR]: No metric selected!\n");
-                m->control_pressed = true;
+            if(matrix == "sim1" || matrix == "sim6" || matrix == "sim8" || matrix == "sim7") {
+                count = 0;
+                while(count < n) {
+                    if (m->control_pressed) { return 0; }
+                nextnum2:
+                    previous = 0.0;
+                    randnum = rand() / double(RAND_MAX);
+                    for(int i=0;i<nrows;i++) {
+                        for(int j=0;j<ncols;j++) {
+                            current = probabilityMatrix[ncols * i + j];
+                            if(randnum <= current && randnum > previous) {
+                                nullmatrix[i][j] = 1;
+                                count++;
+                                if (count > n) break;
+                                else
+                                    goto nextnum2;
+                            }
+                            previous = current;
+                        }
+                    }
+                }
+            }
+            
+            else if (matrix == "sim2") {
+                for(int i=0;i<nrows;i++) {
+                    random_shuffle( co_matrix[i].begin(), co_matrix[i].end() ); 
+                }
+                //do this for the scoring since those all have nullmatrix as a parameter
+                //nullmatrix gets cleared at the begining of each run
+                nullmatrix = co_matrix;
+            }
+            
+            else if(matrix == "sim4") {
+                for(int i=0;i<nrows;i++) {
+                    count = 0;
+                    while(count < rowtotal[i]) {
+                        previous = 0.0;
+                        if (m->control_pressed) { return 0; }
+                        randnum = rand() / double(RAND_MAX);
+                        for(int j=0;j<ncols;j++) {
+                            current = probabilityMatrix[ncols * i + j];
+                            if(randnum <= current && randnum > previous && nullmatrix[i][j] != 1) {
+                                nullmatrix[i][j] = 1;
+                                count++;
+                                previous = 0.0;
+                                break;
+                            }
+                            previous = current;
+                        }
+                    }
+                }
+            }
+            
+            else if(matrix == "sim3" || matrix == "sim5") {
+                //columns
+                for(int j=0;j<ncols;j++) {
+                    count = 0;
+                    while(count < columntotal[j]) {
+                        if (m->control_pressed) { return 0; }
+                        randnum = rand() / double(RAND_MAX);
+                        for(int i=0;i<nrows;i++) {
+                            current = probabilityMatrix[ncols * i + j];
+                            if(randnum <= current && randnum > previous && nullmatrix[i][j] != 1) {
+                                nullmatrix[i][j] = 1;
+                                count++;
+                                previous = 0.0;
+                                break;
+                            }
+                            previous = current;
+                        }
+                    }
+                }
+            }
+            
+            //swap_checkerboards takes the original matrix and swaps checkerboards
+            else if(matrix == "sim9") {
+                trial.swap_checkerboards (co_matrix, ncols, nrows);
+            }
+            else {
+                m->mothurOut("[ERROR]: No null model selected!\n\n"); m->control_pressed = true;
+                return 1;
+            }
+            
+            //run metric on null matrix and add score to the stats vector
+            if (metric == "cscore"){
+                stats.push_back(trial.calc_c_score(nullmatrix, rowtotal, ncols, nrows));
+            }
+            else if (metric == "checker") {
+                stats.push_back(trial.calc_checker(nullmatrix, rowtotal, ncols, nrows));
+            }
+            else if (metric == "vratio") {
+                stats.push_back(trial.calc_vratio(nrows, ncols, rowtotal, columntotal));
+            }
+            else if (metric == "combo") {
+                stats.push_back(trial.calc_combo(nrows, ncols, nullmatrix));
+            }
+            else {
+                m->mothurOut("[ERROR]: No metric selected!\n\n"); m->control_pressed = true;
                 return 1;
             }
             
         }
-
-        double total = 0.0;
-        for (int i=0; i<stats.size();i++)   {   total+=stats[i];   }
         
-        double nullMean = double (total/(double)stats.size()); 
+        
+        
+        double total = 0.0;
+        for (int i=0; i<stats.size();i++) { total+=stats[i]; }
+        
+        double nullMean = double (total/(double)stats.size());
         
         m->mothurOutEndLine(); m->mothurOut("average metric score: " + toString(nullMean)); m->mothurOutEndLine();
         
         double pvalue = 0.0;
-        if (metric == "cscore" || metric == "checker") {    pvalue = trial.calc_pvalue_greaterthan (stats, initscore);   }
-        else{   pvalue = trial.calc_pvalue_lessthan (stats, initscore); }
+        if (metric == "cscore" || metric == "checker") { pvalue = trial.calc_pvalue_greaterthan (stats, initscore); }
+        else{ pvalue = trial.calc_pvalue_lessthan (stats, initscore); }
         
         m->mothurOut("pvalue: " + toString(pvalue)); m->mothurOutEndLine();
         out << metric << '\t' << thisLookUp[0]->getLabel() << '\t' << nullMean << '\t' << pvalue << endl;
         
         return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "CooccurrenceCommand", "Cooccurrence");
-		exit(1);
-	}
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CooccurrenceCommand", "Cooccurrence");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 

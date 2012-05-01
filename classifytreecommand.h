@@ -30,8 +30,6 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	ReadTree* read;
-    TreeMap* tmap;
 	string treefile, taxonomyfile, groupfile, namefile, outputDir;
 	bool abort;
 	vector<string> outputNames;

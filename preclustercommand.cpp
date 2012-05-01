@@ -314,7 +314,17 @@ int PreClusterCommand::createProcessesGroups(SequenceParser* parser, string newF
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
+                outputNames.clear();
 				num = driverGroups(parser, newFName + toString(getpid()) + ".temp", newNName + toString(getpid()) + ".temp", newMFile, lines[process].start, lines[process].end, groups);
+                
+                string tempFile = toString(getpid()) + ".outputNames.temp";
+                ofstream outTemp;
+                m->openOutputFile(tempFile, outTemp);
+                
+                outTemp << outputNames.size();
+                for (int i = 0; i < outputNames.size(); i++) { outTemp << outputNames[i] << endl; }
+                outTemp.close();
+                
 				exit(0);
 			}else { 
 				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
@@ -331,7 +341,23 @@ int PreClusterCommand::createProcessesGroups(SequenceParser* parser, string newF
 			int temp = processIDS[i];
 			wait(&temp);
 		}
-		
+        
+        for (int i = 0; i < processIDS.size(); i++) {
+            string tempFile = toString(processIDS[i]) +  ".outputNames.temp";
+            ifstream intemp;
+            m->openInputFile(tempFile, intemp);
+            
+            int num;
+            intemp >> num;
+            for (int k = 0; k < num; k++) {
+                string name = "";
+                intemp >> name; m->gobble(intemp);
+                
+                outputNames.push_back(name); outputTypes["map"].push_back(name);
+            }
+            intemp.close();
+            m->mothurRemove(tempFile);
+        }
 #else
 		
 		//////////////////////////////////////////////////////////////////////////////////////////////////////

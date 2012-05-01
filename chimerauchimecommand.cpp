@@ -544,7 +544,7 @@ int ChimeraUchimeCommand::execute(){
 				int totalSeqs = 0;
 				
 				if(processors == 1)	{	totalSeqs = driverGroups(parser, outputFileName, newFasta, accnosFileName, alnsFileName, 0, groups.size(), groups);	}
-				else				{	totalSeqs = createProcessesGroups(parser, outputFileName, newFasta, accnosFileName, alnsFileName, groups);			}
+				else				{	totalSeqs = createProcessesGroups(parser, outputFileName, newFasta, accnosFileName, alnsFileName, groups, nameFile, groupFile, fastaFileNames[s]);			}
 
 				if (m->control_pressed) {  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}				
 
@@ -1473,7 +1473,7 @@ int ChimeraUchimeCommand::createProcesses(string outputFileName, string filename
 }
 /**************************************************************************************************/
 
-int ChimeraUchimeCommand::createProcessesGroups(SequenceParser& parser, string outputFName, string filename, string accnos, string alns, vector<string> groups) {
+int ChimeraUchimeCommand::createProcessesGroups(SequenceParser& parser, string outputFName, string filename, string accnos, string alns, vector<string> groups, string nameFile, string groupFile, string fastaFile) {
 	try {
 		
 		processIDS.clear();
@@ -1552,7 +1552,7 @@ int ChimeraUchimeCommand::createProcessesGroups(SequenceParser& parser, string o
 			// Allocate memory for thread data.
 			string extension = toString(i) + ".temp";
 			
-			uchimeData* tempUchime = new uchimeData(outputFName+extension, templatefile, filename+extension, fastafile, namefile, groupfile, accnos+extension, alns+extension, groups, m, lines[i].start, lines[i].end,  i);
+			uchimeData* tempUchime = new uchimeData(outputFName+extension, templatefile, filename+extension, fastaFile, nameFile, groupFile, accnos+extension, alns+extension, groups, m, lines[i].start, lines[i].end,  i);
 			tempUchime->setBooleans(useAbskew, chimealns, useMinH, useMindiv, useXn, useDn, useXa, useChunks, useMinchunk, useIdsmoothwindow, useMinsmoothid, useMaxp, skipgaps, skipgaps2, useMinlen, useMaxlen, ucl, useQueryfract);
 			tempUchime->setVariables(abskew, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, minlen, maxlen, queryfract);
 			

@@ -19,10 +19,9 @@
 class Parsimony : public TreeCalculator  {
 	
 	public:
-		Parsimony(TreeMap* t) : tmap(t) {};
+		Parsimony() {};
 		~Parsimony() {};
 		EstOutput getValues(Tree*, int, string);
-		//EstOutput getValues(Tree*, string, string) { return data; }
 		
 	private:
 		struct linePair {
@@ -33,12 +32,11 @@ class Parsimony : public TreeCalculator  {
 		vector<linePair> lines;
 	
 		EstOutput data;
-		TreeMap* tmap;
 		int processors;
 		string outputDir;
 	
-		EstOutput driver(Tree*, vector< vector<string> >, int, int); 
-		EstOutput createProcesses(Tree*, vector< vector<string> >);
+		EstOutput driver(Tree*, vector< vector<string> >, int, int, TreeMap*); 
+		EstOutput createProcesses(Tree*, vector< vector<string> >, TreeMap*);
 };
 
 /***********************************************************************/

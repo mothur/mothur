@@ -11,6 +11,8 @@
 
 #include "mothurout.h"
 #include "sharedrabundvector.h"
+#include "treemap.h"
+#include "tree.h"
 
 //subsampling overwrites the sharedRabunds.  If you need to reuse the original use the getSamplePreserve function.
 
@@ -22,12 +24,17 @@ class SubSample {
         ~SubSample() {}
     
         vector<string> getSample(vector<SharedRAbundVector*>&, int); //returns the bin labels for the subsample, mothurOuts binlabels are preserved so you can run this multiple times. Overwrites original vector passed in, if you need to preserve it deep copy first.
-    
+        
+        Tree* getSample(Tree*, TreeMap*, map<string, string>, int); //creates new subsampled tree, destroys treemap so copy if needed.
     
     private:
     
         MothurOut* m;
         int eliminateZeroOTUS(vector<SharedRAbundVector*>&);
+    
+        vector<string> getSample(TreeMap*, int); //returns map contains names of seqs in subsample -> group. 
+        map<string, string> deconvolute(map<string, string> wholeSet, vector<string>& subsampleWanted); //returns new nameMap containing only subsampled names, and removes redundants from subsampled wanted because it makes the new nameMap.
+
 
 };
 

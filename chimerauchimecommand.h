@@ -59,7 +59,7 @@ private:
 	int printFile(vector<seqPriorityNode>&, string);
 	int deconvoluteResults(SequenceParser&, string, string, string);
 	int driverGroups(SequenceParser&, string, string, string, string, int, int, vector<string>);
-	int createProcessesGroups(SequenceParser&, string, string, string, string, vector<string>);
+	int createProcessesGroups(SequenceParser&, string, string, string, string, vector<string>, string, string, string);
 
 
 };

@@ -8,6 +8,7 @@
  */
 
 #include "parsimonycommand.h"
+#include "treereader.h"
 
 //**********************************************************************************************************************
 vector<string> ParsimonyCommand::setParameters(){	
@@ -125,12 +126,6 @@ ParsimonyCommand::ParsimonyCommand(string option)  {
 				}
 			}
 			
-			m->runParse = true;
-			m->clearGroups();
-			m->clearAllGroups();
-			m->Treenames.clear();
-			m->names.clear();
-			
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
 			
 			randomtree = validParameter.validFile(parameters, "random", false);		if (randomtree == "not found") { randomtree = ""; }
@@ -203,68 +198,11 @@ int ParsimonyCommand::execute() {
 			
 			m->setTreeFile(treefile);
 			
-			if (groupfile != "") {
-				//read in group map info.
-				tmap = new TreeMap(groupfile);
-				tmap->readMap();
-			}else{ //fake out by putting everyone in one group
-				Tree* tree = new Tree(treefile); delete tree;  //extracts names from tree to make faked out groupmap
-				tmap = new TreeMap();
-				
-				for (int i = 0; i < m->Treenames.size(); i++) { tmap->addSeq(m->Treenames[i], "Group1"); }
-			}
-			
-			if (namefile != "") { readNamesFile(); }
-			
-			read = new ReadNewickTree(treefile);
-			int readOk = read->read(tmap); 
-			
-			if (readOk != 0) { m->mothurOut("Read Terminated."); m->mothurOutEndLine(); delete tmap; delete read; return 0; }
-			
-			read->AssembleTrees();
-			T = read->getTrees();
-			delete read;
-
-			//make sure all files match
-			//if you provide a namefile we will use the numNames in the namefile as long as the number of unique match the tree names size.
-			int numNamesInTree;
-			if (namefile != "")  {  
-				if (numUniquesInName == m->Treenames.size()) {  numNamesInTree = nameMap.size();  }
-				else {   numNamesInTree = m->Treenames.size();  }
-			}else {  numNamesInTree = m->Treenames.size();  }
-			
-			
-			//output any names that are in group file but not in tree
-			if (numNamesInTree < tmap->getNumSeqs()) {
-				for (int i = 0; i < tmap->namesOfSeqs.size(); i++) {
-					//is that name in the tree?
-					int count = 0;
-					for (int j = 0; j < m->Treenames.size(); j++) {
-						if (tmap->namesOfSeqs[i] == m->Treenames[j]) { break; } //found it
-						count++;
-					}
-					
-					if (m->control_pressed) { 
-						delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; }
-						for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
-						m->clearGroups();
-						return 0;
-					}
-					
-					//then you did not find it so report it 
-					if (count == m->Treenames.size()) { 
-						//if it is in your namefile then don't remove
-						map<string, string>::iterator it = nameMap.find(tmap->namesOfSeqs[i]);
-						
-						if (it == nameMap.end()) {
-							m->mothurOut(tmap->namesOfSeqs[i] + " is in your groupfile and not in your tree. It will be disregarded."); m->mothurOutEndLine();
-							tmap->removeSeq(tmap->namesOfSeqs[i]);
-							i--; //need this because removeSeq removes name from namesOfSeqs
-						}
-					}
-				}
-			}
-				
+            TreeReader* reader = new TreeReader(treefile, groupfile, namefile);
+            T = reader->getTrees();
+            tmap = T[0]->getTreeMap();
+            delete reader;
+	
 			if(outputDir == "") { outputDir += m->hasPath(treefile); }
 			output = new ColumnFile(outputDir + m->getSimpleName(treefile)  +  ".parsimony", itersString);
 			outputNames.push_back(outputDir + m->getSimpleName(treefile)  +  ".parsimony");
@@ -284,24 +222,23 @@ int ParsimonyCommand::execute() {
 		}
 			
 		//set users groups to analyze
-		util = new SharedUtil();
+		SharedUtil util;
 		vector<string> mGroups = m->getGroups();
 		vector<string> tGroups = tmap->getNamesOfGroups();
-		util->setGroups(mGroups, tGroups, allGroups, numGroups, "parsimony");	//sets the groups the user wants to analyze
-		util->getCombos(groupComb, mGroups, numComp);
+		util.setGroups(mGroups, tGroups, allGroups, numGroups, "parsimony");	//sets the groups the user wants to analyze
+		util.getCombos(groupComb, mGroups, numComp);
 		m->setGroups(mGroups);
-		delete util;
 			
 		if (numGroups == 1) { numComp++; groupComb.push_back(allGroups); }
 			
-		pars = new Parsimony(tmap);
+		Parsimony pars;
 		counter = 0;
 	
 		Progress* reading;
 		reading = new Progress("Comparing to random:", iters);
 		
 		if (m->control_pressed) { 
-			delete reading; delete pars; delete output;
+			delete reading; delete output;
 			delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; }
 			if (randomtree == "") {  outSum.close();  }
 			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
@@ -323,10 +260,10 @@ int ParsimonyCommand::execute() {
 		if (randomtree == "") {
 			//get pscores for users trees
 			for (int i = 0; i < T.size(); i++) {
-				userData = pars->getValues(T[i], processors, outputDir);  //data = AB, AC, BC, ABC.
+				userData = pars.getValues(T[i], processors, outputDir);  //data = AB, AC, BC, ABC.
 				
 				if (m->control_pressed) { 
-					delete reading; delete pars; delete output;
+					delete reading; delete output;
 					delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; }
 					if (randomtree == "") {  outSum.close();  }
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
@@ -362,10 +299,10 @@ int ParsimonyCommand::execute() {
 				randT->assembleRandomTree();
 
 				//get pscore of random tree
-				randomData = pars->getValues(randT, processors, outputDir);
+				randomData = pars.getValues(randT, processors, outputDir);
 				
 				if (m->control_pressed) { 
-					delete reading; delete pars; delete output; delete randT;
+					delete reading;  delete output; delete randT;
 					if (randomtree == "") {  outSum.close();  }
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
 					delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; }
@@ -403,23 +340,17 @@ int ParsimonyCommand::execute() {
 				randT->assembleRandomTree();
 				
 				if (m->control_pressed) { 
-					delete reading; delete pars; delete output; delete randT;
-					delete tmap; 
-					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
-					m->clearGroups();
-					return 0;
+					delete reading; delete output; delete randT; delete tmap; 
+					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear(); return 0;
 				}
 
 
 				//get pscore of random tree
-				randomData = pars->getValues(randT, processors, outputDir);
+				randomData = pars.getValues(randT, processors, outputDir);
 				
 				if (m->control_pressed) { 
-					delete reading; delete pars;  delete output; delete randT;
-					delete tmap; 
-					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
-					m->clearGroups();
-					return 0;
+					delete reading; delete output; delete randT; delete tmap; 
+					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear(); return 0;
 				}
 			
 				for(int r = 0; r < numComp; r++) {
@@ -471,27 +402,21 @@ int ParsimonyCommand::execute() {
 		}
 		
 		if (m->control_pressed) { 
-				delete reading; delete pars; delete output;
+				delete reading; delete output;
 				delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; }
 				if (randomtree == "") {  outSum.close();  }
 				for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
-				m->clearGroups();
 				return 0;
 		}
 		
 		//finish progress bar
 		reading->finish();
 		delete reading;
-
 		
 		printParsimonyFile();
 		if (randomtree == "") { printUSummaryFile(); }
-		
-		//reset groups parameter
-		m->clearGroups(); 
-		
-		delete pars; delete output; 
-		delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; }
+				
+        delete output; delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; }
 		
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear(); return 0;}
 		
@@ -620,46 +545,6 @@ void ParsimonyCommand::getUserInput() {
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ParsimonyCommand", "getUserInput");
-		exit(1);
-	}
-}
-/*****************************************************************/
-int ParsimonyCommand::readNamesFile() {
-	try {
-		m->names.clear();
-		numUniquesInName = 0;
-		
-		ifstream in;
-		m->openInputFile(namefile, in);
-		
-		string first, second;
-		map<string, string>::iterator itNames;
-		
-		while(!in.eof()) {
-			in >> first >> second; m->gobble(in);
-			
-			numUniquesInName++;
-			
-			itNames = m->names.find(first);
-			if (itNames == m->names.end()) {  
-				m->names[first] = second; 
-				
-				//we need a list of names in your namefile to use above when removing extra seqs above so we don't remove them
-				vector<string> dupNames;
-				m->splitAtComma(second, dupNames);
-				
-				for (int i = 0; i < dupNames.size(); i++) {	
-					nameMap[dupNames[i]] = dupNames[i]; 
-					if ((groupfile == "") && (i != 0)) { tmap->addSeq(dupNames[i], "Group1"); } 
-				}
-			}else {  m->mothurOut(first + " has already been seen in namefile, disregarding names file."); m->mothurOutEndLine(); in.close(); m->names.clear(); namefile = ""; return 1; }			
-		}
-		in.close();
-		
-		return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ParsimonyCommand", "readNamesFile");
 		exit(1);
 	}
 }

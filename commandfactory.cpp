@@ -130,6 +130,7 @@
 #include "cooccurrencecommand.h"
 #include "pcrseqscommand.h"
 #include "createdatabasecommand.h"
+#include "makebiomcommand.h"
 
 /*******************************************************/
 
@@ -281,6 +282,7 @@ CommandFactory::CommandFactory(){
     commands["cooccurrence"]        = "cooccurrence";
     commands["pcr.seqs"]            = "pcr.seqs";
     commands["create.database"]     = "create.database";
+    commands["make.biom"]           = "make.biom";
 	commands["quit"]				= "MPIEnabled"; 
 
 }
@@ -304,7 +306,49 @@ CommandFactory::~CommandFactory(){
 	delete shellcommand;
 	delete pipecommand;
 }
+/***********************************************************/
 
+/***********************************************************/
+int CommandFactory::checkForRedirects(string optionString) {
+    try {
+        
+        int pos = optionString.find("outputdir");
+        if (pos != string::npos) { //user has set outputdir in command option string
+            string outputOption = "";
+            bool foundEquals = false;
+            for(int i=pos;i<optionString.length();i++){
+                if(optionString[i] == ',')       { break;               }		
+                else if(optionString[i] == '=')  { foundEquals = true;	}
+                if (foundEquals)       {   outputOption += optionString[i]; }
+            }
+            if(m->dirCheck(outputOption)){ 
+                setOutputDirectory(outputOption); 
+                m->mothurOut("Setting output directory to: " + outputOption); m->mothurOutEndLine();
+            }
+        }
+        
+        pos = optionString.find("inputdir");
+        if (pos != string::npos) { //user has set inputdir in command option string
+            string intputOption = "";
+            bool foundEquals = false;
+            for(int i=pos;i<optionString.length();i++){
+                if(optionString[i] == ',')       { break;               }		
+                else if(optionString[i] == '=')  { foundEquals = true;	}
+                if (foundEquals)       {   intputOption += optionString[i]; }
+            }
+            if(m->dirCheck(intputOption)){ 
+                setInputDirectory(intputOption); 
+                m->mothurOut("Setting input directory to: " + intputOption); m->mothurOutEndLine();
+            }
+        }
+        
+        return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "CommandFactory", "getCommand");
+		exit(1);
+	}
+}
 /***********************************************************/
 
 /***********************************************************/
@@ -313,7 +357,9 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 	try {
         
 		delete command;   //delete the old command
-		
+        
+        checkForRedirects(optionString);
+        		
 		//user has opted to redirect output from dir where input files are located to some other place
 		if (outputDir != "") { 
 			if (optionString != "") { optionString += ", outputdir=" + outputDir; }
@@ -446,6 +492,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         else if(commandName == "cooccurrence")          {	command = new CooccurrenceCommand(optionString);            }
         else if(commandName == "pcr.seqs")              {	command = new PcrSeqsCommand(optionString);                 }
         else if(commandName == "create.database")       {	command = new CreateDatabaseCommand(optionString);          }
+        else if(commandName == "make.biom")             {	command = new MakeBiomCommand(optionString);                }
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -463,6 +510,8 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 	try {
 		delete pipecommand;   //delete the old command
 		
+        checkForRedirects(optionString);
+        
 		//user has opted to redirect output from dir where input files are located to some other place
 		if (outputDir != "") { 
 			if (optionString != "") { optionString += ", outputdir=" + outputDir; }
@@ -594,6 +643,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
         else if(commandName == "cooccurrence")          {	pipecommand = new CooccurrenceCommand(optionString);            }
         else if(commandName == "pcr.seqs")              {	pipecommand = new PcrSeqsCommand(optionString);                 }
         else if(commandName == "create.database")       {	pipecommand = new CreateDatabaseCommand(optionString);          }
+        else if(commandName == "make.biom")             {	pipecommand = new MakeBiomCommand(optionString);                }
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -730,6 +780,7 @@ Command* CommandFactory::getCommand(string commandName){
         else if(commandName == "cooccurrence")          {	shellcommand = new CooccurrenceCommand();           }
         else if(commandName == "pcr.seqs")              {	shellcommand = new PcrSeqsCommand();                }
         else if(commandName == "create.database")       {	shellcommand = new CreateDatabaseCommand();         }
+        else if(commandName == "make.biom")             {	shellcommand = new MakeBiomCommand();               }
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;

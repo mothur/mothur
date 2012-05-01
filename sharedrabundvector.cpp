@@ -95,15 +95,35 @@ SharedRAbundVector::SharedRAbundVector(ifstream& f) : DataVector(), maxRank(0), 
 					m->binLabelsInFile.push_back(temp);
 				}
 				
-				f >> label;
-			}
-		}else { label = m->saveNextLabel; }
+				f >> label >> groupN >> num;
+			}else {
+                //read in first row since you know there is at least 1 group.
+                f >> groupN >> num;
+                
+                //make binlabels because we don't have any
+                string snumBins = toString(num);
+                m->binLabelsInFile.clear();
+                for (int i = 0; i < num; i++) {  
+                    //if there is a bin label use it otherwise make one
+                    string binLabel = "Otu";
+                    string sbinNumber = toString(i+1);
+                    if (sbinNumber.length() < snumBins.length()) { 
+                        int diff = snumBins.length() - sbinNumber.length();
+                        for (int h = 0; h < diff; h++) { binLabel += "0"; }
+                    }
+                    binLabel += sbinNumber;
+                    m->binLabelsInFile.push_back(binLabel);
+                }
+            }
+		}else { 
+            label = m->saveNextLabel; 
+            
+            //read in first row since you know there is at least 1 group.
+            f >> groupN >> num;
+        }
 		
 		//reset labels, currentLabels may have gotten changed as otus were eliminated because of group choices or sampling
 		m->currentBinLabels = m->binLabelsInFile;
-		
-		//read in first row since you know there is at least 1 group.
-		f >> groupN >> num;
 		
 		holdLabel = label;
 		

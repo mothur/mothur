@@ -10,7 +10,7 @@
 #include "consensus.h"
 
 //**********************************************************************************************************************
-Tree* Consensus::getTree(vector<Tree*>& t, TreeMap* tmap){
+Tree* Consensus::getTree(vector<Tree*>& t){
 	try {
 		numNodes = t[0]->getNumNodes();
 		numLeaves = t[0]->getNumLeaves();
@@ -21,7 +21,7 @@ Tree* Consensus::getTree(vector<Tree*>& t, TreeMap* tmap){
 		
 		if (m->control_pressed) { return 0; }
 		
-		consensusTree = new Tree(tmap);
+		consensusTree = new Tree(t[0]->getTreeMap());
 		
 		it2 = nodePairs.find(treeSet);
 		
@@ -35,11 +35,12 @@ Tree* Consensus::getTree(vector<Tree*>& t, TreeMap* tmap){
 		
 		buildConsensusTree(treeSet);
 		
-		if (m->control_pressed) { delete consensusTree; return 0; }
+		if (m->control_pressed) {  delete consensusTree; return 0; }
 		
-		consensusTree->assembleTree();
+        map<string, string> empty;
+		consensusTree->assembleTree(empty);
 		
-		if (m->control_pressed) { delete consensusTree; return 0; }
+		if (m->control_pressed) {  delete consensusTree; return 0; }
 				
 		return consensusTree; 
 		

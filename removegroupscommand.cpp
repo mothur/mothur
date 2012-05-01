@@ -465,7 +465,6 @@ int RemoveGroupsCommand::readShared(){
 		delete tempInput;
 		m->setGroups(groupsToKeep);
 		m->clearAllGroups();
-		m->names.clear();
 		m->saveNextLabel = "";
 		m->printedHeaders = false;
 		m->currentBinLabels.clear();
