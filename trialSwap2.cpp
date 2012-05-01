@@ -192,10 +192,10 @@ int TrialSwap2::calc_combo (int nrows, int ncols, vector<vector<int> > &nullmatr
     }
 }
 /**************************************************************************************************/
-int TrialSwap2::swap_checkerboards (vector<vector<int> > &co_matrix,  vector<int> rowtotal, vector<int> columntotal, int ncols, int nrows)
+int TrialSwap2::swap_checkerboards (vector<vector<int> > &co_matrix, int ncols, int nrows)
 {
     try {
-        int ncols = co_matrix[0].size(); int nrows = co_matrix.size();
+        //int ncols = co_matrix[0].size(); int nrows = co_matrix.size();
         int i, j, k, l;
         i = m->getRandomIndex(nrows-1);
         while((j = m->getRandomIndex(nrows-1) ) == i ) {;if (m->control_pressed) { return 0; }}

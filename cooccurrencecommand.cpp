@@ -385,7 +385,7 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
                 }
             }
         }
-        else if (matrix == "sim9") { }
+        else if (matrix == "sim9" || matrix == "sim2") { }
         else {
             m->mothurOut("[ERROR]: No model selected! \n");
             m->control_pressed = true;
@@ -408,7 +408,7 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
 
         //burn-in for sim9    
         if(matrix == "sim9") {
-            for(int i=0;i<10000;i++) trial.swap_checkerboards (co_matrix, rowtotal, columntotal, ncols, nrows);
+            for(int i=0;i<10000;i++) trial.swap_checkerboards (co_matrix, ncols, nrows);
         }
 
         //populate null matrix from probability matrix, do this a lot.
@@ -451,7 +451,6 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
             
             else if(matrix == "sim4") {
                 for(int i=0;i<nrows;i++) {
-                    previous = 0.0;
                     count = 0;
                     while(count < rowtotal[i]) {
                         previous = 0.0;
@@ -494,7 +493,7 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
             
             //swap_checkerboards takes the original matrix and swaps checkerboards
             else if(matrix == "sim9") {
-                trial.swap_checkerboards (co_matrix, rowtotal, columntotal, ncols, nrows);
+                trial.swap_checkerboards (co_matrix, ncols, nrows);
             }
             else {
                 m->mothurOut("[ERROR]: No null model selected!\n\n"); m->control_pressed = true;
