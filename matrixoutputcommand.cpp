@@ -298,13 +298,6 @@ int MatrixOutputCommand::execute(){
 		set<string> userLabels = labels;
 					
 		if (lookup.size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); delete input; for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } return 0;}
-		
-		numGroups = lookup.size();
-		lines.resize(processors);
-		for (int i = 0; i < processors; i++) {
-			lines[i].start = int (sqrt(float(i)/float(processors)) * numGroups);
-			lines[i].end = int (sqrt(float(i+1)/float(processors)) * numGroups);
-		}	
         
         if (subsample) { 
             if (subsampleSize == -1) { //user has not set size, set size = smallest samples size
@@ -330,8 +323,17 @@ int MatrixOutputCommand::execute(){
                 lookup = temp;
                 m->setGroups(Groups);
             }
+            
+            if (lookup.size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); m->control_pressed = true; delete input; return 0; }
         }
-		
+        
+		numGroups = lookup.size();
+        lines.resize(processors);
+		for (int i = 0; i < processors; i++) {
+			lines[i].start = int (sqrt(float(i)/float(processors)) * numGroups);
+			lines[i].end = int (sqrt(float(i+1)/float(processors)) * numGroups);
+		}	
+        
 		if (m->control_pressed) { delete input; for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } m->clearGroups(); return 0;  }
 				
 		//as long as you are not at the end of the file or done wih the lines you want
