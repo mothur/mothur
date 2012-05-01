@@ -152,11 +152,11 @@ ShhherCommand::ShhherCommand(string option) {
                 string thisoutputDir = m->hasPath(flowFilesFileName); //if user entered a file with a path then preserve it
                 
 				//flow.files = 9 character offset
-				compositeFASTAFileName = outputDir + flowFilesFileName.substr(0, flowFilesFileName.length()-10) + "shhh.fasta";
+				compositeFASTAFileName = thisoutputDir + flowFilesFileName.substr(0, flowFilesFileName.length()-10) + "shhh.fasta";
 				m->openOutputFile(compositeFASTAFileName, temp);
 				temp.close();
 				
-				compositeNamesFileName = outputDir + flowFilesFileName.substr(0, flowFilesFileName.length()-10) + "shhh.names";
+				compositeNamesFileName = thisoutputDir + flowFilesFileName.substr(0, flowFilesFileName.length()-10) + "shhh.names";
 				m->openOutputFile(compositeNamesFileName, temp);
 				temp.close();
 			}
@@ -1769,7 +1769,7 @@ void ShhherCommand::writeNames(vector<int> otuCounts){
         
         
         if(compositeNamesFileName != ""){
-            m->appendFiles(nameFileName, uchimecompositeNamesFileName);
+            m->appendFiles(nameFileName, compositeNamesFileName);
         }		
     }
     catch(exception& e) {
@@ -2400,8 +2400,7 @@ int ShhherCommand::getUniques(int numSeqs, int numFlowCells, vector<short>& uniq
 		}
 		uniqueFlowDataIntI.resize(numFlowCells * numUniques);
 		uniqueLengths.resize(numUniques);	
-		uniqueFlowgrams.resize(numFlowCells * numUniques);
-        
+		
 		flowDataPrI.resize(numSeqs * numFlowCells, 0);
 		for(int i=0;i<flowDataPrI.size();i++)	{	if (m->control_pressed) { break; } flowDataPrI[i] = getProbIntensity(flowDataIntI[i]);		}
         
