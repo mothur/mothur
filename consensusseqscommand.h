@@ -1,6 +1,6 @@
 #ifndef CONSENSUSSEQSCOMMAND_H
 #define CONSENSUSSEQSCOMMAND_H
-
+//test
 /*
  *  consensusseqscommand.h
  *  Mothur
