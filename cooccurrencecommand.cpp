@@ -318,7 +318,7 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
             }
         }
         //don't need a prob matrix because we just shuffle the rows, may use this in the future
-//        else if (matrix == "sim2") {
+        else if (matrix == "sim2") { }
 //            for(int i=0;i<nrows;i++) {
 //                start = 0.0;
 //                for(int j=0;j<ncols;j++) {
@@ -412,7 +412,7 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
         }
 
         //populate null matrix from probability matrix, do this a lot.
-        for(int i=0;i<runs;i++){
+        for(int h=0;h<runs;h++){
             nullmatrix.clear();
             //zero-fill the null matrix
             nullmatrix.assign(nrows, vector<int>(ncols, 0));
@@ -420,6 +420,7 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
             if(matrix == "sim1" || matrix == "sim6" || matrix == "sim8" || matrix == "sim7") {
                 count = 0;
                 while(count < n) {
+                    if (m->control_pressed) { return 0; }
                 nextnum2:
                     previous = 0.0;
                     randnum = rand() / double(RAND_MAX);
@@ -453,10 +454,12 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
                     previous = 0.0;
                     count = 0;
                     while(count < rowtotal[i]) {
+                        previous = 0.0;
+                        if (m->control_pressed) { return 0; }
                         randnum = rand() / double(RAND_MAX);
                         for(int j=0;j<ncols;j++) {
                             current = probabilityMatrix[ncols * i + j];
-                            if(randnum <= current && randnum > previous && nullmatrix[i][j] != 1) {
+                            if((randnum <= current && randnum > previous && nullmatrix[i][j] != 1) || (previous==current)){
                                 nullmatrix[i][j] = 1;
                                 count++;
                                 previous = 0.0;
@@ -473,6 +476,7 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
                 for(int j=0;j<ncols;j++) {
                     count = 0;
                     while(count < columntotal[j]) {
+                        if (m->control_pressed) { return 0; }
                         randnum = rand() / double(RAND_MAX);
                         for(int i=0;i<nrows;i++) {
                             current = probabilityMatrix[ncols * i + j];

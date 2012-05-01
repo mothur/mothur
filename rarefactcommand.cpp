@@ -474,7 +474,6 @@ vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map
 		
 		//find different types of files
 		map<string, map<string, string> > typesFiles;
-        map<string, string> temp; 
 		for (int i = 0; i < outputNames.size(); i++) {
 			string extension = m->getExtension(outputNames[i]);
 			
@@ -485,9 +484,15 @@ vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map
 			string newLine = labels.substr(0, labels.find_first_of('\t'));
 			
 			newLine += "\tGroup" + labels.substr(labels.find_first_of('\t'));
-			
-            temp[outputNames[i]] = file2Group[i];
-			typesFiles[extension] = temp;
+            
+            map<string, map<string, string> >::iterator itfind = typesFiles.find(extension);
+            if (itfind != typesFiles.end()) {
+                (itfind->second)[outputNames[i]] = file2Group[i];
+            }else {
+                map<string, string> temp;  
+                temp[outputNames[i]] = file2Group[i];
+                typesFiles[extension] = temp;
+            }
 			
 			string combineFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + "groups" + extension;
 			
@@ -507,7 +512,6 @@ vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map
 			string combineFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + "groups" + it->first;
 			m->openOutputFileAppend(combineFileName, out);
 			newFileNames.push_back(combineFileName);
-			
 			map<string, string> thisTypesFiles = it->second;
 		
 			//open each type summary file
@@ -518,7 +522,7 @@ vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map
                 
                 string thisfilename = itFileNameGroup->first;
                 string group = itFileNameGroup->second;
-                
+               
 				ifstream temp;
 				m->openInputFile(thisfilename, temp);
 				
@@ -541,7 +545,6 @@ vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map
 					count++;
 									
 					thisFilesLines.push_back(thisLine);
-					
 					m->gobble(temp);
 				}
 				
@@ -562,7 +565,6 @@ vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map
 				for (map<string, string>::iterator itFileNameGroup = thisTypesFiles.begin(); itFileNameGroup != thisTypesFiles.end(); itFileNameGroup++) {
                     
 					string thisfilename = itFileNameGroup->first;
-                    
 					map<int, int>::iterator itLine = lineToNumber.find(k);
 					if (itLine != lineToNumber.end()) {
 						string output = toString(itLine->second);
