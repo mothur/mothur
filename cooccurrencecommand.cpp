@@ -494,6 +494,7 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
             //swap_checkerboards takes the original matrix and swaps checkerboards
             else if(matrix == "sim9") {
                 trial.swap_checkerboards (co_matrix, ncols, nrows);
+                nullmatrix = co_matrix;
             }
             else {
                 m->mothurOut("[ERROR]: No null model selected!\n\n"); m->control_pressed = true;
