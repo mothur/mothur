@@ -412,7 +412,7 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
         }
 
         //populate null matrix from probability matrix, do this a lot.
-        for(int h=0;h<runs;h++){
+        for(int k=0;k<runs;k++){
             nullmatrix.clear();
             //zero-fill the null matrix
             nullmatrix.assign(nrows, vector<int>(ncols, 0));
@@ -458,7 +458,7 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
                         randnum = rand() / double(RAND_MAX);
                         for(int j=0;j<ncols;j++) {
                             current = probabilityMatrix[ncols * i + j];
-                            if((randnum <= current && randnum > previous && nullmatrix[i][j] != 1) || (previous==current)){
+                            if(randnum <= current && randnum > previous && nullmatrix[i][j] != 1) {
                                 nullmatrix[i][j] = 1;
                                 count++;
                                 previous = 0.0;

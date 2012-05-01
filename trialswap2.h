@@ -21,7 +21,7 @@ public:
     
     double calc_pvalue_lessthan (vector<double>, double);
     double calc_pvalue_greaterthan (vector<double>, double);
-    int swap_checkerboards (vector<vector<int> > &, vector<int>, vector<int>, int, int);
+    int swap_checkerboards (vector<vector<int> > &, int, int);
     int calc_combo (int, int, vector<vector<int> > &);
     double calc_vratio (int, int, vector<int>, vector<int>);
     int calc_checker (vector<vector<int> > &, vector<int>, int, int);
