@@ -195,20 +195,22 @@ int TrialSwap2::calc_combo (int nrows, int ncols, vector<vector<int> > &nullmatr
 int TrialSwap2::swap_checkerboards (vector<vector<int> > &co_matrix, int ncols, int nrows)
 {
     try {
-        //int ncols = co_matrix[0].size(); int nrows = co_matrix.size();
-        int i, j, k, l;
-        i = m->getRandomIndex(nrows-1);
-        while((j = m->getRandomIndex(nrows-1) ) == i ) {;if (m->control_pressed) { return 0; }}
-        k = m->getRandomIndex(ncols-1);
-        while((l = m->getRandomIndex(ncols-1)) == k ) {;if (m->control_pressed) { return 0; }}
-        
-        if((co_matrix[i][k]*co_matrix[j][l]==1 && co_matrix[i][l]+co_matrix[j][k]==0)||(co_matrix[i][k]+co_matrix[j][l]==0 && co_matrix[i][l]*co_matrix[j][k]==1)) //checking for checkerboard value and swap
-        {
-            co_matrix[i][k]=1-co_matrix[i][k];
-            co_matrix[i][l]=1-co_matrix[i][l];
-            co_matrix[j][k]=1-co_matrix[j][k];
-            co_matrix[j][l]=1-co_matrix[j][l];
-            
+        //do 100 runs to make sure enough swaps are happening. This does NOT mean that there will be 1000 swaps, but that is the theoretical max.
+        for(int a=0;a<1000;a++){
+            int i, j, k, l;
+            i = m->getRandomIndex(nrows-1);
+            while((j = m->getRandomIndex(nrows-1) ) == i ) {;if (m->control_pressed) { return 0; }}
+            k = m->getRandomIndex(ncols-1);
+            while((l = m->getRandomIndex(ncols-1)) == k ) {;if (m->control_pressed) { return 0; }}
+
+            if((co_matrix[i][k]*co_matrix[j][l]==1 && co_matrix[i][l]+co_matrix[j][k]==0)||(co_matrix[i][k]+co_matrix[j][l]==0 && co_matrix[i][l]*co_matrix[j][k]==1)) //checking for checkerboard value and swap
+            {
+                co_matrix[i][k]=1-co_matrix[i][k];
+                co_matrix[i][l]=1-co_matrix[i][l];
+                co_matrix[j][k]=1-co_matrix[j][k];
+                co_matrix[j][l]=1-co_matrix[j][l];
+
+            }
         }
         
         return 0;
