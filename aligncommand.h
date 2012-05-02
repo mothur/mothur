@@ -1,6 +1,6 @@
 #ifndef ALIGNCOMMAND_H
 #define ALIGNCOMMAND_H
-
+//test
 /*
  *  aligncommand.h
  *  Mothur
