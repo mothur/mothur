@@ -39,7 +39,7 @@ ifeq  ($(strip $(64BIT_VERSION)),yes)
 	#if you are a linux user use the following line
 	#CXXFLAGS += -mtune=native -march=native -m64
 	
-	CXXFLAGS += -DBIT_VERSION
+	CXXFLAGS += -DBIT_VERSION 
     FORTRAN_FLAGS = -m64
 endif
 
