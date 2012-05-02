@@ -245,6 +245,7 @@ int UnifracUnweightedCommand::execute() {
         T = reader->getTrees();
         tmap = T[0]->getTreeMap();
         map<string, string> nameMap = reader->getNames();
+        map<string, string> unique2Dup = reader->getNameMap();
         delete reader;	
         
 		sumFile = outputDir + m->getSimpleName(treefile) + ".uwsummary";
@@ -281,7 +282,7 @@ int UnifracUnweightedCommand::execute() {
                     int thisSize = thisGroupsSeqs.size();
                     
                     if (thisSize >= subsampleSize) {    Groups.push_back(newGroups[i]);	}
-                    else {  m->mothurOut("You have selected a size that is larger than "+newGroups[i]+" number of sequences, removing "+newGroups[i]+".\n"); }
+                    else {   m->mothurOut("You have selected a size that is larger than "+newGroups[i]+" number of sequences, removing "+newGroups[i]+".\n"); }
                 } 
                 m->setGroups(Groups);
             }
@@ -305,7 +306,7 @@ int UnifracUnweightedCommand::execute() {
 		for (int i = 0; i < T.size(); i++) {
 			if (m->control_pressed) { delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; }outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
 			
-			counter = 0;
+            counter = 0;
 			
 			if (random)  {  
 				output = new ColumnFile(outputDir + m->getSimpleName(treefile)  + toString(i+1) + ".unweighted", itersString);
@@ -353,6 +354,11 @@ int UnifracUnweightedCommand::execute() {
                 
                 SubSample sample;
                 Tree* subSampleTree = sample.getSample(T[i], newTmap, nameMap, subsampleSize);
+                
+                //uses method of setting groups to doNotIncludeMe
+                //SubSample sample;
+                //Tree* newTree2 = sample.getSample(T[i], newTmap, nameMap, subsampleSize, unique2Dup);
+                // newTree2->print(cout);
                 
                 //call new weighted function
                 vector<double> iterData; iterData.resize(numComp,0);

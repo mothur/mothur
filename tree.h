@@ -24,6 +24,7 @@ public:
 	
     TreeMap* getTreeMap() { return tmap; }
 	void getCopy(Tree*);  //makes tree a copy of the one passed in.
+    void getCopy(Tree* copy, map<string, string>, vector<string>); //makes a copy of the tree passed in, but everyone who is not in the vector<string> has group set to doNotIncludeMe. Assumes the tmap already has these seqs group set to doNotIncludeMe.
 	void getSubTree(Tree*, vector<string>);  //makes tree a that contains only the names passed in.
     int getSubTree(Tree* originalToCopy, vector<string> seqToInclude, map<string, string> nameMap);  //used with (int, TreeMap) constructor. SeqsToInclude contains subsample wanted - assumes these are unique seqs and size of vector=numLeaves passed into constructor. nameMap is unique -> redundantList can be empty if no namesfile was provided. 
     

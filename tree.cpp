@@ -588,6 +588,128 @@ int Tree::populateNewTree(vector<Node>& oldtree, int node, int& index) {
 	}
 }
 /*****************************************************************/
+void Tree::getCopy(Tree* copy, map<string, string> nameMap, vector<string> namesToInclude) {
+	try {
+        
+		//for each node in the tree copy its info
+		for (int i = 0; i < numNodes; i++) {
+			//copy name
+			tree[i].setName(copy->tree[i].getName());
+            
+			//copy group
+            vector<string> temp;
+			tree[i].setGroup(temp);
+			
+			//copy branch length
+			tree[i].setBranchLength(copy->tree[i].getBranchLength());
+            
+			//copy parent
+			tree[i].setParent(copy->tree[i].getParent());
+            
+			//copy children
+			tree[i].setChildren(copy->tree[i].getLChild(), copy->tree[i].getRChild());
+            
+			//copy index in node and tmap
+			tree[i].setIndex(copy->tree[i].getIndex());
+			setIndex(copy->tree[i].getName(), getIndex(copy->tree[i].getName()));
+			
+			//copy pGroups
+			tree[i].pGroups.clear();
+            
+			//copy pcount
+			tree[i].pcount.clear();
+		}
+		
+		groupNodeInfo.clear();
+        
+        //now lets change prune the seqs not in namesToInclude by setting their group to "doNotIncludeMe"
+        for (int i = 0; i < numLeaves; i++) {
+            
+            if (m->control_pressed) { break; }
+            
+			string name = tree[i].getName();
+            
+			map<string, string>::iterator itNames = nameMap.find(name);
+            
+			if (itNames == nameMap.end()) { m->mothurOut(name + " is not in your name file, please correct."); m->mothurOutEndLine(); exit(1);  }
+			else {
+				vector<string> dupNames;
+				m->splitAtComma(nameMap[name], dupNames);
+				
+				map<string, int>::iterator itCounts;
+				int maxPars = 1;
+				set<string> groupsAddedForThisNode;
+				for (int j = 0; j < dupNames.size(); j++) {
+					
+					string group = tmap->getGroup(dupNames[j]);
+                    bool includeMe = m->inUsersGroups(dupNames[j], namesToInclude);
+                    
+                    if (!includeMe && (group != "doNotIncludeMe")) { m->mothurOut("[ERROR] : creating subtree in copy.\n"); m->control_pressed = true; }
+					else if (!includeMe) {
+						if (groupsAddedForThisNode.count(group) == 0)  {  groupNodeInfo[group].push_back(i);  groupsAddedForThisNode.insert(group);  } //if you have not already added this node for this group, then add it
+						
+						//update pcounts
+						itCounts = tree[i].pcount.find(group);
+						if (itCounts == tree[i].pcount.end()) { //new group, add it
+							tree[i].pcount[group] = 1;
+						}else {
+							tree[i].pcount[group]++;
+						}
+                        
+						//update pgroups
+						itCounts = tree[i].pGroups.find(group);
+						if (itCounts == tree[i].pGroups.end()) { //new group, add it
+							tree[i].pGroups[group] = 1;
+						}else{
+							tree[i].pGroups[group]++;
+						}
+						
+						//keep highest group
+						if(tree[i].pGroups[group] > maxPars){
+							maxPars = tree[i].pGroups[group];
+						}
+                    }
+				}//end for
+				
+				if (maxPars > 1) { //then we have some more dominant groups
+					//erase all the groups that are less than maxPars because you found a more dominant group.
+					for(it=tree[i].pGroups.begin();it!=tree[i].pGroups.end();){
+						if(it->second < maxPars){
+							tree[i].pGroups.erase(it++);
+						}else { it++; }
+					}
+					//set one remaining groups to 1
+					for(it=tree[i].pGroups.begin();it!=tree[i].pGroups.end();it++){
+						tree[i].pGroups[it->first] = 1;
+					}
+				}//end if
+				
+				//update groups to reflect all the groups this node represents
+				vector<string> nodeGroups;
+				map<string, int>::iterator itGroups;
+				for (itGroups = tree[i].pcount.begin(); itGroups != tree[i].pcount.end(); itGroups++) {
+					nodeGroups.push_back(itGroups->first);
+				}
+				tree[i].setGroup(nodeGroups);
+				
+			}//end else
+		}//end for		
+        
+        
+        //build the pGroups in non leaf nodes to be used in the parsimony calcs.
+		for (int i = numLeaves; i < numNodes; i++) {
+			if (m->control_pressed) { break; }
+            
+			tree[i].pGroups = (mergeGroups(i));
+			tree[i].pcount = (mergeGcounts(i));
+		}
+	}
+	catch(exception& e) {
+		m->errorOut(e, "Tree", "getCopy");
+		exit(1);
+	}
+}
+/*****************************************************************/
 void Tree::getCopy(Tree* copy) {
 	try {
 	
