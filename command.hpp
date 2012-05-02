@@ -1,6 +1,6 @@
 #ifndef COMMAND_HPP
 #define COMMAND_HPP
-//test
+//test2
 /*
  *  command.h
  *  
