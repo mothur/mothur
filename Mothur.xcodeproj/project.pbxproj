@@ -2178,17 +2178,17 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CONFIGURATION_TEMP_DIR = /Users/johnwestcott/desktop/debug;
+				CONFIGURATION_TEMP_DIR = /Users/SarahsWork/Desktop;
 				COPY_PHASE_STRIP = NO;
 				DEPLOYMENT_LOCATION = YES;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				INSTALL_PATH = /Users/johnwestcott/desktop/debug;
-				OBJROOT = /Users/johnwestcott/desktop/debug;
+				INSTALL_PATH = /Users/SarahsWork/Desktop/debug;
+				OBJROOT = /Users/SarahsWork/Desktop;
 				PRODUCT_NAME = Mothur;
 				SDKROOT = macosx10.6;
-				SYMROOT = /Users/johnwestcott/desktop/debug;
+				SYMROOT = /Users/SarahsWork/Desktop;
 			};
 			name = Debug;
 		};
@@ -2196,15 +2196,15 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CONFIGURATION_TEMP_DIR = /Users/johnwestcott/desktop/debug;
+				CONFIGURATION_TEMP_DIR = /Users/SarahsWork/Desktop;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEPLOYMENT_LOCATION = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_WARN_UNUSED_VALUE = YES;
-				INSTALL_PATH = /Users/johnwestcott/desktop/debug;
-				OBJROOT = /Users/johnwestcott/desktop/debug;
+				INSTALL_PATH = /Users/SarahsWork/Desktop/debug;
+				OBJROOT = /Users/SarahsWork/Desktop;
 				PRODUCT_NAME = Mothur;
-				SYMROOT = /Users/johnwestcott/desktop/debug;
+				SYMROOT = /Users/SarahsWork/Desktop;
 			};
 			name = Release;
 		};

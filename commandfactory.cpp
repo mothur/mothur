@@ -284,7 +284,7 @@ CommandFactory::CommandFactory(){
     commands["pcr.seqs"]            = "pcr.seqs";
     commands["create.database"]     = "create.database";
     commands["make.biom"]           = "make.biom";
-    commands["get.coremicrobiom"]   = "get.coremircrobiom";
+    commands["get.coremicrobiom"]   = "get.coremicrobiom";
 	commands["quit"]				= "MPIEnabled"; 
 
 }

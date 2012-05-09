@@ -284,15 +284,13 @@ int GetCoreMicroBiomCommand::createTable(vector<SharedRAbundFloatVector*>& looku
             for (int j = 0; j < lookup.size(); j++) {
                 double relabund = lookup[j]->getAbundance(i);
                 int wholeRelabund = (int) (floor(relabund*100));
-                cout << i << '\t' << j << '\t' << relabund << '\t' << wholeRelabund << endl;
-                for (int k = 0; k < wholeRelabund; k++) { counts[k]++; }
+                for (int k = 0; k < wholeRelabund+1; k++) { counts[k]++; }
             }
             
             //add this otus info to table
             for (int j = 0; j < table.size(); j++) {
                 for (int k = 0; k < counts[j]; k++) { table[j][k]++; }
             }
-            
         }
 		
         //format output
@@ -301,7 +299,7 @@ int GetCoreMicroBiomCommand::createTable(vector<SharedRAbundFloatVector*>& looku
         
         //convert table counts to percents
         for (int i = 0; i < table.size(); i++) {
-            out << "Relabund-" << i << '\t';
+            out << "Relabund-" << i << "%\t";
             if (m->control_pressed) { break; }
             for (int j = 0; j < table[i].size(); j++) {  table[i][j] /= (double) numOtus; }
         }
