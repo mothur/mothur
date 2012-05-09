@@ -198,7 +198,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			taxFile = validParameter.validFile(parameters, "taxonomy", true);
 			if (taxFile == "not open") { taxFile = ""; abort = true; }	
 			else if (taxFile == "not found") { taxFile = ""; }
-			else {  m->setTaxonomyFile(taxFile); }
+			else {  m->setTaxonomyFile(taxFile); if (splitmethod != "fasta") { splitmethod = "classify"; } }
 			
 			if ((phylipfile == "") && (columnfile == "") && (fastafile == "")) { 
 				//is there are current file available for either of these?
@@ -272,7 +272,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			m->mothurConvert(temp, processors);
 			
 			temp = validParameter.validFile(parameters, "splitmethod", false);	
-			if (splitmethod != "fasta") {
+			if ((splitmethod != "fasta") && (splitmethod != "classify")) {
 				if (temp == "not found")  { splitmethod = "distance"; }
 				else {  splitmethod = temp; }
 			}
@@ -286,7 +286,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			
 			method = validParameter.validFile(parameters, "method", false);		if (method == "not found") { method = "average"; }
 			
-			if ((method == "furthest") || (method == "nearest") || (method == "average")) { }
+			if ((method == "furthest") || (method == "nearest") || (method == "average")) { m->mothurOut("Using splitmethod " + splitmethod + ".\n"); }
 			else { m->mothurOut("Not a valid clustering method.  Valid clustering algorithms are furthest, nearest or average."); m->mothurOutEndLine(); abort = true; }
 			
 			if ((splitmethod == "distance") || (splitmethod == "classify") || (splitmethod == "fasta")) { }
