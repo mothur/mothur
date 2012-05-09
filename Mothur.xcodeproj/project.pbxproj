@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		219C1DE01552C4BD004209F9 /* newcommandtemplate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 219C1DDF1552C4BD004209F9 /* newcommandtemplate.cpp */; };
+		219C1DE41559BCCF004209F9 /* getcoremicrobiomcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 219C1DE31559BCCD004209F9 /* getcoremicrobiomcommand.cpp */; };
 		7E6BE10A12F710D8007ADDBE /* refchimeratest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7E6BE10912F710D8007ADDBE /* refchimeratest.cpp */; };
 		8DD76FB00486AB0100D96B5E /* mothur.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = C6A0FF2C0290799A04C91782 /* mothur.1 */; };
 		A70332B712D3A13400761E33 /* makefile in Sources */ = {isa = PBXBuildFile; fileRef = A70332B512D3A13400761E33 /* makefile */; };
@@ -358,6 +360,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		219C1DDF1552C4BD004209F9 /* newcommandtemplate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = newcommandtemplate.cpp; sourceTree = "<group>"; };
+		219C1DE11552C508004209F9 /* newcommandtemplate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = newcommandtemplate.h; sourceTree = "<group>"; };
+		219C1DE31559BCCD004209F9 /* getcoremicrobiomcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getcoremicrobiomcommand.cpp; sourceTree = "<group>"; };
+		219C1DE51559BCF2004209F9 /* getcoremicrobiomcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getcoremicrobiomcommand.h; sourceTree = "<group>"; };
 		7E6BE10812F710D8007ADDBE /* refchimeratest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = refchimeratest.h; sourceTree = "<group>"; };
 		7E6BE10912F710D8007ADDBE /* refchimeratest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = refchimeratest.cpp; sourceTree = "<group>"; };
 		7E78911B135F3E8600E725D2 /* eachgapdistignorens.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = eachgapdistignorens.h; sourceTree = "<group>"; };
@@ -1173,6 +1179,8 @@
 			isa = PBXGroup;
 			children = (
 				A7E9B6AE12D37EC400DA6239 /* command.hpp */,
+				219C1DE11552C508004209F9 /* newcommandtemplate.h */,
+				219C1DDF1552C4BD004209F9 /* newcommandtemplate.cpp */,
 				A7E9B65212D37EC300DA6239 /* aligncommand.h */,
 				A7E9B65112D37EC300DA6239 /* aligncommand.cpp */,
 				A7A61F2B130062E000E05B6B /* amovacommand.h */,
@@ -1247,6 +1255,8 @@
 				A7E9B6E312D37EC400DA6239 /* filterseqscommand.cpp */,
 				A778FE69134CA6CA00C0BA33 /* getcommandinfocommand.h */,
 				A778FE6A134CA6CA00C0BA33 /* getcommandinfocommand.cpp */,
+				219C1DE51559BCF2004209F9 /* getcoremicrobiomcommand.h */,
+				219C1DE31559BCCD004209F9 /* getcoremicrobiomcommand.cpp */,
 				A7FE7C3E1330EA1000F7B327 /* getcurrentcommand.h */,
 				A7FE7C3F1330EA1000F7B327 /* getcurrentcommand.cpp */,
 				A7E9B6F312D37EC400DA6239 /* getgroupcommand.h */,
@@ -2156,6 +2166,8 @@
 				A7876A26152A017C00A0AE86 /* subsample.cpp in Sources */,
 				A7D755DA1535F679009BF21A /* treereader.cpp in Sources */,
 				A724D2B7153C8628000A826F /* makebiomcommand.cpp in Sources */,
+				219C1DE01552C4BD004209F9 /* newcommandtemplate.cpp in Sources */,
+				219C1DE41559BCCF004209F9 /* getcoremicrobiomcommand.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2166,13 +2178,17 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CONFIGURATION_TEMP_DIR = /Users/johnwestcott/desktop/debug;
 				COPY_PHASE_STRIP = NO;
+				DEPLOYMENT_LOCATION = YES;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				INSTALL_PATH = /usr/local/bin;
+				INSTALL_PATH = /Users/johnwestcott/desktop/debug;
+				OBJROOT = /Users/johnwestcott/desktop/debug;
 				PRODUCT_NAME = Mothur;
 				SDKROOT = macosx10.6;
+				SYMROOT = /Users/johnwestcott/desktop/debug;
 			};
 			name = Debug;
 		};
@@ -2180,12 +2196,15 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CONFIGURATION_TEMP_DIR = /Users/johnwestcott/desktop/debug;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEPLOYMENT_LOCATION = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_WARN_UNUSED_VALUE = YES;
-				INSTALL_PATH = ./;
+				INSTALL_PATH = /Users/johnwestcott/desktop/debug;
+				OBJROOT = /Users/johnwestcott/desktop/debug;
 				PRODUCT_NAME = Mothur;
+				SYMROOT = /Users/johnwestcott/desktop/debug;
 			};
 			name = Release;
 		};
