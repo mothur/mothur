@@ -152,11 +152,11 @@ ShhherCommand::ShhherCommand(string option) {
                 string thisoutputDir = m->hasPath(flowFilesFileName); //if user entered a file with a path then preserve it
                 
 				//flow.files = 9 character offset
-				compositeFASTAFileName = thisoutputDir + flowFilesFileName.substr(0, flowFilesFileName.length()-10) + "shhh.fasta";
+				compositeFASTAFileName = thisoutputDir + m->getRootName(m->getSimpleName(flowFilesFileName)) + "shhh.fasta";
 				m->openOutputFile(compositeFASTAFileName, temp);
 				temp.close();
 				
-				compositeNamesFileName = thisoutputDir + flowFilesFileName.substr(0, flowFilesFileName.length()-10) + "shhh.names";
+				compositeNamesFileName = thisoutputDir + m->getRootName(m->getSimpleName(flowFilesFileName)) + "shhh.names";
 				m->openOutputFile(compositeNamesFileName, temp);
 				temp.close();
 			}

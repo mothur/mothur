@@ -130,6 +130,7 @@ class MothurOut {
 		void splitAtChar(string&, vector<string>&, char);
         void splitAtChar(string&, string&, char);
 		int removeConfidences(string&);
+        string makeList(vector<string>&);
 		
 		//math operation
 		int factorial(int num);
