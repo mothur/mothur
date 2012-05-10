@@ -131,7 +131,7 @@
 #include "pcrseqscommand.h"
 #include "createdatabasecommand.h"
 #include "makebiomcommand.h"
-#include "GetCoreMicroBiomeCommand.h"
+#include "getcoremicrobiomecommand.h"
 
 /*******************************************************/
 

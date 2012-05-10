@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Schloss Lab. All rights reserved.
 //
 
-#include "GetCoreMicroBiomeCommand.h"
+#include "getcoremicrobiomecommand.h"
 
 
 //**********************************************************************************************************************
@@ -57,7 +57,7 @@ GetCoreMicroBiomeCommand::GetCoreMicroBiomeCommand(){
 		abort = true; calledHelp = true;
 		setParameters();
         vector<string> tempOutNames;
-		outputTypes["coremicrobiom"] = tempOutNames; 
+		outputTypes["coremicrobiome"] = tempOutNames; 
 	}
 	catch(exception& e) {
 		m->errorOut(e, "GetCoreMicroBiomeCommand", "GetCoreMicroBiomeCommand");
@@ -111,7 +111,9 @@ GetCoreMicroBiomeCommand::GetCoreMicroBiomeCommand(string option)  {
 				}
             }
            
-        
+            vector<string> tempOutNames;
+            outputTypes["coremicrobiome"] = tempOutNames; 
+
 			//check for parameters
             sharedfile = validParameter.validFile(parameters, "shared", true);
 			if (sharedfile == "not open") { abort = true; }
@@ -285,8 +287,8 @@ int GetCoreMicroBiomeCommand::execute(){
 int GetCoreMicroBiomeCommand::createTable(vector<SharedRAbundFloatVector*>& lookup){
 	try {
         
-        string outputFileName = outputDir + m->getRootName(m->getSimpleName(inputFileName)) + lookup[0]->getLabel() + ".core.microbiom";
-        outputNames.push_back(outputFileName);  outputTypes["coremicrobiom"].push_back(outputFileName);
+        string outputFileName = outputDir + m->getRootName(m->getSimpleName(inputFileName)) + lookup[0]->getLabel() + ".core.microbiome";
+        outputNames.push_back(outputFileName);  outputTypes["coremicrobiome"].push_back(outputFileName);
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
         
@@ -370,8 +372,8 @@ int GetCoreMicroBiomeCommand::createTable(vector<SharedRAbundFloatVector*>& look
         if (m->control_pressed) { return 0; }
         
         if ((samples != -1) || (abund != -1))  {
-            string outputFileName2 = outputDir + m->getRootName(m->getSimpleName(inputFileName)) + lookup[0]->getLabel() + ".core.microbiomlist";
-            outputNames.push_back(outputFileName2);  outputTypes["coremicrobiom"].push_back(outputFileName2);
+            string outputFileName2 = outputDir + m->getRootName(m->getSimpleName(inputFileName)) + lookup[0]->getLabel() + ".core.microbiomelist";
+            outputNames.push_back(outputFileName2);  outputTypes["coremicrobiome"].push_back(outputFileName2);
             ofstream out2;
             m->openOutputFile(outputFileName2, out2);
             
