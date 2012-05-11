@@ -342,23 +342,23 @@ int UnifracUnweightedCommand::execute() {
 			
 			if (m->control_pressed) { delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; }if (random) { delete output;  } outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0;  }
             
+            int startSubsample = time(NULL);
+            
             //subsample loop
             vector< vector<double> > calcDistsTotals;  //each iter, each groupCombos dists. this will be used to make .dist files
             for (int thisIter = 0; thisIter < subsampleIters; thisIter++) { //subsampleIters=0, if subsample=f.
-                
                 if (m->control_pressed) { break; }
                 
                 //copy to preserve old one - would do this in subsample but memory cleanup becomes messy.
                 TreeMap* newTmap = new TreeMap();
-                newTmap->getCopy(*tmap);
+                //newTmap->getCopy(*tmap);
                 
-                SubSample sample;
-                Tree* subSampleTree = sample.getSample(T[i], newTmap, nameMap, subsampleSize);
+                //SubSample sample;
+                //Tree* subSampleTree = sample.getSample(T[i], newTmap, nameMap, subsampleSize);
                 
                 //uses method of setting groups to doNotIncludeMe
-                //SubSample sample;
-                //Tree* newTree2 = sample.getSample(T[i], newTmap, nameMap, subsampleSize, unique2Dup);
-                // newTree2->print(cout);
+                SubSample sample;
+                Tree* subSampleTree = sample.getSample(T[i], tmap, newTmap, subsampleSize, unique2Dup);
                 
                 //call new weighted function
                 vector<double> iterData; iterData.resize(numComp,0);
@@ -373,6 +373,7 @@ int UnifracUnweightedCommand::execute() {
                 
                 if((thisIter+1) % 100 == 0){	m->mothurOut(toString(thisIter+1)); m->mothurOutEndLine();		}
             }
+            m->mothurOut("It took " + toString(time(NULL) - startSubsample) + " secs to run the subsampling."); m->mothurOutEndLine();
             
             if (m->control_pressed) { delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; }if (random) { delete output;  } outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0;  }
 

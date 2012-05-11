@@ -218,7 +218,7 @@ ShhherCommand::ShhherCommand(string option) {
                 if (flowFileVector.size() == 0) {  m->mothurOut("[ERROR]: no valid files."); m->mothurOutEndLine(); abort = true; }
             }
             else{
-                outputDir += m->hasPath(flowFileName);
+                if (outputDir == "") { outputDir = m->hasPath(flowFileName); }
                 flowFileVector.push_back(flowFileName);
             }
 		
@@ -2980,7 +2980,7 @@ void ShhherCommand::writeQualities(int numOTUs, int numFlowCells, string filenam
 	
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(filename);  }
+		if (outputDir == "") {  thisOutputDir = m->hasPath(filename);  }
 		string qualityFileName = thisOutputDir + m->getRootName(m->getSimpleName(filename)) + "shhh.qual";
         
 		ofstream qualityFile;
@@ -3088,7 +3088,7 @@ void ShhherCommand::writeQualities(int numOTUs, int numFlowCells, string filenam
 void ShhherCommand::writeSequences(string thisCompositeFASTAFileName, int numOTUs, int numFlowCells, string filename, vector<int> otuCounts, vector<short>& uniqueFlowgrams, vector<string>& seqNameVector, vector<vector<int> >& aaI, vector<int>& centroids){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(filename);  }
+		if (outputDir == "") {  thisOutputDir = m->hasPath(filename);  }
 		string fastaFileName = thisOutputDir + m->getRootName(m->getSimpleName(filename)) + "shhh.fasta";
 		ofstream fastaFile;
 		m->openOutputFile(fastaFileName, fastaFile);
@@ -3136,7 +3136,7 @@ void ShhherCommand::writeSequences(string thisCompositeFASTAFileName, int numOTU
 void ShhherCommand::writeNames(string thisCompositeNamesFileName, int numOTUs, string filename, vector<int> otuCounts, vector<string>& seqNameVector, vector<vector<int> >& aaI, vector<int>& nSeqsPerOTU){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(filename);  }
+		if (outputDir == "") {  thisOutputDir = m->hasPath(filename);  }
 		string nameFileName = thisOutputDir + m->getRootName(m->getSimpleName(filename)) + "shhh.names";
 		ofstream nameFile;
 		m->openOutputFile(nameFileName, nameFile);
@@ -3174,7 +3174,7 @@ void ShhherCommand::writeNames(string thisCompositeNamesFileName, int numOTUs, s
 void ShhherCommand::writeGroups(string filename, int numSeqs, vector<string>& seqNameVector){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(filename);  }
+		if (outputDir == "") {  thisOutputDir = m->hasPath(filename);  }
 		string fileRoot = thisOutputDir + m->getRootName(m->getSimpleName(filename));
 		string groupFileName = fileRoot + "shhh.groups";
 		ofstream groupFile;
@@ -3199,7 +3199,7 @@ void ShhherCommand::writeGroups(string filename, int numSeqs, vector<string>& se
 void ShhherCommand::writeClusters(string filename, int numOTUs, int numFlowCells, vector<int> otuCounts, vector<int>& centroids, vector<short>& uniqueFlowgrams, vector<string>& seqNameVector, vector<vector<int> >& aaI, vector<int>& nSeqsPerOTU, vector<int>& lengths, vector<short>& flowDataIntI){
 	try {
 		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(filename);  }
+		if (outputDir == "") {  thisOutputDir = m->hasPath(filename);  }
 		string otuCountsFileName = thisOutputDir + m->getRootName(m->getSimpleName(filename)) + "shhh.counts";
 		ofstream otuCountsFile;
 		m->openOutputFile(otuCountsFileName, otuCountsFile);
