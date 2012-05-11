@@ -39,10 +39,11 @@ private:
 		string groups, outputDir, treefile, groupfile, namefile;
 		vector<string> Groups, outputNames; //holds groups to be used, and outputFile names
 		
+        map<string, int> getRootForGroups(Tree* t);
 		int readNamesFile();
 		void printData(set<int>&, map< string, vector<float> >&, ofstream&, int);
 		void printSumData(map< string, vector<float> >&, ofstream&, int);
-		vector<float> calcBranchLength(Tree*, int, map< string, set<int> >&);
+        vector<float> calcBranchLength(Tree*, int, vector< map<string, bool> >&, map<string, int>);
 		int driver(Tree*, map< string, vector<float> >&, map<string, vector<float> >&, int, int, vector<int>&, set<int>&, ofstream&, ofstream&, bool);
 		int createProcesses(vector<int>&, Tree*, map< string, vector<float> >&, map<string, vector<float> >&, int, int, vector<int>&, set<int>&, ofstream&, ofstream&);
 
