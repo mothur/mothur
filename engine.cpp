@@ -44,8 +44,13 @@ string Engine::findMothursPath(){
 		vector<string> dirs;
 		mout->splitAtChar(envPath, dirs, delim);
 		
+        if (mout->debug) { mout->mothurOut("[DEBUG]: dir's in path: \n"); }
+        
 		//get path related to mothur
 		for (int i = 0; i < dirs.size(); i++) {
+            
+            if (mout->debug) { mout->mothurOut("[DEBUG]: " + dirs[i] + "\n"); }
+            
 			//to lower so we can find it
 			string tempLower = "";
 			for (int j = 0; j < dirs[i].length(); j++) {  tempLower += tolower(dirs[i][j]);  }
@@ -53,7 +58,9 @@ string Engine::findMothursPath(){
 			//is this mothurs path?
 			if (tempLower.find("mothur") != -1) {  mothurPath = dirs[i]; break;  }
 		}
-		
+        
+		if (mout->debug) { mout->mothurOut("[DEBUG]: mothurPath = " + mothurPath + "\n"); }
+        
 		if (mothurPath != "") {
 			//add mothur so it looks like what argv would look like
 			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
@@ -79,7 +86,7 @@ string Engine::findMothursPath(){
 				mout->openInputFile(tempIn, in, "");
 				
 				//if this file exists
-				if (in) { in.close(); mothurPath = tempIn;  break;  }
+				if (in) { in.close(); mothurPath = tempIn;  break; if (mout->debug) { mout->mothurOut("[DEBUG]: found it, mothurPath = " + mothurPath + "\n"); }  }
 			}
 		}
 		
