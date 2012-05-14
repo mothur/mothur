@@ -165,7 +165,7 @@ MakeBiomCommand::MakeBiomCommand(string option) {
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
-			
+
 			//initialize outputTypes
 			vector<string> tempOutNames;
 			outputTypes["biom"] = tempOutNames;
@@ -612,7 +612,7 @@ vector<string> MakeBiomCommand::parseTax(string tax, vector<string>& scores) {
                         scores.push_back(confidenceScore);
 					}else{ scores.push_back("null"); }
 				}
-			}
+			}else{ scores.push_back("null"); }
 			
             //strip "" if they are there
             pos = taxon.find("\"");

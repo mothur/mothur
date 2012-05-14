@@ -136,7 +136,7 @@ ShhherCommand::ShhherCommand(string option) {
 			flowFileName = validParameter.validFile(parameters, "flow", true);
 			flowFilesFileName = validParameter.validFile(parameters, "file", true);
 			if (flowFileName == "not found" && flowFilesFileName == "not found") {
-				m->mothurOut("values for either flow or file must be provided for the shhh.seqs command.");
+				m->mothurOut("values for either flow or file must be provided for the shhh.flows command.");
 				m->mothurOutEndLine();
 				abort = true; 
 			}

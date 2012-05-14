@@ -367,7 +367,7 @@
 		7E6BE10812F710D8007ADDBE /* refchimeratest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = refchimeratest.h; sourceTree = "<group>"; };
 		7E6BE10912F710D8007ADDBE /* refchimeratest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = refchimeratest.cpp; sourceTree = "<group>"; };
 		7E78911B135F3E8600E725D2 /* eachgapdistignorens.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = eachgapdistignorens.h; sourceTree = "<group>"; };
-		8DD76FB20486AB0100D96B5E /* Mothur */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Mothur; sourceTree = BUILT_PRODUCTS_DIR; };
+		8DD76FB20486AB0100D96B5E /* mothur */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = mothur; sourceTree = BUILT_PRODUCTS_DIR; };
 		A70332B512D3A13400761E33 /* makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = makefile; sourceTree = "<group>"; };
 		A713EBAA12DC7613000092AC /* readphylipvector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readphylipvector.h; sourceTree = "<group>"; };
 		A713EBAB12DC7613000092AC /* readphylipvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readphylipvector.cpp; sourceTree = "<group>"; };
@@ -1150,7 +1150,7 @@
 		1AB674ADFE9D54B511CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				8DD76FB20486AB0100D96B5E /* Mothur */,
+				8DD76FB20486AB0100D96B5E /* mothur */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1809,7 +1809,7 @@
 			name = Mothur;
 			productInstallPath = "$(HOME)/bin";
 			productName = mothur;
-			productReference = 8DD76FB20486AB0100D96B5E /* Mothur */;
+			productReference = 8DD76FB20486AB0100D96B5E /* mothur */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
@@ -2183,9 +2183,9 @@
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				PRODUCT_NAME = Mothur;
+				PRODUCT_NAME = mothur;
 				SDKROOT = macosx10.6;
-				SYMROOT = "";
+				SKIP_INSTALL = NO;
 			};
 			name = Debug;
 		};
@@ -2197,8 +2197,8 @@
 				DEPLOYMENT_LOCATION = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_WARN_UNUSED_VALUE = YES;
-				PRODUCT_NAME = Mothur;
-				SYMROOT = "";
+				PRODUCT_NAME = mothur;
+				SKIP_INSTALL = NO;
 			};
 			name = Release;
 		};
@@ -2222,7 +2222,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = "";
-				INSTALL_PATH = "";
+				INSTALL_PATH = TARGET_BUILD_DIR;
 				MACH_O_TYPE = mh_execute;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CPLUSPLUSFLAGS = (
@@ -2235,6 +2235,7 @@
 					"-lreadline",
 				);
 				SDKROOT = macosx10.6;
+				SKIP_INSTALL = NO;
 				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Debug;
@@ -2260,7 +2261,7 @@
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VALUE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				INSTALL_PATH = "";
+				INSTALL_PATH = TARGET_BUILD_DIR;
 				MACH_O_TYPE = mh_execute;
 				OTHER_CPLUSPLUSFLAGS = (
 					"-DUSE_READLINE",
@@ -2272,6 +2273,7 @@
 					"-lreadline",
 				);
 				SDKROOT = macosx10.6;
+				SKIP_INSTALL = NO;
 			};
 			name = Release;
 		};
