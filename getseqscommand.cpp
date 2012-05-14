@@ -283,6 +283,8 @@ int GetSeqsCommand::execute(){
 		if (taxfile != "")			{		readTax();			}
 		if (qualfile != "")			{		readQual();			}
 		if (accnosfile2 != "")		{		compareAccnos();	}
+        
+        if (m->debug) { runSanityCheck(); }
 		
 		if (m->control_pressed) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
 		
@@ -352,6 +354,8 @@ int GetSeqsCommand::readFasta(){
 		
 		bool wroteSomething = false;
 		int selectedCount = 0;
+        
+        if (m->debug) { set<string> temp; sanity["fasta"] = temp; }
 		
 		while(!in.eof()){
 		
@@ -367,6 +371,8 @@ int GetSeqsCommand::readFasta(){
 					
 					currSeq.printSequence(out);
 					selectedCount++;
+                    
+                    if (m->debug) { sanity["fasta"].insert(name); }
 				}
 			}
 			m->gobble(in);
@@ -405,6 +411,7 @@ int GetSeqsCommand::readQual(){
 		bool wroteSomething = false;
 		int selectedCount = 0;
 		
+        if (m->debug) { set<string> temp; sanity["qual"] = temp; }
 		
 		while(!in.eof()){	
 			string saveName = "";
@@ -436,6 +443,7 @@ int GetSeqsCommand::readQual(){
 						
 				out << name << endl << scores;
 				selectedCount++;
+                if (m->debug) { sanity["qual"].insert(name); }
 			}
 			
 			m->gobble(in);
@@ -472,6 +480,8 @@ int GetSeqsCommand::readList(){
 		
 		bool wroteSomething = false;
 		int selectedCount = 0;
+        
+        if (m->debug) { set<string> temp; sanity["list"] = temp; }
 		
 		while(!in.eof()){
 			
@@ -498,11 +508,11 @@ int GetSeqsCommand::readList(){
 					binnames = binnames.substr(binnames.find_first_of(',')+1, binnames.length());
 					
 					//if that name is in the .accnos file, add it
-					if (names.count(name) != 0) {  newNames += name + ",";  selectedCount++; }
+					if (names.count(name) != 0) {  newNames += name + ",";  selectedCount++; if (m->debug) { sanity["list"].insert(name); } }
 				}
 			
 				//get last name
-				if (names.count(binnames) != 0) {  newNames += binnames + ",";  selectedCount++; }
+				if (names.count(binnames) != 0) {  newNames += binnames + ",";  selectedCount++;  if (m->debug) { sanity["list"].insert(binnames); } }
 
 				//if there are names in this bin add to new list
 				if (newNames != "") { 
@@ -551,6 +561,9 @@ int GetSeqsCommand::readName(){
 		
 		bool wroteSomething = false;
 		int selectedCount = 0;
+        
+        if (m->debug) { set<string> temp; sanity["name"] = temp; }
+        if (m->debug) { set<string> temp; sanity["dupname"] = temp; }
 		
 		while(!in.eof()){
 		
@@ -569,14 +582,16 @@ int GetSeqsCommand::readName(){
 			for (int i = 0; i < parsedNames.size(); i++) {
 				if (names.count(parsedNames[i]) != 0) {
 					validSecond.push_back(parsedNames[i]);
+                    if (m->debug) { sanity["dupname"].insert(parsedNames[i]); }
 				}
 			}
 
 			if ((dups) && (validSecond.size() != 0)) { //dups = true and we want to add someone, then add everyone
-				for (int i = 0; i < parsedNames.size(); i++) {  names.insert(parsedNames[i]);  }
+				for (int i = 0; i < parsedNames.size(); i++) {  names.insert(parsedNames[i]); if (m->debug) { sanity["dupname"].insert(parsedNames[i]); } }
 				out << firstCol << '\t' << hold << endl;
 				wroteSomething = true;
 				selectedCount += parsedNames.size();
+                if (m->debug) { sanity["name"].insert(firstCol); }
 			}else {
 				selectedCount += validSecond.size();
 				
@@ -590,6 +605,8 @@ int GetSeqsCommand::readName(){
 					//you know you have at least one valid second since first column is valid
 					for (int i = 0; i < validSecond.size()-1; i++) {  out << validSecond[i] << ',';  }
 					out << validSecond[validSecond.size()-1] << endl;
+                    
+                    if (m->debug) { sanity["name"].insert(firstCol); }
 					
 				
 				//make first name in set you come to first column and then add the remaining names to second column
@@ -604,6 +621,8 @@ int GetSeqsCommand::readName(){
 						//you know you have at least one valid second since first column is valid
 						for (int i = 0; i < validSecond.size()-1; i++) {  out << validSecond[i] << ',';  }
 						out << validSecond[validSecond.size()-1] << endl;
+                        
+                        if (m->debug) { sanity["name"].insert(validSecond[0]); }
 					}
 				}
 			}
@@ -642,6 +661,8 @@ int GetSeqsCommand::readGroup(){
 		
 		bool wroteSomething = false;
 		int selectedCount = 0;
+        
+        if (m->debug) { set<string> temp; sanity["group"] = temp; }
 		
 		while(!in.eof()){
 
@@ -657,6 +678,8 @@ int GetSeqsCommand::readGroup(){
 				
 				out << name << '\t' << group << endl;
 				selectedCount++;
+                
+                if (m->debug) {  sanity["group"].insert(name); }
 			}
 					
 			m->gobble(in);
@@ -693,6 +716,8 @@ int GetSeqsCommand::readTax(){
 		
 		bool wroteSomething = false;
 		int selectedCount = 0;
+        
+        if (m->debug) { set<string> temp; sanity["tax"] = temp; }
 		
 		while(!in.eof()){
 
@@ -707,6 +732,8 @@ int GetSeqsCommand::readTax(){
 				
 				out << name << '\t' << tax << endl;
 				selectedCount++;
+                
+                if (m->debug) { sanity["tax"].insert(name); }
 			}
 					
 			m->gobble(in);
@@ -822,6 +849,99 @@ int GetSeqsCommand::readAccnos(){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "GetSeqsCommand", "readAccnos");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+//just looking at common mistakes. 
+int GetSeqsCommand::runSanityCheck(){
+	try {
+        string thisOutputDir = outputDir;
+        if (outputDir == "") {  thisOutputDir += m->hasPath(fastafile);  }
+        string filename = outputDir + "get.seqs.debug.report";
+        
+        ofstream out;
+		m->openOutputFile(filename, out); 
+
+       
+        //compare fasta, name, qual and taxonomy if given to make sure they contain the same seqs
+        if (fastafile != "") {
+            if (namefile != "") { //compare with fasta
+                if (sanity["fasta"] != sanity["name"]) { //create mismatch file
+                    createMisMatchFile(out, fastafile, namefile, sanity["fasta"], sanity["name"]);
+                }
+            }
+            if (qualfile != "") {
+                if (sanity["fasta"] != sanity["qual"]) { //create mismatch file
+                    createMisMatchFile(out, fastafile, qualfile, sanity["fasta"], sanity["qual"]);
+                }
+            }
+            if (taxfile != "") {
+                if (sanity["fasta"] != sanity["tax"]) { //create mismatch file
+                    createMisMatchFile(out, fastafile, taxfile, sanity["fasta"], sanity["tax"]);
+                }
+            }
+        }
+        
+        //compare dupnames, groups and list if given to make sure they match
+        if (namefile != "") {
+            if (groupfile != "") {
+                if (sanity["dupname"] != sanity["group"]) { //create mismatch file
+                    createMisMatchFile(out, namefile, groupfile, sanity["dupname"], sanity["group"]);
+                } 
+            }
+            if (listfile != "") {
+                if (sanity["dupname"] != sanity["list"]) { //create mismatch file
+                    createMisMatchFile(out, namefile, listfile, sanity["dupname"], sanity["list"]);
+                } 
+            }
+        }else{
+
+            if ((groupfile != "") && (fastafile != "")) {
+                if (sanity["fasta"] != sanity["group"]) { //create mismatch file
+                    createMisMatchFile(out, fastafile, groupfile, sanity["fasta"], sanity["group"]);
+                } 
+            }
+        }
+        
+        out.close();
+        
+        if (m->isBlank(filename)) { m->mothurRemove(filename); }
+        else { m->mothurOut("\n[DEBUG]: " + filename + " contains the file mismatches.\n");outputNames.push_back(filename); outputTypes["debug"].push_back(filename); }
+        
+        return 0;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "GetSeqsCommand", "runSanityCheck");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+//just looking at common mistakes. 
+int GetSeqsCommand::createMisMatchFile(ofstream& out, string filename1, string filename2, set<string> set1, set<string> set2){
+	try {
+        out << "****************************************" << endl << endl;
+        out << "Names unique to " << filename1 << ":\n";
+        
+        //remove names in set1 that are also in set2
+        for (set<string>::iterator it = set1.begin(); it != set1.end();) {
+            string name = *it;
+            
+            if (set2.count(name) == 0)  { out << name << endl;  } //name unique to set1
+            else                        { set2.erase(name);     } //you are in both so erase 
+            set1.erase(it++);
+        }
+        
+        out << "\nNames unique to " << filename2 << ":\n";
+        //output results
+        for (set<string>::iterator it = set2.begin(); it != set2.end(); it++) {  out << *it << endl;  }
+        
+        out << "****************************************" << endl << endl;
+        
+        return 0;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "GetSeqsCommand", "runSanityCheck");
 		exit(1);
 	}
 }

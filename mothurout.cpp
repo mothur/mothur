@@ -1930,6 +1930,26 @@ void MothurOut::splitAtDash(string& estim, set<int>& container) {
 	}	
 }
 /***********************************************************************/
+string MothurOut::makeList(vector<string>& names) {
+	try {
+		string list = "";
+        
+        if (names.size() == 0) { return list; }
+		
+        for (int i = 0; i < names.size()-1; i++) { list += names[i] + ",";  }
+        
+        //get last name
+        list += names[names.size()-1];
+        
+        return list;
+    }
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "makeList");
+		exit(1);
+	}	
+}
+
+/***********************************************************************/
 //This function parses the a string and puts peices in a vector
 void MothurOut::splitAtComma(string& estim, vector<string>& container) {
 	try {

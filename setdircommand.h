@@ -35,7 +35,7 @@ public:
 private:
 	CommandFactory* commandFactory;
 	string output, input, tempdefault;
-	bool abort;
+	bool abort, debugOnly;
 	vector<string> outputNames;
 	
 		

@@ -588,6 +588,37 @@ int Tree::populateNewTree(vector<Node>& oldtree, int node, int& index) {
 	}
 }
 /*****************************************************************/
+void Tree::getCopy(Tree* copy, map<string, string> nameMap) {
+	try {
+        
+		//for each node in the tree copy its info
+		for (int i = 0; i < numNodes; i++) {
+			//copy branch length
+			tree[i].setBranchLength(copy->tree[i].getBranchLength());
+            
+			//copy parent
+			tree[i].setParent(copy->tree[i].getParent());
+            
+			//copy children
+			tree[i].setChildren(copy->tree[i].getLChild(), copy->tree[i].getRChild());
+        }
+		
+        if (nameMap.size() != 0) {  addNamesToCounts(nameMap);  }
+        
+        //build the pGroups in non leaf nodes to be used in the parsimony calcs.
+		for (int i = numLeaves; i < numNodes; i++) {
+			if (m->control_pressed) { break; }
+            
+			tree[i].pGroups = (mergeGroups(i));
+			tree[i].pcount = (mergeGcounts(i));
+		}
+	}
+	catch(exception& e) {
+		m->errorOut(e, "Tree", "getCopy");
+		exit(1);
+	}
+}
+/*****************************************************************/
 void Tree::getCopy(Tree* copy) {
 	try {
 	

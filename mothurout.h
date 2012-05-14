@@ -130,6 +130,7 @@ class MothurOut {
 		void splitAtChar(string&, vector<string>&, char);
         void splitAtChar(string&, string&, char);
 		int removeConfidences(string&);
+        string makeList(vector<string>&);
 		
 		//math operation
 		int factorial(int num);
@@ -140,7 +141,7 @@ class MothurOut {
 		int getRandomIndex(int); //highest
 
 		int control_pressed;
-		bool executing, runParse, jumble, gui, mothurCalling;
+		bool executing, runParse, jumble, gui, mothurCalling, debug;
 		
 		//current files - if you add a new type you must edit optionParser->getParameters, get.current command and mothurOut->printCurrentFiles/clearCurrentFiles.
 		string getPhylipFile()		{ return phylipfile;		}
@@ -225,6 +226,7 @@ class MothurOut {
 			printedHeaders = false;
 			commandInputsConvertError = false;
             mothurCalling = false;
+            debug = false;
 			sharedHeaderMode = "";
 		}
 		~MothurOut();

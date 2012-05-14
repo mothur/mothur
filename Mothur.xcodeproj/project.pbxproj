@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		219C1DE01552C4BD004209F9 /* newcommandtemplate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 219C1DDF1552C4BD004209F9 /* newcommandtemplate.cpp */; };
+		219C1DE41559BCCF004209F9 /* getcoremicrobiomecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 219C1DE31559BCCD004209F9 /* getcoremicrobiomecommand.cpp */; };
 		7E6BE10A12F710D8007ADDBE /* refchimeratest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7E6BE10912F710D8007ADDBE /* refchimeratest.cpp */; };
 		8DD76FB00486AB0100D96B5E /* mothur.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = C6A0FF2C0290799A04C91782 /* mothur.1 */; };
 		A70332B712D3A13400761E33 /* makefile in Sources */ = {isa = PBXBuildFile; fileRef = A70332B512D3A13400761E33 /* makefile */; };
@@ -20,28 +22,6 @@
 		A73DDBBA13C4A0D1006AAE38 /* clearmemorycommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A73DDBB913C4A0D1006AAE38 /* clearmemorycommand.cpp */; };
 		A73DDC3813C4BF64006AAE38 /* mothurmetastats.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A73DDC3713C4BF64006AAE38 /* mothurmetastats.cpp */; };
 		A74A9A9F148E881E00AB5E3E /* spline.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74A9A9E148E881E00AB5E3E /* spline.cpp */; };
-		A74D3687137DAB8300332B0C /* addtargets2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D3655137DAB8300332B0C /* addtargets2.cpp */; };
-		A74D3688137DAB8400332B0C /* alignchime.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D3656137DAB8300332B0C /* alignchime.cpp */; };
-		A74D3689137DAB8400332B0C /* alignchimel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D3657137DAB8300332B0C /* alignchimel.cpp */; };
-		A74D368A137DAB8400332B0C /* alnparams.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D365A137DAB8300332B0C /* alnparams.cpp */; };
-		A74D368B137DAB8400332B0C /* alpha.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D365C137DAB8300332B0C /* alpha.cpp */; };
-		A74D368C137DAB8400332B0C /* alpha2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D365E137DAB8300332B0C /* alpha2.cpp */; };
-		A74D368D137DAB8400332B0C /* fractid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D3664137DAB8300332B0C /* fractid.cpp */; };
-		A74D368E137DAB8400332B0C /* getparents.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D3665137DAB8300332B0C /* getparents.cpp */; };
-		A74D368F137DAB8400332B0C /* globalalign2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D3666137DAB8300332B0C /* globalalign2.cpp */; };
-		A74D3690137DAB8400332B0C /* make3way.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D366A137DAB8300332B0C /* make3way.cpp */; };
-		A74D3691137DAB8400332B0C /* mx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D366B137DAB8300332B0C /* mx.cpp */; };
-		A74D3692137DAB8400332B0C /* myutils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D366E137DAB8300332B0C /* myutils.cpp */; };
-		A74D3693137DAB8400332B0C /* path.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D3672137DAB8300332B0C /* path.cpp */; };
-		A74D3694137DAB8400332B0C /* searchchime.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D3674137DAB8300332B0C /* searchchime.cpp */; };
-		A74D3695137DAB8400332B0C /* seqdb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D3676137DAB8300332B0C /* seqdb.cpp */; };
-		A74D3696137DAB8400332B0C /* setnucmx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D3678137DAB8300332B0C /* setnucmx.cpp */; };
-		A74D3697137DAB8400332B0C /* sfasta.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D3679137DAB8300332B0C /* sfasta.cpp */; };
-		A74D3698137DAB8400332B0C /* tracebackbit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D367F137DAB8300332B0C /* tracebackbit.cpp */; };
-		A74D3699137DAB8400332B0C /* uchime_main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D3681137DAB8300332B0C /* uchime_main.cpp */; };
-		A74D369A137DAB8400332B0C /* usort.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D3683137DAB8300332B0C /* usort.cpp */; };
-		A74D369B137DAB8400332B0C /* viterbifast.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D3684137DAB8300332B0C /* viterbifast.cpp */; };
-		A74D369C137DAB8400332B0C /* writechhit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D3686137DAB8300332B0C /* writechhit.cpp */; };
 		A74D36B8137DAFAA00332B0C /* chimerauchimecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D36B7137DAFAA00332B0C /* chimerauchimecommand.cpp */; };
 		A754149714840CF7005850D1 /* summaryqualcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A754149614840CF7005850D1 /* summaryqualcommand.cpp */; };
 		A75790591301749D00A30DAB /* homovacommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A75790581301749D00A30DAB /* homovacommand.cpp */; };
@@ -380,6 +360,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		219C1DDF1552C4BD004209F9 /* newcommandtemplate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = newcommandtemplate.cpp; sourceTree = "<group>"; };
+		219C1DE11552C508004209F9 /* newcommandtemplate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = newcommandtemplate.h; sourceTree = "<group>"; };
+		219C1DE31559BCCD004209F9 /* getcoremicrobiomecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getcoremicrobiomecommand.cpp; sourceTree = "<group>"; };
+		219C1DE51559BCF2004209F9 /* getcoremicrobiomecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; path = getcoremicrobiomecommand.h; sourceTree = "<group>"; };
 		7E6BE10812F710D8007ADDBE /* refchimeratest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = refchimeratest.h; sourceTree = "<group>"; };
 		7E6BE10912F710D8007ADDBE /* refchimeratest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = refchimeratest.cpp; sourceTree = "<group>"; };
 		7E78911B135F3E8600E725D2 /* eachgapdistignorens.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = eachgapdistignorens.h; sourceTree = "<group>"; };
@@ -405,56 +389,6 @@
 		A73DDC3713C4BF64006AAE38 /* mothurmetastats.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mothurmetastats.cpp; sourceTree = "<group>"; };
 		A74A9A9D148E881E00AB5E3E /* spline.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = spline.h; sourceTree = "<group>"; };
 		A74A9A9E148E881E00AB5E3E /* spline.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = spline.cpp; sourceTree = "<group>"; };
-		A74D3655137DAB8300332B0C /* addtargets2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = addtargets2.cpp; sourceTree = "<group>"; };
-		A74D3656137DAB8300332B0C /* alignchime.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = alignchime.cpp; sourceTree = "<group>"; };
-		A74D3657137DAB8300332B0C /* alignchimel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = alignchimel.cpp; sourceTree = "<group>"; };
-		A74D3658137DAB8300332B0C /* allocs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = allocs.h; sourceTree = "<group>"; };
-		A74D3659137DAB8300332B0C /* alnheuristics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alnheuristics.h; sourceTree = "<group>"; };
-		A74D365A137DAB8300332B0C /* alnparams.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = alnparams.cpp; sourceTree = "<group>"; };
-		A74D365B137DAB8300332B0C /* alnparams.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alnparams.h; sourceTree = "<group>"; };
-		A74D365C137DAB8300332B0C /* alpha.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = alpha.cpp; sourceTree = "<group>"; };
-		A74D365D137DAB8300332B0C /* alpha.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alpha.h; sourceTree = "<group>"; };
-		A74D365E137DAB8300332B0C /* alpha2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = alpha2.cpp; sourceTree = "<group>"; };
-		A74D365F137DAB8300332B0C /* chainer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chainer.h; sourceTree = "<group>"; };
-		A74D3660137DAB8300332B0C /* chime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chime.h; sourceTree = "<group>"; };
-		A74D3661137DAB8300332B0C /* diagbox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = diagbox.h; sourceTree = "<group>"; };
-		A74D3662137DAB8300332B0C /* dp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dp.h; sourceTree = "<group>"; };
-		A74D3663137DAB8300332B0C /* evalue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = evalue.h; sourceTree = "<group>"; };
-		A74D3664137DAB8300332B0C /* fractid.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = fractid.cpp; sourceTree = "<group>"; };
-		A74D3665137DAB8300332B0C /* getparents.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getparents.cpp; sourceTree = "<group>"; };
-		A74D3666137DAB8300332B0C /* globalalign2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = globalalign2.cpp; sourceTree = "<group>"; };
-		A74D3667137DAB8300332B0C /* help.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = help.h; sourceTree = "<group>"; };
-		A74D3668137DAB8300332B0C /* hsp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hsp.h; sourceTree = "<group>"; };
-		A74D3669137DAB8300332B0C /* hspfinder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hspfinder.h; sourceTree = "<group>"; };
-		A74D366A137DAB8300332B0C /* make3way.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = make3way.cpp; sourceTree = "<group>"; };
-		A74D366B137DAB8300332B0C /* mx.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mx.cpp; sourceTree = "<group>"; };
-		A74D366C137DAB8300332B0C /* mx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mx.h; sourceTree = "<group>"; };
-		A74D366D137DAB8300332B0C /* myopts.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = myopts.h; sourceTree = "<group>"; };
-		A74D366E137DAB8300332B0C /* myutils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = myutils.cpp; sourceTree = "<group>"; };
-		A74D366F137DAB8300332B0C /* myutils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = myutils.h; sourceTree = "<group>"; };
-		A74D3670137DAB8300332B0C /* orf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = orf.h; sourceTree = "<group>"; };
-		A74D3671137DAB8300332B0C /* out.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = out.h; sourceTree = "<group>"; };
-		A74D3672137DAB8300332B0C /* path.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = path.cpp; sourceTree = "<group>"; };
-		A74D3673137DAB8300332B0C /* path.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = path.h; sourceTree = "<group>"; };
-		A74D3674137DAB8300332B0C /* searchchime.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = searchchime.cpp; sourceTree = "<group>"; };
-		A74D3675137DAB8300332B0C /* seq.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = seq.h; sourceTree = "<group>"; };
-		A74D3676137DAB8300332B0C /* seqdb.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = seqdb.cpp; sourceTree = "<group>"; };
-		A74D3677137DAB8300332B0C /* seqdb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = seqdb.h; sourceTree = "<group>"; };
-		A74D3678137DAB8300332B0C /* setnucmx.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = setnucmx.cpp; sourceTree = "<group>"; };
-		A74D3679137DAB8300332B0C /* sfasta.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sfasta.cpp; sourceTree = "<group>"; };
-		A74D367A137DAB8300332B0C /* sfasta.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sfasta.h; sourceTree = "<group>"; };
-		A74D367B137DAB8300332B0C /* svnmods.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = svnmods.h; sourceTree = "<group>"; };
-		A74D367C137DAB8300332B0C /* svnversion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = svnversion.h; sourceTree = "<group>"; };
-		A74D367D137DAB8300332B0C /* timers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = timers.h; sourceTree = "<group>"; };
-		A74D367E137DAB8300332B0C /* timing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = timing.h; sourceTree = "<group>"; };
-		A74D367F137DAB8300332B0C /* tracebackbit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tracebackbit.cpp; sourceTree = "<group>"; };
-		A74D3680137DAB8300332B0C /* uc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uc.h; sourceTree = "<group>"; };
-		A74D3681137DAB8300332B0C /* uchime_main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uchime_main.cpp; sourceTree = "<group>"; };
-		A74D3682137DAB8300332B0C /* ultra.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ultra.h; sourceTree = "<group>"; };
-		A74D3683137DAB8300332B0C /* usort.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = usort.cpp; sourceTree = "<group>"; };
-		A74D3684137DAB8300332B0C /* viterbifast.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = viterbifast.cpp; sourceTree = "<group>"; };
-		A74D3685137DAB8300332B0C /* windex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = windex.h; sourceTree = "<group>"; };
-		A74D3686137DAB8300332B0C /* writechhit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = writechhit.cpp; sourceTree = "<group>"; };
 		A74D36B6137DAFAA00332B0C /* chimerauchimecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimerauchimecommand.h; sourceTree = "<group>"; };
 		A74D36B7137DAFAA00332B0C /* chimerauchimecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimerauchimecommand.cpp; sourceTree = "<group>"; };
 		A754149514840CF7005850D1 /* summaryqualcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = summaryqualcommand.h; sourceTree = "<group>"; };
@@ -1221,63 +1155,6 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		A74D3644137DA7CE00332B0C /* uchime */ = {
-			isa = PBXGroup;
-			children = (
-				A74D3655137DAB8300332B0C /* addtargets2.cpp */,
-				A74D3656137DAB8300332B0C /* alignchime.cpp */,
-				A74D3657137DAB8300332B0C /* alignchimel.cpp */,
-				A74D3658137DAB8300332B0C /* allocs.h */,
-				A74D3659137DAB8300332B0C /* alnheuristics.h */,
-				A74D365A137DAB8300332B0C /* alnparams.cpp */,
-				A74D365B137DAB8300332B0C /* alnparams.h */,
-				A74D365C137DAB8300332B0C /* alpha.cpp */,
-				A74D365D137DAB8300332B0C /* alpha.h */,
-				A74D365E137DAB8300332B0C /* alpha2.cpp */,
-				A74D365F137DAB8300332B0C /* chainer.h */,
-				A74D3660137DAB8300332B0C /* chime.h */,
-				A74D3661137DAB8300332B0C /* diagbox.h */,
-				A74D3662137DAB8300332B0C /* dp.h */,
-				A74D3663137DAB8300332B0C /* evalue.h */,
-				A74D3664137DAB8300332B0C /* fractid.cpp */,
-				A74D3665137DAB8300332B0C /* getparents.cpp */,
-				A74D3666137DAB8300332B0C /* globalalign2.cpp */,
-				A74D3667137DAB8300332B0C /* help.h */,
-				A74D3668137DAB8300332B0C /* hsp.h */,
-				A74D3669137DAB8300332B0C /* hspfinder.h */,
-				A74D366A137DAB8300332B0C /* make3way.cpp */,
-				A74D366B137DAB8300332B0C /* mx.cpp */,
-				A74D366C137DAB8300332B0C /* mx.h */,
-				A74D366D137DAB8300332B0C /* myopts.h */,
-				A74D366E137DAB8300332B0C /* myutils.cpp */,
-				A74D366F137DAB8300332B0C /* myutils.h */,
-				A74D3670137DAB8300332B0C /* orf.h */,
-				A74D3671137DAB8300332B0C /* out.h */,
-				A74D3672137DAB8300332B0C /* path.cpp */,
-				A74D3673137DAB8300332B0C /* path.h */,
-				A74D3674137DAB8300332B0C /* searchchime.cpp */,
-				A74D3675137DAB8300332B0C /* seq.h */,
-				A74D3676137DAB8300332B0C /* seqdb.cpp */,
-				A74D3677137DAB8300332B0C /* seqdb.h */,
-				A74D3678137DAB8300332B0C /* setnucmx.cpp */,
-				A74D3679137DAB8300332B0C /* sfasta.cpp */,
-				A74D367A137DAB8300332B0C /* sfasta.h */,
-				A74D367B137DAB8300332B0C /* svnmods.h */,
-				A74D367C137DAB8300332B0C /* svnversion.h */,
-				A74D367D137DAB8300332B0C /* timers.h */,
-				A74D367E137DAB8300332B0C /* timing.h */,
-				A74D367F137DAB8300332B0C /* tracebackbit.cpp */,
-				A74D3680137DAB8300332B0C /* uc.h */,
-				A74D3681137DAB8300332B0C /* uchime_main.cpp */,
-				A74D3682137DAB8300332B0C /* ultra.h */,
-				A74D3683137DAB8300332B0C /* usort.cpp */,
-				A74D3684137DAB8300332B0C /* viterbifast.cpp */,
-				A74D3685137DAB8300332B0C /* windex.h */,
-				A74D3686137DAB8300332B0C /* writechhit.cpp */,
-			);
-			name = uchime;
-			sourceTree = "<group>";
-		};
 		A7D161E7149F7F50000523E8 /* fortran */ = {
 			isa = PBXGroup;
 			children = (
@@ -1302,6 +1179,8 @@
 			isa = PBXGroup;
 			children = (
 				A7E9B6AE12D37EC400DA6239 /* command.hpp */,
+				219C1DE11552C508004209F9 /* newcommandtemplate.h */,
+				219C1DDF1552C4BD004209F9 /* newcommandtemplate.cpp */,
 				A7E9B65212D37EC300DA6239 /* aligncommand.h */,
 				A7E9B65112D37EC300DA6239 /* aligncommand.cpp */,
 				A7A61F2B130062E000E05B6B /* amovacommand.h */,
@@ -1376,6 +1255,8 @@
 				A7E9B6E312D37EC400DA6239 /* filterseqscommand.cpp */,
 				A778FE69134CA6CA00C0BA33 /* getcommandinfocommand.h */,
 				A778FE6A134CA6CA00C0BA33 /* getcommandinfocommand.cpp */,
+				219C1DE51559BCF2004209F9 /* getcoremicrobiomecommand.h */,
+				219C1DE31559BCCD004209F9 /* getcoremicrobiomecommand.cpp */,
 				A7FE7C3E1330EA1000F7B327 /* getcurrentcommand.h */,
 				A7FE7C3F1330EA1000F7B327 /* getcurrentcommand.cpp */,
 				A7E9B6F312D37EC400DA6239 /* getgroupcommand.h */,
@@ -1795,7 +1676,6 @@
 		A7E9BA4512D3965600DA6239 /* chimera */ = {
 			isa = PBXGroup;
 			children = (
-				A74D3644137DA7CE00332B0C /* uchime */,
 				A7E9B65C12D37EC300DA6239 /* bellerophon.cpp */,
 				A7E9B65D12D37EC300DA6239 /* bellerophon.h */,
 				A7E9B67412D37EC400DA6239 /* ccode.cpp */,
@@ -2245,28 +2125,6 @@
 				A7FE7C401330EA1000F7B327 /* getcurrentcommand.cpp in Sources */,
 				A7FE7E6D13311EA400F7B327 /* setcurrentcommand.cpp in Sources */,
 				A778FE6B134CA6CA00C0BA33 /* getcommandinfocommand.cpp in Sources */,
-				A74D3687137DAB8300332B0C /* addtargets2.cpp in Sources */,
-				A74D3688137DAB8400332B0C /* alignchime.cpp in Sources */,
-				A74D3689137DAB8400332B0C /* alignchimel.cpp in Sources */,
-				A74D368A137DAB8400332B0C /* alnparams.cpp in Sources */,
-				A74D368B137DAB8400332B0C /* alpha.cpp in Sources */,
-				A74D368C137DAB8400332B0C /* alpha2.cpp in Sources */,
-				A74D368D137DAB8400332B0C /* fractid.cpp in Sources */,
-				A74D368E137DAB8400332B0C /* getparents.cpp in Sources */,
-				A74D368F137DAB8400332B0C /* globalalign2.cpp in Sources */,
-				A74D3690137DAB8400332B0C /* make3way.cpp in Sources */,
-				A74D3691137DAB8400332B0C /* mx.cpp in Sources */,
-				A74D3692137DAB8400332B0C /* myutils.cpp in Sources */,
-				A74D3693137DAB8400332B0C /* path.cpp in Sources */,
-				A74D3694137DAB8400332B0C /* searchchime.cpp in Sources */,
-				A74D3695137DAB8400332B0C /* seqdb.cpp in Sources */,
-				A74D3696137DAB8400332B0C /* setnucmx.cpp in Sources */,
-				A74D3697137DAB8400332B0C /* sfasta.cpp in Sources */,
-				A74D3698137DAB8400332B0C /* tracebackbit.cpp in Sources */,
-				A74D3699137DAB8400332B0C /* uchime_main.cpp in Sources */,
-				A74D369A137DAB8400332B0C /* usort.cpp in Sources */,
-				A74D369B137DAB8400332B0C /* viterbifast.cpp in Sources */,
-				A74D369C137DAB8400332B0C /* writechhit.cpp in Sources */,
 				A74D36B8137DAFAA00332B0C /* chimerauchimecommand.cpp in Sources */,
 				A77A221F139001B600B0BE70 /* deuniquetreecommand.cpp in Sources */,
 				A7730EFF13967241007433A3 /* countseqscommand.cpp in Sources */,
@@ -2308,6 +2166,8 @@
 				A7876A26152A017C00A0AE86 /* subsample.cpp in Sources */,
 				A7D755DA1535F679009BF21A /* treereader.cpp in Sources */,
 				A724D2B7153C8628000A826F /* makebiomcommand.cpp in Sources */,
+				219C1DE01552C4BD004209F9 /* newcommandtemplate.cpp in Sources */,
+				219C1DE41559BCCF004209F9 /* getcoremicrobiomecommand.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2318,13 +2178,17 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CONFIGURATION_TEMP_DIR = /Users/SarahsWork/Desktop;
 				COPY_PHASE_STRIP = NO;
+				DEPLOYMENT_LOCATION = YES;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				INSTALL_PATH = /usr/local/bin;
+				INSTALL_PATH = /Users/SarahsWork/Desktop/debug;
+				OBJROOT = /Users/SarahsWork/Desktop;
 				PRODUCT_NAME = Mothur;
 				SDKROOT = macosx10.6;
+				SYMROOT = /Users/SarahsWork/Desktop;
 			};
 			name = Debug;
 		};
@@ -2332,12 +2196,15 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CONFIGURATION_TEMP_DIR = /Users/SarahsWork/Desktop;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEPLOYMENT_LOCATION = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_WARN_UNUSED_VALUE = YES;
-				INSTALL_PATH = ./;
+				INSTALL_PATH = /Users/SarahsWork/Desktop/debug;
+				OBJROOT = /Users/SarahsWork/Desktop;
 				PRODUCT_NAME = Mothur;
+				SYMROOT = /Users/SarahsWork/Desktop;
 			};
 			name = Release;
 		};

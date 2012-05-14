@@ -131,6 +131,7 @@
 #include "pcrseqscommand.h"
 #include "createdatabasecommand.h"
 #include "makebiomcommand.h"
+#include "getcoremicrobiomecommand.h"
 
 /*******************************************************/
 
@@ -283,6 +284,7 @@ CommandFactory::CommandFactory(){
     commands["pcr.seqs"]            = "pcr.seqs";
     commands["create.database"]     = "create.database";
     commands["make.biom"]           = "make.biom";
+    commands["get.coremicrobiome"]   = "get.coremicrobiome";
 	commands["quit"]				= "MPIEnabled"; 
 
 }
@@ -493,6 +495,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         else if(commandName == "pcr.seqs")              {	command = new PcrSeqsCommand(optionString);                 }
         else if(commandName == "create.database")       {	command = new CreateDatabaseCommand(optionString);          }
         else if(commandName == "make.biom")             {	command = new MakeBiomCommand(optionString);                }
+        else if(commandName == "get.coremicrobiome")    {	command = new GetCoreMicroBiomeCommand(optionString);       }
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -644,6 +647,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
         else if(commandName == "pcr.seqs")              {	pipecommand = new PcrSeqsCommand(optionString);                 }
         else if(commandName == "create.database")       {	pipecommand = new CreateDatabaseCommand(optionString);          }
         else if(commandName == "make.biom")             {	pipecommand = new MakeBiomCommand(optionString);                }
+        else if(commandName == "get.coremicrobiome")    {	pipecommand = new GetCoreMicroBiomeCommand(optionString);       }
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -781,6 +785,7 @@ Command* CommandFactory::getCommand(string commandName){
         else if(commandName == "pcr.seqs")              {	shellcommand = new PcrSeqsCommand();                }
         else if(commandName == "create.database")       {	shellcommand = new CreateDatabaseCommand();         }
         else if(commandName == "make.biom")             {	shellcommand = new MakeBiomCommand();               }
+        else if(commandName == "get.coremicrobiome")    {	shellcommand = new GetCoreMicroBiomeCommand();      }
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;

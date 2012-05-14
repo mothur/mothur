@@ -1,6 +1,6 @@
 #ifndef ALIGNCOMMAND_H
 #define ALIGNCOMMAND_H
-
+//test
 /*
  *  aligncommand.h
  *  Mothur
@@ -10,7 +10,6 @@
  *
  */
 
-#include "mothur.h"
 #include "command.hpp"
 #include "database.hpp"
 #include "alignment.hpp"

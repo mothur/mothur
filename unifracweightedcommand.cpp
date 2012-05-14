@@ -237,6 +237,7 @@ int UnifracWeightedCommand::execute() {
         T = reader->getTrees();
         tmap = T[0]->getTreeMap();
         map<string, string> nameMap = reader->getNames();
+        map<string, string> unique2Dup = reader->getNameMap();
         delete reader;
     
         if (m->control_pressed) {  delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; } return 0; }
@@ -336,11 +337,15 @@ int UnifracWeightedCommand::execute() {
                 
                 //copy to preserve old one - would do this in subsample but memory cleanup becomes messy.
                 TreeMap* newTmap = new TreeMap();
-                newTmap->getCopy(*tmap);
+                //newTmap->getCopy(*tmap);
                 
+                //SubSample sample;
+               //Tree* subSampleTree = sample.getSample(T[i], newTmap, nameMap, subsampleSize);
+                
+                //uses method of setting groups to doNotIncludeMe
                 SubSample sample;
-                Tree* subSampleTree = sample.getSample(T[i], newTmap, nameMap, subsampleSize);
-                   
+                Tree* subSampleTree = sample.getSample(T[i], tmap, newTmap, subsampleSize, unique2Dup);
+
                 //call new weighted function
                 vector<double> iterData; iterData.resize(numComp,0);
                 Weighted thisWeighted(includeRoot);

@@ -12,7 +12,7 @@
 //#include "uc.h"
 #include "sequence.hpp"
 #include "referencedb.h"
-
+#include "systemcommand.h"
 
 //**********************************************************************************************************************
 vector<string> ChimeraUchimeCommand::setParameters(){	
@@ -463,10 +463,20 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 			string uchimeCommand;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 			uchimeCommand = path + "uchime";	//	format the database, -o option gives us the ability
+            if (m->debug) { 
+                m->mothurOut("[DEBUG]: Uchime location using \"which uchime\" = "); 
+                Command* newCommand = new SystemCommand("which uchime"); m->mothurOutEndLine();
+                newCommand->execute();
+                delete newCommand;
+                m->mothurOut("[DEBUG]: Mothur's location using \"which mothur\" = "); 
+                newCommand = new SystemCommand("which mothur"); m->mothurOutEndLine();
+                newCommand->execute();
+                delete newCommand;
+            }
 #else
 			uchimeCommand = path + "uchime.exe";
 #endif
-			
+        
 			//test to make sure uchime exists
 			ifstream in;
 			uchimeCommand = m->getFullPathName(uchimeCommand);
