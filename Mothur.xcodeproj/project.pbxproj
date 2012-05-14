@@ -363,7 +363,7 @@
 		219C1DDF1552C4BD004209F9 /* newcommandtemplate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = newcommandtemplate.cpp; sourceTree = "<group>"; };
 		219C1DE11552C508004209F9 /* newcommandtemplate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = newcommandtemplate.h; sourceTree = "<group>"; };
 		219C1DE31559BCCD004209F9 /* getcoremicrobiomecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getcoremicrobiomecommand.cpp; sourceTree = "<group>"; };
-		219C1DE51559BCF2004209F9 /* getcoremicrobiomecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; path = getcoremicrobiomecommand.h; sourceTree = "<group>"; };
+		219C1DE51559BCF2004209F9 /* getcoremicrobiomecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getcoremicrobiomecommand.h; sourceTree = "<group>"; };
 		7E6BE10812F710D8007ADDBE /* refchimeratest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = refchimeratest.h; sourceTree = "<group>"; };
 		7E6BE10912F710D8007ADDBE /* refchimeratest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = refchimeratest.cpp; sourceTree = "<group>"; };
 		7E78911B135F3E8600E725D2 /* eachgapdistignorens.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = eachgapdistignorens.h; sourceTree = "<group>"; };
@@ -2178,17 +2178,17 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CONFIGURATION_TEMP_DIR = /Users/SarahsWork/Desktop;
+				CONFIGURATION_TEMP_DIR = /Users/pschloss/Desktop/mothur;
 				COPY_PHASE_STRIP = NO;
 				DEPLOYMENT_LOCATION = YES;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				INSTALL_PATH = /Users/SarahsWork/Desktop/debug;
-				OBJROOT = /Users/SarahsWork/Desktop;
+				INSTALL_PATH = /Users/pschloss/Desktop/mothur/build/Debug;
+				OBJROOT = /Users/pschloss/Desktop/mothur;
 				PRODUCT_NAME = Mothur;
 				SDKROOT = macosx10.6;
-				SYMROOT = /Users/SarahsWork/Desktop;
+				SYMROOT = /Users/pschloss/Desktop/mothur;
 			};
 			name = Debug;
 		};
@@ -2196,15 +2196,15 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CONFIGURATION_TEMP_DIR = /Users/SarahsWork/Desktop;
+				CONFIGURATION_TEMP_DIR = /Users/pschloss/Desktop/mothur;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEPLOYMENT_LOCATION = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_WARN_UNUSED_VALUE = YES;
-				INSTALL_PATH = /Users/SarahsWork/Desktop/debug;
-				OBJROOT = /Users/SarahsWork/Desktop;
+				INSTALL_PATH = /Users/pschloss/Desktop/mothur/build/Debug;
+				OBJROOT = /Users/pschloss/Desktop/mothur;
 				PRODUCT_NAME = Mothur;
-				SYMROOT = /Users/SarahsWork/Desktop;
+				SYMROOT = /Users/pschloss/Desktop/mothur;
 			};
 			name = Release;
 		};
