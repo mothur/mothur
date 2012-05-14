@@ -92,6 +92,8 @@ SetDirectoryCommand::SetDirectoryCommand(string option)  {
 			if (temp == "not found") {  debug = false;  nodebug=true; }
             else {  debug = m->isTrue(temp); }
             m->debug = debug;
+            
+            if (debug) { m->mothurOut("Setting [DEBUG] flag.\n"); }
 				
 			if ((input == "") && (output == "") && (tempdefault == "") && nodebug) {	
 				m->mothurOut("You must provide either an input, output, tempdefault or debug for the set.outdir command."); m->mothurOutEndLine(); abort = true;
