@@ -100,7 +100,7 @@ class BrokenStick
 		void doBStick(vector<double>);
 };
 
-/**************************************************************************************************/
+//**************************************************************************************************/
 /*This Class calculates the geometric series distribution for the data.
 It prints the D-Statistic and the critical values for the Kolmogorov-Smirnov
 1-sample test at the 95% confidence interval.*/

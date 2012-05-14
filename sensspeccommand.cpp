@@ -19,7 +19,7 @@ vector<string> SensSpecCommand::setParameters(){
 		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
 		CommandParameter pcutoff("cutoff", "Number", "", "-1.00", "", "", "",false,false); parameters.push_back(pcutoff);
 		CommandParameter pprecision("precision", "Number", "", "100", "", "", "",false,false); parameters.push_back(pprecision);
-		CommandParameter phard("hard", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(phard);
+		CommandParameter phard("hard", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(phard);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
 		
@@ -256,7 +256,9 @@ int SensSpecCommand::processPhylip(){
 		
 		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-			if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }  delete list;  return 0;  }
+			if(m->control_pressed){
+                for (int i = 0; i < outputNames.size(); i++){	m->mothurRemove(outputNames[i]);  }  delete list;  return 0;
+            }
 			
 			if(allLines == 1 || labels.count(list->getLabel()) == 1){			
 				
@@ -324,7 +326,9 @@ int SensSpecCommand::processPhylip(){
 		exit(1);
 	}
 }
+
 //***************************************************************************************************************
+
 int SensSpecCommand::fillSeqMap(map<string, int>& seqMap, ListVector*& list){
 	try {
 		//for each otu
@@ -387,7 +391,7 @@ int SensSpecCommand::fillSeqPairSet(set<string>& seqPairSet, ListVector*& list){
 		return numSeqs;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "SensSpecCommand", "fillSeqMap");
+		m->errorOut(e, "SensSpecCommand", "fillSeqPairSet");
 		exit(1);
 	}
 }
@@ -401,7 +405,7 @@ int SensSpecCommand::process(map<string, int>& seqMap, string label, bool& getCu
 		ifstream phylipFile;
 		m->openInputFile(distFile, phylipFile);
 		phylipFile >> pNumSeqs;
-		if(pNumSeqs != lNumSeqs){	m->mothurOut("numSeq mismatch!\n"); m->control_pressed = true; }
+		if(pNumSeqs != lNumSeqs){	m->mothurOut("numSeq mismatch!\n"); /*m->control_pressed = true;*/ }
 		
 		string seqName;
 		double distance;
@@ -426,7 +430,7 @@ int SensSpecCommand::process(map<string, int>& seqMap, string label, bool& getCu
 		
 		m->mothurOut(label); m->mothurOutEndLine();
 		
-		for(int i=0;i<lNumSeqs;i++){
+		for(int i=0;i<pNumSeqs;i++){
 			
 			if (m->control_pressed) { return 0; }
 			

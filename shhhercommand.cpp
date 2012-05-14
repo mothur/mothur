@@ -431,6 +431,8 @@ int ShhherCommand::execute(){
 				
 				if (m->control_pressed) { break; }
 				
+                
+                
 				getOTUData(listFileName);
 
 				m->mothurRemove(distFileName);
@@ -443,6 +445,7 @@ int ShhherCommand::execute(){
 
 				if (m->control_pressed) { break; }
 				
+            
 				for(int i=1;i<ncpus;i++){
 					MPI_Send(&numOTUs, 1, MPI_INT, i, tag, MPI_COMM_WORLD);
 					MPI_Send(&singleLookUp[0], singleLookUp.size(), MPI_DOUBLE, i, tag, MPI_COMM_WORLD);
@@ -2448,7 +2451,7 @@ int ShhherCommand::cluster(string filename, string distFileName, string namesFil
 		NameAssignment* clusterNameMap = new NameAssignment(namesFileName);
 		clusterNameMap->readMap();
 		read->read(clusterNameMap);
-		
+        
 		ListVector* list = read->getListVector();
 		SparseMatrix* matrix = read->getMatrix();
 		
