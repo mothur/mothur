@@ -216,7 +216,7 @@ vector<int> ParseFastaQCommand::convertQual(string qual) {
 	try {
 		vector<int> qualScores;
 		
-		int controlChar = int('!');
+		int controlChar = int('@');
 		
 		for (int i = 0; i < qual.length(); i++) { 
 			int temp = int(qual[i]);

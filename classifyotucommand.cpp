@@ -475,6 +475,9 @@ vector<string> ClassifyOtuCommand::findConsensusTaxonomy(int bin, ListVector* th
 				}
 				
 			}
+            
+            //phylotree adds an extra unknown so we want to remove that
+            if (bestChild.name == "unknown") { bestChildSize--; }
 				
 			//is this taxonomy above cutoff
 			int consensusConfidence = ceil((bestChildSize / (float) size) * 100);

@@ -14,7 +14,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "8DD76FA90486AB0100D96B5E"
-               BuildableName = "Mothur"
+               BuildableName = "mothur"
                BlueprintName = "Mothur"
                ReferencedContainer = "container:Mothur.xcodeproj">
             </BuildableReference>
@@ -32,7 +32,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "8DD76FA90486AB0100D96B5E"
-            BuildableName = "Mothur"
+            BuildableName = "mothur"
             BlueprintName = "Mothur"
             ReferencedContainer = "container:Mothur.xcodeproj">
          </BuildableReference>
@@ -50,7 +50,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "8DD76FA90486AB0100D96B5E"
-            BuildableName = "Mothur"
+            BuildableName = "mothur"
             BlueprintName = "Mothur"
             ReferencedContainer = "container:Mothur.xcodeproj">
          </BuildableReference>
@@ -68,7 +68,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "8DD76FA90486AB0100D96B5E"
-            BuildableName = "Mothur"
+            BuildableName = "mothur"
             BlueprintName = "Mothur"
             ReferencedContainer = "container:Mothur.xcodeproj">
          </BuildableReference>
