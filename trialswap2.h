@@ -26,6 +26,8 @@ public:
     double calc_vratio (int, int, vector<int>, vector<int>);
     int calc_checker (vector<vector<int> > &, vector<int>, int, int);
     double calc_c_score (vector<vector<int> > &, vector<int>, int, int);
+    double get_zscore (double, double, double);
+    double getSD (int, vector<double>, double);
     
     
 private:
@@ -35,7 +37,7 @@ private:
     int print_matrix(vector<vector<int> > &, int, int);
     
     
-    
+        
 };
 #endif
 
