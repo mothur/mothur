@@ -293,26 +293,30 @@ double TrialSwap2::t_test (double initialscore, int runs, double nullMean, vecto
 /**************************************************************************************************/
 double TrialSwap2::getSD (int runs, vector<double> scorevec, double nullMean)
 {
-    double sum = 0;
-    for(int i=0;i<runs;i++)
-        {
-            if (m->control_pressed) { return 0; }
-            sum += pow((scorevec[i] - nullMean),2);
-        }
-    return sqrt( (1/runs) * sum );
+    try{
+        double sum = 0;
+        for(int i=0;i<runs;i++)
+            {
+                if (m->control_pressed) { return 0; }
+                sum += pow((scorevec[i] - nullMean),2);
+            }
+        return sqrt( (1/double(runs)) * sum );
+    }
+    catch(exception& e) {
+        m->errorOut(e, "TrialSwap2", "getSD");
+        exit(1);
+    }
 }
 /**************************************************************************************************/
 double TrialSwap2::get_zscore (double sd, double nullMean, double initscore)
 {
-    map<double, double> ztable;
-    
-    ztable["0.00"] = 0.5;
-    
-    double z;
-    
-    z = (initscore - nullMean) / sd;
-    
-    return z;
+    try {
+        return (initscore - nullMean) / sd;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "TrialSwap2", "get_zscore");
+        exit(1);
+    }
 }
 /**************************************************************************************************/
 int TrialSwap2::print_matrix(vector<vector<int> > &matrix, int nrows, int ncols)

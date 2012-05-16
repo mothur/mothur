@@ -180,7 +180,7 @@ int CooccurrenceCommand::execute(){
         m->openOutputFile(outputFileName, out);
         outputNames.push_back(outputFileName);  outputTypes["summary"].push_back(outputFileName);
         out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
-        out << "metric\tlabel\tScore\tpValue\n";
+        out << "metric\tlabel\tScore\tzScore\n";
 
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
@@ -530,12 +530,20 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
         
         m->mothurOutEndLine(); m->mothurOut("average metric score: " + toString(nullMean)); m->mothurOutEndLine();
         
+        //calc_p_value is not a statistical p-value, it's just the average that are either > or < the initscore.
+        //All it does is show what is expected in a competitively structured community
+        //zscore is output so p-value can be looked up in a ztable
         double pvalue = 0.0;
         if (metric == "cscore" || metric == "checker") { pvalue = trial.calc_pvalue_greaterthan (stats, initscore); }
         else{ pvalue = trial.calc_pvalue_lessthan (stats, initscore); }
+
+        double sd = trial.getSD(runs, stats, nullMean);
+
+        double zscore = trial.get_zscore(sd, nullMean, initscore);
         
-        m->mothurOut("pvalue: " + toString(pvalue)); m->mothurOutEndLine();
-        out << metric << '\t' << thisLookUp[0]->getLabel() << '\t' << nullMean << '\t' << pvalue << endl;
+        m->mothurOut("zscore: " + toString(zscore)); m->mothurOutEndLine();
+        m->mothurOut("standard deviation: " + toString(sd)); m->mothurOutEndLine();
+        out << metric << '\t' << thisLookUp[0]->getLabel() << '\t' << nullMean << '\t' << zscore << endl;
         
         return 0;
     }
