@@ -37,6 +37,8 @@
 		A79234D713C74BF6002B08E2 /* mothurfisher.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A79234D613C74BF6002B08E2 /* mothurfisher.cpp */; };
 		A795840D13F13CD900F201D5 /* countgroupscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A795840C13F13CD900F201D5 /* countgroupscommand.cpp */; };
 		A799F5B91309A3E000AEEFA0 /* makefastqcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A799F5B81309A3E000AEEFA0 /* makefastqcommand.cpp */; };
+		A7A0671A1562946F0095C8C5 /* listotulabelscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7A067191562946F0095C8C5 /* listotulabelscommand.cpp */; };
+		A7A0671F1562AC3E0095C8C5 /* makecontigscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7A0671E1562AC3E0095C8C5 /* makecontigscommand.cpp */; };
 		A7A32DAA14DC43B00001D2E5 /* sortseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7A32DA914DC43B00001D2E5 /* sortseqscommand.cpp */; };
 		A7A3C8C914D041AD00B1BFBE /* otuassociationcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7A3C8C714D041AD00B1BFBE /* otuassociationcommand.cpp */; };
 		A7A61F2D130062E000E05B6B /* amovacommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7A61F2C130062E000E05B6B /* amovacommand.cpp */; };
@@ -419,6 +421,10 @@
 		A795840C13F13CD900F201D5 /* countgroupscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = countgroupscommand.cpp; sourceTree = "<group>"; };
 		A799F5B71309A3E000AEEFA0 /* makefastqcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = makefastqcommand.h; sourceTree = "<group>"; };
 		A799F5B81309A3E000AEEFA0 /* makefastqcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = makefastqcommand.cpp; sourceTree = "<group>"; };
+		A7A067191562946F0095C8C5 /* listotulabelscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = listotulabelscommand.cpp; sourceTree = "<group>"; };
+		A7A0671C156294810095C8C5 /* listotulabelscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = listotulabelscommand.h; sourceTree = "<group>"; };
+		A7A0671D1562AC230095C8C5 /* makecontigscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = makecontigscommand.h; sourceTree = "<group>"; };
+		A7A0671E1562AC3E0095C8C5 /* makecontigscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = makecontigscommand.cpp; sourceTree = "<group>"; };
 		A7A32DA914DC43B00001D2E5 /* sortseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sortseqscommand.cpp; sourceTree = "<group>"; };
 		A7A32DAC14DC43D10001D2E5 /* sortseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sortseqscommand.h; sourceTree = "<group>"; };
 		A7A3C8C714D041AD00B1BFBE /* otuassociationcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = otuassociationcommand.cpp; sourceTree = "<group>"; };
@@ -1299,10 +1305,14 @@
 				A7E9B73B12D37EC400DA6239 /* libshuffcommand.cpp */,
 				A7E9B73E12D37EC400DA6239 /* listseqscommand.h */,
 				A7E9B73D12D37EC400DA6239 /* listseqscommand.cpp */,
+				A7A0671C156294810095C8C5 /* listotulabelscommand.h */,
+				A7A067191562946F0095C8C5 /* listotulabelscommand.cpp */,
 				A7FA10001302E096003860FE /* mantelcommand.h */,
 				A7FA10011302E096003860FE /* mantelcommand.cpp */,
 				A724D2B4153C8600000A826F /* makebiomcommand.h */,
 				A724D2B6153C8628000A826F /* makebiomcommand.cpp */,
+				A7A0671D1562AC230095C8C5 /* makecontigscommand.h */,
+				A7A0671E1562AC3E0095C8C5 /* makecontigscommand.cpp */,
 				A799F5B71309A3E000AEEFA0 /* makefastqcommand.h */,
 				A799F5B81309A3E000AEEFA0 /* makefastqcommand.cpp */,
 				A7E9B74412D37EC400DA6239 /* makegroupcommand.h */,
@@ -2168,6 +2178,8 @@
 				A724D2B7153C8628000A826F /* makebiomcommand.cpp in Sources */,
 				219C1DE01552C4BD004209F9 /* newcommandtemplate.cpp in Sources */,
 				219C1DE41559BCCF004209F9 /* getcoremicrobiomecommand.cpp in Sources */,
+				A7A0671A1562946F0095C8C5 /* listotulabelscommand.cpp in Sources */,
+				A7A0671F1562AC3E0095C8C5 /* makecontigscommand.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

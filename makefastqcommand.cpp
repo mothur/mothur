@@ -201,7 +201,7 @@ string MakeFastQCommand::convertQual(vector<int> qual) {
 	try {
 		string qualScores;
 		
-		int controlChar = int('!');
+		int controlChar = int('@');
 		
 		for (int i = 0; i < qual.size(); i++) { 
 			int temp = qual[i] + controlChar;
