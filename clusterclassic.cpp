@@ -19,6 +19,10 @@ ClusterClassic::ClusterClassic(float c, string f, bool s) : method(f), smallDist
 		cutoff = c;
 		aboveCutoff = cutoff + 10000.0;
 		m = MothurOut::getInstance();
+        if(method == "furthest")        {   tag = "fn";   }
+        else if (method == "average")   {   tag = "an";   }
+        else if (method == "weighted")  {   tag = "wn";   }        
+        else if (method == "nearest")   {   tag = "nn";   }
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClusterClassic", "ClusterClassic");

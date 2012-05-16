@@ -172,9 +172,13 @@ int MakeContigsCommand::execute(){
         //read ffastq and rfastq files creating fasta and qual files.
         //this function will create a forward and reverse, fasta and qual files for each processor.
         //files has an entry for each processor. files[i][0] = forwardFasta, files[i][1] = forwardQual, files[i][2] = reverseFasta, files[i][3] = reverseQual
-        vector< vector<string> > files = readFastqFiles();  
+        int numReads = 0;
+        m->mothurOut("Reading fastq data..."); cout.flush();
+        vector< vector<string> > files = readFastqFiles(numReads);  
+        m->mothurOut("Done.\n");
         
         
+       
         
         string currentFasta = "";
 		itTypes = outputTypes.find("fasta");
@@ -203,7 +207,7 @@ int MakeContigsCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-vector< vector<string> > MakeContigsCommand::readFastqFiles(){
+vector< vector<string> > MakeContigsCommand::readFastqFiles(int& count){
     try {
         vector< vector<string> > files;
         
@@ -250,7 +254,7 @@ vector< vector<string> > MakeContigsCommand::readFastqFiles(){
         ifstream inReverse;
         m->openInputFile(rfastqfile, inReverse);
         
-        int count = 0;
+        count = 0;
         while ((!inForward.eof()) && (!inReverse.eof())) {
             
             if (m->control_pressed) { for (it = tempfiles.begin(); it!=tempfiles.end(); it++) { for (int i = 0; i < (it->second).size(); i++) { (*(it->second)[i]).close();  delete (it->second)[i]; } } for (int i = 0; i < files.size(); i++) {  for(int j = 0; j < files[i].size(); j++) { m->mothurRemove(files[i][j]); } } inForward.close(); inReverse.close(); return files; }
@@ -275,7 +279,15 @@ vector< vector<string> > MakeContigsCommand::readFastqFiles(){
             *(tempfiles[process][3]) << endl;
             
             count++;
-        }
+            
+            //report progress
+			if((count) % 10000 == 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
+			
+		}
+		//report progress
+		if((count) % 10000 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
+		
+
         
         //close files, delete ofstreams
         for (it = tempfiles.begin(); it!=tempfiles.end(); it++) { for (int i = 0; i < (it->second).size(); i++) { (*(it->second)[i]).close();  delete (it->second)[i]; } }

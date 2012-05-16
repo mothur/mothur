@@ -48,7 +48,7 @@ private:
     vector<string> outputNames;
     
     fastqRead readFastq(ifstream&);
-    vector< vector<string> > readFastqFiles();
+    vector< vector<string> > readFastqFiles(int&);
     bool checkReads(fastqRead&, fastqRead&);
 };
 

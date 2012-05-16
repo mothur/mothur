@@ -25,7 +25,7 @@ SplitMatrix::SplitMatrix(string distfile, string name, string tax, float c, stri
 }
 /***********************************************************************/
 
-SplitMatrix::SplitMatrix(string ffile, string name, string tax, float c, float cu, string t, int p, string output){
+SplitMatrix::SplitMatrix(string ffile, string name, string tax, float c, float cu, string t, int p, bool cl, string output){
 	m = MothurOut::getInstance();
 	fastafile = ffile;
 	namefile = name;
@@ -34,6 +34,7 @@ SplitMatrix::SplitMatrix(string ffile, string name, string tax, float c, float c
 	distCutoff = cu; //for fasta method if you are creating distance matrix you need a cutoff for that
 	method = t;
 	processors = p;
+    classic = cl;
 	outputDir = output;
 }
 
@@ -185,7 +186,9 @@ int SplitMatrix::createDistanceFilesFromTax(map<string, int>& seqGroup, int numG
 		//process each distance file
 		for (int i = 0; i < numGroups; i++) { 
 			
-			string options = "fasta=" + (fastafile + "." + toString(i) + ".temp") + ", processors=" + toString(processors) + ", cutoff=" + toString(distCutoff);
+			string options = "";
+            if (classic) { options = "fasta=" + (fastafile + "." + toString(i) + ".temp") + ", processors=" + toString(processors) + ", output=lt"; }
+            else { options = "fasta=" + (fastafile + "." + toString(i) + ".temp") + ", processors=" + toString(processors) + ", cutoff=" + toString(distCutoff); }
 			if (outputDir != "") { options += ", outputdir=" + outputDir; }
 			
 			Command* command = new DistanceCommand(options);
@@ -229,7 +232,9 @@ int SplitMatrix::createDistanceFilesFromTax(map<string, int>& seqGroup, int numG
 		for(int i=0;i<numGroups;i++){
 			string tempNameFile = namefile + "." + toString(i) + ".temp";
 			if (outputDir == "") { outputDir = m->hasPath(fastafile); }
-			string tempDistFile = outputDir + m->getRootName(m->getSimpleName((fastafile + "." + toString(i) + ".temp"))) + "dist";
+			string tempDistFile = "";
+            if (classic) { tempDistFile =  outputDir + m->getRootName(m->getSimpleName((fastafile + "." + toString(i) + ".temp"))) + "phylip.dist";}
+            else { tempDistFile = outputDir + m->getRootName(m->getSimpleName((fastafile + "." + toString(i) + ".temp"))) + "dist"; }
 
 			//if there are valid distances
 			ifstream fileHandle;
