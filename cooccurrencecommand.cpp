@@ -272,6 +272,12 @@ int CooccurrenceCommand::execute(){
 int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp, ofstream& out){
     try {
         int numOTUS = thisLookUp[0]->getNumBins();
+        
+        if(numOTUS < 2) {
+            m->mothurOut("Not enough OTUs for co-occurrence analysis, skipping"); m->mothurOutEndLine();
+            return 0;
+        }
+        
         vector< vector<int> > co_matrix; co_matrix.resize(thisLookUp[0]->getNumBins());
         for (int i = 0; i < thisLookUp[0]->getNumBins(); i++) { co_matrix[i].resize((thisLookUp.size()), 0); }
         vector<int> columntotal; columntotal.resize(thisLookUp.size(), 0);
