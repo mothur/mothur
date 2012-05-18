@@ -40,7 +40,12 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 		ifstream fileHandle;
 		m->openInputFile(filename, fileHandle);
 		
-		fileHandle >> nseqs >> name;
+        string numTest;
+		fileHandle >> numTest >> name;
+        
+        if (!m->isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
+        else { convert(numTest, nseqs); }
+
 
 		matrixNames.push_back(name);
 
