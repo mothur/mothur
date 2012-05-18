@@ -110,6 +110,7 @@ void Alignment::traceBack(){			//	This traceback routine is used by the dynamic 
             newBMap[pairwiseLength-spot-1] = it->first-1;
         }
 		BBaseMap = newBMap;
+        
 		for(int i=0;i<seqAaln.length();i++){
 			if(seqAaln[i] != '-' && seqBaln[i] == '-')		{	seqAstart++;	}
 			else if(seqAaln[i] == '-' && seqBaln[i] != '-')	{	seqBstart++;	}

@@ -18,6 +18,7 @@ vector<string> MakeContigsCommand::setParameters(){
 		CommandParameter pmismatch("mismatch", "Number", "", "-1.0", "", "", "",false,false); parameters.push_back(pmismatch);
 		CommandParameter pgapopen("gapopen", "Number", "", "-2.0", "", "", "",false,false); parameters.push_back(pgapopen);
 		CommandParameter pgapextend("gapextend", "Number", "", "-1.0", "", "", "",false,false); parameters.push_back(pgapextend);
+        CommandParameter pthreshold("threshold", "Number", "", "40", "", "", "",false,false); parameters.push_back(pthreshold);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
@@ -43,6 +44,7 @@ string MakeContigsCommand::getHelpString(){
 		helpString += "The mistmatch parameter allows you to specify the penalty for having different bases.  The default is -1.0.\n";
 		helpString += "The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -2.0.\n";
 		helpString += "The gapextend parameter allows you to specify the penalty for extending a gap in an alignment.  The default is -1.0.\n";
+        helpString += "The threshold parameter allows you to set a quality scores threshold. In the case where we are trying to decide whether to keep a base or remove it because the base is compared to a gap in the other fragment, if the base has a quality score below the threshold we eliminate it. Default=40.\n";
         helpString += "The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n";
         helpString += "The make.contigs command should be in the following format: \n";
 		helpString += "make.contigs(ffastq=yourForwardFastqFile, rfastq=yourReverseFastqFile, align=yourAlignmentMethod) \n";
@@ -152,6 +154,10 @@ MakeContigsCommand::MakeContigsCommand(string option)  {
 			m->mothurConvert(temp, gapExtend); 
             if (gapExtend > 0) { m->mothurOut("[ERROR]: gapextend must be negative.\n"); abort=true; }
 			
+            temp = validParameter.validFile(parameters, "threshold", false);	if (temp == "not found"){	temp = "40";			}
+			m->mothurConvert(temp, threshold); 
+            if ((threshold < 0) || (threshold > 40)) { m->mothurOut("[ERROR]: threshold must be between 0 and 40.\n"); abort=true; }
+
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
 			m->mothurConvert(temp, processors);
@@ -291,7 +297,7 @@ int MakeContigsCommand::createProcesses(vector< vector<string> > files, string o
 		for( int i=0; i<processors-1; i++ ){
 			string extension = toString(i) + ".temp";
 			
-			contigsData* tempcontig = new contigsData(files[i], (outputFasta + extension), (outputQual + extension), (outputMisMatches + extension), align, m, match, misMatch, gapOpen, gapExtend, i);
+			contigsData* tempcontig = new contigsData(files[i], (outputFasta + extension), (outputQual + extension), (outputMisMatches + extension), align, m, match, misMatch, gapOpen, gapExtend, threshold, i);
 			pDataArray.push_back(tempcontig);
 			processIDS.push_back(i);
             
@@ -389,22 +395,27 @@ int MakeContigsCommand::driver(vector<string> files, string outputFasta, string 
            
             vector<int> scores1 = fQual.getQualityScores();
             vector<int> scores2 = rQual.getQualityScores();
-            
             for (int i = 0; i < length; i++) {
                 if (seq1[i] == seq2[i]) { //match, add base and choose highest score
                     contig += seq1[i];
                     contigScores.push_back(scores1[ABaseMap[i]]);
-                    if (scores1[ABaseMap[i]] < scores2[BBaseMap[i]]) { contigScores[i] = scores2[BBaseMap[i]]; }
-                }else if (((seq1[i] == '.') || (seq1[i] == '-')) && ((seq2[i] != '-') && (seq2[i] != '.'))) { //seq1 is a gap and seq2 is a base, choose seq2
-                    contig += seq2[i];
-                    contigScores.push_back(scores2[BBaseMap[i]]);
-                }else if (((seq2[i] == '.') || (seq2[i] == '-')) && ((seq1[i] != '-') && (seq1[i] != '.'))) { //seq2 is a gap and seq1 is a base, choose seq1
-                    contig += seq1[i];
-                    contigScores.push_back(scores1[ABaseMap[i]]);
+                    if (scores1[ABaseMap[i]] < scores2[BBaseMap[i]]) { contigScores[contigScores.size()-1] = scores2[BBaseMap[i]]; }
+                }else if (((seq1[i] == '.') || (seq1[i] == '-')) && ((seq2[i] != '-') && (seq2[i] != '.'))) { //seq1 is a gap and seq2 is a base, choose seq2, unless quality score for base is below threshold. In that case eliminate base
+                    if (scores2[BBaseMap[i]] < threshold) { } //
+                    else {
+                        contig += seq2[i];
+                        contigScores.push_back(scores2[BBaseMap[i]]);
+                    }
+                }else if (((seq2[i] == '.') || (seq2[i] == '-')) && ((seq1[i] != '-') && (seq1[i] != '.'))) { //seq2 is a gap and seq1 is a base, choose seq1, unless quality score for base is below threshold. In that case eliminate base
+                    if (scores1[ABaseMap[i]] < threshold) { } //
+                    else {
+                        contig += seq1[i];
+                        contigScores.push_back(scores1[ABaseMap[i]]);
+                    }
                 }else if (((seq1[i] != '-') && (seq1[i] != '.')) && ((seq2[i] != '-') && (seq2[i] != '.'))) { //both bases choose one with better quality
                     char c = seq1[i];
                     contigScores.push_back(scores1[ABaseMap[i]]);
-                    if (scores1[ABaseMap[i]] < scores2[BBaseMap[i]]) { contigScores[i] = scores2[BBaseMap[i]]; c = seq2[i]; }
+                    if (scores1[ABaseMap[i]] < scores2[BBaseMap[i]]) { contigScores[contigScores.size()-1] = scores2[BBaseMap[i]]; c = seq2[i]; }
                     contig += c;
                     numMismatches++;
                 }else { //should never get here

@@ -52,7 +52,7 @@ private:
     bool abort;
     string outputDir, ffastqfile, rfastqfile, align;
 	float match, misMatch, gapOpen, gapExtend;
-	int processors, longestBase;
+	int processors, longestBase, threshold;
     vector<string> outputNames;
     
     fastqRead readFastq(ifstream&);
@@ -76,10 +76,10 @@ struct contigsData {
     vector<string> files;
 	MothurOut* m;
 	float match, misMatch, gapOpen, gapExtend;
-	int count, threadID;
+	int count, threshold, threadID;
 	
 	contigsData(){}
-	contigsData(vector<string> f, string of, string oq, string om, string al, MothurOut* mout, float ma, float misMa, float gapO, float gapE, int tid) {
+	contigsData(vector<string> f, string of, string oq, string om, string al, MothurOut* mout, float ma, float misMa, float gapO, float gapE, int thr, int tid) {
         files = f;
 		outputFasta = of;
         outputQual = oq;
@@ -89,6 +89,7 @@ struct contigsData {
 		misMatch = misMa;
 		gapOpen = gapO; 
 		gapExtend = gapE; 
+        threshold = thr;
 		align = al;
 		count = 0;
 		threadID = tid;
@@ -165,12 +166,16 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                     contig += seq1[i];
                     contigScores.push_back(scores1[ABaseMap[i]]);
                     if (scores1[ABaseMap[i]] < scores2[BBaseMap[i]]) { contigScores[i] = scores2[BBaseMap[i]]; }
-                }else if (((seq1[i] == '.') || (seq1[i] == '-')) && ((seq2[i] != '-') && (seq2[i] != '.'))) { //seq1 is a gap and seq2 is a base, choose seq2
-                    contig += seq2[i];
-                    contigScores.push_back(scores2[BBaseMap[i]]);
-                }else if (((seq2[i] == '.') || (seq2[i] == '-')) && ((seq1[i] != '-') && (seq1[i] != '.'))) { //seq2 is a gap and seq1 is a base, choose seq1
-                    contig += seq1[i];
-                    contigScores.push_back(scores1[ABaseMap[i]]);
+                }else if (((seq1[i] == '.') || (seq1[i] == '-')) && ((seq2[i] != '-') && (seq2[i] != '.'))) { //seq1 is a gap and seq2 is a base, choose seq2, unless quality score for base is below threshold. In that case eliminate base
+                    if (scores2[BBaseMap[i]] >= pDataArray->threshold)) {
+                        contig += seq2[i];
+                        contigScores.push_back(scores2[BBaseMap[i]]);
+                    }
+                }else if (((seq2[i] == '.') || (seq2[i] == '-')) && ((seq1[i] != '-') && (seq1[i] != '.'))) { //seq2 is a gap and seq1 is a base, choose seq1, unless quality score for base is below threshold. In that case eliminate base
+                    if (scores1[ABaseMap[i]] >= pDataArray->threshold) { 
+                        contig += seq1[i];
+                        contigScores.push_back(scores1[ABaseMap[i]]);
+                    }
                 }else if (((seq1[i] != '-') && (seq1[i] != '.')) && ((seq2[i] != '-') && (seq2[i] != '.'))) { //both bases choose one with better quality
                     char c = seq1[i];
                     contigScores.push_back(scores1[ABaseMap[i]]);

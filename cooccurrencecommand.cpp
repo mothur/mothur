@@ -549,7 +549,7 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
         
         m->mothurOut("zscore: " + toString(zscore)); m->mothurOutEndLine();
         m->mothurOut("standard deviation: " + toString(sd)); m->mothurOutEndLine();
-        out << metric << '\t' << thisLookUp[0]->getLabel() << '\t' << nullMean << '\t' << zscore '\t' << sd << endl;
+        out << metric << '\t' << thisLookUp[0]->getLabel() << '\t' << nullMean << '\t' << zscore << '\t' << sd << endl;
         
         return 0;
     }
