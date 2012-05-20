@@ -30,6 +30,8 @@ public:
 //	float getAlignmentScore();
 	string getSeqAAln();
 	string getSeqBAln();
+    map<int, int> getSeqAAlnBaseMap();
+    map<int, int> getSeqBAlnBaseMap();
 	int getCandidateStartPos();
 	int getCandidateEndPos();
 	int getTemplateStartPos();
@@ -49,6 +51,8 @@ protected:
 	int pairwiseLength;
 	int nRows, nCols, lA, lB;
 	vector<vector<AlignmentCell> > alignment;
+    map<int, int> ABaseMap;
+    map<int, int> BBaseMap;
 	MothurOut* m;
 };
 

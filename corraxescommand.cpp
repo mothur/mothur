@@ -321,7 +321,7 @@ int CorrAxesCommand::calcPearson(map<string, vector<float> >& axes, ofstream& ou
 	   //for each otu
 	   for (int i = 0; i < lookupFloat[0]->getNumBins(); i++) {
 		   
-		   if (metadatafile == "") {  out << i+1;	}
+		   if (metadatafile == "") {  out << m->currentBinLabels[i];	}
 		   else {  out << metadataLabels[i];		}
 		   		   
 		   //find the averages this otu - Y
@@ -456,7 +456,7 @@ int CorrAxesCommand::calcSpearman(map<string, vector<float> >& axes, ofstream& o
 		//for each otu
 		for (int i = 0; i < lookupFloat[0]->getNumBins(); i++) {
 			
-			if (metadatafile == "") {  out << i+1;	}
+			if (metadatafile == "") {  out << m->currentBinLabels[i];	}
 			else {  out << metadataLabels[i];		}
 			
 			//find the ranks of this otu - Y
@@ -609,7 +609,7 @@ int CorrAxesCommand::calcKendall(map<string, vector<float> >& axes, ofstream& ou
 		//for each otu
 		for (int i = 0; i < lookupFloat[0]->getNumBins(); i++) {
 		
-			if (metadatafile == "") {  out << i+1;	}
+			if (metadatafile == "") {  out << m->currentBinLabels[i];	}
 			else {  out << metadataLabels[i];		}
 			
 			//find the ranks of this otu - Y

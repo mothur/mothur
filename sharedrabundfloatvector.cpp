@@ -48,7 +48,7 @@ SharedRAbundFloatVector::SharedRAbundFloatVector(ifstream& f) : DataVector(), ma
 		//are we at the beginning of the file??
 		if (m->saveNextLabel == "") {  
 			f >> label; 
-			
+            
 			//is this a shared file that has headers
 			if (label == "label") { 
 				//gets "group"
@@ -67,20 +67,40 @@ SharedRAbundFloatVector::SharedRAbundFloatVector(ifstream& f) : DataVector(), ma
 					if (m->control_pressed) { break; }
 					string temp;
 					iStringStream >> temp;  m->gobble(iStringStream);
-					
+                    
 					m->binLabelsInFile.push_back(temp);
 				}
 				
-				f >> label;
-			}
-		}else { label = m->saveNextLabel; }
+				f >> label >> groupN >> num;
+			}else {
+                //read in first row since you know there is at least 1 group.
+                f >> groupN >> num;
+                
+                //make binlabels because we don't have any
+                string snumBins = toString(num);
+                m->binLabelsInFile.clear();
+                for (int i = 0; i < num; i++) {  
+                    //if there is a bin label use it otherwise make one
+                    string binLabel = "Otu";
+                    string sbinNumber = toString(i+1);
+                    if (sbinNumber.length() < snumBins.length()) { 
+                        int diff = snumBins.length() - sbinNumber.length();
+                        for (int h = 0; h < diff; h++) { binLabel += "0"; }
+                    }
+                    binLabel += sbinNumber;
+                    m->binLabelsInFile.push_back(binLabel);
+                }
+            }
+		}else { 
+            label = m->saveNextLabel; 
+            
+            //read in first row since you know there is at least 1 group.
+            f >> groupN >> num;
+        }
 		
 		//reset labels, currentLabels may have gotten changed as otus were eliminated because of group choices or sampling
-		m->currentBinLabels = m-> binLabelsInFile;
+		m->currentBinLabels = m->binLabelsInFile;
 		
-		//read in first row since you know there is at least 1 group.
-		f >> groupN >> num;
-
 		holdLabel = label;
 		
 		//add new vector to lookup
@@ -108,6 +128,8 @@ SharedRAbundFloatVector::SharedRAbundFloatVector(ifstream& f) : DataVector(), ma
 		//read the rest of the groups info in
 		while ((nextLabel == holdLabel) && (f.eof() != true)) {
 			f >> groupN >> num;
+            
+            if (num != 1000) { break; }
 			count++;
 			
 			allGroups.push_back(groupN);

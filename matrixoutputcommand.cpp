@@ -8,17 +8,20 @@
  */
 
 #include "matrixoutputcommand.h"
+#include "subsample.h"
 
 //**********************************************************************************************************************
 vector<string> MatrixOutputCommand::setParameters(){	
 	try {
 		CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pshared);
 		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
+        CommandParameter psubsample("subsample", "String", "", "", "", "", "",false,false); parameters.push_back(psubsample);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
 		CommandParameter pcalc("calc", "Multiple", "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan-kstest-sharednseqs-ochiai-anderberg-kulczynski-kulczynskicody-lennon-morisitahorn-braycurtis-whittaker-odum-canberra-structeuclidean-structchord-hellinger-manhattan-structpearson-soergel-spearman-structkulczynski-speciesprofile-hamming-structchi2-gower-memchi2-memchord-memeuclidean-mempearson", "jclass-thetayc", "", "", "",true,false); parameters.push_back(pcalc);
 		CommandParameter poutput("output", "Multiple", "lt-square", "lt", "", "", "",false,false); parameters.push_back(poutput);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+        CommandParameter piters("iters", "Number", "", "1000", "", "", "",false,false); parameters.push_back(piters);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
@@ -35,9 +38,11 @@ string MatrixOutputCommand::getHelpString(){
 	try {
 		string helpString = "";
 		ValidCalculators validCalculator;
-		helpString += "The dist.shared command parameters are shared, groups, calc, output, processors and label.  shared is a required, unless you have a valid current file.\n";
+		helpString += "The dist.shared command parameters are shared, groups, calc, output, processors, subsample, iters and label.  shared is a required, unless you have a valid current file.\n";
 		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like included used.\n";
 		helpString += "The group names are separated by dashes. The label parameter allows you to select what distance levels you would like distance matrices created for, and is also separated by dashes.\n";
+        helpString += "The iters parameter allows you to choose the number of times you would like to run the subsample.\n";
+        helpString += "The subsample parameter allows you to enter the size pergroup of the sample or you can set subsample=T and mothur will use the size of your smallest group.\n";
 		helpString += "The dist.shared command should be in the following format: dist.shared(groups=yourGroups, calc=yourCalcs, label=yourLabels).\n";
 		helpString += "The output parameter allows you to specify format of your distance matrix. Options are lt, and square. The default is lt.\n";
 		helpString += "Example dist.shared(groups=A-B-C, calc=jabund-sorabund).\n";
@@ -158,7 +163,19 @@ MatrixOutputCommand::MatrixOutputCommand(string option)  {
 				//remove citation from list of calcs
 				for (int i = 0; i < Estimators.size(); i++) { if (Estimators[i] == "citation") {  Estimators.erase(Estimators.begin()+i); break; } }
 			}
-
+            
+            temp = validParameter.validFile(parameters, "iters", false);			if (temp == "not found") { temp = "1000"; }
+			m->mothurConvert(temp, iters); 
+            
+            temp = validParameter.validFile(parameters, "subsample", false);		if (temp == "not found") { temp = "F"; }
+			if (m->isNumeric1(temp)) { m->mothurConvert(temp, subsampleSize); subsample = true; }
+            else {  
+                if (m->isTrue(temp)) { subsample = true; subsampleSize = -1; }  //we will set it to smallest group later 
+                else { subsample = false; }
+            }
+            
+            if (subsample == false) { iters = 1; }
+            
 			if (abort == false) {
 			
 				ValidCalculators validCalculator;
@@ -281,14 +298,42 @@ int MatrixOutputCommand::execute(){
 		set<string> userLabels = labels;
 					
 		if (lookup.size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); delete input; for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } return 0;}
-		
+        
+        if (subsample) { 
+            if (subsampleSize == -1) { //user has not set size, set size = smallest samples size
+                subsampleSize = lookup[0]->getNumSeqs();
+                for (int i = 1; i < lookup.size(); i++) {
+                    int thisSize = lookup[i]->getNumSeqs();
+                    
+                    if (thisSize < subsampleSize) {	subsampleSize = thisSize;	}
+                }
+            }else {
+                m->clearGroups();
+                Groups.clear();
+                vector<SharedRAbundVector*> temp;
+                for (int i = 0; i < lookup.size(); i++) {
+                    if (lookup[i]->getNumSeqs() < subsampleSize) { 
+                        m->mothurOut(lookup[i]->getGroup() + " contains " + toString(lookup[i]->getNumSeqs()) + ". Eliminating."); m->mothurOutEndLine();
+                        delete lookup[i];
+                    }else { 
+                        Groups.push_back(lookup[i]->getGroup()); 
+                        temp.push_back(lookup[i]);
+                    }
+                } 
+                lookup = temp;
+                m->setGroups(Groups);
+            }
+            
+            if (lookup.size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); m->control_pressed = true; delete input; return 0; }
+        }
+        
 		numGroups = lookup.size();
-		lines.resize(processors);
+        lines.resize(processors);
 		for (int i = 0; i < processors; i++) {
 			lines[i].start = int (sqrt(float(i)/float(processors)) * numGroups);
 			lines[i].end = int (sqrt(float(i+1)/float(processors)) * numGroups);
 		}	
-		
+        
 		if (m->control_pressed) { delete input; for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } m->clearGroups(); return 0;  }
 				
 		//as long as you are not at the end of the file or done wih the lines you want
@@ -380,7 +425,7 @@ int MatrixOutputCommand::execute(){
 	}
 }
 /***********************************************************/
-void MatrixOutputCommand::printSims(ostream& out, vector< vector<float> >& simMatrix) {
+void MatrixOutputCommand::printSims(ostream& out, vector< vector<double> >& simMatrix) {
 	try {
 		
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
@@ -414,169 +459,306 @@ void MatrixOutputCommand::printSims(ostream& out, vector< vector<float> >& simMa
 /***********************************************************/
 int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
 	try {
-		EstOutput data;
-		vector<SharedRAbundVector*> subset;
-		vector< vector<seqDist> > calcDists; calcDists.resize(matrixCalculators.size()); //one for each calc, this will be used to make .dist files
-		
-	
-		if(processors == 1){
-			driver(thisLookup, 0, numGroups, calcDists);
-		}else{
-			int process = 1;
-			vector<int> processIDS;
+		vector< vector< vector<seqDist> > > calcDistsTotals;  //each iter, one for each calc, then each groupCombos dists. this will be used to make .dist files
+        vector< vector<seqDist>  > calcDists; calcDists.resize(matrixCalculators.size()); 		
+
+        for (int thisIter = 0; thisIter < iters; thisIter++) {
             
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-			//loop through and create all the processes you want
-			while (process != processors) {
-				int pid = fork();
-				
-				if (pid > 0) {
-					processIDS.push_back(pid); 
-					process++;
-				}else if (pid == 0){
-					driver(thisLookup, lines[process].start, lines[process].end, calcDists);   
-					
-					string tempdistFileName = m->getRootName(m->getSimpleName(sharedfile)) + toString(getpid()) + ".dist";
-					ofstream outtemp;
-					m->openOutputFile(tempdistFileName, outtemp);
-						
-					for (int i = 0; i < calcDists.size(); i++) {
-						outtemp << calcDists[i].size() << endl;
-							
-						for (int j = 0; j < calcDists[i].size(); j++) {
-							outtemp << calcDists[i][j].seq1 << '\t' << calcDists[i][j].seq2 << '\t' << calcDists[i][j].dist << endl;
-						}
-					}
-					outtemp.close();
-									
-					exit(0);
-				}else { 
-					m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-					for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-					exit(0);
-				}
-			}
-			
-			//parent do your part
-			driver(thisLookup, lines[0].start, lines[0].end, calcDists);   
-						
-			//force parent to wait until all the processes are done
-			for (int i = 0; i < processIDS.size(); i++) {
-				int temp = processIDS[i];
-				wait(&temp);
-			}
-			
-			for (int i = 0; i < processIDS.size(); i++) {
-				string tempdistFileName = m->getRootName(m->getSimpleName(sharedfile)) + toString(processIDS[i]) +  ".dist";
-				ifstream intemp;
-				m->openInputFile(tempdistFileName, intemp);
-					
-				for (int k = 0; k < calcDists.size(); k++) {
-					int size = 0;
-					intemp >> size; m->gobble(intemp);
-						
-					for (int j = 0; j < size; j++) {
-						int seq1 = 0;
-						int seq2 = 0;
-						float dist = 1.0;
-							
-						intemp >> seq1 >> seq2 >> dist;   m->gobble(intemp);
-							
-						seqDist tempDist(seq1, seq2, dist);
-						calcDists[k].push_back(tempDist);
-					}
-				}
-				intemp.close();
-				m->mothurRemove(tempdistFileName);
-			}
-            #else
-            //////////////////////////////////////////////////////////////////////////////////////////////////////
-            //Windows version shared memory, so be careful when passing variables through the distSharedData struct. 
-            //Above fork() will clone, so memory is separate, but that's not the case with windows, 
-            //Taking advantage of shared memory to pass results vectors.
-            //////////////////////////////////////////////////////////////////////////////////////////////////////
+            vector<SharedRAbundVector*> thisItersLookup = thisLookup;
             
-            vector<distSharedData*> pDataArray; 
-            DWORD   dwThreadIdArray[processors-1];
-            HANDLE  hThreadArray[processors-1]; 
-            
-            //Create processor worker threads.
-            for( int i=1; i<processors; i++ ){
+            if (subsample) {
+                SubSample sample;
+                vector<string> tempLabels; //dont need since we arent printing the sampled sharedRabunds
                 
                 //make copy of lookup so we don't get access violations
                 vector<SharedRAbundVector*> newLookup;
-                for (int k = 0; k < thisLookup.size(); k++) {
+                for (int k = 0; k < thisItersLookup.size(); k++) {
                     SharedRAbundVector* temp = new SharedRAbundVector();
-                    temp->setLabel(thisLookup[k]->getLabel());
-                    temp->setGroup(thisLookup[k]->getGroup());
+                    temp->setLabel(thisItersLookup[k]->getLabel());
+                    temp->setGroup(thisItersLookup[k]->getGroup());
                     newLookup.push_back(temp);
                 }
                 
                 //for each bin
-                for (int k = 0; k < thisLookup[0]->getNumBins(); k++) {
+                for (int k = 0; k < thisItersLookup[0]->getNumBins(); k++) {
                     if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) {  delete newLookup[j];  } return 0; }
-                    for (int j = 0; j < thisLookup.size(); j++) { newLookup[j]->push_back(thisLookup[j]->getAbundance(k), thisLookup[j]->getGroup()); }
+                    for (int j = 0; j < thisItersLookup.size(); j++) { newLookup[j]->push_back(thisItersLookup[j]->getAbundance(k), thisItersLookup[j]->getGroup()); }
                 }
                 
-                // Allocate memory for thread data.
-                distSharedData* tempSum = new distSharedData(m, lines[i].start, lines[i].end, Estimators, newLookup);
-                pDataArray.push_back(tempSum);
-                processIDS.push_back(i);
-                
-                hThreadArray[i-1] = CreateThread(NULL, 0, MyDistSharedThreadFunction, pDataArray[i-1], 0, &dwThreadIdArray[i-1]);   
+                tempLabels = sample.getSample(newLookup, subsampleSize);
+                thisItersLookup = newLookup;
             }
-            
-            //parent do your part
-            driver(thisLookup, lines[0].start, lines[0].end, calcDists);   
-                       
-            //Wait until all threads have terminated.
-            WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
-            
-            //Close all thread handles and free memory allocations.
-            for(int i=0; i < pDataArray.size(); i++){
-                for (int j = 0; j < pDataArray[i]->thisLookup.size(); j++) {  delete pDataArray[i]->thisLookup[j];  } 
+        
+            if(processors == 1){
+                driver(thisItersLookup, 0, numGroups, calcDists);
+            }else{
+                int process = 1;
+                vector<int> processIDS;
                 
-                for (int k = 0; k < calcDists.size(); k++) {
-                    int size = pDataArray[i]->calcDists[k].size();
-                    for (int j = 0; j < size; j++) {    calcDists[k].push_back(pDataArray[i]->calcDists[k][j]);    }
+                #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+                //loop through and create all the processes you want
+                while (process != processors) {
+                    int pid = fork();
+                    
+                    if (pid > 0) {
+                        processIDS.push_back(pid); 
+                        process++;
+                    }else if (pid == 0){
+                        
+                        driver(thisItersLookup, lines[process].start, lines[process].end, calcDists);   
+                        
+                        string tempdistFileName = m->getRootName(m->getSimpleName(sharedfile)) + toString(getpid()) + ".dist";
+                        ofstream outtemp;
+                        m->openOutputFile(tempdistFileName, outtemp);
+                            
+                        for (int i = 0; i < calcDists.size(); i++) {
+                            outtemp << calcDists[i].size() << endl;
+                                
+                            for (int j = 0; j < calcDists[i].size(); j++) {
+                                outtemp << calcDists[i][j].seq1 << '\t' << calcDists[i][j].seq2 << '\t' << calcDists[i][j].dist << endl;
+                            }
+                        }
+                        outtemp.close();
+                                        
+                        exit(0);
+                    }else { 
+                        m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
+                        for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                        exit(0);
+                    }
                 }
                 
-                CloseHandle(hThreadArray[i]);
-                delete pDataArray[i];
+                //parent do your part
+                driver(thisItersLookup, lines[0].start, lines[0].end, calcDists);   
+                            
+                //force parent to wait until all the processes are done
+                for (int i = 0; i < processIDS.size(); i++) {
+                    int temp = processIDS[i];
+                    wait(&temp);
+                }
+                
+                for (int i = 0; i < processIDS.size(); i++) {
+                    string tempdistFileName = m->getRootName(m->getSimpleName(sharedfile)) + toString(processIDS[i]) +  ".dist";
+                    ifstream intemp;
+                    m->openInputFile(tempdistFileName, intemp);
+                        
+                    for (int k = 0; k < calcDists.size(); k++) {
+                        int size = 0;
+                        intemp >> size; m->gobble(intemp);
+                            
+                        for (int j = 0; j < size; j++) {
+                            int seq1 = 0;
+                            int seq2 = 0;
+                            float dist = 1.0;
+                                
+                            intemp >> seq1 >> seq2 >> dist;   m->gobble(intemp);
+                                
+                            seqDist tempDist(seq1, seq2, dist);
+                            calcDists[k].push_back(tempDist);
+                        }
+                    }
+                    intemp.close();
+                    m->mothurRemove(tempdistFileName);
+                }
+                #else
+                //////////////////////////////////////////////////////////////////////////////////////////////////////
+                //Windows version shared memory, so be careful when passing variables through the distSharedData struct. 
+                //Above fork() will clone, so memory is separate, but that's not the case with windows, 
+                //Taking advantage of shared memory to pass results vectors.
+                //////////////////////////////////////////////////////////////////////////////////////////////////////
+                
+                vector<distSharedData*> pDataArray; 
+                DWORD   dwThreadIdArray[processors-1];
+                HANDLE  hThreadArray[processors-1]; 
+                
+                //Create processor worker threads.
+                for( int i=1; i<processors; i++ ){
+                    
+                    //make copy of lookup so we don't get access violations
+                    vector<SharedRAbundVector*> newLookup;
+                    for (int k = 0; k < thisItersLookup.size(); k++) {
+                        SharedRAbundVector* temp = new SharedRAbundVector();
+                        temp->setLabel(thisItersLookup[k]->getLabel());
+                        temp->setGroup(thisItersLookup[k]->getGroup());
+                        newLookup.push_back(temp);
+                    }
+                    
+                    //for each bin
+                    for (int k = 0; k < thisItersLookup[0]->getNumBins(); k++) {
+                        if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) {  delete newLookup[j];  } return 0; }
+                        for (int j = 0; j < thisItersLookup.size(); j++) { newLookup[j]->push_back(thisItersLookup[j]->getAbundance(k), thisItersLookup[j]->getGroup()); }
+                    }
+                    
+                    // Allocate memory for thread data.
+                    distSharedData* tempSum = new distSharedData(m, lines[i].start, lines[i].end, Estimators, newLookup);
+                    pDataArray.push_back(tempSum);
+                    processIDS.push_back(i);
+                    
+                    hThreadArray[i-1] = CreateThread(NULL, 0, MyDistSharedThreadFunction, pDataArray[i-1], 0, &dwThreadIdArray[i-1]);   
+                }
+                
+                //parent do your part
+                driver(thisItersLookup, lines[0].start, lines[0].end, calcDists);   
+                           
+                //Wait until all threads have terminated.
+                WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
+                
+                //Close all thread handles and free memory allocations.
+                for(int i=0; i < pDataArray.size(); i++){
+                    for (int j = 0; j < pDataArray[i]->thisLookup.size(); j++) {  delete pDataArray[i]->thisLookup[j];  } 
+                    
+                    for (int k = 0; k < calcDists.size(); k++) {
+                        int size = pDataArray[i]->calcDists[k].size();
+                        for (int j = 0; j < size; j++) {    calcDists[k].push_back(pDataArray[i]->calcDists[k][j]);    }
+                    }
+                    
+                    CloseHandle(hThreadArray[i]);
+                    delete pDataArray[i];
+                }
+
+                #endif
+            }
+            
+            calcDistsTotals.push_back(calcDists);
+            
+            if (subsample) {  
+                
+                //clean up memory
+                for (int i = 0; i < thisItersLookup.size(); i++) { delete thisItersLookup[i]; }
+                thisItersLookup.clear();
+                for (int i = 0; i < calcDists.size(); i++) {  calcDists[i].clear(); }
+            }
+		}
+		
+        if (iters != 1) {
+            //we need to find the average distance and standard deviation for each groups distance
+            
+            vector< vector<seqDist>  > calcAverages; calcAverages.resize(matrixCalculators.size()); 
+            for (int i = 0; i < calcAverages.size(); i++) {  //initialize sums to zero.
+                calcAverages[i].resize(calcDistsTotals[0][i].size());
+                
+                for (int j = 0; j < calcAverages[i].size(); j++) {
+                    calcAverages[i][j].seq1 = calcDists[i][j].seq1;
+                    calcAverages[i][j].seq2 = calcDists[i][j].seq2;
+                    calcAverages[i][j].dist = 0.0;
+                }
+            }
+            
+            for (int thisIter = 0; thisIter < iters; thisIter++) { //sum all groups dists for each calculator
+                for (int i = 0; i < calcAverages.size(); i++) {  //initialize sums to zero.
+                    for (int j = 0; j < calcAverages[i].size(); j++) {
+                        calcAverages[i][j].dist += calcDistsTotals[thisIter][i][j].dist;
+                    }
+                }
+            }
+            
+            for (int i = 0; i < calcAverages.size(); i++) {  //finds average.
+                for (int j = 0; j < calcAverages[i].size(); j++) {
+                    calcAverages[i][j].dist /= (float) iters;
+                }
+            }
+            
+            //find standard deviation
+            vector< vector<seqDist>  > stdDev; stdDev.resize(matrixCalculators.size());
+            for (int i = 0; i < stdDev.size(); i++) {  //initialize sums to zero.
+                stdDev[i].resize(calcDistsTotals[0][i].size());
+                
+                for (int j = 0; j < stdDev[i].size(); j++) {
+                    stdDev[i][j].seq1 = calcDists[i][j].seq1;
+                    stdDev[i][j].seq2 = calcDists[i][j].seq2;
+                    stdDev[i][j].dist = 0.0;
+                }
+            }
+            
+            for (int thisIter = 0; thisIter < iters; thisIter++) { //compute the difference of each dist from the mean, and square the result of each
+                for (int i = 0; i < stdDev.size(); i++) {  
+                    for (int j = 0; j < stdDev[i].size(); j++) {
+                        stdDev[i][j].dist += ((calcDistsTotals[thisIter][i][j].dist - calcAverages[i][j].dist) * (calcDistsTotals[thisIter][i][j].dist - calcAverages[i][j].dist));
+                    }
+                }
             }
 
-            #endif
-		}
+            for (int i = 0; i < stdDev.size(); i++) {  //finds average.
+                for (int j = 0; j < stdDev[i].size(); j++) {
+                    stdDev[i][j].dist /= (float) iters;
+                    stdDev[i][j].dist = sqrt(stdDev[i][j].dist);
+                }
+            }
+            
+            //print results
+            for (int i = 0; i < calcDists.size(); i++) {
+                vector< vector<double> > matrix; //square matrix to represent the distance
+                matrix.resize(thisLookup.size());
+                for (int k = 0; k < thisLookup.size(); k++) {  matrix[k].resize(thisLookup.size(), 0.0); }
+                
+                vector< vector<double> > stdmatrix; //square matrix to represent the stdDev
+                stdmatrix.resize(thisLookup.size());
+                for (int k = 0; k < thisLookup.size(); k++) {  stdmatrix[k].resize(thisLookup.size(), 0.0); }
 
-		
-		
-		for (int i = 0; i < calcDists.size(); i++) {
-			if (m->control_pressed) { break; }
-				
-			//initialize matrix
-			vector< vector<float> > matrix; //square matrix to represent the distance
-			matrix.resize(thisLookup.size());
-			for (int k = 0; k < thisLookup.size(); k++) {  matrix[k].resize(thisLookup.size(), 0.0); }
-				
-			for (int j = 0; j < calcDists[i].size(); j++) {
-				int row = calcDists[i][j].seq1;
-				int column = calcDists[i][j].seq2;
-				float dist = calcDists[i][j].dist;
-					
-				matrix[row][column] = dist;
-				matrix[column][row] = dist;
-			}
-			
-			string distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + matrixCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + ".dist";
-			outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
-			ofstream outDist;
-			m->openOutputFile(distFileName, outDist);
-			outDist.setf(ios::fixed, ios::floatfield); outDist.setf(ios::showpoint);
-			
-			printSims(outDist, matrix);
-			
-			outDist.close();
-		}
+            
+                for (int j = 0; j < calcAverages[i].size(); j++) {
+                    int row = calcAverages[i][j].seq1;
+                    int column = calcAverages[i][j].seq2;
+                    float dist = calcAverages[i][j].dist;
+                    float stdDist = stdDev[i][j].dist;
+                    
+                    matrix[row][column] = dist;
+                    matrix[column][row] = dist;
+                    stdmatrix[row][column] = stdDist;
+                    stdmatrix[column][row] = stdDist;
+                }
+            
+                string distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + matrixCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + ".ave.dist";
+                outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
+                ofstream outAve;
+                m->openOutputFile(distFileName, outAve);
+                outAve.setf(ios::fixed, ios::floatfield); outAve.setf(ios::showpoint);
+                
+                printSims(outAve, matrix);
+                
+                outAve.close();
+                
+                distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + matrixCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + ".std.dist";
+                outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
+                ofstream outSTD;
+                m->openOutputFile(distFileName, outSTD);
+                outSTD.setf(ios::fixed, ios::floatfield); outSTD.setf(ios::showpoint);
+                
+                printSims(outSTD, stdmatrix);
+                
+                outSTD.close();
+
+            }
+        }else {
+        
+            for (int i = 0; i < calcDists.size(); i++) {
+                if (m->control_pressed) { break; }
+                
+                //initialize matrix
+                vector< vector<double> > matrix; //square matrix to represent the distance
+                matrix.resize(thisLookup.size());
+                for (int k = 0; k < thisLookup.size(); k++) {  matrix[k].resize(thisLookup.size(), 0.0); }
+                
+                for (int j = 0; j < calcDists[i].size(); j++) {
+                    int row = calcDists[i][j].seq1;
+                    int column = calcDists[i][j].seq2;
+                    double dist = calcDists[i][j].dist;
+                    
+                    matrix[row][column] = dist;
+                    matrix[column][row] = dist;
+                }
+                
+                string distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + matrixCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + ".dist";
+                outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
+                ofstream outDist;
+                m->openOutputFile(distFileName, outDist);
+                outDist.setf(ios::fixed, ios::floatfield); outDist.setf(ios::showpoint);
+                
+                printSims(outDist, matrix);
+                
+                outDist.close();
+            }
+        }
 		
 		return 0;
 	}
@@ -588,7 +770,6 @@ int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
 /**************************************************************************************************/
 int MatrixOutputCommand::driver(vector<SharedRAbundVector*> thisLookup, int start, int end, vector< vector<seqDist> >& calcDists) { 
 	try {
-		
 		vector<SharedRAbundVector*> subset;
 		for (int k = start; k < end; k++) { // pass cdd each set of groups to compare
 			

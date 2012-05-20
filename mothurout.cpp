@@ -40,6 +40,7 @@ void MothurOut::printCurrentFiles()  {
 		if (taxonomyfile != "")		{  mothurOut("taxonomy=" + taxonomyfile); mothurOutEndLine();		}
 		if (treefile != "")			{  mothurOut("tree=" + treefile); mothurOutEndLine();				}
 		if (flowfile != "")			{  mothurOut("flow=" + flowfile); mothurOutEndLine();				}
+        if (biomfile != "")			{  mothurOut("biom=" + biomfile); mothurOutEndLine();				}
 		if (processors != "1")		{  mothurOut("processors=" + processors); mothurOutEndLine();		}
 		
 	}
@@ -73,6 +74,7 @@ bool MothurOut::hasCurrentFiles()  {
 		if (taxonomyfile != "")		{  return true;			}
 		if (treefile != "")			{  return true;			}
 		if (flowfile != "")			{  return true;			}
+        if (biomfile != "")			{  return true;			}
 		if (processors != "1")		{  return true;			}
 		
 		return hasCurrent;
@@ -107,6 +109,7 @@ void MothurOut::clearCurrentFiles()  {
 		accnosfile = "";
 		taxonomyfile = "";	
 		flowfile = "";
+        biomfile = "";
 		processors = "1";
 	}
 	catch(exception& e) {
@@ -598,6 +601,48 @@ string MothurOut::getPathName(string longName){
 }
 /***********************************************************************/
 
+bool MothurOut::dirCheck(string& dirName){
+	try {
+        
+        string tag = "";
+        #ifdef USE_MPI
+            int pid; 
+            MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
+		
+            tag = toString(pid);
+        #endif
+
+        //add / to name if needed
+        string lastChar = dirName.substr(dirName.length()-1);
+        #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+        if (lastChar != "/") { dirName += "/"; }
+        #else
+        if (lastChar != "\\") { dirName += "\\"; }	
+        #endif
+
+        //test to make sure directory exists
+        dirName = getFullPathName(dirName);
+        string outTemp = dirName + tag + "temp";
+        ofstream out;
+        out.open(outTemp.c_str(), ios::trunc);
+        if(!out) {
+            mothurOut(dirName + " directory does not exist or is not writable."); mothurOutEndLine(); 
+        }else{
+            out.close();
+            mothurRemove(outTemp);
+            return true;
+        }
+        
+        return false;
+    }
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "dirCheck");
+		exit(1);
+	}	
+    
+}
+/***********************************************************************/
+
 string MothurOut::hasPath(string longName){
 	try {
 		string path = "";
@@ -621,7 +666,7 @@ string MothurOut::hasPath(string longName){
 
 string MothurOut::getExtension(string longName){
 	try {
-		string extension = longName;
+		string extension = "";
 		
 		if(longName.find_last_of('.') != longName.npos){
 			int pos = longName.find_last_of('.');
@@ -972,7 +1017,8 @@ int MothurOut::appendFiles(string temp, string filename) {
 		
 		int numLines = 0;
 		if (ableToOpen == 0) { //you opened it
-			while(char c = input.get()){
+			while(!input.eof()){
+                char c = input.get();
 				if(input.eof())		{	break;			}
 				else				{	output << c;	if (c == '\n') {numLines++;} }
 			}
@@ -1351,7 +1397,7 @@ int MothurOut::readNames(string namefile, map<string, string>& nameMap) {
 		}
 		in.close();
 		
-		return 0;
+		return nameMap.size();
 		
 	}
 	catch(exception& e) {
@@ -1380,7 +1426,7 @@ int MothurOut::readNames(string namefile, map<string, vector<string> >& nameMap)
 		}
 		in.close();
 		
-		return 0;
+		return nameMap.size();
 		
 	}
 	catch(exception& e) {
@@ -1402,7 +1448,8 @@ map<string, int> MothurOut::readNames(string namefile) {
 			if (control_pressed) { break; }
 			
 			string firstCol, secondCol;
-			in >> firstCol >> secondCol; gobble(in);
+			in >> firstCol;  gobble(in);
+            in >> secondCol; gobble(in);
 			
 			int num = getNumNames(secondCol);
 			
@@ -1883,6 +1930,26 @@ void MothurOut::splitAtDash(string& estim, set<int>& container) {
 	}	
 }
 /***********************************************************************/
+string MothurOut::makeList(vector<string>& names) {
+	try {
+		string list = "";
+        
+        if (names.size() == 0) { return list; }
+		
+        for (int i = 0; i < names.size()-1; i++) { list += names[i] + ",";  }
+        
+        //get last name
+        list += names[names.size()-1];
+        
+        return list;
+    }
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "makeList");
+		exit(1);
+	}	
+}
+
+/***********************************************************************/
 //This function parses the a string and puts peices in a vector
 void MothurOut::splitAtComma(string& estim, vector<string>& container) {
 	try {
@@ -1919,6 +1986,25 @@ void MothurOut::splitAtComma(string& estim, vector<string>& container) {
 		exit(1);
 	}	
 }
+/***********************************************************************/
+//This function splits up the various option parameters
+void MothurOut::splitAtChar(string& prefix, string& suffix, char c){
+	try {
+		prefix = suffix.substr(0,suffix.find_first_of(c));
+		if ((suffix.find_first_of(c)+2) <= suffix.length()) {  //checks to make sure you don't have comma at end of string
+			suffix = suffix.substr(suffix.find_first_of(c)+1, suffix.length());
+			string space = " ";
+			while(suffix.at(0) == ' ')
+				suffix = suffix.substr(1, suffix.length());
+		}
+        
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "splitAtComma");
+		exit(1);
+	}	
+}
+
 /***********************************************************************/
 
 //This function splits up the various option parameters

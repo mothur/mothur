@@ -27,6 +27,7 @@ public:
 	Sequence();
 	Sequence(string, string);
 	Sequence(ifstream&);
+    Sequence(ifstream&, string&, bool);
 	Sequence(istringstream&);
 	//these constructors just set the unaligned string to save space
 	Sequence(string, string, string);  

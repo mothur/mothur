@@ -45,7 +45,6 @@ private:
 	vector<string> names;
 	map<string, vector<string> > nameMap;
 	
-	int eliminateZeroOTUS(vector<SharedRAbundVector*>&);
 	int getSubSampleShared();
 	int getSubSampleList();
 	int getSubSampleRabund();

@@ -8,6 +8,7 @@
  */
 
 #include "phylodiversitycommand.h"
+#include "treereader.h"
 
 //**********************************************************************************************************************
 vector<string> PhyloDiversityCommand::setParameters(){	
@@ -136,12 +137,6 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 				}
 			}
 			
-			m->runParse = true;
-			m->clearGroups();
-			m->clearAllGroups();
-			m->Treenames.clear();
-			m->names.clear();
-			
 			//check for required parameters
 			treefile = validParameter.validFile(parameters, "tree", true);
 			if (treefile == "not open") { treefile = ""; abort = true; }
@@ -217,75 +212,18 @@ int PhyloDiversityCommand::execute(){
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
+        int start = time(NULL);
+        
 		m->setTreeFile(treefile);
-		
-		if (groupfile != "") {
-			//read in group map info.
-			tmap = new TreeMap(groupfile);
-			tmap->readMap();
-		}else{ //fake out by putting everyone in one group
-			Tree* tree = new Tree(treefile); delete tree;  //extracts names from tree to make faked out groupmap
-			tmap = new TreeMap();
-			
-			for (int i = 0; i < m->Treenames.size(); i++) { tmap->addSeq(m->Treenames[i], "Group1"); }
-		}
-		
-		if (namefile != "") { readNamesFile(); }
-		
-		read = new ReadNewickTree(treefile);
-		int readOk = read->read(tmap); 
-		
-		if (readOk != 0) { m->mothurOut("Read Terminated."); m->mothurOutEndLine(); delete tmap; delete read; return 0; }
-		
-		read->AssembleTrees();
-		vector<Tree*> trees = read->getTrees();
-		delete read;
-		
-		//make sure all files match
-		//if you provide a namefile we will use the numNames in the namefile as long as the number of unique match the tree names size.
-		int numNamesInTree;
-		if (namefile != "")  {  
-			if (numUniquesInName == m->Treenames.size()) {  numNamesInTree = nameMap.size();  }
-			else {   numNamesInTree = m->Treenames.size();  }
-		}else {  numNamesInTree = m->Treenames.size();  }
-		
-		
-		//output any names that are in group file but not in tree
-		if (numNamesInTree < tmap->getNumSeqs()) {
-			for (int i = 0; i < tmap->namesOfSeqs.size(); i++) {
-				//is that name in the tree?
-				int count = 0;
-				for (int j = 0; j < m->Treenames.size(); j++) {
-					if (tmap->namesOfSeqs[i] == m->Treenames[j]) { break; } //found it
-					count++;
-				}
-				
-				if (m->control_pressed) { 
-					delete tmap; for (int i = 0; i < trees.size(); i++) { delete trees[i]; }
-					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
-					m->clearGroups();
-					return 0;
-				}
-				
-				//then you did not find it so report it 
-				if (count == m->Treenames.size()) { 
-					//if it is in your namefile then don't remove
-					map<string, string>::iterator it = nameMap.find(tmap->namesOfSeqs[i]);
-					
-					if (it == nameMap.end()) {
-						m->mothurOut(tmap->namesOfSeqs[i] + " is in your groupfile and not in your tree. It will be disregarded."); m->mothurOutEndLine();
-						tmap->removeSeq(tmap->namesOfSeqs[i]);
-						i--; //need this because removeSeq removes name from namesOfSeqs
-					}
-				}
-			}
-		}
-		
-		SharedUtil* util = new SharedUtil();
+        TreeReader* reader = new TreeReader(treefile, groupfile, namefile);
+        vector<Tree*> trees = reader->getTrees();
+        tmap = trees[0]->getTreeMap();
+        delete reader;
+
+		SharedUtil util;
 		vector<string> mGroups = m->getGroups();
 		vector<string> tGroups = tmap->getNamesOfGroups();
-		util->setGroups(mGroups, tGroups, "phylo.diversity");	//sets the groups the user wants to analyze
-		delete util;
+		util.setGroups(mGroups, tGroups, "phylo.diversity");	//sets the groups the user wants to analyze
 		
 		//incase the user had some mismatches between the tree and group files we don't want group xxx to be analyzed
 		for (int i = 0; i < mGroups.size(); i++) { if (mGroups[i] == "xxx") { mGroups.erase(mGroups.begin()+i);  break; }  }
@@ -387,6 +325,9 @@ int PhyloDiversityCommand::execute(){
 	
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} return 0; }
 
+        m->mothurOut("It took " + toString(time(NULL) - start) + " secs to run unifrac.unweighted."); m->mothurOutEndLine();
+
+        
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
@@ -493,39 +434,50 @@ int PhyloDiversityCommand::driver(Tree* t, map< string, vector<float> >& div, ma
 	try {
 		int numLeafNodes = randomLeaf.size();
 		vector<string> mGroups = m->getGroups();
-	
+        
+        map<string, int> rootForGroup = getRootForGroups(t); //maps groupName to root node in tree. "root" for group may not be the trees root and we don't want to include the extra branches.
+        
 		for (int l = 0; l < numIters; l++) {
 				random_shuffle(randomLeaf.begin(), randomLeaf.end());
-		
+            cout << l << endl;
 				//initialize counts
 				map<string, int> counts;
-				map< string, set<int> > countedBranch;  
-				for (int j = 0; j < mGroups.size(); j++) {  counts[mGroups[j]] = 0; countedBranch[mGroups[j]].insert(-2);  }  //add dummy index to initialize countedBranch sets
+                vector< map<string, bool> > countedBranch;
+                for (int i = 0; i < t->getNumNodes(); i++) {
+                    map<string, bool> temp;
+                    for (int j = 0; j < mGroups.size(); j++) { temp[mGroups[j]] = false; }
+                    countedBranch.push_back(temp);
+                }
+            
+				for (int j = 0; j < mGroups.size(); j++) {  counts[mGroups[j]] = 0;   }  
 				
 				for(int k = 0; k < numLeafNodes; k++){
 						
 					if (m->control_pressed) { return 0; }
 					
 					//calc branch length of randomLeaf k
-					vector<float> br = calcBranchLength(t, randomLeaf[k], countedBranch);
+                    vector<float> br = calcBranchLength(t, randomLeaf[k], countedBranch, rootForGroup);
 			
 					//for each group in the groups update the total branch length accounting for the names file
 					vector<string> groups = t->tree[randomLeaf[k]].getGroup();
 					
 					for (int j = 0; j < groups.size(); j++) {
-						int numSeqsInGroupJ = 0;
-						map<string, int>::iterator it;
-						it = t->tree[randomLeaf[k]].pcount.find(groups[j]);
-						if (it != t->tree[randomLeaf[k]].pcount.end()) { //this leaf node contains seqs from group j
-							numSeqsInGroupJ = it->second;
-						}
-						
-						if (numSeqsInGroupJ != 0) {	div[groups[j]][(counts[groups[j]]+1)] = div[groups[j]][counts[groups[j]]] + br[j];  }
-						
-						for (int s = (counts[groups[j]]+2); s <= (counts[groups[j]]+numSeqsInGroupJ); s++) {
-							div[groups[j]][s] = div[groups[j]][s-1];  //update counts, but don't add in redundant branch lengths
-						}
-						counts[groups[j]] += numSeqsInGroupJ;
+                        
+                        if (m->inUsersGroups(groups[j], mGroups)) {
+                            int numSeqsInGroupJ = 0;
+                            map<string, int>::iterator it;
+                            it = t->tree[randomLeaf[k]].pcount.find(groups[j]);
+                            if (it != t->tree[randomLeaf[k]].pcount.end()) { //this leaf node contains seqs from group j
+                                numSeqsInGroupJ = it->second;
+                            }
+                            
+                            if (numSeqsInGroupJ != 0) {	div[groups[j]][(counts[groups[j]]+1)] = div[groups[j]][counts[groups[j]]] + br[j];  }
+                            
+                            for (int s = (counts[groups[j]]+2); s <= (counts[groups[j]]+numSeqsInGroupJ); s++) {
+                                div[groups[j]][s] = div[groups[j]][s-1];  //update counts, but don't add in redundant branch lengths
+                            }
+                            counts[groups[j]] += numSeqsInGroupJ;
+                        }
 					}
 				}
 				
@@ -620,9 +572,9 @@ void PhyloDiversityCommand::printData(set<int>& num, map< string, vector<float> 
 }
 //**********************************************************************************************************************
 //need a vector of floats one branch length for every group the node represents.
-vector<float> PhyloDiversityCommand::calcBranchLength(Tree* t, int leaf, map< string, set<int> >& counted){
+vector<float> PhyloDiversityCommand::calcBranchLength(Tree* t, int leaf, vector< map<string, bool> >& counted, map<string, int> roots){
 	try {
-
+        
 		//calc the branch length
 		//while you aren't at root
 		vector<float> sums; 
@@ -631,127 +583,101 @@ vector<float> PhyloDiversityCommand::calcBranchLength(Tree* t, int leaf, map< st
 		vector<string> groups = t->tree[leaf].getGroup();
 		sums.resize(groups.size(), 0.0);
 		
-		map<string, map<int, double> > tempTotals; //maps node to total Branch Length
-		map< string, set<int> > tempCounted;
-		set<int>::iterator it;
-	
-		//you are a leaf
+        
+        //you are a leaf
 		if(t->tree[index].getBranchLength() != -1){	
 			for (int k = 0; k < groups.size(); k++) { 
 				sums[k] += abs(t->tree[index].getBranchLength());	
-				counted[groups[k]].insert(index);
 			}
 		}
-		
-		for (int k = 0; k < groups.size(); k++) { 
-			tempTotals[groups[k]][index] = 0.0;	
-		}
-		
-		index = t->tree[index].getParent();	
-			
+        
+        
+        index = t->tree[index].getParent();	
+        
 		//while you aren't at root
 		while(t->tree[index].getParent() != -1){
-
+            
 			if (m->control_pressed) {  return sums; }
 			
-			int pcountSize = 0;	
 			for (int k = 0; k < groups.size(); k++) {
-				map<string, int>::iterator itGroup = t->tree[index].pcount.find(groups[k]);
-				if (itGroup != t->tree[index].pcount.end()) { pcountSize++;  } 
-			
-				//do both your chidren have have descendants from the users groups? 
-				int lc = t->tree[index].getLChild();
-				int rc = t->tree[index].getRChild();
-			
-				int LpcountSize = 0;
-				itGroup = t->tree[lc].pcount.find(groups[k]);
-				if (itGroup != t->tree[lc].pcount.end()) { LpcountSize++;  } 
-							
-				int RpcountSize = 0;
-				itGroup = t->tree[rc].pcount.find(groups[k]);
-				if (itGroup != t->tree[rc].pcount.end()) { RpcountSize++;  } 
-								
-				//if yes, add your childrens tempTotals
-				if ((LpcountSize != 0) && (RpcountSize != 0)) {
-					sums[k] += tempTotals[groups[k]][lc] + tempTotals[groups[k]][rc]; 
-					
-					for (it = tempCounted[groups[k]].begin(); it != tempCounted[groups[k]].end(); it++) { counted[groups[k]].insert(*it); }
-
-					//cout << "added to total " << tempTotals[lc] << '\t' << tempTotals[rc] << endl;
-					if (t->tree[index].getBranchLength() != -1) {
-						if (counted[groups[k]].count(index) == 0) {
-							tempTotals[groups[k]][index] = abs(t->tree[index].getBranchLength());
-							tempCounted[groups[k]].insert(index);
-						}else{
-							tempTotals[groups[k]][index] = 0.0;
-						}
-					}else {
-						tempTotals[groups[k]][index] = 0.0;
-					}
-				}else { //if no, your tempTotal is your childrens temp totals + your branch length
-					tempTotals[groups[k]][index] = tempTotals[groups[k]][lc] + tempTotals[groups[k]][rc]; 
-									
-					if (counted[groups[k]].count(index) == 0) {
-						tempTotals[groups[k]][index] += abs(t->tree[index].getBranchLength());
-						tempCounted[groups[k]].insert(index);
-					}
-
-				}
-				//cout << "temptotal = "<< tempTotals[i] << endl;
-			}
-			
-			index = t->tree[index].getParent();	
-		}
-
+                
+                if (index >= roots[groups[k]]) { counted[index][groups[k]] = true; } //if you are at this groups "root", then say we are done
+                
+                if (!counted[index][groups[k]]){ //if counted[index][groups[k] is true this groups has already added all br from here to root, so quit early
+                    if (t->tree[index].getBranchLength() != -1) {
+                        sums[k] += abs(t->tree[index].getBranchLength());
+                    }
+                    counted[index][groups[k]] = true;
+                }
+            }
+            index = t->tree[index].getParent();	
+        }
+        
 		return sums;
-
+        
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PhyloDiversityCommand", "calcBranchLength");
 		exit(1);
 	}
 }
-/*****************************************************************/
-int PhyloDiversityCommand::readNamesFile() {
+//**********************************************************************************************************************
+map<string, int> PhyloDiversityCommand::getRootForGroups(Tree* t){
 	try {
-		m->names.clear();
-		numUniquesInName = 0;
-		
-		ifstream in;
-		m->openInputFile(namefile, in);
-		
-		string first, second;
-		map<string, string>::iterator itNames;
-		
-		while(!in.eof()) {
-			in >> first >> second; m->gobble(in);
-			
-			numUniquesInName++;
-			
-			itNames = m->names.find(first);
-			if (itNames == m->names.end()) {  
-				m->names[first] = second; 
-				
-				//we need a list of names in your namefile to use above when removing extra seqs above so we don't remove them
-				vector<string> dupNames;
-				m->splitAtComma(second, dupNames);
-				
-				for (int i = 0; i < dupNames.size(); i++) {	
-					nameMap[dupNames[i]] = dupNames[i]; 
-					if ((groupfile == "") && (i != 0)) { tmap->addSeq(dupNames[i], "Group1"); } 
-				}
-			}else {  m->mothurOut(first + " has already been seen in namefile, disregarding names file."); m->mothurOutEndLine(); in.close(); m->names.clear(); namefile = ""; return 1; }			
-		}
-		in.close();
-		
-		return 0;
+		map<string, int> roots; //maps group to root for group, may not be root of tree
+		map<string, bool> done;
+       
+		//initialize root for all groups to -1
+		for (int k = 0; k < (t->getTreeMap())->getNamesOfGroups().size(); k++) { done[(t->getTreeMap())->getNamesOfGroups()[k]] = false; }
+        
+        for (int i = 0; i < t->getNumLeaves(); i++) {
+            
+            vector<string> groups = t->tree[i].getGroup();
+            
+            int index = t->tree[i].getParent();
+            
+            for (int j = 0; j < groups.size(); j++) {
+                
+                if (done[groups[j]] == false) { //we haven't found the root for this group yet
+                    
+                    done[groups[j]] = true;
+                    roots[groups[j]] = i; //set root to self to start
+                    
+                    //while you aren't at root
+                    while(t->tree[index].getParent() != -1){
+                        
+                        if (m->control_pressed) {  return roots; }
+                        
+                        //do both your chidren have have descendants from the users groups? 
+                        int lc = t->tree[index].getLChild();
+                        int rc = t->tree[index].getRChild();
+                        
+                        int LpcountSize = 0;
+                        map<string, int>:: iterator itGroup = t->tree[lc].pcount.find(groups[j]);
+                        if (itGroup != t->tree[lc].pcount.end()) { LpcountSize++;  } 
+                        
+                        int RpcountSize = 0;
+                        itGroup = t->tree[rc].pcount.find(groups[j]);
+                        if (itGroup != t->tree[rc].pcount.end()) { RpcountSize++;  } 
+                        
+                        if ((LpcountSize != 0) && (RpcountSize != 0)) { //possible root
+                            roots[groups[j]] = index;
+                        }else { ;}
+                        
+                        index = t->tree[index].getParent();	
+                    }
+                }
+            }
+        }
+        
+        return roots;
+        
 	}
 	catch(exception& e) {
-		m->errorOut(e, "PhyloDiversityCommand", "readNamesFile");
+		m->errorOut(e, "PhyloDiversityCommand", "getRootForGroups");
 		exit(1);
 	}
 }
-
 //**********************************************************************************************************************
 
 

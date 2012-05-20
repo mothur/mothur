@@ -7,8 +7,6 @@
 
 struct AlnData;
 
-int uchime_main(int, char**); 
-
 class UCFile
 	{
 public:

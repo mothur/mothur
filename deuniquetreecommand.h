@@ -12,7 +12,6 @@
 
 
 #include "command.hpp"
-#include "treemap.h"
 #include "sharedutilities.h"
 #include "readtree.h"
 
@@ -35,7 +34,6 @@ public:
 	
 	
 private:
-	TreeMap* tmap;
 	int numUniquesInName;
 	
 	bool abort;

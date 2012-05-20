@@ -296,7 +296,8 @@ int Classify::readTaxonomy(string file) {
 			delete buf4;
 
 			istringstream iss (tempBuf,istringstream::in);
-			iss >> name >> taxInfo;
+			iss >> name; m->gobble(iss);
+            iss >> taxInfo;
 			taxonomy[name] = taxInfo;
 			phyloTree->addSeqToTree(name, taxInfo);
 		}
@@ -309,8 +310,9 @@ int Classify::readTaxonomy(string file) {
 	
 		//read template seqs and save
 		while (!inTax.eof()) {
-			inTax >> name >> taxInfo;
-			
+			inTax >> name; m->gobble(inTax);
+            inTax >> taxInfo;
+            	
 			taxonomy[name] = taxInfo;
 			
 			phyloTree->addSeqToTree(name, taxInfo);

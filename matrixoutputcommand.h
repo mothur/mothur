@@ -88,7 +88,7 @@ private:
 	};
 	vector<linePair> lines;
 	
-	void printSims(ostream&, vector< vector<float> >&);
+	void printSims(ostream&, vector< vector<double> >&);
 	int process(vector<SharedRAbundVector*>);
 	
 	vector<Calculator*> matrixCalculators;
@@ -96,10 +96,10 @@ private:
 	InputData* input;
 	vector<SharedRAbundVector*> lookup;
 	string exportFileName, output, sharedfile;
-	int numGroups, processors;
+	int numGroups, processors, iters, subsampleSize;
 	ofstream out;
 
-	bool abort, allLines;
+	bool abort, allLines, subsample;
 	set<string> labels; //holds labels to be used
 	string outputFile, calc, groups, label, outputDir;
 	vector<string>  Estimators, Groups, outputNames; //holds estimators to be used

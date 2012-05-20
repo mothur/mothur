@@ -91,6 +91,8 @@ map<string, string> OptionParser::getParameters() {
 					it->second = m->getAccnosFile();
 				}else if (it->first == "taxonomy") {
 					it->second = m->getTaxonomyFile();
+                }else if (it->first == "biom") {
+                        it->second = m->getBiomFile();
 				}else {
 					m->mothurOut("[ERROR]: mothur does not save a current file for " + it->first); m->mothurOutEndLine();
 				}

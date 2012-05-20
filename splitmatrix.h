@@ -20,7 +20,7 @@ class SplitMatrix  {
 	public:
 
 		SplitMatrix(string, string, string, float, string, bool); //column formatted distance file, namesfile, cutoff, method, large
-		SplitMatrix(string, string, string, float, float, string, int, string); //fastafile, namefile, taxFile, taxcutoff, cutoff, method, processors, outputDir
+		SplitMatrix(string, string, string, float, float, string, int, bool, string); //fastafile, namefile, taxFile, taxcutoff, cutoff, method, processors, classic, outputDir
 		
 		~SplitMatrix();
 		int split();
@@ -33,7 +33,7 @@ class SplitMatrix  {
 		string distFile, namefile, singleton, method, taxFile, fastafile, outputDir;
 		vector< map< string, string> > dists;
 		float cutoff, distCutoff;
-		bool large;
+		bool large, classic;
 		int processors;
 				
 		int splitDistance();

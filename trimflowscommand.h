@@ -67,7 +67,6 @@ private:
 	
 	string flowFileName, oligoFileName, outputDir;
 
-
 	map<string, int> barcodes;
 	map<string, int> primers;
 	vector<string> revPrimer;

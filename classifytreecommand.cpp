@@ -8,6 +8,7 @@
 
 #include "classifytreecommand.h"
 #include "phylotree.h"
+#include "treereader.h"
 
 //**********************************************************************************************************************
 vector<string> ClassifyTreeCommand::setParameters(){	
@@ -85,12 +86,6 @@ ClassifyTreeCommand::ClassifyTreeCommand(string option)  {
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
-			
-			m->runParse = true;
-			m->clearGroups();
-			m->clearAllGroups();
-			m->Treenames.clear();
-			m->names.clear();
 			
 			vector<string> tempOutNames;
 			outputTypes["tree"] = tempOutNames;
@@ -195,73 +190,18 @@ int ClassifyTreeCommand::execute(){
 		//    reading tree info							   //
 		/***************************************************/
         m->setTreeFile(treefile);
-        if (groupfile != "") {
-			//read in group map info.
-			tmap = new TreeMap(groupfile);
-			tmap->readMap();
-		}else{ //fake out by putting everyone in one group
-			Tree* tree = new Tree(treefile); delete tree;  //extracts names from tree to make faked out groupmap
-			tmap = new TreeMap();
-			
-			for (int i = 0; i < m->Treenames.size(); i++) { tmap->addSeq(m->Treenames[i], "Group1"); }
-		}
-		
-		if (namefile != "") { readNamesFile(); }
-		
-		read = new ReadNewickTree(treefile);
-		int readOk = read->read(tmap); 
-		
-		if (readOk != 0) { m->mothurOut("Read Terminated."); m->mothurOutEndLine(); delete tmap; delete read; return 0; }
-		
-		read->AssembleTrees();
-		vector<Tree*> T = read->getTrees();
-        Tree* outputTree = T[0]; 
-		delete read;
-		
-		//make sure all files match
-		//if you provide a namefile we will use the numNames in the namefile as long as the number of unique match the tree names size.
-		int numNamesInTree;
-		if (namefile != "")  {  
-			if (numUniquesInName == m->Treenames.size()) {  numNamesInTree = nameMap.size();  }
-			else {   numNamesInTree = m->Treenames.size();  }
-		}else {  numNamesInTree = m->Treenames.size();  }
-		
-		
-		//output any names that are in group file but not in tree
-		if (numNamesInTree < tmap->getNumSeqs()) {
-			for (int i = 0; i < tmap->namesOfSeqs.size(); i++) {
-				//is that name in the tree?
-				int count = 0;
-				for (int j = 0; j < m->Treenames.size(); j++) {
-					if (tmap->namesOfSeqs[i] == m->Treenames[j]) { break; } //found it
-					count++;
-				}
-				
-				if (m->control_pressed) { 
-					delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; }
-					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
-					m->clearGroups();
-					return 0;
-				}
-				
-				//then you did not find it so report it 
-				if (count == m->Treenames.size()) { 
-					//if it is in your namefile then don't remove
-					map<string, string>::iterator it = nameMap.find(tmap->namesOfSeqs[i]);
-					
-					if (it == nameMap.end()) {
-						m->mothurOut(tmap->namesOfSeqs[i] + " is in your groupfile and not in your tree. It will be disregarded."); m->mothurOutEndLine();
-						tmap->removeSeq(tmap->namesOfSeqs[i]);
-						i--; //need this because removeSeq removes name from namesOfSeqs
-					}
-				}
-			}
-		}
+        
+        TreeReader* reader = new TreeReader(treefile, groupfile, namefile);
+        vector<Tree*> T = reader->getTrees();
+        TreeMap* tmap = T[0]->getTreeMap();
+        Tree* outputTree = T[0];
+        delete reader;
+
+        if (namefile != "") { readNamesFile(); }
                         
-        if (m->control_pressed) { delete outputTree; delete tmap;  return 0; }
+        if (m->control_pressed) { delete tmap;  delete outputTree;  return 0; }
 		
         readTaxonomyFile();
-        
         
         /***************************************************/
         //		get concensus taxonomies                    //
@@ -484,6 +424,7 @@ map<string, set<string> > ClassifyTreeCommand::getDescendantList(Tree*& T, int i
 		
 		int lc = T->tree[i].getLChild();
 		int rc = T->tree[i].getRChild();
+        TreeMap* tmap = T->getTreeMap();
 		
 		if (lc == -1) { //you are a leaf your only descendant is yourself
             string group = tmap->getGroup(T->tree[i].getName());

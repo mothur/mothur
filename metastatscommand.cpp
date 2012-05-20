@@ -483,25 +483,16 @@ int MetaStatsCommand::driver(int start, int num, vector<SharedRAbundVector*>& th
 				outputNames.pop_back();
 			}else {
                 
-                ofstream outTemp;
-                string tempOut = outputDir + "data." + setA + "-" + setB + ".matrix";
-                m->openOutputFile(tempOut, outTemp);
-                for (int i = 0; i < subset.size(); i++) { outTemp << '\t' << subset[i]->getGroup(); }
-                outTemp << endl;
-                
-                
 				//fill data
 				for (int j = 0; j < thisLookUp[0]->getNumBins(); j++) {
 					//data[j] = new double[subset.size()];
 					data2[j].resize(subset.size(), 0.0);
-                    outTemp << "OTU" << (j+1);
+                   
 					for (int i = 0; i < subset.size(); i++) {
 						data2[j][i] = (subset[i]->getAbundance(j));
-                        outTemp << '\t' << subset[i]->getAbundance(j);
 					}
-                    outTemp << endl;
 				}
-				outTemp.close();
+				
 				m->mothurOut("Comparing " + setA + " and " + setB + "..."); m->mothurOutEndLine(); 
 				//metastat_main(output, thisLookUp[0]->getNumBins(), subset.size(), threshold, iters, data, setACount);
 				

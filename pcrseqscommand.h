@@ -45,7 +45,7 @@ private:
 	bool getOligos(vector<vector<string> >&, vector<vector<string> >&, vector<vector<string> >&);
     bool abort, keepprimer, keepdots;
 	string fastafile, oligosfile, taxfile, groupfile, namefile, ecolifile, outputDir, nomatch;
-	int start, end, pdiffs, processors, length;
+	int start, end, processors, length;
 	
     vector<string> revPrimer, outputNames;
 	vector<string> primers;
@@ -315,11 +315,11 @@ static DWORD WINAPI MyPcrThreadFunction(LPVOID lpParam){
                         pDataArray->m->mothurOut("[ERROR]: seqs are not the same length as ecoli seq. When using ecoli option your sequences must be aligned and the same length as the ecoli sequence.\n"); pDataArray->m->control_pressed = true; break; 
                     }else {
                         if (pDataArray->keepdots)   { 
-                            currSeq.filterToPos(start); 
-                            currSeq.filterFromPos(end);
+                            currSeq.filterToPos(pDataArray->start); 
+                            currSeq.filterFromPos(pDataArray->end);
                         }else {
-                            string seqString = currSeq.getAligned().substr(0, end);
-                            seqString = seqString.substr(start);
+                            string seqString = currSeq.getAligned().substr(0, pDataArray->end);
+                            seqString = seqString.substr(pDataArray->start);
                             currSeq.setAligned(seqString); 
                         }
                     }
@@ -331,17 +331,17 @@ static DWORD WINAPI MyPcrThreadFunction(LPVOID lpParam){
                         if (pDataArray->end != -1) {
                             if (pDataArray->end > currSeq.getAligned().length()) {  pDataArray->m->mothurOut("[ERROR]: end is longer than your sequence length, aborting.\n"); pDataArray->m->control_pressed = true; break; }
                             else {
-                                if (pDataArray->keepdots)   { currSeq.filterFromPos(end); }
+                                if (pDataArray->keepdots)   { currSeq.filterFromPos(pDataArray->end); }
                                 else {
-                                    string seqString = currSeq.getAligned().substr(0, end);
+                                    string seqString = currSeq.getAligned().substr(0, pDataArray->end);
                                     currSeq.setAligned(seqString); 
                                 }
                             }
                         }
                         if (pDataArray->start != -1) { 
-                            if (pDataArray->keepdots)   {  currSeq.filterToPos(start);  }
+                            if (pDataArray->keepdots)   {  currSeq.filterToPos(pDataArray->start);  }
                             else {
-                                string seqString = currSeq.getAligned().substr(start);
+                                string seqString = currSeq.getAligned().substr(pDataArray->start);
                                 currSeq.setAligned(seqString); 
                             }
                         }

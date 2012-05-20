@@ -15,7 +15,7 @@ vector<string> ChimeraBellerophonCommand::setParameters(){
 	try {
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none","none","none",false,true); parameters.push_back(pfasta);
 		CommandParameter pfilter("filter", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pfilter);
-		CommandParameter pcorrection("filter", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pcorrection);
+		CommandParameter pcorrection("correction", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pcorrection);
 		CommandParameter pwindow("window", "Number", "", "0", "", "", "",false,false); parameters.push_back(pwindow);
 		CommandParameter pincrement("increment", "Number", "", "25", "", "", "",false,false); parameters.push_back(pincrement);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);

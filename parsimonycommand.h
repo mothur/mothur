@@ -36,15 +36,12 @@ public:
 	void help() { m->mothurOut(getHelpString()); }
 	
 private:
-	ReadTree* read;
-	SharedUtil* util;
 	FileOutput* output;
 	vector<Tree*> T;	   //user trees
 	Tree* randT;  //random tree
 	Tree* copyUserTree; 
 	TreeMap* tmap; 
 	TreeMap* savetmap;
-	Parsimony* pars;
 	vector<string> groupComb; // AB. AC, BC...
 	string sumFile, randomtree, allGroups, outputDir, treefile, groupfile, namefile;
 	int iters, numGroups, numComp, counter, processors, numUniquesInName;

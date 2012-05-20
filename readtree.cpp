@@ -20,12 +20,12 @@ ReadTree::ReadTree() {
 	}
 }
 /***********************************************************************/
-int ReadTree::AssembleTrees() {
+int ReadTree::AssembleTrees(map<string, string> nameMap) {
 	 try {
 		 //assemble users trees
 		 for (int i = 0; i < Trees.size(); i++) {
 			 if (m->control_pressed) { return 0;  }
-			 Trees[i]->assembleTree();
+			 Trees[i]->assembleTree(nameMap);
 		 }
 		 return 0;
 	 }

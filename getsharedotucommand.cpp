@@ -46,8 +46,8 @@ string GetSharedOTUCommand::getHelpString(){
 		helpString += "The output parameter allows you to output the list of names without the group and bin number added. \n";
 		helpString += "With this option you can use the names file as an input in get.seqs and remove.seqs commands. To do this enter output=accnos. \n";
 		helpString += "The get.sharedseqs command outputs a .names file for each distance level containing a list of sequences in the OTUs shared by the groups specified.\n";
-		helpString += "The get.sharedseqs command should be in the following format: get.sharedseqs(label=yourLabels, groups=yourGroups, fasta=yourFastafile, output=yourOutput).\n";
-		helpString += "Example get.sharedseqs(list=amazon.fn.list, label=unique-0.01, group=forest-pasture, fasta=amazon.fasta, output=accnos).\n";
+		helpString += "The get.sharedseqs command should be in the following format: get.sharedseqs(list=yourListFile, group=yourGroupFile, label=yourLabels, unique=yourGroups, fasta=yourFastafile, output=yourOutput).\n";
+		helpString += "Example get.sharedseqs(list=amazon.fn.list, label=unique-0.01, group= amazon.groups, unique=forest-pasture, fasta=amazon.fasta, output=accnos).\n";
 		helpString += "The output to the screen is the distance and the number of otus at that distance for the groups you specified.\n";
 		helpString += "The default value for label is all labels in your inputfile. The default for groups is all groups in your file.\n";
 		helpString += "Note: No spaces between parameter labels (i.e. label), '=' and parameters (i.e.yourLabel).\n";

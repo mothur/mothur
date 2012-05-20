@@ -16,29 +16,19 @@
 class TrialSwap2 {
     
 public:
-	TrialSwap2(){  m = MothurOut::getInstance(); };
+    TrialSwap2(){ m = MothurOut::getInstance(); };
     ~TrialSwap2(){};
     
     double calc_pvalue_lessthan (vector<double>, double);
     double calc_pvalue_greaterthan (vector<double>, double);
-    int swap_checkerboards (vector<vector<int> > &);
-    int calc_combo (vector<vector<int> > &);
-    double calc_vratio (vector<int>, vector<int>);
-    int calc_checker (vector<vector<int> > &,vector<int>);
-    double calc_c_score (vector<vector<int> > &,vector<int>);
+    int swap_checkerboards (vector<vector<int> > &, int, int);
+    int calc_combo (int, int, vector<vector<int> > &);
+    double calc_vratio (int, int, vector<int>, vector<int>);
+    int calc_checker (vector<vector<int> > &, vector<int>, int, int);
+    double calc_c_score (vector<vector<int> > &, vector<int>, int, int);
+    double get_zscore (double, double, double);
+    double getSD (int, vector<double>, double);
     
-    int sim1 (vector<vector<int> > &);
-    void sim2(vector<vector<int> >&);
-    int sim2plus(vector<int>, vector<vector<int> > &);
-    void sim3(vector<vector<int> > &);
-    int sim4(vector<int>, vector<int>, vector<vector<int> > &);
-    int sim5(vector<int>, vector<int>, vector<vector<int> > &);
-    int sim6(vector<int>, vector<vector<int> > &);
-    int sim7(vector<int>, vector<vector<int> > &);
-    int sim8(vector<int>, vector<int>, vector<vector<int> > &);
-    int transpose_matrix (vector<vector<int> > &, vector<vector<int> > &);
-    int update_row_col_totals(vector<vector<int> > &, vector<int>&, vector<int>&);
-
     
 private:
     MothurOut* m;
@@ -47,9 +37,8 @@ private:
     int print_matrix(vector<vector<int> > &, int, int);
     
     
-
+        
 };
-
 #endif
 
 

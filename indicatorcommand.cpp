@@ -99,7 +99,6 @@ IndicatorCommand::IndicatorCommand(string option)  {
 			m->clearGroups();
 			m->clearAllGroups();
 			m->Treenames.clear();
-			m->names.clear();
 			
 			vector<string> tempOutNames;
 			outputTypes["tree"] = tempOutNames;
@@ -236,11 +235,10 @@ int IndicatorCommand::execute(){
 			designMap->readDesignMap();
 			
 			//fill Groups - checks for "all" and for any typo groups
-			SharedUtil* util = new SharedUtil();
+			SharedUtil util;
 			vector<string> nameGroups = designMap->getNamesOfGroups();
-			util->setGroups(Groups, nameGroups);
+			util.setGroups(Groups, nameGroups);
 			designMap->setNamesOfGroups(nameGroups);
-			delete util;
 			
 			//loop through the Groups and fill Globaldata's Groups with the design file info
 			vector<string> namesSeqs = designMap->getNamesSeqs(Groups);
@@ -320,8 +318,9 @@ int IndicatorCommand::execute(){
 				else { for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  } }
 				for (int i = 0; i < T.size(); i++) {  delete T[i];  }  delete treeMap; return 0; 
 			}
-				
-			T[0]->assembleTree();
+            
+			map<string, string> nameMap;	
+			T[0]->assembleTree(nameMap);
 					
 			/***************************************************/
 			//    create ouptut tree - respecting pickedGroups //
@@ -329,12 +328,11 @@ int IndicatorCommand::execute(){
 			Tree* outputTree = new Tree(m->getNumGroups(), treeMap); 
 			
 			outputTree->getSubTree(T[0], m->getGroups());
-			outputTree->assembleTree();
+			outputTree->assembleTree(nameMap);
 				
 			//no longer need original tree, we have output tree to use and label
 			for (int i = 0; i < T.size(); i++) {  delete T[i];  } 
 			
-					
 			if (m->control_pressed) { 
 				if (designfile != "") { delete designMap; }
 				if (sharedfile != "") {  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } }
@@ -470,17 +468,17 @@ int IndicatorCommand::GetIndicatorSpecies(){
 				
 			if (m->control_pressed) { out.close(); return 0; }
 			
-			out << (j+1) << '\t' << indicatorValues[j] << '\t'; 
+			out << m->currentBinLabels[j] << '\t' << indicatorValues[j] << '\t'; 
 			
 			if (pValues[j] > (1/(float)iters)) { out << pValues[j] << endl; } 
 			else { out << "<" << (1/(float)iters) << endl; }
 			
 			if (pValues[j] <= 0.05) {
-				cout << "OTU" << j+1 << '\t' << indicatorValues[j]  << '\t';
+				cout << m->currentBinLabels[j] << '\t' << indicatorValues[j]  << '\t';
 				string pValueString = "<" + toString((1/(float)iters)); 
 				if (pValues[j] > (1/(float)iters)) { pValueString = toString(pValues[j]); cout << pValues[j];} 
 				else { cout << "<" << (1/(float)iters); }
-				m->mothurOutJustToLog("OTU" + toString(j+1) + "\t" + toString(indicatorValues[j]) + "\t" + pValueString); 
+				m->mothurOutJustToLog(m->currentBinLabels[j] + "\t" + toString(indicatorValues[j]) + "\t" + pValueString); 
 				m->mothurOutEndLine(); 
 			}
 		}
@@ -516,7 +514,7 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 		
 		//print headings
 		out << "TreeNode\t";
-		for (int i = 0; i < numBins; i++) { out << "OTU" << (i+1) << "_IndValue" << '\t' << "pValue" << '\t'; }
+		for (int i = 0; i < numBins; i++) { out << m->currentBinLabels[i] << "_IndValue" << '\t' << "pValue" << '\t'; }
 		out << endl;
 		
 		m->mothurOutEndLine(); m->mothurOut("Node\tSpecies\tIndicatorValue\tpValue\n");
@@ -673,11 +671,11 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 				}
 				
 				if (pValues[j] <= 0.05) {
-					cout << i+1 << "\tOTU" << j+1 << '\t' << indicatorValues[j]  << '\t';
+					cout << i+1 << '\t' << m->currentBinLabels[j] << '\t' << indicatorValues[j]  << '\t';
 					string pValueString = "<" + toString((1/(float)iters)); 
 					if (pValues[j] > (1/(float)iters)) { pValueString = toString(pValues[j]); cout << pValues[j];} 
 					else { cout << "<" << (1/(float)iters); }
-					m->mothurOutJustToLog(toString(i) + "\tOTU" + toString(j+1) + "\t" + toString(indicatorValues[j]) + "\t" + pValueString); 
+					m->mothurOutJustToLog(toString(i) + "\t" + m->currentBinLabels[j] + "\t" + toString(indicatorValues[j]) + "\t" + pValueString); 
 					m->mothurOutEndLine(); 
 				}
 			}

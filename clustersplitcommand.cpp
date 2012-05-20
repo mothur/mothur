@@ -10,7 +10,6 @@
 #include "clustersplitcommand.h"
 
 
-
 //**********************************************************************************************************************
 vector<string> ClusterSplitCommand::setParameters(){	
 	try {
@@ -29,6 +28,7 @@ vector<string> ClusterSplitCommand::setParameters(){
 		CommandParameter pprecision("precision", "Number", "", "100", "", "", "",false,false); parameters.push_back(pprecision);
 		CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted", "average", "", "", "",false,false); parameters.push_back(pmethod);
 		CommandParameter phard("hard", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(phard);
+        CommandParameter pclassic("classic", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pclassic);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
 			
@@ -62,6 +62,7 @@ string ClusterSplitCommand::getHelpString(){
 		helpString += "The taxonomy parameter allows you to enter the taxonomy file for your sequences, this is only valid if you are using splitmethod=classify. Be sure your taxonomy file does not include the probability scores. \n";
 		helpString += "The taxlevel parameter allows you to specify the taxonomy level you want to use to split the distance file, default=3, meaning use the first taxon in each list. \n";
 		helpString += "The large parameter allows you to indicate that your distance matrix is too large to fit in RAM.  The default value is false.\n";
+        helpString += "The classic parameter allows you to indicate that you want to run your files with cluster.classic.  It is only valid with splitmethod=fasta. Default=f.\n";
 #ifdef USE_MPI
 		helpString += "When using MPI, the processors parameter is set to the number of MPI processes running. \n";
 #endif
@@ -198,7 +199,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			taxFile = validParameter.validFile(parameters, "taxonomy", true);
 			if (taxFile == "not open") { taxFile = ""; abort = true; }	
 			else if (taxFile == "not found") { taxFile = ""; }
-			else {  m->setTaxonomyFile(taxFile); }
+			else {  m->setTaxonomyFile(taxFile); if (splitmethod != "fasta") { splitmethod = "classify"; } }
 			
 			if ((phylipfile == "") && (columnfile == "") && (fastafile == "")) { 
 				//is there are current file available for either of these?
@@ -266,17 +267,22 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			
 			temp = validParameter.validFile(parameters, "large", false);			if (temp == "not found") { temp = "F"; }
 			large = m->isTrue(temp);
-			
+            
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
 			m->mothurConvert(temp, processors);
 			
 			temp = validParameter.validFile(parameters, "splitmethod", false);	
-			if (splitmethod != "fasta") {
+			if ((splitmethod != "fasta") && (splitmethod != "classify")) {
 				if (temp == "not found")  { splitmethod = "distance"; }
 				else {  splitmethod = temp; }
 			}
 			
+            temp = validParameter.validFile(parameters, "classic", false);			if (temp == "not found") { temp = "F"; }
+			classic = m->isTrue(temp);
+            
+            if ((splitmethod != "fasta") && classic) { m->mothurOut("splitmethod must be fasta to use cluster.classic.\n"); abort=true; }
+
 			temp = validParameter.validFile(parameters, "cutoff", false);		if (temp == "not found")  { temp = "0.25"; }
 			m->mothurConvert(temp, cutoff); 
 			cutoff += (5 / (precision * 10.0));  
@@ -286,7 +292,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			
 			method = validParameter.validFile(parameters, "method", false);		if (method == "not found") { method = "average"; }
 			
-			if ((method == "furthest") || (method == "nearest") || (method == "average")) { }
+			if ((method == "furthest") || (method == "nearest") || (method == "average")) { m->mothurOut("Using splitmethod " + splitmethod + ".\n"); }
 			else { m->mothurOut("Not a valid clustering method.  Valid clustering algorithms are furthest, nearest or average."); m->mothurOutEndLine(); abort = true; }
 			
 			if ((splitmethod == "distance") || (splitmethod == "classify") || (splitmethod == "fasta")) { }
@@ -374,7 +380,7 @@ int ClusterSplitCommand::execute(){
 		SplitMatrix* split;
 		if (splitmethod == "distance")			{	split = new SplitMatrix(distfile, namefile, taxFile, cutoff, splitmethod, large);							}
 		else if (splitmethod == "classify")		{	split = new SplitMatrix(distfile, namefile, taxFile, taxLevelCutoff, splitmethod, large);					}
-		else if (splitmethod == "fasta")		{	split = new SplitMatrix(fastafile, namefile, taxFile, taxLevelCutoff, cutoff, splitmethod, processors, outputDir);	}
+		else if (splitmethod == "fasta")		{	split = new SplitMatrix(fastafile, namefile, taxFile, taxLevelCutoff, cutoff, splitmethod, processors, classic, outputDir);	}
 		else { m->mothurOut("Not a valid splitting method.  Valid splitting algorithms are distance, classify or fasta."); m->mothurOutEndLine(); return 0;		}
 		
 		split->split();
@@ -1021,148 +1027,20 @@ vector<string> ClusterSplitCommand::cluster(vector< map<string, string> > distNa
 		//cluster each distance file
 		for (int i = 0; i < distNames.size(); i++) {
             
-            Cluster* cluster = NULL;
-            SparseMatrix* matrix = NULL;
-            ListVector* list = NULL;
-            ListVector oldList;
-            RAbundVector* rabund = NULL;
-            
-			if (m->control_pressed) { return listFileNames; }
-			
 			string thisNamefile = distNames[i].begin()->second;
 			string thisDistFile = distNames[i].begin()->first;
-						
-			#ifdef USE_MPI
-				int pid;
-				MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-				
-				//output your files too
-				if (pid != 0) {
-					cout << endl << "Reading " << thisDistFile << endl;
-				}
-			#endif
 			
-			m->mothurOutEndLine(); m->mothurOut("Reading " + thisDistFile); m->mothurOutEndLine();
-			
-			ReadMatrix* read = new ReadColumnMatrix(thisDistFile); 	
-			read->setCutoff(cutoff);
+			string listFileName = "";
+            if (classic)    {  listFileName = clusterClassicFile(thisDistFile, thisNamefile, labels, smallestCutoff);   }
+            else            {  listFileName = clusterFile(thisDistFile, thisNamefile, labels, smallestCutoff);          }
 
-			NameAssignment* nameMap = new NameAssignment(thisNamefile);
-			nameMap->readMap();
-			read->read(nameMap);
-			
-			if (m->control_pressed) {  delete read; delete nameMap; return listFileNames; }
-			
-			list = read->getListVector();
-			oldList = *list;
-			matrix = read->getMatrix();
-			
-			delete read;  read = NULL;
-			delete nameMap; nameMap = NULL;
-			
-			
-			#ifdef USE_MPI
-				//output your files too
-				if (pid != 0) {
-					cout << endl << "Clustering " << thisDistFile << endl;
-				}
-			#endif
-			
-			m->mothurOutEndLine(); m->mothurOut("Clustering " + thisDistFile); m->mothurOutEndLine();
-		
-			rabund = new RAbundVector(list->getRAbundVector());
-			
-			//create cluster
-			if (method == "furthest")	{	cluster = new CompleteLinkage(rabund, list, matrix, cutoff, method); }
-			else if(method == "nearest"){	cluster = new SingleLinkage(rabund, list, matrix, cutoff, method); }
-			else if(method == "average"){	cluster = new AverageLinkage(rabund, list, matrix, cutoff, method);	}
-			tag = cluster->getTag();
-		
-			if (outputDir == "") { outputDir += m->hasPath(thisDistFile); }
-			fileroot = outputDir + m->getRootName(m->getSimpleName(thisDistFile));
-			
-			ofstream listFile;
-			m->openOutputFile(fileroot+ tag + ".list",	listFile);
-		
-			listFileNames.push_back(fileroot+ tag + ".list");
-				
-			float previousDist = 0.00000;
-			float rndPreviousDist = 0.00000;
-			
-			oldList = *list;
-
-			print_start = true;
-			start = time(NULL);
-			double saveCutoff = cutoff;
-		
-			while (matrix->getSmallDist() < cutoff && matrix->getNNodes() > 0){
-		
-				if (m->control_pressed) { //clean up
-					delete matrix; delete list;	delete cluster; delete rabund;
-					listFile.close();
-					for (int i = 0; i < listFileNames.size(); i++) {	m->mothurRemove(listFileNames[i]); 	}
-					listFileNames.clear(); return listFileNames;
-				}
-		
-				cluster->update(saveCutoff);
-	
-				float dist = matrix->getSmallDist();
-				float rndDist;
-				if (hard) {
-					rndDist = m->ceilDist(dist, precision); 
-				}else{
-					rndDist = m->roundDist(dist, precision); 
-				}
-
-				if(previousDist <= 0.0000 && dist != previousDist){
-					oldList.setLabel("unique");
-					oldList.print(listFile);
-					if (labels.count("unique") == 0) {  labels.insert("unique");  }
-				}
-				else if(rndDist != rndPreviousDist){
-					oldList.setLabel(toString(rndPreviousDist,  length-1));
-					oldList.print(listFile);
-					if (labels.count(toString(rndPreviousDist,  length-1)) == 0) { labels.insert(toString(rndPreviousDist,  length-1)); }
-				}
-		
-				previousDist = dist;
-				rndPreviousDist = rndDist;
-				oldList = *list;
-			}
-
-		
-			if(previousDist <= 0.0000){
-				oldList.setLabel("unique");
-				oldList.print(listFile);
-				if (labels.count("unique") == 0) { labels.insert("unique"); }
-			}
-			else if(rndPreviousDist<cutoff){
-				oldList.setLabel(toString(rndPreviousDist,  length-1));
-				oldList.print(listFile);
-				if (labels.count(toString(rndPreviousDist,  length-1)) == 0) { labels.insert(toString(rndPreviousDist,  length-1)); }
-			}
-	
-			delete matrix; delete list;	delete cluster; delete rabund; 
-            matrix = NULL; list = NULL; cluster = NULL; rabund = NULL;
-			listFile.close();
-			
 			if (m->control_pressed) { //clean up
 				for (int i = 0; i < listFileNames.size(); i++) {	m->mothurRemove(listFileNames[i]); 	}
 				listFileNames.clear(); return listFileNames;
 			}
-			
-			m->mothurRemove(thisDistFile);
-			m->mothurRemove(thisNamefile);
-			
-			if (saveCutoff != cutoff) { 
-				if (hard)	{  saveCutoff = m->ceilDist(saveCutoff, precision);	}
-				else		{	saveCutoff = m->roundDist(saveCutoff, precision);  }
-			
-				m->mothurOut("Cutoff was " + toString(cutoff) + " changed cutoff to " + toString(saveCutoff)); m->mothurOutEndLine();  
-			}
-			
-			if (saveCutoff < smallestCutoff) { smallestCutoff = saveCutoff;  }
-		}
+            
+            listFileNames.push_back(listFileName);
+        }
 		
 		cutoff = smallestCutoff;
 					
@@ -1175,6 +1053,269 @@ vector<string> ClusterSplitCommand::cluster(vector< map<string, string> > distNa
 	}
 
 
+}
+//**********************************************************************************************************************
+string ClusterSplitCommand::clusterClassicFile(string thisDistFile, string thisNamefile, set<string>& labels, double& smallestCutoff){
+	try {
+        string listFileName = "";
+        
+        ListVector* list = NULL;
+        ListVector oldList;
+        RAbundVector* rabund = NULL;
+        
+#ifdef USE_MPI
+        int pid;
+        MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
+        
+        //output your files too
+        if (pid != 0) {
+            cout << endl << "Reading " << thisDistFile << endl;
+        }
+#endif
+
+        m->mothurOutEndLine(); m->mothurOut("Reading " + thisDistFile); m->mothurOutEndLine();
+        
+        NameAssignment* nameMap = new NameAssignment(thisNamefile);
+        nameMap->readMap();
+				
+		//reads phylip file storing data in 2D vector, also fills list and rabund
+        bool sim = false;
+		ClusterClassic* cluster = new ClusterClassic(cutoff, method, sim);
+		cluster->readPhylipFile(thisDistFile, nameMap);
+		tag = cluster->getTag();
+        
+		if (m->control_pressed) { delete cluster; return 0; }
+		
+		list = cluster->getListVector();
+		rabund = cluster->getRAbundVector();
+        
+		if (outputDir == "") { outputDir += m->hasPath(thisDistFile); }
+		fileroot = outputDir + m->getRootName(m->getSimpleName(thisDistFile));
+        listFileName = fileroot+ tag + ".list";
+        
+        ofstream listFile;
+		m->openOutputFile(fileroot+ tag + ".list",	listFile);
+		
+		float previousDist = 0.00000;
+		float rndPreviousDist = 0.00000;
+		oldList = *list;
+		
+#ifdef USE_MPI
+        //output your files too
+        if (pid != 0) {
+            cout << endl << "Clustering " << thisDistFile << endl;
+        }
+#endif
+
+        m->mothurOutEndLine(); m->mothurOut("Clustering " + thisDistFile); m->mothurOutEndLine();
+        
+		while ((cluster->getSmallDist() < cutoff) && (cluster->getNSeqs() > 1)){
+			if (m->control_pressed) { delete cluster; delete list; delete rabund; listFile.close();  return listFileName;  }
+            
+			cluster->update(cutoff);
+            
+			float dist = cluster->getSmallDist();
+			float rndDist;
+			if (hard) {
+				rndDist = m->ceilDist(dist, precision); 
+			}else{
+				rndDist = m->roundDist(dist, precision); 
+			}
+            
+            if(previousDist <= 0.0000 && dist != previousDist){
+                oldList.setLabel("unique");
+                oldList.print(listFile);
+                if (labels.count("unique") == 0) {  labels.insert("unique");  }
+            }
+            else if(rndDist != rndPreviousDist){
+                oldList.setLabel(toString(rndPreviousDist,  length-1));
+                oldList.print(listFile);
+                if (labels.count(toString(rndPreviousDist,  length-1)) == 0) { labels.insert(toString(rndPreviousDist,  length-1)); }
+            }
+
+            
+			previousDist = dist;
+			rndPreviousDist = rndDist;
+			oldList = *list;
+		}
+        
+		if(previousDist <= 0.0000){
+            oldList.setLabel("unique");
+            oldList.print(listFile);
+            if (labels.count("unique") == 0) { labels.insert("unique"); }
+        }
+        else if(rndPreviousDist<cutoff){
+            oldList.setLabel(toString(rndPreviousDist,  length-1));
+            oldList.print(listFile);
+            if (labels.count(toString(rndPreviousDist,  length-1)) == 0) { labels.insert(toString(rndPreviousDist,  length-1)); }
+        }
+
+        
+		listFile.close();
+		
+		delete cluster; delete nameMap; delete list; delete rabund;
+
+        
+        return listFileName;
+        
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClusterSplitCommand", "clusterClassicFile");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
+string ClusterSplitCommand::clusterFile(string thisDistFile, string thisNamefile, set<string>& labels, double& smallestCutoff){
+	try {
+        string listFileName = "";
+        
+        Cluster* cluster = NULL;
+        SparseMatrix* matrix = NULL;
+        ListVector* list = NULL;
+        ListVector oldList;
+        RAbundVector* rabund = NULL;
+        
+        if (m->control_pressed) { return listFileName; }
+        
+#ifdef USE_MPI
+        int pid;
+        MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
+        
+        //output your files too
+        if (pid != 0) {
+            cout << endl << "Reading " << thisDistFile << endl;
+        }
+#endif
+        
+        m->mothurOutEndLine(); m->mothurOut("Reading " + thisDistFile); m->mothurOutEndLine();
+        
+        ReadMatrix* read = new ReadColumnMatrix(thisDistFile); 	
+        read->setCutoff(cutoff);
+        
+        NameAssignment* nameMap = new NameAssignment(thisNamefile);
+        nameMap->readMap();
+        read->read(nameMap);
+        
+        if (m->control_pressed) {  delete read; delete nameMap; return listFileName; }
+        
+        list = read->getListVector();
+        oldList = *list;
+        matrix = read->getMatrix();
+        
+        delete read;  read = NULL;
+        delete nameMap; nameMap = NULL;
+        
+        
+#ifdef USE_MPI
+        //output your files too
+        if (pid != 0) {
+            cout << endl << "Clustering " << thisDistFile << endl;
+        }
+#endif
+        
+        m->mothurOutEndLine(); m->mothurOut("Clustering " + thisDistFile); m->mothurOutEndLine();
+		
+        rabund = new RAbundVector(list->getRAbundVector());
+        
+        //create cluster
+        if (method == "furthest")	{	cluster = new CompleteLinkage(rabund, list, matrix, cutoff, method); }
+        else if(method == "nearest"){	cluster = new SingleLinkage(rabund, list, matrix, cutoff, method); }
+        else if(method == "average"){	cluster = new AverageLinkage(rabund, list, matrix, cutoff, method);	}
+        tag = cluster->getTag();
+		
+        if (outputDir == "") { outputDir += m->hasPath(thisDistFile); }
+        fileroot = outputDir + m->getRootName(m->getSimpleName(thisDistFile));
+        
+        ofstream listFile;
+        m->openOutputFile(fileroot+ tag + ".list",	listFile);
+		
+        listFileName = fileroot+ tag + ".list";
+        
+        float previousDist = 0.00000;
+        float rndPreviousDist = 0.00000;
+        
+        oldList = *list;
+        
+        print_start = true;
+        start = time(NULL);
+        double saveCutoff = cutoff;
+		
+        while (matrix->getSmallDist() < cutoff && matrix->getNNodes() > 0){
+            
+            if (m->control_pressed) { //clean up
+                delete matrix; delete list;	delete cluster; delete rabund;
+                listFile.close();
+                m->mothurRemove(listFileName); 	
+                return listFileName;
+            }
+            
+            cluster->update(saveCutoff);
+            
+            float dist = matrix->getSmallDist();
+            float rndDist;
+            if (hard) {
+                rndDist = m->ceilDist(dist, precision); 
+            }else{
+                rndDist = m->roundDist(dist, precision); 
+            }
+            
+            if(previousDist <= 0.0000 && dist != previousDist){
+                oldList.setLabel("unique");
+                oldList.print(listFile);
+                if (labels.count("unique") == 0) {  labels.insert("unique");  }
+            }
+            else if(rndDist != rndPreviousDist){
+                oldList.setLabel(toString(rndPreviousDist,  length-1));
+                oldList.print(listFile);
+                if (labels.count(toString(rndPreviousDist,  length-1)) == 0) { labels.insert(toString(rndPreviousDist,  length-1)); }
+            }
+            
+            previousDist = dist;
+            rndPreviousDist = rndDist;
+            oldList = *list;
+        }
+        
+		
+        if(previousDist <= 0.0000){
+            oldList.setLabel("unique");
+            oldList.print(listFile);
+            if (labels.count("unique") == 0) { labels.insert("unique"); }
+        }
+        else if(rndPreviousDist<cutoff){
+            oldList.setLabel(toString(rndPreviousDist,  length-1));
+            oldList.print(listFile);
+            if (labels.count(toString(rndPreviousDist,  length-1)) == 0) { labels.insert(toString(rndPreviousDist,  length-1)); }
+        }
+        
+        delete matrix; delete list;	delete cluster; delete rabund; 
+        matrix = NULL; list = NULL; cluster = NULL; rabund = NULL;
+        listFile.close();
+        
+        if (m->control_pressed) { //clean up
+            m->mothurRemove(listFileName); 	
+            return listFileName;
+        }
+        
+        m->mothurRemove(thisDistFile);
+        m->mothurRemove(thisNamefile);
+        
+        if (saveCutoff != cutoff) { 
+            if (hard)	{  saveCutoff = m->ceilDist(saveCutoff, precision);	}
+            else		{	saveCutoff = m->roundDist(saveCutoff, precision);  }
+			
+            m->mothurOut("Cutoff was " + toString(cutoff) + " changed cutoff to " + toString(saveCutoff)); m->mothurOutEndLine();  
+        }
+        
+        if (saveCutoff < smallestCutoff) { smallestCutoff = saveCutoff;  }
+        
+        return listFileName;
+        
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClusterSplitCommand", "clusterFile");
+		exit(1);
+	}
 }
 //**********************************************************************************************************************
 

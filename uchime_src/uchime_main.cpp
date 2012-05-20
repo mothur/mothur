@@ -87,7 +87,7 @@ float GetAbFromLabel(const string &Label)
 	return 0.0;
 	}
 
-int uchime_main(int argc, char *argv[])
+int main(int argc, char *argv[])
 	{
 		
 	MyCmdLine(argc, argv);

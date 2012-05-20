@@ -128,8 +128,6 @@ PhyloTree::PhyloTree(string tfile){
 		maxLevel = 0;
 		calcTotals = true;
 		string name, tax;
-		addSeqToTree("unknown", "unknown;");
-
 		
 		#ifdef USE_MPI
 			int pid, num, processors;
@@ -193,7 +191,16 @@ PhyloTree::PhyloTree(string tfile){
 		#endif
 	
 		assignHeirarchyIDs(0);
-	
+        
+        
+        string unknownTax = "unknown;";
+        //added last taxon until you get desired level
+		for (int i = 1; i < maxLevel; i++) {
+			unknownTax += "unclassfied;";
+		}
+        
+        addSeqToTree("unknown", unknownTax);
+        
 		//create file for summary if needed
 		setUp(tfile);
 	}

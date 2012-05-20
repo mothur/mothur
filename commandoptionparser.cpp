@@ -22,16 +22,17 @@ CommandOptionParser::CommandOptionParser(string input){
 		optionString = "";
 		commandString = "";
 
-		if(openParen != -1 && closeParen != -1){			
-			commandString = input.substr(0, openParen);   //commandString contains everything before "("
+		if(openParen != -1 && closeParen != -1){	
+            //gobble extra spaces
+            int spot = 0;
+            for (int i = 0; i < input.length(); i++) {  if (!(isspace(input[i]))) { spot = i; break; } }
+            if (spot > openParen) { spot = 0; }
+			commandString = input.substr(spot, openParen-spot);   //commandString contains everything before "("
 			optionString = input.substr((openParen+1), (closeParen-openParen-1)); //optionString contains everything between "(" and ")".
 		}
 		else if (openParen == -1) { m->mothurOut("[ERROR]: You are missing ("); m->mothurOutEndLine(); }
 		else if (closeParen == -1) { m->mothurOut("[ERROR]:You are missing )"); m->mothurOutEndLine(); }
-					
-		//GlobalData* globaldata = GlobalData::getInstance();
-		//globaldata->parseGlobalData(commandString, optionString);			//parser to separate and check options
-	}
+    }
 	catch(exception& e) {
 		m->errorOut(e, "CommandOptionParser", "CommandOptionParser");
 		exit(1);

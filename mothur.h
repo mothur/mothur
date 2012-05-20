@@ -131,9 +131,9 @@ struct clusterNode {
 struct seqDist {
 	int seq1;
 	int seq2;
-	float dist;
+	double dist;
 	seqDist() {}
-	seqDist(int s1, int s2, float d) : seq1(s1), seq2(s2), dist(d) {}
+	seqDist(int s1, int s2, double d) : seq1(s1), seq2(s2), dist(d) {}
 	~seqDist() {}
 };
 /************************************************************/

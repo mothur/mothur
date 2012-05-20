@@ -1,4 +1,4 @@
-//#if	UCHIMES
+#if	UCHIMES
 
 #include "myutils.h"
 #include "seqdb.h"
@@ -83,4 +83,4 @@ void USort(const SeqData &Query, const SeqDB &DB, vector<float> &WordCounts,
 	SortDescending(WordCounts, Order);
 	}
 
-//#endif // UCHIMES
+#endif // UCHIMES

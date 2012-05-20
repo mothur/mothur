@@ -24,7 +24,7 @@ EstOutput BrayCurtis::getValues(vector<SharedRAbundVector*> shared) {
 		sumSharedAB = the sum of the minimum otus int all shared otus in AB.
 		*/
 		
-		for (int i = 0; i < shared[0]->size(); i++) {
+		for (int i = 0; i < shared[0]->getNumBins(); i++) {
 			//store in temps to avoid multiple repetitive function calls
 			tempA = shared[0]->getAbundance(i);
 			tempB = shared[1]->getAbundance(i);

@@ -36,8 +36,6 @@
 #include "binsequencecommand.h"
 #include "getoturepcommand.h"
 #include "treegroupscommand.h"
-#include "bootstrapsharedcommand.h"
-//#include "consensuscommand.h"
 #include "distancecommand.h"
 #include "aligncommand.h"
 #include "matrixoutputcommand.h"
@@ -131,6 +129,11 @@
 #include "classifytreecommand.h"
 #include "cooccurrencecommand.h"
 #include "pcrseqscommand.h"
+#include "createdatabasecommand.h"
+#include "makebiomcommand.h"
+#include "getcoremicrobiomecommand.h"
+#include "listotulabelscommand.h"
+#include "makecontigscommand.h"
 
 /*******************************************************/
 
@@ -190,8 +193,6 @@ CommandFactory::CommandFactory(){
 	commands["get.label"]           = "get.label";
 	commands["get.sabund"]          = "get.sabund";
 	commands["get.rabund"]          = "get.rabund";
-	commands["bootstrap.shared"]	= "bootstrap.shared";
-	//commands["consensus"]			= "consensus";
 	commands["help"]				= "help";
 	commands["reverse.seqs"]		= "reverse.seqs";
 	commands["trim.seqs"]			= "trim.seqs";
@@ -283,6 +284,11 @@ CommandFactory::CommandFactory(){
     commands["classify.tree"]       = "classify.tree";
     commands["cooccurrence"]        = "cooccurrence";
     commands["pcr.seqs"]            = "pcr.seqs";
+    commands["create.database"]     = "create.database";
+    commands["make.biom"]           = "make.biom";
+    commands["get.coremicrobiome"]  = "get.coremicrobiome";
+    commands["list.otulabels"]      = "list.otulabels";
+    commands["make.contigs"]        = "make.contigs";
 	commands["quit"]				= "MPIEnabled"; 
 
 }
@@ -306,7 +312,49 @@ CommandFactory::~CommandFactory(){
 	delete shellcommand;
 	delete pipecommand;
 }
+/***********************************************************/
 
+/***********************************************************/
+int CommandFactory::checkForRedirects(string optionString) {
+    try {
+        
+        int pos = optionString.find("outputdir");
+        if (pos != string::npos) { //user has set outputdir in command option string
+            string outputOption = "";
+            bool foundEquals = false;
+            for(int i=pos;i<optionString.length();i++){
+                if(optionString[i] == ',')       { break;               }		
+                else if(optionString[i] == '=')  { foundEquals = true;	}
+                if (foundEquals)       {   outputOption += optionString[i]; }
+            }
+            if(m->dirCheck(outputOption)){ 
+                setOutputDirectory(outputOption); 
+                m->mothurOut("Setting output directory to: " + outputOption); m->mothurOutEndLine();
+            }
+        }
+        
+        pos = optionString.find("inputdir");
+        if (pos != string::npos) { //user has set inputdir in command option string
+            string intputOption = "";
+            bool foundEquals = false;
+            for(int i=pos;i<optionString.length();i++){
+                if(optionString[i] == ',')       { break;               }		
+                else if(optionString[i] == '=')  { foundEquals = true;	}
+                if (foundEquals)       {   intputOption += optionString[i]; }
+            }
+            if(m->dirCheck(intputOption)){ 
+                setInputDirectory(intputOption); 
+                m->mothurOut("Setting input directory to: " + intputOption); m->mothurOutEndLine();
+            }
+        }
+        
+        return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "CommandFactory", "getCommand");
+		exit(1);
+	}
+}
 /***********************************************************/
 
 /***********************************************************/
@@ -315,7 +363,9 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 	try {
         
 		delete command;   //delete the old command
-		
+        
+        checkForRedirects(optionString);
+        		
 		//user has opted to redirect output from dir where input files are located to some other place
 		if (outputDir != "") { 
 			if (optionString != "") { optionString += ", outputdir=" + outputDir; }
@@ -357,8 +407,6 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "get.oturep")			{   command = new GetOTURepCommand(optionString);				}
 		else if(commandName == "tree.shared")			{   command = new TreeGroupCommand(optionString);				}
 		else if(commandName == "dist.shared")			{   command = new MatrixOutputCommand(optionString);			}
-		else if(commandName == "bootstrap.shared")		{   command = new BootSharedCommand(optionString);				}
-		else if(commandName == "consensus")				{   command = new ConcensusCommand(optionString);				}
 		else if(commandName == "dist.seqs")				{   command = new DistanceCommand(optionString);				}
 		else if(commandName == "align.seqs")			{   command = new AlignCommand(optionString);					}
 		else if(commandName == "summary.seqs")			{	command = new SeqSummaryCommand(optionString);				}
@@ -449,6 +497,11 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         else if(commandName == "classify.tree")         {	command = new ClassifyTreeCommand(optionString);            }
         else if(commandName == "cooccurrence")          {	command = new CooccurrenceCommand(optionString);            }
         else if(commandName == "pcr.seqs")              {	command = new PcrSeqsCommand(optionString);                 }
+        else if(commandName == "create.database")       {	command = new CreateDatabaseCommand(optionString);          }
+        else if(commandName == "make.biom")             {	command = new MakeBiomCommand(optionString);                }
+        else if(commandName == "get.coremicrobiome")    {	command = new GetCoreMicroBiomeCommand(optionString);       }
+        else if(commandName == "list.otulabels")        {	command = new ListOtuLabelsCommand(optionString);           }
+        else if(commandName == "make.contigs")          {	command = new MakeContigsCommand(optionString);             }
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -466,6 +519,8 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 	try {
 		delete pipecommand;   //delete the old command
 		
+        checkForRedirects(optionString);
+        
 		//user has opted to redirect output from dir where input files are located to some other place
 		if (outputDir != "") { 
 			if (optionString != "") { optionString += ", outputdir=" + outputDir; }
@@ -507,8 +562,6 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "get.oturep")			{   pipecommand = new GetOTURepCommand(optionString);				}
 		else if(commandName == "tree.shared")			{   pipecommand = new TreeGroupCommand(optionString);				}
 		else if(commandName == "dist.shared")			{   pipecommand = new MatrixOutputCommand(optionString);			}
-		else if(commandName == "bootstrap.shared")		{   pipecommand = new BootSharedCommand(optionString);				}
-		else if(commandName == "consensus")				{   pipecommand = new ConcensusCommand(optionString);				}
 		else if(commandName == "dist.seqs")				{   pipecommand = new DistanceCommand(optionString);				}
 		else if(commandName == "align.seqs")			{   pipecommand = new AlignCommand(optionString);					}
 		else if(commandName == "summary.seqs")			{	pipecommand = new SeqSummaryCommand(optionString);				}
@@ -598,6 +651,11 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
         else if(commandName == "classify.tree")         {	pipecommand = new ClassifyTreeCommand(optionString);            }
         else if(commandName == "cooccurrence")          {	pipecommand = new CooccurrenceCommand(optionString);            }
         else if(commandName == "pcr.seqs")              {	pipecommand = new PcrSeqsCommand(optionString);                 }
+        else if(commandName == "create.database")       {	pipecommand = new CreateDatabaseCommand(optionString);          }
+        else if(commandName == "make.biom")             {	pipecommand = new MakeBiomCommand(optionString);                }
+        else if(commandName == "get.coremicrobiome")    {	pipecommand = new GetCoreMicroBiomeCommand(optionString);       }
+        else if(commandName == "list.otulabels")        {	pipecommand = new ListOtuLabelsCommand(optionString);           }
+        else if(commandName == "make.contigs")          {	pipecommand = new MakeContigsCommand(optionString);             }
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -644,8 +702,6 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "get.oturep")			{   shellcommand = new GetOTURepCommand();				}
 		else if(commandName == "tree.shared")			{   shellcommand = new TreeGroupCommand();				}
 		else if(commandName == "dist.shared")			{   shellcommand = new MatrixOutputCommand();			}
-		else if(commandName == "bootstrap.shared")		{   shellcommand = new BootSharedCommand();				}
-		else if(commandName == "consensus")				{   shellcommand = new ConcensusCommand();				}
 		else if(commandName == "dist.seqs")				{   shellcommand = new DistanceCommand();				}
 		else if(commandName == "align.seqs")			{   shellcommand = new AlignCommand();					}
 		else if(commandName == "summary.seqs")			{	shellcommand = new SeqSummaryCommand();				}
@@ -735,6 +791,11 @@ Command* CommandFactory::getCommand(string commandName){
         else if(commandName == "classify.tree")         {	shellcommand = new ClassifyTreeCommand();           }
         else if(commandName == "cooccurrence")          {	shellcommand = new CooccurrenceCommand();           }
         else if(commandName == "pcr.seqs")              {	shellcommand = new PcrSeqsCommand();                }
+        else if(commandName == "create.database")       {	shellcommand = new CreateDatabaseCommand();         }
+        else if(commandName == "make.biom")             {	shellcommand = new MakeBiomCommand();               }
+        else if(commandName == "get.coremicrobiome")    {	shellcommand = new GetCoreMicroBiomeCommand();      }
+        else if(commandName == "list.otulabels")        {	shellcommand = new ListOtuLabelsCommand();          }
+        else if(commandName == "make.contigs")          {	shellcommand = new MakeContigsCommand();            }
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;

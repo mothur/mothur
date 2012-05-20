@@ -409,7 +409,7 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
 				success = 0;
 				trashCode += 'l';
 			}
-			cout << currSeq.getName() << endl << currSeq.getUnaligned() << endl;
+			
 			int primerIndex = 0;
 			int barcodeIndex = 0;
 			
