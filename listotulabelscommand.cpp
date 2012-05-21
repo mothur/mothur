@@ -33,11 +33,11 @@ vector<string> ListOtuLabelsCommand::setParameters(){
 string ListOtuLabelsCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The list.labels lists otu labels from shared or relabund file. The results can be used by the get.labels to select specific otus with the output from classify.otu, otu.association, or corr.axes.\n";
-		helpString += "The list.labels parameters are: shared, relabund, label and groups.\n";
+		helpString += "The list.otulabels lists otu labels from shared or relabund file. The results can be used by the get.otulabels to select specific otus with the output from classify.otu, otu.association, or corr.axes.\n";
+		helpString += "The list.otulabels parameters are: shared, relabund, label and groups.\n";
 		helpString += "The label parameter is used to analyze specific labels in your input.\n";
 		helpString += "The groups parameter allows you to specify which of the groups you would like analyzed.\n";
-		helpString += "The list.labels commmand should be in the following format: \n";
+		helpString += "The list.otulabels commmand should be in the following format: \n";
 		helpString += "list.otulabels(shared=yourSharedFile, groups=yourGroup1-yourGroup2)\n";
 		return helpString;
 	}

@@ -133,6 +133,8 @@
 #include "makebiomcommand.h"
 #include "getcoremicrobiomecommand.h"
 #include "listotulabelscommand.h"
+#include "getotulabelscommand.h"
+#include "removeotulabelscommand.h"
 #include "makecontigscommand.h"
 
 /*******************************************************/
@@ -288,6 +290,8 @@ CommandFactory::CommandFactory(){
     commands["make.biom"]           = "make.biom";
     commands["get.coremicrobiome"]  = "get.coremicrobiome";
     commands["list.otulabels"]      = "list.otulabels";
+    commands["get.otulabels"]       = "get.otulabels";
+    commands["remove.otulabels"]    = "remove.otulabels";
     commands["make.contigs"]        = "make.contigs";
 	commands["quit"]				= "MPIEnabled"; 
 
@@ -501,6 +505,8 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         else if(commandName == "make.biom")             {	command = new MakeBiomCommand(optionString);                }
         else if(commandName == "get.coremicrobiome")    {	command = new GetCoreMicroBiomeCommand(optionString);       }
         else if(commandName == "list.otulabels")        {	command = new ListOtuLabelsCommand(optionString);           }
+        else if(commandName == "get.otulabels")         {	command = new GetOtuLabelsCommand(optionString);            }
+        else if(commandName == "remove.otulabels")      {	command = new RemoveOtuLabelsCommand(optionString);         }
         else if(commandName == "make.contigs")          {	command = new MakeContigsCommand(optionString);             }
 		else											{	command = new NoCommand(optionString);						}
 
@@ -655,6 +661,8 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
         else if(commandName == "make.biom")             {	pipecommand = new MakeBiomCommand(optionString);                }
         else if(commandName == "get.coremicrobiome")    {	pipecommand = new GetCoreMicroBiomeCommand(optionString);       }
         else if(commandName == "list.otulabels")        {	pipecommand = new ListOtuLabelsCommand(optionString);           }
+        else if(commandName == "get.otulabels")         {	pipecommand = new GetOtuLabelsCommand(optionString);            }
+        else if(commandName == "remove.otulabels")      {	pipecommand = new RemoveOtuLabelsCommand(optionString);         }
         else if(commandName == "make.contigs")          {	pipecommand = new MakeContigsCommand(optionString);             }
 		else											{	pipecommand = new NoCommand(optionString);						}
 
@@ -795,6 +803,8 @@ Command* CommandFactory::getCommand(string commandName){
         else if(commandName == "make.biom")             {	shellcommand = new MakeBiomCommand();               }
         else if(commandName == "get.coremicrobiome")    {	shellcommand = new GetCoreMicroBiomeCommand();      }
         else if(commandName == "list.otulabels")        {	shellcommand = new ListOtuLabelsCommand();          }
+        else if(commandName == "get.otulabels")         {	shellcommand = new GetOtuLabelsCommand();           }
+        else if(commandName == "remove.otulabels")      {	shellcommand = new RemoveOtuLabelsCommand();        }
         else if(commandName == "make.contigs")          {	shellcommand = new MakeContigsCommand();            }
 		else											{	shellcommand = new NoCommand();						}
 

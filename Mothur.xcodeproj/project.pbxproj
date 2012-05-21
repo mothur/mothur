@@ -11,6 +11,8 @@
 		219C1DE41559BCCF004209F9 /* getcoremicrobiomecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 219C1DE31559BCCD004209F9 /* getcoremicrobiomecommand.cpp */; };
 		7E6BE10A12F710D8007ADDBE /* refchimeratest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7E6BE10912F710D8007ADDBE /* refchimeratest.cpp */; };
 		8DD76FB00486AB0100D96B5E /* mothur.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = C6A0FF2C0290799A04C91782 /* mothur.1 */; };
+		A70056E6156A93D000924A2D /* getotulabelscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A70056E5156A93D000924A2D /* getotulabelscommand.cpp */; };
+		A70056EB156AB6E500924A2D /* removeotulabelscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A70056EA156AB6E500924A2D /* removeotulabelscommand.cpp */; };
 		A70332B712D3A13400761E33 /* makefile in Sources */ = {isa = PBXBuildFile; fileRef = A70332B512D3A13400761E33 /* makefile */; };
 		A713EBAC12DC7613000092AC /* readphylipvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A713EBAB12DC7613000092AC /* readphylipvector.cpp */; };
 		A713EBED12DC7C5E000092AC /* nmdscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A713EBEC12DC7C5E000092AC /* nmdscommand.cpp */; };
@@ -370,6 +372,10 @@
 		7E6BE10912F710D8007ADDBE /* refchimeratest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = refchimeratest.cpp; sourceTree = "<group>"; };
 		7E78911B135F3E8600E725D2 /* eachgapdistignorens.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = eachgapdistignorens.h; sourceTree = "<group>"; };
 		8DD76FB20486AB0100D96B5E /* mothur */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = mothur; sourceTree = BUILT_PRODUCTS_DIR; };
+		A70056E5156A93D000924A2D /* getotulabelscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getotulabelscommand.cpp; sourceTree = "<group>"; };
+		A70056E8156A93E300924A2D /* getotulabelscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getotulabelscommand.h; sourceTree = "<group>"; };
+		A70056E9156AB6D400924A2D /* removeotulabelscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = removeotulabelscommand.h; sourceTree = "<group>"; };
+		A70056EA156AB6E500924A2D /* removeotulabelscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = removeotulabelscommand.cpp; sourceTree = "<group>"; };
 		A70332B512D3A13400761E33 /* makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = makefile; sourceTree = "<group>"; };
 		A713EBAA12DC7613000092AC /* readphylipvector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readphylipvector.h; sourceTree = "<group>"; };
 		A713EBAB12DC7613000092AC /* readphylipvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readphylipvector.cpp; sourceTree = "<group>"; };
@@ -1271,6 +1277,8 @@
 				A7E9B6F412D37EC400DA6239 /* getgroupscommand.cpp */,
 				A7E9B6F712D37EC400DA6239 /* getlabelcommand.h */,
 				A7E9B6F612D37EC400DA6239 /* getlabelcommand.cpp */,
+				A70056E8156A93E300924A2D /* getotulabelscommand.h */,
+				A70056E5156A93D000924A2D /* getotulabelscommand.cpp */,
 				A7E9B6F912D37EC400DA6239 /* getlineagecommand.h */,
 				A7E9B6F812D37EC400DA6239 /* getlineagecommand.cpp */,
 				A7E9B6FB12D37EC400DA6239 /* getlistcountcommand.h */,
@@ -1303,10 +1311,10 @@
 				A7E9B72B12D37EC400DA6239 /* indicatorcommand.cpp */,
 				A7E9B73C12D37EC400DA6239 /* libshuffcommand.h */,
 				A7E9B73B12D37EC400DA6239 /* libshuffcommand.cpp */,
-				A7E9B73E12D37EC400DA6239 /* listseqscommand.h */,
-				A7E9B73D12D37EC400DA6239 /* listseqscommand.cpp */,
 				A7A0671C156294810095C8C5 /* listotulabelscommand.h */,
 				A7A067191562946F0095C8C5 /* listotulabelscommand.cpp */,
+				A7E9B73E12D37EC400DA6239 /* listseqscommand.h */,
+				A7E9B73D12D37EC400DA6239 /* listseqscommand.cpp */,
 				A7FA10001302E096003860FE /* mantelcommand.h */,
 				A7FA10011302E096003860FE /* mantelcommand.cpp */,
 				A724D2B4153C8600000A826F /* makebiomcommand.h */,
@@ -1377,6 +1385,8 @@
 				A7E9B7C512D37EC400DA6239 /* removelineagecommand.cpp */,
 				A7E9B7C812D37EC400DA6239 /* removeotuscommand.h */,
 				A7E9B7C712D37EC400DA6239 /* removeotuscommand.cpp */,
+				A70056E9156AB6D400924A2D /* removeotulabelscommand.h */,
+				A70056EA156AB6E500924A2D /* removeotulabelscommand.cpp */,
 				A727864212E9E28C00F86ABA /* removerarecommand.h */,
 				A727864312E9E28C00F86ABA /* removerarecommand.cpp */,
 				A7E9B7CA12D37EC400DA6239 /* removeseqscommand.h */,
@@ -2180,6 +2190,8 @@
 				219C1DE41559BCCF004209F9 /* getcoremicrobiomecommand.cpp in Sources */,
 				A7A0671A1562946F0095C8C5 /* listotulabelscommand.cpp in Sources */,
 				A7A0671F1562AC3E0095C8C5 /* makecontigscommand.cpp in Sources */,
+				A70056E6156A93D000924A2D /* getotulabelscommand.cpp in Sources */,
+				A70056EB156AB6E500924A2D /* removeotulabelscommand.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

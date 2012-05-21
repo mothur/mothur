@@ -544,7 +544,9 @@ int ClassifyOtuCommand::process(ListVector* processList) {
 			taxaSum = new PhyloSummary(groupfile);
 		}
 		
+
 		//for each bin in the list vector
+        string snumBins = toString(processList->getNumBins());
 		for (int i = 0; i < processList->getNumBins(); i++) {
 			
 			if (m->control_pressed) { break; }
@@ -555,7 +557,15 @@ int ClassifyOtuCommand::process(ListVector* processList) {
 			if (m->control_pressed) { out.close();  return 0; }
 			
 			//output to new names file
-			out << (i+1) << '\t' << size << '\t' << conTax << endl;
+            string binLabel = "Otu";
+            string sbinNumber = toString(i+1);
+            if (sbinNumber.length() < snumBins.length()) { 
+                int diff = snumBins.length() - sbinNumber.length();
+                for (int h = 0; h < diff; h++) { binLabel += "0"; }
+            }
+            binLabel += sbinNumber;
+
+			out << binLabel << '\t' << size << '\t' << conTax << endl;
 			
 			string noConfidenceConTax = conTax;
 			m->removeConfidences(noConfidenceConTax);
