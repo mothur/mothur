@@ -603,7 +603,7 @@ int Sequence::getLongHomoPolymer(){
 int Sequence::getStartPos(){
 	if(startPos == -1){
 		for(int j = 0; j < alignmentLength; j++) {
-			if(aligned[j] != '.'){
+			if((aligned[j] != '.')&&(aligned[j] != '-')){
 				startPos = j + 1;
 				break;
 			}
@@ -668,7 +668,7 @@ int Sequence::filterFromPos(int end){
 int Sequence::getEndPos(){
 	if(endPos == -1){
 		for(int j=alignmentLength-1;j>=0;j--){
-			if(aligned[j] != '.'){
+			if((aligned[j] != '.')&&(aligned[j] != '-')){
 				endPos = j + 1;
 				break;
 			}

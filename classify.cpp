@@ -249,7 +249,8 @@ int Classify::readTaxonomy(string file) {
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Reading in the " + file + " taxonomy...\t");	cout.flush();
-
+        if (m->debug) { m->mothurOut("[DEBUG]: Taxonomies read in...\n"); }
+        
 #ifdef USE_MPI	
 		int pid, num, processors;
 		vector<unsigned long long> positions;
@@ -298,6 +299,7 @@ int Classify::readTaxonomy(string file) {
 			istringstream iss (tempBuf,istringstream::in);
 			iss >> name; m->gobble(iss);
             iss >> taxInfo;
+            if (m->debug) { m->mothurOut("[DEBUG]: name = " + name + " tax = " + taxInfo + "\n"); }
 			taxonomy[name] = taxInfo;
 			phyloTree->addSeqToTree(name, taxInfo);
 		}
@@ -312,7 +314,9 @@ int Classify::readTaxonomy(string file) {
 		while (!inTax.eof()) {
 			inTax >> name; m->gobble(inTax);
             inTax >> taxInfo;
-            	
+            
+            if (m->debug) {  m->mothurOut("[DEBUG]: name = '" + name + "' tax = '" + taxInfo + "'\n");  }
+
 			taxonomy[name] = taxInfo;
 			
 			phyloTree->addSeqToTree(name, taxInfo);
@@ -321,6 +325,8 @@ int Classify::readTaxonomy(string file) {
 		}
 		inTax.close();
 #endif	
+        
+        
 	
 		phyloTree->assignHeirarchyIDs(0);
 		
