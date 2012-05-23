@@ -36,17 +36,16 @@ public:
 private:
 	
 	vector<SharedRAbundVector*> lookup;
-	InputData* input;
-	Rarefact* rCurve;
-	vector<Display*> rDisplays;
 	int nIters;
 	string format;
 	float freq;
 	
 	bool abort, allLines, jumble;
 	set<string> labels; //holds labels to be used
-	string label, calc, groups, outputDir, sharedfile;
-	vector<string>  Estimators, Groups, outputNames;
+	string label, calc, groups, outputDir, sharedfile, designfile;
+	vector<string>  Estimators, Groups, outputNames, Sets;
+    
+    int process(GroupMap&, string);
 
 };
 

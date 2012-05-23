@@ -2046,17 +2046,23 @@ vector<string> ShhherCommand::parseFlowFiles(string filename){
             out << thisNumFLows << endl;
             files.push_back(outputFileName);
             
+            int numLinesWrote = 0;
             for (int i = 0; i < largeSize; i++) {
                 if (in.eof()) { break; }
-                string line = m->getline(in);
+                string line = m->getline(in); m->gobble(in);
                 out << line << endl;
+                numLinesWrote++;
             }
             out.close();
+            
+            if (numLinesWrote == 0) {  m->mothurRemove(outputFileName); files.pop_back();  }
             count++;
         }
         in.close();
         
         if (m->control_pressed) { for (int i = 0; i < files.size(); i++) { m->mothurRemove(files[i]); }  files.clear(); }
+        
+        m->mothurOut("\nDivided " + filename + " into " + toString(files.size()) + " files.\n\n"); 
         
         return files;
     }
@@ -2263,8 +2269,8 @@ int ShhherCommand::driver(vector<string> filenames, string thisCompositeFASTAFil
                         m->mothurRemove(otuCountsFileName);
                         m->appendFiles(groupFileName, (thisOutputDir + m->getRootName(m->getSimpleName(theseFlowFileNames[0])) + "shhh.groups"));
                         m->mothurRemove(groupFileName);
-                        m->mothurRemove(theseFlowFileNames[g]);
                     }
+                    m->mothurRemove(theseFlowFileNames[g]);
                 }
 			}
             
@@ -3319,7 +3325,9 @@ void ShhherCommand::writeClusters(string otuCountsFileName, int numOTUs, int num
 							//otuCountsFile << base;
 						}
 					}
-					otuCountsFile << newSeq.substr(4) << endl;
+					
+                    if (newSeq.length() >= 4) {  otuCountsFile << newSeq.substr(4) << endl;  }
+                    else {  otuCountsFile << "NNNN" << endl;  }
 				}
 				otuCountsFile << endl;
 			}
