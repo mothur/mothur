@@ -150,14 +150,21 @@ ShhherCommand::ShhherCommand(string option) {
 			else{
 				ofstream temp;
                 
-                string thisoutputDir = m->hasPath(flowFilesFileName); //if user entered a file with a path then preserve it
+                string thisoutputDir = outputDir;
+                if (outputDir == "") {  thisoutputDir =  m->hasPath(flowFilesFileName); } //if user entered a file with a path then preserve it
                 
-				//flow.files = 9 character offset
-				compositeFASTAFileName = thisoutputDir + m->getRootName(m->getSimpleName(flowFilesFileName)) + "shhh.fasta";
+				//we want to rip off .files, and also .flow if its there
+                string fileroot = m->getRootName(m->getSimpleName(flowFilesFileName));
+                if (fileroot[fileroot.length()-1] == '.') {  fileroot = fileroot.substr(0, fileroot.length()-1); } //rip off dot
+                string extension = m->getExtension(fileroot);
+                if (extension == ".flow") { fileroot = m->getRootName(fileroot);  }
+                else { fileroot += "."; } //add back if needed
+                
+				compositeFASTAFileName = thisoutputDir + fileroot + "shhh.fasta";
 				m->openOutputFile(compositeFASTAFileName, temp);
 				temp.close();
 				
-				compositeNamesFileName = thisoutputDir + m->getRootName(m->getSimpleName(flowFilesFileName)) + "shhh.names";
+				compositeNamesFileName = thisoutputDir + fileroot + "shhh.names";
 				m->openOutputFile(compositeNamesFileName, temp);
 				temp.close();
 			}

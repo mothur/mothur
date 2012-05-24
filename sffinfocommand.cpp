@@ -306,6 +306,7 @@ int SffInfoCommand::execute(){
 			
 			int start = time(NULL);
 			
+            filenames[s] = m->getFullPathName(filenames[s]);
 			m->mothurOut("Extracting info from " + filenames[s] + " ..." ); m->mothurOutEndLine();
 			
 			string accnos = "";
