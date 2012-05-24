@@ -24,6 +24,7 @@
 
 /* Begin PBXFileReference section */
 		7B142586156968C900D238B7 /* rrf-fs-prototype */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "rrf-fs-prototype"; sourceTree = BUILT_PRODUCTS_DIR; };
+		7BA4404E156C7DD9004A6A54 /* sharedanddesignfilereader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sharedanddesignfilereader.h; sourceTree = "<group>"; };
 		7BE48A7115696A38002928AD /* rrf-fs-prototype.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "rrf-fs-prototype.cpp"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -42,6 +43,7 @@
 			isa = PBXGroup;
 			children = (
 				7BE48A7115696A38002928AD /* rrf-fs-prototype.cpp */,
+				7BA4404E156C7DD9004A6A54 /* sharedanddesignfilereader.h */,
 				7B142587156968C900D238B7 /* Products */,
 			);
 			sourceTree = "<group>";
