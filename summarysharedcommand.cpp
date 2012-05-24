@@ -8,15 +8,19 @@
  */
 
 #include "summarysharedcommand.h"
+#include "subsample.h"
 
 //**********************************************************************************************************************
 vector<string> SummarySharedCommand::setParameters(){	
 	try {
 		CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pshared);
 		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
+        CommandParameter psubsample("subsample", "String", "", "", "", "", "",false,false); parameters.push_back(psubsample);
 		CommandParameter pdistance("distance", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pdistance);
 		CommandParameter pcalc("calc", "Multiple", "sharedchao-sharedsobs-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan-kstest-whittaker-sharednseqs-ochiai-anderberg-kulczynski-kulczynskicody-lennon-morisitahorn-braycurtis-odum-canberra-structeuclidean-structchord-hellinger-manhattan-structpearson-soergel-spearman-structkulczynski-speciesprofile-structchi2-hamming-gower-memchi2-memchord-memeuclidean-mempearson", "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan", "", "", "",true,false); parameters.push_back(pcalc);
+        CommandParameter poutput("output", "Multiple", "lt-square", "lt", "", "", "",false,false); parameters.push_back(poutput);
 		CommandParameter pall("all", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pall);
+        CommandParameter piters("iters", "Number", "", "1000", "", "", "",false,false); parameters.push_back(piters);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
@@ -36,11 +40,14 @@ string SummarySharedCommand::getHelpString(){
 	try {
 		string helpString = "";
 		ValidCalculators validCalculator;
-		helpString += "The summary.shared command parameters are shared, label, calc, distance, processors and all.  shared is required if there is no current sharedfile.\n";
+		helpString += "The summary.shared command parameters are shared, label, calc, distance, processors, subsample, iters and all.  shared is required if there is no current sharedfile.\n";
 		helpString += "The summary.shared command should be in the following format: \n";
 		helpString += "summary.shared(label=yourLabel, calc=yourEstimators, groups=yourGroups).\n";
 		helpString += "Example summary.shared(label=unique-.01-.03, groups=B-C, calc=sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan).\n";
 		helpString +=  validCalculator.printCalc("sharedsummary");
+        helpString += "The iters parameter allows you to choose the number of times you would like to run the subsample.\n";
+        helpString += "The subsample parameter allows you to enter the size pergroup of the sample or you can set subsample=T and mothur will use the size of your smallest group.\n";
+        helpString += "The output parameter allows you to specify format of your distance matrix. Options are lt, and square. The default is lt.\n";
 		helpString += "The default value for calc is sharedsobs-sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan\n";
 		helpString += "The default value for groups is all the groups in your groupfile.\n";
 		helpString += "The distance parameter allows you to indicate you would like a distance file created for each calculator for each label, default=f.\n";
@@ -162,6 +169,21 @@ SummarySharedCommand::SummarySharedCommand(string option)  {
 			temp = validParameter.validFile(parameters, "distance", false);					if (temp == "not found") { temp = "false"; }
 			createPhylip = m->isTrue(temp);
 			
+            temp = validParameter.validFile(parameters, "iters", false);			if (temp == "not found") { temp = "1000"; }
+			m->mothurConvert(temp, iters); 
+            
+            output = validParameter.validFile(parameters, "output", false);		if(output == "not found"){	output = "lt"; }
+			if ((output != "lt") && (output != "square")) { m->mothurOut(output + " is not a valid output form. Options are lt and square. I will use lt."); m->mothurOutEndLine(); output = "lt"; }
+            
+            temp = validParameter.validFile(parameters, "subsample", false);		if (temp == "not found") { temp = "F"; }
+			if (m->isNumeric1(temp)) { m->mothurConvert(temp, subsampleSize); subsample = true; }
+            else {  
+                if (m->isTrue(temp)) { subsample = true; subsampleSize = -1; }  //we will set it to smallest group later 
+                else { subsample = false; }
+            }
+            
+            if (subsample == false) { iters = 1; }
+            
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
 			m->mothurConvert(temp, processors); 
@@ -463,214 +485,374 @@ int SummarySharedCommand::execute(){
 		exit(1);
 	}
 }
-
+/***********************************************************/
+int SummarySharedCommand::printSims(ostream& out, vector< vector<double> >& simMatrix) {
+	try {
+		
+		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
+		
+		//output num seqs
+		out << simMatrix.size() << endl;
+		
+		if (output == "lt") {
+			for (int b = 0; b < simMatrix.size(); b++)	{
+				out << lookup[b]->getGroup() << '\t';
+				for (int n = 0; n < b; n++)	{
+                    if (m->control_pressed) { return 0; }
+					out << simMatrix[b][n] << '\t'; 
+				}
+				out << endl;
+			}
+		}else{
+			for (int b = 0; b < simMatrix.size(); m++)	{
+				out << lookup[b]->getGroup() << '\t';
+				for (int n = 0; n < simMatrix[b].size(); n++)	{
+                    if (m->control_pressed) { return 0; }
+					out << simMatrix[b][n] << '\t'; 
+				}
+				out << endl;
+			}
+		}
+        
+        return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SummarySharedCommand", "printSims");
+		exit(1);
+	}
+}
 /***********************************************************/
 int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string sumFileName, string sumAllFileName) {
 	try {
-        vector< vector<seqDist> > calcDists;  //vector containing vectors that contains the summary results for each group compare
-        calcDists.resize(sumCalculators.size()); //one for each calc, this will be used to make .dist files
+        vector< vector< vector<seqDist> > > calcDistsTotals;  //each iter, one for each calc, then each groupCombos dists. this will be used to make .dist files
+        vector< vector<seqDist>  > calcDists; calcDists.resize(sumCalculators.size()); 		
         
-        
-        if(processors == 1){
-            driver(thisLookup, 0, numGroups, sumFileName+".temp", sumAllFileName+".temp", calcDists);
-            m->appendFiles((sumFileName + ".temp"), sumFileName);
-            m->mothurRemove((sumFileName + ".temp"));
-            if (mult) {
-                m->appendFiles((sumAllFileName + ".temp"), sumAllFileName);
-                m->mothurRemove((sumAllFileName + ".temp"));
-            }
-        }else{
+        for (int thisIter = 0; thisIter < iters; thisIter++) {
             
-            int process = 1;
-            vector<int> processIDS;
+            vector<SharedRAbundVector*> thisItersLookup = thisLookup;
             
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-            //loop through and create all the processes you want
-            while (process != processors) {
-                int pid = fork();
-                
-                if (pid > 0) {
-                    processIDS.push_back(pid); 
-                    process++;
-                }else if (pid == 0){
-                    driver(thisLookup, lines[process].start, lines[process].end, sumFileName + toString(getpid()) + ".temp", sumAllFileName + toString(getpid()) + ".temp", calcDists);   
-                    
-                    //only do this if you want a distance file
-                    if (createPhylip) {
-                        string tempdistFileName = m->getRootName(m->getSimpleName(sumFileName)) + toString(getpid()) + ".dist";
-                        ofstream outtemp;
-                        m->openOutputFile(tempdistFileName, outtemp);
-                        
-                        for (int i = 0; i < calcDists.size(); i++) {
-                            outtemp << calcDists[i].size() << endl;
-                            
-                            for (int j = 0; j < calcDists[i].size(); j++) {
-                                outtemp << calcDists[i][j].seq1 << '\t' << calcDists[i][j].seq2 << '\t' << calcDists[i][j].dist << endl;
-                            }
-                        }
-                        outtemp.close();
-                    }
-                    
-                    exit(0);
-                }else { 
-                    m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-                    for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-                    exit(0);
-                }
-            }
-            
-            //parent do your part
-            driver(thisLookup, lines[0].start, lines[0].end, sumFileName + toString(getpid()) + ".temp", sumAllFileName + toString(getpid()) + ".temp", calcDists);   
-            m->appendFiles((sumFileName + toString(getpid()) + ".temp"), sumFileName);
-            m->mothurRemove((sumFileName + toString(getpid()) + ".temp"));
-            if (mult) { m->appendFiles((sumAllFileName + toString(getpid()) + ".temp"), sumAllFileName); }
-            
-            //force parent to wait until all the processes are done
-            for (int i = 0; i < processIDS.size(); i++) {
-                int temp = processIDS[i];
-                wait(&temp);
-            }
-            
-            for (int i = 0; i < processIDS.size(); i++) {
-                m->appendFiles((sumFileName + toString(processIDS[i]) + ".temp"), sumFileName);
-                m->mothurRemove((sumFileName + toString(processIDS[i]) + ".temp"));
-                if (mult) {	m->mothurRemove((sumAllFileName + toString(processIDS[i]) + ".temp"));	}
-                
-                if (createPhylip) {
-                    string tempdistFileName = m->getRootName(m->getSimpleName(sumFileName)) + toString(processIDS[i]) +  ".dist";
-                    ifstream intemp;
-                    m->openInputFile(tempdistFileName, intemp);
-                    
-                    for (int k = 0; k < calcDists.size(); k++) {
-                        int size = 0;
-                        intemp >> size; m->gobble(intemp);
-                        
-                        for (int j = 0; j < size; j++) {
-                            int seq1 = 0;
-                            int seq2 = 0;
-                            float dist = 1.0;
-                            
-                            intemp >> seq1 >> seq2 >> dist;   m->gobble(intemp);
-                            
-                            seqDist tempDist(seq1, seq2, dist);
-                            calcDists[k].push_back(tempDist);
-                        }
-                    }
-                    intemp.close();
-                    m->mothurRemove(tempdistFileName);
-                }
-            }
-#else
-            //////////////////////////////////////////////////////////////////////////////////////////////////////
-            //Windows version shared memory, so be careful when passing variables through the summarySharedData struct. 
-            //Above fork() will clone, so memory is separate, but that's not the case with windows, 
-            //Taking advantage of shared memory to pass results vectors.
-            //////////////////////////////////////////////////////////////////////////////////////////////////////
-
-            vector<summarySharedData*> pDataArray; 
-            DWORD   dwThreadIdArray[processors-1];
-            HANDLE  hThreadArray[processors-1]; 
-            
-            //Create processor worker threads.
-            for( int i=1; i<processors; i++ ){
+            if (subsample) {
+                SubSample sample;
+                vector<string> tempLabels; //dont need since we arent printing the sampled sharedRabunds
                 
                 //make copy of lookup so we don't get access violations
                 vector<SharedRAbundVector*> newLookup;
-                for (int k = 0; k < thisLookup.size(); k++) {
+                for (int k = 0; k < thisItersLookup.size(); k++) {
                     SharedRAbundVector* temp = new SharedRAbundVector();
-                    temp->setLabel(thisLookup[k]->getLabel());
-                    temp->setGroup(thisLookup[k]->getGroup());
+                    temp->setLabel(thisItersLookup[k]->getLabel());
+                    temp->setGroup(thisItersLookup[k]->getGroup());
                     newLookup.push_back(temp);
                 }
                 
                 //for each bin
-                for (int k = 0; k < thisLookup[0]->getNumBins(); k++) {
+                for (int k = 0; k < thisItersLookup[0]->getNumBins(); k++) {
                     if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) {  delete newLookup[j];  } return 0; }
-                    for (int j = 0; j < thisLookup.size(); j++) { newLookup[j]->push_back(thisLookup[j]->getAbundance(k), thisLookup[j]->getGroup()); }
+                    for (int j = 0; j < thisItersLookup.size(); j++) { newLookup[j]->push_back(thisItersLookup[j]->getAbundance(k), thisItersLookup[j]->getGroup()); }
                 }
-
-                // Allocate memory for thread data.
-                summarySharedData* tempSum = new summarySharedData((sumFileName+toString(i)+".temp"), m, lines[i].start, lines[i].end, Estimators, newLookup);
-                pDataArray.push_back(tempSum);
-                processIDS.push_back(i);
                 
-                hThreadArray[i-1] = CreateThread(NULL, 0, MySummarySharedThreadFunction, pDataArray[i-1], 0, &dwThreadIdArray[i-1]);   
+                tempLabels = sample.getSample(newLookup, subsampleSize);
+                thisItersLookup = newLookup;
             }
+        
             
-            //parent do your part
-            driver(thisLookup, lines[0].start, lines[0].end, sumFileName +"0.temp", sumAllFileName + "0.temp", calcDists);   
-            m->appendFiles((sumFileName + "0.temp"), sumFileName);
-            m->mothurRemove((sumFileName + "0.temp"));
-            if (mult) { m->appendFiles((sumAllFileName + "0.temp"), sumAllFileName); }
-            
-            //Wait until all threads have terminated.
-            WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
-            
-            //Close all thread handles and free memory allocations.
-            for(int i=0; i < pDataArray.size(); i++){
-                m->appendFiles((sumFileName + toString(processIDS[i]) + ".temp"), sumFileName);
-                m->mothurRemove((sumFileName + toString(processIDS[i]) + ".temp"));
+            if(processors == 1){
+                driver(thisLookup, 0, numGroups, sumFileName+".temp", sumAllFileName+".temp", calcDists);
+                m->appendFiles((sumFileName + ".temp"), sumFileName);
+                m->mothurRemove((sumFileName + ".temp"));
+                if (mult) {
+                    m->appendFiles((sumAllFileName + ".temp"), sumAllFileName);
+                    m->mothurRemove((sumAllFileName + ".temp"));
+                }
+            }else{
                 
-                for (int j = 0; j < pDataArray[i]->thisLookup.size(); j++) {  delete pDataArray[i]->thisLookup[j];  } 
+                int process = 1;
+                vector<int> processIDS;
                 
-                if (createPhylip) {
-                    for (int k = 0; k < calcDists.size(); k++) {
-                        int size = pDataArray[i]->calcDists[k].size();
-                        for (int j = 0; j < size; j++) {    calcDists[k].push_back(pDataArray[i]->calcDists[k][j]);    }
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+                //loop through and create all the processes you want
+                while (process != processors) {
+                    int pid = fork();
+                    
+                    if (pid > 0) {
+                        processIDS.push_back(pid); 
+                        process++;
+                    }else if (pid == 0){
+                        driver(thisLookup, lines[process].start, lines[process].end, sumFileName + toString(getpid()) + ".temp", sumAllFileName + toString(getpid()) + ".temp", calcDists);   
+                        
+                        //only do this if you want a distance file
+                        if (createPhylip) {
+                            string tempdistFileName = m->getRootName(m->getSimpleName(sumFileName)) + toString(getpid()) + ".dist";
+                            ofstream outtemp;
+                            m->openOutputFile(tempdistFileName, outtemp);
+                            
+                            for (int i = 0; i < calcDists.size(); i++) {
+                                outtemp << calcDists[i].size() << endl;
+                                
+                                for (int j = 0; j < calcDists[i].size(); j++) {
+                                    outtemp << calcDists[i][j].seq1 << '\t' << calcDists[i][j].seq2 << '\t' << calcDists[i][j].dist << endl;
+                                }
+                            }
+                            outtemp.close();
+                        }
+                        
+                        exit(0);
+                    }else { 
+                        m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
+                        for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+                        exit(0);
                     }
                 }
-              
-                CloseHandle(hThreadArray[i]);
-                delete pDataArray[i];
-            }
-
-#endif
-        }
-              
-        if (createPhylip) {
-            for (int i = 0; i < calcDists.size(); i++) {
-                if (m->control_pressed) { break; }
-				
-                string distFileName = outputDir + m->getRootName(m->getSimpleName(sumFileName)) + sumCalculators[i]->getName() + "." + thisLookup[0]->getLabel() + ".dist";
-                outputNames.push_back(distFileName);
-                ofstream outDist;
-                m->openOutputFile(distFileName, outDist);
-                outDist.setf(ios::fixed, ios::floatfield); outDist.setf(ios::showpoint);
                 
-                //initialize matrix
-                vector< vector<float> > matrix; //square matrix to represent the distance
+                //parent do your part
+                driver(thisLookup, lines[0].start, lines[0].end, sumFileName + toString(getpid()) + ".temp", sumAllFileName + toString(getpid()) + ".temp", calcDists);   
+                m->appendFiles((sumFileName + toString(getpid()) + ".temp"), sumFileName);
+                m->mothurRemove((sumFileName + toString(getpid()) + ".temp"));
+                if (mult) { m->appendFiles((sumAllFileName + toString(getpid()) + ".temp"), sumAllFileName); }
+                
+                //force parent to wait until all the processes are done
+                for (int i = 0; i < processIDS.size(); i++) {
+                    int temp = processIDS[i];
+                    wait(&temp);
+                }
+                
+                for (int i = 0; i < processIDS.size(); i++) {
+                    m->appendFiles((sumFileName + toString(processIDS[i]) + ".temp"), sumFileName);
+                    m->mothurRemove((sumFileName + toString(processIDS[i]) + ".temp"));
+                    if (mult) {	m->mothurRemove((sumAllFileName + toString(processIDS[i]) + ".temp"));	}
+                    
+                    if (createPhylip) {
+                        string tempdistFileName = m->getRootName(m->getSimpleName(sumFileName)) + toString(processIDS[i]) +  ".dist";
+                        ifstream intemp;
+                        m->openInputFile(tempdistFileName, intemp);
+                        
+                        for (int k = 0; k < calcDists.size(); k++) {
+                            int size = 0;
+                            intemp >> size; m->gobble(intemp);
+                            
+                            for (int j = 0; j < size; j++) {
+                                int seq1 = 0;
+                                int seq2 = 0;
+                                float dist = 1.0;
+                                
+                                intemp >> seq1 >> seq2 >> dist;   m->gobble(intemp);
+                                
+                                seqDist tempDist(seq1, seq2, dist);
+                                calcDists[k].push_back(tempDist);
+                            }
+                        }
+                        intemp.close();
+                        m->mothurRemove(tempdistFileName);
+                    }
+                }
+#else
+                //////////////////////////////////////////////////////////////////////////////////////////////////////
+                //Windows version shared memory, so be careful when passing variables through the summarySharedData struct. 
+                //Above fork() will clone, so memory is separate, but that's not the case with windows, 
+                //Taking advantage of shared memory to pass results vectors.
+                //////////////////////////////////////////////////////////////////////////////////////////////////////
+                
+                vector<summarySharedData*> pDataArray; 
+                DWORD   dwThreadIdArray[processors-1];
+                HANDLE  hThreadArray[processors-1]; 
+                
+                //Create processor worker threads.
+                for( int i=1; i<processors; i++ ){
+                    
+                    //make copy of lookup so we don't get access violations
+                    vector<SharedRAbundVector*> newLookup;
+                    for (int k = 0; k < thisLookup.size(); k++) {
+                        SharedRAbundVector* temp = new SharedRAbundVector();
+                        temp->setLabel(thisLookup[k]->getLabel());
+                        temp->setGroup(thisLookup[k]->getGroup());
+                        newLookup.push_back(temp);
+                    }
+                    
+                    //for each bin
+                    for (int k = 0; k < thisLookup[0]->getNumBins(); k++) {
+                        if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) {  delete newLookup[j];  } return 0; }
+                        for (int j = 0; j < thisLookup.size(); j++) { newLookup[j]->push_back(thisLookup[j]->getAbundance(k), thisLookup[j]->getGroup()); }
+                    }
+                    
+                    // Allocate memory for thread data.
+                    summarySharedData* tempSum = new summarySharedData((sumFileName+toString(i)+".temp"), m, lines[i].start, lines[i].end, Estimators, newLookup);
+                    pDataArray.push_back(tempSum);
+                    processIDS.push_back(i);
+                    
+                    hThreadArray[i-1] = CreateThread(NULL, 0, MySummarySharedThreadFunction, pDataArray[i-1], 0, &dwThreadIdArray[i-1]);   
+                }
+                
+                //parent do your part
+                driver(thisLookup, lines[0].start, lines[0].end, sumFileName +"0.temp", sumAllFileName + "0.temp", calcDists);   
+                m->appendFiles((sumFileName + "0.temp"), sumFileName);
+                m->mothurRemove((sumFileName + "0.temp"));
+                if (mult) { m->appendFiles((sumAllFileName + "0.temp"), sumAllFileName); }
+                
+                //Wait until all threads have terminated.
+                WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
+                
+                //Close all thread handles and free memory allocations.
+                for(int i=0; i < pDataArray.size(); i++){
+                    m->appendFiles((sumFileName + toString(processIDS[i]) + ".temp"), sumFileName);
+                    m->mothurRemove((sumFileName + toString(processIDS[i]) + ".temp"));
+                    
+                    for (int j = 0; j < pDataArray[i]->thisLookup.size(); j++) {  delete pDataArray[i]->thisLookup[j];  } 
+                    
+                    if (createPhylip) {
+                        for (int k = 0; k < calcDists.size(); k++) {
+                            int size = pDataArray[i]->calcDists[k].size();
+                            for (int j = 0; j < size; j++) {    calcDists[k].push_back(pDataArray[i]->calcDists[k][j]);    }
+                        }
+                    }
+                    
+                    CloseHandle(hThreadArray[i]);
+                    delete pDataArray[i];
+                }
+                
+#endif
+            }
+            calcDistsTotals.push_back(calcDists);
+            
+            if (subsample) {  
+                
+                //clean up memory
+                for (int i = 0; i < thisItersLookup.size(); i++) { delete thisItersLookup[i]; }
+                thisItersLookup.clear();
+                for (int i = 0; i < calcDists.size(); i++) {  calcDists[i].clear(); }
+            }
+		}
+
+        if (iters != 1) {
+            //we need to find the average distance and standard deviation for each groups distance
+            
+            vector< vector<seqDist>  > calcAverages; calcAverages.resize(sumCalculators.size()); 
+            for (int i = 0; i < calcAverages.size(); i++) {  //initialize sums to zero.
+                calcAverages[i].resize(calcDistsTotals[0][i].size());
+                
+                for (int j = 0; j < calcAverages[i].size(); j++) {
+                    calcAverages[i][j].seq1 = calcDists[i][j].seq1;
+                    calcAverages[i][j].seq2 = calcDists[i][j].seq2;
+                    calcAverages[i][j].dist = 0.0;
+                }
+            }
+            
+            for (int thisIter = 0; thisIter < iters; thisIter++) { //sum all groups dists for each calculator
+                for (int i = 0; i < calcAverages.size(); i++) {  //initialize sums to zero.
+                    for (int j = 0; j < calcAverages[i].size(); j++) {
+                        calcAverages[i][j].dist += calcDistsTotals[thisIter][i][j].dist;
+                    }
+                }
+            }
+            
+            for (int i = 0; i < calcAverages.size(); i++) {  //finds average.
+                for (int j = 0; j < calcAverages[i].size(); j++) {
+                    calcAverages[i][j].dist /= (float) iters;
+                }
+            }
+            
+            //find standard deviation
+            vector< vector<seqDist>  > stdDev; stdDev.resize(sumCalculators.size());
+            for (int i = 0; i < stdDev.size(); i++) {  //initialize sums to zero.
+                stdDev[i].resize(calcDistsTotals[0][i].size());
+                
+                for (int j = 0; j < stdDev[i].size(); j++) {
+                    stdDev[i][j].seq1 = calcDists[i][j].seq1;
+                    stdDev[i][j].seq2 = calcDists[i][j].seq2;
+                    stdDev[i][j].dist = 0.0;
+                }
+            }
+            
+            for (int thisIter = 0; thisIter < iters; thisIter++) { //compute the difference of each dist from the mean, and square the result of each
+                for (int i = 0; i < stdDev.size(); i++) {  
+                    for (int j = 0; j < stdDev[i].size(); j++) {
+                        stdDev[i][j].dist += ((calcDistsTotals[thisIter][i][j].dist - calcAverages[i][j].dist) * (calcDistsTotals[thisIter][i][j].dist - calcAverages[i][j].dist));
+                    }
+                }
+            }
+            
+            for (int i = 0; i < stdDev.size(); i++) {  //finds average.
+                for (int j = 0; j < stdDev[i].size(); j++) {
+                    stdDev[i][j].dist /= (float) iters;
+                    stdDev[i][j].dist = sqrt(stdDev[i][j].dist);
+                }
+            }
+            
+            //print results
+            for (int i = 0; i < calcDists.size(); i++) {
+                vector< vector<double> > matrix; //square matrix to represent the distance
                 matrix.resize(thisLookup.size());
                 for (int k = 0; k < thisLookup.size(); k++) {  matrix[k].resize(thisLookup.size(), 0.0); }
                 
+                vector< vector<double> > stdmatrix; //square matrix to represent the stdDev
+                stdmatrix.resize(thisLookup.size());
+                for (int k = 0; k < thisLookup.size(); k++) {  stdmatrix[k].resize(thisLookup.size(), 0.0); }
                 
-                for (int j = 0; j < calcDists[i].size(); j++) {
-                    int row = calcDists[i][j].seq1;
-                    int column = calcDists[i][j].seq2;
-                    float dist = calcDists[i][j].dist;
+                
+                for (int j = 0; j < calcAverages[i].size(); j++) {
+                    int row = calcAverages[i][j].seq1;
+                    int column = calcAverages[i][j].seq2;
+                    float dist = calcAverages[i][j].dist;
+                    float stdDist = stdDev[i][j].dist;
                     
                     matrix[row][column] = dist;
                     matrix[column][row] = dist;
+                    stdmatrix[row][column] = stdDist;
+                    stdmatrix[column][row] = stdDist;
                 }
                 
-                //output to file
-                outDist << thisLookup.size() << endl;
-                for (int r=0; r<thisLookup.size(); r++) { 
-                    //output name
-                    string name = thisLookup[r]->getGroup();
-                    if (name.length() < 10) { //pad with spaces to make compatible
-                        while (name.length() < 10) {  name += " ";  }
+                string distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + sumCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + ".ave.dist";
+                outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
+                ofstream outAve;
+                m->openOutputFile(distFileName, outAve);
+                outAve.setf(ios::fixed, ios::floatfield); outAve.setf(ios::showpoint);
+                
+                printSims(outAve, matrix);
+                
+                outAve.close();
+                
+                distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + sumCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + ".std.dist";
+                outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
+                ofstream outSTD;
+                m->openOutputFile(distFileName, outSTD);
+                outSTD.setf(ios::fixed, ios::floatfield); outSTD.setf(ios::showpoint);
+                
+                printSims(outSTD, stdmatrix);
+                
+                outSTD.close();
+                
+            }
+        }else {
+            if (createPhylip) {
+                for (int i = 0; i < calcDists.size(); i++) {
+                    if (m->control_pressed) { break; }
+                    
+                    //initialize matrix
+                    vector< vector<double> > matrix; //square matrix to represent the distance
+                    matrix.resize(thisLookup.size());
+                    for (int k = 0; k < thisLookup.size(); k++) {  matrix[k].resize(thisLookup.size(), 0.0); }
+                    
+                    for (int j = 0; j < calcDists[i].size(); j++) {
+                        int row = calcDists[i][j].seq1;
+                        int column = calcDists[i][j].seq2;
+                        double dist = calcDists[i][j].dist;
+                        
+                        matrix[row][column] = dist;
+                        matrix[column][row] = dist;
                     }
-                    outDist << name << '\t';
-					
-                    //output distances
-                    for (int l = 0; l < r; l++) {	outDist  << matrix[r][l] << '\t';  }
-                    outDist << endl;
+                    
+                    string distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + sumCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + ".dist";
+                    outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
+                    ofstream outDist;
+                    m->openOutputFile(distFileName, outDist);
+                    outDist.setf(ios::fixed, ios::floatfield); outDist.setf(ios::showpoint);
+                    
+                    printSims(outDist, matrix);
+                    
+                    outDist.close();
                 }
-                
-                outDist.close();
             }
         }
-		return 0;
+
+        return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SummarySharedCommand", "process");

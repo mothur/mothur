@@ -282,9 +282,15 @@ int RareFactCommand::execute(){
 	
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
+        map<string, set<int> > labelToEnds;
 		if ((format != "sharedfile")) { inputFileNames.push_back(inputfile);  }
-		else {  inputFileNames = parseSharedFile(sharedfile);  format = "rabund"; }
-				
+		else {  inputFileNames = parseSharedFile(sharedfile, labelToEnds);  format = "rabund"; }
+		for (map<string, set<int> >::iterator it = labelToEnds.begin(); it != labelToEnds.end(); it++) {
+            cout << it->first << endl;
+            for (set<int>::iterator its = (it->second).begin(); its != (it->second).end(); its++) {
+                cout << (*its) << endl;
+            }
+        }
 		if (m->control_pressed) { return 0; }
 		
 		map<int, string> file2Group; //index in outputNames[i] -> group
@@ -378,7 +384,10 @@ int RareFactCommand::execute(){
 				if(allLines == 1 || labels.count(order->getLabel()) == 1){
 					
 					m->mothurOut(order->getLabel()); m->mothurOutEndLine();
-					rCurve = new Rarefact(order, rDisplays, processors);
+                    map<string, set<int> >::iterator itEndings = labelToEnds.find(order->getLabel());
+                    set<int> ends;
+                    if (itEndings != labelToEnds.end()) { ends = itEndings->second; }
+					rCurve = new Rarefact(order, rDisplays, processors, ends);
 					rCurve->getCurve(freq, nIters);
 					delete rCurve;
 					
@@ -393,7 +402,11 @@ int RareFactCommand::execute(){
 					order = (input->getOrderVector(lastLabel));
 					
 					m->mothurOut(order->getLabel()); m->mothurOutEndLine();
-					rCurve = new Rarefact(order, rDisplays, processors);
+					map<string, set<int> >::iterator itEndings = labelToEnds.find(order->getLabel());
+                    set<int> ends;
+                    if (itEndings != labelToEnds.end()) { ends = itEndings->second; }
+					rCurve = new Rarefact(order, rDisplays, processors, ends);
+
 					rCurve->getCurve(freq, nIters);
 					delete rCurve;
 					
@@ -433,7 +446,11 @@ int RareFactCommand::execute(){
 				order = (input->getOrderVector(lastLabel));
 				
 				m->mothurOut(order->getLabel()); m->mothurOutEndLine();
-				rCurve = new Rarefact(order, rDisplays, processors);
+				map<string, set<int> >::iterator itEndings = labelToEnds.find(order->getLabel());
+                set<int> ends;
+                if (itEndings != labelToEnds.end()) { ends = itEndings->second; }
+                rCurve = new Rarefact(order, rDisplays, processors, ends);
+
 				rCurve->getCurve(freq, nIters);
 				delete rCurve;
 				
@@ -625,7 +642,7 @@ vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map
 	}
 }
 //**********************************************************************************************************************
-vector<string> RareFactCommand::parseSharedFile(string filename) {
+vector<string> RareFactCommand::parseSharedFile(string filename, map<string, set<int> >& label2Ends) {
 	try {
 		vector<string> filenames;
 		
@@ -657,6 +674,7 @@ vector<string> RareFactCommand::parseSharedFile(string filename) {
 				m->openOutputFileAppend(sharedFileRoot + lookup[i]->getGroup() + ".rabund", *(filehandles[lookup[i]->getGroup()]));
 				rav.print(*(filehandles[lookup[i]->getGroup()]));
 				(*(filehandles[lookup[i]->getGroup()])).close();
+                label2Ends[lookup[i]->getLabel()].insert(rav.getNumSeqs());
 			}
 		
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
