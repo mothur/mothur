@@ -9,31 +9,6 @@
 #ifndef rrf_fs_prototype_dataset_h
 #define rrf_fs_prototype_dataset_h
 
-class TrainingSet{
-public:
-  TrainingSet(vector<int> otuCounts, string outputClass){
-    this->otuCounts = otuCounts;
-    this->outputClass = outputClass;
-  }
-  
-  vector<int> getOtuCounts(){
-    return otuCounts;
-  }
-  
-  string getOutputClass(){
-    return outputClass;
-  }
-  
-  void setOutputClass(string outputClass){
-    this->outputClass = outputClass;
-  }
-  
-private:
-  vector<int> otuCounts;
-  string outputClass;
-};
-
-
 class DataSet{
 public:
   DataSet(vector< vector<string> > sharedFileContent, vector< vector<string> > designFileContent){
@@ -65,6 +40,7 @@ public:
       trainingSets.push_back(trainingSet);
     }
     
+    createUniqIdForTrainignSets();
   }
   
   void printTrainingSets(){
@@ -85,6 +61,31 @@ private:
   
   vector< vector<string> > sharedFileContent;
   vector< vector<string> > designFileContent;
+  
+  void createUniqIdForTrainignSets(){
+    vector<string> uniqOutputStrings;
+    for (unsigned i = 0; i < trainingSets.size(); i++) {
+      string outputClass = trainingSets[i].getOutputClass();
+      bool found = false;
+      for (unsigned j = 0; j < uniqOutputStrings.size(); j++) {
+        if (outputClass == uniqOutputStrings[j]){
+          found = true;
+        }
+      }
+      if (found == false){
+        uniqOutputStrings.push_back(outputClass);
+      }
+    }
+
+    for (unsigned i = 0; i < trainingSets.size(); i++) {
+      string outputClass = trainingSets[i].getOutputClass();
+      for (unsigned j = 0; j < uniqOutputStrings.size(); j++) {
+        if (outputClass == uniqOutputStrings[j]){
+          trainingSets[i].setOutputClassId(j);
+        }
+      }
+    }
+  }
 };
 
 

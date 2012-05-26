@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "sharedanddesignfilereader.h"
+#include "trainingset.h"
 #include "dataset.h"
 
 class TrainingSet;
