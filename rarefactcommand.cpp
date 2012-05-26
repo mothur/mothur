@@ -282,9 +282,15 @@ int RareFactCommand::execute(){
 	
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
+        map<string, set<int> > labelToEnds;
 		if ((format != "sharedfile")) { inputFileNames.push_back(inputfile);  }
-		else {  inputFileNames = parseSharedFile(sharedfile);  format = "rabund"; }
-				
+		else {  inputFileNames = parseSharedFile(sharedfile, labelToEnds);  format = "rabund"; }
+		for (map<string, set<int> >::iterator it = labelToEnds.begin(); it != labelToEnds.end(); it++) {
+            cout << it->first << endl;
+            for (set<int>::iterator its = (it->second).begin(); its != (it->second).end(); its++) {
+                cout << (*its) << endl;
+            }
+        }
 		if (m->control_pressed) { return 0; }
 		
 		map<int, string> file2Group; //index in outputNames[i] -> group
@@ -378,7 +384,10 @@ int RareFactCommand::execute(){
 				if(allLines == 1 || labels.count(order->getLabel()) == 1){
 					
 					m->mothurOut(order->getLabel()); m->mothurOutEndLine();
-					rCurve = new Rarefact(order, rDisplays, processors);
+                    map<string, set<int> >::iterator itEndings = labelToEnds.find(order->getLabel());
+                    set<int> ends;
+                    if (itEndings != labelToEnds.end()) { ends = itEndings->second; }
+					rCurve = new Rarefact(order, rDisplays, processors, ends);
 					rCurve->getCurve(freq, nIters);
 					delete rCurve;
 					
@@ -393,7 +402,11 @@ int RareFactCommand::execute(){
 					order = (input->getOrderVector(lastLabel));
 					
 					m->mothurOut(order->getLabel()); m->mothurOutEndLine();
-					rCurve = new Rarefact(order, rDisplays, processors);
+					map<string, set<int> >::iterator itEndings = labelToEnds.find(order->getLabel());
+                    set<int> ends;
+                    if (itEndings != labelToEnds.end()) { ends = itEndings->second; }
+					rCurve = new Rarefact(order, rDisplays, processors, ends);
+
 					rCurve->getCurve(freq, nIters);
 					delete rCurve;
 					
@@ -433,7 +446,11 @@ int RareFactCommand::execute(){
 				order = (input->getOrderVector(lastLabel));
 				
 				m->mothurOut(order->getLabel()); m->mothurOutEndLine();
-				rCurve = new Rarefact(order, rDisplays, processors);
+				map<string, set<int> >::iterator itEndings = labelToEnds.find(order->getLabel());
+                set<int> ends;
+                if (itEndings != labelToEnds.end()) { ends = itEndings->second; }
+                rCurve = new Rarefact(order, rDisplays, processors, ends);
+
 				rCurve->getCurve(freq, nIters);
 				delete rCurve;
 				
@@ -474,17 +491,38 @@ vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map
 		
 		//find different types of files
 		map<string, map<string, string> > typesFiles;
+        map<string, vector< vector<string> > > fileLabels; //combofile name to labels. each label is a vector because it may be unique lci hci.
+        vector<string> groupNames;
 		for (int i = 0; i < outputNames.size(); i++) {
+            
 			string extension = m->getExtension(outputNames[i]);
-			
+            string combineFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + "groups" + extension;
+			m->mothurRemove(combineFileName); //remove old file
+            
 			ifstream in;
 			m->openInputFile(outputNames[i], in);
 			
 			string labels = m->getline(in);
-			string newLine = labels.substr(0, labels.find_first_of('\t'));
-			
-			newLine += "\tGroup" + labels.substr(labels.find_first_of('\t'));
             
+			istringstream iss (labels,istringstream::in);
+            string newLabel = ""; vector<string> theseLabels;
+            while(!iss.eof()) {  iss >> newLabel; m->gobble(iss); theseLabels.push_back(newLabel); }
+            vector< vector<string> > allLabels;
+            vector<string> thisSet; thisSet.push_back(theseLabels[0]); allLabels.push_back(thisSet); thisSet.clear(); //makes "numSampled" its own grouping
+            for (int j = 1; j < theseLabels.size()-1; j++) {
+                if (theseLabels[j+1] == "lci") {
+                    thisSet.push_back(theseLabels[j]); 
+                    thisSet.push_back(theseLabels[j+1]); 
+                    thisSet.push_back(theseLabels[j+2]);
+                    j++; j++;
+                }else{ //no lci or hci for this calc.
+                    thisSet.push_back(theseLabels[j]); 
+                }
+                allLabels.push_back(thisSet); 
+                thisSet.clear();
+            }
+            fileLabels[combineFileName] = allLabels;
+                    
             map<string, map<string, string> >::iterator itfind = typesFiles.find(extension);
             if (itfind != typesFiles.end()) {
                 (itfind->second)[outputNames[i]] = file2Group[i];
@@ -493,62 +531,57 @@ vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map
                 temp[outputNames[i]] = file2Group[i];
                 typesFiles[extension] = temp;
             }
-			
-			string combineFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + "groups" + extension;
-			
-			//print headers
-			ofstream out;
-			m->openOutputFile(combineFileName, out);
-			out << newLine << endl;
-			out.close();
-			
+            if (!(m->inUsersGroups(file2Group[i], groupNames))) {  groupNames.push_back(file2Group[i]); }
 		}
 		
 		//for each type create a combo file
-		map<int, int> lineToNumber; 
+		
 		for (map<string, map<string, string> >::iterator it = typesFiles.begin(); it != typesFiles.end(); it++) {
 			
 			ofstream out;
 			string combineFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + "groups" + it->first;
 			m->openOutputFileAppend(combineFileName, out);
 			newFileNames.push_back(combineFileName);
-			map<string, string> thisTypesFiles = it->second;
-		
+			map<string, string> thisTypesFiles = it->second; //it->second maps filename to group
+            set<int> numSampledSet;
+            
 			//open each type summary file
-			map<string, vector<string> > files; //maps file name to lines in file
+			map<string, map<int, vector< vector<string> > > > files; //maps file name to lines in file
 			int maxLines = 0;
-			int numColumns = 0;
 			for (map<string, string>::iterator itFileNameGroup = thisTypesFiles.begin(); itFileNameGroup != thisTypesFiles.end(); itFileNameGroup++) {
                 
                 string thisfilename = itFileNameGroup->first;
                 string group = itFileNameGroup->second;
-               
+                
 				ifstream temp;
 				m->openInputFile(thisfilename, temp);
 				
 				//read through first line - labels
 				m->getline(temp);	m->gobble(temp);
 				
-				vector<string> thisFilesLines;
-				
-				thisFilesLines.push_back(group);
-				int count = 1;
+				map<int, vector< vector<string> > > thisFilesLines;
 				while (!temp.eof()){
-				
-					string thisLine = m->getline(temp);
-					
-					string numSampled = thisLine.substr(0, thisLine.find_first_of('\t'));
-					int num = 0;
-					convert(numSampled, num);
-					numColumns = m->getNumChar(thisLine, '\t');
-					lineToNumber[count] = num;
-					count++;
-									
-					thisFilesLines.push_back(thisLine);
-					m->gobble(temp);
+                    int numSampled = 0;
+                    temp >> numSampled; m->gobble(temp);
+                
+                    vector< vector<string> > theseReads;
+                    vector<string> thisSet; thisSet.push_back(toString(numSampled)); theseReads.push_back(thisSet); thisSet.clear();
+                    for (int k = 1; k < fileLabels[combineFileName].size(); k++) { //output thing like 0.03-A lci-A hci-A
+                        vector<string> reads;
+                        string next = "";
+                        for (int l = 0; l < fileLabels[combineFileName][k].size(); l++) { //output modified labels
+                            temp >> next; m->gobble(temp);
+                            reads.push_back(next);
+                        }
+                        theseReads.push_back(reads);
+                    }
+                    thisFilesLines[numSampled] = theseReads;
+                    m->gobble(temp);
+                   
+                    numSampledSet.insert(numSampled);
 				}
 				
-				files[thisfilename] = thisFilesLines;
+				files[group] = thisFilesLines;
 				
 				//save longest file for below
 				if (maxLines < thisFilesLines.size()) { maxLines = thisFilesLines.size(); }
@@ -557,34 +590,46 @@ vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map
 				m->mothurRemove(thisfilename);
 			}
 			
-			
+            //output new labels line
+            out << fileLabels[combineFileName][0][0] << '\t';
+            for (int k = 1; k < fileLabels[combineFileName].size(); k++) { //output thing like 0.03-A lci-A hci-A
+                for (int n = 0; n < groupNames.size(); n++) { // for each group
+                    for (int l = 0; l < fileLabels[combineFileName][k].size(); l++) { //output modified labels
+                        out << fileLabels[combineFileName][k][l] << '-' << groupNames[n] << '\t';
+                    }
+                }
+            }
+			out << endl;
+            
 			//for each label
-			for (int k = 1; k < maxLines; k++) {
+			for (set<int>::iterator itNumSampled = numSampledSet.begin(); itNumSampled != numSampledSet.end(); itNumSampled++) {
 				
-				//grab data for each group
-				for (map<string, string>::iterator itFileNameGroup = thisTypesFiles.begin(); itFileNameGroup != thisTypesFiles.end(); itFileNameGroup++) {
-                    
-					string thisfilename = itFileNameGroup->first;
-					map<int, int>::iterator itLine = lineToNumber.find(k);
-					if (itLine != lineToNumber.end()) {
-						string output = toString(itLine->second);
-						if (k < files[thisfilename].size()) {
-							string line = files[thisfilename][k];
-							output = line.substr(0, line.find_first_of('\t'));
-							output += '\t' + files[thisfilename][0] + '\t' + line.substr(line.find_first_of('\t'));
-						}else{
-							output += '\t' + files[thisfilename][0] + '\t';
-							for (int h = 0; h < numColumns; h++) {
-								output += "NA\t";
-							}
-						}
-						out << output << endl;
-					}else { m->mothurOut("[ERROR]: parsing results, cant find " + toString(k)); m->mothurOutEndLine(); }
-				}
+                out << (*itNumSampled) << '\t';
+                               
+                if (m->control_pressed) { break; }
+                
+                for (int k = 1; k < fileLabels[combineFileName].size(); k++) { //each chunk
+				    //grab data for each group
+                    for (map<string, map<int, vector< vector<string> > > >::iterator itFileNameGroup = files.begin(); itFileNameGroup != files.end(); itFileNameGroup++) {
+                        
+                        string group = itFileNameGroup->first;
+                       
+                        map<int, vector< vector<string> > >::iterator itLine = files[group].find(*itNumSampled);
+                        if (itLine != files[group].end()) { 
+                            for (int l = 0; l < (itLine->second)[k].size(); l++) { 
+                                out << (itLine->second)[k][l] << '\t';
+                               
+                            }                             
+                        }else { 
+                            for (int l = 0; l < fileLabels[combineFileName][k].size(); l++) { 
+                                out << "NA" << '\t';
+                            } 
+                        }
+                    }
+                }
+                out << endl;
 			}	
-			
 			out.close();
-			
 		}
 		
 		//return combine file name
@@ -597,7 +642,7 @@ vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map
 	}
 }
 //**********************************************************************************************************************
-vector<string> RareFactCommand::parseSharedFile(string filename) {
+vector<string> RareFactCommand::parseSharedFile(string filename, map<string, set<int> >& label2Ends) {
 	try {
 		vector<string> filenames;
 		
@@ -629,6 +674,7 @@ vector<string> RareFactCommand::parseSharedFile(string filename) {
 				m->openOutputFileAppend(sharedFileRoot + lookup[i]->getGroup() + ".rabund", *(filehandles[lookup[i]->getGroup()]));
 				rav.print(*(filehandles[lookup[i]->getGroup()]));
 				(*(filehandles[lookup[i]->getGroup()])).close();
+                label2Ends[lookup[i]->getLabel()].insert(rav.getNumSeqs());
 			}
 		
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 

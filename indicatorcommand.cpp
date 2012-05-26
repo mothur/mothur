@@ -240,7 +240,6 @@ int IndicatorCommand::execute(){
 			util.setGroups(Groups, nameGroups);
 			designMap->setNamesOfGroups(nameGroups);
 			
-			//loop through the Groups and fill Globaldata's Groups with the design file info
 			vector<string> namesSeqs = designMap->getNamesSeqs(Groups);
 			m->setGroups(namesSeqs);
 		}

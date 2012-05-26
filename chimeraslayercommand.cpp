@@ -633,6 +633,7 @@ int ChimeraSlayerCommand::execute(){
 #endif
 				
 				totalChimeras = deconvoluteResults(parser, outputFileName, accnosFileName, trimFastaFileName);
+                m->mothurOutEndLine(); m->mothurOut(toString(totalChimeras) + " chimera found."); m->mothurOutEndLine();
 #ifdef USE_MPI	
 				}
 				MPI_Barrier(MPI_COMM_WORLD); //make everyone wait
@@ -641,7 +642,7 @@ int ChimeraSlayerCommand::execute(){
 	
 			if (parser != NULL) { delete parser; } 
 			
-			m->mothurOutEndLine(); m->mothurOut(toString(totalChimeras) + " chimera found."); m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.");	m->mothurOutEndLine();
+            m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.");	m->mothurOutEndLine();
 		}
 		
 		//set accnos file as new current accnosfile

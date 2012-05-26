@@ -33,15 +33,19 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 private:
 	
-	string sharedfile, relabundfile, groups, label, inputFileName, outputDir, method;
+	string sharedfile, relabundfile, metadatafile, groups, label, inputFileName, outputDir, method;
 	bool abort, pickedGroups, allLines;
 	set<string> labels;
+    vector<SharedRAbundFloatVector*> metadataLookup;
+    vector< vector< double> > metadata;
 	
-	vector<string> outputNames, Groups;
+	vector<string> outputNames, Groups, metadataLabels;
 	int processShared();
 	int process(vector<SharedRAbundVector*>&);
 	int processRelabund();
 	int process(vector<SharedRAbundFloatVector*>&);
+    int readMetadata();
+    int getMetadata();
 	
 };
 

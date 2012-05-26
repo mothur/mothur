@@ -392,10 +392,32 @@ int MakeContigsCommand::driver(vector<string> files, string outputFasta, string 
             int numMismatches = 0;
             string seq1 = fSeq.getAligned();
             string seq2 = rSeq.getAligned();
-           
             vector<int> scores1 = fQual.getQualityScores();
             vector<int> scores2 = rQual.getQualityScores();
-            for (int i = 0; i < length; i++) {
+
+           // if (num < 5) {  cout << fSeq.getStartPos() << '\t' << fSeq.getEndPos() << '\t' << rSeq.getStartPos() << '\t' << rSeq.getEndPos() << endl; }
+            int overlapStart = fSeq.getStartPos();
+            int seq2Start = rSeq.getStartPos();
+            //bigger of the 2 starting positions is the location of the overlapping start
+            if (overlapStart < seq2Start) { //seq2 starts later so take from 0 to seq2Start from seq1
+                overlapStart = seq2Start; 
+                for (int i = 0; i < overlapStart; i++) {
+                    contig += seq1[i];
+                    contigScores.push_back(scores1[ABaseMap[i]]);
+                }
+            }else { //seq1 starts later so take from 0 to overlapStart from seq2
+                for (int i = 0; i < overlapStart; i++) {
+                    contig += seq2[i];
+                    contigScores.push_back(scores2[BBaseMap[i]]);
+                }
+            }
+            
+            int seq1End = fSeq.getEndPos();
+            int seq2End = rSeq.getEndPos();
+            int overlapEnd = seq1End;
+            if (seq2End < overlapEnd) { overlapEnd = seq2End; }  //smallest end position is where overlapping ends
+            
+            for (int i = overlapStart; i < overlapEnd; i++) {
                 if (seq1[i] == seq2[i]) { //match, add base and choose highest score
                     contig += seq1[i];
                     contigScores.push_back(scores1[ABaseMap[i]]);
@@ -423,6 +445,19 @@ int MakeContigsCommand::driver(vector<string> files, string outputFasta, string 
                 }
             }
             
+            if (seq1End < seq2End) { //seq1 ends before seq2 so take from overlap to length from seq2
+                for (int i = overlapEnd; i < length; i++) {
+                    contig += seq2[i];
+                    contigScores.push_back(scores2[BBaseMap[i]]);
+                }
+            }else { //seq2 ends before seq1 so take from overlap to length from seq1
+                for (int i = overlapEnd; i < length; i++) {
+                    contig += seq1[i];
+                    contigScores.push_back(scores1[ABaseMap[i]]);
+                }
+
+            }
+            //if (num < 5) { cout << overlapStart << '\t' << overlapEnd << endl << seq1 << endl << seq2 << endl<< contig << endl; }
             //output
             outFasta << ">" << fSeq.getName() << endl << contig << endl;
             outQual << ">" << fSeq.getName() << endl;

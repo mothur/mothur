@@ -10,17 +10,20 @@
 #include "rarefactsharedcommand.h"
 #include "sharedsobs.h"
 #include "sharednseqs.h"
+#include "sharedutilities.h"
 
 //**********************************************************************************************************************
 vector<string> RareFactSharedCommand::setParameters(){	
 	try {
 		CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pshared);
+        CommandParameter pdesign("design", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pdesign);
 		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
 		CommandParameter pfreq("freq", "Number", "", "100", "", "", "",false,false); parameters.push_back(pfreq);
 		CommandParameter piters("iters", "Number", "", "1000", "", "", "",false,false); parameters.push_back(piters);
 		CommandParameter pcalc("calc", "Multiple", "sharednseqs-sharedobserved", "sharedobserved", "", "", "",true,false); parameters.push_back(pcalc);
 		CommandParameter pjumble("jumble", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pjumble);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
+        CommandParameter psets("sets", "String", "", "", "", "", "",false,false); parameters.push_back(psets);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
 		
@@ -39,7 +42,9 @@ string RareFactSharedCommand::getHelpString(){
 		string helpString = "";
 		ValidCalculators validCalculator;
 		helpString += "The collect.shared command parameters are shared, label, freq, calc and groups.  shared is required if there is no current sharedfile. \n";
-		helpString += "The rarefaction.shared command parameters are shared, label, iters, groups, jumble and calc.  shared is required if there is no current sharedfile. \n";
+		helpString += "The rarefaction.shared command parameters are shared, design, label, iters, groups, sets, jumble and calc.  shared is required if there is no current sharedfile. \n";
+        helpString += "The design parameter allows you to assign your groups to sets. If provided mothur will run rarefaction.shared on a per set basis. \n";
+        helpString += "The sets parameter allows you to specify which of the sets in your designfile you would like to analyze. The set names are separated by dashes. THe default is all sets in the designfile.\n";
 		helpString += "The rarefaction command should be in the following format: \n";
 		helpString += "rarefaction.shared(label=yourLabel, iters=yourIters, calc=yourEstimators, jumble=yourJumble, groups=yourGroups).\n";
 		helpString += "The freq parameter is used indicate when to output your data, by default it is set to 100. But you can set it to a percentage of the number of sequence. For example freq=0.10, means 10%. \n";
@@ -114,6 +119,15 @@ RareFactSharedCommand::RareFactSharedCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("design");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["design"] = inputDir + it->second;		}
+				}
+
 			}
 			
 			//get shared file
@@ -125,6 +139,11 @@ RareFactSharedCommand::RareFactSharedCommand(string option)  {
 				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
 				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}else { m->setSharedFile(sharedfile); }
+            
+            designfile = validParameter.validFile(parameters, "design", true);
+			if (designfile == "not open") { abort = true; designfile = ""; }
+			else if (designfile == "not found") {  	designfile = "";	}
+			else { m->setDesignFile(designfile); }
 			
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
@@ -159,6 +178,12 @@ RareFactSharedCommand::RareFactSharedCommand(string option)  {
 				m->splitAtDash(groups, Groups);
 			}
 			m->setGroups(Groups);
+            
+            string sets = validParameter.validFile(parameters, "sets", false);			
+			if (sets == "not found") { sets = ""; }
+			else { 
+				m->splitAtDash(sets, Sets);
+			}
 			
 			string temp;
 			temp = validParameter.validFile(parameters, "freq", false);			if (temp == "not found") { temp = "100"; }
@@ -186,11 +211,73 @@ int RareFactSharedCommand::execute(){
 	try {
 	
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
-	
-		string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(sharedfile));
+        
+        GroupMap designMap;
+        if (designfile == "") { //fake out designMap to run with process
+            process(designMap, "");
+        }else {
+            designMap.readDesignMap(designfile);
+            
+            //fill Sets - checks for "all" and for any typo groups
+			SharedUtil util;
+			vector<string> nameSets = designMap.getNamesOfGroups();
+			util.setGroups(Sets, nameSets);
+            
+            for (int i = 0; i < Sets.size(); i++) {
+                process(designMap, Sets[i]);
+            }
+        }
+                    
+		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+		m->mothurOutEndLine();
+
+		return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "RareFactSharedCommand", "execute");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+
+int RareFactSharedCommand::process(GroupMap& designMap, string thisSet){
+	try {
+        Rarefact* rCurve;
+        vector<Display*> rDisplays;
+        
+        InputData input(sharedfile, "sharedfile");
+		lookup = input.getSharedRAbundVectors();
+        if (lookup.size() < 2) { 
+			m->mothurOut("I cannot run the command without at least 2 valid groups."); 
+            for (int i = 0; i < lookup.size(); i++) { delete lookup[i]; }
+            return 0;
+        }
+        
+        string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(sharedfile));
+        
+        vector<string> newGroups = m->getGroups();
+        if (thisSet != "") {  //make groups only filled with groups from this set so that's all inputdata will read
+            vector<string> thisSets; thisSets.push_back(thisSet);
+            newGroups = designMap.getNamesSeqs(thisSets);
+            fileNameRoot += thisSet + ".";
+        }
+        
+        vector<SharedRAbundVector*> subset;
+        if (thisSet == "") {  subset.clear(); subset = lookup;  }
+        else {//fill subset with this sets groups
+            subset.clear();
+            for (int i = 0; i < lookup.size(); i++) {
+                if (m->inUsersGroups(lookup[i]->getGroup(), newGroups)) {
+                    subset.push_back(lookup[i]);
+                }
+            }
+        }
 		
 		ValidCalculators validCalculator;
-			
 		for (int i=0; i<Estimators.size(); i++) {
 			if (validCalculator.isValidCalculator("sharedrarefaction", Estimators[i]) == true) { 
 				if (Estimators[i] == "sharedobserved") { 
@@ -204,82 +291,90 @@ int RareFactSharedCommand::execute(){
 		}
 		
 		//if the users entered no valid calculators don't execute command
-		if (rDisplays.size() == 0) { return 0; }
-			
-		input = new InputData(sharedfile, "sharedfile");
-		lookup = input->getSharedRAbundVectors();
-		string lastLabel = lookup[0]->getLabel();
+		if (rDisplays.size() == 0) { for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  return 0; }
 		
 		if (m->control_pressed) { 
-			m->clearGroups(); 
-			delete input;
 			for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
 			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 			return 0;
 		}
-
-
-		if (lookup.size() < 2) { 
-			m->mothurOut("I cannot run the command without at least 2 valid groups."); 
-			for (int i = 0; i < lookup.size(); i++) { delete lookup[i]; }
-			return 0;
-		}
-		
+        
+        
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
+        string lastLabel = subset[0]->getLabel();
 		set<string> processedLabels;
 		set<string> userLabels = labels;
-	
+        
 		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+		while((subset[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			if (m->control_pressed) { 
-				m->clearGroups(); 
-				delete input;
 				for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
 				for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}
 				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 				return 0;
 			}
 			
-			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){
-				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
-				rCurve = new Rarefact(lookup, rDisplays);
+			if(allLines == 1 || labels.count(subset[0]->getLabel()) == 1){
+				m->mothurOut(subset[0]->getLabel() + '\t' + thisSet); m->mothurOutEndLine();
+				rCurve = new Rarefact(subset, rDisplays);
 				rCurve->getSharedCurve(freq, nIters);
 				delete rCurve;
-			
-				processedLabels.insert(lookup[0]->getLabel());
-				userLabels.erase(lookup[0]->getLabel());
+                
+				processedLabels.insert(subset[0]->getLabel());
+				userLabels.erase(subset[0]->getLabel());
 			}
 			
-			if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-					string saveLabel = lookup[0]->getLabel();
-			
-					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
-					lookup = input->getSharedRAbundVectors(lastLabel);
+			if ((m->anyLabelsToProcess(subset[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+                string saveLabel = subset[0]->getLabel();
+                
+                for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
+                lookup = input.getSharedRAbundVectors(lastLabel);
+                
+                if (thisSet == "") {  subset.clear(); subset = lookup;  }
+                else {//fill subset with this sets groups
+                    subset.clear();
+                    for (int i = 0; i < lookup.size(); i++) {
+                        if (m->inUsersGroups(lookup[i]->getGroup(), newGroups)) {
+                            subset.push_back(lookup[i]);
+                        }
+                    }
+                }
 
-					m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
-					rCurve = new Rarefact(lookup, rDisplays);
-					rCurve->getSharedCurve(freq, nIters);
-					delete rCurve;
-
-					processedLabels.insert(lookup[0]->getLabel());
-					userLabels.erase(lookup[0]->getLabel());
-					
-					//restore real lastlabel to save below
-					lookup[0]->setLabel(saveLabel);
+                m->mothurOut(subset[0]->getLabel() + '\t' + thisSet); m->mothurOutEndLine();
+                rCurve = new Rarefact(subset, rDisplays);
+                rCurve->getSharedCurve(freq, nIters);
+                delete rCurve;
+                
+                processedLabels.insert(subset[0]->getLabel());
+                userLabels.erase(subset[0]->getLabel());
+                
+                //restore real lastlabel to save below
+                subset[0]->setLabel(saveLabel);
 			}
-				
+            
 			
-			lastLabel = lookup[0]->getLabel();
+			lastLabel = subset[0]->getLabel();
 			
 			//get next line to process
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
-			lookup = input->getSharedRAbundVectors();
+			lookup = input.getSharedRAbundVectors();
+            
+            if (lookup[0] != NULL) {
+                if (thisSet == "") {  subset.clear(); subset = lookup;  }
+                else {//fill subset with this sets groups
+                    subset.clear();
+                    for (int i = 0; i < lookup.size(); i++) {
+                        if (m->inUsersGroups(lookup[i]->getGroup(), newGroups)) {
+                            subset.push_back(lookup[i]);
+                        }
+                    }
+                }
+            }else {  subset.clear(); subset.push_back(NULL); }
+
 		}
 		
 		if (m->control_pressed) { 
-			m->clearGroups(); 
-			delete input;
 			for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
 			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}
 			return 0;
@@ -299,8 +394,6 @@ int RareFactSharedCommand::execute(){
 		}
 		
 		if (m->control_pressed) { 
-			m->clearGroups(); 
-			delete input; 
 			for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
 			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	}
 			return 0;
@@ -309,33 +402,33 @@ int RareFactSharedCommand::execute(){
 		//run last label if you need to
 		if (needToRun == true)  {
 			for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) {	delete lookup[i]; }  } 
-			lookup = input->getSharedRAbundVectors(lastLabel);
-
-			m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
-			rCurve = new Rarefact(lookup, rDisplays);
+			lookup = input.getSharedRAbundVectors(lastLabel);
+            
+            if (thisSet == "") {  subset.clear(); subset = lookup;  }
+            else {//fill subset with this sets groups
+                subset.clear();
+                for (int i = 0; i < lookup.size(); i++) {
+                    if (m->inUsersGroups(lookup[i]->getGroup(), newGroups)) {
+                        subset.push_back(lookup[i]);
+                    }
+                }
+            }
+            
+			m->mothurOut(subset[0]->getLabel() + '\t' + thisSet); m->mothurOutEndLine();
+			rCurve = new Rarefact(subset, rDisplays);
 			rCurve->getSharedCurve(freq, nIters);
 			delete rCurve;
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 		}
 		
 		for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}	
-		m->clearGroups(); 
-		delete input;
-		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
-		
-		m->mothurOutEndLine();
-		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
-		m->mothurOutEndLine();
 
-		return 0;
-	}
+        
+        return 0;
+    }
 	catch(exception& e) {
-		m->errorOut(e, "RareFactSharedCommand", "execute");
+		m->errorOut(e, "RareFactSharedCommand", "process");
 		exit(1);
 	}
 }
-
-
 //**********************************************************************************************************************

@@ -15,8 +15,8 @@ USEREADLINE ?= yes
 CYGWIN_BUILD ?= no
 USECOMPRESSION ?= no
 MOTHUR_FILES="\"Enter_your_default_path_here\""
-RELEASE_DATE = "\"4/30/2012\""
-VERSION = "\"1.25.0\""
+RELEASE_DATE = "\"5/14/2012\""
+VERSION = "\"1.25.1\""
 FORTAN_COMPILER = gfortran
 FORTRAN_FLAGS = 
 
