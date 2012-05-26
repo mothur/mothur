@@ -27,9 +27,14 @@ public:
         string temp;
         getline(stringStream, temp, '\t');
         lineStrings.push_back(temp);
+        temp.clear();
       }
       stringStream.clear();
-      fileContent.push_back(lineStrings);
+      if (lineStrings.size() > 1){  // there was a succesful split, in case of 
+                                    // the end of the file, there will be no 
+                                    // split, we need to discard that
+        fileContent.push_back(lineStrings);
+      }
       lineStrings.clear();
     }
     inputFileStream.close();

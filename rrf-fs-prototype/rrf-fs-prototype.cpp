@@ -17,18 +17,11 @@
 #include <vector>
 
 #include "sharedanddesignfilereader.h"
+#include "dataset.h"
 
-class DataSet{
-public:
-private:
-  vector<string> featureLabels;
-  unsigned numOTUs;
-};
+class TrainingSet;
+class DataSet;
 
-class TrainingSet{
-  vector<int> otuCounts;
-  int outputClass;
-};
 
 using namespace std;
 
@@ -39,9 +32,16 @@ int main(int argc, const char * argv[]){
   
   SharedAndDesignFileReader sharedFileReader(sharedFilePath);
   sharedFileReader.readFileContent();
+//  sharedFileReader.printFileContent();
   
   SharedAndDesignFileReader designFileReader(designFilePath);
   designFileReader.readFileContent();
+//  designFileReader.printFileContent();
+  
+  DataSet dataset(sharedFileReader.getFileContent(), designFileReader.getFileContent());
+  dataset.createTrainingSets();
+//  dataset.printTrainingSets();
+  
   return 0;
 }
 
