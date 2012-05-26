@@ -9,6 +9,8 @@
 #ifndef rrf_fs_prototype_dataset_h
 #define rrf_fs_prototype_dataset_h
 
+#include "trainingset.h"
+
 class DataSet{
 public:
   DataSet(vector< vector<string> > sharedFileContent, vector< vector<string> > designFileContent){
