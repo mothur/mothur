@@ -1,10 +1,10 @@
-//
-//  dataset.h
-//  rrf-fs-prototype
-//
-//  Created by Abu Zaher Faridee on 5/27/12.
-//  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
-//
+  //
+  //  dataset.h
+  //  rrf-fs-prototype
+  //
+  //  Created by Abu Zaher Faridee on 5/27/12.
+  //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
+  //
 
 #ifndef rrf_fs_prototype_dataset_h
 #define rrf_fs_prototype_dataset_h
@@ -14,20 +14,20 @@
 class DataSet{
 public:
   explicit DataSet(vector< vector<string> > sharedFileContent, vector< vector<string> > designFileContent): 
-    sharedFileContent(sharedFileContent),
-    designFileContent(designFileContent){
-      
-      createTrainingSets();
-  }
+  sharedFileContent(sharedFileContent),
+  designFileContent(designFileContent){
     
+    createTrainingSets();
+  }
+  
     // copy constructor
   explicit DataSet(const DataSet& dataSet): 
-    featureLabels(dataSet.featureLabels),
-    numOTUs(dataSet.numOTUs),
-    numTrainingSets(dataSet.numTrainingSets),
-    trainingSets(dataSet.trainingSets),
-    sharedFileContent(dataSet.sharedFileContent),
-    designFileContent(dataSet.designFileContent){
+  featureLabels(dataSet.featureLabels),
+  numOTUs(dataSet.numOTUs),
+  numTrainingSets(dataSet.numTrainingSets),
+  trainingSets(dataSet.trainingSets),
+  sharedFileContent(dataSet.sharedFileContent),
+  designFileContent(dataSet.designFileContent){
   }
   
   void createTrainingSets(){
@@ -94,7 +94,7 @@ private:
         uniqOutputStrings.push_back(outputClass);
       }
     }
-
+    
     for (unsigned i = 0; i < trainingSets.size(); i++) {
       string outputClass = trainingSets[i].getOutputClass();
       for (unsigned j = 0; j < uniqOutputStrings.size(); j++) {

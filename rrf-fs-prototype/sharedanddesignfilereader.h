@@ -14,12 +14,13 @@ using namespace std;
 class SharedAndDesignFileReader{
   
 public:
-  SharedAndDesignFileReader(string filePath){
+  explicit SharedAndDesignFileReader(string filePath){
     this->filePath = filePath;
     
     readFileContent();
     
   }
+  
   void readFileContent(){
     try {
       inputFileStream.open(filePath.c_str());

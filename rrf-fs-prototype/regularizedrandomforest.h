@@ -1,10 +1,10 @@
-//
-//  regularizedrandomforest.h
-//  rrf-fs-prototype
-//
-//  Created by Abu Zaher Faridee on 5/28/12.
-//  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
-//
+  //
+  //  regularizedrandomforest.h
+  //  rrf-fs-prototype
+  //
+  //  Created by Abu Zaher Faridee on 5/28/12.
+  //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
+  //
 
 #ifndef rrf_fs_prototype_regularizedrandomforest_h
 #define rrf_fs_prototype_regularizedrandomforest_h
@@ -13,14 +13,14 @@
 
 class RegularizedRandomForest{
 public:
-  RegularizedRandomForest(string sharedFilePath, string designFilePath, int numberOfDecisionTrees) : 
+  explicit RegularizedRandomForest(string sharedFilePath, string designFilePath, int numberOfDecisionTrees) : 
   sharedFileReader(sharedFilePath), 
   designFileReader(designFilePath),
   dataSet(sharedFileReader.getFileContent(), designFileReader.getFileContent()),
   numberOfDecisionTrees(numberOfDecisionTrees){
     
-      //    sharedFileReader.printFileContent();    
-      //    designFileReader.printFileContent();    
+    sharedFileReader.printFileContent();    
+    designFileReader.printFileContent();    
     dataSet.printTrainingSets();
     
       //    DecisionTree decisionTree(dataSet);
