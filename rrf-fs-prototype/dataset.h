@@ -20,15 +20,15 @@ public:
     createTrainingSets();
   }
   
-    // copy constructor
-  explicit DataSet(const DataSet& dataSet): 
-  featureLabels(dataSet.featureLabels),
-  numOTUs(dataSet.numOTUs),
-  numTrainingSets(dataSet.numTrainingSets),
-  trainingSets(dataSet.trainingSets),
-  sharedFileContent(dataSet.sharedFileContent),
-  designFileContent(dataSet.designFileContent){
-  }
+//    // copy constructor
+//  explicit DataSet(const DataSet& dataSet): 
+//    featureLabels(dataSet.featureLabels),
+//    numOTUs(dataSet.numOTUs),
+//    numTrainingSets(dataSet.numTrainingSets),
+//    trainingSets(dataSet.trainingSets),
+//    sharedFileContent(dataSet.sharedFileContent),
+//    designFileContent(dataSet.designFileContent){
+//  }
   
   void createTrainingSets(){
     for(unsigned i = 3; i < sharedFileContent[0].size(); i++){

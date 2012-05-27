@@ -11,17 +11,19 @@
 
 class DecisionTree{
 public:
-  explicit DecisionTree(DataSet dataset):
+  explicit DecisionTree(DataSet* dataset):
   dataSet(dataSet),
   bootstrappedSamplesSize(100){
-    dataSet.printTrainingSets();
+      // FIXME: getting error "terminate called throwing an exception" if I 
+      // enable the following line
+//    this->dataSet->printTrainingSets();
       //      cout << bootstrappedSamplesSize << endl;
   }
   
   void createBootstrappedSamples(){
   }
 private:
-  DataSet dataSet;
+  DataSet* dataSet;
   vector<TrainingSet> bootstrappedTrainingSamples;
   vector<TrainingSet> testSamples;
   

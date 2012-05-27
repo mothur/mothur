@@ -14,17 +14,17 @@
 class RegularizedRandomForest{
 public:
   explicit RegularizedRandomForest(string sharedFilePath, string designFilePath, int numberOfDecisionTrees) : 
-  sharedFileReader(sharedFilePath), 
-  designFileReader(designFilePath),
-  dataSet(sharedFileReader.getFileContent(), designFileReader.getFileContent()),
-  numberOfDecisionTrees(numberOfDecisionTrees){
-    
-    sharedFileReader.printFileContent();    
-    designFileReader.printFileContent();    
-    dataSet.printTrainingSets();
-    
-      //    DecisionTree decisionTree(dataSet);
-    
+    sharedFileReader(sharedFilePath), 
+    designFileReader(designFilePath),
+    dataSet(sharedFileReader.getFileContent(), designFileReader.getFileContent()),
+    numberOfDecisionTrees(numberOfDecisionTrees){
+      
+  sharedFileReader.printFileContent();    
+  designFileReader.printFileContent();    
+  dataSet.printTrainingSets();
+  
+  DecisionTree decisionTree(&dataSet);
+  
   }
   
 private:
