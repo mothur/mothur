@@ -31,6 +31,8 @@ public:
   }
 private:
   DataSet dataSet;
+  vector<TrainingSet> bootstrappedTrainingSamples;
+  vector<TrainingSet> testSamples;
 };
 
 class RegularizedRandomForest{
