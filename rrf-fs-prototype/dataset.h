@@ -13,9 +13,9 @@
 
 class DataSet{
 public:
-  DataSet(vector< vector<string> > sharedFileContent, vector< vector<string> > designFileContent){
-    this->sharedFileContent = sharedFileContent;
-    this->designFileContent = designFileContent;
+  DataSet(vector< vector<string> > sharedFileContent, vector< vector<string> > designFileContent): 
+    sharedFileContent(sharedFileContent),
+    designFileContent(designFileContent){
   }
   
   void createTrainingSets(){

@@ -22,12 +22,24 @@
 class TrainingSet;
 class DataSet;
 
+class DecisionTree{
+public:
+  DecisionTree(DataSet dataset): dataSet(dataSet){
+  }
+  
+  void createBootstrappedSamples(){
+  }
+private:
+  DataSet dataSet;
+};
+
 class RegularizedRandomForest{
 public:
-  RegularizedRandomForest(string sharedFilePath, string designFilePath) : 
+  RegularizedRandomForest(string sharedFilePath, string designFilePath, int numberOfDecisionTrees) : 
     sharedFileReader(sharedFilePath), 
     designFileReader(designFilePath),
-    dataSet(sharedFileReader.getFileContent(), designFileReader.getFileContent()){
+    dataSet(sharedFileReader.getFileContent(), designFileReader.getFileContent()),
+    numberOfDecisionTrees(numberOfDecisionTrees){
           
 //    sharedFileReader.printFileContent();    
 //    designFileReader.printFileContent();
@@ -37,14 +49,15 @@ public:
 
   }
   
-  void createBootstrappedSamples(){
-  }
 private:
   
   SharedAndDesignFileReader sharedFileReader;
   SharedAndDesignFileReader designFileReader;
   
   DataSet dataSet;
+  vector<DecisionTree> decisionTress;
+  
+  int numberOfDecisionTrees;
 };
 
 
@@ -54,8 +67,9 @@ int main(int argc, const char * argv[]){
   
   string sharedFilePath = "final.an.0.03.subsample.0.03.pick.shared";
   string designFilePath = "mouse.sex_time.design";
+  int numberOfDecisionTrees = 1000;
   
-  RegularizedRandomForest regularizedRandomForest(sharedFilePath, designFilePath);
+  RegularizedRandomForest regularizedRandomForest(sharedFilePath, designFilePath, numberOfDecisionTrees);
   
   return 0;
 }
