@@ -24,6 +24,8 @@
 
 /* Begin PBXFileReference section */
 		7B142586156968C900D238B7 /* rrf-fs-prototype */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "rrf-fs-prototype"; sourceTree = BUILT_PRODUCTS_DIR; };
+		7B8A75E51572C7A7002A3C9E /* regularizedrandomforest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = regularizedrandomforest.h; sourceTree = "<group>"; };
+		7B8A75E71572C7B9002A3C9E /* decisiontree.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = decisiontree.h; sourceTree = "<group>"; };
 		7BA4404E156C7DD9004A6A54 /* sharedanddesignfilereader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sharedanddesignfilereader.h; sourceTree = "<group>"; };
 		7BB761E5157188BB00699057 /* dataset.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dataset.h; sourceTree = "<group>"; };
 		7BB761E715718DBC00699057 /* trainingset.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = trainingset.h; sourceTree = "<group>"; };
@@ -44,6 +46,8 @@
 		7B14257B156968C600D238B7 = {
 			isa = PBXGroup;
 			children = (
+				7B8A75E71572C7B9002A3C9E /* decisiontree.h */,
+				7B8A75E51572C7A7002A3C9E /* regularizedrandomforest.h */,
 				7BE48A7115696A38002928AD /* rrf-fs-prototype.cpp */,
 				7BB761E5157188BB00699057 /* dataset.h */,
 				7BB761E715718DBC00699057 /* trainingset.h */,

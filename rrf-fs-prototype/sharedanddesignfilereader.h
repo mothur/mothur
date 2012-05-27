@@ -57,7 +57,7 @@ public:
     }
   }
   
-  vector< vector<string> > getFileContent(){ return fileContent; }
+  vector< vector<string> >& getFileContent(){ return fileContent; }
   
 private:
   string filePath;

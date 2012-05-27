@@ -18,49 +18,10 @@
 
 #include "sharedanddesignfilereader.h"
 #include "dataset.h"
+#include "regularizedrandomforest.h"
 
 class TrainingSet;
 class DataSet;
-
-class DecisionTree{
-public:
-  DecisionTree(DataSet dataset): dataSet(dataSet){
-  }
-  
-  void createBootstrappedSamples(){
-  }
-private:
-  DataSet dataSet;
-  vector<TrainingSet> bootstrappedTrainingSamples;
-  vector<TrainingSet> testSamples;
-};
-
-class RegularizedRandomForest{
-public:
-  RegularizedRandomForest(string sharedFilePath, string designFilePath, int numberOfDecisionTrees) : 
-    sharedFileReader(sharedFilePath), 
-    designFileReader(designFilePath),
-    dataSet(sharedFileReader.getFileContent(), designFileReader.getFileContent()),
-    numberOfDecisionTrees(numberOfDecisionTrees){
-          
-//    sharedFileReader.printFileContent();    
-//    designFileReader.printFileContent();
-    
-    dataSet.createTrainingSets();
-//    dataSet.printTrainingSets();
-
-  }
-  
-private:
-  
-  SharedAndDesignFileReader sharedFileReader;
-  SharedAndDesignFileReader designFileReader;
-  
-  DataSet dataSet;
-  vector<DecisionTree> decisionTress;
-  
-  int numberOfDecisionTrees;
-};
 
 
 using namespace std;

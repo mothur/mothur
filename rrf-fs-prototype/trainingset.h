@@ -17,7 +17,7 @@ public:
     outputClassId = 0;
   }
   
-  vector<int> getOtuCounts(){
+  vector<int>& getOtuCounts(){
     return otuCounts;
   }
   

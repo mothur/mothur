@@ -13,9 +13,21 @@
 
 class DataSet{
 public:
-  DataSet(vector< vector<string> > sharedFileContent, vector< vector<string> > designFileContent): 
+  explicit DataSet(vector< vector<string> > sharedFileContent, vector< vector<string> > designFileContent): 
     sharedFileContent(sharedFileContent),
     designFileContent(designFileContent){
+      
+      createTrainingSets();
+  }
+    
+    // copy constructor
+  explicit DataSet(const DataSet& dataSet): 
+    featureLabels(dataSet.featureLabels),
+    numOTUs(dataSet.numOTUs),
+    numTrainingSets(dataSet.numTrainingSets),
+    trainingSets(dataSet.trainingSets),
+    sharedFileContent(dataSet.sharedFileContent),
+    designFileContent(dataSet.designFileContent){
   }
   
   void createTrainingSets(){
@@ -53,6 +65,10 @@ public:
       }
       cout << trainingSet.getOutputClass() << endl;
     }
+  }
+  
+  vector<TrainingSet>& getTrainingSets(){
+    return trainingSets;
   }
   
 private:
