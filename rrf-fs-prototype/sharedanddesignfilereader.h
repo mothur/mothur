@@ -17,6 +17,8 @@ public:
   SharedAndDesignFileReader(string filePath){
     this->filePath = filePath;
     
+    readFileContent();
+    
   }
   void readFileContent(){
     inputFileStream.open(filePath.c_str());

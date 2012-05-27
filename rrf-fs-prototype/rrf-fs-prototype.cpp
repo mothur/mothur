@@ -22,6 +22,31 @@
 class TrainingSet;
 class DataSet;
 
+class RegularizedRandomForest{
+public:
+  RegularizedRandomForest(string sharedFilePath, string designFilePath) : 
+    sharedFileReader(sharedFilePath), 
+    designFileReader(designFilePath),
+    dataSet(sharedFileReader.getFileContent(), designFileReader.getFileContent()){
+          
+//    sharedFileReader.printFileContent();    
+//    designFileReader.printFileContent();
+    
+    dataSet.createTrainingSets();
+//    dataSet.printTrainingSets();
+
+  }
+  
+  void createBootstrappedSamples(){
+  }
+private:
+  
+  SharedAndDesignFileReader sharedFileReader;
+  SharedAndDesignFileReader designFileReader;
+  
+  DataSet dataSet;
+};
+
 
 using namespace std;
 
@@ -30,17 +55,7 @@ int main(int argc, const char * argv[]){
   string sharedFilePath = "final.an.0.03.subsample.0.03.pick.shared";
   string designFilePath = "mouse.sex_time.design";
   
-  SharedAndDesignFileReader sharedFileReader(sharedFilePath);
-  sharedFileReader.readFileContent();
-//  sharedFileReader.printFileContent();
-  
-  SharedAndDesignFileReader designFileReader(designFilePath);
-  designFileReader.readFileContent();
-//  designFileReader.printFileContent();
-  
-  DataSet dataset(sharedFileReader.getFileContent(), designFileReader.getFileContent());
-  dataset.createTrainingSets();
-//  dataset.printTrainingSets();
+  RegularizedRandomForest regularizedRandomForest(sharedFilePath, designFilePath);
   
   return 0;
 }
