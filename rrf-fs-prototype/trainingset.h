@@ -14,7 +14,7 @@
 class TrainingSet{
 public:
     // explicit constructor
-  explicit TrainingSet(vector<int> otuCounts, string outputClass): 
+  explicit TrainingSet(const vector<int> otuCounts, const string outputClass): 
       otuCounts(otuCounts),
       outputClass(outputClass),
       outputClassId(0){
@@ -26,11 +26,11 @@ public:
     outputClass(trainingSet.outputClass),
     outputClassId(trainingSet.outputClassId){
         
-    cout << "TrainingSet copy constructor is being called" << endl;
-    for (unsigned i = 0; i < otuCounts.size(); i++) {
-      cout << otuCounts[i] << " ";
-    }
-    cout << outputClass << " " << outputClassId << endl;
+//    cout << "TrainingSet copy constructor is being called" << endl;
+//    for (unsigned i = 0; i < otuCounts.size(); i++) {
+//      cout << otuCounts[i] << " ";
+//    }
+//    cout << outputClass << " " << outputClassId << endl;
         
   }
   
@@ -46,11 +46,11 @@ public:
     return outputClassId;
   }
   
-  void setOutputClass(string outputClass){
+  void setOutputClass(const string outputClass){
     this->outputClass = outputClass;
   }
   
-  void setOutputClassId(int outputClassId){
+  void setOutputClassId(const int outputClassId){
     this->outputClassId = outputClassId;
   }
   

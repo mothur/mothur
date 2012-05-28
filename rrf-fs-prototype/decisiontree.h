@@ -10,13 +10,15 @@
 #define rrf_fs_prototype_decisiontree_h
 
 #include <iostream>
+#include "macros.h"
 
 using namespace std;
 
 class DecisionTree{
 public:
-  explicit DecisionTree(vector<TrainingSet>& baseSample): baseSamples(baseSamples), bootstrappedSamplesSize(baseSamples.size()){
-    cout << bootstrappedSamplesSize << endl;
+  explicit DecisionTree(const vector<TrainingSet>& baseSample): baseSamples(baseSamples), bootstrappedSamplesSize(baseSamples.size()){
+    DEBUGMSG_VAR(baseSamples.size());
+    
     printSamples(baseSamples);
     createBootstrappedSamples();
   }

@@ -28,9 +28,9 @@ using namespace std;
 
 int main(int argc, const char * argv[]){
   
-  string sharedFilePath = "final.an.0.03.subsample.0.03.pick.shared";
-  string designFilePath = "mouse.sex_time.design";
-  int numberOfDecisionTrees = 1000;
+  const string sharedFilePath = "final.an.0.03.subsample.0.03.pick.shared";
+  const string designFilePath = "mouse.sex_time.design";
+  const int numberOfDecisionTrees = 1000;
   
   RegularizedRandomForest regularizedRandomForest(sharedFilePath, designFilePath, numberOfDecisionTrees);
   

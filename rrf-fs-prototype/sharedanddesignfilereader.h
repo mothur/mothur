@@ -14,7 +14,7 @@ using namespace std;
 class SharedAndDesignFileReader{
   
 public:
-  explicit SharedAndDesignFileReader(string filePath){
+  explicit SharedAndDesignFileReader(const string filePath){
     this->filePath = filePath;
     
     readFileContent();
@@ -58,7 +58,7 @@ public:
     }
   }
   
-  vector< vector<string> >& getFileContent(){ return fileContent; }
+  const vector< vector<string> >& getFileContent(){ return fileContent; }
   
 private:
   string filePath;

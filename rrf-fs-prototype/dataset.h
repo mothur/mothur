@@ -13,7 +13,7 @@
 
 class DataSet{
 public:
-  explicit DataSet(vector< vector<string> > sharedFileContent, vector< vector<string> > designFileContent): 
+  explicit DataSet(const vector< vector<string> > sharedFileContent, const vector< vector<string> > designFileContent): 
   sharedFileContent(sharedFileContent),
   designFileContent(designFileContent){
     
@@ -52,11 +52,12 @@ public:
       TrainingSet tempTrainingSet(tempOtuCounts, tempOutputClass);
       tempOtuCounts.clear();
         // copy constructor is being called here
-      DEBUG_INVOCATION;
+//      DEBUGMSG_LOCATION;
       trainingSets.push_back(tempTrainingSet);
     }
     
     createUniqIdForTrainignSets();
+//    printTrainingSets();
 //    alignTrainingSets();
   }
   
@@ -66,7 +67,7 @@ public:
       for (unsigned j = 0; j < trainingSet.getOtuCounts().size(); j++) {
         cout << trainingSet.getOtuCounts()[j] << " ";
       }
-      cout << trainingSet.getOutputClass() << endl;
+      cout << trainingSet.getOutputClass() << " " << trainingSet.getOutputClassId() << endl;
     }
   }
   

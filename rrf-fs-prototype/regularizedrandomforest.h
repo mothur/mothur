@@ -13,19 +13,19 @@
 
 class RegularizedRandomForest{
 public:
-  explicit RegularizedRandomForest(string sharedFilePath, string designFilePath, int numberOfDecisionTrees) : 
+  explicit RegularizedRandomForest(const string sharedFilePath, const string designFilePath, const int numberOfDecisionTrees) : 
     sharedFileReader(sharedFilePath), 
     designFileReader(designFilePath),
     dataSet(sharedFileReader.getFileContent(), designFileReader.getFileContent()),
     numberOfDecisionTrees(numberOfDecisionTrees){
       
-//  sharedFileReader.printFileContent();    
-//  designFileReader.printFileContent();    
-//  dataSet.printTrainingSets();
+//    sharedFileReader.printFileContent();    
+//    designFileReader.printFileContent();    
+//    dataSet.printTrainingSets();
       
-//  vector<TrainingSet> baseSamples = dataSet.getTrainingSets();
-//  cout << baseSamples.size() << endl;
-//  DecisionTree decisionTree(baseSamples);
+    vector<TrainingSet> baseSamples = dataSet.getTrainingSets();
+    DEBUGMSG_VAR(baseSamples.size());
+    DecisionTree decisionTree(baseSamples);
   
   }
   

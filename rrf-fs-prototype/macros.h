@@ -9,6 +9,7 @@
 #ifndef rrf_fs_prototype_macros_h
 #define rrf_fs_prototype_macros_h
 
-#define DEBUG_INVOCATION (cout << "Function Invoked => " << __PRETTY_FUNCTION__ << "\nFrom file => "__FILE__ <<  "#"  << __LINE__ << endl)
+#define DEBUGMSG_LOCATION (cout << "DEBUGMSG " << __PRETTY_FUNCTION__ << "\nDEBUGMSG " << __FILE__ <<  "#"  << __LINE__ << endl)
+#define DEBUGMSG_VAR(X) (cout << "DEBUGMSG " << __PRETTY_FUNCTION__ << "\nDEBUGMSG " <<#X << " -> " << X << endl << endl)
 
 #endif
