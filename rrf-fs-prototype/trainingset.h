@@ -30,7 +30,7 @@ public:
     for (unsigned i = 0; i < otuCounts.size(); i++) {
       cout << otuCounts[i] << " ";
     }
-    cout << outputClassId << endl;
+    cout << outputClass << " " << outputClassId << endl;
         
   }
   
