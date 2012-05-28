@@ -52,11 +52,12 @@ public:
       TrainingSet tempTrainingSet(tempOtuCounts, tempOutputClass);
       tempOtuCounts.clear();
         // copy constructor is being called here
+      DEBUG_INVOCATION;
       trainingSets.push_back(tempTrainingSet);
     }
     
     createUniqIdForTrainignSets();
-    alignTrainingSets();
+//    alignTrainingSets();
   }
   
   void printTrainingSets(){
@@ -111,7 +112,7 @@ private:
     for (unsigned i = 0; i < trainingSets.size(); i++) {
       int currentOtuCount = trainingSets[i].getOtuCounts().size();
       if (currentOtuCount < maxOtuCounts){
-        cout << "need to add paadding" << endl;
+//        cout << "need to add paadding" << endl;
       }
     }
   }

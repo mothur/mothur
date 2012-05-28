@@ -9,6 +9,8 @@
 #ifndef rrf_fs_prototype_trainingset_h
 #define rrf_fs_prototype_trainingset_h
 
+#include "macros.h"
+
 class TrainingSet{
 public:
     // explicit constructor
@@ -20,14 +22,16 @@ public:
   
     // copy constructor
   TrainingSet(const TrainingSet& trainingSet): 
-      otuCounts(trainingSet.otuCounts),
-      outputClass(trainingSet.outputClass),
-      outputClassId(trainingSet.outputClassId){
-        cout << "TrainingSet copy constructor is being called" << endl;
-        for (unsigned i = 0; i < otuCounts.size(); i++) {
-          cout << otuCounts[i] << " ";
-        }
-        cout << outputClassId << endl;
+    otuCounts(trainingSet.otuCounts),
+    outputClass(trainingSet.outputClass),
+    outputClassId(trainingSet.outputClassId){
+        
+    cout << "TrainingSet copy constructor is being called" << endl;
+    for (unsigned i = 0; i < otuCounts.size(); i++) {
+      cout << otuCounts[i] << " ";
+    }
+    cout << outputClassId << endl;
+        
   }
   
   vector<int>& getOtuCounts(){
