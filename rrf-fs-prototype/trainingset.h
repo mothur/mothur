@@ -23,6 +23,11 @@ public:
       otuCounts(trainingSet.otuCounts),
       outputClass(trainingSet.outputClass),
       outputClassId(trainingSet.outputClassId){
+        cout << "TrainingSet copy constructor is being called" << endl;
+        for (unsigned i = 0; i < otuCounts.size(); i++) {
+          cout << otuCounts[i] << " ";
+        }
+        cout << outputClassId << endl;
   }
   
   vector<int>& getOtuCounts(){

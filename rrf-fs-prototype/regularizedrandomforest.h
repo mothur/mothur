@@ -23,9 +23,9 @@ public:
 //  designFileReader.printFileContent();    
 //  dataSet.printTrainingSets();
       
-  vector<TrainingSet> baseSamples = dataSet.getTrainingSets();
-  cout << baseSamples.size() << endl;
-  DecisionTree decisionTree(baseSamples);
+//  vector<TrainingSet> baseSamples = dataSet.getTrainingSets();
+//  cout << baseSamples.size() << endl;
+//  DecisionTree decisionTree(baseSamples);
   
   }
   

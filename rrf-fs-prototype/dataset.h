@@ -49,12 +49,14 @@ public:
         tempOtuCounts.push_back(count);
       }
       string tempOutputClass(designFileContent[i-1][1].c_str());
-      TrainingSet trainingSet(tempOtuCounts, tempOutputClass);
+      TrainingSet tempTrainingSet(tempOtuCounts, tempOutputClass);
       tempOtuCounts.clear();
-      trainingSets.push_back(trainingSet);
+        // copy constructor is being called here
+      trainingSets.push_back(tempTrainingSet);
     }
     
     createUniqIdForTrainignSets();
+    alignTrainingSets();
   }
   
   void printTrainingSets(){
@@ -93,6 +95,23 @@ private:
         if (outputClass == uniqOutputStrings[j]){
           trainingSets[i].setOutputClassId(j);
         }
+      }
+    }
+  }
+  
+    // some training sets has more data than the rest, the ending cells are 
+    // missing in some training sets, so we need to pad those data
+  void alignTrainingSets(){
+    int maxOtuCounts = -1;
+    for (unsigned i = 0; i < trainingSets.size(); i++) {
+      int currentOtuCount = trainingSets[i].getOtuCounts().size();
+      if (currentOtuCount > maxOtuCounts){ maxOtuCounts = currentOtuCount; }
+    }
+    
+    for (unsigned i = 0; i < trainingSets.size(); i++) {
+      int currentOtuCount = trainingSets[i].getOtuCounts().size();
+      if (currentOtuCount < maxOtuCounts){
+        cout << "need to add paadding" << endl;
       }
     }
   }
