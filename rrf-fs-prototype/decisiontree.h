@@ -16,10 +16,10 @@ using namespace std;
 
 class DecisionTree{
 public:
-  explicit DecisionTree(const vector<TrainingSet>& baseSample): baseSamples(baseSamples), bootstrappedSamplesSize(baseSamples.size()){
-    DEBUGMSG_VAR(baseSamples.size());
+  explicit DecisionTree(const vector<TrainingSet>& baseSamples): baseSamples(baseSamples), bootstrappedSamplesSize(baseSamples.size()){
+//    DEBUGMSG_VAR(bootstrappedSamplesSize);
     
-    printSamples(baseSamples);
+//    printSamples(baseSamples);
     createBootstrappedSamples();
   }
   
@@ -29,12 +29,13 @@ public:
     // function that is useful for debugging
   void printSamples(vector<TrainingSet> samples){
     for (unsigned i = 0; i < samples.size(); i++) {
-      vector<int> outCount = samples[i].getOtuCounts();
+      vector<int> otuCounts = samples[i].getOtuCounts();
       int outputClassId = samples[i].getOutputClassId();
-      for (unsigned j = 0; j < outCount.size(); j++) {
-        cout << outCount[j] << " ";
+      string outputClass = samples[i].getOutputClass();
+      for (unsigned j = 0; j < otuCounts.size(); j++) {
+        cout << otuCounts[j] << " ";
       }
-      cout << outputClassId << endl;
+      cout << outputClass << " " << outputClassId << endl;
     }
   }
   

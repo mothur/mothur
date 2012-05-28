@@ -24,7 +24,7 @@ public:
 //    dataSet.printTrainingSets();
       
     vector<TrainingSet> baseSamples = dataSet.getTrainingSets();
-    DEBUGMSG_VAR(baseSamples.size());
+//    DEBUGMSG_VAR(baseSamples.size());
     DecisionTree decisionTree(baseSamples);
   
   }

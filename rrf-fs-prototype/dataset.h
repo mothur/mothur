@@ -52,7 +52,6 @@ public:
       TrainingSet tempTrainingSet(tempOtuCounts, tempOutputClass);
       tempOtuCounts.clear();
         // copy constructor is being called here
-//      DEBUGMSG_LOCATION;
       trainingSets.push_back(tempTrainingSet);
     }
     
