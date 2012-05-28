@@ -19,11 +19,13 @@ public:
     dataSet(sharedFileReader.getFileContent(), designFileReader.getFileContent()),
     numberOfDecisionTrees(numberOfDecisionTrees){
       
-  sharedFileReader.printFileContent();    
-  designFileReader.printFileContent();    
-  dataSet.printTrainingSets();
-  
-  DecisionTree decisionTree(&dataSet);
+//  sharedFileReader.printFileContent();    
+//  designFileReader.printFileContent();    
+//  dataSet.printTrainingSets();
+      
+  vector<TrainingSet> baseSamples = dataSet.getTrainingSets();
+  cout << baseSamples.size() << endl;
+  DecisionTree decisionTree(baseSamples);
   
   }
   

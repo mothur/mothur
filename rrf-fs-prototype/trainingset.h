@@ -11,10 +11,18 @@
 
 class TrainingSet{
 public:
-  explicit TrainingSet(vector<int> otuCounts, string outputClass){
-    this->otuCounts = otuCounts;
-    this->outputClass = outputClass;
-    outputClassId = 0;
+    // explicit constructor
+  explicit TrainingSet(vector<int> otuCounts, string outputClass): 
+      otuCounts(otuCounts),
+      outputClass(outputClass),
+      outputClassId(0){
+  }
+  
+    // copy constructor
+  TrainingSet(const TrainingSet& trainingSet): 
+      otuCounts(trainingSet.otuCounts),
+      outputClass(trainingSet.outputClass),
+      outputClassId(trainingSet.outputClassId){
   }
   
   vector<int>& getOtuCounts(){

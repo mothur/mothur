@@ -71,15 +71,7 @@ public:
     return trainingSets;
   }
   
-private:
-  vector<string> featureLabels;  
-  unsigned numOTUs;
-  unsigned numTrainingSets;
-  vector<TrainingSet> trainingSets;
-  
-  vector< vector<string> > sharedFileContent;
-  vector< vector<string> > designFileContent;
-  
+private:  
   void createUniqIdForTrainignSets(){
     vector<string> uniqOutputStrings;
     for (unsigned i = 0; i < trainingSets.size(); i++) {
@@ -104,6 +96,15 @@ private:
       }
     }
   }
+  
+  vector<string> featureLabels;  
+  unsigned numOTUs;
+  unsigned numTrainingSets;
+  vector<TrainingSet> trainingSets;
+  
+  vector< vector<string> > sharedFileContent;
+  vector< vector<string> > designFileContent;
+
 };
 
 

@@ -9,21 +9,35 @@
 #ifndef rrf_fs_prototype_decisiontree_h
 #define rrf_fs_prototype_decisiontree_h
 
+#include <iostream>
+
+using namespace std;
+
 class DecisionTree{
 public:
-  explicit DecisionTree(DataSet* dataset):
-  dataSet(dataSet),
-  bootstrappedSamplesSize(100){
-      // FIXME: getting error "terminate called throwing an exception" if I 
-      // enable the following line
-//    this->dataSet->printTrainingSets();
-      //      cout << bootstrappedSamplesSize << endl;
+  explicit DecisionTree(vector<TrainingSet>& baseSample): baseSamples(baseSamples), bootstrappedSamplesSize(baseSamples.size()){
+    cout << bootstrappedSamplesSize << endl;
+    printSamples(baseSamples);
+    createBootstrappedSamples();
   }
   
   void createBootstrappedSamples(){
   }
-private:
-  DataSet* dataSet;
+  
+    // function that is useful for debugging
+  void printSamples(vector<TrainingSet> samples){
+    for (unsigned i = 0; i < samples.size(); i++) {
+      vector<int> outCount = samples[i].getOtuCounts();
+      int outputClassId = samples[i].getOutputClassId();
+      for (unsigned j = 0; j < outCount.size(); j++) {
+        cout << outCount[j] << " ";
+      }
+      cout << outputClassId << endl;
+    }
+  }
+  
+private:  
+  vector<TrainingSet> baseSamples;
   vector<TrainingSet> bootstrappedTrainingSamples;
   vector<TrainingSet> testSamples;
   
