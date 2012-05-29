@@ -45,7 +45,7 @@ private:
 	int createProcesses(string, string, string, string, int&);
 		
 	bool abort, useAbskew, chimealns, useMinH, useMindiv, useXn, useDn, useXa, useChunks, useMinchunk, useIdsmoothwindow, useMinsmoothid, useMaxp, skipgaps, skipgaps2, useMinlen, useMaxlen, ucl, useQueryfract;
-	string fastafile, groupfile, templatefile, outputDir, namefile, abskew, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, minlen, maxlen, queryfract;
+	string fastafile, groupfile, templatefile, outputDir, namefile, abskew, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, minlen, maxlen, queryfract, uchimeLocation;
 	int processors;
 	
 	
@@ -74,7 +74,7 @@ struct uchimeData {
 	string namefile; 
 	string groupfile;
 	string outputFName;
-	string accnos, alns, filename, templatefile;
+	string accnos, alns, filename, templatefile, uchimeLocation;
 	MothurOut* m;
 	int start;
 	int end;
@@ -84,7 +84,7 @@ struct uchimeData {
 	string abskew, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, minlen, maxlen, queryfract;
 	
 	uchimeData(){}
-	uchimeData(string o, string t, string file, string f, string n, string g, string ac,  string al, vector<string> gr, MothurOut* mout, int st, int en, int tid) {
+	uchimeData(string o, string uloc, string t, string file, string f, string n, string g, string ac,  string al, vector<string> gr, MothurOut* mout, int st, int en, int tid) {
 		fastafile = f;
 		namefile = n;
 		groupfile = g;
@@ -100,6 +100,7 @@ struct uchimeData {
 		groups = gr;
 		count = 0;
 		numChimeras = 0;
+        uchimeLocation = uloc;
 	}
 	void setBooleans(bool Abskew, bool calns, bool MinH, bool Mindiv, bool Xn, bool Dn, bool Xa, bool Chunks, bool Minchunk, bool Idsmoothwindow, bool Minsmoothid, bool Maxp, bool skipgap, bool skipgap2, bool Minlen, bool Maxlen, bool uc, bool Queryfract) {
 		useAbskew = Abskew;
@@ -183,18 +184,8 @@ static DWORD WINAPI MyUchimeThreadFunction(LPVOID lpParam){
 			
 			vector<char*> cPara;
 			
-			string path = pDataArray->m->argv;
-			string tempPath = path;
-			for (int j = 0; j < path.length(); j++) { tempPath[j] = tolower(path[j]); }
-			path = path.substr(0, (tempPath.find_last_of('m')));
-			
-			string uchimeCommand = path;
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-			uchimeCommand += "uchime ";
-#else
-			uchimeCommand += "uchime";
-			uchimeCommand = "\"" + uchimeCommand + "\"";
-#endif			
+            string uchimeCommand = pDataArray->uchimeLocation;
+            uchimeCommand = "\"" + uchimeCommand + "\"";
 			
 			char* tempUchime;
 			tempUchime= new char[uchimeCommand.length()+1]; 
@@ -403,10 +394,10 @@ static DWORD WINAPI MyUchimeThreadFunction(LPVOID lpParam){
 			
 			//uchime_main(numArgs, uchimeParameters); 
 			//cout << "commandString = " << commandString << endl;
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-#else
 			commandString = "\"" + commandString + "\"";
-#endif
+            
+            if (pDataArray->m->debug) { pDataArray->m->mothurOut("[DEBUG]: uchime command = " + commandString + ".\n"); }
+            
 			system(commandString.c_str());
 			
 			//free memory
@@ -505,11 +496,14 @@ static DWORD WINAPI MyUchimeSeqsThreadFunction(LPVOID lpParam){
 		
 		vector<char*> cPara;
 		
-		char* tempUchime;
-		tempUchime= new char[8]; 
-		*tempUchime = '\0';
-		strncat(tempUchime, "uchime ", 7); 
-		cPara.push_back(tempUchime);
+		string uchimeCommand = pDataArray->uchimeLocation;
+        uchimeCommand = "\"" + uchimeCommand + "\"";
+        
+        char* tempUchime;
+        tempUchime= new char[uchimeCommand.length()+1]; 
+        *tempUchime = '\0';
+        strncat(tempUchime, uchimeCommand.c_str(), uchimeCommand.length());
+        cPara.push_back(tempUchime);
 		
 		char* tempIn = new char[8]; 
 		*tempIn = '\0'; strncat(tempIn, "--input", 7);
@@ -722,6 +716,7 @@ static DWORD WINAPI MyUchimeSeqsThreadFunction(LPVOID lpParam){
 		
 		//uchime_main(numArgs, uchimeParameters); 
 		//cout << "commandString = " << commandString << endl;
+        if (pDataArray->m->debug) { pDataArray->m->mothurOut("[DEBUG]: uchime command = " + commandString + ".\n"); }
 		system(commandString.c_str());
 		
 		//free memory

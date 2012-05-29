@@ -26,78 +26,7 @@ Engine::Engine(){
 	}
 }
 /***********************************************************************/
-string Engine::findMothursPath(){
-	try { 
-		
-		string envPath = getenv("PATH");
-		string mothurPath = "";
-		
-		//delimiting path char
-		char delim;
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-			delim = ':';
-		#else
-			delim = ';';
-		#endif
-		
-		//break apart path variable by ':'
-		vector<string> dirs;
-		mout->splitAtChar(envPath, dirs, delim);
-		
-        if (mout->debug) { mout->mothurOut("[DEBUG]: dir's in path: \n"); }
-        
-		//get path related to mothur
-		for (int i = 0; i < dirs.size(); i++) {
-            
-            if (mout->debug) { mout->mothurOut("[DEBUG]: " + dirs[i] + "\n"); }
-            
-			//to lower so we can find it
-			string tempLower = "";
-			for (int j = 0; j < dirs[i].length(); j++) {  tempLower += tolower(dirs[i][j]);  }
-			
-			//is this mothurs path?
-			if (tempLower.find("mothur") != -1) {  mothurPath = dirs[i]; break;  }
-		}
-        
-		if (mout->debug) { mout->mothurOut("[DEBUG]: mothurPath = " + mothurPath + "\n"); }
-        
-		if (mothurPath != "") {
-			//add mothur so it looks like what argv would look like
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-				mothurPath += "/mothur";
-			#else
-				mothurPath += "\\mothur";
-			#endif
-		}else {
-			//okay mothur is not in the path, so the folder mothur is in must be in the path
-			//lets find out which one
-			
-			//get path related to mothur
-			for (int i = 0; i < dirs.size(); i++) {
-								
-				//is this mothurs path?
-				ifstream in;
-				string tempIn = dirs[i];
-				#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-					tempIn += "/mothur";
-				#else
-					tempIn += "\\mothur";
-				#endif
-				mout->openInputFile(tempIn, in, "");
-				
-				//if this file exists
-				if (in) { in.close(); mothurPath = tempIn;  break; if (mout->debug) { mout->mothurOut("[DEBUG]: found it, mothurPath = " + mothurPath + "\n"); }  }
-			}
-		}
-		
-		return mothurPath;
-		
-	}
-	catch(exception& e) {
-		mout->errorOut(e, "Engine", "findMothursPath");
-		exit(1);
-	}
-}
+
 /***********************************************************************/
 
 InteractEngine::InteractEngine(string path){
@@ -106,7 +35,7 @@ InteractEngine::InteractEngine(string path){
 	string temppath = path.substr(0, (path.find_last_of("othur")-5));
 	
 	//this will happen if you set the path variable to contain mothur's exe location
-	if (temppath == "") { path = findMothursPath(); }
+	if (temppath == "") { path = mout->findProgramPath("mothur"); }
 	
 	mout->argv = path;
 }
@@ -273,7 +202,7 @@ BatchEngine::BatchEngine(string path, string batchFileName){
 		string temppath = path.substr(0, (path.find_last_of("othur")-5));
 	
 		//this will happen if you set the path variable to contain mothur's exe location
-		if (temppath == "") { path = findMothursPath(); }
+		if (temppath == "") { path = mout->findProgramPath("mothur"); }
 		
 		mout->argv = path;
 				
@@ -441,7 +370,7 @@ ScriptEngine::ScriptEngine(string path, string commandString){
 		string temppath = path.substr(0, (path.find_last_of("othur")-5));
 
 		//this will happen if you set the path variable to contain mothur's exe location
-		if (temppath == "") { path = findMothursPath(); }
+		if (temppath == "") { path = mout->findProgramPath("mothur"); }
 		
 		mout->argv = path;
 				

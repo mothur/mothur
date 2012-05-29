@@ -175,16 +175,14 @@ int CatchAllCommand::execute() {
 		path = m->getFullPathName(path);
 		
         if (m->debug) { m->mothurOut("[DEBUG]: mothur's path = " + path + "\n"); }
-        
+       
 		savedOutputDir = outputDir;
 		string catchAllCommandExe = "";
         string catchAllTest = "";
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-			catchAllCommandExe += "mono " + path + "CatchAllcmdL.exe ";
 			if (outputDir == "") { outputDir = "./"; } //force full pathname to be created for catchall, this is necessary because if catchall is in the path it will look for input file whereever the exe is and not the cwd.
             catchAllTest = path + "CatchAllcmdL.exe";
 		#else
-			catchAllCommandExe += "\"" + path + "CatchAllcmdW.exe\"" + " ";
 			if (outputDir == "") { outputDir = ".\\"; } //force full pathname to be created for catchall, this is necessary because if catchall is in the path it will look for input file whereever the exe is and not the cwd.
             catchAllTest = path + "CatchAllcmdW.exe";
 		#endif
@@ -193,12 +191,34 @@ int CatchAllCommand::execute() {
 		ifstream in;
 		catchAllTest = m->getFullPathName(catchAllTest);
 		int ableToOpen = m->openInputFile(catchAllTest, in, "no error"); in.close();
-		if(ableToOpen == 1) {	m->mothurOut("[ERROR]: " + catchAllTest + " file does not exist. mothur requires the catchall executable to run the catchall command."); m->mothurOutEndLine(); m->control_pressed = true; return 0;  }
+		if(ableToOpen == 1) {	
+            m->mothurOut(catchAllTest + " file does not exist. Checking path... \n");
+            //check to see if uchime is in the path??
+            
+            string programName = "CatchAllcmdW.exe";
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+            programName = "CatchAllcmdL.exe";
+#endif
+            string cLocation = m->findProgramPath(programName);
+            
+            ifstream in2;
+            ableToOpen = m->openInputFile(cLocation, in2, "no error"); in2.close();
+
+            if(ableToOpen == 1) { m->mothurOut("[ERROR]: " + cLocation + " file does not exist. mothur requires the catchall executable."); m->mothurOutEndLine();  return 0; } 
+            else {  m->mothurOut("Found catchall in your path, using " + cLocation + "\n"); catchAllTest = cLocation; }
+        }
+        catchAllTest = m->getFullPathName(catchAllTest);
+        
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+        catchAllCommandExe += "mono " + catchAllTest + " ";
+#else
+        catchAllCommandExe += "\"" + catchAllTest + "\" ";
+#endif
         
 		//prepare full output directory
 		outputDir = m->getFullPathName(outputDir);
 		
-        if (m->debug) { m->mothurOut("[DEBUG]: catchall location = " + catchAllCommandExe + ".\n [DEBUG]: outputDir = " + outputDir + ".\n"); }
+        if (m->debug) { m->mothurOut("[DEBUG]: catchall location = " + catchAllCommandExe + "\n[DEBUG]: outputDir = " + outputDir + "\n"); }
         
 		vector<string> inputFileNames;
 		if (sharedfile != "") { inputFileNames = parseSharedFile(sharedfile);   }
@@ -219,7 +239,7 @@ int CatchAllCommand::execute() {
 			string summaryfilename = outputDir + m->getRootName(m->getSimpleName(inputFileNames[p])) + "catchall.summary";
 			summaryfilename = m->getFullPathName(summaryfilename);
 			
-            if (m->debug) { m->mothurOut("[DEBUG]: Input File = " + inputFileNames[p] + ".\n [DEBUG]: inputdata address = " + toString(&input) + ".\n [DEBUG]: sabund address = " + toString(&sabund) + ".\n"); } 
+            if (m->debug) { m->mothurOut("[DEBUG]: Input File = " + inputFileNames[p] + ".\n[DEBUG]: inputdata address = " + toString(&input) + ".\n[DEBUG]: sabund address = " + toString(&sabund) + ".\n"); } 
             
 			ofstream out;
 			m->openOutputFile(summaryfilename, out);	

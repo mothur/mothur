@@ -117,6 +117,81 @@ void MothurOut::clearCurrentFiles()  {
 		exit(1);
 	}
 }
+/***********************************************************************/
+string MothurOut::findProgramPath(string programName){
+	try { 
+		
+		string envPath = getenv("PATH");
+		string pPath = "";
+		
+		//delimiting path char
+		char delim;
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+        delim = ':';
+#else
+        delim = ';';
+#endif
+		
+		//break apart path variable by ':'
+		vector<string> dirs;
+		splitAtChar(envPath, dirs, delim);
+		
+        if (debug) { mothurOut("[DEBUG]: dir's in path: \n"); }
+        
+		//get path related to mothur
+		for (int i = 0; i < dirs.size(); i++) {
+            
+            if (debug) { mothurOut("[DEBUG]: " + dirs[i] + "\n"); }
+            
+			//to lower so we can find it
+			string tempLower = "";
+			for (int j = 0; j < dirs[i].length(); j++) {  tempLower += tolower(dirs[i][j]);  }
+			
+			//is this mothurs path?
+			if (tempLower.find(programName) != -1) {  pPath = dirs[i]; break;  }
+		}
+        
+		if (debug) { mothurOut("[DEBUG]: programPath = " + pPath + "\n"); }
+        
+		if (pPath != "") {
+			//add programName so it looks like what argv would look like
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+            pPath += "/" + programName;
+#else
+            pPath += "\\" + programName;
+#endif
+		}else {
+			//okay programName is not in the path, so the folder programName is in must be in the path
+			//lets find out which one
+			
+			//get path related to the program
+			for (int i = 0; i < dirs.size(); i++) {
+                
+                if (debug) { mothurOut("[DEBUG]: looking in " + dirs[i] + " for " + programName + " \n"); }
+                
+				//is this the programs path?
+				ifstream in;
+				string tempIn = dirs[i];
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+                tempIn += "/" + programName;
+#else
+                tempIn += "\\" + programName;
+#endif
+				openInputFile(tempIn, in, "");
+				
+				//if this file exists
+				if (in) { in.close(); pPath = tempIn; if (debug) { mothurOut("[DEBUG]: found it, programPath = " + pPath + "\n"); } break;   }
+			}
+		}
+		
+		return pPath;
+		
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "findProgramPath");
+		exit(1);
+	}
+}
 /*********************************************************************************************/
 void MothurOut::setFileName(string filename)  {
 	try {
