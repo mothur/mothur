@@ -10,16 +10,22 @@
 #define rrf_fs_prototype_decisiontree_h
 
 #include <iostream>
+#include <cmath>
 #include "macros.h"
+#include "treenode.hpp"
 
 using namespace std;
 
 class DecisionTree{
 public:
-  explicit DecisionTree(const vector<TrainingSet>& baseSamples): baseSamples(baseSamples), bootstrappedSamplesSize(baseSamples.size()){
+  explicit DecisionTree(const vector<TrainingSet>& baseSamples, int numberOfTotalFeatures): 
+    baseSamples(baseSamples), 
+    bootstrappedSamplesSize(baseSamples.size()),
+    numberOfTotalFeatures(numberOfTotalFeatures){
 //    DEBUGMSG_VAR(bootstrappedSamplesSize);
-    createBootstrappedSamples();
     
+    createBootstrappedSamples();
+    buildDecisionTree();
   }
   
     // need to manually provide a copy constructor so that when addign a DecisionTree to a vector, we get desired results
@@ -27,8 +33,57 @@ public:
     baseSamples(decisionTree.baseSamples),
     bootstrappedTrainingSamples(decisionTree.bootstrappedTrainingSamples),
     bootStrammpedTestSamples(decisionTree.bootStrammpedTestSamples),
-    bootstrappedSamplesSize(decisionTree.bootstrappedSamplesSize){
+    bootstrappedSamplesSize(decisionTree.bootstrappedSamplesSize),
+    numberOfTotalFeatures(decisionTree.numberOfTotalFeatures){
   }
+  
+  void buildDecisionTree(){
+    TreeNode* rootTreeNode = new TreeNode(bootstrappedTrainingSamples);
+    splitRecursively(rootTreeNode);
+    delete rootTreeNode;
+  }
+  
+  void splitRecursively(TreeNode* rootTreeNode){
+    if(rootTreeNode->isLeaf == false){
+      vector<int> featureSubsetIndices = selectFeatureSubsetRandomly();
+    }
+  }
+
+    // TODO: we need to modify this later for randomized random forest algo's implementations
+  vector<int> selectFeatureSubsetRandomly(){
+    vector<int> featureSubsetIndices;
+    int optimumFeatureSubsetSize = getOptimumFeatureSubsetSize();
+//    DEBUGMSG_VAR(optimumFeatureSubsetSize);
+    
+    vector<bool> isSelected(numberOfTotalFeatures, false);
+//    DEBUGMSG_VAR(isSelected);
+    
+    while (true) {
+        // TODO: be careful with this random index calculation function, there is a chance it will not
+        // output the hightest number say (527) ever.
+      double randomIndex = (int)((double)rand() / (double)RAND_MAX * numberOfTotalFeatures);
+      isSelected[randomIndex] = true;
+      
+      int count = 0;
+      for (unsigned i = 0; i < numberOfTotalFeatures; i++) {
+        if (isSelected[i] == true){ 
+          count++; 
+        }
+      }
+      if (count == optimumFeatureSubsetSize){ break; }
+    }
+    
+//    DEBUGMSG_VAR(isSelected);
+    for (unsigned i = 0; i < numberOfTotalFeatures; i++) {
+      if (isSelected[i] == true){ featureSubsetIndices.push_back(i); }
+    }
+//    DEBUGMSG_VAR(numberOfTotalFeatures);
+//    DEBUGMSG_VAR(featureSubsetIndices);
+    return featureSubsetIndices;
+  }
+  
+    // TODO: we need to modify this later for randomized random forest algo's implementation
+  int getOptimumFeatureSubsetSize(){ return (int) ceil(log(numberOfTotalFeatures) / log(2)); }
   
   void createBootstrappedSamples(){
     
@@ -71,12 +126,13 @@ public:
     }
   }
   
-private:  
+private:
   vector<TrainingSet> baseSamples;
   vector<TrainingSet> bootstrappedTrainingSamples;
   vector<TrainingSet> bootStrammpedTestSamples;
   
   int bootstrappedSamplesSize;
+  int numberOfTotalFeatures;
 };
 
 

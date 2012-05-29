@@ -22,5 +22,14 @@ ostream& operator <<(ostream& os, vector<int>& integers){
   return os;
 }
 
+ostream& operator <<(ostream& os, vector<bool>& booleans){
+  os << "[ ";
+  for (unsigned i = 0; i < booleans.size(); i++) {
+    os << booleans[i] << " ";
+  }
+  os << "]";
+  return os;
+}
+
 
 #endif

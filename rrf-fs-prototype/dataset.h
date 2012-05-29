@@ -36,9 +36,9 @@ public:
     }
     
     string numOUTStr = sharedFileContent[1][2];
-    numOTUs = atoi(numOUTStr.c_str());
+    numberOfTotalFeatures = atoi(numOUTStr.c_str());
     
-    numTrainingSets = sharedFileContent.size() - 1;
+    numberOfTrainingSets = sharedFileContent.size() - 1;
     
     
     for (unsigned i = 1; i < sharedFileContent.size(); i++) {
@@ -73,6 +73,11 @@ public:
   vector<TrainingSet>& getTrainingSets(){
     return trainingSets;
   }
+  
+  int getNumberOfTotalFeatures(){
+    return numberOfTotalFeatures;
+  }
+
   
 private:  
   void createUniqIdForTrainignSets(){
@@ -116,10 +121,10 @@ private:
       }
     }
   }
-  
-  vector<string> featureLabels;  
-  unsigned numOTUs;
-  unsigned numTrainingSets;
+    
+  vector<string> featureLabels; 
+  unsigned numberOfTotalFeatures; // this is number of OTUs
+  unsigned numberOfTrainingSets;
   vector<TrainingSet> trainingSets;
   
   vector< vector<string> > sharedFileContent;
