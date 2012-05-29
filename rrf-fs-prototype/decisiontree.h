@@ -31,7 +31,8 @@ public:
     }
     
     for (unsigned i = 0; i < bootstrappedSamplesSize; i++) {
-      int randomIndex = (int)((double)(rand()) / RAND_MAX * bootstrappedSamplesSize);
+      int randomIndex = (int)(((double)(rand()) / (double)(RAND_MAX)) * bootstrappedSamplesSize);
+//      DEBUGMSG_VAR(randomIndex);
       isInTrainingSamples[randomIndex] = true;
       bootstrappedTrainingSamples.push_back(baseSamples[randomIndex]);
     }

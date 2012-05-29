@@ -7,18 +7,22 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7BC1658E15748BFD002EFDDC /* final.an.0.03.subsample.0.03.pick.shared in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7BC1658B15748BEE002EFDDC /* final.an.0.03.subsample.0.03.pick.shared */; };
+		7BC1658F15748BFD002EFDDC /* mouse.sex_time.design in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7BC1658C15748BEE002EFDDC /* mouse.sex_time.design */; };
 		7BE48A7215696A38002928AD /* rrf-fs-prototype.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7BE48A7115696A38002928AD /* rrf-fs-prototype.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		7B142584156968C900D238B7 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = /usr/share/man/man1/;
-			dstSubfolderSpec = 0;
+			buildActionMask = 12;
+			dstPath = "";
+			dstSubfolderSpec = 6;
 			files = (
+				7BC1658E15748BFD002EFDDC /* final.an.0.03.subsample.0.03.pick.shared in CopyFiles */,
+				7BC1658F15748BFD002EFDDC /* mouse.sex_time.design in CopyFiles */,
 			);
-			runOnlyForDeploymentPostprocessing = 1;
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
@@ -30,6 +34,8 @@
 		7BA4404E156C7DD9004A6A54 /* sharedanddesignfilereader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sharedanddesignfilereader.h; sourceTree = "<group>"; };
 		7BB761E5157188BB00699057 /* dataset.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dataset.h; sourceTree = "<group>"; };
 		7BB761E715718DBC00699057 /* trainingset.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = trainingset.h; sourceTree = "<group>"; };
+		7BC1658B15748BEE002EFDDC /* final.an.0.03.subsample.0.03.pick.shared */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = final.an.0.03.subsample.0.03.pick.shared; sourceTree = "<group>"; };
+		7BC1658C15748BEE002EFDDC /* mouse.sex_time.design */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = mouse.sex_time.design; sourceTree = "<group>"; };
 		7BE48A7115696A38002928AD /* rrf-fs-prototype.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "rrf-fs-prototype.cpp"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -47,6 +53,7 @@
 		7B14257B156968C600D238B7 = {
 			isa = PBXGroup;
 			children = (
+				7BC1658A15748BEE002EFDDC /* Datasets */,
 				7B8A75E8157313E4002A3C9E /* macros.h */,
 				7B8A75E71572C7B9002A3C9E /* decisiontree.h */,
 				7B8A75E51572C7A7002A3C9E /* regularizedrandomforest.h */,
@@ -64,6 +71,15 @@
 				7B142586156968C900D238B7 /* rrf-fs-prototype */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		7BC1658A15748BEE002EFDDC /* Datasets */ = {
+			isa = PBXGroup;
+			children = (
+				7BC1658B15748BEE002EFDDC /* final.an.0.03.subsample.0.03.pick.shared */,
+				7BC1658C15748BEE002EFDDC /* mouse.sex_time.design */,
+			);
+			path = Datasets;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
