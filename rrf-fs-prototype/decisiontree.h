@@ -18,12 +18,32 @@ class DecisionTree{
 public:
   explicit DecisionTree(const vector<TrainingSet>& baseSamples): baseSamples(baseSamples), bootstrappedSamplesSize(baseSamples.size()){
 //    DEBUGMSG_VAR(bootstrappedSamplesSize);
-    
-//    printSamples(baseSamples);
     createBootstrappedSamples();
   }
   
   void createBootstrappedSamples(){
+    
+      // randomly create indices list
+    vector<bool> isInTrainingSamples;
+    
+    for (unsigned i = 0; i < bootstrappedSamplesSize; i++) {
+      isInTrainingSamples.push_back(false);
+    }
+    
+    for (unsigned i = 0; i < bootstrappedSamplesSize; i++) {
+      int randomIndex = (int)((double)(rand()) / RAND_MAX * bootstrappedSamplesSize);
+      isInTrainingSamples[randomIndex] = true;
+      bootstrappedTrainingSamples.push_back(baseSamples[randomIndex]);
+    }
+    
+    for (unsigned i = 0; i < bootstrappedSamplesSize; i++) {
+      if(isInTrainingSamples[i] == false){
+        bootStrammpedTestSamples.push_back(baseSamples[i]);
+      }
+    }
+    
+//    DEBUGMSG_VAR(bootStrammpedTestSamples.size());
+    
   }
   
     // function that is useful for debugging
@@ -42,7 +62,7 @@ public:
 private:  
   vector<TrainingSet> baseSamples;
   vector<TrainingSet> bootstrappedTrainingSamples;
-  vector<TrainingSet> testSamples;
+  vector<TrainingSet> bootStrammpedTestSamples;
   
   int bootstrappedSamplesSize;
 };

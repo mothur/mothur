@@ -28,6 +28,9 @@ using namespace std;
 
 int main(int argc, const char * argv[]){
   
+    // call srand only once in the program
+  srand(time(NULL));
+  
   const string sharedFilePath = "final.an.0.03.subsample.0.03.pick.shared";
   const string designFilePath = "mouse.sex_time.design";
   const int numberOfDecisionTrees = 1000;
