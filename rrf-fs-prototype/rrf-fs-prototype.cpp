@@ -36,7 +36,7 @@ int main(int argc, const char * argv[]){
   const int numberOfDecisionTrees = 1000;
   
   RegularizedRandomForest regularizedRandomForest(sharedFilePath, designFilePath, numberOfDecisionTrees);
-  
+      
   return 0;
 }
 

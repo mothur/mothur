@@ -11,5 +11,16 @@
 
 #define DEBUGMSG_LOCATION (cout << "DEBUGMSG " << __PRETTY_FUNCTION__ << "\nDEBUGMSG " << __FILE__ <<  "#"  << __LINE__ << endl)
 #define DEBUGMSG_VAR(X) (cout << "DEBUGMSG " << __PRETTY_FUNCTION__ << "\nDEBUGMSG " <<#X << " -> " << X << endl << endl)
+#define NAME_VALUE_PAIR(VAR, OSTREAM) (OSTREAM << #VAR << " : " << VAR)
+
+ostream& operator <<(ostream& os, vector<int>& integers){
+  os << "[ ";
+  for (unsigned i = 0; i < integers.size(); i++) {
+    os << integers[i] << " ";
+  }
+  os << "]";
+  return os;
+}
+
 
 #endif

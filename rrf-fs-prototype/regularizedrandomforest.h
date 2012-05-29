@@ -24,8 +24,13 @@ public:
 //    dataSet.printTrainingSets();
       
     vector<TrainingSet> baseSamples = dataSet.getTrainingSets();
-//    DEBUGMSG_VAR(baseSamples.size());
-    DecisionTree decisionTree(baseSamples);
+      
+//    cout << baseSamples << endl;
+      
+    for (unsigned i = 0; i < numberOfDecisionTrees; i++) {
+      DecisionTree decisionTree(baseSamples);
+      decisionTrees.push_back(decisionTree);
+    }
   
   }
   
@@ -35,7 +40,7 @@ private:
   SharedAndDesignFileReader designFileReader;
   
   DataSet dataSet;
-  vector<DecisionTree> decisionTress;
+  vector<DecisionTree> decisionTrees;
   
   int numberOfDecisionTrees;
 };

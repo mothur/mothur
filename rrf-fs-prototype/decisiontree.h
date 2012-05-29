@@ -19,6 +19,15 @@ public:
   explicit DecisionTree(const vector<TrainingSet>& baseSamples): baseSamples(baseSamples), bootstrappedSamplesSize(baseSamples.size()){
 //    DEBUGMSG_VAR(bootstrappedSamplesSize);
     createBootstrappedSamples();
+    
+  }
+  
+    // need to manually provide a copy constructor so that when addign a DecisionTree to a vector, we get desired results
+  DecisionTree(const DecisionTree& decisionTree) : 
+    baseSamples(decisionTree.baseSamples),
+    bootstrappedTrainingSamples(decisionTree.bootstrappedTrainingSamples),
+    bootStrammpedTestSamples(decisionTree.bootStrammpedTestSamples),
+    bootstrappedSamplesSize(decisionTree.bootstrappedSamplesSize){
   }
   
   void createBootstrappedSamples(){
@@ -30,6 +39,7 @@ public:
       isInTrainingSamples.push_back(false);
     }
     
+    bootstrappedTrainingSamples.clear();
     for (unsigned i = 0; i < bootstrappedSamplesSize; i++) {
       int randomIndex = (int)(((double)(rand()) / (double)(RAND_MAX)) * bootstrappedSamplesSize);
 //      DEBUGMSG_VAR(randomIndex);
@@ -37,6 +47,7 @@ public:
       bootstrappedTrainingSamples.push_back(baseSamples[randomIndex]);
     }
     
+    bootStrammpedTestSamples.clear();
     for (unsigned i = 0; i < bootstrappedSamplesSize; i++) {
       if(isInTrainingSamples[i] == false){
         bootStrammpedTestSamples.push_back(baseSamples[i]);

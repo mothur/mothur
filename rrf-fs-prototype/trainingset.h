@@ -53,12 +53,34 @@ public:
   void setOutputClassId(const int outputClassId){
     this->outputClassId = outputClassId;
   }
+
+  friend ostream& operator <<(ostream& os, TrainingSet& trainingSet);
   
 private:
   vector<int> otuCounts;
   string outputClass;
   int outputClassId;
 };
+
+ostream& operator <<(ostream& os, TrainingSet& trainingSet){
+  os << "{ ";
+  NAME_VALUE_PAIR(trainingSet.otuCounts, os);
+  os << ",\n";
+  NAME_VALUE_PAIR(trainingSet.outputClass, os);
+  os << ",\n";
+  NAME_VALUE_PAIR(trainingSet.outputClassId, os);
+  os << " }";
+  return os;
+}
+
+ostream& operator <<(ostream& os, vector<TrainingSet>& trainingSets){
+  os << "[ ";
+  for (unsigned i = 0; i < trainingSets.size(); i++) {
+    os << trainingSets[i] << "\n\n";
+  }
+  os << "]";
+  return os;
+}
 
 
 #endif
