@@ -56,10 +56,10 @@ private:
 		linePair(int i, int j) : start(i), end(j) {}
 	};
     
-	int abort;
+	bool abort, large;
 	string outputDir, flowFileName, flowFilesFileName, lookupFileName, compositeFASTAFileName, compositeNamesFileName;
 
-	int processors, maxIters;
+	int processors, maxIters, largeSize;
 	float cutoff, sigma, minDelta;
 	string flowOrder;
     
@@ -68,6 +68,7 @@ private:
 	vector<double> jointLookUp;
     vector<string> flowFileVector;
 	
+    vector<string> parseFlowFiles(string);
     int driver(vector<string>, string, string, int, int);
     int createProcesses(vector<string>);
     int getFlowData(string, vector<string>&, vector<int>&, vector<short>&, map<string, int>&, int&);
@@ -90,7 +91,7 @@ private:
     void writeQualities(int, int, string, vector<int>, vector<int>&, vector<int>&, vector<double>&, vector<short>&, vector<short>&, vector<int>&, vector<int>&, vector<string>&, vector<int>&, vector<vector<int> >&);
     void writeSequences(string, int, int, string, vector<int>, vector<short>&, vector<string>&, vector<vector<int> >&, vector<int>&);
     void writeNames(string, int, string, vector<int>, vector<string>&, vector<vector<int> >&, vector<int>&);
-    void writeGroups(string, int, vector<string>&);
+    void writeGroups(string, string, int, vector<string>&);
     void writeClusters(string, int, int, vector<int>, vector<int>&, vector<short>&, vector<string>&, vector<vector<int> >&, vector<int>&, vector<int>&, vector<short>&);
     
 	void getSingleLookUp();

@@ -19,6 +19,10 @@ ClusterClassic::ClusterClassic(float c, string f, bool s) : method(f), smallDist
 		cutoff = c;
 		aboveCutoff = cutoff + 10000.0;
 		m = MothurOut::getInstance();
+        if(method == "furthest")        {   tag = "fn";   }
+        else if (method == "average")   {   tag = "an";   }
+        else if (method == "weighted")  {   tag = "wn";   }        
+        else if (method == "nearest")   {   tag = "nn";   }
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClusterClassic", "ClusterClassic");
@@ -36,7 +40,12 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 		ifstream fileHandle;
 		m->openInputFile(filename, fileHandle);
 		
-		fileHandle >> nseqs >> name;
+        string numTest;
+		fileHandle >> numTest >> name;
+        
+        if (!m->isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
+        else { convert(numTest, nseqs); }
+
 
 		matrixNames.push_back(name);
 

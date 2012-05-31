@@ -11,6 +11,8 @@
 		219C1DE41559BCCF004209F9 /* getcoremicrobiomecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 219C1DE31559BCCD004209F9 /* getcoremicrobiomecommand.cpp */; };
 		7E6BE10A12F710D8007ADDBE /* refchimeratest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7E6BE10912F710D8007ADDBE /* refchimeratest.cpp */; };
 		8DD76FB00486AB0100D96B5E /* mothur.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = C6A0FF2C0290799A04C91782 /* mothur.1 */; };
+		A70056E6156A93D000924A2D /* getotulabelscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A70056E5156A93D000924A2D /* getotulabelscommand.cpp */; };
+		A70056EB156AB6E500924A2D /* removeotulabelscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A70056EA156AB6E500924A2D /* removeotulabelscommand.cpp */; };
 		A70332B712D3A13400761E33 /* makefile in Sources */ = {isa = PBXBuildFile; fileRef = A70332B512D3A13400761E33 /* makefile */; };
 		A713EBAC12DC7613000092AC /* readphylipvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A713EBAB12DC7613000092AC /* readphylipvector.cpp */; };
 		A713EBED12DC7C5E000092AC /* nmdscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A713EBEC12DC7C5E000092AC /* nmdscommand.cpp */; };
@@ -37,6 +39,8 @@
 		A79234D713C74BF6002B08E2 /* mothurfisher.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A79234D613C74BF6002B08E2 /* mothurfisher.cpp */; };
 		A795840D13F13CD900F201D5 /* countgroupscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A795840C13F13CD900F201D5 /* countgroupscommand.cpp */; };
 		A799F5B91309A3E000AEEFA0 /* makefastqcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A799F5B81309A3E000AEEFA0 /* makefastqcommand.cpp */; };
+		A7A0671A1562946F0095C8C5 /* listotulabelscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7A067191562946F0095C8C5 /* listotulabelscommand.cpp */; };
+		A7A0671F1562AC3E0095C8C5 /* makecontigscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7A0671E1562AC3E0095C8C5 /* makecontigscommand.cpp */; };
 		A7A32DAA14DC43B00001D2E5 /* sortseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7A32DA914DC43B00001D2E5 /* sortseqscommand.cpp */; };
 		A7A3C8C914D041AD00B1BFBE /* otuassociationcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7A3C8C714D041AD00B1BFBE /* otuassociationcommand.cpp */; };
 		A7A61F2D130062E000E05B6B /* amovacommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7A61F2C130062E000E05B6B /* amovacommand.cpp */; };
@@ -367,7 +371,11 @@
 		7E6BE10812F710D8007ADDBE /* refchimeratest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = refchimeratest.h; sourceTree = "<group>"; };
 		7E6BE10912F710D8007ADDBE /* refchimeratest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = refchimeratest.cpp; sourceTree = "<group>"; };
 		7E78911B135F3E8600E725D2 /* eachgapdistignorens.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = eachgapdistignorens.h; sourceTree = "<group>"; };
-		8DD76FB20486AB0100D96B5E /* Mothur */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Mothur; sourceTree = BUILT_PRODUCTS_DIR; };
+		8DD76FB20486AB0100D96B5E /* mothur */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = mothur; sourceTree = BUILT_PRODUCTS_DIR; };
+		A70056E5156A93D000924A2D /* getotulabelscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getotulabelscommand.cpp; sourceTree = "<group>"; };
+		A70056E8156A93E300924A2D /* getotulabelscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getotulabelscommand.h; sourceTree = "<group>"; };
+		A70056E9156AB6D400924A2D /* removeotulabelscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = removeotulabelscommand.h; sourceTree = "<group>"; };
+		A70056EA156AB6E500924A2D /* removeotulabelscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = removeotulabelscommand.cpp; sourceTree = "<group>"; };
 		A70332B512D3A13400761E33 /* makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = makefile; sourceTree = "<group>"; };
 		A713EBAA12DC7613000092AC /* readphylipvector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readphylipvector.h; sourceTree = "<group>"; };
 		A713EBAB12DC7613000092AC /* readphylipvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readphylipvector.cpp; sourceTree = "<group>"; };
@@ -419,6 +427,10 @@
 		A795840C13F13CD900F201D5 /* countgroupscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = countgroupscommand.cpp; sourceTree = "<group>"; };
 		A799F5B71309A3E000AEEFA0 /* makefastqcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = makefastqcommand.h; sourceTree = "<group>"; };
 		A799F5B81309A3E000AEEFA0 /* makefastqcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = makefastqcommand.cpp; sourceTree = "<group>"; };
+		A7A067191562946F0095C8C5 /* listotulabelscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = listotulabelscommand.cpp; sourceTree = "<group>"; };
+		A7A0671C156294810095C8C5 /* listotulabelscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = listotulabelscommand.h; sourceTree = "<group>"; };
+		A7A0671D1562AC230095C8C5 /* makecontigscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = makecontigscommand.h; sourceTree = "<group>"; };
+		A7A0671E1562AC3E0095C8C5 /* makecontigscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = makecontigscommand.cpp; sourceTree = "<group>"; };
 		A7A32DA914DC43B00001D2E5 /* sortseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sortseqscommand.cpp; sourceTree = "<group>"; };
 		A7A32DAC14DC43D10001D2E5 /* sortseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sortseqscommand.h; sourceTree = "<group>"; };
 		A7A3C8C714D041AD00B1BFBE /* otuassociationcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = otuassociationcommand.cpp; sourceTree = "<group>"; };
@@ -1150,7 +1162,7 @@
 		1AB674ADFE9D54B511CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				8DD76FB20486AB0100D96B5E /* Mothur */,
+				8DD76FB20486AB0100D96B5E /* mothur */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1265,6 +1277,8 @@
 				A7E9B6F412D37EC400DA6239 /* getgroupscommand.cpp */,
 				A7E9B6F712D37EC400DA6239 /* getlabelcommand.h */,
 				A7E9B6F612D37EC400DA6239 /* getlabelcommand.cpp */,
+				A70056E8156A93E300924A2D /* getotulabelscommand.h */,
+				A70056E5156A93D000924A2D /* getotulabelscommand.cpp */,
 				A7E9B6F912D37EC400DA6239 /* getlineagecommand.h */,
 				A7E9B6F812D37EC400DA6239 /* getlineagecommand.cpp */,
 				A7E9B6FB12D37EC400DA6239 /* getlistcountcommand.h */,
@@ -1297,12 +1311,16 @@
 				A7E9B72B12D37EC400DA6239 /* indicatorcommand.cpp */,
 				A7E9B73C12D37EC400DA6239 /* libshuffcommand.h */,
 				A7E9B73B12D37EC400DA6239 /* libshuffcommand.cpp */,
+				A7A0671C156294810095C8C5 /* listotulabelscommand.h */,
+				A7A067191562946F0095C8C5 /* listotulabelscommand.cpp */,
 				A7E9B73E12D37EC400DA6239 /* listseqscommand.h */,
 				A7E9B73D12D37EC400DA6239 /* listseqscommand.cpp */,
 				A7FA10001302E096003860FE /* mantelcommand.h */,
 				A7FA10011302E096003860FE /* mantelcommand.cpp */,
 				A724D2B4153C8600000A826F /* makebiomcommand.h */,
 				A724D2B6153C8628000A826F /* makebiomcommand.cpp */,
+				A7A0671D1562AC230095C8C5 /* makecontigscommand.h */,
+				A7A0671E1562AC3E0095C8C5 /* makecontigscommand.cpp */,
 				A799F5B71309A3E000AEEFA0 /* makefastqcommand.h */,
 				A799F5B81309A3E000AEEFA0 /* makefastqcommand.cpp */,
 				A7E9B74412D37EC400DA6239 /* makegroupcommand.h */,
@@ -1367,6 +1385,8 @@
 				A7E9B7C512D37EC400DA6239 /* removelineagecommand.cpp */,
 				A7E9B7C812D37EC400DA6239 /* removeotuscommand.h */,
 				A7E9B7C712D37EC400DA6239 /* removeotuscommand.cpp */,
+				A70056E9156AB6D400924A2D /* removeotulabelscommand.h */,
+				A70056EA156AB6E500924A2D /* removeotulabelscommand.cpp */,
 				A727864212E9E28C00F86ABA /* removerarecommand.h */,
 				A727864312E9E28C00F86ABA /* removerarecommand.cpp */,
 				A7E9B7CA12D37EC400DA6239 /* removeseqscommand.h */,
@@ -1809,7 +1829,7 @@
 			name = Mothur;
 			productInstallPath = "$(HOME)/bin";
 			productName = mothur;
-			productReference = 8DD76FB20486AB0100D96B5E /* Mothur */;
+			productReference = 8DD76FB20486AB0100D96B5E /* mothur */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
@@ -2168,6 +2188,10 @@
 				A724D2B7153C8628000A826F /* makebiomcommand.cpp in Sources */,
 				219C1DE01552C4BD004209F9 /* newcommandtemplate.cpp in Sources */,
 				219C1DE41559BCCF004209F9 /* getcoremicrobiomecommand.cpp in Sources */,
+				A7A0671A1562946F0095C8C5 /* listotulabelscommand.cpp in Sources */,
+				A7A0671F1562AC3E0095C8C5 /* makecontigscommand.cpp in Sources */,
+				A70056E6156A93D000924A2D /* getotulabelscommand.cpp in Sources */,
+				A70056EB156AB6E500924A2D /* removeotulabelscommand.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2178,17 +2202,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CONFIGURATION_TEMP_DIR = /Users/pschloss/Desktop/mothur;
 				COPY_PHASE_STRIP = NO;
 				DEPLOYMENT_LOCATION = YES;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				INSTALL_PATH = /Users/pschloss/Desktop/mothur/build/Debug;
-				OBJROOT = /Users/pschloss/Desktop/mothur;
-				PRODUCT_NAME = Mothur;
+				PRODUCT_NAME = mothur;
 				SDKROOT = macosx10.6;
-				SYMROOT = /Users/pschloss/Desktop/mothur;
+				SKIP_INSTALL = NO;
 			};
 			name = Debug;
 		};
@@ -2196,15 +2217,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CONFIGURATION_TEMP_DIR = /Users/pschloss/Desktop/mothur;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEPLOYMENT_LOCATION = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_WARN_UNUSED_VALUE = YES;
-				INSTALL_PATH = /Users/pschloss/Desktop/mothur/build/Debug;
-				OBJROOT = /Users/pschloss/Desktop/mothur;
-				PRODUCT_NAME = Mothur;
-				SYMROOT = /Users/pschloss/Desktop/mothur;
+				PRODUCT_NAME = mothur;
+				SKIP_INSTALL = NO;
 			};
 			name = Release;
 		};
@@ -2220,15 +2238,15 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"../release\\\"\"",
-					"VERSION=\"\\\"1.24.0\\\"\"",
-					"RELEASE_DATE=\"\\\"3/12/2012\\\"\"",
+					"VERSION=\"\\\"1.25.0\\\"\"",
+					"RELEASE_DATE=\"\\\"5/01/2012\\\"\"",
 				);
 				"GCC_VERSION[arch=*]" = "";
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = "";
-				INSTALL_PATH = "";
+				INSTALL_PATH = TARGET_BUILD_DIR;
 				MACH_O_TYPE = mh_execute;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CPLUSPLUSFLAGS = (
@@ -2241,6 +2259,7 @@
 					"-lreadline",
 				);
 				SDKROOT = macosx10.6;
+				SKIP_INSTALL = NO;
 				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Debug;
@@ -2266,7 +2285,7 @@
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VALUE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				INSTALL_PATH = "";
+				INSTALL_PATH = TARGET_BUILD_DIR;
 				MACH_O_TYPE = mh_execute;
 				OTHER_CPLUSPLUSFLAGS = (
 					"-DUSE_READLINE",
@@ -2278,6 +2297,7 @@
 					"-lreadline",
 				);
 				SDKROOT = macosx10.6;
+				SKIP_INSTALL = NO;
 			};
 			name = Release;
 		};

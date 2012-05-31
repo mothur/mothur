@@ -17,11 +17,12 @@
 
 class GroupMap {
 public:
-	GroupMap() {};
+	GroupMap() { m = MothurOut::getInstance(); }
 	GroupMap(string);
 	~GroupMap();
 	int readMap();
 	int readDesignMap();
+    int readDesignMap(string);
 	int getNumGroups();
 	bool isValidGroup(string);  //return true if string is a valid group
 	string getGroup(string);

@@ -1,8 +1,7 @@
-#ifndef CLUSTER_H
-#define CLUSTER_H
+#ifndef CLUSTERCLASSIC_H
+#define CLUSTERCLASSIC_H
 
 
-#include "mothur.h"
 #include "mothurout.h"
 #include "listvector.hpp"
 #include "rabundvector.hpp"
@@ -28,7 +27,7 @@ public:
 	int getNSeqs() { return nseqs; }	
 	ListVector* getListVector() { return list; }
 	RAbundVector* getRAbundVector() { return rabund; }		
-	string getTag();
+	string getTag() { return tag; }
 	void setMapWanted(bool m);  
 	map<string, int> getSeqtoBin()  {  return seq2Bin;	}
 
@@ -57,7 +56,7 @@ private:
 	bool mapWanted, sim;
 	double cutoff, aboveCutoff;
 	map<string, int> seq2Bin;
-	string method;
+	string method, tag;
 	
 	MothurOut* m;
 };

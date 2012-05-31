@@ -619,13 +619,15 @@ bool PhyloTree::ErrorCheck(vector<string> templateFileNames){
 		map<string, int>::iterator itFind;
 		map<string, int> taxonomyFileNames = name2Taxonomy;
 		
+        if (m->debug) { m->mothurOut("[DEBUG]: in error check. Numseqs in template = " + toString(templateFileNames.size()) + ". Numseqs in taxonomy = " + toString(taxonomyFileNames.size()) + ".\n"); }
+        
 		for (int i = 0; i < templateFileNames.size(); i++) {
 			itFind = taxonomyFileNames.find(templateFileNames[i]);
 			
 			if (itFind != taxonomyFileNames.end()) { //found it so erase it
 				taxonomyFileNames.erase(itFind);
 			}else {
-				m->mothurOut(templateFileNames[i] + " is in your template file and is not in your taxonomy file. Please correct."); m->mothurOutEndLine();
+				m->mothurOut("'" +templateFileNames[i] + "' is in your template file and is not in your taxonomy file. Please correct."); m->mothurOutEndLine();
 				okay = false;
 			}
 			

@@ -434,18 +434,18 @@ void MatrixOutputCommand::printSims(ostream& out, vector< vector<double> >& simM
 		out << simMatrix.size() << endl;
 		
 		if (output == "lt") {
-			for (int m = 0; m < simMatrix.size(); m++)	{
-				out << lookup[m]->getGroup() << '\t';
-				for (int n = 0; n < m; n++)	{
-					out << simMatrix[m][n] << '\t'; 
+			for (int b = 0; b < simMatrix.size(); b++)	{
+				out << lookup[b]->getGroup() << '\t';
+				for (int n = 0; n < b; n++)	{
+					out << simMatrix[b][n] << '\t'; 
 				}
 				out << endl;
 			}
 		}else{
-			for (int m = 0; m < simMatrix.size(); m++)	{
-				out << lookup[m]->getGroup() << '\t';
-				for (int n = 0; n < simMatrix[m].size(); n++)	{
-					out << simMatrix[m][n] << '\t'; 
+			for (int b = 0; b < simMatrix.size(); m++)	{
+				out << lookup[b]->getGroup() << '\t';
+				for (int n = 0; n < simMatrix[b].size(); n++)	{
+					out << simMatrix[b][n] << '\t'; 
 				}
 				out << endl;
 			}

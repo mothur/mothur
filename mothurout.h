@@ -82,6 +82,7 @@ class MothurOut {
 		int appendFiles(string, string);
 		int renameFile(string, string); //oldname, newname
 		string getFullPathName(string);
+        string findProgramPath(string programName);
 		string hasPath(string);
 		string getExtension(string);
 		string getPathName(string);

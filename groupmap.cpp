@@ -73,7 +73,35 @@ int GroupMap::readDesignMap() {
 		m->setAllGroups(namesOfGroups);
 		return error;
 }
-
+/************************************************************/
+int GroupMap::readDesignMap(string filename) {
+    groupFileName = filename;
+	m->openInputFile(filename, fileHandle);
+	index = 0;
+    string seqName, seqGroup;
+    int error = 0;
+    
+    while(fileHandle){
+        fileHandle >> seqName;	m->gobble(fileHandle);		//read from first column
+        fileHandle >> seqGroup;			//read from second column
+        
+        if (m->control_pressed) {  fileHandle.close();  return 1; }
+        
+        setNamesOfGroups(seqGroup);
+        
+        it = groupmap.find(seqName);
+        
+        if (it != groupmap.end()) { error = 1; m->mothurOut("Your designfile contains more than 1 group named " + seqName + ", group names must be unique. Please correct."); m->mothurOutEndLine();  }
+        else {
+            groupmap[seqName] = seqGroup;	//store data in map
+            seqsPerGroup[seqGroup]++;  //increment number of seqs in that group
+        }
+        m->gobble(fileHandle);
+    }
+    fileHandle.close();
+    m->setAllGroups(namesOfGroups);
+    return error;
+}
 /************************************************************/
 int GroupMap::getNumGroups() { return namesOfGroups.size();	}
 /************************************************************/

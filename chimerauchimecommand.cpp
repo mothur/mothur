@@ -481,8 +481,26 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 			ifstream in;
 			uchimeCommand = m->getFullPathName(uchimeCommand);
 			int ableToOpen = m->openInputFile(uchimeCommand, in, "no error"); in.close();
-			if(ableToOpen == 1) {	m->mothurOut("[ERROR]: " + uchimeCommand + " file does not exist. mothur requires the uchime executable."); m->mothurOutEndLine(); abort = true; }
-		}
+			if(ableToOpen == 1) {	
+                m->mothurOut(uchimeCommand + " file does not exist. Checking path... \n");
+                //check to see if uchime is in the path??
+                
+                string uLocation = m->findProgramPath("uchime");
+                
+                
+                ifstream in2;
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+                ableToOpen = m->openInputFile(uLocation, in2, "no error"); in2.close();
+#else
+                ableToOpen = m->openInputFile((uLocation + ".exe"), in2, "no error"); in2.close();
+#endif
+
+                if(ableToOpen == 1) { m->mothurOut("[ERROR]: " + uLocation + " file does not exist. mothur requires the uchime executable."); m->mothurOutEndLine(); abort = true; } 
+                else {  m->mothurOut("Found uchime in your path, using " + uLocation + "\n");uchimeLocation = uLocation; }
+            }else {  uchimeLocation = uchimeCommand; }
+            
+            uchimeLocation = m->getFullPathName(uchimeLocation);
+        }
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ChimeraSlayerCommand", "ChimeraSlayerCommand");
@@ -1010,16 +1028,10 @@ int ChimeraUchimeCommand::driver(string outputFName, string filename, string acc
 				
 		vector<char*> cPara;
 		
-		string path = m->argv;
-		string tempPath = path;
-		for (int i = 0; i < path.length(); i++) { tempPath[i] = tolower(path[i]); }
-		path = path.substr(0, (tempPath.find_last_of('m')));
-		
-		string uchimeCommand = path;
+		string uchimeCommand = uchimeLocation;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-		uchimeCommand += "uchime ";
+		uchimeCommand += " ";
 #else
-		uchimeCommand += "uchime";
 		uchimeCommand = "\"" + uchimeCommand + "\"";
 #endif
 		
@@ -1258,6 +1270,7 @@ int ChimeraUchimeCommand::driver(string outputFName, string filename, string acc
 #else
 		commandString = "\"" + commandString + "\"";
 #endif
+        if (m->debug) { m->mothurOut("[DEBUG]: uchime command = " + commandString + ".\n"); }
 		system(commandString.c_str());
 		
 		//free memory
@@ -1430,7 +1443,7 @@ int ChimeraUchimeCommand::createProcesses(string outputFileName, string filename
 			// Allocate memory for thread data.
 			string extension = toString(i) + ".temp";
 			
-			uchimeData* tempUchime = new uchimeData(outputFileName+extension, templatefile, files[i], "", "", "", accnos+extension, alns+extension, dummy, m, 0, 0,  i);
+			uchimeData* tempUchime = new uchimeData(outputFileName+extension, uchimeLocation, templatefile, files[i], "", "", "", accnos+extension, alns+extension, dummy, m, 0, 0,  i);
 			tempUchime->setBooleans(useAbskew, chimealns, useMinH, useMindiv, useXn, useDn, useXa, useChunks, useMinchunk, useIdsmoothwindow, useMinsmoothid, useMaxp, skipgaps, skipgaps2, useMinlen, useMaxlen, ucl, useQueryfract);
 			tempUchime->setVariables(abskew, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, minlen, maxlen, queryfract);
 			
@@ -1562,7 +1575,7 @@ int ChimeraUchimeCommand::createProcessesGroups(SequenceParser& parser, string o
 			// Allocate memory for thread data.
 			string extension = toString(i) + ".temp";
 			
-			uchimeData* tempUchime = new uchimeData(outputFName+extension, templatefile, filename+extension, fastaFile, nameFile, groupFile, accnos+extension, alns+extension, groups, m, lines[i].start, lines[i].end,  i);
+			uchimeData* tempUchime = new uchimeData(outputFName+extension, uchimeLocation, templatefile, filename+extension, fastaFile, nameFile, groupFile, accnos+extension, alns+extension, groups, m, lines[i].start, lines[i].end,  i);
 			tempUchime->setBooleans(useAbskew, chimealns, useMinH, useMindiv, useXn, useDn, useXa, useChunks, useMinchunk, useIdsmoothwindow, useMinsmoothid, useMaxp, skipgaps, skipgaps2, useMinlen, useMaxlen, ucl, useQueryfract);
 			tempUchime->setVariables(abskew, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, minlen, maxlen, queryfract);
 			

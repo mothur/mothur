@@ -50,7 +50,7 @@ private:
 	vector<string> groups;
 	string outputDir;
 	
-	vector<string> parseSharedFile(string);
+	vector<string> parseSharedFile(string, map<string, set<int> >&);
 	vector<string> createGroupFile(vector<string>&, map<int, string>);
 };
 

@@ -467,7 +467,6 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
             }
 			
 		}
-		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClassifySeqsCommand", "ClassifySeqsCommand");
@@ -486,7 +485,7 @@ ClassifySeqsCommand::~ClassifySeqsCommand(){
 int ClassifySeqsCommand::execute(){
 	try {
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
-		
+        
 		if(method == "bayesian"){	classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, iters, rand(), flip);		}
 		else if(method == "knn"){	classify = new Knn(taxonomyFileName, templateFileName, search, kmerSize, gapOpen, gapExtend, match, misMatch, numWanted, rand());				}
 		else {
@@ -507,8 +506,8 @@ int ClassifySeqsCommand::execute(){
 			string RippedTaxName = m->getRootName(m->getSimpleName(baseTName));
 			RippedTaxName = m->getExtension(RippedTaxName.substr(0, RippedTaxName.length()-1));
 			if (RippedTaxName[0] == '.') { RippedTaxName = RippedTaxName.substr(1, RippedTaxName.length()); }
-			RippedTaxName +=  "."; 
-		
+			if (RippedTaxName != "") { RippedTaxName +=  "."; }
+           
 			if (outputDir == "") { outputDir += m->hasPath(fastaFileNames[s]); }
 			string newTaxonomyFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + RippedTaxName + "taxonomy";
 			string newaccnosFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + RippedTaxName + "flip.accnos";
