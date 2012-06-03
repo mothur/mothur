@@ -270,9 +270,9 @@ if __name__ == "__main__":
 	numDecisionTrees = 1
 
 	# small-alter.txt has a modified dataset
-	dataSet = readFileContents('small-alter.txt')
+	dataSet = readFileContents('Datasets/small-alter.txt')
 
-#	mouseData = ["final.an.0.03.subsample.0.03.pick.shared", "mouse.sex_time.design"]
+#	mouseData = ["Datasets/final.an.0.03.subsample.0.03.pick.shared", "Datasets/mouse.sex_time.design"]
 #	sharedFilePath, designFilePath = mouseData
 #	fileReader = FileReader(sharedFilePath, designFilePath)
 #	dataSet = fileReader.getDataSet()
