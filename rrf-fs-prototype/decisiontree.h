@@ -43,10 +43,31 @@ public:
     delete rootTreeNode;
   }
   
+    // this is the heart of the whole process
+    // right now just doing some experiments, nothing important is going on
   void splitRecursively(TreeNode* rootTreeNode){
     if(rootTreeNode->isLeaf == false){
       vector<int> featureSubsetIndices = selectFeatureSubsetRandomly();
+      DEBUGMSG_VAR(featureSubsetIndices);
+      
+//      bool isInSameClass = checkIfBelongsToSameClass(rootTreeNode->samples);
     }
+  }
+  
+    /* 
+     returns true if all the data belongs to the same class 
+     i.e. data has been already classified
+     */
+  bool checkIfBelongsToSameClass(vector<TrainingSet>& samples){
+    bool isInSameClass = true;
+    string searchClass = samples[0].getOutputClass();
+    for (unsigned i = 0; i < samples.size(); i++) {
+      string foundClass = samples[i].getOutputClass();
+      if (foundClass == searchClass){
+        isInSameClass = false;
+      }
+    }
+    return isInSameClass;
   }
 
     // TODO: we need to modify this later for randomized random forest algo's implementations
