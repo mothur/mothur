@@ -41,9 +41,11 @@ class DecisionTree:
 #		print "###"
 #		for x in self.bootstrappedTestSamples: print x
 
+	# randomly select log2(totalFeatures) number features for each node
 	def selectFeatureSubsetRandomly(self):
 		# TODO optimum feature is log2(totalFeatures), we might need to modify this one
 		self.optimumFeatureSubsetSize = int(ceil(log(self.numFeatures, 2)))
+
 		featureSubsetIndices = []
 		while len(featureSubsetIndices) < self.optimumFeatureSubsetSize:
 			randomIndex = random.randint(0, self.numFeatures - 1)
@@ -57,34 +59,58 @@ class DecisionTree:
 
 	def splitRecursively(self, rootNode):
 		print "splitRecursively()"
+
+		if rootNode.numSamples < 2:
+			rootNode.isLeaf = True
+			return
 		# return immediately if this node is just a leaf, no recursion is needed
 		if self.checkIfAlreadyClassified(rootNode):
 			rootNode.isLeaf = True
 			return
-		else:
-			featureSubsetIndices = self.selectFeatureSubsetRandomly()
 
-#			print "featureSubsetIndices: ", featureSubsetIndices
-#			print "rootNode.bootstrappedTrainingSamples:"
-#			for x in rootNode.bootstrappedTrainingSamples: print x
-#			print "rootNode.bootstrappedFeatureVectors: "
-#			for x in rootNode.bootstrappedFeatureVectors: print x
+		rootNode.featureSubsetIndices = self.selectFeatureSubsetRandomly()
 
-#			for i in featureSubsetIndices: print rootNode.bootstrappedFeatureVectors[i], rootNode.bootstrappedOutputVector
+#		print "featureSubsetIndices: ", featureSubsetIndices
+#		print "rootNode.bootstrappedTrainingSamples:"
+#		for x in rootNode.bootstrappedTrainingSamples: print x
+#		print "rootNode.bootstrappedFeatureVectors: "
+#		for x in rootNode.bootstrappedFeatureVectors: print x
+#
+#		for i in featureSubsetIndices: print rootNode.bootstrappedFeatureVectors[i], rootNode.bootstrappedOutputVector
 
-			bestFeatureToSplitOn, bestFeatureSplitValue =  self.getBestFeatureToSplitOn(rootNode.bootstrappedFeatureVectors, rootNode.bootstrappedOutputVector, featureSubsetIndices)
-			rootNode.splitFeatureIndex = bestFeatureToSplitOn
-			rootNode.splitFeatureValue = bestFeatureSplitValue
+		bestFeatureToSplitOn, bestFeatureSplitValue, bestFeatureSplitEntropy =  self.getBestFeatureToSplitOn(rootNode)
+		rootNode.splitFeatureIndex = bestFeatureToSplitOn
+		rootNode.splitFeatureValue = bestFeatureSplitValue
+		rootNode.splitFeatureEntropy = bestFeatureSplitEntropy
 
+		print bestFeatureToSplitOn, bestFeatureSplitValue, bestFeatureSplitEntropy
+		leftChildSamples, rightChildSamples = self.getSplitPopulation(rootNode)
+		print leftChildSamples, rightChildSamples
+
+		leftChild = TreeNode(leftChildSamples, self.numFeatures, len(leftChildSamples), self.numOutputClasses)
+		rightChild = TreeNode(rightChildSamples, self.numFeatures, len(rightChildSamples), self.numOutputClasses)
+		self.splitRecursively(leftChild)
+		self.splitRecursively(rightChild)
+
+		# given a split point, gives the user two different sets of data
 	def getSplitPopulation(self, node):
-		node = TreeNode()
-		pass
+		leftChildSamples, rightChildSamples = [], []
+		globalIndex = node.splitFeatureIndex
+		for x in node.bootstrappedTrainingSamples:
+			if x[globalIndex] < node.splitFeatureValue: leftChildSamples.append(x)
+			else: rightChildSamples.append(x)
+		return leftChildSamples, rightChildSamples
+
 
 	def createChild(self, createLeftChild = True):
 		pass
 
 	# given the feature indices, selects the best feature index to split on
-	def getBestFeatureToSplitOn(self, bootstrappedFeatureVectors, bootstrappedOutputVector, featureSubsetIndices):
+	def getBestFeatureToSplitOn(self, node):
+		bootstrappedFeatureVectors = node.bootstrappedFeatureVectors
+		bootstrappedOutputVector = node.bootstrappedOutputVector
+		featureSubsetIndices = node.featureSubsetIndices
+
 		print "getBestFeatureToSplitOn()"
 		for x in bootstrappedFeatureVectors: print x
 		print "featureSubsetIndices: ", featureSubsetIndices
@@ -104,10 +130,10 @@ class DecisionTree:
 		bestFeatureToSplitOn = featureSubsetEntropies.index(featureMinEntropy)
 		bestFeatureSplitValue = featureSubsetSplitValues[bestFeatureToSplitOn]
 
-		print 'Best Split is possible with feature:', bestFeatureToSplitOn
+		print 'Best Split is possible with global feature:', featureSubsetIndices[bestFeatureToSplitOn]
 		print 'Which has an entropy of:', featureMinEntropy
 		print 'Best Split on this feature with value:', bestFeatureSplitValue
-		return featureSubsetIndices[bestFeatureToSplitOn], bestFeatureSplitValue
+		return featureSubsetIndices[bestFeatureToSplitOn], bestFeatureSplitValue, featureMinEntropy
 
 	def getMinEntropyOfFeature(self, featureVector, outputVector, numOutputClasses):
 		print "getMinEntropyOfFeature()"
@@ -185,11 +211,11 @@ class DecisionTree:
 
 		return splitEntropy
 
-	def checkIfAlreadyClassified(self, rootNode):
+	def checkIfAlreadyClassified(self, treeNode):
 		print "checkIfAlreadyClassified()"
 		outPutClasses = []
-		for x in rootNode.bootstrappedTrainingSamples:
-			if x not in outPutClasses: outPutClasses.append(x)
+		for x in treeNode.bootstrappedTrainingSamples:
+			if x[treeNode.numFeatures] not in outPutClasses: outPutClasses.append(x[treeNode.numFeatures])
 		if len(outPutClasses) < 2: return True
 		else: return False
 
@@ -206,9 +232,11 @@ class TreeNode:
 
 		self.splitFeatureIndex = 0
 		self.splitFeatureValue = 0
+		self.splitFeatureEntropy = 0
 
 		self.calcFeatureVectors()
 		self.bootstrappedOutputVector = [bootstrappedTrainingSamples[x][self.numFeatures] for x in range(0, self.numSamples)]
+		self.featureSubsetIndices = []
 
 	def calcFeatureVectors(self):
 		print "calcFeatureVectors()"
