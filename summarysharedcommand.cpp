@@ -365,11 +365,38 @@ int SummarySharedCommand::execute(){
 			return 0;
 		}
 		/******************************************************/
-		
+        if (subsample) { 
+            if (subsampleSize == -1) { //user has not set size, set size = smallest samples size
+                subsampleSize = lookup[0]->getNumSeqs();
+                for (int i = 1; i < lookup.size(); i++) {
+                    int thisSize = lookup[i]->getNumSeqs();
+                    
+                    if (thisSize < subsampleSize) {	subsampleSize = thisSize;	}
+                }
+            }else {
+                m->clearGroups();
+                Groups.clear();
+                vector<SharedRAbundVector*> temp;
+                for (int i = 0; i < lookup.size(); i++) {
+                    if (lookup[i]->getNumSeqs() < subsampleSize) { 
+                        m->mothurOut(lookup[i]->getGroup() + " contains " + toString(lookup[i]->getNumSeqs()) + ". Eliminating."); m->mothurOutEndLine();
+                        delete lookup[i];
+                    }else { 
+                        Groups.push_back(lookup[i]->getGroup()); 
+                        temp.push_back(lookup[i]);
+                    }
+                } 
+                lookup = temp;
+                m->setGroups(Groups);
+            }
+            
+            if (lookup.size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); m->control_pressed = true; delete input; return 0; }
+        }
+
 		
 		/******************************************************/
 		//comparison breakup to be used by different processes later
-		numGroups = m->getNumGroups();
+		numGroups = lookup.size();
 		lines.resize(processors);
 		for (int i = 0; i < processors; i++) {
 			lines[i].start = int (sqrt(float(i)/float(processors)) * numGroups);
@@ -527,11 +554,11 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
         vector< vector< vector<seqDist> > > calcDistsTotals;  //each iter, one for each calc, then each groupCombos dists. this will be used to make .dist files
         vector< vector<seqDist>  > calcDists; calcDists.resize(sumCalculators.size()); 		
         
-        for (int thisIter = 0; thisIter < iters; thisIter++) {
+        for (int thisIter = 0; thisIter < iters+1; thisIter++) {
             
             vector<SharedRAbundVector*> thisItersLookup = thisLookup;
             
-            if (subsample) {
+            if (subsample && (thisIter != 0)) { //we want the summary results for the whole dataset, then the subsampling
                 SubSample sample;
                 vector<string> tempLabels; //dont need since we arent printing the sampled sharedRabunds
                 
@@ -710,14 +737,44 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                 
 #endif
             }
-            calcDistsTotals.push_back(calcDists);
             
-            if (subsample) {  
+            if (subsample && (thisIter != 0)) { //we want the summary results for the whole dataset, then the subsampling
                 
+                calcDistsTotals.push_back(calcDists); 
                 //clean up memory
                 for (int i = 0; i < thisItersLookup.size(); i++) { delete thisItersLookup[i]; }
                 thisItersLookup.clear();
                 for (int i = 0; i < calcDists.size(); i++) {  calcDists[i].clear(); }
+            }else {
+                if (createPhylip) {
+                    for (int i = 0; i < calcDists.size(); i++) {
+                        if (m->control_pressed) { break; }
+                        
+                        //initialize matrix
+                        vector< vector<double> > matrix; //square matrix to represent the distance
+                        matrix.resize(thisLookup.size());
+                        for (int k = 0; k < thisLookup.size(); k++) {  matrix[k].resize(thisLookup.size(), 0.0); }
+                        
+                        for (int j = 0; j < calcDists[i].size(); j++) {
+                            int row = calcDists[i][j].seq1;
+                            int column = calcDists[i][j].seq2;
+                            double dist = calcDists[i][j].dist;
+                            
+                            matrix[row][column] = dist;
+                            matrix[column][row] = dist;
+                        }
+                        
+                        string distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + sumCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + ".dist";
+                        outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
+                        ofstream outDist;
+                        m->openOutputFile(distFileName, outDist);
+                        outDist.setf(ios::fixed, ios::floatfield); outDist.setf(ios::showpoint);
+                        
+                        printSims(outDist, matrix);
+                        
+                        outDist.close();
+                    }
+                }
             }
 		}
 
@@ -820,38 +877,8 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                 outSTD.close();
                 
             }
-        }else {
-            if (createPhylip) {
-                for (int i = 0; i < calcDists.size(); i++) {
-                    if (m->control_pressed) { break; }
-                    
-                    //initialize matrix
-                    vector< vector<double> > matrix; //square matrix to represent the distance
-                    matrix.resize(thisLookup.size());
-                    for (int k = 0; k < thisLookup.size(); k++) {  matrix[k].resize(thisLookup.size(), 0.0); }
-                    
-                    for (int j = 0; j < calcDists[i].size(); j++) {
-                        int row = calcDists[i][j].seq1;
-                        int column = calcDists[i][j].seq2;
-                        double dist = calcDists[i][j].dist;
-                        
-                        matrix[row][column] = dist;
-                        matrix[column][row] = dist;
-                    }
-                    
-                    string distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + sumCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + ".dist";
-                    outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
-                    ofstream outDist;
-                    m->openOutputFile(distFileName, outDist);
-                    outDist.setf(ios::fixed, ios::floatfield); outDist.setf(ios::showpoint);
-                    
-                    printSims(outDist, matrix);
-                    
-                    outDist.close();
-                }
-            }
         }
-
+        
         return 0;
 	}
 	catch(exception& e) {

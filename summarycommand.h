@@ -37,9 +37,9 @@ private:
 	vector<Calculator*> sumCalculators;	
 	InputData* input;
 	SAbundVector* sabund;
-	int abund, size;
+	int abund, size, iters, subsampleSize;
 
-	bool abort, allLines, groupMode;
+	bool abort, allLines, groupMode, subsample;
 	set<string> labels; //holds labels to be used
 	string label, calc, outputDir, sharedfile, listfile, rabundfile, sabundfile, format, inputfile;
 	vector<string>  Estimators;
@@ -47,7 +47,8 @@ private:
 	vector<string> groups;
 	
 	vector<string> parseSharedFile(string);
-	string createGroupSummaryFile(int, int, vector<string>&);
+	vector<string> createGroupSummaryFile(int, int, vector<string>&, map<string, string>);
+    int process(SAbundVector*&, ofstream&, ofstream&, ofstream&);
 
 
 };
