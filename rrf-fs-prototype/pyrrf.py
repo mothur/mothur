@@ -54,21 +54,33 @@ class DecisionTree:
 
 	def buildDecisionTree(self):
 		print "buildDecisionTree()"
-		rootNode = TreeNode(self.bootstrappedTrainingSamples, self.numFeatures, self.numSamples, self.numOutputClasses)
-		self.splitRecursively(rootNode)
+		treeNode = TreeNode(self.bootstrappedTrainingSamples, self.numFeatures, self.numSamples, self.numOutputClasses, 0)
+		self.splitRecursively(treeNode)
+		self.printTree(treeNode, "root")
 
-	def splitRecursively(self, rootNode):
+	def printTree(self, treeNode, caption):
+		tabs = ""
+		for i in range(0, treeNode.generation): tabs += '\t'
+
+		if not treeNode.isLeaf:
+			print tabs + caption + '( ' + str(treeNode.splitFeatureValue) + ' < X'+ str(treeNode.splitFeatureIndex) + ' )'
+			self.printTree(treeNode.leftChildNode, 'leftChild')
+			self.printTree(treeNode.rightChildNode, 'rightChild')
+		else:
+			print tabs + caption + '( classified )'
+
+
+
+	def splitRecursively(self, treeNode):
 		print "splitRecursively()"
 
-		if rootNode.numSamples < 2:
-			rootNode.isLeaf = True
-			return
 		# return immediately if this node is just a leaf, no recursion is needed
-		if self.checkIfAlreadyClassified(rootNode):
-			rootNode.isLeaf = True
+		if treeNode.numSamples < 2 or self.checkIfAlreadyClassified(treeNode):
+			print "Already classified"
+			treeNode.isLeaf = True
 			return
 
-		rootNode.featureSubsetIndices = self.selectFeatureSubsetRandomly()
+		treeNode.featureSubsetIndices = self.selectFeatureSubsetRandomly()
 
 #		print "featureSubsetIndices: ", featureSubsetIndices
 #		print "rootNode.bootstrappedTrainingSamples:"
@@ -78,19 +90,23 @@ class DecisionTree:
 #
 #		for i in featureSubsetIndices: print rootNode.bootstrappedFeatureVectors[i], rootNode.bootstrappedOutputVector
 
-		bestFeatureToSplitOn, bestFeatureSplitValue, bestFeatureSplitEntropy =  self.getBestFeatureToSplitOn(rootNode)
-		rootNode.splitFeatureIndex = bestFeatureToSplitOn
-		rootNode.splitFeatureValue = bestFeatureSplitValue
-		rootNode.splitFeatureEntropy = bestFeatureSplitEntropy
+		bestFeatureToSplitOn, bestFeatureSplitValue, bestFeatureSplitEntropy =  self.getBestFeatureToSplitOn(treeNode)
+		treeNode.splitFeatureIndex = bestFeatureToSplitOn
+		treeNode.splitFeatureValue = bestFeatureSplitValue
+		treeNode.splitFeatureEntropy = bestFeatureSplitEntropy
 
 		print bestFeatureToSplitOn, bestFeatureSplitValue, bestFeatureSplitEntropy
-		leftChildSamples, rightChildSamples = self.getSplitPopulation(rootNode)
-		print leftChildSamples, rightChildSamples
+		leftChildSamples, rightChildSamples = self.getSplitPopulation(treeNode)
+		print "leftChildSamples:", leftChildSamples
+		print "rightChildSamples:", rightChildSamples
 
-		leftChild = TreeNode(leftChildSamples, self.numFeatures, len(leftChildSamples), self.numOutputClasses)
-		rightChild = TreeNode(rightChildSamples, self.numFeatures, len(rightChildSamples), self.numOutputClasses)
-		self.splitRecursively(leftChild)
-		self.splitRecursively(rightChild)
+		leftChildNode = TreeNode(leftChildSamples, self.numFeatures, len(leftChildSamples), self.numOutputClasses, treeNode.generation + 1)
+		rightChildNode = TreeNode(rightChildSamples, self.numFeatures, len(rightChildSamples), self.numOutputClasses, treeNode.generation + 1)
+
+		treeNode.leftChildNode = leftChildNode
+		treeNode.rightChildNode = rightChildNode
+		self.splitRecursively(leftChildNode)
+		self.splitRecursively(rightChildNode)
 
 		# given a split point, gives the user two different sets of data
 	def getSplitPopulation(self, node):
@@ -100,10 +116,6 @@ class DecisionTree:
 			if x[globalIndex] < node.splitFeatureValue: leftChildSamples.append(x)
 			else: rightChildSamples.append(x)
 		return leftChildSamples, rightChildSamples
-
-
-	def createChild(self, createLeftChild = True):
-		pass
 
 	# given the feature indices, selects the best feature index to split on
 	def getBestFeatureToSplitOn(self, node):
@@ -130,9 +142,9 @@ class DecisionTree:
 		bestFeatureToSplitOn = featureSubsetEntropies.index(featureMinEntropy)
 		bestFeatureSplitValue = featureSubsetSplitValues[bestFeatureToSplitOn]
 
-		print 'Best Split is possible with global feature:', featureSubsetIndices[bestFeatureToSplitOn]
-		print 'Which has an entropy of:', featureMinEntropy
-		print 'Best Split on this feature with value:', bestFeatureSplitValue
+#		print 'Best Split is possible with global feature:', featureSubsetIndices[bestFeatureToSplitOn]
+#		print 'Which has an entropy of:', featureMinEntropy
+#		print 'Best Split on this feature with value:', bestFeatureSplitValue
 		return featureSubsetIndices[bestFeatureToSplitOn], bestFeatureSplitValue, featureMinEntropy
 
 	def getMinEntropyOfFeature(self, featureVector, outputVector, numOutputClasses):
@@ -221,14 +233,14 @@ class DecisionTree:
 
 
 class TreeNode:
-	def __init__(self, bootstrappedTrainingSamples, numFeatures, numSamples, numOutputClasses):
+	def __init__(self, bootstrappedTrainingSamples, numFeatures, numSamples, numOutputClasses, generation):
 		self.numFeatures = numFeatures
 		self.numSamples =  numSamples
 		self.numOutputClasses = numOutputClasses
 		self.isLeaf = False
 		self.bootstrappedTrainingSamples = bootstrappedTrainingSamples
 		self.bootstrappedFeatureVectors = []
-		self.generation = 0
+		self.generation = generation
 
 		self.splitFeatureIndex = 0
 		self.splitFeatureValue = 0
@@ -237,6 +249,9 @@ class TreeNode:
 		self.calcFeatureVectors()
 		self.bootstrappedOutputVector = [bootstrappedTrainingSamples[x][self.numFeatures] for x in range(0, self.numSamples)]
 		self.featureSubsetIndices = []
+
+		self.leftChildNode = None
+		self.rightChildNode = None
 
 	def calcFeatureVectors(self):
 		print "calcFeatureVectors()"
@@ -298,12 +313,12 @@ if __name__ == "__main__":
 	numDecisionTrees = 1
 
 	# small-alter.txt has a modified dataset
-	dataSet = readFileContents('Datasets/small-alter.txt')
+#	dataSet = readFileContents('Datasets/small-alter.txt')
 
-#	mouseData = ["Datasets/final.an.0.03.subsample.0.03.pick.shared", "Datasets/mouse.sex_time.design"]
-#	sharedFilePath, designFilePath = mouseData
-#	fileReader = FileReader(sharedFilePath, designFilePath)
-#	dataSet = fileReader.getDataSet()
+	mouseData = ["Datasets/final.an.0.03.subsample.0.03.pick.shared", "Datasets/mouse.sex_time.design"]
+	sharedFilePath, designFilePath = mouseData
+	fileReader = FileReader(sharedFilePath, designFilePath)
+	dataSet = fileReader.getDataSet()
 
 	regularizedRandomForest = RegularizedRandomForest(dataSet, numDecisionTrees)
 	regularizedRandomForest.populateDecisionTrees()
