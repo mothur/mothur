@@ -285,13 +285,8 @@ int RareFactCommand::execute(){
         map<string, set<int> > labelToEnds;
 		if ((format != "sharedfile")) { inputFileNames.push_back(inputfile);  }
 		else {  inputFileNames = parseSharedFile(sharedfile, labelToEnds);  format = "rabund"; }
-		for (map<string, set<int> >::iterator it = labelToEnds.begin(); it != labelToEnds.end(); it++) {
-            cout << it->first << endl;
-            for (set<int>::iterator its = (it->second).begin(); its != (it->second).end(); its++) {
-                cout << (*its) << endl;
-            }
-        }
-		if (m->control_pressed) { return 0; }
+        
+        if (m->control_pressed) { return 0; }
 		
 		map<int, string> file2Group; //index in outputNames[i] -> group
 		for (int p = 0; p < inputFileNames.size(); p++) {

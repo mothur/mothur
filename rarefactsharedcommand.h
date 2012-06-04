@@ -40,12 +40,14 @@ private:
 	string format;
 	float freq;
 	
-	bool abort, allLines, jumble;
+     map<int, string> file2Group; //index in outputNames[i] -> group
+	bool abort, allLines, jumble, groupMode;
 	set<string> labels; //holds labels to be used
 	string label, calc, groups, outputDir, sharedfile, designfile;
 	vector<string>  Estimators, Groups, outputNames, Sets;
     
     int process(GroupMap&, string);
+    vector<string> createGroupFile(vector<string>&);
 
 };
 
