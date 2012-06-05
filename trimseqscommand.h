@@ -63,6 +63,7 @@ private:
 	vector<string> revPrimer, outputNames;
 	set<string> filesToRemove;
 	map<string, int> barcodes;
+    map<string, int> rbarcodes;
 	vector<string> groupVector;
 	map<string, int> primers;
     vector<string>  linker;
@@ -101,6 +102,7 @@ struct trimData {
 	double qRollAverage, qThreshold, qWindowAverage, qAverage;
     vector<string> revPrimer;
 	map<string, int> barcodes;
+    map<string, int> rbarcodes;
 	map<string, int> primers;
     vector<string>  linker;
     vector<string>  spacer;
@@ -112,7 +114,7 @@ struct trimData {
     
 	trimData(){}
 	trimData(string fn, string qn, string nf, string tn, string sn, string tqn, string sqn, string tnn, string snn, string gn, vector<vector<string> > ffn, vector<vector<string> > qfn, vector<vector<string> > nfn, unsigned long long lstart, unsigned long long lend, unsigned long long qstart, unsigned long long qend,  MothurOut* mout,
-                      int pd, int bd, int ld, int sd, int td, map<string, int> pri, map<string, int> bar, vector<string> revP, vector<string> li, vector<string> spa, 
+                      int pd, int bd, int ld, int sd, int td, map<string, int> pri, map<string, int> bar, map<string, int> rbar, vector<string> revP, vector<string> li, vector<string> spa, 
                       vector<string> priNameVector, vector<string> barNameVector, bool cGroup, bool aFiles, bool keepF, int keepfi, int removeL,
                       int WindowStep, int WindowSize, int WindowAverage, bool trim, double Threshold, double Average, double RollAverage,
                       int minL, int maxA, int maxH, int maxL, bool fli, map<string, string> nm) {
@@ -141,6 +143,7 @@ struct trimData {
         sdiffs = sd;
         tdiffs = td;
         barcodes = bar;
+        rbarcodes = rbar;
         primers = pri;      numFPrimers = primers.size();
         revPrimer = revP;   numRPrimers = revPrimer.size();
         linker = li;        numLinkers = linker.size();
@@ -237,7 +240,7 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
 		}
 		
 		
-		TrimOligos trimOligos(pDataArray->pdiffs, pDataArray->bdiffs, pDataArray->ldiffs, pDataArray->sdiffs, pDataArray->primers, pDataArray->barcodes, pDataArray->revPrimer, pDataArray->linker, pDataArray->spacer);
+		TrimOligos trimOligos(pDataArray->pdiffs, pDataArray->bdiffs, pDataArray->ldiffs, pDataArray->sdiffs, pDataArray->primers, pDataArray->barcodes, pDataArray->rbarcodes, pDataArray->revPrimer, pDataArray->linker, pDataArray->spacer);
         
 		pDataArray->count = pDataArray->lineEnd;
 		for(int i = 0; i < pDataArray->lineEnd; i++){ //end is the number of sequences to process
@@ -277,7 +280,13 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
 					if(success > pDataArray->bdiffs)		{	trashCode += 'b';	}
 					else{ currentSeqsDiffs += success;  }
 				}
-				
+                
+				if(pDataArray->rbarcodes.size() != 0){
+					success = trimOligos.stripRBarcode(currSeq, currQual, barcodeIndex);
+					if(success > pDataArray->bdiffs)		{	trashCode += 'b';	}
+					else{ currentSeqsDiffs += success;  }
+				}
+                
                 if(pDataArray->numSpacers != 0){
 					success = trimOligos.stripSpacer(currSeq, currQual);
 					if(success > pDataArray->sdiffs)		{	trashCode += 's';	}
