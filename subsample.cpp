@@ -322,8 +322,51 @@ int SubSample::eliminateZeroOTUS(vector<SharedRAbundVector*>& thislookup) {
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
+int SubSample::getSample(SAbundVector*& sabund, int size) {
+	try {
+		
+        OrderVector* order = new OrderVector();
+        *order = sabund->getOrderVector(NULL);
+        
+		int numBins = order->getNumBins();
+		int thisSize = order->getNumSeqs();
+        
+		if (thisSize > size) {
+			random_shuffle(order->begin(), order->end());
+			
+            RAbundVector* rabund = new RAbundVector(numBins);
+			rabund->setLabel(order->getLabel());
 
-
+			for (int j = 0; j < size; j++) {
+                
+				if (m->control_pressed) { delete order; delete rabund; return 0; }
+				
+				int bin = order->get(j);
+				
+				int abund = rabund->get(bin);
+				rabund->set(bin, (abund+1));
+			}
+			
+            delete sabund;
+            sabund = new SAbundVector();
+            *sabund = rabund->getSAbundVector();
+            delete rabund;
+            
+		}else if (thisSize < size) { m->mothurOut("[ERROR]: The size you requested is larger than the number of sequences in the sabund vector. You requested " + toString(size) + " and you only have " + toString(thisSize) + " seqs in your sabund vector.\n"); m->control_pressed = true; }
+		
+		if (m->control_pressed) { return 0; }
+        
+		delete order;
+		
+		return 0;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SubSampleCommand", "getSample");
+		exit(1);
+	}
+}			
 //**********************************************************************************************************************
 
 

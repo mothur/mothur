@@ -462,11 +462,11 @@ int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
 		vector< vector< vector<seqDist> > > calcDistsTotals;  //each iter, one for each calc, then each groupCombos dists. this will be used to make .dist files
         vector< vector<seqDist>  > calcDists; calcDists.resize(matrixCalculators.size()); 		
 
-        for (int thisIter = 0; thisIter < iters; thisIter++) {
+        for (int thisIter = 0; thisIter < iters+1; thisIter++) {
             
             vector<SharedRAbundVector*> thisItersLookup = thisLookup;
             
-            if (subsample) {
+            if (subsample && (thisIter != 0)) {
                 SubSample sample;
                 vector<string> tempLabels; //dont need since we arent printing the sampled sharedRabunds
                 
@@ -619,14 +619,40 @@ int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
                 #endif
             }
             
-            calcDistsTotals.push_back(calcDists);
-            
-            if (subsample) {  
-                
+            if (subsample && (thisIter != 0)) {  
+                calcDistsTotals.push_back(calcDists);
                 //clean up memory
                 for (int i = 0; i < thisItersLookup.size(); i++) { delete thisItersLookup[i]; }
                 thisItersLookup.clear();
                 for (int i = 0; i < calcDists.size(); i++) {  calcDists[i].clear(); }
+            }else { //print results for whole dataset
+                for (int i = 0; i < calcDists.size(); i++) {
+                    if (m->control_pressed) { break; }
+                    
+                    //initialize matrix
+                    vector< vector<double> > matrix; //square matrix to represent the distance
+                    matrix.resize(thisLookup.size());
+                    for (int k = 0; k < thisLookup.size(); k++) {  matrix[k].resize(thisLookup.size(), 0.0); }
+                    
+                    for (int j = 0; j < calcDists[i].size(); j++) {
+                        int row = calcDists[i][j].seq1;
+                        int column = calcDists[i][j].seq2;
+                        double dist = calcDists[i][j].dist;
+                        
+                        matrix[row][column] = dist;
+                        matrix[column][row] = dist;
+                    }
+                    
+                    string distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + matrixCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + ".dist";
+                    outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
+                    ofstream outDist;
+                    m->openOutputFile(distFileName, outDist);
+                    outDist.setf(ios::fixed, ios::floatfield); outDist.setf(ios::showpoint);
+                    
+                    printSims(outDist, matrix);
+                    
+                    outDist.close();
+                }
             }
 		}
 		
@@ -728,35 +754,6 @@ int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
                 
                 outSTD.close();
 
-            }
-        }else {
-        
-            for (int i = 0; i < calcDists.size(); i++) {
-                if (m->control_pressed) { break; }
-                
-                //initialize matrix
-                vector< vector<double> > matrix; //square matrix to represent the distance
-                matrix.resize(thisLookup.size());
-                for (int k = 0; k < thisLookup.size(); k++) {  matrix[k].resize(thisLookup.size(), 0.0); }
-                
-                for (int j = 0; j < calcDists[i].size(); j++) {
-                    int row = calcDists[i][j].seq1;
-                    int column = calcDists[i][j].seq2;
-                    double dist = calcDists[i][j].dist;
-                    
-                    matrix[row][column] = dist;
-                    matrix[column][row] = dist;
-                }
-                
-                string distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + matrixCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + ".dist";
-                outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
-                ofstream outDist;
-                m->openOutputFile(distFileName, outDist);
-                outDist.setf(ios::fixed, ios::floatfield); outDist.setf(ios::showpoint);
-                
-                printSims(outDist, matrix);
-                
-                outDist.close();
             }
         }
 		

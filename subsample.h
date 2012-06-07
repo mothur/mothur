@@ -27,6 +27,7 @@ class SubSample {
         
         //Tree* getSample(Tree*, TreeMap*, map<string, string>, int); //creates new subsampled tree, destroys treemap so copy if needed.
         Tree* getSample(Tree*, TreeMap*, TreeMap*, int, map<string, string>); //creates new subsampled tree. Uses first treemap to fill new treemap with sabsampled seqs. Sets groups of seqs not in subsample to "doNotIncludeMe".
+        int getSample(SAbundVector*&, int); //destroys sabundvector passed in, so copy it if you need it
     
     private:
     
