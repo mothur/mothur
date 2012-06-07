@@ -63,11 +63,11 @@ class DecisionTree:
 		for i in range(0, treeNode.generation): tabs += '\t'
 
 		if not treeNode.isLeaf:
-			print tabs + caption + '( ' + str(treeNode.splitFeatureValue) + ' < X'+ str(treeNode.splitFeatureIndex) + ' )'
+			print tabs + caption + ' ( ' + str(treeNode.splitFeatureValue) + ' < X'+ str(treeNode.splitFeatureIndex) + ' )'
 			self.printTree(treeNode.leftChildNode, 'leftChild')
 			self.printTree(treeNode.rightChildNode, 'rightChild')
 		else:
-			print tabs + caption + '( classified )'
+			print tabs + caption + ' ( classified to: ' + str(treeNode.outputClass) +', samples: ' + str(treeNode.numSamples) +' )'
 
 
 
@@ -75,22 +75,27 @@ class DecisionTree:
 		print "splitRecursively()"
 
 		# return immediately if this node is just a leaf, no recursion is needed
-		if treeNode.numSamples < 2 or self.checkIfAlreadyClassified(treeNode):
-			print "Already classified"
+		if treeNode.numSamples < 2:
+			print "Already classified: Case 1"
+			treeNode.isLeaf = True
+			treeNode.outputClass = treeNode.bootstrappedTrainingSamples[0][treeNode.numFeatures]
+			return
+
+		ifAlreadyClassified, treeNode.outputClass = self.checkIfAlreadyClassified(treeNode)
+		if ifAlreadyClassified:
+			print "Already classified: Case 2"
 			treeNode.isLeaf = True
 			return
 
 		treeNode.featureSubsetIndices = self.selectFeatureSubsetRandomly()
-
-#		print "featureSubsetIndices: ", featureSubsetIndices
-#		print "rootNode.bootstrappedTrainingSamples:"
-#		for x in rootNode.bootstrappedTrainingSamples: print x
-#		print "rootNode.bootstrappedFeatureVectors: "
-#		for x in rootNode.bootstrappedFeatureVectors: print x
-#
-#		for i in featureSubsetIndices: print rootNode.bootstrappedFeatureVectors[i], rootNode.bootstrappedOutputVector
+		# DEBUG
+#		treeNode.featureSubsetIndices = [100, 103, 161, 163, 197, 355, 460, 463, 507, 509]
 
 		bestFeatureToSplitOn, bestFeatureSplitValue, bestFeatureSplitEntropy =  self.getBestFeatureToSplitOn(treeNode)
+		# TODO: create a bound check, if you have the split on the extreme indices, that means already classified
+		# so return immediately
+
+
 		treeNode.splitFeatureIndex = bestFeatureToSplitOn
 		treeNode.splitFeatureValue = bestFeatureSplitValue
 		treeNode.splitFeatureEntropy = bestFeatureSplitEntropy
@@ -186,13 +191,15 @@ class DecisionTree:
 			numLessThanValueAtSplitPoint = 0
 			numGreaterThanValueAtSplitPoint = 0
 			for record in featureOutputPair:
-				if record[0] < valueAtSplitPoint: numLessThanValueAtSplitPoint += 1
+				if record[0] <= valueAtSplitPoint: numLessThanValueAtSplitPoint += 1
 				else: numGreaterThanValueAtSplitPoint += 1
 			# print 'numLessThanValueAtSplitPoint:', numLessThanValueAtSplitPoint, 'numGreaterThanValueAtSplitPoint:', numGreaterThanValueAtSplitPoint
 			# call for upper portion
 			upperEntropyOfSplit = self.calcSplitEntropy(featureOutputPair, index, numOutputClasses, True)
 			# call for lower portion
 			lowerEntropyOfSplit = self.calcSplitEntropy(featureOutputPair, index, numOutputClasses, False)
+			print "upperEntropyOfSplit:", upperEntropyOfSplit, "lowerEntropyOfSplit:", lowerEntropyOfSplit
+			print "numLessThanValueAtSplitPoint:", numLessThanValueAtSplitPoint, "numGreaterThanValueAtSplitPoint:", numGreaterThanValueAtSplitPoint
 			totalEntropy = (numLessThanValueAtSplitPoint * upperEntropyOfSplit + numGreaterThanValueAtSplitPoint * lowerEntropyOfSplit) / numSamples
 #			print "totalEntropy", totalEntropy
 			entropies.append(totalEntropy)
@@ -228,8 +235,8 @@ class DecisionTree:
 		outPutClasses = []
 		for x in treeNode.bootstrappedTrainingSamples:
 			if x[treeNode.numFeatures] not in outPutClasses: outPutClasses.append(x[treeNode.numFeatures])
-		if len(outPutClasses) < 2: return True
-		else: return False
+		if len(outPutClasses) < 2: return True, outPutClasses[0]
+		else: return False, None
 
 
 class TreeNode:
@@ -238,6 +245,7 @@ class TreeNode:
 		self.numSamples =  numSamples
 		self.numOutputClasses = numOutputClasses
 		self.isLeaf = False
+		self.outputClass = None
 		self.bootstrappedTrainingSamples = bootstrappedTrainingSamples
 		self.bootstrappedFeatureVectors = []
 		self.generation = generation
@@ -292,13 +300,13 @@ class FileReader:
 		self.dataSet = []
 		self.dataSetClasses = {}
 		for line in self.sharedFileData[1:]:
-			self.dataSet.append(line[3:])
+			self.dataSet.append([int(x) for x in line[3:]])
 		i, j = 0, 0
 		for line in self.designFileData:
 			if line[1] not in self.dataSetClasses.keys():
 				self.dataSetClasses[line[1]] = j
 				j += 1
-			self.dataSet[i].append(self.dataSetClasses[line[1]])
+			self.dataSet[i].append(int(self.dataSetClasses[line[1]]))
 			i += 1
 		return self.dataSet
 
@@ -319,6 +327,7 @@ if __name__ == "__main__":
 	sharedFilePath, designFilePath = mouseData
 	fileReader = FileReader(sharedFilePath, designFilePath)
 	dataSet = fileReader.getDataSet()
+#	for x in dataSet: print dataSet
 
 	regularizedRandomForest = RegularizedRandomForest(dataSet, numDecisionTrees)
 	regularizedRandomForest.populateDecisionTrees()
