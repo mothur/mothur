@@ -41,15 +41,26 @@ class DecisionTree:
 #		print "###"
 #		for x in self.bootstrappedTestSamples: print x
 
+	def findNullFeatures(self, bootstrappedTrainingSamples):
+		print "findNullFeatures()"
+		featureVectors = zip(*bootstrappedTrainingSamples)
+		nullFeatureIndices = []
+		for index, value in enumerate(featureVectors):
+			total = sum(value)
+			if not total: nullFeatureIndices.append(index)
+		return nullFeatureIndices
+
+
 	# randomly select log2(totalFeatures) number features for each node
-	def selectFeatureSubsetRandomly(self):
+	def selectFeatureSubsetRandomly(self, nullFeatureIndices):
 		# TODO optimum feature is log2(totalFeatures), we might need to modify this one
 		self.optimumFeatureSubsetSize = int(ceil(log(self.numFeatures, 2)))
 
 		featureSubsetIndices = []
 		while len(featureSubsetIndices) < self.optimumFeatureSubsetSize:
 			randomIndex = random.randint(0, self.numFeatures - 1)
-			if randomIndex not in featureSubsetIndices: featureSubsetIndices.append(randomIndex)
+			if (randomIndex not in featureSubsetIndices) and (randomIndex not in nullFeatureIndices):
+				featureSubsetIndices.append(randomIndex)
 		return sorted(featureSubsetIndices)
 
 	def buildDecisionTree(self):
@@ -87,7 +98,10 @@ class DecisionTree:
 			treeNode.isLeaf = True
 			return
 
-		treeNode.featureSubsetIndices = self.selectFeatureSubsetRandomly()
+		nullFeatureIndices = self.findNullFeatures(treeNode.bootstrappedTrainingSamples)
+		treeNode.featureSubsetIndices = self.selectFeatureSubsetRandomly(nullFeatureIndices)
+		print "nullFeatureIndices:", nullFeatureIndices
+		print "featureSubsetIndices:", treeNode.featureSubsetIndices
 		# DEBUG
 #		treeNode.featureSubsetIndices = [100, 103, 161, 163, 197, 355, 460, 463, 507, 509]
 
@@ -129,7 +143,7 @@ class DecisionTree:
 		featureSubsetIndices = node.featureSubsetIndices
 
 		print "getBestFeatureToSplitOn()"
-		for x in bootstrappedFeatureVectors: print x
+#		for x in bootstrappedFeatureVectors: print x
 		print "featureSubsetIndices: ", featureSubsetIndices
 		featureSubsetEntropies = []
 		featureSubsetSplitValues = []
