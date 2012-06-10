@@ -465,8 +465,7 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
                     }
                 }
             }
-			
-		}
+        }
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClassifySeqsCommand", "ClassifySeqsCommand");
@@ -503,11 +502,17 @@ int ClassifySeqsCommand::execute(){
 			string baseTName = taxonomyFileName;
 			if (taxonomyFileName == "saved") {baseTName = rdb->getSavedTaxonomy();	}
 			
-			string RippedTaxName = m->getRootName(m->getSimpleName(baseTName));
-			RippedTaxName = m->getExtension(RippedTaxName.substr(0, RippedTaxName.length()-1));
-			if (RippedTaxName[0] == '.') { RippedTaxName = RippedTaxName.substr(1, RippedTaxName.length()); }
-			if (RippedTaxName != "") { RippedTaxName +=  "."; }
-           
+            //set rippedTaxName to 
+			string RippedTaxName = "";
+            bool foundDot = false;
+            for (int i = baseTName.length()-1; i >= 0; i--) {
+                cout << baseTName[i] << endl;
+                if (foundDot && (baseTName[i] != '.')) {  RippedTaxName = baseTName[i] + RippedTaxName; }
+                else if (foundDot && (baseTName[i] == '.')) {  break; }
+                else if (!foundDot && (baseTName[i] == '.')) {  foundDot = true; }
+            }
+            if (RippedTaxName != "") { RippedTaxName +=  "."; }   
+          
 			if (outputDir == "") { outputDir += m->hasPath(fastaFileNames[s]); }
 			string newTaxonomyFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + RippedTaxName + "taxonomy";
 			string newaccnosFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + RippedTaxName + "flip.accnos";

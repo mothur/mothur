@@ -24,7 +24,8 @@ vector<string> RareFactSharedCommand::setParameters(){
 		CommandParameter pjumble("jumble", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pjumble);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
         CommandParameter psets("sets", "String", "", "", "", "", "",false,false); parameters.push_back(psets);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+		CommandParameter pgroupmode("groupmode", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pgroupmode);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
@@ -41,8 +42,7 @@ string RareFactSharedCommand::getHelpString(){
 	try {
 		string helpString = "";
 		ValidCalculators validCalculator;
-		helpString += "The collect.shared command parameters are shared, label, freq, calc and groups.  shared is required if there is no current sharedfile. \n";
-		helpString += "The rarefaction.shared command parameters are shared, design, label, iters, groups, sets, jumble and calc.  shared is required if there is no current sharedfile. \n";
+		helpString += "The rarefaction.shared command parameters are shared, design, label, iters, groups, sets, jumble, groupmode and calc.  shared is required if there is no current sharedfile. \n";
         helpString += "The design parameter allows you to assign your groups to sets. If provided mothur will run rarefaction.shared on a per set basis. \n";
         helpString += "The sets parameter allows you to specify which of the sets in your designfile you would like to analyze. The set names are separated by dashes. THe default is all sets in the designfile.\n";
 		helpString += "The rarefaction command should be in the following format: \n";
@@ -196,6 +196,9 @@ RareFactSharedCommand::RareFactSharedCommand(string option)  {
 			if (m->isTrue(temp)) { jumble = true; }
 			else { jumble = false; }
 			m->jumble = jumble;
+            
+            temp = validParameter.validFile(parameters, "groupmode", false);		if (temp == "not found") { temp = "T"; }
+			groupMode = m->isTrue(temp);
 				
 		}
 
@@ -226,6 +229,8 @@ int RareFactSharedCommand::execute(){
             for (int i = 0; i < Sets.size(); i++) {
                 process(designMap, Sets[i]);
             }
+            
+            if (groupMode) { outputNames = createGroupFile(outputNames); }
         }
                     
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
@@ -288,6 +293,7 @@ int RareFactSharedCommand::process(GroupMap& designMap, string thisSet){
 					outputNames.push_back(fileNameRoot+"shared.r_nseqs"); outputTypes["sharedr_nseqs"].push_back(fileNameRoot+"shared.r_nseqs");
 				}
 			}
+            file2Group[outputNames.size()-1] = thisSet;
 		}
 		
 		//if the users entered no valid calculators don't execute command
@@ -428,6 +434,164 @@ int RareFactSharedCommand::process(GroupMap& designMap, string thisSet){
     }
 	catch(exception& e) {
 		m->errorOut(e, "RareFactSharedCommand", "process");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> RareFactSharedCommand::createGroupFile(vector<string>& outputNames) {
+	try {
+		
+		vector<string> newFileNames;
+		
+		//find different types of files
+		map<string, map<string, string> > typesFiles;
+        map<string, vector< vector<string> > > fileLabels; //combofile name to labels. each label is a vector because it may be unique lci hci.
+        vector<string> groupNames;
+		for (int i = 0; i < outputNames.size(); i++) {
+            
+			string extension = m->getExtension(outputNames[i]);
+            string combineFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + "groups" + extension;
+			m->mothurRemove(combineFileName); //remove old file
+            
+			ifstream in;
+			m->openInputFile(outputNames[i], in);
+			
+			string labels = m->getline(in);
+            
+			istringstream iss (labels,istringstream::in);
+            string newLabel = ""; vector<string> theseLabels;
+            while(!iss.eof()) {  iss >> newLabel; m->gobble(iss); theseLabels.push_back(newLabel); }
+            vector< vector<string> > allLabels;
+            vector<string> thisSet; thisSet.push_back(theseLabels[0]); allLabels.push_back(thisSet); thisSet.clear(); //makes "numSampled" its own grouping
+            for (int j = 1; j < theseLabels.size()-1; j++) {
+                if (theseLabels[j+1] == "lci") {
+                    thisSet.push_back(theseLabels[j]); 
+                    thisSet.push_back(theseLabels[j+1]); 
+                    thisSet.push_back(theseLabels[j+2]);
+                    j++; j++;
+                }else{ //no lci or hci for this calc.
+                    thisSet.push_back(theseLabels[j]); 
+                }
+                allLabels.push_back(thisSet); 
+                thisSet.clear();
+            }
+            fileLabels[combineFileName] = allLabels;
+            
+            map<string, map<string, string> >::iterator itfind = typesFiles.find(extension);
+            if (itfind != typesFiles.end()) {
+                (itfind->second)[outputNames[i]] = file2Group[i];
+            }else {
+                map<string, string> temp;  
+                temp[outputNames[i]] = file2Group[i];
+                typesFiles[extension] = temp;
+            }
+            if (!(m->inUsersGroups(file2Group[i], groupNames))) {  groupNames.push_back(file2Group[i]); }
+		}
+		
+		//for each type create a combo file
+		
+		for (map<string, map<string, string> >::iterator it = typesFiles.begin(); it != typesFiles.end(); it++) {
+			
+			ofstream out;
+			string combineFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + "groups" + it->first;
+			m->openOutputFileAppend(combineFileName, out);
+			newFileNames.push_back(combineFileName);
+			map<string, string> thisTypesFiles = it->second; //it->second maps filename to group
+            set<int> numSampledSet;
+            
+			//open each type summary file
+			map<string, map<int, vector< vector<string> > > > files; //maps file name to lines in file
+			int maxLines = 0;
+			for (map<string, string>::iterator itFileNameGroup = thisTypesFiles.begin(); itFileNameGroup != thisTypesFiles.end(); itFileNameGroup++) {
+                
+                string thisfilename = itFileNameGroup->first;
+                string group = itFileNameGroup->second;
+                
+				ifstream temp;
+				m->openInputFile(thisfilename, temp);
+				
+				//read through first line - labels
+				m->getline(temp);	m->gobble(temp);
+				
+				map<int, vector< vector<string> > > thisFilesLines;
+				while (!temp.eof()){
+                    int numSampled = 0;
+                    temp >> numSampled; m->gobble(temp);
+                    
+                    vector< vector<string> > theseReads;
+                    vector<string> thisSet; thisSet.push_back(toString(numSampled)); theseReads.push_back(thisSet); thisSet.clear();
+                    for (int k = 1; k < fileLabels[combineFileName].size(); k++) { //output thing like 0.03-A lci-A hci-A
+                        vector<string> reads;
+                        string next = "";
+                        for (int l = 0; l < fileLabels[combineFileName][k].size(); l++) { //output modified labels
+                            temp >> next; m->gobble(temp);
+                            reads.push_back(next);
+                        }
+                        theseReads.push_back(reads);
+                    }
+                    thisFilesLines[numSampled] = theseReads;
+                    m->gobble(temp);
+                    
+                    numSampledSet.insert(numSampled);
+				}
+				
+				files[group] = thisFilesLines;
+				
+				//save longest file for below
+				if (maxLines < thisFilesLines.size()) { maxLines = thisFilesLines.size(); }
+				
+				temp.close();
+				m->mothurRemove(thisfilename);
+			}
+			
+            //output new labels line
+            out << fileLabels[combineFileName][0][0] << '\t';
+            for (int k = 1; k < fileLabels[combineFileName].size(); k++) { //output thing like 0.03-A lci-A hci-A
+                for (int n = 0; n < groupNames.size(); n++) { // for each group
+                    for (int l = 0; l < fileLabels[combineFileName][k].size(); l++) { //output modified labels
+                        out << fileLabels[combineFileName][k][l] << '-' << groupNames[n] << '\t';
+                    }
+                }
+            }
+			out << endl;
+            
+			//for each label
+			for (set<int>::iterator itNumSampled = numSampledSet.begin(); itNumSampled != numSampledSet.end(); itNumSampled++) {
+				
+                out << (*itNumSampled) << '\t';
+                
+                if (m->control_pressed) { break; }
+                
+                for (int k = 1; k < fileLabels[combineFileName].size(); k++) { //each chunk
+				    //grab data for each group
+                    for (map<string, map<int, vector< vector<string> > > >::iterator itFileNameGroup = files.begin(); itFileNameGroup != files.end(); itFileNameGroup++) {
+                        
+                        string group = itFileNameGroup->first;
+                        
+                        map<int, vector< vector<string> > >::iterator itLine = files[group].find(*itNumSampled);
+                        if (itLine != files[group].end()) { 
+                            for (int l = 0; l < (itLine->second)[k].size(); l++) { 
+                                out << (itLine->second)[k][l] << '\t';
+                                
+                            }                             
+                        }else { 
+                            for (int l = 0; l < fileLabels[combineFileName][k].size(); l++) { 
+                                out << "NA" << '\t';
+                            } 
+                        }
+                    }
+                }
+                out << endl;
+			}	
+			out.close();
+		}
+		
+		//return combine file name
+		return newFileNames;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "RareFactSharedCommand", "createGroupFile");
 		exit(1);
 	}
 }

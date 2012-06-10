@@ -1934,12 +1934,14 @@ int ShhherCommand::createProcesses(vector<string> filenames){
 		
 		//divide the groups between the processors
 		vector<linePair> lines;
+        vector<int> numFilesToComplete;
 		int numFilesPerProcessor = filenames.size() / processors;
 		for (int i = 0; i < processors; i++) {
 			int startIndex =  i * numFilesPerProcessor;
 			int endIndex = (i+1) * numFilesPerProcessor;
 			if(i == (processors - 1)){	endIndex = filenames.size(); 	}
 			lines.push_back(linePair(startIndex, endIndex));
+            numFilesToComplete.push_back((endIndex-startIndex));
 		}
 		
         #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)		
@@ -1953,6 +1955,14 @@ int ShhherCommand::createProcesses(vector<string> filenames){
 				process++;
 			}else if (pid == 0){
 				num = driver(filenames, compositeFASTAFileName + toString(getpid()) + ".temp", compositeNamesFileName  + toString(getpid()) + ".temp", lines[process].start, lines[process].end);
+                
+                //pass numSeqs to parent
+				ofstream out;
+				string tempFile = compositeFASTAFileName + toString(getpid()) + ".num.temp";
+				m->openOutputFile(tempFile, out);
+				out << num << endl;
+				out.close();
+                
 				exit(0);
 			}else { 
 				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
@@ -2015,6 +2025,18 @@ int ShhherCommand::createProcesses(vector<string> filenames){
         #endif
         
         for (int i=0;i<processIDS.size();i++) { 
+            ifstream in;
+			string tempFile =  compositeFASTAFileName + toString(processIDS[i]) + ".num.temp";
+			m->openInputFile(tempFile, in);
+			if (!in.eof()) { 
+                int tempNum = 0; 
+                in >> tempNum; 
+                if (tempNum != numFilesToComplete[i+1]) {
+                    m->mothurOut("[ERROR]: main process expected " + toString(processIDS[i]) + " to complete " + toString(numFilesToComplete[i+1]) + " files, and it only reported completing " + toString(tempNum) + ". This will cause file mismatches.  The flow files may be too large to process with multiple processors. \n");
+                }
+            }
+			in.close(); m->mothurRemove(tempFile);
+            
             if (compositeFASTAFileName != "") {
                 m->appendFiles((compositeFASTAFileName + toString(processIDS[i]) + ".temp"), compositeFASTAFileName);
                 m->appendFiles((compositeNamesFileName + toString(processIDS[i]) + ".temp"), compositeNamesFileName);
@@ -2082,6 +2104,8 @@ vector<string> ShhherCommand::parseFlowFiles(string filename){
 
 int ShhherCommand::driver(vector<string> filenames, string thisCompositeFASTAFileName, string thisCompositeNamesFileName, int start, int end){
     try {
+        
+        int numCompleted = 0;
         
         for(int i=start;i<end;i++){
 			
@@ -2281,12 +2305,13 @@ int ShhherCommand::driver(vector<string> filenames, string thisCompositeFASTAFil
                 }
 			}
             
+            numCompleted++;
 			m->mothurOut("Total time to process " + flowFileName + ":\t" + toString(time(NULL) - begTime) + '\t' + toString((clock() - begClock)/(double)CLOCKS_PER_SEC) + '\n');
 		}
 		
         if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
         
-        return 0;
+        return numCompleted;
         
     }catch(exception& e) {
             m->errorOut(e, "ShhherCommand", "driver");
