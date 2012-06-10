@@ -8,7 +8,7 @@ import inspect
 
 # The main algorithm resides here, it the manipulator class
 class DecisionTree:
-	def __init__(self, baseDataSet):
+	def __init__(self, baseDataSet, discardedFeatureIndices):
 		self.baseDataSet = baseDataSet
 		self.numSamples = len(baseDataSet)
 		self.numFeatures = len(baseDataSet[0]) - 1
@@ -17,6 +17,7 @@ class DecisionTree:
 		self.bootstrappedTrainingSamples = []
 		self.bootstrappedTestSamples = []
 		self.rootNode = None
+		self.discardedFeatureIndices = discardedFeatureIndices
 
 		for i in range(0, self.numSamples):
 			outcome = baseDataSet[i][-1]
@@ -43,6 +44,8 @@ class DecisionTree:
 
 	def findNullFeatures(self, bootstrappedTrainingSamples):
 		print "findNullFeatures()"
+		# we can easily get the featureVectors by transposing, this zip functions is an easy
+		# shortcut for transposing a matrix
 		featureVectors = zip(*bootstrappedTrainingSamples)
 		nullFeatureIndices = []
 		for index, value in enumerate(featureVectors):
@@ -52,14 +55,14 @@ class DecisionTree:
 
 
 	# randomly select log2(totalFeatures) number features for each node
-	def selectFeatureSubsetRandomly(self, nullFeatureIndices):
+	def selectFeatureSubsetRandomly(self, discardedFeatureIndices):
 		# TODO optimum feature is log2(totalFeatures), we might need to modify this one
 		self.optimumFeatureSubsetSize = int(ceil(log(self.numFeatures, 2)))
 
 		featureSubsetIndices = []
 		while len(featureSubsetIndices) < self.optimumFeatureSubsetSize:
 			randomIndex = random.randint(0, self.numFeatures - 1)
-			if (randomIndex not in featureSubsetIndices) and (randomIndex not in nullFeatureIndices):
+			if (randomIndex not in featureSubsetIndices) and (randomIndex not in discardedFeatureIndices):
 				featureSubsetIndices.append(randomIndex)
 		return sorted(featureSubsetIndices)
 
@@ -74,11 +77,11 @@ class DecisionTree:
 		for i in range(0, treeNode.generation): tabs += '\t'
 
 		if not treeNode.isLeaf:
-			print tabs + caption + ' ( ' + str(treeNode.splitFeatureValue) + ' < X'+ str(treeNode.splitFeatureIndex) + ' )'
+			print tabs + caption + ' [ gen: ' + str(treeNode.generation) + ' ] ( ' + str(treeNode.splitFeatureValue) + ' < X'+ str(treeNode.splitFeatureIndex) + ' )'
 			self.printTree(treeNode.leftChildNode, 'leftChild')
 			self.printTree(treeNode.rightChildNode, 'rightChild')
 		else:
-			print tabs + caption + ' ( classified to: ' + str(treeNode.outputClass) +', samples: ' + str(treeNode.numSamples) +' )'
+			print tabs + caption + ' [ gen: ' + str(treeNode.generation) + ' ] ( classified to: ' + str(treeNode.outputClass) +', samples: ' + str(treeNode.numSamples) +' )'
 
 
 
@@ -98,9 +101,9 @@ class DecisionTree:
 			treeNode.isLeaf = True
 			return
 
-		nullFeatureIndices = self.findNullFeatures(treeNode.bootstrappedTrainingSamples)
-		treeNode.featureSubsetIndices = self.selectFeatureSubsetRandomly(nullFeatureIndices)
-		print "nullFeatureIndices:", nullFeatureIndices
+#		nullFeatureIndices = self.findNullFeatures(treeNode.bootstrappedTrainingSamples)
+		treeNode.featureSubsetIndices = self.selectFeatureSubsetRandomly(self.discardedFeatureIndices)
+		print "discardedFeatureIndices:", discardedFeatureIndices
 		print "featureSubsetIndices:", treeNode.featureSubsetIndices
 		# DEBUG
 #		treeNode.featureSubsetIndices = [100, 103, 161, 163, 197, 355, 460, 463, 507, 509]
@@ -114,7 +117,7 @@ class DecisionTree:
 		treeNode.splitFeatureValue = bestFeatureSplitValue
 		treeNode.splitFeatureEntropy = bestFeatureSplitEntropy
 
-		print bestFeatureToSplitOn, bestFeatureSplitValue, bestFeatureSplitEntropy
+		print "bestFeatureToSplitOn:", bestFeatureToSplitOn, "bestFeatureSplitValue:", bestFeatureSplitValue, "bestFeatureSplitEntropy:", bestFeatureSplitEntropy
 		leftChildSamples, rightChildSamples = self.getSplitPopulation(treeNode)
 		print "leftChildSamples:", leftChildSamples
 		print "rightChildSamples:", rightChildSamples
@@ -144,7 +147,7 @@ class DecisionTree:
 
 		print "getBestFeatureToSplitOn()"
 #		for x in bootstrappedFeatureVectors: print x
-		print "featureSubsetIndices: ", featureSubsetIndices
+#		print "featureSubsetIndices: ", featureSubsetIndices
 		featureSubsetEntropies = []
 		featureSubsetSplitValues = []
 		for i in range(0, len(featureSubsetIndices)):
@@ -205,7 +208,7 @@ class DecisionTree:
 			numLessThanValueAtSplitPoint = 0
 			numGreaterThanValueAtSplitPoint = 0
 			for record in featureOutputPair:
-				if record[0] <= valueAtSplitPoint: numLessThanValueAtSplitPoint += 1
+				if record[0] < valueAtSplitPoint: numLessThanValueAtSplitPoint += 1
 				else: numGreaterThanValueAtSplitPoint += 1
 			# print 'numLessThanValueAtSplitPoint:', numLessThanValueAtSplitPoint, 'numGreaterThanValueAtSplitPoint:', numGreaterThanValueAtSplitPoint
 			# call for upper portion
@@ -286,15 +289,16 @@ class TreeNode:
 ''' The main algorithm for Regularized Random Forest, it creates a number of decision trees and then aggregates them
 	to find the solution '''
 class RegularizedRandomForest:
-	def __init__(self, dataSet, numDecisionTrees):
+	def __init__(self, dataSet, discardedFeatureIndices, numDecisionTrees):
 		self.decisionTrees = []
 		self.dataSet = dataSet
 		self.numDecisionTrees = numDecisionTrees
+		self.discardedFeatureIndices = discardedFeatureIndices
 
 	def populateDecisionTrees(self):
 		for i in range(0, self.numDecisionTrees):
 #			self.decisionTrees.append(createDecisionTree(self.dataSet))
-			decisionTree = DecisionTree(dataSet)
+			decisionTree = DecisionTree(dataSet, discardedFeatureIndices)
 			self.decisionTrees.append(decisionTree)
 
 		# TODO do the usual stuffs (aggregation) with the decisionTrees
@@ -324,6 +328,14 @@ class FileReader:
 			i += 1
 		return self.dataSet
 
+	def getDiscardedFeatureIndices(self):
+		featureVectors = zip(*self.dataSet)[:-1]
+		discardedFeatureIndices = []
+		for i, x in enumerate(featureVectors):
+			total = sum(x)
+			if total < 10: discardedFeatureIndices.append(i)
+		return discardedFeatureIndices
+
 def readFileContents(fileName):
 	data = []
 	file = open(fileName)
@@ -341,9 +353,10 @@ if __name__ == "__main__":
 	sharedFilePath, designFilePath = mouseData
 	fileReader = FileReader(sharedFilePath, designFilePath)
 	dataSet = fileReader.getDataSet()
-#	for x in dataSet: print dataSet
+	discardedFeatureIndices = fileReader.getDiscardedFeatureIndices()
 
-	regularizedRandomForest = RegularizedRandomForest(dataSet, numDecisionTrees)
+
+	regularizedRandomForest = RegularizedRandomForest(dataSet, discardedFeatureIndices, numDecisionTrees)
 	regularizedRandomForest.populateDecisionTrees()
 
 #	createDecisionTree(dataSet)
