@@ -184,16 +184,31 @@ class DecisionTree:
 		splitPoints = []
 		for i in range(0, len(featureVector)):
 			if featureOutputPair[i][1] != searchOutput:
+				# we need to make sure that the split point does not contain a zero
+				splitOnValue = featureOutputPair[i][0]
+				if splitOnValue == 0:
+					print "splitOnValue 0 detected, not adding this to splitIndex"
+					continue
 				splitPoints.append(i)
 				searchOutput = featureOutputPair[i][1]
 
 		#	now we have the splitPoints, so we need to find which of them gives
 		#	us the highest entropy gain
 		print "splitPoints:", splitPoints
-		minEntropy, bestSplitIndex = self.getBestSplitAndMinEntropy(featureOutputPair, splitPoints, numOutputClasses)
-		featureSplitValue = featureOutputPair[splitPoints[bestSplitIndex]][0]
-#		print minEntropy, bestSplitIndex, splitPoints[bestSplitIndex], featureOutputPair[splitPoints[bestSplitIndex]][0]
+
+		# if we had too many zero containing split points, that means we ignored them all, and we have
+		# now an empty split point list, so we need to check this before going further
+		if not len(splitPoints):
+			minEntropy = float("inf")
+			bestSplitIndex = -1
+			featureSplitValue = 0
+		else:
+			minEntropy, bestSplitIndex = self.getBestSplitAndMinEntropy(featureOutputPair, splitPoints, numOutputClasses)
+			featureSplitValue = featureOutputPair[splitPoints[bestSplitIndex]][0]
+	#		print minEntropy, bestSplitIndex, splitPoints[bestSplitIndex], featureOutputPair[splitPoints[bestSplitIndex]][0]
+
 		return minEntropy, featureSplitValue
+
 
 	# calculate all the possible splits for a feature vector and then return the value of the best split
 	def getBestSplitAndMinEntropy(self, featureOutputPair, splitPoints, numOutputClasses):
@@ -333,14 +348,26 @@ class FileReader:
 		discardedFeatureIndices = []
 		for i, x in enumerate(featureVectors):
 			total = sum(x)
-			if total < 10: discardedFeatureIndices.append(i)
+			if total < 1: discardedFeatureIndices.append(i)
 		return discardedFeatureIndices
 
 def readFileContents(fileName):
 	data = []
 	file = open(fileName)
-	for x in file: data.append([int(y) for y in x.strip().split()])
+	for line in file: data.append([int(y) for y in line.strip().split()])
 	return data
+
+def getDiscardedFeatureIndices(dataSet):
+	featureVectors = zip(*dataSet)[:-1]
+	discardedFeatureIndices = []
+	for i, x in enumerate(featureVectors):
+		total = sum(x)
+		zeroCount = x.count(0)
+		if total < 800 or zeroCount > 90: discardedFeatureIndices.append(i)
+	print 'number of discarded features:', len(discardedFeatureIndices)
+	print 'total features:', len(featureVectors)
+	return discardedFeatureIndices
+
 
 
 if __name__ == "__main__":
@@ -348,12 +375,15 @@ if __name__ == "__main__":
 
 	# small-alter.txt has a modified dataset
 #	dataSet = readFileContents('Datasets/small-alter.txt')
+	dataSet = readFileContents('Datasets/inpatient.final.an.0.03.subsample.avg.matrix')
+	discardedFeatureIndices = getDiscardedFeatureIndices(dataSet)
+#	for x in discardedFeatureIndices: print x
 
-	mouseData = ["Datasets/final.an.0.03.subsample.0.03.pick.shared", "Datasets/mouse.sex_time.design"]
-	sharedFilePath, designFilePath = mouseData
-	fileReader = FileReader(sharedFilePath, designFilePath)
-	dataSet = fileReader.getDataSet()
-	discardedFeatureIndices = fileReader.getDiscardedFeatureIndices()
+#	mouseData = ["Datasets/final.an.0.03.subsample.0.03.pick.shared", "Datasets/mouse.sex_time.design"]
+#	sharedFilePath, designFilePath = mouseData
+#	fileReader = FileReader(sharedFilePath, designFilePath)
+#	dataSet = fileReader.getDataSet()
+#	discardedFeatureIndices = fileReader.getDiscardedFeatureIndices()
 
 
 	regularizedRandomForest = RegularizedRandomForest(dataSet, discardedFeatureIndices, numDecisionTrees)
