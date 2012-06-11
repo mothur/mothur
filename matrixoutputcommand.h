@@ -101,7 +101,7 @@ private:
 
 	bool abort, allLines, subsample;
 	set<string> labels; //holds labels to be used
-	string outputFile, calc, groups, label, outputDir;
+	string outputFile, calc, groups, label, outputDir, mode;
 	vector<string>  Estimators, Groups, outputNames; //holds estimators to be used
 	int process(vector<SharedRAbundVector*>, string, string);
 	int driver(vector<SharedRAbundVector*>, int, int, vector< vector<seqDist> >&);

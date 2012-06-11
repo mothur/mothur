@@ -37,13 +37,16 @@ SequenceParser::SequenceParser(string groupFile, string fastaFile, string nameFi
 		m->openInputFile(fastaFile, in);
 		
 		map<string, string> seqName; //stores name -> sequence string so we can make new "unique" sequences when we parse the name file
+        int fastaCount = 0;
 		while (!in.eof()) {
 			
 			if (m->control_pressed) { break; }
 			
 			Sequence seq(in); m->gobble(in);
+            fastaCount++;
+            if (m->debug) { if((fastaCount) % 1000 == 0){	m->mothurOut("[DEBUG]: reading seq " + toString(fastaCount) + "\n.");	} }
 			
-			if (seq.getName() != "") {
+        if (seq.getName() != "") {
 				
 				 string group = groupMap->getGroup(seq.getName());
 				 if (group == "not found") {  error = 1; m->mothurOut("[ERROR]: " + seq.getName() + " is in your fasta file and not in your groupfile, please correct."); m->mothurOutEndLine();  }
@@ -133,7 +136,7 @@ SequenceParser::SequenceParser(string groupFile, string fastaFile, string nameFi
 		inName.close();
 		
 		if (error == 1) { m->control_pressed = true; }
-		
+		        
 		if (countName != (groupMap->getNumSeqs())) {
 			vector<string> groupseqsnames = groupMap->getNamesSeqs();
 			
@@ -253,6 +256,7 @@ vector<Sequence> SequenceParser::getSeqs(string g){
 			m->mothurOut("[ERROR]: No sequences available for group " + g + ", please correct."); m->mothurOutEndLine();
 		}else {
 			seqForThisGroup = it->second;
+            if (m->debug) {  m->mothurOut("[DEBUG]: group " + g + " fasta file has " + toString(seqForThisGroup.size()) + " sequences.");  }
 		}
 		
 		return seqForThisGroup; 
@@ -346,6 +350,7 @@ map<string, string> SequenceParser::getNameMap(string g){
 			m->mothurOut("[ERROR]: No nameMap available for group " + g + ", please correct."); m->mothurOutEndLine();
 		}else {
 			nameMapForThisGroup = it->second;
+            if (m->debug) {  m->mothurOut("[DEBUG]: group " + g + " name file has " + toString(nameMapForThisGroup.size()) + " unique sequences.");  }
 		}
 		
 		return nameMapForThisGroup; 

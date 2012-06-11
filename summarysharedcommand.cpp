@@ -744,7 +744,6 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                 //clean up memory
                 for (int i = 0; i < thisItersLookup.size(); i++) { delete thisItersLookup[i]; }
                 thisItersLookup.clear();
-                for (int i = 0; i < calcDists.size(); i++) {  calcDists[i].clear(); }
             }else {
                 if (createPhylip) {
                     for (int i = 0; i < calcDists.size(); i++) {
@@ -776,6 +775,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                     }
                 }
             }
+            for (int i = 0; i < calcDists.size(); i++) {  calcDists[i].clear(); }
 		}
 
         if (iters != 1) {

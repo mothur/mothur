@@ -938,6 +938,8 @@ void ShhherCommand::initPyroCluster(){
     try{
         if (numOTUs < processors) { processors = 1; }
         
+        if (m->debug) { m->mothurOut("[DEBUG]: numSeqs = " + toString(numSeqs) + " numOTUS = " + toString(numOTUs) + " about to alloc a dist vector with size = " + toString((numSeqs * numOTUs)) + ".\n"); }
+        
         dist.assign(numSeqs * numOTUs, 0);
         change.assign(numOTUs, 1);
         centroids.assign(numOTUs, -1);
@@ -946,6 +948,8 @@ void ShhherCommand::initPyroCluster(){
         
         nSeqsBreaks.assign(processors+1, 0);
         nOTUsBreaks.assign(processors+1, 0);
+        
+        if (m->debug) { m->mothurOut("[DEBUG]: made it through the memory allocation.\n"); }
         
         nSeqsBreaks[0] = 0;
         for(int i=0;i<processors;i++){
@@ -2137,6 +2141,7 @@ int ShhherCommand::driver(vector<string> filenames, string thisCompositeFASTAFil
                 vector<int> uniqueLengths;
                 int numFlowCells;
                 
+                if (m->debug) { m->mothurOut("[DEBUG]: About to read flowgrams.\n"); }
                 int numSeqs = getFlowData(flowFileName, seqNameVector, lengths, flowDataIntI, nameMap, numFlowCells);
                 
                 if (m->control_pressed) { break; }
@@ -2193,6 +2198,8 @@ int ShhherCommand::driver(vector<string> filenames, string thisCompositeFASTAFil
                 vector<int> nSeqsBreaks;
                 vector<int> nOTUsBreaks;
                 
+                if (m->debug) { m->mothurOut("[DEBUG]: numSeqs = " + toString(numSeqs) + " numOTUS = " + toString(numOTUs) + " about to alloc a dist vector with size = " + toString((numSeqs * numOTUs)) + ".\n"); }
+                
                 dist.assign(numSeqs * numOTUs, 0);
                 change.assign(numOTUs, 1);
                 centroids.assign(numOTUs, -1);
@@ -2205,6 +2212,8 @@ int ShhherCommand::driver(vector<string> filenames, string thisCompositeFASTAFil
                 nSeqsBreaks[0] = 0;
                 nSeqsBreaks[1] = numSeqs;
                 nOTUsBreaks[1] = numOTUs;
+                
+                if (m->debug) { m->mothurOut("[DEBUG]: done allocating memory, about to denoise.\n"); }
                 
                 if (m->control_pressed) { break; }
                 
@@ -2336,17 +2345,21 @@ int ShhherCommand::getFlowData(string filename, vector<string>& thisSeqNameVecto
 		thisNameMap.clear();
 		
 		flowFile >> numFlowCells;
+        if (m->debug) { m->mothurOut("[DEBUG]: numFlowCells = " + toString(numFlowCells) + ".\n"); }
 		int index = 0;//pcluster
 		while(!flowFile.eof()){
 			
 			if (m->control_pressed) { break; }
 			
 			flowFile >> seqName >> currentNumFlowCells;
+            
 			thisLengths.push_back(currentNumFlowCells);
            
 			thisSeqNameVector.push_back(seqName);
 			thisNameMap[seqName] = index++;//pcluster
-
+            
+            if (m->debug) { m->mothurOut("[DEBUG]: seqName = " + seqName + " length = " + toString(currentNumFlowCells) + " index = " + toString(index) + "\n"); }
+            
 			for(int i=0;i<numFlowCells;i++){
 				flowFile >> intensity;
 				if(intensity > 9.99)	{	intensity = 9.99;	}
@@ -2634,6 +2647,8 @@ int ShhherCommand::getOTUData(int numSeqs, string fileName,  vector<int>& otuDat
 		
 		listFile >> label >> numOTUs;
         
+        if (m->debug) { m->mothurOut("[DEBUG]: Getting OTU Data...\n"); }
+        
 		otuData.assign(numSeqs, 0);
 		cumNumSeqs.assign(numOTUs, 0);
 		nSeqsPerOTU.assign(numOTUs, 0);
@@ -2648,6 +2663,7 @@ int ShhherCommand::getOTUData(int numSeqs, string fileName,  vector<int>& otuDat
 		for(int i=0;i<numOTUs;i++){
 			
 			if (m->control_pressed) { break; }
+            if (m->debug) { m->mothurOut("[DEBUG]: processing OTU " + toString(i) + ".\n"); }
             
 			listFile >> singleOTU;
 			

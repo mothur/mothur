@@ -994,7 +994,8 @@ int ChimeraUchimeCommand::driverGroups(SequenceParser& parser, string outputFNam
 			if (m->control_pressed) { return 0; }
 			
 			//remove file made for uchime
-			m->mothurRemove(filename);
+			if (!m->debug) {  m->mothurRemove(filename);  }
+            else { m->mothurOut("[DEBUG]: saving file: " + filename + ".\n"); }
 			
 			//append files
 			m->appendFiles((outputFName+groups[i]), outputFName); m->mothurRemove((outputFName+groups[i]));
