@@ -1,7 +1,7 @@
 #!/usr/bin/python
 from __future__ import division
 from idlelib.TreeWidget import TreeNode
-from math import log, ceil
+from math import log, ceil, sqrt
 import random
 import inspect
 
@@ -368,7 +368,12 @@ def getDiscardedFeatureIndices(dataSet):
 	print 'total features:', len(featureVectors)
 	return discardedFeatureIndices
 
-
+# standard deviation calculation function
+def getStandardDeviation(featureVector):
+	n = len(featureVector)
+	avg = sum(featureVector) / n
+	standardDeviation = sqrt(sum([ (x - avg) ** 2 for x in featureVector]) / n)
+	return standardDeviation
 
 if __name__ == "__main__":
 	numDecisionTrees = 1
