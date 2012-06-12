@@ -39,7 +39,6 @@ private:
 		
 	vector<int> readFasta(vector<Sequence>&);
     vector<int> readTax(vector<string>&);
-    int readNames(map<string, string>&); 
 	ListVector* getList();
 	
 };

@@ -919,8 +919,8 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
 		else { m->mothurRemove(accnos); } //remove so other files can be renamed to it
         
 		for(int i=0;i<processIDS.size();i++){
-			appendTaxFiles((taxFileName + toString(processIDS[i]) + ".temp"), taxFileName);
-			appendTaxFiles((tempTaxFile + toString(processIDS[i]) + ".temp"), tempTaxFile);
+			m->appendFiles((taxFileName + toString(processIDS[i]) + ".temp"), taxFileName);
+			m->appendFiles((tempTaxFile + toString(processIDS[i]) + ".temp"), tempTaxFile);
             if (!(m->isBlank(accnos + toString(processIDS[i]) + ".temp"))) {
 				nonBlankAccnosFiles.push_back(accnos + toString(processIDS[i]) + ".temp");
 			}else { m->mothurRemove((accnos + toString(processIDS[i]) + ".temp"));  }
@@ -934,7 +934,7 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
 			rename(nonBlankAccnosFiles[0].c_str(), accnos.c_str());
 			
 			for (int h=1; h < nonBlankAccnosFiles.size(); h++) {
-				appendTaxFiles(nonBlankAccnosFiles[h], accnos);
+				m->appendFiles(nonBlankAccnosFiles[h], accnos);
 				m->mothurRemove(nonBlankAccnosFiles[h]);
 			}
 		}else { //recreate the accnosfile if needed
@@ -951,30 +951,6 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
 		exit(1);
 	}
 }
-/**************************************************************************************************/
-
-void ClassifySeqsCommand::appendTaxFiles(string temp, string filename) {
-	try{
-		
-		ofstream output;
-		ifstream input;
-		m->openOutputFileAppend(filename, output);
-		m->openInputFile(temp, input);
-		
-		while(char c = input.get()){
-			if(input.eof())		{	break;			}
-			else				{	output << c;	}
-		}
-		
-		input.close();
-		output.close();
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClassifySeqsCommand", "appendTaxFiles");
-		exit(1);
-	}
-}
-
 //**********************************************************************************************************************
 
 int ClassifySeqsCommand::driver(linePair* filePos, string taxFName, string tempTFName, string accnos, string filename){

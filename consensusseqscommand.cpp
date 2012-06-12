@@ -653,38 +653,29 @@ int ConsensusSeqsCommand::readFasta(){
 
 int ConsensusSeqsCommand::readNames(){
 	 try{
-		 
-		 ifstream in;
-		 m->openInputFile(namefile, in);
-		 
-		 string thisname, repnames;
-		 map<string, string>::iterator it;
-		 
-		 bool error = false;
-		 
-		 while(!in.eof()){
-			 
-			 if (m->control_pressed) { break; }
-			 
-			 in >> thisname;		m->gobble(in);		//read from first column
-			 in >> repnames;			//read from second column
-			 
-			 it = nameMap.find(thisname);
+         map<string, string> temp;
+         map<string, string>::iterator it;
+         bool error = false;
+         
+         m->readNames(namefile, temp); //use central buffered read
+         
+         for (map<string, string>::iterator itTemp = temp.begin(); itTemp != temp.end(); itTemp++) {
+             string thisname, repnames;
+             thisname = itTemp->first;
+             repnames = itTemp->second;
+             
+             it = nameMap.find(thisname);
 			 if (it != nameMap.end()) { //then this sequence was in the fastafile
-				 
+				 nameFileMap[thisname] = repnames;	//for later when outputting the new namesFile if the list file is unique
+                 
 				 vector<string> splitRepNames;
 				 m->splitAtComma(repnames, splitRepNames);
 				 
-				 nameFileMap[thisname] = repnames;	//for later when outputting the new namesFile if the list file is unique
 				 for (int i = 0; i < splitRepNames.size(); i++) { nameMap[splitRepNames[i]] = thisname; }
 				 
 			 }else{	m->mothurOut("[ERROR]: " + thisname + " is not in the fasta file, please correct."); m->mothurOutEndLine(); error = true; }
-			 
-			 m->gobble(in);
-		 }
-		 
-		 in.close();
-		 
+         }
+         
 		 if (error) { m->control_pressed = true; }
  
 		 return 0;

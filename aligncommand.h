@@ -55,7 +55,6 @@ private:
 	
 	int driver(linePair*, string, string, string, string);
 	int createProcesses(string, string, string, string);
-	void appendAlignFiles(string, string); 
 	void appendReportFiles(string, string);
 	
 	#ifdef USE_MPI

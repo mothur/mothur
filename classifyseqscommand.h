@@ -75,7 +75,6 @@ private:
 	bool abort, probs, save, flip;
 	
 	int driver(linePair*, string, string, string, string);
-	void appendTaxFiles(string, string);
 	int createProcesses(string, string, string, string); 
 	string addUnclassifieds(string, int);
 	

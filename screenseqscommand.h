@@ -60,7 +60,6 @@ private:
 	vector<string> outputNames;
 	vector<string> optimize;
 	map<string, int> nameMap;
-	int readNames();
 	
 	int getSummary(vector<unsigned long long>&);
 	int createProcessesCreateSummary(vector<int>&, vector<int>&, vector<int>&, vector<int>&, vector<int>&, string);

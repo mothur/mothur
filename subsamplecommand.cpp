@@ -639,34 +639,13 @@ int SubSampleCommand::getNames() {
 int SubSampleCommand::readNames() {
 	try {
 		
-		ifstream in;
-		m->openInputFile(namefile, in);
-		
-		string thisname, repnames;
-		map<string, vector<string> >::iterator it;
-		
-		while(!in.eof()){
-			
-			if (m->control_pressed) { in.close(); return 0; }
-			
-			in >> thisname;		m->gobble(in);		//read from first column
-			in >> repnames;			//read from second column
-			
-			it = nameMap.find(thisname);
-			if (it == nameMap.end()) {
-				
-				vector<string> splitRepNames;
-				m->splitAtComma(repnames, splitRepNames);
-				
-				nameMap[thisname] = splitRepNames;	
-				for (int i = 0; i < splitRepNames.size(); i++) { names.push_back(splitRepNames[i]); }
-				
-			}else{	m->mothurOut(thisname + " is already in namesfile. I will use first definition."); m->mothurOutEndLine();  }
-			
-			m->gobble(in);
-		}
-		in.close();	
-		
+        nameMap.clear();
+        m->readNames(namefile, nameMap);
+        
+        //save names of all sequences
+        map<string, vector<string> >::iterator it;
+        for (it = nameMap.begin(); it != nameMap.end(); it++) { for (int i = 0; i < (it->second).size(); i++) { names.push_back((it->second)[i]); } }
+        
 		return 0;
 		
 	}

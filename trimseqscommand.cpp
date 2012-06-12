@@ -687,6 +687,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 						currQual.printQScores(trimQualFile);
 					}
 					
+                    
 					if(nameFile != ""){
 						map<string, string>::iterator itName = nameMap.find(currSeq.getName());
 						if (itName != nameMap.end()) {  trimNameFile << itName->first << '\t' << itName->second << endl; }
@@ -708,11 +709,13 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 							
 							outGroupsFile << currSeq.getName() << '\t' << thisGroup << endl;
 							
+                            int numRedundants = 0;
 							if (nameFile != "") {
 								map<string, string>::iterator itName = nameMap.find(currSeq.getName());
 								if (itName != nameMap.end()) { 
 									vector<string> thisSeqsNames; 
 									m->splitAtChar(itName->second, thisSeqsNames, ',');
+                                    numRedundants = thisSeqsNames.size()-1; //we already include ourselves below
 									for (int k = 1; k < thisSeqsNames.size(); k++) { //start at 1 to skip self
 										outGroupsFile << thisSeqsNames[k] << '\t' << thisGroup << endl;
 									}
@@ -720,8 +723,8 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 							}
 							
 							map<string, int>::iterator it = groupCounts.find(thisGroup);
-							if (it == groupCounts.end()) {	groupCounts[thisGroup] = 1; }
-							else { groupCounts[it->first]++; }
+							if (it == groupCounts.end()) {	groupCounts[thisGroup] = 1 + numRedundants; }
+							else { groupCounts[it->first] += (1 + numRedundants); }
 								
 						}
 					}

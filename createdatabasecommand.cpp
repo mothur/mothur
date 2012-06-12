@@ -209,7 +209,7 @@ int CreateDatabaseCommand::execute(){
         
         //names redundants to uniques. backwards to how we normally do it, but each bin is the list file will be a key entry in the map.
         map<string, string> repNames;
-        int numUniqueNamesFile = readNames(repNames);
+        int numUniqueNamesFile = m->readNames(repnamesfile, repNames);
         
         //are there the same number of otus in the fasta and name files
         if (repOtusSizes.size() != numUniqueNamesFile) { m->mothurOut("[ERROR]: you have " + toString(numUniqueNamesFile) + " unique seqs in your repname file, but " + toString(repOtusSizes.size()) + " seqs in your repfasta file.  These should match.\n"); m->control_pressed = true; }
@@ -391,32 +391,6 @@ vector<int> CreateDatabaseCommand::readFasta(vector<Sequence>& seqs){
     }
 	catch(exception& e) {
 		m->errorOut(e, "CreateDatabaseCommand", "readFasta");
-		exit(1);
-	}
-}
-/**********************************************************************************************************************/
-int CreateDatabaseCommand::readNames(map<string, string>& nameMap) { 
-	try {
-		
-		//open input file
-		ifstream in;
-		m->openInputFile(repnamesfile, in);
-		
-		while (!in.eof()) {
-			if (m->control_pressed) { break; }
-			
-			string firstCol, secondCol;
-			in >> firstCol >> secondCol; m->gobble(in);
-			
-			nameMap[secondCol] = firstCol;
-		}
-		in.close();
-		
-		return nameMap.size();
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "CreateDatabaseCommand", "readNames");
 		exit(1);
 	}
 }

@@ -97,6 +97,7 @@ class MothurOut {
 		string getline(istringstream&);
 		void gobble(istream&);
 		void gobble(istringstream&);
+        vector<string> splitWhiteSpace(string& rest, char[], int);
 		map<string, int> readNames(string);
 		int readNames(string, map<string, string>&);
 		int readNames(string, map<string, vector<string> >&);
