@@ -18,6 +18,9 @@ class DecisionTree:
 		self.rootNode = None
 		self.globalDiscardedFeatureIndices = globalDiscardedFeatureIndices
 
+		# TODO optimum feature is log2(totalFeatures), we might need to modify this one
+		self.optimumFeatureSubsetSize = int(ceil(log(self.numFeatures, 2)))
+
 		for i in range(0, self.numSamples):
 			outcome = baseDataSet[i][-1]
 			if outcome not in self.classes:
@@ -26,6 +29,7 @@ class DecisionTree:
 
 		self.createBootStrappedSamples()
 		self.buildDecisionTree()
+
 
 	def createBootStrappedSamples(self):
 		isInTrainingSamples = [False for i in range(0, self.numSamples)]
@@ -54,19 +58,26 @@ class DecisionTree:
 
 
 	# randomly select log2(totalFeatures) number features for each node
-	def selectFeatureSubsetRandomly(self, globalDiscardedFeatureIndices, locallDiscardedFeatureIndices):
+	def selectFeatureSubsetRandomly(self, globalDiscardedFeatureIndices, localDiscardedFeatureIndices):
 		print "selectFeatureSubsetRandomly()"
-		# TODO optimum feature is log2(totalFeatures), we might need to modify this one
-		# FIXME this is decision tree level global, so no need to recalculate this over and over again
-		self.optimumFeatureSubsetSize = int(ceil(log(self.numFeatures, 2)))
 
 		featureSubsetIndices = []
-		while len(featureSubsetIndices) < self.optimumFeatureSubsetSize:
+
+		combinedDiscardedFeatureIndices = []
+		combinedDiscardedFeatureIndices.extend(globalDiscardedFeatureIndices)
+		combinedDiscardedFeatureIndices.extend(localDiscardedFeatureIndices)
+
+		numberOfRemainingSuitableFeatures = self.numFeatures - len(combinedDiscardedFeatureIndices)
+
+		if numberOfRemainingSuitableFeatures < self.optimumFeatureSubsetSize: currentFeatureSubsetSize = numberOfRemainingSuitableFeatures
+		else: currentFeatureSubsetSize = self.optimumFeatureSubsetSize
+
+		while len(featureSubsetIndices) < currentFeatureSubsetSize:
 			randomIndex = random.randint(0, self.numFeatures - 1)
-			# FIXME the loop goes infininite here since it cannot find remaining features, need a way to break the loop
-			if (randomIndex not in featureSubsetIndices) and (randomIndex not in globalDiscardedFeatureIndices) and (randomIndex not in locallDiscardedFeatureIndices):
+			# TODO the loop goes infinite here since it cannot find remaining features, need a way to break the loop
+			if (randomIndex not in featureSubsetIndices) and (randomIndex not in combinedDiscardedFeatureIndices):
 				featureSubsetIndices.append(randomIndex)
-		print 'returning from selectFeatureSubsetRandomly()'
+#		print 'returning from selectFeatureSubsetRandomly()'
 		return sorted(featureSubsetIndices)
 
 	def buildDecisionTree(self):
@@ -188,7 +199,7 @@ class DecisionTree:
 			if featureOutputPair[i][1] != searchOutput:
 				# we need to make sure that the split point does not contain a zero
 				splitOnValue = featureOutputPair[i][0]
-				if splitOnValue == 0:
+				if (splitOnValue == 0):
 					print "splitOnValue 0 detected, not adding this to splitIndex"
 					continue
 				splitPoints.append(i)
@@ -308,7 +319,7 @@ class TreeNode:
 	def createLocalDiscardedFeatureList(self):
 		print "createLocalDiscardedFeatureList()"
 		for i, x in enumerate(self.bootstrappedFeatureVectors):
-			if getStandardDeviation(x) <= 0:
+			if i not in globalDiscardedFeatureIndices and getStandardDeviation(x) <= 0:
 				self.localDiscardedFeatureIndices.append(i)
 		print self.localDiscardedFeatureIndices
 
@@ -392,7 +403,7 @@ def getDiscardedFeatureIndices(dataSet):
 # standard deviation calculation function
 def getStandardDeviation(featureVector):
 	n = len(featureVector)
-	if n == 0:
+	if not n:
 		# standard deviation cannot be negative, this special value is returned to let the caller
 		# function know that the list is empty
 		return -1
