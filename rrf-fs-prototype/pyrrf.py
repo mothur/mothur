@@ -193,17 +193,27 @@ class DecisionTree:
 
 		#	find the splitPoints that has the values where the changes has occurred,
 		#	so these 'splitPoints' are best places to split
-		searchOutput = featureOutputPair[0][1]
+#		searchOutput = featureOutputPair[0][1]
 		splitPoints = []
-		for i in range(0, len(featureVector)):
-			if featureOutputPair[i][1] != searchOutput:
-				# we need to make sure that the split point does not contain a zero
-				splitOnValue = featureOutputPair[i][0]
-				if (splitOnValue == 0):
-					print "splitOnValue 0 detected, not adding this to splitIndex"
-					continue
-				splitPoints.append(i)
-				searchOutput = featureOutputPair[i][1]
+		uniqueFeatureValues = [ featureOutputPair[0][0] ]
+
+		# trying out a different implementation of split points calculation logic
+		for index, pair in enumerate(featureOutputPair):
+			if pair[0] not in uniqueFeatureValues:
+				uniqueFeatureValues.append(pair[0])
+				splitPoints.append(index)
+
+
+#		for i in range(0, len(featureVector)):
+#			if featureOutputPair[i][1] != searchOutput:
+#				# we need to make sure that the split point does not contain a zero
+#				splitOnValue = featureOutputPair[i][0]
+#				if splitOnValue == 0:
+#					print "splitOnValue 0 detected, not adding this to splitIndex"
+#					continue
+#				splitPoints.append(i)
+#				searchOutput = featureOutputPair[i][1]
+#
 
 		#	now we have the splitPoints, so we need to find which of them gives
 		#	us the highest entropy gain
