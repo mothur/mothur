@@ -3,12 +3,11 @@ from __future__ import division
 from idlelib.TreeWidget import TreeNode
 from math import log, ceil, sqrt
 import random
-import inspect
 
 
 # The main algorithm resides here, it the manipulator class
 class DecisionTree:
-	def __init__(self, baseDataSet, discardedFeatureIndices):
+	def __init__(self, baseDataSet, globalDiscardedFeatureIndices):
 		self.baseDataSet = baseDataSet
 		self.numSamples = len(baseDataSet)
 		self.numFeatures = len(baseDataSet[0]) - 1
@@ -17,7 +16,7 @@ class DecisionTree:
 		self.bootstrappedTrainingSamples = []
 		self.bootstrappedTestSamples = []
 		self.rootNode = None
-		self.discardedFeatureIndices = discardedFeatureIndices
+		self.globalDiscardedFeatureIndices = globalDiscardedFeatureIndices
 
 		for i in range(0, self.numSamples):
 			outcome = baseDataSet[i][-1]
@@ -55,15 +54,19 @@ class DecisionTree:
 
 
 	# randomly select log2(totalFeatures) number features for each node
-	def selectFeatureSubsetRandomly(self, discardedFeatureIndices):
+	def selectFeatureSubsetRandomly(self, globalDiscardedFeatureIndices, locallDiscardedFeatureIndices):
+		print "selectFeatureSubsetRandomly()"
 		# TODO optimum feature is log2(totalFeatures), we might need to modify this one
+		# FIXME this is decision tree level global, so no need to recalculate this over and over again
 		self.optimumFeatureSubsetSize = int(ceil(log(self.numFeatures, 2)))
 
 		featureSubsetIndices = []
 		while len(featureSubsetIndices) < self.optimumFeatureSubsetSize:
 			randomIndex = random.randint(0, self.numFeatures - 1)
-			if (randomIndex not in featureSubsetIndices) and (randomIndex not in discardedFeatureIndices):
+			# FIXME the loop goes infininite here since it cannot find remaining features, need a way to break the loop
+			if (randomIndex not in featureSubsetIndices) and (randomIndex not in globalDiscardedFeatureIndices) and (randomIndex not in locallDiscardedFeatureIndices):
 				featureSubsetIndices.append(randomIndex)
+		print 'returning from selectFeatureSubsetRandomly()'
 		return sorted(featureSubsetIndices)
 
 	def buildDecisionTree(self):
@@ -84,7 +87,6 @@ class DecisionTree:
 			print tabs + caption + ' [ gen: ' + str(treeNode.generation) + ' ] ( classified to: ' + str(treeNode.outputClass) +', samples: ' + str(treeNode.numSamples) +' )'
 
 
-
 	def splitRecursively(self, treeNode):
 		print "splitRecursively()"
 
@@ -100,10 +102,10 @@ class DecisionTree:
 			print "Already classified: Case 2"
 			treeNode.isLeaf = True
 			return
-
+		
 #		nullFeatureIndices = self.findNullFeatures(treeNode.bootstrappedTrainingSamples)
-		treeNode.featureSubsetIndices = self.selectFeatureSubsetRandomly(self.discardedFeatureIndices)
-		print "discardedFeatureIndices:", discardedFeatureIndices
+		treeNode.featureSubsetIndices = self.selectFeatureSubsetRandomly(self.globalDiscardedFeatureIndices, treeNode.localDiscardedFeatureIndices)
+		print "discardedFeatureIndices:", globalDiscardedFeatureIndices
 		print "featureSubsetIndices:", treeNode.featureSubsetIndices
 		# DEBUG
 #		treeNode.featureSubsetIndices = [100, 103, 161, 163, 197, 355, 460, 463, 507, 509]
@@ -264,9 +266,15 @@ class DecisionTree:
 
 	def checkIfAlreadyClassified(self, treeNode):
 		print "checkIfAlreadyClassified()"
+		print "len(bootstrappedTrainingSamples):", len(treeNode.bootstrappedTrainingSamples)
+#		if len(treeNode.bootstrappedTrainingSamples) < 10:
+#			print treeNode.bootstrappedTrainingSamples
 		outPutClasses = []
-		for x in treeNode.bootstrappedTrainingSamples:
-			if x[treeNode.numFeatures] not in outPutClasses: outPutClasses.append(x[treeNode.numFeatures])
+		for i, x in enumerate(treeNode.bootstrappedTrainingSamples):
+			print "index:", i
+			if x[treeNode.numFeatures] not in outPutClasses:
+				print "appending: ", x[treeNode.numFeatures]
+				outPutClasses.append(x[treeNode.numFeatures])
 		if len(outPutClasses) < 2: return True, outPutClasses[0]
 		else: return False, None
 
@@ -293,6 +301,17 @@ class TreeNode:
 		self.leftChildNode = None
 		self.rightChildNode = None
 
+		self.localDiscardedFeatureIndices = []
+
+		self.createLocalDiscardedFeatureList()
+
+	def createLocalDiscardedFeatureList(self):
+		print "createLocalDiscardedFeatureList()"
+		for i, x in enumerate(self.bootstrappedFeatureVectors):
+			if getStandardDeviation(x) <= 0:
+				self.localDiscardedFeatureIndices.append(i)
+		print self.localDiscardedFeatureIndices
+
 	def calcFeatureVectors(self):
 		print "calcFeatureVectors()"
 		self.bootstrappedFeatureVectors = [[] for x in range (0, self.numFeatures)]
@@ -304,16 +323,16 @@ class TreeNode:
 ''' The main algorithm for Regularized Random Forest, it creates a number of decision trees and then aggregates them
 	to find the solution '''
 class RegularizedRandomForest:
-	def __init__(self, dataSet, discardedFeatureIndices, numDecisionTrees):
+	def __init__(self, dataSet, globalDiscardedFeatureIndices, numDecisionTrees):
 		self.decisionTrees = []
 		self.dataSet = dataSet
 		self.numDecisionTrees = numDecisionTrees
-		self.discardedFeatureIndices = discardedFeatureIndices
+		self.globalDiscardedFeatureIndices = globalDiscardedFeatureIndices
 
 	def populateDecisionTrees(self):
 		for i in range(0, self.numDecisionTrees):
 #			self.decisionTrees.append(createDecisionTree(self.dataSet))
-			decisionTree = DecisionTree(dataSet, discardedFeatureIndices)
+			decisionTree = DecisionTree(dataSet, globalDiscardedFeatureIndices)
 			self.decisionTrees.append(decisionTree)
 
 		# TODO do the usual stuffs (aggregation) with the decisionTrees
@@ -360,10 +379,12 @@ def readFileContents(fileName):
 def getDiscardedFeatureIndices(dataSet):
 	featureVectors = zip(*dataSet)[:-1]
 	discardedFeatureIndices = []
-	for i, x in enumerate(featureVectors):
-		total = sum(x)
-		zeroCount = x.count(0)
-		if total < 800 or zeroCount > 90: discardedFeatureIndices.append(i)
+	for index, featureVector in enumerate(featureVectors):
+		total = sum(featureVector)
+		zeroCount = featureVector.count(0)
+		stdDeviation = getStandardDeviation(featureVector)
+		if total < 800 or zeroCount > len(dataSet) / 2 or stdDeviation == 0:
+			discardedFeatureIndices.append(index)
 	print 'number of discarded features:', len(discardedFeatureIndices)
 	print 'total features:', len(featureVectors)
 	return discardedFeatureIndices
@@ -371,6 +392,10 @@ def getDiscardedFeatureIndices(dataSet):
 # standard deviation calculation function
 def getStandardDeviation(featureVector):
 	n = len(featureVector)
+	if n == 0:
+		# standard deviation cannot be negative, this special value is returned to let the caller
+		# function know that the list is empty
+		return -1
 	avg = sum(featureVector) / n
 	standardDeviation = sqrt(sum([ (x - avg) ** 2 for x in featureVector]) / n)
 	return standardDeviation
@@ -381,7 +406,7 @@ if __name__ == "__main__":
 	# small-alter.txt has a modified dataset
 #	dataSet = readFileContents('Datasets/small-alter.txt')
 	dataSet = readFileContents('Datasets/inpatient.final.an.0.03.subsample.avg.matrix')
-	discardedFeatureIndices = getDiscardedFeatureIndices(dataSet)
+	globalDiscardedFeatureIndices = getDiscardedFeatureIndices(dataSet)
 #	for x in discardedFeatureIndices: print x
 
 #	mouseData = ["Datasets/final.an.0.03.subsample.0.03.pick.shared", "Datasets/mouse.sex_time.design"]
@@ -391,7 +416,7 @@ if __name__ == "__main__":
 #	discardedFeatureIndices = fileReader.getDiscardedFeatureIndices()
 
 
-	regularizedRandomForest = RegularizedRandomForest(dataSet, discardedFeatureIndices, numDecisionTrees)
+	regularizedRandomForest = RegularizedRandomForest(dataSet, globalDiscardedFeatureIndices, numDecisionTrees)
 	regularizedRandomForest.populateDecisionTrees()
 
 #	createDecisionTree(dataSet)
