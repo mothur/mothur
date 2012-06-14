@@ -83,6 +83,7 @@ class DecisionTree:
 	def buildDecisionTree(self):
 		print "buildDecisionTree()"
 		treeNode = TreeNode(self.bootstrappedTrainingSamples, self.numFeatures, self.numSamples, self.numOutputClasses, 0)
+		self.rootNode = treeNode
 		self.splitRecursively(treeNode)
 		self.printTree(treeNode, "root")
 
@@ -132,8 +133,8 @@ class DecisionTree:
 
 		print "bestFeatureToSplitOn:", bestFeatureToSplitOn, "bestFeatureSplitValue:", bestFeatureSplitValue, "bestFeatureSplitEntropy:", bestFeatureSplitEntropy
 		leftChildSamples, rightChildSamples = self.getSplitPopulation(treeNode)
-		print "leftChildSamples:", leftChildSamples
-		print "rightChildSamples:", rightChildSamples
+		# print "leftChildSamples:", leftChildSamples
+		# print "rightChildSamples:", rightChildSamples
 
 		leftChildNode = TreeNode(leftChildSamples, self.numFeatures, len(leftChildSamples), self.numOutputClasses, treeNode.generation + 1)
 		rightChildNode = TreeNode(rightChildSamples, self.numFeatures, len(rightChildSamples), self.numOutputClasses, treeNode.generation + 1)
@@ -165,7 +166,7 @@ class DecisionTree:
 		featureSubsetSplitValues = []
 		for i in range(0, len(featureSubsetIndices)):
 			tryIndex = featureSubsetIndices[i]
-			print "tryIndex", tryIndex
+			print "trying feature of index:", tryIndex
 			featureMinEntropy, featureSplitValue = self.getMinEntropyOfFeature(bootstrappedFeatureVectors[tryIndex], bootstrappedOutputVector, self.numOutputClasses)
 			featureSubsetEntropies.append(featureMinEntropy)
 			featureSubsetSplitValues.append(featureSplitValue)
@@ -198,6 +199,8 @@ class DecisionTree:
 		uniqueFeatureValues = [ featureOutputPair[0][0] ]
 
 		# trying out a different implementation of split points calculation logic
+		# this seems to be working fine
+		# need to come up with a logic to speed this up
 		for index, pair in enumerate(featureOutputPair):
 			if pair[0] not in uniqueFeatureValues:
 				uniqueFeatureValues.append(pair[0])
@@ -292,12 +295,37 @@ class DecisionTree:
 #			print treeNode.bootstrappedTrainingSamples
 		outPutClasses = []
 		for i, x in enumerate(treeNode.bootstrappedTrainingSamples):
-			print "index:", i
+			# print "index:", i
 			if x[treeNode.numFeatures] not in outPutClasses:
 				print "appending: ", x[treeNode.numFeatures]
 				outPutClasses.append(x[treeNode.numFeatures])
 		if len(outPutClasses) < 2: return True, outPutClasses[0]
 		else: return False, None
+
+	def calcTreeVariableImportanceAndError(self):
+		pass
+
+	# uses the evaluateSample() function to calculate the error rate of the tree
+	def calcTreeErrorRate(self):
+		numCorrect = 0
+		for testSample in self.bootstrappedTestSamples:
+			actualSampleOutputClass = testSample[self.numFeatures]
+			predictedSampleOutputClass = self.evaluateSample(testSample)
+			if actualSampleOutputClass == predictedSampleOutputClass:
+				numCorrect += 1
+
+		treeErrorRate = 1 - (numCorrect / len(self.bootstrappedTestSamples))
+		print "treeErrorRate:", treeErrorRate
+
+	# this function will be used to get the predicted output by giving it a test data
+	def evaluateSample(self, testSample):
+		node = self.rootNode
+		while True:
+			if node.isLeaf: return node.outputClass
+
+			sampleSplitFeatureValue = testSample[node.splitFeatureIndex]
+			if sampleSplitFeatureValue < node.splitFeatureValue: node = node.leftChildNode
+			else: node = node.rightChildNode
 
 
 class TreeNode:
@@ -354,6 +382,9 @@ class RegularizedRandomForest:
 		for i in range(0, self.numDecisionTrees):
 #			self.decisionTrees.append(createDecisionTree(self.dataSet))
 			decisionTree = DecisionTree(dataSet, globalDiscardedFeatureIndices)
+
+			decisionTree.calcTreeErrorRate()
+
 			self.decisionTrees.append(decisionTree)
 
 		# TODO do the usual stuffs (aggregation) with the decisionTrees
@@ -397,18 +428,18 @@ def readFileContents(fileName):
 	for line in file: data.append([int(y) for y in line.strip().split()])
 	return data
 
-def getDiscardedFeatureIndices(dataSet):
+def getGlobalDiscardedFeatureIndices(dataSet):
 	featureVectors = zip(*dataSet)[:-1]
-	discardedFeatureIndices = []
+	globalDiscardedFeatureIndices = []
 	for index, featureVector in enumerate(featureVectors):
 		total = sum(featureVector)
 		zeroCount = featureVector.count(0)
-		stdDeviation = getStandardDeviation(featureVector)
-		if total < 800 or zeroCount > len(dataSet) / 2 or stdDeviation == 0:
-			discardedFeatureIndices.append(index)
-	print 'number of discarded features:', len(discardedFeatureIndices)
+#		if total < 800 or zeroCount > len(dataSet) / 2 or getStandardDeviation(featureVector) <= 0:
+		if getStandardDeviation(featureVector) <= 0:
+			globalDiscardedFeatureIndices.append(index)
+	print 'number of global discarded features:', len(globalDiscardedFeatureIndices)
 	print 'total features:', len(featureVectors)
-	return discardedFeatureIndices
+	return globalDiscardedFeatureIndices
 
 # standard deviation calculation function
 def getStandardDeviation(featureVector):
@@ -427,7 +458,7 @@ if __name__ == "__main__":
 	# small-alter.txt has a modified dataset
 #	dataSet = readFileContents('Datasets/small-alter.txt')
 	dataSet = readFileContents('Datasets/inpatient.final.an.0.03.subsample.avg.matrix')
-	globalDiscardedFeatureIndices = getDiscardedFeatureIndices(dataSet)
+	globalDiscardedFeatureIndices = getGlobalDiscardedFeatureIndices(dataSet)
 #	for x in discardedFeatureIndices: print x
 
 #	mouseData = ["Datasets/final.an.0.03.subsample.0.03.pick.shared", "Datasets/mouse.sex_time.design"]
