@@ -4,6 +4,7 @@ from idlelib.TreeWidget import TreeNode
 from math import log, ceil, sqrt
 import random
 
+DEBUG_MODE = False
 
 # The main algorithm resides here, it the manipulator class
 class DecisionTree:
@@ -60,7 +61,7 @@ class DecisionTree:
 
 	# randomly select log2(totalFeatures) number features for each node
 	def selectFeatureSubsetRandomly(self, globalDiscardedFeatureIndices, localDiscardedFeatureIndices):
-		print "selectFeatureSubsetRandomly()"
+		if DEBUG_MODE: print "selectFeatureSubsetRandomly()"
 
 		featureSubsetIndices = []
 
@@ -82,11 +83,11 @@ class DecisionTree:
 		return sorted(featureSubsetIndices)
 
 	def buildDecisionTree(self):
-		print "buildDecisionTree()"
+		if DEBUG_MODE: print "buildDecisionTree()"
 		treeNode = TreeNode(self.bootstrappedTrainingSamples, self.numFeatures, self.numSamples, self.numOutputClasses, 0)
 		self.rootNode = treeNode
 		self.splitRecursively(treeNode)
-		self.printTree(treeNode, "root")
+		if DEBUG_MODE: self.printTree(treeNode, "root")
 
 	def printTree(self, treeNode, caption):
 		tabs = ""
@@ -101,25 +102,25 @@ class DecisionTree:
 
 
 	def splitRecursively(self, treeNode):
-		print "splitRecursively()"
+		if DEBUG_MODE: print "splitRecursively()"
 
 		# return immediately if this node is just a leaf, no recursion is needed
 		if treeNode.numSamples < 2:
-			print "Already classified: Case 1"
+			if DEBUG_MODE: print "Already classified: Case 1"
 			treeNode.isLeaf = True
 			treeNode.outputClass = treeNode.bootstrappedTrainingSamples[0][treeNode.numFeatures]
 			return
 
 		ifAlreadyClassified, treeNode.outputClass = self.checkIfAlreadyClassified(treeNode)
 		if ifAlreadyClassified:
-			print "Already classified: Case 2"
+			if DEBUG_MODE: print "Already classified: Case 2"
 			treeNode.isLeaf = True
 			return
 		
 #		nullFeatureIndices = self.findNullFeatures(treeNode.bootstrappedTrainingSamples)
 		treeNode.featureSubsetIndices = self.selectFeatureSubsetRandomly(self.globalDiscardedFeatureIndices, treeNode.localDiscardedFeatureIndices)
-		print "discardedFeatureIndices:", globalDiscardedFeatureIndices
-		print "featureSubsetIndices:", treeNode.featureSubsetIndices
+		if DEBUG_MODE: print "discardedFeatureIndices:", globalDiscardedFeatureIndices
+		if DEBUG_MODE: print "featureSubsetIndices:", treeNode.featureSubsetIndices
 		# DEBUG
 #		treeNode.featureSubsetIndices = [100, 103, 161, 163, 197, 355, 460, 463, 507, 509]
 
@@ -132,7 +133,7 @@ class DecisionTree:
 		treeNode.splitFeatureValue = bestFeatureSplitValue
 		treeNode.splitFeatureEntropy = bestFeatureSplitEntropy
 
-		print "bestFeatureToSplitOn:", bestFeatureToSplitOn, "bestFeatureSplitValue:", bestFeatureSplitValue, "bestFeatureSplitEntropy:", bestFeatureSplitEntropy
+		if DEBUG_MODE: print "bestFeatureToSplitOn:", bestFeatureToSplitOn, "bestFeatureSplitValue:", bestFeatureSplitValue, "bestFeatureSplitEntropy:", bestFeatureSplitEntropy
 		leftChildSamples, rightChildSamples = self.getSplitPopulation(treeNode)
 		# print "leftChildSamples:", leftChildSamples
 		# print "rightChildSamples:", rightChildSamples
@@ -160,20 +161,20 @@ class DecisionTree:
 		bootstrappedOutputVector = node.bootstrappedOutputVector
 		featureSubsetIndices = node.featureSubsetIndices
 
-		print "getBestFeatureToSplitOn()"
+		if DEBUG_MODE: print "getBestFeatureToSplitOn()"
 #		for x in bootstrappedFeatureVectors: print x
 #		print "featureSubsetIndices: ", featureSubsetIndices
 		featureSubsetEntropies = []
 		featureSubsetSplitValues = []
 		for i in range(0, len(featureSubsetIndices)):
 			tryIndex = featureSubsetIndices[i]
-			print "trying feature of index:", tryIndex
+			if DEBUG_MODE: print "trying feature of index:", tryIndex
 			featureMinEntropy, featureSplitValue = self.getMinEntropyOfFeature(bootstrappedFeatureVectors[tryIndex], bootstrappedOutputVector, self.numOutputClasses)
 			featureSubsetEntropies.append(featureMinEntropy)
 			featureSubsetSplitValues.append(featureSplitValue)
 
-		print "featureSubsetEntropies:", featureSubsetEntropies
-		print "featureSubsetSplitValues", featureSubsetSplitValues
+		if DEBUG_MODE: print "featureSubsetEntropies:", featureSubsetEntropies
+		if DEBUG_MODE: print "featureSubsetSplitValues", featureSubsetSplitValues
 
 		featureMinEntropy = min(featureSubsetEntropies)
 		bestFeatureToSplitOn = featureSubsetEntropies.index(featureMinEntropy)
@@ -185,11 +186,11 @@ class DecisionTree:
 		return featureSubsetIndices[bestFeatureToSplitOn], bestFeatureSplitValue, featureMinEntropy
 
 	def getMinEntropyOfFeature(self, featureVector, outputVector, numOutputClasses):
-		print "getMinEntropyOfFeature()"
+		if DEBUG_MODE: print "getMinEntropyOfFeature()"
 		# create feature vs output tuple
 		featureOutputPair = [[featureVector[x], outputVector[x]] for x in range(0, len(featureVector))]
 		featureOutputPair = sorted(featureOutputPair, key = lambda x: x[0])
-		print "featureOutputPair", featureOutputPair
+		if DEBUG_MODE: print "featureOutputPair", featureOutputPair
 
 		#	for x in featureOutputPair: print x
 
@@ -221,7 +222,7 @@ class DecisionTree:
 
 		#	now we have the splitPoints, so we need to find which of them gives
 		#	us the highest entropy gain
-		print "splitPoints:", splitPoints
+		if DEBUG_MODE: print "splitPoints:", splitPoints
 
 		# if we had too many zero containing split points, that means we ignored them all, and we have
 		# now an empty split point list, so we need to check this before going further
@@ -239,7 +240,7 @@ class DecisionTree:
 
 	# calculate all the possible splits for a feature vector and then return the value of the best split
 	def getBestSplitAndMinEntropy(self, featureOutputPair, splitPoints, numOutputClasses):
-		print "getBestSplitAndMinEntropy()"
+		if DEBUG_MODE: print "getBestSplitAndMinEntropy()"
 		numSamples = len(featureOutputPair)
 #		print "numSamples:", numSamples
 
@@ -257,13 +258,13 @@ class DecisionTree:
 			upperEntropyOfSplit = self.calcSplitEntropy(featureOutputPair, index, numOutputClasses, True)
 			# call for lower portion
 			lowerEntropyOfSplit = self.calcSplitEntropy(featureOutputPair, index, numOutputClasses, False)
-			print "upperEntropyOfSplit:", upperEntropyOfSplit, "lowerEntropyOfSplit:", lowerEntropyOfSplit
-			print "numLessThanValueAtSplitPoint:", numLessThanValueAtSplitPoint, "numGreaterThanValueAtSplitPoint:", numGreaterThanValueAtSplitPoint
+			if DEBUG_MODE: print "upperEntropyOfSplit:", upperEntropyOfSplit, "lowerEntropyOfSplit:", lowerEntropyOfSplit
+			if DEBUG_MODE: print "numLessThanValueAtSplitPoint:", numLessThanValueAtSplitPoint, "numGreaterThanValueAtSplitPoint:", numGreaterThanValueAtSplitPoint
 			totalEntropy = (numLessThanValueAtSplitPoint * upperEntropyOfSplit + numGreaterThanValueAtSplitPoint * lowerEntropyOfSplit) / numSamples
 #			print "totalEntropy", totalEntropy
 			entropies.append(totalEntropy)
 
-		print "entropies:", entropies
+		if DEBUG_MODE: print "entropies:", entropies
 		minEntropy = min(entropies)
 		minEntropyIndex = entropies.index(minEntropy)
 		return minEntropy, minEntropyIndex
@@ -290,21 +291,21 @@ class DecisionTree:
 		return splitEntropy
 
 	def checkIfAlreadyClassified(self, treeNode):
-		print "checkIfAlreadyClassified()"
-		print "len(bootstrappedTrainingSamples):", len(treeNode.bootstrappedTrainingSamples)
+		if DEBUG_MODE: print "checkIfAlreadyClassified()"
+		if DEBUG_MODE: print "len(bootstrappedTrainingSamples):", len(treeNode.bootstrappedTrainingSamples)
 #		if len(treeNode.bootstrappedTrainingSamples) < 10:
 #			print treeNode.bootstrappedTrainingSamples
 		outPutClasses = []
 		for i, x in enumerate(treeNode.bootstrappedTrainingSamples):
 			# print "index:", i
 			if x[treeNode.numFeatures] not in outPutClasses:
-				print "appending: ", x[treeNode.numFeatures]
+				if DEBUG_MODE: print "appending: ", x[treeNode.numFeatures]
 				outPutClasses.append(x[treeNode.numFeatures])
 		if len(outPutClasses) < 2: return True, outPutClasses[0]
 		else: return False, None
 
 	def calcTreeVariableImportanceAndError(self):
-		print "calcTreeVariableImportanceAndError()"
+		if DEBUG_MODE: print "calcTreeVariableImportanceAndError()"
 		numCorrect, treeErrorRate = self.calcTreeErrorRate()
 		print "len(self.bootstrappedTestSamples):", len(self.bootstrappedTestSamples)
 		print "numCorrect:", numCorrect
@@ -400,14 +401,14 @@ class TreeNode:
 		self.createLocalDiscardedFeatureList()
 
 	def createLocalDiscardedFeatureList(self):
-		print "createLocalDiscardedFeatureList()"
+		if DEBUG_MODE: print "createLocalDiscardedFeatureList()"
 		for i, x in enumerate(self.bootstrappedFeatureVectors):
 			if i not in globalDiscardedFeatureIndices and getStandardDeviation(x) <= 0:
 				self.localDiscardedFeatureIndices.append(i)
-		print self.localDiscardedFeatureIndices
+		if DEBUG_MODE: print self.localDiscardedFeatureIndices
 
 	def calcFeatureVectors(self):
-		print "calcFeatureVectors()"
+		if DEBUG_MODE: print "calcFeatureVectors()"
 		self.bootstrappedFeatureVectors = [[] for x in range (0, self.numFeatures)]
 		for i in range(0, self.numSamples):
 			for j in range(0, self.numFeatures):
@@ -482,8 +483,8 @@ def getGlobalDiscardedFeatureIndices(dataSet):
 #		if total < 800 or zeroCount > len(dataSet) / 2 or getStandardDeviation(featureVector) <= 0:
 		if getStandardDeviation(featureVector) <= 0:
 			globalDiscardedFeatureIndices.append(index)
-	print 'number of global discarded features:', len(globalDiscardedFeatureIndices)
-	print 'total features:', len(featureVectors)
+	if DEBUG_MODE: print 'number of global discarded features:', len(globalDiscardedFeatureIndices)
+	if DEBUG_MODE: print 'total features:', len(featureVectors)
 	return globalDiscardedFeatureIndices
 
 # standard deviation calculation function
