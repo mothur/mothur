@@ -17,7 +17,7 @@ class DecisionTree:
 		self.bootstrappedTestSamples = []
 		self.rootNode = None
 		self.globalDiscardedFeatureIndices = globalDiscardedFeatureIndices
-		self.variableImportance = [0 for x in range(0, self.numFeatures)]
+		self.variableImportanceList = [0 for x in range(0, self.numFeatures)]
 
 		# TODO optimum feature is log2(totalFeatures), we might need to modify this one
 		self.optimumFeatureSubsetSize = int(ceil(log(self.numFeatures, 2)))
@@ -320,9 +320,16 @@ class DecisionTree:
 				predictedSampleOutputClass = self.evaluateSample(shuffledSample)
 				if actualSampleOutputClass == predictedSampleOutputClass:
 					numCorrectAfterShuffle += 1
-			self.variableImportance[i] += (numCorrect - numCorrectAfterShuffle)
+			self.variableImportanceList[i] += (numCorrect - numCorrectAfterShuffle)
 
-		print "self.variableImportance:", self.variableImportance
+#		print "self.variableImportanceList:", self.variableImportanceList
+
+		variableRanks = []
+		for i, x in enumerate(self.variableImportanceList):
+			if x > 0: variableRanks.append([i, x])
+		variableRanks = sorted(variableRanks, key = lambda x: x[1], reverse = True)
+		print "variableRanks:", variableRanks
+
 
 	# given a sample and a featureIndex, it randomly shuffles that only specified feature
 	# and returns the whole dataset
