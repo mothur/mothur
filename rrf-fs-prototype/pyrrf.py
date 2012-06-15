@@ -17,6 +17,7 @@ class DecisionTree:
 		self.bootstrappedTestSamples = []
 		self.rootNode = None
 		self.globalDiscardedFeatureIndices = globalDiscardedFeatureIndices
+		self.variableImportance = [0 for x in range(0, self.numFeatures)]
 
 		# TODO optimum feature is log2(totalFeatures), we might need to modify this one
 		self.optimumFeatureSubsetSize = int(ceil(log(self.numFeatures, 2)))
@@ -303,7 +304,31 @@ class DecisionTree:
 		else: return False, None
 
 	def calcTreeVariableImportanceAndError(self):
-		pass
+		print "calcTreeVariableImportanceAndError()"
+		numCorrect, treeErrorRate = self.calcTreeErrorRate()
+		print "treeErrorRate:", treeErrorRate
+		print "numCorrect:", numCorrect
+
+		for i in range(0, self.numFeatures):
+			randomlySampledTestData = self.randomlyShuffleAttribute(self.bootstrappedTestSamples, i)
+
+			numCorrectAfterShuffle = 0
+			for shuffledSample in randomlySampledTestData:
+				actualSampleOutputClass = shuffledSample[self.numFeatures]
+				predictedSampleOutputClass = self.evaluateSample(shuffledSample)
+				if actualSampleOutputClass == predictedSampleOutputClass:
+					numCorrectAfterShuffle += 1
+			self.variableImportance[i] += (numCorrect - numCorrectAfterShuffle)
+
+		print "self.variableImportance:", self.variableImportance
+
+	# given a sample and a featureIndex, it randomly shuffles that only specified feature
+	# and returns the whole dataset
+	def randomlyShuffleAttribute(self, samples, featureIndex):
+		featureVectors = [list(x) for x in zip(*samples)]
+		random.shuffle(featureVectors[featureIndex])
+		shuffledSample = zip(*featureVectors)
+		return shuffledSample
 
 	# uses the evaluateSample() function to calculate the error rate of the tree
 	def calcTreeErrorRate(self):
@@ -315,7 +340,7 @@ class DecisionTree:
 				numCorrect += 1
 
 		treeErrorRate = 1 - (numCorrect / len(self.bootstrappedTestSamples))
-		print "treeErrorRate:", treeErrorRate
+		return numCorrect, treeErrorRate
 
 	# this function will be used to get the predicted output by giving it a test data
 	def evaluateSample(self, testSample):
@@ -383,7 +408,7 @@ class RegularizedRandomForest:
 #			self.decisionTrees.append(createDecisionTree(self.dataSet))
 			decisionTree = DecisionTree(dataSet, globalDiscardedFeatureIndices)
 
-			decisionTree.calcTreeErrorRate()
+			decisionTree.calcTreeVariableImportanceAndError()
 
 			self.decisionTrees.append(decisionTree)
 
