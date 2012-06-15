@@ -306,8 +306,10 @@ class DecisionTree:
 	def calcTreeVariableImportanceAndError(self):
 		print "calcTreeVariableImportanceAndError()"
 		numCorrect, treeErrorRate = self.calcTreeErrorRate()
-		print "treeErrorRate:", treeErrorRate
+		print "len(self.bootstrappedTestSamples):", len(self.bootstrappedTestSamples)
 		print "numCorrect:", numCorrect
+		print "treeErrorRate:", treeErrorRate
+
 
 		for i in range(0, self.numFeatures):
 			randomlySampledTestData = self.randomlyShuffleAttribute(self.bootstrappedTestSamples, i)
@@ -351,6 +353,17 @@ class DecisionTree:
 			sampleSplitFeatureValue = testSample[node.splitFeatureIndex]
 			if sampleSplitFeatureValue < node.splitFeatureValue: node = node.leftChildNode
 			else: node = node.rightChildNode
+
+	# once the calculation has been done, we do not need to have the samples associated with the TreeNodes, this
+	# hogs a lot of data. So recursively delete the values associated with the TreeNode, just keep the values that
+	# are important for classification
+	def clearTreeData(self, node):
+		node = TreeNode()
+		# pyunicode
+		# node.data = []
+		# if node.left is not None: clearData(node.left)
+		# if node.right is not None: clearData(node.right)
+		pass
 
 
 class TreeNode:
