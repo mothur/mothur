@@ -363,10 +363,9 @@ class DecisionTree:
 
 			actualSampleOutputClass = testSample[self.numFeatures]
 			predictedSampleOutputClass = self.evaluateSample(testSample)
-			if actualSampleOutputClass == predictedSampleOutputClass:
-				numCorrect += 1
+			if actualSampleOutputClass == predictedSampleOutputClass: numCorrect += 1
 
-			self.outOfBagEstimates[indexOfSample] = outputClassOfSample
+			self.outOfBagEstimates[testSampleIndex] = predictedSampleOutputClass
 
 		treeErrorRate = 1 - (numCorrect / len(self.bootstrappedTestSamples))
 		return numCorrect, treeErrorRate
@@ -443,6 +442,9 @@ class RegularizedRandomForest:
 		self.numDecisionTrees = numDecisionTrees
 		self.globalDiscardedFeatureIndices = globalDiscardedFeatureIndices
 
+		self.numSamples = len(dataSet)
+		self.numFeatures = len(dataSet[0]) - 1
+
 		self.globalOutOfBagEstimates = {}
 
 	def updateGlobalOutOfBagEstimates(self, decisionTree):
@@ -452,6 +454,21 @@ class RegularizedRandomForest:
 
 			self.globalOutOfBagEstimates[indexOfSample][predictedOutcomeOfSample] += 1
 
+	def calcForrestErrorRate(self):
+		print "calcForrestErrorRate()"
+		numCorrect = 0
+		for indexOfSample, predictedOutComes in self.globalOutOfBagEstimates.iteritems():
+			majorityVotedOutcome = predictedOutComes.index(max(predictedOutComes))
+			realOutCome = self.dataSet[indexOfSample][self.numFeatures]
+
+			if majorityVotedOutcome == realOutCome: numCorrect += 1
+#			print "realOutCome", realOutCome, "majorityVotedOutcome", majorityVotedOutcome
+		print "len(self.globalOutOfBagEstimates):", len(self.globalOutOfBagEstimates)
+		print "numCorrect", numCorrect
+
+		forrestErrorRate = 1 - (numCorrect / len(self.globalOutOfBagEstimates))
+		print "forrestErrorRate:", forrestErrorRate
+
 	def populateDecisionTrees(self):
 		print "populateDecisionTrees()"
 		for i in range(0, self.numDecisionTrees):
@@ -460,11 +477,11 @@ class RegularizedRandomForest:
 			decisionTree.calcTreeVariableImportanceAndError()
 
 			self.updateGlobalOutOfBagEstimates(decisionTree)
-			print "self.globalOutOfBagEstimates:", self.globalOutOfBagEstimates
 
 			self.decisionTrees.append(decisionTree)
 
 		# TODO do the usual stuffs (aggregation) with the decisionTrees
+		if DEBUG_MODE: print "self.globalOutOfBagEstimates:", self.globalOutOfBagEstimates
 
 ''' This class reads the file and crates a data matrix for further processing '''
 class FileReader:
@@ -547,5 +564,6 @@ if __name__ == "__main__":
 
 	regularizedRandomForest = RegularizedRandomForest(dataSet, globalDiscardedFeatureIndices, numDecisionTrees)
 	regularizedRandomForest.populateDecisionTrees()
+	regularizedRandomForest.calcForrestErrorRate()
 
 #	createDecisionTree(dataSet)
