@@ -380,22 +380,20 @@ class DecisionTree:
 			if sampleSplitFeatureValue < node.splitFeatureValue: node = node.leftChildNode
 			else: node = node.rightChildNode
 
-	def purgeDataSets(self):
-		node = self.rootNode
-		node = TreeNode()
-		pass
+	def purgeDataSetsFromTree(self):
+		self.purgeTreeNodesDataRecursively(self.rootNode)
 
 	# once the calculation has been done, we do not need to have the samples associated with the TreeNodes, this
 	# hogs a lot of data. So recursively delete the values associated with the TreeNode, just keep the values that
 	# are important for classification
-	def clearTreeData(self, node):
-		node = TreeNode()
-		# pyunicode
-		# node.data = []
-		# if node.left is not None: clearData(node.left)
-		# if node.right is not None: clearData(node.right)
-		pass
+	def purgeTreeNodesDataRecursively(self, treeNode):
+		treeNode.bootstrappedTrainingSamples = None
+		treeNode.bootstrappedFeatureVectors = None
+		treeNode.bootstrappedOutputVector = None
+		treeNode.localDiscardedFeatureIndices = None
 
+		if treeNode.leftChildNode is not None: self.purgeTreeNodesDataRecursively(treeNode.leftChildNode)
+		if treeNode.rightChildNode is not None: self.purgeTreeNodesDataRecursively(treeNode.rightChildNode)
 
 class TreeNode:
 	def __init__(self, bootstrappedTrainingSamples, numFeatures, numSamples, numOutputClasses, generation):
@@ -405,7 +403,6 @@ class TreeNode:
 		self.isLeaf = False
 		self.outputClass = None
 		self.bootstrappedTrainingSamples = bootstrappedTrainingSamples
-		self.bootstrappedFeatureVectors = []
 		self.generation = generation
 
 		self.splitFeatureIndex = 0
@@ -413,7 +410,6 @@ class TreeNode:
 		self.splitFeatureEntropy = 0
 
 		self.bootstrappedFeatureVectors = [list(x) for x in zip(*self.bootstrappedTrainingSamples)]
-
 		self.bootstrappedOutputVector = [bootstrappedTrainingSamples[x][self.numFeatures] for x in range(0, self.numSamples)]
 		self.featureSubsetIndices = []
 
@@ -477,6 +473,9 @@ class RegularizedRandomForest:
 			decisionTree.calcTreeVariableImportanceAndError()
 
 			self.updateGlobalOutOfBagEstimates(decisionTree)
+
+			decisionTree.purgeDataSetsFromTree()
+			
 #			self.decisionTrees.append(decisionTree)
 
 		# TODO do the usual stuffs (aggregation) with the decisionTrees
