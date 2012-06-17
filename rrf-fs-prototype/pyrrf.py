@@ -442,6 +442,7 @@ class RegularizedRandomForest:
 		self.numFeatures = len(dataSet[0]) - 1
 
 		self.globalOutOfBagEstimates = {}
+		self.globalVariableImportanceList = [0 for x in range(0, self.numFeatures)]
 
 	def updateGlobalOutOfBagEstimates(self, decisionTree):
 		for indexOfSample, predictedOutcomeOfSample in decisionTree.outOfBagEstimates.iteritems():
@@ -449,6 +450,24 @@ class RegularizedRandomForest:
 				self.globalOutOfBagEstimates[indexOfSample] = [0 for i in range(0, decisionTree.numOutputClasses)]
 
 			self.globalOutOfBagEstimates[indexOfSample][predictedOutcomeOfSample] += 1
+
+	def calcForrestVariableImportance(self):
+		print "calcForrestVariableImportance()"
+
+		# make the sum of all the importance
+		for decisionTree in self.decisionTrees:
+			for i in range(0, self.numFeatures):
+				self.globalVariableImportanceList[i] += decisionTree.variableImportanceList[i]
+
+		# take the average of the trees
+		for i in range(0, self.numFeatures):
+			self.globalVariableImportanceList[i] /= self.numDecisionTrees
+
+		globalVariableRanks = []
+		for i, x in enumerate(self.globalVariableImportanceList):
+			if x > 0: globalVariableRanks.append([i, x])
+		globalVariableRanks = sorted(globalVariableRanks, key = lambda x: x[1], reverse = True)
+		print "globalVariableRanks:", globalVariableRanks
 
 	def calcForrestErrorRate(self):
 		print "calcForrestErrorRate()"
@@ -475,8 +494,8 @@ class RegularizedRandomForest:
 			self.updateGlobalOutOfBagEstimates(decisionTree)
 
 			decisionTree.purgeDataSetsFromTree()
-			
-#			self.decisionTrees.append(decisionTree)
+
+			self.decisionTrees.append(decisionTree)
 
 		# TODO do the usual stuffs (aggregation) with the decisionTrees
 		if DEBUG_MODE: print "self.globalOutOfBagEstimates:", self.globalOutOfBagEstimates
@@ -545,7 +564,7 @@ def getStandardDeviation(featureVector):
 	return standardDeviation
 
 if __name__ == "__main__":
-	numDecisionTrees = 3
+	numDecisionTrees = 2
 
 	# small-alter.txt has a modified dataset
 #	dataSet = readFileContents('Datasets/small-alter.txt')
@@ -563,5 +582,6 @@ if __name__ == "__main__":
 	regularizedRandomForest = RegularizedRandomForest(dataSet, globalDiscardedFeatureIndices, numDecisionTrees)
 	regularizedRandomForest.populateDecisionTrees()
 	regularizedRandomForest.calcForrestErrorRate()
+	regularizedRandomForest.calcForrestVariableImportance()
 
 #	createDecisionTree(dataSet)
