@@ -24,6 +24,8 @@ class DecisionTree:
 		self.globalDiscardedFeatureIndices = globalDiscardedFeatureIndices
 		self.variableImportanceList = [0 for x in range(0, self.numFeatures)]
 
+		self.outOfBagEstimates = {}
+
 		# TODO optimum feature is log2(totalFeatures), we might need to modify this one
 		self.optimumFeatureSubsetSize = int(ceil(log(self.numFeatures, 2)))
 
@@ -356,11 +358,15 @@ class DecisionTree:
 	# uses the evaluateSample() function to calculate the error rate of the tree
 	def calcTreeErrorRate(self):
 		numCorrect = 0
-		for testSample in self.bootstrappedTestSamples:
+		for i, testSample in enumerate(self.bootstrappedTestSamples):
+			testSampleIndex = self.bootstrappedTestSampleIndices[i]
+
 			actualSampleOutputClass = testSample[self.numFeatures]
 			predictedSampleOutputClass = self.evaluateSample(testSample)
 			if actualSampleOutputClass == predictedSampleOutputClass:
 				numCorrect += 1
+
+			self.outOfBagEstimates[indexOfSample] = outputClassOfSample
 
 		treeErrorRate = 1 - (numCorrect / len(self.bootstrappedTestSamples))
 		return numCorrect, treeErrorRate
@@ -437,12 +443,25 @@ class RegularizedRandomForest:
 		self.numDecisionTrees = numDecisionTrees
 		self.globalDiscardedFeatureIndices = globalDiscardedFeatureIndices
 
+		self.globalOutOfBagEstimates = {}
+
+	def updateGlobalOutOfBagEstimates(self, decisionTree):
+		for indexOfSample, predictedOutcomeOfSample in decisionTree.outOfBagEstimates.iteritems():
+			if not self.globalOutOfBagEstimates.has_key(indexOfSample):
+				self.globalOutOfBagEstimates[indexOfSample] = [0 for i in range(0, decisionTree.numOutputClasses)]
+
+			self.globalOutOfBagEstimates[indexOfSample][predictedOutcomeOfSample] += 1
+
 	def populateDecisionTrees(self):
 		print "populateDecisionTrees()"
 		for i in range(0, self.numDecisionTrees):
 			print "Creating", i, "(th) Decision tree"
 			decisionTree = DecisionTree(dataSet, globalDiscardedFeatureIndices)
 			decisionTree.calcTreeVariableImportanceAndError()
+
+			self.updateGlobalOutOfBagEstimates(decisionTree)
+			print "self.globalOutOfBagEstimates:", self.globalOutOfBagEstimates
+
 			self.decisionTrees.append(decisionTree)
 
 		# TODO do the usual stuffs (aggregation) with the decisionTrees
