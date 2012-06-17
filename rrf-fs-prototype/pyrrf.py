@@ -380,6 +380,11 @@ class DecisionTree:
 			if sampleSplitFeatureValue < node.splitFeatureValue: node = node.leftChildNode
 			else: node = node.rightChildNode
 
+	def purgeDataSets(self):
+		node = self.rootNode
+		node = TreeNode()
+		pass
+
 	# once the calculation has been done, we do not need to have the samples associated with the TreeNodes, this
 	# hogs a lot of data. So recursively delete the values associated with the TreeNode, just keep the values that
 	# are important for classification
@@ -407,7 +412,8 @@ class TreeNode:
 		self.splitFeatureValue = 0
 		self.splitFeatureEntropy = 0
 
-		self.calcFeatureVectors()
+		self.bootstrappedFeatureVectors = [list(x) for x in zip(*self.bootstrappedTrainingSamples)]
+
 		self.bootstrappedOutputVector = [bootstrappedTrainingSamples[x][self.numFeatures] for x in range(0, self.numSamples)]
 		self.featureSubsetIndices = []
 
@@ -416,6 +422,7 @@ class TreeNode:
 
 		self.localDiscardedFeatureIndices = []
 
+		# call some helper functions
 		self.createLocalDiscardedFeatureList()
 
 	def createLocalDiscardedFeatureList(self):
@@ -424,13 +431,6 @@ class TreeNode:
 			if i not in globalDiscardedFeatureIndices and getStandardDeviation(x) <= 0:
 				self.localDiscardedFeatureIndices.append(i)
 		if DEBUG_MODE: print self.localDiscardedFeatureIndices
-
-	def calcFeatureVectors(self):
-		if DEBUG_MODE: print "calcFeatureVectors()"
-		self.bootstrappedFeatureVectors = [[] for x in range (0, self.numFeatures)]
-		for i in range(0, self.numSamples):
-			for j in range(0, self.numFeatures):
-				self.bootstrappedFeatureVectors[j].append(self.bootstrappedTrainingSamples[i][j])
 
 
 ''' The main algorithm for Regularized Random Forest, it creates a number of decision trees and then aggregates them
@@ -477,8 +477,7 @@ class RegularizedRandomForest:
 			decisionTree.calcTreeVariableImportanceAndError()
 
 			self.updateGlobalOutOfBagEstimates(decisionTree)
-
-			self.decisionTrees.append(decisionTree)
+#			self.decisionTrees.append(decisionTree)
 
 		# TODO do the usual stuffs (aggregation) with the decisionTrees
 		if DEBUG_MODE: print "self.globalOutOfBagEstimates:", self.globalOutOfBagEstimates
@@ -547,7 +546,7 @@ def getStandardDeviation(featureVector):
 	return standardDeviation
 
 if __name__ == "__main__":
-	numDecisionTrees = 5
+	numDecisionTrees = 3
 
 	# small-alter.txt has a modified dataset
 #	dataSet = readFileContents('Datasets/small-alter.txt')
