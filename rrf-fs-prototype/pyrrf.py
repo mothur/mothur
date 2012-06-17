@@ -14,8 +14,12 @@ class DecisionTree:
 		self.numFeatures = len(baseDataSet[0]) - 1
 		self.numOutputClasses = 0
 		self.classes = []
+
 		self.bootstrappedTrainingSamples = []
+		self.bootstrappedTrainingSampleIndices = []
 		self.bootstrappedTestSamples = []
+		self.bootstrappedTestSampleIndices = []
+
 		self.rootNode = None
 		self.globalDiscardedFeatureIndices = globalDiscardedFeatureIndices
 		self.variableImportanceList = [0 for x in range(0, self.numFeatures)]
@@ -33,19 +37,28 @@ class DecisionTree:
 		self.buildDecisionTree()
 
 
+	# this is the code which creates bootstrapped samples from given data
 	def createBootStrappedSamples(self):
 		isInTrainingSamples = [False for i in range(0, self.numSamples)]
-		for i in range(0, self.numSamples):
-			index = random.randint(0, self.numSamples - 1)
-			self.bootstrappedTrainingSamples.append(self.baseDataSet[index])
-			isInTrainingSamples[index] = True
 
 		for i in range(0, self.numSamples):
-			if not isInTrainingSamples[i]:
+			randomIndex = random.randint(0, self.numSamples - 1)
+			self.bootstrappedTrainingSamples.append(self.baseDataSet[randomIndex])
+			isInTrainingSamples[randomIndex] = True
+
+		for i in range(0, self.numSamples):
+			if isInTrainingSamples[i]:
+				self.bootstrappedTrainingSampleIndices.append(i)
+			else:
 				self.bootstrappedTestSamples.append(self.baseDataSet[i])
+				self.bootstrappedTestSampleIndices.append(i)
+
 #		for x in self.bootstrappedTrainingSamples: print x
 #		print "###"
-#		for x in self.bootstrappedTestSamples: print x
+		if DEBUG_MODE:
+			for x in self.bootstrappedTestSamples: print x
+		if DEBUG_MODE: print "self.bootstrappedTrainingSampleIndices:", self.bootstrappedTrainingSampleIndices
+		if DEBUG_MODE: print "self.bootstrappedTestSampleIndices:", self.bootstrappedTestSampleIndices
 
 	def findNullFeatures(self, bootstrappedTrainingSamples):
 		print "findNullFeatures()"
@@ -425,12 +438,11 @@ class RegularizedRandomForest:
 		self.globalDiscardedFeatureIndices = globalDiscardedFeatureIndices
 
 	def populateDecisionTrees(self):
+		print "populateDecisionTrees()"
 		for i in range(0, self.numDecisionTrees):
-#			self.decisionTrees.append(createDecisionTree(self.dataSet))
+			print "Creating", i, "(th) Decision tree"
 			decisionTree = DecisionTree(dataSet, globalDiscardedFeatureIndices)
-
 			decisionTree.calcTreeVariableImportanceAndError()
-
 			self.decisionTrees.append(decisionTree)
 
 		# TODO do the usual stuffs (aggregation) with the decisionTrees
@@ -499,7 +511,7 @@ def getStandardDeviation(featureVector):
 	return standardDeviation
 
 if __name__ == "__main__":
-	numDecisionTrees = 1
+	numDecisionTrees = 5
 
 	# small-alter.txt has a modified dataset
 #	dataSet = readFileContents('Datasets/small-alter.txt')
