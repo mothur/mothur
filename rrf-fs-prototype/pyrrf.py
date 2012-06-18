@@ -564,11 +564,12 @@ def getStandardDeviation(featureVector):
 	return standardDeviation
 
 if __name__ == "__main__":
-	numDecisionTrees = 2
+	numDecisionTrees = 3
 
 	# small-alter.txt has a modified dataset
 #	dataSet = readFileContents('Datasets/small-alter.txt')
 	dataSet = readFileContents('Datasets/inpatient.final.an.0.03.subsample.avg.matrix')
+	dataSet = readFileContents('Datasets/outin.final.an.0.03.subsample.avg.matrix')
 	globalDiscardedFeatureIndices = getGlobalDiscardedFeatureIndices(dataSet)
 #	for x in discardedFeatureIndices: print x
 
