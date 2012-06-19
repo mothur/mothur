@@ -25,7 +25,8 @@ public:
     string getCommandName()			{ return "list.otulabels";          }
     string getCommandCategory()		{ return "OTU-Based Approaches";	} 
     //commmand category choices: Sequence Processing, OTU-Based Approaches, Hypothesis Testing, Phylotype Analysis, General, Clustering and Hidden
-    string getHelpString();	
+    string getOutputFileNameTag(string, string);
+	string getHelpString();	
     string getCitation() { return "http://www.mothur.org/wiki/List.otulabels"; }
     string getDescription()		{ return "lists otu labels from shared or relabund file. Can be used by get.otulabels with output from classify.otu, otu.association, or corr.axes to select specific otus."; }
     

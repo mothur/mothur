@@ -22,6 +22,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "create.database";		}
 	string getCommandCategory()		{ return "OTU-Based Approaches"; }
+	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Create.database"; }
 	string getDescription()		{ return "creates database file that includes, abundances across groups, representative sequences, and taxonomy for each OTU"; }

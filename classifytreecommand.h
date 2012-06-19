@@ -22,6 +22,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "classify.tree";				}
 	string getCommandCategory()		{ return "Phylotype Analysis";          }
+	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Classify.tree"; }
 	string getDescription()		{ return "Find the consensus taxonomy for the descendant of each tree node"; }
@@ -41,8 +42,6 @@ private:
 	int getClassifications(Tree*&);
 	map<string, set<string> > getDescendantList(Tree*&, int, map<int, map<string, set<string> > >);
     string getTaxonomy(set<string>, int&);
-    int readNamesFile(); 
-    int readTaxonomyFile();
 	
 };
 

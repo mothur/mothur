@@ -56,7 +56,28 @@ string TrimFlowsCommand::getHelpString(){
 		exit(1);
 	}
 }
-
+//**********************************************************************************************************************
+string TrimFlowsCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "flow")            {   outputFileName =  "flow";   }
+            else if (type == "fasta")            {   outputFileName =  "flow.fasta";   }
+            else if (type == "file")            {   outputFileName =  "flow.files";   }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "TrimFlowsCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 
 TrimFlowsCommand::TrimFlowsCommand(){	
@@ -66,6 +87,7 @@ TrimFlowsCommand::TrimFlowsCommand(){
 		vector<string> tempOutNames;
 		outputTypes["flow"] = tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
+        outputTypes["file"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "TrimFlowsCommand", "TrimFlowsCommand");
@@ -103,6 +125,7 @@ TrimFlowsCommand::TrimFlowsCommand(string option)  {
 			vector<string> tempOutNames;
 			outputTypes["flow"] = tempOutNames;
 			outputTypes["fasta"] = tempOutNames;
+            outputTypes["file"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -225,13 +248,13 @@ int TrimFlowsCommand::execute(){
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 
-		string trimFlowFileName = outputDir + m->getRootName(m->getSimpleName(flowFileName)) + "trim.flow";
+		string trimFlowFileName = outputDir + m->getRootName(m->getSimpleName(flowFileName)) + "trim." + getOutputFileNameTag("flow");
 		outputNames.push_back(trimFlowFileName); outputTypes["flow"].push_back(trimFlowFileName);
 		
-		string scrapFlowFileName = outputDir + m->getRootName(m->getSimpleName(flowFileName)) + "scrap.flow";
+		string scrapFlowFileName = outputDir + m->getRootName(m->getSimpleName(flowFileName)) + "scrap." + getOutputFileNameTag("flow");;
 		outputNames.push_back(scrapFlowFileName); outputTypes["flow"].push_back(scrapFlowFileName);
 
-		string fastaFileName = outputDir + m->getRootName(m->getSimpleName(flowFileName)) + "flow.fasta";
+		string fastaFileName = outputDir + m->getRootName(m->getSimpleName(flowFileName)) + getOutputFileNameTag("fasta");
 		if(fasta){
 			outputNames.push_back(fastaFileName); outputTypes["fasta"].push_back(fastaFileName);
 		}
@@ -284,7 +307,7 @@ int TrimFlowsCommand::execute(){
 		
 		if(allFiles){
 			set<string> namesAlreadyProcessed;
-			flowFilesFileName = outputDir + m->getRootName(m->getSimpleName(flowFileName)) + "flow.files";
+			flowFilesFileName = outputDir + m->getRootName(m->getSimpleName(flowFileName)) + getOutputFileNameTag("file");
 			m->openOutputFile(flowFilesFileName, output);
 
 			for(int i=0;i<barcodePrimerComboFileNames.size();i++){
@@ -317,7 +340,7 @@ int TrimFlowsCommand::execute(){
 			output.close();
 		}
 		else{
-			flowFilesFileName = outputDir + m->getRootName(m->getSimpleName(flowFileName)) + "flow.files";
+			flowFilesFileName = outputDir + m->getRootName(m->getSimpleName(flowFileName)) + getOutputFileNameTag("file");
 			m->openOutputFile(flowFilesFileName, output);
 			
 			output << m->getFullPathName(trimFlowFileName) << endl;

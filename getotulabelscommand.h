@@ -23,7 +23,8 @@ public:
     vector<string> setParameters();
     string getCommandName()			{ return "get.otulabels";          }
     string getCommandCategory()		{ return "OTU-Based Approaches";	} 
-    string getHelpString();	
+    string getOutputFileNameTag(string, string);
+	string getHelpString();	
     string getCitation() { return "http://www.mothur.org/wiki/Get.otulabels"; }
     string getDescription()		{ return "Can be used with output from classify.otu, otu.association, or corr.axes to select specific otus."; }
     
@@ -39,8 +40,6 @@ private:
     int readClassifyOtu();
     int readOtuAssociation();
     int readCorrAxes();
-    int readAccnos();
-    
 };
 
 /**************************************************************************************************/

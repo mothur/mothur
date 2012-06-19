@@ -25,7 +25,8 @@ class ChopSeqsCommand : public Command {
 		vector<string> setParameters();
 		string getCommandName()			{ return "chop.seqs";		}
 		string getCommandCategory()		{ return "Sequence Processing"; }
-		string getHelpString();	
+		string getOutputFileNameTag(string, string);
+        string getHelpString();	
 		string getCitation() { return "http://www.mothur.org/wiki/Chops.seqs"; }
 		string getDescription()		{ return "trim sequence length"; }
 	

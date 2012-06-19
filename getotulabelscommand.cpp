@@ -46,14 +46,36 @@ string GetOtuLabelsCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string GetOtuLabelsCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "constaxonomy") {  outputFileName =  "pick.taxonomy"; }
+            else if (type == "otucorr") {  outputFileName =  "pick.corr"; }
+            else if (type == "corraxes") {  outputFileName =  "pick.axes"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetOtuLabelsCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 GetOtuLabelsCommand::GetOtuLabelsCommand(){	
 	try {
 		abort = true; calledHelp = true;
 		setParameters();
         vector<string> tempOutNames;
-		outputTypes["contaxonomy"] = tempOutNames; 
-        outputTypes["otu.corr"] = tempOutNames;
-        outputTypes["corr.axes"] = tempOutNames;
+		outputTypes["constaxonomy"] = tempOutNames; 
+        outputTypes["otucorr"] = tempOutNames;
+        outputTypes["corraxes"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "GetOtuLabelsCommand", "GetOtuLabelsCommand");
@@ -126,9 +148,9 @@ GetOtuLabelsCommand::GetOtuLabelsCommand(string option)  {
             }
             
             vector<string> tempOutNames;
-            outputTypes["contaxonomy"] = tempOutNames; 
-            outputTypes["otu.corr"] = tempOutNames;
-            outputTypes["corr.axes"] = tempOutNames;
+            outputTypes["constaxonomy"] = tempOutNames; 
+            outputTypes["otucorr"] = tempOutNames;
+            outputTypes["corraxes"] = tempOutNames;
             
  			//check for parameters
             accnosfile = validParameter.validFile(parameters, "accnos", true);
@@ -175,7 +197,7 @@ int GetOtuLabelsCommand::execute(){
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
         
         //get labels you want to keep
-		readAccnos();
+		labels = m->readAccnos(accnosfile);
 		
 		if (m->control_pressed) { return 0; }
 		
@@ -204,7 +226,7 @@ int GetOtuLabelsCommand::readClassifyOtu(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(constaxonomyfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(constaxonomyfile)) + "pick.taxonomy";
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(constaxonomyfile)) + getOutputFileNameTag("constaxonomy");
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		
@@ -255,7 +277,7 @@ int GetOtuLabelsCommand::readOtuAssociation(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(otucorrfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(otucorrfile)) + "pick.corr";
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(otucorrfile)) + getOutputFileNameTag("otucorr");
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		
@@ -289,7 +311,7 @@ int GetOtuLabelsCommand::readOtuAssociation(){
         out.close();
 		
 		if (wroteSomething == false) { m->mothurOut("Your file does not contain any labels from the .accnos file."); m->mothurOutEndLine();  }
-		outputNames.push_back(outputFileName);  outputTypes["otu.corr"].push_back(outputFileName);
+		outputNames.push_back(outputFileName);  outputTypes["otucorr"].push_back(outputFileName);
 		
 		m->mothurOut("Selected " + toString(selectedCount) + " lines from your otu.corr file."); m->mothurOutEndLine();
 		
@@ -306,7 +328,7 @@ int GetOtuLabelsCommand::readCorrAxes(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(corraxesfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(corraxesfile)) + "pick.axes";
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(corraxesfile)) + getOutputFileNameTag("corraxes");
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		
@@ -340,7 +362,7 @@ int GetOtuLabelsCommand::readCorrAxes(){
         out.close();
 		
 		if (wroteSomething == false) { m->mothurOut("Your file does not contain any labels from the .accnos file."); m->mothurOutEndLine();  }
-		outputNames.push_back(outputFileName);  outputTypes["corr.axes"].push_back(outputFileName);
+		outputNames.push_back(outputFileName);  outputTypes["corraxes"].push_back(outputFileName);
 		
 		m->mothurOut("Selected " + toString(selectedCount) + " lines from your corr.axes file."); m->mothurOutEndLine();
 		
@@ -349,32 +371,6 @@ int GetOtuLabelsCommand::readCorrAxes(){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "GetOtuLabelsCommand", "readCorrAxes");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-int GetOtuLabelsCommand::readAccnos(){
-	try {
-		
-		ifstream in;
-		m->openInputFile(accnosfile, in);
-		string name;
-		
-		while(!in.eof()){
-			in >> name;
-            
-			labels.insert(name);
-			
-			m->gobble(in);
-		}
-		in.close();	
-		
-		return 0;
-        
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetOtuLabelsCommand", "readAccnos");
 		exit(1);
 	}
 }

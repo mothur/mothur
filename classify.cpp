@@ -306,28 +306,12 @@ int Classify::readTaxonomy(string file) {
 		
 		MPI_File_close(&inMPI);
 		MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
-#else				
-		ifstream inTax;
-		m->openInputFile(file, inTax);
-	
-		//read template seqs and save
-		while (!inTax.eof()) {
-			inTax >> name; m->gobble(inTax);
-            inTax >> taxInfo;
-            
-            if (m->debug) {  m->mothurOut("[DEBUG]: name = '" + name + "' tax = '" + taxInfo + "'\n");  }
-
-			taxonomy[name] = taxInfo;
-			
-			phyloTree->addSeqToTree(name, taxInfo);
-		
-			m->gobble(inTax);
-		}
-		inTax.close();
+#else	
+        
+        taxonomy.clear(); 
+        m->readTax(file, taxonomy);
+        for (map<string, string>::iterator itTax = taxonomy.begin(); itTax != taxonomy.end(); itTax++) {  phyloTree->addSeqToTree(itTax->first, itTax->second);  }
 #endif	
-        
-        
-	
 		phyloTree->assignHeirarchyIDs(0);
 		
 		phyloTree->setUp(file);

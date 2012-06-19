@@ -57,6 +57,27 @@ string FilterSeqsCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string FilterSeqsCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "fasta") {  outputFileName =  "filter.fasta"; }
+            else if (type == "filter") {  outputFileName =  "filter"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "FilterSeqsCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 FilterSeqsCommand::FilterSeqsCommand(){	
 	try {
 		abort = true; calledHelp = true; 
@@ -278,8 +299,8 @@ int FilterSeqsCommand::execute() {
 		
 		//prevent giantic file name
 		string filterFile;
-		if (fastafileNames.size() > 3) { filterFile = outputDir + "merge.filter"; }
-		else {  filterFile = outputDir + filterFileName + ".filter";  }
+		if (fastafileNames.size() > 3) { filterFile = outputDir + "merge." + getOutputFileNameTag("filter"); }
+		else {  filterFile = outputDir + filterFileName + "." + getOutputFileNameTag("filter");  }
 		
 		m->openOutputFile(filterFile, outFilter);
 		outFilter << filter << endl;
@@ -342,7 +363,7 @@ int FilterSeqsCommand::filterSequences() {
 			
 				for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
 				
-				string filteredFasta = outputDir + m->getRootName(m->getSimpleName(fastafileNames[s])) + "filter.fasta";
+				string filteredFasta = outputDir + m->getRootName(m->getSimpleName(fastafileNames[s])) + getOutputFileNameTag("fasta");
 #ifdef USE_MPI	
 				int pid, numSeqsPerProcessor, num; 
 				int tag = 2001;

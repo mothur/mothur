@@ -64,6 +64,33 @@ string SubSampleCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string SubSampleCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "fasta")            {   outputFileName =  "subsample" + m->getExtension(inputName);   }
+            else if (type == "sabund")    {   outputFileName =  "subsample" + m->getExtension(inputName);   }
+            else if (type == "name")        {   outputFileName =  "subsample" + m->getExtension(inputName);   }
+            else if (type == "group")       {   outputFileName =  "subsample" + m->getExtension(inputName);   }
+            else if (type == "list")        {   outputFileName =  "subsample" + m->getExtension(inputName);   }
+            else if (type == "rabund")       {   outputFileName =  "subsample" + m->getExtension(inputName);   }
+            else if (type == "shared") {   outputFileName =  "subsample" + m->getExtension(inputName);        }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SubSampleCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
 SubSampleCommand::SubSampleCommand(){	
 	try {
 		abort = true; calledHelp = true; 
@@ -479,8 +506,7 @@ int SubSampleCommand::getSubSampleFasta() {
 		
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(fastafile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(fastafile)) + "subsample" + m->getExtension(fastafile);
-		
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(fastafile)) + getOutputFileNameTag("fasta", fastafile);		
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		
@@ -528,6 +554,7 @@ int SubSampleCommand::getSubSampleFasta() {
 		if (namefile != "") {
 			m->mothurOut("Deconvoluting subsampled fasta file... "); m->mothurOutEndLine();
 			
+            string outputNameFileName = thisOutputDir + m->getRootName(m->getSimpleName(namefile)) + getOutputFileNameTag("name", namefile);
 			//use unique.seqs to create new name and fastafile
 			string inputString = "fasta=" + outputFileName;
 			m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
@@ -542,10 +569,11 @@ int SubSampleCommand::getSubSampleFasta() {
 			delete uniqueCommand;
 			m->mothurCalling = false;
             
-			outputTypes["name"].push_back(filenames["name"][0]);  outputNames.push_back(filenames["name"][0]);
-			m->mothurRemove(outputFileName);
-			outputFileName = filenames["fasta"][0];
-			
+            m->renameFile(filenames["name"][0], outputNameFileName);
+            m->renameFile(filenames["fasta"][0], outputFileName);
+            
+			outputTypes["name"].push_back(outputNameFileName);  outputNames.push_back(outputNameFileName);
+
 			m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
 			
 			m->mothurOut("Done."); m->mothurOutEndLine();
@@ -558,7 +586,7 @@ int SubSampleCommand::getSubSampleFasta() {
 			
 			string groupOutputDir = outputDir;
 			if (outputDir == "") {  groupOutputDir += m->hasPath(groupfile);  }
-			string groupOutputFileName = groupOutputDir + m->getRootName(m->getSimpleName(groupfile)) + "subsample" + m->getExtension(groupfile);
+			string groupOutputFileName = groupOutputDir + m->getRootName(m->getSimpleName(groupfile)) + getOutputFileNameTag("group", groupfile);
 			
 			ofstream outGroup;
 			m->openOutputFile(groupOutputFileName, outGroup);
@@ -780,8 +808,7 @@ int SubSampleCommand::processShared(vector<SharedRAbundVector*>& thislookup) {
 		
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(sharedfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(sharedfile)) + thislookup[0]->getLabel() + ".subsample" + m->getExtension(sharedfile);
-        
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(sharedfile)) + thislookup[0]->getLabel() + getOutputFileNameTag("shared", sharedfile);        
         SubSample sample;
         vector<string> subsampledLabels = sample.getSample(thislookup, size);
         
@@ -819,8 +846,7 @@ int SubSampleCommand::getSubSampleList() {
 		
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(listfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(listfile)) + "subsample" + m->getExtension(listfile);
-		
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(listfile)) + getOutputFileNameTag("list", listfile);		
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		outputTypes["list"].push_back(outputFileName);  outputNames.push_back(outputFileName);
@@ -1164,8 +1190,7 @@ int SubSampleCommand::getSubSampleRabund() {
 		
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(rabundfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(rabundfile)) + "subsample" + m->getExtension(rabundfile);
-		
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(rabundfile)) + getOutputFileNameTag("rabund", rabundfile);		
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		outputTypes["rabund"].push_back(outputFileName);  outputNames.push_back(outputFileName);
@@ -1319,8 +1344,7 @@ int SubSampleCommand::getSubSampleSabund() {
 		
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(sabundfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(sabundfile)) + "subsample" + m->getExtension(sabundfile);
-		
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(sabundfile)) + getOutputFileNameTag("sabund", sabundfile);		
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		outputTypes["sabund"].push_back(outputFileName);  outputNames.push_back(outputFileName);

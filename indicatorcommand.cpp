@@ -57,7 +57,27 @@ string IndicatorCommand::getHelpString(){
 		exit(1);
 	}
 }
-
+//**********************************************************************************************************************
+string IndicatorCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "tree")       {   outputFileName =  "indicator.tre";   }
+            else if (type == "summary")    {   outputFileName =  "indicator.summary";   }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "IndicatorCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 IndicatorCommand::IndicatorCommand(){	
 	try {
@@ -385,7 +405,7 @@ int IndicatorCommand::GetIndicatorSpecies(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(inputFileName);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(inputFileName)) + "indicator.summary";
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(inputFileName)) + getOutputFileNameTag("summary");
 		outputNames.push_back(outputFileName); outputTypes["summary"].push_back(outputFileName);
 		
 		ofstream out;
@@ -500,7 +520,7 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 		
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(inputFileName);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(inputFileName)) + "indicator.summary";
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(inputFileName)) + getOutputFileNameTag("summary");
 		outputNames.push_back(outputFileName); outputTypes["summary"].push_back(outputFileName);
 		
 		ofstream out;
@@ -520,7 +540,7 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 		
 		string treeOutputDir = outputDir;
 		if (outputDir == "") {  treeOutputDir += m->hasPath(treefile);  }
-		string outputTreeFileName = treeOutputDir + m->getRootName(m->getSimpleName(treefile)) + "indicator.tre";
+		string outputTreeFileName = treeOutputDir + m->getRootName(m->getSimpleName(treefile)) + getOutputFileNameTag("tree");
 		
 		
 		//create a map from tree node index to names of descendants, save time later to know which sharedRabund you need

@@ -98,8 +98,14 @@ class MothurOut {
 		void gobble(istream&);
 		void gobble(istringstream&);
         vector<string> splitWhiteSpace(string& rest, char[], int);
-		map<string, int> readNames(string);
+        vector<string> splitWhiteSpace(string);
+        set<string> readAccnos(string);
+        int readAccnos(string, vector<string>&);
+        map<string, int> readNames(string);
+        int readTax(string, map<string, string>&);
+        int readNames(string, map<string, string>&, map<string, int>&);
 		int readNames(string, map<string, string>&);
+        int readNames(string, map<string, string>&, bool);
 		int readNames(string, map<string, vector<string> >&);
 		int readNames(string, vector<seqPriorityNode>&, map<string, string>&);
 		int mothurRemove(string);
@@ -145,7 +151,7 @@ class MothurOut {
 		int control_pressed;
 		bool executing, runParse, jumble, gui, mothurCalling, debug;
 		
-		//current files - if you add a new type you must edit optionParser->getParameters, get.current command and mothurOut->printCurrentFiles/clearCurrentFiles.
+		//current files - if you add a new type you must edit optionParser->getParameters, get.current command and mothurOut->printCurrentFiles/clearCurrentFiles/getCurrentTypes.
 		string getPhylipFile()		{ return phylipfile;		}
 		string getColumnFile()		{ return columnfile;		}
 		string getListFile()		{ return listfile;			}
@@ -190,11 +196,12 @@ class MothurOut {
 		void setTaxonomyFile(string f)		{ taxonomyfile = getFullPathName(f);		}
 		void setFlowFile(string f)			{ flowfile = getFullPathName(f);			}
         void setBiomFile(string f)			{ biomfile = getFullPathName(f);			}
-		void setProcessors(string p)		{ processors = p;							}
+        void setProcessors(string p)		{ processors = p; mothurOut("\nUsing " + toString(p) + " processors.\n");	}
 		
 		void printCurrentFiles();
 		bool hasCurrentFiles();
 		void clearCurrentFiles();
+        set<string> getCurrentTypes(); 
 		
 	private:
 		static MothurOut* _uniqueInstance;

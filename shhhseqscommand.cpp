@@ -55,6 +55,29 @@ string ShhhSeqsCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string ShhhSeqsCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "fasta")            {   outputFileName =  "shhh_seqs.fasta";   }
+            else if (type == "name")    {   outputFileName =  "shhh_seqs.names";   }
+            else if (type == "map")        {   outputFileName =  "shhh_seqs.map";   }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ShhhSeqsCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
 
 ShhhSeqsCommand::ShhhSeqsCommand(){	
 	try {
@@ -185,9 +208,9 @@ int ShhhSeqsCommand::execute() {
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		if (outputDir == "") { outputDir = m->hasPath(fastafile);  }//if user entered a file with a path then preserve it				
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "shhh.fasta";
-		string nameFileName = outputDir + m->getRootName(m->getSimpleName(fastafile))  + "shhh.names";
-		string mapFileName = outputDir + m->getRootName(m->getSimpleName(fastafile))  + "shhh.map";
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(fastafile)) + getOutputFileNameTag("fasta");
+		string nameFileName = outputDir + m->getRootName(m->getSimpleName(fastafile))  + getOutputFileNameTag("name");
+		string mapFileName = outputDir + m->getRootName(m->getSimpleName(fastafile))  + getOutputFileNameTag("map");
 		
 		if (groupfile != "") {
 			//Parse sequences by group

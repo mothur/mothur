@@ -58,7 +58,30 @@ string PcrSeqsCommand::getHelpString(){
 	}
 }
 
-
+//**********************************************************************************************************************
+string PcrSeqsCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "fasta") {  outputFileName =  "pcr.fasta"; }
+            else if (type == "taxonomy") {  outputFileName =  "pcr" + m->getExtension(inputName); }
+            else if (type == "group") {  outputFileName =  "pcr" + m->getExtension(inputName); }
+            else if (type == "name") {  outputFileName =  "pcr" + m->getExtension(inputName); }
+            else if (type == "accnos") {  outputFileName =  "bad.accnos"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PcrSeqsCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 
 PcrSeqsCommand::PcrSeqsCommand(){	
@@ -265,10 +288,10 @@ int PcrSeqsCommand::execute(){
         
         string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(fastafile);  }
-		string trimSeqFile = thisOutputDir + m->getRootName(m->getSimpleName(fastafile)) + "pcr.fasta";
+		string trimSeqFile = thisOutputDir + m->getRootName(m->getSimpleName(fastafile)) + getOutputFileNameTag("fasta");
 		outputNames.push_back(trimSeqFile); outputTypes["fasta"].push_back(trimSeqFile);
         
-        string badSeqFile = thisOutputDir + m->getRootName(m->getSimpleName(fastafile)) + "pcr.scrap.fasta";
+        string badSeqFile = thisOutputDir + m->getRootName(m->getSimpleName(fastafile)) + "scrap." + getOutputFileNameTag("fasta");
 		
 		
         length = 0;
@@ -857,7 +880,7 @@ int PcrSeqsCommand::writeAccnos(set<string> badNames){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(fastafile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(fastafile)) + "bad.accnos";
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(fastafile)) + getOutputFileNameTag("accnos");
         outputNames.push_back(outputFileName); outputTypes["accnos"].push_back(outputFileName);
         
         ofstream out;
@@ -919,7 +942,7 @@ int PcrSeqsCommand::readName(set<string>& names){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(namefile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(namefile)) + "pcr" + m->getExtension(namefile);
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(namefile)) + getOutputFileNameTag("name", namefile);
         
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
@@ -977,7 +1000,7 @@ int PcrSeqsCommand::readGroup(set<string> names){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(groupfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(groupfile)) + "pcr" + m->getExtension(groupfile);
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(groupfile)) + getOutputFileNameTag("group", groupfile);
 		
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
@@ -1024,7 +1047,7 @@ int PcrSeqsCommand::readTax(set<string> names){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(taxfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(taxfile)) + "pcr" + m->getExtension(taxfile);
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(taxfile)) + getOutputFileNameTag("taxonomy", taxfile);
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
         

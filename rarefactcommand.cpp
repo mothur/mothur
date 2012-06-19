@@ -74,6 +74,39 @@ string RareFactCommand::getHelpString(){
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
+string RareFactCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "rarefaction") {  outputFileName =  "rarefaction"; }
+            else if (type == "r_chao") {  outputFileName =  "r_chao"; }
+            else if (type == "r_ace") {  outputFileName =  "r_ace"; }
+            else if (type == "r_jack") {  outputFileName =  "r_jack"; }
+            else if (type == "r_shannon") {  outputFileName =  "r_shannon"; }
+            else if (type == "r_shannoneven") {  outputFileName =  "r_shannoneven"; }
+            else if (type == "r_smithwilson") {  outputFileName =  "r_smithwilson"; }
+            else if (type == "r_npshannon") {  outputFileName =  "r_npshannon"; }
+            else if (type == "r_simpson") {  outputFileName =  "r_simpson"; }
+            else if (type == "r_simpsoneven") {  outputFileName =  "r_simpsoneven"; }
+            else if (type == "r_invsimpson") {  outputFileName =  "r_invsimpson"; }
+            else if (type == "r_bootstrap") {  outputFileName =  "r_bootstrap"; }
+            else if (type == "r_coverage") {  outputFileName =  "r_coverage"; }
+            else if (type == "r_nseqs") {  outputFileName =  "r_nseqs"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "RareFactCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
 
 //**********************************************************************************************************************
 RareFactCommand::RareFactCommand(){	
@@ -305,52 +338,52 @@ int RareFactCommand::execute(){
 			for (i=0; i<Estimators.size(); i++) {
 				if (validCalculator.isValidCalculator("rarefaction", Estimators[i]) == true) { 
 					if (Estimators[i] == "sobs") { 
-						rDisplays.push_back(new RareDisplay(new Sobs(), new ThreeColumnFile(fileNameRoot+"rarefaction")));
-						outputNames.push_back(fileNameRoot+"rarefaction"); outputTypes["rarefaction"].push_back(fileNameRoot+"rarefaction");
+						rDisplays.push_back(new RareDisplay(new Sobs(), new ThreeColumnFile(fileNameRoot+getOutputFileNameTag("rarefaction"))));
+						outputNames.push_back(fileNameRoot+getOutputFileNameTag("rarefaction")); outputTypes["rarefaction"].push_back(fileNameRoot+getOutputFileNameTag("rarefaction"));
 					}else if (Estimators[i] == "chao") { 
-						rDisplays.push_back(new RareDisplay(new Chao1(), new ThreeColumnFile(fileNameRoot+"r_chao")));
-						outputNames.push_back(fileNameRoot+"r_chao"); outputTypes["r_chao"].push_back(fileNameRoot+"r_chao");
+						rDisplays.push_back(new RareDisplay(new Chao1(), new ThreeColumnFile(fileNameRoot+getOutputFileNameTag("r_chao"))));
+						outputNames.push_back(fileNameRoot+getOutputFileNameTag("r_chao")); outputTypes["r_chao"].push_back(fileNameRoot+getOutputFileNameTag("r_chao"));
 					}else if (Estimators[i] == "ace") { 
 						if(abund < 5)
 							abund = 10;
-						rDisplays.push_back(new RareDisplay(new Ace(abund), new ThreeColumnFile(fileNameRoot+"r_ace")));
-						outputNames.push_back(fileNameRoot+"r_ace"); outputTypes["r_ace"].push_back(fileNameRoot+"r_ace");
+						rDisplays.push_back(new RareDisplay(new Ace(abund), new ThreeColumnFile(fileNameRoot+getOutputFileNameTag("r_ace"))));
+						outputNames.push_back(fileNameRoot+getOutputFileNameTag("r_ace")); outputTypes["r_ace"].push_back(fileNameRoot+getOutputFileNameTag("r_ace"));
 					}else if (Estimators[i] == "jack") { 
-						rDisplays.push_back(new RareDisplay(new Jackknife(), new ThreeColumnFile(fileNameRoot+"r_jack")));
-						outputNames.push_back(fileNameRoot+"r_jack"); outputTypes["r_jack"].push_back(fileNameRoot+"r_jack");
+						rDisplays.push_back(new RareDisplay(new Jackknife(), new ThreeColumnFile(fileNameRoot+getOutputFileNameTag("r_jack"))));
+						outputNames.push_back(fileNameRoot+getOutputFileNameTag("r_jack")); outputTypes["r_jack"].push_back(fileNameRoot+getOutputFileNameTag("r_jack"));
 					}else if (Estimators[i] == "shannon") { 
-						rDisplays.push_back(new RareDisplay(new Shannon(), new ThreeColumnFile(fileNameRoot+"r_shannon")));
-						outputNames.push_back(fileNameRoot+"r_shannon"); outputTypes["r_shannon"].push_back(fileNameRoot+"r_shannon");
+						rDisplays.push_back(new RareDisplay(new Shannon(), new ThreeColumnFile(fileNameRoot+getOutputFileNameTag("r_shannon"))));
+						outputNames.push_back(fileNameRoot+getOutputFileNameTag("r_shannon")); outputTypes["r_shannon"].push_back(fileNameRoot+getOutputFileNameTag("r_shannon"));
 					}else if (Estimators[i] == "shannoneven") { 
-						rDisplays.push_back(new RareDisplay(new ShannonEven(), new ThreeColumnFile(fileNameRoot+"r_shannoneven")));
-						outputNames.push_back(fileNameRoot+"r_shannoneven"); outputTypes["r_shannoneven"].push_back(fileNameRoot+"r_shannoneven");
+						rDisplays.push_back(new RareDisplay(new ShannonEven(), new ThreeColumnFile(fileNameRoot+getOutputFileNameTag("r_shannoneven"))));
+						outputNames.push_back(fileNameRoot+getOutputFileNameTag("r_shannoneven")); outputTypes["r_shannoneven"].push_back(fileNameRoot+getOutputFileNameTag("r_shannoneven"));
 					}else if (Estimators[i] == "heip") { 
-						rDisplays.push_back(new RareDisplay(new Heip(), new ThreeColumnFile(fileNameRoot+"r_heip")));
-						outputNames.push_back(fileNameRoot+"r_heip"); outputTypes["r_heip"].push_back(fileNameRoot+"r_heip");
+						rDisplays.push_back(new RareDisplay(new Heip(), new ThreeColumnFile(fileNameRoot+getOutputFileNameTag("r_heip"))));
+						outputNames.push_back(fileNameRoot+getOutputFileNameTag("r_heip")); outputTypes["r_heip"].push_back(fileNameRoot+getOutputFileNameTag("r_heip"));
 					}else if (Estimators[i] == "smithwilson") { 
-						rDisplays.push_back(new RareDisplay(new SmithWilson(), new ThreeColumnFile(fileNameRoot+"r_smithwilson")));
-						outputNames.push_back(fileNameRoot+"r_smithwilson"); outputTypes["r_smithwilson"].push_back(fileNameRoot+"r_smithwilson");
+						rDisplays.push_back(new RareDisplay(new SmithWilson(), new ThreeColumnFile(fileNameRoot+getOutputFileNameTag("r_smithwilson"))));
+						outputNames.push_back(fileNameRoot+getOutputFileNameTag("r_smithwilson")); outputTypes["r_smithwilson"].push_back(fileNameRoot+getOutputFileNameTag("r_smithwilson"));
 					}else if (Estimators[i] == "npshannon") { 
-						rDisplays.push_back(new RareDisplay(new NPShannon(), new ThreeColumnFile(fileNameRoot+"r_npshannon")));
-						outputNames.push_back(fileNameRoot+"r_npshannon"); outputTypes["r_npshannon"].push_back(fileNameRoot+"r_npshannon");
+						rDisplays.push_back(new RareDisplay(new NPShannon(), new ThreeColumnFile(fileNameRoot+getOutputFileNameTag("r_npshannon"))));
+						outputNames.push_back(fileNameRoot+getOutputFileNameTag("r_npshannon")); outputTypes["r_npshannon"].push_back(fileNameRoot+getOutputFileNameTag("r_npshannon"));
 					}else if (Estimators[i] == "simpson") { 
-						rDisplays.push_back(new RareDisplay(new Simpson(), new ThreeColumnFile(fileNameRoot+"r_simpson")));
-						outputNames.push_back(fileNameRoot+"r_simpson"); outputTypes["r_simpson"].push_back(fileNameRoot+"r_simpson");
+						rDisplays.push_back(new RareDisplay(new Simpson(), new ThreeColumnFile(fileNameRoot+getOutputFileNameTag("r_simpson"))));
+						outputNames.push_back(fileNameRoot+getOutputFileNameTag("r_simpson")); outputTypes["r_simpson"].push_back(fileNameRoot+getOutputFileNameTag("r_simpson"));
 					}else if (Estimators[i] == "simpsoneven") { 
-						rDisplays.push_back(new RareDisplay(new SimpsonEven(), new ThreeColumnFile(fileNameRoot+"r_simpsoneven")));
-						outputNames.push_back(fileNameRoot+"r_simpsoneven"); outputTypes["r_simpsoneven"].push_back(fileNameRoot+"r_simpsoneven");
+						rDisplays.push_back(new RareDisplay(new SimpsonEven(), new ThreeColumnFile(fileNameRoot+getOutputFileNameTag("r_simpsoneven"))));
+						outputNames.push_back(fileNameRoot+getOutputFileNameTag("r_simpsoneven")); outputTypes["r_simpsoneven"].push_back(fileNameRoot+getOutputFileNameTag("r_simpsoneven"));
 					}else if (Estimators[i] == "invsimpson") { 
-						rDisplays.push_back(new RareDisplay(new InvSimpson(), new ThreeColumnFile(fileNameRoot+"r_invsimpson")));
-						outputNames.push_back(fileNameRoot+"r_invsimpson"); outputTypes["r_invsimpson"].push_back(fileNameRoot+"r_invsimpson");
+						rDisplays.push_back(new RareDisplay(new InvSimpson(), new ThreeColumnFile(fileNameRoot+getOutputFileNameTag("r_invsimpson"))));
+						outputNames.push_back(fileNameRoot+getOutputFileNameTag("r_invsimpson")); outputTypes["r_invsimpson"].push_back(fileNameRoot+getOutputFileNameTag("r_invsimpson"));
 					}else if (Estimators[i] == "bootstrap") { 
-						rDisplays.push_back(new RareDisplay(new Bootstrap(), new ThreeColumnFile(fileNameRoot+"r_bootstrap")));
-						outputNames.push_back(fileNameRoot+"r_bootstrap"); outputTypes["r_bootstrap"].push_back(fileNameRoot+"r_bootstrap");
+						rDisplays.push_back(new RareDisplay(new Bootstrap(), new ThreeColumnFile(fileNameRoot+getOutputFileNameTag("r_bootstrap"))));
+						outputNames.push_back(fileNameRoot+getOutputFileNameTag("r_bootstrap")); outputTypes["r_bootstrap"].push_back(fileNameRoot+getOutputFileNameTag("r_bootstrap"));
 					}else if (Estimators[i] == "coverage") { 
-						rDisplays.push_back(new RareDisplay(new Coverage(), new ThreeColumnFile(fileNameRoot+"r_coverage")));
-						outputNames.push_back(fileNameRoot+"r_coverage"); outputTypes["r_coverage"].push_back(fileNameRoot+"r_coverage");
+						rDisplays.push_back(new RareDisplay(new Coverage(), new ThreeColumnFile(fileNameRoot+getOutputFileNameTag("r_coverage"))));
+						outputNames.push_back(fileNameRoot+getOutputFileNameTag("r_coverage")); outputTypes["r_coverage"].push_back(fileNameRoot+getOutputFileNameTag("r_coverage"));
 					}else if (Estimators[i] == "nseqs") { 
-						rDisplays.push_back(new RareDisplay(new NSeqs(), new ThreeColumnFile(fileNameRoot+"r_nseqs")));
-						outputNames.push_back(fileNameRoot+"r_nseqs"); outputTypes["r_nseqs"].push_back(fileNameRoot+"r_nseqs");
+						rDisplays.push_back(new RareDisplay(new NSeqs(), new ThreeColumnFile(fileNameRoot+getOutputFileNameTag("r_nseqs"))));
+						outputNames.push_back(fileNameRoot+getOutputFileNameTag("r_nseqs")); outputTypes["r_nseqs"].push_back(fileNameRoot+getOutputFileNameTag("r_nseqs"));
 					}
                     if (inputFileNames.size() > 1) { file2Group[outputNames.size()-1] = groups[p]; }
 				}

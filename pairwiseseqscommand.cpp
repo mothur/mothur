@@ -64,7 +64,27 @@ string PairwiseSeqsCommand::getHelpString(){
 		exit(1);
 	}
 }
-
+//**********************************************************************************************************************
+string PairwiseSeqsCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "phylip") {  outputFileName =  "dist"; }
+            else if (type == "column") {  outputFileName =  "dist"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PairwiseSeqsCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 PairwiseSeqsCommand::PairwiseSeqsCommand(){	
 	try {
@@ -272,14 +292,14 @@ int PairwiseSeqsCommand::execute(){
 			string outputFile = "";
 				
 			if (output == "lt") { //does the user want lower triangle phylip formatted file 
-				outputFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + "phylip.dist";
+				outputFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + "phylip." + getOutputFileNameTag("phylip");
 				m->mothurRemove(outputFile); outputTypes["phylip"].push_back(outputFile);
 			}else if (output == "column") { //user wants column format
-				outputFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + "dist";
+				outputFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + getOutputFileNameTag("column");
 				outputTypes["column"].push_back(outputFile);
 				m->mothurRemove(outputFile);
 			}else { //assume square
-				outputFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + "square.dist";
+				outputFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + "square." + getOutputFileNameTag("phylip");
 				m->mothurRemove(outputFile);
 				outputTypes["phylip"].push_back(outputFile);
 			}

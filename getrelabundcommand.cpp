@@ -49,6 +49,26 @@ string GetRelAbundCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string GetRelAbundCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "relabund")         {   outputFileName = "relabund" ;  }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetRelAbundCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 GetRelAbundCommand::GetRelAbundCommand(){	
 	try {
 		abort = true; calledHelp = true; 
@@ -154,7 +174,7 @@ int GetRelAbundCommand::execute(){
 	
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + "relabund";
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + getOutputFileNameTag("relabund");
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);

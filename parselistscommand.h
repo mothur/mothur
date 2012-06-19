@@ -26,6 +26,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "parse.list";				}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Parse.list"; }
 	string getDescription()		{ return "parses a list file by group"; }

@@ -63,6 +63,27 @@ string ClassifyOtuCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string ClassifyOtuCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "constaxonomy") {  outputFileName =  "cons.taxonomy"; }
+            else if (type == "taxsummary") {  outputFileName =  "cons.tax.summary"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClassifyOtuCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 ClassifyOtuCommand::ClassifyOtuCommand(){	
 	try {
 		abort = true; calledHelp = true; 
@@ -234,10 +255,10 @@ int ClassifyOtuCommand::execute(){
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//if user gave a namesfile then use it
-		if (namefile != "") {	readNamesFile();	}
+		if (namefile != "") {	m->readNames(namefile, nameMap, true);	}
 		
 		//read taxonomy file and save in map for easy access in building bin trees
-		readTaxonomyFile();
+		m->readTax(taxfile, taxMap);
 		
 		if (m->control_pressed) { return 0; }
 		
@@ -324,67 +345,6 @@ int ClassifyOtuCommand::execute(){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClassifyOtuCommand", "execute");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-int ClassifyOtuCommand::readNamesFile() {
-	try {
-		
-		ifstream inNames;
-		m->openInputFile(namefile, inNames);
-		
-		string name, names;
-	
-		while(!inNames.eof()){
-			inNames >> name;			//read from first column  A
-			inNames >> names;		//read from second column  A,B,C,D
-			m->gobble(inNames);
-			
-			//parse names into vector
-			vector<string> theseNames;
-			m->splitAtComma(names, theseNames);
-
-			for (int i = 0; i < theseNames.size(); i++) {  nameMap[theseNames[i]] = name;  }
-			
-			if (m->control_pressed) { inNames.close(); nameMap.clear(); return 0; }
-		}
-		inNames.close();
-		
-		return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClassifyOtuCommand", "readNamesFile");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-int ClassifyOtuCommand::readTaxonomyFile() {
-	try {
-		
-		ifstream in;
-		m->openInputFile(taxfile, in);
-		
-		string name, tax;
-	
-		while(!in.eof()){
-			in >> name >> tax;		
-			m->gobble(in);
-			
-			//are there confidence scores, if so remove them
-			if (tax.find_first_of('(') != -1) {  m->removeConfidences(tax);	}
-			
-			taxMap[name] = tax;
-			
-			if (m->control_pressed) { in.close(); taxMap.clear(); return 0; }
-		}
-		in.close();
-		
-		return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClassifyOtuCommand", "readTaxonomyFile");
 		exit(1);
 	}
 }
@@ -526,12 +486,12 @@ int ClassifyOtuCommand::process(ListVector* processList) {
 		if (outputDir == "") { outputDir += m->hasPath(listfile); }
 				
 		ofstream out;
-		string outputFile = outputDir + m->getRootName(m->getSimpleName(listfile)) + processList->getLabel() + ".cons.taxonomy";
+		string outputFile = outputDir + m->getRootName(m->getSimpleName(listfile)) + processList->getLabel() + getOutputFileNameTag("constaxonomy");
 		m->openOutputFile(outputFile, out);
 		outputNames.push_back(outputFile); outputTypes["constaxonomy"].push_back(outputFile);
 		
 		ofstream outSum;
-		string outputSumFile = outputDir + m->getRootName(m->getSimpleName(listfile)) + processList->getLabel() + ".cons.tax.summary";
+		string outputSumFile = outputDir + m->getRootName(m->getSimpleName(listfile)) + processList->getLabel() + getOutputFileNameTag("taxsummary");
 		m->openOutputFile(outputSumFile, outSum);
 		outputNames.push_back(outputSumFile); outputTypes["taxsummary"].push_back(outputSumFile);
 		

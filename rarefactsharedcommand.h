@@ -25,6 +25,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "rarefaction.shared";		}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "Magurran AE (2004). Measuring biological diversity. Blackwell Pub.: Malden, Ma. \nhttp://www.mothur.org/wiki/Rarefaction.shared"; }
 	string getDescription()		{ return "generate inter-sample rarefaction curves using a re-sampling without replacement approach"; }

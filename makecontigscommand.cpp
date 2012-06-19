@@ -56,7 +56,28 @@ string MakeContigsCommand::getHelpString(){
 		exit(1);
 	}
 }
-
+//**********************************************************************************************************************
+string MakeContigsCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "fasta")             {   outputFileName =  "contigs.fasta";         }
+            else if (type == "qfile")        {   outputFileName =  "contigs.qual";          }
+            else if (type == "mismatch")     {   outputFileName =  "contigs.mismatch";      }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "MakeContigsCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 MakeContigsCommand::MakeContigsCommand(){	
 	try {
@@ -189,9 +210,9 @@ int MakeContigsCommand::execute(){
     
         if (m->control_pressed) { return 0; }
         
-        string outFastaFile = outputDir + m->getRootName(m->getSimpleName(ffastqfile)) + "contigs.fasta";
-        string outQualFile = outputDir + m->getRootName(m->getSimpleName(ffastqfile)) + "contigs.qual";
-        string outMisMatchFile = outputDir + m->getRootName(m->getSimpleName(ffastqfile)) + "contigs.mismatches";
+        string outFastaFile = outputDir + m->getRootName(m->getSimpleName(ffastqfile)) + getOutputFileNameTag("fasta");
+        string outQualFile = outputDir + m->getRootName(m->getSimpleName(ffastqfile)) + getOutputFileNameTag("qfile");
+        string outMisMatchFile = outputDir + m->getRootName(m->getSimpleName(ffastqfile)) + getOutputFileNameTag("mismatches");
         outputNames.push_back(outFastaFile); outputTypes["fasta"].push_back(outFastaFile);
         outputNames.push_back(outQualFile); outputTypes["qfile"].push_back(outQualFile);
         outputNames.push_back(outMisMatchFile); outputTypes["mismatch"].push_back(outMisMatchFile);

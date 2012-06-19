@@ -25,6 +25,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "pcr.seqs";	}
 	string getCommandCategory()		{ return "Sequence Processing";		}
+	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Pcr.seqs"; }
 	string getDescription()		{ return "pcr.seqs"; }

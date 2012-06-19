@@ -54,6 +54,27 @@ string CreateDatabaseCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string CreateDatabaseCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "database") {  outputFileName =  "database"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "CreateDatabaseCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
 CreateDatabaseCommand::CreateDatabaseCommand(){	
 	try {
 		abort = true; calledHelp = true; 
@@ -244,7 +265,7 @@ int CreateDatabaseCommand::execute(){
         if (m->control_pressed) { delete list; if (groupfile != "") { delete groupmap; } return 0; }
         
         if (outputDir == "") { outputDir += m->hasPath(listfile); }
-        string outputFileName = outputDir + m->getRootName(m->getSimpleName(listfile)) + "database";
+        string outputFileName = outputDir + m->getRootName(m->getSimpleName(listfile)) + getOutputFileNameTag("database");
         outputNames.push_back(outputFileName); outputTypes["database"].push_back(outputFileName);
         
         ofstream out;

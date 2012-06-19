@@ -61,7 +61,28 @@ string PhyloDiversityCommand::getHelpString(){
 		exit(1);
 	}
 }
-
+//**********************************************************************************************************************
+string PhyloDiversityCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "phylodiv") {  outputFileName =  "phylodiv"; }
+            else if (type == "rarefy") {  outputFileName =  "phylodiv.rarefaction"; }
+            else if (type == "summary") {  outputFileName =  "phylodiv.summary"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PhyloDiversityCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
 
 //**********************************************************************************************************************
 PhyloDiversityCommand::PhyloDiversityCommand(){	
@@ -237,9 +258,9 @@ int PhyloDiversityCommand::execute(){
 			if (m->control_pressed) { delete tmap; for (int j = 0; j < trees.size(); j++) { delete trees[j]; } for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]); 	} return 0; }
 			
 			ofstream outSum, outRare, outCollect;
-			string outSumFile = outputDir + m->getRootName(m->getSimpleName(treefile))  + toString(i+1) + ".phylodiv.summary";
-			string outRareFile = outputDir + m->getRootName(m->getSimpleName(treefile))  + toString(i+1) + ".phylodiv.rarefaction";
-			string outCollectFile = outputDir + m->getRootName(m->getSimpleName(treefile))  + toString(i+1) + ".phylodiv";
+			string outSumFile = outputDir + m->getRootName(m->getSimpleName(treefile))  + toString(i+1) + "." + getOutputFileNameTag("summary");
+			string outRareFile = outputDir + m->getRootName(m->getSimpleName(treefile))  + toString(i+1) + "." + getOutputFileNameTag("rarefy");
+			string outCollectFile = outputDir + m->getRootName(m->getSimpleName(treefile))  + toString(i+1) + "." + getOutputFileNameTag("phylodiv");
 			
 			if (summary)	{ m->openOutputFile(outSumFile, outSum); outputNames.push_back(outSumFile);		outputTypes["summary"].push_back(outSumFile);			}
 			if (rarefy)		{ m->openOutputFile(outRareFile, outRare); outputNames.push_back(outRareFile);	outputTypes["rarefy"].push_back(outRareFile);			}

@@ -55,6 +55,28 @@ string NMDSCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string NMDSCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "nmds") {  outputFileName =  "nmds.axes"; }
+            else if (type == "stress") {  outputFileName =  "nmds.stress"; }
+            else if (type == "iters") {  outputFileName =  "nmds.iters"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "NMDSCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 NMDSCommand::NMDSCommand(){	
 	try {
 		abort = true; calledHelp = true; 
@@ -186,8 +208,8 @@ int NMDSCommand::execute(){
 		vector< vector<double> > axes;
 		if (axesfile != "") {  axes = readAxes(names);		}
 		
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(phylipfile)) + "nmds.iters";
-		string stressFileName = outputDir + m->getRootName(m->getSimpleName(phylipfile)) + "nmds.stress";
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(phylipfile)) + getOutputFileNameTag("iters");
+		string stressFileName = outputDir + m->getRootName(m->getSimpleName(phylipfile)) + getOutputFileNameTag("stress");
 		outputNames.push_back(outputFileName); outputTypes["iters"].push_back(outputFileName);
 		outputNames.push_back(stressFileName); outputTypes["stress"].push_back(stressFileName);
 		
@@ -256,7 +278,7 @@ int NMDSCommand::execute(){
 		out.close(); out2.close();
 		
 		//output best config
-		string BestFileName = outputDir + m->getRootName(m->getSimpleName(phylipfile)) + "nmds.axes";
+		string BestFileName = outputDir + m->getRootName(m->getSimpleName(phylipfile)) + getOutputFileNameTag("nmds");
 		outputNames.push_back(BestFileName); outputTypes["nmds"].push_back(BestFileName);
 		
 		m->mothurOut("\nNumber of dimensions:\t" + toString(bestDim) + "\n");

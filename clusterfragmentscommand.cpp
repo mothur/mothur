@@ -67,6 +67,28 @@ string ClusterFragmentsCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string ClusterFragmentsCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "fasta") {  outputFileName =  "fragclust.fasta"; }
+            else if (type == "name") {  outputFileName =  "fragclust.names"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClusterFragmentsCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
 ClusterFragmentsCommand::ClusterFragmentsCommand(){	
 	try {
 		abort = true; calledHelp = true; 
@@ -230,8 +252,8 @@ int ClusterFragmentsCommand::execute(){
 		
 		string fileroot = outputDir + m->getRootName(m->getSimpleName(fastafile));
 		
-		string newFastaFile = fileroot + "fragclust.fasta";
-		string newNamesFile = fileroot + "fragclust.names";
+		string newFastaFile = fileroot + getOutputFileNameTag("fasta");
+		string newNamesFile = fileroot + getOutputFileNameTag("name");
 		
 		if (m->control_pressed) { return 0; }
 		

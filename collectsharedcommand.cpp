@@ -98,6 +98,64 @@ string CollectSharedCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string CollectSharedCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "sharedchao")               {  outputFileName =  "shared.chao";     }
+            else if (type == "sharedsobs")          {  outputFileName =  "shared.sobs";     }
+            else if (type == "sharedace")           {  outputFileName =  "shared.ace";      }
+            else if (type == "jabund")              {  outputFileName =  "jabund";          }
+            else if (type == "sorabund")            {  outputFileName =  "sorabund";        }
+            else if (type == "jclass")              {  outputFileName =  "jclass";          }
+            else if (type == "sorclass")            {  outputFileName =  "sorclass";        }
+            else if (type == "jest")                {  outputFileName =  "jest";            }
+            else if (type == "sorest")              {  outputFileName =  "sorest";          }
+            else if (type == "thetayc")             {  outputFileName =  "thetayc";         }
+            else if (type == "thetan")              {  outputFileName =  "thetan";          }
+            else if (type == "kstest")              {  outputFileName =  "kstest";          }
+            else if (type == "whittaker")           {  outputFileName =  "whittaker";       }
+            else if (type == "sharednseqs")         {  outputFileName =  "shared.nseqs";    }
+            else if (type == "ochiai")              {  outputFileName =  "ochiai";          }
+            else if (type == "anderberg")           {  outputFileName =  "anderberg";       }
+            else if (type == "kulczynski")          {  outputFileName =  "kulczynski";      }
+            else if (type == "kulczynskicody")      {  outputFileName =  "kulczynskicody";  }
+            else if (type == "lennon")              {  outputFileName =  "lennon";          }
+            else if (type == "morisitahorn")        {  outputFileName =  "morisitahorn";    }
+            else if (type == "braycurtis")          {  outputFileName =  "braycurtis";      }
+            else if (type == "odum")                {  outputFileName =  "odum";            }
+            else if (type == "canberra")            {  outputFileName =  "canberra";        }
+            else if (type == "structeuclidean")     {  outputFileName =  "structeuclidean"; }
+            else if (type == "structchord")         {  outputFileName =  "structchord";     }
+            else if (type == "hellinger")           {  outputFileName =  "hellinger";       }
+            else if (type == "manhattan")           {  outputFileName =  "manhattan";       }
+            else if (type == "structpearson")       {  outputFileName =  "structpearson";   }
+            else if (type == "soergel")             {  outputFileName =  "soergel";         }
+            else if (type == "spearman")            {  outputFileName =  "spearman";        }
+            else if (type == "structkulczynski")    {  outputFileName =  "structkulczynski";}
+            else if (type == "structchi2")          {  outputFileName =  "structchi2";      }
+            else if (type == "speciesprofile")      {  outputFileName =  "speciesprofile";  }
+            else if (type == "hamming")             {  outputFileName =  "hamming";         }
+            else if (type == "gower")               {  outputFileName =  "gower";           }
+            else if (type == "memchi2")             {  outputFileName =  "memchi2";         }
+            else if (type == "memchord")            {  outputFileName =  "memchord";        }
+            else if (type == "memeuclidean")        {  outputFileName =  "memeuclidean";    }
+            else if (type == "mempearson")          {  outputFileName =  "mempearson";      }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "CollectSharedCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 CollectSharedCommand::CollectSharedCommand(){	
 	try {
 		abort = true; calledHelp = true; 
@@ -288,122 +346,122 @@ CollectSharedCommand::CollectSharedCommand(string option)  {
 				for (int i=0; i<Estimators.size(); i++) {
 					if (validCalculator.isValidCalculator("shared", Estimators[i]) == true) { 
 						if (Estimators[i] == "sharedchao") { 
-							cDisplays.push_back(new CollectDisplay(new SharedChao1(), new SharedOneColumnFile(fileNameRoot+"shared.chao")));
-							outputNames.push_back(fileNameRoot+"shared.chao"); outputTypes["sharedchao"].push_back(fileNameRoot+"shared.chao");
+							cDisplays.push_back(new CollectDisplay(new SharedChao1(), new SharedOneColumnFile(fileNameRoot+getOutputFileNameTag("sharedchao"))));
+							outputNames.push_back(fileNameRoot+getOutputFileNameTag("sharedchao")); outputTypes["sharedchao"].push_back(fileNameRoot+getOutputFileNameTag("sharedchao"));
 						}else if (Estimators[i] == "sharedsobs") { 
-							cDisplays.push_back(new CollectDisplay(new SharedSobsCS(), new SharedOneColumnFile(fileNameRoot+"shared.sobs")));
-							outputNames.push_back(fileNameRoot+"shared.sobs"); outputTypes["sharedsobs"].push_back(fileNameRoot+"shared.sobs");
+							cDisplays.push_back(new CollectDisplay(new SharedSobsCS(), new SharedOneColumnFile(fileNameRoot+getOutputFileNameTag("sharedsobs"))));
+							outputNames.push_back(fileNameRoot+getOutputFileNameTag("sharedsobs")); outputTypes["sharedsobs"].push_back(fileNameRoot+getOutputFileNameTag("sharedsobs"));
 						}else if (Estimators[i] == "sharedace") { 
-							cDisplays.push_back(new CollectDisplay(new SharedAce(), new SharedOneColumnFile(fileNameRoot+"shared.ace")));
-							outputNames.push_back(fileNameRoot+"shared.ace"); outputTypes["sharedace"].push_back(fileNameRoot+"shared.ace");
+							cDisplays.push_back(new CollectDisplay(new SharedAce(), new SharedOneColumnFile(fileNameRoot+getOutputFileNameTag("sharedace"))));
+							outputNames.push_back(fileNameRoot+getOutputFileNameTag("sharedace")); outputTypes["sharedace"].push_back(fileNameRoot+getOutputFileNameTag("sharedace"));
 						}else if (Estimators[i] == "jabund") { 	
-							cDisplays.push_back(new CollectDisplay(new JAbund(), new SharedOneColumnFile(fileNameRoot+"jabund")));
-							outputNames.push_back(fileNameRoot+"jabund"); outputTypes["jabund"].push_back(fileNameRoot+"jabund");
+							cDisplays.push_back(new CollectDisplay(new JAbund(), new SharedOneColumnFile(fileNameRoot+getOutputFileNameTag("jabund"))));
+							outputNames.push_back(fileNameRoot+getOutputFileNameTag("jabund")); outputTypes["jabund"].push_back(fileNameRoot+getOutputFileNameTag("jabund"));
 						}else if (Estimators[i] == "sorabund") { 
-							cDisplays.push_back(new CollectDisplay(new SorAbund(), new SharedOneColumnFile(fileNameRoot+"sorabund")));
-							outputNames.push_back(fileNameRoot+"sorabund"); outputTypes["sorabund"].push_back(fileNameRoot+"sorabund");
+							cDisplays.push_back(new CollectDisplay(new SorAbund(), new SharedOneColumnFile(fileNameRoot+getOutputFileNameTag("sorabund"))));
+							outputNames.push_back(fileNameRoot+getOutputFileNameTag("sorabund")); outputTypes["sorabund"].push_back(fileNameRoot+getOutputFileNameTag("sorabund"));
 						}else if (Estimators[i] == "jclass") { 
-							cDisplays.push_back(new CollectDisplay(new Jclass(), new SharedOneColumnFile(fileNameRoot+"jclass")));
-							outputNames.push_back(fileNameRoot+"jclass"); outputTypes["jclass"].push_back(fileNameRoot+"jclass");
+							cDisplays.push_back(new CollectDisplay(new Jclass(), new SharedOneColumnFile(fileNameRoot+getOutputFileNameTag("jclass"))));
+							outputNames.push_back(fileNameRoot+getOutputFileNameTag("jclass")); outputTypes["jclass"].push_back(fileNameRoot+getOutputFileNameTag("jclass"));
 						}else if (Estimators[i] == "sorclass") { 
-							cDisplays.push_back(new CollectDisplay(new SorClass(), new SharedOneColumnFile(fileNameRoot+"sorclass")));
-							outputNames.push_back(fileNameRoot+"sorclass"); outputTypes["sorclass"].push_back(fileNameRoot+"sorclass");
+							cDisplays.push_back(new CollectDisplay(new SorClass(), new SharedOneColumnFile(fileNameRoot+getOutputFileNameTag("sorclass"))));
+							outputNames.push_back(fileNameRoot+getOutputFileNameTag("sorclass")); outputTypes["sorclass"].push_back(fileNameRoot+getOutputFileNameTag("sorclass"));
 						}else if (Estimators[i] == "jest") { 
-							cDisplays.push_back(new CollectDisplay(new Jest(), new SharedOneColumnFile(fileNameRoot+"jest")));
-							outputNames.push_back(fileNameRoot+"jest"); outputTypes["jest"].push_back(fileNameRoot+"jest");
+							cDisplays.push_back(new CollectDisplay(new Jest(), new SharedOneColumnFile(fileNameRoot+getOutputFileNameTag("jest"))));
+							outputNames.push_back(fileNameRoot+getOutputFileNameTag("jest")); outputTypes["jest"].push_back(fileNameRoot+getOutputFileNameTag("jest"));
 						}else if (Estimators[i] == "sorest") { 
-							cDisplays.push_back(new CollectDisplay(new SorEst(), new SharedOneColumnFile(fileNameRoot+"sorest")));
-							outputNames.push_back(fileNameRoot+"sorest"); outputTypes["sorest"].push_back(fileNameRoot+"sorest");
+							cDisplays.push_back(new CollectDisplay(new SorEst(), new SharedOneColumnFile(fileNameRoot+getOutputFileNameTag("sorest"))));
+							outputNames.push_back(fileNameRoot+getOutputFileNameTag("sorest")); outputTypes["sorest"].push_back(fileNameRoot+getOutputFileNameTag("sorest"));
 						}else if (Estimators[i] == "thetayc") { 
-							cDisplays.push_back(new CollectDisplay(new ThetaYC(), new SharedOneColumnFile(fileNameRoot+"thetayc")));
-							outputNames.push_back(fileNameRoot+"thetayc"); outputTypes["thetayc"].push_back(fileNameRoot+"thetayc");
+							cDisplays.push_back(new CollectDisplay(new ThetaYC(), new SharedOneColumnFile(fileNameRoot+getOutputFileNameTag("thetayc"))));
+							outputNames.push_back(fileNameRoot+getOutputFileNameTag("thetayc")); outputTypes["thetayc"].push_back(fileNameRoot+getOutputFileNameTag("thetayc"));
 						}else if (Estimators[i] == "thetan") { 
-							cDisplays.push_back(new CollectDisplay(new ThetaN(), new SharedOneColumnFile(fileNameRoot+"thetan")));
-							outputNames.push_back(fileNameRoot+"thetan"); outputTypes["thetan"].push_back(fileNameRoot+"thetan");
+							cDisplays.push_back(new CollectDisplay(new ThetaN(), new SharedOneColumnFile(fileNameRoot+getOutputFileNameTag("thetan"))));
+							outputNames.push_back(fileNameRoot+getOutputFileNameTag("thetan")); outputTypes["thetan"].push_back(fileNameRoot+getOutputFileNameTag("thetan"));
 						}else if (Estimators[i] == "kstest") { 
-							cDisplays.push_back(new CollectDisplay(new KSTest(), new SharedOneColumnFile(fileNameRoot+"kstest")));
-							outputNames.push_back(fileNameRoot+"kstest"); outputTypes["kstest"].push_back(fileNameRoot+"kstest");
+							cDisplays.push_back(new CollectDisplay(new KSTest(), new SharedOneColumnFile(fileNameRoot+getOutputFileNameTag("kstest"))));
+							outputNames.push_back(fileNameRoot+getOutputFileNameTag("kstest")); outputTypes["kstest"].push_back(fileNameRoot+getOutputFileNameTag("kstest"));
 						}else if (Estimators[i] == "whittaker") { 
-							cDisplays.push_back(new CollectDisplay(new Whittaker(), new SharedOneColumnFile(fileNameRoot+"whittaker")));
-							outputNames.push_back(fileNameRoot+"whittaker"); outputTypes["whittaker"].push_back(fileNameRoot+"whittaker");
+							cDisplays.push_back(new CollectDisplay(new Whittaker(), new SharedOneColumnFile(fileNameRoot+getOutputFileNameTag("whittaker"))));
+							outputNames.push_back(fileNameRoot+getOutputFileNameTag("whittaker")); outputTypes["whittaker"].push_back(fileNameRoot+getOutputFileNameTag("whittaker"));
 						}else if (Estimators[i] == "sharednseqs") { 
-							cDisplays.push_back(new CollectDisplay(new SharedNSeqs(), new SharedOneColumnFile(fileNameRoot+"shared.nseqs")));
-							outputNames.push_back(fileNameRoot+"shared.nseqs"); outputTypes["shared.nseqs"].push_back(fileNameRoot+"shared.nseqs");
+							cDisplays.push_back(new CollectDisplay(new SharedNSeqs(), new SharedOneColumnFile(fileNameRoot+getOutputFileNameTag("sharednseqs"))));
+							outputNames.push_back(fileNameRoot+getOutputFileNameTag("sharednseqs")); outputTypes["shared.nseqs"].push_back(fileNameRoot+getOutputFileNameTag("sharednseqs"));
 						}else if (Estimators[i] == "ochiai") { 
-							cDisplays.push_back(new CollectDisplay(new Ochiai(), new SharedOneColumnFile(fileNameRoot+"ochiai")));
-							outputNames.push_back(fileNameRoot+"ochiai"); outputTypes["ochiai"].push_back(fileNameRoot+"ochiai");
+							cDisplays.push_back(new CollectDisplay(new Ochiai(), new SharedOneColumnFile(fileNameRoot+getOutputFileNameTag("ochiai"))));
+							outputNames.push_back(fileNameRoot+getOutputFileNameTag("ochiai")); outputTypes["ochiai"].push_back(fileNameRoot+getOutputFileNameTag("ochiai"));
 						}else if (Estimators[i] == "anderberg") { 
-							cDisplays.push_back(new CollectDisplay(new Anderberg(), new SharedOneColumnFile(fileNameRoot+"anderberg")));
-							outputNames.push_back(fileNameRoot+"anderberg"); outputTypes["anderberg"].push_back(fileNameRoot+"anderberg");
+							cDisplays.push_back(new CollectDisplay(new Anderberg(), new SharedOneColumnFile(fileNameRoot+getOutputFileNameTag("anderberg"))));
+							outputNames.push_back(fileNameRoot+getOutputFileNameTag("anderberg")); outputTypes["anderberg"].push_back(fileNameRoot+getOutputFileNameTag("anderberg"));
 						}else if (Estimators[i] == "kulczynski") { 
-							cDisplays.push_back(new CollectDisplay(new Kulczynski(), new SharedOneColumnFile(fileNameRoot+"kulczynski")));
-							outputNames.push_back(fileNameRoot+"kulczynski"); outputTypes["kulczynski"].push_back(fileNameRoot+"kulczynski");
+							cDisplays.push_back(new CollectDisplay(new Kulczynski(), new SharedOneColumnFile(fileNameRoot+getOutputFileNameTag("kulczynski"))));
+							outputNames.push_back(fileNameRoot+getOutputFileNameTag("kulczynski")); outputTypes["kulczynski"].push_back(fileNameRoot+getOutputFileNameTag("kulczynski"));
 						}else if (Estimators[i] == "kulczynskicody") { 
-							cDisplays.push_back(new CollectDisplay(new KulczynskiCody(), new SharedOneColumnFile(fileNameRoot+"kulczynskicody")));
-							outputNames.push_back(fileNameRoot+"kulczynskicody"); outputTypes["kulczynskicody"].push_back(fileNameRoot+"kulczynskicody");
+							cDisplays.push_back(new CollectDisplay(new KulczynskiCody(), new SharedOneColumnFile(fileNameRoot+getOutputFileNameTag("kulczynskicody"))));
+							outputNames.push_back(fileNameRoot+getOutputFileNameTag("kulczynskicody")); outputTypes["kulczynskicody"].push_back(fileNameRoot+getOutputFileNameTag("kulczynskicody"));
 						}else if (Estimators[i] == "lennon") { 
-							cDisplays.push_back(new CollectDisplay(new Lennon(), new SharedOneColumnFile(fileNameRoot+"lennon")));
-							outputNames.push_back(fileNameRoot+"lennon"); outputTypes["lennon"].push_back(fileNameRoot+"lennon");
+							cDisplays.push_back(new CollectDisplay(new Lennon(), new SharedOneColumnFile(fileNameRoot+getOutputFileNameTag("lennon"))));
+							outputNames.push_back(fileNameRoot+getOutputFileNameTag("lennon")); outputTypes["lennon"].push_back(fileNameRoot+getOutputFileNameTag("lennon"));
 						}else if (Estimators[i] == "morisitahorn") { 
-							cDisplays.push_back(new CollectDisplay(new MorHorn(), new SharedOneColumnFile(fileNameRoot+"morisitahorn")));
-							outputNames.push_back(fileNameRoot+"morisitahorn"); outputTypes["morisitahorn"].push_back(fileNameRoot+"morisitahorn");
+							cDisplays.push_back(new CollectDisplay(new MorHorn(), new SharedOneColumnFile(fileNameRoot+getOutputFileNameTag("morisitahorn"))));
+							outputNames.push_back(fileNameRoot+getOutputFileNameTag("morisitahorn")); outputTypes["morisitahorn"].push_back(fileNameRoot+getOutputFileNameTag("morisitahorn"));
 						}else if (Estimators[i] == "braycurtis") { 
-							cDisplays.push_back(new CollectDisplay(new BrayCurtis(), new SharedOneColumnFile(fileNameRoot+"braycurtis")));
-							outputNames.push_back(fileNameRoot+"braycurtis"); outputTypes["braycurtis"].push_back(fileNameRoot+"braycurtis");
+							cDisplays.push_back(new CollectDisplay(new BrayCurtis(), new SharedOneColumnFile(fileNameRoot+getOutputFileNameTag("braycurtis"))));
+							outputNames.push_back(fileNameRoot+getOutputFileNameTag("braycurtis")); outputTypes["braycurtis"].push_back(fileNameRoot+getOutputFileNameTag("braycurtis"));
 						}else if (Estimators[i] == "odum") { 
-							cDisplays.push_back(new CollectDisplay(new Odum(), new SharedOneColumnFile(fileNameRoot+"odum")));
-							outputNames.push_back(fileNameRoot+"odum"); outputTypes["odum"].push_back(fileNameRoot+"odum");
+							cDisplays.push_back(new CollectDisplay(new Odum(), new SharedOneColumnFile(fileNameRoot+getOutputFileNameTag("odum"))));
+							outputNames.push_back(fileNameRoot+getOutputFileNameTag("odum")); outputTypes["odum"].push_back(fileNameRoot+getOutputFileNameTag("odum"));
 						}else if (Estimators[i] == "canberra") { 
-							cDisplays.push_back(new CollectDisplay(new Canberra(), new SharedOneColumnFile(fileNameRoot+"canberra")));
-							outputNames.push_back(fileNameRoot+"canberra"); outputTypes["canberra"].push_back(fileNameRoot+"canberra");
+							cDisplays.push_back(new CollectDisplay(new Canberra(), new SharedOneColumnFile(fileNameRoot+getOutputFileNameTag("canberra"))));
+							outputNames.push_back(fileNameRoot+getOutputFileNameTag("canberra")); outputTypes["canberra"].push_back(fileNameRoot+getOutputFileNameTag("canberra"));
 						}else if (Estimators[i] == "structeuclidean") { 
-							cDisplays.push_back(new CollectDisplay(new StructEuclidean(), new SharedOneColumnFile(fileNameRoot+"structeuclidean")));
-							outputNames.push_back(fileNameRoot+"structeuclidean"); outputTypes["structeuclidean"].push_back(fileNameRoot+"structeuclidean");
+							cDisplays.push_back(new CollectDisplay(new StructEuclidean(), new SharedOneColumnFile(fileNameRoot+getOutputFileNameTag("structeuclidean"))));
+							outputNames.push_back(fileNameRoot+getOutputFileNameTag("structeuclidean")); outputTypes["structeuclidean"].push_back(fileNameRoot+getOutputFileNameTag("structeuclidean"));
 						}else if (Estimators[i] == "structchord") { 
-							cDisplays.push_back(new CollectDisplay(new StructChord(), new SharedOneColumnFile(fileNameRoot+"structchord")));
-							outputNames.push_back(fileNameRoot+"structchord"); outputTypes["structchord"].push_back(fileNameRoot+"structchord");
+							cDisplays.push_back(new CollectDisplay(new StructChord(), new SharedOneColumnFile(fileNameRoot+getOutputFileNameTag("structchord"))));
+							outputNames.push_back(fileNameRoot+getOutputFileNameTag("structchord")); outputTypes["structchord"].push_back(fileNameRoot+getOutputFileNameTag("structchord"));
 						}else if (Estimators[i] == "hellinger") { 
-							cDisplays.push_back(new CollectDisplay(new Hellinger(), new SharedOneColumnFile(fileNameRoot+"hellinger")));
-							outputNames.push_back(fileNameRoot+"hellinger"); outputTypes["hellinger"].push_back(fileNameRoot+"hellinger");
+							cDisplays.push_back(new CollectDisplay(new Hellinger(), new SharedOneColumnFile(fileNameRoot+getOutputFileNameTag("hellinger"))));
+							outputNames.push_back(fileNameRoot+getOutputFileNameTag("hellinger")); outputTypes["hellinger"].push_back(fileNameRoot+getOutputFileNameTag("hellinger"));
 						}else if (Estimators[i] == "manhattan") { 
-							cDisplays.push_back(new CollectDisplay(new Manhattan(), new SharedOneColumnFile(fileNameRoot+"manhattan")));
-							outputNames.push_back(fileNameRoot+"manhattan"); outputTypes["manhattan"].push_back(fileNameRoot+"manhattan");
+							cDisplays.push_back(new CollectDisplay(new Manhattan(), new SharedOneColumnFile(fileNameRoot+getOutputFileNameTag("manhattan"))));
+							outputNames.push_back(fileNameRoot+getOutputFileNameTag("manhattan")); outputTypes["manhattan"].push_back(fileNameRoot+getOutputFileNameTag("manhattan"));
 						}else if (Estimators[i] == "structpearson") { 
-							cDisplays.push_back(new CollectDisplay(new StructPearson(), new SharedOneColumnFile(fileNameRoot+"structpearson")));
-							outputNames.push_back(fileNameRoot+"structpearson"); outputTypes["structpearson"].push_back(fileNameRoot+"structpearson");
+							cDisplays.push_back(new CollectDisplay(new StructPearson(), new SharedOneColumnFile(fileNameRoot+getOutputFileNameTag("structpearson"))));
+							outputNames.push_back(fileNameRoot+getOutputFileNameTag("structpearson")); outputTypes["structpearson"].push_back(fileNameRoot+getOutputFileNameTag("structpearson"));
 						}else if (Estimators[i] == "soergel") { 
-							cDisplays.push_back(new CollectDisplay(new Soergel(), new SharedOneColumnFile(fileNameRoot+"soergel")));
-							outputNames.push_back(fileNameRoot+"soergel"); outputTypes["soergel"].push_back(fileNameRoot+"soergel");
+							cDisplays.push_back(new CollectDisplay(new Soergel(), new SharedOneColumnFile(fileNameRoot+getOutputFileNameTag("soergel"))));
+							outputNames.push_back(fileNameRoot+getOutputFileNameTag("soergel")); outputTypes["soergel"].push_back(fileNameRoot+getOutputFileNameTag("soergel"));
 						}else if (Estimators[i] == "spearman") { 
-							cDisplays.push_back(new CollectDisplay(new Spearman(), new SharedOneColumnFile(fileNameRoot+"spearman")));
-							outputNames.push_back(fileNameRoot+"spearman"); outputTypes["spearman"].push_back(fileNameRoot+"spearman");
+							cDisplays.push_back(new CollectDisplay(new Spearman(), new SharedOneColumnFile(fileNameRoot+getOutputFileNameTag("spearman"))));
+							outputNames.push_back(fileNameRoot+getOutputFileNameTag("spearman")); outputTypes["spearman"].push_back(fileNameRoot+getOutputFileNameTag("spearman"));
 						}else if (Estimators[i] == "structkulczynski") { 
-							cDisplays.push_back(new CollectDisplay(new StructKulczynski(), new SharedOneColumnFile(fileNameRoot+"structkulczynski")));
-							outputNames.push_back(fileNameRoot+"structkulczynski"); outputTypes["structkulczynski"].push_back(fileNameRoot+"structkulczynski");
+							cDisplays.push_back(new CollectDisplay(new StructKulczynski(), new SharedOneColumnFile(fileNameRoot+getOutputFileNameTag("structkulczynski"))));
+							outputNames.push_back(fileNameRoot+getOutputFileNameTag("structkulczynski")); outputTypes["structkulczynski"].push_back(fileNameRoot+getOutputFileNameTag("structkulczynski"));
 						}else if (Estimators[i] == "speciesprofile") { 
-							cDisplays.push_back(new CollectDisplay(new SpeciesProfile(), new SharedOneColumnFile(fileNameRoot+"speciesprofile")));
-							outputNames.push_back(fileNameRoot+"speciesprofile"); outputTypes["speciesprofile"].push_back(fileNameRoot+"speciesprofile");
+							cDisplays.push_back(new CollectDisplay(new SpeciesProfile(), new SharedOneColumnFile(fileNameRoot+getOutputFileNameTag("speciesprofile"))));
+							outputNames.push_back(fileNameRoot+getOutputFileNameTag("speciesprofile")); outputTypes["speciesprofile"].push_back(fileNameRoot+getOutputFileNameTag("speciesprofile"));
 						}else if (Estimators[i] == "hamming") { 
-							cDisplays.push_back(new CollectDisplay(new Hamming(), new SharedOneColumnFile(fileNameRoot+"hamming")));
-							outputNames.push_back(fileNameRoot+"hamming"); outputTypes["hamming"].push_back(fileNameRoot+"hamming");
+							cDisplays.push_back(new CollectDisplay(new Hamming(), new SharedOneColumnFile(fileNameRoot+getOutputFileNameTag("hamming"))));
+							outputNames.push_back(fileNameRoot+getOutputFileNameTag("hamming")); outputTypes["hamming"].push_back(fileNameRoot+getOutputFileNameTag("hamming"));
 						}else if (Estimators[i] == "structchi2") { 
-							cDisplays.push_back(new CollectDisplay(new StructChi2(), new SharedOneColumnFile(fileNameRoot+"structchi2")));
-							outputNames.push_back(fileNameRoot+"structchi2"); outputTypes["structchi2"].push_back(fileNameRoot+"structchi2");
+							cDisplays.push_back(new CollectDisplay(new StructChi2(), new SharedOneColumnFile(fileNameRoot+getOutputFileNameTag("structchi2"))));
+							outputNames.push_back(fileNameRoot+getOutputFileNameTag("structchi2")); outputTypes["structchi2"].push_back(fileNameRoot+getOutputFileNameTag("structchi2"));
 						}else if (Estimators[i] == "gower") { 
-							cDisplays.push_back(new CollectDisplay(new Gower(), new SharedOneColumnFile(fileNameRoot+"gower")));
-							outputNames.push_back(fileNameRoot+"gower"); outputTypes["gower"].push_back(fileNameRoot+"gower");
+							cDisplays.push_back(new CollectDisplay(new Gower(), new SharedOneColumnFile(fileNameRoot+getOutputFileNameTag("gower"))));
+							outputNames.push_back(fileNameRoot+getOutputFileNameTag("gower")); outputTypes["gower"].push_back(fileNameRoot+getOutputFileNameTag("gower"));
 						}else if (Estimators[i] == "memchi2") { 
-							cDisplays.push_back(new CollectDisplay(new MemChi2(), new SharedOneColumnFile(fileNameRoot+"memchi2")));
-							outputNames.push_back(fileNameRoot+"memchi2"); outputTypes["memchi2"].push_back(fileNameRoot+"memchi2");
+							cDisplays.push_back(new CollectDisplay(new MemChi2(), new SharedOneColumnFile(fileNameRoot+getOutputFileNameTag("memchi2"))));
+							outputNames.push_back(fileNameRoot+getOutputFileNameTag("memchi2")); outputTypes["memchi2"].push_back(fileNameRoot+getOutputFileNameTag("memchi2"));
 						}else if (Estimators[i] == "memchord") { 
-							cDisplays.push_back(new CollectDisplay(new MemChord(), new SharedOneColumnFile(fileNameRoot+"memchord")));
-							outputNames.push_back(fileNameRoot+"memchord"); outputTypes["memchord"].push_back(fileNameRoot+"memchord");
+							cDisplays.push_back(new CollectDisplay(new MemChord(), new SharedOneColumnFile(fileNameRoot+getOutputFileNameTag("memchord"))));
+							outputNames.push_back(fileNameRoot+getOutputFileNameTag("memchord")); outputTypes["memchord"].push_back(fileNameRoot+getOutputFileNameTag("memchord"));
 						}else if (Estimators[i] == "memeuclidean") { 
-							cDisplays.push_back(new CollectDisplay(new MemEuclidean(), new SharedOneColumnFile(fileNameRoot+"memeuclidean")));
-							outputNames.push_back(fileNameRoot+"memeuclidean"); outputTypes["memeuclidean"].push_back(fileNameRoot+"memeuclidean");
+							cDisplays.push_back(new CollectDisplay(new MemEuclidean(), new SharedOneColumnFile(fileNameRoot+getOutputFileNameTag("memeuclidean"))));
+							outputNames.push_back(fileNameRoot+getOutputFileNameTag("memeuclidean")); outputTypes["memeuclidean"].push_back(fileNameRoot+getOutputFileNameTag("memeuclidean"));
 						}else if (Estimators[i] == "mempearson") { 
-							cDisplays.push_back(new CollectDisplay(new MemPearson(), new SharedOneColumnFile(fileNameRoot+"mempearson")));
-							outputNames.push_back(fileNameRoot+"mempearson"); outputTypes["mempearson"].push_back(fileNameRoot+"mempearson");
+							cDisplays.push_back(new CollectDisplay(new MemPearson(), new SharedOneColumnFile(fileNameRoot+getOutputFileNameTag("mempearson"))));
+							outputNames.push_back(fileNameRoot+getOutputFileNameTag("mempearson")); outputTypes["mempearson"].push_back(fileNameRoot+getOutputFileNameTag("mempearson"));
 						}
 						
 					}

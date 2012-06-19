@@ -25,6 +25,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "set.logfile";		}
 	string getCommandCategory()		{ return "General";			}
+	string getOutputFileNameTag(string, string) { return ""; }
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Set.logfile"; }
 	string getDescription()		{ return "set logfile name"; }

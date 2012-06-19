@@ -76,6 +76,29 @@ string AlignCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string AlignCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string tag = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "fasta") {  tag = "align"; }
+            else if (type == "alignreport") {  tag = "align.report"; }
+            else if (type == "accnos") {  tag = "flip.accnos"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return tag;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "AlignCommand", "getOutputFileName");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
 AlignCommand::AlignCommand(){	
 	try {
 		abort = true; calledHelp = true; 
@@ -305,9 +328,9 @@ int AlignCommand::execute(){
 			m->mothurOut("Aligning sequences from " + candidateFileNames[s] + " ..." ); m->mothurOutEndLine();
 			
 			if (outputDir == "") {  outputDir += m->hasPath(candidateFileNames[s]); }
-			string alignFileName = outputDir + m->getRootName(m->getSimpleName(candidateFileNames[s])) + "align";
-			string reportFileName = outputDir + m->getRootName(m->getSimpleName(candidateFileNames[s])) + "align.report";
-			string accnosFileName = outputDir + m->getRootName(m->getSimpleName(candidateFileNames[s])) + "flip.accnos";
+			string alignFileName = outputDir + m->getRootName(m->getSimpleName(candidateFileNames[s])) + getOutputFileNameTag("fasta");  
+			string reportFileName = outputDir + m->getRootName(m->getSimpleName(candidateFileNames[s])) + getOutputFileNameTag("alignreport");
+			string accnosFileName = outputDir + m->getRootName(m->getSimpleName(candidateFileNames[s])) + getOutputFileNameTag("accnos");
 			bool hasAccnos = true;
 			
 			int numFastaSeqs = 0;

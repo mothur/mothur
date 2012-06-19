@@ -47,6 +47,30 @@ string ShhherCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string ShhherCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "fasta")            {   outputFileName =  "shhh.fasta";   }
+            else if (type == "name")    {   outputFileName =  "shhh.names";   }
+            else if (type == "group")        {   outputFileName =  "shhh.groups";   }
+            else if (type == "counts")        {   outputFileName =  "shhh.counts";   }
+            else if (type == "qfile")        {   outputFileName =  "shhh.qual";   }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ShhherCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 
 ShhherCommand::ShhherCommand(){	
 	try {
@@ -54,8 +78,12 @@ ShhherCommand::ShhherCommand(){
 		setParameters();
 		
 		//initialize outputTypes
-//		vector<string> tempOutNames;
-//		outputTypes["pn.dist"] = tempOutNames;
+		vector<string> tempOutNames;
+		outputTypes["fasta"] = tempOutNames;
+        outputTypes["name"] = tempOutNames;
+        outputTypes["group"] = tempOutNames;
+        outputTypes["counts"] = tempOutNames;
+        outputTypes["qfile"] = tempOutNames;
 
 	}
 	catch(exception& e) {
@@ -96,9 +124,13 @@ ShhherCommand::ShhherCommand(string option) {
 			}
 			
 			//initialize outputTypes
-			vector<string> tempOutNames;
-//			outputTypes["pn.dist"] = tempOutNames;
-			//			outputTypes["fasta"] = tempOutNames;
+            vector<string> tempOutNames;
+            outputTypes["fasta"] = tempOutNames;
+            outputTypes["name"] = tempOutNames;
+            outputTypes["group"] = tempOutNames;
+            outputTypes["counts"] = tempOutNames;
+            outputTypes["qfile"] = tempOutNames;
+
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -770,7 +802,7 @@ string ShhherCommand::createNamesFile(){
 			duplicateNames[mapSeqToUnique[i]] += seqNameVector[i] + ',';
 		}
 		
-		string nameFileName = flowFileName.substr(0,flowFileName.find_last_of('.')) + ".shhh.names";
+		string nameFileName = outputDir + m->getRootName(m->getSimpleName(flowFileName) + getOutputFileNameTag("name");
 		
 		ofstream nameFile;
 		m->openOutputFile(nameFileName, nameFile);
@@ -1614,7 +1646,7 @@ void ShhherCommand::writeQualities(vector<int> otuCounts){
     try {
         string thisOutputDir = outputDir;
         if (outputDir == "") {  thisOutputDir += m->hasPath(flowFileName);  }
-        string qualityFileName = thisOutputDir + m->getRootName(m->getSimpleName(flowFileName)) + "shhh.qual";
+        string qualityFileName = thisOutputDir + m->getRootName(m->getSimpleName(flowFileName)) + getOutputFileNameTag("qfile");
         
         ofstream qualityFile;
         m->openOutputFile(qualityFileName, qualityFile);
@@ -1721,7 +1753,7 @@ void ShhherCommand::writeSequences(vector<int> otuCounts){
     try {
         string thisOutputDir = outputDir;
         if (outputDir == "") {  thisOutputDir += m->hasPath(flowFileName);  }
-        string fastaFileName = thisOutputDir + m->getRootName(m->getSimpleName(flowFileName)) + "shhh.fasta";
+        string fastaFileName = thisOutputDir + m->getRootName(m->getSimpleName(flowFileName)) + getOutputFileNameTag("fasta");
         ofstream fastaFile;
         m->openOutputFile(fastaFileName, fastaFile);
         
@@ -1769,7 +1801,7 @@ void ShhherCommand::writeNames(vector<int> otuCounts){
     try {
         string thisOutputDir = outputDir;
         if (outputDir == "") {  thisOutputDir += m->hasPath(flowFileName);  }
-        string nameFileName = thisOutputDir + m->getRootName(m->getSimpleName(flowFileName)) + "shhh.names";
+        string nameFileName = thisOutputDir + m->getRootName(m->getSimpleName(flowFileName)) + getOutputFileNameTag("name");
         ofstream nameFile;
         m->openOutputFile(nameFileName, nameFile);
         
@@ -1808,7 +1840,7 @@ void ShhherCommand::writeGroups(){
         string thisOutputDir = outputDir;
         if (outputDir == "") {  thisOutputDir += m->hasPath(flowFileName);  }
         string fileRoot = thisOutputDir + m->getRootName(m->getSimpleName(flowFileName));
-        string groupFileName = fileRoot + "shhh.groups";
+        string groupFileName = fileRoot + getOutputFileNameTag("group");
         ofstream groupFile;
         m->openOutputFile(groupFileName, groupFile);
         
@@ -1832,7 +1864,7 @@ void ShhherCommand::writeClusters(vector<int> otuCounts){
     try {
         string thisOutputDir = outputDir;
         if (outputDir == "") {  thisOutputDir += m->hasPath(flowFileName);  }
-        string otuCountsFileName = thisOutputDir + m->getRootName(m->getSimpleName(flowFileName)) + "shhh.counts";
+        string otuCountsFileName = thisOutputDir + m->getRootName(m->getSimpleName(flowFileName)) +getOutputFileNameTag("counts");
         ofstream otuCountsFile;
         m->openOutputFile(otuCountsFileName, otuCountsFile);
         
@@ -2283,12 +2315,12 @@ int ShhherCommand::driver(vector<string> filenames, string thisCompositeFASTAFil
                 if ((large) && (g == 0)) {  flowFileName = filenames[i]; theseFlowFileNames[0] = filenames[i]; }
                 string thisOutputDir = outputDir;
                 if (outputDir == "") {  thisOutputDir = m->hasPath(flowFileName);  }
-                string qualityFileName = thisOutputDir + m->getRootName(m->getSimpleName(flowFileName)) + "shhh.qual";
-                string fastaFileName = thisOutputDir + m->getRootName(m->getSimpleName(flowFileName)) + "shhh.fasta";
-                string nameFileName = thisOutputDir + m->getRootName(m->getSimpleName(flowFileName)) + "shhh.names";
-                string otuCountsFileName = thisOutputDir + m->getRootName(m->getSimpleName(flowFileName)) + "shhh.counts";
+                string qualityFileName = thisOutputDir + m->getRootName(m->getSimpleName(flowFileName)) + getOutputFileNameTag("qfile");
+                string fastaFileName = thisOutputDir + m->getRootName(m->getSimpleName(flowFileName)) + getOutputFileNameTag("fasta");
+                string nameFileName = thisOutputDir + m->getRootName(m->getSimpleName(flowFileName)) + getOutputFileNameTag("name");
+                string otuCountsFileName = thisOutputDir + m->getRootName(m->getSimpleName(flowFileName)) + getOutputFileNameTag("counts");
                 string fileRoot = thisOutputDir + m->getRootName(m->getSimpleName(flowFileName));
-                string groupFileName = fileRoot + "shhh.groups";
+                string groupFileName = fileRoot + getOutputFileNameTag("group");
 
                 
                 writeQualities(numOTUs, numFlowCells, qualityFileName, otuCounts, nSeqsPerOTU, seqNumber, singleTau, flowDataIntI, uniqueFlowgrams, cumNumSeqs, mapUniqueToSeq, seqNameVector, centroids, aaI); if (m->control_pressed) { break; }
@@ -2299,15 +2331,15 @@ int ShhherCommand::driver(vector<string> filenames, string thisCompositeFASTAFil
                 
                 if (large) {
                     if (g > 0) {
-                        m->appendFiles(qualityFileName, (thisOutputDir + m->getRootName(m->getSimpleName(theseFlowFileNames[0])) + "shhh.qual"));
+                        m->appendFiles(qualityFileName, (thisOutputDir + m->getRootName(m->getSimpleName(theseFlowFileNames[0])) + getOutputFileNameTag("qfile")));
                         m->mothurRemove(qualityFileName);
-                        m->appendFiles(fastaFileName, (thisOutputDir + m->getRootName(m->getSimpleName(theseFlowFileNames[0])) + "shhh.fasta"));
+                        m->appendFiles(fastaFileName, (thisOutputDir + m->getRootName(m->getSimpleName(theseFlowFileNames[0])) + getOutputFileNameTag("fasta")));
                         m->mothurRemove(fastaFileName);
-                        m->appendFiles(nameFileName, (thisOutputDir + m->getRootName(m->getSimpleName(theseFlowFileNames[0])) + "shhh.names"));
+                        m->appendFiles(nameFileName, (thisOutputDir + m->getRootName(m->getSimpleName(theseFlowFileNames[0])) + getOutputFileNameTag("name")));
                         m->mothurRemove(nameFileName);
-                        m->appendFiles(otuCountsFileName, (thisOutputDir + m->getRootName(m->getSimpleName(theseFlowFileNames[0])) + "shhh.counts"));
+                        m->appendFiles(otuCountsFileName, (thisOutputDir + m->getRootName(m->getSimpleName(theseFlowFileNames[0])) + getOutputFileNameTag("counts")));
                         m->mothurRemove(otuCountsFileName);
-                        m->appendFiles(groupFileName, (thisOutputDir + m->getRootName(m->getSimpleName(theseFlowFileNames[0])) + "shhh.groups"));
+                        m->appendFiles(groupFileName, (thisOutputDir + m->getRootName(m->getSimpleName(theseFlowFileNames[0])) + getOutputFileNameTag("group")));
                         m->mothurRemove(groupFileName);
                     }
                     m->mothurRemove(theseFlowFileNames[g]);

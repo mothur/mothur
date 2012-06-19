@@ -53,6 +53,28 @@ string ConsensusSeqsCommand::getHelpString(){
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
+string ConsensusSeqsCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "fasta") {  outputFileName =  "cons.fasta"; }
+            else if (type == "name") {  outputFileName =  "cons.names"; }
+            else if (type == "summary") {  outputFileName =  "cons.summary"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ConsensusSeqsCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
 
 //**********************************************************************************************************************
 ConsensusSeqsCommand::ConsensusSeqsCommand(){	
@@ -194,7 +216,7 @@ int ConsensusSeqsCommand::execute(){
 		if (listfile == "") {
 			
 			ofstream outSummary;
-			string outputSummaryFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "cons.summary";
+			string outputSummaryFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + getOutputFileNameTag("summary");
 			m->openOutputFile(outputSummaryFile, outSummary);
 			outSummary.setf(ios::fixed, ios::floatfield); outSummary.setf(ios::showpoint);
 			outputNames.push_back(outputSummaryFile); outputTypes["summary"].push_back(outputSummaryFile);
@@ -202,7 +224,7 @@ int ConsensusSeqsCommand::execute(){
 			outSummary << "PositioninAlignment\tA\tT\tG\tC\tGap\tNumberofSeqs\tConsensusBase" << endl;
 			
 			ofstream outFasta;
-			string outputFastaFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "cons.fasta";
+			string outputFastaFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + getOutputFileNameTag("fasta");
 			m->openOutputFile(outputFastaFile, outFasta);
 			outputNames.push_back(outputFastaFile); outputTypes["fasta"].push_back(outputFastaFile);
 			
@@ -370,18 +392,18 @@ int ConsensusSeqsCommand::processList(ListVector*& list){
 	try{
 		
 		ofstream outSummary;
-		string outputSummaryFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + list->getLabel() + ".cons.summary";
+		string outputSummaryFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + list->getLabel() + getOutputFileNameTag("summary");
 		m->openOutputFile(outputSummaryFile, outSummary);
 		outSummary.setf(ios::fixed, ios::floatfield); outSummary.setf(ios::showpoint);
 		outputNames.push_back(outputSummaryFile); outputTypes["summary"].push_back(outputSummaryFile);
 		
 		ofstream outName;
-		string outputNameFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + list->getLabel() + ".cons.names";
+		string outputNameFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + list->getLabel() + getOutputFileNameTag("name");
 		m->openOutputFile(outputNameFile, outName);
 		outputNames.push_back(outputNameFile); outputTypes["name"].push_back(outputNameFile);
 		
 		ofstream outFasta;
-		string outputFastaFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + list->getLabel() + ".cons.fasta";
+		string outputFastaFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + list->getLabel() + getOutputFileNameTag("fasta");
 		m->openOutputFile(outputFastaFile, outFasta);
 		outputNames.push_back(outputFastaFile); outputTypes["fasta"].push_back(outputFastaFile);
 		

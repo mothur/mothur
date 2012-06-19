@@ -95,6 +95,27 @@ string GetOTURepCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string GetOTURepCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "fasta")            {   outputFileName =  "rep.fasta";   }
+            else if (type == "name")        {   outputFileName =  "rep.names";   }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetOTURepCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 GetOTURepCommand::GetOTURepCommand(){	
 	try {
 		abort = true; calledHelp = true; 
@@ -771,7 +792,7 @@ int GetOTURepCommand::process(ListVector* processList) {
 		map<string, ofstream*> filehandles;
 		
 		if (Groups.size() == 0) { //you don't want to use groups
-			outputNamesFile  = outputDir + m->getRootName(m->getSimpleName(listfile)) + processList->getLabel() + ".rep.names";
+			outputNamesFile  = outputDir + m->getRootName(m->getSimpleName(listfile)) + processList->getLabel() + "." + getOutputFileNameTag("name");
 			m->openOutputFile(outputNamesFile, newNamesOutput);
 			outputNames.push_back(outputNamesFile); outputTypes["name"].push_back(outputNamesFile); 
 			outputNameFiles[outputNamesFile] = processList->getLabel();
@@ -780,7 +801,7 @@ int GetOTURepCommand::process(ListVector* processList) {
 			for (int i=0; i<Groups.size(); i++) {
 				temp = new ofstream;
 				filehandles[Groups[i]] = temp;
-				outputNamesFile = outputDir + m->getRootName(m->getSimpleName(listfile)) + processList->getLabel() + "." + Groups[i] + ".rep.names";
+				outputNamesFile = outputDir + m->getRootName(m->getSimpleName(listfile)) + processList->getLabel() + "." + Groups[i] + "." + getOutputFileNameTag("name");
 				
 				m->openOutputFile(outputNamesFile, *(temp));
 				outputNames.push_back(outputNamesFile); outputTypes["name"].push_back(outputNamesFile);
@@ -868,7 +889,7 @@ int GetOTURepCommand::processFastaNames(string filename, string label) {
 
 		//create output file
 		if (outputDir == "") { outputDir += m->hasPath(listfile); }
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(listfile)) + label + ".rep.fasta";
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(listfile)) + label + "." + getOutputFileNameTag("fasta");
 		m->openOutputFile(outputFileName, out);
 		vector<repStruct> reps;
 		outputNames.push_back(outputFileName); outputTypes["fasta"].push_back(outputFileName);

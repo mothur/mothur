@@ -30,6 +30,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "clearcut";			}
 	string getCommandCategory()		{ return "Hypothesis Testing";	}
+	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "Sheneman L, Evans J, Foster JA (2006). Clearcut: a fast implementation of relaxed neighbor joining. Bioinformatics 22: 2823-4. \nhttp://www.mothur.org/wiki/Clearcut"; }
 	string getDescription()		{ return "create a tree from a fasta or phylip file"; }

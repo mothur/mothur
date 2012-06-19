@@ -47,6 +47,27 @@ string ListOtuLabelsCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string ListOtuLabelsCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "otulabels")             {   outputFileName =  "otulabels";       }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ListOtuLabelsCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
 ListOtuLabelsCommand::ListOtuLabelsCommand(){	
 	try {
 		abort = true; calledHelp = true;
@@ -344,7 +365,7 @@ int ListOtuLabelsCommand::execute(){
 int ListOtuLabelsCommand::createList(vector<SharedRAbundVector*>& lookup){
 	try {
         
-        string outputFileName = outputDir + m->getRootName(m->getSimpleName(inputFileName)) + lookup[0]->getLabel() + ".otu.labels";
+        string outputFileName = outputDir + m->getRootName(m->getSimpleName(inputFileName)) + lookup[0]->getLabel() + "." + getOutputFileNameTag("otulabels");
         outputNames.push_back(outputFileName);  outputTypes["otulabels"].push_back(outputFileName);
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
@@ -366,7 +387,7 @@ int ListOtuLabelsCommand::createList(vector<SharedRAbundVector*>& lookup){
 int ListOtuLabelsCommand::createList(vector<SharedRAbundFloatVector*>& lookup){
 	try {
         
-        string outputFileName = outputDir + m->getRootName(m->getSimpleName(inputFileName)) + lookup[0]->getLabel() + ".otu.labels";
+        string outputFileName = outputDir + m->getRootName(m->getSimpleName(inputFileName)) + lookup[0]->getLabel() + "." + getOutputFileNameTag("otulabels");
         outputNames.push_back(outputFileName);  outputTypes["accnos"].push_back(outputFileName);
 		ofstream out;
 		m->openOutputFile(outputFileName, out);

@@ -31,6 +31,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "catchall";			}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "Bunge, J. (2011). Estimating the number of species with CatchAll. Forthcoming in Proceedings of the Pacific Symposium on Biocomputing 2011.\nhttp://www.northeastern.edu/catchall/index.html http://www.mothur.org/wiki/Catchall"; }
 	string getDescription()		{ return "estimate number of species"; }

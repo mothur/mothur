@@ -98,6 +98,28 @@ string ChimeraUchimeCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string ChimeraUchimeCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "chimera") {  outputFileName =  "uchime.chimeras"; }
+            else if (type == "accnos") {  outputFileName =  "uchime.accnos"; }
+            else if (type == "alns") {  outputFileName =  "uchime.alns"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChimeraUchimeCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 ChimeraUchimeCommand::ChimeraUchimeCommand(){	
 	try {
 		abort = true; calledHelp = true;
@@ -522,9 +544,9 @@ int ChimeraUchimeCommand::execute(){
 			int start = time(NULL);	
 			string nameFile = "";
 			if (outputDir == "") { outputDir = m->hasPath(fastaFileNames[s]);  }//if user entered a file with a path then preserve it				
-			string outputFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + "uchime.chimera";
-			string accnosFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]))  + "uchime.accnos";
-			string alnsFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]))  + "uchime.alns";
+			string outputFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + getOutputFileNameTag("chimera");
+			string accnosFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + getOutputFileNameTag("accnos");
+			string alnsFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]))  + getOutputFileNameTag("alns");
 			string newFasta = m->getRootName(fastaFileNames[s]) + "temp";
 				
 			//you provided a groupfile

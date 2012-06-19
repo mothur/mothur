@@ -45,7 +45,26 @@ string SummaryQualCommand::getHelpString(){
 		exit(1);
 	}
 }
-
+//**********************************************************************************************************************
+string SummaryQualCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "summary")            {   outputFileName =  "qual.summary";   }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SummaryQualCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 SummaryQualCommand::SummaryQualCommand(){	
 	try {
@@ -189,7 +208,7 @@ int SummaryQualCommand::execute(){
 		if (m->control_pressed) {  return 0; }
 		
 		//print summary file
-		string summaryFile = outputDir + m->getRootName(m->getSimpleName(qualfile)) + "qual.summary";
+		string summaryFile = outputDir + m->getRootName(m->getSimpleName(qualfile)) + getOutputFileNameTag("summary");
 		printQual(summaryFile, position, averageQ, scores);
 		
 		if (m->control_pressed) {  m->mothurRemove(summaryFile); return 0; }

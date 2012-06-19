@@ -27,6 +27,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "trim.seqs";	}
 	string getCommandCategory()		{ return "Sequence Processing";		}
+	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Trim.seqs"; }
 	string getDescription()		{ return "provides the preprocessing features needed to screen and sort pyrosequences"; }

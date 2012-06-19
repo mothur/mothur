@@ -8,9 +8,6 @@
  */
 
 #include "command.hpp"
-#include "readdistcommand.h"
-#include "readtreecommand.h"
-#include "readotucommand.h"
 #include "clustercommand.h"
 #include "collectcommand.h"
 #include "collectsharedcommand.h"
@@ -136,6 +133,7 @@
 #include "getotulabelscommand.h"
 #include "removeotulabelscommand.h"
 #include "makecontigscommand.h"
+#include "loadlogfilecommand.h"
 
 /*******************************************************/
 
@@ -168,9 +166,6 @@ CommandFactory::CommandFactory(){
 	append = false;
 	
 	//initialize list of valid commands
-	commands["read.dist"]			= "read.dist"; 
-	commands["read.otu"]			= "read.otu";
-	commands["read.tree"]			= "read.tree"; 
 	commands["make.shared"]			= "make.shared"; 
 	commands["bin.seqs"]			= "bin.seqs"; 
 	commands["get.oturep"]			= "get.oturep";
@@ -293,6 +288,7 @@ CommandFactory::CommandFactory(){
     commands["get.otulabels"]       = "get.otulabels";
     commands["remove.otulabels"]    = "remove.otulabels";
     commands["make.contigs"]        = "make.contigs";
+    commands["load.logfile"]        = "load.logfile";
 	commands["quit"]				= "MPIEnabled"; 
 
 }
@@ -382,10 +378,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 			else { optionString += "inputdir=" + inputDir; }
 		}
 		
-		if(commandName == "read.dist")					{	command = new ReadDistCommand(optionString);				}
-		else if(commandName == "read.otu")				{	command = new ReadOtuCommand(optionString);					}
-		else if(commandName == "read.tree")				{	command = new ReadTreeCommand(optionString);				}
-		else if(commandName == "cluster")				{	command = new ClusterCommand(optionString);					}
+		if(commandName == "cluster")				{	command = new ClusterCommand(optionString);					}
 		else if(commandName == "unique.seqs")			{	command = new DeconvoluteCommand(optionString);				}
 		else if(commandName == "parsimony")				{	command = new ParsimonyCommand(optionString);				}
 		else if(commandName == "help")					{	command = new HelpCommand(optionString);					}
@@ -508,6 +501,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         else if(commandName == "get.otulabels")         {	command = new GetOtuLabelsCommand(optionString);            }
         else if(commandName == "remove.otulabels")      {	command = new RemoveOtuLabelsCommand(optionString);         }
         else if(commandName == "make.contigs")          {	command = new MakeContigsCommand(optionString);             }
+        else if(commandName == "load.logfile")          {	command = new LoadLogfileCommand(optionString);             }
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -539,10 +533,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 			else { optionString += "inputdir=" + inputDir; }
 		}
 		
-		if(commandName == "read.dist")					{	pipecommand = new ReadDistCommand(optionString);				}
-		else if(commandName == "read.otu")				{	pipecommand = new ReadOtuCommand(optionString);					}
-		else if(commandName == "read.tree")				{	pipecommand = new ReadTreeCommand(optionString);				}
-		else if(commandName == "cluster")				{	pipecommand = new ClusterCommand(optionString);					}
+		if(commandName == "cluster")				{	pipecommand = new ClusterCommand(optionString);					}
 		else if(commandName == "unique.seqs")			{	pipecommand = new DeconvoluteCommand(optionString);				}
 		else if(commandName == "parsimony")				{	pipecommand = new ParsimonyCommand(optionString);				}
 		else if(commandName == "help")					{	pipecommand = new HelpCommand(optionString);					}
@@ -664,6 +655,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
         else if(commandName == "get.otulabels")         {	pipecommand = new GetOtuLabelsCommand(optionString);            }
         else if(commandName == "remove.otulabels")      {	pipecommand = new RemoveOtuLabelsCommand(optionString);         }
         else if(commandName == "make.contigs")          {	pipecommand = new MakeContigsCommand(optionString);             }
+        else if(commandName == "load.logfile")          {	pipecommand = new LoadLogfileCommand(optionString);             }
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -681,10 +673,7 @@ Command* CommandFactory::getCommand(string commandName){
 	try {
 		delete shellcommand;   //delete the old command
 		
-		if(commandName == "read.dist")					{	shellcommand = new ReadDistCommand();				}
-		else if(commandName == "read.otu")				{	shellcommand = new ReadOtuCommand();				}
-		else if(commandName == "read.tree")				{	shellcommand = new ReadTreeCommand();				}
-		else if(commandName == "cluster")				{	shellcommand = new ClusterCommand();				}
+		if(commandName == "cluster")				{	shellcommand = new ClusterCommand();				}
 		else if(commandName == "unique.seqs")			{	shellcommand = new DeconvoluteCommand();			}
 		else if(commandName == "parsimony")				{	shellcommand = new ParsimonyCommand();				}
 		else if(commandName == "help")					{	shellcommand = new HelpCommand();					}
@@ -806,6 +795,7 @@ Command* CommandFactory::getCommand(string commandName){
         else if(commandName == "get.otulabels")         {	shellcommand = new GetOtuLabelsCommand();           }
         else if(commandName == "remove.otulabels")      {	shellcommand = new RemoveOtuLabelsCommand();        }
         else if(commandName == "make.contigs")          {	shellcommand = new MakeContigsCommand();            }
+        else if(commandName == "load.logfile")          {	shellcommand = new LoadLogfileCommand();            }
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;

@@ -21,6 +21,7 @@
 		A721765713BB9F7D0014DAAE /* referencedb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A721765613BB9F7D0014DAAE /* referencedb.cpp */; };
 		A724D2B7153C8628000A826F /* makebiomcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A724D2B6153C8628000A826F /* makebiomcommand.cpp */; };
 		A727864412E9E28C00F86ABA /* removerarecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A727864312E9E28C00F86ABA /* removerarecommand.cpp */; };
+		A73901081588C40900ED2ED6 /* loadlogfilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A73901071588C40900ED2ED6 /* loadlogfilecommand.cpp */; };
 		A73DDBBA13C4A0D1006AAE38 /* clearmemorycommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A73DDBB913C4A0D1006AAE38 /* clearmemorycommand.cpp */; };
 		A73DDC3813C4BF64006AAE38 /* mothurmetastats.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A73DDC3713C4BF64006AAE38 /* mothurmetastats.cpp */; };
 		A74A9A9F148E881E00AB5E3E /* spline.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74A9A9E148E881E00AB5E3E /* spline.cpp */; };
@@ -214,11 +215,8 @@
 		A7E9B92912D37EC400DA6239 /* readblast.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7B012D37EC400DA6239 /* readblast.cpp */; };
 		A7E9B92A12D37EC400DA6239 /* readcluster.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7B212D37EC400DA6239 /* readcluster.cpp */; };
 		A7E9B92B12D37EC400DA6239 /* readcolumn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7B412D37EC400DA6239 /* readcolumn.cpp */; };
-		A7E9B92C12D37EC400DA6239 /* readdistcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7B612D37EC400DA6239 /* readdistcommand.cpp */; };
-		A7E9B92E12D37EC400DA6239 /* readotucommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7BB12D37EC400DA6239 /* readotucommand.cpp */; };
 		A7E9B92F12D37EC400DA6239 /* readphylip.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7BD12D37EC400DA6239 /* readphylip.cpp */; };
 		A7E9B93012D37EC400DA6239 /* readtree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7BF12D37EC400DA6239 /* readtree.cpp */; };
-		A7E9B93112D37EC400DA6239 /* readtreecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7C112D37EC400DA6239 /* readtreecommand.cpp */; };
 		A7E9B93212D37EC400DA6239 /* removegroupscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7C312D37EC400DA6239 /* removegroupscommand.cpp */; };
 		A7E9B93312D37EC400DA6239 /* removelineagecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7C512D37EC400DA6239 /* removelineagecommand.cpp */; };
 		A7E9B93412D37EC400DA6239 /* removeotuscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7C712D37EC400DA6239 /* removeotuscommand.cpp */; };
@@ -391,6 +389,8 @@
 		A724D2B6153C8628000A826F /* makebiomcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = makebiomcommand.cpp; sourceTree = "<group>"; };
 		A727864212E9E28C00F86ABA /* removerarecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = removerarecommand.h; sourceTree = "<group>"; };
 		A727864312E9E28C00F86ABA /* removerarecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = removerarecommand.cpp; sourceTree = "<group>"; };
+		A73901051588C3EF00ED2ED6 /* loadlogfilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = loadlogfilecommand.h; sourceTree = "<group>"; };
+		A73901071588C40900ED2ED6 /* loadlogfilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = loadlogfilecommand.cpp; sourceTree = "<group>"; };
 		A73DDBB813C4A0D1006AAE38 /* clearmemorycommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = clearmemorycommand.h; sourceTree = "<group>"; };
 		A73DDBB913C4A0D1006AAE38 /* clearmemorycommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = clearmemorycommand.cpp; sourceTree = "<group>"; };
 		A73DDC3613C4BF64006AAE38 /* mothurmetastats.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mothurmetastats.h; sourceTree = "<group>"; };
@@ -797,17 +797,11 @@
 		A7E9B7B312D37EC400DA6239 /* readcluster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readcluster.h; sourceTree = "<group>"; };
 		A7E9B7B412D37EC400DA6239 /* readcolumn.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readcolumn.cpp; sourceTree = "<group>"; };
 		A7E9B7B512D37EC400DA6239 /* readcolumn.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readcolumn.h; sourceTree = "<group>"; };
-		A7E9B7B612D37EC400DA6239 /* readdistcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readdistcommand.cpp; sourceTree = "<group>"; };
-		A7E9B7B712D37EC400DA6239 /* readdistcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readdistcommand.h; sourceTree = "<group>"; };
 		A7E9B7B812D37EC400DA6239 /* readmatrix.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = readmatrix.hpp; sourceTree = "<group>"; };
-		A7E9B7BB12D37EC400DA6239 /* readotucommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readotucommand.cpp; sourceTree = "<group>"; };
-		A7E9B7BC12D37EC400DA6239 /* readotucommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readotucommand.h; sourceTree = "<group>"; };
 		A7E9B7BD12D37EC400DA6239 /* readphylip.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readphylip.cpp; sourceTree = "<group>"; };
 		A7E9B7BE12D37EC400DA6239 /* readphylip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readphylip.h; sourceTree = "<group>"; };
 		A7E9B7BF12D37EC400DA6239 /* readtree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readtree.cpp; sourceTree = "<group>"; };
 		A7E9B7C012D37EC400DA6239 /* readtree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readtree.h; sourceTree = "<group>"; };
-		A7E9B7C112D37EC400DA6239 /* readtreecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readtreecommand.cpp; sourceTree = "<group>"; };
-		A7E9B7C212D37EC400DA6239 /* readtreecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readtreecommand.h; sourceTree = "<group>"; };
 		A7E9B7C312D37EC400DA6239 /* removegroupscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = removegroupscommand.cpp; sourceTree = "<group>"; };
 		A7E9B7C412D37EC400DA6239 /* removegroupscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = removegroupscommand.h; sourceTree = "<group>"; };
 		A7E9B7C512D37EC400DA6239 /* removelineagecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = removelineagecommand.cpp; sourceTree = "<group>"; };
@@ -1315,6 +1309,8 @@
 				A7A067191562946F0095C8C5 /* listotulabelscommand.cpp */,
 				A7E9B73E12D37EC400DA6239 /* listseqscommand.h */,
 				A7E9B73D12D37EC400DA6239 /* listseqscommand.cpp */,
+				A73901051588C3EF00ED2ED6 /* loadlogfilecommand.h */,
+				A73901071588C40900ED2ED6 /* loadlogfilecommand.cpp */,
 				A7FA10001302E096003860FE /* mantelcommand.h */,
 				A7FA10011302E096003860FE /* mantelcommand.cpp */,
 				A724D2B4153C8600000A826F /* makebiomcommand.h */,
@@ -1373,12 +1369,6 @@
 				A7E9B7AB12D37EC400DA6239 /* rarefactcommand.cpp */,
 				A7E9B7AF12D37EC400DA6239 /* rarefactsharedcommand.h */,
 				A7E9B7AE12D37EC400DA6239 /* rarefactsharedcommand.cpp */,
-				A7E9B7B712D37EC400DA6239 /* readdistcommand.h */,
-				A7E9B7B612D37EC400DA6239 /* readdistcommand.cpp */,
-				A7E9B7BC12D37EC400DA6239 /* readotucommand.h */,
-				A7E9B7BB12D37EC400DA6239 /* readotucommand.cpp */,
-				A7E9B7C212D37EC400DA6239 /* readtreecommand.h */,
-				A7E9B7C112D37EC400DA6239 /* readtreecommand.cpp */,
 				A7E9B7C412D37EC400DA6239 /* removegroupscommand.h */,
 				A7E9B7C312D37EC400DA6239 /* removegroupscommand.cpp */,
 				A7E9B7C612D37EC400DA6239 /* removelineagecommand.h */,
@@ -2030,11 +2020,8 @@
 				A7E9B92912D37EC400DA6239 /* readblast.cpp in Sources */,
 				A7E9B92A12D37EC400DA6239 /* readcluster.cpp in Sources */,
 				A7E9B92B12D37EC400DA6239 /* readcolumn.cpp in Sources */,
-				A7E9B92C12D37EC400DA6239 /* readdistcommand.cpp in Sources */,
-				A7E9B92E12D37EC400DA6239 /* readotucommand.cpp in Sources */,
 				A7E9B92F12D37EC400DA6239 /* readphylip.cpp in Sources */,
 				A7E9B93012D37EC400DA6239 /* readtree.cpp in Sources */,
-				A7E9B93112D37EC400DA6239 /* readtreecommand.cpp in Sources */,
 				A7E9B93212D37EC400DA6239 /* removegroupscommand.cpp in Sources */,
 				A7E9B93312D37EC400DA6239 /* removelineagecommand.cpp in Sources */,
 				A7E9B93412D37EC400DA6239 /* removeotuscommand.cpp in Sources */,
@@ -2192,6 +2179,7 @@
 				A7A0671F1562AC3E0095C8C5 /* makecontigscommand.cpp in Sources */,
 				A70056E6156A93D000924A2D /* getotulabelscommand.cpp in Sources */,
 				A70056EB156AB6E500924A2D /* removeotulabelscommand.cpp in Sources */,
+				A73901081588C40900ED2ED6 /* loadlogfilecommand.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

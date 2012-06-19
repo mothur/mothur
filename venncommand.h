@@ -25,6 +25,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "venn";					}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Venn"; }
 	string getDescription()		{ return "generates a Venn diagram from data provided in a shared file"; }

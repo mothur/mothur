@@ -61,6 +61,27 @@ string MetaStatsCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string MetaStatsCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "metastats")        {   outputFileName = "metastats";       }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "MetaStatsCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
 MetaStatsCommand::MetaStatsCommand(){	
 	try {
 		abort = true; calledHelp = true;
@@ -449,7 +470,7 @@ int MetaStatsCommand::driver(int start, int num, vector<SharedRAbundVector*>& th
 			string setB = namesOfGroupCombos[c][1];
 		
 			//get filename
-			string outputFileName = outputDir +  m->getRootName(m->getSimpleName(sharedfile)) + thisLookUp[0]->getLabel() + "." + setA + "-" + setB + ".metastats";
+			string outputFileName = outputDir +  m->getRootName(m->getSimpleName(sharedfile)) + thisLookUp[0]->getLabel() + "." + setA + "-" + setB + "." + getOutputFileNameTag("metastats");
 			outputNames.push_back(outputFileName); outputTypes["metastats"].push_back(outputFileName);
 			//int nameLength = outputFileName.length();
 			//char * output = new char[nameLength];

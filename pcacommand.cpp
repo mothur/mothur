@@ -49,6 +49,28 @@ string PCACommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string PCACommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "pca") {  outputFileName =  "pca.axes"; }
+            else if (type == "loadings") {  outputFileName =  "pca.loadings"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PCACommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
 PCACommand::PCACommand(){	
 	try {
 		abort = true; calledHelp = true; 
@@ -403,17 +425,19 @@ void PCACommand::output(string fnameRoot, vector<string> name_list, vector<vecto
 			dsum += d[i];
 		}
 		
-		ofstream pcaData((fnameRoot+".pca.axes").c_str(), ios::trunc);
+		ofstream pcaData;
+        m->openOutputFile((fnameRoot+"."+getOutputFileNameTag("pca")), pcaData);
 		pcaData.setf(ios::fixed, ios::floatfield);
 		pcaData.setf(ios::showpoint);	
-		outputNames.push_back(fnameRoot+".pca.axes");
-		outputTypes["pca"].push_back(fnameRoot+".pca.axes");
+		outputNames.push_back(fnameRoot+"."+getOutputFileNameTag("pca"));
+		outputTypes["pca"].push_back(fnameRoot+"."+getOutputFileNameTag("pca"));
 		
-		ofstream pcaLoadings((fnameRoot+".pca.loadings").c_str(), ios::trunc);
+		ofstream pcaLoadings;
+         m->openOutputFile((fnameRoot+"."+getOutputFileNameTag("loadings")), pcaLoadings);
 		pcaLoadings.setf(ios::fixed, ios::floatfield);
 		pcaLoadings.setf(ios::showpoint);
-		outputNames.push_back(fnameRoot+".pca.loadings");
-		outputTypes["loadings"].push_back(fnameRoot+".pca.loadings");	
+		outputNames.push_back(fnameRoot+"."+getOutputFileNameTag("loadings"));
+		outputTypes["loadings"].push_back(fnameRoot+"."+getOutputFileNameTag("loadings"));	
 		
 		pcaLoadings << "axis\tloading\n";
 		for(int i=0;i<numEigenValues;i++){

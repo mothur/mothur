@@ -65,6 +65,27 @@ string LibShuffCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string LibShuffCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "coverage")             {   outputFileName =  "libshuff.coverage";       }
+            else if (type == "libshuffsummary")      {   outputFileName =  "libshuff.summary";   }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "LibShuffCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 LibShuffCommand::LibShuffCommand(){	
 	try {
 		abort = true; calledHelp = true; 
@@ -341,7 +362,7 @@ int LibShuffCommand::printCoverageFile() {
 	try {
 
 		ofstream outCov;
-		summaryFile = outputDir + m->getRootName(m->getSimpleName(phylipfile)) + "libshuff.coverage";
+		summaryFile = outputDir + m->getRootName(m->getSimpleName(phylipfile)) + getOutputFileNameTag("coverage");
 		m->openOutputFile(summaryFile, outCov);
 		outputNames.push_back(summaryFile); outputTypes["coverage"].push_back(summaryFile);
 		outCov.setf(ios::fixed, ios::floatfield); outCov.setf(ios::showpoint);
@@ -437,7 +458,7 @@ int LibShuffCommand::printSummaryFile() {
 	try {
 
 		ofstream outSum;
-		summaryFile = outputDir + m->getRootName(m->getSimpleName(phylipfile)) + "libshuff.summary";
+		summaryFile = outputDir + m->getRootName(m->getSimpleName(phylipfile)) + getOutputFileNameTag("libshuffsummary");
 		m->openOutputFile(summaryFile, outSum);
 		outputNames.push_back(summaryFile); outputTypes["libshuffsummary"].push_back(summaryFile);
 

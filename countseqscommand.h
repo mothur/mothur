@@ -23,6 +23,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "count.seqs";				}
 	string getCommandCategory()		{ return "Sequence Processing";		}
+	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Count.seqs"; }
 	string getDescription()		{ return "counts the number of sequences represented by each unique sequence in a namesfile"; }

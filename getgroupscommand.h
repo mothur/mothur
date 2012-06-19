@@ -25,6 +25,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "get.groups";				}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Get.groups"; }
 	string getDescription()		{ return "gets sequences from a list, fasta, name, group, shared, design or taxonomy file from a given group or set of groups"; }
@@ -47,7 +48,6 @@ private:
 	int readFasta();
 	int readName();
 	int readGroup();
-	void readAccnos();
 	int readList();
 	int readTax();
 	int fillNames();

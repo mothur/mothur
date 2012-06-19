@@ -46,6 +46,26 @@ string DegapSeqsCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string DegapSeqsCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "fasta") {  outputFileName =  "ng.fasta"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "DegapSeqsCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 DegapSeqsCommand::DegapSeqsCommand(){	
 	try {
 		abort = true; calledHelp = true; 
@@ -193,7 +213,7 @@ int DegapSeqsCommand::execute(){
 			ofstream outFASTA;
 			string tempOutputDir = outputDir;
 			if (outputDir == "") { tempOutputDir = m->hasPath(fastaFileNames[s]); }
-			string degapFile = tempOutputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + "ng.fasta";
+			string degapFile = tempOutputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + getOutputFileNameTag("fasta");
 			m->openOutputFile(degapFile, outFASTA);
 			
 			while(!inFASTA.eof()){

@@ -47,7 +47,26 @@ string GetRAbundCommand::getHelpString(){
 		exit(1);
 	}
 }
-
+//**********************************************************************************************************************
+string GetRAbundCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "rabund")            {   outputFileName = "rabund";  }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetRAbundCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 GetRAbundCommand::GetRAbundCommand(){	
 	try {
@@ -173,7 +192,7 @@ int GetRAbundCommand::execute(){
 	
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
-		filename = outputDir + m->getRootName(m->getSimpleName(inputfile)) + "rabund";
+		filename = outputDir + m->getRootName(m->getSimpleName(inputfile)) + getOutputFileNameTag("rabund");
 		m->openOutputFile(filename, out);
 		
 		input = new InputData(inputfile, format);

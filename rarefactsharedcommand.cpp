@@ -62,7 +62,27 @@ string RareFactSharedCommand::getHelpString(){
 		exit(1);
 	}
 }
-
+//**********************************************************************************************************************
+string RareFactSharedCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "sharedrarefaction") {  outputFileName =  "shared.rarefaction"; }
+            else if (type == "sharedr_nseqs") {  outputFileName =  "shared.r_nseqs"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "RareFactSharedCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 RareFactSharedCommand::RareFactSharedCommand(){	
 	try {
@@ -286,11 +306,11 @@ int RareFactSharedCommand::process(GroupMap& designMap, string thisSet){
 		for (int i=0; i<Estimators.size(); i++) {
 			if (validCalculator.isValidCalculator("sharedrarefaction", Estimators[i]) == true) { 
 				if (Estimators[i] == "sharedobserved") { 
-					rDisplays.push_back(new RareDisplay(new SharedSobs(), new SharedThreeColumnFile(fileNameRoot+"shared.rarefaction", "")));
-					outputNames.push_back(fileNameRoot+"shared.rarefaction"); outputTypes["sharedrarefaction"].push_back(fileNameRoot+"shared.rarefaction");
+					rDisplays.push_back(new RareDisplay(new SharedSobs(), new SharedThreeColumnFile(fileNameRoot+getOutputFileNameTag("sharedrarefaction"), "")));
+					outputNames.push_back(fileNameRoot+getOutputFileNameTag("sharedrarefaction")); outputTypes["sharedrarefaction"].push_back(fileNameRoot+getOutputFileNameTag("sharedrarefaction"));
 				}else if (Estimators[i] == "sharednseqs") { 
-					rDisplays.push_back(new RareDisplay(new SharedNSeqs(), new SharedThreeColumnFile(fileNameRoot+"shared.r_nseqs", "")));
-					outputNames.push_back(fileNameRoot+"shared.r_nseqs"); outputTypes["sharedr_nseqs"].push_back(fileNameRoot+"shared.r_nseqs");
+					rDisplays.push_back(new RareDisplay(new SharedNSeqs(), new SharedThreeColumnFile(fileNameRoot+getOutputFileNameTag("sharedr_nseqs"), "")));
+					outputNames.push_back(fileNameRoot+getOutputFileNameTag("sharedr_nseqs")); outputTypes["sharedr_nseqs"].push_back(fileNameRoot+getOutputFileNameTag("sharedr_nseqs"));
 				}
 			}
             file2Group[outputNames.size()-1] = thisSet;

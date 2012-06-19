@@ -49,6 +49,26 @@ string GetListCountCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string GetListCountCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "otu") {  outputFileName =  "otu"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetListCountCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 GetListCountCommand::GetListCountCommand(){	
 	try {
 		abort = true; calledHelp = true; 
@@ -234,7 +254,7 @@ void GetListCountCommand::process(ListVector* list) {
 	try {
 		string binnames;
 		if (outputDir == "") { outputDir += m->hasPath(listfile); }
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(listfile)) + list->getLabel() + ".otu";
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(listfile)) + list->getLabel() + "." +getOutputFileNameTag("otu");
 		m->openOutputFile(outputFileName, out);
 		outputNames.push_back(outputFileName); outputTypes["otu"].push_back(outputFileName);
 		

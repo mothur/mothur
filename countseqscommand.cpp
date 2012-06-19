@@ -46,7 +46,26 @@ string CountSeqsCommand::getHelpString(){
 		exit(1);
 	}
 }
-
+//**********************************************************************************************************************
+string CountSeqsCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "summary") {  outputFileName =  "seq.count"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "CountSeqsCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 CountSeqsCommand::CountSeqsCommand(){	
 	try {
@@ -147,7 +166,7 @@ int CountSeqsCommand::execute(){
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		ofstream out;
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(namefile)) + "seq.count";
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(namefile)) + getOutputFileNameTag("summary");
 		m->openOutputFile(outputFileName, out); outputTypes["summary"].push_back(outputFileName);
 		out << "Representative_Sequence\ttotal\t";
 		

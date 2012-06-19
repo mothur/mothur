@@ -59,6 +59,27 @@ string DistanceCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string DistanceCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "phylip") {  outputFileName =  "dist"; }
+            else if (type == "column") {  outputFileName =  "dist"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "DistanceCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 DistanceCommand::DistanceCommand(){	
 	try {
 		abort = true; calledHelp = true; 
@@ -229,12 +250,12 @@ int DistanceCommand::execute(){
 		string outputFile;
 				
 		if (output == "lt") { //does the user want lower triangle phylip formatted file 
-			outputFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "phylip.dist";
+			outputFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "phylip." + getOutputFileNameTag("phylip");
 			m->mothurRemove(outputFile); outputTypes["phylip"].push_back(outputFile);
 			
 			//output numSeqs to phylip formatted dist file
 		}else if (output == "column") { //user wants column format
-			outputFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "dist";
+			outputFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + getOutputFileNameTag("column");
 			outputTypes["column"].push_back(outputFile);
 			
 			//so we don't accidentally overwrite
@@ -245,7 +266,7 @@ int DistanceCommand::execute(){
 			
 			m->mothurRemove(outputFile);
 		}else { //assume square
-			outputFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "square.dist";
+			outputFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "square." + getOutputFileNameTag("phylip");
 			m->mothurRemove(outputFile);
 			outputTypes["phylip"].push_back(outputFile);
 		}

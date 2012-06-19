@@ -50,6 +50,26 @@ string BinSeqCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string BinSeqCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "fasta") {  outputFileName =  "fasta"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "BinSeqCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 BinSeqCommand::BinSeqCommand(){	
 	try {
 		abort = true; calledHelp = true; 
@@ -344,8 +364,8 @@ int BinSeqCommand::process(ListVector* list) {
 	try {
 				string binnames, name, sequence;
 				
-				string outputFileName = outputDir + m->getRootName(m->getSimpleName(listfile)) + list->getLabel() + ".fasta";
-				m->openOutputFile(outputFileName, out);
+        string outputFileName = outputDir + m->getRootName(m->getSimpleName(listfile)) + list->getLabel() + getOutputFileNameTag("fasta");
+        m->openOutputFile(outputFileName, out);
 				
 				//save to output list of output file names
 				outputNames.push_back(outputFileName);  outputTypes["fasta"].push_back(outputFileName);

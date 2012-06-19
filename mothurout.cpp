@@ -18,8 +18,45 @@ MothurOut* MothurOut::getInstance() {
 	return _uniqueInstance;
 }
 /*********************************************************************************************/
+set<string> MothurOut::getCurrentTypes()  {
+	try {
+        
+        set<string> types;
+        types.insert("fasta");
+        types.insert("accnos");
+        types.insert("column");
+        types.insert("design");
+        types.insert("group");
+        types.insert("list");
+        types.insert("name");
+        types.insert("oligos");
+        types.insert("order");
+        types.insert("ordergroup");
+        types.insert("phylip");
+        types.insert("qfile");
+        types.insert("relabund");
+        types.insert("sabund");
+        types.insert("rabund");
+        types.insert("sff");
+        types.insert("shared");
+        types.insert("taxonomy");
+        types.insert("tree");
+        types.insert("flow");
+        types.insert("biom");
+        types.insert("processors");
+
+		return types;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "getCurrentTypes");
+		exit(1);
+	}
+}
+/*********************************************************************************************/
 void MothurOut::printCurrentFiles()  {
 	try {
+        
+        
 		if (accnosfile != "")		{  mothurOut("accnos=" + accnosfile); mothurOutEndLine();			}
 		if (columnfile != "")		{  mothurOut("column=" + columnfile); mothurOutEndLine();			}
 		if (designfile != "")		{  mothurOut("design=" + designfile); mothurOutEndLine();			}
@@ -1477,7 +1514,163 @@ vector<string> MothurOut::splitWhiteSpace(string& rest, char buffer[], int size)
         return pieces;
 	}
 	catch(exception& e) {
-		errorOut(e, "MothurOut", "parsePieces");
+		errorOut(e, "MothurOut", "splitWhiteSpace");
+		exit(1);
+	}
+}
+/***********************************************************************/
+vector<string> MothurOut::splitWhiteSpace(string input){
+	try {
+        vector<string> pieces;
+        string rest = "";
+        
+        for (int i = 0; i < input.length(); i++) {
+            if (!isspace(input[i]))  { rest += input[i];  }
+            else {
+                pieces.push_back(rest);  rest = "";
+                while (i < input.length()) {  //gobble white space
+                    if (isspace(input[i])) { i++; }
+                    else { rest = input[i];  break; } //cout << "next piece buffer = " << nextPiece << endl;
+                } 
+            }
+        }
+        
+        if (rest != "") { pieces.push_back(rest); }
+        
+        return pieces;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "splitWhiteSpace");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+int MothurOut::readTax(string namefile, map<string, string>& taxMap) {
+	try {
+		
+        //open input file
+		ifstream in;
+		openInputFile(namefile, in);
+        
+        string rest = "";
+        char buffer[4096];
+        bool pairDone = false;
+        bool columnOne = true;
+        string firstCol, secondCol;
+        
+		while (!in.eof()) {
+			if (control_pressed) { break; }
+			
+            in.read(buffer, 4096);
+            vector<string> pieces = splitWhiteSpace(rest, buffer, in.gcount());
+            
+            for (int i = 0; i < pieces.size(); i++) {
+                if (columnOne) {  firstCol = pieces[i]; columnOne=false; }
+                else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
+                
+                if (pairDone) { 
+                    //are there confidence scores, if so remove them
+                    if (secondCol.find_first_of('(') != -1) {  removeConfidences(secondCol);	}
+                    taxMap[firstCol] = secondCol;
+                    if (debug) {  mothurOut("[DEBUG]: name = '" + firstCol + "' tax = '" + secondCol + "'\n");  }
+                    pairDone = false; 
+                }
+            }
+		}
+		in.close();
+		
+		return taxMap.size();
+
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "readTax");
+		exit(1);
+	}
+}
+/**********************************************************************************************************************/
+int MothurOut::readNames(string namefile, map<string, string>& nameMap, bool redund) { 
+	try {
+		
+		//open input file
+		ifstream in;
+		openInputFile(namefile, in);
+        
+        string rest = "";
+        char buffer[4096];
+        bool pairDone = false;
+        bool columnOne = true;
+        string firstCol, secondCol;
+        
+		while (!in.eof()) {
+			if (control_pressed) { break; }
+			
+            in.read(buffer, 4096);
+            vector<string> pieces = splitWhiteSpace(rest, buffer, in.gcount());
+            
+            for (int i = 0; i < pieces.size(); i++) {
+                if (columnOne) {  firstCol = pieces[i]; columnOne=false; }
+                else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
+                
+                if (pairDone) { 
+                    //parse names into vector
+                    vector<string> theseNames;
+                    splitAtComma(secondCol, theseNames);
+                    for (int i = 0; i < theseNames.size(); i++) {  nameMap[theseNames[i]] = firstCol;  }
+                    pairDone = false; 
+                }
+            }
+		}
+		in.close();
+		
+		return nameMap.size();
+		
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "readNames");
+		exit(1);
+	}
+}
+/**********************************************************************************************************************/
+int MothurOut::readNames(string namefile, map<string, string>& nameMap, map<string, int>& nameCount) { 
+	try {
+		nameMap.clear(); nameCount.clear();
+		//open input file
+		ifstream in;
+		openInputFile(namefile, in);
+        
+        string rest = "";
+        char buffer[4096];
+        bool pairDone = false;
+        bool columnOne = true;
+        string firstCol, secondCol;
+        
+		while (!in.eof()) {
+			if (control_pressed) { break; }
+			
+            in.read(buffer, 4096);
+            vector<string> pieces = splitWhiteSpace(rest, buffer, in.gcount());
+            
+            for (int i = 0; i < pieces.size(); i++) {
+                if (columnOne) {  firstCol = pieces[i]; columnOne=false; }
+                else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
+                
+                if (pairDone) { 
+                    //parse names into vector
+                    vector<string> theseNames;
+                    splitAtComma(secondCol, theseNames);
+                    for (int i = 0; i < theseNames.size(); i++) {  nameMap[theseNames[i]] = firstCol;  }
+                    nameCount[firstCol] = theseNames.size();
+                    pairDone = false; 
+                }
+            }
+		}
+		in.close();
+		
+		return nameMap.size();
+		
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "readNames");
 		exit(1);
 	}
 }
@@ -1652,7 +1845,62 @@ int MothurOut::readNames(string namefile, vector<seqPriorityNode>& nameVector, m
 		exit(1);
 	}
 }
-
+//**********************************************************************************************************************
+set<string> MothurOut::readAccnos(string accnosfile){
+	try {
+		set<string> names;
+		ifstream in;
+		openInputFile(accnosfile, in);
+		string name;
+		
+        string rest = "";
+        char buffer[4096];
+        
+		while (!in.eof()) {
+			if (control_pressed) { break; }
+			
+            in.read(buffer, 4096);
+            vector<string> pieces = splitWhiteSpace(rest, buffer, in.gcount());
+            
+            for (int i = 0; i < pieces.size(); i++) {  names.insert(pieces[i]);  }
+        }
+		in.close();	
+		
+		return names;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "readAccnos");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+int MothurOut::readAccnos(string accnosfile, vector<string>& names){
+	try {
+        names.clear();
+		ifstream in;
+		openInputFile(accnosfile, in);
+		string name;
+		
+        string rest = "";
+        char buffer[4096];
+        
+		while (!in.eof()) {
+			if (control_pressed) { break; }
+			
+            in.read(buffer, 4096);
+            vector<string> pieces = splitWhiteSpace(rest, buffer, in.gcount());
+            
+            for (int i = 0; i < pieces.size(); i++) {  names.push_back(pieces[i]);  }
+        }
+		in.close();	
+		
+		return 0;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "readAccnos");
+		exit(1);
+	}
+}
 /***********************************************************************/
 
 int MothurOut::getNumNames(string names){

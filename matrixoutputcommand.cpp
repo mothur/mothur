@@ -61,6 +61,26 @@ string MatrixOutputCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string MatrixOutputCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "phylip")             {   outputFileName =  "dist";         }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "MatrixOutputCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 MatrixOutputCommand::MatrixOutputCommand(){	
 	try {
 		abort = true; calledHelp = true; 
@@ -653,7 +673,7 @@ int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
                         matrix[column][row] = dist;
                     }
                     
-                    string distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + matrixCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + ".dist";
+                    string distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + matrixCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + "." + getOutputFileNameTag("phylip");
                     outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
                     ofstream outDist;
                     m->openOutputFile(distFileName, outDist);
@@ -757,7 +777,7 @@ int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
                     stdmatrix[column][row] = stdDist;
                 }
             
-                string distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + matrixCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + ".ave.dist";
+                string distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + matrixCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + ".ave." + getOutputFileNameTag("phylip");
                 outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
                 ofstream outAve;
                 m->openOutputFile(distFileName, outAve);
@@ -767,7 +787,7 @@ int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
                 
                 outAve.close();
                 
-                distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + matrixCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + ".std.dist";
+                distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + matrixCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + ".std." + getOutputFileNameTag("phylip");
                 outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
                 ofstream outSTD;
                 m->openOutputFile(distFileName, outSTD);

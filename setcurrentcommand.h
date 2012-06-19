@@ -23,6 +23,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "set.current";	}
 	string getCommandCategory()		{ return "General";		}
+	string getOutputFileNameTag(string, string) { return ""; }
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Set.current"; }
 	string getDescription()		{ return "set current files for mothur"; }

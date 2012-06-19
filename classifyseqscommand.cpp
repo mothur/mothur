@@ -85,6 +85,29 @@ string ClassifySeqsCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string ClassifySeqsCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "taxonomy") {  outputFileName =  "taxonomy"; }
+            else if (type == "accnos") {  outputFileName =  "flip.accnos"; }
+            else if (type == "taxsummary") {  outputFileName =  "tax.summary"; }
+            else if (type == "matchdist") {  outputFileName =  "match.dist"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClassifySeqsCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 ClassifySeqsCommand::ClassifySeqsCommand(){	
 	try {
 		abort = true; calledHelp = true; 
@@ -506,7 +529,6 @@ int ClassifySeqsCommand::execute(){
 			string RippedTaxName = "";
             bool foundDot = false;
             for (int i = baseTName.length()-1; i >= 0; i--) {
-                cout << baseTName[i] << endl;
                 if (foundDot && (baseTName[i] != '.')) {  RippedTaxName = baseTName[i] + RippedTaxName; }
                 else if (foundDot && (baseTName[i] == '.')) {  break; }
                 else if (!foundDot && (baseTName[i] == '.')) {  foundDot = true; }
@@ -514,13 +536,13 @@ int ClassifySeqsCommand::execute(){
             if (RippedTaxName != "") { RippedTaxName +=  "."; }   
           
 			if (outputDir == "") { outputDir += m->hasPath(fastaFileNames[s]); }
-			string newTaxonomyFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + RippedTaxName + "taxonomy";
-			string newaccnosFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + RippedTaxName + "flip.accnos";
+			string newTaxonomyFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + RippedTaxName + getOutputFileNameTag("taxonomy");
+			string newaccnosFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + RippedTaxName + getOutputFileNameTag("accnos");
 			string tempTaxonomyFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + "taxonomy.temp";
-			string taxSummary = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + RippedTaxName + "tax.summary";
+			string taxSummary = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + RippedTaxName + getOutputFileNameTag("taxsummary");
 			
 			if ((method == "knn") && (search == "distance")) { 
-				string DistName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + "match.dist";
+				string DistName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + getOutputFileNameTag("matchdist");
 				classify->setDistName(DistName);  outputNames.push_back(DistName); outputTypes["matchdist"].push_back(DistName);
 			}
 			
@@ -666,23 +688,8 @@ int ClassifySeqsCommand::execute(){
 			if(namefile != "") {
 			
 			    m->mothurOut("Reading " + namefileNames[s] + "..."); cout.flush();
-				
 				nameMap.clear(); //remove old names
-				
-				ifstream inNames;
-				m->openInputFile(namefileNames[s], inNames);
-				
-				string firstCol, secondCol;
-				while(!inNames.eof()) {
-					inNames >> firstCol >> secondCol; m->gobble(inNames);
-					
-					vector<string> temp;
-					m->splitAtComma(secondCol, temp);
-			
-					nameMap[firstCol] = temp;  
-				}
-				inNames.close();
-				
+				m->readNames(namefileNames[s], nameMap);				
 				m->mothurOut("  Done."); m->mothurOutEndLine();
 			}
 		#endif

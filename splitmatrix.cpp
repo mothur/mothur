@@ -91,16 +91,13 @@ int SplitMatrix::splitClassify(){
 		//build tree from users taxonomy file
 		PhyloTree* phylo = new PhyloTree();
 		
-		ifstream in;
-		m->openInputFile(taxFile, in);
-			
-		//read in users taxonomy file and add sequences to tree
-		string seqname, tax;
-		while(!in.eof()){
-			in >> seqname >> tax; m->gobble(in);
-			phylo->addSeqToTree(seqname, tax);
-		}
-		in.close();
+        map<string, string> temp;
+        m->readTax(taxFile, temp);
+        
+        for (map<string, string>::iterator itTemp = temp.begin(); itTemp != temp.end();) {
+            phylo->addSeqToTree(itTemp->first, itTemp->second);
+            temp.erase(itTemp++);
+        }
 		
 		phylo->assignHeirarchyIDs(0);
 

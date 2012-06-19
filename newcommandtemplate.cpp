@@ -64,6 +64,28 @@ string NewCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string NewCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string tag = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "fileType1") {  tag = "tag1"; }
+            else if (type == "fileType2") {  tag = "tag2"; }
+            else if (type == "fileType3") {  tag = "tag3"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return tag;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "NewCommand", "getOutputFileName");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 NewCommand::NewCommand(){	
 	try {
 		abort = true; calledHelp = true;
@@ -71,7 +93,7 @@ NewCommand::NewCommand(){
         vector<string> tempOutNames;
 		outputTypes["fileType1"] = tempOutNames; //filetypes should be things like: shared, fasta, accnos...
 		outputTypes["fileType2"] = tempOutNames;
-		outputTypes["FileType2"] = tempOutNames;
+		outputTypes["FileType3"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "NewCommand", "NewCommand");

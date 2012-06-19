@@ -27,6 +27,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "chimera.check";		}
 	string getCommandCategory()		{ return "Sequence Processing"; }
+	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "CHIMERA_CHECK version 2.7 written by Niels Larsen (http://wdcm.nig.ac.jp/RDP/docs/chimera_doc.html) \nhttp://www.mothur.org/wiki/Chimera.check"; }
 	string getDescription()		{ return "detect chimeric sequences"; }
