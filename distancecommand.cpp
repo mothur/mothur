@@ -15,7 +15,7 @@ vector<string> DistanceCommand::setParameters(){
 		CommandParameter pcolumn("column", "InputTypes", "", "", "none", "none", "OldFastaColumn",false,false); parameters.push_back(pcolumn);
 		CommandParameter poldfasta("oldfasta", "InputTypes", "", "", "none", "none", "OldFastaColumn",false,false); parameters.push_back(poldfasta);
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
-		CommandParameter poutput("output", "Multiple", "column-lt-square", "column", "", "", "",false,false); parameters.push_back(poutput);
+		CommandParameter poutput("output", "Multiple", "column-lt-square-phylip", "column", "", "", "",false,false); parameters.push_back(poutput);
 		CommandParameter pcalc("calc", "Multiple", "nogaps-eachgap-onegap", "onegap", "", "", "",false,false); parameters.push_back(pcalc);
 		CommandParameter pcountends("countends", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pcountends);
 		CommandParameter pcompress("compress", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pcompress);
@@ -210,6 +210,7 @@ DistanceCommand::DistanceCommand(string option) {
 			convert(temp, compress);
 
 			output = validParameter.validFile(parameters, "output", false);		if(output == "not found"){	output = "column"; }
+            if (output == "phylip") { output = "lt";  }
 			
 			if (((column != "") && (oldfastafile == "")) || ((column == "") && (oldfastafile != ""))) { m->mothurOut("If you provide column or oldfasta, you must provide both."); m->mothurOutEndLine(); abort=true; }
 			

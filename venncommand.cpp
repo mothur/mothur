@@ -250,8 +250,7 @@ int VennCommand::execute(){
 					}else if (Estimators[i] == "chao") { 
 						vennCalculators.push_back(new Chao1());
 					}else if (Estimators[i] == "ace") {
-						if(abund < 5)
-							abund = 10;
+						if(abund < 5) { abund = 10; }
 						vennCalculators.push_back(new Ace(abund));
 					}
 				}

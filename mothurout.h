@@ -106,6 +106,7 @@ class MothurOut {
         int readNames(string, map<string, string>&, map<string, int>&);
 		int readNames(string, map<string, string>&);
         int readNames(string, map<string, string>&, bool);
+        int readNames(string, map<string, string>&, int);
 		int readNames(string, map<string, vector<string> >&);
 		int readNames(string, vector<seqPriorityNode>&, map<string, string>&);
 		int mothurRemove(string);

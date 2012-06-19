@@ -1631,6 +1631,46 @@ int MothurOut::readNames(string namefile, map<string, string>& nameMap, bool red
 	}
 }
 /**********************************************************************************************************************/
+int MothurOut::readNames(string namefile, map<string, string>& nameMap, int flip) { 
+	try {
+		
+		//open input file
+		ifstream in;
+		openInputFile(namefile, in);
+        
+        string rest = "";
+        char buffer[4096];
+        bool pairDone = false;
+        bool columnOne = true;
+        string firstCol, secondCol;
+        
+		while (!in.eof()) {
+			if (control_pressed) { break; }
+			
+            in.read(buffer, 4096);
+            vector<string> pieces = splitWhiteSpace(rest, buffer, in.gcount());
+            
+            for (int i = 0; i < pieces.size(); i++) {
+                if (columnOne) {  firstCol = pieces[i]; columnOne=false; }
+                else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
+                
+                if (pairDone) { 
+                    nameMap[secondCol] = firstCol;
+                    pairDone = false; 
+                }
+            }
+		}
+		in.close();
+		
+		return nameMap.size();
+		
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "readNames");
+		exit(1);
+	}
+}
+/**********************************************************************************************************************/
 int MothurOut::readNames(string namefile, map<string, string>& nameMap, map<string, int>& nameCount) { 
 	try {
 		nameMap.clear(); nameCount.clear();

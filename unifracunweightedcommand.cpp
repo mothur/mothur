@@ -22,7 +22,7 @@ vector<string> UnifracUnweightedCommand::setParameters(){
 		CommandParameter piters("iters", "Number", "", "1000", "", "", "",false,false); parameters.push_back(piters);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
 		CommandParameter prandom("random", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(prandom);
-		CommandParameter pdistance("distance", "Multiple", "column-lt-square", "column", "", "", "",false,false); parameters.push_back(pdistance);
+		CommandParameter pdistance("distance", "Multiple", "column-lt-square-phylip", "column", "", "", "",false,false); parameters.push_back(pdistance);
         CommandParameter psubsample("subsample", "String", "", "", "", "", "",false,false); parameters.push_back(psubsample);
         CommandParameter pconsensus("consensus", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pconsensus);
         CommandParameter proot("root", "Boolean", "F", "", "", "", "",false,false); parameters.push_back(proot);
@@ -204,6 +204,7 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option)  {
 			string temp = validParameter.validFile(parameters, "distance", false);			
 			if (temp == "not found") { phylip = false; outputForm = ""; }
 			else{
+                if (temp=="phylip") { temp = "lt"; }
 				if ((temp == "lt") || (temp == "column") || (temp == "square")) {  phylip = true;  outputForm = temp; }
 				else { m->mothurOut("Options for distance are: lt, square, or column. Using lt."); m->mothurOutEndLine(); phylip = true; outputForm = "lt"; }
 			}
