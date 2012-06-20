@@ -230,9 +230,19 @@ int MGClusterCommand::execute(){
 		//must remember to delete those objects here since readBlast does not
 		read = new ReadBlast(blastfile, cutoff, penalty, length, minWanted, hclusterWanted);
 		read->read(nameMap);
-		
-		list = new ListVector(nameMap->getListVector());
-		RAbundVector* rabund = new RAbundVector(list->getRAbundVector());
+        
+        list = new ListVector(nameMap->getListVector());
+        RAbundVector* rabund = NULL;
+        if(large) {
+            map<string, int> nameMapCounts = m->readNames(namefile);
+            RAbundVector* rabund = newFunctionToCreateRabund(list, nameMapCounts);
+        }else {
+            RAbundVector* rabund = new RAbundVector(list->getRAbundVector());
+        }
+        
+        
+		//list = new ListVector(nameMap->getListVector());
+		//RAbundVector* rabund = new RAbundVector(list->getRAbundVector());
 		
 		if (m->control_pressed) { outputTypes.clear(); delete nameMap; delete read; delete list; delete rabund; return 0; }
 		
