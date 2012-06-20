@@ -61,6 +61,7 @@ private:
 	ListVector* mergeOPFs(map<string, int>, float);
 	void sortHclusterFiles(string, string);
 	vector<seqDist> getSeqs(ifstream&);
+    RAbundVector createRabund(ListVector, map<string, int>);
 
 };
 

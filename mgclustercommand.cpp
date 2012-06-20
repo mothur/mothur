@@ -235,12 +235,12 @@ int MGClusterCommand::execute(){
         RAbundVector* rabund = NULL;
         if(large) {
             map<string, int> nameMapCounts = m->readNames(namefile);
-            RAbundVector* rabund = newFunctionToCreateRabund(list, nameMapCounts);
+            RAbundVector* rabund = createRabund(list, nameMapCounts);
         }else {
             RAbundVector* rabund = new RAbundVector(list->getRAbundVector());
         }
         
-        
+                
 		//list = new ListVector(nameMap->getListVector());
 		//RAbundVector* rabund = new RAbundVector(list->getRAbundVector());
 		
@@ -709,7 +709,12 @@ void MGClusterCommand::sortHclusterFiles(string unsortedDist, string unsortedOve
 
 //**********************************************************************************************************************
 
+RAbundVector MGClusterCommand::createRabund(ListVector list, map<string, int> nameMapCounts){
+    for(int i = 0; i < list->getNumBins(); i++) { 
+    
+    }
+}
 
-
+//**********************************************************************************************************************
 
 
