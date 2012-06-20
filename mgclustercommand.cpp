@@ -224,7 +224,7 @@ int MGClusterCommand::execute(){
 		string tag = "";
 		time_t start;
 		float previousDist = 0.00000;
-		float rndPreviousDist = 0.00000;
+		float rndPreviousDist = 0.00000; 
 		
 		//read blastfile - creates sparsematrices for the distances and overlaps as well as a listvector
 		//must remember to delete those objects here since readBlast does not
