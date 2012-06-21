@@ -14,6 +14,7 @@ vector<string> MGClusterCommand::setParameters(){
 	try {
 		CommandParameter pblast("blast", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pblast);
 		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
+        CommandParameter plarge("large", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(plarge);
 		CommandParameter plength("length", "Number", "", "5", "", "", "",false,false); parameters.push_back(plength);
 		CommandParameter ppenalty("penalty", "Number", "", "0.10", "", "", "",false,false); parameters.push_back(ppenalty);
 		CommandParameter pcutoff("cutoff", "Number", "", "0.70", "", "", "",false,false); parameters.push_back(pcutoff);
@@ -169,6 +170,9 @@ MGClusterCommand::MGClusterCommand(string option) {
 			
 			//check for optional parameter and set defaults
 			string temp;
+            temp = validParameter.validFile(parameters, "large", false);			if (temp == "not found") { temp = "false"; }            
+			large = m->isTrue(temp); 
+            
 			temp = validParameter.validFile(parameters, "precision", false);		if (temp == "not found") { temp = "100"; }
 			precisionLength = temp.length();
 			m->mothurConvert(temp, precision); 
@@ -199,7 +203,7 @@ MGClusterCommand::MGClusterCommand(string option) {
 			hclusterWanted = m->isTrue(temp); 
 			
 			temp = validParameter.validFile(parameters, "hard", false);			if (temp == "not found") { temp = "T"; }
-			hard = m->isTrue(temp);
+			hard = m->isTrue(temp);            
 		}
 
 	}
@@ -211,7 +215,7 @@ MGClusterCommand::MGClusterCommand(string option) {
 //**********************************************************************************************************************
 int MGClusterCommand::execute(){
 	try {
-		
+		cout << "1" << endl;
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//read names file
@@ -225,24 +229,26 @@ int MGClusterCommand::execute(){
 		time_t start;
 		float previousDist = 0.00000;
 		float rndPreviousDist = 0.00000; 
-		
+        
 		//read blastfile - creates sparsematrices for the distances and overlaps as well as a listvector
 		//must remember to delete those objects here since readBlast does not
 		read = new ReadBlast(blastfile, cutoff, penalty, length, minWanted, hclusterWanted);
 		read->read(nameMap);
         
-        list = new ListVector(nameMap->getListVector());
-        RAbundVector* rabund = NULL;
-        if(large) {
-            map<string, int> nameMapCounts = m->readNames(namefile);
-            RAbundVector* rabund = createRabund(list, nameMapCounts);
-        }else {
-            RAbundVector* rabund = new RAbundVector(list->getRAbundVector());
-        }
+//        list = new ListVector(nameMap->getListVector());
+//        RAbundVector* rabund = NULL;
+//        
+//        if(large) {
+//            map<string, int> nameMapCounts = m->readNames(namefile);
+//            createRabund(nameMapCounts);
+//            rabund = &rav;
+//        }else {
+//            rabund = new RAbundVector(list->getRAbundVector());
+//        }
         
                 
-		//list = new ListVector(nameMap->getListVector());
-		//RAbundVector* rabund = new RAbundVector(list->getRAbundVector());
+		list = new ListVector(nameMap->getListVector());
+		RAbundVector* rabund = new RAbundVector(list->getRAbundVector());
 		
 		if (m->control_pressed) { outputTypes.clear(); delete nameMap; delete read; delete list; delete rabund; return 0; }
 		
@@ -708,19 +714,22 @@ void MGClusterCommand::sortHclusterFiles(string unsortedDist, string unsortedOve
 }
 
 //**********************************************************************************************************************
-
-RAbundVector MGClusterCommand::createRabund(ListVector list, map<string, int> nameMapCounts){
-    try {
-        RAbundVector rav;
-        for(int i = 0; i < list->getNumBins(); i++) {   rav.push_back(nameMapCounts[i]);    }
-        return rav;
-    }
-    catch(exception& e) {
-		m->errorOut(e, "MGClusterCommand", "createRabund");
-		exit(1);
-	}
-    
-}
+//
+//void MGClusterCommand::createRabund(map<string, int> nameMapCounts){
+//    try {
+//        //RAbundVector rav;
+//        map<string,int>::iterator it;
+//        //it = nameMapCounts.begin();
+//        //for(int i = 0; i < list->getNumBins(); i++) {   rav.push_back((*it).second); it++;    }
+//        for ( it=nameMapCounts.begin(); it!=nameMapCounts.end(); it++ ) {    rav.push_back( it->second );    }
+//        //return rav;
+//    }
+//    catch(exception& e) {
+//		m->errorOut(e, "MGClusterCommand", "createRabund");
+//		exit(1);
+//	}
+//    
+//}
 
 //**********************************************************************************************************************
 
