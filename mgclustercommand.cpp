@@ -247,8 +247,8 @@ int MGClusterCommand::execute(){
         }
         
                 
-		list = new ListVector(nameMap->getListVector());
-		RAbundVector* rabund = new RAbundVector(list->getRAbundVector());
+		//list = new ListVector(nameMap->getListVector());
+		//rabund = new RAbundVector(list->getRAbundVector());
 		
 		if (m->control_pressed) { outputTypes.clear(); delete nameMap; delete read; delete list; delete rabund; return 0; }
 		
@@ -519,8 +519,8 @@ int MGClusterCommand::execute(){
 			m->mothurRemove(overlapFile);
 		}
 		
-		delete list; 
-		delete rabund;
+		delete list;
+		if (!large) {delete rabund;}
 		listFile.close();
 		sabundFile.close();
 		rabundFile.close();

@@ -47,7 +47,7 @@ private:
 	HCluster* hcluster;
 	ListVector* list;
 	ListVector oldList;
-        RAbundVector rav;
+    RAbundVector rav;
 	vector<seqDist> overlapMatrix;
 	vector<string> outputNames;
 	
@@ -62,7 +62,7 @@ private:
 	ListVector* mergeOPFs(map<string, int>, float);
 	void sortHclusterFiles(string, string);
 	vector<seqDist> getSeqs(ifstream&);
-        void createRabund(map<string, int>);
+    void createRabund(map<string, int>);
 
 };
 
