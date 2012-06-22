@@ -235,16 +235,16 @@ int MGClusterCommand::execute(){
 		read = new ReadBlast(blastfile, cutoff, penalty, length, minWanted, hclusterWanted);
 		read->read(nameMap);
         
-//        list = new ListVector(nameMap->getListVector());
-//        RAbundVector* rabund = NULL;
-//        
-//        if(large) {
-//            map<string, int> nameMapCounts = m->readNames(namefile);
-//            createRabund(nameMapCounts);
-//            rabund = &rav;
-//        }else {
-//            rabund = new RAbundVector(list->getRAbundVector());
-//        }
+        list = new ListVector(nameMap->getListVector());
+        RAbundVector* rabund = NULL;
+        
+        if(large) {
+            map<string, int> nameMapCounts = m->readNames(namefile);
+            createRabund(nameMapCounts);
+            rabund = &rav;
+        }else {
+            rabund = new RAbundVector(list->getRAbundVector());
+        }
         
                 
 		list = new ListVector(nameMap->getListVector());
@@ -714,22 +714,22 @@ void MGClusterCommand::sortHclusterFiles(string unsortedDist, string unsortedOve
 }
 
 //**********************************************************************************************************************
-//
-//void MGClusterCommand::createRabund(map<string, int> nameMapCounts){
-//    try {
-//        //RAbundVector rav;
-//        map<string,int>::iterator it;
-//        //it = nameMapCounts.begin();
-//        //for(int i = 0; i < list->getNumBins(); i++) {   rav.push_back((*it).second); it++;    }
-//        for ( it=nameMapCounts.begin(); it!=nameMapCounts.end(); it++ ) {    rav.push_back( it->second );    }
-//        //return rav;
-//    }
-//    catch(exception& e) {
-//		m->errorOut(e, "MGClusterCommand", "createRabund");
-//		exit(1);
-//	}
-//    
-//}
+
+void MGClusterCommand::createRabund(map<string, int> nameMapCounts){
+    try {
+        //RAbundVector rav;
+        map<string,int>::iterator it;
+        //it = nameMapCounts.begin();
+        //for(int i = 0; i < list->getNumBins(); i++) {   rav.push_back((*it).second); it++;    }
+        for ( it=nameMapCounts.begin(); it!=nameMapCounts.end(); it++ ) {    rav.push_back( it->second );    }
+        //return rav;
+    }
+    catch(exception& e) {
+		m->errorOut(e, "MGClusterCommand", "createRabund");
+		exit(1);
+	}
+    
+}
 
 //**********************************************************************************************************************
 
