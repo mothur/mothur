@@ -34,8 +34,14 @@ public:
 	
 private:
 	string namefile, groupfile, outputDir, groups;
-	bool abort;
-	vector<string> Groups;
+	bool abort, large;
+	vector<string> Groups, outputNames;
+    
+    int processSmall(string);
+    int processLarge(string);
+    map<int, string> processNameFile(string);
+    map<int, string> getGroupNames(string, set<string>&);
+    
 };
 
 #endif

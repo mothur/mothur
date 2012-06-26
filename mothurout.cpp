@@ -43,6 +43,7 @@ set<string> MothurOut::getCurrentTypes()  {
         types.insert("tree");
         types.insert("flow");
         types.insert("biom");
+        types.insert("counttable");
         types.insert("processors");
 
 		return types;
@@ -78,6 +79,7 @@ void MothurOut::printCurrentFiles()  {
 		if (treefile != "")			{  mothurOut("tree=" + treefile); mothurOutEndLine();				}
 		if (flowfile != "")			{  mothurOut("flow=" + flowfile); mothurOutEndLine();				}
         if (biomfile != "")			{  mothurOut("biom=" + biomfile); mothurOutEndLine();				}
+        if (counttablefile != "")	{  mothurOut("counttable=" + counttablefile); mothurOutEndLine();	}
 		if (processors != "1")		{  mothurOut("processors=" + processors); mothurOutEndLine();		}
 		
 	}
@@ -112,6 +114,7 @@ bool MothurOut::hasCurrentFiles()  {
 		if (treefile != "")			{  return true;			}
 		if (flowfile != "")			{  return true;			}
         if (biomfile != "")			{  return true;			}
+        if (counttablefile != "")	{  return true;			}
 		if (processors != "1")		{  return true;			}
 		
 		return hasCurrent;
@@ -147,6 +150,7 @@ void MothurOut::clearCurrentFiles()  {
 		taxonomyfile = "";	
 		flowfile = "";
         biomfile = "";
+        counttablefile = "";
 		processors = "1";
 	}
 	catch(exception& e) {
@@ -1291,16 +1295,6 @@ vector<unsigned long long> MothurOut::setFilePosEachLine(string filename, int& n
 			positions.push_back(0);
 		
 			while(!in.eof()){
-				//unsigned long long lastpos = in.tellg();
-				//input = getline(in); 
-				//if (input.length() != 0) {
-					//unsigned long long pos = in.tellg(); 
-					//if (pos != -1) { positions.push_back(pos - input.length() - 1);	}
-					//else {  positions.push_back(lastpos);  }
-				//}
-				//gobble(in); //has to be here since windows line endings are 2 characters and mess up the positions
-				
-				
 				//getline counting reads
 				char d = in.get(); count++;
 				while ((d != '\n') && (d != '\r') && (d != '\f') && (d != in.eof()))	{
@@ -1503,7 +1497,7 @@ vector<string> MothurOut::splitWhiteSpace(string& rest, char buffer[], int size)
         for (int i = 0; i < size; i++) {
             if (!isspace(buffer[i]))  { rest += buffer[i];  }
             else {
-                pieces.push_back(rest);  rest = "";
+                if (rest != "") { pieces.push_back(rest);  rest = ""; }
                 while (i < size) {  //gobble white space
                     if (isspace(buffer[i])) { i++; }
                     else { rest = buffer[i];  break; } //cout << "next piece buffer = " << nextPiece << endl;
@@ -1527,7 +1521,7 @@ vector<string> MothurOut::splitWhiteSpace(string input){
         for (int i = 0; i < input.length(); i++) {
             if (!isspace(input[i]))  { rest += input[i];  }
             else {
-                pieces.push_back(rest);  rest = "";
+                if (rest != "") { pieces.push_back(rest);  rest = ""; }
                 while (i < input.length()) {  //gobble white space
                     if (isspace(input[i])) { i++; }
                     else { rest = input[i];  break; } //cout << "next piece buffer = " << nextPiece << endl;

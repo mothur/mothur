@@ -174,6 +174,7 @@ class MothurOut {
 		string getTaxonomyFile()	{ return taxonomyfile;		}
 		string getFlowFile()		{ return flowfile;			}
         string getBiomFile()		{ return biomfile;			}
+        string getCountTableFile()	{ return counttablefile;	}
 		string getProcessors()		{ return processors;		}
 		
 		void setListFile(string f)			{ listfile = getFullPathName(f);			}
@@ -197,6 +198,7 @@ class MothurOut {
 		void setTaxonomyFile(string f)		{ taxonomyfile = getFullPathName(f);		}
 		void setFlowFile(string f)			{ flowfile = getFullPathName(f);			}
         void setBiomFile(string f)			{ biomfile = getFullPathName(f);			}
+        void setCountTableFile(string f)	{ counttablefile = getFullPathName(f);		}
         void setProcessors(string p)		{ processors = p; mothurOut("\nUsing " + toString(p) + " processors.\n");	}
 		
 		void printCurrentFiles();
@@ -232,6 +234,7 @@ class MothurOut {
 			processors = "1";
 			flowfile = "";
             biomfile = "";
+            counttablefile = "";
 			gui = false;
 			printedHeaders = false;
 			commandInputsConvertError = false;
@@ -246,7 +249,7 @@ class MothurOut {
 		string releaseDate, version;
 	
 		string accnosfile, phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, designfile, taxonomyfile, biomfile;
-		string orderfile, treefile, sharedfile, ordergroupfile, relabundfile, fastafile, qualfile, sfffile, oligosfile, processors, flowfile;
+		string orderfile, treefile, sharedfile, ordergroupfile, relabundfile, fastafile, qualfile, sfffile, oligosfile, processors, flowfile, counttablefile;
 
 		vector<string> Groups;
 		vector<string> namesOfGroups;
