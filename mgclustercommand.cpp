@@ -215,7 +215,6 @@ MGClusterCommand::MGClusterCommand(string option) {
 //**********************************************************************************************************************
 int MGClusterCommand::execute(){
 	try {
-		cout << "1" << endl;
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//read names file
