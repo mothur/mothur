@@ -10,10 +10,16 @@
 
 #include "command.hpp"
 
-class KruskalWallisCommand : public Command {
+    struct groupRank {
+        sstring group;
+        double value;
+        double rank;        
+    };
 
+class KruskalWallisCommand : public Command {
+   
 public:
-	
+	    
 	KruskalWallisCommand(string);	
 	KruskalWallisCommand();
 	~KruskalWallisCommand(){}
@@ -28,13 +34,21 @@ public:
     
     int execute(); 
 	void help() { m->mothurOut(getHelpString()); }
-    multimap<double,double> getRank(vector<KruskalWallisCommand::groupRank>);
+    void assignRank(vector<groupRank>);
     
 private:
     string outputDir;
     vector<int> counts;
     vector<double> rankSums;
     vector<double> rankMeans;
+    
+  
+        
+    bool comparevalue(const groupRank &a, const groupRank &b) { return a.value < b.value; }
+    bool equalvalue(const groupRank &a, const groupRank &b) { return a.value == b.value; }
+    bool comparerank(const groupRank &a, const groupRank &b) { return a.rank < b.rank; }
+    bool equalrank(const groupRank &a, const groupRank &b) { return a.rank == b.rank; }
+    bool equalgroup(const groupRank &a, const groupRank &b) { return a.group == b.group; }
     
 };
 

@@ -7,13 +7,6 @@
 #include "kruskalwalliscommand.h"
 
 //**********************************************************************************************************************
-class groupRank {
-public:
-    string group;
-    double value;
-    double rank;
-};
-//**********************************************************************************************************************
 vector<string> KruskalWallisCommand::setParameters(){	
 	try {
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
@@ -132,12 +125,32 @@ int KruskalWallisCommand::execute(){
         
         //math goes here
         
-        int N;
-        double ss, H;
+        int N; //= thisLookUp.size();
+        double H;
         double tmp = 0.0;
+        vector<groupRank> vec;
+        string group;
+        int count;
+        double sum;
                 
         //merge all groups into a vector
         //rank function here
+        assignRank(vec);
+        
+        //populate counts and ranSums vectors
+        for (int i=0;i<N;i++) {
+            count = 0;
+            sum = 0;
+            //group = next group
+            for(int j;j<vec.size();j++) {
+                if (vec[j].group == group) {
+                    count++;
+                    sum = sum + vec[j].rank;
+                }
+            }
+            counts[i] = count;
+            rankSums[i] = sum;
+        }
         
         //test statistic
         for (int i=0;i<N;i++) { tmp = tmp + (pow(rankSums[i],2) / counts[i]); }
@@ -152,8 +165,6 @@ int KruskalWallisCommand::execute(){
         
         //p-value calculation
         
-        
-        
 		return 0;
 	}
 	catch(exception& e) {
@@ -162,22 +173,36 @@ int KruskalWallisCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-multimap<double,double> KruskalWallisCommand::getRank(vector<groupRank> vec) {
+void KruskalWallisCommand::assignRank(vector<groupRank> &vec) {
     try {
-        multimap<double,double> rankMap;
         double rank = 1;
-        double previous;
-        double tie = 0.0;
-        int tiecount = 0;
+        double numRanks, avgRank;
+        vector<groupRank>::iterator it, oldit;
 
-        sort (vec.begin(), vec.end());
+        sort (vec.begin(), vec.end(), comparevalue);
 
-        for (int i=0;i<vec.size();i++) {
-            if (vec[i] != previous) { rankMap[rank] = vec[i]; }
-            else {tie = tie + rank; tiecount++;}
-            rank++;
-            previous = vec[i];
+        it = vec.begin();
+
+        while ( it != vec.end() ) {
+            j = rank;
+            oldit = it;
+            if (!equalvalue(*it, *it+1)) { *it->rank = rank; rank++; it++; }
+            else {
+                while(equalrank(*it, *it+1)) {
+                    j = j + (j+1.0);
+                    rank++;
+                    it++;
+                }
+                numRanks = double (distance(oldit, it));
+                avgRank = j / numRanks;
+                while(oldit != it) {
+                    *oldit->rank = avgRank;
+                    oldit++;
+                }
+            }
+
         }
+
     }
     catch(exception& e) {
 		m->errorOut(e, "KruskalWallisCommand", "getRank");
