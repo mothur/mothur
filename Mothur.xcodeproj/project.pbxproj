@@ -26,6 +26,7 @@
 		A73DDC3813C4BF64006AAE38 /* mothurmetastats.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A73DDC3713C4BF64006AAE38 /* mothurmetastats.cpp */; };
 		A74A9A9F148E881E00AB5E3E /* spline.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74A9A9E148E881E00AB5E3E /* spline.cpp */; };
 		A74D36B8137DAFAA00332B0C /* chimerauchimecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D36B7137DAFAA00332B0C /* chimerauchimecommand.cpp */; };
+		A74D59A4159A1E2000043046 /* counttable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D59A3159A1E2000043046 /* counttable.cpp */; };
 		A754149714840CF7005850D1 /* summaryqualcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A754149614840CF7005850D1 /* summaryqualcommand.cpp */; };
 		A75790591301749D00A30DAB /* homovacommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A75790581301749D00A30DAB /* homovacommand.cpp */; };
 		A76CDD821510F143004C8458 /* prcseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A76CDD811510F143004C8458 /* prcseqscommand.cpp */; };
@@ -399,6 +400,8 @@
 		A74A9A9E148E881E00AB5E3E /* spline.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = spline.cpp; sourceTree = "<group>"; };
 		A74D36B6137DAFAA00332B0C /* chimerauchimecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimerauchimecommand.h; sourceTree = "<group>"; };
 		A74D36B7137DAFAA00332B0C /* chimerauchimecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimerauchimecommand.cpp; sourceTree = "<group>"; };
+		A74D59A3159A1E2000043046 /* counttable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = counttable.cpp; sourceTree = "<group>"; };
+		A74D59A6159A1E3600043046 /* counttable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = counttable.h; sourceTree = "<group>"; };
 		A754149514840CF7005850D1 /* summaryqualcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = summaryqualcommand.h; sourceTree = "<group>"; };
 		A754149614840CF7005850D1 /* summaryqualcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = summaryqualcommand.cpp; sourceTree = "<group>"; };
 		A75790571301749D00A30DAB /* homovacommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = homovacommand.h; sourceTree = "<group>"; };
@@ -1616,10 +1619,12 @@
 				A7E9B66312D37EC400DA6239 /* blastalign.hpp */,
 				A7E9B66412D37EC400DA6239 /* blastdb.cpp */,
 				A7E9B66512D37EC400DA6239 /* blastdb.hpp */,
+				A74D59A6159A1E3600043046 /* counttable.h */,
+				A74D59A3159A1E2000043046 /* counttable.cpp */,
+				A7E9B6CD12D37EC400DA6239 /* distancedb.cpp */,
 				A7E9B6BD12D37EC400DA6239 /* database.cpp */,
 				A7E9B6BE12D37EC400DA6239 /* database.hpp */,
 				A7E9B6BF12D37EC400DA6239 /* datavector.hpp */,
-				A7E9B6CD12D37EC400DA6239 /* distancedb.cpp */,
 				A7E9B6CE12D37EC400DA6239 /* distancedb.hpp */,
 				A7E9B6DE12D37EC400DA6239 /* fastamap.cpp */,
 				A7E9B6DF12D37EC400DA6239 /* fastamap.h */,
@@ -2180,6 +2185,7 @@
 				A70056E6156A93D000924A2D /* getotulabelscommand.cpp in Sources */,
 				A70056EB156AB6E500924A2D /* removeotulabelscommand.cpp in Sources */,
 				A73901081588C40900ED2ED6 /* loadlogfilecommand.cpp in Sources */,
+				A74D59A4159A1E2000043046 /* counttable.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

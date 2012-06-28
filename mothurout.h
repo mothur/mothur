@@ -68,7 +68,7 @@ class MothurOut {
 		//map<string, string> names;
 		vector<string> binLabelsInFile;
 		vector<string> currentBinLabels;
-		string saveNextLabel, argv, sharedHeaderMode;
+		string saveNextLabel, argv, sharedHeaderMode, groupMode;
 		bool printedHeaders, commandInputsConvertError;
 		
 		//functions from mothur.h
@@ -179,7 +179,7 @@ class MothurOut {
 		
 		void setListFile(string f)			{ listfile = getFullPathName(f);			}
 		void setTreeFile(string f)			{ treefile = getFullPathName(f);			}
-		void setGroupFile(string f)			{ groupfile = getFullPathName(f);			}		
+		void setGroupFile(string f)			{ groupfile = getFullPathName(f);	groupMode = "group";		}		
 		void setPhylipFile(string f)		{ phylipfile = getFullPathName(f);			}
 		void setColumnFile(string f)		{ columnfile = getFullPathName(f);			}
 		void setNameFile(string f)			{ namefile = getFullPathName(f);			}	
@@ -198,7 +198,7 @@ class MothurOut {
 		void setTaxonomyFile(string f)		{ taxonomyfile = getFullPathName(f);		}
 		void setFlowFile(string f)			{ flowfile = getFullPathName(f);			}
         void setBiomFile(string f)			{ biomfile = getFullPathName(f);			}
-        void setCountTableFile(string f)	{ counttablefile = getFullPathName(f);		}
+        void setCountTableFile(string f)	{ counttablefile = getFullPathName(f);	groupMode = "count";	}
         void setProcessors(string p)		{ processors = p; mothurOut("\nUsing " + toString(p) + " processors.\n");	}
 		
 		void printCurrentFiles();
@@ -241,6 +241,7 @@ class MothurOut {
             mothurCalling = false;
             debug = false;
 			sharedHeaderMode = "";
+            groupMode = "group";
 		}
 		~MothurOut();
 
