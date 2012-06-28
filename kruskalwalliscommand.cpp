@@ -7,7 +7,7 @@
 #include "kruskalwalliscommand.h"
 
 //**********************************************************************************************************************
-vector<string> KruskalWallisCommand::setParameters(){	
+/*vector<string> KruskalWallisCommand::setParameters(){	
 	try {
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
@@ -117,7 +117,7 @@ KruskalWallisCommand::KruskalWallisCommand(string option) {
 		m->errorOut(e, "KruskalWallisCommand", "KruskalWallisCommand");
 		exit(1);
 	}
-}
+}**/
 //**********************************************************************************************************************
 int KruskalWallisCommand::execute(){
 	try {
@@ -176,7 +176,7 @@ int KruskalWallisCommand::execute(){
 void KruskalWallisCommand::assignRank(vector<groupRank> &vec) {
     try {
         double rank = 1;
-        double numRanks, avgRank;
+        double numRanks, avgRank, j;
         vector<groupRank>::iterator it, oldit;
 
         sort (vec.begin(), vec.end(), comparevalue);
@@ -186,7 +186,7 @@ void KruskalWallisCommand::assignRank(vector<groupRank> &vec) {
         while ( it != vec.end() ) {
             j = rank;
             oldit = it;
-            if (!equalvalue(*it, *it+1)) { *it->rank = rank; rank++; it++; }
+            if (!equalvalue(*it, *it+1)) { *it->rank = rank; rank=rank+1; it++; }
             else {
                 while(equalrank(*it, *it+1)) {
                     j = j + (j+1.0);

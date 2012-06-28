@@ -11,7 +11,6 @@
 #include "command.hpp"
 
 
-
 class KruskalWallisCommand : public Command {
    
 public:
@@ -29,17 +28,19 @@ public:
 	string getDescription()		{ return "Non-parametric method for testing whether samples originate from the same distribution."; }
     
     struct groupRank {
-        sstring group;
+        string group;
         double value;
         double rank;        
     };
     
     int execute(); 
 	void help() { m->mothurOut(getHelpString()); }
-    void assignRank(vector<groupRank>);
+    void assignRank(vector<groupRank>&);
+    
     
 private:
     string outputDir;
+    bool abort;
     vector<int> counts;
     vector<double> rankSums;
     vector<double> rankMeans;
