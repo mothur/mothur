@@ -10,11 +10,7 @@
 
 #include "command.hpp"
 
-    struct groupRank {
-        sstring group;
-        double value;
-        double rank;        
-    };
+
 
 class KruskalWallisCommand : public Command {
    
@@ -31,6 +27,12 @@ public:
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/kruskalwallis"; }
 	string getDescription()		{ return "Non-parametric method for testing whether samples originate from the same distribution."; }
+    
+    struct groupRank {
+        sstring group;
+        double value;
+        double rank;        
+    };
     
     int execute(); 
 	void help() { m->mothurOut(getHelpString()); }
