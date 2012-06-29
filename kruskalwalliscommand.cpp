@@ -7,7 +7,7 @@
 #include "kruskalwalliscommand.h"
 
 //**********************************************************************************************************************
-/*vector<string> KruskalWallisCommand::setParameters(){	
+vector<string> KruskalWallisCommand::setParameters(){	
 	try {
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
@@ -117,7 +117,7 @@ KruskalWallisCommand::KruskalWallisCommand(string option) {
 		m->errorOut(e, "KruskalWallisCommand", "KruskalWallisCommand");
 		exit(1);
 	}
-}**/
+}
 //**********************************************************************************************************************
 int KruskalWallisCommand::execute(){
 	try {
