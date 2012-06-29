@@ -47,11 +47,11 @@ private:
     
   
         
-    bool comparevalue(const groupRank &a, const groupRank &b) { return a.value < b.value; }
-    bool equalvalue(const groupRank &a, const groupRank &b) { return a.value == b.value; }
-    bool comparerank(const groupRank &a, const groupRank &b) { return a.rank < b.rank; }
-    bool equalrank(const groupRank &a, const groupRank &b) { return a.rank == b.rank; }
-    bool equalgroup(const groupRank &a, const groupRank &b) { return a.group == b.group; }
+    static bool comparevalue(const groupRank &a, const groupRank &b) { return a.value < b.value; }
+    static bool equalvalue(const groupRank &a, const groupRank &b) { return a.value == b.value; }
+    static bool comparerank(const groupRank &a, const groupRank &b) { return a.rank < b.rank; }
+    static bool equalrank(const groupRank &a, const groupRank &b) { return a.rank == b.rank; }
+    static bool equalgroup(const groupRank &a, const groupRank &b) { return a.group == b.group; }
     
 };
 

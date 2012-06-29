@@ -4,6 +4,7 @@
  *
  * Created on June 26, 2012, 11:06 AM
  */
+
 #include "kruskalwalliscommand.h"
 
 //**********************************************************************************************************************
@@ -186,22 +187,26 @@ void KruskalWallisCommand::assignRank(vector<groupRank> &vec) {
         while ( it != vec.end() ) {
             j = rank;
             oldit = it;
-            if (!equalvalue(*it, *it+1)) { *it->rank = rank; rank=rank+1; it++; }
+            if (!equalvalue(*it, *(it+1))) {
+                (*it).rank = rank; 
+                rank = rank+1; 
+                it++; }
             else {
-                while(equalrank(*it, *it+1)) {
-                    j = j + (j+1.0);
+                while(equalrank(*it, *(it+1))) {
+                    j = j + (j+1);
                     rank++;
                     it++;
                 }
                 numRanks = double (distance(oldit, it));
                 avgRank = j / numRanks;
                 while(oldit != it) {
-                    *oldit->rank = avgRank;
+                    (*oldit).rank = avgRank;
                     oldit++;
                 }
             }
 
         }
+        
 
     }
     catch(exception& e) {
