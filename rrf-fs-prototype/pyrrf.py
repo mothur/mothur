@@ -5,9 +5,9 @@ import random
 
 DEBUG_MODE = False
 
-# The main algorithm resides here, it the manipulator class
-class DecisionTree:
+class AbstractDecisionTree(object):
 	def __init__(self, baseDataSet, globalDiscardedFeatureIndices, optimumFeatureSubsetSelector):
+
 		self.baseDataSet = baseDataSet
 		self.numSamples = len(baseDataSet)
 		self.numFeatures = len(baseDataSet[0]) - 1
@@ -21,11 +21,7 @@ class DecisionTree:
 
 		self.rootNode = None
 		self.globalDiscardedFeatureIndices = globalDiscardedFeatureIndices
-		self.variableImportanceList = [0 for x in range(0, self.numFeatures)]
 
-		self.outOfBagEstimates = {}
-
-		# TODO optimum feature is log2(totalFeatures), we might need to modify this one
 		self.optimumFeatureSubsetSize = optimumFeatureSubsetSelector.getOptimumFeatureSubsetSize(self.numFeatures)
 
 		for i in range(0, self.numSamples):
@@ -34,9 +30,21 @@ class DecisionTree:
 				self.classes.append(outcome)
 				self.numOutputClasses += 1
 
+
+class RegularizedDecisionTree(AbstractDecisionTree):
+	pass
+
+# The main algorithm resides here, it the manipulator class
+class DecisionTree(AbstractDecisionTree):
+	def __init__(self, baseDataSet, globalDiscardedFeatureIndices, optimumFeatureSubsetSelector):
+		# calling to super-class's ctor
+		super(DecisionTree, self).__init__(baseDataSet, globalDiscardedFeatureIndices, optimumFeatureSubsetSelector)
+
+		self.variableImportanceList = [0 for x in range(0, self.numFeatures)]
+		self.outOfBagEstimates = {}
+
 		self.createBootStrappedSamples()
 		self.buildDecisionTree()
-
 
 	# this is the code which creates bootstrapped samples from given data
 	def createBootStrappedSamples(self):
@@ -457,10 +465,10 @@ class AbstractRandomForest(object):
 
 class RegularizedRandomForest(AbstractRandomForest):
 	def populateDecisionTrees(self):
-#		print "populateDecisionTrees()"
-#		for i in range(0, self.numDecisionTrees):
-#			print "Creating", i, "(th) Decision tree"
-#			decisionTree = DecisionTree(dataSet, self.globalDiscardedFeatureIndices, OptimumFeatureSubsetSelector('log2'))
+		print "populateDecisionTrees()"
+		for i in range(0, self.numDecisionTrees):
+			print "Creating", i, "(th) Decision tree"
+			decisionTree = RegularizedDecisionTree(dataSet, self.globalDiscardedFeatureIndices, OptimumFeatureSubsetSelector('log2'))
 #			decisionTree.calcTreeVariableImportanceAndError()
 #
 #			self.updateGlobalOutOfBagEstimates(decisionTree)
