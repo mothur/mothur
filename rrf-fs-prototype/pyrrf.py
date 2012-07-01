@@ -98,7 +98,7 @@ class DecisionTree:
 
 	def buildDecisionTree(self):
 		if DEBUG_MODE: print "buildDecisionTree()"
-		treeNode = TreeNode(self.bootstrappedTrainingSamples, self.numFeatures, self.numSamples, self.numOutputClasses, 0)
+		treeNode = TreeNode(self.bootstrappedTrainingSamples, self.globalDiscardedFeatureIndices, self.numFeatures, self.numSamples, self.numOutputClasses, 0)
 		self.rootNode = treeNode
 		self.splitRecursively(treeNode)
 		if DEBUG_MODE: self.printTree(treeNode, "root")
@@ -152,8 +152,8 @@ class DecisionTree:
 		# print "leftChildSamples:", leftChildSamples
 		# print "rightChildSamples:", rightChildSamples
 
-		leftChildNode = TreeNode(leftChildSamples, self.numFeatures, len(leftChildSamples), self.numOutputClasses, treeNode.generation + 1)
-		rightChildNode = TreeNode(rightChildSamples, self.numFeatures, len(rightChildSamples), self.numOutputClasses, treeNode.generation + 1)
+		leftChildNode = TreeNode(leftChildSamples, self.globalDiscardedFeatureIndices, self.numFeatures, len(leftChildSamples), self.numOutputClasses, treeNode.generation + 1)
+		rightChildNode = TreeNode(rightChildSamples, self.globalDiscardedFeatureIndices, self.numFeatures, len(rightChildSamples), self.numOutputClasses, treeNode.generation + 1)
 
 		treeNode.leftChildNode = leftChildNode
 		treeNode.rightChildNode = rightChildNode
@@ -390,18 +390,20 @@ class DecisionTree:
 		treeNode.bootstrappedFeatureVectors = None
 		treeNode.bootstrappedOutputVector = None
 		treeNode.localDiscardedFeatureIndices = None
+		treeNode.globalDiscardedFeatureIndices = None
 
 		if treeNode.leftChildNode is not None: self.purgeTreeNodesDataRecursively(treeNode.leftChildNode)
 		if treeNode.rightChildNode is not None: self.purgeTreeNodesDataRecursively(treeNode.rightChildNode)
 
 class TreeNode:
-	def __init__(self, bootstrappedTrainingSamples, numFeatures, numSamples, numOutputClasses, generation):
+	def __init__(self, bootstrappedTrainingSamples, globalDiscardedFeatureIndices, numFeatures, numSamples, numOutputClasses, generation):
 		self.numFeatures = numFeatures
 		self.numSamples =  numSamples
 		self.numOutputClasses = numOutputClasses
 		self.isLeaf = False
 		self.outputClass = None
 		self.bootstrappedTrainingSamples = bootstrappedTrainingSamples
+		self.globalDiscardedFeatureIndices = globalDiscardedFeatureIndices
 		self.generation = generation
 
 		self.splitFeatureIndex = 0
@@ -423,7 +425,7 @@ class TreeNode:
 	def createLocalDiscardedFeatureList(self):
 		if DEBUG_MODE: print "createLocalDiscardedFeatureList()"
 		for i, x in enumerate(self.bootstrappedFeatureVectors):
-			if i not in globalDiscardedFeatureIndices and getStandardDeviation(x) <= 0:
+			if i not in self.globalDiscardedFeatureIndices and getStandardDeviation(x) <= 0:
 				self.localDiscardedFeatureIndices.append(i)
 		if DEBUG_MODE: print self.localDiscardedFeatureIndices
 
@@ -431,11 +433,13 @@ class TreeNode:
 ''' The main algorithm for Regularized Random Forest, it creates a number of decision trees and then aggregates them
 	to find the solution '''
 class RandomForest:
-	def __init__(self, dataSet, globalDiscardedFeatureIndices, numDecisionTrees):
+	def __init__(self, dataSet, numDecisionTrees):
 		self.decisionTrees = []
 		self.dataSet = dataSet
 		self.numDecisionTrees = numDecisionTrees
-		self.globalDiscardedFeatureIndices = globalDiscardedFeatureIndices
+
+		# calculate globalDiscardedFeatureIndices
+		self.globalDiscardedFeatureIndices = self.getGlobalDiscardedFeatureIndices()
 
 		self.numSamples = len(dataSet)
 		self.numFeatures = len(dataSet[0]) - 1
@@ -487,7 +491,7 @@ class RandomForest:
 		print "populateDecisionTrees()"
 		for i in range(0, self.numDecisionTrees):
 			print "Creating", i, "(th) Decision tree"
-			decisionTree = DecisionTree(dataSet, globalDiscardedFeatureIndices, OptimumFeatureSubsetSelector('log2'))
+			decisionTree = DecisionTree(dataSet, self.globalDiscardedFeatureIndices, OptimumFeatureSubsetSelector('log2'))
 			decisionTree.calcTreeVariableImportanceAndError()
 
 			self.updateGlobalOutOfBagEstimates(decisionTree)
@@ -498,6 +502,20 @@ class RandomForest:
 
 		# TODO do the usual stuffs (aggregation) with the decisionTrees
 		if DEBUG_MODE: print "self.globalOutOfBagEstimates:", self.globalOutOfBagEstimates
+
+	def getGlobalDiscardedFeatureIndices(self):
+		featureVectors = zip(*self.dataSet)[:-1]
+		globalDiscardedFeatureIndices = []
+		for index, featureVector in enumerate(featureVectors):
+			total = sum(featureVector)
+			zeroCount = featureVector.count(0)
+			#		if total < 800 or zeroCount > len(dataSet) / 2 or getStandardDeviation(featureVector) <= 0:
+			if getStandardDeviation(featureVector) <= 0:
+				globalDiscardedFeatureIndices.append(index)
+		if DEBUG_MODE: print 'number of global discarded features:', len(globalDiscardedFeatureIndices)
+		if DEBUG_MODE: print 'total features:', len(featureVectors)
+		return globalDiscardedFeatureIndices
+
 
 class OptimumFeatureSubsetSelector:
 	def __init__(self, selectionType = 'log2'):
@@ -566,27 +584,6 @@ class SharedAndDesignFileReader:
 			i += 1
 		return self.dataSet
 
-#	def getDiscardedFeatureIndices(self):
-#		featureVectors = zip(*self.dataSet)[:-1]
-#		discardedFeatureIndices = []
-#		for i, x in enumerate(featureVectors):
-#			total = sum(x)
-#			if total < 1: discardedFeatureIndices.append(i)
-#		return discardedFeatureIndices
-
-def getGlobalDiscardedFeatureIndices(dataSet):
-	featureVectors = zip(*dataSet)[:-1]
-	globalDiscardedFeatureIndices = []
-	for index, featureVector in enumerate(featureVectors):
-		total = sum(featureVector)
-		zeroCount = featureVector.count(0)
-#		if total < 800 or zeroCount > len(dataSet) / 2 or getStandardDeviation(featureVector) <= 0:
-		if getStandardDeviation(featureVector) <= 0:
-			globalDiscardedFeatureIndices.append(index)
-	if DEBUG_MODE: print 'number of global discarded features:', len(globalDiscardedFeatureIndices)
-	if DEBUG_MODE: print 'total features:', len(featureVectors)
-	return globalDiscardedFeatureIndices
-
 # standard deviation calculation function
 def getStandardDeviation(featureVector):
 	n = len(featureVector)
@@ -595,14 +592,13 @@ def getStandardDeviation(featureVector):
 		# function know that the list is empty
 		return -1
 	avg = sum(featureVector) / n
-	standardDeviation = sqrt(sum([ (x - avg) ** 2 for x in featureVector]) / n)
+	standardDeviation = sqrt(sum([ (x - avg) ** 2 for x in featureVector ]) / n)
 	return standardDeviation
 
 if __name__ == "__main__":
 	numDecisionTrees = 1
 
 	# example of matrix file reading
-	# small-alter.txt has a modified dataset
 #	fileReaderFactory = fileReaderFactory(fileType = 'matrix', matrixFilePath = 'Datasets/small-alter.txt');
 	fileReaderFactory = FileReaderFactory(fileType = 'matrix', matrixFilePath = 'Datasets/inpatient.final.an.0.03.subsample.avg.matrix');
 #	fileReaderFactory = FileReaderFactory(fileType = 'matrix', matrixFilePath = 'Datasets/outin.final.an.0.03.subsample.avg.matrix');
@@ -611,9 +607,8 @@ if __name__ == "__main__":
 #	fileReaderFactory = FileReaderFactory(fileType='sharedAndDesign', sharedFilePath='Datasets/final.an.0.03.subsample.0.03.pick.shared', designFilePath='Datasets/mouse.sex_time.design')
 
 	dataSet = fileReaderFactory.getFileReader().getDataSetFromFile()
-	globalDiscardedFeatureIndices = getGlobalDiscardedFeatureIndices(dataSet)
 
-	randomForest = RandomForest(dataSet, globalDiscardedFeatureIndices, numDecisionTrees)
+	randomForest = RandomForest(dataSet, numDecisionTrees)
 	randomForest.populateDecisionTrees()
 	randomForest.calcForrestErrorRate()
 	randomForest.calcForrestVariableImportance()
