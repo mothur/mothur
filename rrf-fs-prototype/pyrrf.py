@@ -499,8 +499,35 @@ class RegularizedRandomForest:
 		# TODO do the usual stuffs (aggregation) with the decisionTrees
 		if DEBUG_MODE: print "self.globalOutOfBagEstimates:", self.globalOutOfBagEstimates
 
+class FileReaderFactory:
+	def __init__(self, fileType = "matrix", sharedFilePath = None, designFilePath = None, matrixFilePath = None):
+		self.sharedFilePath = sharedFilePath
+		self.designFilePath = designFilePath
+		self.matrixFilePath = matrixFilePath
+
+		self.fileReader = None
+
+		if fileType == "matrix":
+			self.fileReader = MatrixFileReader(self.matrixFilePath)
+		elif fileType == "sharedAndDesign":
+			self.fileReader = SharedAndDesignFileReader(self.sharedFilePath, designFilePath)
+
+	def getFileReader(self):
+		return self.fileReader
+
+class MatrixFileReader:
+	def __init__(self, matrixFilePath):
+		self.matrixFilePath = matrixFilePath
+
+	def getDataSetFromFile(self):
+		data = []
+		file = open(self.matrixFilePath)
+		for line in file: data.append([int(y) for y in line.strip().split()])
+		return data
+
+
 ''' This class reads the file and crates a data matrix for further processing '''
-class FileReader:
+class SharedAndDesignFileReader:
 
 	def __init__(self, sharedFilePath, designFilePath):
 		self.sharedFileData = []
@@ -510,7 +537,7 @@ class FileReader:
 		with open(designFilePath) as designFile:
 			for line in designFile: self.designFileData.append(line.strip().split())
 
-	def getDataSet(self):
+	def getDataSetFromFile(self):
 		self.dataSet = []
 		self.dataSetClasses = {}
 		for line in self.sharedFileData[1:]:
@@ -524,19 +551,13 @@ class FileReader:
 			i += 1
 		return self.dataSet
 
-	def getDiscardedFeatureIndices(self):
-		featureVectors = zip(*self.dataSet)[:-1]
-		discardedFeatureIndices = []
-		for i, x in enumerate(featureVectors):
-			total = sum(x)
-			if total < 1: discardedFeatureIndices.append(i)
-		return discardedFeatureIndices
-
-def readFileContents(fileName):
-	data = []
-	file = open(fileName)
-	for line in file: data.append([int(y) for y in line.strip().split()])
-	return data
+#	def getDiscardedFeatureIndices(self):
+#		featureVectors = zip(*self.dataSet)[:-1]
+#		discardedFeatureIndices = []
+#		for i, x in enumerate(featureVectors):
+#			total = sum(x)
+#			if total < 1: discardedFeatureIndices.append(i)
+#		return discardedFeatureIndices
 
 def getGlobalDiscardedFeatureIndices(dataSet):
 	featureVectors = zip(*dataSet)[:-1]
@@ -563,21 +584,19 @@ def getStandardDeviation(featureVector):
 	return standardDeviation
 
 if __name__ == "__main__":
-	numDecisionTrees = 100
+	numDecisionTrees = 1
 
+	# example of matrix file reading
 	# small-alter.txt has a modified dataset
-#	dataSet = readFileContents('Datasets/small-alter.txt')
-	# dataSet = readFileContents('Datasets/inpatient.final.an.0.03.subsample.avg.matrix')
-	dataSet = readFileContents('Datasets/outin.final.an.0.03.subsample.avg.matrix')
+#	fileReaderFactory = fileReaderFactory(fileType = 'matrix', matrixFilePath = 'Datasets/small-alter.txt');
+	fileReaderFactory = FileReaderFactory(fileType = 'matrix', matrixFilePath = 'Datasets/inpatient.final.an.0.03.subsample.avg.matrix');
+#	fileReaderFactory = FileReaderFactory(fileType = 'matrix', matrixFilePath = 'Datasets/outin.final.an.0.03.subsample.avg.matrix');
+
+	# example of shared and design file reading
+#	fileReaderFactory = FileReaderFactory(fileType='sharedAndDesign', sharedFilePath='Datasets/final.an.0.03.subsample.0.03.pick.shared', designFilePath='Datasets/mouse.sex_time.design')
+
+	dataSet = fileReaderFactory.getFileReader().getDataSetFromFile()
 	globalDiscardedFeatureIndices = getGlobalDiscardedFeatureIndices(dataSet)
-#	for x in discardedFeatureIndices: print x
-
-#	mouseData = ["Datasets/final.an.0.03.subsample.0.03.pick.shared", "Datasets/mouse.sex_time.design"]
-#	sharedFilePath, designFilePath = mouseData
-#	fileReader = FileReader(sharedFilePath, designFilePath)
-#	dataSet = fileReader.getDataSet()
-#	discardedFeatureIndices = fileReader.getDiscardedFeatureIndices()
-
 
 	regularizedRandomForest = RegularizedRandomForest(dataSet, globalDiscardedFeatureIndices, numDecisionTrees)
 	regularizedRandomForest.populateDecisionTrees()
