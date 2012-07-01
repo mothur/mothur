@@ -30,22 +30,6 @@ class AbstractDecisionTree(object):
 				self.classes.append(outcome)
 				self.numOutputClasses += 1
 
-
-class RegularizedDecisionTree(AbstractDecisionTree):
-	pass
-
-# The main algorithm resides here, it the manipulator class
-class DecisionTree(AbstractDecisionTree):
-	def __init__(self, baseDataSet, globalDiscardedFeatureIndices, optimumFeatureSubsetSelector):
-		# calling to super-class's ctor
-		super(DecisionTree, self).__init__(baseDataSet, globalDiscardedFeatureIndices, optimumFeatureSubsetSelector)
-
-		self.variableImportanceList = [0 for x in range(0, self.numFeatures)]
-		self.outOfBagEstimates = {}
-
-		self.createBootStrappedSamples()
-		self.buildDecisionTree()
-
 	# this is the code which creates bootstrapped samples from given data
 	def createBootStrappedSamples(self):
 		isInTrainingSamples = [False for i in range(0, self.numSamples)]
@@ -62,12 +46,31 @@ class DecisionTree(AbstractDecisionTree):
 				self.bootstrappedTestSamples.append(self.baseDataSet[i])
 				self.bootstrappedTestSampleIndices.append(i)
 
-#		for x in self.bootstrappedTrainingSamples: print x
-#		print "###"
+			#		for x in self.bootstrappedTrainingSamples: print x
+			#		print "###"
 		if DEBUG_MODE:
 			for x in self.bootstrappedTestSamples: print x
 		if DEBUG_MODE: print "self.bootstrappedTrainingSampleIndices:", self.bootstrappedTrainingSampleIndices
 		if DEBUG_MODE: print "self.bootstrappedTestSampleIndices:", self.bootstrappedTestSampleIndices
+
+
+
+class RegularizedDecisionTree(AbstractDecisionTree):
+	pass
+
+# The main algorithm resides here, it the manipulator class
+class DecisionTree(AbstractDecisionTree):
+	def __init__(self, baseDataSet, globalDiscardedFeatureIndices, optimumFeatureSubsetSelector):
+
+		# calling to super-class's ctor
+		super(DecisionTree, self).__init__(baseDataSet, globalDiscardedFeatureIndices, optimumFeatureSubsetSelector)
+
+		self.variableImportanceList = [0 for x in range(0, self.numFeatures)]
+		self.outOfBagEstimates = {}
+
+		self.createBootStrappedSamples()
+		self.buildDecisionTree()
+
 
 	def findNullFeatures(self, bootstrappedTrainingSamples):
 		print "findNullFeatures()"
@@ -230,18 +233,6 @@ class DecisionTree(AbstractDecisionTree):
 				uniqueFeatureValues.append(pair[0])
 				splitPoints.append(index)
 
-
-#		for i in range(0, len(featureVector)):
-#			if featureOutputPair[i][1] != searchOutput:
-#				# we need to make sure that the split point does not contain a zero
-#				splitOnValue = featureOutputPair[i][0]
-#				if splitOnValue == 0:
-#					print "splitOnValue 0 detected, not adding this to splitIndex"
-#					continue
-#				splitPoints.append(i)
-#				searchOutput = featureOutputPair[i][1]
-#
-
 		#	now we have the splitPoints, so we need to find which of them gives
 		#	us the highest entropy gain
 		if DEBUG_MODE: print "splitPoints:", splitPoints
@@ -403,7 +394,7 @@ class DecisionTree(AbstractDecisionTree):
 		if treeNode.leftChildNode is not None: self.purgeTreeNodesDataRecursively(treeNode.leftChildNode)
 		if treeNode.rightChildNode is not None: self.purgeTreeNodesDataRecursively(treeNode.rightChildNode)
 
-class TreeNode:
+class TreeNode(object):
 	def __init__(self, bootstrappedTrainingSamples, globalDiscardedFeatureIndices, numFeatures, numSamples, numOutputClasses, generation):
 		self.numFeatures = numFeatures
 		self.numSamples =  numSamples
@@ -468,7 +459,7 @@ class RegularizedRandomForest(AbstractRandomForest):
 		print "populateDecisionTrees()"
 		for i in range(0, self.numDecisionTrees):
 			print "Creating", i, "(th) Decision tree"
-			decisionTree = RegularizedDecisionTree(dataSet, self.globalDiscardedFeatureIndices, OptimumFeatureSubsetSelector('log2'))
+			decisionTree = RegularizedDecisionTree(dataSet, self.globalDiscardedFeatureIndices, OptimumFeatureSubsetSelector('squareRoot'))
 #			decisionTree.calcTreeVariableImportanceAndError()
 #
 #			self.updateGlobalOutOfBagEstimates(decisionTree)
@@ -543,7 +534,7 @@ class RandomForest(AbstractRandomForest):
 		if DEBUG_MODE: print "self.globalOutOfBagEstimates:", self.globalOutOfBagEstimates
 
 
-class OptimumFeatureSubsetSelector:
+class OptimumFeatureSubsetSelector(object):
 	def __init__(self, selectionType = 'log2'):
 		self.selectionType = selectionType
 
@@ -638,5 +629,7 @@ if __name__ == "__main__":
 	randomForest.populateDecisionTrees()
 	randomForest.calcForrestErrorRate()
 	randomForest.calcForrestVariableImportance()
+
+#	regularizedRandomForest = RegularizedRandomForest(dataSet, numDecisionTrees)
 
 #	createDecisionTree(dataSet)
