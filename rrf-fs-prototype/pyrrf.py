@@ -1,6 +1,5 @@
 #!/usr/bin/python
 from __future__ import division
-from idlelib.TreeWidget import TreeNode
 from math import log, ceil, sqrt
 import random
 
