@@ -7,7 +7,7 @@ DEBUG_MODE = False
 
 # The main algorithm resides here, it the manipulator class
 class DecisionTree:
-	def __init__(self, baseDataSet, globalDiscardedFeatureIndices):
+	def __init__(self, baseDataSet, globalDiscardedFeatureIndices, optimumFeatureSubsetSelector):
 		self.baseDataSet = baseDataSet
 		self.numSamples = len(baseDataSet)
 		self.numFeatures = len(baseDataSet[0]) - 1
@@ -26,7 +26,7 @@ class DecisionTree:
 		self.outOfBagEstimates = {}
 
 		# TODO optimum feature is log2(totalFeatures), we might need to modify this one
-		self.optimumFeatureSubsetSize = int(ceil(log(self.numFeatures, 2)))
+		self.optimumFeatureSubsetSize = optimumFeatureSubsetSelector.getOptimumFeatureSubsetSize(self.numFeatures)
 
 		for i in range(0, self.numSamples):
 			outcome = baseDataSet[i][-1]
@@ -430,7 +430,7 @@ class TreeNode:
 
 ''' The main algorithm for Regularized Random Forest, it creates a number of decision trees and then aggregates them
 	to find the solution '''
-class RegularizedRandomForest:
+class RandomForest:
 	def __init__(self, dataSet, globalDiscardedFeatureIndices, numDecisionTrees):
 		self.decisionTrees = []
 		self.dataSet = dataSet
@@ -487,7 +487,7 @@ class RegularizedRandomForest:
 		print "populateDecisionTrees()"
 		for i in range(0, self.numDecisionTrees):
 			print "Creating", i, "(th) Decision tree"
-			decisionTree = DecisionTree(dataSet, globalDiscardedFeatureIndices)
+			decisionTree = DecisionTree(dataSet, globalDiscardedFeatureIndices, OptimumFeatureSubsetSelector('log2'))
 			decisionTree.calcTreeVariableImportanceAndError()
 
 			self.updateGlobalOutOfBagEstimates(decisionTree)
@@ -498,6 +498,21 @@ class RegularizedRandomForest:
 
 		# TODO do the usual stuffs (aggregation) with the decisionTrees
 		if DEBUG_MODE: print "self.globalOutOfBagEstimates:", self.globalOutOfBagEstimates
+
+class OptimumFeatureSubsetSelector:
+	def __init__(self, selectionType = 'log2'):
+		self.selectionType = selectionType
+
+	def getOptimumFeatureSubsetSize(self, numFeatures):
+		if DEBUG_MODE: print 'getOptimumFeatureSubsetSize()'
+		if self.selectionType == 'log2':
+			if DEBUG_MODE: print 'Using log2 mode'
+			return int(ceil(log(numFeatures, 2)))
+		elif self.selectionType == 'squareRoot':
+			if DEBUG_MODE: print 'Using squareRoot mode'
+			return int(ceil(sqrt(numFeatures)))
+		else: return None
+
 
 class FileReaderFactory:
 	def __init__(self, fileType = "matrix", sharedFilePath = None, designFilePath = None, matrixFilePath = None):
@@ -598,9 +613,9 @@ if __name__ == "__main__":
 	dataSet = fileReaderFactory.getFileReader().getDataSetFromFile()
 	globalDiscardedFeatureIndices = getGlobalDiscardedFeatureIndices(dataSet)
 
-	regularizedRandomForest = RegularizedRandomForest(dataSet, globalDiscardedFeatureIndices, numDecisionTrees)
-	regularizedRandomForest.populateDecisionTrees()
-	regularizedRandomForest.calcForrestErrorRate()
-	regularizedRandomForest.calcForrestVariableImportance()
+	randomForest = RandomForest(dataSet, globalDiscardedFeatureIndices, numDecisionTrees)
+	randomForest.populateDecisionTrees()
+	randomForest.calcForrestErrorRate()
+	randomForest.calcForrestVariableImportance()
 
 #	createDecisionTree(dataSet)
