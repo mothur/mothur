@@ -429,16 +429,12 @@ class TreeNode:
 				self.localDiscardedFeatureIndices.append(i)
 		if DEBUG_MODE: print self.localDiscardedFeatureIndices
 
-
-''' The main algorithm for Regularized Random Forest, it creates a number of decision trees and then aggregates them
-	to find the solution '''
-class RandomForest:
+class AbstractRandomForest(object):
 	def __init__(self, dataSet, numDecisionTrees):
 		self.decisionTrees = []
 		self.dataSet = dataSet
 		self.numDecisionTrees = numDecisionTrees
 
-		# calculate globalDiscardedFeatureIndices
 		self.globalDiscardedFeatureIndices = self.getGlobalDiscardedFeatureIndices()
 
 		self.numSamples = len(dataSet)
@@ -447,6 +443,41 @@ class RandomForest:
 		self.globalOutOfBagEstimates = {}
 		self.globalVariableImportanceList = [0 for x in range(0, self.numFeatures)]
 
+	def getGlobalDiscardedFeatureIndices(self):
+		featureVectors = zip(*self.dataSet)[:-1]
+		globalDiscardedFeatureIndices = []
+		for index, featureVector in enumerate(featureVectors):
+			total = sum(featureVector)
+			zeroCount = featureVector.count(0)
+			if getStandardDeviation(featureVector) <= 0:
+				globalDiscardedFeatureIndices.append(index)
+		if DEBUG_MODE: print 'number of global discarded features:', len(globalDiscardedFeatureIndices)
+		if DEBUG_MODE: print 'total features:', len(featureVectors)
+		return globalDiscardedFeatureIndices
+
+class RegularizedRandomForest(AbstractRandomForest):
+	def populateDecisionTrees(self):
+#		print "populateDecisionTrees()"
+#		for i in range(0, self.numDecisionTrees):
+#			print "Creating", i, "(th) Decision tree"
+#			decisionTree = DecisionTree(dataSet, self.globalDiscardedFeatureIndices, OptimumFeatureSubsetSelector('log2'))
+#			decisionTree.calcTreeVariableImportanceAndError()
+#
+#			self.updateGlobalOutOfBagEstimates(decisionTree)
+#
+#			decisionTree.purgeDataSetsFromTree()
+#
+#			self.decisionTrees.append(decisionTree)
+#
+#		# TODO do the usual stuffs (aggregation) with the decisionTrees
+#		if DEBUG_MODE: print "self.globalOutOfBagEstimates:", self.globalOutOfBagEstimates
+
+		pass
+
+
+''' The main algorithm for Regularized Random Forest, it creates a number of decision trees and then aggregates them
+	to find the solution '''
+class RandomForest(AbstractRandomForest):
 	def updateGlobalOutOfBagEstimates(self, decisionTree):
 		for indexOfSample, predictedOutcomeOfSample in decisionTree.outOfBagEstimates.iteritems():
 			if not self.globalOutOfBagEstimates.has_key(indexOfSample):
@@ -502,19 +533,6 @@ class RandomForest:
 
 		# TODO do the usual stuffs (aggregation) with the decisionTrees
 		if DEBUG_MODE: print "self.globalOutOfBagEstimates:", self.globalOutOfBagEstimates
-
-	def getGlobalDiscardedFeatureIndices(self):
-		featureVectors = zip(*self.dataSet)[:-1]
-		globalDiscardedFeatureIndices = []
-		for index, featureVector in enumerate(featureVectors):
-			total = sum(featureVector)
-			zeroCount = featureVector.count(0)
-			#		if total < 800 or zeroCount > len(dataSet) / 2 or getStandardDeviation(featureVector) <= 0:
-			if getStandardDeviation(featureVector) <= 0:
-				globalDiscardedFeatureIndices.append(index)
-		if DEBUG_MODE: print 'number of global discarded features:', len(globalDiscardedFeatureIndices)
-		if DEBUG_MODE: print 'total features:', len(featureVectors)
-		return globalDiscardedFeatureIndices
 
 
 class OptimumFeatureSubsetSelector:
@@ -596,7 +614,7 @@ def getStandardDeviation(featureVector):
 	return standardDeviation
 
 if __name__ == "__main__":
-	numDecisionTrees = 1
+	numDecisionTrees = 10
 
 	# example of matrix file reading
 #	fileReaderFactory = fileReaderFactory(fileType = 'matrix', matrixFilePath = 'Datasets/small-alter.txt');
