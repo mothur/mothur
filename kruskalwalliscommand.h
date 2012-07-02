@@ -38,6 +38,7 @@ public:
     int execute(); 
 	void help() { m->mothurOut(getHelpString()); }
     void assignRank(vector<groupRank>&);
+    void assignValue(vector<groupRank>&);
     
     
 private:

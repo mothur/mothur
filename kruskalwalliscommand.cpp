@@ -141,15 +141,19 @@ int KruskalWallisCommand::execute(){
         
         //math goes here
         
-        int N = lookup.size();
+        int N = m->getNumGroups();
         double H;
         double tmp = 0.0;
         vector<groupRank> vec;
+        vector<string> groups = m->getGroups();
         string group;
         int count;
         double sum;
                 
         //merge all groups into a vector
+        
+        
+        
         //rank function here
         assignRank(vec);
         
@@ -157,7 +161,7 @@ int KruskalWallisCommand::execute(){
         for (int i=0;i<N;i++) {
             count = 0;
             sum = 0;
-            //group = next group
+            group = groups[i];
             for(int j;j<vec.size();j++) {
                 if (vec[j].group == group) {
                     count++;
@@ -231,7 +235,9 @@ void KruskalWallisCommand::assignRank(vector<groupRank> &vec) {
     
 }
 //**********************************************************************************************************************
-
+void KruskalWallisCommand::assignValue(vector<groupRank> &vec) {
+    
+}
 //**********************************************************************************************************************
 //**********************************************************************************************************************
 //**********************************************************************************************************************
