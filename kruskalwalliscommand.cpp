@@ -124,9 +124,24 @@ int KruskalWallisCommand::execute(){
 	try {
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
         
+        InputData* input = new InputData(sharedfile, "sharedfile");
+        vector<SharedRAbundVector*> lookup = input->getSharedRAbundVectors();
+		string lastLabel = lookup[0]->getLabel();
+		
+		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
+		set<string> processedLabels;
+		set<string> userLabels = labels;
+
+        ofstream out;
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + getOutputFileNameTag("summary");
+        m->openOutputFile(outputFileName, out);
+        outputNames.push_back(outputFileName);  outputTypes["summary"].push_back(outputFileName);
+        out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
+        out << "H\tpvalue\n";
+        
         //math goes here
         
-        int N; //= thisLookUp.size();
+        int N = lookUp.size();
         double H;
         double tmp = 0.0;
         vector<groupRank> vec;
