@@ -141,7 +141,7 @@ int KruskalWallisCommand::execute(){
         
         //math goes here
         
-        int N = lookUp.size();
+        int N = lookup.size();
         double H;
         double tmp = 0.0;
         vector<groupRank> vec;

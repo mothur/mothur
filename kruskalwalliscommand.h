@@ -9,6 +9,8 @@
 #define	KRUSKALWALLISCOMMAND_H
 
 #include "command.hpp"
+#include "inputdata.h"
+#include "sharedrabundvector.h"
 
 
 class KruskalWallisCommand : public Command {
@@ -39,8 +41,10 @@ public:
     
     
 private:
-    string outputDir;
+    string outputDir, sharedfile;
     bool abort;
+    set<string> labels;
+    vector<string> outputNames;
     vector<int> counts;
     vector<double> rankSums;
     vector<double> rankMeans;
