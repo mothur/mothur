@@ -22,7 +22,7 @@ void NameAssignment::readMap(){
 		int rowIndex = 0;
 		
 		while(fileHandle){
-			fileHandle >> firstCol;				//read from first column
+			fileHandle >> firstCol;	m->gobble(fileHandle);			//read from first column
 			fileHandle >> secondCol;			//read from second column
 						
 			itData = (*this).find(firstCol);

@@ -37,18 +37,19 @@ public:
 private:
 	
 	vector<SharedRAbundVector*> lookup;
-	int nIters;
+	int nIters, subsampleSize, iters;
 	string format;
 	float freq;
 	
      map<int, string> file2Group; //index in outputNames[i] -> group
-	bool abort, allLines, jumble, groupMode;
+	bool abort, allLines, jumble, groupMode, subsample;
 	set<string> labels; //holds labels to be used
 	string label, calc, groups, outputDir, sharedfile, designfile;
 	vector<string>  Estimators, Groups, outputNames, Sets;
     
     int process(GroupMap&, string);
     vector<string> createGroupFile(vector<string>&);
+    int subsampleLookup(vector<SharedRAbundVector*>&, string);
 
 };
 

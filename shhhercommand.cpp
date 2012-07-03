@@ -1839,14 +1839,17 @@ void ShhherCommand::writeGroups(){
     try {
         string thisOutputDir = outputDir;
         if (outputDir == "") {  thisOutputDir += m->hasPath(flowFileName);  }
-        string fileRoot = thisOutputDir + m->getRootName(m->getSimpleName(flowFileName));
-        string groupFileName = fileRoot + getOutputFileNameTag("group");
+        string fileRoot = m->getRootName(m->getSimpleName(flowFileName));
+        int pos = fileRoot.find_first_of('.');
+        string fileGroup = fileRoot;
+        if (pos != string::npos) {  fileGroup = fileRoot.substr(pos+1, (fileRoot.length()-1-(pos+1)));  }
+        string groupFileName = thisOutputDir + fileRoot + getOutputFileNameTag("group");
         ofstream groupFile;
         m->openOutputFile(groupFileName, groupFile);
         
         for(int i=0;i<numSeqs;i++){
             if (m->control_pressed) { break; }
-            groupFile << seqNameVector[i] << '\t' << fileRoot << endl;
+            groupFile << seqNameVector[i] << '\t' << fileGroup << endl;
         }
         groupFile.close();
         outputNames.push_back(groupFileName);
@@ -2319,15 +2322,18 @@ int ShhherCommand::driver(vector<string> filenames, string thisCompositeFASTAFil
                 string fastaFileName = thisOutputDir + m->getRootName(m->getSimpleName(flowFileName)) + getOutputFileNameTag("fasta");
                 string nameFileName = thisOutputDir + m->getRootName(m->getSimpleName(flowFileName)) + getOutputFileNameTag("name");
                 string otuCountsFileName = thisOutputDir + m->getRootName(m->getSimpleName(flowFileName)) + getOutputFileNameTag("counts");
-                string fileRoot = thisOutputDir + m->getRootName(m->getSimpleName(flowFileName));
-                string groupFileName = fileRoot + getOutputFileNameTag("group");
+                string fileRoot = m->getRootName(m->getSimpleName(flowFileName));
+                int pos = fileRoot.find_first_of('.');
+                string fileGroup = fileRoot;
+                if (pos != string::npos) {  fileGroup = fileRoot.substr(pos+1, (fileRoot.length()-1-(pos+1)));  }
+                string groupFileName = thisOutputDir + fileRoot + getOutputFileNameTag("group");
 
                 
                 writeQualities(numOTUs, numFlowCells, qualityFileName, otuCounts, nSeqsPerOTU, seqNumber, singleTau, flowDataIntI, uniqueFlowgrams, cumNumSeqs, mapUniqueToSeq, seqNameVector, centroids, aaI); if (m->control_pressed) { break; }
                 writeSequences(thisCompositeFASTAFileName, numOTUs, numFlowCells, fastaFileName, otuCounts, uniqueFlowgrams, seqNameVector, aaI, centroids);if (m->control_pressed) { break; }
                 writeNames(thisCompositeNamesFileName, numOTUs, nameFileName, otuCounts, seqNameVector, aaI, nSeqsPerOTU);				if (m->control_pressed) { break; }
                 writeClusters(otuCountsFileName, numOTUs, numFlowCells,otuCounts, centroids, uniqueFlowgrams, seqNameVector, aaI, nSeqsPerOTU, lengths, flowDataIntI);			if (m->control_pressed) { break; }
-                writeGroups(groupFileName, fileRoot, numSeqs, seqNameVector);						if (m->control_pressed) { break; }
+                writeGroups(groupFileName, fileGroup, numSeqs, seqNameVector);						if (m->control_pressed) { break; }
                 
                 if (large) {
                     if (g > 0) {

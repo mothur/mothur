@@ -12,6 +12,7 @@
 
 #include "datavector.hpp"
 #include "groupmap.h"
+#include "counttable.h"
 #include "sharedrabundvector.h"
 #include "sharedsabundvector.h"
 
@@ -32,8 +33,8 @@ public:
 	SharedListVector();
 	SharedListVector(int);
 	SharedListVector(ifstream&);
-	SharedListVector(const SharedListVector& lv) : DataVector(lv.label), data(lv.data), maxRank(lv.maxRank), numBins(lv.numBins), numSeqs(lv.numSeqs){ groupmap = NULL; };
-	~SharedListVector(){ if (groupmap != NULL) { delete groupmap; } };
+	SharedListVector(const SharedListVector& lv) : DataVector(lv.label), data(lv.data), maxRank(lv.maxRank), numBins(lv.numBins), numSeqs(lv.numSeqs){ groupmap = NULL; countTable = NULL; };
+	~SharedListVector(){ if (groupmap != NULL) { delete groupmap; } if (countTable != NULL) { delete countTable; } };
 	
 	int getNumBins()							{	return numBins;		}
 	int getNumSeqs()							{	return numSeqs;		}
@@ -58,6 +59,7 @@ public:
 private:
 	vector<string> data;  //data[i] is a list of names of sequences in the ith OTU.
 	GroupMap* groupmap;
+    CountTable* countTable;
 	int maxRank;
 	int numBins;
 	int numSeqs;

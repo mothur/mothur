@@ -308,7 +308,7 @@ int GetCoreMicroBiomeCommand::execute(){
 int GetCoreMicroBiomeCommand::createTable(vector<SharedRAbundFloatVector*>& lookup){
 	try {
         
-        string outputFileName = outputDir + m->getRootName(m->getSimpleName(inputFileName)) + lookup[0]->getLabel() + getOutputFileNameTag("coremicrobiome");
+        string outputFileName = outputDir + m->getRootName(m->getSimpleName(inputFileName)) + lookup[0]->getLabel() + "." + getOutputFileNameTag("coremicrobiome");
         outputNames.push_back(outputFileName);  outputTypes["coremicrobiome"].push_back(outputFileName);
 		ofstream out;
 		m->openOutputFile(outputFileName, out);

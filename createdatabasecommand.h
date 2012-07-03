@@ -34,13 +34,15 @@ public:
 private:
 	
 	bool abort;
-	string listfile, groupfile, repfastafile, repnamesfile, contaxonomyfile, label, outputDir;
+	string sharedfile, listfile, groupfile, repfastafile, repnamesfile, contaxonomyfile, label, outputDir;
 	
 	vector<string> outputNames;
 		
 	vector<int> readFasta(vector<Sequence>&);
-    vector<int> readTax(vector<string>&);
+    vector<int> readTax(vector<string>&, vector<string>&);
 	ListVector* getList();
+    vector<SharedRAbundVector*> getShared();
+    int findIndex(vector<string>&, string);
 	
 };
 

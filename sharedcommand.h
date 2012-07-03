@@ -40,7 +40,6 @@ public:
 	
 private:
 	void printSharedData(vector<SharedRAbundVector*>, ofstream&);
-	int createMisMatchFile(SharedListVector*, GroupMap*);
 	int readOrderFile();
 	bool isValidGroup(string, vector<string>);
 	int eliminateZeroOTUS(vector<SharedRAbundVector*>&);
@@ -48,13 +47,13 @@ private:
     int createSharedFromListGroup(string);
     int createSharedFromBiom(string);
     string getTag(string&);
-    vector<string> readRows(string, ifstream&, int&); 
+    vector<string> readRows(string, int&); 
     int getDims(string, int&, int&);
-    vector<SharedRAbundVector*> readData(string, string, ifstream&, vector<string>&, int);
+    vector<SharedRAbundVector*> readData(string, string, string, vector<string>&, int);
 	
 	vector<string> Groups, outputNames, order;
 	set<string> labels;
-	string fileroot, outputDir, listfile, groupfile, biomfile, ordergroupfile;
+	string fileroot, outputDir, listfile, groupfile, biomfile, ordergroupfile, countfile;
 	bool firsttime, pickedGroups, abort, allLines;
 	map<string, ofstream*> filehandles;
 	map<string, ofstream*>::iterator it3;

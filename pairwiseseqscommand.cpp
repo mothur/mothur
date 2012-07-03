@@ -19,7 +19,7 @@ vector<string> PairwiseSeqsCommand::setParameters(){
 		CommandParameter pgapopen("gapopen", "Number", "", "-2.0", "", "", "",false,false); parameters.push_back(pgapopen);
 		CommandParameter pgapextend("gapextend", "Number", "", "-1.0", "", "", "",false,false); parameters.push_back(pgapextend);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
-		CommandParameter poutput("output", "Multiple", "column-lt-square", "column", "", "", "",false,false); parameters.push_back(poutput);
+		CommandParameter poutput("output", "Multiple", "column-lt-square-phylip", "column", "", "", "",false,false); parameters.push_back(poutput);
 		CommandParameter pcalc("calc", "Multiple", "nogaps-eachgap-onegap", "onegap", "", "", "",false,false); parameters.push_back(pcalc);
 		CommandParameter pcountends("countends", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pcountends);
 		CommandParameter pcompress("compress", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pcompress);
@@ -249,6 +249,7 @@ PairwiseSeqsCommand::PairwiseSeqsCommand(string option)  {
 			align = validParameter.validFile(parameters, "align", false);		if (align == "not found"){	align = "needleman";	}
 			
 			output = validParameter.validFile(parameters, "output", false);		if(output == "not found"){	output = "column"; }
+            if (output=="phylip") { output = "lt"; }
 			if ((output != "column") && (output != "lt") && (output != "square")) { m->mothurOut(output + " is not a valid output form. Options are column, lt and square. I will use column."); m->mothurOutEndLine(); output = "column"; }
 			
 			calc = validParameter.validFile(parameters, "calc", false);			
