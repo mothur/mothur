@@ -14,7 +14,8 @@ vector<string> MGClusterCommand::setParameters(){
 	try {
 		CommandParameter pblast("blast", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pblast);
 		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
-        CommandParameter plarge("large", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(plarge);
+        CommandParameter pcount("count", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pcount);
+        //CommandParameter plarge("large", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(plarge);
 		CommandParameter plength("length", "Number", "", "5", "", "", "",false,false); parameters.push_back(plength);
 		CommandParameter ppenalty("penalty", "Number", "", "0.10", "", "", "",false,false); parameters.push_back(ppenalty);
 		CommandParameter pcutoff("cutoff", "Number", "", "0.70", "", "", "",false,false); parameters.push_back(pcutoff);
@@ -165,6 +166,13 @@ MGClusterCommand::MGClusterCommand(string option) {
 			if (namefile == "not open") { abort = true; }	
 			else if (namefile == "not found") { namefile = ""; }
 			else { m->setNameFile(namefile); }
+            
+            countfile = validParameter.validFile(parameters, "count", true);
+			if (countfile == "not open") { abort = true; }	
+			else if (countfile == "not found") { countfile = ""; }
+            else { m->setCountTableFile(countfile); }
+            
+            if (countfile != "" && namefile != "") { m->mothurOut("Cannot have both a name file and count file. Please use one or the other."); m->mothurOutEndLine(); abort = true; }
 			
 			if ((blastfile == "")) { m->mothurOut("When executing a mgcluster command you must provide a blastfile."); m->mothurOutEndLine(); abort = true; }
 			
@@ -237,9 +245,11 @@ int MGClusterCommand::execute(){
         list = new ListVector(nameMap->getListVector());
         RAbundVector* rabund = NULL;
         
-        if(large) {
-            map<string, int> nameMapCounts = m->readNames(namefile);
-            createRabund(nameMapCounts);
+        if(countfile != "") {
+            //map<string, int> nameMapCounts = m->readNames(namefile);
+            CountTable ct = new CountTable();
+            ct.readTable(countfile);
+            createRabund(ct, list);
             rabund = &rav;
         }else {
             rabund = new RAbundVector(list->getRAbundVector());
@@ -714,14 +724,25 @@ void MGClusterCommand::sortHclusterFiles(string unsortedDist, string unsortedOve
 
 //**********************************************************************************************************************
 
-void MGClusterCommand::createRabund(map<string, int> nameMapCounts){
+void MGClusterCommand::createRabund(CountTable ct, ListVector list){
     try {
-        //RAbundVector rav;
-        map<string,int>::iterator it;
-        //it = nameMapCounts.begin();
-        //for(int i = 0; i < list->getNumBins(); i++) {   rav.push_back((*it).second); it++;    }
-        for ( it=nameMapCounts.begin(); it!=nameMapCounts.end(); it++ ) {    rav.push_back( it->second );    }
+        //vector<string> names = ct.getNamesOfSeqs();
+
+        //for ( int i; i < ct.getNumGroups(); i++ ) {    rav.push_back( ct.getNumSeqs(names[i]) );    }
         //return rav;
+        
+        for(int i = 0; i < list->getNumBins(); i++) { 
+           vector<string> binNames;
+           string bin = list->get(i);
+           m->splitAtComma(bin, binNames);
+           int total = 0;
+           for (int j = 0; j < binNames.size(); j++) { 
+               total += ct->getNumSeqs(binNames[j]);
+           }
+           rav.push_back(total);   
+       }
+        
+        
     }
     catch(exception& e) {
 		m->errorOut(e, "MGClusterCommand", "createRabund");
