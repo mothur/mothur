@@ -247,8 +247,8 @@ int MGClusterCommand::execute(){
         
         if(countfile != "") {
             //map<string, int> nameMapCounts = m->readNames(namefile);
-            CountTable ct = new CountTable();
-            ct.readTable(countfile);
+            ct = new CountTable();
+            ct->readTable(countfile);
             createRabund(ct, list);
             rabund = &rav;
         }else {
@@ -724,7 +724,7 @@ void MGClusterCommand::sortHclusterFiles(string unsortedDist, string unsortedOve
 
 //**********************************************************************************************************************
 
-void MGClusterCommand::createRabund(CountTable ct, ListVector list){
+void MGClusterCommand::createRabund(CountTable* ct, ListVector* list){
     try {
         //vector<string> names = ct.getNamesOfSeqs();
 
