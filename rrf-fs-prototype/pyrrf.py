@@ -3,7 +3,7 @@ from __future__ import division
 from math import log, ceil, sqrt
 import random
 
-DEBUG_MODE = False
+DEBUG_MODE = True
 
 class AbstractDecisionTree(object):
 	def __init__(self, baseDataSet, globalDiscardedFeatureIndices, optimumFeatureSubsetSelector):
@@ -53,10 +53,163 @@ class AbstractDecisionTree(object):
 		if DEBUG_MODE: print "self.bootstrappedTrainingSampleIndices:", self.bootstrappedTrainingSampleIndices
 		if DEBUG_MODE: print "self.bootstrappedTestSampleIndices:", self.bootstrappedTestSampleIndices
 
+	def getMinEntropyOfFeature(self, featureVector, outputVector, numOutputClasses):
+		if DEBUG_MODE: print "getMinEntropyOfFeature()"
+		# create feature vs output tuple
+		featureOutputPair = zip(featureVector, outputVector)
+		featureOutputPair = sorted(featureOutputPair, key = lambda x: x[0])
+		if DEBUG_MODE: print "featureOutputPair", featureOutputPair
+
+		#	for x in featureOutputPair: print x
+
+		#	find the splitPoints that has the values where the changes has occurred,
+		#	so these 'splitPoints' are best places to split
+		#		searchOutput = featureOutputPair[0][1]
+		splitPoints = []
+		uniqueFeatureValues = [ featureOutputPair[0][0] ]
+
+		# trying out a different implementation of split points calculation logic
+		# this seems to be working fine
+		# need to come up with a logic to speed this up
+		for index, pair in enumerate(featureOutputPair):
+			if pair[0] not in uniqueFeatureValues:
+				uniqueFeatureValues.append(pair[0])
+				splitPoints.append(index)
+
+		#	now we have the splitPoints, so we need to find which of them gives
+		#	us the highest entropy gain
+		if DEBUG_MODE: print "splitPoints:", splitPoints
+
+		# if we had too many zero containing split points, that means we ignored them all, and we have
+		# now an empty split point list, so we need to check this before going further
+		if not len(splitPoints):
+			minEntropy = float("inf")
+			bestSplitIndex = -1
+			featureSplitValue = 0
+		else:
+			minEntropy, bestSplitIndex = self.getBestSplitAndMinEntropy(featureOutputPair, splitPoints, numOutputClasses)
+			featureSplitValue = featureOutputPair[splitPoints[bestSplitIndex]][0]
+		#		print minEntropy, bestSplitIndex, splitPoints[bestSplitIndex], featureOutputPair[splitPoints[bestSplitIndex]][0]
+
+		return minEntropy, featureSplitValue
 
 
+	# calculate all the possible splits for a feature vector and then return the value of the best split
+	def getBestSplitAndMinEntropy(self, featureOutputPair, splitPoints, numOutputClasses):
+		if DEBUG_MODE: print "getBestSplitAndMinEntropy()"
+		numSamples = len(featureOutputPair)
+		#		print "numSamples:", numSamples
+
+		entropies = []
+		for index in splitPoints:
+			# print "for the cut in index", index
+			valueAtSplitPoint = featureOutputPair[index][0]
+			numLessThanValueAtSplitPoint = 0
+			numGreaterThanValueAtSplitPoint = 0
+			for record in featureOutputPair:
+				if record[0] < valueAtSplitPoint: numLessThanValueAtSplitPoint += 1
+				else: numGreaterThanValueAtSplitPoint += 1
+			# print 'numLessThanValueAtSplitPoint:', numLessThanValueAtSplitPoint, 'numGreaterThanValueAtSplitPoint:', numGreaterThanValueAtSplitPoint
+			# call for upper portion
+			upperEntropyOfSplit = self.calcSplitEntropy(featureOutputPair, index, numOutputClasses, True)
+			# call for lower portion
+			lowerEntropyOfSplit = self.calcSplitEntropy(featureOutputPair, index, numOutputClasses, False)
+			if DEBUG_MODE: print "upperEntropyOfSplit:", upperEntropyOfSplit, "lowerEntropyOfSplit:", lowerEntropyOfSplit
+			if DEBUG_MODE: print "numLessThanValueAtSplitPoint:", numLessThanValueAtSplitPoint, "numGreaterThanValueAtSplitPoint:", numGreaterThanValueAtSplitPoint
+			totalEntropy = (numLessThanValueAtSplitPoint * upperEntropyOfSplit + numGreaterThanValueAtSplitPoint * lowerEntropyOfSplit) / numSamples
+			#			print "totalEntropy", totalEntropy
+			entropies.append(totalEntropy)
+
+		if DEBUG_MODE: print "entropies:", entropies
+		minEntropy = min(entropies)
+		minEntropyIndex = entropies.index(minEntropy)
+		return minEntropy, minEntropyIndex
+
+
+# This is the regularized version of the DecisionTree class
 class RegularizedDecisionTree(AbstractDecisionTree):
-	pass
+	def __init__(self, baseDataSet, globalDiscardedFeatureIndices, optimumFeatureSubsetSelector):
+
+		# calling to super-class's ctor
+		super(RegularizedDecisionTree, self).__init__(baseDataSet, globalDiscardedFeatureIndices, optimumFeatureSubsetSelector)
+
+		self.createBootStrappedSamples()
+		self.buildDecisionTree()
+
+	def buildDecisionTree(self):
+		if DEBUG_MODE: print "buildDecisionTree()"
+		treeNode = TreeNode(self.bootstrappedTrainingSamples, self.globalDiscardedFeatureIndices, self.numFeatures, self.numSamples, self.numOutputClasses, 0)
+		self.rootNode = treeNode
+
+		penalty = 1
+		featureSubset = []
+		self.splitRecursively(treeNode, featureSubset, penalty)
+
+		# TODO: implement the printTree method
+#		if DEBUG_MODE: self.printTree(treeNode, "root")
+
+	def splitRecursively(self, treeNode, featureSubset, penalty):
+		if DEBUG_MODE: print "splitRecursively()"
+
+		bestGain = 0
+		numberOfNewFeaturesTested = 0
+		penalizedGains = [0 for x in range(0, self.numFeatures)]
+
+		# TODO: how about we shuffle the value of the indices rather than using increasing
+		# value? the randomization might give it a quality boost
+		for x in range(0, self.numFeatures):
+			if x in featureSubset:
+				# calculate the gain by using x
+#				node.bootstrappedFeatureVectors
+				pass
+			else:
+				pass
+
+
+#		# return immediately if this node is just a leaf, no recursion is needed
+#		if treeNode.numSamples < 2:
+#			if DEBUG_MODE: print "Already classified: Case 1"
+#			treeNode.isLeaf = True
+#			treeNode.outputClass = treeNode.bootstrappedTrainingSamples[0][treeNode.numFeatures]
+#			return
+#
+#		ifAlreadyClassified, treeNode.outputClass = self.checkIfAlreadyClassified(treeNode)
+#		if ifAlreadyClassified:
+#			if DEBUG_MODE: print "Already classified: Case 2"
+#			treeNode.isLeaf = True
+#			return
+#
+#		#		nullFeatureIndices = self.findNullFeatures(treeNode.bootstrappedTrainingSamples)
+#		treeNode.featureSubsetIndices = self.selectFeatureSubsetRandomly(self.globalDiscardedFeatureIndices, treeNode.localDiscardedFeatureIndices)
+#		if DEBUG_MODE: print "discardedFeatureIndices:", globalDiscardedFeatureIndices
+#		if DEBUG_MODE: print "featureSubsetIndices:", treeNode.featureSubsetIndices
+#		# DEBUG
+#		#		treeNode.featureSubsetIndices = [100, 103, 161, 163, 197, 355, 460, 463, 507, 509]
+#
+#		bestFeatureToSplitOn, bestFeatureSplitValue, bestFeatureSplitEntropy =  self.getBestFeatureToSplitOn(treeNode)
+#		# TODO: create a bound check, if you have the split on the extreme indices, that means already classified
+#		# so return immediately
+#
+#
+#		treeNode.splitFeatureIndex = bestFeatureToSplitOn
+#		treeNode.splitFeatureValue = bestFeatureSplitValue
+#		treeNode.splitFeatureEntropy = bestFeatureSplitEntropy
+#
+#		if DEBUG_MODE: print "bestFeatureToSplitOn:", bestFeatureToSplitOn, "bestFeatureSplitValue:", bestFeatureSplitValue, "bestFeatureSplitEntropy:", bestFeatureSplitEntropy
+#		leftChildSamples, rightChildSamples = self.getSplitPopulation(treeNode)
+#		# print "leftChildSamples:", leftChildSamples
+#		# print "rightChildSamples:", rightChildSamples
+#
+#		leftChildNode = TreeNode(leftChildSamples, self.globalDiscardedFeatureIndices, self.numFeatures, len(leftChildSamples), self.numOutputClasses, treeNode.generation + 1)
+#		rightChildNode = TreeNode(rightChildSamples, self.globalDiscardedFeatureIndices, self.numFeatures, len(rightChildSamples), self.numOutputClasses, treeNode.generation + 1)
+#
+#		treeNode.leftChildNode = leftChildNode
+#		treeNode.rightChildNode = rightChildNode
+#		self.splitRecursively(leftChildNode)
+#		self.splitRecursively(rightChildNode)
+
+
+
 
 # The main algorithm resides here, it the manipulator class
 class DecisionTree(AbstractDecisionTree):
@@ -144,7 +297,7 @@ class DecisionTree(AbstractDecisionTree):
 		
 #		nullFeatureIndices = self.findNullFeatures(treeNode.bootstrappedTrainingSamples)
 		treeNode.featureSubsetIndices = self.selectFeatureSubsetRandomly(self.globalDiscardedFeatureIndices, treeNode.localDiscardedFeatureIndices)
-		if DEBUG_MODE: print "discardedFeatureIndices:", globalDiscardedFeatureIndices
+		if DEBUG_MODE: print "discardedFeatureIndices:", self.globalDiscardedFeatureIndices
 		if DEBUG_MODE: print "featureSubsetIndices:", treeNode.featureSubsetIndices
 		# DEBUG
 #		treeNode.featureSubsetIndices = [100, 103, 161, 163, 197, 355, 460, 463, 507, 509]
@@ -171,7 +324,7 @@ class DecisionTree(AbstractDecisionTree):
 		self.splitRecursively(leftChildNode)
 		self.splitRecursively(rightChildNode)
 
-		# given a split point, gives the user two different sets of data
+	# given a split point, gives the user two different sets of data
 	def getSplitPopulation(self, node):
 		leftChildSamples, rightChildSamples = [], []
 		globalIndex = node.splitFeatureIndex
@@ -210,77 +363,7 @@ class DecisionTree(AbstractDecisionTree):
 #		print 'Best Split on this feature with value:', bestFeatureSplitValue
 		return featureSubsetIndices[bestFeatureToSplitOn], bestFeatureSplitValue, featureMinEntropy
 
-	def getMinEntropyOfFeature(self, featureVector, outputVector, numOutputClasses):
-		if DEBUG_MODE: print "getMinEntropyOfFeature()"
-		# create feature vs output tuple
-		featureOutputPair = [[featureVector[x], outputVector[x]] for x in range(0, len(featureVector))]
-		featureOutputPair = sorted(featureOutputPair, key = lambda x: x[0])
-		if DEBUG_MODE: print "featureOutputPair", featureOutputPair
 
-		#	for x in featureOutputPair: print x
-
-		#	find the splitPoints that has the values where the changes has occurred,
-		#	so these 'splitPoints' are best places to split
-#		searchOutput = featureOutputPair[0][1]
-		splitPoints = []
-		uniqueFeatureValues = [ featureOutputPair[0][0] ]
-
-		# trying out a different implementation of split points calculation logic
-		# this seems to be working fine
-		# need to come up with a logic to speed this up
-		for index, pair in enumerate(featureOutputPair):
-			if pair[0] not in uniqueFeatureValues:
-				uniqueFeatureValues.append(pair[0])
-				splitPoints.append(index)
-
-		#	now we have the splitPoints, so we need to find which of them gives
-		#	us the highest entropy gain
-		if DEBUG_MODE: print "splitPoints:", splitPoints
-
-		# if we had too many zero containing split points, that means we ignored them all, and we have
-		# now an empty split point list, so we need to check this before going further
-		if not len(splitPoints):
-			minEntropy = float("inf")
-			bestSplitIndex = -1
-			featureSplitValue = 0
-		else:
-			minEntropy, bestSplitIndex = self.getBestSplitAndMinEntropy(featureOutputPair, splitPoints, numOutputClasses)
-			featureSplitValue = featureOutputPair[splitPoints[bestSplitIndex]][0]
-	#		print minEntropy, bestSplitIndex, splitPoints[bestSplitIndex], featureOutputPair[splitPoints[bestSplitIndex]][0]
-
-		return minEntropy, featureSplitValue
-
-
-	# calculate all the possible splits for a feature vector and then return the value of the best split
-	def getBestSplitAndMinEntropy(self, featureOutputPair, splitPoints, numOutputClasses):
-		if DEBUG_MODE: print "getBestSplitAndMinEntropy()"
-		numSamples = len(featureOutputPair)
-#		print "numSamples:", numSamples
-
-		entropies = []
-		for index in splitPoints:
-			# print "for the cut in index", index
-			valueAtSplitPoint = featureOutputPair[index][0]
-			numLessThanValueAtSplitPoint = 0
-			numGreaterThanValueAtSplitPoint = 0
-			for record in featureOutputPair:
-				if record[0] < valueAtSplitPoint: numLessThanValueAtSplitPoint += 1
-				else: numGreaterThanValueAtSplitPoint += 1
-			# print 'numLessThanValueAtSplitPoint:', numLessThanValueAtSplitPoint, 'numGreaterThanValueAtSplitPoint:', numGreaterThanValueAtSplitPoint
-			# call for upper portion
-			upperEntropyOfSplit = self.calcSplitEntropy(featureOutputPair, index, numOutputClasses, True)
-			# call for lower portion
-			lowerEntropyOfSplit = self.calcSplitEntropy(featureOutputPair, index, numOutputClasses, False)
-			if DEBUG_MODE: print "upperEntropyOfSplit:", upperEntropyOfSplit, "lowerEntropyOfSplit:", lowerEntropyOfSplit
-			if DEBUG_MODE: print "numLessThanValueAtSplitPoint:", numLessThanValueAtSplitPoint, "numGreaterThanValueAtSplitPoint:", numGreaterThanValueAtSplitPoint
-			totalEntropy = (numLessThanValueAtSplitPoint * upperEntropyOfSplit + numGreaterThanValueAtSplitPoint * lowerEntropyOfSplit) / numSamples
-#			print "totalEntropy", totalEntropy
-			entropies.append(totalEntropy)
-
-		if DEBUG_MODE: print "entropies:", entropies
-		minEntropy = min(entropies)
-		minEntropyIndex = entropies.index(minEntropy)
-		return minEntropy, minEntropyIndex
 
 	# calculate entropy for each of the splits
 	def calcSplitEntropy(self, featureOutputPairs, splitIndex, numOutputClasses, isUpperSplit):
@@ -455,6 +538,7 @@ class AbstractRandomForest(object):
 		return globalDiscardedFeatureIndices
 
 class RegularizedRandomForest(AbstractRandomForest):
+	# TODO: finish the implementation
 	def populateDecisionTrees(self):
 		print "populateDecisionTrees()"
 		for i in range(0, self.numDecisionTrees):
@@ -613,7 +697,7 @@ def getStandardDeviation(featureVector):
 	return standardDeviation
 
 if __name__ == "__main__":
-	numDecisionTrees = 10
+	numDecisionTrees = 1
 
 	# example of matrix file reading
 #	fileReaderFactory = fileReaderFactory(fileType = 'matrix', matrixFilePath = 'Datasets/small-alter.txt');
@@ -631,5 +715,6 @@ if __name__ == "__main__":
 	randomForest.calcForrestVariableImportance()
 
 #	regularizedRandomForest = RegularizedRandomForest(dataSet, numDecisionTrees)
+#	regularizedRandomForest.populateDecisionTrees()
 
 #	createDecisionTree(dataSet)
