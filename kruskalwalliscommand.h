@@ -42,10 +42,10 @@ public:
     
     
 private:
-    string outputDir, sharedfile;
+    string outputDir, sharedfile, groups;
     bool abort;
     set<string> labels;
-    vector<string> outputNames;
+    vector<string> outputNames, Groups;
     vector<int> counts;
     vector<double> rankSums;
     vector<double> rankMeans;
