@@ -173,5 +173,37 @@ vector<string> CountTable::getNamesOfSeqs() {
 	}
 }
 /************************************************************/
+//returns names of seqs
+int CountTable::mergeCounts(string seq1, string seq2) {
+    try {
+        map<string, int>::iterator it = indexNameMap.find(seq1);
+        if (it == indexNameMap.end()) {
+            m->mothurOut("[ERROR]: " + seq1 + " is not in your count table. Please correct.\n"); m->control_pressed = true;
+        }else { 
+            map<string, int>::iterator it2 = indexNameMap.find(seq2);
+            if (it2 == indexNameMap.end()) {
+                m->mothurOut("[ERROR]: " + seq2 + " is not in your count table. Please correct.\n"); m->control_pressed = true;
+            }else { 
+                //merge data
+                for (int i = 0; i < groups.size(); i++) {
+                    counts[it->second][i] += counts[it2->second][i];
+                    counts[it2->second][i] = 0;
+                }
+                totals[it->second] += totals[it2->second];
+                totals[it2->second] = 0;
+                uniques--;
+                indexNameMap.erase(it2); 
+            }
+        }
+        
+        return 0;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "CountTable", "getNamesOfSeqs");
+		exit(1);
+	}
+}
+
+/************************************************************/
 
 

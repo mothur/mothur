@@ -148,7 +148,7 @@ RemoveOtuLabelsCommand::RemoveOtuLabelsCommand(string option)  {
             }
             
             vector<string> tempOutNames;
-            outputTypes["contaxonomy"] = tempOutNames; 
+            outputTypes["constaxonomy"] = tempOutNames; 
             outputTypes["otucorr"] = tempOutNames;
             outputTypes["corraxes"] = tempOutNames;
             

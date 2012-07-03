@@ -33,9 +33,9 @@ string GetOtuLabelsCommand::getHelpString(){
 		string helpString = "";
 		helpString += "The get.otulabels command can be used to select specific otus with the output from classify.otu, otu.association, or corr.axes.\n";
 		helpString += "The get.otulabels parameters are: constaxonomy, otucorr, corraxes, and accnos.\n";
-		helpString += "The constaxonomy parameter is input the results of the classify.otu command.\n";
-        helpString += "The otucorr parameter is input the results of the otu.association command.\n";
-        helpString += "The corraxes parameter is input the results of the corr.axes command.\n";
+		helpString += "The constaxonomy parameter is used to input the results of the classify.otu command.\n";
+        helpString += "The otucorr parameter is used to input the results of the otu.association command.\n";
+        helpString += "The corraxes parameter is used to input the results of the corr.axes command.\n";
 		helpString += "The get.otulabels commmand should be in the following format: \n";
 		helpString += "get.otulabels(accnos=yourListOfOTULabels, corraxes=yourCorrAxesFile)\n";
 		return helpString;

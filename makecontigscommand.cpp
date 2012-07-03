@@ -38,8 +38,8 @@ string MakeContigsCommand::getHelpString(){
 		string helpString = "";
 		helpString += "The make.contigs command reads a forward fastq file and a reverse fastq file and outputs new fasta and quality files.\n";
 		helpString += "The make.contigs command parameters are ffastq, rfastq, align, match, mismatch, gapopen, gapextend and processors.\n";
-		helpString += "The ffastq and rfastq parameter is required.\n";
-		helpString += "The align parameter allows you to specify the alignment method to use.  Your options are: gotoh, needleman, blast and noalign. The default is needleman.\n";
+		helpString += "The ffastq and rfastq parameters are required.\n";
+		helpString += "The align parameter allows you to specify the alignment method to use.  Your options are: gotoh and needleman. The default is needleman.\n";
 		helpString += "The match parameter allows you to specify the bonus for having the same base. The default is 1.0.\n";
 		helpString += "The mistmatch parameter allows you to specify the penalty for having different bases.  The default is -1.0.\n";
 		helpString += "The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -2.0.\n";
@@ -212,7 +212,7 @@ int MakeContigsCommand::execute(){
         
         string outFastaFile = outputDir + m->getRootName(m->getSimpleName(ffastqfile)) + getOutputFileNameTag("fasta");
         string outQualFile = outputDir + m->getRootName(m->getSimpleName(ffastqfile)) + getOutputFileNameTag("qfile");
-        string outMisMatchFile = outputDir + m->getRootName(m->getSimpleName(ffastqfile)) + getOutputFileNameTag("mismatches");
+        string outMisMatchFile = outputDir + m->getRootName(m->getSimpleName(ffastqfile)) + getOutputFileNameTag("mismatch");
         outputNames.push_back(outFastaFile); outputTypes["fasta"].push_back(outFastaFile);
         outputNames.push_back(outQualFile); outputTypes["qfile"].push_back(outQualFile);
         outputNames.push_back(outMisMatchFile); outputTypes["mismatch"].push_back(outMisMatchFile);

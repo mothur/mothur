@@ -59,6 +59,7 @@ class CountTable {
         int getNumUniqueSeqs() { return uniques; } //return number of unique/representative seqs
         int getGroupIndex(string); //returns index in getGroupCounts vector of specific group
         vector<string> getNamesOfSeqs();
+        int mergeCounts(string, string); //combines counts for 2 seqs, saving under the first name passed in.
     
     private:
         string filename;
