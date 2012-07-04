@@ -507,7 +507,7 @@ class TreeNode(object):
 	def createLocalDiscardedFeatureList(self):
 		if DEBUG_MODE: print "createLocalDiscardedFeatureList()"
 		for i, x in enumerate(self.bootstrappedFeatureVectors):
-			if i not in self.globalDiscardedFeatureIndices and getStandardDeviation(x) <= 0:
+			if i not in self.globalDiscardedFeatureIndices and Utils.getStandardDeviation(x) <= 0:
 				self.localDiscardedFeatureIndices.append(i)
 		if DEBUG_MODE: print self.localDiscardedFeatureIndices
 
@@ -531,7 +531,7 @@ class AbstractRandomForest(object):
 		for index, featureVector in enumerate(featureVectors):
 			total = sum(featureVector)
 			zeroCount = featureVector.count(0)
-			if getStandardDeviation(featureVector) <= 0:
+			if Utils.getStandardDeviation(featureVector) <= 0:
 				globalDiscardedFeatureIndices.append(index)
 		if DEBUG_MODE: print 'number of global discarded features:', len(globalDiscardedFeatureIndices)
 		if DEBUG_MODE: print 'total features:', len(featureVectors)
@@ -633,7 +633,7 @@ class OptimumFeatureSubsetSelector(object):
 		else: return None
 
 
-class FileReaderFactory:
+class FileReaderFactory(object):
 	def __init__(self, fileType = "matrix", sharedFilePath = None, designFilePath = None, matrixFilePath = None):
 		self.sharedFilePath = sharedFilePath
 		self.designFilePath = designFilePath
@@ -649,7 +649,7 @@ class FileReaderFactory:
 	def getFileReader(self):
 		return self.fileReader
 
-class MatrixFileReader:
+class MatrixFileReader(object):
 	def __init__(self, matrixFilePath):
 		self.matrixFilePath = matrixFilePath
 
@@ -661,7 +661,7 @@ class MatrixFileReader:
 
 
 ''' This class reads the file and crates a data matrix for further processing '''
-class SharedAndDesignFileReader:
+class SharedAndDesignFileReader(object):
 
 	def __init__(self, sharedFilePath, designFilePath):
 		self.sharedFileData = []
@@ -685,16 +685,19 @@ class SharedAndDesignFileReader:
 			i += 1
 		return self.dataSet
 
-# standard deviation calculation function
-def getStandardDeviation(featureVector):
-	n = len(featureVector)
-	if not n:
-		# standard deviation cannot be negative, this special value is returned to let the caller
-		# function know that the list is empty
-		return -1
-	avg = sum(featureVector) / n
-	standardDeviation = sqrt(sum([ (x - avg) ** 2 for x in featureVector ]) / n)
-	return standardDeviation
+class Utils(object):
+	# standard deviation calculation function
+	@staticmethod
+	def getStandardDeviation(featureVector):
+		n = len(featureVector)
+		if not n:
+			# standard deviation cannot be negative, this special value is returned to let the caller
+			# function know that the list is empty
+			return -1
+		avg = sum(featureVector) / n
+		standardDeviation = sqrt(sum([ (x - avg) ** 2 for x in featureVector ]) / n)
+		return standardDeviation
+
 
 if __name__ == "__main__":
 	numDecisionTrees = 1
