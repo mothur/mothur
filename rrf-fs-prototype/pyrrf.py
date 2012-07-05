@@ -279,48 +279,51 @@ class DecisionTree(AbstractDecisionTree):
 			print tabs + caption + ' [ gen: ' + str(treeNode.generation) + ' ] ( classified to: ' + str(treeNode.outputClass) +', samples: ' + str(treeNode.numSamples) +' )'
 
 
-	def splitRecursively(self, treeNode):
+	def splitRecursively(self, rootNode):
 		if DEBUG_MODE: print "splitRecursively()"
 
 		# return immediately if this node is just a leaf, no recursion is needed
-		if treeNode.numSamples < 2:
+		if rootNode.numSamples < 2:
 			if DEBUG_MODE: print "Already classified: Case 1"
-			treeNode.isLeaf = True
-			treeNode.outputClass = treeNode.bootstrappedTrainingSamples[0][treeNode.numFeatures]
+			rootNode.isLeaf = True
+			rootNode.outputClass = rootNode.bootstrappedTrainingSamples[0][rootNode.numFeatures]
 			return
 
-		ifAlreadyClassified, treeNode.outputClass = self.checkIfAlreadyClassified(treeNode)
+		ifAlreadyClassified, rootNode.outputClass = self.checkIfAlreadyClassified(rootNode)
 		if ifAlreadyClassified:
 			if DEBUG_MODE: print "Already classified: Case 2"
-			treeNode.isLeaf = True
+			rootNode.isLeaf = True
 			return
 		
 #		nullFeatureIndices = self.findNullFeatures(treeNode.bootstrappedTrainingSamples)
-		treeNode.featureSubsetIndices = self.selectFeatureSubsetRandomly(self.globalDiscardedFeatureIndices, treeNode.localDiscardedFeatureIndices)
+		rootNode.featureSubsetIndices = self.selectFeatureSubsetRandomly(self.globalDiscardedFeatureIndices, rootNode.localDiscardedFeatureIndices)
 		if DEBUG_MODE: print "discardedFeatureIndices:", self.globalDiscardedFeatureIndices
-		if DEBUG_MODE: print "featureSubsetIndices:", treeNode.featureSubsetIndices
+		if DEBUG_MODE: print "featureSubsetIndices:", rootNode.featureSubsetIndices
 		# DEBUG
 #		treeNode.featureSubsetIndices = [100, 103, 161, 163, 197, 355, 460, 463, 507, 509]
 
-		bestFeatureToSplitOn, bestFeatureSplitValue, bestFeatureSplitEntropy =  self.getBestFeatureToSplitOn(treeNode)
+		bestFeatureToSplitOn, bestFeatureSplitValue, bestFeatureSplitEntropy =  self.getBestFeatureToSplitOn(rootNode)
 		# TODO: create a bound check, if you have the split on the extreme indices, that means already classified
 		# so return immediately
 
 
-		treeNode.splitFeatureIndex = bestFeatureToSplitOn
-		treeNode.splitFeatureValue = bestFeatureSplitValue
-		treeNode.splitFeatureEntropy = bestFeatureSplitEntropy
+		rootNode.splitFeatureIndex = bestFeatureToSplitOn
+		rootNode.splitFeatureValue = bestFeatureSplitValue
+		rootNode.splitFeatureEntropy = bestFeatureSplitEntropy
 
 		if DEBUG_MODE: print "bestFeatureToSplitOn:", bestFeatureToSplitOn, "bestFeatureSplitValue:", bestFeatureSplitValue, "bestFeatureSplitEntropy:", bestFeatureSplitEntropy
-		leftChildSamples, rightChildSamples = self.getSplitPopulation(treeNode)
+		leftChildSamples, rightChildSamples = self.getSplitPopulation(rootNode)
 		# print "leftChildSamples:", leftChildSamples
 		# print "rightChildSamples:", rightChildSamples
 
-		leftChildNode = TreeNode(leftChildSamples, self.globalDiscardedFeatureIndices, self.numFeatures, len(leftChildSamples), self.numOutputClasses, treeNode.generation + 1)
-		rightChildNode = TreeNode(rightChildSamples, self.globalDiscardedFeatureIndices, self.numFeatures, len(rightChildSamples), self.numOutputClasses, treeNode.generation + 1)
+		leftChildNode = TreeNode(leftChildSamples, self.globalDiscardedFeatureIndices, self.numFeatures, len(leftChildSamples), self.numOutputClasses, rootNode.generation + 1)
+		rightChildNode = TreeNode(rightChildSamples, self.globalDiscardedFeatureIndices, self.numFeatures, len(rightChildSamples), self.numOutputClasses, rootNode.generation + 1)
 
-		treeNode.leftChildNode = leftChildNode
-		treeNode.rightChildNode = rightChildNode
+		rootNode.leftChildNode = leftChildNode
+		rootNode.leftChildNode.parentNode = rootNode
+		rootNode.rightChildNode = rightChildNode
+		rootNode.rightChildNode.parentNode = rootNode
+
 		self.splitRecursively(leftChildNode)
 		self.splitRecursively(rightChildNode)
 
@@ -498,6 +501,7 @@ class TreeNode(object):
 
 		self.leftChildNode = None
 		self.rightChildNode = None
+		self.parentNode = None
 
 		self.localDiscardedFeatureIndices = []
 
