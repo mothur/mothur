@@ -350,7 +350,7 @@ class DecisionTree(AbstractDecisionTree):
 		if DEBUG_MODE: print "featureSubsetEntropies:", featureSubsetEntropies
 		if DEBUG_MODE: print "featureSubsetSplitValues", featureSubsetSplitValues
 
-		# TODO: add information gain code
+		# TODO: add gain ratio code
 
 		featureMinEntropy = min(featureSubsetEntropies)
 		bestFeatureToSplitOn = featureSubsetEntropies.index(featureMinEntropy)
@@ -361,6 +361,7 @@ class DecisionTree(AbstractDecisionTree):
 		node.splitFeatureIndex = featureSubsetIndices[bestFeatureToSplitOn]
 		node.splitFeatureValue = bestFeatureSplitValue
 		node.splitFeatureEntropy = featureMinEntropy
+		node.splitInformationGain = node.ownEntropy - node.splitFeatureEntropy
 
 #		print 'Best Split is possible with global feature:', featureSubsetIndices[bestFeatureToSplitOn]
 #		print 'Which has an entropy of:', featureMinEntropy
@@ -495,11 +496,11 @@ class TreeNode(object):
 		self.splitFeatureIndex = 0
 		self.splitFeatureValue = 0
 		self.splitFeatureEntropy = 0
+		self.splitInformationGain = 0
 
 		# these features are values of this node
 		self.ownEntropy = 0
-		# information gain must be maximized, so we set it to zero by default
-		self.informationGain = 0
+
 
 		self.bootstrappedFeatureVectors = [list(x) for x in zip(*self.bootstrappedTrainingSamples)]
 		self.bootstrappedOutputVector = [bootstrappedTrainingSamples[x][self.numFeatures] for x in range(0, self.numSamples)]
@@ -725,7 +726,7 @@ class Utils(object):
 
 
 if __name__ == "__main__":
-	numDecisionTrees = 10
+	numDecisionTrees = 1
 
 	# example of matrix file reading
 #	fileReaderFactory = fileReaderFactory(fileType = 'matrix', matrixFilePath = 'Datasets/small-alter.txt');
