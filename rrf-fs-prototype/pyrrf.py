@@ -540,7 +540,7 @@ class TreeNode(object):
 		self.ownEntropy= nodeEntropy
 
 class AbstractRandomForest(object):
-	def __init__(self, dataSet, numDecisionTrees):
+	def __init__(self, dataSet, numDecisionTrees, splitCriterion='informationGain'):
 		self.decisionTrees = []
 		self.dataSet = dataSet
 		self.numDecisionTrees = numDecisionTrees
@@ -552,6 +552,9 @@ class AbstractRandomForest(object):
 
 		self.globalOutOfBagEstimates = {}
 		self.globalVariableImportanceList = [0 for x in range(0, self.numFeatures)]
+
+		# TODO: use this when splitting in decision tree, need to pass this value when creating decision trees
+		self.splitCriterion = splitCriterion
 
 	def getGlobalDiscardedFeatureIndices(self):
 		featureVectors = zip(*self.dataSet)[:-1]
@@ -728,7 +731,7 @@ class Utils(object):
 
 
 if __name__ == "__main__":
-	numDecisionTrees = 1
+	numDecisionTrees = 10
 
 	# example of matrix file reading
 #	fileReaderFactory = fileReaderFactory(fileType = 'matrix', matrixFilePath = 'Datasets/small-alter.txt');
@@ -740,7 +743,7 @@ if __name__ == "__main__":
 
 	dataSet = fileReaderFactory.getFileReader().getDataSetFromFile()
 
-	randomForest = RandomForest(dataSet, numDecisionTrees)
+	randomForest = RandomForest(dataSet, numDecisionTrees, splitCriterion='informationGain')
 	randomForest.populateDecisionTrees()
 	randomForest.calcForrestErrorRate()
 	randomForest.calcForrestVariableImportance()
