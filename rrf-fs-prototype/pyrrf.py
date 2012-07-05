@@ -264,6 +264,7 @@ class DecisionTree(AbstractDecisionTree):
 		if DEBUG_MODE: print "buildDecisionTree()"
 		treeNode = TreeNode(self.bootstrappedTrainingSamples, self.globalDiscardedFeatureIndices, self.numFeatures, self.numSamples, self.numOutputClasses, 0)
 		self.rootNode = treeNode
+
 		self.splitRecursively(treeNode)
 		if DEBUG_MODE: self.printTree(treeNode, "root")
 
@@ -321,6 +322,7 @@ class DecisionTree(AbstractDecisionTree):
 
 		rootNode.leftChildNode = leftChildNode
 		rootNode.leftChildNode.parentNode = rootNode
+
 		rootNode.rightChildNode = rightChildNode
 		rootNode.rightChildNode.parentNode = rootNode
 
@@ -491,9 +493,15 @@ class TreeNode(object):
 		self.globalDiscardedFeatureIndices = globalDiscardedFeatureIndices
 		self.generation = generation
 
+		# these three are values of a the child
 		self.splitFeatureIndex = 0
 		self.splitFeatureValue = 0
 		self.splitFeatureEntropy = 0
+
+		# these features are values of this node
+		self.ownEntropy = 0
+		# information gain must be maximized, so we set it to zero by default
+		self.informationGain = 0
 
 		self.bootstrappedFeatureVectors = [list(x) for x in zip(*self.bootstrappedTrainingSamples)]
 		self.bootstrappedOutputVector = [bootstrappedTrainingSamples[x][self.numFeatures] for x in range(0, self.numSamples)]
@@ -508,12 +516,26 @@ class TreeNode(object):
 		# call some helper functions
 		self.createLocalDiscardedFeatureList()
 
+		self.updateNodeEntropy()
+
 	def createLocalDiscardedFeatureList(self):
 		if DEBUG_MODE: print "createLocalDiscardedFeatureList()"
 		for i, x in enumerate(self.bootstrappedFeatureVectors):
 			if i not in self.globalDiscardedFeatureIndices and Utils.getStandardDeviation(x) <= 0:
 				self.localDiscardedFeatureIndices.append(i)
 		if DEBUG_MODE: print self.localDiscardedFeatureIndices
+
+	def updateNodeEntropy(self):
+		classCounts = [0 for i in range(0, self.numOutputClasses)]
+		for i in range(0, len(self.bootstrappedOutputVector)):
+			classCounts[self.bootstrappedOutputVector[i]] += 1
+		totalClassCounts = sum(classCounts)
+		nodeEntropy = 0
+		for x in classCounts:
+			if not x: continue
+			probability = x / totalClassCounts
+			nodeEntropy += -(probability * log(probability, 2))
+		self.ownEntropy= nodeEntropy
 
 class AbstractRandomForest(object):
 	def __init__(self, dataSet, numDecisionTrees):
