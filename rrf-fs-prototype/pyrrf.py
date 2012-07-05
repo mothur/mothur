@@ -145,7 +145,6 @@ class RegularizedDecisionTree(AbstractDecisionTree):
 		featureSubset = []
 		self.splitRecursively(treeNode, featureSubset, penalty)
 
-		# TODO: implement the printTree method
 #		if DEBUG_MODE: self.printTree(treeNode, "root")
 
 	def splitRecursively(self, treeNode, featureSubset, penalty):
@@ -187,7 +186,6 @@ class RegularizedDecisionTree(AbstractDecisionTree):
 #		#		treeNode.featureSubsetIndices = [100, 103, 161, 163, 197, 355, 460, 463, 507, 509]
 #
 #		bestFeatureToSplitOn, bestFeatureSplitValue, bestFeatureSplitEntropy =  self.getBestFeatureToSplitOn(treeNode)
-#		# TODO: create a bound check, if you have the split on the extreme indices, that means already classified
 #		# so return immediately
 #
 #
@@ -254,7 +252,6 @@ class DecisionTree(AbstractDecisionTree):
 
 		while len(featureSubsetIndices) < currentFeatureSubsetSize:
 			randomIndex = random.randint(0, self.numFeatures - 1)
-			# TODO the loop goes infinite here since it cannot find remaining features, need a way to break the loop
 			if (randomIndex not in featureSubsetIndices) and (randomIndex not in combinedDiscardedFeatureIndices):
 				featureSubsetIndices.append(randomIndex)
 #		print 'returning from selectFeatureSubsetRandomly()'
@@ -305,7 +302,6 @@ class DecisionTree(AbstractDecisionTree):
 
 #		bestFeatureToSplitOn, bestFeatureSplitValue, bestFeatureSplitEntropy =  self.getBestFeatureToSplitOn(rootNode)
 		self.findAndUpdateBestFeatureToSplitOn(rootNode)
-		# TODO: create a bound check, if you have the split on the extreme indices, that means already classified
 		# so return immediately
 
 		leftChildSamples, rightChildSamples = self.getSplitPopulation(rootNode)
@@ -354,7 +350,7 @@ class DecisionTree(AbstractDecisionTree):
 		if DEBUG_MODE: print "featureSubsetEntropies:", featureSubsetEntropies
 		if DEBUG_MODE: print "featureSubsetSplitValues", featureSubsetSplitValues
 
-		# FIXME: add information gain code
+		# TODO: add information gain code
 
 		featureMinEntropy = min(featureSubsetEntropies)
 		bestFeatureToSplitOn = featureSubsetEntropies.index(featureMinEntropy)
@@ -553,7 +549,7 @@ class AbstractRandomForest(object):
 		self.globalOutOfBagEstimates = {}
 		self.globalVariableImportanceList = [0 for x in range(0, self.numFeatures)]
 
-		# TODO: use this when splitting in decision tree, need to pass this value when creating decision trees
+		# TODO: use splitCriterion when splitting in decision tree, need to pass this value when creating decision trees
 		self.splitCriterion = splitCriterion
 
 	def getGlobalDiscardedFeatureIndices(self):
@@ -583,7 +579,6 @@ class RegularizedRandomForest(AbstractRandomForest):
 #
 #			self.decisionTrees.append(decisionTree)
 #
-#		# TODO do the usual stuffs (aggregation) with the decisionTrees
 #		if DEBUG_MODE: print "self.globalOutOfBagEstimates:", self.globalOutOfBagEstimates
 
 		pass
@@ -645,7 +640,6 @@ class RandomForest(AbstractRandomForest):
 
 			self.decisionTrees.append(decisionTree)
 
-		# TODO do the usual stuffs (aggregation) with the decisionTrees
 		if DEBUG_MODE: print "self.globalOutOfBagEstimates:", self.globalOutOfBagEstimates
 
 
