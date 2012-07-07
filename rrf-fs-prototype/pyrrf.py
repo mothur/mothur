@@ -3,10 +3,10 @@ from __future__ import division
 from math import log, ceil, sqrt
 import random
 
-DEBUG_MODE = True
+DEBUG_MODE = False
 
 class AbstractDecisionTree(object):
-	def __init__(self, baseDataSet, globalDiscardedFeatureIndices, optimumFeatureSubsetSelector):
+	def __init__(self, baseDataSet, globalDiscardedFeatureIndices, optimumFeatureSubsetSelector, treeSplitCriterion):
 
 		self.baseDataSet = baseDataSet
 		self.numSamples = len(baseDataSet)
@@ -29,6 +29,8 @@ class AbstractDecisionTree(object):
 			if outcome not in self.classes:
 				self.classes.append(outcome)
 				self.numOutputClasses += 1
+
+		self.treeSplitCriterion = treeSplitCriterion
 
 	# this is the code which creates bootstrapped samples from given data
 	def createBootStrappedSamples(self):
@@ -53,7 +55,7 @@ class AbstractDecisionTree(object):
 		if DEBUG_MODE: print "self.bootstrappedTrainingSampleIndices:", self.bootstrappedTrainingSampleIndices
 		if DEBUG_MODE: print "self.bootstrappedTestSampleIndices:", self.bootstrappedTestSampleIndices
 
-	def getMinEntropyOfFeature(self, featureVector, outputVector, numOutputClasses):
+	def getMinEntropyOfFeature(self, featureVector, outputVector):
 		if DEBUG_MODE: print "getMinEntropyOfFeature()"
 		# create feature vs output tuple
 		featureOutputPair = zip(featureVector, outputVector)
@@ -87,20 +89,32 @@ class AbstractDecisionTree(object):
 			bestSplitIndex = -1
 			featureSplitValue = 0
 		else:
-			minEntropy, bestSplitIndex = self.getBestSplitAndMinEntropy(featureOutputPair, splitPoints, numOutputClasses)
+			minEntropy, bestSplitIndex, intrinsicValue = self.getBestSplitAndMinEntropy(featureOutputPair, splitPoints)
 			featureSplitValue = featureOutputPair[splitPoints[bestSplitIndex]][0]
 		#		print minEntropy, bestSplitIndex, splitPoints[bestSplitIndex], featureOutputPair[splitPoints[bestSplitIndex]][0]
 
-		return minEntropy, featureSplitValue
+		return minEntropy, featureSplitValue, intrinsicValue
 
+	def calcIntrinsicValue(self, numLessThanValueAtSplitPoint, numGreaterThanValueAtSplitPoint, numSamples):
+		upperSplitEntropy = 0
+		lowerSplitEntropy = 0
+		if numLessThanValueAtSplitPoint > 0:
+			upperSplitEntropy = numLessThanValueAtSplitPoint * log(numLessThanValueAtSplitPoint / numSamples, 2)
+		if numGreaterThanValueAtSplitPoint > 0:
+			lowerSplitEntropy = numGreaterThanValueAtSplitPoint * log(numGreaterThanValueAtSplitPoint / numSamples, 2)
+
+		intrinsicValue = - ((upperSplitEntropy + lowerSplitEntropy) / numSamples)
+		return intrinsicValue
 
 	# calculate all the possible splits for a feature vector and then return the value of the best split
-	def getBestSplitAndMinEntropy(self, featureOutputPair, splitPoints, numOutputClasses):
+	def getBestSplitAndMinEntropy(self, featureOutputPair, splitPoints):
 		if DEBUG_MODE: print "getBestSplitAndMinEntropy()"
 		numSamples = len(featureOutputPair)
 		#		print "numSamples:", numSamples
 
 		entropies = []
+		intrinsicValues = []
+
 		for index in splitPoints:
 			# print "for the cut in index", index
 			valueAtSplitPoint = featureOutputPair[index][0]
@@ -111,22 +125,31 @@ class AbstractDecisionTree(object):
 				else: numGreaterThanValueAtSplitPoint += 1
 			# print 'numLessThanValueAtSplitPoint:', numLessThanValueAtSplitPoint, 'numGreaterThanValueAtSplitPoint:', numGreaterThanValueAtSplitPoint
 			# call for upper portion
-			upperEntropyOfSplit = self.calcSplitEntropy(featureOutputPair, index, numOutputClasses, True)
+			upperEntropyOfSplit = self.calcSplitEntropy(featureOutputPair, index, self.numOutputClasses, isUpperSplit=True)
 			# call for lower portion
-			lowerEntropyOfSplit = self.calcSplitEntropy(featureOutputPair, index, numOutputClasses, False)
-			if DEBUG_MODE: print "upperEntropyOfSplit:", upperEntropyOfSplit, "lowerEntropyOfSplit:", lowerEntropyOfSplit
-			if DEBUG_MODE: print "numLessThanValueAtSplitPoint:", numLessThanValueAtSplitPoint, "numGreaterThanValueAtSplitPoint:", numGreaterThanValueAtSplitPoint
-			totalEntropy = (numLessThanValueAtSplitPoint * upperEntropyOfSplit + numGreaterThanValueAtSplitPoint * lowerEntropyOfSplit) / numSamples
-			#			print "totalEntropy", totalEntropy
-			entropies.append(totalEntropy)
+			lowerEntropyOfSplit = self.calcSplitEntropy(featureOutputPair, index, self.numOutputClasses, isUpperSplit=False)
 
-		if DEBUG_MODE: print "entropies:", entropies
+			if DEBUG_MODE:
+				print 'upperEntropyOfSplit:', upperEntropyOfSplit, 'lowerEntropyOfSplit:', lowerEntropyOfSplit
+				print 'numLessThanValueAtSplitPoint:', numLessThanValueAtSplitPoint, 'numGreaterThanValueAtSplitPoint:', numGreaterThanValueAtSplitPoint
+
+			totalEntropy = (numLessThanValueAtSplitPoint * upperEntropyOfSplit + numGreaterThanValueAtSplitPoint * lowerEntropyOfSplit) / numSamples
+			intrinsicValue = self.calcIntrinsicValue(numLessThanValueAtSplitPoint, numGreaterThanValueAtSplitPoint, numSamples)
+
+			entropies.append(totalEntropy)
+			intrinsicValues.append(intrinsicValue)
+
+		if DEBUG_MODE:
+			print 'entropies:', entropies
+			print 'intrinsicValues', intrinsicValues
 		minEntropy = min(entropies)
 		minEntropyIndex = entropies.index(minEntropy)
-		return minEntropy, minEntropyIndex
+		relatedIntrinsicValue = intrinsicValues[minEntropyIndex]
+
+		return minEntropy, minEntropyIndex, relatedIntrinsicValue
 
 
-# This is the regularized version of the DecisionTree class
+	# This is the regularized version of the DecisionTree class
 class RegularizedDecisionTree(AbstractDecisionTree):
 	def __init__(self, baseDataSet, globalDiscardedFeatureIndices, optimumFeatureSubsetSelector):
 
@@ -211,10 +234,10 @@ class RegularizedDecisionTree(AbstractDecisionTree):
 
 # The main algorithm resides here, it the manipulator class
 class DecisionTree(AbstractDecisionTree):
-	def __init__(self, baseDataSet, globalDiscardedFeatureIndices, optimumFeatureSubsetSelector):
+	def __init__(self, baseDataSet, globalDiscardedFeatureIndices, optimumFeatureSubsetSelector, treeSplitCriterion):
 
 		# calling to super-class's ctor
-		super(DecisionTree, self).__init__(baseDataSet, globalDiscardedFeatureIndices, optimumFeatureSubsetSelector)
+		super(DecisionTree, self).__init__(baseDataSet, globalDiscardedFeatureIndices, optimumFeatureSubsetSelector, treeSplitCriterion)
 
 		self.variableImportanceList = [0 for x in range(0, self.numFeatures)]
 		self.outOfBagEstimates = {}
@@ -340,28 +363,48 @@ class DecisionTree(AbstractDecisionTree):
 #		print "featureSubsetIndices: ", featureSubsetIndices
 		featureSubsetEntropies = []
 		featureSubsetSplitValues = []
+		featureSubsetIntrinsicValues = []
+
+		featureSubsetGainRatios = []
+
 		for i in range(0, len(featureSubsetIndices)):
 			tryIndex = featureSubsetIndices[i]
 			if DEBUG_MODE: print "trying feature of index:", tryIndex
-			featureMinEntropy, featureSplitValue = self.getMinEntropyOfFeature(bootstrappedFeatureVectors[tryIndex], bootstrappedOutputVector, self.numOutputClasses)
+			featureMinEntropy, featureSplitValue, featureIntrinsicValue = self.getMinEntropyOfFeature(bootstrappedFeatureVectors[tryIndex], bootstrappedOutputVector)
+
 			featureSubsetEntropies.append(featureMinEntropy)
 			featureSubsetSplitValues.append(featureSplitValue)
+			featureSubsetIntrinsicValues.append(featureIntrinsicValue)
 
-		if DEBUG_MODE: print "featureSubsetEntropies:", featureSubsetEntropies
-		if DEBUG_MODE: print "featureSubsetSplitValues", featureSubsetSplitValues
+			featureInformationGain = node.ownEntropy - featureMinEntropy
+			featureGainRatio = featureInformationGain / featureIntrinsicValue
+			featureSubsetGainRatios.append(featureGainRatio)
 
-		# TODO: add gain ratio code
+		if DEBUG_MODE:
+			print 'featureSubsetEntropies:', featureSubsetEntropies
+			print 'featureSubsetSplitValues', featureSubsetSplitValues
+			print 'featureSubsetIntrinsicValues', featureSubsetIntrinsicValues
+			print 'featureSubsetGainRatios', featureSubsetGainRatios
+
 
 		featureMinEntropy = min(featureSubsetEntropies)
-		bestFeatureToSplitOn = featureSubsetEntropies.index(featureMinEntropy)
+		featureMaxGainRatio = max(featureSubsetGainRatios)
+
+		if self.treeSplitCriterion == 'gainRatio':
+			bestFeatureToSplitOn = featureSubsetGainRatios.index(featureMaxGainRatio)
+#		elif self.treeSplitCriterion == 'informationGain':
+		else:
+			bestFeatureToSplitOn = featureSubsetEntropies.index(featureMinEntropy)
+
 		bestFeatureSplitValue = featureSubsetSplitValues[bestFeatureToSplitOn]
+#		splitInformationGain = node.ownEntropy - node.splitFeatureEntropy
 
 		if DEBUG_MODE: print "bestFeatureToSplitOn:", bestFeatureToSplitOn, "bestFeatureSplitValue:", bestFeatureSplitValue, "bestFeatureSplitEntropy:", featureMinEntropy
 
 		node.splitFeatureIndex = featureSubsetIndices[bestFeatureToSplitOn]
 		node.splitFeatureValue = bestFeatureSplitValue
 		node.splitFeatureEntropy = featureMinEntropy
-		node.splitInformationGain = node.ownEntropy - node.splitFeatureEntropy
+#		node.splitInformationGain = splitInformationGain
 
 #		print 'Best Split is possible with global feature:', featureSubsetIndices[bestFeatureToSplitOn]
 #		print 'Which has an entropy of:', featureMinEntropy
@@ -496,7 +539,7 @@ class TreeNode(object):
 		self.splitFeatureIndex = 0
 		self.splitFeatureValue = 0
 		self.splitFeatureEntropy = 0
-		self.splitInformationGain = 0
+#		self.splitInformationGain = 0
 
 		# these features are values of this node
 		self.ownEntropy = 0
@@ -537,7 +580,7 @@ class TreeNode(object):
 		self.ownEntropy= nodeEntropy
 
 class AbstractRandomForest(object):
-	def __init__(self, dataSet, numDecisionTrees, splitCriterion='informationGain'):
+	def __init__(self, dataSet, numDecisionTrees, treeSplitCriterion='informationGain'):
 		self.decisionTrees = []
 		self.dataSet = dataSet
 		self.numDecisionTrees = numDecisionTrees
@@ -551,7 +594,7 @@ class AbstractRandomForest(object):
 		self.globalVariableImportanceList = [0 for x in range(0, self.numFeatures)]
 
 		# TODO: use splitCriterion when splitting in decision tree, need to pass this value when creating decision trees
-		self.splitCriterion = splitCriterion
+		self.treeSplitCriterion = treeSplitCriterion
 
 	def getGlobalDiscardedFeatureIndices(self):
 		featureVectors = zip(*self.dataSet)[:-1]
@@ -632,7 +675,7 @@ class RandomForest(AbstractRandomForest):
 		print "populateDecisionTrees()"
 		for i in range(0, self.numDecisionTrees):
 			print "Creating", i, "(th) Decision tree"
-			decisionTree = DecisionTree(dataSet, self.globalDiscardedFeatureIndices, OptimumFeatureSubsetSelector('log2'))
+			decisionTree = DecisionTree(dataSet, self.globalDiscardedFeatureIndices, OptimumFeatureSubsetSelector('log2'), self.treeSplitCriterion)
 			decisionTree.calcTreeVariableImportanceAndError()
 
 			self.updateGlobalOutOfBagEstimates(decisionTree)
@@ -726,7 +769,7 @@ class Utils(object):
 
 
 if __name__ == "__main__":
-	numDecisionTrees = 1
+	numDecisionTrees = 10
 
 	# example of matrix file reading
 #	fileReaderFactory = fileReaderFactory(fileType = 'matrix', matrixFilePath = 'Datasets/small-alter.txt');
@@ -738,7 +781,8 @@ if __name__ == "__main__":
 
 	dataSet = fileReaderFactory.getFileReader().getDataSetFromFile()
 
-	randomForest = RandomForest(dataSet, numDecisionTrees, splitCriterion='informationGain')
+#	randomForest = RandomForest(dataSet, numDecisionTrees, treeSplitCriterion='informationGain')
+	randomForest = RandomForest(dataSet, numDecisionTrees, treeSplitCriterion='gainRatio')
 	randomForest.populateDecisionTrees()
 	randomForest.calcForrestErrorRate()
 	randomForest.calcForrestVariableImportance()
