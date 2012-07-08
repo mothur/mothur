@@ -3,7 +3,7 @@ from __future__ import division
 from math import log, ceil, sqrt
 import random
 
-DEBUG_MODE = False
+DEBUG_MODE = True
 
 class AbstractDecisionTree(object):
 	def __init__(self, baseDataSet, globalDiscardedFeatureIndices, optimumFeatureSubsetSelector, treeSplitCriterion):
@@ -86,6 +86,7 @@ class AbstractDecisionTree(object):
 		# now an empty split point list, so we need to check this before going further
 		if not len(splitPoints):
 			minEntropy = float("inf")
+			intrinsicValue = float('inf')
 			bestSplitIndex = -1
 			featureSplitValue = 0
 		else:
@@ -149,12 +150,56 @@ class AbstractDecisionTree(object):
 		return minEntropy, minEntropyIndex, relatedIntrinsicValue
 
 
+	# calculate entropy for each of the splits
+	def calcSplitEntropy(self, featureOutputPairs, splitIndex, numOutputClasses, isUpperSplit):
+	#		print "calcSplitEntropy()"
+	#		print featureOutputPairs
+		classCounts = [0 for i in range(0, numOutputClasses)]
+		if isUpperSplit:
+			for i in range(0, splitIndex): classCounts[featureOutputPairs[i][1]] += 1
+		else:
+			for i in range(splitIndex, len(featureOutputPairs)): classCounts[featureOutputPairs[i][1]] += 1
+		totalClassCounts = sum(classCounts)
+
+		splitEntropy = 0
+		for x in classCounts:
+			# if x == 0 we are in trouble, cause the log function will return infinity,
+			# but we want actually zero so do a continue and skip
+			if not x: continue
+			probability = x / totalClassCounts
+			splitEntropy += -(probability * log(probability, 2))
+
+		return splitEntropy
+
+	# given a split point, gives the user two different sets of data
+	def getSplitPopulation(self, node):
+		leftChildSamples, rightChildSamples = [], []
+		globalIndex = node.splitFeatureIndex
+		for x in node.bootstrappedTrainingSamples:
+			if x[globalIndex] < node.splitFeatureValue: leftChildSamples.append(x)
+			else: rightChildSamples.append(x)
+		return leftChildSamples, rightChildSamples
+
+	def checkIfAlreadyClassified(self, treeNode):
+		if DEBUG_MODE: print "checkIfAlreadyClassified()"
+		if DEBUG_MODE: print "len(bootstrappedTrainingSamples):", len(treeNode.bootstrappedTrainingSamples)
+		#		if len(treeNode.bootstrappedTrainingSamples) < 10:
+		#			print treeNode.bootstrappedTrainingSamples
+		outPutClasses = []
+		for i, x in enumerate(treeNode.bootstrappedTrainingSamples):
+			# print "index:", i
+			if x[treeNode.numFeatures] not in outPutClasses:
+				if DEBUG_MODE: print "appending: ", x[treeNode.numFeatures]
+				outPutClasses.append(x[treeNode.numFeatures])
+		if len(outPutClasses) < 2: return True, outPutClasses[0]
+		else: return False, None
+
 	# This is the regularized version of the DecisionTree class
 class RegularizedDecisionTree(AbstractDecisionTree):
-	def __init__(self, baseDataSet, globalDiscardedFeatureIndices, optimumFeatureSubsetSelector):
+	def __init__(self, baseDataSet, globalDiscardedFeatureIndices, optimumFeatureSubsetSelector, treeSplitCriterion):
 
 		# calling to super-class's ctor
-		super(RegularizedDecisionTree, self).__init__(baseDataSet, globalDiscardedFeatureIndices, optimumFeatureSubsetSelector)
+		super(RegularizedDecisionTree, self).__init__(baseDataSet, globalDiscardedFeatureIndices, optimumFeatureSubsetSelector, treeSplitCriterion)
 
 		self.createBootStrappedSamples()
 		self.buildDecisionTree()
@@ -164,7 +209,10 @@ class RegularizedDecisionTree(AbstractDecisionTree):
 		treeNode = TreeNode(self.bootstrappedTrainingSamples, self.globalDiscardedFeatureIndices, self.numFeatures, self.numSamples, self.numOutputClasses, 0)
 		self.rootNode = treeNode
 
-		penalty = 1
+		# TODO: penalty is a factor we might need to fine tune first, 1 means no penalty
+		# the smaller the value, the higher the penalty, I'm setting an initial penalty of
+		# 0.8 as default, I'd do further tuning later
+		penalty = 0.8
 		featureSubset = []
 		self.splitRecursively(treeNode, featureSubset, penalty)
 
@@ -173,63 +221,76 @@ class RegularizedDecisionTree(AbstractDecisionTree):
 	def splitRecursively(self, treeNode, featureSubset, penalty):
 		if DEBUG_MODE: print "splitRecursively()"
 
-		bestGain = 0
-		numberOfNewFeaturesTested = 0
-		penalizedGains = [0 for x in range(0, self.numFeatures)]
+		bootstrappedFeatureVectors = treeNode.bootstrappedFeatureVectors
+		bootstrappedOutputVector = treeNode.bootstrappedOutputVector
+
+		bestGain = 0												# gain* in the paper
+		bestFeatureIndex = -1										# X* in paper
+		bestFeatureValue = -1										# the value upon which the binary split is
+																	# based on
+		numberOfNewFeaturesTested = 0								# count in the paper
+
+		# TODO: use the optimum feature selector class later
+		numFeaturesToTest = int(ceil(sqrt(self.numFeatures)))		# sqrt(M) in the paper
 
 		# TODO: how about we shuffle the value of the indices rather than using increasing
 		# value? the randomization might give it a quality boost
+
 		for x in range(0, self.numFeatures):
+			# first calculate the mathematical gain of the feature
+			# TODO: ignoring the the concept of 'Gain Ratio' for now, we'll come back to this later
+			featureMinEntropy, featureSplitValue, featureIntrinsicValue = self.getMinEntropyOfFeature(bootstrappedFeatureVectors[x], bootstrappedOutputVector)
+			featureInformationGain = treeNode.ownEntropy - featureMinEntropy
+
+			penalizedGain = 0										# GainR in the paper
 			if x in featureSubset:
-				# calculate the gain by using x
-#				node.bootstrappedFeatureVectors
-				pass
-			else:
-				pass
+				penalizedGain = featureInformationGain
+			elif numberOfNewFeaturesTested < numFeaturesToTest:
+				penalizedGain = penalty * featureInformationGain
+				numberOfNewFeaturesTested += 1
+			if penalizedGain > bestGain:
+				bestGain = penalizedGain
+				bestFeatureIndex = x
+				bestFeatureValue = featureSplitValue
+		# end for
 
+		# if bestGain is 0, so no gain was done
+		if not bestGain:
+			treeNode.isLeaf = True
+			# TODO: use isAlreadyClassified to print debug info
+			ifAlreadyClassified, outputClass = self.checkIfAlreadyClassified(treeNode)
+			# TODO: need to set outputClass
+			# treeNode.outputClass =
+			print treeNode.bootstrappedTrainingSamples
+			# leaf reached, nothing to do, return
+			if not ifAlreadyClassified:
+				print 'DEBUG not classified, but still returning cause no gain so far'
+			return
 
-#		# return immediately if this node is just a leaf, no recursion is needed
-#		if treeNode.numSamples < 2:
-#			if DEBUG_MODE: print "Already classified: Case 1"
-#			treeNode.isLeaf = True
-#			treeNode.outputClass = treeNode.bootstrappedTrainingSamples[0][treeNode.numFeatures]
-#			return
-#
-#		ifAlreadyClassified, treeNode.outputClass = self.checkIfAlreadyClassified(treeNode)
-#		if ifAlreadyClassified:
-#			if DEBUG_MODE: print "Already classified: Case 2"
-#			treeNode.isLeaf = True
-#			return
-#
-#		#		nullFeatureIndices = self.findNullFeatures(treeNode.bootstrappedTrainingSamples)
-#		treeNode.featureSubsetIndices = self.selectFeatureSubsetRandomly(self.globalDiscardedFeatureIndices, treeNode.localDiscardedFeatureIndices)
-#		if DEBUG_MODE: print "discardedFeatureIndices:", globalDiscardedFeatureIndices
-#		if DEBUG_MODE: print "featureSubsetIndices:", treeNode.featureSubsetIndices
-#		# DEBUG
-#		#		treeNode.featureSubsetIndices = [100, 103, 161, 163, 197, 355, 460, 463, 507, 509]
-#
-#		bestFeatureToSplitOn, bestFeatureSplitValue, bestFeatureSplitEntropy =  self.getBestFeatureToSplitOn(treeNode)
-#		# so return immediately
-#
-#
-#		treeNode.splitFeatureIndex = bestFeatureToSplitOn
-#		treeNode.splitFeatureValue = bestFeatureSplitValue
-#		treeNode.splitFeatureEntropy = bestFeatureSplitEntropy
-#
-#		if DEBUG_MODE: print "bestFeatureToSplitOn:", bestFeatureToSplitOn, "bestFeatureSplitValue:", bestFeatureSplitValue, "bestFeatureSplitEntropy:", bestFeatureSplitEntropy
-#		leftChildSamples, rightChildSamples = self.getSplitPopulation(treeNode)
-#		# print "leftChildSamples:", leftChildSamples
-#		# print "rightChildSamples:", rightChildSamples
-#
-#		leftChildNode = TreeNode(leftChildSamples, self.globalDiscardedFeatureIndices, self.numFeatures, len(leftChildSamples), self.numOutputClasses, treeNode.generation + 1)
-#		rightChildNode = TreeNode(rightChildSamples, self.globalDiscardedFeatureIndices, self.numFeatures, len(rightChildSamples), self.numOutputClasses, treeNode.generation + 1)
-#
-#		treeNode.leftChildNode = leftChildNode
-#		treeNode.rightChildNode = rightChildNode
-#		self.splitRecursively(leftChildNode)
-#		self.splitRecursively(rightChildNode)
+		if bestFeatureIndex not in featureSubset: featureSubset.append(bestFeatureIndex)
 
+		# TODO: split code
+		# for each split code, call this function recursively
+		# since we are doing binary split, this is just calling the function twice
 
+		treeNode.splitFeatureIndex = bestFeatureIndex
+		treeNode.splitFeatureValue = bestFeatureValue
+
+		leftChildSamples, rightChildSamples = self.getSplitPopulation(treeNode)
+
+		leftChildNode = TreeNode(leftChildSamples, self.globalDiscardedFeatureIndices, self.numFeatures, len(leftChildSamples), self.numOutputClasses, treeNode.generation + 1)
+		rightChildNode = TreeNode(rightChildSamples, self.globalDiscardedFeatureIndices, self.numFeatures, len(rightChildSamples), self.numOutputClasses, treeNode.generation + 1)
+
+		treeNode.leftChildNode = leftChildNode
+		treeNode.leftChildNode.parentNode = treeNode
+
+		treeNode.rightChildNode = rightChildNode
+		treeNode.rightChildNode.parentNode = treeNode
+
+		self.splitRecursively(leftChildNode, featureSubset, penalty)
+		self.splitRecursively(rightChildNode, featureSubset, penalty)
+
+		# value is returned in the featureSubset variable
 
 
 # The main algorithm resides here, it the manipulator class
@@ -343,15 +404,6 @@ class DecisionTree(AbstractDecisionTree):
 		self.splitRecursively(leftChildNode)
 		self.splitRecursively(rightChildNode)
 
-	# given a split point, gives the user two different sets of data
-	def getSplitPopulation(self, node):
-		leftChildSamples, rightChildSamples = [], []
-		globalIndex = node.splitFeatureIndex
-		for x in node.bootstrappedTrainingSamples:
-			if x[globalIndex] < node.splitFeatureValue: leftChildSamples.append(x)
-			else: rightChildSamples.append(x)
-		return leftChildSamples, rightChildSamples
-
 	# given the feature indices, selects the best feature index to split on
 	def findAndUpdateBestFeatureToSplitOn(self, node):
 		bootstrappedFeatureVectors = node.bootstrappedFeatureVectors
@@ -390,6 +442,7 @@ class DecisionTree(AbstractDecisionTree):
 		featureMinEntropy = min(featureSubsetEntropies)
 		featureMaxGainRatio = max(featureSubsetGainRatios)
 
+		# TODO: apply some heuristics for gainRatio
 		if self.treeSplitCriterion == 'gainRatio':
 			bestFeatureToSplitOn = featureSubsetGainRatios.index(featureMaxGainRatio)
 #		elif self.treeSplitCriterion == 'informationGain':
@@ -410,42 +463,6 @@ class DecisionTree(AbstractDecisionTree):
 #		print 'Which has an entropy of:', featureMinEntropy
 #		print 'Best Split on this feature with value:', bestFeatureSplitValue
 #		return featureSubsetIndices[bestFeatureToSplitOn], bestFeatureSplitValue, featureMinEntropy
-
-
-	# calculate entropy for each of the splits
-	def calcSplitEntropy(self, featureOutputPairs, splitIndex, numOutputClasses, isUpperSplit):
-#		print "calcSplitEntropy()"
-#		print featureOutputPairs
-		classCounts = [0 for i in range(0, numOutputClasses)]
-		if isUpperSplit:
-			for i in range(0, splitIndex): classCounts[featureOutputPairs[i][1]] += 1
-		else:
-			for i in range(splitIndex, len(featureOutputPairs)): classCounts[featureOutputPairs[i][1]] += 1
-		totalClassCounts = sum(classCounts)
-
-		splitEntropy = 0
-		for x in classCounts:
-			# if x == 0 we are in trouble, cause the log function will return infinity,
-			# but we want actually zero so do a continue and skip
-			if not x: continue
-			probability = x / totalClassCounts
-			splitEntropy += -(probability * log(probability, 2))
-
-		return splitEntropy
-
-	def checkIfAlreadyClassified(self, treeNode):
-		if DEBUG_MODE: print "checkIfAlreadyClassified()"
-		if DEBUG_MODE: print "len(bootstrappedTrainingSamples):", len(treeNode.bootstrappedTrainingSamples)
-#		if len(treeNode.bootstrappedTrainingSamples) < 10:
-#			print treeNode.bootstrappedTrainingSamples
-		outPutClasses = []
-		for i, x in enumerate(treeNode.bootstrappedTrainingSamples):
-			# print "index:", i
-			if x[treeNode.numFeatures] not in outPutClasses:
-				if DEBUG_MODE: print "appending: ", x[treeNode.numFeatures]
-				outPutClasses.append(x[treeNode.numFeatures])
-		if len(outPutClasses) < 2: return True, outPutClasses[0]
-		else: return False, None
 
 	def calcTreeVariableImportanceAndError(self):
 		if DEBUG_MODE: print "calcTreeVariableImportanceAndError()"
@@ -614,7 +631,7 @@ class RegularizedRandomForest(AbstractRandomForest):
 		print "populateDecisionTrees()"
 		for i in range(0, self.numDecisionTrees):
 			print "Creating", i, "(th) Decision tree"
-			decisionTree = RegularizedDecisionTree(dataSet, self.globalDiscardedFeatureIndices, OptimumFeatureSubsetSelector('squareRoot'))
+			decisionTree = RegularizedDecisionTree(dataSet, self.globalDiscardedFeatureIndices, OptimumFeatureSubsetSelector('squareRoot'), self.treeSplitCriterion)
 #			decisionTree.calcTreeVariableImportanceAndError()
 #
 #			self.updateGlobalOutOfBagEstimates(decisionTree)
@@ -769,7 +786,7 @@ class Utils(object):
 
 
 if __name__ == "__main__":
-	numDecisionTrees = 10
+	numDecisionTrees = 1
 
 	# example of matrix file reading
 #	fileReaderFactory = fileReaderFactory(fileType = 'matrix', matrixFilePath = 'Datasets/small-alter.txt');
@@ -781,13 +798,15 @@ if __name__ == "__main__":
 
 	dataSet = fileReaderFactory.getFileReader().getDataSetFromFile()
 
+	# this is normal random forest, this can provide variable ranks (feature selection) as well as do
+	# classification
 #	randomForest = RandomForest(dataSet, numDecisionTrees, treeSplitCriterion='informationGain')
 	randomForest = RandomForest(dataSet, numDecisionTrees, treeSplitCriterion='gainRatio')
 	randomForest.populateDecisionTrees()
 	randomForest.calcForrestErrorRate()
 	randomForest.calcForrestVariableImportance()
 
-#	regularizedRandomForest = RegularizedRandomForest(dataSet, numDecisionTrees)
+	# this is regularized random forest, optimized for feature selection
+#	regularizedRandomForest = RegularizedRandomForest(dataSet, numDecisionTrees, treeSplitCriterion='informationGain')
 #	regularizedRandomForest.populateDecisionTrees()
 
-#	createDecisionTree(dataSet)
