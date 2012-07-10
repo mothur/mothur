@@ -168,7 +168,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                     contigScores.push_back(scores1[ABaseMap[i]]);
                     if (scores1[ABaseMap[i]] < scores2[BBaseMap[i]]) { contigScores[i] = scores2[BBaseMap[i]]; }
                 }else if (((seq1[i] == '.') || (seq1[i] == '-')) && ((seq2[i] != '-') && (seq2[i] != '.'))) { //seq1 is a gap and seq2 is a base, choose seq2, unless quality score for base is below threshold. In that case eliminate base
-                    if (scores2[BBaseMap[i]] >= pDataArray->threshold)) {
+                    if (scores2[BBaseMap[i]] >= pDataArray->threshold) {
                         contig += seq2[i];
                         contigScores.push_back(scores2[BBaseMap[i]]);
                     }

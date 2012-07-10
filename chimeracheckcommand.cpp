@@ -551,6 +551,7 @@ int ChimeraCheckCommand::driver(linePair* filePos, string outputFName, string fi
 			
 			//report progress
 			if((count) % 100 == 0){	m->mothurOut("Processing sequence: " + toString(count)); m->mothurOutEndLine();		}
+            count++;
 		}
 		//report progress
 		if((count) % 100 != 0){	m->mothurOut("Processing sequence: " + toString(count)); m->mothurOutEndLine();		}

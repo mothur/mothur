@@ -74,7 +74,7 @@ string SummarySharedCommand::getOutputFileNameTag(string type, string inputName=
         if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
         else {
             if (type == "summary")            {   outputFileName =  "shared.summary";   }
-            if (type == "phylip")            {   outputFileName =  "dist";   }
+            else if (type == "phylip")            {   outputFileName =  "dist";   }
             else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
         }
         return outputFileName;
@@ -879,7 +879,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                     stdmatrix[column][row] = stdDist;
                 }
                 
-                string distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + sumCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + ".ave." + getOutputFileNameTag("phylip");;
+                string distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + sumCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + ".ave." + getOutputFileNameTag("phylip");
                 outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
                 ofstream outAve;
                 m->openOutputFile(distFileName, outAve);

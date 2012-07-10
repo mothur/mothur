@@ -25,6 +25,7 @@ SharedListVector::SharedListVector(int n):	DataVector(), data(n, "") , maxRank(0
 /***********************************************************************/
 SharedListVector::SharedListVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), numSeqs(0) {
 	try {
+        groupmap = NULL; countTable = NULL;
 		//set up groupmap for later.
         if (m->groupMode == "group") {
             groupmap = new GroupMap(m->getGroupFile());

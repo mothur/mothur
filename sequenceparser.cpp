@@ -64,7 +64,7 @@ SequenceParser::SequenceParser(string groupFile, string fastaFile, string nameFi
 		ifstream inName;
 		m->openInputFile(nameFile, inName);
 		
-		string first, second;
+		//string first, second;
 		int countName = 0;
 		set<string> thisnames1;
 		
@@ -85,8 +85,9 @@ SequenceParser::SequenceParser(string groupFile, string fastaFile, string nameFi
                 else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
                 
                 if (pairDone) { //save one line
+                    if (m->debug) { m->mothurOut("[DEBUG]: reading names: " + firstCol + '\t' + secondCol + ".\n"); }
                     vector<string> names;
-                    m->splitAtChar(second, names, ',');
+                    m->splitAtChar(secondCol, names, ',');
                     
                     //get aligned string for these seqs from the fasta file
                     string alignedString = "";

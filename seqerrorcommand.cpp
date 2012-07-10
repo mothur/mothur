@@ -782,7 +782,7 @@ int SeqErrorCommand::driver(string filename, string qFileName, string rFileName,
 				if (queryFile.eof()) { break; }
 			#endif
 			
-			if(index % 100 == 0){	m->mothurOut(toString(index) + '\n');	}
+			if(index % 100 == 0){	m->mothurOut(toString(index));	m->mothurOutEndLine(); }
 		}
 		queryFile.close();
 		if(qFileName != "" && rFileName != ""){  reportFile.close(); qualFile.close(); }
@@ -790,7 +790,7 @@ int SeqErrorCommand::driver(string filename, string qFileName, string rFileName,
 		errorSeqFile.close();
 		
 		//report progress
-		if(index % 100 != 0){	m->mothurOut(toString(index) + '\n');	}
+		if(index % 100 != 0){	m->mothurOut(toString(index));	m->mothurOutEndLine(); }
 		
 		return index;
 	}

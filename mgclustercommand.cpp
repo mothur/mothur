@@ -716,12 +716,6 @@ void MGClusterCommand::sortHclusterFiles(string unsortedDist, string unsortedOve
 
 void MGClusterCommand::createRabund(map<string, int> nameMapCounts){
     try {
-        //RAbundVector rav;
-        map<string,int>::iterator it;
-        //it = nameMapCounts.begin();
-        //for(int i = 0; i < list->getNumBins(); i++) {   rav.push_back((*it).second); it++;    }
-        for ( it=nameMapCounts.begin(); it!=nameMapCounts.end(); it++ ) {    rav.push_back( it->second );    }
-        //return rav;
     }
     catch(exception& e) {
 		m->errorOut(e, "MGClusterCommand", "createRabund");

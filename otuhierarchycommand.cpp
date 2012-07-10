@@ -199,7 +199,7 @@ int OtuHierarchyCommand::execute(){
 		}
 		
 		ofstream out;
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(listFile)) + lists[0].getLabel() + "-" + lists[1].getLabel() + "." + getOutputFileNameTag("otuhierarchy");
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(listFile)) + lists[0].getLabel() + "-" + lists[1].getLabel() + "." + getOutputFileNameTag("otuheirarchy");
 		m->openOutputFile(outputFileName, out);
 		
 		//go through each bin in "big" otu and output the bins in "little" otu which created it

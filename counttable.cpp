@@ -42,7 +42,8 @@ int CountTable::readTable(string file) {
             
             if (m->control_pressed) { break; }
             
-            in >> name >> thisTotal; m->gobble(in);
+            in >> name; m->gobble(in); in >> thisTotal; m->gobble(in);
+            if (m->debug) { m->mothurOut("[DEBUG]: " + name + '\t' + toString(thisTotal) + "\n"); }
             
             //if group info, then read it
             vector<int> groupCounts; groupCounts.resize(numGroups, 0);
