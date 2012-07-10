@@ -24,6 +24,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "merge.groups";	}
 	string getCommandCategory()		{ return "General";			}
+	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Merge.groups"; }
 	string getDescription()		{ return "reads shared file and a design file and merges the groups in the shared file that are in the same grouping in the design file"; }

@@ -85,6 +85,29 @@ string ClassifySeqsCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string ClassifySeqsCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "taxonomy") {  outputFileName =  "taxonomy"; }
+            else if (type == "accnos") {  outputFileName =  "flip.accnos"; }
+            else if (type == "taxsummary") {  outputFileName =  "tax.summary"; }
+            else if (type == "matchdist") {  outputFileName =  "match.dist"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClassifySeqsCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 ClassifySeqsCommand::ClassifySeqsCommand(){	
 	try {
 		abort = true; calledHelp = true; 
@@ -506,7 +529,6 @@ int ClassifySeqsCommand::execute(){
 			string RippedTaxName = "";
             bool foundDot = false;
             for (int i = baseTName.length()-1; i >= 0; i--) {
-                cout << baseTName[i] << endl;
                 if (foundDot && (baseTName[i] != '.')) {  RippedTaxName = baseTName[i] + RippedTaxName; }
                 else if (foundDot && (baseTName[i] == '.')) {  break; }
                 else if (!foundDot && (baseTName[i] == '.')) {  foundDot = true; }
@@ -514,13 +536,13 @@ int ClassifySeqsCommand::execute(){
             if (RippedTaxName != "") { RippedTaxName +=  "."; }   
           
 			if (outputDir == "") { outputDir += m->hasPath(fastaFileNames[s]); }
-			string newTaxonomyFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + RippedTaxName + "taxonomy";
-			string newaccnosFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + RippedTaxName + "flip.accnos";
+			string newTaxonomyFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + RippedTaxName + getOutputFileNameTag("taxonomy");
+			string newaccnosFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + RippedTaxName + getOutputFileNameTag("accnos");
 			string tempTaxonomyFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + "taxonomy.temp";
-			string taxSummary = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + RippedTaxName + "tax.summary";
+			string taxSummary = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + RippedTaxName + getOutputFileNameTag("taxsummary");
 			
 			if ((method == "knn") && (search == "distance")) { 
-				string DistName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + "match.dist";
+				string DistName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + getOutputFileNameTag("matchdist");
 				classify->setDistName(DistName);  outputNames.push_back(DistName); outputTypes["matchdist"].push_back(DistName);
 			}
 			
@@ -666,23 +688,8 @@ int ClassifySeqsCommand::execute(){
 			if(namefile != "") {
 			
 			    m->mothurOut("Reading " + namefileNames[s] + "..."); cout.flush();
-				
 				nameMap.clear(); //remove old names
-				
-				ifstream inNames;
-				m->openInputFile(namefileNames[s], inNames);
-				
-				string firstCol, secondCol;
-				while(!inNames.eof()) {
-					inNames >> firstCol >> secondCol; m->gobble(inNames);
-					
-					vector<string> temp;
-					m->splitAtComma(secondCol, temp);
-			
-					nameMap[firstCol] = temp;  
-				}
-				inNames.close();
-				
+				m->readNames(namefileNames[s], nameMap);				
 				m->mothurOut("  Done."); m->mothurOutEndLine();
 			}
 		#endif
@@ -919,8 +926,8 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
 		else { m->mothurRemove(accnos); } //remove so other files can be renamed to it
         
 		for(int i=0;i<processIDS.size();i++){
-			appendTaxFiles((taxFileName + toString(processIDS[i]) + ".temp"), taxFileName);
-			appendTaxFiles((tempTaxFile + toString(processIDS[i]) + ".temp"), tempTaxFile);
+			m->appendFiles((taxFileName + toString(processIDS[i]) + ".temp"), taxFileName);
+			m->appendFiles((tempTaxFile + toString(processIDS[i]) + ".temp"), tempTaxFile);
             if (!(m->isBlank(accnos + toString(processIDS[i]) + ".temp"))) {
 				nonBlankAccnosFiles.push_back(accnos + toString(processIDS[i]) + ".temp");
 			}else { m->mothurRemove((accnos + toString(processIDS[i]) + ".temp"));  }
@@ -934,7 +941,7 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
 			rename(nonBlankAccnosFiles[0].c_str(), accnos.c_str());
 			
 			for (int h=1; h < nonBlankAccnosFiles.size(); h++) {
-				appendTaxFiles(nonBlankAccnosFiles[h], accnos);
+				m->appendFiles(nonBlankAccnosFiles[h], accnos);
 				m->mothurRemove(nonBlankAccnosFiles[h]);
 			}
 		}else { //recreate the accnosfile if needed
@@ -951,30 +958,6 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
 		exit(1);
 	}
 }
-/**************************************************************************************************/
-
-void ClassifySeqsCommand::appendTaxFiles(string temp, string filename) {
-	try{
-		
-		ofstream output;
-		ifstream input;
-		m->openOutputFileAppend(filename, output);
-		m->openInputFile(temp, input);
-		
-		while(char c = input.get()){
-			if(input.eof())		{	break;			}
-			else				{	output << c;	}
-		}
-		
-		input.close();
-		output.close();
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClassifySeqsCommand", "appendTaxFiles");
-		exit(1);
-	}
-}
-
 //**********************************************************************************************************************
 
 int ClassifySeqsCommand::driver(linePair* filePos, string taxFName, string tempTFName, string accnos, string filename){

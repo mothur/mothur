@@ -23,7 +23,8 @@ class ListSeqsCommand : public Command {
 		vector<string> setParameters();
 		string getCommandName()			{ return "list.seqs";				}
 		string getCommandCategory()		{ return "Sequence Processing";		}
-		string getHelpString();	
+		string getOutputFileNameTag(string, string);
+	string getHelpString();	
 		string getCitation() { return "http://www.mothur.org/wiki/List.seqs"; }
 		string getDescription()		{ return "lists sequences from a list, fasta, name, group, alignreport or taxonomy file"; }
 

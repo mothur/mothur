@@ -11,6 +11,7 @@
 #include "sharedsobs.h"
 #include "sharednseqs.h"
 #include "sharedutilities.h"
+#include "subsample.h"
 
 //**********************************************************************************************************************
 vector<string> RareFactSharedCommand::setParameters(){	
@@ -21,6 +22,8 @@ vector<string> RareFactSharedCommand::setParameters(){
 		CommandParameter pfreq("freq", "Number", "", "100", "", "", "",false,false); parameters.push_back(pfreq);
 		CommandParameter piters("iters", "Number", "", "1000", "", "", "",false,false); parameters.push_back(piters);
 		CommandParameter pcalc("calc", "Multiple", "sharednseqs-sharedobserved", "sharedobserved", "", "", "",true,false); parameters.push_back(pcalc);
+        CommandParameter psubsampleiters("subsampleiters", "Number", "", "1000", "", "", "",false,false); parameters.push_back(psubsampleiters);
+        CommandParameter psubsample("subsample", "String", "", "", "", "", "",false,false); parameters.push_back(psubsample);
 		CommandParameter pjumble("jumble", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pjumble);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
         CommandParameter psets("sets", "String", "", "", "", "", "",false,false); parameters.push_back(psets);
@@ -50,6 +53,8 @@ string RareFactSharedCommand::getHelpString(){
 		helpString += "The freq parameter is used indicate when to output your data, by default it is set to 100. But you can set it to a percentage of the number of sequence. For example freq=0.10, means 10%. \n";
 		helpString += "Example rarefaction.shared(label=unique-0.01-0.03,  iters=10000, groups=B-C, jumble=T, calc=sharedobserved).\n";
 		helpString += "The default values for iters is 1000, freq is 100, and calc is sharedobserved which calculates the shared rarefaction curve for the observed richness.\n";
+        helpString += "The subsampleiters parameter allows you to choose the number of times you would like to run the subsample.\n";
+        helpString += "The subsample parameter allows you to enter the size pergroup of the sample or you can set subsample=T and mothur will use the size of your smallest group.\n";
 		helpString += "The default value for groups is all the groups in your groupfile, and jumble is true.\n";
 		helpString += validCalculator.printCalc("sharedrarefaction");
 		helpString += "The label parameter is used to analyze specific labels in your input.\n";
@@ -62,7 +67,27 @@ string RareFactSharedCommand::getHelpString(){
 		exit(1);
 	}
 }
-
+//**********************************************************************************************************************
+string RareFactSharedCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "sharedrarefaction") {  outputFileName =  "shared.rarefaction"; }
+            else if (type == "sharedr_nseqs") {  outputFileName =  "shared.r_nseqs"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "RareFactSharedCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 RareFactSharedCommand::RareFactSharedCommand(){	
 	try {
@@ -199,6 +224,18 @@ RareFactSharedCommand::RareFactSharedCommand(string option)  {
             
             temp = validParameter.validFile(parameters, "groupmode", false);		if (temp == "not found") { temp = "T"; }
 			groupMode = m->isTrue(temp);
+            
+            temp = validParameter.validFile(parameters, "subsampleiters", false);			if (temp == "not found") { temp = "1000"; }
+			m->mothurConvert(temp, iters); 
+            
+            temp = validParameter.validFile(parameters, "subsample", false);		if (temp == "not found") { temp = "F"; }
+			if (m->isNumeric1(temp)) { m->mothurConvert(temp, subsampleSize); subsample = true; }
+            else {  
+                if (m->isTrue(temp)) { subsample = true; subsampleSize = -1; }  //we will set it to smallest group later 
+                else { subsample = false; }
+            }
+            
+            if (subsample == false) { iters = 1; }
 				
 		}
 
@@ -281,16 +318,44 @@ int RareFactSharedCommand::process(GroupMap& designMap, string thisSet){
                 }
             }
         }
-		
+
+        /******************************************************/
+        if (subsample) { 
+            if (subsampleSize == -1) { //user has not set size, set size = smallest samples size
+                subsampleSize = subset[0]->getNumSeqs();
+                for (int i = 1; i < subset.size(); i++) {
+                    int thisSize = subset[i]->getNumSeqs();
+                    
+                    if (thisSize < subsampleSize) {	subsampleSize = thisSize;	}
+                }
+            }else {
+                newGroups.clear();
+                vector<SharedRAbundVector*> temp;
+                for (int i = 0; i < subset.size(); i++) {
+                    if (subset[i]->getNumSeqs() < subsampleSize) { 
+                        m->mothurOut(subset[i]->getGroup() + " contains " + toString(subset[i]->getNumSeqs()) + ". Eliminating."); m->mothurOutEndLine();
+                        delete subset[i];
+                    }else { 
+                        newGroups.push_back(subset[i]->getGroup()); 
+                        temp.push_back(subset[i]);
+                    }
+                } 
+                subset = temp;
+            }
+            
+            if (subset.size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); m->control_pressed = true; return 0; }
+        }
+        /******************************************************/
+       		
 		ValidCalculators validCalculator;
 		for (int i=0; i<Estimators.size(); i++) {
 			if (validCalculator.isValidCalculator("sharedrarefaction", Estimators[i]) == true) { 
 				if (Estimators[i] == "sharedobserved") { 
-					rDisplays.push_back(new RareDisplay(new SharedSobs(), new SharedThreeColumnFile(fileNameRoot+"shared.rarefaction", "")));
-					outputNames.push_back(fileNameRoot+"shared.rarefaction"); outputTypes["sharedrarefaction"].push_back(fileNameRoot+"shared.rarefaction");
+					rDisplays.push_back(new RareDisplay(new SharedSobs(), new SharedThreeColumnFile(fileNameRoot+getOutputFileNameTag("sharedrarefaction"), "")));
+					outputNames.push_back(fileNameRoot+getOutputFileNameTag("sharedrarefaction")); outputTypes["sharedrarefaction"].push_back(fileNameRoot+getOutputFileNameTag("sharedrarefaction"));
 				}else if (Estimators[i] == "sharednseqs") { 
-					rDisplays.push_back(new RareDisplay(new SharedNSeqs(), new SharedThreeColumnFile(fileNameRoot+"shared.r_nseqs", "")));
-					outputNames.push_back(fileNameRoot+"shared.r_nseqs"); outputTypes["sharedr_nseqs"].push_back(fileNameRoot+"shared.r_nseqs");
+					rDisplays.push_back(new RareDisplay(new SharedNSeqs(), new SharedThreeColumnFile(fileNameRoot+getOutputFileNameTag("sharedr_nseqs"), "")));
+					outputNames.push_back(fileNameRoot+getOutputFileNameTag("sharedr_nseqs")); outputTypes["sharedr_nseqs"].push_back(fileNameRoot+getOutputFileNameTag("sharedr_nseqs"));
 				}
 			}
             file2Group[outputNames.size()-1] = thisSet;
@@ -327,6 +392,8 @@ int RareFactSharedCommand::process(GroupMap& designMap, string thisSet){
 				rCurve->getSharedCurve(freq, nIters);
 				delete rCurve;
                 
+                if (subsample) { subsampleLookup(subset, fileNameRoot);  }
+                    
 				processedLabels.insert(subset[0]->getLabel());
 				userLabels.erase(subset[0]->getLabel());
 			}
@@ -351,6 +418,8 @@ int RareFactSharedCommand::process(GroupMap& designMap, string thisSet){
                 rCurve = new Rarefact(subset, rDisplays);
                 rCurve->getSharedCurve(freq, nIters);
                 delete rCurve;
+                
+                if (subsample) { subsampleLookup(subset, fileNameRoot);  }
                 
                 processedLabels.insert(subset[0]->getLabel());
                 userLabels.erase(subset[0]->getLabel());
@@ -424,6 +493,9 @@ int RareFactSharedCommand::process(GroupMap& designMap, string thisSet){
 			rCurve = new Rarefact(subset, rDisplays);
 			rCurve->getSharedCurve(freq, nIters);
 			delete rCurve;
+            
+            if (subsample) { subsampleLookup(subset, fileNameRoot);  }
+                
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 		}
 		
@@ -434,6 +506,158 @@ int RareFactSharedCommand::process(GroupMap& designMap, string thisSet){
     }
 	catch(exception& e) {
 		m->errorOut(e, "RareFactSharedCommand", "process");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+int RareFactSharedCommand::subsampleLookup(vector<SharedRAbundVector*>& thisLookup, string fileNameRoot) {
+	try {
+        
+        map<string, vector<string> > filenames;
+        for (int thisIter = 0; thisIter < iters; thisIter++) {
+            
+            vector<SharedRAbundVector*> thisItersLookup = thisLookup;
+            
+             //we want the summary results for the whole dataset, then the subsampling
+            SubSample sample;
+            vector<string> tempLabels; //dont need since we arent printing the sampled sharedRabunds
+                
+            //make copy of lookup so we don't get access violations
+            vector<SharedRAbundVector*> newLookup;
+            for (int k = 0; k < thisItersLookup.size(); k++) {
+                SharedRAbundVector* temp = new SharedRAbundVector();
+                temp->setLabel(thisItersLookup[k]->getLabel());
+                temp->setGroup(thisItersLookup[k]->getGroup());
+                newLookup.push_back(temp);
+            }
+                
+            //for each bin
+            for (int k = 0; k < thisItersLookup[0]->getNumBins(); k++) {
+                if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) {  delete newLookup[j];  } return 0; }
+                for (int j = 0; j < thisItersLookup.size(); j++) { newLookup[j]->push_back(thisItersLookup[j]->getAbundance(k), thisItersLookup[j]->getGroup()); }
+                }
+                
+            tempLabels = sample.getSample(newLookup, subsampleSize);
+            thisItersLookup = newLookup;
+            
+            
+            Rarefact* rCurve;
+            vector<Display*> rDisplays;
+            
+            string thisfileNameRoot = fileNameRoot + toString(thisIter);
+            
+            ValidCalculators validCalculator;
+            for (int i=0; i<Estimators.size(); i++) {
+                if (validCalculator.isValidCalculator("sharedrarefaction", Estimators[i]) == true) { 
+                    if (Estimators[i] == "sharedobserved") { 
+                        rDisplays.push_back(new RareDisplay(new SharedSobs(), new SharedThreeColumnFile(thisfileNameRoot+getOutputFileNameTag("sharedrarefaction"), "")));
+                        filenames["sharedrarefaction"].push_back(thisfileNameRoot+getOutputFileNameTag("sharedrarefaction"));
+                    }else if (Estimators[i] == "sharednseqs") { 
+                        rDisplays.push_back(new RareDisplay(new SharedNSeqs(), new SharedThreeColumnFile(thisfileNameRoot+getOutputFileNameTag("sharedr_nseqs"), "")));
+                        filenames["sharedr_nseqs"].push_back(thisfileNameRoot+getOutputFileNameTag("sharedr_nseqs"));
+                    }
+                }
+            }
+            
+            rCurve = new Rarefact(thisItersLookup, rDisplays);
+			rCurve->getSharedCurve(freq, nIters);
+			delete rCurve;
+            
+            //clean up memory
+            for (int i = 0; i < thisItersLookup.size(); i++) { delete thisItersLookup[i]; }
+            thisItersLookup.clear();
+            for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
+        }
+        
+        //create std and ave outputs
+        vector< vector< vector< double > > > results; //iter -> numSampled -> data
+        for (map<string, vector<string> >::iterator it = filenames.begin(); it != filenames.end(); it++) {
+            vector<string> thisTypesFiles = it->second;
+            vector<string> columnHeaders;
+            for (int i = 0; i < thisTypesFiles.size(); i++) {
+                ifstream in;
+                m->openInputFile(thisTypesFiles[i], in);
+                
+                string headers = m->getline(in); m->gobble(in);
+                columnHeaders = m->splitWhiteSpace(headers);
+                int numCols = columnHeaders.size();
+                
+                vector<vector<double> > thisFilesLines;
+                while (!in.eof()) {
+                    if (m->control_pressed) { break; }
+                    vector<double> data; data.resize(numCols, 0);
+                    //read numSampled line
+                    for (int j = 0; j < numCols; j++) { in >> data[j]; m->gobble(in); }
+                    thisFilesLines.push_back(data);
+                }
+                in.close();
+                results.push_back(thisFilesLines);
+                m->mothurRemove(thisTypesFiles[i]);
+            }
+            
+            if (!m->control_pressed) {
+                //process results
+                string outputFile = fileNameRoot + "ave-std." + thisLookup[0]->getLabel() + "." + getOutputFileNameTag(it->first);
+                ofstream out;
+                m->openOutputFile(outputFile, out);
+                outputNames.push_back(outputFile); outputTypes[it->first].push_back(outputFile);
+                
+                out << columnHeaders[0] << '\t' << "method\t";
+                for (int i = 1; i < columnHeaders.size(); i++) { out << columnHeaders[i] << '\t'; }
+                out << endl;
+            
+                vector< vector<double> > aveResults; aveResults.resize(results[0].size());
+                for (int i = 0; i < aveResults.size(); i++) { aveResults[i].resize(results[0][i].size(), 0.0); }
+                
+                for (int thisIter = 0; thisIter < iters; thisIter++) { //sum all groups dists for each calculator
+                    for (int i = 0; i < aveResults.size(); i++) {  //initialize sums to zero.
+                        aveResults[i][0] = results[thisIter][i][0];
+                        for (int j = 1; j < aveResults[i].size(); j++) {
+                            aveResults[i][j] += results[thisIter][i][j];
+                        }
+                    }
+                }
+                
+                for (int i = 0; i < aveResults.size(); i++) {  //finds average.
+                    for (int j = 1; j < aveResults[i].size(); j++) {
+                        aveResults[i][j] /= (float) iters;
+                    }
+                }
+                
+                //standard deviation
+                vector< vector<double> > stdResults; stdResults.resize(results[0].size());
+                for (int i = 0; i < stdResults.size(); i++) { stdResults[i].resize(results[0][i].size(), 0.0); }
+                
+                for (int thisIter = 0; thisIter < iters; thisIter++) { //compute the difference of each dist from the mean, and square the result of each
+                    for (int i = 0; i < stdResults.size(); i++) {  
+                        stdResults[i][0] = aveResults[i][0];
+                        for (int j = 1; j < stdResults[i].size(); j++) {
+                            stdResults[i][j] += ((results[thisIter][i][j] - aveResults[i][j]) * (results[thisIter][i][j] - aveResults[i][j]));
+                        }
+                    }
+                }
+                
+                for (int i = 0; i < stdResults.size(); i++) {  //finds average.
+                    out << aveResults[i][0] << '\t' << "ave\t";
+                    for (int j = 1; j < aveResults[i].size(); j++) { out << aveResults[i][j] << '\t'; }
+                    out << endl;
+                    out << stdResults[i][0] << '\t' << "std\t";
+                    for (int j = 1; j < stdResults[i].size(); j++) {
+                        stdResults[i][j] /= (float) iters;
+                        stdResults[i][j] = sqrt(stdResults[i][j]);
+                        out << stdResults[i][j] << '\t';
+                    }
+                    out << endl;
+                }
+                out.close();
+            }
+        }
+        
+        
+        return 0;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "RareFactSharedCommand", "subsample");
 		exit(1);
 	}
 }

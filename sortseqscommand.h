@@ -25,7 +25,8 @@ public:
     vector<string> setParameters();
     string getCommandName()			{ return "sort.seqs";				}
     string getCommandCategory()		{ return "Sequence Processing";		}
-    string getHelpString();	
+    string getOutputFileNameTag(string, string);
+	string getHelpString();	
     string getCitation() { return "http://www.mothur.org/wiki/Sort.seqs"; }
     string getDescription()		{ return "puts sequences from a fasta, name, group, quality, flow or taxonomy file in the same order"; }
     
@@ -43,7 +44,6 @@ private:
     int readFlow();
     int readName();
     int readGroup();
-    int readAccnos();
     int readTax();
     int readQual();
     

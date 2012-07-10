@@ -27,7 +27,8 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "cluster.classic";		}
 	string getCommandCategory()		{ return "Clustering";			}
-	string getHelpString();	
+    string getOutputFileNameTag(string, string);
+	string getHelpString();		
 	string getCitation() { return "Schloss PD, Handelsman J (2005). Introducing DOTUR, a computer program for defining operational taxonomic units and estimating species richness. Appl Environ Microbiol 71: 1501-6. \nhttp://www.mothur.org/wiki/Cluster.classic"; }
 	string getDescription()		{ return "cluster your sequences into OTUs using DOTUR’s method"; }
 	

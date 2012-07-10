@@ -24,6 +24,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "filter.seqs";			}
 	string getCommandCategory()		{ return "Sequence Processing";	}
+	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Filter.seqs"; }
 	string getDescription()		{ return "removes columns from alignments based on a criteria defined by the user"; }

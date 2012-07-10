@@ -35,6 +35,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "cluster.split";		}
 	string getCommandCategory()		{ return "Clustering";			}
+	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "Schloss PD, Westcott SL (2011). Assessing and improving methods used in OTU-based approaches for 16S rRNA gene sequence analysis. Appl Environ Microbiol. \nhttp://www.mothur.org/wiki/Cluster.split"; }
 	string getDescription()		{ return "splits your sequences by distance or taxonomy then clusters into OTUs"; }

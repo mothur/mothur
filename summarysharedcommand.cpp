@@ -64,12 +64,34 @@ string SummarySharedCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string SummarySharedCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "summary")            {   outputFileName =  "shared.summary";   }
+            else if (type == "phylip")            {   outputFileName =  "dist";   }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SummarySharedCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 SummarySharedCommand::SummarySharedCommand(){	
 	try {
 		abort = true; calledHelp = true; 
 		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["summary"] = tempOutNames;
+        outputTypes["phylip"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SummarySharedCommand", "SummarySharedCommand");
@@ -104,6 +126,7 @@ SummarySharedCommand::SummarySharedCommand(string option)  {
 			//initialize outputTypes
 			vector<string> tempOutNames;
 			outputTypes["summary"] = tempOutNames;
+            outputTypes["phylip"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -294,7 +317,7 @@ int SummarySharedCommand::execute(){
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		ofstream outputFileHandle, outAll;
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + "shared.summary";
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + getOutputFileNameTag("summary");
 		
 		//if the users entered no valid calculators don't execute command
 		if (sumCalculators.size() == 0) { return 0; }
@@ -325,7 +348,7 @@ int SummarySharedCommand::execute(){
 		outputFileHandle.close();
 		
 		//create file and put column headers for multiple groups file
-		string outAllFileName = ((m->getRootName(sharedfile)) + "sharedmultiple.summary");
+		string outAllFileName = ((m->getRootName(sharedfile)) + "multiple." + getOutputFileNameTag("summary"));
 		if (mult == true) {
 			m->openOutputFile(outAllFileName, outAll);
 			outputNames.push_back(outAllFileName);
@@ -744,7 +767,6 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                 //clean up memory
                 for (int i = 0; i < thisItersLookup.size(); i++) { delete thisItersLookup[i]; }
                 thisItersLookup.clear();
-                for (int i = 0; i < calcDists.size(); i++) {  calcDists[i].clear(); }
             }else {
                 if (createPhylip) {
                     for (int i = 0; i < calcDists.size(); i++) {
@@ -764,7 +786,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                             matrix[column][row] = dist;
                         }
                         
-                        string distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + sumCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + ".dist";
+                        string distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + sumCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + "." + getOutputFileNameTag("phylip");
                         outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
                         ofstream outDist;
                         m->openOutputFile(distFileName, outDist);
@@ -776,6 +798,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                     }
                 }
             }
+            for (int i = 0; i < calcDists.size(); i++) {  calcDists[i].clear(); }
 		}
 
         if (iters != 1) {
@@ -856,7 +879,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                     stdmatrix[column][row] = stdDist;
                 }
                 
-                string distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + sumCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + ".ave.dist";
+                string distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + sumCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + ".ave." + getOutputFileNameTag("phylip");
                 outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
                 ofstream outAve;
                 m->openOutputFile(distFileName, outAve);
@@ -866,7 +889,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                 
                 outAve.close();
                 
-                distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + sumCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + ".std.dist";
+                distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + sumCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + ".std." + getOutputFileNameTag("phylip");
                 outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
                 ofstream outSTD;
                 m->openOutputFile(distFileName, outSTD);

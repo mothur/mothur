@@ -31,6 +31,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "mgcluster";	}
 	string getCommandCategory()		{ return "Clustering";	}
+	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "Schloss PD, Handelsman J (2008). A statistical toolbox for metagenomics. BMC Bioinformatics 9: 34. \nhttp://www.mothur.org/wiki/Mgcluster"; }
 	string getDescription()		{ return "cluster your sequences into OTUs using a blast file"; }
@@ -46,6 +47,7 @@ private:
 	HCluster* hcluster;
 	ListVector* list;
 	ListVector oldList;
+    RAbundVector rav;
 	vector<seqDist> overlapMatrix;
 	vector<string> outputNames;
 	
@@ -54,12 +56,13 @@ private:
 	double cutoff;
 	float penalty;
 	int precision, length, precisionLength;
-	bool abort, minWanted, hclusterWanted, merge, hard;
+	bool abort, minWanted, hclusterWanted, merge, hard, large;
 	
 	void printData(ListVector*);
 	ListVector* mergeOPFs(map<string, int>, float);
 	void sortHclusterFiles(string, string);
 	vector<seqDist> getSeqs(ifstream&);
+    void createRabund(map<string, int>);
 
 };
 

@@ -52,6 +52,31 @@ string SortSeqsCommand::getHelpString(){
 	}
 }
 
+//**********************************************************************************************************************
+string SortSeqsCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "fasta")            {   outputFileName =  "sorted" + m->getExtension(inputName);   }
+            else if (type == "taxonomy")    {   outputFileName =  "sorted" + m->getExtension(inputName);   }
+            else if (type == "name")        {   outputFileName =  "sorted" + m->getExtension(inputName);   }
+            else if (type == "group")       {   outputFileName =  "sorted" + m->getExtension(inputName);   }
+            else if (type == "flow")        {   outputFileName =  "sorted" + m->getExtension(inputName);   }
+            else if (type == "qfile")       {   outputFileName =  "sorted" + m->getExtension(inputName);   }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SortSeqsCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
 
 //**********************************************************************************************************************
 SortSeqsCommand::SortSeqsCommand(){	
@@ -230,7 +255,13 @@ int SortSeqsCommand::execute(){
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//read through the correct file and output lines you want to keep
-        if (accnosfile != "")		{		readAccnos();	}
+        if (accnosfile != "")		{		
+            vector<string> temp;
+            m->readAccnos(accnosfile, temp);
+            for (int i = 0; i < temp.size(); i++) {  names[temp[i]] = i;  }
+            m->mothurOut("\nUsing " + accnosfile + " to determine the order. It contains " + toString(temp.size()) + " representative sequences.\n");	
+        }
+        
 		if (fastafile != "")		{		readFasta();	}
         if (flowfile != "")         {		readFlow();     }
         if (qualfile != "")			{		readQual();		}
@@ -294,7 +325,7 @@ int SortSeqsCommand::readFasta(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(fastafile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(fastafile)) + "sorted" + m->getExtension(fastafile);
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(fastafile)) + getOutputFileNameTag("fasta", fastafile);
 		outputTypes["fasta"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
 		ofstream out;
@@ -467,7 +498,7 @@ int SortSeqsCommand::readFlow(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(flowfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(flowfile)) + "sorted" + m->getExtension(flowfile);
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(flowfile)) + getOutputFileNameTag("flow", flowfile);
 		outputTypes["flow"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
 		ofstream out;
@@ -645,7 +676,7 @@ int SortSeqsCommand::readQual(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(qualfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(qualfile)) + "sorted" +  m->getExtension(qualfile);
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(qualfile)) + getOutputFileNameTag("qfile", qualfile);
         outputTypes["qfile"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
 		ofstream out;
@@ -825,7 +856,7 @@ int SortSeqsCommand::readName(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(namefile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(namefile)) + "sorted" + m->getExtension(namefile);
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(namefile)) + getOutputFileNameTag("name", namefile); 
         outputTypes["name"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
 		ofstream out;
@@ -902,8 +933,8 @@ int SortSeqsCommand::readGroup(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(groupfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(groupfile)) + "pick" + m->getExtension(groupfile);
-		outputTypes["group"].push_back(outputFileName);  outputNames.push_back(outputFileName);
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(groupfile)) + getOutputFileNameTag("group", groupfile);	
+        outputTypes["group"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
@@ -978,7 +1009,7 @@ int SortSeqsCommand::readTax(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(taxfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(taxfile)) + "pick" + m->getExtension(taxfile);
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(taxfile)) + getOutputFileNameTag("taxonomy", taxfile); 
         outputTypes["taxonomy"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
 		ofstream out;
@@ -1050,38 +1081,6 @@ int SortSeqsCommand::readTax(){
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-int SortSeqsCommand::readAccnos(){
-	try {
-		
-		ifstream in;
-		m->openInputFile(accnosfile, in);
-		string name;
-        int count = 0;
-		
-		while(!in.eof()){
-            
-            if (m->control_pressed) { break; }
-            
-			in >> name; m->gobble(in);
-            
-            if (name != "") {
-                names[name] = count;
-                count++;
-            }
-		}
-		in.close();		
-        
-        m->mothurOut("\nUsing " + accnosfile + " to determine the order. It contains " + toString(count) + " representative sequences.\n");
-        
-        return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SortSeqsCommand", "readAccnos");
-		exit(1);
-	}
-}
-
 //**********************************************************************************************************************
 
 

@@ -73,24 +73,16 @@ PhyloSummary::PhyloSummary(string groupFile){
 
 int PhyloSummary::summarize(string userTfile){
 	try {
-		
-		ifstream in;
-		m->openInputFile(userTfile, in);
-		
-		//read in users taxonomy file and add sequences to tree
-		string name, tax;
-		int numSeqs = 0;
-		while(!in.eof()){
-			in >> name >> tax; m->gobble(in);
-			
-			addSeqToTree(name, tax);
+		map<string, string> temp;
+        m->readTax(userTfile, temp);
+        
+        for (map<string, string>::iterator itTemp = temp.begin(); itTemp != temp.end();) {
+            addSeqToTree(itTemp->first, itTemp->second);
 			numSeqs++;
-			
-			if (m->control_pressed) { break;  }
-		}
-		in.close();
-		
-		return numSeqs;
+            temp.erase(itTemp++);
+        }
+        
+        return numSeqs;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PhyloSummary", "summarize");

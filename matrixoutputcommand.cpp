@@ -19,6 +19,7 @@ vector<string> MatrixOutputCommand::setParameters(){
 		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
 		CommandParameter pcalc("calc", "Multiple", "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan-kstest-sharednseqs-ochiai-anderberg-kulczynski-kulczynskicody-lennon-morisitahorn-braycurtis-whittaker-odum-canberra-structeuclidean-structchord-hellinger-manhattan-structpearson-soergel-spearman-structkulczynski-speciesprofile-hamming-structchi2-gower-memchi2-memchord-memeuclidean-mempearson", "jclass-thetayc", "", "", "",true,false); parameters.push_back(pcalc);
 		CommandParameter poutput("output", "Multiple", "lt-square", "lt", "", "", "",false,false); parameters.push_back(poutput);
+        CommandParameter pmode("mode", "Multiple", "average-median", "average", "", "", "",false,false); parameters.push_back(pmode);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
         CommandParameter piters("iters", "Number", "", "1000", "", "", "",false,false); parameters.push_back(piters);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
@@ -38,13 +39,14 @@ string MatrixOutputCommand::getHelpString(){
 	try {
 		string helpString = "";
 		ValidCalculators validCalculator;
-		helpString += "The dist.shared command parameters are shared, groups, calc, output, processors, subsample, iters and label.  shared is a required, unless you have a valid current file.\n";
+		helpString += "The dist.shared command parameters are shared, groups, calc, output, processors, subsample, iters, mode, and label.  shared is a required, unless you have a valid current file.\n";
 		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like included used.\n";
 		helpString += "The group names are separated by dashes. The label parameter allows you to select what distance levels you would like distance matrices created for, and is also separated by dashes.\n";
         helpString += "The iters parameter allows you to choose the number of times you would like to run the subsample.\n";
         helpString += "The subsample parameter allows you to enter the size pergroup of the sample or you can set subsample=T and mothur will use the size of your smallest group.\n";
 		helpString += "The dist.shared command should be in the following format: dist.shared(groups=yourGroups, calc=yourCalcs, label=yourLabels).\n";
 		helpString += "The output parameter allows you to specify format of your distance matrix. Options are lt, and square. The default is lt.\n";
+        helpString += "The mode parameter allows you to specify if you want the average or the median values reported when subsampling. Options are average, and median. The default is average.\n";
 		helpString += "Example dist.shared(groups=A-B-C, calc=jabund-sorabund).\n";
 		helpString += "The default value for groups is all the groups in your groupfile.\n";
 		helpString += "The default value for calc is jclass and thetayc.\n";
@@ -55,6 +57,26 @@ string MatrixOutputCommand::getHelpString(){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "MatrixOutputCommand", "getHelpString");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string MatrixOutputCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "phylip")             {   outputFileName =  "dist";         }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "MatrixOutputCommand", "getOutputFileNameTag");
 		exit(1);
 	}
 }
@@ -140,6 +162,9 @@ MatrixOutputCommand::MatrixOutputCommand(string option)  {
 			
 			output = validParameter.validFile(parameters, "output", false);		if(output == "not found"){	output = "lt"; }
 			if ((output != "lt") && (output != "square")) { m->mothurOut(output + " is not a valid output form. Options are lt and square. I will use lt."); m->mothurOutEndLine(); output = "lt"; }
+            
+            mode = validParameter.validFile(parameters, "mode", false);		if(mode == "not found"){	mode = "average"; }
+			if ((mode != "average") && (mode != "median")) { m->mothurOut(mode + " is not a valid mode. Options are average and medina. I will use average."); m->mothurOutEndLine(); output = "average"; }
 			
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = ""; }
@@ -442,7 +467,7 @@ void MatrixOutputCommand::printSims(ostream& out, vector< vector<double> >& simM
 				out << endl;
 			}
 		}else{
-			for (int b = 0; b < simMatrix.size(); m++)	{
+			for (int b = 0; b < simMatrix.size(); b++)	{
 				out << lookup[b]->getGroup() << '\t';
 				for (int n = 0; n < simMatrix[b].size(); n++)	{
 					out << simMatrix[b][n] << '\t'; 
@@ -620,11 +645,16 @@ int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
             }
             
             if (subsample && (thisIter != 0)) {  
+                if((thisIter) % 100 == 0){	m->mothurOut(toString(thisIter)); m->mothurOutEndLine();		}
                 calcDistsTotals.push_back(calcDists);
+                for (int i = 0; i < calcDists.size(); i++) {
+                    for (int j = 0; j < calcDists[i].size(); j++) {
+                        if (m->debug) {  m->mothurOut("[DEBUG]: Results: iter = " + toString(thisIter) + ", " + thisLookup[calcDists[i][j].seq1]->getGroup() + " - " + thisLookup[calcDists[i][j].seq2]->getGroup() + " distance = " + toString(calcDists[i][j].dist) + ".\n");  }
+                    } 
+                }
                 //clean up memory
                 for (int i = 0; i < thisItersLookup.size(); i++) { delete thisItersLookup[i]; }
                 thisItersLookup.clear();
-                for (int i = 0; i < calcDists.size(); i++) {  calcDists[i].clear(); }
             }else { //print results for whole dataset
                 for (int i = 0; i < calcDists.size(); i++) {
                     if (m->control_pressed) { break; }
@@ -643,7 +673,7 @@ int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
                         matrix[column][row] = dist;
                     }
                     
-                    string distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + matrixCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + ".dist";
+                    string distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + matrixCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + "." + getOutputFileNameTag("phylip");
                     outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
                     ofstream outDist;
                     m->openOutputFile(distFileName, outDist);
@@ -654,6 +684,7 @@ int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
                     outDist.close();
                 }
             }
+            for (int i = 0; i < calcDists.size(); i++) {  calcDists[i].clear(); }
 		}
 		
         if (iters != 1) {
@@ -664,34 +695,46 @@ int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
                 calcAverages[i].resize(calcDistsTotals[0][i].size());
                 
                 for (int j = 0; j < calcAverages[i].size(); j++) {
-                    calcAverages[i][j].seq1 = calcDists[i][j].seq1;
-                    calcAverages[i][j].seq2 = calcDists[i][j].seq2;
+                    calcAverages[i][j].seq1 = calcDistsTotals[0][i][j].seq1;
+                    calcAverages[i][j].seq2 = calcDistsTotals[0][i][j].seq2;
                     calcAverages[i][j].dist = 0.0;
                 }
             }
-            
-            for (int thisIter = 0; thisIter < iters; thisIter++) { //sum all groups dists for each calculator
-                for (int i = 0; i < calcAverages.size(); i++) {  //initialize sums to zero.
+            if (mode == "average") {
+                for (int thisIter = 0; thisIter < iters; thisIter++) { //sum all groups dists for each calculator
+                    for (int i = 0; i < calcAverages.size(); i++) {  //initialize sums to zero.
+                        for (int j = 0; j < calcAverages[i].size(); j++) {
+                            calcAverages[i][j].dist += calcDistsTotals[thisIter][i][j].dist;
+                            if (m->debug) {  m->mothurOut("[DEBUG]: Totaling for average calc: iter = " + toString(thisIter) + ", " + thisLookup[calcDistsTotals[thisIter][i][j].seq1]->getGroup() + " - " + thisLookup[calcDistsTotals[thisIter][i][j].seq2]->getGroup() + " distance = " + toString(calcDistsTotals[thisIter][i][j].dist) + ". New total = " + toString(calcAverages[i][j].dist) + ".\n");  }
+                        }
+                    }
+                }
+                
+                for (int i = 0; i < calcAverages.size(); i++) {  //finds average.
                     for (int j = 0; j < calcAverages[i].size(); j++) {
-                        calcAverages[i][j].dist += calcDistsTotals[thisIter][i][j].dist;
+                        calcAverages[i][j].dist /= (float) iters;
+                    }
+                }
+            }else { //find median
+                for (int i = 0; i < calcAverages.size(); i++) { //for each calc
+                    for (int j = 0; j < calcAverages[i].size(); j++) {  //for each comparison
+                        vector<double> dists;
+                        for (int thisIter = 0; thisIter < iters; thisIter++) { //for each subsample
+                            dists.push_back(calcDistsTotals[thisIter][i][j].dist);
+                        }
+                        sort(dists.begin(), dists.end());
+                        calcAverages[i][j].dist = dists[(iters/2)];
                     }
                 }
             }
-            
-            for (int i = 0; i < calcAverages.size(); i++) {  //finds average.
-                for (int j = 0; j < calcAverages[i].size(); j++) {
-                    calcAverages[i][j].dist /= (float) iters;
-                }
-            }
-            
             //find standard deviation
             vector< vector<seqDist>  > stdDev; stdDev.resize(matrixCalculators.size());
             for (int i = 0; i < stdDev.size(); i++) {  //initialize sums to zero.
                 stdDev[i].resize(calcDistsTotals[0][i].size());
                 
                 for (int j = 0; j < stdDev[i].size(); j++) {
-                    stdDev[i][j].seq1 = calcDists[i][j].seq1;
-                    stdDev[i][j].seq2 = calcDists[i][j].seq2;
+                    stdDev[i][j].seq1 = calcDistsTotals[0][i][j].seq1;
+                    stdDev[i][j].seq2 = calcDistsTotals[0][i][j].seq2;
                     stdDev[i][j].dist = 0.0;
                 }
             }
@@ -734,7 +777,7 @@ int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
                     stdmatrix[column][row] = stdDist;
                 }
             
-                string distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + matrixCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + ".ave.dist";
+                string distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + matrixCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + ".ave." + getOutputFileNameTag("phylip");
                 outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
                 ofstream outAve;
                 m->openOutputFile(distFileName, outAve);
@@ -744,7 +787,7 @@ int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
                 
                 outAve.close();
                 
-                distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + matrixCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + ".std.dist";
+                distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + matrixCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + ".std." + getOutputFileNameTag("phylip");
                 outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
                 ofstream outSTD;
                 m->openOutputFile(distFileName, outSTD);
@@ -768,6 +811,7 @@ int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
 int MatrixOutputCommand::driver(vector<SharedRAbundVector*> thisLookup, int start, int end, vector< vector<seqDist> >& calcDists) { 
 	try {
 		vector<SharedRAbundVector*> subset;
+        
 		for (int k = start; k < end; k++) { // pass cdd each set of groups to compare
 			
 			for (int l = 0; l < k; l++) {

@@ -25,6 +25,7 @@ public:
 	string getCommandName()			{ return "help";		}
 	string getCommandCategory()		{ return "Hidden";		}
 	string getHelpString() { return "For more information about a specific command type 'commandName(help)' i.e. 'cluster(help)'"; }	
+    string getOutputFileNameTag(string, string) { return "";  }
 	string getCitation() { return "no citation"; }
 	string getDescription()		{ return "help"; }
 

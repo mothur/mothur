@@ -52,7 +52,27 @@ string RemoveOtusCommand::getHelpString(){
 		exit(1);
 	}
 }
-
+//**********************************************************************************************************************
+string RemoveOtusCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "group")            {   outputFileName = "pick" + m->getExtension(inputName);  }
+            else if (type == "list")        {   outputFileName = "pick" + m->getExtension(inputName);  }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "RemoveOtusCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
 ///**********************************************************************************************************************
 RemoveOtusCommand::RemoveOtusCommand(){	
 	try {
@@ -182,7 +202,7 @@ int RemoveOtusCommand::execute(){
 		groupMap->readMap();
 		
 		//get groups you want to remove
-		if (accnosfile != "") { readAccnos(); }
+		if (accnosfile != "") { m->readAccnos(accnosfile, Groups); m->setGroups(Groups);  }
 		
 		//make sure groups are valid
 		//takes care of user setting groupNames that are invalid or setting groups=all
@@ -230,14 +250,14 @@ int RemoveOtusCommand::readListGroup(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(listfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(listfile)) + "pick." + label +  m->getExtension(listfile);
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(listfile)) + label + "." + getOutputFileNameTag("list", listfile);
 		
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		
 		string GroupOutputDir = outputDir;
 		if (outputDir == "") {  GroupOutputDir += m->hasPath(groupfile);  }
-		string outputGroupFileName = GroupOutputDir + m->getRootName(m->getSimpleName(groupfile)) + "pick." + label  + m->getExtension(groupfile);
+		string outputGroupFileName = GroupOutputDir + m->getRootName(m->getSimpleName(groupfile)) + label + "." + getOutputFileNameTag("group", groupfile);
 		
 		ofstream outGroup;
 		m->openOutputFile(outputGroupFileName, outGroup);
@@ -403,30 +423,6 @@ int RemoveOtusCommand::processList(ListVector*& list, GroupMap*& groupMap, ofstr
 	}
 	catch(exception& e) {
 		m->errorOut(e, "RemoveOtusCommand", "processList");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-void RemoveOtusCommand::readAccnos(){
-	try {
-		Groups.clear();
-		
-		ifstream in;
-		m->openInputFile(accnosfile, in);
-		string name;
-		
-		while(!in.eof()){
-			in >> name;
-			
-			Groups.push_back(name);
-			
-			m->gobble(in);
-		}
-		in.close();		
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "RemoveOtusCommand", "readAccnos");
 		exit(1);
 	}
 }

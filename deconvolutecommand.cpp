@@ -45,6 +45,27 @@ string DeconvoluteCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string DeconvoluteCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "fasta") {  outputFileName =  "unique" + m->getExtension(inputName); }
+            else if (type == "name") {  outputFileName =  "names"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "DeconvoluteCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 DeconvoluteCommand::DeconvoluteCommand(){	
 	try {
 		abort = true; calledHelp = true; 
@@ -149,14 +170,14 @@ int DeconvoluteCommand::execute() {
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 
 		//prepare filenames and open files
-		string outNameFile = outputDir + m->getRootName(m->getSimpleName(inFastaName)) + "names";
-		string outFastaFile = outputDir + m->getRootName(m->getSimpleName(inFastaName)) + "unique" + m->getExtension(inFastaName);
+		string outNameFile = outputDir + m->getRootName(m->getSimpleName(inFastaName)) + getOutputFileNameTag("name");
+		string outFastaFile = outputDir + m->getRootName(m->getSimpleName(inFastaName)) + getOutputFileNameTag("fasta", inFastaName);
 		
 		map<string, string> nameMap;
 		map<string, string>::iterator itNames;
 		if (oldNameMapFName != "")  {  
             m->readNames(oldNameMapFName, nameMap); 
-            if (oldNameMapFName == outNameFile){ outNameFile = outputDir + m->getRootName(m->getSimpleName(inFastaName)) + "unique.names";   }
+            if (oldNameMapFName == outNameFile){ outNameFile = outputDir + m->getRootName(m->getSimpleName(inFastaName)) + "unique." + getOutputFileNameTag("name");   }
         }
 		
 		if (m->control_pressed) { return 0; }

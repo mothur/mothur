@@ -24,7 +24,7 @@ vector<string> UnifracWeightedCommand::setParameters(){
         CommandParameter psubsample("subsample", "String", "", "", "", "", "",false,false); parameters.push_back(psubsample);
         CommandParameter pconsensus("consensus", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pconsensus);
         CommandParameter prandom("random", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(prandom);
-		CommandParameter pdistance("distance", "Multiple", "column-lt-square", "column", "", "", "",false,false); parameters.push_back(pdistance);
+		CommandParameter pdistance("distance", "Multiple", "column-lt-square-phylip", "column", "", "", "",false,false); parameters.push_back(pdistance);
 		CommandParameter proot("root", "Boolean", "F", "", "", "", "",false,false); parameters.push_back(proot);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
@@ -60,6 +60,30 @@ string UnifracWeightedCommand::getHelpString(){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "UnifracWeightedCommand", "getHelpString");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string UnifracWeightedCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "weighted")            {   outputFileName =  "weighted";   }
+            else if (type == "wsummary")        {   outputFileName =  "wsummary";   }
+            else if (type == "phylip")           {   outputFileName =  "dist";   }
+            else if (type == "column")           {   outputFileName =  "dist";   }
+            else if (type == "tree")             {   outputFileName =  "tre";   }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "UnifracWeightedCommand", "getOutputFileNameTag");
 		exit(1);
 	}
 }
@@ -180,6 +204,7 @@ UnifracWeightedCommand::UnifracWeightedCommand(string option) {
 			string temp = validParameter.validFile(parameters, "distance", false);			
 			if (temp == "not found") { phylip = false; outputForm = ""; }
 			else{
+                if (temp=="phylip") { temp = "lt"; }
 				if ((temp == "lt") || (temp == "column") || (temp == "square")) {  phylip = true;  outputForm = temp; }
 				else { m->mothurOut("Options for distance are: lt, square, or column. Using lt."); m->mothurOutEndLine(); phylip = true; outputForm = "lt"; }
 			}
@@ -242,7 +267,7 @@ int UnifracWeightedCommand::execute() {
     
         if (m->control_pressed) {  delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; } return 0; }
 				
-		sumFile = outputDir + m->getSimpleName(treefile) + ".wsummary";
+		sumFile = outputDir + m->getSimpleName(treefile) + getOutputFileNameTag("wsummary");
 		m->openOutputFile(sumFile, outSum);
 		outputNames.push_back(sumFile);  outputTypes["wsummary"].push_back(sumFile);
 		
@@ -306,9 +331,9 @@ int UnifracWeightedCommand::execute() {
             vector<double> randomData; randomData.resize(numComp,0); //weighted score info for random trees. data[0] = weightedscore AB, data[1] = weightedscore AC...
             
             if (random) {  
-                output = new ColumnFile(outputDir + m->getSimpleName(treefile)  + toString(i+1) + ".weighted", itersString);  
-                outputNames.push_back(outputDir + m->getSimpleName(treefile)  + toString(i+1) + ".weighted");
-                outputTypes["weighted"].push_back(outputDir + m->getSimpleName(treefile)  + toString(i+1) + ".weighted");
+                output = new ColumnFile(outputDir + m->getSimpleName(treefile)  + toString(i+1) + "." + getOutputFileNameTag("weighted"), itersString);  
+                outputNames.push_back(outputDir + m->getSimpleName(treefile)  + toString(i+1) + "." + getOutputFileNameTag("weighted"));
+                outputTypes["weighted"].push_back(outputDir + m->getSimpleName(treefile)  + toString(i+1) + "." + getOutputFileNameTag("weighted"));
             } 
             
             userData = weighted.getValues(T[i], processors, outputDir); //userData[0] = weightedscore
@@ -461,15 +486,15 @@ int UnifracWeightedCommand::getAverageSTDMatrices(vector< vector<double> >& dist
             }
         }
         
-        string aveFileName = outputDir + m->getSimpleName(treefile)  + toString(treeNum+1) + ".weighted.ave.dist";
-        outputNames.push_back(aveFileName); outputTypes["phylip"].push_back(aveFileName); 
-        
+        string aveFileName = outputDir + m->getSimpleName(treefile)  + toString(treeNum+1) + ".weighted.ave." + getOutputFileNameTag("phylip");
+        if (outputForm != "column") { outputNames.push_back(aveFileName); outputTypes["phylip"].push_back(aveFileName);  }
+        else { outputNames.push_back(aveFileName); outputTypes["column"].push_back(aveFileName);  }
         ofstream out;
         m->openOutputFile(aveFileName, out);
         
-       string stdFileName = outputDir + m->getSimpleName(treefile)  + toString(treeNum+1) + ".weighted.std.dist";
-       outputNames.push_back(stdFileName); outputTypes["phylip"].push_back(stdFileName); 
-        
+        string stdFileName = outputDir + m->getSimpleName(treefile)  + toString(treeNum+1) + ".weighted.std." + getOutputFileNameTag("phylip");
+        if (outputForm != "column") { outputNames.push_back(stdFileName); outputTypes["phylip"].push_back(stdFileName); }
+        else { outputNames.push_back(stdFileName); outputTypes["column"].push_back(stdFileName); }        
         ofstream outStd;
         m->openOutputFile(stdFileName, outStd);
         
@@ -550,7 +575,7 @@ int UnifracWeightedCommand::getConsensusTrees(vector< vector<double> >& dists, i
         Tree* conTree = con.getTree(newTrees);
         
         //create a new filename
-        string conFile = outputDir + m->getRootName(m->getSimpleName(treefile)) + toString(treeNum+1) + ".weighted.cons.tre";				
+        string conFile = outputDir + m->getRootName(m->getSimpleName(treefile)) + toString(treeNum+1) + ".weighted.cons." + getOutputFileNameTag("tree");				
         outputNames.push_back(conFile); outputTypes["tree"].push_back(conFile); 
         ofstream outTree;
         m->openOutputFile(conFile, outTree);
@@ -574,7 +599,7 @@ vector<Tree*> UnifracWeightedCommand::buildTrees(vector< vector<double> >& dists
         vector<Tree*> trees;
         
         //create a new filename
-        string outputFile = outputDir + m->getRootName(m->getSimpleName(treefile)) + toString(treeNum+1) + ".weighted.all.tre";				
+        string outputFile = outputDir + m->getRootName(m->getSimpleName(treefile)) + toString(treeNum+1) + ".weighted.all." + getOutputFileNameTag("tree");				
         outputNames.push_back(outputFile); outputTypes["tree"].push_back(outputFile); 
         
         ofstream outAll;
@@ -885,10 +910,10 @@ void UnifracWeightedCommand::createPhylipFile() {
 		
 			string phylipFileName;
 			if ((outputForm == "lt") || (outputForm == "square")) {
-				phylipFileName = outputDir + m->getSimpleName(treefile)  + toString(i+1) + ".weighted.phylip.dist";
+				phylipFileName = outputDir + m->getSimpleName(treefile)  + toString(i+1) + ".weighted.phylip." + getOutputFileNameTag("phylip");
 				outputNames.push_back(phylipFileName); outputTypes["phylip"].push_back(phylipFileName); 
 			}else { //column
-				phylipFileName = outputDir + m->getSimpleName(treefile)  + toString(i+1) + ".weighted.column.dist";
+				phylipFileName = outputDir + m->getSimpleName(treefile)  + toString(i+1) + ".weighted.column." + getOutputFileNameTag("column");
 				outputNames.push_back(phylipFileName); outputTypes["column"].push_back(phylipFileName); 
 			}
 			

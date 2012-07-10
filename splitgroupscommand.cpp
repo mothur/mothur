@@ -51,6 +51,27 @@ string SplitGroupCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string SplitGroupCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "fasta")            {   outputFileName =  "fasta";   }
+            else if (type == "name")        {   outputFileName =  "names";   }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SplitGroupCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 SplitGroupCommand::SplitGroupCommand(){	
 	try {
 		abort = true; calledHelp = true; 
@@ -188,8 +209,8 @@ int SplitGroupCommand::execute(){
 			
 			m->mothurOut("Processing group: " + Groups[i]); m->mothurOutEndLine();
 			
-			string newFasta = fastafileRoot + Groups[i] + ".fasta";
-			string newName = namefileRoot + Groups[i] + ".names";
+			string newFasta = fastafileRoot + Groups[i] + "." + getOutputFileNameTag("fasta");
+			string newName = namefileRoot + Groups[i] + "." + getOutputFileNameTag("name");
 			
 			parser->getSeqs(Groups[i], newFasta, false);
 			outputNames.push_back(newFasta); outputTypes["fasta"].push_back(newFasta);

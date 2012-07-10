@@ -53,6 +53,27 @@ string MergeGroupsCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string MergeGroupsCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "shared")        {   outputFileName = "merge" +  m->getExtension(inputName);       }
+            else if (type == "group")    {   outputFileName =   "merge" +  m->getExtension(inputName);     }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "MergeGroupsCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 MergeGroupsCommand::MergeGroupsCommand(){	
 	try {
 		abort = true; calledHelp = true; 
@@ -284,8 +305,8 @@ int MergeGroupsCommand::processSharedFile(GroupMap*& designMap){
 		
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(sharedfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(sharedfile)) + "merge" +  m->getExtension(sharedfile);
-		outputTypes["shared"].push_back(outputFileName); outputNames.push_back(outputFileName);
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(sharedfile)) + getOutputFileNameTag("shared", sharedfile);
+        outputTypes["shared"].push_back(outputFileName); outputNames.push_back(outputFileName);
 		
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
@@ -387,7 +408,7 @@ int MergeGroupsCommand::processGroupFile(GroupMap*& designMap){
 		
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(groupfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(groupfile)) + "merge" +  m->getExtension(groupfile);
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(groupfile)) + getOutputFileNameTag("group", groupfile);
 		outputTypes["group"].push_back(outputFileName); outputNames.push_back(outputFileName);
 		
 		ofstream out;

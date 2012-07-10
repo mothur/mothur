@@ -25,6 +25,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "summary.single";			}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Summary.single"; }
 	string getDescription()		{ return "generate summary file that has the calculator value for each line in the OTU data"; }
@@ -48,7 +49,7 @@ private:
 	
 	vector<string> parseSharedFile(string);
 	vector<string> createGroupSummaryFile(int, int, vector<string>&, map<string, string>);
-    int process(SAbundVector*&, ofstream&, ofstream&, ofstream&);
+    int process(SAbundVector*&, ofstream&, ofstream&);
 
 
 };

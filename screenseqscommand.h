@@ -23,6 +23,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "screen.seqs";				}
 	string getCommandCategory()		{ return "Sequence Processing";		}
+	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Screen.seqs"; }
 	string getDescription()		{ return "enables you to keep sequences that fulfill certain user defined criteria"; }
@@ -60,7 +61,6 @@ private:
 	vector<string> outputNames;
 	vector<string> optimize;
 	map<string, int> nameMap;
-	int readNames();
 	
 	int getSummary(vector<unsigned long long>&);
 	int createProcessesCreateSummary(vector<int>&, vector<int>&, vector<int>&, vector<int>&, vector<int>&, string);

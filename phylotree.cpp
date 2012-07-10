@@ -178,16 +178,13 @@ PhyloTree::PhyloTree(string tfile){
 			MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 		
 		#else
-			ifstream in;
-			m->openInputFile(tfile, in);
-			
-			//read in users taxonomy file and add sequences to tree
-			while(!in.eof()){
-				in >> name >> tax; m->gobble(in);
-			
-				addSeqToTree(name, tax);
-			}
-			in.close();
+            map<string, string> temp;
+            m->readTax(tfile, temp);
+        
+            for (map<string, string>::iterator itTemp = temp.begin(); itTemp != temp.end();) {
+                addSeqToTree(itTemp->first, itTemp->second);
+                temp.erase(itTemp++);
+            }
 		#endif
 	
 		assignHeirarchyIDs(0);

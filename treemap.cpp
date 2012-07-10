@@ -21,75 +21,107 @@
  TreeMap::~TreeMap(){}
 /************************************************************/
 int TreeMap::readMap(string gf) {
-    
-    groupFileName = gf;
-	m->openInputFile(gf, fileHandle);
-    
-    string seqName, seqGroup;
-    int error = 0;
-    
-    while(fileHandle){
-        fileHandle >> seqName;       m->gobble(fileHandle);	//read from first column
-        fileHandle >> seqGroup;			//read from second column
+    try {
+        groupFileName = gf;
+        m->openInputFile(gf, fileHandle);
         
-        if (m->control_pressed) {  fileHandle.close();  return 1; }
+        string seqName, seqGroup;
+        int error = 0;
+
+        string rest = "";
+        char buffer[4096];
+        bool pairDone = false;
+        bool columnOne = true;
         
-        setNamesOfGroups(seqGroup);
-        
-        map<string, GroupIndex>::iterator itCheck = treemap.find(seqName);
-        if (itCheck != treemap.end()) { error = 1; m->mothurOut("[WARNING]: Your groupfile contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine();  }
-        else {
-            namesOfSeqs.push_back(seqName);
-            treemap[seqName].groupname = seqGroup;	//store data in map
+        while (!fileHandle.eof()) {
+            if (m->control_pressed) { fileHandle.close();  return 1; }
             
-            it2 = seqsPerGroup.find(seqGroup);
-            if (it2 == seqsPerGroup.end()) { //if it's a new group
-                seqsPerGroup[seqGroup] = 1;
-            }else {//it's a group we already have
-                seqsPerGroup[seqGroup]++;
-            }				
+            fileHandle.read(buffer, 4096);
+            vector<string> pieces = m->splitWhiteSpace(rest, buffer, fileHandle.gcount());
+            
+            for (int i = 0; i < pieces.size(); i++) {
+                if (columnOne) {  seqName = pieces[i]; columnOne=false; }
+                else  { seqGroup = pieces[i]; pairDone = true; columnOne=true; }
+                
+                if (pairDone) { 
+                    setNamesOfGroups(seqGroup);
+                    
+                    map<string, GroupIndex>::iterator itCheck = treemap.find(seqName);
+                    if (itCheck != treemap.end()) { error = 1; m->mothurOut("[WARNING]: Your groupfile contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine();  }
+                    else {
+                        namesOfSeqs.push_back(seqName);
+                        treemap[seqName].groupname = seqGroup;	//store data in map
+                        
+                        it2 = seqsPerGroup.find(seqGroup);
+                        if (it2 == seqsPerGroup.end()) { //if it's a new group
+                            seqsPerGroup[seqGroup] = 1;
+                        }else {//it's a group we already have
+                            seqsPerGroup[seqGroup]++;
+                        }				
+                    }
+                    pairDone = false; 
+                } 
+            }
         }
+        fileHandle.close();
         
-        m->gobble(fileHandle);
+        return error;
     }
-    fileHandle.close();
-    
-    return error;
+	catch(exception& e) {
+		m->errorOut(e, "TreeMap", "readMap");
+		exit(1);
+	}
 }
 
 /************************************************************/
 int TreeMap::readMap() {
-		string seqName, seqGroup;
-		int error = 0;
-		
-		while(fileHandle){
-			fileHandle >> seqName;      	 m->gobble(fileHandle); //read from first column
-			fileHandle >> seqGroup;			//read from second column
-			
-			if (m->control_pressed) {  fileHandle.close();  return 1; }
-			
-			setNamesOfGroups(seqGroup);
-					
-			map<string, GroupIndex>::iterator itCheck = treemap.find(seqName);
-			if (itCheck != treemap.end()) { error = 1; m->mothurOut("[WARNING]: Your groupfile contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine();  }
-			else {
-				namesOfSeqs.push_back(seqName);
-				treemap[seqName].groupname = seqGroup;	//store data in map
-				
-				it2 = seqsPerGroup.find(seqGroup);
-				if (it2 == seqsPerGroup.end()) { //if it's a new group
-					seqsPerGroup[seqGroup] = 1;
-				}else {//it's a group we already have
-					seqsPerGroup[seqGroup]++;
-				}				
-			}
-			
-			m->gobble(fileHandle);
-		}
-		fileHandle.close();
-	
-
-		return error;
+    try {
+        string seqName, seqGroup;
+        int error = 0;
+        
+        string rest = "";
+        char buffer[4096];
+        bool pairDone = false;
+        bool columnOne = true;
+        
+        while (!fileHandle.eof()) {
+            if (m->control_pressed) { fileHandle.close();  return 1; }
+            
+            fileHandle.read(buffer, 4096);
+            vector<string> pieces = m->splitWhiteSpace(rest, buffer, fileHandle.gcount());
+            
+            for (int i = 0; i < pieces.size(); i++) {
+                if (columnOne) {  seqName = pieces[i]; columnOne=false; }
+                else  { seqGroup = pieces[i]; pairDone = true; columnOne=true; }
+                
+                if (pairDone) { 
+                    setNamesOfGroups(seqGroup);
+                    
+                    map<string, GroupIndex>::iterator itCheck = treemap.find(seqName);
+                    if (itCheck != treemap.end()) { error = 1; m->mothurOut("[WARNING]: Your groupfile contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine();  }
+                    else {
+                        namesOfSeqs.push_back(seqName);
+                        treemap[seqName].groupname = seqGroup;	//store data in map
+                        
+                        it2 = seqsPerGroup.find(seqGroup);
+                        if (it2 == seqsPerGroup.end()) { //if it's a new group
+                            seqsPerGroup[seqGroup] = 1;
+                        }else {//it's a group we already have
+                            seqsPerGroup[seqGroup]++;
+                        }				
+                    }
+                    pairDone = false; 
+                } 
+            }
+        }
+        fileHandle.close();
+        
+        return error;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "TreeMap", "readMap");
+		exit(1);
+	}
 }
 /************************************************************/
 void TreeMap::addSeq(string seqName, string seqGroup) {

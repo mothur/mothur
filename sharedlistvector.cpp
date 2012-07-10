@@ -16,18 +16,24 @@
 
 /***********************************************************************/
 
-SharedListVector::SharedListVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0){ groupmap = NULL; }
+SharedListVector::SharedListVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0){ groupmap = NULL; countTable = NULL; }
 
 /***********************************************************************/
 
-SharedListVector::SharedListVector(int n):	DataVector(), data(n, "") , maxRank(0), numBins(0), numSeqs(0){ groupmap = NULL; }
+SharedListVector::SharedListVector(int n):	DataVector(), data(n, "") , maxRank(0), numBins(0), numSeqs(0){ groupmap = NULL; countTable = NULL; }
 
 /***********************************************************************/
 SharedListVector::SharedListVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), numSeqs(0) {
 	try {
+        groupmap = NULL; countTable = NULL;
 		//set up groupmap for later.
-		groupmap = new GroupMap(m->getGroupFile());
-		groupmap->readMap(); 
+        if (m->groupMode == "group") {
+            groupmap = new GroupMap(m->getGroupFile());
+            groupmap->readMap(); 
+        }else {
+            countTable = new CountTable();
+            countTable->readTable(m->getCountTableFile());
+        }
 
 		int hold;
 		string inputData;
@@ -188,27 +194,34 @@ SAbundVector SharedListVector::getSAbundVector(){
 /***********************************************************************/
 SharedOrderVector* SharedListVector::getSharedOrderVector(){
 	try {
-		string groupName, names, name;
-	
 		SharedOrderVector* order = new SharedOrderVector();
 		order->setLabel(label);
 	
 		for(int i=0;i<numBins;i++){
 			int binSize = m->getNumNames(get(i));	//find number of individual in given bin	
-			names = get(i);
-			while (names.find_first_of(',') != -1) { 
-				name = names.substr(0,names.find_first_of(','));
-				names = names.substr(names.find_first_of(',')+1, names.length());
-				groupName = groupmap->getGroup(name);
+			string names = get(i);
+            vector<string> binNames;
+            m->splitAtComma(names, binNames);
+            if (m->groupMode != "group") {
+                binSize = 0;
+                for (int j = 0; j < binNames.size(); j++) {  binSize += countTable->getNumSeqs(binNames[i]);  }
+            }
+			for (int j = 0; j < binNames.size(); j++) { 
+                if (m->control_pressed) { return order; }
+                if (m->groupMode == "group") {
+                    string groupName = groupmap->getGroup(binNames[i]);
+                    if(groupName == "not found") {	m->mothurOut("Error: Sequence '" + binNames[i] + "' was not found in the group file, please correct."); m->mothurOutEndLine();  exit(1); }
 				
-				if(groupName == "not found") {	m->mothurOut("Error: Sequence '" + name + "' was not found in the group file, please correct."); m->mothurOutEndLine();  exit(1); }
-				
-				order->push_back(i, binSize, groupName);  //i represents what bin you are in
+                    order->push_back(i, binSize, groupName);  //i represents what bin you are in
+                }else {
+                    vector<int> groupAbundances = countTable->getGroupCounts(binNames[i]);
+                    vector<string> groupNames = countTable->getNamesOfGroups();
+                    for (int k = 0; k < groupAbundances.size(); k++) { //groupAbundances.size() == 0 if there is a file mismatch and m->control_pressed is true.
+                        if (m->control_pressed) { return order; }
+                        for (int l = 0; l < groupAbundances[k]; l++) {  order->push_back(i, binSize, groupNames[k]);  }
+                    }
+                }
 			}
-			//get last name
-			groupName = groupmap->getGroup(names);
-			if(groupName == "not found") {	m->mothurOut("Error: Sequence '" + names + "' was not found in the group file, please correct."); m->mothurOutEndLine();  exit(1); }
-			order->push_back(i, binSize, groupName);
 		}
 
 		random_shuffle(order->begin(), order->end());
@@ -225,25 +238,23 @@ SharedOrderVector* SharedListVector::getSharedOrderVector(){
 SharedRAbundVector SharedListVector::getSharedRAbundVector(string groupName) {
 	try {
 		SharedRAbundVector rav(data.size());
-		string group, names, name;
 		
 		for(int i=0;i<numBins;i++){
-			names = get(i);  
-			while (names.find_first_of(',') != -1) { 
-				name = names.substr(0,names.find_first_of(','));
-				names = names.substr(names.find_first_of(',')+1, names.length());
-				group = groupmap->getGroup(name);
-				if(group == "not found") {	m->mothurOut("Error: Sequence '" + name + "' was not found in the group file, please correct."); m->mothurOutEndLine();  exit(1); }
-				if (group == groupName) { //this name is in the group you want the vector for.
-					rav.set(i, rav.getAbundance(i) + 1, group);  //i represents what bin you are in
-				}
-			}
-			
-			//get last name
-			groupName = groupmap->getGroup(names);
-			if(groupName == "not found") {	m->mothurOut("Error: Sequence '" + names + "' was not found in the group file, please correct."); m->mothurOutEndLine();  exit(1); }
-			if (group == groupName) { //this name is in the group you want the vector for.
-					rav.set(i, rav.getAbundance(i) + 1, group);  //i represents what bin you are in
+			string names = get(i);
+            vector<string> binNames;
+            m->splitAtComma(names, binNames);
+            for (int j = 0; j < binNames.size(); j++) { 
+				if (m->control_pressed) { return rav; }
+                if (m->groupMode == "group") {
+                    string group = groupmap->getGroup(binNames[j]);
+                    if(group == "not found") {	m->mothurOut("Error: Sequence '" + binNames[j] + "' was not found in the group file, please correct."); m->mothurOutEndLine();  exit(1); }
+                    if (group == groupName) { //this name is in the group you want the vector for.
+                        rav.set(i, rav.getAbundance(i) + 1, group);  //i represents what bin you are in
+                    }
+                }else {
+                    int count = countTable->getGroupCount(binNames[j], groupName);
+                    rav.set(i, rav.getAbundance(i) + count, groupName);
+                }
 			}
 		}
 		
@@ -264,11 +275,13 @@ vector<SharedRAbundVector*> SharedListVector::getSharedRAbundVector() {
 		SharedUtil* util;
 		util = new SharedUtil();
 		vector<SharedRAbundVector*> lookup;  //contains just the groups the user selected
+        vector<SharedRAbundVector*> lookupDelete;
 		map<string, SharedRAbundVector*> finder;  //contains all groups in groupmap
-		string group, names, name;
 		
 		vector<string> Groups = m->getGroups();
-		vector<string> allGroups = groupmap->getNamesOfGroups();
+        vector<string> allGroups;
+		if (m->groupMode == "group") {  allGroups = groupmap->getNamesOfGroups();  }
+        else {  allGroups = countTable->getNamesOfGroups();  }
 		util->setGroups(Groups, allGroups);
 		m->setGroups(Groups);
 		delete util;
@@ -280,47 +293,31 @@ vector<SharedRAbundVector*> SharedListVector::getSharedRAbundVector() {
 			finder[allGroups[i]]->setGroup(allGroups[i]);
 			if (m->inUsersGroups(allGroups[i], m->getGroups())) {  //if this group is in user groups
 				lookup.push_back(finder[allGroups[i]]);
-			}
+			}else {
+                lookupDelete.push_back(finder[allGroups[i]]);
+            }
 		}
 	
 		//fill vectors
 		for(int i=0;i<numBins;i++){
-			names = get(i);  
-			int nameLength = names.size();
-			string seqName = "";
-			
-			for(int j=0;j<nameLength;j++){
-				if(names[j] == ','){
-					group = groupmap->getGroup(seqName);
-					if(group == "not found") {	m->mothurOut("Error: Sequence '" + seqName + "' was not found in the group file, please correct."); m->mothurOutEndLine();  exit(1); }
-					finder[group]->set(i, finder[group]->getAbundance(i) + 1, group);  //i represents what bin you are in
-					
-					seqName = "";
-				}
-				else{
-					seqName += names[j];
-				}
+			string names = get(i);  
+			vector<string> binNames;
+            m->splitAtComma(names, binNames);
+            for (int j = 0; j < binNames.size(); j++) { 
+                if (m->groupMode == "group") {
+                    string group = groupmap->getGroup(binNames[j]);
+                    if(group == "not found") {	m->mothurOut("Error: Sequence '" + binNames[j] + "' was not found in the group file, please correct."); m->mothurOutEndLine();  exit(1); }
+                    finder[group]->set(i, finder[group]->getAbundance(i) + 1, group);  //i represents what bin you are in	
+                }else{
+                    vector<int> counts = countTable->getGroupCounts(binNames[j]);
+                    for (int k = 0; k < allGroups.size(); k++) {
+                        finder[allGroups[k]]->set(i, finder[allGroups[k]]->getAbundance(i) + counts[k], allGroups[k]);
+                    }
+                }
 			}
-			group = groupmap->getGroup(seqName);
-			if(group == "not found") {	m->mothurOut("Error: Sequence '" + seqName + "' was not found in the group file, please correct."); m->mothurOutEndLine();  exit(1); }
-			finder[group]->set(i, finder[group]->getAbundance(i) + 1, group);  //i represents what bin you are in
-			
-			
-			
-//			while (names.find_first_of(',') != -1) { 
-//				name = names.substr(0,names.find_first_of(','));
-//				names = names.substr(names.find_first_of(',')+1, names.length());
-//				group = groupmap->getGroup(name);
-//				if(group == "not found") {	m->mothurOut("Error: Sequence '" + name + "' was not found in the group file, please correct."); m->mothurOutEndLine();  exit(1); }
-//				finder[group]->set(i, finder[group]->getAbundance(i) + 1, group);  //i represents what bin you are in
-//			}
-			
-			//get last name
-//			group = groupmap->getGroup(names);
-//			if(group == "not found") {	m->mothurOut("Error: Sequence '" + names + "' was not found in the group file, please correct."); m->mothurOutEndLine();  exit(1); }
-//			finder[group]->set(i, finder[group]->getAbundance(i) + 1, group);  //i represents what bin you are in
-			
 		}
+        
+        for (int j = 0; j < lookupDelete.size(); j++) {  delete lookupDelete[j];  }
 
 		return lookup;
 	}
@@ -355,7 +352,14 @@ OrderVector SharedListVector::getOrderVector(map<string,int>* orderMap = NULL){
 			OrderVector ov;
 		
 			for(int i=0;i<data.size();i++){
-				int binSize = m->getNumNames(data[i]);		
+                string names = data[i];
+                vector<string> binNames;
+                m->splitAtComma(names, binNames);
+				int binSize = binNames.size();	
+                if (m->groupMode != "group") {
+                    binSize = 0;
+                    for (int j = 0; j < binNames.size(); j++) {  binSize += countTable->getNumSeqs(binNames[i]);  }
+                }
 				for(int j=0;j<binSize;j++){
 					ov.push_back(i);
 				}
@@ -372,31 +376,15 @@ OrderVector SharedListVector::getOrderVector(map<string,int>* orderMap = NULL){
 		
 			for(int i=0;i<data.size();i++){
 				string listOTU = data[i];
-				int length = listOTU.size();
-				
-				string seqName="";
-			
-				for(int j=0;j<length;j++){
-				
-					if(listOTU[j] != ','){
-						seqName += listOTU[j];
-					}
-					else{
-						if(orderMap->count(seqName) == 0){
-							m->mothurOut(seqName + " not found, check *.names file\n");
-							exit(1);
-						}
-					
-						ov.set((*orderMap)[seqName], i);
-						seqName = "";
-					}						
+				vector<string> binNames;
+                m->splitAtComma(listOTU, binNames);
+                for (int j = 0; j < binNames.size(); j++) { 
+                    if(orderMap->count(binNames[j]) == 0){
+                        m->mothurOut(binNames[j] + " not found, check *.names file\n");
+                        exit(1);
+                    }
+                    ov.set((*orderMap)[binNames[j]], i);
 				}
-			
-				if(orderMap->count(seqName) == 0){
-					m->mothurOut(seqName + " not found, check *.names file\n");
-					exit(1);
-				}
-				ov.set((*orderMap)[seqName], i);	
 			}
 		
 			ov.setLabel(label);

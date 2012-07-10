@@ -70,6 +70,26 @@ string TreeGroupCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string TreeGroupCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "tree")            {   outputFileName =  "tre";   }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "TreeGroupCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 TreeGroupCommand::TreeGroupCommand(){	
 	try {
 		abort = true; calledHelp = true;
@@ -442,7 +462,7 @@ int TreeGroupCommand::execute(){
 			if (m->control_pressed) { return 0; }
 
 			//create a new filename
-			string outputFile = outputDir + m->getRootName(m->getSimpleName(inputfile)) + "tre";	
+			string outputFile = outputDir + m->getRootName(m->getSimpleName(inputfile)) + getOutputFileNameTag("tree");	
 			outputNames.push_back(outputFile); outputTypes["tree"].push_back(outputFile);
 				
 			Tree* newTree = createTree(matrix);
@@ -896,7 +916,7 @@ int TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
                 }
                 
                 //create a new filename
-                string outputFile = outputDir + m->getRootName(m->getSimpleName(inputfile)) + treeCalculators[i]->getName() + "." + thisLookup[0]->getLabel() + ".ave.tre";				
+                string outputFile = outputDir + m->getRootName(m->getSimpleName(inputfile)) + treeCalculators[i]->getName() + "." + thisLookup[0]->getLabel() + ".ave." + getOutputFileNameTag("tree");				
                 outputNames.push_back(outputFile); outputTypes["tree"].push_back(outputFile); 
                 
                 //creates tree from similarity matrix and write out file
@@ -909,7 +929,7 @@ int TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
                 if (m->control_pressed) { break; }
                 
                 //create a new filename
-                string outputFile = outputDir + m->getRootName(m->getSimpleName(inputfile)) + treeCalculators[i]->getName() + "." + thisLookup[0]->getLabel() + ".all.tre";				
+                string outputFile = outputDir + m->getRootName(m->getSimpleName(inputfile)) + treeCalculators[i]->getName() + "." + thisLookup[0]->getLabel() + ".all." + getOutputFileNameTag("tree");				
                 outputNames.push_back(outputFile); outputTypes["tree"].push_back(outputFile); 
                 
                 ofstream outAll;
@@ -950,7 +970,7 @@ int TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
                 Tree* conTree = consensus.getTree(trees);
                 
                 //create a new filename
-                string conFile = outputDir + m->getRootName(m->getSimpleName(inputfile)) + treeCalculators[i]->getName() + "." + thisLookup[0]->getLabel() + ".cons.tre";				
+                string conFile = outputDir + m->getRootName(m->getSimpleName(inputfile)) + treeCalculators[i]->getName() + "." + thisLookup[0]->getLabel() + ".cons." + getOutputFileNameTag("tree");				
                 outputNames.push_back(conFile); outputTypes["tree"].push_back(conFile); 
                 ofstream outTree;
                 m->openOutputFile(conFile, outTree);
@@ -978,7 +998,7 @@ int TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
                 }
                 
                 //create a new filename
-                string outputFile = outputDir + m->getRootName(m->getSimpleName(inputfile)) + treeCalculators[i]->getName() + "." + thisLookup[0]->getLabel() + ".tre";				
+                string outputFile = outputDir + m->getRootName(m->getSimpleName(inputfile)) + treeCalculators[i]->getName() + "." + thisLookup[0]->getLabel() + "." + getOutputFileNameTag("tree");				
                 outputNames.push_back(outputFile); outputTypes["tree"].push_back(outputFile); 
                 
                 //creates tree from similarity matrix and write out file

@@ -53,12 +53,32 @@ string OTUAssociationCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string OTUAssociationCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "otucorr") {  outputFileName =  "otu.corr"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "OTUAssociationCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 OTUAssociationCommand::OTUAssociationCommand(){	
 	try {
 		abort = true; calledHelp = true; 
 		setParameters();
 		vector<string> tempOutNames;
-		outputTypes["otu.corr"] = tempOutNames;
+		outputTypes["otucorr"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "OTUAssociationCommand", "OTUAssociationCommand");
@@ -90,7 +110,7 @@ OTUAssociationCommand::OTUAssociationCommand(string option)  {
 			}
 			
 			vector<string> tempOutNames;
-			outputTypes["otu.corr"] = tempOutNames;
+			outputTypes["otucorr"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -306,8 +326,8 @@ int OTUAssociationCommand::processShared(){
 int OTUAssociationCommand::process(vector<SharedRAbundVector*>& lookup){
 	try {
 		
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(inputFileName)) + lookup[0]->getLabel() + "." + method + ".otu.corr";
-		outputNames.push_back(outputFileName); outputTypes["shared"].push_back(outputFileName);
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(inputFileName)) + lookup[0]->getLabel() + "." + method + "." + getOutputFileNameTag("otucorr");
+		outputNames.push_back(outputFileName); outputTypes["otucorr"].push_back(outputFileName);
 		
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
@@ -466,8 +486,8 @@ int OTUAssociationCommand::processRelabund(){
 int OTUAssociationCommand::process(vector<SharedRAbundFloatVector*>& lookup){
 	try {
 		
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(inputFileName)) + lookup[0]->getLabel() + "." + method + ".otu.corr";
-		outputNames.push_back(outputFileName); outputTypes["shared"].push_back(outputFileName);
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(inputFileName)) + lookup[0]->getLabel() + "." + method + "." + getOutputFileNameTag("otucorr");
+		outputNames.push_back(outputFileName); outputTypes["otucorr"].push_back(outputFileName);
 		
 		ofstream out;
 		m->openOutputFile(outputFileName, out);

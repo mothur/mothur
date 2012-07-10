@@ -25,6 +25,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "rarefaction.shared";		}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "Magurran AE (2004). Measuring biological diversity. Blackwell Pub.: Malden, Ma. \nhttp://www.mothur.org/wiki/Rarefaction.shared"; }
 	string getDescription()		{ return "generate inter-sample rarefaction curves using a re-sampling without replacement approach"; }
@@ -36,18 +37,19 @@ public:
 private:
 	
 	vector<SharedRAbundVector*> lookup;
-	int nIters;
+	int nIters, subsampleSize, iters;
 	string format;
 	float freq;
 	
      map<int, string> file2Group; //index in outputNames[i] -> group
-	bool abort, allLines, jumble, groupMode;
+	bool abort, allLines, jumble, groupMode, subsample;
 	set<string> labels; //holds labels to be used
 	string label, calc, groups, outputDir, sharedfile, designfile;
 	vector<string>  Estimators, Groups, outputNames, Sets;
     
     int process(GroupMap&, string);
     vector<string> createGroupFile(vector<string>&);
+    int subsampleLookup(vector<SharedRAbundVector*>&, string);
 
 };
 

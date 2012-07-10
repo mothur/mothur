@@ -26,6 +26,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "chimera.bellerophon";	}
 	string getCommandCategory()		{ return "Sequence Processing"; }
+	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "Huber T, Faulkner G, Hugenholtz P (2004). Bellerophon: a program to detect chimeric sequences in multiple sequence alignments. Bioinformatics 20: 2317-9. \nhttp://www.mothur.org/wiki/Chimera.bellerophon"; }
 	string getDescription()		{ return "detect chimeric sequences"; }

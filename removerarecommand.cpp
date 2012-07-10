@@ -59,6 +59,31 @@ string RemoveRareCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string RemoveRareCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "rabund")            {   outputFileName =  "pick" + m->getExtension(inputName);   }
+            else if (type == "sabund")    {   outputFileName =  "pick" + m->getExtension(inputName);   }
+            else if (type == "shared")        {   outputFileName =  "pick" + m->getExtension(inputName);   }
+            else if (type == "group")       {   outputFileName =  "pick" + m->getExtension(inputName);   }
+            else if (type == "list")        {   outputFileName =  "pick" + m->getExtension(inputName);   }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "RemoveRareCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
 RemoveRareCommand::RemoveRareCommand(){	
 	try {
 		abort = true; calledHelp = true; 
@@ -301,9 +326,8 @@ int RemoveRareCommand::processList(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(listfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(listfile)) + "pick" +  m->getExtension(listfile);
-		string outputGroupFileName = thisOutputDir + m->getRootName(m->getSimpleName(groupfile)) + "pick" +  m->getExtension(groupfile);
-		
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(listfile)) + getOutputFileNameTag("list", listfile);
+		string outputGroupFileName = thisOutputDir + m->getRootName(m->getSimpleName(groupfile)) + getOutputFileNameTag("group", groupfile);		
 		ofstream out, outGroup;
 		m->openOutputFile(outputFileName, out);
 		
@@ -423,7 +447,7 @@ int RemoveRareCommand::processSabund(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(sabundfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(sabundfile)) + "pick" +  m->getExtension(sabundfile);
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(sabundfile)) + getOutputFileNameTag("sabund", sabundfile);
 		outputTypes["sabund"].push_back(outputFileName); outputNames.push_back(outputFileName);
 
 		ofstream out;
@@ -522,7 +546,7 @@ int RemoveRareCommand::processRabund(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(rabundfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(rabundfile)) + "pick" +  m->getExtension(rabundfile);
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(rabundfile)) + getOutputFileNameTag("rabund", rabundfile);
 		outputTypes["rabund"].push_back(outputFileName); outputNames.push_back(outputFileName);
 		
 		ofstream out;
@@ -629,7 +653,7 @@ int RemoveRareCommand::processShared(){
 		
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(sharedfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(sharedfile)) + "pick" +  m->getExtension(sharedfile);
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(sharedfile)) + getOutputFileNameTag("shared", sharedfile);
 		outputTypes["shared"].push_back(outputFileName); outputNames.push_back(outputFileName);
 		
 		ofstream out;

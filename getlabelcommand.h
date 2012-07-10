@@ -24,6 +24,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "get.label";				}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getOutputFileNameTag(string, string) { return ""; }
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Get.label"; }
 	string getDescription()		{ return "outputs labels"; }

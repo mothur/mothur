@@ -69,6 +69,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "sffinfo";					}
 	string getCommandCategory()		{ return "Sequence Processing";		}
+	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Sffinfo"; }
 	string getDescription()		{ return "extract sequences reads from a .sff file"; }

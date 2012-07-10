@@ -21,12 +21,13 @@ public:
 	NoCommand() {}
 	~NoCommand(){}
 	
-	vector<string> setParameters()	{ return outputNames;	} //dummy, doesn't really do anything	
-	string getCommandName()			{ return "NoCommand";	}
-	string getCommandCategory()		{ return "Hidden";		}
-	string getHelpString() { return "No Command"; }	
-	string getCitation() { return "no citation"; }
-	string getDescription()		{ return "no description"; }
+	vector<string> setParameters()      { return outputNames;       } //dummy, doesn't really do anything	
+	string getCommandName()             { return "NoCommand";       }
+	string getCommandCategory()         { return "Hidden";          }
+	string getHelpString()              { return "No Command";      }	
+    string getOutputFileNameTag(string, string) { return "";                }
+	string getCitation()                { return "no citation";     }
+	string getDescription()             { return "no description";  }
 
 	
 	int execute(); 

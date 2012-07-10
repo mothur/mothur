@@ -23,6 +23,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "count.seqs";				}
 	string getCommandCategory()		{ return "Sequence Processing";		}
+	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Count.seqs"; }
 	string getDescription()		{ return "counts the number of sequences represented by each unique sequence in a namesfile"; }
@@ -33,8 +34,14 @@ public:
 	
 private:
 	string namefile, groupfile, outputDir, groups;
-	bool abort;
-	vector<string> Groups;
+	bool abort, large;
+	vector<string> Groups, outputNames;
+    
+    int processSmall(string);
+    int processLarge(string);
+    map<int, string> processNameFile(string);
+    map<int, string> getGroupNames(string, set<string>&);
+    
 };
 
 #endif

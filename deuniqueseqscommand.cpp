@@ -45,6 +45,26 @@ string DeUniqueSeqsCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string DeUniqueSeqsCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "fasta") {  outputFileName =  "redundant.fasta"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "DeUniqueSeqsCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 DeUniqueSeqsCommand::DeUniqueSeqsCommand(){	
 	try {
 		abort = true; calledHelp = true; 
@@ -148,9 +168,9 @@ int DeUniqueSeqsCommand::execute() {
 		string outFastaFile = m->getRootName(m->getSimpleName(fastaFile));
 		int pos = outFastaFile.find("unique");
 		if (pos != string::npos) {
-			outFastaFile = outputDir + outFastaFile.substr(0, pos) + "redundant" + m->getExtension(fastaFile);
+			outFastaFile = outputDir + outFastaFile.substr(0, pos) + getOutputFileNameTag("fasta");
 		}else{
-			outFastaFile = outputDir + m->getRootName(m->getSimpleName(fastaFile)) + "redundant" + m->getExtension(fastaFile);
+			outFastaFile = outputDir + m->getRootName(m->getSimpleName(fastaFile)) + getOutputFileNameTag("fasta");
 		}
 		m->openOutputFile(outFastaFile, out);
 		

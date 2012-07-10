@@ -47,6 +47,28 @@ string ParseFastaQCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string ParseFastaQCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "fasta") {  outputFileName =  "fasta"; }
+            else if (type == "qfile") {  outputFileName =  "qual"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ParseFastaQCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
 ParseFastaQCommand::ParseFastaQCommand(){	
 	try {
 		abort = true; calledHelp = true; 
@@ -132,8 +154,8 @@ int ParseFastaQCommand::execute(){
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//open Output Files
-		string fastaFile = outputDir + m->getRootName(m->getSimpleName(fastaQFile)) + "fasta";
-		string qualFile = outputDir + m->getRootName(m->getSimpleName(fastaQFile)) + "qual";
+		string fastaFile = outputDir + m->getRootName(m->getSimpleName(fastaQFile)) + getOutputFileNameTag("fasta");
+		string qualFile = outputDir + m->getRootName(m->getSimpleName(fastaQFile)) + getOutputFileNameTag("qfile");
 		ofstream outFasta, outQual;
 		
 		if (fasta) { m->openOutputFile(fastaFile, outFasta);  outputNames.push_back(fastaFile); outputTypes["fasta"].push_back(fastaFile);	}

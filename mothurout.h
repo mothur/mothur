@@ -68,7 +68,7 @@ class MothurOut {
 		//map<string, string> names;
 		vector<string> binLabelsInFile;
 		vector<string> currentBinLabels;
-		string saveNextLabel, argv, sharedHeaderMode;
+		string saveNextLabel, argv, sharedHeaderMode, groupMode;
 		bool printedHeaders, commandInputsConvertError;
 		
 		//functions from mothur.h
@@ -97,8 +97,16 @@ class MothurOut {
 		string getline(istringstream&);
 		void gobble(istream&);
 		void gobble(istringstream&);
-		map<string, int> readNames(string);
+        vector<string> splitWhiteSpace(string& rest, char[], int);
+        vector<string> splitWhiteSpace(string);
+        set<string> readAccnos(string);
+        int readAccnos(string, vector<string>&);
+        map<string, int> readNames(string);
+        int readTax(string, map<string, string>&);
+        int readNames(string, map<string, string>&, map<string, int>&);
 		int readNames(string, map<string, string>&);
+        int readNames(string, map<string, string>&, bool);
+        int readNames(string, map<string, string>&, int);
 		int readNames(string, map<string, vector<string> >&);
 		int readNames(string, vector<seqPriorityNode>&, map<string, string>&);
 		int mothurRemove(string);
@@ -144,7 +152,7 @@ class MothurOut {
 		int control_pressed;
 		bool executing, runParse, jumble, gui, mothurCalling, debug;
 		
-		//current files - if you add a new type you must edit optionParser->getParameters, get.current command and mothurOut->printCurrentFiles/clearCurrentFiles.
+		//current files - if you add a new type you must edit optionParser->getParameters, get.current command and mothurOut->printCurrentFiles/clearCurrentFiles/getCurrentTypes.
 		string getPhylipFile()		{ return phylipfile;		}
 		string getColumnFile()		{ return columnfile;		}
 		string getListFile()		{ return listfile;			}
@@ -166,11 +174,12 @@ class MothurOut {
 		string getTaxonomyFile()	{ return taxonomyfile;		}
 		string getFlowFile()		{ return flowfile;			}
         string getBiomFile()		{ return biomfile;			}
+        string getCountTableFile()	{ return counttablefile;	}
 		string getProcessors()		{ return processors;		}
 		
 		void setListFile(string f)			{ listfile = getFullPathName(f);			}
 		void setTreeFile(string f)			{ treefile = getFullPathName(f);			}
-		void setGroupFile(string f)			{ groupfile = getFullPathName(f);			}		
+		void setGroupFile(string f)			{ groupfile = getFullPathName(f);	groupMode = "group";		}		
 		void setPhylipFile(string f)		{ phylipfile = getFullPathName(f);			}
 		void setColumnFile(string f)		{ columnfile = getFullPathName(f);			}
 		void setNameFile(string f)			{ namefile = getFullPathName(f);			}	
@@ -189,11 +198,13 @@ class MothurOut {
 		void setTaxonomyFile(string f)		{ taxonomyfile = getFullPathName(f);		}
 		void setFlowFile(string f)			{ flowfile = getFullPathName(f);			}
         void setBiomFile(string f)			{ biomfile = getFullPathName(f);			}
-		void setProcessors(string p)		{ processors = p;							}
+        void setCountTableFile(string f)	{ counttablefile = getFullPathName(f);	groupMode = "count";	}
+        void setProcessors(string p)		{ processors = p; mothurOut("\nUsing " + toString(p) + " processors.\n");	}
 		
 		void printCurrentFiles();
 		bool hasCurrentFiles();
 		void clearCurrentFiles();
+        set<string> getCurrentTypes(); 
 		
 	private:
 		static MothurOut* _uniqueInstance;
@@ -223,12 +234,14 @@ class MothurOut {
 			processors = "1";
 			flowfile = "";
             biomfile = "";
+            counttablefile = "";
 			gui = false;
 			printedHeaders = false;
 			commandInputsConvertError = false;
             mothurCalling = false;
             debug = false;
 			sharedHeaderMode = "";
+            groupMode = "group";
 		}
 		~MothurOut();
 
@@ -237,7 +250,7 @@ class MothurOut {
 		string releaseDate, version;
 	
 		string accnosfile, phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, designfile, taxonomyfile, biomfile;
-		string orderfile, treefile, sharedfile, ordergroupfile, relabundfile, fastafile, qualfile, sfffile, oligosfile, processors, flowfile;
+		string orderfile, treefile, sharedfile, ordergroupfile, relabundfile, fastafile, qualfile, sfffile, oligosfile, processors, flowfile, counttablefile;
 
 		vector<string> Groups;
 		vector<string> namesOfGroups;

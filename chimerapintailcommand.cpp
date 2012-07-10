@@ -69,6 +69,27 @@ string ChimeraPintailCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string ChimeraPintailCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "chimera") {  outputFileName =  "pintail.chimeras"; }
+            else if (type == "accnos") {  outputFileName =  "pintail.accnos"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChimeraPintailCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 ChimeraPintailCommand::ChimeraPintailCommand(){	
 	try {
 		abort = true; calledHelp = true;
@@ -397,11 +418,11 @@ int ChimeraPintailCommand::execute(){
 			if (outputDir == "") { outputDir = m->hasPath(fastaFileNames[s]);  }//if user entered a file with a path then preserve it
 			string outputFileName, accnosFileName;
 			if (maskfile != "") {
-				outputFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + m->getSimpleName(m->getRootName(maskfile)) + ".pintail.chimeras";
-				accnosFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + m->getSimpleName(m->getRootName(maskfile)) + ".pintail.accnos";
+				outputFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + m->getSimpleName(m->getRootName(maskfile)) + getOutputFileNameTag("chimera");
+				accnosFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + m->getSimpleName(m->getRootName(maskfile)) + getOutputFileNameTag("accnos");
 			}else {
-				outputFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]))  + "pintail.chimeras";
-				accnosFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]))  + "pintail.accnos";
+				outputFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + getOutputFileNameTag("chimera");
+				accnosFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + getOutputFileNameTag("accnos");
 			}
 			
 			if (m->control_pressed) { delete chimera; for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}

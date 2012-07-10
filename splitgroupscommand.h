@@ -30,6 +30,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "split.group";				}
 	string getCommandCategory()		{ return "Sequence Processing";		}
+	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Split.group"; }
 	string getDescription()		{ return "split a name or fasta file by group"; }

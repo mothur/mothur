@@ -54,6 +54,28 @@ string ClusterCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string ClusterCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "list") {  outputFileName =  "list"; }
+            else if (type == "rabund") {  outputFileName =  "rabund"; }
+            else if (type == "sabund") {  outputFileName =  "sabund"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClusterCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 ClusterCommand::ClusterCommand(){	
 	try {
 		abort = true; calledHelp = true; 
@@ -287,13 +309,17 @@ int ClusterCommand::execute(){
 		if (outputDir == "") { outputDir += m->hasPath(distfile); }
 		fileroot = outputDir + m->getRootName(m->getSimpleName(distfile));
 		
-		m->openOutputFile(fileroot+ tag + ".sabund",	sabundFile);
-		m->openOutputFile(fileroot+ tag + ".rabund",	rabundFile);
-		m->openOutputFile(fileroot+ tag + ".list",		listFile);
+        string sabundFileName = fileroot+ tag + "." + getOutputFileNameTag("sabund");
+        string rabundFileName = fileroot+ tag + "." + getOutputFileNameTag("rabund");
+        string listFileName = fileroot+ tag + "." + getOutputFileNameTag("list");
+        
+		m->openOutputFile(sabundFileName,	sabundFile);
+		m->openOutputFile(rabundFileName,	rabundFile);
+		m->openOutputFile(listFileName,	listFile);
 		
-		outputNames.push_back(fileroot+ tag + ".sabund"); outputTypes["sabund"].push_back(fileroot+ tag + ".sabund");
-		outputNames.push_back(fileroot+ tag + ".rabund"); outputTypes["rabund"].push_back(fileroot+ tag + ".rabund");
-		outputNames.push_back(fileroot+ tag + ".list"); outputTypes["list"].push_back(fileroot+ tag + ".list");
+		outputNames.push_back(sabundFileName); outputTypes["sabund"].push_back(sabundFileName);
+		outputNames.push_back(rabundFileName); outputTypes["rabund"].push_back(rabundFileName);
+		outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
 		
 		
 		time_t estart = time(NULL);

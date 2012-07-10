@@ -51,7 +51,28 @@ string PreClusterCommand::getHelpString(){
 		exit(1);
 	}
 }
-
+//**********************************************************************************************************************
+string PreClusterCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "fasta") {  outputFileName =  "precluster" + m->getExtension(inputName); }
+            else if (type == "name") {  outputFileName =  "precluster.names"; }
+            else if (type == "map") {  outputFileName =  "precluster.map"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PreClusterCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 PreClusterCommand::PreClusterCommand(){	
 	try {
@@ -184,9 +205,9 @@ int PreClusterCommand::execute(){
 		int start = time(NULL);
 		
 		string fileroot = outputDir + m->getRootName(m->getSimpleName(fastafile));
-		string newFastaFile = fileroot + "precluster" + m->getExtension(fastafile);
-		string newNamesFile = fileroot + "precluster.names";
-		string newMapFile = fileroot + "precluster.map"; //add group name if by group
+		string newFastaFile = fileroot + getOutputFileNameTag("fasta", fastafile);
+		string newNamesFile = fileroot + getOutputFileNameTag("name");
+		string newMapFile = fileroot + getOutputFileNameTag("map"); //add group name if by group
 		outputNames.push_back(newFastaFile); outputTypes["fasta"].push_back(newFastaFile);
 		outputNames.push_back(newNamesFile); outputTypes["name"].push_back(newNamesFile);
 		

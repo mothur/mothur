@@ -43,6 +43,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "get.oturep";				}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Get.oturep"; }
 	string getDescription()		{ return "gets a representative sequence for each OTU"; }

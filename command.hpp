@@ -33,6 +33,7 @@ class Command {
 		virtual string getDescription() = 0;
 		
 		virtual map<string, vector<string> > getOutputFiles() { return outputTypes; }
+        virtual string getOutputFileNameTag(string, string) = 0;  //we may not know the complete filename, because some commands use info from the file to create the output file name (ie label). but we do the ending tag which should be enough to find the output file name from a list. Allows for optional passing of the inputFileName for the commands that require its extension.
 		virtual vector<string> setParameters() = 0; //to fill parameters
 		virtual vector<CommandParameter> getParameters() { return parameters; }
 	

@@ -58,6 +58,33 @@ string GetGroupsCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string GetGroupsCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "fasta")            {   outputFileName =  "pick" + m->getExtension(inputName);   }
+            else if (type == "taxonomy")    {   outputFileName =  "pick" + m->getExtension(inputName);   }
+            else if (type == "name")        {   outputFileName =  "pick" + m->getExtension(inputName);   }
+            else if (type == "group")       {   outputFileName =  "pick" + m->getExtension(inputName);   }
+            else if (type == "list")        {   outputFileName =  "pick" + m->getExtension(inputName);   }
+            else if (type == "shared")      {   outputFileName =  "pick" + m->getExtension(inputName);   }
+            else if (type == "design")      {   outputFileName =  "pick" + m->getExtension(inputName);   }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetGroupsCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
 GetGroupsCommand::GetGroupsCommand(){	
 	try {
 		abort = true; calledHelp = true;
@@ -293,7 +320,7 @@ int GetGroupsCommand::execute(){
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//get groups you want to remove
-		if (accnosfile != "") { readAccnos(); }
+		if (accnosfile != "") { m->readAccnos(accnosfile, Groups); m->setGroups(Groups); }
 		
 		if (groupfile != "") {
 			groupMap = new GroupMap(groupfile);
@@ -385,7 +412,7 @@ int GetGroupsCommand::readFasta(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(fastafile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(fastafile)) + "pick" + m->getExtension(fastafile);
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(fastafile)) + getOutputFileNameTag("fasta", fastafile);
 		
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
@@ -453,7 +480,7 @@ int GetGroupsCommand::readShared(){
 		
 		while(lookup[0] != NULL) {
 			
-			string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(sharedfile)) + lookup[0]->getLabel() + ".pick" + m->getExtension(sharedfile);
+			string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(sharedfile)) + lookup[0]->getLabel() + "." + getOutputFileNameTag("shared", sharedfile);
 			ofstream out;
 			m->openOutputFile(outputFileName, out);
 			outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
@@ -498,7 +525,7 @@ int GetGroupsCommand::readList(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(listfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(listfile)) + "pick" +  m->getExtension(listfile);
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(listfile)) + getOutputFileNameTag("list", listfile);
 		
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
@@ -591,7 +618,7 @@ int GetGroupsCommand::readName(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(namefile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(namefile)) + "pick" + m->getExtension(namefile);
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(namefile)) + getOutputFileNameTag("name", namefile);
 		
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
@@ -672,7 +699,7 @@ int GetGroupsCommand::readGroup(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(groupfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(groupfile)) + "pick" + m->getExtension(groupfile);
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(groupfile)) + getOutputFileNameTag("group", groupfile);
 		
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
@@ -719,7 +746,7 @@ int GetGroupsCommand::readDesign(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(designfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(designfile)) + "pick" + m->getExtension(designfile);
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(designfile)) + getOutputFileNameTag("design", designfile);
 		
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
@@ -769,7 +796,7 @@ int GetGroupsCommand::readTax(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(taxfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(taxfile)) + "pick" + m->getExtension(taxfile);
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(taxfile)) + getOutputFileNameTag("taxonomy", taxfile);
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		
@@ -810,32 +837,6 @@ int GetGroupsCommand::readTax(){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "GetGroupsCommand", "readTax");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-void GetGroupsCommand::readAccnos(){
-	try {
-		Groups.clear();
-		
-		ifstream in;
-		m->openInputFile(accnosfile, in);
-		string name;
-		
-		while(!in.eof()){
-			in >> name;
-			
-			Groups.push_back(name);
-			
-			m->gobble(in);
-		}
-		in.close();		
-		
-		m->setGroups(Groups);
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetGroupsCommand", "readAccnos");
 		exit(1);
 	}
 }

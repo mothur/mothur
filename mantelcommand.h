@@ -22,6 +22,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "mantel";					}
 	string getCommandCategory()		{ return "Hypothesis Testing";		}
+	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "McCune B, Grace JB, Urban DL (2002). Analysis of ecological communities. MjM Software Design: Gleneden Beach, OR. \nLegendre P, Legendre L (1998). Numerical Ecology. Elsevier: New York. \nhttp://www.mothur.org/wiki/Mantel"; }
 	string getDescription()		{ return "Mantel’s test for correlation between matrices"; }

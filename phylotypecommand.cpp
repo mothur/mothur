@@ -53,7 +53,28 @@ string PhylotypeCommand::getHelpString(){
 		exit(1);
 	}
 }
-
+//**********************************************************************************************************************
+string PhylotypeCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "list") {  outputFileName =  "list"; }
+            else if (type == "rabund") {  outputFileName =  "rabund"; }
+            else if (type == "sabund") {  outputFileName =  "sabund"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PhylotypeCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 PhylotypeCommand::PhylotypeCommand(){	
 	try {
@@ -198,13 +219,13 @@ int PhylotypeCommand::execute(){
 		string fileroot = outputDir + m->getRootName(m->getSimpleName(taxonomyFileName));
 		
 		ofstream outList;
-		string outputListFile = fileroot + "tx.list";
+		string outputListFile = fileroot + "tx." + getOutputFileNameTag("list");
 		m->openOutputFile(outputListFile, outList);
 		ofstream outSabund;
-		string outputSabundFile = fileroot + "tx.sabund";
+		string outputSabundFile = fileroot + "tx." + getOutputFileNameTag("sabund");
 		m->openOutputFile(outputSabundFile, outSabund);
 		ofstream outRabund;
-		string outputRabundFile = fileroot + "tx.rabund";
+		string outputRabundFile = fileroot + "tx." + getOutputFileNameTag("rabund");
 		m->openOutputFile(outputRabundFile, outRabund);
 		
 		outputNames.push_back(outputListFile); outputTypes["list"].push_back(outputListFile);

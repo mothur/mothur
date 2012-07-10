@@ -76,6 +76,29 @@ string AlignCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string AlignCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string tag = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "fasta") {  tag = "align"; }
+            else if (type == "alignreport") {  tag = "align.report"; }
+            else if (type == "accnos") {  tag = "flip.accnos"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return tag;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "AlignCommand", "getOutputFileName");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
 AlignCommand::AlignCommand(){	
 	try {
 		abort = true; calledHelp = true; 
@@ -305,9 +328,9 @@ int AlignCommand::execute(){
 			m->mothurOut("Aligning sequences from " + candidateFileNames[s] + " ..." ); m->mothurOutEndLine();
 			
 			if (outputDir == "") {  outputDir += m->hasPath(candidateFileNames[s]); }
-			string alignFileName = outputDir + m->getRootName(m->getSimpleName(candidateFileNames[s])) + "align";
-			string reportFileName = outputDir + m->getRootName(m->getSimpleName(candidateFileNames[s])) + "align.report";
-			string accnosFileName = outputDir + m->getRootName(m->getSimpleName(candidateFileNames[s])) + "flip.accnos";
+			string alignFileName = outputDir + m->getRootName(m->getSimpleName(candidateFileNames[s])) + getOutputFileNameTag("fasta");  
+			string reportFileName = outputDir + m->getRootName(m->getSimpleName(candidateFileNames[s])) + getOutputFileNameTag("alignreport");
+			string accnosFileName = outputDir + m->getRootName(m->getSimpleName(candidateFileNames[s])) + getOutputFileNameTag("accnos");
 			bool hasAccnos = true;
 			
 			int numFastaSeqs = 0;
@@ -875,7 +898,7 @@ int AlignCommand::createProcesses(string alignFileName, string reportFileName, s
 			if (!in.eof()) { int tempNum = 0; in >> tempNum; num += tempNum; }
 			in.close(); m->mothurRemove(tempFile);
 			
-			appendAlignFiles((alignFileName + toString(processIDS[i]) + ".temp"), alignFileName);
+			m->appendFiles((alignFileName + toString(processIDS[i]) + ".temp"), alignFileName);
 			m->mothurRemove((alignFileName + toString(processIDS[i]) + ".temp"));
 			
 			appendReportFiles((reportFileName + toString(processIDS[i]) + ".temp"), reportFileName);
@@ -892,7 +915,7 @@ int AlignCommand::createProcesses(string alignFileName, string reportFileName, s
 			rename(nonBlankAccnosFiles[0].c_str(), accnosFName.c_str());
 			
 			for (int h=1; h < nonBlankAccnosFiles.size(); h++) {
-				appendAlignFiles(nonBlankAccnosFiles[h], accnosFName);
+				m->appendFiles(nonBlankAccnosFiles[h], accnosFName);
 				m->mothurRemove(nonBlankAccnosFiles[h]);
 			}
 		}else { //recreate the accnosfile if needed
@@ -957,7 +980,7 @@ int AlignCommand::createProcesses(string alignFileName, string reportFileName, s
 		else { m->mothurRemove(accnosFName); } //remove so other files can be renamed to it
 		
 		for (int i = 1; i < processors; i++) {
-			appendAlignFiles((alignFileName + toString(i) + ".temp"), alignFileName);
+			m->appendFiles((alignFileName + toString(i) + ".temp"), alignFileName);
 			m->mothurRemove((alignFileName + toString(i) + ".temp"));
 			
 			appendReportFiles((reportFileName + toString(i) + ".temp"), reportFileName);
@@ -973,7 +996,7 @@ int AlignCommand::createProcesses(string alignFileName, string reportFileName, s
 			rename(nonBlankAccnosFiles[0].c_str(), accnosFName.c_str());
 			
 			for (int h=1; h < nonBlankAccnosFiles.size(); h++) {
-				appendAlignFiles(nonBlankAccnosFiles[h], accnosFName);
+				m->appendFiles(nonBlankAccnosFiles[h], accnosFName);
 				m->mothurRemove(nonBlankAccnosFiles[h]);
 			}
 		}else { //recreate the accnosfile if needed
@@ -990,29 +1013,6 @@ int AlignCommand::createProcesses(string alignFileName, string reportFileName, s
 		exit(1);
 	}
 }
-/**************************************************************************************************/
-
-void AlignCommand::appendAlignFiles(string temp, string filename) {
-	try{
-		
-		ofstream output;
-		ifstream input;
-		m->openOutputFileAppend(filename, output);
-		m->openInputFile(temp, input);
-		
-		while(char c = input.get()){
-			if(input.eof())		{	break;			}
-			else				{	output << c;	}
-		}
-		
-		input.close();
-		output.close();
-	}
-	catch(exception& e) {
-		m->errorOut(e, "AlignCommand", "appendAlignFiles");
-		exit(1);
-	}
-}
 //**********************************************************************************************************************
 
 void AlignCommand::appendReportFiles(string temp, string filename) {
@@ -1025,10 +1025,11 @@ void AlignCommand::appendReportFiles(string temp, string filename) {
 
 		while (!input.eof())	{	char c = input.get(); if (c == 10 || c == 13){	break;	}	} // get header line
 				
-		while(char c = input.get()){
-			if(input.eof())		{	break;			}
-			else				{	output << c;	}
-		}
+        char buffer[4096];        
+        while (!input.eof()) {
+            input.read(buffer, 4096);
+            output.write(buffer, input.gcount());
+        }
 		
 		input.close();
 		output.close();

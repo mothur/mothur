@@ -81,6 +81,50 @@ string CollectCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string CollectCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "sobs")             {  outputFileName =  "sobs";            }
+            else if (type == "chao")        {  outputFileName =  "chao";            }
+            else if (type == "nseqs")       {  outputFileName =  "nseqs";           }
+            else if (type == "coverage")    {  outputFileName =  "coverage";        }
+            else if (type == "ace")         {  outputFileName =  "ace";             }
+            else if (type == "jack")        {  outputFileName =  "jack";            }
+            else if (type == "shannon")     {  outputFileName =  "shannon";         }
+            else if (type == "shannoneven") {  outputFileName =  "shannoneven";     }
+            else if (type == "npshannon")   {  outputFileName =  "npshannon";       }
+            else if (type == "heip")        {  outputFileName =  "heip";            }
+            else if (type == "smithwilson") {  outputFileName =  "smithwilson";     }
+            else if (type == "simpson")     {  outputFileName =  "simpson";         }
+            else if (type == "simpsoneven") {  outputFileName =  "simpsoneven";     }
+            else if (type == "invsimpson")  {  outputFileName =  "invsimpson";      }
+            else if (type == "bootstrap")   {  outputFileName =  "bootstrap";       }
+            else if (type == "geometric")   {  outputFileName =  "geometric";       }
+            else if (type == "qstat")       {  outputFileName =  "qstat";           }
+            else if (type == "logseries")   {  outputFileName =  "logseries";       }
+            else if (type == "bergerparker") {  outputFileName =  "bergerparker";   }
+            else if (type == "bstick")      {  outputFileName =  "bstick";          }
+            else if (type == "goodscoverage") {  outputFileName =  "goodscoverage"; }
+            else if (type == "efron")       {  outputFileName =  "efron";           }
+            else if (type == "boneh")       {  outputFileName =  "boneh";           }
+            else if (type == "solow")       {  outputFileName =  "solow";           }
+            else if (type == "shen")        {  outputFileName =  "shen";            }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "CollectCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 CollectCommand::CollectCommand(){	
 	try {
 		abort = true; calledHelp = true; 
@@ -322,80 +366,80 @@ int CollectCommand::execute(){
 			for (int i=0; i<Estimators.size(); i++) {
 				if (validCalculator.isValidCalculator("single", Estimators[i]) == true) { 
 					if (Estimators[i] == "sobs") { 
-						cDisplays.push_back(new CollectDisplay(new Sobs(), new OneColumnFile(fileNameRoot+"sobs")));
-						outputNames.push_back(fileNameRoot+"sobs"); outputTypes["sobs"].push_back(fileNameRoot+"sobs");
+						cDisplays.push_back(new CollectDisplay(new Sobs(), new OneColumnFile(fileNameRoot+getOutputFileNameTag("sobs"))));
+						outputNames.push_back(fileNameRoot+getOutputFileNameTag("sobs")); outputTypes["sobs"].push_back(fileNameRoot+getOutputFileNameTag("sobs"));
 					}else if (Estimators[i] == "chao") { 
-						cDisplays.push_back(new CollectDisplay(new Chao1(), new ThreeColumnFile(fileNameRoot+"chao")));
-						outputNames.push_back(fileNameRoot+"chao"); outputTypes["chao"].push_back(fileNameRoot+"chao");
+						cDisplays.push_back(new CollectDisplay(new Chao1(), new ThreeColumnFile(fileNameRoot+getOutputFileNameTag("chao"))));
+						outputNames.push_back(fileNameRoot+getOutputFileNameTag("chao")); outputTypes["chao"].push_back(fileNameRoot+getOutputFileNameTag("chao"));
 					}else if (Estimators[i] == "nseqs") { 
-						cDisplays.push_back(new CollectDisplay(new NSeqs(), new OneColumnFile(fileNameRoot+"nseqs")));
-						outputNames.push_back(fileNameRoot+"nseqs"); outputTypes["nseqs"].push_back(fileNameRoot+"nseqs");
+						cDisplays.push_back(new CollectDisplay(new NSeqs(), new OneColumnFile(fileNameRoot+getOutputFileNameTag("nseqs"))));
+						outputNames.push_back(fileNameRoot+getOutputFileNameTag("nseqs")); outputTypes["nseqs"].push_back(fileNameRoot+getOutputFileNameTag("nseqs"));
 					}else if (Estimators[i] == "coverage") { 
-						cDisplays.push_back(new CollectDisplay(new Coverage(), new OneColumnFile(fileNameRoot+"coverage")));
-						outputNames.push_back(fileNameRoot+"coverage"); outputTypes["coverage"].push_back(fileNameRoot+"coverage");
+						cDisplays.push_back(new CollectDisplay(new Coverage(), new OneColumnFile(fileNameRoot+getOutputFileNameTag("coverage"))));
+						outputNames.push_back(fileNameRoot+getOutputFileNameTag("coverage")); outputTypes["coverage"].push_back(fileNameRoot+getOutputFileNameTag("coverage"));
 					}else if (Estimators[i] == "ace") { 
-						cDisplays.push_back(new CollectDisplay(new Ace(abund), new ThreeColumnFile(fileNameRoot+"ace")));
-						outputNames.push_back(fileNameRoot+"ace"); outputTypes["ace"].push_back(fileNameRoot+"ace");
+						cDisplays.push_back(new CollectDisplay(new Ace(abund), new ThreeColumnFile(fileNameRoot+getOutputFileNameTag("ace"))));
+						outputNames.push_back(fileNameRoot+getOutputFileNameTag("ace")); outputTypes["ace"].push_back(fileNameRoot+getOutputFileNameTag("ace"));
 					}else if (Estimators[i] == "jack") { 
-						cDisplays.push_back(new CollectDisplay(new Jackknife(), new ThreeColumnFile(fileNameRoot+"jack")));
-						outputNames.push_back(fileNameRoot+"jack"); outputTypes["jack"].push_back(fileNameRoot+"jack");
+						cDisplays.push_back(new CollectDisplay(new Jackknife(), new ThreeColumnFile(fileNameRoot+getOutputFileNameTag("jack"))));
+						outputNames.push_back(fileNameRoot+getOutputFileNameTag("jack")); outputTypes["jack"].push_back(fileNameRoot+getOutputFileNameTag("jack"));
 					}else if (Estimators[i] == "shannon") { 
-						cDisplays.push_back(new CollectDisplay(new Shannon(), new ThreeColumnFile(fileNameRoot+"shannon")));
-						outputNames.push_back(fileNameRoot+"shannon"); outputTypes["shannon"].push_back(fileNameRoot+"shannon");
+						cDisplays.push_back(new CollectDisplay(new Shannon(), new ThreeColumnFile(fileNameRoot+getOutputFileNameTag("shannon"))));
+						outputNames.push_back(fileNameRoot+getOutputFileNameTag("shannon")); outputTypes["shannon"].push_back(fileNameRoot+getOutputFileNameTag("shannon"));
 					}else if (Estimators[i] == "shannoneven") { 
-						cDisplays.push_back(new CollectDisplay(new ShannonEven(), new OneColumnFile(fileNameRoot+"shannoneven")));
-						outputNames.push_back(fileNameRoot+"shannoneven"); outputTypes["shannoneven"].push_back(fileNameRoot+"shannoneven");
+						cDisplays.push_back(new CollectDisplay(new ShannonEven(), new OneColumnFile(fileNameRoot+getOutputFileNameTag("shannoneven"))));
+						outputNames.push_back(fileNameRoot+getOutputFileNameTag("shannoneven")); outputTypes["shannoneven"].push_back(fileNameRoot+getOutputFileNameTag("shannoneven"));
 					}else if (Estimators[i] == "npshannon") { 
-						cDisplays.push_back(new CollectDisplay(new NPShannon(), new OneColumnFile(fileNameRoot+"npshannon")));
-						outputNames.push_back(fileNameRoot+"npshannon"); outputTypes["npshannon"].push_back(fileNameRoot+"npshannon");
+						cDisplays.push_back(new CollectDisplay(new NPShannon(), new OneColumnFile(fileNameRoot+getOutputFileNameTag("npshannon"))));
+						outputNames.push_back(fileNameRoot+getOutputFileNameTag("npshannon")); outputTypes["npshannon"].push_back(fileNameRoot+getOutputFileNameTag("npshannon"));
 					}else if (Estimators[i] == "heip") { 
-						cDisplays.push_back(new CollectDisplay(new Heip(), new OneColumnFile(fileNameRoot+"heip")));
-						outputNames.push_back(fileNameRoot+"heip"); outputTypes["heip"].push_back(fileNameRoot+"heip");
+						cDisplays.push_back(new CollectDisplay(new Heip(), new OneColumnFile(fileNameRoot+getOutputFileNameTag("heip"))));
+						outputNames.push_back(fileNameRoot+getOutputFileNameTag("heip")); outputTypes["heip"].push_back(fileNameRoot+getOutputFileNameTag("heip"));
 					}else if (Estimators[i] == "smithwilson") { 
-						cDisplays.push_back(new CollectDisplay(new SmithWilson(), new OneColumnFile(fileNameRoot+"smithwilson")));
-						outputNames.push_back(fileNameRoot+"smithwilson"); outputTypes["smithwilson"].push_back(fileNameRoot+"smithwilson");
+						cDisplays.push_back(new CollectDisplay(new SmithWilson(), new OneColumnFile(fileNameRoot+getOutputFileNameTag("smithwilson"))));
+						outputNames.push_back(fileNameRoot+getOutputFileNameTag("smithwilson")); outputTypes["smithwilson"].push_back(fileNameRoot+getOutputFileNameTag("smithwilson"));
 					}else if (Estimators[i] == "simpson") { 
-						cDisplays.push_back(new CollectDisplay(new Simpson(), new ThreeColumnFile(fileNameRoot+"simpson")));
-						outputNames.push_back(fileNameRoot+"simpson"); outputTypes["simpson"].push_back(fileNameRoot+"simpson");
+						cDisplays.push_back(new CollectDisplay(new Simpson(), new ThreeColumnFile(fileNameRoot+getOutputFileNameTag("simpson"))));
+						outputNames.push_back(fileNameRoot+getOutputFileNameTag("simpson")); outputTypes["simpson"].push_back(fileNameRoot+getOutputFileNameTag("simpson"));
 					}else if (Estimators[i] == "simpsoneven") { 
-						cDisplays.push_back(new CollectDisplay(new SimpsonEven(), new OneColumnFile(fileNameRoot+"simpsoneven")));
-						outputNames.push_back(fileNameRoot+"simpsoneven"); outputTypes["simpsoneven"].push_back(fileNameRoot+"simpsoneven");
+						cDisplays.push_back(new CollectDisplay(new SimpsonEven(), new OneColumnFile(fileNameRoot+getOutputFileNameTag("simpsoneven"))));
+						outputNames.push_back(fileNameRoot+getOutputFileNameTag("simpsoneven")); outputTypes["simpsoneven"].push_back(fileNameRoot+getOutputFileNameTag("simpsoneven"));
 					}else if (Estimators[i] == "invsimpson") { 
-						cDisplays.push_back(new CollectDisplay(new InvSimpson(), new ThreeColumnFile(fileNameRoot+"invsimpson")));
-						outputNames.push_back(fileNameRoot+"invsimpson"); outputTypes["invsimpson"].push_back(fileNameRoot+"invsimpson");
+						cDisplays.push_back(new CollectDisplay(new InvSimpson(), new ThreeColumnFile(fileNameRoot+getOutputFileNameTag("invsimpson"))));
+						outputNames.push_back(fileNameRoot+getOutputFileNameTag("invsimpson")); outputTypes["invsimpson"].push_back(fileNameRoot+getOutputFileNameTag("invsimpson"));
 					}else if (Estimators[i] == "bootstrap") { 
-						cDisplays.push_back(new CollectDisplay(new Bootstrap(), new OneColumnFile(fileNameRoot+"bootstrap")));
-						outputNames.push_back(fileNameRoot+"bootstrap"); outputTypes["bootstrap"].push_back(fileNameRoot+"bootstrap");
+						cDisplays.push_back(new CollectDisplay(new Bootstrap(), new OneColumnFile(fileNameRoot+getOutputFileNameTag("bootstrap"))));
+						outputNames.push_back(fileNameRoot+getOutputFileNameTag("bootstrap")); outputTypes["bootstrap"].push_back(fileNameRoot+getOutputFileNameTag("bootstrap"));
 					}else if (Estimators[i] == "geometric") { 
-						cDisplays.push_back(new CollectDisplay(new Geom(), new OneColumnFile(fileNameRoot+"geometric")));
-						outputNames.push_back(fileNameRoot+"geometric"); outputTypes["geometric"].push_back(fileNameRoot+"geometric");
+						cDisplays.push_back(new CollectDisplay(new Geom(), new OneColumnFile(fileNameRoot+getOutputFileNameTag("geometric"))));
+						outputNames.push_back(fileNameRoot+getOutputFileNameTag("geometric")); outputTypes["geometric"].push_back(fileNameRoot+getOutputFileNameTag("geometric"));
 					}else if (Estimators[i] == "qstat") { 
-						cDisplays.push_back(new CollectDisplay(new QStat(), new OneColumnFile(fileNameRoot+"qstat")));
-						outputNames.push_back(fileNameRoot+"qstat"); outputTypes["qstat"].push_back(fileNameRoot+"qstat");
+						cDisplays.push_back(new CollectDisplay(new QStat(), new OneColumnFile(fileNameRoot+getOutputFileNameTag("qstat"))));
+						outputNames.push_back(fileNameRoot+getOutputFileNameTag("qstat")); outputTypes["qstat"].push_back(fileNameRoot+getOutputFileNameTag("qstat"));
 					}else if (Estimators[i] == "logseries") { 
-						cDisplays.push_back(new CollectDisplay(new LogSD(), new OneColumnFile(fileNameRoot+"logseries")));
-						outputNames.push_back(fileNameRoot+"logseries"); outputTypes["logseries"].push_back(fileNameRoot+"logseries");
+						cDisplays.push_back(new CollectDisplay(new LogSD(), new OneColumnFile(fileNameRoot+getOutputFileNameTag("logseries"))));
+						outputNames.push_back(fileNameRoot+getOutputFileNameTag("logseries")); outputTypes["logseries"].push_back(fileNameRoot+getOutputFileNameTag("logseries"));
 					}else if (Estimators[i] == "bergerparker") { 
-						cDisplays.push_back(new CollectDisplay(new BergerParker(), new OneColumnFile(fileNameRoot+"bergerparker")));
-						outputNames.push_back(fileNameRoot+"bergerparker"); outputTypes["bergerparker"].push_back(fileNameRoot+"bergerparker");
+						cDisplays.push_back(new CollectDisplay(new BergerParker(), new OneColumnFile(fileNameRoot+getOutputFileNameTag("bergerparker"))));
+						outputNames.push_back(fileNameRoot+getOutputFileNameTag("bergerparker")); outputTypes["bergerparker"].push_back(fileNameRoot+getOutputFileNameTag("bergerparker"));
 					}else if (Estimators[i] == "bstick") { 
-						cDisplays.push_back(new CollectDisplay(new BStick(), new ThreeColumnFile(fileNameRoot+"bstick")));
-						outputNames.push_back(fileNameRoot+"bstick"); outputTypes["bstick"].push_back(fileNameRoot+"bstick");
+						cDisplays.push_back(new CollectDisplay(new BStick(), new ThreeColumnFile(fileNameRoot+getOutputFileNameTag("bstick"))));
+						outputNames.push_back(fileNameRoot+getOutputFileNameTag("bstick")); outputTypes["bstick"].push_back(fileNameRoot+getOutputFileNameTag("bstick"));
 					}else if (Estimators[i] == "goodscoverage") { 
-						cDisplays.push_back(new CollectDisplay(new GoodsCoverage(), new OneColumnFile(fileNameRoot+"goodscoverage")));
-						outputNames.push_back(fileNameRoot+"goodscoverage"); outputTypes["goodscoverage"].push_back(fileNameRoot+"goodscoverage");
+						cDisplays.push_back(new CollectDisplay(new GoodsCoverage(), new OneColumnFile(fileNameRoot+getOutputFileNameTag("goodscoverage"))));
+						outputNames.push_back(fileNameRoot+getOutputFileNameTag("goodscoverage")); outputTypes["goodscoverage"].push_back(fileNameRoot+getOutputFileNameTag("goodscoverage"));
 					}else if (Estimators[i] == "efron") {
-						cDisplays.push_back(new CollectDisplay(new Efron(size), new OneColumnFile(fileNameRoot+"efron")));
-						outputNames.push_back(fileNameRoot+"efron"); outputTypes["efron"].push_back(fileNameRoot+"efron");
+						cDisplays.push_back(new CollectDisplay(new Efron(size), new OneColumnFile(fileNameRoot+getOutputFileNameTag("efron"))));
+						outputNames.push_back(fileNameRoot+getOutputFileNameTag("efron")); outputTypes["efron"].push_back(fileNameRoot+getOutputFileNameTag("efron"));
 					}else if (Estimators[i] == "boneh") {
-						cDisplays.push_back(new CollectDisplay(new Boneh(size), new OneColumnFile(fileNameRoot+"boneh")));
-						outputNames.push_back(fileNameRoot+"boneh"); outputTypes["boneh"].push_back(fileNameRoot+"boneh");
+						cDisplays.push_back(new CollectDisplay(new Boneh(size), new OneColumnFile(fileNameRoot+getOutputFileNameTag("boneh"))));
+						outputNames.push_back(fileNameRoot+getOutputFileNameTag("boneh")); outputTypes["boneh"].push_back(fileNameRoot+getOutputFileNameTag("boneh"));
 					}else if (Estimators[i] == "solow") {
-						cDisplays.push_back(new CollectDisplay(new Solow(size), new OneColumnFile(fileNameRoot+"solow")));
-						outputNames.push_back(fileNameRoot+"solow"); outputTypes["solow"].push_back(fileNameRoot+"solow");
+						cDisplays.push_back(new CollectDisplay(new Solow(size), new OneColumnFile(fileNameRoot+getOutputFileNameTag("solow"))));
+						outputNames.push_back(fileNameRoot+getOutputFileNameTag("solow")); outputTypes["solow"].push_back(fileNameRoot+getOutputFileNameTag("solow"));
 					}else if (Estimators[i] == "shen") {
-						cDisplays.push_back(new CollectDisplay(new Shen(size, abund), new OneColumnFile(fileNameRoot+"shen")));
-						outputNames.push_back(fileNameRoot+"shen"); outputTypes["shen"].push_back(fileNameRoot+"shen");
+						cDisplays.push_back(new CollectDisplay(new Shen(size, abund), new OneColumnFile(fileNameRoot+getOutputFileNameTag("shen"))));
+						outputNames.push_back(fileNameRoot+getOutputFileNameTag("shen")); outputTypes["shen"].push_back(fileNameRoot+getOutputFileNameTag("shen"));
 					}
 				}
 			}

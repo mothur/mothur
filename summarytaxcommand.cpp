@@ -48,7 +48,26 @@ string SummaryTaxCommand::getHelpString(){
 		exit(1);
 	}
 }
-
+//**********************************************************************************************************************
+string SummaryTaxCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "summary")            {   outputFileName =  "tax.summary";   }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SummaryTaxCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 SummaryTaxCommand::SummaryTaxCommand(){	
 	try {
@@ -225,7 +244,7 @@ int SummaryTaxCommand::execute(){
 		
 		//print summary file
 		ofstream outTaxTree;
-		string summaryFile = outputDir + m->getRootName(m->getSimpleName(taxfile)) + "tax.summary";
+		string summaryFile = outputDir + m->getRootName(m->getSimpleName(taxfile)) + getOutputFileNameTag("summary");
 		m->openOutputFile(summaryFile, outTaxTree);
 		taxaSum->print(outTaxTree);
 		outTaxTree.close();

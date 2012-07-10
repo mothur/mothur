@@ -58,6 +58,27 @@ string ChimeraPerseusCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string ChimeraPerseusCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "chimera") {  outputFileName =  "perseus.chimeras"; }
+            else if (type == "accnos") {  outputFileName =  "perseus.accnos"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChimeraPerseusCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 ChimeraPerseusCommand::ChimeraPerseusCommand(){	
 	try {
 		abort = true; calledHelp = true;
@@ -376,8 +397,9 @@ int ChimeraPerseusCommand::execute(){
 			
 			int start = time(NULL);	
 			if (outputDir == "") { outputDir = m->hasPath(fastaFileNames[s]);  }//if user entered a file with a path then preserve it				
-			string outputFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + "perseus.chimera";
-			string accnosFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]))  + "perseus.accnos";
+			string outputFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + getOutputFileNameTag("chimera");
+			string accnosFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + getOutputFileNameTag("accnos");
+
 			//string newFasta = m->getRootName(fastaFileNames[s]) + "temp";
 			
 			//you provided a groupfile

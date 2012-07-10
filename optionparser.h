@@ -21,6 +21,7 @@
 class OptionParser {
 public:
 	OptionParser(string);
+    OptionParser(string, map<string, string>&);
 	~OptionParser() {}
 	map<string, string> getParameters();
 	bool getNameFile(vector<string>);

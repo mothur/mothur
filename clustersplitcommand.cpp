@@ -77,6 +77,29 @@ string ClusterSplitCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string ClusterSplitCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "list") {  outputFileName =  "list"; }
+            else if (type == "rabund") {  outputFileName =  "rabund"; }
+            else if (type == "sabund") {  outputFileName =  "sabund"; }
+            else if (type == "column") {  outputFileName =  "dist"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClusterSplitCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 ClusterSplitCommand::ClusterSplitCommand(){	
 	try {
 		abort = true; calledHelp = true; 
@@ -750,14 +773,17 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, map<float, int> us
 		if (outputDir == "") { outputDir += m->hasPath(distfile); }
 		fileroot = outputDir + m->getRootName(m->getSimpleName(distfile));
 		
-		m->openOutputFile(fileroot+ tag + ".sabund",	outSabund);
-		m->openOutputFile(fileroot+ tag + ".rabund",	outRabund);
-		m->openOutputFile(fileroot+ tag + ".list",		outList);
-				
-		outputNames.push_back(fileroot+ tag + ".sabund");  outputTypes["list"].push_back(fileroot+ tag + ".list");
-		outputNames.push_back(fileroot+ tag + ".rabund");  outputTypes["rabund"].push_back(fileroot+ tag + ".rabund");
-		outputNames.push_back(fileroot+ tag + ".list");    outputTypes["sabund"].push_back(fileroot+ tag + ".sabund");
+        string sabundFileName = fileroot+ tag + "." + getOutputFileNameTag("sabund");
+        string rabundFileName = fileroot+ tag + "." + getOutputFileNameTag("rabund");
+        string listFileName = fileroot+ tag + "." + getOutputFileNameTag("list");
+        
+		m->openOutputFile(sabundFileName,	outSabund);
+		m->openOutputFile(rabundFileName,	outRabund);
+		m->openOutputFile(listFileName,	outList);
 		
+		outputNames.push_back(sabundFileName); outputTypes["sabund"].push_back(sabundFileName);
+		outputNames.push_back(rabundFileName); outputTypes["rabund"].push_back(rabundFileName);
+		outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);		
 		map<float, int>::iterator itLabel;
 
 		//for each label needed
@@ -1331,7 +1357,7 @@ int ClusterSplitCommand::createMergedDistanceFile(vector< map<string, string> > 
 		
 		string thisOutputDir = outputDir;
 		if (outputDir == "") { thisOutputDir = m->hasPath(fastafile); }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(fastafile)) + "dist";
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(fastafile)) + getOutputFileNameTag("column");
 		m->mothurRemove(outputFileName);
 		
 		

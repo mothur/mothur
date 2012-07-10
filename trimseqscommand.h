@@ -27,6 +27,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "trim.seqs";	}
 	string getCommandCategory()		{ return "Sequence Processing";		}
+	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Trim.seqs"; }
 	string getDescription()		{ return "provides the preprocessing features needed to screen and sort pyrosequences"; }
@@ -413,11 +414,13 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
 							
 							outGroupsFile << currSeq.getName() << '\t' << thisGroup << endl;
 							
+                            int numRedundants = 0;
 							if (pDataArray->nameFile != "") {
 								map<string, string>::iterator itName = pDataArray->nameMap.find(currSeq.getName());
 								if (itName != pDataArray->nameMap.end()) { 
 									vector<string> thisSeqsNames; 
 									pDataArray->m->splitAtChar(itName->second, thisSeqsNames, ',');
+                                    numRedundants = thisSeqsNames.size()-1; //we already include ourselves below
 									for (int k = 1; k < thisSeqsNames.size(); k++) { //start at 1 to skip self
 										outGroupsFile << thisSeqsNames[k] << '\t' << thisGroup << endl;
 									}
@@ -425,8 +428,8 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
 							}
 							
 							map<string, int>::iterator it = pDataArray->groupCounts.find(thisGroup);
-							if (it == pDataArray->groupCounts.end()) {	pDataArray->groupCounts[thisGroup] = 1; }
-							else { pDataArray->groupCounts[it->first]++; }
+							if (it == pDataArray->groupCounts.end()) {	pDataArray->groupCounts[thisGroup] = 1 + numRedundants; }
+							else { pDataArray->groupCounts[it->first] += (1 + numRedundants); }
                             
 						}
 					}

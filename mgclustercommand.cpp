@@ -14,6 +14,7 @@ vector<string> MGClusterCommand::setParameters(){
 	try {
 		CommandParameter pblast("blast", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pblast);
 		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
+        CommandParameter plarge("large", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(plarge);
 		CommandParameter plength("length", "Number", "", "5", "", "", "",false,false); parameters.push_back(plength);
 		CommandParameter ppenalty("penalty", "Number", "", "0.10", "", "", "",false,false); parameters.push_back(ppenalty);
 		CommandParameter pcutoff("cutoff", "Number", "", "0.70", "", "", "",false,false); parameters.push_back(pcutoff);
@@ -57,6 +58,28 @@ string MGClusterCommand::getHelpString(){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "MGClusterCommand", "getHelpString");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string MGClusterCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "list") {  outputFileName =  "list"; }
+            else if (type == "rabund") {  outputFileName =  "rabund"; }
+            else if (type == "sabund") {  outputFileName =  "sabund"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "MGClusterCommand", "getOutputFileNameTag");
 		exit(1);
 	}
 }
@@ -147,6 +170,9 @@ MGClusterCommand::MGClusterCommand(string option) {
 			
 			//check for optional parameter and set defaults
 			string temp;
+            temp = validParameter.validFile(parameters, "large", false);			if (temp == "not found") { temp = "false"; }            
+			large = m->isTrue(temp); 
+            
 			temp = validParameter.validFile(parameters, "precision", false);		if (temp == "not found") { temp = "100"; }
 			precisionLength = temp.length();
 			m->mothurConvert(temp, precision); 
@@ -177,7 +203,7 @@ MGClusterCommand::MGClusterCommand(string option) {
 			hclusterWanted = m->isTrue(temp); 
 			
 			temp = validParameter.validFile(parameters, "hard", false);			if (temp == "not found") { temp = "T"; }
-			hard = m->isTrue(temp);
+			hard = m->isTrue(temp);            
 		}
 
 	}
@@ -189,7 +215,6 @@ MGClusterCommand::MGClusterCommand(string option) {
 //**********************************************************************************************************************
 int MGClusterCommand::execute(){
 	try {
-		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//read names file
@@ -202,15 +227,27 @@ int MGClusterCommand::execute(){
 		string tag = "";
 		time_t start;
 		float previousDist = 0.00000;
-		float rndPreviousDist = 0.00000;
-		
+		float rndPreviousDist = 0.00000; 
+        
 		//read blastfile - creates sparsematrices for the distances and overlaps as well as a listvector
 		//must remember to delete those objects here since readBlast does not
 		read = new ReadBlast(blastfile, cutoff, penalty, length, minWanted, hclusterWanted);
 		read->read(nameMap);
-		
-		list = new ListVector(nameMap->getListVector());
-		RAbundVector* rabund = new RAbundVector(list->getRAbundVector());
+        
+        list = new ListVector(nameMap->getListVector());
+        RAbundVector* rabund = NULL;
+        
+        if(large) {
+            map<string, int> nameMapCounts = m->readNames(namefile);
+            createRabund(nameMapCounts);
+            rabund = &rav;
+        }else {
+            rabund = new RAbundVector(list->getRAbundVector());
+        }
+        
+                
+		//list = new ListVector(nameMap->getListVector());
+		//rabund = new RAbundVector(list->getRAbundVector());
 		
 		if (m->control_pressed) { outputTypes.clear(); delete nameMap; delete read; delete list; delete rabund; return 0; }
 		
@@ -223,10 +260,13 @@ int MGClusterCommand::execute(){
 		else if (method == "nearest")	{ tag = "nn";  }
 		else							{ tag = "an";  }
 		
-		//open output files
-		m->openOutputFile(fileroot+ tag + ".list",  listFile);
-		m->openOutputFile(fileroot+ tag + ".rabund",  rabundFile);
-		m->openOutputFile(fileroot+ tag + ".sabund",  sabundFile);
+        string sabundFileName = fileroot+ tag + "." + getOutputFileNameTag("sabund");
+        string rabundFileName = fileroot+ tag + "." + getOutputFileNameTag("rabund");
+        string listFileName = fileroot+ tag + "." + getOutputFileNameTag("list");
+        
+		m->openOutputFile(sabundFileName,	sabundFile);
+		m->openOutputFile(rabundFileName,	rabundFile);
+		m->openOutputFile(listFileName,	listFile);
 		
 		if (m->control_pressed) { 
 			delete nameMap; delete read; delete list; delete rabund; 
@@ -478,8 +518,8 @@ int MGClusterCommand::execute(){
 			m->mothurRemove(overlapFile);
 		}
 		
-		delete list; 
-		delete rabund;
+		delete list;
+		if (!large) {delete rabund;}
 		listFile.close();
 		sabundFile.close();
 		rabundFile.close();
@@ -493,9 +533,9 @@ int MGClusterCommand::execute(){
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-		m->mothurOut(fileroot+ tag + ".list"); m->mothurOutEndLine();	outputNames.push_back(fileroot+ tag + ".list"); outputTypes["list"].push_back(fileroot+ tag + ".list");
-		m->mothurOut(fileroot+ tag + ".rabund"); m->mothurOutEndLine();	outputNames.push_back(fileroot+ tag + ".rabund"); outputTypes["rabund"].push_back(fileroot+ tag + ".rabund");
-		m->mothurOut(fileroot+ tag + ".sabund"); m->mothurOutEndLine();	outputNames.push_back(fileroot+ tag + ".sabund"); outputTypes["sabund"].push_back(fileroot+ tag + ".sabund");
+		m->mothurOut(listFileName); m->mothurOutEndLine();	outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
+		m->mothurOut(rabundFileName); m->mothurOutEndLine();	outputNames.push_back(rabundFileName); outputTypes["rabund"].push_back(rabundFileName);
+		m->mothurOut(sabundFileName); m->mothurOutEndLine();	outputNames.push_back(sabundFileName); outputTypes["sabund"].push_back(sabundFileName);
 		m->mothurOutEndLine();
 		
 		if (saveCutoff != cutoff) { 
@@ -674,7 +714,16 @@ void MGClusterCommand::sortHclusterFiles(string unsortedDist, string unsortedOve
 
 //**********************************************************************************************************************
 
+void MGClusterCommand::createRabund(map<string, int> nameMapCounts){
+    try {
+    }
+    catch(exception& e) {
+		m->errorOut(e, "MGClusterCommand", "createRabund");
+		exit(1);
+	}
+    
+}
 
-
+//**********************************************************************************************************************
 
 

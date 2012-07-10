@@ -56,12 +56,32 @@ string CorrAxesCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string CorrAxesCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "corraxes") {  outputFileName =  "corr.axes"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "CorrAxesCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 CorrAxesCommand::CorrAxesCommand(){	
 	try {
 		abort = true; calledHelp = true; 
 		setParameters();
 		vector<string> tempOutNames;
-		outputTypes["corr.axes"] = tempOutNames;
+		outputTypes["corraxes"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "CorrAxesCommand", "CorrAxesCommand");
@@ -92,7 +112,7 @@ CorrAxesCommand::CorrAxesCommand(string option)  {
 			}
 			
 			vector<string> tempOutNames;
-			outputTypes["corr.axes"] = tempOutNames;
+			outputTypes["corraxes"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -266,8 +286,8 @@ int CorrAxesCommand::execute(){
 		// calc the r values																//
 		/************************************************************************************/
 		
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(inputFileName)) + method + ".corr.axes";
-		outputNames.push_back(outputFileName); outputTypes["corr.axes"].push_back(outputFileName);	
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(inputFileName)) + method + "." + getOutputFileNameTag("corraxes");
+		outputNames.push_back(outputFileName); outputTypes["corraxes"].push_back(outputFileName);	
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
