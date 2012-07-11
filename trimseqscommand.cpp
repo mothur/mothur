@@ -607,9 +607,11 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 
 			Sequence currSeq(inFASTA); m->gobble(inFASTA);
 			//cout << currSeq.getName() << '\t' << currSeq.getUnaligned().length() << endl;
+            if (m->debug) { m->mothurOut("[DEBUG]: " + toString(count) + " fasta = " + currSeq.getName() + '\n'); }
 			QualityScores currQual;
 			if(qFileName != ""){
 				currQual = QualityScores(qFile);  m->gobble(qFile);
+                 if (m->debug) { m->mothurOut("[DEBUG]: qual = " + currQual.getName() + '\n'); }
 			}
 			
 			string origSeq = currSeq.getUnaligned();
@@ -1185,6 +1187,7 @@ int TrimSeqsCommand::setLines(string filename, string qfilename) {
         }
         
         for (int i = 0; i < (fastaFilePos.size()-1); i++) {
+            if (m->debug) { m->mothurOut("[DEBUG]: " + toString(i) +'\t' + toString(fastaFilePos[i]) + '\t' + toString(fastaFilePos[i+1]) + '\n'); }
 			lines.push_back(linePair(fastaFilePos[i], fastaFilePos[(i+1)]));
 			if (qfilename != "") {  qLines.push_back(linePair(qfileFilePos[i], qfileFilePos[(i+1)]));  }
 		}	
