@@ -64,7 +64,7 @@ private:
 	ListVector* mergeOPFs(map<string, int>, float);
 	void sortHclusterFiles(string, string);
 	vector<seqDist> getSeqs(ifstream&);
-    void createRabund(CountTable*, ListVector*);
+    void createRabund(CountTable*&, ListVector*&, RAbundVector*&);
 
 };
 

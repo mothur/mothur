@@ -172,7 +172,7 @@ MGClusterCommand::MGClusterCommand(string option) {
 			else if (countfile == "not found") { countfile = ""; }
             else { m->setCountTableFile(countfile); }
             
-            if (countfile != "" && namefile != "") { m->mothurOut("Cannot have both a name file and count file. Please use one or the other."); m->mothurOutEndLine(); abort = true; }
+            if (countfile != "" && namefile != "") { m->mothurOut("[ERROR]: Cannot have both a name file and count file. Please use one or the other."); m->mothurOutEndLine(); abort = true; }
 			
 			if ((blastfile == "")) { m->mothurOut("When executing a mgcluster command you must provide a blastfile."); m->mothurOutEndLine(); abort = true; }
 			
@@ -249,8 +249,8 @@ int MGClusterCommand::execute(){
             //map<string, int> nameMapCounts = m->readNames(namefile);
             ct = new CountTable();
             ct->readTable(countfile);
-            createRabund(ct, list);
-            rabund = &rav;
+            rabund = new RAbundVector();
+            createRabund(ct, list, rabund);
         }else {
             rabund = new RAbundVector(list->getRAbundVector());
         }
@@ -724,7 +724,7 @@ void MGClusterCommand::sortHclusterFiles(string unsortedDist, string unsortedOve
 
 //**********************************************************************************************************************
 
-void MGClusterCommand::createRabund(CountTable* ct, ListVector* list){
+void MGClusterCommand::createRabund(CountTable*& ct, ListVector*& list, RAbundVector*& rabund){
     try {
         //vector<string> names = ct.getNamesOfSeqs();
 
@@ -739,7 +739,7 @@ void MGClusterCommand::createRabund(CountTable* ct, ListVector* list){
            for (int j = 0; j < binNames.size(); j++) { 
                total += ct->getNumSeqs(binNames[j]);
            }
-           rav.push_back(total);   
+           rabund->push_back(total);   
        }
         
         
