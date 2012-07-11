@@ -18,6 +18,7 @@
 #include "hcluster.h"
 #include "rabundvector.hpp"
 #include "sabundvector.hpp"
+#include "counttable.h"
 
 /**********************************************************************/
 
@@ -46,12 +47,13 @@ private:
 	Cluster* cluster;
 	HCluster* hcluster;
 	ListVector* list;
+    CountTable* ct;
 	ListVector oldList;
     RAbundVector rav;
 	vector<seqDist> overlapMatrix;
 	vector<string> outputNames;
 	
-	string blastfile, method, namefile, overlapFile, distFile, outputDir;
+	string blastfile, method, namefile, countfile, overlapFile, distFile, outputDir;
 	ofstream sabundFile, rabundFile, listFile;
 	double cutoff;
 	float penalty;
@@ -62,7 +64,7 @@ private:
 	ListVector* mergeOPFs(map<string, int>, float);
 	void sortHclusterFiles(string, string);
 	vector<seqDist> getSeqs(ifstream&);
-    void createRabund(map<string, int>);
+    void createRabund(CountTable*, ListVector*);
 
 };
 
