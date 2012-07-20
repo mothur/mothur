@@ -19,6 +19,7 @@
 #include "sharedanddesignfilereader.h"
 #include "dataset.h"
 #include "regularizedrandomforest.h"
+#include "Datasets/inpatient.final.an.0.03.subsample.avg.matrix.h"
 
 class TrainingSet;
 class DataSet;
@@ -31,11 +32,19 @@ int main(int argc, const char * argv[]){
     // call srand only once in the program
   srand(time(NULL));
   
-  const string sharedFilePath = "final.an.0.03.subsample.0.03.pick.shared";
-  const string designFilePath = "mouse.sex_time.design";
-  const int numberOfDecisionTrees = 1000;
+//  const string sharedFilePath = "final.an.0.03.subsample.0.03.pick.shared";
+//  const string designFilePath = "mouse.sex_time.design";
+//  const int numberOfDecisionTrees = 1000;
   
-  RegularizedRandomForest regularizedRandomForest(sharedFilePath, designFilePath, numberOfDecisionTrees);
+//  RegularizedRandomForest regularizedRandomForest(sharedFilePath, designFilePath, numberOfDecisionTrees);
+  
+    // test of Dataset
+//  for (int i = 0; i < rows; i++) {
+//    for (int j = 0; j < columns; j++) {
+//      cout << dataSet[i][j] << " ";
+//    }
+//    cout << endl;
+//  }
       
   return 0;
 }

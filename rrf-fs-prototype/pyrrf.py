@@ -220,6 +220,7 @@ class RegularizedDecisionTree(AbstractDecisionTree):
 
 	def splitRecursively(self, treeNode, featureSubset, penalty):
 		if DEBUG_MODE: print "splitRecursively()"
+		print 'featureSubset', featureSubset
 
 		bootstrappedFeatureVectors = treeNode.bootstrappedFeatureVectors
 		bootstrappedOutputVector = treeNode.bootstrappedOutputVector
@@ -633,15 +634,10 @@ class RegularizedRandomForest(AbstractRandomForest):
 			print "Creating", i, "(th) Decision tree"
 			decisionTree = RegularizedDecisionTree(dataSet, self.globalDiscardedFeatureIndices, OptimumFeatureSubsetSelector('squareRoot'), self.treeSplitCriterion)
 #			decisionTree.calcTreeVariableImportanceAndError()
-#
 #			self.updateGlobalOutOfBagEstimates(decisionTree)
-#
 #			decisionTree.purgeDataSetsFromTree()
-#
 #			self.decisionTrees.append(decisionTree)
-#
 #		if DEBUG_MODE: print "self.globalOutOfBagEstimates:", self.globalOutOfBagEstimates
-
 		pass
 
 
