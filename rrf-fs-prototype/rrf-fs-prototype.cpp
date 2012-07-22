@@ -45,19 +45,20 @@ int main(int argc, const char * argv[]){
   for (int i = 0; i < numRows; i++) { for (int j = 0; j < numColumns; j++) { dataSet[i][j] = inpatientDataSet[i][j]; } }
   
   int numDecisionTrees = 1;
-  OptimumFeatureSubsetSelector optimumFeatureSubsetSelector("log2");
   AbstractRandomForest abstractRandomForest(dataSet, numDecisionTrees, "informationGain");
       
   // just a test
   vector<int> dummyDiscaredFeatureIndices;
+  OptimumFeatureSubsetSelector optimumFeatureSubsetSelector("log2");
   AbstractDecisionTree abstractDecisionTree(dataSet, dummyDiscaredFeatureIndices, optimumFeatureSubsetSelector, "informationGain");
+
   
-    // another test
-  int numFeatures = 845;
-  int numSamples = 187;
-  int numOutputClasses = 2;
-  int generation = 0;
-  TreeNode treeNode(dataSet, dummyDiscaredFeatureIndices, numFeatures, numSamples, numOutputClasses, generation);
+  // another test
+//  int numFeatures = 845;
+//  int numSamples = 187;
+//  int numOutputClasses = 2;
+//  int generation = 0;
+//  TreeNode treeNode(dataSet, dummyDiscaredFeatureIndices, numFeatures, numSamples, numOutputClasses, generation);
   return 0;
 }
 

@@ -12,7 +12,7 @@ class AbstractDecisionTree(object):
 		self.numSamples = len(baseDataSet)
 		self.numFeatures = len(baseDataSet[0]) - 1
 		self.numOutputClasses = 0
-		self.classes = []
+		self.outputClasses = []
 
 		self.bootstrappedTrainingSamples = []
 		self.bootstrappedTrainingSampleIndices = []
@@ -26,8 +26,8 @@ class AbstractDecisionTree(object):
 
 		for i in range(0, self.numSamples):
 			outcome = baseDataSet[i][-1]
-			if outcome not in self.classes:
-				self.classes.append(outcome)
+			if outcome not in self.outputClasses:
+				self.outputClasses.append(outcome)
 				self.numOutputClasses += 1
 
 		self.treeSplitCriterion = treeSplitCriterion

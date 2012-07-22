@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <cmath>
 #include "macros.h"
+#include "treenode.hpp"
 
 #define DEBUG_MODE
 
@@ -30,22 +31,23 @@ public:
   numSamples(baseDataSet.size()),
   numFeatures(baseDataSet[0].size()),
   numOutputClasses(0),
-    // TODO: self.rootNode = None
+  rootNode(NULL),
   globalDiscardedFeatureIndices(globalDiscardedFeatureIndices),
   optimumFeatureSubsetSize(optimumFeatureSubsetSelector.getOptimumFeatureSubsetSize(numFeatures)),
   treeSplitCriterion(treeSplitCriterion){
     
     for (int i = 0;  i < numSamples; i++) {
       int outcome = baseDataSet[i][numFeatures - 1];
-      vector<int>::iterator it = find(classes.begin(), classes.end(), outcome);
-      if (it == classes.end()){       // find() will return classes.end() if the element is not found
-        classes.push_back(outcome);
+      vector<int>::iterator it = find(outputClasses.begin(), outputClasses.end(), outcome);
+      if (it == outputClasses.end()){       // find() will return classes.end() if the element is not found
+        outputClasses.push_back(outcome);
         numOutputClasses++;
       }
     }    
   }
   
   ~AbstractDecisionTree(){
+    if (rootNode != NULL){ delete rootNode; }
   }
 protected:
 private:
@@ -53,14 +55,15 @@ private:
   int numSamples;
   int numFeatures;
   int numOutputClasses;
-  vector<int> classes;
+  vector<int> outputClasses;
   vector< vector<int> > bootstrappedTrainingSamples;
   vector<int> bootstrappedTrainingSampleIndices;
   vector< vector<int> > bootstrappedTestSamples;
   vector<int> bootstrappedTestSampleIndices;
-    // self.rootNode = None
+  
+  TreeNode* rootNode;
   vector<int> globalDiscardedFeatureIndices;
-  int optimumFeatureSubsetSize; // fix this
+  int optimumFeatureSubsetSize;
   string treeSplitCriterion;
 };
 
