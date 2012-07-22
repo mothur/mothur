@@ -13,6 +13,27 @@
 #define DEBUGMSG_VAR(X) (cout << "DEBUGMSG " << __PRETTY_FUNCTION__ << "\nDEBUGMSG " << #X << " -> " << X << endl << endl)
 #define NAME_VALUE_PAIR(VAR, OSTREAM) (OSTREAM << #VAR << " : " << VAR)
 
+using namespace std;
+
+class OptimumFeatureSubsetSelector{
+public:
+  OptimumFeatureSubsetSelector(string selectionType = "log2"): selectionType(selectionType){
+  }
+  
+  int getOptimumFeatureSubsetSize(unsigned numFeatures){
+#ifdef DEBUG_MODE
+    DEBUGMSG_LOCATION;
+#endif
+    if (selectionType == "log2"){ return (int)ceil(log2(numFeatures)); }
+    else if (selectionType == "squareRoot"){ return (int)ceil(sqrt(numFeatures)); } 
+    return -1;
+  }
+private:
+  string selectionType;
+};
+
+
+/* overrding "cout <<" for vector of integers */
 ostream& operator <<(ostream& os, vector<int>& integers){
   os << "[ ";
   for (unsigned i = 0; i < integers.size(); i++) {
@@ -22,6 +43,17 @@ ostream& operator <<(ostream& os, vector<int>& integers){
   return os;
 }
 
+/* overrding "cout <<" 2d matrix of itergers whuch uses vectors */
+ostream& operator <<(ostream& os, vector< vector<int> > matrix){
+  os << "[ ";
+  for (unsigned i = 0; i < matrix.size(); i++) {
+    os << "ROW " << i << ":" << matrix[i] << endl;
+  }
+  os << "]";
+  return os;
+}
+
+/* overrding "cout <<" for vector of booleans */
 ostream& operator <<(ostream& os, vector<bool>& booleans){
   os << "[ ";
   for (unsigned i = 0; i < booleans.size(); i++) {
@@ -31,5 +63,14 @@ ostream& operator <<(ostream& os, vector<bool>& booleans){
   return os;
 }
 
+/* overrding "cout <<" for vector of double */
+ostream& operator <<(ostream& os, vector<double>& doubles){
+  os << "[ ";
+  for (unsigned i = 0; i < doubles.size(); i++) {
+    os << doubles[i] << " ";
+  }
+  os << "]";
+  return os;
+}
 
 #endif
