@@ -29,10 +29,13 @@
 /* Begin PBXFileReference section */
 		7B09D86A1574B1E4003278C1 /* treenode.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = treenode.hpp; sourceTree = "<group>"; };
 		7B12A9F015B92F3E00793E64 /* inpatient.final.an.0.03.subsample.avg.matrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = inpatient.final.an.0.03.subsample.avg.matrix.h; sourceTree = "<group>"; };
+		7B12A9F215B932D300793E64 /* randomforest.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = randomforest.hpp; sourceTree = "<group>"; };
+		7B12A9F315B9333800793E64 /* abstractrandomforest.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = abstractrandomforest.hpp; sourceTree = "<group>"; };
 		7B142586156968C900D238B7 /* rrf-fs-prototype */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "rrf-fs-prototype"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7B8A75E51572C7A7002A3C9E /* regularizedrandomforest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = regularizedrandomforest.h; sourceTree = "<group>"; };
 		7B8A75E71572C7B9002A3C9E /* decisiontree.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = decisiontree.h; sourceTree = "<group>"; };
 		7B8A75E8157313E4002A3C9E /* macros.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = macros.h; sourceTree = "<group>"; };
+		7B9E492115BB5E2900719329 /* abstractdecisiontree.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = abstractdecisiontree.hpp; sourceTree = "<group>"; };
 		7BA4404E156C7DD9004A6A54 /* sharedanddesignfilereader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sharedanddesignfilereader.h; sourceTree = "<group>"; };
 		7BB761E5157188BB00699057 /* dataset.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dataset.h; sourceTree = "<group>"; };
 		7BB761E715718DBC00699057 /* trainingset.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = trainingset.h; sourceTree = "<group>"; };
@@ -55,6 +58,9 @@
 		7B14257B156968C600D238B7 = {
 			isa = PBXGroup;
 			children = (
+				7B9E492115BB5E2900719329 /* abstractdecisiontree.hpp */,
+				7B12A9F315B9333800793E64 /* abstractrandomforest.hpp */,
+				7B12A9F215B932D300793E64 /* randomforest.hpp */,
 				7BC1658A15748BEE002EFDDC /* Datasets */,
 				7B8A75E8157313E4002A3C9E /* macros.h */,
 				7B8A75E71572C7B9002A3C9E /* decisiontree.h */,

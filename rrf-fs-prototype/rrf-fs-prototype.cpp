@@ -16,13 +16,14 @@
 #include <string>
 #include <vector>
 
-#include "sharedanddesignfilereader.h"
-#include "dataset.h"
-#include "regularizedrandomforest.h"
+//#include "sharedanddesignfilereader.h"
+//#include "dataset.h"
+//#include "regularizedrandomforest.h"
+#include "abstractrandomforest.hpp"
 #include "Datasets/inpatient.final.an.0.03.subsample.avg.matrix.h"
 
-class TrainingSet;
-class DataSet;
+//class TrainingSet;
+//class DataSet;
 
 
 using namespace std;
@@ -37,15 +38,18 @@ int main(int argc, const char * argv[]){
 //  const int numberOfDecisionTrees = 1000;
   
 //  RegularizedRandomForest regularizedRandomForest(sharedFilePath, designFilePath, numberOfDecisionTrees);
+    
+  /* create 2d vector from the array */
+  vector< vector<int> > dataSet(numRows, vector<int>(numColumns, 0));
+  for (int i = 0; i < numRows; i++) { for (int j = 0; j < numColumns; j++) { dataSet[i][j] = inpatientDataSet[i][j]; } }
   
-    // test of Dataset
-//  for (int i = 0; i < rows; i++) {
-//    for (int j = 0; j < columns; j++) {
-//      cout << dataSet[i][j] << " ";
-//    }
-//    cout << endl;
-//  }
+  int numDecisionTrees = 1;
+  OptimumFeatureSubsetSelector optimumFeatureSubsetSelector("log2");
+  AbstractRandomForest abstractRandomForest(dataSet, numDecisionTrees, "informationGain");
       
+  // just a test
+  vector<int> x;
+  AbstractDecisionTree abstractDecisionTree(dataSet, x, optimumFeatureSubsetSelector, "informationGain");
   return 0;
 }
 
