@@ -20,6 +20,7 @@
 //#include "dataset.h"
 //#include "regularizedrandomforest.h"
 #include "abstractrandomforest.hpp"
+#include "treenode.hpp"
 #include "Datasets/inpatient.final.an.0.03.subsample.avg.matrix.h"
 
 //class TrainingSet;
@@ -48,8 +49,15 @@ int main(int argc, const char * argv[]){
   AbstractRandomForest abstractRandomForest(dataSet, numDecisionTrees, "informationGain");
       
   // just a test
-  vector<int> x;
-  AbstractDecisionTree abstractDecisionTree(dataSet, x, optimumFeatureSubsetSelector, "informationGain");
+  vector<int> dummyDiscaredFeatureIndices;
+  AbstractDecisionTree abstractDecisionTree(dataSet, dummyDiscaredFeatureIndices, optimumFeatureSubsetSelector, "informationGain");
+  
+    // another test
+  int numFeatures = 845;
+  int numSamples = 187;
+  int numOutputClasses = 2;
+  int generation = 0;
+  TreeNode treeNode(dataSet, dummyDiscaredFeatureIndices, numFeatures, numSamples, numOutputClasses, generation);
   return 0;
 }
 

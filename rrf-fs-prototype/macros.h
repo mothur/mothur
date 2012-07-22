@@ -32,6 +32,18 @@ private:
   string selectionType;
 };
 
+// function for calculating standard deviation
+double getStandardDeviation(vector<int> featureVector){
+  unsigned sum = accumulate(featureVector.begin(), featureVector.end(), 0);
+    //    unsigned zeroCount = count(featureVectors[i].begin(), featureVectors[i].end(), 0);
+  double mean = (double) sum / (double) featureVector.size();
+  vector<double> differenceFromMean(featureVector.size());
+  transform(featureVector.begin(), featureVector.end(), differenceFromMean.begin(), bind2nd(minus<double>(), mean));
+  double squaredSum = inner_product(differenceFromMean.begin(), differenceFromMean.end(), differenceFromMean.begin(), 0.0);
+  double standardDeviation = sqrt(squaredSum / featureVector.size());    
+  return standardDeviation;
+}
+
 
 /* overrding "cout <<" for vector of integers */
 ostream& operator <<(ostream& os, vector<int>& integers){
