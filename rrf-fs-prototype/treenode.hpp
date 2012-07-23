@@ -47,6 +47,15 @@ public:
   
   ~TreeNode(){
   }
+  
+    // getters
+    // we need to return const reference so that we have the actual value and note a copy, 
+    // plus we do not modify the value as well
+  const int& getSplitFeatureIndex(){ return splitFeatureIndex; }
+    // TODO: check if this works properly or returs a shallow copy of the data
+  const vector< vector<int> >& getBootstrappedTrainingSamples(){ return bootstrappedTrainingSamples; }
+  const int& getSplitFeatureValue(){ return splitFeatureValue; }
+  
 protected:
 private:
   vector<vector<int> > bootstrappedTrainingSamples;
@@ -95,6 +104,7 @@ private:
     }
     ownEntropy = nodeEntropy;
   }
+  
 };
 
 #endif
