@@ -75,6 +75,21 @@ public:
 #endif    
   }
   
+  double calcIntrinsicValue(unsigned numLessThanValueAtSplitPoint, unsigned numGreaterThanValueAtSplitPoint, unsigned numSamples){
+    
+    double upperSplitEntropy = 0.0, lowerSplitEntropy = 0.0;
+    if (numLessThanValueAtSplitPoint > 0){
+      upperSplitEntropy = numLessThanValueAtSplitPoint * log2((double) numLessThanValueAtSplitPoint / (double) numSamples);
+    }
+    
+    if (numGreaterThanValueAtSplitPoint > 0){
+      lowerSplitEntropy = numGreaterThanValueAtSplitPoint * log2((double) numGreaterThanValueAtSplitPoint / (double) numSamples);
+    }
+    
+    double intrinsicValue = - ((double)(upperSplitEntropy + lowerSplitEntropy) / (double)numSamples);
+    return intrinsicValue;
+  }
+  
 protected:
 private:
   vector< vector<int> > baseDataSet;
