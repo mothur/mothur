@@ -29,7 +29,7 @@ public:
                        string treeSplitCriterion)
   : baseDataSet(baseDataSet),
   numSamples(baseDataSet.size()),
-  numFeatures(baseDataSet[0].size()),
+  numFeatures(baseDataSet[0].size() - 1),
   numOutputClasses(0),
   rootNode(NULL),
   globalDiscardedFeatureIndices(globalDiscardedFeatureIndices),
