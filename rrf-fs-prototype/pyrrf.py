@@ -174,9 +174,9 @@ class AbstractDecisionTree(object):
 	# given a split point, gives the user two different sets of data
 	def getSplitPopulation(self, node):
 		leftChildSamples, rightChildSamples = [], []
-		globalIndex = node.splitFeatureIndex
+		splitFeatureGlobalIndex = node.splitFeatureIndex
 		for x in node.bootstrappedTrainingSamples:
-			if x[globalIndex] < node.splitFeatureValue: leftChildSamples.append(x)
+			if x[splitFeatureGlobalIndex] < node.splitFeatureValue: leftChildSamples.append(x)
 			else: rightChildSamples.append(x)
 		return leftChildSamples, rightChildSamples
 
