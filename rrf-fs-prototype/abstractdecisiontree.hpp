@@ -206,6 +206,23 @@ public:
     return splitEntropy;
   }
   
+  void getSplitPopulation(TreeNode* node, vector< vector<int> >& leftChildSamples, vector< vector<int> >& rightChildSamples){    
+      // TODO: there is a possibility of optimization if we can recycle the samples in each nodes
+      // we just need to pointers to the samples i.e. vector<int> and use it everywhere and not create the sample 
+      // sample over and over again
+      // we need to make this const so that it is not modified by all the function calling
+      // currently purgeTreeNodesDataRecursively() is used for the same purpose, but this can be avoided altogher
+      // if re-using the same data over the classes
+    
+    int splitFeatureGlobalIndex = node->getSplitFeatureIndex();
+    
+    for (unsigned i = 0; i < node->getBootstrappedTrainingSamples().size(); i++) {
+      vector<int> sample =  node->getBootstrappedTrainingSamples()[i];
+      if (sample[splitFeatureGlobalIndex] < node->getSplitFeatureValue()){ leftChildSamples.push_back(sample); }
+      else{ rightChildSamples.push_back(sample); }
+    }
+  }
+  
 protected:
 private:
   vector< vector<int> > baseDataSet;
