@@ -12,7 +12,7 @@ class AbstractDecisionTree(object):
 		self.numSamples = len(baseDataSet)
 		self.numFeatures = len(baseDataSet[0]) - 1
 		self.numOutputClasses = 0
-		self.outputClasses = []
+		self.classes = []
 
 		self.bootstrappedTrainingSamples = []
 		self.bootstrappedTrainingSampleIndices = []
@@ -26,8 +26,8 @@ class AbstractDecisionTree(object):
 
 		for i in range(0, self.numSamples):
 			outcome = baseDataSet[i][-1]
-			if outcome not in self.outputClasses:
-				self.outputClasses.append(outcome)
+			if outcome not in self.classes:
+				self.classes.append(outcome)
 				self.numOutputClasses += 1
 
 		self.treeSplitCriterion = treeSplitCriterion
@@ -108,9 +108,9 @@ class AbstractDecisionTree(object):
 		return intrinsicValue
 
 	# calculate all the possible splits for a feature vector and then return the value of the best split
-	def getBestSplitAndMinEntropy(self, featureOutputPair, splitPoints):
+	def getBestSplitAndMinEntropy(self, featureOutputPairs, splitPoints):
 		if DEBUG_MODE: print "getBestSplitAndMinEntropy()"
-		numSamples = len(featureOutputPair)
+		numSamples = len(featureOutputPairs)
 		#		print "numSamples:", numSamples
 
 		entropies = []
@@ -118,17 +118,17 @@ class AbstractDecisionTree(object):
 
 		for index in splitPoints:
 			# print "for the cut in index", index
-			valueAtSplitPoint = featureOutputPair[index][0]
+			valueAtSplitPoint = featureOutputPairs[index][0]
 			numLessThanValueAtSplitPoint = 0
 			numGreaterThanValueAtSplitPoint = 0
-			for record in featureOutputPair:
+			for record in featureOutputPairs:
 				if record[0] < valueAtSplitPoint: numLessThanValueAtSplitPoint += 1
 				else: numGreaterThanValueAtSplitPoint += 1
 			# print 'numLessThanValueAtSplitPoint:', numLessThanValueAtSplitPoint, 'numGreaterThanValueAtSplitPoint:', numGreaterThanValueAtSplitPoint
 			# call for upper portion
-			upperEntropyOfSplit = self.calcSplitEntropy(featureOutputPair, index, self.numOutputClasses, isUpperSplit=True)
+			upperEntropyOfSplit = self.calcSplitEntropy(featureOutputPairs, index, self.numOutputClasses, isUpperSplit=True)
 			# call for lower portion
-			lowerEntropyOfSplit = self.calcSplitEntropy(featureOutputPair, index, self.numOutputClasses, isUpperSplit=False)
+			lowerEntropyOfSplit = self.calcSplitEntropy(featureOutputPairs, index, self.numOutputClasses, isUpperSplit=False)
 
 			if DEBUG_MODE:
 				print 'upperEntropyOfSplit:', upperEntropyOfSplit, 'lowerEntropyOfSplit:', lowerEntropyOfSplit
