@@ -12,7 +12,7 @@ class AbstractDecisionTree(object):
 		self.numSamples = len(baseDataSet)
 		self.numFeatures = len(baseDataSet[0]) - 1
 		self.numOutputClasses = 0
-		self.classes = []
+		self.outputClasses = []
 
 		self.bootstrappedTrainingSamples = []
 		self.bootstrappedTrainingSampleIndices = []
@@ -26,8 +26,8 @@ class AbstractDecisionTree(object):
 
 		for i in range(0, self.numSamples):
 			outcome = baseDataSet[i][-1]
-			if outcome not in self.classes:
-				self.classes.append(outcome)
+			if outcome not in self.outputClasses:
+				self.outputClasses.append(outcome)
 				self.numOutputClasses += 1
 
 		self.treeSplitCriterion = treeSplitCriterion
@@ -185,13 +185,13 @@ class AbstractDecisionTree(object):
 		if DEBUG_MODE: print "len(bootstrappedTrainingSamples):", len(treeNode.bootstrappedTrainingSamples)
 		#		if len(treeNode.bootstrappedTrainingSamples) < 10:
 		#			print treeNode.bootstrappedTrainingSamples
-		outPutClasses = []
+		tempOutputClasses = []
 		for i, x in enumerate(treeNode.bootstrappedTrainingSamples):
 			# print "index:", i
-			if x[treeNode.numFeatures] not in outPutClasses:
+			if x[treeNode.numFeatures] not in tempOutputClasses:
 				if DEBUG_MODE: print "appending: ", x[treeNode.numFeatures]
-				outPutClasses.append(x[treeNode.numFeatures])
-		if len(outPutClasses) < 2: return True, outPutClasses[0]
+				tempOutputClasses.append(x[treeNode.numFeatures])
+		if len(tempOutputClasses) < 2: return True, tempOutputClasses[0]
 		else: return False, None
 
 	# This is the regularized version of the DecisionTree class
