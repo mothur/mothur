@@ -14,6 +14,7 @@
 #include <numeric>
 #include <algorithm>
 #include <cmath>
+#include <limits>
 #include "macros.h"
 #include "treenode.hpp"
 
@@ -49,6 +50,31 @@ public:
   ~AbstractDecisionTree(){
     if (rootNode != NULL){ delete rootNode; }
   }
+  
+  void createBootStrappedSamples(){
+    vector<bool> isInTrainingSamples(numSamples, false);
+    
+    for (unsigned i = 0; i < numSamples; i++) {
+        // TODO: optimize the rand() function call + double check if it's working properly
+      int randomIndex = rand() % numSamples;
+      bootstrappedTrainingSamples.push_back(baseDataSet[randomIndex]);
+      isInTrainingSamples[randomIndex] = true;
+    }
+            
+    for (unsigned i = 0; i < numSamples; i++) {
+      if (isInTrainingSamples[i]){ bootstrappedTrainingSampleIndices.push_back(i); }
+      else{
+        bootstrappedTestSamples.push_back(baseDataSet[i]);
+        bootstrappedTestSampleIndices.push_back(i);
+      }
+    }
+    
+#ifdef DEBUG_MODE
+    DEBUGMSG_VAR(bootstrappedTrainingSampleIndices);
+    DEBUGMSG_VAR(bootstrappedTestSampleIndices);
+#endif    
+  }
+  
 protected:
 private:
   vector< vector<int> > baseDataSet;
