@@ -75,6 +75,51 @@ public:
 #endif    
   }
   
+    // TODO: finish implementation getMinEntropyOfFeature()
+  void getMinEntropyOfFeature(vector<int> featureVector, vector<int> outputVector, 
+                              double& minEntropy, int& featureSplitValue, double& intrinsicValue){
+    
+    vector< vector<int> > featureOutputPair(featureVector.size(), vector<int>(2, 0));
+    for (unsigned i = 0; i < featureVector.size(); i++) { 
+      featureOutputPair[i][0] = featureVector[i];
+      featureOutputPair[i][1] = outputVector[i];
+    }
+      // TODO: using default behavior to sort(), need to specify the comparator for added safety and compiler portability
+    sort(featureOutputPair.begin(), featureOutputPair.end());
+    
+#ifdef DEBUG_MODE
+    DEBUGMSG_VAR(featureOutputPair);
+#endif
+    
+    vector<int> splitPoints;
+    vector<int> uniqueFeatureValues(1, featureOutputPair[0][0]);
+    
+    for (unsigned i = 0; i < featureOutputPair.size(); i++) {
+      int featureValue = featureOutputPair[i][0];
+      vector<int>::iterator it = find(uniqueFeatureValues.begin(), uniqueFeatureValues.end(), featureValue);
+      if (it == uniqueFeatureValues.end()){                 // NOT FOUND
+        uniqueFeatureValues.push_back(featureValue);
+        splitPoints.push_back(i);
+      }
+    }
+    
+#ifdef DEBUG_MODE
+    DEBUGMSG_VAR(splitPoints);
+#endif
+    
+    int bestSplitIndex = -1;
+    if (splitPoints.size() == 0){
+        // TODO: trying out C++'s infitinity, don't know if this will work properly
+      minEntropy = numeric_limits<double>::infinity();
+      intrinsicValue = numeric_limits<double>::infinity();
+      featureSplitValue = -1;
+    }else{
+      getBestSplitAndMinEntropy(featureOutputPair, splitPoints, minEntropy, bestSplitIndex, intrinsicValue);
+      featureSplitValue = featureOutputPair[splitPoints[bestSplitIndex]][0];
+    }
+    
+  }
+  
   double calcIntrinsicValue(unsigned numLessThanValueAtSplitPoint, unsigned numGreaterThanValueAtSplitPoint, unsigned numSamples){
     
     double upperSplitEntropy = 0.0, lowerSplitEntropy = 0.0;
