@@ -40,7 +40,7 @@ double getStandardDeviation(vector<int> featureVector){
   vector<double> differenceFromMean(featureVector.size());
   transform(featureVector.begin(), featureVector.end(), differenceFromMean.begin(), bind2nd(minus<double>(), mean));
   double squaredSum = inner_product(differenceFromMean.begin(), differenceFromMean.end(), differenceFromMean.begin(), 0.0);
-  double standardDeviation = sqrt(squaredSum / featureVector.size());    
+  double standardDeviation = sqrt(squaredSum / (double)featureVector.size());    
   return standardDeviation;
 }
 
