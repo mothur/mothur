@@ -90,6 +90,77 @@ public:
     return intrinsicValue;
   }
   
+  void getBestSplitAndMinEntropy(vector< vector<int> > featureOutputPairs, vector<int> splitPoints,
+                                 double& minEntropy, int& minEntropyIndex, double& relatedIntrinsicValue){
+    
+    int numSamples = featureOutputPairs.size();
+    vector<double> entropies;
+    vector<double> intrinsicValues;
+    
+    for (int i = 0; i < splitPoints.size(); i++) {
+      int index = splitPoints[i];
+      int valueAtSplitPoint = featureOutputPairs[index][0];
+      unsigned numLessThanValueAtSplitPoint = 0;
+      unsigned numGreaterThanValueAtSplitPoint = 0;
+      
+      for (int j = 0; j < featureOutputPairs.size(); j++) {
+        vector<int> record = featureOutputPairs[j];
+        if (record[0] < valueAtSplitPoint){ numLessThanValueAtSplitPoint++; }
+        else{ numGreaterThanValueAtSplitPoint++; }
+      }
+      
+      double upperEntropyOfSplit = calcSplitEntropy(featureOutputPairs, index, numOutputClasses, true);
+      double lowerEntropyOfSplit = calcSplitEntropy(featureOutputPairs, index, numOutputClasses, false);
+      
+#ifdef DEBUG_MODE
+      DEBUGMSG_VAR(upperEntropyOfSplit);
+      DEBUGMSG_VAR(lowerEntropyOfSplit);
+      DEBUGMSG_VAR(numLessThanValueAtSplitPoint);
+      DEBUGMSG_VAR(numGreaterThanValueAtSplitPoint);
+#endif
+      
+      double totalEntropy = (numLessThanValueAtSplitPoint * upperEntropyOfSplit + numGreaterThanValueAtSplitPoint * lowerEntropyOfSplit) / (double)numSamples;
+      double intrinsicValue = calcIntrinsicValue(numLessThanValueAtSplitPoint, numGreaterThanValueAtSplitPoint, numSamples);
+      entropies.push_back(totalEntropy);
+      intrinsicValues.push_back(intrinsicValue);      
+    }
+    
+#ifdef DEBUG_MODE
+    DEBUGMSG_VAR(entropies);
+    DEBUGMSG_VAR(intrinsicValues);
+#endif
+    
+      // set output values
+    vector<double>::iterator it = min_element(entropies.begin(), entropies.end());
+    minEntropy = *it;
+    minEntropyIndex = (int)(it - entropies.begin());
+    relatedIntrinsicValue = intrinsicValues[minEntropyIndex];
+
+  }
+    
+    // TODO: featureOutputPair should be featureOutputPairs, plural, fix that in python
+  double calcSplitEntropy(vector< vector<int> > featureOutputPairs, int splitIndex, int numOutputClasses, bool isUpperSplit){
+    vector<int> classCounts(numOutputClasses, 0);
+    
+    if (isUpperSplit){ 
+      for (unsigned i = 0; i < splitIndex; i++) { classCounts[featureOutputPairs[i][1]]++; }
+    } else{
+      for (unsigned i = splitIndex; i < featureOutputPairs.size(); i++) { classCounts[featureOutputPairs[i][1]]++; }
+    }
+    
+    int totalClassCounts = accumulate(classCounts.begin(), classCounts.end(), 0);
+    
+    double splitEntropy = 0.0;
+    
+    for (unsigned i = 0; i < classCounts.size(); i++) {
+      if (classCounts[i] == 0){ continue; }
+      double probability = (double)classCounts[i] / (double)totalClassCounts;
+      splitEntropy += -(probability * log2(probability));
+    }
+    
+    return splitEntropy;
+  }
+  
 protected:
 private:
   vector< vector<int> > baseDataSet;
