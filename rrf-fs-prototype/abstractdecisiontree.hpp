@@ -44,7 +44,10 @@ public:
         outputClasses.push_back(outcome);
         numOutputClasses++;
       }
-    }    
+    }
+    
+      // TODO: this should be removed later
+    createBootStrappedSamples();
   }
   
   ~AbstractDecisionTree(){
@@ -221,6 +224,24 @@ public:
       if (sample[splitFeatureGlobalIndex] < node->getSplitFeatureValue()){ leftChildSamples.push_back(sample); }
       else{ rightChildSamples.push_back(sample); }
     }
+  }
+  
+  
+    // TODO: checkIfAlreadyClassified() verify code
+    // TODO: use bootstrappedOutputVector for easier calculation instead of using getBootstrappedTrainingSamples()
+  bool checkIfAlreadyClassified(TreeNode* treeNode, int& outputClass){
+    
+    vector<int> tempOutputClasses;
+    for (unsigned i = 0; i < treeNode->getBootstrappedTrainingSamples().size(); i++) {
+      int sampleOutputClass = treeNode->getBootstrappedTrainingSamples()[i][numFeatures];
+      vector<int>::iterator it = find(tempOutputClasses.begin(), tempOutputClasses.end(), sampleOutputClass);
+      if (it == tempOutputClasses.end()){               // NOT FOUND
+        tempOutputClasses.push_back(sampleOutputClass);
+      }
+    }
+    
+    if (tempOutputClasses.size() < 2){ outputClass = tempOutputClasses[0]; return true; }
+    else{ outputClass = -1; return false; }
   }
   
 protected:
