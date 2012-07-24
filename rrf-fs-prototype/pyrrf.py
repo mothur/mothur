@@ -372,8 +372,8 @@ class DecisionTree(AbstractDecisionTree):
 			rootNode.outputClass = rootNode.bootstrappedTrainingSamples[0][rootNode.numFeatures]
 			return
 
-		ifAlreadyClassified, rootNode.outputClass = self.checkIfAlreadyClassified(rootNode)
-		if ifAlreadyClassified:
+		isAlreadyClassified, rootNode.outputClass = self.checkIfAlreadyClassified(rootNode)
+		if isAlreadyClassified:
 			if DEBUG_MODE: print "Already classified: Case 2"
 			rootNode.isLeaf = True
 			return
