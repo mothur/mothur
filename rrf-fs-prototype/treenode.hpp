@@ -63,6 +63,11 @@ public:
   TreeNode* getRightChildNode(){ return rightChildNode; }
   const int& getOutputClass(){ return outputClass; }
   const int& getNumSamples(){ return numSamples; }
+  const int& getNumFeatures(){ return numFeatures; }
+  
+    // setters
+  void setIsLeaf(bool isLeaf){ this->isLeaf = isLeaf; }
+  void setOutputClass(int outputClass){ this->outputClass = outputClass; }
   
 protected:
 private:
