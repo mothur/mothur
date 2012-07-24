@@ -62,7 +62,66 @@ private:
 #endif
   }
   
+    // TODO: splitRecursively() finish implementation
   void splitRecursively(TreeNode* rootNode){
+    
+#ifdef DEBUG_MODE
+    DEBUGMSG_LOCATION;
+#endif
+    
+    if (rootNode->getNumSamples() < 2){      
+#ifdef DEBUG_MODE
+      DEBUGMSG("Already classified: Case 1");
+#endif      
+      rootNode->setIsLeaf(true);
+      rootNode->setOutputClass(rootNode->getBootstrappedTrainingSamples()[0][rootNode->getNumFeatures()]);
+      return;
+    }
+    
+    int classifiedOutputClass;
+    bool isAlreadyClassified = checkIfAlreadyClassified(rootNode, classifiedOutputClass);    
+    if (isAlreadyClassified == true){
+#ifdef DEBUG_MODE
+      DEBUGMSG("Already classified: Case 2");
+#endif
+      rootNode->setIsLeaf(true);
+      rootNode->setOutputClass(classifiedOutputClass);
+      return;
+    }
+    
+    vector<int> featureSubsetIndices = selectFeatureSubsetRandomly(globalDiscardedFeatureIndices, rootNode->getLocalDiscardedFeatureIndices());
+    rootNode->setFeatureSubsetIndices(featureSubsetIndices);
+    
+#ifdef DEBUG_MODE
+    DEBUGMSG_VAR(globalDiscardedFeatureIndices);
+    DEBUGMSG_VAR(featureSubsetIndices);
+#endif
+    
+    findAndUpdateBestFeatureToSplitOn(rootNode);
+    
+    vector< vector<int> > leftChildSamples;
+    vector< vector<int> > rightChildSamples;
+    getSplitPopulation(rootNode, leftChildSamples, rightChildSamples);
+    
+      // TODO: need to write code to clear this memory
+    TreeNode* leftChildNode = new TreeNode(leftChildSamples, globalDiscardedFeatureIndices, numFeatures, leftChildSamples.size(), numOutputClasses, rootNode->getGeneration() + 1);
+    TreeNode* rightChildNode = new TreeNode(rightChildSamples, globalDiscardedFeatureIndices, numFeatures, rightChildSamples.size(), numOutputClasses, rootNode->getGeneration() + 1);
+    
+    rootNode->setLeftChildNode(leftChildNode);
+    leftChildNode->setParentNode(rootNode);
+    
+    rootNode->setRightChildNode(rightChildNode);
+    rightChildNode->setParentNode(rootNode);
+    
+      // TODO: This recursive split can be parrallelized later
+    splitRecursively(leftChildNode);
+    splitRecursively(rightChildNode);
+  }
+  
+    // TODO: finish implementation of findAndUpdateBestFeatureToSplitOn()
+  void findAndUpdateBestFeatureToSplitOn(TreeNode* rootNode){
+  }
+  
   vector<int> selectFeatureSubsetRandomly(vector<int> globalDiscardedFeatureIndices, vector<int> localDiscardedFeatureIndices){
 #ifdef DEBUG_MODE
     DEBUGMSG_LOCATION;
