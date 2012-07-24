@@ -31,6 +31,11 @@
 
 using namespace std;
 
+//bool comparator(vector<int> first, vector<int> second){ return first[1] < second[1]; }
+//struct struct_comparator {
+//  bool operator() (vector<int> first, vector<int> second){ return first[1] > second[1]; }
+//} obj;
+
 int main(int argc, const char * argv[]){
   
     // call srand only once in the program
@@ -52,7 +57,7 @@ int main(int argc, const char * argv[]){
   // just a test
   vector<int> dummyDiscaredFeatureIndices;
   OptimumFeatureSubsetSelector optimumFeatureSubsetSelector("log2");
-  DecisionTree decisionTree(dataSet, dummyDiscaredFeatureIndices, optimumFeatureSubsetSelector, "informationGain");
+//  DecisionTree decisionTree(dataSet, dummyDiscaredFeatureIndices, optimumFeatureSubsetSelector, "informationGain");
 
   
   // another test
@@ -61,6 +66,20 @@ int main(int argc, const char * argv[]){
 //  int numOutputClasses = 2;
 //  int generation = 0;
 //  TreeNode treeNode(dataSet, dummyDiscaredFeatureIndices, numFeatures, numSamples, numOutputClasses, generation);
-    
-}
 
+    // depending on the first element of the row, the 2d matrix is sorted
+    // the whole row is shuffled not just the first element of the row
+//  vector< vector<int> > a(3, vector<int>(3, 0));
+//  a[0][0] = 3; a[0][1] = 18; a[0][2] = 7;
+//  a[1][0] = 2; a[1][1] = 12; a[1][2] = 1;
+//  a[2][0] = 14; a[2][1] = 1; a[2][2] = -1;
+//
+//  PRINT_VAR(a);  
+//  sort(a.begin(), a.end());
+//  PRINT_VAR(a);
+//  sort(a.begin(), a.end(), comparator);
+//  PRINT_VAR(a);
+//  sort(a.begin(), a.end(), obj);
+//  PRINT_VAR(a);
+
+}
