@@ -21,6 +21,10 @@
 
 using namespace std;
 
+struct VariableRankDescendingSorter {
+  bool operator() (vector<int> first, vector<int> second){ return first[1] > second[1]; }
+};
+
 class DecisionTree: public AbstractDecisionTree{
   
 public:
@@ -87,6 +91,30 @@ public:
     PRINT_VAR(variableRanks);
   }
   
+    // TODO: finish implementation
+  int evaluateSample(vector<int> shuffledSample){
+    
+  }
+  
+    // TODO: finish implementaion
+  void calcTreeErrorRate(int& numCorrect, double& treeErrorRate){
+  }
+  
+    // TODO: optimize the algo, instead of transposing two time, we can extarct the feature,
+    // shuffle it and then re-insert in the original place, thus iproving runnting time
+  vector< vector<int> > randomlyShuffleAttribute(vector< vector<int> > samples, int featureIndex) {
+    
+    vector< vector<int> > featureVectors(numFeatures, vector<int>(samples.size(), 0));
+    for (unsigned i = 0; i < samples.size(); i++) { for (unsigned j = 0; j < numFeatures; i++) { featureVectors[j][i] =  samples[i][j]; } }
+    
+    random_shuffle(featureVectors[featureIndex].begin(), featureVectors[featureIndex].end());
+    
+    vector< vector<int> > shuffledSample(samples.size(), vector<int>(numFeatures, 0));
+    for (unsigned i = 0; i < shuffledSample.size(); i++) { for (unsigned j = 0; j < numFeatures; i++) { shuffledSample[i][j] = featureVectors[j][i]; } }
+    
+    return shuffledSample;
+  }
+  
 protected:
   
 private:
@@ -96,11 +124,10 @@ private:
     rootNode = new TreeNode(bootstrappedTrainingSamples, globalDiscardedFeatureIndices, numFeatures, numSamples, numOutputClasses, generation);
     splitRecursively(rootNode);
 #ifdef DEBUG_MODE
-//    printTree(rootNode, "root");
+    printTree(rootNode, "root");
 #endif
   }
   
-    // TODO: splitRecursively() finish implementation
   void splitRecursively(TreeNode* rootNode){
     
 #ifdef DEBUG_MODE
@@ -266,7 +293,7 @@ private:
     string tabs = "";
     for (unsigned i = 0; i < treeNode->getGeneration(); i++) { tabs += "\t"; }
     
-    if (treeNode->checkIsLeaf() == false){
+    if (treeNode != NULL && treeNode->checkIsLeaf() == false){
       cout << tabs << caption << " [ gen: " << treeNode->getGeneration() << " ] ( " << treeNode->getSplitFeatureValue() << " < X" << treeNode->getSplitFeatureIndex() << " )" << endl;
       printTree(treeNode->getLeftChildNode(), "leftChild");
       printTree(treeNode->getRightChildNode(), "rightChild");
