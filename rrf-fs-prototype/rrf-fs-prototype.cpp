@@ -21,6 +21,7 @@
 //#include "dataset.h"
 //#include "regularizedrandomforest.h"
 #include "abstractrandomforest.hpp"
+#include "decisiontree.hpp"
 #include "treenode.hpp"
 #include "Datasets/inpatient.final.an.0.03.subsample.avg.matrix.h"
 
@@ -51,7 +52,7 @@ int main(int argc, const char * argv[]){
   // just a test
   vector<int> dummyDiscaredFeatureIndices;
   OptimumFeatureSubsetSelector optimumFeatureSubsetSelector("log2");
-  AbstractDecisionTree abstractDecisionTree(dataSet, dummyDiscaredFeatureIndices, optimumFeatureSubsetSelector, "informationGain");
+  DecisionTree decisionTree(dataSet, dummyDiscaredFeatureIndices, optimumFeatureSubsetSelector, "informationGain");
 
   
   // another test
@@ -60,8 +61,6 @@ int main(int argc, const char * argv[]){
 //  int numOutputClasses = 2;
 //  int generation = 0;
 //  TreeNode treeNode(dataSet, dummyDiscaredFeatureIndices, numFeatures, numSamples, numOutputClasses, generation);
-  
     
-  return 0;
 }
 
