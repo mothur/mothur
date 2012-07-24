@@ -1,160 +1,87 @@
   //
-  //  decisiontree.h
+  //  decisiontree.hpp
   //  rrf-fs-prototype
   //
   //  Created by Abu Zaher Faridee on 5/28/12.
   //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
   //
 
-#ifndef rrf_fs_prototype_decisiontree_h
-#define rrf_fs_prototype_decisiontree_h
+#ifndef rrf_fs_prototype_decisiontree_hpp
+#define rrf_fs_prototype_decisiontree_hpp
 
-#include <iostream>
+#include <vector>
+#include <map>
+#include <numeric>
+#include <algorithm>
 #include <cmath>
+#include <limits>
 #include "macros.h"
 #include "treenode.hpp"
+#include "abstractdecisiontree.hpp"
 
 using namespace std;
 
-class DecisionTree{
+class DecisionTree: public AbstractDecisionTree{
+  
 public:
-  explicit DecisionTree(const vector<TrainingSet>& baseSamples, int numberOfTotalFeatures): 
-    baseSamples(baseSamples), 
-    bootstrappedSamplesSize(baseSamples.size()),
-    numberOfTotalFeatures(numberOfTotalFeatures){
-//    DEBUGMSG_VAR(bootstrappedSamplesSize);
+  
+  DecisionTree(vector< vector<int> > baseDataSet,
+               vector<int> globalDiscardedFeatureIndices,
+               OptimumFeatureSubsetSelector optimumFeatureSubsetSelector,
+               string treeSplitCriterion)
+  
+  : AbstractDecisionTree(baseDataSet,
+                         globalDiscardedFeatureIndices,
+                         optimumFeatureSubsetSelector,
+                         treeSplitCriterion),
+  
+  variableImportanceList(numFeatures, 0){
     
-    createBootstrappedSamples();
+      // TODO self.outOfBagEstimates = {}
+    
+//		self.buildDecisionTree()
+    
+    createBootStrappedSamples();
     buildDecisionTree();
   }
   
-    // need to manually provide a copy constructor so that when addign a DecisionTree to a vector, we get desired results
-  DecisionTree(const DecisionTree& decisionTree) : 
-    baseSamples(decisionTree.baseSamples),
-    bootstrappedTrainingSamples(decisionTree.bootstrappedTrainingSamples),
-    bootStrammpedTestSamples(decisionTree.bootStrammpedTestSamples),
-    bootstrappedSamplesSize(decisionTree.bootstrappedSamplesSize),
-    numberOfTotalFeatures(decisionTree.numberOfTotalFeatures){
+  ~DecisionTree(){
+    if (rootNode != NULL){ delete rootNode; }
   }
   
-  void buildDecisionTree(){
-    TreeNode* rootTreeNode = new TreeNode(bootstrappedTrainingSamples);
-    splitRecursively(rootTreeNode);
-    delete rootTreeNode;
-  }
-  
-    // this is the heart of the whole process
-    // right now just doing some experiments, nothing important is going on
-  void splitRecursively(TreeNode* rootTreeNode){
-    if(rootTreeNode->isLeaf == false){
-      vector<int> featureSubsetIndices = selectFeatureSubsetRandomly();
-      DEBUGMSG_VAR(featureSubsetIndices);
-      
-//      bool isInSameClass = checkIfBelongsToSameClass(rootTreeNode->samples);
-    }
-  }
-  
-    /* 
-     returns true if all the data belongs to the same class 
-     i.e. data has been already classified
-     */
-  bool checkIfBelongsToSameClass(vector<TrainingSet>& samples){
-    bool isInSameClass = true;
-    string searchClass = samples[0].getOutputClass();
-    for (unsigned i = 0; i < samples.size(); i++) {
-      string foundClass = samples[i].getOutputClass();
-      if (foundClass == searchClass){
-        isInSameClass = false;
-      }
-    }
-    return isInSameClass;
-  }
-
-    // TODO: we need to modify this later for randomized random forest algo's implementations
-  vector<int> selectFeatureSubsetRandomly(){
-    vector<int> featureSubsetIndices;
-    int optimumFeatureSubsetSize = getOptimumFeatureSubsetSize();
-//    DEBUGMSG_VAR(optimumFeatureSubsetSize);
-    
-    vector<bool> isSelected(numberOfTotalFeatures, false);
-//    DEBUGMSG_VAR(isSelected);
-    
-    while (true) {
-        // TODO: be careful with this random index calculation function, there is a chance it will not
-        // output the hightest number say (527) ever.
-      double randomIndex = (int)((double)rand() / (double)RAND_MAX * numberOfTotalFeatures);
-      isSelected[randomIndex] = true;
-      
-      int count = 0;
-      for (unsigned i = 0; i < numberOfTotalFeatures; i++) {
-        if (isSelected[i] == true){ 
-          count++; 
-        }
-      }
-      if (count == optimumFeatureSubsetSize){ break; }
-    }
-    
-//    DEBUGMSG_VAR(isSelected);
-    for (unsigned i = 0; i < numberOfTotalFeatures; i++) {
-      if (isSelected[i] == true){ featureSubsetIndices.push_back(i); }
-    }
-//    DEBUGMSG_VAR(numberOfTotalFeatures);
-//    DEBUGMSG_VAR(featureSubsetIndices);
-    return featureSubsetIndices;
-  }
-  
-    // TODO: we need to modify this later for randomized random forest algo's implementation
-  int getOptimumFeatureSubsetSize(){ return (int) ceil(log(numberOfTotalFeatures) / log(2)); }
-  
-  void createBootstrappedSamples(){
-    
-      // randomly create indices list
-    vector<bool> isInTrainingSamples;
-    
-    for (unsigned i = 0; i < bootstrappedSamplesSize; i++) {
-      isInTrainingSamples.push_back(false);
-    }
-    
-    bootstrappedTrainingSamples.clear();
-    for (unsigned i = 0; i < bootstrappedSamplesSize; i++) {
-      int randomIndex = (int)(((double)(rand()) / (double)(RAND_MAX)) * bootstrappedSamplesSize);
-//      DEBUGMSG_VAR(randomIndex);
-      isInTrainingSamples[randomIndex] = true;
-      bootstrappedTrainingSamples.push_back(baseSamples[randomIndex]);
-    }
-    
-    bootStrammpedTestSamples.clear();
-    for (unsigned i = 0; i < bootstrappedSamplesSize; i++) {
-      if(isInTrainingSamples[i] == false){
-        bootStrammpedTestSamples.push_back(baseSamples[i]);
-      }
-    }
-    
-//    DEBUGMSG_VAR(bootStrammpedTestSamples.size());
-    
-  }
-  
-    // function that is useful for debugging
-  void printSamples(vector<TrainingSet> samples){
-    for (unsigned i = 0; i < samples.size(); i++) {
-      vector<int> otuCounts = samples[i].getOtuCounts();
-      int outputClassId = samples[i].getOutputClassId();
-      string outputClass = samples[i].getOutputClass();
-      for (unsigned j = 0; j < otuCounts.size(); j++) {
-        cout << otuCounts[j] << " ";
-      }
-      cout << outputClass << " " << outputClassId << endl;
-    }
-  }
+protected:
   
 private:
-  vector<TrainingSet> baseSamples;
-  vector<TrainingSet> bootstrappedTrainingSamples;
-  vector<TrainingSet> bootStrammpedTestSamples;
   
-  int bootstrappedSamplesSize;
-  int numberOfTotalFeatures;
+  void buildDecisionTree(){
+    int generation = 0;
+    rootNode = new TreeNode(bootstrappedTrainingSamples, globalDiscardedFeatureIndices, numFeatures, numSamples, numOutputClasses, generation);
+    splitRecursively(rootNode);
+#ifdef DEBUG_MODE
+//    printTree(rootNode, "root");
+#endif
+  }
+  
+  void splitRecursively(TreeNode* rootNode){
+  }
+  
+    // TODO: printTree() needs a check if correct
+  void printTree(TreeNode* treeNode, string caption){
+    
+    string tabs = "";
+    for (unsigned i = 0; i < treeNode->getGeneration(); i++) { tabs += "\t"; }
+    
+    if (treeNode->checkIsLeaf() == false){
+      cout << tabs << caption << " [ gen: " << treeNode->getGeneration() << " ] ( " << treeNode->getSplitFeatureValue() << " < X" << treeNode->getSplitFeatureIndex() << " )" << endl;
+      printTree(treeNode->getLeftChildNode(), "leftChild");
+      printTree(treeNode->getRightChildNode(), "rightChild");
+    }else {
+      cout << tabs << caption << " [ gen: " << treeNode->getGeneration() + " ] ( classified to: " << treeNode->getOutputClass() << ", samples: " << treeNode->getNumSamples() << " )";
+    }
+    
+  }
+  
+  vector<int> variableImportanceList;
 };
-
 
 #endif
