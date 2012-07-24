@@ -119,7 +119,77 @@ private:
   }
   
     // TODO: finish implementation of findAndUpdateBestFeatureToSplitOn()
-  void findAndUpdateBestFeatureToSplitOn(TreeNode* rootNode){
+  void findAndUpdateBestFeatureToSplitOn(TreeNode* node){
+    
+#ifdef DEBUG_MODE
+    DEBUGMSG_LOCATION;
+#endif
+    
+    vector< vector<int> > bootstrappedFeatureVectors = node->getBootstrappedFeatureVectors();
+    vector<int> bootstrappedOutputVector = node->getBootstrappedOutputVector();
+    vector<int> featureSubsetIndices = node->getFeatureSubsetIndices();
+    
+    vector<double> featureSubsetEntropies;
+    vector<int> featureSubsetSplitValues;
+    vector<double> featureSubsetIntrinsicValues;
+    vector<double> featureSubsetGainRatios;
+    
+    for (unsigned i = 0; i < featureSubsetIndices.size(); i++) {
+      int tryIndex = featureSubsetIndices[i];
+      
+#ifdef DEBUG_MODE
+      cout << "trying feature of index:" << tryIndex << endl;
+#endif
+      double featureMinEntropy;
+      int featureSplitValue;
+      double featureIntrinsicValue;
+      
+      getMinEntropyOfFeature(bootstrappedFeatureVectors[tryIndex], bootstrappedOutputVector, featureMinEntropy, featureSplitValue, featureIntrinsicValue);
+      
+      featureSubsetEntropies.push_back(featureMinEntropy);
+      featureSubsetSplitValues.push_back(featureSplitValue);
+      featureSubsetIntrinsicValues.push_back(featureIntrinsicValue);
+      
+      double featureInformationGain = node->getOwnEntropy() - featureMinEntropy;
+      double featureGainRatio = (double)featureInformationGain / (double)featureIntrinsicValue;
+      featureSubsetGainRatios.push_back(featureGainRatio);
+      
+    }
+    
+#ifdef DEBUG_MODE
+    DEBUGMSG_VAR(featureSubsetEntropies);
+    DEBUGMSG_VAR(featureSubsetSplitValues);
+    DEBUGMSG_VAR(featureSubsetIntrinsicValues);
+    DEBUGMSG_VAR(featureSubsetGainRatios);
+#endif
+
+    vector<double>::iterator minEntropyIterator = min_element(featureSubsetEntropies.begin(), featureSubsetEntropies.end());
+    vector<double>::iterator maxGainRatioIterator = max_element(featureSubsetGainRatios.begin(), featureSubsetGainRatios.end());
+    double featureMinEntropy = *minEntropyIterator;
+    double featureMaxGainRatio = *maxGainRatioIterator;
+
+    double bestFeatureSplitEntropy = featureMinEntropy;
+    int bestFeatureToSplitOnIndex = -1;
+    if (treeSplitCriterion == "gainRatio"){ 
+      bestFeatureToSplitOnIndex = (int)(maxGainRatioIterator - featureSubsetGainRatios.begin());
+        // if using 'gainRatio' measure, then featureMinEntropy must be re-updated, as the index
+        // for 'featureMaxGainRatio' would be different
+      bestFeatureSplitEntropy = featureSubsetEntropies[bestFeatureToSplitOnIndex];
+    }
+    else { bestFeatureToSplitOnIndex = (int)(minEntropyIterator - featureSubsetEntropies.begin()); }
+    
+    int bestFeatureSplitValue = featureSubsetSplitValues[bestFeatureToSplitOnIndex];
+    
+#ifdef DEBUG_MODE
+    DEBUGMSG_VAR(bestFeatureToSplitOnIndex);
+    DEBUGMSG_VAR(bestFeatureSplitValue);
+    DEBUGMSG_VAR(bestFeatureSplitEntropy);
+    if (treeSplitCriterion == "gainRatio") { DEBUGMSG_VAR(featureMaxGainRatio); }
+#endif
+    
+    node->setSplitFeatureIndex(featureSubsetIndices[bestFeatureToSplitOnIndex]);
+    node->setSplitFeatureValue(bestFeatureSplitValue);
+    node->setSplitFeatureEntropy(bestFeatureSplitEntropy);
   }
   
   vector<int> selectFeatureSubsetRandomly(vector<int> globalDiscardedFeatureIndices, vector<int> localDiscardedFeatureIndices){
