@@ -64,10 +64,15 @@ public:
   const int& getOutputClass(){ return outputClass; }
   const int& getNumSamples(){ return numSamples; }
   const int& getNumFeatures(){ return numFeatures; }
+  const vector<int>& getLocalDiscardedFeatureIndices(){ return localDiscardedFeatureIndices; }
   
     // setters
   void setIsLeaf(bool isLeaf){ this->isLeaf = isLeaf; }
   void setOutputClass(int outputClass){ this->outputClass = outputClass; }
+  void setFeatureSubsetIndices(vector<int> featureSubsetIndices){ this->featureSubsetIndices = featureSubsetIndices; }
+  void setLeftChildNode(TreeNode* leftChildNode){ this->leftChildNode = leftChildNode; }
+  void setRightChildNode(TreeNode* rightChildNode){ this->rightChildNode = rightChildNode; }
+  void setParentNode(TreeNode* parentNode){ this->parentNode = parentNode; }
   
 protected:
 private:
