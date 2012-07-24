@@ -49,6 +49,44 @@ public:
     if (rootNode != NULL){ delete rootNode; }
   }
   
+  void calcTreeVariableImportanceAndError() {
+#ifdef DEBUG_MODE
+    DEBUGMSG_LOCATION;
+#endif
+    int numCorrect;
+    double treeErrorRate;
+    calcTreeErrorRate(numCorrect, treeErrorRate);
+    
+    PRINT_VAR(bootstrappedTestSamples.size());
+    PRINT_VAR(numCorrect);
+    PRINT_VAR(treeErrorRate);
+    
+    for (unsigned i = 0; i < numFeatures; i++) {
+      vector< vector<int> > randomlySampledTestData = randomlyShuffleAttribute(bootstrappedTestSamples, i);
+      int numCorrectAfterShuffle = 0;
+      for (unsigned j = 0; j < randomlySampledTestData.size(); j++) {
+        vector<int> shuffledSample = randomlySampledTestData[j];
+        int actualSampleOutputClass = shuffledSample[numFeatures];
+        int predictedSampleOutputClass = evaluateSample(shuffledSample);
+        if (actualSampleOutputClass == predictedSampleOutputClass) { numCorrectAfterShuffle++; }
+        variableImportanceList[i] += (numCorrect - numCorrectAfterShuffle);
+      }
+    }
+    
+      // TODO: do we need to save the variableRanks in the DecisionTree, do we need it later?
+    vector< vector<int> > variableRanks;
+    for (unsigned i = 0; i < variableImportanceList.size(); i++) {
+      if (variableImportanceList[i] > 0) {
+          // TODO: is there a way to optimize the follow line's code?
+        vector<int> variableRank(2, 0);
+        variableRank[0] = i; variableRank[1] = variableImportanceList[i];
+      }
+    }
+    VariableRankDescendingSorter variableRankDescendingSorter;
+    sort(variableRanks.begin(), variableRanks.end(), variableRankDescendingSorter);
+    PRINT_VAR(variableRanks);
+  }
+  
 protected:
   
 private:
