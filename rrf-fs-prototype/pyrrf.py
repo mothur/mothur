@@ -308,6 +308,7 @@ class DecisionTree(AbstractDecisionTree):
 		self.buildDecisionTree()
 
 
+	# deprecated function, needs to be removed
 	def findNullFeatures(self, bootstrappedTrainingSamples):
 		print "findNullFeatures()"
 		# we can easily get the featureVectors by transposing, this zip functions is an easy
