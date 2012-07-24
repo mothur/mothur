@@ -78,7 +78,6 @@ public:
 #endif    
   }
   
-    // TODO: finish implementation getMinEntropyOfFeature()
   void getMinEntropyOfFeature(vector<int> featureVector, vector<int> outputVector, 
                               double& minEntropy, int& featureSplitValue, double& intrinsicValue){
     
