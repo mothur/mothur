@@ -47,13 +47,11 @@ public:
   
 protected:
   
-  vector<int> getGlobalDiscardedFeatureIndices(){
+  vector<int> getGlobalDiscardedFeatureIndices() {
       // calculate feature vectors
-    vector< vector<int> > featureVectors(numFeatures);
+    vector< vector<int> > featureVectors(numFeatures, vector<int>(numSamples, 0));
     for (int i = 0; i < numSamples; i++) {
-      for (int j = 0; j < numFeatures; j++) {
-        featureVectors[j].push_back(dataSet[i][j]);
-      }
+      for (int j = 0; j < numFeatures; j++) { featureVectors[j][i] = dataSet[i][j]; }
     }
     
     vector<int> globalDiscardedFeatureIndices;
