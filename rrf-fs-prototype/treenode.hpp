@@ -55,6 +55,14 @@ public:
     // TODO: check if this works properly or returs a shallow copy of the data
   const vector< vector<int> >& getBootstrappedTrainingSamples(){ return bootstrappedTrainingSamples; }
   const int& getSplitFeatureValue(){ return splitFeatureValue; }
+  const int& getGeneration(){ return generation; }
+  const bool& checkIsLeaf(){ return isLeaf; }
+    // TODO: fix this const pointer dillema
+    // we do not want to modify the data pointer by getLeftChildNode
+  TreeNode* getLeftChildNode(){ return leftChildNode; }
+  TreeNode* getRightChildNode(){ return rightChildNode; }
+  const int& getOutputClass(){ return outputClass; }
+  const int& getNumSamples(){ return numSamples; }
   
 protected:
 private:
