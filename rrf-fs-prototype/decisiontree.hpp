@@ -63,6 +63,34 @@ private:
   }
   
   void splitRecursively(TreeNode* rootNode){
+  vector<int> selectFeatureSubsetRandomly(vector<int> globalDiscardedFeatureIndices, vector<int> localDiscardedFeatureIndices){
+#ifdef DEBUG_MODE
+    DEBUGMSG_LOCATION;
+#endif
+    vector<int> featureSubsetIndices;
+    
+    vector<int> combinedDiscardedFeatureIndices;
+    combinedDiscardedFeatureIndices.insert(combinedDiscardedFeatureIndices.end(), globalDiscardedFeatureIndices.begin(), globalDiscardedFeatureIndices.end());
+    combinedDiscardedFeatureIndices.insert(combinedDiscardedFeatureIndices.end(), localDiscardedFeatureIndices.begin(), localDiscardedFeatureIndices.end());
+    
+    sort(combinedDiscardedFeatureIndices.begin(), combinedDiscardedFeatureIndices.end());
+    
+    int numberOfRemainingSuitableFeatures = numFeatures - combinedDiscardedFeatureIndices.size();
+    int currentFeatureSubsetSize = numberOfRemainingSuitableFeatures < optimumFeatureSubsetSize ? numberOfRemainingSuitableFeatures : optimumFeatureSubsetSize;
+    
+    while (featureSubsetIndices.size() < currentFeatureSubsetSize) {
+      int randomIndex = rand() % numFeatures;
+      vector<int>::iterator it = find(featureSubsetIndices.begin(), featureSubsetIndices.end(), randomIndex);
+      if (it == featureSubsetIndices.end()){    // NOT FOUND
+        vector<int>::iterator it2 = find(combinedDiscardedFeatureIndices.begin(), combinedDiscardedFeatureIndices.end(), randomIndex);
+        if (it2 == combinedDiscardedFeatureIndices.end()){  // NOT FOUND AGAIN
+          featureSubsetIndices.push_back(randomIndex);
+        }
+      }
+    }
+    sort(featureSubsetIndices.begin(), featureSubsetIndices.end());
+    
+    return featureSubsetIndices;
   }
   
     // TODO: printTree() needs a check if correct
