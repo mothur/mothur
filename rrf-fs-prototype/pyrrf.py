@@ -411,7 +411,7 @@ class DecisionTree(AbstractDecisionTree):
 		bootstrappedOutputVector = node.bootstrappedOutputVector
 		featureSubsetIndices = node.featureSubsetIndices
 
-		if DEBUG_MODE: print "getBestFeatureToSplitOn()"
+		if DEBUG_MODE: print "findAndUpdateBestFeatureToSplitOn()"
 #		for x in bootstrappedFeatureVectors: print x
 #		print "featureSubsetIndices: ", featureSubsetIndices
 		featureSubsetEntropies = []
@@ -443,22 +443,31 @@ class DecisionTree(AbstractDecisionTree):
 		featureMinEntropy = min(featureSubsetEntropies)
 		featureMaxGainRatio = max(featureSubsetGainRatios)
 
+		bestFeatureSplitEntropy = featureMinEntropy
 		# TODO: apply some heuristics for gainRatio
 		if self.treeSplitCriterion == 'gainRatio':
-			bestFeatureToSplitOn = featureSubsetGainRatios.index(featureMaxGainRatio)
+			bestFeatureToSplitOnIndex = featureSubsetGainRatios.index(featureMaxGainRatio)
+			# if using 'gainRatio' measure, then featureMinEntropy must be re-updated, as the index
+			# for 'featureMaxGainRatio' would be different
+			bestFeatureSplitEntropy = featureSubsetEntropies[bestFeatureToSplitOnIndex]
 #		elif self.treeSplitCriterion == 'informationGain':
+#			pass
 		else:
-			bestFeatureToSplitOn = featureSubsetEntropies.index(featureMinEntropy)
+			bestFeatureToSplitOnIndex = featureSubsetEntropies.index(featureMinEntropy)
 
-		bestFeatureSplitValue = featureSubsetSplitValues[bestFeatureToSplitOn]
+		bestFeatureSplitValue = featureSubsetSplitValues[bestFeatureToSplitOnIndex]
 #		splitInformationGain = node.ownEntropy - node.splitFeatureEntropy
 
-		if DEBUG_MODE: print "bestFeatureToSplitOn:", bestFeatureToSplitOn, "bestFeatureSplitValue:", bestFeatureSplitValue, "bestFeatureSplitEntropy:", featureMinEntropy
+		if DEBUG_MODE:
+			print "bestFeatureToSplitOnIndex:", bestFeatureToSplitOnIndex, "bestFeatureSplitValue:", bestFeatureSplitValue
+			print "bestFeatureSplitEntropy:", bestFeatureSplitEntropy
+			if self.treeSplitCriterion == 'gainRatio': pass "bestFeatureMaxGainRatio", featureMaxGainRatio
 
-		node.splitFeatureIndex = featureSubsetIndices[bestFeatureToSplitOn]
+
+		node.splitFeatureIndex = featureSubsetIndices[bestFeatureToSplitOnIndex]
 		node.splitFeatureValue = bestFeatureSplitValue
-		node.splitFeatureEntropy = featureMinEntropy
-#		node.splitInformationGain = splitInformationGain
+		node.splitFeatureEntropy = bestFeatureSplitEntropy
+	#		node.splitInformationGain = splitInformationGain
 
 #		print 'Best Split is possible with global feature:', featureSubsetIndices[bestFeatureToSplitOn]
 #		print 'Which has an entropy of:', featureMinEntropy
