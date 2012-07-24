@@ -23,11 +23,14 @@
 using namespace std;
 
 class AbstractDecisionTree{
+  
 public:
+  
   AbstractDecisionTree(vector<vector<int> >baseDataSet, 
                        vector<int> globalDiscardedFeatureIndices, 
                        OptimumFeatureSubsetSelector optimumFeatureSubsetSelector, 
                        string treeSplitCriterion)
+  
   : baseDataSet(baseDataSet),
   numSamples(baseDataSet.size()),
   numFeatures(baseDataSet[0].size() - 1),
@@ -44,14 +47,11 @@ public:
         outputClasses.push_back(outcome);
         numOutputClasses++;
       }
-    }
-    
-      // TODO: this should be removed later
-    createBootStrappedSamples();
+    }    
   }
   
   ~AbstractDecisionTree(){
-    if (rootNode != NULL){ delete rootNode; }
+//    if (rootNode != NULL){ delete rootNode; }
   }
   
   void createBootStrappedSamples(){
@@ -245,7 +245,7 @@ public:
   }
   
 protected:
-private:
+  
   vector< vector<int> > baseDataSet;
   int numSamples;
   int numFeatures;
@@ -260,6 +260,9 @@ private:
   vector<int> globalDiscardedFeatureIndices;
   int optimumFeatureSubsetSize;
   string treeSplitCriterion;
+  
+private:
+  
 };
 
 #endif
