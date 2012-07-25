@@ -41,15 +41,13 @@ public:
   
   variableImportanceList(numFeatures, 0){
     
-      // TODO self.outOfBagEstimates = {}
-    
-//		self.buildDecisionTree()
-    
     createBootStrappedSamples();
     buildDecisionTree();
   }
   
   ~DecisionTree(){
+      // TODO: implement the memory cleary algo that clear memory recusively 
+      // for all the nodes
     if (rootNode != NULL){ delete rootNode; }
   }
   
@@ -203,7 +201,6 @@ private:
     splitRecursively(rightChildNode);
   }
   
-    // TODO: finish implementation of findAndUpdateBestFeatureToSplitOn()
   void findAndUpdateBestFeatureToSplitOn(TreeNode* node){
     
 #ifdef DEBUG_MODE
@@ -339,6 +336,7 @@ private:
   }
   
   vector<int> variableImportanceList;
+  map<int, int> outOfBagEstimates;
 };
 
 #endif
