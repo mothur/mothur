@@ -323,6 +323,21 @@ private:
     
   }
   
+  void purgeDataSetsFromTree() {
+    purgeTreeNodesDataRecursively(rootNode);
+  }
+  
+  void purgeTreeNodesDataRecursively(TreeNode* treeNode) {
+    treeNode->bootstrappedTrainingSamples.clear();
+    treeNode->bootstrappedFeatureVectors.clear();
+    treeNode->bootstrappedOutputVector.clear();
+    treeNode->localDiscardedFeatureIndices.clear();
+    treeNode->globalDiscardedFeatureIndices.clear();
+    
+    if (treeNode->leftChildNode != NULL) { purgeTreeNodesDataRecursively(treeNode->leftChildNode); }
+    if (treeNode->rightChildNode != NULL) { purgeTreeNodesDataRecursively(treeNode->rightChildNode); }
+  }
+  
   vector<int> variableImportanceList;
 };
 
