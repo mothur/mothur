@@ -102,8 +102,22 @@ public:
     return 0;
   }
   
-    // TODO: finish implementaion
   void calcTreeErrorRate(int& numCorrect, double& treeErrorRate){
+    numCorrect = 0;
+    for (unsigned i = 0; i < bootstrappedTestSamples.size(); i++) {
+      
+      vector<int> testSample = bootstrappedTestSamples[i];
+      int testSampleIndex = bootstrappedTestSampleIndices[i];
+      
+      int actualSampleOutputClass = testSample[numFeatures];
+      int predictedSampleOutputClass = evaluateSample(testSample);
+      
+      if (actualSampleOutputClass == predictedSampleOutputClass) { numCorrect++; } 
+      
+      outOfBagEstimates[testSampleIndex] = predictedSampleOutputClass;
+    }
+    
+    treeErrorRate = 1 - ((double)numCorrect / (double)bootstrappedTestSamples.size());    
   }
   
     // TODO: optimize the algo, instead of transposing two time, we can extarct the feature,
