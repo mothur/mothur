@@ -91,9 +91,15 @@ public:
     PRINT_VAR(variableRanks);
   }
   
-    // TODO: finish implementation
-  int evaluateSample(vector<int> shuffledSample){
-    
+  int evaluateSample(vector<int> testSample) {
+    TreeNode *node = rootNode;
+    while (true) {
+      if (node->checkIsLeaf() == true) { return node->getOutputClass(); }
+      int sampleSplitFeatureValue = testSample[node->getSplitFeatureIndex()];
+      if (sampleSplitFeatureValue < node->getSplitFeatureValue()) { node = node->getLeftChildNode(); }
+      else { node = node->getRightChildNode(); } 
+    }
+    return 0;
   }
   
     // TODO: finish implementaion
