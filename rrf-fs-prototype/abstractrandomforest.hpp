@@ -39,8 +39,8 @@ public:
   }
   
     // intialization with 2d const array
-  AbstractRandomForest(int** dataSetAs2dArray, const int rows, const int columns, const int numDecisionTrees, const std::string treeSplitCriterion="informationGain"){
-  }
+//  AbstractRandomForest(int** dataSetAs2dArray, const int rows, const int columns, const int numDecisionTrees, const std::string treeSplitCriterion="informationGain"){
+//  }
     
   ~AbstractRandomForest(){
   }
@@ -62,9 +62,10 @@ protected:
     }
     
 #ifdef DEBUG_MODE
-    cout << "number of global discarded features: "<< globalDiscardedFeatureIndices.size() << endl;
-    cout << "total features: " << featureVectors.size() << endl;
+    PRINT_MSG("number of global discarded features: ", globalDiscardedFeatureIndices.size());
+    PRINT_MSG("total features:", featureVectors.size());
 #endif
+    
     return globalDiscardedFeatureIndices;
   }
   

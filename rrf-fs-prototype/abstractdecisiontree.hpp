@@ -38,7 +38,7 @@ public:
   rootNode(NULL),
   globalDiscardedFeatureIndices(globalDiscardedFeatureIndices),
   optimumFeatureSubsetSize(optimumFeatureSubsetSelector.getOptimumFeatureSubsetSize(numFeatures)),
-  treeSplitCriterion(treeSplitCriterion){
+  treeSplitCriterion(treeSplitCriterion) {
     
     for (int i = 0;  i < numSamples; i++) {
       int outcome = baseDataSet[i][numFeatures - 1];
@@ -73,13 +73,17 @@ public:
     }
     
 #ifdef DEBUG_MODE
-    DEBUGMSG_VAR(bootstrappedTrainingSampleIndices);
-    DEBUGMSG_VAR(bootstrappedTestSampleIndices);
+    PRINT_VAR(bootstrappedTrainingSampleIndices);
+    PRINT_VAR(bootstrappedTestSampleIndices);
 #endif    
   }
   
   void getMinEntropyOfFeature(vector<int> featureVector, vector<int> outputVector, 
                               double& minEntropy, int& featureSplitValue, double& intrinsicValue){
+    
+#ifdef DEBUG_MODE
+    DEBUGMSG_LOCATION;
+#endif
     
     vector< vector<int> > featureOutputPair(featureVector.size(), vector<int>(2, 0));
     for (unsigned i = 0; i < featureVector.size(); i++) { 
@@ -90,7 +94,7 @@ public:
     sort(featureOutputPair.begin(), featureOutputPair.end());
     
 #ifdef DEBUG_MODE
-    DEBUGMSG_VAR(featureOutputPair);
+    PRINT_VAR(featureOutputPair);
 #endif
     
     vector<int> splitPoints;
@@ -106,12 +110,14 @@ public:
     }
     
 #ifdef DEBUG_MODE
-    DEBUGMSG_VAR(splitPoints);
+    PRINT_VAR(splitPoints);
 #endif
     
     int bestSplitIndex = -1;
     if (splitPoints.size() == 0){
         // TODO: trying out C++'s infitinity, don't know if this will work properly
+        // TODO: check the caller function of this function, there check the value if minEntropy and comapre to inf
+        // so that no wrong calculation is done
       minEntropy = numeric_limits<double>::infinity();
       intrinsicValue = numeric_limits<double>::infinity();
       featureSplitValue = -1;
@@ -122,14 +128,14 @@ public:
     
   }
   
-  double calcIntrinsicValue(unsigned numLessThanValueAtSplitPoint, unsigned numGreaterThanValueAtSplitPoint, unsigned numSamples){
+  double calcIntrinsicValue(unsigned numLessThanValueAtSplitPoint, unsigned numGreaterThanValueAtSplitPoint, unsigned numSamples) {
     
     double upperSplitEntropy = 0.0, lowerSplitEntropy = 0.0;
-    if (numLessThanValueAtSplitPoint > 0){
+    if (numLessThanValueAtSplitPoint > 0) {
       upperSplitEntropy = numLessThanValueAtSplitPoint * log2((double) numLessThanValueAtSplitPoint / (double) numSamples);
     }
     
-    if (numGreaterThanValueAtSplitPoint > 0){
+    if (numGreaterThanValueAtSplitPoint > 0) {
       lowerSplitEntropy = numGreaterThanValueAtSplitPoint * log2((double) numGreaterThanValueAtSplitPoint / (double) numSamples);
     }
     
@@ -160,10 +166,10 @@ public:
       double lowerEntropyOfSplit = calcSplitEntropy(featureOutputPairs, index, numOutputClasses, false);
       
 #ifdef DEBUG_MODE
-      DEBUGMSG_VAR(upperEntropyOfSplit);
-      DEBUGMSG_VAR(lowerEntropyOfSplit);
-      DEBUGMSG_VAR(numLessThanValueAtSplitPoint);
-      DEBUGMSG_VAR(numGreaterThanValueAtSplitPoint);
+      PRINT_VAR(upperEntropyOfSplit);
+      PRINT_VAR(lowerEntropyOfSplit);
+      PRINT_VAR(numLessThanValueAtSplitPoint);
+      PRINT_VAR(numGreaterThanValueAtSplitPoint);
 #endif
       
       double totalEntropy = (numLessThanValueAtSplitPoint * upperEntropyOfSplit + numGreaterThanValueAtSplitPoint * lowerEntropyOfSplit) / (double)numSamples;
@@ -173,8 +179,8 @@ public:
     }
     
 #ifdef DEBUG_MODE
-    DEBUGMSG_VAR(entropies);
-    DEBUGMSG_VAR(intrinsicValues);
+    PRINT_VAR(entropies);
+    PRINT_VAR(intrinsicValues);
 #endif
     
       // set output values
@@ -185,13 +191,12 @@ public:
 
   }
     
-    // TODO: featureOutputPair should be featureOutputPairs, plural, fix that in python
-  double calcSplitEntropy(vector< vector<int> > featureOutputPairs, int splitIndex, int numOutputClasses, bool isUpperSplit){
+  double calcSplitEntropy(vector< vector<int> > featureOutputPairs, int splitIndex, int numOutputClasses, bool isUpperSplit) {
     vector<int> classCounts(numOutputClasses, 0);
     
-    if (isUpperSplit){ 
+    if (isUpperSplit) { 
       for (unsigned i = 0; i < splitIndex; i++) { classCounts[featureOutputPairs[i][1]]++; }
-    } else{
+    } else {
       for (unsigned i = splitIndex; i < featureOutputPairs.size(); i++) { classCounts[featureOutputPairs[i][1]]++; }
     }
     
@@ -200,8 +205,8 @@ public:
     double splitEntropy = 0.0;
     
     for (unsigned i = 0; i < classCounts.size(); i++) {
-      if (classCounts[i] == 0){ continue; }
-      double probability = (double)classCounts[i] / (double)totalClassCounts;
+      if (classCounts[i] == 0) { continue; }
+      double probability = (double) classCounts[i] / (double) totalClassCounts;
       splitEntropy += -(probability * log2(probability));
     }
     
@@ -228,13 +233,13 @@ public:
   
     // TODO: checkIfAlreadyClassified() verify code
     // TODO: use bootstrappedOutputVector for easier calculation instead of using getBootstrappedTrainingSamples()
-  bool checkIfAlreadyClassified(TreeNode* treeNode, int& outputClass){
+  bool checkIfAlreadyClassified(TreeNode* treeNode, int& outputClass) {
     
     vector<int> tempOutputClasses;
     for (unsigned i = 0; i < treeNode->getBootstrappedTrainingSamples().size(); i++) {
       int sampleOutputClass = treeNode->getBootstrappedTrainingSamples()[i][numFeatures];
       vector<int>::iterator it = find(tempOutputClasses.begin(), tempOutputClasses.end(), sampleOutputClass);
-      if (it == tempOutputClasses.end()){               // NOT FOUND
+      if (it == tempOutputClasses.end()) {               // NOT FOUND
         tempOutputClasses.push_back(sampleOutputClass);
       }
     }

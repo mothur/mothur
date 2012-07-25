@@ -57,7 +57,7 @@ int main(int argc, const char * argv[]){
   // just a test
   vector<int> dummyDiscaredFeatureIndices;
   OptimumFeatureSubsetSelector optimumFeatureSubsetSelector("log2");
-//  DecisionTree decisionTree(dataSet, dummyDiscaredFeatureIndices, optimumFeatureSubsetSelector, "informationGain");
+  DecisionTree decisionTree(dataSet, dummyDiscaredFeatureIndices, optimumFeatureSubsetSelector, "informationGain");
 
   
   // another test

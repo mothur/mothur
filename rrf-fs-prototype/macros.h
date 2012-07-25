@@ -12,6 +12,7 @@
 #define DEBUGMSG_LOCATION (cout << "DEBUGMSG " << __PRETTY_FUNCTION__ << "\nDEBUGMSG " << __FILE__ <<  "#"  << __LINE__ << endl)
 #define DEBUGMSG_VAR(X) (cout << "DEBUGMSG " << __PRETTY_FUNCTION__ << "\nDEBUGMSG " << #X << " -> " << X << endl << endl)
 #define PRINT_VAR(X) (cout << #X << " -> " << X << endl << endl)
+#define PRINT_MSG(Y, X) (cout <<  Y << " " << #X << " -> " << X << endl << endl)
 #define DEBUGMSG(X) (cout << "DEBUGMSG " << X << endl)
 #define NAME_VALUE_PAIR(VAR, OSTREAM) (OSTREAM << #VAR << " : " << VAR)
 
