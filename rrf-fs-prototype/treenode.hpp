@@ -10,13 +10,16 @@
 #define rrf_fs_prototype_treenode_hpp
 
 class TreeNode{
+  
 public:
+  
   TreeNode(vector< vector<int> > bootstrappedTrainingSamples,
            vector<int> globalDiscardedFeatureIndices,
            int numFeatures,
            int numSamples,
            int numOutputClasses,
            int generation)
+  
   : bootstrappedTrainingSamples(bootstrappedTrainingSamples),
   globalDiscardedFeatureIndices(globalDiscardedFeatureIndices),
   numFeatures(numFeatures),
@@ -33,7 +36,7 @@ public:
   bootstrappedOutputVector(numSamples, 0),
   leftChildNode(NULL),
   rightChildNode(NULL),
-  parentNode(NULL){
+  parentNode(NULL) {
 
     for (int i = 0; i < numSamples; i++) {    // just doing a simple transpose of the matrix
       for (int j = 0; j < numFeatures; j++) { bootstrappedFeatureVectors[j][i] = bootstrappedTrainingSamples[i][j]; }
@@ -81,7 +84,11 @@ public:
   void setSplitFeatureValue(int splitFeatureValue) { this->splitFeatureValue = splitFeatureValue; }
   void setSplitFeatureEntropy(double splitFeatureEntropy) { this->splitFeatureEntropy = splitFeatureEntropy; }
   
+    // TODO: need to remove this mechanism of friend class
+  friend class DecisionTree;
+  
 protected:
+  
 private:
   vector<vector<int> > bootstrappedTrainingSamples;
   vector<int> globalDiscardedFeatureIndices;
