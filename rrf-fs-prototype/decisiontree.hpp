@@ -46,9 +46,7 @@ public:
   }
   
   ~DecisionTree(){
-      // TODO: implement the memory cleary algo that clear memory recusively 
-      // for all the nodes
-    if (rootNode != NULL){ delete rootNode; }
+    deleteTreeNodesRecursively(rootNode);
   }
   
   void calcTreeVariableImportanceAndError() {
@@ -333,6 +331,13 @@ private:
     
     if (treeNode->leftChildNode != NULL) { purgeTreeNodesDataRecursively(treeNode->leftChildNode); }
     if (treeNode->rightChildNode != NULL) { purgeTreeNodesDataRecursively(treeNode->rightChildNode); }
+  }
+  
+  void deleteTreeNodesRecursively(TreeNode* treeNode) {
+    if (treeNode == NULL) { return; }
+    deleteTreeNodesRecursively(treeNode->leftChildNode);
+    deleteTreeNodesRecursively(treeNode->rightChildNode);
+    delete treeNode;
   }
   
   vector<int> variableImportanceList;
