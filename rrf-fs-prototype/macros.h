@@ -10,6 +10,7 @@
 #define rrf_fs_prototype_macros_h
 
 #define DEBUGMSG_LOCATION (cout << "DEBUGMSG " << __PRETTY_FUNCTION__ << "\nDEBUGMSG " << __FILE__ <<  "#"  << __LINE__ << endl)
+#define DEBUGMSG_FUNC (cout << "DEBUGMSG " << __PRETTY_FUNCTION__ << endl)
 #define DEBUGMSG_VAR(X) (cout << "DEBUGMSG " << __PRETTY_FUNCTION__ << "\nDEBUGMSG " << #X << " -> " << X << endl << endl)
 #define PRINT_VAR(X) (cout << #X << " -> " << X << endl << endl)
 #define PRINT_MSG(Y, X) (cout <<  Y << " " << #X << " -> " << X << endl << endl)
@@ -60,9 +61,9 @@ ostream& operator <<(ostream& os, vector<int>& integers){
 
 /* overrding "cout <<" 2d matrix of itergers whuch uses vectors */
 ostream& operator <<(ostream& os, vector< vector<int> > matrix){
-  os << "[ ";
+  os << "[ " << endl;
   for (unsigned i = 0; i < matrix.size(); i++) {
-    os << "ROW " << i << ":" << matrix[i] << endl;
+    os << "\t" << i << " : " << matrix[i] << endl;
   }
   os << "]";
   return os;
@@ -88,4 +89,15 @@ ostream& operator <<(ostream& os, vector<double>& doubles){
   return os;
 }
 
+/* overrding "cout <<" for map of int and vector<int> */
+ostream& operator <<(ostream& os, map<int, vector<int> >& keyValuePairs){
+  os << "[ " << endl;
+  for (map<int, vector<int> >::iterator it = keyValuePairs.begin(); it != keyValuePairs.end(); it++) {
+    os << "\t" << it->first << " => " << it->second << endl;
+  }
+  os << "]";
+  return os;
+}
+  
+  
 #endif
