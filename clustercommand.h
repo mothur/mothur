@@ -14,7 +14,7 @@
 #include "sabundvector.hpp"
 #include "listvector.hpp"
 #include "cluster.hpp"
-#include "sparsematrix.hpp"
+#include "sparsedistancematrix.h"
 
 /* The cluster() command:
 	The cluster command outputs a .list , .rabund and .sabund files.  
@@ -44,7 +44,7 @@ public:
 	
 private:
 	Cluster* cluster;
-	SparseMatrix* matrix;
+	SparseDistanceMatrix* matrix;
 	ListVector* list;
 	RAbundVector* rabund;
 	RAbundVector oldRAbund;

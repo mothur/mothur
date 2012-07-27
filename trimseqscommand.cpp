@@ -607,11 +607,11 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 
 			Sequence currSeq(inFASTA); m->gobble(inFASTA);
 			//cout << currSeq.getName() << '\t' << currSeq.getUnaligned().length() << endl;
-            if (m->debug) { m->mothurOut("[DEBUG]: " + toString(count) + " fasta = " + currSeq.getName() + '\n'); }
+            
 			QualityScores currQual;
 			if(qFileName != ""){
 				currQual = QualityScores(qFile);  m->gobble(qFile);
-                 if (m->debug) { m->mothurOut("[DEBUG]: qual = " + currQual.getName() + '\n'); }
+                if ((m->debug)&&(count>15800)) { m->mothurOut("[DEBUG]: " + toString(count) + " fasta = " + currSeq.getName() + '\n'); m->mothurOut("[DEBUG]: " + toString(getpid()) + '\n'); }
 			}
 			
 			string origSeq = currSeq.getUnaligned();
@@ -883,6 +883,8 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
 								 tempNameFileNames,
 								 lines[process],
 								 qLines[process]);
+                
+                if (m->debug) { m->mothurOut("[DEBUG]: " + toString(lines[process].start) + '\t' + toString(qLines[process].start) + '\t' + toString(getpid()) + '\n'); }
 				
 				//pass groupCounts to parent
 				if(createGroup){

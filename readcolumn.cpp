@@ -34,7 +34,7 @@ int ReadColumnMatrix::read(NameAssignment* nameMap){
 		string firstName, secondName;
 		float distance;
 		int nseqs = nameMap->size();
-
+        DMatrix->resize(nseqs);
 		list = new ListVector(nameMap->getListVector());
 	
 		Progress* reading = new Progress("Reading matrix:     ", nseqs * nseqs);
@@ -63,33 +63,34 @@ int ReadColumnMatrix::read(NameAssignment* nameMap){
 			
 			if(distance < cutoff && itA != itB){
 				if(itA->second > itB->second){
-					PCell value(itA->second, itB->second, distance);
-			
+                    PDistCell value(itA->second, distance);
+                    
+                    
 					if(refRow == refCol){		// in other words, if we haven't loaded refRow and refCol...
 						refRow = itA->second;
 						refCol = itB->second;
-						D->addCell(value);
+						DMatrix->addCell(itB->second, value);
 					}
 					else if(refRow == itA->second && refCol == itB->second){
 						lt = 0;
 					}
 					else{
-						D->addCell(value);
+						DMatrix->addCell(itB->second, value);
 					}
 				}
 				else if(itA->second < itB->second){
-					PCell value(itB->second, itA->second, distance);
+					PDistCell value(itB->second, distance);
 			
 					if(refRow == refCol){		// in other words, if we haven't loaded refRow and refCol...
 						refRow = itA->second;
 						refCol = itB->second;
-						D->addCell(value);
+						DMatrix->addCell(itA->second, value);
 					}
 					else if(refRow == itB->second && refCol == itA->second){
 						lt = 0;
 					}
 					else{
-						D->addCell(value);
+						DMatrix->addCell(itA->second, value);
 					}
 				}
 				reading->update(itA->second * nseqs);
@@ -100,7 +101,7 @@ int ReadColumnMatrix::read(NameAssignment* nameMap){
 		if(lt == 0){  // oops, it was square
 	
 			fileHandle.close();  //let's start over
-			D->clear();  //let's start over
+			DMatrix->clear();  //let's start over
 		   
 			m->openInputFile(distFile, fileHandle);  //let's start over
 
@@ -119,8 +120,8 @@ int ReadColumnMatrix::read(NameAssignment* nameMap){
 				else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
 				
 				if(distance < cutoff && itA->second > itB->second){
-					PCell value(itA->second, itB->second, distance);
-					D->addCell(value);
+                    PDistCell value(itA->second, distance);
+					DMatrix->addCell(itB->second, value);
 					reading->update(itA->second * nseqs);
 				}
 		
@@ -145,10 +146,6 @@ int ReadColumnMatrix::read(NameAssignment* nameMap){
 }
 
 /***********************************************************************/
-
-ReadColumnMatrix::~ReadColumnMatrix(){
-	//delete D;
-	//delete list;
-}
-
+ReadColumnMatrix::~ReadColumnMatrix(){}
+/***********************************************************************/
 

@@ -346,7 +346,7 @@ int PhyloDiversityCommand::execute(){
 	
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} return 0; }
 
-        m->mothurOut("It took " + toString(time(NULL) - start) + " secs to run unifrac.unweighted."); m->mothurOutEndLine();
+        m->mothurOut("It took " + toString(time(NULL) - start) + " secs to run phylo.diversity."); m->mothurOutEndLine();
 
         
 		m->mothurOutEndLine();
@@ -460,7 +460,7 @@ int PhyloDiversityCommand::driver(Tree* t, map< string, vector<float> >& div, ma
         
 		for (int l = 0; l < numIters; l++) {
 				random_shuffle(randomLeaf.begin(), randomLeaf.end());
-            cout << l << endl;
+         
 				//initialize counts
 				map<string, int> counts;
                 vector< map<string, bool> > countedBranch;

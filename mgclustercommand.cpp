@@ -287,7 +287,7 @@ int MGClusterCommand::execute(){
 		
 		if (!hclusterWanted) {
 			//get distmatrix and overlap
-			SparseMatrix* distMatrix = read->getDistMatrix();
+			SparseDistanceMatrix* distMatrix = read->getDistMatrix();
 			overlapMatrix = read->getOverlapMatrix(); //already sorted by read 
 			delete read;
 		

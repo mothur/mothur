@@ -33,7 +33,7 @@ int ReadPhylipMatrix::read(NameAssignment* nameMap){
         try {
         
                         float distance;
-                        int square, nseqs;
+                        int square, nseqs; 
                         string name;
                         vector<string> matrixNames;
 						
@@ -72,7 +72,8 @@ int ReadPhylipMatrix::read(NameAssignment* nameMap){
                         }
         
                         Progress* reading;
-      
+                        DMatrix->resize(nseqs);
+        
                         if(square == 0){
 
                                 reading = new Progress("Reading matrix:     ", nseqs * (nseqs - 1) / 2);
@@ -95,14 +96,13 @@ int ReadPhylipMatrix::read(NameAssignment* nameMap){
 														if (m->control_pressed) { delete reading; fileHandle.close(); return 0;  }
 														
                                                         fileHandle >> distance;
-											
                                                 
                                                         if (distance == -1) { distance = 1000000; }
 														else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                                                 
                                                         if(distance < cutoff){
-                                                                PCell value(i, j, distance);
-                                                                D->addCell(value);
+                                                            PDistCell value(i, distance);
+                                                            DMatrix->addCell(j, value);
                                                         }
                                                         index++;
                                                         reading->update(index);
@@ -121,8 +121,8 @@ int ReadPhylipMatrix::read(NameAssignment* nameMap){
 														else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                                                         
                                                         if(distance < cutoff){
-                                                                PCell value(nameMap->get(matrixNames[i]), nameMap->get(matrixNames[j]), distance);
-                                                                D->addCell(value);
+                                                            PDistCell value(nameMap->get(matrixNames[i]), distance);
+                                                            DMatrix->addCell(nameMap->get(matrixNames[j]), value);
                                                         }
                                                         index++;
                                                         reading->update(index);
@@ -153,8 +153,8 @@ int ReadPhylipMatrix::read(NameAssignment* nameMap){
 														else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                                                         
                                                         if(distance < cutoff && j < i){
-                                                                PCell value(i, j, distance);
-                                                                D->addCell(value);
+                                                            PDistCell value(i, distance);
+                                                            DMatrix->addCell(j, value);
                                                         }
                                                         index++;
                                                         reading->update(index);
@@ -173,8 +173,8 @@ int ReadPhylipMatrix::read(NameAssignment* nameMap){
 														else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.                                                        
                                                         
 														if(distance < cutoff && j < i){
-                                                                PCell value(nameMap->get(matrixNames[i]), nameMap->get(matrixNames[j]), distance);
-                                                                D->addCell(value);
+                                                            PDistCell value(nameMap->get(matrixNames[i]), distance);
+                                                            DMatrix->addCell(nameMap->get(matrixNames[j]), value);
                                                         }
                                                         index++;
                                                         reading->update(index);
@@ -187,20 +187,11 @@ int ReadPhylipMatrix::read(NameAssignment* nameMap){
 						
                         reading->finish();
                         delete reading;
-
+            
                         list->setLabel("0");
                         fileHandle.close();
 
-                     /*   if(nameMap != NULL){
-                                for(int i=0;i<matrixNames.size();i++){
-                                        nameMap->erase(matrixNames[i]);
-                                }
-                                if(nameMap->size() > 0){
-                                        //should probably tell them what is missing if we missed something
-                                        m->mothurOut("missed something\t" + toString(nameMap->size())); m->mothurOutEndLine();
-                                }
-                        } */
-						
+                    						
 						return 1;
 
                 }
@@ -211,8 +202,6 @@ int ReadPhylipMatrix::read(NameAssignment* nameMap){
 	}
 
 /***********************************************************************/
+ReadPhylipMatrix::~ReadPhylipMatrix(){}
+/***********************************************************************/
 
-ReadPhylipMatrix::~ReadPhylipMatrix(){
-       // delete D;
-       // delete list;
-}

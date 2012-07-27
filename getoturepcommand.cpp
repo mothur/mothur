@@ -359,16 +359,19 @@ int GetOTURepCommand::execute(){
 
 			list = readMatrix->getListVector();
 
-			SparseMatrix* matrix = readMatrix->getMatrix();
+			SparseDistanceMatrix* matrix = readMatrix->getDMatrix();
 			
 			// Create a data structure to quickly access the distance information.
 			// It consists of a vector of distance maps, where each map contains
 			// all distances of a certain sequence. Vector and maps are accessed
 			// via the index of a sequence in the distance matrix
 			seqVec = vector<SeqMap>(list->size()); 
-			for (MatData currentCell = matrix->begin(); currentCell != matrix->end(); currentCell++) {
-				if (m->control_pressed) { delete readMatrix; return 0; }
-				seqVec[currentCell->row][currentCell->column] = currentCell->dist;
+            for (int i = 0; i < matrix->seqVec.size(); i++) {
+                for (int j = 0; j < matrix->seqVec[i].size(); j++) {
+                    if (m->control_pressed) { delete readMatrix; return 0; }
+                    //already added everyone else in row
+                    if (i < matrix->seqVec[i][j].index) {  seqVec[i][matrix->seqVec[i][j].index] = matrix->seqVec[i][j].dist;  }
+                }
 			}
 			//add dummy map for unweighted calc
 			SeqMap dummy;

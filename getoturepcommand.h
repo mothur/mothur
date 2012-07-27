@@ -19,7 +19,6 @@
 #include "readmatrix.hpp"
 #include "formatmatrix.h"
 
-typedef list<PCell>::iterator MatData;
 typedef map<int, float> SeqMap;
 
 struct repStruct {

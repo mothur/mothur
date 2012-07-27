@@ -101,12 +101,10 @@ private:
 	Tree* createTree(vector< vector<double> >&);
 	void printSims(ostream&, vector< vector<double> >&);
 	int makeSimsShared();
-	vector< vector<double> > makeSimsDist();
+	vector< vector<double> > makeSimsDist(SparseDistanceMatrix*);
     int writeTree(string, Tree*);
     int driver(vector<SharedRAbundVector*>, int, int, vector< vector<seqDist> >&);
 	
-	ReadMatrix* readMatrix;
-	SparseMatrix* matrix;
 	NameAssignment* nameMap;
 	ListVector* list;
 	TreeMap* tmap;

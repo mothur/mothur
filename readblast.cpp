@@ -54,7 +54,8 @@ int ReadBlast::read(NameAssignment* nameMap) {
 		
 		//create objects needed for read
 		if (!hclusterWanted) {
-			matrix = new SparseMatrix();
+			matrix = new SparseDistanceMatrix();
+            matrix->resize(nseqs);
 		}else{
 			overlapFile = m->getRootName(blastfile) + "overlap.dist";
 			distFile = m->getRootName(blastfile) + "hclusterDists.dist";
@@ -185,8 +186,13 @@ int ReadBlast::read(NameAssignment* nameMap) {
 							//is this distance below cutoff
 							if (distance < cutoff) {
 								if (!hclusterWanted) {
-									PCell value(itA->second, it->first, distance);
-									matrix->addCell(value);
+                                    if (itA->second < it->first) {
+                                        PDistCell value(it->first, distance);
+                                        matrix->addCell(itA->second, value);
+                                    }else {
+                                        PDistCell value(itA->second, distance);
+                                        matrix->addCell(it->first, value);
+                                    }
 								}else{
 									outDist << itA->first << '\t' << nameMap->get(it->first) << '\t' << distance << endl;
 								}
@@ -252,8 +258,13 @@ int ReadBlast::read(NameAssignment* nameMap) {
 				//is this distance below cutoff
 				if (distance < cutoff) {
 					if (!hclusterWanted) {
-						PCell value(itA->second, it->first, distance);
-						matrix->addCell(value);
+						if (itA->second < it->first) {
+                            PDistCell value(it->first, distance);
+                            matrix->addCell(itA->second, value);
+                        }else {
+                            PDistCell value(itA->second, distance);
+                            matrix->addCell(it->first, value);
+                        }
 					}else{
 						outDist << itA->first << '\t' << nameMap->get(it->first) << '\t' << distance << endl;
 					}

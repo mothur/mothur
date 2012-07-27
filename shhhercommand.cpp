@@ -802,7 +802,7 @@ string ShhherCommand::createNamesFile(){
 			duplicateNames[mapSeqToUnique[i]] += seqNameVector[i] + ',';
 		}
 		
-		string nameFileName = outputDir + m->getRootName(m->getSimpleName(flowFileName) + getOutputFileNameTag("name");
+		string nameFileName = outputDir + m->getRootName(m->getSimpleName(flowFileName)) + getOutputFileNameTag("name");
 		
 		ofstream nameFile;
 		m->openOutputFile(nameFileName, nameFile);
@@ -2309,7 +2309,7 @@ int ShhherCommand::driver(vector<string> filenames, string thisCompositeFASTAFil
                 if (m->control_pressed) { break; }
                 
                 vector<int> otuCounts(numOTUs, 0);
-                for(int i=0;i<numSeqs;i++)	{	otuCounts[otuData[i]]++;	}
+                for(int j=0;j<numSeqs;j++)	{	otuCounts[otuData[j]]++;	}
                 
                 calcCentroidsDriver(numOTUs, cumNumSeqs, nSeqsPerOTU, seqIndex, change, centroids, singleTau, mapSeqToUnique, uniqueFlowgrams, flowDataIntI, lengths, numFlowCells, seqNumber);	
                 
@@ -2632,7 +2632,7 @@ int ShhherCommand::cluster(string filename, string distFileName, string namesFil
 		read->read(clusterNameMap);
         
 		ListVector* list = read->getListVector();
-		SparseMatrix* matrix = read->getMatrix();
+		SparseDistanceMatrix* matrix = read->getDMatrix();
 		
 		delete read; 
 		delete clusterNameMap; 

@@ -1197,7 +1197,7 @@ string ClusterSplitCommand::clusterFile(string thisDistFile, string thisNamefile
         string listFileName = "";
         
         Cluster* cluster = NULL;
-        SparseMatrix* matrix = NULL;
+        SparseDistanceMatrix* matrix = NULL;
         ListVector* list = NULL;
         ListVector oldList;
         RAbundVector* rabund = NULL;
@@ -1227,7 +1227,7 @@ string ClusterSplitCommand::clusterFile(string thisDistFile, string thisNamefile
         
         list = read->getListVector();
         oldList = *list;
-        matrix = read->getMatrix();
+        matrix = read->getDMatrix();
         
         delete read;  read = NULL;
         delete nameMap; nameMap = NULL;
