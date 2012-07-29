@@ -53,9 +53,11 @@ public:
   }
   
   void calcTreeVariableImportanceAndError() {
-#ifdef DEBUG_MODE
-    DEBUGMSG_LOCATION;
+    
+#ifdef DEBUG_LEVEL_2
+    DEBUGMSG_FUNC;
 #endif
+    
     int numCorrect;
     double treeErrorRate;
     calcTreeErrorRate(numCorrect, treeErrorRate);
@@ -91,7 +93,6 @@ public:
     }
     VariableRankDescendingSorter variableRankDescendingSorter;
     sort(variableRanks.begin(), variableRanks.end(), variableRankDescendingSorter);
-    PRINT_VAR(variableRanks);
   }
   
   int evaluateSample(vector<int> testSample) {
@@ -160,22 +161,27 @@ private:
   void buildDecisionTree(){
     int generation = 0;
     rootNode = new TreeNode(bootstrappedTrainingSamples, globalDiscardedFeatureIndices, numFeatures, numSamples, numOutputClasses, generation);
+        
     splitRecursively(rootNode);
+    
 #ifdef DEBUG_MODE
     printTree(rootNode, "root");
 #endif
+    
   }
   
   void splitRecursively(TreeNode* rootNode){
     
-#ifdef DEBUG_MODE
-    DEBUGMSG_LOCATION;
+#ifdef DEBUG_LEVEL_2
+    DEBUGMSG_FUNC;
 #endif
     
-    if (rootNode->getNumSamples() < 2){      
-#ifdef DEBUG_MODE
+    if (rootNode->getNumSamples() < 2){
+      
+#ifdef DEBUG_LEVEL_2
       DEBUGMSG("Already classified: Case 1");
-#endif      
+#endif
+      
       rootNode->setIsLeaf(true);
       rootNode->setOutputClass(rootNode->getBootstrappedTrainingSamples()[0][rootNode->getNumFeatures()]);
       return;
@@ -184,9 +190,11 @@ private:
     int classifiedOutputClass;
     bool isAlreadyClassified = checkIfAlreadyClassified(rootNode, classifiedOutputClass);    
     if (isAlreadyClassified == true){
-#ifdef DEBUG_MODE
+      
+#ifdef DEBUG_LEVEL_2
       DEBUGMSG("Already classified: Case 2");
 #endif
+      
       rootNode->setIsLeaf(true);
       rootNode->setOutputClass(classifiedOutputClass);
       return;
@@ -195,11 +203,11 @@ private:
     vector<int> featureSubsetIndices = selectFeatureSubsetRandomly(globalDiscardedFeatureIndices, rootNode->getLocalDiscardedFeatureIndices());
     rootNode->setFeatureSubsetIndices(featureSubsetIndices);
     
-#ifdef DEBUG_MODE
-    DEBUGMSG_VAR(globalDiscardedFeatureIndices);
-    DEBUGMSG_VAR(featureSubsetIndices);
+#ifdef DEBUG_LEVEL_2
+    PRINT_VAR(globalDiscardedFeatureIndices);
+    PRINT_VAR(featureSubsetIndices);
 #endif
-    
+        
     findAndUpdateBestFeatureToSplitOn(rootNode);
     
     vector< vector<int> > leftChildSamples;
@@ -223,8 +231,8 @@ private:
   
   void findAndUpdateBestFeatureToSplitOn(TreeNode* node){
     
-#ifdef DEBUG_MODE
-    DEBUGMSG_LOCATION;
+#ifdef DEBUG_LEVEL_2
+    DEBUGMSG_FUNC;
 #endif
     
     vector< vector<int> > bootstrappedFeatureVectors = node->getBootstrappedFeatureVectors();
@@ -239,15 +247,16 @@ private:
     for (unsigned i = 0; i < featureSubsetIndices.size(); i++) {
       int tryIndex = featureSubsetIndices[i];
       
-#ifdef DEBUG_MODE
+#ifdef DEBUG_LEVEL_4
       cout << "trying feature of index:" << tryIndex << endl;
 #endif
+      
       double featureMinEntropy;
       int featureSplitValue;
       double featureIntrinsicValue;
-      
+          
       getMinEntropyOfFeature(bootstrappedFeatureVectors[tryIndex], bootstrappedOutputVector, featureMinEntropy, featureSplitValue, featureIntrinsicValue);
-      
+            
       featureSubsetEntropies.push_back(featureMinEntropy);
       featureSubsetSplitValues.push_back(featureSplitValue);
       featureSubsetIntrinsicValues.push_back(featureIntrinsicValue);
@@ -258,13 +267,14 @@ private:
       
     }
     
-#ifdef DEBUG_MODE
-    DEBUGMSG_VAR(featureSubsetEntropies);
-    DEBUGMSG_VAR(featureSubsetSplitValues);
-    DEBUGMSG_VAR(featureSubsetIntrinsicValues);
-    DEBUGMSG_VAR(featureSubsetGainRatios);
+#ifdef DEBUG_LEVEL_2
+    PRINT_VAR(featureSubsetIndices);
+    PRINT_VAR(featureSubsetEntropies);
+    PRINT_VAR(featureSubsetSplitValues);
+    PRINT_VAR(featureSubsetIntrinsicValues);
+    PRINT_VAR(featureSubsetGainRatios);
 #endif
-
+    
     vector<double>::iterator minEntropyIterator = min_element(featureSubsetEntropies.begin(), featureSubsetEntropies.end());
     vector<double>::iterator maxGainRatioIterator = max_element(featureSubsetGainRatios.begin(), featureSubsetGainRatios.end());
     double featureMinEntropy = *minEntropyIterator;
@@ -282,11 +292,12 @@ private:
     
     int bestFeatureSplitValue = featureSubsetSplitValues[bestFeatureToSplitOnIndex];
     
-#ifdef DEBUG_MODE
-    DEBUGMSG_VAR(bestFeatureToSplitOnIndex);
-    DEBUGMSG_VAR(bestFeatureSplitValue);
-    DEBUGMSG_VAR(bestFeatureSplitEntropy);
-    if (treeSplitCriterion == "gainRatio") { DEBUGMSG_VAR(featureMaxGainRatio); }
+#ifdef DEBUG_LEVEL_3
+    PRINT_VAR(bestFeatureToSplitOnIndex);
+    PRINT_VAR(featureSubsetIndices[bestFeatureToSplitOnIndex]);
+    PRINT_VAR(bestFeatureSplitValue);
+    PRINT_VAR(bestFeatureSplitEntropy);
+    if (treeSplitCriterion == "gainRatio") { PRINT_VAR(featureMaxGainRatio); }
 #endif
     
     node->setSplitFeatureIndex(featureSubsetIndices[bestFeatureToSplitOnIndex]);
@@ -295,18 +306,24 @@ private:
   }
   
   vector<int> selectFeatureSubsetRandomly(vector<int> globalDiscardedFeatureIndices, vector<int> localDiscardedFeatureIndices){
-#ifdef DEBUG_MODE
-    DEBUGMSG_LOCATION;
+    
+#ifdef DEBUG_LEVEL_2
+    DEBUGMSG_FUNC;
 #endif
+    
     vector<int> featureSubsetIndices;
     
     vector<int> combinedDiscardedFeatureIndices;
     combinedDiscardedFeatureIndices.insert(combinedDiscardedFeatureIndices.end(), globalDiscardedFeatureIndices.begin(), globalDiscardedFeatureIndices.end());
     combinedDiscardedFeatureIndices.insert(combinedDiscardedFeatureIndices.end(), localDiscardedFeatureIndices.begin(), localDiscardedFeatureIndices.end());
-    
+        
     sort(combinedDiscardedFeatureIndices.begin(), combinedDiscardedFeatureIndices.end());
     
-    int numberOfRemainingSuitableFeatures = numFeatures - combinedDiscardedFeatureIndices.size();
+#ifdef DEBUG_LEVEL_2
+    PRINT_VAR(combinedDiscardedFeatureIndices);
+#endif
+    
+    int numberOfRemainingSuitableFeatures = (int)(numFeatures - combinedDiscardedFeatureIndices.size());
     int currentFeatureSubsetSize = numberOfRemainingSuitableFeatures < optimumFeatureSubsetSize ? numberOfRemainingSuitableFeatures : optimumFeatureSubsetSize;
     
     while (featureSubsetIndices.size() < currentFeatureSubsetSize) {
@@ -320,6 +337,10 @@ private:
       }
     }
     sort(featureSubsetIndices.begin(), featureSubsetIndices.end());
+    
+//#ifdef DEBUG_LEVEL_2
+//    PRINT_VAR(featureSubsetIndices);
+//#endif
     
     return featureSubsetIndices;
   }
