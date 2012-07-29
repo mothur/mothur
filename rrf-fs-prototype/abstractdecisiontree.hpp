@@ -32,8 +32,8 @@ public:
                        string treeSplitCriterion)
   
   : baseDataSet(baseDataSet),
-  numSamples(baseDataSet.size()),
-  numFeatures(baseDataSet[0].size() - 1),
+  numSamples((int)baseDataSet.size()),
+  numFeatures((int)(baseDataSet[0].size() - 1)),
   numOutputClasses(0),
   rootNode(NULL),
   globalDiscardedFeatureIndices(globalDiscardedFeatureIndices),
@@ -49,7 +49,12 @@ public:
         outputClasses.push_back(outcome);
         numOutputClasses++;
       }
-    }    
+    }
+    
+#ifdef DEBUG_MODE
+    PRINT_VAR(outputClasses);
+    PRINT_VAR(numOutputClasses);
+#endif
   }
   
   virtual ~AbstractDecisionTree(){
@@ -57,6 +62,11 @@ public:
   }
   
   void createBootStrappedSamples(){
+    
+#ifdef DEBUG_MODE
+    DEBUGMSG_FUNC;
+#endif
+
     vector<bool> isInTrainingSamples(numSamples, false);
     
     for (unsigned i = 0; i < numSamples; i++) {
@@ -75,6 +85,7 @@ public:
     }
     
 #ifdef DEBUG_MODE
+    PRINT_VAR(numSamples);
     PRINT_VAR(bootstrappedTrainingSampleIndices);
     PRINT_VAR(bootstrappedTestSampleIndices);
 #endif    
@@ -83,8 +94,8 @@ public:
   void getMinEntropyOfFeature(vector<int> featureVector, vector<int> outputVector, 
                               double& minEntropy, int& featureSplitValue, double& intrinsicValue){
     
-#ifdef DEBUG_MODE
-    DEBUGMSG_LOCATION;
+#ifdef DEBUG_LEVEL_4
+    DEBUGMSG_FUNC;
 #endif
     
     vector< vector<int> > featureOutputPair(featureVector.size(), vector<int>(2, 0));
@@ -95,13 +106,13 @@ public:
       // TODO: using default behavior to sort(), need to specify the comparator for added safety and compiler portability
     sort(featureOutputPair.begin(), featureOutputPair.end());
     
-#ifdef DEBUG_MODE
+#ifdef DEBUG_LEVEL_4
     PRINT_VAR(featureOutputPair);
 #endif
     
     vector<int> splitPoints;
     vector<int> uniqueFeatureValues(1, featureOutputPair[0][0]);
-    
+        
     for (unsigned i = 0; i < featureOutputPair.size(); i++) {
       int featureValue = featureOutputPair[i][0];
       vector<int>::iterator it = find(uniqueFeatureValues.begin(), uniqueFeatureValues.end(), featureValue);
@@ -111,7 +122,7 @@ public:
       }
     }
     
-#ifdef DEBUG_MODE
+#ifdef DEBUG_LEVEL_4
     PRINT_VAR(splitPoints);
 #endif
     
@@ -145,10 +156,11 @@ public:
     return intrinsicValue;
   }
   
+  
   void getBestSplitAndMinEntropy(vector< vector<int> > featureOutputPairs, vector<int> splitPoints,
                                  double& minEntropy, int& minEntropyIndex, double& relatedIntrinsicValue){
     
-    int numSamples = featureOutputPairs.size();
+    int numSamples = (int)featureOutputPairs.size();
     vector<double> entropies;
     vector<double> intrinsicValues;
     
@@ -172,15 +184,19 @@ public:
       entropies.push_back(totalEntropy);
       intrinsicValues.push_back(intrinsicValue);
       
-#ifdef DEBUG_MODE
+#ifdef DEBUG_LEVEL_4
+      PRINT_VAR(index);
+      cout << "----------------------------" << endl;
       PRINT_VAR(upperEntropyOfSplit);
       PRINT_VAR(lowerEntropyOfSplit);
       PRINT_VAR(numLessThanValueAtSplitPoint);
       PRINT_VAR(numGreaterThanValueAtSplitPoint);
+      PRINT_VAR(totalEntropy);
 #endif
+
     }
     
-#ifdef DEBUG_MODE
+#ifdef DEBUG_LEVEL_4
     PRINT_VAR(entropies);
     PRINT_VAR(intrinsicValues);
 #endif
