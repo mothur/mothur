@@ -37,18 +37,18 @@ public:
   leftChildNode(NULL),
   rightChildNode(NULL),
   parentNode(NULL) {
-
+        
     for (int i = 0; i < numSamples; i++) {    // just doing a simple transpose of the matrix
       for (int j = 0; j < numFeatures; j++) { bootstrappedFeatureVectors[j][i] = bootstrappedTrainingSamples[i][j]; }
     }
     
     for (int i = 0; i < numSamples; i++) { bootstrappedOutputVector[i] = bootstrappedTrainingSamples[i][numFeatures]; }
-    
+        
     createLocalDiscardedFeatureList();
     updateNodeEntropy();
   }
   
-  ~TreeNode(){
+  virtual ~TreeNode(){
   }
   
     // getters
@@ -65,7 +65,7 @@ public:
   TreeNode* getLeftChildNode() { return leftChildNode; }
   TreeNode* getRightChildNode() { return rightChildNode; }
   const int& getOutputClass() { return outputClass; }
-  const int& getNumSamples() { return numSamples; }
+  const unsigned getNumSamples() { return numSamples; }
   const int& getNumFeatures() { return numFeatures; }
   const vector<int>& getLocalDiscardedFeatureIndices() { return localDiscardedFeatureIndices; }
   const vector< vector<int> >& getBootstrappedFeatureVectors() { return bootstrappedFeatureVectors; }
@@ -93,7 +93,7 @@ private:
   vector<vector<int> > bootstrappedTrainingSamples;
   vector<int> globalDiscardedFeatureIndices;
   int numFeatures;
-  int numSamples;
+  unsigned numSamples;
   int numOutputClasses;
   int generation;
   bool isLeaf;
@@ -115,16 +115,31 @@ private:
   vector<int> localDiscardedFeatureIndices;
   
   void createLocalDiscardedFeatureList(){
+    
+#ifdef DEBUG_LEVEL_3
+    DEBUGMSG_FUNC;
+#endif
+    
     for (int i = 0; i < numFeatures; i++) {
       vector<int>::iterator it = find(globalDiscardedFeatureIndices.begin(), globalDiscardedFeatureIndices.end(), i);
       if (it == globalDiscardedFeatureIndices.end()){                           // NOT FOUND
         double standardDeviation = getStandardDeviation(bootstrappedFeatureVectors[i]);  
-        if (standardDeviation <= 0){ localDiscardedFeatureIndices.push_back(i); }
+        if (standardDeviation <= FEATURE_DISCARD_SD_THRESHOLD){ localDiscardedFeatureIndices.push_back(i); }
       }
     }
+    
+#ifdef DEBUG_LEVEL_3
+    PRINT_VAR(localDiscardedFeatureIndices);
+#endif
+    
   }
   
-  void updateNodeEntropy(){    
+  void updateNodeEntropy() {
+    
+#ifdef DEBUG_LEVEL_3
+    DEBUGMSG_FUNC;
+#endif
+    
     vector<int> classCounts(numOutputClasses, 0);
     for (int i = 0; i < bootstrappedOutputVector.size(); i++) { classCounts[bootstrappedOutputVector[i]]++; }
     int totalClassCounts = accumulate(classCounts.begin(), classCounts.end(), 0);
@@ -135,8 +150,13 @@ private:
       nodeEntropy += -(probability * log2(probability));
     }
     ownEntropy = nodeEntropy;
+    
+#ifdef DEBUG_LEVEL_3
+    PRINT_VAR(ownEntropy);
+#endif
+
   }
-  
+    
 };
 
 #endif
