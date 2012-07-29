@@ -27,6 +27,8 @@ struct VariableRankDescendingSorter {
 
 class DecisionTree: public AbstractDecisionTree{
   
+  friend class RandomForest;
+  
 public:
   
   DecisionTree(vector< vector<int> > baseDataSet,
