@@ -40,8 +40,10 @@ public:
   optimumFeatureSubsetSize(optimumFeatureSubsetSelector.getOptimumFeatureSubsetSize(numFeatures)),
   treeSplitCriterion(treeSplitCriterion) {
     
+      // TODO: istead of calculating this for every DecisionTree
+      // clacualte this once in the RandomForest class and pass the values
     for (int i = 0;  i < numSamples; i++) {
-      int outcome = baseDataSet[i][numFeatures - 1];
+      int outcome = baseDataSet[i][numFeatures];
       vector<int>::iterator it = find(outputClasses.begin(), outputClasses.end(), outcome);
       if (it == outputClasses.end()){       // find() will return classes.end() if the element is not found
         outputClasses.push_back(outcome);
@@ -50,7 +52,7 @@ public:
     }    
   }
   
-  ~AbstractDecisionTree(){
+  virtual ~AbstractDecisionTree(){
 //    if (rootNode != NULL){ delete rootNode; }
   }
   
@@ -164,6 +166,11 @@ public:
       
       double upperEntropyOfSplit = calcSplitEntropy(featureOutputPairs, index, numOutputClasses, true);
       double lowerEntropyOfSplit = calcSplitEntropy(featureOutputPairs, index, numOutputClasses, false);
+            
+      double totalEntropy = (numLessThanValueAtSplitPoint * upperEntropyOfSplit + numGreaterThanValueAtSplitPoint * lowerEntropyOfSplit) / (double)numSamples;
+      double intrinsicValue = calcIntrinsicValue(numLessThanValueAtSplitPoint, numGreaterThanValueAtSplitPoint, numSamples);
+      entropies.push_back(totalEntropy);
+      intrinsicValues.push_back(intrinsicValue);
       
 #ifdef DEBUG_MODE
       PRINT_VAR(upperEntropyOfSplit);
@@ -171,11 +178,6 @@ public:
       PRINT_VAR(numLessThanValueAtSplitPoint);
       PRINT_VAR(numGreaterThanValueAtSplitPoint);
 #endif
-      
-      double totalEntropy = (numLessThanValueAtSplitPoint * upperEntropyOfSplit + numGreaterThanValueAtSplitPoint * lowerEntropyOfSplit) / (double)numSamples;
-      double intrinsicValue = calcIntrinsicValue(numLessThanValueAtSplitPoint, numGreaterThanValueAtSplitPoint, numSamples);
-      entropies.push_back(totalEntropy);
-      intrinsicValues.push_back(intrinsicValue);      
     }
     
 #ifdef DEBUG_MODE
