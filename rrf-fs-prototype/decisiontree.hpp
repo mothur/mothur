@@ -42,12 +42,13 @@ public:
                          treeSplitCriterion),
   
   variableImportanceList(numFeatures, 0){
-    
+        
     createBootStrappedSamples();
     buildDecisionTree();
+    
   }
   
-  ~DecisionTree(){
+  virtual ~DecisionTree(){
     deleteTreeNodesRecursively(rootNode);
   }
   
@@ -62,17 +63,21 @@ public:
     PRINT_VAR(bootstrappedTestSamples.size());
     PRINT_VAR(numCorrect);
     PRINT_VAR(treeErrorRate);
-    
+        
     for (unsigned i = 0; i < numFeatures; i++) {
+        // NOTE: only shuffle the features, never shuffle the output vector
+        // so i = 0 and i will be alwaays <= (numFeatures - 1) as the index at numFeatures will denote
+        // the feature vector
       vector< vector<int> > randomlySampledTestData = randomlyShuffleAttribute(bootstrappedTestSamples, i);
+      
       int numCorrectAfterShuffle = 0;
       for (unsigned j = 0; j < randomlySampledTestData.size(); j++) {
         vector<int> shuffledSample = randomlySampledTestData[j];
         int actualSampleOutputClass = shuffledSample[numFeatures];
         int predictedSampleOutputClass = evaluateSample(shuffledSample);
         if (actualSampleOutputClass == predictedSampleOutputClass) { numCorrectAfterShuffle++; }
-        variableImportanceList[i] += (numCorrect - numCorrectAfterShuffle);
       }
+      variableImportanceList[i] += (numCorrect - numCorrectAfterShuffle);
     }
     
       // TODO: do we need to save the variableRanks in the DecisionTree, do we need it later?
