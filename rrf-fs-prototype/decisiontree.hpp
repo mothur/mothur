@@ -89,6 +89,7 @@ public:
           // TODO: is there a way to optimize the follow line's code?
         vector<int> variableRank(2, 0);
         variableRank[0] = i; variableRank[1] = variableImportanceList[i];
+        variableRanks.push_back(variableRank);
       }
     }
     VariableRankDescendingSorter variableRankDescendingSorter;
@@ -128,13 +129,24 @@ public:
     // shuffle it and then re-insert in the original place, thus iproving runnting time
   vector< vector<int> > randomlyShuffleAttribute(vector< vector<int> > samples, int featureIndex) {
     
-    vector< vector<int> > featureVectors(numFeatures, vector<int>(samples.size(), 0));
-    for (unsigned i = 0; i < samples.size(); i++) { for (unsigned j = 0; j < numFeatures; i++) { featureVectors[j][i] =  samples[i][j]; } }
+      // NOTE: we need (numFeatures + 1) featureVecotors, the last extra vector is actually outputVector
+    vector< vector<int> > featureVectors(samples[0].size(), vector<int>(samples.size(), 0));
+        
+    for (unsigned i = 0; i < samples.size(); i++) {
+      for (unsigned j = 0; j < samples[0].size(); j++) {
+        featureVectors[j][i] =  samples[i][j];
+      }
+    }
     
     random_shuffle(featureVectors[featureIndex].begin(), featureVectors[featureIndex].end());
     
-    vector< vector<int> > shuffledSample(samples.size(), vector<int>(numFeatures, 0));
-    for (unsigned i = 0; i < shuffledSample.size(); i++) { for (unsigned j = 0; j < numFeatures; i++) { shuffledSample[i][j] = featureVectors[j][i]; } }
+    vector< vector<int> > shuffledSample(samples.size(), vector<int>(samples[0].size(), 0));
+
+    for (unsigned i = 0; i < shuffledSample.size(); i++) {
+      for (unsigned j = 0; j < numFeatures; j++) {
+        shuffledSample[i][j] = featureVectors[j][i];
+      }
+    }
     
     return shuffledSample;
   }
