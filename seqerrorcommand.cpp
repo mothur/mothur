@@ -821,12 +821,16 @@ void SeqErrorCommand::getReferences(){
 				//
 				//			int endPos = rdb->referenceSeqs[i].getEndPos();
 				//			if(endPos < minEndPos)		{	minEndPos = endPos;		}				
+				if (rdb->referenceSeqs[i].getNumBases() == 0) {
+                    m->mothurOut("[WARNING]: " + rdb->referenceSeqs[i].getName() + " is blank, ignoring.");m->mothurOutEndLine(); 
+                }else {
+                    referenceSeqs.push_back(rdb->referenceSeqs[i]);
+                }
 				
-				referenceSeqs.push_back(rdb->referenceSeqs[i]);
 			}
 			referenceFileName = rdb->getSavedReference();
 			
-			m->mothurOut("It took " + toString(time(NULL) - start) + " to load " + toString(rdb->referenceSeqs.size()) + " sequences.");m->mothurOutEndLine();  
+			m->mothurOut("It took " + toString(time(NULL) - start) + " to load " + toString(referenceSeqs.size()) + " sequences.");m->mothurOutEndLine();  
 		
 		}else {
 			int start = time(NULL);
@@ -844,9 +848,12 @@ void SeqErrorCommand::getReferences(){
 	//
 	//			int endPos = currentSeq.getEndPos();
 	//			if(endPos < minEndPos)		{	minEndPos = endPos;		}
-				referenceSeqs.push_back(currentSeq);
-				
-				if (rdb->save) { rdb->referenceSeqs.push_back(currentSeq); }
+                if (currentSeq.getNumBases() == 0) {
+                    m->mothurOut("[WARNING]: " + currentSeq.getName() + " is blank, ignoring.");m->mothurOutEndLine(); 
+                }else {
+                    referenceSeqs.push_back(currentSeq);
+                    if (rdb->save) { rdb->referenceSeqs.push_back(currentSeq); }
+                }
 					
 				m->gobble(referenceFile);
 			}
@@ -860,7 +867,7 @@ void SeqErrorCommand::getReferences(){
 		for(int i=0;i<numRefs;i++){
 			referenceSeqs[i].padToPos(maxStartPos);
 			referenceSeqs[i].padFromPos(minEndPos);
-		}
+        }
 		
 		if(numAmbigSeqs != 0){
 			m->mothurOut("Warning: " + toString(numAmbigSeqs) + " reference sequences have ambiguous bases, these bases will be ignored\n");
@@ -964,7 +971,6 @@ int SeqErrorCommand::getErrors(Sequence query, Sequence reference, Compare& erro
 		errors.errorRate = (double)(errors.total-errors.matches) / (double)errors.total;
 		errors.queryName = query.getName();
 		errors.refName = reference.getName();
-		
 		//return errors;
         return 0;
 	}

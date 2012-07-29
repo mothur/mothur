@@ -2018,6 +2018,28 @@ bool MothurOut::mothurConvert(string item, int& num){
 	}
 }
 /***********************************************************************/
+bool MothurOut::mothurConvert(string item, intDist& num){
+	try {
+		bool error = false;
+		
+		if (isNumeric1(item)) {
+			convert(item, num);
+		}else {
+			num = 0;
+			error = true;
+			mothurOut("[ERROR]: cannot convert " + item + " to an integer."); mothurOutEndLine();
+			commandInputsConvertError = true;
+		}
+		
+		return error;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "mothurConvert");
+		exit(1);
+	}
+}
+
+/***********************************************************************/
 bool MothurOut::isNumeric1(string stringToCheck){
 	try {
 		bool numeric = false;

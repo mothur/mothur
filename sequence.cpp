@@ -682,7 +682,7 @@ int Sequence::getEndPos(){
 //********************************************************************************************************************
 
 void Sequence::padFromPos(int end){
-	cout << end << '\t' << endPos << endl;
+	//cout << end << '\t' << endPos << endl;
 	for(int j = end; j < endPos; j++) {
 		aligned[j] = '.';
 	}

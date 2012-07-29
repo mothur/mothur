@@ -288,7 +288,7 @@ int ClusterCommand::execute(){
 		
 		read->read(nameMap);
 		list = read->getListVector();
-		matrix = read->getMatrix();
+		matrix = read->getDMatrix();
 		rabund = new RAbundVector(list->getRAbundVector());
 		delete read;
 		
@@ -333,7 +333,7 @@ int ClusterCommand::execute(){
 		loops = 0;
 		double saveCutoff = cutoff;
 		
-		while (matrix->getSmallDist() < cutoff && matrix->getNNodes() > 0){
+		while (matrix->getSmallDist() < cutoff && matrix->getNNodes() > 0){  
 		
 			if (m->control_pressed) { //clean up
 				delete list; delete matrix; delete rabund; delete cluster;
@@ -353,8 +353,8 @@ int ClusterCommand::execute(){
 			loops++;
 
 			cluster->update(cutoff);
-	
-			float dist = matrix->getSmallDist();
+            
+            float dist = matrix->getSmallDist();
 			float rndDist;
 			if (hard) {
 				rndDist = m->ceilDist(dist, precision); 

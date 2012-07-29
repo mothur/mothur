@@ -11,7 +11,7 @@
 
 /***********************************************************************/
 
-WeightedLinkage::WeightedLinkage(RAbundVector* rav, ListVector* lv, SparseMatrix* dm, float c, string s) :
+WeightedLinkage::WeightedLinkage(RAbundVector* rav, ListVector* lv, SparseDistanceMatrix* dm, float c, string s) :
 	Cluster(rav, lv, dm, c, s)
 {
 	saveRow = -1;
@@ -28,7 +28,7 @@ string WeightedLinkage::getTag() {
 
 /***********************************************************************/
 //This function updates the distance based on the average linkage method.
-bool WeightedLinkage::updateDistance(MatData& colCell, MatData& rowCell) {
+bool WeightedLinkage::updateDistance(PDistCell& colCell, PDistCell& rowCell) {
 	try {
 		if ((saveRow != smallRow) || (saveCol != smallCol)) {
 //			rowBin = rabund->get(smallRow);
@@ -38,7 +38,7 @@ bool WeightedLinkage::updateDistance(MatData& colCell, MatData& rowCell) {
 			saveCol = smallCol;
 		}
 		
-		colCell->dist = (colCell->dist + rowCell->dist) / 2.0;
+		colCell.dist = (colCell.dist + rowCell.dist) / 2.0;
 		
 		return(true);
 	}

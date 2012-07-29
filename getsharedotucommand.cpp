@@ -417,10 +417,11 @@ int GetSharedOTUCommand::process(ListVector* shared) {
 			
 			vector<string> namesOfSeqsInThisBin;
 			
-			string names = shared->get(i);  
-			while ((names.find_first_of(',') != -1)) { 
-				string name = names.substr(0,names.find_first_of(','));
-				names = names.substr(names.find_first_of(',')+1, names.length());
+			string names = shared->get(i); 
+            vector<string> binNames;
+            m->splitAtComma(names, binNames);
+			for(int j = 0; j < binNames.size(); j++) {
+				string name = binNames[j];
 				
 				//find group
 				string seqGroup = groupMap->getGroup(name);
@@ -435,20 +436,6 @@ int GetSharedOTUCommand::process(ListVector* shared) {
 				if (it == groupFinder.end()) {  uniqueOTU = false;  } //you have a sequence from a group you don't want
 				else {  atLeastOne[seqGroup]++;  }
 			}
-			
-			//get last name
-			string seqGroup = groupMap->getGroup(names);
-			if (output != "accnos") {
-				namesOfSeqsInThisBin.push_back((names + "|" + seqGroup + "|" + toString(i+1)));
-			}else {  namesOfSeqsInThisBin.push_back(names);	}
-			
-			if (seqGroup == "not found") { m->mothurOut(names + " is not in your groupfile. Please correct."); m->mothurOutEndLine(); exit(1);  }
-			
-			//is this seq in one of hte groups we care about
-			it = groupFinder.find(seqGroup);
-			if (it == groupFinder.end()) {  uniqueOTU = false;  } //you have a sequence from a group you don't want
-			else {  atLeastOne[seqGroup]++;  }
-			
 			
 			//make sure you have at least one seq from each group you want
 			bool sharedByAll = true;

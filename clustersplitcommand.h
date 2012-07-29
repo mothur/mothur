@@ -15,7 +15,7 @@
 #include "sabundvector.hpp"
 #include "listvector.hpp"
 #include "cluster.hpp"
-#include "sparsematrix.hpp"
+#include "sparsedistancematrix.h"
 #include "readcluster.h"
 #include "splitmatrix.h"
 #include "readphylip.h"
