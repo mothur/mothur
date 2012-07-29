@@ -9,13 +9,21 @@
 #ifndef rrf_fs_prototype_macros_h
 #define rrf_fs_prototype_macros_h
 
+#define DEBUG_LEVEL_1
+//#define DEBUG_LEVEL_2
+//#define DEBUG_LEVEL_3
+//#define DEBUG_LEVEL_4
+
 #define DEBUGMSG_LOCATION (cout << "DEBUGMSG " << __PRETTY_FUNCTION__ << "\nDEBUGMSG " << __FILE__ <<  "#"  << __LINE__ << endl)
-#define DEBUGMSG_FUNC (cout << "DEBUGMSG " << __PRETTY_FUNCTION__ << endl)
+#define DEBUGMSG_FUNC (cout << __PRETTY_FUNCTION__ << endl \
+        << "--------------------------------------------------------------------------------" << endl)
 #define DEBUGMSG_VAR(X) (cout << "DEBUGMSG " << __PRETTY_FUNCTION__ << "\nDEBUGMSG " << #X << " -> " << X << endl << endl)
-#define PRINT_VAR(X) (cout << #X << " -> " << X << endl << endl)
+#define PRINT_VAR(X) (cout << #X << " -> " << X << endl)
 #define PRINT_MSG(Y, X) (cout <<  Y << " " << #X << " -> " << X << endl << endl)
-#define DEBUGMSG(X) (cout << "DEBUGMSG " << X << endl)
+#define DEBUGMSG(X) (cout << X << endl)
 #define NAME_VALUE_PAIR(VAR, OSTREAM) (OSTREAM << #VAR << " : " << VAR)
+
+#define FEATURE_DISCARD_SD_THRESHOLD  0
 
 using namespace std;
 
@@ -93,6 +101,16 @@ ostream& operator <<(ostream& os, vector<double>& doubles){
 ostream& operator <<(ostream& os, map<int, vector<int> >& keyValuePairs){
   os << "[ " << endl;
   for (map<int, vector<int> >::iterator it = keyValuePairs.begin(); it != keyValuePairs.end(); it++) {
+    os << "\t" << it->first << " => " << it->second << endl;
+  }
+  os << "]";
+  return os;
+}
+
+/* overrding "cout <<" for map of int and int */  
+ostream& operator <<(ostream& os, map<int, int>& keyValuePairs){
+  os << "[ " << endl;
+  for (map<int, int>::iterator it = keyValuePairs.begin(); it != keyValuePairs.end(); it++) {
     os << "\t" << it->first << " => " << it->second << endl;
   }
   os << "]";
