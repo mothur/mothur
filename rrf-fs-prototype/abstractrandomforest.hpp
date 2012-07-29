@@ -82,7 +82,7 @@ protected:
     
     return globalDiscardedFeatureIndices;
   }
-private:
+
   int numDecisionTrees;
   int numSamples;
   int numFeatures;
@@ -91,6 +91,11 @@ private:
   vector<double> globalVariableImportanceList;
   string treeSplitCriterion;
   map<int, vector<int> > globalOutOfBagEstimates;
-  vector<AbstractDecisionTree> decisionTrees;
+  
+    // TODO: fix this, do we use pointers?
+  vector<AbstractDecisionTree*> decisionTrees;
+  
+private:
+
 };
 #endif
