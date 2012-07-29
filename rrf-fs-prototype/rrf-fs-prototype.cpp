@@ -20,7 +20,7 @@
 //#include "sharedanddesignfilereader.h"
 //#include "dataset.h"
 //#include "regularizedrandomforest.h"
-#include "abstractrandomforest.hpp"
+#include "randomforest.hpp"
 #include "decisiontree.hpp"
 #include "treenode.hpp"
 #include "Datasets/inpatient.final.an.0.03.subsample.avg.matrix.h"
@@ -51,13 +51,17 @@ int main(int argc, const char * argv[]){
   vector< vector<int> > dataSet(numRows, vector<int>(numColumns, 0));
   for (int i = 0; i < numRows; i++) { for (int j = 0; j < numColumns; j++) { dataSet[i][j] = inpatientDataSet[i][j]; } }
   
-  int numDecisionTrees = 1;
-  AbstractRandomForest abstractRandomForest(dataSet, numDecisionTrees, "informationGain");
+  int numDecisionTrees = 100;
+//  AbstractRandomForest abstractRandomForest(dataSet, numDecisionTrees, "informationGain");
+  RandomForest randomForest(dataSet, numDecisionTrees, "informationGain");
       
   // just a test
-  vector<int> dummyDiscaredFeatureIndices;
-  OptimumFeatureSubsetSelector optimumFeatureSubsetSelector("log2");
-  DecisionTree decisionTree(dataSet, dummyDiscaredFeatureIndices, optimumFeatureSubsetSelector, "informationGain");
+//  vector<int> dummyDiscaredFeatureIndices;
+//  OptimumFeatureSubsetSelector optimumFeatureSubsetSelector("log2");
+//  DecisionTree decisionTree(dataSet, dummyDiscaredFeatureIndices, optimumFeatureSubsetSelector, "informationGain");
+  randomForest.populateDecisionTrees();
+  randomForest.calcForrestErrorRate();
+  randomForest.calcForrestVariableImportance();
 
   
   // another test
@@ -81,5 +85,5 @@ int main(int argc, const char * argv[]){
 //  PRINT_VAR(a);
 //  sort(a.begin(), a.end(), obj);
 //  PRINT_VAR(a);
-
+  
 }
