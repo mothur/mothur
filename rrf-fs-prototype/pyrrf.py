@@ -462,7 +462,7 @@ class DecisionTree(AbstractDecisionTree):
 		if DEBUG_MODE:
 			print "bestFeatureToSplitOnIndex:", bestFeatureToSplitOnIndex, "bestFeatureSplitValue:", bestFeatureSplitValue
 			print "bestFeatureSplitEntropy:", bestFeatureSplitEntropy
-			if self.treeSplitCriterion == 'gainRatio': pass "bestFeatureMaxGainRatio", featureMaxGainRatio
+			if self.treeSplitCriterion == 'gainRatio': print "bestFeatureMaxGainRatio", featureMaxGainRatio
 
 
 		node.splitFeatureIndex = featureSubsetIndices[bestFeatureToSplitOnIndex]
