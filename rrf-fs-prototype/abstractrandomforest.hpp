@@ -33,7 +33,7 @@ public:
   numSamples(dataSet.size()),
   numFeatures(dataSet[0].size() - 1),
   globalDiscardedFeatureIndices(getGlobalDiscardedFeatureIndices()),
-  globalVariableImportanceList(numFeatures),
+  globalVariableImportanceList(numFeatures, 0),
   treeSplitCriterion(treeSplitCriterion){
       // TODO: double check if the implemenatation of 'globalOutOfBagEstimates' is correct
   }
@@ -42,11 +42,25 @@ public:
 //  AbstractRandomForest(int** dataSetAs2dArray, const int rows, const int columns, const int numDecisionTrees, const std::string treeSplitCriterion="informationGain"){
 //  }
     
-  ~AbstractRandomForest(){
+  virtual ~AbstractRandomForest(){
   }
+  
+  virtual void populateDecisionTrees() = 0;
+  virtual void calcForrestErrorRate() = 0;
+  virtual void calcForrestVariableImportance() = 0;
   
 protected:
   
+    // TODO: create a better way of discarding feature
+    // currently we just set FEATURE_DISCARD_SD_THRESHOLD to 0 to solved this
+    // it can be tuned for better selection
+    // also, there might be other factors like Mean or other stuffs
+    // same would apply for createLocalDiscardedFeatureList in the TreeNode class
+  
+    // TODO: Another idea is getting an aggregated discarded feature indices after the run, from combining
+    // the local discarded feature indices
+    // this would penalize a feature, even if in global space the feature looks quite good
+    // the penalization would be averaged, so this woould unlikely to create a local optmina
   vector<int> getGlobalDiscardedFeatureIndices() {
       // calculate feature vectors
     vector< vector<int> > featureVectors(numFeatures, vector<int>(numSamples, 0));
@@ -58,7 +72,7 @@ protected:
     
     for (int i = 0; i < featureVectors.size(); i++) {
       double standardDeviation = getStandardDeviation(featureVectors[i]);
-      if (standardDeviation <= 0){ globalDiscardedFeatureIndices.push_back(i); }
+      if (standardDeviation <= FEATURE_DISCARD_SD_THRESHOLD){ globalDiscardedFeatureIndices.push_back(i); }
     }
     
 #ifdef DEBUG_MODE
@@ -68,7 +82,6 @@ protected:
     
     return globalDiscardedFeatureIndices;
   }
-  
 private:
   int numDecisionTrees;
   int numSamples;
