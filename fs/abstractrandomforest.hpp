@@ -90,6 +90,8 @@ protected:
   vector<int> globalDiscardedFeatureIndices;
   vector<double> globalVariableImportanceList;
   string treeSplitCriterion;
+    // This is a map of each feature to outcome count of each classes
+    // e.g. 1 => [2 7] means feature 1 has 2 outcome of 0 and 7 outcome of 1
   map<int, vector<int> > globalOutOfBagEstimates;
   
     // TODO: fix this, do we use pointers?

@@ -40,7 +40,7 @@ int main(int argc, const char * argv[]){
   vector< vector<int> > dataSet(numRows, vector<int>(numColumns, 0));
   for (int i = 0; i < numRows; i++) { for (int j = 0; j < numColumns; j++) { dataSet[i][j] = inpatientDataSet[i][j]; } }
   
-  int numDecisionTrees = 100;
+  int numDecisionTrees = 1;
   RandomForest randomForest(dataSet, numDecisionTrees, "informationGain");
       
   randomForest.populateDecisionTrees();

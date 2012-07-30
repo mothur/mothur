@@ -96,6 +96,7 @@ public:
     sort(variableRanks.begin(), variableRanks.end(), variableRankDescendingSorter);
   }
   
+    // TODO: there must be a way to optimize this function
   int evaluateSample(vector<int> testSample) {
     TreeNode *node = rootNode;
     while (true) {
@@ -104,7 +105,6 @@ public:
       if (sampleSplitFeatureValue < node->getSplitFeatureValue()) { node = node->getLeftChildNode(); }
       else { node = node->getRightChildNode(); } 
     }
-    return 0;
   }
   
   void calcTreeErrorRate(int& numCorrect, double& treeErrorRate){
@@ -361,7 +361,7 @@ private:
   void printTree(TreeNode* treeNode, string caption){
     
     string tabs = "";
-    for (unsigned i = 0; i < treeNode->getGeneration(); i++) { tabs += "\t"; }
+    for (unsigned i = 0; i < treeNode->getGeneration(); i++) { tabs += " "; }
     
     if (treeNode != NULL && treeNode->checkIsLeaf() == false){
       cout << tabs << caption << " [ gen: " << treeNode->getGeneration() << " ] ( " << treeNode->getSplitFeatureValue() << " < X" << treeNode->getSplitFeatureIndex() << " )" << endl;
