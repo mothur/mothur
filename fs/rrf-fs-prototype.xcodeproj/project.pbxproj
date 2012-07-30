@@ -33,12 +33,8 @@
 		7B12A9F315B9333800793E64 /* abstractrandomforest.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = abstractrandomforest.hpp; sourceTree = "<group>"; };
 		7B142586156968C900D238B7 /* rrf-fs-prototype */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "rrf-fs-prototype"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7B757F2E15BDCA0600CBCECB /* decisiontree.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = decisiontree.hpp; sourceTree = "<group>"; };
-		7B8A75E51572C7A7002A3C9E /* regularizedrandomforest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = regularizedrandomforest.h; sourceTree = "<group>"; };
 		7B8A75E8157313E4002A3C9E /* macros.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = macros.h; sourceTree = "<group>"; };
 		7B9E492115BB5E2900719329 /* abstractdecisiontree.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = abstractdecisiontree.hpp; sourceTree = "<group>"; };
-		7BA4404E156C7DD9004A6A54 /* sharedanddesignfilereader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sharedanddesignfilereader.h; sourceTree = "<group>"; };
-		7BB761E5157188BB00699057 /* dataset.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dataset.h; sourceTree = "<group>"; };
-		7BB761E715718DBC00699057 /* trainingset.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = trainingset.h; sourceTree = "<group>"; };
 		7BC1658B15748BEE002EFDDC /* final.an.0.03.subsample.0.03.pick.shared */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = final.an.0.03.subsample.0.03.pick.shared; sourceTree = "<group>"; };
 		7BC1658C15748BEE002EFDDC /* mouse.sex_time.design */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = mouse.sex_time.design; sourceTree = "<group>"; };
 		7BE48A7115696A38002928AD /* rrf-fs-prototype.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "rrf-fs-prototype.cpp"; sourceTree = "<group>"; };
@@ -65,11 +61,7 @@
 				7BC1658A15748BEE002EFDDC /* Datasets */,
 				7B8A75E8157313E4002A3C9E /* macros.h */,
 				7B09D86A1574B1E4003278C1 /* treenode.hpp */,
-				7B8A75E51572C7A7002A3C9E /* regularizedrandomforest.h */,
 				7BE48A7115696A38002928AD /* rrf-fs-prototype.cpp */,
-				7BB761E5157188BB00699057 /* dataset.h */,
-				7BB761E715718DBC00699057 /* trainingset.h */,
-				7BA4404E156C7DD9004A6A54 /* sharedanddesignfilereader.h */,
 				7B142587156968C900D238B7 /* Products */,
 			);
 			sourceTree = "<group>";
