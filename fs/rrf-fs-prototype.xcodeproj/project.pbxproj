@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		7BC1658E15748BFD002EFDDC /* final.an.0.03.subsample.0.03.pick.shared in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7BC1658B15748BEE002EFDDC /* final.an.0.03.subsample.0.03.pick.shared */; };
 		7BC1658F15748BFD002EFDDC /* mouse.sex_time.design in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7BC1658C15748BEE002EFDDC /* mouse.sex_time.design */; };
-		7BE48A7215696A38002928AD /* rrf-fs-prototype.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7BE48A7115696A38002928AD /* rrf-fs-prototype.cpp */; };
+		7BE48A7215696A38002928AD /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7BE48A7115696A38002928AD /* main.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -37,7 +37,7 @@
 		7B9E492115BB5E2900719329 /* abstractdecisiontree.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = abstractdecisiontree.hpp; sourceTree = "<group>"; };
 		7BC1658B15748BEE002EFDDC /* final.an.0.03.subsample.0.03.pick.shared */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = final.an.0.03.subsample.0.03.pick.shared; sourceTree = "<group>"; };
 		7BC1658C15748BEE002EFDDC /* mouse.sex_time.design */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = mouse.sex_time.design; sourceTree = "<group>"; };
-		7BE48A7115696A38002928AD /* rrf-fs-prototype.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "rrf-fs-prototype.cpp"; sourceTree = "<group>"; };
+		7BE48A7115696A38002928AD /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,7 +61,7 @@
 				7BC1658A15748BEE002EFDDC /* Datasets */,
 				7B8A75E8157313E4002A3C9E /* macros.h */,
 				7B09D86A1574B1E4003278C1 /* treenode.hpp */,
-				7BE48A7115696A38002928AD /* rrf-fs-prototype.cpp */,
+				7BE48A7115696A38002928AD /* main.cpp */,
 				7B142587156968C900D238B7 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -134,7 +134,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7BE48A7215696A38002928AD /* rrf-fs-prototype.cpp in Sources */,
+				7BE48A7215696A38002928AD /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
