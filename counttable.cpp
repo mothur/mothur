@@ -158,7 +158,41 @@ int CountTable::getNumSeqs(string seqName) {
 	}
 }
 /************************************************************/
-//returns names of seqs
+//returns unique index for sequence like get in NameAssignment
+int CountTable::get(string seqName) {
+    try {
+        
+        map<string, int>::iterator it = indexNameMap.find(seqName);
+        if (it == indexNameMap.end()) {
+            m->mothurOut("[ERROR]: " + seqName + " is not in your count table. Please correct.\n"); m->control_pressed = true;
+        }else { return it->second; }
+        
+        return -1;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "CountTable", "get");
+		exit(1);
+	}
+}
+/************************************************************/
+//create ListVector from uniques
+ListVector CountTable::getListVector() {
+    try {
+        ListVector list(indexNameMap.size());
+        for (map<string, int>::iterator it = indexNameMap.begin(); it != indexNameMap.end(); it++) { 
+            if (m->control_pressed) { break; }
+            list.set(it->second, it->first); 
+        }
+        return list;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "CountTable", "getListVector");
+		exit(1);
+	}
+}
+
+/************************************************************/
+//returns the names of all unique sequences in file
 vector<string> CountTable::getNamesOfSeqs() {
     try {
         vector<string> names;

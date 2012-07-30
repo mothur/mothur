@@ -13,12 +13,14 @@
 #include "readmatrix.hpp"
 #include "clusterdoturcommand.h"
 
+
 //**********************************************************************************************************************
 vector<string> ClusterCommand::setParameters(){	
 	try {
 		CommandParameter pphylip("phylip", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "none",false,false); parameters.push_back(pphylip);
-		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "ColumnName",false,false); parameters.push_back(pname);
-		CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "ColumnName",false,false); parameters.push_back(pcolumn);		
+		CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "ColumnName",false,false); parameters.push_back(pname);
+		CommandParameter pcount("count", "InputTypes", "", "", "NameCount", "none", "none",false,false); parameters.push_back(pcount);
+        CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "ColumnName",false,false); parameters.push_back(pcolumn);		
 		CommandParameter pcutoff("cutoff", "Number", "", "10", "", "", "",false,false); parameters.push_back(pcutoff);
 		CommandParameter pprecision("precision", "Number", "", "100", "", "", "",false,false); parameters.push_back(pprecision);
 		CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted", "average", "", "", "",false,false); parameters.push_back(pmethod);
@@ -42,7 +44,7 @@ vector<string> ClusterCommand::setParameters(){
 string ClusterCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The cluster command parameter options are phylip, column, name, method, cuttoff, hard, precision, sim, showabund and timing. Phylip or column and name are required, unless you have a valid current file.\n";
+		helpString += "The cluster command parameter options are phylip, column, name, count, method, cuttoff, hard, precision, sim, showabund and timing. Phylip or column and name are required, unless you have a valid current file.\n";
 		helpString += "The cluster command should be in the following format: \n";
 		helpString += "cluster(method=yourMethod, cutoff=yourCutoff, precision=yourPrecision) \n";
 		helpString += "The acceptable cluster methods are furthest, nearest, average and weighted.  If no method is provided then average is assumed.\n";	
@@ -169,6 +171,11 @@ ClusterCommand::ClusterCommand(string option)  {
 			if (namefile == "not open") { abort = true; }	
 			else if (namefile == "not found") { namefile = ""; }
 			else { m->setNameFile(namefile); }
+            
+            countfile = validParameter.validFile(parameters, "count", true);
+			if (countfile == "not open") { abort = true; countfile = ""; }	
+			else if (countfile == "not found") { countfile = ""; }
+			else { m->setCountTableFile(countfile); }
 			
 			if ((phylipfile == "") && (columnfile == "")) { 
 				//is there are current file available for either of these?
@@ -187,16 +194,22 @@ ClusterCommand::ClusterCommand(string option)  {
 			else if ((phylipfile != "") && (columnfile != "")) { m->mothurOut("When executing a cluster command you must enter ONLY ONE of the following: phylip or column."); m->mothurOutEndLine(); abort = true; }
 			
 			if (columnfile != "") {
-				if (namefile == "") { 
+				if ((namefile == "") && (countfile == "")){ 
 					namefile = m->getNameFile(); 
 					if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
 					else { 
-						m->mothurOut("You need to provide a namefile if you are going to use the column format."); m->mothurOutEndLine(); 
-						abort = true; 
+						countfile = m->getCountTableFile();
+                        if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
+                        else { 
+                            m->mothurOut("You need to provide a namefile or countfile if you are going to use the column format."); m->mothurOutEndLine(); 
+                            abort = true; 
+                        }	
 					}	
 				}
 			}
 			
+            if ((countfile != "") && (namefile != "")) { m->mothurOut("When executing a cluster command you must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
+            
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			//get user cutoff and precision or use defaults
@@ -253,6 +266,7 @@ int ClusterCommand::execute(){
 			//run unique.seqs for deconvolute results
 			string inputString = "phylip=" + distfile;
 			if (namefile != "") { inputString += ", name=" + namefile; }
+            else if (countfile != "") { inputString += ", count=" + countfile; }
 			inputString += ", precision=" + toString(precision);
 			inputString += ", method=" + method;
 			if (hard)	{ inputString += ", hard=T";	}
@@ -281,22 +295,30 @@ int ClusterCommand::execute(){
 		read->setCutoff(cutoff);
 		
 		NameAssignment* nameMap = NULL;
+        CountTable* ct = NULL;
 		if(namefile != ""){	
 			nameMap = new NameAssignment(namefile);
 			nameMap->readMap();
-		}
+            read->read(nameMap);
+		}else if (countfile != "") {
+            ct = new CountTable();
+            ct->readTable(countfile);
+            read->read(ct);
+        }
 		
-		read->read(nameMap);
 		list = read->getListVector();
 		matrix = read->getDMatrix();
-		rabund = new RAbundVector(list->getRAbundVector());
+        
+		if(countfile != "") {
+            rabund = new RAbundVector();
+            createRabund(ct, list, rabund); //creates an rabund that includes the counts for the unique list
+            delete ct;
+        }else { rabund = new RAbundVector(list->getRAbundVector()); }
 		delete read;
 		
 		if (m->control_pressed) { //clean up
-			delete list; delete matrix; delete rabund;
-			sabundFile.close();rabundFile.close();listFile.close();
-			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} outputTypes.clear();
-			return 0;
+			delete list; delete matrix; delete rabund; if(countfile == ""){rabundFile.close(); sabundFile.close();  m->mothurRemove((fileroot+ tag + ".rabund")); m->mothurRemove((fileroot+ tag + ".sabund")); }
+			listFile.close(); m->mothurRemove((fileroot+ tag + ".list")); outputTypes.clear(); return 0;
 		}
 		
 		//create cluster
@@ -311,15 +333,19 @@ int ClusterCommand::execute(){
 		
         string sabundFileName = fileroot+ tag + "." + getOutputFileNameTag("sabund");
         string rabundFileName = fileroot+ tag + "." + getOutputFileNameTag("rabund");
-        string listFileName = fileroot+ tag + "." + getOutputFileNameTag("list");
+        string listFileName = fileroot+ tag + ".";
+        if (countfile != "") { listFileName += "unique_"; }
+        listFileName += getOutputFileNameTag("list");
         
-		m->openOutputFile(sabundFileName,	sabundFile);
-		m->openOutputFile(rabundFileName,	rabundFile);
+        if (countfile == "") {
+            m->openOutputFile(sabundFileName,	sabundFile);
+            m->openOutputFile(rabundFileName,	rabundFile);
+            outputNames.push_back(sabundFileName); outputTypes["sabund"].push_back(sabundFileName);
+            outputNames.push_back(rabundFileName); outputTypes["rabund"].push_back(rabundFileName);
+
+        }
 		m->openOutputFile(listFileName,	listFile);
-		
-		outputNames.push_back(sabundFileName); outputTypes["sabund"].push_back(sabundFileName);
-		outputNames.push_back(rabundFileName); outputTypes["rabund"].push_back(rabundFileName);
-		outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
+        outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
 		
 		
 		time_t estart = time(NULL);
@@ -337,9 +363,8 @@ int ClusterCommand::execute(){
 		
 			if (m->control_pressed) { //clean up
 				delete list; delete matrix; delete rabund; delete cluster;
-				sabundFile.close();rabundFile.close();listFile.close();
-				for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} outputTypes.clear();
-				return 0;
+				if(countfile == "") {rabundFile.close(); sabundFile.close();  m->mothurRemove((fileroot+ tag + ".rabund")); m->mothurRemove((fileroot+ tag + ".sabund")); }
+                listFile.close(); m->mothurRemove((fileroot+ tag + ".list")); outputTypes.clear(); return 0;
 			}
 		
 			if (print_start && m->isTrue(timing)) {
@@ -393,9 +418,10 @@ int ClusterCommand::execute(){
 		delete list;
 		delete rabund;
 		delete cluster;
-		
-		sabundFile.close();
-		rabundFile.close();
+        if (countfile == "") {
+            sabundFile.close();
+            rabundFile.close();
+        }
 		listFile.close();
 	
 		if (saveCutoff != cutoff) { 
@@ -454,14 +480,17 @@ void ClusterCommand::printData(string label){
 		print_start = true;
 		loops = 0;
 		start = time(NULL);
-
-		oldRAbund.setLabel(label);
-		if (m->isTrue(showabund)) {
-			oldRAbund.getSAbundVector().print(cout);
-		}
-		oldRAbund.print(rabundFile);
-		oldRAbund.getSAbundVector().print(sabundFile);
-	
+        
+        if (countfile == "") {
+            oldRAbund.print(rabundFile);
+            oldRAbund.getSAbundVector().print(sabundFile);
+        }
+        
+        oldRAbund.setLabel(label);
+        if (m->isTrue(showabund)) {
+            oldRAbund.getSAbundVector().print(cout);
+        }
+        
 		oldList.setLabel(label);
 		oldList.print(listFile);
 	}
@@ -471,5 +500,27 @@ void ClusterCommand::printData(string label){
 	}
 
 
+}
+//**********************************************************************************************************************
+
+int ClusterCommand::createRabund(CountTable*& ct, ListVector*& list, RAbundVector*& rabund){
+    try {
+        rabund->setLabel(list->getLabel());        
+        for(int i = 0; i < list->getNumBins(); i++) { 
+            if (m->control_pressed) { break; }
+            vector<string> binNames;
+            string bin = list->get(i);
+            m->splitAtComma(bin, binNames);
+            int total = 0;
+            for (int j = 0; j < binNames.size(); j++) { total += ct->getNumSeqs(binNames[j]);  }
+            rabund->push_back(total);   
+        }
+        return 0;
+    }
+    catch(exception& e) {
+		m->errorOut(e, "ClusterCommand", "createRabund");
+		exit(1);
+	}
+    
 }
 //**********************************************************************************************************************

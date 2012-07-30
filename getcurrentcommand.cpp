@@ -140,7 +140,7 @@ int GetCurrentCommand::execute(){
 					m->setFlowFile("");
                 }else if (types[i] == "biom") {
 					m->setBiomFile("");
-                }else if (types[i] == "counttable") {
+                }else if (types[i] == "count") {
 					m->setCountTableFile("");
 				}else if (types[i] == "processors") {
 					m->setProcessors("1");

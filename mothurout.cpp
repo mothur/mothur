@@ -43,7 +43,7 @@ set<string> MothurOut::getCurrentTypes()  {
         types.insert("tree");
         types.insert("flow");
         types.insert("biom");
-        types.insert("counttable");
+        types.insert("count");
         types.insert("processors");
 
 		return types;
@@ -79,7 +79,7 @@ void MothurOut::printCurrentFiles()  {
 		if (treefile != "")			{  mothurOut("tree=" + treefile); mothurOutEndLine();				}
 		if (flowfile != "")			{  mothurOut("flow=" + flowfile); mothurOutEndLine();				}
         if (biomfile != "")			{  mothurOut("biom=" + biomfile); mothurOutEndLine();				}
-        if (counttablefile != "")	{  mothurOut("counttable=" + counttablefile); mothurOutEndLine();	}
+        if (counttablefile != "")	{  mothurOut("count=" + counttablefile); mothurOutEndLine();	}
 		if (processors != "1")		{  mothurOut("processors=" + processors); mothurOutEndLine();		}
 		
 	}
@@ -1052,6 +1052,9 @@ int MothurOut::openInputFile(string fileName, ifstream& fileHandle){
 
 int MothurOut::renameFile(string oldName, string newName){
 	try {
+        
+        if (oldName == newName) { return 0; }
+        
 		ifstream inTest;
 		int exist = openInputFile(newName, inTest, "");
 		inTest.close();

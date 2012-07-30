@@ -37,6 +37,7 @@
 
 
 #include "mothurout.h"
+#include "listvector.hpp"
 
 class CountTable {
     
@@ -60,6 +61,9 @@ class CountTable {
         int getGroupIndex(string); //returns index in getGroupCounts vector of specific group
         vector<string> getNamesOfSeqs();
         int mergeCounts(string, string); //combines counts for 2 seqs, saving under the first name passed in.
+        int get(string); //returns unique sequence index for reading distance matrices like NameAssignment
+        ListVector getListVector();
+        int size() { return indexNameMap.size(); }
     
     private:
         string filename;

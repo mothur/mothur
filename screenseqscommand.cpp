@@ -48,8 +48,8 @@ string ScreenSeqsCommand::getHelpString(){
 		helpString += "The screen.seqs command parameters are fasta, start, end, maxambig, maxhomop, minlength, maxlength, name, group, qfile, alignreport, taxonomy, optimize, criteria and processors.\n";
 		helpString += "The fasta parameter is required.\n";
 		helpString += "The alignreport and taxonomy parameters allow you to remove bad seqs from taxonomy and alignreport files.\n";
-		helpString += "The start parameter .... The default is -1.\n";
-		helpString += "The end parameter .... The default is -1.\n";
+		helpString += "The start parameter is used to set a position the \"good\" sequences must start by. The default is -1.\n";
+		helpString += "The end parameter is used to set a position the \"good\" sequences must end after. The default is -1.\n";
 		helpString += "The maxambig parameter allows you to set the maximum number of ambigious bases allowed. The default is -1.\n";
 		helpString += "The maxhomop parameter allows you to set a maximum homopolymer length. \n";
 		helpString += "The minlength parameter allows you to set and minimum sequence length. \n";
@@ -1236,7 +1236,6 @@ int ScreenSeqsCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& 
 			int length = MPIPos[start+i+1] - MPIPos[start+i];
 
 			char* buf4 = new char[length];
-			memcpy(buf4, outputString.c_str(), length);
 
 			MPI_File_read_at(inMPI, MPIPos[start+i], buf4, length, MPI_CHAR, &status);
 			

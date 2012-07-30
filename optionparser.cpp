@@ -124,7 +124,7 @@ map<string, string> OptionParser::getParameters() {
                         it->second = m->getTaxonomyFile();
                     }else if (it->first == "biom") {
                         it->second = m->getBiomFile();
-                    }else if (it->first == "counttable") {
+                    }else if (it->first == "count") {
                             it->second = m->getCountTableFile();
                     }else {
                         m->mothurOut("[ERROR]: mothur does not save a current file for " + it->first); m->mothurOutEndLine();

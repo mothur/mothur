@@ -777,7 +777,7 @@ vector<string> SummaryCommand::createGroupSummaryFile(int numLines, int numCols,
             }
 			
 			temp.close();
-			//m->mothurRemove(outputNames[i]);
+			m->mothurRemove(outputNames[i]);
 		}
 		
         

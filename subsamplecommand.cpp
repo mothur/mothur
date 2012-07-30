@@ -569,8 +569,8 @@ int SubSampleCommand::getSubSampleFasta() {
 			delete uniqueCommand;
 			m->mothurCalling = false;
             
-            m->renameFile(filenames["name"][0], outputNameFileName);
-            m->renameFile(filenames["fasta"][0], outputFileName);
+            m->renameFile(filenames["name"][0], outputNameFileName); 
+            m->renameFile(filenames["fasta"][0], outputFileName);  
             
 			outputTypes["name"].push_back(outputNameFileName);  outputNames.push_back(outputNameFileName);
 

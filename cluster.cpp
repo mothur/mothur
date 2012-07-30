@@ -64,7 +64,7 @@ void Cluster::update(double& cutOFF){
         nRowCells = dMatrix->seqVec[smallRow].size();
         
 		vector<int> foundCol(nColCells, 0);
-        //cout << "small cell: " << smallRow << '\t' << smallCol << endl;  
+        //cout << dMatrix->getNNodes() << " small cell: " << smallRow << '\t' << smallCol << endl;  
 		int search;
 		bool changed;
         

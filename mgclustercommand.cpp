@@ -268,7 +268,9 @@ int MGClusterCommand::execute(){
 		
         string sabundFileName = fileroot+ tag + "." + getOutputFileNameTag("sabund");
         string rabundFileName = fileroot+ tag + "." + getOutputFileNameTag("rabund");
-        string listFileName = fileroot+ tag + "." + getOutputFileNameTag("list");
+        string listFileName = fileroot+ tag + ".";
+        if (countfile != "") { listFileName += "unique_"; }
+        listFileName += getOutputFileNameTag("list");
         
         if (countfile == "") {
             m->openOutputFile(sabundFileName,	sabundFile);

@@ -9,14 +9,15 @@ NameAssignment::NameAssignment(string nameMapFile){
 	m->openInputFile(nameMapFile, fileHandle);
 	
 }
-
+//**********************************************************************************************************************
+NameAssignment::NameAssignment(){ m = MothurOut::getInstance(); }
 //**********************************************************************************************************************
 
 void NameAssignment::readMap(){
 	try{
 		string firstCol, secondCol, skip;
 	//	int index = 0;
-	
+        
 		
 		map<string, int>::iterator itData;
 		int rowIndex = 0;
