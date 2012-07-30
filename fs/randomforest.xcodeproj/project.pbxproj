@@ -31,7 +31,7 @@
 		7B12A9F015B92F3E00793E64 /* inpatient.final.an.0.03.subsample.avg.matrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = inpatient.final.an.0.03.subsample.avg.matrix.h; sourceTree = "<group>"; };
 		7B12A9F215B932D300793E64 /* randomforest.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = randomforest.hpp; sourceTree = "<group>"; };
 		7B12A9F315B9333800793E64 /* abstractrandomforest.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = abstractrandomforest.hpp; sourceTree = "<group>"; };
-		7B142586156968C900D238B7 /* rrf-fs-prototype */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "rrf-fs-prototype"; sourceTree = BUILT_PRODUCTS_DIR; };
+		7B142586156968C900D238B7 /* randomforest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = randomforest; sourceTree = BUILT_PRODUCTS_DIR; };
 		7B757F2E15BDCA0600CBCECB /* decisiontree.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = decisiontree.hpp; sourceTree = "<group>"; };
 		7B8A75E8157313E4002A3C9E /* macros.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = macros.h; sourceTree = "<group>"; };
 		7B9E492115BB5E2900719329 /* abstractdecisiontree.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = abstractdecisiontree.hpp; sourceTree = "<group>"; };
@@ -69,7 +69,7 @@
 		7B142587156968C900D238B7 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				7B142586156968C900D238B7 /* rrf-fs-prototype */,
+				7B142586156968C900D238B7 /* randomforest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -87,9 +87,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		7B142585156968C900D238B7 /* rrf-fs-prototype */ = {
+		7B142585156968C900D238B7 /* randomforest */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 7B142590156968CA00D238B7 /* Build configuration list for PBXNativeTarget "rrf-fs-prototype" */;
+			buildConfigurationList = 7B142590156968CA00D238B7 /* Build configuration list for PBXNativeTarget "randomforest" */;
 			buildPhases = (
 				7B142582156968C900D238B7 /* Sources */,
 				7B142583156968C900D238B7 /* Frameworks */,
@@ -99,9 +99,9 @@
 			);
 			dependencies = (
 			);
-			name = "rrf-fs-prototype";
+			name = randomforest;
 			productName = "rrf-fs-prototype";
-			productReference = 7B142586156968C900D238B7 /* rrf-fs-prototype */;
+			productReference = 7B142586156968C900D238B7 /* randomforest */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
@@ -112,7 +112,7 @@
 			attributes = {
 				LastUpgradeCheck = 0430;
 			};
-			buildConfigurationList = 7B142580156968C700D238B7 /* Build configuration list for PBXProject "rrf-fs-prototype" */;
+			buildConfigurationList = 7B142580156968C700D238B7 /* Build configuration list for PBXProject "randomforest" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -124,7 +124,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				7B142585156968C900D238B7 /* rrf-fs-prototype */,
+				7B142585156968C900D238B7 /* randomforest */,
 			);
 		};
 /* End PBXProject section */
@@ -189,21 +189,21 @@
 		7B142591156968CA00D238B7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = randomforest;
 			};
 			name = Debug;
 		};
 		7B142592156968CA00D238B7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = randomforest;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		7B142580156968C700D238B7 /* Build configuration list for PBXProject "rrf-fs-prototype" */ = {
+		7B142580156968C700D238B7 /* Build configuration list for PBXProject "randomforest" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				7B14258E156968CA00D238B7 /* Debug */,
@@ -212,7 +212,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		7B142590156968CA00D238B7 /* Build configuration list for PBXNativeTarget "rrf-fs-prototype" */ = {
+		7B142590156968CA00D238B7 /* Build configuration list for PBXNativeTarget "randomforest" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				7B142591156968CA00D238B7 /* Debug */,
