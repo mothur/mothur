@@ -43,7 +43,27 @@ string ReverseSeqsCommand::getHelpString(){
 		exit(1);
 	}
 }
-
+//**********************************************************************************************************************
+string ReverseSeqsCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "fasta")            {   outputFileName =  "rc" + m->getExtension(inputName);   }
+            else if (type == "qfile")       {   outputFileName =  "rc" + m->getExtension(inputName);   }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ReverseSeqsCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 ReverseSeqsCommand::ReverseSeqsCommand(){	
 	try {
@@ -162,7 +182,7 @@ int ReverseSeqsCommand::execute(){
 			ofstream outFASTA;
 			string tempOutputDir = outputDir;
 			if (outputDir == "") { tempOutputDir += m->hasPath(fastaFileName); } //if user entered a file with a path then preserve it
-			fastaReverseFileName = tempOutputDir + m->getRootName(m->getSimpleName(fastaFileName)) + "rc" + m->getExtension(fastaFileName);
+			fastaReverseFileName = tempOutputDir + m->getRootName(m->getSimpleName(fastaFileName)) + getOutputFileNameTag("fasta", fastaFileName);
 			m->openOutputFile(fastaReverseFileName, outFASTA);
 			
 			while(!inFASTA.eof()){
@@ -190,8 +210,8 @@ int ReverseSeqsCommand::execute(){
 			ofstream outQual;
 			string tempOutputDir = outputDir;
 			if (outputDir == "") { tempOutputDir += m->hasPath(qualFileName); } //if user entered a file with a path then preserve it
-			string qualReverseFileName = tempOutputDir + m->getRootName(m->getSimpleName(qualFileName)) + "rc" + m->getExtension(qualFileName);
-			m->openOutputFile(qualReverseFileName, outQual);
+			string qualReverseFileName = tempOutputDir + m->getRootName(m->getSimpleName(qualFileName)) + getOutputFileNameTag("qfile", qualFileName);
+            m->openOutputFile(qualReverseFileName, outQual);
 
 			while(!inQual.eof()){
 				if (m->control_pressed) {  inQual.close();  outQual.close(); m->mothurRemove(qualReverseFileName); return 0; }

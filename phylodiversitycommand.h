@@ -25,7 +25,8 @@ class PhyloDiversityCommand : public Command {
 		vector<string> setParameters();
 		string getCommandName()			{ return "phylo.diversity";			}
 		string getCommandCategory()		{ return "Hypothesis Testing";		}
-		string getHelpString();	
+		string getOutputFileNameTag(string, string);
+	string getHelpString();	
 		string getCitation() { return "Faith DP (1994). Phylogenetic pattern and the quantification of organismal biodiversity. Philos Trans R Soc Lond B Biol Sci 345: 45-58. \nhttp://www.mothur.org/wiki/Phylo.diversity"; }
 		string getDescription()		{ return "phylo.diversity"; }
 

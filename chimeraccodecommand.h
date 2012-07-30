@@ -26,6 +26,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "chimera.ccode";		}
 	string getCommandCategory()		{ return "Sequence Processing"; }
+	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "Gonzalez JM, Zimmermann J, Saiz-Jimenez C (2005). Evaluating putative chimeric sequences from PCR-amplified products. Bioinformatics 21: 333-7. \nhttp://www.mothur.org/wiki/Chimera.ccode"; }
 	string getDescription()		{ return "detect chimeric sequences"; }

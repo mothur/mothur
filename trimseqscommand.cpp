@@ -97,6 +97,29 @@ string TrimSeqsCommand::getHelpString(){
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
+string TrimSeqsCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "qfile")            {   outputFileName =  "qual";   }
+            else if (type == "fasta")            {   outputFileName =  "fasta";   }
+            else if (type == "group")            {   outputFileName =  "groups";   }
+            else if (type == "name")            {   outputFileName =  "names";   }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "TrimSeqsCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
 
 
 //**********************************************************************************************************************
@@ -336,14 +359,14 @@ int TrimSeqsCommand::execute(){
 		vector<vector<string> > qualFileNames;
 		vector<vector<string> > nameFileNames;
 		
-		string trimSeqFile = outputDir + m->getRootName(m->getSimpleName(fastaFile)) + "trim.fasta";
+		string trimSeqFile = outputDir + m->getRootName(m->getSimpleName(fastaFile)) + "trim." + getOutputFileNameTag("fasta");
 		outputNames.push_back(trimSeqFile); outputTypes["fasta"].push_back(trimSeqFile);
 		
-		string scrapSeqFile = outputDir + m->getRootName(m->getSimpleName(fastaFile)) + "scrap.fasta";
+		string scrapSeqFile = outputDir + m->getRootName(m->getSimpleName(fastaFile)) + "scrap." + getOutputFileNameTag("fasta");
 		outputNames.push_back(scrapSeqFile); outputTypes["fasta"].push_back(scrapSeqFile);
 		
-		string trimQualFile = outputDir + m->getRootName(m->getSimpleName(fastaFile)) + "trim.qual";
-		string scrapQualFile = outputDir + m->getRootName(m->getSimpleName(fastaFile)) + "scrap.qual";
+		string trimQualFile = outputDir + m->getRootName(m->getSimpleName(fastaFile)) + "trim." + getOutputFileNameTag("qfile");
+		string scrapQualFile = outputDir + m->getRootName(m->getSimpleName(fastaFile)) + "scrap." + getOutputFileNameTag("qfile");
 		
 		if (qFileName != "") {
 			outputNames.push_back(trimQualFile);
@@ -352,8 +375,8 @@ int TrimSeqsCommand::execute(){
 			outputTypes["qfile"].push_back(scrapQualFile); 
 		}
 		
-		string trimNameFile = outputDir + m->getRootName(m->getSimpleName(nameFile)) + "trim.names";
-		string scrapNameFile = outputDir + m->getRootName(m->getSimpleName(nameFile)) + "scrap.names";
+		string trimNameFile = outputDir + m->getRootName(m->getSimpleName(nameFile)) + "trim." + getOutputFileNameTag("name");
+		string scrapNameFile = outputDir + m->getRootName(m->getSimpleName(nameFile)) + "scrap." + getOutputFileNameTag("name");
 		
 		if (nameFile != "") {
 			m->readNames(nameFile, nameMap);
@@ -369,7 +392,7 @@ int TrimSeqsCommand::execute(){
 		if(oligoFile != ""){
 			createGroup = getOligos(fastaFileNames, qualFileNames, nameFileNames);
 			if (createGroup) {
-				outputGroupFileName = outputDir + m->getRootName(m->getSimpleName(fastaFile)) + "groups";
+				outputGroupFileName = outputDir + m->getRootName(m->getSimpleName(fastaFile)) + getOutputFileNameTag("group");
 				outputNames.push_back(outputGroupFileName); outputTypes["group"].push_back(outputGroupFileName);
 			}
 		}
@@ -428,7 +451,7 @@ int TrimSeqsCommand::execute(){
 				m->openInputFile(it->first, in);
 				
 				ofstream out;
-				string thisGroupName = outputDir + m->getRootName(m->getSimpleName(it->first)) + "groups";
+				string thisGroupName = outputDir + m->getRootName(m->getSimpleName(it->first)) + getOutputFileNameTag("group");
 				outputNames.push_back(thisGroupName); outputTypes["group"].push_back(thisGroupName);
 				m->openOutputFile(thisGroupName, out);
 				
@@ -584,9 +607,11 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 
 			Sequence currSeq(inFASTA); m->gobble(inFASTA);
 			//cout << currSeq.getName() << '\t' << currSeq.getUnaligned().length() << endl;
+            
 			QualityScores currQual;
 			if(qFileName != ""){
 				currQual = QualityScores(qFile);  m->gobble(qFile);
+                if ((m->debug)&&(count>15800)) { m->mothurOut("[DEBUG]: " + toString(count) + " fasta = " + currSeq.getName() + '\n'); m->mothurOut("[DEBUG]: " + toString(getpid()) + '\n'); }
 			}
 			
 			string origSeq = currSeq.getUnaligned();
@@ -687,6 +712,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 						currQual.printQScores(trimQualFile);
 					}
 					
+                    
 					if(nameFile != ""){
 						map<string, string>::iterator itName = nameMap.find(currSeq.getName());
 						if (itName != nameMap.end()) {  trimNameFile << itName->first << '\t' << itName->second << endl; }
@@ -708,11 +734,13 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 							
 							outGroupsFile << currSeq.getName() << '\t' << thisGroup << endl;
 							
+                            int numRedundants = 0;
 							if (nameFile != "") {
 								map<string, string>::iterator itName = nameMap.find(currSeq.getName());
 								if (itName != nameMap.end()) { 
 									vector<string> thisSeqsNames; 
 									m->splitAtChar(itName->second, thisSeqsNames, ',');
+                                    numRedundants = thisSeqsNames.size()-1; //we already include ourselves below
 									for (int k = 1; k < thisSeqsNames.size(); k++) { //start at 1 to skip self
 										outGroupsFile << thisSeqsNames[k] << '\t' << thisGroup << endl;
 									}
@@ -720,8 +748,8 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 							}
 							
 							map<string, int>::iterator it = groupCounts.find(thisGroup);
-							if (it == groupCounts.end()) {	groupCounts[thisGroup] = 1; }
-							else { groupCounts[it->first]++; }
+							if (it == groupCounts.end()) {	groupCounts[thisGroup] = 1 + numRedundants; }
+							else { groupCounts[it->first] += (1 + numRedundants); }
 								
 						}
 					}
@@ -855,6 +883,8 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
 								 tempNameFileNames,
 								 lines[process],
 								 qLines[process]);
+                
+                if (m->debug) { m->mothurOut("[DEBUG]: " + toString(lines[process].start) + '\t' + toString(qLines[process].start) + '\t' + toString(getpid()) + '\n'); }
 				
 				//pass groupCounts to parent
 				if(createGroup){
@@ -1159,6 +1189,7 @@ int TrimSeqsCommand::setLines(string filename, string qfilename) {
         }
         
         for (int i = 0; i < (fastaFilePos.size()-1); i++) {
+            if (m->debug) { m->mothurOut("[DEBUG]: " + toString(i) +'\t' + toString(fastaFilePos[i]) + '\t' + toString(fastaFilePos[i+1]) + '\n'); }
 			lines.push_back(linePair(fastaFilePos[i], fastaFilePos[(i+1)]));
 			if (qfilename != "") {  qLines.push_back(linePair(qfileFilePos[i], qfileFilePos[(i+1)]));  }
 		}	

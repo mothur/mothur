@@ -51,6 +51,26 @@ string CooccurrenceCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string CooccurrenceCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "summary") {  outputFileName =  "cooccurence.summary"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "CooccurrenceCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 CooccurrenceCommand::CooccurrenceCommand(){	
 	try {
 		abort = true; calledHelp = true; 
@@ -176,7 +196,7 @@ int CooccurrenceCommand::execute(){
 		set<string> userLabels = labels;
 
         ofstream out;
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + "cooccurence.summary";
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + getOutputFileNameTag("summary");
         m->openOutputFile(outputFileName, out);
         outputNames.push_back(outputFileName);  outputTypes["summary"].push_back(outputFileName);
         out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);

@@ -12,27 +12,28 @@
 
 #include "mothur.h"
 #include "listvector.hpp"
-#include "sparsematrix.hpp"
 #include "nameassignment.hpp"
+#include "counttable.h"
+#include "sparsedistancematrix.h"
 
 class SparseMatrix;
 
 class ReadMatrix {
 
 public:
-	ReadMatrix(){	D = new SparseMatrix();	 m = MothurOut::getInstance();  }
+	ReadMatrix(){ DMatrix = new SparseDistanceMatrix(); m = MothurOut::getInstance();  }
 	virtual ~ReadMatrix() {}
 	virtual int read(NameAssignment*){ return 1; }
+    virtual int read(CountTable*){ return 1; }
 	
 	void setCutoff(float c)			{	cutoff = c;		}
-	SparseMatrix* getMatrix()		{	return D;		}
+    SparseDistanceMatrix* getDMatrix()		{	return DMatrix;		}
 	ListVector* getListVector()		{	return list;	}
-//	OrderVector* getOrderVector()   {	return order;	}
 
 	int successOpen;
 	
 protected:
-	SparseMatrix* D;
+    SparseDistanceMatrix* DMatrix;
 	ListVector* list;
 	float cutoff;
 	MothurOut* m;

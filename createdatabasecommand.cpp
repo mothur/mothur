@@ -15,7 +15,8 @@ vector<string> CreateDatabaseCommand::setParameters(){
 		CommandParameter pfasta("repfasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
 		CommandParameter pname("repname", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pname);
 		CommandParameter pcontaxonomy("contaxonomy", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pcontaxonomy);
-		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(plist);
+		CommandParameter plist("list", "InputTypes", "", "", "ListShared", "ListShared", "none",false,false); parameters.push_back(plist);
+        CommandParameter pshared("shared", "InputTypes", "", "", "ListShared", "ListShared", "none",false,false); parameters.push_back(pshared);
 		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pgroup);
 		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
@@ -34,8 +35,8 @@ vector<string> CreateDatabaseCommand::setParameters(){
 string CreateDatabaseCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The create.database command reads a listfile, *.cons.taxonomy, *.rep.fasta, *.rep.names and optional groupfile, and creates a database file.\n";
-		helpString += "The create.database command parameters are repfasta, list, repname, contaxonomy, group and label. List, repfasta, repnames, and contaxonomy are required.\n";
+		helpString += "The create.database command reads a list file or a shared file, *.cons.taxonomy, *.rep.fasta, *.rep.names and optional groupfile, and creates a database file.\n";
+		helpString += "The create.database command parameters are repfasta, list, shared, repname, contaxonomy, group and label. List, repfasta, repnames, and contaxonomy are required.\n";
         helpString += "The repfasta file is fasta file outputted by get.oturep(fasta=yourFastaFile, list=yourListfile, column=yourDistFile, name=yourNameFile).\n";
         helpString += "The repname file is the name file outputted by get.oturep(fasta=yourFastaFile, list=yourListfile, column=yourDistFile, name=yourNameFile).\n";
         helpString += "The contaxonomy file is the taxonomy file outputted by classify.otu(list=yourListfile, taxonomy=yourTaxonomyFile).\n";
@@ -53,6 +54,27 @@ string CreateDatabaseCommand::getHelpString(){
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
+string CreateDatabaseCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "database") {  outputFileName =  "database"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "CreateDatabaseCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+
 //**********************************************************************************************************************
 CreateDatabaseCommand::CreateDatabaseCommand(){	
 	try {
@@ -138,6 +160,14 @@ CreateDatabaseCommand::CreateDatabaseCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("shared");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
+				}
 			}
             
 			
@@ -146,14 +176,33 @@ CreateDatabaseCommand::CreateDatabaseCommand(string option)  {
 			
 			//check for required parameters
 			listfile = validParameter.validFile(parameters, "list", true);
-			if (listfile == "not found") {				
-				//if there is a current list file, use it
+			if (listfile == "not found") {	listfile = "";			}
+			else if (listfile == "not open") { listfile = ""; abort = true; }	
+			else { m->setListFile(listfile); }
+            
+            sharedfile = validParameter.validFile(parameters, "shared", true);
+			if (sharedfile == "not found") {	sharedfile = "";			}
+			else if (sharedfile == "not open") { sharedfile = ""; abort = true; }	
+			else { m->setSharedFile(sharedfile); }
+            
+            if ((sharedfile == "") && (listfile == "")) { 
+				//is there are current file available for either of these?
+				//give priority to list, then shared
 				listfile = m->getListFile(); 
 				if (listfile != "") {  m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current listfile and the list parameter is required."); m->mothurOutEndLine(); abort = true; }
+				else { 
+					sharedfile = m->getSharedFile(); 
+					if (sharedfile != "") {  m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+					else { 
+						m->mothurOut("No valid current files. You must provide a shared or list file before you can use the create.database command."); m->mothurOutEndLine(); 
+						abort = true;
+					}
+				}
 			}
-			else if (listfile == "not open") { abort = true; }	
-			else { m->setListFile(listfile); }
+			else if ((sharedfile != "") && (listfile != "")) { m->mothurOut("When executing a create.database command you must enter ONLY ONE of the following: shared or list."); m->mothurOutEndLine(); abort = true; }
+            
+            if (sharedfile != "") { if (outputDir == "") { outputDir = m->hasPath(sharedfile); } }
+            else { if (outputDir == "") { outputDir = m->hasPath(listfile); } }
 			
 			contaxonomyfile = validParameter.validFile(parameters, "contaxonomy", true);
 			if (contaxonomyfile == "not found") {  //if there is a current list file, use it
@@ -198,7 +247,8 @@ int CreateDatabaseCommand::execute(){
         //taxonomies holds the taxonomy info for each Otu
         //classifyOtuSizes holds the size info of each Otu to help with error checking
         vector<string> taxonomies;
-        vector<int> classifyOtuSizes = readTax(taxonomies);
+        vector<string> otuLabels;
+        vector<int> classifyOtuSizes = readTax(taxonomies, otuLabels);
         
         if (m->control_pressed) { return 0; }
         
@@ -209,7 +259,7 @@ int CreateDatabaseCommand::execute(){
         
         //names redundants to uniques. backwards to how we normally do it, but each bin is the list file will be a key entry in the map.
         map<string, string> repNames;
-        int numUniqueNamesFile = readNames(repNames);
+        int numUniqueNamesFile = m->readNames(repnamesfile, repNames, 1);
         
         //are there the same number of otus in the fasta and name files
         if (repOtusSizes.size() != numUniqueNamesFile) { m->mothurOut("[ERROR]: you have " + toString(numUniqueNamesFile) + " unique seqs in your repname file, but " + toString(repOtusSizes.size()) + " seqs in your repfasta file.  These should match.\n"); m->control_pressed = true; }
@@ -230,86 +280,130 @@ int CreateDatabaseCommand::execute(){
         
         if (m->control_pressed) { return 0; }
         
-        //at this point we are fairly sure the repfasta, repnames and contaxonomy files match so lets proceed with the listfile
-        ListVector* list = getList();
         
-        if (m->control_pressed) { delete list; return 0; }
-        
-        GroupMap* groupmap = NULL;
-        if (groupfile != "") {
-			groupmap = new GroupMap(groupfile);
-			groupmap->readMap();
-		}
-        
-        if (m->control_pressed) { delete list; if (groupfile != "") { delete groupmap; } return 0; }
-        
-        if (outputDir == "") { outputDir += m->hasPath(listfile); }
-        string outputFileName = outputDir + m->getRootName(m->getSimpleName(listfile)) + "database";
+        string outputFileName = "";
+        if (listfile != "") { outputFileName = outputDir + m->getRootName(m->getSimpleName(listfile)) + getOutputFileNameTag("database"); }
+        else { outputFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + getOutputFileNameTag("database"); }
         outputNames.push_back(outputFileName); outputTypes["database"].push_back(outputFileName);
         
         ofstream out;
         m->openOutputFile(outputFileName, out);
         
         string header = "OTUNumber\tAbundance\t";
-        if (groupfile != "") { 
-            header = "OTUNumber\t";
-            for (int i = 0; i < groupmap->getNamesOfGroups().size(); i++) { header += (groupmap->getNamesOfGroups())[i] + '\t'; }
-        }
-        header += "repSeqName\trepSeq\tOTUConTaxonomy";
-        out << header << endl;
+
         
-        for (int i = 0; i < list->getNumBins(); i++) {
+        if (listfile != "") {
+            //at this point we are fairly sure the repfasta, repnames and contaxonomy files match so lets proceed with the listfile
+            ListVector* list = getList();
             
-            if (m->control_pressed) { break; }
+            if (otuLabels.size() != list->getNumBins()) { 
+                m->mothurOut("[ERROR]: you have " + toString(otuLabels.size()) + " otus in your contaxonomy file, but your list file has " + toString(list->getNumBins()) + " otus. These should match. Make sure you are using files for the same distance.\n"); m->control_pressed = true;  }
             
-            out << (i+1) << '\t';
+            if (m->control_pressed) { delete list; return 0; }
             
-            vector<string> binNames;
-            string bin = list->get(i);
-            
-            map<string, string>::iterator it = repNames.find(bin);
-            if (it == repNames.end()) {
-                m->mothurOut("[ERROR: OTU " + toString(i+1) + " is not in the repnames file. Make sure you are using files for the same distance.\n"); m->control_pressed = true;   break;
-            }
-            
-            m->splitAtComma(bin, binNames);
-            
-            //sanity check
-            if (binNames.size() != classifyOtuSizes[i]) {
-                 m->mothurOut("[ERROR: OTU " + toString(i+1) + " contains " + toString(binNames.size()) + " sequence, but the rep and taxonomy files indicated this OTU should have " + toString(classifyOtuSizes[i]) + ". Make sure you are using files for the same distance.\n"); m->control_pressed = true;   break;
-            }
-            
-            //output abundances
+            GroupMap* groupmap = NULL;
             if (groupfile != "") {
-                string groupAbunds = "";
-                map<string, int> counts;
-                //initialize counts to 0
-                for (int j = 0; j < groupmap->getNamesOfGroups().size(); j++) { counts[(groupmap->getNamesOfGroups())[j]] = 0; }
+                groupmap = new GroupMap(groupfile);
+                groupmap->readMap();
+            }
+            
+            if (m->control_pressed) { delete list; if (groupfile != "") { delete groupmap; } return 0; }
+            
+            if (groupfile != "") { 
+                header = "OTUNumber\t";
+                for (int i = 0; i < groupmap->getNamesOfGroups().size(); i++) { header += (groupmap->getNamesOfGroups())[i] + '\t'; }
+            }
+            header += "repSeqName\trepSeq\tOTUConTaxonomy";
+            out << header << endl;
+            
+            for (int i = 0; i < list->getNumBins(); i++) {
                 
-                //find abundances by group
-                bool error = false;
-                for (int j = 0; j < binNames.size(); j++) {
-                    string group = groupmap->getGroup(binNames[j]);
-                    if (group == "not found") {
-                        m->mothurOut("[ERROR]: " + binNames[j] + " is not in your groupfile, please correct.\n");
-                        error = true;
-                    }else { counts[group]++; }
+                if (m->control_pressed) { break; }
+                
+                out << otuLabels[i] << '\t';
+                
+                vector<string> binNames;
+                string bin = list->get(i);
+                
+                map<string, string>::iterator it = repNames.find(bin);
+                if (it == repNames.end()) {
+                    m->mothurOut("[ERROR: OTU " + otuLabels[i] + " is not in the repnames file. Make sure you are using files for the same distance.\n"); m->control_pressed = true;   break;
                 }
                 
-                //output counts
-                for (int j = 0; j < groupmap->getNamesOfGroups().size(); j++) { out << counts[(groupmap->getNamesOfGroups())[j]] << '\t';  }
+                m->splitAtComma(bin, binNames);
                 
-                if (error) { m->control_pressed = true; }
-            }else { out << binNames.size() << '\t'; }
+                //sanity check
+                if (binNames.size() != classifyOtuSizes[i]) {
+                    m->mothurOut("[ERROR: OTU " + otuLabels[i] + " contains " + toString(binNames.size()) + " sequence, but the rep and taxonomy files indicated this OTU should have " + toString(classifyOtuSizes[i]) + ". Make sure you are using files for the same distance.\n"); m->control_pressed = true;   break;
+                }
+                
+                //output abundances
+                if (groupfile != "") {
+                    string groupAbunds = "";
+                    map<string, int> counts;
+                    //initialize counts to 0
+                    for (int j = 0; j < groupmap->getNamesOfGroups().size(); j++) { counts[(groupmap->getNamesOfGroups())[j]] = 0; }
+                    
+                    //find abundances by group
+                    bool error = false;
+                    for (int j = 0; j < binNames.size(); j++) {
+                        string group = groupmap->getGroup(binNames[j]);
+                        if (group == "not found") {
+                            m->mothurOut("[ERROR]: " + binNames[j] + " is not in your groupfile, please correct.\n");
+                            error = true;
+                        }else { counts[group]++; }
+                    }
+                    
+                    //output counts
+                    for (int j = 0; j < groupmap->getNamesOfGroups().size(); j++) { out << counts[(groupmap->getNamesOfGroups())[j]] << '\t';  }
+                    
+                    if (error) { m->control_pressed = true; }
+                }else { out << binNames.size() << '\t'; }
+                
+                //output repSeq
+                out << it->second << '\t' << seqs[i].getAligned() << '\t' << taxonomies[i] << endl;
+            }
             
-            //output repSeq
-            out << it->second << '\t' << seqs[i].getAligned() << '\t' << taxonomies[i] << endl;
+            
+            delete list;
+            if (groupfile != "") { delete groupmap; }
+           
+        }else {
+            vector<SharedRAbundVector*> lookup = getShared();
+            
+            header = "OTUNumber\t";
+            for (int i = 0; i < lookup.size(); i++) { header += lookup[i]->getGroup() + '\t'; }
+            header += "repSeqName\trepSeq\tOTUConTaxonomy";
+            out << header << endl;
+            
+            for (int h = 0; h < lookup[0]->getNumBins(); h++) {
+                
+                if (m->control_pressed) { break; }
+                
+                int index = findIndex(otuLabels, m->currentBinLabels[h]);
+                if (index == -1) {  m->mothurOut("[ERROR]: " + m->currentBinLabels[h] + " is not in your constaxonomy file, aborting.\n"); m->control_pressed = true; }
+                
+                if (m->control_pressed) { break; }
+                
+                out << otuLabels[index] << '\t';
+                
+                int totalAbund = 0;
+                for (int i = 0; i < lookup.size(); i++) { 
+                    int abund = lookup[i]->getAbundance(h);
+                    totalAbund += abund; 
+                    out << abund << '\t';
+                }
+                
+                //sanity check
+                if (totalAbund != classifyOtuSizes[index]) {
+                    m->mothurOut("[WARNING]: OTU " + m->currentBinLabels[h] + " contains " + toString(totalAbund) + " sequence, but the rep and taxonomy files indicated this OTU should have " + toString(classifyOtuSizes[index]) + ". Make sure you are using files for the same distance.\n"); //m->control_pressed = true;   break;
+                }
+                
+                //output repSeq
+                out << seqs[index].getName() << '\t' << seqs[index].getAligned() << '\t' << taxonomies[index] << endl;
+            }
         }
         out.close();
-        
-        delete list;
-        if (groupfile != "") { delete groupmap; }
-        
         if (m->control_pressed) { m->mothurRemove(outputFileName); return 0; }
         
         m->mothurOutEndLine();
@@ -326,7 +420,21 @@ int CreateDatabaseCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-vector<int> CreateDatabaseCommand::readTax(vector<string>& taxonomies){
+int CreateDatabaseCommand::findIndex(vector<string>& otuLabels, string label){
+	try {
+        int index = -1;
+        for (int i = 0; i < otuLabels.size(); i++) {
+            if (otuLabels[i] == label) { index = i; break; }
+        }
+		return index;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "CreateDatabaseCommand", "findIndex");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<int> CreateDatabaseCommand::readTax(vector<string>& taxonomies, vector<string>& otuLabels){
 	try {
 		
         vector<int> sizes; 
@@ -348,6 +456,7 @@ vector<int> CreateDatabaseCommand::readTax(vector<string>& taxonomies){
             
             sizes.push_back(size);
             taxonomies.push_back(tax);
+            otuLabels.push_back(otu);
         }
         in.close();
         
@@ -391,32 +500,6 @@ vector<int> CreateDatabaseCommand::readFasta(vector<Sequence>& seqs){
     }
 	catch(exception& e) {
 		m->errorOut(e, "CreateDatabaseCommand", "readFasta");
-		exit(1);
-	}
-}
-/**********************************************************************************************************************/
-int CreateDatabaseCommand::readNames(map<string, string>& nameMap) { 
-	try {
-		
-		//open input file
-		ifstream in;
-		m->openInputFile(repnamesfile, in);
-		
-		while (!in.eof()) {
-			if (m->control_pressed) { break; }
-			
-			string firstCol, secondCol;
-			in >> firstCol >> secondCol; m->gobble(in);
-			
-			nameMap[secondCol] = firstCol;
-		}
-		in.close();
-		
-		return nameMap.size();
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "CreateDatabaseCommand", "readNames");
 		exit(1);
 	}
 }
@@ -497,6 +580,82 @@ ListVector* CreateDatabaseCommand::getList(){
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
+vector<SharedRAbundVector*> CreateDatabaseCommand::getShared(){
+	try {
+		InputData input(sharedfile, "sharedfile");
+		vector<SharedRAbundVector*> lookup = input.getSharedRAbundVectors();
+		string lastLabel = lookup[0]->getLabel();
+		
+		if (label == "") { label = lastLabel; return lookup; }
+		
+		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
+		set<string> labels; labels.insert(label);
+		set<string> processedLabels;
+		set<string> userLabels = labels;
+		
+		//as long as you are not at the end of the file or done wih the lines you want
+		while((lookup[0] != NULL) && (userLabels.size() != 0)) {
+			if (m->control_pressed) {  return lookup;  }
+			
+			if(labels.count(lookup[0]->getLabel()) == 1){
+				processedLabels.insert(lookup[0]->getLabel());
+				userLabels.erase(lookup[0]->getLabel());
+				break;
+			}
+			
+			if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				string saveLabel = lookup[0]->getLabel();
+				
+				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+				lookup = input.getSharedRAbundVectors(lastLabel);
+				
+				processedLabels.insert(lookup[0]->getLabel());
+				userLabels.erase(lookup[0]->getLabel());
+				
+				//restore real lastlabel to save below
+				lookup[0]->setLabel(saveLabel);
+				break;
+			}
+			
+			lastLabel = lookup[0]->getLabel();			
+			
+			//get next line to process
+			//prevent memory leak
+			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+			lookup = input.getSharedRAbundVectors();
+		}
+		
+		
+		if (m->control_pressed) { return lookup;  }
+		
+		//output error messages about any remaining user labels
+		set<string>::iterator it;
+		bool needToRun = false;
+		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
+			m->mothurOut("Your file does not include the label " + *it); 
+			if (processedLabels.count(lastLabel) != 1) {
+				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
+				needToRun = true;
+			}else {
+				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
+			}
+		}
+		
+		//run last label if you need to
+		if (needToRun == true)  {
+			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+			lookup = input.getSharedRAbundVectors(lastLabel);
+		}	
+        
+        return lookup;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "CreateDatabaseCommand", "getList");
+		exit(1);
+	}
+}
+
 //**********************************************************************************************************************
 
 

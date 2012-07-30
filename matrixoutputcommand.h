@@ -73,6 +73,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "dist.shared";				}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Dist.shared"; }
 	string getDescription()		{ return "generate a distance matrix that describes the dissimilarity among multiple groups"; }
@@ -101,7 +102,7 @@ private:
 
 	bool abort, allLines, subsample;
 	set<string> labels; //holds labels to be used
-	string outputFile, calc, groups, label, outputDir;
+	string outputFile, calc, groups, label, outputDir, mode;
 	vector<string>  Estimators, Groups, outputNames; //holds estimators to be used
 	int process(vector<SharedRAbundVector*>, string, string);
 	int driver(vector<SharedRAbundVector*>, int, int, vector< vector<seqDist> >&);

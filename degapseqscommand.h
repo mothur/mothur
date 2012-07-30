@@ -22,6 +22,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "degap.seqs";		}
 	string getCommandCategory()		{ return "Sequence Processing";		}
+	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Degap.seqs"; }
 	string getDescription()		{ return "removes gap characters from sequences"; }

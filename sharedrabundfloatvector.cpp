@@ -129,7 +129,6 @@ SharedRAbundFloatVector::SharedRAbundFloatVector(ifstream& f) : DataVector(), ma
 		while ((nextLabel == holdLabel) && (f.eof() != true)) {
 			f >> groupN >> num;
             
-            if (num != 1000) { break; }
 			count++;
 			
 			allGroups.push_back(groupN);
@@ -153,6 +152,7 @@ SharedRAbundFloatVector::SharedRAbundFloatVector(ifstream& f) : DataVector(), ma
 		
 		m->saveNextLabel = nextLabel;
 		m->setAllGroups(allGroups);
+        for (int i = 0; i < allGroups.size(); i++) { cout << allGroups[i] << endl; }
 	
 	}
 	catch(exception& e) {

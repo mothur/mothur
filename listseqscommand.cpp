@@ -49,7 +49,26 @@ string ListSeqsCommand::getHelpString(){
 		exit(1);
 	}
 }
-
+//**********************************************************************************************************************
+string ListSeqsCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "accnos")             {   outputFileName =  "accnos";       }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ListSeqsCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 ListSeqsCommand::ListSeqsCommand(){	
 	try {
@@ -214,7 +233,7 @@ int ListSeqsCommand::execute(){
 		
 		if (outputDir == "") {  outputDir += m->hasPath(inputFileName);  }
 		
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(inputFileName)) + "accnos";
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(inputFileName)) + getOutputFileNameTag("accnos");
 
 		ofstream out;
 		m->openOutputFile(outputFileName, out);

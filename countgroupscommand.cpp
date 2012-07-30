@@ -170,7 +170,7 @@ int CountGroupsCommand::execute(){
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//get groups you want to remove
-		if (accnosfile != "") { readAccnos(); }
+		if (accnosfile != "") { m->readAccnos(accnosfile, Groups); m->setGroups(Groups); }
 		
 		if (groupfile != "") {
 			GroupMap groupMap(groupfile);
@@ -204,32 +204,6 @@ int CountGroupsCommand::execute(){
 	
 	catch(exception& e) {
 		m->errorOut(e, "CountGroupsCommand", "execute");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-void CountGroupsCommand::readAccnos(){
-	try {
-		Groups.clear();
-		
-		ifstream in;
-		m->openInputFile(accnosfile, in);
-		string name;
-		
-		while(!in.eof()){
-			in >> name;
-			
-			Groups.push_back(name);
-			
-			m->gobble(in);
-		}
-		in.close();		
-		
-		m->setGroups(Groups);
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "CountGroupsCommand", "readAccnos");
 		exit(1);
 	}
 }

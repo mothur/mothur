@@ -84,7 +84,26 @@ string SummaryCommand::getHelpString(){
 		exit(1);
 	}
 }
-
+//**********************************************************************************************************************
+string SummaryCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "summary")            {   outputFileName =  "summary";   }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SummaryCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 SummaryCommand::SummaryCommand(){	
 	try {
@@ -288,13 +307,10 @@ int SummaryCommand::execute(){
 			numLines = 0;
 			numCols = 0;
 			
-			string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(inputFileNames[p])) + "summary";
-            string fileNameAve = outputDir + m->getRootName(m->getSimpleName(inputFileNames[p])) + "ave";
-            string fileNameSTD = outputDir + m->getRootName(m->getSimpleName(inputFileNames[p])) + "std";
-			outputNames.push_back(fileNameRoot); outputTypes["summary"].push_back(fileNameRoot);
+			string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(inputFileNames[p])) + getOutputFileNameTag("summary");
+            string fileNameAve = outputDir + m->getRootName(m->getSimpleName(inputFileNames[p])) + "ave-std." + getOutputFileNameTag("summary");
+            outputNames.push_back(fileNameRoot); outputTypes["summary"].push_back(fileNameRoot);
             
-            
-			
 			if (inputFileNames.size() > 1) {
 				m->mothurOutEndLine(); m->mothurOut("Processing group " + groups[p]); m->mothurOutEndLine(); m->mothurOutEndLine();
                 groupIndex[fileNameRoot] = groups[p];
@@ -369,18 +385,14 @@ int SummaryCommand::execute(){
 			m->openOutputFile(fileNameRoot, outputFileHandle);
 			outputFileHandle << "label";
             
-            ofstream outAve, outSTD;
+            ofstream outAve;
             if (subsample) {
                 m->openOutputFile(fileNameAve, outAve);
-                m->openOutputFile(fileNameSTD, outSTD);
-                outputNames.push_back(fileNameAve); outputTypes["ave"].push_back(fileNameAve);
-                outputNames.push_back(fileNameSTD); outputTypes["std"].push_back(fileNameSTD);
-                outAve << "label"; outSTD << "label";
+                outputNames.push_back(fileNameAve); outputTypes["summary"].push_back(fileNameAve);
+                outAve << "label\tmethod"; 
                 outAve.setf(ios::fixed, ios::floatfield); outAve.setf(ios::showpoint);
-                outSTD.setf(ios::fixed, ios::floatfield); outSTD.setf(ios::showpoint);
                 if (inputFileNames.size() > 1) {
                     groupIndex[fileNameAve] = groups[p];
-                    groupIndex[fileNameSTD] = groups[p];
                 }
             }
 		
@@ -391,17 +403,17 @@ int SummaryCommand::execute(){
 			for(int i=0;i<sumCalculators.size();i++){
 				if(sumCalculators[i]->getCols() == 1){
 					outputFileHandle << '\t' << sumCalculators[i]->getName();
-                    if (subsample) { outAve << '\t' << sumCalculators[i]->getName(); outSTD << '\t' << sumCalculators[i]->getName(); }
+                    if (subsample) { outAve << '\t' << sumCalculators[i]->getName();  }
 					numCols++;
 				}
 				else{
 					outputFileHandle << '\t' << sumCalculators[i]->getName() << "\t" << sumCalculators[i]->getName() << "_lci\t" << sumCalculators[i]->getName() << "_hci";
-                    if (subsample) { outAve << '\t' << sumCalculators[i]->getName() << "\t" << sumCalculators[i]->getName() << "_lci\t" << sumCalculators[i]->getName() << "_hci"; outSTD << '\t' << sumCalculators[i]->getName() << "\t" << sumCalculators[i]->getName() << "_lci\t" << sumCalculators[i]->getName() << "_hci"; }
+                    if (subsample) { outAve << '\t' << sumCalculators[i]->getName() << "\t" << sumCalculators[i]->getName() << "_lci\t" << sumCalculators[i]->getName() << "_hci";  }
 					numCols += 3;
 				}
 			}
 			outputFileHandle << endl;
-            if (subsample) { outSTD << endl; outAve << endl; }
+            if (subsample) {  outAve << endl; }
 			
 			//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 			set<string> processedLabels;
@@ -409,11 +421,11 @@ int SummaryCommand::execute(){
 			
             
             
-			if (m->control_pressed) {  outputFileHandle.close(); outAve.close(); outSTD.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;  delete input;  return 0;  }
+			if (m->control_pressed) {  outputFileHandle.close(); outAve.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;  delete input;  return 0;  }
 			
 			while((sabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 				
-				if (m->control_pressed) { outputFileHandle.close(); outAve.close(); outSTD.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;  delete input;  return 0;  }
+				if (m->control_pressed) { outputFileHandle.close(); outAve.close();  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;  delete input;  return 0;  }
 				
 				if(allLines == 1 || labels.count(sabund->getLabel()) == 1){			
 					
@@ -421,9 +433,9 @@ int SummaryCommand::execute(){
 					processedLabels.insert(sabund->getLabel());
 					userLabels.erase(sabund->getLabel());
 					
-                    process(sabund, outputFileHandle, outAve, outSTD);
+                    process(sabund, outputFileHandle, outAve);
                     
-                    if (m->control_pressed) { outputFileHandle.close(); outAve.close(); outSTD.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;  delete input;  return 0;  }
+                    if (m->control_pressed) { outputFileHandle.close(); outAve.close();  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;  delete input;  return 0;  }
 					numLines++;
 				}
 				
@@ -437,9 +449,9 @@ int SummaryCommand::execute(){
 					processedLabels.insert(sabund->getLabel());
 					userLabels.erase(sabund->getLabel());
 					
-                    process(sabund, outputFileHandle, outAve, outSTD);
+                    process(sabund, outputFileHandle, outAve);
                     
-                    if (m->control_pressed) { outputFileHandle.close(); outAve.close(); outSTD.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;  delete input;  return 0;  }
+                    if (m->control_pressed) { outputFileHandle.close(); outAve.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;  delete input;  return 0;  }
 					numLines++;
 					
 					//restore real lastlabel to save below
@@ -452,7 +464,7 @@ int SummaryCommand::execute(){
 				sabund = input->getSAbundVector();
 			}
 			
-			if (m->control_pressed) {  outputFileHandle.close(); outAve.close(); outSTD.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }   delete input;  return 0;  }
+			if (m->control_pressed) {  outputFileHandle.close(); outAve.close();  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }   delete input;  return 0;  }
 
 			//output error messages about any remaining user labels
 			set<string>::iterator it;
@@ -473,15 +485,15 @@ int SummaryCommand::execute(){
 				sabund = input->getSAbundVector(lastLabel);
 				
 				m->mothurOut(sabund->getLabel()); m->mothurOutEndLine();
-                process(sabund, outputFileHandle, outAve, outSTD);
+                process(sabund, outputFileHandle, outAve);
                 
-                if (m->control_pressed) { outputFileHandle.close(); outAve.close(); outSTD.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;  delete input;  return 0;  }
+                if (m->control_pressed) { outputFileHandle.close(); outAve.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;  delete input;  return 0;  }
 				numLines++;
 				delete sabund;
 			}
 			
 			outputFileHandle.close();
-            if (subsample) { outAve.close(); outSTD.close(); }
+            if (subsample) { outAve.close(); }
 			
 			if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }   delete input;  return 0;  }
 
@@ -510,7 +522,7 @@ int SummaryCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-int SummaryCommand::process(SAbundVector*& sabund, ofstream& outputFileHandle, ofstream& outAve, ofstream& outStd) {
+int SummaryCommand::process(SAbundVector*& sabund, ofstream& outputFileHandle, ofstream& outAve) {
     try {
         
         //calculator -> data -> values
@@ -559,7 +571,7 @@ int SummaryCommand::process(SAbundVector*& sabund, ofstream& outputFileHandle, o
         outputFileHandle << endl;
      
         if (subsample) {
-            outAve << sabund->getLabel() << '\t'; outStd << sabund->getLabel() << '\t';
+            outAve << sabund->getLabel() << '\t' << "ave\t"; 
             //find ave and std for this label and output
             //will need to modify the createGroupSummary to combine results and not mess with the .summary file.
             
@@ -594,14 +606,15 @@ int SummaryCommand::process(SAbundVector*& sabund, ofstream& outputFileHandle, o
                 }
             }
             
+            outAve << endl << sabund->getLabel() << '\t' << "std\t"; 
             for (int i = 0; i < stdDev.size(); i++) {  //finds average.
                 for (int j = 0; j < stdDev[i].size(); j++) {
                     stdDev[i][j] /= (float) iters;
                     stdDev[i][j] = sqrt(stdDev[i][j]);
-                    outStd << stdDev[i][j] << '\t';
+                    outAve << stdDev[i][j] << '\t';
                 }
             }
-            outAve << endl;  outStd << endl; 
+            outAve << endl;  
         }
         
         return 0;
@@ -702,38 +715,37 @@ vector<string> SummaryCommand::createGroupSummaryFile(int numLines, int numCols,
 				
 		//open each groups summary file
         vector<string> newComboNames;
-		string newLabel = "";
+		
 		map<string, map<string, vector<string> > > files;
+        map<string, string> filesTypesLabels;
+        map<string, int> filesTypesNumLines;
 		for (int i=0; i<outputNames.size(); i++) {
-            string extension = m->getExtension(outputNames[i]);
-            string combineFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + "groups" + extension;
-			m->mothurRemove(combineFileName); //remove old file
-             
 			vector<string> thisFilesLines;
             
 			ifstream temp;
 			m->openInputFile(outputNames[i], temp);
 			
 			//read through first line - labels
-			string tempLabel;
-			if (i == 0) { //we want to save the labels to output below
-				for (int j = 0; j < numCols+1; j++) {  
-					temp >> tempLabel; 
-					
-					if (j == 1) {  newLabel += "group\t" + tempLabel + '\t';
-					}else{  newLabel += tempLabel + '\t';	}
-				}
-			}else{  for (int j = 0; j < numCols+1; j++) {  temp >> tempLabel;  }  }
+            string labelsLine = m->getline(temp);
+            vector<string> theseLabels = m->splitWhiteSpace(labelsLine);
+            
+            string newLabel = "";
+            for (int j = 0; j < theseLabels.size(); j++) { 
+                 if (j == 1) {  newLabel += "group\t" + theseLabels[j] + '\t';
+                }else{  newLabel += theseLabels[j] + '\t';	}
+            }
 			
 			m->gobble(temp);
 			
+            int stop = numLines;
+            if (theseLabels.size() != numCols+1) {  stop = numLines*2; }
 			//for each label
-			for (int k = 0; k < numLines; k++) {
+			for (int k = 0; k < stop; k++) {
 				
 				string thisLine = "";
 				string tempLabel;
 					
-				for (int j = 0; j < numCols+1; j++) {  
+				for (int j = 0; j < theseLabels.size(); j++) {  
 					temp >> tempLabel; 
 						
 					//save for later
@@ -747,6 +759,13 @@ vector<string> SummaryCommand::createGroupSummaryFile(int numLines, int numCols,
 					
 				m->gobble(temp);
 			}
+            
+            string extension = m->getExtension(outputNames[i]);
+            if (theseLabels.size() != numCols+1) { extension = ".ave-std" + extension;  }
+            string combineFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + "groups" + extension;
+			m->mothurRemove(combineFileName); //remove old file
+            filesTypesLabels[extension] = newLabel;
+            filesTypesNumLines[extension] = stop;
             
             map<string, map<string, vector<string> > >::iterator itFiles = files.find(extension);
             if (itFiles != files.end()) { //add new files info to existing type
@@ -775,10 +794,10 @@ vector<string> SummaryCommand::createGroupSummaryFile(int numLines, int numCols,
             m->openOutputFile(combineFileName, out);
             
             //output label line to new file
-            out << newLabel << endl;
+            out <<  filesTypesLabels[extension] << endl;
 		
             //for each label
-            for (int k = 0; k < numLines; k++) {
+            for (int k = 0; k < filesTypesNumLines[extension]; k++) {
 		
                 //grab summary data for each group
                 for (map<string, vector<string> >::iterator itType = thisType.begin(); itType != thisType.end(); itType++) {

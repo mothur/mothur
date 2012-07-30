@@ -50,6 +50,26 @@ string MantelCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string MantelCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "mantel")             {   outputFileName =  "mantel";       }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "MantelCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 MantelCommand::MantelCommand(){	
 	try {
 		abort = true; calledHelp = true;
@@ -206,7 +226,7 @@ int MantelCommand::execute(){
 		
 		if (m->control_pressed) { return 0; }
 		
-		string outputFile = outputDir + m->getRootName(m->getSimpleName(phylipfile1)) + "mantel";
+		string outputFile = outputDir + m->getRootName(m->getSimpleName(phylipfile1)) + getOutputFileNameTag("mantel");
 		outputNames.push_back(outputFile); outputTypes["mantel"].push_back(outputFile);
 		ofstream out;
 		

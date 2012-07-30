@@ -26,6 +26,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "unique.seqs";		}
 	string getCommandCategory()		{ return "Sequence Processing";		}
+    string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Unique.seqs"; }
 	string getDescription()		{ return "creates a fasta containing the unique sequences as well as a namesfile with the names each sequence represents"; }

@@ -26,6 +26,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "phylotype";		}
 	string getCommandCategory()		{ return "Clustering";		}
+	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Phylotype"; }
 	string getDescription()		{ return "cluster your sequences into OTUs based on their classifications"; }

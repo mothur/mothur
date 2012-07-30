@@ -18,6 +18,7 @@
 #include "hcluster.h"
 #include "rabundvector.hpp"
 #include "sabundvector.hpp"
+#include "counttable.h"
 
 /**********************************************************************/
 
@@ -31,6 +32,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "mgcluster";	}
 	string getCommandCategory()		{ return "Clustering";	}
+	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "Schloss PD, Handelsman J (2008). A statistical toolbox for metagenomics. BMC Bioinformatics 9: 34. \nhttp://www.mothur.org/wiki/Mgcluster"; }
 	string getDescription()		{ return "cluster your sequences into OTUs using a blast file"; }
@@ -45,11 +47,13 @@ private:
 	Cluster* cluster;
 	HCluster* hcluster;
 	ListVector* list;
+    CountTable* ct;
 	ListVector oldList;
+    RAbundVector rav;
 	vector<seqDist> overlapMatrix;
 	vector<string> outputNames;
 	
-	string blastfile, method, namefile, overlapFile, distFile, outputDir;
+	string blastfile, method, namefile, countfile, overlapFile, distFile, outputDir;
 	ofstream sabundFile, rabundFile, listFile;
 	double cutoff;
 	float penalty;
@@ -60,6 +64,7 @@ private:
 	ListVector* mergeOPFs(map<string, int>, float);
 	void sortHclusterFiles(string, string);
 	vector<seqDist> getSeqs(ifstream&);
+    void createRabund(CountTable*&, ListVector*&, RAbundVector*&);
 
 };
 

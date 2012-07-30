@@ -26,6 +26,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "heatmap.sim";				}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Heatmap.sim"; }
 	string getDescription()		{ return "generate a heatmap indicating the pairwise distance between multiple samples using a variety of calculators"; }

@@ -24,6 +24,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "get.sabund";				}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Get.sabund"; }
 	string getDescription()		{ return "creates a sabund file"; }

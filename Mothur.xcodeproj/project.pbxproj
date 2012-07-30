@@ -21,10 +21,12 @@
 		A721765713BB9F7D0014DAAE /* referencedb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A721765613BB9F7D0014DAAE /* referencedb.cpp */; };
 		A724D2B7153C8628000A826F /* makebiomcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A724D2B6153C8628000A826F /* makebiomcommand.cpp */; };
 		A727864412E9E28C00F86ABA /* removerarecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A727864312E9E28C00F86ABA /* removerarecommand.cpp */; };
+		A73901081588C40900ED2ED6 /* loadlogfilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A73901071588C40900ED2ED6 /* loadlogfilecommand.cpp */; };
 		A73DDBBA13C4A0D1006AAE38 /* clearmemorycommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A73DDBB913C4A0D1006AAE38 /* clearmemorycommand.cpp */; };
 		A73DDC3813C4BF64006AAE38 /* mothurmetastats.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A73DDC3713C4BF64006AAE38 /* mothurmetastats.cpp */; };
 		A74A9A9F148E881E00AB5E3E /* spline.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74A9A9E148E881E00AB5E3E /* spline.cpp */; };
 		A74D36B8137DAFAA00332B0C /* chimerauchimecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D36B7137DAFAA00332B0C /* chimerauchimecommand.cpp */; };
+		A74D59A4159A1E2000043046 /* counttable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D59A3159A1E2000043046 /* counttable.cpp */; };
 		A754149714840CF7005850D1 /* summaryqualcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A754149614840CF7005850D1 /* summaryqualcommand.cpp */; };
 		A75790591301749D00A30DAB /* homovacommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A75790581301749D00A30DAB /* homovacommand.cpp */; };
 		A76CDD821510F143004C8458 /* prcseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A76CDD811510F143004C8458 /* prcseqscommand.cpp */; };
@@ -49,6 +51,7 @@
 		A7C3DC0B14FE457500FE1924 /* cooccurrencecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7C3DC0914FE457500FE1924 /* cooccurrencecommand.cpp */; };
 		A7C3DC0F14FE469500FE1924 /* trialSwap2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7C3DC0D14FE469500FE1924 /* trialSwap2.cpp */; };
 		A7D755DA1535F679009BF21A /* treereader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7D755D91535F679009BF21A /* treereader.cpp */; };
+		A7E0243D15B4520A00A5F046 /* sparsedistancematrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E0243C15B4520A00A5F046 /* sparsedistancematrix.cpp */; };
 		A7E9B88112D37EC400DA6239 /* ace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B64F12D37EC300DA6239 /* ace.cpp */; };
 		A7E9B88212D37EC400DA6239 /* aligncommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B65112D37EC300DA6239 /* aligncommand.cpp */; };
 		A7E9B88312D37EC400DA6239 /* alignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B65312D37EC300DA6239 /* alignment.cpp */; };
@@ -214,11 +217,8 @@
 		A7E9B92912D37EC400DA6239 /* readblast.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7B012D37EC400DA6239 /* readblast.cpp */; };
 		A7E9B92A12D37EC400DA6239 /* readcluster.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7B212D37EC400DA6239 /* readcluster.cpp */; };
 		A7E9B92B12D37EC400DA6239 /* readcolumn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7B412D37EC400DA6239 /* readcolumn.cpp */; };
-		A7E9B92C12D37EC400DA6239 /* readdistcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7B612D37EC400DA6239 /* readdistcommand.cpp */; };
-		A7E9B92E12D37EC400DA6239 /* readotucommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7BB12D37EC400DA6239 /* readotucommand.cpp */; };
 		A7E9B92F12D37EC400DA6239 /* readphylip.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7BD12D37EC400DA6239 /* readphylip.cpp */; };
 		A7E9B93012D37EC400DA6239 /* readtree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7BF12D37EC400DA6239 /* readtree.cpp */; };
-		A7E9B93112D37EC400DA6239 /* readtreecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7C112D37EC400DA6239 /* readtreecommand.cpp */; };
 		A7E9B93212D37EC400DA6239 /* removegroupscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7C312D37EC400DA6239 /* removegroupscommand.cpp */; };
 		A7E9B93312D37EC400DA6239 /* removelineagecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7C512D37EC400DA6239 /* removelineagecommand.cpp */; };
 		A7E9B93412D37EC400DA6239 /* removeotuscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7C712D37EC400DA6239 /* removeotuscommand.cpp */; };
@@ -391,6 +391,8 @@
 		A724D2B6153C8628000A826F /* makebiomcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = makebiomcommand.cpp; sourceTree = "<group>"; };
 		A727864212E9E28C00F86ABA /* removerarecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = removerarecommand.h; sourceTree = "<group>"; };
 		A727864312E9E28C00F86ABA /* removerarecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = removerarecommand.cpp; sourceTree = "<group>"; };
+		A73901051588C3EF00ED2ED6 /* loadlogfilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = loadlogfilecommand.h; sourceTree = "<group>"; };
+		A73901071588C40900ED2ED6 /* loadlogfilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = loadlogfilecommand.cpp; sourceTree = "<group>"; };
 		A73DDBB813C4A0D1006AAE38 /* clearmemorycommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = clearmemorycommand.h; sourceTree = "<group>"; };
 		A73DDBB913C4A0D1006AAE38 /* clearmemorycommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = clearmemorycommand.cpp; sourceTree = "<group>"; };
 		A73DDC3613C4BF64006AAE38 /* mothurmetastats.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mothurmetastats.h; sourceTree = "<group>"; };
@@ -399,6 +401,8 @@
 		A74A9A9E148E881E00AB5E3E /* spline.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = spline.cpp; sourceTree = "<group>"; };
 		A74D36B6137DAFAA00332B0C /* chimerauchimecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimerauchimecommand.h; sourceTree = "<group>"; };
 		A74D36B7137DAFAA00332B0C /* chimerauchimecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimerauchimecommand.cpp; sourceTree = "<group>"; };
+		A74D59A3159A1E2000043046 /* counttable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = counttable.cpp; sourceTree = "<group>"; };
+		A74D59A6159A1E3600043046 /* counttable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = counttable.h; sourceTree = "<group>"; };
 		A754149514840CF7005850D1 /* summaryqualcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = summaryqualcommand.h; sourceTree = "<group>"; };
 		A754149614840CF7005850D1 /* summaryqualcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = summaryqualcommand.cpp; sourceTree = "<group>"; };
 		A75790571301749D00A30DAB /* homovacommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = homovacommand.h; sourceTree = "<group>"; };
@@ -450,6 +454,8 @@
 		A7D755D71535F665009BF21A /* treereader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = treereader.h; sourceTree = "<group>"; };
 		A7D755D91535F679009BF21A /* treereader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = treereader.cpp; sourceTree = "<group>"; };
 		A7DAAFA3133A254E003956EB /* commandparameter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = commandparameter.h; sourceTree = "<group>"; };
+		A7E0243C15B4520A00A5F046 /* sparsedistancematrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sparsedistancematrix.cpp; sourceTree = "<group>"; };
+		A7E0243F15B4522000A5F046 /* sparsedistancematrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sparsedistancematrix.h; sourceTree = "<group>"; };
 		A7E9B64F12D37EC300DA6239 /* ace.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ace.cpp; sourceTree = "<group>"; };
 		A7E9B65012D37EC300DA6239 /* ace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ace.h; sourceTree = "<group>"; };
 		A7E9B65112D37EC300DA6239 /* aligncommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = aligncommand.cpp; sourceTree = "<group>"; };
@@ -797,17 +803,11 @@
 		A7E9B7B312D37EC400DA6239 /* readcluster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readcluster.h; sourceTree = "<group>"; };
 		A7E9B7B412D37EC400DA6239 /* readcolumn.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readcolumn.cpp; sourceTree = "<group>"; };
 		A7E9B7B512D37EC400DA6239 /* readcolumn.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readcolumn.h; sourceTree = "<group>"; };
-		A7E9B7B612D37EC400DA6239 /* readdistcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readdistcommand.cpp; sourceTree = "<group>"; };
-		A7E9B7B712D37EC400DA6239 /* readdistcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readdistcommand.h; sourceTree = "<group>"; };
 		A7E9B7B812D37EC400DA6239 /* readmatrix.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = readmatrix.hpp; sourceTree = "<group>"; };
-		A7E9B7BB12D37EC400DA6239 /* readotucommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readotucommand.cpp; sourceTree = "<group>"; };
-		A7E9B7BC12D37EC400DA6239 /* readotucommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readotucommand.h; sourceTree = "<group>"; };
 		A7E9B7BD12D37EC400DA6239 /* readphylip.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readphylip.cpp; sourceTree = "<group>"; };
 		A7E9B7BE12D37EC400DA6239 /* readphylip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readphylip.h; sourceTree = "<group>"; };
 		A7E9B7BF12D37EC400DA6239 /* readtree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readtree.cpp; sourceTree = "<group>"; };
 		A7E9B7C012D37EC400DA6239 /* readtree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readtree.h; sourceTree = "<group>"; };
-		A7E9B7C112D37EC400DA6239 /* readtreecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readtreecommand.cpp; sourceTree = "<group>"; };
-		A7E9B7C212D37EC400DA6239 /* readtreecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readtreecommand.h; sourceTree = "<group>"; };
 		A7E9B7C312D37EC400DA6239 /* removegroupscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = removegroupscommand.cpp; sourceTree = "<group>"; };
 		A7E9B7C412D37EC400DA6239 /* removegroupscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = removegroupscommand.h; sourceTree = "<group>"; };
 		A7E9B7C512D37EC400DA6239 /* removelineagecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = removelineagecommand.cpp; sourceTree = "<group>"; };
@@ -1315,6 +1315,8 @@
 				A7A067191562946F0095C8C5 /* listotulabelscommand.cpp */,
 				A7E9B73E12D37EC400DA6239 /* listseqscommand.h */,
 				A7E9B73D12D37EC400DA6239 /* listseqscommand.cpp */,
+				A73901051588C3EF00ED2ED6 /* loadlogfilecommand.h */,
+				A73901071588C40900ED2ED6 /* loadlogfilecommand.cpp */,
 				A7FA10001302E096003860FE /* mantelcommand.h */,
 				A7FA10011302E096003860FE /* mantelcommand.cpp */,
 				A724D2B4153C8600000A826F /* makebiomcommand.h */,
@@ -1373,12 +1375,6 @@
 				A7E9B7AB12D37EC400DA6239 /* rarefactcommand.cpp */,
 				A7E9B7AF12D37EC400DA6239 /* rarefactsharedcommand.h */,
 				A7E9B7AE12D37EC400DA6239 /* rarefactsharedcommand.cpp */,
-				A7E9B7B712D37EC400DA6239 /* readdistcommand.h */,
-				A7E9B7B612D37EC400DA6239 /* readdistcommand.cpp */,
-				A7E9B7BC12D37EC400DA6239 /* readotucommand.h */,
-				A7E9B7BB12D37EC400DA6239 /* readotucommand.cpp */,
-				A7E9B7C212D37EC400DA6239 /* readtreecommand.h */,
-				A7E9B7C112D37EC400DA6239 /* readtreecommand.cpp */,
 				A7E9B7C412D37EC400DA6239 /* removegroupscommand.h */,
 				A7E9B7C312D37EC400DA6239 /* removegroupscommand.cpp */,
 				A7E9B7C612D37EC400DA6239 /* removelineagecommand.h */,
@@ -1626,10 +1622,12 @@
 				A7E9B66312D37EC400DA6239 /* blastalign.hpp */,
 				A7E9B66412D37EC400DA6239 /* blastdb.cpp */,
 				A7E9B66512D37EC400DA6239 /* blastdb.hpp */,
+				A74D59A6159A1E3600043046 /* counttable.h */,
+				A74D59A3159A1E2000043046 /* counttable.cpp */,
+				A7E9B6CD12D37EC400DA6239 /* distancedb.cpp */,
 				A7E9B6BD12D37EC400DA6239 /* database.cpp */,
 				A7E9B6BE12D37EC400DA6239 /* database.hpp */,
 				A7E9B6BF12D37EC400DA6239 /* datavector.hpp */,
-				A7E9B6CD12D37EC400DA6239 /* distancedb.cpp */,
 				A7E9B6CE12D37EC400DA6239 /* distancedb.hpp */,
 				A7E9B6DE12D37EC400DA6239 /* fastamap.cpp */,
 				A7E9B6DF12D37EC400DA6239 /* fastamap.h */,
@@ -1677,6 +1675,8 @@
 				A7E9B81412D37EC400DA6239 /* sharedsabundvector.h */,
 				A7E9B83912D37EC400DA6239 /* sparsematrix.cpp */,
 				A7E9B83A12D37EC400DA6239 /* sparsematrix.hpp */,
+				A7E0243F15B4522000A5F046 /* sparsedistancematrix.h */,
+				A7E0243C15B4520A00A5F046 /* sparsedistancematrix.cpp */,
 				A7E9B85112D37EC400DA6239 /* suffixdb.cpp */,
 				A7E9B85212D37EC400DA6239 /* suffixdb.hpp */,
 				A7E9B85312D37EC400DA6239 /* suffixnodes.cpp */,
@@ -2030,11 +2030,8 @@
 				A7E9B92912D37EC400DA6239 /* readblast.cpp in Sources */,
 				A7E9B92A12D37EC400DA6239 /* readcluster.cpp in Sources */,
 				A7E9B92B12D37EC400DA6239 /* readcolumn.cpp in Sources */,
-				A7E9B92C12D37EC400DA6239 /* readdistcommand.cpp in Sources */,
-				A7E9B92E12D37EC400DA6239 /* readotucommand.cpp in Sources */,
 				A7E9B92F12D37EC400DA6239 /* readphylip.cpp in Sources */,
 				A7E9B93012D37EC400DA6239 /* readtree.cpp in Sources */,
-				A7E9B93112D37EC400DA6239 /* readtreecommand.cpp in Sources */,
 				A7E9B93212D37EC400DA6239 /* removegroupscommand.cpp in Sources */,
 				A7E9B93312D37EC400DA6239 /* removelineagecommand.cpp in Sources */,
 				A7E9B93412D37EC400DA6239 /* removeotuscommand.cpp in Sources */,
@@ -2192,6 +2189,9 @@
 				A7A0671F1562AC3E0095C8C5 /* makecontigscommand.cpp in Sources */,
 				A70056E6156A93D000924A2D /* getotulabelscommand.cpp in Sources */,
 				A70056EB156AB6E500924A2D /* removeotulabelscommand.cpp in Sources */,
+				A73901081588C40900ED2ED6 /* loadlogfilecommand.cpp in Sources */,
+				A74D59A4159A1E2000043046 /* counttable.cpp in Sources */,
+				A7E0243D15B4520A00A5F046 /* sparsedistancematrix.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2239,8 +2239,8 @@
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"../release\\\"\"",
-					"VERSION=\"\\\"1.25.0\\\"\"",
-					"RELEASE_DATE=\"\\\"5/01/2012\\\"\"",
+					"VERSION=\"\\\"1.26.0\\\"\"",
+					"RELEASE_DATE=\"\\\"7/9/2012\\\"\"",
 				);
 				"GCC_VERSION[arch=*]" = "";
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
@@ -2275,8 +2275,8 @@
 				GCC_MODEL_TUNING = "";
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"VERSION=\"\\\"1.25.0\\\"\"",
-					"RELEASE_DATE=\"\\\"4/30/2012\\\"\"",
+					"VERSION=\"\\\"1.26.0\\\"\"",
+					"RELEASE_DATE=\"\\\"7/9/2012\\\"\"",
 				);
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;

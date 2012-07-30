@@ -25,6 +25,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "set.dir";		}
 	string getCommandCategory()		{ return "General";		}
+	string getOutputFileNameTag(string, string) { return ""; }
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Set.dir"; }
 	string getDescription()		{ return "set input, output and default directories"; }

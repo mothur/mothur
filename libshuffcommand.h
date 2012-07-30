@@ -26,6 +26,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "libshuff";				}
 	string getCommandCategory()		{ return "Hypothesis Testing";		}
+	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "Singleton DR, Furlong MA, Rathbun SL, Whitman WB (2001). Quantitative comparisons of 16S rRNA gene sequence libraries from environmental samples. Appl Environ Microbiol 67: 4374-6. \nSchloss PD, Larget BR, Handelsman J (2004). Integration of microbial ecology and statistics: a test to compare gene libraries. Appl Environ Microbiol 70: 5485-92. \nhttp://www.mothur.org/wiki/Libshuff"; }
 	string getDescription()		{ return "a generic test that describes whether two or more communities have the same structure using the Cramer-von Mises test statistic"; }

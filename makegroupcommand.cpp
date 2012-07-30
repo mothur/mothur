@@ -48,6 +48,26 @@ string MakeGroupCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string MakeGroupCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "group")             {   outputFileName =  "groups";         }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "MakeGroupCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 MakeGroupCommand::MakeGroupCommand(){	
 	try {
 		abort = true; calledHelp = true; 
@@ -165,8 +185,8 @@ MakeGroupCommand::MakeGroupCommand(string option)  {
 				}
 				
 				//prevent giantic file name
-				if (fastaFileNames.size() > 3) { filename = outputDir + "merge.groups"; }
-				else {  filename += "groups";  }
+				if (fastaFileNames.size() > 3) { filename = outputDir + "merge." + getOutputFileNameTag("group"); }
+				else {  filename += getOutputFileNameTag("group");  }
 				
 				//make sure there is at least one valid file left
 				if (fastaFileNames.size() == 0) { m->mothurOut("no valid files."); m->mothurOutEndLine(); abort = true; }

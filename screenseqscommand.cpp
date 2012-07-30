@@ -48,8 +48,8 @@ string ScreenSeqsCommand::getHelpString(){
 		helpString += "The screen.seqs command parameters are fasta, start, end, maxambig, maxhomop, minlength, maxlength, name, group, qfile, alignreport, taxonomy, optimize, criteria and processors.\n";
 		helpString += "The fasta parameter is required.\n";
 		helpString += "The alignreport and taxonomy parameters allow you to remove bad seqs from taxonomy and alignreport files.\n";
-		helpString += "The start parameter .... The default is -1.\n";
-		helpString += "The end parameter .... The default is -1.\n";
+		helpString += "The start parameter is used to set a position the \"good\" sequences must start by. The default is -1.\n";
+		helpString += "The end parameter is used to set a position the \"good\" sequences must end after. The default is -1.\n";
 		helpString += "The maxambig parameter allows you to set the maximum number of ambigious bases allowed. The default is -1.\n";
 		helpString += "The maxhomop parameter allows you to set a maximum homopolymer length. \n";
 		helpString += "The minlength parameter allows you to set and minimum sequence length. \n";
@@ -70,6 +70,33 @@ string ScreenSeqsCommand::getHelpString(){
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
+string ScreenSeqsCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "fasta")            {   outputFileName =  "good" + m->getExtension(inputName);   }
+            else if (type == "taxonomy")    {   outputFileName =  "good" + m->getExtension(inputName);   }
+            else if (type == "name")        {   outputFileName =  "good" + m->getExtension(inputName);   }
+            else if (type == "group")       {   outputFileName =  "good" + m->getExtension(inputName);   }
+            else if (type == "accnos")      {   outputFileName =  "bad.accnos";   }
+            else if (type == "qfile")       {   outputFileName =  "good" + m->getExtension(inputName);   }
+            else if (type == "alignreport") {   outputFileName =  "good.align.report";                   }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ScreenSeqsCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+
 //**********************************************************************************************************************
 ScreenSeqsCommand::ScreenSeqsCommand(){	
 	try {
@@ -309,8 +336,8 @@ int ScreenSeqsCommand::execute(){
 			#endif
 		}
         				
-		string goodSeqFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "good" + m->getExtension(fastafile);
-		string badAccnosFile =  outputDir + m->getRootName(m->getSimpleName(fastafile)) + "bad.accnos";
+		string goodSeqFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + getOutputFileNameTag("fasta", fastafile);
+		string badAccnosFile =  outputDir + m->getRootName(m->getSimpleName(fastafile)) + getOutputFileNameTag("accnos");
 		
 		int numFastaSeqs = 0;
 		set<string> badSeqNames;
@@ -514,7 +541,7 @@ int ScreenSeqsCommand::screenNameGroupFile(set<string> badSeqNames){
 		string seqName, seqList, group;
 		set<string>::iterator it;
 
-		string goodNameFile = outputDir + m->getRootName(m->getSimpleName(namefile)) + "good" + m->getExtension(namefile);
+		string goodNameFile = outputDir + m->getRootName(m->getSimpleName(namefile)) + getOutputFileNameTag("name", namefile);
 		outputNames.push_back(goodNameFile);  outputTypes["name"].push_back(goodNameFile);
 		
 		ofstream goodNameOut;	m->openOutputFile(goodNameFile, goodNameOut);
@@ -560,7 +587,7 @@ int ScreenSeqsCommand::screenNameGroupFile(set<string> badSeqNames){
 			ifstream inputGroups;
 			m->openInputFile(groupfile, inputGroups);
 
-			string goodGroupFile = outputDir + m->getRootName(m->getSimpleName(groupfile)) + "good" + m->getExtension(groupfile);
+			string goodGroupFile = outputDir + m->getRootName(m->getSimpleName(groupfile)) + getOutputFileNameTag("group", groupfile);
 			outputNames.push_back(goodGroupFile);   outputTypes["group"].push_back(goodGroupFile);
 			
 			ofstream goodGroupOut;	m->openOutputFile(goodGroupFile, goodGroupOut);
@@ -893,8 +920,8 @@ int ScreenSeqsCommand::screenGroupFile(set<string> badSeqNames){
 		string seqName, group;
 		set<string>::iterator it;
 		
-		string goodGroupFile = outputDir + m->getRootName(m->getSimpleName(groupfile)) + "good" + m->getExtension(groupfile);
-		outputNames.push_back(goodGroupFile);  outputTypes["group"].push_back(goodGroupFile);
+		string goodGroupFile = outputDir + m->getRootName(m->getSimpleName(groupfile)) + getOutputFileNameTag("group", groupfile);
+        outputNames.push_back(goodGroupFile);  outputTypes["group"].push_back(goodGroupFile);
 		ofstream goodGroupOut;	m->openOutputFile(goodGroupFile, goodGroupOut);
 		
 		while(!inputGroups.eof()){
@@ -945,7 +972,7 @@ int ScreenSeqsCommand::screenAlignReport(set<string> badSeqNames){
 		string seqName, group;
 		set<string>::iterator it;
 		
-		string goodAlignReportFile = outputDir + m->getRootName(m->getSimpleName(alignreport)) + "good" + m->getExtension(alignreport);
+		string goodAlignReportFile = outputDir + m->getRootName(m->getSimpleName(alignreport)) + getOutputFileNameTag("alignreport");
 		outputNames.push_back(goodAlignReportFile);  outputTypes["alignreport"].push_back(goodAlignReportFile);
 		ofstream goodAlignReportOut;	m->openOutputFile(goodAlignReportFile, goodAlignReportOut);
 
@@ -1009,7 +1036,7 @@ int ScreenSeqsCommand::screenTaxonomy(set<string> badSeqNames){
 		string seqName, tax;
 		set<string>::iterator it;
 		
-		string goodTaxFile = outputDir + m->getRootName(m->getSimpleName(taxonomy)) + "good" + m->getExtension(taxonomy);
+		string goodTaxFile = outputDir + m->getRootName(m->getSimpleName(taxonomy)) + getOutputFileNameTag("taxonomy", taxonomy);
 		outputNames.push_back(goodTaxFile);  outputTypes["taxonomy"].push_back(goodTaxFile);
 		ofstream goodTaxOut;	m->openOutputFile(goodTaxFile, goodTaxOut);
 				
@@ -1058,7 +1085,7 @@ int ScreenSeqsCommand::screenQual(set<string> badSeqNames){
 		m->openInputFile(qualfile, in);
 		set<string>::iterator it;
 		
-		string goodQualFile = outputDir + m->getRootName(m->getSimpleName(qualfile)) + "good" + m->getExtension(qualfile);
+		string goodQualFile = outputDir + m->getRootName(m->getSimpleName(qualfile)) + getOutputFileNameTag("qfile", qualfile);
 		outputNames.push_back(goodQualFile);  outputTypes["qfile"].push_back(goodQualFile);
 		ofstream goodQual;	m->openOutputFile(goodQualFile, goodQual);
 		
@@ -1209,7 +1236,6 @@ int ScreenSeqsCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& 
 			int length = MPIPos[start+i+1] - MPIPos[start+i];
 
 			char* buf4 = new char[length];
-			memcpy(buf4, outputString.c_str(), length);
 
 			MPI_File_read_at(inMPI, MPIPos[start+i], buf4, length, MPI_CHAR, &status);
 			

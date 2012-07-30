@@ -16,6 +16,7 @@ vector<string> CountSeqsCommand::setParameters(){
 	try {
 		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pname);
 		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pgroup);
+        CommandParameter plarge("large", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(plarge);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
@@ -33,11 +34,12 @@ vector<string> CountSeqsCommand::setParameters(){
 string CountSeqsCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The count.seqs command reads a name file and outputs a .seq.count file.  You may also provide a group file to get the counts broken down by group.\n";
+		helpString += "The count.seqs aka. make.table command reads a name file and outputs a .count.table file.  You may also provide a group file to get the counts broken down by group.\n";
 		helpString += "The groups parameter allows you to indicate which groups you want to include in the counts, by default all groups in your groupfile are used.\n";
+        helpString += "The large parameter indicates the name and group files are too large to fit in RAM.\n";
 		helpString += "When you use the groups parameter and a sequence does not represent any sequences from the groups you specify it is not included in the .count.summary file.\n";
 		helpString += "The count.seqs command should be in the following format: count.seqs(name=yourNameFile).\n";
-		helpString += "Example count.seqs(name=amazon.names).\n";
+		helpString += "Example count.seqs(name=amazon.names) or make.table(name=amazon.names).\n";
 		helpString += "Note: No spaces between parameter labels (i.e. name), '=' and parameters (i.e.yourNameFile).\n";
 		return helpString;
 	}
@@ -46,14 +48,33 @@ string CountSeqsCommand::getHelpString(){
 		exit(1);
 	}
 }
-
+//**********************************************************************************************************************
+string CountSeqsCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "counttable") {  outputFileName =  "count.table"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "CountSeqsCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 CountSeqsCommand::CountSeqsCommand(){	
 	try {
 		abort = true; calledHelp = true; 
 		setParameters();
 		vector<string> tempOutNames;
-		outputTypes["summary"] = tempOutNames;
+		outputTypes["counttable"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "CountSeqsCommand", "CountSeqsCommand");
@@ -85,7 +106,7 @@ CountSeqsCommand::CountSeqsCommand(string option)  {
 			
 			//initialize outputTypes
 			vector<string> tempOutNames;
-			outputTypes["summary"] = tempOutNames;
+			outputTypes["counttable"] = tempOutNames;
 			
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
@@ -127,6 +148,9 @@ CountSeqsCommand::CountSeqsCommand(string option)  {
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = "all"; }
 			m->splitAtDash(groups, Groups);
+            
+            string temp = validParameter.validFile(parameters, "large", false);		if (temp == "not found") {	temp = "F";	}
+			large = m->isTrue(temp);
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(namefile);		}
@@ -146,12 +170,45 @@ int CountSeqsCommand::execute(){
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
-		ofstream out;
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(namefile)) + "seq.count";
-		m->openOutputFile(outputFileName, out); outputTypes["summary"].push_back(outputFileName);
-		out << "Representative_Sequence\ttotal\t";
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(namefile)) + getOutputFileNameTag("counttable");
 		
-		GroupMap* groupMap;
+        int total = 0;
+        if (!large) { total = processSmall(outputFileName); }
+        else { total = processLarge(outputFileName);  }
+				
+		if (m->control_pressed) { m->mothurRemove(outputFileName); return 0; }
+		
+        //set rabund file as new current rabundfile
+		itTypes = outputTypes.find("counttable");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { string current = (itTypes->second)[0]; m->setCountTableFile(current); }
+		}
+        
+        m->mothurOutEndLine();
+		m->mothurOut("Total number of sequences: " + toString(total)); m->mothurOutEndLine();
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
+		m->mothurOut(outputFileName); m->mothurOutEndLine();	
+		m->mothurOutEndLine();
+		
+		return 0;		
+	}
+	
+	catch(exception& e) {
+		m->errorOut(e, "CountSeqsCommand", "execute");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+
+int CountSeqsCommand::processSmall(string outputFileName){
+	try {
+        ofstream out;
+        m->openOutputFile(outputFileName, out); outputTypes["counttable"].push_back(outputFileName);
+        outputNames.push_back(outputFileName); outputTypes["counttable"].push_back(outputFileName);
+		out << "Representative_Sequence\ttotal\t";
+        
+        GroupMap* groupMap;
 		if (groupfile != "") { 
 			groupMap = new GroupMap(groupfile); groupMap->readMap(); 
 			
@@ -180,7 +237,7 @@ int CountSeqsCommand::execute(){
 			if (m->control_pressed) { break; }
 			
 			string firstCol, secondCol;
-			in >> firstCol >> secondCol; m->gobble(in);
+			in >> firstCol; m->gobble(in); in >> secondCol; m->gobble(in);
 			
 			vector<string> names;
 			m->splitAtChar(secondCol, names, ',');
@@ -221,24 +278,241 @@ int CountSeqsCommand::execute(){
 			total += names.size();
 		}
 		in.close();
+        out.close();
 		
 		if (groupfile != "") { delete groupMap; }
-		
-		if (m->control_pressed) { m->mothurRemove(outputFileName); return 0; }
-		
-        m->mothurOutEndLine();
-		m->mothurOut("Total number of sequences: " + toString(total)); m->mothurOutEndLine();
-		m->mothurOutEndLine();
-		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
-		m->mothurOut(outputFileName); m->mothurOutEndLine();	
-		m->mothurOutEndLine();
-		
-		return 0;		
-	}
-	
+
+        return total;
+    }
 	catch(exception& e) {
-		m->errorOut(e, "CountSeqsCommand", "execute");
+		m->errorOut(e, "CountSeqsCommand", "processSmall");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
+
+int CountSeqsCommand::processLarge(string outputFileName){
+	try {
+        set<string> namesOfGroups;
+        map<string, int> initial;
+        for (set<string>::iterator it = namesOfGroups.begin(); it != namesOfGroups.end(); it++) { initial[(*it)] = 0;  }
+        ofstream out;
+        m->openOutputFile(outputFileName, out); 
+        outputNames.push_back(outputFileName); outputTypes["counttable"].push_back(outputFileName);
+		out << "Representative_Sequence\ttotal\t";
+        if (groupfile == "") { out << endl; }
+        
+        map<string, unsigned long long> namesToIndex;
+        string outfile = m->getRootName(groupfile) + "sorted.groups.temp";
+        string outName = m->getRootName(namefile) + "sorted.name.temp";
+        map<int, string> indexToName;
+        map<int, string> indexToGroup;
+        if (groupfile != "") { 
+            time_t estart = time(NULL);
+            //convert name file to redundant -> unique.  set unique name equal to index so we can use vectors, save name for later.
+            string newNameFile = m->getRootName(namefile) + ".name.temp";
+            string newGroupFile = m->getRootName(groupfile) + ".group.temp";
+            indexToName = processNameFile(newNameFile);
+            indexToGroup = getGroupNames(newGroupFile, namesOfGroups);
+            
+            //sort file by first column so the names of sequences will be easier to find
+            //use the unix sort 
+            #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+                string command = "sort -n " + newGroupFile + " -o " + outfile;
+                system(command.c_str());
+                command = "sort -n " + newNameFile + " -o " + outName;
+                system(command.c_str());
+            #else //sort using windows sort
+                string command = "sort " + newGroupFile + " /O " + outfile;
+                system(command.c_str());
+                command = "sort " + newNameFile + " /O " + outName;
+                system(command.c_str());
+            #endif
+            m->mothurRemove(newNameFile);
+            m->mothurRemove(newGroupFile);
+            
+            m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to sort and index the group and name files. "); m->mothurOutEndLine();
+        }else { outName = namefile; }
+         
+        time_t estart = time(NULL);
+        //open input file
+		ifstream in;
+		m->openInputFile(outName, in);
+        
+        //open input file
+		ifstream in2;
+		
+		int total = 0;
+        vector< vector<int> > nameMapCount;
+        if (groupfile != "") {
+            m->openInputFile(outfile, in2);
+            nameMapCount.resize(indexToName.size());
+            for (int i = 0; i < nameMapCount.size(); i++) {
+                nameMapCount[i].resize(indexToGroup.size(), 0);
+            }
+        }
+        
+		while (!in.eof()) {
+			if (m->control_pressed) { break; }
+			
+			string firstCol;
+			in >> firstCol;  m->gobble(in);
+			
+			if (groupfile != "") {
+                int uniqueIndex;
+                in >> uniqueIndex; m->gobble(in);
+                
+                string name; int groupIndex;
+                in2 >> name >> groupIndex; m->gobble(in2);
+                
+                if (name != firstCol) { m->mothurOut("[ERROR]: found " + name + " in your groupfile, but " + firstCol + " was in your namefile, please correct.\n"); m->control_pressed = true; }
+                
+                nameMapCount[uniqueIndex][groupIndex]++;
+                total++;
+            }else { 
+                string secondCol;
+                in >> secondCol; m->gobble(in);
+                int num = m->getNumNames(secondCol);
+                out << firstCol << '\t' << num << endl;
+                total += num;
+            }
+		}
+		in.close();
+        
+        if (groupfile != "") {
+            m->mothurRemove(outfile);
+            m->mothurRemove(outName);
+            in2.close();
+            for (map<int, string>::iterator it = indexToGroup.begin(); it != indexToGroup.end(); it++) { out << it->second << '\t';  }
+            out << endl;
+            for (int i = 0; i < nameMapCount.size(); i++) {
+                string totalsLine = "";
+                int seqTotal = 0;
+                for (int j = 0; j < nameMapCount[i].size(); j++) {
+                    seqTotal += nameMapCount[i][j];
+                    totalsLine += toString(nameMapCount[i][j]) + '\t';
+                }
+                out << indexToName[i] << '\t' << seqTotal << '\t' << totalsLine << endl;
+            }
+        }
+        
+        out.close();
+        
+        m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to create the count table file. "); m->mothurOutEndLine();
+        
+        return total;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "CountSeqsCommand", "processLarge");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+map<int, string> CountSeqsCommand::processNameFile(string name) {
+	try {
+        map<int, string> indexToNames;
+        
+        ofstream out;
+        m->openOutputFile(name, out);
+        
+        //open input file
+		ifstream in;
+		m->openInputFile(namefile, in);
+        
+        string rest = "";
+        char buffer[4096];
+        bool pairDone = false;
+        bool columnOne = true;
+        string firstCol, secondCol;
+        int count = 0;
+        
+		while (!in.eof()) {
+			if (m->control_pressed) { break; }
+			
+            in.read(buffer, 4096);
+            vector<string> pieces = m->splitWhiteSpace(rest, buffer, in.gcount());
+            
+            for (int i = 0; i < pieces.size(); i++) {
+                if (columnOne) {  firstCol = pieces[i]; columnOne=false; }
+                else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
+                
+                if (pairDone) { 
+                    //parse names into vector
+                    vector<string> theseNames;
+                    m->splitAtComma(secondCol, theseNames);
+                    for (int i = 0; i < theseNames.size(); i++) {  out << theseNames[i] << '\t' << count << endl;  }
+                    indexToNames[count] = firstCol;
+                    pairDone = false; 
+                    count++;
+                }
+            }
+		}
+		in.close();
+        out.close();
+		
+        return indexToNames;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "CountSeqsCommand", "processNameFile");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+map<int, string> CountSeqsCommand::getGroupNames(string filename, set<string>& namesOfGroups) {
+	try {
+        map<int, string> indexToGroups;
+        map<string, int> groupIndex;
+        map<string, int>::iterator it;
+        
+        ofstream out;
+        m->openOutputFile(filename, out);
+        
+        //open input file
+		ifstream in;
+		m->openInputFile(groupfile, in);
+        
+        string rest = "";
+        char buffer[4096];
+        bool pairDone = false;
+        bool columnOne = true;
+        string firstCol, secondCol;
+        int count = 0;
+        
+		while (!in.eof()) {
+			if (m->control_pressed) { break; }
+			
+            in.read(buffer, 4096);
+            vector<string> pieces = m->splitWhiteSpace(rest, buffer, in.gcount());
+            
+            for (int i = 0; i < pieces.size(); i++) {
+                if (columnOne) {  firstCol = pieces[i]; columnOne=false; }
+                else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
+                
+                if (pairDone) { 
+                    it = groupIndex.find(secondCol);
+                    if (it == groupIndex.end()) { //add group, assigning the group and number so we can use vectors above
+                        groupIndex[secondCol] = count;
+                        count++;
+                    }
+                    out << firstCol << '\t' << groupIndex[secondCol] << endl; 
+                    namesOfGroups.insert(secondCol);
+                    pairDone = false; 
+                }
+            }
+		}
+		in.close();
+        out.close();
+		
+        for (it = groupIndex.begin(); it != groupIndex.end(); it++) {  indexToGroups[it->second] = it->first;  }
+        
+        return indexToGroups;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "CountSeqsCommand", "getGroupNames");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+
+
+

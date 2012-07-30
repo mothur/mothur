@@ -28,6 +28,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "chimera.perseus";		}
 	string getCommandCategory()		{ return "Sequence Processing"; }
+	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Chimera.perseus\n"; }
 	string getDescription()		{ return "detect chimeric sequences"; }

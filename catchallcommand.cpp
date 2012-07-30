@@ -49,6 +49,27 @@ string CatchAllCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string CatchAllCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "csv") {  outputFileName =  "csv"; }
+            else if (type == "summary") {  outputFileName =  "catchall.summary"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "CatchAllCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 CatchAllCommand::CatchAllCommand(){	
 	try {
 		abort = true; calledHelp = true;
@@ -236,7 +257,7 @@ int CatchAllCommand::execute() {
 			set<string> processedLabels;
 			set<string> userLabels = labels;
 			
-			string summaryfilename = outputDir + m->getRootName(m->getSimpleName(inputFileNames[p])) + "catchall.summary";
+			string summaryfilename = outputDir + m->getRootName(m->getSimpleName(inputFileNames[p])) + getOutputFileNameTag("summary");
 			summaryfilename = m->getFullPathName(summaryfilename);
 			
             if (m->debug) { m->mothurOut("[DEBUG]: Input File = " + inputFileNames[p] + ".\n[DEBUG]: inputdata address = " + toString(&input) + ".\n[DEBUG]: sabund address = " + toString(&sabund) + ".\n"); } 
@@ -283,10 +304,10 @@ int CatchAllCommand::execute() {
 						filename = m->getRootName(filename); filename = filename.substr(0, filename.length()-1); //rip off extra .
 						if (savedOutputDir == "") { filename = m->getSimpleName(filename); }
 					
-						outputNames.push_back(filename + "_Analysis.csv"); outputTypes["csv"].push_back(filename + "_Analysis.csv");
-						outputNames.push_back(filename + "_BestModelsAnalysis.csv"); outputTypes["csv"].push_back(filename + "_BestModelsAnalysis.csv");
-						outputNames.push_back(filename + "_BestModelsFits.csv"); outputTypes["csv"].push_back(filename + "_BestModelsFits.csv");
-						outputNames.push_back(filename + "_BubblePlot.csv"); outputTypes["csv"].push_back(filename + "_BubblePlot.csv");
+						outputNames.push_back(filename + "_Analysis." + getOutputFileNameTag("csv")); outputTypes["csv"].push_back(filename + "_Analysis." + getOutputFileNameTag("csv"));
+						outputNames.push_back(filename + "_BestModelsAnalysis." + getOutputFileNameTag("csv")); outputTypes["csv"].push_back(filename + "_BestModelsAnalysis." + getOutputFileNameTag("csv"));
+						outputNames.push_back(filename + "_BestModelsFits." + getOutputFileNameTag("csv")); outputTypes["csv"].push_back(filename + "_BestModelsFits." + getOutputFileNameTag("csv"));
+						outputNames.push_back(filename + "_BubblePlot." + getOutputFileNameTag("csv")); outputTypes["csv"].push_back(filename + "_BubblePlot." + getOutputFileNameTag("csv"));
                         
                         if (m->debug) { m->mothurOut("[DEBUG]: About to create summary file for: " + filename + ".\n[DEBUG]: sabund label = " + sabund->getLabel() + ".\n"); }
                     
@@ -336,10 +357,10 @@ int CatchAllCommand::execute() {
 						filename = m->getRootName(filename); filename = filename.substr(0, filename.length()-1); //rip off extra .
 						if (savedOutputDir == "") { filename = m->getSimpleName(filename); }
 					
-						outputNames.push_back(filename + "_Analysis.csv"); outputTypes["csv"].push_back(filename + "_Analysis.csv");
-						outputNames.push_back(filename + "_BestModelsAnalysis.csv"); outputTypes["csv"].push_back(filename + "_BestModelsAnalysis.csv");
-						outputNames.push_back(filename + "_BestModelsFits.csv"); outputTypes["csv"].push_back(filename + "_BestModelsFits.csv");
-						outputNames.push_back(filename + "_BubblePlot.csv"); outputTypes["csv"].push_back(filename + "_BubblePlot.csv");
+                        outputNames.push_back(filename + "_Analysis." + getOutputFileNameTag("csv")); outputTypes["csv"].push_back(filename + "_Analysis." + getOutputFileNameTag("csv"));
+                        outputNames.push_back(filename + "_BestModelsAnalysis." + getOutputFileNameTag("csv")); outputTypes["csv"].push_back(filename + "_BestModelsAnalysis." + getOutputFileNameTag("csv"));
+                        outputNames.push_back(filename + "_BestModelsFits." + getOutputFileNameTag("csv")); outputTypes["csv"].push_back(filename + "_BestModelsFits." + getOutputFileNameTag("csv"));
+                        outputNames.push_back(filename + "_BubblePlot." + getOutputFileNameTag("csv")); outputTypes["csv"].push_back(filename + "_BubblePlot." + getOutputFileNameTag("csv"));
                         
                     
                         if (m->debug) { m->mothurOut("[DEBUG]: About to create summary file for: " + filename + ".\n[DEBUG]: sabund label = " + sabund->getLabel() + ".\n"); }
@@ -410,11 +431,10 @@ int CatchAllCommand::execute() {
 				filename = m->getRootName(filename); filename = filename.substr(0, filename.length()-1); //rip off extra .
 				if (savedOutputDir == "") { filename = m->getSimpleName(filename); }
 				
-				outputNames.push_back(filename + "_Analysis.csv"); outputTypes["csv"].push_back(filename + "_Analysis.csv");
-				outputNames.push_back(filename + "_BestModelsAnalysis.csv"); outputTypes["csv"].push_back(filename + "_BestModelsAnalysis.csv");
-				outputNames.push_back(filename + "_BestModelsFits.csv"); outputTypes["csv"].push_back(filename + "_BestModelsFits.csv");
-				outputNames.push_back(filename + "_BubblePlot.csv"); outputTypes["csv"].push_back(filename + "_BubblePlot.csv");	
-				if (m->debug) { m->mothurOut("[DEBUG]: About to create summary file for: " + filename + ".\n[DEBUG]: sabund label = " + sabund->getLabel() + ".\n"); }
+				outputNames.push_back(filename + "_Analysis." + getOutputFileNameTag("csv")); outputTypes["csv"].push_back(filename + "_Analysis." + getOutputFileNameTag("csv"));
+                outputNames.push_back(filename + "_BestModelsAnalysis." + getOutputFileNameTag("csv")); outputTypes["csv"].push_back(filename + "_BestModelsAnalysis." + getOutputFileNameTag("csv"));
+                outputNames.push_back(filename + "_BestModelsFits." + getOutputFileNameTag("csv")); outputTypes["csv"].push_back(filename + "_BestModelsFits." + getOutputFileNameTag("csv"));
+                outputNames.push_back(filename + "_BubblePlot." + getOutputFileNameTag("csv")); outputTypes["csv"].push_back(filename + "_BubblePlot." + getOutputFileNameTag("csv"));				if (m->debug) { m->mothurOut("[DEBUG]: About to create summary file for: " + filename + ".\n[DEBUG]: sabund label = " + sabund->getLabel() + ".\n"); }
                 
 				createSummaryFile(filename + "_BestModelsAnalysis.csv", sabund->getLabel(), out);
                 
@@ -491,7 +511,7 @@ string CatchAllCommand::combineSummmary(vector<string>& outputNames) {
 	try {
 		
 		ofstream out;
-		string combineFileName = savedOutputDir + m->getRootName(m->getSimpleName(sharedfile)) + "catchall.summary";
+		string combineFileName = savedOutputDir + m->getRootName(m->getSimpleName(sharedfile)) + getOutputFileNameTag("summary");
 		
 		//open combined file
 		m->openOutputFile(combineFileName, out);

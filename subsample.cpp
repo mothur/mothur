@@ -250,7 +250,7 @@ vector<string> SubSample::getSample(vector<SharedRAbundVector*>& thislookup, int
 		
 		//subsampling may have created some otus with no sequences in them
 		eliminateZeroOTUS(thislookup);
-		
+        
 		if (m->control_pressed) { return m->currentBinLabels; }
 		
 		//save mothurOut's binLabels to restore for next label

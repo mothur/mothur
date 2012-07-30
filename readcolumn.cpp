@@ -34,7 +34,7 @@ int ReadColumnMatrix::read(NameAssignment* nameMap){
 		string firstName, secondName;
 		float distance;
 		int nseqs = nameMap->size();
-
+        DMatrix->resize(nseqs);
 		list = new ListVector(nameMap->getListVector());
 	
 		Progress* reading = new Progress("Reading matrix:     ", nseqs * nseqs);
@@ -54,7 +54,7 @@ int ReadColumnMatrix::read(NameAssignment* nameMap){
 	
 			map<string,int>::iterator itA = nameMap->find(firstName);
 			map<string,int>::iterator itB = nameMap->find(secondName);
-				
+
 			if(itA == nameMap->end()){  m->mothurOut("AAError: Sequence '" + firstName + "' was not found in the names file, please correct\n"); exit(1);  }
 			if(itB == nameMap->end()){  m->mothurOut("ABError: Sequence '" + secondName + "' was not found in the names file, please correct\n"); exit(1);  }
 
@@ -63,33 +63,34 @@ int ReadColumnMatrix::read(NameAssignment* nameMap){
 			
 			if(distance < cutoff && itA != itB){
 				if(itA->second > itB->second){
-					PCell value(itA->second, itB->second, distance);
-			
+                    PDistCell value(itA->second, distance);
+                    
+                    
 					if(refRow == refCol){		// in other words, if we haven't loaded refRow and refCol...
 						refRow = itA->second;
 						refCol = itB->second;
-						D->addCell(value);
+						DMatrix->addCell(itB->second, value);
 					}
 					else if(refRow == itA->second && refCol == itB->second){
 						lt = 0;
 					}
 					else{
-						D->addCell(value);
+						DMatrix->addCell(itB->second, value);
 					}
 				}
 				else if(itA->second < itB->second){
-					PCell value(itB->second, itA->second, distance);
+					PDistCell value(itB->second, distance);
 			
 					if(refRow == refCol){		// in other words, if we haven't loaded refRow and refCol...
 						refRow = itA->second;
 						refCol = itB->second;
-						D->addCell(value);
+						DMatrix->addCell(itA->second, value);
 					}
 					else if(refRow == itB->second && refCol == itA->second){
 						lt = 0;
 					}
 					else{
-						D->addCell(value);
+						DMatrix->addCell(itA->second, value);
 					}
 				}
 				reading->update(itA->second * nseqs);
@@ -100,7 +101,7 @@ int ReadColumnMatrix::read(NameAssignment* nameMap){
 		if(lt == 0){  // oops, it was square
 	
 			fileHandle.close();  //let's start over
-			D->clear();  //let's start over
+			DMatrix->clear();  //let's start over
 		   
 			m->openInputFile(distFile, fileHandle);  //let's start over
 
@@ -119,8 +120,8 @@ int ReadColumnMatrix::read(NameAssignment* nameMap){
 				else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
 				
 				if(distance < cutoff && itA->second > itB->second){
-					PCell value(itA->second, itB->second, distance);
-					D->addCell(value);
+                    PDistCell value(itA->second, distance);
+					DMatrix->addCell(itB->second, value);
 					reading->update(itA->second * nseqs);
 				}
 		
@@ -143,12 +144,126 @@ int ReadColumnMatrix::read(NameAssignment* nameMap){
 		exit(1);
 	}
 }
-
 /***********************************************************************/
 
-ReadColumnMatrix::~ReadColumnMatrix(){
-	//delete D;
-	//delete list;
+int ReadColumnMatrix::read(CountTable* countTable){
+	try {		
+        
+		string firstName, secondName;
+		float distance;
+		int nseqs = countTable->size();
+        
+        DMatrix->resize(nseqs);
+		list = new ListVector(countTable->getListVector());
+        
+		Progress* reading = new Progress("Reading matrix:     ", nseqs * nseqs);
+        
+		int lt = 1;
+		int refRow = 0;	//we'll keep track of one cell - Cell(refRow,refCol) - and see if it's transpose
+		int refCol = 0; //shows up later - Cell(refCol,refRow).  If it does, then its a square matrix
+        
+		//need to see if this is a square or a triangular matrix...
+               
+		while(fileHandle && lt == 1){  //let's assume it's a triangular matrix...
+            
+            
+			fileHandle >> firstName >> secondName >> distance;	// get the row and column names and distance
+			
+			if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
+            
+			int itA = countTable->get(firstName);
+			int itB = countTable->get(secondName);
+            
+            if (m->control_pressed) { exit(1); }
+            
+			if (distance == -1) { distance = 1000000; }
+			else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
+			
+			if(distance < cutoff && itA != itB){
+				if(itA > itB){
+                    PDistCell value(itA, distance);
+                    
+                    
+					if(refRow == refCol){		// in other words, if we haven't loaded refRow and refCol...
+						refRow = itA;
+						refCol = itB;
+						DMatrix->addCell(itB, value);
+					}
+					else if(refRow == itA && refCol == itB){
+						lt = 0;
+					}
+					else{
+						DMatrix->addCell(itB, value);
+					}
+				}
+				else if(itA < itB){
+					PDistCell value(itB, distance);
+                    
+					if(refRow == refCol){		// in other words, if we haven't loaded refRow and refCol...
+						refRow = itA;
+						refCol = itB;
+						DMatrix->addCell(itA, value);
+					}
+					else if(refRow == itB && refCol == itA){
+						lt = 0;
+					}
+					else{
+						DMatrix->addCell(itA, value);
+					}
+				}
+				reading->update(itA * nseqs);
+			}
+			m->gobble(fileHandle);
+		}
+        
+		if(lt == 0){  // oops, it was square
+            
+			fileHandle.close();  //let's start over
+			DMatrix->clear();  //let's start over
+            
+			m->openInputFile(distFile, fileHandle);  //let's start over
+            
+			while(fileHandle){
+				fileHandle >> firstName >> secondName >> distance;
+				
+				if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
+                
+				int itA = countTable->get(firstName);
+                int itB = countTable->get(secondName);
+                
+                
+                if (m->control_pressed) { exit(1); }
+				
+				if (distance == -1) { distance = 1000000; }
+				else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
+				
+				if(distance < cutoff && itA > itB){
+                    PDistCell value(itA, distance);
+					DMatrix->addCell(itB, value);
+					reading->update(itA * nseqs);
+				}
+                
+				m->gobble(fileHandle);
+			}
+		}
+		
+		if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
+		
+		reading->finish();
+		fileHandle.close();
+        
+		list->setLabel("0");
+		
+		return 1;
+        
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ReadColumnMatrix", "read");
+		exit(1);
+	}
 }
 
+/***********************************************************************/
+ReadColumnMatrix::~ReadColumnMatrix(){}
+/***********************************************************************/
 

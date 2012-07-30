@@ -51,7 +51,27 @@ string ChopSeqsCommand::getHelpString(){
 		exit(1);
 	}
 }
-
+//**********************************************************************************************************************
+string ChopSeqsCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "fasta") {  outputFileName =  "chop.fasta"; }
+            else if (type == "accnos") {  outputFileName =  "chop.accnos"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChopSeqsCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 ChopSeqsCommand::ChopSeqsCommand(){	
 	try {
@@ -147,8 +167,8 @@ int ChopSeqsCommand::execute(){
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "chop.fasta";
-		string outputFileNameAccnos = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "chop.accnos";
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(fastafile)) + getOutputFileNameTag("fasta");
+		string outputFileNameAccnos = outputDir + m->getRootName(m->getSimpleName(fastafile)) + getOutputFileNameTag("accnos");
 		
 		ofstream out;
 		m->openOutputFile(outputFileName, out);

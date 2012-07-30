@@ -24,6 +24,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "otu.hierarchy";			}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Otu.hierarchy"; }
 	string getDescription()		{ return "relates OTUs at different distances"; }

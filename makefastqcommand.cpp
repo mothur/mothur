@@ -46,6 +46,26 @@ string MakeFastQCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string MakeFastQCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "fastq")             {   outputFileName =  "fastq";         }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "MakeFastQCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 MakeFastQCommand::MakeFastQCommand(){	
 	try {
 		abort = true; calledHelp = true; 
@@ -145,7 +165,7 @@ int MakeFastQCommand::execute(){
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		
-		string outputFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "fastq";
+		string outputFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + getOutputFileNameTag("fastq");
 		outputNames.push_back(outputFile); outputTypes["fastq"].push_back(outputFile);
 		
 		ofstream out;

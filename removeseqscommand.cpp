@@ -53,7 +53,32 @@ string RemoveSeqsCommand::getHelpString(){
 		exit(1);
 	}
 }
-
+//**********************************************************************************************************************
+string RemoveSeqsCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "fasta")            {   outputFileName =  "pick" + m->getExtension(inputName);   }
+            else if (type == "taxonomy")    {   outputFileName =  "pick" + m->getExtension(inputName);   }
+            else if (type == "name")        {   outputFileName =  "pick" + m->getExtension(inputName);   }
+            else if (type == "group")       {   outputFileName =  "pick" + m->getExtension(inputName);   }
+            else if (type == "list")        {   outputFileName =  "pick" + m->getExtension(inputName);   }
+            else if (type == "qfile")       {   outputFileName =  "pick" + m->getExtension(inputName);   }
+            else if (type == "alignreport") {   outputFileName =  "pick.align.report";                   }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "RemoveSeqsCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
 
 //**********************************************************************************************************************
 RemoveSeqsCommand::RemoveSeqsCommand(){	
@@ -257,7 +282,7 @@ int RemoveSeqsCommand::execute(){
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//get names you want to keep
-		readAccnos();
+		names = m->readAccnos(accnosfile);
 		
 		if (m->control_pressed) { return 0; }
 		
@@ -325,7 +350,7 @@ int RemoveSeqsCommand::readFasta(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(fastafile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(fastafile)) + "pick" + m->getExtension(fastafile);
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(fastafile)) + getOutputFileNameTag("fasta", fastafile);
 		
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
@@ -374,7 +399,7 @@ int RemoveSeqsCommand::readQual(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(qualfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(qualfile)) + "pick" +  m->getExtension(qualfile);
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(qualfile)) + getOutputFileNameTag("qfile", qualfile);
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		
@@ -442,8 +467,7 @@ int RemoveSeqsCommand::readList(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(listfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(listfile)) + "pick" +  m->getExtension(listfile);
-		
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(listfile)) + getOutputFileNameTag("list", listfile);		
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		
@@ -521,8 +545,7 @@ int RemoveSeqsCommand::readName(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(namefile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(namefile)) + "pick" + m->getExtension(namefile);
-
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(namefile)) + getOutputFileNameTag("name", namefile);
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 
@@ -604,8 +627,7 @@ int RemoveSeqsCommand::readGroup(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(groupfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(groupfile)) + "pick" + m->getExtension(groupfile);
-		
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(groupfile)) + getOutputFileNameTag("group", groupfile);		
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 
@@ -651,7 +673,7 @@ int RemoveSeqsCommand::readTax(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(taxfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(taxfile)) + "pick" + m->getExtension(taxfile);
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(taxfile)) + getOutputFileNameTag("taxonomy", taxfile);
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 
@@ -697,7 +719,7 @@ int RemoveSeqsCommand::readAlign(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(alignfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(alignfile)) + "pick.align.report";
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(alignfile)) + getOutputFileNameTag("alignreport");
 		
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
@@ -763,30 +785,6 @@ int RemoveSeqsCommand::readAlign(){
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-void RemoveSeqsCommand::readAccnos(){
-	try {
-		
-		ifstream in;
-		m->openInputFile(accnosfile, in);
-		string name;
-		
-		while(!in.eof()){
-			in >> name;
-						
-			names.insert(name);
-			
-			m->gobble(in);
-		}
-		in.close();		
-
-	}
-	catch(exception& e) {
-		m->errorOut(e, "RemoveSeqsCommand", "readAccnos");
-		exit(1);
-	}
-}
-
 //**********************************************************************************************************************
 
 

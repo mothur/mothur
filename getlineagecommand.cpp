@@ -57,7 +57,31 @@ string GetLineageCommand::getHelpString(){
 		exit(1);
 	}
 }
-
+//**********************************************************************************************************************
+string GetLineageCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "fasta")            {   outputFileName =  "pick" + m->getExtension(inputName);   }
+            else if (type == "taxonomy")    {   outputFileName =  "pick" + m->getExtension(inputName);   }
+            else if (type == "name")        {   outputFileName =  "pick" + m->getExtension(inputName);   }
+            else if (type == "group")       {   outputFileName =  "pick" + m->getExtension(inputName);   }
+            else if (type == "list")        {   outputFileName =  "pick" + m->getExtension(inputName);   }
+            else if (type == "alignreport") {   outputFileName =  "pick.align.report";   }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetLineageCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 GetLineageCommand::GetLineageCommand(){	
 	try {
@@ -298,7 +322,7 @@ int GetLineageCommand::readFasta(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(fastafile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(fastafile)) + "pick" +  m->getExtension(fastafile);
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(fastafile)) + getOutputFileNameTag("fasta", fastafile);
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		
@@ -345,7 +369,7 @@ int GetLineageCommand::readList(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(listfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(listfile)) + "pick" +  m->getExtension(listfile);
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(listfile)) + getOutputFileNameTag("list", listfile);
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		
@@ -417,7 +441,7 @@ int GetLineageCommand::readName(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(namefile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(namefile)) + "pick" +  m->getExtension(namefile);
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(namefile)) + getOutputFileNameTag("name", namefile);
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		
@@ -503,7 +527,7 @@ int GetLineageCommand::readGroup(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(groupfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(groupfile)) + "pick" + m->getExtension(groupfile);
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(groupfile)) + getOutputFileNameTag("group", groupfile);
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		
@@ -550,7 +574,7 @@ int GetLineageCommand::readTax(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(taxfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(taxfile)) + "pick" + m->getExtension(taxfile);
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(taxfile)) + getOutputFileNameTag("taxonomy", taxfile);
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		
@@ -739,7 +763,7 @@ int GetLineageCommand::readAlign(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(alignfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(alignfile)) + "pick.align.report";
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(alignfile)) + getOutputFileNameTag("alignreport");
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		

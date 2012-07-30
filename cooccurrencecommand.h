@@ -28,6 +28,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "Cooccurrence";			}
 	string getCommandCategory()		{ return "Hypothesis Testing";	}
+	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Cooccurrence"; }
 	string getDescription()		{ return "calculates four metrics and tests their significance to assess whether presence-absence patterns are different than what one would expect by chance."; }

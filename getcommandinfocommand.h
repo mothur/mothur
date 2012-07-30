@@ -27,6 +27,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "get.commandinfo";		}
 	string getCommandCategory()		{ return "Hidden";				}
+	string getOutputFileNameTag(string, string) {  return "";  }
 	string getHelpString();	
 	string getCitation() { return "no citation"; }
 	string getDescription()		{ return "get.commandinfo"; }

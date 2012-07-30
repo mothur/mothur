@@ -64,6 +64,28 @@ string ChimeraCcodeCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string ChimeraCcodeCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "chimera") {  outputFileName =  "ccode.chimeras"; }
+            else if (type == "mapinfo") {  outputFileName =  "mapinfo"; }
+            else if (type == "accnos") {  outputFileName =  "ccode.accnos"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChimeraCcodeCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 ChimeraCcodeCommand::ChimeraCcodeCommand(){	
 	try {
 		abort = true; calledHelp = true;
@@ -284,14 +306,16 @@ int ChimeraCcodeCommand::execute(){
 			if (outputDir == "") { outputDir = m->hasPath(fastaFileNames[s]);  }//if user entered a file with a path then preserve it
 			string outputFileName, accnosFileName;
 			if (maskfile != "") {
-				outputFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + maskfile + ".ccode.chimeras";
-				accnosFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + maskfile + ".ccode.accnos";
+				outputFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + maskfile + getOutputFileNameTag("chimera");
+				accnosFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + maskfile + getOutputFileNameTag("accnos");
 			}else {
-				outputFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]))  + "ccode.chimeras";
-				accnosFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]))  + "ccode.accnos";
+				outputFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]))  + getOutputFileNameTag("chimera");
+				accnosFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]))  + getOutputFileNameTag("accnos");
+
 			}
 
-			string mapInfo = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + "mapinfo";
+			string mapInfo = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + getOutputFileNameTag("mapinfo");
+
 			
 			if (m->control_pressed) { delete chimera;  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} outputTypes.clear(); return 0;	}
 			

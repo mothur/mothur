@@ -22,6 +22,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "create.database";		}
 	string getCommandCategory()		{ return "OTU-Based Approaches"; }
+	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Create.database"; }
 	string getDescription()		{ return "creates database file that includes, abundances across groups, representative sequences, and taxonomy for each OTU"; }
@@ -33,14 +34,15 @@ public:
 private:
 	
 	bool abort;
-	string listfile, groupfile, repfastafile, repnamesfile, contaxonomyfile, label, outputDir;
+	string sharedfile, listfile, groupfile, repfastafile, repnamesfile, contaxonomyfile, label, outputDir;
 	
 	vector<string> outputNames;
 		
 	vector<int> readFasta(vector<Sequence>&);
-    vector<int> readTax(vector<string>&);
-    int readNames(map<string, string>&); 
+    vector<int> readTax(vector<string>&, vector<string>&);
 	ListVector* getList();
+    vector<SharedRAbundVector*> getShared();
+    int findIndex(vector<string>&, string);
 	
 };
 

@@ -52,6 +52,27 @@ string GetCoreMicroBiomeCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string GetCoreMicroBiomeCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "coremicrobiome") {  outputFileName =  "core.microbiome"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetCoreMicroBiomeCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
 GetCoreMicroBiomeCommand::GetCoreMicroBiomeCommand(){	
 	try {
 		abort = true; calledHelp = true;
@@ -287,7 +308,7 @@ int GetCoreMicroBiomeCommand::execute(){
 int GetCoreMicroBiomeCommand::createTable(vector<SharedRAbundFloatVector*>& lookup){
 	try {
         
-        string outputFileName = outputDir + m->getRootName(m->getSimpleName(inputFileName)) + lookup[0]->getLabel() + ".core.microbiome";
+        string outputFileName = outputDir + m->getRootName(m->getSimpleName(inputFileName)) + lookup[0]->getLabel() + "." + getOutputFileNameTag("coremicrobiome");
         outputNames.push_back(outputFileName);  outputTypes["coremicrobiome"].push_back(outputFileName);
 		ofstream out;
 		m->openOutputFile(outputFileName, out);

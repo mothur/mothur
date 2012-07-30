@@ -88,6 +88,7 @@ using namespace std;
 
 
 typedef unsigned long ull;
+typedef unsigned short intDist;
 
 struct IntNode {
 	int lvalue;
@@ -119,7 +120,13 @@ struct diffPair {
 		reverseProb = rp;
 	}
 };
-
+/***********************************************************************/
+struct PDistCell{
+	ull index;
+	float dist;
+	PDistCell() :  index(0), dist(0) {};
+	PDistCell(ull c, float d) :  index(c), dist(d) {}
+};
 /************************************************************/
 struct clusterNode {
 	int numSeq;
@@ -158,10 +165,14 @@ struct spearmanRank {
 	
 	spearmanRank(string n, float s) : name(n), score(s) {}
 };
+//***********************************************************************
+inline bool compareIndexes(PDistCell left, PDistCell right){
+	return (left.index > right.index);	
+}
 //********************************************************************************************************************
 //sorts highest to lowest
 inline bool compareSpearman(spearmanRank left, spearmanRank right){
-	return (left.score > right.score);	
+	return (left.score < right.score);	
 } 
 //********************************************************************************************************************
 //sorts highest to lowest

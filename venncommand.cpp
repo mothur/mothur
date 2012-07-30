@@ -66,6 +66,27 @@ string VennCommand::getHelpString(){
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
+
+string VennCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "svg")            {   outputFileName =  "svg";   }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "VennCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
 
 //**********************************************************************************************************************
 VennCommand::VennCommand(){	
@@ -229,8 +250,7 @@ int VennCommand::execute(){
 					}else if (Estimators[i] == "chao") { 
 						vennCalculators.push_back(new Chao1());
 					}else if (Estimators[i] == "ace") {
-						if(abund < 5)
-							abund = 10;
+						if(abund < 5) { abund = 10; }
 						vennCalculators.push_back(new Ace(abund));
 					}
 				}

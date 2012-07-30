@@ -55,6 +55,29 @@ string SffInfoCommand::getHelpString(){
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
+string SffInfoCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "fasta")            {   outputFileName =  "fasta";   }
+            else if (type == "flow")    {   outputFileName =  "flow";   }
+            else if (type == "sfftxt")        {   outputFileName =  "sff.txt";   }
+            else if (type == "qfile")       {   outputFileName =  "qual";   }
+             else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SffInfoCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
 
 
 //**********************************************************************************************************************
@@ -365,14 +388,14 @@ int SffInfoCommand::extractSffInfo(string input, string accnos){
         string rootName = outputDir + m->getRootName(m->getSimpleName(input));
         if(rootName.find_last_of(".") == rootName.npos){ rootName += "."; }
         
-		string sfftxtFileName = outputDir + m->getRootName(m->getSimpleName(input)) + "sff.txt";
-		string outFlowFileName = outputDir + m->getRootName(m->getSimpleName(input)) + "flow";
+		string sfftxtFileName = outputDir + m->getRootName(m->getSimpleName(input)) + getOutputFileNameTag("sfftxt");
+		string outFlowFileName = outputDir + m->getRootName(m->getSimpleName(input)) + getOutputFileNameTag("flow");
 		if (trim) {
-			outFastaFileName = outputDir + m->getRootName(m->getSimpleName(input)) + "fasta";
-			outQualFileName = outputDir + m->getRootName(m->getSimpleName(input)) + "qual";
+			outFastaFileName = outputDir + m->getRootName(m->getSimpleName(input)) + getOutputFileNameTag("fasta");
+			outQualFileName = outputDir + m->getRootName(m->getSimpleName(input)) + getOutputFileNameTag("qfile");
 		}else{
-			outFastaFileName = outputDir + m->getRootName(m->getSimpleName(input)) + "raw.fasta";
-			outQualFileName = outputDir + m->getRootName(m->getSimpleName(input)) + "raw.qual";
+			outFastaFileName = outputDir + m->getRootName(m->getSimpleName(input)) + "raw." + getOutputFileNameTag("fasta");
+			outQualFileName = outputDir + m->getRootName(m->getSimpleName(input)) + "raw." + getOutputFileNameTag("qfile");
 		}
 		
 		if (sfftxt) { m->openOutputFile(sfftxtFileName, outSfftxt); outSfftxt.setf(ios::fixed, ios::floatfield); outSfftxt.setf(ios::showpoint);  outputNames.push_back(sfftxtFileName);  outputTypes["sfftxt"].push_back(sfftxtFileName); }
@@ -940,17 +963,17 @@ int SffInfoCommand::parseSffTxt() {
 			fileRoot = m->getRootName(fileRoot);
 		}
 		
-		string outFlowFileName = outputDir + fileRoot + "flow";
+		string outFlowFileName = outputDir + fileRoot + getOutputFileNameTag("flow");
 		if (trim) {
-			outFastaFileName = outputDir + fileRoot + "fasta";
-			outQualFileName = outputDir + fileRoot + "qual";
+			outFastaFileName = outputDir + fileRoot + getOutputFileNameTag("fasta");
+			outQualFileName = outputDir + fileRoot + getOutputFileNameTag("qfile");
 		}else{
-			outFastaFileName = outputDir + fileRoot + "raw.fasta";
-			outQualFileName = outputDir + fileRoot + "raw.qual";
+			outFastaFileName = outputDir + fileRoot + "raw." + getOutputFileNameTag("fasta");
+			outQualFileName = outputDir + fileRoot + "raw." + getOutputFileNameTag("qfile");
 		}
 		
 		if (fasta)	{ m->openOutputFile(outFastaFileName, outFasta);	outputNames.push_back(outFastaFileName); outputTypes["fasta"].push_back(outFastaFileName); }
-		if (qual)	{ m->openOutputFile(outQualFileName, outQual);		outputNames.push_back(outQualFileName); outputTypes["qual"].push_back(outQualFileName);  }
+		if (qual)	{ m->openOutputFile(outQualFileName, outQual);		outputNames.push_back(outQualFileName); outputTypes["qfile"].push_back(outQualFileName);  }
 		if (flow)	{ m->openOutputFile(outFlowFileName, outFlow);		outputNames.push_back(outFlowFileName);  outFlow.setf(ios::fixed, ios::floatfield); outFlow.setf(ios::showpoint); outputTypes["flow"].push_back(outFlowFileName);  }
 		
 		//read common header

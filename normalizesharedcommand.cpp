@@ -54,7 +54,26 @@ string NormalizeSharedCommand::getHelpString(){
 	}
 }
 
-
+//**********************************************************************************************************************
+string NormalizeSharedCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "shared") {  outputFileName =  "norm.shared"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "NormalizeSharedCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 NormalizeSharedCommand::NormalizeSharedCommand(){	
 	try {
@@ -449,7 +468,7 @@ int NormalizeSharedCommand::normalize(vector<SharedRAbundVector*>& thisLookUp){
 		
 		if (pickedGroups) { eliminateZeroOTUS(thisLookUp); }
 		
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(inputfile)) + thisLookUp[0]->getLabel() + ".norm.shared";
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(inputfile)) + thisLookUp[0]->getLabel() + "." + getOutputFileNameTag("shared");
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		outputNames.push_back(outputFileName); outputTypes["shared"].push_back(outputFileName);
@@ -540,7 +559,7 @@ int NormalizeSharedCommand::normalize(vector<SharedRAbundFloatVector*>& thisLook
 		//save mothurOut's binLabels to restore for next label
 		vector<string> saveBinLabels = m->currentBinLabels;
 		
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(inputfile)) + thisLookUp[0]->getLabel() + ".norm.shared";
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(inputfile)) + thisLookUp[0]->getLabel() + "." + getOutputFileNameTag("shared");
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		outputNames.push_back(outputFileName); outputTypes["shared"].push_back(outputFileName);

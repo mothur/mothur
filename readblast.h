@@ -10,7 +10,7 @@
  */
 
 #include "mothur.h"
-#include "sparsematrix.hpp"
+#include "sparsedistancematrix.h"
 #include "nameassignment.hpp"
 
 /****************************************************************************************/
@@ -26,7 +26,7 @@ public:
 	~ReadBlast() {}
 	
 	int read(NameAssignment*);
-	SparseMatrix* getDistMatrix()		{	return matrix;		}
+	SparseDistanceMatrix* getDistMatrix()		{	return matrix;		}
 	vector<seqDist> getOverlapMatrix()	{	return overlap;		}
 	string getOverlapFile()				{	return overlapFile;	}
 	string getDistFile()				{	return distFile;	}
@@ -38,7 +38,7 @@ private:
 	bool minWanted;  //if true choose min bsr, if false choose max bsr
 	bool hclusterWanted;
 	
-	SparseMatrix* matrix;
+	SparseDistanceMatrix* matrix;
 	vector<seqDist> overlap;
 	MothurOut* m;
 	

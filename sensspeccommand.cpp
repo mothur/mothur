@@ -45,6 +45,26 @@ string SensSpecCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string SensSpecCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "sensspec")            {   outputFileName =  "sensspec";   }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SensSpecCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 SensSpecCommand::SensSpecCommand(){	
 	try {
 		abort = true; calledHelp = true; 
@@ -197,7 +217,7 @@ SensSpecCommand::SensSpecCommand(string option)  {
 				else { allLines = 1;  }
 			}
 			
-			sensSpecFileName = outputDir + m->getRootName(m->getSimpleName(listFile)) + "sensspec";
+			sensSpecFileName = outputDir + m->getRootName(m->getSimpleName(listFile)) + getOutputFileNameTag("sensspec");
 		}
 	}
 	catch(exception& e) {

@@ -21,6 +21,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "reverse.seqs";			}
 	string getCommandCategory()		{ return "Sequence Processing";		}
+	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Reverse.seqs"; }
 	string getDescription()		{ return "outputs a fasta file containing the reverse-complements"; }

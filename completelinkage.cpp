@@ -3,7 +3,7 @@
 
 /***********************************************************************/
 
-CompleteLinkage::CompleteLinkage(RAbundVector* rav, ListVector* lv, SparseMatrix* dm, float c, string s) :
+CompleteLinkage::CompleteLinkage(RAbundVector* rav, ListVector* lv, SparseDistanceMatrix* dm, float c, string s) :
 	Cluster(rav, lv, dm, c, s)
 {}
 
@@ -16,11 +16,11 @@ string CompleteLinkage::getTag() {
 
 /***********************************************************************/
 //This function updates the distance based on the furthest neighbor method.
-bool CompleteLinkage::updateDistance(MatData& colCell, MatData& rowCell) {
+bool CompleteLinkage::updateDistance(PDistCell& colCell, PDistCell& rowCell) {
 	try {
 		bool changed = false;
-		if (colCell->dist < rowCell->dist) {
-			colCell->dist = rowCell->dist;
+		if (colCell.dist < rowCell.dist) {
+			colCell.dist = rowCell.dist;
 			changed = true;
 		}	
 		return(changed);

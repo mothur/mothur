@@ -41,13 +41,13 @@ private:
 	struct colDist {
 		int col;
 		int row;
-		double dist;
+		float dist;
 		colDist(int r, int c, double d) : row(r), col(c), dist(d) {}
 	};
 	
 	RAbundVector* rabund;
 	ListVector* list;
-	vector< vector<double> > dMatrix;	
+	vector< vector<float> > dMatrix;	
 	//vector<colDist> rowSmallDists;
 	
 	int smallRow;

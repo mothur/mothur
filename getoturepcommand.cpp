@@ -95,6 +95,27 @@ string GetOTURepCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string GetOTURepCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "fasta")            {   outputFileName =  "rep.fasta";   }
+            else if (type == "name")        {   outputFileName =  "rep.names";   }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetOTURepCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 GetOTURepCommand::GetOTURepCommand(){	
 	try {
 		abort = true; calledHelp = true; 
@@ -338,16 +359,19 @@ int GetOTURepCommand::execute(){
 
 			list = readMatrix->getListVector();
 
-			SparseMatrix* matrix = readMatrix->getMatrix();
+			SparseDistanceMatrix* matrix = readMatrix->getDMatrix();
 			
 			// Create a data structure to quickly access the distance information.
 			// It consists of a vector of distance maps, where each map contains
 			// all distances of a certain sequence. Vector and maps are accessed
 			// via the index of a sequence in the distance matrix
 			seqVec = vector<SeqMap>(list->size()); 
-			for (MatData currentCell = matrix->begin(); currentCell != matrix->end(); currentCell++) {
-				if (m->control_pressed) { delete readMatrix; return 0; }
-				seqVec[currentCell->row][currentCell->column] = currentCell->dist;
+            for (int i = 0; i < matrix->seqVec.size(); i++) {
+                for (int j = 0; j < matrix->seqVec[i].size(); j++) {
+                    if (m->control_pressed) { delete readMatrix; return 0; }
+                    //already added everyone else in row
+                    if (i < matrix->seqVec[i][j].index) {  seqVec[i][matrix->seqVec[i][j].index] = matrix->seqVec[i][j].dist;  }
+                }
 			}
 			//add dummy map for unweighted calc
 			SeqMap dummy;
@@ -771,7 +795,7 @@ int GetOTURepCommand::process(ListVector* processList) {
 		map<string, ofstream*> filehandles;
 		
 		if (Groups.size() == 0) { //you don't want to use groups
-			outputNamesFile  = outputDir + m->getRootName(m->getSimpleName(listfile)) + processList->getLabel() + ".rep.names";
+			outputNamesFile  = outputDir + m->getRootName(m->getSimpleName(listfile)) + processList->getLabel() + "." + getOutputFileNameTag("name");
 			m->openOutputFile(outputNamesFile, newNamesOutput);
 			outputNames.push_back(outputNamesFile); outputTypes["name"].push_back(outputNamesFile); 
 			outputNameFiles[outputNamesFile] = processList->getLabel();
@@ -780,7 +804,7 @@ int GetOTURepCommand::process(ListVector* processList) {
 			for (int i=0; i<Groups.size(); i++) {
 				temp = new ofstream;
 				filehandles[Groups[i]] = temp;
-				outputNamesFile = outputDir + m->getRootName(m->getSimpleName(listfile)) + processList->getLabel() + "." + Groups[i] + ".rep.names";
+				outputNamesFile = outputDir + m->getRootName(m->getSimpleName(listfile)) + processList->getLabel() + "." + Groups[i] + "." + getOutputFileNameTag("name");
 				
 				m->openOutputFile(outputNamesFile, *(temp));
 				outputNames.push_back(outputNamesFile); outputTypes["name"].push_back(outputNamesFile);
@@ -868,7 +892,7 @@ int GetOTURepCommand::processFastaNames(string filename, string label) {
 
 		//create output file
 		if (outputDir == "") { outputDir += m->hasPath(listfile); }
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(listfile)) + label + ".rep.fasta";
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(listfile)) + label + "." + getOutputFileNameTag("fasta");
 		m->openOutputFile(outputFileName, out);
 		vector<repStruct> reps;
 		outputNames.push_back(outputFileName); outputTypes["fasta"].push_back(outputFileName);

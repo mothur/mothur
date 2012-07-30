@@ -41,7 +41,6 @@ string MergeFileCommand::getHelpString(){
 		exit(1);
 	}
 }
-
 //**********************************************************************************************************************
 MergeFileCommand::MergeFileCommand(){	
 	try {
@@ -130,29 +129,10 @@ int MergeFileCommand::execute(){
 	try {
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
-		ofstream outputFile;
-		m->openOutputFile(outputFileName, outputFile);
+		m->mothurRemove(outputFileName);
+		for(int i=0;i<numInputFiles;i++){  m->appendFiles(fileNames[i], outputFileName);  }
 		
-		char c;
-		for(int i=0;i<numInputFiles;i++){
-			ifstream inputFile; //declaration must be inside for loop of windows throws an error
-			
-			m->openInputFile(fileNames[i], inputFile);
-			
-			while(!inputFile.eof()){	
-				if (m->control_pressed) { outputTypes.clear(); inputFile.close(); outputFile.close(); m->mothurRemove(outputFileName); return 0;  }
-			
-				c = inputFile.get(); 
-				//-1 is eof char
-				if (int(c) != -1) { outputFile << c; }   
-			}
-			
-			inputFile.close();
-		}
-		
-		outputFile.close();
-		
-		if (m->control_pressed) { outputTypes.clear();  m->mothurRemove(outputFileName); return 0;  }
+		if (m->control_pressed) {  m->mothurRemove(outputFileName); return 0;  }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Name: "); m->mothurOutEndLine();

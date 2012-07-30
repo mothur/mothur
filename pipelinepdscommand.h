@@ -26,6 +26,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "pipeline.pds";	}
 	string getCommandCategory()		{ return "Hidden";			}
+	string getOutputFileNameTag(string, string) { return ""; }
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Pipeline.pds"; }
 	string getDescription()		{ return "pat's pipeline"; }

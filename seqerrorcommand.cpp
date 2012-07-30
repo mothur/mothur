@@ -63,20 +63,52 @@ string SeqErrorCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string SeqErrorCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "errorsummary")            {   outputFileName =  "error.summary";   }
+            else if (type == "errorseq")            {   outputFileName =  "error.seq";   }
+            else if (type == "errorquality")            {   outputFileName =  "error.quality";   }
+            else if (type == "errorqualforward")            {   outputFileName =  "error.qual.forward";   }
+            else if (type == "errorqualreverse")            {   outputFileName =  "error.qual.reverse";   }
+            else if (type == "errorforward")            {   outputFileName =  "error.seq.forward";   }
+            else if (type == "errorreverse")            {   outputFileName =  "error.seq.reverse";   }
+            else if (type == "errorcount")            {   outputFileName =  "error.count";   }
+            else if (type == "errormatrix")            {   outputFileName =  "error.matrix";   }
+            else if (type == "errorchimera")            {   outputFileName =  "error.chimera";   }
+            else if (type == "errorref-query")            {   outputFileName =  "error.ref-query";   }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SeqErrorCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 SeqErrorCommand::SeqErrorCommand(){	
 	try {
 		abort = true; calledHelp = true; 
 		setParameters();
 		vector<string> tempOutNames;
-		outputTypes["error.summary"] = tempOutNames;
-		outputTypes["error.seq"] = tempOutNames;
-		outputTypes["error.quality"] = tempOutNames;
-		outputTypes["error.qual.forward"] = tempOutNames;
-		outputTypes["error.qual.reverse"] = tempOutNames;
-		outputTypes["error.forward"] = tempOutNames;
-		outputTypes["error.reverse"] = tempOutNames;
-		outputTypes["error.count"] = tempOutNames;
-		outputTypes["error.matrix"] = tempOutNames;
+		outputTypes["errorsummary"] = tempOutNames;
+		outputTypes["errorseq"] = tempOutNames;
+		outputTypes["errorquality"] = tempOutNames;
+		outputTypes["errorqualforward"] = tempOutNames;
+		outputTypes["errorqualreverse"] = tempOutNames;
+		outputTypes["errorforward"] = tempOutNames;
+		outputTypes["errorreverse"] = tempOutNames;
+		outputTypes["errorcount"] = tempOutNames;
+		outputTypes["errormatrix"] = tempOutNames;
+        outputTypes["errorchimera"] = tempOutNames;
+        outputTypes["errorref-query"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SeqErrorCommand", "SeqErrorCommand");
@@ -112,15 +144,17 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 			
 			//initialize outputTypes
 			vector<string> tempOutNames;
-			outputTypes["error.summary"] = tempOutNames;
-			outputTypes["error.seq"] = tempOutNames;
-			outputTypes["error.quality"] = tempOutNames;
-			outputTypes["error.qual.forward"] = tempOutNames;
-			outputTypes["error.qual.reverse"] = tempOutNames;
-			outputTypes["error.forward"] = tempOutNames;
-			outputTypes["error.reverse"] = tempOutNames;
-			outputTypes["error.count"] = tempOutNames;
-			outputTypes["error.matrix"] = tempOutNames;
+			outputTypes["errorsummary"] = tempOutNames;
+			outputTypes["errorseq"] = tempOutNames;
+			outputTypes["errorquality"] = tempOutNames;
+			outputTypes["errorqualforward"] = tempOutNames;
+			outputTypes["errorqualreverse"] = tempOutNames;
+			outputTypes["errorforward"] = tempOutNames;
+			outputTypes["errorreverse"] = tempOutNames;
+			outputTypes["errorcount"] = tempOutNames;
+			outputTypes["errormatrix"] = tempOutNames;
+            outputTypes["errorchimera"] = tempOutNames;
+            outputTypes["errorref-query"] = tempOutNames;
 
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
@@ -269,14 +303,15 @@ int SeqErrorCommand::execute(){
 		totalBases = 0;
 		totalMatches = 0;
 		
-		string errorSummaryFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".error.summary";
-		outputNames.push_back(errorSummaryFileName); outputTypes["error.summary"].push_back(errorSummaryFileName);
+        string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(queryFileName));
+		string errorSummaryFileName = fileNameRoot + getOutputFileNameTag("errorsummary");
+		outputNames.push_back(errorSummaryFileName); outputTypes["errorsummary"].push_back(errorSummaryFileName);
 			
-		string errorSeqFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".error.seq";
-		outputNames.push_back(errorSeqFileName); outputTypes["error.seq"].push_back(errorSeqFileName);
+		string errorSeqFileName = fileNameRoot + getOutputFileNameTag("errorseq");
+		outputNames.push_back(errorSeqFileName); outputTypes["errorseq"].push_back(errorSeqFileName);
 		
-		string errorChimeraFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".error.chimera";
-		outputNames.push_back(errorChimeraFileName); outputTypes["error.chimera"].push_back(errorChimeraFileName);
+		string errorChimeraFileName = fileNameRoot + getOutputFileNameTag("errorchimera");
+		outputNames.push_back(errorChimeraFileName); outputTypes["errorchimera"].push_back(errorChimeraFileName);
 		
 		getReferences();	//read in reference sequences - make sure there's no ambiguous bases
 
@@ -317,10 +352,10 @@ int SeqErrorCommand::execute(){
 		
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
 
-		string errorCountFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".error.count";
+		string errorCountFileName = fileNameRoot + getOutputFileNameTag("errorcount");
 		ofstream errorCountFile;
 		m->openOutputFile(errorCountFileName, errorCountFile);
-		outputNames.push_back(errorCountFileName);  outputTypes["error.count"].push_back(errorCountFileName);
+		outputNames.push_back(errorCountFileName);  outputTypes["errorcount"].push_back(errorCountFileName);
 		m->mothurOut("Overall error rate:\t" + toString((double)(totalBases - totalMatches) / (double)totalBases) + "\n");
 		m->mothurOut("Errors\tSequences\n");
 		errorCountFile << "Errors\tSequences\n";		
@@ -334,10 +369,10 @@ int SeqErrorCommand::execute(){
 
 		printSubMatrix();
 				
-		string megAlignmentFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".error.ref-query";
+		string megAlignmentFileName = fileNameRoot + getOutputFileNameTag("errorref-query");
 		ofstream megAlignmentFile;
 		m->openOutputFile(megAlignmentFileName, megAlignmentFile);
-		outputNames.push_back(megAlignmentFileName);  outputTypes["error.ref-query"].push_back(megAlignmentFileName);
+		outputNames.push_back(megAlignmentFileName);  outputTypes["errorref-query"].push_back(megAlignmentFileName);
 		
 		for(int i=0;i<numRefs;i++){
 			megAlignmentFile << referenceSeqs[i].getInlineSeq() << endl;
@@ -747,7 +782,7 @@ int SeqErrorCommand::driver(string filename, string qFileName, string rFileName,
 				if (queryFile.eof()) { break; }
 			#endif
 			
-			if(index % 100 == 0){	m->mothurOut(toString(index) + '\n');	}
+			if(index % 100 == 0){	m->mothurOut(toString(index));	m->mothurOutEndLine(); }
 		}
 		queryFile.close();
 		if(qFileName != "" && rFileName != ""){  reportFile.close(); qualFile.close(); }
@@ -755,7 +790,7 @@ int SeqErrorCommand::driver(string filename, string qFileName, string rFileName,
 		errorSeqFile.close();
 		
 		//report progress
-		if(index % 100 != 0){	m->mothurOut(toString(index) + '\n');	}
+		if(index % 100 != 0){	m->mothurOut(toString(index));	m->mothurOutEndLine(); }
 		
 		return index;
 	}
@@ -786,12 +821,16 @@ void SeqErrorCommand::getReferences(){
 				//
 				//			int endPos = rdb->referenceSeqs[i].getEndPos();
 				//			if(endPos < minEndPos)		{	minEndPos = endPos;		}				
+				if (rdb->referenceSeqs[i].getNumBases() == 0) {
+                    m->mothurOut("[WARNING]: " + rdb->referenceSeqs[i].getName() + " is blank, ignoring.");m->mothurOutEndLine(); 
+                }else {
+                    referenceSeqs.push_back(rdb->referenceSeqs[i]);
+                }
 				
-				referenceSeqs.push_back(rdb->referenceSeqs[i]);
 			}
 			referenceFileName = rdb->getSavedReference();
 			
-			m->mothurOut("It took " + toString(time(NULL) - start) + " to load " + toString(rdb->referenceSeqs.size()) + " sequences.");m->mothurOutEndLine();  
+			m->mothurOut("It took " + toString(time(NULL) - start) + " to load " + toString(referenceSeqs.size()) + " sequences.");m->mothurOutEndLine();  
 		
 		}else {
 			int start = time(NULL);
@@ -809,9 +848,12 @@ void SeqErrorCommand::getReferences(){
 	//
 	//			int endPos = currentSeq.getEndPos();
 	//			if(endPos < minEndPos)		{	minEndPos = endPos;		}
-				referenceSeqs.push_back(currentSeq);
-				
-				if (rdb->save) { rdb->referenceSeqs.push_back(currentSeq); }
+                if (currentSeq.getNumBases() == 0) {
+                    m->mothurOut("[WARNING]: " + currentSeq.getName() + " is blank, ignoring.");m->mothurOutEndLine(); 
+                }else {
+                    referenceSeqs.push_back(currentSeq);
+                    if (rdb->save) { rdb->referenceSeqs.push_back(currentSeq); }
+                }
 					
 				m->gobble(referenceFile);
 			}
@@ -825,7 +867,7 @@ void SeqErrorCommand::getReferences(){
 		for(int i=0;i<numRefs;i++){
 			referenceSeqs[i].padToPos(maxStartPos);
 			referenceSeqs[i].padFromPos(minEndPos);
-		}
+        }
 		
 		if(numAmbigSeqs != 0){
 			m->mothurOut("Warning: " + toString(numAmbigSeqs) + " reference sequences have ambiguous bases, these bases will be ignored\n");
@@ -929,7 +971,6 @@ int SeqErrorCommand::getErrors(Sequence query, Sequence reference, Compare& erro
 		errors.errorRate = (double)(errors.total-errors.matches) / (double)errors.total;
 		errors.queryName = query.getName();
 		errors.refName = reference.getName();
-		
 		//return errors;
         return 0;
 	}
@@ -1046,10 +1087,11 @@ void SeqErrorCommand::printErrorData(Compare error, int numParentSeqs, ofstream&
 
 void SeqErrorCommand::printSubMatrix(){
 	try {
-		string subMatrixFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".error.matrix";
+        string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(queryFileName));
+		string subMatrixFileName = fileNameRoot + getOutputFileNameTag("errormatrix");
 		ofstream subMatrixFile;
 		m->openOutputFile(subMatrixFileName, subMatrixFile);
-		outputNames.push_back(subMatrixFileName);  outputTypes["error.matrix"].push_back(subMatrixFileName);
+		outputNames.push_back(subMatrixFileName);  outputTypes["errormatrix"].push_back(subMatrixFileName);
 		vector<string> bases(6);
 		bases[0] = "A";
 		bases[1] = "T";
@@ -1092,10 +1134,11 @@ void SeqErrorCommand::printSubMatrix(){
 
 void SeqErrorCommand::printErrorFRFile(map<char, vector<int> > errorForward, map<char, vector<int> > errorReverse){
 	try{
-		string errorForwardFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".error.seq.forward";
+        string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(queryFileName));
+		string errorForwardFileName = fileNameRoot + getOutputFileNameTag("errorforward");
 		ofstream errorForwardFile;
 		m->openOutputFile(errorForwardFileName, errorForwardFile);
-		outputNames.push_back(errorForwardFileName);  outputTypes["error.forward"].push_back(errorForwardFileName);
+		outputNames.push_back(errorForwardFileName);  outputTypes["errorforward"].push_back(errorForwardFileName);
 
 		errorForwardFile << "position\ttotalseqs\tmatch\tsubstitution\tinsertion\tdeletion\tambiguous" << endl;
 		for(int i=0;i<maxLength;i++){
@@ -1110,10 +1153,10 @@ void SeqErrorCommand::printErrorFRFile(map<char, vector<int> > errorForward, map
 		}
 		errorForwardFile.close();
 
-		string errorReverseFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".error.seq.reverse";
+		string errorReverseFileName = fileNameRoot + getOutputFileNameTag("errorreverse");
 		ofstream errorReverseFile;
 		m->openOutputFile(errorReverseFileName, errorReverseFile);
-		outputNames.push_back(errorReverseFileName);  outputTypes["error.reverse"].push_back(errorReverseFileName);
+		outputNames.push_back(errorReverseFileName);  outputTypes["errorreverse"].push_back(errorReverseFileName);
 
 		errorReverseFile << "position\ttotalseqs\tmatch\tsubstitution\tinsertion\tdeletion\tambiguous" << endl;
 		for(int i=0;i<maxLength;i++){
@@ -1138,11 +1181,11 @@ void SeqErrorCommand::printErrorFRFile(map<char, vector<int> > errorForward, map
 
 void SeqErrorCommand::printErrorQuality(map<char, vector<int> > qScoreErrorMap){
 	try{
-
-		string errorQualityFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".error.quality";
+        string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(queryFileName));
+		string errorQualityFileName = fileNameRoot + getOutputFileNameTag("errorquality");
 		ofstream errorQualityFile;
 		m->openOutputFile(errorQualityFileName, errorQualityFile);
-		outputNames.push_back(errorQualityFileName);  outputTypes["error.quality"].push_back(errorQualityFileName);
+		outputNames.push_back(errorQualityFileName);  outputTypes["errorquality"].push_back(errorQualityFileName);
 
 		errorQualityFile << "qscore\tmatches\tsubstitutions\tinsertions\tambiguous" << endl;
 		for(int i=0;i<41;i++){
@@ -1172,11 +1215,11 @@ void SeqErrorCommand::printQualityFR(vector<vector<int> > qualForwardMap, vector
 				}
 			}
 		}
-
-		string qualityForwardFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".error.qual.forward";
+        string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(queryFileName));
+		string qualityForwardFileName = fileNameRoot + getOutputFileNameTag("errorqualforward");
 		ofstream qualityForwardFile;
 		m->openOutputFile(qualityForwardFileName, qualityForwardFile);
-		outputNames.push_back(qualityForwardFileName);  outputTypes["error.qual.forward"].push_back(qualityForwardFileName);
+		outputNames.push_back(qualityForwardFileName);  outputTypes["errorqualforward"].push_back(qualityForwardFileName);
 
 		for(int i=0;i<numColumns;i++){	qualityForwardFile << '\t' << i;	}	qualityForwardFile << endl;
 
@@ -1191,10 +1234,10 @@ void SeqErrorCommand::printQualityFR(vector<vector<int> > qualForwardMap, vector
 		qualityForwardFile.close();
 
 		
-		string qualityReverseFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".error.qual.reverse";
+		string qualityReverseFileName = fileNameRoot + getOutputFileNameTag("errorqualreverse");
 		ofstream qualityReverseFile;
 		m->openOutputFile(qualityReverseFileName, qualityReverseFile);
-		outputNames.push_back(qualityReverseFileName);  outputTypes["error.qual.reverse"].push_back(qualityReverseFileName);
+		outputNames.push_back(qualityReverseFileName);  outputTypes["errorqualreverse"].push_back(qualityReverseFileName);
 		
 		for(int i=0;i<numColumns;i++){	qualityReverseFile << '\t' << i;	}	qualityReverseFile << endl;
 		for(int i=0;i<numRows;i++){

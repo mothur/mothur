@@ -20,6 +20,7 @@ public:
 	ReadColumnMatrix(string, bool);
 	~ReadColumnMatrix();
 	int read(NameAssignment*);
+    int read(CountTable*);
 private:
 	ifstream fileHandle;
 	string distFile;

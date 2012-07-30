@@ -41,7 +41,8 @@ public:
     string getCommandName()			{ return "make.contigs";			}
     string getCommandCategory()		{ return "Sequence Processing";		} 
     //commmand category choices: Sequence Processing, OTU-Based Approaches, Hypothesis Testing, Phylotype Analysis, General, Clustering and Hidden
-    string getHelpString();	
+    string getOutputFileNameTag(string, string);
+	string getHelpString();	
     string getCitation() { return "http://www.mothur.org/wiki/Make.contigs"; }
     string getDescription()		{ return "description"; }
     
@@ -167,7 +168,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                     contigScores.push_back(scores1[ABaseMap[i]]);
                     if (scores1[ABaseMap[i]] < scores2[BBaseMap[i]]) { contigScores[i] = scores2[BBaseMap[i]]; }
                 }else if (((seq1[i] == '.') || (seq1[i] == '-')) && ((seq2[i] != '-') && (seq2[i] != '.'))) { //seq1 is a gap and seq2 is a base, choose seq2, unless quality score for base is below threshold. In that case eliminate base
-                    if (scores2[BBaseMap[i]] >= pDataArray->threshold)) {
+                    if (scores2[BBaseMap[i]] >= pDataArray->threshold) {
                         contig += seq2[i];
                         contigScores.push_back(scores2[BBaseMap[i]]);
                     }

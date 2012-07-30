@@ -15,7 +15,7 @@ vector<string> DistanceCommand::setParameters(){
 		CommandParameter pcolumn("column", "InputTypes", "", "", "none", "none", "OldFastaColumn",false,false); parameters.push_back(pcolumn);
 		CommandParameter poldfasta("oldfasta", "InputTypes", "", "", "none", "none", "OldFastaColumn",false,false); parameters.push_back(poldfasta);
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
-		CommandParameter poutput("output", "Multiple", "column-lt-square", "column", "", "", "",false,false); parameters.push_back(poutput);
+		CommandParameter poutput("output", "Multiple", "column-lt-square-phylip", "column", "", "", "",false,false); parameters.push_back(poutput);
 		CommandParameter pcalc("calc", "Multiple", "nogaps-eachgap-onegap", "onegap", "", "", "",false,false); parameters.push_back(pcalc);
 		CommandParameter pcountends("countends", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pcountends);
 		CommandParameter pcompress("compress", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pcompress);
@@ -55,6 +55,27 @@ string DistanceCommand::getHelpString(){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "DistanceCommand", "getHelpString");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string DistanceCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "phylip") {  outputFileName =  "dist"; }
+            else if (type == "column") {  outputFileName =  "dist"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "DistanceCommand", "getOutputFileNameTag");
 		exit(1);
 	}
 }
@@ -189,6 +210,7 @@ DistanceCommand::DistanceCommand(string option) {
 			convert(temp, compress);
 
 			output = validParameter.validFile(parameters, "output", false);		if(output == "not found"){	output = "column"; }
+            if (output == "phylip") { output = "lt";  }
 			
 			if (((column != "") && (oldfastafile == "")) || ((column == "") && (oldfastafile != ""))) { m->mothurOut("If you provide column or oldfasta, you must provide both."); m->mothurOutEndLine(); abort=true; }
 			
@@ -229,12 +251,12 @@ int DistanceCommand::execute(){
 		string outputFile;
 				
 		if (output == "lt") { //does the user want lower triangle phylip formatted file 
-			outputFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "phylip.dist";
+			outputFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "phylip." + getOutputFileNameTag("phylip");
 			m->mothurRemove(outputFile); outputTypes["phylip"].push_back(outputFile);
 			
 			//output numSeqs to phylip formatted dist file
 		}else if (output == "column") { //user wants column format
-			outputFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "dist";
+			outputFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + getOutputFileNameTag("column");
 			outputTypes["column"].push_back(outputFile);
 			
 			//so we don't accidentally overwrite
@@ -245,7 +267,7 @@ int DistanceCommand::execute(){
 			
 			m->mothurRemove(outputFile);
 		}else { //assume square
-			outputFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "square.dist";
+			outputFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "square." + getOutputFileNameTag("phylip");
 			m->mothurRemove(outputFile);
 			outputTypes["phylip"].push_back(outputFile);
 		}

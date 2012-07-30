@@ -14,7 +14,8 @@
 #include "sabundvector.hpp"
 #include "listvector.hpp"
 #include "cluster.hpp"
-#include "sparsematrix.hpp"
+#include "sparsedistancematrix.h"
+#include "counttable.h"
 
 /* The cluster() command:
 	The cluster command outputs a .list , .rabund and .sabund files.  
@@ -34,6 +35,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "cluster";		}
 	string getCommandCategory()		{ return "Clustering";	}
+	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "Schloss PD, Westcott SL (2011). Assessing and improving methods used in OTU-based approaches for 16S rRNA gene sequence analysis. Appl Environ Microbiol. \nhttp://www.mothur.org/wiki/Cluster"; }
 	string getDescription()		{ return "cluster your sequences into OTUs using a distance matrix"; }
@@ -43,7 +45,7 @@ public:
 	
 private:
 	Cluster* cluster;
-	SparseMatrix* matrix;
+	SparseDistanceMatrix* matrix;
 	ListVector* list;
 	RAbundVector* rabund;
 	RAbundVector oldRAbund;
@@ -51,7 +53,7 @@ private:
 
 	bool abort, hard, sim;
 
-	string method, fileroot, tag, outputDir, phylipfile, columnfile, namefile, format, distfile;
+	string method, fileroot, tag, outputDir, phylipfile, columnfile, namefile, format, distfile, countfile;
 	double cutoff;
 	string showabund, timing;
 	int precision, length;
@@ -63,6 +65,8 @@ private:
 	
 	void printData(string label);
 	vector<string> outputNames;
+    
+    int createRabund(CountTable*&, ListVector*&, RAbundVector*&);
 };
 
 #endif

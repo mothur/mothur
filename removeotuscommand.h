@@ -25,6 +25,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "remove.otus";				}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
+	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Remove.otus"; }
 	string getDescription()		{ return "outputs a new list file containing the otus NOT containing sequences from the groups specified"; }
@@ -38,7 +39,6 @@ private:
 	vector<string> outputNames, Groups;
 	GroupMap* groupMap;
 	
-	void readAccnos();
 	int readListGroup();
 	int processList(ListVector*&, GroupMap*&, ofstream&, ofstream&, bool&);
 	

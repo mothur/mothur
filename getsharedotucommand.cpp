@@ -59,6 +59,29 @@ string GetSharedOTUCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string GetSharedOTUCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "fasta")            {   outputFileName =  "shared.fasta";   }
+            else if (type == "accnos")      {   outputFileName =  "accnos";         }
+            else if (type == "sharedseqs")  {   outputFileName =  "shared.seqs";    }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetSharedOTUCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
 GetSharedOTUCommand::GetSharedOTUCommand(){	
 	try {
 		abort = true; calledHelp = true;
@@ -372,9 +395,9 @@ int GetSharedOTUCommand::process(ListVector* shared) {
 		
 		if (outputDir == "") { outputDir += m->hasPath(listfile); }
 		if (output != "accnos") {
-			outputFileNames = outputDir + m->getRootName(m->getSimpleName(listfile)) + shared->getLabel() + userGroups + ".shared.seqs";
+			outputFileNames = outputDir + m->getRootName(m->getSimpleName(listfile)) + shared->getLabel() + userGroups + "." + getOutputFileNameTag("sharedseqs");
 		}else {
-			outputFileNames = outputDir + m->getRootName(m->getSimpleName(listfile)) + shared->getLabel() + userGroups + ".accnos";
+			outputFileNames = outputDir + m->getRootName(m->getSimpleName(listfile)) + shared->getLabel() + userGroups + "." + getOutputFileNameTag("accnos");
 		}
 		m->openOutputFile(outputFileNames, outNames);
 		
@@ -394,10 +417,11 @@ int GetSharedOTUCommand::process(ListVector* shared) {
 			
 			vector<string> namesOfSeqsInThisBin;
 			
-			string names = shared->get(i);  
-			while ((names.find_first_of(',') != -1)) { 
-				string name = names.substr(0,names.find_first_of(','));
-				names = names.substr(names.find_first_of(',')+1, names.length());
+			string names = shared->get(i); 
+            vector<string> binNames;
+            m->splitAtComma(names, binNames);
+			for(int j = 0; j < binNames.size(); j++) {
+				string name = binNames[j];
 				
 				//find group
 				string seqGroup = groupMap->getGroup(name);
@@ -412,20 +436,6 @@ int GetSharedOTUCommand::process(ListVector* shared) {
 				if (it == groupFinder.end()) {  uniqueOTU = false;  } //you have a sequence from a group you don't want
 				else {  atLeastOne[seqGroup]++;  }
 			}
-			
-			//get last name
-			string seqGroup = groupMap->getGroup(names);
-			if (output != "accnos") {
-				namesOfSeqsInThisBin.push_back((names + "|" + seqGroup + "|" + toString(i+1)));
-			}else {  namesOfSeqsInThisBin.push_back(names);	}
-			
-			if (seqGroup == "not found") { m->mothurOut(names + " is not in your groupfile. Please correct."); m->mothurOutEndLine(); exit(1);  }
-			
-			//is this seq in one of hte groups we care about
-			it = groupFinder.find(seqGroup);
-			if (it == groupFinder.end()) {  uniqueOTU = false;  } //you have a sequence from a group you don't want
-			else {  atLeastOne[seqGroup]++;  }
-			
 			
 			//make sure you have at least one seq from each group you want
 			bool sharedByAll = true;
@@ -481,7 +491,7 @@ int GetSharedOTUCommand::process(ListVector* shared) {
 		//if fasta file provided output new fasta file
 		if ((fastafile != "") && wroteSomething) {
 			if (outputDir == "") { outputDir += m->hasPath(fastafile); }
-			string outputFileFasta = outputDir + m->getRootName(m->getSimpleName(fastafile)) + shared->getLabel() + userGroups + ".shared.fasta";
+			string outputFileFasta = outputDir + m->getRootName(m->getSimpleName(fastafile)) + shared->getLabel() + userGroups + "." + getOutputFileNameTag("fasta");
 			ofstream outFasta;
 			m->openOutputFile(outputFileFasta, outFasta);
 			outputNames.push_back(outputFileFasta); outputTypes["fasta"].push_back(outputFileFasta);

@@ -49,7 +49,27 @@ string ClassifyTreeCommand::getHelpString(){
 		exit(1);
 	}
 }
-
+//**********************************************************************************************************************
+string ClassifyTreeCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string outputFileName = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "tree") {  outputFileName =  "taxonomy.tre"; }
+            else if (type == "summary") {  outputFileName =  "taxonomy.summary"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+        }
+        return outputFileName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClassifyTreeCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 ClassifyTreeCommand::ClassifyTreeCommand(){	
 	try {
@@ -197,11 +217,11 @@ int ClassifyTreeCommand::execute(){
         Tree* outputTree = T[0];
         delete reader;
 
-        if (namefile != "") { readNamesFile(); }
+        if (namefile != "") { m->readNames(namefile, nameMap, nameCount); }
                         
         if (m->control_pressed) { delete tmap;  delete outputTree;  return 0; }
 		
-        readTaxonomyFile();
+        m->readTax(taxonomyfile, taxMap);
         
         /***************************************************/
         //		get concensus taxonomies                    //
@@ -242,7 +262,7 @@ int ClassifyTreeCommand::getClassifications(Tree*& T){
 		
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(treefile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(treefile)) + "taxonomy.summary";
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(treefile)) + getOutputFileNameTag("summary");
 		outputNames.push_back(outputFileName); outputTypes["summary"].push_back(outputFileName);
 		
 		ofstream out;
@@ -256,7 +276,7 @@ int ClassifyTreeCommand::getClassifications(Tree*& T){
 		
 		string treeOutputDir = outputDir;
 		if (outputDir == "") {  treeOutputDir += m->hasPath(treefile);  }
-		string outputTreeFileName = treeOutputDir + m->getRootName(m->getSimpleName(treefile)) + "taxonomy.tre";
+		string outputTreeFileName = treeOutputDir + m->getRootName(m->getSimpleName(treefile)) + getOutputFileNameTag("tree");
 		
 		//create a map from tree node index to names of descendants, save time later
 		map<int, map<string, set<string> > > nodeToDescendants; //node# -> (groupName -> groupMembers)
@@ -453,68 +473,6 @@ map<string, set<string> > ClassifyTreeCommand::getDescendantList(Tree*& T, int i
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-int ClassifyTreeCommand::readTaxonomyFile() {
-	try {
-		
-		ifstream in;
-		m->openInputFile(taxonomyfile, in);
-		
-		string name, tax;
-        
-		while(!in.eof()){
-			in >> name >> tax;		
-			m->gobble(in);
-			
-			//are there confidence scores, if so remove them
-			if (tax.find_first_of('(') != -1) {  m->removeConfidences(tax);	}
-			
-			taxMap[name] = tax;
-			
-			if (m->control_pressed) { in.close(); taxMap.clear(); return 0; }
-		}
-		in.close();
-		
-		return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClassifyTreeCommand", "readTaxonomyFile");
-		exit(1);
-	}
-}
-
-/*****************************************************************/
-int ClassifyTreeCommand::readNamesFile() {
-	try {
-		ifstream inNames;
-		m->openInputFile(namefile, inNames);
-		
-		string name, names;
-        
-		while(!inNames.eof()){
-			inNames >> name;			//read from first column  A
-			inNames >> names;		//read from second column  A,B,C,D
-			m->gobble(inNames);
-			
-			//parse names into vector
-			vector<string> theseNames;
-			m->splitAtComma(names, theseNames);
-            
-			for (int i = 0; i < theseNames.size(); i++) {  nameMap[theseNames[i]] = name;  }
-            nameCount[name] = theseNames.size();
-			
-			if (m->control_pressed) { inNames.close(); nameMap.clear(); return 0; }
-		}
-		inNames.close();
-		
-		return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClassifyTreeCommand", "readNamesFile");
-		exit(1);
-	}
-}
-
 /*****************************************************************/
 
 

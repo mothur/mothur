@@ -51,6 +51,26 @@ string AmovaCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string AmovaCommand::getOutputFileNameTag(string type, string inputName=""){	
+	try {
+        string tag = "";
+		map<string, vector<string> >::iterator it;
+        
+        //is this a type this command creates
+        it = outputTypes.find(type);
+        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+        else {
+            if (type == "amova") {  tag = "amova"; }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file.\n");  }
+        }
+        return tag;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "AmovaCommand", "getOutputFileNameTag");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 AmovaCommand::AmovaCommand(){	
 	try {
 		abort = true; calledHelp = true; 
@@ -187,7 +207,7 @@ int AmovaCommand::execute(){
 		
 		//create a new filename
 		ofstream AMOVAFile;
-		string AMOVAFileName = outputDir + m->getRootName(m->getSimpleName(phylipFileName))  + "amova";				
+		string AMOVAFileName = outputDir + m->getRootName(m->getSimpleName(phylipFileName)) + getOutputFileNameTag("amova");				
 		m->openOutputFile(AMOVAFileName, AMOVAFile);
 		outputNames.push_back(AMOVAFileName); outputTypes["amova"].push_back(AMOVAFileName);
 		
