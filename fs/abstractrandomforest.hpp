@@ -30,8 +30,8 @@ public:
                        const std::string treeSplitCriterion = "informationGain")
   : dataSet(dataSet), 
   numDecisionTrees(numDecisionTrees),
-  numSamples(dataSet.size()),
-  numFeatures(dataSet[0].size() - 1),
+  numSamples((int)dataSet.size()),
+  numFeatures((int)(dataSet[0].size() - 1)),
   globalDiscardedFeatureIndices(getGlobalDiscardedFeatureIndices()),
   globalVariableImportanceList(numFeatures, 0),
   treeSplitCriterion(treeSplitCriterion){

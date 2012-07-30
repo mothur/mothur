@@ -227,8 +227,8 @@ private:
     getSplitPopulation(rootNode, leftChildSamples, rightChildSamples);
     
       // TODO: need to write code to clear this memory
-    TreeNode* leftChildNode = new TreeNode(leftChildSamples, globalDiscardedFeatureIndices, numFeatures, leftChildSamples.size(), numOutputClasses, rootNode->getGeneration() + 1);
-    TreeNode* rightChildNode = new TreeNode(rightChildSamples, globalDiscardedFeatureIndices, numFeatures, rightChildSamples.size(), numOutputClasses, rootNode->getGeneration() + 1);
+    TreeNode* leftChildNode = new TreeNode(leftChildSamples, globalDiscardedFeatureIndices, numFeatures, (int)leftChildSamples.size(), numOutputClasses, rootNode->getGeneration() + 1);
+    TreeNode* rightChildNode = new TreeNode(rightChildSamples, globalDiscardedFeatureIndices, numFeatures, (int)rightChildSamples.size(), numOutputClasses, rootNode->getGeneration() + 1);
     
     rootNode->setLeftChildNode(leftChildNode);
     leftChildNode->setParentNode(rootNode);
