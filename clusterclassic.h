@@ -6,6 +6,7 @@
 #include "listvector.hpp"
 #include "rabundvector.hpp"
 #include "nameassignment.hpp"
+#include "counttable.h"
 
 /*
  *  clusterclassic.h
@@ -22,6 +23,7 @@ class ClusterClassic {
 public:
 	ClusterClassic(float, string, bool);
 	int readPhylipFile(string, NameAssignment*);
+    int readPhylipFile(string, CountTable*);
 	void update(double&);
 	double getSmallDist() { return smallDist; }	
 	int getNSeqs() { return nseqs; }	
