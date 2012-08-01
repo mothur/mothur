@@ -362,79 +362,48 @@ void BinSeqCommand::readNamesFile() {
 //return 1 if error, 0 otherwise
 int BinSeqCommand::process(ListVector* list) {
 	try {
-				string binnames, name, sequence;
-				
         string outputFileName = outputDir + m->getRootName(m->getSimpleName(listfile)) + list->getLabel() + getOutputFileNameTag("fasta");
         m->openOutputFile(outputFileName, out);
-				
-				//save to output list of output file names
-				outputNames.push_back(outputFileName);  outputTypes["fasta"].push_back(outputFileName);
-
-				m->mothurOut(list->getLabel()); m->mothurOutEndLine();
-				
-				//for each bin in the list vector
-				for (int i = 0; i < list->size(); i++) {
-					
-					if (m->control_pressed) {  return 1; }
-					
-					binnames = list->get(i);
-					while (binnames.find_first_of(',') != -1) { 
-						name = binnames.substr(0,binnames.find_first_of(','));
-						binnames = binnames.substr(binnames.find_first_of(',')+1, binnames.length());
-						
-						//do work for that name
-						sequence = fasta->getSequence(name);
-						if (sequence != "not found") {
-							//if you don't have groups
-							if (groupfile == "") {
-								name = name + "\t" + toString(i+1);
-								out << ">" << name << endl;
-								out << sequence << endl;
-							}else {//if you do have groups
-								string group = groupMap->getGroup(name);
-								if (group == "not found") {  
-									m->mothurOut(name + " is missing from your group file. Please correct. ");  m->mothurOutEndLine();
-									return 1;
-								}else{
-									name = name + "\t" + group + "\t" + toString(i+1);
-									out << ">" << name << endl;
-									out << sequence << endl;
-								}
-							}
-						}else { 
-							m->mothurOut(name + " is missing from your fasta or name file. Please correct. "); m->mothurOutEndLine();
-							return 1;
-						}
-						
-					}
-					
-					//get last name
-					sequence = fasta->getSequence(binnames);
-					if (sequence != "not found") {
-						//if you don't have groups
-						if (groupfile == "") {
-							binnames = binnames + "\t" + toString(i+1);
-							out << ">" << binnames << endl;
-							out << sequence << endl;
-						}else {//if you do have groups
-							string group = groupMap->getGroup(binnames);
-							if (group == "not found") {  
-								m->mothurOut(binnames + " is missing from your group file. Please correct. "); m->mothurOutEndLine();
-								return 1;
-							}else{
-								binnames = binnames + "\t" + group + "\t" + toString(i+1);
-								out << ">" << binnames << endl;
-								out << sequence << endl;
-							}
-						}
-					}else { 
-						m->mothurOut(binnames + " is missing from your fasta or name file. Please correct. "); m->mothurOutEndLine();
-						return 1;
-					}
-				}
-					
-				out.close();
-				return 0;
+        outputNames.push_back(outputFileName);  outputTypes["fasta"].push_back(outputFileName);
+        
+        m->mothurOut(list->getLabel()); m->mothurOutEndLine();
+        
+        //for each bin in the list vector
+        for (int i = 0; i < list->size(); i++) {
+            
+            if (m->control_pressed) {  return 1; }
+            
+            string binnames = list->get(i);
+            vector<string> names;
+            m->splitAtComma(binnames, names);
+            for (int j = 0; j < names.size(); j++) {
+                string name = names[j];
+                
+                //do work for that name
+                string sequence = fasta->getSequence(name);
+                if (sequence != "not found") {
+                    //if you don't have groups
+                    if (groupfile == "") {
+                        name = name + "\t" + toString(i+1);
+                        out << ">" << name << endl;
+                        out << sequence << endl;
+                    }else {//if you do have groups
+                        string group = groupMap->getGroup(name);
+                        if (group == "not found") {  
+                            m->mothurOut(name + " is missing from your group file. Please correct. ");  m->mothurOutEndLine();
+                            return 1;
+                        }else{
+                            name = name + "\t" + group + "\t" + toString(i+1);
+                            out << ">" << name << endl;
+                            out << sequence << endl;
+                        }
+                    }
+                }else { m->mothurOut(name + " is missing from your fasta or name file. Please correct. "); m->mothurOutEndLine(); return 1; }
+            }
+        }
+        
+        out.close();
+        return 0;
 
 	}
 	catch(exception& e) {

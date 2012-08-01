@@ -1332,7 +1332,7 @@ bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
 				}else if(type == "SPACER"){
 					spacer.push_back(oligo);
 				}
-				else{	m->mothurOut(type + " is not recognized as a valid type. Choices are forward, reverse, and barcode. Ignoring " + oligo + "."); m->mothurOutEndLine();  }
+				else{	m->mothurOut("[WARNING]: " + type + " is not recognized as a valid type. Choices are forward, reverse, and barcode. Ignoring " + oligo + "."); m->mothurOutEndLine(); }
 			}
 			m->gobble(inOligos);
 		}	

@@ -597,16 +597,12 @@ void ClusterClassic::setMapWanted(bool f)  {
 			
 			//parse bin 
 			string names = list->get(i);
-			while (names.find_first_of(',') != -1) { 
-				//get name from bin
-				string name = names.substr(0,names.find_first_of(','));
+			vector<string> binnames;
+            m->splitAtComma(names, binnames);
+            for (int j = 0; j < binnames.size(); j++) {
 				//save name and bin number
-				seq2Bin[name] = i;
-				names = names.substr(names.find_first_of(',')+1, names.length());
+				seq2Bin[binnames[j]] = i;
 			}
-			
-			//get last name
-			seq2Bin[names] = i;
 		}
 		
 	}
@@ -619,17 +615,13 @@ void ClusterClassic::setMapWanted(bool f)  {
 void ClusterClassic::updateMap() {
 try {
 		//update location of seqs in smallRow since they move to smallCol now
-		string names = list->get(smallRow);
-		while (names.find_first_of(',') != -1) { 
-			//get name from bin
-			string name = names.substr(0,names.find_first_of(','));
-			//save name and bin number
-			seq2Bin[name] = smallCol;
-			names = names.substr(names.find_first_of(',')+1, names.length());
-		}
-			
-		//get last name
-		seq2Bin[names] = smallCol;
+        string names = list->get(smallRow);
+        vector<string> binnames;
+        m->splitAtComma(names, binnames);
+        for (int j = 0; j < binnames.size(); j++) {
+            //save name and bin number
+            seq2Bin[binnames[j]] = smallCol;
+        }
 		
 	}
 	catch(exception& e) {
