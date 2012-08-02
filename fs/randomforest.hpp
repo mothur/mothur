@@ -81,20 +81,20 @@ public:
     
       // TODO: need to add try/catch operators to fix this
       // follow the link: http://en.wikipedia.org/wiki/Dynamic_cast
-    for (unsigned i = 0; i < decisionTrees.size(); i++) {
+    for (int i = 0; i < decisionTrees.size(); i++) {
       DecisionTree* decisionTree = dynamic_cast<DecisionTree*>(decisionTrees[i]);
       
-      for (unsigned j = 0; j < numFeatures; j++) {
+      for (int j = 0; j < numFeatures; j++) {
         globalVariableImportanceList[j] += (double)decisionTree->variableImportanceList[j];
       }
     }
     
-    for (unsigned i = 0;  i < numFeatures; i++) {
+    for (int i = 0;  i < numFeatures; i++) {
       globalVariableImportanceList[i] /= (double)numDecisionTrees;
     }
     
     vector< vector<int> > globalVariableRanks;
-    for (unsigned i = 0; i < globalVariableImportanceList.size(); i++) {
+    for (int i = 0; i < globalVariableImportanceList.size(); i++) {
       if (globalVariableImportanceList[i] > 0) {
         vector<int> globalVariableRank(2, 0);
         globalVariableRank[0] = i; globalVariableRank[1] = globalVariableImportanceList[i];
@@ -119,7 +119,7 @@ public:
 #endif
     
     
-    for (unsigned i = 0; i < numDecisionTrees; i++) {
+    for (int i = 0; i < numDecisionTrees; i++) {
       cout << "Creating " << i << " (th) Decision tree" << endl;
         // TODO: need to first fix if we are going to use pointer based system or anything else
       DecisionTree* decisionTree = new DecisionTree(dataSet, globalDiscardedFeatureIndices, OptimumFeatureSubsetSelector("log2"), treeSplitCriterion);

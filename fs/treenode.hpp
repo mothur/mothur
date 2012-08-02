@@ -65,7 +65,7 @@ public:
   TreeNode* getLeftChildNode() { return leftChildNode; }
   TreeNode* getRightChildNode() { return rightChildNode; }
   const int& getOutputClass() { return outputClass; }
-  const unsigned getNumSamples() { return numSamples; }
+  const int getNumSamples() { return numSamples; }
   const int& getNumFeatures() { return numFeatures; }
   const vector<int>& getLocalDiscardedFeatureIndices() { return localDiscardedFeatureIndices; }
   const vector< vector<int> >& getBootstrappedFeatureVectors() { return bootstrappedFeatureVectors; }
@@ -93,7 +93,7 @@ private:
   vector<vector<int> > bootstrappedTrainingSamples;
   vector<int> globalDiscardedFeatureIndices;
   int numFeatures;
-  unsigned numSamples;
+  int numSamples;
   int numOutputClasses;
   int generation;
   bool isLeaf;

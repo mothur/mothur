@@ -31,7 +31,7 @@ public:
 //  }
   
   void createTrainingSets(){
-    for(unsigned i = 3; i < sharedFileContent[0].size(); i++){
+    for(int i = 3; i < sharedFileContent[0].size(); i++){
       featureLabels.push_back(sharedFileContent[0][i]);
     }
     
@@ -41,10 +41,10 @@ public:
     numberOfTrainingSets = sharedFileContent.size() - 1;
     
     
-    for (unsigned i = 1; i < sharedFileContent.size(); i++) {
+    for (int i = 1; i < sharedFileContent.size(); i++) {
       
       vector<int> tempOtuCounts;
-      for(unsigned j = 3; j < sharedFileContent[i].size(); j++){
+      for(int j = 3; j < sharedFileContent[i].size(); j++){
         int count = atoi(sharedFileContent[i][j].c_str());
         tempOtuCounts.push_back(count);
       }
@@ -61,9 +61,9 @@ public:
   }
   
   void printTrainingSets(){
-    for(unsigned i = 0; i < trainingSets.size(); i++){
+    for(int i = 0; i < trainingSets.size(); i++){
       TrainingSet trainingSet = trainingSets[i];
-      for (unsigned j = 0; j < trainingSet.getOtuCounts().size(); j++) {
+      for (int j = 0; j < trainingSet.getOtuCounts().size(); j++) {
         cout << trainingSet.getOtuCounts()[j] << " ";
       }
       cout << trainingSet.getOutputClass() << " " << trainingSet.getOutputClassId() << endl;
@@ -82,10 +82,10 @@ public:
 private:  
   void createUniqIdForTrainignSets(){
     vector<string> uniqOutputStrings;
-    for (unsigned i = 0; i < trainingSets.size(); i++) {
+    for (int i = 0; i < trainingSets.size(); i++) {
       string outputClass = trainingSets[i].getOutputClass();
       bool found = false;
-      for (unsigned j = 0; j < uniqOutputStrings.size(); j++) {
+      for (int j = 0; j < uniqOutputStrings.size(); j++) {
         if (outputClass == uniqOutputStrings[j]){
           found = true;
         }
@@ -95,9 +95,9 @@ private:
       }
     }
     
-    for (unsigned i = 0; i < trainingSets.size(); i++) {
+    for (int i = 0; i < trainingSets.size(); i++) {
       string outputClass = trainingSets[i].getOutputClass();
-      for (unsigned j = 0; j < uniqOutputStrings.size(); j++) {
+      for (int j = 0; j < uniqOutputStrings.size(); j++) {
         if (outputClass == uniqOutputStrings[j]){
           trainingSets[i].setOutputClassId(j);
         }
@@ -109,12 +109,12 @@ private:
     // missing in some training sets, so we need to pad those data
   void alignTrainingSets(){
     int maxOtuCounts = -1;
-    for (unsigned i = 0; i < trainingSets.size(); i++) {
+    for (int i = 0; i < trainingSets.size(); i++) {
       int currentOtuCount = trainingSets[i].getOtuCounts().size();
       if (currentOtuCount > maxOtuCounts){ maxOtuCounts = currentOtuCount; }
     }
     
-    for (unsigned i = 0; i < trainingSets.size(); i++) {
+    for (int i = 0; i < trainingSets.size(); i++) {
       int currentOtuCount = trainingSets[i].getOtuCounts().size();
       if (currentOtuCount < maxOtuCounts){
 //        cout << "need to add paadding" << endl;
@@ -123,8 +123,8 @@ private:
   }
     
   vector<string> featureLabels; 
-  unsigned numberOfTotalFeatures; // this is number of OTUs
-  unsigned numberOfTrainingSets;
+  int numberOfTotalFeatures; // this is number of OTUs
+  int numberOfTrainingSets;
   vector<TrainingSet> trainingSets;
   
   vector< vector<string> > sharedFileContent;

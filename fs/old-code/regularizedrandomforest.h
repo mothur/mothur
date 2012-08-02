@@ -28,7 +28,7 @@ public:
       
     DecisionTree decisionTree(baseSamples, numberOfTotalFeatures);
       
-//    for (unsigned i = 0; i < numberOfDecisionTrees; i++) {
+//    for (int i = 0; i < numberOfDecisionTrees; i++) {
 //      DecisionTree decisionTree(baseSamples, numberOfTotalFeatures);
 //      decisionTrees.push_back(decisionTree);
 //    }

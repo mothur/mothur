@@ -66,14 +66,14 @@ public:
     PRINT_VAR(numCorrect);
     PRINT_VAR(treeErrorRate);
         
-    for (unsigned i = 0; i < numFeatures; i++) {
+    for (int i = 0; i < numFeatures; i++) {
         // NOTE: only shuffle the features, never shuffle the output vector
         // so i = 0 and i will be alwaays <= (numFeatures - 1) as the index at numFeatures will denote
         // the feature vector
       vector< vector<int> > randomlySampledTestData = randomlyShuffleAttribute(bootstrappedTestSamples, i);
       
       int numCorrectAfterShuffle = 0;
-      for (unsigned j = 0; j < randomlySampledTestData.size(); j++) {
+      for (int j = 0; j < randomlySampledTestData.size(); j++) {
         vector<int> shuffledSample = randomlySampledTestData[j];
         int actualSampleOutputClass = shuffledSample[numFeatures];
         int predictedSampleOutputClass = evaluateSample(shuffledSample);
@@ -84,7 +84,7 @@ public:
     
       // TODO: do we need to save the variableRanks in the DecisionTree, do we need it later?
     vector< vector<int> > variableRanks;
-    for (unsigned i = 0; i < variableImportanceList.size(); i++) {
+    for (int i = 0; i < variableImportanceList.size(); i++) {
       if (variableImportanceList[i] > 0) {
           // TODO: is there a way to optimize the follow line's code?
         vector<int> variableRank(2, 0);
@@ -109,7 +109,7 @@ public:
   
   void calcTreeErrorRate(int& numCorrect, double& treeErrorRate){
     numCorrect = 0;
-    for (unsigned i = 0; i < bootstrappedTestSamples.size(); i++) {
+    for (int i = 0; i < bootstrappedTestSamples.size(); i++) {
       
       vector<int> testSample = bootstrappedTestSamples[i];
       int testSampleIndex = bootstrappedTestSampleIndices[i];
@@ -132,8 +132,8 @@ public:
       // NOTE: we need (numFeatures + 1) featureVecotors, the last extra vector is actually outputVector
     vector< vector<int> > featureVectors(samples[0].size(), vector<int>(samples.size(), 0));
         
-    for (unsigned i = 0; i < samples.size(); i++) {
-      for (unsigned j = 0; j < samples[0].size(); j++) {
+    for (int i = 0; i < samples.size(); i++) {
+      for (int j = 0; j < samples[0].size(); j++) {
         featureVectors[j][i] =  samples[i][j];
       }
     }
@@ -142,8 +142,8 @@ public:
     
     vector< vector<int> > shuffledSample(samples.size(), vector<int>(samples[0].size(), 0));
 
-    for (unsigned i = 0; i < shuffledSample.size(); i++) {
-      for (unsigned j = 0; j < numFeatures; j++) {
+    for (int i = 0; i < shuffledSample.size(); i++) {
+      for (int j = 0; j < numFeatures; j++) {
         shuffledSample[i][j] = featureVectors[j][i];
       }
     }
@@ -256,7 +256,7 @@ private:
     vector<double> featureSubsetIntrinsicValues;
     vector<double> featureSubsetGainRatios;
     
-    for (unsigned i = 0; i < featureSubsetIndices.size(); i++) {
+    for (int i = 0; i < featureSubsetIndices.size(); i++) {
       int tryIndex = featureSubsetIndices[i];
       
 #ifdef DEBUG_LEVEL_4
@@ -361,7 +361,7 @@ private:
   void printTree(TreeNode* treeNode, string caption){
     
     string tabs = "";
-    for (unsigned i = 0; i < treeNode->getGeneration(); i++) { tabs += " "; }
+    for (int i = 0; i < treeNode->getGeneration(); i++) { tabs += " "; }
     
     if (treeNode != NULL && treeNode->checkIsLeaf() == false){
       cout << tabs << caption << " [ gen: " << treeNode->getGeneration() << " ] ( " << treeNode->getSplitFeatureValue() << " < X" << treeNode->getSplitFeatureIndex() << " )" << endl;

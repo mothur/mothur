@@ -27,7 +27,7 @@ public:
     outputClassId(trainingSet.outputClassId){
         
 //    cout << "TrainingSet copy constructor is being called" << endl;
-//    for (unsigned i = 0; i < otuCounts.size(); i++) {
+//    for (int i = 0; i < otuCounts.size(); i++) {
 //      cout << otuCounts[i] << " ";
 //    }
 //    cout << outputClass << " " << outputClassId << endl;
@@ -75,7 +75,7 @@ ostream& operator <<(ostream& os, TrainingSet& trainingSet){
 
 ostream& operator <<(ostream& os, vector<TrainingSet>& trainingSets){
   os << "[ ";
-  for (unsigned i = 0; i < trainingSets.size(); i++) {
+  for (int i = 0; i < trainingSets.size(); i++) {
     os << trainingSets[i] << "\n\n";
   }
   os << "]";

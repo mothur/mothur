@@ -49,9 +49,9 @@ public:
   }
   
   void printFileContent(){
-    for (unsigned i = 0; i < fileContent.size(); ++i) {
+    for (int i = 0; i < fileContent.size(); ++i) {
       vector<string> temp = fileContent[i];
-      for (unsigned j = 0; j < temp.size(); ++j) {
+      for (int j = 0; j < temp.size(); ++j) {
         cout << temp[j] << "\t";
       }
       cout << endl << endl;

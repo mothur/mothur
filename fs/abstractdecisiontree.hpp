@@ -69,14 +69,14 @@ public:
 
     vector<bool> isInTrainingSamples(numSamples, false);
     
-    for (unsigned i = 0; i < numSamples; i++) {
+    for (int i = 0; i < numSamples; i++) {
         // TODO: optimize the rand() function call + double check if it's working properly
       int randomIndex = rand() % numSamples;
       bootstrappedTrainingSamples.push_back(baseDataSet[randomIndex]);
       isInTrainingSamples[randomIndex] = true;
     }
             
-    for (unsigned i = 0; i < numSamples; i++) {
+    for (int i = 0; i < numSamples; i++) {
       if (isInTrainingSamples[i]){ bootstrappedTrainingSampleIndices.push_back(i); }
       else{
         bootstrappedTestSamples.push_back(baseDataSet[i]);
@@ -99,7 +99,7 @@ public:
 #endif
     
     vector< vector<int> > featureOutputPair(featureVector.size(), vector<int>(2, 0));
-    for (unsigned i = 0; i < featureVector.size(); i++) { 
+    for (int i = 0; i < featureVector.size(); i++) { 
       featureOutputPair[i][0] = featureVector[i];
       featureOutputPair[i][1] = outputVector[i];
     }
@@ -113,7 +113,7 @@ public:
     vector<int> splitPoints;
     vector<int> uniqueFeatureValues(1, featureOutputPair[0][0]);
         
-    for (unsigned i = 0; i < featureOutputPair.size(); i++) {
+    for (int i = 0; i < featureOutputPair.size(); i++) {
       int featureValue = featureOutputPair[i][0];
       vector<int>::iterator it = find(uniqueFeatureValues.begin(), uniqueFeatureValues.end(), featureValue);
       if (it == uniqueFeatureValues.end()){                 // NOT FOUND
@@ -141,7 +141,7 @@ public:
     
   }
   
-  double calcIntrinsicValue(unsigned numLessThanValueAtSplitPoint, unsigned numGreaterThanValueAtSplitPoint, unsigned numSamples) {
+  double calcIntrinsicValue(int numLessThanValueAtSplitPoint, int numGreaterThanValueAtSplitPoint, int numSamples) {
     
     double upperSplitEntropy = 0.0, lowerSplitEntropy = 0.0;
     if (numLessThanValueAtSplitPoint > 0) {
@@ -167,8 +167,8 @@ public:
     for (int i = 0; i < splitPoints.size(); i++) {
       int index = splitPoints[i];
       int valueAtSplitPoint = featureOutputPairs[index][0];
-      unsigned numLessThanValueAtSplitPoint = 0;
-      unsigned numGreaterThanValueAtSplitPoint = 0;
+      int numLessThanValueAtSplitPoint = 0;
+      int numGreaterThanValueAtSplitPoint = 0;
       
       for (int j = 0; j < featureOutputPairs.size(); j++) {
         vector<int> record = featureOutputPairs[j];
@@ -213,16 +213,16 @@ public:
     vector<int> classCounts(numOutputClasses, 0);
     
     if (isUpperSplit) { 
-      for (unsigned i = 0; i < splitIndex; i++) { classCounts[featureOutputPairs[i][1]]++; }
+      for (int i = 0; i < splitIndex; i++) { classCounts[featureOutputPairs[i][1]]++; }
     } else {
-      for (unsigned i = splitIndex; i < featureOutputPairs.size(); i++) { classCounts[featureOutputPairs[i][1]]++; }
+      for (int i = splitIndex; i < featureOutputPairs.size(); i++) { classCounts[featureOutputPairs[i][1]]++; }
     }
     
     int totalClassCounts = accumulate(classCounts.begin(), classCounts.end(), 0);
     
     double splitEntropy = 0.0;
     
-    for (unsigned i = 0; i < classCounts.size(); i++) {
+    for (int i = 0; i < classCounts.size(); i++) {
       if (classCounts[i] == 0) { continue; }
       double probability = (double) classCounts[i] / (double) totalClassCounts;
       splitEntropy += -(probability * log2(probability));
@@ -241,7 +241,7 @@ public:
     
     int splitFeatureGlobalIndex = node->getSplitFeatureIndex();
     
-    for (unsigned i = 0; i < node->getBootstrappedTrainingSamples().size(); i++) {
+    for (int i = 0; i < node->getBootstrappedTrainingSamples().size(); i++) {
       vector<int> sample =  node->getBootstrappedTrainingSamples()[i];
       if (sample[splitFeatureGlobalIndex] < node->getSplitFeatureValue()){ leftChildSamples.push_back(sample); }
       else{ rightChildSamples.push_back(sample); }
@@ -254,7 +254,7 @@ public:
   bool checkIfAlreadyClassified(TreeNode* treeNode, int& outputClass) {
     
     vector<int> tempOutputClasses;
-    for (unsigned i = 0; i < treeNode->getBootstrappedTrainingSamples().size(); i++) {
+    for (int i = 0; i < treeNode->getBootstrappedTrainingSamples().size(); i++) {
       int sampleOutputClass = treeNode->getBootstrappedTrainingSamples()[i][numFeatures];
       vector<int>::iterator it = find(tempOutputClasses.begin(), tempOutputClasses.end(), sampleOutputClass);
       if (it == tempOutputClasses.end()) {               // NOT FOUND
