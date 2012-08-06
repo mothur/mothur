@@ -13,6 +13,9 @@
 
  TreeMap::TreeMap(string filename) {
 	m = MothurOut::getInstance();
+    ofstream out2;
+    m->openOutputFileAppend(filename, out2);
+    out2 << endl; out2.close();
 	groupFileName = filename;
 	m->openInputFile(filename, fileHandle);
 }
@@ -22,6 +25,10 @@
 /************************************************************/
 int TreeMap::readMap(string gf) {
     try {
+        ofstream out2;
+        m->openOutputFileAppend(gf, out2);
+        out2 << endl; out2.close();
+        
         groupFileName = gf;
         m->openInputFile(gf, fileHandle);
         
@@ -64,6 +71,34 @@ int TreeMap::readMap(string gf) {
             }
         }
         fileHandle.close();
+        
+        if (rest != "") {
+            vector<string> pieces = m->splitWhiteSpace(rest);
+            
+            for (int i = 0; i < pieces.size(); i++) {
+                if (columnOne) {  seqName = pieces[i]; columnOne=false; }
+                else  { seqGroup = pieces[i]; pairDone = true; columnOne=true; }
+                
+                if (pairDone) { 
+                    setNamesOfGroups(seqGroup);
+                    
+                    map<string, GroupIndex>::iterator itCheck = treemap.find(seqName);
+                    if (itCheck != treemap.end()) { error = 1; m->mothurOut("[WARNING]: Your groupfile contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine();  }
+                    else {
+                        namesOfSeqs.push_back(seqName);
+                        treemap[seqName].groupname = seqGroup;	//store data in map
+                        
+                        it2 = seqsPerGroup.find(seqGroup);
+                        if (it2 == seqsPerGroup.end()) { //if it's a new group
+                            seqsPerGroup[seqGroup] = 1;
+                        }else {//it's a group we already have
+                            seqsPerGroup[seqGroup]++;
+                        }				
+                    }
+                    pairDone = false; 
+                } 
+            }
+        }
         
         return error;
     }
@@ -115,6 +150,34 @@ int TreeMap::readMap() {
             }
         }
         fileHandle.close();
+        
+        if (rest != "") {
+            vector<string> pieces = m->splitWhiteSpace(rest);
+            
+            for (int i = 0; i < pieces.size(); i++) {
+                if (columnOne) {  seqName = pieces[i]; columnOne=false; }
+                else  { seqGroup = pieces[i]; pairDone = true; columnOne=true; }
+                
+                if (pairDone) { 
+                    setNamesOfGroups(seqGroup);
+                    
+                    map<string, GroupIndex>::iterator itCheck = treemap.find(seqName);
+                    if (itCheck != treemap.end()) { error = 1; m->mothurOut("[WARNING]: Your groupfile contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine();  }
+                    else {
+                        namesOfSeqs.push_back(seqName);
+                        treemap[seqName].groupname = seqGroup;	//store data in map
+                        
+                        it2 = seqsPerGroup.find(seqGroup);
+                        if (it2 == seqsPerGroup.end()) { //if it's a new group
+                            seqsPerGroup[seqGroup] = 1;
+                        }else {//it's a group we already have
+                            seqsPerGroup[seqGroup]++;
+                        }				
+                    }
+                    pairDone = false; 
+                } 
+            }
+        }
         
         return error;
     }

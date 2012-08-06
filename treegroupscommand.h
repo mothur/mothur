@@ -19,7 +19,6 @@
 #include "readmatrix.hpp"
 #include "readcolumn.h"
 #include "readphylip.h"
-#include "sparsematrix.hpp"
 #include "sharedsobscollectsummary.h"
 #include "sharedchao1.h"
 #include "sharedace.h"
@@ -68,8 +67,6 @@
 	The user can select the lines or labels they wish to use as well as the groups they would like included.
 	They can also use as many or as few calculators as they wish. */
 	
-
-typedef list<PCell>::iterator MatData;
 
 class TreeGroupCommand : public Command {
 	

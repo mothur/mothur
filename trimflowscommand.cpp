@@ -423,11 +423,9 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
 			string trashCode = "";
 			
 			flowData.getNext(flowFile); 
-			//cout << "driver good bit " << flowFile.good() << endl;	
 			flowData.capFlows(maxFlows);	
 			
 			Sequence currSeq = flowData.getSequence();
-			
 			if(!flowData.hasMinFlows(minFlows)){	//screen to see if sequence is of a minimum number of flows
 				success = 0;
 				trashCode += 'l';

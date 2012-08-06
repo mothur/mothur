@@ -352,11 +352,12 @@ int ClusterDoturCommand::execute(){
 
 void ClusterDoturCommand::printData(string label){
 	try {
-	
-		oldRAbund.setLabel(label);
-		oldRAbund.print(rabundFile);
-		oldRAbund.getSAbundVector().print(sabundFile);
-		
+        oldRAbund.setLabel(label);
+        if (countfile == "") {
+            oldRAbund.print(rabundFile);
+            oldRAbund.getSAbundVector().print(sabundFile);
+        }
+
 		oldRAbund.getSAbundVector().print(cout);
 		
 		oldList.setLabel(label);

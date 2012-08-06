@@ -16,7 +16,6 @@
 #include "counttable.h"
 #include "sparsedistancematrix.h"
 
-class SparseMatrix;
 
 class ReadMatrix {
 

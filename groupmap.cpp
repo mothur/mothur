@@ -57,6 +57,28 @@ int GroupMap::readMap() {
         }
 		fileHandle.close();
         
+        if (rest != "") {
+            vector<string> pieces = m->splitWhiteSpace(rest);
+            
+            for (int i = 0; i < pieces.size(); i++) {
+                if (columnOne) {  seqName = pieces[i]; columnOne=false; }
+                else  { seqGroup = pieces[i]; pairDone = true; columnOne=true; }
+                
+                if (pairDone) { 
+                    setNamesOfGroups(seqGroup);
+                    
+                    it = groupmap.find(seqName);
+                    
+                    if (it != groupmap.end()) { error = 1; m->mothurOut("Your groupfile contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine();  }
+                    else {
+                        groupmap[seqName] = seqGroup;	//store data in map
+                        seqsPerGroup[seqGroup]++;  //increment number of seqs in that group
+                    }
+                    pairDone = false; 
+                } 
+            }
+        }
+        
 		m->setAllGroups(namesOfGroups);
 		return error;
     }
@@ -100,6 +122,29 @@ int GroupMap::readDesignMap() {
             }
         }
 		fileHandle.close();
+        
+        if (rest != "") {
+            vector<string> pieces = m->splitWhiteSpace(rest);
+            
+            for (int i = 0; i < pieces.size(); i++) {
+                if (columnOne) {  seqName = pieces[i]; columnOne=false; }
+                else  { seqGroup = pieces[i]; pairDone = true; columnOne=true; }
+                
+                if (pairDone) { 
+                    setNamesOfGroups(seqGroup);
+                    
+                    it = groupmap.find(seqName);
+                    
+                    if (it != groupmap.end()) { error = 1; m->mothurOut("Your designfile contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine();  }
+                    else {
+                        groupmap[seqName] = seqGroup;	//store data in map
+                        seqsPerGroup[seqGroup]++;  //increment number of seqs in that group
+                    }
+                    pairDone = false; 
+                } 
+            }
+
+        }
         
 		m->setAllGroups(namesOfGroups);
 		return error;
@@ -147,6 +192,28 @@ int GroupMap::readDesignMap(string filename) {
             }
         }
 		fileHandle.close();
+        
+        if (rest != "") {
+            vector<string> pieces = m->splitWhiteSpace(rest);
+            
+            for (int i = 0; i < pieces.size(); i++) {
+                if (columnOne) {  seqName = pieces[i]; columnOne=false; }
+                else  { seqGroup = pieces[i]; pairDone = true; columnOne=true; }
+                
+                if (pairDone) { 
+                    setNamesOfGroups(seqGroup);
+                    
+                    it = groupmap.find(seqName);
+                    
+                    if (it != groupmap.end()) { error = 1; m->mothurOut("Your designfile contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine();  }
+                    else {
+                        groupmap[seqName] = seqGroup;	//store data in map
+                        seqsPerGroup[seqGroup]++;  //increment number of seqs in that group
+                    }
+                    pairDone = false; 
+                } 
+            }
+        }
         
 		m->setAllGroups(namesOfGroups);
 		return error;

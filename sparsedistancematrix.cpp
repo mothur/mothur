@@ -126,7 +126,7 @@ ull SparseDistanceMatrix::getSmallestCell(ull& row){
 		return col;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "SparseMatrix", "getSmallestCell");
+		m->errorOut(e, "SparseDistanceMatrix", "getSmallestCell");
 		exit(1);
 	}
 }
@@ -141,7 +141,7 @@ int SparseDistanceMatrix::sortSeqVec(){
         return 0;
     }
 	catch(exception& e) {
-		m->errorOut(e, "SparseMatrix", "getSmallestCell");
+		m->errorOut(e, "SparseDistanceMatrix", "sortSeqVec");
 		exit(1);
 	}
 }

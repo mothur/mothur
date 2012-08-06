@@ -808,7 +808,7 @@ int SubSampleCommand::processShared(vector<SharedRAbundVector*>& thislookup) {
 		
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(sharedfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(sharedfile)) + thislookup[0]->getLabel() + getOutputFileNameTag("shared", sharedfile);        
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(sharedfile)) + thislookup[0]->getLabel() + "." +getOutputFileNameTag("shared", sharedfile);        
         SubSample sample;
         vector<string> subsampledLabels = sample.getSample(thislookup, size);
         

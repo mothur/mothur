@@ -450,6 +450,26 @@ map<int, string> CountSeqsCommand::processNameFile(string name) {
 		in.close();
         out.close();
 		
+        if (rest != "") {
+            vector<string> pieces = m->splitWhiteSpace(rest);
+            
+            for (int i = 0; i < pieces.size(); i++) {
+                if (columnOne) {  firstCol = pieces[i]; columnOne=false; }
+                else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
+                
+                if (pairDone) { 
+                    //parse names into vector
+                    vector<string> theseNames;
+                    m->splitAtComma(secondCol, theseNames);
+                    for (int i = 0; i < theseNames.size(); i++) {  out << theseNames[i] << '\t' << count << endl;  }
+                    indexToNames[count] = firstCol;
+                    pairDone = false; 
+                    count++;
+                }
+            }
+
+        }
+        
         return indexToNames;
     }
 	catch(exception& e) {
@@ -502,6 +522,26 @@ map<int, string> CountSeqsCommand::getGroupNames(string filename, set<string>& n
 		}
 		in.close();
         out.close();
+        
+        if (rest != "") {
+            vector<string> pieces = m->splitWhiteSpace(rest);
+            
+            for (int i = 0; i < pieces.size(); i++) {
+                if (columnOne) {  firstCol = pieces[i]; columnOne=false; }
+                else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
+                
+                if (pairDone) { 
+                    it = groupIndex.find(secondCol);
+                    if (it == groupIndex.end()) { //add group, assigning the group and number so we can use vectors above
+                        groupIndex[secondCol] = count;
+                        count++;
+                    }
+                    out << firstCol << '\t' << groupIndex[secondCol] << endl; 
+                    namesOfGroups.insert(secondCol);
+                    pairDone = false; 
+                }
+            }
+        }
 		
         for (it = groupIndex.begin(); it != groupIndex.end(); it++) {  indexToGroups[it->second] = it->first;  }
         

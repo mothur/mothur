@@ -1035,7 +1035,7 @@ vector<string>  ClusterSplitCommand::createProcesses(vector< map<string, string>
 		//Above fork() will clone, so memory is separate, but that's not the case with windows, 
 		//Taking advantage of shared memory to allow both threads to add labels.
 		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		
+		/*
 		vector<clusterData*> pDataArray; 
 		DWORD   dwThreadIdArray[processors-1];
 		HANDLE  hThreadArray[processors-1]; 
@@ -1073,7 +1073,7 @@ vector<string>  ClusterSplitCommand::createProcesses(vector< map<string, string>
 			CloseHandle(hThreadArray[i]);
 			delete pDataArray[i];
 		}
-
+*/
 	#endif		
         
         return listFiles;

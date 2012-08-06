@@ -481,12 +481,12 @@ void ClusterCommand::printData(string label){
 		loops = 0;
 		start = time(NULL);
         
+        oldRAbund.setLabel(label);
         if (countfile == "") {
             oldRAbund.print(rabundFile);
             oldRAbund.getSAbundVector().print(sabundFile);
         }
-        
-        oldRAbund.setLabel(label);
+       
         if (m->isTrue(showabund)) {
             oldRAbund.getSAbundVector().print(cout);
         }

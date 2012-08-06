@@ -12,7 +12,6 @@
 
 #include "command.hpp"
 #include "readblast.h"
-#include "sparsematrix.hpp"
 #include "nameassignment.hpp"
 #include "cluster.hpp"
 #include "hcluster.h"

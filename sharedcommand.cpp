@@ -825,7 +825,7 @@ int SharedCommand::createSharedFromListGroup(string filename) {
         int error = ListGroupSameSeqs(namesSeqs, SharedList);
         
         if ((!pickedGroups) && (SharedList->getNumSeqs() != numGroupNames)) {  //if the user has not specified any groups and their files don't match exit with error
-            m->mothurOut("Your group file contains " + toString(numGroupNames) + " sequences and list file contains " + toString(SharedList->getNumSeqs()) + " sequences. Please correct."); m->mothurOutEndLine(); 
+            m->mothurOut("Your group file contains " + toString(numGroupNames) + " sequences and list file contains " + toString(SharedList->getNumSeqs()) + " sequences. Please correct."); m->mothurOutEndLine(); m->control_pressed = true;
             
             out.close(); m->mothurRemove(filename); //remove blank shared file you made
             

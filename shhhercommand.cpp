@@ -1039,7 +1039,12 @@ void ShhherCommand::getFlowData(){
         
         float intensity;
         
-        flowFile >> numFlowCells;
+        string numFlowTest;
+        flowFile >> numFlowTest;
+        
+        if (!m->isContainingOnlyDigits(numFlowTest)) { m->mothurOut("[ERROR]: expected a number and got " + numFlowTest + ", quitting. Did you use the flow parameter instead of the file parameter?"); m->mothurOutEndLine(); exit(1); }
+        else { convert(numFlowTest, numFlowCells); }
+        
         int index = 0;//pcluster
         while(!flowFile.eof()){
             
@@ -1376,17 +1381,17 @@ string ShhherCommand::cluster(string distFileName, string namesFileName){
     try {
         
         ReadMatrix* read = new ReadColumnMatrix(distFileName); 	
-        read->setCutoff(cutoff);
+		read->setCutoff(cutoff);
+		
+		NameAssignment* clusterNameMap = new NameAssignment(namesFileName);
+		clusterNameMap->readMap();
+		read->read(clusterNameMap);
         
-        NameAssignment* clusterNameMap = new NameAssignment(namesFileName);
-        clusterNameMap->readMap();
-        read->read(clusterNameMap);
-        
-        ListVector* list = read->getListVector();
-        SparseMatrix* matrix = read->getMatrix();
-        
-        delete read; 
-        delete clusterNameMap; 
+		ListVector* list = read->getListVector();
+		SparseDistanceMatrix* matrix = read->getDMatrix();
+		
+		delete read; 
+		delete clusterNameMap; 
         
         RAbundVector* rabund = new RAbundVector(list->getRAbundVector());
         
@@ -2029,7 +2034,7 @@ int ShhherCommand::createProcesses(vector<string> filenames){
 		//Windows version shared memory, so be careful when passing variables through the shhhFlowsData struct. 
 		//Above fork() will clone, so memory is separate, but that's not the case with windows, 
 		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		
+		/*
 		vector<shhhFlowsData*> pDataArray; 
 		DWORD   dwThreadIdArray[processors-1];
 		HANDLE  hThreadArray[processors-1]; 
@@ -2060,7 +2065,7 @@ int ShhherCommand::createProcesses(vector<string> filenames){
 			CloseHandle(hThreadArray[i]);
 			delete pDataArray[i];
 		}
-		
+		*/
         #endif
         
         for (int i=0;i<processIDS.size();i++) { 
@@ -2382,7 +2387,12 @@ int ShhherCommand::getFlowData(string filename, vector<string>& thisSeqNameVecto
 		thisFlowDataIntI.clear();
 		thisNameMap.clear();
 		
-		flowFile >> numFlowCells;
+		string numFlowTest;
+        flowFile >> numFlowTest;
+        
+        if (!m->isContainingOnlyDigits(numFlowTest)) { m->mothurOut("[ERROR]: expected a number and got " + numFlowTest + ", quitting. Did you use the flow parameter instead of the file parameter?"); m->mothurOutEndLine(); exit(1); }
+        else { convert(numFlowTest, numFlowCells); }
+        
         if (m->debug) { m->mothurOut("[DEBUG]: numFlowCells = " + toString(numFlowCells) + ".\n"); }
 		int index = 0;//pcluster
 		while(!flowFile.eof()){

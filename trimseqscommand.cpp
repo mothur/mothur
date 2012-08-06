@@ -611,7 +611,6 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 			QualityScores currQual;
 			if(qFileName != ""){
 				currQual = QualityScores(qFile);  m->gobble(qFile);
-                if ((m->debug)&&(count>15800)) { m->mothurOut("[DEBUG]: " + toString(count) + " fasta = " + currSeq.getName() + '\n'); m->mothurOut("[DEBUG]: " + toString(getpid()) + '\n'); }
 			}
 			
 			string origSeq = currSeq.getUnaligned();

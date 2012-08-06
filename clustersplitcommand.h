@@ -76,7 +76,7 @@ private:
 // anything to do with mothur's use of copy constructors in many of our data structures. ie. listvector 
 // is copied by nameassignment and passed to read which passes to the thread?  -westcott 2-8-12
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/**************************************************************************************************/
+/**************************************************************************************************
 //custom data structure for threads to use.
 // This is passed by void pointer so it can be any data type
 // that can be passed using a single void pointer (LPVOID).
@@ -106,7 +106,7 @@ struct clusterData {
 	}
 };
 
-/**************************************************************************************************/
+/**************************************************************************************************
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 #else
 static DWORD WINAPI MyClusterThreadFunction(LPVOID lpParam){ 
@@ -258,7 +258,7 @@ static DWORD WINAPI MyClusterThreadFunction(LPVOID lpParam){
 } 
 #endif
 
-
+*/
 
 
 #endif
