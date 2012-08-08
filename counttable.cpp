@@ -175,6 +175,75 @@ int CountTable::get(string seqName) {
 	}
 }
 /************************************************************/
+//add seqeunce without group info
+int CountTable::push_back(string seqName) {
+    try {
+        map<string, int>::iterator it = indexNameMap.find(seqName);
+        if (it == indexNameMap.end()) {
+            if (hasGroups) {  m->mothurOut("[ERROR]: Your count table has groups and I have no group information for " + seqName + "."); m->mothurOutEndLine(); m->control_pressed = true;  }
+            indexNameMap[seqName] = uniques;
+            totals.push_back(1);
+            total++;
+            uniques++;
+        }else {
+            m->mothurOut("[ERROR]: Your count table contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine(); m->control_pressed = true;
+        }
+        
+        return 0;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "CountTable", "push_back");
+		exit(1);
+	}
+}
+/************************************************************/
+//add seqeunce without group info
+int CountTable::push_back(string seqName, int thisTotal) {
+    try {
+        map<string, int>::iterator it = indexNameMap.find(seqName);
+        if (it == indexNameMap.end()) {
+            if (hasGroups) {  m->mothurOut("[ERROR]: Your count table has groups and I have no group information for " + seqName + "."); m->mothurOutEndLine(); m->control_pressed = true;  }
+            indexNameMap[seqName] = uniques;
+            totals.push_back(thisTotal);
+            total+=thisTotal;
+            uniques++;
+        }else {
+            m->mothurOut("[ERROR]: Your count table contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine(); m->control_pressed = true;
+        }
+        
+        return 0;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "CountTable", "push_back");
+		exit(1);
+	}
+}
+/************************************************************/
+//add sequence with group info
+int CountTable::push_back(string seqName, vector<int> groupCounts) {
+    try {
+        map<string, int>::iterator it = indexNameMap.find(seqName);
+        if (it == indexNameMap.end()) {
+            if ((hasGroups) && (groupCounts.size() != getNumGroups())) {  m->mothurOut("[ERROR]: Your count table has a " + toString(getNumGroups()) + " groups and " + seqName + " has " + toString(groupCounts.size()) + ", please correct."); m->mothurOutEndLine(); m->control_pressed = true;  }
+            int thisTotal = 0;
+            for (int i = 0; i < getNumGroups(); i++) {   totalGroups[i] += groupCounts[i];  thisTotal += groupCounts[i]; }
+            indexNameMap[seqName] = uniques;
+            totals.push_back(thisTotal);
+            total+= thisTotal;
+            uniques++;
+        }else {
+            m->mothurOut("[ERROR]: Your count table contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine(); m->control_pressed = true;
+        }
+        
+        return 0;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "CountTable", "push_back");
+		exit(1);
+	}
+}
+
+/************************************************************/
 //create ListVector from uniques
 ListVector CountTable::getListVector() {
     try {

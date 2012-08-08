@@ -310,8 +310,6 @@ vector<string> SequenceParser::getNamesOfGroups(){ return groupMap->getNamesOfGr
 /************************************************************/
 bool SequenceParser::isValidGroup(string g){ return groupMap->isValidGroup(g); }
 /************************************************************/
-string SequenceParser::getGroup(string g){ return groupMap->getGroup(g); }
-/************************************************************/
 int SequenceParser::getNumSeqs(string g){ 
 	try {
 		map<string, vector<Sequence> >::iterator it;

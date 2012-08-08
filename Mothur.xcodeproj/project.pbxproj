@@ -24,6 +24,7 @@
 		A73901081588C40900ED2ED6 /* loadlogfilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A73901071588C40900ED2ED6 /* loadlogfilecommand.cpp */; };
 		A73DDBBA13C4A0D1006AAE38 /* clearmemorycommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A73DDBB913C4A0D1006AAE38 /* clearmemorycommand.cpp */; };
 		A73DDC3813C4BF64006AAE38 /* mothurmetastats.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A73DDC3713C4BF64006AAE38 /* mothurmetastats.cpp */; };
+		A741FAD215D1688E0067BCC5 /* sequencecountparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A741FAD115D1688E0067BCC5 /* sequencecountparser.cpp */; };
 		A74A9A9F148E881E00AB5E3E /* spline.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74A9A9E148E881E00AB5E3E /* spline.cpp */; };
 		A74D36B8137DAFAA00332B0C /* chimerauchimecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D36B7137DAFAA00332B0C /* chimerauchimecommand.cpp */; };
 		A74D59A4159A1E2000043046 /* counttable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D59A3159A1E2000043046 /* counttable.cpp */; };
@@ -397,6 +398,8 @@
 		A73DDBB913C4A0D1006AAE38 /* clearmemorycommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = clearmemorycommand.cpp; sourceTree = "<group>"; };
 		A73DDC3613C4BF64006AAE38 /* mothurmetastats.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mothurmetastats.h; sourceTree = "<group>"; };
 		A73DDC3713C4BF64006AAE38 /* mothurmetastats.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mothurmetastats.cpp; sourceTree = "<group>"; };
+		A741FAD115D1688E0067BCC5 /* sequencecountparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sequencecountparser.cpp; sourceTree = "<group>"; };
+		A741FAD415D168A00067BCC5 /* sequencecountparser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sequencecountparser.h; sourceTree = "<group>"; };
 		A74A9A9D148E881E00AB5E3E /* spline.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = spline.h; sourceTree = "<group>"; };
 		A74A9A9E148E881E00AB5E3E /* spline.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = spline.cpp; sourceTree = "<group>"; };
 		A74D36B6137DAFAA00332B0C /* chimerauchimecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimerauchimecommand.h; sourceTree = "<group>"; };
@@ -1659,6 +1662,8 @@
 				A7E9B7D012D37EC400DA6239 /* sabundvector.hpp */,
 				A7E9B7DB12D37EC400DA6239 /* sequence.cpp */,
 				A7E9B7DC12D37EC400DA6239 /* sequence.hpp */,
+				A741FAD415D168A00067BCC5 /* sequencecountparser.h */,
+				A741FAD115D1688E0067BCC5 /* sequencecountparser.cpp */,
 				A7E9B7DD12D37EC400DA6239 /* sequencedb.cpp */,
 				A7E9B7DE12D37EC400DA6239 /* sequencedb.h */,
 				A7F9F5CD141A5E500032F693 /* sequenceparser.h */,
@@ -2192,6 +2197,7 @@
 				A73901081588C40900ED2ED6 /* loadlogfilecommand.cpp in Sources */,
 				A74D59A4159A1E2000043046 /* counttable.cpp in Sources */,
 				A7E0243D15B4520A00A5F046 /* sparsedistancematrix.cpp in Sources */,
+				A741FAD215D1688E0067BCC5 /* sequencecountparser.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
