@@ -8,7 +8,23 @@
 
 #include "counttable.h"
 
-
+/************************************************************/
+bool CountTable::testGroups(string file) {
+    try {
+        m = MothurOut::getInstance(); hasGroups = false; total = 0;
+        ifstream in;
+        m->openInputFile(file, in);
+    
+        string headers = m->getline(in); m->gobble(in);
+        vector<string> columnHeaders = m->splitWhiteSpace(headers);
+        if (columnHeaders.size() > 2) { hasGroups = true;   }
+        return hasGroups;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "CountTable", "readTable");
+		exit(1);
+	}
+}
 /************************************************************/
 int CountTable::readTable(string file) {
     try {

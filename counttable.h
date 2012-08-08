@@ -47,6 +47,7 @@ class CountTable {
         ~CountTable() {}
     
         int readTable(string);
+        bool testGroups(string file); //used to check if file has group data without reading it.
     
         bool hasGroupInfo() { return hasGroups; }
         int getNumGroups() { return groups.size(); }

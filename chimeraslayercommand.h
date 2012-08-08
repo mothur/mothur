@@ -15,6 +15,7 @@
 #include "chimera.h"
 #include "chimeraslayer.h"
 #include "sequenceparser.h"
+#include "sequencecountparser.h"
 
 /***********************************************************/
 
@@ -51,12 +52,14 @@ private:
 	int divideInHalf(Sequence, string&, string&);
 	map<string, int> sortFastaFile(string, string);
 	map<string, int> sortFastaFile(vector<Sequence>&, map<string, string>&, string newFile);
+    int sortFastaFile(vector<Sequence>&, map<string, int>&, string newFile);
 	string getNamesFile(string&);
 	//int setupChimera(string,);
 	int MPIExecute(string, string, string, string, map<string, int>&);
-	int deconvoluteResults(SequenceParser*, string, string, string);
+	int deconvoluteResults(map<string, string>&, string, string, string);
 	map<string, int> priority;
 	int setUpForSelfReference(SequenceParser*&, map<string, string>&, map<string, map<string, int> >&, int);
+    int setUpForSelfReference(SequenceCountParser*&, map<string, string>&, map<string, map<string, int> >&, int);
 	int driverGroups(string, string, string, map<string, map<string, int> >&, map<string, string>&);
 	int createProcessesGroups(string, string, string, map<string, map<string, int> >&, map<string, string>&);
 	int MPIExecuteGroups(string, string, string, map<string, map<string, int> >&, map<string, string>&);
@@ -66,8 +69,8 @@ private:
 	int driverMPI(int, int, MPI_File&, MPI_File&, MPI_File&, MPI_File&, vector<unsigned long long>&, string, map<string, int>&, bool);
 	#endif
 
-	bool abort, realign, trim, trimera, save;
-	string fastafile, groupfile, templatefile, outputDir, search, namefile, blastlocation;
+	bool abort, realign, trim, trimera, save, hasName, hasCount;
+	string fastafile, groupfile, templatefile, outputDir, search, namefile, countfile, blastlocation;
 	int processors, window, iters, increment, numwanted, ksize, match, mismatch, parents, minSimilarity, minCoverage, minBS, minSNP, numSeqs, templateSeqsLength;
 	float divR;
 	
