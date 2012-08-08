@@ -353,10 +353,10 @@ class DecisionTree(AbstractDecisionTree):
 
 	def printTree(self, treeNode, caption):
 		tabs = ""
-		for i in range(0, treeNode.generation): tabs += '\t'
+		for i in range(0, treeNode.generation): tabs += '|--'
 
 		if not treeNode.isLeaf:
-			print tabs + caption + ' [ gen: ' + str(treeNode.generation) + ' ] ( ' + str(treeNode.splitFeatureValue) + ' < X'+ str(treeNode.splitFeatureIndex) + ' )'
+			print tabs + caption + ' [ gen: ' + str(treeNode.generation) + ' ] ( ' + str(treeNode.splitFeatureValue) + ' < X'+ str(treeNode.splitFeatureIndex) + ' ) ( predicted to: ' + str(treeNode.outputClass)
 			self.printTree(treeNode.leftChildNode, 'leftChild')
 			self.printTree(treeNode.rightChildNode, 'rightChild')
 		else:
@@ -389,6 +389,9 @@ class DecisionTree(AbstractDecisionTree):
 #		bestFeatureToSplitOn, bestFeatureSplitValue, bestFeatureSplitEntropy =  self.getBestFeatureToSplitOn(rootNode)
 		self.findAndUpdateBestFeatureToSplitOn(rootNode)
 		# so return immediately
+
+		# update rootNode outputClass
+		self.updateOutputClassOfNode(rootNode)
 
 		leftChildSamples, rightChildSamples = self.getSplitPopulation(rootNode)
 		# print "leftChildSamples:", leftChildSamples
@@ -552,12 +555,30 @@ class DecisionTree(AbstractDecisionTree):
 		if treeNode.leftChildNode is not None: self.purgeTreeNodesDataRecursively(treeNode.leftChildNode)
 		if treeNode.rightChildNode is not None: self.purgeTreeNodesDataRecursively(treeNode.rightChildNode)
 
+	# implements "Reduced Error Pruning" algorithm here,
+	# TODO: implement other alternate ways of pruning
+	def pruneTree(self):
+		pass
+
+
+	def updateOutputClassOfNode(self, treeNode):
+		if not treeNode.isLeaf:
+			counts = [0 for x in range(0, self.numOutputClasses)]
+			for x in treeNode.bootstrappedOutputVector: counts[x] += 1
+			majorityVotedOutputClassCount =  max(counts)
+			majorityVotedOutputClass = counts.index(majorityVotedOutputClassCount)
+			treeNode.outputClass = majorityVotedOutputClass
+
+
 class TreeNode(object):
 	def __init__(self, bootstrappedTrainingSamples, globalDiscardedFeatureIndices, numFeatures, numSamples, numOutputClasses, generation):
 		self.numFeatures = numFeatures
 		self.numSamples =  numSamples
 		self.numOutputClasses = numOutputClasses
 		self.isLeaf = False
+		# each node will have an outputClass associated with them, leaf node will have the true output class whereas
+		# internal nodes will have majority voted output class
+		# NOTE: do not make assumptions if a node is leaf based on outputClass
 		self.outputClass = None
 		self.bootstrappedTrainingSamples = bootstrappedTrainingSamples
 		self.globalDiscardedFeatureIndices = globalDiscardedFeatureIndices
@@ -699,6 +720,7 @@ class RandomForest(AbstractRandomForest):
 		for i in range(0, self.numDecisionTrees):
 			print "Creating", i, "(th) Decision tree"
 			decisionTree = DecisionTree(dataSet, self.globalDiscardedFeatureIndices, OptimumFeatureSubsetSelector('log2'), self.treeSplitCriterion)
+			decisionTree.pruneTree()
 			decisionTree.calcTreeVariableImportanceAndError()
 
 			self.updateGlobalOutOfBagEstimates(decisionTree)
