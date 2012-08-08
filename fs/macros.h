@@ -10,7 +10,7 @@
 #define rrf_fs_prototype_macros_h
 
 #define DEBUG_LEVEL_1
-//#define DEBUG_LEVEL_2
+#define DEBUG_LEVEL_2
 //#define DEBUG_LEVEL_3
 //#define DEBUG_LEVEL_4
 
@@ -69,9 +69,11 @@ ostream& operator <<(ostream& os, vector<int>& integers){
 
 /* overrding "cout <<" 2d matrix of itergers whuch uses vectors */
 ostream& operator <<(ostream& os, vector< vector<int> > matrix){
-  os << "[ " << endl;
+//  os << "[ " << endl;
+  os << "[ ";
   for (int i = 0; i < matrix.size(); i++) {
-    os << "\t" << i << " : " << matrix[i] << endl;
+//    os << "\t" << i << " : " << matrix[i] << endl;
+    os << i << " : " << matrix[i] << ", ";
   }
   os << "]";
   return os;
@@ -99,9 +101,11 @@ ostream& operator <<(ostream& os, vector<double>& doubles){
 
 /* overrding "cout <<" for map of int and vector<int> */
 ostream& operator <<(ostream& os, map<int, vector<int> >& keyValuePairs){
-  os << "[ " << endl;
+//  os << "[ " << endl;
+  os << "[ ";
   for (map<int, vector<int> >::iterator it = keyValuePairs.begin(); it != keyValuePairs.end(); it++) {
-    os << "\t" << it->first << " => " << it->second << endl;
+//    os << "\t" << it->first << " => " << it->second << endl;
+    os << it->first << " => " << it->second << ", ";
   }
   os << "]";
   return os;

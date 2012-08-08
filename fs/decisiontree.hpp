@@ -54,17 +54,19 @@ public:
   
   void calcTreeVariableImportanceAndError() {
     
-#ifdef DEBUG_LEVEL_2
+#ifdef DEBUG_LEVEL_3
     DEBUGMSG_FUNC;
 #endif
     
     int numCorrect;
     double treeErrorRate;
     calcTreeErrorRate(numCorrect, treeErrorRate);
-    
+
+#ifdef DEBUG_LEVEL_3
     PRINT_VAR(bootstrappedTestSamples.size());
     PRINT_VAR(numCorrect);
     PRINT_VAR(treeErrorRate);
+#endif
         
     for (int i = 0; i < numFeatures; i++) {
         // NOTE: only shuffle the features, never shuffle the output vector
@@ -171,12 +173,17 @@ protected:
 private:
   
   void buildDecisionTree(){
+    
+#ifdef DEBUG_LEVEL_3
+    DEBUGMSG_FUNC;
+#endif
+    
     int generation = 0;
     rootNode = new TreeNode(bootstrappedTrainingSamples, globalDiscardedFeatureIndices, numFeatures, numSamples, numOutputClasses, generation);
         
     splitRecursively(rootNode);
     
-#ifdef DEBUG_MODE
+#ifdef DEBUG_LEVEL_3
     printTree(rootNode, "root");
 #endif
     
@@ -184,13 +191,13 @@ private:
   
   void splitRecursively(TreeNode* rootNode){
     
-#ifdef DEBUG_LEVEL_2
+#ifdef DEBUG_LEVEL_3
     DEBUGMSG_FUNC;
 #endif
     
     if (rootNode->getNumSamples() < 2){
       
-#ifdef DEBUG_LEVEL_2
+#ifdef DEBUG_LEVEL_3
       DEBUGMSG("Already classified: Case 1");
 #endif
       
@@ -203,7 +210,7 @@ private:
     bool isAlreadyClassified = checkIfAlreadyClassified(rootNode, classifiedOutputClass);    
     if (isAlreadyClassified == true){
       
-#ifdef DEBUG_LEVEL_2
+#ifdef DEBUG_LEVEL_3
       DEBUGMSG("Already classified: Case 2");
 #endif
       
@@ -243,7 +250,7 @@ private:
   
   void findAndUpdateBestFeatureToSplitOn(TreeNode* node){
     
-#ifdef DEBUG_LEVEL_2
+#ifdef DEBUG_LEVEL_3
     DEBUGMSG_FUNC;
 #endif
     
@@ -259,7 +266,7 @@ private:
     for (int i = 0; i < featureSubsetIndices.size(); i++) {
       int tryIndex = featureSubsetIndices[i];
       
-#ifdef DEBUG_LEVEL_4
+#ifdef DEBUG_LEVEL_3
       cout << "trying feature of index:" << tryIndex << endl;
 #endif
       
@@ -319,7 +326,7 @@ private:
   
   vector<int> selectFeatureSubsetRandomly(vector<int> globalDiscardedFeatureIndices, vector<int> localDiscardedFeatureIndices){
     
-#ifdef DEBUG_LEVEL_2
+#ifdef DEBUG_LEVEL_3
     DEBUGMSG_FUNC;
 #endif
     
@@ -331,7 +338,7 @@ private:
         
     sort(combinedDiscardedFeatureIndices.begin(), combinedDiscardedFeatureIndices.end());
     
-#ifdef DEBUG_LEVEL_2
+#ifdef DEBUG_LEVEL_3
     PRINT_VAR(combinedDiscardedFeatureIndices);
 #endif
     
@@ -339,6 +346,7 @@ private:
     int currentFeatureSubsetSize = numberOfRemainingSuitableFeatures < optimumFeatureSubsetSize ? numberOfRemainingSuitableFeatures : optimumFeatureSubsetSize;
     
     while (featureSubsetIndices.size() < currentFeatureSubsetSize) {
+        // TODO: optimize rand() call here
       int randomIndex = rand() % numFeatures;
       vector<int>::iterator it = find(featureSubsetIndices.begin(), featureSubsetIndices.end(), randomIndex);
       if (it == featureSubsetIndices.end()){    // NOT FOUND
@@ -350,7 +358,7 @@ private:
     }
     sort(featureSubsetIndices.begin(), featureSubsetIndices.end());
     
-//#ifdef DEBUG_LEVEL_2
+//#ifdef DEBUG_LEVEL_3
 //    PRINT_VAR(featureSubsetIndices);
 //#endif
     
@@ -361,14 +369,16 @@ private:
   void printTree(TreeNode* treeNode, string caption){
     
     string tabs = "";
-    for (int i = 0; i < treeNode->getGeneration(); i++) { tabs += " "; }
+    for (int i = 0; i < treeNode->getGeneration(); i++) { tabs += "   "; }
+//    for (int i = 0; i < treeNode->getGeneration() - 1; i++) { tabs += "|  "; }
+//    if (treeNode->getGeneration() != 0) { tabs += "|--"; }
     
     if (treeNode != NULL && treeNode->checkIsLeaf() == false){
       cout << tabs << caption << " [ gen: " << treeNode->getGeneration() << " ] ( " << treeNode->getSplitFeatureValue() << " < X" << treeNode->getSplitFeatureIndex() << " )" << endl;
       printTree(treeNode->getLeftChildNode(), "leftChild");
       printTree(treeNode->getRightChildNode(), "rightChild");
     }else {
-      cout << tabs << caption << " [ gen: " << treeNode->getGeneration() + " ] ( classified to: " << treeNode->getOutputClass() << ", samples: " << treeNode->getNumSamples() << " )";
+      cout << tabs << caption << " [ gen: " << treeNode->getGeneration() + " ] ( classified to: " << treeNode->getOutputClass() << ", samples: " << treeNode->getNumSamples() << " )" << endl;
     }
     
   }

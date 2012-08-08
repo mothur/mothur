@@ -63,7 +63,7 @@ public:
   
   void createBootStrappedSamples(){
     
-#ifdef DEBUG_MODE
+#ifdef DEBUG_LEVEL_3
     DEBUGMSG_FUNC;
 #endif
 
@@ -84,7 +84,7 @@ public:
       }
     }
     
-#ifdef DEBUG_MODE
+#ifdef DEBUG_LEVEL_3
     PRINT_VAR(numSamples);
     PRINT_VAR(bootstrappedTrainingSampleIndices);
     PRINT_VAR(bootstrappedTestSampleIndices);
@@ -94,7 +94,7 @@ public:
   void getMinEntropyOfFeature(vector<int> featureVector, vector<int> outputVector, 
                               double& minEntropy, int& featureSplitValue, double& intrinsicValue){
     
-#ifdef DEBUG_LEVEL_4
+#ifdef DEBUG_LEVEL_3
     DEBUGMSG_FUNC;
 #endif
     
@@ -106,7 +106,7 @@ public:
       // TODO: using default behavior to sort(), need to specify the comparator for added safety and compiler portability
     sort(featureOutputPair.begin(), featureOutputPair.end());
     
-#ifdef DEBUG_LEVEL_4
+#ifdef DEBUG_LEVEL_3
     PRINT_VAR(featureOutputPair);
 #endif
     
@@ -131,12 +131,12 @@ public:
         // TODO: trying out C++'s infitinity, don't know if this will work properly
         // TODO: check the caller function of this function, there check the value if minEntropy and comapre to inf
         // so that no wrong calculation is done
-      minEntropy = numeric_limits<double>::infinity();
-      intrinsicValue = numeric_limits<double>::infinity();
-      featureSplitValue = -1;
+      minEntropy = numeric_limits<double>::infinity();                          // OUTPUT
+      intrinsicValue = numeric_limits<double>::infinity();                      // OUTPUT
+      featureSplitValue = -1;                                                   // OUTPUT
     }else{
-      getBestSplitAndMinEntropy(featureOutputPair, splitPoints, minEntropy, bestSplitIndex, intrinsicValue);
-      featureSplitValue = featureOutputPair[splitPoints[bestSplitIndex]][0];
+      getBestSplitAndMinEntropy(featureOutputPair, splitPoints, minEntropy, bestSplitIndex, intrinsicValue);  // OUTPUT
+      featureSplitValue = featureOutputPair[splitPoints[bestSplitIndex]][0];    // OUTPUT
     }
     
   }
@@ -159,6 +159,10 @@ public:
   
   void getBestSplitAndMinEntropy(vector< vector<int> > featureOutputPairs, vector<int> splitPoints,
                                  double& minEntropy, int& minEntropyIndex, double& relatedIntrinsicValue){
+    
+#ifdef DEBUG_LEVEL_3
+    DEBUGMSG_FUNC;
+#endif
     
     int numSamples = (int)featureOutputPairs.size();
     vector<double> entropies;
@@ -184,7 +188,7 @@ public:
       entropies.push_back(totalEntropy);
       intrinsicValues.push_back(intrinsicValue);
       
-#ifdef DEBUG_LEVEL_4
+#ifdef DEBUG_LEVEL_3
       PRINT_VAR(index);
       cout << "----------------------------" << endl;
       PRINT_VAR(upperEntropyOfSplit);
@@ -196,20 +200,20 @@ public:
 
     }
     
-#ifdef DEBUG_LEVEL_4
+#ifdef DEBUG_LEVEL_3
     PRINT_VAR(entropies);
     PRINT_VAR(intrinsicValues);
 #endif
     
       // set output values
     vector<double>::iterator it = min_element(entropies.begin(), entropies.end());
-    minEntropy = *it;
-    minEntropyIndex = (int)(it - entropies.begin());
-    relatedIntrinsicValue = intrinsicValues[minEntropyIndex];
+    minEntropy = *it;                                                         // OUTPUT
+    minEntropyIndex = (int)(it - entropies.begin());                          // OUTPUT
+    relatedIntrinsicValue = intrinsicValues[minEntropyIndex];                 // OUTPUT
 
   }
     
-  double calcSplitEntropy(vector< vector<int> > featureOutputPairs, int splitIndex, int numOutputClasses, bool isUpperSplit) {
+  double calcSplitEntropy(vector< vector<int> > featureOutputPairs, int splitIndex, int numOutputClasses, bool isUpperSplit = true) {
     vector<int> classCounts(numOutputClasses, 0);
     
     if (isUpperSplit) { 
@@ -253,6 +257,11 @@ public:
     // TODO: use bootstrappedOutputVector for easier calculation instead of using getBootstrappedTrainingSamples()
   bool checkIfAlreadyClassified(TreeNode* treeNode, int& outputClass) {
     
+#ifdef DEBUG_LEVEL_3
+    DEBUGMSG_FUNC;
+    PRINT_VAR(treeNode->bootstrappedTrainingSamples.size());
+#endif
+    
     vector<int> tempOutputClasses;
     for (int i = 0; i < treeNode->getBootstrappedTrainingSamples().size(); i++) {
       int sampleOutputClass = treeNode->getBootstrappedTrainingSamples()[i][numFeatures];
@@ -262,8 +271,8 @@ public:
       }
     }
     
-    if (tempOutputClasses.size() < 2){ outputClass = tempOutputClasses[0]; return true; }
-    else{ outputClass = -1; return false; }
+    if (tempOutputClasses.size() < 2) { outputClass = tempOutputClasses[0]; return true; }
+    else { outputClass = -1; return false; }
   }
   
 protected:

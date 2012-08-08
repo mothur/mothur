@@ -105,7 +105,7 @@ public:
     VariableRankDescendingSorter variableRankDescendingSorter;
     sort(globalVariableRanks.begin(), globalVariableRanks.end(), variableRankDescendingSorter);
     
-#ifdef DEBUG_MODE
+#ifdef DEBUG_LEVEL_1
     PRINT_VAR(globalVariableRanks);
 #endif
     
