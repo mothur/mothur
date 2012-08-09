@@ -3,7 +3,8 @@ from __future__ import division
 from math import log, ceil, sqrt
 import random
 
-DEBUG_MODE = True
+#DEBUG_MODE = True
+DEBUG_MODE = False
 
 class AbstractDecisionTree(object):
 	def __init__(self, baseDataSet, globalDiscardedFeatureIndices, optimumFeatureSubsetSelector, treeSplitCriterion):
@@ -569,24 +570,24 @@ class DecisionTree(AbstractDecisionTree):
 
 	# implements "Reduced Error Pruning" algorithm here,
 	# TODO: implement other alternate ways of pruning
-	def pruneTree(self):
+	def pruneTree(self, pruneAggressiveness = 1):
 		# find out the number of misclassification by each of the nodes
 		for testSample in self.bootstrappedTestSamples:
 			self.updateMisclassificationCountRecursively(self.rootNode, testSample)
 #		print 'nodeMisclassificationCounts:', self.nodeMisclassificationCounts
 
 		# do the actual pruning
-		self.pruneRecursively(self.rootNode)
+		self.pruneRecursively(self.rootNode, pruneAggressiveness)
 
-	def pruneRecursively(self, treeNode):
+	def pruneRecursively(self, treeNode, pruneAggressiveness):
 		if not treeNode.isLeaf:
-			self.pruneRecursively(treeNode.leftChildNode)
-			self.pruneRecursively(treeNode.rightChildNode)
+			self.pruneRecursively(treeNode.leftChildNode, pruneAggressiveness)
+			self.pruneRecursively(treeNode.rightChildNode, pruneAggressiveness)
 
 			subTreeMisclassificationCount =  treeNode.leftChildNode.testSampleMisclassificationCount + treeNode.rightChildNode.testSampleMisclassificationCount
-			ownMisclassficiationCount = treeNode.testSampleMisclassificationCount
+			ownMisclassificationCount = treeNode.testSampleMisclassificationCount
 
-			if subTreeMisclassificationCount > ownMisclassficiationCount:
+			if (subTreeMisclassificationCount * pruneAggressiveness) > ownMisclassificationCount:
 				# consider for pruning
 				treeNode.leftChildNode = None
 				treeNode.rightChildNode = None
@@ -772,16 +773,20 @@ class RandomForest(AbstractRandomForest):
 			print "Creating", i, "(th) Decision tree"
 			decisionTree = DecisionTree(dataSet, self.globalDiscardedFeatureIndices, OptimumFeatureSubsetSelector('log2'), self.treeSplitCriterion)
 
-			print 'Tree before pruning\n--------------------------------------------------------------------------------'
-			decisionTree.printTree(decisionTree.rootNode, "ROOT")
+			print 'Before pruning'
+			print '--------------------------------------------------------------------------------'
+			if DEBUG_MODE: decisionTree.printTree(decisionTree.rootNode, "ROOT")
 			numCorrect, treeErrorRate = decisionTree.calcTreeErrorRate()
 			print "numCorrect:", numCorrect
 			print "treeErrorRate:", treeErrorRate
 
 			# after pruning
-			decisionTree.pruneTree()
-			print 'Tree after pruning\n--------------------------------------------------------------------------------'
-			decisionTree.printTree(decisionTree.rootNode, "ROOT")
+#			pruneAggressiveness = 0.9
+			pruneAggressiveness = 1
+			decisionTree.pruneTree(pruneAggressiveness)
+			print 'After pruning'
+			print '--------------------------------------------------------------------------------'
+			if DEBUG_MODE: decisionTree.printTree(decisionTree.rootNode, "ROOT")
 			numCorrect, treeErrorRate = decisionTree.calcTreeErrorRate()
 			decisionTree.calcTreeVariableImportanceAndError(numCorrect, treeErrorRate)
 
@@ -874,7 +879,7 @@ class Utils(object):
 
 
 if __name__ == "__main__":
-	numDecisionTrees = 1
+	numDecisionTrees = 1000
 
 	# example of matrix file reading
 #	fileReaderFactory = fileReaderFactory(fileType = 'matrix', matrixFilePath = 'Datasets/small-alter.txt');
