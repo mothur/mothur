@@ -20,6 +20,8 @@ class AbstractDecisionTree(object):
 		self.bootstrappedTestSampleIndices = []
 
 		self.rootNode = None
+		self.nodeIdCount = 0
+		self.nodeMisclassificationCounts = {}
 		self.globalDiscardedFeatureIndices = globalDiscardedFeatureIndices
 
 		self.optimumFeatureSubsetSize = optimumFeatureSubsetSelector.getOptimumFeatureSubsetSize(self.numFeatures)
@@ -206,7 +208,8 @@ class RegularizedDecisionTree(AbstractDecisionTree):
 
 	def buildDecisionTree(self):
 		if DEBUG_MODE: print "buildDecisionTree()"
-		treeNode = TreeNode(self.bootstrappedTrainingSamples, self.globalDiscardedFeatureIndices, self.numFeatures, self.numSamples, self.numOutputClasses, 0)
+		treeNode = TreeNode(self.bootstrappedTrainingSamples, self.globalDiscardedFeatureIndices, self.numFeatures, self.numSamples, self.numOutputClasses, 0, self.nodeIdCount)
+		self.nodeIdCount += 1
 		self.rootNode = treeNode
 
 		# TODO: penalty is a factor we might need to fine tune first, 1 means no penalty
@@ -279,8 +282,10 @@ class RegularizedDecisionTree(AbstractDecisionTree):
 
 		leftChildSamples, rightChildSamples = self.getSplitPopulation(treeNode)
 
-		leftChildNode = TreeNode(leftChildSamples, self.globalDiscardedFeatureIndices, self.numFeatures, len(leftChildSamples), self.numOutputClasses, treeNode.generation + 1)
-		rightChildNode = TreeNode(rightChildSamples, self.globalDiscardedFeatureIndices, self.numFeatures, len(rightChildSamples), self.numOutputClasses, treeNode.generation + 1)
+		leftChildNode = TreeNode(leftChildSamples, self.globalDiscardedFeatureIndices, self.numFeatures, len(leftChildSamples), self.numOutputClasses, treeNode.generation + 1, self.nodeIdCount)
+		self.nodeIdCount += 1
+		rightChildNode = TreeNode(rightChildSamples, self.globalDiscardedFeatureIndices, self.numFeatures, len(rightChildSamples), self.numOutputClasses, treeNode.generation + 1, self.nodeIdCount)
+		self.nodeIdCount += 1
 
 		treeNode.leftChildNode = leftChildNode
 		treeNode.leftChildNode.parentNode = treeNode
@@ -345,25 +350,26 @@ class DecisionTree(AbstractDecisionTree):
 
 	def buildDecisionTree(self):
 		if DEBUG_MODE: print "buildDecisionTree()"
-		treeNode = TreeNode(self.bootstrappedTrainingSamples, self.globalDiscardedFeatureIndices, self.numFeatures, self.numSamples, self.numOutputClasses, 0)
+		treeNode = TreeNode(self.bootstrappedTrainingSamples, self.globalDiscardedFeatureIndices, self.numFeatures, self.numSamples, self.numOutputClasses, 0, self.nodeIdCount)
+		self.nodeIdCount += 1
 		self.rootNode = treeNode
 
 		self.splitRecursively(treeNode)
-		if DEBUG_MODE: self.printTree(treeNode, "ROOT")
+#		if DEBUG_MODE: self.printTree(treeNode, "ROOT")
 
 	def printTree(self, treeNode, caption):
 		tabs = ""
 		for i in range(0, treeNode.generation): tabs += '|--'
 
 		if not treeNode.isLeaf:
-			print tabs + caption + ' [ gen: ' + str(treeNode.generation) + ' ] ( ' + str(treeNode.splitFeatureValue) \
-				  + ' < X'+ str(treeNode.splitFeatureIndex) + ' ) ( predicted: ' + str(treeNode.outputClass) \
-					+ ' , misclassified: ' + str(treeNode.testSampleMisclassificationCount) + ' )'
+			print tabs + caption + ' [ gen: ' + str(treeNode.generation) + ' , id: ' +  str(treeNode.nodeId)+ ' ] ( ' \
+				  + str(treeNode.splitFeatureValue) + ' < X'+ str(treeNode.splitFeatureIndex) + ' ) ( predicted: ' \
+				  + str(treeNode.outputClass) + ' , misclassified: ' + str(treeNode.testSampleMisclassificationCount) + ' )'
 			self.printTree(treeNode.leftChildNode, 'left ')
 			self.printTree(treeNode.rightChildNode, 'right')
 		else:
-			print tabs + caption + ' [ gen: ' + str(treeNode.generation) + ' ] ( classified: ' \
-				  + str(treeNode.outputClass) + ', samples: ' + str(treeNode.numSamples)\
+			print tabs + caption + ' [ gen: ' + str(treeNode.generation) + ' , id: ' + str(treeNode.nodeId) \
+				  + ' ] ( classified: ' + str(treeNode.outputClass) + ', samples: ' + str(treeNode.numSamples) \
 				  + ' , misclassified: ' + str(treeNode.testSampleMisclassificationCount) + ' )'
 
 
@@ -402,8 +408,10 @@ class DecisionTree(AbstractDecisionTree):
 		# print "leftChildSamples:", leftChildSamples
 		# print "rightChildSamples:", rightChildSamples
 
-		leftChildNode = TreeNode(leftChildSamples, self.globalDiscardedFeatureIndices, self.numFeatures, len(leftChildSamples), self.numOutputClasses, rootNode.generation + 1)
-		rightChildNode = TreeNode(rightChildSamples, self.globalDiscardedFeatureIndices, self.numFeatures, len(rightChildSamples), self.numOutputClasses, rootNode.generation + 1)
+		leftChildNode = TreeNode(leftChildSamples, self.globalDiscardedFeatureIndices, self.numFeatures, len(leftChildSamples), self.numOutputClasses, rootNode.generation + 1, self.nodeIdCount)
+		self.nodeIdCount += 1
+		rightChildNode = TreeNode(rightChildSamples, self.globalDiscardedFeatureIndices, self.numFeatures, len(rightChildSamples), self.numOutputClasses, rootNode.generation + 1, self.nodeIdCount)
+		self.nodeIdCount += 1
 
 		rootNode.leftChildNode = leftChildNode
 		rootNode.leftChildNode.parentNode = rootNode
@@ -562,7 +570,27 @@ class DecisionTree(AbstractDecisionTree):
 	# implements "Reduced Error Pruning" algorithm here,
 	# TODO: implement other alternate ways of pruning
 	def pruneTree(self):
-		pass
+		# find out the number of misclassification by each of the nodes
+		for testSample in self.bootstrappedTestSamples:
+			self.updateMisclassificationCountRecursively(self.rootNode, testSample)
+
+		print 'nodeMisclassificationCounts:', self.nodeMisclassificationCounts
+
+	def updateMisclassificationCountRecursively(self, treeNode, testSample):
+		actualSampleOutputClass = testSample[self.numFeatures]
+		nodePredictedOutputClass = treeNode.outputClass
+		if nodePredictedOutputClass != actualSampleOutputClass:
+			treeNode.testSampleMisclassificationCount += 1
+			if treeNode.nodeId not in self.nodeMisclassificationCounts: self.nodeMisclassificationCounts[treeNode.nodeId] = 0
+			self.nodeMisclassificationCounts[treeNode.nodeId] += 1
+
+		if not treeNode.isLeaf:
+			sampleSplitFeatureValue = testSample[treeNode.splitFeatureIndex]
+			if sampleSplitFeatureValue < treeNode.splitFeatureValue:
+				self.updateMisclassificationCountRecursively(treeNode.leftChildNode, testSample)
+			else:
+				self.updateMisclassificationCountRecursively(treeNode.rightChildNode, testSample)
+
 
 	# uses the training set to predict at each of the nodes
 	def updateOutputClassOfNode(self, treeNode):
@@ -574,7 +602,7 @@ class DecisionTree(AbstractDecisionTree):
 
 
 class TreeNode(object):
-	def __init__(self, bootstrappedTrainingSamples, globalDiscardedFeatureIndices, numFeatures, numSamples, numOutputClasses, generation):
+	def __init__(self, bootstrappedTrainingSamples, globalDiscardedFeatureIndices, numFeatures, numSamples, numOutputClasses, generation, nodeId):
 		self.numFeatures = numFeatures
 		self.numSamples =  numSamples
 		self.numOutputClasses = numOutputClasses
@@ -584,6 +612,7 @@ class TreeNode(object):
 		# internal nodes will have majority voted output class
 		# NOTE: do not make assumptions if a node is leaf based on outputClass
 		self.outputClass = None
+		self.nodeId = nodeId
 		self.testSampleMisclassificationCount = 0
 
 		self.bootstrappedTrainingSamples = bootstrappedTrainingSamples
@@ -727,11 +756,11 @@ class RandomForest(AbstractRandomForest):
 			print "Creating", i, "(th) Decision tree"
 			decisionTree = DecisionTree(dataSet, self.globalDiscardedFeatureIndices, OptimumFeatureSubsetSelector('log2'), self.treeSplitCriterion)
 
-			# evaluateSampleAndUpdateMissClassificationCount called inside calcTreeErrorRate()
-			numCorrect, treeErrorRate = decisionTree.calcTreeErrorRate()
-			# updateMisclassificationCount calculation is already done
+			decisionTree.pruneTree()
 
-#			decisionTree.pruneTree()
+			decisionTree.printTree(decisionTree.rootNode, "ROOT")
+
+			numCorrect, treeErrorRate = decisionTree.calcTreeErrorRate()
 			decisionTree.calcTreeVariableImportanceAndError(numCorrect, treeErrorRate)
 
 			self.updateGlobalOutOfBagEstimates(decisionTree)
