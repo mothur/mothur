@@ -573,8 +573,24 @@ class DecisionTree(AbstractDecisionTree):
 		# find out the number of misclassification by each of the nodes
 		for testSample in self.bootstrappedTestSamples:
 			self.updateMisclassificationCountRecursively(self.rootNode, testSample)
+#		print 'nodeMisclassificationCounts:', self.nodeMisclassificationCounts
 
-		print 'nodeMisclassificationCounts:', self.nodeMisclassificationCounts
+		# do the actual pruning
+		self.pruneRecursively(self.rootNode)
+
+	def pruneRecursively(self, treeNode):
+		if not treeNode.isLeaf:
+			self.pruneRecursively(treeNode.leftChildNode)
+			self.pruneRecursively(treeNode.rightChildNode)
+
+			subTreeMisclassificationCount =  treeNode.leftChildNode.testSampleMisclassificationCount + treeNode.rightChildNode.testSampleMisclassificationCount
+			ownMisclassficiationCount = treeNode.testSampleMisclassificationCount
+
+			if subTreeMisclassificationCount > ownMisclassficiationCount:
+				# consider for pruning
+				treeNode.leftChildNode = None
+				treeNode.rightChildNode = None
+				treeNode.isLeaf = True
 
 	def updateMisclassificationCountRecursively(self, treeNode, testSample):
 		actualSampleOutputClass = testSample[self.numFeatures]
@@ -756,10 +772,16 @@ class RandomForest(AbstractRandomForest):
 			print "Creating", i, "(th) Decision tree"
 			decisionTree = DecisionTree(dataSet, self.globalDiscardedFeatureIndices, OptimumFeatureSubsetSelector('log2'), self.treeSplitCriterion)
 
-			decisionTree.pruneTree()
-
+			print 'Tree before pruning\n--------------------------------------------------------------------------------'
 			decisionTree.printTree(decisionTree.rootNode, "ROOT")
+			numCorrect, treeErrorRate = decisionTree.calcTreeErrorRate()
+			print "numCorrect:", numCorrect
+			print "treeErrorRate:", treeErrorRate
 
+			# after pruning
+			decisionTree.pruneTree()
+			print 'Tree after pruning\n--------------------------------------------------------------------------------'
+			decisionTree.printTree(decisionTree.rootNode, "ROOT")
 			numCorrect, treeErrorRate = decisionTree.calcTreeErrorRate()
 			decisionTree.calcTreeVariableImportanceAndError(numCorrect, treeErrorRate)
 
