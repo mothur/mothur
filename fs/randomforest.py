@@ -349,18 +349,22 @@ class DecisionTree(AbstractDecisionTree):
 		self.rootNode = treeNode
 
 		self.splitRecursively(treeNode)
-		if DEBUG_MODE: self.printTree(treeNode, "root")
+		if DEBUG_MODE: self.printTree(treeNode, "ROOT")
 
 	def printTree(self, treeNode, caption):
 		tabs = ""
 		for i in range(0, treeNode.generation): tabs += '|--'
 
 		if not treeNode.isLeaf:
-			print tabs + caption + ' [ gen: ' + str(treeNode.generation) + ' ] ( ' + str(treeNode.splitFeatureValue) + ' < X'+ str(treeNode.splitFeatureIndex) + ' ) ( predicted to: ' + str(treeNode.outputClass)
-			self.printTree(treeNode.leftChildNode, 'leftChild')
-			self.printTree(treeNode.rightChildNode, 'rightChild')
+			print tabs + caption + ' [ gen: ' + str(treeNode.generation) + ' ] ( ' + str(treeNode.splitFeatureValue) \
+				  + ' < X'+ str(treeNode.splitFeatureIndex) + ' ) ( predicted: ' + str(treeNode.outputClass) \
+					+ ' , misclassified: ' + str(treeNode.testSampleMisclassificationCount) + ' )'
+			self.printTree(treeNode.leftChildNode, 'left ')
+			self.printTree(treeNode.rightChildNode, 'right')
 		else:
-			print tabs + caption + ' [ gen: ' + str(treeNode.generation) + ' ] ( classified to: ' + str(treeNode.outputClass) +', samples: ' + str(treeNode.numSamples) +' )'
+			print tabs + caption + ' [ gen: ' + str(treeNode.generation) + ' ] ( classified: ' \
+				  + str(treeNode.outputClass) + ', samples: ' + str(treeNode.numSamples)\
+				  + ' , misclassified: ' + str(treeNode.testSampleMisclassificationCount) + ' )'
 
 
 	def splitRecursively(self, rootNode):
@@ -390,7 +394,8 @@ class DecisionTree(AbstractDecisionTree):
 		self.findAndUpdateBestFeatureToSplitOn(rootNode)
 		# so return immediately
 
-		# update rootNode outputClass
+		# update rootNode outputClass, this is needed for pruning
+		# this is only for internal nodes
 		self.updateOutputClassOfNode(rootNode)
 
 		leftChildSamples, rightChildSamples = self.getSplitPopulation(rootNode)
@@ -478,9 +483,8 @@ class DecisionTree(AbstractDecisionTree):
 #		print 'Best Split on this feature with value:', bestFeatureSplitValue
 #		return featureSubsetIndices[bestFeatureToSplitOn], bestFeatureSplitValue, featureMinEntropy
 
-	def calcTreeVariableImportanceAndError(self):
+	def calcTreeVariableImportanceAndError(self, numCorrect, treeErrorRate):
 		if DEBUG_MODE: print "calcTreeVariableImportanceAndError()"
-		numCorrect, treeErrorRate = self.calcTreeErrorRate()
 		print "len(self.bootstrappedTestSamples):", len(self.bootstrappedTestSamples)
 		print "numCorrect:", numCorrect
 		print "treeErrorRate:", treeErrorRate
@@ -560,14 +564,13 @@ class DecisionTree(AbstractDecisionTree):
 	def pruneTree(self):
 		pass
 
-
+	# uses the training set to predict at each of the nodes
 	def updateOutputClassOfNode(self, treeNode):
-		if not treeNode.isLeaf:
-			counts = [0 for x in range(0, self.numOutputClasses)]
-			for x in treeNode.bootstrappedOutputVector: counts[x] += 1
-			majorityVotedOutputClassCount =  max(counts)
-			majorityVotedOutputClass = counts.index(majorityVotedOutputClassCount)
-			treeNode.outputClass = majorityVotedOutputClass
+		counts = [0 for x in range(0, self.numOutputClasses)]
+		for x in treeNode.bootstrappedOutputVector: counts[x] += 1
+		majorityVotedOutputClassCount =  max(counts)
+		majorityVotedOutputClass = counts.index(majorityVotedOutputClassCount)
+		treeNode.outputClass = majorityVotedOutputClass
 
 
 class TreeNode(object):
@@ -576,10 +579,13 @@ class TreeNode(object):
 		self.numSamples =  numSamples
 		self.numOutputClasses = numOutputClasses
 		self.isLeaf = False
+
 		# each node will have an outputClass associated with them, leaf node will have the true output class whereas
 		# internal nodes will have majority voted output class
 		# NOTE: do not make assumptions if a node is leaf based on outputClass
 		self.outputClass = None
+		self.testSampleMisclassificationCount = 0
+
 		self.bootstrappedTrainingSamples = bootstrappedTrainingSamples
 		self.globalDiscardedFeatureIndices = globalDiscardedFeatureIndices
 		self.generation = generation
@@ -720,13 +726,16 @@ class RandomForest(AbstractRandomForest):
 		for i in range(0, self.numDecisionTrees):
 			print "Creating", i, "(th) Decision tree"
 			decisionTree = DecisionTree(dataSet, self.globalDiscardedFeatureIndices, OptimumFeatureSubsetSelector('log2'), self.treeSplitCriterion)
-			decisionTree.pruneTree()
-			decisionTree.calcTreeVariableImportanceAndError()
+
+			# evaluateSampleAndUpdateMissClassificationCount called inside calcTreeErrorRate()
+			numCorrect, treeErrorRate = decisionTree.calcTreeErrorRate()
+			# updateMisclassificationCount calculation is already done
+
+#			decisionTree.pruneTree()
+			decisionTree.calcTreeVariableImportanceAndError(numCorrect, treeErrorRate)
 
 			self.updateGlobalOutOfBagEstimates(decisionTree)
-
 			decisionTree.purgeDataSetsFromTree()
-
 			self.decisionTrees.append(decisionTree)
 
 		if DEBUG_MODE: print "self.globalOutOfBagEstimates:", self.globalOutOfBagEstimates
