@@ -692,7 +692,7 @@ class TreeNode(object):
 		self.ownEntropy= nodeEntropy
 
 class AbstractRandomForest(object):
-	def __init__(self, dataSet, numDecisionTrees, treeSplitCriterion='informationGain'):
+	def __init__(self, dataSet, numDecisionTrees, treeSplitCriterion='informationGain', doPruning = False, pruneAggressiveness = 0.9):
 		self.decisionTrees = []
 		self.dataSet = dataSet
 		self.numDecisionTrees = numDecisionTrees
@@ -707,6 +707,9 @@ class AbstractRandomForest(object):
 
 		# TODO: use splitCriterion when splitting in decision tree, need to pass this value when creating decision trees
 		self.treeSplitCriterion = treeSplitCriterion
+
+		self.doPruning = doPruning
+		self.pruneAggressiveness = pruneAggressiveness
 
 	def getGlobalDiscardedFeatureIndices(self):
 		featureVectors = zip(*self.dataSet)[:-1]
@@ -778,7 +781,7 @@ class RandomForest(AbstractRandomForest):
 		forrestErrorRate = 1 - (numCorrect / len(self.globalOutOfBagEstimates))
 		print "forrestErrorRate:", forrestErrorRate
 
-	def populateDecisionTrees(self, doPruning = True):
+	def populateDecisionTrees(self):
 		print "populateDecisionTrees()"
 		for i in range(0, self.numDecisionTrees):
 			print "Creating", i, "(th) Decision tree"
@@ -786,19 +789,18 @@ class RandomForest(AbstractRandomForest):
 
 			if DEBUG_MODE: decisionTree.printTree(decisionTree.rootNode, "ROOT")
 			numCorrect, treeErrorRate = decisionTree.calcTreeErrorRate()
-			if doPruning:
+			if self.doPruning:
 				print 'BEFORE PRUNING'
 			print "treeErrorRate:", treeErrorRate, "numCorrect:", numCorrect
 
-			if doPruning:
+			if self.doPruning:
 				# after pruning
-				pruneAggressiveness = 0.9
-				decisionTree.pruneTree(pruneAggressiveness)
+				decisionTree.pruneTree(self.pruneAggressiveness)
 				if DEBUG_MODE: decisionTree.printTree(decisionTree.rootNode, "ROOT")
 				numCorrect, treeErrorRate = decisionTree.calcTreeErrorRate()
 
 			decisionTree.calcTreeVariableImportanceAndError(numCorrect, treeErrorRate)
-			if doPruning:
+			if self.doPruning:
 				print 'AFTER PRUNING'
 				print "treeErrorRate:", treeErrorRate, "numCorrect:", numCorrect
 
@@ -906,7 +908,10 @@ if __name__ == "__main__":
 	# this is normal random forest, this can provide variable ranks (feature selection) as well as do
 	# classification
 #	randomForest = RandomForest(dataSet, numDecisionTrees, treeSplitCriterion='informationGain')
-	randomForest = RandomForest(dataSet, numDecisionTrees, treeSplitCriterion='gainRatio')
+	randomForest = RandomForest(dataSet, numDecisionTrees,
+								treeSplitCriterion='gainRatio',
+								doPruning = True,
+								pruneAggressiveness = 0.9)
 	randomForest.populateDecisionTrees()
 	randomForest.calcForrestErrorRate()
 	randomForest.calcForrestVariableImportance()
