@@ -2,6 +2,7 @@
 from __future__ import division
 from math import log, ceil, sqrt
 import random
+import copy
 
 DEBUG_MODE = True
 #DEBUG_MODE = False
@@ -501,8 +502,6 @@ class DecisionTree(AbstractDecisionTree):
 	def calcTreeVariableImportanceAndError(self, numCorrect, treeErrorRate):
 		if DEBUG_MODE: print "calcTreeVariableImportanceAndError()"
 		print "len(self.bootstrappedTestSamples):", len(self.bootstrappedTestSamples)
-		print "numCorrect:", numCorrect
-		print "treeErrorRate:", treeErrorRate
 
 		for i in range(0, self.numFeatures):
 			# if the index is in globalDiscardedFeatureIndices (i.e, null feature) we don't want to shuffle them
@@ -581,13 +580,14 @@ class DecisionTree(AbstractDecisionTree):
 
 	# implements "Reduced Error Pruning" algorithm here,
 	# TODO: implement other alternate ways of pruning
-	def pruneTree(self, pruneAggressiveness = 1):
+	def pruneTree(self, pruneAggressiveness = 0.9):
 		# find out the number of misclassification by each of the nodes
 		for testSample in self.bootstrappedTestSamples:
 			self.updateMisclassificationCountRecursively(self.rootNode, testSample)
 #		print 'nodeMisclassificationCounts:', self.nodeMisclassificationCounts
 
 		# do the actual pruning
+#		pruneRootNode = copy.deepcopy(self.rootNode)
 		self.pruneRecursively(self.rootNode, pruneAggressiveness)
 
 	def pruneRecursively(self, treeNode, pruneAggressiveness):
@@ -778,28 +778,29 @@ class RandomForest(AbstractRandomForest):
 		forrestErrorRate = 1 - (numCorrect / len(self.globalOutOfBagEstimates))
 		print "forrestErrorRate:", forrestErrorRate
 
-	def populateDecisionTrees(self):
+	def populateDecisionTrees(self, doPruning = True):
 		print "populateDecisionTrees()"
 		for i in range(0, self.numDecisionTrees):
 			print "Creating", i, "(th) Decision tree"
 			decisionTree = DecisionTree(dataSet, self.globalDiscardedFeatureIndices, OptimumFeatureSubsetSelector('log2'), self.treeSplitCriterion)
 
-			print 'Before pruning'
-			print '--------------------------------------------------------------------------------'
 			if DEBUG_MODE: decisionTree.printTree(decisionTree.rootNode, "ROOT")
 			numCorrect, treeErrorRate = decisionTree.calcTreeErrorRate()
-			print "numCorrect:", numCorrect
-			print "treeErrorRate:", treeErrorRate
+			if doPruning:
+				print 'BEFORE PRUNING'
+			print "treeErrorRate:", treeErrorRate, "numCorrect:", numCorrect
 
-			# after pruning
-#			pruneAggressiveness = 0.9
-			pruneAggressiveness = 1
-			decisionTree.pruneTree(pruneAggressiveness)
-			print 'After pruning'
-			print '--------------------------------------------------------------------------------'
-			if DEBUG_MODE: decisionTree.printTree(decisionTree.rootNode, "ROOT")
-			numCorrect, treeErrorRate = decisionTree.calcTreeErrorRate()
+			if doPruning:
+				# after pruning
+				pruneAggressiveness = 0.9
+				decisionTree.pruneTree(pruneAggressiveness)
+				if DEBUG_MODE: decisionTree.printTree(decisionTree.rootNode, "ROOT")
+				numCorrect, treeErrorRate = decisionTree.calcTreeErrorRate()
+
 			decisionTree.calcTreeVariableImportanceAndError(numCorrect, treeErrorRate)
+			if doPruning:
+				print 'AFTER PRUNING'
+				print "treeErrorRate:", treeErrorRate, "numCorrect:", numCorrect
 
 			self.updateGlobalOutOfBagEstimates(decisionTree)
 			decisionTree.purgeDataSetsFromTree()
