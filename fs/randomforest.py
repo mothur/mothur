@@ -776,8 +776,6 @@ class RandomForest(AbstractRandomForest):
 	def calcForrestVariableImportance(self):
 		if DEBUG_LEVEL_FOREST: print "calcForrestVariableImportance()"
 
-		if len(self.decisionTrees) < 1: print 'Too few trees, returning home'; return
-
 		# make the sum of all the importance
 		for decisionTree in self.decisionTrees:
 			for i in range(0, self.numFeatures):
@@ -796,7 +794,9 @@ class RandomForest(AbstractRandomForest):
 	def calcForrestErrorRate(self):
 		if DEBUG_LEVEL_FOREST: print "calcForrestErrorRate()"
 
-		if len(self.decisionTrees) < 1: print 'Too few trees, returning home'; return
+		if len(self.decisionTrees) < 1:
+			print 'Too few trees, returning home. Try increasing the number of trees'
+			exit(-1)
 
 		numCorrect = 0
 		for indexOfSample, predictedOutComes in self.globalOutOfBagEstimates.iteritems():
@@ -961,7 +961,7 @@ if __name__ == "__main__":
 	# this is normal random forest, this can provide variable ranks (feature selection) as well as do
 	# classification
 	randomForest = RandomForest(dataSet,
-								numDecisionTrees = 1,
+								numDecisionTrees = 10,
 #								treeSplitCriterion='informationGain',
 								treeSplitCriterion='gainRatio',
 								doPruning = True,
