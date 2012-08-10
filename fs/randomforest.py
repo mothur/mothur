@@ -692,7 +692,13 @@ class TreeNode(object):
 		self.ownEntropy= nodeEntropy
 
 class AbstractRandomForest(object):
-	def __init__(self, dataSet, numDecisionTrees, treeSplitCriterion='informationGain', doPruning = False, pruneAggressiveness = 0.9):
+	def __init__(self, dataSet, numDecisionTrees,
+				 treeSplitCriterion='informationGain',
+				 doPruning = False,
+				 pruneAggressiveness = 0.9,
+				 discardHighErrorTrees = True,
+				 highErrorTreeDiscardThreshold = 0.4):
+
 		self.decisionTrees = []
 		self.dataSet = dataSet
 		self.numDecisionTrees = numDecisionTrees
@@ -710,6 +716,8 @@ class AbstractRandomForest(object):
 
 		self.doPruning = doPruning
 		self.pruneAggressiveness = pruneAggressiveness
+		self.discardHighErrorTrees = discardHighErrorTrees
+		self.highErrorTreeDiscardThreshold = highErrorTreeDiscardThreshold
 
 	def getGlobalDiscardedFeatureIndices(self):
 		featureVectors = zip(*self.dataSet)[:-1]
@@ -751,6 +759,8 @@ class RandomForest(AbstractRandomForest):
 	def calcForrestVariableImportance(self):
 		print "calcForrestVariableImportance()"
 
+		if len(self.decisionTrees) < 1: print 'Too few trees, returning home'; return
+
 		# make the sum of all the importance
 		for decisionTree in self.decisionTrees:
 			for i in range(0, self.numFeatures):
@@ -768,6 +778,9 @@ class RandomForest(AbstractRandomForest):
 
 	def calcForrestErrorRate(self):
 		print "calcForrestErrorRate()"
+
+		if len(self.decisionTrees) < 1: print 'Too few trees, returning home'; return
+
 		numCorrect = 0
 		for indexOfSample, predictedOutComes in self.globalOutOfBagEstimates.iteritems():
 			majorityVotedOutcome = predictedOutComes.index(max(predictedOutComes))
@@ -804,9 +817,14 @@ class RandomForest(AbstractRandomForest):
 				print 'AFTER PRUNING'
 				print "treeErrorRate:", treeErrorRate, "numCorrect:", numCorrect
 
-			self.updateGlobalOutOfBagEstimates(decisionTree)
-			decisionTree.purgeDataSetsFromTree()
-			self.decisionTrees.append(decisionTree)
+			if self.discardHighErrorTrees:
+				# only use this tree in the forest if the error is low enough
+				if treeErrorRate < self.highErrorTreeDiscardThreshold:
+					self.updateGlobalOutOfBagEstimates(decisionTree)
+					decisionTree.purgeDataSetsFromTree()
+					self.decisionTrees.append(decisionTree)
+				else:
+					decisionTree = None
 
 		if DEBUG_MODE: print "self.globalOutOfBagEstimates:", self.globalOutOfBagEstimates
 
@@ -893,7 +911,7 @@ class Utils(object):
 
 
 if __name__ == "__main__":
-	numDecisionTrees = 1
+	numDecisionTrees = 10
 
 	# example of matrix file reading
 #	fileReaderFactory = fileReaderFactory(fileType = 'matrix', matrixFilePath = 'Datasets/small-alter.txt');
@@ -911,7 +929,9 @@ if __name__ == "__main__":
 	randomForest = RandomForest(dataSet, numDecisionTrees,
 								treeSplitCriterion='gainRatio',
 								doPruning = True,
-								pruneAggressiveness = 0.9)
+								pruneAggressiveness = 0.9,
+								discardHighErrorTrees = True,
+								highErrorTreeDiscardThreshold = 0.40)
 	randomForest.populateDecisionTrees()
 	randomForest.calcForrestErrorRate()
 	randomForest.calcForrestVariableImportance()
