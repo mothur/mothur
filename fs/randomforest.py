@@ -3,8 +3,8 @@ from __future__ import division
 from math import log, ceil, sqrt
 import random
 
-#DEBUG_MODE = True
-DEBUG_MODE = False
+DEBUG_MODE = True
+#DEBUG_MODE = False
 
 class AbstractDecisionTree(object):
 	def __init__(self, baseDataSet, globalDiscardedFeatureIndices, optimumFeatureSubsetSelector, treeSplitCriterion):
@@ -19,6 +19,8 @@ class AbstractDecisionTree(object):
 		self.bootstrappedTrainingSampleIndices = []
 		self.bootstrappedTestSamples = []
 		self.bootstrappedTestSampleIndices = []
+
+		self.testSampleFeatureVectors = []
 
 		self.rootNode = None
 		self.nodeIdCount = 0
@@ -53,10 +55,14 @@ class AbstractDecisionTree(object):
 
 			#		for x in self.bootstrappedTrainingSamples: print x
 			#		print "###"
+		# create feature vector from test samples as well
+		self.testSampleFeatureVectors = [list(x) for x in zip(*self.bootstrappedTestSamples)]
+
 		if DEBUG_MODE:
 			for x in self.bootstrappedTestSamples: print x
 		if DEBUG_MODE: print "self.bootstrappedTrainingSampleIndices:", self.bootstrappedTrainingSampleIndices
 		if DEBUG_MODE: print "self.bootstrappedTestSampleIndices:", self.bootstrappedTestSampleIndices
+
 
 	def getMinEntropyOfFeature(self, featureVector, outputVector):
 		if DEBUG_MODE: print "getMinEntropyOfFeature()"
@@ -498,17 +504,22 @@ class DecisionTree(AbstractDecisionTree):
 		print "numCorrect:", numCorrect
 		print "treeErrorRate:", treeErrorRate
 
-
 		for i in range(0, self.numFeatures):
-			randomlySampledTestData = self.randomlyShuffleAttribute(self.bootstrappedTestSamples, i)
+			# if the index is in globalDiscardedFeatureIndices (i.e, null feature) we don't want to shuffle them
+			if i not in self.globalDiscardedFeatureIndices:
+				# the standard deviation is very low, we know it's not a good feature at all
+				# we can save some time here by discarding that feature
+				if Utils.getStandardDeviation(self.testSampleFeatureVectors[i]) > 0:
+					randomlySampledTestData = self.randomlyShuffleAttribute(self.bootstrappedTestSamples, i)
 
-			numCorrectAfterShuffle = 0
-			for shuffledSample in randomlySampledTestData:
-				actualSampleOutputClass = shuffledSample[self.numFeatures]
-				predictedSampleOutputClass = self.evaluateSample(shuffledSample)
-				if actualSampleOutputClass == predictedSampleOutputClass:
-					numCorrectAfterShuffle += 1
-			self.variableImportanceList[i] += (numCorrect - numCorrectAfterShuffle)
+					numCorrectAfterShuffle = 0
+					for shuffledSample in randomlySampledTestData:
+						actualSampleOutputClass = shuffledSample[self.numFeatures]
+						predictedSampleOutputClass = self.evaluateSample(shuffledSample)
+						if actualSampleOutputClass == predictedSampleOutputClass:
+							numCorrectAfterShuffle += 1
+
+					self.variableImportanceList[i] += (numCorrect - numCorrectAfterShuffle)
 
 #		print "self.variableImportanceList:", self.variableImportanceList
 
@@ -666,7 +677,7 @@ class TreeNode(object):
 		for i, x in enumerate(self.bootstrappedFeatureVectors):
 			if i not in self.globalDiscardedFeatureIndices and Utils.getStandardDeviation(x) <= 0:
 				self.localDiscardedFeatureIndices.append(i)
-		if DEBUG_MODE: print self.localDiscardedFeatureIndices
+		if DEBUG_MODE: print 'localDiscardedFeatureIndices:', self.localDiscardedFeatureIndices
 
 	def updateNodeEntropy(self):
 		classCounts = [0 for i in range(0, self.numOutputClasses)]
@@ -879,7 +890,7 @@ class Utils(object):
 
 
 if __name__ == "__main__":
-	numDecisionTrees = 1000
+	numDecisionTrees = 1
 
 	# example of matrix file reading
 #	fileReaderFactory = fileReaderFactory(fileType = 'matrix', matrixFilePath = 'Datasets/small-alter.txt');
