@@ -6,7 +6,7 @@ import copy
 
 DEBUG_LEVEL_TOP = False
 DEBUG_LEVEL_TREE = True
-DEBUG_LEVEL_TREE_VERBOSE = False
+DEBUG_LEVEL_TREE_VERBOSE = True
 DEBUG_LEVEL_BEST_FEATURE = False
 DEBUG_LEVEL_NODE = False
 DEBUG_LEVEL_RECURSIVE_SPLIT = False
@@ -600,6 +600,8 @@ class DecisionTree(AbstractDecisionTree):
 
 		# do the actual pruning
 #		pruneRootNode = copy.deepcopy(self.rootNode)
+#		pruneRootNode = copy.copy(self.rootNode)
+#		self.pruneRecursively(pruneRootNode, pruneAggressiveness)
 		self.pruneRecursively(self.rootNode, pruneAggressiveness)
 
 	def pruneRecursively(self, treeNode, pruneAggressiveness):
@@ -821,7 +823,7 @@ class RandomForest(AbstractRandomForest):
 										self.treeSplitCriterion)
 
 			if DEBUG_LEVEL_TREE and self.doPruning:
-				print 'BEFORE PRUNING, NOTE: misclassified count has not been updated yet, showing 0 there'
+				print 'BEFORE PRUNING'
 			if DEBUG_LEVEL_TREE_VERBOSE: decisionTree.printTree(decisionTree.rootNode, "ROOT")
 			numCorrect, treeErrorRate = decisionTree.calcTreeErrorRate()
 			prePrunedErrorRate = treeErrorRate
@@ -959,7 +961,7 @@ if __name__ == "__main__":
 	# this is normal random forest, this can provide variable ranks (feature selection) as well as do
 	# classification
 	randomForest = RandomForest(dataSet,
-								numDecisionTrees = 10,
+								numDecisionTrees = 1,
 #								treeSplitCriterion='informationGain',
 								treeSplitCriterion='gainRatio',
 								doPruning = True,
