@@ -6,7 +6,7 @@ import copy
 
 DEBUG_LEVEL_TOP = False
 DEBUG_LEVEL_TREE = True
-DEBUG_LEVEL_TREE_VERBOSE = True
+DEBUG_LEVEL_TREE_VERBOSE = False
 DEBUG_LEVEL_BEST_FEATURE = False
 DEBUG_LEVEL_NODE = False
 DEBUG_LEVEL_RECURSIVE_SPLIT = False
@@ -706,7 +706,8 @@ class TreeNode(object):
 		self.ownEntropy= nodeEntropy
 
 class AbstractRandomForest(object):
-	def __init__(self, dataSet, numDecisionTrees,
+	def __init__(self, dataSet,
+				 numDecisionTrees,
 				 treeSplitCriterion='informationGain',
 				 doPruning = False,
 				 pruneAggressiveness = 0.9,
@@ -716,12 +717,18 @@ class AbstractRandomForest(object):
 
 		self.decisionTrees = []
 		self.dataSet = dataSet
-		self.numDecisionTrees = numDecisionTrees
 
 		self.globalDiscardedFeatureIndices = self.getGlobalDiscardedFeatureIndices()
 
 		self.numSamples = len(dataSet)
 		self.numFeatures = len(dataSet[0]) - 1
+
+		if not numDecisionTrees:
+			print 'using automatic setting to guess numDecisionTrees'
+			self.numDecisionTrees = self.numFeatures - len(self.globalDiscardedFeatureIndices)
+			print 'numDecisionTrees set to', self.numDecisionTrees
+		else: self.numDecisionTrees = numDecisionTrees
+
 
 		self.globalOutOfBagEstimates = {}
 		self.globalVariableImportanceList = [0 for x in range(0, self.numFeatures)]
@@ -961,7 +968,7 @@ if __name__ == "__main__":
 	# this is normal random forest, this can provide variable ranks (feature selection) as well as do
 	# classification
 	randomForest = RandomForest(dataSet,
-								numDecisionTrees = 10,
+								numDecisionTrees = 0,
 #								treeSplitCriterion='informationGain',
 								treeSplitCriterion='gainRatio',
 								doPruning = True,
