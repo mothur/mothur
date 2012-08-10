@@ -811,6 +811,8 @@ class RandomForest(AbstractRandomForest):
 
 	def populateDecisionTrees(self):
 		if DEBUG_LEVEL_TOP: print "populateDecisionTrees()"
+
+		errorRateImprovements = []
 		for i in range(0, self.numDecisionTrees):
 			print "Creating", i, "(th) Decision tree"
 			decisionTree = DecisionTree(dataSet,
@@ -836,7 +838,9 @@ class RandomForest(AbstractRandomForest):
 			decisionTree.calcTreeVariableImportanceAndError(numCorrect, treeErrorRate)
 			if DEBUG_LEVEL_TREE and self.doPruning:
 				print "treeErrorRate:", treeErrorRate, "numCorrect:", numCorrect
-				print 'error rate change:', (prePrunedErrorRate - postPrunedErrorRate) / prePrunedErrorRate
+
+			errorRateImprovement = (prePrunedErrorRate - postPrunedErrorRate) / prePrunedErrorRate
+			print 'errorRateImprovement:', errorRateImprovement
 
 			if self.discardHighErrorTrees:
 				# only use this tree in the forest if the error is low enough
@@ -844,9 +848,19 @@ class RandomForest(AbstractRandomForest):
 					self.updateGlobalOutOfBagEstimates(decisionTree)
 					decisionTree.purgeDataSetsFromTree()
 					self.decisionTrees.append(decisionTree)
+					if self.doPruning: errorRateImprovements.append(errorRateImprovement)
 				else:
 					decisionTree = None
+			else:
+				self.updateGlobalOutOfBagEstimates(decisionTree)
+				decisionTree.purgeDataSetsFromTree()
+				self.decisionTrees.append(decisionTree)
+				if self.doPruning: errorRateImprovements.append(errorRateImprovement)
 
+		if len(errorRateImprovements) > 0:
+			avgErrorRateImprovement = sum(errorRateImprovements) / len(errorRateImprovements)
+		else: avgErrorRateImprovement = 0
+		if DEBUG_LEVEL_TREE: print 'avgErrorRateImprovement:', avgErrorRateImprovement
 		if DEBUG_LEVEL_TOP: print "self.globalOutOfBagEstimates:", self.globalOutOfBagEstimates
 
 
@@ -933,7 +947,6 @@ class Utils(object):
 
 if __name__ == "__main__":
 
-	# example of matrix file reading
 #	fileReaderFactory = fileReaderFactory(fileType = 'matrix', matrixFilePath = 'Datasets/small-alter.txt');
 	fileReaderFactory = FileReaderFactory(fileType = 'matrix', matrixFilePath = 'Datasets/inpatient.final.an.0.03.subsample.avg.matrix');
 #	fileReaderFactory = FileReaderFactory(fileType = 'matrix', matrixFilePath = 'Datasets/outin.final.an.0.03.subsample.avg.matrix');
@@ -945,7 +958,6 @@ if __name__ == "__main__":
 
 	# this is normal random forest, this can provide variable ranks (feature selection) as well as do
 	# classification
-#	randomForest = RandomForest(dataSet, numDecisionTrees, treeSplitCriterion='informationGain')
 	randomForest = RandomForest(dataSet,
 								numDecisionTrees = 10,
 #								treeSplitCriterion='informationGain',
@@ -953,7 +965,7 @@ if __name__ == "__main__":
 								doPruning = True,
 								pruneAggressiveness = 0.9,
 								discardHighErrorTrees = True,
-								highErrorTreeDiscardThreshold = 0.40,
+								highErrorTreeDiscardThreshold = 0.30,
 #								optimumFeatureSubsetSelectionCriteria = 'squareRoot')
 								optimumFeatureSubsetSelectionCriteria = 'log2')
 	randomForest.populateDecisionTrees()
