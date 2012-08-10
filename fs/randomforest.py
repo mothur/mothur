@@ -4,8 +4,16 @@ from math import log, ceil, sqrt
 import random
 import copy
 
-DEBUG_MODE = True
-#DEBUG_MODE = False
+DEBUG_LEVEL_TOP = False
+DEBUG_LEVEL_TREE = True
+DEBUG_LEVEL_BEST_FEATURE = False
+DEBUG_LEVEL_NODE = False
+DEBUG_LEVEL_RECURSIVE_SPLIT = False
+DEBUG_LEVEL_FEATURE_ENTROPY = False
+DEBUG_LEVEL_FEATURE_ENTROPY_INTERNAL = False
+DEBUG_LEVEL_SAMPLES = False
+DEBUG_LEVEL_FOREST = False
+
 
 class AbstractDecisionTree(object):
 	def __init__(self, baseDataSet, globalDiscardedFeatureIndices, optimumFeatureSubsetSelector, treeSplitCriterion):
@@ -59,18 +67,19 @@ class AbstractDecisionTree(object):
 		# create feature vector from test samples as well
 		self.testSampleFeatureVectors = [list(x) for x in zip(*self.bootstrappedTestSamples)]
 
-		if DEBUG_MODE:
+		if DEBUG_LEVEL_SAMPLES:
+			print 'bootstrappedTestSamples'
 			for x in self.bootstrappedTestSamples: print x
-		if DEBUG_MODE: print "self.bootstrappedTrainingSampleIndices:", self.bootstrappedTrainingSampleIndices
-		if DEBUG_MODE: print "self.bootstrappedTestSampleIndices:", self.bootstrappedTestSampleIndices
+		if DEBUG_LEVEL_SAMPLES: print "self.bootstrappedTrainingSampleIndices:", self.bootstrappedTrainingSampleIndices
+		if DEBUG_LEVEL_SAMPLES: print "self.bootstrappedTestSampleIndices:", self.bootstrappedTestSampleIndices
 
 
 	def getMinEntropyOfFeature(self, featureVector, outputVector):
-		if DEBUG_MODE: print "getMinEntropyOfFeature()"
+		if DEBUG_LEVEL_FEATURE_ENTROPY_INTERNAL: print "getMinEntropyOfFeature()"
 		# create feature vs output tuple
 		featureOutputPair = zip(featureVector, outputVector)
 		featureOutputPair = sorted(featureOutputPair, key = lambda x: x[0])
-		if DEBUG_MODE: print "featureOutputPair", featureOutputPair
+		if DEBUG_LEVEL_FEATURE_ENTROPY_INTERNAL: print "featureOutputPair", featureOutputPair
 
 		#	for x in featureOutputPair: print x
 
@@ -90,7 +99,7 @@ class AbstractDecisionTree(object):
 
 		#	now we have the splitPoints, so we need to find which of them gives
 		#	us the highest entropy gain
-		if DEBUG_MODE: print "splitPoints:", splitPoints
+		if DEBUG_LEVEL_FEATURE_ENTROPY_INTERNAL: print "splitPoints:", splitPoints
 
 		# if we had too many zero containing split points, that means we ignored them all, and we have
 		# now an empty split point list, so we need to check this before going further
@@ -119,7 +128,7 @@ class AbstractDecisionTree(object):
 
 	# calculate all the possible splits for a feature vector and then return the value of the best split
 	def getBestSplitAndMinEntropy(self, featureOutputPairs, splitPoints):
-		if DEBUG_MODE: print "getBestSplitAndMinEntropy()"
+		if DEBUG_LEVEL_FEATURE_ENTROPY: print "getBestSplitAndMinEntropy()"
 		numSamples = len(featureOutputPairs)
 		#		print "numSamples:", numSamples
 
@@ -140,7 +149,7 @@ class AbstractDecisionTree(object):
 			# call for lower portion
 			lowerEntropyOfSplit = self.calcSplitEntropy(featureOutputPairs, index, self.numOutputClasses, isUpperSplit=False)
 
-			if DEBUG_MODE:
+			if DEBUG_LEVEL_FEATURE_ENTROPY:
 				print 'upperEntropyOfSplit:', upperEntropyOfSplit, 'lowerEntropyOfSplit:', lowerEntropyOfSplit
 				print 'numLessThanValueAtSplitPoint:', numLessThanValueAtSplitPoint, 'numGreaterThanValueAtSplitPoint:', numGreaterThanValueAtSplitPoint
 
@@ -150,7 +159,7 @@ class AbstractDecisionTree(object):
 			entropies.append(totalEntropy)
 			intrinsicValues.append(intrinsicValue)
 
-		if DEBUG_MODE:
+		if DEBUG_LEVEL_FEATURE_ENTROPY:
 			print 'entropies:', entropies
 			print 'intrinsicValues', intrinsicValues
 		minEntropy = min(entropies)
@@ -191,15 +200,15 @@ class AbstractDecisionTree(object):
 		return leftChildSamples, rightChildSamples
 
 	def checkIfAlreadyClassified(self, treeNode):
-		if DEBUG_MODE: print "checkIfAlreadyClassified()"
-		if DEBUG_MODE: print "len(bootstrappedTrainingSamples):", len(treeNode.bootstrappedTrainingSamples)
+		if DEBUG_LEVEL_RECURSIVE_SPLIT: print "checkIfAlreadyClassified()"
+		if DEBUG_LEVEL_RECURSIVE_SPLIT: print "len(bootstrappedTrainingSamples):", len(treeNode.bootstrappedTrainingSamples)
 		#		if len(treeNode.bootstrappedTrainingSamples) < 10:
 		#			print treeNode.bootstrappedTrainingSamples
 		tempOutputClasses = []
 		for i, x in enumerate(treeNode.bootstrappedTrainingSamples):
 			# print "index:", i
 			if x[treeNode.numFeatures] not in tempOutputClasses:
-				if DEBUG_MODE: print "appending: ", x[treeNode.numFeatures]
+				if DEBUG_LEVEL_RECURSIVE_SPLIT: print "appending: ", x[treeNode.numFeatures]
 				tempOutputClasses.append(x[treeNode.numFeatures])
 		if len(tempOutputClasses) < 2: return True, tempOutputClasses[0]
 		else: return False, None
@@ -215,7 +224,7 @@ class RegularizedDecisionTree(AbstractDecisionTree):
 		self.buildDecisionTree()
 
 	def buildDecisionTree(self):
-		if DEBUG_MODE: print "buildDecisionTree()"
+		if DEBUG_LEVEL_TOP: print "buildDecisionTree()"
 		treeNode = TreeNode(self.bootstrappedTrainingSamples, self.globalDiscardedFeatureIndices, self.numFeatures, self.numSamples, self.numOutputClasses, 0, self.nodeIdCount)
 		self.nodeIdCount += 1
 		self.rootNode = treeNode
@@ -227,11 +236,12 @@ class RegularizedDecisionTree(AbstractDecisionTree):
 		featureSubset = []
 		self.splitRecursively(treeNode, featureSubset, penalty)
 
-#		if DEBUG_MODE: self.printTree(treeNode, "root")
+#		if DEBUG_LEVEL_TOP: self.printTree(treeNode, "root")
 
 	def splitRecursively(self, treeNode, featureSubset, penalty):
-		if DEBUG_MODE: print "splitRecursively()"
-		print 'featureSubset', featureSubset
+		if DEBUG_LEVEL_RECURSIVE_SPLIT:
+			print "splitRecursively()"
+			print 'featureSubset', featureSubset
 
 		bootstrappedFeatureVectors = treeNode.bootstrappedFeatureVectors
 		bootstrappedOutputVector = treeNode.bootstrappedOutputVector
@@ -336,7 +346,7 @@ class DecisionTree(AbstractDecisionTree):
 
 	# randomly select log2(totalFeatures) number features for each node
 	def selectFeatureSubsetRandomly(self, globalDiscardedFeatureIndices, localDiscardedFeatureIndices):
-		if DEBUG_MODE: print "selectFeatureSubsetRandomly()"
+		if DEBUG_LEVEL_RECURSIVE_SPLIT: print "selectFeatureSubsetRandomly()"
 
 		featureSubsetIndices = []
 
@@ -357,13 +367,13 @@ class DecisionTree(AbstractDecisionTree):
 		return sorted(featureSubsetIndices)
 
 	def buildDecisionTree(self):
-		if DEBUG_MODE: print "buildDecisionTree()"
+		if DEBUG_LEVEL_TOP: print "buildDecisionTree()"
 		treeNode = TreeNode(self.bootstrappedTrainingSamples, self.globalDiscardedFeatureIndices, self.numFeatures, self.numSamples, self.numOutputClasses, 0, self.nodeIdCount)
 		self.nodeIdCount += 1
 		self.rootNode = treeNode
 
 		self.splitRecursively(treeNode)
-#		if DEBUG_MODE: self.printTree(treeNode, "ROOT")
+#		if DEBUG_LEVEL_TOP: self.printTree(treeNode, "ROOT")
 
 	def printTree(self, treeNode, caption):
 		tabs = ""
@@ -382,25 +392,25 @@ class DecisionTree(AbstractDecisionTree):
 
 
 	def splitRecursively(self, rootNode):
-		if DEBUG_MODE: print "splitRecursively()"
+		if DEBUG_LEVEL_RECURSIVE_SPLIT: print "splitRecursively()"
 
 		# return immediately if this node is just a leaf, no recursion is needed
 		if rootNode.numSamples < 2:
-			if DEBUG_MODE: print "Already classified: Case 1"
+			if DEBUG_LEVEL_RECURSIVE_SPLIT: print "Already classified: Case 1"
 			rootNode.isLeaf = True
 			rootNode.outputClass = rootNode.bootstrappedTrainingSamples[0][rootNode.numFeatures]
 			return
 
 		isAlreadyClassified, rootNode.outputClass = self.checkIfAlreadyClassified(rootNode)
 		if isAlreadyClassified:
-			if DEBUG_MODE: print "Already classified: Case 2"
+			if DEBUG_LEVEL_RECURSIVE_SPLIT: print "Already classified: Case 2"
 			rootNode.isLeaf = True
 			return
 		
 #		nullFeatureIndices = self.findNullFeatures(treeNode.bootstrappedTrainingSamples)
 		rootNode.featureSubsetIndices = self.selectFeatureSubsetRandomly(self.globalDiscardedFeatureIndices, rootNode.localDiscardedFeatureIndices)
-		if DEBUG_MODE: print "discardedFeatureIndices:", self.globalDiscardedFeatureIndices
-		if DEBUG_MODE: print "featureSubsetIndices:", rootNode.featureSubsetIndices
+		if DEBUG_LEVEL_RECURSIVE_SPLIT: print "discardedFeatureIndices:", self.globalDiscardedFeatureIndices
+		if DEBUG_LEVEL_RECURSIVE_SPLIT: print "featureSubsetIndices:", rootNode.featureSubsetIndices
 		# DEBUG
 #		treeNode.featureSubsetIndices = [100, 103, 161, 163, 197, 355, 460, 463, 507, 509]
 
@@ -436,7 +446,7 @@ class DecisionTree(AbstractDecisionTree):
 		bootstrappedOutputVector = node.bootstrappedOutputVector
 		featureSubsetIndices = node.featureSubsetIndices
 
-		if DEBUG_MODE: print "findAndUpdateBestFeatureToSplitOn()"
+		if DEBUG_LEVEL_BEST_FEATURE: print "findAndUpdateBestFeatureToSplitOn()"
 #		for x in bootstrappedFeatureVectors: print x
 #		print "featureSubsetIndices: ", featureSubsetIndices
 		featureSubsetEntropies = []
@@ -447,7 +457,7 @@ class DecisionTree(AbstractDecisionTree):
 
 		for i in range(0, len(featureSubsetIndices)):
 			tryIndex = featureSubsetIndices[i]
-			if DEBUG_MODE: print "trying feature of index:", tryIndex
+			if DEBUG_LEVEL_BEST_FEATURE: print "trying feature of index:", tryIndex
 			featureMinEntropy, featureSplitValue, featureIntrinsicValue = self.getMinEntropyOfFeature(bootstrappedFeatureVectors[tryIndex], bootstrappedOutputVector)
 
 			featureSubsetEntropies.append(featureMinEntropy)
@@ -458,7 +468,7 @@ class DecisionTree(AbstractDecisionTree):
 			featureGainRatio = featureInformationGain / featureIntrinsicValue
 			featureSubsetGainRatios.append(featureGainRatio)
 
-		if DEBUG_MODE:
+		if DEBUG_LEVEL_BEST_FEATURE:
 			print 'featureSubsetEntropies:', featureSubsetEntropies
 			print 'featureSubsetSplitValues', featureSubsetSplitValues
 			print 'featureSubsetIntrinsicValues', featureSubsetIntrinsicValues
@@ -483,7 +493,7 @@ class DecisionTree(AbstractDecisionTree):
 		bestFeatureSplitValue = featureSubsetSplitValues[bestFeatureToSplitOnIndex]
 #		splitInformationGain = node.ownEntropy - node.splitFeatureEntropy
 
-		if DEBUG_MODE:
+		if DEBUG_LEVEL_BEST_FEATURE:
 			print "bestFeatureToSplitOnIndex:", bestFeatureToSplitOnIndex, "bestFeatureSplitValue:", bestFeatureSplitValue
 			print "bestFeatureSplitEntropy:", bestFeatureSplitEntropy
 			if self.treeSplitCriterion == 'gainRatio': print "bestFeatureMaxGainRatio", featureMaxGainRatio
@@ -500,8 +510,9 @@ class DecisionTree(AbstractDecisionTree):
 #		return featureSubsetIndices[bestFeatureToSplitOn], bestFeatureSplitValue, featureMinEntropy
 
 	def calcTreeVariableImportanceAndError(self, numCorrect, treeErrorRate):
-		if DEBUG_MODE: print "calcTreeVariableImportanceAndError()"
-		print "len(self.bootstrappedTestSamples):", len(self.bootstrappedTestSamples)
+		if DEBUG_LEVEL_TOP:
+			print "calcTreeVariableImportanceAndError()"
+			print "len(self.bootstrappedTestSamples):", len(self.bootstrappedTestSamples)
 
 		for i in range(0, self.numFeatures):
 			# if the index is in globalDiscardedFeatureIndices (i.e, null feature) we don't want to shuffle them
@@ -673,11 +684,11 @@ class TreeNode(object):
 		self.updateNodeEntropy()
 
 	def createLocalDiscardedFeatureList(self):
-		if DEBUG_MODE: print "createLocalDiscardedFeatureList()"
+		if DEBUG_LEVEL_NODE: print "createLocalDiscardedFeatureList()"
 		for i, x in enumerate(self.bootstrappedFeatureVectors):
 			if i not in self.globalDiscardedFeatureIndices and Utils.getStandardDeviation(x) <= 0:
 				self.localDiscardedFeatureIndices.append(i)
-		if DEBUG_MODE: print 'localDiscardedFeatureIndices:', self.localDiscardedFeatureIndices
+		if DEBUG_LEVEL_NODE: print 'localDiscardedFeatureIndices:', self.localDiscardedFeatureIndices
 
 	def updateNodeEntropy(self):
 		classCounts = [0 for i in range(0, self.numOutputClasses)]
@@ -727,14 +738,14 @@ class AbstractRandomForest(object):
 			zeroCount = featureVector.count(0)
 			if Utils.getStandardDeviation(featureVector) <= 0:
 				globalDiscardedFeatureIndices.append(index)
-		if DEBUG_MODE: print 'number of global discarded features:', len(globalDiscardedFeatureIndices)
-		if DEBUG_MODE: print 'total features:', len(featureVectors)
+		if DEBUG_LEVEL_TOP: print 'number of global discarded features:', len(globalDiscardedFeatureIndices)
+		if DEBUG_LEVEL_TOP: print 'total features:', len(featureVectors)
 		return globalDiscardedFeatureIndices
 
 class RegularizedRandomForest(AbstractRandomForest):
 	# TODO: finish the implementation
 	def populateDecisionTrees(self):
-		print "populateDecisionTrees()"
+		if DEBUG_LEVEL_TOP: print "populateDecisionTrees()"
 		for i in range(0, self.numDecisionTrees):
 			print "Creating", i, "(th) Decision tree"
 			decisionTree = RegularizedDecisionTree(dataSet, self.globalDiscardedFeatureIndices, OptimumFeatureSubsetSelector('squareRoot'), self.treeSplitCriterion)
@@ -742,7 +753,7 @@ class RegularizedRandomForest(AbstractRandomForest):
 #			self.updateGlobalOutOfBagEstimates(decisionTree)
 #			decisionTree.purgeDataSetsFromTree()
 #			self.decisionTrees.append(decisionTree)
-#		if DEBUG_MODE: print "self.globalOutOfBagEstimates:", self.globalOutOfBagEstimates
+#		if DEBUG_LEVEL_TOP: print "self.globalOutOfBagEstimates:", self.globalOutOfBagEstimates
 		pass
 
 
@@ -757,7 +768,7 @@ class RandomForest(AbstractRandomForest):
 			self.globalOutOfBagEstimates[indexOfSample][predictedOutcomeOfSample] += 1
 
 	def calcForrestVariableImportance(self):
-		print "calcForrestVariableImportance()"
+		if DEBUG_LEVEL_FOREST: print "calcForrestVariableImportance()"
 
 		if len(self.decisionTrees) < 1: print 'Too few trees, returning home'; return
 
@@ -777,7 +788,7 @@ class RandomForest(AbstractRandomForest):
 		print "globalVariableRanks:", globalVariableRanks
 
 	def calcForrestErrorRate(self):
-		print "calcForrestErrorRate()"
+		if DEBUG_LEVEL_FOREST: print "calcForrestErrorRate()"
 
 		if len(self.decisionTrees) < 1: print 'Too few trees, returning home'; return
 
@@ -788,32 +799,35 @@ class RandomForest(AbstractRandomForest):
 
 			if majorityVotedOutcome == realOutCome: numCorrect += 1
 #			print "realOutCome", realOutCome, "majorityVotedOutcome", majorityVotedOutcome
-		print "len(self.globalOutOfBagEstimates):", len(self.globalOutOfBagEstimates)
+		if DEBUG_LEVEL_FOREST: print "len(self.globalOutOfBagEstimates):", len(self.globalOutOfBagEstimates)
 		print "numCorrect", numCorrect
 
 		forrestErrorRate = 1 - (numCorrect / len(self.globalOutOfBagEstimates))
 		print "forrestErrorRate:", forrestErrorRate
 
 	def populateDecisionTrees(self):
-		print "populateDecisionTrees()"
+		if DEBUG_LEVEL_TOP: print "populateDecisionTrees()"
 		for i in range(0, self.numDecisionTrees):
 			print "Creating", i, "(th) Decision tree"
-			decisionTree = DecisionTree(dataSet, self.globalDiscardedFeatureIndices, OptimumFeatureSubsetSelector('log2'), self.treeSplitCriterion)
+			decisionTree = DecisionTree(dataSet,
+										self.globalDiscardedFeatureIndices,
+										OptimumFeatureSubsetSelector('log2'),
+										self.treeSplitCriterion)
 
-			if DEBUG_MODE: decisionTree.printTree(decisionTree.rootNode, "ROOT")
+			if DEBUG_LEVEL_TREE and self.doPruning:
+				print 'BEFORE PRUNING, NOTE: misclassified count has not been updated yet, showing 0 there'
+			if DEBUG_LEVEL_TREE: decisionTree.printTree(decisionTree.rootNode, "ROOT")
 			numCorrect, treeErrorRate = decisionTree.calcTreeErrorRate()
-			if self.doPruning:
-				print 'BEFORE PRUNING'
-			print "treeErrorRate:", treeErrorRate, "numCorrect:", numCorrect
+			if DEBUG_LEVEL_TREE: print "treeErrorRate:", treeErrorRate, "numCorrect:", numCorrect
 
 			if self.doPruning:
 				# after pruning
 				decisionTree.pruneTree(self.pruneAggressiveness)
-				if DEBUG_MODE: decisionTree.printTree(decisionTree.rootNode, "ROOT")
+				if DEBUG_LEVEL_TREE: decisionTree.printTree(decisionTree.rootNode, "ROOT")
 				numCorrect, treeErrorRate = decisionTree.calcTreeErrorRate()
 
 			decisionTree.calcTreeVariableImportanceAndError(numCorrect, treeErrorRate)
-			if self.doPruning:
+			if DEBUG_LEVEL_TREE and self.doPruning:
 				print 'AFTER PRUNING'
 				print "treeErrorRate:", treeErrorRate, "numCorrect:", numCorrect
 
@@ -826,7 +840,7 @@ class RandomForest(AbstractRandomForest):
 				else:
 					decisionTree = None
 
-		if DEBUG_MODE: print "self.globalOutOfBagEstimates:", self.globalOutOfBagEstimates
+		if DEBUG_LEVEL_TOP: print "self.globalOutOfBagEstimates:", self.globalOutOfBagEstimates
 
 
 class OptimumFeatureSubsetSelector(object):
@@ -834,12 +848,12 @@ class OptimumFeatureSubsetSelector(object):
 		self.selectionType = selectionType
 
 	def getOptimumFeatureSubsetSize(self, numFeatures):
-		if DEBUG_MODE: print 'getOptimumFeatureSubsetSize()'
+		if DEBUG_LEVEL_TOP: print 'getOptimumFeatureSubsetSize()'
 		if self.selectionType == 'log2':
-			if DEBUG_MODE: print 'Using log2 mode'
+			if DEBUG_LEVEL_TOP: print 'Using log2 mode'
 			return int(ceil(log(numFeatures, 2)))
 		elif self.selectionType == 'squareRoot':
-			if DEBUG_MODE: print 'Using squareRoot mode'
+			if DEBUG_LEVEL_TOP: print 'Using squareRoot mode'
 			return int(ceil(sqrt(numFeatures)))
 		else: return None
 
@@ -911,7 +925,7 @@ class Utils(object):
 
 
 if __name__ == "__main__":
-	numDecisionTrees = 10
+	numDecisionTrees = 2
 
 	# example of matrix file reading
 #	fileReaderFactory = fileReaderFactory(fileType = 'matrix', matrixFilePath = 'Datasets/small-alter.txt');
