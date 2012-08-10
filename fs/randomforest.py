@@ -708,7 +708,8 @@ class AbstractRandomForest(object):
 				 doPruning = False,
 				 pruneAggressiveness = 0.9,
 				 discardHighErrorTrees = True,
-				 highErrorTreeDiscardThreshold = 0.4):
+				 highErrorTreeDiscardThreshold = 0.4,
+				 optimumFeatureSubsetSelectionCriteria = 'log2'):
 
 		self.decisionTrees = []
 		self.dataSet = dataSet
@@ -729,6 +730,8 @@ class AbstractRandomForest(object):
 		self.pruneAggressiveness = pruneAggressiveness
 		self.discardHighErrorTrees = discardHighErrorTrees
 		self.highErrorTreeDiscardThreshold = highErrorTreeDiscardThreshold
+
+		self.optimumFeatureSubsetSelectionCriteria = optimumFeatureSubsetSelectionCriteria
 
 	def getGlobalDiscardedFeatureIndices(self):
 		featureVectors = zip(*self.dataSet)[:-1]
@@ -811,7 +814,7 @@ class RandomForest(AbstractRandomForest):
 			print "Creating", i, "(th) Decision tree"
 			decisionTree = DecisionTree(dataSet,
 										self.globalDiscardedFeatureIndices,
-										OptimumFeatureSubsetSelector('log2'),
+										OptimumFeatureSubsetSelector(self.optimumFeatureSubsetSelectionCriteria),
 										self.treeSplitCriterion)
 
 			if DEBUG_LEVEL_TREE and self.doPruning:
@@ -925,7 +928,6 @@ class Utils(object):
 
 
 if __name__ == "__main__":
-	numDecisionTrees = 2
 
 	# example of matrix file reading
 #	fileReaderFactory = fileReaderFactory(fileType = 'matrix', matrixFilePath = 'Datasets/small-alter.txt');
@@ -940,13 +942,16 @@ if __name__ == "__main__":
 	# this is normal random forest, this can provide variable ranks (feature selection) as well as do
 	# classification
 #	randomForest = RandomForest(dataSet, numDecisionTrees, treeSplitCriterion='informationGain')
-	randomForest = RandomForest(dataSet, numDecisionTrees,
+	randomForest = RandomForest(dataSet,
+								numDecisionTrees = 10,
 #								treeSplitCriterion='informationGain',
 								treeSplitCriterion='gainRatio',
 								doPruning = True,
 								pruneAggressiveness = 0.9,
 								discardHighErrorTrees = True,
-								highErrorTreeDiscardThreshold = 0.40)
+								highErrorTreeDiscardThreshold = 0.40,
+#								optimumFeatureSubsetSelectionCriteria = 'squareRoot')
+								optimumFeatureSubsetSelectionCriteria = 'log2')
 	randomForest.populateDecisionTrees()
 	randomForest.calcForrestErrorRate()
 	randomForest.calcForrestVariableImportance()
