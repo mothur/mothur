@@ -6,6 +6,7 @@ import copy
 
 DEBUG_LEVEL_TOP = False
 DEBUG_LEVEL_TREE = True
+DEBUG_LEVEL_TREE_VERBOSE = False
 DEBUG_LEVEL_BEST_FEATURE = False
 DEBUG_LEVEL_NODE = False
 DEBUG_LEVEL_RECURSIVE_SPLIT = False
@@ -819,20 +820,23 @@ class RandomForest(AbstractRandomForest):
 
 			if DEBUG_LEVEL_TREE and self.doPruning:
 				print 'BEFORE PRUNING, NOTE: misclassified count has not been updated yet, showing 0 there'
-			if DEBUG_LEVEL_TREE: decisionTree.printTree(decisionTree.rootNode, "ROOT")
+			if DEBUG_LEVEL_TREE_VERBOSE: decisionTree.printTree(decisionTree.rootNode, "ROOT")
 			numCorrect, treeErrorRate = decisionTree.calcTreeErrorRate()
+			prePrunedErrorRate = treeErrorRate
 			if DEBUG_LEVEL_TREE: print "treeErrorRate:", treeErrorRate, "numCorrect:", numCorrect
 
 			if self.doPruning:
 				# after pruning
 				decisionTree.pruneTree(self.pruneAggressiveness)
 				if DEBUG_LEVEL_TREE: print 'AFTER PRUNING'
-				if DEBUG_LEVEL_TREE: decisionTree.printTree(decisionTree.rootNode, "ROOT")
+				if DEBUG_LEVEL_TREE_VERBOSE: decisionTree.printTree(decisionTree.rootNode, "ROOT")
 				numCorrect, treeErrorRate = decisionTree.calcTreeErrorRate()
+			postPrunedErrorRate = treeErrorRate
 
 			decisionTree.calcTreeVariableImportanceAndError(numCorrect, treeErrorRate)
 			if DEBUG_LEVEL_TREE and self.doPruning:
 				print "treeErrorRate:", treeErrorRate, "numCorrect:", numCorrect
+				print 'error rate change:', (prePrunedErrorRate - postPrunedErrorRate) / prePrunedErrorRate
 
 			if self.discardHighErrorTrees:
 				# only use this tree in the forest if the error is low enough
