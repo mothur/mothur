@@ -325,16 +325,23 @@ class RegularizedDecisionTree(AbstractDecisionTree):
 
 # The main algorithm resides here, it the manipulator class
 class DecisionTree(AbstractDecisionTree):
-	def __init__(self, baseDataSet, globalDiscardedFeatureIndices, optimumFeatureSubsetSelector, treeSplitCriterion):
+	def __init__(self,
+				 baseDataSet,
+				 globalDiscardedFeatureIndices,
+				 optimumFeatureSubsetSelector,
+				 treeSplitCriterion,
+				 featureStandardDeviationThreshold = 0.0):
 
 		# calling to super-class's ctor
 		super(DecisionTree, self).__init__(baseDataSet, globalDiscardedFeatureIndices, optimumFeatureSubsetSelector, treeSplitCriterion)
 
 		self.variableImportanceList = [0 for x in range(0, self.numFeatures)]
 		self.outOfBagEstimates = {}
+		self.featureStandardDeviationThreshold = featureStandardDeviationThreshold
 
 		self.createBootStrappedSamples()
 		self.buildDecisionTree()
+
 
 
 	# deprecated function, needs to be removed
@@ -374,7 +381,7 @@ class DecisionTree(AbstractDecisionTree):
 
 	def buildDecisionTree(self):
 		if DEBUG_LEVEL_TOP: print "buildDecisionTree()"
-		treeNode = TreeNode(self.bootstrappedTrainingSamples, self.globalDiscardedFeatureIndices, self.numFeatures, self.numSamples, self.numOutputClasses, 0, self.nodeIdCount)
+		treeNode = TreeNode(self.bootstrappedTrainingSamples, self.globalDiscardedFeatureIndices, self.numFeatures, self.numSamples, self.numOutputClasses, 0, self.nodeIdCount, self.featureStandardDeviationThreshold)
 		self.nodeIdCount += 1
 		self.rootNode = treeNode
 
@@ -432,9 +439,9 @@ class DecisionTree(AbstractDecisionTree):
 		# print "leftChildSamples:", leftChildSamples
 		# print "rightChildSamples:", rightChildSamples
 
-		leftChildNode = TreeNode(leftChildSamples, self.globalDiscardedFeatureIndices, self.numFeatures, len(leftChildSamples), self.numOutputClasses, rootNode.generation + 1, self.nodeIdCount)
+		leftChildNode = TreeNode(leftChildSamples, self.globalDiscardedFeatureIndices, self.numFeatures, len(leftChildSamples), self.numOutputClasses, rootNode.generation + 1, self.nodeIdCount, self.featureStandardDeviationThreshold)
 		self.nodeIdCount += 1
-		rightChildNode = TreeNode(rightChildSamples, self.globalDiscardedFeatureIndices, self.numFeatures, len(rightChildSamples), self.numOutputClasses, rootNode.generation + 1, self.nodeIdCount)
+		rightChildNode = TreeNode(rightChildSamples, self.globalDiscardedFeatureIndices, self.numFeatures, len(rightChildSamples), self.numOutputClasses, rootNode.generation + 1, self.nodeIdCount, self.featureStandardDeviationThreshold)
 		self.nodeIdCount += 1
 
 		rootNode.leftChildNode = leftChildNode
@@ -527,7 +534,7 @@ class DecisionTree(AbstractDecisionTree):
 			if i not in self.globalDiscardedFeatureIndices:
 				# the standard deviation is very low, we know it's not a good feature at all
 				# we can save some time here by discarding that feature
-				if Utils.getStandardDeviation(self.testSampleFeatureVectors[i]) > 0:
+				if Utils.getStandardDeviation(self.testSampleFeatureVectors[i]) > self.featureStandardDeviationThreshold:
 					randomlySampledTestData = self.randomlyShuffleAttribute(self.bootstrappedTestSamples, i)
 
 					numCorrectAfterShuffle = 0
@@ -651,7 +658,16 @@ class DecisionTree(AbstractDecisionTree):
 
 
 class TreeNode(object):
-	def __init__(self, bootstrappedTrainingSamples, globalDiscardedFeatureIndices, numFeatures, numSamples, numOutputClasses, generation, nodeId):
+	def __init__(self,
+				 bootstrappedTrainingSamples,
+				 globalDiscardedFeatureIndices,
+				 numFeatures,
+				 numSamples,
+				 numOutputClasses,
+				 generation,
+				 nodeId,
+				 featureStandardDeviationThreshold = 0.0):
+
 		self.numFeatures = numFeatures
 		self.numSamples =  numSamples
 		self.numOutputClasses = numOutputClasses
@@ -677,6 +693,7 @@ class TreeNode(object):
 		# these features are values of this node
 		self.ownEntropy = 0
 
+		self.featureStandardDeviationThreshold = featureStandardDeviationThreshold
 
 		self.bootstrappedFeatureVectors = [list(x) for x in zip(*self.bootstrappedTrainingSamples)]
 		self.bootstrappedOutputVector = [bootstrappedTrainingSamples[x][self.numFeatures] for x in range(0, self.numSamples)]
@@ -696,7 +713,7 @@ class TreeNode(object):
 	def createLocalDiscardedFeatureList(self):
 		if DEBUG_LEVEL_NODE: print "createLocalDiscardedFeatureList()"
 		for i, x in enumerate(self.bootstrappedFeatureVectors):
-			if i not in self.globalDiscardedFeatureIndices and Utils.getStandardDeviation(x) <= 0:
+			if i not in self.globalDiscardedFeatureIndices and Utils.getStandardDeviation(x) <= self.featureStandardDeviationThreshold:
 				self.localDiscardedFeatureIndices.append(i)
 		if DEBUG_LEVEL_NODE: print 'localDiscardedFeatureIndices:', self.localDiscardedFeatureIndices
 
@@ -720,10 +737,13 @@ class AbstractRandomForest(object):
 				 pruneAggressiveness = 0.9,
 				 discardHighErrorTrees = True,
 				 highErrorTreeDiscardThreshold = 0.4,
-				 optimumFeatureSubsetSelectionCriteria = 'log2'):
+				 optimumFeatureSubsetSelectionCriteria = 'log2',
+				 featureStandardDeviationThreshold = 0.0):
 
 		self.decisionTrees = []
 		self.dataSet = dataSet
+
+		self.featureStandardDeviationThreshold = featureStandardDeviationThreshold
 
 		self.globalDiscardedFeatureIndices = self.getGlobalDiscardedFeatureIndices()
 
@@ -756,7 +776,7 @@ class AbstractRandomForest(object):
 		for index, featureVector in enumerate(featureVectors):
 			total = sum(featureVector)
 			zeroCount = featureVector.count(0)
-			if Utils.getStandardDeviation(featureVector) <= 0:
+			if Utils.getStandardDeviation(featureVector) <= self.featureStandardDeviationThreshold:
 				globalDiscardedFeatureIndices.append(index)
 		if DEBUG_LEVEL_TOP: print 'number of global discarded features:', len(globalDiscardedFeatureIndices)
 		if DEBUG_LEVEL_TOP: print 'total features:', len(featureVectors)
@@ -834,7 +854,8 @@ class RandomForest(AbstractRandomForest):
 			decisionTree = DecisionTree(dataSet,
 										self.globalDiscardedFeatureIndices,
 										OptimumFeatureSubsetSelector(self.optimumFeatureSubsetSelectionCriteria),
-										self.treeSplitCriterion)
+										self.treeSplitCriterion,
+										self.featureStandardDeviationThreshold)
 
 			if DEBUG_LEVEL_TREE and self.doPruning:
 				print 'BEFORE PRUNING'
@@ -964,9 +985,9 @@ class Utils(object):
 if __name__ == "__main__":
 
 #	fileReaderFactory = fileReaderFactory(fileType = 'matrix', matrixFilePath = 'Datasets/small-alter.txt');
-	# fileReaderFactory = FileReaderFactory(fileType = 'matrix', matrixFilePath = 'Datasets/inpatient.final.an.0.03.subsample.avg.matrix');
+	fileReaderFactory = FileReaderFactory(fileType = 'matrix', matrixFilePath = 'Datasets/inpatient.final.an.0.03.subsample.avg.matrix');
 #	fileReaderFactory = FileReaderFactory(fileType = 'matrix', matrixFilePath = 'Datasets/outin.final.an.0.03.subsample.avg.matrix');
-	fileReaderFactory = FileReaderFactory(fileType = 'matrix', matrixFilePath = 'Datasets/HumanCRC.final.subsample.shared.matrix');
+#	fileReaderFactory = FileReaderFactory(fileType = 'matrix', matrixFilePath = 'Datasets/HumanCRC.final.subsample.shared.matrix');
 
 	# example of shared and design file reading
 #	fileReaderFactory = FileReaderFactory(fileType='sharedAndDesign', sharedFilePath='Datasets/final.an.0.03.subsample.0.03.pick.shared', designFilePath='Datasets/mouse.sex_time.design')
@@ -980,11 +1001,20 @@ if __name__ == "__main__":
 #								treeSplitCriterion='informationGain',
 								treeSplitCriterion='gainRatio',
 								doPruning = True,
+								# the parameter to control the pruning. Most aggressive would be 1
+								# set to 0 or set doPruning to false to completely disable this feature
+								# good value is 0.9
 								pruneAggressiveness = 0.9,
 								discardHighErrorTrees = True,
-								highErrorTreeDiscardThreshold = 1,
+								# discard any tree that has a higher error rate than this threshold,
+								# say 0.4 that is 40% error. set to 1 to completely disable this feature
+								# 0.4 is a good starting value
+								highErrorTreeDiscardThreshold = 0.4,
 #								optimumFeatureSubsetSelectionCriteria = 'squareRoot')
-								optimumFeatureSubsetSelectionCriteria = 'log2')
+								optimumFeatureSubsetSelectionCriteria = 'log2',
+								# discard any feature that has a lower standard deviation than this, good value is 0.1 or
+								# similar. set to 0.0 to completely disable this feature
+								featureStandardDeviationThreshold= 0.1)
 	randomForest.populateDecisionTrees()
 	randomForest.calcForrestErrorRate()
 	randomForest.calcForrestVariableImportance()
