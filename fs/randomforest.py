@@ -4,16 +4,16 @@ from math import log, ceil, sqrt
 import random
 import copy
 
-DEBUG_LEVEL_TOP = False
+DEBUG_LEVEL_TOP = True
 DEBUG_LEVEL_TREE = True
-DEBUG_LEVEL_TREE_VERBOSE = False
-DEBUG_LEVEL_BEST_FEATURE = False
-DEBUG_LEVEL_NODE = False
-DEBUG_LEVEL_RECURSIVE_SPLIT = False
-DEBUG_LEVEL_FEATURE_ENTROPY = False
-DEBUG_LEVEL_FEATURE_ENTROPY_INTERNAL = False
-DEBUG_LEVEL_SAMPLES = False
-DEBUG_LEVEL_FOREST = False
+DEBUG_LEVEL_TREE_VERBOSE = True
+DEBUG_LEVEL_BEST_FEATURE = True
+DEBUG_LEVEL_NODE = True
+DEBUG_LEVEL_RECURSIVE_SPLIT = True
+DEBUG_LEVEL_FEATURE_ENTROPY = True
+DEBUG_LEVEL_FEATURE_ENTROPY_INTERNAL = True
+DEBUG_LEVEL_SAMPLES = True
+DEBUG_LEVEL_FOREST = True
 
 
 class AbstractDecisionTree(object):
@@ -77,10 +77,15 @@ class AbstractDecisionTree(object):
 
 	def getMinEntropyOfFeature(self, featureVector, outputVector):
 		if DEBUG_LEVEL_FEATURE_ENTROPY_INTERNAL: print "getMinEntropyOfFeature()"
+
 		# create feature vs output tuple
 		featureOutputPair = zip(featureVector, outputVector)
 		featureOutputPair = sorted(featureOutputPair, key = lambda x: x[0])
-		if DEBUG_LEVEL_FEATURE_ENTROPY_INTERNAL: print "featureOutputPair", featureOutputPair
+		featureStandardDeviation = Utils.getStandardDeviation(featureVector)
+
+		if DEBUG_LEVEL_FEATURE_ENTROPY_INTERNAL:
+			print "featureOutputPair", featureOutputPair
+			print 'featureStandardDeviation', featureStandardDeviation
 
 		#	for x in featureOutputPair: print x
 
@@ -495,7 +500,9 @@ class DecisionTree(AbstractDecisionTree):
 #		splitInformationGain = node.ownEntropy - node.splitFeatureEntropy
 
 		if DEBUG_LEVEL_BEST_FEATURE:
-			print "bestFeatureToSplitOnIndex:", bestFeatureToSplitOnIndex, "bestFeatureSplitValue:", bestFeatureSplitValue
+			print "bestFeatureToSplitOnIndex:", bestFeatureToSplitOnIndex
+			print 'bestFeatureToSplitOnGlobalIndex', featureSubsetIndices[bestFeatureToSplitOnIndex]
+			print "bestFeatureSplitValue:", bestFeatureSplitValue
 			print "bestFeatureSplitEntropy:", bestFeatureSplitEntropy
 			if self.treeSplitCriterion == 'gainRatio': print "bestFeatureMaxGainRatio", featureMaxGainRatio
 
@@ -969,13 +976,13 @@ if __name__ == "__main__":
 	# this is normal random forest, this can provide variable ranks (feature selection) as well as do
 	# classification
 	randomForest = RandomForest(dataSet,
-								numDecisionTrees = 100,
+								numDecisionTrees = 1,
 #								treeSplitCriterion='informationGain',
 								treeSplitCriterion='gainRatio',
 								doPruning = True,
 								pruneAggressiveness = 0.9,
 								discardHighErrorTrees = True,
-								highErrorTreeDiscardThreshold = 0.30,
+								highErrorTreeDiscardThreshold = 1,
 #								optimumFeatureSubsetSelectionCriteria = 'squareRoot')
 								optimumFeatureSubsetSelectionCriteria = 'log2')
 	randomForest.populateDecisionTrees()
