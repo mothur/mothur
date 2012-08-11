@@ -957,8 +957,9 @@ class Utils(object):
 if __name__ == "__main__":
 
 #	fileReaderFactory = fileReaderFactory(fileType = 'matrix', matrixFilePath = 'Datasets/small-alter.txt');
-	fileReaderFactory = FileReaderFactory(fileType = 'matrix', matrixFilePath = 'Datasets/inpatient.final.an.0.03.subsample.avg.matrix');
+	# fileReaderFactory = FileReaderFactory(fileType = 'matrix', matrixFilePath = 'Datasets/inpatient.final.an.0.03.subsample.avg.matrix');
 #	fileReaderFactory = FileReaderFactory(fileType = 'matrix', matrixFilePath = 'Datasets/outin.final.an.0.03.subsample.avg.matrix');
+	fileReaderFactory = FileReaderFactory(fileType = 'matrix', matrixFilePath = 'Datasets/HumanCRC.final.subsample.shared.matrix');
 
 	# example of shared and design file reading
 #	fileReaderFactory = FileReaderFactory(fileType='sharedAndDesign', sharedFilePath='Datasets/final.an.0.03.subsample.0.03.pick.shared', designFilePath='Datasets/mouse.sex_time.design')
@@ -968,7 +969,7 @@ if __name__ == "__main__":
 	# this is normal random forest, this can provide variable ranks (feature selection) as well as do
 	# classification
 	randomForest = RandomForest(dataSet,
-								numDecisionTrees = 0,
+								numDecisionTrees = 100,
 #								treeSplitCriterion='informationGain',
 								treeSplitCriterion='gainRatio',
 								doPruning = True,
