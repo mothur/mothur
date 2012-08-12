@@ -997,21 +997,26 @@ if __name__ == "__main__":
 	# this is normal random forest, this can provide variable ranks (feature selection) as well as do
 	# classification
 	randomForest = RandomForest(dataSet,
-								numDecisionTrees = 1,
+								numDecisionTrees = 100,
+
 #								treeSplitCriterion='informationGain',
 								treeSplitCriterion='gainRatio',
+
 								doPruning = True,
 								# the parameter to control the pruning. Most aggressive would be 1
 								# set to 0 or set doPruning to false to completely disable this feature
 								# good value is 0.9
 								pruneAggressiveness = 0.9,
+
 								discardHighErrorTrees = True,
 								# discard any tree that has a higher error rate than this threshold,
 								# say 0.4 that is 40% error. set to 1 to completely disable this feature
 								# 0.4 is a good starting value
 								highErrorTreeDiscardThreshold = 0.4,
+
 #								optimumFeatureSubsetSelectionCriteria = 'squareRoot')
 								optimumFeatureSubsetSelectionCriteria = 'log2',
+
 								# discard any feature that has a lower standard deviation than this, good value is 0.1 or
 								# similar. set to 0.0 to completely disable this feature
 								featureStandardDeviationThreshold= 0.1)
