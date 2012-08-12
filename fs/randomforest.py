@@ -749,6 +749,10 @@ class AbstractRandomForest(object):
 
 		self.numSamples = len(dataSet)
 		self.numFeatures = len(dataSet[0]) - 1
+		self.numSamplesPerFeatures = self.numSamples / self.numFeatures
+		
+		print 'numSamples:', self.numSamples
+		print 'numFeatures:', self.numFeatures
 
 		if not numDecisionTrees:
 			print 'using automatic setting to guess numDecisionTrees'
@@ -839,8 +843,10 @@ class RandomForest(AbstractRandomForest):
 
 			if majorityVotedOutcome == realOutCome: numCorrect += 1
 #			print "realOutCome", realOutCome, "majorityVotedOutcome", majorityVotedOutcome
-		if DEBUG_LEVEL_FOREST: print "len(self.globalOutOfBagEstimates):", len(self.globalOutOfBagEstimates)
+		if DEBUG_LEVEL_FOREST:
+			print "len(self.globalOutOfBagEstimates):", len(self.globalOutOfBagEstimates)
 		print "numCorrect", numCorrect
+		print 'numSamplesPerFeatures:', self.numSamplesPerFeatures
 
 		forrestErrorRate = 1 - (numCorrect / len(self.globalOutOfBagEstimates))
 		print "forrestErrorRate:", forrestErrorRate
