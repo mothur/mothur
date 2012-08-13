@@ -10,6 +10,21 @@
 
   // TODO: finish implementation
 ClassifySharedCommand::ClassifySharedCommand() {
+  try {
+    abort = true; calledHelp = true;
+    setParameters();
+    vector<string> tempOutNames;
+      // TODO update the outputTypes variable
+      // START of segmenet to be updated
+    outputTypes["fileType1"] = tempOutNames; //filetypes should be things like: shared, fasta, accnos...
+    outputTypes["fileType2"] = tempOutNames;
+    outputTypes["FileType3"] = tempOutNames;
+      // END of segment to be updated
+  }
+  catch(exception& e) {
+    m->errorOut(e, "ClassifySharedCommand", "ClassifySharedCommand");
+    exit(1);
+  }
 }
 
   // TODO: finish implementation
@@ -60,11 +75,42 @@ vector<string> ClassifySharedCommand::setParameters() {
 
   // TODO: finish implementation
 string ClassifySharedCommand::getOutputFileNameTag(string type, string inputName="") {
-  return NULL;
+  try {
+    string tag = "";
+    map<string, vector<string> >::iterator it;
+    
+      //is this a type this command creates
+    it = outputTypes.find(type);
+    if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
+    else {
+        // TODO: update this code content, keeping this as placeholder
+        // START of segment to be udpated
+      if (type == "fileType1") {  tag = "tag1"; }
+      else if (type == "fileType2") {  tag = "tag2"; }
+      else if (type == "fileType3") {  tag = "tag3"; }
+        // END of segment to be updated
+      else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
+    }
+    return tag;
+  }
+  catch(exception& e) {
+    m->errorOut(e, "ClassifySharedCommand", "getOutputFileName");
+    exit(1);
+  }
+
 }
 
+  // TODO: udpate the contents of the helpString
 string ClassifySharedCommand::getHelpString() {
-  return NULL;
+  try {
+    string helpString = "";
+    helpString += "dummy help string\n";
+    return helpString;
+  }
+  catch(exception& e) {
+    m->errorOut(e, "ClassifySharedCommand", "getHelpString");
+    exit(1);
+  }
 }
 
   // TODO: finish implementation
