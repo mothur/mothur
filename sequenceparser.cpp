@@ -400,7 +400,7 @@ int SequenceParser::getSeqs(string g, string filename, bool uchimeFormat=false){
 					
 					if(m->control_pressed) { out.close(); m->mothurRemove(filename); return 1; }
 					
-					out << ">" << nameVector[i].name  << "/ab=" << nameVector[i].numIdentical << "/" << endl << nameVector[i].seq << endl;
+					out << ">" <<  nameVector[i].name << "/ab=" << nameVector[i].numIdentical << "/" << endl << nameVector[i].seq << endl; //
 				}
 				
 			}else { 

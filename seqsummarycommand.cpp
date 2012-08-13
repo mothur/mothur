@@ -420,7 +420,7 @@ int SeqSummaryCommand::driverCreateSummary(vector<int>& startPosition, vector<in
 
 		bool done = false;
 		int count = 0;
-	
+       
 		while (!done) {
 				
 			if (m->control_pressed) { in.close(); outSummary.close(); return 1; }

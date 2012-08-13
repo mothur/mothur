@@ -19,8 +19,9 @@ vector<string> ChimeraUchimeCommand::setParameters(){
 	try {
 		CommandParameter ptemplate("reference", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(ptemplate);
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
-		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
-		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pgroup);
+		CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none",false,false); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none",false,false); parameters.push_back(pcount);
+		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none",false,false); parameters.push_back(pgroup);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
@@ -58,9 +59,10 @@ string ChimeraUchimeCommand::getHelpString(){
 		string helpString = "";
 		helpString += "The chimera.uchime command reads a fastafile and referencefile and outputs potentially chimeric sequences.\n";
 		helpString += "This command is a wrapper for uchime written by Robert C. Edgar.\n";
-		helpString += "The chimera.uchime command parameters are fasta, name, reference, processors, abskew, chimealns, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, skipgaps, skipgaps2, minlen, maxlen, ucl and queryfact.\n";
+		helpString += "The chimera.uchime command parameters are fasta, name, count, reference, processors, abskew, chimealns, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, skipgaps, skipgaps2, minlen, maxlen, ucl and queryfact.\n";
 		helpString += "The fasta parameter allows you to enter the fasta file containing your potentially chimeric sequences, and is required, unless you have a valid current fasta file. \n";
 		helpString += "The name parameter allows you to provide a name file, if you are using template=self. \n";
+        helpString += "The count parameter allows you to provide a count file, if you are using template=self. \n";
 		helpString += "You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amazon.fasta \n";
 		helpString += "The group parameter allows you to provide a group file. The group file can be used with a namesfile and reference=self. When checking sequences, only sequences from the same group as the query sequence will be used as the reference. \n";
 		helpString += "The reference parameter allows you to enter a reference file containing known non-chimeric sequences, and is required. You may also set template=self, in this case the abundant sequences will be used as potential parents. \n";
@@ -137,7 +139,7 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(){
 //***************************************************************************************************************
 ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 	try {
-		abort = false; calledHelp = false; 
+		abort = false; calledHelp = false; hasName=false; hasCount=false;
 		ReferenceDB* rdb = ReferenceDB::getInstance();
 		
 		//allow user to run help
@@ -247,9 +249,8 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 			
 			
 			//check for required parameters
-			bool hasName = true;
 			namefile = validParameter.validFile(parameters, "name", false);
-			if (namefile == "not found") { namefile = "";  hasName = false; }
+			if (namefile == "not found") { namefile = "";  	}
 			else { 
 				m->splitAtDash(namefile, nameFileNames);
 				
@@ -316,12 +317,91 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 						}
 					}
 				}
-				
-				//make sure there is at least one valid file left
-				if (nameFileNames.size() == 0) { m->mothurOut("[ERROR]: no valid name files."); m->mothurOutEndLine(); abort = true; }
 			}
-			
-			if (hasName && (nameFileNames.size() != fastaFileNames.size())) { m->mothurOut("[ERROR]: The number of namefiles does not match the number of fastafiles, please correct."); m->mothurOutEndLine(); abort=true; }
+            
+            if (nameFileNames.size() != 0) { hasName = true; }
+            
+            //check for required parameters
+            vector<string> countfileNames;
+			countfile = validParameter.validFile(parameters, "count", false);
+			if (countfile == "not found") { 
+                countfile = "";  
+			}else { 
+				m->splitAtDash(countfile, countfileNames);
+				
+				//go through files and make sure they are good, if not, then disregard them
+				for (int i = 0; i < countfileNames.size(); i++) {
+					
+					bool ignore = false;
+					if (countfileNames[i] == "current") { 
+						countfileNames[i] = m->getCountTableFile(); 
+						if (nameFileNames[i] != "") {  m->mothurOut("Using " + countfileNames[i] + " as input file for the count parameter where you had given current."); m->mothurOutEndLine(); }
+						else { 	
+							m->mothurOut("You have no current count file, ignoring current."); m->mothurOutEndLine(); ignore=true; 
+							//erase from file list
+							countfileNames.erase(countfileNames.begin()+i);
+							i--;
+						}
+					}
+					
+					if (!ignore) {
+						
+						if (inputDir != "") {
+							string path = m->hasPath(countfileNames[i]);
+							//if the user has not given a path then, add inputdir. else leave path alone.
+							if (path == "") {	countfileNames[i] = inputDir + countfileNames[i];		}
+						}
+						
+						int ableToOpen;
+						ifstream in;
+						
+						ableToOpen = m->openInputFile(countfileNames[i], in, "noerror");
+						
+						//if you can't open it, try default location
+						if (ableToOpen == 1) {
+							if (m->getDefaultPath() != "") { //default path is set
+								string tryPath = m->getDefaultPath() + m->getSimpleName(countfileNames[i]);
+								m->mothurOut("Unable to open " + countfileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
+								ifstream in2;
+								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+								in2.close();
+								countfileNames[i] = tryPath;
+							}
+						}
+						
+						if (ableToOpen == 1) {
+							if (m->getOutputDir() != "") { //default path is set
+								string tryPath = m->getOutputDir() + m->getSimpleName(countfileNames[i]);
+								m->mothurOut("Unable to open " + countfileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
+								ifstream in2;
+								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+								in2.close();
+								countfileNames[i] = tryPath;
+							}
+						}
+						
+						in.close();
+						
+						if (ableToOpen == 1) { 
+							m->mothurOut("Unable to open " + countfileNames[i] + ". It will be disregarded."); m->mothurOutEndLine(); 
+							//erase from file list
+							countfileNames.erase(countfileNames.begin()+i);
+							i--;
+						}else {
+							m->setCountTableFile(countfileNames[i]);
+						}
+					}
+				}
+			}
+            
+            if (countfileNames.size() != 0) { hasCount = true; }
+            
+			//make sure there is at least one valid file left
+            if (hasName && hasCount) { m->mothurOut("[ERROR]: You must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
+            
+            if (!hasName && hasCount) { nameFileNames = countfileNames; }
+            
+			if ((hasCount || hasName) && (nameFileNames.size() != fastaFileNames.size())) { m->mothurOut("[ERROR]: The number of name or count files does not match the number of fastafiles, please correct."); m->mothurOutEndLine(); abort=true; }
 			
 			bool hasGroup = true;
 			groupfile = validParameter.validFile(parameters, "group", false);
@@ -399,6 +479,10 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 			
 			if (hasGroup && (groupFileNames.size() != fastaFileNames.size())) { m->mothurOut("[ERROR]: The number of groupfiles does not match the number of fastafiles, please correct."); m->mothurOutEndLine(); abort=true; }
 			
+            if (hasGroup && hasCount) { m->mothurOut("[ERROR]: You must enter ONLY ONE of the following: count or group."); m->mothurOutEndLine(); abort = true; }			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
+			
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
@@ -427,6 +511,7 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 					}
 				}
 			}else if (hasName) {  templatefile = "self"; }
+            else if (hasCount) {  templatefile = "self"; }
 			else { 
 				if (rdb->getSavedReference() != "") {
 					templatefile = rdb->getSavedReference();
@@ -533,7 +618,8 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 
 int ChimeraUchimeCommand::execute(){
 	try{
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+        
+        if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		m->mothurOut("\nuchime by Robert C. Edgar\nhttp://drive5.com/uchime\nThis code is donated to the public domain.\n\n");
 		
@@ -551,9 +637,14 @@ int ChimeraUchimeCommand::execute(){
 				
 			//you provided a groupfile
 			string groupFile = "";
-			if (groupFileNames.size() != 0) { groupFile = groupFileNames[s]; }
+            bool hasGroup = false;
+			if (groupFileNames.size() != 0) { groupFile = groupFileNames[s]; hasGroup = true; }
+            else if (hasCount) {
+                CountTable ct;
+                if (ct.testGroups(nameFileNames[s])) { hasGroup = true; }
+            }
 			
-			if ((templatefile == "self") && (groupFile == "")) { //you want to run uchime with a reference template
+			if ((templatefile == "self") && (!hasGroup)) { //you want to run uchime with a template=self and no groups
 
 				if (processors != 1) { m->mothurOut("When using template=self, mothur can only use 1 processor, continuing."); m->mothurOutEndLine(); processors = 1; }
 				if (nameFileNames.size() != 0) { //you provided a namefile and we don't need to create one
@@ -565,7 +656,21 @@ int ChimeraUchimeCommand::execute(){
 
 				//read namefile
 				vector<seqPriorityNode> nameMapCount;
-				int error = m->readNames(nameFile, nameMapCount, seqs); if (m->control_pressed) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
+                int error;
+                if (hasCount) {
+                    CountTable ct;
+                    ct.readTable(nameFile);
+                    for(map<string, string>::iterator it = seqs.begin(); it != seqs.end(); it++) {
+                        int num = ct.getNumSeqs(it->first);
+                        if (num == 0) { error = 1; }
+                        else {
+                            seqPriorityNode temp(num, it->second, it->first);
+                            nameMapCount.push_back(temp);
+                        }
+                    }
+                }else {
+                    error = m->readNames(nameFile, nameMapCount, seqs); if (m->control_pressed) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
+                }
 				if (error == 1) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
 				if (seqs.size() != nameMapCount.size()) { m->mothurOut( "The number of sequences in your fastafile does not match the number of sequences in your namefile, aborting."); m->mothurOutEndLine(); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
 				
@@ -575,14 +680,23 @@ int ChimeraUchimeCommand::execute(){
 			
 			if (m->control_pressed) {  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}				
 			
-			if (groupFile != "") {
+			if (hasGroup) {
 				if (nameFileNames.size() != 0) { //you provided a namefile and we don't need to create one
 					nameFile = nameFileNames[s];
 				}else { nameFile = getNamesFile(fastaFileNames[s]); }
 				
 				//Parse sequences by group
-				SequenceParser parser(groupFile, fastaFileNames[s], nameFile);
-				vector<string> groups = parser.getNamesOfGroups();
+                vector<string> groups;
+                map<string, string> uniqueNames;
+                if (hasCount) {
+                    cparser = new SequenceCountParser(nameFile, fastaFileNames[s]);
+                    groups = cparser->getNamesOfGroups();
+                    uniqueNames = cparser->getAllSeqsMap();
+                }else{
+                    sparser = new SequenceParser(groupFile, fastaFileNames[s], nameFile);
+                    groups = sparser->getNamesOfGroups();
+                    uniqueNames = sparser->getAllSeqsMap();
+                }
 					
 				if (m->control_pressed) { for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }
 								
@@ -593,12 +707,14 @@ int ChimeraUchimeCommand::execute(){
 				if (chimealns) { m->openOutputFile(alnsFileName, out2); out2.close(); }
 				int totalSeqs = 0;
 				
-				if(processors == 1)	{	totalSeqs = driverGroups(parser, outputFileName, newFasta, accnosFileName, alnsFileName, 0, groups.size(), groups);	}
-				else				{	totalSeqs = createProcessesGroups(parser, outputFileName, newFasta, accnosFileName, alnsFileName, groups, nameFile, groupFile, fastaFileNames[s]);			}
+				if(processors == 1)	{	totalSeqs = driverGroups(outputFileName, newFasta, accnosFileName, alnsFileName, 0, groups.size(), groups);	}
+				else				{	totalSeqs = createProcessesGroups(outputFileName, newFasta, accnosFileName, alnsFileName, groups, nameFile, groupFile, fastaFileNames[s]);			}
 
 				if (m->control_pressed) {  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}				
+                if (hasCount) { delete cparser; }
+                else { delete sparser; }
 
-				int totalChimeras = deconvoluteResults(parser, outputFileName, accnosFileName, alnsFileName);
+				int totalChimeras = deconvoluteResults(uniqueNames, outputFileName, accnosFileName, alnsFileName);
 				
 				m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(totalSeqs) + " sequences. " + toString(totalChimeras) + " chimeras were found.");	m->mothurOutEndLine();
 				m->mothurOut("The number of sequences checked may be larger than the number of unique sequences because some sequences are found in several samples."); m->mothurOutEndLine(); 
@@ -657,9 +773,8 @@ int ChimeraUchimeCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-int ChimeraUchimeCommand::deconvoluteResults(SequenceParser& parser, string outputFileName, string accnosFileName, string alnsFileName){
+int ChimeraUchimeCommand::deconvoluteResults(map<string, string>& uniqueNames, string outputFileName, string accnosFileName, string alnsFileName){
 	try {
-		map<string, string> uniqueNames = parser.getAllSeqsMap();
 		map<string, string>::iterator itUnique;
 		int total = 0;
 		
@@ -999,7 +1114,7 @@ string ChimeraUchimeCommand::getNamesFile(string& inputFile){
 	}
 }
 //**********************************************************************************************************************
-int ChimeraUchimeCommand::driverGroups(SequenceParser& parser, string outputFName, string filename, string accnos, string alns, int start, int end, vector<string> groups){
+int ChimeraUchimeCommand::driverGroups(string outputFName, string filename, string accnos, string alns, int start, int end, vector<string> groups){
 	try {
 		
 		int totalSeqs = 0;
@@ -1007,8 +1122,10 @@ int ChimeraUchimeCommand::driverGroups(SequenceParser& parser, string outputFNam
 		
 		for (int i = start; i < end; i++) {
 			int start = time(NULL);	 if (m->control_pressed) {  return 0; }
-			
-			int error = parser.getSeqs(groups[i], filename, true); if ((error == 1) || m->control_pressed) {  return 0; }
+            
+			int error;
+            if (hasCount) { error = cparser->getSeqs(groups[i], filename, true); if ((error == 1) || m->control_pressed) {  return 0; } }
+            else { error = sparser->getSeqs(groups[i], filename, true); if ((error == 1) || m->control_pressed) {  return 0; } }
 			
 			int numSeqs = driver((outputFName + groups[i]), filename, (accnos+ groups[i]), (alns+ groups[i]), numChimeras);
 			totalSeqs += numSeqs;
@@ -1026,7 +1143,6 @@ int ChimeraUchimeCommand::driverGroups(SequenceParser& parser, string outputFNam
 			
 			m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences from group " + groups[i] + ".");	m->mothurOutEndLine();					
 		}	
-		
 		return totalSeqs;
 		
 	}
@@ -1519,7 +1635,7 @@ int ChimeraUchimeCommand::createProcesses(string outputFileName, string filename
 }
 /**************************************************************************************************/
 
-int ChimeraUchimeCommand::createProcessesGroups(SequenceParser& parser, string outputFName, string filename, string accnos, string alns, vector<string> groups, string nameFile, string groupFile, string fastaFile) {
+int ChimeraUchimeCommand::createProcessesGroups(string outputFName, string filename, string accnos, string alns, vector<string> groups, string nameFile, string groupFile, string fastaFile) {
 	try {
 		
 		processIDS.clear();
@@ -1549,7 +1665,7 @@ int ChimeraUchimeCommand::createProcessesGroups(SequenceParser& parser, string o
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				num = driverGroups(parser, outputFName + toString(getpid()) + ".temp", filename + toString(getpid()) + ".temp", accnos + toString(getpid()) + ".temp", alns + toString(getpid()) + ".temp", lines[process].start, lines[process].end, groups);
+				num = driverGroups(outputFName + toString(getpid()) + ".temp", filename + toString(getpid()) + ".temp", accnos + toString(getpid()) + ".temp", alns + toString(getpid()) + ".temp", lines[process].start, lines[process].end, groups);
 				
 				//pass numSeqs to parent
 				ofstream out;
@@ -1567,7 +1683,7 @@ int ChimeraUchimeCommand::createProcessesGroups(SequenceParser& parser, string o
 		}
 		
 		//do my part
-		num = driverGroups(parser, outputFName, filename, accnos, alns, lines[0].start, lines[0].end, groups);
+		num = driverGroups(outputFName, filename, accnos, alns, lines[0].start, lines[0].end, groups);
 		
 		//force parent to wait until all the processes are done
 		for (int i=0;i<processIDS.size();i++) { 
