@@ -1173,24 +1173,18 @@ int ChimeraUchimeCommand::driver(string outputFName, string filename, string acc
 #else
 		uchimeCommand = "\"" + uchimeCommand + "\"";
 #endif
-		
-		char* tempUchime;
+        char* tempUchime;
 		tempUchime= new char[uchimeCommand.length()+1]; 
 		*tempUchime = '\0';
 		strncat(tempUchime, uchimeCommand.c_str(), uchimeCommand.length());
 		cPara.push_back(tempUchime);
 		
-		char* tempIn = new char[8]; 
-		*tempIn = '\0'; strncat(tempIn, "--input", 7);
-		//strcpy(tempIn, "--input"); 
-		cPara.push_back(tempIn);
-		char* temp = new char[filename.length()+1];
-		*temp = '\0'; strncat(temp, filename.c_str(), filename.length());
-		//strcpy(temp, filename.c_str());
-		cPara.push_back(temp);
-		
-		//are you using a reference file
+        //are you using a reference file
 		if (templatefile != "self") {
+            string outputFileName = filename.substr(1, filename.length()-2) + ".uchime_formatted";
+            prepFile(filename.substr(1, filename.length()-2), outputFileName);
+            filename = outputFileName;
+            filename = "\"" + filename + "\"";
 			//add reference file
 			char* tempRef = new char[5]; 
 			//strcpy(tempRef, "--db"); 
@@ -1201,6 +1195,15 @@ int ChimeraUchimeCommand::driver(string outputFName, string filename, string acc
 			*tempR = '\0'; strncat(tempR, templatefile.c_str(), templatefile.length());
 			cPara.push_back(tempR);
 		}
+		
+		char* tempIn = new char[8]; 
+		*tempIn = '\0'; strncat(tempIn, "--input", 7);
+		//strcpy(tempIn, "--input"); 
+		cPara.push_back(tempIn);
+		char* temp = new char[filename.length()+1];
+		*temp = '\0'; strncat(temp, filename.c_str(), filename.length());
+		//strcpy(temp, filename.c_str());
+		cPara.push_back(temp);
 		
 		char* tempO = new char[12]; 
 		*tempO = '\0'; strncat(tempO, "--uchimeout", 11);
@@ -1455,10 +1458,40 @@ int ChimeraUchimeCommand::driver(string outputFName, string filename, string acc
 		in.close();
 		out.close();
 		
+        //if (templatefile != "self") {  m->mothurRemove(filename); }
+        
 		return num;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ChimeraUchimeCommand", "driver");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+//uchime can't handle some of the things allowed in mothurs fasta files. This functions "cleans up" the file.
+int ChimeraUchimeCommand::prepFile(string filename, string output) {
+	try {
+        
+        ifstream in;
+        m->openInputFile(filename, in);
+        
+        ofstream out;
+        m->openOutputFile(output, out);
+        
+        while (!in.eof()) {
+            if (m->control_pressed) { break;  }
+            
+            Sequence seq(in); m->gobble(in);
+            
+            if (seq.getName() != "") { seq.printSequence(out); }
+        }
+        in.close();
+        out.close();
+        
+        return 0;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "ChimeraUchimeCommand", "prepFile");
 		exit(1);
 	}
 }

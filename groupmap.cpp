@@ -44,6 +44,7 @@ int GroupMap::readMap() {
                 if (pairDone) { 
                     setNamesOfGroups(seqGroup);
                     
+                    if (m->debug) { m->mothurOut("[DEBUG]: name = '" + seqName + "', group = '" + seqGroup + "'\n"); }
                     it = groupmap.find(seqName);
                     
                     if (it != groupmap.end()) { error = 1; m->mothurOut("Your groupfile contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine();  }
@@ -66,6 +67,8 @@ int GroupMap::readMap() {
                 
                 if (pairDone) { 
                     setNamesOfGroups(seqGroup);
+                    
+                    if (m->debug) { m->mothurOut("[DEBUG]: name = '" + seqName + "', group = '" + seqGroup + "'\n"); }
                     
                     it = groupmap.find(seqName);
                     
@@ -110,6 +113,8 @@ int GroupMap::readDesignMap() {
                 if (pairDone) { 
                     setNamesOfGroups(seqGroup);
                     
+                    if (m->debug) { m->mothurOut("[DEBUG]: name = '" + seqName + "', group = '" + seqGroup + "'\n"); }
+                    
                     it = groupmap.find(seqName);
                     
                     if (it != groupmap.end()) { error = 1; m->mothurOut("Your designfile contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine();  }
@@ -132,6 +137,8 @@ int GroupMap::readDesignMap() {
                 
                 if (pairDone) { 
                     setNamesOfGroups(seqGroup);
+                    
+                    if (m->debug) { m->mothurOut("[DEBUG]: name = '" + seqName + "', group = '" + seqGroup + "'\n"); }
                     
                     it = groupmap.find(seqName);
                     
@@ -180,6 +187,8 @@ int GroupMap::readDesignMap(string filename) {
                 if (pairDone) { 
                     setNamesOfGroups(seqGroup);
                     
+                    if (m->debug) { m->mothurOut("[DEBUG]: name = '" + seqName + "', group = '" + seqGroup + "'\n"); }
+                    
                     it = groupmap.find(seqName);
                     
                     if (it != groupmap.end()) { error = 1; m->mothurOut("Your designfile contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine();  }
@@ -202,6 +211,8 @@ int GroupMap::readDesignMap(string filename) {
                 
                 if (pairDone) { 
                     setNamesOfGroups(seqGroup);
+                    
+                    if (m->debug) { m->mothurOut("[DEBUG]: name = '" + seqName + "', group = '" + seqGroup + "'\n"); }
                     
                     it = groupmap.find(seqName);
                     

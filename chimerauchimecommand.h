@@ -64,6 +64,7 @@ private:
 	int deconvoluteResults(map<string, string>&, string, string, string);
 	int driverGroups(string, string, string, string, int, int, vector<string>);
 	int createProcessesGroups(string, string, string, string, vector<string>, string, string, string);
+    int prepFile(string filename, string);
 
 
 };
@@ -524,16 +525,31 @@ static DWORD WINAPI MyUchimeSeqsThreadFunction(LPVOID lpParam){
         strncat(tempUchime, uchimeCommand.c_str(), uchimeCommand.length());
         cPara.push_back(tempUchime);
 		
-		char* tempIn = new char[8]; 
-		*tempIn = '\0'; strncat(tempIn, "--input", 7);
-		//strcpy(tempIn, "--input"); 
-		cPara.push_back(tempIn);
-		char* temp = new char[filename.length()+1];
-		*temp = '\0'; strncat(temp, filename.c_str(), filename.length());
-		//strcpy(temp, filename.c_str());
-		cPara.push_back(temp);
-	
-		//add reference file
+        string outputFileName = filename.substr(1, filename.length()-2) + ".uchime_formatted";
+        //prepFile(filename.substr(1, filename.length()-2), outputFileName);
+        //prepFile(filename, outputFileName);
+        /******************************************/
+        ifstream in23;
+        m->openInputFile((filename.substr(1, filename.length()-2)), in23);
+        
+        ofstream out23;
+        m->openOutputFile(outputFileName, out23);
+        
+        while (!in23.eof()) {
+            if (m->control_pressed) { break;  }
+            
+            Sequence seq(in23); m->gobble(in23);
+            
+            if (seq.getName() != "") { seq.printSequence(out23); }
+        }
+        in23.close();
+        out23.close();
+        /******************************************/
+        
+        filename = outputFileName;
+        filename = "\"" + filename + "\"";
+        
+        //add reference file
 		char* tempRef = new char[5]; 
 		//strcpy(tempRef, "--db"); 
 		*tempRef = '\0'; strncat(tempRef, "--db", 4);
@@ -542,6 +558,15 @@ static DWORD WINAPI MyUchimeSeqsThreadFunction(LPVOID lpParam){
 		//strcpy(tempR, templatefile.c_str());
 		*tempR = '\0'; strncat(tempR, templatefile.c_str(), templatefile.length());
 		cPara.push_back(tempR);
+        
+		char* tempIn = new char[8]; 
+		*tempIn = '\0'; strncat(tempIn, "--input", 7);
+		//strcpy(tempIn, "--input"); 
+		cPara.push_back(tempIn);
+		char* temp = new char[filename.length()+1];
+		*temp = '\0'; strncat(temp, filename.c_str(), filename.length());
+		//strcpy(temp, filename.c_str());
+		cPara.push_back(temp);
 		
 		char* tempO = new char[12]; 
 		*tempO = '\0'; strncat(tempO, "--uchimeout", 11);
