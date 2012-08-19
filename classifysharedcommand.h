@@ -26,7 +26,7 @@ public:
   string getHelpString();
   string getCitation() { return "http://www.mothur.org/wiki/classsify.shared\n"; }
   // TODO: find a proper description
-  string getDescription()		{ return "find highest imact otu from a shared file"; }
+  string getDescription()		{ return "find the most important otu from a shared file"; }
 
   int execute();
   void help() { m->mothurOut(getHelpString()); }
