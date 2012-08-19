@@ -127,7 +127,10 @@ ClassifySharedCommand::ClassifySharedCommand(string option) {
         //use by the other class functions.
       string phylipfile, columnfile, namefile, fastafile;
       string sharedfile, designfile, method;
+      string splitcriteria;
+      string otupersplit;
       int processors;
+      int numtrees;
       bool useTiming, allLines;
       vector<string> Estimators, Groups;
       set<string> labels;
@@ -216,30 +219,50 @@ ClassifySharedCommand::ClassifySharedCommand(string option) {
         //////////////////////////////////////////////////////////////////////
       
         //use only one Mutliple type
-      method = validParameter.validFile(parameters, "method", false);
-      if (method == "not found") { method = "average"; }
+//      method = validParameter.validFile(parameters, "method", false);
+//      if (method == "not found") { method = "average"; }
+//      if ((method == "furthest") || (method == "nearest") || (method == "average") || (method == "weighted")) { }
+//      else { m->mothurOut("Not a valid clustering method.  Valid clustering algorithms are furthest, nearest, average, and weighted."); m->mothurOutEndLine(); abort = true; }
+//      
+//        //use more than one multiple type. do not check to make sure the entry is valid.
+//      string calc = validParameter.validFile(parameters, "calc", false);
+//      if (calc == "not found") { calc = "sobs-chao-ace-jack-shannon-npshannon-simpson";  }
+//      else {
+//        if (calc == "default")  {  calc = "sobs-chao-ace-jack-shannon-npshannon-simpson";  }
+//      }
+//      m->splitAtDash(calc, Estimators);
       
-      if ((method == "furthest") || (method == "nearest") || (method == "average") || (method == "weighted")) { }
-      else { m->mothurOut("Not a valid clustering method.  Valid clustering algorithms are furthest, nearest, average, and weighted."); m->mothurOutEndLine(); abort = true; }
-      
-        //use more than one multiple type. do not check to make sure the entry is valid.
-      string calc = validParameter.validFile(parameters, "calc", false);
-      if (calc == "not found") { calc = "sobs-chao-ace-jack-shannon-npshannon-simpson";  }
-      else {
-        if (calc == "default")  {  calc = "sobs-chao-ace-jack-shannon-npshannon-simpson";  }
+        // NEW CODE for OTU per split selection criteria
+      otupersplit = validParameter.validFile(parameters, "otupersplit", false);
+      if (otupersplit == "not found") { otupersplit = "log2"; }
+      if ((otupersplit == "squareroot") || (otupersplit == "log2")) {
+          // TODO: new code
       }
-      m->splitAtDash(calc, Estimators);
+      else { m->mothurOut("Not a valid OTU per split selection method. Valid OTU per split selection methods are 'log2' and 'squareroot'."); m->mothurOutEndLine(); abort = true; }
       
-        //Boolean type - m->isTrue looks for t, true, f or false and is case insensitive
-      string timing = validParameter.validFile(parameters, "timing", false);
-      if (timing == "not found") { timing = "F"; }
-      useTiming = m->isTrue(timing);
+        // splitcriteria
+      splitcriteria = validParameter.validFile(parameters, "splitcriteria", false);
+      if (splitcriteria == "not found") { splitcriteria = "gainratio"; }
+      if ((splitcriteria == "gainratio") || (splitcriteria == "infogain")) {
+          // TODO: new code
+      }
+      else { m->mothurOut("Not a valid tree splitting criterio. Valid tree splitting criteria are 'gainratio' and 'infogain'."); m->mothurOutEndLine(); abort = true; }
       
-        //Number type - mothurConvert makes sure the convert can happen to avoid a crash.
-      string temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
-      m->setProcessors(temp);
-      m->mothurConvert(temp, processors);
+        // boolean example
+//        //Boolean type - m->isTrue looks for t, true, f or false and is case insensitive
+//      string timing = validParameter.validFile(parameters, "timing", false);
+//      if (timing == "not found") { timing = "F"; }
+//      useTiming = m->isTrue(timing);
+
+        // number example
+//        //Number type - mothurConvert makes sure the convert can happen to avoid a crash.
+//      string temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
+//      m->setProcessors(temp);
+//      m->mothurConvert(temp, processors);
       
+      string temp = validParameter.validFile(parameters, "numtrees", false); if (temp == "not found"){	temp = 100;	}
+      m->mothurConvert(temp, numtrees);
+
         //Groups must be checked later to make sure they are valid. SharedUtilities has functions of check the validity, just make to so m->setGroups() after the checks.  If you are using these with a shared file no need to check the SharedRAbundVector class will call SharedUtilites for you, kinda nice, huh?
       string groups = validParameter.validFile(parameters, "groups", false);
       if (groups == "not found") { groups = ""; }
