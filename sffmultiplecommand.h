@@ -30,14 +30,26 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
+    
+    struct linePair {
+		int start;
+		int end;
+		linePair(int i, int j) : start(i), end(j) {}
+	};
+
 	string filename, outputDir, flowOrder;
 	vector<string> outputNames;
-	bool abort, trim;
+	bool abort, trim, large, flip, qtrim, allFiles, keepforward;
 	int maxFlows, minFlows, minLength, maxLength, maxHomoP, tdiffs, bdiffs, pdiffs, sdiffs, ldiffs, numLinkers, numSpacers;
-	int numFlows, numFPrimers, numRPrimers, processors;
-	float signal, noise;
+	int numFlows, numFPrimers, numRPrimers, processors, maxIters, largeSize;
+	float signal, noise, cutoff, sigma, minDelta;
+    int qWindowSize, qWindowStep, keepFirst, removeLast, maxAmbig;
+	double qRollAverage, qThreshold, qWindowAverage, qAverage;
     
     int readFile(vector<string>& sffFiles, vector<string>& oligosFiles);
+    int createProcesses(vector<string> sffFiles, vector<string> oligosFiles);
+    int driver(vector<string> sffFiles, vector<string> oligosFiles, int start, int end);
+
     
 };
 

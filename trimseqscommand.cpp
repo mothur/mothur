@@ -611,6 +611,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 			QualityScores currQual;
 			if(qFileName != ""){
 				currQual = QualityScores(qFile);  m->gobble(qFile);
+                //cout << currQual.getName() << endl;
 			}
 			
 			string origSeq = currSeq.getUnaligned();
