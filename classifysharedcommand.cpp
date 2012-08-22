@@ -277,15 +277,23 @@ ClassifySharedCommand::ClassifySharedCommand(string option) {
         else { allLines = 1;  }
       }
       
-        //if your command has a namefile as an option, you may want ot check to see if there is a current namefile
-        //saved by mothur that is associated with the other files you are using as inputs.
-        //You can do so by adding the files associated with the namefile to the files vector and then asking parser to check.
-        //This saves our users headaches over file mismatches because they forgot to include the namefile, :)
-      if (namefile == "") {
-        vector<string> files; files.push_back(fastafile);
-        parser.getNameFile(files);
-      }
+//        //if your command has a namefile as an option, you may want ot check to see if there is a current namefile
+//        //saved by mothur that is associated with the other files you are using as inputs.
+//        //You can do so by adding the files associated with the namefile to the files vector and then asking parser to check.
+//        //This saves our users headaches over file mismatches because they forgot to include the namefile, :)
+//      if (namefile == "") {
+//        vector<string> files; files.push_back(fastafile);
+//        parser.getNameFile(files);
+//      }
       
+        // TODO: add code for inputDir and outputDir
+        // see aligncommand.cpp
+      outputDir = validParameter.validFile(parameters, "outputdir", false);
+      if (outputDir == "not found"){	outputDir = "";		}
+      inputDir = validParameter.validFile(parameters, "inputdir", false);
+      if (inputDir == "not found"){	inputDir = "";		}
+        // TODO: if inputdir is found, need to change the shared and deisgn paramters to incorporate inputDir
+        // check aligncommand.cpp line 154
     }
     
   }
