@@ -396,101 +396,101 @@ int ClassifySharedCommand::execute() {
     
       //Reads sharefile, binLabels are stored in m->currentBinLabels, lookup will be filled with groups in m->getGroups() or all groups in file if m->getGroups is empty. If groups are selected, some bins maybe eliminated if they only contained seqs from groups not included. No need to worry about the details of this, SharedRAbundVector takes care of it.  Just make sure to use m->currentBinLabels if you are outputting OTU labels so that if otus are eliminated you still have the correct names.
     
-//    /*
-     InputData input(sharedfile, "sharedfile");
-     vector<SharedRAbundVector*> lookup = input.getSharedRAbundVectors();
-     string lastLabel = lookup[0]->getLabel();
-     
-     //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-     set<string> processedLabels;
-     set<string> userLabels = labels;
-     
-     
-     //as long as you are not at the end of the file or done wih the lines you want
-     while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-     
-     if (m->control_pressed) { for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  return 0; }
-     
-     if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){
-     
-     m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
-     
-     ///////////////////////////////////////////////////////////////////////////////////
-     //// Call your function to process specific distance in sharedfile, ie lookup /////
-     ///////////////////////////////////////////////////////////////////////////////////
-     
-     processedLabels.insert(lookup[0]->getLabel());
-     userLabels.erase(lookup[0]->getLabel());
-     }
-     
-     if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-     string saveLabel = lookup[0]->getLabel();
-     
-     for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
-     lookup = input.getSharedRAbundVectors(lastLabel);
-     m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
-     
-     ///////////////////////////////////////////////////////////////////////////////////
-     //// Call your function to process specific distance in sharedfile, ie lookup /////
-     ///////////////////////////////////////////////////////////////////////////////////
-     
-     
-     processedLabels.insert(lookup[0]->getLabel());
-     userLabels.erase(lookup[0]->getLabel());
-     
-     //restore real lastlabel to save below
-     lookup[0]->setLabel(saveLabel);
-     }
-     
-     lastLabel = lookup[0]->getLabel();
-     //prevent memory leak
-     for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
-     
-     if (m->control_pressed) { return 0; }
-     
-     //get next line to process
-     lookup = input.getSharedRAbundVectors();
-     }
-     
-     if (m->control_pressed) {  return 0; }
-     
-     //output error messages about any remaining user labels
-     set<string>::iterator it;
-     bool needToRun = false;
-     for (it = userLabels.begin(); it != userLabels.end(); it++) {
-     m->mothurOut("Your file does not include the label " + *it);
-     if (processedLabels.count(lastLabel) != 1) {
-     m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-     needToRun = true;
-     }else {
-     m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-     }
-     }
-     
-     //run last label if you need to
-     if (needToRun == true)  {
-     for (int i = 0; i < lookup.size(); i++) { if (lookup[i] != NULL) { delete lookup[i]; } }
-     lookup = input.getSharedRAbundVectors(lastLabel);
-     
-     m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
-     
-     ///////////////////////////////////////////////////////////////////////////////////
-     //// Call your function to process specific distance in sharedfile, ie lookup /////
-     ///////////////////////////////////////////////////////////////////////////////////
-     
-     
-     for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
-     }
-//     */
+      //    /*
+    InputData input(sharedfile, "sharedfile");
+    vector<SharedRAbundVector*> lookup = input.getSharedRAbundVectors();
+    string lastLabel = lookup[0]->getLabel();
+    
+      //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
+    set<string> processedLabels;
+    set<string> userLabels = labels;
     
     
-    
-      //if you make a new file or a type that mothur keeps track of the current version, you can update it with something like the following.
-    string currentFasta = "";
-    itTypes = outputTypes.find("fasta");
-    if (itTypes != outputTypes.end()) {
-      if ((itTypes->second).size() != 0) { currentFasta = (itTypes->second)[0]; m->setFastaFile(currentFasta); }
+      //as long as you are not at the end of the file or done wih the lines you want
+    while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+      
+      if (m->control_pressed) { for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  return 0; }
+      
+      if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){
+        
+        m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+        
+          ///////////////////////////////////////////////////////////////////////////////////
+          //// Call your function to process specific distance in sharedfile, ie lookup /////
+          ///////////////////////////////////////////////////////////////////////////////////
+        
+        processedLabels.insert(lookup[0]->getLabel());
+        userLabels.erase(lookup[0]->getLabel());
+      }
+      
+      if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+        string saveLabel = lookup[0]->getLabel();
+        
+        for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+        lookup = input.getSharedRAbundVectors(lastLabel);
+        m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+        
+          ///////////////////////////////////////////////////////////////////////////////////
+          //// Call your function to process specific distance in sharedfile, ie lookup /////
+          ///////////////////////////////////////////////////////////////////////////////////
+        
+        
+        processedLabels.insert(lookup[0]->getLabel());
+        userLabels.erase(lookup[0]->getLabel());
+        
+          //restore real lastlabel to save below
+        lookup[0]->setLabel(saveLabel);
+      }
+      
+      lastLabel = lookup[0]->getLabel();
+        //prevent memory leak
+      for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
+      
+      if (m->control_pressed) { return 0; }
+      
+        //get next line to process
+      lookup = input.getSharedRAbundVectors();
     }
+    
+    if (m->control_pressed) {  return 0; }
+    
+      //output error messages about any remaining user labels
+    set<string>::iterator it;
+    bool needToRun = false;
+    for (it = userLabels.begin(); it != userLabels.end(); it++) {
+      m->mothurOut("Your file does not include the label " + *it);
+      if (processedLabels.count(lastLabel) != 1) {
+        m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
+        needToRun = true;
+      }else {
+        m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
+      }
+    }
+    
+      //run last label if you need to
+    if (needToRun == true)  {
+      for (int i = 0; i < lookup.size(); i++) { if (lookup[i] != NULL) { delete lookup[i]; } }
+      lookup = input.getSharedRAbundVectors(lastLabel);
+      
+      m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+      
+        ///////////////////////////////////////////////////////////////////////////////////
+        //// Call your function to process specific distance in sharedfile, ie lookup /////
+        ///////////////////////////////////////////////////////////////////////////////////
+      
+      
+      for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+    }
+      //     */
+    
+    
+    
+      //      //if you make a new file or a type that mothur keeps track of the current version, you can update it with something like the following.
+      //    string currentFasta = "";
+      //    itTypes = outputTypes.find("fasta");
+      //    if (itTypes != outputTypes.end()) {
+      //      if ((itTypes->second).size() != 0) { currentFasta = (itTypes->second)[0]; m->setFastaFile(currentFasta); }
+      //    }
     
       //output files created by command
     m->mothurOutEndLine();
