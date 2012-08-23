@@ -10,6 +10,7 @@
 #define __Mothur__classifysharedcommand__
 
 #include "command.hpp"
+#include "inputdata.h"
 
 class ClassifySharedCommand : public Command {
 public:
@@ -35,7 +36,10 @@ private:
   bool abort;
   string outputDir;
   vector<string> outputNames;
-
+  
+  string sharedfile, designfile;
+  set<string> labels;
+  bool allLines;
 };
 
 #endif /* defined(__Mothur__classifysharedcommand__) */

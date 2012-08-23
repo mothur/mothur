@@ -126,14 +126,13 @@ ClassifySharedCommand::ClassifySharedCommand(string option) {
         ///variables for examples below that you will most likely want to put in the header for
         //use by the other class functions.
       string phylipfile, columnfile, namefile, fastafile;
-      string sharedfile, designfile, method;
+      string method;
       string splitcriteria;
       string otupersplit;
       int processors;
       int numtrees;
-      bool useTiming, allLines;
+      bool useTiming;
       vector<string> Estimators, Groups;
-      set<string> labels;
         //if allLines is used it should be initialized to 1 above.
       
       
@@ -260,7 +259,7 @@ ClassifySharedCommand::ClassifySharedCommand(string option) {
 //      m->setProcessors(temp);
 //      m->mothurConvert(temp, processors);
       
-      string temp = validParameter.validFile(parameters, "numtrees", false); if (temp == "not found"){	temp = 100;	}
+      string temp = validParameter.validFile(parameters, "numtrees", false); if (temp == "not found"){	temp = "100";	}
       m->mothurConvert(temp, numtrees);
 
         //Groups must be checked later to make sure they are valid. SharedUtilities has functions of check the validity, just make to so m->setGroups() after the checks.  If you are using these with a shared file no need to check the SharedRAbundVector class will call SharedUtilites for you, kinda nice, huh?
@@ -288,12 +287,12 @@ ClassifySharedCommand::ClassifySharedCommand(string option) {
       
         // TODO: add code for inputDir and outputDir
         // see aligncommand.cpp
-      outputDir = validParameter.validFile(parameters, "outputdir", false);
-      if (outputDir == "not found"){	outputDir = "";		}
-      inputDir = validParameter.validFile(parameters, "inputdir", false);
-      if (inputDir == "not found"){	inputDir = "";		}
+//      outputDir = validParameter.validFile(parameters, "outputdir", false);
+//      if (outputDir == "not found"){	outputDir = "";		}
+//      inputDir = validParameter.validFile(parameters, "inputdir", false);
+//      if (inputDir == "not found"){	inputDir = "";		}
         // TODO: if inputdir is found, need to change the shared and deisgn paramters to incorporate inputDir
-        // check aligncommand.cpp line 154
+        // check aligncommand.cpp line 154      
     }
     
   }
@@ -397,7 +396,7 @@ int ClassifySharedCommand::execute() {
     
       //Reads sharefile, binLabels are stored in m->currentBinLabels, lookup will be filled with groups in m->getGroups() or all groups in file if m->getGroups is empty. If groups are selected, some bins maybe eliminated if they only contained seqs from groups not included. No need to worry about the details of this, SharedRAbundVector takes care of it.  Just make sure to use m->currentBinLabels if you are outputting OTU labels so that if otus are eliminated you still have the correct names.
     
-    /*
+//    /*
      InputData input(sharedfile, "sharedfile");
      vector<SharedRAbundVector*> lookup = input.getSharedRAbundVectors();
      string lastLabel = lookup[0]->getLabel();
@@ -482,7 +481,7 @@ int ClassifySharedCommand::execute() {
      
      for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
      }
-     */
+//     */
     
     
     
