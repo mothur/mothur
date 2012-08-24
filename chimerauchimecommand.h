@@ -190,7 +190,7 @@ static DWORD WINAPI MyUchimeThreadFunction(LPVOID lpParam){
             if (pDataArray->hasCount) { 
                 error = cparser->getSeqs(pDataArray->groups[i], pDataArray->filename, true); if ((error == 1) || pDataArray->m->control_pressed) {  delete cparser; return 0; }
             }else {
-               error = cparser->getSeqs(pDataArray->groups[i], pDataArray->filename, true); if ((error == 1) || pDataArray->m->control_pressed) {  delete parser; return 0; } 
+               error = parser->getSeqs(pDataArray->groups[i], pDataArray->filename, true); if ((error == 1) || pDataArray->m->control_pressed) {  delete parser; return 0; } 
             }
 			
 			//int numSeqs = driver((outputFName + groups[i]), filename, (accnos+ groups[i]), (alns+ groups[i]), numChimeras);
@@ -530,15 +530,15 @@ static DWORD WINAPI MyUchimeSeqsThreadFunction(LPVOID lpParam){
         //prepFile(filename, outputFileName);
         /******************************************/
         ifstream in23;
-        m->openInputFile((filename.substr(1, filename.length()-2)), in23);
+        pDataArray->m->openInputFile((filename.substr(1, filename.length()-2)), in23);
         
         ofstream out23;
-        m->openOutputFile(outputFileName, out23);
+        pDataArray->m->openOutputFile(outputFileName, out23);
         
         while (!in23.eof()) {
-            if (m->control_pressed) { break;  }
+            if (pDataArray->m->control_pressed) { break;  }
             
-            Sequence seq(in23); m->gobble(in23);
+            Sequence seq(in23); pDataArray->m->gobble(in23);
             
             if (seq.getName() != "") { seq.printSequence(out23); }
         }

@@ -939,7 +939,7 @@ string MothurOut::getFullPathName(string fileName){
 				}
 			
 				for (int i = index; i >= 0; i--) {
-					newFileName = dirs[i] +  "\\" + newFileName;		
+					newFileName = dirs[i] +  "\\\\" + newFileName;		
 				}
 				
 				return newFileName;
@@ -2431,30 +2431,29 @@ void MothurOut::splitAtDash(string& estim, vector<string>& container) {
 	try {
 		string individual = "";
 		int estimLength = estim.size();
+		bool prevEscape = false;
 		for(int i=0;i<estimLength;i++){
-			if(estim[i] == '-'){
-				container.push_back(individual);
-				individual = "";				
+			if(prevEscape){
+				individual += estim[i];
+				prevEscape = false;
 			}
 			else{
-				individual += estim[i];
+				if(estim[i] == '\\'){
+					prevEscape = true;
+				}
+				else if(estim[i] == '-'){
+					container.push_back(individual);
+					individual = "";
+					prevEscape = false;				
+				}
+				else{
+					individual += estim[i];
+					prevEscape = false;
+				}
 			}
 		}
 		container.push_back(individual);
-
-	
-	/*	string individual;
-		
-		while (estim.find_first_of('-') != -1) {
-			individual = estim.substr(0,estim.find_first_of('-'));
-			if ((estim.find_first_of('-')+1) <= estim.length()) { //checks to make sure you don't have dash at end of string
-				estim = estim.substr(estim.find_first_of('-')+1, estim.length());
-				container.push_back(individual);
-			}
-		}
-		//get last one
-		container.push_back(estim); */
-	}
+ 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "splitAtDash");
 		exit(1);
@@ -2467,29 +2466,29 @@ void MothurOut::splitAtDash(string& estim, set<string>& container) {
 	try {
 		string individual = "";
 		int estimLength = estim.size();
+		bool prevEscape = false;
 		for(int i=0;i<estimLength;i++){
-			if(estim[i] == '-'){
-				container.insert(individual);
-				individual = "";				
+			if(prevEscape){
+				individual += estim[i];
+				prevEscape = false;
 			}
 			else{
-				individual += estim[i];
+				if(estim[i] == '\\'){
+					prevEscape = true;
+				}
+				else if(estim[i] == '-'){
+					container.insert(individual);
+					individual = "";
+					prevEscape = false;				
+				}
+				else{
+					individual += estim[i];
+					prevEscape = false;
+				}
 			}
 		}
 		container.insert(individual);
-
-	//	string individual;
-		
-	//	while (estim.find_first_of('-') != -1) {
-	//		individual = estim.substr(0,estim.find_first_of('-'));
-	//		if ((estim.find_first_of('-')+1) <= estim.length()) { //checks to make sure you don't have dash at end of string
-	//			estim = estim.substr(estim.find_first_of('-')+1, estim.length());
-	//			container.insert(individual);
-	//		}
-	//	}
-		//get last one
-	//	container.insert(estim);
-	
+        
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "splitAtDash");
@@ -2500,19 +2499,32 @@ void MothurOut::splitAtDash(string& estim, set<string>& container) {
 //This function parses the line options and puts them in a set
 void MothurOut::splitAtDash(string& estim, set<int>& container) {
 	try {
-		string individual;
+		string individual = "";
 		int lineNum;
-		
-		while (estim.find_first_of('-') != -1) {
-			individual = estim.substr(0,estim.find_first_of('-'));
-			if ((estim.find_first_of('-')+1) <= estim.length()) { //checks to make sure you don't have dash at end of string
-				estim = estim.substr(estim.find_first_of('-')+1, estim.length());
-				convert(individual, lineNum); //convert the string to int
-				container.insert(lineNum);
+		int estimLength = estim.size();
+		bool prevEscape = false;
+		for(int i=0;i<estimLength;i++){
+			if(prevEscape){
+				individual += estim[i];
+				prevEscape = false;
+			}
+			else{
+				if(estim[i] == '\\'){
+					prevEscape = true;
+				}
+				else if(estim[i] == '-'){
+					convert(individual, lineNum); //convert the string to int
+					container.insert(lineNum);
+					individual = "";
+					prevEscape = false;				
+				}
+				else{
+					individual += estim[i];
+					prevEscape = false;
+				}
 			}
 		}
-		//get last one
-		convert(estim, lineNum); //convert the string to int
+		convert(individual, lineNum); //convert the string to int
 		container.insert(lineNum);
 	}
 	catch(exception& e) {

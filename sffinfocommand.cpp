@@ -118,7 +118,7 @@ SffInfoCommand::SffInfoCommand(){
 SffInfoCommand::SffInfoCommand(string option)  {
 	try {
 		abort = false; calledHelp = false;   
-		hasAccnos = false;
+		hasAccnos = false; hasOligos = false;
         split = 1;
 		
 		//allow user to run help
@@ -583,7 +583,6 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
             //create new common headers for each file with the correct number of reads
             adjustCommonHeader(header);
             
-            map<string, string> uniqueSffNames;// so we don't add the same sff multiple times
 			map<string, string>::iterator it;
 			set<string> namesToRemove;
 			for(int i=0;i<filehandles.size();i++){
@@ -594,12 +593,7 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
 								m->mothurRemove(filehandles[i][j]);
                                 m->mothurRemove(filehandlesHeaders[i][j]);
 								namesToRemove.insert(filehandles[i][j]);
-                            }else{	
-								it = uniqueSffNames.find(filehandles[i][j]);
-								if (it == uniqueSffNames.end()) {	
-									uniqueSffNames[filehandles[i][j]] = barcodeNameVector[i];	
-								}	
-							}
+                            }
 						}
 					}
 				}

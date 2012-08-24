@@ -7,11 +7,7 @@
 //
 
 #include "sffmultiplecommand.h"
-#include "sffinfocommand.h"
-#include "seqsummarycommand.h"
-#include "trimflowscommand.h"
-#include "shhhercommand.h"
-#include "trimseqscommand.h"
+
 
 
 //**********************************************************************************************************************
@@ -33,7 +29,7 @@ vector<string> SffMultipleCommand::setParameters(){
         CommandParameter ptdiffs("tdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(ptdiffs);
 		CommandParameter psignal("signal", "Number", "", "0.50", "", "", "",false,false); parameters.push_back(psignal);
 		CommandParameter pnoise("noise", "Number", "", "0.70", "", "", "",false,false); parameters.push_back(pnoise);
-		CommandParameter porder("order", "String", "", "", "", "", "",false,false); parameters.push_back(porder);
+		CommandParameter porder("order", "String", "", "TACG", "", "", "",false,false); parameters.push_back(porder);
 
         //shhh.flows
         CommandParameter plookup("lookup", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(plookup);
@@ -50,14 +46,7 @@ vector<string> SffMultipleCommand::setParameters(){
 		CommandParameter pminlength("minlength", "Number", "", "0", "", "", "",false,false); parameters.push_back(pminlength);
 		CommandParameter pmaxlength("maxlength", "Number", "", "0", "", "", "",false,false); parameters.push_back(pmaxlength);
 		CommandParameter pkeepforward("keepforward", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pkeepforward);
-		CommandParameter pqtrim("qtrim", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pqtrim);
-		CommandParameter pqthreshold("qthreshold", "Number", "", "0", "", "", "",false,false); parameters.push_back(pqthreshold);
-		CommandParameter pqaverage("qaverage", "Number", "", "0", "", "", "",false,false); parameters.push_back(pqaverage);
-		CommandParameter prollaverage("rollaverage", "Number", "", "0", "", "", "",false,false); parameters.push_back(prollaverage);
-		CommandParameter pqwindowaverage("qwindowaverage", "Number", "", "0", "", "", "",false,false); parameters.push_back(pqwindowaverage);
-		CommandParameter pqstepsize("qstepsize", "Number", "", "1", "", "", "",false,false); parameters.push_back(pqstepsize);
-		CommandParameter pqwindowsize("qwindowsize", "Number", "", "50", "", "", "",false,false); parameters.push_back(pqwindowsize);
-		CommandParameter pkeepfirst("keepfirst", "Number", "", "0", "", "", "",false,false); parameters.push_back(pkeepfirst);
+        CommandParameter pkeepfirst("keepfirst", "Number", "", "0", "", "", "",false,false); parameters.push_back(pkeepfirst);
 		CommandParameter premovelast("removelast", "Number", "", "0", "", "", "",false,false); parameters.push_back(premovelast);
 
         
@@ -96,16 +85,8 @@ string SffMultipleCommand::getHelpString(){
 		helpString += "The pdiffs parameter is used to specify the number of differences allowed in the primer. The default is 0.\n";
         helpString += "The ldiffs parameter is used to specify the number of differences allowed in the linker. The default is 0.\n";
 		helpString += "The sdiffs parameter is used to specify the number of differences allowed in the spacer. The default is 0.\n";
-		helpString += "The qfile parameter allows you to provide a quality file.\n";
-		helpString += "The qthreshold parameter allows you to set a minimum quality score allowed. \n";
-		helpString += "The qaverage parameter allows you to set a minimum average quality score allowed. \n";
-		helpString += "The qwindowsize parameter allows you to set a number of bases in a window. Default=50.\n";
-		helpString += "The qwindowaverage parameter allows you to set a minimum average quality score allowed over a window. \n";
-		helpString += "The rollaverage parameter allows you to set a minimum rolling average quality score allowed over a window. \n";
-		helpString += "The qstepsize parameter allows you to set a number of bases to move the window over. Default=1.\n";
 		helpString += "The allfiles parameter will create separate group and fasta file for each grouping. The default is F.\n";
 		helpString += "The keepforward parameter allows you to indicate whether you want the forward primer removed or not. The default is F, meaning remove the forward primer.\n";
-		helpString += "The qtrim parameter will trim sequence from the point that they fall below the qthreshold and put it in the .trim file if set to true. The default is T.\n";
 		helpString += "The keepfirst parameter trims the sequence to the first keepfirst number of bases after the barcode or primers are removed, before the sequence is checked to see if it meets the other requirements. \n";
 		helpString += "The removelast removes the last removelast number of bases after the barcode or primers are removed, before the sequence is checked to see if it meets the other requirements.\n";
 
@@ -128,7 +109,10 @@ string SffMultipleCommand::getOutputFileNameTag(string type, string inputName=""
         it = outputTypes.find(type);
         if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
         else {
-            m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  
+            if (type == "fasta")            {   outputFileName =  "fasta";   }
+            else if (type == "name")    {   outputFileName =  "names";   }
+            else if (type == "group")        {   outputFileName =  "groups";   }
+            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
         }
         return outputFileName;
 	}
@@ -146,6 +130,8 @@ SffMultipleCommand::SffMultipleCommand(){
 		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
+        outputTypes["name"] = tempOutNames;
+        outputTypes["group"] = tempOutNames;
 		outputTypes["flow"] = tempOutNames;
 		outputTypes["qfile"] = tempOutNames;
 	}
@@ -158,7 +144,7 @@ SffMultipleCommand::SffMultipleCommand(){
 
 SffMultipleCommand::SffMultipleCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
+		abort = false; calledHelp = false;  append=false; makeGroup=false;
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
@@ -184,6 +170,9 @@ SffMultipleCommand::SffMultipleCommand(string option)  {
 			outputTypes["fasta"] = tempOutNames;
 			outputTypes["flow"] = tempOutNames;
 			outputTypes["qfile"] = tempOutNames;
+            outputTypes["name"] = tempOutNames;
+            outputTypes["group"] = tempOutNames;
+
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
@@ -199,6 +188,14 @@ SffMultipleCommand::SffMultipleCommand(string option)  {
 					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["file"] = inputDir + it->second;		}
+				}
+                
+                it = parameters.find("lookup");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["lookup"] = inputDir + it->second;		}
 				}
 			}
             
@@ -257,7 +254,7 @@ SffMultipleCommand::SffMultipleCommand(string option)  {
 			m->mothurConvert(temp, cutoff); 
 			
 			temp = validParameter.validFile(parameters, "mindelta", false);	if (temp == "not found"){	temp = "0.000001";	}
-			m->mothurConvert(temp, minDelta); 
+			minDelta = temp; 
             
 			temp = validParameter.validFile(parameters, "maxiter", false);	if (temp == "not found"){	temp = "1000";		}
 			m->mothurConvert(temp, maxIters); 
@@ -284,27 +281,6 @@ SffMultipleCommand::SffMultipleCommand(string option)  {
 			temp = validParameter.validFile(parameters, "maxlength", false);	if (temp == "not found") { temp = "0"; }
 			m->mothurConvert(temp, maxLength);
 						
-			temp = validParameter.validFile(parameters, "qthreshold", false);	if (temp == "not found") { temp = "0"; }
-			m->mothurConvert(temp, qThreshold);
-			
-			temp = validParameter.validFile(parameters, "qtrim", false);		if (temp == "not found") { temp = "t"; }
-			qtrim = m->isTrue(temp);
-            
-			temp = validParameter.validFile(parameters, "rollaverage", false);	if (temp == "not found") { temp = "0"; }
-			convert(temp, qRollAverage);
-            
-			temp = validParameter.validFile(parameters, "qwindowaverage", false);if (temp == "not found") { temp = "0"; }
-			convert(temp, qWindowAverage);
-            
-			temp = validParameter.validFile(parameters, "qwindowsize", false);	if (temp == "not found") { temp = "50"; }
-			convert(temp, qWindowSize);
-            
-			temp = validParameter.validFile(parameters, "qstepsize", false);	if (temp == "not found") { temp = "1"; }
-			convert(temp, qWindowStep);
-            
-			temp = validParameter.validFile(parameters, "qaverage", false);		if (temp == "not found") { temp = "0"; }
-			convert(temp, qAverage);
-            
 			temp = validParameter.validFile(parameters, "keepfirst", false);	if (temp == "not found") { temp = "0"; }
 			convert(temp, keepFirst);
             
@@ -316,11 +292,76 @@ SffMultipleCommand::SffMultipleCommand(string option)  {
             
             temp = validParameter.validFile(parameters, "keepforward", false);		if (temp == "not found") { temp = "F"; }
 			keepforward = m->isTrue(temp);
-	          
-            numFPrimers = 0;
-			numRPrimers = 0;
-            numLinkers = 0;
-            numSpacers = 0;
+            
+            temp = validParameter.validFile(parameters, "lookup", true);
+			if (temp == "not found")	{	
+				lookupFileName = "LookUp_Titanium.pat";	
+				
+				int ableToOpen;
+				ifstream in;
+				ableToOpen = m->openInputFile(lookupFileName, in, "noerror");
+				in.close();	
+				
+				//if you can't open it, try input location
+				if (ableToOpen == 1) {
+					if (inputDir != "") { //default path is set
+						string tryPath = inputDir + lookupFileName;
+						m->mothurOut("Unable to open " + lookupFileName + ". Trying input directory " + tryPath); m->mothurOutEndLine();
+						ifstream in2;
+						ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+						in2.close();
+						lookupFileName = tryPath;
+					}
+				}
+				
+				//if you can't open it, try default location
+				if (ableToOpen == 1) {
+					if (m->getDefaultPath() != "") { //default path is set
+						string tryPath = m->getDefaultPath() + m->getSimpleName(lookupFileName);
+						m->mothurOut("Unable to open " + lookupFileName + ". Trying default " + tryPath); m->mothurOutEndLine();
+						ifstream in2;
+						ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+						in2.close();
+						lookupFileName = tryPath;
+					}
+				}
+				
+				//if you can't open it its not in current working directory or inputDir, try mothur excutable location
+				if (ableToOpen == 1) {
+					string exepath = m->argv;
+					string tempPath = exepath;
+					for (int i = 0; i < exepath.length(); i++) { tempPath[i] = tolower(exepath[i]); }
+					exepath = exepath.substr(0, (tempPath.find_last_of('m')));
+					
+					string tryPath = m->getFullPathName(exepath) + m->getSimpleName(lookupFileName);
+					m->mothurOut("Unable to open " + lookupFileName + ". Trying mothur's executable location " + tryPath); m->mothurOutEndLine();
+					ifstream in2;
+					ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+					in2.close();
+					lookupFileName = tryPath;
+				}
+				
+				if (ableToOpen == 1) {  m->mothurOut("Unable to open " + lookupFileName + "."); m->mothurOutEndLine(); abort=true;  }
+			}
+			else if(temp == "not open")	{	
+				
+				lookupFileName = validParameter.validFile(parameters, "lookup", false);
+				
+				//if you can't open it its not inputDir, try mothur excutable location
+				string exepath = m->argv;
+				string tempPath = exepath;
+				for (int i = 0; i < exepath.length(); i++) { tempPath[i] = tolower(exepath[i]); }
+				exepath = exepath.substr(0, (tempPath.find_last_of('m')));
+                
+				string tryPath = m->getFullPathName(exepath) + lookupFileName;
+				m->mothurOut("Unable to open " + lookupFileName + ". Trying mothur's executable location " + tryPath); m->mothurOutEndLine();
+				ifstream in2;
+				int ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+				in2.close();
+				lookupFileName = tryPath;
+				
+				if (ableToOpen == 1) {  m->mothurOut("Unable to open " + lookupFileName + "."); m->mothurOutEndLine(); abort=true;  }
+			}else						{	lookupFileName = temp;	}
 		}
 	}
 	catch(exception& e) {
@@ -336,15 +377,34 @@ int SffMultipleCommand::execute(){
 		vector<string> sffFiles, oligosFiles;
         readFile(sffFiles, oligosFiles);
         
+        outputDir = m->hasPath(filename);
+        string fileroot = outputDir + m->getRootName(m->getSimpleName(filename));
+        string fasta = fileroot + getOutputFileNameTag("fasta");
+        string name = fileroot + getOutputFileNameTag("name");
+        string group = fileroot + getOutputFileNameTag("group");
+        
         if (m->control_pressed) { return 0; }
         
         if (sffFiles.size() < processors) { processors = sffFiles.size(); }
-    
-        if (processors == 1) { driver(sffFiles, oligosFiles, 0, sffFiles.size()); }
-        else { createProcesses(sffFiles, oligosFiles); } 
+        
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#else
+        //trim.flows, shhh.flows cannot handle multiple processors for windows.
+        processors = 1; m->mothurOut("This command can only use 1 processor on Windows platforms, using 1 processors.\n\n");
+#endif
+        if (processors == 1) { driver(sffFiles, oligosFiles, 0, sffFiles.size(), fasta, name, group); }
+        else { createProcesses(sffFiles, oligosFiles, fasta, name, group); } 
 		
 		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} return 0; }
 		
+        if (append) { 
+            outputNames.push_back(fasta); outputTypes["fasta"].push_back(fasta);
+            m->setFastaFile(fasta);
+            outputNames.push_back(name); outputTypes["name"].push_back(name);
+            m->setNameFile(name);
+            if (makeGroup) { outputNames.push_back(group); outputTypes["group"].push_back(group); m->setGroupFile(group); }
+        }
+        
 		//report output filenames
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -364,6 +424,8 @@ int SffMultipleCommand::readFile(vector<string>& sffFiles, vector<string>& oligo
         
         ifstream in;
         m->openInputFile(filename, in);
+        bool allBlank = true;
+        bool allFull = true;
         
         string oligos, sff;
         while (!in.eof()) {
@@ -371,6 +433,8 @@ int SffMultipleCommand::readFile(vector<string>& sffFiles, vector<string>& oligo
             if (m->control_pressed) { break; }
             
             in >> sff;
+            
+            sff = m->getFullPathName(sff);
             
             //ignore file pairing
             if(sff[0] == '#'){ while (!in.eof())	{	char c = in.get();  if (c == 10 || c == 13){	break;	}	} m->gobble(in); }
@@ -384,13 +448,17 @@ int SffMultipleCommand::readFile(vector<string>& sffFiles, vector<string>& oligo
                     else if (c == 32 || c == 9){;} //space or tab
                     else { 	oligos += c;  }
                 } 
+                sffFiles.push_back(sff);
+                if (oligos != "") { oligos = m->getFullPathName(oligos); allBlank = false;  }
+                if (oligos == "") { allFull = false;  }
+                oligosFiles.push_back(oligos); //will push a blank if there is not an oligos for this sff file
             }
             m->gobble(in);
-            
-            sffFiles.push_back(sff);
-            oligosFiles.push_back(oligos); //will push a blank if there is not an oligos for this sff file
         }
         in.close();
+        
+        if (allBlank || allFull) { append = true; }
+        if (allFull) { makeGroup = true; }
         
         return 0;
     }
@@ -400,12 +468,17 @@ int SffMultipleCommand::readFile(vector<string>& sffFiles, vector<string>& oligo
 	}
 }
 //**********************************************************************************************************************
-int SffMultipleCommand::driver(vector<string> sffFiles, vector<string> oligosFiles, int start, int end){
+//runs sffinfo, summary.seqs, trim.flows, shhh.flows, trim.seqs, summary.seqs for each sff file.
+int SffMultipleCommand::driver(vector<string> sffFiles, vector<string> oligosFiles, int start, int end, string fasta, string name, string group){
     try {
+        m->mothurRemove(fasta); m->mothurRemove(name); m->mothurRemove(group);
         int count = 0;
-        for (int i = start; i < end; i++) {
-            string sff = sffFiles[i];
-            string oligos = oligosFiles[i];
+        for (int s = start; s < end; s++) {
+            
+            string sff = sffFiles[s];
+            string oligos = oligosFiles[s];
+            
+            m->mothurOut("\n>>>>>\tProcessing " + sff + " (file " + toString(s+1) + " of " + toString(sffFiles.size()) + ")\t<<<<<\n");
             
             //run sff.info
             string inputString = "sff=" + sff + ", flow=T";
@@ -417,11 +490,13 @@ int SffMultipleCommand::driver(vector<string> sffFiles, vector<string> oligosFil
             Command* sffCommand = new SffInfoCommand(inputString);
             sffCommand->execute();
             
+            if (m->control_pressed){ break; }
+            
             map<string, vector<string> > filenames = sffCommand->getOutputFiles();
             
             delete sffCommand;
             m->mothurCalling = false;
-            m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
+            m->mothurOutEndLine(); 
             
             //run summary.seqs on the fasta file
             string fastaFile = "";
@@ -429,19 +504,211 @@ int SffMultipleCommand::driver(vector<string> sffFiles, vector<string> oligosFil
             if (it != filenames.end()) {  if ((it->second).size() != 0) { fastaFile = (it->second)[0];  } }
             else {  m->mothurOut("[ERROR]: sffinfo did not create a fasta file, quitting.\n"); m->control_pressed = true; break;  }
             
-            inputString = "fasta=" + fastaFile;
-            m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
+            inputString = "fasta=" + fastaFile + ", processors=1";
+            m->mothurOutEndLine(); 
             m->mothurOut("Running command: summary.seqs(" + inputString + ")"); m->mothurOutEndLine(); 
             m->mothurCalling = true;
             
             Command* summarySeqsCommand = new SeqSummaryCommand(inputString);
             summarySeqsCommand->execute();
             
+            if (m->control_pressed){ break; }
+            
+            map<string, vector<string> > temp = summarySeqsCommand->getOutputFiles();
+            mergeOutputFileList(filenames, temp);
+            
             delete summarySeqsCommand;
             m->mothurCalling = false;
+            
+            m->mothurOutEndLine(); 
+            
+            //run trim.flows on the fasta file
+            string flowFile = "";
+            it = filenames.find("flow");
+            if (it != filenames.end()) {  if ((it->second).size() != 0) { flowFile = (it->second)[0];  } }
+            else {  m->mothurOut("[ERROR]: sffinfo did not create a flow file, quitting.\n"); m->control_pressed = true; break;  }
+            
+            inputString = "flow=" + flowFile;
+            if (oligos != "") { inputString += ", oligos=" + oligos; }
+            inputString += ", maxhomop=" + toString(maxHomoP) + ", maxflows=" + toString(maxFlows) + ", minflows=" + toString(minFlows);
+            inputString += ", pdiffs=" + toString(pdiffs) + ", bdiffs=" + toString(bdiffs) + ", ldiffs=" + toString(ldiffs) + ", sdiffs=" + toString(sdiffs);
+            inputString += ", tdiffs=" + toString(tdiffs) + ", signal=" + toString(signal) + ", noise=" + toString(noise) + ", order=" + flowOrder + ", processors=1";
+            
+            m->mothurOutEndLine(); 
+            m->mothurOut("Running command: trim.flows(" + inputString + ")"); m->mothurOutEndLine(); 
+            m->mothurCalling = true;
+            
+            Command* trimFlowCommand = new TrimFlowsCommand(inputString);
+            trimFlowCommand->execute();
+            
+            if (m->control_pressed){ break; }
+            
+            temp = trimFlowCommand->getOutputFiles();
+            mergeOutputFileList(filenames, temp);
+            
+            delete trimFlowCommand;
+            m->mothurCalling = false;
+            
+            
+            string fileFileName = "";
+            flowFile = "";
+            if (oligos != "") { 
+                it = temp.find("file");
+                if (it != temp.end()) {  if ((it->second).size() != 0) { fileFileName = (it->second)[0];  } }
+                else {  m->mothurOut("[ERROR]: trim.flows did not create a file file, quitting.\n"); m->control_pressed = true; break;  }
+            }else {
+                vector<string> flowFiles;
+                it = temp.find("flow");
+                if (it != temp.end()) {  if ((it->second).size() != 0) { flowFiles = (it->second);  } }
+                else {  m->mothurOut("[ERROR]: trim.flows did not create a flow file, quitting.\n"); m->control_pressed = true; break;  }
+                
+                for (int i = 0; i < flowFiles.size(); i++) {
+                    string end = flowFiles[i].substr(flowFiles[i].length()-9);
+                    if (end == "trim.flow") {
+                        flowFile = flowFiles[i]; i+=flowFiles.size(); //if we found the trim.flow file stop looking
+                    }
+                }
+            }
+            
+            if ((fileFileName == "") && (flowFile == "")) { m->mothurOut("[ERROR]: trim.flows did not create a file file or a trim.flow file, quitting.\n"); m->control_pressed = true; break;  }
+            
+            if (fileFileName != "") { inputString = "file=" + fileFileName; }
+            else { inputString = "flow=" + flowFile; }
+            
+            inputString += ", lookup=" + lookupFileName + ", cutoff=" + toString(cutoff); + ", maxiters=" + toString(maxIters);
+            if (large) { inputString += ", large=" + toString(largeSize); }
+            inputString += ", sigma=" +toString(sigma);
+            inputString += ", mindelta=" + toString(minDelta);  
+            inputString += ", order=" + flowOrder + ", processors=1";
+            
+            //run shhh.flows
+            m->mothurOutEndLine(); 
+            m->mothurOut("Running command: shhh.flows(" + inputString + ")"); m->mothurOutEndLine(); 
+            m->mothurCalling = true;
+            
+            Command* shhhFlowCommand = new ShhherCommand(inputString);
+            shhhFlowCommand->execute();
+            
+            if (m->control_pressed){ break; }
+            
+            temp = shhhFlowCommand->getOutputFiles();
+            mergeOutputFileList(filenames, temp);
+            
+            delete shhhFlowCommand;
+            m->mothurCalling = false;
+            
+            vector<string> fastaFiles;
+            vector<string> nameFiles;
+            it = temp.find("fasta");
+            if (it != temp.end()) {  if ((it->second).size() != 0) { fastaFiles = (it->second);  } }
+            else {  m->mothurOut("[ERROR]: shhh.flows did not create a fasta file, quitting.\n"); m->control_pressed = true; break;  }
+           
+            it = temp.find("name");
+            if (it != temp.end()) {  if ((it->second).size() != 0) { nameFiles = (it->second);  } }
+            else {  m->mothurOut("[ERROR]: shhh.flows did not create a name file, quitting.\n"); m->control_pressed = true; break;  }
+            
+            //find fasta and name files with the shortest name.  This is because if there is a composite name it will be the shortest.
+            fastaFile = fastaFiles[0];
+            for (int i = 1; i < fastaFiles.size(); i++) { if (fastaFiles[i].length() < fastaFile.length()) { fastaFile = fastaFiles[i]; } }
+            string nameFile = nameFiles[0];
+            for (int i = 1; i < nameFiles.size(); i++) { if (nameFiles[i].length() < nameFile.length()) { nameFile = nameFiles[i]; } }
+            
+            inputString = "fasta=" + fastaFile + ", name=" + nameFile;
+            if (oligos != "") { inputString += ", oligos=" + oligos; }
+            if (allFiles) { inputString += ", allfiles=t"; }
+            else { inputString += ", allfiles=f";  }
+            if (flip) { inputString += ", flip=t"; }
+            else { inputString += ", flip=f";  }
+            if (keepforward) { inputString += ", keepforward=t"; }
+            else { inputString += ", keepforward=f";  }
+            
+            
+            inputString += ", pdiffs=" + toString(pdiffs) + ", bdiffs=" + toString(bdiffs) + ", ldiffs=" + toString(ldiffs) + ", sdiffs=" + toString(sdiffs);
+            inputString += ", tdiffs=" + toString(tdiffs) + ", maxambig=" + toString(maxAmbig) + ", minlength=" + toString(minLength) + ", maxlength=" + toString(maxLength);
+            if (keepFirst != 0) { inputString += ", keepfirst=" + toString(keepFirst); }
+            if (removeLast != 0) { inputString += ", removelast=" + toString(removeLast); }
+            inputString += ", processors=1";
+            
+            //run trim.seqs
+            m->mothurOutEndLine(); 
+            m->mothurOut("Running command: trim.seqs(" + inputString + ")"); m->mothurOutEndLine(); 
+            m->mothurCalling = true;
+            
+            Command* trimseqsCommand = new TrimSeqsCommand(inputString);
+            trimseqsCommand->execute();
+            
+            if (m->control_pressed){ break; }
+            
+            temp = trimseqsCommand->getOutputFiles();
+            mergeOutputFileList(filenames, temp);
+            
+            delete trimseqsCommand;
+            m->mothurCalling = false;
+            
+            it = temp.find("fasta");
+            if (it != temp.end()) {  if ((it->second).size() != 0) { fastaFiles = (it->second);  } }
+            else {  m->mothurOut("[ERROR]: trim.seqs did not create a fasta file, quitting.\n"); m->control_pressed = true; break;  }
+            
+            for (int i = 0; i < fastaFiles.size(); i++) {
+                string end = fastaFiles[i].substr(fastaFiles[i].length()-10);
+                if (end == "trim.fasta") {
+                    fastaFile = fastaFiles[i]; i+=fastaFiles.size(); //if we found the trim.fasta file stop looking
+                }
+            }
+            
+            it = temp.find("name");
+            if (it != temp.end()) {  if ((it->second).size() != 0) { nameFiles = (it->second);  } }
+            else {  m->mothurOut("[ERROR]: trim.seqs did not create a name file, quitting.\n"); m->control_pressed = true; break;  }
+            
+            for (int i = 0; i < nameFiles.size(); i++) {
+                string end = nameFiles[i].substr(nameFiles[i].length()-10);
+                if (end == "trim.names") {
+                    nameFile = nameFiles[i]; i+=nameFiles.size(); //if we found the trim.names file stop looking
+                }
+            }
+            
+            vector<string> groupFiles;
+            string groupFile = "";
+            if (makeGroup) {
+                it = temp.find("group");
+                if (it != temp.end()) {  if ((it->second).size() != 0) { groupFiles = (it->second);  } }
+            
+                //find group file with the shortest name.  This is because if there is a composite group file it will be the shortest.
+                groupFile = groupFiles[0];
+                for (int i = 1; i < groupFiles.size(); i++) { if (groupFiles[i].length() < groupFile.length()) { groupFile = groupFiles[i]; } }
+            }
+            
+            inputString = "fasta=" + fastaFile + ", processors=1, name=" + nameFile;
+            m->mothurOutEndLine(); 
+            m->mothurOut("Running command: summary.seqs(" + inputString + ")"); m->mothurOutEndLine(); 
+            m->mothurCalling = true;
+            
+            summarySeqsCommand = new SeqSummaryCommand(inputString);
+            summarySeqsCommand->execute();
+            
+            if (m->control_pressed){ break; }
+            
+            temp = summarySeqsCommand->getOutputFiles();
+            mergeOutputFileList(filenames, temp);
+            
+            delete summarySeqsCommand;
+            m->mothurCalling = false;
+            
+            m->mothurOutEndLine(); 
             m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
             
+            if (append) {
+                m->appendFiles(fastaFile, fasta);
+                m->appendFiles(nameFile, name);
+                if (makeGroup) { m->appendFiles(groupFile, group);  }
+            }
             count++;
+            
+            for (it = filenames.begin(); it != filenames.end(); it++) {
+                for (int i = 0; i < (it->second).size(); i++) {
+                    outputNames.push_back((it->second)[i]); outputTypes[it->first].push_back((it->second)[i]);
+                }
+            }
         }
         
         return count;
@@ -452,7 +719,29 @@ int SffMultipleCommand::driver(vector<string> sffFiles, vector<string> oligosFil
 	}
 }
 //**********************************************************************************************************************
-int SffMultipleCommand::createProcesses(vector<string> sffFiles, vector<string> oligosFiles){
+int SffMultipleCommand::mergeOutputFileList(map<string, vector<string> >& files, map<string, vector<string> >& temp){
+    try {
+        map<string, vector<string> >::iterator it;
+        for (it = temp.begin(); it != temp.end(); it++) {
+            map<string, vector<string> >::iterator it2 = files.find(it->first);
+            if (it2 == files.end()) { //we do not already have this type so just add it
+                files[it->first] = it->second;
+            }else { //merge them
+                for (int i = 0; i < (it->second).size(); i++) {
+                    files[it->first].push_back((it->second)[i]);
+                }
+            }
+        }
+        
+        return 0;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "SffMultipleCommand", "mergeOutputFileList");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+int SffMultipleCommand::createProcesses(vector<string> sffFiles, vector<string> oligosFiles, string fasta, string name, string group){
     try {
         vector<int> processIDS;
 		int process = 1;
@@ -480,13 +769,14 @@ int SffMultipleCommand::createProcesses(vector<string> sffFiles, vector<string> 
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				num = driver(sffFiles, oligosFiles, lines[process].start, lines[process].end);
+				num = driver(sffFiles, oligosFiles, lines[process].start, lines[process].end, fasta + toString(getpid()) + ".temp", name  + toString(getpid()) + ".temp", group  + toString(getpid()) + ".temp");
                 
                 //pass numSeqs to parent
 				ofstream out;
 				string tempFile = toString(getpid()) + ".num.temp";
 				m->openOutputFile(tempFile, out);
-				out << num << endl;
+				out << num << '\t' << outputNames.size() << endl;
+                for (int i = 0; i < outputNames.size(); i++) {  out << outputNames[i] << endl;  }
 				out.close();
                 
 				exit(0);
@@ -498,7 +788,7 @@ int SffMultipleCommand::createProcesses(vector<string> sffFiles, vector<string> 
 		}
 		
 		//do my part
-		num = driver(sffFiles, oligosFiles, lines[0].start, lines[0].end);
+		num = driver(sffFiles, oligosFiles, lines[0].start, lines[0].end, fasta, name, group);
 		
 		//force parent to wait until all the processes are done
 		for (int i=0;i<processIDS.size();i++) { 
@@ -506,60 +796,31 @@ int SffMultipleCommand::createProcesses(vector<string> sffFiles, vector<string> 
 			wait(&temp);
 		}
         
-#else
-        
-        //////////////////////////////////////////////////////////////////////////////////////////////////////
-		//Windows version shared memory, so be careful when passing variables through the sffMultiplesData struct. 
-		//Above fork() will clone, so memory is separate, but that's not the case with windows, 
-		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		/*
-         vector<shhhFlowsData*> pDataArray; 
-         DWORD   dwThreadIdArray[processors-1];
-         HANDLE  hThreadArray[processors-1]; 
-         
-         //Create processor worker threads.
-         for( int i=0; i<processors-1; i++ ){
-         // Allocate memory for thread data.
-         string extension = "";
-         if (i != 0) { extension = toString(i) + ".temp"; }
-         
-         shhhFlowsData* tempFlow = new shhhFlowsData(filenames, (compositeFASTAFileName + extension), (compositeNamesFileName + extension), outputDir, flowOrder, jointLookUp, singleLookUp, m, lines[i].start, lines[i].end, cutoff, sigma, minDelta, maxIters, i);
-         pDataArray.push_back(tempFlow);
-         processIDS.push_back(i);
-         
-         hThreadArray[i] = CreateThread(NULL, 0, ShhhFlowsThreadFunction, pDataArray[i], 0, &dwThreadIdArray[i]);   
-         }
-         
-         //using the main process as a worker saves time and memory
-         //do my part
-         driver(filenames, compositeFASTAFileName, compositeNamesFileName, lines[processors-1].start, lines[processors-1].end);
-         
-         //Wait until all threads have terminated.
-         WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
-         
-         //Close all thread handles and free memory allocations.
-         for(int i=0; i < pDataArray.size(); i++){
-         for(int j=0; j < pDataArray[i]->outputNames.size(); j++){ outputNames.push_back(pDataArray[i]->outputNames[j]); }
-         CloseHandle(hThreadArray[i]);
-         delete pDataArray[i];
-         }
-         */
-#endif
-        
         for (int i=0;i<processIDS.size();i++) { 
             ifstream in;
 			string tempFile = toString(processIDS[i]) + ".num.temp";
 			m->openInputFile(tempFile, in);
 			if (!in.eof()) { 
-                int tempNum = 0; 
-                in >> tempNum; 
+                int tempNum = 0; int outputNamesSize = 0; 
+                in >> tempNum >> outputNamesSize; m->gobble(in);
+                for (int j = 0; j < outputNamesSize; j++) {
+                    string tempName;
+                    in >> tempName; m->gobble(in);
+                    outputNames.push_back(tempName);
+                }
                 if (tempNum != numFilesToComplete[i+1]) {
                     m->mothurOut("[ERROR]: main process expected " + toString(processIDS[i]) + " to complete " + toString(numFilesToComplete[i+1]) + " files, and it only reported completing " + toString(tempNum) + ". This will cause file mismatches.  The flow files may be too large to process with multiple processors. \n");
                 }
             }
 			in.close(); m->mothurRemove(tempFile);
+            
+            if (append) {
+                m->appendFiles(fasta+toString(processIDS[i])+".temp", fasta);   m->mothurRemove(fasta+toString(processIDS[i])+".temp");
+                m->appendFiles(name+toString(processIDS[i])+".temp", name);     m->mothurRemove(name+toString(processIDS[i])+".temp");
+                if (makeGroup) { m->appendFiles(group+toString(processIDS[i])+".temp", group);  m->mothurRemove(group+toString(processIDS[i])+".temp"); }
+            }
         }
-        
+#endif
         return 0;
         
     }

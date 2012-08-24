@@ -28,7 +28,7 @@ vector<string> TrimFlowsCommand::setParameters(){
 		CommandParameter psignal("signal", "Number", "", "0.50", "", "", "",false,false); parameters.push_back(psignal);
 		CommandParameter pnoise("noise", "Number", "", "0.70", "", "", "",false,false); parameters.push_back(pnoise);
 		CommandParameter pallfiles("allfiles", "Boolean", "", "t", "", "", "",false,false); parameters.push_back(pallfiles);
-		CommandParameter porder("order", "String", "", "", "", "", "",false,false); parameters.push_back(porder);
+		CommandParameter porder("order", "String", "", "TACG", "", "", "",false,false); parameters.push_back(porder);
 		CommandParameter pfasta("fasta", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pfasta);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
@@ -347,7 +347,7 @@ int TrimFlowsCommand::execute(){
 			
 			output.close();
 		}
-		outputTypes["flow.files"].push_back(flowFilesFileName);
+		outputTypes["file"].push_back(flowFilesFileName);
 		outputNames.push_back(flowFilesFileName);
 		
 //		set fasta file as new current fastafile

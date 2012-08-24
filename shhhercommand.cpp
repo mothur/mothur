@@ -776,8 +776,8 @@ int ShhherCommand::execute(){
 
 		
 		if(compositeFASTAFileName != ""){
-			outputNames.push_back(compositeFASTAFileName);
-			outputNames.push_back(compositeNamesFileName);
+			outputNames.push_back(compositeFASTAFileName); outputTypes["fasta"].push_back(compositeFASTAFileName);
+			outputNames.push_back(compositeNamesFileName); outputTypes["name"].push_back(compositeNamesFileName); 
 		}
 
 		m->mothurOutEndLine();
@@ -1743,7 +1743,7 @@ void ShhherCommand::writeQualities(vector<int> otuCounts){
             }
         }
         qualityFile.close();
-        outputNames.push_back(qualityFileName);
+        outputNames.push_back(qualityFileName); outputTypes["qfile"].push_back(qualityFileName);
         
     }
     catch(exception& e) {
@@ -1788,7 +1788,7 @@ void ShhherCommand::writeSequences(vector<int> otuCounts){
         }
         fastaFile.close();
         
-        outputNames.push_back(fastaFileName);
+        outputNames.push_back(fastaFileName); outputTypes["fasta"].push_back(fastaFileName);
         
         if(compositeFASTAFileName != ""){
             m->appendFiles(fastaFileName, compositeFASTAFileName);
@@ -1825,7 +1825,7 @@ void ShhherCommand::writeNames(vector<int> otuCounts){
             }
         }
         nameFile.close();
-        outputNames.push_back(nameFileName);
+        outputNames.push_back(nameFileName); outputTypes["name"].push_back(nameFileName);
         
         
         if(compositeNamesFileName != ""){
@@ -1857,7 +1857,7 @@ void ShhherCommand::writeGroups(){
             groupFile << seqNameVector[i] << '\t' << fileGroup << endl;
         }
         groupFile.close();
-        outputNames.push_back(groupFileName);
+        outputNames.push_back(groupFileName); outputTypes["group"].push_back(groupFileName);
         
     }
     catch(exception& e) {
@@ -1917,7 +1917,7 @@ void ShhherCommand::writeClusters(vector<int> otuCounts){
             }
         }
         otuCountsFile.close();
-        outputNames.push_back(otuCountsFileName);
+        outputNames.push_back(otuCountsFileName); outputTypes["counts"].push_back(otuCountsFileName);
         
     }
     catch(exception& e) {
@@ -1948,8 +1948,8 @@ int ShhherCommand::execute(){
 #endif
         
 		if(compositeFASTAFileName != ""){
-			outputNames.push_back(compositeFASTAFileName);
-			outputNames.push_back(compositeNamesFileName);
+			outputNames.push_back(compositeFASTAFileName); outputTypes["fasta"].push_back(compositeFASTAFileName);
+			outputNames.push_back(compositeNamesFileName); outputTypes["name"].push_back(compositeNamesFileName);
 		}
 
 		m->mothurOutEndLine();
@@ -3266,7 +3266,7 @@ void ShhherCommand::writeQualities(int numOTUs, int numFlowCells, string quality
 			}
 		}
 		qualityFile.close();
-		outputNames.push_back(qualityFileName);
+		outputNames.push_back(qualityFileName); outputTypes["qfile"].push_back(qualityFileName);
         
 	}
 	catch(exception& e) {
@@ -3310,7 +3310,7 @@ void ShhherCommand::writeSequences(string thisCompositeFASTAFileName, int numOTU
 		}
 		fastaFile.close();
         
-		outputNames.push_back(fastaFileName);
+		outputNames.push_back(fastaFileName); outputTypes["fasta"].push_back(fastaFileName);
         
 		if(thisCompositeFASTAFileName != ""){
 			m->appendFiles(fastaFileName, thisCompositeFASTAFileName);
@@ -3345,7 +3345,7 @@ void ShhherCommand::writeNames(string thisCompositeNamesFileName, int numOTUs, s
 			}
 		}
 		nameFile.close();
-		outputNames.push_back(nameFileName);
+		outputNames.push_back(nameFileName); outputTypes["name"].push_back(nameFileName);
 		
 		
 		if(thisCompositeNamesFileName != ""){
@@ -3370,7 +3370,7 @@ void ShhherCommand::writeGroups(string groupFileName, string fileRoot, int numSe
 			groupFile << seqNameVector[i] << '\t' << fileRoot << endl;
 		}
 		groupFile.close();
-		outputNames.push_back(groupFileName);
+		outputNames.push_back(groupFileName); outputTypes["group"].push_back(groupFileName);
         
 	}
 	catch(exception& e) {
@@ -3429,7 +3429,7 @@ void ShhherCommand::writeClusters(string otuCountsFileName, int numOTUs, int num
 			}
 		}
 		otuCountsFile.close();
-		outputNames.push_back(otuCountsFileName);
+		outputNames.push_back(otuCountsFileName); outputTypes["counts"].push_back(otuCountsFileName);
         
 	}
 	catch(exception& e) {

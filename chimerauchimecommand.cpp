@@ -1616,7 +1616,7 @@ int ChimeraUchimeCommand::createProcesses(string outputFileName, string filename
 			string extension = toString(i) + ".temp";
 			
 			uchimeData* tempUchime = new uchimeData(outputFileName+extension, uchimeLocation, templatefile, files[i], "", "", "", accnos+extension, alns+extension, dummy, m, 0, 0,  i);
-			tempUchime->setBooleans(useAbskew, chimealns, useMinH, useMindiv, useXn, useDn, useXa, useChunks, useMinchunk, useIdsmoothwindow, useMinsmoothid, useMaxp, skipgaps, skipgaps2, useMinlen, useMaxlen, ucl, useQueryfract);
+			tempUchime->setBooleans(useAbskew, chimealns, useMinH, useMindiv, useXn, useDn, useXa, useChunks, useMinchunk, useIdsmoothwindow, useMinsmoothid, useMaxp, skipgaps, skipgaps2, useMinlen, useMaxlen, ucl, useQueryfract, hasCount);
 			tempUchime->setVariables(abskew, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, minlen, maxlen, queryfract);
 			
 			pDataArray.push_back(tempUchime);
@@ -1748,7 +1748,7 @@ int ChimeraUchimeCommand::createProcessesGroups(string outputFName, string filen
 			string extension = toString(i) + ".temp";
 			
 			uchimeData* tempUchime = new uchimeData(outputFName+extension, uchimeLocation, templatefile, filename+extension, fastaFile, nameFile, groupFile, accnos+extension, alns+extension, groups, m, lines[i].start, lines[i].end,  i);
-			tempUchime->setBooleans(useAbskew, chimealns, useMinH, useMindiv, useXn, useDn, useXa, useChunks, useMinchunk, useIdsmoothwindow, useMinsmoothid, useMaxp, skipgaps, skipgaps2, useMinlen, useMaxlen, ucl, useQueryfract);
+			tempUchime->setBooleans(useAbskew, chimealns, useMinH, useMindiv, useXn, useDn, useXa, useChunks, useMinchunk, useIdsmoothwindow, useMinsmoothid, useMaxp, skipgaps, skipgaps2, useMinlen, useMaxlen, ucl, useQueryfract, hasCount);
 			tempUchime->setVariables(abskew, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, minlen, maxlen, queryfract);
 			
 			pDataArray.push_back(tempUchime);
@@ -1761,7 +1761,7 @@ int ChimeraUchimeCommand::createProcessesGroups(string outputFName, string filen
 		
 		
 		//using the main process as a worker saves time and memory
-		num = driverGroups(parser, outputFName, filename, accnos, alns, lines[0].start, lines[0].end, groups);
+		num = driverGroups(outputFName, filename, accnos, alns, lines[0].start, lines[0].end, groups);
 		
 		//Wait until all threads have terminated.
 		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
