@@ -7,6 +7,10 @@
 //
 
 #include "classifysharedcommand.h"
+#include "fs/randomforest.hpp"
+#include "fs/decisiontree.hpp"
+#include "fs/treenode.hpp"
+
 
   // TODO: finish implementation
 ClassifySharedCommand::ClassifySharedCommand() {
@@ -67,37 +71,6 @@ ClassifySharedCommand::ClassifySharedCommand(string option) {
           //edit file types below to include only the types you added as parameters
         
         string path;
-//        it = parameters.find("phylip");
-//          //user has given a template file
-//        if(it != parameters.end()){
-//          path = m->hasPath(it->second);
-//            //if the user has not given a path then, add inputdir. else leave path alone.
-//          if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
-//        }
-        
-//        it = parameters.find("column");
-//          //user has given a template file
-//        if(it != parameters.end()){
-//          path = m->hasPath(it->second);
-//            //if the user has not given a path then, add inputdir. else leave path alone.
-//          if (path == "") {	parameters["column"] = inputDir + it->second;		}
-//        }
-        
-//        it = parameters.find("fasta");
-//          //user has given a template file
-//        if(it != parameters.end()){
-//          path = m->hasPath(it->second);
-//            //if the user has not given a path then, add inputdir. else leave path alone.
-//          if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
-//        }
-        
-//        it = parameters.find("name");
-//          //user has given a template file
-//        if(it != parameters.end()){
-//          path = m->hasPath(it->second);
-//            //if the user has not given a path then, add inputdir. else leave path alone.
-//          if (path == "") {	parameters["name"] = inputDir + it->second;		}
-//        }
         
         it = parameters.find("shared");
           //user has given a shared file
@@ -137,55 +110,6 @@ ClassifySharedCommand::ClassifySharedCommand(string option) {
       
       
         //check for parameters
-//      phylipfile = validParameter.validFile(parameters, "phylip", true);
-//      if (phylipfile == "not open") { phylipfile = ""; abort = true; }
-//      else if (phylipfile == "not found") { phylipfile = ""; }
-//      else { 	m->setPhylipFile(phylipfile); }
-      
-//      columnfile = validParameter.validFile(parameters, "column", true);
-//      if (columnfile == "not open") { columnfile = ""; abort = true; }
-//      else if (columnfile == "not found") { columnfile = ""; }
-//      else {   m->setColumnFile(columnfile);	}
-      
-//      namefile = validParameter.validFile(parameters, "name", true);
-//      if (namefile == "not open") { abort = true; }
-//      else if (namefile == "not found") { namefile = ""; }
-//      else { m->setNameFile(namefile); }
-      
-//        //get fastafile - it is not required
-//      fastafile = validParameter.validFile(parameters, "fasta", true);
-//      if (fastafile == "not open") { fastafile = ""; abort=true;  }
-//      else if (fastafile == "not found") {  fastafile = "";  }
-//      if (fastafile != "") { m->setFastaFile(fastafile); }
-      
-      
-//      if ((phylipfile == "") && (columnfile == "")) {
-//          //is there are current file available for either of these?
-//          //give priority to column, then phylip
-//        columnfile = m->getColumnFile();
-//        if (columnfile != "") {   m->mothurOut("Using " + columnfile + " as input file for the column parameter."); m->mothurOutEndLine(); }
-//        else {
-//          phylipfile = m->getPhylipFile();
-//          if (phylipfile != "") {  m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
-//          else {
-//            m->mothurOut("No valid current files. You must provide a phylip or column file before you can use the cluster command."); m->mothurOutEndLine();
-//            abort = true;
-//          }
-//        }
-//      }
-//      else if ((phylipfile != "") && (columnfile != "")) { m->mothurOut("When executing a cluster command you must enter ONLY ONE of the following: phylip or column."); m->mothurOutEndLine(); abort = true; }
-//      
-//      if (columnfile != "") {
-//        if (namefile == "") {
-//          namefile = m->getNameFile();
-//          if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
-//          else {
-//            m->mothurOut("You need to provide a namefile if you are going to use the column format."); m->mothurOutEndLine();
-//            abort = true;
-//          }
-//        }
-//      }
-      
         //get shared file, it is required
       sharedfile = validParameter.validFile(parameters, "shared", true);
       if (sharedfile == "not open") { sharedfile = ""; abort = true; }
@@ -275,24 +199,6 @@ ClassifySharedCommand::ClassifySharedCommand(string option) {
         if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
         else { allLines = 1;  }
       }
-      
-//        //if your command has a namefile as an option, you may want ot check to see if there is a current namefile
-//        //saved by mothur that is associated with the other files you are using as inputs.
-//        //You can do so by adding the files associated with the namefile to the files vector and then asking parser to check.
-//        //This saves our users headaches over file mismatches because they forgot to include the namefile, :)
-//      if (namefile == "") {
-//        vector<string> files; files.push_back(fastafile);
-//        parser.getNameFile(files);
-//      }
-      
-        // TODO: add code for inputDir and outputDir
-        // see aligncommand.cpp
-//      outputDir = validParameter.validFile(parameters, "outputdir", false);
-//      if (outputDir == "not found"){	outputDir = "";		}
-//      inputDir = validParameter.validFile(parameters, "inputdir", false);
-//      if (inputDir == "not found"){	inputDir = "";		}
-        // TODO: if inputdir is found, need to change the shared and deisgn paramters to incorporate inputDir
-        // check aligncommand.cpp line 154      
     }
     
   }
@@ -399,6 +305,13 @@ int ClassifySharedCommand::execute() {
       //    /*
     InputData input(sharedfile, "sharedfile");
     vector<SharedRAbundVector*> lookup = input.getSharedRAbundVectors();
+        
+      //read design file
+    designMap = new GroupMap(designfile);
+    designMap->readDesignMap();
+    
+    processSharedAndDesignData(lookup);
+    
     string lastLabel = lookup[0]->getLabel();
     
       //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
@@ -480,23 +393,16 @@ int ClassifySharedCommand::execute() {
       
       
       for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+      
     }
       //     */
-    
-    
-    
-      //      //if you make a new file or a type that mothur keeps track of the current version, you can update it with something like the following.
-      //    string currentFasta = "";
-      //    itTypes = outputTypes.find("fasta");
-      //    if (itTypes != outputTypes.end()) {
-      //      if ((itTypes->second).size() != 0) { currentFasta = (itTypes->second)[0]; m->setFastaFile(currentFasta); }
-      //    }
-    
+        
+      // TODO: re-enable this portion later and write to output files
       //output files created by command
-    m->mothurOutEndLine();
-    m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-    for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
-    m->mothurOutEndLine();
+//    m->mothurOutEndLine();
+//    m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+//    for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+//    m->mothurOutEndLine();
     return 0;
     
   }
@@ -504,5 +410,57 @@ int ClassifySharedCommand::execute() {
     m->errorOut(e, "ClassifySharedCommand", "execute");
     exit(1);
   }
+}
+
+void ClassifySharedCommand::processSharedAndDesignData(vector<SharedRAbundVector*> lookup){  
+//    for (int i = 0; i < designMap->getNamesOfGroups().size(); i++) {
+//      string groupName = designMap->getNamesOfGroups()[i];
+//      cout << groupName << endl;
+//    }
+
+//    for (int i = 0; i < designMap->getNumSeqs(); i++) {
+//      string sharedGroupName = designMap->getNamesSeqs()[i];
+//      string treatmentName = designMap->getGroup(sharedGroupName);
+//      cout << sharedGroupName << " : " << treatmentName <<  endl;
+//    }
+  
+  map<string, int> treatmentToIntMap;
+  map<int, string> intToTreatmentMap;
+  for (int  i = 0; i < designMap->getNumGroups(); i++) {
+    string treatmentName = designMap->getNamesOfGroups()[i];
+    treatmentToIntMap[treatmentName] = i;
+    intToTreatmentMap[i] = treatmentName;
+  }
+
+  int numSamples = lookup.size();
+  int numFeatures = lookup[0]->size();
+
+  int numRows = numSamples;
+  int numColumns = numFeatures + 1;           // extra one space needed for the treatment/outcome
+  
+  vector< vector<int> > dataSet(numRows, vector<int>(numColumns, 0));
+  
+  for (int i = 0; i < lookup.size(); i++) {
+    vector<individual> data = lookup[i]->getData();
+    string sharedGroupName = data[0].group;
+    string treatmentName = designMap->getGroup(sharedGroupName);
+    
+    int j = 0;
+    for (; j < data.size(); j++) {
+      int otuCount = data[j].abundance;
+      dataSet[i][j] = otuCount;
+    }
+    dataSet[i][j] = treatmentToIntMap[treatmentName];
+  }
+  
+//  cout << dataSet << endl;
+  
+  int numDecisionTrees = 1;
+  RandomForest randomForest(dataSet, numDecisionTrees, "informationGain");
+  
+  randomForest.populateDecisionTrees();
+  randomForest.calcForrestErrorRate();
+  randomForest.calcForrestVariableImportance();
+
 }
 

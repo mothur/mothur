@@ -30,6 +30,7 @@ public:
   string getDescription()		{ return "find the most important otu from a shared file"; }
 
   int execute();
+  void processSharedAndDesignData(vector<SharedRAbundVector*> lookup);
   void help() { m->mothurOut(getHelpString()); }
 
 private:
@@ -40,6 +41,8 @@ private:
   string sharedfile, designfile;
   set<string> labels;
   bool allLines;
+  
+  GroupMap* designMap;
 };
 
 #endif /* defined(__Mothur__classifysharedcommand__) */
