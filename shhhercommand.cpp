@@ -1931,7 +1931,7 @@ void ShhherCommand::writeClusters(vector<int> otuCounts){
 
 int ShhherCommand::execute(){
 	try {
-		if (abort == true) { return 0; }
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		getSingleLookUp();	if (m->control_pressed) { return 0; }
 		getJointLookUp();	if (m->control_pressed) { return 0; }

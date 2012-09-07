@@ -15,8 +15,9 @@ vector<string> ClassifyTreeCommand::setParameters(){
 	try {
 		CommandParameter ptree("tree", "InputTypes", "", "", "", "", "none",false,true); parameters.push_back(ptree);
         CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "", "", "none",false,true); parameters.push_back(ptaxonomy);
-        CommandParameter pname("name", "InputTypes", "", "", "", "", "none",false,false); parameters.push_back(pname);
-        CommandParameter pgroup("group", "InputTypes", "", "", "", "", "none",false,false); parameters.push_back(pgroup);
+        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none",false,false); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none",false,false); parameters.push_back(pcount);
+		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none",false,false); parameters.push_back(pgroup);
         CommandParameter pcutoff("cutoff", "Number", "", "51", "", "", "",false,true); parameters.push_back(pcutoff);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
@@ -37,8 +38,9 @@ string ClassifyTreeCommand::getHelpString(){
 		helpString += "The classify.tree command reads a tree and taxonomy file and output the consensus taxonomy for each node on the tree. \n";
 		helpString += "If you provide a group file, the concensus for each group will also be provided. \n";
 		helpString += "The new tree contains labels at each internal node.  The label is the node number so you can relate the tree to the summary file.\n";
+        helpString += "The count parameter allows you add a count file so you can have the summary totals broken up by group.\n";
 		helpString += "The summary file lists the concensus taxonomy for the descendants of each node.\n";
-		helpString += "The classify.tree command parameters are tree, group, name and taxonomy. The tree and taxonomy files are required.\n";
+		helpString += "The classify.tree command parameters are tree, group, name, count and taxonomy. The tree and taxonomy files are required.\n";
         helpString += "The cutoff parameter allows you to specify a consensus confidence threshold for your taxonomy.  The default is 51, meaning 51%. Cutoff cannot be below 51.\n";
         helpString += "The classify.tree command should be used in the following format: classify.tree(tree=test.tre, group=test.group, taxonomy=test.taxonomy)\n";
 		helpString += "Note: No spaces between parameter labels (i.e. tree), '=' and parameters (i.e.yourTreefile).\n"; 
@@ -147,6 +149,14 @@ ClassifyTreeCommand::ClassifyTreeCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("count");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["count"] = inputDir + it->second;		}
+				}
 			}
 			
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
@@ -178,16 +188,30 @@ ClassifyTreeCommand::ClassifyTreeCommand(string option)  {
 			else if (groupfile == "not found") { groupfile = ""; }
 			else { m->setGroupFile(groupfile); }
             
+            countfile = validParameter.validFile(parameters, "count", true);
+			if (countfile == "not open") { countfile = ""; abort = true; }
+			else if (countfile == "not found") { countfile = "";  }	
+			else { m->setCountTableFile(countfile); }
+            
+            if ((namefile != "") && (countfile != "")) {
+                m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
+            }
+			
+            if ((groupfile != "") && (countfile != "")) {
+                m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+            }
+            
             string temp = validParameter.validFile(parameters, "cutoff", false);			if (temp == "not found") { temp = "51"; }
 			m->mothurConvert(temp, cutoff); 
 			
 			if ((cutoff < 51) || (cutoff > 100)) { m->mothurOut("cutoff must be above 50, and no greater than 100."); m->mothurOutEndLine(); abort = true;  }
             
-            if (namefile == "") {
-				vector<string> files; files.push_back(treefile);
-				parser.getNameFile(files);
+            if (countfile == "") {
+                if (namefile == "") {
+                    vector<string> files; files.push_back(treefile);
+                    parser.getNameFile(files);
+                }
 			}
-			
 		}
 	}
 	catch(exception& e) {
@@ -213,7 +237,7 @@ int ClassifyTreeCommand::execute(){
         
         TreeReader* reader = new TreeReader(treefile, groupfile, namefile);
         vector<Tree*> T = reader->getTrees();
-        TreeMap* tmap = T[0]->getTreeMap();
+        CountTable* tmap = T[0]->getCountTable();
         Tree* outputTree = T[0];
         delete reader;
 
@@ -367,10 +391,15 @@ string ClassifyTreeCommand::getTaxonomy(set<string> names, int& size) {
 				if (itTax == taxMap.end()) { //this name is not in taxonomy file, skip it
 					m->mothurOut((*it) + " is not in your taxonomy file.  I will not include it in the consensus."); m->mothurOutEndLine();
 				}else{
-					//add seq to tree
-					phylo->addSeqToTree((*it), itTax->second);
-                    size++;
-				}
+					if (countfile != "") {
+                        int numDups = ct->getNumSeqs((*it)); 
+                        for (int j = 0; j < numDups; j++) {  phylo->addSeqToTree((*it), itTax->second);  }
+                        size += numDups;
+                    }else{
+                        //add seq to tree
+                        phylo->addSeqToTree((*it), itTax->second);
+                        size++;  
+                    }				}
 			}
             
 			if (m->control_pressed) { delete phylo; return conTax; }
@@ -444,12 +473,12 @@ map<string, set<string> > ClassifyTreeCommand::getDescendantList(Tree*& T, int i
 		
 		int lc = T->tree[i].getLChild();
 		int rc = T->tree[i].getRChild();
-        TreeMap* tmap = T->getTreeMap();
+       // TreeMap* tmap = T->getTreeMap();
 		
 		if (lc == -1) { //you are a leaf your only descendant is yourself
-            string group = tmap->getGroup(T->tree[i].getName());
+            vector<string> groups = T->tree[i].getGroup();
             set<string> mynames; mynames.insert(T->tree[i].getName());
-            names[group] = mynames; //mygroup -> me
+            for (int j = 0; j < groups.size(); j++) { names[groups[j]] = mynames;   } //mygroup -> me
             names["AllGroups"] = mynames;
 		}else{ //your descedants are the combination of your childrens descendants
 			names = descendants[lc];

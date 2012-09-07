@@ -1255,7 +1255,9 @@ bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
 		while(!inOligos.eof()){
 
 			inOligos >> type; 
-		 			
+            
+		 	if (m->debug) { m->mothurOut("[DEBUG]: reading type - " + type + ".\n"); }	
+            
 			if(type[0] == '#'){
 				while (!inOligos.eof())	{	char c = inOligos.get();  if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
 				m->gobble(inOligos);
@@ -1266,6 +1268,8 @@ bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
 				for(int i=0;i<type.length();i++){	type[i] = toupper(type[i]);  }
 				
 				inOligos >> oligo;
+                
+                if (m->debug) { m->mothurOut("[DEBUG]: reading - " + oligo + ".\n"); }
 				
 				for(int i=0;i<oligo.length();i++){
 					oligo[i] = toupper(oligo[i]);
@@ -1287,6 +1291,8 @@ bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
 					map<string, int>::iterator itPrime = primers.find(oligo);
 					if (itPrime != primers.end()) { m->mothurOut("primer " + oligo + " is in your oligos file already."); m->mothurOutEndLine();  }
 					
+                    if (m->debug) {  if (group != "") { m->mothurOut("[DEBUG]: reading group " + group + ".\n"); }else{ m->mothurOut("[DEBUG]: no group for primer " + oligo + ".\n"); }  }
+                    
 					primers[oligo]=indexPrimer; indexPrimer++;		
 					primerNameVector.push_back(group);
 				}
@@ -1311,15 +1317,22 @@ bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
 					
                     //then this is illumina data with 4 columns
                     if (temp != "") {  
-                        string reverseBarcode = reverseOligo(group); //reverse barcode
-                        group = temp;
                         
+                        for(int i=0;i<group.length();i++){
+                            group[i] = toupper(group[i]);
+                            if(group[i] == 'U')	{	group[i] = 'T';	}
+                        }
+                        
+                        if (m->debug) { m->mothurOut("[DEBUG]: reading reverse " + group + ", and group = " + temp + ".\n"); }
+                        
+                        string reverseBarcode = reverseOligo(group); //reverse barcode
                         //check for repeat barcodes
                         map<string, int>::iterator itBar = rbarcodes.find(reverseBarcode);
-                        if (itBar != rbarcodes.end()) { m->mothurOut("barcode " + reverseBarcode + " is in your oligos file already."); m->mothurOutEndLine();  }
-						
+                        if (itBar != rbarcodes.end()) { m->mothurOut("reverse barcode " + group + " is in your oligos file already."); m->mothurOutEndLine();  }
+                        
+                        group = temp;
                         rbarcodes[reverseBarcode]=indexBarcode; 
-                    }
+                    }else { if (m->debug) { m->mothurOut("[DEBUG]: reading group " + group + ".\n"); } }
                         
 					//check for repeat barcodes
 					map<string, int>::iterator itBar = barcodes.find(oligo);
@@ -1438,7 +1451,7 @@ bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
 				break;
 			}
 		}
-		
+
 		if (allBlank) {
 			m->mothurOut("[WARNING]: your oligos file does not contain any group names.  mothur will not create a groupfile."); m->mothurOutEndLine();
 			allFiles = false;

@@ -10,6 +10,7 @@
 #include "countseqscommand.h"
 #include "groupmap.h"
 #include "sharedutilities.h"
+#include "counttable.h"
 
 //**********************************************************************************************************************
 vector<string> CountSeqsCommand::setParameters(){	
@@ -175,7 +176,7 @@ int CountSeqsCommand::execute(){
         int total = 0;
         if (!large) { total = processSmall(outputFileName); }
         else { total = processLarge(outputFileName);  }
-				
+        
 		if (m->control_pressed) { m->mothurRemove(outputFileName); return 0; }
 		
         //set rabund file as new current rabundfile

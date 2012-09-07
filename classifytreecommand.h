@@ -12,6 +12,7 @@
 #include "command.hpp"
 #include "readtree.h"
 #include "treemap.h"
+#include "counttable.h"
 
 class ClassifyTreeCommand : public Command {
 public:
@@ -31,13 +32,14 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	string treefile, taxonomyfile, groupfile, namefile, outputDir;
+	string treefile, taxonomyfile, groupfile, namefile, countfile, outputDir;
 	bool abort;
 	vector<string> outputNames;
     int numUniquesInName, cutoff;
     map<string, string> nameMap;
     map<string, int> nameCount;
     map<string, string> taxMap;
+    CountTable* ct;
 	
 	int getClassifications(Tree*&);
 	map<string, set<string> > getDescendantList(Tree*&, int, map<int, map<string, set<string> > >);

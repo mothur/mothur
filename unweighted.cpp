@@ -16,7 +16,7 @@ EstOutput Unweighted::getValues(Tree* t, int p, string o) {
 		processors = p;
 		outputDir = o;
         
-        TreeMap* tmap = t->getTreeMap();
+        CountTable* ct = t->getCountTable();
         
 		//if the users enters no groups then give them the score of all groups
 		int numGroups = m->getNumGroups();
@@ -36,9 +36,9 @@ EstOutput Unweighted::getValues(Tree* t, int p, string o) {
 			vector<string> groups;
 			if (numGroups == 0) {
 				//get score for all users groups
-				for (int i = 0; i < (tmap->getNamesOfGroups()).size(); i++) {
-					if ((tmap->getNamesOfGroups())[i] != "xxx") {
-						groups.push_back((tmap->getNamesOfGroups())[i]);
+				for (int i = 0; i < (ct->getNamesOfGroups()).size(); i++) {
+					if ((ct->getNamesOfGroups())[i] != "xxx") {
+						groups.push_back((ct->getNamesOfGroups())[i]);
 					}
 				}
 				namesOfGroupCombos.push_back(groups);
@@ -52,7 +52,7 @@ EstOutput Unweighted::getValues(Tree* t, int p, string o) {
 
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 			if(processors == 1){
-				data = driver(t, namesOfGroupCombos, 0, namesOfGroupCombos.size(), tmap);
+				data = driver(t, namesOfGroupCombos, 0, namesOfGroupCombos.size(), ct);
 			}else{
 				int numPairs = namesOfGroupCombos.size();
 				
@@ -67,11 +67,11 @@ EstOutput Unweighted::getValues(Tree* t, int p, string o) {
 		
 					lines.push_back(linePair(startPos, numPairsPerProcessor));
 				}
-				data = createProcesses(t, namesOfGroupCombos, tmap);
+				data = createProcesses(t, namesOfGroupCombos, ct);
 				lines.clear();
 			}
 		#else
-			data = driver(t, namesOfGroupCombos, 0, namesOfGroupCombos.size(), tmap);
+			data = driver(t, namesOfGroupCombos, 0, namesOfGroupCombos.size(), ct);
 		#endif
 		
 		return data;
@@ -83,7 +83,7 @@ EstOutput Unweighted::getValues(Tree* t, int p, string o) {
 }
 /**************************************************************************************************/
 
-EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfGroupCombos, TreeMap* tmap) {
+EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfGroupCombos, CountTable* ct) {
 	try {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		int process = 1;
@@ -100,7 +100,7 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
 				process++;
 			}else if (pid == 0){
 				EstOutput myresults;
-				myresults = driver(t, namesOfGroupCombos, lines[process].start, lines[process].num, tmap);
+				myresults = driver(t, namesOfGroupCombos, lines[process].start, lines[process].num, ct);
 				
 				if (m->control_pressed) { exit(0); }
 				
@@ -122,7 +122,7 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
 			}
 		}
 		
-		results = driver(t, namesOfGroupCombos, lines[0].start, lines[0].num, tmap);
+		results = driver(t, namesOfGroupCombos, lines[0].start, lines[0].num, ct);
 		
 		//force parent to wait until all the processes are done
 		for (int i=0;i<(processors-1);i++) { 
@@ -167,7 +167,7 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
 	}
 }
 /**************************************************************************************************/
-EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombos, int start, int num, TreeMap* tmap) { 
+EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombos, int start, int num, CountTable* ct) { 
  try {
 	
 	 
@@ -261,7 +261,7 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB, int p, st
 		processors = p;
 		outputDir = o;
 		
-        TreeMap* tmap = t->getTreeMap();
+        CountTable* ct = t->getCountTable();
      
 		//if the users enters no groups then give them the score of all groups
 		int numGroups = m->getNumGroups();
@@ -281,9 +281,9 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB, int p, st
 			vector<string> groups;
 			if (numGroups == 0) {
 				//get score for all users groups
-				for (int i = 0; i < (tmap->getNamesOfGroups()).size(); i++) {
-					if ((tmap->getNamesOfGroups())[i] != "xxx") {
-						groups.push_back((tmap->getNamesOfGroups())[i]);
+				for (int i = 0; i < (ct->getNamesOfGroups()).size(); i++) {
+					if ((ct->getNamesOfGroups())[i] != "xxx") {
+						groups.push_back((ct->getNamesOfGroups())[i]);
 					}
 				}
 				namesOfGroupCombos.push_back(groups);
@@ -297,7 +297,7 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB, int p, st
 
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 			if(processors == 1){
-				data = driver(t, namesOfGroupCombos, 0, namesOfGroupCombos.size(), true, tmap);
+				data = driver(t, namesOfGroupCombos, 0, namesOfGroupCombos.size(), true, ct);
 			}else{
 				int numPairs = namesOfGroupCombos.size();
 				
@@ -311,12 +311,12 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB, int p, st
 					lines.push_back(linePair(startPos, numPairsPerProcessor));
 				}
 					
-				data = createProcesses(t, namesOfGroupCombos, true, tmap);
+				data = createProcesses(t, namesOfGroupCombos, true, ct);
 				
 				lines.clear();
 			}
 		#else
-			data = driver(t, namesOfGroupCombos, 0, namesOfGroupCombos.size(), true, tmap);
+			data = driver(t, namesOfGroupCombos, 0, namesOfGroupCombos.size(), true, ct);
 		#endif
 	
 		return data;
@@ -328,7 +328,7 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB, int p, st
 }
 /**************************************************************************************************/
 
-EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfGroupCombos, bool usingGroups, TreeMap* tmap) {
+EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfGroupCombos, bool usingGroups, CountTable* ct) {
 	try {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		int process = 1;
@@ -345,7 +345,7 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
 				process++;
 			}else if (pid == 0){
 				EstOutput myresults;
-				myresults = driver(t, namesOfGroupCombos, lines[process].start, lines[process].num, usingGroups, tmap);
+				myresults = driver(t, namesOfGroupCombos, lines[process].start, lines[process].num, usingGroups, ct);
 				
 				if (m->control_pressed) { exit(0); }
 				
@@ -365,7 +365,7 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
 			}
 		}
 		
-		results = driver(t, namesOfGroupCombos, lines[0].start, lines[0].num, usingGroups, tmap);
+		results = driver(t, namesOfGroupCombos, lines[0].start, lines[0].num, usingGroups, ct);
 		
 		//force parent to wait until all the processes are done
 		for (int i=0;i<(processors-1);i++) { 
@@ -409,14 +409,14 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
 	}
 }
 /**************************************************************************************************/
-EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombos, int start, int num, bool usingGroups, TreeMap* tmap) { 
+EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombos, int start, int num, bool usingGroups, CountTable* ct) { 
  try {
 		
 		EstOutput results; results.resize(num);
 		
 		int count = 0;
 		
-		Tree* copyTree = new Tree(tmap);
+		Tree* copyTree = new Tree(ct);
 		
 		for (int h = start; h < (start+num); h++) {
 		

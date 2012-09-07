@@ -12,7 +12,7 @@
 
 #include "command.hpp"
 #include "unweighted.h"
-#include "treemap.h"
+#include "counttable.h"
 #include "sharedutilities.h"
 #include "fileoutput.h"
 #include "readtree.h"
@@ -39,7 +39,7 @@ class UnifracUnweightedCommand : public Command {
 	private:
 		FileOutput* output;
 		vector<Tree*> T;	   //user trees
-		TreeMap* tmap;
+		CountTable* ct;
 		string sumFile, allGroups;
 		vector<string> groupComb; // AB. AC, BC...
 		int iters, numGroups, numComp, counter, processors, subsampleSize, subsampleIters;
@@ -50,7 +50,7 @@ class UnifracUnweightedCommand : public Command {
 		vector< map<float, float> > rCumul;  //map <unweighted score, cumulative percentage of number of random trees with that score or higher.> -vector entry for each combination.
 		
 		bool abort, phylip, random, includeRoot, consensus, subsample;
-		string groups, itersString, outputDir, outputForm, treefile, groupfile, namefile;
+		string groups, itersString, outputDir, outputForm, treefile, groupfile, namefile, countfile;
 		vector<string> Groups, outputNames; //holds groups to be used
 
 		ofstream outSum, out;
@@ -60,7 +60,7 @@ class UnifracUnweightedCommand : public Command {
 		void printUWSummaryFile(int);
 		void printUnweightedFile();
 		void createPhylipFile(int);
-        vector<Tree*> buildTrees(vector< vector<double> >&, int, TreeMap&);
+        vector<Tree*> buildTrees(vector< vector<double> >&, int, CountTable&);
         int getConsensusTrees(vector< vector<double> >&, int);
         int getAverageSTDMatrices(vector< vector<double> >&, int);
 		

@@ -17,8 +17,10 @@ vector<string> ClassifySeqsCommand::setParameters(){
 		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(ptaxonomy);
 		CommandParameter ptemplate("reference", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(ptemplate);
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
-		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
-		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pgroup);
+        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none",false,false); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none",false,false); parameters.push_back(pcount);
+		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none",false,false); parameters.push_back(pgroup);
+
 		CommandParameter psearch("search", "Multiple", "kmer-blast-suffix-distance", "kmer", "", "", "",false,false); parameters.push_back(psearch);
 		CommandParameter pksize("ksize", "Number", "", "8", "", "", "",false,false); parameters.push_back(pksize);
 		CommandParameter pmethod("method", "Multiple", "bayesian-knn", "bayesian", "", "", "",false,false); parameters.push_back(pmethod);
@@ -50,11 +52,12 @@ string ClassifySeqsCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The classify.seqs command reads a fasta file containing sequences and creates a .taxonomy file and a .tax.summary file.\n";
-		helpString += "The classify.seqs command parameters are reference, fasta, name, search, ksize, method, taxonomy, processors, match, mismatch, gapopen, gapextend, numwanted and probs.\n";
+		helpString += "The classify.seqs command parameters are reference, fasta, name, group, count, search, ksize, method, taxonomy, processors, match, mismatch, gapopen, gapextend, numwanted and probs.\n";
 		helpString += "The reference, fasta and taxonomy parameters are required. You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amzon.fasta \n";
 		helpString += "The search parameter allows you to specify the method to find most similar template.  Your options are: suffix, kmer, blast and distance. The default is kmer.\n";
 		helpString += "The name parameter allows you add a names file with your fasta file, if you enter multiple fasta files, you must enter matching names files for them.\n";
 		helpString += "The group parameter allows you add a group file so you can have the summary totals broken up by group.\n";
+        helpString += "The count parameter allows you add a count file so you can have the summary totals broken up by group.\n";
 		helpString += "The method parameter allows you to specify classification method to use.  Your options are: bayesian and knn. The default is bayesian.\n";
 		helpString += "The ksize parameter allows you to specify the kmer size for finding most similar template to candidate.  The default is 8.\n";
 		helpString += "The processors parameter allows you to specify the number of processors to use. The default is 1.\n";
@@ -127,7 +130,7 @@ ClassifySeqsCommand::ClassifySeqsCommand(){
 ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 	try {
 		abort = false; calledHelp = false;   
-		rdb = ReferenceDB::getInstance();
+		rdb = ReferenceDB::getInstance(); hasName = false; hasCount=false;
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
@@ -184,6 +187,14 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
+				}
+                
+                it = parameters.find("count");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
 			}
 
@@ -333,11 +344,90 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 					}
 				}
 			}
-
+            
+            if (namefileNames.size() != 0) { hasName = true; }
+            
 			if (namefile != "") {
 				if (namefileNames.size() != fastaFileNames.size()) { abort = true; m->mothurOut("If you provide a name file, you must have one for each fasta file."); m->mothurOutEndLine(); }
 			}
 			
+            //check for required parameters
+			countfile = validParameter.validFile(parameters, "count", false);
+			if (countfile == "not found") { 
+                countfile = "";  
+			}else { 
+				m->splitAtDash(countfile, countfileNames);
+				
+				//go through files and make sure they are good, if not, then disregard them
+				for (int i = 0; i < countfileNames.size(); i++) {
+					
+					bool ignore = false;
+					if (countfileNames[i] == "current") { 
+						countfileNames[i] = m->getCountTableFile(); 
+						if (countfileNames[i] != "") {  m->mothurOut("Using " + countfileNames[i] + " as input file for the count parameter where you had given current."); m->mothurOutEndLine(); }
+						else { 	
+							m->mothurOut("You have no current count file, ignoring current."); m->mothurOutEndLine(); ignore=true; 
+							//erase from file list
+							countfileNames.erase(countfileNames.begin()+i);
+							i--;
+						}
+					}
+					
+					if (!ignore) {
+						
+						if (inputDir != "") {
+							string path = m->hasPath(countfileNames[i]);
+							//if the user has not given a path then, add inputdir. else leave path alone.
+							if (path == "") {	countfileNames[i] = inputDir + countfileNames[i];		}
+						}
+						
+						int ableToOpen;
+						ifstream in;
+						
+						ableToOpen = m->openInputFile(countfileNames[i], in, "noerror");
+						
+						//if you can't open it, try default location
+						if (ableToOpen == 1) {
+							if (m->getDefaultPath() != "") { //default path is set
+								string tryPath = m->getDefaultPath() + m->getSimpleName(countfileNames[i]);
+								m->mothurOut("Unable to open " + countfileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
+								ifstream in2;
+								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+								in2.close();
+								countfileNames[i] = tryPath;
+							}
+						}
+						
+						if (ableToOpen == 1) {
+							if (m->getOutputDir() != "") { //default path is set
+								string tryPath = m->getOutputDir() + m->getSimpleName(countfileNames[i]);
+								m->mothurOut("Unable to open " + countfileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
+								ifstream in2;
+								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+								in2.close();
+								countfileNames[i] = tryPath;
+							}
+						}
+						
+						in.close();
+						
+						if (ableToOpen == 1) { 
+							m->mothurOut("Unable to open " + countfileNames[i] + ". It will be disregarded."); m->mothurOutEndLine(); 
+							//erase from file list
+							countfileNames.erase(countfileNames.begin()+i);
+							i--;
+						}else {
+							m->setCountTableFile(countfileNames[i]);
+						}
+					}
+				}
+			}
+            
+            if (countfileNames.size() != 0) { hasCount = true; if (countfileNames.size() != fastaFileNames.size()) {m->mothurOut("If you provide a count file, you must have one for each fasta file."); m->mothurOutEndLine(); } }
+            
+			//make sure there is at least one valid file left
+            if (hasName && hasCount) { m->mothurOut("[ERROR]: You must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
+
 			groupfile = validParameter.validFile(parameters, "group", false);
 			if (groupfile == "not found") { groupfile = "";  }
 			else { 
@@ -393,6 +483,7 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 
 			if (groupfile != "") {
 				if (groupfileNames.size() != fastaFileNames.size()) { abort = true; m->mothurOut("If you provide a group file, you must have one for each fasta file."); m->mothurOutEndLine(); }
+                if (hasCount) { m->mothurOut("[ERROR]: You must enter ONLY ONE of the following: count or group."); m->mothurOutEndLine(); abort = true; }
 			}else {
 				for (int i = 0; i < fastaFileNames.size(); i++) {  groupfileNames.push_back("");  }
 			}
@@ -481,10 +572,12 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 			}
 			
             if (!abort) {
-                if (namefileNames.size() == 0){
-                    if (fastaFileNames.size() != 0) {
-                        vector<string> files; files.push_back(fastaFileNames[fastaFileNames.size()-1]); 
-                        parser.getNameFile(files);
+                if (!hasCount) {
+                    if (namefileNames.size() == 0){
+                        if (fastaFileNames.size() != 0) {
+                            vector<string> files; files.push_back(fastaFileNames[fastaFileNames.size()-1]); 
+                            parser.getNameFile(files);
+                        }
                     }
                 }
             }
@@ -694,46 +787,58 @@ int ClassifySeqsCommand::execute(){
 			}
 		#endif
 
-			string group = "";
-			if (groupfile != "") {  group = groupfileNames[s]; }
-			
-			PhyloSummary taxaSum(baseTName, group);
-			
-			if (m->control_pressed) { outputTypes.clear();  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} delete classify; return 0; }
-		
-			if (namefile == "") {  taxaSum.summarize(tempTaxonomyFile);  }
-			else {
-				ifstream in;
-				m->openInputFile(tempTaxonomyFile, in);
-				
-				//read in users taxonomy file and add sequences to tree
-				string name, taxon;
-				
-				while(!in.eof()){
-					in >> name >> taxon; m->gobble(in);
-					
-					itNames = nameMap.find(name);
-		
-					if (itNames == nameMap.end()) { 
-						m->mothurOut(name + " is not in your name file please correct."); m->mothurOutEndLine(); exit(1);
-					}else{
-						for (int i = 0; i < itNames->second.size(); i++) { 
-							taxaSum.addSeqToTree(itNames->second[i], taxon);  //add it as many times as there are identical seqs
-						}
-						itNames->second.clear();
-						nameMap.erase(itNames->first);
-					}
-				}
-				in.close();
-			}
+                string group = "";
+                GroupMap* groupMap = NULL;
+                CountTable* ct = NULL;
+                PhyloSummary* taxaSum;
+                if (hasCount) { 
+                    ct = new CountTable();
+                    ct->readTable(countfileNames[s]);
+                    taxaSum = new PhyloSummary(baseTName, ct);
+                    taxaSum->summarize(tempTaxonomyFile);
+                }else {
+                    if (groupfile != "") {  group = groupfileNames[s]; groupMap = new GroupMap(group); groupMap->readMap(); }
+                    
+                    taxaSum = new PhyloSummary(baseTName, groupMap);
+                    
+                    if (m->control_pressed) { outputTypes.clear(); if (ct != NULL) { delete ct; }  if (groupMap != NULL) { delete groupMap; } delete taxaSum; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} delete classify; return 0; }
+                    
+                    if (namefile == "") {  taxaSum->summarize(tempTaxonomyFile);  }
+                    else {
+                        ifstream in;
+                        m->openInputFile(tempTaxonomyFile, in);
+                        
+                        //read in users taxonomy file and add sequences to tree
+                        string name, taxon;
+                        
+                        while(!in.eof()){
+                            if (m->control_pressed) { outputTypes.clear();  if (ct != NULL) { delete ct; } if (groupMap != NULL) { delete groupMap; } delete taxaSum; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} delete classify; return 0; }
+                            
+                            in >> name >> taxon; m->gobble(in);
+                            
+                            itNames = nameMap.find(name);
+                            
+                            if (itNames == nameMap.end()) { 
+                                m->mothurOut(name + " is not in your name file please correct."); m->mothurOutEndLine(); exit(1);
+                            }else{
+                                for (int i = 0; i < itNames->second.size(); i++) { 
+                                    taxaSum->addSeqToTree(itNames->second[i], taxon);  //add it as many times as there are identical seqs
+                                }
+                                itNames->second.clear();
+                                nameMap.erase(itNames->first);
+                            }
+                        }
+                        in.close();
+                    }
+                }
 			m->mothurRemove(tempTaxonomyFile);
 			
-			if (m->control_pressed) {  outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} delete classify; return 0; }
+			if (m->control_pressed) {  outputTypes.clear(); if (ct != NULL) { delete ct; } if (groupMap != NULL) { delete groupMap; } for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} delete classify; return 0; }
 			
 			//print summary file
 			ofstream outTaxTree;
 			m->openOutputFile(taxSummary, outTaxTree);
-			taxaSum.print(outTaxTree);
+			taxaSum->print(outTaxTree);
 			outTaxTree.close();
 			
 			//output taxonomy with the unclassified bins added
@@ -745,12 +850,12 @@ int ClassifySeqsCommand::execute(){
 			m->openOutputFile(unclass, outTax);
 			
 			//get maxLevel from phylotree so you know how many 'unclassified's to add
-			int maxLevel = taxaSum.getMaxLevel();
+			int maxLevel = taxaSum->getMaxLevel();
 							
 			//read taxfile - this reading and rewriting is done to preserve the confidence scores.
 			string name, taxon;
 			while (!inTax.eof()) {
-				if (m->control_pressed) { outputTypes.clear();  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} m->mothurRemove(unclass); delete classify; return 0; }
+				if (m->control_pressed) { outputTypes.clear(); if (ct != NULL) { delete ct; }  if (groupMap != NULL) { delete groupMap; } delete taxaSum; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} m->mothurRemove(unclass); delete classify; return 0; }
 
 				inTax >> name >> taxon; m->gobble(inTax);
 				
@@ -761,6 +866,8 @@ int ClassifySeqsCommand::execute(){
 			inTax.close();	
 			outTax.close();
 			
+            if (ct != NULL) { delete ct; }
+            if (groupMap != NULL) { delete groupMap; } delete taxaSum;
 			m->mothurRemove(newTaxonomyFile);
 			rename(unclass.c_str(), newTaxonomyFile.c_str());
 			

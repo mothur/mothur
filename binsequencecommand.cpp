@@ -15,8 +15,9 @@ vector<string> BinSeqCommand::setParameters(){
 	try {
 		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(plist);
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
-		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
-		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pgroup);
+        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none",false,false); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none",false,false); parameters.push_back(pcount);
+		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none",false,false); parameters.push_back(pgroup);
 		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
@@ -34,7 +35,7 @@ vector<string> BinSeqCommand::setParameters(){
 string BinSeqCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The bin.seqs command parameters are list, fasta, name, label and group.  The fasta and list are required, unless you have a valid current list and fasta file.\n";
+		helpString += "The bin.seqs command parameters are list, fasta, name, count, label and group.  The fasta and list are required, unless you have a valid current list and fasta file.\n";
 		helpString += "The label parameter allows you to select what distance levels you would like a output files created for, and are separated by dashes.\n";
 		helpString += "The bin.seqs command should be in the following format: bin.seqs(fasta=yourFastaFile, name=yourNamesFile, group=yourGroupFile, label=yourLabels).\n";
 		helpString += "Example bin.seqs(fasta=amazon.fasta, group=amazon.groups, name=amazon.names).\n";
@@ -147,6 +148,14 @@ BinSeqCommand::BinSeqCommand(string option) {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("count");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["count"] = inputDir + it->second;		}
+				}
 			}
 
 			
@@ -195,11 +204,26 @@ BinSeqCommand::BinSeqCommand(string option) {
 			if (groupfile == "not open") { abort = true; }
 			else if (groupfile == "not found") { groupfile = ""; }
 			else { m->setGroupFile(groupfile); }
+            
+            countfile = validParameter.validFile(parameters, "count", true);
+			if (countfile == "not open") { countfile = ""; abort = true; }
+			else if (countfile == "not found") { countfile = "";  }	
+			else { m->setCountTableFile(countfile); }
+            
+            if ((namesfile != "") && (countfile != "")) {
+                m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
+            }
 			
-			if (namesfile == ""){
-				vector<string> files; files.push_back(fastafile); 
-				parser.getNameFile(files);
-			}
+            if ((groupfile != "") && (countfile != "")) {
+                m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+            }
+			
+            if (countfile == "") {
+                if (namesfile == ""){
+                    vector<string> files; files.push_back(fastafile); 
+                    parser.getNameFile(files);
+                }
+            }
 			
 		}
 	}
@@ -229,9 +253,8 @@ int BinSeqCommand::execute(){
 		fasta->readFastaFile(fastafile);
 		
 		//if user gave a namesfile then use it
-		if (namesfile != "") {
-			readNamesFile();
-		}
+		if (namesfile != "") {  readNamesFile();  }
+        if (countfile != "") {  ct.readTable(countfile);  }
 		
 		input = new InputData(listfile, "list");
 		list = input->getListVector();
@@ -362,7 +385,7 @@ void BinSeqCommand::readNamesFile() {
 //return 1 if error, 0 otherwise
 int BinSeqCommand::process(ListVector* list) {
 	try {
-        string outputFileName = outputDir + m->getRootName(m->getSimpleName(listfile)) + list->getLabel() + getOutputFileNameTag("fasta");
+        string outputFileName = outputDir + m->getRootName(m->getSimpleName(listfile)) + list->getLabel() + "." + getOutputFileNameTag("fasta");
         m->openOutputFile(outputFileName, out);
         outputNames.push_back(outputFileName);  outputTypes["fasta"].push_back(outputFileName);
         
@@ -381,24 +404,47 @@ int BinSeqCommand::process(ListVector* list) {
                 
                 //do work for that name
                 string sequence = fasta->getSequence(name);
-                if (sequence != "not found") {
-                    //if you don't have groups
-                    if (groupfile == "") {
-                        name = name + "\t" + toString(i+1);
-                        out << ">" << name << endl;
-                        out << sequence << endl;
-                    }else {//if you do have groups
-                        string group = groupMap->getGroup(name);
-                        if (group == "not found") {  
-                            m->mothurOut(name + " is missing from your group file. Please correct. ");  m->mothurOutEndLine();
-                            return 1;
-                        }else{
-                            name = name + "\t" + group + "\t" + toString(i+1);
+                
+                if (countfile != "") {
+                    if (sequence != "not found") {
+                        if (ct.hasGroupInfo()) {
+                            vector<string> groups = ct.getGroups(name);
+                            string groupInfo = "";
+                            for (int k = 0; k < groups.size()-1; k++) {
+                                groupInfo += groups[k] + "-";
+                            }
+                            if (groups.size() != 0) { groupInfo += groups[groups.size()-1]; }
+                            else { groupInfo = "not found";  }
+                            name = name + "\t" + groupInfo + "\t" + toString(i+1)+ "\tNumRep=" + toString(ct.getNumSeqs(name));
+                            out << ">" << name << endl;
+                            out << sequence << endl;
+                        }else {
+                            name = name + "\t" + toString(i+1) + "\tNumRep=" + toString(ct.getNumSeqs(name));
                             out << ">" << name << endl;
                             out << sequence << endl;
                         }
-                    }
-                }else { m->mothurOut(name + " is missing from your fasta or name file. Please correct. "); m->mothurOutEndLine(); return 1; }
+                        
+                    }else { m->mothurOut(name + " is missing from your fasta. Does your list file contain all sequence names or just the uniques?"); m->mothurOutEndLine(); return 1; }
+                }else {
+                    if (sequence != "not found") {
+                        //if you don't have groups
+                        if (groupfile == "") {
+                            name = name + "\t" + toString(i+1);
+                            out << ">" << name << endl;
+                            out << sequence << endl;
+                        }else {//if you do have groups
+                            string group = groupMap->getGroup(name);
+                            if (group == "not found") {  
+                                m->mothurOut(name + " is missing from your group file. Please correct. ");  m->mothurOutEndLine();
+                                return 1;
+                            }else{
+                                name = name + "\t" + group + "\t" + toString(i+1);
+                                out << ">" << name << endl;
+                                out << sequence << endl;
+                            }
+                        }
+                    }else { m->mothurOut(name + " is missing from your fasta or name file. Please correct. "); m->mothurOutEndLine(); return 1; }
+                }
             }
         }
         

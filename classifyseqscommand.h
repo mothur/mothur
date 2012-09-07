@@ -62,6 +62,7 @@ private:
 	vector<linePair*> lines;
 	vector<string> fastaFileNames;
 	vector<string> namefileNames;
+    vector<string> countfileNames;
 	vector<string> groupfileNames;
 	vector<string> outputNames;
 	map<string, vector<string> > nameMap;
@@ -70,10 +71,10 @@ private:
 	Classify* classify;
 	ReferenceDB* rdb;
 	
-	string fastaFileName, templateFileName, distanceFileName, namefile, search, method, taxonomyFileName, outputDir, groupfile;
+	string fastaFileName, templateFileName, countfile, distanceFileName, namefile, search, method, taxonomyFileName, outputDir, groupfile;
 	int processors, kmerSize, numWanted, cutoff, iters;
 	float match, misMatch, gapOpen, gapExtend;
-	bool abort, probs, save, flip;
+	bool abort, probs, save, flip, hasName, hasCount;
 	
 	int driver(linePair*, string, string, string, string);
 	int createProcesses(string, string, string, string); 

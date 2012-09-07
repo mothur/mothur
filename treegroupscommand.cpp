@@ -287,7 +287,7 @@ TreeGroupCommand::~TreeGroupCommand(){
 	if (abort == false) {
 		if (format == "sharedfile") {  delete input; }
 		else { delete list; }
-		delete tmap;  
+		delete ct;  
 	}
 	
 }
@@ -400,8 +400,16 @@ int TreeGroupCommand::execute(){
 			m->runParse = false;
 			
 			//create treemap class from groupmap for tree class to use
-			tmap = new TreeMap();
-			tmap->makeSim(m->getAllGroups());
+			ct = new CountTable();
+            set<string> nameMap;
+            map<string, string> groupMap;
+            set<string> gps;
+            for (int i = 0; i < m->getAllGroups().size(); i++) { 
+                nameMap.insert(m->getAllGroups()[i]); 
+                gps.insert(m->getAllGroups()[i]); 
+                groupMap[m->getAllGroups()[i]] = m->getAllGroups()[i];
+            }
+            ct->createTable(nameMap, groupMap, gps);
 			
 			//clear globaldatas old tree names if any
 			m->Treenames.clear();
@@ -429,22 +437,26 @@ int TreeGroupCommand::execute(){
 				nameMap = new NameAssignment(namefile);
 				nameMap->readMap();
 			}
-			else{
-				nameMap = NULL;
-			}
+			else{ nameMap = NULL; }
 	
 			readMatrix->read(nameMap);
 			list = readMatrix->getListVector();
 			SparseDistanceMatrix* dMatrix = readMatrix->getDMatrix();
 
 			//make treemap
-			tmap = new TreeMap();
+			ct = new CountTable();
+            set<string> nameMap;
+            map<string, string> groupMap;
+            set<string> gps;
+            for (int i = 0; i < list->getNumBins(); i++) {
+                string bin = list->get(i);
+                nameMap.insert(bin); 
+                gps.insert(bin); 
+                groupMap[bin] = bin;
+            }
+            ct->createTable(nameMap, groupMap, gps);
 			
-			if (m->control_pressed) { return 0; }
-			
-			tmap->makeSim(list);
-			
-			vector<string> namesGroups = tmap->getNamesOfGroups();
+			vector<string> namesGroups = ct->getNamesOfGroups();
 			m->setGroups(namesGroups);
 		
 			//clear globaldatas old tree names if any
@@ -505,13 +517,12 @@ int TreeGroupCommand::execute(){
 Tree* TreeGroupCommand::createTree(vector< vector<double> >& simMatrix){
 	try {
 		//create tree
-		t = new Tree(tmap, simMatrix);
+		t = new Tree(ct, simMatrix);
         
         if (m->control_pressed) { delete t; t = NULL; return t; }
 		
         //assemble tree
-        map<string, string> empty;
-		t->assembleTree(empty);
+		t->assembleTree();
 
 		return t;
 	}

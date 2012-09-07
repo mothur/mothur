@@ -15,7 +15,7 @@
 #include "groupmap.h"
 #include "validcalculator.h"
 #include "tree.h"
-#include "treemap.h"
+#include "counttable.h"
 #include "readmatrix.hpp"
 #include "readcolumn.h"
 #include "readphylip.h"
@@ -104,7 +104,7 @@ private:
 	
 	NameAssignment* nameMap;
 	ListVector* list;
-	TreeMap* tmap;
+	CountTable* ct;
 	Tree* t;
     InputData* input;
 	vector<Calculator*> treeCalculators;

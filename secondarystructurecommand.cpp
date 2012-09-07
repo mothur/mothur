@@ -15,7 +15,8 @@ vector<string> AlignCheckCommand::setParameters(){
 	try {
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
 		CommandParameter pmap("map", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pmap);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
+        CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
@@ -31,7 +32,7 @@ vector<string> AlignCheckCommand::setParameters(){
 string AlignCheckCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The align.check command reads a fasta file and map file.\n";
+		helpString += "The align.check command reads a fasta file and map file as well as an optional name file.\n";
 		helpString += "It outputs a file containing the secondary structure matches in the .align.check file.\n";
 		helpString += "The align.check command parameters are fasta and map, both are required.\n";
 		helpString += "The align.check command should be in the following format: align.check(fasta=yourFasta, map=yourMap).\n";

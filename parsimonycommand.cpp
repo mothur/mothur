@@ -14,8 +14,9 @@
 vector<string> ParsimonyCommand::setParameters(){	
 	try {
 		CommandParameter ptree("tree", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(ptree);
-		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pgroup);
-		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
+        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none",false,false); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none",false,false); parameters.push_back(pcount);
+		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none",false,false); parameters.push_back(pgroup);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
 		CommandParameter prandom("random", "String", "", "", "", "", "",false,false); parameters.push_back(prandom);
 		CommandParameter piters("iters", "Number", "", "1000", "", "", "",false,false); parameters.push_back(piters);
@@ -36,7 +37,7 @@ vector<string> ParsimonyCommand::setParameters(){
 string ParsimonyCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The parsimony command parameters are tree, group, name, random, groups, processors and iters.  tree parameter is required unless you have valid current tree file or are using random.\n";
+		helpString += "The parsimony command parameters are tree, group, name, count, random, groups, processors and iters.  tree parameter is required unless you have valid current tree file or are using random.\n";
 		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 1 valid group.\n";
 		helpString += "The group names are separated by dashes.  The iters parameter allows you to specify how many random trees you would like compared to your tree.\n";
 		helpString += "The parsimony command should be in the following format: parsimony(random=yourOutputFilename, groups=yourGroups, iters=yourIters).\n";
@@ -145,6 +146,14 @@ ParsimonyCommand::ParsimonyCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("count");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["count"] = inputDir + it->second;		}
+				}
 			}
 			
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
@@ -172,6 +181,20 @@ ParsimonyCommand::ParsimonyCommand(string option)  {
 				if (namefile == "not open") { namefile = ""; abort = true; }
 				else if (namefile == "not found") { namefile = ""; }
 				else { m->setNameFile(namefile); }
+                
+                countfile = validParameter.validFile(parameters, "count", true);
+                if (countfile == "not open") { countfile = ""; abort = true; }
+                else if (countfile == "not found") { countfile = "";  }	
+                else { m->setCountTableFile(countfile); }
+                
+                if ((namefile != "") && (countfile != "")) {
+                    m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
+                }
+                
+                if ((groupfile != "") && (countfile != "")) {
+                    m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+                }
+
 			}
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
@@ -193,10 +216,12 @@ ParsimonyCommand::ParsimonyCommand(string option)  {
 			m->setProcessors(temp);
 			m->mothurConvert(temp, processors);
 			
-			if (namefile == "") {
-				vector<string> files; files.push_back(treefile);
-				parser.getNameFile(files);
-			}
+			if (countfile=="") {
+                if (namefile == "") {
+                    vector<string> files; files.push_back(treefile);
+                    parser.getNameFile(files);
+                } 
+            }
 			
 		}
 
@@ -219,9 +244,11 @@ int ParsimonyCommand::execute() {
 			
 			m->setTreeFile(treefile);
 			
-            TreeReader* reader = new TreeReader(treefile, groupfile, namefile);
+            TreeReader* reader;
+            if (countfile == "") { reader = new TreeReader(treefile, groupfile, namefile); }
+            else { reader = new TreeReader(treefile, countfile); }
             T = reader->getTrees();
-            tmap = T[0]->getTreeMap();
+            ct = T[0]->getCountTable();
             delete reader;
 	
 			if(outputDir == "") { outputDir += m->hasPath(treefile); }
@@ -245,7 +272,7 @@ int ParsimonyCommand::execute() {
 		//set users groups to analyze
 		SharedUtil util;
 		vector<string> mGroups = m->getGroups();
-		vector<string> tGroups = tmap->getNamesOfGroups();
+		vector<string> tGroups = ct->getNamesOfGroups();
 		util.setGroups(mGroups, tGroups, allGroups, numGroups, "parsimony");	//sets the groups the user wants to analyze
 		util.getCombos(groupComb, mGroups, numComp);
 		m->setGroups(mGroups);
@@ -260,7 +287,7 @@ int ParsimonyCommand::execute() {
 		
 		if (m->control_pressed) { 
 			delete reading; delete output;
-			delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; }
+			delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; }
 			if (randomtree == "") {  outSum.close();  }
 			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
 			m->clearGroups();
@@ -285,7 +312,7 @@ int ParsimonyCommand::execute() {
 				
 				if (m->control_pressed) { 
 					delete reading; delete output;
-					delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; }
+					delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; }
 					if (randomtree == "") {  outSum.close();  }
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
 					m->clearGroups();
@@ -314,7 +341,7 @@ int ParsimonyCommand::execute() {
 			for (int j = 0; j < iters; j++) {
 								
 				//create new tree with same num nodes and leaves as users
-				randT = new Tree(tmap);
+				randT = new Tree(ct);
 
 				//create random relationships between nodes
 				randT->assembleRandomTree();
@@ -326,7 +353,7 @@ int ParsimonyCommand::execute() {
 					delete reading;  delete output; delete randT;
 					if (randomtree == "") {  outSum.close();  }
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
-					delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; }
+					delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; }
 					m->clearGroups();
 					return 0;
 				}
@@ -355,13 +382,13 @@ int ParsimonyCommand::execute() {
 			for (int j = 0; j < iters; j++) {
 								
 				//create new tree with same num nodes and leaves as users
-				randT = new Tree(tmap);
+				randT = new Tree(ct);
 				//create random relationships between nodes
 
 				randT->assembleRandomTree();
 				
 				if (m->control_pressed) { 
-					delete reading; delete output; delete randT; delete tmap; 
+					delete reading; delete output; delete randT; delete ct; 
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear(); return 0;
 				}
 
@@ -370,7 +397,7 @@ int ParsimonyCommand::execute() {
 				randomData = pars.getValues(randT, processors, outputDir);
 				
 				if (m->control_pressed) { 
-					delete reading; delete output; delete randT; delete tmap; 
+					delete reading; delete output; delete randT; delete ct; 
 					for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear(); return 0;
 				}
 			
@@ -424,7 +451,7 @@ int ParsimonyCommand::execute() {
 		
 		if (m->control_pressed) { 
 				delete reading; delete output;
-				delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; }
+				delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; }
 				if (randomtree == "") {  outSum.close();  }
 				for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
 				return 0;
@@ -437,7 +464,7 @@ int ParsimonyCommand::execute() {
 		printParsimonyFile();
 		if (randomtree == "") { printUSummaryFile(); }
 				
-        delete output; delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; }
+        delete output; delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; }
 		
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear(); return 0;}
 		
@@ -529,7 +556,7 @@ void ParsimonyCommand::getUserInput() {
 	try {
 	
 		//create treemap
-		tmap = new TreeMap();
+		ct = new CountTable();
 
 		m->mothurOut("Please enter the number of groups you would like to analyze: ");
 		cin >> numGroups;
@@ -539,30 +566,31 @@ void ParsimonyCommand::getUserInput() {
 		count = 1;
 		numEachGroup.resize(numGroups, 0);  
 		
-		
+        set<string> nameMap;
+        map<string, string> groupMap;
+        set<string> gps;
+                
 		for (int i = 1; i <= numGroups; i++) {
 			m->mothurOut("Please enter the number of sequences in group " + toString(i) +  ": ");
 			cin >> num;
 			m->mothurOutJustToLog(toString(num)); m->mothurOutEndLine();
-				
-			//set tmaps seqsPerGroup
-			tmap->seqsPerGroup[toString(i)] = num;
-			tmap->addGroup(toString(i));
 			
+            gps.insert(toString(i));
+            
 			//set tmaps namesOfSeqs
 			for (int j = 0; j < num; j++) {
-				tmap->namesOfSeqs.push_back(toString(count));
-				tmap->treemap[toString(count)].groupname = toString(i);
+				groupMap[toString(count)] = i;
+				nameMap.insert(toString(count));
 				count++;
 			}
 		}
-		
+		ct->createTable(nameMap, groupMap, gps);
+        
 		//clears buffer so next command doesn't have error
 		string s;	
 		getline(cin, s);
 		
-		m->Treenames = tmap->namesOfSeqs; 
-		
+		m->Treenames = ct->getNamesOfSeqs(); 
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ParsimonyCommand", "getUserInput");

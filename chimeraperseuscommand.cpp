@@ -295,7 +295,7 @@ ChimeraPerseusCommand::ChimeraPerseusCommand(string option)  {
 					bool ignore = false;
 					if (countfileNames[i] == "current") { 
 						countfileNames[i] = m->getCountTableFile(); 
-						if (nameFileNames[i] != "") {  m->mothurOut("Using " + countfileNames[i] + " as input file for the count parameter where you had given current."); m->mothurOutEndLine(); }
+						if (countfileNames[i] != "") {  m->mothurOut("Using " + countfileNames[i] + " as input file for the count parameter where you had given current."); m->mothurOutEndLine(); }
 						else { 	
 							m->mothurOut("You have no current count file, ignoring current."); m->mothurOutEndLine(); ignore=true; 
 							//erase from file list
