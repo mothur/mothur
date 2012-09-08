@@ -15,10 +15,37 @@
 //#define DEBUG_LEVEL_4
 
 #define DEBUGMSG_LOCATION (cout << "DEBUGMSG " << __PRETTY_FUNCTION__ << "\nDEBUGMSG " << __FILE__ <<  "#"  << __LINE__ << endl)
+//#define DEBUGMSG_LOCATION   m->mothurOut("DEBUGMSG"); \
+//                            m->mothurOut(__PRETTY_FUNCTION__); \
+//                            m->mothurOut("\nDEBUGMSG "); \
+//                            m->mothurOut(__FILE__); \
+//                            m->mothurOut("#"); \
+//                            m->mothurOut(__LINE__); \
+//                            m->mothurOutEndLine()
+
 #define DEBUGMSG_FUNC (cout << __PRETTY_FUNCTION__ << endl \
         << "--------------------------------------------------------------------------------" << endl)
-#define DEBUGMSG_VAR(X) (cout << "DEBUGMSG " << __PRETTY_FUNCTION__ << "\nDEBUGMSG " << #X << " -> " << X << endl << endl)
+//#define DEBUGMSG_FUNC       m->mothurOut(__PRETTY_FUNCTION__); \
+//                            m->mothurOutEndLine(); \
+//                            m->mothurOut("--------------------------------------------------------------------------------"); \
+//                            m->mothurOutEndLine()
+
+//#define DEBUGMSG_VAR(X) (cout << "DEBUGMSG " << __PRETTY_FUNCTION__ << "\nDEBUGMSG " << #X << " -> " << X << endl << endl)
+//#define DEBUGMSG_VAR(X)     m->mothurOut("DEBUGMSG"); \
+//                            m->mothurOut(__PRETTY_FUNCTION__); \
+//                            m->mothurOut("\nDEBUGMSG "); \
+//                            m->mothurOut(#X); \
+//                            m->mothurOut(" -> "); \
+//                            m->mothurOut(X); \
+//                            m->mothurOutEndLine(); \
+//                            m->mothurOutEndLine()
+
 #define PRINT_VAR(X) (cout << #X << " -> " << X << endl)
+//#define PRINT_VAR(X)          m->mothurOut(#X); \
+//                              m->mothurOut(" -> "); \
+//                              m->mothurOut(X); \
+//                              m->mothurOutEndLine()
+
 #define PRINT_MSG(Y, X) (cout <<  Y << " " << #X << " -> " << X << endl << endl)
 #define DEBUGMSG(X) (cout << X << endl)
 #define NAME_VALUE_PAIR(VAR, OSTREAM) (OSTREAM << #VAR << " : " << VAR)
