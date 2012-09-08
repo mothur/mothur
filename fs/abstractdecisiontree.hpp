@@ -275,6 +275,8 @@ public:
     else { outputClass = -1; return false; }
   }
   
+  void setMothurOut(MothurOut* m){ this->m = m; }
+  
 protected:
   
   vector< vector<int> > baseDataSet;
@@ -291,6 +293,8 @@ protected:
   vector<int> globalDiscardedFeatureIndices;
   int optimumFeatureSubsetSize;
   string treeSplitCriterion;
+  
+  MothurOut* m;
   
 private:
   

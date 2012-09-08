@@ -102,9 +102,6 @@ ClassifySharedCommand::ClassifySharedCommand(string option) {
       string method;
       string splitcriteria;
       string otupersplit;
-      int processors;
-      int numtrees;
-      bool useTiming;
       vector<string> Estimators, Groups;
         //if allLines is used it should be initialized to 1 above.
       
@@ -159,7 +156,7 @@ ClassifySharedCommand::ClassifySharedCommand(string option) {
       otupersplit = validParameter.validFile(parameters, "otupersplit", false);
       if (otupersplit == "not found") { otupersplit = "log2"; }
       if ((otupersplit == "squareroot") || (otupersplit == "log2")) {
-          // TODO: new code
+        optimumFeatureSubsetSelectionCriteria = otupersplit;
       }
       else { m->mothurOut("Not a valid OTU per split selection method. Valid OTU per split selection methods are 'log2' and 'squareroot'."); m->mothurOutEndLine(); abort = true; }
       
@@ -167,7 +164,7 @@ ClassifySharedCommand::ClassifySharedCommand(string option) {
       splitcriteria = validParameter.validFile(parameters, "splitcriteria", false);
       if (splitcriteria == "not found") { splitcriteria = "gainratio"; }
       if ((splitcriteria == "gainratio") || (splitcriteria == "infogain")) {
-          // TODO: new code
+        treeSplitCriterion = splitcriteria;
       }
       else { m->mothurOut("Not a valid tree splitting criterio. Valid tree splitting criteria are 'gainratio' and 'infogain'."); m->mothurOutEndLine(); abort = true; }
       
@@ -184,7 +181,7 @@ ClassifySharedCommand::ClassifySharedCommand(string option) {
 //      m->mothurConvert(temp, processors);
       
       string temp = validParameter.validFile(parameters, "numtrees", false); if (temp == "not found"){	temp = "100";	}
-      m->mothurConvert(temp, numtrees);
+      m->mothurConvert(temp, numDecisionTrees);
 
         //Groups must be checked later to make sure they are valid. SharedUtilities has functions of check the validity, just make to so m->setGroups() after the checks.  If you are using these with a shared file no need to check the SharedRAbundVector class will call SharedUtilites for you, kinda nice, huh?
       string groups = validParameter.validFile(parameters, "groups", false);
@@ -455,12 +452,14 @@ void ClassifySharedCommand::processSharedAndDesignData(vector<SharedRAbundVector
   
 //  cout << dataSet << endl;
   
-  int numDecisionTrees = 1;
-  RandomForest randomForest(dataSet, numDecisionTrees, "informationGain");
+  RandomForest randomForest(dataSet, numDecisionTrees, treeSplitCriterion);
+  randomForest.setMothurOut(m);
   
   randomForest.populateDecisionTrees();
   randomForest.calcForrestErrorRate();
   randomForest.calcForrestVariableImportance();
+  
+  m->mothurOutEndLine();
 
 }
 

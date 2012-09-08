@@ -123,6 +123,7 @@ public:
       cout << "Creating " << i << " (th) Decision tree" << endl;
         // TODO: need to first fix if we are going to use pointer based system or anything else
       DecisionTree* decisionTree = new DecisionTree(dataSet, globalDiscardedFeatureIndices, OptimumFeatureSubsetSelector("log2"), treeSplitCriterion);
+      decisionTree->setMothurOut(m);
       decisionTree->calcTreeVariableImportanceAndError();
       updateGlobalOutOfBagEstimates(decisionTree);
       decisionTree->purgeDataSetsFromTree();

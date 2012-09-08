@@ -42,7 +42,15 @@ private:
   set<string> labels;
   bool allLines;
   
+  int processors;
+  bool useTiming;
+
   GroupMap* designMap;
+  
+  int numDecisionTrees;
+  string treeSplitCriterion, optimumFeatureSubsetSelectionCriteria;
+  bool doPruning, discardHighErrorTrees;
+  double pruneAggressiveness, highErrorTreeDiscardThreshold, featureStandardDeviationThreshold;
 };
 
 #endif /* defined(__Mothur__classifysharedcommand__) */

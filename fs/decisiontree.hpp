@@ -180,6 +180,7 @@ private:
     
     int generation = 0;
     rootNode = new TreeNode(bootstrappedTrainingSamples, globalDiscardedFeatureIndices, numFeatures, numSamples, numOutputClasses, generation);
+    rootNode->setMothurOut(m);
         
     splitRecursively(rootNode);
     
@@ -235,7 +236,9 @@ private:
     
       // TODO: need to write code to clear this memory
     TreeNode* leftChildNode = new TreeNode(leftChildSamples, globalDiscardedFeatureIndices, numFeatures, (int)leftChildSamples.size(), numOutputClasses, rootNode->getGeneration() + 1);
+    leftChildNode->setMothurOut(m);
     TreeNode* rightChildNode = new TreeNode(rightChildSamples, globalDiscardedFeatureIndices, numFeatures, (int)rightChildSamples.size(), numOutputClasses, rootNode->getGeneration() + 1);
+    rightChildNode->setMothurOut(m);
     
     rootNode->setLeftChildNode(leftChildNode);
     leftChildNode->setParentNode(rootNode);

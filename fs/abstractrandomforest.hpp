@@ -34,16 +34,17 @@ public:
   numFeatures((int)(dataSet[0].size() - 1)),
   globalDiscardedFeatureIndices(getGlobalDiscardedFeatureIndices()),
   globalVariableImportanceList(numFeatures, 0),
-  treeSplitCriterion(treeSplitCriterion){
+  treeSplitCriterion(treeSplitCriterion) {
       // TODO: double check if the implemenatation of 'globalOutOfBagEstimates' is correct
   }
   
     // intialization with 2d const array
 //  AbstractRandomForest(int** dataSetAs2dArray, const int rows, const int columns, const int numDecisionTrees, const std::string treeSplitCriterion="informationGain"){
 //  }
+  
+  void setMothurOut(MothurOut* m){ this->m = m; }
     
-  virtual ~AbstractRandomForest(){
-  }
+  virtual ~AbstractRandomForest(){ }
   
   virtual void populateDecisionTrees() = 0;
   virtual void calcForrestErrorRate() = 0;
@@ -82,7 +83,7 @@ protected:
     
     return globalDiscardedFeatureIndices;
   }
-
+  
   int numDecisionTrees;
   int numSamples;
   int numFeatures;
@@ -96,6 +97,8 @@ protected:
   
     // TODO: fix this, do we use pointers?
   vector<AbstractDecisionTree*> decisionTrees;
+  
+  MothurOut* m;
   
 private:
 

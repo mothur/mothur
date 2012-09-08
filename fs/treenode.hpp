@@ -84,6 +84,8 @@ public:
   void setSplitFeatureValue(int splitFeatureValue) { this->splitFeatureValue = splitFeatureValue; }
   void setSplitFeatureEntropy(double splitFeatureEntropy) { this->splitFeatureEntropy = splitFeatureEntropy; }
   
+  void setMothurOut(MothurOut* m){ this->m = m; }
+  
     // TODO: need to remove this mechanism of friend class
   friend class DecisionTree;
   friend class AbstractDecisionTree;
@@ -114,6 +116,8 @@ private:
   TreeNode* parentNode;
   
   vector<int> localDiscardedFeatureIndices;
+  
+  MothurOut* m;
   
   void createLocalDiscardedFeatureList(){
     
