@@ -141,6 +141,7 @@ class MothurOut {
         void splitAtChar(string&, string&, char);
 		int removeConfidences(string&);
         string makeList(vector<string>&);
+        bool isSubset(vector<string>, vector<string>); //bigSet, subset
 		
 		//math operation
 		int factorial(int num);

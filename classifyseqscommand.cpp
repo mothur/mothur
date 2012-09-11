@@ -34,6 +34,7 @@ vector<string> ClassifySeqsCommand::setParameters(){
 		CommandParameter pprobs("probs", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pprobs);
 		CommandParameter piters("iters", "Number", "", "100", "", "", "",false,true); parameters.push_back(piters);
 		CommandParameter psave("save", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(psave);
+        CommandParameter pshortcuts("shortcuts", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pshortcuts);
 		CommandParameter pnumwanted("numwanted", "Number", "", "10", "", "", "",false,true); parameters.push_back(pnumwanted);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
@@ -557,6 +558,9 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 			
 			temp = validParameter.validFile(parameters, "probs", false);		if (temp == "not found"){	temp = "true";			}
 			probs = m->isTrue(temp);
+            
+            temp = validParameter.validFile(parameters, "shortcuts", false);	if (temp == "not found"){	temp = "true";			}
+			writeShortcuts = m->isTrue(temp);
 			
 			//temp = validParameter.validFile(parameters, "flip", false);			if (temp == "not found"){	temp = "T";				}
 			//flip = m->isTrue(temp); 
@@ -601,12 +605,12 @@ int ClassifySeqsCommand::execute(){
 	try {
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
         
-		if(method == "bayesian"){	classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, iters, rand(), flip);		}
+		if(method == "bayesian"){	classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, iters, rand(), flip, writeShortcuts);		}
 		else if(method == "knn"){	classify = new Knn(taxonomyFileName, templateFileName, search, kmerSize, gapOpen, gapExtend, match, misMatch, numWanted, rand());				}
 		else {
 			m->mothurOut(search + " is not a valid method option. I will run the command using bayesian.");
 			m->mothurOutEndLine();
-			classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, iters, rand(), flip);	
+			classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, iters, rand(), flip, writeShortcuts);	
 		}
 		
 		if (m->control_pressed) { delete classify; return 0; }
@@ -1004,7 +1008,7 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
 			string extension = "";
 			if (i != 0) { extension = toString(i) + ".temp"; processIDS.push_back(i); }
 			
-			classifyData* tempclass = new classifyData((accnos + extension), probs, method, templateFileName, taxonomyFileName, (taxFileName + extension), (tempTaxFile + extension), filename, search, kmerSize, iters, numWanted, m, lines[i]->start, lines[i]->end, match, misMatch, gapOpen, gapExtend, cutoff, i, flip);
+			classifyData* tempclass = new classifyData((accnos + extension), probs, method, templateFileName, taxonomyFileName, (taxFileName + extension), (tempTaxFile + extension), filename, search, kmerSize, iters, numWanted, m, lines[i]->start, lines[i]->end, match, misMatch, gapOpen, gapExtend, cutoff, i, flip, writeShortcuts);
 			pDataArray.push_back(tempclass);
 			
 			//MySeqSumThreadFunction is in header. It must be global or static to work with the threads.

@@ -447,6 +447,7 @@ int CountTable::addGroup(string groupName) {
             counts[i] = newCounts;
         }
         hasGroups = true;
+        m->setAllGroups(groups);
         
         return 0;
     }

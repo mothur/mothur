@@ -12,13 +12,14 @@
 #include "phylosummary.h"
 #include "referencedb.h"
 /**************************************************************************************************/
-Bayesian::Bayesian(string tfile, string tempFile, string method, int ksize, int cutoff, int i, int tid, bool f) : 
+Bayesian::Bayesian(string tfile, string tempFile, string method, int ksize, int cutoff, int i, int tid, bool f, bool sh) : 
 Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 	try {
 		ReferenceDB* rdb = ReferenceDB::getInstance();
 		
 		threadID = tid;
 		flip = f;
+        shortcuts = sh;
 		string baseName = tempFile;
 			
 		if (baseName == "saved") { baseName = rdb->getSavedReference(); }
@@ -63,7 +64,7 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 			}
 			saveIn.close();			
 		}
-		
+FilesGood = false;
 		if(probFileTest && probFileTest2 && phyloTreeTest && probFileTest3 && FilesGood){	
 			if (tempFile == "saved") { m->mothurOutEndLine();  m->mothurOut("Using sequences from " + rdb->getSavedReference() + " that are saved in memory.");	m->mothurOutEndLine(); }
 			
@@ -113,7 +114,7 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 				WordPairDiffArr.resize(numKmers);
 			
 				for (int j = 0; j < wordGenusProb.size(); j++) {	wordGenusProb[j].resize(genusNodes.size());		}
-                    ofstream out;
+                ofstream out;
 				ofstream out2;
 				
 				#ifdef USE_MPI
@@ -124,17 +125,19 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 				#endif
 
 				
-				m->openOutputFile(probFileName, out);
+                if (shortcuts) { 
+                    m->openOutputFile(probFileName, out); 
 				
-				//output mothur version
-				out << "#" << m->getVersion() << endl;
+                    //output mothur version
+                    out << "#" << m->getVersion() << endl;
 				
-				out << numKmers << endl;
+                    out << numKmers << endl;
 				
-				m->openOutputFile(probFileName2, out2);
+                    m->openOutputFile(probFileName2, out2);
 				
-				//output mothur version
-				out2 << "#" << m->getVersion() << endl;
+                    //output mothur version
+                    out2 << "#" << m->getVersion() << endl;
+                }
 				
 				#ifdef USE_MPI
 					}
@@ -151,7 +154,7 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 						if (pid == 0) {  
 					#endif
 
-					out << i << '\t';
+                    if (shortcuts) {  out << i << '\t'; }
 					
 					#ifdef USE_MPI
 						}
@@ -188,7 +191,7 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 								if (pid == 0) {  
 							#endif
 
-							out << k << '\t' << wordGenusProb[i][k] << '\t' ; 
+                            if (shortcuts) { out << k << '\t' << wordGenusProb[i][k] << '\t' ; }
 							
 							#ifdef USE_MPI
 								}
@@ -204,8 +207,10 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 						if (pid == 0) {  
 					#endif
 					
-					out << endl;
-					out2 << probabilityInTemplate << '\t' << numNotZero << '\t' << log(probabilityInTemplate) << endl;
+                            if (shortcuts) { 
+                                out << endl;
+                                out2 << probabilityInTemplate << '\t' << numNotZero << '\t' << log(probabilityInTemplate) << endl;
+                            }
 					
 					#ifdef USE_MPI
 						}
@@ -218,9 +223,10 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 					if (pid == 0) {  
 				#endif
 				
-				out.close();
-				out2.close();
-				
+                        if (shortcuts) { 
+                            out.close();
+                            out2.close();
+                        }
 				#ifdef USE_MPI
 					}
 				#endif

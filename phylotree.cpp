@@ -598,7 +598,7 @@ int PhyloTree::getIndex(string seqName){
 	try {
 		map<string, int>::iterator itFind = name2Taxonomy.find(seqName);
 	
-		if (itFind != name2Taxonomy.end()) {  return name2Taxonomy[seqName];  }
+		if (itFind != name2Taxonomy.end()) {  return itFind->second;  }
 		else { m->mothurOut("Cannot find " + seqName + ". Mismatch with taxonomy and template files. Cannot continue."); m->mothurOutEndLine(); exit(1);}
 	}
 	catch(exception& e) {

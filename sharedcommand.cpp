@@ -1083,8 +1083,12 @@ int SharedCommand::ListGroupSameSeqs(vector<string>& groupMapsSeqs, SharedListVe
 			for (int j = 0; j < listNames.size(); j++) {
 				int num = groupNamesSeqs.count(listNames[j]);
 				
-				if (num == 0) { error = 1; m->mothurOut("[ERROR]: " + listNames[j] + " is in your listfile and not in your groupfile. Please correct."); m->mothurOutEndLine();	}
-				else { groupNamesSeqs.erase(listNames[j]); }
+				if (num == 0) { 
+                    error = 1; 
+                    if (groupfile != "") { 
+                        m->mothurOut("[ERROR]: " + listNames[j] + " is in your listfile and not in your groupfile. Please correct."); m->mothurOutEndLine();	} 
+                    else{ m->mothurOut("[ERROR]: " + listNames[j] + " is in your listfile and not in your count file. Please correct."); m->mothurOutEndLine();	}
+                }else { groupNamesSeqs.erase(listNames[j]); }
 			}
 		}
 		

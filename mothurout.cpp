@@ -2114,6 +2114,32 @@ int MothurOut::getNumChar(string line, char c){
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
+bool MothurOut::isSubset(vector<string> bigset, vector<string> subset) {
+	try {
+		
+        
+		if (subset.size() > bigset.size()) { return false;  }
+		
+		//check if each guy in suset is also in bigset
+		for (int i = 0; i < subset.size(); i++) {
+			bool match = false;
+			for (int j = 0; j < bigset.size(); j++) {
+				if (subset[i] == bigset[j]) { match = true; break; }
+			}
+			
+			//you have a guy in subset that had no match in bigset
+			if (match == false) { return false; }
+		}
+		
+		return true;
+        
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "isSubset");
+		exit(1);
+	}
+}
 /***********************************************************************/
 int MothurOut::mothurRemove(string filename){
 	try {
