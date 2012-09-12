@@ -704,6 +704,8 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 					}
 				}
 				
+                if (m->debug) { m->mothurOut("[DEBUG]: " + currSeq.getName() + ", trashcode= " + trashCode); if (trashCode.length() != 0) { m->mothurOutEndLine(); } }
+                
 				if(trashCode.length() == 0){
 					currSeq.setAligned(currSeq.getUnaligned());
 					currSeq.printSequence(trimFASTAFile);
@@ -732,6 +734,8 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 								} 
 							}
 							
+                            if (m->debug) { m->mothurOut(", group= " + thisGroup + "\n"); }
+                            
 							outGroupsFile << currSeq.getName() << '\t' << thisGroup << endl;
 							
                             int numRedundants = 0;

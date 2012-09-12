@@ -75,7 +75,7 @@ PhyloTree::PhyloTree(ifstream& in, string filename){
 			for (int i = 0; i < numGenus; i++) {
 				iss >> gnode >> gsize; m->gobble(iss);
 				
-				uniqueTaxonomies[gnode] = gnode;
+				uniqueTaxonomies.insert(gnode);
 				totals.push_back(gsize);
 			}
 			
@@ -102,7 +102,7 @@ PhyloTree::PhyloTree(ifstream& in, string filename){
 			for (int i = 0; i < numGenus; i++) {
 				in >> gnode >> gsize; m->gobble(in);
 				
-				uniqueTaxonomies[gnode] = gnode;
+				uniqueTaxonomies.insert(gnode);
 				totals.push_back(gsize);
 			}
 			
@@ -260,7 +260,7 @@ int PhyloTree::addSeqToTree(string seqName, string seqTaxonomy){
 			//use print to reassign the taxa id
 			taxon = getNextTaxon(seqTaxonomy, seqName);
 			
-			if (taxon == "") {  m->mothurOut(seqName + " has an error in the taxonomy.  This may be due to a ;;"); m->mothurOutEndLine(); if (currentNode != 0) {  uniqueTaxonomies[currentNode] = currentNode; } break;  }
+			if (taxon == "") {  m->mothurOut(seqName + " has an error in the taxonomy.  This may be due to a ;;"); m->mothurOutEndLine(); if (currentNode != 0) {  uniqueTaxonomies.insert(currentNode); } break;  }
 			
 			childPointer = tree[currentNode].children.find(taxon);
 			
@@ -280,7 +280,7 @@ int PhyloTree::addSeqToTree(string seqName, string seqTaxonomy){
 				name2Taxonomy[seqName] = currentNode;
 			}
 	
-			if (seqTaxonomy == "") {   uniqueTaxonomies[currentNode] = currentNode;	}
+			if (seqTaxonomy == "") {   uniqueTaxonomies.insert(currentNode);	}
 		}
 		
 		return 0;
@@ -295,9 +295,16 @@ vector<int> PhyloTree::getGenusNodes()	{
 	try {
 		genusIndex.clear();
 		//generate genusIndexes
-		map<int, int>::iterator it2;
-		for (it2=uniqueTaxonomies.begin(); it2!=uniqueTaxonomies.end(); it2++) {  genusIndex.push_back(it2->first);	}
+		set<int>::iterator it2;
+        map<int, int> temp;
+		for (it2=uniqueTaxonomies.begin(); it2!=uniqueTaxonomies.end(); it2++) {  genusIndex.push_back(*it2); 	temp[*it2] = genusIndex.size()-1; }
 		
+        for (map<string, int>::iterator itName = name2Taxonomy.begin(); itName != name2Taxonomy.end(); itName++) {
+            map<int, int>::iterator itTemp = temp.find(itName->second);
+            if (itTemp != temp.end()) { name2GenusNodeIndex[itName->first] = itTemp->second; }
+            else {  m->mothurOut("[ERROR]: trouble making name2GenusNodeIndex, aborting.\n"); m->control_pressed = true; }
+        }
+        
 		return genusIndex;
 	}
 	catch(exception& e) {
@@ -541,8 +548,8 @@ void PhyloTree::printTreeNodes(string treefilename) {
 			
 			//print genus nodes
 			outTree << endl << uniqueTaxonomies.size() << endl;
-			map<int, int>::iterator it2;
-			for (it2=uniqueTaxonomies.begin(); it2!=uniqueTaxonomies.end(); it2++) {  outTree << it2->first << '\t' << tree[it2->first].accessions.size() << endl;	}
+			set<int>::iterator it2;
+			for (it2=uniqueTaxonomies.begin(); it2!=uniqueTaxonomies.end(); it2++) {  outTree << *it2 << '\t' << tree[*it2].accessions.size() << endl;	}
 			outTree << endl;
 			
 			outTree.close();
@@ -594,12 +601,12 @@ string PhyloTree::getName(int i ){
 	}
 }
 /**************************************************************************************************/
-int PhyloTree::getIndex(string seqName){
+int PhyloTree::getGenusIndex(string seqName){
 	try {
-		map<string, int>::iterator itFind = name2Taxonomy.find(seqName);
+		map<string, int>::iterator itFind = name2GenusNodeIndex.find(seqName);
 	
-		if (itFind != name2Taxonomy.end()) {  return itFind->second;  }
-		else { m->mothurOut("Cannot find " + seqName + ". Mismatch with taxonomy and template files. Cannot continue."); m->mothurOutEndLine(); exit(1);}
+		if (itFind != name2GenusNodeIndex.end()) {  return itFind->second;  }
+		else { m->mothurOut("Cannot find " + seqName + ". Could be a mismatch with taxonomy and template files. Cannot continue."); m->mothurOutEndLine(); exit(1);}
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PhyloTree", "get");

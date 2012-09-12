@@ -200,8 +200,7 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
 				}
 				fastaFile.close();
 
-                if ((method == "kmer") && (!shortcuts)) {;} //don't print
-                else {database->generateDB(); }
+                database->generateDB(); 
 				
 			}else if ((method == "kmer") && (!needToGenerate)) {	
 				ifstream kmerFileTest(kmerDBName.c_str());

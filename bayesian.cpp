@@ -64,7 +64,7 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 			}
 			saveIn.close();			
 		}
-FilesGood = false;
+
 		if(probFileTest && probFileTest2 && phyloTreeTest && probFileTest3 && FilesGood){	
 			if (tempFile == "saved") { m->mothurOutEndLine();  m->mothurOut("Using sequences from " + rdb->getSavedReference() + " that are saved in memory.");	m->mothurOutEndLine(); }
 			
@@ -143,7 +143,6 @@ FilesGood = false;
 					}
 				#endif
 
-				
 				//for each word
 				for (int i = 0; i < numKmers; i++) {
 					if (m->control_pressed) {  break; }
@@ -162,12 +161,10 @@ FilesGood = false;
 					
 					vector<int> seqsWithWordi = database->getSequencesWithKmer(i);
 					
-					map<int, int> count;
-					for (int k = 0; k < genusNodes.size(); k++) {  count[genusNodes[k]] = 0;  }			
-							
 					//for each sequence with that word
+                    vector<int> count; count.resize(genusNodes.size(), 0);
 					for (int j = 0; j < seqsWithWordi.size(); j++) {
-						int temp = phyloTree->getIndex(names[seqsWithWordi[j]]);
+						int temp = phyloTree->getGenusIndex(names[seqsWithWordi[j]]);
 						count[temp]++;  //increment count of seq in this genus who have this word
 					}
 					
@@ -181,9 +178,9 @@ FilesGood = false;
 						//probabilityInThisTaxonomy = (# of seqs with that word in this taxonomy + probabilityInTemplate) / (total number of seqs in this taxonomy + 1);
 						
 						
-						wordGenusProb[i][k] = log((count[genusNodes[k]] + probabilityInTemplate) / (float) (genusTotals[k] + 1));  
+						wordGenusProb[i][k] = log((count[k] + probabilityInTemplate) / (float) (genusTotals[k] + 1));  
 									
-						if (count[genusNodes[k]] != 0) { 
+						if (count[k] != 0) { 
 							#ifdef USE_MPI
 								int pid;
 								MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
