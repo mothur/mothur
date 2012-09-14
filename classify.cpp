@@ -61,7 +61,8 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
 					names.push_back(temp.getName());
 					database->addSequence(temp);	
 				}
-				database->generateDB();
+				if ((method == "kmer") && (!shortcuts)) {;} //don't print
+                else {database->generateDB(); }
 			}else if ((method == "kmer") && (!needToGenerate)) {	
 				ifstream kmerFileTest(kmerDBName.c_str());
 				database->readKmerDB(kmerFileTest);	
@@ -200,7 +201,8 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
 				}
 				fastaFile.close();
 
-                database->generateDB(); 
+                if ((method == "kmer") && (!shortcuts)) {;} //don't print
+                else {database->generateDB(); } 
 				
 			}else if ((method == "kmer") && (!needToGenerate)) {	
 				ifstream kmerFileTest(kmerDBName.c_str());

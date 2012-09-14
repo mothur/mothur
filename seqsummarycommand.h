@@ -34,7 +34,7 @@ public:
 	void help() { m->mothurOut(getHelpString()); }		
 private:
 	bool abort;
-	string fastafile, outputDir, namefile;
+	string fastafile, outputDir, namefile, countfile;
 	int processors;
 	vector<string> outputNames;
 	map<string, int> nameMap;
@@ -74,18 +74,18 @@ struct seqSumData {
 	unsigned long long end;
 	int count;
 	MothurOut* m;
-	string namefile;
+	bool hasNameMap;
 	map<string, int> nameMap;
 	
 	
 	seqSumData(){}
-	seqSumData(string f, string sf, MothurOut* mout, unsigned long long st, unsigned long long en, string na, map<string, int> nam) {
+	seqSumData(string f, string sf, MothurOut* mout, unsigned long long st, unsigned long long en, bool na, map<string, int> nam) {
 		filename = f;
 		sumFile = sf;
 		m = mout;
 		start = st;
 		end = en;
-		namefile = na;
+		hasNameMap = na;
 		nameMap = nam;
 		count = 0;
 	}
@@ -123,11 +123,11 @@ static DWORD WINAPI MySeqSumThreadFunction(LPVOID lpParam){
 			if (current.getName() != "") {
 				
 				int num = 1;
-				if (pDataArray->namefile != "") {
+				if (pDataArray->hasNameMap){
 					//make sure this sequence is in the namefile, else error 
 					map<string, int>::iterator it = pDataArray->nameMap.find(current.getName());
 					
-					if (it == pDataArray->nameMap.end()) { pDataArray->m->mothurOut("[ERROR]: " + current.getName() + " is not in your namefile, please correct."); pDataArray->m->mothurOutEndLine(); pDataArray->m->control_pressed = true; }
+					if (it == pDataArray->nameMap.end()) { pDataArray->m->mothurOut("[ERROR]: " + current.getName() + " is not in your name or count file, please correct."); pDataArray->m->mothurOutEndLine(); pDataArray->m->control_pressed = true; }
 					else { num = it->second; }
 				}
 				

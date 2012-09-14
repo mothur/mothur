@@ -34,12 +34,13 @@ class RemoveLineageCommand : public Command {
 	private:
 		set<string> names;
 		vector<string> outputNames, listOfTaxons;
-		string fastafile, namefile, groupfile, alignfile, listfile, taxfile, outputDir, taxons;
+		string fastafile, namefile, groupfile, alignfile, listfile, countfile, taxfile, outputDir, taxons;
 		bool abort, dups;
 		
 		int readFasta();
 		int readName();
 		int readGroup();
+        int readCount();
 		int readAlign();
 		int readList();
 		int readTax();	

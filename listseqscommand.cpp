@@ -10,6 +10,7 @@
 #include "listseqscommand.h"
 #include "sequence.hpp"
 #include "listvector.hpp"
+#include "counttable.h"
 
 
 //**********************************************************************************************************************
@@ -17,6 +18,7 @@ vector<string> ListSeqsCommand::setParameters(){
 	try {
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "FNGLT", "FNGLT", "none",false,false); parameters.push_back(pfasta);
 		CommandParameter pname("name", "InputTypes", "", "", "FNGLT", "FNGLT", "none",false,false); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "FNGLT", "FNGLT", "none",false,false); parameters.push_back(pcount);
 		CommandParameter pgroup("group", "InputTypes", "", "", "FNGLT", "FNGLT", "none",false,false); parameters.push_back(pgroup);
 		CommandParameter plist("list", "InputTypes", "", "", "FNGLT", "FNGLT", "none",false,false); parameters.push_back(plist);
 		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "FNGLT", "FNGLT", "none",false,false); parameters.push_back(ptaxonomy);
@@ -37,8 +39,8 @@ vector<string> ListSeqsCommand::setParameters(){
 string ListSeqsCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The list.seqs command reads a fasta, name, group, list, taxonomy or alignreport file and outputs a .accnos file containing sequence names.\n";
-		helpString += "The list.seqs command parameters are fasta, name, group, list, taxonomy and alignreport.  You must provide one of these parameters.\n";
+		helpString += "The list.seqs command reads a fasta, name, group, count, list, taxonomy or alignreport file and outputs a .accnos file containing sequence names.\n";
+		helpString += "The list.seqs command parameters are fasta, name, group, count, list, taxonomy and alignreport.  You must provide one of these parameters.\n";
 		helpString += "The list.seqs command should be in the following format: list.seqs(fasta=yourFasta).\n";
 		helpString += "Example list.seqs(fasta=amazon.fasta).\n";
 		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n";
@@ -164,6 +166,14 @@ ListSeqsCommand::ListSeqsCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("count");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["count"] = inputDir + it->second;		}
+				}
 			}
 
 			//check for required parameters
@@ -195,8 +205,13 @@ ListSeqsCommand::ListSeqsCommand(string option)  {
 			if (taxfile == "not open") { abort = true; }
 			else if (taxfile == "not found") {  taxfile = "";  }
 			else { m->setTaxonomyFile(taxfile); }
+            
+            countfile = validParameter.validFile(parameters, "count", true);
+			if (countfile == "not open") { abort = true; }
+			else if (countfile == "not found") {  countfile = "";  }
+			else { m->setCountTableFile(countfile); }
 			
-			if ((fastafile == "") && (namefile == "") && (listfile == "") && (groupfile == "") && (alignfile == "") && (taxfile == ""))  { m->mothurOut("You must provide a file."); m->mothurOutEndLine(); abort = true; }
+			if ((countfile == "") && (fastafile == "") && (namefile == "") && (listfile == "") && (groupfile == "") && (alignfile == "") && (taxfile == ""))  { m->mothurOut("You must provide a file."); m->mothurOutEndLine(); abort = true; }
 			
 			int okay = 1;
 			if (outputDir != "") { okay++; }
@@ -225,6 +240,7 @@ int ListSeqsCommand::execute(){
 		else if (alignfile != "")	{	inputFileName = alignfile;	readAlign();	}
 		else if (listfile != "")	{	inputFileName = listfile;	readList();		}
 		else if (taxfile != "")		{	inputFileName = taxfile;	readTax();		}
+        else if (countfile != "")	{	inputFileName = countfile;	readCount();	}
 		
 		if (m->control_pressed) { outputTypes.clear();  return 0; }
 		
@@ -293,12 +309,6 @@ int ListSeqsCommand::readFasta(){
 			
 			Sequence currSeq(in);
 			name = currSeq.getName();
-			//if (lastName == "") { lastName = name; }
-			//if (name != lastName) { count = 1; }
-		//	lastName = name;
-			
-			//Sequence newSeq(name+"_"+toString(count), currSeq.getAligned());
-			//newSeq.printSequence(out);
 			
 			if (name != "") {  names.push_back(name);  }
 			
@@ -404,7 +414,24 @@ int ListSeqsCommand::readGroup(){
 		exit(1);
 	}
 }
-
+//**********************************************************************************************************************
+int ListSeqsCommand::readCount(){
+	try {
+		CountTable ct;
+		ct.readTable(countfile);
+        
+        if (m->control_pressed) { return 0; }
+        
+        names = ct.getNamesOfSeqs();
+        
+        return 0;
+        
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ListSeqsCommand", "readCount");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 //alignreport file has a column header line then all other lines contain 16 columns.  we just want the first column since that contains the name
 int ListSeqsCommand::readAlign(){

@@ -661,6 +661,22 @@ vector<string> CountTable::getNamesOfSeqs() {
 	}
 }
 /************************************************************/
+//returns the names of all unique sequences in file mapped to their seqCounts
+map<string, int> CountTable::getNameMap() {
+    try {
+        map<string, int> names;
+        for (map<string, int>::iterator it = indexNameMap.begin(); it != indexNameMap.end(); it++) {
+            names[it->first] = totals[it->second];
+        }
+        
+        return names;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "CountTable", "getNameMap");
+		exit(1);
+	}
+}
+/************************************************************/
 //returns the names of all unique sequences in file
 vector<string> CountTable::getNamesOfSeqs(string group) {
     try {

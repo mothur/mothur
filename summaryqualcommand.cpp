@@ -8,13 +8,14 @@
  */
 
 #include "summaryqualcommand.h"
-
+#include "counttable.h"
 
 //**********************************************************************************************************************
 vector<string> SummaryQualCommand::setParameters(){	
 	try {
 		CommandParameter pqual("qfile", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pqual);
-		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
+		CommandParameter pname("name", "InputTypes", "", "", "namecount", "none", "none",false,false); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "namecount", "none", "none",false,false); parameters.push_back(pcount);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
@@ -32,9 +33,10 @@ vector<string> SummaryQualCommand::setParameters(){
 string SummaryQualCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The summary.qual command reads a quality file and an optional name file, and summarizes the quality information.\n";
-		helpString += "The summary.tax command parameters are qfile, name and processors. qfile is required, unless you have a valid current quality file.\n";
+		helpString += "The summary.qual command reads a quality file and an optional name or count file, and summarizes the quality information.\n";
+		helpString += "The summary.tax command parameters are qfile, name, count and processors. qfile is required, unless you have a valid current quality file.\n";
 		helpString += "The name parameter allows you to enter a name file associated with your quality file. \n";
+        helpString += "The count parameter allows you to enter a count file associated with your quality file. \n";
 		helpString += "The summary.qual command should be in the following format: \n";
 		helpString += "summary.qual(qfile=yourQualityFile) \n";
 		helpString += "Note: No spaces between parameter labels (i.e. qfile), '=' and parameters (i.e.yourQualityFile).\n";	
@@ -122,6 +124,14 @@ SummaryQualCommand::SummaryQualCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("count");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["count"] = inputDir + it->second;		}
+				}
 			}
 			
 			//initialize outputTypes
@@ -141,6 +151,13 @@ SummaryQualCommand::SummaryQualCommand(string option)  {
 			if (namefile == "not open") { namefile = ""; abort = true; }
 			else if (namefile == "not found") { namefile = "";  }	
 			else { m->setNameFile(namefile); }
+            
+            countfile = validParameter.validFile(parameters, "count", true);
+			if (countfile == "not open") { abort = true; countfile = ""; }	
+			else if (countfile == "not found") { countfile = ""; }
+			else { m->setCountTableFile(countfile); }
+			
+            if ((countfile != "") && (namefile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
@@ -152,10 +169,13 @@ SummaryQualCommand::SummaryQualCommand(string option)  {
 			m->setProcessors(temp);
 			m->mothurConvert(temp, processors);	
 			
-			if (namefile == "") {
-				vector<string> files; files.push_back(qualfile);
-				parser.getNameFile(files);
-			}
+            
+			if (countfile == "") {
+                if (namefile == "") {
+                    vector<string> files; files.push_back(qualfile);
+                    parser.getNameFile(files);
+                }
+            }
 		}
 	}
 	catch(exception& e) {
@@ -179,7 +199,12 @@ int SummaryQualCommand::execute(){
 		if (m->control_pressed) { return 0; }
 		
 		if (namefile != "") { nameMap = m->readNames(namefile); }
-		
+		else if (countfile != "") {
+            CountTable ct;
+            ct.readTable(countfile);
+            nameMap = ct.getNameMap();
+        }
+        
 		vector<unsigned long long> positions; 
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		positions = m->divideFile(qualfile, processors);
@@ -257,7 +282,7 @@ int SummaryQualCommand::driverCreateSummary(vector<int>& position, vector<int>& 
 			if (current.getName() != "") {
 				
 				int num = 1;
-				if (namefile != "") {
+				if ((namefile != "") || (countfile != "")) {
 					//make sure this sequence is in the namefile, else error 
 					map<string, int>::iterator it = nameMap.find(current.getName());
 					
@@ -400,11 +425,14 @@ int SummaryQualCommand::createProcessesCreateSummary(vector<int>& position, vect
 		DWORD   dwThreadIdArray[processors];
 		HANDLE  hThreadArray[processors]; 
 		
+        bool hasNameMap = false;
+        if ((namefile !="") || (countfile != "")) { hasNameMap = true; }
+        
 		//Create processor worker threads.
 		for( int i=0; i<processors; i++ ){
 			
 			// Allocate memory for thread data.
-			seqSumQualData* tempSum = new seqSumQualData(filename, m, lines[i].start, lines[i].end, namefile, nameMap);
+			seqSumQualData* tempSum = new seqSumQualData(filename, m, lines[i].start, lines[i].end, hasNameMap, nameMap);
 			pDataArray.push_back(tempSum);
 			processIDS.push_back(i);
         
@@ -457,7 +485,7 @@ int SummaryQualCommand::printQual(string sumFile, vector<int>& position, vector<
 			
 			if (m->control_pressed) { out.close(); return 0; }
 			
-			float average = averageQ[i] / (float) position[i];
+			double average = averageQ[i] / (float) position[i];
 			out << i << '\t' << position[i] << '\t' << average << '\t';
 			
 			for (int j = 0; j < 41; j++) {

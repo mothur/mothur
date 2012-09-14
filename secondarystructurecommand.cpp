@@ -9,13 +9,15 @@
 
 #include "secondarystructurecommand.h"
 #include "sequence.hpp"
+#include "counttable.h"
 
 //**********************************************************************************************************************
 vector<string> AlignCheckCommand::setParameters(){	
 	try {
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
 		CommandParameter pmap("map", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pmap);
-        CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
+		CommandParameter pname("name", "InputTypes", "", "", "namecount", "none", "none",false,false); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "namecount", "none", "none",false,false); parameters.push_back(pcount);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
 		
@@ -32,7 +34,7 @@ vector<string> AlignCheckCommand::setParameters(){
 string AlignCheckCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The align.check command reads a fasta file and map file as well as an optional name file.\n";
+		helpString += "The align.check command reads a fasta file and map file as well as an optional name or count file.\n";
 		helpString += "It outputs a file containing the secondary structure matches in the .align.check file.\n";
 		helpString += "The align.check command parameters are fasta and map, both are required.\n";
 		helpString += "The align.check command should be in the following format: align.check(fasta=yourFasta, map=yourMap).\n";
@@ -135,6 +137,14 @@ AlignCheckCommand::AlignCheckCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("count");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["count"] = inputDir + it->second;		}
+				}
 			}
 
 			//check for required parameters
@@ -155,16 +165,25 @@ AlignCheckCommand::AlignCheckCommand(string option)  {
 			else if (namefile == "not found") { namefile = "";  }	
 			else { m->setNameFile(namefile); }
 			
+            countfile = validParameter.validFile(parameters, "count", true);
+			if (countfile == "not open") { abort = true; countfile = ""; }	
+			else if (countfile == "not found") { countfile = ""; }
+			else { m->setCountTableFile(countfile); }
+			
+            if ((countfile != "") && (namefile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
+            
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
 				outputDir = "";	
 				outputDir += m->hasPath(fastafile); //if user entered a file with a path then preserve it	
 			}
 			
-			if ((namefile == "") && (fastafile != "")){
-				vector<string> files; files.push_back(fastafile); 
-				parser.getNameFile(files);
-			}
+            if (countfile == "") {
+                if ((namefile == "") && (fastafile != "")){
+                    vector<string> files; files.push_back(fastafile); 
+                    parser.getNameFile(files);
+                }
+            }
 		}
 
 	}
@@ -184,6 +203,11 @@ int AlignCheckCommand::execute(){
 		readMap();
 		
 		if (namefile != "") { nameMap = m->readNames(namefile); }
+        else if (countfile != "") {
+            CountTable ct;
+            ct.readTable(countfile);
+            nameMap = ct.getNameMap();
+        }
 		
 		if (m->control_pressed) { return 0; }
 		
@@ -217,7 +241,7 @@ int AlignCheckCommand::execute(){
 				if (haderror == 1) { m->control_pressed = true; break; }
 				
 				int num = 1;
-				if (namefile != "") {
+				if ((namefile != "") || (countfile != "")) {
 					//make sure this sequence is in the namefile, else error 
 					map<string, int>::iterator it = nameMap.find(seq.getName());
 					
@@ -274,7 +298,7 @@ int AlignCheckCommand::execute(){
 		m->mothurOut("75%-tile:\t" + toString(pound[ptile75]) + "\t" + toString(dash[ptile75]) + "\t" + toString(plus[ptile75]) + "\t" + toString(equal[ptile75]) + "\t" + toString(loop[ptile75]) + "\t" + toString(tilde[ptile75]) + "\t" + toString(total[ptile75])); m->mothurOutEndLine();
 		m->mothurOut("97.5%-tile:\t" + toString(pound[ptile97_5]) + "\t" + toString(dash[ptile97_5]) + "\t" + toString(plus[ptile97_5]) + "\t" + toString(equal[ptile97_5]) + "\t" + toString(loop[ptile97_5]) + "\t" + toString(tilde[ptile97_5]) + "\t" + toString(total[ptile97_5])); m->mothurOutEndLine();
 		m->mothurOut("Maximum:\t" + toString(pound[ptile100]) + "\t" + toString(dash[ptile100]) + "\t" + toString(plus[ptile100]) + "\t" + toString(equal[ptile100]) + "\t" + toString(loop[ptile100]) + "\t" + toString(tilde[ptile100]) + "\t" + toString(total[ptile100])); m->mothurOutEndLine();
-		if (namefile == "") {  m->mothurOut("# of Seqs:\t" + toString(count)); m->mothurOutEndLine(); }
+		if ((namefile == "") && (countfile == "")) {  m->mothurOut("# of Seqs:\t" + toString(count)); m->mothurOutEndLine(); }
 		else { m->mothurOut("# of unique seqs:\t" + toString(count)); m->mothurOutEndLine(); m->mothurOut("total # of seqs:\t" + toString(size)); m->mothurOutEndLine(); }
 		
 		
