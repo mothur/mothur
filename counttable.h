@@ -47,9 +47,11 @@ class CountTable {
         CountTable() { m = MothurOut::getInstance(); hasGroups = false; total = 0; uniques = 0; }
         ~CountTable() {}
     
+        //reads and creates smart enough to eliminate groups with zero counts 
         int createTable(set<string>&, map<string, string>&, set<string>&); //seqNames, seqName->group, groupNames 
         int createTable(string, string, bool); //namefile, groupfile, createGroup
-        int readTable(string);    
+        int readTable(string); 
+    
         int printTable(string);
         int printHeaders(ofstream&);
         int printSeq(ofstream&, string);
@@ -60,6 +62,7 @@ class CountTable {
         int getNumGroups() { return groups.size(); }
         vector<string> getNamesOfGroups() {  return groups;   }  //returns group names, if no group info vector is blank.
         int addGroup(string);
+        int removeGroup(string);
         
         int renameSeq(string, string); //used to change name of sequence for use with trees
         int setAbund(string, string, int); //set abundance number of seqs for that group for that seq

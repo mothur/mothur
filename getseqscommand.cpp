@@ -10,6 +10,7 @@
 #include "getseqscommand.h"
 #include "sequence.hpp"
 #include "listvector.hpp"
+#include "counttable.h"
 
 //**********************************************************************************************************************
 vector<string> GetSeqsCommand::setParameters(){	
@@ -90,7 +91,7 @@ string GetSeqsCommand::getOutputFileNameTag(string type, string inputName=""){
             if (type == "fasta")            {   outputFileName =  "pick" + m->getExtension(inputName);   }
             else if (type == "taxonomy")    {   outputFileName =  "pick" + m->getExtension(inputName);   }
             else if (type == "name")        {   outputFileName =  "pick" + m->getExtension(inputName);   }
-            else if (type == "count")       {   outputFileName =  "pick.count.table";   }
+            else if (type == "count")       {   outputFileName =  "pick.count_table";   }
             else if (type == "group")       {   outputFileName =  "pick" + m->getExtension(inputName);   }
             else if (type == "list")        {   outputFileName =  "pick" + m->getExtension(inputName);   }
             else if (type == "qfile")       {   outputFileName =  "pick" + m->getExtension(inputName);   }
@@ -568,6 +569,13 @@ int GetSeqsCommand::readCount(){
         }
         in.close();
 		out.close();
+        
+        //check for groups that have been eliminated
+        CountTable ct;
+        if (ct.testGroups(outputFileName)) {
+            ct.readTable(outputFileName);
+            ct.printTable(outputFileName);
+        }
 		
 		if (wroteSomething == false) {  m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();  }
 		outputTypes["count"].push_back(outputFileName); outputNames.push_back(outputFileName);
@@ -617,19 +625,16 @@ int GetSeqsCommand::readList(){
 			
 				//parse out names that are in accnos file
 				string binnames = list.get(i);
+                vector<string> bnames;
+                m->splitAtComma(binnames, bnames);
 				
 				string newNames = "";
-				while (binnames.find_first_of(',') != -1) { 
-					string name = binnames.substr(0,binnames.find_first_of(','));
-					binnames = binnames.substr(binnames.find_first_of(',')+1, binnames.length());
-					
+                for (int i = 0; i < bnames.size(); i++) {
+					string name = bnames[i];
 					//if that name is in the .accnos file, add it
 					if (names.count(name) != 0) {  newNames += name + ",";  selectedCount++; if (m->debug) { sanity["list"].insert(name); } }
 				}
 			
-				//get last name
-				if (names.count(binnames) != 0) {  newNames += binnames + ",";  selectedCount++;  if (m->debug) { sanity["list"].insert(binnames); } }
-
 				//if there are names in this bin add to new list
 				if (newNames != "") { 
 					newNames = newNames.substr(0, newNames.length()-1); //rip off extra comma

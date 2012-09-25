@@ -10,6 +10,7 @@
 #include "removeseqscommand.h"
 #include "sequence.hpp"
 #include "listvector.hpp"
+#include "counttable.h"
 
 //**********************************************************************************************************************
 vector<string> RemoveSeqsCommand::setParameters(){	
@@ -71,7 +72,7 @@ string RemoveSeqsCommand::getOutputFileNameTag(string type, string inputName="")
             else if (type == "list")        {   outputFileName =  "pick" + m->getExtension(inputName);   }
             else if (type == "qfile")       {   outputFileName =  "pick" + m->getExtension(inputName);   }
             else if (type == "alignreport") {   outputFileName =  "pick.align.report";                   }
-            else if (type == "count")       {   outputFileName =  "pick.count.table";   }
+            else if (type == "count")       {   outputFileName =  "pick.count_table";   }
             else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
         }
         return outputFileName;
@@ -538,6 +539,14 @@ int RemoveSeqsCommand::readCount(){
         }
         in.close();
 		out.close();
+        
+        //check for groups that have been eliminated
+        CountTable ct;
+        if (ct.testGroups(outputFileName)) {
+            ct.readTable(outputFileName);
+            ct.printTable(outputFileName);
+        }
+
 		
 		if (wroteSomething == false) {  m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();  }
 		outputTypes["count"].push_back(outputFileName); outputNames.push_back(outputFileName);

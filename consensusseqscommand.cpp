@@ -66,7 +66,7 @@ string ConsensusSeqsCommand::getOutputFileNameTag(string type, string inputName=
         else {
             if (type == "fasta") {  outputFileName =  "cons.fasta"; }
             else if (type == "name") {  outputFileName =  "cons.names"; }
-            else if (type == "count") {  outputFileName =  "cons.count.table"; }
+            else if (type == "count") {  outputFileName =  "cons.count_table"; }
             else if (type == "summary") {  outputFileName =  "cons.summary"; }
             else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
         }

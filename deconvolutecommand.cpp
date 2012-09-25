@@ -57,7 +57,7 @@ string DeconvoluteCommand::getOutputFileNameTag(string type, string inputName=""
         else {
             if (type == "fasta") {  outputFileName =  "unique" + m->getExtension(inputName); }
             else if (type == "name") {  outputFileName =  "names"; }
-            else if (type == "count") {  outputFileName =  "count.table"; }
+            else if (type == "count") {  outputFileName =  "count_table"; }
             else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
         }
         return outputFileName;

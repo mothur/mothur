@@ -2890,6 +2890,28 @@ int MothurOut::removeConfidences(string& tax) {
 	}
 }
 /**************************************************************************************************/
+string MothurOut::removeQuotes(string tax) {
+	try {
+		
+		string taxon;
+		string newTax = "";
+		
+		for (int i = 0; i < tax.length(); i++) {
+			
+			if (control_pressed) { return newTax; }
+            
+            if ((tax[i] != '\'') && (tax[i] != '\"')) { newTax += tax[i]; }
+			
+        }
+		
+		return newTax;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "removeQuotes");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
 
 
 

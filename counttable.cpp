@@ -52,6 +52,12 @@ int CountTable::createTable(set<string>& n, map<string, string>& g, set<string>&
             }
         }
         
+        if (hasGroups) {
+            for (int i = 0; i < totalGroups.size(); i++) {
+                if (totalGroups[i] == 0) { m->mothurOut("\nRemoving group: " + groups[i] + " because all sequences have been removed.\n"); removeGroup(groups[i]); i--; }
+            }
+        }
+
         return 0;
     }
 	catch(exception& e) {
@@ -179,7 +185,14 @@ int CountTable::createTable(string namefile, string groupfile, bool createGroup)
         in.close();
 		
         if (error) { m->control_pressed = true; }
-		if (groupfile != "") { delete groupMap; }
+        else { //check for zero groups
+            if (hasGroups) {
+                for (int i = 0; i < totalGroups.size(); i++) {
+                    if (totalGroups[i] == 0) { m->mothurOut("\nRemoving group: " + groups[i] + " because all sequences have been removed.\n"); removeGroup(groups[i]); i--; }
+                }
+            }
+        }
+        if (groupfile != "") { delete groupMap; }
         
         return 0;
     }
@@ -243,6 +256,13 @@ int CountTable::readTable(string file) {
         in.close();
         
         if (error) { m->control_pressed = true; }
+        else { //check for zero groups
+            if (hasGroups) {
+                for (int i = 0; i < totalGroups.size(); i++) {
+                    if (totalGroups[i] == 0) { m->mothurOut("\nRemoving group: " + groups[i] + " because all sequences have been removed.\n"); removeGroup(groups[i]); i--; }
+                }
+            }
+        }
         
         return 0;
     }
@@ -457,6 +477,51 @@ int CountTable::addGroup(string groupName) {
 	}
 }
 /************************************************************/
+//remove group
+int CountTable::removeGroup(string groupName) {
+    try {        
+        if (hasGroups) {
+            map<string, int>::iterator it = indexGroupMap.find(groupName);
+            if (it == indexGroupMap.end()) {
+                m->mothurOut("[ERROR]: " + groupName + " is not in your count table. Please correct.\n"); m->control_pressed = true;
+            }else { 
+                int indexOfGroupToRemove = it->second;
+                map<string, int> currentGroupIndex = indexGroupMap;
+                vector<string> newGroups;
+                for (int i = 0; i < groups.size(); i++) {
+                    if (groups[i] != groupName) { 
+                        newGroups.push_back(groups[i]);
+                        indexGroupMap[groups[i]] = i;
+                    }
+                }
+                indexGroupMap.erase(groupName);
+                groups = newGroups;
+                totalGroups.erase(totalGroups.begin()+indexOfGroupToRemove);
+                 
+                for (int i = 0; i < counts.size(); i++) {
+                    int num = counts[i][indexOfGroupToRemove];
+                    counts[i].erase(counts[i].begin()+indexOfGroupToRemove);
+                    totals[i] -= num;
+                    total -= num;
+                    if (totals[i] == 0) { //your sequences are only from the group we want to remove, then remove you.
+                        counts.erase(counts.begin()+i);
+                        totals.erase(totals.begin()+i);
+                        uniques--;
+                        i--;
+                    }
+                }
+                if (groups.size() == 0) { hasGroups = false; }
+            }
+        }else { m->mothurOut("[ERROR]: your count table does not contain group information, can not remove group " + groupName + ".\n"); m->control_pressed = true; }
+    
+        return 0;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "CountTable", "removeGroup");
+		exit(1);
+	}
+}
+/************************************************************/
 //vector of groups for the seq
 vector<string> CountTable::getGroups(string seqName) {
     try {
@@ -560,7 +625,7 @@ int CountTable::push_back(string seqName) {
 int CountTable::remove(string seqName) {
     try {
         map<string, int>::iterator it = indexNameMap.find(seqName);
-        if (it == indexNameMap.end()) {
+        if (it != indexNameMap.end()) {
             uniques--;
             if (hasGroups){ //remove this sequences counts from group totals
                 for (int i = 0; i < totalGroups.size(); i++) {  totalGroups[i] -= counts[it->second][i];  counts[it->second][i] = 0; }

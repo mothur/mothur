@@ -110,7 +110,7 @@ private:
 	vector<Calculator*> treeCalculators;
 	vector<SharedRAbundVector*> lookup;
 	string lastLabel;
-	string format, groupNames, filename, sharedfile, inputfile;
+	string format, groupNames, filename, sharedfile, countfile, inputfile;
 	int numGroups, subsampleSize, iters, processors;
 	ofstream out;
 	float precision, cutoff;

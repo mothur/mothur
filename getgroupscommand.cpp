@@ -72,7 +72,7 @@ string GetGroupsCommand::getOutputFileNameTag(string type, string inputName=""){
             else if (type == "taxonomy")    {   outputFileName =  "pick" + m->getExtension(inputName);   }
             else if (type == "name")        {   outputFileName =  "pick" + m->getExtension(inputName);   }
             else if (type == "group")       {   outputFileName =  "pick" + m->getExtension(inputName);   }
-            else if (type == "count")       {   outputFileName =  "pick.count.table";   }
+            else if (type == "count")       {   outputFileName =  "pick.count_table";   }
             else if (type == "list")        {   outputFileName =  "pick" + m->getExtension(inputName);   }
             else if (type == "shared")      {   outputFileName =  "pick" + m->getExtension(inputName);   }
             else if (type == "design")      {   outputFileName =  "pick" + m->getExtension(inputName);   }

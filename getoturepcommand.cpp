@@ -41,9 +41,10 @@ vector<string> GetOTURepCommand::setParameters(){
 	try {
 		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(plist);
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pfasta);
-		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pgroup);
 		CommandParameter pphylip("phylip", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "none",false,false); parameters.push_back(pphylip);
-		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "ColumnName",false,false); parameters.push_back(pname);
+        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "ColumnName",false,false); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "ColumnName",false,false); parameters.push_back(pcount);
+		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none",false,false); parameters.push_back(pgroup);
 		CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "ColumnName",false,false); parameters.push_back(pcolumn);
 		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
@@ -68,9 +69,9 @@ vector<string> GetOTURepCommand::setParameters(){
 string GetOTURepCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The get.oturep command parameters are phylip, column, list, fasta, name, group, large, weighted, cutoff, precision, groups, sorted and label.  The list parameter is required, as well as phylip or column and name, unless you have valid current files.\n";
+		helpString += "The get.oturep command parameters are phylip, column, list, fasta, name, group, count, large, weighted, cutoff, precision, groups, sorted and label.  The list parameter is required, as well as phylip or column and name, unless you have valid current files.\n";
 		helpString += "The label parameter allows you to select what distance levels you would like a output files created for, and is separated by dashes.\n";
-		helpString += "The phylip or column parameter is required, but only one may be used.  If you use a column file the name filename is required. \n";
+		helpString += "The phylip or column parameter is required, but only one may be used.  If you use a column file the name or count filename is required. \n";
 		helpString += "If you do not provide a cutoff value 10.00 is assumed. If you do not provide a precision value then 100 is assumed.\n";
 		helpString += "The get.oturep command should be in the following format: get.oturep(phylip=yourDistanceMatrix, fasta=yourFastaFile, list=yourListFile, name=yourNamesFile, group=yourGroupFile, label=yourLabels).\n";
 		helpString += "Example get.oturep(phylip=amazon.dist, fasta=amazon.fasta, list=amazon.fn.list, group=amazon.groups).\n";
@@ -106,6 +107,7 @@ string GetOTURepCommand::getOutputFileNameTag(string type, string inputName=""){
         else {
             if (type == "fasta")            {   outputFileName =  "rep.fasta";   }
             else if (type == "name")        {   outputFileName =  "rep.names";   }
+            else if (type == "count")        {   outputFileName =  "rep.count_table";   }
             else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
         }
         return outputFileName;
@@ -123,6 +125,7 @@ GetOTURepCommand::GetOTURepCommand(){
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
 		outputTypes["name"] = tempOutNames;
+        outputTypes["count"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "GetOTURepCommand", "GetOTURepCommand");
@@ -157,6 +160,7 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 			vector<string> tempOutNames;
 			outputTypes["fasta"] = tempOutNames;
 			outputTypes["name"] = tempOutNames;
+            outputTypes["count"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -210,6 +214,14 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("count");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["count"] = inputDir + it->second;		}
+				}
 			}
 
 			
@@ -245,6 +257,24 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 			if (namefile == "not open") { abort = true; }	
 			else if (namefile == "not found") { namefile = ""; }
 			else { m->setNameFile(namefile); }
+            
+            hasGroups = false;
+            countfile = validParameter.validFile(parameters, "count", true);
+			if (countfile == "not found") { countfile =  "";   }
+			else if (countfile == "not open") { abort = true; countfile =  ""; }	
+			else {   
+                m->setCountTableFile(countfile); 
+                ct.readTable(countfile);
+                if (ct.hasGroupInfo()) { hasGroups = true; }
+            }
+            
+            if ((namefile != "") && (countfile != "")) {
+                m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
+            }
+            
+            if ((groupfile != "") && (countfile != "")) {
+                m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+            }
 			
 			if ((phylipfile == "") && (columnfile == "")) { //is there are current file available for either of these?
 				//give priority to column, then phylip
@@ -261,14 +291,18 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 			}else if ((phylipfile != "") && (columnfile != "")) { m->mothurOut("When executing a get.oturep command you must enter ONLY ONE of the following: phylip or column."); m->mothurOutEndLine(); abort = true; }
 		
 			if (columnfile != "") {  
-				if (namefile == "") {  
+				if ((namefile == "") && (countfile == "")) { 
 					namefile = m->getNameFile(); 
 					if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
 					else { 
-						m->mothurOut("You need to provide a namefile if you are going to use the column format."); m->mothurOutEndLine(); 
-						abort = true; 
+						countfile = m->getCountTableFile();
+                        if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
+                        else { 
+                            m->mothurOut("You need to provide a namefile or countfile if you are going to use the column format."); m->mothurOutEndLine(); 
+                            abort = true; 
+                        }	
 					}	
-				} 
+				}
 			}
 
 			//check for optional parameter and set defaults
@@ -292,15 +326,15 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 				sorted = "";
 			}
 			
-			if ((sorted == "group") && (groupfile == "")) {
-				m->mothurOut("You must provide a groupfile to sort by group. I will not sort."); m->mothurOutEndLine();
+			if ((sorted == "group") && ((groupfile == "")&& !hasGroups)) {
+				m->mothurOut("You must provide a groupfile or have a count file with group info to sort by group. I will not sort."); m->mothurOutEndLine();
 				sorted = "";
 			}
 			
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = ""; }
 			else { 
-				if (groupfile == "") {
+				if ((groupfile == "") && (!hasGroups)) {
 					m->mothurOut("You must provide a groupfile to use groups."); m->mothurOutEndLine();
 					abort = true;
 				}else { 
@@ -340,106 +374,9 @@ int GetOTURepCommand::execute(){
 		int error;
 		list = NULL;
 		
-		if (!large) {
-			//read distance files
-			if (format == "column") { readMatrix = new ReadColumnMatrix(distFile); }	
-			else if (format == "phylip") { readMatrix = new ReadPhylipMatrix(distFile); }
-			else { m->mothurOut("File format error."); m->mothurOutEndLine(); return 0;  }
-			
-			readMatrix->setCutoff(cutoff);
-	
-			if(namefile != ""){	
-				nameMap = new NameAssignment(namefile);
-				nameMap->readMap();
-			}else{	nameMap = NULL;		}
-			
-			readMatrix->read(nameMap);
-			
-			if (m->control_pressed) { delete readMatrix; return 0; }
-
-			list = readMatrix->getListVector();
-
-			SparseDistanceMatrix* matrix = readMatrix->getDMatrix();
-			
-			// Create a data structure to quickly access the distance information.
-			// It consists of a vector of distance maps, where each map contains
-			// all distances of a certain sequence. Vector and maps are accessed
-			// via the index of a sequence in the distance matrix
-			seqVec = vector<SeqMap>(list->size()); 
-            for (int i = 0; i < matrix->seqVec.size(); i++) {
-                for (int j = 0; j < matrix->seqVec[i].size(); j++) {
-                    if (m->control_pressed) { delete readMatrix; return 0; }
-                    //already added everyone else in row
-                    if (i < matrix->seqVec[i][j].index) {  seqVec[i][matrix->seqVec[i][j].index] = matrix->seqVec[i][j].dist;  }
-                }
-			}
-			//add dummy map for unweighted calc
-			SeqMap dummy;
-			seqVec.push_back(dummy);
-			
-			delete matrix;
-			delete readMatrix;
-			delete nameMap;
-			
-			if (m->control_pressed) { return 0; }
-		}else {
-			//process file and set up indexes
-			if (format == "column") { formatMatrix = new FormatColumnMatrix(distFile); }	
-			else if (format == "phylip") { formatMatrix = new FormatPhylipMatrix(distFile); }
-			else { m->mothurOut("File format error."); m->mothurOutEndLine(); return 0;  }
-			
-			formatMatrix->setCutoff(cutoff);
-	
-			if(namefile != ""){	
-				nameMap = new NameAssignment(namefile);
-				nameMap->readMap();
-			}else{	nameMap = NULL;		}
-			
-			formatMatrix->read(nameMap);
-			
-			if (m->control_pressed) { delete formatMatrix;  return 0; }
-
-			list = formatMatrix->getListVector();
-			
-			distFile = formatMatrix->getFormattedFileName();
-			
-			//positions in file where the distances for each sequence begin
-			//rowPositions[1] = position in file where distance related to sequence 1 start.
-			rowPositions = formatMatrix->getRowPositions();
-			rowPositions.push_back(-1); //dummy row for unweighted calc
-			
-			delete formatMatrix;
-			delete nameMap;
-			
-			//openfile for getMap to use
-			m->openInputFile(distFile, inRow);
-			
-			if (m->control_pressed) { inRow.close(); m->mothurRemove(distFile); return 0; }
-		}
-		
-		
-		//list bin 0 = first name read in distance matrix, list bin 1 = second name read in distance matrix
-		if (list != NULL) {
-			vector<string> names;
-			string binnames;
-			//map names to rows in sparsematrix
-			for (int i = 0; i < list->size(); i++) {
-				names.clear();
-				binnames = list->get(i);
+		readDist();		
 				
-				m->splitAtComma(binnames, names);
-				
-				for (int j = 0; j < names.size(); j++) {
-					nameToIndex[names[j]] = i;
-				}
-			}
-		} else { m->mothurOut("error, no listvector."); m->mothurOutEndLine(); }
-		
-				
-		if (m->control_pressed) { 
-			if (large) {  inRow.close(); m->mothurRemove(distFile);  }
-			return 0; 
-		}
+		if (m->control_pressed) { if (large) {  inRow.close(); m->mothurRemove(distFile);  } return 0; }
 		
 		if (groupfile != "") {
 			//read in group map info.
@@ -448,13 +385,18 @@ int GetOTURepCommand::execute(){
 			if (error == 1) { delete groupMap; m->mothurOut("Error reading your groupfile. Proceeding without groupfile."); m->mothurOutEndLine(); groupfile = "";  }
 			
 			if (Groups.size() != 0) {
-				SharedUtil* util = new SharedUtil();
+				SharedUtil util;
 				vector<string> gNamesOfGroups = groupMap->getNamesOfGroups();
-				util->setGroups(Groups, gNamesOfGroups, "getoturep");
+				util.setGroups(Groups, gNamesOfGroups, "getoturep");
 				groupMap->setNamesOfGroups(gNamesOfGroups);
-				delete util;
 			}
-		}
+		}else if (hasGroups) {
+            if (Groups.size() != 0) {
+				SharedUtil util;
+				vector<string> gNamesOfGroups = ct.getNamesOfGroups();
+				util.setGroups(Groups, gNamesOfGroups, "getoturep");
+			}
+        }
 		
 		//done with listvector from matrix
 		if (list != NULL) { delete list; }
@@ -595,6 +537,11 @@ int GetOTURepCommand::execute(){
 		if (itTypes != outputTypes.end()) {
 			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setNameFile(current); }
 		}
+        
+        itTypes = outputTypes.find("count");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setCountTableFile(current); }
+		}
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -608,7 +555,116 @@ int GetOTURepCommand::execute(){
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
+int GetOTURepCommand::readDist() {
+	try {
+        
+        if (!large) {
+			//read distance files
+			if (format == "column") { readMatrix = new ReadColumnMatrix(distFile); }	
+			else if (format == "phylip") { readMatrix = new ReadPhylipMatrix(distFile); }
+			else { m->mothurOut("File format error."); m->mothurOutEndLine(); return 0;  }
+			
+			readMatrix->setCutoff(cutoff);
+            
+			NameAssignment* nameMap = NULL;
+            if(namefile != ""){	
+                nameMap = new NameAssignment(namefile);
+                nameMap->readMap();
+                readMatrix->read(nameMap);
+            }else if (countfile != "") {
+                readMatrix->read(&ct);
+            }
+			
+			if (m->control_pressed) { delete readMatrix; return 0; }
+            
+			list = readMatrix->getListVector();
+			SparseDistanceMatrix* matrix = readMatrix->getDMatrix();
+			
+			// Create a data structure to quickly access the distance information.
+			// It consists of a vector of distance maps, where each map contains
+			// all distances of a certain sequence. Vector and maps are accessed
+			// via the index of a sequence in the distance matrix
+			seqVec = vector<SeqMap>(list->size()); 
+            for (int i = 0; i < matrix->seqVec.size(); i++) {
+                for (int j = 0; j < matrix->seqVec[i].size(); j++) {
+                    if (m->control_pressed) { delete readMatrix; return 0; }
+                    //already added everyone else in row
+                    if (i < matrix->seqVec[i][j].index) {  seqVec[i][matrix->seqVec[i][j].index] = matrix->seqVec[i][j].dist;  }
+                }
+			}
+			//add dummy map for unweighted calc
+			SeqMap dummy;
+			seqVec.push_back(dummy);
+			
+			delete matrix;
+			delete readMatrix;
+			delete nameMap;
+			
+			if (m->control_pressed) { return 0; }
+		}else {
+			//process file and set up indexes
+			if (format == "column") { formatMatrix = new FormatColumnMatrix(distFile); }	
+			else if (format == "phylip") { formatMatrix = new FormatPhylipMatrix(distFile); }
+			else { m->mothurOut("File format error."); m->mothurOutEndLine(); return 0;  }
+			
+			formatMatrix->setCutoff(cutoff);
+            
+			NameAssignment* nameMap = NULL;
+            if(namefile != ""){	
+                nameMap = new NameAssignment(namefile);
+                nameMap->readMap();
+                readMatrix->read(nameMap);
+            }else if (countfile != "") {
+                readMatrix->read(&ct);
+            }
+			
+			if (m->control_pressed) { delete formatMatrix;  return 0; }
+            
+			list = formatMatrix->getListVector();
+			distFile = formatMatrix->getFormattedFileName();
+			
+			//positions in file where the distances for each sequence begin
+			//rowPositions[1] = position in file where distance related to sequence 1 start.
+			rowPositions = formatMatrix->getRowPositions();
+			rowPositions.push_back(-1); //dummy row for unweighted calc
+			
+			delete formatMatrix;
+			delete nameMap;
+			
+			//openfile for getMap to use
+			m->openInputFile(distFile, inRow);
+			
+			if (m->control_pressed) { inRow.close(); m->mothurRemove(distFile); return 0; }
+		}
+		
+		
+		//list bin 0 = first name read in distance matrix, list bin 1 = second name read in distance matrix
+		if (list != NULL) {
+			vector<string> names;
+			string binnames;
+			//map names to rows in sparsematrix
+			for (int i = 0; i < list->size(); i++) {
+				names.clear();
+				binnames = list->get(i);
+				
+				m->splitAtComma(binnames, names);
+				
+				for (int j = 0; j < names.size(); j++) {
+					nameToIndex[names[j]] = i;
+				}
+			}
+		} else { m->mothurOut("error, no listvector."); m->mothurOutEndLine(); }
 
+        if (m->control_pressed) { if (large) {  inRow.close(); m->mothurRemove(distFile);  }return 0; }
+        
+        return 0;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "GetOTURepCommand", "execute");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 void GetOTURepCommand::readNamesFile() {
 	try {
@@ -677,32 +733,38 @@ void GetOTURepCommand::readNamesFile(bool w) {
 	}
 }
 //**********************************************************************************************************************
-string GetOTURepCommand::findRep(vector<string> names) {
+string GetOTURepCommand::findRep(vector<string> names, string group) {
 	try{
 		// if only 1 sequence in bin or processing the "unique" label, then 
 		// the first sequence of the OTU is the representative one
 		if ((names.size() == 1)) {
 			return names[0];
 		}else{
-			vector<int> seqIndex(names.size());
-			vector<float> max_dist(names.size());
-			vector<float> total_dist(names.size());
+			vector<int> seqIndex; //(names.size());
 			map<string, string>::iterator itNameFile;
 			map<string, int>::iterator itNameIndex;
 
 			//fill seqIndex and initialize sums
 			for (size_t i = 0; i < names.size(); i++) {
 				if (weighted) {
-					seqIndex[i] = nameToIndex[names[i]];
+					seqIndex.push_back(nameToIndex[names[i]]);
+                    if (countfile != "") {  //if countfile is not blank then we can assume the list file contains only uniques, otherwise we assume list file contains everyone.
+                        int numRep = 0;
+                        if (group != "") {  numRep = ct.getGroupCount(names[i], group);  }
+                        else { numRep = ct.getGroupCount(names[i]);  }
+                        for (int j = 1; j < numRep; j++) { //don't add yourself again
+                            seqIndex.push_back(nameToIndex[names[i]]);
+                        }
+                    }
 				}else { 
 					if (namefile == "") {
 						itNameIndex = nameToIndex.find(names[i]);
 						
 						if (itNameIndex == nameToIndex.end()) { // you are not in the distance file and no namesfile, then assume you are not unique
-							if (large) {  seqIndex[i] = (rowPositions.size()-1); }
-							else {  seqIndex[i] = (seqVec.size()-1); }
+							if (large) {  seqIndex.push_back((rowPositions.size()-1)); }
+							else {  seqIndex.push_back((seqVec.size()-1)); }
 						}else {
-							seqIndex[i] = itNameIndex->second;
+							seqIndex.push_back(itNameIndex->second);
 						}
 						
 					}else {
@@ -715,17 +777,18 @@ string GetOTURepCommand::findRep(vector<string> names) {
 							string name2 = itNameFile->second;
 							
 							if (name1 == name2) { //then you are unique so add your real dists
-								seqIndex[i] = nameToIndex[names[i]];
+								seqIndex.push_back(nameToIndex[names[i]]);
 							}else { //add dummy
-								if (large) {  seqIndex[i] = (rowPositions.size()-1); }
-								else {  seqIndex[i] = (seqVec.size()-1); }
+								if (large) {  seqIndex.push_back((rowPositions.size()-1)); }
+								else {  seqIndex.push_back((seqVec.size()-1)); }
 							}
 						}
 					}
 				}
-				max_dist[i] = 0.0;
-				total_dist[i] = 0.0;
 			}
+            
+            vector<float> max_dist(seqIndex.size(), 0.0);
+			vector<float> total_dist(seqIndex.size(), 0.0);
 			
 			// loop through all entries in seqIndex
 			SeqMap::iterator it;
@@ -795,19 +858,33 @@ int GetOTURepCommand::process(ListVector* processList) {
 		map<string, ofstream*> filehandles;
 		
 		if (Groups.size() == 0) { //you don't want to use groups
-			outputNamesFile  = outputDir + m->getRootName(m->getSimpleName(listfile)) + processList->getLabel() + "." + getOutputFileNameTag("name");
-			m->openOutputFile(outputNamesFile, newNamesOutput);
-			outputNames.push_back(outputNamesFile); outputTypes["name"].push_back(outputNamesFile); 
+			outputNamesFile  = outputDir + m->getRootName(m->getSimpleName(listfile)) + processList->getLabel() + ".";
+            if (countfile == "") { 
+                outputNamesFile += getOutputFileNameTag("name");
+                outputNames.push_back(outputNamesFile); outputTypes["name"].push_back(outputNamesFile); 
+            }else {
+                outputNamesFile += getOutputFileNameTag("count");
+                outputNames.push_back(outputNamesFile); outputTypes["count"].push_back(outputNamesFile); 
+            }
 			outputNameFiles[outputNamesFile] = processList->getLabel();
+            m->openOutputFile(outputNamesFile, newNamesOutput);
+            newNamesOutput << "noGroup" << endl;
 		}else{ //you want to use groups
 			ofstream* temp;
 			for (int i=0; i<Groups.size(); i++) {
 				temp = new ofstream;
 				filehandles[Groups[i]] = temp;
-				outputNamesFile = outputDir + m->getRootName(m->getSimpleName(listfile)) + processList->getLabel() + "." + Groups[i] + "." + getOutputFileNameTag("name");
+				outputNamesFile = outputDir + m->getRootName(m->getSimpleName(listfile)) + processList->getLabel() + "." + Groups[i] + ".";
+                if (countfile == "") { 
+                    outputNamesFile += getOutputFileNameTag("name");
+                    outputNames.push_back(outputNamesFile); outputTypes["name"].push_back(outputNamesFile); 
+                }else {
+                    outputNamesFile += getOutputFileNameTag("count");
+                    outputNames.push_back(outputNamesFile); outputTypes["count"].push_back(outputNamesFile); 
+                }
 				
 				m->openOutputFile(outputNamesFile, *(temp));
-				outputNames.push_back(outputNamesFile); outputTypes["name"].push_back(outputNamesFile);
+                *(temp) << Groups[i] << endl;
 				outputNameFiles[outputNamesFile] = processList->getLabel() + "." + Groups[i];
 			}
 		}
@@ -832,7 +909,7 @@ int GetOTURepCommand::process(ListVector* processList) {
 			m->splitAtComma(temp, namesInBin);
 			
 			if (Groups.size() == 0) {
-				nameRep = findRep(namesInBin);
+				nameRep = findRep(namesInBin, "");
 				newNamesOutput << i << '\t' << nameRep << '\t' << processList->get(i) << endl;
 			}else{
 				map<string, vector<string> > NamesInGroup;
@@ -841,20 +918,25 @@ int GetOTURepCommand::process(ListVector* processList) {
 				}
 				
 				for (int j=0; j<namesInBin.size(); j++) {
-					string thisgroup = groupMap->getGroup(namesInBin[j]);
-					
-					if (thisgroup == "not found") { m->mothurOut(namesInBin[j] + " is not in your groupfile, please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
-					
-					if (m->inUsersGroups(thisgroup, Groups)) { //add this name to correct group
-						NamesInGroup[thisgroup].push_back(namesInBin[j]);
-					}
+                    if (groupfile != "") {
+                        string thisgroup = groupMap->getGroup(namesInBin[j]);
+                        if (thisgroup == "not found") { m->mothurOut(namesInBin[j] + " is not in your groupfile, please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
+                        
+                        //add this name to correct group
+                        if (m->inUsersGroups(thisgroup, Groups)) { NamesInGroup[thisgroup].push_back(namesInBin[j]);  }
+                    }else {
+                        vector<string> thisSeqsGroups = ct.getGroups(namesInBin[j]);
+                        for (int k = 0; k < thisSeqsGroups.size(); k++) {
+                            if (m->inUsersGroups(thisSeqsGroups[k], Groups)) { NamesInGroup[thisSeqsGroups[k]].push_back(namesInBin[j]);  }
+                        }
+                    }
 				}
 				
 				//get rep for each group in otu
 				for (int j=0; j<Groups.size(); j++) {
 					if (NamesInGroup[Groups[j]].size() != 0) { //are there members from this group in this otu?
 						//get rep for each group
-						nameRep = findRep(NamesInGroup[Groups[j]]);
+						nameRep = findRep(NamesInGroup[Groups[j]], Groups[j]);
 						
 						//output group rep and other members of this group
 						(*(filehandles[Groups[j]])) << i << '\t' << nameRep << '\t';
@@ -900,28 +982,51 @@ int GetOTURepCommand::processFastaNames(string filename, string label) {
 		ofstream out2;
 		string tempNameFile = filename + ".temp";
 		m->openOutputFile(tempNameFile, out2);
-		
+            
 		ifstream in;
 		m->openInputFile(filename, in);
 		
 		int i = 0;
+        string tempGroup = "";
+        in >> tempGroup; m->gobble(in);
+        
+        CountTable thisCt;
+        if (countfile != "") {
+            thisCt.readTable(countfile);
+            if (tempGroup != "noGroup") { out2 << "Representative_Sequence\ttotal\t" << tempGroup << endl; }
+        }
+    
+        int thistotal = 0;
 		while (!in.eof()) {
 			string rep, binnames;
 			in >> i >> rep >> binnames; m->gobble(in);
-			out2 << rep << '\t' << binnames << endl;
 			
 			vector<string> names;
 			m->splitAtComma(binnames, names);
 			int binsize = names.size();
-			
+            
+            if (countfile == "") { out2 << rep << '\t' << binnames << endl; }
+            else {
+                if (tempGroup == "noGroup") {
+                    for (int j = 0; j < names.size(); j++) {
+                        if (names[j] != rep) { thisCt.mergeCounts(rep, names[j]); }
+                    }
+                    binsize = thisCt.getNumSeqs(rep);
+                }else {
+                    int total = 0; 
+                    for (int j = 0; j < names.size(); j++) {  total += thisCt.getGroupCount(names[j], tempGroup);  }
+                    out2 << rep << '\t' << total << '\t' << total << endl;
+                    binsize = total;
+                }
+            }
+			thistotal += binsize;
 			//if you have a groupfile
 			string group = "";
+            map<string, string> groups;
+            map<string, string>::iterator groupIt;
 			if (groupfile != "") {
-				map<string, string> groups;
-				map<string, string>::iterator groupIt;
-				
 				//find the groups that are in this bin
-				for (size_t i = 0; i < names.size(); i++) {
+				for (int i = 0; i < names.size(); i++) {
 					string groupName = groupMap->getGroup(names[i]);
 					if (groupName == "not found") {  
 						m->mothurOut(names[i] + " is missing from your group file. Please correct. "); m->mothurOutEndLine();
@@ -937,7 +1042,21 @@ int GetOTURepCommand::processFastaNames(string filename, string label) {
 				}
 				//rip off last dash
 				group = group.substr(0, group.length()-1);
-			}else{ group = ""; }
+			}else if (hasGroups) {
+                map<string, string> groups;
+                for (int i = 0; i < names.size(); i++) {
+                    vector<string> thisSeqsGroups = ct.getGroups(names[i]);
+                    for (int j = 0; j < thisSeqsGroups.size(); j++) { groups[thisSeqsGroups[j]] = thisSeqsGroups[j]; }
+                }
+                //turn the groups into a string
+				for (groupIt = groups.begin(); groupIt != groups.end(); groupIt++) {
+					group += groupIt->first + "-";
+				}
+				//rip off last dash
+				group = group.substr(0, group.length()-1);
+                //cout << group << endl;
+            }
+            else{ group = ""; }
 
 			
 			//print out name and sequence for that bin
@@ -947,7 +1066,7 @@ int GetOTURepCommand::processFastaNames(string filename, string label) {
 				if (sorted == "") { //print them out
 					rep = rep + "\t" + toString(i+1);
 					rep = rep + "|" + toString(binsize);
-					if (groupfile != "") {
+					if (group != "") {
 						rep = rep + "|" + group;
 					}
 					out << ">" << rep << endl;
@@ -973,7 +1092,7 @@ int GetOTURepCommand::processFastaNames(string filename, string label) {
 				string sequence = fasta->getSequence(reps[i].name);
 				string outputName = reps[i].name + "\t" + toString(reps[i].bin);
 				outputName = outputName + "|" + toString(reps[i].size);
-				if (groupfile != "") {
+				if (reps[i].group != "") {
 					outputName = outputName + "|" + reps[i].group;
 				}
 				out << ">" << outputName << endl;
@@ -984,9 +1103,11 @@ int GetOTURepCommand::processFastaNames(string filename, string label) {
 		in.close();
 		out.close();
 		out2.close();
-		
+        	
 		m->mothurRemove(filename);
 		rename(tempNameFile.c_str(), filename.c_str());
+        
+        if ((countfile != "") && (tempGroup == "noGroup")) { thisCt.printTable(filename); } 
 		
 		return 0;
 
@@ -1012,10 +1133,35 @@ int GetOTURepCommand::processNames(string filename, string label) {
 		
 		int i = 0;
 		string rep, binnames;
+        
+        string tempGroup = "";
+        in >> tempGroup; m->gobble(in);
+        
+        CountTable thisCt;
+        if (countfile != "") {
+            thisCt.readTable(countfile);
+            if (tempGroup != "noGroup") { out2 << "Representative_Sequence\ttotal\t" << tempGroup << endl; }
+        }
+        
 		while (!in.eof()) {
 			if (m->control_pressed) { break; }
 			in >> i >> rep >> binnames; m->gobble(in);
-			out2 << rep << '\t' << binnames << endl;
+            
+			if (countfile == "") { out2 << rep << '\t' << binnames << endl; }
+            else {
+                vector<string> names;
+                m->splitAtComma(binnames, names);
+                if (tempGroup == "noGroup") {
+                    for (int j = 0; j < names.size(); j++) {
+                        if (names[j] != rep) { thisCt.mergeCounts(rep, names[j]); }
+                    }
+                }else {
+                    int total = 0; 
+                    for (int j = 0; j < names.size(); j++) {  total += thisCt.getGroupCount(names[j], tempGroup);  }
+                    out2 << rep << '\t' << total << '\t' << total << endl;
+                }
+            }
+
 		}
 		in.close();
 		out2.close();
@@ -1023,6 +1169,8 @@ int GetOTURepCommand::processNames(string filename, string label) {
 		m->mothurRemove(filename);
 		rename(tempNameFile.c_str(), filename.c_str());
 		
+        if ((countfile != "") && (tempGroup == "noGroup")) { thisCt.printTable(filename); } 
+        
 		return 0;
 	}
 	catch(exception& e) {

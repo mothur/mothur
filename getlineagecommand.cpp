@@ -10,6 +10,7 @@
 #include "getlineagecommand.h"
 #include "sequence.hpp"
 #include "listvector.hpp"
+#include "counttable.h"
 
 //**********************************************************************************************************************
 vector<string> GetLineageCommand::setParameters(){	
@@ -71,7 +72,7 @@ string GetLineageCommand::getOutputFileNameTag(string type, string inputName="")
             if (type == "fasta")            {   outputFileName =  "pick" + m->getExtension(inputName);   }
             else if (type == "taxonomy")    {   outputFileName =  "pick" + m->getExtension(inputName);   }
             else if (type == "name")        {   outputFileName =  "pick" + m->getExtension(inputName);   }
-            else if (type == "count")       {   outputFileName =  "pick.count.table";                    }  
+            else if (type == "count")       {   outputFileName =  "pick.count_table";                    }  
             else if (type == "group")       {   outputFileName =  "pick" + m->getExtension(inputName);   }
             else if (type == "list")        {   outputFileName =  "pick" + m->getExtension(inputName);   }
             else if (type == "alignreport") {   outputFileName =  "pick.align.report";   }
@@ -438,6 +439,14 @@ int GetLineageCommand::readCount(){
         }
         in.close();
 		out.close();
+        
+        //check for groups that have been eliminated
+        CountTable ct;
+        if (ct.testGroups(outputFileName)) {
+            ct.readTable(outputFileName);
+            ct.printTable(outputFileName);
+        }
+
 		
 		if (wroteSomething == false) {  m->mothurOut("Your file contains does not contain any sequences from " + taxons + "."); m->mothurOutEndLine();  }
 		outputTypes["count"].push_back(outputFileName); outputNames.push_back(outputFileName);
@@ -691,15 +700,17 @@ int GetLineageCommand::readTax(){
 			in >> name;				//read from first column
 			in >> tax;			//read from second column
 			
+            string noQuotesTax = m->removeQuotes(tax);
+            
 			for (int j = 0; j < listOfTaxons.size(); j++) {
 							
-				string newtax = tax;
+				string newtax = noQuotesTax;
 			
 				//if the users file contains confidence scores we want to ignore them when searching for the taxons, unless the taxon has them
 				if (!taxonsHasConfidence[j]) {
-					int hasConfidences = tax.find_first_of('(');
+					int hasConfidences = noQuotesTax.find_first_of('(');
 					if (hasConfidences != string::npos) { 
-						newtax = tax;
+						newtax = noQuotesTax;
 						m->removeConfidences(newtax);
 					}
 				
@@ -712,7 +723,7 @@ int GetLineageCommand::readTax(){
 						break;
 					}
 				}else{//if listOfTaxons[i] has them and you don't them remove taxons
-					int hasConfidences = tax.find_first_of('(');
+					int hasConfidences = noQuotesTax.find_first_of('(');
 					if (hasConfidences == string::npos) { 
 					
 						int pos = newtax.find(noConfidenceTaxons[j]);
@@ -726,10 +737,10 @@ int GetLineageCommand::readTax(){
 					}else { //both have confidences so we want to make sure the users confidences are greater then or equal to the taxons
 						//first remove confidences from both and see if the taxonomy exists
 					
-						string noNewTax = tax;
-						int hasConfidences = tax.find_first_of('(');
+						string noNewTax = noQuotesTax;
+						int hasConfidences = noQuotesTax.find_first_of('(');
 						if (hasConfidences != string::npos) { 
-							noNewTax = tax;
+							noNewTax = noQuotesTax;
 							m->removeConfidences(noNewTax);
 						}
 					

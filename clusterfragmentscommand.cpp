@@ -79,7 +79,7 @@ string ClusterFragmentsCommand::getOutputFileNameTag(string type, string inputNa
         else {
             if (type == "fasta") {  outputFileName =  "fragclust.fasta"; }
             else if (type == "name") {  outputFileName =  "fragclust.names"; }
-            else if (type == "count") {  outputFileName =  "fragclust.count.table"; }
+            else if (type == "count") {  outputFileName =  "fragclust.count_table"; }
             else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
         }
         return outputFileName;

@@ -619,7 +619,7 @@ int ClassifySeqsCommand::execute(){
 		
 			m->mothurOut("Classifying sequences from " + fastaFileNames[s] + " ..." ); m->mothurOutEndLine();
 			
-			string baseTName = taxonomyFileName;
+			string baseTName = m->getSimpleName(taxonomyFileName);
 			if (taxonomyFileName == "saved") {baseTName = rdb->getSavedTaxonomy();	}
 			
             //set rippedTaxName to 

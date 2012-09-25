@@ -140,6 +140,7 @@ class MothurOut {
 		void splitAtChar(string&, vector<string>&, char);
         void splitAtChar(string&, string&, char);
 		int removeConfidences(string&);
+        string removeQuotes(string);
         string makeList(vector<string>&);
         bool isSubset(vector<string>, vector<string>); //bigSet, subset
 		

@@ -10,6 +10,7 @@
 #include "removelineagecommand.h"
 #include "sequence.hpp"
 #include "listvector.hpp"
+#include "counttable.h"
 
 //**********************************************************************************************************************
 vector<string> RemoveLineageCommand::setParameters(){	
@@ -73,7 +74,7 @@ string RemoveLineageCommand::getOutputFileNameTag(string type, string inputName=
             else if (type == "name")        {   outputFileName =  "pick" + m->getExtension(inputName);   }
             else if (type == "group")       {   outputFileName =  "pick" + m->getExtension(inputName);   }
             else if (type == "list")        {   outputFileName =  "pick" + m->getExtension(inputName);   }
-            else if (type == "count")       {   outputFileName =  "pick.count.table";   }
+            else if (type == "count")       {   outputFileName =  "pick.count_table";   }
             else if (type == "alignreport")      {   outputFileName =  "pick.align.report";   }
             else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
         }
@@ -585,6 +586,13 @@ int RemoveLineageCommand::readCount(){
         }
         in.close();
 		out.close();
+        
+        //check for groups that have been eliminated
+        CountTable ct;
+        if (ct.testGroups(outputFileName)) {
+            ct.readTable(outputFileName);
+            ct.printTable(outputFileName);
+        }
 		
 		if (wroteSomething == false) {  m->mothurOut("Your group file contains only sequences from " + taxons + "."); m->mothurOutEndLine();  }
 		outputTypes["count"].push_back(outputFileName); outputNames.push_back(outputFileName);
@@ -678,15 +686,17 @@ int RemoveLineageCommand::readTax(){
 			
 			bool remove = false;
 			
+            string noQuotesTax = m->removeQuotes(tax);
+            
 			for (int j = 0; j < listOfTaxons.size(); j++) {
-				string newtax = tax;
+				string newtax = noQuotesTax;
 				
 				//if the users file contains confidence scores we want to ignore them when searching for the taxons, unless the taxon has them
 				if (!taxonsHasConfidence[j]) {
 					
-					int hasConfidences = tax.find_first_of('(');
+					int hasConfidences = noQuotesTax.find_first_of('(');
 					if (hasConfidences != string::npos) { 
-						newtax = tax;
+						newtax = noQuotesTax;
 						m->removeConfidences(newtax);
 					}
 					
@@ -701,7 +711,7 @@ int RemoveLineageCommand::readTax(){
 					}
 					
 				}else{//if taxons has them and you don't them remove taxons
-					int hasConfidences = tax.find_first_of('(');
+					int hasConfidences = noQuotesTax.find_first_of('(');
 					if (hasConfidences == string::npos) { 
 						
 						int pos = newtax.find(noConfidenceTaxons[j]);
@@ -716,10 +726,10 @@ int RemoveLineageCommand::readTax(){
 					}else { //both have confidences so we want to make sure the users confidences are greater then or equal to the taxons
 						//first remove confidences from both and see if the taxonomy exists
 						
-						string noNewTax = tax;
-						int hasConfidences = tax.find_first_of('(');
+						string noNewTax = noQuotesTax;
+						int hasConfidences = noQuotesTax.find_first_of('(');
 						if (hasConfidences != string::npos) { 
-							noNewTax = tax;
+							noNewTax = noQuotesTax;
 							m->removeConfidences(noNewTax);
 						}
 						

@@ -247,26 +247,6 @@ string TreeMap::getGroup(string sequenceName) {
 	}
 		
 }
-/************************************************************
-void TreeMap::setIndex(string seq, int index) {
-	it = treemap.find(seq);
-	if (it != treemap.end()) { //sequence name was in group file
-		treemap[seq].vectorIndex = index;	
-	}else {
-		treemap[seq].vectorIndex = index;
-		treemap[seq].groupname = "not found";
-	}
-}
-/************************************************************
-int TreeMap::getIndex(string seq) {
-	
-	it = treemap.find(seq);
-	// if it is a valid sequence name then return index
-	if (it != treemap.end()) { return treemap[seq].vectorIndex; }
-	// if not return error code
-	else { return -1; }
-	
-}
 /************************************************************/
 
 void TreeMap::setNamesOfGroups(string seqGroup) {
