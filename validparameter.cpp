@@ -307,6 +307,14 @@ string ValidParameters::validFile(map<string, string>& container, string paramet
 					
 					if (!m->isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ". I suspect you entered a column formatted file as a phylip file, aborting."); m->mothurOutEndLine(); return "not found"; }
 				}
+                
+                //check for blank file
+                if (ableToOpen != 1) {
+                    if (m->isBlank(container[parameter])) {
+                        m->mothurOut("[ERROR]: " + container[parameter] + " is blank, aborting."); m->mothurOutEndLine(); return "not found"; 
+                    }
+                }
+                    
 			}
 		}else { return "not found"; }
 		

@@ -36,7 +36,6 @@ class SequenceParser {
 		int getNumGroups();
 		vector<string> getNamesOfGroups();	
 		bool isValidGroup(string);  //return true if string is a valid group
-		string getGroup(string);	//returns group of a specific sequence
 		
 		int getNumSeqs(string);		//returns the number of unique sequences in a specific group
 		vector<Sequence> getSeqs(string); //returns unique sequences in a specific group

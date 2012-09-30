@@ -5,7 +5,6 @@
 #include "mothur.h"
 #include "cluster.hpp"
 #include "rabundvector.hpp"
-#include "sparsematrix.hpp"
 
 /* This class implements the WPGMA, weighted average neighbor clustering algorithm */
 

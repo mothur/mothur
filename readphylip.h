@@ -20,6 +20,7 @@ public:
 	ReadPhylipMatrix(string, bool);
 	~ReadPhylipMatrix();
 	int read(NameAssignment*);
+    int read(CountTable*);
 private:
 	ifstream fileHandle;
 	string distFile;

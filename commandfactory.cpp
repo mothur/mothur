@@ -135,6 +135,7 @@
 #include "makecontigscommand.h"
 #include "loadlogfilecommand.h"
 #include "classifysharedcommand.h"
+#include "sffmultiplecommand.h"
 
 /*******************************************************/
 
@@ -291,8 +292,9 @@ CommandFactory::CommandFactory(){
     commands["make.contigs"]        = "make.contigs";
     commands["load.logfile"]        = "load.logfile";
     commands["make.table"]          = "make.table";
-	commands["quit"]				= "MPIEnabled";
-    commands["classify.shared"]     = "classify.shared";
+    commands["sff.multiple"]        = "sff.multiple";
+	commands["classify.shared"]     = "classify.shared";
+	commands["quit"]				= "MPIEnabled"; 
 
 }
 /***********************************************************/
@@ -506,6 +508,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         else if(commandName == "make.contigs")          {	command = new MakeContigsCommand(optionString);             }
         else if(commandName == "load.logfile")          {	command = new LoadLogfileCommand(optionString);             }
         else if(commandName == "classify.shared")       {   command = new ClassifySharedCommand(optionString);          }
+        else if(commandName == "sff.multiple")          {	command = new SffMultipleCommand(optionString);             }
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -661,6 +664,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
         else if(commandName == "make.contigs")          {	pipecommand = new MakeContigsCommand(optionString);             }
         else if(commandName == "load.logfile")          {	pipecommand = new LoadLogfileCommand(optionString);             }
         else if(commandName == "classify.shared")       {   command = new ClassifySharedCommand(optionString);          }
+        else if(commandName == "sff.multiple")          {	pipecommand = new SffMultipleCommand(optionString);             }
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -802,6 +806,7 @@ Command* CommandFactory::getCommand(string commandName){
         else if(commandName == "make.contigs")          {	shellcommand = new MakeContigsCommand();            }
         else if(commandName == "load.logfile")          {	shellcommand = new LoadLogfileCommand();            }
         else if(commandName == "classify.shared")       {   shellcommand = new ClassifySharedCommand();         }
+        else if(commandName == "sff.multiple")          {	shellcommand = new SffMultipleCommand();            }
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;

@@ -50,7 +50,7 @@ class AlignCheckCommand : public Command {
 	
 	private:
 		vector<int> structMap;
-		string mapfile, fastafile, outputDir, namefile;
+		string mapfile, fastafile, outputDir, namefile, countfile;
 		bool abort;
 		int seqLength, haderror;
 		vector<string> outputNames;

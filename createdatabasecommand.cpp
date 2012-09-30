@@ -396,7 +396,7 @@ int CreateDatabaseCommand::execute(){
                 
                 //sanity check
                 if (totalAbund != classifyOtuSizes[index]) {
-                    m->mothurOut("[ERROR: OTU " + m->currentBinLabels[h] + " contains " + toString(totalAbund) + " sequence, but the rep and taxonomy files indicated this OTU should have " + toString(classifyOtuSizes[index]) + ". Make sure you are using files for the same distance.\n"); m->control_pressed = true;   break;
+                    m->mothurOut("[WARNING]: OTU " + m->currentBinLabels[h] + " contains " + toString(totalAbund) + " sequence, but the rep and taxonomy files indicated this OTU should have " + toString(classifyOtuSizes[index]) + ". Make sure you are using files for the same distance.\n"); //m->control_pressed = true;   break;
                 }
                 
                 //output repSeq

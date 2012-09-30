@@ -13,6 +13,7 @@
 
 #include "command.hpp"
 #include "sequence.hpp"
+#include "counttable.h"
 
 /************************************************************/
 struct seqRNode {
@@ -46,8 +47,9 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
+    CountTable ct;
 	bool abort;
-	string fastafile, namefile, outputDir;
+	string fastafile, namefile, countfile, outputDir;
 	int diffs, percent;
 	vector<seqRNode> alignSeqs; 
 	map<string, string> names; //represents the names file first column maps to second column

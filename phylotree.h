@@ -44,7 +44,7 @@ public:
 	TaxNode get(int i);				
 	TaxNode get(string seqName);
 	string getName(int i);			
-	int getIndex(string seqName);	
+	int getGenusIndex(string seqName);	
 	string getFullTaxonomy(string);	 //pass a sequence name return taxonomy
 	
 	int getMaxLevel()		{	return maxLevel;	}
@@ -63,7 +63,8 @@ private:
 	vector<int> genusIndex; //holds the indexes in tree where the genus level taxonomies are stored
 	vector<int> totals; //holds the numSeqs at each genus level taxonomy
 	map<string, int> name2Taxonomy;  //maps name to index in tree
-	map<int, int> uniqueTaxonomies;  //map of unique taxonomies
+    map<string, int> name2GenusNodeIndex;
+	set<int> uniqueTaxonomies;  //map of unique taxonomies
 	map<int, int> leafNodes; //used to create static reference taxonomy file
 	//void print(int, ofstream&);
 	int numNodes;

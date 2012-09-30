@@ -47,7 +47,7 @@ private:
 	vector<int> processIDS;   //processid
 	vector<string> outputNames;
 	
-	string method, fileroot, tag, outputDir, phylipfile, columnfile, namefile, distfile, format, showabund, timing, splitmethod, taxFile, fastafile;
+	string method, fileroot, tag, outputDir, phylipfile, columnfile, namefile, countfile, distfile, format, showabund, timing, splitmethod, taxFile, fastafile;
 	double cutoff, splitcutoff;
 	int precision, length, processors, taxLevelCutoff;
 	bool print_start, abort, hard, large, classic;
@@ -62,6 +62,7 @@ private:
 	int mergeLists(vector<string>, map<float, int>, ListVector*);
 	map<float, int> completeListFile(vector<string>, string, set<string>&, ListVector*&);
 	int createMergedDistanceFile(vector< map<string, string> >);
+    int createRabund(CountTable*& ct, ListVector*& list, RAbundVector*& rabund);
 };
 
 /////////////////not working for Windows////////////////////////////////////////////////////////////
@@ -75,7 +76,7 @@ private:
 // anything to do with mothur's use of copy constructors in many of our data structures. ie. listvector 
 // is copied by nameassignment and passed to read which passes to the thread?  -westcott 2-8-12
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-/**************************************************************************************************/
+/**************************************************************************************************
 //custom data structure for threads to use.
 // This is passed by void pointer so it can be any data type
 // that can be passed using a single void pointer (LPVOID).
@@ -105,7 +106,7 @@ struct clusterData {
 	}
 };
 
-/**************************************************************************************************/
+/**************************************************************************************************
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 #else
 static DWORD WINAPI MyClusterThreadFunction(LPVOID lpParam){ 
@@ -257,7 +258,7 @@ static DWORD WINAPI MyClusterThreadFunction(LPVOID lpParam){
 } 
 #endif
 
-
+*/
 
 
 #endif

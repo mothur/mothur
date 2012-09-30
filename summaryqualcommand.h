@@ -35,7 +35,7 @@ public:
 	
 private:
 	bool abort;
-	string qualfile, outputDir, namefile;
+	string qualfile, outputDir, namefile, countfile;
 	vector<string> outputNames;
 	map<string, int> nameMap;
 	int processors;
@@ -62,20 +62,21 @@ struct seqSumQualData {
 	vector<int> position;
 	vector<int> averageQ;
 	vector< vector<int> > scores; 
-	string filename, namefile; 
+	string filename; 
 	unsigned long long start;
 	unsigned long long end;
 	int count;
 	MothurOut* m;
+    bool hasNameMap;
 	map<string, int> nameMap;
 	
 	~seqSumQualData(){}
-	seqSumQualData(string f, MothurOut* mout, unsigned long long st, unsigned long long en, string n, map<string, int> nam) {
+	seqSumQualData(string f, MothurOut* mout, unsigned long long st, unsigned long long en, bool n, map<string, int> nam) {
 		filename = f;
 		m = mout;
 		start = st;
 		end = en;
-		namefile = n;
+		hasNameMap = n;
 		nameMap = nam;
 		count = 0;
 	}
@@ -109,7 +110,7 @@ static DWORD WINAPI MySeqSumQualThreadFunction(LPVOID lpParam){
 			if (current.getName() != "") {
 			
 				int num = 1;
-				if (pDataArray->namefile != "") {
+				if (pDataArray->hasNameMap) {
 					//make sure this sequence is in the namefile, else error 
 					map<string, int>::iterator it = pDataArray->nameMap.find(current.getName());
 					

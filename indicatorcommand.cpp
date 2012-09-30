@@ -287,17 +287,22 @@ int IndicatorCommand::execute(){
 			string groupfile = ""; 
 			m->setTreeFile(treefile);
 			Tree* tree = new Tree(treefile); delete tree;  //extracts names from tree to make faked out groupmap
-			treeMap = new TreeMap();
+			ct = new CountTable();
 			bool mismatch = false;
-				
-			for (int i = 0; i < m->Treenames.size(); i++) { 
-				//sanity check - is this a group that is not in the sharedfile?
+            
+            set<string> nameMap;
+            map<string, string> groupMap;
+            set<string> gps;
+            for (int i = 0; i < m->Treenames.size(); i++) { 
+                nameMap.insert(m->Treenames[i]); 
+                //sanity check - is this a group that is not in the sharedfile?
 				if (designfile == "") {
+                    if (i == 0) { gps.insert("Group1"); }
 					if (!(m->inUsersGroups(m->Treenames[i], m->getAllGroups()))) {
 						m->mothurOut("[ERROR]: " + m->Treenames[i] + " is not a group in your shared or relabund file."); m->mothurOutEndLine();
 						mismatch = true;
 					}
-					treeMap->addSeq(m->Treenames[i], "Group1"); 
+					groupMap[m->Treenames[i]] = "Group1"; 
 				}else{
 					vector<string> myGroups; myGroups.push_back(m->Treenames[i]);
 					vector<string> myNames = designMap->getNamesSeqs(myGroups);
@@ -308,9 +313,10 @@ int IndicatorCommand::execute(){
 							mismatch = true;
 						}
 					}
-					treeMap->addSeq(m->Treenames[i], "Group1");
+					groupMap[m->Treenames[i]] = "Group1";
 				}
-			}
+            }
+            ct->createTable(nameMap, groupMap, gps);
 			
 			if ((designfile != "") && (m->Treenames.size() != Groups.size())) { cout << Groups.size() << '\t' << m->Treenames.size() << endl; m->mothurOut("[ERROR]: You design file does not match your tree, aborting."); m->mothurOutEndLine(); mismatch = true; }
 					
@@ -318,14 +324,14 @@ int IndicatorCommand::execute(){
 				if (designfile != "") { delete designMap; }
 				if (sharedfile != "") {  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } }
 				else { for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  } }
-				delete treeMap;
+				delete ct;
 				return 0;
 			}
 		 
 			read = new ReadNewickTree(treefile);
-			int readOk = read->read(treeMap); 
+			int readOk = read->read(ct); 
 			
-			if (readOk != 0) { m->mothurOut("Read Terminated."); m->mothurOutEndLine(); delete treeMap; delete read; return 0; }
+			if (readOk != 0) { m->mothurOut("Read Terminated."); m->mothurOutEndLine(); delete ct; delete read; return 0; }
 			
 			vector<Tree*> T = read->getTrees();
 			
@@ -335,19 +341,18 @@ int IndicatorCommand::execute(){
 				if (designfile != "") { delete designMap; }
 				if (sharedfile != "") {  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } }
 				else { for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  } }
-				for (int i = 0; i < T.size(); i++) {  delete T[i];  }  delete treeMap; return 0; 
+				for (int i = 0; i < T.size(); i++) {  delete T[i];  }  delete ct; return 0; 
 			}
             
-			map<string, string> nameMap;	
-			T[0]->assembleTree(nameMap);
+			T[0]->assembleTree();
 					
 			/***************************************************/
 			//    create ouptut tree - respecting pickedGroups //
 			/***************************************************/
-			Tree* outputTree = new Tree(m->getNumGroups(), treeMap); 
+			Tree* outputTree = new Tree(m->getNumGroups(), ct); 
 			
 			outputTree->getSubTree(T[0], m->getGroups());
-			outputTree->assembleTree(nameMap);
+			outputTree->assembleTree();
 				
 			//no longer need original tree, we have output tree to use and label
 			for (int i = 0; i < T.size(); i++) {  delete T[i];  } 
@@ -356,14 +361,14 @@ int IndicatorCommand::execute(){
 				if (designfile != "") { delete designMap; }
 				if (sharedfile != "") {  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } }
 				else { for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  } }
-				delete outputTree; delete treeMap;  return 0; 
+				delete outputTree; delete ct;  return 0; 
 			}
 			
 			/***************************************************/
 			//		get indicator species values			   //
 			/***************************************************/
 			GetIndicatorSpecies(outputTree);
-			delete outputTree; delete treeMap;
+			delete outputTree; delete ct;
 			
 		}else { //run with design file only
 			//get indicator species

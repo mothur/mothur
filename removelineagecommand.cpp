@@ -10,13 +10,15 @@
 #include "removelineagecommand.h"
 #include "sequence.hpp"
 #include "listvector.hpp"
+#include "counttable.h"
 
 //**********************************************************************************************************************
 vector<string> RemoveLineageCommand::setParameters(){	
 	try {
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pfasta);
-		CommandParameter pname("name", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pname);
-		CommandParameter pgroup("group", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pgroup);
+        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "FNGLT", "none",false,false); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "FNGLT", "none",false,false); parameters.push_back(pcount);
+		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "FNGLT", "none",false,false); parameters.push_back(pgroup);
 		CommandParameter plist("list", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(plist);
 		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "FNGLT", "none",false,true); parameters.push_back(ptaxonomy);
 		CommandParameter palignreport("alignreport", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(palignreport);
@@ -38,9 +40,9 @@ vector<string> RemoveLineageCommand::setParameters(){
 string RemoveLineageCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The remove.lineage command reads a taxonomy file and any of the following file types: fasta, name, group, list or alignreport file.\n";
+		helpString += "The remove.lineage command reads a taxonomy file and any of the following file types: fasta, name, group, count, list or alignreport file.\n";
 		helpString += "It outputs a file containing only the sequences from the taxonomy file that are not from the taxon you requested to be removed.\n";
-		helpString += "The remove.lineage command parameters are taxon, fasta, name, group, list, taxonomy, alignreport and dups.  You must provide taxonomy unless you have a valid current taxonomy file.\n";
+		helpString += "The remove.lineage command parameters are taxon, fasta, name, group, list, taxonomy, count, alignreport and dups.  You must provide taxonomy unless you have a valid current taxonomy file.\n";
 		helpString += "The dups parameter allows you to add the entire line from a name file if you add any name from the line. default=false. \n";
 		helpString += "The taxon parameter allows you to select the taxons you would like to remove, and is required.\n";
 		helpString += "You may enter your taxons with confidence scores, doing so will remove only those sequences that belong to the taxonomy and whose cofidence scores fall below the scores you give.\n";
@@ -72,6 +74,7 @@ string RemoveLineageCommand::getOutputFileNameTag(string type, string inputName=
             else if (type == "name")        {   outputFileName =  "pick" + m->getExtension(inputName);   }
             else if (type == "group")       {   outputFileName =  "pick" + m->getExtension(inputName);   }
             else if (type == "list")        {   outputFileName =  "pick" + m->getExtension(inputName);   }
+            else if (type == "count")       {   outputFileName =  "pick.count_table";   }
             else if (type == "alignreport")      {   outputFileName =  "pick.align.report";   }
             else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
         }
@@ -94,6 +97,7 @@ RemoveLineageCommand::RemoveLineageCommand(){
 		outputTypes["group"] = tempOutNames;
 		outputTypes["alignreport"] = tempOutNames;
 		outputTypes["list"] = tempOutNames;
+        outputTypes["count"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "RemoveLineageCommand", "RemoveLineageCommand");
@@ -131,6 +135,7 @@ RemoveLineageCommand::RemoveLineageCommand(string option)  {
 			outputTypes["group"] = tempOutNames;
 			outputTypes["alignreport"] = tempOutNames;
 			outputTypes["list"] = tempOutNames;
+            outputTypes["count"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
@@ -187,6 +192,14 @@ RemoveLineageCommand::RemoveLineageCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("count");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["count"] = inputDir + it->second;		}
+				}
 			}
 
 			
@@ -223,6 +236,19 @@ RemoveLineageCommand::RemoveLineageCommand(string option)  {
 				else { 	m->mothurOut("You have no current taxonomy file and the taxonomy parameter is required."); m->mothurOutEndLine(); abort = true; }
 			}else { m->setTaxonomyFile(taxfile); }
 			
+            countfile = validParameter.validFile(parameters, "count", true);
+            if (countfile == "not open") { countfile = ""; abort = true; }
+            else if (countfile == "not found") { countfile = "";  }	
+            else { m->setCountTableFile(countfile); }
+            
+            if ((namefile != "") && (countfile != "")) {
+                m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
+            }
+            
+            if ((groupfile != "") && (countfile != "")) {
+                m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+            }
+            
 			string usedDups = "true";
 			string temp = validParameter.validFile(parameters, "dups", false);	
 			if (temp == "not found") { 
@@ -240,14 +266,16 @@ RemoveLineageCommand::RemoveLineageCommand(string option)  {
 			}
 			m->splitAtChar(taxons, listOfTaxons, '-');
 			
-			if ((fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == "") && (taxfile == ""))  { m->mothurOut("You must provide one of the following: fasta, name, group, alignreport, taxonomy or listfile."); m->mothurOutEndLine(); abort = true; }
+			if ((fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == "") && (taxfile == "") && (countfile == ""))  { m->mothurOut("You must provide one of the following: fasta, name, group, count, alignreport, taxonomy or listfile."); m->mothurOutEndLine(); abort = true; }
 		
 			if ((usedDups != "") && (namefile == "")) {  m->mothurOut("You may only use dups with the name option."); m->mothurOutEndLine();  abort = true; }			
 			
-			if ((namefile == "") && ((fastafile != "") || (taxfile != ""))){
-				vector<string> files; files.push_back(fastafile); files.push_back(taxfile);
-				parser.getNameFile(files);
-			}
+			if (countfile == "") {
+                if ((namefile == "") && ((fastafile != "") || (taxfile != ""))){
+                    vector<string> files; files.push_back(fastafile); files.push_back(taxfile);
+                    parser.getNameFile(files);
+                }
+            }
 			
 		}
 
@@ -265,6 +293,12 @@ int RemoveLineageCommand::execute(){
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		if (m->control_pressed) { return 0; }
+        
+        if (countfile != "") {
+            if ((fastafile != "") || (listfile != "") || (taxfile != "")) { 
+                m->mothurOut("\n[NOTE]: The count file should contain only unique names, so mothur assumes your fasta, list and taxonomy files also contain only uniques.\n\n");
+            }
+        }
 		
 		//read through the correct file and output lines you want to keep
 		if (taxfile != "")			{		readTax();		}  //fills the set of names to remove
@@ -273,6 +307,7 @@ int RemoveLineageCommand::execute(){
 		if (groupfile != "")		{		readGroup();	}
 		if (alignfile != "")		{		readAlign();	}
 		if (listfile != "")			{		readList();		}
+        if (countfile != "")		{		readCount();	}
 		
 		
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
@@ -308,6 +343,11 @@ int RemoveLineageCommand::execute(){
 			itTypes = outputTypes.find("taxonomy");
 			if (itTypes != outputTypes.end()) {
 				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setTaxonomyFile(current); }
+			}
+            
+            itTypes = outputTypes.find("count");
+			if (itTypes != outputTypes.end()) {
+				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setCountTableFile(current); }
 			}
 		}
 		
@@ -511,7 +551,59 @@ int RemoveLineageCommand::readName(){
 		exit(1);
 	}
 }
-
+//**********************************************************************************************************************
+int RemoveLineageCommand::readCount(){
+	try {
+		string thisOutputDir = outputDir;
+		if (outputDir == "") {  thisOutputDir += m->hasPath(countfile);  }
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(countfile)) + getOutputFileNameTag("count", countfile);
+		
+		ofstream out;
+		m->openOutputFile(outputFileName, out);
+		
+		ifstream in;
+		m->openInputFile(countfile, in);
+		
+		bool wroteSomething = false;
+		
+        string headers = m->getline(in); m->gobble(in);
+        out << headers << endl;
+        
+        string name, rest; int thisTotal;
+        while (!in.eof()) {
+            
+            if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+            
+            in >> name; m->gobble(in); 
+            in >> thisTotal; m->gobble(in);
+            rest = m->getline(in); m->gobble(in);
+            if (m->debug) { m->mothurOut("[DEBUG]: " + name + '\t' + rest + "\n"); }
+            
+            if (names.count(name) == 0) {
+                out << name << '\t' << thisTotal << '\t' << rest << endl;
+                wroteSomething = true;
+            }
+        }
+        in.close();
+		out.close();
+        
+        //check for groups that have been eliminated
+        CountTable ct;
+        if (ct.testGroups(outputFileName)) {
+            ct.readTable(outputFileName);
+            ct.printTable(outputFileName);
+        }
+		
+		if (wroteSomething == false) {  m->mothurOut("Your group file contains only sequences from " + taxons + "."); m->mothurOutEndLine();  }
+		outputTypes["count"].push_back(outputFileName); outputNames.push_back(outputFileName);
+        
+		return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "RemoveLineageCommand", "readCount");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 int RemoveLineageCommand::readGroup(){
 	try {
@@ -594,15 +686,17 @@ int RemoveLineageCommand::readTax(){
 			
 			bool remove = false;
 			
+            string noQuotesTax = m->removeQuotes(tax);
+            
 			for (int j = 0; j < listOfTaxons.size(); j++) {
-				string newtax = tax;
+				string newtax = noQuotesTax;
 				
 				//if the users file contains confidence scores we want to ignore them when searching for the taxons, unless the taxon has them
 				if (!taxonsHasConfidence[j]) {
 					
-					int hasConfidences = tax.find_first_of('(');
+					int hasConfidences = noQuotesTax.find_first_of('(');
 					if (hasConfidences != string::npos) { 
-						newtax = tax;
+						newtax = noQuotesTax;
 						m->removeConfidences(newtax);
 					}
 					
@@ -617,7 +711,7 @@ int RemoveLineageCommand::readTax(){
 					}
 					
 				}else{//if taxons has them and you don't them remove taxons
-					int hasConfidences = tax.find_first_of('(');
+					int hasConfidences = noQuotesTax.find_first_of('(');
 					if (hasConfidences == string::npos) { 
 						
 						int pos = newtax.find(noConfidenceTaxons[j]);
@@ -632,10 +726,10 @@ int RemoveLineageCommand::readTax(){
 					}else { //both have confidences so we want to make sure the users confidences are greater then or equal to the taxons
 						//first remove confidences from both and see if the taxonomy exists
 						
-						string noNewTax = tax;
-						int hasConfidences = tax.find_first_of('(');
+						string noNewTax = noQuotesTax;
+						int hasConfidences = noQuotesTax.find_first_of('(');
 						if (hasConfidences != string::npos) { 
-							noNewTax = tax;
+							noNewTax = noQuotesTax;
 							m->removeConfidences(noNewTax);
 						}
 						

@@ -14,7 +14,6 @@ vector<string> SensSpecCommand::setParameters(){
 	try {
 		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(plist);
 		CommandParameter pphylip("phylip", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "none",false,false); parameters.push_back(pphylip);
-		//CommandParameter pname("name", "InputTypes", "", "", "none", "none", "ColumnName",false,false); parameters.push_back(pname);
 		CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "none",false,false); parameters.push_back(pcolumn);
 		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
 		CommandParameter pcutoff("cutoff", "Number", "", "-1.00", "", "", "",false,false); parameters.push_back(pcutoff);
@@ -136,16 +135,7 @@ SensSpecCommand::SensSpecCommand(string option)  {
 					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["column"] = inputDir + it->second;		}
-				}
-				
-				//it = parameters.find("name");
-				//user has given a template file
-				//if(it != parameters.end()){ 
-					//path = m->hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					//if (path == "") {	parameters["name"] = inputDir + it->second;		}
-				//}
-				
+				}				
 			}
 			//check for required parameters
 			listFile = validParameter.validFile(parameters, "list", true);
@@ -196,12 +186,6 @@ SensSpecCommand::SensSpecCommand(string option)  {
 			else if(!m->isTrue(temp))	{	hard = 0;	}
 			else if(m->isTrue(temp))	{	hard = 1;	}
 			
-//			temp = validParameter.validFile(parameters, "name", true);
-//			if (temp == "not found")	{	nameFile = "";		}
-//			else if(temp == "not open")	{	abort = true;		}
-//			else						{	nameFile = temp;	}
-//			cout << "name:\t" << nameFile << endl;
-
 			temp = validParameter.validFile(parameters, "cutoff", false);		if (temp == "not found") { temp = "-1.00"; }
 			m->mothurConvert(temp, cutoff);  
 //			cout << cutoff << endl;

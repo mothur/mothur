@@ -37,29 +37,56 @@
 
 
 #include "mothurout.h"
+#include "listvector.hpp"
+#include "groupmap.h"
 
 class CountTable {
     
     public:
     
-        CountTable() { m = MothurOut::getInstance(); hasGroups = false; total = 0; }
+        CountTable() { m = MothurOut::getInstance(); hasGroups = false; total = 0; uniques = 0; }
         ~CountTable() {}
     
-        int readTable(string);
+        //reads and creates smart enough to eliminate groups with zero counts 
+        int createTable(set<string>&, map<string, string>&, set<string>&); //seqNames, seqName->group, groupNames 
+        int createTable(string, string, bool); //namefile, groupfile, createGroup
+        int readTable(string); 
+    
+        int printTable(string);
+        int printHeaders(ofstream&);
+        int printSeq(ofstream&, string);
+        bool testGroups(string file); //used to check if file has group data without reading it.
+        int copy(CountTable*);
     
         bool hasGroupInfo() { return hasGroups; }
         int getNumGroups() { return groups.size(); }
         vector<string> getNamesOfGroups() {  return groups;   }  //returns group names, if no group info vector is blank.
+        int addGroup(string);
+        int removeGroup(string);
+        
+        int renameSeq(string, string); //used to change name of sequence for use with trees
+        int setAbund(string, string, int); //set abundance number of seqs for that group for that seq
+        int push_back(string); //add a sequence 
+        int push_back(string, int); //add a sequence 
+        int push_back(string, vector<int>); //add a sequence with group info
+        int remove(string); //remove seq
+        int get(string); //returns unique sequence index for reading distance matrices like NameAssignment
+        int size() { return indexNameMap.size(); }
     
+        vector<string> getGroups(string); //returns vector of groups represented by this sequences
         vector<int> getGroupCounts(string);  //returns group counts for a seq passed in, if no group info is in file vector is blank. Order is the same as the groups returned by getGroups function.
         int getGroupCount(string, string); //returns number of seqs for that group for that seq
         int getGroupCount(string); // returns total seqs for that group
-        int getNumSeqs(string); //returns total seqs for that seq
+        int getNumSeqs(string); //returns total seqs for that seq, 0 if not found 
         int getNumSeqs() { return total; } //return total number of seqs
         int getNumUniqueSeqs() { return uniques; } //return number of unique/representative seqs
         int getGroupIndex(string); //returns index in getGroupCounts vector of specific group
+    
         vector<string> getNamesOfSeqs();
+        vector<string> getNamesOfSeqs(string);
         int mergeCounts(string, string); //combines counts for 2 seqs, saving under the first name passed in.
+        ListVector getListVector();
+        map<string, int> getNameMap();
     
     private:
         string filename;

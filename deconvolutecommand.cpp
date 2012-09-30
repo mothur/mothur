@@ -14,7 +14,8 @@
 vector<string> DeconvoluteCommand::setParameters(){	
 	try {
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
-		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
+		CommandParameter pname("name", "InputTypes", "", "", "namecount", "none", "none",false,false); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "namecount", "none", "none",false,false); parameters.push_back(pcount);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
 		
@@ -31,7 +32,7 @@ vector<string> DeconvoluteCommand::setParameters(){
 string DeconvoluteCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The unique.seqs command reads a fastafile and creates a namesfile.\n";
+		helpString += "The unique.seqs command reads a fastafile and creates a name or count file.\n";
 		helpString += "It creates a file where the first column is the groupname and the second column is a list of sequence names who have the same sequence. \n";
 		helpString += "If the sequence is unique the second column will just contain its name. \n";
 		helpString += "The unique.seqs command parameters are fasta and name.  fasta is required, unless there is a valid current fasta file.\n";
@@ -56,6 +57,7 @@ string DeconvoluteCommand::getOutputFileNameTag(string type, string inputName=""
         else {
             if (type == "fasta") {  outputFileName =  "unique" + m->getExtension(inputName); }
             else if (type == "name") {  outputFileName =  "names"; }
+            else if (type == "count") {  outputFileName =  "count_table"; }
             else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
         }
         return outputFileName;
@@ -73,6 +75,7 @@ DeconvoluteCommand::DeconvoluteCommand(){
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
 		outputTypes["name"] = tempOutNames;
+        outputTypes["count"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "DeconvoluteCommand", "DeconvoluteCommand");
@@ -106,6 +109,7 @@ DeconvoluteCommand::DeconvoluteCommand(string option)  {
 			vector<string> tempOutNames;
 			outputTypes["fasta"] = tempOutNames;
 			outputTypes["name"] = tempOutNames;
+            outputTypes["count"] = tempOutNames;
 		
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -126,6 +130,14 @@ DeconvoluteCommand::DeconvoluteCommand(string option)  {
 					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
+				}
+                
+                it = parameters.find("count");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
 			}
 
@@ -149,11 +161,21 @@ DeconvoluteCommand::DeconvoluteCommand(string option)  {
 			if (oldNameMapFName == "not open") { oldNameMapFName = ""; abort = true; }
 			else if (oldNameMapFName == "not found"){	oldNameMapFName = "";	}
 			else { m->setNameFile(oldNameMapFName); }
+            
+            countfile = validParameter.validFile(parameters, "count", true);
+			if (countfile == "not open") { abort = true; countfile = ""; }	
+			else if (countfile == "not found") { countfile = ""; }
+			else { m->setCountTableFile(countfile); }
 			
-			if (oldNameMapFName == "") {
-				vector<string> files; files.push_back(inFastaName);
-				parser.getNameFile(files);
-			}
+            if ((countfile != "") && (oldNameMapFName != "")) { m->mothurOut("When executing a unique.seqs command you must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
+			
+
+			if (countfile == "") {
+                if (oldNameMapFName == "") {
+                    vector<string> files; files.push_back(inFastaName);
+                    parser.getNameFile(files);
+                }
+            }
 			
 		}
 
@@ -171,6 +193,7 @@ int DeconvoluteCommand::execute() {
 
 		//prepare filenames and open files
 		string outNameFile = outputDir + m->getRootName(m->getSimpleName(inFastaName)) + getOutputFileNameTag("name");
+        string outCountFile = outputDir + m->getRootName(m->getSimpleName(inFastaName)) + getOutputFileNameTag("count");
 		string outFastaFile = outputDir + m->getRootName(m->getSimpleName(inFastaName)) + getOutputFileNameTag("fasta", inFastaName);
 		
 		map<string, string> nameMap;
@@ -178,6 +201,11 @@ int DeconvoluteCommand::execute() {
 		if (oldNameMapFName != "")  {  
             m->readNames(oldNameMapFName, nameMap); 
             if (oldNameMapFName == outNameFile){ outNameFile = outputDir + m->getRootName(m->getSimpleName(inFastaName)) + "unique." + getOutputFileNameTag("name");   }
+        }
+        CountTable ct;
+        if (countfile != "")  {  
+            ct.readTable(countfile);
+            if (countfile == outCountFile){ outCountFile = outputDir + m->getRootName(m->getSimpleName(inFastaName)) + "unique." + getOutputFileNameTag("count");   }
         }
 		
 		if (m->control_pressed) { return 0; }
@@ -222,7 +250,10 @@ int DeconvoluteCommand::execute() {
 							sequenceStrings[seq.getAligned()] = itNames->second;
 							nameFileOrder.push_back(seq.getAligned());
 						}
-					}else {	sequenceStrings[seq.getAligned()] = seq.getName();	nameFileOrder.push_back(seq.getAligned()); }
+					}else if (countfile != "") { 
+                        ct.getNumSeqs(seq.getName()); //checks to make sure seq is in table
+                        sequenceStrings[seq.getAligned()] = seq.getName();	nameFileOrder.push_back(seq.getAligned());
+                    }else {	sequenceStrings[seq.getAligned()] = seq.getName();	nameFileOrder.push_back(seq.getAligned()); }
 				}else { //this is a dup
 					if (oldNameMapFName != "") {
 						itNames = nameMap.find(seq.getName());
@@ -232,7 +263,12 @@ int DeconvoluteCommand::execute() {
 						}else {
 							sequenceStrings[seq.getAligned()] += "," + itNames->second;
 						}
-					}else {	sequenceStrings[seq.getAligned()] += "," + seq.getName();	}
+                    }else if (countfile != "") { 
+                        int num = ct.getNumSeqs(seq.getName()); //checks to make sure seq is in table
+                        if (num != 0) { //its in the table
+                            ct.mergeCounts(itStrings->second, seq.getName()); //merges counts and saves in uniques name
+                        }
+                    }else {	sequenceStrings[seq.getAligned()] += "," + seq.getName();	}
 				}
 				
 				count++;
@@ -252,34 +288,35 @@ int DeconvoluteCommand::execute() {
 		
 		//print new names file
 		ofstream outNames;
-		m->openOutputFile(outNameFile, outNames);
+		if (countfile == "") { m->openOutputFile(outNameFile, outNames); outputNames.push_back(outNameFile); outputTypes["name"].push_back(outNameFile);  }
+        else { m->openOutputFile(outCountFile, outNames); ct.printHeaders(outNames); outputTypes["count"].push_back(outCountFile); outputNames.push_back(outCountFile); }
 		
 		for (int i = 0; i < nameFileOrder.size(); i++) {
-		//for (itStrings = sequenceStrings.begin(); itStrings != sequenceStrings.end(); itStrings++) {
-			if (m->control_pressed) { outputTypes.clear(); m->mothurRemove(outFastaFile); outNames.close(); m->mothurRemove(outNameFile); return 0; }
+			if (m->control_pressed) { outputTypes.clear(); m->mothurRemove(outFastaFile); outNames.close(); for (int j = 0; j < outputNames.size(); j++) { m->mothurRemove(outputNames[j]); } return 0; }
 			
 			itStrings = sequenceStrings.find(nameFileOrder[i]);
 			
 			if (itStrings != sequenceStrings.end()) {
-				//get rep name
-				int pos = (itStrings->second).find_first_of(',');
-			
-				if (pos == string::npos) { // only reps itself
-					outNames << itStrings->second << '\t' << itStrings->second << endl;
-				}else {
-					outNames << (itStrings->second).substr(0, pos) << '\t' << itStrings->second << endl;
-				}
+                if (countfile == "") {
+                    //get rep name
+                    int pos = (itStrings->second).find_first_of(',');
+                    
+                    if (pos == string::npos) { // only reps itself
+                        outNames << itStrings->second << '\t' << itStrings->second << endl;
+                    }else {
+                        outNames << (itStrings->second).substr(0, pos) << '\t' << itStrings->second << endl;
+                    }
+                }else {  ct.printSeq(outNames, itStrings->second);  }
 			}else{ m->mothurOut("[ERROR]: mismatch in namefile print."); m->mothurOutEndLine(); m->control_pressed = true; }
 		}
 		outNames.close();
 		
-		if (m->control_pressed) { outputTypes.clear(); m->mothurRemove(outFastaFile); m->mothurRemove(outNameFile); return 0; }
+		if (m->control_pressed) { outputTypes.clear(); m->mothurRemove(outFastaFile); for (int j = 0; j < outputNames.size(); j++) { m->mothurRemove(outputNames[j]); }  return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-		m->mothurOut(outFastaFile); m->mothurOutEndLine();	
-		m->mothurOut(outNameFile); m->mothurOutEndLine();
-		outputNames.push_back(outFastaFile);  outputNames.push_back(outNameFile); outputTypes["fasta"].push_back(outFastaFile);  outputTypes["name"].push_back(outNameFile); 
+		outputNames.push_back(outFastaFile);   outputTypes["fasta"].push_back(outFastaFile);  
+        for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
 		m->mothurOutEndLine();
 
 		//set fasta file as new current fastafile
@@ -292,6 +329,11 @@ int DeconvoluteCommand::execute() {
 		itTypes = outputTypes.find("name");
 		if (itTypes != outputTypes.end()) {
 			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setNameFile(current); }
+		}
+        
+        itTypes = outputTypes.find("count");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setCountTableFile(current); }
 		}
 		
 		return 0;

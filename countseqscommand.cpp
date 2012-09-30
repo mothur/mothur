@@ -10,6 +10,7 @@
 #include "countseqscommand.h"
 #include "groupmap.h"
 #include "sharedutilities.h"
+#include "counttable.h"
 
 //**********************************************************************************************************************
 vector<string> CountSeqsCommand::setParameters(){	
@@ -34,7 +35,7 @@ vector<string> CountSeqsCommand::setParameters(){
 string CountSeqsCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The count.seqs aka. make.table command reads a name file and outputs a .count.table file.  You may also provide a group file to get the counts broken down by group.\n";
+		helpString += "The count.seqs aka. make.table command reads a name file and outputs a .count_table file.  You may also provide a group file to get the counts broken down by group.\n";
 		helpString += "The groups parameter allows you to indicate which groups you want to include in the counts, by default all groups in your groupfile are used.\n";
         helpString += "The large parameter indicates the name and group files are too large to fit in RAM.\n";
 		helpString += "When you use the groups parameter and a sequence does not represent any sequences from the groups you specify it is not included in the .count.summary file.\n";
@@ -58,7 +59,7 @@ string CountSeqsCommand::getOutputFileNameTag(string type, string inputName=""){
         it = outputTypes.find(type);
         if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
         else {
-            if (type == "counttable") {  outputFileName =  "count.table"; }
+            if (type == "counttable") {  outputFileName =  "count_table"; }
             else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
         }
         return outputFileName;
@@ -175,7 +176,7 @@ int CountSeqsCommand::execute(){
         int total = 0;
         if (!large) { total = processSmall(outputFileName); }
         else { total = processLarge(outputFileName);  }
-				
+        
 		if (m->control_pressed) { m->mothurRemove(outputFileName); return 0; }
 		
         //set rabund file as new current rabundfile
@@ -450,6 +451,26 @@ map<int, string> CountSeqsCommand::processNameFile(string name) {
 		in.close();
         out.close();
 		
+        if (rest != "") {
+            vector<string> pieces = m->splitWhiteSpace(rest);
+            
+            for (int i = 0; i < pieces.size(); i++) {
+                if (columnOne) {  firstCol = pieces[i]; columnOne=false; }
+                else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
+                
+                if (pairDone) { 
+                    //parse names into vector
+                    vector<string> theseNames;
+                    m->splitAtComma(secondCol, theseNames);
+                    for (int i = 0; i < theseNames.size(); i++) {  out << theseNames[i] << '\t' << count << endl;  }
+                    indexToNames[count] = firstCol;
+                    pairDone = false; 
+                    count++;
+                }
+            }
+
+        }
+        
         return indexToNames;
     }
 	catch(exception& e) {
@@ -502,6 +523,26 @@ map<int, string> CountSeqsCommand::getGroupNames(string filename, set<string>& n
 		}
 		in.close();
         out.close();
+        
+        if (rest != "") {
+            vector<string> pieces = m->splitWhiteSpace(rest);
+            
+            for (int i = 0; i < pieces.size(); i++) {
+                if (columnOne) {  firstCol = pieces[i]; columnOne=false; }
+                else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
+                
+                if (pairDone) { 
+                    it = groupIndex.find(secondCol);
+                    if (it == groupIndex.end()) { //add group, assigning the group and number so we can use vectors above
+                        groupIndex[secondCol] = count;
+                        count++;
+                    }
+                    out << firstCol << '\t' << groupIndex[secondCol] << endl; 
+                    namesOfGroups.insert(secondCol);
+                    pairDone = false; 
+                }
+            }
+        }
 		
         for (it = groupIndex.begin(); it != groupIndex.end(); it++) {  indexToGroups[it->second] = it->first;  }
         

@@ -12,7 +12,7 @@
  */
 
 #include "treecalculator.h"
-#include "treemap.h"
+#include "counttable.h"
 
 /***********************************************************************/
 
@@ -41,8 +41,8 @@ class Weighted : public TreeCalculator  {
 		map< vector<string>, set<int> > rootForGrouping;  //maps a grouping combo to the root for that combo
 		bool includeRoot;
 		
-		EstOutput driver(Tree*, vector< vector<string> >, int, int, TreeMap*); 
-		EstOutput createProcesses(Tree*, vector< vector<string> >, TreeMap*);
+		EstOutput driver(Tree*, vector< vector<string> >, int, int, CountTable*); 
+		EstOutput createProcesses(Tree*, vector< vector<string> >, CountTable*);
 		double getLengthToRoot(Tree*, int, string, string);
 };
 

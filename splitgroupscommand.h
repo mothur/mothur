@@ -42,9 +42,12 @@ public:
 private:
 	vector<string> outputNames;
 		
-	string outputDir, namefile, groupfile, groups, fastafile;
+	string outputDir, namefile, groupfile, countfile, groups, fastafile;
 	vector<string> Groups;
 	bool abort;
+    
+    int runNameGroup();
+    int runCount();
 };
 
 /***************************************************************************************/

@@ -13,9 +13,9 @@
 #include "mothur.h"
 #include "listvector.hpp"
 #include "nameassignment.hpp"
+#include "counttable.h"
 #include "sparsedistancematrix.h"
 
-class SparseMatrix;
 
 class ReadMatrix {
 
@@ -23,6 +23,7 @@ public:
 	ReadMatrix(){ DMatrix = new SparseDistanceMatrix(); m = MothurOut::getInstance();  }
 	virtual ~ReadMatrix() {}
 	virtual int read(NameAssignment*){ return 1; }
+    virtual int read(CountTable*){ return 1; }
 	
 	void setCutoff(float c)			{	cutoff = c;		}
     SparseDistanceMatrix* getDMatrix()		{	return DMatrix;		}

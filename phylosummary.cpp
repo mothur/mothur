@@ -8,21 +8,68 @@
  */
 
 #include "phylosummary.h"
-
 /**************************************************************************************************/
 
-PhyloSummary::PhyloSummary(string refTfile, string groupFile){
+PhyloSummary::PhyloSummary(string refTfile, CountTable* c){
 	try {
 		m = MothurOut::getInstance();
 		maxLevel = 0;
 		ignore = false;
+        numSeqs = 0;
 		
-		if (groupFile != "") {
-			groupmap = new GroupMap(groupFile);
-			groupmap->readMap();
+		ct = c;
+        groupmap = NULL;
+        
+		//check for necessary files
+		string taxFileNameTest = m->getFullPathName((refTfile.substr(0,refTfile.find_last_of(".")+1) + "tree.sum"));
+		ifstream FileTest(taxFileNameTest.c_str());
+		
+		if (!FileTest) { 
+			m->mothurOut("Error: can't find " + taxFileNameTest + "."); m->mothurOutEndLine(); exit(1);
 		}else{
-			groupmap = NULL;
+			readTreeStruct(FileTest);
 		}
+		
+		tree[0].rank = "0";
+		assignRank(0);
+        
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PhyloSummary", "PhyloSummary");
+		exit(1);
+	}
+}
+
+/**************************************************************************************************/
+
+PhyloSummary::PhyloSummary(CountTable* c){
+	try {
+		m = MothurOut::getInstance();
+		maxLevel = 0;
+		ignore = true;
+        numSeqs = 0;
+		
+		ct = c;
+        groupmap = NULL;
+		
+		tree.push_back(rawTaxNode("Root"));
+		tree[0].rank = "0";
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PhyloSummary", "PhyloSummary");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+PhyloSummary::PhyloSummary(string refTfile, GroupMap* g){
+	try {
+		m = MothurOut::getInstance();
+		maxLevel = 0;
+		ignore = false;
+        numSeqs = 0;
+		
+		groupmap = g;
+        ct = NULL;
 				
 		//check for necessary files
 		string taxFileNameTest = m->getFullPathName((refTfile.substr(0,refTfile.find_last_of(".")+1) + "tree.sum"));
@@ -46,23 +93,18 @@ PhyloSummary::PhyloSummary(string refTfile, string groupFile){
 
 /**************************************************************************************************/
 
-PhyloSummary::PhyloSummary(string groupFile){
+PhyloSummary::PhyloSummary(GroupMap* g){
 	try {
 		m = MothurOut::getInstance();
 		maxLevel = 0;
 		ignore = true;
+        numSeqs = 0;
 		
-		if (groupFile != "") {
-			groupmap = new GroupMap(groupFile);
-			groupmap->readMap();
-		}else{
-			groupmap = NULL;
-		}
+		groupmap = g;
+        ct = NULL;
 		
 		tree.push_back(rawTaxNode("Root"));
 		tree[0].rank = "0";
-		
-		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PhyloSummary", "PhyloSummary");
@@ -78,7 +120,6 @@ int PhyloSummary::summarize(string userTfile){
         
         for (map<string, string>::iterator itTemp = temp.begin(); itTemp != temp.end();) {
             addSeqToTree(itTemp->first, itTemp->second);
-			numSeqs++;
             temp.erase(itTemp++);
         }
         
@@ -137,7 +178,9 @@ int PhyloSummary::addSeqToTree(string seqName, string seqTaxonomy){
 			childPointer = tree[currentNode].children.find(taxon);
 			
 			if(childPointer != tree[currentNode].children.end()){	//if the node already exists, update count and move on
-				if (groupmap != NULL) {
+				int thisCount = 1;
+                
+                if (groupmap != NULL) {
 					//find out the sequences group
 					string group = groupmap->getGroup(seqName);
 					
@@ -150,9 +193,27 @@ int PhyloSummary::addSeqToTree(string seqName, string seqTaxonomy){
 					if (itGroup != tree[childPointer->second].groupCount.end()) {
 						tree[childPointer->second].groupCount[group]++;
 					}
-				}
+				}else if (ct != NULL) {
+                    if (ct->hasGroupInfo()) {
+                        vector<int> groupCounts = ct->getGroupCounts(seqName);
+                        vector<string> groups = ct->getNamesOfGroups();
+                        for (int i = 0; i < groups.size(); i++) {
+                            
+                            if (groupCounts[i] != 0) {
+                                //do you have a count for this group?
+                                map<string, int>::iterator itGroup = tree[childPointer->second].groupCount.find(groups[i]);
+                                
+                                //if yes, increment it - there should not be a case where we can't find it since we load group in read
+                                if (itGroup != tree[childPointer->second].groupCount.end()) {
+                                    tree[childPointer->second].groupCount[groups[i]] += groupCounts[i];
+                                }
+                            }
+                        }
+                    }
+                    thisCount = ct->getNumSeqs(seqName);
+                }
 				
-				tree[childPointer->second].total++;
+				tree[childPointer->second].total += thisCount;
 
 				currentNode = childPointer->second;
 			}else{	
@@ -163,8 +224,8 @@ int PhyloSummary::addSeqToTree(string seqName, string seqTaxonomy){
 				
 					tree[index].parent = currentNode;
 					tree[index].level = (level+1);
-					tree[index].total = 1;
 					tree[currentNode].children[taxon] = index;
+                    int thisCount = 1;
 					
 					//initialize groupcounts
 					if (groupmap != NULL) {
@@ -184,9 +245,33 @@ int PhyloSummary::addSeqToTree(string seqName, string seqTaxonomy){
 						//if yes, increment it - there should not be a case where we can't find it since we load group in read
 						if (itGroup != tree[index].groupCount.end()) {
 							tree[index].groupCount[group]++;
-						}						
-					}
+						}
+					}else if (ct != NULL) {
+                        if (ct->hasGroupInfo()) {
+                            vector<string> mGroups = ct->getNamesOfGroups();
+                            for (int j = 0; j < mGroups.size(); j++) {
+                                tree[index].groupCount[mGroups[j]] = 0;
+                            }
+                            vector<int> groupCounts = ct->getGroupCounts(seqName);
+                            vector<string> groups = ct->getNamesOfGroups();
+                        
+                            for (int i = 0; i < groups.size(); i++) {
+                                if (groupCounts[i] != 0) {
+                                   
+                                    //do you have a count for this group?
+                                    map<string, int>::iterator itGroup = tree[index].groupCount.find(groups[i]);
+                                     
+                                    //if yes, increment it - there should not be a case where we can't find it since we load group in read
+                                    if (itGroup != tree[index].groupCount.end()) {
+                                        tree[index].groupCount[groups[i]]+=groupCounts[i];
+                                    }
+                                }
+                            }
+                        }
+                        thisCount = ct->getNumSeqs(seqName);
+                    }
 					
+                    tree[index].total = thisCount;
 					currentNode = index;
 					
 				}else{ //otherwise, error
@@ -210,7 +295,7 @@ int PhyloSummary::addSeqToTree(string seqName, string seqTaxonomy){
 }
 /**************************************************************************************************/
 
-int PhyloSummary::addSeqToTree(string seqTaxonomy, vector<string> names){
+int PhyloSummary::addSeqToTree(string seqTaxonomy, map<string, bool> containsGroup){
 	try {
 		numSeqs++;
 		
@@ -235,32 +320,12 @@ int PhyloSummary::addSeqToTree(string seqTaxonomy, vector<string> names){
 			childPointer = tree[currentNode].children.find(taxon);
 			
 			if(childPointer != tree[currentNode].children.end()){	//if the node already exists, update count and move on
-				if (groupmap != NULL) {
+                for (map<string, bool>::iterator itGroup = containsGroup.begin(); itGroup != containsGroup.end(); itGroup++) {
+                    if (itGroup->second == true) {
+                        tree[childPointer->second].groupCount[itGroup->first]++;
+                    }
+                }
 					
-					map<string, bool> containsGroup; 
-					vector<string> mGroups = groupmap->getNamesOfGroups();
-					for (int j = 0; j < mGroups.size(); j++) {
-						containsGroup[mGroups[j]] = false;
-					}
-					
-					for (int k = 0; k < names.size(); k++) {
-						//find out the sequences group
-						string group = groupmap->getGroup(names[k]);
-					
-						if (group == "not found") {  m->mothurOut("[WARNING]: " + names[k] + " is not in your groupfile, and will be included in the overall total, but not any group total."); m->mothurOutEndLine();  }
-						else {
-							containsGroup[group] = true;
-						}
-					}
-					
-					for (map<string, bool>::iterator itGroup = containsGroup.begin(); itGroup != containsGroup.end(); itGroup++) {
-						if (itGroup->second == true) {
-							tree[childPointer->second].groupCount[itGroup->first]++;
-						}
-					}
-					
-				}
-				
 				tree[childPointer->second].total++;
 				
 				currentNode = childPointer->second;
@@ -274,33 +339,12 @@ int PhyloSummary::addSeqToTree(string seqTaxonomy, vector<string> names){
 					tree[index].level = (level+1);
 					tree[index].total = 1;
 					tree[currentNode].children[taxon] = index;
-					
-					//initialize groupcounts
-					if (groupmap != NULL) {
-						map<string, bool> containsGroup; 
-						vector<string> mGroups = groupmap->getNamesOfGroups();
-						for (int j = 0; j < mGroups.size(); j++) {
-							tree[index].groupCount[mGroups[j]] = 0;
-							containsGroup[mGroups[j]] = false;
-						}
 						
-						
-						for (int k = 0; k < names.size(); k++) {
-							//find out the sequences group
-							string group = groupmap->getGroup(names[k]);
-							
-							if (group == "not found") {  m->mothurOut("[WARNING]: " + names[k] + " is not in your groupfile, and will be included in the overall total, but not any group total."); m->mothurOutEndLine();  }
-							else {
-								containsGroup[group] = true;
-							}
-						}
-						
-						for (map<string, bool>::iterator itGroup = containsGroup.begin(); itGroup != containsGroup.end(); itGroup++) {
-							if (itGroup->second == true) {
-								tree[index].groupCount[itGroup->first]++;
-							}
-						}
-					}
+                    for (map<string, bool>::iterator itGroup = containsGroup.begin(); itGroup != containsGroup.end(); itGroup++) {
+                        if (itGroup->second == true) {
+                            tree[index].groupCount[itGroup->first]++;
+                        }
+                    }
 					
 					currentNode = index;
 					
@@ -349,17 +393,24 @@ void PhyloSummary::print(ofstream& out){
 	try {
 		
 		if (ignore) { assignRank(0); }
-	
+        vector<string> mGroups;
 		//print labels
 		out << "taxlevel\t rankID\t taxon\t daughterlevels\t total\t";
 		if (groupmap != NULL) {
 			//so the labels match the counts below, since the map sorts them automatically...
 			//sort(groupmap->namesOfGroups.begin(), groupmap->namesOfGroups.end());
-			vector<string> mGroups = groupmap->getNamesOfGroups();
+            mGroups = groupmap->getNamesOfGroups();
 			for (int i = 0; i < mGroups.size(); i++) {
 				out << mGroups[i] << '\t';
 			}
-		}
+		}else if (ct != NULL) {
+            if (ct->hasGroupInfo()) {
+                mGroups = ct->getNamesOfGroups();
+                for (int i = 0; i < mGroups.size(); i++) {
+                    out << mGroups[i] << '\t';
+                }
+            }
+        }
 		
 		out << endl;
 		
@@ -373,9 +424,10 @@ void PhyloSummary::print(ofstream& out){
 				tree[0].total += tree[it->second].total;
 				
 				if (groupmap != NULL) {
-					vector<string> mGroups = groupmap->getNamesOfGroups();
 					for (int i = 0; i < mGroups.size(); i++) { tree[0].groupCount[mGroups[i]] += tree[it->second].groupCount[mGroups[i]]; } 
-				}
+				}else if ( ct != NULL) {
+                    if (ct->hasGroupInfo()) { for (int i = 0; i < mGroups.size(); i++) { tree[0].groupCount[mGroups[i]] += tree[it->second].groupCount[mGroups[i]]; } }
+                }
 			}
 		}
 		
@@ -384,12 +436,10 @@ void PhyloSummary::print(ofstream& out){
 		
 		
 		if (groupmap != NULL) {
-			//for (itGroup = tree[0].groupCount.begin(); itGroup != tree[0].groupCount.end(); itGroup++) {
-			//	out << itGroup->second << '\t';
-			//}
-			vector<string> mGroups = groupmap->getNamesOfGroups();
-			for (int i = 0; i < mGroups.size(); i++) {  out << tree[0].groupCount[mGroups[i]] << '\t'; } 
-		}
+			for (int i = 0; i < mGroups.size(); i++) {  out << tree[0].groupCount[mGroups[i]] << '\t'; }  
+        }else if ( ct != NULL) {
+            if (ct->hasGroupInfo()) { for (int i = 0; i < mGroups.size(); i++) {  out << tree[0].groupCount[mGroups[i]] << '\t'; } }
+        }
 		out << endl;
 		
 		//print rest
@@ -427,7 +477,12 @@ void PhyloSummary::print(int i, ofstream& out){
 					//}
 					vector<string> mGroups = groupmap->getNamesOfGroups();
 					for (int i = 0; i < mGroups.size(); i++) {  out << tree[it->second].groupCount[mGroups[i]] << '\t'; } 
-				}
+				}else if (ct != NULL) {
+                    if (ct->hasGroupInfo()) {
+                        vector<string> mGroups = ct->getNamesOfGroups();
+                        for (int i = 0; i < mGroups.size(); i++) {  out << tree[it->second].groupCount[mGroups[i]] << '\t'; } 
+                    }
+                }
 				out << endl;
 				
 			}
@@ -473,7 +528,13 @@ void PhyloSummary::readTreeStruct(ifstream& in){
 				for (int j = 0; j < (groupmap->getNamesOfGroups()).size(); j++) {
 					tree[i].groupCount[(groupmap->getNamesOfGroups())[j]] = 0;
 				}
-			}
+			}else if (ct != NULL) {
+                if (ct->hasGroupInfo()) {
+                    for (int j = 0; j < (ct->getNamesOfGroups()).size(); j++) {
+                        tree[i].groupCount[(ct->getNamesOfGroups())[j]] = 0;
+                    }
+                }
+            }
 			
 			tree[i].total = 0;
 			

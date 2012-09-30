@@ -61,7 +61,8 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
 					names.push_back(temp.getName());
 					database->addSequence(temp);	
 				}
-				database->generateDB();
+				if ((method == "kmer") && (!shortcuts)) {;} //don't print
+                else {database->generateDB(); }
 			}else if ((method == "kmer") && (!needToGenerate)) {	
 				ifstream kmerFileTest(kmerDBName.c_str());
 				database->readKmerDB(kmerFileTest);	
@@ -200,7 +201,8 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
 				}
 				fastaFile.close();
 
-				database->generateDB();
+                if ((method == "kmer") && (!shortcuts)) {;} //don't print
+                else {database->generateDB(); } 
 				
 			}else if ((method == "kmer") && (!needToGenerate)) {	
 				ifstream kmerFileTest(kmerDBName.c_str());
@@ -260,9 +262,6 @@ int Classify::readTaxonomy(string file) {
 		MPI_File inMPI;
 		MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
 		MPI_Comm_size(MPI_COMM_WORLD, &processors);
-
-		//char* inFileName = new char[file.length()];
-		//memcpy(inFileName, file.c_str(), file.length());
 		
 		char inFileName[1024];
 		strcpy(inFileName, file.c_str());

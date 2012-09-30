@@ -15,11 +15,10 @@
 #include "groupmap.h"
 #include "validcalculator.h"
 #include "tree.h"
-#include "treemap.h"
+#include "counttable.h"
 #include "readmatrix.hpp"
 #include "readcolumn.h"
 #include "readphylip.h"
-#include "sparsematrix.hpp"
 #include "sharedsobscollectsummary.h"
 #include "sharedchao1.h"
 #include "sharedace.h"
@@ -69,8 +68,6 @@
 	They can also use as many or as few calculators as they wish. */
 	
 
-typedef list<PCell>::iterator MatData;
-
 class TreeGroupCommand : public Command {
 	
 public:
@@ -107,13 +104,13 @@ private:
 	
 	NameAssignment* nameMap;
 	ListVector* list;
-	TreeMap* tmap;
+	CountTable* ct;
 	Tree* t;
     InputData* input;
 	vector<Calculator*> treeCalculators;
 	vector<SharedRAbundVector*> lookup;
 	string lastLabel;
-	string format, groupNames, filename, sharedfile, inputfile;
+	string format, groupNames, filename, sharedfile, countfile, inputfile;
 	int numGroups, subsampleSize, iters, processors;
 	ofstream out;
 	float precision, cutoff;

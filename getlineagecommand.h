@@ -36,11 +36,12 @@ class GetLineageCommand : public Command {
 	private:
 		set<string> names;
 		vector<string> outputNames, listOfTaxons;
-		string fastafile, namefile, groupfile, alignfile, listfile, taxfile, outputDir, taxons;
+		string fastafile, namefile, groupfile, alignfile, countfile, listfile, taxfile, outputDir, taxons;
 		bool abort, dups;
 		
 		int readFasta();
 		int readName();
+        int readCount();
 		int readGroup();
 		int readAlign();
 		int readList();

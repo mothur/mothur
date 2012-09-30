@@ -14,6 +14,7 @@ Knn::Knn(string tfile, string tempFile, string method, int kmerSize, float gapOp
 : Classify(), num(n), search(method) {
 	try {
 		threadID = tid;
+        shortcuts = true;
 		
 		//create search database and names vector
 		generateDatabaseAndNames(tfile, tempFile, method, kmerSize, gapOpen, gapExtend, match, misMatch);

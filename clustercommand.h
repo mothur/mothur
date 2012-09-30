@@ -15,6 +15,7 @@
 #include "listvector.hpp"
 #include "cluster.hpp"
 #include "sparsedistancematrix.h"
+#include "counttable.h"
 
 /* The cluster() command:
 	The cluster command outputs a .list , .rabund and .sabund files.  
@@ -52,7 +53,7 @@ private:
 
 	bool abort, hard, sim;
 
-	string method, fileroot, tag, outputDir, phylipfile, columnfile, namefile, format, distfile;
+	string method, fileroot, tag, outputDir, phylipfile, columnfile, namefile, format, distfile, countfile;
 	double cutoff;
 	string showabund, timing;
 	int precision, length;
@@ -64,6 +65,8 @@ private:
 	
 	void printData(string label);
 	vector<string> outputNames;
+    
+    int createRabund(CountTable*&, ListVector*&, RAbundVector*&);
 };
 
 #endif

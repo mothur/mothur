@@ -25,6 +25,7 @@
 		A73901081588C40900ED2ED6 /* loadlogfilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A73901071588C40900ED2ED6 /* loadlogfilecommand.cpp */; };
 		A73DDBBA13C4A0D1006AAE38 /* clearmemorycommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A73DDBB913C4A0D1006AAE38 /* clearmemorycommand.cpp */; };
 		A73DDC3813C4BF64006AAE38 /* mothurmetastats.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A73DDC3713C4BF64006AAE38 /* mothurmetastats.cpp */; };
+		A741FAD215D1688E0067BCC5 /* sequencecountparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A741FAD115D1688E0067BCC5 /* sequencecountparser.cpp */; };
 		A74A9A9F148E881E00AB5E3E /* spline.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74A9A9E148E881E00AB5E3E /* spline.cpp */; };
 		A74D36B8137DAFAA00332B0C /* chimerauchimecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D36B7137DAFAA00332B0C /* chimerauchimecommand.cpp */; };
 		A74D59A4159A1E2000043046 /* counttable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D59A3159A1E2000043046 /* counttable.cpp */; };
@@ -51,6 +52,7 @@
 		A7BF2232145879B2000AD524 /* chimeraperseuscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7BF2231145879B2000AD524 /* chimeraperseuscommand.cpp */; };
 		A7C3DC0B14FE457500FE1924 /* cooccurrencecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7C3DC0914FE457500FE1924 /* cooccurrencecommand.cpp */; };
 		A7C3DC0F14FE469500FE1924 /* trialSwap2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7C3DC0D14FE469500FE1924 /* trialSwap2.cpp */; };
+		A7C7DAB915DA758B0059B0CF /* sffmultiplecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7C7DAB815DA758B0059B0CF /* sffmultiplecommand.cpp */; };
 		A7D755DA1535F679009BF21A /* treereader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7D755D91535F679009BF21A /* treereader.cpp */; };
 		A7E0243D15B4520A00A5F046 /* sparsedistancematrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E0243C15B4520A00A5F046 /* sparsedistancematrix.cpp */; };
 		A7E9B88112D37EC400DA6239 /* ace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B64F12D37EC300DA6239 /* ace.cpp */; };
@@ -406,6 +408,8 @@
 		A73DDBB913C4A0D1006AAE38 /* clearmemorycommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = clearmemorycommand.cpp; sourceTree = "<group>"; };
 		A73DDC3613C4BF64006AAE38 /* mothurmetastats.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mothurmetastats.h; sourceTree = "<group>"; };
 		A73DDC3713C4BF64006AAE38 /* mothurmetastats.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mothurmetastats.cpp; sourceTree = "<group>"; };
+		A741FAD115D1688E0067BCC5 /* sequencecountparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sequencecountparser.cpp; sourceTree = "<group>"; };
+		A741FAD415D168A00067BCC5 /* sequencecountparser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sequencecountparser.h; sourceTree = "<group>"; };
 		A74A9A9D148E881E00AB5E3E /* spline.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = spline.h; sourceTree = "<group>"; };
 		A74A9A9E148E881E00AB5E3E /* spline.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = spline.cpp; sourceTree = "<group>"; };
 		A74D36B6137DAFAA00332B0C /* chimerauchimecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimerauchimecommand.h; sourceTree = "<group>"; };
@@ -460,6 +464,8 @@
 		A7C3DC0A14FE457500FE1924 /* cooccurrencecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cooccurrencecommand.h; sourceTree = "<group>"; };
 		A7C3DC0D14FE469500FE1924 /* trialSwap2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = trialSwap2.cpp; sourceTree = "<group>"; };
 		A7C3DC0E14FE469500FE1924 /* trialswap2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = trialswap2.h; sourceTree = "<group>"; };
+		A7C7DAB615DA75760059B0CF /* sffmultiplecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sffmultiplecommand.h; sourceTree = "<group>"; };
+		A7C7DAB815DA758B0059B0CF /* sffmultiplecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sffmultiplecommand.cpp; sourceTree = "<group>"; };
 		A7D755D71535F665009BF21A /* treereader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = treereader.h; sourceTree = "<group>"; };
 		A7D755D91535F679009BF21A /* treereader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = treereader.cpp; sourceTree = "<group>"; };
 		A7DAAFA3133A254E003956EB /* commandparameter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = commandparameter.h; sourceTree = "<group>"; };
@@ -1430,6 +1436,8 @@
 				A7E9B7E112D37EC400DA6239 /* setlogfilecommand.cpp */,
 				A7E9B7E412D37EC400DA6239 /* sffinfocommand.h */,
 				A7E9B7E312D37EC400DA6239 /* sffinfocommand.cpp */,
+				A7C7DAB615DA75760059B0CF /* sffmultiplecommand.h */,
+				A7C7DAB815DA758B0059B0CF /* sffmultiplecommand.cpp */,
 				A7E9B7F312D37EC400DA6239 /* sharedcommand.h */,
 				A7E9B7F212D37EC400DA6239 /* sharedcommand.cpp */,
 				A7E9B82812D37EC400DA6239 /* shhhercommand.h */,
@@ -1684,6 +1692,8 @@
 				A7E9B7D012D37EC400DA6239 /* sabundvector.hpp */,
 				A7E9B7DB12D37EC400DA6239 /* sequence.cpp */,
 				A7E9B7DC12D37EC400DA6239 /* sequence.hpp */,
+				A741FAD415D168A00067BCC5 /* sequencecountparser.h */,
+				A741FAD115D1688E0067BCC5 /* sequencecountparser.cpp */,
 				A7E9B7DD12D37EC400DA6239 /* sequencedb.cpp */,
 				A7E9B7DE12D37EC400DA6239 /* sequencedb.h */,
 				A7F9F5CD141A5E500032F693 /* sequenceparser.h */,
@@ -2218,6 +2228,8 @@
 				A74D59A4159A1E2000043046 /* counttable.cpp in Sources */,
 				A7E0243D15B4520A00A5F046 /* sparsedistancematrix.cpp in Sources */,
 				7B481F1A15D8520D0090E14C /* classifysharedcommand.cpp in Sources */,
+				A741FAD215D1688E0067BCC5 /* sequencecountparser.cpp in Sources */,
+				A7C7DAB915DA758B0059B0CF /* sffmultiplecommand.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2300,8 +2312,8 @@
 				GCC_MODEL_TUNING = "";
 				GCC_OPTIMIZATION_LEVEL = s;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"VERSION=\"\\\"1.26.0\\\"\"",
-					"RELEASE_DATE=\"\\\"7/9/2012\\\"\"",
+					"VERSION=\"\\\"1.27.0\\\"\"",
+					"RELEASE_DATE=\"\\\"8/8/2012\\\"\"",
 				);
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;

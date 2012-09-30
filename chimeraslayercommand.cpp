@@ -11,14 +11,16 @@
 #include "deconvolutecommand.h"
 #include "referencedb.h"
 #include "sequenceparser.h"
+#include "counttable.h"
 
 //**********************************************************************************************************************
 vector<string> ChimeraSlayerCommand::setParameters(){	
 	try {
 		CommandParameter ptemplate("reference", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(ptemplate);
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
-		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
-		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pgroup);
+		CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none",false,false); parameters.push_back(pname);
+         CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none",false,false); parameters.push_back(pcount);
+		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none",false,false); parameters.push_back(pgroup);
 		CommandParameter pwindow("window", "Number", "", "50", "", "", "",false,false); parameters.push_back(pwindow);
 		CommandParameter pksize("ksize", "Number", "", "7", "", "", "",false,false); parameters.push_back(pksize);
 		CommandParameter pmatch("match", "Number", "", "5.0", "", "", "",false,false); parameters.push_back(pmatch);
@@ -57,10 +59,11 @@ string ChimeraSlayerCommand::getHelpString(){
 		string helpString = "";
 		helpString += "The chimera.slayer command reads a fastafile and referencefile and outputs potentially chimeric sequences.\n";
 		helpString += "This command was modeled after the chimeraSlayer written by the Broad Institute.\n";
-		helpString += "The chimera.slayer command parameters are fasta, name, template, processors, trim, ksize, window, match, mismatch, divergence. minsim, mincov, minbs, minsnp, parents, search, iters, increment, numwanted, blastlocation and realign.\n";
+		helpString += "The chimera.slayer command parameters are fasta, name, group, template, processors, trim, ksize, window, match, mismatch, divergence. minsim, mincov, minbs, minsnp, parents, search, iters, increment, numwanted, blastlocation and realign.\n";
 		helpString += "The fasta parameter allows you to enter the fasta file containing your potentially chimeric sequences, and is required, unless you have a valid current fasta file. \n";
 		helpString += "The name parameter allows you to provide a name file, if you are using reference=self. \n";
 		helpString += "The group parameter allows you to provide a group file. The group file can be used with a namesfile and reference=self. When checking sequences, only sequences from the same group as the query sequence will be used as the reference. \n";
+        helpString += "The count parameter allows you to provide a count file. The count file reference=self. If your count file contains group information, when checking sequences, only sequences from the same group as the query sequence will be used as the reference. \n";
 		helpString += "You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amazon.fasta \n";
 		helpString += "The reference parameter allows you to enter a reference file containing known non-chimeric sequences, and is required. You may also set template=self, in this case the abundant sequences will be used as potential parents. \n";
 		helpString += "The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n";
@@ -139,6 +142,8 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 	try {
 		abort = false; calledHelp = false;   
 		ReferenceDB* rdb = ReferenceDB::getInstance();
+        hasCount = false;
+        hasName = false;
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
@@ -247,9 +252,8 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 			
 			
 			//check for required parameters
-			bool hasName = true;
 			namefile = validParameter.validFile(parameters, "name", false);
-			if (namefile == "not found") { namefile = "";  hasName = false; }
+			if (namefile == "not found") { namefile = "";  	}
 			else { 
 				m->splitAtDash(namefile, nameFileNames);
 				
@@ -316,12 +320,91 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 						}
 					}
 				}
-				
-				//make sure there is at least one valid file left
-				if (nameFileNames.size() == 0) { m->mothurOut("[ERROR]: no valid name files."); m->mothurOutEndLine(); abort = true; }
 			}
-			
-			if (hasName && (nameFileNames.size() != fastaFileNames.size())) { m->mothurOut("[ERROR]: The number of namefiles does not match the number of fastafiles, please correct."); m->mothurOutEndLine(); abort=true; }
+            
+            if (nameFileNames.size() != 0) { hasName = true; }
+            
+            //check for required parameters
+            vector<string> countfileNames;
+			countfile = validParameter.validFile(parameters, "count", false);
+			if (countfile == "not found") { 
+                countfile = "";  
+			}else { 
+				m->splitAtDash(countfile, countfileNames);
+				
+				//go through files and make sure they are good, if not, then disregard them
+				for (int i = 0; i < countfileNames.size(); i++) {
+					
+					bool ignore = false;
+					if (countfileNames[i] == "current") { 
+						countfileNames[i] = m->getCountTableFile(); 
+						if (nameFileNames[i] != "") {  m->mothurOut("Using " + countfileNames[i] + " as input file for the count parameter where you had given current."); m->mothurOutEndLine(); }
+						else { 	
+							m->mothurOut("You have no current count file, ignoring current."); m->mothurOutEndLine(); ignore=true; 
+							//erase from file list
+							countfileNames.erase(countfileNames.begin()+i);
+							i--;
+						}
+					}
+					
+					if (!ignore) {
+						
+						if (inputDir != "") {
+							string path = m->hasPath(countfileNames[i]);
+							//if the user has not given a path then, add inputdir. else leave path alone.
+							if (path == "") {	countfileNames[i] = inputDir + countfileNames[i];		}
+						}
+						
+						int ableToOpen;
+						ifstream in;
+						
+						ableToOpen = m->openInputFile(countfileNames[i], in, "noerror");
+						
+						//if you can't open it, try default location
+						if (ableToOpen == 1) {
+							if (m->getDefaultPath() != "") { //default path is set
+								string tryPath = m->getDefaultPath() + m->getSimpleName(countfileNames[i]);
+								m->mothurOut("Unable to open " + countfileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
+								ifstream in2;
+								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+								in2.close();
+								countfileNames[i] = tryPath;
+							}
+						}
+						
+						if (ableToOpen == 1) {
+							if (m->getOutputDir() != "") { //default path is set
+								string tryPath = m->getOutputDir() + m->getSimpleName(countfileNames[i]);
+								m->mothurOut("Unable to open " + countfileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
+								ifstream in2;
+								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+								in2.close();
+								countfileNames[i] = tryPath;
+							}
+						}
+						
+						in.close();
+						
+						if (ableToOpen == 1) { 
+							m->mothurOut("Unable to open " + countfileNames[i] + ". It will be disregarded."); m->mothurOutEndLine(); 
+							//erase from file list
+							countfileNames.erase(countfileNames.begin()+i);
+							i--;
+						}else {
+							m->setCountTableFile(countfileNames[i]);
+						}
+					}
+				}
+			}
+            
+            if (countfileNames.size() != 0) { hasCount = true; }
+            
+			//make sure there is at least one valid file left
+            if (hasName && hasCount) { m->mothurOut("[ERROR]: You must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
+            
+            if (!hasName && hasCount) { nameFileNames = countfileNames; }
+            
+			if ((hasCount || hasName) && (nameFileNames.size() != fastaFileNames.size())) { m->mothurOut("[ERROR]: The number of name or count files does not match the number of fastafiles, please correct."); m->mothurOutEndLine(); abort=true; }
 			
 			bool hasGroup = true;
 			groupfile = validParameter.validFile(parameters, "group", false);
@@ -399,7 +482,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 			
 			if (hasGroup && (groupFileNames.size() != fastaFileNames.size())) { m->mothurOut("[ERROR]: The number of groupfiles does not match the number of fastafiles, please correct."); m->mothurOutEndLine(); abort=true; }
 			
-			
+            if (hasGroup && hasCount) { m->mothurOut("[ERROR]: You must enter ONLY ONE of the following: count or group."); m->mothurOutEndLine(); abort = true; }			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
 			
@@ -444,6 +527,12 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 					}else {	if (save) {	rdb->setSavedReference(templatefile);	}	}	
 				}
 			}else if (hasName) {  templatefile = "self"; 
+				if (save) {
+					m->mothurOut("[WARNING]: You can't save reference=self, ignoring save."); 
+					m->mothurOutEndLine();
+					save = false;
+				}
+			}else if (hasCount) {  templatefile = "self"; 
 				if (save) {
 					m->mothurOut("[WARNING]: You can't save reference=self, ignoring save."); 
 					m->mothurOutEndLine();
@@ -551,7 +640,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 
 			if ((search != "blast") && (search != "kmer")) { m->mothurOut(search + " is not a valid search."); m->mothurOutEndLine(); abort = true;  }
 			
-			if (hasName && (templatefile != "self")) { m->mothurOut("You have provided a namefile and the reference parameter is not set to self. I am not sure what reference you are trying to use, aborting."); m->mothurOutEndLine(); abort=true; }
+			if ((hasName || hasCount) && (templatefile != "self")) { m->mothurOut("You have provided a namefile or countfile and the reference parameter is not set to self. I am not sure what reference you are trying to use, aborting."); m->mothurOutEndLine(); abort=true; }
 			if (hasGroup && (templatefile != "self")) { m->mothurOut("You have provided a group file and the reference parameter is not set to self. I am not sure what reference you are trying to use, aborting."); m->mothurOutEndLine(); abort=true; }
 
 			//until we resolve the issue 10-18-11
@@ -599,13 +688,23 @@ int ChimeraSlayerCommand::execute(){
 			map<string, string> fileGroup;
 			fileToPriority[fastaFileNames[s]] = priority; //default
 			fileGroup[fastaFileNames[s]] = "noGroup";
-			SequenceParser* parser = NULL;
+            map<string, string> uniqueNames; 
 			int totalChimeras = 0;
 			lines.clear();
 			
-			if (templatefile == "self") { setUpForSelfReference(parser, fileGroup, fileToPriority, s); }
+			if (templatefile == "self") { 
+                if (hasCount) {
+                    SequenceCountParser* parser = NULL;
+                    setUpForSelfReference(parser, fileGroup, fileToPriority, s); 
+                    if (parser != NULL) { uniqueNames = parser->getAllSeqsMap(); delete parser; }
+                }else {
+                    SequenceParser* parser = NULL;
+                    setUpForSelfReference(parser, fileGroup, fileToPriority, s); 
+                    if (parser != NULL) { uniqueNames = parser->getAllSeqsMap(); delete parser; }
+                }
+            }
 			
-			if (m->control_pressed) {  if (parser != NULL) { delete parser; } for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}
+			if (m->control_pressed) {   for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}
 
 			if (fileToPriority.size() == 1) { //you running without a groupfile
 				itFile = fileToPriority.begin();
@@ -637,7 +736,7 @@ int ChimeraSlayerCommand::execute(){
 				if(processors == 1){ numSeqs = driver(lines[0], outputFileName, thisFastaName, accnosFileName, trimFastaFileName, thisPriority);  }
 				else{ numSeqs = createProcesses(outputFileName, thisFastaName, accnosFileName, trimFastaFileName, thisPriority); }
 				
-				if (m->control_pressed) { if (parser != NULL) { delete parser; }  outputTypes.clear(); if (trim) { m->mothurRemove(trimFastaFileName); } m->mothurRemove(outputFileName); m->mothurRemove(accnosFileName); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }				
+				if (m->control_pressed) {  outputTypes.clear(); if (trim) { m->mothurRemove(trimFastaFileName); } m->mothurRemove(outputFileName); m->mothurRemove(accnosFileName); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }				
 #endif
 			}else { //you have provided a groupfile
 #ifdef USE_MPI	
@@ -653,16 +752,13 @@ int ChimeraSlayerCommand::execute(){
 				
 				if (pid == 0) {
 #endif
-				
-				totalChimeras = deconvoluteResults(parser, outputFileName, accnosFileName, trimFastaFileName);
+				totalChimeras = deconvoluteResults(uniqueNames, outputFileName, accnosFileName, trimFastaFileName);
                 m->mothurOutEndLine(); m->mothurOut(toString(totalChimeras) + " chimera found."); m->mothurOutEndLine();
 #ifdef USE_MPI	
 				}
 				MPI_Barrier(MPI_COMM_WORLD); //make everyone wait
 #endif
 			}
-	
-			if (parser != NULL) { delete parser; } 
 			
             m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.");	m->mothurOutEndLine();
 		}
@@ -919,9 +1015,8 @@ int ChimeraSlayerCommand::MPIExecute(string inputFile, string outputFileName, st
 	}
 }
 //**********************************************************************************************************************
-int ChimeraSlayerCommand::deconvoluteResults(SequenceParser* parser, string outputFileName, string accnosFileName, string trimFileName){
+int ChimeraSlayerCommand::deconvoluteResults(map<string, string>& uniqueNames, string outputFileName, string accnosFileName, string trimFileName){
 	try {
-		map<string, string> uniqueNames = parser->getAllSeqsMap();
 		map<string, string>::iterator itUnique;
 		int total = 0;
         
@@ -1169,7 +1264,51 @@ int ChimeraSlayerCommand::setUpForSelfReference(SequenceParser*& parser, map<str
 		exit(1);
 	}
 }
-
+//**********************************************************************************************************************
+int ChimeraSlayerCommand::setUpForSelfReference(SequenceCountParser*& parser, map<string, string>& fileGroup, map<string, map<string, int> >& fileToPriority, int s){
+	try {
+		fileGroup.clear();
+		fileToPriority.clear();
+		
+		string nameFile = "";
+		if (nameFileNames.size() != 0) { //you provided a namefile and we don't need to create one
+			nameFile = nameFileNames[s];
+		}else {  m->control_pressed = true; return 0; }
+         
+		CountTable ct;
+		if (!ct.testGroups(nameFile)) {  
+			if (processors != 1) { m->mothurOut("When using template=self, mothur can only use 1 processor, continuing."); m->mothurOutEndLine(); processors = 1; }
+            
+			//sort fastafile by abundance, returns new sorted fastafile name
+			m->mothurOut("Sorting fastafile according to abundance..."); cout.flush(); 
+			priority = sortFastaFile(fastaFileNames[s], nameFile);
+			m->mothurOut("Done."); m->mothurOutEndLine();
+			
+			fileToPriority[fastaFileNames[s]] = priority;
+			fileGroup[fastaFileNames[s]] = "noGroup";
+		}else {
+			//Parse sequences by group
+			parser = new SequenceCountParser(nameFile, fastaFileNames[s]);
+			vector<string> groups = parser->getNamesOfGroups();
+			
+			for (int i = 0; i < groups.size(); i++) {
+				vector<Sequence> thisGroupsSeqs = parser->getSeqs(groups[i]);
+				map<string, int> thisGroupsMap = parser->getCountTable(groups[i]);
+				string newFastaFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + groups[i] + "-sortedTemp.fasta";
+				sortFastaFile(thisGroupsSeqs, thisGroupsMap, newFastaFile); 
+				fileToPriority[newFastaFile] = thisGroupsMap;
+				fileGroup[newFastaFile] = groups[i];
+			}
+		}
+		
+		
+		return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChimeraSlayerCommand", "setUpForSelfReference");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 string ChimeraSlayerCommand::getNamesFile(string& inputFile){
 	try {
@@ -1820,9 +1959,22 @@ map<string, int> ChimeraSlayerCommand::sortFastaFile(string fastaFile, string na
 		
 		in.close();
 		
-		//read namefile
+		//read namefile or countfile
 		vector<seqPriorityNode> nameMapCount;
-		int error = m->readNames(nameFile, nameMapCount, seqs);
+        int error;
+        if (hasCount) { 
+            CountTable ct;
+            ct.readTable(nameFile);
+            
+            for(map<string, string>::iterator it = seqs.begin(); it != seqs.end(); it++) {
+                int num = ct.getNumSeqs(it->first);
+                if (num == 0) { error = 1; }
+                else {
+                    seqPriorityNode temp(num, it->second, it->first);
+                    nameMapCount.push_back(temp);
+                }
+            }
+        }else { error = m->readNames(nameFile, nameMapCount, seqs); }
 		
 		if (m->control_pressed) { return nameAbund; }
 		
@@ -1896,6 +2048,53 @@ map<string, int> ChimeraSlayerCommand::sortFastaFile(vector<Sequence>& thisseqs,
 		out.close();
 		
 		return nameAbund;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChimeraSlayerCommand", "sortFastaFile");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+int ChimeraSlayerCommand::sortFastaFile(vector<Sequence>& thisseqs, map<string, int>& countMap, string newFile) {
+	try {
+		vector<seqPriorityNode> nameVector;
+		
+		//read through fastafile and store info
+		map<string, string> seqs;
+        
+		for (int i = 0; i < thisseqs.size(); i++) {
+			
+			if (m->control_pressed) { return 0; }
+			
+			map<string, int>::iterator itCountMap = countMap.find(thisseqs[i].getName());
+			
+			if (itCountMap == countMap.end()){
+				m->control_pressed = true;
+				m->mothurOut("[ERROR]: " + thisseqs[i].getName() + " is in your fastafile, but is not in your count file, please correct."); m->mothurOutEndLine();
+			}else {
+                seqPriorityNode temp(itCountMap->second, thisseqs[i].getAligned(), thisseqs[i].getName());
+				nameVector.push_back(temp);
+			}
+		}
+        
+		//sort by num represented
+		sort(nameVector.begin(), nameVector.end(), compareSeqPriorityNodes);
+        
+		if (m->control_pressed) { return 0; }
+		
+		if (thisseqs.size() != nameVector.size()) { m->mothurOut( "The number of sequences in your fastafile does not match the number of sequences in your count file, aborting."); m->mothurOutEndLine(); m->control_pressed = true; return 0; }
+        
+		ofstream out;
+		m->openOutputFile(newFile, out);
+		
+		//print new file in order of
+		for (int i = 0; i < nameVector.size(); i++) {
+			out << ">" << nameVector[i].name << endl << nameVector[i].seq << endl;
+		}
+		out.close();
+		
+		return 0;
 		
 	}
 	catch(exception& e) {

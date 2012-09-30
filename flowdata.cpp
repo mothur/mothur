@@ -43,13 +43,15 @@ bool FlowData::getNext(ifstream& flowFile){
 	
 	try {
 		flowFile >> seqName >> endFlow;	
-		//cout << "in Flowdata " + seqName << endl;
-		for(int i=0;i<numFlows;i++)	{	flowFile >> flowData[i]; 	}
-		//cout << "in Flowdata read " << seqName + " done" << endl;
-		updateEndFlow(); 
-		translateFlow();
-		
-		m->gobble(flowFile);
+        if (seqName.length() != 0) {
+            //cout << "in Flowdata " + seqName << endl;
+            for(int i=0;i<numFlows;i++)	{	flowFile >> flowData[i]; 	}
+            //cout << "in Flowdata read " << seqName + " done" << endl;
+            updateEndFlow(); 
+            translateFlow();
+            m->gobble(flowFile);
+		}else{ m->mothurOut("Error in reading your flowfile, at position " + toString(flowFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); }
+            
 		if(flowFile){	return 1;	}
 		else		{	return 0;	}
 	}

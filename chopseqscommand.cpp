@@ -14,7 +14,8 @@
 vector<string> ChopSeqsCommand::setParameters(){	
 	try {
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
-		CommandParameter pnumbases("numbases", "Number", "", "0", "", "", "",false,true); parameters.push_back(pnumbases);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
+        CommandParameter pnumbases("numbases", "Number", "", "0", "", "", "",false,true); parameters.push_back(pnumbases);
 		CommandParameter pcountgaps("countgaps", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pcountgaps);
 		CommandParameter pshort("short", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pshort);
 		CommandParameter pkeep("keep", "Multiple", "front-back", "front", "", "", "",false,false); parameters.push_back(pkeep);
@@ -41,7 +42,8 @@ string ChopSeqsCommand::getHelpString(){
 		helpString += "The keep parameter allows you to specify whether you want to keep the front or the back of your sequence, default=front.\n";
 		helpString += "The countgaps parameter allows you to specify whether you want to count gaps as bases, default=false.\n";
 		helpString += "The short parameter allows you to specify you want to keep sequences that are too short to chop, default=false.\n";
-		helpString += "For example, if you ran chop.seqs with numbases=200 and short=t, if a sequence had 100 bases mothur would keep the sequence rather than eliminate it.\n";
+		helpString += "The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n";
+        helpString += "For example, if you ran chop.seqs with numbases=200 and short=t, if a sequence had 100 bases mothur would keep the sequence rather than eliminate it.\n";
 		helpString += "Example chop.seqs(fasta=amazon.fasta, numbases=200, keep=front).\n";
 		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n";
 		return helpString;
@@ -143,6 +145,10 @@ ChopSeqsCommand::ChopSeqsCommand(string option)  {
 			string temp = validParameter.validFile(parameters, "numbases", false);	if (temp == "not found") { temp = "0"; } 
 			m->mothurConvert(temp, numbases);   
 			
+            temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
+			m->setProcessors(temp);
+			m->mothurConvert(temp, processors);
+            
 			temp = validParameter.validFile(parameters, "countgaps", false);	if (temp == "not found") { temp = "f"; } 
 			countGaps = m->isTrue(temp);  
 			
@@ -169,39 +175,32 @@ int ChopSeqsCommand::execute(){
 		
 		string outputFileName = outputDir + m->getRootName(m->getSimpleName(fastafile)) + getOutputFileNameTag("fasta");
 		string outputFileNameAccnos = outputDir + m->getRootName(m->getSimpleName(fastafile)) + getOutputFileNameTag("accnos");
+        
+        
+        vector<unsigned long long> positions; 
+        vector<linePair> lines;
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+        positions = m->divideFile(fastafile, processors);
+        for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	}
+#else
+        int numSeqs = 0;
+        positions = m->setFilePosFasta(fastafile, numSeqs); 
+        if (positions.size() < processors) { processors = positions.size(); }
 		
-		ofstream out;
-		m->openOutputFile(outputFileName, out);
-		
-		ofstream outAcc;
-		m->openOutputFile(outputFileNameAccnos, outAcc);
-		
-		ifstream in;
-		m->openInputFile(fastafile, in);
-		
-		bool wroteAccnos = false;
-		
-		while (!in.eof()) {
-			
-			Sequence seq(in);
-			
-			if (m->control_pressed) { outputTypes.clear(); in.close(); out.close(); outAcc.close(); m->mothurRemove(outputFileName); m->mothurRemove(outputFileNameAccnos); return 0;  }
-			
-			if (seq.getName() != "") {
-				string newSeqString = getChopped(seq);
-				
-				//output trimmed sequence
-				if (newSeqString != "") {
-					out << ">" << seq.getName() << endl << newSeqString << endl;
-				}else{
-					outAcc << seq.getName() << endl;
-					wroteAccnos = true;
-				}
-			}
-		}
-		in.close();
-		out.close();
-		outAcc.close();
+        //figure out how many sequences you have to process
+        int numSeqsPerProcessor = numSeqs / processors;
+        for (int i = 0; i < processors; i++) {
+            int startIndex =  i * numSeqsPerProcessor;
+            if(i == (processors - 1)){	numSeqsPerProcessor = numSeqs - i * numSeqsPerProcessor; 	}
+            lines.push_back(linePair(positions[startIndex], numSeqsPerProcessor));
+        }
+#endif
+        
+        bool wroteAccnos = false;
+        if(processors == 1) {   wroteAccnos = driver(lines[0], fastafile, outputFileName, outputFileNameAccnos);        }
+        else                {   wroteAccnos = createProcesses(lines, fastafile, outputFileName, outputFileNameAccnos);  }
+        
+        if (m->control_pressed) {  return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
@@ -232,6 +231,202 @@ int ChopSeqsCommand::execute(){
 
 	catch(exception& e) {
 		m->errorOut(e, "ChopSeqsCommand", "execute");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+bool ChopSeqsCommand::createProcesses(vector<linePair> lines, string filename, string outFasta, string outAccnos) {
+	try {
+		int process = 1;
+		bool wroteAccnos = false;
+		vector<int> processIDS;
+        vector<string> nonBlankAccnosFiles;
+		
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+		
+		//loop through and create all the processes you want
+		while (process != processors) {
+			int pid = fork();
+			
+			if (pid > 0) {
+				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+				process++;
+			}else if (pid == 0){
+				wroteAccnos = driver(lines[process], filename, outFasta + toString(getpid()) + ".temp", outAccnos + toString(getpid()) + ".temp");
+				
+				//pass numSeqs to parent
+				ofstream out;
+				string tempFile = fastafile + toString(getpid()) + ".bool.temp";
+				m->openOutputFile(tempFile, out);
+				out << wroteAccnos << endl;				
+				out.close();
+				
+				exit(0);
+			}else { 
+				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
+				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+				exit(0);
+			}
+		}
+		
+		//do your part
+		wroteAccnos = driver(lines[0], filename, outFasta, outAccnos);
+        
+		//force parent to wait until all the processes are done
+		for (int i=0;i<processIDS.size();i++) { 
+			int temp = processIDS[i];
+			wait(&temp);
+		}
+		
+        
+		if (wroteAccnos) { nonBlankAccnosFiles.push_back(outAccnos); }
+		else { m->mothurRemove(outAccnos); } //remove so other files can be renamed to it
+        
+		//parent reads in and combine Filter info
+		for (int i = 0; i < processIDS.size(); i++) {
+			string tempFilename = fastafile + toString(processIDS[i]) + ".bool.temp";
+			ifstream in;
+			m->openInputFile(tempFilename, in);
+			
+			bool temp;
+			in >> temp; m->gobble(in); 
+            if (temp) { wroteAccnos = temp; nonBlankAccnosFiles.push_back(outAccnos + toString(processIDS[i]) + ".temp");  }
+			else { m->mothurRemove((outAccnos + toString(processIDS[i]) + ".temp"));  }
+            
+			in.close();
+			m->mothurRemove(tempFilename);
+		}
+#else
+		//////////////////////////////////////////////////////////////////////////////////////////////////////
+		//Windows version shared memory, so be careful when passing variables through the seqSumData struct. 
+		//Above fork() will clone, so memory is separate, but that's not the case with windows, 
+		//Taking advantage of shared memory to allow both threads to add info to vectors.
+		//////////////////////////////////////////////////////////////////////////////////////////////////////
+		
+		vector<chopData*> pDataArray; 
+		DWORD   dwThreadIdArray[processors-1];
+		HANDLE  hThreadArray[processors-1]; 
+		
+		//Create processor worker threads.
+		for( int i=0; i<processors-1; i++ ){
+            
+            string extension = "";
+            if (i != 0) { extension = toString(i) + ".temp"; processIDS.push_back(i); }
+			// Allocate memory for thread data.
+			chopData* tempChop = new chopData(filename, (outFasta+extension), (outAccnos+extension), m, lines[i].start, lines[i].end, keep, countGaps, numbases, Short);
+			pDataArray.push_back(tempChop);
+			
+			//MyChopThreadFunction is in header. It must be global or static to work with the threads.
+			//default security attributes, thread function name, argument to thread function, use default creation flags, returns the thread identifier
+			hThreadArray[i] = CreateThread(NULL, 0, MyChopThreadFunction, pDataArray[i], 0, &dwThreadIdArray[i]);   
+		}
+		
+        //do your part
+		wroteAccnos = driver(lines[processors-1], filename, (outFasta + toString(processors-1) + ".temp"), (outAccnos + toString(processors-1) + ".temp"));
+        processIDS.push_back(processors-1);
+        
+		//Wait until all threads have terminated.
+		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
+		
+        if (wroteAccnos) { nonBlankAccnosFiles.push_back(outAccnos); }
+		else { m->mothurRemove(outAccnos); } //remove so other files can be renamed to it
+
+		//Close all thread handles and free memory allocations.
+		for(int i=0; i < pDataArray.size(); i++){
+            if (pDataArray[i]->wroteAccnos) { wroteAccnos = pDataArray[i]->wroteAccnos; nonBlankAccnosFiles.push_back(outAccnos + toString(processIDS[i]) + ".temp");  }
+			else { m->mothurRemove((outAccnos + toString(processIDS[i]) + ".temp"));  }
+			CloseHandle(hThreadArray[i]);
+			delete pDataArray[i];
+		}
+#endif		
+                
+		for (int i = 0; i < processIDS.size(); i++) {
+			m->appendFiles((outFasta + toString(processIDS[i]) + ".temp"), outFasta);
+			m->mothurRemove((outFasta + toString(processIDS[i]) + ".temp"));
+		}
+		
+        if (nonBlankAccnosFiles.size() != 0) { 
+			m->renameFile(nonBlankAccnosFiles[0], outAccnos);
+			
+			for (int h=1; h < nonBlankAccnosFiles.size(); h++) {
+				m->appendFiles(nonBlankAccnosFiles[h], outAccnos);
+				m->mothurRemove(nonBlankAccnosFiles[h]);
+			}
+		}else { //recreate the accnosfile if needed
+			ofstream out;
+			m->openOutputFile(outAccnos, out);
+			out.close();
+		}
+
+		return wroteAccnos;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChopSeqsCommand", "createProcesses");
+		exit(1);
+	}
+}
+/**************************************************************************************/
+bool ChopSeqsCommand::driver(linePair filePos, string filename, string outFasta, string outAccnos) {	
+	try {
+		
+		ofstream out;
+		m->openOutputFile(outFasta, out);
+        
+        ofstream outAcc;
+		m->openOutputFile(outAccnos, outAcc);
+        
+		ifstream in;
+		m->openInputFile(filename, in);
+        
+		in.seekg(filePos.start);
+        
+		bool done = false;
+        bool wroteAccnos = false;
+		int count = 0;
+        
+		while (!done) {
+            
+			if (m->control_pressed) { in.close(); out.close(); return 1; }
+            
+			Sequence seq(in); m->gobble(in);
+			
+			if (m->control_pressed) {  in.close(); out.close(); outAcc.close(); m->mothurRemove(outFasta); m->mothurRemove(outAccnos); return 0;  }
+			
+			if (seq.getName() != "") {
+				string newSeqString = getChopped(seq);
+				
+				//output trimmed sequence
+				if (newSeqString != "") {
+					out << ">" << seq.getName() << endl << newSeqString << endl;
+				}else{
+					outAcc << seq.getName() << endl;
+					wroteAccnos = true;
+				}
+                count++;
+			}
+			
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+            unsigned long long pos = in.tellg();
+            if ((pos == -1) || (pos >= filePos.end)) { break; }
+#else
+            if (in.eof()) { break; }
+#endif
+            //report progress
+			if((count) % 1000 == 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
+			
+		}
+		//report progress
+		if((count) % 1000 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
+
+		
+		in.close();
+        out.close();
+        outAcc.close();
+		
+		return wroteAccnos;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChopSeqsCommand", "driver");
 		exit(1);
 	}
 }

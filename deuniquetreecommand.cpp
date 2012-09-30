@@ -161,7 +161,8 @@ int DeuniqueTreeCommand::execute() {
 		
 		TreeReader* reader = new TreeReader(treefile, "", namefile);
         vector<Tree*> T = reader->getTrees();
-        map<string, string> nameMap = reader->getNameMap();
+        map<string, string> nameMap;
+        m->readNames(namefile, nameMap);
         delete reader;		
 		
 		//print new Tree
@@ -172,7 +173,7 @@ int DeuniqueTreeCommand::execute() {
 		T[0]->print(out, nameMap);
 		out.close();
 		
-        delete (T[0]->getTreeMap());
+        delete (T[0]->getCountTable());
 		for (int i = 0; i < T.size(); i++) { delete T[i]; }
 				
 		//set phylip file as new current phylipfile

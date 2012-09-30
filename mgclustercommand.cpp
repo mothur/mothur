@@ -13,8 +13,8 @@
 vector<string> MGClusterCommand::setParameters(){	
 	try {
 		CommandParameter pblast("blast", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pblast);
-		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
-        CommandParameter pcount("count", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pcount);
+		CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "ColumnName",false,false); parameters.push_back(pname);
+		CommandParameter pcount("count", "InputTypes", "", "", "NameCount", "none", "none",false,false); parameters.push_back(pcount);
 		CommandParameter plength("length", "Number", "", "5", "", "", "",false,false); parameters.push_back(plength);
 		CommandParameter ppenalty("penalty", "Number", "", "0.10", "", "", "",false,false); parameters.push_back(ppenalty);
 		CommandParameter pcutoff("cutoff", "Number", "", "0.70", "", "", "",false,false); parameters.push_back(pcutoff);
@@ -147,6 +147,14 @@ MGClusterCommand::MGClusterCommand(string option) {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("count");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["count"] = inputDir + it->second;		}
+				}
 			}
 
 			
@@ -268,7 +276,9 @@ int MGClusterCommand::execute(){
 		
         string sabundFileName = fileroot+ tag + "." + getOutputFileNameTag("sabund");
         string rabundFileName = fileroot+ tag + "." + getOutputFileNameTag("rabund");
-        string listFileName = fileroot+ tag + "." + getOutputFileNameTag("list");
+        string listFileName = fileroot+ tag + ".";
+        if (countfile != "") { listFileName += "unique_"; }
+        listFileName += getOutputFileNameTag("list");
         
         if (countfile == "") {
             m->openOutputFile(sabundFileName,	sabundFile);

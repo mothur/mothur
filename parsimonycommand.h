@@ -11,7 +11,7 @@
 
 #include "command.hpp"
 #include "parsimony.h"
-#include "treemap.h"
+#include "counttable.h"
 #include "progress.hpp"
 #include "sharedutilities.h"
 #include "fileoutput.h"
@@ -41,10 +41,10 @@ private:
 	vector<Tree*> T;	   //user trees
 	Tree* randT;  //random tree
 	Tree* copyUserTree; 
-	TreeMap* tmap; 
-	TreeMap* savetmap;
+	CountTable* ct; 
+	CountTable* savect;
 	vector<string> groupComb; // AB. AC, BC...
-	string sumFile, randomtree, allGroups, outputDir, treefile, groupfile, namefile;
+	string sumFile, randomtree, allGroups, outputDir, treefile, groupfile, namefile, countfile;
 	int iters, numGroups, numComp, counter, processors, numUniquesInName;
 	vector<int> numEachGroup; //vector containing the number of sequences in each group the users wants for random distrib.
 	vector< vector<float> > userTreeScores; //scores for users trees for each comb.

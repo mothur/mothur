@@ -825,7 +825,7 @@ int SharedCommand::createSharedFromListGroup(string filename) {
         int error = ListGroupSameSeqs(namesSeqs, SharedList);
         
         if ((!pickedGroups) && (SharedList->getNumSeqs() != numGroupNames)) {  //if the user has not specified any groups and their files don't match exit with error
-            m->mothurOut("Your group file contains " + toString(numGroupNames) + " sequences and list file contains " + toString(SharedList->getNumSeqs()) + " sequences. Please correct."); m->mothurOutEndLine(); 
+            m->mothurOut("Your group file contains " + toString(numGroupNames) + " sequences and list file contains " + toString(SharedList->getNumSeqs()) + " sequences. Please correct."); m->mothurOutEndLine(); m->control_pressed = true;
             
             out.close(); m->mothurRemove(filename); //remove blank shared file you made
             
@@ -1083,8 +1083,12 @@ int SharedCommand::ListGroupSameSeqs(vector<string>& groupMapsSeqs, SharedListVe
 			for (int j = 0; j < listNames.size(); j++) {
 				int num = groupNamesSeqs.count(listNames[j]);
 				
-				if (num == 0) { error = 1; m->mothurOut("[ERROR]: " + listNames[j] + " is in your listfile and not in your groupfile. Please correct."); m->mothurOutEndLine();	}
-				else { groupNamesSeqs.erase(listNames[j]); }
+				if (num == 0) { 
+                    error = 1; 
+                    if (groupfile != "") { 
+                        m->mothurOut("[ERROR]: " + listNames[j] + " is in your listfile and not in your groupfile. Please correct."); m->mothurOutEndLine();	} 
+                    else{ m->mothurOut("[ERROR]: " + listNames[j] + " is in your listfile and not in your count file. Please correct."); m->mothurOutEndLine();	}
+                }else { groupNamesSeqs.erase(listNames[j]); }
 			}
 		}
 		

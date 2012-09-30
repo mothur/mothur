@@ -17,7 +17,7 @@ USECOMPRESSION ?= no
 MOTHUR_FILES="\"Enter_your_default_path_here\""
 RELEASE_DATE = "\"7/9/2012\""
 VERSION = "\"1.26.0\""
-FORTAN_COMPILER = gfortran
+FORTAN_COMPILER = /usr/local/gfortran/bin/gfortran
 FORTRAN_FLAGS = 
 
 # Optimize to level 3:

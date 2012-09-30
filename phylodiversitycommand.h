@@ -11,7 +11,7 @@
  */
 
 #include "command.hpp"
-#include "treemap.h"
+#include "counttable.h"
 #include "sharedutilities.h"
 #include "tree.h"
 
@@ -33,11 +33,11 @@ class PhyloDiversityCommand : public Command {
 		int execute();
 		void help() { m->mothurOut(getHelpString()); }
 private:
-		TreeMap* tmap;
+		CountTable* ct;
 		float freq;
 		int iters, processors, numUniquesInName;  
 		bool abort, rarefy, summary, collect, scale;
-		string groups, outputDir, treefile, groupfile, namefile;
+		string groups, outputDir, treefile, groupfile, namefile, countfile;
 		vector<string> Groups, outputNames; //holds groups to be used, and outputFile names
 		
         map<string, int> getRootForGroups(Tree* t);

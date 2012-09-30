@@ -11,6 +11,7 @@
  */
 
 #include "command.hpp"
+#include "counttable.h"
 
 /**************************************************************************************************/
 
@@ -33,7 +34,7 @@ class SummaryTaxCommand : public Command {
 		
 	private:
 		bool abort;
-		string taxfile, outputDir, namefile, groupfile, refTaxonomy;
+		string taxfile, outputDir, namefile, groupfile, refTaxonomy, countfile;
 		vector<string> outputNames;
 		map<string, int> nameMap;
 };

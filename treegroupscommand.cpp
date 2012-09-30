@@ -16,8 +16,9 @@ vector<string> TreeGroupCommand::setParameters(){
 	try {
 		CommandParameter pshared("shared", "InputTypes", "", "", "PhylipColumnShared", "PhylipColumnShared", "none",false,false); parameters.push_back(pshared);
 		CommandParameter pphylip("phylip", "InputTypes", "", "", "PhylipColumnShared", "PhylipColumnShared", "none",false,false); parameters.push_back(pphylip);
-		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "ColumnName",false,false); parameters.push_back(pname);
-		CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumnShared", "PhylipColumnShared", "ColumnName",false,false); parameters.push_back(pcolumn);	
+		CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "ColumnName",false,false); parameters.push_back(pname);
+		CommandParameter pcount("count", "InputTypes", "", "", "NameCount", "none", "countcolumn",false,false); parameters.push_back(pcount);
+        CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumnShared", "PhylipColumnShared", "ColumnName-countcolumn",false,false); parameters.push_back(pcolumn);		
         CommandParameter piters("iters", "Number", "", "1000", "", "", "",false,false); parameters.push_back(piters);
         CommandParameter psubsample("subsample", "String", "", "", "", "", "",false,false); parameters.push_back(psubsample);
         CommandParameter pcutoff("cutoff", "Number", "", "10", "", "", "",false,false); parameters.push_back(pcutoff);
@@ -160,6 +161,14 @@ TreeGroupCommand::TreeGroupCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("count");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["count"] = inputDir + it->second;		}
+				}
 			}
 			
 			//check for required parameters
@@ -182,6 +191,11 @@ TreeGroupCommand::TreeGroupCommand(string option)  {
 			if (namefile == "not open") { abort = true; }	
 			else if (namefile == "not found") { namefile = ""; }
 			else { m->setNameFile(namefile); }
+            
+            countfile = validParameter.validFile(parameters, "count", true);
+			if (countfile == "not open") { abort = true; countfile = ""; }	
+			else if (countfile == "not found") { countfile = ""; }
+			else { m->setCountTableFile(countfile); }
 			
 			if ((phylipfile == "") && (columnfile == "") && (sharedfile == "")) { 
 				//is there are current file available for either of these?
@@ -204,15 +218,20 @@ TreeGroupCommand::TreeGroupCommand(string option)  {
 			else if ((phylipfile != "") && (columnfile != "")) { m->mothurOut("When running the tree.shared command with a distance file you may not use both the column and the phylip parameters."); m->mothurOutEndLine(); abort = true; }
 			
 			if (columnfile != "") {
-				if (namefile == "") { 
+				if ((namefile == "") && (countfile == "")){ 
 					namefile = m->getNameFile(); 
 					if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
 					else { 
-						m->mothurOut("You need to provide a namefile if you are going to use the column format."); m->mothurOutEndLine(); 
-						abort = true; 
+						countfile = m->getCountTableFile();
+                        if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
+                        else { 
+                            m->mothurOut("You need to provide a namefile or countfile if you are going to use the column format."); m->mothurOutEndLine(); 
+                            abort = true; 
+                        }	
 					}	
 				}
 			}
+
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -287,7 +306,7 @@ TreeGroupCommand::~TreeGroupCommand(){
 	if (abort == false) {
 		if (format == "sharedfile") {  delete input; }
 		else { delete list; }
-		delete tmap;  
+		delete ct;  
 	}
 	
 }
@@ -400,8 +419,16 @@ int TreeGroupCommand::execute(){
 			m->runParse = false;
 			
 			//create treemap class from groupmap for tree class to use
-			tmap = new TreeMap();
-			tmap->makeSim(m->getAllGroups());
+			ct = new CountTable();
+            set<string> nameMap;
+            map<string, string> groupMap;
+            set<string> gps;
+            for (int i = 0; i < m->getAllGroups().size(); i++) { 
+                nameMap.insert(m->getAllGroups()[i]); 
+                gps.insert(m->getAllGroups()[i]); 
+                groupMap[m->getAllGroups()[i]] = m->getAllGroups()[i];
+            }
+            ct->createTable(nameMap, groupMap, gps);
 			
 			//clear globaldatas old tree names if any
 			m->Treenames.clear();
@@ -425,31 +452,40 @@ int TreeGroupCommand::execute(){
 				
 			readMatrix->setCutoff(cutoff);
 	
-			if(namefile != ""){	
-				nameMap = new NameAssignment(namefile);
-				nameMap->readMap();
-			}
-			else{
-				nameMap = NULL;
-			}
-	
-			readMatrix->read(nameMap);
+            ct = NULL;
+            if(namefile != ""){	
+                nameMap = new NameAssignment(namefile);
+                nameMap->readMap();
+                readMatrix->read(nameMap);
+            }else if (countfile != "") {
+                ct = new CountTable();
+                ct->readTable(countfile);
+                readMatrix->read(ct);
+            }
+
 			list = readMatrix->getListVector();
 			SparseDistanceMatrix* dMatrix = readMatrix->getDMatrix();
 
 			//make treemap
-			tmap = new TreeMap();
+            if (ct != NULL) { delete ct; }
+			ct = new CountTable();
+            set<string> nameMap;
+            map<string, string> groupMap;
+            set<string> gps;
+            for (int i = 0; i < list->getNumBins(); i++) {
+                string bin = list->get(i);
+                nameMap.insert(bin); 
+                gps.insert(bin); 
+                groupMap[bin] = bin;
+            }
+            ct->createTable(nameMap, groupMap, gps);
 			
-			if (m->control_pressed) { return 0; }
-			
-			tmap->makeSim(list);
-			
-			vector<string> namesGroups = tmap->getNamesOfGroups();
+			vector<string> namesGroups = ct->getNamesOfGroups();
 			m->setGroups(namesGroups);
 		
 			//clear globaldatas old tree names if any
 			m->Treenames.clear();
-		
+            
 			//fills globaldatas tree names
 			m->Treenames = m->getGroups();
 			
@@ -505,13 +541,12 @@ int TreeGroupCommand::execute(){
 Tree* TreeGroupCommand::createTree(vector< vector<double> >& simMatrix){
 	try {
 		//create tree
-		t = new Tree(tmap, simMatrix);
+		t = new Tree(ct, simMatrix);
         
         if (m->control_pressed) { delete t; t = NULL; return t; }
 		
         //assemble tree
-        map<string, string> empty;
-		t->assembleTree(empty);
+		t->assembleTree();
 
 		return t;
 	}

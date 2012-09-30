@@ -569,8 +569,8 @@ int SubSampleCommand::getSubSampleFasta() {
 			delete uniqueCommand;
 			m->mothurCalling = false;
             
-            m->renameFile(filenames["name"][0], outputNameFileName);
-            m->renameFile(filenames["fasta"][0], outputFileName);
+            m->renameFile(filenames["name"][0], outputNameFileName); 
+            m->renameFile(filenames["fasta"][0], outputFileName);  
             
 			outputTypes["name"].push_back(outputNameFileName);  outputNames.push_back(outputNameFileName);
 
@@ -808,7 +808,7 @@ int SubSampleCommand::processShared(vector<SharedRAbundVector*>& thislookup) {
 		
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(sharedfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(sharedfile)) + thislookup[0]->getLabel() + getOutputFileNameTag("shared", sharedfile);        
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(sharedfile)) + thislookup[0]->getLabel() + "." +getOutputFileNameTag("shared", sharedfile);        
         SubSample sample;
         vector<string> subsampledLabels = sample.getSample(thislookup, size);
         

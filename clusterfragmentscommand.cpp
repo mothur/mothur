@@ -29,7 +29,8 @@ inline bool comparePriority(seqRNode first, seqRNode second) {
 vector<string> ClusterFragmentsCommand::setParameters(){	
 	try {
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
-		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
+		CommandParameter pname("name", "InputTypes", "", "", "namecount", "none", "none",false,false); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "namecount", "none", "none",false,false); parameters.push_back(pcount);
 		CommandParameter pdiffs("diffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(pdiffs);
 		CommandParameter ppercent("percent", "Number", "", "0", "", "", "",false,false); parameters.push_back(ppercent);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
@@ -49,8 +50,8 @@ string ClusterFragmentsCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The cluster.fragments command groups sequences that are part of a larger sequence.\n";
-		helpString += "The cluster.fragments command outputs a new fasta and name file.\n";
-		helpString += "The cluster.fragments command parameters are fasta, name, diffs and percent. The fasta parameter is required, unless you have a valid current file. \n";
+		helpString += "The cluster.fragments command outputs a new fasta and name or count file.\n";
+		helpString += "The cluster.fragments command parameters are fasta, name, count, diffs and percent. The fasta parameter is required, unless you have a valid current file. \n";
 		helpString += "The names parameter allows you to give a list of seqs that are identical. This file is 2 columns, first column is name or representative sequence, second column is a list of its identical sequences separated by commas.\n";
 		helpString += "The diffs parameter allows you to set the number of differences allowed, default=0. \n";
 		helpString += "The percent parameter allows you to set percentage of differences allowed, default=0. percent=2 means if the number of difference is less than or equal to two percent of the length of the fragment, then cluster.\n";
@@ -78,6 +79,7 @@ string ClusterFragmentsCommand::getOutputFileNameTag(string type, string inputNa
         else {
             if (type == "fasta") {  outputFileName =  "fragclust.fasta"; }
             else if (type == "name") {  outputFileName =  "fragclust.names"; }
+            else if (type == "count") {  outputFileName =  "fragclust.count_table"; }
             else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
         }
         return outputFileName;
@@ -96,6 +98,7 @@ ClusterFragmentsCommand::ClusterFragmentsCommand(){
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
 		outputTypes["name"] = tempOutNames;
+        outputTypes["count"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClusterFragmentsCommand", "ClusterFragmentsCommand");
@@ -129,6 +132,7 @@ ClusterFragmentsCommand::ClusterFragmentsCommand(string option) {
 			vector<string> tempOutNames;
 			outputTypes["fasta"] = tempOutNames;
 			outputTypes["name"] = tempOutNames;
+            outputTypes["count"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -149,6 +153,14 @@ ClusterFragmentsCommand::ClusterFragmentsCommand(string option) {
 					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
+				}
+                
+                it = parameters.find("count");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
 			}
 
@@ -171,6 +183,13 @@ ClusterFragmentsCommand::ClusterFragmentsCommand(string option) {
 			if (namefile == "not found") { namefile =  "";  }
 			else if (namefile == "not open") { namefile = ""; abort = true; }	
 			else {  readNameFile(); m->setNameFile(namefile); }
+            
+            countfile = validParameter.validFile(parameters, "count", true);
+			if (countfile == "not open") { abort = true; countfile = ""; }	
+			else if (countfile == "not found") { countfile = ""; }
+			else { ct.readTable(countfile); m->setCountTableFile(countfile); }
+			
+            if ((countfile != "") && (namefile != "")) { m->mothurOut("When executing a cluster.fragments command you must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
 			
 			string temp;
 			temp = validParameter.validFile(parameters, "diffs", false);		if (temp == "not found"){	temp = "0";				}
@@ -179,10 +198,12 @@ ClusterFragmentsCommand::ClusterFragmentsCommand(string option) {
 			temp = validParameter.validFile(parameters, "percent", false);		if (temp == "not found"){	temp = "0";				}
 			m->mothurConvert(temp, percent);
 			
-			if (namefile == "") {
-				vector<string> files; files.push_back(fastafile);
-				parser.getNameFile(files);
-			}
+			if (countfile == "") {
+                if (namefile == "") {
+                    vector<string> files; files.push_back(fastafile);
+                    parser.getNameFile(files);
+                }
+            }
 			
 		}
 				
@@ -229,10 +250,13 @@ int ClusterFragmentsCommand::execute(){
 						string jBases = alignSeqs[j].seq.getUnaligned();
 													
 						if (isFragment(iBases, jBases)) {
-							//merge
-							alignSeqs[i].names += ',' + alignSeqs[j].names;
-							alignSeqs[i].numIdentical += alignSeqs[j].numIdentical;
-
+                            if (countfile != "") {
+                                ct.mergeCounts(alignSeqs[i].names, alignSeqs[j].names);
+                            }else {
+                                //merge
+                                alignSeqs[i].names += ',' + alignSeqs[j].names;
+                                alignSeqs[i].numIdentical += alignSeqs[j].numIdentical;
+                            }
 							alignSeqs[j].active = 0;
 							alignSeqs[j].numIdentical = 0;
 							count++;
@@ -254,6 +278,7 @@ int ClusterFragmentsCommand::execute(){
 		
 		string newFastaFile = fileroot + getOutputFileNameTag("fasta");
 		string newNamesFile = fileroot + getOutputFileNameTag("name");
+        if (countfile != "") { newNamesFile = fileroot + getOutputFileNameTag("count"); }
 		
 		if (m->control_pressed) { return 0; }
 		
@@ -284,6 +309,11 @@ int ClusterFragmentsCommand::execute(){
 		itTypes = outputTypes.find("name");
 		if (itTypes != outputTypes.end()) {
 			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setNameFile(current); }
+		}
+        
+        itTypes = outputTypes.find("count");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setCountTableFile(current); }
 		}
 
 		return 0;
@@ -372,7 +402,10 @@ int ClusterFragmentsCommand::readFASTA(){
 					else{
 						seqRNode tempNode(itSize->second, seq, names[seq.getName()], seq.getUnaligned().length());
 						alignSeqs.push_back(tempNode);
-					}	
+					}
+                }else if(countfile != "") {
+                    seqRNode tempNode(ct.getNumSeqs(seq.getName()), seq, seq.getName(), seq.getUnaligned().length());
+                    alignSeqs.push_back(tempNode);
 				}else { //no names file, you are identical to yourself 
 					seqRNode tempNode(1, seq, seq.getName(), seq.getUnaligned().length());
 					alignSeqs.push_back(tempNode);
@@ -396,17 +429,18 @@ void ClusterFragmentsCommand::printData(string newfasta, string newname){
 		ofstream outNames;
 		
 		m->openOutputFile(newfasta, outFasta);
-		m->openOutputFile(newname, outNames);
+		if (countfile == "") {  m->openOutputFile(newname, outNames); }
 		
 		for (int i = 0; i < alignSeqs.size(); i++) {
 			if (alignSeqs[i].numIdentical != 0) {
 				alignSeqs[i].seq.printSequence(outFasta); 
-				outNames << alignSeqs[i].seq.getName() << '\t' << alignSeqs[i].names << endl;
+				if (countfile == "") {  outNames << alignSeqs[i].seq.getName() << '\t' << alignSeqs[i].names << endl;  }
 			}
 		}
 		
 		outFasta.close();
-		outNames.close();
+		if (countfile == "") {  outNames.close(); }
+        else { ct.printTable(newname); }
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClusterFragmentsCommand", "printData");
@@ -438,6 +472,5 @@ void ClusterFragmentsCommand::readNameFile(){
 		exit(1);
 	}
 }
-
 /**************************************************************************************************/
 

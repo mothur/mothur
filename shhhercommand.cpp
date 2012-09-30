@@ -776,8 +776,8 @@ int ShhherCommand::execute(){
 
 		
 		if(compositeFASTAFileName != ""){
-			outputNames.push_back(compositeFASTAFileName);
-			outputNames.push_back(compositeNamesFileName);
+			outputNames.push_back(compositeFASTAFileName); outputTypes["fasta"].push_back(compositeFASTAFileName);
+			outputNames.push_back(compositeNamesFileName); outputTypes["name"].push_back(compositeNamesFileName); 
 		}
 
 		m->mothurOutEndLine();
@@ -1039,7 +1039,12 @@ void ShhherCommand::getFlowData(){
         
         float intensity;
         
-        flowFile >> numFlowCells;
+        string numFlowTest;
+        flowFile >> numFlowTest;
+        
+        if (!m->isContainingOnlyDigits(numFlowTest)) { m->mothurOut("[ERROR]: expected a number and got " + numFlowTest + ", quitting. Did you use the flow parameter instead of the file parameter?"); m->mothurOutEndLine(); exit(1); }
+        else { convert(numFlowTest, numFlowCells); }
+        
         int index = 0;//pcluster
         while(!flowFile.eof()){
             
@@ -1376,17 +1381,17 @@ string ShhherCommand::cluster(string distFileName, string namesFileName){
     try {
         
         ReadMatrix* read = new ReadColumnMatrix(distFileName); 	
-        read->setCutoff(cutoff);
+		read->setCutoff(cutoff);
+		
+		NameAssignment* clusterNameMap = new NameAssignment(namesFileName);
+		clusterNameMap->readMap();
+		read->read(clusterNameMap);
         
-        NameAssignment* clusterNameMap = new NameAssignment(namesFileName);
-        clusterNameMap->readMap();
-        read->read(clusterNameMap);
-        
-        ListVector* list = read->getListVector();
-        SparseMatrix* matrix = read->getMatrix();
-        
-        delete read; 
-        delete clusterNameMap; 
+		ListVector* list = read->getListVector();
+		SparseDistanceMatrix* matrix = read->getDMatrix();
+		
+		delete read; 
+		delete clusterNameMap; 
         
         RAbundVector* rabund = new RAbundVector(list->getRAbundVector());
         
@@ -1738,7 +1743,7 @@ void ShhherCommand::writeQualities(vector<int> otuCounts){
             }
         }
         qualityFile.close();
-        outputNames.push_back(qualityFileName);
+        outputNames.push_back(qualityFileName); outputTypes["qfile"].push_back(qualityFileName);
         
     }
     catch(exception& e) {
@@ -1783,7 +1788,7 @@ void ShhherCommand::writeSequences(vector<int> otuCounts){
         }
         fastaFile.close();
         
-        outputNames.push_back(fastaFileName);
+        outputNames.push_back(fastaFileName); outputTypes["fasta"].push_back(fastaFileName);
         
         if(compositeFASTAFileName != ""){
             m->appendFiles(fastaFileName, compositeFASTAFileName);
@@ -1820,7 +1825,7 @@ void ShhherCommand::writeNames(vector<int> otuCounts){
             }
         }
         nameFile.close();
-        outputNames.push_back(nameFileName);
+        outputNames.push_back(nameFileName); outputTypes["name"].push_back(nameFileName);
         
         
         if(compositeNamesFileName != ""){
@@ -1852,7 +1857,7 @@ void ShhherCommand::writeGroups(){
             groupFile << seqNameVector[i] << '\t' << fileGroup << endl;
         }
         groupFile.close();
-        outputNames.push_back(groupFileName);
+        outputNames.push_back(groupFileName); outputTypes["group"].push_back(groupFileName);
         
     }
     catch(exception& e) {
@@ -1912,7 +1917,7 @@ void ShhherCommand::writeClusters(vector<int> otuCounts){
             }
         }
         otuCountsFile.close();
-        outputNames.push_back(otuCountsFileName);
+        outputNames.push_back(otuCountsFileName); outputTypes["counts"].push_back(otuCountsFileName);
         
     }
     catch(exception& e) {
@@ -1926,7 +1931,7 @@ void ShhherCommand::writeClusters(vector<int> otuCounts){
 
 int ShhherCommand::execute(){
 	try {
-		if (abort == true) { return 0; }
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		getSingleLookUp();	if (m->control_pressed) { return 0; }
 		getJointLookUp();	if (m->control_pressed) { return 0; }
@@ -1943,8 +1948,8 @@ int ShhherCommand::execute(){
 #endif
         
 		if(compositeFASTAFileName != ""){
-			outputNames.push_back(compositeFASTAFileName);
-			outputNames.push_back(compositeNamesFileName);
+			outputNames.push_back(compositeFASTAFileName); outputTypes["fasta"].push_back(compositeFASTAFileName);
+			outputNames.push_back(compositeNamesFileName); outputTypes["name"].push_back(compositeNamesFileName);
 		}
 
 		m->mothurOutEndLine();
@@ -2029,7 +2034,7 @@ int ShhherCommand::createProcesses(vector<string> filenames){
 		//Windows version shared memory, so be careful when passing variables through the shhhFlowsData struct. 
 		//Above fork() will clone, so memory is separate, but that's not the case with windows, 
 		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		
+		/*
 		vector<shhhFlowsData*> pDataArray; 
 		DWORD   dwThreadIdArray[processors-1];
 		HANDLE  hThreadArray[processors-1]; 
@@ -2060,7 +2065,7 @@ int ShhherCommand::createProcesses(vector<string> filenames){
 			CloseHandle(hThreadArray[i]);
 			delete pDataArray[i];
 		}
-		
+		*/
         #endif
         
         for (int i=0;i<processIDS.size();i++) { 
@@ -2382,7 +2387,12 @@ int ShhherCommand::getFlowData(string filename, vector<string>& thisSeqNameVecto
 		thisFlowDataIntI.clear();
 		thisNameMap.clear();
 		
-		flowFile >> numFlowCells;
+		string numFlowTest;
+        flowFile >> numFlowTest;
+        
+        if (!m->isContainingOnlyDigits(numFlowTest)) { m->mothurOut("[ERROR]: expected a number and got " + numFlowTest + ", quitting. Did you use the flow parameter instead of the file parameter?"); m->mothurOutEndLine(); exit(1); }
+        else { convert(numFlowTest, numFlowCells); }
+        
         if (m->debug) { m->mothurOut("[DEBUG]: numFlowCells = " + toString(numFlowCells) + ".\n"); }
 		int index = 0;//pcluster
 		while(!flowFile.eof()){
@@ -3256,7 +3266,7 @@ void ShhherCommand::writeQualities(int numOTUs, int numFlowCells, string quality
 			}
 		}
 		qualityFile.close();
-		outputNames.push_back(qualityFileName);
+		outputNames.push_back(qualityFileName); outputTypes["qfile"].push_back(qualityFileName);
         
 	}
 	catch(exception& e) {
@@ -3300,7 +3310,7 @@ void ShhherCommand::writeSequences(string thisCompositeFASTAFileName, int numOTU
 		}
 		fastaFile.close();
         
-		outputNames.push_back(fastaFileName);
+		outputNames.push_back(fastaFileName); outputTypes["fasta"].push_back(fastaFileName);
         
 		if(thisCompositeFASTAFileName != ""){
 			m->appendFiles(fastaFileName, thisCompositeFASTAFileName);
@@ -3335,7 +3345,7 @@ void ShhherCommand::writeNames(string thisCompositeNamesFileName, int numOTUs, s
 			}
 		}
 		nameFile.close();
-		outputNames.push_back(nameFileName);
+		outputNames.push_back(nameFileName); outputTypes["name"].push_back(nameFileName);
 		
 		
 		if(thisCompositeNamesFileName != ""){
@@ -3360,7 +3370,7 @@ void ShhherCommand::writeGroups(string groupFileName, string fileRoot, int numSe
 			groupFile << seqNameVector[i] << '\t' << fileRoot << endl;
 		}
 		groupFile.close();
-		outputNames.push_back(groupFileName);
+		outputNames.push_back(groupFileName); outputTypes["group"].push_back(groupFileName);
         
 	}
 	catch(exception& e) {
@@ -3419,7 +3429,7 @@ void ShhherCommand::writeClusters(string otuCountsFileName, int numOTUs, int num
 			}
 		}
 		otuCountsFile.close();
-		outputNames.push_back(otuCountsFileName);
+		outputNames.push_back(otuCountsFileName); outputTypes["counts"].push_back(otuCountsFileName);
         
 	}
 	catch(exception& e) {

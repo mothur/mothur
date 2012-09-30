@@ -43,7 +43,7 @@ set<string> MothurOut::getCurrentTypes()  {
         types.insert("tree");
         types.insert("flow");
         types.insert("biom");
-        types.insert("counttable");
+        types.insert("count");
         types.insert("processors");
 
 		return types;
@@ -79,7 +79,7 @@ void MothurOut::printCurrentFiles()  {
 		if (treefile != "")			{  mothurOut("tree=" + treefile); mothurOutEndLine();				}
 		if (flowfile != "")			{  mothurOut("flow=" + flowfile); mothurOutEndLine();				}
         if (biomfile != "")			{  mothurOut("biom=" + biomfile); mothurOutEndLine();				}
-        if (counttablefile != "")	{  mothurOut("counttable=" + counttablefile); mothurOutEndLine();	}
+        if (counttablefile != "")	{  mothurOut("count=" + counttablefile); mothurOutEndLine();	}
 		if (processors != "1")		{  mothurOut("processors=" + processors); mothurOutEndLine();		}
 		
 	}
@@ -939,7 +939,7 @@ string MothurOut::getFullPathName(string fileName){
 				}
 			
 				for (int i = index; i >= 0; i--) {
-					newFileName = dirs[i] +  "\\" + newFileName;		
+					newFileName = dirs[i] +  "\\\\" + newFileName;		
 				}
 				
 				return newFileName;
@@ -1052,6 +1052,9 @@ int MothurOut::openInputFile(string fileName, ifstream& fileHandle){
 
 int MothurOut::renameFile(string oldName, string newName){
 	try {
+        
+        if (oldName == newName) { return 0; }
+        
 		ifstream inTest;
 		int exist = openInputFile(newName, inTest, "");
 		inTest.close();
@@ -1541,7 +1544,6 @@ vector<string> MothurOut::splitWhiteSpace(string input){
 //**********************************************************************************************************************
 int MothurOut::readTax(string namefile, map<string, string>& taxMap) {
 	try {
-		
         //open input file
 		ifstream in;
 		openInputFile(namefile, in);
@@ -1572,6 +1574,23 @@ int MothurOut::readTax(string namefile, map<string, string>& taxMap) {
             }
 		}
 		in.close();
+        
+        if (rest != "") {
+            vector<string> pieces = splitWhiteSpace(rest);
+            
+            for (int i = 0; i < pieces.size(); i++) {
+                if (columnOne) {  firstCol = pieces[i]; columnOne=false; }
+                else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
+                
+                if (pairDone) { 
+                    //are there confidence scores, if so remove them
+                    if (secondCol.find_first_of('(') != -1) {  removeConfidences(secondCol);	}
+                    taxMap[firstCol] = secondCol;
+                    if (debug) {  mothurOut("[DEBUG]: name = '" + firstCol + "' tax = '" + secondCol + "'\n");  }
+                    pairDone = false; 
+                }
+            } 
+        }
 		
 		return taxMap.size();
 
@@ -1584,7 +1603,6 @@ int MothurOut::readTax(string namefile, map<string, string>& taxMap) {
 /**********************************************************************************************************************/
 int MothurOut::readNames(string namefile, map<string, string>& nameMap, bool redund) { 
 	try {
-		
 		//open input file
 		ifstream in;
 		openInputFile(namefile, in);
@@ -1615,6 +1633,23 @@ int MothurOut::readNames(string namefile, map<string, string>& nameMap, bool red
             }
 		}
 		in.close();
+        
+        if (rest != "") {
+            vector<string> pieces = splitWhiteSpace(rest);
+            
+            for (int i = 0; i < pieces.size(); i++) {
+                if (columnOne) {  firstCol = pieces[i]; columnOne=false; }
+                else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
+                
+                if (pairDone) { 
+                    //parse names into vector
+                    vector<string> theseNames;
+                    splitAtComma(secondCol, theseNames);
+                    for (int i = 0; i < theseNames.size(); i++) {  nameMap[theseNames[i]] = firstCol;  }
+                    pairDone = false; 
+                }
+            }  
+        }
 		
 		return nameMap.size();
 		
@@ -1627,7 +1662,6 @@ int MothurOut::readNames(string namefile, map<string, string>& nameMap, bool red
 /**********************************************************************************************************************/
 int MothurOut::readNames(string namefile, map<string, string>& nameMap, int flip) { 
 	try {
-		
 		//open input file
 		ifstream in;
 		openInputFile(namefile, in);
@@ -1655,6 +1689,20 @@ int MothurOut::readNames(string namefile, map<string, string>& nameMap, int flip
             }
 		}
 		in.close();
+        
+        if (rest != "") {
+            vector<string> pieces = splitWhiteSpace(rest);
+            
+            for (int i = 0; i < pieces.size(); i++) {
+                if (columnOne) {  firstCol = pieces[i]; columnOne=false; }
+                else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
+                
+                if (pairDone) { 
+                    nameMap[secondCol] = firstCol;
+                    pairDone = false; 
+                }
+            } 
+        }
 		
 		return nameMap.size();
 		
@@ -1667,7 +1715,7 @@ int MothurOut::readNames(string namefile, map<string, string>& nameMap, int flip
 /**********************************************************************************************************************/
 int MothurOut::readNames(string namefile, map<string, string>& nameMap, map<string, int>& nameCount) { 
 	try {
-		nameMap.clear(); nameCount.clear();
+ 		nameMap.clear(); nameCount.clear();
 		//open input file
 		ifstream in;
 		openInputFile(namefile, in);
@@ -1700,6 +1748,24 @@ int MothurOut::readNames(string namefile, map<string, string>& nameMap, map<stri
 		}
 		in.close();
 		
+        if (rest != "") {
+            vector<string> pieces = splitWhiteSpace(rest);
+            
+            for (int i = 0; i < pieces.size(); i++) {
+                if (columnOne) {  firstCol = pieces[i]; columnOne=false; }
+                else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
+                
+                if (pairDone) { 
+                    //parse names into vector
+                    vector<string> theseNames;
+                    splitAtComma(secondCol, theseNames);
+                    for (int i = 0; i < theseNames.size(); i++) {  nameMap[theseNames[i]] = firstCol;  }
+                    nameCount[firstCol] = theseNames.size();
+                    pairDone = false; 
+                }
+            }
+
+        }
 		return nameMap.size();
 		
 	}
@@ -1711,7 +1777,6 @@ int MothurOut::readNames(string namefile, map<string, string>& nameMap, map<stri
 /**********************************************************************************************************************/
 int MothurOut::readNames(string namefile, map<string, string>& nameMap) { 
 	try {
-		
 		//open input file
 		ifstream in;
 		openInputFile(namefile, in);
@@ -1736,6 +1801,17 @@ int MothurOut::readNames(string namefile, map<string, string>& nameMap) {
             }
 		}
 		in.close();
+        
+        if (rest != "") {
+            vector<string> pieces = splitWhiteSpace(rest);
+            
+            for (int i = 0; i < pieces.size(); i++) {
+                if (columnOne) {  firstCol = pieces[i]; columnOne=false; }
+                else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
+                
+                if (pairDone) { nameMap[firstCol] = secondCol; pairDone = false; }
+            }
+        }
 		
 		return nameMap.size();
 		
@@ -1747,8 +1823,7 @@ int MothurOut::readNames(string namefile, map<string, string>& nameMap) {
 }
 /**********************************************************************************************************************/
 int MothurOut::readNames(string namefile, map<string, vector<string> >& nameMap) { 
-	try {
-		
+	try {        
 		//open input file
 		ifstream in;
 		openInputFile(namefile, in);
@@ -1779,6 +1854,22 @@ int MothurOut::readNames(string namefile, map<string, vector<string> >& nameMap)
 		}
 		in.close();
         
+        if (rest != "") {
+            vector<string> pieces = splitWhiteSpace(rest);
+            
+            for (int i = 0; i < pieces.size(); i++) {
+                if (columnOne) {  firstCol = pieces[i]; columnOne=false; }
+                else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
+                
+                if (pairDone) { 
+                    vector<string> temp;
+                    splitAtComma(secondCol, temp);
+                    nameMap[firstCol] = temp;
+                    pairDone = false;  
+                } 
+            }
+        }
+        
 		return nameMap.size();
 	}
 	catch(exception& e) {
@@ -1789,7 +1880,6 @@ int MothurOut::readNames(string namefile, map<string, vector<string> >& nameMap)
 /**********************************************************************************************************************/
 map<string, int> MothurOut::readNames(string namefile) { 
 	try {
-		
 		map<string, int> nameMap;
 		
 		//open input file
@@ -1820,6 +1910,20 @@ map<string, int> MothurOut::readNames(string namefile) {
             }
 		}
         in.close();
+        
+        if (rest != "") {
+            vector<string> pieces = splitWhiteSpace(rest);
+            for (int i = 0; i < pieces.size(); i++) {
+                if (columnOne) {  firstCol = pieces[i]; columnOne=false; }
+                else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
+                
+                if (pairDone) { 
+                    int num = getNumNames(secondCol);
+                    nameMap[firstCol] = num;
+                    pairDone = false;  
+                } 
+            }
+        }
 		
 		return nameMap;
 		
@@ -1872,6 +1976,29 @@ int MothurOut::readNames(string namefile, vector<seqPriorityNode>& nameVector, m
 		}
         in.close();
         
+        if (rest != "") {
+            vector<string> pieces = splitWhiteSpace(rest);
+            
+            for (int i = 0; i < pieces.size(); i++) {
+                if (columnOne) {  firstCol = pieces[i]; columnOne=false; }
+                else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
+                
+                if (pairDone) { 
+                    int num = getNumNames(secondCol);
+                    
+                    map<string, string>::iterator it = fastamap.find(firstCol);
+                    if (it == fastamap.end()) {
+                        error = 1;
+                        mothurOut("[ERROR]: " + firstCol + " is not in your fastafile, but is in your namesfile, please correct."); mothurOutEndLine();
+                    }else {
+                        seqPriorityNode temp(num, it->second, firstCol);
+                        nameVector.push_back(temp);
+                    }
+                    
+                    pairDone = false;  
+                } 
+            }
+        }
 		return error;
 	}
 	catch(exception& e) {
@@ -1882,7 +2009,7 @@ int MothurOut::readNames(string namefile, vector<seqPriorityNode>& nameVector, m
 //**********************************************************************************************************************
 set<string> MothurOut::readAccnos(string accnosfile){
 	try {
-		set<string> names;
+ 		set<string> names;
 		ifstream in;
 		openInputFile(accnosfile, in);
 		string name;
@@ -1900,6 +2027,10 @@ set<string> MothurOut::readAccnos(string accnosfile){
         }
 		in.close();	
 		
+        if (rest != "") {
+            vector<string> pieces = splitWhiteSpace(rest);
+            for (int i = 0; i < pieces.size(); i++) {  names.insert(pieces[i]);  } 
+        }
 		return names;
 	}
 	catch(exception& e) {
@@ -1927,6 +2058,11 @@ int MothurOut::readAccnos(string accnosfile, vector<string>& names){
             for (int i = 0; i < pieces.size(); i++) {  names.push_back(pieces[i]);  }
         }
 		in.close();	
+        
+        if (rest != "") {
+            vector<string> pieces = splitWhiteSpace(rest);
+            for (int i = 0; i < pieces.size(); i++) {  names.push_back(pieces[i]);  }
+        }
 		
 		return 0;
 	}
@@ -1975,6 +2111,32 @@ int MothurOut::getNumChar(string line, char c){
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "getNumChar");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+bool MothurOut::isSubset(vector<string> bigset, vector<string> subset) {
+	try {
+		
+        
+		if (subset.size() > bigset.size()) { return false;  }
+		
+		//check if each guy in suset is also in bigset
+		for (int i = 0; i < subset.size(); i++) {
+			bool match = false;
+			for (int j = 0; j < bigset.size(); j++) {
+				if (subset[i] == bigset[j]) { match = true; break; }
+			}
+			
+			//you have a guy in subset that had no match in bigset
+			if (match == false) { return false; }
+		}
+		
+		return true;
+        
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "isSubset");
 		exit(1);
 	}
 }
@@ -2295,30 +2457,29 @@ void MothurOut::splitAtDash(string& estim, vector<string>& container) {
 	try {
 		string individual = "";
 		int estimLength = estim.size();
+		bool prevEscape = false;
 		for(int i=0;i<estimLength;i++){
-			if(estim[i] == '-'){
-				container.push_back(individual);
-				individual = "";				
+			if(prevEscape){
+				individual += estim[i];
+				prevEscape = false;
 			}
 			else{
-				individual += estim[i];
+				if(estim[i] == '\\'){
+					prevEscape = true;
+				}
+				else if(estim[i] == '-'){
+					container.push_back(individual);
+					individual = "";
+					prevEscape = false;				
+				}
+				else{
+					individual += estim[i];
+					prevEscape = false;
+				}
 			}
 		}
 		container.push_back(individual);
-
-	
-	/*	string individual;
-		
-		while (estim.find_first_of('-') != -1) {
-			individual = estim.substr(0,estim.find_first_of('-'));
-			if ((estim.find_first_of('-')+1) <= estim.length()) { //checks to make sure you don't have dash at end of string
-				estim = estim.substr(estim.find_first_of('-')+1, estim.length());
-				container.push_back(individual);
-			}
-		}
-		//get last one
-		container.push_back(estim); */
-	}
+ 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "splitAtDash");
 		exit(1);
@@ -2331,29 +2492,29 @@ void MothurOut::splitAtDash(string& estim, set<string>& container) {
 	try {
 		string individual = "";
 		int estimLength = estim.size();
+		bool prevEscape = false;
 		for(int i=0;i<estimLength;i++){
-			if(estim[i] == '-'){
-				container.insert(individual);
-				individual = "";				
+			if(prevEscape){
+				individual += estim[i];
+				prevEscape = false;
 			}
 			else{
-				individual += estim[i];
+				if(estim[i] == '\\'){
+					prevEscape = true;
+				}
+				else if(estim[i] == '-'){
+					container.insert(individual);
+					individual = "";
+					prevEscape = false;				
+				}
+				else{
+					individual += estim[i];
+					prevEscape = false;
+				}
 			}
 		}
 		container.insert(individual);
-
-	//	string individual;
-		
-	//	while (estim.find_first_of('-') != -1) {
-	//		individual = estim.substr(0,estim.find_first_of('-'));
-	//		if ((estim.find_first_of('-')+1) <= estim.length()) { //checks to make sure you don't have dash at end of string
-	//			estim = estim.substr(estim.find_first_of('-')+1, estim.length());
-	//			container.insert(individual);
-	//		}
-	//	}
-		//get last one
-	//	container.insert(estim);
-	
+        
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "splitAtDash");
@@ -2364,19 +2525,32 @@ void MothurOut::splitAtDash(string& estim, set<string>& container) {
 //This function parses the line options and puts them in a set
 void MothurOut::splitAtDash(string& estim, set<int>& container) {
 	try {
-		string individual;
+		string individual = "";
 		int lineNum;
-		
-		while (estim.find_first_of('-') != -1) {
-			individual = estim.substr(0,estim.find_first_of('-'));
-			if ((estim.find_first_of('-')+1) <= estim.length()) { //checks to make sure you don't have dash at end of string
-				estim = estim.substr(estim.find_first_of('-')+1, estim.length());
-				convert(individual, lineNum); //convert the string to int
-				container.insert(lineNum);
+		int estimLength = estim.size();
+		bool prevEscape = false;
+		for(int i=0;i<estimLength;i++){
+			if(prevEscape){
+				individual += estim[i];
+				prevEscape = false;
+			}
+			else{
+				if(estim[i] == '\\'){
+					prevEscape = true;
+				}
+				else if(estim[i] == '-'){
+					convert(individual, lineNum); //convert the string to int
+					container.insert(lineNum);
+					individual = "";
+					prevEscape = false;				
+				}
+				else{
+					individual += estim[i];
+					prevEscape = false;
+				}
 			}
 		}
-		//get last one
-		convert(estim, lineNum); //convert the string to int
+		convert(individual, lineNum); //convert the string to int
 		container.insert(lineNum);
 	}
 	catch(exception& e) {
@@ -2712,6 +2886,28 @@ int MothurOut::removeConfidences(string& tax) {
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "removeConfidences");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+string MothurOut::removeQuotes(string tax) {
+	try {
+		
+		string taxon;
+		string newTax = "";
+		
+		for (int i = 0; i < tax.length(); i++) {
+			
+			if (control_pressed) { return newTax; }
+            
+            if ((tax[i] != '\'') && (tax[i] != '\"')) { newTax += tax[i]; }
+			
+        }
+		
+		return newTax;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "removeQuotes");
 		exit(1);
 	}
 }
