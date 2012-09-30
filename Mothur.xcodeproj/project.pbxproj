@@ -1863,7 +1863,7 @@
 		08FB7793FE84155DC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0430;
+				LastUpgradeCheck = 0450;
 				ORGANIZATIONNAME = "Schloss Lab";
 			};
 			buildConfigurationList = 1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "Mothur" */;
@@ -2235,7 +2235,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
 				PRODUCT_NAME = Mothur;
-				SDKROOT = macosx10.7;
+				SDKROOT = macosx;
 			};
 			name = Debug;
 		};
@@ -2249,7 +2249,7 @@
 				GCC_WARN_UNUSED_VALUE = YES;
 				INSTALL_PATH = ./;
 				PRODUCT_NAME = Mothur;
-				SDKROOT = macosx10.7;
+				SDKROOT = macosx;
 			};
 			name = Release;
 		};
@@ -2262,7 +2262,7 @@
 				GCC_ENABLE_SSE3_EXTENSIONS = NO;
 				GCC_ENABLE_SSE41_EXTENSIONS = NO;
 				GCC_ENABLE_SSE42_EXTENSIONS = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_OPTIMIZATION_LEVEL = s;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"../release\\\"\"",
 					"VERSION=\"\\\"1.26.0\\\"\"",
@@ -2285,7 +2285,7 @@
 					"-lncurses",
 					"-lreadline",
 				);
-				SDKROOT = macosx;
+				SDKROOT = "";
 				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Debug;
@@ -2298,7 +2298,7 @@
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = "";
-				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_OPTIMIZATION_LEVEL = s;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"VERSION=\"\\\"1.26.0\\\"\"",
 					"RELEASE_DATE=\"\\\"7/9/2012\\\"\"",
@@ -2322,7 +2322,7 @@
 					"-lncurses",
 					"-lreadline",
 				);
-				SDKROOT = macosx;
+				SDKROOT = "";
 			};
 			name = Release;
 		};
