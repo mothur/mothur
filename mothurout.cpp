@@ -2912,8 +2912,31 @@ string MothurOut::removeQuotes(string tax) {
 	}
 }
 /**************************************************************************************************/
-
-
+// function for calculating standard deviation
+double MothurOut::getStandardDeviation(vector<int>& featureVector){
+    try {
+        //finds sum
+        double average = 0; 
+        for (int i = 0; i < featureVector.size(); i++) { average += featureVector[i]; }
+        average /= (double) featureVector.size();
+        
+        //find standard deviation
+        double stdDev = 0;
+        for (int i = 0; i < featureVector.size(); i++) { //compute the difference of each dist from the mean, and square the result of each
+            stdDev += ((featureVector[i] - average) * (featureVector[i] - average));
+        }
+          
+        stdDev /= (double) featureVector.size(); 
+        stdDev = sqrt(stdDev);
+        
+        return stdDev;
+    }
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "getStandardDeviation");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
 
 
 

@@ -441,6 +441,8 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
                 
             }
             
+            if (m->debug) { m->mothurOut("[DEBUG]: " + currSeq.getName() + " " + currSeq.getUnaligned() + "\n"); }
+            
 			if(barcodes.size() != 0){
 				success = trimOligos.stripBarcode(currSeq, barcodeIndex);
 				if(success > bdiffs)		{	trashCode += 'b';	}

@@ -188,7 +188,11 @@ SharedCommand::SharedCommand(string option)  {
              countfile = validParameter.validFile(parameters, "count", true);
              if (countfile == "not open") { countfile = ""; abort = true; }	
              else if (countfile == "not found") { countfile = ""; }
-             else {  m->setCountTableFile(countfile); }
+             else {  
+                 m->setCountTableFile(countfile); 
+                 CountTable temp;
+                 if (!temp.testGroups(countfile)) { m->mothurOut("[ERROR]: Your count file does not have group info, aborting."); m->mothurOutEndLine(); abort=true; }
+             }
 			 
             if ((biomfile == "") && (listfile == "")) { 
 				//is there are current file available for either of these?

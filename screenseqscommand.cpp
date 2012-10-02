@@ -1039,7 +1039,7 @@ int ScreenSeqsCommand::screenCountFile(set<string> badSeqNames){
 		//we were unable to remove some of the bad sequences
 		if (badSeqNames.size() != 0) {
 			for (it = badSeqNames.begin(); it != badSeqNames.end(); it++) {  
-				m->mothurOut("Your groupfile does not include the sequence " + *it + " please correct."); 
+				m->mothurOut("Your count file does not include the sequence " + *it + " please correct."); 
 				m->mothurOutEndLine();
 			}
 		}

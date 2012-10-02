@@ -15,6 +15,14 @@
 #include "tree.h"
 #include "counttable.h"
 
+struct item {
+    string name;
+    string group;
+    
+    item() {}
+    item(string n, string g) : name(n), group(g) {}
+    ~item() {}
+};
 
 //subsampling overwrites the sharedRabunds.  If you need to reuse the original use the getSamplePreserve function.
 
@@ -28,6 +36,8 @@ class SubSample {
         vector<string> getSample(vector<SharedRAbundVector*>&, int); //returns the bin labels for the subsample, mothurOuts binlabels are preserved so you can run this multiple times. Overwrites original vector passed in, if you need to preserve it deep copy first.
         Tree* getSample(Tree*, CountTable*, CountTable*, int); //creates new subsampled tree. Uses first counttable to fill new counttable with sabsampled seqs. Sets groups of seqs not in subsample to "doNotIncludeMe".
         int getSample(SAbundVector*&, int); //destroys sabundvector passed in, so copy it if you need it
+        CountTable getSample(CountTable&, int, vector<string>); //subsample a countTable bygroup(same number sampled from each group, returns subsampled countTable 
+        CountTable getSample(CountTable&, int, vector<string>, bool); //subsample a countTable. If you want to only sample from specific groups, pass in groups in the vector and set bool=true, otherwise set bool=false.   
     
     private:
     

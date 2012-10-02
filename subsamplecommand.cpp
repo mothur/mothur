@@ -16,8 +16,9 @@
 vector<string> SubSampleCommand::setParameters(){	
 	try {		
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "FLSSR", "none",false,false); parameters.push_back(pfasta);
-		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
-		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pgroup);
+        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none",false,false); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none",false,false); parameters.push_back(pcount);
+		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none",false,false); parameters.push_back(pgroup);
 		CommandParameter plist("list", "InputTypes", "", "", "none", "FLSSR", "none",false,false); parameters.push_back(plist);
 		CommandParameter pshared("shared", "InputTypes", "", "", "none", "FLSSR", "none",false,false); parameters.push_back(pshared);
 		CommandParameter prabund("rabund", "InputTypes", "", "", "none", "FLSSR", "none",false,false); parameters.push_back(prabund);
@@ -43,7 +44,7 @@ string SubSampleCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The sub.sample command is designed to be used as a way to normalize your data, or create a smaller set from your original set.\n";
-		helpString += "The sub.sample command parameters are fasta, name, list, group, rabund, sabund, shared, groups, size, persample and label.  You must provide a fasta, list, sabund, rabund or shared file as an input file.\n";
+		helpString += "The sub.sample command parameters are fasta, name, list, group, count, rabund, sabund, shared, groups, size, persample and label.  You must provide a fasta, list, sabund, rabund or shared file as an input file.\n";
 		helpString += "The namefile is only used with the fasta file, not with the listfile, because the list file should contain all sequences.\n";
 		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like included. The group names are separated by dashes.\n";
 		helpString += "The label parameter allows you to select what distance levels you would like, and are also separated by dashes.\n";
@@ -76,6 +77,7 @@ string SubSampleCommand::getOutputFileNameTag(string type, string inputName=""){
             if (type == "fasta")            {   outputFileName =  "subsample" + m->getExtension(inputName);   }
             else if (type == "sabund")    {   outputFileName =  "subsample" + m->getExtension(inputName);   }
             else if (type == "name")        {   outputFileName =  "subsample" + m->getExtension(inputName);   }
+            else if (type == "count")        {   outputFileName =  "subsample" + m->getExtension(inputName);   }
             else if (type == "group")       {   outputFileName =  "subsample" + m->getExtension(inputName);   }
             else if (type == "list")        {   outputFileName =  "subsample" + m->getExtension(inputName);   }
             else if (type == "rabund")       {   outputFileName =  "subsample" + m->getExtension(inputName);   }
@@ -103,6 +105,7 @@ SubSampleCommand::SubSampleCommand(){
 		outputTypes["fasta"] = tempOutNames;
 		outputTypes["name"] = tempOutNames;
 		outputTypes["group"] = tempOutNames;
+        outputTypes["count"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SubSampleCommand", "GetRelAbundCommand");
@@ -142,6 +145,7 @@ SubSampleCommand::SubSampleCommand(string option) {
 			outputTypes["fasta"] = tempOutNames;
 			outputTypes["name"] = tempOutNames;
 			outputTypes["group"] = tempOutNames;
+            outputTypes["count"] = tempOutNames;
 					
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
@@ -206,6 +210,14 @@ SubSampleCommand::SubSampleCommand(string option) {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("count");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["count"] = inputDir + it->second;		}
+				}
 			}
 			
 			//check for required parameters
@@ -244,6 +256,22 @@ SubSampleCommand::SubSampleCommand(string option) {
 			else if (groupfile == "not found") { groupfile = ""; }
 			else { m->setGroupFile(groupfile); }
 			
+            countfile = validParameter.validFile(parameters, "count", true);
+			if (countfile == "not open") { countfile = ""; abort = true; }
+			else if (countfile == "not found") { countfile = "";  }	
+			else {
+                m->setCountTableFile(countfile); 
+                ct.readTable(countfile);
+            }
+            
+            if ((namefile != "") && (countfile != "")) {
+                m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
+            }
+			
+            if ((groupfile != "") && (countfile != "")) {
+                m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+            }
+            
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			label = validParameter.validFile(parameters, "label", false);			
@@ -267,26 +295,34 @@ SubSampleCommand::SubSampleCommand(string option) {
 			temp = validParameter.validFile(parameters, "persample", false);		if (temp == "not found"){	temp = "f";		}
 			persample = m->isTrue(temp);
 			
-			if (groupfile == "") { persample = false; }
+			if ((groupfile == "") && (countfile == "")) { persample = false; }
+            if (countfile != "") {
+                if (!ct.hasGroupInfo()) { 
+                    persample = false; 
+                    if (pickedGroups) { m->mothurOut("You cannot pick groups without group info in your count file."); m->mothurOutEndLine(); abort = true; }
+                }
+            }
 			
 			if ((namefile != "") && (fastafile == "")) { m->mothurOut("You may only use a namefile with a fastafile."); m->mothurOutEndLine(); abort = true; }
 			
 			if ((fastafile == "") && (listfile == "") && (sabundfile == "") && (rabundfile == "") && (sharedfile == "")) {
 				m->mothurOut("You must provide a fasta, list, sabund, rabund or shared file as an input file."); m->mothurOutEndLine(); abort = true; }
 			
-			if (pickedGroups && ((groupfile == "") && (sharedfile == ""))) { 
-				m->mothurOut("You cannot pick groups without a valid group file or shared file."); m->mothurOutEndLine(); abort = true; }
+			if (pickedGroups && ((groupfile == "") && (sharedfile == "") && (countfile == ""))) { 
+				m->mothurOut("You cannot pick groups without a valid group, count or shared file."); m->mothurOutEndLine(); abort = true; }
 			
-			if ((groupfile != "") && ((fastafile == "") && (listfile == ""))) { 
-				m->mothurOut("Group file only valid with listfile or fastafile."); m->mothurOutEndLine(); abort = true; }
+			if (((groupfile != "") || (countfile != "")) && ((fastafile == "") && (listfile == ""))) { 
+				m->mothurOut("Group or count files are only valid with listfile or fastafile."); m->mothurOutEndLine(); abort = true; }
 			
-			if ((groupfile != "") && ((fastafile != "") && (listfile != ""))) { 
-				m->mothurOut("A new group file can only be made from the subsample of a listfile or fastafile, not both. Please correct."); m->mothurOutEndLine(); abort = true; }
+			if (((groupfile != "") || (countfile != "")) && ((fastafile != "") && (listfile != ""))) { 
+				m->mothurOut("A new group or count file can only be made from the subsample of a listfile or fastafile, not both. Please correct."); m->mothurOutEndLine(); abort = true; }
 			
-			if ((fastafile != "") && (namefile == "")) {
-				vector<string> files; files.push_back(fastafile);
-				parser.getNameFile(files);
-			}
+            if (countfile == "") {
+                if ((fastafile != "") && (namefile == "")) {
+                    vector<string> files; files.push_back(fastafile);
+                    parser.getNameFile(files);
+                }
+            }
 		}
 
 	}
@@ -353,6 +389,11 @@ int SubSampleCommand::execute(){
 		if (itTypes != outputTypes.end()) {
 			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setSabundFile(current); }
 		}
+        
+        itTypes = outputTypes.find("count");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setCountTableFile(current); }
+		}
 		
 		
 		m->mothurOutEndLine();
@@ -374,49 +415,67 @@ int SubSampleCommand::getSubSampleFasta() {
 		if (namefile != "") { readNames(); }	//fills names with all names in namefile.
 		else { getNames(); }//no name file, so get list of names to pick from
 		
-		GroupMap* groupMap;
+		GroupMap groupMap;
 		if (groupfile != "") {
-			
-			groupMap = new GroupMap(groupfile);
-			groupMap->readMap();
+			groupMap.readMap(groupfile);
 			
 			//takes care of user setting groupNames that are invalid or setting groups=all
-			SharedUtil* util = new SharedUtil();
-			vector<string> namesGroups = groupMap->getNamesOfGroups();
-			util->setGroups(Groups, namesGroups);
-			delete util;
+			SharedUtil util;
+			vector<string> namesGroups = groupMap.getNamesOfGroups();
+			util.setGroups(Groups, namesGroups);
 			
 			//file mismatch quit
-			if (names.size() != groupMap->getNumSeqs()) { 
-				m->mothurOut("[ERROR]: your fasta file contains " + toString(names.size()) + " sequences, and your groupfile contains " + toString(groupMap->getNumSeqs()) + ", please correct."); 
+			if (names.size() != groupMap.getNumSeqs()) { 
+				m->mothurOut("[ERROR]: your fasta file contains " + toString(names.size()) + " sequences, and your groupfile contains " + toString(groupMap.getNumSeqs()) + ", please correct."); 
 				m->mothurOutEndLine();
-				delete groupMap;
 				return 0;
 			}			
-		}	
+		}else if (countfile != "") {
+            if (ct.hasGroupInfo()) {
+                SharedUtil util;
+                vector<string> namesGroups = ct.getNamesOfGroups();
+                util.setGroups(Groups, namesGroups);
+            }
+            
+            //file mismatch quit
+			if (names.size() != ct.getNumUniqueSeqs()) { 
+				m->mothurOut("[ERROR]: your fasta file contains " + toString(names.size()) + " sequences, and your count file contains " + toString(ct.getNumUniqueSeqs()) + " unique sequences, please correct."); 
+				m->mothurOutEndLine();
+				return 0;
+			}	
+        }
 		
 		if (m->control_pressed) { return 0; }
 		
-		
 		//make sure that if your picked groups size is not too big
-		int thisSize = names.size();
+		int thisSize = 0;
+        if (countfile == "") { thisSize = names.size();  }
+        else {  thisSize = ct. getNumSeqs();  }  //all seqs not just unique
+        
 		if (persample) { 
 			if (size == 0) { //user has not set size, set size = smallest samples size
-				size = groupMap->getNumSeqs(Groups[0]);
+				if (countfile == "") { size = groupMap.getNumSeqs(Groups[0]); }
+                else {  size = ct.getGroupCount(Groups[0]);  }
+                
 				for (int i = 1; i < Groups.size(); i++) {
-					int thisSize = groupMap->getNumSeqs(Groups[i]);
+					int thisSize = 0;
+                    if (countfile == "") { thisSize = groupMap.getNumSeqs(Groups[i]); }
+                    else {  thisSize = ct.getGroupCount(Groups[i]);  }
 					
 					if (thisSize < size) {	size = thisSize;	}
 				}
 			}else { //make sure size is not too large
 				vector<string> newGroups;
 				for (int i = 0; i < Groups.size(); i++) {
-					int thisSize = groupMap->getNumSeqs(Groups[i]);
+					int thisSize = 0;
+                    if (countfile == "") { thisSize = groupMap.getNumSeqs(Groups[i]); }
+                    else {  thisSize = ct.getGroupCount(Groups[i]);  }
 					
 					if (thisSize >= size) {	newGroups.push_back(Groups[i]);	}
 					else {  m->mothurOut("You have selected a size that is larger than " + Groups[i] + " number of sequences, removing " + Groups[i] + "."); m->mothurOutEndLine(); }
 				}
 				Groups = newGroups;
+                if (newGroups.size() == 0) {  m->mothurOut("[ERROR]: all groups removed."); m->mothurOutEndLine(); m->control_pressed = true; }
 			}
 			
 			m->mothurOut("Sampling " + toString(size) + " from each group."); m->mothurOutEndLine();			
@@ -424,7 +483,8 @@ int SubSampleCommand::getSubSampleFasta() {
 			if (pickedGroups) {
 				int total = 0;
 				for(int i = 0; i < Groups.size(); i++) {
-					total += groupMap->getNumSeqs(Groups[i]);
+                    if (countfile == "") { total += groupMap.getNumSeqs(Groups[i]); }
+                    else {  total += ct.getGroupCount(Groups[i]);  }
 				}
 				
 				if (size == 0) { //user has not set size, set size = 10% samples size
@@ -442,64 +502,87 @@ int SubSampleCommand::getSubSampleFasta() {
 			}
 			
 			if (size == 0) { //user has not set size, set size = 10% samples size
-				size = int (names.size() * 0.10);
+				if (countfile == "") {  size = int (names.size() * 0.10); }
+                else {  size = int (ct.getNumSeqs() * 0.10); }
 			}
 			
-			if (size > thisSize) { m->mothurOut("Your fasta file only contains " + toString(thisSize) + " sequences. Setting size to " + toString(thisSize) + "."); m->mothurOutEndLine();
-				size = thisSize;
-			}
-			
-			if (!pickedGroups) { m->mothurOut("Sampling " + toString(size) + " from " + toString(thisSize) + "."); m->mothurOutEndLine(); }
+            
+            if (size > thisSize) { m->mothurOut("Your fasta file only contains " + toString(thisSize) + " sequences. Setting size to " + toString(thisSize) + "."); m->mothurOutEndLine();
+                    size = thisSize;
+            }
+            
+            if (!pickedGroups) { m->mothurOut("Sampling " + toString(size) + " from " + toString(thisSize) + "."); m->mothurOutEndLine(); }
 
 		}
 		random_shuffle(names.begin(), names.end());
 		
 		set<string> subset; //dont want repeat sequence names added
 		if (persample) {
-			//initialize counts
-			map<string, int> groupCounts;
-			map<string, int>::iterator itGroupCounts;
-			for (int i = 0; i < Groups.size(); i++) { groupCounts[Groups[i]] = 0; }
+            if (countfile == "") {
+                //initialize counts
+                map<string, int> groupCounts;
+                map<string, int>::iterator itGroupCounts;
+                for (int i = 0; i < Groups.size(); i++) { groupCounts[Groups[i]] = 0; }
 			
-			for (int j = 0; j < names.size(); j++) {
+                for (int j = 0; j < names.size(); j++) {
 					
-				if (m->control_pressed) { return 0; }
+                    if (m->control_pressed) { return 0; }
 												
-				string group = groupMap->getGroup(names[j]);
-				if (group == "not found") { m->mothurOut("[ERROR]: " + names[j] + " is not in your groupfile. please correct."); m->mothurOutEndLine(); group = "NOTFOUND"; }
-				else{
-					itGroupCounts = groupCounts.find(group);
-					if (itGroupCounts != groupCounts.end()) {
-						if (groupCounts[group] < size) {	subset.insert(names[j]); 	groupCounts[group]++; }
-					}
-				}				
-			}
+                    string group = groupMap.getGroup(names[j]);
+                    if (group == "not found") { m->mothurOut("[ERROR]: " + names[j] + " is not in your groupfile. please correct."); m->mothurOutEndLine(); group = "NOTFOUND"; }
+                    else{
+                        itGroupCounts = groupCounts.find(group);
+                        if (itGroupCounts != groupCounts.end()) {
+                            if (groupCounts[group] < size) {	subset.insert(names[j]); 	groupCounts[group]++; }
+                        }
+                    }				
+                }
+            }else {
+                SubSample sample;
+                CountTable sampledCt = sample.getSample(ct, size, Groups);
+                vector<string> sampledSeqs = sampledCt.getNamesOfSeqs();
+                for (int i = 0; i < sampledSeqs.size(); i++) { subset.insert(sampledSeqs[i]); }
+                
+                string countOutputDir = outputDir;
+                if (outputDir == "") {  countOutputDir += m->hasPath(countfile);  }
+                string countOutputFileName = countOutputDir + m->getRootName(m->getSimpleName(countfile)) + getOutputFileNameTag("count", countfile);
+                outputTypes["count"].push_back(countOutputFileName);  outputNames.push_back(countOutputFileName);
+                sampledCt.printTable(countOutputFileName);
+            }
 		}else {
-			
-			//randomly select a subset of those names to include in the subsample
-			//since names was randomly shuffled just grab the next one
-			for (int j = 0; j < names.size(); j++) {
-				
-				if (m->control_pressed) { return 0; }
-				
-				if (groupfile != "") { //if there is a groupfile given fill in group info
-					string group = groupMap->getGroup(names[j]);
-					if (group == "not found") { m->mothurOut("[ERROR]: " + names[j] + " is not in your groupfile. please correct."); m->mothurOutEndLine(); group = "NOTFOUND"; }
-					
-					if (pickedGroups) { //if hte user picked groups, we only want to keep the names of sequences from those groups
-						if (m->inUsersGroups(group, Groups)) {
-							subset.insert(names[j]); 
-						}
-					}else{
-						subset.insert(names[j]); 
-					}
-				}else{ //save everyone, group
-					subset.insert(names[j]); 
-				}					
-			
-				//do we have enough??
-				if (subset.size() == size) { break; }
-			}	
+			if (countfile == "") {
+                //randomly select a subset of those names to include in the subsample
+                //since names was randomly shuffled just grab the next one
+                for (int j = 0; j < names.size(); j++) {
+                    
+                    if (m->control_pressed) { return 0; }
+                    
+                    if (groupfile != "") { //if there is a groupfile given fill in group info
+                        string group = groupMap.getGroup(names[j]);
+                        if (group == "not found") { m->mothurOut("[ERROR]: " + names[j] + " is not in your groupfile. please correct."); m->mothurOutEndLine(); group = "NOTFOUND"; }
+                        
+                        if (pickedGroups) { //if hte user picked groups, we only want to keep the names of sequences from those groups
+                            if (m->inUsersGroups(group, Groups)) {  subset.insert(names[j]); }
+                        }else{  subset.insert(names[j]); }
+                    }else{ //save everyone, group
+                        subset.insert(names[j]); 
+                    }					
+                    
+                    //do we have enough??
+                    if (subset.size() == size) { break; }
+                }
+            }else {
+                SubSample sample;
+                CountTable sampledCt = sample.getSample(ct, size, Groups, pickedGroups);
+                vector<string> sampledSeqs = sampledCt.getNamesOfSeqs();
+                for (int i = 0; i < sampledSeqs.size(); i++) { subset.insert(sampledSeqs[i]); }
+                
+                string countOutputDir = outputDir;
+                if (outputDir == "") {  countOutputDir += m->hasPath(countfile);  }
+                string countOutputFileName = countOutputDir + m->getRootName(m->getSimpleName(countfile)) + getOutputFileNameTag("count", countfile);
+                outputTypes["count"].push_back(countOutputFileName);  outputNames.push_back(countOutputFileName);
+                sampledCt.printTable(countOutputFileName);
+            }
 		}
 		
 		if (subset.size() == 0) {  m->mothurOut("The size you selected is too large, skipping fasta file."); m->mothurOutEndLine();  return 0; }
@@ -858,67 +941,76 @@ int SubSampleCommand::getSubSampleList() {
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = labels;
-		
+
 		ofstream outGroup;
-		GroupMap* groupMap;
+		GroupMap groupMap;
 		if (groupfile != "") {
-			
-			groupMap = new GroupMap(groupfile);
-			groupMap->readMap();
+			groupMap.readMap(groupfile);
 			
 			//takes care of user setting groupNames that are invalid or setting groups=all
-			SharedUtil* util = new SharedUtil();
-			vector<string> namesGroups = groupMap->getNamesOfGroups();
-			util->setGroups(Groups, namesGroups);
-			delete util;
+			SharedUtil util; vector<string> namesGroups = groupMap.getNamesOfGroups(); util.setGroups(Groups, namesGroups);
 			
 			//create outputfiles
 			string groupOutputDir = outputDir;
 			if (outputDir == "") {  groupOutputDir += m->hasPath(groupfile);  }
 			string groupOutputFileName = groupOutputDir + m->getRootName(m->getSimpleName(groupfile)) + "subsample" + m->getExtension(groupfile);
-			
 			m->openOutputFile(groupOutputFileName, outGroup);
 			outputTypes["group"].push_back(groupOutputFileName);  outputNames.push_back(groupOutputFileName);
 			
 			//file mismatch quit
-			if (list->getNumSeqs() != groupMap->getNumSeqs()) { 
-				m->mothurOut("[ERROR]: your list file contains " + toString(list->getNumSeqs()) + " sequences, and your groupfile contains " + toString(groupMap->getNumSeqs()) + ", please correct."); 
-				m->mothurOutEndLine();
-				delete groupMap;
-				delete list;
-				delete input;
-				out.close();
-				outGroup.close();
-				return 0;
+			if (list->getNumSeqs() != groupMap.getNumSeqs()) { 
+				m->mothurOut("[ERROR]: your list file contains " + toString(list->getNumSeqs()) + " sequences, and your groupfile contains " + toString(groupMap.getNumSeqs()) + ", please correct."); 
+				m->mothurOutEndLine(); delete list; delete input; out.close(); outGroup.close(); return 0;
 			}			
-		}
-		
+		}else if (countfile != "") {
+            if (ct.hasGroupInfo()) {
+                SharedUtil util;
+                vector<string> namesGroups = ct.getNamesOfGroups();
+                util.setGroups(Groups, namesGroups);
+            }
+            
+            //file mismatch quit
+			if (list->getNumSeqs() != ct.getNumUniqueSeqs()) { 
+				m->mothurOut("[ERROR]: your list file contains " + toString(list->getNumSeqs()) + " sequences, and your count file contains " + toString(ct.getNumUniqueSeqs()) + " unique sequences, please correct."); 
+				m->mothurOutEndLine();
+				return 0;
+			}	
+        }
+
 		//make sure that if your picked groups size is not too big
 		if (persample) {
 			if (size == 0) { //user has not set size, set size = smallest samples size
-				size = groupMap->getNumSeqs(Groups[0]);
+				if (countfile == "") { size = groupMap.getNumSeqs(Groups[0]); }
+                else {  size = ct.getGroupCount(Groups[0]);  }
+                
 				for (int i = 1; i < Groups.size(); i++) {
-					int thisSize = groupMap->getNumSeqs(Groups[i]);
+					int thisSize = 0;
+                    if (countfile == "") { thisSize = groupMap.getNumSeqs(Groups[i]); }
+                    else {  thisSize = ct.getGroupCount(Groups[i]);  }
 					
 					if (thisSize < size) {	size = thisSize;	}
 				}
 			}else { //make sure size is not too large
 				vector<string> newGroups;
 				for (int i = 0; i < Groups.size(); i++) {
-					int thisSize = groupMap->getNumSeqs(Groups[i]);
+					int thisSize = 0;
+                    if (countfile == "") { thisSize = groupMap.getNumSeqs(Groups[i]); }
+                    else {  thisSize = ct.getGroupCount(Groups[i]);  }
 					
 					if (thisSize >= size) {	newGroups.push_back(Groups[i]);	}
 					else {  m->mothurOut("You have selected a size that is larger than " + Groups[i] + " number of sequences, removing " + Groups[i] + "."); m->mothurOutEndLine(); }
 				}
 				Groups = newGroups;
+                if (newGroups.size() == 0) {  m->mothurOut("[ERROR]: all groups removed."); m->mothurOutEndLine(); m->control_pressed = true; }
 			}
 			
-			m->mothurOut("Sampling " + toString(size) + " from each group."); m->mothurOutEndLine();	
+			m->mothurOut("Sampling " + toString(size) + " from each group."); m->mothurOutEndLine();		
 		}else{
-			if (pickedGroups) {
+            if (pickedGroups) {
 				int total = 0;
 				for(int i = 0; i < Groups.size(); i++) {
-					total += groupMap->getNumSeqs(Groups[i]);
+                    if (countfile == "") { total += groupMap.getNumSeqs(Groups[i]); }
+                    else {  total += ct.getGroupCount(Groups[i]);  }
 				}
 				
 				if (size == 0) { //user has not set size, set size = 10% samples size
@@ -926,122 +1018,110 @@ int SubSampleCommand::getSubSampleList() {
 				}
 				
 				if (total < size) { 
-					m->mothurOut("Your size is too large for the number of groups you selected. Adjusting to " + toString(int (total * 0.10)) + "."); m->mothurOutEndLine();
+					if (size != 0) { 
+						m->mothurOut("Your size is too large for the number of groups you selected. Adjusting to " + toString(int (total * 0.10)) + "."); m->mothurOutEndLine();
+					}
 					size = int (total * 0.10);
 				}
 				
 				m->mothurOut("Sampling " + toString(size) + " from " + toString(total) + "."); m->mothurOutEndLine();
-			}else{
-				
-				if (size == 0) { //user has not set size, set size = 10% samples size
-					size = int (list->getNumSeqs() * 0.10);
+			}else {
+                if (size == 0) { //user has not set size, set size = 10% samples size
+					if (countfile == "") {  size = int (list->getNumSeqs() * 0.10);  }
+                    else { size = int (ct.getNumSeqs() * 0.10);  }
 				}
 				
-				int thisSize = list->getNumSeqs();
+				int thisSize = 0;
+                if (countfile == "") { thisSize = list->getNumSeqs();  }
+                else { thisSize = ct.getNumSeqs(); }
+                
 				if (size > thisSize) { m->mothurOut("Your list file only contains " + toString(thisSize) + " sequences. Setting size to " + toString(thisSize) + "."); m->mothurOutEndLine();
 					size = thisSize;
 				}
 				
-				m->mothurOut("Sampling " + toString(size) + " from " + toString(list->getNumSeqs()) + "."); m->mothurOutEndLine();
-			}
-		}
+				m->mothurOut("Sampling " + toString(size) + " from " + toString(thisSize) + "."); m->mothurOutEndLine();
+            }
+        }
 		
-		
-		//fill names
-		for (int i = 0; i < list->getNumBins(); i++) {
-			string binnames = list->get(i);
+        set<string> subset; //dont want repeat sequence names added
+		if (countfile == "") {
+            //fill names
+            for (int i = 0; i < list->getNumBins(); i++) {
+                string binnames = list->get(i);
+                vector<string> thisBin;
+                m->splitAtComma(binnames, thisBin);
+                
+                for(int j=0;j<thisBin.size();j++){
+                    if (groupfile != "") { //if there is a groupfile given fill in group info
+                        string group = groupMap.getGroup(thisBin[j]);
+                        if (group == "not found") { m->mothurOut("[ERROR]: " + thisBin[j] + " is not in your groupfile. please correct."); m->mothurOutEndLine(); group = "NOTFOUND"; }
+                        
+						//if hte user picked groups, we only want to keep the names of sequences from those groups
+						if (pickedGroups) { if (m->inUsersGroups(group, Groups)) { names.push_back(thisBin[j]); }  }
+						else{ names.push_back(thisBin[j]); } 
+                    }//save everyone, group
+                    else{ names.push_back(thisBin[j]); }
+                }
+            }
+            
+            random_shuffle(names.begin(), names.end());
 			
-			//parse names
-			string individual = "";
-			int length = binnames.length();
-			for(int j=0;j<length;j++){
-				if(binnames[j] == ','){
-					
-					if (groupfile != "") { //if there is a groupfile given fill in group info
-						string group = groupMap->getGroup(individual);
-						if (group == "not found") { m->mothurOut("[ERROR]: " + individual + " is not in your groupfile. please correct."); m->mothurOutEndLine(); group = "NOTFOUND"; }
-						
-						if (pickedGroups) { //if hte user picked groups, we only want to keep the names of sequences from those groups
-							if (m->inUsersGroups(group, Groups)) {
-								names.push_back(individual);
-							}
-						}else{
-							names.push_back(individual);
-						}
-					}else{ //save everyone, group
-						names.push_back(individual);
-					}
-					individual = "";				
-				}
-				else{
-					individual += binnames[j];
-				}
-			}
-			//save last name
-			if (groupfile != "") { //if there is a groupfile given fill in group info
-				string group = groupMap->getGroup(individual);
-				if (group == "not found") { m->mothurOut("[ERROR]: " + individual + " is not in your groupfile. please correct."); m->mothurOutEndLine(); group = "NOTFOUND"; }
-				
-				if (pickedGroups) { //if hte user picked groups, we only want to keep the names of sequences from those groups
-					if (m->inUsersGroups(group, Groups)) {
-						names.push_back(individual);
-					}
-				}else{
-					names.push_back(individual);
-				}
-			}else{ //save everyone, group
-				names.push_back(individual);
-			}
-		}
-		
-		random_shuffle(names.begin(), names.end());
-			
-		//randomly select a subset of those names to include in the subsample
-		set<string> subset; //dont want repeat sequence names added
-		if (persample) {
-			//initialize counts
-			map<string, int> groupCounts;
-			map<string, int>::iterator itGroupCounts;
-			for (int i = 0; i < Groups.size(); i++) { groupCounts[Groups[i]] = 0; }
-			
-			for (int j = 0; j < names.size(); j++) {
-				
-				if (m->control_pressed) { return 0; }
-				
-				string group = groupMap->getGroup(names[j]);
-				if (group == "not found") { m->mothurOut("[ERROR]: " + names[j] + " is not in your groupfile. please correct."); m->mothurOutEndLine(); group = "NOTFOUND"; }
-				else{
-					itGroupCounts = groupCounts.find(group);
-					if (itGroupCounts != groupCounts.end()) {
-						if (groupCounts[group] < size) {	subset.insert(names[j]); 	groupCounts[group]++; }
-					}
-				}				
-			}
-		}else{
-			for (int j = 0; j < size; j++) {
-				
-				if (m->control_pressed) { break; }
-				
-				subset.insert(names[j]); 
-			}	
-		}
-		
-		if (groupfile != "") { 
-			//write out new groupfile
-			for (set<string>::iterator it = subset.begin(); it != subset.end(); it++) {
-				string group = groupMap->getGroup(*it);
-				if (group == "not found") { group = "NOTFOUND"; }
-				
-				outGroup << *it << '\t' << group << endl;
-			}
-			outGroup.close(); delete groupMap; 
-		}
-		
+            //randomly select a subset of those names to include in the subsample
+            if (persample) {
+                //initialize counts
+                map<string, int> groupCounts;
+                map<string, int>::iterator itGroupCounts;
+                for (int i = 0; i < Groups.size(); i++) { groupCounts[Groups[i]] = 0; }
+                
+                for (int j = 0; j < names.size(); j++) {
+                    
+                    if (m->control_pressed) { delete list; delete input;  return 0; }
+                    
+                    string group = groupMap.getGroup(names[j]);
+                    if (group == "not found") { m->mothurOut("[ERROR]: " + names[j] + " is not in your groupfile. please correct."); m->mothurOutEndLine(); group = "NOTFOUND"; }
+                    else{
+                        itGroupCounts = groupCounts.find(group);
+                        if (itGroupCounts != groupCounts.end()) {
+                            if (groupCounts[group] < size) {	subset.insert(names[j]); 	groupCounts[group]++; }
+                        }
+                    }				
+                }
+            }else{
+                for (int j = 0; j < size; j++) {
+                    if (m->control_pressed) { break; }
+                    subset.insert(names[j]); 
+                }	
+            }
+            
+            if (groupfile != "") { 
+                //write out new groupfile
+                for (set<string>::iterator it = subset.begin(); it != subset.end(); it++) {
+                    string group = groupMap.getGroup(*it);
+                    if (group == "not found") { group = "NOTFOUND"; }
+                    outGroup << *it << '\t' << group << endl;
+                }
+                outGroup.close(); 
+            }
+		}else {
+            SubSample sample; CountTable sampledCt;
+            
+            if (persample)  { sampledCt = sample.getSample(ct, size, Groups);               }
+            else            { sampledCt = sample.getSample(ct, size, Groups, pickedGroups); }
+            
+            vector<string> sampledSeqs = sampledCt.getNamesOfSeqs();
+            for (int i = 0; i < sampledSeqs.size(); i++) { subset.insert(sampledSeqs[i]); }
+        
+            string countOutputDir = outputDir;
+            if (outputDir == "") {  countOutputDir += m->hasPath(countfile);  }
+            string countOutputFileName = countOutputDir + m->getRootName(m->getSimpleName(countfile)) + getOutputFileNameTag("count", countfile);
+            outputTypes["count"].push_back(countOutputFileName);  outputNames.push_back(countOutputFileName);
+            sampledCt.printTable(countOutputFileName);
+        }
 						
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-			if (m->control_pressed) {  delete list; delete input; out.close();  return 0;  }
+			if (m->control_pressed) {  delete list; delete input;  out.close();  return 0;  }
 			
 			if(allLines == 1 || labels.count(list->getLabel()) == 1){			
 				
@@ -1132,22 +1212,12 @@ int SubSampleCommand::processList(ListVector*& list, ofstream& out, set<string>&
 			
 			if (m->control_pressed) { break; }
 			
-			string binnames = list->get(i);
+			string bin = list->get(i);
+            vector<string> binnames;
+            m->splitAtComma(bin, binnames);
 			
-			//parse names
-			string individual = "";
-			string newNames = "";
-			int length = binnames.length();
-			for(int j=0;j<length;j++){
-				if(binnames[j] == ','){
-					if (subset.count(individual) != 0) {  newNames += individual + ",";  }
-					individual = "";				
-				}else{
-					individual += binnames[j];
-				}
-			}
-			if (subset.count(individual) != 0) {  newNames += individual + ",";  }
-			
+            string newNames = "";
+			for(int j=0;j<binnames.size();j++){ if (subset.count(binnames[j]) != 0) {  newNames += binnames[j] + ",";  } }
 			
 			//if there are names in this bin add to new list
 			if (newNames != "") { 

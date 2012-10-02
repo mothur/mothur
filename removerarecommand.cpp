@@ -20,7 +20,8 @@ vector<string> RemoveRareCommand::setParameters(){
 		CommandParameter prabund("rabund", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(prabund);
 		CommandParameter psabund("sabund", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(psabund);
 		CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pshared);
-		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pgroup);
+        CommandParameter pcount("count", "InputTypes", "", "", "CountGroup", "none", "none",false,false); parameters.push_back(pcount);
+		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none",false,false); parameters.push_back(pgroup);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
 		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
 		CommandParameter pnseqs("nseqs", "Number", "", "0", "", "", "",false,true); parameters.push_back(pnseqs);
@@ -41,7 +42,7 @@ vector<string> RemoveRareCommand::setParameters(){
 string RemoveRareCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The remove.rare command parameters are list, rabund, sabund, shared, group, label, groups, bygroup and nseqs.\n";
+		helpString += "The remove.rare command parameters are list, rabund, sabund, shared, group, count, label, groups, bygroup and nseqs.\n";
 		helpString += "The remove.rare command reads one of the following file types: list, rabund, sabund or shared file. It outputs a new file after removing the rare otus.\n";
 		helpString += "The groups parameter allows you to specify which of the groups you would like analyzed.  Default=all. You may separate group names with dashes.\n";
 		helpString += "The label parameter is used to analyze specific labels in your input. default=all. You may separate label names with dashes.\n";
@@ -72,6 +73,7 @@ string RemoveRareCommand::getOutputFileNameTag(string type, string inputName="")
             else if (type == "sabund")    {   outputFileName =  "pick" + m->getExtension(inputName);   }
             else if (type == "shared")        {   outputFileName =  "pick" + m->getExtension(inputName);   }
             else if (type == "group")       {   outputFileName =  "pick" + m->getExtension(inputName);   }
+            else if (type == "count")       {   outputFileName =  "pick" + m->getExtension(inputName);   }
             else if (type == "list")        {   outputFileName =  "pick" + m->getExtension(inputName);   }
             else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
         }
@@ -93,6 +95,7 @@ RemoveRareCommand::RemoveRareCommand(){
 		outputTypes["sabund"] = tempOutNames;
 		outputTypes["list"] = tempOutNames;
 		outputTypes["group"] = tempOutNames;
+        outputTypes["count"] = tempOutNames;
 		outputTypes["shared"] = tempOutNames;
 	}
 	catch(exception& e) {
@@ -131,6 +134,7 @@ RemoveRareCommand::RemoveRareCommand(string option)  {
 			outputTypes["list"] = tempOutNames;
 			outputTypes["group"] = tempOutNames;
 			outputTypes["shared"] = tempOutNames;	
+            outputTypes["count"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
@@ -179,6 +183,14 @@ RemoveRareCommand::RemoveRareCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("count");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["count"] = inputDir + it->second;		}
+				}
 			}
 			
 			
@@ -207,6 +219,15 @@ RemoveRareCommand::RemoveRareCommand(string option)  {
 			if (sharedfile == "not open") { sharedfile = "";  abort = true; }
 			else if (sharedfile == "not found") {  sharedfile = "";  }
 			else { m->setSharedFile(sharedfile); }
+            
+            countfile = validParameter.validFile(parameters, "count", true);
+			if (countfile == "not open") { countfile = ""; abort = true; }
+			else if (countfile == "not found") { countfile = "";  }	
+			else { m->setCountTableFile(countfile); }
+            			
+            if ((groupfile != "") && (countfile != "")) {
+                m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+            }
 			
 			if ((sharedfile == "") && (listfile == "") && (rabundfile == "") && (sabundfile == "")) { 
 				//is there are current file available for any of these?
@@ -252,7 +273,7 @@ RemoveRareCommand::RemoveRareCommand(string option)  {
 			
 			if (byGroup && (sharedfile == "")) { m->mothurOut("The byGroup parameter is only valid with a shared file."); m->mothurOutEndLine(); }
 			
-			if ((groupfile != "") && (listfile == "")) { m->mothurOut("A groupfile is only valid with a list file."); m->mothurOutEndLine(); groupfile = ""; }
+			if (((groupfile != "") || (countfile != "")) && (listfile == "")) { m->mothurOut("A group or count file is only valid with a list file."); m->mothurOutEndLine(); groupfile = ""; countfile = ""; }
 		}
 		
 	}
@@ -310,6 +331,11 @@ int RemoveRareCommand::execute(){
 			if (itTypes != outputTypes.end()) {
 				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setSharedFile(current); }
 			}
+            
+            itTypes = outputTypes.find("count");
+			if (itTypes != outputTypes.end()) {
+				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setCountTableFile(current); }
+			}
 		}
 		
 		return 0;		
@@ -327,7 +353,9 @@ int RemoveRareCommand::processList(){
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(listfile);  }
 		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(listfile)) + getOutputFileNameTag("list", listfile);
-		string outputGroupFileName = thisOutputDir + m->getRootName(m->getSimpleName(groupfile)) + getOutputFileNameTag("group", groupfile);		
+		string outputGroupFileName = thisOutputDir + m->getRootName(m->getSimpleName(groupfile)) + getOutputFileNameTag("group", groupfile);
+        string outputCountFileName = thisOutputDir + m->getRootName(m->getSimpleName(countfile)) + getOutputFileNameTag("count", countfile);
+        
 		ofstream out, outGroup;
 		m->openOutputFile(outputFileName, out);
 		
@@ -374,13 +402,21 @@ int RemoveRareCommand::processList(){
 		
 		//if groupfile is given then use it
 		GroupMap* groupMap;
+        CountTable ct;
 		if (groupfile != "") { 
 			groupMap = new GroupMap(groupfile); groupMap->readMap(); 
 			SharedUtil util;
 			vector<string> namesGroups = groupMap->getNamesOfGroups();
 			util.setGroups(Groups, namesGroups);
 			m->openOutputFile(outputGroupFileName, outGroup);
-		}
+		}else if (countfile != "") {
+            ct.readTable(countfile);
+            if (ct.hasGroupInfo()) {
+                vector<string> namesGroups = ct.getNamesOfGroups();
+                SharedUtil util;
+                util.setGroups(Groups, namesGroups);
+            }
+        }
 		
 		
 		if (list != NULL) {	
@@ -397,6 +433,7 @@ int RemoveRareCommand::processList(){
 				vector<string> names;
 				string saveBinNames = binnames;
 				m->splitAtComma(binnames, names);
+                int binsize = names.size();
 				
 				vector<string> newGroupFile;
 				if (groupfile != "") {
@@ -412,14 +449,38 @@ int RemoveRareCommand::processList(){
 							saveBinNames += names[k] + ",";
 						}
 					}
-					names = newNames;
+					names = newNames; binsize = names.size();
 					saveBinNames = saveBinNames.substr(0, saveBinNames.length()-1);
-				}
+				}else if (countfile != "") {
+					saveBinNames = "";
+                    binsize = 0;
+					for(int k = 0; k < names.size(); k++) {
+                        if (ct.hasGroupInfo()) {
+                            vector<string> thisSeqsGroups = ct.getGroups(names[k]);
+                            
+                            int thisSeqsCount = 0;
+                            for (int n = 0; n < thisSeqsGroups.size(); n++) {
+                                if (m->inUsersGroups(thisSeqsGroups[n], Groups)) {
+                                    thisSeqsCount += ct.getGroupCount(names[k], thisSeqsGroups[n]);
+                                }
+                            }
+                            binsize += thisSeqsCount;
+                            //if you don't have any seqs from the groups the user wants, then remove you.
+                            if (thisSeqsCount == 0) { newGroupFile.push_back(names[k]); }
+                            else { saveBinNames += names[k] + ","; }
+                        }else {
+                            binsize += ct.getNumSeqs(names[k]); 
+                            saveBinNames += names[k] + ",";
+                        }
+					}
+					saveBinNames = saveBinNames.substr(0, saveBinNames.length()-1);
+                }
 
-				if (names.size() > nseqs) { //keep bin
+				if (binsize > nseqs) { //keep bin
 					newList.push_back(saveBinNames);
-					for(int k = 0; k < newGroupFile.size(); k++) { outGroup << newGroupFile[k] << endl; }
-				}
+					if (groupfile != "") {  for(int k = 0; k < newGroupFile.size(); k++) { outGroup << newGroupFile[k] << endl; }  }
+                    else if (countfile != "") { for(int k = 0; k < newGroupFile.size(); k++) {  ct.remove(newGroupFile[k]); } }  
+				}else {  if (countfile != "") {  for(int k = 0; k < names.size(); k++) {  ct.remove(names[k]); } }  }
 			}
 			
 			//print new listvector
@@ -431,6 +492,17 @@ int RemoveRareCommand::processList(){
 		
 		out.close();
 		if (groupfile != "") { outGroup.close(); outputTypes["group"].push_back(outputGroupFileName); outputNames.push_back(outputGroupFileName); }
+        if (countfile != "") { 
+            if (ct.hasGroupInfo()) {
+                vector<string> allGroups = ct.getNamesOfGroups();
+                for (int i = 0; i < allGroups.size(); i++) {
+                    if (!m->inUsersGroups(allGroups[i], Groups)) { ct.removeGroup(allGroups[i]); }
+                }
+
+            }
+            ct.printTable(outputCountFileName);
+            outputTypes["count"].push_back(outputCountFileName); outputNames.push_back(outputCountFileName); 
+        }
 		
 		if (wroteSomething == false) {  m->mothurOut("Your file contains only rare sequences."); m->mothurOutEndLine();  }
 		outputTypes["list"].push_back(outputFileName); outputNames.push_back(outputFileName);
