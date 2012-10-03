@@ -21,9 +21,9 @@ vector<string> ClassifySeqsCommand::setParameters(){
         CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none",false,false); parameters.push_back(pcount);
 		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none",false,false); parameters.push_back(pgroup);
 
-		CommandParameter psearch("search", "Multiple", "kmer-blast-suffix-distance", "kmer", "", "", "",false,false); parameters.push_back(psearch);
+		CommandParameter psearch("search", "Multiple", "kmer-blast-suffix-distance-align", "kmer", "", "", "",false,false); parameters.push_back(psearch);
 		CommandParameter pksize("ksize", "Number", "", "8", "", "", "",false,false); parameters.push_back(pksize);
-		CommandParameter pmethod("method", "Multiple", "bayesian-knn", "bayesian", "", "", "",false,false); parameters.push_back(pmethod);
+		CommandParameter pmethod("method", "Multiple", "wang-knn-zap", "wang", "", "", "",false,false); parameters.push_back(pmethod);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
 		CommandParameter pmatch("match", "Number", "", "1.0", "", "", "",false,false); parameters.push_back(pmatch);
 		CommandParameter pmismatch("mismatch", "Number", "", "-1.0", "", "", "",false,false); parameters.push_back(pmismatch);
@@ -55,11 +55,11 @@ string ClassifySeqsCommand::getHelpString(){
 		helpString += "The classify.seqs command reads a fasta file containing sequences and creates a .taxonomy file and a .tax.summary file.\n";
 		helpString += "The classify.seqs command parameters are reference, fasta, name, group, count, search, ksize, method, taxonomy, processors, match, mismatch, gapopen, gapextend, numwanted and probs.\n";
 		helpString += "The reference, fasta and taxonomy parameters are required. You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amzon.fasta \n";
-		helpString += "The search parameter allows you to specify the method to find most similar template.  Your options are: suffix, kmer, blast and distance. The default is kmer.\n";
+		helpString += "The search parameter allows you to specify the method to find most similar template.  Your options are: suffix, kmer, blast, align and distance. The default is kmer.\n";
 		helpString += "The name parameter allows you add a names file with your fasta file, if you enter multiple fasta files, you must enter matching names files for them.\n";
 		helpString += "The group parameter allows you add a group file so you can have the summary totals broken up by group.\n";
         helpString += "The count parameter allows you add a count file so you can have the summary totals broken up by group.\n";
-		helpString += "The method parameter allows you to specify classification method to use.  Your options are: bayesian and knn. The default is bayesian.\n";
+		helpString += "The method parameter allows you to specify classification method to use.  Your options are: wang, knn and zap. The default is wang.\n";
 		helpString += "The ksize parameter allows you to specify the kmer size for finding most similar template to candidate.  The default is 8.\n";
 		helpString += "The processors parameter allows you to specify the number of processors to use. The default is 1.\n";
 #ifdef USE_MPI
@@ -72,8 +72,8 @@ string ClassifySeqsCommand::getHelpString(){
 		helpString += "The gapextend parameter allows you to specify the penalty for extending a gap in an alignment.  The default is -1.0.\n";
 		helpString += "The numwanted parameter allows you to specify the number of sequence matches you want with the knn method.  The default is 10.\n";
 		helpString += "The cutoff parameter allows you to specify a bootstrap confidence threshold for your taxonomy.  The default is 0.\n";
-		helpString += "The probs parameter shuts off the bootstrapping results for the bayesian method. The default is true, meaning you want the bootstrapping to be shown.\n";
-		helpString += "The iters parameter allows you to specify how many iterations to do when calculating the bootstrap confidence score for your taxonomy with the bayesian method.  The default is 100.\n";
+		helpString += "The probs parameter shuts off the bootstrapping results for the wang and zap method. The default is true, meaning you want the bootstrapping to be shown.\n";
+		helpString += "The iters parameter allows you to specify how many iterations to do when calculating the bootstrap confidence score for your taxonomy with the wang method.  The default is 100.\n";
 		//helpString += "The flip parameter allows you shut off mothur's   The default is T.\n";
 		helpString += "The classify.seqs command should be in the following format: \n";
 		helpString += "classify.seqs(reference=yourTemplateFile, fasta=yourFastaFile, method=yourClassificationMethod, search=yourSearchmethod, ksize=yourKmerSize, taxonomy=yourTaxonomyFile, processors=yourProcessors) \n";
@@ -492,9 +492,6 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			string temp;
-			temp = validParameter.validFile(parameters, "ksize", false);		if (temp == "not found"){	temp = "8";				}
-			m->mothurConvert(temp, kmerSize); 
-			
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
 			m->mothurConvert(temp, processors); 
@@ -536,7 +533,13 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 			
 			search = validParameter.validFile(parameters, "search", false);		if (search == "not found"){	search = "kmer";		}
 			
-			method = validParameter.validFile(parameters, "method", false);		if (method == "not found"){	method = "bayesian";	}
+			method = validParameter.validFile(parameters, "method", false);		if (method == "not found"){	method = "wang";	}
+            
+            temp = validParameter.validFile(parameters, "ksize", false);		if (temp == "not found"){	
+                temp = "8";	
+                if (method == "zap") { temp = "7"; }
+            }
+			m->mothurConvert(temp, kmerSize); 
 			
 			temp = validParameter.validFile(parameters, "match", false);		if (temp == "not found"){	temp = "1.0";			}
 			m->mothurConvert(temp, match);  
@@ -570,8 +573,13 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 			m->mothurConvert(temp, iters); 
 
 			
-			if ((method == "bayesian") && (search != "kmer"))  { 
-				m->mothurOut("The bayesian method requires the kmer search." + search + "will be disregarded." ); m->mothurOutEndLine();
+			if ((method == "wang") && (search != "kmer"))  { 
+				m->mothurOut("The wang method requires the kmer search. " + search + " will be disregarded, and kmer will be used." ); m->mothurOutEndLine();
+				search = "kmer";
+			}
+            
+            if ((method == "zap") && ((search != "kmer") && (search != "align")))  { 
+				m->mothurOut("The zap method requires the kmer or align search. " + search + " will be disregarded, and kmer will be used." ); m->mothurOutEndLine();
 				search = "kmer";
 			}
 			
@@ -605,10 +613,16 @@ int ClassifySeqsCommand::execute(){
 	try {
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
         
-		if(method == "bayesian"){	classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, iters, rand(), flip, writeShortcuts);		}
+        string outputMethodTag = method + ".";
+		if(method == "wang"){	classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, iters, rand(), flip, writeShortcuts);	}
 		else if(method == "knn"){	classify = new Knn(taxonomyFileName, templateFileName, search, kmerSize, gapOpen, gapExtend, match, misMatch, numWanted, rand());				}
+        else if(method == "zap"){	
+            outputMethodTag = search + "_" + outputMethodTag;
+            if (search == "kmer") {   classify = new KmerTree(templateFileName, taxonomyFileName, kmerSize, cutoff); }
+            else {  classify = new AlignTree(templateFileName, taxonomyFileName, cutoff);  }
+        }
 		else {
-			m->mothurOut(search + " is not a valid method option. I will run the command using bayesian.");
+			m->mothurOut(search + " is not a valid method option. I will run the command using wang.");
 			m->mothurOutEndLine();
 			classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, iters, rand(), flip, writeShortcuts);	
 		}
@@ -633,10 +647,10 @@ int ClassifySeqsCommand::execute(){
             if (RippedTaxName != "") { RippedTaxName +=  "."; }   
           
 			if (outputDir == "") { outputDir += m->hasPath(fastaFileNames[s]); }
-			string newTaxonomyFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + RippedTaxName + getOutputFileNameTag("taxonomy");
-			string newaccnosFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + RippedTaxName + getOutputFileNameTag("accnos");
+			string newTaxonomyFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + RippedTaxName + outputMethodTag + getOutputFileNameTag("taxonomy");
+			string newaccnosFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + RippedTaxName + outputMethodTag +getOutputFileNameTag("accnos");
 			string tempTaxonomyFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + "taxonomy.temp";
-			string taxSummary = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + RippedTaxName + getOutputFileNameTag("taxsummary");
+			string taxSummary = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + RippedTaxName + outputMethodTag + getOutputFileNameTag("taxsummary");
 			
 			if ((method == "knn") && (search == "distance")) { 
 				string DistName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + getOutputFileNameTag("matchdist");
@@ -798,12 +812,12 @@ int ClassifySeqsCommand::execute(){
                 if (hasCount) { 
                     ct = new CountTable();
                     ct->readTable(countfileNames[s]);
-                    taxaSum = new PhyloSummary(baseTName, ct);
+                    taxaSum = new PhyloSummary(taxonomyFileName, ct);
                     taxaSum->summarize(tempTaxonomyFile);
                 }else {
                     if (groupfile != "") {  group = groupfileNames[s]; groupMap = new GroupMap(group); groupMap->readMap(); }
                     
-                    taxaSum = new PhyloSummary(baseTName, groupMap);
+                    taxaSum = new PhyloSummary(taxonomyFileName, groupMap);
                     
                     if (m->control_pressed) { outputTypes.clear(); if (ct != NULL) { delete ct; }  if (groupMap != NULL) { delete groupMap; } delete taxaSum; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} delete classify; return 0; }
                     

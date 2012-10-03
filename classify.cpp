@@ -354,3 +354,37 @@ vector<string> Classify::parseTax(string tax) {
 }
 /**************************************************************************************************/
 
+double Classify::getLogExpSum(vector<double> probabilities, int& maxIndex){
+	try {
+        //	http://jblevins.org/notes/log-sum-exp
+        
+        double maxProb = probabilities[0];
+        maxIndex = 0;
+        
+        int numProbs = (int)probabilities.size();
+        
+        for(int i=1;i<numProbs;i++){
+            if(probabilities[i] >= maxProb){
+                maxProb = probabilities[i];
+                maxIndex = i;
+            }
+        }
+        
+        double probSum = 0.0000;
+        
+        for(int i=0;i<numProbs;i++){
+            probSum += exp(probabilities[i] - maxProb);		
+        }
+        
+        probSum = log(probSum) + maxProb;
+        
+        return probSum;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "Classify", "getLogExpSum");
+		exit(1);
+	}
+}
+
+/**************************************************************************************************/
+
