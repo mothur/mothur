@@ -47,7 +47,7 @@ private:
 	int driver(string, string, string, string, int&);
 	int createProcesses(string, string, string, string, int&);
 		
-	bool abort, useAbskew, chimealns, useMinH, useMindiv, useXn, useDn, useXa, useChunks, useMinchunk, useIdsmoothwindow, useMinsmoothid, useMaxp, skipgaps, skipgaps2, useMinlen, useMaxlen, ucl, useQueryfract, hasCount, hasName;
+	bool abort, useAbskew, chimealns, useMinH, useMindiv, useXn, useDn, useXa, useChunks, useMinchunk, useIdsmoothwindow, useMinsmoothid, useMaxp, skipgaps, skipgaps2, useMinlen, useMaxlen, ucl, useQueryfract, hasCount, hasName, dups;
 	string fastafile, groupfile, templatefile, outputDir, namefile, countfile, abskew, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, minlen, maxlen, queryfract, uchimeLocation;
 	int processors;
 	
@@ -758,6 +758,8 @@ static DWORD WINAPI MyUchimeSeqsThreadFunction(LPVOID lpParam){
 		for (int j = 0; j < cPara.size(); j++) {  uchimeParameters[j] = cPara[j];  commandString += toString(cPara[j]) + " "; } 
 		//int numArgs = cPara.size();
 		
+        commandString = "\"" + commandString + "\"";
+        
 		//uchime_main(numArgs, uchimeParameters); 
 		//cout << "commandString = " << commandString << endl;
         if (pDataArray->m->debug) { pDataArray->m->mothurOut("[DEBUG]: uchime command = " + commandString + ".\n"); }

@@ -660,7 +660,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 		
 		int count = 0;
 		bool moreSeqs = 1;
-		TrimOligos trimOligos(pdiffs, bdiffs, ldiffs, sdiffs, primers, barcodes, rbarcodes, revPrimer, linker, spacer);
+		TrimOligos trimOligos(pdiffs, bdiffs, ldiffs, sdiffs, primers, barcodes, revPrimer, linker, spacer);
 	
 		while (moreSeqs) {
 				
@@ -701,12 +701,6 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
                 
 				if(barcodes.size() != 0){
 					success = trimOligos.stripBarcode(currSeq, currQual, barcodeIndex);
-					if(success > bdiffs)		{	trashCode += 'b';	}
-					else{ currentSeqsDiffs += success;  }
-				}
-                
-                if(rbarcodes.size() != 0){
-					success = trimOligos.stripRBarcode(currSeq, currQual, barcodeIndex);
 					if(success > bdiffs)		{	trashCode += 'b';	}
 					else{ currentSeqsDiffs += success;  }
 				}
@@ -1088,7 +1082,7 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
                                               tempPrimerQualFileNames,
                                               tempNameFileNames,
                                               lines[i].start, lines[i].end, qLines[i].start, qLines[i].end, m,
-                                              pdiffs, bdiffs, ldiffs, sdiffs, tdiffs, primers, barcodes, rbarcodes, revPrimer, linker, spacer, 
+                                              pdiffs, bdiffs, ldiffs, sdiffs, tdiffs, primers, barcodes, revPrimer, linker, spacer, 
                                              primerNameVector, barcodeNameVector, createGroup, allFiles, keepforward, keepFirst, removeLast,
                                               qWindowStep, qWindowSize, qWindowAverage, qtrim, qThreshold, qAverage, qRollAverage,
                                              minLength, maxAmbig, maxHomoP, maxLength, flip, nameMap, nameCount);
@@ -1435,40 +1429,11 @@ bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
 				}
 				else if(type == "BARCODE"){
 					inOligos >> group;
-                    
-                    //barcode lines can look like   BARCODE   atgcatgc   groupName  - for 454 seqs
-                    //or                            BARCODE   atgcatgc   atgcatgc    groupName  - for illumina data that has forward and reverse info
-					string temp = "";
-                    while (!inOligos.eof())	{	
-						char c = inOligos.get(); 
-						if (c == 10 || c == 13){	break;	}
-						else if (c == 32 || c == 9){;} //space or tab
-						else { 	temp += c;  }
-					} 
 					
-                    //then this is illumina data with 4 columns
-                    if (temp != "") {  
-                        
-                        for(int i=0;i<group.length();i++){
-                            group[i] = toupper(group[i]);
-                            if(group[i] == 'U')	{	group[i] = 'T';	}
-                        }
-                        
-                        if (m->debug) { m->mothurOut("[DEBUG]: reading reverse " + group + ", and group = " + temp + ".\n"); }
-                        
-                        string reverseBarcode = reverseOligo(group); //reverse barcode
-                        //check for repeat barcodes
-                        map<string, int>::iterator itBar = rbarcodes.find(reverseBarcode);
-                        if (itBar != rbarcodes.end()) { m->mothurOut("reverse barcode " + group + " is in your oligos file already."); m->mothurOutEndLine();  }
-                        
-                        group = temp;
-                        rbarcodes[reverseBarcode]=indexBarcode; 
-                    }else { if (m->debug) { m->mothurOut("[DEBUG]: reading group " + group + ".\n"); } }
-                        
 					//check for repeat barcodes
 					map<string, int>::iterator itBar = barcodes.find(oligo);
 					if (itBar != barcodes.end()) { m->mothurOut("barcode " + oligo + " is in your oligos file already."); m->mothurOutEndLine();  }
-						
+                    
 					barcodes[oligo]=indexBarcode; indexBarcode++;
 					barcodeNameVector.push_back(group);
 				}else if(type == "LINKER"){

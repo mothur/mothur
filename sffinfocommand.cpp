@@ -1037,7 +1037,7 @@ int SffInfoCommand::readSeqData(ifstream& in, seqRead& read, int numFlowReads, H
 int SffInfoCommand::findGroup(Header header, seqRead read, int& barcode, int& primer) {
 	try {
         //find group read belongs to
-        TrimOligos trimOligos(pdiffs, bdiffs, ldiffs, sdiffs, primers, barcodes, rbarcodes, revPrimer, linker, spacer);
+        TrimOligos trimOligos(pdiffs, bdiffs, ldiffs, sdiffs, primers, barcodes, revPrimer, linker, spacer);
         
         int success = 1;
         string trashCode = "";
@@ -1078,12 +1078,6 @@ int SffInfoCommand::findGroup(Header header, seqRead read, int& barcode, int& pr
         
         if(barcodes.size() != 0){
             success = trimOligos.stripBarcode(currSeq, currQual, barcode);
-            if(success > bdiffs)		{	trashCode += 'b';	}
-            else{ currentSeqsDiffs += success;  }
-        }
-        
-        if(rbarcodes.size() != 0){
-            success = trimOligos.stripRBarcode(currSeq, currQual, barcode);
             if(success > bdiffs)		{	trashCode += 'b';	}
             else{ currentSeqsDiffs += success;  }
         }
@@ -1675,36 +1669,13 @@ bool SffInfoCommand::readOligos(string oligoFile){
 				}
 				else if(type == "BARCODE"){
 					inOligos >> group;
-                    
-                    //barcode lines can look like   BARCODE   atgcatgc   groupName  - for 454 seqs
-                    //or                            BARCODE   atgcatgc   atgcatgc    groupName  - for illumina data that has forward and reverse info
-					string temp = "";
-                    while (!inOligos.eof())	{	
-						char c = inOligos.get(); 
-						if (c == 10 || c == 13){	break;	}
-						else if (c == 32 || c == 9){;} //space or tab
-						else { 	temp += c;  }
-					} 
 					
-                    //then this is illumina data with 4 columns
-                    if (temp != "") {  
-                        string reverseBarcode = reverseOligo(group); //reverse barcode
-                        group = temp;
-                        
-                        //check for repeat barcodes
-                        map<string, int>::iterator itBar = rbarcodes.find(reverseBarcode);
-                        if (itBar != rbarcodes.end()) { m->mothurOut("barcode " + reverseBarcode + " is in your oligos file already."); m->mothurOutEndLine();  }
-						
-                        rbarcodes[reverseBarcode]=indexBarcode; 
-                    }
-                    
 					//check for repeat barcodes
 					map<string, int>::iterator itBar = barcodes.find(oligo);
 					if (itBar != barcodes.end()) { m->mothurOut("barcode " + oligo + " is in your oligos file already."); m->mothurOutEndLine();  }
                     
 					barcodes[oligo]=indexBarcode; indexBarcode++;
 					barcodeNameVector.push_back(group);
-
 				}else if(type == "LINKER"){
 					linker.push_back(oligo);
 				}else if(type == "SPACER"){
