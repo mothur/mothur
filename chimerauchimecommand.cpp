@@ -35,7 +35,7 @@ vector<string> ChimeraUchimeCommand::setParameters(){
 		CommandParameter pchunks("chunks", "Number", "", "4", "", "", "",false,false); parameters.push_back(pchunks);
 		CommandParameter pminchunk("minchunk", "Number", "", "64", "", "", "",false,false); parameters.push_back(pminchunk);
 		CommandParameter pidsmoothwindow("idsmoothwindow", "Number", "", "32", "", "", "",false,false); parameters.push_back(pidsmoothwindow);
-        CommandParameter pdups("dups", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pdups);
+        CommandParameter pdups("dereplicate", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pdups);
 
 		//CommandParameter pminsmoothid("minsmoothid", "Number", "", "0.95", "", "", "",false,false); parameters.push_back(pminsmoothid);
 		CommandParameter pmaxp("maxp", "Number", "", "2", "", "", "",false,false); parameters.push_back(pmaxp);
@@ -61,13 +61,13 @@ string ChimeraUchimeCommand::getHelpString(){
 		string helpString = "";
 		helpString += "The chimera.uchime command reads a fastafile and referencefile and outputs potentially chimeric sequences.\n";
 		helpString += "This command is a wrapper for uchime written by Robert C. Edgar.\n";
-		helpString += "The chimera.uchime command parameters are fasta, name, count, reference, processors, dups, abskew, chimealns, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, skipgaps, skipgaps2, minlen, maxlen, ucl and queryfact.\n";
+		helpString += "The chimera.uchime command parameters are fasta, name, count, reference, processors, dereplicate, abskew, chimealns, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, skipgaps, skipgaps2, minlen, maxlen, ucl and queryfact.\n";
 		helpString += "The fasta parameter allows you to enter the fasta file containing your potentially chimeric sequences, and is required, unless you have a valid current fasta file. \n";
 		helpString += "The name parameter allows you to provide a name file, if you are using template=self. \n";
         helpString += "The count parameter allows you to provide a count file, if you are using template=self. \n";
 		helpString += "You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amazon.fasta \n";
 		helpString += "The group parameter allows you to provide a group file. The group file can be used with a namesfile and reference=self. When checking sequences, only sequences from the same group as the query sequence will be used as the reference. \n";
-        helpString += "If the dups parameter is true, then if one group finds the seqeunce to be chimeric, then all groups find it to be chimeric, default=t.\n";
+        helpString += "If the dereplicate parameter is false, then if one group finds the seqeunce to be chimeric, then all groups find it to be chimeric, default=f.\n";
 		helpString += "The reference parameter allows you to enter a reference file containing known non-chimeric sequences, and is required. You may also set template=self, in this case the abundant sequences will be used as potential parents. \n";
 		helpString += "The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n";
 		helpString += "The abskew parameter can only be used with template=self. Minimum abundance skew. Default 1.9. Abundance skew is: min [ abund(parent1), abund(parent2) ] / abund(query).\n";
@@ -561,11 +561,11 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 			temp = validParameter.validFile(parameters, "skipgaps2", false);				if (temp == "not found") { temp = "t"; }
 			skipgaps2 = m->isTrue(temp); 
             
-            string usedDups = "true";
-			temp = validParameter.validFile(parameters, "dups", false);	
+            string usedDups = "false";
+			temp = validParameter.validFile(parameters, "dereplicate", false);	
 			if (temp == "not found") { 
-				if (groupfile != "")    {  temp = "true";					}
-				else                    {  temp = "false"; usedDups = "";	}
+				if (groupfile != "")    {  temp = "false";					}
+				else                    {  temp = "true"; usedDups = "";	}
 			}
 			dups = m->isTrue(temp);
 
@@ -726,7 +726,7 @@ int ChimeraUchimeCommand::execute(){
                 if (hasCount) { delete cparser; }
                 else { delete sparser; }
                 
-                if (dups) { 
+                if (!dups) { 
                     int totalChimeras = deconvoluteResults(uniqueNames, outputFileName, accnosFileName, alnsFileName);
 				
                     m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(totalSeqs) + " sequences. " + toString(totalChimeras) + " chimeras were found.");	m->mothurOutEndLine();
