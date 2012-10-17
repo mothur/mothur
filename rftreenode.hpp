@@ -6,8 +6,8 @@
 //  Copyright (c) 2012 Schloss Lab. All rights reserved.
 //
 
-#ifndef rrf_fs_prototype_treenode_hpp
-#define rrf_fs_prototype_treenode_hpp
+#ifndef RF_RFTREENODE_HPP
+#define RF_RFTREENODE_HPP
 
 #include "mothurout.h"
 #include "macros.h"

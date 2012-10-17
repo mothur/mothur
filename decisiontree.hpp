@@ -6,8 +6,8 @@
   //  Copyright (c) 2012 Schloss Lab. All rights reserved.
   //
 
-#ifndef rrf_fs_prototype_decisiontree_hpp
-#define rrf_fs_prototype_decisiontree_hpp
+#ifndef RF_DECISIONTREE_HPP
+#define RF_DECISIONTREE_HPP
 
 #include "macros.h"
 #include "rftreenode.hpp"

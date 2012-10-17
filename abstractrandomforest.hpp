@@ -6,8 +6,8 @@
 //  Copyright (c) 2012 Schloss Lab. All rights reserved.
 //
 
-#ifndef rrf_fs_prototype_abstractrandomforest_hpp
-#define rrf_fs_prototype_abstractrandomforest_hpp
+#ifndef RF_ABSTRACTRANDOMFOREST_HPP
+#define RF_ABSTRACTRANDOMFOREST_HPP
 
 #include "mothurout.h"
 #include "macros.h"

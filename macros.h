@@ -6,8 +6,8 @@
 //  Copyright (c) 2012 Schloss Lab. All rights reserved.
 //
 
-#ifndef rrf_fs_prototype_macros_h
-#define rrf_fs_prototype_macros_h
+#ifndef RF_MACROS_H
+#define RF_MACROS_H
 
 #include "mothurout.h" 
 

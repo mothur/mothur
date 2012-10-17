@@ -6,8 +6,8 @@
 //  Copyright (c) 2012 Schloss Lab. All rights reserved.
 //
 
-#ifndef rrf_fs_prototype_abstractdecisiontree_hpp
-#define rrf_fs_prototype_abstractdecisiontree_hpp
+#ifndef RF_ABSTRACTDECISIONTREE_HPP
+#define RF_ABSTRACTDECISIONTREE_HPP
 
 #include "mothurout.h"
 #include "macros.h"

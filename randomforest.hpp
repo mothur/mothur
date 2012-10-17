@@ -6,8 +6,8 @@
 //  Copyright (c) 2012 Schloss Lab. All rights reserved.
 //
 
-#ifndef rrf_fs_prototype_randomforest_hpp
-#define rrf_fs_prototype_randomforest_hpp
+#ifndef RF_RANDOMFOREST_HPP
+#define RF_RANDOMFOREST_HPP
 
 #include "macros.h"
 #include "abstractrandomforest.hpp"
