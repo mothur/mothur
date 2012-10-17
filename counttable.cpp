@@ -481,6 +481,10 @@ int CountTable::addGroup(string groupName) {
 int CountTable::removeGroup(string groupName) {
     try {        
         if (hasGroups) {
+            //save for later in case removing a group means we need to remove a seq.
+            map<int, string> reverse;
+            for (map<string, int>::iterator it = indexNameMap.begin(); it !=indexNameMap.end(); it++) { reverse[it->second] = it->first;  }
+            
             map<string, int>::iterator it = indexGroupMap.find(groupName);
             if (it == indexGroupMap.end()) {
                 m->mothurOut("[ERROR]: " + groupName + " is not in your count table. Please correct.\n"); m->control_pressed = true;
@@ -491,13 +495,15 @@ int CountTable::removeGroup(string groupName) {
                 for (int i = 0; i < groups.size(); i++) {
                     if (groups[i] != groupName) { 
                         newGroups.push_back(groups[i]);
-                        indexGroupMap[groups[i]] = i;
+                        indexGroupMap[groups[i]] = newGroups.size()-1;
                     }
                 }
                 indexGroupMap.erase(groupName);
                 groups = newGroups;
                 totalGroups.erase(totalGroups.begin()+indexOfGroupToRemove);
-                 
+                
+                int thisIndex = 0;
+                map<string, int> newIndexNameMap;
                 for (int i = 0; i < counts.size(); i++) {
                     int num = counts[i][indexOfGroupToRemove];
                     counts[i].erase(counts[i].begin()+indexOfGroupToRemove);
@@ -509,7 +515,11 @@ int CountTable::removeGroup(string groupName) {
                         uniques--;
                         i--;
                     }
+                    newIndexNameMap[reverse[thisIndex]] = i;
+                    thisIndex++;
                 }
+                indexNameMap = newIndexNameMap;
+                
                 if (groups.size() == 0) { hasGroups = false; }
             }
         }else { m->mothurOut("[ERROR]: your count table does not contain group information, can not remove group " + groupName + ".\n"); m->control_pressed = true; }

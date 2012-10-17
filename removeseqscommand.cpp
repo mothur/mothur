@@ -406,6 +406,12 @@ int RemoveSeqsCommand::readFasta(){
 			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 			
 			Sequence currSeq(in);
+            
+            if (!dups) {//adjust name if needed
+                map<string, string>::iterator it = uniqueMap.find(currSeq.getName());
+                if (it != uniqueMap.end()) { currSeq.setName(it->second); }
+            }
+
 			name = currSeq.getName();
 			
 			if (name != "") {
@@ -413,7 +419,7 @@ int RemoveSeqsCommand::readFasta(){
 				if (names.count(name) == 0) {
 					wroteSomething = true;
 					
-					currSeq.printSequence(out);
+                    currSeq.printSequence(out);
 				}else {  removedCount++;  }
 			}
 			m->gobble(in);
@@ -477,6 +483,11 @@ int RemoveSeqsCommand::readQual(){
 			
 			m->gobble(in);
 			
+            if (!dups) {//adjust name if needed
+                map<string, string>::iterator it = uniqueMap.find(saveName);
+                if (it != uniqueMap.end()) { name = ">" + it->second; saveName = it->second; }
+            }
+            
 			if (names.count(saveName) == 0) {
 				wroteSomething = true;
 				
@@ -695,6 +706,8 @@ int RemoveSeqsCommand::readName(){
 						wroteSomething = true;
 						
 						out << validSecond[0] << '\t';
+                        //we are changing the unique name in the fasta file
+                        uniqueMap[firstCol] = validSecond[0];
 						
 						//you know you have at least one valid second since first column is valid
 						for (int i = 0; i < validSecond.size()-1; i++) {  out << validSecond[i] << ',';  }
@@ -788,9 +801,15 @@ int RemoveSeqsCommand::readTax(){
 			in >> name;				//read from first column
 			in >> tax;			//read from second column
 			
+            if (!dups) {//adjust name if needed
+                map<string, string>::iterator it = uniqueMap.find(name);
+                if (it != uniqueMap.end()) { name = it->second; }
+            }
+            
 			//if this name is in the accnos file
 			if (names.count(name) == 0) {
 				wroteSomething = true;
+            
 				out << name << '\t' << tax << endl;
 			}else {  removedCount++;  }
 					
@@ -840,6 +859,11 @@ int RemoveSeqsCommand::readAlign(){
 			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 			
 			in >> name;				//read from first column
+            
+            if (!dups) {//adjust name if needed
+                map<string, string>::iterator it = uniqueMap.find(name);
+                if (it != uniqueMap.end()) { name = it->second; }
+            }
 			
 			//if this name is in the accnos file
 			if (names.count(name) == 0) {

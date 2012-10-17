@@ -13,7 +13,15 @@ vector<string> MakeContigsCommand::setParameters(){
 	try {
 		CommandParameter pfasta("ffastq", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
         CommandParameter prfasta("rfastq", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(prfasta);
-		CommandParameter palign("align", "Multiple", "needleman-gotoh", "needleman", "", "", "",false,false); parameters.push_back(palign);
+        CommandParameter poligos("oligos", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(poligos);
+		CommandParameter ppdiffs("pdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(ppdiffs);
+		CommandParameter pbdiffs("bdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(pbdiffs);
+        CommandParameter pldiffs("ldiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(pldiffs);
+		CommandParameter psdiffs("sdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(psdiffs);
+        CommandParameter ptdiffs("tdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(ptdiffs);
+
+        CommandParameter palign("align", "Multiple", "needleman-gotoh", "needleman", "", "", "",false,false); parameters.push_back(palign);
+        CommandParameter pallfiles("allfiles", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pallfiles);
 		CommandParameter pmatch("match", "Number", "", "1.0", "", "", "",false,false); parameters.push_back(pmatch);
 		CommandParameter pmismatch("mismatch", "Number", "", "-1.0", "", "", "",false,false); parameters.push_back(pmismatch);
 		CommandParameter pgapopen("gapopen", "Number", "", "-2.0", "", "", "",false,false); parameters.push_back(pgapopen);
@@ -37,15 +45,22 @@ string MakeContigsCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The make.contigs command reads a forward fastq file and a reverse fastq file and outputs new fasta and quality files.\n";
-		helpString += "The make.contigs command parameters are ffastq, rfastq, align, match, mismatch, gapopen, gapextend and processors.\n";
+        helpString += "If an oligos file is provided barcodes and primers will be trimmed, and a group file will be created.\n";
+		helpString += "The make.contigs command parameters are ffastq, rfastq, oligos, tdiffs, bdiffs, ldiffs, sdiffs, pdiffs, align, match, mismatch, gapopen, gapextend, allfiles and processors.\n";
 		helpString += "The ffastq and rfastq parameters are required.\n";
 		helpString += "The align parameter allows you to specify the alignment method to use.  Your options are: gotoh and needleman. The default is needleman.\n";
+        helpString += "The tdiffs parameter is used to specify the total number of differences allowed in the sequence. The default is pdiffs + bdiffs + sdiffs + ldiffs.\n";
+		helpString += "The bdiffs parameter is used to specify the number of differences allowed in the barcode. The default is 0.\n";
+		helpString += "The pdiffs parameter is used to specify the number of differences allowed in the primer. The default is 0.\n";
+        helpString += "The ldiffs parameter is used to specify the number of differences allowed in the linker. The default is 0.\n";
+		helpString += "The sdiffs parameter is used to specify the number of differences allowed in the spacer. The default is 0.\n";
 		helpString += "The match parameter allows you to specify the bonus for having the same base. The default is 1.0.\n";
 		helpString += "The mistmatch parameter allows you to specify the penalty for having different bases.  The default is -1.0.\n";
 		helpString += "The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -2.0.\n";
 		helpString += "The gapextend parameter allows you to specify the penalty for extending a gap in an alignment.  The default is -1.0.\n";
         helpString += "The threshold parameter allows you to set a quality scores threshold. In the case where we are trying to decide whether to keep a base or remove it because the base is compared to a gap in the other fragment, if the base has a quality score below the threshold we eliminate it. Default=40.\n";
         helpString += "The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n";
+        helpString += "The allfiles parameter will create separate group and fasta file for each grouping. The default is F.\n";
         helpString += "The make.contigs command should be in the following format: \n";
 		helpString += "make.contigs(ffastq=yourForwardFastqFile, rfastq=yourReverseFastqFile, align=yourAlignmentMethod) \n";
 		helpString += "Note: No spaces between parameter labels (i.e. ffastq), '=' and parameters (i.e.yourForwardFastqFile).\n";
@@ -68,6 +83,7 @@ string MakeContigsCommand::getOutputFileNameTag(string type, string inputName=""
         else {
             if (type == "fasta")             {   outputFileName =  "contigs.fasta";         }
             else if (type == "qfile")        {   outputFileName =  "contigs.qual";          }
+            else if (type == "group")            {   outputFileName =  "groups";   }
             else if (type == "mismatch")     {   outputFileName =  "contigs.mismatch";      }
             else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
         }
@@ -86,6 +102,7 @@ MakeContigsCommand::MakeContigsCommand(){
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
 		outputTypes["qfile"] = tempOutNames;
+        outputTypes["group"] = tempOutNames;
         outputTypes["mismatch"] = tempOutNames;
 	}
 	catch(exception& e) {
@@ -121,6 +138,7 @@ MakeContigsCommand::MakeContigsCommand(string option)  {
 			outputTypes["fasta"] = tempOutNames;
 			outputTypes["qfile"] = tempOutNames;
             outputTypes["mismatch"] = tempOutNames;
+            outputTypes["group"] = tempOutNames;
 			
             
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
@@ -143,6 +161,14 @@ MakeContigsCommand::MakeContigsCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["rfastq"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("oligos");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["oligos"] = inputDir + it->second;		}
+				}
             }
             
             ffastqfile = validParameter.validFile(parameters, "ffastq", true);
@@ -152,6 +178,11 @@ MakeContigsCommand::MakeContigsCommand(string option)  {
 			rfastqfile = validParameter.validFile(parameters, "rfastq", true);
 			if (rfastqfile == "not open") { rfastqfile = ""; abort = true; }	
 			else if (rfastqfile == "not found") { rfastqfile = ""; abort=true;  m->mothurOut("The rfastq parameter is required.\n"); }
+            
+            oligosfile = validParameter.validFile(parameters, "oligos", true);
+			if (oligosfile == "not found")      {	oligosfile = "";	}
+			else if(oligosfile == "not open")   {	abort = true;       } 
+			else {	 m->setOligosFile(oligosfile);		}
             
             //if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(ffastqfile);		}
@@ -182,6 +213,26 @@ MakeContigsCommand::MakeContigsCommand(string option)  {
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
 			m->mothurConvert(temp, processors);
+            
+            temp = validParameter.validFile(parameters, "bdiffs", false);		if (temp == "not found") { temp = "0"; }
+			m->mothurConvert(temp, bdiffs);
+			
+			temp = validParameter.validFile(parameters, "pdiffs", false);		if (temp == "not found") { temp = "0"; }
+			m->mothurConvert(temp, pdiffs);
+            
+            temp = validParameter.validFile(parameters, "ldiffs", false);		if (temp == "not found") { temp = "0"; }
+			m->mothurConvert(temp, ldiffs);
+            
+            temp = validParameter.validFile(parameters, "sdiffs", false);		if (temp == "not found") { temp = "0"; }
+			m->mothurConvert(temp, sdiffs);
+			
+			temp = validParameter.validFile(parameters, "tdiffs", false);		if (temp == "not found") { int tempTotal = pdiffs + bdiffs + ldiffs + sdiffs;  temp = toString(tempTotal); }
+			m->mothurConvert(temp, tdiffs);
+			
+			if(tdiffs == 0){	tdiffs = bdiffs + pdiffs + ldiffs + sdiffs;	}
+
+            temp = validParameter.validFile(parameters, "allfiles", false);		if (temp == "not found") { temp = "F"; }
+			allFiles = m->isTrue(temp);
 			
 			align = validParameter.validFile(parameters, "align", false);		if (align == "not found"){	align = "needleman";	}
 			if ((align != "needleman") && (align != "gotoh")) { m->mothurOut(align + " is not a valid alignment method. Options are needleman or gotoh. I will use needleman."); m->mothurOutEndLine(); align = "needleman"; }
@@ -239,6 +290,12 @@ int MakeContigsCommand::execute(){
 		if (itTypes != outputTypes.end()) {
 			if ((itTypes->second).size() != 0) { currentQual = (itTypes->second)[0]; m->setQualFile(currentQual); }
 		}
+        
+        string currentGroup = "";
+		itTypes = outputTypes.find("group");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { currentGroup = (itTypes->second)[0]; m->setGroupFile(currentGroup); }
+		}
 		
         //output files created by command
 		m->mothurOutEndLine();
@@ -246,7 +303,6 @@ int MakeContigsCommand::execute(){
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
 		m->mothurOutEndLine();
 
-        
         return 0;
     }
 	catch(exception& e) {
@@ -699,6 +755,262 @@ bool MakeContigsCommand::checkReads(fastqRead& forward, fastqRead& reverse){
         m->errorOut(e, "MakeContigsCommand", "readFastq");
         exit(1);
     }
+}
+//***************************************************************************************************************
+//illumina data requires paired forward and reverse data
+//BARCODE   atgcatgc   atgcatgc    groupName 
+//PRIMER   atgcatgc   atgcatgc    groupName  
+//PRIMER   atgcatgc   atgcatgc  
+bool MakeContigsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<vector<string> >& qualFileNames){
+	try {
+		ifstream in;
+		m->openInputFile(oligosfile, in);
+		
+		ofstream test;
+		
+		string type, foligo, roligo, group;
+        
+		int indexPrimer = 0;
+		int indexBarcode = 0;
+        set<string> uniquePrimers;
+        set<string> uniqueBarcodes;
+		
+		while(!in.eof()){
+            
+			in >> type; 
+            
+		 	if (m->debug) { m->mothurOut("[DEBUG]: reading type - " + type + ".\n"); }	
+            
+			if(type[0] == '#'){
+				while (!in.eof())	{	char c = in.get();  if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
+				m->gobble(in);
+			}
+			else{
+				m->gobble(in);
+				//make type case insensitive
+				for(int i=0;i<type.length();i++){	type[i] = toupper(type[i]);  }
+				
+				in >> foligo;
+                
+                if (m->debug) { m->mothurOut("[DEBUG]: reading - " + foligo + ".\n"); }
+				
+				for(int i=0;i<foligo.length();i++){
+					foligo[i] = toupper(foligo[i]);
+					if(foligo[i] == 'U')	{	foligo[i] = 'T';	}
+				}
+				
+				if(type == "PRIMER"){
+					m->gobble(in);
+					
+                    in >> roligo;
+                    
+                    for(int i=0;i<roligo.length();i++){
+                        roligo[i] = toupper(roligo[i]);
+                        if(roligo[i] == 'U')	{	roligo[i] = 'T';	}
+                    }
+                    roligo = reverseOligo(roligo);
+                    
+                    group = "";
+                    
+					// get rest of line in case there is a primer name
+					while (!in.eof())	{	
+						char c = in.get(); 
+						if (c == 10 || c == 13){	break;	}
+						else if (c == 32 || c == 9){;} //space or tab
+						else { 	group += c;  }
+					} 
+                    
+                    oligosPair newPrimer(foligo, roligo);
+					
+					//check for repeat barcodes
+                    string tempPair = foligo+roligo;
+                    if (uniquePrimers.count(tempPair) != 0) { m->mothurOut("primer pair " + newPrimer.forward + " " + newPrimer.reverse + " is in your oligos file already."); m->mothurOutEndLine();  }
+                    else { uniquePrimers.insert(tempPair); }
+					
+                    if (m->debug) {  if (group != "") { m->mothurOut("[DEBUG]: reading group " + group + ".\n"); }else{ m->mothurOut("[DEBUG]: no group for primer pair " + newPrimer.forward + " " + newPrimer.reverse + ".\n"); }  }
+                    
+					primers[indexPrimer]=newPrimer; indexPrimer++;		
+					primerNameVector.push_back(group);
+				}else if(type == "BARCODE"){
+					m->gobble(in);
+					
+                    in >> roligo;
+                    
+                    for(int i=0;i<roligo.length();i++){
+                        roligo[i] = toupper(roligo[i]);
+                        if(roligo[i] == 'U')	{	roligo[i] = 'T';	}
+                    }
+                    roligo = reverseOligo(roligo);
+                    
+                    oligosPair newPair(foligo, roligo);
+                    
+                    group = "";
+                    while (!in.eof())	{	
+						char c = in.get(); 
+						if (c == 10 || c == 13){	break;	}
+						else if (c == 32 || c == 9){;} //space or tab
+						else { 	group += c;  }
+					} 
+					
+                    if (m->debug) { m->mothurOut("[DEBUG]: barcode pair " + newPair.forward + " " + newPair.reverse + ", and group = " + group + ".\n"); }
+                        
+                    //check for repeat barcodes
+                    string tempPair = foligo+roligo;
+                    if (uniqueBarcodes.count(tempPair) != 0) { m->mothurOut("barcode pair " + newPair.forward + " " + newPair.reverse +  " is in your oligos file already, disregarding."); m->mothurOutEndLine();  }
+                    else { uniqueBarcodes.insert(tempPair); }
+                        
+                    barcodes[indexBarcode]=newPair; indexBarcode++;
+					barcodeNameVector.push_back(group);
+				}else if(type == "LINKER"){
+					linker.push_back(foligo);
+				}else if(type == "SPACER"){
+					spacer.push_back(foligo);
+				}
+				else{	m->mothurOut("[WARNING]: " + type + " is not recognized as a valid type. Choices are primer, barcode, linker and spacer. Ignoring " + foligo + "."); m->mothurOutEndLine(); }
+			}
+			m->gobble(in);
+		}	
+		in.close();
+		
+		if(barcodeNameVector.size() == 0 && primerNameVector[0] == ""){	allFiles = 0;	}
+		
+		//add in potential combos
+		if(barcodeNameVector.size() == 0){
+            oligosPair temp("", "");
+			barcodes[0] = temp;
+			barcodeNameVector.push_back("");			
+		}
+		
+		if(primerNameVector.size() == 0){
+            oligosPair temp("", "");
+			primers[0] = temp;
+			primerNameVector.push_back("");			
+		}
+		
+		fastaFileNames.resize(barcodeNameVector.size());
+		for(int i=0;i<fastaFileNames.size();i++){
+			fastaFileNames[i].assign(primerNameVector.size(), "");
+		}
+		qualFileNames = fastaFileNames;	
+		
+		if(allFiles){
+			set<string> uniqueNames; //used to cleanup outputFileNames
+			for(map<int, oligosPair>::iterator itBar = barcodes.begin();itBar != barcodes.end();itBar++){
+				for(map<int, oligosPair>::iterator itPrimer = primers.begin();itPrimer != primers.end(); itPrimer++){
+					
+					string primerName = primerNameVector[itPrimer->first];
+					string barcodeName = barcodeNameVector[itBar->first];
+					
+					string comboGroupName = "";
+					string fastaFileName = "";
+					string qualFileName = "";
+					string nameFileName = "";
+                    string countFileName = "";
+					
+					if(primerName == ""){
+						comboGroupName = barcodeNameVector[itBar->first];
+					}
+					else{
+						if(barcodeName == ""){
+							comboGroupName = primerNameVector[itPrimer->first];
+						}
+						else{
+							comboGroupName = barcodeNameVector[itBar->first] + "." + primerNameVector[itPrimer->first];
+						}
+					}
+					
+					
+					ofstream temp;
+					fastaFileName = outputDir + m->getRootName(m->getSimpleName(ffastqfile)) + comboGroupName + ".fasta";
+					if (uniqueNames.count(fastaFileName) == 0) {
+						outputNames.push_back(fastaFileName);
+						outputTypes["fasta"].push_back(fastaFileName);
+						uniqueNames.insert(fastaFileName);
+					}
+					
+					fastaFileNames[itBar->first][itPrimer->first] = fastaFileName;
+					m->openOutputFile(fastaFileName, temp);		temp.close();
+					
+					
+                    qualFileName = outputDir + m->getRootName(m->getSimpleName(ffastqfile)) + comboGroupName + ".qual";
+                    if (uniqueNames.count(qualFileName) == 0) {
+                        outputNames.push_back(qualFileName);
+                        outputTypes["qfile"].push_back(qualFileName);
+                    }
+						
+                    qualFileNames[itBar->first][itPrimer->first] = qualFileName;
+                    m->openOutputFile(qualFileName, temp);		temp.close();
+				}
+			}
+		}
+		
+		bool allBlank = true;
+		for (int i = 0; i < barcodeNameVector.size(); i++) {
+			if (barcodeNameVector[i] != "") {
+				allBlank = false;
+				break;
+			}
+		}
+		for (int i = 0; i < primerNameVector.size(); i++) {
+			if (primerNameVector[i] != "") {
+				allBlank = false;
+				break;
+			}
+		}
+        
+		if (allBlank) {
+			m->mothurOut("[WARNING]: your oligos file does not contain any group names.  mothur will not create a groupfile."); m->mothurOutEndLine();
+			allFiles = false;
+			return false;
+		}
+		
+		return true;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "MakeContigsCommand", "getOligos");
+		exit(1);
+	}
+}
+//********************************************************************/
+string MakeContigsCommand::reverseOligo(string oligo){
+	try {
+        string reverse = "";
+        
+        for(int i=oligo.length()-1;i>=0;i--){
+            
+            if(oligo[i] == 'A')		{	reverse += 'T';	}
+            else if(oligo[i] == 'T'){	reverse += 'A';	}
+            else if(oligo[i] == 'U'){	reverse += 'A';	}
+            
+            else if(oligo[i] == 'G'){	reverse += 'C';	}
+            else if(oligo[i] == 'C'){	reverse += 'G';	}
+            
+            else if(oligo[i] == 'R'){	reverse += 'Y';	}
+            else if(oligo[i] == 'Y'){	reverse += 'R';	}
+            
+            else if(oligo[i] == 'M'){	reverse += 'K';	}
+            else if(oligo[i] == 'K'){	reverse += 'M';	}
+            
+            else if(oligo[i] == 'W'){	reverse += 'W';	}
+            else if(oligo[i] == 'S'){	reverse += 'S';	}
+            
+            else if(oligo[i] == 'B'){	reverse += 'V';	}
+            else if(oligo[i] == 'V'){	reverse += 'B';	}
+            
+            else if(oligo[i] == 'D'){	reverse += 'H';	}
+            else if(oligo[i] == 'H'){	reverse += 'D';	}
+            
+            else						{	reverse += 'N';	}
+        }
+        
+        
+        return reverse;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "MakeContigsCommand", "reverseOligo");
+		exit(1);
+	}
 }
 //**********************************************************************************************************************
 

@@ -37,6 +37,7 @@ class RemoveSeqsCommand : public Command {
 		string accnosfile, fastafile, namefile, groupfile, countfile, alignfile, listfile, taxfile, qualfile, outputDir;
 		bool abort, dups;
 		vector<string> outputNames;
+        map<string, string> uniqueMap;
 		
 		int readFasta();
 		int readName();

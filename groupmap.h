@@ -21,6 +21,7 @@ public:
 	GroupMap(string);
 	~GroupMap();
 	int readMap();
+    int readMap(string);
 	int readDesignMap();
     int readDesignMap(string);
 	int getNumGroups();

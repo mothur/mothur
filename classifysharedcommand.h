@@ -15,42 +15,40 @@
 class ClassifySharedCommand : public Command {
 public:
   ClassifySharedCommand();
-  ClassifySharedCommand(string option);
+  ClassifySharedCommand(string);
   ~ClassifySharedCommand() {};
   
   vector<string> setParameters();
   string getCommandName()			{ return "classify.shared";     }
-  // TODO: is General is the best category for this command?
-  //commmand category choices: Sequence Processing, OTU-Based Approaches, Hypothesis Testing, Phylotype Analysis, General, Clustering and Hidden
-  string getCommandCategory()		{ return "General";		}
+  string getCommandCategory()		{ return "OTU-Based Approaches";		}
   string getOutputFileNameTag(string, string);
   string getHelpString();
-  string getCitation() { return "http://www.mothur.org/wiki/classsify.shared\n"; }
-  // TODO: find a proper description
-  string getDescription()		{ return "find the most important otu from a shared file"; }
-
+  string getCitation() { return "http://www.mothur.org/wiki/Classify.shared\n"; }
+  string getDescription()		{ return "description"; }
   int execute();
-  void processSharedAndDesignData(vector<SharedRAbundVector*> lookup);
+  
   void help() { m->mothurOut(getHelpString()); }
 
 private:
-  bool abort;
-  string outputDir;
-  vector<string> outputNames;
+    bool abort;
+    string outputDir;
+    vector<string> outputNames, Groups;
   
-  string sharedfile, designfile;
-  set<string> labels;
-  bool allLines;
+    string sharedfile, designfile, otupersplit, splitcriteria;
+    set<string> labels;
+    bool allLines;
   
-  int processors;
-  bool useTiming;
+    int processors;
+    bool useTiming;
 
-  GroupMap* designMap;
+    GroupMap designMap;
   
-  int numDecisionTrees;
-  string treeSplitCriterion, optimumFeatureSubsetSelectionCriteria;
-  bool doPruning, discardHighErrorTrees;
-  double pruneAggressiveness, highErrorTreeDiscardThreshold, featureStandardDeviationThreshold;
+    int numDecisionTrees;
+    string treeSplitCriterion, optimumFeatureSubsetSelectionCriteria;
+    bool doPruning, discardHighErrorTrees;
+    double pruneAggressiveness, highErrorTreeDiscardThreshold, featureStandardDeviationThreshold;
+    
+    void processSharedAndDesignData(vector<SharedRAbundVector*> lookup);
 };
 
 #endif /* defined(__Mothur__classifysharedcommand__) */

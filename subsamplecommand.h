@@ -16,6 +16,7 @@
 #include "rabundvector.hpp"
 #include "inputdata.h"
 #include "sequence.hpp"
+#include "counttable.h"
 
 
 class SubSampleCommand : public Command {
@@ -38,13 +39,14 @@ public:
 	
 private:	
 	bool abort, pickedGroups, allLines, persample;
-	string listfile, groupfile, sharedfile, rabundfile, sabundfile, fastafile, namefile;
+	string listfile, groupfile, countfile, sharedfile, rabundfile, sabundfile, fastafile, namefile;
 	set<string> labels; //holds labels to be used
 	string groups, label, outputDir;
 	vector<string> Groups, outputNames;
 	int size;
 	vector<string> names;
 	map<string, vector<string> > nameMap;
+    CountTable ct;
 	
 	int getSubSampleShared();
 	int getSubSampleList();

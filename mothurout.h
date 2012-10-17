@@ -151,6 +151,7 @@ class MothurOut {
 		float roundDist(float, int);
 		unsigned int fromBase36(string);
 		int getRandomIndex(int); //highest
+        double getStandardDeviation(vector<int>&);
 
 		int control_pressed;
 		bool executing, runParse, jumble, gui, mothurCalling, debug;

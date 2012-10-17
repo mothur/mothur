@@ -17,7 +17,7 @@
 #include "needlemanoverlap.hpp"
 #include "blastalign.hpp"
 #include "noalign.hpp"
-
+#include "trimoligos.h"
 
 struct fastqRead {
 	vector<int> scores;
@@ -50,17 +50,31 @@ public:
     void help() { m->mothurOut(getHelpString()); }	
     
 private:
-    bool abort;
-    string outputDir, ffastqfile, rfastqfile, align;
+    bool abort, allFiles;
+    string outputDir, ffastqfile, rfastqfile, align, oligosfile;
 	float match, misMatch, gapOpen, gapExtend;
-	int processors, longestBase, threshold;
+	int processors, longestBase, threshold, tdiffs, bdiffs, pdiffs, ldiffs, sdiffs;
     vector<string> outputNames;
+    
+    map<int, oligosPair> barcodes;
+	map<int, oligosPair> primers;
+    vector<string>  linker;
+    vector<string>  spacer;
+	vector<string> primerNameVector;	
+	vector<string> barcodeNameVector;	
+    
+	map<string, int> groupCounts;  
+    //map<string, int> combos;
+	//map<string, int> groupToIndex;
+    //vector<string> groupVector;
     
     fastqRead readFastq(ifstream&);
     vector< vector<string> > readFastqFiles(int&);
     bool checkReads(fastqRead&, fastqRead&);
     int createProcesses(vector< vector<string> >, string, string, string);
     int driver(vector<string>, string, string, string);
+    bool getOligos(vector<vector<string> >&, vector<vector<string> >&);
+    string reverseOligo(string);
 };
 
 /**************************************************************************************************/

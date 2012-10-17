@@ -20,8 +20,17 @@
 		A71CB160130B04A2001E7287 /* anosimcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A71CB15E130B04A2001E7287 /* anosimcommand.cpp */; };
 		A71FE12C12EDF72400963CA7 /* mergegroupscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A71FE12B12EDF72400963CA7 /* mergegroupscommand.cpp */; };
 		A721765713BB9F7D0014DAAE /* referencedb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A721765613BB9F7D0014DAAE /* referencedb.cpp */; };
+		A721AB6A161C570F009860A1 /* alignnode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A721AB66161C570F009860A1 /* alignnode.cpp */; };
+		A721AB6B161C570F009860A1 /* aligntree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A721AB68161C570F009860A1 /* aligntree.cpp */; };
+		A721AB71161C572A009860A1 /* kmernode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A721AB6D161C572A009860A1 /* kmernode.cpp */; };
+		A721AB72161C572A009860A1 /* kmertree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A721AB6F161C572A009860A1 /* kmertree.cpp */; };
+		A721AB77161C573B009860A1 /* taxonomynode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A721AB73161C573B009860A1 /* taxonomynode.cpp */; };
 		A724D2B7153C8628000A826F /* makebiomcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A724D2B6153C8628000A826F /* makebiomcommand.cpp */; };
 		A727864412E9E28C00F86ABA /* removerarecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A727864312E9E28C00F86ABA /* removerarecommand.cpp */; };
+		A7386C231619CCE600651424 /* classifysharedcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7386C211619CCE600651424 /* classifysharedcommand.cpp */; };
+		A7386C251619E52300651424 /* abstractdecisiontree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7386C241619E52200651424 /* abstractdecisiontree.cpp */; };
+		A7386C27161A0F9D00651424 /* abstractrandomforest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7386C26161A0F9C00651424 /* abstractrandomforest.cpp */; };
+		A7386C29161A110800651424 /* decisiontree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7386C28161A110700651424 /* decisiontree.cpp */; };
 		A73901081588C40900ED2ED6 /* loadlogfilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A73901071588C40900ED2ED6 /* loadlogfilecommand.cpp */; };
 		A73DDBBA13C4A0D1006AAE38 /* clearmemorycommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A73DDBB913C4A0D1006AAE38 /* clearmemorycommand.cpp */; };
 		A73DDC3813C4BF64006AAE38 /* mothurmetastats.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A73DDC3713C4BF64006AAE38 /* mothurmetastats.cpp */; };
@@ -38,6 +47,8 @@
 		A77410F614697C300098E6AC /* seqnoise.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A77410F414697C300098E6AC /* seqnoise.cpp */; };
 		A778FE6B134CA6CA00C0BA33 /* getcommandinfocommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A778FE6A134CA6CA00C0BA33 /* getcommandinfocommand.cpp */; };
 		A77A221F139001B600B0BE70 /* deuniquetreecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A77A221E139001B600B0BE70 /* deuniquetreecommand.cpp */; };
+		A77E1938161B201E00DB1A2A /* randomforest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A77E1937161B201E00DB1A2A /* randomforest.cpp */; };
+		A77E193B161B289600DB1A2A /* rftreenode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A77E193A161B289600DB1A2A /* rftreenode.cpp */; };
 		A77EBD2F1523709100ED407C /* createdatabasecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A77EBD2E1523709100ED407C /* createdatabasecommand.cpp */; };
 		A7876A26152A017C00A0AE86 /* subsample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7876A25152A017C00A0AE86 /* subsample.cpp */; };
 		A79234D713C74BF6002B08E2 /* mothurfisher.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A79234D613C74BF6002B08E2 /* mothurfisher.cpp */; };
@@ -398,10 +409,31 @@
 		A71FE12B12EDF72400963CA7 /* mergegroupscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mergegroupscommand.cpp; sourceTree = "<group>"; };
 		A721765513BB9F7D0014DAAE /* referencedb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = referencedb.h; sourceTree = "<group>"; };
 		A721765613BB9F7D0014DAAE /* referencedb.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = referencedb.cpp; sourceTree = "<group>"; };
+		A721AB66161C570F009860A1 /* alignnode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = alignnode.cpp; sourceTree = "<group>"; };
+		A721AB67161C570F009860A1 /* alignnode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alignnode.h; sourceTree = "<group>"; };
+		A721AB68161C570F009860A1 /* aligntree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = aligntree.cpp; sourceTree = "<group>"; };
+		A721AB69161C570F009860A1 /* aligntree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = aligntree.h; sourceTree = "<group>"; };
+		A721AB6D161C572A009860A1 /* kmernode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = kmernode.cpp; sourceTree = "<group>"; };
+		A721AB6E161C572A009860A1 /* kmernode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = kmernode.h; sourceTree = "<group>"; };
+		A721AB6F161C572A009860A1 /* kmertree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = kmertree.cpp; sourceTree = "<group>"; };
+		A721AB70161C572A009860A1 /* kmertree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = kmertree.h; sourceTree = "<group>"; };
+		A721AB73161C573B009860A1 /* taxonomynode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = taxonomynode.cpp; sourceTree = "<group>"; };
+		A721AB74161C573B009860A1 /* taxonomynode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = taxonomynode.h; sourceTree = "<group>"; };
 		A724D2B4153C8600000A826F /* makebiomcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = makebiomcommand.h; sourceTree = "<group>"; };
 		A724D2B6153C8628000A826F /* makebiomcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = makebiomcommand.cpp; sourceTree = "<group>"; };
 		A727864212E9E28C00F86ABA /* removerarecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = removerarecommand.h; sourceTree = "<group>"; };
 		A727864312E9E28C00F86ABA /* removerarecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = removerarecommand.cpp; sourceTree = "<group>"; };
+		A7386C1B1619CACB00651424 /* abstractdecisiontree.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = abstractdecisiontree.hpp; sourceTree = "<group>"; };
+		A7386C1C1619CACB00651424 /* abstractrandomforest.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = abstractrandomforest.hpp; sourceTree = "<group>"; };
+		A7386C1D1619CACB00651424 /* decisiontree.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = decisiontree.hpp; sourceTree = "<group>"; };
+		A7386C1E1619CACB00651424 /* macros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = macros.h; sourceTree = "<group>"; };
+		A7386C1F1619CACB00651424 /* randomforest.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = randomforest.hpp; sourceTree = "<group>"; };
+		A7386C201619CACB00651424 /* rftreenode.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = rftreenode.hpp; sourceTree = "<group>"; };
+		A7386C211619CCE600651424 /* classifysharedcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = classifysharedcommand.cpp; sourceTree = "<group>"; };
+		A7386C221619CCE600651424 /* classifysharedcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = classifysharedcommand.h; sourceTree = "<group>"; };
+		A7386C241619E52200651424 /* abstractdecisiontree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = abstractdecisiontree.cpp; sourceTree = "<group>"; };
+		A7386C26161A0F9C00651424 /* abstractrandomforest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = abstractrandomforest.cpp; sourceTree = "<group>"; };
+		A7386C28161A110700651424 /* decisiontree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = decisiontree.cpp; sourceTree = "<group>"; };
 		A73901051588C3EF00ED2ED6 /* loadlogfilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = loadlogfilecommand.h; sourceTree = "<group>"; };
 		A73901071588C40900ED2ED6 /* loadlogfilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = loadlogfilecommand.cpp; sourceTree = "<group>"; };
 		A73DDBB813C4A0D1006AAE38 /* clearmemorycommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = clearmemorycommand.h; sourceTree = "<group>"; };
@@ -434,6 +466,8 @@
 		A778FE6A134CA6CA00C0BA33 /* getcommandinfocommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getcommandinfocommand.cpp; sourceTree = "<group>"; };
 		A77A221D139001B600B0BE70 /* deuniquetreecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = deuniquetreecommand.h; sourceTree = "<group>"; };
 		A77A221E139001B600B0BE70 /* deuniquetreecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = deuniquetreecommand.cpp; sourceTree = "<group>"; };
+		A77E1937161B201E00DB1A2A /* randomforest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = randomforest.cpp; sourceTree = "<group>"; };
+		A77E193A161B289600DB1A2A /* rftreenode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rftreenode.cpp; sourceTree = "<group>"; };
 		A77EBD2C1523707F00ED407C /* createdatabasecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = createdatabasecommand.h; sourceTree = "<group>"; };
 		A77EBD2E1523709100ED407C /* createdatabasecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = createdatabasecommand.cpp; sourceTree = "<group>"; };
 		A7876A25152A017C00A0AE86 /* subsample.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = subsample.cpp; sourceTree = "<group>"; };
@@ -1142,6 +1176,7 @@
 				A7E9B79B12D37EC400DA6239 /* progress.cpp */,
 				A7E9B79C12D37EC400DA6239 /* progress.hpp */,
 				A7E9B7A512D37EC400DA6239 /* rarecalc.cpp */,
+				A7386C191619C9FB00651424 /* randomforest */,
 				A7E9B7A612D37EC400DA6239 /* rarecalc.h */,
 				A7E9B7A712D37EC400DA6239 /* raredisplay.cpp */,
 				A7E9B7A812D37EC400DA6239 /* raredisplay.h */,
@@ -1183,17 +1218,22 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		7BE5CBCA15EB6E560004AE85 /* fs */ = {
+		A7386C191619C9FB00651424 /* randomforest */ = {
 			isa = PBXGroup;
 			children = (
-				7BE5CBC315EB6E440004AE85 /* abstractdecisiontree.hpp */,
-				7BE5CBC415EB6E440004AE85 /* abstractrandomforest.hpp */,
-				7BE5CBC515EB6E440004AE85 /* decisiontree.hpp */,
-				7BE5CBC615EB6E440004AE85 /* macros.h */,
-				7BE5CBC715EB6E440004AE85 /* randomforest.hpp */,
-				7BE5CBC815EB6E450004AE85 /* treenode.hpp */,
+				A7386C1B1619CACB00651424 /* abstractdecisiontree.hpp */,
+				A7386C241619E52200651424 /* abstractdecisiontree.cpp */,
+				A7386C1C1619CACB00651424 /* abstractrandomforest.hpp */,
+				A7386C26161A0F9C00651424 /* abstractrandomforest.cpp */,
+				A7386C1D1619CACB00651424 /* decisiontree.hpp */,
+				A7386C28161A110700651424 /* decisiontree.cpp */,
+				A7386C1E1619CACB00651424 /* macros.h */,
+				A7386C1F1619CACB00651424 /* randomforest.hpp */,
+				A77E1937161B201E00DB1A2A /* randomforest.cpp */,
+				A7386C201619CACB00651424 /* rftreenode.hpp */,
+				A77E193A161B289600DB1A2A /* rftreenode.cpp */,
 			);
-			name = fs;
+			name = randomforest;
 			sourceTree = "<group>";
 		};
 		A7D161E7149F7F50000523E8 /* fortran */ = {
@@ -1252,6 +1292,8 @@
 				A7E9B69012D37EC400DA6239 /* classifyotucommand.cpp */,
 				A7E9B69312D37EC400DA6239 /* classifyseqscommand.h */,
 				A7E9B69212D37EC400DA6239 /* classifyseqscommand.cpp */,
+				A7386C221619CCE600651424 /* classifysharedcommand.h */,
+				A7386C211619CCE600651424 /* classifysharedcommand.cpp */,
 				A7EEB0F714F29C1B00344B83 /* classifytreecommand.h */,
 				A7EEB0F414F29BFD00344B83 /* classifytreecommand.cpp */,
 				A7E9B69712D37EC400DA6239 /* clearcutcommand.h */,
@@ -1760,10 +1802,18 @@
 		A7E9BA4B12D3966900DA6239 /* classifier */ = {
 			isa = PBXGroup;
 			children = (
-				A7E9B65A12D37EC300DA6239 /* bayesian.cpp */,
+				A721AB67161C570F009860A1 /* alignnode.h */,
+				A721AB66161C570F009860A1 /* alignnode.cpp */,
+				A721AB69161C570F009860A1 /* aligntree.h */,
+				A721AB68161C570F009860A1 /* aligntree.cpp */,
 				A7E9B65B12D37EC300DA6239 /* bayesian.h */,
+				A7E9B65A12D37EC300DA6239 /* bayesian.cpp */,
 				A7E9B68E12D37EC400DA6239 /* classify.cpp */,
 				A7E9B68F12D37EC400DA6239 /* classify.h */,
+				A721AB6E161C572A009860A1 /* kmernode.h */,
+				A721AB6D161C572A009860A1 /* kmernode.cpp */,
+				A721AB70161C572A009860A1 /* kmertree.h */,
+				A721AB6F161C572A009860A1 /* kmertree.cpp */,
 				A7E9B73812D37EC400DA6239 /* knn.h */,
 				A7E9B73712D37EC400DA6239 /* knn.cpp */,
 				A7E9B78D12D37EC400DA6239 /* phylosummary.cpp */,
@@ -1772,6 +1822,8 @@
 				A7E9B79012D37EC400DA6239 /* phylotree.h */,
 				A7E9B85D12D37EC400DA6239 /* taxonomyequalizer.cpp */,
 				A7E9B85E12D37EC400DA6239 /* taxonomyequalizer.h */,
+				A721AB74161C573B009860A1 /* taxonomynode.h */,
+				A721AB73161C573B009860A1 /* taxonomynode.cpp */,
 			);
 			name = classifier;
 			sourceTree = "<group>";
@@ -2230,6 +2282,17 @@
 				7B481F1A15D8520D0090E14C /* classifysharedcommand.cpp in Sources */,
 				A741FAD215D1688E0067BCC5 /* sequencecountparser.cpp in Sources */,
 				A7C7DAB915DA758B0059B0CF /* sffmultiplecommand.cpp in Sources */,
+				A7386C231619CCE600651424 /* classifysharedcommand.cpp in Sources */,
+				A7386C251619E52300651424 /* abstractdecisiontree.cpp in Sources */,
+				A7386C27161A0F9D00651424 /* abstractrandomforest.cpp in Sources */,
+				A7386C29161A110800651424 /* decisiontree.cpp in Sources */,
+				A77E1938161B201E00DB1A2A /* randomforest.cpp in Sources */,
+				A77E193B161B289600DB1A2A /* rftreenode.cpp in Sources */,
+				A721AB6A161C570F009860A1 /* alignnode.cpp in Sources */,
+				A721AB6B161C570F009860A1 /* aligntree.cpp in Sources */,
+				A721AB71161C572A009860A1 /* kmernode.cpp in Sources */,
+				A721AB72161C572A009860A1 /* kmertree.cpp in Sources */,
+				A721AB77161C573B009860A1 /* taxonomynode.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

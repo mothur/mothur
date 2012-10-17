@@ -84,7 +84,6 @@ private:
 	int mycount, split, numFPrimers, numLinkers, numSpacers, pdiffs, bdiffs, ldiffs, sdiffs, tdiffs;
 	set<string> seqNames;
     map<string, int> barcodes;
-    map<string, int> rbarcodes;
     map<string, int> primers;
     vector<string> linker, spacer, primerNameVector, barcodeNameVector, revPrimer;
     vector<vector<int> > numSplitReads;

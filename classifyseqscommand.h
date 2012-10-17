@@ -19,9 +19,11 @@
 #include "phylotree.h"
 #include "phylosummary.h"
 #include "knn.h"
+#include "kmertree.h"
+#include "aligntree.h"
 
 
-//KNN and Bayesian methods modeled from algorithms in
+//KNN and Wang methods modeled from algorithms in
 //Naı¨ve Bayesian Classiﬁer for Rapid Assignment of rRNA Sequences 
 //into the New Bacterial Taxonomy􏰎† 
 //Qiong Wang,1 George M. Garrity,1,2 James M. Tiedje,1,2 and James R. Cole1* 
@@ -166,6 +168,11 @@ static DWORD WINAPI MyClassThreadFunction(LPVOID lpParam){
 		Classify* myclassify;
 		if(pDataArray->method == "bayesian"){	myclassify = new Bayesian(pDataArray->taxonomyFileName, pDataArray->templateFileName, pDataArray->search, pDataArray->kmerSize, pDataArray->cutoff, pDataArray->iters, pDataArray->threadID, pDataArray->flip, pDataArray->writeShortcuts);		}
 		else if(pDataArray->method == "knn"){	myclassify = new Knn(pDataArray->taxonomyFileName, pDataArray->templateFileName, pDataArray->search, pDataArray->kmerSize, pDataArray->gapOpen, pDataArray->gapExtend, pDataArray->match, pDataArray->misMatch, pDataArray->numWanted, pDataArray->threadID);				}
+        else if(pDataArray->method == "zap"){	
+            outputMethodTag = search + "_" + outputMethodTag;
+            if (pDataArray->search == "kmer") {   myclassify = new KmerTree(pDataArray->templateFileName, pDataArray->taxonomyFileName, pDataArray->kmerSize, pDataArray->cutoff); }
+            else {  myclassify = new AlignTree(pDataArray->templateFileName, pDataArray->taxonomyFileName, pDataArray->cutoff);  }
+        }
 		else {
 			pDataArray->m->mothurOut(pDataArray->search + " is not a valid method option. I will run the command using bayesian.");
 			pDataArray->m->mothurOutEndLine();
