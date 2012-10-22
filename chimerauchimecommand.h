@@ -28,7 +28,7 @@ public:
 	string getCommandCategory()		{ return "Sequence Processing"; }
 	string getOutputFileNameTag(string, string);
 	string getHelpString();	
-	string getCitation() { return "uchime by Robert C. Edgar\nhttp://drive5.com/uchime\nThis code is donated to the public domain.\nhttp://www.mothur.org/wiki/Chimera.uchime\nEdgar,R.C., Haas,B.J., Clemente,J.C., Quince,C. and Knight,R. (2011), UCHIME improves sensitivity and speed of chimera detection, Bioinformatics, in press.\n"; }
+	string getCitation() { return "uchime by Robert C. Edgar\nhttp://drive5.com/uchime\nThis code was donated to the public domain.\nEdgar,R.C., Haas,B.J., Clemente,J.C., Quince,C. and Knight,R. (2011), UCHIME improves sensitivity and speed of chimera detection.  Bioinformatics 27:2194.\nhttp://www.mothur.org/wiki/Chimera.uchime\n"; }
 	string getDescription()		{ return "detect chimeric sequences"; }
 	
 	int execute(); 
