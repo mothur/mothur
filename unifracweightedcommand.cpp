@@ -384,16 +384,20 @@ int UnifracWeightedCommand::execute() {
             //subsample loop
             vector< vector<double> > calcDistsTotals;  //each iter, each groupCombos dists. this will be used to make .dist files
             for (int thisIter = 0; thisIter < subsampleIters; thisIter++) { //subsampleIters=0, if subsample=f.
-                
                 if (m->control_pressed) { break; }
                 
                 //copy to preserve old one - would do this in subsample but memory cleanup becomes messy.
                 CountTable* newCt = new CountTable();
                 
+                int sampleTime = 0;
+                if (m->debug) { sampleTime = time(NULL); }
+                
                 //uses method of setting groups to doNotIncludeMe
                 SubSample sample;
                 Tree* subSampleTree = sample.getSample(T[i], ct, newCt, subsampleSize);
-               
+                
+                if (m->debug) { m->mothurOut("[DEBUG]: iter " + toString(thisIter) + " took " + toString(time(NULL) - sampleTime) + " seconds to sample tree.\n"); }
+                
                 //call new weighted function
                 vector<double> iterData; iterData.resize(numComp,0);
                 Weighted thisWeighted(includeRoot);

@@ -10,12 +10,14 @@
 #include "amovacommand.h"
 #include "readphylipvector.h"
 #include "groupmap.h"
+#include "sharedutilities.h"
 
 
 //**********************************************************************************************************************
 vector<string> AmovaCommand::setParameters(){	
 	try {
 		CommandParameter pdesign("design", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pdesign);
+        CommandParameter psets("sets", "String", "", "", "", "", "",false,false); parameters.push_back(psets);
 		CommandParameter pphylip("phylip", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pphylip);
 		CommandParameter piters("iters", "Number", "", "1000", "", "", "",false,false); parameters.push_back(piters);
 		CommandParameter palpha("alpha", "Number", "", "0.05", "", "", "",false,false); parameters.push_back(palpha);
@@ -37,9 +39,10 @@ string AmovaCommand::getHelpString(){
 		string helpString = "";
 		helpString += "Referenced: Anderson MJ (2001). A new method for non-parametric multivariate analysis of variance. Austral Ecol 26: 32-46.";
 		helpString += "The amova command outputs a .amova file.";
-		helpString += "The amova command parameters are phylip, iters, and alpha.  The phylip and design parameters are required, unless you have valid current files.";
+		helpString += "The amova command parameters are phylip, iters, sets and alpha.  The phylip and design parameters are required, unless you have valid current files.";
 		helpString += "The design parameter allows you to assign your samples to groups when you are running amova. It is required.";
 		helpString += "The design file looks like the group file.  It is a 2 column tab delimited file, where the first column is the sample name and the second column is the group the sample belongs to.";
+        helpString += "The sets parameter allows you to specify which of the sets in your designfile you would like to analyze. The set names are separated by dashes. THe default is all sets in the designfile.\n";
 		helpString += "The iters parameter allows you to set number of randomization for the P value.  The default is 1000.";
 		helpString += "The amova command should be in the following format: amova(phylip=file.dist, design=file.design).";
 		helpString += "Note: No spaces between parameter labels (i.e. iters), '=' and parameters (i.e. 1000).";
@@ -161,6 +164,12 @@ AmovaCommand::AmovaCommand(string option) {
 			temp = validParameter.validFile(parameters, "alpha", false);
 			if (temp == "not found") { temp = "0.05"; }
 			m->mothurConvert(temp, experimentwiseAlpha); 
+            
+            string sets = validParameter.validFile(parameters, "sets", false);			
+			if (sets == "not found") { sets = ""; }
+			else { 
+				m->splitAtDash(sets, Sets);
+			}
 		}
 	}
 	catch(exception& e) {
@@ -184,7 +193,32 @@ int AmovaCommand::execute(){
 		//read in distance matrix and square it
 		ReadPhylipVector readMatrix(phylipFileName);
 		vector<string> sampleNames = readMatrix.read(distanceMatrix);
-		
+        
+        if (Sets.size() != 0) { //user selected sets, so we want to remove the samples not in those sets
+            SharedUtil util; 
+            vector<string> dGroups = designMap->getNamesOfGroups();
+            util.setGroups(Sets, dGroups);  
+
+            for(int i=0;i<distanceMatrix.size();i++){
+                
+                if (m->control_pressed) { delete designMap; return 0; }
+                
+                string group = designMap->getGroup(sampleNames[i]);
+                
+                if (group == "not found") {
+                    m->mothurOut("[ERROR]: " + sampleNames[i] + " is not in your design file, please correct."); m->mothurOutEndLine(); m->control_pressed = true;
+                }else if (!m->inUsersGroups(group, Sets)){  //not in set we want remove it
+                    //remove from all other rows
+                    for(int j=0;j<distanceMatrix.size();j++){
+                        distanceMatrix[j].erase(distanceMatrix[j].begin()+i);
+                    }
+                    distanceMatrix.erase(distanceMatrix.begin()+i);
+                    sampleNames.erase(sampleNames.begin()+i);
+                    i--;
+                }
+            }
+        }
+        
 		for(int i=0;i<distanceMatrix.size();i++){
 			for(int j=0;j<i;j++){
 				distanceMatrix[i][j] *= distanceMatrix[i][j];	

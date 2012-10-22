@@ -925,16 +925,11 @@ int CorrAxesCommand::getMetadata(){
 		m->openInputFile(metadatafile, in);
 		
 		string headerLine = m->getline(in); m->gobble(in);
-		istringstream iss (headerLine,istringstream::in);
-		
-		//read the first label, because it refers to the groups
-		string columnLabel;
-		iss >> columnLabel; m->gobble(iss); 
+		vector<string> pieces = m->splitWhiteSpace(headerLine);
 		
 		//save names of columns you are reading
-		while (!iss.eof()) {
-			iss >> columnLabel; m->gobble(iss);
-			metadataLabels.push_back(columnLabel);
+		for (int i = 1; i < pieces.size(); i++) {
+			metadataLabels.push_back(pieces[i]);
 		}
 		int count = metadataLabels.size();
 			

@@ -36,6 +36,7 @@ private:
 	
 	string sharedfile, relabundfile, metadatafile, groups, label, inputFileName, outputDir, method;
 	bool abort, pickedGroups, allLines;
+    double cutoff;
 	set<string> labels;
     vector<SharedRAbundFloatVector*> metadataLookup;
     vector< vector< double> > metadata;

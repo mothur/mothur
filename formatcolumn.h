@@ -19,6 +19,7 @@ public:
 	FormatColumnMatrix(string);
 	~FormatColumnMatrix();
 	int read(NameAssignment*);
+    int read(CountTable*);
 	
 private:
 	ifstream fileHandle;

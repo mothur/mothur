@@ -13,6 +13,7 @@
 #include "mothur.h"
 #include "listvector.hpp"
 #include "nameassignment.hpp"
+#include "counttable.h"
 
 
 //**********************************************************************************************************************
@@ -61,6 +62,7 @@ public:
 	virtual ~FormatMatrix() {}
 	
 	virtual int read(NameAssignment*){ return 1; }
+    virtual int read(CountTable*){ return 1; }
 	
 	void setCutoff(float c)			{	cutoff = c;			}
 	ListVector* getListVector()		{	return list;		}

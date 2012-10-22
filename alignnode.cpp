@@ -7,7 +7,7 @@
  *
  */
 
-#include "alignNode.h"
+#include "alignnode.h"
 #include "taxonomynode.h"
 
 #include "bayesian.h"

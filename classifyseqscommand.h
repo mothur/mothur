@@ -166,10 +166,11 @@ static DWORD WINAPI MyClassThreadFunction(LPVOID lpParam){
 		
 		//make classify
 		Classify* myclassify;
+        string outputMethodTag = pDataArray->method + ".";
 		if(pDataArray->method == "bayesian"){	myclassify = new Bayesian(pDataArray->taxonomyFileName, pDataArray->templateFileName, pDataArray->search, pDataArray->kmerSize, pDataArray->cutoff, pDataArray->iters, pDataArray->threadID, pDataArray->flip, pDataArray->writeShortcuts);		}
 		else if(pDataArray->method == "knn"){	myclassify = new Knn(pDataArray->taxonomyFileName, pDataArray->templateFileName, pDataArray->search, pDataArray->kmerSize, pDataArray->gapOpen, pDataArray->gapExtend, pDataArray->match, pDataArray->misMatch, pDataArray->numWanted, pDataArray->threadID);				}
         else if(pDataArray->method == "zap"){	
-            outputMethodTag = search + "_" + outputMethodTag;
+            outputMethodTag = pDataArray->search + "_" + outputMethodTag;
             if (pDataArray->search == "kmer") {   myclassify = new KmerTree(pDataArray->templateFileName, pDataArray->taxonomyFileName, pDataArray->kmerSize, pDataArray->cutoff); }
             else {  myclassify = new AlignTree(pDataArray->templateFileName, pDataArray->taxonomyFileName, pDataArray->cutoff);  }
         }

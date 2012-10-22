@@ -574,6 +574,8 @@ int GetOTURepCommand::readDist() {
                 readMatrix->read(nameMap);
             }else if (countfile != "") {
                 readMatrix->read(&ct);
+            }else {
+               readMatrix->read(nameMap); 
             }
 			
 			if (m->control_pressed) { delete readMatrix; return 0; }
@@ -614,9 +616,11 @@ int GetOTURepCommand::readDist() {
             if(namefile != ""){	
                 nameMap = new NameAssignment(namefile);
                 nameMap->readMap();
-                readMatrix->read(nameMap);
+                formatMatrix->read(nameMap);
             }else if (countfile != "") {
-                readMatrix->read(&ct);
+                formatMatrix->read(&ct);
+            }else {
+                formatMatrix->read(nameMap); 
             }
 			
 			if (m->control_pressed) { delete formatMatrix;  return 0; }

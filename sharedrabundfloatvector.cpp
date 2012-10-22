@@ -152,8 +152,6 @@ SharedRAbundFloatVector::SharedRAbundFloatVector(ifstream& f) : DataVector(), ma
 		
 		m->saveNextLabel = nextLabel;
 		m->setAllGroups(allGroups);
-        for (int i = 0; i < allGroups.size(); i++) { cout << allGroups[i] << endl; }
-	
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SharedRAbundFloatVector", "SharedRAbundFloatVector");

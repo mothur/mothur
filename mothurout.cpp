@@ -1541,6 +1541,46 @@ vector<string> MothurOut::splitWhiteSpace(string input){
 		exit(1);
 	}
 }
+/***********************************************************************/
+vector<string> MothurOut::splitWhiteSpaceWithQuotes(string input){
+	try {
+        vector<string> pieces;
+        string rest = "";
+        
+        int pos = input.find('\'');
+        int pos2 = input.find('\"');
+        
+        if ((pos == string::npos) && (pos2 == string::npos)) { return splitWhiteSpace(input); } //no quotes to worry about
+        else {
+            for (int i = 0; i < input.length(); i++) {
+                if ((input[i] == '\'') || (input[i] == '\"') || (rest == "\'") || (rest == "\"")) { //grab everything til end or next ' or "
+                    rest += input[i];
+                    for (int j = i+1; j < input.length(); j++) {
+                        if ((input[j] == '\'') || (input[j] == '\"')) {  //then quit
+                            rest += input[j];
+                            i = j+1;
+                            j+=input.length();
+                        }else { rest += input[j]; }
+                    }
+                }else if (!isspace(input[i]))  { rest += input[i];  }
+                else {
+                    if (rest != "") { pieces.push_back(rest);  rest = ""; }
+                    while (i < input.length()) {  //gobble white space
+                        if (isspace(input[i])) { i++; }
+                        else { rest = input[i];  break; } //cout << "next piece buffer = " << nextPiece << endl;
+                    } 
+                }
+            }
+            
+            if (rest != "") { pieces.push_back(rest); }
+        }
+        return pieces;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "splitWhiteSpace");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 int MothurOut::readTax(string namefile, map<string, string>& taxMap) {
 	try {
@@ -2688,6 +2728,35 @@ bool MothurOut::inUsersGroups(string groupname, vector<string> Groups) {
 		exit(1);
 	}	
 }
+/**************************************************************************************************/
+
+bool MothurOut::inUsersGroups(vector<int> set, vector< vector<int> > sets) {
+	try {
+		for (int i = 0; i < sets.size(); i++) {
+			if (set == sets[i]) { return true; }
+		}
+		return false;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "inUsersGroups");
+		exit(1);
+	}	
+}
+/**************************************************************************************************/
+
+bool MothurOut::inUsersGroups(int groupname, vector<int> Groups) {
+	try {
+		for (int i = 0; i < Groups.size(); i++) {
+			if (groupname == Groups[i]) { return true; }
+		}
+		return false;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "inUsersGroups");
+		exit(1);
+	}	
+}
+
 /**************************************************************************************************/
 //returns true if any of the strings in first vector are in second vector
 bool MothurOut::inUsersGroups(vector<string> groupnames, vector<string> Groups) {

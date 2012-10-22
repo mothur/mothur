@@ -300,7 +300,7 @@ string Sequence::getSequenceString(ifstream& fastaFile, int& numAmbig) {
 			if(letter == '>'){
 				fastaFile.putback(letter);
 				break;
-			}
+			}else if (letter == ' ') {;}
 			else if(isprint(letter)){
 				letter = toupper(letter);
 				if(letter == 'U'){letter = 'T';}
@@ -354,7 +354,7 @@ string Sequence::getSequenceString(istringstream& fastaFile, int& numAmbig) {
 			if(letter == '>'){
 				fastaFile.putback(letter);
 				break;
-			}
+			}else if (letter == ' ') {;}
 			else if(isprint(letter)){
 				letter = toupper(letter);
 				if(letter == 'U'){letter = 'T';}

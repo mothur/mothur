@@ -272,11 +272,14 @@ int PhylotypeCommand::execute(){
                                 map<string, string>::iterator itNames = namemap.find(names[i]);  //make sure this name is in namefile
                                 
                                 if (itNames != namemap.end()) {  name += namemap[names[i]] + ",";   } //you found it in namefile
-                                else { m->mothurOut(names[i] + " is not in your namefile, please correct."); m->mothurOutEndLine(); exit(1);  }
+                                else { m->mothurOut("[ERROR]: " + names[i] + " is not in your namefile, please correct."); m->mothurOutEndLine(); m->control_pressed = true;  }
                                 
                             }else{   name += names[i] + ",";	}
                         }
 					}
+                    
+                    if (m->control_pressed) { break; }
+                    
 					name = name.substr(0, name.length()-1);  //rip off extra ','
 					//add bin to list vector
 					if (name != "") { list.push_back(name); } //caused by unknown

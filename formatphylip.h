@@ -20,6 +20,8 @@ public:
 	FormatPhylipMatrix(string);
 	~FormatPhylipMatrix();
 	int read(NameAssignment*);
+    int read(CountTable*);
+    
 private:
 	ifstream fileHandle;
 	string filename;
