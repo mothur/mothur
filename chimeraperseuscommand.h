@@ -16,7 +16,9 @@
 #include "mothur.h"
 #include "command.hpp"
 #include "sequenceparser.h"
+#include "sequencecountparser.h"
 #include "myPerseus.h"
+#include "counttable.h"
 
 /***********************************************************/
 class ChimeraPerseusCommand : public Command {
@@ -43,10 +45,12 @@ private:
 		linePair(int i, int j) : start(i), end(j) {}
 	};
 	
-	bool abort;
-	string fastafile, groupfile, outputDir, namefile;
+	bool abort, hasName, hasCount;
+	string fastafile, groupfile, countfile, outputDir, namefile;
 	int processors, alignLength;
 	double cutoff, alpha, beta;
+    SequenceParser* parser;
+    SequenceCountParser* cparser;
 	
 	vector<string> outputNames;
 	vector<string> fastaFileNames;
@@ -56,10 +60,11 @@ private:
 	string getNamesFile(string&);
 	int driver(string, vector<seqData>&, string, int&);
 	vector<seqData> readFiles(string, string);
-	vector<seqData> loadSequences(SequenceParser&, string);
-	int deconvoluteResults(SequenceParser&, string, string);
-	int driverGroups(SequenceParser&, string, string, int, int, vector<string>);
-	int createProcessesGroups(SequenceParser&, string, string, vector<string>, string, string, string);
+    vector<seqData> readFiles(string inputFile, CountTable* ct);
+	vector<seqData> loadSequences(string);
+	int deconvoluteResults(map<string, string>&, string, string);
+	int driverGroups(string, string, int, int, vector<string>);
+	int createProcessesGroups(string, string, vector<string>, string, string, string);
 };
 
 /**************************************************************************************************/
@@ -75,12 +80,13 @@ struct perseusData {
 	MothurOut* m;
 	int start;
 	int end;
+    bool hasName, hasCount;
 	int threadID, count, numChimeras;
 	double alpha, beta, cutoff;
 	vector<string> groups;
 	
 	perseusData(){}
-	perseusData(double a, double b, double c, string o,  string f, string n, string g, string ac, vector<string> gr, MothurOut* mout, int st, int en, int tid) {
+	perseusData(bool hn, bool hc, double a, double b, double c, string o,  string f, string n, string g, string ac, vector<string> gr, MothurOut* mout, int st, int en, int tid) {
 		alpha = a;
 		beta = b;
 		cutoff = c;
@@ -94,6 +100,8 @@ struct perseusData {
 		end = en;
 		threadID = tid;
 		groups = gr;
+        hasName = hn;
+        hasCount = hc;
 		count = 0;
 		numChimeras = 0;
 	}
@@ -114,38 +122,67 @@ static DWORD WINAPI MyPerseusThreadFunction(LPVOID lpParam){
 		
 		//parse fasta and name file by group
 		SequenceParser* parser;
-		if (pDataArray->namefile != "") { parser = new SequenceParser(pDataArray->groupfile, pDataArray->fastafile, pDataArray->namefile);	}
-		else							{ parser = new SequenceParser(pDataArray->groupfile, pDataArray->fastafile);						}
-		
+        SequenceCountParser* cparser;
+		if (pDataArray->hasCount) {
+            CountTable* ct = new CountTable();
+            ct->readTable(pDataArray->namefile);
+            cparser = new SequenceCountParser(pDataArray->fastafile, *ct);
+            delete ct;
+        }else {
+            if (pDataArray->namefile != "") { parser = new SequenceParser(pDataArray->groupfile, pDataArray->fastafile, pDataArray->namefile);	}
+            else							{ parser = new SequenceParser(pDataArray->groupfile, pDataArray->fastafile);						}
+        }
+    
 		int totalSeqs = 0;
 		int numChimeras = 0;
 		
 		for (int i = pDataArray->start; i < pDataArray->end; i++) {
 			
-			int start = time(NULL);	 if (pDataArray->m->control_pressed) {  delete parser; pDataArray->m->mothurRemove(pDataArray->outputFName); pDataArray->m->mothurRemove(pDataArray->accnos); return 0; }
+			int start = time(NULL);	 if (pDataArray->m->control_pressed) {  if (pDataArray->hasCount) { delete cparser; } { delete parser; } pDataArray->m->mothurRemove(pDataArray->outputFName); pDataArray->m->mothurRemove(pDataArray->accnos); return 0; }
 			
 			pDataArray->m->mothurOutEndLine(); pDataArray->m->mothurOut("Checking sequences from group " + pDataArray->groups[i] + "...");	pDataArray->m->mothurOutEndLine();					
 			
 			//vector<seqData> sequences = loadSequences(parser, groups[i]); - same function below
 			////////////////////////////////////////////////////////////////////////////////////////
-			vector<Sequence> thisGroupsSeqs = parser->getSeqs(pDataArray->groups[i]);
-			map<string, string> nameMap = parser->getNameMap(pDataArray->groups[i]);
-			map<string, string>::iterator it;
-			
-			vector<seqData> sequences;
 			bool error = false;
-			
-			for (int j = 0; j < thisGroupsSeqs.size(); j++) {
-				
-				if (pDataArray->m->control_pressed) {  delete parser; pDataArray->m->mothurRemove(pDataArray->outputFName); pDataArray->m->mothurRemove(pDataArray->accnos); return 0; }
-				
-				it = nameMap.find(thisGroupsSeqs[j].getName());
-				if (it == nameMap.end()) { error = true; pDataArray->m->mothurOut("[ERROR]: " + thisGroupsSeqs[j].getName() + " is in your fasta file and not in your namefile, please correct."); pDataArray->m->mothurOutEndLine(); }
-				else {
-					int num = pDataArray->m->getNumNames(it->second);
-					sequences.push_back(seqData(thisGroupsSeqs[j].getName(), thisGroupsSeqs[j].getUnaligned(), num));
-				}
-			}
+            int alignLength = 0;
+            vector<seqData> sequences;
+            if (pDataArray->hasCount) {
+                vector<Sequence> thisGroupsSeqs = cparser->getSeqs(pDataArray->groups[i]);
+                map<string, int> counts = cparser->getCountTable(pDataArray->groups[i]);
+                map<string, int>::iterator it;
+                
+                for (int i = 0; i < thisGroupsSeqs.size(); i++) {
+                    
+                    if (pDataArray->m->control_pressed) {  break; }
+                    
+                    it = counts.find(thisGroupsSeqs[i].getName());
+                    if (it == counts.end()) { error = true; pDataArray->m->mothurOut("[ERROR]: " + thisGroupsSeqs[i].getName() + " is in your fasta file and not in your count file, please correct."); pDataArray->m->mothurOutEndLine(); }
+                    else {
+                        sequences.push_back(seqData(thisGroupsSeqs[i].getName(), thisGroupsSeqs[i].getUnaligned(), it->second));
+                        if (thisGroupsSeqs[i].getUnaligned().length() > alignLength) { alignLength = thisGroupsSeqs[i].getUnaligned().length(); }
+                    }
+                }
+            }else{
+                vector<Sequence> thisGroupsSeqs = parser->getSeqs(pDataArray->groups[i]);
+                map<string, string> nameMap = parser->getNameMap(pDataArray->groups[i]);
+                map<string, string>::iterator it;
+                
+                for (int i = 0; i < thisGroupsSeqs.size(); i++) {
+                    
+                    if (pDataArray->m->control_pressed) {  break; }
+                    
+                    it = nameMap.find(thisGroupsSeqs[i].getName());
+                    if (it == nameMap.end()) { error = true; pDataArray->m->mothurOut("[ERROR]: " + thisGroupsSeqs[i].getName() + " is in your fasta file and not in your namefile, please correct."); pDataArray->m->mothurOutEndLine(); }
+                    else {
+                        int num = pDataArray->m->getNumNames(it->second);
+                        sequences.push_back(seqData(thisGroupsSeqs[i].getName(), thisGroupsSeqs[i].getUnaligned(), num));
+                        if (thisGroupsSeqs[i].getUnaligned().length() > alignLength) { alignLength = thisGroupsSeqs[i].getUnaligned().length(); }
+                    }
+                }
+                
+            }
+            
 			
 			if (error) { pDataArray->m->control_pressed = true; }
 			
@@ -153,7 +190,7 @@ static DWORD WINAPI MyPerseusThreadFunction(LPVOID lpParam){
 			sort(sequences.rbegin(), sequences.rend());
 			////////////////////////////////////////////////////////////////////////////////////////
 
-			if (pDataArray->m->control_pressed) { delete parser; pDataArray->m->mothurRemove(pDataArray->outputFName); pDataArray->m->mothurRemove(pDataArray->accnos); return 0; }
+			if (pDataArray->m->control_pressed) { if (pDataArray->hasCount) { delete cparser; } { delete parser; } pDataArray->m->mothurRemove(pDataArray->outputFName); pDataArray->m->mothurRemove(pDataArray->accnos); return 0; }
 			
 			//int numSeqs = driver((outputFName + groups[i]), sequences, (accnos+groups[i]), numChimeras); - same function below
 			////////////////////////////////////////////////////////////////////////////////////////
@@ -184,7 +221,7 @@ static DWORD WINAPI MyPerseusThreadFunction(LPVOID lpParam){
 			}
 			
 			int numSeqs = sequences.size();
-			int alignLength = sequences[0].sequence.size();
+			//int alignLength = sequences[0].sequence.size();
 			
 			ofstream chimeraFile;
 			ofstream accnosFile;
@@ -200,7 +237,7 @@ static DWORD WINAPI MyPerseusThreadFunction(LPVOID lpParam){
 			
 			for(int j=0;j<numSeqs;j++){	
 				
-				if (pDataArray->m->control_pressed) { delete parser; pDataArray->m->mothurRemove(pDataArray->outputFName); pDataArray->m->mothurRemove(pDataArray->accnos); chimeraFile.close(); pDataArray->m->mothurRemove(chimeraFileName); accnosFile.close(); pDataArray->m->mothurRemove(accnosFileName); return 0; }
+				if (pDataArray->m->control_pressed) { if (pDataArray->hasCount) { delete cparser; } { delete parser; } pDataArray->m->mothurRemove(pDataArray->outputFName); pDataArray->m->mothurRemove(pDataArray->accnos); chimeraFile.close(); pDataArray->m->mothurRemove(chimeraFileName); accnosFile.close(); pDataArray->m->mothurRemove(accnosFileName); return 0; }
 				
 				vector<bool> restricted = chimeras;
 				
@@ -217,7 +254,7 @@ static DWORD WINAPI MyPerseusThreadFunction(LPVOID lpParam){
 				
 				int comparisons = myPerseus.getAlignments(j, sequences, alignments, leftDiffs, leftMaps, rightDiffs, rightMaps, bestSingleIndex, bestSingleDiff, restricted);
 				
-				if (pDataArray->m->control_pressed) { delete parser; pDataArray->m->mothurRemove(pDataArray->outputFName); pDataArray->m->mothurRemove(pDataArray->accnos); chimeraFile.close(); pDataArray->m->mothurRemove(chimeraFileName); accnosFile.close(); pDataArray->m->mothurRemove(accnosFileName); return 0; }
+				if (pDataArray->m->control_pressed) { if (pDataArray->hasCount) { delete cparser; } { delete parser; } pDataArray->m->mothurRemove(pDataArray->outputFName); pDataArray->m->mothurRemove(pDataArray->accnos); chimeraFile.close(); pDataArray->m->mothurRemove(chimeraFileName); accnosFile.close(); pDataArray->m->mothurRemove(accnosFileName); return 0; }
 				
 				int minMismatchToChimera, leftParentBi, rightParentBi, breakPointBi;
 				
@@ -226,7 +263,7 @@ static DWORD WINAPI MyPerseusThreadFunction(LPVOID lpParam){
 				if(comparisons >= 2){	
 					minMismatchToChimera = myPerseus.getChimera(sequences, leftDiffs, rightDiffs, leftParentBi, rightParentBi, breakPointBi, singleLeft, bestLeft, singleRight, bestRight, restricted);
 					
-					if (pDataArray->m->control_pressed) { delete parser;  pDataArray->m->mothurRemove(pDataArray->outputFName); pDataArray->m->mothurRemove(pDataArray->accnos); chimeraFile.close(); pDataArray->m->mothurRemove(chimeraFileName); accnosFile.close(); pDataArray->m->mothurRemove(accnosFileName); return 0; }
+					if (pDataArray->m->control_pressed) { if (pDataArray->hasCount) { delete cparser; } { delete parser; }  pDataArray->m->mothurRemove(pDataArray->outputFName); pDataArray->m->mothurRemove(pDataArray->accnos); chimeraFile.close(); pDataArray->m->mothurRemove(chimeraFileName); accnosFile.close(); pDataArray->m->mothurRemove(accnosFileName); return 0; }
 					
 					int minMismatchToTrimera = numeric_limits<int>::max();
 					int leftParentTri, middleParentTri, rightParentTri, breakPointTriA, breakPointTriB;
@@ -234,12 +271,12 @@ static DWORD WINAPI MyPerseusThreadFunction(LPVOID lpParam){
 					if(minMismatchToChimera >= 3 && comparisons >= 3){
 						minMismatchToTrimera = myPerseus.getTrimera(sequences, leftDiffs, leftParentTri, middleParentTri, rightParentTri, breakPointTriA, breakPointTriB, singleLeft, bestLeft, singleRight, bestRight, restricted);
 						
-						if (pDataArray->m->control_pressed) { delete parser;  pDataArray->m->mothurRemove(pDataArray->outputFName); pDataArray->m->mothurRemove(pDataArray->accnos); chimeraFile.close(); pDataArray->m->mothurRemove(chimeraFileName); accnosFile.close(); pDataArray->m->mothurRemove(accnosFileName); return 0; }
+						if (pDataArray->m->control_pressed) { if (pDataArray->hasCount) { delete cparser; } { delete parser; }  pDataArray->m->mothurRemove(pDataArray->outputFName); pDataArray->m->mothurRemove(pDataArray->accnos); chimeraFile.close(); pDataArray->m->mothurRemove(chimeraFileName); accnosFile.close(); pDataArray->m->mothurRemove(accnosFileName); return 0; }
 					}
 					
 					double singleDist = myPerseus.modeledPairwiseAlignSeqs(sequences[j].sequence, sequences[bestSingleIndex].sequence, dummyA, dummyB, correctModel);
 					
-					if (pDataArray->m->control_pressed) { delete parser;  pDataArray->m->mothurRemove(pDataArray->outputFName); pDataArray->m->mothurRemove(pDataArray->accnos); chimeraFile.close(); pDataArray->m->mothurRemove(chimeraFileName); accnosFile.close(); pDataArray->m->mothurRemove(accnosFileName); return 0; }
+					if (pDataArray->m->control_pressed) { if (pDataArray->hasCount) { delete cparser; } { delete parser; }  pDataArray->m->mothurRemove(pDataArray->outputFName); pDataArray->m->mothurRemove(pDataArray->accnos); chimeraFile.close(); pDataArray->m->mothurRemove(chimeraFileName); accnosFile.close(); pDataArray->m->mothurRemove(accnosFileName); return 0; }
 					
 					string type;
 					string chimeraRefSeq;
@@ -253,16 +290,16 @@ static DWORD WINAPI MyPerseusThreadFunction(LPVOID lpParam){
 						chimeraRefSeq = myPerseus.stitchBimera(alignments, leftParentBi, rightParentBi, breakPointBi, leftMaps, rightMaps);
 					}
 					
-					if (pDataArray->m->control_pressed) { delete parser; pDataArray->m->mothurRemove(pDataArray->outputFName); pDataArray->m->mothurRemove(pDataArray->accnos); chimeraFile.close(); pDataArray->m->mothurRemove(chimeraFileName); accnosFile.close(); pDataArray->m->mothurRemove(accnosFileName); return 0; }
+					if (pDataArray->m->control_pressed) { if (pDataArray->hasCount) { delete cparser; } { delete parser; }; pDataArray->m->mothurRemove(pDataArray->outputFName); pDataArray->m->mothurRemove(pDataArray->accnos); chimeraFile.close(); pDataArray->m->mothurRemove(chimeraFileName); accnosFile.close(); pDataArray->m->mothurRemove(accnosFileName); return 0; }
 					
 					double chimeraDist = myPerseus.modeledPairwiseAlignSeqs(sequences[j].sequence, chimeraRefSeq, dummyA, dummyB, correctModel);
 					
-					if (pDataArray->m->control_pressed) { delete parser; pDataArray->m->mothurRemove(pDataArray->outputFName); pDataArray->m->mothurRemove(pDataArray->accnos); chimeraFile.close(); pDataArray->m->mothurRemove(chimeraFileName); accnosFile.close(); pDataArray->m->mothurRemove(accnosFileName); return 0; }
+					if (pDataArray->m->control_pressed) { if (pDataArray->hasCount) { delete cparser; } { delete parser; } pDataArray->m->mothurRemove(pDataArray->outputFName); pDataArray->m->mothurRemove(pDataArray->accnos); chimeraFile.close(); pDataArray->m->mothurRemove(chimeraFileName); accnosFile.close(); pDataArray->m->mothurRemove(accnosFileName); return 0; }
 					
 					double cIndex = chimeraDist;//modeledPairwiseAlignSeqs(sequences[j].sequence, chimeraRefSeq);
 					double loonIndex = myPerseus.calcLoonIndex(sequences[j].sequence, sequences[leftParentBi].sequence, sequences[rightParentBi].sequence, breakPointBi, binMatrix);		
 					
-					if (pDataArray->m->control_pressed) { delete parser; pDataArray->m->mothurRemove(pDataArray->outputFName); pDataArray->m->mothurRemove(pDataArray->accnos); chimeraFile.close(); pDataArray->m->mothurRemove(chimeraFileName); accnosFile.close(); pDataArray->m->mothurRemove(accnosFileName); return 0; }
+					if (pDataArray->m->control_pressed) { if (pDataArray->hasCount) { delete cparser; } { delete parser; } pDataArray->m->mothurRemove(pDataArray->outputFName); pDataArray->m->mothurRemove(pDataArray->accnos); chimeraFile.close(); pDataArray->m->mothurRemove(chimeraFileName); accnosFile.close(); pDataArray->m->mothurRemove(accnosFileName); return 0; }
 					
 					chimeraFile << j << '\t' << sequences[j].seqName << '\t' << bestSingleDiff << '\t' << bestSingleIndex << '\t' << sequences[bestSingleIndex].seqName << '\t';
 					chimeraFile << minMismatchToChimera << '\t' << leftParentBi << '\t' << rightParentBi << '\t' << sequences[leftParentBi].seqName << '\t' << sequences[rightParentBi].seqName << '\t';
@@ -304,11 +341,11 @@ static DWORD WINAPI MyPerseusThreadFunction(LPVOID lpParam){
 			pDataArray->m->appendFiles(accnosFileName, pDataArray->accnos); pDataArray->m->mothurRemove(accnosFileName);
 			pDataArray->m->mothurOutEndLine(); pDataArray->m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences from group " + pDataArray->groups[i] + ".");	pDataArray->m->mothurOutEndLine();					
 			
-			if (pDataArray->m->control_pressed) { delete parser; pDataArray->m->mothurRemove(pDataArray->outputFName); pDataArray->m->mothurRemove(pDataArray->accnos); return 0; }
+			if (pDataArray->m->control_pressed) { if (pDataArray->hasCount) { delete cparser; } { delete parser; } pDataArray->m->mothurRemove(pDataArray->outputFName); pDataArray->m->mothurRemove(pDataArray->accnos); return 0; }
 		}	
 		
 		pDataArray->count = totalSeqs;
-		delete parser;
+		if (pDataArray->hasCount) { delete cparser; } { delete parser; }
 		return totalSeqs;
 		
 	}

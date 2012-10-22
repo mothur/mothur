@@ -61,7 +61,8 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
 					names.push_back(temp.getName());
 					database->addSequence(temp);	
 				}
-				database->generateDB();
+				if ((method == "kmer") && (!shortcuts)) {;} //don't print
+                else {database->generateDB(); }
 			}else if ((method == "kmer") && (!needToGenerate)) {	
 				ifstream kmerFileTest(kmerDBName.c_str());
 				database->readKmerDB(kmerFileTest);	
@@ -200,7 +201,8 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
 				}
 				fastaFile.close();
 
-				database->generateDB();
+                if ((method == "kmer") && (!shortcuts)) {;} //don't print
+                else {database->generateDB(); } 
 				
 			}else if ((method == "kmer") && (!needToGenerate)) {	
 				ifstream kmerFileTest(kmerDBName.c_str());
@@ -260,9 +262,6 @@ int Classify::readTaxonomy(string file) {
 		MPI_File inMPI;
 		MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
 		MPI_Comm_size(MPI_COMM_WORLD, &processors);
-
-		//char* inFileName = new char[file.length()];
-		//memcpy(inFileName, file.c_str(), file.length());
 		
 		char inFileName[1024];
 		strcpy(inFileName, file.c_str());
@@ -353,5 +352,39 @@ vector<string> Classify::parseTax(string tax) {
 		exit(1);
 	}
 }
+/**************************************************************************************************/
+
+double Classify::getLogExpSum(vector<double> probabilities, int& maxIndex){
+	try {
+        //	http://jblevins.org/notes/log-sum-exp
+        
+        double maxProb = probabilities[0];
+        maxIndex = 0;
+        
+        int numProbs = (int)probabilities.size();
+        
+        for(int i=1;i<numProbs;i++){
+            if(probabilities[i] >= maxProb){
+                maxProb = probabilities[i];
+                maxIndex = i;
+            }
+        }
+        
+        double probSum = 0.0000;
+        
+        for(int i=0;i<numProbs;i++){
+            probSum += exp(probabilities[i] - maxProb);		
+        }
+        
+        probSum = log(probSum) + maxProb;
+        
+        return probSum;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "Classify", "getLogExpSum");
+		exit(1);
+	}
+}
+
 /**************************************************************************************************/
 

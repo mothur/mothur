@@ -233,6 +233,205 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 
 }
 /***********************************************************************/
+int ClusterClassic::readPhylipFile(string filename, CountTable* countTable) {
+	try {
+		double distance;
+		int square;
+		string name;
+		vector<string> matrixNames;
+		
+		ifstream fileHandle;
+		m->openInputFile(filename, fileHandle);
+		
+        string numTest;
+		fileHandle >> numTest >> name;
+        
+        if (!m->isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
+        else { convert(numTest, nseqs); }
+        
+        
+		matrixNames.push_back(name);
+        
+		if(countTable == NULL){
+            list = new ListVector(nseqs);
+            list->set(0, name);
+        }
+        else{  list = new ListVector(countTable->getListVector()); }
+
+		
+		//initialize distance matrix to cutoff
+		dMatrix.resize(nseqs);
+		//rowSmallDists.resize(nseqs, temp);
+		for (int i = 1; i < nseqs; i++) {			
+			dMatrix[i].resize(i, aboveCutoff);		
+		}												
+        
+		
+		char d;
+		while((d=fileHandle.get()) != EOF){
+            
+            if(isalnum(d)){
+                square = 1;
+                fileHandle.putback(d);
+                for(int i=0;i<nseqs;i++){
+                    fileHandle >> distance;
+                }
+                break;
+            }
+            if(d == '\n'){
+                square = 0;
+                break;
+            }
+		}
+        
+		Progress* reading;
+        
+		if(square == 0){
+            
+            reading = new Progress("Reading matrix:     ", nseqs * (nseqs - 1) / 2);
+            
+            int        index = 0;
+            
+            for(int i=1;i<nseqs;i++){
+                if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
+                
+                fileHandle >> name;
+                matrixNames.push_back(name);
+                
+                
+                //there's A LOT of repeated code throughout this method...
+                 if(countTable == NULL){
+                    list->set(i, name);
+                    
+                    for(int j=0;j<i;j++){
+                        
+                        if (m->control_pressed) { delete reading; fileHandle.close(); return 0;  }
+                        
+                        fileHandle >> distance;
+                        
+                        if (distance == -1) { distance = 1000000; }
+                        else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
+                        
+                        //if(distance < cutoff){
+                        dMatrix[i][j] = distance;
+                        if (distance < smallDist) { smallDist = distance; }
+                        //if (rowSmallDists[i].dist > distance) {  rowSmallDists[i].dist = distance; rowSmallDists[i].col = j; rowSmallDists[i].row = i; }
+                        //if (rowSmallDists[j].dist > distance) {  rowSmallDists[j].dist = distance; rowSmallDists[j].col = i; rowSmallDists[j].row = j; }
+                        //}
+                        index++;
+                        reading->update(index);
+                    }
+                    
+                }
+                else{
+                    for(int j=0;j<i;j++){
+                        fileHandle >> distance;
+                        
+                        if (m->control_pressed) { delete reading; fileHandle.close(); return 0;  }
+                        
+                        if (distance == -1) { distance = 1000000; }
+                        else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
+                        
+                        if (distance < smallDist) { smallDist = distance; }
+                        
+                        int row = countTable->get(matrixNames[i]);
+                        int col = countTable->get(matrixNames[j]);
+                       
+                        if (row < col) {  dMatrix[col][row] = distance; }
+                        else { dMatrix[row][col] = distance; }
+                        
+                        index++;
+                        reading->update(index);
+                    }
+                }
+            }
+		}
+		else{
+            
+            reading = new Progress("Reading matrix:     ", nseqs * nseqs);
+            
+            int index = nseqs;
+            
+            for(int i=1;i<nseqs;i++){
+                fileHandle >> name;                
+                matrixNames.push_back(name);
+                
+                if(countTable == NULL){
+                    list->set(i, name);
+                    for(int j=0;j<nseqs;j++){
+                        fileHandle >> distance;
+                        
+                        if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
+                        
+                        if (distance == -1) { distance = 1000000; }
+                        else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
+                        
+                        if(j < i){
+                            if (distance < smallDist) { smallDist = distance; }
+                            
+                            dMatrix[i][j] = distance;
+                        }
+                        index++;
+                        reading->update(index);
+                    }
+                    
+                }
+                else{
+                    
+                    for(int j=0;j<nseqs;j++){
+                        fileHandle >> distance;
+                        
+                        if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
+                        
+                        if (distance == -1) { distance = 1000000; }
+                        else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.                                                        
+                        
+                        if(j < i){
+                            if (distance < smallDist) { smallDist = distance; }
+                            
+                            int row = countTable->get(matrixNames[i]);
+                            int col = countTable->get(matrixNames[j]);
+                            
+                            if (row < col) {  dMatrix[col][row] = distance; }
+                            else { dMatrix[row][col] = distance; }
+                        }
+                        index++;
+                        reading->update(index);
+                    }
+                }
+            }
+		}
+		
+		if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
+		
+		reading->finish();
+		delete reading;
+        
+		list->setLabel("0");
+		rabund = new RAbundVector();
+        rabund->setLabel(list->getLabel());  
+        
+        for(int i = 0; i < list->getNumBins(); i++) { 
+            if (m->control_pressed) { break; }
+            vector<string> binNames;
+            string bin = list->get(i);
+            m->splitAtComma(bin, binNames);
+            int total = 0;
+            for (int j = 0; j < binNames.size(); j++) { total += countTable->getNumSeqs(binNames[j]);  }
+            rabund->push_back(total);   
+        }
+		
+		fileHandle.close();
+		
+		return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClusterClassic", "readPhylipFile");
+		exit(1);
+	}
+    
+}
+/***********************************************************************/
 //sets smallCol and smallRow, returns distance
 double ClusterClassic::getSmallCell() {
 	try {
@@ -398,16 +597,12 @@ void ClusterClassic::setMapWanted(bool f)  {
 			
 			//parse bin 
 			string names = list->get(i);
-			while (names.find_first_of(',') != -1) { 
-				//get name from bin
-				string name = names.substr(0,names.find_first_of(','));
+			vector<string> binnames;
+            m->splitAtComma(names, binnames);
+            for (int j = 0; j < binnames.size(); j++) {
 				//save name and bin number
-				seq2Bin[name] = i;
-				names = names.substr(names.find_first_of(',')+1, names.length());
+				seq2Bin[binnames[j]] = i;
 			}
-			
-			//get last name
-			seq2Bin[names] = i;
 		}
 		
 	}
@@ -420,17 +615,13 @@ void ClusterClassic::setMapWanted(bool f)  {
 void ClusterClassic::updateMap() {
 try {
 		//update location of seqs in smallRow since they move to smallCol now
-		string names = list->get(smallRow);
-		while (names.find_first_of(',') != -1) { 
-			//get name from bin
-			string name = names.substr(0,names.find_first_of(','));
-			//save name and bin number
-			seq2Bin[name] = smallCol;
-			names = names.substr(names.find_first_of(',')+1, names.length());
-		}
-			
-		//get last name
-		seq2Bin[names] = smallCol;
+        string names = list->get(smallRow);
+        vector<string> binnames;
+        m->splitAtComma(names, binnames);
+        for (int j = 0; j < binnames.size(); j++) {
+            //save name and bin number
+            seq2Bin[binnames[j]] = smallCol;
+        }
 		
 	}
 	catch(exception& e) {

@@ -10,13 +10,15 @@
 #include "removeseqscommand.h"
 #include "sequence.hpp"
 #include "listvector.hpp"
+#include "counttable.h"
 
 //**********************************************************************************************************************
 vector<string> RemoveSeqsCommand::setParameters(){	
 	try {
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pfasta);
-		CommandParameter pname("name", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pname);
-		CommandParameter pgroup("group", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pgroup);
+        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "FNGLT", "none",false,false); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "FNGLT", "none",false,false); parameters.push_back(pcount);
+		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "FNGLT", "none",false,false); parameters.push_back(pgroup);
 		CommandParameter plist("list", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(plist);
 		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(ptaxonomy);
 		CommandParameter palignreport("alignreport", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(palignreport);
@@ -39,9 +41,9 @@ vector<string> RemoveSeqsCommand::setParameters(){
 string RemoveSeqsCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The remove.seqs command reads an .accnos file and at least one of the following file types: fasta, name, group, list, taxonomy, quality or alignreport file.\n";
+		helpString += "The remove.seqs command reads an .accnos file and at least one of the following file types: fasta, name, group, count, list, taxonomy, quality or alignreport file.\n";
 		helpString += "It outputs a file containing the sequences NOT in the .accnos file.\n";
-		helpString += "The remove.seqs command parameters are accnos, fasta, name, group, list, taxonomy, qfile, alignreport and dups.  You must provide accnos and at least one of the file parameters.\n";
+		helpString += "The remove.seqs command parameters are accnos, fasta, name, group, count, list, taxonomy, qfile, alignreport and dups.  You must provide accnos and at least one of the file parameters.\n";
 		helpString += "The dups parameter allows you to remove the entire line from a name file if you remove any name from the line. default=true. \n";
 		helpString += "The remove.seqs command should be in the following format: remove.seqs(accnos=yourAccnos, fasta=yourFasta).\n";
 		helpString += "Example remove.seqs(accnos=amazon.accnos, fasta=amazon.fasta).\n";
@@ -70,6 +72,7 @@ string RemoveSeqsCommand::getOutputFileNameTag(string type, string inputName="")
             else if (type == "list")        {   outputFileName =  "pick" + m->getExtension(inputName);   }
             else if (type == "qfile")       {   outputFileName =  "pick" + m->getExtension(inputName);   }
             else if (type == "alignreport") {   outputFileName =  "pick.align.report";                   }
+            else if (type == "count")       {   outputFileName =  "pick.count_table";   }
             else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
         }
         return outputFileName;
@@ -93,6 +96,7 @@ RemoveSeqsCommand::RemoveSeqsCommand(){
 		outputTypes["alignreport"] = tempOutNames;
 		outputTypes["list"] = tempOutNames;
 		outputTypes["qfile"] = tempOutNames;
+        outputTypes["count"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "RemoveSeqsCommand", "RemoveSeqsCommand");
@@ -131,6 +135,7 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
 			outputTypes["alignreport"] = tempOutNames;
 			outputTypes["list"] = tempOutNames;
 			outputTypes["qfile"] = tempOutNames;
+            outputTypes["count"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
@@ -203,6 +208,14 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["qfile"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("count");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["count"] = inputDir + it->second;		}
+				}
 			}
 
 			
@@ -259,13 +272,28 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
 				else				{  temp = "false"; usedDups = "";	}
 			}
 			dups = m->isTrue(temp);
+            
+            countfile = validParameter.validFile(parameters, "count", true);
+            if (countfile == "not open") { countfile = ""; abort = true; }
+            else if (countfile == "not found") { countfile = "";  }	
+            else { m->setCountTableFile(countfile); }
+            
+            if ((namefile != "") && (countfile != "")) {
+                m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
+            }
+            
+            if ((groupfile != "") && (countfile != "")) {
+                m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+            }
 			
-			if ((fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == "") && (taxfile == "") && (qualfile == ""))  { m->mothurOut("You must provide at least one of the following: fasta, name, group, taxonomy, quality, alignreport or list."); m->mothurOutEndLine(); abort = true; }
+			if ((countfile == "") && (fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == "") && (taxfile == "") && (qualfile == ""))  { m->mothurOut("You must provide at least one of the following: fasta, name, group, taxonomy, quality, alignreport or list."); m->mothurOutEndLine(); abort = true; }
 			
-			if ((fastafile != "") && (namefile == "")) {
-				vector<string> files; files.push_back(fastafile);
-				parser.getNameFile(files);
-			}
+            if (countfile == "") {
+                if ((fastafile != "") && (namefile == "")) {
+                    vector<string> files; files.push_back(fastafile);
+                    parser.getNameFile(files);
+                }
+            }
 		}
 
 	}
@@ -285,6 +313,12 @@ int RemoveSeqsCommand::execute(){
 		names = m->readAccnos(accnosfile);
 		
 		if (m->control_pressed) { return 0; }
+        
+        if (countfile != "") {
+            if ((fastafile != "") || (listfile != "") || (taxfile != "")) { 
+                m->mothurOut("\n[NOTE]: The count file should contain only unique names, so mothur assumes your fasta, list and taxonomy files also contain only uniques.\n\n");
+            }
+        }
 		
 		//read through the correct file and output lines you want to keep
 		if (namefile != "")			{		readName();		}
@@ -294,6 +328,7 @@ int RemoveSeqsCommand::execute(){
 		if (listfile != "")			{		readList();		}
 		if (taxfile != "")			{		readTax();		}
 		if (qualfile != "")			{		readQual();		}
+        if (countfile != "")		{		readCount();		}
 		
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 	
@@ -333,7 +368,12 @@ int RemoveSeqsCommand::execute(){
 			itTypes = outputTypes.find("qfile");
 			if (itTypes != outputTypes.end()) {
 				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setQualFile(current); }
-			}			
+			}	
+            
+            itTypes = outputTypes.find("count");
+			if (itTypes != outputTypes.end()) {
+				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setCountTableFile(current); }
+			}
 		}
 		
 		return 0;		
@@ -366,6 +406,12 @@ int RemoveSeqsCommand::readFasta(){
 			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 			
 			Sequence currSeq(in);
+            
+            if (!dups) {//adjust name if needed
+                map<string, string>::iterator it = uniqueMap.find(currSeq.getName());
+                if (it != uniqueMap.end()) { currSeq.setName(it->second); }
+            }
+
 			name = currSeq.getName();
 			
 			if (name != "") {
@@ -373,7 +419,7 @@ int RemoveSeqsCommand::readFasta(){
 				if (names.count(name) == 0) {
 					wroteSomething = true;
 					
-					currSeq.printSequence(out);
+                    currSeq.printSequence(out);
 				}else {  removedCount++;  }
 			}
 			m->gobble(in);
@@ -437,6 +483,11 @@ int RemoveSeqsCommand::readQual(){
 			
 			m->gobble(in);
 			
+            if (!dups) {//adjust name if needed
+                map<string, string>::iterator it = uniqueMap.find(saveName);
+                if (it != uniqueMap.end()) { name = ">" + it->second; saveName = it->second; }
+            }
+            
 			if (names.count(saveName) == 0) {
 				wroteSomething = true;
 				
@@ -459,6 +510,64 @@ int RemoveSeqsCommand::readQual(){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "RemoveSeqsCommand", "readQual");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+int RemoveSeqsCommand::readCount(){
+	try {
+        
+		string thisOutputDir = outputDir;
+		if (outputDir == "") {  thisOutputDir += m->hasPath(countfile);  }
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(countfile)) + getOutputFileNameTag("count", countfile);
+		
+		ofstream out;
+		m->openOutputFile(outputFileName, out);
+		
+		ifstream in;
+		m->openInputFile(countfile, in);
+		
+		bool wroteSomething = false;
+		int removedCount = 0;
+		
+        string headers = m->getline(in); m->gobble(in);
+        out << headers << endl;
+        
+        string name, rest; int thisTotal;
+        while (!in.eof()) {
+            
+            if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+            
+            in >> name; m->gobble(in); 
+            in >> thisTotal; m->gobble(in);
+            rest = m->getline(in); m->gobble(in);
+            if (m->debug) { m->mothurOut("[DEBUG]: " + name + '\t' + rest + "\n"); }
+            
+            if (names.count(name) == 0) {
+                out << name << '\t' << thisTotal << '\t' << rest << endl;
+                wroteSomething = true;
+            }else { removedCount += thisTotal; }
+        }
+        in.close();
+		out.close();
+        
+        //check for groups that have been eliminated
+        CountTable ct;
+        if (ct.testGroups(outputFileName)) {
+            ct.readTable(outputFileName);
+            ct.printTable(outputFileName);
+        }
+
+		
+		if (wroteSomething == false) {  m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();  }
+		outputTypes["count"].push_back(outputFileName); outputNames.push_back(outputFileName);
+		
+		m->mothurOut("Removed " + toString(removedCount) + " sequences from your count file."); m->mothurOutEndLine();
+        
+		return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "RemoveSeqsCommand", "readCount");
 		exit(1);
 	}
 }
@@ -597,6 +706,8 @@ int RemoveSeqsCommand::readName(){
 						wroteSomething = true;
 						
 						out << validSecond[0] << '\t';
+                        //we are changing the unique name in the fasta file
+                        uniqueMap[firstCol] = validSecond[0];
 						
 						//you know you have at least one valid second since first column is valid
 						for (int i = 0; i < validSecond.size()-1; i++) {  out << validSecond[i] << ',';  }
@@ -690,9 +801,15 @@ int RemoveSeqsCommand::readTax(){
 			in >> name;				//read from first column
 			in >> tax;			//read from second column
 			
+            if (!dups) {//adjust name if needed
+                map<string, string>::iterator it = uniqueMap.find(name);
+                if (it != uniqueMap.end()) { name = it->second; }
+            }
+            
 			//if this name is in the accnos file
 			if (names.count(name) == 0) {
 				wroteSomething = true;
+            
 				out << name << '\t' << tax << endl;
 			}else {  removedCount++;  }
 					
@@ -742,6 +859,11 @@ int RemoveSeqsCommand::readAlign(){
 			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 			
 			in >> name;				//read from first column
+            
+            if (!dups) {//adjust name if needed
+                map<string, string>::iterator it = uniqueMap.find(name);
+                if (it != uniqueMap.end()) { name = it->second; }
+            }
 			
 			//if this name is in the accnos file
 			if (names.count(name) == 0) {

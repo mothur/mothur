@@ -16,8 +16,9 @@
 vector<string> UnifracUnweightedCommand::setParameters(){	
 	try {
 		CommandParameter ptree("tree", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(ptree);
-		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pgroup);
-		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
+        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none",false,false); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none",false,false); parameters.push_back(pcount);
+		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none",false,false); parameters.push_back(pgroup);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
 		CommandParameter piters("iters", "Number", "", "1000", "", "", "",false,false); parameters.push_back(piters);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
@@ -42,7 +43,7 @@ vector<string> UnifracUnweightedCommand::setParameters(){
 string UnifracUnweightedCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The unifrac.unweighted command parameters are tree, group, name, groups, iters, distance, processors, root and random.  tree parameter is required unless you have valid current tree file.\n";
+		helpString += "The unifrac.unweighted command parameters are tree, group, name, count, groups, iters, distance, processors, root and random.  tree parameter is required unless you have valid current tree file.\n";
 		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 1 valid group.\n";
 		helpString += "The group names are separated by dashes.  The iters parameter allows you to specify how many random trees you would like compared to your tree.\n";
 		helpString += "The distance parameter allows you to create a distance file from the results. The default is false. You may set distance to lt, square or column.\n";
@@ -165,6 +166,14 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("count");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["count"] = inputDir + it->second;		}
+				}
 			}
 			
             //check for required parameters
@@ -186,6 +195,19 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option)  {
 			if (namefile == "not open") { namefile = ""; abort = true; }
 			else if (namefile == "not found") { namefile = ""; }
 			else { m->setNameFile(namefile); }
+            
+            countfile = validParameter.validFile(parameters, "count", true);
+			if (countfile == "not open") { countfile = ""; abort = true; }
+			else if (countfile == "not found") { countfile = "";  }	
+			else { m->setCountTableFile(countfile); }
+            
+            if ((namefile != "") && (countfile != "")) {
+                m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
+            }
+			
+            if ((groupfile != "") && (countfile != "")) {
+                m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+            }
 			
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(treefile);	}
 			
@@ -233,7 +255,13 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option)  {
 			consensus = m->isTrue(temp);
             
 			if (subsample && random) {  m->mothurOut("[ERROR]: random must be false, if subsample=t.\n"); abort=true;  } 
-			if (subsample && (groupfile == "")) {  m->mothurOut("[ERROR]: if subsample=t, a group file must be provided.\n"); abort=true;  } 
+            if (countfile == "") { if (subsample && (groupfile == "")) {  m->mothurOut("[ERROR]: if subsample=t, a group file must be provided.\n"); abort=true;  } }
+            else {  
+                CountTable testCt; 
+                if ((!testCt.testGroups(countfile)) && (subsample)) {
+                    m->mothurOut("[ERROR]: if subsample=t, a count file with group info must be provided.\n"); abort=true;  
+                }
+            }
             if (subsample && (!phylip)) { phylip=true; outputForm = "lt"; }
             if (consensus && (!subsample)) { m->mothurOut("[ERROR]: you cannot use consensus without subsample.\n"); abort=true; }
 
@@ -246,10 +274,12 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option)  {
 				m->setGroups(Groups);
 			}
 			
-			if (namefile == "") {
-				vector<string> files; files.push_back(treefile);
-				parser.getNameFile(files);
-			}
+			if (countfile=="") {
+                if (namefile == "") {
+                    vector<string> files; files.push_back(treefile);
+                    parser.getNameFile(files);
+                } 
+            }
 		}
 		
 	}
@@ -267,12 +297,12 @@ int UnifracUnweightedCommand::execute() {
 		
 		m->setTreeFile(treefile);
 		
-		TreeReader* reader = new TreeReader(treefile, groupfile, namefile);
+		TreeReader* reader;
+        if (countfile == "") { reader = new TreeReader(treefile, groupfile, namefile); }
+        else { reader = new TreeReader(treefile, countfile); }
         T = reader->getTrees();
-        tmap = T[0]->getTreeMap();
-        map<string, string> nameMap = reader->getNames();
-        map<string, string> unique2Dup = reader->getNameMap();
-        delete reader;	
+        ct = T[0]->getCountTable();
+        delete reader;
         
 		sumFile = outputDir + m->getRootName(m->getSimpleName(treefile)) + getOutputFileNameTag("uwsummary");
 		outputNames.push_back(sumFile); outputTypes["uwsummary"].push_back(sumFile);
@@ -280,7 +310,7 @@ int UnifracUnweightedCommand::execute() {
 		
 		SharedUtil util;
 		Groups = m->getGroups();
-		vector<string> namesGroups = tmap->getNamesOfGroups();
+		vector<string> namesGroups = ct->getNamesOfGroups();
 		util.setGroups(Groups, namesGroups, allGroups, numGroups, "unweighted");	//sets the groups the user wants to analyze
 		
 		Unweighted unweighted(includeRoot);
@@ -292,10 +322,9 @@ int UnifracUnweightedCommand::execute() {
             //user has not set size, set size = smallest samples size
             if (subsampleSize == -1) { 
                 vector<string> temp; temp.push_back(Groups[0]);
-                subsampleSize = (tmap->getNamesSeqs(temp)).size(); //num in first group
+                subsampleSize = ct->getGroupCount(Groups[0]); //num in first group
                 for (int i = 1; i < Groups.size(); i++) {
-                    temp.clear(); temp.push_back(Groups[i]);
-                    int thisSize = (tmap->getNamesSeqs(temp)).size();
+                    int thisSize = ct->getGroupCount(Groups[i]);
                     if (thisSize < subsampleSize) {	subsampleSize = thisSize;	}
                 }
                 m->mothurOut("\nSetting subsample size to " + toString(subsampleSize) + ".\n\n");
@@ -303,9 +332,7 @@ int UnifracUnweightedCommand::execute() {
                 vector<string> newGroups = Groups;
                 Groups.clear();
                 for (int i = 0; i < newGroups.size(); i++) {
-                    vector<string> thisGroup; thisGroup.push_back(newGroups[i]);
-                    vector<string> thisGroupsSeqs = tmap->getNamesSeqs(thisGroup);
-                    int thisSize = thisGroupsSeqs.size();
+                    int thisSize = ct->getGroupCount(newGroups[i]);
                     
                     if (thisSize >= subsampleSize) {    Groups.push_back(newGroups[i]);	}
                     else {   m->mothurOut("You have selected a size that is larger than "+newGroups[i]+" number of sequences, removing "+newGroups[i]+".\n"); }
@@ -330,7 +357,7 @@ int UnifracUnweightedCommand::execute() {
 	 
 		//get pscores for users trees
 		for (int i = 0; i < T.size(); i++) {
-			if (m->control_pressed) { delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; }outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
+			if (m->control_pressed) { delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; }outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
 			
             counter = 0;
 			
@@ -351,7 +378,7 @@ int UnifracUnweightedCommand::execute() {
 
 			userData = unweighted.getValues(T[i], processors, outputDir);  //userData[0] = unweightedscore
 		
-			if (m->control_pressed) { delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; }if (random) { delete output;  } outSum.close();  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }return 0; }
+			if (m->control_pressed) { delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; }if (random) { delete output;  } outSum.close();  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }return 0; }
 			
 			//output scores for each combination
 			for(int k = 0; k < numComp; k++) {
@@ -366,7 +393,7 @@ int UnifracUnweightedCommand::execute() {
             
             if (random) {  runRandomCalcs(T[i], userData);  }
 			
-			if (m->control_pressed) { delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; }if (random) { delete output;  } outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0;  }
+			if (m->control_pressed) { delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; }if (random) { delete output;  } outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0;  }
             
             int startSubsample = time(NULL);
             
@@ -376,32 +403,28 @@ int UnifracUnweightedCommand::execute() {
                 if (m->control_pressed) { break; }
                 
                 //copy to preserve old one - would do this in subsample but memory cleanup becomes messy.
-                TreeMap* newTmap = new TreeMap();
-                //newTmap->getCopy(*tmap);
-                
-                //SubSample sample;
-                //Tree* subSampleTree = sample.getSample(T[i], newTmap, nameMap, subsampleSize);
-                
+                CountTable* newCt = new CountTable();
+                 
                 //uses method of setting groups to doNotIncludeMe
                 SubSample sample;
-                Tree* subSampleTree = sample.getSample(T[i], tmap, newTmap, subsampleSize, unique2Dup);
+                Tree* subSampleTree = sample.getSample(T[i], ct, newCt, subsampleSize);
                 
                 //call new weighted function
                 vector<double> iterData; iterData.resize(numComp,0);
                 Unweighted thisUnweighted(includeRoot);
                 iterData = thisUnweighted.getValues(subSampleTree, processors, outputDir); //userData[0] = weightedscore
-                
+        
                 //save data to make ave dist, std dist
                 calcDistsTotals.push_back(iterData);
                 
-                delete newTmap;
+                delete newCt;
                 delete subSampleTree;
                 
                 if((thisIter+1) % 100 == 0){	m->mothurOut(toString(thisIter+1)); m->mothurOutEndLine();		}
             }
-            m->mothurOut("It took " + toString(time(NULL) - startSubsample) + " secs to run the subsampling."); m->mothurOutEndLine();
+            if (subsample) { m->mothurOut("It took " + toString(time(NULL) - startSubsample) + " secs to run the subsampling."); m->mothurOutEndLine(); }
             
-            if (m->control_pressed) { delete tmap; for (int i = 0; i < T.size(); i++) { delete T[i]; }if (random) { delete output;  } outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0;  }
+            if (m->control_pressed) { delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; }if (random) { delete output;  } outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0;  }
 
             if (subsample) {  getAverageSTDMatrices(calcDistsTotals, i); }
             if (consensus) {  getConsensusTrees(calcDistsTotals, i);  }
@@ -420,7 +443,7 @@ int UnifracUnweightedCommand::execute() {
 		
 
 		outSum.close();
-		delete tmap; 
+		delete ct; 
 		for (int i = 0; i < T.size(); i++) { delete T[i]; }
 		
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }	return 0; }
@@ -472,7 +495,7 @@ int UnifracUnweightedCommand::getAverageSTDMatrices(vector< vector<double> >& di
         //find standard deviation
         vector<double> stdDev; stdDev.resize(numComp, 0);
         
-        for (int thisIter = 0; thisIter < iters; thisIter++) { //compute the difference of each dist from the mean, and square the result of each
+        for (int thisIter = 0; thisIter < subsampleIters; thisIter++) { //compute the difference of each dist from the mean, and square the result of each
             for (int j = 0; j < dists[thisIter].size(); j++) {
                 stdDev[j] += ((dists[thisIter][j] - averages[j]) * (dists[thisIter][j] - averages[j]));
             }
@@ -578,8 +601,16 @@ int UnifracUnweightedCommand::getConsensusTrees(vector< vector<double> >& dists,
         m->runParse = false;
         
         //create treemap class from groupmap for tree class to use
-        TreeMap newTmap;
-        newTmap.makeSim(m->getGroups());
+        CountTable newCt;
+        set<string> nameMap;
+        map<string, string> groupMap;
+        set<string> gps;
+        for (int i = 0; i < m->getGroups().size(); i++) { 
+            nameMap.insert(m->getGroups()[i]); 
+            gps.insert(m->getGroups()[i]); 
+            groupMap[m->getGroups()[i]] = m->getGroups()[i];
+        }
+        newCt.createTable(nameMap, groupMap, gps);
         
         //clear  old tree names if any
         m->Treenames.clear();
@@ -587,7 +618,7 @@ int UnifracUnweightedCommand::getConsensusTrees(vector< vector<double> >& dists,
         //fills globaldatas tree names
         m->Treenames = m->getGroups();
         
-        vector<Tree*> newTrees = buildTrees(dists, treeNum, newTmap); //also creates .all.tre file containing the trees created
+        vector<Tree*> newTrees = buildTrees(dists, treeNum, newCt); //also creates .all.tre file containing the trees created
         
         if (m->control_pressed) { return 0; }
         
@@ -613,7 +644,7 @@ int UnifracUnweightedCommand::getConsensusTrees(vector< vector<double> >& dists,
 }
 /**************************************************************************************************/
 
-vector<Tree*> UnifracUnweightedCommand::buildTrees(vector< vector<double> >& dists, int treeNum, TreeMap& mytmap) {
+vector<Tree*> UnifracUnweightedCommand::buildTrees(vector< vector<double> >& dists, int treeNum, CountTable& myct) {
 	try {
         
         vector<Tree*> trees;
@@ -647,9 +678,8 @@ vector<Tree*> UnifracUnweightedCommand::buildTrees(vector< vector<double> >& dis
 			}
             
             //create tree
-            Tree* tempTree = new Tree(&mytmap, sims);
-            map<string, string> empty;
-            tempTree->assembleTree(empty);
+            Tree* tempTree = new Tree(&myct, sims);
+            tempTree->assembleTree();
             
             trees.push_back(tempTree);
             

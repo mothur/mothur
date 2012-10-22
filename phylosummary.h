@@ -13,6 +13,7 @@
 #include "mothur.h"
 #include "mothurout.h"
 #include "groupmap.h"
+#include "counttable.h"
 
 /**************************************************************************************************/
 
@@ -32,13 +33,15 @@ struct rawTaxNode {
 class PhyloSummary {
 
 public:
-	PhyloSummary(string);
-	PhyloSummary(string, string);
-	~PhyloSummary() { if (groupmap != NULL)  {  delete groupmap;  }  }
+	PhyloSummary(GroupMap*);
+	PhyloSummary(string, GroupMap*);
+    PhyloSummary(CountTable*);
+	PhyloSummary(string, CountTable*);
+	~PhyloSummary() {}
 	
 	int summarize(string);  //pass it a taxonomy file and a group file and it makes the tree
 	int addSeqToTree(string, string);
-	int addSeqToTree(string, vector<string>);
+	int addSeqToTree(string, map<string, bool>);
 	void print(ofstream&);
 	int getMaxLevel() { return maxLevel; }
 	
@@ -49,6 +52,7 @@ private:
 	void assignRank(int);
 	void readTreeStruct(ifstream&);
 	GroupMap* groupmap;
+    CountTable* ct;
 	bool ignore;
 	
 	int numNodes;

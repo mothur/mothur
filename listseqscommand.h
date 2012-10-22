@@ -34,7 +34,7 @@ class ListSeqsCommand : public Command {
 	
 	private:
 		vector<string> names, outputNames;
-		string fastafile, namefile, groupfile, alignfile, inputFileName, outputDir, listfile, taxfile;
+		string fastafile, namefile, groupfile, countfile, alignfile, inputFileName, outputDir, listfile, taxfile;
 		bool abort;
 		
 		int readFasta();
@@ -43,6 +43,7 @@ class ListSeqsCommand : public Command {
 		int readAlign();
 		int readList();
 		int readTax();
+        int readCount();
 		
 };
 

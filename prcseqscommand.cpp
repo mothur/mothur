@@ -13,8 +13,9 @@ vector<string> PcrSeqsCommand::setParameters(){
 	try {
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
 		CommandParameter poligos("oligos", "InputTypes", "", "", "ecolioligos", "none", "none",false,false); parameters.push_back(poligos);
-		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
-        CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pgroup);
+        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none",false,false); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none",false,false); parameters.push_back(pcount);
+		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none",false,false); parameters.push_back(pgroup);
         CommandParameter ptax("taxonomy", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(ptax);
         CommandParameter pecoli("ecoli", "InputTypes", "", "", "ecolioligos", "none", "none",false,false); parameters.push_back(pecoli);
 		CommandParameter pstart("start", "Number", "", "-1", "", "", "",false,false); parameters.push_back(pstart);
@@ -40,7 +41,7 @@ string PcrSeqsCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The pcr.seqs command reads a fasta file.\n";
-        helpString += "The pcr.seqs command parameters are fasta, oligos, name, group, taxonomy, ecoli, start, end, nomatch, processors, keepprimer and keepdots.\n";
+        helpString += "The pcr.seqs command parameters are fasta, oligos, name, group, count, taxonomy, ecoli, start, end, nomatch, processors, keepprimer and keepdots.\n";
 		helpString += "The ecoli parameter is used to provide a fasta file containing a single reference sequence (e.g. for e. coli) this must be aligned. Mothur will trim to the start and end positions of the reference sequence.\n";
         helpString += "The start parameter allows you to provide a starting position to trim to.\n";
         helpString += "The end parameter allows you to provide a ending position to trim from.\n";
@@ -72,6 +73,7 @@ string PcrSeqsCommand::getOutputFileNameTag(string type, string inputName=""){
             else if (type == "taxonomy") {  outputFileName =  "pcr" + m->getExtension(inputName); }
             else if (type == "group") {  outputFileName =  "pcr" + m->getExtension(inputName); }
             else if (type == "name") {  outputFileName =  "pcr" + m->getExtension(inputName); }
+            else if (type == "count") {  outputFileName =  "pcr" + m->getExtension(inputName); }
             else if (type == "accnos") {  outputFileName =  "bad.accnos"; }
             else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
         }
@@ -93,6 +95,7 @@ PcrSeqsCommand::PcrSeqsCommand(){
 		outputTypes["taxonomy"] = tempOutNames;
 		outputTypes["group"] = tempOutNames;
 		outputTypes["name"] = tempOutNames;
+        outputTypes["count"] = tempOutNames;
         outputTypes["accnos"] = tempOutNames;
 	}
 	catch(exception& e) {
@@ -132,6 +135,7 @@ PcrSeqsCommand::PcrSeqsCommand(string option)  {
 			outputTypes["group"] = tempOutNames;
 			outputTypes["name"] = tempOutNames;
             outputTypes["accnos"] = tempOutNames;
+            outputTypes["count"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -185,6 +189,14 @@ PcrSeqsCommand::PcrSeqsCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("count");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["count"] = inputDir + it->second;		}
+				}
 				
 			}
             
@@ -229,6 +241,19 @@ PcrSeqsCommand::PcrSeqsCommand(string option)  {
 			else if(groupfile == "not open"){	groupfile = ""; abort = true;	} 
             else { m->setGroupFile(groupfile); }
             
+            countfile = validParameter.validFile(parameters, "count", true);
+			if (countfile == "not open") { countfile = ""; abort = true; }
+			else if (countfile == "not found") { countfile = "";  }	
+			else { m->setCountTableFile(countfile); }
+            
+            if ((namefile != "") && (countfile != "")) {
+                m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
+            }
+			
+            if ((groupfile != "") && (countfile != "")) {
+                m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+            }
+            
             taxfile = validParameter.validFile(parameters, "taxonomy", true);
 			if (taxfile == "not found"){	taxfile = "";		}
 			else if(taxfile == "not open"){	taxfile = ""; abort = true;	} 
@@ -265,10 +290,12 @@ PcrSeqsCommand::PcrSeqsCommand(string option)  {
             }
 			
 			//check to make sure you didn't forget the name file by mistake			
-			if (namefile == "") {
-				vector<string> files; files.push_back(fastafile);
-				parser.getNameFile(files);
-			}
+			if (countfile == "") { 
+                if (namefile == "") {
+                    vector<string> files; files.push_back(fastafile);
+                    parser.getNameFile(files);
+                }
+            }
 		}
         
 	}
@@ -339,7 +366,9 @@ int PcrSeqsCommand::execute(){
         if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 		if (taxfile != "")			{		readTax(badNames);		}
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
-        
+  		if (countfile != "")			{		readCount(badNames);		}
+		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+      
         m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		for (int i = 0; i < outputNames.size(); i++) { m->mothurOut(outputNames[i]); m->mothurOutEndLine(); }
@@ -371,6 +400,11 @@ int PcrSeqsCommand::execute(){
 		itTypes = outputTypes.find("taxonomy");
 		if (itTypes != outputTypes.end()) {
 			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setTaxonomyFile(current); }
+		}
+        
+        itTypes = outputTypes.find("count");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setCountTableFile(current); }
 		}
         
 		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to screen " + toString(numFastaSeqs) + " sequences.");
@@ -1084,6 +1118,63 @@ int PcrSeqsCommand::readTax(set<string> names){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PcrSeqsCommand", "readTax");
+		exit(1);
+	}
+}
+//***************************************************************************************************************
+int PcrSeqsCommand::readCount(set<string> badSeqNames){
+	try {
+		ifstream in;
+		m->openInputFile(countfile, in);
+		set<string>::iterator it;
+		
+		string goodCountFile = outputDir + m->getRootName(m->getSimpleName(countfile)) + getOutputFileNameTag("count", countfile);
+        outputNames.push_back(goodCountFile);  outputTypes["count"].push_back(goodCountFile);
+		ofstream goodCountOut;	m->openOutputFile(goodCountFile, goodCountOut);
+		
+        string headers = m->getline(in); m->gobble(in);
+        goodCountOut << headers << endl;
+        
+        string name, rest; int thisTotal, removedCount; removedCount = 0;
+        bool wroteSomething = false;
+        while (!in.eof()) {
+            
+			if (m->control_pressed) { goodCountOut.close(); in.close(); m->mothurRemove(goodCountFile); return 0; }
+            
+			in >> name; m->gobble(in); 
+            in >> thisTotal; m->gobble(in);
+            rest = m->getline(in); m->gobble(in);
+            
+			if (badSeqNames.count(name) != 0) { removedCount+=thisTotal; }
+			else{
+                wroteSomething = true;
+				goodCountOut << name << '\t' << thisTotal << '\t' << rest << endl;
+			}
+		}
+		in.close();
+		goodCountOut.close();
+        
+        if (m->control_pressed) { m->mothurRemove(goodCountFile);   }
+        
+        if (wroteSomething == false) {  m->mothurOut("Your count file contains only sequences from the .accnos file."); m->mothurOutEndLine(); }
+        
+        //check for groups that have been eliminated
+        CountTable ct;
+        if (ct.testGroups(goodCountFile)) {
+            ct.readTable(goodCountFile);
+            ct.printTable(goodCountFile);
+        }
+		
+		if (m->control_pressed) { m->mothurRemove(goodCountFile);   }
+        
+        m->mothurOut("Removed " + toString(removedCount) + " sequences from your count file."); m->mothurOutEndLine();
+
+		
+		return 0;
+        
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PcrSeqsCommand", "readCOunt");
 		exit(1);
 	}
 }

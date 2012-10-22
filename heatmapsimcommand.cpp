@@ -25,7 +25,8 @@ vector<string> HeatMapSimCommand::setParameters(){
 	try {
 		CommandParameter pshared("shared", "InputTypes", "", "", "PhylipColumnShared", "PhylipColumnShared", "none",false,false); parameters.push_back(pshared);	
 		CommandParameter pphylip("phylip", "InputTypes", "", "", "PhylipColumnShared", "PhylipColumnShared", "none",false,false); parameters.push_back(pphylip);
-		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "ColumnName",false,false); parameters.push_back(pname);
+		CommandParameter pname("name", "InputTypes", "", "", "namecount", "none", "none",false,false); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "namecount", "none", "none",false,false); parameters.push_back(pcount);
 		CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumnShared", "PhylipColumnShared", "ColumnName",false,false); parameters.push_back(pcolumn);		
 		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
 		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
@@ -48,9 +49,8 @@ string HeatMapSimCommand::getHelpString(){
 	try {
 		string helpString = "";
 		ValidCalculators validCalculator;
-		helpString += "The heatmap.sim command parameters are shared, phylip, column, name, groups, calc, fontsize and label.  shared or phylip or column and name are required unless valid current files exist.\n";
-		helpString += "There are two ways to use the heatmap.sim command. The first is with the read.otu command. \n";
-		helpString += "With the read.otu command you may use the groups, label and calc parameters. \n";
+		helpString += "The heatmap.sim command parameters are shared, phylip, column, name, count, groups, calc, fontsize and label.  shared or phylip or column and name are required unless valid current files exist.\n";
+		helpString += "There are two ways to use the heatmap.sim command. The first is with a shared file, and you may use the groups, label and calc parameter. \n";
 		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like included in your heatmap.\n";
 		helpString += "The group names are separated by dashes. The label parameter allows you to select what distance levels you would like a heatmap created for, and is also separated by dashes.\n";
 		helpString += "The fontsize parameter allows you to adjust the font size of the picture created, default=24.\n";
@@ -174,6 +174,14 @@ HeatMapSimCommand::HeatMapSimCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("count");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["count"] = inputDir + it->second;		}
+				}
 			}
 
 			//required parameters
@@ -197,6 +205,12 @@ HeatMapSimCommand::HeatMapSimCommand(string option)  {
 			else if (namefile == "not found") { namefile = ""; }
 			else { m->setNameFile(namefile); }
 			
+            countfile = validParameter.validFile(parameters, "count", true);
+			if (countfile == "not open") { abort = true; countfile = ""; }	
+			else if (countfile == "not found") { countfile = ""; }
+			else { m->setCountTableFile(countfile); }
+			
+            if ((countfile != "") && (namefile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
 			
 			//error checking on files			
 			if ((sharedfile == "") && ((phylipfile == "") && (columnfile == "")))	{ 
@@ -224,8 +238,12 @@ HeatMapSimCommand::HeatMapSimCommand(string option)  {
 					namefile = m->getNameFile(); 
 					if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
 					else { 
-						m->mothurOut("You need to provide a namefile if you are going to use the column format."); m->mothurOutEndLine(); 
-						abort = true; 
+                        countfile = m->getCountTableFile(); 
+						if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
+                        else { 
+                            m->mothurOut("You need to provide a name or count file if you are going to use the column format."); m->mothurOutEndLine(); 
+                            abort = true; 
+                        }	
 					}	
 				}
 			}
@@ -520,20 +538,28 @@ int HeatMapSimCommand::runCommandDist() {
 			in.close();
 		}else {
 			//read names file
-			NameAssignment* nameMap = new NameAssignment(namefile);
-			nameMap->readMap();
+			NameAssignment* nameMap;
+            CountTable ct; 
+            if (namefile != "") { 
+                nameMap = new NameAssignment(namefile);
+                nameMap->readMap();
+                
+                //put names in order in vector
+                for (int i = 0; i < nameMap->size(); i++) {
+                    names.push_back(nameMap->get(i));
+                }
+             }else if (countfile != "") {
+                nameMap = NULL;
+                ct.readTable(countfile);
+                names = ct.getNamesOfSeqs();
+            }
 			
-			//put names in order in vector
-			for (int i = 0; i < nameMap->size(); i++) {
-				names.push_back(nameMap->get(i));
-			}
-			
-			//resize matrix
-			matrix.resize(nameMap->size());
-			for (int i = 0; i < nameMap->size(); i++) {
-				matrix[i].resize(nameMap->size(), 0.0);
-			}
-			
+            //resize matrix
+            matrix.resize(names.size());
+            for (int i = 0; i < names.size(); i++) {
+                matrix[i].resize(names.size(), 0.0);
+            }
+						
 			//read column file
 			string first, second;
 			double dist;
@@ -544,19 +570,26 @@ int HeatMapSimCommand::runCommandDist() {
 				
 				if (m->control_pressed) { return 0; }
 				
-				map<string, int>::iterator itA = nameMap->find(first);
-				map<string, int>::iterator itB = nameMap->find(second);
-				
-				if(itA == nameMap->end()){  m->mothurOut("AAError: Sequence '" + first + "' was not found in the names file, please correct\n"); exit(1);  }
-				if(itB == nameMap->end()){  m->mothurOut("ABError: Sequence '" + second + "' was not found in the names file, please correct\n"); exit(1);  }
-				
-				//save distance
-				matrix[itA->second][itB->second] = dist;
-				matrix[itB->second][itA->second] = dist;
+                if (namefile != "") {
+                    map<string, int>::iterator itA = nameMap->find(first);
+                    map<string, int>::iterator itB = nameMap->find(second);
+                    
+                    if(itA == nameMap->end()){  m->mothurOut("AAError: Sequence '" + first + "' was not found in the names file, please correct\n"); exit(1);  }
+                    if(itB == nameMap->end()){  m->mothurOut("ABError: Sequence '" + second + "' was not found in the names file, please correct\n"); exit(1);  }
+                    
+                    //save distance
+                    matrix[itA->second][itB->second] = dist;
+                    matrix[itB->second][itA->second] = dist;
+                }else if (countfile != "") {
+                    int itA = ct.get(first);
+                    int itB = ct.get(second);
+                    matrix[itA][itB] = dist;
+                    matrix[itB][itA] = dist;
+                }
 			}
 			in.close();
 			
-			delete nameMap;
+			if (namefile != "") { delete nameMap; }
 		}
 		
 		

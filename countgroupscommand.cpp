@@ -16,6 +16,7 @@ vector<string> CountGroupsCommand::setParameters(){
 	try {
 		CommandParameter pshared("shared", "InputTypes", "", "", "sharedGroup", "sharedGroup", "none",false,false); parameters.push_back(pshared);
 		CommandParameter pgroup("group", "InputTypes", "", "", "sharedGroup", "sharedGroup", "none",false,false); parameters.push_back(pgroup);
+        CommandParameter pcount("count", "InputTypes", "", "", "sharedGroup", "sharedGroup", "none",false,false); parameters.push_back(pcount);
 		CommandParameter paccnos("accnos", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(paccnos);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
@@ -34,7 +35,7 @@ vector<string> CountGroupsCommand::setParameters(){
 string CountGroupsCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The count.groups command counts sequences from a specific group or set of groups from the following file types: group or shared file.\n";
+		helpString += "The count.groups command counts sequences from a specific group or set of groups from the following file types: group, count or shared file.\n";
 		helpString += "The count.groups command parameters are accnos, group, shared and groups. You must provide a group or shared file.\n";
 		helpString += "The accnos parameter allows you to provide a file containing the list of groups.\n";
 		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like.  You can separate group names with dashes.\n";
@@ -114,6 +115,14 @@ CountGroupsCommand::CountGroupsCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("count");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["count"] = inputDir + it->second;		}
+				}
 			}
 			
 			
@@ -138,9 +147,23 @@ CountGroupsCommand::CountGroupsCommand(string option)  {
 			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") { groupfile = ""; abort = true; }
 			else if (groupfile == "not found") {  	groupfile = "";	}
-			else { m->setGroupFile(groupfile); }	
+			else { m->setGroupFile(groupfile); }
+            
+            countfile = validParameter.validFile(parameters, "count", true);
+            if (countfile == "not open") { countfile = ""; abort = true; }
+            else if (countfile == "not found") { countfile = "";  }	
+            else { 
+                m->setCountTableFile(countfile); 
+                CountTable ct;
+                if (!ct.testGroups(countfile)) { m->mothurOut("[ERROR]: Your count file does not have any group information, aborting."); m->mothurOutEndLine(); abort=true; }
+            }
+            
+            if ((groupfile != "") && (countfile != "")) {
+                m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+            }
+
 			
-			if ((sharedfile == "") && (groupfile == "")) { 
+			if ((sharedfile == "") && (groupfile == "") && (countfile == "")) { 
 				//give priority to shared, then group
 				sharedfile = m->getSharedFile(); 
 				if (sharedfile != "") {  m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
@@ -148,7 +171,11 @@ CountGroupsCommand::CountGroupsCommand(string option)  {
 					groupfile = m->getGroupFile(); 
 					if (groupfile != "") { m->mothurOut("Using " + groupfile + " as input file for the group parameter."); m->mothurOutEndLine(); }
 					else { 
-						m->mothurOut("You have no current groupfile or sharedfile and one is required."); m->mothurOutEndLine(); abort = true;
+						countfile = m->getCountTableFile(); 
+                        if (countfile != "") { m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
+                        else { 
+                            m->mothurOut("You have no current groupfile, countfile or sharedfile and one is required."); m->mothurOutEndLine(); abort = true;
+                        }
 					}
 				}
 			}
@@ -182,9 +209,36 @@ int CountGroupsCommand::execute(){
 			vector<string> nameGroups = groupMap.getNamesOfGroups();
 			util.setGroups(Groups, nameGroups);
 			
+            int total = 0;
 			for (int i = 0; i < Groups.size(); i++) {
-				m->mothurOut(Groups[i] + " contains " + toString(groupMap.getNumSeqs(Groups[i])) + "."); m->mothurOutEndLine();
+                int num = groupMap.getNumSeqs(Groups[i]);
+                total += num;
+				m->mothurOut(Groups[i] + " contains " + toString(num) + "."); m->mothurOutEndLine();
 			}
+            
+            m->mothurOut("\nTotal seqs: " + toString(total) + "."); m->mothurOutEndLine();
+		}
+        
+        if (m->control_pressed) { return 0; }
+        
+        if (countfile != "") {
+			CountTable ct;
+			ct.readTable(countfile);
+            
+			//make sure groups are valid
+			//takes care of user setting groupNames that are invalid or setting groups=all
+			SharedUtil util;
+			vector<string> nameGroups = ct.getNamesOfGroups();
+			util.setGroups(Groups, nameGroups);
+			
+            int total = 0;
+			for (int i = 0; i < Groups.size(); i++) {
+                int num = ct.getGroupCount(Groups[i]);
+                total += num;
+				m->mothurOut(Groups[i] + " contains " + toString(num) + "."); m->mothurOutEndLine();
+			}
+            
+            m->mothurOut("\nTotal seqs: " + toString(total) + "."); m->mothurOutEndLine();
 		}
 		
 		if (m->control_pressed) { return 0; }
@@ -193,10 +247,15 @@ int CountGroupsCommand::execute(){
 			InputData input(sharedfile, "sharedfile");
 			vector<SharedRAbundVector*> lookup = input.getSharedRAbundVectors();
 			
+            int total = 0;
 			for (int i = 0; i < lookup.size(); i++) {
-				m->mothurOut(lookup[i]->getGroup() + " contains " + toString(lookup[i]->getNumSeqs()) + "."); m->mothurOutEndLine();
+                int num = lookup[i]->getNumSeqs();
+                total += num;
+				m->mothurOut(lookup[i]->getGroup() + " contains " + toString(num) + "."); m->mothurOutEndLine();
 				delete lookup[i];
-			}			
+			}
+			
+            m->mothurOut("\nTotal seqs: " + toString(total) + "."); m->mothurOutEndLine();
 		}
 				
 		return 0;		

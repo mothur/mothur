@@ -37,7 +37,7 @@ public:
 	
 private:
 	bool abort, hard, sim;
-	string method, fileroot, tag, outputDir, phylipfile, namefile;
+	string method, fileroot, tag, outputDir, phylipfile, namefile, countfile;
 	double cutoff;
 	int precision, length;
 	ofstream sabundFile, rabundFile, listFile;

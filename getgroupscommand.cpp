@@ -18,8 +18,9 @@ vector<string> GetGroupsCommand::setParameters(){
 	try {
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "FNGLT",false,false); parameters.push_back(pfasta);
 		CommandParameter pshared("shared", "InputTypes", "", "", "none", "sharedGroup", "none",false,false); parameters.push_back(pshared);
-		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
-		CommandParameter pgroup("group", "InputTypes", "", "", "none", "sharedGroup", "FNGLT",false,false); parameters.push_back(pgroup);
+        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none",false,false); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none",false,false); parameters.push_back(pcount);
+		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "sharedGroup", "FNGLT",false,false); parameters.push_back(pgroup);		
         CommandParameter pdesign("design", "InputTypes", "", "", "none", "sharedGroup", "FNGLT",false,false); parameters.push_back(pdesign);
 		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "FNGLT",false,false); parameters.push_back(plist);
 		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "none", "FNGLT",false,false); parameters.push_back(ptaxonomy);
@@ -43,7 +44,7 @@ string GetGroupsCommand::getHelpString(){
 		string helpString = "";
 		helpString += "The get.groups command selects sequences from a specfic group or set of groups from the following file types: fasta, name, group, list, taxonomy, design or shared file.\n";
 		helpString += "It outputs a file containing the sequences in the those specified groups, or a sharedfile containing only those groups.\n";
-		helpString += "The get.groups command parameters are accnos, fasta, name, group, list, taxonomy, shared, design and groups. The group parameter is required, unless you have a current group file, or are using a shared file.\n";
+		helpString += "The get.groups command parameters are accnos, fasta, name, group, list, taxonomy, shared, design and groups. The group or count parameter is required, unless you have a current group or count file, or are using a shared file.\n";
 		helpString += "You must also provide an accnos containing the list of groups to get or set the groups parameter to the groups you wish to select.\n";
 		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like.  You can separate group names with dashes.\n";
 		helpString += "The get.groups command should be in the following format: get.groups(accnos=yourAccnos, fasta=yourFasta, group=yourGroupFile).\n";
@@ -71,6 +72,7 @@ string GetGroupsCommand::getOutputFileNameTag(string type, string inputName=""){
             else if (type == "taxonomy")    {   outputFileName =  "pick" + m->getExtension(inputName);   }
             else if (type == "name")        {   outputFileName =  "pick" + m->getExtension(inputName);   }
             else if (type == "group")       {   outputFileName =  "pick" + m->getExtension(inputName);   }
+            else if (type == "count")       {   outputFileName =  "pick.count_table";   }
             else if (type == "list")        {   outputFileName =  "pick" + m->getExtension(inputName);   }
             else if (type == "shared")      {   outputFileName =  "pick" + m->getExtension(inputName);   }
             else if (type == "design")      {   outputFileName =  "pick" + m->getExtension(inputName);   }
@@ -97,6 +99,7 @@ GetGroupsCommand::GetGroupsCommand(){
 		outputTypes["list"] = tempOutNames;
 		outputTypes["shared"] = tempOutNames;
         outputTypes["design"] = tempOutNames;
+        outputTypes["count"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "GetGroupsCommand", "GetGroupsCommand");
@@ -135,6 +138,7 @@ GetGroupsCommand::GetGroupsCommand(string option)  {
 			outputTypes["list"] = tempOutNames;
 			outputTypes["shared"] = tempOutNames;
             outputTypes["design"] = tempOutNames;
+            outputTypes["count"] = tempOutNames;
 			
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
@@ -208,6 +212,14 @@ GetGroupsCommand::GetGroupsCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["design"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("count");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["count"] = inputDir + it->second;		}
+				}
 			}
 			
 			
@@ -226,11 +238,6 @@ GetGroupsCommand::GetGroupsCommand(string option)  {
 			if (namefile == "not open") { namefile = ""; abort = true; }
 			else if (namefile == "not found") {  namefile = "";  }	
 			else { m->setNameFile(namefile); }
-			
-			groupfile = validParameter.validFile(parameters, "group", true);
-			if (groupfile == "not open") { groupfile = ""; abort = true; }
-			else if (groupfile == "not found") {  groupfile = "";			}
-			else { m->setGroupFile(groupfile); }	
 			
 			listfile = validParameter.validFile(parameters, "list", true);
 			if (listfile == "not open") { abort = true; }
@@ -263,8 +270,22 @@ GetGroupsCommand::GetGroupsCommand(string option)  {
 			if (designfile == "not open") { designfile = ""; abort = true; }
 			else if (designfile == "not found") {  	designfile = "";	}
 			else { m->setDesignFile(designfile); }
+            
+            countfile = validParameter.validFile(parameters, "count", true);
+            if (countfile == "not open") { countfile = ""; abort = true; }
+            else if (countfile == "not found") { countfile = "";  }	
+            else { m->setCountTableFile(countfile); }
+            
+            if ((namefile != "") && (countfile != "")) {
+                m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
+            }
+            
+            if ((groupfile != "") && (countfile != "")) {
+                m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+            }
+
 			
-			if ((sharedfile == "") && (groupfile == "") && (designfile == "")) { 
+			if ((sharedfile == "") && (groupfile == "") && (designfile == "") && (countfile == "")) { 
 				//is there are current file available for any of these?
 				if ((namefile != "") || (fastafile != "") || (listfile != "") || (taxfile != "")) {
 					//give priority to group, then shared
@@ -274,7 +295,11 @@ GetGroupsCommand::GetGroupsCommand(string option)  {
 						sharedfile = m->getSharedFile(); 
 						if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
 						else { 
-							m->mothurOut("You have no current groupfile or sharedfile and one is required."); m->mothurOutEndLine(); abort = true;
+							countfile = m->getCountTableFile(); 
+                            if (countfile != "") { m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
+                            else { 
+                                m->mothurOut("You have no current groupfile, countfile or sharedfile and one is required."); m->mothurOutEndLine(); abort = true;
+                            }
 						}
 					}
 				}else {
@@ -288,7 +313,12 @@ GetGroupsCommand::GetGroupsCommand(string option)  {
 							designfile = m->getDesignFile(); 
                             if (designfile != "") { m->mothurOut("Using " + designfile + " as input file for the design parameter."); m->mothurOutEndLine(); }
                             else { 
-                                m->mothurOut("You have no current groupfile or sharedfile or designfile and one is required."); m->mothurOutEndLine(); abort = true;
+                                countfile = m->getCountTableFile(); 
+                                if (countfile != "") { m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
+                                else { 
+                                    m->mothurOut("You have no current groupfile, designfile, countfile or sharedfile and one is required."); m->mothurOutEndLine(); abort = true;
+                                }
+
                             }
 						}
 					}
@@ -297,13 +327,15 @@ GetGroupsCommand::GetGroupsCommand(string option)  {
 			
 			if ((accnosfile == "") && (Groups.size() == 0)) { m->mothurOut("You must provide an accnos file or specify groups using the groups parameter."); m->mothurOutEndLine(); abort = true; }
 			
-			if ((fastafile == "") && (namefile == "") && (groupfile == "")  && (designfile == "") && (sharedfile == "") && (listfile == "") && (taxfile == ""))  { m->mothurOut("You must provide at least one of the following: fasta, name, taxonomy, group, shared, design or list."); m->mothurOutEndLine(); abort = true; }
-			if ((groupfile == "") && ((namefile != "") || (fastafile != "") || (listfile != "") || (taxfile != "")))  { m->mothurOut("If using a fasta, name, taxonomy, group or list, then you must provide a group file."); m->mothurOutEndLine(); abort = true; }
-
-			if ((namefile == "") && ((fastafile != "") || (taxfile != ""))){
-				vector<string> files; files.push_back(fastafile); files.push_back(taxfile);
-				parser.getNameFile(files);
-			}
+			if ((fastafile == "") && (namefile == "") && (countfile == "") && (groupfile == "")  && (designfile == "") && (sharedfile == "") && (listfile == "") && (taxfile == ""))  { m->mothurOut("You must provide at least one of the following: fasta, name, taxonomy, group, shared, design, count or list."); m->mothurOutEndLine(); abort = true; }
+			if (((groupfile == "") && (countfile == "")) && ((namefile != "") || (fastafile != "") || (listfile != "") || (taxfile != "")))  { m->mothurOut("If using a fasta, name, taxonomy, group or list, then you must provide a group or count file."); m->mothurOutEndLine(); abort = true; }
+            
+            if (countfile == "") {
+                if ((namefile == "") && ((fastafile != "") || (taxfile != ""))){
+                    vector<string> files; files.push_back(fastafile); files.push_back(taxfile);
+                    parser.getNameFile(files);
+                }
+            }
 		}
 		
 	}
@@ -331,6 +363,7 @@ int GetGroupsCommand::execute(){
 			SharedUtil* util = new SharedUtil();
 			vector<string> gNamesOfGroups = groupMap->getNamesOfGroups();
 			util->setGroups(Groups, gNamesOfGroups);
+            m->setGroups(Groups);
 			groupMap->setNamesOfGroups(gNamesOfGroups);
 			delete util;
 			
@@ -338,7 +371,23 @@ int GetGroupsCommand::execute(){
 			fillNames();
 			
 			delete groupMap;
-		}
+		}else if (countfile != ""){
+            if ((fastafile != "") || (listfile != "") || (taxfile != "")) { 
+                m->mothurOut("\n[NOTE]: The count file should contain only unique names, so mothur assumes your fasta, list and taxonomy files also contain only uniques.\n\n");
+            }
+            CountTable ct;
+            ct.readTable(countfile);
+            if (!ct.hasGroupInfo()) { m->mothurOut("[ERROR]: your count file does not contain group info, aborting.\n"); return 0; }
+                
+            vector<string> gNamesOfGroups = ct.getNamesOfGroups();
+            SharedUtil util;
+            util.setGroups(Groups, gNamesOfGroups);
+            m->setGroups(Groups);
+            for (int i = 0; i < Groups.size(); i++) {
+                vector<string> thisGroupsSeqs = ct.getNamesOfSeqs(Groups[i]);
+                for (int j = 0; j < thisGroupsSeqs.size(); j++) { names.insert(thisGroupsSeqs[j]); }
+            }
+        }
 		
 		if (m->control_pressed) { return 0; }
 		
@@ -346,6 +395,7 @@ int GetGroupsCommand::execute(){
 		if (namefile != "")			{		readName();		}
 		if (fastafile != "")		{		readFasta();	}
 		if (groupfile != "")		{		readGroup();	}
+        if (countfile != "")		{		readCount();	}
 		if (listfile != "")			{		readList();		}
 		if (taxfile != "")			{		readTax();		}
 		if (sharedfile != "")		{		readShared();	}
@@ -395,6 +445,11 @@ int GetGroupsCommand::execute(){
             itTypes = outputTypes.find("design");
 			if (itTypes != outputTypes.end()) {
 				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setDesignFile(current); }
+			}
+            
+            itTypes = outputTypes.find("count");
+			if (itTypes != outputTypes.end()) {
+				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setCountTableFile(current); }
 			}
 		}
 		
@@ -738,6 +793,82 @@ int GetGroupsCommand::readGroup(){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "GetGroupsCommand", "readGroup");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+int GetGroupsCommand::readCount(){
+	try {
+		string thisOutputDir = outputDir;
+		if (outputDir == "") {  thisOutputDir += m->hasPath(countfile);  }
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(countfile)) + getOutputFileNameTag("count", countfile);
+		
+		ofstream out;
+		m->openOutputFile(outputFileName, out);
+		
+		ifstream in;
+		m->openInputFile(countfile, in);
+		
+		bool wroteSomething = false;
+		int selectedCount = 0;
+		
+        string headers = m->getline(in); m->gobble(in);
+        vector<string> columnHeaders = m->splitWhiteSpace(headers);
+        
+        vector<string> groups;
+        map<int, string> originalGroupIndexes;
+        map<string, int> GroupIndexes;
+        set<int> indexOfGroupsChosen;
+        for (int i = 2; i < columnHeaders.size(); i++) {  groups.push_back(columnHeaders[i]);  originalGroupIndexes[i-2] = columnHeaders[i]; }
+        //sort groups to keep consistent with how we store the groups in groupmap
+        sort(groups.begin(), groups.end());
+        for (int i = 0; i < groups.size(); i++) {  GroupIndexes[groups[i]] = i; }
+        sort(Groups.begin(), Groups.end());
+        out << "Representative_Sequence\ttotal\t";
+        for (int i = 0; i < Groups.size(); i++) { out << Groups[i] << '\t'; indexOfGroupsChosen.insert(GroupIndexes[Groups[i]]); }
+        out << endl;
+        
+        string name; int oldTotal;
+        while (!in.eof()) {
+            
+            if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+            
+            in >> name; m->gobble(in); in >> oldTotal; m->gobble(in);
+            if (m->debug) { m->mothurOut("[DEBUG]: " + name + '\t' + toString(oldTotal) + "\n"); }
+            
+            if (names.count(name) != 0) {
+                //if group info, then read it
+                vector<int> selectedCounts; int thisTotal = 0; int temp;
+                for (int i = 0; i < groups.size(); i++) {  
+                    int thisIndex = GroupIndexes[originalGroupIndexes[i]]; 
+                    in >> temp;  m->gobble(in);
+                    if (indexOfGroupsChosen.count(thisIndex) != 0) { //we want this group
+                        selectedCounts.push_back(temp); thisTotal += temp;
+                    }
+                }
+
+                out << name << '\t' << thisTotal << '\t';
+                for (int i = 0; i < selectedCounts.size(); i++) {  out << selectedCounts[i] << '\t'; }
+                out << endl;
+                
+                wroteSomething = true;
+                selectedCount+= thisTotal;
+            }else {  m->getline(in); }
+            
+            m->gobble(in);
+        }
+        in.close();
+		out.close();
+		
+		if (wroteSomething == false) {  m->mothurOut("Your file does NOT contain sequences from the groups you wish to get."); m->mothurOutEndLine();  }
+		outputTypes["count"].push_back(outputFileName); outputNames.push_back(outputFileName);
+		
+		m->mothurOut("Selected " + toString(selectedCount) + " sequences from your count file."); m->mothurOutEndLine();
+        
+		return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetGroupsCommand", "readCount");
 		exit(1);
 	}
 }

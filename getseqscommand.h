@@ -35,7 +35,7 @@ class GetSeqsCommand : public Command {
 	private:
 		set<string> names;
 		vector<string> outputNames;
-		string accnosfile, accnosfile2, fastafile, namefile, groupfile, alignfile, listfile, taxfile, qualfile, outputDir;
+		string accnosfile, accnosfile2, fastafile, namefile, countfile, groupfile, alignfile, listfile, taxfile, qualfile, outputDir;
 		bool abort, dups;
     
         //for debug
@@ -44,6 +44,7 @@ class GetSeqsCommand : public Command {
 		int readFasta();
 		int readName();
 		int readGroup();
+        int readCount();
 		int readAlign();
 		int readList();
 		int readTax();

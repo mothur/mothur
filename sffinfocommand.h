@@ -78,18 +78,24 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	string sffFilename, sfftxtFilename, outputDir, accnosName;
-	vector<string> filenames, outputNames, accnosFileNames;
-	bool abort, fasta, qual, trim, flow, sfftxt, hasAccnos;
-	int mycount;
+	string sffFilename, sfftxtFilename, outputDir, accnosName, currentFileName, oligosfile, noMatchFile;
+	vector<string> filenames, outputNames, accnosFileNames, oligosFileNames;
+	bool abort, fasta, qual, trim, flow, sfftxt, hasAccnos, hasOligos;
+	int mycount, split, numFPrimers, numLinkers, numSpacers, pdiffs, bdiffs, ldiffs, sdiffs, tdiffs;
 	set<string> seqNames;
+    map<string, int> barcodes;
+    map<string, int> primers;
+    vector<string> linker, spacer, primerNameVector, barcodeNameVector, revPrimer;
+    vector<vector<int> > numSplitReads;
+    vector<vector<string> > filehandles, filehandlesHeaders;
     
 	//extract sff file functions
-	int extractSffInfo(string, string);
+	int extractSffInfo(string, string, string);
 	int readCommonHeader(ifstream&, CommonHeader&);
-	int readHeader(ifstream&, Header&);
-	int readSeqData(ifstream&, seqRead&, int, int);
+	//int readHeader(ifstream&, Header&);
+	int readSeqData(ifstream&, seqRead&, int, Header&);
 	int decodeName(string&, string&, string&, string);
+    bool readOligos(string oligosFile);
 	
 	int printCommonHeader(ofstream&, CommonHeader&); 
 	int printHeader(ofstream&, Header&);
@@ -100,6 +106,9 @@ private:
 	int readAccnosFile(string);
 	int parseSffTxt();
 	bool sanityCheck(Header&, seqRead&);
+    int adjustCommonHeader(CommonHeader);
+    int findGroup(Header header, seqRead read, int& barcode, int& primer);
+    string reverseOligo(string oligo);
     
 	//parsesfftxt file functions
 	int parseHeaderLineToInt(ifstream&);

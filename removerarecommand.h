@@ -36,7 +36,7 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	string sabundfile, rabundfile, sharedfile, groupfile, listfile, outputDir, groups, label;
+	string sabundfile, rabundfile, sharedfile, groupfile, countfile, listfile, outputDir, groups, label;
 	int nseqs, allLines;
 	bool abort, byGroup;
 	vector<string> outputNames, Groups;

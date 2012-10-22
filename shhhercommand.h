@@ -18,7 +18,6 @@
 #include "sabundvector.hpp"
 #include "listvector.hpp"
 #include "cluster.hpp"
-#include "sparsematrix.hpp"
 #include <cfloat>
 
 //**********************************************************************************************************************
@@ -167,7 +166,7 @@ private:
 	
 };
 
-/**************************************************************************************************/
+/**************************************************************************************************
 //custom data structure for threads to use.
 // This is passed by void pointer so it can be any data type
 // that can be passed using a single void pointer (LPVOID).
@@ -203,7 +202,7 @@ struct shhhFlowsData {
 	}
 };
 
-/**************************************************************************************************/
+/**************************************************************************************************
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 #else
 static DWORD WINAPI ShhhFlowsThreadFunction(LPVOID lpParam){ 
@@ -234,7 +233,7 @@ static DWORD WINAPI ShhhFlowsThreadFunction(LPVOID lpParam){
             int numFlowCells;
             
             //int numSeqs = getFlowData(flowFileName, seqNameVector, lengths, flowDataIntI, nameMap, numFlowCells);
-            /*****************************************************************************************************/
+            /*****************************************************************************************************
             
             ifstream flowFile;
            // cout << "herethread " << flowFileName << '\t' << &flowFile << endl;
@@ -279,13 +278,13 @@ static DWORD WINAPI ShhhFlowsThreadFunction(LPVOID lpParam){
                 }
             }
           //  cout << "here" << endl; 
-            /*****************************************************************************************************/
+            /*****************************************************************************************************
 	
 			if (pDataArray->m->control_pressed) { return 0; }
 			
 			pDataArray->m->mothurOut("Identifying unique flowgrams...\n");
 			//int numUniques = getUniques(numSeqs, numFlowCells, uniqueFlowgrams, uniqueCount, uniqueLengths, mapSeqToUnique, mapUniqueToSeq, lengths, flowDataPrI, flowDataIntI);
-            /*****************************************************************************************************/
+            /*****************************************************************************************************
             int numUniques = 0;
             uniqueFlowgrams.assign(numFlowCells * numSeqs, -1);
             uniqueCount.assign(numSeqs, 0);							//	anWeights
@@ -364,7 +363,7 @@ static DWORD WINAPI ShhhFlowsThreadFunction(LPVOID lpParam){
                 }
             }            
             
-            /*****************************************************************************************************/
+            /*****************************************************************************************************
 			
 			if (pDataArray->m->control_pressed) { return 0; }
 			
@@ -374,7 +373,7 @@ static DWORD WINAPI ShhhFlowsThreadFunction(LPVOID lpParam){
             double begClock = clock();
             
             //flowDistParentFork(numFlowCells, distFileName, numUniques, mapUniqueToSeq, mapSeqToUnique, lengths, flowDataPrI, flowDataIntI);	
-            /*****************************************************************************************************/
+            /*****************************************************************************************************
             ostringstream outStream;
             outStream.setf(ios::fixed, ios::floatfield);
             outStream.setf(ios::dec, ios::basefield);
@@ -390,7 +389,7 @@ static DWORD WINAPI ShhhFlowsThreadFunction(LPVOID lpParam){
                 
                 for(int j=0;j<i;j++){
                     //float flowDistance = calcPairwiseDist(numFlowCells, mapUniqueToSeq[i], mapUniqueToSeq[j], mapSeqToUnique, lengths, flowDataPrI, flowDataIntI);
-                    /*****************************************************************************************************/
+                    /*****************************************************************************************************
                     int seqA = mapUniqueToSeq[i]; int seqB = mapUniqueToSeq[j];
                     int minLength = lengths[mapSeqToUnique[seqA]];
                     if(lengths[seqB] < minLength){	minLength = lengths[mapSeqToUnique[seqB]];	}
@@ -413,7 +412,7 @@ static DWORD WINAPI ShhhFlowsThreadFunction(LPVOID lpParam){
                     }
                     
                     flowDistance /= (float) minLength;
-                    /*****************************************************************************************************/
+                    /*****************************************************************************************************
 
                     if(flowDistance < 1e-6){
                         outStream << mapUniqueToSeq[i] << '\t' << mapUniqueToSeq[j] << '\t' << 0.000000 << endl;
@@ -439,14 +438,14 @@ static DWORD WINAPI ShhhFlowsThreadFunction(LPVOID lpParam){
                 pDataArray->m->mothurOut("\t" + toString((clock()-thisbegClock)/CLOCKS_PER_SEC));
                 pDataArray->m->mothurOutEndLine();
             }
-            /*****************************************************************************************************/
+            /*****************************************************************************************************
 
             pDataArray->m->mothurOutEndLine();
             pDataArray->m->mothurOut("Total time: " + toString(time(NULL) - begTime) + '\t' + toString((clock() - begClock)/CLOCKS_PER_SEC) + '\n');
             
 			string namesFileName = flowFileName.substr(0,flowFileName.find_last_of('.')) + ".shhh.names";
 			//createNamesFile(numSeqs, numUniques, namesFileName, seqNameVector, mapSeqToUnique, mapUniqueToSeq);
-            /*****************************************************************************************************/
+            /*****************************************************************************************************
             vector<string> duplicateNames(numUniques, "");
             for(int i=0;i<numSeqs;i++){
                 duplicateNames[mapSeqToUnique[i]] += seqNameVector[i] + ',';
@@ -460,14 +459,14 @@ static DWORD WINAPI ShhhFlowsThreadFunction(LPVOID lpParam){
                 nameFile << mapUniqueToSeq[i] << '\t' << duplicateNames[i].substr(0, duplicateNames[i].find_last_of(',')) << endl;
             }
             nameFile.close();
-            /*****************************************************************************************************/
+            /*****************************************************************************************************
 
 			if (pDataArray->m->control_pressed) { return 0; }
 			
 			pDataArray->m->mothurOut("\nClustering flowgrams...\n");
             string listFileName = flowFileName.substr(0,flowFileName.find_last_of('.')) + ".shhh.list";
 			//cluster(listFileName, distFileName, namesFileName);
-            /*****************************************************************************************************/
+            /*****************************************************************************************************
             ReadMatrix* read = new ReadColumnMatrix(distFileName); 	
             read->setCutoff(pDataArray->cutoff);
             
@@ -502,7 +501,7 @@ static DWORD WINAPI ShhhFlowsThreadFunction(LPVOID lpParam){
             listFileOut.close();
             
             delete matrix;	delete cluster;	delete rabund; delete list;
-            /*****************************************************************************************************/
+            /*****************************************************************************************************
 
 			if (pDataArray->m->control_pressed) { return 0; }
             
@@ -516,7 +515,7 @@ static DWORD WINAPI ShhhFlowsThreadFunction(LPVOID lpParam){
             
 			
 			//int numOTUs = getOTUData(numSeqs, listFileName, otuData, cumNumSeqs, nSeqsPerOTU, aaP, aaI, seqNumber, seqIndex, nameMap);
-			/*****************************************************************************************************/
+			/*****************************************************************************************************
             ifstream listFile;
             pDataArray->m->openInputFile(listFileName, listFile);
             string label;
@@ -596,7 +595,7 @@ static DWORD WINAPI ShhhFlowsThreadFunction(LPVOID lpParam){
             seqIndex = seqNumber;
             
             listFile.close();	    
-            /*****************************************************************************************************/
+            /*****************************************************************************************************
 
 			if (pDataArray->m->control_pressed) { return 0; }
 			
@@ -643,7 +642,7 @@ static DWORD WINAPI ShhhFlowsThreadFunction(LPVOID lpParam){
 				double cycClock = clock();
 				unsigned long long cycTime = time(NULL);
 				//fill(numOTUs, seqNumber, seqIndex, cumNumSeqs, nSeqsPerOTU, aaP, aaI);
-                /*****************************************************************************************************/
+                /*****************************************************************************************************
                 int indexFill = 0;
                 for(int i=0;i<numOTUs;i++){
                     
@@ -657,13 +656,13 @@ static DWORD WINAPI ShhhFlowsThreadFunction(LPVOID lpParam){
                         indexFill++;
                     }
                 }
-                /*****************************************************************************************************/
+                /*****************************************************************************************************
 
 				
 				if (pDataArray->m->control_pressed) { break; }
                 
 				//calcCentroidsDriver(numOTUs, cumNumSeqs, nSeqsPerOTU, seqIndex, change, centroids, singleTau, mapSeqToUnique, uniqueFlowgrams, flowDataIntI, lengths, numFlowCells, seqNumber);
-                /*****************************************************************************************************/
+                /*****************************************************************************************************
                 for(int i=0;i<numOTUs;i++){
                     
                     if (pDataArray->m->control_pressed) { break; }
@@ -708,7 +707,7 @@ static DWORD WINAPI ShhhFlowsThreadFunction(LPVOID lpParam){
                             
                             for(int k=0;k<position;k++){
                                // double dist = getDistToCentroid(anL[k], nI, lengths[nI], uniqueFlowgrams, flowDataIntI, numFlowCells);
-                                /*****************************************************************************************************/
+                                /*****************************************************************************************************
                                 int flowAValue = anL[k] * numFlowCells;
                                 int flowBValue = nI * numFlowCells;
                                 
@@ -721,7 +720,7 @@ static DWORD WINAPI ShhhFlowsThreadFunction(LPVOID lpParam){
                                 }
                                 
                                 dist = dist / (double)lengths[nI];
-                                /*****************************************************************************************************/
+                                /*****************************************************************************************************
                                 adF[k] += dist * tauValue;
                             }
                         }
@@ -743,12 +742,12 @@ static DWORD WINAPI ShhhFlowsThreadFunction(LPVOID lpParam){
                         centroids[i] = -1;			
                     }
                 }
-                /*****************************************************************************************************/
+                /*****************************************************************************************************
 
 				if (pDataArray->m->control_pressed) { break; }
                 
 				//maxDelta = getNewWeights(numOTUs, cumNumSeqs, nSeqsPerOTU, singleTau, seqNumber, weight);  
-                /*****************************************************************************************************/
+                /*****************************************************************************************************
                 double maxChange = 0;
                 
                 for(int i=0;i<numOTUs;i++){
@@ -768,12 +767,12 @@ static DWORD WINAPI ShhhFlowsThreadFunction(LPVOID lpParam){
                     if(difference > maxChange){	maxChange = difference;	}
                 }
                 maxDelta = maxChange;
-                /*****************************************************************************************************/
+                /*****************************************************************************************************
 
                 if (pDataArray->m->control_pressed) { break; }
                 
 				//double nLL = getLikelihood(numSeqs, numOTUs, nSeqsPerOTU, seqNumber, cumNumSeqs, seqIndex, dist, weight); 
-                /*****************************************************************************************************/
+                /*****************************************************************************************************
                 vector<long double> P(numSeqs, 0);
                 int effNumOTUs = 0;
                 
@@ -804,12 +803,12 @@ static DWORD WINAPI ShhhFlowsThreadFunction(LPVOID lpParam){
                 }
                 
                 nLL = nLL -(double)numSeqs * log(pDataArray->sigma);
-                /*****************************************************************************************************/
+                /*****************************************************************************************************
 
                 if (pDataArray->m->control_pressed) { break; }
                 
 				//checkCentroids(numOTUs, centroids, weight);
-                /*****************************************************************************************************/
+                /*****************************************************************************************************
                 vector<int> unique(numOTUs, 1);
                 
                 for(int i=0;i<numOTUs;i++){
@@ -837,12 +836,12 @@ static DWORD WINAPI ShhhFlowsThreadFunction(LPVOID lpParam){
                         }
                     }
                 }
-                /*****************************************************************************************************/
+                /*****************************************************************************************************
 
 				if (pDataArray->m->control_pressed) { break; }
 				
 				//calcNewDistances(numSeqs, numOTUs, nSeqsPerOTU,  dist, weight, change, centroids, aaP, singleTau, aaI, seqNumber, seqIndex, uniqueFlowgrams, flowDataIntI, numFlowCells, lengths);
-                /*****************************************************************************************************/
+                /*****************************************************************************************************
                 int total = 0;
                 vector<double> newTau(numOTUs,0);
                 vector<double> norms(numSeqs, 0);
@@ -860,7 +859,7 @@ static DWORD WINAPI ShhhFlowsThreadFunction(LPVOID lpParam){
                         
                         if(weight[j] > MIN_WEIGHT && change[j] == 1){
                             //dist[indexOffset + j] = getDistToCentroid(centroids[j], i, lengths[i], uniqueFlowgrams, flowDataIntI, numFlowCells);
-                            /*****************************************************************************************************/
+                            /*****************************************************************************************************
                             int flowAValue = centroids[j] * numFlowCells;
                             int flowBValue = i * numFlowCells;
                             
@@ -873,7 +872,7 @@ static DWORD WINAPI ShhhFlowsThreadFunction(LPVOID lpParam){
                             }
                             
                             dist[indexOffset + j] = distTemp / (double)lengths[i];
-                            /*****************************************************************************************************/
+                            /*****************************************************************************************************
 
                         }
                         
@@ -917,7 +916,7 @@ static DWORD WINAPI ShhhFlowsThreadFunction(LPVOID lpParam){
                     
                 }
 
-                /*****************************************************************************************************/
+                /*****************************************************************************************************
 
 				if (pDataArray->m->control_pressed) { break; }
 				
@@ -931,7 +930,7 @@ static DWORD WINAPI ShhhFlowsThreadFunction(LPVOID lpParam){
 			
 			pDataArray->m->mothurOut("\nFinalizing...\n");
 			//fill(numOTUs, seqNumber, seqIndex, cumNumSeqs, nSeqsPerOTU, aaP, aaI);
-            /*****************************************************************************************************/
+            /*****************************************************************************************************
             int indexFill = 0;
             for(int i=0;i<numOTUs;i++){
                 
@@ -945,12 +944,12 @@ static DWORD WINAPI ShhhFlowsThreadFunction(LPVOID lpParam){
                     indexFill++;
                 }
             }
-            /*****************************************************************************************************/
+            /*****************************************************************************************************
 
 			if (pDataArray->m->control_pressed) { break; }
 			
 			//setOTUs(numOTUs, numSeqs, seqNumber, seqIndex, cumNumSeqs, nSeqsPerOTU, otuData, singleTau, dist, aaP, aaI);
-            /*****************************************************************************************************/
+            /*****************************************************************************************************
             vector<double> bigTauMatrix(numOTUs * numSeqs, 0.0000);
             
             for(int i=0;i<numOTUs;i++){
@@ -993,7 +992,7 @@ static DWORD WINAPI ShhhFlowsThreadFunction(LPVOID lpParam){
             }
             
             //fill(numOTUs, seqNumber, seqIndex, cumNumSeqs, nSeqsPerOTU, aaP, aaI);	
-            /*****************************************************************************************************/
+            /*****************************************************************************************************
             indexFill = 0;
             for(int i=0;i<numOTUs;i++){
                 
@@ -1009,7 +1008,7 @@ static DWORD WINAPI ShhhFlowsThreadFunction(LPVOID lpParam){
             }
             /*****************************************************************************************************/
 
-            /*****************************************************************************************************/
+            /*****************************************************************************************************
 
 			if (pDataArray->m->control_pressed) { break; }
 			
@@ -1017,7 +1016,7 @@ static DWORD WINAPI ShhhFlowsThreadFunction(LPVOID lpParam){
 			for(int i=0;i<numSeqs;i++)	{	otuCounts[otuData[i]]++;	}
 			
 			//calcCentroidsDriver(numOTUs, cumNumSeqs, nSeqsPerOTU, seqIndex, change, centroids, singleTau, mapSeqToUnique, uniqueFlowgrams, flowDataIntI, lengths, numFlowCells, seqNumber);	
-            /*****************************************************************************************************/
+            /*****************************************************************************************************
             for(int i=0;i<numOTUs;i++){
                 
                 if (pDataArray->m->control_pressed) { break; }
@@ -1062,7 +1061,7 @@ static DWORD WINAPI ShhhFlowsThreadFunction(LPVOID lpParam){
                         
                         for(int k=0;k<position;k++){
                             // double dist = getDistToCentroid(anL[k], nI, lengths[nI], uniqueFlowgrams, flowDataIntI, numFlowCells);
-                            /*****************************************************************************************************/
+                            /*****************************************************************************************************
                             int flowAValue = anL[k] * numFlowCells;
                             int flowBValue = nI * numFlowCells;
                             
@@ -1075,7 +1074,7 @@ static DWORD WINAPI ShhhFlowsThreadFunction(LPVOID lpParam){
                             }
                             
                             dist = dist / (double)lengths[nI];
-                            /*****************************************************************************************************/
+                            /*****************************************************************************************************
                             adF[k] += dist * tauValue;
                         }
                     }
@@ -1098,13 +1097,13 @@ static DWORD WINAPI ShhhFlowsThreadFunction(LPVOID lpParam){
                 }
             }
 
-            /*****************************************************************************************************/
+            /*****************************************************************************************************
 
             if (pDataArray->m->control_pressed) { break; }
             
 			//writeQualities(numOTUs, numFlowCells, flowFileName, otuCounts, nSeqsPerOTU, seqNumber, singleTau, flowDataIntI, uniqueFlowgrams, cumNumSeqs, mapUniqueToSeq, seqNameVector, centroids, aaI); 
             if (pDataArray->m->control_pressed) { break; }
-            /*****************************************************************************************************/
+            /*****************************************************************************************************
             string thisOutputDir = pDataArray->outputDir;
             if (pDataArray->outputDir == "") {  thisOutputDir += pDataArray->m->hasPath(flowFileName);  }
             string qualityFileName = thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(flowFileName)) + "shhh.qual";
@@ -1200,11 +1199,11 @@ static DWORD WINAPI ShhhFlowsThreadFunction(LPVOID lpParam){
             }
             qualityFile.close();
             pDataArray->outputNames.push_back(qualityFileName);
-            /*****************************************************************************************************/
+            /*****************************************************************************************************
 
            // writeSequences(thisCompositeFASTAFileName, numOTUs, numFlowCells, flowFileName, otuCounts, uniqueFlowgrams, seqNameVector, aaI, centroids);
             if (pDataArray->m->control_pressed) { break; }
-            /*****************************************************************************************************/
+            /*****************************************************************************************************
             thisOutputDir = pDataArray->outputDir;
             if (pDataArray->outputDir == "") {  thisOutputDir += pDataArray->m->hasPath(flowFileName);  }
             string fastaFileName = thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(flowFileName)) + "shhh.fasta";
@@ -1243,11 +1242,11 @@ static DWORD WINAPI ShhhFlowsThreadFunction(LPVOID lpParam){
                 pDataArray->m->appendFiles(fastaFileName, pDataArray->thisCompositeFASTAFileName);
             }
 
-            /*****************************************************************************************************/
+            /*****************************************************************************************************
 
             //writeNames(thisCompositeNamesFileName, numOTUs, flowFileName, otuCounts, seqNameVector, aaI, nSeqsPerOTU);				
             if (pDataArray->m->control_pressed) { break; }
-            /*****************************************************************************************************/
+            /*****************************************************************************************************
             thisOutputDir = pDataArray->outputDir;
             if (pDataArray->outputDir == "") {  thisOutputDir += pDataArray->m->hasPath(flowFileName);  }
             string nameFileName = thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(flowFileName)) + "shhh.names";
@@ -1275,11 +1274,11 @@ static DWORD WINAPI ShhhFlowsThreadFunction(LPVOID lpParam){
             if(pDataArray->thisCompositeNameFileName != ""){
                 pDataArray->m->appendFiles(nameFileName, pDataArray->thisCompositeNameFileName);
             }		
-            /*****************************************************************************************************/
+            /*****************************************************************************************************
 
             //writeClusters(flowFileName, numOTUs, numFlowCells,otuCounts, centroids, uniqueFlowgrams, seqNameVector, aaI, nSeqsPerOTU, lengths, flowDataIntI);			
             if (pDataArray->m->control_pressed) { break; }
-            /*****************************************************************************************************/
+            /*****************************************************************************************************
             thisOutputDir = pDataArray->outputDir;
             if (pDataArray->outputDir == "") {  thisOutputDir += pDataArray->m->hasPath(flowFileName);  }
             string otuCountsFileName = thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(flowFileName)) + "shhh.counts";
@@ -1327,12 +1326,12 @@ static DWORD WINAPI ShhhFlowsThreadFunction(LPVOID lpParam){
                 }
             }
             otuCountsFile.close();
-            pDataArray->outputNames.push_back(otuCountsFileName);
-            /*****************************************************************************************************/
+            pDataArray->outputNames.push_back(otuCountsFileName)
+            /*****************************************************************************************************
 
             //writeGroups(flowFileName, numSeqs, seqNameVector);						
             if (pDataArray->m->control_pressed) { break; }
-            /*****************************************************************************************************/
+            /*****************************************************************************************************
             thisOutputDir = pDataArray->outputDir;
             if (pDataArray->outputDir == "") {  thisOutputDir += pDataArray->m->hasPath(flowFileName);  }
             string fileRoot = thisOutputDir + pDataArray->m->getRootName(pDataArray->m->getSimpleName(flowFileName));
@@ -1346,7 +1345,7 @@ static DWORD WINAPI ShhhFlowsThreadFunction(LPVOID lpParam){
             }
             groupFile.close();
             pDataArray->outputNames.push_back(groupFileName);
-            /*****************************************************************************************************/
+            /*****************************************************************************************************
 
             pDataArray->m->mothurOut("Total time to process " + flowFileName + ":\t" + toString(time(NULL) - begTime) + '\t' + toString((clock() - begClock)/(double)CLOCKS_PER_SEC) + '\n');
 		}
@@ -1362,7 +1361,7 @@ static DWORD WINAPI ShhhFlowsThreadFunction(LPVOID lpParam){
 	}
 } 
 #endif
-
+*/
 
 #endif
 

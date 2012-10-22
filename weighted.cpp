@@ -19,7 +19,7 @@ EstOutput Weighted::getValues(Tree* t, int p, string o) {
 		processors = p;
 		outputDir = o;
         
-        TreeMap* tmap = t->getTreeMap();
+        CountTable* ct = t->getCountTable();
 		
 		numGroups = m->getNumGroups();
 		
@@ -38,7 +38,7 @@ EstOutput Weighted::getValues(Tree* t, int p, string o) {
 		
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 			if(processors == 1){
-				data = driver(t, namesOfGroupCombos, 0, namesOfGroupCombos.size(), tmap);
+				data = driver(t, namesOfGroupCombos, 0, namesOfGroupCombos.size(), ct);
 			}else{
 				int numPairs = namesOfGroupCombos.size();
 				
@@ -52,12 +52,12 @@ EstOutput Weighted::getValues(Tree* t, int p, string o) {
 					lines.push_back(linePair(startPos, numPairsPerProcessor));
 				}
 
-				data = createProcesses(t, namesOfGroupCombos, tmap);
+				data = createProcesses(t, namesOfGroupCombos, ct);
 				
 				lines.clear();
 			}
 		#else
-			data = driver(t, namesOfGroupCombos, 0, namesOfGroupCombos.size(), tmap);
+			data = driver(t, namesOfGroupCombos, 0, namesOfGroupCombos.size(), ct);
 		#endif
 		
 		return data;
@@ -69,7 +69,7 @@ EstOutput Weighted::getValues(Tree* t, int p, string o) {
 }
 /**************************************************************************************************/
 
-EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGroupCombos, TreeMap* tmap) {
+EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGroupCombos, CountTable* ct) {
 	try {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		int process = 1;
@@ -87,7 +87,7 @@ EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGro
 			}else if (pid == 0){
 	
 				EstOutput Myresults;
-				Myresults = driver(t, namesOfGroupCombos, lines[process].start, lines[process].num, tmap);
+				Myresults = driver(t, namesOfGroupCombos, lines[process].start, lines[process].num, ct);
 			
 				//m->mothurOut("Merging results."); m->mothurOutEndLine();
 				
@@ -110,7 +110,7 @@ EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGro
 			}
 		}
 	
-		results = driver(t, namesOfGroupCombos, lines[0].start, lines[0].num, tmap);
+		results = driver(t, namesOfGroupCombos, lines[0].start, lines[0].num, ct);
 	
 		//force parent to wait until all the processes are done
 		for (int i=0;i<(processors-1);i++) { 
@@ -155,7 +155,7 @@ EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGro
 	}
 }
 /**************************************************************************************************/
-EstOutput Weighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombos, int start, int num, TreeMap* tmap) { 
+EstOutput Weighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombos, int start, int num, CountTable* ct) { 
  try {
 		EstOutput results;
 		vector<double> D;
@@ -179,7 +179,7 @@ EstOutput Weighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombos,
 				int numSeqsInGroupI = it->second;
 				
 				double sum = getLengthToRoot(t, t->groupNodeInfo[groupA][j], groupA, groupB);
-				double weightedSum = ((numSeqsInGroupI * sum) / (double)tmap->seqsPerGroup[groupA]);
+				double weightedSum = ((numSeqsInGroupI * sum) / (double)ct->getGroupCount(groupA));
 			
 				D[count] += weightedSum;
 			}
@@ -190,7 +190,7 @@ EstOutput Weighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombos,
 				int numSeqsInGroupL = it->second;
 				
 				double sum = getLengthToRoot(t, t->groupNodeInfo[groupB][j], groupA, groupB);
-				double weightedSum = ((numSeqsInGroupL * sum) / (double)tmap->seqsPerGroup[groupB]);
+				double weightedSum = ((numSeqsInGroupL * sum) / (double)ct->getGroupCount(groupB));
 			
 				D[count] += weightedSum;
 			}
@@ -216,7 +216,7 @@ EstOutput Weighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombos,
 				it = t->tree[i].pcount.find(groupA);
 				//if it does u = # of its descendants with a certain group / total number in tree with a certain group
 				if (it != t->tree[i].pcount.end()) {
-					u = (double) t->tree[i].pcount[groupA] / (double) tmap->seqsPerGroup[groupA];
+					u = (double) t->tree[i].pcount[groupA] / (double) ct->getGroupCount(groupA);
 				}else { u = 0.00; }
 				
 				
@@ -225,7 +225,7 @@ EstOutput Weighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombos,
 				
 				//if it does subtract their percentage from u
 				if (it != t->tree[i].pcount.end()) {
-					u -= (double) t->tree[i].pcount[groupB] / (double) tmap->seqsPerGroup[groupB];
+					u -= (double) t->tree[i].pcount[groupB] / (double) ct->getGroupCount(groupB);
 				}
 				
 				if (includeRoot) {
@@ -270,7 +270,7 @@ EstOutput Weighted::getValues(Tree* t, string groupA, string groupB) {
 		
 		data.clear(); //clear out old values
      
-        TreeMap* tmap = t->getTreeMap();
+        CountTable* ct = t->getCountTable();
 		
 		if (m->control_pressed) { return data; }
 		
@@ -287,7 +287,7 @@ EstOutput Weighted::getValues(Tree* t, string groupA, string groupB) {
 			int numSeqsInGroupI = it->second;
 			
 			double sum = getLengthToRoot(t, t->groupNodeInfo[groups[0]][j], groups[0], groups[1]);
-			double weightedSum = ((numSeqsInGroupI * sum) / (double)tmap->seqsPerGroup[groups[0]]);
+			double weightedSum = ((numSeqsInGroupI * sum) / (double)ct->getGroupCount(groups[0]));
 		
 			D += weightedSum;
 		}
@@ -298,7 +298,7 @@ EstOutput Weighted::getValues(Tree* t, string groupA, string groupB) {
 			int numSeqsInGroupL = it->second;
 			
 			double sum = getLengthToRoot(t, t->groupNodeInfo[groups[1]][j], groups[0], groups[1]);
-			double weightedSum = ((numSeqsInGroupL * sum) / (double)tmap->seqsPerGroup[groups[1]]);
+			double weightedSum = ((numSeqsInGroupL * sum) / (double)ct->getGroupCount(groups[1]));
 		
 			D += weightedSum;
 		}
@@ -314,7 +314,7 @@ EstOutput Weighted::getValues(Tree* t, string groupA, string groupB) {
 			it = t->tree[i].pcount.find(groupA);
 			//if it does u = # of its descendants with a certain group / total number in tree with a certain group
 			if (it != t->tree[i].pcount.end()) {
-				u = (double) t->tree[i].pcount[groupA] / (double) tmap->seqsPerGroup[groupA];
+				u = (double) t->tree[i].pcount[groupA] / (double) ct->getGroupCount(groupA);
 			}else { u = 0.00; }
 			
 			
@@ -322,7 +322,7 @@ EstOutput Weighted::getValues(Tree* t, string groupA, string groupB) {
 			it = t->tree[i].pcount.find(groupB);
 			//if it does subtract their percentage from u
 			if (it != t->tree[i].pcount.end()) {
-				u -= (double) t->tree[i].pcount[groupB] / (double) tmap->seqsPerGroup[groupB];
+				u -= (double) t->tree[i].pcount[groupB] / (double) ct->getGroupCount(groupB);
 			}
 			
 			if (includeRoot) {

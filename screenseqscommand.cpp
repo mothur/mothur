@@ -8,14 +8,15 @@
  */
 
 #include "screenseqscommand.h"
-
+#include "counttable.h"
 
 //**********************************************************************************************************************
 vector<string> ScreenSeqsCommand::setParameters(){	
 	try {
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
-		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
-		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pgroup);
+        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none",false,false); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none",false,false); parameters.push_back(pcount);
+		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none",false,false); parameters.push_back(pgroup);
 		CommandParameter pqfile("qfile", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pqfile);
 		CommandParameter palignreport("alignreport", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(palignreport);
 		CommandParameter ptax("taxonomy", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(ptax);
@@ -44,8 +45,8 @@ vector<string> ScreenSeqsCommand::setParameters(){
 string ScreenSeqsCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The screen.seqs command reads a fastafile and creates .....\n";
-		helpString += "The screen.seqs command parameters are fasta, start, end, maxambig, maxhomop, minlength, maxlength, name, group, qfile, alignreport, taxonomy, optimize, criteria and processors.\n";
+		helpString += "The screen.seqs command reads a fastafile and screens sequences.\n";
+		helpString += "The screen.seqs command parameters are fasta, start, end, maxambig, maxhomop, minlength, maxlength, name, group, count, qfile, alignreport, taxonomy, optimize, criteria and processors.\n";
 		helpString += "The fasta parameter is required.\n";
 		helpString += "The alignreport and taxonomy parameters allow you to remove bad seqs from taxonomy and alignreport files.\n";
 		helpString += "The start parameter is used to set a position the \"good\" sequences must start by. The default is -1.\n";
@@ -83,6 +84,7 @@ string ScreenSeqsCommand::getOutputFileNameTag(string type, string inputName="")
             if (type == "fasta")            {   outputFileName =  "good" + m->getExtension(inputName);   }
             else if (type == "taxonomy")    {   outputFileName =  "good" + m->getExtension(inputName);   }
             else if (type == "name")        {   outputFileName =  "good" + m->getExtension(inputName);   }
+            else if (type == "count")        {   outputFileName =  "good" + m->getExtension(inputName);   }
             else if (type == "group")       {   outputFileName =  "good" + m->getExtension(inputName);   }
             else if (type == "accnos")      {   outputFileName =  "bad.accnos";   }
             else if (type == "qfile")       {   outputFileName =  "good" + m->getExtension(inputName);   }
@@ -110,6 +112,7 @@ ScreenSeqsCommand::ScreenSeqsCommand(){
 		outputTypes["accnos"] = tempOutNames;
 		outputTypes["qfile"] = tempOutNames;
 		outputTypes["taxonomy"] = tempOutNames;
+        outputTypes["count"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ScreenSeqsCommand", "ScreenSeqsCommand");
@@ -149,6 +152,7 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 			outputTypes["accnos"] = tempOutNames;
 			outputTypes["qfile"] = tempOutNames;
 			outputTypes["taxonomy"] = tempOutNames;
+            outputTypes["count"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -202,6 +206,14 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("count");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["count"] = inputDir + it->second;		}
+				}
 			}
 
 			//check for required parameters
@@ -229,6 +241,19 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 			else if (namefile == "not found") { namefile = ""; }	
 			else { m->setNameFile(namefile); }
 			
+            countfile = validParameter.validFile(parameters, "count", true);
+			if (countfile == "not open") { countfile = ""; abort = true; }
+			else if (countfile == "not found") { countfile = "";  }	
+			else { m->setCountTableFile(countfile); }
+            
+            if ((namefile != "") && (countfile != "")) {
+                m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
+            }
+			
+            if ((groupfile != "") && (countfile != "")) {
+                m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+            }
+            
 			alignreport = validParameter.validFile(parameters, "alignreport", true);
 			if (alignreport == "not open") { abort = true; }
 			else if (alignreport == "not found") { alignreport = ""; }
@@ -288,10 +313,12 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 			temp = validParameter.validFile(parameters, "criteria", false);	if (temp == "not found"){	temp = "90";				}
 			m->mothurConvert(temp, criteria); 
 			
-			if (namefile == "") {
-				vector<string> files; files.push_back(fastafile);
-				parser.getNameFile(files);
-			}
+			if (countfile == "") { 
+                if (namefile == "") {
+                    vector<string> files; files.push_back(fastafile);
+                    parser.getNameFile(files);
+                }
+            }
 		}
 
 	}
@@ -312,6 +339,11 @@ int ScreenSeqsCommand::execute(){
 		if (optimize.size() != 0) {  //get summary is paralellized so we need to divideFile, no need to do this step twice so I moved it here
 			//use the namefile to optimize correctly
 			if (namefile != "") { nameMap = m->readNames(namefile); }
+            else if (countfile != "") {
+                CountTable ct;
+                ct.readTable(countfile);
+                nameMap = ct.getNameMap();
+            }
 			getSummary(positions); 
 		} 
 		else { 
@@ -472,7 +504,9 @@ int ScreenSeqsCommand::execute(){
 			screenNameGroupFile(badSeqNames);
 			if (m->control_pressed) {  m->mothurRemove(goodSeqFile);  return 0; }	
 		}else if(groupfile != "")				{	screenGroupFile(badSeqNames);		}	// this screens just the group
-		
+		else if (countfile != "") {     screenCountFile(badSeqNames);		}
+            
+                
 		if (m->control_pressed) { m->mothurRemove(goodSeqFile);  return 0; }
 
 		if(alignreport != "")					{	screenAlignReport(badSeqNames);		}
@@ -518,6 +552,11 @@ int ScreenSeqsCommand::execute(){
 		itTypes = outputTypes.find("taxonomy");
 		if (itTypes != outputTypes.end()) {
 			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setTaxonomyFile(current); }
+		}
+        
+        itTypes = outputTypes.find("count");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setCountTableFile(current); }
 		}
 
 		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to screen " + toString(numFastaSeqs) + " sequences.");
@@ -962,7 +1001,69 @@ int ScreenSeqsCommand::screenGroupFile(set<string> badSeqNames){
 		exit(1);
 	}
 }
+//***************************************************************************************************************
+int ScreenSeqsCommand::screenCountFile(set<string> badSeqNames){
+	try {
+		ifstream in;
+		m->openInputFile(countfile, in);
+		set<string>::iterator it;
+		
+		string goodCountFile = outputDir + m->getRootName(m->getSimpleName(countfile)) + getOutputFileNameTag("count", countfile);
+        outputNames.push_back(goodCountFile);  outputTypes["count"].push_back(goodCountFile);
+		ofstream goodCountOut;	m->openOutputFile(goodCountFile, goodCountOut);
+		
+        string headers = m->getline(in); m->gobble(in);
+        goodCountOut << headers << endl;
+        
+        string name, rest; int thisTotal;
+        while (!in.eof()) {
 
+			if (m->control_pressed) { goodCountOut.close(); in.close(); m->mothurRemove(goodCountFile); return 0; }
+            
+			in >> name; m->gobble(in); 
+            in >> thisTotal; m->gobble(in);
+            rest = m->getline(in); m->gobble(in);
+            
+			it = badSeqNames.find(name);
+			
+			if(it != badSeqNames.end()){
+				badSeqNames.erase(it);
+			}
+			else{
+				goodCountOut << name << '\t' << thisTotal << '\t' << rest << endl;
+			}
+		}
+		
+		if (m->control_pressed) { goodCountOut.close();  in.close(); m->mothurRemove(goodCountFile);  return 0; }
+        
+		//we were unable to remove some of the bad sequences
+		if (badSeqNames.size() != 0) {
+			for (it = badSeqNames.begin(); it != badSeqNames.end(); it++) {  
+				m->mothurOut("Your count file does not include the sequence " + *it + " please correct."); 
+				m->mothurOutEndLine();
+			}
+		}
+		
+		in.close();
+		goodCountOut.close();
+        
+        //check for groups that have been eliminated
+        CountTable ct;
+        if (ct.testGroups(goodCountFile)) {
+            ct.readTable(goodCountFile);
+            ct.printTable(goodCountFile);
+        }
+		
+		if (m->control_pressed) { m->mothurRemove(goodCountFile);   }
+		
+		return 0;
+        
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ScreenSeqsCommand", "screenCountFile");
+		exit(1);
+	}
+}
 //***************************************************************************************************************
 
 int ScreenSeqsCommand::screenAlignReport(set<string> badSeqNames){

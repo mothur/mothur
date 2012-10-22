@@ -10,7 +10,6 @@
 #include "hcluster.h"
 #include "rabundvector.hpp"
 #include "listvector.hpp"
-#include "sparsematrix.hpp"
 
 /***********************************************************************/
 HCluster::HCluster(RAbundVector* rav, ListVector* lv, string ms, string d, NameAssignment* n, float c) :  rabund(rav), list(lv), method(ms), distfile(d), nameMap(n), cutoff(c) {

@@ -13,6 +13,7 @@
 #include "mothur.h"
 #include "nameassignment.hpp"
 #include "listvector.hpp"
+#include "counttable.h"
 
 
 /******************************************************/
@@ -23,6 +24,7 @@ public:
 	ReadCluster(string, float, string, bool);
 	~ReadCluster();
 	int read(NameAssignment*&);
+    int read(CountTable*&);
 	string getOutputFile() { return OutPutFile; }
 	void setFormat(string f) { format = f;	}
 	ListVector* getListVector()		{	return list;	}
@@ -36,6 +38,7 @@ private:
 	bool sortWanted;
 	
 	int convertPhylip2Column(NameAssignment*&);
+    int convertPhylip2Column(CountTable*&);
 };
 
 /******************************************************/

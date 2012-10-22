@@ -18,6 +18,7 @@
 #include "groupmap.h"
 #include "readmatrix.hpp"
 #include "formatmatrix.h"
+#include "counttable.h"
 
 typedef map<int, float> SeqMap;
 
@@ -60,10 +61,11 @@ private:
 	ReadMatrix* readMatrix;
 	FormatMatrix* formatMatrix;
 	NameAssignment* nameMap;
-	string filename, fastafile, listfile, namefile, groupfile, label, sorted, phylipfile, columnfile, distFile, format, outputDir, groups;
+    CountTable ct;
+	string filename, fastafile, listfile, namefile, groupfile, label, sorted, phylipfile, countfile, columnfile, distFile, format, outputDir, groups;
 	ofstream out;
 	ifstream in, inNames, inRow;
-	bool abort, allLines, groupError, large, weighted;
+	bool abort, allLines, groupError, large, weighted, hasGroups;
 	set<string> labels; //holds labels to be used
 	map<string, int> nameToIndex;  //maps sequence name to index in sparsematrix
 	map<string, string> nameFileMap;
@@ -79,9 +81,10 @@ private:
 	void readNamesFile(bool);
 	int process(ListVector*);
 	SeqMap getMap(int);
-	string findRep(vector<string>); 	// returns the name of the "representative" sequence of given bin or subset of a bin, for groups
+	string findRep(vector<string>, string); 	// returns the name of the "representative" sequence of given bin or subset of a bin, for groups
 	int processNames(string, string);
 	int processFastaNames(string, string);
+    int readDist();
 };
 
 #endif

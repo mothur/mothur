@@ -16,6 +16,7 @@
 #include "listvector.hpp"
 #include "fastamap.h"
 #include "groupmap.h"
+#include "counttable.h"
 
 class BinSeqCommand : public Command {
 	
@@ -36,14 +37,14 @@ public:
 	void help() { m->mothurOut(getHelpString()); }		
 	
 private:
-	
+	CountTable ct;
 	ListVector* list;
 	InputData* input;
 	FastaMap* fasta;
 	GroupMap* groupMap;
 	bool abort, allLines;
 	set<string> labels; //holds labels to be used
-	string filename, fastafile, listfile, namesfile, groupfile, label, outputDir;
+	string filename, fastafile, listfile, namesfile, groupfile, countfile, label, outputDir;
 	ofstream out;
 	ifstream in, inNames;
 	vector<string> outputNames;

@@ -8,13 +8,14 @@
  */
 
 #include "seqsummarycommand.h"
-
+#include "counttable.h"
 
 //**********************************************************************************************************************
 vector<string> SeqSummaryCommand::setParameters(){	
 	try {
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
-		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
+		CommandParameter pname("name", "InputTypes", "", "", "namecount", "none", "none",false,false); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "namecount", "none", "none",false,false); parameters.push_back(pcount);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
@@ -33,8 +34,9 @@ string SeqSummaryCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The summary.seqs command reads a fastafile and summarizes the sequences.\n";
-		helpString += "The summary.seqs command parameters are fasta, name and processors, fasta is required, unless you have a valid current fasta file.\n";
+		helpString += "The summary.seqs command parameters are fasta, name, count and processors, fasta is required, unless you have a valid current fasta file.\n";
 		helpString += "The name parameter allows you to enter a name file associated with your fasta file. \n";
+        helpString += "The count parameter allows you to enter a count file associated with your fasta file. \n";
 		helpString += "The summary.seqs command should be in the following format: \n";
 		helpString += "summary.seqs(fasta=yourFastaFile, processors=2) \n";
 		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n";	
@@ -123,6 +125,14 @@ SeqSummaryCommand::SeqSummaryCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("count");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["count"] = inputDir + it->second;		}
+				}
 			}
 			
 			//initialize outputTypes
@@ -142,6 +152,13 @@ SeqSummaryCommand::SeqSummaryCommand(string option)  {
 			if (namefile == "not open") { namefile = ""; abort = true; }
 			else if (namefile == "not found") { namefile = "";  }	
 			else { m->setNameFile(namefile); }
+            
+            countfile = validParameter.validFile(parameters, "count", true);
+			if (countfile == "not open") { abort = true; countfile = ""; }	
+			else if (countfile == "not found") { countfile = ""; }
+			else { m->setCountTableFile(countfile); }
+			
+            if ((countfile != "") && (namefile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
@@ -153,11 +170,12 @@ SeqSummaryCommand::SeqSummaryCommand(string option)  {
 			m->setProcessors(temp);
 			m->mothurConvert(temp, processors);
 			
-			if (namefile == "") {
-				vector<string> files; files.push_back(fastafile);
-				parser.getNameFile(files);
-			}
-			
+            if (countfile == "") {
+                if (namefile == "") {
+                    vector<string> files; files.push_back(fastafile);
+                    parser.getNameFile(files);
+                }
+            }
 		}
 	}
 	catch(exception& e) {
@@ -186,6 +204,11 @@ int SeqSummaryCommand::execute(){
 		vector<int> longHomoPolymer;
 		
 		if (namefile != "") { nameMap = m->readNames(namefile); }
+        else if (countfile != "") {
+            CountTable ct;
+            ct.readTable(countfile);
+            nameMap = ct.getNameMap();
+        }
 		
 		if (m->control_pressed) { return 0; }
 			
@@ -344,7 +367,7 @@ int SeqSummaryCommand::execute(){
 		int size = startPosition.size();
 		
 		//find means
-		float meanStartPosition, meanEndPosition, meanSeqLength, meanAmbigBases, meanLongHomoPolymer;
+		double meanStartPosition, meanEndPosition, meanSeqLength, meanAmbigBases, meanLongHomoPolymer;
 		meanStartPosition = 0; meanEndPosition = 0; meanSeqLength = 0; meanAmbigBases = 0; meanLongHomoPolymer = 0;
 		for (int i = 0; i < size; i++) {
 			meanStartPosition += startPosition[i];
@@ -353,6 +376,7 @@ int SeqSummaryCommand::execute(){
 			meanAmbigBases += ambigBases[i];
 			meanLongHomoPolymer += longHomoPolymer[i];
 		}
+                
 		//this is an int divide so the remainder is lost
 		meanStartPosition /= (float) size; meanEndPosition /= (float) size; meanLongHomoPolymer /= (float) size; meanSeqLength /= (float) size; meanAmbigBases /= (float) size;
 				
@@ -380,7 +404,7 @@ int SeqSummaryCommand::execute(){
 		m->mothurOut("Maximum:\t" + toString(startPosition[ptile100]) + "\t" + toString(endPosition[ptile100]) + "\t" + toString(seqLength[ptile100]) + "\t" + toString(ambigBases[ptile100]) + "\t" + toString(longHomoPolymer[ptile100]) + "\t" + toString(ptile100+1)); m->mothurOutEndLine();
 		m->mothurOut("Mean:\t" + toString(meanStartPosition) + "\t" + toString(meanEndPosition) + "\t" + toString(meanSeqLength) + "\t" + toString(meanAmbigBases) + "\t" + toString(meanLongHomoPolymer)); m->mothurOutEndLine();
 
-		if (namefile == "") {  m->mothurOut("# of Seqs:\t" + toString(numSeqs)); m->mothurOutEndLine(); }
+		if ((namefile == "") && (countfile == "")) {  m->mothurOut("# of Seqs:\t" + toString(numSeqs)); m->mothurOutEndLine(); }
 		else { m->mothurOut("# of unique seqs:\t" + toString(numSeqs)); m->mothurOutEndLine(); m->mothurOut("total # of seqs:\t" + toString(startPosition.size())); m->mothurOutEndLine(); }
 		
 		if (m->control_pressed) {  m->mothurRemove(summaryFile); return 0; }
@@ -420,7 +444,7 @@ int SeqSummaryCommand::driverCreateSummary(vector<int>& startPosition, vector<in
 
 		bool done = false;
 		int count = 0;
-	
+       
 		while (!done) {
 				
 			if (m->control_pressed) { in.close(); outSummary.close(); return 1; }
@@ -430,11 +454,11 @@ int SeqSummaryCommand::driverCreateSummary(vector<int>& startPosition, vector<in
 			if (current.getName() != "") {
 				
 				int num = 1;
-				if (namefile != "") {
+				if ((namefile != "") || (countfile != "")) {
 					//make sure this sequence is in the namefile, else error 
 					map<string, int>::iterator it = nameMap.find(current.getName());
 					
-					if (it == nameMap.end()) { m->mothurOut("[ERROR]: '" + current.getName() + "' is not in your namefile, please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
+					if (it == nameMap.end()) { m->mothurOut("[ERROR]: '" + current.getName() + "' is not in your name or count file, please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
 					else { num = it->second; }
 				}
 				
@@ -505,11 +529,11 @@ int SeqSummaryCommand::MPICreateSummary(int start, int num, vector<int>& startPo
 			if (current.getName() != "") {
 				
 				int num = 1;
-				if (namefile != "") {
+				if ((namefile != "") || (countfile != "")) {
 					//make sure this sequence is in the namefile, else error 
 					map<string, int>::iterator it = nameMap.find(current.getName());
 					
-					if (it == nameMap.end()) { cout << "[ERROR]: " << current.getName() << " is not in your namefile, please correct." << endl; m->control_pressed = true; }
+					if (it == nameMap.end()) { cout << "[ERROR]: " << current.getName() << " is not in your name or count file, please correct." << endl; m->control_pressed = true; }
 					else { num = it->second; }
 				}
 				
@@ -626,14 +650,17 @@ int SeqSummaryCommand::createProcessesCreateSummary(vector<int>& startPosition, 
 		vector<seqSumData*> pDataArray; 
 		DWORD   dwThreadIdArray[processors-1];
 		HANDLE  hThreadArray[processors-1]; 
-		
+        
+		bool hasNameMap = false;
+        if ((namefile !="") || (countfile != "")) { hasNameMap = true; }
+        
 		//Create processor worker threads.
 		for( int i=0; i<processors-1; i++ ){
             
             string extension = "";
             if (i != 0) { extension = toString(i) + ".temp"; processIDS.push_back(i); }
 			// Allocate memory for thread data.
-			seqSumData* tempSum = new seqSumData(filename, (sumFile+extension), m, lines[i]->start, lines[i]->end, namefile, nameMap);
+			seqSumData* tempSum = new seqSumData(filename, (sumFile+extension), m, lines[i]->start, lines[i]->end, hasNameMap, nameMap);
 			pDataArray.push_back(tempSum);
 			
 			//MySeqSumThreadFunction is in header. It must be global or static to work with the threads.

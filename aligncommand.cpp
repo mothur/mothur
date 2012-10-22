@@ -572,7 +572,6 @@ int AlignCommand::driver(linePair* filePos, string alignFName, string reportFNam
 				if (candidateSeq->getUnaligned().length() > alignment->getnRows()) {
 					alignment->resize(candidateSeq->getUnaligned().length()+1);
 				}
-								
 				Sequence temp = templateDB->findClosestSequence(candidateSeq);
 				Sequence* templateSeq = &temp;
 				

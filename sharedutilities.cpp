@@ -120,7 +120,7 @@ void SharedUtil::setGroups(vector<string>& userGroups, vector<string>& allGroups
 				
 				//if the user only entered invalid groups
 				if (userGroups.size() == 0) { 
-					m->mothurOut("You provided no valid groups. I will run the command using all the groups in your groupfile."); m->mothurOutEndLine();
+					m->mothurOut("You provided no valid groups. I will run the command using all the groups in your file."); m->mothurOutEndLine();
 					for (int i = 0; i < allGroups.size(); i++) {
 						userGroups.push_back(allGroups[i]);
 					}

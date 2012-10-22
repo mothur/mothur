@@ -12,7 +12,7 @@
 
 #include "command.hpp"
 #include "readtree.h"
-#include "treemap.h"
+#include "counttable.h"
 #include "sharedrabundvector.h"
 #include "sharedrabundfloatvector.h"
 #include "inputdata.h"
@@ -36,7 +36,7 @@ public:
 	
 private:
 	ReadTree* read;
-	TreeMap* treeMap;
+	CountTable* ct;
 	GroupMap* designMap;
 	string treefile, sharedfile, relabundfile, groups, label, inputFileName, outputDir, designfile;
 	bool abort;

@@ -16,7 +16,8 @@ vector<string> ClusterSplitCommand::setParameters(){
 		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "none", "FastaTaxName",false,false); parameters.push_back(ptaxonomy);
 		CommandParameter pphylip("phylip", "InputTypes", "", "", "PhylipColumnFasta", "PhylipColumnFasta", "none",false,false); parameters.push_back(pphylip);
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "PhylipColumnFasta", "PhylipColumnFasta", "FastaTaxName",false,false); parameters.push_back(pfasta);
-		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "ColumnName-FastaTaxName",false,false); parameters.push_back(pname);
+		CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "ColumnName-FastaTaxName",false,false); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "NameCount", "none", "",false,false); parameters.push_back(pcount);
 		CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumnFasta", "PhylipColumnFasta", "ColumnName",false,false); parameters.push_back(pcolumn);
 		CommandParameter ptaxlevel("taxlevel", "Number", "", "3", "", "", "",false,false); parameters.push_back(ptaxlevel);
 		CommandParameter psplitmethod("splitmethod", "Multiple", "classify-fasta-distance", "distance", "", "", "",false,false); parameters.push_back(psplitmethod);
@@ -45,7 +46,7 @@ vector<string> ClusterSplitCommand::setParameters(){
 string ClusterSplitCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The cluster.split command parameter options are fasta, phylip, column, name, cutoff, precision, method, splitmethod, taxonomy, taxlevel, showabund, timing, hard, large, processors. Fasta or Phylip or column and name are required.\n";
+		helpString += "The cluster.split command parameter options are fasta, phylip, column, name, count, cutoff, precision, method, splitmethod, taxonomy, taxlevel, showabund, timing, hard, large, processors. Fasta or Phylip or column and name are required.\n";
 		helpString += "The cluster.split command can split your files in 3 ways. Splitting by distance file, by classification, or by classification also using a fasta file. \n";
 		helpString += "For the distance file method, you need only provide your distance file and mothur will split the file into distinct groups. \n";
 		helpString += "For the classification method, you need to provide your distance file and taxonomy file, and set the splitmethod to classify.  \n";
@@ -54,7 +55,8 @@ string ClusterSplitCommand::getHelpString(){
 		helpString += "You will also need to set the taxlevel you want to split by. mothur will split the sequence into distinct taxonomy groups, and create distance files for each grouping. \n";
 		helpString += "The phylip and column parameter allow you to enter your distance file. \n";
 		helpString += "The fasta parameter allows you to enter your aligned fasta file. \n";
-		helpString += "The name parameter allows you to enter your name file and is required if your distance file is in column format. \n";
+		helpString += "The name parameter allows you to enter your name file. \n";
+        helpString += "The count parameter allows you to enter your count file. \n A count or name file is required if your distance file is in column format";
 		helpString += "The cutoff parameter allow you to set the distance you want to cluster to, default is 0.25. \n";
 		helpString += "The precision parameter allows you specify the precision of the precision of the distances outputted, default=100, meaning 2 decimal places. \n";
 		helpString += "The method allows you to specify what clustering algorythm you want to use, default=average, option furthest, nearest, or average. \n";
@@ -196,6 +198,14 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("count");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["count"] = inputDir + it->second;		}
+				}
 			}
 			
 			//check for required parameters
@@ -210,9 +220,14 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			else {  distfile = columnfile; format = "column";	m->setColumnFile(columnfile); }
 			
 			namefile = validParameter.validFile(parameters, "name", true);
-			if (namefile == "not open") { abort = true; }	
+			if (namefile == "not open") { abort = true; namefile = "";}	
 			else if (namefile == "not found") { namefile = "";  }
 			else { m->setNameFile(namefile); }
+            
+            countfile = validParameter.validFile(parameters, "count", true);
+			if (countfile == "not open") { abort = true; countfile = "";}	
+			else if (countfile == "not found") { countfile = "";  }
+			else { m->setCountTableFile(countfile); }
 			
 			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not open") { abort = true; }	
@@ -243,14 +258,20 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 				}
 			}
 			else if ((phylipfile != "") && (columnfile != "") && (fastafile != "")) { m->mothurOut("When executing a cluster.split command you must enter ONLY ONE of the following: fasta, phylip or column."); m->mothurOutEndLine(); abort = true; }
-		
+            
+            if ((countfile != "") && (namefile != "")) { m->mothurOut("When executing a cluster.split command you must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
+            
 			if (columnfile != "") {
-				if (namefile == "") { 
+				if ((namefile == "") && (countfile == "")) { 
 					namefile = m->getNameFile(); 
 					if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
 					else { 
-						m->mothurOut("You need to provide a namefile if you are going to use the column format."); m->mothurOutEndLine(); 
-						abort = true; 
+						countfile = m->getCountTableFile();
+                        if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
+                        else { 
+                            m->mothurOut("You need to provide a namefile or countfile if you are going to use the column format."); m->mothurOutEndLine(); 
+                            abort = true; 
+                        }	
 					}	
 				}
 			}
@@ -265,12 +286,16 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 					}	
 				}
 				
-				if (namefile == "") { 
+				if ((namefile == "") && (countfile == "")) { 
 					namefile = m->getNameFile(); 
 					if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
 					else { 
-						m->mothurOut("You need to provide a namefile if you are if you are using a fasta file to generate the split."); m->mothurOutEndLine(); 
-						abort = true; 
+						countfile = m->getCountTableFile();
+                        if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
+                        else { 
+                            m->mothurOut("You need to provide a namefile or countfile if you are going to use the fasta file to generate the split."); m->mothurOutEndLine(); 
+                            abort = true; 
+                        }	
 					}	
 				}
 			}
@@ -379,7 +404,7 @@ int ClusterSplitCommand::execute(){
 		
 			//if no names file given with phylip file, create it
 			ListVector* listToMakeNameFile =  convert->getListVector();
-			if (namefile == "") {  //you need to make a namefile for split matrix
+			if ((namefile == "") && (countfile == "")) {  //you need to make a namefile for split matrix
 				ofstream out;
 				namefile = phylipfile + ".names";
 				m->openOutputFile(namefile, out);
@@ -401,9 +426,9 @@ int ClusterSplitCommand::execute(){
 		
 		//split matrix into non-overlapping groups
 		SplitMatrix* split;
-		if (splitmethod == "distance")			{	split = new SplitMatrix(distfile, namefile, taxFile, cutoff, splitmethod, large);							}
-		else if (splitmethod == "classify")		{	split = new SplitMatrix(distfile, namefile, taxFile, taxLevelCutoff, splitmethod, large);					}
-		else if (splitmethod == "fasta")		{	split = new SplitMatrix(fastafile, namefile, taxFile, taxLevelCutoff, cutoff, splitmethod, processors, classic, outputDir);	}
+		if (splitmethod == "distance")			{	split = new SplitMatrix(distfile, namefile, countfile, taxFile, cutoff, splitmethod, large);							}
+		else if (splitmethod == "classify")		{	split = new SplitMatrix(distfile, namefile, countfile, taxFile, taxLevelCutoff, splitmethod, large);					}
+		else if (splitmethod == "fasta")		{	split = new SplitMatrix(fastafile, namefile, countfile, taxFile, taxLevelCutoff, cutoff, splitmethod, processors, classic, outputDir);	}
 		else { m->mothurOut("Not a valid splitting method.  Valid splitting algorithms are distance, classify or fasta."); m->mothurOutEndLine(); return 0;		}
 		
 		split->split();
@@ -666,15 +691,21 @@ map<float, int> ClusterSplitCommand::completeListFile(vector<string> listNames, 
 		
 		//read in singletons
 		if (singleton != "none") {
-			ifstream in;
-			m->openInputFile(singleton, in);
+            
+            ifstream in;
+            m->openInputFile(singleton, in);
 				
 			string firstCol, secondCol;
 			listSingle = new ListVector();
+            
+            if (countfile != "") { m->getline(in); m->gobble(in); }
+            
 			while (!in.eof()) {
-				in >> firstCol >> secondCol; m->gobble(in);
-				listSingle->push_back(secondCol);
+				in >> firstCol >> secondCol; m->getline(in); m->gobble(in);
+				if (countfile == "") { listSingle->push_back(secondCol); }
+                else { listSingle->push_back(firstCol); }
 			}
+            
 			in.close();
 			m->mothurRemove(singleton);
 			
@@ -775,15 +806,21 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, map<float, int> us
 		
         string sabundFileName = fileroot+ tag + "." + getOutputFileNameTag("sabund");
         string rabundFileName = fileroot+ tag + "." + getOutputFileNameTag("rabund");
-        string listFileName = fileroot+ tag + "." + getOutputFileNameTag("list");
+        string listFileName = fileroot+ tag + ".";
+        if (countfile != "") { listFileName += "unique_"; }
+        listFileName += getOutputFileNameTag("list");
         
-		m->openOutputFile(sabundFileName,	outSabund);
-		m->openOutputFile(rabundFileName,	outRabund);
+        if (countfile == "") {
+            m->openOutputFile(sabundFileName,	outSabund);
+            m->openOutputFile(rabundFileName,	outRabund);
+            outputNames.push_back(sabundFileName); outputTypes["sabund"].push_back(sabundFileName);
+            outputNames.push_back(rabundFileName); outputTypes["rabund"].push_back(rabundFileName);
+            
+        }
 		m->openOutputFile(listFileName,	outList);
+        outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
 		
-		outputNames.push_back(sabundFileName); outputTypes["sabund"].push_back(sabundFileName);
-		outputNames.push_back(rabundFileName); outputTypes["rabund"].push_back(rabundFileName);
-		outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);		
+		
 		map<float, int>::iterator itLabel;
 
 		//for each label needed
@@ -794,22 +831,25 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, map<float, int> us
 			else { thisLabel = toString(itLabel->first,  length-1);  } 
 			
 			outList << thisLabel << '\t' << itLabel->second << '\t';
-
-			RAbundVector* rabund = new RAbundVector();
-			rabund->setLabel(thisLabel);
+            
+            RAbundVector* rabund = NULL;
+            if (countfile == "") {
+                rabund = new RAbundVector();
+                rabund->setLabel(thisLabel);
+            }
 
 			//add in singletons
 			if (listSingle != NULL) {
 				for (int j = 0; j < listSingle->getNumBins(); j++) {
 					outList << listSingle->get(j) << '\t';
-					rabund->push_back(m->getNumNames(listSingle->get(j)));
+					if (countfile == "") { rabund->push_back(m->getNumNames(listSingle->get(j))); }
 				}
 			}
 			
 			//get the list info from each file
 			for (int k = 0; k < listNames.size(); k++) {
 	
-				if (m->control_pressed) {  if (listSingle != NULL) { delete listSingle;   } for (int i = 0; i < listNames.size(); i++) { m->mothurRemove(listNames[i]);  } delete rabund; return 0; }
+				if (m->control_pressed) {  if (listSingle != NULL) { delete listSingle;   } for (int i = 0; i < listNames.size(); i++) { m->mothurRemove(listNames[i]);  } if (rabund != NULL) { delete rabund; } return 0; }
 				
 				InputData* input = new InputData(listNames[k], "list");
 				ListVector* list = input->getListVector(thisLabel);
@@ -819,26 +859,28 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, map<float, int> us
 				else {		
 					for (int j = 0; j < list->getNumBins(); j++) {
 						outList << list->get(j) << '\t';
-						rabund->push_back(m->getNumNames(list->get(j)));
+						if (countfile == "") { rabund->push_back(m->getNumNames(list->get(j))); }
 					}
 					delete list;
 				}
 				delete input;
 			}
 			
-			SAbundVector sabund = rabund->getSAbundVector();
-			
-			sabund.print(outSabund);
-			rabund->print(outRabund);
+            if (countfile == "") {
+                SAbundVector sabund = rabund->getSAbundVector();
+                sabund.print(outSabund);
+                rabund->print(outRabund);
+            }
 			outList << endl;
 			
-			delete rabund;
+			if (rabund != NULL) { delete rabund; }
 		}
 		
 		outList.close();
-		outRabund.close();
-		outSabund.close();
-		
+        if (countfile == "") {
+            outRabund.close();
+            outSabund.close();
+		}
 		if (listSingle != NULL) { delete listSingle;  }
 		
 		for (int i = 0; i < listNames.size(); i++) {  m->mothurRemove(listNames[i]);  }
@@ -993,7 +1035,7 @@ vector<string>  ClusterSplitCommand::createProcesses(vector< map<string, string>
 		//Above fork() will clone, so memory is separate, but that's not the case with windows, 
 		//Taking advantage of shared memory to allow both threads to add labels.
 		//////////////////////////////////////////////////////////////////////////////////////////////////////
-		
+		/*
 		vector<clusterData*> pDataArray; 
 		DWORD   dwThreadIdArray[processors-1];
 		HANDLE  hThreadArray[processors-1]; 
@@ -1031,7 +1073,7 @@ vector<string>  ClusterSplitCommand::createProcesses(vector< map<string, string>
 			CloseHandle(hThreadArray[i]);
 			delete pDataArray[i];
 		}
-
+*/
 	#endif		
         
         return listFiles;
@@ -1101,16 +1143,25 @@ string ClusterSplitCommand::clusterClassicFile(string thisDistFile, string thisN
 
         m->mothurOutEndLine(); m->mothurOut("Reading " + thisDistFile); m->mothurOutEndLine();
         
-        NameAssignment* nameMap = new NameAssignment(thisNamefile);
-        nameMap->readMap();
-				
-		//reads phylip file storing data in 2D vector, also fills list and rabund
+        //reads phylip file storing data in 2D vector, also fills list and rabund
         bool sim = false;
 		ClusterClassic* cluster = new ClusterClassic(cutoff, method, sim);
-		cluster->readPhylipFile(thisDistFile, nameMap);
-		tag = cluster->getTag();
         
-		if (m->control_pressed) { delete cluster; return 0; }
+        NameAssignment* nameMap = NULL;
+        CountTable* ct = NULL;
+        if(namefile != ""){	
+			nameMap = new NameAssignment(thisNamefile);
+			nameMap->readMap();
+            cluster->readPhylipFile(thisDistFile, nameMap);
+		}else if (countfile != "") {
+            ct = new CountTable();
+            ct->readTable(thisNamefile);
+            cluster->readPhylipFile(thisDistFile, ct);
+        }
+        tag = cluster->getTag();
+        
+		if (m->control_pressed) { if(namefile != ""){	delete nameMap; }
+            else { delete ct; } delete cluster; return 0; }
 		
 		list = cluster->getListVector();
 		rabund = cluster->getRAbundVector();
@@ -1136,7 +1187,8 @@ string ClusterSplitCommand::clusterClassicFile(string thisDistFile, string thisN
         m->mothurOutEndLine(); m->mothurOut("Clustering " + thisDistFile); m->mothurOutEndLine();
         
 		while ((cluster->getSmallDist() < cutoff) && (cluster->getNSeqs() > 1)){
-			if (m->control_pressed) { delete cluster; delete list; delete rabund; listFile.close();  return listFileName;  }
+			if (m->control_pressed) { delete cluster; delete list; delete rabund; listFile.close();  if(namefile != ""){	delete nameMap; }
+                else { delete ct; } return listFileName;  }
             
 			cluster->update(cutoff);
             
@@ -1179,8 +1231,12 @@ string ClusterSplitCommand::clusterClassicFile(string thisDistFile, string thisN
         
 		listFile.close();
 		
-		delete cluster; delete nameMap; delete list; delete rabund;
-
+		delete cluster;  delete list; delete rabund;
+        if(namefile != ""){	delete nameMap; }
+        else { delete ct; }
+        
+        m->mothurRemove(thisDistFile);
+        m->mothurRemove(thisNamefile);
         
         return listFileName;
         
@@ -1219,18 +1275,30 @@ string ClusterSplitCommand::clusterFile(string thisDistFile, string thisNamefile
         ReadMatrix* read = new ReadColumnMatrix(thisDistFile); 	
         read->setCutoff(cutoff);
         
-        NameAssignment* nameMap = new NameAssignment(thisNamefile);
-        nameMap->readMap();
-        read->read(nameMap);
-        
-        if (m->control_pressed) {  delete read; delete nameMap; return listFileName; }
-        
-        list = read->getListVector();
+        NameAssignment* nameMap = NULL;
+        CountTable* ct = NULL;
+		if(namefile != ""){	
+			nameMap = new NameAssignment(thisNamefile);
+			nameMap->readMap();
+            read->read(nameMap);
+		}else if (countfile != "") {
+            ct = new CountTable();
+            ct->readTable(thisNamefile);
+            read->read(ct);
+        }
+		
+		list = read->getListVector();
         oldList = *list;
-        matrix = read->getDMatrix();
+		matrix = read->getDMatrix();
         
+		if(countfile != "") {
+            rabund = new RAbundVector();
+            createRabund(ct, list, rabund); //creates an rabund that includes the counts for the unique list
+            delete ct;
+        }else { rabund = new RAbundVector(list->getRAbundVector()); }
+
         delete read;  read = NULL;
-        delete nameMap; nameMap = NULL;
+        if (namefile != "") { delete nameMap; nameMap = NULL; }
         
         
 #ifdef USE_MPI
@@ -1242,8 +1310,6 @@ string ClusterSplitCommand::clusterFile(string thisDistFile, string thisNamefile
         
         m->mothurOutEndLine(); m->mothurOut("Clustering " + thisDistFile); m->mothurOutEndLine();
 		
-        rabund = new RAbundVector(list->getRAbundVector());
-        
         //create cluster
         if (method == "furthest")	{	cluster = new CompleteLinkage(rabund, list, matrix, cutoff, method); }
         else if(method == "nearest"){	cluster = new SingleLinkage(rabund, list, matrix, cutoff, method); }
@@ -1383,5 +1449,26 @@ int ClusterSplitCommand::createMergedDistanceFile(vector< map<string, string> > 
 		m->errorOut(e, "ClusterSplitCommand", "createMergedDistanceFile");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+int ClusterSplitCommand::createRabund(CountTable*& ct, ListVector*& list, RAbundVector*& rabund){
+    try {
+        rabund->setLabel(list->getLabel());        
+        for(int i = 0; i < list->getNumBins(); i++) { 
+            if (m->control_pressed) { break; }
+            vector<string> binNames;
+            string bin = list->get(i);
+            m->splitAtComma(bin, binNames);
+            int total = 0;
+            for (int j = 0; j < binNames.size(); j++) { total += ct->getNumSeqs(binNames[j]);  }
+            rabund->push_back(total);   
+        }
+        return 0;
+    }
+    catch(exception& e) {
+		m->errorOut(e, "ClusterCommand", "createRabund");
+		exit(1);
+	}
+    
 }
 //**********************************************************************************************************************

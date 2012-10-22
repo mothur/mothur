@@ -15,8 +15,9 @@ vector<string> PhyloDiversityCommand::setParameters(){
 	try {
 
 		CommandParameter ptree("tree", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(ptree);
-		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pgroup);
-		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
+        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none",false,false); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none",false,false); parameters.push_back(pcount);
+		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none",false,false); parameters.push_back(pgroup);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
 		CommandParameter piters("iters", "Number", "", "1000", "", "", "",false,false); parameters.push_back(piters);
 		CommandParameter pfreq("freq", "Number", "", "100", "", "", "",false,false); parameters.push_back(pfreq);
@@ -41,7 +42,7 @@ vector<string> PhyloDiversityCommand::setParameters(){
 string PhyloDiversityCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The phylo.diversity command parameters are tree, group, name, groups, iters, freq, processors, scale, rarefy, collect and summary.  tree and group are required, unless you have valid current files.\n";
+		helpString += "The phylo.diversity command parameters are tree, group, name, count, groups, iters, freq, processors, scale, rarefy, collect and summary.  tree and group are required, unless you have valid current files.\n";
 		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed. The group names are separated by dashes. By default all groups are used.\n";
 		helpString += "The iters parameter allows you to specify the number of randomizations to preform, by default iters=1000, if you set rarefy to true.\n";
 		helpString += "The freq parameter is used indicate when to output your data, by default it is set to 100. But you can set it to a percentage of the number of sequence. For example freq=0.10, means 10%. \n";
@@ -156,6 +157,14 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("count");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["count"] = inputDir + it->second;		}
+				}
 			}
 			
 			//check for required parameters
@@ -179,6 +188,19 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 			else if (namefile == "not found") { namefile = ""; }
 			else { m->setNameFile(namefile); }
 			
+            countfile = validParameter.validFile(parameters, "count", true);
+			if (countfile == "not open") { countfile = ""; abort = true; }
+			else if (countfile == "not found") { countfile = "";  }	
+			else { m->setCountTableFile(countfile); }
+            
+            if ((namefile != "") && (countfile != "")) {
+                m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
+            }
+			
+            if ((groupfile != "") && (countfile != "")) {
+                m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+            }
+
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(treefile);	}
 			
 			string temp;
@@ -214,10 +236,12 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 			
 			if ((!collect) && (!rarefy) && (!summary)) { m->mothurOut("No outputs selected. You must set either collect, rarefy or summary to true, summary=T by default."); m->mothurOutEndLine(); abort=true; }
 			
-			if (namefile == "") {
-				vector<string> files; files.push_back(treefile);
-				parser.getNameFile(files);
-			}
+			if (countfile=="") {
+                if (namefile == "") {
+                    vector<string> files; files.push_back(treefile);
+                    parser.getNameFile(files);
+                } 
+            }
 		}
 		
 	}
@@ -236,14 +260,16 @@ int PhyloDiversityCommand::execute(){
         int start = time(NULL);
         
 		m->setTreeFile(treefile);
-        TreeReader* reader = new TreeReader(treefile, groupfile, namefile);
+        TreeReader* reader;
+        if (countfile == "") { reader = new TreeReader(treefile, groupfile, namefile); }
+        else { reader = new TreeReader(treefile, countfile); }
         vector<Tree*> trees = reader->getTrees();
-        tmap = trees[0]->getTreeMap();
+        ct = trees[0]->getCountTable();
         delete reader;
 
 		SharedUtil util;
 		vector<string> mGroups = m->getGroups();
-		vector<string> tGroups = tmap->getNamesOfGroups();
+		vector<string> tGroups = ct->getNamesOfGroups();
 		util.setGroups(mGroups, tGroups, "phylo.diversity");	//sets the groups the user wants to analyze
 		
 		//incase the user had some mismatches between the tree and group files we don't want group xxx to be analyzed
@@ -255,7 +281,7 @@ int PhyloDiversityCommand::execute(){
 		//for each of the users trees
 		for(int i = 0; i < trees.size(); i++) {
 		
-			if (m->control_pressed) { delete tmap; for (int j = 0; j < trees.size(); j++) { delete trees[j]; } for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]); 	} return 0; }
+			if (m->control_pressed) { delete ct; for (int j = 0; j < trees.size(); j++) { delete trees[j]; } for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]); 	} return 0; }
 			
 			ofstream outSum, outRare, outCollect;
 			string outSumFile = outputDir + m->getRootName(m->getSimpleName(treefile))  + toString(i+1) + "." + getOutputFileNameTag("summary");
@@ -286,15 +312,16 @@ int PhyloDiversityCommand::execute(){
 			
 			//find largest group total 
 			int largestGroup = 0;
-			for (int j = 0; j < mGroups.size(); j++) {  
-				if (tmap->seqsPerGroup[mGroups[j]] > largestGroup) { largestGroup = tmap->seqsPerGroup[mGroups[j]]; }
+			for (int j = 0; j < mGroups.size(); j++) { 
+                int numSeqsThisGroup = ct->getGroupCount(mGroups[j]);
+				if (numSeqsThisGroup > largestGroup) { largestGroup = numSeqsThisGroup; }
 				
 				//initialize diversity
-				diversity[mGroups[j]].resize(tmap->seqsPerGroup[mGroups[j]]+1, 0.0);		//numSampled
+				diversity[mGroups[j]].resize(numSeqsThisGroup+1, 0.0);		//numSampled
 																											//groupA		0.0			0.0
 																											
 				//initialize sumDiversity
-				sumDiversity[mGroups[j]].resize(tmap->seqsPerGroup[mGroups[j]]+1, 0.0);
+				sumDiversity[mGroups[j]].resize(numSeqsThisGroup+1, 0.0);
 			}	
 
 			//convert freq percentage to number
@@ -649,7 +676,7 @@ map<string, int> PhyloDiversityCommand::getRootForGroups(Tree* t){
 		map<string, bool> done;
        
 		//initialize root for all groups to -1
-		for (int k = 0; k < (t->getTreeMap())->getNamesOfGroups().size(); k++) { done[(t->getTreeMap())->getNamesOfGroups()[k]] = false; }
+		for (int k = 0; k < (t->getCountTable())->getNamesOfGroups().size(); k++) { done[(t->getCountTable())->getNamesOfGroups()[k]] = false; }
         
         for (int i = 0; i < t->getNumLeaves(); i++) {
             

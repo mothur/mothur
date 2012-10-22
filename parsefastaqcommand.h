@@ -34,10 +34,11 @@ public:
 private:
 
 	vector<string> outputNames;	
-	string outputDir, fastaQFile;
+	string outputDir, fastaQFile, format;
 	bool abort, fasta, qual;
 	
 	vector<int> convertQual(string);
+    vector<char> convertTable;
 };
 
 #endif

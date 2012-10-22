@@ -15,6 +15,7 @@
 #include "command.hpp"
 #include "sequence.hpp"
 #include "sequenceparser.h"
+#include "sequencecountparser.h"
 
 /************************************************************/
 struct seqPNode {
@@ -28,7 +29,13 @@ struct seqPNode {
 	~seqPNode() {}
 };
 /************************************************************/
-inline bool comparePriority(seqPNode first, seqPNode second) {  return (first.numIdentical > second.numIdentical); }
+inline bool comparePriority(seqPNode first, seqPNode second) {  
+    if (first.numIdentical > second.numIdentical) { return true;  }
+    else if (first.numIdentical == second.numIdentical) { 
+        if (first.seq.getName() > second.seq.getName()) { return true; }
+    }
+    return false; 
+}
 //************************************************************/
 
 class PreClusterCommand : public Command {
@@ -58,9 +65,13 @@ private:
 		linePair(int i, int j) : start(i), end(j) {}
 	};
 	
+    SequenceParser* parser;
+    SequenceCountParser* cparser;
+    CountTable ct;
+    
 	int diffs, length, processors;
 	bool abort, bygroup;
-	string fastafile, namefile, outputDir, groupfile;
+	string fastafile, namefile, outputDir, groupfile, countfile;
 	vector<seqPNode> alignSeqs; //maps the number of identical seqs to a sequence
 	map<string, string> names; //represents the names file first column maps to second column
 	map<string, int> sizes;  //this map a seq name to the number of identical seqs in the names file
@@ -73,11 +84,12 @@ private:
 	void readNameFile();
 	//int readNamesFASTA();
 	int calcMisMatches(string, string);
-	void printData(string, string); //fasta filename, names file name
+	void printData(string, string, string); //fasta filename, names file name
 	int process(string);
-	int loadSeqs(map<string, string>&, vector<Sequence>&);
-	int driverGroups(SequenceParser*, string, string, string, int, int, vector<string> groups);
-	int createProcessesGroups(SequenceParser*, string, string, string, vector<string>);
+	int loadSeqs(map<string, string>&, vector<Sequence>&, string);
+	int driverGroups(string, string, string, int, int, vector<string> groups);
+	int createProcessesGroups(string, string, string, vector<string>);
+    int mergeGroupCounts(string, string, string);
 };
 
 /**************************************************************************************************/
@@ -87,7 +99,7 @@ private:
 struct preClusterData {
 	string fastafile; 
 	string namefile; 
-	string groupfile;
+	string groupfile, countfile;
 	string newFName, newNName, newMName;
 	MothurOut* m;
 	int start;
@@ -97,7 +109,7 @@ struct preClusterData {
 	vector<string> mapFileNames;
 	
 	preClusterData(){}
-	preClusterData(string f, string n, string g, string nff,  string nnf, string nmf, vector<string> gr, MothurOut* mout, int st, int en, int d, int tid) {
+	preClusterData(string f, string n, string g, string c, string nff,  string nnf, string nmf, vector<string> gr, MothurOut* mout, int st, int en, int d, int tid) {
 		fastafile = f;
 		namefile = n;
 		groupfile = g;
@@ -110,6 +122,7 @@ struct preClusterData {
 		diffs = d;
 		threadID = tid;
 		groups = gr;
+        countfile = c;
 	}
 };
 
@@ -124,10 +137,15 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
 		
 		//parse fasta and name file by group
 		SequenceParser* parser;
-		if (pDataArray->namefile != "") { parser = new SequenceParser(pDataArray->groupfile, pDataArray->fastafile, pDataArray->namefile);	}
-		else							{ parser = new SequenceParser(pDataArray->groupfile, pDataArray->fastafile);						}
-		
-		int numSeqs = 0;
+        SequenceCountParser* cparser;
+        if (pDataArray->countfile != "") {
+            cparser = new SequenceCountParser(pDataArray->countfile, pDataArray->fastafile);
+        }else {
+            if (pDataArray->namefile != "") { parser = new SequenceParser(pDataArray->groupfile, pDataArray->fastafile, pDataArray->namefile);	}
+            else				{ parser = new SequenceParser(pDataArray->groupfile, pDataArray->fastafile);			}
+        }
+        
+ 		int numSeqs = 0;
 		vector<seqPNode> alignSeqs;
 		//clear out old files
 		ofstream outF; pDataArray->m->openOutputFile(pDataArray->newFName, outF); outF.close();
@@ -143,8 +161,13 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
 			pDataArray->m->mothurOutEndLine(); pDataArray->m->mothurOut("Processing group " + pDataArray->groups[k] + ":"); pDataArray->m->mothurOutEndLine();
 			
 			map<string, string> thisNameMap;
-			if (pDataArray->namefile != "") { thisNameMap = parser->getNameMap(pDataArray->groups[k]); }
-			vector<Sequence> thisSeqs = parser->getSeqs(pDataArray->groups[k]);
+            vector<Sequence> thisSeqs;
+			if (pDataArray->groupfile != "") { 
+                thisSeqs = parser->getSeqs(pDataArray->groups[k]);
+            }else if (pDataArray->countfile != "") {
+                thisSeqs = cparser->getSeqs(pDataArray->groups[k]);
+            }
+			if (pDataArray->namefile != "") {  thisNameMap = parser->getNameMap(pDataArray->groups[k]); }
 			
 			//fill alignSeqs with this groups info.
 			////////////////////////////////////////////////////
@@ -154,6 +177,9 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
 			alignSeqs.clear();
 			map<string, string>::iterator it;
 			bool error = false;
+            map<string, int> thisCount;
+            if (pDataArray->countfile != "") { thisCount = cparser->getCountTable(pDataArray->groups[k]);  }
+
 		 	
 			for (int i = 0; i < thisSeqs.size(); i++) {
 				
@@ -176,8 +202,16 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
 						if (thisSeqs[i].getAligned().length() > length) {  length = thisSeqs[i].getAligned().length();  }
 					}	
 				}else { //no names file, you are identical to yourself 
-					seqPNode tempNode(1, thisSeqs[i], thisSeqs[i].getName());
-					alignSeqs.push_back(tempNode);
+					int numRep = 1;
+                    if (pDataArray->countfile != "") { 
+                        map<string, int>::iterator it2 = thisCount.find(thisSeqs[i].getName());
+                        
+                        //should never be true since parser checks for this
+                        if (it2 == thisCount.end()) { pDataArray->m->mothurOut(thisSeqs[i].getName() + " is not in your count file, please correct."); pDataArray->m->mothurOutEndLine(); error = true; }
+                        else { numRep = it2->second;  }
+                    }
+                    seqPNode tempNode(numRep, thisSeqs[i], thisSeqs[i].getName());
+                    alignSeqs.push_back(tempNode);
 					if (thisSeqs[i].getAligned().length() > length) {  length = thisSeqs[i].getAligned().length();  }
 				}
 			}
@@ -274,7 +308,9 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
 			for (int i = 0; i < alignSeqs.size(); i++) {
 				if (alignSeqs[i].numIdentical != 0) {
 					alignSeqs[i].seq.printSequence(outFasta); 
-					outNames << alignSeqs[i].seq.getName() << '\t' << alignSeqs[i].names << endl;
+					if (pDataArray->countfile != "") {  outNames << pDataArray->groups[k] << '\t' << alignSeqs[i].seq.getName() << '\t' << alignSeqs[i].names << endl; 
+                    }else {  outNames << alignSeqs[i].seq.getName() << '\t' << alignSeqs[i].names << endl;  }
+
 				}
 			}
 			

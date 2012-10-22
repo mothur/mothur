@@ -177,7 +177,13 @@ inline bool compareSpearman(spearmanRank left, spearmanRank right){
 //********************************************************************************************************************
 //sorts highest to lowest
 inline bool compareSeqPriorityNodes(seqPriorityNode left, seqPriorityNode right){
-	return (left.numIdentical > right.numIdentical);	
+	if (left.numIdentical > right.numIdentical) {
+        return true;
+    }else if (left.numIdentical == right.numIdentical) {
+        if (left.seq > right.seq) { return true; }
+        else { return false; }
+    }
+    return false;	
 } 
 //********************************************************************************************************************
 //sorts lowest to highest

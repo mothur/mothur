@@ -14,8 +14,9 @@
 vector<string> SummaryTaxCommand::setParameters(){	
 	try {
 		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(ptaxonomy);
-		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
-		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pgroup);
+        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none",false,false); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none",false,false); parameters.push_back(pcount);
+		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none",false,false); parameters.push_back(pgroup);
 		CommandParameter preftaxonomy("reftaxonomy", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(preftaxonomy);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
@@ -34,9 +35,10 @@ string SummaryTaxCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The summary.tax command reads a taxonomy file and an optional name file, and summarizes the taxonomy information.\n";
-		helpString += "The summary.tax command parameters are taxonomy, group and name. taxonomy is required, unless you have a valid current taxonomy file.\n";
+		helpString += "The summary.tax command parameters are taxonomy, count, group and name. taxonomy is required, unless you have a valid current taxonomy file.\n";
 		helpString += "The name parameter allows you to enter a name file associated with your taxonomy file. \n";
 		helpString += "The group parameter allows you add a group file so you can have the summary totals broken up by group.\n";
+        helpString += "The count parameter allows you add a count file so you can have the summary totals broken up by group.\n";
 		helpString += "The reftaxonomy parameter allows you give the name of the reference taxonomy file used when you classified your sequences. It is not required, but providing it will keep the rankIDs in the summary file static.\n";
 		helpString += "The summary.tax command should be in the following format: \n";
 		helpString += "summary.tax(taxonomy=yourTaxonomyFile) \n";
@@ -142,6 +144,14 @@ SummaryTaxCommand::SummaryTaxCommand(string option)  {
 					if (path == "") {	parameters["reftaxonomy"] = inputDir + it->second;		}
 				}
 				
+                it = parameters.find("count");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["count"] = inputDir + it->second;		}
+				}
+
 			}
 			
 			//initialize outputTypes
@@ -166,7 +176,20 @@ SummaryTaxCommand::SummaryTaxCommand(string option)  {
 			if (groupfile == "not open") { groupfile = ""; abort = true; }
 			else if (groupfile == "not found") { groupfile = ""; }
 			else { m->setGroupFile(groupfile); }
+            
+            countfile = validParameter.validFile(parameters, "count", true);
+			if (countfile == "not open") { countfile = ""; abort = true; }
+			else if (countfile == "not found") { countfile = "";  }	
+			else { m->setCountTableFile(countfile); }
+            
+            if ((namefile != "") && (countfile != "")) {
+                m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
+            }
 			
+            if ((groupfile != "") && (countfile != "")) {
+                m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+            }
+            
 			refTaxonomy = validParameter.validFile(parameters, "reftaxonomy", true);
 			if (refTaxonomy == "not found") { refTaxonomy = ""; m->mothurOut("reftaxonomy is not required, but if given will keep the rankIDs in the summary file static."); m->mothurOutEndLine(); }
 			else if (refTaxonomy == "not open") { refTaxonomy = ""; abort = true; }
@@ -177,11 +200,12 @@ SummaryTaxCommand::SummaryTaxCommand(string option)  {
 				outputDir += m->hasPath(taxfile); //if user entered a file with a path then preserve it	
 			}
 			
-			if (namefile == "") {
-				vector<string> files; files.push_back(taxfile);
-				parser.getNameFile(files);
+            if (countfile == "") {
+                if (namefile == "") {
+                    vector<string> files; files.push_back(taxfile);
+                    parser.getNameFile(files);
+                }
 			}
-			
 		}
 	}
 	catch(exception& e) {
@@ -197,23 +221,35 @@ int SummaryTaxCommand::execute(){
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		int start = time(NULL);
 		
-		PhyloSummary* taxaSum;
-		if (refTaxonomy != "") {
-			taxaSum = new PhyloSummary(refTaxonomy, groupfile);
-		}else {
-			taxaSum = new PhyloSummary(groupfile);
-		}
+        GroupMap* groupMap = NULL;
+        CountTable* ct = NULL;
+        if (groupfile != "") {
+            groupMap = new GroupMap(groupfile);
+            groupMap->readMap();
+        }else if (countfile != "") {
+            ct = new CountTable();
+            ct->readTable(countfile);
+        }
 		
-		if (m->control_pressed) { delete taxaSum; return 0; }
+        PhyloSummary* taxaSum;
+        if (countfile != "") {
+            if (refTaxonomy != "") { taxaSum = new PhyloSummary(refTaxonomy, ct); }
+            else { taxaSum = new PhyloSummary(ct); }
+        }else {
+            if (refTaxonomy != "") { taxaSum = new PhyloSummary(refTaxonomy, groupMap); }
+            else { taxaSum = new PhyloSummary(groupMap); }
+		}
+        
+		if (m->control_pressed) { if (groupMap != NULL) { delete groupMap; } if (ct != NULL) { delete ct; } delete taxaSum; return 0; }
 		
 		int numSeqs = 0;
-		if (namefile == "") { numSeqs = taxaSum->summarize(taxfile);  }
-		else {
+		if ((namefile == "") || (countfile != "")) { numSeqs = taxaSum->summarize(taxfile);  }
+		else if (namefile != "") {
 			map<string, vector<string> > nameMap;
 			map<string, vector<string> >::iterator itNames;
 			m->readNames(namefile, nameMap);
 			
-			if (m->control_pressed) { delete taxaSum; return 0; }
+			if (m->control_pressed) { if (groupMap != NULL) { delete groupMap; } if (ct != NULL) { delete ct; } delete taxaSum; return 0; }
 			
 			ifstream in;
 			m->openInputFile(taxfile, in);
@@ -222,6 +258,9 @@ int SummaryTaxCommand::execute(){
 			string name, taxon;
 			
 			while(!in.eof()){
+                
+                if (m->control_pressed) { break; }
+                
 				in >> name >> taxon; m->gobble(in);
 				
 				itNames = nameMap.find(name);
@@ -240,7 +279,7 @@ int SummaryTaxCommand::execute(){
 			in.close();
 		}
 		
-		if (m->control_pressed) {  delete taxaSum; return 0; }
+		if (m->control_pressed) {  if (groupMap != NULL) { delete groupMap; } if (ct != NULL) { delete ct; } delete taxaSum; return 0; }
 		
 		//print summary file
 		ofstream outTaxTree;
@@ -250,6 +289,7 @@ int SummaryTaxCommand::execute(){
 		outTaxTree.close();
 		
 		delete taxaSum;
+        if (groupMap != NULL) { delete groupMap; } if (ct != NULL) { delete ct; }
 		
 		if (m->control_pressed) {  m->mothurRemove(summaryFile); return 0; }
 		

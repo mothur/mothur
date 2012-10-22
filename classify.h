@@ -17,9 +17,7 @@
 #include "database.hpp"
 #include "phylotree.h"
 
-
 class Sequence;
-
 
 /**************************************************************************************************/
 
@@ -37,7 +35,6 @@ public:
 protected:
 
 	map<string, string> taxonomy;  //name maps to taxonomy
-	//map<string, int> genusCount;  //maps genus to count - in essence a list of how many seqs are in each taxonomy
 	map<string, int>::iterator itTax;
 	map<string, string>::iterator it;
 	Database* database;
@@ -45,11 +42,12 @@ protected:
 	
 	string taxFile, templateFile, simpleTax;
 	vector<string> names;
-	int threadID;
-	bool flip, flipped;
+	int threadID, numLevels, numTaxa;
+	bool flip, flipped, shortcuts;
 	
 	int readTaxonomy(string);
 	vector<string> parseTax(string);
+    double getLogExpSum(vector<double>, int&);
 	MothurOut* m;
 	
 };

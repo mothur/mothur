@@ -20,12 +20,12 @@ ReadTree::ReadTree() {
 	}
 }
 /***********************************************************************/
-int ReadTree::AssembleTrees(map<string, string> nameMap) {
+int ReadTree::AssembleTrees() {
 	 try {
 		 //assemble users trees
 		 for (int i = 0; i < Trees.size(); i++) {
 			 if (m->control_pressed) { return 0;  }
-			 Trees[i]->assembleTree(nameMap);
+			 Trees[i]->assembleTree();
 		 }
 		 return 0;
 	 }
@@ -107,7 +107,7 @@ float ReadTree::readBranchLength(istream& f) {
 /***********************************************************************/
 //This class reads a file in Newick form and stores it in a tree.
 
-int ReadNewickTree::read(TreeMap* tmap) {
+int ReadNewickTree::read(CountTable* ct) {
 	try {
 		holder = "";
 		int c, error;
@@ -129,12 +129,12 @@ int ReadNewickTree::read(TreeMap* tmap) {
 				}
 
 				//make new tree
-				T = new Tree(tmap); 
+				T = new Tree(ct); 
 
 				numNodes = T->getNumNodes();
 				numLeaves = T->getNumLeaves();
 				
-				error = readTreeString(tmap); 
+				error = readTreeString(ct); 
 				
 				//save trees for later commands
 				Trees.push_back(T); 
@@ -143,9 +143,9 @@ int ReadNewickTree::read(TreeMap* tmap) {
 		//if you are a nexus file
 		}else if ((c = filehandle.peek()) == '#') {
 			//get right number of seqs from nexus file.
-			Tree* temp = new Tree(tmap);  delete temp;
+			Tree* temp = new Tree(ct);  delete temp;
 			
-			nexusTranslation(tmap);  //reads file through the translation and updates treemap
+			nexusTranslation(ct);  //reads file through the translation and updates treemap
 			while((c = filehandle.peek()) != EOF) { 
 				// get past comments
 				while ((c = filehandle.peek()) != EOF) {	
@@ -166,12 +166,12 @@ int ReadNewickTree::read(TreeMap* tmap) {
 				filehandle.putback(c);  //put back first ( of tree.
 				
 				//make new tree
-				T = new Tree(tmap); 
+				T = new Tree(ct); 
 				numNodes = T->getNumNodes();
 				numLeaves = T->getNumLeaves();
 				
 				//read tree info
-				error = readTreeString(tmap); 
+				error = readTreeString(ct); 
 				 
 				//save trees for later commands
 				Trees.push_back(T); 
@@ -191,7 +191,7 @@ int ReadNewickTree::read(TreeMap* tmap) {
 }
 /**************************************************************************************************/
 //This function read the file through the translation of the sequences names and updates treemap.
-string ReadNewickTree::nexusTranslation(TreeMap* tmap) {
+string ReadNewickTree::nexusTranslation(CountTable* ct) {
 	try {
 		
 		holder = "";
@@ -209,42 +209,14 @@ string ReadNewickTree::nexusTranslation(TreeMap* tmap) {
 			filehandle >> holder; 
 			if(holder == "tree" && comment != 1){return holder;}
 		}
-		
-		//update treemap
-		tmap->namesOfSeqs.clear();
-		
-		/*char c;
-		string number, name;
-		while ((c = filehandle.peek()) != EOF) {	
-			
-			filehandle >> number; 
-			
-			if ((number == "tree") || (number == ";") ) {  name = number; break;  }
-			
-			filehandle >> name; 
-			
-			char lastChar;
-			if (name.length() != 0) { lastChar = name[name.length()-1]; }
-			
-			if ((name == "tree") || (name == ";") ) {  break;  }
-			
-			if (lastChar == ',') {  name.erase(name.end()-1); } //erase the comma
-			*/	
-		
+    
 		string number, name;
 		for(int i=0;i<numSeqs;i++){
 			
 			filehandle >> number;
 			filehandle >> name;
 			name.erase(name.end()-1);  //erase the comma
-			
-			//insert new one with new name
-			string group = tmap->getGroup(name);
-			tmap->treemap[toString(number)].groupname = group;
-			tmap->treemap[toString(number)].vectorIndex = tmap->getIndex(name);
-			//erase old one.  so treemap[sarah].groupnumber is now treemap[1].groupnumber. if number is 1 and name is sarah.
-			tmap->treemap.erase(name);
-			tmap->namesOfSeqs.push_back(number);
+			ct->renameSeq(name, toString(number));
 		}
 		
 		return name;
@@ -256,7 +228,7 @@ string ReadNewickTree::nexusTranslation(TreeMap* tmap) {
 }
 
 /**************************************************************************************************/
-int ReadNewickTree::readTreeString(TreeMap* tmap) {
+int ReadNewickTree::readTreeString(CountTable* ct) {
 	try {
 		
 		int n = 0;
@@ -269,7 +241,7 @@ int ReadNewickTree::readTreeString(TreeMap* tmap) {
 		if(ch == '('){
 			n = numLeaves;  //number of leaves / sequences, we want node 1 to start where the leaves left off
 
-			lc = readNewickInt(filehandle, n, T, tmap);
+			lc = readNewickInt(filehandle, n, T, ct);
 			if (lc == -1) { m->mothurOut("error with lc"); m->mothurOutEndLine(); return -1; } //reports an error in reading
 	
 			if(filehandle.peek()==','){							
@@ -281,7 +253,7 @@ int ReadNewickTree::readTreeString(TreeMap* tmap) {
 			}	
 		
 			if(rooted != 1){								
-				rc = readNewickInt(filehandle, n, T, tmap);
+				rc = readNewickInt(filehandle, n, T, ct);
 				if (rc == -1) { m->mothurOut("error with rc"); m->mothurOutEndLine(); return -1; } //reports an error in reading
 				if(filehandle.peek() == ')'){					
 					readSpecialChar(filehandle,')',"right parenthesis");
@@ -326,7 +298,7 @@ int ReadNewickTree::readTreeString(TreeMap* tmap) {
 }
 /**************************************************************************************************/
 
-int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T, TreeMap* tmap) {
+int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T, CountTable* ct) {
 	try {
 		
 		if (m->control_pressed) { return -1; } 
@@ -339,7 +311,7 @@ int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T, TreeMap* tmap) {
 			//read all children
 			vector<int> childrenNodes;
 			while(f.peek() != ')'){
-				int child = readNewickInt(f, n, T, tmap);
+				int child = readNewickInt(f, n, T, ct);
 				if (child == -1) { return -1; } //reports an error in reading
 		//cout << "child = " << child << endl;		
 				childrenNodes.push_back(child);
@@ -387,12 +359,7 @@ int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T, TreeMap* tmap) {
 			}else{
 				T->tree[n].setBranchLength(0.0); 
 			}						
-			
-			//T->tree[n].setChildren(lc,rc);
-			//T->tree[lc].setParent(n);
-			//T->tree[rc].setParent(n);
-			//T->printTree();  cout << endl;
-			
+						
 			return n++;
 		
 		}else{
@@ -410,33 +377,27 @@ int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T, TreeMap* tmap) {
 			f.putback(d);
 		
 			//set group info
-			string group = tmap->getGroup(name);
+			vector<string> group = ct->getGroups(name);
 			
 			//find index in tree of name
 			int n1 = T->getIndex(name);
 			
 			//adds sequence names that are not in group file to the "xxx" group
-			if(group == "not found") {
+			if(group.size() == 0) {
 				m->mothurOut("Name: " + name + " is not in your groupfile, and will be disregarded. \n");  //readOk = -1; return n1;
 				
-				tmap->namesOfSeqs.push_back(name);
-				tmap->treemap[name].groupname = "xxx";
-				
-				map<string, int>::iterator it;
-				it = tmap->seqsPerGroup.find("xxx");
-				if (it == tmap->seqsPerGroup.end()) { //its a new group
-					tmap->addGroup("xxx");
-					tmap->seqsPerGroup["xxx"] = 1;
-				}else {
-					tmap->seqsPerGroup["xxx"]++;
-				}
-				
-				group = "xxx";
-			}
-			
-			vector<string> tempGroup; tempGroup.push_back(group);
-			
-			T->tree[n1].setGroup(tempGroup);
+                vector<string> currentGroups = ct->getNamesOfGroups();
+                if (!m->inUsersGroups("xxx", currentGroups)) {  ct->addGroup("xxx");  }
+                currentGroups = ct->getNamesOfGroups();
+                vector<int> thisCounts; thisCounts.resize(currentGroups.size(), 0);
+                for (int h = 0; h < currentGroups.size(); h++) {  
+                    if (currentGroups[h] == "xxx") {  thisCounts[h] = 1;  break; }
+                }
+                ct->push_back(name, thisCounts);
+                
+				group.push_back("xxx");
+			}			
+			T->tree[n1].setGroup(group);
 			T->tree[n1].setChildren(-1,-1);
 		
 			if(blen == 1){	

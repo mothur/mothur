@@ -36,7 +36,7 @@ public:
 	
 private:
     map<string, int> names;
-    string accnosfile, fastafile, namefile, groupfile, taxfile, qualfile, flowfile, outputDir;
+    string accnosfile, fastafile, namefile, groupfile, countfile, taxfile, qualfile, flowfile, outputDir;
     bool abort, large;
     vector<string> outputNames;
     
@@ -45,6 +45,7 @@ private:
     int readName();
     int readGroup();
     int readTax();
+    int readCount();
     int readQual();
     
 };

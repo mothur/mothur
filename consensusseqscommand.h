@@ -13,6 +13,7 @@
 
 #include "command.hpp"
 #include "listvector.hpp"
+#include "counttable.h"
 
 class ConsensusSeqsCommand : public Command {
 public:
@@ -34,19 +35,20 @@ public:
 	
 private:
 	
+    CountTable ct;
 	bool abort, allLines;
-	string fastafile, listfile, namefile, label, outputDir;
+	string fastafile, listfile, namefile, countfile, label, outputDir;
 	set<string> labels;
 	vector<string> outputNames;
 	map<string, string> fastaMap;
 	map<string, string> nameMap;
-	map<string, string> nameFileMap;
-	int cutoff;
+	map<string, int> nameFileMap;
+	int cutoff, seqLength;
 	
 	int readFasta();
 	int readNames();
 	int processList(ListVector*&);
-	string getConsSeq(string, ofstream&, string&, int);
+	string getConsSeq(string, ofstream&, int);
 	char getBase(vector<int>, int);
 };
 

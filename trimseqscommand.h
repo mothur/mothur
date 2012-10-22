@@ -14,8 +14,8 @@
 #include "command.hpp"
 #include "sequence.hpp"
 #include "qualityscores.h"
-#include "groupmap.h"
 #include "trimoligos.h"
+#include "counttable.h"
 
 
 class TrimSeqsCommand : public Command {
@@ -36,16 +36,13 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	
-	GroupMap* groupMap;
-    
     struct linePair {
         unsigned long long start;
         unsigned long long end;
         linePair(unsigned long long i, unsigned long long j) : start(i), end(j) {}
         linePair() {}
     };
-
+    
 	bool getOligos(vector<vector<string> >&, vector<vector<string> >&, vector<vector<string> >&);
 	bool keepFirstTrim(Sequence&, QualityScores&);
 	bool removeLastTrim(Sequence&, QualityScores&);
@@ -55,7 +52,7 @@ private:
     string reverseOligo(string);
 
 	bool abort, createGroup;
-	string fastaFile, oligoFile, qFileName, groupfile, nameFile, outputDir;
+	string fastaFile, oligoFile, qFileName, groupfile, nameFile, countfile, outputDir;
 	
 	bool flip, allFiles, qtrim, keepforward;
 	int numFPrimers, numRPrimers, numLinkers, numSpacers, maxAmbig, maxHomoP, minLength, maxLength, processors, tdiffs, bdiffs, pdiffs, ldiffs, sdiffs, comboStarts;
@@ -64,7 +61,6 @@ private:
 	vector<string> revPrimer, outputNames;
 	set<string> filesToRemove;
 	map<string, int> barcodes;
-    map<string, int> rbarcodes;
 	vector<string> groupVector;
 	map<string, int> primers;
     vector<string>  linker;
@@ -75,13 +71,15 @@ private:
 	vector<string> barcodeNameVector;	//needed here?
 	map<string, int> groupCounts;  
 	map<string, string> nameMap;
+    map<string, int> nameCount; //for countfile name -> repCount
+    map<string, string> groupMap; //for countfile name -> group
 
 	vector<int> processIDS;   //processid
 	vector<linePair> lines;
 	vector<linePair> qLines;
 	
-	int driverCreateTrim(string, string, string, string, string, string, string, string, string, vector<vector<string> >, vector<vector<string> >, vector<vector<string> >, linePair, linePair);	
-	int createProcessesCreateTrim(string, string, string, string, string, string, string, string, string, vector<vector<string> >, vector<vector<string> >, vector<vector<string> >);
+	int driverCreateTrim(string, string, string, string, string, string, string, string, string, string, string, vector<vector<string> >, vector<vector<string> >, vector<vector<string> >, linePair, linePair);	
+	int createProcessesCreateTrim(string, string, string, string, string, string, string, string, string, string, string, vector<vector<string> >, vector<vector<string> >, vector<vector<string> >);
 	int setLines(string, string);
 };
 
@@ -92,7 +90,7 @@ private:
 struct trimData {
     unsigned long long start, end;
     MothurOut* m;
-    string filename, qFileName, trimFileName, scrapFileName, trimQFileName, scrapQFileName, trimNFileName, scrapNFileName, groupFileName, nameFile;
+    string filename, qFileName, trimFileName, scrapFileName, trimQFileName, scrapQFileName, trimNFileName, scrapNFileName, trimCFileName, scrapCFileName, groupFileName, nameFile, countfile;
 	vector<vector<string> > fastaFileNames;
     vector<vector<string> > qualFileNames;
     vector<vector<string> > nameFileNames;
@@ -103,8 +101,8 @@ struct trimData {
 	double qRollAverage, qThreshold, qWindowAverage, qAverage;
     vector<string> revPrimer;
 	map<string, int> barcodes;
-    map<string, int> rbarcodes;
 	map<string, int> primers;
+    map<string, int> nameCount;
     vector<string>  linker;
     vector<string>  spacer;
 	map<string, int> combos;
@@ -112,22 +110,26 @@ struct trimData {
 	vector<string> barcodeNameVector;	
 	map<string, int> groupCounts;  
 	map<string, string> nameMap;
+    map<string, string> groupMap;
     
 	trimData(){}
-	trimData(string fn, string qn, string nf, string tn, string sn, string tqn, string sqn, string tnn, string snn, string gn, vector<vector<string> > ffn, vector<vector<string> > qfn, vector<vector<string> > nfn, unsigned long long lstart, unsigned long long lend, unsigned long long qstart, unsigned long long qend,  MothurOut* mout,
-                      int pd, int bd, int ld, int sd, int td, map<string, int> pri, map<string, int> bar, map<string, int> rbar, vector<string> revP, vector<string> li, vector<string> spa, 
+	trimData(string fn, string qn, string nf, string cf, string tn, string sn, string tqn, string sqn, string tnn, string snn, string tcn, string scn,string gn, vector<vector<string> > ffn, vector<vector<string> > qfn, vector<vector<string> > nfn, unsigned long long lstart, unsigned long long lend, unsigned long long qstart, unsigned long long qend,  MothurOut* mout,
+                      int pd, int bd, int ld, int sd, int td, map<string, int> pri, map<string, int> bar, vector<string> revP, vector<string> li, vector<string> spa, 
                       vector<string> priNameVector, vector<string> barNameVector, bool cGroup, bool aFiles, bool keepF, int keepfi, int removeL,
                       int WindowStep, int WindowSize, int WindowAverage, bool trim, double Threshold, double Average, double RollAverage,
-                      int minL, int maxA, int maxH, int maxL, bool fli, map<string, string> nm) {
+                      int minL, int maxA, int maxH, int maxL, bool fli, map<string, string> nm, map<string, int> ncount) {
         filename = fn;
         qFileName = qn;
         nameFile = nf;
+        countfile = cf;
         trimFileName = tn;
         scrapFileName = sn;
         trimQFileName = tqn;
         scrapQFileName = sqn;
         trimNFileName = tnn;
         scrapNFileName = snn;
+        trimCFileName = tcn;
+        scrapCFileName = scn;
         groupFileName = gn;
         fastaFileNames = ffn;
         qualFileNames = qfn;
@@ -137,6 +139,7 @@ struct trimData {
         qlineStart = qstart;
         qlineEnd = qend;
 		m = mout;
+        nameCount = ncount;
         
         pdiffs = pd;
         bdiffs = bd;
@@ -144,7 +147,6 @@ struct trimData {
         sdiffs = sd;
         tdiffs = td;
         barcodes = bar;
-        rbarcodes = rbar;
         primers = pri;      numFPrimers = primers.size();
         revPrimer = revP;   numRPrimers = revPrimer.size();
         linker = li;        numLinkers = linker.size();
@@ -203,7 +205,7 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
 		
 		
 		ofstream outGroupsFile;
-		if (pDataArray->createGroup){	pDataArray->m->openOutputFile(pDataArray->groupFileName, outGroupsFile);   }
+		if ((pDataArray->createGroup) && (pDataArray->countfile == "")){	pDataArray->m->openOutputFile(pDataArray->groupFileName, outGroupsFile);   }
 		if(pDataArray->allFiles){
 			for (int i = 0; i < pDataArray->fastaFileNames.size(); i++) { //clears old file
 				for (int j = 0; j < pDataArray->fastaFileNames[i].size(); j++) { //clears old file
@@ -222,6 +224,14 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
 			}
 		}
 		
+        ofstream trimCountFile;
+		ofstream scrapCountFile;
+		if(pDataArray->countfile != ""){
+			pDataArray->m->openOutputFile(pDataArray->trimCFileName, trimCountFile);
+			pDataArray->m->openOutputFile(pDataArray->scrapCFileName, scrapCountFile);
+            if ((pDataArray->lineStart == 0) || (pDataArray->lineStart == 1)) { trimCountFile << "Representative_Sequence\ttotal" << endl; scrapCountFile << "Representative_Sequence\ttotal" << endl; }
+		}
+        
 		ifstream inFASTA;
 		pDataArray->m->openInputFile(pDataArray->filename, inFASTA);
 		if ((pDataArray->lineStart == 0) || (pDataArray->lineStart == 1)) {
@@ -241,14 +251,18 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
 		}
 		
 		
-		TrimOligos trimOligos(pDataArray->pdiffs, pDataArray->bdiffs, pDataArray->ldiffs, pDataArray->sdiffs, pDataArray->primers, pDataArray->barcodes, pDataArray->rbarcodes, pDataArray->revPrimer, pDataArray->linker, pDataArray->spacer);
+		TrimOligos trimOligos(pDataArray->pdiffs, pDataArray->bdiffs, pDataArray->ldiffs, pDataArray->sdiffs, pDataArray->primers, pDataArray->barcodes, pDataArray->revPrimer, pDataArray->linker, pDataArray->spacer);
         
 		pDataArray->count = pDataArray->lineEnd;
 		for(int i = 0; i < pDataArray->lineEnd; i++){ //end is the number of sequences to process
 			           
 			if (pDataArray->m->control_pressed) { 
 				inFASTA.close(); trimFASTAFile.close(); scrapFASTAFile.close();
-				if (pDataArray->createGroup) {	 outGroupsFile.close();   }
+				if ((pDataArray->createGroup) && (pDataArray->countfile == "")) {	 outGroupsFile.close();   }
+                if(pDataArray->qFileName != "")	{	qFile.close();	scrapQualFile.close(); trimQualFile.close();	}
+                if(pDataArray->nameFile != "")	{	scrapNameFile.close(); trimNameFile.close();	}
+                if(pDataArray->countfile != "")	{	scrapCountFile.close(); trimCountFile.close();	}
+
 				if(pDataArray->qFileName != ""){ qFile.close(); }
 				return 0;
 			}
@@ -278,12 +292,6 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
                 
 				if(pDataArray->barcodes.size() != 0){
 					success = trimOligos.stripBarcode(currSeq, currQual, barcodeIndex);
-					if(success > pDataArray->bdiffs)		{	trashCode += 'b';	}
-					else{ currentSeqsDiffs += success;  }
-				}
-                
-				if(pDataArray->rbarcodes.size() != 0){
-					success = trimOligos.stripRBarcode(currSeq, currQual, barcodeIndex);
 					if(success > pDataArray->bdiffs)		{	trashCode += 'b';	}
 					else{ currentSeqsDiffs += success;  }
 				}
@@ -399,6 +407,15 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
 						else { pDataArray->m->mothurOut("[ERROR]: " + currSeq.getName() + " is not in your namefile, please correct."); pDataArray->m->mothurOutEndLine(); }
 					}
 					
+                    int numRedundants = 0;
+                    if (pDataArray->countfile != "") {
+                        map<string, int>::iterator itCount = pDataArray->nameCount.find(currSeq.getName());
+                        if (itCount != pDataArray->nameCount.end()) { 
+                            trimCountFile << itCount->first << '\t' << itCount->second << endl;
+                            numRedundants = itCount->second-1;
+                        }else { pDataArray->m->mothurOut("[ERROR]: " + currSeq.getName() + " is not in your count file, please correct."); pDataArray->m->mothurOutEndLine(); }
+                    }
+					
 					if (pDataArray->createGroup) {
 						if(pDataArray->barcodes.size() != 0){
 							string thisGroup = pDataArray->barcodeNameVector[barcodeIndex];
@@ -412,9 +429,9 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
 								} 
 							}
 							
-							outGroupsFile << currSeq.getName() << '\t' << thisGroup << endl;
+							if (pDataArray->countfile == "") { outGroupsFile << currSeq.getName() << '\t' << thisGroup << endl; }
+                            else {   pDataArray->groupMap[currSeq.getName()] = thisGroup; }
 							
-                            int numRedundants = 0;
 							if (pDataArray->nameFile != "") {
 								map<string, string>::iterator itName = pDataArray->nameMap.find(currSeq.getName());
 								if (itName != pDataArray->nameMap.end()) { 
@@ -462,6 +479,12 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
 						if (itName != pDataArray->nameMap.end()) {  scrapNameFile << itName->first << '\t' << itName->second << endl; }
 						else { pDataArray->m->mothurOut("[ERROR]: " + currSeq.getName() + " is not in your namefile, please correct."); pDataArray->m->mothurOutEndLine(); }
 					}
+                    if (pDataArray->countfile != "") {
+                        map<string, int>::iterator itCount = pDataArray->nameCount.find(currSeq.getName());
+                        if (itCount != pDataArray->nameCount.end()) { 
+                            trimCountFile << itCount->first << '\t' << itCount->second << endl;
+                        }else { pDataArray->m->mothurOut("[ERROR]: " + currSeq.getName() + " is not in your count file, please correct."); pDataArray->m->mothurOutEndLine(); }
+                    }
 					currSeq.setName(currSeq.getName() + '|' + trashCode);
 					currSeq.setUnaligned(origSeq);
 					currSeq.setAligned(origSeq);

@@ -8,27 +8,25 @@
 
 #include "treereader.h"
 #include "readtree.h"
+#include "groupmap.h"
 
 /***********************************************************************/
-
-TreeReader::TreeReader(string tf) : treefile(tf)  { 
+TreeReader::TreeReader(string tf, string cf) : treefile(tf), countfile(cf)  { 
     try {
         m = MothurOut::getInstance();
+        ct = new CountTable();
+        ct->readTable(cf);
+        
+        //if no groupinfo in count file we need to add it
+        if (!ct->hasGroupInfo()) {
+            ct->addGroup("Group1");
+            vector<string> namesOfSeqs = ct->getNamesOfSeqs();
+            for (int i = 0; i < namesOfSeqs.size(); i++) { 
+                ct->setAbund(namesOfSeqs[i], "Group1", ct->getNumSeqs(namesOfSeqs[i]));
+            }
+        }
         namefile = "";
         groupfile = "";
-        readTrees();
-    }
-	catch(exception& e) {
-		m->errorOut(e, "TreeReader", "TreeReader");
-		exit(1);
-	}
-}
-/***********************************************************************/
-
-TreeReader::TreeReader(string tf, string gf) : treefile(tf),  groupfile(gf)  { 
-    try {
-        m = MothurOut::getInstance();
-        namefile = "";
         readTrees();
     }
 	catch(exception& e) {
@@ -40,6 +38,29 @@ TreeReader::TreeReader(string tf, string gf) : treefile(tf),  groupfile(gf)  {
 TreeReader::TreeReader(string tf, string gf, string nf) : treefile(tf),  groupfile(gf), namefile(nf)  { 
     try {
         m = MothurOut::getInstance();
+        countfile = "";
+        ct = new CountTable();
+        if (namefile != "") { ct->createTable(namefile, groupfile, true); }
+        else {
+            Tree* tree = new Tree(treefile); delete tree;  //extracts names from tree to make faked out groupmap
+            set<string> nameMap;
+            map<string, string> groupMap;
+            set<string> gps;
+            for (int i = 0; i < m->Treenames.size(); i++) { nameMap.insert(m->Treenames[i]);  }
+            if (groupfile == "") { gps.insert("Group1"); for (int i = 0; i < m->Treenames.size(); i++) { groupMap[m->Treenames[i]] = "Group1"; } }
+            else {
+                GroupMap g(groupfile); 
+                g.readMap();
+                vector<string> seqs = g.getNamesSeqs();
+                for (int i = 0; i < seqs.size(); i++) {  
+                    string group = g.getGroup(seqs[i]);
+                    groupMap[seqs[i]] = group;
+                    gps.insert(group);
+                }
+            }
+            ct->createTable(nameMap, groupMap, gps);
+        }
+
         readTrees();
     }
 	catch(exception& e) {
@@ -51,22 +72,15 @@ TreeReader::TreeReader(string tf, string gf, string nf) : treefile(tf),  groupfi
 bool TreeReader::readTrees()  { 
     try {
         
-        tmap = new TreeMap();
-        if (groupfile != "") {      tmap->readMap(groupfile);        }
-		else{ //fake out by putting everyone in one group
-			Tree* tree = new Tree(treefile); delete tree;  //extracts names from tree to make faked out groupmap
-			for (int i = 0; i < m->Treenames.size(); i++) { tmap->addSeq(m->Treenames[i], "Group1"); }
-		}
-		
-        int numUniquesInName = 0;
-		if (namefile != "") { numUniquesInName = readNamesFile(); }
+        int numUniquesInName = ct->getNumUniqueSeqs();
+		//if (namefile != "") { numUniquesInName = readNamesFile(); }
 		
 		ReadTree* read = new ReadNewickTree(treefile);
-		int readOk = read->read(tmap); 
+		int readOk = read->read(ct); 
 		
 		if (readOk != 0) { m->mothurOut("Read Terminated."); m->mothurOutEndLine();  delete read; m->control_pressed=true; return 0; }
 		
-		read->AssembleTrees(names);
+		read->AssembleTrees();
 		trees = read->getTrees();
 		delete read;
         
@@ -74,18 +88,19 @@ bool TreeReader::readTrees()  {
 		//if you provide a namefile we will use the numNames in the namefile as long as the number of unique match the tree names size.
 		int numNamesInTree;
 		if (namefile != "")  {  
-			if (numUniquesInName == m->Treenames.size()) {  numNamesInTree = nameMap.size();  }
+			if (numUniquesInName == m->Treenames.size()) {  numNamesInTree = ct->getNumSeqs();  }
 			else {   numNamesInTree = m->Treenames.size();  }
 		}else {  numNamesInTree = m->Treenames.size();  }
 		
 		
 		//output any names that are in group file but not in tree
-		if (numNamesInTree < tmap->getNumSeqs()) {
-			for (int i = 0; i < tmap->namesOfSeqs.size(); i++) {
+		if (numNamesInTree < ct->getNumSeqs()) {
+            vector<string> namesSeqsCt = ct->getNamesOfSeqs();
+			for (int i = 0; i < namesSeqsCt.size(); i++) {
 				//is that name in the tree?
 				int count = 0;
 				for (int j = 0; j < m->Treenames.size(); j++) {
-					if (tmap->namesOfSeqs[i] == m->Treenames[j]) { break; } //found it
+					if (namesSeqsCt[i] == m->Treenames[j]) { break; } //found it
 					count++;
 				}
 				
@@ -93,14 +108,8 @@ bool TreeReader::readTrees()  {
 				
 				//then you did not find it so report it 
 				if (count == m->Treenames.size()) { 
-					//if it is in your namefile then don't remove
-					map<string, string>::iterator it = nameMap.find(tmap->namesOfSeqs[i]);
-					
-					if (it == nameMap.end()) {
-						m->mothurOut(tmap->namesOfSeqs[i] + " is in your groupfile and not in your tree. It will be disregarded."); m->mothurOutEndLine();
-						tmap->removeSeq(tmap->namesOfSeqs[i]);
-						i--; //need this because removeSeq removes name from namesOfSeqs
-					}
+                    m->mothurOut(namesSeqsCt[i] + " is in your name or group file and not in your tree. It will be disregarded."); m->mothurOutEndLine();
+                    ct->remove(namesSeqsCt[i]);
 				}
 			}
 		}
@@ -109,47 +118,6 @@ bool TreeReader::readTrees()  {
     }
 	catch(exception& e) {
 		m->errorOut(e, "TreeReader", "readTrees");
-		exit(1);
-	}
-}
-/*****************************************************************/
-int TreeReader::readNamesFile() {
-	try {
-		nameMap.clear();
-        names.clear();
-		int numUniquesInName = 0;
-		
-		ifstream in;
-		m->openInputFile(namefile, in);
-		
-		string first, second;
-		map<string, string>::iterator itNames;
-		
-		while(!in.eof()) {
-			in >> first >> second; m->gobble(in);
-			
-			numUniquesInName++;
-			
-			itNames = nameMap.find(first);
-			if (itNames == nameMap.end()) {  
-				names[first] = second; 
-				
-				//we need a list of names in your namefile to use above when removing extra seqs above so we don't remove them
-				vector<string> dupNames;
-				m->splitAtComma(second, dupNames);
-				
-				for (int i = 0; i < dupNames.size(); i++) {	
-					nameMap[dupNames[i]] = first; 
-					if ((groupfile == "") && (i != 0)) { tmap->addSeq(dupNames[i], "Group1"); } 
-				}
-			}else {  m->mothurOut(first + " has already been seen in namefile, disregarding names file."); m->mothurOutEndLine(); in.close(); nameMap.clear(); names.clear(); namefile = ""; return 1; }			
-		}
-		in.close();
-		
-		return numUniquesInName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "TreeReader", "readNamesFile");
 		exit(1);
 	}
 }

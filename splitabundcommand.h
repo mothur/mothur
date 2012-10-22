@@ -22,6 +22,7 @@ also allow an option where a user can give a group file with the list or names f
 #include "inputdata.h"
 #include "listvector.hpp"
 #include "sequence.hpp"
+#include "counttable.h"
 
 /***************************************************************************************/
 
@@ -47,24 +48,24 @@ private:
 	int splitList(ListVector*);
 	int splitNames(); //namefile
 	int writeNames(); 
-	int writeList(ListVector*, string); 
+	int writeList(ListVector*, string, int); 
 	int writeAccnos(string); 
 	int parseGroup(string); 
 	int parseFasta(string); 
+    int parseCount(string);
+    int splitCount();
 	int readNamesFile(); //namefile
 	int createNameMap(ListVector*);
 	
 	vector<string> outputNames;
-	ListVector* list;
-	GroupMap* groupMap;
-	InputData* input;
+    GroupMap groupMap;
+    CountTable ct;
 	
-	string outputDir, listfile, namefile, groupfile, label, groups, fastafile, inputFile;
+	string outputDir, listfile, namefile, groupfile, countfile, label, groups, fastafile, inputFile;
 	set<string> labels, rareNames, abundNames;
 	vector<string> Groups;
 	bool abort, allLines, accnos;
 	int cutoff;
-	//map<string, bool> wroteListFile;
 	map<string, string> nameMap;
 	
 	

@@ -12,7 +12,7 @@
 
 #include "command.hpp"
 #include "weighted.h"
-#include "treemap.h"
+#include "counttable.h"
 #include "progress.hpp"
 #include "sharedutilities.h"
 #include "fileoutput.h"
@@ -43,7 +43,7 @@ class UnifracWeightedCommand : public Command {
 			linePair(int i, int j) : start(i), num(j) {}
 		};
 		vector<linePair> lines;
-        TreeMap* tmap;
+        CountTable* ct;
 		FileOutput* output;
 		vector<Tree*> T;	   //user trees
 		vector<double> utreeScores;  //user tree unweighted scores
@@ -58,7 +58,7 @@ class UnifracWeightedCommand : public Command {
 		map<float, float>  validScores;  //map contains scores from random
 		
 		bool abort, phylip, random, includeRoot, subsample, consensus;
-		string groups, itersString, outputForm, treefile, groupfile, namefile;
+		string groups, itersString, outputForm, treefile, groupfile, namefile, countfile;
 		vector<string> Groups, outputNames; //holds groups to be used
 		int processors, subsampleSize, subsampleIters;
 		ofstream outSum;
@@ -73,7 +73,7 @@ class UnifracWeightedCommand : public Command {
 		int createProcesses(Tree*,  vector< vector<string> >,  vector< vector<double> >&);
 		int driver(Tree*, vector< vector<string> >, int, int,  vector< vector<double> >&);
         int runRandomCalcs(Tree*, vector<double>);
-        vector<Tree*> buildTrees(vector< vector<double> >&, int, TreeMap&);
+        vector<Tree*> buildTrees(vector< vector<double> >&, int, CountTable&);
         int getConsensusTrees(vector< vector<double> >&, int);
         int getAverageSTDMatrices(vector< vector<double> >&, int);
 		

@@ -15,8 +15,9 @@ vector<string> SortSeqsCommand::setParameters(){
 	try {
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pfasta);
         CommandParameter pflow("flow", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pflow);
-		CommandParameter pname("name", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pname);
-		CommandParameter pgroup("group", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pgroup);
+        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "FNGLT", "none",false,false); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "FNGLT", "none",false,false); parameters.push_back(pcount);
+		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "FNGLT", "none",false,false); parameters.push_back(pgroup);
 		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(ptaxonomy);
 		CommandParameter pqfile("qfile", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pqfile);
 		CommandParameter plarge("large", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(plarge);
@@ -37,8 +38,8 @@ vector<string> SortSeqsCommand::setParameters(){
 string SortSeqsCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The sort.seqs command puts the sequences in the same order for the following file types: accnos fasta, name, group, taxonomy, flow or quality file.\n";
-        helpString += "The sort.seqs command parameters are accnos, fasta, name, group, taxonomy, flow, qfile and large.\n";
+		helpString += "The sort.seqs command puts the sequences in the same order for the following file types: accnos fasta, name, group, count, taxonomy, flow or quality file.\n";
+        helpString += "The sort.seqs command parameters are accnos, fasta, name, group, count, taxonomy, flow, qfile and large.\n";
         helpString += "The accnos file allows you to specify the order you want the files in.  If none is provided, mothur will use the order of the first file it reads.\n";
         helpString += "The large parameters is used to indicate your files are too large to fit in RAM.\n";
 		helpString += "The sort.seqs command should be in the following format: sort.seqs(fasta=yourFasta).\n";
@@ -65,6 +66,7 @@ string SortSeqsCommand::getOutputFileNameTag(string type, string inputName=""){
             if (type == "fasta")            {   outputFileName =  "sorted" + m->getExtension(inputName);   }
             else if (type == "taxonomy")    {   outputFileName =  "sorted" + m->getExtension(inputName);   }
             else if (type == "name")        {   outputFileName =  "sorted" + m->getExtension(inputName);   }
+            else if (type == "count")       {   outputFileName =  "sorted" + m->getExtension(inputName);   }
             else if (type == "group")       {   outputFileName =  "sorted" + m->getExtension(inputName);   }
             else if (type == "flow")        {   outputFileName =  "sorted" + m->getExtension(inputName);   }
             else if (type == "qfile")       {   outputFileName =  "sorted" + m->getExtension(inputName);   }
@@ -87,6 +89,7 @@ SortSeqsCommand::SortSeqsCommand(){
 		outputTypes["fasta"] = tempOutNames;
 		outputTypes["taxonomy"] = tempOutNames;
 		outputTypes["name"] = tempOutNames;
+        outputTypes["count"] = tempOutNames;
 		outputTypes["group"] = tempOutNames;
 		outputTypes["qfile"] = tempOutNames;
         outputTypes["flow"] = tempOutNames;
@@ -127,6 +130,7 @@ SortSeqsCommand::SortSeqsCommand(string option)  {
 			outputTypes["group"] = tempOutNames;
 			outputTypes["qfile"] = tempOutNames;
             outputTypes["flow"] = tempOutNames;
+            outputTypes["count"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
@@ -191,6 +195,14 @@ SortSeqsCommand::SortSeqsCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["flow"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("count");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["count"] = inputDir + it->second;		}
+				}
 			}
             
 			
@@ -229,16 +241,31 @@ SortSeqsCommand::SortSeqsCommand(string option)  {
 			if (qualfile == "not open") { abort = true; }
 			else if (qualfile == "not found") {  qualfile = "";  }			
 			else { m->setQualFile(qualfile); }
+            
+            countfile = validParameter.validFile(parameters, "count", true);
+			if (countfile == "not open") { countfile = ""; abort = true; }
+			else if (countfile == "not found") { countfile = "";  }	
+			else { m->setCountTableFile(countfile); }
+            
+            if ((namefile != "") && (countfile != "")) {
+                m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
+            }
+			
+            if ((groupfile != "") && (countfile != "")) {
+                m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+            }
 			
             string temp = validParameter.validFile(parameters, "large", false);		if (temp == "not found") { temp = "f"; }
 			large = m->isTrue(temp);
             
-			if ((fastafile == "") && (namefile == "") && (groupfile == "") && (taxfile == "") && (flowfile == "") && (qualfile == ""))  { m->mothurOut("You must provide at least one of the following: fasta, name, group, taxonomy, flow or quality."); m->mothurOutEndLine(); abort = true; }
+			if ((fastafile == "") && (namefile == "") && (countfile == "") && (groupfile == "") && (taxfile == "") && (flowfile == "") && (qualfile == ""))  { m->mothurOut("You must provide at least one of the following: fasta, name, group, count, taxonomy, flow or quality."); m->mothurOutEndLine(); abort = true; }
 			
-			if ((fastafile != "") && (namefile == "")) {
-				vector<string> files; files.push_back(fastafile);
-				parser.getNameFile(files);
-			}
+            if (countfile == "") {
+                if ((fastafile != "") && (namefile == "")) {
+                    vector<string> files; files.push_back(fastafile);
+                    parser.getNameFile(files);
+                }
+            }
 		}
         
 	}
@@ -267,6 +294,7 @@ int SortSeqsCommand::execute(){
         if (qualfile != "")			{		readQual();		}
         if (namefile != "")			{		readName();		}
 		if (groupfile != "")		{		readGroup();	}
+        if (countfile != "")		{		readCount();	}
         if (taxfile != "")			{		readTax();		}
 		
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
@@ -308,7 +336,12 @@ int SortSeqsCommand::execute(){
             itTypes = outputTypes.find("flow");
 			if (itTypes != outputTypes.end()) {
 				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setFlowFile(current); }
-			}	
+			}
+            
+            itTypes = outputTypes.find("count");
+			if (itTypes != outputTypes.end()) {
+				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setCountTableFile(current); }
+			}
 		}
 		
 		return 0;		
@@ -927,7 +960,88 @@ int SortSeqsCommand::readName(){
 		exit(1);
 	}
 }
-
+//**********************************************************************************************************************
+int SortSeqsCommand::readCount(){
+	try {
+		string thisOutputDir = outputDir;
+		if (outputDir == "") {  thisOutputDir += m->hasPath(countfile);  }
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(countfile)) + getOutputFileNameTag("count", countfile); 
+        outputTypes["count"].push_back(outputFileName);  outputNames.push_back(outputFileName);
+        
+		ofstream out;
+		m->openOutputFile(outputFileName, out);
+        
+		ifstream in;
+		m->openInputFile(countfile, in);
+		string firstCol, rest;
+		
+        if (names.size() != 0) {//this is not the first file we are reading so we need to use the order we already have
+            
+            vector<string> seqs; seqs.resize(names.size(), "");
+            
+            string headers = m->getline(in); m->gobble(in);
+            
+            while(!in.eof()){
+                if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+                
+                in >> firstCol;		m->gobble(in);		
+                rest = m->getline(in);    m->gobble(in);
+                
+                if (firstCol != "") {
+                    map<string, int>::iterator it = names.find(firstCol);
+                    if (it != names.end()) { //we found it, so put it in the vector in the right place.
+                        seqs[it->second] = firstCol + '\t' + rest;  
+                    }else { //if we cant find it then add it to the end
+                        names[firstCol] = seqs.size();
+                        seqs.push_back((firstCol + '\t' + rest));
+                        m->mothurOut(firstCol + " was not in the contained the file which determined the order, adding it to the end.\n");
+                    }
+                }
+            }
+            in.close();	
+            
+            int count = 0;
+            out << headers << endl;
+            for (int i = 0; i < seqs.size(); i++) {
+                if (seqs[i] != "") { out << seqs[i] << endl; count++; }
+            }
+            out.close();
+            
+            m->mothurOut("Ordered " + toString(count) + " sequences from " + countfile + ".\n");
+            
+        }else { //read in file to fill names
+            int count = 0;
+            
+            string headers = m->getline(in); m->gobble(in);
+            out << headers << endl;
+            
+            while(!in.eof()){
+                if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
+                
+                in >> firstCol;		m->gobble(in);		
+                rest = m->getline(in);  m->gobble(in);
+                
+                if (firstCol != "") {
+                    //if this name is in the accnos file
+                    names[firstCol] = count;
+                    count++;
+                    out << firstCol << '\t' << rest << endl;
+                }
+                m->gobble(in);
+            }
+            in.close();	
+            out.close();
+            
+            m->mothurOut("\nUsing " + countfile + " to determine the order. It contains " + toString(count) + " representative sequences.\n");
+        }
+        
+		return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SortSeqsCommand", "readCount");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 int SortSeqsCommand::readGroup(){
 	try {

@@ -19,9 +19,11 @@
 #include "phylotree.h"
 #include "phylosummary.h"
 #include "knn.h"
+#include "kmertree.h"
+#include "aligntree.h"
 
 
-//KNN and Bayesian methods modeled from algorithms in
+//KNN and Wang methods modeled from algorithms in
 //Naı¨ve Bayesian Classiﬁer for Rapid Assignment of rRNA Sequences 
 //into the New Bacterial Taxonomy􏰎† 
 //Qiong Wang,1 George M. Garrity,1,2 James M. Tiedje,1,2 and James R. Cole1* 
@@ -62,6 +64,7 @@ private:
 	vector<linePair*> lines;
 	vector<string> fastaFileNames;
 	vector<string> namefileNames;
+    vector<string> countfileNames;
 	vector<string> groupfileNames;
 	vector<string> outputNames;
 	map<string, vector<string> > nameMap;
@@ -70,10 +73,10 @@ private:
 	Classify* classify;
 	ReferenceDB* rdb;
 	
-	string fastaFileName, templateFileName, distanceFileName, namefile, search, method, taxonomyFileName, outputDir, groupfile;
+	string fastaFileName, templateFileName, countfile, distanceFileName, namefile, search, method, taxonomyFileName, outputDir, groupfile;
 	int processors, kmerSize, numWanted, cutoff, iters;
 	float match, misMatch, gapOpen, gapExtend;
-	bool abort, probs, save, flip;
+	bool abort, probs, save, flip, hasName, hasCount, writeShortcuts;
 	
 	int driver(linePair*, string, string, string, string);
 	int createProcesses(string, string, string, string); 
@@ -99,10 +102,10 @@ struct classifyData {
 	MothurOut* m;
 	float match, misMatch, gapOpen, gapExtend;
 	int count, kmerSize, threadID, cutoff, iters, numWanted;
-	bool probs, flip;
+	bool probs, flip, writeShortcuts;
 	 
 	classifyData(){}
-	classifyData(string acc, bool p, string me, string te, string tx, string a, string r, string f, string se, int ks, int i, int numW, MothurOut* mout, unsigned long long st, unsigned long long en, float ma, float misMa, float gapO, float gapE, int cut, int tid, bool fli) {
+	classifyData(string acc, bool p, string me, string te, string tx, string a, string r, string f, string se, int ks, int i, int numW, MothurOut* mout, unsigned long long st, unsigned long long en, float ma, float misMa, float gapO, float gapE, int cut, int tid, bool fli, bool wsh) {
 		accnos = acc;
 		taxonomyFileName = tx;
 		templateFileName = te;
@@ -126,6 +129,7 @@ struct classifyData {
 		probs = p;
 		count = 0;
 		flip = fli;
+        writeShortcuts = wsh;
 	}
 };
 
@@ -162,12 +166,17 @@ static DWORD WINAPI MyClassThreadFunction(LPVOID lpParam){
 		
 		//make classify
 		Classify* myclassify;
-		if(pDataArray->method == "bayesian"){	myclassify = new Bayesian(pDataArray->taxonomyFileName, pDataArray->templateFileName, pDataArray->search, pDataArray->kmerSize, pDataArray->cutoff, pDataArray->iters, pDataArray->threadID, pDataArray->flip);		}
+		if(pDataArray->method == "bayesian"){	myclassify = new Bayesian(pDataArray->taxonomyFileName, pDataArray->templateFileName, pDataArray->search, pDataArray->kmerSize, pDataArray->cutoff, pDataArray->iters, pDataArray->threadID, pDataArray->flip, pDataArray->writeShortcuts);		}
 		else if(pDataArray->method == "knn"){	myclassify = new Knn(pDataArray->taxonomyFileName, pDataArray->templateFileName, pDataArray->search, pDataArray->kmerSize, pDataArray->gapOpen, pDataArray->gapExtend, pDataArray->match, pDataArray->misMatch, pDataArray->numWanted, pDataArray->threadID);				}
+        else if(pDataArray->method == "zap"){	
+            outputMethodTag = search + "_" + outputMethodTag;
+            if (pDataArray->search == "kmer") {   myclassify = new KmerTree(pDataArray->templateFileName, pDataArray->taxonomyFileName, pDataArray->kmerSize, pDataArray->cutoff); }
+            else {  myclassify = new AlignTree(pDataArray->templateFileName, pDataArray->taxonomyFileName, pDataArray->cutoff);  }
+        }
 		else {
 			pDataArray->m->mothurOut(pDataArray->search + " is not a valid method option. I will run the command using bayesian.");
 			pDataArray->m->mothurOutEndLine();
-			myclassify = new Bayesian(pDataArray->taxonomyFileName, pDataArray->templateFileName, pDataArray->search, pDataArray->kmerSize, pDataArray->cutoff, pDataArray->iters, pDataArray->threadID, pDataArray->flip);	
+			myclassify = new Bayesian(pDataArray->taxonomyFileName, pDataArray->templateFileName, pDataArray->search, pDataArray->kmerSize, pDataArray->cutoff, pDataArray->iters, pDataArray->threadID, pDataArray->flip, pDataArray->writeShortcuts);	
 		}
 		
 		if (pDataArray->m->control_pressed) { delete myclassify; return 0; }

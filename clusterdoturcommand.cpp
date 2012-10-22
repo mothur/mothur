@@ -14,7 +14,8 @@
 vector<string> ClusterDoturCommand::setParameters(){	
 	try {
 		CommandParameter pphylip("phylip", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pphylip);
-		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
+		CommandParameter pname("name", "InputTypes", "", "", "namecount", "none", "none",false,false); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "namecount", "none", "none",false,false); parameters.push_back(pcount);
 		CommandParameter pcutoff("cutoff", "Number", "", "10", "", "", "",false,false); parameters.push_back(pcutoff);
 		CommandParameter pprecision("precision", "Number", "", "100", "", "", "",false,false); parameters.push_back(pprecision);
 		CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted", "average", "", "", "",false,false); parameters.push_back(pmethod);
@@ -37,7 +38,7 @@ string ClusterDoturCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The cluster.classic command clusters using the algorithm from dotur. \n";
-		helpString += "The cluster.classic command parameter options are phylip, name, method, cuttoff, hard, sim, precision. Phylip is required, unless you have a valid current file.\n";
+		helpString += "The cluster.classic command parameter options are phylip, name, count, method, cuttoff, hard, sim, precision. Phylip is required, unless you have a valid current file.\n";
 		helpString += "The cluster.classic command should be in the following format: \n";
 		helpString += "cluster.classic(phylip=yourDistanceMatrix, method=yourMethod, cutoff=yourCutoff, precision=yourPrecision) \n";
 		helpString += "The acceptable cluster methods are furthest, nearest, weighted and average.  If no method is provided then average is assumed.\n";	
@@ -132,7 +133,14 @@ ClusterDoturCommand::ClusterDoturCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
-
+                
+                it = parameters.find("count");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["count"] = inputDir + it->second;		}
+				}
 			}
 			
 			//initialize outputTypes
@@ -159,10 +167,17 @@ ClusterDoturCommand::ClusterDoturCommand(string option)  {
 		
 			//check for optional parameter and set defaults
 			namefile = validParameter.validFile(parameters, "name", true);
-			if (namefile == "not open") { abort = true; }	
+			if (namefile == "not open") { abort = true; namefile = ""; }	
 			else if (namefile == "not found") { namefile = ""; }
 			else { m->setNameFile(namefile); }
+            
+            countfile = validParameter.validFile(parameters, "count", true);
+			if (countfile == "not open") { abort = true; countfile = ""; }	
+			else if (countfile == "not found") { countfile = ""; }
+			else { m->setCountTableFile(countfile); }
 			
+            if ((countfile != "") && (namefile != "")) { m->mothurOut("When executing a cluster.classic command you must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
+            
 			string temp;
 			temp = validParameter.validFile(parameters, "precision", false);
 			if (temp == "not found") { temp = "100"; }
@@ -204,36 +219,49 @@ int ClusterDoturCommand::execute(){
 	
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
-		if(namefile != ""){	
+        
+        ClusterClassic* cluster = new ClusterClassic(cutoff, method, sim);
+        
+        NameAssignment* nameMap = NULL;
+        CountTable* ct = NULL;
+        if(namefile != "") {	
 			nameMap = new NameAssignment(namefile);
 			nameMap->readMap();
-		}else{
-			nameMap = NULL;
-		}
-		
-		//reads phylip file storing data in 2D vector, also fills list and rabund
-		ClusterClassic* cluster = new ClusterClassic(cutoff, method, sim);
-		cluster->readPhylipFile(phylipfile, nameMap);
-		
-		if (m->control_pressed) { delete cluster; delete list; delete rabund; return 0; }
+            cluster->readPhylipFile(phylipfile, nameMap);
+            delete nameMap;
+		}else if (countfile != "") {
+            ct = new CountTable();
+            ct->readTable(countfile);
+            cluster->readPhylipFile(phylipfile, ct);
+            delete ct;
+        }else {
+            cluster->readPhylipFile(phylipfile, nameMap);
+        }
+        tag = cluster->getTag();
+        
+		if (m->control_pressed) { delete cluster; return 0; }
 		
 		list = cluster->getListVector();
 		rabund = cluster->getRAbundVector();
-						
+								
 		if (outputDir == "") { outputDir += m->hasPath(phylipfile); }
 		fileroot = outputDir + m->getRootName(m->getSimpleName(phylipfile));
 			
         string sabundFileName = fileroot+ tag + "." + getOutputFileNameTag("sabund");
         string rabundFileName = fileroot+ tag + "." + getOutputFileNameTag("rabund");
-        string listFileName = fileroot+ tag + "." + getOutputFileNameTag("list");
+        string listFileName = fileroot+ tag + ".";
+        if (countfile != "") { listFileName += "unique_"; }
+        listFileName += getOutputFileNameTag("list");
         
-		m->openOutputFile(sabundFileName,	sabundFile);
-		m->openOutputFile(rabundFileName,	rabundFile);
+        if (countfile == "") {
+            m->openOutputFile(sabundFileName,	sabundFile);
+            m->openOutputFile(rabundFileName,	rabundFile);
+            outputNames.push_back(sabundFileName); outputTypes["sabund"].push_back(sabundFileName);
+            outputNames.push_back(rabundFileName); outputTypes["rabund"].push_back(rabundFileName);
+            
+        }
 		m->openOutputFile(listFileName,	listFile);
-		
-		outputNames.push_back(sabundFileName); outputTypes["sabund"].push_back(sabundFileName);
-		outputNames.push_back(rabundFileName); outputTypes["rabund"].push_back(rabundFileName);
-		outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
+        outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
 		
 		float previousDist = 0.00000;
 		float rndPreviousDist = 0.00000;
@@ -245,7 +273,8 @@ int ClusterDoturCommand::execute(){
 		int estart = time(NULL);
 	
 		while ((cluster->getSmallDist() < cutoff) && (cluster->getNSeqs() > 1)){
-			if (m->control_pressed) { delete cluster; delete list; delete rabund; sabundFile.close();rabundFile.close();listFile.close();  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); 	} outputTypes.clear();  return 0;  }
+			if (m->control_pressed) { delete cluster; delete list; delete rabund; if(countfile == "") {rabundFile.close(); sabundFile.close();  m->mothurRemove((fileroot+ tag + ".rabund")); m->mothurRemove((fileroot+ tag + ".sabund")); }
+                listFile.close(); m->mothurRemove((fileroot+ tag + ".list")); outputTypes.clear();  return 0;  }
 		
 			cluster->update(cutoff);
 	
@@ -276,18 +305,14 @@ int ClusterDoturCommand::execute(){
 		else if(rndPreviousDist<cutoff){
 			printData(toString(rndPreviousDist, length-1));
 		}
-					
-		sabundFile.close();
-		rabundFile.close();
+		
+        if (countfile == "") {
+            sabundFile.close();
+            rabundFile.close();
+        }
 		listFile.close();
 		
-		delete cluster; delete nameMap; delete list; delete rabund;
-	
-		//if (saveCutoff != cutoff) { 
-		//	if (hard)	{  saveCutoff = m->ceilDist(saveCutoff, precision);	}
-		//	else		{	saveCutoff = m->roundDist(saveCutoff, precision);  }
-		//	m->mothurOut("changed cutoff to " + toString(cutoff)); m->mothurOutEndLine(); 
-		//}
+		delete cluster;  delete list; delete rabund;
 		
 		//set list file as new current listfile
 		string current = "";
@@ -327,11 +352,12 @@ int ClusterDoturCommand::execute(){
 
 void ClusterDoturCommand::printData(string label){
 	try {
-	
-		oldRAbund.setLabel(label);
-		oldRAbund.print(rabundFile);
-		oldRAbund.getSAbundVector().print(sabundFile);
-		
+        oldRAbund.setLabel(label);
+        if (countfile == "") {
+            oldRAbund.print(rabundFile);
+            oldRAbund.getSAbundVector().print(sabundFile);
+        }
+
 		oldRAbund.getSAbundVector().print(cout);
 		
 		oldList.setLabel(label);

@@ -154,6 +154,14 @@ ClusterCommand::ClusterCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("count");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["count"] = inputDir + it->second;		}
+				}
 			}
 			
 			//check for required parameters
@@ -481,12 +489,12 @@ void ClusterCommand::printData(string label){
 		loops = 0;
 		start = time(NULL);
         
+        oldRAbund.setLabel(label);
         if (countfile == "") {
             oldRAbund.print(rabundFile);
             oldRAbund.getSAbundVector().print(sabundFile);
         }
-        
-        oldRAbund.setLabel(label);
+       
         if (m->isTrue(showabund)) {
             oldRAbund.getSAbundVector().print(cout);
         }

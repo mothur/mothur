@@ -11,6 +11,7 @@
 
 #include "command.hpp"
 #include "fastamap.h"
+#include "counttable.h"
 
 /* The unique.seqs command reads a fasta file, finds the duplicate sequences and outputs a names file
 	containing 2 columns.  The first being the groupname and the second the list of identical sequence names. */ 
@@ -37,7 +38,7 @@ public:
 	
 	
 private:
-	string inFastaName, oldNameMapFName, outputDir;
+	string inFastaName, oldNameMapFName, outputDir, countfile;
 	vector<string> outputNames;
 
 	bool abort;

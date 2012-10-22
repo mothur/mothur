@@ -28,7 +28,7 @@ vector<string> TrimFlowsCommand::setParameters(){
 		CommandParameter psignal("signal", "Number", "", "0.50", "", "", "",false,false); parameters.push_back(psignal);
 		CommandParameter pnoise("noise", "Number", "", "0.70", "", "", "",false,false); parameters.push_back(pnoise);
 		CommandParameter pallfiles("allfiles", "Boolean", "", "t", "", "", "",false,false); parameters.push_back(pallfiles);
-		CommandParameter porder("order", "String", "", "", "", "", "",false,false); parameters.push_back(porder);
+		CommandParameter porder("order", "String", "", "TACG", "", "", "",false,false); parameters.push_back(porder);
 		CommandParameter pfasta("fasta", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pfasta);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
@@ -347,7 +347,7 @@ int TrimFlowsCommand::execute(){
 			
 			output.close();
 		}
-		outputTypes["flow.files"].push_back(flowFilesFileName);
+		outputTypes["file"].push_back(flowFilesFileName);
 		outputNames.push_back(flowFilesFileName);
 		
 //		set fasta file as new current fastafile
@@ -423,11 +423,9 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
 			string trashCode = "";
 			
 			flowData.getNext(flowFile); 
-			//cout << "driver good bit " << flowFile.good() << endl;	
 			flowData.capFlows(maxFlows);	
 			
 			Sequence currSeq = flowData.getSequence();
-			
 			if(!flowData.hasMinFlows(minFlows)){	//screen to see if sequence is of a minimum number of flows
 				success = 0;
 				trashCode += 'l';
@@ -442,6 +440,8 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
                 else{ currentSeqDiffs += success;  }
                 
             }
+            
+            if (m->debug) { m->mothurOut("[DEBUG]: " + currSeq.getName() + " " + currSeq.getUnaligned() + "\n"); }
             
 			if(barcodes.size() != 0){
 				success = trimOligos.stripBarcode(currSeq, barcodeIndex);

@@ -549,15 +549,16 @@ vector<string> MakeBiomCommand::getMetaData(vector<SharedRAbundVector*>& lookup)
                 if (m->control_pressed) { return metadata; }
                 
                 //if there is a bin label use it otherwise make one
-                string binLabel = binTag;
-                string sbinNumber = otuLabels[i];
-                if (sbinNumber.length() < snumBins.length()) { 
-                    int diff = snumBins.length() - sbinNumber.length();
-                    for (int h = 0; h < diff; h++) { binLabel += "0"; }
-                }
-                binLabel += sbinNumber;
-                
-                labelTaxMap[binLabel] = taxs[i];
+                if (m->isContainingOnlyDigits(otuLabels[i])) {
+                    string binLabel = binTag;
+                    string sbinNumber = otuLabels[i];
+                    if (sbinNumber.length() < snumBins.length()) { 
+                        int diff = snumBins.length() - sbinNumber.length();
+                        for (int h = 0; h < diff; h++) { binLabel += "0"; }
+                    }
+                    binLabel += sbinNumber;
+                    labelTaxMap[binLabel] = taxs[i];
+                }else {  labelTaxMap[otuLabels[i]] = taxs[i]; }
             }
             
             

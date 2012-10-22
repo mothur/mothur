@@ -140,7 +140,9 @@ class MothurOut {
 		void splitAtChar(string&, vector<string>&, char);
         void splitAtChar(string&, string&, char);
 		int removeConfidences(string&);
+        string removeQuotes(string);
         string makeList(vector<string>&);
+        bool isSubset(vector<string>, vector<string>); //bigSet, subset
 		
 		//math operation
 		int factorial(int num);
@@ -149,6 +151,7 @@ class MothurOut {
 		float roundDist(float, int);
 		unsigned int fromBase36(string);
 		int getRandomIndex(int); //highest
+        double getStandardDeviation(vector<int>&);
 
 		int control_pressed;
 		bool executing, runParse, jumble, gui, mothurCalling, debug;

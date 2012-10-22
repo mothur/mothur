@@ -21,7 +21,7 @@ Tree* Consensus::getTree(vector<Tree*>& t){
 		
 		if (m->control_pressed) { return 0; }
 		
-		consensusTree = new Tree(t[0]->getTreeMap());
+		consensusTree = new Tree(t[0]->getCountTable());
 		
 		it2 = nodePairs.find(treeSet);
 		
@@ -37,8 +37,7 @@ Tree* Consensus::getTree(vector<Tree*>& t){
 		
 		if (m->control_pressed) {  delete consensusTree; return 0; }
 		
-        map<string, string> empty;
-		consensusTree->assembleTree(empty);
+		consensusTree->assembleTree();
 		
 		if (m->control_pressed) {  delete consensusTree; return 0; }
 				

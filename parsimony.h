@@ -12,7 +12,7 @@
  */
 
 #include "treecalculator.h"
-#include "treemap.h"
+#include "counttable.h"
 
 /***********************************************************************/
 
@@ -35,8 +35,8 @@ class Parsimony : public TreeCalculator  {
 		int processors;
 		string outputDir;
 	
-		EstOutput driver(Tree*, vector< vector<string> >, int, int, TreeMap*); 
-		EstOutput createProcesses(Tree*, vector< vector<string> >, TreeMap*);
+		EstOutput driver(Tree*, vector< vector<string> >, int, int, CountTable*); 
+		EstOutput createProcesses(Tree*, vector< vector<string> >, CountTable*);
 };
 
 /***********************************************************************/

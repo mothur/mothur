@@ -15,6 +15,7 @@
 #include "trimoligos.h"
 #include "alignment.hpp"
 #include "needlemanoverlap.hpp"
+#include "counttable.h"
 
 class PcrSeqsCommand : public Command {
 public:
@@ -45,7 +46,7 @@ private:
     vector<linePair> lines;
 	bool getOligos(vector<vector<string> >&, vector<vector<string> >&, vector<vector<string> >&);
     bool abort, keepprimer, keepdots;
-	string fastafile, oligosfile, taxfile, groupfile, namefile, ecolifile, outputDir, nomatch;
+	string fastafile, oligosfile, taxfile, groupfile, namefile, countfile, ecolifile, outputDir, nomatch;
 	int start, end, processors, length;
 	
     vector<string> revPrimer, outputNames;
@@ -55,6 +56,7 @@ private:
     int readName(set<string>&);
     int readGroup(set<string>);
     int readTax(set<string>);
+    int readCount(set<string>);
     bool readOligos();
     bool readEcoli();
 	int driverPcr(string, string, string, set<string>&, linePair);	

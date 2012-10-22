@@ -13,6 +13,7 @@
 #include "command.hpp"
 #include "listvector.hpp"
 #include "inputdata.h"
+#include "counttable.h"
 
 
 class ClassifyOtuCommand : public Command {
@@ -34,10 +35,11 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 
 private:
-
+    GroupMap* groupMap;
+    CountTable* ct;
 	ListVector* list;
 	InputData* input;
-	string listfile, namefile, taxfile, label, outputDir, refTaxonomy, groupfile, basis;
+	string listfile, namefile, taxfile, label, outputDir, refTaxonomy, groupfile, basis, countfile;
 	bool abort, allLines, probs;
 	int cutoff;
 	set<string> labels; //holds labels to be used

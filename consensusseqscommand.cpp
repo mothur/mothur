@@ -15,7 +15,8 @@
 vector<string> ConsensusSeqsCommand::setParameters(){	
 	try {
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
-		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
+		CommandParameter pname("name", "InputTypes", "", "", "namecount", "none", "none",false,false); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "namecount", "none", "none",false,false); parameters.push_back(pcount);
 		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(plist);
 		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
 		CommandParameter pcutoff("cutoff", "Number", "", "100", "", "", "",false,false); parameters.push_back(pcutoff);
@@ -36,7 +37,7 @@ string ConsensusSeqsCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The consensus.seqs command can be used in 2 ways: create a consensus sequence from a fastafile, or with a listfile create a consensus sequence for each otu. Sequences must be aligned.\n";
-		helpString += "The consensus.seqs command parameters are fasta, list, name, cutoff and label.\n";
+		helpString += "The consensus.seqs command parameters are fasta, list, name, count, cutoff and label.\n";
 		helpString += "The fasta parameter allows you to enter the fasta file containing your sequences, and is required, unless you have a valid current fasta file. \n";
 		helpString += "The list parameter allows you to enter a your list file. \n";
 		helpString += "The name parameter allows you to enter a names file associated with the fasta file. \n";
@@ -65,6 +66,7 @@ string ConsensusSeqsCommand::getOutputFileNameTag(string type, string inputName=
         else {
             if (type == "fasta") {  outputFileName =  "cons.fasta"; }
             else if (type == "name") {  outputFileName =  "cons.names"; }
+            else if (type == "count") {  outputFileName =  "cons.count_table"; }
             else if (type == "summary") {  outputFileName =  "cons.summary"; }
             else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
         }
@@ -84,6 +86,7 @@ ConsensusSeqsCommand::ConsensusSeqsCommand(){
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
 		outputTypes["name"] = tempOutNames;
+        outputTypes["count"] = tempOutNames;
 		outputTypes["summary"] = tempOutNames;
 	}
 	catch(exception& e) {
@@ -120,6 +123,7 @@ ConsensusSeqsCommand::ConsensusSeqsCommand(string option)  {
 			vector<string> tempOutNames;
 			outputTypes["fasta"] = tempOutNames;
 			outputTypes["name"] = tempOutNames;
+            outputTypes["count"] = tempOutNames;
 			outputTypes["summary"] = tempOutNames;
 			
 						
@@ -151,6 +155,14 @@ ConsensusSeqsCommand::ConsensusSeqsCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["list"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("count");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["count"] = inputDir + it->second;		}
+				}
 			}
 			
 			
@@ -168,6 +180,13 @@ ConsensusSeqsCommand::ConsensusSeqsCommand(string option)  {
 			else if (namefile == "not found") { namefile = ""; }
 			else { m->setNameFile(namefile); }
 			
+            countfile = validParameter.validFile(parameters, "count", true);
+			if (countfile == "not open") { abort = true; countfile = ""; }	
+			else if (countfile == "not found") { countfile = ""; }
+			else { m->setCountTableFile(countfile); }
+			
+            if ((countfile != "") && (namefile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
+            
 			listfile = validParameter.validFile(parameters, "list", true);
 			if (listfile == "not open") { abort = true; }
 			else if (listfile == "not found") { listfile = "";  }	
@@ -186,10 +205,12 @@ ConsensusSeqsCommand::ConsensusSeqsCommand(string option)  {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(fastafile);	}
 			
-			if (namefile == ""){
-				vector<string> files; files.push_back(fastafile); 
-				parser.getNameFile(files);
-			}
+            if (countfile == "") {
+                if (namefile == ""){
+                    vector<string> files; files.push_back(fastafile); 
+                    parser.getNameFile(files);
+                }
+            }
 		}
 	}
 	catch(exception& e) {
@@ -209,6 +230,7 @@ int ConsensusSeqsCommand::execute(){
 		if (m->control_pressed) { return 0; }
 		
 		if (namefile != "") { readNames(); }
+        if (countfile != "") { ct.readTable(countfile);  }
 		
 		if (m->control_pressed) { return 0; }
 		
@@ -227,25 +249,12 @@ int ConsensusSeqsCommand::execute(){
 			string outputFastaFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + getOutputFileNameTag("fasta");
 			m->openOutputFile(outputFastaFile, outFasta);
 			outputNames.push_back(outputFastaFile); outputTypes["fasta"].push_back(outputFastaFile);
-			
-			vector<string> seqs;
-			int seqLength = 0;
-			for (map<string, string>::iterator it = nameMap.begin(); it != nameMap.end(); it++) {
-				
-				if (m->control_pressed) { outSummary.close(); outFasta.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
-				
-				string seq = fastaMap[it->second];
-				seqs.push_back(seq);
-				
-				if (seqLength == 0) { seqLength = seq.length(); }
-				else if (seqLength != seq.length()) { m->mothurOut("[ERROR]: sequence are not the same length, please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
-
-			}
-			
+        
 			vector< vector<float> > percentages; percentages.resize(5);
 			for (int j = 0; j < percentages.size(); j++) { percentages[j].resize(seqLength, 0.0); }
 			
 			string consSeq = "";
+            int thisCount;
 			//get counts
 			for (int j = 0; j < seqLength; j++) {
 				
@@ -253,41 +262,55 @@ int ConsensusSeqsCommand::execute(){
 				
 				vector<int> counts; counts.resize(5, 0); //A,T,G,C,Gap
 				int numDots = 0;
-				
-				for (int i = 0; i < seqs.size(); i++) {
+				thisCount = 0;
+				for (map<string, string>::iterator it = fastaMap.begin(); it != fastaMap.end(); it++) {
 					
-					if (seqs[i][j] == '.') { numDots++; }
-					
-					char base = toupper(seqs[i][j]);
-					if (base == 'A') { counts[0]++; }
-					else if (base == 'T') { counts[1]++; }
-					else if (base == 'G') { counts[2]++; }
-					else if (base == 'C') { counts[3]++; }
-					else { counts[4]++; }
+                    string thisSeq = it->second;
+                    int size = 0;
+                    
+                    if (countfile != "") { size = ct.getNumSeqs(it->first); }
+                    else {
+                        map<string, int>::iterator itCount = nameFileMap.find(it->first);
+                        if (itCount != nameFileMap.end()) {
+                            size = itCount->second;
+                        }else { m->mothurOut("[ERROR]: file mismatch, aborting.\n"); m->control_pressed = true; break; }
+                    }
+                    
+                    for (int k = 0; k < size; k++) {
+                        if (thisSeq[j] == '.') { numDots++; }
+                        
+                        char base = toupper(thisSeq[j]);
+                        if (base == 'A') { counts[0]++; }
+                        else if (base == 'T') { counts[1]++; }
+                        else if (base == 'G') { counts[2]++; }
+                        else if (base == 'C') { counts[3]++; }
+                        else { counts[4]++; }
+                        thisCount++;
+                    }
 				}
 				
 				char conBase = '.';
-				if (numDots != seqs.size()) { conBase = getBase(counts, seqs.size()); }
+				if (numDots != thisCount) { conBase = getBase(counts, thisCount); }
 				
 				consSeq += conBase;
 				
-				percentages[0][j] = counts[0] / (float) seqs.size();
-				percentages[1][j] = counts[1] / (float) seqs.size();
-				percentages[2][j] = counts[2] / (float) seqs.size();
-				percentages[3][j] = counts[3] / (float) seqs.size();
-				percentages[4][j] = counts[4] / (float) seqs.size();
-				
+				percentages[0][j] = counts[0] / (float) thisCount;
+				percentages[1][j] = counts[1] / (float) thisCount;
+				percentages[2][j] = counts[2] / (float) thisCount;
+				percentages[3][j] = counts[3] / (float) thisCount;
+				percentages[4][j] = counts[4] / (float) thisCount;
 			}
 			
 			for (int j = 0; j < seqLength; j++) { 
-				outSummary << (j+1) << '\t' << percentages[0][j] << '\t'<< percentages[1][j] << '\t'<< percentages[2][j] << '\t' << percentages[3][j] << '\t' << percentages[4][j] << '\t' << seqs.size() << '\t' << consSeq[j] << endl;
+				outSummary << (j+1) << '\t' << percentages[0][j] << '\t'<< percentages[1][j] << '\t'<< percentages[2][j] << '\t' << percentages[3][j] << '\t' << percentages[4][j] << '\t' << thisCount << '\t' << consSeq[j] << endl;
 			}
 			
 				
 			outFasta << ">conseq" << endl << consSeq << endl;
 			
 			outSummary.close(); outFasta.close();
-			
+            
+			if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
 		
 		}else {
 			
@@ -414,12 +437,10 @@ int ConsensusSeqsCommand::processList(ListVector*& list){
 			if (m->control_pressed) { outSummary.close(); outName.close(); outFasta.close(); return 0; }
 			
 			string bin = list->get(i);
-			
-			string newName = "";
-			string consSeq = getConsSeq(bin, outSummary, newName, i);
+			string consSeq = getConsSeq(bin, outSummary, i);
 			
 			outFasta << ">seq" << (i+1) << endl << consSeq << endl;
-			outName << "seq" << (i+1) << '\t' << "seq" << (i+1) << "," << newName << endl;
+			outName << "seq" << (i+1) << '\t' << "seq" << (i+1) << "," << bin << endl;
 		}
 		
 		outSummary.close(); outName.close(); outFasta.close();
@@ -434,96 +455,127 @@ int ConsensusSeqsCommand::processList(ListVector*& list){
 }
 
 //***************************************************************************************************************
-//made this smart enough to owrk with unique or non unique list file
-string ConsensusSeqsCommand::getConsSeq(string bin, ofstream& outSummary, string& name, int binNumber){
+string ConsensusSeqsCommand::getConsSeq(string bin, ofstream& outSummary, int binNumber){
 	try{
 		
 		string consSeq = "";
 		bool error = false;
-		
-		//the whole bin is the second column if no names file, otherwise build it
-		name = bin;
-		if (namefile != "") { name = ""; }
-		
+        int totalSize=0;
+				
 		vector<string> binNames;
 		m->splitAtComma(bin, binNames);
-		
-		//get sequence strings for each name in the bin
-		vector<string> seqs;
-		
-		set<string> addedAlready;
-		int seqLength = 0;
-		for (int i = 0; i < binNames.size(); i++) {
-			
-			map<string, string>::iterator it;
-			
-			it = nameMap.find(binNames[i]);
-			if (it == nameMap.end()) { 
-				if (namefile == "") { m->mothurOut("[ERROR]: " + binNames[i] + " is not in your fasta file, please correct."); m->mothurOutEndLine(); error = true; }
-				else { m->mothurOut("[ERROR]: " + binNames[i] + " is not in your fasta or name file, please correct."); m->mothurOutEndLine(); error = true; }
-				break;
-			}else {
-				
-				//add sequence string to seqs vector to process below
-				string seq = fastaMap[it->second];
-				seqs.push_back(seq);
-				
-				if (seqLength == 0) { seqLength = seq.length(); }
-				else if (seqLength != seq.length()) { m->mothurOut("[ERROR]: sequence are not the same length, please correct."); m->mothurOutEndLine(); error = true; break; }
-				
-				if (namefile != "") { 
-					//did we add this line from name file already?
-					if (addedAlready.count(it->second) == 0) {
-						name += "," + nameFileMap[it->second];
-						addedAlready.insert(it->second);
-					}
-				}
-				
-			}
-		}
-		
-		if (error) { m->control_pressed = true; return consSeq; }
-		
-		if (namefile != "") { name = name.substr(1); }
-		
-		vector< vector<float> > percentages; percentages.resize(5);
+        
+        vector< vector<float> > percentages; percentages.resize(5);
 		for (int j = 0; j < percentages.size(); j++) { percentages[j].resize(seqLength, 0.0); }
+
+        if (countfile != "") {
+            //get counts
+            for (int j = 0; j < seqLength; j++) {
+                
+                if (m->control_pressed) { return consSeq; }
+                
+                vector<int> counts; counts.resize(5, 0); //A,T,G,C,Gap
+                int numDots = 0;
+                totalSize = 0;
+                 for (int i = 0; i < binNames.size(); i++) {
+                     if (m->control_pressed) { return consSeq; }
+                     
+                     string thisSeq = "";
+                     map<string, string>::iterator itFasta = fastaMap.find(binNames[i]);
+                     if (itFasta != fastaMap.end()) {
+                         thisSeq = itFasta->second;
+                     }else { m->mothurOut("[ERROR]: " + binNames[i] + " is not in your fasta file, please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
+                     
+                     int size = ct.getNumSeqs(binNames[i]);
+                     if (size != 0) {
+                         for (int k = 0; k < size; k++) {
+                             if (thisSeq[j] == '.') { numDots++; }
+                             
+                             char base = toupper(thisSeq[j]);
+                             if (base == 'A') { counts[0]++; }
+                             else if (base == 'T') { counts[1]++; }
+                             else if (base == 'G') { counts[2]++; }
+                             else if (base == 'C') { counts[3]++; }
+                             else { counts[4]++; }
+                             totalSize++;
+                         }
+                     }else { m->mothurOut("[ERROR]: " + binNames[i] + " is not in your count file, please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
+                 }
+                char conBase = '.';
+                if (numDots != totalSize) { conBase = getBase(counts, totalSize); }
+                
+                consSeq += conBase;
+                
+                percentages[0][j] = counts[0] / (float) totalSize;
+                percentages[1][j] = counts[1] / (float) totalSize;
+                percentages[2][j] = counts[2] / (float) totalSize;
+                percentages[3][j] = counts[3] / (float) totalSize;
+                percentages[4][j] = counts[4] / (float) totalSize;
+            }
+
+        }else {
 		
-		//get counts
-		for (int j = 0; j < seqLength; j++) {
-			
-			if (m->control_pressed) { return consSeq; }
-			
-			vector<int> counts; counts.resize(5, 0); //A,T,G,C,Gap
-			int numDots = 0;
-			
-			for (int i = 0; i < seqs.size(); i++) {
-				
-				if (seqs[i][j] == '.') { numDots++; }
-				
-				char base = toupper(seqs[i][j]);
-				if (base == 'A') { counts[0]++; }
-				else if (base == 'T') { counts[1]++; }
-				else if (base == 'G') { counts[2]++; }
-				else if (base == 'C') { counts[3]++; }
-				else { counts[4]++; }
-			}
-			
-			char conBase = '.';
-			if (numDots != seqs.size()) { conBase = getBase(counts, seqs.size()); }
-			
-			consSeq += conBase;
-			
-			percentages[0][j] = counts[0] / (float) seqs.size();
-			percentages[1][j] = counts[1] / (float) seqs.size();
-			percentages[2][j] = counts[2] / (float) seqs.size();
-			percentages[3][j] = counts[3] / (float) seqs.size();
-			percentages[4][j] = counts[4] / (float) seqs.size();
-			
+            //get sequence strings for each name in the bin
+            vector<string> seqs;
+            for (int i = 0; i < binNames.size(); i++) {
+                
+                map<string, string>::iterator it;
+                it = nameMap.find(binNames[i]);
+                if (it == nameMap.end()) { 
+                    if (namefile == "") { m->mothurOut("[ERROR]: " + binNames[i] + " is not in your fasta file, please correct."); m->mothurOutEndLine(); error = true; }
+                    else { m->mothurOut("[ERROR]: " + binNames[i] + " is not in your fasta or name file, please correct."); m->mothurOutEndLine(); error = true; }
+                    break;
+                }else {
+                    //add sequence string to seqs vector to process below
+                    map<string, string>::iterator itFasta = fastaMap.find(it->second);
+                    
+                    if (itFasta != fastaMap.end()) {
+                        string seq = itFasta->second;
+                        seqs.push_back(seq);
+                    }else { m->mothurOut("[ERROR]: file mismatch, aborting. \n"); }
+                }
+            }
+            
+            if (error) { m->control_pressed = true; return consSeq; }
+            totalSize = seqs.size();
+            //get counts
+            for (int j = 0; j < seqLength; j++) {
+                
+                if (m->control_pressed) { return consSeq; }
+                
+                vector<int> counts; counts.resize(5, 0); //A,T,G,C,Gap
+                int numDots = 0;
+                
+                for (int i = 0; i < seqs.size(); i++) {
+                    
+                    if (seqs[i][j] == '.') { numDots++; }
+                    
+                    char base = toupper(seqs[i][j]);
+                    if (base == 'A') { counts[0]++; }
+                    else if (base == 'T') { counts[1]++; }
+                    else if (base == 'G') { counts[2]++; }
+                    else if (base == 'C') { counts[3]++; }
+                    else { counts[4]++; }
+                }
+                
+                char conBase = '.';
+                if (numDots != seqs.size()) { conBase = getBase(counts, seqs.size()); }
+                
+                consSeq += conBase;
+                
+                percentages[0][j] = counts[0] / (float) seqs.size();
+                percentages[1][j] = counts[1] / (float) seqs.size();
+                percentages[2][j] = counts[2] / (float) seqs.size();
+                percentages[3][j] = counts[3] / (float) seqs.size();
+                percentages[4][j] = counts[4] / (float) seqs.size();
+                
+            }
 		}
-		
+        
+        
+        
 		for (int j = 0; j < seqLength; j++) { 
-			outSummary << (binNumber + 1) << '\t' << (j+1) << '\t' << percentages[0][j] << '\t'<< percentages[1][j] << '\t'<< percentages[2][j] << '\t' << percentages[3][j] << '\t' << percentages[4][j] << '\t' << seqs.size() << '\t' << consSeq[j] << endl;
+			outSummary << (binNumber + 1) << '\t' << (j+1) << '\t' << percentages[0][j] << '\t'<< percentages[1][j] << '\t'<< percentages[2][j] << '\t' << percentages[3][j] << '\t' << percentages[4][j] << '\t' << totalSize << '\t' << consSeq[j] << endl;
 		}
 		
 		return consSeq;
@@ -646,7 +698,8 @@ int ConsensusSeqsCommand::readFasta(){
 		
 		ifstream in;
 		m->openInputFile(fastafile, in);
-		
+		seqLength = 0;
+        
 		while (!in.eof()) {
 			
 			if (m->control_pressed) { break; }
@@ -657,7 +710,10 @@ int ConsensusSeqsCommand::readFasta(){
 			if (name != "") {
 				fastaMap[name] = seq.getAligned();
 				nameMap[name] = name; //set nameMap incase no names file
-				nameFileMap[name] = name;
+				nameFileMap[name] = 1;
+                
+                if (seqLength == 0) { seqLength = seq.getAligned().length(); }
+				else if (seqLength != seq.getAligned().length()) { m->mothurOut("[ERROR]: sequence are not the same length, please correct."); m->mothurOutEndLine(); m->control_pressed = true; break; }
 			}
 		}
 		
@@ -688,7 +744,7 @@ int ConsensusSeqsCommand::readNames(){
              
              it = nameMap.find(thisname);
 			 if (it != nameMap.end()) { //then this sequence was in the fastafile
-				 nameFileMap[thisname] = repnames;	//for later when outputting the new namesFile if the list file is unique
+				 nameFileMap[thisname] = m->getNumNames(repnames);	//for later when outputting the new namesFile if the list file is unique
                  
 				 vector<string> splitRepNames;
 				 m->splitAtComma(repnames, splitRepNames);
