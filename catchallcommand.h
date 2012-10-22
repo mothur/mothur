@@ -33,7 +33,7 @@ public:
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
 	string getOutputFileNameTag(string, string);
 	string getHelpString();	
-	string getCitation() { return "Bunge, J. (2011). Estimating the number of species with CatchAll. Forthcoming in Proceedings of the Pacific Symposium on Biocomputing 2011.\nhttp://www.northeastern.edu/catchall/index.html http://www.mothur.org/wiki/Catchall"; }
+	string getCitation() { return "Bunge J, Woodard L, Bohning D, Foster JA, Connolly S, Allen HK (2012). Estimating population diversity with CatchAll. Bioinformatics  28:1045.\nhttp://www.northeastern.edu/catchall/index.html\nhttp://www.mothur.org/wiki/Catchall"; }
 	string getDescription()		{ return "estimate number of species"; }
 	
 	int execute(); 
