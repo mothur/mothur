@@ -10,6 +10,7 @@
 		219C1DE01552C4BD004209F9 /* newcommandtemplate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 219C1DDF1552C4BD004209F9 /* newcommandtemplate.cpp */; };
 		219C1DE41559BCCF004209F9 /* getcoremicrobiomecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 219C1DE31559BCCD004209F9 /* getcoremicrobiomecommand.cpp */; };
 		7E6BE10A12F710D8007ADDBE /* refchimeratest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7E6BE10912F710D8007ADDBE /* refchimeratest.cpp */; };
+		83F25B0C163B031200ABE73D /* forest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 83F25B0A163B031200ABE73D /* forest.cpp */; };
 		8DD76FB00486AB0100D96B5E /* mothur.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = C6A0FF2C0290799A04C91782 /* mothur.1 */; };
 		A70056E6156A93D000924A2D /* getotulabelscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A70056E5156A93D000924A2D /* getotulabelscommand.cpp */; };
 		A70056EB156AB6E500924A2D /* removeotulabelscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A70056EA156AB6E500924A2D /* removeotulabelscommand.cpp */; };
@@ -384,6 +385,8 @@
 		7E6BE10812F710D8007ADDBE /* refchimeratest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = refchimeratest.h; sourceTree = "<group>"; };
 		7E6BE10912F710D8007ADDBE /* refchimeratest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = refchimeratest.cpp; sourceTree = "<group>"; };
 		7E78911B135F3E8600E725D2 /* eachgapdistignorens.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = eachgapdistignorens.h; sourceTree = "<group>"; };
+		83F25B0A163B031200ABE73D /* forest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = forest.cpp; sourceTree = "<group>"; };
+		83F25B0B163B031200ABE73D /* forest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = forest.h; sourceTree = "<group>"; };
 		8DD76FB20486AB0100D96B5E /* mothur */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = mothur; sourceTree = BUILT_PRODUCTS_DIR; };
 		A70056E5156A93D000924A2D /* getotulabelscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getotulabelscommand.cpp; sourceTree = "<group>"; };
 		A70056E8156A93E300924A2D /* getotulabelscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getotulabelscommand.h; sourceTree = "<group>"; };
@@ -1222,6 +1225,8 @@
 				A77E1937161B201E00DB1A2A /* randomforest.cpp */,
 				A7386C201619CACB00651424 /* rftreenode.hpp */,
 				A77E193A161B289600DB1A2A /* rftreenode.cpp */,
+				83F25B0A163B031200ABE73D /* forest.cpp */,
+				83F25B0B163B031200ABE73D /* forest.h */,
 			);
 			name = randomforest;
 			sourceTree = "<group>";
@@ -2280,6 +2285,7 @@
 				A721AB71161C572A009860A1 /* kmernode.cpp in Sources */,
 				A721AB72161C572A009860A1 /* kmertree.cpp in Sources */,
 				A721AB77161C573B009860A1 /* taxonomynode.cpp in Sources */,
+				83F25B0C163B031200ABE73D /* forest.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
