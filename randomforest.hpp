@@ -13,7 +13,7 @@
 #include "abstractrandomforest.hpp"
 #include "decisiontree.hpp"
 
-class RandomForest: public AbstractRandomForest {
+class RandomForest: public Forest {
     
 public:
     
