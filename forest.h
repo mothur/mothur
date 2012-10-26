@@ -12,6 +12,7 @@
 #include <iostream>
 #include "mothurout.h"
 #include "macros.h"
+#include "decisiontree.hpp"
 #include "abstractdecisiontree.hpp"
 /***********************************************************************/
 //this is a re-implementation of the abstractrandomforest class
@@ -26,6 +27,7 @@ public:
     virtual int populateDecisionTrees() = 0;
     virtual int calcForrestErrorRate() = 0;
     virtual int calcForrestVariableImportance(string) = 0;
+    virtual int updateGlobalOutOfBagEstimates(DecisionTree* decisionTree) = 0;
     
     /***********************************************************************/
     

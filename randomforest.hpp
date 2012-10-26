@@ -10,7 +10,7 @@
 #define rrf_fs_prototype_randomforest_hpp
 
 #include "macros.h"
-#include "abstractrandomforest.hpp"
+#include "forest.h"
 #include "decisiontree.hpp"
 
 class RandomForest: public Forest {
@@ -23,14 +23,14 @@ public:
     
     //NOTE:: if you are going to dynamically cast, aren't you undoing the advantage of abstraction. Why abstract at all?
     //could cause maintenance issues later if other types of Abstract decison trees are created that cannot be cast as a decision tree.
-    virtual ~RandomForest() {
-        for (vector<AbstractDecisionTree*>::iterator it = decisionTrees.begin(); it != decisionTrees.end(); it++) {
-            // we know that this is decision tree, so we can do a dynamic_case<DecisionTree*> here
-            DecisionTree* decisionTree = dynamic_cast<DecisionTree*>(*it);
-            // calling the destructor by deleting
-            delete decisionTree;
-        }
-    }
+//    virtual ~RandomForest() {
+//        for (vector<AbstractDecisionTree*>::iterator it = decisionTrees.begin(); it != decisionTrees.end(); it++) {
+//            // we know that this is decision tree, so we can do a dynamic_case<DecisionTree*> here
+//            DecisionTree* decisionTree = dynamic_cast<DecisionTree*>(*it);
+//            // calling the destructor by deleting
+//            delete decisionTree;
+//        }
+//    }
     
     int calcForrestErrorRate();
     int calcForrestVariableImportance(string);

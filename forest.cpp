@@ -27,10 +27,11 @@ treeSplitCriterion(treeSplitCriterion) {
 
 vector<int> Forest::getGlobalDiscardedFeatureIndices() {
     try {
-        vector<int> globalDiscardedFeatureIndices;
+        //vector<int> globalDiscardedFeatureIndices;
+        //globalDiscardedFeatureIndices.push_back(1);
         
         // calculate feature vectors
-        vector< vector<int> > featureVectors(numFeatures, vector<int>(numSamples, 0));
+        vector< vector<int> > featureVectors(numFeatures, vector<int>(numSamples, 0) );
         for (int i = 0; i < numSamples; i++) {
             if (m->control_pressed) { return globalDiscardedFeatureIndices; }
             for (int j = 0; j < numFeatures; j++) { featureVectors[j][i] = dataSet[i][j]; }
