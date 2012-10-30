@@ -367,8 +367,8 @@
 		8DD76FAF0486AB0100D96B5E /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 8;
-			dstPath = /usr/share/man/man1/;
-			dstSubfolderSpec = 0;
+			dstPath = Users/SarahsWork/desktop/debug;
+			dstSubfolderSpec = 16;
 			files = (
 				8DD76FB00486AB0100D96B5E /* mothur.1 in CopyFiles */,
 			);
@@ -1530,8 +1530,6 @@
 				A7E9B67112D37EC400DA6239 /* canberra.h */,
 				A7E9B67612D37EC400DA6239 /* chao1.cpp */,
 				A7E9B67712D37EC400DA6239 /* chao1.h */,
-				A7E9B6A412D37EC400DA6239 /* cmdargs.cpp */,
-				A7E9B6A512D37EC400DA6239 /* cmdargs.h */,
 				A7E9B6BB12D37EC400DA6239 /* coverage.cpp */,
 				A7E9B6BC12D37EC400DA6239 /* coverage.h */,
 				A7E9B6CA12D37EC400DA6239 /* dist.h */,
@@ -1821,6 +1819,8 @@
 			children = (
 				A7E9B69412D37EC400DA6239 /* clearcut.cpp */,
 				A7E9B69512D37EC400DA6239 /* clearcut.h */,
+				A7E9B6A412D37EC400DA6239 /* cmdargs.cpp */,
+				A7E9B6A512D37EC400DA6239 /* cmdargs.h */,
 				A7E9B6B312D37EC400DA6239 /* common.h */,
 				A7E9B6CF12D37EC400DA6239 /* distclearcut.cpp */,
 				A7E9B6D012D37EC400DA6239 /* distclearcut.h */,
@@ -2292,9 +2292,12 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = NO;
 				DEPLOYMENT_LOCATION = YES;
+				DSTROOT = TARGET_BUILD_DIR;
+				"DSTROOT[sdk=*]" = TARGET_BUILD_DIR;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 3;
+				"INSTALL_PATH[sdk=*]" = TARGET_BUILD_DIR;
 				PRODUCT_NAME = mothur;
 				SDKROOT = macosx10.6;
 				SKIP_INSTALL = NO;
@@ -2307,6 +2310,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEPLOYMENT_LOCATION = YES;
+				DSTROOT = TARGET_BUILD_DIR;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_WARN_UNUSED_VALUE = YES;
@@ -2400,7 +2404,7 @@
 				1DEB928708733DD80010E9CD /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "Mothur" */ = {
 			isa = XCConfigurationList;
@@ -2409,7 +2413,7 @@
 				1DEB928B08733DD80010E9CD /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
 	};

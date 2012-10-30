@@ -1183,7 +1183,7 @@ string MothurOut::sortFile(string distFile, string outputDir){
 
 			string firstName, secondName;
 			float dist;
-			while (input) {
+			while (!input.eof()) {
 				input >> firstName >> secondName >> dist;
 				output << dist << '\t' << firstName << '\t' << secondName << endl;
 				gobble(input);
@@ -1199,16 +1199,17 @@ string MothurOut::sortFile(string distFile, string outputDir){
 		
 			//read in sorted file and put distance at end again
 			ifstream input2;
+            ofstream output2;
 			openInputFile(tempOutfile, input2);
-			openOutputFile(outfile, output);
+			openOutputFile(outfile, output2);
 		
-			while (input2) {
+            while (!input2.eof()) {
 				input2 >> dist >> firstName >> secondName;
-				output << firstName << '\t' << secondName << '\t' << dist << endl;
+				output2 << firstName << '\t' << secondName << '\t' << dist << endl;
 				gobble(input2);
 			}
 			input2.close();
-			output.close();
+			output2.close();
 		
 			//remove temp files
 			mothurRemove(tempDistFile);
@@ -2470,6 +2471,9 @@ void MothurOut::getNumSeqs(ifstream& file, int& numSeqs){
 //This function parses the estimator options and puts them in a vector
 void MothurOut::splitAtChar(string& estim, vector<string>& container, char symbol) {
 	try {
+        
+        if (symbol == '-') { splitAtDash(estim, container); return; }
+        
 		string individual = "";
 		int estimLength = estim.size();
 		for(int i=0;i<estimLength;i++){

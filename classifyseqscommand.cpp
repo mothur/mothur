@@ -634,7 +634,7 @@ int ClassifySeqsCommand::execute(){
 			m->mothurOut("Classifying sequences from " + fastaFileNames[s] + " ..." ); m->mothurOutEndLine();
 			
 			string baseTName = m->getSimpleName(taxonomyFileName);
-			if (taxonomyFileName == "saved") {baseTName = rdb->getSavedTaxonomy();	}
+			if (taxonomyFileName == "saved") {  baseTName = rdb->getSavedTaxonomy();	}
 			
             //set rippedTaxName to 
 			string RippedTaxName = "";
@@ -897,6 +897,7 @@ int ClassifySeqsCommand::execute(){
 				}
 			#endif
 		}
+        delete classify;
         
         m->mothurOutEndLine();
         m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -916,7 +917,7 @@ int ClassifySeqsCommand::execute(){
 			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setAccnosFile(current); }
 		}
 		
-		delete classify;
+		
 		
 		return 0;
 	}

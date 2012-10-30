@@ -13,6 +13,27 @@
 #include "ordervector.hpp"
 #include "listvector.hpp"
 
+//sorts highest to lowest
+/***********************************************************************/
+inline bool abundNamesSort(string left, string right){
+    
+    int countLeft = 0;
+    if(left != ""){
+        countLeft = 1;
+        for(int i=0;i<left.size();i++){  if(left[i] == ','){  countLeft++;  }  }
+    }
+    
+    int countRight = 0;
+    if(right != ""){
+        countRight = 1;
+        for(int i=0;i<right.size();i++){  if(right[i] == ','){  countRight++;  }  }
+    }
+    
+	if (countLeft > countRight) {
+        return true;
+    }
+    return false;	
+} 
 
 /***********************************************************************/
 
@@ -135,9 +156,12 @@ void ListVector::print(ostream& output){
 	try {
 		output << label << '\t' << numBins << '\t';
 	
-		for(int i=0;i<data.size();i++){
-			if(data[i] != ""){
-				output << data[i] << '\t';
+        vector<string> hold = data;
+        sort(hold.begin(), hold.end(), abundNamesSort);
+        
+		for(int i=0;i<hold.size();i++){
+			if(hold[i] != ""){
+				output << hold[i] << '\t';
 			}
 		}
 		output << endl;

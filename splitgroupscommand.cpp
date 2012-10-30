@@ -36,14 +36,14 @@ vector<string> SplitGroupCommand::setParameters(){
 string SplitGroupCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The split.group command reads a group or count file, and parses your fasta and names or count files by groups. \n";
-		helpString += "The split.group command parameters are fasta, name, group, count and groups.\n";
+		helpString += "The split.groups command reads a group or count file, and parses your fasta and names or count files by groups. \n";
+		helpString += "The split.groups command parameters are fasta, name, group, count and groups.\n";
 		helpString += "The fasta and group or count parameters are required.\n";
 		helpString += "The groups parameter allows you to select groups to create files for.  \n";
 		helpString += "For example if you set groups=A-B-C, you will get a .A.fasta, .A.names, .B.fasta, .B.names, .C.fasta, .C.names files.  \n";
 		helpString += "If you want .fasta and .names files for all groups, set groups=all.  \n";
-		helpString += "The split.group command should be used in the following format: split.group(fasta=yourFasta, group=yourGroupFile).\n";
-		helpString += "Example: split.group(fasta=abrecovery.fasta, group=abrecovery.groups).\n";
+		helpString += "The split.groups command should be used in the following format: split.group(fasta=yourFasta, group=yourGroupFile).\n";
+		helpString += "Example: split.groups(fasta=abrecovery.fasta, group=abrecovery.groups).\n";
 		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n";
 		return helpString;
 	}

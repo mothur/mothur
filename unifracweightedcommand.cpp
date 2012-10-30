@@ -305,7 +305,8 @@ int UnifracWeightedCommand::execute() {
 		string s; //to make work with setgroups
 		Groups = m->getGroups();
 		vector<string> nameGroups = ct->getNamesOfGroups();
-		util.setGroups(Groups, nameGroups, s, numGroups, "weighted");	//sets the groups the user wants to analyze
+        if (nameGroups.size() < 2) { m->mothurOut("[ERROR]: You cannot run unifrac.weighted with less than 2 groups, aborting.\n"); delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; } return 0; }
+ 		util.setGroups(Groups, nameGroups, s, numGroups, "weighted");	//sets the groups the user wants to analyze
 		m->setGroups(Groups);
 		
         if (m->control_pressed) {  delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; } return 0; }

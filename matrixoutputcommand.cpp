@@ -199,7 +199,7 @@ MatrixOutputCommand::MatrixOutputCommand(string option)  {
                 else { subsample = false; }
             }
             
-            if (subsample == false) { iters = 1; }
+            if (subsample == false) { iters = 0; }
             
 			if (abort == false) {
 			
@@ -675,6 +675,7 @@ int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
                     
                     string distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + matrixCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + "." + getOutputFileNameTag("phylip");
                     outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
+                    
                     ofstream outDist;
                     m->openOutputFile(distFileName, outDist);
                     outDist.setf(ios::fixed, ios::floatfield); outDist.setf(ios::showpoint);
@@ -687,7 +688,7 @@ int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
             for (int i = 0; i < calcDists.size(); i++) {  calcDists[i].clear(); }
 		}
 		
-        if (iters != 1) {
+        if (iters != 0) {
             //we need to find the average distance and standard deviation for each groups distance
             
             vector< vector<seqDist>  > calcAverages; calcAverages.resize(matrixCalculators.size()); 

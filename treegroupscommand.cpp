@@ -453,6 +453,7 @@ int TreeGroupCommand::execute(){
 			readMatrix->setCutoff(cutoff);
 	
             ct = NULL;
+            nameMap = NULL;
             if(namefile != ""){	
                 nameMap = new NameAssignment(namefile);
                 nameMap->readMap();
@@ -461,6 +462,8 @@ int TreeGroupCommand::execute(){
                 ct = new CountTable();
                 ct->readTable(countfile);
                 readMatrix->read(ct);
+            }else {
+                readMatrix->read(nameMap);
             }
 
 			list = readMatrix->getListVector();

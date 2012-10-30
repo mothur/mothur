@@ -269,51 +269,50 @@ int ClearcutCommand::execute() {
 		
 		vector<char*> cPara;
 		
-		char* tempClearcut = new char[8];  
-		strcpy(tempClearcut, "clearcut"); 
+		char* tempClearcut = new char[9];  
+		*tempClearcut = '\0'; strncat(tempClearcut, "clearcut", 8); 
 		cPara.push_back(tempClearcut);
 				
 		//you gave us a distance matrix
-		if (phylipfile != "") {  char* temp = new char[10];  strcpy(temp, "--distance");  cPara.push_back(temp);	}
+		if (phylipfile != "") {  char* temp = new char[11];  *temp = '\0'; strncat(temp, "--distance", 10);  cPara.push_back(temp);	}
 		
 		//you gave us a fastafile
-		if (fastafile != "") { char* temp = new char[11];  strcpy(temp, "--alignment");  cPara.push_back(temp); 	}
+		if (fastafile != "") { char* temp = new char[12];  *temp = '\0'; strncat(temp, "--alignment", 11);  cPara.push_back(temp); 	}
 		
-		if (version)			{  char* temp = new char[9];  strcpy(temp, "--version");  cPara.push_back(temp);	}
-		if (verbose)			{  char* temp = new char[9];  strcpy(temp, "--verbose");  cPara.push_back(temp);	}
-		if (quiet)				{  char* temp = new char[7];  strcpy(temp, "--quiet");  cPara.push_back(temp);	}
+		if (version)			{  char* temp = new char[10];  *temp = '\0'; strncat(temp, "--version", 9);  cPara.push_back(temp);	}
+		if (verbose)			{  char* temp = new char[10];  *temp = '\0'; strncat(temp, "--verbose", 9);  cPara.push_back(temp);	}
+		if (quiet)				{  char* temp = new char[8];  *temp = '\0'; strncat(temp, "--quiet", 7);  cPara.push_back(temp);	}
 		if (seed != "*")		{  
 			string tempSeed = "--seed=" + seed;
-			char* temp = new char[tempSeed.length()];
-			strcpy(temp, tempSeed.c_str());
+			char* temp = new char[tempSeed.length()+1];
+			*temp = '\0'; strncat(temp, tempSeed.c_str(), tempSeed.length());
 			cPara.push_back(temp);
 		}
-		if (norandom)			{  char* temp = new char[10];  strcpy(temp, "--norandom");  cPara.push_back(temp);	}
-		if (shuffle)			{  char* temp = new char[9];  strcpy(temp, "--shuffle");  cPara.push_back(temp);	}
-		if (neighbor)			{  char* temp = new char[10];  strcpy(temp, "--neighbor");  cPara.push_back(temp);	}
+		if (norandom)			{  char* temp = new char[11];  *temp = '\0'; strncat(temp, "--norandom", 10);  cPara.push_back(temp);	}
+		if (shuffle)			{  char* temp = new char[10];  *temp = '\0'; strncat(temp, "--shuffle", 9);  cPara.push_back(temp);	}
+		if (neighbor)			{  char* temp = new char[11];  *temp = '\0'; strncat(temp, "--neighbor", 10);  cPara.push_back(temp);	}
 		
 		string tempIn = "--in=" + inputFile;  
-		char* tempI = new char[tempIn.length()];
-		strcpy(tempI, tempIn.c_str());
+		char* tempI = new char[tempIn.length()+1];
+		*tempI = '\0'; strncat(tempI, tempIn.c_str(), tempIn.length());
 		cPara.push_back(tempI);
 		
-		if (stdoutWanted)		{  char* temp = new char[8];  strcpy(temp, "--stdout");  cPara.push_back(temp);	}
+		if (stdoutWanted)		{  char* temp = new char[9];  *temp = '\0'; strncat(temp, "--stdout", 8);  cPara.push_back(temp);	}
 		else{  
 			string tempOut = "--out=" + outputName;  
-			
-			char* temp = new char[tempOut.length()];
-			strcpy(temp, tempOut.c_str());
+			char* temp = new char[tempOut.length()+1];
+			*temp = '\0'; strncat(temp, tempOut.c_str(), tempOut.length());
 			cPara.push_back(temp);
 		}
 			
-		if (DNA)				{  char* temp = new char[5];  strcpy(temp, "--DNA");  cPara.push_back(temp);		}
-		if (protein)			{  char* temp = new char[9];  strcpy(temp, "--protein");  cPara.push_back(temp);	}
-		if (jukes)				{  char* temp = new char[7];  strcpy(temp, "--jukes");  cPara.push_back(temp);		}
-		if (kimura)				{ char* temp = new char[8];  strcpy(temp, "--kimura");  cPara.push_back(temp);		}
+		if (DNA)				{  char* temp = new char[6];  *temp = '\0'; strncat(temp, "--DNA", 5);  cPara.push_back(temp);		}
+		if (protein)			{  char* temp = new char[10];  *temp = '\0'; strncat(temp, "--protein", 9);  cPara.push_back(temp);	}
+		if (jukes)				{  char* temp = new char[8];  *temp = '\0'; strncat(temp, "--jukes", 7);  cPara.push_back(temp);		}
+		if (kimura)				{ char* temp = new char[9];  *temp = '\0'; strncat(temp, "--kimura", 8);  cPara.push_back(temp);		}
 		if (matrixout != "")	{  
 			string tempMatrix =  "--matrixout=" + outputDir + matrixout; 
-			char* temp = new char[tempMatrix.length()];
-			strcpy(temp, tempMatrix.c_str());
+			char* temp = new char[tempMatrix.length()+1];
+			*temp = '\0'; strncat(temp, tempMatrix.c_str(), tempMatrix.length());
 			cPara.push_back(temp);
 			outputNames.push_back((outputDir + matrixout));
 			outputTypes["matrixout"].push_back((outputDir + matrixout));
@@ -321,13 +320,13 @@ int ClearcutCommand::execute() {
 
 		if (ntrees != "1")		{  
 			string tempNtrees = "--ntrees=" + ntrees; 
-			char* temp = new char[tempNtrees.length()];
-			strcpy(temp, tempNtrees.c_str());
+			char* temp = new char[tempNtrees.length()+1];
+			*temp = '\0'; strncat(temp, tempNtrees.c_str(), tempNtrees.length());
 			cPara.push_back(temp);
 		}
 
-		if (expblen)			{ char* temp = new char[9];  strcpy(temp, "--expblen");  cPara.push_back(temp); 	}
-		if (expdist)			{ char* temp = new char[9];  strcpy(temp, "--expdist");  cPara.push_back(temp);	}
+		if (expblen)			{ char* temp = new char[10];  *temp = '\0'; strncat(temp, "--expblen", 9);  cPara.push_back(temp); 	}
+		if (expdist)			{ char* temp = new char[10];  *temp = '\0'; strncat(temp, "--expdist", 9);  cPara.push_back(temp);	}
 		
 		char** clearcutParameters;
 		clearcutParameters = new char*[cPara.size()];
