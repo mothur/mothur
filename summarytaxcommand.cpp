@@ -277,7 +277,7 @@ int SummaryTaxCommand::execute(){
 				}
 			}
 			in.close();
-		}
+		}else { numSeqs = taxaSum->summarize(taxfile);  }
 		
 		if (m->control_pressed) {  if (groupMap != NULL) { delete groupMap; } if (ct != NULL) { delete ct; } delete taxaSum; return 0; }
 		

@@ -1608,8 +1608,17 @@ int MothurOut::readTax(string namefile, map<string, string>& taxMap) {
                 if (pairDone) { 
                     //are there confidence scores, if so remove them
                     if (secondCol.find_first_of('(') != -1) {  removeConfidences(secondCol);	}
-                    taxMap[firstCol] = secondCol;
-                    if (debug) {  mothurOut("[DEBUG]: name = '" + firstCol + "' tax = '" + secondCol + "'\n");  }
+                    map<string, string>::iterator itTax = taxMap.find(firstCol);
+                    
+                    if(itTax == taxMap.end()) {
+                        bool ignore = false;
+                        if (secondCol != "") { if (secondCol[secondCol.length()-1] != ';') { mothurOut("[ERROR]: " + firstCol + " is missing the final ';', ignoring.\n"); ignore=true; }
+                        }
+                        if (!ignore) { taxMap[firstCol] = secondCol; }
+                        if (debug) {  mothurOut("[DEBUG]: name = '" + firstCol + "' tax = '" + secondCol + "'\n");  }
+                    }else {
+                        mothurOut("[ERROR]: " + firstCol + " is already in your taxonomy file, names must be unique./n"); control_pressed = true;
+                    }
                     pairDone = false; 
                 }
             }
@@ -1626,8 +1635,18 @@ int MothurOut::readTax(string namefile, map<string, string>& taxMap) {
                 if (pairDone) { 
                     //are there confidence scores, if so remove them
                     if (secondCol.find_first_of('(') != -1) {  removeConfidences(secondCol);	}
-                    taxMap[firstCol] = secondCol;
-                    if (debug) {  mothurOut("[DEBUG]: name = '" + firstCol + "' tax = '" + secondCol + "'\n");  }
+                    map<string, string>::iterator itTax = taxMap.find(firstCol);
+                    
+                    if(itTax == taxMap.end()) {
+                        bool ignore = false;
+                        if (secondCol != "") { if (secondCol[secondCol.length()-1] != ';') { mothurOut("[ERROR]: " + firstCol + " is missing the final ';', ignoring.\n"); ignore=true; }
+                        }
+                        if (!ignore) { taxMap[firstCol] = secondCol; }
+                        if (debug) {  mothurOut("[DEBUG]: name = '" + firstCol + "' tax = '" + secondCol + "'\n");  }
+                    }else {
+                        mothurOut("[ERROR]: " + firstCol + " is already in your taxonomy file, names must be unique./n"); control_pressed = true;
+                    }
+
                     pairDone = false; 
                 }
             } 
