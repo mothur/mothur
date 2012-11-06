@@ -50,13 +50,16 @@ private:
 	int GetIndicatorSpecies(Tree*&);
 	int GetIndicatorSpecies();
 	set<string> getDescendantList(Tree*&, int, map<int, set<string> >, map<int, set<int> >&);
-	vector<float> getValues(vector< vector<SharedRAbundVector*> >&, map< vector<int>, vector<int> >);
-	vector<float> getValues(vector< vector<SharedRAbundFloatVector*> >&, map< vector<int>, vector<int> >);
+	vector<float> getValues(vector< vector<SharedRAbundVector*> >&, vector<string>&, map< vector<int>, vector<int> >);
+	vector<float> getValues(vector< vector<SharedRAbundFloatVector*> >&, vector<string>&, map< vector<int>, vector<int> >);
+    
 	map<int, float> getDistToRoot(Tree*&);
 	map< vector<int>, vector<int> > randomizeGroupings(vector< vector<SharedRAbundVector*> >&, int);
 	map< vector<int>, vector<int> > randomizeGroupings(vector< vector<SharedRAbundFloatVector*> >&, int);
+    
 	vector<float> driver(vector< vector<SharedRAbundFloatVector*> >&, map< vector<int>, vector<int> >, int, vector<float>, int);
 	vector<float> driver(vector< vector<SharedRAbundVector*> >&, map< vector<int>, vector<int> >, int, vector<float>, int);
+    
 	vector<float> getPValues(vector< vector<SharedRAbundFloatVector*> >&, map< vector<int>, vector<int> >, int, vector<float>);
 	vector<float> getPValues(vector< vector<SharedRAbundVector*> >&, map< vector<int>, vector<int> >, int, vector<float>);
 

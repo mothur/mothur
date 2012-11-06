@@ -410,7 +410,7 @@ int SeqSummaryCommand::execute(){
 		if (m->control_pressed) {  m->mothurRemove(summaryFile); return 0; }
 		
 		m->mothurOutEndLine();
-		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		m->mothurOut(summaryFile); m->mothurOutEndLine();	outputNames.push_back(summaryFile); outputTypes["summary"].push_back(summaryFile);
 		m->mothurOutEndLine();
 		

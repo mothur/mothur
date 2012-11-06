@@ -135,7 +135,7 @@ int MergeFileCommand::execute(){
 		if (m->control_pressed) {  m->mothurRemove(outputFileName); return 0;  }
 		
 		m->mothurOutEndLine();
-		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		m->mothurOut(outputFileName); m->mothurOutEndLine();	outputNames.push_back(outputFileName); outputTypes["merge"].push_back(outputFileName);
 		m->mothurOutEndLine();
 

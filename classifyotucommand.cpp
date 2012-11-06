@@ -10,6 +10,7 @@
 #include "classifyotucommand.h"
 #include "phylotree.h"
 #include "phylosummary.h"
+#include "sharedutilities.h"
 
 //**********************************************************************************************************************
 vector<string> ClassifyOtuCommand::setParameters(){	
@@ -20,7 +21,8 @@ vector<string> ClassifyOtuCommand::setParameters(){
         CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none",false,false); parameters.push_back(pname);
         CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none",false,false); parameters.push_back(pcount);
 		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none",false,false); parameters.push_back(pgroup);
-		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
+        CommandParameter ppersample("persample", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(ppersample);
+        CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
 		CommandParameter pbasis("basis", "Multiple", "otu-sequence", "otu", "", "", "",false,false); parameters.push_back(pbasis);
 		CommandParameter pcutoff("cutoff", "Number", "", "51", "", "", "",false,true); parameters.push_back(pcutoff);
 		CommandParameter pprobs("probs", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pprobs);
@@ -244,7 +246,7 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
-			
+            
 			basis = validParameter.validFile(parameters, "basis", false);
 			if (basis == "not found") { basis = "otu"; }	
 			
@@ -255,7 +257,18 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 			
 			temp = validParameter.validFile(parameters, "probs", false);					if (temp == "not found"){	temp = "true";			}
 			probs = m->isTrue(temp);
+            
+            temp = validParameter.validFile(parameters, "persample", false);		if (temp == "not found"){	temp = "f";		}
+			persample = m->isTrue(temp);
 			
+            if ((groupfile == "") && (countfile == "")) { if (persample) { m->mothurOut("persample is only valid with a group file, or count file with group information. Setting persample=f.\n"); persample = false; } 
+            }
+            if (countfile != "") {
+                CountTable cts;
+                if (!cts.testGroups(countfile)) { 
+                    if (persample) { m->mothurOut("persample is only valid with a group file, or count file with group information. Setting persample=f.\n"); persample = false; }
+                }
+            }
 			
 			if ((cutoff < 51) || (cutoff > 100)) { m->mothurOut("cutoff must be above 50, and no greater than 100."); m->mothurOutEndLine(); abort = true;  }
 			
@@ -282,11 +295,11 @@ int ClassifyOtuCommand::execute(){
 		
 		//if user gave a namesfile then use it
 		if (namefile != "")     {	m->readNames(namefile, nameMap, true);	}
-        if (groupfile != "")    {   groupMap = new GroupMap(groupfile);  groupMap->readMap(); }
+        if (groupfile != "")    {   groupMap = new GroupMap(groupfile);  groupMap->readMap();  groups = groupMap->getNamesOfGroups(); }
         else { groupMap = NULL;  }
-        if (countfile != "") {  ct = new CountTable(); ct->readTable(countfile);    }
+        if (countfile != "") {  ct = new CountTable(); ct->readTable(countfile);  if (ct->hasGroupInfo()) { groups = ct->getNamesOfGroups(); } }
         else {  ct = NULL;    }
-		
+        
 		//read taxonomy file and save in map for easy access in building bin trees
 		m->readTax(taxfile, taxMap);
 		
@@ -381,17 +394,12 @@ int ClassifyOtuCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-vector<string> ClassifyOtuCommand::findConsensusTaxonomy(int bin, ListVector* thisList, int& size, string& conTax) {
+vector<string> ClassifyOtuCommand::findConsensusTaxonomy(vector<string> names, int& size, string& conTax) {
 	try{
 		conTax = "";
-		vector<string> names;
 		vector<string> allNames;
 		map<string, string>::iterator it;
 		map<string, string>::iterator it2;
-
-		//parse names into vector
-		string binnames = thisList->get(bin);
-		m->splitAtComma(binnames, names);
 
 		//create a tree containing sequences from this bin
 		PhyloTree* phylo = new PhyloTree();
@@ -543,7 +551,39 @@ int ClassifyOtuCommand::process(ListVector* processList) {
             if (refTaxonomy != "") { taxaSum = new PhyloSummary(refTaxonomy, groupMap);  }
             else {  taxaSum = new PhyloSummary(groupMap); }
         }
-
+        
+        vector<ofstream*> outSums;
+        vector<ofstream*> outs;
+        vector<PhyloSummary*> taxaSums;
+        map<string, int> groupIndex;
+        if (persample) {
+            for (int i = 0; i < groups.size(); i++) {
+                groupIndex[groups[i]] = i;
+                ofstream* temp = new ofstream();
+                string outputFile = outputDir + m->getRootName(m->getSimpleName(listfile)) + processList->getLabel() + "." + groups[i] + "." +getOutputFileNameTag("constaxonomy");
+                m->openOutputFile(outputFile, *temp);
+                (*temp) << "OTU\tSize\tTaxonomy" << endl;
+                outs.push_back(temp);
+                outputNames.push_back(outputFile); outputTypes["constaxonomy"].push_back(outputFile);
+                
+                ofstream* tempSum = new ofstream();
+                string outputSumFile = outputDir + m->getRootName(m->getSimpleName(listfile)) + processList->getLabel() + "." + groups[i] + "." +getOutputFileNameTag("taxsummary");
+                m->openOutputFile(outputSumFile, *tempSum);
+                outSums.push_back(tempSum);
+                outputNames.push_back(outputSumFile); outputTypes["taxsummary"].push_back(outputSumFile);
+                
+                PhyloSummary* taxaSumt;
+                if (countfile != "") {
+                    if (refTaxonomy != "") { taxaSumt = new PhyloSummary(refTaxonomy, ct);  }
+                    else {  taxaSumt = new PhyloSummary(ct); }
+                }else {
+                    if (refTaxonomy != "") { taxaSumt = new PhyloSummary(refTaxonomy, groupMap);  }
+                    else {  taxaSumt = new PhyloSummary(groupMap); }
+                }
+                taxaSums.push_back(taxaSumt);
+            }
+        }
+        
 		//for each bin in the list vector
         string snumBins = toString(processList->getNumBins());
 		for (int i = 0; i < processList->getNumBins(); i++) {
@@ -551,9 +591,13 @@ int ClassifyOtuCommand::process(ListVector* processList) {
 			if (m->control_pressed) { break; }
 			
 			vector<string> names;
-			names = findConsensusTaxonomy(i, processList, size, conTax);
+            string binnames = processList->get(i);
+            vector<string> thisNames;
+            m->splitAtComma(binnames, thisNames);
+            
+			names = findConsensusTaxonomy(thisNames, size, conTax);
 		
-			if (m->control_pressed) { out.close();  return 0; }
+			if (m->control_pressed) { break; }
 			
 			//output to new names file
             string binLabel = "Otu";
@@ -571,7 +615,11 @@ int ClassifyOtuCommand::process(ListVector* processList) {
 			
 			//add this bins taxonomy to summary
 			if (basis == "sequence") {
-				for(int j = 0; j < names.size(); j++) {  taxaSum->addSeqToTree(names[j], noConfidenceConTax);  }
+				for(int j = 0; j < names.size(); j++) {  
+                    int numReps = 1;
+                    if (countfile != "") {  numReps = ct->getNumSeqs(names[j]); }
+                    for(int k = 0; k < numReps; k++) {  taxaSum->addSeqToTree(names[j], noConfidenceConTax);  }
+                }
 			}else { //otu
                 map<string, bool> containsGroup; 
                 if (countfile != "") {
@@ -602,6 +650,66 @@ int ClassifyOtuCommand::process(ListVector* processList) {
                 }
 				taxaSum->addSeqToTree(noConfidenceConTax, containsGroup);
 			}
+            
+            
+            if (persample) {
+                //divide names by group
+                map<string, vector<string> > parsedNames;
+                map<string, vector<string> >::iterator itParsed;
+                
+                //parse names by group
+                for (int j = 0; j < names.size(); j++) {
+                    if (groupfile != "") { 
+                        string group = groupMap->getGroup(names[j]); 
+                        itParsed = parsedNames.find(group);
+                        
+                        if (itParsed != parsedNames.end()) { itParsed->second.push_back(names[j]); }
+                        else { vector<string> tempNames; tempNames.push_back(names[j]); parsedNames[group] = tempNames; }
+                    }else { //count file was used
+                        vector<string> thisSeqsGroups = ct->getGroups(names[j]);
+                        for (int k = 0; k < thisSeqsGroups.size(); k++) {
+                            string group = thisSeqsGroups[k]; 
+                            itParsed = parsedNames.find(group);
+                            
+                            if (itParsed != parsedNames.end()) { itParsed->second.push_back(names[j]); }
+                            else { vector<string> tempNames; tempNames.push_back(names[j]); parsedNames[group] = tempNames; }
+                        }
+                    }
+                }
+                
+                for (itParsed = parsedNames.begin(); itParsed != parsedNames.end(); itParsed++) {
+                    vector<string> theseNames = findConsensusTaxonomy(itParsed->second, size, conTax);
+                    
+                    if (m->control_pressed) { break; }
+                    
+                    //output to new names file
+                    string binLabel = "Otu";
+                    string sbinNumber = toString(i+1);
+                    if (sbinNumber.length() < snumBins.length()) { 
+                        int diff = snumBins.length() - sbinNumber.length();
+                        for (int h = 0; h < diff; h++) { binLabel += "0"; }
+                    }
+                    binLabel += sbinNumber;
+                    
+                    (*outs[groupIndex[itParsed->first]]) << binLabel << '\t' << size << '\t' << conTax << endl;
+                    
+                    string noConfidenceConTax = conTax;
+                    m->removeConfidences(noConfidenceConTax);
+                    
+                    //add this bins taxonomy to summary
+                    if (basis == "sequence") {
+                        for(int j = 0; j < theseNames.size(); j++) {  
+                            int numReps = 1;
+                            if (countfile != "") {  numReps = ct->getGroupCount(theseNames[j], itParsed->first); } //get num seqs for this seq from this group
+                            for(int k = 0; k < numReps; k++) {  (taxaSums[groupIndex[itParsed->first]])->addSeqToTree(theseNames[j], noConfidenceConTax);  }
+                        }
+                    }else { //otu
+                        map<string, bool> containsGroup; 
+                        containsGroup[itParsed->first] = true;
+                        (taxaSums[groupIndex[itParsed->first]])->addSeqToTree(noConfidenceConTax, containsGroup);
+                    }
+                }
+            }
 		}
 
 		out.close();
@@ -609,6 +717,17 @@ int ClassifyOtuCommand::process(ListVector* processList) {
 		//print summary file
 		taxaSum->print(outSum);
 		outSum.close();
+        
+        if (persample) {
+            for (int i = 0; i < groups.size(); i++) {
+                (*outs[i]).close();
+                taxaSums[i]->print(*outSums[i]);
+                (*outSums[i]).close();
+                delete outs[i];
+                delete outSums[i];
+                delete taxaSums[i];
+            }
+        }
 		
 		delete taxaSum;
 		

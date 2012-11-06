@@ -269,7 +269,7 @@ int ListSeqsCommand::execute(){
 		m->setAccnosFile(outputFileName);
 		
 		m->mothurOutEndLine();
-		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		m->mothurOut(outputFileName); m->mothurOutEndLine();	
 		m->mothurOutEndLine();
 		

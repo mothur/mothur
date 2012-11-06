@@ -188,7 +188,7 @@ int CountSeqsCommand::execute(){
         m->mothurOutEndLine();
 		m->mothurOut("Total number of sequences: " + toString(total)); m->mothurOutEndLine();
 		m->mothurOutEndLine();
-		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		m->mothurOut(outputFileName); m->mothurOutEndLine();	
 		m->mothurOutEndLine();
 		

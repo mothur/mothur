@@ -28,7 +28,7 @@ public:
 	
 	vector<string> setParameters();
 	string getCommandName()			{ return "sub.sample";	}
-	string getCommandCategory()		{ return "General";		}
+	string getCommandCategory()		{ return "Sequence Processing";		}
 	string getOutputFileNameTag(string, string);
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/Sub.sample"; }

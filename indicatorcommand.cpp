@@ -416,7 +416,7 @@ int IndicatorCommand::GetIndicatorSpecies(){
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
-		m->mothurOutEndLine(); m->mothurOut("Species\tIndicatorValue\tpValue\n");
+		m->mothurOutEndLine(); m->mothurOut("Species\tIndicator_Groups\tIndicatorValue\tpValue\n");
 		
 		int numBins = 0;
 		if (sharedfile != "") { numBins = lookup[0]->getNumBins(); }
@@ -430,6 +430,7 @@ int IndicatorCommand::GetIndicatorSpecies(){
 			
 		vector<float> indicatorValues; //size of numBins
 		vector<float> pValues;
+        vector<string> indicatorGroups;
 		map< vector<int>, vector<int> > randomGroupingsMap; //maps location in groupings to location in groupings, ie, [0][0] -> [1][2]. This is so we don't have to actually move the sharedRabundVectors.
 			
 		if (sharedfile != "") {
@@ -453,7 +454,7 @@ int IndicatorCommand::GetIndicatorSpecies(){
 				
 			if (groupsAlreadyAdded.size() != lookup.size()) {  m->mothurOut("[ERROR]: could not make proper groupings."); m->mothurOutEndLine(); }
 				
-			indicatorValues = getValues(groupings, randomGroupingsMap);
+			indicatorValues = getValues(groupings, indicatorGroups, randomGroupingsMap);
 			
 			pValues = getPValues(groupings, randomGroupingsMap, lookup.size(), indicatorValues);				
 		}else {
@@ -476,7 +477,7 @@ int IndicatorCommand::GetIndicatorSpecies(){
 			
 			if (groupsAlreadyAdded.size() != lookupFloat.size()) {  m->mothurOut("[ERROR]: could not make proper groupings."); m->mothurOutEndLine(); }
 			
-			indicatorValues = getValues(groupings, randomGroupingsMap);
+			indicatorValues = getValues(groupings, indicatorGroups, randomGroupingsMap);
 			
 			pValues = getPValues(groupings, randomGroupingsMap, lookupFloat.size(), indicatorValues);
 		}
@@ -487,22 +488,22 @@ int IndicatorCommand::GetIndicatorSpecies(){
 		/******************************************************/
 		//output indicator values to table form               //
 		/*****************************************************/
-		out << "OTU\tIndicator_Value\tpValue" << endl;
+		out << "OTU\tIndicator_Groups\tIndicator_Value\tpValue" << endl;
 		for (int j = 0; j < indicatorValues.size(); j++) {
 				
 			if (m->control_pressed) { out.close(); return 0; }
 			
-			out << m->currentBinLabels[j] << '\t' << indicatorValues[j] << '\t'; 
+			out << m->currentBinLabels[j] << '\t' << indicatorGroups[j] << '\t' << indicatorValues[j] << '\t'; 
 			
 			if (pValues[j] > (1/(float)iters)) { out << pValues[j] << endl; } 
 			else { out << "<" << (1/(float)iters) << endl; }
 			
 			if (pValues[j] <= 0.05) {
-				cout << m->currentBinLabels[j] << '\t' << indicatorValues[j]  << '\t';
+				cout << m->currentBinLabels[j] << '\t' << indicatorGroups[j] << '\t' << indicatorValues[j]  << '\t';
 				string pValueString = "<" + toString((1/(float)iters)); 
 				if (pValues[j] > (1/(float)iters)) { pValueString = toString(pValues[j]); cout << pValues[j];} 
 				else { cout << "<" << (1/(float)iters); }
-				m->mothurOutJustToLog(m->currentBinLabels[j] + "\t" + toString(indicatorValues[j]) + "\t" + pValueString); 
+				m->mothurOutJustToLog(m->currentBinLabels[j] + "\t" + indicatorGroups[j] + "\t" + toString(indicatorValues[j]) + "\t" + pValueString); 
 				m->mothurOutEndLine(); 
 			}
 		}
@@ -538,10 +539,10 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 		
 		//print headings
 		out << "TreeNode\t";
-		for (int i = 0; i < numBins; i++) { out << m->currentBinLabels[i] << "_IndValue" << '\t' << "pValue" << '\t'; }
+		for (int i = 0; i < numBins; i++) { out << m->currentBinLabels[i] << "_IndGroups" << '\t' << m->currentBinLabels[i] << "_IndValue" << '\t' << "pValue" << '\t'; }
 		out << endl;
 		
-		m->mothurOutEndLine(); m->mothurOut("Node\tSpecies\tIndicatorValue\tpValue\n");
+		m->mothurOutEndLine(); m->mothurOut("Node\tSpecies\tIndicator_Groups\tIndicatorValue\tpValue\n");
 		
 		string treeOutputDir = outputDir;
 		if (outputDir == "") {  treeOutputDir += m->hasPath(treefile);  }
@@ -572,6 +573,7 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 			
 			vector<float> indicatorValues; //size of numBins
 			vector<float> pValues;
+            vector<string> indicatorGroups;
 			map< vector<int>, vector<int> > randomGroupingsMap; //maps location in groupings to location in groupings, ie, [0][0] -> [1][2]. This is so we don't have to actually move the sharedRabundVectors.
 			
 			if (sharedfile != "") {
@@ -623,7 +625,7 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 				
 				if (groupsAlreadyAdded.size() != lookup.size()) {  m->mothurOut("[ERROR]: could not make proper groupings."); m->mothurOutEndLine(); }
 								
-				indicatorValues = getValues(groupings, randomGroupingsMap);
+				indicatorValues = getValues(groupings, indicatorGroups, randomGroupingsMap);
 				
 				pValues = getPValues(groupings, randomGroupingsMap, lookup.size(), indicatorValues);				
 			}else {
@@ -672,7 +674,7 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 				
 				if (groupsAlreadyAdded.size() != lookupFloat.size()) { m->mothurOut("[ERROR]: could not make proper groupings."); m->mothurOutEndLine(); }
 				
-				indicatorValues = getValues(groupings, randomGroupingsMap);
+				indicatorValues = getValues(groupings, indicatorGroups, randomGroupingsMap);
 				
 				pValues = getPValues(groupings, randomGroupingsMap, lookupFloat.size(), indicatorValues);
 			}
@@ -689,17 +691,17 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 				if (m->control_pressed) { out.close(); return 0; }
 				
 				if (pValues[j] < (1/(float)iters)) {
-					out << indicatorValues[j] << '\t' << '<' << (1/(float)iters) << '\t';
+					out << indicatorGroups[j] << '\t' << indicatorValues[j] << '\t' << '<' << (1/(float)iters) << '\t';
 				}else {
-					out << indicatorValues[j] << '\t' << pValues[j] << '\t';
+					out << indicatorGroups[j] << '\t' << indicatorValues[j] << '\t' << pValues[j] << '\t';
 				}
 				
 				if (pValues[j] <= 0.05) {
-					cout << i+1 << '\t' << m->currentBinLabels[j] << '\t' << indicatorValues[j]  << '\t';
+					cout << i+1 << '\t' << m->currentBinLabels[j] << '\t' << indicatorGroups[j] << '\t' << indicatorValues[j]  << '\t';
 					string pValueString = "<" + toString((1/(float)iters)); 
 					if (pValues[j] > (1/(float)iters)) { pValueString = toString(pValues[j]); cout << pValues[j];} 
 					else { cout << "<" << (1/(float)iters); }
-					m->mothurOutJustToLog(toString(i) + "\t" + m->currentBinLabels[j] + "\t" + toString(indicatorValues[j]) + "\t" + pValueString); 
+					m->mothurOutJustToLog(toString(i) + "\t" + m->currentBinLabels[j] + "\t" + indicatorGroups[j] + "\t" + toString(indicatorValues[j]) + "\t" + pValueString); 
 					m->mothurOutEndLine(); 
 				}
 			}
@@ -724,11 +726,25 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 	}
 }
 //**********************************************************************************************************************
-vector<float> IndicatorCommand::getValues(vector< vector<SharedRAbundFloatVector*> >& groupings, map< vector<int>, vector<int> > groupingsMap){
+vector<float> IndicatorCommand::getValues(vector< vector<SharedRAbundFloatVector*> >& groupings, vector<string>& indicatorGroupings, map< vector<int>, vector<int> > groupingsMap){
 	try {
 		vector<float> values;
 		map< vector<int>, vector<int> >::iterator it;
-		
+        
+        indicatorGroupings.clear();
+        
+        //create grouping strings
+        vector<string> groupingsGroups;
+        for (int j = 0; j < groupings.size(); j++) {
+            string tempGrouping = "";
+            for (int k = 0; k < groupings[j].size()-1; k++) { 
+                tempGrouping += groupings[j][k]->getGroup() + "-";
+            }
+            tempGrouping += groupings[j][groupings[j].size()-1]->getGroup();
+            groupingsGroups.push_back(tempGrouping);
+        }
+        
+        
 		//for each otu
 		for (int i = 0; i < groupings[0][0]->getNumBins(); i++) {
 			
@@ -768,15 +784,17 @@ vector<float> IndicatorCommand::getValues(vector< vector<SharedRAbundFloatVector
 			}
 			
 			float maxIndVal = 0.0;
+            string maxGrouping = "";
 			for (int j = 0; j < terms.size(); j++) { 
 				float thisAij = (terms[j] / AijDenominator); //relative abundance
 				float thisValue = thisAij * Bij[j] * 100.0;
 				
 				//save largest
-				if (thisValue > maxIndVal) { maxIndVal = thisValue; }
+				if (thisValue > maxIndVal) { maxIndVal = thisValue;  maxGrouping = groupingsGroups[j]; }
 			}
 			
 			values.push_back(maxIndVal);
+            indicatorGroupings.push_back(maxGrouping);
 		}
 		
 		return values;
@@ -788,17 +806,24 @@ vector<float> IndicatorCommand::getValues(vector< vector<SharedRAbundFloatVector
 }
 //**********************************************************************************************************************
 //same as above, just data type difference
-vector<float> IndicatorCommand::getValues(vector< vector<SharedRAbundVector*> >& groupings, map< vector<int>, vector<int> > groupingsMap){
+vector<float> IndicatorCommand::getValues(vector< vector<SharedRAbundVector*> >& groupings, vector<string>& indicatorGroupings, map< vector<int>, vector<int> > groupingsMap){
 	try {
 		vector<float> values;
-		
-	/*for (int j = 0; j < groupings.size(); j++) {		
-		cout << "grouping " << j << endl;
-		for (int k = 0; k < groupings[j].size(); k++) { 
-			cout << groupings[j][k]->getGroup() << endl;
-		}
-	}*/
 		map< vector<int>, vector<int> >::iterator it;
+        
+        indicatorGroupings.clear();
+        
+        //create grouping strings
+        vector<string> groupingsGroups;
+        for (int j = 0; j < groupings.size(); j++) {
+            string tempGrouping = "";
+            for (int k = 0; k < groupings[j].size()-1; k++) { 
+                tempGrouping += groupings[j][k]->getGroup() + "-";
+            }
+            tempGrouping += groupings[j][groupings[j].size()-1]->getGroup();
+            groupingsGroups.push_back(tempGrouping);
+        }
+
 		
 		//for each otu
 		for (int i = 0; i < groupings[0][0]->getNumBins(); i++) {
@@ -835,15 +860,17 @@ vector<float> IndicatorCommand::getValues(vector< vector<SharedRAbundVector*> >&
 			}
 			
 			float maxIndVal = 0.0;
+            string maxGrouping = "";
 			for (int j = 0; j < terms.size(); j++) { 
 				float thisAij = (terms[j] / AijDenominator); //relative abundance
 				float thisValue = thisAij * Bij[j] * 100.0;
 					
 				//save largest
-				if (thisValue > maxIndVal) { maxIndVal = thisValue; }
+				if (thisValue > maxIndVal) { maxIndVal = thisValue;  maxGrouping = groupingsGroups[j]; }
 			}
 			
 			values.push_back(maxIndVal);
+            indicatorGroupings.push_back(maxGrouping);
 		}
 		
 		return values;
@@ -1119,11 +1146,12 @@ vector<float> IndicatorCommand::driver(vector< vector<SharedRAbundFloatVector*> 
 	try {
 		vector<float> pvalues;
 		pvalues.resize(indicatorValues.size(), 0);
+        vector<string> notUsedGroupings;  //we dont care about the grouping for the pvalues since they are randomized, but we need to pass the function something to make it work.
 		
 		for(int i=0;i<numIters;i++){
 			if (m->control_pressed) { break; }
 			groupingsMap = randomizeGroupings(groupings, num);
-			vector<float> randomIndicatorValues = getValues(groupings, groupingsMap);
+			vector<float> randomIndicatorValues = getValues(groupings, notUsedGroupings, groupingsMap);
 			
 			for (int j = 0; j < indicatorValues.size(); j++) {
 				if (randomIndicatorValues[j] >= indicatorValues[j]) { pvalues[j]++; }
@@ -1232,11 +1260,12 @@ vector<float> IndicatorCommand::driver(vector< vector<SharedRAbundVector*> >& gr
 	try {
 		vector<float> pvalues;
 		pvalues.resize(indicatorValues.size(), 0);
+        vector<string> notUsedGroupings;  //we dont care about the grouping for the pvalues since they are randomized, but we need to pass the function something to make it work.
 		
 		for(int i=0;i<numIters;i++){
 			if (m->control_pressed) { break; }
 			groupingsMap = randomizeGroupings(groupings, num);
-			vector<float> randomIndicatorValues = getValues(groupings, groupingsMap);
+			vector<float> randomIndicatorValues = getValues(groupings, notUsedGroupings, groupingsMap);
 			
 			for (int j = 0; j < indicatorValues.size(); j++) {
 				if (randomIndicatorValues[j] >= indicatorValues[j]) { pvalues[j]++; }

@@ -223,7 +223,7 @@ int SensSpecCommand::execute(){
 		if (m->control_pressed) { m->mothurRemove(sensSpecFileName); return 0; }
 		
 		m->mothurOutEndLine();
-		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		m->mothurOut(sensSpecFileName); m->mothurOutEndLine();	
 		m->mothurOutEndLine();
 		

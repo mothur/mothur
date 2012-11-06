@@ -23,6 +23,7 @@ vector<string> ClusterSplitCommand::setParameters(){
 		CommandParameter psplitmethod("splitmethod", "Multiple", "classify-fasta-distance", "distance", "", "", "",false,false); parameters.push_back(psplitmethod);
 		CommandParameter plarge("large", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(plarge);
 		CommandParameter pshowabund("showabund", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pshowabund);
+        CommandParameter pcluster("cluster", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pcluster);
 		CommandParameter ptiming("timing", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(ptiming);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
 		CommandParameter pcutoff("cutoff", "Number", "", "0.25", "", "", "",false,false); parameters.push_back(pcutoff);
@@ -46,7 +47,7 @@ vector<string> ClusterSplitCommand::setParameters(){
 string ClusterSplitCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The cluster.split command parameter options are fasta, phylip, column, name, count, cutoff, precision, method, splitmethod, taxonomy, taxlevel, showabund, timing, hard, large, processors. Fasta or Phylip or column and name are required.\n";
+		helpString += "The cluster.split command parameter options are fasta, phylip, column, name, count, cutoff, precision, method, splitmethod, taxonomy, taxlevel, showabund, timing, hard, large, cluster, processors. Fasta or Phylip or column and name are required.\n";
 		helpString += "The cluster.split command can split your files in 3 ways. Splitting by distance file, by classification, or by classification also using a fasta file. \n";
 		helpString += "For the distance file method, you need only provide your distance file and mothur will split the file into distinct groups. \n";
 		helpString += "For the classification method, you need to provide your distance file and taxonomy file, and set the splitmethod to classify.  \n";
@@ -57,6 +58,7 @@ string ClusterSplitCommand::getHelpString(){
 		helpString += "The fasta parameter allows you to enter your aligned fasta file. \n";
 		helpString += "The name parameter allows you to enter your name file. \n";
         helpString += "The count parameter allows you to enter your count file. \n A count or name file is required if your distance file is in column format";
+        helpString += "The cluster parameter allows you to indicate whether you want to run the clustering or just split the distance matrix, default=t";
 		helpString += "The cutoff parameter allow you to set the distance you want to cluster to, default is 0.25. \n";
 		helpString += "The precision parameter allows you specify the precision of the precision of the distances outputted, default=100, meaning 2 decimal places. \n";
 		helpString += "The method allows you to specify what clustering algorythm you want to use, default=average, option furthest, nearest, or average. \n";
@@ -350,6 +352,9 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 
 			showabund = validParameter.validFile(parameters, "showabund", false);
 			if (showabund == "not found") { showabund = "T"; }
+            
+            temp = validParameter.validFile(parameters, "cluster", false);  if (temp == "not found") { temp = "T"; }
+            runCluster = m->isTrue(temp);
 
 			timing = validParameter.validFile(parameters, "timing", false);
 			if (timing == "not found") { timing = "F"; }
@@ -447,7 +452,19 @@ int ClusterSplitCommand::execute(){
 		
 		m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to split the distance file."); m->mothurOutEndLine();
 		estart = time(NULL);
-		
+                
+        if (!runCluster) { 
+#ifdef USE_MPI
+    }
+#endif	
+                m->mothurOutEndLine();
+                m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+                for (int i = 0; i < distName.size(); i++) {	m->mothurOut(distName[i].begin()->first); m->mothurOutEndLine(); m->mothurOut(distName[i].begin()->second); m->mothurOutEndLine();	}
+                m->mothurOutEndLine();
+                return 0;
+                
+        }
+                
 		//****************** break up files between processes and cluster each file set ******************************//
 	#ifdef USE_MPI
 			////you are process 0 from above////

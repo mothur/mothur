@@ -14,8 +14,8 @@
 vector<string> ParseFastaQCommand::setParameters(){	
 	try {
 		CommandParameter pfastq("fastq", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfastq);
-		CommandParameter pfasta("fasta", "Bool", "", "T", "", "", "",false,false); parameters.push_back(pfasta);
-		CommandParameter pqual("qfile", "Bool", "", "T", "", "", "",false,false); parameters.push_back(pqual);
+		CommandParameter pfasta("fasta", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pfasta);
+		CommandParameter pqual("qfile", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pqual);
  		CommandParameter pformat("format", "Multiple", "sanger-illumina-solexa", "sanger", "", "", "",false,false); parameters.push_back(pformat);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);

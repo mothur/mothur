@@ -303,7 +303,7 @@ int AlignCheckCommand::execute(){
 		
 		
 		m->mothurOutEndLine();
-		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		m->mothurOut(outfile); m->mothurOutEndLine();	outputNames.push_back(outfile); outputTypes["aligncheck"].push_back(outfile);
 		m->mothurOutEndLine();
 		

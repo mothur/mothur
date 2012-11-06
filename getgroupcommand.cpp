@@ -126,7 +126,7 @@ int GetgroupCommand::execute(){
 		}
 			
 		m->mothurOutEndLine();
-		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		m->mothurOutEndLine();
 		
 		return 0;	
