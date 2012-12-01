@@ -255,9 +255,8 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 /**************************************************************************************************/
 Bayesian::~Bayesian() {
 	try {
-		
-		 delete phyloTree; 
-		 if (database != NULL) {  delete database; }
+        if (phyloTree != NULL) { delete phyloTree; }
+        if (database != NULL) {  delete database; }
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Bayesian", "~Bayesian");

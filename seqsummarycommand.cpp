@@ -450,7 +450,7 @@ int SeqSummaryCommand::driverCreateSummary(vector<int>& startPosition, vector<in
 			if (m->control_pressed) { in.close(); outSummary.close(); return 1; }
 					
 			Sequence current(in); m->gobble(in);
-	
+           
 			if (current.getName() != "") {
 				
 				int num = 1;

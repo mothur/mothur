@@ -814,25 +814,30 @@ vector< map<string, float> > RemoveLineageCommand::getTaxons(string tax) {
 		int taxLength = tax.length();
 		for(int i=0;i<taxLength;i++){
 			if(tax[i] == ';'){
-				
-				int openParen = taxon.find_first_of('(');
+                
+				int openParen = taxon.find_last_of('(');
 				int closeParen = taxon.find_last_of(')');
 				
 				string newtaxon, confidence;
 				if ((openParen != string::npos) && (closeParen != string::npos)) {
-					newtaxon = taxon.substr(0, openParen); //rip off confidence
-					confidence = taxon.substr((openParen+1), (closeParen-openParen-1));  
+                    string confidenceScore = taxon.substr(openParen+1, (closeParen-(openParen+1)));
+                    if (m->isNumeric1(confidenceScore)) {  //its a confidence
+                        newtaxon = taxon.substr(0, openParen); //rip off confidence
+                        confidence = taxon.substr((openParen+1), (closeParen-openParen-1));  
+                    }else { //its part of the taxon
+                        newtaxon = taxon;
+                        confidence = "0";
+                    }
 				}else{
 					newtaxon = taxon;
 					confidence = "0";
-				}
+				} 
 				float con = 0;
 				convert(confidence, con);
 				
 				map<string, float> temp;
 				temp[newtaxon] = con;
 				t.push_back(temp);
-				
 				taxon = "";
 			}
 			else{

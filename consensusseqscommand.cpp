@@ -610,10 +610,10 @@ char ConsensusSeqsCommand::getBase(vector<int> counts, int size){  //A,T,G,C,Gap
 		
 		//zero out counts that don't make the cutoff
 		float percentage = (100.0 - cutoff) / 100.0;
-		int zeroCutoff = percentage * size;
-		
+        
 		for (int i = 0; i < counts.size(); i++) {
-			if (counts[i] < zeroCutoff) { counts[i] = 0; }
+            float countPercentage = counts[i] / (float) size;
+			if (countPercentage < percentage) { counts[i] = 0; }
 		}
 		
 		//any

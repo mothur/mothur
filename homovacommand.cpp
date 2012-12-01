@@ -10,12 +10,14 @@
 #include "homovacommand.h"
 #include "groupmap.h"
 #include "readphylipvector.h"
+#include "sharedutilities.h"
 
 //**********************************************************************************************************************
 vector<string> HomovaCommand::setParameters(){	
 	try {
 		CommandParameter pdesign("design", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pdesign);
 		CommandParameter pphylip("phylip", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pphylip);
+        CommandParameter psets("sets", "String", "", "", "", "", "",false,false); parameters.push_back(psets);
 		CommandParameter piters("iters", "Number", "", "1000", "", "", "",false,false); parameters.push_back(piters);
 		CommandParameter palpha("alpha", "Number", "", "0.05", "", "", "",false,false); parameters.push_back(palpha);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
@@ -36,9 +38,10 @@ string HomovaCommand::getHelpString(){
 		string helpString = "";
 		helpString += "Referenced: Stewart CN, Excoffier L (1996). Assessing population genetic structure and variability with RAPD data: Application to Vaccinium macrocarpon (American Cranberry). J Evol Biol 9: 153-71.\n";
 		helpString += "The homova command outputs a .homova file. \n";
-		helpString += "The homova command parameters are phylip, iters, and alpha.  The phylip and design parameters are required, unless valid current files exist.\n";
+		helpString += "The homova command parameters are phylip, iters, sets and alpha.  The phylip and design parameters are required, unless valid current files exist.\n";
 		helpString += "The design parameter allows you to assign your samples to groups when you are running homova. It is required. \n";
 		helpString += "The design file looks like the group file.  It is a 2 column tab delimited file, where the first column is the sample name and the second column is the group the sample belongs to.\n";
+        helpString += "The sets parameter allows you to specify which of the sets in your designfile you would like to analyze. The set names are separated by dashes. THe default is all sets in the designfile.\n";
 		helpString += "The iters parameter allows you to set number of randomization for the P value.  The default is 1000. \n";
 		helpString += "The homova command should be in the following format: homova(phylip=file.dist, design=file.design).\n";
 		helpString += "Note: No spaces between parameter labels (i.e. iters), '=' and parameters (i.e. 1000).\n";
@@ -162,6 +165,12 @@ HomovaCommand::HomovaCommand(string option) {
 			temp = validParameter.validFile(parameters, "alpha", false);
 			if (temp == "not found") { temp = "0.05"; }
 			m->mothurConvert(temp, experimentwiseAlpha); 
+            
+            string sets = validParameter.validFile(parameters, "sets", false);			
+			if (sets == "not found") { sets = ""; }
+			else { 
+				m->splitAtDash(sets, Sets);
+			}
 		}
 		
 	}
@@ -187,6 +196,31 @@ int HomovaCommand::execute(){
 		ReadPhylipVector readMatrix(phylipFileName);
 		vector<string> sampleNames = readMatrix.read(distanceMatrix);
 		
+        if (Sets.size() != 0) { //user selected sets, so we want to remove the samples not in those sets
+            SharedUtil util; 
+            vector<string> dGroups = designMap->getNamesOfGroups();
+            util.setGroups(Sets, dGroups);  
+            
+            for(int i=0;i<distanceMatrix.size();i++){
+                
+                if (m->control_pressed) { delete designMap; return 0; }
+                
+                string group = designMap->getGroup(sampleNames[i]);
+                
+                if (group == "not found") {
+                    m->mothurOut("[ERROR]: " + sampleNames[i] + " is not in your design file, please correct."); m->mothurOutEndLine(); m->control_pressed = true;
+                }else if (!m->inUsersGroups(group, Sets)){  //not in set we want remove it
+                    //remove from all other rows
+                    for(int j=0;j<distanceMatrix.size();j++){
+                        distanceMatrix[j].erase(distanceMatrix[j].begin()+i);
+                    }
+                    distanceMatrix.erase(distanceMatrix.begin()+i);
+                    sampleNames.erase(sampleNames.begin()+i);
+                    i--;
+                }
+            }
+        }
+
 		for(int i=0;i<distanceMatrix.size();i++){
 			for(int j=0;j<i;j++){
 				distanceMatrix[i][j] *= distanceMatrix[i][j];	

@@ -634,7 +634,7 @@ int ClassifySeqsCommand::execute(){
 			m->mothurOut("Classifying sequences from " + fastaFileNames[s] + " ..." ); m->mothurOutEndLine();
 			
 			string baseTName = m->getSimpleName(taxonomyFileName);
-			if (taxonomyFileName == "saved") {baseTName = rdb->getSavedTaxonomy();	}
+			if (taxonomyFileName == "saved") {  baseTName = rdb->getSavedTaxonomy();	}
 			
             //set rippedTaxName to 
 			string RippedTaxName = "";
@@ -658,7 +658,6 @@ int ClassifySeqsCommand::execute(){
 			}
 			
 			outputNames.push_back(newTaxonomyFile); outputTypes["taxonomy"].push_back(newTaxonomyFile);
-			outputNames.push_back(newaccnosFile); outputTypes["accnos"].push_back(newaccnosFile);
 			outputNames.push_back(taxSummary);	outputTypes["taxsummary"].push_back(taxSummary);
 			
 			int start = time(NULL);
@@ -782,7 +781,9 @@ int ClassifySeqsCommand::execute(){
 			}
 #endif
 			
-			if (!m->isBlank(newaccnosFile)) { m->mothurOutEndLine(); m->mothurOut("[WARNING]: mothur suspects some of your sequences may be reversed, please check " + newaccnosFile + " for the list of the sequences."); m->mothurOutEndLine(); }
+			if (!m->isBlank(newaccnosFile)) { m->mothurOutEndLine(); m->mothurOut("[WARNING]: mothur suspects some of your sequences may be reversed, please check " + newaccnosFile + " for the list of the sequences."); m->mothurOutEndLine(); 
+                outputNames.push_back(newaccnosFile); outputTypes["accnos"].push_back(newaccnosFile);
+            }else { m->mothurRemove(newaccnosFile); }
 
 		m->mothurOutEndLine();
 		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to classify " + toString(numFastaSeqs) + " sequences."); m->mothurOutEndLine(); m->mothurOutEndLine();
@@ -895,12 +896,13 @@ int ClassifySeqsCommand::execute(){
 			#ifdef USE_MPI	
 				}
 			#endif
-
-			m->mothurOutEndLine();
-			m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-			for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
-			m->mothurOutEndLine();
 		}
+        delete classify;
+        
+        m->mothurOutEndLine();
+        m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+        for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+        m->mothurOutEndLine();
 		
 		//set taxonomy file as new current taxonomyfile
 		string current = "";
@@ -915,7 +917,7 @@ int ClassifySeqsCommand::execute(){
 			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setAccnosFile(current); }
 		}
 		
-		delete classify;
+		
 		
 		return 0;
 	}

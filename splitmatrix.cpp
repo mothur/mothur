@@ -637,7 +637,7 @@ int SplitMatrix::splitNames(map<string, int>& seqGroup, int numGroups, vector<st
                     ofstream out;
                     string newtempNameFile = tempNameFile + "2";
                     m->openOutputFile(newtempNameFile, out);
-                    out << headers << endl;
+                    out << "Representative_Sequence\ttotal" << endl;
                     out.close();
                     m->appendFiles(tempNameFile, newtempNameFile);
                     m->mothurRemove(tempNameFile);
@@ -671,7 +671,7 @@ int SplitMatrix::splitNames(map<string, int>& seqGroup, int numGroups, vector<st
             ofstream out;
             string newtempNameFile = singleton + "2";
             m->openOutputFile(newtempNameFile, out);
-            out << headers << endl;
+            out << "Representative_Sequence\ttotal" << endl; 
             out.close();
             m->appendFiles(singleton, newtempNameFile);
             m->mothurRemove(singleton);

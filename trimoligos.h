@@ -29,7 +29,7 @@ class TrimOligos {
 	public:
         TrimOligos(int,int, map<string, int>, map<string, int>, vector<string>); //pdiffs, bdiffs, primers, barcodes, revPrimers
         TrimOligos(int,int, int, int, map<string, int>, map<string, int>, vector<string>, vector<string>, vector<string>); //pdiffs, bdiffs, ldiffs, sdiffs, primers, barcodes, revPrimers, linker, spacer
-        TrimOligos(int,int, int, int, map<int, oligosPair>, map<int, oligosPair>, vector<string>, vector<string>); //pdiffs, bdiffs, ldiffs, sdiffs, primers, barcodes, linker, spacer
+        TrimOligos(int,int, int, int, map<int, oligosPair>, map<int, oligosPair>); //pdiffs, bdiffs, ldiffs, sdiffs, primers, barcodes
 		~TrimOligos();
 	
 		int stripBarcode(Sequence&, int&);	
@@ -58,8 +58,14 @@ class TrimOligos {
 		vector<string> revPrimer;
         vector<string> linker;
         vector<string> spacer;
-        map<int, oligosPair> ibarcodes;
-        map<int, oligosPair> iprimers;
+        map<string, vector<int> > ifbarcodes;
+        map<string, vector<int> > ifprimers;
+        map<string, vector<int> > irbarcodes;
+        map<string, vector<int> > irprimers;
+        map<int, oligosPair> ipbarcodes;
+        map<int, oligosPair> ipprimers;
+    
+        int maxFBarcodeLength, maxRBarcodeLength, maxFPrimerLength, maxRPrimerLength, maxLinkerLength, maxSpacerLength;
 	
 		MothurOut* m;
 	

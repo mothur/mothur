@@ -1285,7 +1285,7 @@ string ClusterSplitCommand::clusterFile(string thisDistFile, string thisNamefile
             ct = new CountTable();
             ct->readTable(thisNamefile);
             read->read(ct);
-        }
+        }else { read->read(nameMap); }
 		
 		list = read->getListVector();
         oldList = *list;

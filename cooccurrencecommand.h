@@ -30,7 +30,7 @@ public:
 	string getCommandCategory()		{ return "Hypothesis Testing";	}
 	string getOutputFileNameTag(string, string);
 	string getHelpString();	
-	string getCitation() { return "http://www.mothur.org/wiki/Cooccurrence"; }
+	string getCitation() { return "Ulrich W & Gotelli NJ (2010).  Null model analysis of species associations using abundance data.  Ecology  91:3384.\nhttp://www.mothur.org/wiki/Cooccurrence"; }
 	string getDescription()		{ return "calculates four metrics and tests their significance to assess whether presence-absence patterns are different than what one would expect by chance."; }
 	
 	int execute(); 

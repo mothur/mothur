@@ -11,7 +11,7 @@
 /***********************************************************************/
 
 RandomForest::RandomForest(const vector <vector<int> > dataSet,const int numDecisionTrees,
-             const string treeSplitCriterion = "informationGain") : AbstractRandomForest(dataSet, numDecisionTrees, treeSplitCriterion) {
+             const string treeSplitCriterion = "informationGain") : Forest(dataSet, numDecisionTrees, treeSplitCriterion) {
     m = MothurOut::getInstance();
 }
 
@@ -58,6 +58,7 @@ int RandomForest::calcForrestVariableImportance(string filename) {
         //could cause maintenance issues later if other types of Abstract decison trees are created that cannot be cast as a decision tree.
     for (int i = 0; i < decisionTrees.size(); i++) {
         if (m->control_pressed) { return 0; }
+        
         DecisionTree* decisionTree = dynamic_cast<DecisionTree*>(decisionTrees[i]);
         
         for (int j = 0; j < numFeatures; j++) {
@@ -127,7 +128,7 @@ int RandomForest::populateDecisionTrees() {
 }
 /***********************************************************************/
 // TODO: need to finalize bettween reference and pointer for DecisionTree [partially solved]
-// TODO: make this pure virtual in superclass
+// DONE: make this pure virtual in superclass
 // DONE
 int RandomForest::updateGlobalOutOfBagEstimates(DecisionTree* decisionTree) {
     try {

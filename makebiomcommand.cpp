@@ -9,6 +9,7 @@
 #include "makebiomcommand.h"
 #include "sharedrabundvector.h"
 #include "inputdata.h"
+#include "sharedutilities.h"
 
 //taken from http://biom-format.org/documentation/biom_format.html
 /* Minimal Sparse 
@@ -93,6 +94,7 @@ vector<string> MakeBiomCommand::setParameters(){
 	try {
 		CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pshared);
         CommandParameter pcontaxonomy("contaxonomy", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pcontaxonomy);
+        CommandParameter pmetadata("metadata", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pmetadata);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
 		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
@@ -112,11 +114,12 @@ vector<string> MakeBiomCommand::setParameters(){
 string MakeBiomCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The make.biom command parameters are shared, contaxonomy, groups, matrixtype and label.  shared is required, unless you have a valid current file.\n";
+		helpString += "The make.biom command parameters are shared, contaxonomy, metadata, groups, matrixtype and label.  shared is required, unless you have a valid current file.\n";
 		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like included. The group names are separated by dashes.\n";
 		helpString += "The label parameter allows you to select what distance levels you would like, and are also separated by dashes.\n";
 		helpString += "The matrixtype parameter allows you to select what type you would like to make. Choices are sparse and dense, default is sparse.\n";
-        helpString += "The contaxonomy file is the taxonomy file outputted by classify.otu(list=yourListfile, taxonomy=yourTaxonomyFile). Be SURE that the you are the constaxonomy file distance matches the shared file distance.  ie, for *.0.03.cons.taxonomy set label=0.03. Mothur is smart enough to handle shared files that have been subsampled.\n";
+        helpString += "The contaxonomy file is the taxonomy file outputted by classify.otu(list=yourListfile, taxonomy=yourTaxonomyFile). Be SURE that the you are the constaxonomy file distance matches the shared file distance.  ie, for *.0.03.cons.taxonomy set label=0.03. Mothur is smart enough to handle shared files that have been subsampled. It is used to assign taxonomy information to the metadata of rows.\n";
+        helpString += "The metadata parameter is used to provide experimental parameters to the columns.  Things like 'sample1 gut human_gut'. \n";
 		helpString += "The make.biom command should be in the following format: make.biom(shared=yourShared, groups=yourGroups, label=yourLabels).\n";
 		helpString += "Example make.biom(shared=abrecovery.an.shared, groups=A-B-C).\n";
 		helpString += "The default value for groups is all the groups in your groupfile, and all labels in your inputfile will be used.\n";
@@ -211,6 +214,14 @@ MakeBiomCommand::MakeBiomCommand(string option) {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["contaxonomy"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("metadata");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["metadata"] = inputDir + it->second;		}
+				}
 			}
             
 			//get shared file
@@ -231,6 +242,9 @@ MakeBiomCommand::MakeBiomCommand(string option) {
 			if (contaxonomyfile == "not found") {  contaxonomyfile = "";  }
 			else if (contaxonomyfile == "not open") { contaxonomyfile = ""; abort = true; }
 
+            metadatafile = validParameter.validFile(parameters, "metadata", true);
+			if (metadatafile == "not found") {  metadatafile = "";  }
+			else if (metadatafile == "not open") { metadatafile = ""; abort = true; }
             
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -280,6 +294,8 @@ int MakeBiomCommand::execute(){
             labels.insert(lastLabel);
         }
 		
+        getSampleMetaData(lookup);
+        
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = labels;
@@ -423,13 +439,13 @@ int MakeBiomCommand::getBiom(vector<SharedRAbundVector*>& lookup){
                     {"id":"Sample6", "metadata":null}
                     ],*/
         
-        string colBack = "\", \"metadata\":null}";
+        string colBack = "\", \"metadata\":";
         out << spaces + "\"columns\":[\n";
         for (int i = 0; i < lookup.size()-1; i++) {
             if (m->control_pressed) {  out.close(); return 0; }
-            out << rowFront << lookup[i]->getGroup() << colBack << ",\n";
+            out << rowFront << lookup[i]->getGroup() << colBack << sampleMetadata[i] << "},\n";
         }
-        out << rowFront << lookup[(lookup.size()-1)]->getGroup() << colBack << "\n" + spaces + "],\n";
+        out << rowFront << lookup[(lookup.size()-1)]->getGroup() << colBack << sampleMetadata[lookup.size()-1] << "}\n" + spaces + "],\n";
         
         out << spaces + "\"matrix_type\": \"" << format << "\",\n" + spaces + "\"matrix_element_type\": \"int\",\n";
         out <<  spaces + "\"shape\": [" << m->currentBinLabels.size() << "," << lookup.size() << "],\n";
@@ -608,6 +624,81 @@ vector<string> MakeBiomCommand::getMetaData(vector<SharedRAbundVector*>& lookup)
 	}
 
 }
+//**********************************************************************************************************************
+int MakeBiomCommand::getSampleMetaData(vector<SharedRAbundVector*>& lookup){
+	try {
+        
+        if (metadatafile == "") { for (int i = 0; i < lookup.size(); i++) {  sampleMetadata.push_back("null");  } }
+        else {
+            ifstream in;
+            m->openInputFile(metadatafile, in);
+            
+            vector<string> groupNames, metadataLabels;
+            map<string, vector<string> > lines;
+            
+            string headerLine = m->getline(in); m->gobble(in);
+            vector<string> pieces = m->splitWhiteSpace(headerLine);
+            
+            //save names of columns you are reading
+            for (int i = 1; i < pieces.size(); i++) {
+                metadataLabels.push_back(pieces[i]);
+            }
+            int count = metadataLabels.size();
+			
+            vector<string> groups = m->getGroups();
+            
+            //read rest of file
+            while (!in.eof()) {
+                
+                if (m->control_pressed) { in.close(); return 0; }
+                
+                string group = "";
+                in >> group; m->gobble(in);
+                groupNames.push_back(group);
+                
+                string line = m->getline(in); m->gobble(in);
+                vector<string> thisPieces = m->splitWhiteSpaceWithQuotes(line);
+        
+                if (thisPieces.size() != count) { m->mothurOut("[ERROR]: expected " + toString(count) + " items of data for sample " + group + " read " + toString(thisPieces.size()) + ", quitting.\n"); }
+                else {  if (m->inUsersGroups(group, groups)) { lines[group] = thisPieces; } }
+                
+                m->gobble(in);
+            }
+            in.close();
+            
+            map<string, vector<string> >::iterator it;
+            for (int i = 0; i < lookup.size(); i++) {
+                
+                if (m->control_pressed) { return 0; }
+                
+                it = lines.find(lookup[i]->getGroup());
+                
+                if (it == lines.end()) { m->mothurOut("[ERROR]: can't find metadata information for " + lookup[i]->getGroup() + ", quitting.\n"); m->control_pressed = true; }
+                else {
+                    vector<string> values = it->second;
+                    
+                    string data = "{";
+                    for (int j = 0; j < metadataLabels.size()-1; j++) { 
+                        values[j] = m->removeQuotes(values[j]); 
+                        data += "\"" + metadataLabels[j] + "\":\"" + values[j] + "\", "; 
+                    }
+                    values[metadataLabels.size()-1] = m->removeQuotes(values[metadataLabels.size()-1]);
+                    data += "\"" + metadataLabels[metadataLabels.size()-1] + "\":\"" + values[metadataLabels.size()-1] + "\"}";
+                    sampleMetadata.push_back(data);
+                }
+            }
+        }
+        
+        return 0;
+        
+    }
+	catch(exception& e) {
+		m->errorOut(e, "MakeBiomCommand", "getSampleMetaData");
+		exit(1);
+	}
+    
+}
+
 /**************************************************************************************************/
 //returns {Bacteria, Bacteroidetes, ..} and scores is filled with {100, 98, ...} or {null, null, null}
 vector<string> MakeBiomCommand::parseTax(string tax, vector<string>& scores) {

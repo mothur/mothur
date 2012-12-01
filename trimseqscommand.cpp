@@ -1036,10 +1036,10 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
 		HANDLE  hThreadArray[processors-1]; 
 		
 		//Create processor worker threads.
-		for( int i=0; i<processors-1; i++){
+		for( int h=0; h<processors-1; h++){
 			
             string extension = "";
-			if (i != 0) { extension = toString(i) + ".temp"; processIDS.push_back(i); }
+			if (h != 0) { extension = toString(h) + ".temp"; processIDS.push_back(h); }
             vector<vector<string> > tempFASTAFileNames = fastaFileNames;
             vector<vector<string> > tempPrimerQualFileNames = qualFileNames;
             vector<vector<string> > tempNameFileNames = nameFileNames;
@@ -1081,14 +1081,14 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
                                               tempFASTAFileNames,
                                               tempPrimerQualFileNames,
                                               tempNameFileNames,
-                                              lines[i].start, lines[i].end, qLines[i].start, qLines[i].end, m,
+                                              lines[h].start, lines[h].end, qLines[h].start, qLines[h].end, m,
                                               pdiffs, bdiffs, ldiffs, sdiffs, tdiffs, primers, barcodes, revPrimer, linker, spacer, 
                                              primerNameVector, barcodeNameVector, createGroup, allFiles, keepforward, keepFirst, removeLast,
                                               qWindowStep, qWindowSize, qWindowAverage, qtrim, qThreshold, qAverage, qRollAverage,
                                              minLength, maxAmbig, maxHomoP, maxLength, flip, nameMap, nameCount);
 			pDataArray.push_back(tempTrim);
             
-			hThreadArray[i] = CreateThread(NULL, 0, MyTrimThreadFunction, pDataArray[i], 0, &dwThreadIdArray[i]);   
+			hThreadArray[h] = CreateThread(NULL, 0, MyTrimThreadFunction, pDataArray[h], 0, &dwThreadIdArray[h]);   
 		}
         
         //parent do my part
@@ -1103,8 +1103,32 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
 			m->openOutputFile(trimNameFileName, temp);		temp.close();
 			m->openOutputFile(scrapNameFileName, temp);		temp.close();
 		}
+        vector<vector<string> > tempFASTAFileNames = fastaFileNames;
+        vector<vector<string> > tempPrimerQualFileNames = qualFileNames;
+        vector<vector<string> > tempNameFileNames = nameFileNames;
+        if(allFiles){
+            ofstream temp;
+            string extension = toString(processors-1) + ".temp";
+            for(int i=0;i<tempFASTAFileNames.size();i++){
+                for(int j=0;j<tempFASTAFileNames[i].size();j++){
+                    if (tempFASTAFileNames[i][j] != "") {
+                        tempFASTAFileNames[i][j] += extension;
+                        m->openOutputFile(tempFASTAFileNames[i][j], temp);			temp.close();
+                        
+                        if(qFileName != ""){
+                            tempPrimerQualFileNames[i][j] += extension;
+                            m->openOutputFile(tempPrimerQualFileNames[i][j], temp);		temp.close();
+                        }
+                        if(nameFile != ""){
+                            tempNameFileNames[i][j] += extension;
+                            m->openOutputFile(tempNameFileNames[i][j], temp);		temp.close();
+                        }
+                    }
+                }
+            }
+        }
         
-		driverCreateTrim(filename, qFileName, (trimFASTAFileName + toString(processors-1) + ".temp"), (scrapFASTAFileName + toString(processors-1) + ".temp"), (trimQualFileName + toString(processors-1) + ".temp"), (scrapQualFileName + toString(processors-1) + ".temp"), (trimNameFileName + toString(processors-1) + ".temp"), (scrapNameFileName + toString(processors-1) + ".temp"), (trimCountFileName + toString(processors-1) + ".temp"), (scrapCountFileName + toString(processors-1) + ".temp"), (groupFile + toString(processors-1) + ".temp"), fastaFileNames, qualFileNames, nameFileNames, lines[processors-1], qLines[processors-1]);
+		driverCreateTrim(filename, qFileName, (trimFASTAFileName + toString(processors-1) + ".temp"), (scrapFASTAFileName + toString(processors-1) + ".temp"), (trimQualFileName + toString(processors-1) + ".temp"), (scrapQualFileName + toString(processors-1) + ".temp"), (trimNameFileName + toString(processors-1) + ".temp"), (scrapNameFileName + toString(processors-1) + ".temp"), (trimCountFileName + toString(processors-1) + ".temp"), (scrapCountFileName + toString(processors-1) + ".temp"), (groupFile + toString(processors-1) + ".temp"), tempFASTAFileNames, tempPrimerQualFileNames, tempNameFileNames, lines[processors-1], qLines[processors-1]);
         processIDS.push_back(processors-1);
 
         

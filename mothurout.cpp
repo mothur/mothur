@@ -1183,7 +1183,7 @@ string MothurOut::sortFile(string distFile, string outputDir){
 
 			string firstName, secondName;
 			float dist;
-			while (input) {
+			while (!input.eof()) {
 				input >> firstName >> secondName >> dist;
 				output << dist << '\t' << firstName << '\t' << secondName << endl;
 				gobble(input);
@@ -1199,16 +1199,17 @@ string MothurOut::sortFile(string distFile, string outputDir){
 		
 			//read in sorted file and put distance at end again
 			ifstream input2;
+            ofstream output2;
 			openInputFile(tempOutfile, input2);
-			openOutputFile(outfile, output);
+			openOutputFile(outfile, output2);
 		
-			while (input2) {
+            while (!input2.eof()) {
 				input2 >> dist >> firstName >> secondName;
-				output << firstName << '\t' << secondName << '\t' << dist << endl;
+				output2 << firstName << '\t' << secondName << '\t' << dist << endl;
 				gobble(input2);
 			}
 			input2.close();
-			output.close();
+			output2.close();
 		
 			//remove temp files
 			mothurRemove(tempDistFile);
@@ -1541,6 +1542,46 @@ vector<string> MothurOut::splitWhiteSpace(string input){
 		exit(1);
 	}
 }
+/***********************************************************************/
+vector<string> MothurOut::splitWhiteSpaceWithQuotes(string input){
+	try {
+        vector<string> pieces;
+        string rest = "";
+        
+        int pos = input.find('\'');
+        int pos2 = input.find('\"');
+        
+        if ((pos == string::npos) && (pos2 == string::npos)) { return splitWhiteSpace(input); } //no quotes to worry about
+        else {
+            for (int i = 0; i < input.length(); i++) {
+                if ((input[i] == '\'') || (input[i] == '\"') || (rest == "\'") || (rest == "\"")) { //grab everything til end or next ' or "
+                    rest += input[i];
+                    for (int j = i+1; j < input.length(); j++) {
+                        if ((input[j] == '\'') || (input[j] == '\"')) {  //then quit
+                            rest += input[j];
+                            i = j+1;
+                            j+=input.length();
+                        }else { rest += input[j]; }
+                    }
+                }else if (!isspace(input[i]))  { rest += input[i];  }
+                else {
+                    if (rest != "") { pieces.push_back(rest);  rest = ""; }
+                    while (i < input.length()) {  //gobble white space
+                        if (isspace(input[i])) { i++; }
+                        else { rest = input[i];  break; } //cout << "next piece buffer = " << nextPiece << endl;
+                    } 
+                }
+            }
+            
+            if (rest != "") { pieces.push_back(rest); }
+        }
+        return pieces;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "splitWhiteSpace");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 int MothurOut::readTax(string namefile, map<string, string>& taxMap) {
 	try {
@@ -1567,8 +1608,17 @@ int MothurOut::readTax(string namefile, map<string, string>& taxMap) {
                 if (pairDone) { 
                     //are there confidence scores, if so remove them
                     if (secondCol.find_first_of('(') != -1) {  removeConfidences(secondCol);	}
-                    taxMap[firstCol] = secondCol;
-                    if (debug) {  mothurOut("[DEBUG]: name = '" + firstCol + "' tax = '" + secondCol + "'\n");  }
+                    map<string, string>::iterator itTax = taxMap.find(firstCol);
+                    
+                    if(itTax == taxMap.end()) {
+                        bool ignore = false;
+                        if (secondCol != "") { if (secondCol[secondCol.length()-1] != ';') { mothurOut("[ERROR]: " + firstCol + " is missing the final ';', ignoring.\n"); ignore=true; }
+                        }
+                        if (!ignore) { taxMap[firstCol] = secondCol; }
+                        if (debug) {  mothurOut("[DEBUG]: name = '" + firstCol + "' tax = '" + secondCol + "'\n");  }
+                    }else {
+                        mothurOut("[ERROR]: " + firstCol + " is already in your taxonomy file, names must be unique./n"); control_pressed = true;
+                    }
                     pairDone = false; 
                 }
             }
@@ -1585,8 +1635,18 @@ int MothurOut::readTax(string namefile, map<string, string>& taxMap) {
                 if (pairDone) { 
                     //are there confidence scores, if so remove them
                     if (secondCol.find_first_of('(') != -1) {  removeConfidences(secondCol);	}
-                    taxMap[firstCol] = secondCol;
-                    if (debug) {  mothurOut("[DEBUG]: name = '" + firstCol + "' tax = '" + secondCol + "'\n");  }
+                    map<string, string>::iterator itTax = taxMap.find(firstCol);
+                    
+                    if(itTax == taxMap.end()) {
+                        bool ignore = false;
+                        if (secondCol != "") { if (secondCol[secondCol.length()-1] != ';') { mothurOut("[ERROR]: " + firstCol + " is missing the final ';', ignoring.\n"); ignore=true; }
+                        }
+                        if (!ignore) { taxMap[firstCol] = secondCol; }
+                        if (debug) {  mothurOut("[DEBUG]: name = '" + firstCol + "' tax = '" + secondCol + "'\n");  }
+                    }else {
+                        mothurOut("[ERROR]: " + firstCol + " is already in your taxonomy file, names must be unique./n"); control_pressed = true;
+                    }
+
                     pairDone = false; 
                 }
             } 
@@ -2430,6 +2490,9 @@ void MothurOut::getNumSeqs(ifstream& file, int& numSeqs){
 //This function parses the estimator options and puts them in a vector
 void MothurOut::splitAtChar(string& estim, vector<string>& container, char symbol) {
 	try {
+        
+        if (symbol == '-') { splitAtDash(estim, container); return; }
+        
 		string individual = "";
 		int estimLength = estim.size();
 		for(int i=0;i<estimLength;i++){
@@ -2688,6 +2751,35 @@ bool MothurOut::inUsersGroups(string groupname, vector<string> Groups) {
 		exit(1);
 	}	
 }
+/**************************************************************************************************/
+
+bool MothurOut::inUsersGroups(vector<int> set, vector< vector<int> > sets) {
+	try {
+		for (int i = 0; i < sets.size(); i++) {
+			if (set == sets[i]) { return true; }
+		}
+		return false;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "inUsersGroups");
+		exit(1);
+	}	
+}
+/**************************************************************************************************/
+
+bool MothurOut::inUsersGroups(int groupname, vector<int> Groups) {
+	try {
+		for (int i = 0; i < Groups.size(); i++) {
+			if (groupname == Groups[i]) { return true; }
+		}
+		return false;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "inUsersGroups");
+		exit(1);
+	}	
+}
+
 /**************************************************************************************************/
 //returns true if any of the strings in first vector are in second vector
 bool MothurOut::inUsersGroups(vector<string> groupnames, vector<string> Groups) {

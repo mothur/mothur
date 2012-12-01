@@ -1452,15 +1452,21 @@ int ChimeraUchimeCommand::driver(string outputFName, string filename, string acc
 			
 			string name = "";
 			string chimeraFlag = "";
-			in >> chimeraFlag >> name;
+			//in >> chimeraFlag >> name;
 			
-			//fix name if needed
-			if (templatefile == "self") { 
-				name = name.substr(0, name.length()-1); //rip off last /
-				name = name.substr(0, name.find_last_of('/'));
+            string line = m->getline(in);
+            vector<string> pieces = m->splitWhiteSpace(line);
+            if (pieces.size() > 2) { 
+                name = pieces[1];
+                //fix name if needed
+                if (templatefile == "self") { 
+                    name = name.substr(0, name.length()-1); //rip off last /
+                    name = name.substr(0, name.find_last_of('/'));
+                }
+                
+                chimeraFlag = pieces[pieces.size()-1];
 			}
-			
-			for (int i = 0; i < 15; i++) {  in >> chimeraFlag; }
+			//for (int i = 0; i < 15; i++) {  in >> chimeraFlag; }
 			m->gobble(in);
 			
 			if (chimeraFlag == "Y") {  out << name << endl; numChimeras++; }

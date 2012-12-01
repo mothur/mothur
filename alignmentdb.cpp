@@ -42,12 +42,14 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
 			
 			numSeqs = templateSequences.size();
 			if (!silent) { m->mothurOut("It took " + toString(time(NULL) - start) + " to load " + toString(rdb->referenceSeqs.size()) + " sequences.");m->mothurOutEndLine();  }
-
+            
 		}else {
 			int start = time(NULL);
 			m->mothurOutEndLine();
 			m->mothurOut("Reading in the " + fastaFileName + " template sequences...\t");	cout.flush();
-			
+			bool aligned = false;
+            int tempLength = 0;
+            
 			#ifdef USE_MPI	
 				int pid, processors;
 				vector<unsigned long long> positions;
@@ -102,6 +104,9 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
 						
 						//save longest base
 						if (temp.getUnaligned().length() >= longest)  { longest = temp.getUnaligned().length()+1; }
+                        if (tempLength != 0) {
+                            if (tempLength != temp.getAligned().length()) { m->mothurOut("[ERROR]: template is not aligned, aborting.\n"); m->control_pressed=true; }
+                        }else { tempLength = temp.getAligned().length(); }
 					}
 				}
 				
@@ -125,6 +130,10 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
 					
 					//save longest base
 					if (temp.getUnaligned().length() >= longest)  { longest = (temp.getUnaligned().length()+1); }
+                    
+                    if (tempLength != 0) {
+                        if (tempLength != temp.getAligned().length()) { m->mothurOut("[ERROR]: template is not aligned, aborting.\n"); m->control_pressed=true; }
+                    }else { tempLength = temp.getAligned().length(); }
 				}
 			}
 			fastaFile.close();

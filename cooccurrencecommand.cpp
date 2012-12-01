@@ -321,11 +321,11 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
         int nrows = numOTUS;//rows of inital matrix
         int ncols = thisLookUp.size();//groups
         double initscore = 0.0;
-        
+       
         vector<double> stats;
-        double probabilityMatrix[ncols * nrows];
+        vector<double> probabilityMatrix; probabilityMatrix.resize(ncols * nrows, 0);
         vector<vector<int> > nullmatrix(nrows, vector<int>(ncols, 0));
-        
+       
         TrialSwap2 trial;
         
         int n = accumulate( columntotal.begin(), columntotal.end(), 0 );

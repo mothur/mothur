@@ -23,7 +23,7 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
 		if (tfile == "saved") { tfile = rdb->getSavedTaxonomy(); }
 		
 		taxFile = tfile;
-		readTaxonomy(taxFile);	
+		
 		int numSeqs = 0;
 		
 		if (tempFile == "saved") {
@@ -73,11 +73,6 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
 			}	
 			
 			database->setNumSeqs(numSeqs);
-			
-			//sanity check
-			bool okay = phyloTree->ErrorCheck(names);
-			
-			if (!okay) { m->control_pressed = true; }
 			
 			m->mothurOut("It took " + toString(time(NULL) - start) + " to load " + toString(rdb->referenceSeqs.size()) + " sequences and generate the search databases.");m->mothurOutEndLine();  
 			
@@ -221,18 +216,19 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
 				fastaFile.close();
 			}
 	#endif	
-		
+            	
 			database->setNumSeqs(names.size());
-			
-			//sanity check
-			bool okay = phyloTree->ErrorCheck(names);
-			
-			if (!okay) { m->control_pressed = true; }
 			
 			m->mothurOut("DONE."); m->mothurOutEndLine();
 			m->mothurOut("It took " + toString(time(NULL) - start) + " seconds generate search database. "); m->mothurOutEndLine();
 		}
-
+        
+        readTaxonomy(taxFile);
+        
+        //sanity check
+        bool okay = phyloTree->ErrorCheck(names);
+        
+        if (!okay) { m->control_pressed = true; }
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Classify", "generateDatabaseAndNames");
@@ -240,7 +236,7 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
 	}
 }
 /**************************************************************************************************/
-Classify::Classify() {		m = MothurOut::getInstance();	database = NULL;	flipped=false; }
+Classify::Classify() {		m = MothurOut::getInstance();	database = NULL;	phyloTree=NULL; flipped=false; }
 /**************************************************************************************************/
 
 int Classify::readTaxonomy(string file) {
@@ -299,9 +295,13 @@ int Classify::readTaxonomy(string file) {
 			iss >> name; m->gobble(iss);
             iss >> taxInfo;
             if (m->debug) { m->mothurOut("[DEBUG]: name = " + name + " tax = " + taxInfo + "\n"); }
-			taxonomy[name] = taxInfo;
-			phyloTree->addSeqToTree(name, taxInfo);
-		}
+			if (m->inUsersGroups(name, names)) {
+                taxonomy[name] = taxInfo;
+                phyloTree->addSeqToTree(name, taxInfo);
+            }else {
+                m->mothurOut("[WARNING]: " + name + " is in your taxonomy file and not in your reference file, ignoring.\n");
+            }		
+        }
 		
 		MPI_File_close(&inMPI);
 		MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
@@ -309,7 +309,16 @@ int Classify::readTaxonomy(string file) {
         
         taxonomy.clear(); 
         m->readTax(file, taxonomy);
-        for (map<string, string>::iterator itTax = taxonomy.begin(); itTax != taxonomy.end(); itTax++) {  phyloTree->addSeqToTree(itTax->first, itTax->second);  }
+        map<string, string> tempTaxonomy;
+        for (map<string, string>::iterator itTax = taxonomy.begin(); itTax != taxonomy.end(); itTax++) {  
+            if (m->inUsersGroups(itTax->first, names)) {
+                phyloTree->addSeqToTree(itTax->first, itTax->second); 
+                tempTaxonomy[itTax->first] = itTax->second;
+            }else {
+                m->mothurOut("[WARNING]: " + itTax->first + " is in your taxonomy file and not in your reference file, ignoring.\n");
+            }
+        }
+        taxonomy = tempTaxonomy;
 #endif	
 		phyloTree->assignHeirarchyIDs(0);
 		

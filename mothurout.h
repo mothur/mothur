@@ -120,7 +120,9 @@ class MothurOut {
 		bool checkReleaseVersion(ifstream&, string);
 		bool anyLabelsToProcess(string, set<string>&, string);
 		bool inUsersGroups(vector<string>, vector<string>);
+        bool inUsersGroups(vector<int>, vector< vector<int> >);
 		bool inUsersGroups(string, vector<string>);
+        bool inUsersGroups(int, vector<int>);
 		void getNumSeqs(ifstream&, int&);
 		int getNumSeqs(ifstream&);
 		int getNumNames(string);
@@ -139,6 +141,7 @@ class MothurOut {
 		void splitAtDash(string&, vector<string>&);
 		void splitAtChar(string&, vector<string>&, char);
         void splitAtChar(string&, string&, char);
+        vector<string> splitWhiteSpaceWithQuotes(string);
 		int removeConfidences(string&);
         string removeQuotes(string);
         string makeList(vector<string>&);

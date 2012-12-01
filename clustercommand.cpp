@@ -312,7 +312,7 @@ int ClusterCommand::execute(){
             ct = new CountTable();
             ct->readTable(countfile);
             read->read(ct);
-        }
+        }else { read->read(nameMap); }
 		
 		list = read->getListVector();
 		matrix = read->getDMatrix();

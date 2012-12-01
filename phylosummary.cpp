@@ -8,6 +8,7 @@
  */
 
 #include "phylosummary.h"
+#include "referencedb.h"
 /**************************************************************************************************/
 
 PhyloSummary::PhyloSummary(string refTfile, CountTable* c){
@@ -21,6 +22,7 @@ PhyloSummary::PhyloSummary(string refTfile, CountTable* c){
         groupmap = NULL;
         
 		//check for necessary files
+        if (refTfile == "saved") { ReferenceDB* rdb = ReferenceDB::getInstance(); refTfile = rdb->getSavedTaxonomy(); }
 		string taxFileNameTest = m->getFullPathName((refTfile.substr(0,refTfile.find_last_of(".")+1) + "tree.sum"));
 		ifstream FileTest(taxFileNameTest.c_str());
 		
@@ -72,6 +74,7 @@ PhyloSummary::PhyloSummary(string refTfile, GroupMap* g){
         ct = NULL;
 				
 		//check for necessary files
+        if (refTfile == "saved") { ReferenceDB* rdb = ReferenceDB::getInstance(); refTfile = rdb->getSavedTaxonomy(); }
 		string taxFileNameTest = m->getFullPathName((refTfile.substr(0,refTfile.find_last_of(".")+1) + "tree.sum"));
 		ifstream FileTest(taxFileNameTest.c_str());
 		

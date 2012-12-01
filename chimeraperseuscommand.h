@@ -32,7 +32,7 @@ public:
 	string getCommandCategory()		{ return "Sequence Processing"; }
 	string getOutputFileNameTag(string, string);
 	string getHelpString();	
-	string getCitation() { return "http://www.mothur.org/wiki/Chimera.perseus\n"; }
+	string getCitation() { return "Quince C, Lanzen A, Davenport RJ, Turnbaugh PJ (2011).  Removing noise from pyrosequenced amplicons.  BMC Bioinformatics  12:38.\nEdgar,R.C., Haas,B.J., Clemente,J.C., Quince,C. and Knight,R. (2011), UCHIME improves sensitivity and speed of chimera detection.  Bioinformatics 27:2194.\nhttp://www.mothur.org/wiki/Chimera.perseus\n"; }
 	string getDescription()		{ return "detect chimeric sequences"; }
 	
 	int execute(); 

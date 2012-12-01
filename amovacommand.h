@@ -38,7 +38,7 @@ private:
 	map<string, vector<int> > getRandomizedGroups(map<string, vector<int> >);
 
 	bool abort;
-	vector<string> outputNames;
+	vector<string> outputNames, Sets;
 
 	string outputDir, inputDir, designFileName, phylipFileName;
 	GroupMap* designMap;

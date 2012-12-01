@@ -56,7 +56,7 @@ string RareFactCommand::getHelpString(){
 	try {
 		ValidCalculators validCalculator;
 		string helpString = "";
-		helpString += "The rarefaction.single command parameters are list, sabund, rabund, shared, label, iters, freq, calc, processors and abund.  list, sabund, rabund or shared is required unless you have a valid current file. \n";
+		helpString += "The rarefaction.single command parameters are list, sabund, rabund, shared, label, iters, freq, calc, processors, groupmode and abund.  list, sabund, rabund or shared is required unless you have a valid current file. \n";
 		helpString += "The freq parameter is used indicate when to output your data, by default it is set to 100. But you can set it to a percentage of the number of sequence. For example freq=0.10, means 10%. \n";
 		helpString += "The processors parameter allows you to specify the number of processors to use. The default is 1.\n";
 		helpString += "The rarefaction.single command should be in the following format: \n";

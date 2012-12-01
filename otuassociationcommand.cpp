@@ -16,6 +16,7 @@ vector<string> OTUAssociationCommand::setParameters(){
 		CommandParameter pshared("shared", "InputTypes", "", "", "SharedRelMeta", "SharedRelMeta", "none",false,false); parameters.push_back(pshared);
 		CommandParameter prelabund("relabund", "InputTypes", "", "", "SharedRelMeta", "SharedRelMeta", "none",false,false); parameters.push_back(prelabund);
         CommandParameter pmetadata("metadata", "InputTypes", "", "", "SharedRelMeta", "SharedRelMeta", "none",false,false); parameters.push_back(pmetadata);
+        CommandParameter pcutoff("cutoff", "Number", "", "10", "", "", "",false,false); parameters.push_back(pcutoff);
 		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
 		CommandParameter pmethod("method", "Multiple", "pearson-spearman-kendall", "pearson", "", "", "",false,false); parameters.push_back(pmethod);
@@ -37,9 +38,10 @@ string OTUAssociationCommand::getHelpString(){
 		string helpString = "";
 		helpString += "The otu.association command reads a shared or relabund file and calculates the correlation coefficients between otus.\n";
         helpString += "If you provide a metadata file, mothur will calculate te correlation bewteen the metadata and the otus.\n";
-		helpString += "The otu.association command parameters are shared, relabund, metadata, groups, method and label.  The shared or relabund parameter is required.\n";
+		helpString += "The otu.association command parameters are shared, relabund, metadata, groups, method, cutoff and label.  The shared or relabund parameter is required.\n";
 		helpString += "The groups parameter allows you to specify which of the groups you would like included. The group names are separated by dashes.\n";
 		helpString += "The label parameter allows you to select what distances level you would like used, and are also separated by dashes.\n";
+        helpString += "The cutoff parameter allows you to set a pvalue at which the otu will be reported.\n";
 		helpString += "The method parameter allows you to select what method you would like to use. Options are pearson, spearman and kendall. Default=pearson.\n";
 		helpString += "The otu.association command should be in the following format: otu.association(shared=yourSharedFile, method=yourMethod).\n";
 		helpString += "Example otu.association(shared=genus.pool.shared, method=kendall).\n";
@@ -195,6 +197,10 @@ OTUAssociationCommand::OTUAssociationCommand(string option)  {
 			
 			method = validParameter.validFile(parameters, "method", false);		if (method == "not found"){	method = "pearson";		}
 			
+            string temp = validParameter.validFile(parameters, "cutoff", false);
+			if (temp == "not found") { temp = "10"; }
+			m->mothurConvert(temp, cutoff); 
+            
 			if ((method != "pearson") && (method != "spearman") && (method != "kendall")) { m->mothurOut(method + " is not a valid method. Valid methods are pearson, spearman, and kendall."); m->mothurOutEndLine(); abort = true; }
 			
 		}
@@ -356,7 +362,7 @@ int OTUAssociationCommand::process(vector<SharedRAbundVector*>& lookup){
                     else if (method == "kendall")	{	coef = linear.calcKendall(xy[i], xy[k], sig);	}                   
                     else { m->mothurOut("[ERROR]: invalid method, choices are spearman, pearson or kendall."); m->mothurOutEndLine(); m->control_pressed = true; }
                     
-                    out << m->binLabelsInFile[i] << '\t' << m->binLabelsInFile[k] << '\t' << coef << '\t' << sig << endl;
+                    if (sig < cutoff) { out << m->binLabelsInFile[i] << '\t' << m->binLabelsInFile[k] << '\t' << coef << '\t' << sig << endl; }
                 }
             }
 		}else { //compare otus to metadata
@@ -373,7 +379,7 @@ int OTUAssociationCommand::process(vector<SharedRAbundVector*>& lookup){
                     else if (method == "kendall")	{	coef = linear.calcKendall(xy[i], metadata[k], sig);	}                   
                     else { m->mothurOut("[ERROR]: invalid method, choices are spearman, pearson or kendall."); m->mothurOutEndLine(); m->control_pressed = true; }
                     
-                    out << m->binLabelsInFile[i] << '\t' << metadataLabels[k] << '\t' << coef << '\t' << sig << endl;
+                    if (sig < cutoff) { out << m->binLabelsInFile[i] << '\t' << metadataLabels[k] << '\t' << coef << '\t' << sig << endl; }
                 }
             }
 
@@ -515,7 +521,7 @@ int OTUAssociationCommand::process(vector<SharedRAbundFloatVector*>& lookup){
                     else if (method == "kendall")	{	coef = linear.calcKendall(xy[i], xy[k], sig);	}                   
                     else { m->mothurOut("[ERROR]: invalid method, choices are spearman, pearson or kendall."); m->mothurOutEndLine(); m->control_pressed = true; }
                     
-                    out << m->binLabelsInFile[i] << '\t' << m->binLabelsInFile[k] << '\t' << coef << '\t' << sig << endl;
+                    if (sig < cutoff) { out << m->binLabelsInFile[i] << '\t' << m->binLabelsInFile[k] << '\t' << coef << '\t' << sig << endl; }
                 }
             }
 		}else { //compare otus to metadata
@@ -532,7 +538,7 @@ int OTUAssociationCommand::process(vector<SharedRAbundFloatVector*>& lookup){
                     else if (method == "kendall")	{	coef = linear.calcKendall(xy[i], metadata[k], sig);	}                   
                     else { m->mothurOut("[ERROR]: invalid method, choices are spearman, pearson or kendall."); m->mothurOutEndLine(); m->control_pressed = true; }
                     
-                    out << m->binLabelsInFile[i] << '\t' << metadataLabels[k] << '\t' << coef << '\t' << sig << endl;
+                    if (sig < cutoff) { out << m->binLabelsInFile[i] << '\t' << metadataLabels[k] << '\t' << coef << '\t' << sig << endl; }
                 }
             }
             
