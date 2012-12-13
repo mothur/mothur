@@ -50,9 +50,10 @@ double TrialSwap2::calc_c_score (vector<vector<int> > &co_matrix, vector<int> ro
             }
         }
         
-        cscore = cscore/(double)(nrows*(nrows-1)/2);
+        //cscore = cscore/(double)(nrows*(nrows-1)/2);  //not normalized
         //cout << "normalized c score: " << normcscore/nonzeros << endl;
-        
+        cscore = normcscore/(double)nonzeros;
+
         return cscore;
     }
     catch(exception& e) {

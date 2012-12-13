@@ -197,7 +197,7 @@ int CooccurrenceCommand::execute(){
         m->openOutputFile(outputFileName, out);
         outputNames.push_back(outputFileName);  outputTypes["summary"].push_back(outputFileName);
         out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
-        out << "metric\tlabel\tScore\tzScore\tstandardDeviation\n";
+        out << "metric\tlabel\tScore\tzScore\tstandardDeviation\tnp_Pvalue\n";
 
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
@@ -566,7 +566,8 @@ int CooccurrenceCommand::getCooccurrence(vector<SharedRAbundVector*>& thisLookUp
         
         m->mothurOut("zscore: " + toString(zscore)); m->mothurOutEndLine();
         m->mothurOut("standard deviation: " + toString(sd)); m->mothurOutEndLine();
-        out << metric << '\t' << thisLookUp[0]->getLabel() << '\t' << nullMean << '\t' << zscore << '\t' << sd << endl;
+        m->mothurOut("non-parametric p-value: " + toString(pvalue)); m->mothurOutEndLine();
+        out << metric << '\t' << thisLookUp[0]->getLabel() << '\t' << nullMean << '\t' << zscore << '\t' << sd << '\t' << pvalue << endl;
         
         return 0;
     }
