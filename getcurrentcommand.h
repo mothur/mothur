@@ -22,8 +22,8 @@ class GetCurrentCommand : public Command {
 		vector<string> setParameters();
 		string getCommandName()			{ return "get.current";	}
 		string getCommandCategory()		{ return "General";		}
-        string getOutputFileNameTag(string, string) { return ""; }
         string getHelpString();	
+        string getOutputPattern(string)	{ return ""; }
 		string getCitation() { return "http://www.mothur.org/wiki/Get.current"; }
 		string getDescription()		{ return "get current files saved by mothur"; }
 

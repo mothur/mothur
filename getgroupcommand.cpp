@@ -13,9 +13,9 @@
 //**********************************************************************************************************************
 vector<string> GetgroupCommand::setParameters(){	
 	try {
-		CommandParameter pshared("shared", "InputTypes", "", "current", "none", "none", "none",false,true); parameters.push_back(pshared);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pshared("shared", "InputTypes", "", "current", "none", "none", "none","",false,true, true); parameters.push_back(pshared);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}

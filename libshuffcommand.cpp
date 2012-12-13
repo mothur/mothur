@@ -23,16 +23,16 @@
 //**********************************************************************************************************************
 vector<string> LibShuffCommand::setParameters(){	
 	try {
-		CommandParameter pphylip("phylip", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pphylip);
-		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pgroup);
-		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
-		CommandParameter piters("iters", "Number", "", "10000", "", "", "",false,false); parameters.push_back(piters);
-		CommandParameter pstep("step", "Number", "", "0.01", "", "", "",false,false); parameters.push_back(pstep);
-		CommandParameter pcutoff("cutoff", "Number", "", "1.0", "", "", "",false,false); parameters.push_back(pcutoff);
-		CommandParameter pform("form", "Multiple", "discrete-integral", "integral", "", "", "",false,false); parameters.push_back(pform);
-		CommandParameter psim("sim", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(psim);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pphylip("phylip", "InputTypes", "", "", "none", "none", "none","coverage-libshuffsummary",false,true,true); parameters.push_back(pphylip);
+		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(pgroup);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
+		CommandParameter piters("iters", "Number", "", "10000", "", "", "","",false,false); parameters.push_back(piters);
+		CommandParameter pstep("step", "Number", "", "0.01", "", "", "","",false,false); parameters.push_back(pstep);
+		CommandParameter pcutoff("cutoff", "Number", "", "1.0", "", "", "","",false,false); parameters.push_back(pcutoff);
+		CommandParameter pform("form", "Multiple", "discrete-integral", "integral", "", "", "","",false,false); parameters.push_back(pform);
+		CommandParameter psim("sim", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(psim);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -65,25 +65,20 @@ string LibShuffCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string LibShuffCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string LibShuffCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "coverage")             {   outputFileName =  "libshuff.coverage";       }
-            else if (type == "libshuffsummary")      {   outputFileName =  "libshuff.summary";   }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "LibShuffCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "coverage") {  pattern = "[filename],libshuff.coverage"; } 
+        else if (type == "libshuffsummary") {  pattern = "[filename],libshuff.summary"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "LibShuffCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 LibShuffCommand::LibShuffCommand(){	
@@ -362,7 +357,9 @@ int LibShuffCommand::printCoverageFile() {
 	try {
 
 		ofstream outCov;
-		summaryFile = outputDir + m->getRootName(m->getSimpleName(phylipfile)) + getOutputFileNameTag("coverage");
+        map<string, string> variables; 
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(phylipfile));
+		summaryFile = getOutputFileName("coverage", variables);
 		m->openOutputFile(summaryFile, outCov);
 		outputNames.push_back(summaryFile); outputTypes["coverage"].push_back(summaryFile);
 		outCov.setf(ios::fixed, ios::floatfield); outCov.setf(ios::showpoint);
@@ -458,7 +455,9 @@ int LibShuffCommand::printSummaryFile() {
 	try {
 
 		ofstream outSum;
-		summaryFile = outputDir + m->getRootName(m->getSimpleName(phylipfile)) + getOutputFileNameTag("libshuffsummary");
+        map<string, string> variables; 
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(phylipfile));
+		summaryFile = getOutputFileName("libshuffsummary",variables);
 		m->openOutputFile(summaryFile, outSum);
 		outputNames.push_back(summaryFile); outputTypes["libshuffsummary"].push_back(summaryFile);
 

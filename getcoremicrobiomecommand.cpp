@@ -12,15 +12,15 @@
 //**********************************************************************************************************************
 vector<string> GetCoreMicroBiomeCommand::setParameters(){	
 	try {
-        CommandParameter pshared("shared", "InputTypes", "", "", "SharedRel", "SharedRel", "none",false,false); parameters.push_back(pshared);
-		CommandParameter prelabund("relabund", "InputTypes", "", "", "SharedRel", "SharedRel", "none",false,false); parameters.push_back(prelabund);
-        CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
-		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
-		CommandParameter poutput("output", "Multiple", "fraction-count", "fraction", "", "", "",false,false); parameters.push_back(poutput);
-        CommandParameter pabund("abundance", "Number", "", "-1", "", "", "",false,false); parameters.push_back(pabund);
-		CommandParameter psamples("samples", "Number", "", "-1", "", "", "",false,false); parameters.push_back(psamples);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+        CommandParameter pshared("shared", "InputTypes", "", "", "SharedRel", "SharedRel", "none","coremicrobiom",false,false, true); parameters.push_back(pshared);
+		CommandParameter prelabund("relabund", "InputTypes", "", "", "SharedRel", "SharedRel", "none","coremicrobiom",false,false, true); parameters.push_back(prelabund);
+        CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
+		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
+		CommandParameter poutput("output", "Multiple", "fraction-count", "fraction", "", "", "","",false,false); parameters.push_back(poutput);
+        CommandParameter pabund("abundance", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(pabund);
+		CommandParameter psamples("samples", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(psamples);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -52,26 +52,20 @@ string GetCoreMicroBiomeCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string GetCoreMicroBiomeCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string GetCoreMicroBiomeCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "coremicrobiome") {  outputFileName =  "core.microbiome"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetCoreMicroBiomeCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "coremicrobiome") {  pattern = "[filename],[tag],core.microbiome"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GetCoreMicroBiomeCommand", "getOutputPattern");
+        exit(1);
+    }
 }
-
 //**********************************************************************************************************************
 GetCoreMicroBiomeCommand::GetCoreMicroBiomeCommand(){	
 	try {
@@ -307,8 +301,10 @@ int GetCoreMicroBiomeCommand::execute(){
 
 int GetCoreMicroBiomeCommand::createTable(vector<SharedRAbundFloatVector*>& lookup){
 	try {
-        
-        string outputFileName = outputDir + m->getRootName(m->getSimpleName(inputFileName)) + lookup[0]->getLabel() + "." + getOutputFileNameTag("coremicrobiome");
+        map<string, string> variables; 
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputFileName));
+        variables["[tag]"] = lookup[0]->getLabel();
+        string outputFileName = getOutputFileName("coremicrobiome", variables);
         outputNames.push_back(outputFileName);  outputTypes["coremicrobiome"].push_back(outputFileName);
 		ofstream out;
 		m->openOutputFile(outputFileName, out);

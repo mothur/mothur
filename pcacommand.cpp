@@ -13,13 +13,13 @@
 //**********************************************************************************************************************
 vector<string> PCACommand::setParameters(){	
 	try {
-		CommandParameter pshared("shared", "InputTypes", "", "", "LRSS", "LRSS", "none",false,false); parameters.push_back(pshared);	
-		CommandParameter prelabund("relabund", "InputTypes", "", "", "LRSS", "LRSS", "none",false,false); parameters.push_back(prelabund);
-		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
-		CommandParameter pmetric("metric", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pmetric);
-		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pshared("shared", "InputTypes", "", "", "LRSS", "LRSS", "none","pca-loadings",false,false,true); parameters.push_back(pshared);	
+		CommandParameter prelabund("relabund", "InputTypes", "", "", "LRSS", "LRSS", "none","pca-loadings",false,false,true); parameters.push_back(prelabund);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
+		CommandParameter pmetric("metric", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pmetric);
+		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -49,25 +49,20 @@ string PCACommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string PCACommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string PCACommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "pca") {  outputFileName =  "pca.axes"; }
-            else if (type == "loadings") {  outputFileName =  "pca.loadings"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PCACommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "pca") {  pattern = "[filename],[distance],pca.axes"; } 
+        else if (type == "loadings") {  pattern = "[filename],[distance],pca.loadings"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "PCACommand", "getOutputPattern");
+        exit(1);
+    }
 }
 
 //**********************************************************************************************************************
@@ -386,8 +381,8 @@ int PCACommand::process(vector<SharedRAbundFloatVector*>& lookupFloat){
 		if (m->control_pressed) { return 0; }
 		
 		string fbase = outputDir + m->getRootName(m->getSimpleName(inputFile));
-		string outputFileName = fbase + lookupFloat[0]->getLabel();
-		output(outputFileName, m->getGroups(), X, d);
+		//string outputFileName = fbase + lookupFloat[0]->getLabel();
+		output(fbase, lookupFloat[0]->getLabel(), m->getGroups(), X, d);
 		
 		if (metric) {   
 			
@@ -416,7 +411,7 @@ int PCACommand::process(vector<SharedRAbundFloatVector*>& lookupFloat){
 }
 /*********************************************************************************************************************************/
 
-void PCACommand::output(string fnameRoot, vector<string> name_list, vector<vector<double> >& G, vector<double> d) {
+void PCACommand::output(string fbase, string label, vector<string> name_list, vector<vector<double> >& G, vector<double> d) {
 	try {
 
 		int numEigenValues = d.size();
@@ -426,18 +421,23 @@ void PCACommand::output(string fnameRoot, vector<string> name_list, vector<vecto
 		}
 		
 		ofstream pcaData;
-        m->openOutputFile((fnameRoot+"."+getOutputFileNameTag("pca")), pcaData);
+        map<string, string> variables; 
+        variables["[filename]"] = fbase;
+        variables["[distance]"] = label;
+        string pcaFileName = getOutputFileName("pca",variables);
+        m->openOutputFile(pcaFileName, pcaData);
 		pcaData.setf(ios::fixed, ios::floatfield);
 		pcaData.setf(ios::showpoint);	
-		outputNames.push_back(fnameRoot+"."+getOutputFileNameTag("pca"));
-		outputTypes["pca"].push_back(fnameRoot+"."+getOutputFileNameTag("pca"));
+		outputNames.push_back(pcaFileName);
+		outputTypes["pca"].push_back(pcaFileName);
 		
 		ofstream pcaLoadings;
-         m->openOutputFile((fnameRoot+"."+getOutputFileNameTag("loadings")), pcaLoadings);
+        string loadingsFilename = getOutputFileName("loadings",variables);
+         m->openOutputFile(loadingsFilename, pcaLoadings);
 		pcaLoadings.setf(ios::fixed, ios::floatfield);
 		pcaLoadings.setf(ios::showpoint);
-		outputNames.push_back(fnameRoot+"."+getOutputFileNameTag("loadings"));
-		outputTypes["loadings"].push_back(fnameRoot+"."+getOutputFileNameTag("loadings"));	
+		outputNames.push_back(loadingsFilename);
+		outputTypes["loadings"].push_back(loadingsFilename);	
 		
 		pcaLoadings << "axis\tloading\n";
 		for(int i=0;i<numEigenValues;i++){

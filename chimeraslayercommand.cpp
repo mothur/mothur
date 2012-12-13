@@ -16,33 +16,33 @@
 //**********************************************************************************************************************
 vector<string> ChimeraSlayerCommand::setParameters(){	
 	try {
-		CommandParameter ptemplate("reference", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(ptemplate);
-		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
-		CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none",false,false); parameters.push_back(pname);
-         CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none",false,false); parameters.push_back(pcount);
-		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none",false,false); parameters.push_back(pgroup);
-		CommandParameter pwindow("window", "Number", "", "50", "", "", "",false,false); parameters.push_back(pwindow);
-		CommandParameter pksize("ksize", "Number", "", "7", "", "", "",false,false); parameters.push_back(pksize);
-		CommandParameter pmatch("match", "Number", "", "5.0", "", "", "",false,false); parameters.push_back(pmatch);
-		CommandParameter pmismatch("mismatch", "Number", "", "-4.0", "", "", "",false,false); parameters.push_back(pmismatch);
-		CommandParameter pminsim("minsim", "Number", "", "90", "", "", "",false,false); parameters.push_back(pminsim);
-		CommandParameter pmincov("mincov", "Number", "", "70", "", "", "",false,false); parameters.push_back(pmincov);
-		CommandParameter pminsnp("minsnp", "Number", "", "10", "", "", "",false,false); parameters.push_back(pminsnp);
-		CommandParameter pminbs("minbs", "Number", "", "90", "", "", "",false,false); parameters.push_back(pminbs);
-		CommandParameter psearch("search", "Multiple", "kmer-blast", "blast", "", "", "",false,false); parameters.push_back(psearch);
-		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
-		CommandParameter prealign("realign", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(prealign);
-		CommandParameter ptrim("trim", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(ptrim);
-		CommandParameter psplit("split", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(psplit);
-		CommandParameter pnumwanted("numwanted", "Number", "", "15", "", "", "",false,false); parameters.push_back(pnumwanted);
-		CommandParameter piters("iters", "Number", "", "1000", "", "", "",false,false); parameters.push_back(piters);
-		CommandParameter pdivergence("divergence", "Number", "", "1.007", "", "", "",false,false); parameters.push_back(pdivergence);
-		CommandParameter pparents("parents", "Number", "", "3", "", "", "",false,false); parameters.push_back(pparents);
-		CommandParameter pincrement("increment", "Number", "", "5", "", "", "",false,false); parameters.push_back(pincrement);
-		CommandParameter pblastlocation("blastlocation", "String", "", "", "", "", "",false,false); parameters.push_back(pblastlocation);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
-		CommandParameter psave("save", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(psave);
+		CommandParameter ptemplate("reference", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(ptemplate);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","chimera-accnos",false,true,true); parameters.push_back(pfasta);
+		CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none","",false,false,true); parameters.push_back(pname);
+         CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none","",false,false,true); parameters.push_back(pcount);
+		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
+		CommandParameter pwindow("window", "Number", "", "50", "", "", "","",false,false); parameters.push_back(pwindow);
+		CommandParameter pksize("ksize", "Number", "", "7", "", "", "","",false,false); parameters.push_back(pksize);
+		CommandParameter pmatch("match", "Number", "", "5.0", "", "", "","",false,false); parameters.push_back(pmatch);
+		CommandParameter pmismatch("mismatch", "Number", "", "-4.0", "", "", "","",false,false); parameters.push_back(pmismatch);
+		CommandParameter pminsim("minsim", "Number", "", "90", "", "", "","",false,false); parameters.push_back(pminsim);
+		CommandParameter pmincov("mincov", "Number", "", "70", "", "", "","",false,false); parameters.push_back(pmincov);
+		CommandParameter pminsnp("minsnp", "Number", "", "10", "", "", "","",false,false); parameters.push_back(pminsnp);
+		CommandParameter pminbs("minbs", "Number", "", "90", "", "", "","",false,false); parameters.push_back(pminbs);
+		CommandParameter psearch("search", "Multiple", "kmer-blast", "blast", "", "", "","",false,false); parameters.push_back(psearch);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
+		CommandParameter prealign("realign", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(prealign);
+		CommandParameter ptrim("trim", "Boolean", "", "F", "", "", "","fasta",false,false); parameters.push_back(ptrim);
+		CommandParameter psplit("split", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(psplit);
+		CommandParameter pnumwanted("numwanted", "Number", "", "15", "", "", "","",false,false); parameters.push_back(pnumwanted);
+		CommandParameter piters("iters", "Number", "", "1000", "", "", "","",false,false); parameters.push_back(piters);
+		CommandParameter pdivergence("divergence", "Number", "", "1.007", "", "", "","",false,false); parameters.push_back(pdivergence);
+		CommandParameter pparents("parents", "Number", "", "3", "", "", "","",false,false); parameters.push_back(pparents);
+		CommandParameter pincrement("increment", "Number", "", "5", "", "", "","",false,false); parameters.push_back(pincrement);
+		CommandParameter pblastlocation("blastlocation", "String", "", "", "", "", "","",false,false); parameters.push_back(pblastlocation);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+		CommandParameter psave("save", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(psave);
 
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -101,26 +101,21 @@ string ChimeraSlayerCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string ChimeraSlayerCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string ChimeraSlayerCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "chimera") {  outputFileName =  "slayer.chimeras"; }
-            else if (type == "accnos") {  outputFileName =  "slayer.accnos"; }
-            else if (type == "fasta") {  outputFileName =  "slayer.fasta"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChimeraSlayerCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "chimera") {  pattern = "[filename],slayer.chimeras"; } 
+        else if (type == "accnos") {  pattern = "[filename],slayer.accnos"; } 
+        else if (type == "fasta") {  pattern = "[filename],slayer.fasta"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ChimeraSlayerCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 ChimeraSlayerCommand::ChimeraSlayerCommand(){	
@@ -666,10 +661,12 @@ int ChimeraSlayerCommand::execute(){
 			m->mothurOut("Checking sequences from " + fastaFileNames[s] + " ..." ); m->mothurOutEndLine();
 		
 			int start = time(NULL);	
-			if (outputDir == "") { outputDir = m->hasPath(fastaFileNames[s]);  }//if user entered a file with a path then preserve it				
-			string outputFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + getOutputFileNameTag("chimera");
-			string accnosFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + getOutputFileNameTag("accnos");
-			string trimFastaFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + getOutputFileNameTag("fasta");		
+			if (outputDir == "") { outputDir = m->hasPath(fastaFileNames[s]);  }//if user entered a file with a path then preserve it	
+			map<string, string> variables; 
+            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]));
+			string outputFileName = getOutputFileName("chimera", variables);
+			string accnosFileName = getOutputFileName("accnos", variables);
+			string trimFastaFileName = getOutputFileName("fasta", variables);
 			
 			//clears files
 			ofstream out, out1, out2;

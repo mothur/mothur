@@ -15,12 +15,12 @@
 //**********************************************************************************************************************
 vector<string> CountSeqsCommand::setParameters(){	
 	try {
-		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pname);
-		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pgroup);
-        CommandParameter plarge("large", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(plarge);
-		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none","count",false,true,true); parameters.push_back(pname);
+		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none","",false,false,true); parameters.push_back(pgroup);
+        CommandParameter plarge("large", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(plarge);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -50,24 +50,19 @@ string CountSeqsCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string CountSeqsCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string CountSeqsCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "counttable") {  outputFileName =  "count_table"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "CountSeqsCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "count") {  pattern = "[filename],count_table"; }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CountSeqsCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 CountSeqsCommand::CountSeqsCommand(){	
@@ -75,7 +70,7 @@ CountSeqsCommand::CountSeqsCommand(){
 		abort = true; calledHelp = true; 
 		setParameters();
 		vector<string> tempOutNames;
-		outputTypes["counttable"] = tempOutNames;
+		outputTypes["count"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "CountSeqsCommand", "CountSeqsCommand");
@@ -107,7 +102,7 @@ CountSeqsCommand::CountSeqsCommand(string option)  {
 			
 			//initialize outputTypes
 			vector<string> tempOutNames;
-			outputTypes["counttable"] = tempOutNames;
+			outputTypes["count"] = tempOutNames;
 			
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
@@ -171,7 +166,9 @@ int CountSeqsCommand::execute(){
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(namefile)) + getOutputFileNameTag("counttable");
+        map<string, string> variables; 
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(namefile));
+		string outputFileName = getOutputFileName("count", variables);
 		
         int total = 0;
         if (!large) { total = processSmall(outputFileName); }
@@ -180,7 +177,7 @@ int CountSeqsCommand::execute(){
 		if (m->control_pressed) { m->mothurRemove(outputFileName); return 0; }
 		
         //set rabund file as new current rabundfile
-		itTypes = outputTypes.find("counttable");
+		itTypes = outputTypes.find("count");
 		if (itTypes != outputTypes.end()) {
 			if ((itTypes->second).size() != 0) { string current = (itTypes->second)[0]; m->setCountTableFile(current); }
 		}
@@ -205,8 +202,8 @@ int CountSeqsCommand::execute(){
 int CountSeqsCommand::processSmall(string outputFileName){
 	try {
         ofstream out;
-        m->openOutputFile(outputFileName, out); outputTypes["counttable"].push_back(outputFileName);
-        outputNames.push_back(outputFileName); outputTypes["counttable"].push_back(outputFileName);
+        m->openOutputFile(outputFileName, out); outputTypes["count"].push_back(outputFileName);
+        outputNames.push_back(outputFileName); outputTypes["count"].push_back(outputFileName);
 		out << "Representative_Sequence\ttotal\t";
         
         GroupMap* groupMap;
@@ -299,7 +296,7 @@ int CountSeqsCommand::processLarge(string outputFileName){
         for (set<string>::iterator it = namesOfGroups.begin(); it != namesOfGroups.end(); it++) { initial[(*it)] = 0;  }
         ofstream out;
         m->openOutputFile(outputFileName, out); 
-        outputNames.push_back(outputFileName); outputTypes["counttable"].push_back(outputFileName);
+        outputNames.push_back(outputFileName); outputTypes["count"].push_back(outputFileName);
 		out << "Representative_Sequence\ttotal\t";
         if (groupfile == "") { out << endl; }
         

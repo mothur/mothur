@@ -12,12 +12,12 @@
 //**********************************************************************************************************************
 vector<string> GetRelAbundCommand::setParameters(){	
 	try {
-		CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pshared);
-		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
-		CommandParameter pscale("scale", "Multiple", "totalgroup-totalotu-averagegroup-averageotu", "totalgroup", "", "", "",false,false); parameters.push_back(pscale);
-		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none","relabund",false,true, true); parameters.push_back(pshared);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
+		CommandParameter pscale("scale", "Multiple", "totalgroup-totalotu-averagegroup-averageotu", "totalgroup", "", "", "","",false,false); parameters.push_back(pscale);
+		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -49,24 +49,19 @@ string GetRelAbundCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string GetRelAbundCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string GetRelAbundCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "relabund")         {   outputFileName = "relabund" ;  }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetRelAbundCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "relabund")      {   pattern = "[filename],relabund";    }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GetRelAbundCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 GetRelAbundCommand::GetRelAbundCommand(){	
@@ -174,7 +169,9 @@ int GetRelAbundCommand::execute(){
 	
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + getOutputFileNameTag("relabund");
+        map<string, string> variables; 
+		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
+		string outputFileName = getOutputFileName("relabund", variables);
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);

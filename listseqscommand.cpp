@@ -16,15 +16,15 @@
 //**********************************************************************************************************************
 vector<string> ListSeqsCommand::setParameters(){	
 	try {
-		CommandParameter pfasta("fasta", "InputTypes", "", "", "FNGLT", "FNGLT", "none",false,false); parameters.push_back(pfasta);
-		CommandParameter pname("name", "InputTypes", "", "", "FNGLT", "FNGLT", "none",false,false); parameters.push_back(pname);
-        CommandParameter pcount("count", "InputTypes", "", "", "FNGLT", "FNGLT", "none",false,false); parameters.push_back(pcount);
-		CommandParameter pgroup("group", "InputTypes", "", "", "FNGLT", "FNGLT", "none",false,false); parameters.push_back(pgroup);
-		CommandParameter plist("list", "InputTypes", "", "", "FNGLT", "FNGLT", "none",false,false); parameters.push_back(plist);
-		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "FNGLT", "FNGLT", "none",false,false); parameters.push_back(ptaxonomy);
-		CommandParameter palignreport("alignreport", "InputTypes", "", "", "FNGLT", "FNGLT", "none",false,false); parameters.push_back(palignreport);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "FNGLT", "FNGLT", "none","accnos",false,false,true); parameters.push_back(pfasta);
+		CommandParameter pname("name", "InputTypes", "", "", "FNGLT", "FNGLT", "none","accnos",false,false,true); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "FNGLT", "FNGLT", "none","accnos",false,false,true); parameters.push_back(pcount);
+		CommandParameter pgroup("group", "InputTypes", "", "", "FNGLT", "FNGLT", "none","accnos",false,false,true); parameters.push_back(pgroup);
+		CommandParameter plist("list", "InputTypes", "", "", "FNGLT", "FNGLT", "none","accnos",false,false,true); parameters.push_back(plist);
+		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "FNGLT", "FNGLT", "none","accnos",false,false,true); parameters.push_back(ptaxonomy);
+		CommandParameter palignreport("alignreport", "InputTypes", "", "", "FNGLT", "FNGLT", "none","accnos",false,false); parameters.push_back(palignreport);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -52,24 +52,19 @@ string ListSeqsCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string ListSeqsCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string ListSeqsCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "accnos")             {   outputFileName =  "accnos";       }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ListSeqsCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "accnos") {  pattern = "[filename],accnos"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ListSeqsCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 ListSeqsCommand::ListSeqsCommand(){	
@@ -249,7 +244,9 @@ int ListSeqsCommand::execute(){
 		
 		if (outputDir == "") {  outputDir += m->hasPath(inputFileName);  }
 		
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(inputFileName)) + getOutputFileNameTag("accnos");
+        map<string, string> variables; 
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputFileName));
+		string outputFileName = getOutputFileName("accnos", variables);
 
 		ofstream out;
 		m->openOutputFile(outputFileName, out);

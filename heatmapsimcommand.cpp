@@ -23,17 +23,17 @@
 //**********************************************************************************************************************
 vector<string> HeatMapSimCommand::setParameters(){	
 	try {
-		CommandParameter pshared("shared", "InputTypes", "", "", "PhylipColumnShared", "PhylipColumnShared", "none",false,false); parameters.push_back(pshared);	
-		CommandParameter pphylip("phylip", "InputTypes", "", "", "PhylipColumnShared", "PhylipColumnShared", "none",false,false); parameters.push_back(pphylip);
-		CommandParameter pname("name", "InputTypes", "", "", "namecount", "none", "none",false,false); parameters.push_back(pname);
-        CommandParameter pcount("count", "InputTypes", "", "", "namecount", "none", "none",false,false); parameters.push_back(pcount);
-		CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumnShared", "PhylipColumnShared", "ColumnName",false,false); parameters.push_back(pcolumn);		
-		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
-		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
-		CommandParameter pcalc("calc", "Multiple", "jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan-morisitahorn-braycurtis", "jest-thetayc", "", "", "",true,false); parameters.push_back(pcalc);
-		CommandParameter pfontsize("fontsize", "Number", "", "24", "", "", "",false,false); parameters.push_back(pfontsize);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pshared("shared", "InputTypes", "", "", "PhylipColumnShared", "PhylipColumnShared", "none","svg",false,false,true); parameters.push_back(pshared);	
+		CommandParameter pphylip("phylip", "InputTypes", "", "", "PhylipColumnShared", "PhylipColumnShared", "none","svg",false,false); parameters.push_back(pphylip);
+		CommandParameter pname("name", "InputTypes", "", "", "namecount", "none", "none","",false,false); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "namecount", "none", "none","",false,false); parameters.push_back(pcount);
+		CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumnShared", "PhylipColumnShared", "ColumnName","svg",false,false); parameters.push_back(pcolumn);		
+		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
+		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
+		CommandParameter pcalc("calc", "Multiple", "jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan-morisitahorn-braycurtis", "jest-thetayc", "", "", "","",true,false); parameters.push_back(pcalc);
+		CommandParameter pfontsize("fontsize", "Number", "", "24", "", "", "","",false,false); parameters.push_back(pfontsize);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -73,27 +73,20 @@ string HeatMapSimCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-
-string HeatMapSimCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string HeatMapSimCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "svg")            {   outputFileName =  "svg";   }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "HeatMapSimCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "svg") {  pattern = "[filename],svg"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "HeatMapCommand", "getOutputPattern");
+        exit(1);
+    }
 }
-
 //**********************************************************************************************************************
 HeatMapSimCommand::HeatMapSimCommand(){	
 	try {

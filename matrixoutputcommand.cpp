@@ -13,17 +13,17 @@
 //**********************************************************************************************************************
 vector<string> MatrixOutputCommand::setParameters(){	
 	try {
-		CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pshared);
-		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
-        CommandParameter psubsample("subsample", "String", "", "", "", "", "",false,false); parameters.push_back(psubsample);
-		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
-		CommandParameter pcalc("calc", "Multiple", "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan-kstest-sharednseqs-ochiai-anderberg-kulczynski-kulczynskicody-lennon-morisitahorn-braycurtis-whittaker-odum-canberra-structeuclidean-structchord-hellinger-manhattan-structpearson-soergel-spearman-structkulczynski-speciesprofile-hamming-structchi2-gower-memchi2-memchord-memeuclidean-mempearson", "jclass-thetayc", "", "", "",true,false); parameters.push_back(pcalc);
-		CommandParameter poutput("output", "Multiple", "lt-square", "lt", "", "", "",false,false); parameters.push_back(poutput);
-        CommandParameter pmode("mode", "Multiple", "average-median", "average", "", "", "",false,false); parameters.push_back(pmode);
-		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
-        CommandParameter piters("iters", "Number", "", "1000", "", "", "",false,false); parameters.push_back(piters);
-        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none","phylip",false,true,true); parameters.push_back(pshared);
+		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
+        CommandParameter psubsample("subsample", "String", "", "", "", "", "","",false,false); parameters.push_back(psubsample);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
+		CommandParameter pcalc("calc", "Multiple", "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan-kstest-sharednseqs-ochiai-anderberg-kulczynski-kulczynskicody-lennon-morisitahorn-braycurtis-whittaker-odum-canberra-structeuclidean-structchord-hellinger-manhattan-structpearson-soergel-spearman-structkulczynski-speciesprofile-hamming-structchi2-gower-memchi2-memchord-memeuclidean-mempearson", "jclass-thetayc", "", "", "","",true,false,true); parameters.push_back(pcalc);
+		CommandParameter poutput("output", "Multiple", "lt-square", "lt", "", "", "","",false,false); parameters.push_back(poutput);
+        CommandParameter pmode("mode", "Multiple", "average-median", "average", "", "", "","",false,false); parameters.push_back(pmode);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
+        CommandParameter piters("iters", "Number", "", "1000", "", "", "","",false,false); parameters.push_back(piters);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -61,24 +61,19 @@ string MatrixOutputCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string MatrixOutputCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string MatrixOutputCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "phylip")             {   outputFileName =  "dist";         }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "MatrixOutputCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "phylip") {  pattern = "[filename],[calc],[distance],[outputtag],dist-[filename],[calc],[distance],[outputtag],[tag2],dist"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MatrixOutputCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 MatrixOutputCommand::MatrixOutputCommand(){	
@@ -486,8 +481,12 @@ int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
 	try {
 		vector< vector< vector<seqDist> > > calcDistsTotals;  //each iter, one for each calc, then each groupCombos dists. this will be used to make .dist files
         vector< vector<seqDist>  > calcDists; calcDists.resize(matrixCalculators.size()); 		
-
+                  
         for (int thisIter = 0; thisIter < iters+1; thisIter++) {
+            map<string, string> variables; 
+            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
+            variables["[distance]"] = thisLookup[0]->getLabel();
+            variables["[tag2]"] = "";
             
             vector<SharedRAbundVector*> thisItersLookup = thisLookup;
             
@@ -673,7 +672,9 @@ int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
                         matrix[column][row] = dist;
                     }
                     
-                    string distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + matrixCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + "." + getOutputFileNameTag("phylip");
+                    variables["[outputtag]"] = output;
+                    variables["[calc]"] = matrixCalculators[i]->getName();
+                    string distFileName = getOutputFileName("phylip",variables);
                     outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
                     
                     ofstream outDist;
@@ -777,8 +778,14 @@ int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
                     stdmatrix[row][column] = stdDist;
                     stdmatrix[column][row] = stdDist;
                 }
-            
-                string distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + matrixCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + ".ave." + getOutputFileNameTag("phylip");
+                
+                map<string, string> variables; 
+                variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
+                variables["[distance]"] = thisLookup[0]->getLabel();
+                variables["[outputtag]"] = output;
+                variables["[tag2]"] = "ave";
+                variables["[calc]"] = matrixCalculators[i]->getName();
+                string distFileName = getOutputFileName("phylip",variables);
                 outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
                 ofstream outAve;
                 m->openOutputFile(distFileName, outAve);
@@ -788,7 +795,8 @@ int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
                 
                 outAve.close();
                 
-                distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + matrixCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + ".std." + getOutputFileNameTag("phylip");
+                variables["[tag2]"] = "std";
+                distFileName = outputDir + getOutputFileName("phylip",variables);
                 outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
                 ofstream outSTD;
                 m->openOutputFile(distFileName, outSTD);

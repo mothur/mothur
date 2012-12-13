@@ -14,23 +14,23 @@
 //**********************************************************************************************************************
 vector<string> TreeGroupCommand::setParameters(){	
 	try {
-		CommandParameter pshared("shared", "InputTypes", "", "", "PhylipColumnShared", "PhylipColumnShared", "none",false,false); parameters.push_back(pshared);
-		CommandParameter pphylip("phylip", "InputTypes", "", "", "PhylipColumnShared", "PhylipColumnShared", "none",false,false); parameters.push_back(pphylip);
-		CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "ColumnName",false,false); parameters.push_back(pname);
-		CommandParameter pcount("count", "InputTypes", "", "", "NameCount", "none", "countcolumn",false,false); parameters.push_back(pcount);
-        CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumnShared", "PhylipColumnShared", "ColumnName-countcolumn",false,false); parameters.push_back(pcolumn);		
-        CommandParameter piters("iters", "Number", "", "1000", "", "", "",false,false); parameters.push_back(piters);
-        CommandParameter psubsample("subsample", "String", "", "", "", "", "",false,false); parameters.push_back(psubsample);
-        CommandParameter pcutoff("cutoff", "Number", "", "10", "", "", "",false,false); parameters.push_back(pcutoff);
-		CommandParameter pprecision("precision", "Number", "", "100", "", "", "",false,false); parameters.push_back(pprecision);		
-		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
-		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
-		CommandParameter pcalc("calc", "Multiple", "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan-kstest-sharednseqs-ochiai-anderberg-kulczynski-kulczynskicody-lennon-morisitahorn-braycurtis-whittaker-odum-canberra-structeuclidean-structchord-hellinger-manhattan-structpearson-soergel-spearman-structkulczynski-speciesprofile-hamming-structchi2-gower-memchi2-memchord-memeuclidean-mempearson", "jclass-thetayc", "", "", "",true,false); parameters.push_back(pcalc);
+		CommandParameter pshared("shared", "InputTypes", "", "", "PhylipColumnShared", "PhylipColumnShared", "none","tree",false,false,true); parameters.push_back(pshared);
+		CommandParameter pphylip("phylip", "InputTypes", "", "", "PhylipColumnShared", "PhylipColumnShared", "none","tree",false,false); parameters.push_back(pphylip);
+		CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "ColumnName","",false,false); parameters.push_back(pname);
+		CommandParameter pcount("count", "InputTypes", "", "", "NameCount", "none", "countcolumn","",false,false); parameters.push_back(pcount);
+        CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumnShared", "PhylipColumnShared", "ColumnName-countcolumn","tree",false,false); parameters.push_back(pcolumn);		
+        CommandParameter piters("iters", "Number", "", "1000", "", "", "","",false,false); parameters.push_back(piters);
+        CommandParameter psubsample("subsample", "String", "", "", "", "", "","",false,false); parameters.push_back(psubsample);
+        CommandParameter pcutoff("cutoff", "Number", "", "10", "", "", "","",false,false); parameters.push_back(pcutoff);
+		CommandParameter pprecision("precision", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pprecision);		
+		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
+		CommandParameter pcalc("calc", "Multiple", "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan-kstest-sharednseqs-ochiai-anderberg-kulczynski-kulczynskicody-lennon-morisitahorn-braycurtis-whittaker-odum-canberra-structeuclidean-structchord-hellinger-manhattan-structpearson-soergel-spearman-structkulczynski-speciesprofile-hamming-structchi2-gower-memchi2-memchord-memeuclidean-mempearson", "jclass-thetayc", "", "", "","",true,false,true); parameters.push_back(pcalc);
 		
-        CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
+        CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
 //CommandParameter poutput("output", "Multiple", "lt-square", "lt", "", "", "",false,false); parameters.push_back(poutput);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -71,24 +71,19 @@ string TreeGroupCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string TreeGroupCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string TreeGroupCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "tree")            {   outputFileName =  "tre";   }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "TreeGroupCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "tree") {  pattern = "[filename],[calc],[distance],[tag],tre-[filename],tre"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "TreeGroupCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 TreeGroupCommand::TreeGroupCommand(){	
@@ -504,7 +499,9 @@ int TreeGroupCommand::execute(){
 			if (m->control_pressed) { return 0; }
 
 			//create a new filename
-			string outputFile = outputDir + m->getRootName(m->getSimpleName(inputfile)) + getOutputFileNameTag("tree");	
+            map<string, string> variables; 
+            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputfile));
+			string outputFile = getOutputFileName("tree",variables);	
 			outputNames.push_back(outputFile); outputTypes["tree"].push_back(outputFile);
 				
 			Tree* newTree = createTree(matrix);
@@ -961,7 +958,12 @@ int TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
                 }
                 
                 //create a new filename
-                string outputFile = outputDir + m->getRootName(m->getSimpleName(inputfile)) + treeCalculators[i]->getName() + "." + thisLookup[0]->getLabel() + ".ave." + getOutputFileNameTag("tree");				
+                map<string, string> variables; 
+                variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputfile));
+                variables["[calc]"] = treeCalculators[i]->getName();
+                variables["[distance]"] = thisLookup[0]->getLabel();
+                variables["[tag]"] = "ave";
+                string outputFile = getOutputFileName("tree",variables);				
                 outputNames.push_back(outputFile); outputTypes["tree"].push_back(outputFile); 
                 
                 //creates tree from similarity matrix and write out file
@@ -974,7 +976,13 @@ int TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
                 if (m->control_pressed) { break; }
                 
                 //create a new filename
-                string outputFile = outputDir + m->getRootName(m->getSimpleName(inputfile)) + treeCalculators[i]->getName() + "." + thisLookup[0]->getLabel() + ".all." + getOutputFileNameTag("tree");				
+                //create a new filename
+                map<string, string> variables; 
+                variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputfile));
+                variables["[calc]"] = treeCalculators[i]->getName();
+                variables["[distance]"] = thisLookup[0]->getLabel();
+                variables["[tag]"] = "all";
+                string outputFile = getOutputFileName("tree",variables);				
                 outputNames.push_back(outputFile); outputTypes["tree"].push_back(outputFile); 
                 
                 ofstream outAll;
@@ -1015,7 +1023,8 @@ int TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
                 Tree* conTree = consensus.getTree(trees);
                 
                 //create a new filename
-                string conFile = outputDir + m->getRootName(m->getSimpleName(inputfile)) + treeCalculators[i]->getName() + "." + thisLookup[0]->getLabel() + ".cons." + getOutputFileNameTag("tree");				
+                variables["[tag]"] = "cons";
+                string conFile = getOutputFileName("tree",variables);				
                 outputNames.push_back(conFile); outputTypes["tree"].push_back(conFile); 
                 ofstream outTree;
                 m->openOutputFile(conFile, outTree);
@@ -1043,7 +1052,12 @@ int TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
                 }
                 
                 //create a new filename
-                string outputFile = outputDir + m->getRootName(m->getSimpleName(inputfile)) + treeCalculators[i]->getName() + "." + thisLookup[0]->getLabel() + "." + getOutputFileNameTag("tree");				
+                map<string, string> variables; 
+                variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputfile));
+                variables["[calc]"] = treeCalculators[i]->getName();
+                variables["[distance]"] = thisLookup[0]->getLabel();
+                variables["[tag]"] = "";
+                string outputFile = getOutputFileName("tree",variables);					
                 outputNames.push_back(outputFile); outputTypes["tree"].push_back(outputFile); 
                 
                 //creates tree from similarity matrix and write out file

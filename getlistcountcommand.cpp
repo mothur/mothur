@@ -12,11 +12,11 @@
 //**********************************************************************************************************************
 vector<string> GetListCountCommand::setParameters(){	
 	try {
-		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(plist);
-		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
-		CommandParameter parasort("sort", "Multiple", "name-otu", "otu", "", "", "",false,false); parameters.push_back(parasort);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none","otu",false,true, true); parameters.push_back(plist);
+		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
+		CommandParameter parasort("sort", "Multiple", "name-otu", "otu", "", "", "","",false,false); parameters.push_back(parasort);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -49,24 +49,19 @@ string GetListCountCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string GetListCountCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string GetListCountCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "otu") {  outputFileName =  "otu"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetListCountCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "otu") {  pattern = "[filename],[tag],otu"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GetListCountCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 GetListCountCommand::GetListCountCommand(){	
@@ -254,7 +249,11 @@ void GetListCountCommand::process(ListVector* list) {
 	try {
 		string binnames;
 		if (outputDir == "") { outputDir += m->hasPath(listfile); }
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(listfile)) + list->getLabel() + "." +getOutputFileNameTag("otu");
+        map<string, string> variables; 
+		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(listfile));
+        variables["[tag]"] = list->getLabel();
+		string outputFileName = getOutputFileName("otu", variables);
+		
 		m->openOutputFile(outputFileName, out);
 		outputNames.push_back(outputFileName); outputTypes["otu"].push_back(outputFileName);
 		

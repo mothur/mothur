@@ -14,14 +14,14 @@
 //**********************************************************************************************************************
 vector<string> FilterSeqsCommand::setParameters(){	
 	try {
-		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
-		CommandParameter phard("hard", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(phard);
-		CommandParameter ptrump("trump", "String", "", "*", "", "", "",false,false); parameters.push_back(ptrump);
-		CommandParameter psoft("soft", "Number", "", "0", "", "", "",false,false); parameters.push_back(psoft);
-		CommandParameter pvertical("vertical", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pvertical);
-		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","fasta-filter",false,true, true); parameters.push_back(pfasta);
+		CommandParameter phard("hard", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(phard);
+		CommandParameter ptrump("trump", "String", "", "*", "", "", "","",false,false, true); parameters.push_back(ptrump);
+		CommandParameter psoft("soft", "Number", "", "0", "", "", "","",false,false); parameters.push_back(psoft);
+		CommandParameter pvertical("vertical", "Boolean", "", "T", "", "", "","",false,false, true); parameters.push_back(pvertical);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false, true); parameters.push_back(pprocessors);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -57,25 +57,20 @@ string FilterSeqsCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string FilterSeqsCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string FilterSeqsCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "fasta") {  outputFileName =  "filter.fasta"; }
-            else if (type == "filter") {  outputFileName =  "filter"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "FilterSeqsCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "fasta") {  pattern = "[filename],filter.fasta"; } 
+        else if (type == "filter") {  pattern =  "[filename],filter"; }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "FilterSeqsCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 FilterSeqsCommand::FilterSeqsCommand(){	
@@ -298,9 +293,10 @@ int FilterSeqsCommand::execute() {
 		ofstream outFilter;
 		
 		//prevent giantic file name
-		string filterFile;
-		if (fastafileNames.size() > 3) { filterFile = outputDir + "merge." + getOutputFileNameTag("filter"); }
-		else {  filterFile = outputDir + filterFileName + "." + getOutputFileNameTag("filter");  }
+        map<string, string> variables; 
+        variables["[filename]"] = outputDir + filterFileName + ".";
+		if (fastafileNames.size() > 3) { variables["[filename]"] = outputDir + "merge."; }
+		string filterFile = getOutputFileName("filter", variables);  
 		
 		m->openOutputFile(filterFile, outFilter);
 		outFilter << filter << endl;
@@ -363,7 +359,9 @@ int FilterSeqsCommand::filterSequences() {
 			
 				for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
 				
-				string filteredFasta = outputDir + m->getRootName(m->getSimpleName(fastafileNames[s])) + getOutputFileNameTag("fasta");
+                map<string, string> variables; 
+                variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastafileNames[s]));
+				string filteredFasta = getOutputFileName("fasta", variables);
 #ifdef USE_MPI	
 				int pid, numSeqsPerProcessor, num; 
 				int tag = 2001;

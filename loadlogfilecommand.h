@@ -23,8 +23,8 @@ public:
     vector<string> setParameters();
     string getCommandName()			{ return "load.logfile";		}
     string getCommandCategory()		{ return "General";             } 
-    string getOutputFileNameTag(string, string) { return ""; }
 	string getHelpString();	
+    string getOutputPattern(string) { return ""; }	
     string getCitation() { return "http://www.mothur.org/wiki/Load.logfile"; }
     string getDescription()		{ return "extracts current files from a logfile"; }
     
@@ -35,6 +35,8 @@ private:
     bool abort;
     string outputDir, logfile;
     vector<string> outputNames;
+    
+    int updateCurrent(string pattern, string type, string, vector<string> outputNames, map<string, string>& currentFiles);
 };
 
 /**************************************************************************************************/

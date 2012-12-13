@@ -14,12 +14,12 @@
 //**********************************************************************************************************************
 vector<string> AlignCheckCommand::setParameters(){	
 	try {
-		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
-		CommandParameter pmap("map", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pmap);
-		CommandParameter pname("name", "InputTypes", "", "", "namecount", "none", "none",false,false); parameters.push_back(pname);
-        CommandParameter pcount("count", "InputTypes", "", "", "namecount", "none", "none",false,false); parameters.push_back(pcount);
-        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","aligncheck",false,true,true); parameters.push_back(pfasta);
+		CommandParameter pmap("map", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(pmap);
+		CommandParameter pname("name", "InputTypes", "", "", "namecount", "none", "none","",false,false); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "namecount", "none", "none","",false,false); parameters.push_back(pcount);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -48,24 +48,19 @@ string AlignCheckCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string AlignCheckCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string AlignCheckCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "aligncheck")            {   outputFileName =  "align.check";   }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "AlignCheckCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "aligncheck") {  pattern = "[filename],align.check"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "AlignCheckCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 AlignCheckCommand::AlignCheckCommand(){	
@@ -215,7 +210,9 @@ int AlignCheckCommand::execute(){
 		m->openInputFile(fastafile, in);
 		
 		ofstream out;
-		string outfile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + getOutputFileNameTag("aligncheck");
+        map<string, string> variables; 
+		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastafile));
+		string outfile = getOutputFileName("aligncheck",variables);
 		m->openOutputFile(outfile, out);
 		
 				

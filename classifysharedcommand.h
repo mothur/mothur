@@ -21,8 +21,9 @@ public:
   vector<string> setParameters();
   string getCommandName()			{ return "classify.shared";     }
    string getCommandCategory()		{ return "OTU-Based Approaches";		}
-  string getOutputFileNameTag(string, string);
-  string getHelpString();
+  
+  string getHelpString();	
+    string getOutputPattern(string);
   string getCitation() { return "http://www.mothur.org/wiki/Classify.shared\n"; }
   string getDescription()		{ return "description"; }
   int execute();

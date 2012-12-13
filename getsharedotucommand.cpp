@@ -13,15 +13,15 @@
 //**********************************************************************************************************************
 vector<string> GetSharedOTUCommand::setParameters(){	
 	try {
-		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pfasta);
-		CommandParameter pgroup("group", "InputTypes", "", "", "none", "FNGLT", "none",false,true); parameters.push_back(pgroup);
-		CommandParameter plist("list", "InputTypes", "", "", "none", "FNGLT", "none",false,true); parameters.push_back(plist);
-		CommandParameter poutput("output", "Multiple", "accnos-default", "default", "", "", "",false,false); parameters.push_back(poutput);
-		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
-		CommandParameter punique("unique", "String", "", "", "", "", "",false,false); parameters.push_back(punique);
-		CommandParameter pshared("shared", "String", "", "", "", "", "",false,false); parameters.push_back(pshared);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "FNGLT", "none","fasta",false,false); parameters.push_back(pfasta);
+		CommandParameter pgroup("group", "InputTypes", "", "", "none", "FNGLT", "none","sharedseq",false,true,true); parameters.push_back(pgroup);
+		CommandParameter plist("list", "InputTypes", "", "", "none", "FNGLT", "none","sharedseq",false,true,true); parameters.push_back(plist);
+		CommandParameter poutput("output", "Multiple", "accnos-default", "default", "", "", "","",false,false); parameters.push_back(poutput);
+		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
+		CommandParameter punique("unique", "String", "", "", "", "", "","",false,false,true); parameters.push_back(punique);
+		CommandParameter pshared("shared", "String", "", "", "", "", "","",false,false,true); parameters.push_back(pshared);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -59,28 +59,22 @@ string GetSharedOTUCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string GetSharedOTUCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
-        
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "fasta")            {   outputFileName =  "shared.fasta";   }
-            else if (type == "accnos")      {   outputFileName =  "accnos";         }
-            else if (type == "sharedseqs")  {   outputFileName =  "shared.seqs";    }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetSharedOTUCommand", "getOutputFileNameTag");
-		exit(1);
-	}
-}
+string GetSharedOTUCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
 
+        if (type == "fasta")            {   pattern =  "[filename],[distance],[group],shared.fasta";   }
+        else if (type == "accnos")      {   pattern =  "[filename],[distance],[group],accnos";         }
+        else if (type == "sharedseqs")  {   pattern =  "[filename],[distance],[group],shared.seqs";    }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GetSharedOTUCommand", "getOutputPattern");
+        exit(1);
+    }
+}
 //**********************************************************************************************************************
 GetSharedOTUCommand::GetSharedOTUCommand(){	
 	try {
@@ -394,11 +388,13 @@ int GetSharedOTUCommand::process(ListVector* shared) {
 		string outputFileNames;
 		
 		if (outputDir == "") { outputDir += m->hasPath(listfile); }
-		if (output != "accnos") {
-			outputFileNames = outputDir + m->getRootName(m->getSimpleName(listfile)) + shared->getLabel() + userGroups + "." + getOutputFileNameTag("sharedseqs");
-		}else {
-			outputFileNames = outputDir + m->getRootName(m->getSimpleName(listfile)) + shared->getLabel() + userGroups + "." + getOutputFileNameTag("accnos");
-		}
+        map<string, string> variables;
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(listfile));
+        variables["[distance]"] = shared->getLabel();
+        variables["[group]"] = userGroups;
+		if (output != "accnos") { outputFileNames = getOutputFileName("sharedseqs", variables); }
+		else { outputFileNames = getOutputFileName("accnos", variables); }
+        
 		m->openOutputFile(outputFileNames, outNames);
 		
 		bool wroteSomething = false;
@@ -491,7 +487,8 @@ int GetSharedOTUCommand::process(ListVector* shared) {
 		//if fasta file provided output new fasta file
 		if ((fastafile != "") && wroteSomething) {
 			if (outputDir == "") { outputDir += m->hasPath(fastafile); }
-			string outputFileFasta = outputDir + m->getRootName(m->getSimpleName(fastafile)) + shared->getLabel() + userGroups + "." + getOutputFileNameTag("fasta");
+            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastafile));
+			string outputFileFasta = getOutputFileName("fasta", variables);
 			ofstream outFasta;
 			m->openOutputFile(outputFileFasta, outFasta);
 			outputNames.push_back(outputFileFasta); outputTypes["fasta"].push_back(outputFileFasta);

@@ -26,8 +26,9 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "sff.multiple";			}
 	string getCommandCategory()		{ return "Sequence Processing";		}
-	string getOutputFileNameTag(string, string);
+	
 	string getHelpString();	
+    string getOutputPattern(string);	
 	string getCitation() { return "http://www.mothur.org/wiki/Sff.multiple"; }
 	string getDescription()		{ return "run multiple sff files through, sffinfo, trim.flow, shhh.flows and trim.seqs combining the results"; }
     

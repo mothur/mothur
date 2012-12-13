@@ -24,8 +24,8 @@ class SystemCommand : public Command {
 		vector<string> setParameters();
 		string getCommandName()			{ return "system";		}
 		string getCommandCategory()		{ return "General";		}
-        string getOutputFileNameTag(string, string) { return ""; }
         string getHelpString();	
+        string getOutputPattern(string){ return ""; }	
 		string getCitation() { return "http://www.mothur.org/wiki/System"; }
 		string getDescription()		{ return "execute system commands from within mothur"; }
 

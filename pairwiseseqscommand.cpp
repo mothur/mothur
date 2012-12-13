@@ -12,20 +12,20 @@
 //**********************************************************************************************************************
 vector<string> PairwiseSeqsCommand::setParameters(){	
 	try {
-		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
-		CommandParameter palign("align", "Multiple", "needleman-gotoh-blast-noalign", "needleman", "", "", "",false,false); parameters.push_back(palign);
-		CommandParameter pmatch("match", "Number", "", "1.0", "", "", "",false,false); parameters.push_back(pmatch);
-		CommandParameter pmismatch("mismatch", "Number", "", "-1.0", "", "", "",false,false); parameters.push_back(pmismatch);
-		CommandParameter pgapopen("gapopen", "Number", "", "-2.0", "", "", "",false,false); parameters.push_back(pgapopen);
-		CommandParameter pgapextend("gapextend", "Number", "", "-1.0", "", "", "",false,false); parameters.push_back(pgapextend);
-		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
-		CommandParameter poutput("output", "Multiple", "column-lt-square-phylip", "column", "", "", "",false,false); parameters.push_back(poutput);
-		CommandParameter pcalc("calc", "Multiple", "nogaps-eachgap-onegap", "onegap", "", "", "",false,false); parameters.push_back(pcalc);
-		CommandParameter pcountends("countends", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pcountends);
-		CommandParameter pcompress("compress", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pcompress);
-		CommandParameter pcutoff("cutoff", "Number", "", "1.0", "", "", "",false,false); parameters.push_back(pcutoff);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","phylip-column",false,true,true); parameters.push_back(pfasta);
+		CommandParameter palign("align", "Multiple", "needleman-gotoh-blast-noalign", "needleman", "", "", "","",false,false); parameters.push_back(palign);
+		CommandParameter pmatch("match", "Number", "", "1.0", "", "", "","",false,false); parameters.push_back(pmatch);
+		CommandParameter pmismatch("mismatch", "Number", "", "-1.0", "", "", "","",false,false); parameters.push_back(pmismatch);
+		CommandParameter pgapopen("gapopen", "Number", "", "-2.0", "", "", "","",false,false); parameters.push_back(pgapopen);
+		CommandParameter pgapextend("gapextend", "Number", "", "-1.0", "", "", "","",false,false); parameters.push_back(pgapextend);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
+		CommandParameter poutput("output", "Multiple", "column-lt-square-phylip", "column", "", "", "","phylip-column",false,false,true); parameters.push_back(poutput);
+		CommandParameter pcalc("calc", "Multiple", "nogaps-eachgap-onegap", "onegap", "", "", "","",false,false); parameters.push_back(pcalc);
+		CommandParameter pcountends("countends", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pcountends);
+		CommandParameter pcompress("compress", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pcompress);
+		CommandParameter pcutoff("cutoff", "Number", "", "1.0", "", "", "","",false,false,true); parameters.push_back(pcutoff);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -65,25 +65,20 @@ string PairwiseSeqsCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string PairwiseSeqsCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string PairwiseSeqsCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "phylip") {  outputFileName =  "dist"; }
-            else if (type == "column") {  outputFileName =  "dist"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PairwiseSeqsCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "phylip") {  pattern = "[filename],[outputtag],dist"; } 
+        else if (type == "column") { pattern = "[filename],dist"; }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "PairwiseSeqsCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 PairwiseSeqsCommand::PairwiseSeqsCommand(){	
@@ -291,16 +286,20 @@ int PairwiseSeqsCommand::execute(){
 			int numSeqs = alignDB.getNumSeqs();
 			int startTime = time(NULL);
 			string outputFile = "";
-				
+			
+            map<string, string> variables; 
+            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]));
 			if (output == "lt") { //does the user want lower triangle phylip formatted file 
-				outputFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + "phylip." + getOutputFileNameTag("phylip");
+				variables["[outputtag]"] = "phylip";
+                outputFile = getOutputFileName("phylip", variables);
 				m->mothurRemove(outputFile); outputTypes["phylip"].push_back(outputFile);
 			}else if (output == "column") { //user wants column format
-				outputFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + getOutputFileNameTag("column");
+				outputFile = getOutputFileName("column", variables);
 				outputTypes["column"].push_back(outputFile);
 				m->mothurRemove(outputFile);
 			}else { //assume square
-				outputFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + "square." + getOutputFileNameTag("phylip");
+                variables["[outputtag]"] = "square";
+                outputFile = getOutputFileName("phylip", variables);
 				m->mothurRemove(outputFile);
 				outputTypes["phylip"].push_back(outputFile);
 			}

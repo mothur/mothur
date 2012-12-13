@@ -12,9 +12,9 @@
 //**********************************************************************************************************************
 vector<string> GetCommandInfoCommand::setParameters(){	
 	try {
-		CommandParameter poutput("output", "String", "", "", "", "", "",false,false); parameters.push_back(poutput);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter poutput("output", "String", "", "", "", "", "","",false,false); parameters.push_back(poutput);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -127,13 +127,17 @@ int GetCommandInfoCommand::execute(){
 				map<string, vector<string> > thisOutputTypes = thisCommand->getOutputFiles();
 				map<string, vector<string> >::iterator itTypes;
 				
-				if (thisOutputTypes.size() == 0) { out << "outputTypes=none" << endl; }
+				if (thisOutputTypes.size() == 0) { out << "outputTypesNames=0" << endl; }
 				else {
-					string types = "";
-					for (itTypes = thisOutputTypes.begin(); itTypes != thisOutputTypes.end(); itTypes++) {	types += itTypes->first + "-";	}
+					//string types = "";
+					//for (itTypes = thisOutputTypes.begin(); itTypes != thisOutputTypes.end(); itTypes++) {	types += itTypes->first + "-";	}
 					//rip off last -
-					types = types.substr(0, types.length()-1);
-					out << "outputTypes=" << types << endl;
+					//types = types.substr(0, types.length()-1);
+					out << "outputTypesNames=" << thisOutputTypes.size() << endl;
+                    
+                    for (itTypes = thisOutputTypes.begin(); itTypes != thisOutputTypes.end(); itTypes++) {
+                        out << itTypes->first << "=" << thisCommand->getOutputPattern(itTypes->first) << endl;
+                    }
 				}
 				
 				vector<string> booleans; vector<string> numbers; vector<string> multiples; vector<string> Strings;
@@ -212,34 +216,54 @@ int GetCommandInfoCommand::getInfo(vector<CommandParameter> para, vector<string>
 		for (int i = 0; i < para.size(); i++) {
 			if ((para[i].name == "inputdir") || (para[i].name == "outputdir")) {} //ignore
 			else {
+                string important = "|F";
+                if (para[i].important || para[i].required) { important = "|T"; }
+                
+                string outputType = "|none";
+                if (para[i].outputTypes != "") { outputType = "|" + para[i].outputTypes; }
+                
 				if (para[i].type == "Boolean") {
-					string temp = para[i].name + "=" + para[i].optionsDefault;
+					string temp = para[i].name + "=" + para[i].optionsDefault + important + outputType;
 					booleans.push_back(temp);
 				}else if (para[i].type == "Multiple") {
 					string multAllowed = "F";
 					if (para[i].multipleSelectionAllowed) { multAllowed = "T"; }
-					string temp = para[i].name + "=" + para[i].options + "|" + para[i].optionsDefault + "|" + multAllowed;
+					string temp = para[i].name + "=" + para[i].options + "|" + para[i].optionsDefault + "|" + multAllowed + important + outputType;
 					multiples.push_back(temp);
 				}else if (para[i].type == "Number") {
-					string temp = para[i].name + "=" + para[i].optionsDefault;
+					string temp = para[i].name + "=" + para[i].optionsDefault + important + outputType;
 					numbers.push_back(temp);
 				}else if (para[i].type == "String") {
-					string temp = para[i].name + "=" + para[i].optionsDefault;
+					string temp = para[i].name + "=" + para[i].optionsDefault + important + outputType;
 					strings.push_back(temp);
 				}else if (para[i].type == "InputTypes") {
 					string required = "F";
 					if (para[i].required) { required = "T"; }
-					string temp = required + "|" + para[i].chooseOnlyOneGroup + "|" + para[i].chooseAtLeastOneGroup + "|" + para[i].linkedGroup;
+					string temp = required + important + "|" + para[i].chooseOnlyOneGroup + "|" + para[i].chooseAtLeastOneGroup + "|" + para[i].linkedGroup + outputType;
 					inputTypes[para[i].name] = temp;
 					
 					//add choose only one groups
-					groups[para[i].chooseOnlyOneGroup].insert(para[i].name);
-					
+                    vector<string> tempGroups;
+                    m->splitAtDash(para[i].chooseOnlyOneGroup, tempGroups);
+                    for (int l = 0; l < tempGroups.size(); l++) {
+                        groups[tempGroups[l]].insert(para[i].name);
+                    }
+					tempGroups.clear();
+                    
 					//add at least one group names
-					groups[para[i].chooseAtLeastOneGroup].insert(para[i].name);
+                    m->splitAtDash(para[i].chooseAtLeastOneGroup, tempGroups);
+                    for (int l = 0; l < tempGroups.size(); l++) {
+                        groups[tempGroups[l]].insert(para[i].name);
+                    }
+					tempGroups.clear();
+					
 					
 					//add at linked group names
-					groups[para[i].linkedGroup].insert(para[i].name);
+                    m->splitAtDash(para[i].linkedGroup, tempGroups);
+                    for (int l = 0; l < tempGroups.size(); l++) {
+                        groups[tempGroups[l]].insert(para[i].name);
+                    }
+					tempGroups.clear();
 						  
 				}else { m->mothurOut("[ERROR]: " + para[i].type + " is an unknown parameter type, please correct."); m->mothurOutEndLine(); }
 			}

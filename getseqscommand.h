@@ -23,8 +23,9 @@ class GetSeqsCommand : public Command {
 		vector<string> setParameters();
 		string getCommandName()			{ return "get.seqs";				}
 		string getCommandCategory()		{ return "Sequence Processing";		}
-		string getOutputFileNameTag(string, string);
+		
 	string getHelpString();	
+    string getOutputPattern(string);	
 		string getCitation() { return "http://www.mothur.org/wiki/Get.seqs"; }
 		string getDescription()		{ return "gets sequences from a list, fasta, name, group, alignreport, quality or taxonomy file"; }
 

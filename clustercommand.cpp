@@ -17,19 +17,19 @@
 //**********************************************************************************************************************
 vector<string> ClusterCommand::setParameters(){	
 	try {
-		CommandParameter pphylip("phylip", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "none",false,false); parameters.push_back(pphylip);
-		CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "ColumnName",false,false); parameters.push_back(pname);
-		CommandParameter pcount("count", "InputTypes", "", "", "NameCount", "none", "none",false,false); parameters.push_back(pcount);
-        CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "ColumnName",false,false); parameters.push_back(pcolumn);		
-		CommandParameter pcutoff("cutoff", "Number", "", "10", "", "", "",false,false); parameters.push_back(pcutoff);
-		CommandParameter pprecision("precision", "Number", "", "100", "", "", "",false,false); parameters.push_back(pprecision);
-		CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted", "average", "", "", "",false,false); parameters.push_back(pmethod);
-		CommandParameter pshowabund("showabund", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pshowabund);
-		CommandParameter ptiming("timing", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(ptiming);
-		CommandParameter psim("sim", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(psim);
-		CommandParameter phard("hard", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(phard);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pphylip("phylip", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "none","list",false,false,true); parameters.push_back(pphylip);
+		CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "ColumnName","rabund-sabund",false,false,true); parameters.push_back(pname);
+		CommandParameter pcount("count", "InputTypes", "", "", "NameCount", "none", "none","",false,false,true); parameters.push_back(pcount);
+        CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "ColumnName","list",false,false,true); parameters.push_back(pcolumn);		
+		CommandParameter pcutoff("cutoff", "Number", "", "10", "", "", "","",false,false,true); parameters.push_back(pcutoff);
+		CommandParameter pprecision("precision", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pprecision);
+		CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted", "average", "", "", "","",false,false,true); parameters.push_back(pmethod);
+		CommandParameter pshowabund("showabund", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pshowabund);
+		CommandParameter ptiming("timing", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(ptiming);
+		CommandParameter psim("sim", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(psim);
+		CommandParameter phard("hard", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(phard);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -56,26 +56,21 @@ string ClusterCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string ClusterCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string ClusterCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "list") {  outputFileName =  "list"; }
-            else if (type == "rabund") {  outputFileName =  "rabund"; }
-            else if (type == "sabund") {  outputFileName =  "sabund"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClusterCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "list") {  pattern = "[filename],[clustertag],list-[filename],[clustertag],[tag2],list"; } 
+        else if (type == "rabund") {  pattern = "[filename],[clustertag],rabund"; } 
+        else if (type == "sabund") {  pattern = "[filename],[clustertag],sabund"; }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ClusterCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 ClusterCommand::ClusterCommand(){	
@@ -339,11 +334,13 @@ int ClusterCommand::execute(){
 		if (outputDir == "") { outputDir += m->hasPath(distfile); }
 		fileroot = outputDir + m->getRootName(m->getSimpleName(distfile));
 		
-        string sabundFileName = fileroot+ tag + "." + getOutputFileNameTag("sabund");
-        string rabundFileName = fileroot+ tag + "." + getOutputFileNameTag("rabund");
-        string listFileName = fileroot+ tag + ".";
-        if (countfile != "") { listFileName += "unique_"; }
-        listFileName += getOutputFileNameTag("list");
+        map<string, string> variables; 
+        variables["[filename]"] = fileroot;
+        if (countfile != "") { variables["[tag2]"] = "unique_list"; }
+        variables["[clustertag]"] = tag;
+        string sabundFileName = getOutputFileName("sabund", variables);
+        string rabundFileName = getOutputFileName("rabund", variables);
+        string listFileName = getOutputFileName("list", variables);
         
         if (countfile == "") {
             m->openOutputFile(sabundFileName,	sabundFile);

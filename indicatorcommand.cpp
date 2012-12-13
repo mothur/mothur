@@ -14,16 +14,16 @@
 //**********************************************************************************************************************
 vector<string> IndicatorCommand::setParameters(){	
 	try {
-		CommandParameter piters("iters", "Number", "", "1000", "", "", "",false,false); parameters.push_back(piters);
-		CommandParameter pdesign("design", "InputTypes", "", "", "TreeDesign", "TreeDesign", "none",false,false); parameters.push_back(pdesign);
-		CommandParameter pshared("shared", "InputTypes", "", "", "SharedRel", "SharedRel", "none",false,false); parameters.push_back(pshared);	
-		CommandParameter prelabund("relabund", "InputTypes", "", "", "SharedRel", "SharedRel", "none",false,false); parameters.push_back(prelabund);
-		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
-		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
-		CommandParameter ptree("tree", "InputTypes", "", "", "TreeDesign", "TreeDesign", "none",false,false); parameters.push_back(ptree);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
-		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
+		CommandParameter piters("iters", "Number", "", "1000", "", "", "","",false,false); parameters.push_back(piters);
+		CommandParameter pdesign("design", "InputTypes", "", "", "TreeDesign", "TreeDesign", "none","summary",false,false,true); parameters.push_back(pdesign);
+		CommandParameter pshared("shared", "InputTypes", "", "", "SharedRel", "SharedRel", "none","summary",false,false,true); parameters.push_back(pshared);	
+		CommandParameter prelabund("relabund", "InputTypes", "", "", "SharedRel", "SharedRel", "none","summary",false,false); parameters.push_back(prelabund);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
+		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
+		CommandParameter ptree("tree", "InputTypes", "", "", "TreeDesign", "TreeDesign", "none","tree-summary",false,false,true); parameters.push_back(ptree);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false); parameters.push_back(pprocessors);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -58,25 +58,20 @@ string IndicatorCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string IndicatorCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string IndicatorCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "tree")       {   outputFileName =  "indicator.tre";   }
-            else if (type == "summary")    {   outputFileName =  "indicator.summary";   }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "IndicatorCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "tree") {  pattern = "[filename],indicator.tre"; } 
+        else if (type == "summary") {  pattern = "[filename],indicator.summary"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "IndicatorCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 IndicatorCommand::IndicatorCommand(){	
@@ -410,7 +405,9 @@ int IndicatorCommand::GetIndicatorSpecies(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(inputFileName);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(inputFileName)) + getOutputFileNameTag("summary");
+        map<string, string> variables; 
+        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(inputFileName));
+		string outputFileName = getOutputFileName("summary", variables);
 		outputNames.push_back(outputFileName); outputTypes["summary"].push_back(outputFileName);
 		
 		ofstream out;
@@ -526,7 +523,9 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 		
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(inputFileName);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(inputFileName)) + getOutputFileNameTag("summary");
+        map<string, string> variables; 
+        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(inputFileName));
+		string outputFileName = getOutputFileName("summary",variables);
 		outputNames.push_back(outputFileName); outputTypes["summary"].push_back(outputFileName);
 		
 		ofstream out;
@@ -546,7 +545,8 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 		
 		string treeOutputDir = outputDir;
 		if (outputDir == "") {  treeOutputDir += m->hasPath(treefile);  }
-		string outputTreeFileName = treeOutputDir + m->getRootName(m->getSimpleName(treefile)) + getOutputFileNameTag("tree");
+        variables["[filename]"] = treeOutputDir + m->getRootName(m->getSimpleName(treefile));
+		string outputTreeFileName = getOutputFileName("tree", variables);
 		
 		
 		//create a map from tree node index to names of descendants, save time later to know which sharedRabund you need

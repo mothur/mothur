@@ -24,8 +24,9 @@ class SummaryTaxCommand : public Command {
 		vector<string> setParameters();
 		string getCommandName()			{ return "summary.tax";			}
 		string getCommandCategory()		{ return "Phylotype Analysis";		}
-		string getOutputFileNameTag(string, string);
+		
 	string getHelpString();	
+    string getOutputPattern(string);	
 		string getCitation() { return "http://www.mothur.org/wiki/Summary.tax"; }
 		string getDescription()		{ return "summarize the taxonomies of a set of sequences"; }
 		

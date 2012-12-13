@@ -11,25 +11,25 @@
 //**********************************************************************************************************************
 vector<string> MakeContigsCommand::setParameters(){	
 	try {
-		CommandParameter pfasta("ffastq", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
-        CommandParameter prfasta("rfastq", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(prfasta);
-        CommandParameter poligos("oligos", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(poligos);
-		CommandParameter ppdiffs("pdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(ppdiffs);
-		CommandParameter pbdiffs("bdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(pbdiffs);
+		CommandParameter pfasta("ffastq", "InputTypes", "", "", "none", "none", "none","fasta-qfile",false,true,true); parameters.push_back(pfasta);
+        CommandParameter prfasta("rfastq", "InputTypes", "", "", "none", "none", "none","fasta-qfile",false,true,true); parameters.push_back(prfasta);
+        CommandParameter poligos("oligos", "InputTypes", "", "", "none", "none", "none","group",false,false,true); parameters.push_back(poligos);
+		CommandParameter ppdiffs("pdiffs", "Number", "", "0", "", "", "","",false,false,true); parameters.push_back(ppdiffs);
+		CommandParameter pbdiffs("bdiffs", "Number", "", "0", "", "", "","",false,false,true); parameters.push_back(pbdiffs);
 //        CommandParameter pldiffs("ldiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(pldiffs);
 //		CommandParameter psdiffs("sdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(psdiffs);
-        CommandParameter ptdiffs("tdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(ptdiffs);
+        CommandParameter ptdiffs("tdiffs", "Number", "", "0", "", "", "","",false,false); parameters.push_back(ptdiffs);
 
-        CommandParameter palign("align", "Multiple", "needleman-gotoh", "needleman", "", "", "",false,false); parameters.push_back(palign);
-        CommandParameter pallfiles("allfiles", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pallfiles);
-		CommandParameter pmatch("match", "Number", "", "1.0", "", "", "",false,false); parameters.push_back(pmatch);
-		CommandParameter pmismatch("mismatch", "Number", "", "-1.0", "", "", "",false,false); parameters.push_back(pmismatch);
-		CommandParameter pgapopen("gapopen", "Number", "", "-2.0", "", "", "",false,false); parameters.push_back(pgapopen);
-		CommandParameter pgapextend("gapextend", "Number", "", "-1.0", "", "", "",false,false); parameters.push_back(pgapextend);
-        CommandParameter pthreshold("threshold", "Number", "", "40", "", "", "",false,false); parameters.push_back(pthreshold);
-		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+        CommandParameter palign("align", "Multiple", "needleman-gotoh", "needleman", "", "", "","",false,false); parameters.push_back(palign);
+        CommandParameter pallfiles("allfiles", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pallfiles);
+		CommandParameter pmatch("match", "Number", "", "1.0", "", "", "","",false,false); parameters.push_back(pmatch);
+		CommandParameter pmismatch("mismatch", "Number", "", "-1.0", "", "", "","",false,false); parameters.push_back(pmismatch);
+		CommandParameter pgapopen("gapopen", "Number", "", "-2.0", "", "", "","",false,false); parameters.push_back(pgapopen);
+		CommandParameter pgapextend("gapextend", "Number", "", "-1.0", "", "", "","",false,false); parameters.push_back(pgapextend);
+        CommandParameter pthreshold("threshold", "Number", "", "40", "", "", "","",false,false); parameters.push_back(pthreshold);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -72,27 +72,22 @@ string MakeContigsCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string MakeContigsCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string MakeContigsCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "fasta")             {   outputFileName =  "contigs.fasta";         }
-            else if (type == "qfile")        {   outputFileName =  "contigs.qual";          }
-            else if (type == "group")            {   outputFileName =  "groups";   }
-            else if (type == "mismatch")     {   outputFileName =  "contigs.mismatch";      }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "MakeContigsCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "fasta") {  pattern = "[filename],[tag],contigs.fasta"; } 
+        else if (type == "qfile") {  pattern = "[filename],[tag],contigs.qual"; } 
+        else if (type == "group") {  pattern = "[filename],[tag],groups"; }
+        else if (type == "mismatch") {  pattern = "[filename],[tag],contigs.mismatch"; }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MakeContigsCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 MakeContigsCommand::MakeContigsCommand(){	
@@ -220,13 +215,15 @@ MakeContigsCommand::MakeContigsCommand(string option)  {
 			temp = validParameter.validFile(parameters, "pdiffs", false);		if (temp == "not found") { temp = "0"; }
 			m->mothurConvert(temp, pdiffs);
             
- //           temp = validParameter.validFile(parameters, "ldiffs", false);		if (temp == "not found") { temp = "0"; }
+  //          temp = validParameter.validFile(parameters, "ldiffs", false);		if (temp == "not found") { temp = "0"; }
 //			m->mothurConvert(temp, ldiffs);
+            ldiffs = 0;
             
  //           temp = validParameter.validFile(parameters, "sdiffs", false);		if (temp == "not found") { temp = "0"; }
-//		m->mothurConvert(temp, sdiffs);
+ //           m->mothurConvert(temp, sdiffs);
+            sdiffs = 0;
 			
-			temp = validParameter.validFile(parameters, "tdiffs", false);		if (temp == "not found") { int tempTotal = pdiffs + bdiffs + ldiffs + sdiffs;  temp = toString(tempTotal); }
+			temp = validParameter.validFile(parameters, "tdiffs", false);		if (temp == "not found") { int tempTotal = pdiffs + bdiffs;  temp = toString(tempTotal); }
 			m->mothurConvert(temp, tdiffs);
 			
 			if(tdiffs == 0){	tdiffs = bdiffs + pdiffs;	}  //+ ldiffs + sdiffs;
@@ -265,20 +262,26 @@ int MakeContigsCommand::execute(){
 		vector<vector<string> > qualFileNames;
         createGroup = false;
         string outputGroupFileName;
+        map<string, string> variables; 
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(ffastqfile));
+        variables["[tag]"] = "";
         if(oligosfile != ""){
 			createGroup = getOligos(fastaFileNames, qualFileNames);
             if (createGroup) { 
-                outputGroupFileName = outputDir + m->getRootName(m->getSimpleName(ffastqfile)) + getOutputFileNameTag("group");
+                outputGroupFileName = getOutputFileName("group",variables);
                 outputNames.push_back(outputGroupFileName); outputTypes["group"].push_back(outputGroupFileName);
             }
 		}
         
-        string outFastaFile = outputDir + m->getRootName(m->getSimpleName(ffastqfile)) + "trim." + getOutputFileNameTag("fasta");
-        string outQualFile = outputDir + m->getRootName(m->getSimpleName(ffastqfile)) + "trim." + getOutputFileNameTag("qfile");
-        string outScrapFastaFile = outputDir + m->getRootName(m->getSimpleName(ffastqfile)) + "scrap." + getOutputFileNameTag("fasta");
-        string outScrapQualFile = outputDir + m->getRootName(m->getSimpleName(ffastqfile)) + "scrap." + getOutputFileNameTag("qfile");
+        variables["[tag]"] = "trim";
+        string outFastaFile = getOutputFileName("fasta",variables);
+        string outQualFile = getOutputFileName("qfile",variables);
+        variables["[tag]"] = "scrap";
+        string outScrapFastaFile = getOutputFileName("fasta",variables);
+        string outScrapQualFile = getOutputFileName("qfile",variables);
 
-        string outMisMatchFile = outputDir + m->getRootName(m->getSimpleName(ffastqfile)) + getOutputFileNameTag("mismatch");
+        variables["[tag]"] = "";
+        string outMisMatchFile = getOutputFileName("mismatch",variables);
         outputNames.push_back(outFastaFile); outputTypes["fasta"].push_back(outFastaFile);
         outputNames.push_back(outQualFile); outputTypes["qfile"].push_back(outQualFile);
         outputNames.push_back(outScrapFastaFile); outputTypes["fasta"].push_back(outScrapFastaFile);
@@ -330,7 +333,7 @@ int MakeContigsCommand::execute(){
                 
                 ofstream out;
                 string thisGroupName = outputDir + m->getRootName(m->getSimpleName(it->first));
-                thisGroupName += getOutputFileNameTag("group"); outputNames.push_back(thisGroupName); outputTypes["group"].push_back(thisGroupName); 
+                thisGroupName += getOutputFileName("group",variables); outputNames.push_back(thisGroupName); outputTypes["group"].push_back(thisGroupName); 
                 m->openOutputFile(thisGroupName, out);
                  
                 while (!in.eof()){

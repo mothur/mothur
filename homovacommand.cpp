@@ -15,13 +15,13 @@
 //**********************************************************************************************************************
 vector<string> HomovaCommand::setParameters(){	
 	try {
-		CommandParameter pdesign("design", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pdesign);
-		CommandParameter pphylip("phylip", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pphylip);
-        CommandParameter psets("sets", "String", "", "", "", "", "",false,false); parameters.push_back(psets);
-		CommandParameter piters("iters", "Number", "", "1000", "", "", "",false,false); parameters.push_back(piters);
-		CommandParameter palpha("alpha", "Number", "", "0.05", "", "", "",false,false); parameters.push_back(palpha);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pdesign("design", "InputTypes", "", "", "none", "none", "none","homova",false,true,true); parameters.push_back(pdesign);
+		CommandParameter pphylip("phylip", "InputTypes", "", "", "none", "none", "none","homova",false,true,true); parameters.push_back(pphylip);
+        CommandParameter psets("sets", "String", "", "", "", "", "","",false,false); parameters.push_back(psets);
+		CommandParameter piters("iters", "Number", "", "1000", "", "", "","",false,false); parameters.push_back(piters);
+		CommandParameter palpha("alpha", "Number", "", "0.05", "", "", "","",false,false); parameters.push_back(palpha);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -53,24 +53,19 @@ string HomovaCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string HomovaCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string HomovaCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "homova")            {   outputFileName =  "homova";   }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "HomovaCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "homova") {  pattern = "[filename],homova"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "HomovaCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 HomovaCommand::HomovaCommand(){	
@@ -242,7 +237,9 @@ int HomovaCommand::execute(){
 		
 		//create a new filename
 		ofstream HOMOVAFile;
-		string HOMOVAFileName = outputDir + m->getRootName(m->getSimpleName(phylipFileName)) + getOutputFileNameTag("homova");				
+        map<string, string> variables; 
+		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(phylipFileName));
+		string HOMOVAFileName = getOutputFileName("homova", variables);				
 		m->openOutputFile(HOMOVAFileName, HOMOVAFile);
 		outputNames.push_back(HOMOVAFileName); outputTypes["homova"].push_back(HOMOVAFileName);
 		

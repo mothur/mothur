@@ -92,14 +92,14 @@
 //**********************************************************************************************************************
 vector<string> MakeBiomCommand::setParameters(){	
 	try {
-		CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pshared);
-        CommandParameter pcontaxonomy("contaxonomy", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pcontaxonomy);
-        CommandParameter pmetadata("metadata", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pmetadata);
-		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
-		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
-        CommandParameter pmatrixtype("matrixtype", "Multiple", "sparse-dense", "sparse", "", "", "",false,false); parameters.push_back(pmatrixtype);
+		CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none","biom",false,true,true); parameters.push_back(pshared);
+        CommandParameter pcontaxonomy("contaxonomy", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pcontaxonomy);
+        CommandParameter pmetadata("metadata", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pmetadata);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
+		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        CommandParameter pmatrixtype("matrixtype", "Multiple", "sparse-dense", "sparse", "", "", "","",false,false); parameters.push_back(pmatrixtype);
 
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -133,24 +133,19 @@ string MakeBiomCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string MakeBiomCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string MakeBiomCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "biom")             {   outputFileName =  "biom";       }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "MakeBiomCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "biom") {  pattern = "[filename],[distance],biom"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MakeBiomCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 
 //**********************************************************************************************************************
@@ -388,8 +383,10 @@ int MakeBiomCommand::execute(){
 //**********************************************************************************************************************
 int MakeBiomCommand::getBiom(vector<SharedRAbundVector*>& lookup){
 	try {
-        
-        string outputFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + lookup[0]->getLabel() + "." + getOutputFileNameTag("biom");
+        map<string, string> variables; 
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
+        variables["[distance]"] = lookup[0]->getLabel();
+        string outputFileName = getOutputFileName("biom",variables);
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		outputNames.push_back(outputFileName); outputTypes["biom"].push_back(outputFileName);

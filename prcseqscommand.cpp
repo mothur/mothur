@@ -11,21 +11,21 @@
 //**********************************************************************************************************************
 vector<string> PcrSeqsCommand::setParameters(){	
 	try {
-		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
-		CommandParameter poligos("oligos", "InputTypes", "", "", "ecolioligos", "none", "none",false,false); parameters.push_back(poligos);
-        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none",false,false); parameters.push_back(pname);
-        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none",false,false); parameters.push_back(pcount);
-		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none",false,false); parameters.push_back(pgroup);
-        CommandParameter ptax("taxonomy", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(ptax);
-        CommandParameter pecoli("ecoli", "InputTypes", "", "", "ecolioligos", "none", "none",false,false); parameters.push_back(pecoli);
-		CommandParameter pstart("start", "Number", "", "-1", "", "", "",false,false); parameters.push_back(pstart);
-		CommandParameter pend("end", "Number", "", "-1", "", "", "",false,false); parameters.push_back(pend);
- 		CommandParameter pnomatch("nomatch", "Multiple", "reject-keep", "reject", "", "", "",false,false); parameters.push_back(pnomatch);
-		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
-		CommandParameter pkeepprimer("keepprimer", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pkeepprimer);
-        CommandParameter pkeepdots("keepdots", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pkeepdots);
-        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","fasta",false,true,true); parameters.push_back(pfasta);
+		CommandParameter poligos("oligos", "InputTypes", "", "", "ecolioligos", "none", "none","",false,false,true); parameters.push_back(poligos);
+        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none","name",false,false,true); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none","count",false,false,true); parameters.push_back(pcount);
+		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","group",false,false,true); parameters.push_back(pgroup);
+        CommandParameter ptax("taxonomy", "InputTypes", "", "", "none", "none", "none","taxonomy",false,false,true); parameters.push_back(ptax);
+        CommandParameter pecoli("ecoli", "InputTypes", "", "", "ecolioligos", "none", "none","",false,false); parameters.push_back(pecoli);
+		CommandParameter pstart("start", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(pstart);
+		CommandParameter pend("end", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(pend);
+ 		CommandParameter pnomatch("nomatch", "Multiple", "reject-keep", "reject", "", "", "","",false,false); parameters.push_back(pnomatch);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
+		CommandParameter pkeepprimer("keepprimer", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pkeepprimer);
+        CommandParameter pkeepdots("keepdots", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pkeepdots);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
         
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -58,31 +58,25 @@ string PcrSeqsCommand::getHelpString(){
 		exit(1);
 	}
 }
-
 //**********************************************************************************************************************
-string PcrSeqsCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string PcrSeqsCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "fasta") {  outputFileName =  "pcr.fasta"; }
-            else if (type == "taxonomy") {  outputFileName =  "pcr" + m->getExtension(inputName); }
-            else if (type == "group") {  outputFileName =  "pcr" + m->getExtension(inputName); }
-            else if (type == "name") {  outputFileName =  "pcr" + m->getExtension(inputName); }
-            else if (type == "count") {  outputFileName =  "pcr" + m->getExtension(inputName); }
-            else if (type == "accnos") {  outputFileName =  "bad.accnos"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PcrSeqsCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "fasta")            {   pattern = "[filename],pcr,[extension]-[filename],[tag],pcr,[extension]";    }
+        else if (type == "taxonomy")    {   pattern = "[filename],pcr,[extension]";    }
+        else if (type == "name")        {   pattern = "[filename],pcr,[extension]";    }
+        else if (type == "group")       {   pattern = "[filename],pcr,[extension]";    }
+        else if (type == "count")       {   pattern = "[filename],pcr,[extension]";    }
+        else if (type == "accnos")      {   pattern = "[filename],bad.accnos";    }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "PcrSeqsCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 
@@ -315,10 +309,13 @@ int PcrSeqsCommand::execute(){
         
         string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(fastafile);  }
-		string trimSeqFile = thisOutputDir + m->getRootName(m->getSimpleName(fastafile)) + getOutputFileNameTag("fasta");
+        map<string, string> variables; 
+        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(fastafile));
+        variables["[extension]"] = m->getExtension(fastafile);
+		string trimSeqFile = getOutputFileName("fasta",variables);
 		outputNames.push_back(trimSeqFile); outputTypes["fasta"].push_back(trimSeqFile);
-        
-        string badSeqFile = thisOutputDir + m->getRootName(m->getSimpleName(fastafile)) + "scrap." + getOutputFileNameTag("fasta");
+        variables["[tag]"] = "scrap";
+        string badSeqFile = getOutputFileName("fasta",variables);
 		
 		
         length = 0;
@@ -914,7 +911,9 @@ int PcrSeqsCommand::writeAccnos(set<string> badNames){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(fastafile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(fastafile)) + getOutputFileNameTag("accnos");
+        map<string, string> variables; 
+		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(fastafile));
+		string outputFileName = getOutputFileName("accnos",variables);
         outputNames.push_back(outputFileName); outputTypes["accnos"].push_back(outputFileName);
         
         ofstream out;
@@ -976,7 +975,10 @@ int PcrSeqsCommand::readName(set<string>& names){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(namefile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(namefile)) + getOutputFileNameTag("name", namefile);
+		map<string, string> variables; 
+		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(namefile));
+        variables["[extension]"] = m->getExtension(namefile);
+		string outputFileName = getOutputFileName("name", variables);
         
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
@@ -1034,7 +1036,10 @@ int PcrSeqsCommand::readGroup(set<string> names){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(groupfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(groupfile)) + getOutputFileNameTag("group", groupfile);
+		map<string, string> variables; 
+		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(groupfile));
+        variables["[extension]"] = m->getExtension(groupfile);
+		string outputFileName = getOutputFileName("group", variables);
 		
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
@@ -1081,7 +1086,11 @@ int PcrSeqsCommand::readTax(set<string> names){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(taxfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(taxfile)) + getOutputFileNameTag("taxonomy", taxfile);
+		map<string, string> variables; 
+		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(taxfile));
+        variables["[extension]"] = m->getExtension(taxfile);
+		string outputFileName = getOutputFileName("taxonomy", variables);
+
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
         
@@ -1128,7 +1137,11 @@ int PcrSeqsCommand::readCount(set<string> badSeqNames){
 		m->openInputFile(countfile, in);
 		set<string>::iterator it;
 		
-		string goodCountFile = outputDir + m->getRootName(m->getSimpleName(countfile)) + getOutputFileNameTag("count", countfile);
+		map<string, string> variables; 
+		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(countfile));
+        variables["[extension]"] = m->getExtension(countfile);
+		string goodCountFile = getOutputFileName("count", variables);
+
         outputNames.push_back(goodCountFile);  outputTypes["count"].push_back(goodCountFile);
 		ofstream goodCountOut;	m->openOutputFile(goodCountFile, goodCountOut);
 		

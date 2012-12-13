@@ -13,24 +13,24 @@
 //**********************************************************************************************************************
 vector<string> ScreenSeqsCommand::setParameters(){	
 	try {
-		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
-        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none",false,false); parameters.push_back(pname);
-        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none",false,false); parameters.push_back(pcount);
-		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none",false,false); parameters.push_back(pgroup);
-		CommandParameter pqfile("qfile", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pqfile);
-		CommandParameter palignreport("alignreport", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(palignreport);
-		CommandParameter ptax("taxonomy", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(ptax);
-		CommandParameter pstart("start", "Number", "", "-1", "", "", "",false,false); parameters.push_back(pstart);
-		CommandParameter pend("end", "Number", "", "-1", "", "", "",false,false); parameters.push_back(pend);
-		CommandParameter pmaxambig("maxambig", "Number", "", "-1", "", "", "",false,false); parameters.push_back(pmaxambig);
-		CommandParameter pmaxhomop("maxhomop", "Number", "", "-1", "", "", "",false,false); parameters.push_back(pmaxhomop);
-		CommandParameter pminlength("minlength", "Number", "", "-1", "", "", "",false,false); parameters.push_back(pminlength);
-		CommandParameter pmaxlength("maxlength", "Number", "", "-1", "", "", "",false,false); parameters.push_back(pmaxlength);
-		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
-		CommandParameter pcriteria("criteria", "Number", "", "90", "", "", "",false,false); parameters.push_back(pcriteria);
-		CommandParameter poptimize("optimize", "Multiple", "none-start-end-maxambig-maxhomop-minlength-maxlength", "none", "", "", "",true,false); parameters.push_back(poptimize);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","fasta",false,true,true); parameters.push_back(pfasta);
+        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none","name",false,false,true); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none","count",false,false,true); parameters.push_back(pcount);
+		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","group",false,false,true); parameters.push_back(pgroup);
+		CommandParameter pqfile("qfile", "InputTypes", "", "", "none", "none", "none","qfile",false,false); parameters.push_back(pqfile);
+		CommandParameter palignreport("alignreport", "InputTypes", "", "", "none", "none", "none","alignreport",false,false); parameters.push_back(palignreport);
+		CommandParameter ptax("taxonomy", "InputTypes", "", "", "none", "none", "none","taxonomy",false,false); parameters.push_back(ptax);
+		CommandParameter pstart("start", "Number", "", "-1", "", "", "","",false,false,true); parameters.push_back(pstart);
+		CommandParameter pend("end", "Number", "", "-1", "", "", "","",false,false,true); parameters.push_back(pend);
+		CommandParameter pmaxambig("maxambig", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(pmaxambig);
+		CommandParameter pmaxhomop("maxhomop", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(pmaxhomop);
+		CommandParameter pminlength("minlength", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(pminlength);
+		CommandParameter pmaxlength("maxlength", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(pmaxlength);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
+		CommandParameter pcriteria("criteria", "Number", "", "90", "", "", "","",false,false); parameters.push_back(pcriteria);
+		CommandParameter poptimize("optimize", "Multiple", "none-start-end-maxambig-maxhomop-minlength-maxlength", "none", "", "", "","",true,false); parameters.push_back(poptimize);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -72,33 +72,27 @@ string ScreenSeqsCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string ScreenSeqsCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string ScreenSeqsCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "fasta")            {   outputFileName =  "good" + m->getExtension(inputName);   }
-            else if (type == "taxonomy")    {   outputFileName =  "good" + m->getExtension(inputName);   }
-            else if (type == "name")        {   outputFileName =  "good" + m->getExtension(inputName);   }
-            else if (type == "count")        {   outputFileName =  "good" + m->getExtension(inputName);   }
-            else if (type == "group")       {   outputFileName =  "good" + m->getExtension(inputName);   }
-            else if (type == "accnos")      {   outputFileName =  "bad.accnos";   }
-            else if (type == "qfile")       {   outputFileName =  "good" + m->getExtension(inputName);   }
-            else if (type == "alignreport") {   outputFileName =  "good.align.report";                   }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ScreenSeqsCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "fasta")            {   pattern = "[filename],good,[extension]";    }
+        else if (type == "taxonomy")    {   pattern = "[filename],good,[extension]";    }
+        else if (type == "name")        {   pattern = "[filename],good,[extension]";    }
+        else if (type == "group")       {   pattern = "[filename],good,[extension]";    }
+        else if (type == "count")       {   pattern = "[filename],good,[extension]";    }
+        else if (type == "accnos")      {   pattern = "[filename],bad.accnos";          }
+        else if (type == "qfile")       {   pattern = "[filename],good,[extension]";    }
+        else if (type == "alignreport")      {   pattern = "[filename],good.align.report";    }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ScreenSeqsCommand", "getOutputPattern");
+        exit(1);
+    }
 }
-
 //**********************************************************************************************************************
 ScreenSeqsCommand::ScreenSeqsCommand(){	
 	try {
@@ -367,9 +361,13 @@ int ScreenSeqsCommand::execute(){
                 }
 			#endif
 		}
-        				
-		string goodSeqFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + getOutputFileNameTag("fasta", fastafile);
-		string badAccnosFile =  outputDir + m->getRootName(m->getSimpleName(fastafile)) + getOutputFileNameTag("accnos");
+        
+        map<string, string> variables; 
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastafile));
+        string badAccnosFile =  getOutputFileName("accnos",variables);
+        variables["[extension]"] = m->getExtension(fastafile);
+		string goodSeqFile = getOutputFileName("fasta", variables);
+		
 		
 		int numFastaSeqs = 0;
 		set<string> badSeqNames;
@@ -579,8 +577,10 @@ int ScreenSeqsCommand::screenNameGroupFile(set<string> badSeqNames){
 		set<string> badSeqGroups;
 		string seqName, seqList, group;
 		set<string>::iterator it;
-
-		string goodNameFile = outputDir + m->getRootName(m->getSimpleName(namefile)) + getOutputFileNameTag("name", namefile);
+        map<string, string> variables; 
+		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(namefile));
+        variables["[extension]"] = m->getExtension(namefile);
+		string goodNameFile = getOutputFileName("name", variables);
 		outputNames.push_back(goodNameFile);  outputTypes["name"].push_back(goodNameFile);
 		
 		ofstream goodNameOut;	m->openOutputFile(goodNameFile, goodNameOut);
@@ -625,8 +625,10 @@ int ScreenSeqsCommand::screenNameGroupFile(set<string> badSeqNames){
 			
 			ifstream inputGroups;
 			m->openInputFile(groupfile, inputGroups);
-
-			string goodGroupFile = outputDir + m->getRootName(m->getSimpleName(groupfile)) + getOutputFileNameTag("group", groupfile);
+            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(groupfile));
+            variables["[extension]"] = m->getExtension(groupfile);
+            string goodGroupFile = getOutputFileName("group", variables);
+			
 			outputNames.push_back(goodGroupFile);   outputTypes["group"].push_back(goodGroupFile);
 			
 			ofstream goodGroupOut;	m->openOutputFile(goodGroupFile, goodGroupOut);
@@ -958,8 +960,10 @@ int ScreenSeqsCommand::screenGroupFile(set<string> badSeqNames){
 		m->openInputFile(groupfile, inputGroups);
 		string seqName, group;
 		set<string>::iterator it;
-		
-		string goodGroupFile = outputDir + m->getRootName(m->getSimpleName(groupfile)) + getOutputFileNameTag("group", groupfile);
+		map<string, string> variables;
+		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(groupfile));
+        variables["[extension]"] = m->getExtension(groupfile);
+        string goodGroupFile = getOutputFileName("group", variables);
         outputNames.push_back(goodGroupFile);  outputTypes["group"].push_back(goodGroupFile);
 		ofstream goodGroupOut;	m->openOutputFile(goodGroupFile, goodGroupOut);
 		
@@ -1007,8 +1011,11 @@ int ScreenSeqsCommand::screenCountFile(set<string> badSeqNames){
 		ifstream in;
 		m->openInputFile(countfile, in);
 		set<string>::iterator it;
+		map<string, string> variables;
+		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(countfile));
+        variables["[extension]"] = m->getExtension(countfile);
+        string goodCountFile = getOutputFileName("count", variables);
 		
-		string goodCountFile = outputDir + m->getRootName(m->getSimpleName(countfile)) + getOutputFileNameTag("count", countfile);
         outputNames.push_back(goodCountFile);  outputTypes["count"].push_back(goodCountFile);
 		ofstream goodCountOut;	m->openOutputFile(goodCountFile, goodCountOut);
 		
@@ -1073,7 +1080,10 @@ int ScreenSeqsCommand::screenAlignReport(set<string> badSeqNames){
 		string seqName, group;
 		set<string>::iterator it;
 		
-		string goodAlignReportFile = outputDir + m->getRootName(m->getSimpleName(alignreport)) + getOutputFileNameTag("alignreport");
+        map<string, string> variables;
+		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(alignreport));
+        string goodAlignReportFile = getOutputFileName("alignreport", variables);
+		
 		outputNames.push_back(goodAlignReportFile);  outputTypes["alignreport"].push_back(goodAlignReportFile);
 		ofstream goodAlignReportOut;	m->openOutputFile(goodAlignReportFile, goodAlignReportOut);
 
@@ -1136,8 +1146,11 @@ int ScreenSeqsCommand::screenTaxonomy(set<string> badSeqNames){
 		m->openInputFile(taxonomy, input);
 		string seqName, tax;
 		set<string>::iterator it;
-		
-		string goodTaxFile = outputDir + m->getRootName(m->getSimpleName(taxonomy)) + getOutputFileNameTag("taxonomy", taxonomy);
+        map<string, string> variables;
+		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(taxonomy));
+        variables["[extension]"] = m->getExtension(taxonomy);
+        string goodTaxFile = getOutputFileName("taxonomy", variables);
+
 		outputNames.push_back(goodTaxFile);  outputTypes["taxonomy"].push_back(goodTaxFile);
 		ofstream goodTaxOut;	m->openOutputFile(goodTaxFile, goodTaxOut);
 				
@@ -1185,8 +1198,11 @@ int ScreenSeqsCommand::screenQual(set<string> badSeqNames){
 		ifstream in;
 		m->openInputFile(qualfile, in);
 		set<string>::iterator it;
+		map<string, string> variables;
+		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(qualfile));
+        variables["[extension]"] = m->getExtension(qualfile);
+        string goodQualFile = getOutputFileName("qfile", variables);
 		
-		string goodQualFile = outputDir + m->getRootName(m->getSimpleName(qualfile)) + getOutputFileNameTag("qfile", qualfile);
 		outputNames.push_back(goodQualFile);  outputTypes["qfile"].push_back(goodQualFile);
 		ofstream goodQual;	m->openOutputFile(goodQualFile, goodQual);
 		

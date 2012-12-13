@@ -12,18 +12,18 @@
 //**********************************************************************************************************************
 vector<string> HClusterCommand::setParameters(){	
 	try {
-		CommandParameter pphylip("phylip", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "none",false,false); parameters.push_back(pphylip);
-		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "ColumnName",false,false); parameters.push_back(pname);
-		CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "ColumnName",false,false); parameters.push_back(pcolumn);
-		CommandParameter pcutoff("cutoff", "Number", "", "10", "", "", "",false,false); parameters.push_back(pcutoff);
-		CommandParameter pprecision("precision", "Number", "", "100", "", "", "",false,false); parameters.push_back(pprecision);
-		CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted", "average", "", "", "",false,false); parameters.push_back(pmethod);
-		CommandParameter phard("hard", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(phard);
-		CommandParameter psorted("sorted", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(psorted);
-		CommandParameter pshowabund("showabund", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pshowabund);
-		CommandParameter ptiming("timing", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(ptiming);		
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pphylip("phylip", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "none","list-rabund-sabund",false,false,true); parameters.push_back(pphylip);
+		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "ColumnName","",false,false,true); parameters.push_back(pname);
+		CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "ColumnName","list-rabund-sabund",false,false,true); parameters.push_back(pcolumn);
+		CommandParameter pcutoff("cutoff", "Number", "", "10", "", "", "","",false,false,true); parameters.push_back(pcutoff);
+		CommandParameter pprecision("precision", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pprecision);
+		CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted", "average", "", "", "","",false,false); parameters.push_back(pmethod);
+		CommandParameter phard("hard", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(phard);
+		CommandParameter psorted("sorted", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(psorted);
+		CommandParameter pshowabund("showabund", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pshowabund);
+		CommandParameter ptiming("timing", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(ptiming);		
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 			
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -52,27 +52,23 @@ string HClusterCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string HClusterCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string HClusterCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "list") {  outputFileName =  "list"; }
-            else if (type == "rabund") {  outputFileName =  "rabund"; }
-            else if (type == "sabund") {  outputFileName =  "sabund"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "HClusterCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "list") {  pattern = "[filename],[clustertag],list"; } 
+        else if (type == "rabund") {  pattern = "[filename],[clustertag],rabund"; } 
+        else if (type == "sabund") {  pattern = "[filename],[clustertag],sabund"; }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "HClusterCommand", "getOutputPattern");
+        exit(1);
+    }
 }
+
 //**********************************************************************************************************************
 HClusterCommand::HClusterCommand(){	
 	try {
@@ -240,10 +236,14 @@ HClusterCommand::HClusterCommand(string option)  {
 				else if (method == "nearest")	{ tag = "nn";  }
 				else if (method == "weighted")	{ tag = "wn";  }
 				else							{ tag = "an";  }
+                
+                map<string, string> variables;
+                variables["[filename]"] = fileroot;
+                variables["[clustertag]"] = tag;
 			
-				string sabundFileName = fileroot+ tag + "." + getOutputFileNameTag("sabund");
-                string rabundFileName = fileroot+ tag + "." + getOutputFileNameTag("rabund");
-                string listFileName = fileroot+ tag + "." + getOutputFileNameTag("list");
+				string sabundFileName = getOutputFileName("sabund",variables);
+                string rabundFileName = getOutputFileName("rabund",variables);
+                string listFileName = getOutputFileName("list", variables);
                 
                 m->openOutputFile(sabundFileName,	sabundFile);
                 m->openOutputFile(rabundFileName,	rabundFile);

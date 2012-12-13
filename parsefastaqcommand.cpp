@@ -13,12 +13,12 @@
 //**********************************************************************************************************************
 vector<string> ParseFastaQCommand::setParameters(){	
 	try {
-		CommandParameter pfastq("fastq", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfastq);
-		CommandParameter pfasta("fasta", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pfasta);
-		CommandParameter pqual("qfile", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pqual);
- 		CommandParameter pformat("format", "Multiple", "sanger-illumina-solexa", "sanger", "", "", "",false,false); parameters.push_back(pformat);
-        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pfastq("fastq", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(pfastq);
+		CommandParameter pfasta("fasta", "Boolean", "", "T", "", "", "","fasta",false,false); parameters.push_back(pfasta);
+		CommandParameter pqual("qfile", "Boolean", "", "T", "", "", "","qfile",false,false); parameters.push_back(pqual);
+ 		CommandParameter pformat("format", "Multiple", "sanger-illumina-solexa", "sanger", "", "", "","",false,false,true); parameters.push_back(pformat);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -49,27 +49,21 @@ string ParseFastaQCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string ParseFastaQCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string ParseFastaQCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "fasta") {  outputFileName =  "fasta"; }
-            else if (type == "qfile") {  outputFileName =  "qual"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ParseFastaQCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "fasta") {  pattern = "[filename],fasta"; } 
+        else if (type == "qfile") {  pattern = "[filename],qual"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ParseFastaQCommand", "getOutputPattern");
+        exit(1);
+    }
 }
-
 //**********************************************************************************************************************
 ParseFastaQCommand::ParseFastaQCommand(){	
 	try {
@@ -163,8 +157,10 @@ int ParseFastaQCommand::execute(){
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//open Output Files
-		string fastaFile = outputDir + m->getRootName(m->getSimpleName(fastaQFile)) + getOutputFileNameTag("fasta");
-		string qualFile = outputDir + m->getRootName(m->getSimpleName(fastaQFile)) + getOutputFileNameTag("qfile");
+        map<string, string> variables; 
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastaQFile));
+		string fastaFile = getOutputFileName("fasta",variables);
+		string qualFile = getOutputFileName("qfile",variables);
 		ofstream outFasta, outQual;
 		
 		if (fasta) { m->openOutputFile(fastaFile, outFasta);  outputNames.push_back(fastaFile); outputTypes["fasta"].push_back(fastaFile);	}
@@ -261,9 +257,9 @@ vector<int> ParseFastaQCommand::convertQual(string qual) {
                 temp -= 64; //char '@'
             }else if (format == "solexa") {
                 temp = int(convertTable[temp]); //convert to sanger
-                temp -= 33; //char '!'
+                temp -= int('!'); //char '!'
             }else {
-                temp -= 33; //char '!'
+                temp -= int('!'); //char '!'
             }
 			qualScores.push_back(temp);
 		}

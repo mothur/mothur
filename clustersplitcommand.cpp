@@ -13,26 +13,26 @@
 //**********************************************************************************************************************
 vector<string> ClusterSplitCommand::setParameters(){	
 	try {
-		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "none", "FastaTaxName",false,false); parameters.push_back(ptaxonomy);
-		CommandParameter pphylip("phylip", "InputTypes", "", "", "PhylipColumnFasta", "PhylipColumnFasta", "none",false,false); parameters.push_back(pphylip);
-		CommandParameter pfasta("fasta", "InputTypes", "", "", "PhylipColumnFasta", "PhylipColumnFasta", "FastaTaxName",false,false); parameters.push_back(pfasta);
-		CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "ColumnName-FastaTaxName",false,false); parameters.push_back(pname);
-        CommandParameter pcount("count", "InputTypes", "", "", "NameCount", "none", "",false,false); parameters.push_back(pcount);
-		CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumnFasta", "PhylipColumnFasta", "ColumnName",false,false); parameters.push_back(pcolumn);
-		CommandParameter ptaxlevel("taxlevel", "Number", "", "3", "", "", "",false,false); parameters.push_back(ptaxlevel);
-		CommandParameter psplitmethod("splitmethod", "Multiple", "classify-fasta-distance", "distance", "", "", "",false,false); parameters.push_back(psplitmethod);
-		CommandParameter plarge("large", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(plarge);
-		CommandParameter pshowabund("showabund", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pshowabund);
-        CommandParameter pcluster("cluster", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pcluster);
-		CommandParameter ptiming("timing", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(ptiming);
-		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
-		CommandParameter pcutoff("cutoff", "Number", "", "0.25", "", "", "",false,false); parameters.push_back(pcutoff);
-		CommandParameter pprecision("precision", "Number", "", "100", "", "", "",false,false); parameters.push_back(pprecision);
-		CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted", "average", "", "", "",false,false); parameters.push_back(pmethod);
-		CommandParameter phard("hard", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(phard);
-        CommandParameter pclassic("classic", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pclassic);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "none", "FastaTaxName","",false,false,true); parameters.push_back(ptaxonomy);
+		CommandParameter pphylip("phylip", "InputTypes", "", "", "PhylipColumnFasta", "PhylipColumnFasta", "none","list",false,false,true); parameters.push_back(pphylip);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "PhylipColumnFasta", "PhylipColumnFasta", "FastaTaxName","list",false,false,true); parameters.push_back(pfasta);
+		CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "ColumnName-FastaTaxName","rabund-sabund",false,false,true); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "NameCount", "none", "","",false,false,true); parameters.push_back(pcount);
+		CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumnFasta", "PhylipColumnFasta", "ColumnName","list",false,false,true); parameters.push_back(pcolumn);
+		CommandParameter ptaxlevel("taxlevel", "Number", "", "3", "", "", "","",false,false,true); parameters.push_back(ptaxlevel);
+		CommandParameter psplitmethod("splitmethod", "Multiple", "classify-fasta-distance", "distance", "", "", "","",false,false,true); parameters.push_back(psplitmethod);
+		CommandParameter plarge("large", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(plarge);
+		CommandParameter pshowabund("showabund", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pshowabund);
+        CommandParameter pcluster("cluster", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pcluster);
+		CommandParameter ptiming("timing", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(ptiming);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
+		CommandParameter pcutoff("cutoff", "Number", "", "0.25", "", "", "","",false,false,true); parameters.push_back(pcutoff);
+		CommandParameter pprecision("precision", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pprecision);
+		CommandParameter pmethod("method", "Multiple", "furthest-nearest-average-weighted", "average", "", "", "","",false,false); parameters.push_back(pmethod);
+		CommandParameter phard("hard", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(phard);
+        CommandParameter pclassic("classic", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pclassic);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 			
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -81,27 +81,22 @@ string ClusterSplitCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string ClusterSplitCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string ClusterSplitCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "list") {  outputFileName =  "list"; }
-            else if (type == "rabund") {  outputFileName =  "rabund"; }
-            else if (type == "sabund") {  outputFileName =  "sabund"; }
-            else if (type == "column") {  outputFileName =  "dist"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClusterSplitCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "list") {  pattern = "[filename],[clustertag],list-[filename],[clustertag],[tag2],list"; } 
+        else if (type == "rabund") {  pattern = "[filename],[clustertag],rabund"; } 
+        else if (type == "sabund") {  pattern = "[filename],[clustertag],sabund"; }
+        else if (type == "column") {  pattern = "[filename],dist"; }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ClusterSplitCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 ClusterSplitCommand::ClusterSplitCommand(){	
@@ -821,11 +816,13 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, map<float, int> us
 		if (outputDir == "") { outputDir += m->hasPath(distfile); }
 		fileroot = outputDir + m->getRootName(m->getSimpleName(distfile));
 		
-        string sabundFileName = fileroot+ tag + "." + getOutputFileNameTag("sabund");
-        string rabundFileName = fileroot+ tag + "." + getOutputFileNameTag("rabund");
-        string listFileName = fileroot+ tag + ".";
-        if (countfile != "") { listFileName += "unique_"; }
-        listFileName += getOutputFileNameTag("list");
+        map<string, string> variables; 
+        variables["[filename]"] = fileroot;
+        if (countfile != "") { variables["[tag2]"] = "unique_list"; }
+        variables["[clustertag]"] = tag;
+        string sabundFileName = getOutputFileName("sabund", variables);
+        string rabundFileName = getOutputFileName("rabund", variables);
+        string listFileName = getOutputFileName("list", variables);
         
         if (countfile == "") {
             m->openOutputFile(sabundFileName,	outSabund);
@@ -1440,7 +1437,9 @@ int ClusterSplitCommand::createMergedDistanceFile(vector< map<string, string> > 
 		
 		string thisOutputDir = outputDir;
 		if (outputDir == "") { thisOutputDir = m->hasPath(fastafile); }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(fastafile)) + getOutputFileNameTag("column");
+        map<string, string> variables; 
+        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(fastafile));
+		string outputFileName = getOutputFileName("column", variables);
 		m->mothurRemove(outputFileName);
 		
 		

@@ -16,21 +16,21 @@
 //**********************************************************************************************************************
 vector<string> SffInfoCommand::setParameters(){	
 	try {		
-		CommandParameter psff("sff", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(psff);
-        CommandParameter poligos("oligos", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(poligos);
-		CommandParameter paccnos("accnos", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(paccnos);
-		CommandParameter psfftxt("sfftxt", "String", "", "", "", "", "",false,false); parameters.push_back(psfftxt);
-		CommandParameter pflow("flow", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pflow);
-		CommandParameter ptrim("trim", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(ptrim);
-		CommandParameter pfasta("fasta", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pfasta);
-		CommandParameter pqfile("name", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pqfile);
-        CommandParameter ppdiffs("pdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(ppdiffs);
-		CommandParameter pbdiffs("bdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(pbdiffs);
-        CommandParameter pldiffs("ldiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(pldiffs);
-		CommandParameter psdiffs("sdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(psdiffs);
-        CommandParameter ptdiffs("tdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(ptdiffs);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter psff("sff", "InputTypes", "", "", "none", "none", "none","",false,false,true); parameters.push_back(psff);
+        CommandParameter poligos("oligos", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(poligos);
+		CommandParameter paccnos("accnos", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(paccnos);
+		CommandParameter psfftxt("sfftxt", "String", "", "", "", "", "","",false,false); parameters.push_back(psfftxt);
+		CommandParameter pflow("flow", "Boolean", "", "T", "", "", "","flow",false,false); parameters.push_back(pflow);
+		CommandParameter ptrim("trim", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(ptrim);
+		CommandParameter pfasta("fasta", "Boolean", "", "T", "", "", "","fasta",false,false); parameters.push_back(pfasta);
+		CommandParameter pqfile("qfile", "Boolean", "", "T", "", "", "","qfile",false,false); parameters.push_back(pqfile);
+        CommandParameter ppdiffs("pdiffs", "Number", "", "0", "", "", "","",false,false); parameters.push_back(ppdiffs);
+		CommandParameter pbdiffs("bdiffs", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pbdiffs);
+        CommandParameter pldiffs("ldiffs", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pldiffs);
+		CommandParameter psdiffs("sdiffs", "Number", "", "0", "", "", "","",false,false); parameters.push_back(psdiffs);
+        CommandParameter ptdiffs("tdiffs", "Number", "", "0", "", "", "","",false,false); parameters.push_back(ptdiffs);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -70,32 +70,26 @@ string SffInfoCommand::getHelpString(){
 		exit(1);
 	}
 }
+
 //**********************************************************************************************************************
-string SffInfoCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string SffInfoCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "fasta")            {   outputFileName =  "fasta";   }
-            else if (type == "flow")    {   outputFileName =  "flow";   }
-            else if (type == "sfftxt")        {   outputFileName =  "sff.txt";   }
-            else if (type == "sff")        {   outputFileName =  "sff";   }
-            else if (type == "qfile")       {   outputFileName =  "qual";   }
-             else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SffInfoCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "fasta")            {   pattern =  "[filename],fasta-[filename],[tag],fasta";   }
+        else if (type == "flow")    {   pattern =  "[filename],flow";   }
+        else if (type == "sfftxt")        {   pattern =  "[filename],sff.txt";   }
+        else if (type == "sff")        {   pattern =  "[filename],[group],sff";   }
+        else if (type == "qfile")       {   pattern =  "[filename],qual-[filename],[tag],qual";   }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SffInfoCommand", "getOutputPattern");
+        exit(1);
+    }
 }
-
-
 //**********************************************************************************************************************
 SffInfoCommand::SffInfoCommand(){	
 	try {
@@ -504,16 +498,14 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
         string rootName = outputDir + m->getRootName(m->getSimpleName(input));
         if(rootName.find_last_of(".") == rootName.npos){ rootName += "."; }
         
-		string sfftxtFileName = outputDir + m->getRootName(m->getSimpleName(input)) + getOutputFileNameTag("sfftxt");
-		string outFlowFileName = outputDir + m->getRootName(m->getSimpleName(input)) + getOutputFileNameTag("flow");
-		if (trim) {
-			outFastaFileName = outputDir + m->getRootName(m->getSimpleName(input)) + getOutputFileNameTag("fasta");
-			outQualFileName = outputDir + m->getRootName(m->getSimpleName(input)) + getOutputFileNameTag("qfile");
-		}else{
-			outFastaFileName = outputDir + m->getRootName(m->getSimpleName(input)) + "raw." + getOutputFileNameTag("fasta");
-			outQualFileName = outputDir + m->getRootName(m->getSimpleName(input)) + "raw." + getOutputFileNameTag("qfile");
-		}
-		
+        map<string, string> variables; 
+		variables["[filename]"] = rootName;
+		string sfftxtFileName = getOutputFileName("sfftxt",variables);
+		string outFlowFileName = getOutputFileName("flow",variables);
+		if (!trim) { variables["[tag]"] = "raw"; }
+		outFastaFileName = getOutputFileName("fasta",variables);
+        outQualFileName = getOutputFileName("qfile",variables);
+        
 		if (sfftxt) { m->openOutputFile(sfftxtFileName, outSfftxt); outSfftxt.setf(ios::fixed, ios::floatfield); outSfftxt.setf(ios::showpoint);  outputNames.push_back(sfftxtFileName);  outputTypes["sfftxt"].push_back(sfftxtFileName); }
 		if (fasta)	{ m->openOutputFile(outFastaFileName, outFasta);	outputNames.push_back(outFastaFileName); outputTypes["fasta"].push_back(outFastaFileName); }
 		if (qual)	{ m->openOutputFile(outQualFileName, outQual);		outputNames.push_back(outQualFileName); outputTypes["qfile"].push_back(outQualFileName);  }
@@ -1396,14 +1388,13 @@ int SffInfoCommand::parseSffTxt() {
 			fileRoot = m->getRootName(fileRoot);
 		}
 		
-		string outFlowFileName = outputDir + fileRoot + getOutputFileNameTag("flow");
-		if (trim) {
-			outFastaFileName = outputDir + fileRoot + getOutputFileNameTag("fasta");
-			outQualFileName = outputDir + fileRoot + getOutputFileNameTag("qfile");
-		}else{
-			outFastaFileName = outputDir + fileRoot + "raw." + getOutputFileNameTag("fasta");
-			outQualFileName = outputDir + fileRoot + "raw." + getOutputFileNameTag("qfile");
-		}
+        map<string, string> variables; 
+		variables["[filename]"] = fileRoot;
+		string sfftxtFileName = getOutputFileName("sfftxt",variables);
+		string outFlowFileName = getOutputFileName("flow",variables);
+		if (!trim) { variables["[tag]"] = "raw"; }
+		outFastaFileName = getOutputFileName("fasta",variables);
+        outQualFileName = getOutputFileName("qfile",variables);
 		
 		if (fasta)	{ m->openOutputFile(outFastaFileName, outFasta);	outputNames.push_back(outFastaFileName); outputTypes["fasta"].push_back(outFastaFileName); }
 		if (qual)	{ m->openOutputFile(outQualFileName, outQual);		outputNames.push_back(outQualFileName); outputTypes["qfile"].push_back(outQualFileName);  }
@@ -1731,7 +1722,10 @@ bool SffInfoCommand::readOligos(string oligoFile){
 					}
 					
 					ofstream temp;
-					string thisFilename = outputDir + m->getRootName(m->getSimpleName(currentFileName)) + comboGroupName + "." + getOutputFileNameTag("sff");
+                    map<string, string> variables; 
+                    variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(currentFileName));
+                    variables["[group]"] = comboGroupName;
+					string thisFilename = getOutputFileName("sff",variables);
 					if (uniqueNames.count(thisFilename) == 0) {
 						outputNames.push_back(thisFilename);
 						outputTypes["sff"].push_back(thisFilename);
@@ -1746,7 +1740,10 @@ bool SffInfoCommand::readOligos(string oligoFile){
 		numFPrimers = primers.size();
         numLinkers = linker.size();
         numSpacers = spacer.size();
-		noMatchFile = outputDir + m->getRootName(m->getSimpleName(currentFileName)) + "scrap." + getOutputFileNameTag("sff");
+        map<string, string> variables; 
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(currentFileName));
+        variables["[group]"] = "scrap";
+		noMatchFile = getOutputFileName("sff",variables);
         m->mothurRemove(noMatchFile);
         
 		bool allBlank = true;

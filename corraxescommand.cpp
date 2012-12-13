@@ -14,16 +14,16 @@
 //**********************************************************************************************************************
 vector<string> CorrAxesCommand::setParameters(){	
 	try {
-		CommandParameter paxes("axes", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(paxes);
-		CommandParameter pshared("shared", "InputTypes", "", "", "SharedRelMeta", "SharedRelMeta", "none",false,false); parameters.push_back(pshared);
-		CommandParameter prelabund("relabund", "InputTypes", "", "", "SharedRelMeta", "SharedRelMeta", "none",false,false); parameters.push_back(prelabund);
-		CommandParameter pmetadata("metadata", "InputTypes", "", "", "SharedRelMeta", "SharedRelMeta", "none",false,false); parameters.push_back(pmetadata);
-		CommandParameter pnumaxes("numaxes", "Number", "", "3", "", "", "",false,false); parameters.push_back(pnumaxes);
-		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
-		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
-		CommandParameter pmethod("method", "Multiple", "pearson-spearman-kendall", "pearson", "", "", "",false,false); parameters.push_back(pmethod);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter paxes("axes", "InputTypes", "", "", "none", "none", "none","corraxes",false,true,true); parameters.push_back(paxes);
+		CommandParameter pshared("shared", "InputTypes", "", "", "SharedRelMeta", "SharedRelMeta", "none","",false,false,true); parameters.push_back(pshared);
+		CommandParameter prelabund("relabund", "InputTypes", "", "", "SharedRelMeta", "SharedRelMeta", "none","",false,false,true); parameters.push_back(prelabund);
+		CommandParameter pmetadata("metadata", "InputTypes", "", "", "SharedRelMeta", "SharedRelMeta", "none","",false,false); parameters.push_back(pmetadata);
+		CommandParameter pnumaxes("numaxes", "Number", "", "3", "", "", "","",false,false); parameters.push_back(pnumaxes);
+		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
+		CommandParameter pmethod("method", "Multiple", "pearson-spearman-kendall", "pearson", "", "", "","",false,false); parameters.push_back(pmethod);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -56,25 +56,21 @@ string CorrAxesCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string CorrAxesCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string CorrAxesCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "corraxes") {  outputFileName =  "corr.axes"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "CorrAxesCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "corraxes") {  pattern = "[filename],[tag],corr.axes"; }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CorrAxesCommand", "getOutputPattern");
+        exit(1);
+    }
 }
+
 //**********************************************************************************************************************
 CorrAxesCommand::CorrAxesCommand(){	
 	try {
@@ -285,8 +281,10 @@ int CorrAxesCommand::execute(){
 		/*************************************************************************************/
 		// calc the r values																//
 		/************************************************************************************/
-		
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(inputFileName)) + method + "." + getOutputFileNameTag("corraxes");
+        map<string, string> variables; 
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputFileName));
+        variables["[tag]"] = method;
+		string outputFileName = getOutputFileName("corraxes", variables);
 		outputNames.push_back(outputFileName); outputTypes["corraxes"].push_back(outputFileName);	
 		ofstream out;
 		m->openOutputFile(outputFileName, out);

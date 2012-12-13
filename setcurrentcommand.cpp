@@ -13,32 +13,32 @@
 vector<string> SetCurrentCommand::setParameters(){	
 	try {
 		
-		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
-		CommandParameter pflow("flow", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pflow);
-        CommandParameter pbiom("biom", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pbiom);
-		CommandParameter pphylip("phylip", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pphylip);
-		CommandParameter pcolumn("column", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pcolumn);
-		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pfasta);
-		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
-		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pgroup);
-		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(plist);
-		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(ptaxonomy);
-		CommandParameter pqfile("qfile", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pqfile);
-		CommandParameter paccnos("accnos", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(paccnos);		
-		CommandParameter prabund("rabund", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(prabund);
-		CommandParameter psabund("sabund", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(psabund);
-		CommandParameter pdesign("design", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pdesign);
-		CommandParameter porder("order", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(porder);
-		CommandParameter ptree("tree", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(ptree);
-		CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pshared);
-		CommandParameter pordergroup("ordergroup", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pordergroup);
-        CommandParameter pcount("count", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pcount);
-		CommandParameter prelabund("relabund", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(prelabund);
-		CommandParameter psff("sff", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(psff);
-		CommandParameter poligos("oligos", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(poligos);
-		CommandParameter pclear("clear", "String", "", "", "", "", "",false,false); parameters.push_back(pclear);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
+		CommandParameter pflow("flow", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pflow);
+        CommandParameter pbiom("biom", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pbiom);
+		CommandParameter pphylip("phylip", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pphylip);
+		CommandParameter pcolumn("column", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pcolumn);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pfasta);
+		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pname);
+		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pgroup);
+		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(plist);
+		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(ptaxonomy);
+		CommandParameter pqfile("qfile", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pqfile);
+		CommandParameter paccnos("accnos", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(paccnos);		
+		CommandParameter prabund("rabund", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(prabund);
+		CommandParameter psabund("sabund", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(psabund);
+		CommandParameter pdesign("design", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pdesign);
+		CommandParameter porder("order", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(porder);
+		CommandParameter ptree("tree", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(ptree);
+		CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pshared);
+		CommandParameter pordergroup("ordergroup", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pordergroup);
+        CommandParameter pcount("count", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pcount);
+		CommandParameter prelabund("relabund", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(prelabund);
+		CommandParameter psff("sff", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(psff);
+		CommandParameter poligos("oligos", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(poligos);
+		CommandParameter pclear("clear", "String", "", "", "", "", "","",false,false); parameters.push_back(pclear);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}

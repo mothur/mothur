@@ -15,35 +15,35 @@
 //**********************************************************************************************************************
 vector<string> TrimSeqsCommand::setParameters(){	
 	try {
-		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
-		CommandParameter poligos("oligos", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(poligos);
-		CommandParameter pqfile("qfile", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pqfile);
-		CommandParameter pname("name", "InputTypes", "", "", "namecount", "none", "none",false,false); parameters.push_back(pname);
-        CommandParameter pcount("count", "InputTypes", "", "", "namecount", "none", "none",false,false); parameters.push_back(pcount);
-		CommandParameter pflip("flip", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pflip);
-		CommandParameter pmaxambig("maxambig", "Number", "", "-1", "", "", "",false,false); parameters.push_back(pmaxambig);
-		CommandParameter pmaxhomop("maxhomop", "Number", "", "0", "", "", "",false,false); parameters.push_back(pmaxhomop);
-		CommandParameter pminlength("minlength", "Number", "", "0", "", "", "",false,false); parameters.push_back(pminlength);
-		CommandParameter pmaxlength("maxlength", "Number", "", "0", "", "", "",false,false); parameters.push_back(pmaxlength);
-		CommandParameter ppdiffs("pdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(ppdiffs);
-		CommandParameter pbdiffs("bdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(pbdiffs);
-        CommandParameter pldiffs("ldiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(pldiffs);
-		CommandParameter psdiffs("sdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(psdiffs);
-        CommandParameter ptdiffs("tdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(ptdiffs);
-		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
-		CommandParameter pallfiles("allfiles", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pallfiles);
-		CommandParameter pkeepforward("keepforward", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pkeepforward);
-		CommandParameter pqtrim("qtrim", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pqtrim);
-		CommandParameter pqthreshold("qthreshold", "Number", "", "0", "", "", "",false,false); parameters.push_back(pqthreshold);
-		CommandParameter pqaverage("qaverage", "Number", "", "0", "", "", "",false,false); parameters.push_back(pqaverage);
-		CommandParameter prollaverage("rollaverage", "Number", "", "0", "", "", "",false,false); parameters.push_back(prollaverage);
-		CommandParameter pqwindowaverage("qwindowaverage", "Number", "", "0", "", "", "",false,false); parameters.push_back(pqwindowaverage);
-		CommandParameter pqstepsize("qstepsize", "Number", "", "1", "", "", "",false,false); parameters.push_back(pqstepsize);
-		CommandParameter pqwindowsize("qwindowsize", "Number", "", "50", "", "", "",false,false); parameters.push_back(pqwindowsize);
-		CommandParameter pkeepfirst("keepfirst", "Number", "", "0", "", "", "",false,false); parameters.push_back(pkeepfirst);
-		CommandParameter premovelast("removelast", "Number", "", "0", "", "", "",false,false); parameters.push_back(premovelast);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","fasta",false,true,true); parameters.push_back(pfasta);
+		CommandParameter poligos("oligos", "InputTypes", "", "", "none", "none", "none","group",false,false,true); parameters.push_back(poligos);
+		CommandParameter pqfile("qfile", "InputTypes", "", "", "none", "none", "none","qfile",false,false,true); parameters.push_back(pqfile);
+		CommandParameter pname("name", "InputTypes", "", "", "namecount", "none", "none","name",false,false,true); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "namecount", "none", "none","count",false,false,true); parameters.push_back(pcount);
+		CommandParameter pflip("flip", "Boolean", "", "F", "", "", "","",false,false,true); parameters.push_back(pflip);
+		CommandParameter pmaxambig("maxambig", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(pmaxambig);
+		CommandParameter pmaxhomop("maxhomop", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pmaxhomop);
+		CommandParameter pminlength("minlength", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pminlength);
+		CommandParameter pmaxlength("maxlength", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pmaxlength);
+		CommandParameter ppdiffs("pdiffs", "Number", "", "0", "", "", "","",false,false,true); parameters.push_back(ppdiffs);
+		CommandParameter pbdiffs("bdiffs", "Number", "", "0", "", "", "","",false,false,true); parameters.push_back(pbdiffs);
+        CommandParameter pldiffs("ldiffs", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pldiffs);
+		CommandParameter psdiffs("sdiffs", "Number", "", "0", "", "", "","",false,false); parameters.push_back(psdiffs);
+        CommandParameter ptdiffs("tdiffs", "Number", "", "0", "", "", "","",false,false); parameters.push_back(ptdiffs);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
+		CommandParameter pallfiles("allfiles", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pallfiles);
+		CommandParameter pkeepforward("keepforward", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pkeepforward);
+		CommandParameter pqtrim("qtrim", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pqtrim);
+		CommandParameter pqthreshold("qthreshold", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pqthreshold);
+		CommandParameter pqaverage("qaverage", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pqaverage);
+		CommandParameter prollaverage("rollaverage", "Number", "", "0", "", "", "","",false,false); parameters.push_back(prollaverage);
+		CommandParameter pqwindowaverage("qwindowaverage", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pqwindowaverage);
+		CommandParameter pqstepsize("qstepsize", "Number", "", "1", "", "", "","",false,false); parameters.push_back(pqstepsize);
+		CommandParameter pqwindowsize("qwindowsize", "Number", "", "50", "", "", "","",false,false); parameters.push_back(pqwindowsize);
+		CommandParameter pkeepfirst("keepfirst", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pkeepfirst);
+		CommandParameter premovelast("removelast", "Number", "", "0", "", "", "","",false,false); parameters.push_back(premovelast);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 			
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -101,31 +101,24 @@ string TrimSeqsCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string TrimSeqsCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string TrimSeqsCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "qfile")            {   outputFileName =  "qual";   }
-            else if (type == "fasta")            {   outputFileName =  "fasta";   }
-            else if (type == "group")            {   outputFileName =  "groups";   }
-            else if (type == "name")            {   outputFileName =  "names";   }
-            else if (type == "count")            {   outputFileName =  "count_table";   }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "TrimSeqsCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "qfile") {  pattern = "[filename],[tag],qual"; } 
+        else if (type == "fasta") {  pattern = "[filename],[tag],fasta"; } 
+        else if (type == "group") {  pattern = "[filename],groups"; }
+        else if (type == "name") {  pattern = "[filename],[tag],names"; }
+        else if (type == "count") {  pattern = "[filename],count_table"; }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "TrimSeqsCommand", "getOutputPattern");
+        exit(1);
+    }
 }
-
-
 //**********************************************************************************************************************
 
 TrimSeqsCommand::TrimSeqsCommand(){	
@@ -382,14 +375,17 @@ int TrimSeqsCommand::execute(){
 		vector<vector<string> > qualFileNames;
 		vector<vector<string> > nameFileNames;
 		
-		string trimSeqFile = outputDir + m->getRootName(m->getSimpleName(fastaFile)) + "trim." + getOutputFileNameTag("fasta");
+        map<string, string> variables; 
+		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastaFile));
+        variables["[tag]"] = "trim";
+		string trimSeqFile = getOutputFileName("fasta",variables);
+        string trimQualFile = getOutputFileName("qfile",variables);
 		outputNames.push_back(trimSeqFile); outputTypes["fasta"].push_back(trimSeqFile);
-		
-		string scrapSeqFile = outputDir + m->getRootName(m->getSimpleName(fastaFile)) + "scrap." + getOutputFileNameTag("fasta");
+        
+        variables["[tag]"] = "scrap";
+		string scrapSeqFile = getOutputFileName("fasta",variables);
+        string scrapQualFile = getOutputFileName("qfile",variables);
 		outputNames.push_back(scrapSeqFile); outputTypes["fasta"].push_back(scrapSeqFile);
-		
-		string trimQualFile = outputDir + m->getRootName(m->getSimpleName(fastaFile)) + "trim." + getOutputFileNameTag("qfile");
-		string scrapQualFile = outputDir + m->getRootName(m->getSimpleName(fastaFile)) + "scrap." + getOutputFileNameTag("qfile");
 		
 		if (qFileName != "") {
 			outputNames.push_back(trimQualFile);
@@ -398,8 +394,11 @@ int TrimSeqsCommand::execute(){
 			outputTypes["qfile"].push_back(scrapQualFile); 
 		}
 		
-		string trimNameFile = outputDir + m->getRootName(m->getSimpleName(nameFile)) + "trim." + getOutputFileNameTag("name");
-		string scrapNameFile = outputDir + m->getRootName(m->getSimpleName(nameFile)) + "scrap." + getOutputFileNameTag("name");
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(nameFile));
+        variables["[tag]"] = "trim";
+		string trimNameFile = getOutputFileName("name",variables);
+        variables["[tag]"] = "scrap";
+		string scrapNameFile = getOutputFileName("name",variables);
 		
 		if (nameFile != "") {
 			m->readNames(nameFile, nameMap);
@@ -409,8 +408,11 @@ int TrimSeqsCommand::execute(){
 			outputTypes["name"].push_back(scrapNameFile); 
 		}
         
-        string trimCountFile = outputDir + m->getRootName(m->getSimpleName(countfile)) + "trim." + getOutputFileNameTag("count");
-		string scrapCountFile = outputDir + m->getRootName(m->getSimpleName(countfile)) + "scrap." + getOutputFileNameTag("count");
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(countfile));
+        variables["[tag]"] = "trim";
+        string trimCountFile = getOutputFileName("count",variables);
+        variables["[tag]"] = "scrap";
+		string scrapCountFile = getOutputFileName("count",variables);
 		
 		if (countfile != "") {
             CountTable ct;
@@ -429,7 +431,9 @@ int TrimSeqsCommand::execute(){
 		if(oligoFile != ""){
 			createGroup = getOligos(fastaFileNames, qualFileNames, nameFileNames);
 			if ((createGroup) && (countfile == "")){
-				outputGroupFileName = outputDir + m->getRootName(m->getSimpleName(fastaFile)) + getOutputFileNameTag("group");
+                map<string, string> myvariables; 
+                myvariables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastaFile));
+				outputGroupFileName = getOutputFileName("group",myvariables);
 				outputNames.push_back(outputGroupFileName); outputTypes["group"].push_back(outputGroupFileName);
 			}
 		}
@@ -488,9 +492,11 @@ int TrimSeqsCommand::execute(){
                 m->openInputFile(it->first, in);
                 
                 ofstream out;
-                string thisGroupName = outputDir + m->getRootName(m->getSimpleName(it->first));
-                if (countfile == "") { thisGroupName += getOutputFileNameTag("group"); outputNames.push_back(thisGroupName); outputTypes["group"].push_back(thisGroupName); }
-                else {  thisGroupName += getOutputFileNameTag("count"); outputNames.push_back(thisGroupName); outputTypes["count"].push_back(thisGroupName);  }
+                map<string, string> myvariables; 
+                myvariables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(it->first));
+                string thisGroupName = "";
+                if (countfile == "") { thisGroupName = getOutputFileName("group",variables); outputNames.push_back(thisGroupName); outputTypes["group"].push_back(thisGroupName); }
+                else {  thisGroupName = getOutputFileName("count",variables); outputNames.push_back(thisGroupName); outputTypes["count"].push_back(thisGroupName);  }
                 m->openOutputFile(thisGroupName, out);
                 
                 if (countfile != "") {  out << "Representative_Sequence\ttotal\t" << it->second << endl;  }
@@ -1519,7 +1525,10 @@ bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
 					
 					
 					ofstream temp;
-					fastaFileName = outputDir + m->getRootName(m->getSimpleName(fastaFile)) + comboGroupName + ".fasta";
+                    map<string, string> variables; 
+                    variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastaFile));
+                    variables["[tag]"] = comboGroupName;
+					fastaFileName = getOutputFileName("fasta", variables);
 					if (uniqueNames.count(fastaFileName) == 0) {
 						outputNames.push_back(fastaFileName);
 						outputTypes["fasta"].push_back(fastaFileName);
@@ -1530,7 +1539,8 @@ bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
 					m->openOutputFile(fastaFileName, temp);		temp.close();
 					
 					if(qFileName != ""){
-						qualFileName = outputDir + m->getRootName(m->getSimpleName(qFileName)) + comboGroupName + ".qual";
+                        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(qFileName));
+						qualFileName = getOutputFileName("qfile", variables);
 						if (uniqueNames.count(qualFileName) == 0) {
 							outputNames.push_back(qualFileName);
 							outputTypes["qfile"].push_back(qualFileName);
@@ -1541,7 +1551,8 @@ bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
 					}
 					
 					if(nameFile != ""){
-						nameFileName = outputDir + m->getRootName(m->getSimpleName(nameFile)) + comboGroupName + ".names";
+                        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(nameFile));
+						nameFileName = getOutputFileName("name", variables);
 						if (uniqueNames.count(nameFileName) == 0) {
 							outputNames.push_back(nameFileName);
 							outputTypes["name"].push_back(nameFileName);

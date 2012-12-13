@@ -14,9 +14,9 @@
 //**********************************************************************************************************************
 vector<string> LoadLogfileCommand::setParameters(){	
 	try {
-        CommandParameter plogfile("logfile", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(plogfile);		
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+        CommandParameter plogfile("logfile", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(plogfile);		
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -141,14 +141,14 @@ int LoadLogfileCommand::execute(){
             //look for "mothur >"
             int pos = line.find("mothur > "); //command line
             int pos2 = line.find("Output File "); //indicates command completed and we can update the current file
-            int pos3 = line.find("*****************"); 
+            int pos3 = line.find("/*****************"); 
             
             //skipping over parts where a command runs another command
             if (pos3 != string::npos) {
                 while (!in.eof()) {
                     if (m->control_pressed) { break; }
                     line = m->getline(in); m->gobble(in); 
-                    int posTemp = line.find("*****************");
+                    int posTemp = line.find("/*****************");
                     if (posTemp != string::npos) { break; }
                 }
             }
@@ -184,6 +184,7 @@ int LoadLogfileCommand::execute(){
                 Command* command = cFactory->getCommand(commandName);
                 map<string, vector<string> > thisOutputTypes = command->getOutputFiles();
                 
+                
                 for (map<string, vector<string> >::iterator it = thisOutputTypes.begin(); it != thisOutputTypes.end(); it++) {
                     if (currentTypes.count((it->first)) != 0) {  //do we save this type
                         //if yes whats its tag
@@ -191,25 +192,14 @@ int LoadLogfileCommand::execute(){
                         string thisTypesCurrentFile = "";
                         if (itCurrentFiles != currentFiles.end()) { thisTypesCurrentFile = itCurrentFiles->second;  }
                         
-                        string tag = command->getOutputFileNameTag(it->first, thisTypesCurrentFile); //pass it "fasta" and the current fasta file name.  some commands use the current name to get the extension, the others wont care.
-                        //search for the tag in the list of output files
-                        for (int h = 0; h < theseOutputNames.size(); h++) {
-                            string ending = theseOutputNames[h].substr(theseOutputNames[h].length()-tag.length(), tag.length());
-                            if (ending == tag) { //if it's there and this is a type we save a current version of, save it
-                                if ((it->first == "column") || (it->first == "phylip")) { //check for format
-                                    string RippedName = "";
-                                    bool foundDot = false;
-                                    for (int i = theseOutputNames[h].length()-1; i >= 0; i--) {
-                                        if (foundDot && (theseOutputNames[h][i] != '.')) {  RippedName = theseOutputNames[h][i] + RippedName; }
-                                        else if (foundDot && (theseOutputNames[h][i] == '.')) {  break; }
-                                        else if (!foundDot && (theseOutputNames[h][i] == '.')) {  foundDot = true; }
-                                    }
-                                    if ((RippedName == "phylip") || (RippedName == "lt") || (RippedName == "square"))  {  currentFiles["phylip"] = theseOutputNames[h];  }
-                                    else {  currentFiles["column"] = theseOutputNames[h]; }
-                                }else {  currentFiles[it->first] = theseOutputNames[h]; }
-                                break;
-                            }
-                        }
+                        //outputfilename pattern for this input type
+                        string pattern = command->getOutputPattern(it->first);
+                        updateCurrent(pattern, it->first, thisTypesCurrentFile, theseOutputNames, currentFiles);
+                        
+                        //cout << "current=\n\n";
+                        //for (map<string, string>::iterator itcc = currentFiles.begin(); itcc != currentFiles.end(); itcc++) {
+                          //  cout << itcc->first << '\t' << itcc->second << endl;
+                       // }
                     }
                 }
             }
@@ -243,6 +233,53 @@ int LoadLogfileCommand::execute(){
     }
 	catch(exception& e) {
 		m->errorOut(e, "LoadLogfileCommand", "execute");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+
+int LoadLogfileCommand::updateCurrent(string pattern, string type, string thisTypesCurrentFile, vector<string> filenames, map<string, string>& currentFiles){
+	try {
+        
+        vector<string> patterns; m->splitAtChar(pattern, patterns, '-');
+        
+        for (int i = 0; i < patterns.size(); i++) {
+            
+            vector<string> peices; m->splitAtChar(patterns[i], peices, ',');
+            //cout << "patterns i = " << patterns[i] << endl;
+            if (peices.size() != 0) {
+                string tag = peices[peices.size()-1];
+                //cout << "tag = " << tag << endl;
+                if (peices[peices.size()-1] == "[extension]") {  tag = m->getExtension(thisTypesCurrentFile);  }
+               
+                //search for the tag in the list of output files
+                for (int h = 0; h < filenames.size(); h++) {
+                    
+                    if (m->control_pressed) { return 0; }
+                    //cout << "filename h = " << filenames[h]<< endl;
+                    string ending = filenames[h].substr(filenames[h].length()-tag.length(), tag.length());
+                    if (ending == tag) { //if it's there and this is a type we save a current version of, save it
+                        if ((type == "column") || (type == "phylip")) { //check for format
+                            string RippedName = "";
+                            bool foundDot = false;
+                            for (int i = filenames[h].length()-1; i >= 0; i--) {
+                                if (foundDot && (filenames[h][i] != '.')) {  RippedName = filenames[h][i] + RippedName; }
+                                else if (foundDot && (filenames[h][i] == '.')) {  break; }
+                                else if (!foundDot && (filenames[h][i] == '.')) {  foundDot = true; }
+                            }
+                            if ((RippedName == "phylip") || (RippedName == "lt") || (RippedName == "square"))  {  currentFiles["phylip"] = filenames[h];  }
+                            else {  currentFiles["column"] = filenames[h]; }
+                        }else {  currentFiles[type] = filenames[h]; }
+                        break;
+                    }
+                }
+            }
+        }
+        
+        return 0;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "LoadLogfileCommand", "updateCurrent");
 		exit(1);
 	}
 }

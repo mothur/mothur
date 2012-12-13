@@ -15,16 +15,16 @@
 vector<string> ClassifySharedCommand::setParameters(){	
 	try {
 		//CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);        
-        CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pshared);		
-        CommandParameter pdesign("design", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pdesign);	
-        CommandParameter potupersplit("otupersplit", "Multiple", "log2-squareroot", "log2", "", "", "",false,false); parameters.push_back(potupersplit);
-        CommandParameter psplitcriteria("splitcriteria", "Multiple", "gainratio-infogain", "gainratio", "", "", "",false,false); parameters.push_back(psplitcriteria);
-		CommandParameter pnumtrees("numtrees", "Number", "", "100", "", "", "",false,false); parameters.push_back(pnumtrees);
+        CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none","summary",false,true,true); parameters.push_back(pshared);		
+        CommandParameter pdesign("design", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(pdesign);	
+        CommandParameter potupersplit("otupersplit", "Multiple", "log2-squareroot", "log2", "", "", "","",false,false); parameters.push_back(potupersplit);
+        CommandParameter psplitcriteria("splitcriteria", "Multiple", "gainratio-infogain", "gainratio", "", "", "","",false,false); parameters.push_back(psplitcriteria);
+		CommandParameter pnumtrees("numtrees", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pnumtrees);
 
-        CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
-		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
-  		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+        CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
+		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
+  		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -53,24 +53,19 @@ string ClassifySharedCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string ClassifySharedCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string tag = "";
-		map<string, vector<string> >::iterator it;
+string ClassifySharedCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "summary") {  tag = "summary"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return tag;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClassifySharedCommand", "getOutputFileName");
-		exit(1);
-	}
+        if (type == "summary") {  pattern = "[filename],[distance],summary"; } //makes file like: amazon.0.03.fasta
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ClassifySharedCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 
@@ -348,7 +343,10 @@ void ClassifySharedCommand::processSharedAndDesignData(vector<SharedRAbundVector
         randomForest.populateDecisionTrees();
         randomForest.calcForrestErrorRate();
         
-        string filename = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + lookup[0]->getLabel() + "." + getOutputFileNameTag("summary");
+        map<string, string> variables; 
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
+        variables["[distance]"] = lookup[0]->getLabel();
+        string filename = getOutputFileName("summary", variables);
         outputNames.push_back(filename); outputTypes["summary"].push_back(filename);
         
         randomForest.calcForrestVariableImportance(filename);

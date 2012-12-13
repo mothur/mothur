@@ -12,14 +12,14 @@
 //**********************************************************************************************************************
 vector<string> CooccurrenceCommand::setParameters() {	
 	try { 
-		CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pshared);		
-		CommandParameter pmetric("metric", "Multiple", "cscore-checker-combo-vratio", "cscore", "", "", "",false,false); parameters.push_back(pmetric);
-		CommandParameter pmatrix("matrixmodel", "Multiple", "sim1-sim2-sim3-sim4-sim5-sim6-sim7-sim8-sim9", "sim2", "", "", "",false,false); parameters.push_back(pmatrix);
-        CommandParameter pruns("iters", "Number", "", "1000", "", "", "",false,false); parameters.push_back(pruns);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
-		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
-        CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
+		CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none","summary",false,true,true); parameters.push_back(pshared);		
+		CommandParameter pmetric("metric", "Multiple", "cscore-checker-combo-vratio", "cscore", "", "", "","",false,false); parameters.push_back(pmetric);
+		CommandParameter pmatrix("matrixmodel", "Multiple", "sim1-sim2-sim3-sim4-sim5-sim6-sim7-sim8-sim9", "sim2", "", "", "","",false,false); parameters.push_back(pmatrix);
+        CommandParameter pruns("iters", "Number", "", "1000", "", "", "","",false,false); parameters.push_back(pruns);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
+        CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
 
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -51,24 +51,19 @@ string CooccurrenceCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string CooccurrenceCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string CooccurrenceCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "summary") {  outputFileName =  "cooccurence.summary"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "CooccurrenceCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "summary") {  pattern = "[filename],cooccurence.summary"; }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CooccurrenceCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 CooccurrenceCommand::CooccurrenceCommand(){	
@@ -196,7 +191,9 @@ int CooccurrenceCommand::execute(){
 		set<string> userLabels = labels;
 
         ofstream out;
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + getOutputFileNameTag("summary");
+        map<string, string> variables; 
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
+		string outputFileName = getOutputFileName("summary", variables);
         m->openOutputFile(outputFileName, out);
         outputNames.push_back(outputFileName);  outputTypes["summary"].push_back(outputFileName);
         out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);

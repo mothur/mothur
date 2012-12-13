@@ -13,15 +13,15 @@
 //**********************************************************************************************************************
 vector<string> OTUAssociationCommand::setParameters(){	
 	try {
-		CommandParameter pshared("shared", "InputTypes", "", "", "SharedRelMeta", "SharedRelMeta", "none",false,false); parameters.push_back(pshared);
-		CommandParameter prelabund("relabund", "InputTypes", "", "", "SharedRelMeta", "SharedRelMeta", "none",false,false); parameters.push_back(prelabund);
-        CommandParameter pmetadata("metadata", "InputTypes", "", "", "SharedRelMeta", "SharedRelMeta", "none",false,false); parameters.push_back(pmetadata);
-        CommandParameter pcutoff("cutoff", "Number", "", "10", "", "", "",false,false); parameters.push_back(pcutoff);
-		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
-		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
-		CommandParameter pmethod("method", "Multiple", "pearson-spearman-kendall", "pearson", "", "", "",false,false); parameters.push_back(pmethod);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pshared("shared", "InputTypes", "", "", "SharedRelMeta", "SharedRelMeta", "none","otucorr",false,false,true); parameters.push_back(pshared);
+		CommandParameter prelabund("relabund", "InputTypes", "", "", "SharedRelMeta", "SharedRelMeta", "none","otucorr",false,false); parameters.push_back(prelabund);
+        CommandParameter pmetadata("metadata", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pmetadata);
+        CommandParameter pcutoff("cutoff", "Number", "", "10", "", "", "","",false,false,true); parameters.push_back(pcutoff);
+		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
+		CommandParameter pmethod("method", "Multiple", "pearson-spearman-kendall", "pearson", "", "", "","",false,false,true); parameters.push_back(pmethod);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -55,24 +55,19 @@ string OTUAssociationCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string OTUAssociationCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string OTUAssociationCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "otucorr") {  outputFileName =  "otu.corr"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "OTUAssociationCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "otucorr") {  pattern = "[filename],[distance],[tag],otu.corr"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OTUAssociationCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 OTUAssociationCommand::OTUAssociationCommand(){	
@@ -331,8 +326,11 @@ int OTUAssociationCommand::processShared(){
 //**********************************************************************************************************************
 int OTUAssociationCommand::process(vector<SharedRAbundVector*>& lookup){
 	try {
-		
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(inputFileName)) + lookup[0]->getLabel() + "." + method + "." + getOutputFileNameTag("otucorr");
+		map<string, string> variables; 
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputFileName));
+        variables["[distance]"] = lookup[0]->getLabel();
+        variables["[tag]"] = method;
+		string outputFileName = getOutputFileName("otucorr",variables);
 		outputNames.push_back(outputFileName); outputTypes["otucorr"].push_back(outputFileName);
 		
 		ofstream out;
@@ -492,7 +490,11 @@ int OTUAssociationCommand::processRelabund(){
 int OTUAssociationCommand::process(vector<SharedRAbundFloatVector*>& lookup){
 	try {
 		
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(inputFileName)) + lookup[0]->getLabel() + "." + method + "." + getOutputFileNameTag("otucorr");
+		map<string, string> variables; 
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputFileName));
+        variables["[distance]"] = lookup[0]->getLabel();
+        variables["[tag]"] = method;
+        string outputFileName = getOutputFileName("otucorr",variables);
 		outputNames.push_back(outputFileName); outputTypes["otucorr"].push_back(outputFileName);
 		
 		ofstream out;

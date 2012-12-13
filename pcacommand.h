@@ -25,8 +25,9 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "pca";					}
 	string getCommandCategory()		{ return "Hypothesis Testing";	}
-	string getOutputFileNameTag(string, string);
+	
 	string getHelpString();	
+    string getOutputPattern(string);	
 	string getCitation() { return "McCune B, Grace JB, Urban DL (2002). Analysis of ecological communities. MjM Software Design: Gleneden Beach, OR. \nLegendre P, Legendre L (1998). Numerical Ecology. Elsevier: New York. \nhttp://www.mothur.org/wiki/Pca"; }
 	string getDescription()		{ return "pca"; }
 
@@ -44,7 +45,7 @@ private:
 	
 	//vector< vector<double> > createMatrix(vector<SharedRAbundFloatVector*>);
 	int process(vector<SharedRAbundFloatVector*>&);
-	void output(string, vector<string>, vector<vector<double> >&, vector<double>);
+	void output(string, string, vector<string>, vector<vector<double> >&, vector<double>);
 	
 };
 

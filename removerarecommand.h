@@ -26,8 +26,9 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "remove.rare";				}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
-	string getOutputFileNameTag(string, string);
+	
 	string getHelpString();	
+    string getOutputPattern(string);	
 	string getCitation() { return "http://www.mothur.org/wiki/Remove.rare"; }
 	string getDescription()		{ return "removes rare sequences from a sabund, rabund, shared or list and group file"; }
 

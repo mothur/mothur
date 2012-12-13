@@ -14,10 +14,10 @@
 //**********************************************************************************************************************
 vector<string> ReverseSeqsCommand::setParameters(){	
 	try {
-		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "fastaQual", "none",false,false); parameters.push_back(pfasta);
-		CommandParameter pqfile("qfile", "InputTypes", "", "", "none", "fastaQual", "none",false,false); parameters.push_back(pqfile);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "fastaQual", "none","fasta",false,false,true); parameters.push_back(pfasta);
+		CommandParameter pqfile("qfile", "InputTypes", "", "", "none", "fastaQual", "none","qfile",false,false,true); parameters.push_back(pqfile);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -44,25 +44,20 @@ string ReverseSeqsCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string ReverseSeqsCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string ReverseSeqsCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "fasta")            {   outputFileName =  "rc" + m->getExtension(inputName);   }
-            else if (type == "qfile")       {   outputFileName =  "rc" + m->getExtension(inputName);   }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ReverseSeqsCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "fasta") {  pattern = "[filename],rc,[extension]"; } 
+        else if (type == "qfile") {  pattern = "[filename],rc,[extension]"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ReverseSeqsCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 ReverseSeqsCommand::ReverseSeqsCommand(){	
@@ -182,7 +177,10 @@ int ReverseSeqsCommand::execute(){
 			ofstream outFASTA;
 			string tempOutputDir = outputDir;
 			if (outputDir == "") { tempOutputDir += m->hasPath(fastaFileName); } //if user entered a file with a path then preserve it
-			fastaReverseFileName = tempOutputDir + m->getRootName(m->getSimpleName(fastaFileName)) + getOutputFileNameTag("fasta", fastaFileName);
+            map<string, string> variables; 
+            variables["[filename]"] = tempOutputDir + m->getRootName(m->getSimpleName(fastaFileName));
+            variables["[extension]"] = m->getExtension(fastaFileName);
+			fastaReverseFileName = getOutputFileName("fasta", variables);
 			m->openOutputFile(fastaReverseFileName, outFASTA);
 			
 			while(!inFASTA.eof()){
@@ -210,7 +208,10 @@ int ReverseSeqsCommand::execute(){
 			ofstream outQual;
 			string tempOutputDir = outputDir;
 			if (outputDir == "") { tempOutputDir += m->hasPath(qualFileName); } //if user entered a file with a path then preserve it
-			string qualReverseFileName = tempOutputDir + m->getRootName(m->getSimpleName(qualFileName)) + getOutputFileNameTag("qfile", qualFileName);
+            map<string, string> variables; 
+            variables["[filename]"] = tempOutputDir + m->getRootName(m->getSimpleName(qualFileName));
+            variables["[extension]"] = m->getExtension(qualFileName);
+			string qualReverseFileName = getOutputFileName("qfile", variables);
             m->openOutputFile(qualReverseFileName, outQual);
 
 			while(!inQual.eof()){

@@ -19,26 +19,26 @@ extern "C" {
 //**********************************************************************************************************************
 vector<string> ClearcutCommand::setParameters(){	
 	try {
-		CommandParameter pphylip("phylip", "InputTypes", "", "", "FastaPhylip", "FastaPhylip", "none",false,false); parameters.push_back(pphylip);
-		CommandParameter pfasta("fasta", "InputTypes", "", "", "FastaPhylip", "FastaPhylip", "none",false,false); parameters.push_back(pfasta);
-		CommandParameter pverbose("verbose", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pverbose);
-		CommandParameter pquiet("quiet", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pquiet);
-		CommandParameter pversion("version", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pversion);
-		CommandParameter pseed("seed", "String", "", "", "*", "", "",false,false); parameters.push_back(pseed);
-		CommandParameter pnorandom("norandom", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pnorandom);
-		CommandParameter pshuffle("shuffle", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pshuffle);
-		CommandParameter pneighbor("neighbor", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pneighbor);
-		CommandParameter pexpblen("expblen", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pexpblen);
-		CommandParameter pexpdist("expdist", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pexpdist);
-		CommandParameter pDNA("DNA", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pDNA);
-		CommandParameter pprotein("protein", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pprotein);
-		CommandParameter pjukes("jukes", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pjukes);
-		CommandParameter pkimura("kimura", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pkimura);
-		CommandParameter pstdout("stdout", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pstdout);
-		CommandParameter pntrees("ntrees", "Number", "", "1", "", "", "",false,false); parameters.push_back(pntrees);
-		CommandParameter pmatrixout("matrixout", "String", "", "", "", "", "",false,false); parameters.push_back(pmatrixout);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pphylip("phylip", "InputTypes", "", "", "FastaPhylip", "FastaPhylip", "none","tree",false,false,true); parameters.push_back(pphylip);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "FastaPhylip", "FastaPhylip", "none","tree",false,false,true); parameters.push_back(pfasta);
+		CommandParameter pverbose("verbose", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pverbose);
+		CommandParameter pquiet("quiet", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pquiet);
+		CommandParameter pversion("version", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pversion);
+		CommandParameter pseed("seed", "String", "", "", "*", "", "","",false,false); parameters.push_back(pseed);
+		CommandParameter pnorandom("norandom", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pnorandom);
+		CommandParameter pshuffle("shuffle", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pshuffle);
+		CommandParameter pneighbor("neighbor", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pneighbor);
+		CommandParameter pexpblen("expblen", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pexpblen);
+		CommandParameter pexpdist("expdist", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pexpdist);
+		CommandParameter pDNA("DNA", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pDNA);
+		CommandParameter pprotein("protein", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pprotein);
+		CommandParameter pjukes("jukes", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pjukes);
+		CommandParameter pkimura("kimura", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pkimura);
+		CommandParameter pstdout("stdout", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pstdout);
+		CommandParameter pntrees("ntrees", "Number", "", "1", "", "", "","",false,false); parameters.push_back(pntrees);
+		CommandParameter pmatrixout("matrixout", "String", "", "", "", "", "","",false,false); parameters.push_back(pmatrixout);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -87,25 +87,20 @@ string ClearcutCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string ClearcutCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string ClearcutCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "tree") {  outputFileName =  "tre"; }
-            else if (type == "matrixout") {  outputFileName =  ""; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClearcutCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "matrixout") {  pattern = "[filename],"; } 
+        else if (type == "tree") {  pattern = "[filename],tre"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ClearcutCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 ClearcutCommand::ClearcutCommand(){	
@@ -264,7 +259,9 @@ int ClearcutCommand::execute() {
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//prepare filename
-		string outputName = outputDir + m->getRootName(m->getSimpleName(inputFile)) + getOutputFileNameTag("tree");
+        map<string, string> variables; 
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputFile));
+		string outputName = getOutputFileName("tree", variables);
 		outputNames.push_back(outputName); outputTypes["tree"].push_back(outputName);
 		
 		vector<char*> cPara;

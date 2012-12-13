@@ -14,14 +14,14 @@
 //**********************************************************************************************************************
 vector<string> ConsensusSeqsCommand::setParameters(){	
 	try {
-		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
-		CommandParameter pname("name", "InputTypes", "", "", "namecount", "none", "none",false,false); parameters.push_back(pname);
-        CommandParameter pcount("count", "InputTypes", "", "", "namecount", "none", "none",false,false); parameters.push_back(pcount);
-		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(plist);
-		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
-		CommandParameter pcutoff("cutoff", "Number", "", "100", "", "", "",false,false); parameters.push_back(pcutoff);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","fasta-name",false,true,true); parameters.push_back(pfasta);
+		CommandParameter pname("name", "InputTypes", "", "", "namecount", "none", "none","name",false,false,true); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "namecount", "none", "none","count",false,false,true); parameters.push_back(pcount);
+		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none","fasta-name",false,false,true); parameters.push_back(plist);
+		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
+		CommandParameter pcutoff("cutoff", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pcutoff);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -55,29 +55,23 @@ string ConsensusSeqsCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string ConsensusSeqsCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string ConsensusSeqsCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "fasta") {  outputFileName =  "cons.fasta"; }
-            else if (type == "name") {  outputFileName =  "cons.names"; }
-            else if (type == "count") {  outputFileName =  "cons.count_table"; }
-            else if (type == "summary") {  outputFileName =  "cons.summary"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ConsensusSeqsCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "fasta") {  pattern = "[filename],cons.fasta-[filename],[tag],cons.fasta"; } 
+        else if (type == "name") {  pattern = "[filename],cons.names-[filename],[tag],cons.names"; } 
+        else if (type == "count") {  pattern = "[filename],cons.count_table-[filename],[tag],cons.count_table"; }
+        else if (type == "summary") {  pattern = "[filename],cons.summary-[filename],[tag],cons.summary"; }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ConsensusSeqsCommand", "getOutputPattern");
+        exit(1);
+    }
 }
-
 //**********************************************************************************************************************
 ConsensusSeqsCommand::ConsensusSeqsCommand(){	
 	try {
@@ -238,7 +232,9 @@ int ConsensusSeqsCommand::execute(){
 		if (listfile == "") {
 			
 			ofstream outSummary;
-			string outputSummaryFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + getOutputFileNameTag("summary");
+            map<string, string> variables; 
+            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastafile));
+			string outputSummaryFile = getOutputFileName("summary", variables);
 			m->openOutputFile(outputSummaryFile, outSummary);
 			outSummary.setf(ios::fixed, ios::floatfield); outSummary.setf(ios::showpoint);
 			outputNames.push_back(outputSummaryFile); outputTypes["summary"].push_back(outputSummaryFile);
@@ -246,7 +242,7 @@ int ConsensusSeqsCommand::execute(){
 			outSummary << "PositioninAlignment\tA\tT\tG\tC\tGap\tNumberofSeqs\tConsensusBase" << endl;
 			
 			ofstream outFasta;
-			string outputFastaFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + getOutputFileNameTag("fasta");
+			string outputFastaFile = getOutputFileName("fasta", variables);
 			m->openOutputFile(outputFastaFile, outFasta);
 			outputNames.push_back(outputFastaFile); outputTypes["fasta"].push_back(outputFastaFile);
         
@@ -415,18 +411,21 @@ int ConsensusSeqsCommand::processList(ListVector*& list){
 	try{
 		
 		ofstream outSummary;
-		string outputSummaryFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + list->getLabel() + getOutputFileNameTag("summary");
+        map<string, string> variables; 
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastafile));
+        variables["[tag]"] = list->getLabel();
+		string outputSummaryFile = getOutputFileName("summary", variables);
 		m->openOutputFile(outputSummaryFile, outSummary);
 		outSummary.setf(ios::fixed, ios::floatfield); outSummary.setf(ios::showpoint);
 		outputNames.push_back(outputSummaryFile); outputTypes["summary"].push_back(outputSummaryFile);
 		
 		ofstream outName;
-		string outputNameFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + list->getLabel() + getOutputFileNameTag("name");
+		string outputNameFile = getOutputFileName("name",variables);
 		m->openOutputFile(outputNameFile, outName);
 		outputNames.push_back(outputNameFile); outputTypes["name"].push_back(outputNameFile);
 		
 		ofstream outFasta;
-		string outputFastaFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + list->getLabel() + getOutputFileNameTag("fasta");
+		string outputFastaFile = getOutputFileName("fasta",variables);
 		m->openOutputFile(outputFastaFile, outFasta);
 		outputNames.push_back(outputFastaFile); outputTypes["fasta"].push_back(outputFastaFile);
 		

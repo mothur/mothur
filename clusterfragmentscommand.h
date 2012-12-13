@@ -38,8 +38,9 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "cluster.fragments";		}
 	string getCommandCategory()		{ return "Sequence Processing";		}
-	string getOutputFileNameTag(string, string);
+	
 	string getHelpString();	
+    string getOutputPattern(string);	
 	string getCitation() { return "http://www.mothur.org/wiki/Cluster.fragments"; }
 	string getDescription()		{ return "creates a namesfile with sequences that are a fragment of a larger sequence"; }
 	

@@ -13,30 +13,30 @@
 vector<string> NewCommand::setParameters(){	
 	try {
 		//eaxamples of each type of parameter. more info on the types of parameters can be found in commandparameter.h
-		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false); parameters.push_back(pprocessors);
         
         //files that have dependancies
-        CommandParameter pphylip("phylip", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "none",false,false); parameters.push_back(pphylip);
-		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "ColumnName",false,false); parameters.push_back(pname);
-		CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "ColumnName",false,false); parameters.push_back(pcolumn);		
+        CommandParameter pphylip("phylip", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "none","outputType",false,false); parameters.push_back(pphylip);
+		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "ColumnName","outputType",false,false); parameters.push_back(pname);
+		CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "ColumnName","outputType",false,false); parameters.push_back(pcolumn);		
         //files that do not have dependancies - fasta is set to not be required whereas shared is set to be required
-		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pfasta);
-        CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pshared);		
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","outputType",false,false); parameters.push_back(pfasta);
+        CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none","outputType",false,true); parameters.push_back(pshared);		
 
         
-        CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
-		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
+        CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
+		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
 		
         //choose more than one multiple options
-        CommandParameter pcalc("calc", "Multiple", "jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan-morisitahorn-braycurtis", "jest-thetayc", "", "", "",true,false); parameters.push_back(pcalc);
+        CommandParameter pcalc("calc", "Multiple", "jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan-morisitahorn-braycurtis", "jest-thetayc", "", "", "","",true,false); parameters.push_back(pcalc);
         //choose only one multiple options
-        CommandParameter pdistance("distance", "Multiple", "column-lt-square", "column", "", "", "",false,false); parameters.push_back(pdistance);
+        CommandParameter pdistance("distance", "Multiple", "column-lt-square", "column", "", "", "","",false,false); parameters.push_back(pdistance);
         
-        CommandParameter ptiming("timing", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(ptiming);
+        CommandParameter ptiming("timing", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(ptiming);
         
         //every command must have inputdir and outputdir.  This allows mothur users to redirect input and output files.
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -64,26 +64,21 @@ string NewCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string NewCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string tag = "";
-		map<string, vector<string> >::iterator it;
+string NewCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "fileType1") {  tag = "tag1"; }
-            else if (type == "fileType2") {  tag = "tag2"; }
-            else if (type == "fileType3") {  tag = "tag3"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return tag;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "NewCommand", "getOutputFileName");
-		exit(1);
-	}
+        if (type == "fileType1") {  pattern = "[filename],tag1"; }
+        else if (type == "fileType2") {  pattern = "[filename],tag2"; }
+        else if (type == "fileType3") {  pattern = "[filename],tag3"; }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "NewCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 NewCommand::NewCommand(){	

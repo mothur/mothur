@@ -27,7 +27,7 @@ public:
 	string getCommandName()			{ return "quit";		}
 	string getCommandCategory()		{ return "Hidden";		}
 	string getHelpString() { return "The quit command will terminate mothur and should be in the following format: quit() or quit. \n"; }	
-    string getOutputFileNameTag(string, string) { return "";        }
+    string getOutputPattern(string) { return "";                }
 	string getCitation() { return "no citation"; }
 	string getDescription()		{ return "quit"; }
 

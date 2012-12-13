@@ -38,19 +38,19 @@
 //**********************************************************************************************************************
 vector<string> SummaryCommand::setParameters(){	
 	try {
-		CommandParameter plist("list", "InputTypes", "", "", "LRSS", "LRSS", "none",false,false); parameters.push_back(plist);
-		CommandParameter prabund("rabund", "InputTypes", "", "", "LRSS", "LRSS", "none",false,false); parameters.push_back(prabund);
-		CommandParameter psabund("sabund", "InputTypes", "", "", "LRSS", "LRSS", "none",false,false); parameters.push_back(psabund);
-		CommandParameter pshared("shared", "InputTypes", "", "", "LRSS", "LRSS", "none",false,false); parameters.push_back(pshared);
-        CommandParameter psubsample("subsample", "String", "", "", "", "", "",false,false); parameters.push_back(psubsample);
-        CommandParameter piters("iters", "Number", "", "1000", "", "", "",false,false); parameters.push_back(piters);
-		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
-		CommandParameter pcalc("calc", "Multiple", "sobs-chao-nseqs-coverage-ace-jack-shannon-shannoneven-npshannon-heip-smithwilson-simpson-simpsoneven-invsimpson-bootstrap-geometric-qstat-logseries-bergerparker-bstick-goodscoverage-efron-boneh-solow-shen", "sobs-chao-ace-jack-shannon-npshannon-simpson", "", "", "",true,false); parameters.push_back(pcalc);
-		CommandParameter pabund("abund", "Number", "", "10", "", "", "",false,false); parameters.push_back(pabund);
-		CommandParameter psize("size", "Number", "", "0", "", "", "",false,false); parameters.push_back(psize);
-		CommandParameter pgroupmode("groupmode", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pgroupmode);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter plist("list", "InputTypes", "", "", "LRSS", "LRSS", "none","summary",false,false,true); parameters.push_back(plist);
+		CommandParameter prabund("rabund", "InputTypes", "", "", "LRSS", "LRSS", "none","summary",false,false); parameters.push_back(prabund);
+		CommandParameter psabund("sabund", "InputTypes", "", "", "LRSS", "LRSS", "none","summary",false,false); parameters.push_back(psabund);
+		CommandParameter pshared("shared", "InputTypes", "", "", "LRSS", "LRSS", "none","summary",false,false,true); parameters.push_back(pshared);
+        CommandParameter psubsample("subsample", "String", "", "", "", "", "","",false,false); parameters.push_back(psubsample);
+        CommandParameter piters("iters", "Number", "", "1000", "", "", "","",false,false); parameters.push_back(piters);
+		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
+		CommandParameter pcalc("calc", "Multiple", "sobs-chao-nseqs-coverage-ace-jack-shannon-shannoneven-npshannon-heip-smithwilson-simpson-simpsoneven-invsimpson-bootstrap-geometric-qstat-logseries-bergerparker-bstick-goodscoverage-efron-boneh-solow-shen", "sobs-chao-ace-jack-shannon-npshannon-simpson", "", "", "","",true,false,true); parameters.push_back(pcalc);
+		CommandParameter pabund("abund", "Number", "", "10", "", "", "","",false,false); parameters.push_back(pabund);
+		CommandParameter psize("size", "Number", "", "0", "", "", "","",false,false); parameters.push_back(psize);
+		CommandParameter pgroupmode("groupmode", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pgroupmode);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -85,24 +85,19 @@ string SummaryCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string SummaryCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string SummaryCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "summary")            {   outputFileName =  "summary";   }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SummaryCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "summary") {  pattern = "[filename],summary-[filename],[tag],summary"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SummaryCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 SummaryCommand::SummaryCommand(){	
@@ -273,7 +268,7 @@ SummaryCommand::SummaryCommand(string option)  {
                 else { subsample = false; subsampleSize = -1; }
             }
             
-            if (subsample == false) { iters = 1; }
+            if (subsample == false) { iters = 0; }
             else {
                 //if you did not set a samplesize and are not using a sharedfile
                 if ((subsampleSize == -1) && (format != "sharedfile"))  { m->mothurOut("[ERROR]: If you want to subsample with a list, rabund or sabund file, you must provide the sample size.  You can do this by setting subsample=yourSampleSize.\n");  abort=true; }
@@ -307,8 +302,11 @@ int SummaryCommand::execute(){
 			numLines = 0;
 			numCols = 0;
 			
-			string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(inputFileNames[p])) + getOutputFileNameTag("summary");
-            string fileNameAve = outputDir + m->getRootName(m->getSimpleName(inputFileNames[p])) + "ave-std." + getOutputFileNameTag("summary");
+            map<string, string> variables; 
+            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputFileNames[p]));
+			string fileNameRoot = getOutputFileName("summary",variables);
+            variables["[tag]"] = "ave-std";
+            string fileNameAve = getOutputFileName("summary",variables);
             outputNames.push_back(fileNameRoot); outputTypes["summary"].push_back(fileNameRoot);
             
 			if (inputFileNames.size() > 1) {

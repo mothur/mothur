@@ -73,8 +73,9 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "dist.shared";				}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
-	string getOutputFileNameTag(string, string);
+	
 	string getHelpString();	
+    string getOutputPattern(string);	
 	string getCitation() { return "http://www.mothur.org/wiki/Dist.shared"; }
 	string getDescription()		{ return "generate a distance matrix that describes the dissimilarity among multiple groups"; }
 

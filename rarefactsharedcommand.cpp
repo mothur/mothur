@@ -16,20 +16,20 @@
 //**********************************************************************************************************************
 vector<string> RareFactSharedCommand::setParameters(){	
 	try {
-		CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pshared);
-        CommandParameter pdesign("design", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pdesign);
-		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
-		CommandParameter pfreq("freq", "Number", "", "100", "", "", "",false,false); parameters.push_back(pfreq);
-		CommandParameter piters("iters", "Number", "", "1000", "", "", "",false,false); parameters.push_back(piters);
-		CommandParameter pcalc("calc", "Multiple", "sharednseqs-sharedobserved", "sharedobserved", "", "", "",true,false); parameters.push_back(pcalc);
-        CommandParameter psubsampleiters("subsampleiters", "Number", "", "1000", "", "", "",false,false); parameters.push_back(psubsampleiters);
-        CommandParameter psubsample("subsample", "String", "", "", "", "", "",false,false); parameters.push_back(psubsample);
-		CommandParameter pjumble("jumble", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pjumble);
-		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
-        CommandParameter psets("sets", "String", "", "", "", "", "",false,false); parameters.push_back(psets);
-		CommandParameter pgroupmode("groupmode", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pgroupmode);
-        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(pshared);
+        CommandParameter pdesign("design", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pdesign);
+		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
+		CommandParameter pfreq("freq", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pfreq);
+		CommandParameter piters("iters", "Number", "", "1000", "", "", "","",false,false); parameters.push_back(piters);
+		CommandParameter pcalc("calc", "Multiple", "sharednseqs-sharedobserved", "sharedobserved", "", "", "","",true,false,true); parameters.push_back(pcalc);
+        CommandParameter psubsampleiters("subsampleiters", "Number", "", "1000", "", "", "","",false,false); parameters.push_back(psubsampleiters);
+        CommandParameter psubsample("subsample", "String", "", "", "", "", "","",false,false); parameters.push_back(psubsample);
+		CommandParameter pjumble("jumble", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pjumble);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
+        CommandParameter psets("sets", "String", "", "", "", "", "","",false,false); parameters.push_back(psets);
+		CommandParameter pgroupmode("groupmode", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pgroupmode);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -68,25 +68,20 @@ string RareFactSharedCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string RareFactSharedCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string RareFactSharedCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "sharedrarefaction") {  outputFileName =  "shared.rarefaction"; }
-            else if (type == "sharedr_nseqs") {  outputFileName =  "shared.r_nseqs"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "RareFactSharedCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "sharedrarefaction") {  pattern = "[filename],shared.rarefaction"; }
+        else if (type == "sharedr_nseqs") {  pattern = "[filename],shared.r_nseqs"; }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "RareFactSharedCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 RareFactSharedCommand::RareFactSharedCommand(){	
@@ -346,16 +341,18 @@ int RareFactSharedCommand::process(GroupMap& designMap, string thisSet){
             if (subset.size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); m->control_pressed = true; return 0; }
         }
         /******************************************************/
-       		
+        
+        map<string, string> variables; 
+        variables["[filename]"] = fileNameRoot;
 		ValidCalculators validCalculator;
 		for (int i=0; i<Estimators.size(); i++) {
 			if (validCalculator.isValidCalculator("sharedrarefaction", Estimators[i]) == true) { 
 				if (Estimators[i] == "sharedobserved") { 
-					rDisplays.push_back(new RareDisplay(new SharedSobs(), new SharedThreeColumnFile(fileNameRoot+getOutputFileNameTag("sharedrarefaction"), "")));
-					outputNames.push_back(fileNameRoot+getOutputFileNameTag("sharedrarefaction")); outputTypes["sharedrarefaction"].push_back(fileNameRoot+getOutputFileNameTag("sharedrarefaction"));
+					rDisplays.push_back(new RareDisplay(new SharedSobs(), new SharedThreeColumnFile(getOutputFileName("sharedrarefaction",variables), "")));
+					outputNames.push_back(getOutputFileName("sharedrarefaction",variables)); outputTypes["sharedrarefaction"].push_back(getOutputFileName("sharedrarefaction",variables));
 				}else if (Estimators[i] == "sharednseqs") { 
-					rDisplays.push_back(new RareDisplay(new SharedNSeqs(), new SharedThreeColumnFile(fileNameRoot+getOutputFileNameTag("sharedr_nseqs"), "")));
-					outputNames.push_back(fileNameRoot+getOutputFileNameTag("sharedr_nseqs")); outputTypes["sharedr_nseqs"].push_back(fileNameRoot+getOutputFileNameTag("sharedr_nseqs"));
+					rDisplays.push_back(new RareDisplay(new SharedNSeqs(), new SharedThreeColumnFile(getOutputFileName("sharedr_nseqs",variables), "")));
+					outputNames.push_back(getOutputFileName("sharedr_nseqs",variables)); outputTypes["sharedr_nseqs"].push_back(getOutputFileName("sharedr_nseqs",variables));
 				}
 			}
             file2Group[outputNames.size()-1] = thisSet;
@@ -546,15 +543,18 @@ int RareFactSharedCommand::subsampleLookup(vector<SharedRAbundVector*>& thisLook
             
             string thisfileNameRoot = fileNameRoot + toString(thisIter);
             
+            map<string, string> variables; 
+            variables["[filename]"] = thisfileNameRoot;
+            
             ValidCalculators validCalculator;
             for (int i=0; i<Estimators.size(); i++) {
                 if (validCalculator.isValidCalculator("sharedrarefaction", Estimators[i]) == true) { 
                     if (Estimators[i] == "sharedobserved") { 
-                        rDisplays.push_back(new RareDisplay(new SharedSobs(), new SharedThreeColumnFile(thisfileNameRoot+getOutputFileNameTag("sharedrarefaction"), "")));
-                        filenames["sharedrarefaction"].push_back(thisfileNameRoot+getOutputFileNameTag("sharedrarefaction"));
+                        rDisplays.push_back(new RareDisplay(new SharedSobs(), new SharedThreeColumnFile(getOutputFileName("sharedrarefaction",variables), "")));
+                        filenames["sharedrarefaction"].push_back(getOutputFileName("sharedrarefaction",variables));
                     }else if (Estimators[i] == "sharednseqs") { 
-                        rDisplays.push_back(new RareDisplay(new SharedNSeqs(), new SharedThreeColumnFile(thisfileNameRoot+getOutputFileNameTag("sharedr_nseqs"), "")));
-                        filenames["sharedr_nseqs"].push_back(thisfileNameRoot+getOutputFileNameTag("sharedr_nseqs"));
+                        rDisplays.push_back(new RareDisplay(new SharedNSeqs(), new SharedThreeColumnFile(getOutputFileName("sharedr_nseqs",variables), "")));
+                        filenames["sharedr_nseqs"].push_back(getOutputFileName("sharedr_nseqs",variables));
                     }
                 }
             }
@@ -597,7 +597,9 @@ int RareFactSharedCommand::subsampleLookup(vector<SharedRAbundVector*>& thisLook
             
             if (!m->control_pressed) {
                 //process results
-                string outputFile = fileNameRoot + "ave-std." + thisLookup[0]->getLabel() + "." + getOutputFileNameTag(it->first);
+                map<string, string> variables; variables["[filename]"] = fileNameRoot + "ave-std." + thisLookup[0]->getLabel() + ".";
+
+                string outputFile = getOutputFileName(it->first,variables);
                 ofstream out;
                 m->openOutputFile(outputFile, out);
                 outputNames.push_back(outputFile); outputTypes[it->first].push_back(outputFile);

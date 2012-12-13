@@ -28,8 +28,9 @@ public:
 	string getCitation() { return "http://www.mothur.org/wiki/Get.otulist"; }
 	string getDescription()		{ return "lists each OTU number and the sequence contained in that OTU"; }
 
-	string getOutputFileNameTag(string, string);
+	
 	string getHelpString();	
+    string getOutputPattern(string);	
 	
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	

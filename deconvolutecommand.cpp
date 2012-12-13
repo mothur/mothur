@@ -13,11 +13,11 @@
 //**********************************************************************************************************************
 vector<string> DeconvoluteCommand::setParameters(){	
 	try {
-		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
-		CommandParameter pname("name", "InputTypes", "", "", "namecount", "none", "none",false,false); parameters.push_back(pname);
-        CommandParameter pcount("count", "InputTypes", "", "", "namecount", "none", "none",false,false); parameters.push_back(pcount);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","fasta-name",false,true,true); parameters.push_back(pfasta);
+		CommandParameter pname("name", "InputTypes", "", "", "namecount", "none", "none","name",false,false,true); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "namecount", "none", "none","count",false,false,true); parameters.push_back(pcount);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -46,27 +46,23 @@ string DeconvoluteCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string DeconvoluteCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string DeconvoluteCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "fasta") {  outputFileName =  "unique" + m->getExtension(inputName); }
-            else if (type == "name") {  outputFileName =  "names"; }
-            else if (type == "count") {  outputFileName =  "count_table"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "DeconvoluteCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "fasta") {  pattern = "[filename],unique,[extension]"; } 
+        else if (type == "name") {  pattern = "[filename],names-[filename],[tag],names"; } 
+        else if (type == "count") {  pattern = "[filename],count_table-[filename],[tag],count_table"; }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "DeconvoluteCommand", "getOutputPattern");
+        exit(1);
+    }
 }
+
 //**********************************************************************************************************************
 DeconvoluteCommand::DeconvoluteCommand(){	
 	try {
@@ -192,20 +188,27 @@ int DeconvoluteCommand::execute() {
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 
 		//prepare filenames and open files
-		string outNameFile = outputDir + m->getRootName(m->getSimpleName(inFastaName)) + getOutputFileNameTag("name");
-        string outCountFile = outputDir + m->getRootName(m->getSimpleName(inFastaName)) + getOutputFileNameTag("count");
-		string outFastaFile = outputDir + m->getRootName(m->getSimpleName(inFastaName)) + getOutputFileNameTag("fasta", inFastaName);
+        map<string, string> variables; 
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inFastaName));
+        string outNameFile = getOutputFileName("name", variables);
+        string outCountFile = getOutputFileName("count", variables);
+        variables["[extension]"] = m->getExtension(inFastaName);
+		string outFastaFile = getOutputFileName("fasta", variables);
 		
 		map<string, string> nameMap;
 		map<string, string>::iterator itNames;
 		if (oldNameMapFName != "")  {  
             m->readNames(oldNameMapFName, nameMap); 
-            if (oldNameMapFName == outNameFile){ outNameFile = outputDir + m->getRootName(m->getSimpleName(inFastaName)) + "unique." + getOutputFileNameTag("name");   }
+            if (oldNameMapFName == outNameFile){ 
+                variables["[tag]"] = "unique";
+                outNameFile = getOutputFileName("name", variables);   }
         }
         CountTable ct;
         if (countfile != "")  {  
             ct.readTable(countfile);
-            if (countfile == outCountFile){ outCountFile = outputDir + m->getRootName(m->getSimpleName(inFastaName)) + "unique." + getOutputFileNameTag("count");   }
+            if (countfile == outCountFile){ 
+                variables["[tag]"] = "unique";
+                outCountFile = getOutputFileName("count", variables);   }
         }
 		
 		if (m->control_pressed) { return 0; }

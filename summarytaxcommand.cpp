@@ -13,13 +13,13 @@
 //**********************************************************************************************************************
 vector<string> SummaryTaxCommand::setParameters(){	
 	try {
-		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(ptaxonomy);
-        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none",false,false); parameters.push_back(pname);
-        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none",false,false); parameters.push_back(pcount);
-		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none",false,false); parameters.push_back(pgroup);
-		CommandParameter preftaxonomy("reftaxonomy", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(preftaxonomy);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "none", "none","summary",false,true,true); parameters.push_back(ptaxonomy);
+        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none","",false,false,true); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none","",false,false,true); parameters.push_back(pcount);
+		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
+		CommandParameter preftaxonomy("reftaxonomy", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(preftaxonomy);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -51,24 +51,19 @@ string SummaryTaxCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string SummaryTaxCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string SummaryTaxCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "summary")            {   outputFileName =  "tax.summary";   }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SummaryTaxCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "summary") {  pattern = "[filename],tax.summary"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SummaryTaxCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 SummaryTaxCommand::SummaryTaxCommand(){	
@@ -283,7 +278,9 @@ int SummaryTaxCommand::execute(){
 		
 		//print summary file
 		ofstream outTaxTree;
-		string summaryFile = outputDir + m->getRootName(m->getSimpleName(taxfile)) + getOutputFileNameTag("summary");
+        map<string, string> variables; 
+		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(taxfile));
+		string summaryFile = getOutputFileName("summary",variables);
 		m->openOutputFile(summaryFile, outTaxTree);
 		taxaSum->print(outTaxTree);
 		outTaxTree.close();

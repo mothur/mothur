@@ -13,14 +13,14 @@
 //**********************************************************************************************************************
 vector<string> ChimeraBellerophonCommand::setParameters(){	
 	try {
-		CommandParameter pfasta("fasta", "InputTypes", "", "", "none","none","none",false,true); parameters.push_back(pfasta);
-		CommandParameter pfilter("filter", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pfilter);
-		CommandParameter pcorrection("correction", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pcorrection);
-		CommandParameter pwindow("window", "Number", "", "0", "", "", "",false,false); parameters.push_back(pwindow);
-		CommandParameter pincrement("increment", "Number", "", "25", "", "", "",false,false); parameters.push_back(pincrement);
-		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none","none","none","chimera-accnos",false,true,true); parameters.push_back(pfasta);
+		CommandParameter pfilter("filter", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pfilter);
+		CommandParameter pcorrection("correction", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pcorrection);
+		CommandParameter pwindow("window", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pwindow);
+		CommandParameter pincrement("increment", "Number", "", "25", "", "", "","",false,false); parameters.push_back(pincrement);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -57,25 +57,20 @@ string ChimeraBellerophonCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string ChimeraBellerophonCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string ChimeraBellerophonCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "chimera") {  outputFileName =  "bellerophon.chimeras"; }
-            else if (type == "accnos") {  outputFileName =  "bellerophon.accnos"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChimeraBellerophonCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "chimera") {  pattern = "[filename],bellerophon.chimeras"; } 
+        else if (type == "accnos") {  pattern = "[filename],bellerophon.accnos"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ChimeraBellerophonCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 ChimeraBellerophonCommand::ChimeraBellerophonCommand(){	
@@ -242,9 +237,11 @@ int ChimeraBellerophonCommand::execute(){
 			
 			chimera = new Bellerophon(fastaFileNames[i], filter, correction, window, increment, processors, outputDir);	
 			
-			if (outputDir == "") { outputDir = m->hasPath(fastaFileNames[i]);  }//if user entered a file with a path then preserve it		
-			string outputFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[i])) +  getOutputFileNameTag("chimera");
-			string accnosFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[i])) +  getOutputFileNameTag("accnos");
+			if (outputDir == "") { outputDir = m->hasPath(fastaFileNames[i]);  }//if user entered a file with a path then preserve it	
+            map<string, string> variables; 
+            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[i]));
+			string outputFileName = getOutputFileName("chimera", variables);
+			string accnosFileName = getOutputFileName("accnos", variables);
 			
 			chimera->getChimeras();
 			

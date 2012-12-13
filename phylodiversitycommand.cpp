@@ -14,20 +14,20 @@
 vector<string> PhyloDiversityCommand::setParameters(){	
 	try {
 
-		CommandParameter ptree("tree", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(ptree);
-        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none",false,false); parameters.push_back(pname);
-        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none",false,false); parameters.push_back(pcount);
-		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none",false,false); parameters.push_back(pgroup);
-		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
-		CommandParameter piters("iters", "Number", "", "1000", "", "", "",false,false); parameters.push_back(piters);
-		CommandParameter pfreq("freq", "Number", "", "100", "", "", "",false,false); parameters.push_back(pfreq);
-		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
-		CommandParameter prarefy("rarefy", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(prarefy);
-		CommandParameter psummary("summary", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(psummary);
-		CommandParameter pcollect("collect", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pcollect);
-		CommandParameter pscale("scale", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pscale);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter ptree("tree", "InputTypes", "", "", "none", "none", "none","phylodiv",false,true,true); parameters.push_back(ptree);
+        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none","",false,false,true); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none","",false,false,true); parameters.push_back(pcount);
+		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
+		CommandParameter piters("iters", "Number", "", "1000", "", "", "","",false,false); parameters.push_back(piters);
+		CommandParameter pfreq("freq", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pfreq);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
+		CommandParameter prarefy("rarefy", "Boolean", "", "F", "", "", "","rarefy",false,false); parameters.push_back(prarefy);
+		CommandParameter psummary("summary", "Boolean", "", "T", "", "", "","summary",false,false); parameters.push_back(psummary);
+		CommandParameter pcollect("collect", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pcollect);
+		CommandParameter pscale("scale", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pscale);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -63,26 +63,21 @@ string PhyloDiversityCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string PhyloDiversityCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string PhyloDiversityCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "phylodiv") {  outputFileName =  "phylodiv"; }
-            else if (type == "rarefy") {  outputFileName =  "phylodiv.rarefaction"; }
-            else if (type == "summary") {  outputFileName =  "phylodiv.summary"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PhyloDiversityCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "phylodiv") {  pattern = "[filename],[tag],phylodiv"; } 
+        else if (type == "rarefy") {  pattern = "[filename],[tag],phylodiv.rarefaction"; } 
+        else if (type == "summary") {  pattern = "[filename],[tag],phylodiv.summary"; }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "PhyloDiversityCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 
 //**********************************************************************************************************************
@@ -284,9 +279,12 @@ int PhyloDiversityCommand::execute(){
 			if (m->control_pressed) { delete ct; for (int j = 0; j < trees.size(); j++) { delete trees[j]; } for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]); 	} return 0; }
 			
 			ofstream outSum, outRare, outCollect;
-			string outSumFile = outputDir + m->getRootName(m->getSimpleName(treefile))  + toString(i+1) + "." + getOutputFileNameTag("summary");
-			string outRareFile = outputDir + m->getRootName(m->getSimpleName(treefile))  + toString(i+1) + "." + getOutputFileNameTag("rarefy");
-			string outCollectFile = outputDir + m->getRootName(m->getSimpleName(treefile))  + toString(i+1) + "." + getOutputFileNameTag("phylodiv");
+            map<string, string> variables; 
+            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(treefile));
+            variables["[tag]"] = toString(i+1);
+			string outSumFile = getOutputFileName("summary",variables);
+			string outRareFile = getOutputFileName("rarefy",variables);
+			string outCollectFile = getOutputFileName("phylodiv",variables);
 			
 			if (summary)	{ m->openOutputFile(outSumFile, outSum); outputNames.push_back(outSumFile);		outputTypes["summary"].push_back(outSumFile);			}
 			if (rarefy)		{ m->openOutputFile(outRareFile, outRare); outputNames.push_back(outRareFile);	outputTypes["rarefy"].push_back(outRareFile);			}
@@ -301,6 +299,31 @@ int PhyloDiversityCommand::execute(){
 					randomLeaf.push_back(j); 
 				}
 			}
+            
+           /* float sum = 0;
+            vector<float> sums; sums.resize(m->getGroups().size(), 0);
+            vector<float> sumsAboveRoot; sumsAboveRoot.resize(m->getGroups().size(), 0);
+            for (int j = 0; j < trees[i]->getNumNodes(); j++) { 
+                if (trees[i]->tree[j].getBranchLength() < 0) { cout << j << '\t' << trees[i]->tree[j].getName() << '\t' << trees[i]->tree[j].getBranchLength() << endl; }
+                
+				sum += abs(trees[i]->tree[j].getBranchLength());
+                for (int k = 0; k < m->getGroups().size(); k++) {
+                    map<string, int>::iterator itGroup = trees[i]->tree[j].pcount.find(m->getGroups()[k]);
+                    if (itGroup != trees[i]->tree[j].pcount.end()) {  //this branch belongs to a group we care about
+                        if (j < rootForGroup[m->getGroups()[k]]) {
+                            sums[k] += abs(trees[i]->tree[j].getBranchLength());
+                        }else {
+                            sumsAboveRoot[k] += abs(trees[i]->tree[j].getBranchLength());
+                        }
+                    } 
+                }
+			}
+            cout << sum << endl; //exit(1);
+            
+            for (int k = 0; k < m->getGroups().size(); k++) {
+                cout << m->getGroups()[k] << "root node = " << rootForGroup[m->getGroups()[k]] << "sum below root = " << sums[k] << "sum above root = " << sumsAboveRoot[k] << endl;
+            }
+             exit(1);  */ 
 			
 			numLeafNodes = randomLeaf.size();  //reset the number of leaf nodes you are using 
 			
@@ -571,6 +594,7 @@ void PhyloDiversityCommand::printSumData(map< string, vector<float> >& div, ofst
 			else		{	score = div[mGroups[j]][numSampled] / (float)numIters;	}
 				
 			out << setprecision(4) << score << endl;
+            cout << mGroups[j] << '\t' << numSampled << '\t'<< setprecision(4) << score << endl;
 		}
 					
 		out.close();
@@ -635,7 +659,7 @@ vector<float> PhyloDiversityCommand::calcBranchLength(Tree* t, int leaf, vector<
         //you are a leaf
 		if(t->tree[index].getBranchLength() != -1){	
 			for (int k = 0; k < groups.size(); k++) { 
-				sums[k] += abs(t->tree[index].getBranchLength());	
+                sums[k] += abs(t->tree[index].getBranchLength());	
 			}
 		}
         
@@ -686,10 +710,10 @@ map<string, int> PhyloDiversityCommand::getRootForGroups(Tree* t){
             
             for (int j = 0; j < groups.size(); j++) {
                 
-                if (done[groups[j]] == false) { //we haven't found the root for this group yet
-                    
-                    done[groups[j]] = true;
-                    roots[groups[j]] = i; //set root to self to start
+                    if (done[groups[j]] == false) { //we haven't found the root for this group yet, initialize it
+                        done[groups[j]] = true;
+                        roots[groups[j]] = i; //set root to self to start
+                    }
                     
                     //while you aren't at root
                     while(t->tree[index].getParent() != -1){
@@ -709,14 +733,16 @@ map<string, int> PhyloDiversityCommand::getRootForGroups(Tree* t){
                         if (itGroup != t->tree[rc].pcount.end()) { RpcountSize++;  } 
                         
                         if ((LpcountSize != 0) && (RpcountSize != 0)) { //possible root
-                            roots[groups[j]] = index;
+                            if (index > roots[groups[j]]) {  roots[groups[j]] = index; }
                         }else { ;}
                         
                         index = t->tree[index].getParent();	
                     }
-                }
+                //}
             }
         }
+        
+        
         
         return roots;
         

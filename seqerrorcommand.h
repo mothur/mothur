@@ -24,8 +24,9 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "seq.error";				}
 	string getCommandCategory()		{ return "Sequence Processing";		}
-	string getOutputFileNameTag(string, string);
+	
 	string getHelpString();	
+    string getOutputPattern(string);	
 	string getCitation() { return "Schloss PD, Gevers D, Westcott SL (2011).  Reducing the effects of PCR amplification and sequencing artifacts on 16S rRNA-based studies.  PLoS ONE.  6:e27310.\nhttp://www.mothur.org/wiki/Seq.error"; }
 	string getDescription()		{ return "seq.error"; }
 

@@ -67,8 +67,9 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "summary.shared";			}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
-	string getOutputFileNameTag(string, string);
+	
 	string getHelpString();	
+    string getOutputPattern(string);	
 	string getCitation() { return "http://www.mothur.org/wiki/Summary.shared"; }
 	string getDescription()		{ return "generate a summary file containing calculator values for each line in the OTU data and for all possible comparisons between groups"; }
 

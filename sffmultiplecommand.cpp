@@ -13,46 +13,46 @@
 //**********************************************************************************************************************
 vector<string> SffMultipleCommand::setParameters(){	
 	try {		
-		CommandParameter pfile("file", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfile);
+		CommandParameter pfile("file", "InputTypes", "", "", "none", "none", "none","fasta-name",false,true,true); parameters.push_back(pfile);
         
         //sffinfo
-		CommandParameter ptrim("trim", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(ptrim);
+		CommandParameter ptrim("trim", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(ptrim);
         
         //trim.flows
- 		CommandParameter pmaxhomop("maxhomop", "Number", "", "9", "", "", "",false,false); parameters.push_back(pmaxhomop);
-		CommandParameter pmaxflows("maxflows", "Number", "", "450", "", "", "",false,false); parameters.push_back(pmaxflows);
-		CommandParameter pminflows("minflows", "Number", "", "450", "", "", "",false,false); parameters.push_back(pminflows);
-		CommandParameter ppdiffs("pdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(ppdiffs);
-		CommandParameter pbdiffs("bdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(pbdiffs);
-        CommandParameter pldiffs("ldiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(pldiffs);
-		CommandParameter psdiffs("sdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(psdiffs);
-        CommandParameter ptdiffs("tdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(ptdiffs);
-		CommandParameter psignal("signal", "Number", "", "0.50", "", "", "",false,false); parameters.push_back(psignal);
-		CommandParameter pnoise("noise", "Number", "", "0.70", "", "", "",false,false); parameters.push_back(pnoise);
-		CommandParameter porder("order", "String", "", "TACG", "", "", "",false,false); parameters.push_back(porder);
+ 		CommandParameter pmaxhomop("maxhomop", "Number", "", "9", "", "", "","",false,false); parameters.push_back(pmaxhomop);
+		CommandParameter pmaxflows("maxflows", "Number", "", "450", "", "", "","",false,false); parameters.push_back(pmaxflows);
+		CommandParameter pminflows("minflows", "Number", "", "450", "", "", "","",false,false); parameters.push_back(pminflows);
+		CommandParameter ppdiffs("pdiffs", "Number", "", "0", "", "", "","",false,false,true); parameters.push_back(ppdiffs);
+		CommandParameter pbdiffs("bdiffs", "Number", "", "0", "", "", "","",false,false,true); parameters.push_back(pbdiffs);
+        CommandParameter pldiffs("ldiffs", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pldiffs);
+		CommandParameter psdiffs("sdiffs", "Number", "", "0", "", "", "","",false,false); parameters.push_back(psdiffs);
+        CommandParameter ptdiffs("tdiffs", "Number", "", "0", "", "", "","",false,false); parameters.push_back(ptdiffs);
+		CommandParameter psignal("signal", "Number", "", "0.50", "", "", "","",false,false); parameters.push_back(psignal);
+		CommandParameter pnoise("noise", "Number", "", "0.70", "", "", "","",false,false); parameters.push_back(pnoise);
+		CommandParameter porder("order", "String", "", "TACG", "", "", "","",false,false); parameters.push_back(porder);
 
         //shhh.flows
-        CommandParameter plookup("lookup", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(plookup);
-		CommandParameter pcutoff("cutoff", "Number", "", "0.01", "", "", "",false,false); parameters.push_back(pcutoff);
-		CommandParameter pmaxiter("maxiter", "Number", "", "1000", "", "", "",false,false); parameters.push_back(pmaxiter);
-        CommandParameter plarge("large", "Number", "", "-1", "", "", "",false,false); parameters.push_back(plarge);
-		CommandParameter psigma("sigma", "Number", "", "60", "", "", "",false,false); parameters.push_back(psigma);
-		CommandParameter pmindelta("mindelta", "Number", "", "0.000001", "", "", "",false,false); parameters.push_back(pmindelta);
+        CommandParameter plookup("lookup", "InputTypes", "", "", "none", "none", "none","",false,false,true); parameters.push_back(plookup);
+		CommandParameter pcutoff("cutoff", "Number", "", "0.01", "", "", "","",false,false); parameters.push_back(pcutoff);
+		CommandParameter pmaxiter("maxiter", "Number", "", "1000", "", "", "","",false,false); parameters.push_back(pmaxiter);
+        CommandParameter plarge("large", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(plarge);
+		CommandParameter psigma("sigma", "Number", "", "60", "", "", "","",false,false); parameters.push_back(psigma);
+		CommandParameter pmindelta("mindelta", "Number", "", "0.000001", "", "", "","",false,false); parameters.push_back(pmindelta);
         
         //trim.seqs parameters
-        CommandParameter pallfiles("allfiles", "Boolean", "", "t", "", "", "",false,false); parameters.push_back(pallfiles);
-        CommandParameter pflip("flip", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pflip);
-		CommandParameter pmaxambig("maxambig", "Number", "", "-1", "", "", "",false,false); parameters.push_back(pmaxambig);
-		CommandParameter pminlength("minlength", "Number", "", "0", "", "", "",false,false); parameters.push_back(pminlength);
-		CommandParameter pmaxlength("maxlength", "Number", "", "0", "", "", "",false,false); parameters.push_back(pmaxlength);
-		CommandParameter pkeepforward("keepforward", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pkeepforward);
-        CommandParameter pkeepfirst("keepfirst", "Number", "", "0", "", "", "",false,false); parameters.push_back(pkeepfirst);
-		CommandParameter premovelast("removelast", "Number", "", "0", "", "", "",false,false); parameters.push_back(premovelast);
+        CommandParameter pallfiles("allfiles", "Boolean", "", "t", "", "", "","",false,false); parameters.push_back(pallfiles);
+        CommandParameter pflip("flip", "Boolean", "", "F", "", "", "","",false,false,true); parameters.push_back(pflip);
+		CommandParameter pmaxambig("maxambig", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(pmaxambig);
+		CommandParameter pminlength("minlength", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pminlength);
+		CommandParameter pmaxlength("maxlength", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pmaxlength);
+		CommandParameter pkeepforward("keepforward", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pkeepforward);
+        CommandParameter pkeepfirst("keepfirst", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pkeepfirst);
+		CommandParameter premovelast("removelast", "Number", "", "0", "", "", "","",false,false); parameters.push_back(premovelast);
 
         
-        CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+        CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -100,29 +100,22 @@ string SffMultipleCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string SffMultipleCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string SffMultipleCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "fasta")            {   outputFileName =  "fasta";   }
-            else if (type == "name")    {   outputFileName =  "names";   }
-            else if (type == "group")        {   outputFileName =  "groups";   }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SffMultipleCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "fasta") {  pattern = "[filename],fasta"; } 
+        else if (type == "name") {  pattern = "[filename],names"; } 
+        else if (type == "group") {  pattern = "[filename],groups"; }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SffMultipleCommand", "getOutputPattern");
+        exit(1);
+    }
 }
-
-
 //**********************************************************************************************************************
 SffMultipleCommand::SffMultipleCommand(){	
 	try {
@@ -132,8 +125,6 @@ SffMultipleCommand::SffMultipleCommand(){
 		outputTypes["fasta"] = tempOutNames;
         outputTypes["name"] = tempOutNames;
         outputTypes["group"] = tempOutNames;
-		outputTypes["flow"] = tempOutNames;
-		outputTypes["qfile"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SffMultipleCommand", "SffMultipleCommand");
@@ -168,8 +159,6 @@ SffMultipleCommand::SffMultipleCommand(string option)  {
 			//initialize outputTypes
 			vector<string> tempOutNames;
 			outputTypes["fasta"] = tempOutNames;
-			outputTypes["flow"] = tempOutNames;
-			outputTypes["qfile"] = tempOutNames;
             outputTypes["name"] = tempOutNames;
             outputTypes["group"] = tempOutNames;
 
@@ -379,9 +368,11 @@ int SffMultipleCommand::execute(){
         
         outputDir = m->hasPath(filename);
         string fileroot = outputDir + m->getRootName(m->getSimpleName(filename));
-        string fasta = fileroot + getOutputFileNameTag("fasta");
-        string name = fileroot + getOutputFileNameTag("name");
-        string group = fileroot + getOutputFileNameTag("group");
+        map<string, string> variables; 
+		variables["[filename]"] = fileroot;
+        string fasta = fileroot + getOutputFileName("fasta",variables);
+        string name = fileroot + getOutputFileName("name",variables);
+        string group = fileroot + getOutputFileName("group",variables);
         
         if (m->control_pressed) { return 0; }
         

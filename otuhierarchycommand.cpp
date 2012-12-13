@@ -12,11 +12,11 @@
 //**********************************************************************************************************************
 vector<string> OtuHierarchyCommand::setParameters(){	
 	try {
-		CommandParameter poutput("output", "Multiple", "name-number", "name", "", "", "",false,false); parameters.push_back(poutput);
-		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(plist);
-		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter poutput("output", "Multiple", "name-number", "name", "", "", "","",false,false); parameters.push_back(poutput);
+		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none","otuheirarchy",false,true,true); parameters.push_back(plist);
+		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -47,24 +47,19 @@ string OtuHierarchyCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string OtuHierarchyCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string OtuHierarchyCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "otuheirarchy") {  outputFileName =  "otu.hierarchy"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "OtuHierarchyCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "otuheirarchy") {  pattern = "[filename],[distance1],[tag],[distance2],otu.hierarchy"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OtuHierarchyCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 OtuHierarchyCommand::OtuHierarchyCommand(){	
@@ -199,7 +194,12 @@ int OtuHierarchyCommand::execute(){
 		}
 		
 		ofstream out;
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(listFile)) + lists[0].getLabel() + "-" + lists[1].getLabel() + "." + getOutputFileNameTag("otuheirarchy");
+        map<string, string> variables; 
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(listFile));
+        variables["[distance1]"] = lists[0].getLabel();
+        variables["[tag]"] = "-"; 
+        variables["[distance2]"] = lists[1].getLabel();
+		string outputFileName = getOutputFileName("otuheirarchy",variables);
 		m->openOutputFile(outputFileName, out);
 		
 		//go through each bin in "big" otu and output the bins in "little" otu which created it

@@ -14,13 +14,13 @@
 //**********************************************************************************************************************
 vector<string> ShhhSeqsCommand::setParameters(){	
 	try {
-		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
-		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pname);
-		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pgroup);
-		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
-		CommandParameter psigma("sigma", "Number", "", "0.01", "", "", "",false,false); parameters.push_back(psigma);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","fasta-map",false,true,true); parameters.push_back(pfasta);
+		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none","name",false,true,true); parameters.push_back(pname);
+		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pgroup);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+		CommandParameter psigma("sigma", "Number", "", "0.01", "", "", "","",false,false); parameters.push_back(psigma);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -55,26 +55,21 @@ string ShhhSeqsCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string ShhhSeqsCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string ShhhSeqsCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "fasta")            {   outputFileName =  "shhh_seqs.fasta";   }
-            else if (type == "name")    {   outputFileName =  "shhh_seqs.names";   }
-            else if (type == "map")        {   outputFileName =  "shhh_seqs.map";   }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ShhhSeqsCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "fasta")            {   pattern = "[filename],shhh_seqs.fasta";   }
+        else if (type == "name")    {   pattern = "[filename],shhh_seqs.names";   }
+        else if (type == "map")        {   pattern = "[filename],shhh_seqs.map";   }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ShhhSeqsCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 
 //**********************************************************************************************************************
@@ -207,10 +202,13 @@ int ShhhSeqsCommand::execute() {
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
-		if (outputDir == "") { outputDir = m->hasPath(fastafile);  }//if user entered a file with a path then preserve it				
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(fastafile)) + getOutputFileNameTag("fasta");
-		string nameFileName = outputDir + m->getRootName(m->getSimpleName(fastafile))  + getOutputFileNameTag("name");
-		string mapFileName = outputDir + m->getRootName(m->getSimpleName(fastafile))  + getOutputFileNameTag("map");
+		if (outputDir == "") { outputDir = m->hasPath(fastafile);  }//if user entered a file with a path then preserve it		
+		
+        map<string, string> variables; 
+		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastafile));
+		string outputFileName = getOutputFileName("fasta",variables);
+		string nameFileName = getOutputFileName("name",variables);
+		string mapFileName = getOutputFileName("map",variables);
 		
 		if (groupfile != "") {
 			//Parse sequences by group

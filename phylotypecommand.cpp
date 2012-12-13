@@ -16,12 +16,12 @@
 //**********************************************************************************************************************
 vector<string> PhylotypeCommand::setParameters(){	
 	try {
-		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(ptaxonomy);
-		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
-		CommandParameter pcutoff("cutoff", "Number", "", "-1", "", "", "",false,false); parameters.push_back(pcutoff);
-		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "none", "none","list-rabund-sabund",false,true,true); parameters.push_back(ptaxonomy);
+		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none","",false,false,true); parameters.push_back(pname);
+		CommandParameter pcutoff("cutoff", "Number", "", "-1", "", "", "","",false,false,true); parameters.push_back(pcutoff);
+		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -54,26 +54,21 @@ string PhylotypeCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string PhylotypeCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string PhylotypeCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "list") {  outputFileName =  "list"; }
-            else if (type == "rabund") {  outputFileName =  "rabund"; }
-            else if (type == "sabund") {  outputFileName =  "sabund"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PhylotypeCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "list") {  pattern = "[filename],[tag],list"; } 
+        else if (type == "rabund") {  pattern = "[filename],[tag],rabund"; } 
+        else if (type == "sabund") {  pattern = "[filename],[tag],sabund"; }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "PhylotypeCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 PhylotypeCommand::PhylotypeCommand(){	
@@ -217,15 +212,17 @@ int PhylotypeCommand::execute(){
 		if (m->control_pressed) { delete tree; return 0; }
 		
 		string fileroot = outputDir + m->getRootName(m->getSimpleName(taxonomyFileName));
-		
-		ofstream outList;
-		string outputListFile = fileroot + "tx." + getOutputFileNameTag("list");
+		map<string, string> variables; 
+        variables["[filename]"] = fileroot;
+        variables["[tag]"] = "tx";
+        ofstream outList;
+		string outputListFile = getOutputFileName("list",variables);
 		m->openOutputFile(outputListFile, outList);
 		ofstream outSabund;
-		string outputSabundFile = fileroot + "tx." + getOutputFileNameTag("sabund");
+		string outputSabundFile = getOutputFileName("sabund",variables);
 		m->openOutputFile(outputSabundFile, outSabund);
 		ofstream outRabund;
-		string outputRabundFile = fileroot + "tx." + getOutputFileNameTag("rabund");
+		string outputRabundFile = getOutputFileName("rabund",variables);
 		m->openOutputFile(outputRabundFile, outRabund);
 		
 		outputNames.push_back(outputListFile); outputTypes["list"].push_back(outputListFile);

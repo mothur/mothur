@@ -26,8 +26,9 @@ public:
     string getCommandName()			{ return "get.coremicrobiome";			}
     string getCommandCategory()		{ return "OTU-Based Approaches";		} 
     //commmand category choices: Sequence Processing, OTU-Based Approaches, Hypothesis Testing, Phylotype Analysis, General, Clustering and Hidden
-    string getOutputFileNameTag(string, string);
+    
 	string getHelpString();	
+    string getOutputPattern(string);	
     string getCitation() { return "http://www.mothur.org/wiki/Get.coremicrobiome"; }
     string getDescription()		{ return "determines the fraction of OTUs that are found in varying numbers of samples for different minimum relative abundances"; }
     

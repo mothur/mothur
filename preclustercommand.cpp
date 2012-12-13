@@ -13,14 +13,14 @@
 //**********************************************************************************************************************
 vector<string> PreClusterCommand::setParameters(){	
 	try {
-		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
-		CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none",false,false); parameters.push_back(pname);
-        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none",false,false); parameters.push_back(pcount);
-		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none",false,false); parameters.push_back(pgroup);
-		CommandParameter pdiffs("diffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(pdiffs);
-		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","fasta-name",false,true,true); parameters.push_back(pfasta);
+		CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none","name",false,false,true); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none","count",false,false,true); parameters.push_back(pcount);
+		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
+		CommandParameter pdiffs("diffs", "Number", "", "0", "", "", "","",false,false,true); parameters.push_back(pdiffs);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -54,27 +54,22 @@ string PreClusterCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string PreClusterCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string PreClusterCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "fasta") {  outputFileName =  "precluster" + m->getExtension(inputName); }
-            else if (type == "name") {  outputFileName =  "precluster.names"; }
-            else if (type == "count") {  outputFileName =  "precluster.count_table"; }
-            else if (type == "map") {  outputFileName =  "precluster.map"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PreClusterCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "fasta") {  pattern = "[filename],precluster,[extension]"; } 
+        else if (type == "name") {  pattern = "[filename],precluster.names"; } 
+        else if (type == "count") {  pattern = "[filename],precluster.count_table"; }
+        else if (type == "map") {  pattern =  "[filename],precluster.map"; }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "PreClusterCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 PreClusterCommand::PreClusterCommand(){	
@@ -239,10 +234,13 @@ int PreClusterCommand::execute(){
 		int start = time(NULL);
 		
 		string fileroot = outputDir + m->getRootName(m->getSimpleName(fastafile));
-		string newFastaFile = fileroot + getOutputFileNameTag("fasta", fastafile);
-		string newNamesFile = fileroot + getOutputFileNameTag("name");
-        string newCountFile = fileroot + getOutputFileNameTag("count");
-		string newMapFile = fileroot + getOutputFileNameTag("map"); //add group name if by group
+        map<string, string> variables; 
+        variables["[filename]"] = fileroot;
+		string newNamesFile = getOutputFileName("name",variables);
+        string newCountFile = getOutputFileName("count",variables);
+		string newMapFile = getOutputFileName("map",variables); //add group name if by group
+        variables["[extension]"] = m->getExtension(fastafile);
+		string newFastaFile = getOutputFileName("fasta", variables);
 		outputNames.push_back(newFastaFile); outputTypes["fasta"].push_back(newFastaFile);
 		if (countfile == "") { outputNames.push_back(newNamesFile); outputTypes["name"].push_back(newNamesFile); }
 		else { outputNames.push_back(newCountFile); outputTypes["count"].push_back(newCountFile); }

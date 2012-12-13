@@ -13,15 +13,15 @@
 //**********************************************************************************************************************
 vector<string> NMDSCommand::setParameters(){	
 	try {
-		CommandParameter paxes("axes", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(paxes);
-		CommandParameter pphylip("phylip", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pphylip);
-		CommandParameter pmaxdim("maxdim", "Number", "", "2", "", "", "",false,false); parameters.push_back(pmaxdim);
-		CommandParameter pmindim("mindim", "Number", "", "2", "", "", "",false,false); parameters.push_back(pmindim);
-		CommandParameter piters("iters", "Number", "", "10", "", "", "",false,false); parameters.push_back(piters);
-		CommandParameter pmaxiters("maxiters", "Number", "", "500", "", "", "",false,false); parameters.push_back(pmaxiters);
-		CommandParameter pepsilon("epsilon", "Number", "", "0.000000000001", "", "", "",false,false); parameters.push_back(pepsilon);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter paxes("axes", "InputTypes", "", "", "none", "none", "none","",false,false,true); parameters.push_back(paxes);
+		CommandParameter pphylip("phylip", "InputTypes", "", "", "none", "none", "none","nmds-stress",false,true,true); parameters.push_back(pphylip);
+		CommandParameter pmaxdim("maxdim", "Number", "", "2", "", "", "","",false,false); parameters.push_back(pmaxdim);
+		CommandParameter pmindim("mindim", "Number", "", "2", "", "", "","",false,false); parameters.push_back(pmindim);
+		CommandParameter piters("iters", "Number", "", "10", "", "", "","",false,false); parameters.push_back(piters);
+		CommandParameter pmaxiters("maxiters", "Number", "", "500", "", "", "","",false,false); parameters.push_back(pmaxiters);
+		CommandParameter pepsilon("epsilon", "Number", "", "0.000000000001", "", "", "","",false,false); parameters.push_back(pepsilon);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -55,27 +55,23 @@ string NMDSCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string NMDSCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string NMDSCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "nmds") {  outputFileName =  "nmds.axes"; }
-            else if (type == "stress") {  outputFileName =  "nmds.stress"; }
-            else if (type == "iters") {  outputFileName =  "nmds.iters"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "NMDSCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "nmds") {  pattern = "[filename],nmds.axes"; } 
+        else if (type == "stress") {  pattern = "[filename],nmds.stress"; } 
+        else if (type == "iters") {  pattern = "[filename],nmds.iters"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "NMDSCommand", "getOutputPattern");
+        exit(1);
+    }
 }
+
 //**********************************************************************************************************************
 NMDSCommand::NMDSCommand(){	
 	try {
@@ -208,8 +204,10 @@ int NMDSCommand::execute(){
 		vector< vector<double> > axes;
 		if (axesfile != "") {  axes = readAxes(names);		}
 		
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(phylipfile)) + getOutputFileNameTag("iters");
-		string stressFileName = outputDir + m->getRootName(m->getSimpleName(phylipfile)) + getOutputFileNameTag("stress");
+        map<string, string> variables; 
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(phylipfile));
+		string outputFileName = getOutputFileName("iters",variables);
+		string stressFileName = getOutputFileName("stress",variables);
 		outputNames.push_back(outputFileName); outputTypes["iters"].push_back(outputFileName);
 		outputNames.push_back(stressFileName); outputTypes["stress"].push_back(stressFileName);
 		
@@ -278,7 +276,7 @@ int NMDSCommand::execute(){
 		out.close(); out2.close();
 		
 		//output best config
-		string BestFileName = outputDir + m->getRootName(m->getSimpleName(phylipfile)) + getOutputFileNameTag("nmds");
+		string BestFileName = getOutputFileName("nmds",variables);
 		outputNames.push_back(BestFileName); outputTypes["nmds"].push_back(BestFileName);
 		
 		m->mothurOut("\nNumber of dimensions:\t" + toString(bestDim) + "\n");

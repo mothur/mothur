@@ -25,8 +25,9 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "summary.seqs";			}
 	string getCommandCategory()		{ return "Sequence Processing";		}
-	string getOutputFileNameTag(string, string);
+	
 	string getHelpString();	
+    string getOutputPattern(string);	
 	string getCitation() { return "http://www.mothur.org/wiki/Summary.seqs"; }
 	string getDescription()		{ return "summarize the quality of sequences in an unaligned or aligned fasta file"; }
 	

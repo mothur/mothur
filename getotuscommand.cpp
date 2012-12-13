@@ -15,13 +15,13 @@
 //**********************************************************************************************************************
 vector<string> GetOtusCommand::setParameters(){	
 	try {
-		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pgroup);
-		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(plist);
-		CommandParameter paccnos("accnos", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(paccnos);
-		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
-		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none","group",false,true, true); parameters.push_back(pgroup);
+		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none","list",false,true, true); parameters.push_back(plist);
+		CommandParameter paccnos("accnos", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(paccnos);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
+		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -54,25 +54,20 @@ string GetOtusCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string GetOtusCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string GetOtusCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "group")            {   outputFileName = "pick" + m->getExtension(inputName);  }
-            else if (type == "list")        {   outputFileName = "pick" + m->getExtension(inputName);  }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetOtusCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "group")       {   pattern = "[filename],[tag],pick,[extension]";    }
+        else if (type == "list")        {   pattern = "[filename],[tag],pick,[extension]";    }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GetOtusCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 GetOtusCommand::GetOtusCommand(){	
@@ -251,14 +246,20 @@ int GetOtusCommand::readListGroup(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(listfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(listfile)) + label + "." + getOutputFileNameTag("list", listfile);
+        map<string, string> variables; 
+        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(listfile));
+        variables["[tag]"] = label;
+        variables["[extension]"] = m->getExtension(listfile);
+		string outputFileName = getOutputFileName("list", variables);
 		
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		
 		string GroupOutputDir = outputDir;
 		if (outputDir == "") {  GroupOutputDir += m->hasPath(groupfile);  }
-		string outputGroupFileName = GroupOutputDir + m->getRootName(m->getSimpleName(groupfile)) + label + "." + getOutputFileNameTag("group", groupfile);
+        variables["[filename]"] = GroupOutputDir + m->getRootName(m->getSimpleName(groupfile));
+        variables["[extension]"] = m->getExtension(groupfile);
+		string outputGroupFileName = getOutputFileName("group", variables);
 		
 		ofstream outGroup;
 		m->openOutputFile(outputGroupFileName, outGroup);

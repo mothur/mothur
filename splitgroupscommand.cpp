@@ -15,13 +15,13 @@
 //**********************************************************************************************************************
 vector<string> SplitGroupCommand::setParameters(){	
 	try {		
-		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
-        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none",false,false); parameters.push_back(pname);
-        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "CountGroup", "none",false,false); parameters.push_back(pcount);
-		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "CountGroup", "none",false,false); parameters.push_back(pgroup);
-		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","fasta",false,true,true); parameters.push_back(pfasta);
+        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none","name",false,false,true); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "CountGroup", "none","count",false,false,true); parameters.push_back(pcount);
+		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "CountGroup", "none","group",false,false,true); parameters.push_back(pgroup);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -53,27 +53,23 @@ string SplitGroupCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string SplitGroupCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string SplitGroupCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "fasta")            {   outputFileName =  "fasta";   }
-            else if (type == "name")        {   outputFileName =  "names";   }
-            else if (type == "count")        {   outputFileName =  "count_table";   }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SplitGroupCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "fasta") {  pattern = "[filename],[group],fasta"; } 
+        else if (type == "name") {  pattern = "[filename],[group],names"; } 
+        else if (type == "count") {  pattern = "[filename],[group],count_table"; }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SplitGroupCommand", "getOutputPattern");
+        exit(1);
+    }
 }
+
 //**********************************************************************************************************************
 SplitGroupCommand::SplitGroupCommand(){	
 	try {
@@ -289,8 +285,13 @@ int SplitGroupCommand::runNameGroup(){
 			
 			m->mothurOut("Processing group: " + Groups[i]); m->mothurOutEndLine();
 			
-			string newFasta = fastafileRoot + Groups[i] + "." + getOutputFileNameTag("fasta");
-			string newName = namefileRoot + Groups[i] + "." + getOutputFileNameTag("name");
+            map<string, string> variables; 
+            variables["[filename]"] = fastafileRoot;
+            variables["[group]"] = Groups[i];
+
+			string newFasta = getOutputFileName("fasta",variables);
+            variables["[filename]"] = namefileRoot;
+			string newName = getOutputFileName("name",variables);
 			
 			parser->getSeqs(Groups[i], newFasta, false);
 			outputNames.push_back(newFasta); outputTypes["fasta"].push_back(newFasta);
@@ -334,12 +335,16 @@ int SplitGroupCommand::runCount(){
         for (int i=0; i<Groups.size(); i++) {
             temp = new ofstream;
             ffiles[Groups[i]] = temp;
-            string newFasta = outputDir + m->getRootName(m->getSimpleName(fastafile)) + Groups[i] + "." + getOutputFileNameTag("fasta");
+            map<string, string> variables; 
+            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastafile));
+            variables["[group]"] = Groups[i];
+            string newFasta = getOutputFileName("fasta",variables);
             outputNames.push_back(newFasta); outputTypes["fasta"].push_back(newFasta);
             m->openOutputFile(newFasta, (*temp));
             temp = new ofstream;
             cfiles[Groups[i]] = temp;
-            string newCount = outputDir + m->getRootName(m->getSimpleName(countfile)) + Groups[i] + "." + getOutputFileNameTag("count");
+            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(countfile));
+            string newCount = getOutputFileName("count",variables);
             m->openOutputFile(newCount, (*temp));
             outputNames.push_back(newCount); outputTypes["count"].push_back(newCount);
             (*temp) << "Representative_Sequence\ttotal\t" << Groups[i] << endl;

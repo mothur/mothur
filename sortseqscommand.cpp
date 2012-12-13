@@ -13,17 +13,17 @@
 //**********************************************************************************************************************
 vector<string> SortSeqsCommand::setParameters(){	
 	try {
-		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pfasta);
-        CommandParameter pflow("flow", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pflow);
-        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "FNGLT", "none",false,false); parameters.push_back(pname);
-        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "FNGLT", "none",false,false); parameters.push_back(pcount);
-		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "FNGLT", "none",false,false); parameters.push_back(pgroup);
-		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(ptaxonomy);
-		CommandParameter pqfile("qfile", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pqfile);
-		CommandParameter plarge("large", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(plarge);
-		CommandParameter paccnos("accnos", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(paccnos);
-        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "FNGLT", "none","fasta",false,false); parameters.push_back(pfasta);
+        CommandParameter pflow("flow", "InputTypes", "", "", "none", "FNGLT", "none","flow",false,false); parameters.push_back(pflow);
+        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "FNGLT", "none","name",false,false); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "FNGLT", "none","count",false,false); parameters.push_back(pcount);
+		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "FNGLT", "none","group",false,false); parameters.push_back(pgroup);
+		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "FNGLT", "none","taxonomy",false,false); parameters.push_back(ptaxonomy);
+		CommandParameter pqfile("qfile", "InputTypes", "", "", "none", "FNGLT", "none","qfile",false,false); parameters.push_back(pqfile);
+		CommandParameter plarge("large", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(plarge);
+		CommandParameter paccnos("accnos", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(paccnos);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -52,34 +52,27 @@ string SortSeqsCommand::getHelpString(){
 		exit(1);
 	}
 }
-
 //**********************************************************************************************************************
-string SortSeqsCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string SortSeqsCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "fasta")            {   outputFileName =  "sorted" + m->getExtension(inputName);   }
-            else if (type == "taxonomy")    {   outputFileName =  "sorted" + m->getExtension(inputName);   }
-            else if (type == "name")        {   outputFileName =  "sorted" + m->getExtension(inputName);   }
-            else if (type == "count")       {   outputFileName =  "sorted" + m->getExtension(inputName);   }
-            else if (type == "group")       {   outputFileName =  "sorted" + m->getExtension(inputName);   }
-            else if (type == "flow")        {   outputFileName =  "sorted" + m->getExtension(inputName);   }
-            else if (type == "qfile")       {   outputFileName =  "sorted" + m->getExtension(inputName);   }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SortSeqsCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "fasta")            {   pattern = "[filename],sorted,[extension]";    }
+        else if (type == "taxonomy")    {   pattern = "[filename],sorted,[extension]";    }
+        else if (type == "name")        {   pattern = "[filename],sorted,[extension]";    }
+        else if (type == "group")       {   pattern = "[filename],sorted,[extension]";    }
+        else if (type == "count")       {   pattern = "[filename],sorted,[extension]";    }
+        else if (type == "flow")        {   pattern = "[filename],sorted,[extension]";    }
+        else if (type == "qfile")      {   pattern = "[filename],sorted,[extension]";    }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SortSeqsCommand", "getOutputPattern");
+        exit(1);
+    }
 }
-
 //**********************************************************************************************************************
 SortSeqsCommand::SortSeqsCommand(){	
 	try {
@@ -358,7 +351,10 @@ int SortSeqsCommand::readFasta(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(fastafile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(fastafile)) + getOutputFileNameTag("fasta", fastafile);
+		map<string, string> variables; 
+        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(fastafile));
+        variables["[extension]"] = m->getExtension(fastafile);
+		string outputFileName = getOutputFileName("fasta", variables);
 		outputTypes["fasta"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
 		ofstream out;
@@ -531,7 +527,10 @@ int SortSeqsCommand::readFlow(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(flowfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(flowfile)) + getOutputFileNameTag("flow", flowfile);
+        map<string, string> variables; 
+        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(flowfile));
+        variables["[extension]"] = m->getExtension(flowfile);
+		string outputFileName = getOutputFileName("flow", variables);
 		outputTypes["flow"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
 		ofstream out;
@@ -709,7 +708,10 @@ int SortSeqsCommand::readQual(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(qualfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(qualfile)) + getOutputFileNameTag("qfile", qualfile);
+		map<string, string> variables; 
+        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(qualfile));
+        variables["[extension]"] = m->getExtension(qualfile);
+		string outputFileName = getOutputFileName("qfile", variables);
         outputTypes["qfile"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
 		ofstream out;
@@ -889,7 +891,10 @@ int SortSeqsCommand::readName(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(namefile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(namefile)) + getOutputFileNameTag("name", namefile); 
+        map<string, string> variables; 
+		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(namefile));
+        variables["[extension]"] = m->getExtension(namefile);
+		string outputFileName = getOutputFileName("name", variables);
         outputTypes["name"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
 		ofstream out;
@@ -965,7 +970,10 @@ int SortSeqsCommand::readCount(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(countfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(countfile)) + getOutputFileNameTag("count", countfile); 
+        map<string, string> variables; 
+		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(countfile));
+        variables["[extension]"] = m->getExtension(countfile);
+		string outputFileName = getOutputFileName("count", variables);
         outputTypes["count"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
 		ofstream out;
@@ -1047,7 +1055,10 @@ int SortSeqsCommand::readGroup(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(groupfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(groupfile)) + getOutputFileNameTag("group", groupfile);	
+		map<string, string> variables; 
+		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(groupfile));
+        variables["[extension]"] = m->getExtension(groupfile);
+		string outputFileName = getOutputFileName("group", variables);
         outputTypes["group"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
 		ofstream out;
@@ -1123,7 +1134,11 @@ int SortSeqsCommand::readTax(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(taxfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(taxfile)) + getOutputFileNameTag("taxonomy", taxfile); 
+		map<string, string> variables; 
+		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(taxfile));
+        variables["[extension]"] = m->getExtension(taxfile);
+		string outputFileName = getOutputFileName("taxonomy", variables);
+
         outputTypes["taxonomy"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
 		ofstream out;

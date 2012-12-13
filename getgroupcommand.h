@@ -21,8 +21,8 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "get.group";				}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
-	string getOutputFileNameTag(string, string) { return "";  }
 	string getHelpString();	
+    string getOutputPattern(string)	{ return "";  }
 	string getCitation() { return "http://www.mothur.org/wiki/Get.group"; }
 	string getDescription()		{ return "outputs group names"; }
 

@@ -15,19 +15,19 @@
 //**********************************************************************************************************************
 vector<string> ClassifyOtuCommand::setParameters(){	
 	try {
-		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(plist);
-		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(ptaxonomy);
-		CommandParameter preftaxonomy("reftaxonomy", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(preftaxonomy);
-        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none",false,false); parameters.push_back(pname);
-        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none",false,false); parameters.push_back(pcount);
-		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none",false,false); parameters.push_back(pgroup);
-        CommandParameter ppersample("persample", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(ppersample);
-        CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
-		CommandParameter pbasis("basis", "Multiple", "otu-sequence", "otu", "", "", "",false,false); parameters.push_back(pbasis);
-		CommandParameter pcutoff("cutoff", "Number", "", "51", "", "", "",false,true); parameters.push_back(pcutoff);
-		CommandParameter pprobs("probs", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pprobs);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(plist);
+		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "none", "none","constaxonomy",false,true,true); parameters.push_back(ptaxonomy);
+		CommandParameter preftaxonomy("reftaxonomy", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(preftaxonomy);
+        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none","",false,false,true); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none","",false,false,true); parameters.push_back(pcount);
+		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
+        CommandParameter ppersample("persample", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(ppersample);
+        CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
+		CommandParameter pbasis("basis", "Multiple", "otu-sequence", "otu", "", "", "","",false,false); parameters.push_back(pbasis);
+		CommandParameter pcutoff("cutoff", "Number", "", "51", "", "", "","",false,true); parameters.push_back(pcutoff);
+		CommandParameter pprobs("probs", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pprobs);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -67,25 +67,20 @@ string ClassifyOtuCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string ClassifyOtuCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string ClassifyOtuCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "constaxonomy") {  outputFileName =  "cons.taxonomy"; }
-            else if (type == "taxsummary") {  outputFileName =  "cons.tax.summary"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClassifyOtuCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "constaxonomy") {  pattern = "[filename],[distance],cons.taxonomy"; } 
+        else if (type == "taxsummary") {  pattern = "[filename],[distance],cons.tax.summary"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ClassifyOtuCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 ClassifyOtuCommand::ClassifyOtuCommand(){	
@@ -532,12 +527,15 @@ int ClassifyOtuCommand::process(ListVector* processList) {
 		if (outputDir == "") { outputDir += m->hasPath(listfile); }
 				
 		ofstream out;
-		string outputFile = outputDir + m->getRootName(m->getSimpleName(listfile)) + processList->getLabel() + "." +getOutputFileNameTag("constaxonomy");
+        map<string, string> variables; 
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(listfile));
+        variables["[distance]"] = processList->getLabel();
+		string outputFile = getOutputFileName("constaxonomy", variables);
 		m->openOutputFile(outputFile, out);
 		outputNames.push_back(outputFile); outputTypes["constaxonomy"].push_back(outputFile);
 		
 		ofstream outSum;
-		string outputSumFile = outputDir + m->getRootName(m->getSimpleName(listfile)) + processList->getLabel() + "." +getOutputFileNameTag("taxsummary");
+		string outputSumFile = getOutputFileName("taxsummary", variables);
 		m->openOutputFile(outputSumFile, outSum);
 		outputNames.push_back(outputSumFile); outputTypes["taxsummary"].push_back(outputSumFile);
 		
@@ -560,14 +558,15 @@ int ClassifyOtuCommand::process(ListVector* processList) {
             for (int i = 0; i < groups.size(); i++) {
                 groupIndex[groups[i]] = i;
                 ofstream* temp = new ofstream();
-                string outputFile = outputDir + m->getRootName(m->getSimpleName(listfile)) + processList->getLabel() + "." + groups[i] + "." +getOutputFileNameTag("constaxonomy");
+                variables["[distance]"] = processList->getLabel() + "." + groups[i];
+                string outputFile = getOutputFileName("constaxonomy", variables);
                 m->openOutputFile(outputFile, *temp);
                 (*temp) << "OTU\tSize\tTaxonomy" << endl;
                 outs.push_back(temp);
                 outputNames.push_back(outputFile); outputTypes["constaxonomy"].push_back(outputFile);
                 
                 ofstream* tempSum = new ofstream();
-                string outputSumFile = outputDir + m->getRootName(m->getSimpleName(listfile)) + processList->getLabel() + "." + groups[i] + "." +getOutputFileNameTag("taxsummary");
+                string outputSumFile = getOutputFileName("taxsummary", variables);
                 m->openOutputFile(outputSumFile, *tempSum);
                 outSums.push_back(tempSum);
                 outputNames.push_back(outputSumFile); outputTypes["taxsummary"].push_back(outputSumFile);

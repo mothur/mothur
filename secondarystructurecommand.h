@@ -39,8 +39,9 @@ class AlignCheckCommand : public Command {
 		vector<string> setParameters();
 		string getCommandName()			{ return "align.check";				}
 		string getCommandCategory()		{ return "Sequence Processing";		}
-		string getOutputFileNameTag(string, string);
+		
 	string getHelpString();	
+    string getOutputPattern(string);	
 		string getCitation() { return "http://www.mothur.org/wiki/Align.check"; }
 		string getDescription()		{ return "calculate the number of potentially misaligned bases in a 16S rRNA gene sequence alignment"; }
 
