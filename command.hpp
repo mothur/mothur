@@ -74,8 +74,13 @@ class Command {
                                         m->mothurOut("[ERROR]: Did not provide variable for " + pieces[i] + ".\n"); m->control_pressed = true;
                                     }else {
                                         if (it->second != "") {
-                                            if (it->first != "[filename]") { filename += it->second + "."; }
-                                            else { filename += it->second; }
+                                            if (it->first == "[filename]") { filename += it->second; }
+                                            else if (it->first == "[extension]") { 
+                                                if (filename.length() > 0) { //rip off last "."
+                                                    filename = filename.substr(0, filename.length()-1);
+                                                }
+                                                filename += it->second + "."; 
+                                            }else { filename += it->second + "."; }
                                         }
                                     }
                                 }else {

@@ -110,8 +110,9 @@ int ReadBlast::read(NameAssignment* nameMap) {
 				}
 			}
 		}else { m->mothurOut("Error in your blast file, cannot read."); m->mothurOutEndLine(); exit(1); }
-
-				
+string outDistFilem = "../kathryn/blastDist.dist";
+        ofstream outMDist;
+        m->openOutputFile(outDistFilem, outMDist);
 		//read file
 		while(!fileHandle.eof()){  
 		
@@ -193,6 +194,7 @@ int ReadBlast::read(NameAssignment* nameMap) {
                                         PDistCell value(itA->second, distance);
                                         matrix->addCell(it->first, value);
                                     }
+                                    outMDist << itA->first << '\t' << nameMap->get(it->first) << '\t' << distance << endl;
 								}else{
 									outDist << itA->first << '\t' << nameMap->get(it->first) << '\t' << distance << endl;
 								}
@@ -324,8 +326,8 @@ int ReadBlast::readNames(NameAssignment* nameMap) {
 		ifstream in;
 		m->openInputFile(blastfile, in);
 		
-		//ofstream outName;
-		//m->openOutputFile((blastfile + ".tempOutNames"), outName);
+		ofstream outName;
+		m->openOutputFile((blastfile + ".tempOutNames"), outName);
 		
 		//read first line
 		in >> prevName;
@@ -349,6 +351,7 @@ int ReadBlast::readNames(NameAssignment* nameMap) {
 			if (name != prevName) {
 				prevName = name;
 				nameMap->push_back(name);
+                outName << name << '\t' << name << endl;
 				num++;
 			}
 		}

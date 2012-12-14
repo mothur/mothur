@@ -27,9 +27,9 @@ public:
 	
 	int read(NameAssignment*);
 	SparseDistanceMatrix* getDistMatrix()		{	return matrix;		}
-	vector<seqDist> getOverlapMatrix()	{	return overlap;		}
-	string getOverlapFile()				{	return overlapFile;	}
-	string getDistFile()				{	return distFile;	}
+	vector<seqDist> getOverlapMatrix()          {	return overlap;		}
+	string getOverlapFile()                     {	return overlapFile;	}
+	string getDistFile()                        {	return distFile;	}
 	
 private:
 	string blastfile, overlapFile, distFile;
