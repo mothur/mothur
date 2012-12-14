@@ -24,7 +24,7 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "kruskalwallis";			}
 	string getCommandCategory()		{ return "Hypothesis Testing";	}
-	string getOutputFileNameTag(string, string);
+    string getOutputPattern(string);	
 	string getHelpString();	
 	string getCitation() { return "http://www.mothur.org/wiki/kruskalwallis"; }
 	string getDescription()		{ return "Non-parametric method for testing whether samples originate from the same distribution."; }
