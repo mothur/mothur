@@ -312,10 +312,13 @@ int MGClusterCommand::execute(){
 				outputTypes.clear();
 				return 0; 
 			}
-		
+            
+            
 			//cluster using cluster classes
 			while (distMatrix->getSmallDist() < cutoff && distMatrix->getNNodes() > 0){
 				
+                if (m->debug) {  cout << "numNodes=" << distMatrix->getNNodes() << " smallDist = " << distMatrix->getSmallDist() << endl; }
+                
 				cluster->update(cutoff);
 				
 				if (m->control_pressed) { 

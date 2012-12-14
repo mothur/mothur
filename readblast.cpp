@@ -110,9 +110,8 @@ int ReadBlast::read(NameAssignment* nameMap) {
 				}
 			}
 		}else { m->mothurOut("Error in your blast file, cannot read."); m->mothurOutEndLine(); exit(1); }
-string outDistFilem = "../kathryn/blastDist.dist";
-        ofstream outMDist;
-        m->openOutputFile(outDistFilem, outMDist);
+
+       
 		//read file
 		while(!fileHandle.eof()){  
 		
@@ -194,8 +193,7 @@ string outDistFilem = "../kathryn/blastDist.dist";
                                         PDistCell value(itA->second, distance);
                                         matrix->addCell(it->first, value);
                                     }
-                                    outMDist << itA->first << '\t' << nameMap->get(it->first) << '\t' << distance << endl;
-								}else{
+                                }else{
 									outDist << itA->first << '\t' << nameMap->get(it->first) << '\t' << distance << endl;
 								}
 							}
@@ -326,8 +324,8 @@ int ReadBlast::readNames(NameAssignment* nameMap) {
 		ifstream in;
 		m->openInputFile(blastfile, in);
 		
-		ofstream outName;
-		m->openOutputFile((blastfile + ".tempOutNames"), outName);
+		//ofstream outName;
+		//m->openOutputFile((blastfile + ".tempOutNames"), outName);
 		
 		//read first line
 		in >> prevName;
@@ -350,8 +348,12 @@ int ReadBlast::readNames(NameAssignment* nameMap) {
 			//is this a new name?
 			if (name != prevName) {
 				prevName = name;
-				nameMap->push_back(name);
-                outName << name << '\t' << name << endl;
+                
+                if (nameMap->get(name) != -1) { m->mothurOut("[ERROR]: trying to exact names from blast file, and I found dups.  Are you sequence names unique? quitting.\n"); m->control_pressed = true; }
+                else {
+                    nameMap->push_back(name);
+                }
+                //outName << name << '\t' << name << endl;
 				num++;
 			}
 		}

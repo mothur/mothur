@@ -809,7 +809,7 @@ int DistanceCommand::driverMPI(int startLine, int endLine, MPI_File& outMPI, flo
 			}
 			
 			if(i % 100 == 0){
-				//m->mothurOut(toString(i) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
+				m->mothurOut(toString(i) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
 				cout << i << '\t' << (time(NULL) - startTime) << endl;
 			}
 			
@@ -826,7 +826,7 @@ int DistanceCommand::driverMPI(int startLine, int endLine, MPI_File& outMPI, flo
 			
 		}
 		
-		//m->mothurOut(toString(endLine-1) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
+		m->mothurOut(toString(endLine-1) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
 		cout << (endLine-1) << '\t' << (time(NULL) - startTime) << endl;	
 		delete distCalculator;
 		return 1;
@@ -904,7 +904,7 @@ int DistanceCommand::driverMPI(int startLine, int endLine, string file, unsigned
 
 		
 			if(i % 100 == 0){
-				//m->mothurOut(toString(i) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
+				m->mothurOut(toString(i) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
 				cout << i << '\t' << (time(NULL) - startTime) << endl;
 			}
 			
@@ -920,7 +920,7 @@ int DistanceCommand::driverMPI(int startLine, int endLine, string file, unsigned
 			delete buf;
 		}
 		
-		//m->mothurOut(toString(endLine-1) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
+		m->mothurOut(toString(endLine-1) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
 		cout << (endLine-1) << '\t' << (time(NULL) - startTime) << endl;
 		MPI_File_close(&outMPI);
 		delete distCalculator;
@@ -999,7 +999,7 @@ int DistanceCommand::driverMPI(int startLine, int endLine, string file, unsigned
 
 		
 			if(i % 100 == 0){
-				//m->mothurOut(toString(i) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
+				m->mothurOut(toString(i) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
 				cout << i << '\t' << (time(NULL) - startTime) << endl;
 			}
 			
@@ -1015,7 +1015,7 @@ int DistanceCommand::driverMPI(int startLine, int endLine, string file, unsigned
 			delete buf;
 		}
 		
-		//m->mothurOut(toString(endLine-1) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
+		m->mothurOut(toString(endLine-1) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
 		cout << (endLine-1) << '\t' << (time(NULL) - startTime) << endl;
 		MPI_File_close(&outMPI);
 		delete distCalculator;
