@@ -429,7 +429,10 @@ int TreeGroupCommand::execute(){
 			m->Treenames.clear();
 			
 			//fills globaldatas tree names
-			m->Treenames = m->getGroups();
+			//m->Treenames = m->getGroups();
+            for (int k = 0; k < lookup.size(); k++) {
+                m->Treenames.push_back(lookup[k]->getGroup());
+            }
 		
 			if (m->control_pressed) { return 0; }
 			
@@ -463,7 +466,10 @@ int TreeGroupCommand::execute(){
 
 			list = readMatrix->getListVector();
 			SparseDistanceMatrix* dMatrix = readMatrix->getDMatrix();
-
+            
+            //clear globaldatas old tree names if any
+			m->Treenames.clear();
+            
 			//make treemap
             if (ct != NULL) { delete ct; }
 			ct = new CountTable();
@@ -475,17 +481,12 @@ int TreeGroupCommand::execute(){
                 nameMap.insert(bin); 
                 gps.insert(bin); 
                 groupMap[bin] = bin;
+                m->Treenames.push_back(bin);
             }
             ct->createTable(nameMap, groupMap, gps);
 			
 			vector<string> namesGroups = ct->getNamesOfGroups();
 			m->setGroups(namesGroups);
-		
-			//clear globaldatas old tree names if any
-			m->Treenames.clear();
-            
-			//fills globaldatas tree names
-			m->Treenames = m->getGroups();
 			
 			//used in tree constructor 
 			m->runParse = false;

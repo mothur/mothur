@@ -22,7 +22,9 @@ void SharedUtil::getSharedVectors(vector<string> Groups, vector<SharedRAbundVect
 		}
 		
 		lookup.clear();
-		
+        
+		sort(Groups.begin(), Groups.end());
+        
 		//create and initialize vector of sharedvectors, one for each group
 		for (int i = 0; i < Groups.size(); i++) { 
 			SharedRAbundVector* temp = new SharedRAbundVector(order->getNumBins());
