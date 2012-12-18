@@ -27,6 +27,8 @@ public:
 	Calculator(string n, int c, bool f, bool a) : name(n), cols(c), multiple(f), needsAll(a) { m = MothurOut::getInstance(); };
 	virtual EstOutput getValues(SAbundVector*) = 0;	
 	virtual EstOutput getValues(vector<SharedRAbundVector*>) = 0;
+    //optional calc that returns the otus labels of shared otus
+    virtual EstOutput getValues(vector<SharedRAbundVector*> sv , vector<string>&) { data = getValues(sv); return data; }
 	virtual void print(ostream& f)	{ f.setf(ios::fixed, ios::floatfield); f.setf(ios::showpoint);
 									  f << data[0]; for(int i=1;i<data.size();i++){	f << '\t' << data[i];	}}
 	virtual string getName()		{	return name;	}

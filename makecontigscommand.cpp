@@ -11,8 +11,13 @@
 //**********************************************************************************************************************
 vector<string> MakeContigsCommand::setParameters(){	
 	try {
-		CommandParameter pfasta("ffastq", "InputTypes", "", "", "none", "none", "none","fasta-qfile",false,true,true); parameters.push_back(pfasta);
-        CommandParameter prfasta("rfastq", "InputTypes", "", "", "none", "none", "none","fasta-qfile",false,true,true); parameters.push_back(prfasta);
+		CommandParameter pfastq("ffastq", "InputTypes", "", "", "FastaFastqFile", "FastaFastqFile", "fastqGroup","fasta-qfile",false,false,true); parameters.push_back(pfastq);
+        CommandParameter prfastq("rfastq", "InputTypes", "", "", "none", "none", "fastqGroup","fasta-qfile",false,false,true); parameters.push_back(prfastq);
+        CommandParameter pfasta("ffasta", "InputTypes", "", "", "FastaFastqFile", "FastaFastqFile", "fastaGroup","fasta",false,false,true); parameters.push_back(pfasta);
+        CommandParameter prfasta("rfasta", "InputTypes", "", "", "none", "none", "none","fastaGroup",false,false,true); parameters.push_back(prfasta);
+        CommandParameter pfqual("fqfile", "InputTypes", "", "", "none", "none", "qfileGroup","qfile",false,false,true); parameters.push_back(pfqual);
+        CommandParameter prqual("rqfile", "InputTypes", "", "", "none", "none", "qfileGroup","qfile",false,false,true); parameters.push_back(prqual);
+        CommandParameter pfile("file", "InputTypes", "", "", "FastaFastqFile", "FastaFastqFile", "none","fasta-qfile",false,false,true); parameters.push_back(pfile);
         CommandParameter poligos("oligos", "InputTypes", "", "", "none", "none", "none","group",false,false,true); parameters.push_back(poligos);
 		CommandParameter ppdiffs("pdiffs", "Number", "", "0", "", "", "","",false,false,true); parameters.push_back(ppdiffs);
 		CommandParameter pbdiffs("bdiffs", "Number", "", "0", "", "", "","",false,false,true); parameters.push_back(pbdiffs);
@@ -44,10 +49,14 @@ vector<string> MakeContigsCommand::setParameters(){
 string MakeContigsCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The make.contigs command reads a forward fastq file and a reverse fastq file and outputs new fasta and quality files.\n";
+		helpString += "The make.contigs command reads a file, forward fastq file and a reverse fastq file or forward fasta and reverse fasta files and outputs new fasta.  It will also provide new quality files if the fastq or file parameter is used.\n";
         helpString += "If an oligos file is provided barcodes and primers will be trimmed, and a group file will be created.\n";
 		helpString += "The make.contigs command parameters are ffastq, rfastq, oligos, tdiffs, bdiffs, ldiffs, sdiffs, pdiffs, align, match, mismatch, gapopen, gapextend, allfiles and processors.\n";
-		helpString += "The ffastq and rfastq parameters are required.\n";
+		helpString += "The ffastq and rfastq, file, or ffasta and rfasta parameters are required.\n";
+        helpString += "The file parameter is 2 column file containing the forward fastq files in the first column and their matching reverse fastq files in the second column.  Mothur will process each pair and create a combined fasta and qual file with all the sequences.\n";
+        helpString += "The ffastq and rfastq parameters are used to provide a forward fastq and reverse fastq file to process.  If you provide one, you must provide the other.\n";
+        helpString += "The ffasta and rfasta parameters are used to provide a forward fasta and reverse fasta file to process.  If you provide one, you must provide the other.\n";
+        helpString += "The fqfile and rqfile parameters are used to provide a forward quality and reverse quality files to process with the ffasta and rfasta parameters.  If you provide one, you must provide the other.\n";
 		helpString += "The align parameter allows you to specify the alignment method to use.  Your options are: gotoh and needleman. The default is needleman.\n";
         helpString += "The tdiffs parameter is used to specify the total number of differences allowed in the sequence. The default is pdiffs + bdiffs + sdiffs + ldiffs.\n";
 		helpString += "The bdiffs parameter is used to specify the number of differences allowed in the barcode. The default is 0.\n";
@@ -157,6 +166,46 @@ MakeContigsCommand::MakeContigsCommand(string option)  {
 					if (path == "") {	parameters["rfastq"] = inputDir + it->second;		}
 				}
                 
+                it = parameters.find("ffasta");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["ffasta"] = inputDir + it->second;		}
+				}
+                
+                it = parameters.find("rfasta");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["rfasta"] = inputDir + it->second;		}
+				}
+                
+                it = parameters.find("fqfile");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["fqfile"] = inputDir + it->second;		}
+				}
+                
+                it = parameters.find("rqfile");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["rqfile"] = inputDir + it->second;		}
+				}
+                
+                it = parameters.find("file");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["file"] = inputDir + it->second;		}
+				}
+                
                 it = parameters.find("oligos");
 				//user has given a template file
 				if(it != parameters.end()){ 
@@ -167,12 +216,36 @@ MakeContigsCommand::MakeContigsCommand(string option)  {
             }
             
             ffastqfile = validParameter.validFile(parameters, "ffastq", true);
-			if (ffastqfile == "not open") { ffastqfile = ""; abort = true; }	
-			else if (ffastqfile == "not found") { ffastqfile = ""; abort=true;  m->mothurOut("The ffastq parameter is required.\n"); }
+			if (ffastqfile == "not open") {  abort = true; }	
+			else if (ffastqfile == "not found") { ffastqfile = ""; }
 			
 			rfastqfile = validParameter.validFile(parameters, "rfastq", true);
-			if (rfastqfile == "not open") { rfastqfile = ""; abort = true; }	
-			else if (rfastqfile == "not found") { rfastqfile = ""; abort=true;  m->mothurOut("The rfastq parameter is required.\n"); }
+			if (rfastqfile == "not open") {  abort = true; }	
+			else if (rfastqfile == "not found") { rfastqfile = "";  }
+            
+            ffastafile = validParameter.validFile(parameters, "ffasta", true);
+			if (ffastafile == "not open") {  abort = true; }	
+			else if (ffastafile == "not found") { ffastafile = ""; }
+			
+			rfastafile = validParameter.validFile(parameters, "rfasta", true);
+			if (rfastafile == "not open") {  abort = true; }	
+			else if (rfastafile == "not found") { rfastafile = "";  }
+            
+            fqualfile = validParameter.validFile(parameters, "fqfile", true);
+			if (fqualfile == "not open") {  abort = true; }	
+			else if (fqualfile == "not found") { fqualfile = ""; }
+			
+			rqualfile = validParameter.validFile(parameters, "rqfile", true);
+			if (rqualfile == "not open") {  abort = true; }	
+			else if (rqualfile == "not found") { rqualfile = "";  }
+            
+            file = validParameter.validFile(parameters, "file", true);
+			if (file == "not open") {  abort = true; }	
+			else if (file == "not found") { file = "";  }
+            
+            if ((file == "") && (ffastafile == "") && (ffastqfile == "")) { abort = true; m->mothurOut("[ERROR]: ffastq and rfastq parameters are required.\n"); }
+            if ((ffastqfile != "") && (rfastqfile == "")) {  abort = true; }
+            if ((ffastqfile == "") && (rfastqfile != "")) {  abort = true; }
             
             oligosfile = validParameter.validFile(parameters, "oligos", true);
 			if (oligosfile == "not found")      {	oligosfile = "";	}
@@ -249,13 +322,13 @@ int MakeContigsCommand::execute(){
         //read ffastq and rfastq files creating fasta and qual files.
         //this function will create a forward and reverse, fasta and qual files for each processor.
         //files has an entry for each processor. files[i][0] = forwardFasta, files[i][1] = forwardQual, files[i][2] = reverseFasta, files[i][3] = reverseQual
-        int numReads = 0;
+        unsigned long int numReads = 0;
         int start = time(NULL);
         longestBase = 1000;
         m->mothurOut("Reading fastq data...\n"); 
         vector< vector<string> > files = readFastqFiles(numReads);  
         m->mothurOut("Done.\n");
-    
+       
         if (m->control_pressed) { return 0; }
         
         vector<vector<string> > fastaFileNames;
@@ -884,7 +957,7 @@ int MakeContigsCommand::driver(vector<string> files, string outputFasta, string 
 	}
 }
 //**********************************************************************************************************************
-vector< vector<string> > MakeContigsCommand::readFastqFiles(int& count){
+vector< vector<string> > MakeContigsCommand::readFastqFiles(unsigned long int& count){
     try {
         vector< vector<string> > files;
         
@@ -947,11 +1020,13 @@ vector< vector<string> > MakeContigsCommand::readFastqFiles(int& count){
             else { ignorer = true; }
             
             vector<pairFastqRead> reads = getReads(ignoref, ignorer, thisFread, thisRread, uniques);
-            
+           
             for (int i = 0; i < reads.size(); i++) {
                 fastqRead fread = reads[i].forward;
                 fastqRead rread = reads[i].reverse;
                 
+                if (m->debug) { m->mothurOut(toString(count) + '\t' + fread.name + '\t' + rread.name + '\n'); }
+               
                 if (checkReads(fread, rread)) {
                     if (m->control_pressed) { for (it = tempfiles.begin(); it!=tempfiles.end(); it++) { for (int i = 0; i < (it->second).size(); i++) { (*(it->second)[i]).close();  delete (it->second)[i]; } } for (int i = 0; i < files.size(); i++) {  for(int j = 0; j < files[i].size(); j++) { m->mothurRemove(files[i][j]); } } inForward.close(); inReverse.close(); return files; }
                     
@@ -1015,25 +1090,42 @@ vector<pairFastqRead> MakeContigsCommand::getReads(bool ignoref, bool ignorer, f
                 pairFastqRead temp(forward, reverse);
                 reads.push_back(temp);
             }else {
-                //look for forward pair
-                itUniques = uniques.find(forward.name);
-                if (itUniques != uniques.end()) {  //we have the pair for this read
-                    pairFastqRead temp(forward, itUniques->second);
-                    reads.push_back(temp);
-                    uniques.erase(itUniques);
-                }else { //save this read for later
-                    uniques[forward.name] = forward;
+                bool match = false;
+                //if no match are the names only different by 1 and 2?
+                string tempFRead = forward.name.substr(0, forward.name.length()-1);
+                string tempRRead = reverse.name.substr(0, reverse.name.length()-1);
+                if (tempFRead == tempRRead) {
+                    if ((forward.name[forward.name.length()-1] == '1') && (reverse.name[reverse.name.length()-1] == '2')) {
+                        forward.name = tempFRead;
+                        reverse.name = tempRRead;
+                        pairFastqRead temp(forward, reverse);
+                        reads.push_back(temp);
+                        match = true;
+                    }
                 }
                 
-                //look for reverse pair
-                itUniques = uniques.find(reverse.name);
-                if (itUniques != uniques.end()) {  //we have the pair for this read
-                    pairFastqRead temp(itUniques->second, reverse);
-                    reads.push_back(temp);
-                    uniques.erase(itUniques);
-                }else { //save this read for later
-                    uniques[reverse.name] = reverse;
+                if (!match) {
+                    //look for forward pair
+                    itUniques = uniques.find(forward.name);
+                    if (itUniques != uniques.end()) {  //we have the pair for this read
+                        pairFastqRead temp(forward, itUniques->second);
+                        reads.push_back(temp);
+                        uniques.erase(itUniques);
+                    }else { //save this read for later
+                        uniques[forward.name] = forward;
+                    }
+                    
+                    //look for reverse pair
+                    itUniques = uniques.find(reverse.name);
+                    if (itUniques != uniques.end()) {  //we have the pair for this read
+                        pairFastqRead temp(itUniques->second, reverse);
+                        reads.push_back(temp);
+                        uniques.erase(itUniques);
+                    }else { //save this read for later
+                        uniques[reverse.name] = reverse;
+                    }
                 }
+                                
             }
         }else if (!ignoref && ignorer) { //ignore reverse keep forward
             //look for forward pair

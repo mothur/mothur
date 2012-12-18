@@ -60,7 +60,7 @@ public:
     
 private:
     bool abort, allFiles, createGroup;
-    string outputDir, ffastqfile, rfastqfile, align, oligosfile;
+    string outputDir, ffastqfile, rfastqfile, align, oligosfile, rfastafile, ffastafile, rqualfile, fqualfile, file;
 	float match, misMatch, gapOpen, gapExtend;
 	int processors, longestBase, threshold, tdiffs, bdiffs, pdiffs, ldiffs, sdiffs;
     vector<string> outputNames;
@@ -79,7 +79,7 @@ private:
     //vector<string> groupVector;
     
     fastqRead readFastq(ifstream&, bool&);
-    vector< vector<string> > readFastqFiles(int&);
+    vector< vector<string> > readFastqFiles(unsigned long int&);
     bool checkReads(fastqRead&, fastqRead&);
     int createProcesses(vector< vector<string> >, string, string, string, string, string, vector<vector<string> >, vector<vector<string> >);
     int driver(vector<string>, string, string, string, string, string, vector<vector<string> >, vector<vector<string> >);
