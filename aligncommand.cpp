@@ -20,21 +20,21 @@
 //**********************************************************************************************************************
 vector<string> AlignCommand::setParameters(){	
 	try {
-		CommandParameter ptemplate("reference", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(ptemplate);
-		CommandParameter pcandidate("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pcandidate);
-		CommandParameter psearch("search", "Multiple", "kmer-blast-suffix", "kmer", "", "", "",false,false); parameters.push_back(psearch);
-		CommandParameter pksize("ksize", "Number", "", "8", "", "", "",false,false); parameters.push_back(pksize);
-		CommandParameter pmatch("match", "Number", "", "1.0", "", "", "",false,false); parameters.push_back(pmatch);
-		CommandParameter palign("align", "Multiple", "needleman-gotoh-blast-noalign", "needleman", "", "", "",false,false); parameters.push_back(palign);
-		CommandParameter pmismatch("mismatch", "Number", "", "-1.0", "", "", "",false,false); parameters.push_back(pmismatch);
-		CommandParameter pgapopen("gapopen", "Number", "", "-2.0", "", "", "",false,false); parameters.push_back(pgapopen);
-		CommandParameter pgapextend("gapextend", "Number", "", "-1.0", "", "", "",false,false); parameters.push_back(pgapextend);
-		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
-		CommandParameter pflip("flip", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pflip);
-		CommandParameter psave("save", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(psave);
-		CommandParameter pthreshold("threshold", "Number", "", "0.50", "", "", "",false,false); parameters.push_back(pthreshold);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter ptemplate("reference", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(ptemplate);
+		CommandParameter pcandidate("fasta", "InputTypes", "", "", "none", "none", "none","fasta-alignreport-accnos",false,true,true); parameters.push_back(pcandidate);
+		CommandParameter psearch("search", "Multiple", "kmer-blast-suffix", "kmer", "", "", "","",false,false,true); parameters.push_back(psearch);
+		CommandParameter pksize("ksize", "Number", "", "8", "", "", "","",false,false); parameters.push_back(pksize);
+		CommandParameter pmatch("match", "Number", "", "1.0", "", "", "","",false,false); parameters.push_back(pmatch);
+		CommandParameter palign("align", "Multiple", "needleman-gotoh-blast-noalign", "needleman", "", "", "","",false,false,true); parameters.push_back(palign);
+		CommandParameter pmismatch("mismatch", "Number", "", "-1.0", "", "", "","",false,false); parameters.push_back(pmismatch);
+		CommandParameter pgapopen("gapopen", "Number", "", "-2.0", "", "", "","",false,false); parameters.push_back(pgapopen);
+		CommandParameter pgapextend("gapextend", "Number", "", "-1.0", "", "", "","",false,false); parameters.push_back(pgapextend);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
+		CommandParameter pflip("flip", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pflip);
+		CommandParameter psave("save", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(psave);
+		CommandParameter pthreshold("threshold", "Number", "", "0.50", "", "", "","",false,false); parameters.push_back(pthreshold);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -76,28 +76,22 @@ string AlignCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string AlignCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string tag = "";
-		map<string, vector<string> >::iterator it;
+string AlignCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "fasta") {  tag = "align"; }
-            else if (type == "alignreport") {  tag = "align.report"; }
-            else if (type == "accnos") {  tag = "flip.accnos"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return tag;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "AlignCommand", "getOutputFileName");
-		exit(1);
-	}
+        if (type == "fasta") {  pattern = "[filename],align"; } //makes file like: amazon.align
+        else if (type == "alignreport") {  pattern = "[filename],align.report"; }
+        else if (type == "accnos") {  pattern = "[filename],flip.accnos"; }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "AlignCommand", "getOutputPattern");
+        exit(1);
+    }
 }
-
 //**********************************************************************************************************************
 AlignCommand::AlignCommand(){	
 	try {
@@ -328,9 +322,11 @@ int AlignCommand::execute(){
 			m->mothurOut("Aligning sequences from " + candidateFileNames[s] + " ..." ); m->mothurOutEndLine();
 			
 			if (outputDir == "") {  outputDir += m->hasPath(candidateFileNames[s]); }
-			string alignFileName = outputDir + m->getRootName(m->getSimpleName(candidateFileNames[s])) + getOutputFileNameTag("fasta");  
-			string reportFileName = outputDir + m->getRootName(m->getSimpleName(candidateFileNames[s])) + getOutputFileNameTag("alignreport");
-			string accnosFileName = outputDir + m->getRootName(m->getSimpleName(candidateFileNames[s])) + getOutputFileNameTag("accnos");
+            map<string, string> variables; variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(candidateFileNames[s]));
+			string alignFileName = getOutputFileName("fasta", variables);  
+			string reportFileName = getOutputFileName("alignreport", variables);
+			string accnosFileName = getOutputFileName("accnos", variables);
+            
 			bool hasAccnos = true;
 			
 			int numFastaSeqs = 0;

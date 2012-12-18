@@ -16,13 +16,13 @@
 //**********************************************************************************************************************
 vector<string> AmovaCommand::setParameters(){	
 	try {
-		CommandParameter pdesign("design", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pdesign);
-        CommandParameter psets("sets", "String", "", "", "", "", "",false,false); parameters.push_back(psets);
-		CommandParameter pphylip("phylip", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pphylip);
-		CommandParameter piters("iters", "Number", "", "1000", "", "", "",false,false); parameters.push_back(piters);
-		CommandParameter palpha("alpha", "Number", "", "0.05", "", "", "",false,false); parameters.push_back(palpha);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pdesign("design", "InputTypes", "", "", "none", "none", "none","amova",false,true,true); parameters.push_back(pdesign);
+        CommandParameter psets("sets", "String", "", "", "", "", "","",false,false); parameters.push_back(psets);
+		CommandParameter pphylip("phylip", "InputTypes", "", "", "none", "none", "none","amova",false,true,true); parameters.push_back(pphylip);
+		CommandParameter piters("iters", "Number", "", "1000", "", "", "","",false,false); parameters.push_back(piters);
+		CommandParameter palpha("alpha", "Number", "", "0.05", "", "", "","",false,false); parameters.push_back(palpha);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 	
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -54,24 +54,19 @@ string AmovaCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string AmovaCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string tag = "";
-		map<string, vector<string> >::iterator it;
+string AmovaCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "amova") {  tag = "amova"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file.\n");  }
-        }
-        return tag;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "AmovaCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "amova") {  pattern = "[filename],amova"; } //makes file like: amazon.align
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "AmovaCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 AmovaCommand::AmovaCommand(){	
@@ -241,7 +236,9 @@ int AmovaCommand::execute(){
 		
 		//create a new filename
 		ofstream AMOVAFile;
-		string AMOVAFileName = outputDir + m->getRootName(m->getSimpleName(phylipFileName)) + getOutputFileNameTag("amova");				
+        map<string, string> variables; variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(phylipFileName));
+		string AMOVAFileName = getOutputFileName("amova", variables);	
+        
 		m->openOutputFile(AMOVAFileName, AMOVAFile);
 		outputNames.push_back(AMOVAFileName); outputTypes["amova"].push_back(AMOVAFileName);
 		

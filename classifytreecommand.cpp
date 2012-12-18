@@ -13,14 +13,14 @@
 //**********************************************************************************************************************
 vector<string> ClassifyTreeCommand::setParameters(){	
 	try {
-		CommandParameter ptree("tree", "InputTypes", "", "", "", "", "none",false,true); parameters.push_back(ptree);
-        CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "", "", "none",false,true); parameters.push_back(ptaxonomy);
-        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none",false,false); parameters.push_back(pname);
-        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none",false,false); parameters.push_back(pcount);
-		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none",false,false); parameters.push_back(pgroup);
-        CommandParameter pcutoff("cutoff", "Number", "", "51", "", "", "",false,true); parameters.push_back(pcutoff);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter ptree("tree", "InputTypes", "", "", "", "", "none","tree-summary",false,true,true); parameters.push_back(ptree);
+        CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "", "", "none","",false,true,true); parameters.push_back(ptaxonomy);
+        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none","",false,false,true); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none","",false,false,true); parameters.push_back(pcount);
+		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
+        CommandParameter pcutoff("cutoff", "Number", "", "51", "", "", "","",false,true); parameters.push_back(pcutoff);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -52,25 +52,20 @@ string ClassifyTreeCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string ClassifyTreeCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string ClassifyTreeCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "tree") {  outputFileName =  "taxonomy.tre"; }
-            else if (type == "summary") {  outputFileName =  "taxonomy.summary"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClassifyTreeCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "summary") {  pattern = "[filename],taxonomy.summary"; } //makes file like: amazon.0.03.fasta
+        else if (type == "tree") {  pattern = "[filename],taxonomy.tre"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ClassifyTreeCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 ClassifyTreeCommand::ClassifyTreeCommand(){	
@@ -286,7 +281,9 @@ int ClassifyTreeCommand::getClassifications(Tree*& T){
 		
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(treefile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(treefile)) + getOutputFileNameTag("summary");
+        map<string, string> variables; 
+        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(treefile));
+		string outputFileName = getOutputFileName("summary", variables);
 		outputNames.push_back(outputFileName); outputTypes["summary"].push_back(outputFileName);
 		
 		ofstream out;
@@ -300,7 +297,8 @@ int ClassifyTreeCommand::getClassifications(Tree*& T){
 		
 		string treeOutputDir = outputDir;
 		if (outputDir == "") {  treeOutputDir += m->hasPath(treefile);  }
-		string outputTreeFileName = treeOutputDir + m->getRootName(m->getSimpleName(treefile)) + getOutputFileNameTag("tree");
+        variables["[filename]"] = treeOutputDir + m->getRootName(m->getSimpleName(treefile));
+		string outputTreeFileName = getOutputFileName("tree", variables);
 		
 		//create a map from tree node index to names of descendants, save time later
 		map<int, map<string, set<string> > > nodeToDescendants; //node# -> (groupName -> groupMembers)

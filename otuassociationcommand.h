@@ -25,8 +25,9 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "otu.association";			}
 	string getCommandCategory()		{ return "Hypothesis Testing";		}
-	string getOutputFileNameTag(string, string);
+	
 	string getHelpString();	
+    string getOutputPattern(string);	
 	string getCitation() { return "http://www.mothur.org/wiki/Otu.association"; }
 	string getDescription()		{ return "calculate the correlation coefficient for the otus in a shared/relabund file"; }
 	

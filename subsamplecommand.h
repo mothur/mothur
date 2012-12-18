@@ -28,9 +28,10 @@ public:
 	
 	vector<string> setParameters();
 	string getCommandName()			{ return "sub.sample";	}
-	string getCommandCategory()		{ return "General";		}
-	string getOutputFileNameTag(string, string);
+	string getCommandCategory()		{ return "Sequence Processing";		}
+	
 	string getHelpString();	
+    string getOutputPattern(string);	
 	string getCitation() { return "http://www.mothur.org/wiki/Sub.sample"; }
 	string getDescription()		{ return "get a sampling of sequences from a list, shared, rabund, sabund or fasta file"; }
 

@@ -14,11 +14,11 @@
 //**********************************************************************************************************************
 vector<string> MakeGroupCommand::setParameters(){	
 	try {
-		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
-		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
-		CommandParameter poutput("output", "String", "", "", "", "", "",false,false); parameters.push_back(poutput);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","group",false,true,true); parameters.push_back(pfasta);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false,true); parameters.push_back(pgroups);
+		CommandParameter poutput("output", "String", "", "", "", "", "","",false,false); parameters.push_back(poutput);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -48,24 +48,19 @@ string MakeGroupCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string MakeGroupCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string MakeGroupCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "group")             {   outputFileName =  "groups";         }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "MakeGroupCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "group") {  pattern = "[filename],groups"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MakeGroupCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 MakeGroupCommand::MakeGroupCommand(){	
@@ -185,8 +180,10 @@ MakeGroupCommand::MakeGroupCommand(string option)  {
 				}
 				
 				//prevent giantic file name
-				if (fastaFileNames.size() > 3) { filename = outputDir + "merge." + getOutputFileNameTag("group"); }
-				else {  filename += getOutputFileNameTag("group");  }
+                map<string, string> variables; 
+                variables["[filename]"] = filename;
+				if (fastaFileNames.size() > 3) { variables["[filename]"] = outputDir + "merge"; }
+				filename = getOutputFileName("group",variables);  
 				
 				//make sure there is at least one valid file left
 				if (fastaFileNames.size() == 0) { m->mothurOut("no valid files."); m->mothurOutEndLine(); abort = true; }
@@ -245,7 +242,7 @@ int MakeGroupCommand::execute(){
 		out.close();
 		
 		m->mothurOutEndLine();
-		m->mothurOut("Output File Name: " + filename); m->mothurOutEndLine(); outputNames.push_back(filename); outputTypes["group"].push_back(filename); 
+		m->mothurOut("Output File Names: " + filename); m->mothurOutEndLine(); outputNames.push_back(filename); outputTypes["group"].push_back(filename); 
 		m->mothurOutEndLine();
 		
 		//set group file as new current groupfile

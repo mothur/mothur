@@ -49,8 +49,9 @@ public:
     string getCommandName()			{ return "make.contigs";			}
     string getCommandCategory()		{ return "Sequence Processing";		} 
     //commmand category choices: Sequence Processing, OTU-Based Approaches, Hypothesis Testing, Phylotype Analysis, General, Clustering and Hidden
-    string getOutputFileNameTag(string, string);
+    
 	string getHelpString();	
+    string getOutputPattern(string);	
     string getCitation() { return "http://www.mothur.org/wiki/Make.contigs"; }
     string getDescription()		{ return "description"; }
     

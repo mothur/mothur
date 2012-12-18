@@ -24,8 +24,9 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "consensus.seqs";		}
 	string getCommandCategory()		{ return "Sequence Processing"; }
-	string getOutputFileNameTag(string, string);
+	
 	string getHelpString();	
+    string getOutputPattern(string);	
 	string getCitation() { return "http://www.mothur.org/wiki/Consensus.seqs"; }
 	string getDescription()		{ return "create a consensus sequence for each OTU or for a fasta file"; }
 

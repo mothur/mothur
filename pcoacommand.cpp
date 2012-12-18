@@ -15,10 +15,10 @@
 //**********************************************************************************************************************
 vector<string> PCOACommand::setParameters(){	
 	try {
-		CommandParameter pphylip("phylip", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pphylip);
-		CommandParameter pmetric("metric", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pmetric);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pphylip("phylip", "InputTypes", "", "", "none", "none", "none","pcoa-loadings",false,true,true); parameters.push_back(pphylip);
+		CommandParameter pmetric("metric", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pmetric);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -45,28 +45,23 @@ string PCOACommand::getHelpString(){
 		exit(1);
 	}
 }
-
 //**********************************************************************************************************************
-string PCOACommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string PCOACommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "pcoa") {  outputFileName =  "pcoa.axes"; }
-            else if (type == "loadings") {  outputFileName =  "pcoa.loadings"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PCOACommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "pcoa") {  pattern = "[filename],pcoa.axes"; } 
+        else if (type == "loadings") {  pattern = "[filename],pcoa.loadings"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "PCOACommand", "getOutputPattern");
+        exit(1);
+    }
 }
+
 
 //**********************************************************************************************************************
 PCOACommand::PCOACommand(){	
@@ -251,7 +246,9 @@ void PCOACommand::output(string fnameRoot, vector<string> name_list, vector<vect
 		}
 		
 		ofstream pcaData;
-        string pcoaDataFile = fnameRoot+getOutputFileNameTag("pcoa");
+        map<string, string> variables; 
+        variables["[filename]"] = fnameRoot;
+        string pcoaDataFile = getOutputFileName("pcoa",variables);
         m->openOutputFile(pcoaDataFile, pcaData);
 		pcaData.setf(ios::fixed, ios::floatfield);
 		pcaData.setf(ios::showpoint);	
@@ -259,7 +256,7 @@ void PCOACommand::output(string fnameRoot, vector<string> name_list, vector<vect
 		outputTypes["pcoa"].push_back(pcoaDataFile);
 		
 		ofstream pcaLoadings;
-        string loadingsFile = fnameRoot+getOutputFileNameTag("loadings");
+        string loadingsFile = getOutputFileName("loadings",variables);
         m->openOutputFile(loadingsFile, pcaLoadings);
 		pcaLoadings.setf(ios::fixed, ios::floatfield);
 		pcaLoadings.setf(ios::showpoint);

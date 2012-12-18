@@ -13,14 +13,14 @@
 //**********************************************************************************************************************
 vector<string> ChopSeqsCommand::setParameters(){	
 	try {
-		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
-		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
-        CommandParameter pnumbases("numbases", "Number", "", "0", "", "", "",false,true); parameters.push_back(pnumbases);
-		CommandParameter pcountgaps("countgaps", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pcountgaps);
-		CommandParameter pshort("short", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pshort);
-		CommandParameter pkeep("keep", "Multiple", "front-back", "front", "", "", "",false,false); parameters.push_back(pkeep);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","fasta",false,true,true); parameters.push_back(pfasta);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
+        CommandParameter pnumbases("numbases", "Number", "", "0", "", "", "","",false,true,true); parameters.push_back(pnumbases);
+		CommandParameter pcountgaps("countgaps", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pcountgaps);
+		CommandParameter pshort("short", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pshort);
+		CommandParameter pkeep("keep", "Multiple", "front-back", "front", "", "", "","",false,false); parameters.push_back(pkeep);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -54,25 +54,20 @@ string ChopSeqsCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string ChopSeqsCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string ChopSeqsCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "fasta") {  outputFileName =  "chop.fasta"; }
-            else if (type == "accnos") {  outputFileName =  "chop.accnos"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChopSeqsCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "fasta") {  pattern = "[filename],chop.fasta"; } 
+        else if (type == "accnos") {  pattern = "[filename],chop.accnos"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ChopSeqsCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 ChopSeqsCommand::ChopSeqsCommand(){	
@@ -173,9 +168,10 @@ int ChopSeqsCommand::execute(){
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(fastafile)) + getOutputFileNameTag("fasta");
-		string outputFileNameAccnos = outputDir + m->getRootName(m->getSimpleName(fastafile)) + getOutputFileNameTag("accnos");
-        
+        map<string, string> variables; 
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastafile));
+        string outputFileName = getOutputFileName("fasta", variables);
+        string outputFileNameAccnos = getOutputFileName("accnos", variables);        
         
         vector<unsigned long long> positions; 
         vector<linePair> lines;
@@ -203,7 +199,7 @@ int ChopSeqsCommand::execute(){
         if (m->control_pressed) {  return 0; }
 		
 		m->mothurOutEndLine();
-		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		m->mothurOut(outputFileName); m->mothurOutEndLine();	outputNames.push_back(outputFileName); outputTypes["fasta"].push_back(outputFileName);
 		
 		if (wroteAccnos) { m->mothurOut(outputFileNameAccnos); m->mothurOutEndLine(); outputNames.push_back(outputFileNameAccnos); outputTypes["accnos"].push_back(outputFileNameAccnos); }

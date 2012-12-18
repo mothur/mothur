@@ -12,15 +12,15 @@
 //**********************************************************************************************************************
 vector<string> SensSpecCommand::setParameters(){	
 	try {
-		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(plist);
-		CommandParameter pphylip("phylip", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "none",false,false); parameters.push_back(pphylip);
-		CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "none",false,false); parameters.push_back(pcolumn);
-		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
-		CommandParameter pcutoff("cutoff", "Number", "", "-1.00", "", "", "",false,false); parameters.push_back(pcutoff);
-		CommandParameter pprecision("precision", "Number", "", "100", "", "", "",false,false); parameters.push_back(pprecision);
-		CommandParameter phard("hard", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(phard);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none","sensspec",false,true,true); parameters.push_back(plist);
+		CommandParameter pphylip("phylip", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "none","",false,false); parameters.push_back(pphylip);
+		CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "none","",false,false); parameters.push_back(pcolumn);
+		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
+		CommandParameter pcutoff("cutoff", "Number", "", "-1.00", "", "", "","",false,false); parameters.push_back(pcutoff);
+		CommandParameter pprecision("precision", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pprecision);
+		CommandParameter phard("hard", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(phard);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -44,24 +44,19 @@ string SensSpecCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string SensSpecCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string SensSpecCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "sensspec")            {   outputFileName =  "sensspec";   }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SensSpecCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "sensspec") {  pattern = "[filename],sensspec"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SensSpecCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 SensSpecCommand::SensSpecCommand(){	
@@ -201,7 +196,9 @@ SensSpecCommand::SensSpecCommand(string option)  {
 				else { allLines = 1;  }
 			}
 			
-			sensSpecFileName = outputDir + m->getRootName(m->getSimpleName(listFile)) + getOutputFileNameTag("sensspec");
+            map<string, string> variables; 
+            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(listFile));
+			sensSpecFileName = getOutputFileName("sensspec",variables);
 		}
 	}
 	catch(exception& e) {
@@ -223,7 +220,7 @@ int SensSpecCommand::execute(){
 		if (m->control_pressed) { m->mothurRemove(sensSpecFileName); return 0; }
 		
 		m->mothurOutEndLine();
-		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		m->mothurOut(sensSpecFileName); m->mothurOutEndLine();	
 		m->mothurOutEndLine();
 		

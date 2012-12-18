@@ -12,10 +12,10 @@
 //**********************************************************************************************************************
 vector<string> MergeFileCommand::setParameters(){	
 	try {
-		CommandParameter pinput("input", "String", "", "", "", "", "",false,true); parameters.push_back(pinput);
-		CommandParameter poutput("output", "String", "", "", "", "", "",false,true); parameters.push_back(poutput);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pinput("input", "String", "", "", "", "", "","",false,true,true); parameters.push_back(pinput);
+		CommandParameter poutput("output", "String", "", "", "", "", "","",false,true,true); parameters.push_back(poutput);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -135,7 +135,7 @@ int MergeFileCommand::execute(){
 		if (m->control_pressed) {  m->mothurRemove(outputFileName); return 0;  }
 		
 		m->mothurOutEndLine();
-		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		m->mothurOut(outputFileName); m->mothurOutEndLine();	outputNames.push_back(outputFileName); outputTypes["merge"].push_back(outputFileName);
 		m->mothurOutEndLine();
 

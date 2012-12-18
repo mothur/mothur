@@ -28,8 +28,9 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "heatmap.bin";				}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
-	string getOutputFileNameTag(string, string);
+	
 	string getHelpString();	
+    string getOutputPattern(string);	
 	string getCitation() { return "http://www.mothur.org/wiki/Heatmap.bin"; }
 	string getDescription()		{ return "generate a heatmap where the color represents the relative abundanceof an OTU"; }
 

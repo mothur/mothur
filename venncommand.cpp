@@ -20,17 +20,17 @@
 //**********************************************************************************************************************
 vector<string> VennCommand::setParameters(){	
 	try {
-		CommandParameter plist("list", "InputTypes", "", "", "LRSS", "LRSS", "none",false,false); parameters.push_back(plist);
-		CommandParameter pshared("shared", "InputTypes", "", "", "LRSS", "LRSS", "none",false,false); parameters.push_back(pshared);	
-		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
-		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
-		CommandParameter pcalc("calc", "String", "", "", "", "", "",false,false); parameters.push_back(pcalc);
-		CommandParameter pabund("abund", "Number", "", "10", "", "", "",false,false); parameters.push_back(pabund);
-		CommandParameter pnseqs("nseqs", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pnseqs);
-		CommandParameter pfontsize("fontsize", "Number", "", "24", "", "", "",false,false); parameters.push_back(pfontsize);
-		CommandParameter ppermute("permute", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(ppermute);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter plist("list", "InputTypes", "", "", "LRSS", "LRSS", "none","svg",false,false,true); parameters.push_back(plist);
+		CommandParameter pshared("shared", "InputTypes", "", "", "LRSS", "LRSS", "none","svg",false,false,true); parameters.push_back(pshared);	
+		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
+		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
+		CommandParameter pcalc("calc", "String", "", "", "", "", "","",false,false); parameters.push_back(pcalc);
+		CommandParameter pabund("abund", "Number", "", "10", "", "", "","",false,false); parameters.push_back(pabund);
+		CommandParameter pnseqs("nseqs", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pnseqs);
+		CommandParameter pfontsize("fontsize", "Number", "", "24", "", "", "","",false,false); parameters.push_back(pfontsize);
+		CommandParameter ppermute("permute", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(ppermute);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -67,25 +67,19 @@ string VennCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-
-string VennCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string VennCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "svg")            {   outputFileName =  "svg";   }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "VennCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "svg") {  pattern = "[filename],svg"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "VennCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 
 //**********************************************************************************************************************

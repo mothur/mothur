@@ -28,8 +28,9 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "parsimony";				}
 	string getCommandCategory()		{ return "Hypothesis Testing";		}
-	string getOutputFileNameTag(string, string);
+	
 	string getHelpString();	
+    string getOutputPattern(string);	
 	string getCitation() { return "Slatkin M, Maddison WP (1989). A cladistic measure of gene flow inferred from the phylogenies of alleles. Genetics 123: 603-13. \nSlatkin M, Maddison WP (1990). Detecting isolation by distance using phylogenies of genes. Genetics 126: 249-60. \nMartin AP (2002). Phylogenetic approaches for describing and comparing the diversity of microbial communities. Appl Environ Microbiol 68: 3673-82. \nSchloss PD, Handelsman J (2006). Introducing TreeClimber, a test to compare microbial community structure. Appl Environ Microbiol 72: 2379-84.\nhttp://www.mothur.org/wiki/Parsimony"; }
 	string getDescription()		{ return "generic test that describes whether two or more communities have the same structure"; }
 

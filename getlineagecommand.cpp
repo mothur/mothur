@@ -15,17 +15,17 @@
 //**********************************************************************************************************************
 vector<string> GetLineageCommand::setParameters(){	
 	try {
-		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pfasta);
-        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "FNGLT", "none",false,false); parameters.push_back(pname);
-        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "FNGLT", "none",false,false); parameters.push_back(pcount);
-		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "FNGLT", "none",false,false); parameters.push_back(pgroup);
-		CommandParameter plist("list", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(plist);
-		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "FNGLT", "none",false,true); parameters.push_back(ptaxonomy);
-		CommandParameter palignreport("alignreport", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(palignreport);
-		CommandParameter ptaxon("taxon", "String", "", "", "", "", "",false,true); parameters.push_back(ptaxon);
-		CommandParameter pdups("dups", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pdups);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "FNGLT", "none","fasta",false,false, true); parameters.push_back(pfasta);
+        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "FNGLT", "none","name",false,false, true); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "FNGLT", "none","count",false,false, true); parameters.push_back(pcount);
+		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "FNGLT", "none","group",false,false, true); parameters.push_back(pgroup);
+		CommandParameter plist("list", "InputTypes", "", "", "none", "FNGLT", "none","list",false,false, true); parameters.push_back(plist);
+		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "FNGLT", "none","taxonomy",false,true, true); parameters.push_back(ptaxonomy);
+		CommandParameter palignreport("alignreport", "InputTypes", "", "", "none", "FNGLT", "none","alignreport",false,false); parameters.push_back(palignreport);
+		CommandParameter ptaxon("taxon", "String", "", "", "", "", "","",false,true, true); parameters.push_back(ptaxon);
+		CommandParameter pdups("dups", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pdups);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -60,30 +60,25 @@ string GetLineageCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string GetLineageCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string GetLineageCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "fasta")            {   outputFileName =  "pick" + m->getExtension(inputName);   }
-            else if (type == "taxonomy")    {   outputFileName =  "pick" + m->getExtension(inputName);   }
-            else if (type == "name")        {   outputFileName =  "pick" + m->getExtension(inputName);   }
-            else if (type == "count")       {   outputFileName =  "pick.count_table";                    }  
-            else if (type == "group")       {   outputFileName =  "pick" + m->getExtension(inputName);   }
-            else if (type == "list")        {   outputFileName =  "pick" + m->getExtension(inputName);   }
-            else if (type == "alignreport") {   outputFileName =  "pick.align.report";   }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetLineageCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "fasta")            {   pattern = "[filename],pick,[extension]";    }
+        else if (type == "taxonomy")    {   pattern = "[filename],pick,[extension]";    }
+        else if (type == "name")        {   pattern = "[filename],pick,[extension]";    }
+        else if (type == "group")       {   pattern = "[filename],pick,[extension]";    }
+        else if (type == "count")       {   pattern = "[filename],pick,[extension]";    }
+        else if (type == "list")        {   pattern = "[filename],pick,[extension]";    }
+        else if (type == "alignreport")      {   pattern = "[filename],pick.align.report";    }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GetLineageCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 GetLineageCommand::GetLineageCommand(){	
@@ -362,7 +357,10 @@ int GetLineageCommand::readFasta(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(fastafile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(fastafile)) + getOutputFileNameTag("fasta", fastafile);
+		map<string, string> variables; 
+        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(fastafile));
+        variables["[extension]"] = m->getExtension(fastafile);
+		string outputFileName = getOutputFileName("fasta", variables);
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		
@@ -409,7 +407,10 @@ int GetLineageCommand::readCount(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(countfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(countfile)) + getOutputFileNameTag("count", countfile);
+		map<string, string> variables; 
+		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(countfile));
+        variables["[extension]"] = m->getExtension(countfile);
+		string outputFileName = getOutputFileName("count", variables);
 		
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
@@ -463,7 +464,10 @@ int GetLineageCommand::readList(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(listfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(listfile)) + getOutputFileNameTag("list", listfile);
+		map<string, string> variables; 
+        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(listfile));
+        variables["[extension]"] = m->getExtension(listfile);
+		string outputFileName = getOutputFileName("list", variables);
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		
@@ -535,7 +539,10 @@ int GetLineageCommand::readName(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(namefile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(namefile)) + getOutputFileNameTag("name", namefile);
+		map<string, string> variables; 
+		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(namefile));
+        variables["[extension]"] = m->getExtension(namefile);
+		string outputFileName = getOutputFileName("name", variables);
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		
@@ -621,7 +628,10 @@ int GetLineageCommand::readGroup(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(groupfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(groupfile)) + getOutputFileNameTag("group", groupfile);
+		map<string, string> variables; 
+		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(groupfile));
+        variables["[extension]"] = m->getExtension(groupfile);
+		string outputFileName = getOutputFileName("group", variables);
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		
@@ -668,7 +678,10 @@ int GetLineageCommand::readTax(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(taxfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(taxfile)) + getOutputFileNameTag("taxonomy", taxfile);
+		map<string, string> variables; 
+		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(taxfile));
+        variables["[extension]"] = m->getExtension(taxfile);
+		string outputFileName = getOutputFileName("taxonomy", variables);
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		
@@ -867,7 +880,11 @@ int GetLineageCommand::readAlign(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(alignfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(alignfile)) + getOutputFileNameTag("alignreport");
+        map<string, string> variables; 
+		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(alignfile));
+        variables["[extension]"] = m->getExtension(alignfile);
+		string outputFileName = getOutputFileName("alignreport", variables);
+		
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		

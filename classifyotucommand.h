@@ -26,8 +26,9 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "classify.otu";		}
 	string getCommandCategory()		{ return "Phylotype Analysis";	}
-	string getOutputFileNameTag(string, string);
+	
 	string getHelpString();	
+    string getOutputPattern(string);	
 	string getCitation() { return "Schloss PD, Westcott SL (2011). Assessing and improving methods used in OTU-based approaches for 16S rRNA gene sequence analysis. Appl Environ Microbiol 77:3219.\nhttp://www.mothur.org/wiki/Classify.otu"; }
 	string getDescription()		{ return "find the concensus taxonomy for each OTU"; }
 	
@@ -40,16 +41,16 @@ private:
 	ListVector* list;
 	InputData* input;
 	string listfile, namefile, taxfile, label, outputDir, refTaxonomy, groupfile, basis, countfile;
-	bool abort, allLines, probs;
+	bool abort, allLines, probs, persample;
 	int cutoff;
 	set<string> labels; //holds labels to be used
-	vector<string> outputNames;
+	vector<string> outputNames, groups;
 	map<string, string> nameMap;
 	map<string, string> taxMap;
 
 	int process(ListVector*);
 	string addUnclassifieds(string, int);
-	vector<string> findConsensusTaxonomy(int, ListVector*, int&, string&); 	// returns the name of the "representative" taxonomy of given bin
+	vector<string> findConsensusTaxonomy(vector<string>, int&, string&); 	// returns the name of the "representative" taxonomy of given bin
 	
 												
 };

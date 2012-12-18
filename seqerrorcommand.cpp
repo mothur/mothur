@@ -17,17 +17,17 @@
 //**********************************************************************************************************************
 vector<string> SeqErrorCommand::setParameters(){	
 	try {
-		CommandParameter pquery("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pquery);
-		CommandParameter preference("reference", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(preference);
-		CommandParameter pqfile("qfile", "InputTypes", "", "", "none", "none", "QualReport",false,false); parameters.push_back(pqfile);
-		CommandParameter preport("report", "InputTypes", "", "", "none", "none", "QualReport",false,false); parameters.push_back(preport);
-		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
-		CommandParameter pignorechimeras("ignorechimeras", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pignorechimeras);
-		CommandParameter pthreshold("threshold", "Number", "", "1.0", "", "", "",false,false); parameters.push_back(pthreshold);
-		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
-		CommandParameter psave("save", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(psave);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pquery("fasta", "InputTypes", "", "", "none", "none", "none","errorType",false,true,true); parameters.push_back(pquery);
+		CommandParameter preference("reference", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(preference);
+		CommandParameter pqfile("qfile", "InputTypes", "", "", "none", "none", "QualReport","",false,false); parameters.push_back(pqfile);
+		CommandParameter preport("report", "InputTypes", "", "", "none", "none", "QualReport","",false,false); parameters.push_back(preport);
+		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pname);
+		CommandParameter pignorechimeras("ignorechimeras", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pignorechimeras);
+		CommandParameter pthreshold("threshold", "Number", "", "1.0", "", "", "","",false,false); parameters.push_back(pthreshold);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
+		CommandParameter psave("save", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(psave);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -63,34 +63,29 @@ string SeqErrorCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string SeqErrorCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string SeqErrorCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "errorsummary")            {   outputFileName =  "error.summary";   }
-            else if (type == "errorseq")            {   outputFileName =  "error.seq";   }
-            else if (type == "errorquality")            {   outputFileName =  "error.quality";   }
-            else if (type == "errorqualforward")            {   outputFileName =  "error.qual.forward";   }
-            else if (type == "errorqualreverse")            {   outputFileName =  "error.qual.reverse";   }
-            else if (type == "errorforward")            {   outputFileName =  "error.seq.forward";   }
-            else if (type == "errorreverse")            {   outputFileName =  "error.seq.reverse";   }
-            else if (type == "errorcount")            {   outputFileName =  "error.count";   }
-            else if (type == "errormatrix")            {   outputFileName =  "error.matrix";   }
-            else if (type == "errorchimera")            {   outputFileName =  "error.chimera";   }
-            else if (type == "errorref-query")            {   outputFileName =  "error.ref-query";   }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SeqErrorCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "errorsummary")            {   pattern = "[filename],error.summary";   }
+        else if (type == "errorseq")            {   pattern = "[filename],error.seq";   }
+        else if (type == "errorquality")            {   pattern = "[filename],error.quality";   }
+        else if (type == "errorqualforward")            {   pattern = "[filename],error.qual.forward";   }
+        else if (type == "errorqualreverse")            {   pattern = "[filename],error.qual.reverse";   }
+        else if (type == "errorforward")            {   pattern = "[filename],error.seq.forward";   }
+        else if (type == "errorreverse")            {   pattern = "[filename],error.seq.reverse";   }
+        else if (type == "errorcount")            {   pattern = "[filename],error.count";   }
+        else if (type == "errormatrix")            {   pattern = "[filename],error.matrix";   }
+        else if (type == "errorchimera")            {   pattern = "[filename],error.chimera";   }
+        else if (type == "errorref-query")            {   pattern = "[filename],error.ref-query";   }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SeqErrorCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 SeqErrorCommand::SeqErrorCommand(){	
@@ -304,13 +299,15 @@ int SeqErrorCommand::execute(){
 		totalMatches = 0;
 		
         string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(queryFileName));
-		string errorSummaryFileName = fileNameRoot + getOutputFileNameTag("errorsummary");
+        map<string, string> variables; 
+		variables["[filename]"] = fileNameRoot;
+		string errorSummaryFileName = getOutputFileName("errorsummary",variables);
 		outputNames.push_back(errorSummaryFileName); outputTypes["errorsummary"].push_back(errorSummaryFileName);
 			
-		string errorSeqFileName = fileNameRoot + getOutputFileNameTag("errorseq");
+		string errorSeqFileName = getOutputFileName("errorseq",variables);
 		outputNames.push_back(errorSeqFileName); outputTypes["errorseq"].push_back(errorSeqFileName);
 		
-		string errorChimeraFileName = fileNameRoot + getOutputFileNameTag("errorchimera");
+		string errorChimeraFileName = getOutputFileName("errorchimera",variables);
 		outputNames.push_back(errorChimeraFileName); outputTypes["errorchimera"].push_back(errorChimeraFileName);
 		
 		getReferences();	//read in reference sequences - make sure there's no ambiguous bases
@@ -352,7 +349,7 @@ int SeqErrorCommand::execute(){
 		
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
 
-		string errorCountFileName = fileNameRoot + getOutputFileNameTag("errorcount");
+		string errorCountFileName = getOutputFileName("errorcount",variables);
 		ofstream errorCountFile;
 		m->openOutputFile(errorCountFileName, errorCountFile);
 		outputNames.push_back(errorCountFileName);  outputTypes["errorcount"].push_back(errorCountFileName);
@@ -369,7 +366,7 @@ int SeqErrorCommand::execute(){
 
 		printSubMatrix();
 				
-		string megAlignmentFileName = fileNameRoot + getOutputFileNameTag("errorref-query");
+		string megAlignmentFileName = getOutputFileName("errorref-query",variables);
 		ofstream megAlignmentFile;
 		m->openOutputFile(megAlignmentFileName, megAlignmentFile);
 		outputNames.push_back(megAlignmentFileName);  outputTypes["errorref-query"].push_back(megAlignmentFileName);
@@ -1088,7 +1085,9 @@ void SeqErrorCommand::printErrorData(Compare error, int numParentSeqs, ofstream&
 void SeqErrorCommand::printSubMatrix(){
 	try {
         string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(queryFileName));
-		string subMatrixFileName = fileNameRoot + getOutputFileNameTag("errormatrix");
+        map<string, string> variables; 
+		variables["[filename]"] = fileNameRoot;
+		string subMatrixFileName = getOutputFileName("errormatrix",variables);
 		ofstream subMatrixFile;
 		m->openOutputFile(subMatrixFileName, subMatrixFile);
 		outputNames.push_back(subMatrixFileName);  outputTypes["errormatrix"].push_back(subMatrixFileName);
@@ -1135,7 +1134,9 @@ void SeqErrorCommand::printSubMatrix(){
 void SeqErrorCommand::printErrorFRFile(map<char, vector<int> > errorForward, map<char, vector<int> > errorReverse){
 	try{
         string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(queryFileName));
-		string errorForwardFileName = fileNameRoot + getOutputFileNameTag("errorforward");
+        map<string, string> variables; 
+		variables["[filename]"] = fileNameRoot;
+		string errorForwardFileName = getOutputFileName("errorforward",variables);
 		ofstream errorForwardFile;
 		m->openOutputFile(errorForwardFileName, errorForwardFile);
 		outputNames.push_back(errorForwardFileName);  outputTypes["errorforward"].push_back(errorForwardFileName);
@@ -1153,7 +1154,7 @@ void SeqErrorCommand::printErrorFRFile(map<char, vector<int> > errorForward, map
 		}
 		errorForwardFile.close();
 
-		string errorReverseFileName = fileNameRoot + getOutputFileNameTag("errorreverse");
+		string errorReverseFileName = getOutputFileName("errorreverse",variables);
 		ofstream errorReverseFile;
 		m->openOutputFile(errorReverseFileName, errorReverseFile);
 		outputNames.push_back(errorReverseFileName);  outputTypes["errorreverse"].push_back(errorReverseFileName);
@@ -1182,7 +1183,9 @@ void SeqErrorCommand::printErrorFRFile(map<char, vector<int> > errorForward, map
 void SeqErrorCommand::printErrorQuality(map<char, vector<int> > qScoreErrorMap){
 	try{
         string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(queryFileName));
-		string errorQualityFileName = fileNameRoot + getOutputFileNameTag("errorquality");
+        map<string, string> variables; 
+		variables["[filename]"] = fileNameRoot;
+		string errorQualityFileName = getOutputFileName("errorquality",variables);
 		ofstream errorQualityFile;
 		m->openOutputFile(errorQualityFileName, errorQualityFile);
 		outputNames.push_back(errorQualityFileName);  outputTypes["errorquality"].push_back(errorQualityFileName);
@@ -1216,7 +1219,9 @@ void SeqErrorCommand::printQualityFR(vector<vector<int> > qualForwardMap, vector
 			}
 		}
         string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(queryFileName));
-		string qualityForwardFileName = fileNameRoot + getOutputFileNameTag("errorqualforward");
+        map<string, string> variables; 
+		variables["[filename]"] = fileNameRoot;
+		string qualityForwardFileName = getOutputFileName("errorqualforward",variables);
 		ofstream qualityForwardFile;
 		m->openOutputFile(qualityForwardFileName, qualityForwardFile);
 		outputNames.push_back(qualityForwardFileName);  outputTypes["errorqualforward"].push_back(qualityForwardFileName);
@@ -1234,7 +1239,7 @@ void SeqErrorCommand::printQualityFR(vector<vector<int> > qualForwardMap, vector
 		qualityForwardFile.close();
 
 		
-		string qualityReverseFileName = fileNameRoot + getOutputFileNameTag("errorqualreverse");
+		string qualityReverseFileName = getOutputFileName("errorqualreverse",variables);
 		ofstream qualityReverseFile;
 		m->openOutputFile(qualityReverseFileName, qualityReverseFile);
 		outputNames.push_back(qualityReverseFileName);  outputTypes["errorqualreverse"].push_back(qualityReverseFileName);

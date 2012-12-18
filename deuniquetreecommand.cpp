@@ -13,10 +13,10 @@
 //**********************************************************************************************************************
 vector<string> DeuniqueTreeCommand::setParameters(){	
 	try {
-		CommandParameter ptree("tree", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(ptree);
-		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter ptree("tree", "InputTypes", "", "", "none", "none", "none","tree",false,true,true); parameters.push_back(ptree);
+		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(pname);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -43,24 +43,19 @@ string DeuniqueTreeCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string DeuniqueTreeCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string DeuniqueTreeCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "tree") {  outputFileName =  "deunique.tre"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "DeuniqueTreeCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "tree") {  pattern = "[filename],deunique.tre"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "DeuniqueTreeCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 DeuniqueTreeCommand::DeuniqueTreeCommand(){	
@@ -166,7 +161,9 @@ int DeuniqueTreeCommand::execute() {
         delete reader;		
 		
 		//print new Tree
-		string outputFile = outputDir + m->getRootName(m->getSimpleName(treefile)) + getOutputFileNameTag("tree");
+        map<string, string> variables; 
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(treefile));
+		string outputFile = getOutputFileName("tree", variables);
 		outputNames.push_back(outputFile); outputTypes["tree"].push_back(outputFile);
 		ofstream out;
 		m->openOutputFile(outputFile, out);

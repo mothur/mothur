@@ -28,8 +28,9 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "chimera.uchime";		}
 	string getCommandCategory()		{ return "Sequence Processing"; }
-	string getOutputFileNameTag(string, string);
+	
 	string getHelpString();	
+    string getOutputPattern(string);	
 	string getCitation() { return "uchime by Robert C. Edgar\nhttp://drive5.com/uchime\nThis code was donated to the public domain.\nEdgar,R.C., Haas,B.J., Clemente,J.C., Quince,C. and Knight,R. (2011), UCHIME improves sensitivity and speed of chimera detection.  Bioinformatics 27:2194.\nhttp://www.mothur.org/wiki/Chimera.uchime\n"; }
 	string getDescription()		{ return "detect chimeric sequences"; }
 	

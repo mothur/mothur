@@ -30,8 +30,9 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "chimera.perseus";		}
 	string getCommandCategory()		{ return "Sequence Processing"; }
-	string getOutputFileNameTag(string, string);
+	
 	string getHelpString();	
+    string getOutputPattern(string);	
 	string getCitation() { return "Quince C, Lanzen A, Davenport RJ, Turnbaugh PJ (2011).  Removing noise from pyrosequenced amplicons.  BMC Bioinformatics  12:38.\nEdgar,R.C., Haas,B.J., Clemente,J.C., Quince,C. and Knight,R. (2011), UCHIME improves sensitivity and speed of chimera detection.  Bioinformatics 27:2194.\nhttp://www.mothur.org/wiki/Chimera.perseus\n"; }
 	string getDescription()		{ return "detect chimeric sequences"; }
 	
@@ -65,6 +66,7 @@ private:
 	int deconvoluteResults(map<string, string>&, string, string);
 	int driverGroups(string, string, int, int, vector<string>);
 	int createProcessesGroups(string, string, vector<string>, string, string, string);
+    string removeNs(string);
 };
 
 /**************************************************************************************************/
@@ -136,11 +138,11 @@ static DWORD WINAPI MyPerseusThreadFunction(LPVOID lpParam){
 		int totalSeqs = 0;
 		int numChimeras = 0;
 		
-		for (int i = pDataArray->start; i < pDataArray->end; i++) {
+		for (int u = pDataArray->start; u < pDataArray->end; u++) {
 			
 			int start = time(NULL);	 if (pDataArray->m->control_pressed) {  if (pDataArray->hasCount) { delete cparser; } { delete parser; } pDataArray->m->mothurRemove(pDataArray->outputFName); pDataArray->m->mothurRemove(pDataArray->accnos); return 0; }
 			
-			pDataArray->m->mothurOutEndLine(); pDataArray->m->mothurOut("Checking sequences from group " + pDataArray->groups[i] + "...");	pDataArray->m->mothurOutEndLine();					
+			pDataArray->m->mothurOutEndLine(); pDataArray->m->mothurOut("Checking sequences from group " + pDataArray->groups[u] + "...");	pDataArray->m->mothurOutEndLine();					
 			
 			//vector<seqData> sequences = loadSequences(parser, groups[i]); - same function below
 			////////////////////////////////////////////////////////////////////////////////////////
@@ -148,8 +150,8 @@ static DWORD WINAPI MyPerseusThreadFunction(LPVOID lpParam){
             int alignLength = 0;
             vector<seqData> sequences;
             if (pDataArray->hasCount) {
-                vector<Sequence> thisGroupsSeqs = cparser->getSeqs(pDataArray->groups[i]);
-                map<string, int> counts = cparser->getCountTable(pDataArray->groups[i]);
+                vector<Sequence> thisGroupsSeqs = cparser->getSeqs(pDataArray->groups[u]);
+                map<string, int> counts = cparser->getCountTable(pDataArray->groups[u]);
                 map<string, int>::iterator it;
                 
                 for (int i = 0; i < thisGroupsSeqs.size(); i++) {
@@ -159,13 +161,18 @@ static DWORD WINAPI MyPerseusThreadFunction(LPVOID lpParam){
                     it = counts.find(thisGroupsSeqs[i].getName());
                     if (it == counts.end()) { error = true; pDataArray->m->mothurOut("[ERROR]: " + thisGroupsSeqs[i].getName() + " is in your fasta file and not in your count file, please correct."); pDataArray->m->mothurOutEndLine(); }
                     else {
+                        string newSeq = "";
+                        string tempSeq = thisGroupsSeqs[i].getUnaligned();
+                        for (int j = 0; j < tempSeq.length(); j++) { if (tempSeq[j] != 'N') {  newSeq += tempSeq[j]; } }
+                        thisGroupsSeqs[i].setAligned(newSeq);
+                        
                         sequences.push_back(seqData(thisGroupsSeqs[i].getName(), thisGroupsSeqs[i].getUnaligned(), it->second));
                         if (thisGroupsSeqs[i].getUnaligned().length() > alignLength) { alignLength = thisGroupsSeqs[i].getUnaligned().length(); }
                     }
                 }
             }else{
-                vector<Sequence> thisGroupsSeqs = parser->getSeqs(pDataArray->groups[i]);
-                map<string, string> nameMap = parser->getNameMap(pDataArray->groups[i]);
+                vector<Sequence> thisGroupsSeqs = parser->getSeqs(pDataArray->groups[u]);
+                map<string, string> nameMap = parser->getNameMap(pDataArray->groups[u]);
                 map<string, string>::iterator it;
                 
                 for (int i = 0; i < thisGroupsSeqs.size(); i++) {
@@ -176,6 +183,11 @@ static DWORD WINAPI MyPerseusThreadFunction(LPVOID lpParam){
                     if (it == nameMap.end()) { error = true; pDataArray->m->mothurOut("[ERROR]: " + thisGroupsSeqs[i].getName() + " is in your fasta file and not in your namefile, please correct."); pDataArray->m->mothurOutEndLine(); }
                     else {
                         int num = pDataArray->m->getNumNames(it->second);
+                        string newSeq = "";
+                        string tempSeq = thisGroupsSeqs[i].getUnaligned();
+                        for (int j = 0; j < tempSeq.length(); j++) { if (tempSeq[j] != 'N') {  newSeq += tempSeq[j]; } }
+                        thisGroupsSeqs[i].setAligned(newSeq);
+
                         sequences.push_back(seqData(thisGroupsSeqs[i].getName(), thisGroupsSeqs[i].getUnaligned(), num));
                         if (thisGroupsSeqs[i].getUnaligned().length() > alignLength) { alignLength = thisGroupsSeqs[i].getUnaligned().length(); }
                     }
@@ -194,8 +206,8 @@ static DWORD WINAPI MyPerseusThreadFunction(LPVOID lpParam){
 			
 			//int numSeqs = driver((outputFName + groups[i]), sequences, (accnos+groups[i]), numChimeras); - same function below
 			////////////////////////////////////////////////////////////////////////////////////////
-			string chimeraFileName = pDataArray->outputFName+pDataArray->groups[i];
-			string accnosFileName = pDataArray->accnos+pDataArray->groups[i];
+			string chimeraFileName = pDataArray->outputFName+pDataArray->groups[u];
+			string accnosFileName = pDataArray->accnos+pDataArray->groups[u];
 			
 			vector<vector<double> > correctModel(4);	//could be an option in the future to input own model matrix
 			for(int j=0;j<4;j++){	correctModel[j].resize(4);	}
@@ -339,7 +351,7 @@ static DWORD WINAPI MyPerseusThreadFunction(LPVOID lpParam){
 			//append files
 			pDataArray->m->appendFiles(chimeraFileName, pDataArray->outputFName); pDataArray->m->mothurRemove(chimeraFileName);
 			pDataArray->m->appendFiles(accnosFileName, pDataArray->accnos); pDataArray->m->mothurRemove(accnosFileName);
-			pDataArray->m->mothurOutEndLine(); pDataArray->m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences from group " + pDataArray->groups[i] + ".");	pDataArray->m->mothurOutEndLine();					
+			pDataArray->m->mothurOutEndLine(); pDataArray->m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences from group " + pDataArray->groups[u] + ".");	pDataArray->m->mothurOutEndLine();					
 			
 			if (pDataArray->m->control_pressed) { if (pDataArray->hasCount) { delete cparser; } { delete parser; } pDataArray->m->mothurRemove(pDataArray->outputFName); pDataArray->m->mothurRemove(pDataArray->accnos); return 0; }
 		}	

@@ -11,12 +11,12 @@
 //**********************************************************************************************************************
 vector<string> GetOtuLabelsCommand::setParameters(){	
 	try {
-        CommandParameter paccnos("accnos", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(paccnos);
-        CommandParameter pconstaxonomy("constaxonomy", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pconstaxonomy);
-		CommandParameter potucorr("otucorr", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(potucorr);
-        CommandParameter pcorraxes("corraxes", "InputTypes", "", "", "none", "FNGLT", "none",false,false); parameters.push_back(pcorraxes);
-        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+        CommandParameter paccnos("accnos", "InputTypes", "", "", "none", "none", "none","",false,true, true); parameters.push_back(paccnos);
+        CommandParameter pconstaxonomy("constaxonomy", "InputTypes", "", "", "none", "FNGLT", "none","constaxonomy",false,false, true); parameters.push_back(pconstaxonomy);
+		CommandParameter potucorr("otucorr", "InputTypes", "", "", "none", "FNGLT", "none","otucorr",false,false, true); parameters.push_back(potucorr);
+        CommandParameter pcorraxes("corraxes", "InputTypes", "", "", "none", "FNGLT", "none","corraxes",false,false, true); parameters.push_back(pcorraxes);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -46,27 +46,23 @@ string GetOtuLabelsCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string GetOtuLabelsCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string GetOtuLabelsCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "constaxonomy") {  outputFileName =  "pick.taxonomy"; }
-            else if (type == "otucorr") {  outputFileName =  "pick.corr"; }
-            else if (type == "corraxes") {  outputFileName =  "pick.axes"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetOtuLabelsCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "constaxonomy")            {   pattern = "[filename],pick,[extension]";    }
+        else if (type == "otucorr")    {   pattern = "[filename],pick,[extension]";    }
+        else if (type == "corraxes")        {   pattern = "[filename],pick,[extension]";    }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GetOtuLabelsCommand", "getOutputPattern");
+        exit(1);
+    }
 }
+
 //**********************************************************************************************************************
 GetOtuLabelsCommand::GetOtuLabelsCommand(){	
 	try {
@@ -226,7 +222,11 @@ int GetOtuLabelsCommand::readClassifyOtu(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(constaxonomyfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(constaxonomyfile)) + getOutputFileNameTag("constaxonomy");
+        map<string, string> variables; 
+        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(constaxonomyfile));
+        variables["[extension]"] = m->getExtension(constaxonomyfile);
+		string outputFileName = getOutputFileName("constaxonomy", variables);
+		
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		
@@ -277,7 +277,11 @@ int GetOtuLabelsCommand::readOtuAssociation(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(otucorrfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(otucorrfile)) + getOutputFileNameTag("otucorr");
+        map<string, string> variables; 
+        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(otucorrfile));
+        variables["[extension]"] = m->getExtension(otucorrfile);
+		string outputFileName = getOutputFileName("otucorr", variables);
+
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		
@@ -328,7 +332,11 @@ int GetOtuLabelsCommand::readCorrAxes(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(corraxesfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(corraxesfile)) + getOutputFileNameTag("corraxes");
+        map<string, string> variables; 
+        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(corraxesfile));
+        variables["[extension]"] = m->getExtension(corraxesfile);
+		string outputFileName = getOutputFileName("corraxes", variables);
+
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		

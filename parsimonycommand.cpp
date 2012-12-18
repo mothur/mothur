@@ -13,16 +13,16 @@
 //**********************************************************************************************************************
 vector<string> ParsimonyCommand::setParameters(){	
 	try {
-		CommandParameter ptree("tree", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(ptree);
-        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none",false,false); parameters.push_back(pname);
-        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none",false,false); parameters.push_back(pcount);
-		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none",false,false); parameters.push_back(pgroup);
-		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
-		CommandParameter prandom("random", "String", "", "", "", "", "",false,false); parameters.push_back(prandom);
-		CommandParameter piters("iters", "Number", "", "1000", "", "", "",false,false); parameters.push_back(piters);
-		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter ptree("tree", "InputTypes", "", "", "none", "none", "none","parsimony-psummary",false,true,true); parameters.push_back(ptree);
+        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none","",false,false,true); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none","",false,false,true); parameters.push_back(pcount);
+		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
+		CommandParameter prandom("random", "String", "", "", "", "", "","",false,false); parameters.push_back(prandom);
+		CommandParameter piters("iters", "Number", "", "1000", "", "", "","",false,false); parameters.push_back(piters);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -54,27 +54,21 @@ string ParsimonyCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string ParsimonyCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string ParsimonyCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "parsimony") {  outputFileName =  "parsimony"; }
-            else if (type == "psummary") {  outputFileName =  "psummary"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ParsimonyCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "parsimony") {  pattern = "[filename],parsimony"; } 
+        else if (type == "psummary") {  pattern = "[filename],psummary"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ParsimonyCommand", "getOutputPattern");
+        exit(1);
+    }
 }
-
 //**********************************************************************************************************************
 ParsimonyCommand::ParsimonyCommand(){	
 	try {
@@ -252,11 +246,14 @@ int ParsimonyCommand::execute() {
             delete reader;
 	
 			if(outputDir == "") { outputDir += m->hasPath(treefile); }
-			output = new ColumnFile(outputDir + m->getSimpleName(treefile)  +  "." + getOutputFileNameTag("parsimony"), itersString);
-			outputNames.push_back(outputDir + m->getSimpleName(treefile)  +  "." + getOutputFileNameTag("parsimony"));
-			outputTypes["parsimony"].push_back(outputDir + m->getSimpleName(treefile)  + "." + getOutputFileNameTag("parsimony"));
+            map<string, string> variables; 
+            variables["[filename]"] = outputDir + m->getSimpleName(treefile) +  ".";
+            
+			output = new ColumnFile(getOutputFileName("parsimony",variables), itersString);
+			outputNames.push_back(getOutputFileName("parsimony",variables));
+			outputTypes["parsimony"].push_back(getOutputFileName("parsimony",variables));
 				
-			sumFile = outputDir + m->getSimpleName(treefile) + "." + getOutputFileNameTag("psummary");
+			sumFile = getOutputFileName("psummary",variables);
 			m->openOutputFile(sumFile, outSum);
 			outputNames.push_back(sumFile);
 			outputTypes["psummary"].push_back(sumFile);
@@ -579,7 +576,7 @@ void ParsimonyCommand::getUserInput() {
             
 			//set tmaps namesOfSeqs
 			for (int j = 0; j < num; j++) {
-				groupMap[toString(count)] = i;
+				groupMap[toString(count)] = toString(i);
 				nameMap.insert(toString(count));
 				count++;
 			}
@@ -591,6 +588,7 @@ void ParsimonyCommand::getUserInput() {
 		getline(cin, s);
 		
 		m->Treenames = ct->getNamesOfSeqs(); 
+        m->runParse = false;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ParsimonyCommand", "getUserInput");

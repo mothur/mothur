@@ -12,20 +12,20 @@
 //**********************************************************************************************************************
 vector<string> MGClusterCommand::setParameters(){	
 	try {
-		CommandParameter pblast("blast", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pblast);
-		CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "ColumnName",false,false); parameters.push_back(pname);
-		CommandParameter pcount("count", "InputTypes", "", "", "NameCount", "none", "none",false,false); parameters.push_back(pcount);
-		CommandParameter plength("length", "Number", "", "5", "", "", "",false,false); parameters.push_back(plength);
-		CommandParameter ppenalty("penalty", "Number", "", "0.10", "", "", "",false,false); parameters.push_back(ppenalty);
-		CommandParameter pcutoff("cutoff", "Number", "", "0.70", "", "", "",false,false); parameters.push_back(pcutoff);
-		CommandParameter pprecision("precision", "Number", "", "100", "", "", "",false,false); parameters.push_back(pprecision);
-		CommandParameter pmethod("method", "Multiple", "furthest-nearest-average", "average", "", "", "",false,false); parameters.push_back(pmethod);
-		CommandParameter phard("hard", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(phard);
-		CommandParameter pmin("min", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pmin);
-		CommandParameter pmerge("merge", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pmerge);
-		CommandParameter phcluster("hcluster", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(phcluster);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pblast("blast", "InputTypes", "", "", "none", "none", "none","list",false,true,true); parameters.push_back(pblast);
+		CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "ColumnName","rabund-sabund",false,false,true); parameters.push_back(pname);
+		CommandParameter pcount("count", "InputTypes", "", "", "NameCount", "none", "none","",false,false,true); parameters.push_back(pcount);
+		CommandParameter plength("length", "Number", "", "5", "", "", "","",false,false); parameters.push_back(plength);
+		CommandParameter ppenalty("penalty", "Number", "", "0.10", "", "", "","",false,false); parameters.push_back(ppenalty);
+		CommandParameter pcutoff("cutoff", "Number", "", "0.70", "", "", "","",false,false,true); parameters.push_back(pcutoff);
+		CommandParameter pprecision("precision", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pprecision);
+		CommandParameter pmethod("method", "Multiple", "furthest-nearest-average", "average", "", "", "","",false,false); parameters.push_back(pmethod);
+		CommandParameter phard("hard", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(phard);
+		CommandParameter pmin("min", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pmin);
+		CommandParameter pmerge("merge", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pmerge);
+		CommandParameter phcluster("hcluster", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(phcluster);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -62,28 +62,23 @@ string MGClusterCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string MGClusterCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string MGClusterCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "list") {  outputFileName =  "list"; }
-            else if (type == "rabund") {  outputFileName =  "rabund"; }
-            else if (type == "sabund") {  outputFileName =  "sabund"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "MGClusterCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "list") {  pattern = "[filename],[clustertag],list-[filename],[clustertag],[tag2],list"; } 
+        else if (type == "rabund") {  pattern = "[filename],[clustertag],rabund"; } 
+        else if (type == "sabund") {  pattern = "[filename],[clustertag],sabund"; }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MGClusterCommand", "getOutputPattern");
+        exit(1);
+    }
 }
-//**********************************************************************************************************************
+//*******************************************************************************************************************
 MGClusterCommand::MGClusterCommand(){	
 	try {
 		abort = true; calledHelp = true; 
@@ -274,11 +269,13 @@ int MGClusterCommand::execute(){
 		else if (method == "nearest")	{ tag = "nn";  }
 		else							{ tag = "an";  }
 		
-        string sabundFileName = fileroot+ tag + "." + getOutputFileNameTag("sabund");
-        string rabundFileName = fileroot+ tag + "." + getOutputFileNameTag("rabund");
-        string listFileName = fileroot+ tag + ".";
-        if (countfile != "") { listFileName += "unique_"; }
-        listFileName += getOutputFileNameTag("list");
+        map<string, string> variables; 
+        variables["[filename]"] = fileroot;
+        if (countfile != "") { variables["[tag2]"] = "unique_list"; }
+        variables["[clustertag]"] = tag;
+        string sabundFileName = getOutputFileName("sabund", variables);
+        string rabundFileName = getOutputFileName("rabund", variables);
+        string listFileName = getOutputFileName("list", variables);
         
         if (countfile == "") {
             m->openOutputFile(sabundFileName,	sabundFile);
@@ -315,10 +312,13 @@ int MGClusterCommand::execute(){
 				outputTypes.clear();
 				return 0; 
 			}
-		
+            
+            
 			//cluster using cluster classes
 			while (distMatrix->getSmallDist() < cutoff && distMatrix->getNNodes() > 0){
 				
+                if (m->debug) {  cout << "numNodes=" << distMatrix->getNNodes() << " smallDist = " << distMatrix->getSmallDist() << endl; }
+                
 				cluster->update(cutoff);
 				
 				if (m->control_pressed) { 

@@ -26,8 +26,9 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "sens.spec";				}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
-	string getOutputFileNameTag(string, string);
+	
 	string getHelpString();	
+    string getOutputPattern(string);	
 	string getCitation() { return "Schloss PD, Westcott SL (2011). Assessing and improving methods used in OTU-based approaches for 16S rRNA gene sequence analysis. Appl Environ Microbiol 77:3219.\nhttp://www.mothur.org/wiki/Sens.spec"; }
 	string getDescription()		{ return "sens.spec"; }
 

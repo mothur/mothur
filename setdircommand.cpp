@@ -12,12 +12,12 @@
 //**********************************************************************************************************************
 vector<string> SetDirectoryCommand::setParameters(){	
 	try {
-		CommandParameter ptempdefault("tempdefault", "String", "", "", "", "", "",false,false); parameters.push_back(ptempdefault);
-        CommandParameter pdebug("debug", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pdebug);
-		CommandParameter pinput("input", "String", "", "", "", "", "",false,false); parameters.push_back(pinput);
-		CommandParameter poutput("output", "String", "", "", "", "", "",false,false); parameters.push_back(poutput);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter ptempdefault("tempdefault", "String", "", "", "", "", "","",false,false); parameters.push_back(ptempdefault);
+        CommandParameter pdebug("debug", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pdebug);
+		CommandParameter pinput("input", "String", "", "", "", "", "","",false,false,true); parameters.push_back(pinput);
+		CommandParameter poutput("output", "String", "", "", "", "", "","",false,false,true); parameters.push_back(poutput);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}

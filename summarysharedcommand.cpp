@@ -13,18 +13,18 @@
 //**********************************************************************************************************************
 vector<string> SummarySharedCommand::setParameters(){	
 	try {
-		CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pshared);
-		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
-        CommandParameter psubsample("subsample", "String", "", "", "", "", "",false,false); parameters.push_back(psubsample);
-		CommandParameter pdistance("distance", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pdistance);
-		CommandParameter pcalc("calc", "Multiple", "sharedchao-sharedsobs-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan-kstest-whittaker-sharednseqs-ochiai-anderberg-kulczynski-kulczynskicody-lennon-morisitahorn-braycurtis-odum-canberra-structeuclidean-structchord-hellinger-manhattan-structpearson-soergel-spearman-structkulczynski-speciesprofile-structchi2-hamming-gower-memchi2-memchord-memeuclidean-mempearson", "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan", "", "", "",true,false); parameters.push_back(pcalc);
-        CommandParameter poutput("output", "Multiple", "lt-square", "lt", "", "", "",false,false); parameters.push_back(poutput);
-		CommandParameter pall("all", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pall);
-        CommandParameter piters("iters", "Number", "", "1000", "", "", "",false,false); parameters.push_back(piters);
-		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
-		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none","summary",false,true,true); parameters.push_back(pshared);
+		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
+        CommandParameter psubsample("subsample", "String", "", "", "", "", "","phylip",false,false); parameters.push_back(psubsample);
+		CommandParameter pdistance("distance", "Boolean", "", "F", "", "", "","phylip",false,false); parameters.push_back(pdistance);
+		CommandParameter pcalc("calc", "Multiple", "sharedchao-sharedsobs-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan-kstest-whittaker-sharednseqs-ochiai-anderberg-kulczynski-kulczynskicody-lennon-morisitahorn-braycurtis-odum-canberra-structeuclidean-structchord-hellinger-manhattan-structpearson-soergel-spearman-structkulczynski-speciesprofile-structchi2-hamming-gower-memchi2-memchord-memeuclidean-mempearson", "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan", "", "", "","",true,false,true); parameters.push_back(pcalc);
+        CommandParameter poutput("output", "Multiple", "lt-square", "lt", "", "", "","",false,false); parameters.push_back(poutput);
+		CommandParameter pall("all", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pall);
+        CommandParameter piters("iters", "Number", "", "1000", "", "", "","",false,false); parameters.push_back(piters);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -64,25 +64,20 @@ string SummarySharedCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string SummarySharedCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string SummarySharedCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "summary")            {   outputFileName =  "shared.summary";   }
-            else if (type == "phylip")            {   outputFileName =  "dist";   }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SummarySharedCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "summary") {  pattern = "[filename],summary-[filename],[tag],summary"; } 
+        else if (type == "phylip") {  pattern = "[filename],[calc],[distance],[outputtag],[tag2],dist"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SummarySharedCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 SummarySharedCommand::SummarySharedCommand(){	
@@ -205,7 +200,7 @@ SummarySharedCommand::SummarySharedCommand(string option)  {
                 else { subsample = false; }
             }
             
-            if (subsample == false) { iters = 1; }
+            if (subsample == false) { iters = 0; }
             
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
@@ -317,7 +312,9 @@ int SummarySharedCommand::execute(){
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		ofstream outputFileHandle, outAll;
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + getOutputFileNameTag("summary");
+        map<string, string> variables; 
+		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
+		string outputFileName = getOutputFileName("summary",variables);
 		
 		//if the users entered no valid calculators don't execute command
 		if (sumCalculators.size() == 0) { return 0; }
@@ -348,7 +345,8 @@ int SummarySharedCommand::execute(){
 		outputFileHandle.close();
 		
 		//create file and put column headers for multiple groups file
-		string outAllFileName = ((m->getRootName(sharedfile)) + "multiple." + getOutputFileNameTag("summary"));
+        variables["[tag]"]= "multiple";
+		string outAllFileName = getOutputFileName("summary",variables);
 		if (mult == true) {
 			m->openOutputFile(outAllFileName, outAll);
 			outputNames.push_back(outAllFileName);
@@ -786,7 +784,12 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                             matrix[column][row] = dist;
                         }
                         
-                        string distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + sumCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + "." + getOutputFileNameTag("phylip");
+                        map<string, string> variables; 
+                        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
+                        variables["[calc]"] = sumCalculators[i]->getName();
+                        variables["[distance]"] = thisLookup[0]->getLabel();
+                        variables["[outputtag]"] = output;
+                        string distFileName = getOutputFileName("phylip",variables);
                         outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
                         ofstream outDist;
                         m->openOutputFile(distFileName, outDist);
@@ -879,7 +882,13 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                     stdmatrix[column][row] = stdDist;
                 }
                 
-                string distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + sumCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + ".ave." + getOutputFileNameTag("phylip");
+                map<string, string> variables; 
+                variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
+                variables["[calc]"] = sumCalculators[i]->getName();
+                variables["[distance]"] = thisLookup[0]->getLabel();
+                variables["[outputtag]"] = output;
+                variables["[tag2]"] = "ave";
+                string distFileName = getOutputFileName("phylip",variables);
                 outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
                 ofstream outAve;
                 m->openOutputFile(distFileName, outAve);
@@ -889,7 +898,8 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                 
                 outAve.close();
                 
-                distFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + sumCalculators[i]->getName() + "." + thisLookup[0]->getLabel()  + "." + output + ".std." + getOutputFileNameTag("phylip");
+                variables["[tag2]"] = "std";
+                distFileName = getOutputFileName("phylip",variables);
                 outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
                 ofstream outSTD;
                 m->openOutputFile(distFileName, outSTD);

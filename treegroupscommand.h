@@ -78,8 +78,9 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "tree.shared";				}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
-	string getOutputFileNameTag(string, string);
+	
 	string getHelpString();	
+    string getOutputPattern(string);	
 	string getCitation() { return "http://www.mothur.org/wiki/Tree.shared"; }
 	string getDescription()		{ return "generate a tree file that describes the dissimilarity among groups"; }
 

@@ -13,16 +13,16 @@
 //**********************************************************************************************************************
 vector<string> ChimeraCheckCommand::setParameters(){	
 	try {
-		CommandParameter ptemplate("reference", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(ptemplate);
-		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
-		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pname);
-		CommandParameter psvg("svg", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(psvg);
-		CommandParameter pincrement("increment", "Number", "", "10", "", "", "",false,false); parameters.push_back(pincrement);
-		CommandParameter pksize("ksize", "Number", "", "7", "", "", "",false,false); parameters.push_back(pksize);
-		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
-		CommandParameter psave("save", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(psave);
+		CommandParameter ptemplate("reference", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(ptemplate);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","chimera",false,true,true); parameters.push_back(pfasta);
+		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none","",false,false,true); parameters.push_back(pname);
+		CommandParameter psvg("svg", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(psvg);
+		CommandParameter pincrement("increment", "Number", "", "10", "", "", "","",false,false); parameters.push_back(pincrement);
+		CommandParameter pksize("ksize", "Number", "", "7", "", "", "","",false,false); parameters.push_back(pksize);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+		CommandParameter psave("save", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(psave);
 
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -65,24 +65,19 @@ string ChimeraCheckCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string ChimeraCheckCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string ChimeraCheckCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "chimera") {  outputFileName =  "chimeracheck.chimeras"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChimeraCcodeCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "chimera") {  pattern = "[filename],chimeracheck.chimeras"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ChimeraCheckCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 ChimeraCheckCommand::ChimeraCheckCommand(){	
@@ -362,7 +357,9 @@ int ChimeraCheckCommand::execute(){
 			if (m->control_pressed) { delete chimera;	return 0;	}
 			
 			if (outputDir == "") { outputDir = m->hasPath(fastaFileNames[i]);  }//if user entered a file with a path then preserve it
-			string outputFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[i])) + getOutputFileNameTag("chimera");
+            map<string, string> variables;
+            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[i]));
+			string outputFileName = getOutputFileName("chimera", variables);
 			outputNames.push_back(outputFileName); outputTypes["chimera"].push_back(outputFileName);
 			
 		#ifdef USE_MPI

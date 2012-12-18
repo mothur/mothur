@@ -25,8 +25,9 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "make.biom";	}
 	string getCommandCategory()		{ return "General";		}
-	string getOutputFileNameTag(string, string);
+	
 	string getHelpString();	
+    string getOutputPattern(string);	
 	string getCitation() { return "http://biom-format.org/documentation/biom_format.html, http://www.mothur.org/wiki/Make.biom"; }
 	string getDescription()		{ return "creates a biom file"; }
     

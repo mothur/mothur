@@ -14,12 +14,12 @@
 //**********************************************************************************************************************
 vector<string> MantelCommand::setParameters(){	
 	try {
-		CommandParameter pphylip1("phylip1", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pphylip1);
-		CommandParameter pphylip2("phylip2", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pphylip2);
-		CommandParameter piters("iters", "Number", "", "1000", "", "", "",false,false); parameters.push_back(piters);
-		CommandParameter pmethod("method", "Multiple", "pearson-spearman-kendall", "pearson", "", "", "",false,false); parameters.push_back(pmethod);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pphylip1("phylip1", "InputTypes", "", "", "none", "none", "none","mantel",false,true,true); parameters.push_back(pphylip1);
+		CommandParameter pphylip2("phylip2", "InputTypes", "", "", "none", "none", "none","mantel",false,true,true); parameters.push_back(pphylip2);
+		CommandParameter piters("iters", "Number", "", "1000", "", "", "","",false,false); parameters.push_back(piters);
+		CommandParameter pmethod("method", "Multiple", "pearson-spearman-kendall", "pearson", "", "", "","",false,false); parameters.push_back(pmethod);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -50,24 +50,19 @@ string MantelCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string MantelCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string MantelCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "mantel")             {   outputFileName =  "mantel";       }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "MantelCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "mantel") {  pattern = "[filename],mantel"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MantelCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 MantelCommand::MantelCommand(){	
@@ -226,7 +221,9 @@ int MantelCommand::execute(){
 		
 		if (m->control_pressed) { return 0; }
 		
-		string outputFile = outputDir + m->getRootName(m->getSimpleName(phylipfile1)) + getOutputFileNameTag("mantel");
+        map<string, string> variables; 
+		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(phylipfile1));
+		string outputFile = getOutputFileName("mantel",variables);
 		outputNames.push_back(outputFile); outputTypes["mantel"].push_back(outputFile);
 		ofstream out;
 		

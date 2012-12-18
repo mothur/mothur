@@ -24,8 +24,9 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "make.fastq";				}
 	string getCommandCategory()		{ return "Sequence Processing";		}
-	string getOutputFileNameTag(string, string);
+	
 	string getHelpString();	
+    string getOutputPattern(string);	
 	string getCitation() { return "http://www.mothur.org/wiki/Make.fastq"; }
 	string getDescription()		{ return "creates a fastq file from a fasta and quality file"; }
 
@@ -36,7 +37,7 @@ public:
 	
 private:
 	
-	string fastafile, qualfile, outputDir;
+	string fastafile, qualfile, outputDir, format;
 	bool abort;
 	vector<string> outputNames;
 	

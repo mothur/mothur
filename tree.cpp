@@ -1344,7 +1344,7 @@ int Tree::readTreeString(ifstream& filehandle)	{
 				c = filehandle.get();
 			//k = c;
 //cout << k << endl;
-				while ((c != '(') && (c != ')') && (c != ',') && (c != ':') && (c != '\n') && (c != 32) && (c != '\t')) {			
+				while ((c != '(') && (c != ')') && (c != ',') && (c != ':')  && (c != '\n') && (c != 32) && (c != '\t')) {			
 					name += c;
 					c = filehandle.get();
 			//k = c;
@@ -1352,7 +1352,9 @@ int Tree::readTreeString(ifstream& filehandle)	{
 				}
 				
 //cout << "name = " << name << endl;
-				m->Treenames.push_back(name);
+                if (name != "\r" ) {
+                    m->Treenames.push_back(name);   } //cout << m->Treenames.size() << '\t' << name << endl;
+                
 				filehandle.putback(c);
 //k = c;
 //cout << " after putback" <<  k << endl;

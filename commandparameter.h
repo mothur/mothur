@@ -20,9 +20,11 @@
 class CommandParameter {
 	
 	public:
-		CommandParameter() { name = ""; type = ""; options = ""; optionsDefault = ""; chooseOnlyOneGroup = ""; chooseAtLeastOneGroup = ""; linkedGroup = ""; multipleSelectionAllowed = false; required = false; }
-		CommandParameter(string n, string t, string o, string d, string only, string atLeast, string linked, bool m, bool r) : name(n), type(t), options(o), optionsDefault(d), 
-				chooseOnlyOneGroup(only), chooseAtLeastOneGroup(atLeast), linkedGroup(linked), multipleSelectionAllowed(m), required(r) {}
+    CommandParameter() { name = ""; type = ""; options = ""; optionsDefault = ""; chooseOnlyOneGroup = ""; chooseAtLeastOneGroup = ""; linkedGroup = ""; multipleSelectionAllowed = false; required = false; important = false; outputTypes = ""; }
+		CommandParameter(string n, string t, string o, string d, string only, string atLeast, string linked, string opt, bool m, bool r, bool i) : name(n), type(t), options(o), optionsDefault(d), 
+				chooseOnlyOneGroup(only), chooseAtLeastOneGroup(atLeast), linkedGroup(linked), outputTypes(opt),multipleSelectionAllowed(m), required(r), important(i) {}
+        CommandParameter(string n, string t, string o, string d, string only, string atLeast, string linked, string opt, bool m, bool r) : name(n), type(t), options(o), optionsDefault(d), 
+    chooseOnlyOneGroup(only), chooseAtLeastOneGroup(atLeast), linkedGroup(linked), outputTypes(opt), multipleSelectionAllowed(m), required(r)  { important = false; }
 		~CommandParameter() {}
 	
 		string name;		//something like fasta, processors, method
@@ -37,11 +39,14 @@ class CommandParameter {
 		string chooseAtLeastOneGroup; //for file inputs: if a command has several options for input files and you want to make sure one is choosen then put them in a group
 									//for instance in the read.dist command you must provide a phylip or column file so set chooseAtLeastOneGroup for both parameters to something like "DistanceFileGroup"
 		string linkedGroup; //for file inputs: if a command has a file option were if you provide one you must provide another you can put them in a group
-										//for instance in the read.dist command if you provide a column file you must provide a name file so set linkedGroup for both parameters to something like "ColumnNameGroup"
+										//for instance in the cluster command if you provide a column file you must provide a name file so set linkedGroup for both parameters to something like "ColumnNameGroup"
 
 		bool multipleSelectionAllowed; //for "Multiple" type to say whether you can select multiple options, for instance for calc parameter set to true, but for method set to false
 		bool required; //is this parameter required
-	
+    
+        bool important; //is this parameter important.  The gui will put "important" parameters first in the option panel.
+        
+        string outputTypes; //types on files created by the command if this parameter is given.  ie. get.seqs command fasta parameter makes a fasta file. can be multiple values split by dashes.
 		
 	private:
 };

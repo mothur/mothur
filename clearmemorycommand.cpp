@@ -22,25 +22,6 @@ vector<string> ClearMemoryCommand::setParameters(){
 	}
 }
 //**********************************************************************************************************************
-string ClearMemoryCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
-        
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true; 
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClearMemoryCommand", "getOutputFileNameTag");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 string ClearMemoryCommand::getHelpString(){	
 	try {
 		string helpString = "";

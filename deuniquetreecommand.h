@@ -25,8 +25,9 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "deunique.tree";		}
 	string getCommandCategory()		{ return "Hypothesis Testing";		}
-	string getOutputFileNameTag(string, string);
+	
 	string getHelpString();	
+    string getOutputPattern(string);	
 	string getCitation() { return "http://www.mothur.org/wiki/Deunique.tree"; }
 	string getDescription()		{ return "add the redundant sequence names back into a tree of unique sequences"; }
 	

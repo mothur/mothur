@@ -27,8 +27,9 @@ class UnifracUnweightedCommand : public Command {
 		vector<string> setParameters();
 		string getCommandName()			{ return "unifrac.unweighted";		}
 		string getCommandCategory()		{ return "Hypothesis Testing";		}
-		string getOutputFileNameTag(string, string);
+		
 	string getHelpString();	
+    string getOutputPattern(string);	
 		string getCitation() { return "Lozupone C, Knight R (2005). UniFrac: a new phylogenetic method for comparing microbial communities. Appl Environ Microbiol 71: 8228-35. \nhttp://www.mothur.org/wiki/Unifrac.unweighted"; }
 		string getDescription()		{ return "generic tests that describes whether two or more communities have the same structure"; }
 

@@ -35,9 +35,10 @@ public:
     vector<string> setParameters();
     string getCommandName()			{ return "newCommandNameToBeSeenByUser";			}
     string getCommandCategory()		{ return "commandCategory";		} 
-    string getOutputFileNameTag(string, string);
+    
+    string getOutputPattern(string);
     //commmand category choices: Sequence Processing, OTU-Based Approaches, Hypothesis Testing, Phylotype Analysis, General, Clustering and Hidden
-	string getHelpString();		
+	string getHelpString();	
     string getCitation() { return "http://www.mothur.org/wiki/newCommandNameToBeSeenByUser"; }
     string getDescription()		{ return "brief description"; }
     

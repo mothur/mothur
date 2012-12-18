@@ -10,10 +10,10 @@
 //**********************************************************************************************************************
 vector<string> KruskalWallisCommand::setParameters(){	
 	try {
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
-        CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
-        CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pshared);	
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false,true); parameters.push_back(pgroups);
+        CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none","summary",false,true,true); parameters.push_back(pshared);	
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -38,24 +38,19 @@ string KruskalWallisCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string KruskalWallisCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string KruskalWallisCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "summary") {  outputFileName =  "cooccurence.summary"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "KruskalWallisCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "summary") {  pattern = "[filename],cooccurence.summary"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "KruskalWallisCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 KruskalWallisCommand::KruskalWallisCommand(){	
@@ -155,7 +150,9 @@ int KruskalWallisCommand::execute(){
 		set<string> userLabels = labels;
 
         ofstream out;
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + getOutputFileNameTag("summary");
+        map<string,string> variables;
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
+		string outputFileName = getOutputFileName("summary",variables);
         m->openOutputFile(outputFileName, out);
         outputNames.push_back(outputFileName);  outputTypes["summary"].push_back(outputFileName);
         out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);

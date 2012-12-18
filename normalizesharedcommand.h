@@ -24,8 +24,9 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "normalize.shared";		}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
-	string getOutputFileNameTag(string, string);
+	
 	string getHelpString();	
+    string getOutputPattern(string);	
 	string getCitation() { return "http://www.mothur.org/wiki/Normalize.shared"; }
 	string getDescription()		{ return "normalize samples in a shared or relabund file"; }
 

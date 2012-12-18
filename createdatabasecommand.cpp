@@ -12,15 +12,15 @@
 //**********************************************************************************************************************
 vector<string> CreateDatabaseCommand::setParameters(){	
 	try {
-		CommandParameter pfasta("repfasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
-		CommandParameter pname("repname", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pname);
-		CommandParameter pcontaxonomy("contaxonomy", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pcontaxonomy);
-		CommandParameter plist("list", "InputTypes", "", "", "ListShared", "ListShared", "none",false,false); parameters.push_back(plist);
-        CommandParameter pshared("shared", "InputTypes", "", "", "ListShared", "ListShared", "none",false,false); parameters.push_back(pshared);
-		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pgroup);
-		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pfasta("repfasta", "InputTypes", "", "", "none", "none", "none","database",false,true,true); parameters.push_back(pfasta);
+		CommandParameter pname("repname", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(pname);
+		CommandParameter pcontaxonomy("contaxonomy", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(pcontaxonomy);
+		CommandParameter plist("list", "InputTypes", "", "", "ListShared", "ListShared", "none","",false,false,true); parameters.push_back(plist);
+        CommandParameter pshared("shared", "InputTypes", "", "", "ListShared", "ListShared", "none","",false,false,true); parameters.push_back(pshared);
+		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pgroup);
+		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -55,26 +55,20 @@ string CreateDatabaseCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string CreateDatabaseCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string CreateDatabaseCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "database") {  outputFileName =  "database"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "CreateDatabaseCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "database") {  pattern = "[filename],database"; }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CreateDatabaseCommand", "getOutputPattern");
+        exit(1);
+    }
 }
-
 //**********************************************************************************************************************
 CreateDatabaseCommand::CreateDatabaseCommand(){	
 	try {
@@ -281,9 +275,10 @@ int CreateDatabaseCommand::execute(){
         if (m->control_pressed) { return 0; }
         
         
-        string outputFileName = "";
-        if (listfile != "") { outputFileName = outputDir + m->getRootName(m->getSimpleName(listfile)) + getOutputFileNameTag("database"); }
-        else { outputFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + getOutputFileNameTag("database"); }
+        map<string, string> variables; 
+        if (listfile != "") {  variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(listfile)); }
+        else { variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile)); }
+        string outputFileName = getOutputFileName("database", variables); 
         outputNames.push_back(outputFileName); outputTypes["database"].push_back(outputFileName);
         
         ofstream out;

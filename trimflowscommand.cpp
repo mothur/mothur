@@ -14,24 +14,24 @@
 //**********************************************************************************************************************
 vector<string> TrimFlowsCommand::setParameters(){	
 	try {
-		CommandParameter pflow("flow", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pflow);
-		CommandParameter poligos("oligos", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(poligos);
-		CommandParameter pmaxhomop("maxhomop", "Number", "", "9", "", "", "",false,false); parameters.push_back(pmaxhomop);
-		CommandParameter pmaxflows("maxflows", "Number", "", "450", "", "", "",false,false); parameters.push_back(pmaxflows);
-		CommandParameter pminflows("minflows", "Number", "", "450", "", "", "",false,false); parameters.push_back(pminflows);
-		CommandParameter ppdiffs("pdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(ppdiffs);
-		CommandParameter pbdiffs("bdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(pbdiffs);
-        CommandParameter pldiffs("ldiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(pldiffs);
-		CommandParameter psdiffs("sdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(psdiffs);
-        CommandParameter ptdiffs("tdiffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(ptdiffs);
-		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
-		CommandParameter psignal("signal", "Number", "", "0.50", "", "", "",false,false); parameters.push_back(psignal);
-		CommandParameter pnoise("noise", "Number", "", "0.70", "", "", "",false,false); parameters.push_back(pnoise);
-		CommandParameter pallfiles("allfiles", "Boolean", "", "t", "", "", "",false,false); parameters.push_back(pallfiles);
-		CommandParameter porder("order", "String", "", "TACG", "", "", "",false,false); parameters.push_back(porder);
-		CommandParameter pfasta("fasta", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pfasta);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pflow("flow", "InputTypes", "", "", "none", "none", "none","flow",false,true,true); parameters.push_back(pflow);
+		CommandParameter poligos("oligos", "InputTypes", "", "", "none", "none", "none","",false,false,true); parameters.push_back(poligos);
+		CommandParameter pmaxhomop("maxhomop", "Number", "", "9", "", "", "","",false,false); parameters.push_back(pmaxhomop);
+		CommandParameter pmaxflows("maxflows", "Number", "", "450", "", "", "","",false,false); parameters.push_back(pmaxflows);
+		CommandParameter pminflows("minflows", "Number", "", "450", "", "", "","",false,false); parameters.push_back(pminflows);
+		CommandParameter ppdiffs("pdiffs", "Number", "", "0", "", "", "","",false,false,true); parameters.push_back(ppdiffs);
+		CommandParameter pbdiffs("bdiffs", "Number", "", "0", "", "", "","",false,false,true); parameters.push_back(pbdiffs);
+        CommandParameter pldiffs("ldiffs", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pldiffs);
+		CommandParameter psdiffs("sdiffs", "Number", "", "0", "", "", "","",false,false); parameters.push_back(psdiffs);
+        CommandParameter ptdiffs("tdiffs", "Number", "", "0", "", "", "","",false,false); parameters.push_back(ptdiffs);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
+		CommandParameter psignal("signal", "Number", "", "0.50", "", "", "","",false,false); parameters.push_back(psignal);
+		CommandParameter pnoise("noise", "Number", "", "0.70", "", "", "","",false,false); parameters.push_back(pnoise);
+		CommandParameter pallfiles("allfiles", "Boolean", "", "t", "", "", "","",false,false); parameters.push_back(pallfiles);
+		CommandParameter porder("order", "String", "", "TACG", "", "", "","",false,false); parameters.push_back(porder);
+		CommandParameter pfasta("fasta", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pfasta);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -57,26 +57,21 @@ string TrimFlowsCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string TrimFlowsCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string TrimFlowsCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "flow")            {   outputFileName =  "flow";   }
-            else if (type == "fasta")            {   outputFileName =  "flow.fasta";   }
-            else if (type == "file")            {   outputFileName =  "flow.files";   }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "TrimFlowsCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "flow") {  pattern = "[filename],[tag],flow"; } 
+        else if (type == "fasta") {  pattern = "[filename],flow.fasta"; } 
+        else if (type == "file") {  pattern = "[filename],flow.files"; }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "TrimFlowsCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 
@@ -248,16 +243,20 @@ int TrimFlowsCommand::execute(){
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 
-		string trimFlowFileName = outputDir + m->getRootName(m->getSimpleName(flowFileName)) + "trim." + getOutputFileNameTag("flow");
+        map<string, string> variables; 
+		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(flowFileName));
+        string fastaFileName = getOutputFileName("fasta",variables);
+		if(fasta){ outputNames.push_back(fastaFileName); outputTypes["fasta"].push_back(fastaFileName); }
+        
+        variables["[tag]"] = "trim";
+		string trimFlowFileName = getOutputFileName("flow",variables);
 		outputNames.push_back(trimFlowFileName); outputTypes["flow"].push_back(trimFlowFileName);
 		
-		string scrapFlowFileName = outputDir + m->getRootName(m->getSimpleName(flowFileName)) + "scrap." + getOutputFileNameTag("flow");;
+        variables["[tag]"] = "scrap";
+		string scrapFlowFileName = getOutputFileName("flow",variables);
 		outputNames.push_back(scrapFlowFileName); outputTypes["flow"].push_back(scrapFlowFileName);
 
-		string fastaFileName = outputDir + m->getRootName(m->getSimpleName(flowFileName)) + getOutputFileNameTag("fasta");
-		if(fasta){
-			outputNames.push_back(fastaFileName); outputTypes["fasta"].push_back(fastaFileName);
-		}
+		
 		
 		vector<unsigned long long> flowFilePos;
 	#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
@@ -307,7 +306,8 @@ int TrimFlowsCommand::execute(){
 		
 		if(allFiles){
 			set<string> namesAlreadyProcessed;
-			flowFilesFileName = outputDir + m->getRootName(m->getSimpleName(flowFileName)) + getOutputFileNameTag("file");
+            variables["[tag]"] = "";
+			flowFilesFileName = getOutputFileName("file",variables);
 			m->openOutputFile(flowFilesFileName, output);
 
 			for(int i=0;i<barcodePrimerComboFileNames.size();i++){
@@ -340,7 +340,8 @@ int TrimFlowsCommand::execute(){
 			output.close();
 		}
 		else{
-			flowFilesFileName = outputDir + m->getRootName(m->getSimpleName(flowFileName)) + getOutputFileNameTag("file");
+            variables["[tag]"] = "";
+			flowFilesFileName = getOutputFileName("file",variables);
 			m->openOutputFile(flowFilesFileName, output);
 			
 			output << m->getFullPathName(trimFlowFileName) << endl;
@@ -623,9 +624,13 @@ void TrimFlowsCommand::getOligos(vector<vector<string> >& outFlowFileNames){
 					string comboGroupName = "";
 					string fileName = "";
 					
+                    map<string, string> variables; 
+                    variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(flowFileName));
+                    
 					if(primerName == ""){
 						comboGroupName = barcodeNameVector[itBar->second];
-						fileName = outputDir + m->getRootName(m->getSimpleName(flowFileName)) + comboGroupName + ".flow";
+                        variables["[tag]"] = comboGroupName;
+						fileName = getOutputFileName("flow", variables);
 					}
 					else{
 						if(barcodeName == ""){
@@ -634,7 +639,8 @@ void TrimFlowsCommand::getOligos(vector<vector<string> >& outFlowFileNames){
 						else{
 							comboGroupName = barcodeNameVector[itBar->second] + "." + primerNameVector[itPrimer->second];
 						}
-						fileName = outputDir + m->getRootName(m->getSimpleName(flowFileName)) + comboGroupName + ".flow";
+                        variables["[tag]"] = comboGroupName;
+						fileName = getOutputFileName("flow", variables);
 					}
 					
 					outFlowFileNames[itBar->second][itPrimer->second] = fileName;

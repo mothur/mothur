@@ -14,10 +14,11 @@
 //**********************************************************************************************************************
 vector<string> MakeFastQCommand::setParameters(){	
 	try {
-		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
-		CommandParameter pqfile("qfile", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pqfile);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","fastq",false,true,true); parameters.push_back(pfasta);
+		CommandParameter pqfile("qfile", "InputTypes", "", "", "none", "none", "none","fastq",false,true,true); parameters.push_back(pqfile);
+		CommandParameter pformat("format", "Multiple", "sanger-illumina", "sanger", "", "", "","",false,false); parameters.push_back(pformat);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -32,9 +33,9 @@ vector<string> MakeFastQCommand::setParameters(){
 string MakeFastQCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The make.fastq command read a fasta and quality file and creates a fastq file.\n";
-		helpString += "The make.fastq command parameters are fasta and qfile, both are required.\n";
-		helpString += "You must also provide an accnos containing the list of groups to get or set the groups parameter to the groups you wish to select.\n";
+		helpString += "The make.fastq command reads a fasta and quality file and creates a fastq file.\n";
+		helpString += "The make.fastq command parameters are fasta, qfile and format.  fasta and qfile are required.\n";
+		helpString += "The format parameter is used to indicate whether your sequences are sanger or illumina, default=sanger.\n";
 		helpString += "The make.fastq command should be in the following format: make.fastq(qfile=yourQualityFile, fasta=yourFasta).\n";
 		helpString += "Example make.fastq(fasta=amazon.fasta, qfile=amazon.qual).\n";
 		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n";
@@ -46,24 +47,19 @@ string MakeFastQCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string MakeFastQCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string MakeFastQCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "fastq")             {   outputFileName =  "fastq";         }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "MakeFastQCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "fastq") {  pattern = "[filename],fastq"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MakeFastQCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 MakeFastQCommand::MakeFastQCommand(){	
@@ -148,6 +144,14 @@ MakeFastQCommand::MakeFastQCommand(string option)  {
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(fastafile);		}
+            
+            format = validParameter.validFile(parameters, "format", false);		if (format == "not found"){	format = "sanger";	}
+            
+            if ((format != "sanger") && (format != "illumina") && (format != "solexa"))  { 
+				m->mothurOut(format + " is not a valid format. Your format choices are sanger, solexa and illumina, aborting." ); m->mothurOutEndLine();
+				abort=true;
+			}
+
 
 		}
 		
@@ -164,8 +168,9 @@ int MakeFastQCommand::execute(){
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
-		
-		string outputFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + getOutputFileNameTag("fastq");
+        map<string, string> variables; 
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastafile));
+		string outputFile = getOutputFileName("fastq",variables);
 		outputNames.push_back(outputFile); outputTypes["fastq"].push_back(outputFile);
 		
 		ofstream out;
@@ -176,7 +181,7 @@ int MakeFastQCommand::execute(){
 		
 		ifstream fFile;
 		m->openInputFile(fastafile, fFile);
-		
+        
 		while (!fFile.eof() && !qFile.eof()) {
 			
 			if (m->control_pressed) { break; }
@@ -221,9 +226,10 @@ string MakeFastQCommand::convertQual(vector<int> qual) {
 	try {
 		string qualScores;
 		
-		int controlChar = int('@');
-		
-		for (int i = 0; i < qual.size(); i++) { 
+        for (int i = 0; i < qual.size(); i++) { 
+            int controlChar = int('!');
+            if (format == "illumina") {  controlChar = int('@');  }
+            
 			int temp = qual[i] + controlChar;
 			char qualChar = (char) temp;
 			

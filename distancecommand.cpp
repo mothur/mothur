@@ -12,17 +12,17 @@
 //**********************************************************************************************************************
 vector<string> DistanceCommand::setParameters(){	
 	try {
-		CommandParameter pcolumn("column", "InputTypes", "", "", "none", "none", "OldFastaColumn",false,false); parameters.push_back(pcolumn);
-		CommandParameter poldfasta("oldfasta", "InputTypes", "", "", "none", "none", "OldFastaColumn",false,false); parameters.push_back(poldfasta);
-		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
-		CommandParameter poutput("output", "Multiple", "column-lt-square-phylip", "column", "", "", "",false,false); parameters.push_back(poutput);
-		CommandParameter pcalc("calc", "Multiple", "nogaps-eachgap-onegap", "onegap", "", "", "",false,false); parameters.push_back(pcalc);
-		CommandParameter pcountends("countends", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pcountends);
-		CommandParameter pcompress("compress", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pcompress);
-		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
-		CommandParameter pcutoff("cutoff", "Number", "", "1.0", "", "", "",false,false); parameters.push_back(pcutoff);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pcolumn("column", "InputTypes", "", "", "none", "none", "OldFastaColumn","column",false,false); parameters.push_back(pcolumn);
+		CommandParameter poldfasta("oldfasta", "InputTypes", "", "", "none", "none", "OldFastaColumn","",false,false); parameters.push_back(poldfasta);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","phylip-column",false,true, true); parameters.push_back(pfasta);
+		CommandParameter poutput("output", "Multiple", "column-lt-square-phylip", "column", "", "", "","phylip-column",false,false, true); parameters.push_back(poutput);
+		CommandParameter pcalc("calc", "Multiple", "nogaps-eachgap-onegap", "onegap", "", "", "","",false,false); parameters.push_back(pcalc);
+		CommandParameter pcountends("countends", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pcountends);
+		CommandParameter pcompress("compress", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pcompress);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false, true); parameters.push_back(pprocessors);
+		CommandParameter pcutoff("cutoff", "Number", "", "1.0", "", "", "","",false,false, true); parameters.push_back(pcutoff);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -59,25 +59,20 @@ string DistanceCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string DistanceCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string DistanceCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "phylip") {  outputFileName =  "dist"; }
-            else if (type == "column") {  outputFileName =  "dist"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "DistanceCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "phylip") {  pattern = "[filename],[outputtag],dist"; } 
+        else if (type == "column") { pattern = "[filename],dist"; }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "DistanceCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 DistanceCommand::DistanceCommand(){	
@@ -249,14 +244,17 @@ int DistanceCommand::execute(){
 		if (!alignDB.sameLength()) {  m->mothurOut("[ERROR]: your sequences are not the same length, aborting."); m->mothurOutEndLine(); return 0; }
 		
 		string outputFile;
-				
+        
+        map<string, string> variables; 
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastafile));
 		if (output == "lt") { //does the user want lower triangle phylip formatted file 
-			outputFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "phylip." + getOutputFileNameTag("phylip");
+            variables["[outputtag]"] = "phylip";
+			outputFile = getOutputFileName("phylip", variables);
 			m->mothurRemove(outputFile); outputTypes["phylip"].push_back(outputFile);
 			
 			//output numSeqs to phylip formatted dist file
 		}else if (output == "column") { //user wants column format
-			outputFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + getOutputFileNameTag("column");
+			outputFile = getOutputFileName("column", variables);
 			outputTypes["column"].push_back(outputFile);
 			
 			//so we don't accidentally overwrite
@@ -267,7 +265,8 @@ int DistanceCommand::execute(){
 			
 			m->mothurRemove(outputFile);
 		}else { //assume square
-			outputFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "square." + getOutputFileNameTag("phylip");
+			variables["[outputtag]"] = "square";
+			outputFile = getOutputFileName("phylip", variables);
 			m->mothurRemove(outputFile);
 			outputTypes["phylip"].push_back(outputFile);
 		}
@@ -505,7 +504,7 @@ int DistanceCommand::execute(){
 		}
 		
 		m->mothurOutEndLine();
-		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		m->mothurOut(outputFile); m->mothurOutEndLine();
 		m->mothurOutEndLine();
 		m->mothurOut("It took " + toString(time(NULL) - startTime) + " to calculate the distances for " + toString(numSeqs) + " sequences."); m->mothurOutEndLine();
@@ -810,7 +809,7 @@ int DistanceCommand::driverMPI(int startLine, int endLine, MPI_File& outMPI, flo
 			}
 			
 			if(i % 100 == 0){
-				//m->mothurOut(toString(i) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
+				m->mothurOut(toString(i) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
 				cout << i << '\t' << (time(NULL) - startTime) << endl;
 			}
 			
@@ -827,7 +826,7 @@ int DistanceCommand::driverMPI(int startLine, int endLine, MPI_File& outMPI, flo
 			
 		}
 		
-		//m->mothurOut(toString(endLine-1) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
+		m->mothurOut(toString(endLine-1) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
 		cout << (endLine-1) << '\t' << (time(NULL) - startTime) << endl;	
 		delete distCalculator;
 		return 1;
@@ -905,7 +904,7 @@ int DistanceCommand::driverMPI(int startLine, int endLine, string file, unsigned
 
 		
 			if(i % 100 == 0){
-				//m->mothurOut(toString(i) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
+				m->mothurOut(toString(i) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
 				cout << i << '\t' << (time(NULL) - startTime) << endl;
 			}
 			
@@ -921,7 +920,7 @@ int DistanceCommand::driverMPI(int startLine, int endLine, string file, unsigned
 			delete buf;
 		}
 		
-		//m->mothurOut(toString(endLine-1) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
+		m->mothurOut(toString(endLine-1) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
 		cout << (endLine-1) << '\t' << (time(NULL) - startTime) << endl;
 		MPI_File_close(&outMPI);
 		delete distCalculator;
@@ -1000,7 +999,7 @@ int DistanceCommand::driverMPI(int startLine, int endLine, string file, unsigned
 
 		
 			if(i % 100 == 0){
-				//m->mothurOut(toString(i) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
+				m->mothurOut(toString(i) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
 				cout << i << '\t' << (time(NULL) - startTime) << endl;
 			}
 			
@@ -1016,7 +1015,7 @@ int DistanceCommand::driverMPI(int startLine, int endLine, string file, unsigned
 			delete buf;
 		}
 		
-		//m->mothurOut(toString(endLine-1) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
+		m->mothurOut(toString(endLine-1) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
 		cout << (endLine-1) << '\t' << (time(NULL) - startTime) << endl;
 		MPI_File_close(&outMPI);
 		delete distCalculator;

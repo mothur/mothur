@@ -23,8 +23,9 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "classify.tree";				}
 	string getCommandCategory()		{ return "Phylotype Analysis";          }
-	string getOutputFileNameTag(string, string);
+	
 	string getHelpString();	
+    string getOutputPattern(string);	
 	string getCitation() { return "http://www.mothur.org/wiki/Classify.tree"; }
 	string getDescription()		{ return "Find the consensus taxonomy for the descendant of each tree node"; }
     

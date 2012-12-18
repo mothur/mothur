@@ -15,16 +15,16 @@
 //**********************************************************************************************************************
 vector<string> ChimeraPerseusCommand::setParameters(){	
 	try {
-		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
-		CommandParameter pname("name", "InputTypes", "", "", "NameCount", "NameCount", "none",false,false); parameters.push_back(pname);
-        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "NameCount", "none",false,false); parameters.push_back(pcount);
-		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none",false,false); parameters.push_back(pgroup);
-		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
-		CommandParameter pcutoff("cutoff", "Number", "", "0.5", "", "", "",false,false); parameters.push_back(pcutoff);
-		CommandParameter palpha("alpha", "Number", "", "-5.54", "", "", "",false,false); parameters.push_back(palpha);
-		CommandParameter pbeta("beta", "Number", "", "0.33", "", "", "",false,false); parameters.push_back(pbeta);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","chimera-accnos",false,true,true); parameters.push_back(pfasta);
+		CommandParameter pname("name", "InputTypes", "", "", "NameCount", "NameCount", "none","",false,false,true); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "NameCount", "none","",false,false,true); parameters.push_back(pcount);
+		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+		CommandParameter pcutoff("cutoff", "Number", "", "0.5", "", "", "","",false,false); parameters.push_back(pcutoff);
+		CommandParameter palpha("alpha", "Number", "", "-5.54", "", "", "","",false,false); parameters.push_back(palpha);
+		CommandParameter pbeta("beta", "Number", "", "0.33", "", "", "","",false,false); parameters.push_back(pbeta);
 			
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -62,25 +62,20 @@ string ChimeraPerseusCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string ChimeraPerseusCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string ChimeraPerseusCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "chimera") {  outputFileName =  "perseus.chimeras"; }
-            else if (type == "accnos") {  outputFileName =  "perseus.accnos"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChimeraPerseusCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "chimera") {  pattern = "[filename],perseus.chimeras"; } 
+        else if (type == "accnos") {  pattern = "[filename],perseus.accnos"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ChimeraPerseusCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 ChimeraPerseusCommand::ChimeraPerseusCommand(){	
@@ -486,9 +481,11 @@ int ChimeraPerseusCommand::execute(){
 			m->mothurOut("Checking sequences from " + fastaFileNames[s] + " ..." ); m->mothurOutEndLine();
 			
 			int start = time(NULL);	
-			if (outputDir == "") { outputDir = m->hasPath(fastaFileNames[s]);  }//if user entered a file with a path then preserve it				
-			string outputFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + getOutputFileNameTag("chimera");
-			string accnosFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + getOutputFileNameTag("accnos");
+			if (outputDir == "") { outputDir = m->hasPath(fastaFileNames[s]);  }//if user entered a file with a path then preserve it	
+			map<string, string> variables;
+			variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]));
+			string outputFileName = getOutputFileName("chimera", variables);
+			string accnosFileName = getOutputFileName("accnos", variables);
 
 			//string newFasta = m->getRootName(fastaFileNames[s]) + "temp";
 			
@@ -695,6 +692,7 @@ vector<seqData> ChimeraPerseusCommand::loadSequences(string group){
                 it = counts.find(thisGroupsSeqs[i].getName());
                 if (it == counts.end()) { error = true; m->mothurOut("[ERROR]: " + thisGroupsSeqs[i].getName() + " is in your fasta file and not in your count file, please correct."); m->mothurOutEndLine(); }
                 else {
+                    thisGroupsSeqs[i].setAligned(removeNs(thisGroupsSeqs[i].getUnaligned()));
                     sequences.push_back(seqData(thisGroupsSeqs[i].getName(), thisGroupsSeqs[i].getUnaligned(), it->second));
                     if (thisGroupsSeqs[i].getUnaligned().length() > alignLength) { alignLength = thisGroupsSeqs[i].getUnaligned().length(); }
                 }
@@ -712,6 +710,7 @@ vector<seqData> ChimeraPerseusCommand::loadSequences(string group){
                 if (it == nameMap.end()) { error = true; m->mothurOut("[ERROR]: " + thisGroupsSeqs[i].getName() + " is in your fasta file and not in your namefile, please correct."); m->mothurOutEndLine(); }
                 else {
                     int num = m->getNumNames(it->second);
+                    thisGroupsSeqs[i].setAligned(removeNs(thisGroupsSeqs[i].getUnaligned()));
                     sequences.push_back(seqData(thisGroupsSeqs[i].getName(), thisGroupsSeqs[i].getUnaligned(), num));
                     if (thisGroupsSeqs[i].getUnaligned().length() > alignLength) { alignLength = thisGroupsSeqs[i].getUnaligned().length(); }
                 }
@@ -753,6 +752,7 @@ vector<seqData> ChimeraPerseusCommand::readFiles(string inputFile, string name){
 			it = nameMap.find(temp.getName());
 			if (it == nameMap.end()) { error = true; m->mothurOut("[ERROR]: " + temp.getName() + " is in your fasta file and not in your namefile, please correct."); m->mothurOutEndLine(); }
 			else {
+                temp.setAligned(removeNs(temp.getUnaligned()));
 				sequences.push_back(seqData(temp.getName(), temp.getUnaligned(), it->second));
                 if (temp.getUnaligned().length() > alignLength) { alignLength = temp.getUnaligned().length(); }
 			}
@@ -772,6 +772,20 @@ vector<seqData> ChimeraPerseusCommand::readFiles(string inputFile, string name){
 	}
 }
 //**********************************************************************************************************************
+string ChimeraPerseusCommand::removeNs(string seq){
+	try {
+        string newSeq = "";
+        for (int i = 0; i < seq.length(); i++) {
+            if (seq[i] != 'N') {  newSeq += seq[i]; }
+        }
+        return newSeq;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "ChimeraPerseusCommand", "removeNs");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 vector<seqData> ChimeraPerseusCommand::readFiles(string inputFile, CountTable* ct){
 	try {		
 		//read fasta file and create sequenceData structure - checking for file mismatches
@@ -786,6 +800,7 @@ vector<seqData> ChimeraPerseusCommand::readFiles(string inputFile, CountTable* c
 			int count = ct->getNumSeqs(temp.getName());
 			if (m->control_pressed) { break; }
 			else {
+                temp.setAligned(removeNs(temp.getUnaligned()));
 				sequences.push_back(seqData(temp.getName(), temp.getUnaligned(), count));
                 if (temp.getUnaligned().length() > alignLength) { alignLength = temp.getUnaligned().length(); }
 			}

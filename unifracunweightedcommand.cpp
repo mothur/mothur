@@ -15,20 +15,20 @@
 //**********************************************************************************************************************
 vector<string> UnifracUnweightedCommand::setParameters(){	
 	try {
-		CommandParameter ptree("tree", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(ptree);
-        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none",false,false); parameters.push_back(pname);
-        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none",false,false); parameters.push_back(pcount);
-		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none",false,false); parameters.push_back(pgroup);
-		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
-		CommandParameter piters("iters", "Number", "", "1000", "", "", "",false,false); parameters.push_back(piters);
-		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
-		CommandParameter prandom("random", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(prandom);
-		CommandParameter pdistance("distance", "Multiple", "column-lt-square-phylip", "column", "", "", "",false,false); parameters.push_back(pdistance);
-        CommandParameter psubsample("subsample", "String", "", "", "", "", "",false,false); parameters.push_back(psubsample);
-        CommandParameter pconsensus("consensus", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pconsensus);
-        CommandParameter proot("root", "Boolean", "F", "", "", "", "",false,false); parameters.push_back(proot);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter ptree("tree", "InputTypes", "", "", "none", "none", "none","unweighted-uwsummary",false,true,true); parameters.push_back(ptree);
+        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none","",false,false,true); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none","",false,false,true); parameters.push_back(pcount);
+		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
+		CommandParameter piters("iters", "Number", "", "1000", "", "", "","",false,false); parameters.push_back(piters);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
+		CommandParameter prandom("random", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(prandom);
+		CommandParameter pdistance("distance", "Multiple", "column-lt-square-phylip", "column", "", "", "","phylip-column",false,false); parameters.push_back(pdistance);
+        CommandParameter psubsample("subsample", "String", "", "", "", "", "","",false,false); parameters.push_back(psubsample);
+        CommandParameter pconsensus("consensus", "Boolean", "", "F", "", "", "","tree",false,false); parameters.push_back(pconsensus);
+        CommandParameter proot("root", "Boolean", "F", "", "", "", "","",false,false); parameters.push_back(proot);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -65,30 +65,23 @@ string UnifracUnweightedCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string UnifracUnweightedCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string UnifracUnweightedCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
+        if (type == "unweighted")            {  pattern = "[filename],unweighted-[filename],[tag],unweighted";   }
+        else if (type == "uwsummary")        {  pattern = "[filename],uwsummary";   }
+        else if (type == "phylip")           {  pattern = "[filename],[tag],[tag2],dist";   }
+        else if (type == "column")           {  pattern = "[filename],[tag],[tag2],dist";   }
+        else if (type == "tree")             {  pattern = "[filename],[tag],[tag2],tre";   }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "unweighted")            {   outputFileName =  "unweighted";   }
-            else if (type == "uwsummary")        {   outputFileName =  "uwsummary";   }
-            else if (type == "phylip")           {   outputFileName =  "dist";   }
-            else if (type == "column")           {   outputFileName =  "dist";   }
-            else if (type == "tree")             {   outputFileName =  "tre";   }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "UnifracUnweightedCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "UnifracUnweightedCommand", "getOutputPattern");
+        exit(1);
+    }
 }
-
 //**********************************************************************************************************************
 UnifracUnweightedCommand::UnifracUnweightedCommand(){	
 	try {
@@ -304,7 +297,9 @@ int UnifracUnweightedCommand::execute() {
         ct = T[0]->getCountTable();
         delete reader;
         
-		sumFile = outputDir + m->getRootName(m->getSimpleName(treefile)) + getOutputFileNameTag("uwsummary");
+        map<string, string> variables; 
+		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(treefile));
+		sumFile = getOutputFileName("uwsummary",variables);
 		outputNames.push_back(sumFile); outputTypes["uwsummary"].push_back(sumFile);
 		m->openOutputFile(sumFile, outSum);
 		
@@ -362,9 +357,11 @@ int UnifracUnweightedCommand::execute() {
             counter = 0;
 			
 			if (random)  {  
-				output = new ColumnFile(outputDir + m->getSimpleName(treefile)  + toString(i+1) + "." + getOutputFileNameTag("unweighted"), itersString);
-				outputNames.push_back(outputDir + m->getSimpleName(treefile)  + toString(i+1) + "." + getOutputFileNameTag("unweighted"));
-				outputTypes["unweighted"].push_back(outputDir + m->getSimpleName(treefile)  + toString(i+1) + "." + getOutputFileNameTag("unweighted"));
+                variables["[filename]"] = outputDir + m->getSimpleName(treefile);
+                variables["[tag]"] = toString(i+1);
+                string unFileName = getOutputFileName("unweighted", variables);
+				output = new ColumnFile(unFileName, itersString);
+				outputNames.push_back(unFileName); outputTypes["unweighted"].push_back(unFileName);
 			}
 			
 			
@@ -406,8 +403,12 @@ int UnifracUnweightedCommand::execute() {
                 CountTable* newCt = new CountTable();
                  
                 //uses method of setting groups to doNotIncludeMe
+                int sampleTime = 0;
+                if (m->debug) { sampleTime = time(NULL); }
                 SubSample sample;
                 Tree* subSampleTree = sample.getSample(T[i], ct, newCt, subsampleSize);
+                
+                if (m->debug) { m->mothurOut("[DEBUG]: iter " + toString(thisIter) + " took " + toString(time(NULL) - sampleTime) + " seconds to sample tree.\n"); }
                 
                 //call new weighted function
                 vector<double> iterData; iterData.resize(numComp,0);
@@ -529,13 +530,18 @@ int UnifracUnweightedCommand::getAverageSTDMatrices(vector< vector<double> >& di
             }
         }
         
-        string aveFileName = outputDir + m->getSimpleName(treefile)  + toString(treeNum+1) + ".unweighted.ave." + getOutputFileNameTag("phylip");
+        map<string, string> variables; 
+		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(treefile));
+        variables["[tag]"] = toString(treeNum+1);
+        variables["[tag2]"] = "unweighted.ave";
+        string aveFileName = getOutputFileName("phylip",variables);
         if (outputForm != "column") { outputNames.push_back(aveFileName); outputTypes["phylip"].push_back(aveFileName);  }
         else { outputNames.push_back(aveFileName); outputTypes["column"].push_back(aveFileName);  }
         ofstream out;
         m->openOutputFile(aveFileName, out);
         
-        string stdFileName = outputDir + m->getSimpleName(treefile)  + toString(treeNum+1) + ".unweighted.std." + getOutputFileNameTag("phylip");
+        variables["[tag2]"] = "unweighted.std";
+        string stdFileName = getOutputFileName("phylip",variables);
         if (outputForm != "column") { outputNames.push_back(stdFileName); outputTypes["phylip"].push_back(stdFileName); }
         else { outputNames.push_back(stdFileName); outputTypes["column"].push_back(stdFileName); }
         ofstream outStd;
@@ -626,7 +632,11 @@ int UnifracUnweightedCommand::getConsensusTrees(vector< vector<double> >& dists,
         Tree* conTree = con.getTree(newTrees);
         
         //create a new filename
-        string conFile = outputDir + m->getRootName(m->getSimpleName(treefile)) + toString(treeNum+1) + ".unweighted.cons." + getOutputFileNameTag("tree");				
+        map<string, string> variables; 
+		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(treefile));
+        variables["[tag]"] = toString(treeNum+1);
+        variables["[tag2]"] = "unweighted.cons";
+        string conFile = getOutputFileName("tree",variables);				
         outputNames.push_back(conFile); outputTypes["tree"].push_back(conFile); 
         ofstream outTree;
         m->openOutputFile(conFile, outTree);
@@ -650,7 +660,11 @@ vector<Tree*> UnifracUnweightedCommand::buildTrees(vector< vector<double> >& dis
         vector<Tree*> trees;
         
         //create a new filename
-        string outputFile = outputDir + m->getRootName(m->getSimpleName(treefile)) + toString(treeNum+1) + ".unweighted.all." + getOutputFileNameTag("tree");				
+        map<string, string> variables; 
+		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(treefile));
+        variables["[tag]"] = toString(treeNum+1);
+        variables["[tag2]"] = "unweighted.all";
+        string outputFile = getOutputFileName("tree",variables);				
         outputNames.push_back(outputFile); outputTypes["tree"].push_back(outputFile); 
         
         ofstream outAll;
@@ -816,11 +830,16 @@ void UnifracUnweightedCommand::printUWSummaryFile(int i) {
 void UnifracUnweightedCommand::createPhylipFile(int i) {
 	try {
 		string phylipFileName;
+        map<string, string> variables; 
+		variables["[filename]"] = outputDir + m->getSimpleName(treefile);
+        variables["[tag]"] = toString(i+1);
 		if ((outputForm == "lt") || (outputForm == "square")) {
-			phylipFileName = outputDir + m->getSimpleName(treefile)  + toString(i+1) + ".unweighted.phylip." + getOutputFileNameTag("phylip");
+            variables["[tag2]"] = "unweighted.phylip";
+			phylipFileName = getOutputFileName("phylip",variables);
 			outputNames.push_back(phylipFileName); outputTypes["phylip"].push_back(phylipFileName); 
 		}else { //column
-			phylipFileName = outputDir + m->getSimpleName(treefile)  + toString(i+1) + ".unweighted.column." + getOutputFileNameTag("column");
+            variables["[tag2]"] = "unweighted.column";
+			phylipFileName = getOutputFileName("column",variables);
 			outputNames.push_back(phylipFileName); outputTypes["column"].push_back(phylipFileName); 
 		}
 		

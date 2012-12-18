@@ -28,13 +28,13 @@ inline bool comparePriority(seqRNode first, seqRNode second) {
 //**********************************************************************************************************************
 vector<string> ClusterFragmentsCommand::setParameters(){	
 	try {
-		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
-		CommandParameter pname("name", "InputTypes", "", "", "namecount", "none", "none",false,false); parameters.push_back(pname);
-        CommandParameter pcount("count", "InputTypes", "", "", "namecount", "none", "none",false,false); parameters.push_back(pcount);
-		CommandParameter pdiffs("diffs", "Number", "", "0", "", "", "",false,false); parameters.push_back(pdiffs);
-		CommandParameter ppercent("percent", "Number", "", "0", "", "", "",false,false); parameters.push_back(ppercent);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","fasta-name",false,true,true); parameters.push_back(pfasta);
+		CommandParameter pname("name", "InputTypes", "", "", "namecount", "none", "none","name",false,false,true); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "namecount", "none", "none","count",false,false,true); parameters.push_back(pcount);
+		CommandParameter pdiffs("diffs", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pdiffs);
+		CommandParameter ppercent("percent", "Number", "", "0", "", "", "","",false,false); parameters.push_back(ppercent);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -68,28 +68,22 @@ string ClusterFragmentsCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string ClusterFragmentsCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string ClusterFragmentsCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "fasta") {  outputFileName =  "fragclust.fasta"; }
-            else if (type == "name") {  outputFileName =  "fragclust.names"; }
-            else if (type == "count") {  outputFileName =  "fragclust.count_table"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClusterFragmentsCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "fasta") {  pattern = "[filename],fragclust.fasta"; } 
+        else if (type == "name") {  pattern = "[filename],fragclust.names"; } 
+        else if (type == "count") {  pattern = "[filename],fragclust.count_table"; }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ClusterFragmentsCommand", "getOutputPattern");
+        exit(1);
+    }
 }
-
 //**********************************************************************************************************************
 ClusterFragmentsCommand::ClusterFragmentsCommand(){	
 	try {
@@ -275,10 +269,11 @@ int ClusterFragmentsCommand::execute(){
 	
 		
 		string fileroot = outputDir + m->getRootName(m->getSimpleName(fastafile));
-		
-		string newFastaFile = fileroot + getOutputFileNameTag("fasta");
-		string newNamesFile = fileroot + getOutputFileNameTag("name");
-        if (countfile != "") { newNamesFile = fileroot + getOutputFileNameTag("count"); }
+        map<string, string> variables; 
+        variables["[filename]"] = fileroot;
+		string newFastaFile = getOutputFileName("fasta", variables);
+		string newNamesFile = getOutputFileName("name", variables);
+        if (countfile != "") { newNamesFile = getOutputFileName("count", variables); }
 		
 		if (m->control_pressed) { return 0; }
 		

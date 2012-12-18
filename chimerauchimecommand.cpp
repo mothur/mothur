@@ -17,34 +17,34 @@
 //**********************************************************************************************************************
 vector<string> ChimeraUchimeCommand::setParameters(){	
 	try {
-		CommandParameter ptemplate("reference", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(ptemplate);
-		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
-		CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none",false,false); parameters.push_back(pname);
-        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none",false,false); parameters.push_back(pcount);
-		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none",false,false); parameters.push_back(pgroup);
-		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
-		CommandParameter pabskew("abskew", "Number", "", "1.9", "", "", "",false,false); parameters.push_back(pabskew);
-		CommandParameter pchimealns("chimealns", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pchimealns);
-		CommandParameter pminh("minh", "Number", "", "0.3", "", "", "",false,false); parameters.push_back(pminh);
-		CommandParameter pmindiv("mindiv", "Number", "", "0.5", "", "", "",false,false); parameters.push_back(pmindiv);
-		CommandParameter pxn("xn", "Number", "", "8.0", "", "", "",false,false); parameters.push_back(pxn);
-		CommandParameter pdn("dn", "Number", "", "1.4", "", "", "",false,false); parameters.push_back(pdn);
-		CommandParameter pxa("xa", "Number", "", "1", "", "", "",false,false); parameters.push_back(pxa);
-		CommandParameter pchunks("chunks", "Number", "", "4", "", "", "",false,false); parameters.push_back(pchunks);
-		CommandParameter pminchunk("minchunk", "Number", "", "64", "", "", "",false,false); parameters.push_back(pminchunk);
-		CommandParameter pidsmoothwindow("idsmoothwindow", "Number", "", "32", "", "", "",false,false); parameters.push_back(pidsmoothwindow);
-        CommandParameter pdups("dereplicate", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pdups);
+		CommandParameter ptemplate("reference", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(ptemplate);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","chimera-accnos",false,true,true); parameters.push_back(pfasta);
+		CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none","",false,false,true); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none","",false,false,true); parameters.push_back(pcount);
+		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+		CommandParameter pabskew("abskew", "Number", "", "1.9", "", "", "","",false,false); parameters.push_back(pabskew);
+		CommandParameter pchimealns("chimealns", "Boolean", "", "F", "", "", "","alns",false,false); parameters.push_back(pchimealns);
+		CommandParameter pminh("minh", "Number", "", "0.3", "", "", "","",false,false); parameters.push_back(pminh);
+		CommandParameter pmindiv("mindiv", "Number", "", "0.5", "", "", "","",false,false); parameters.push_back(pmindiv);
+		CommandParameter pxn("xn", "Number", "", "8.0", "", "", "","",false,false); parameters.push_back(pxn);
+		CommandParameter pdn("dn", "Number", "", "1.4", "", "", "","",false,false); parameters.push_back(pdn);
+		CommandParameter pxa("xa", "Number", "", "1", "", "", "","",false,false); parameters.push_back(pxa);
+		CommandParameter pchunks("chunks", "Number", "", "4", "", "", "","",false,false); parameters.push_back(pchunks);
+		CommandParameter pminchunk("minchunk", "Number", "", "64", "", "", "","",false,false); parameters.push_back(pminchunk);
+		CommandParameter pidsmoothwindow("idsmoothwindow", "Number", "", "32", "", "", "","",false,false); parameters.push_back(pidsmoothwindow);
+        CommandParameter pdups("dereplicate", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pdups);
 
 		//CommandParameter pminsmoothid("minsmoothid", "Number", "", "0.95", "", "", "",false,false); parameters.push_back(pminsmoothid);
-		CommandParameter pmaxp("maxp", "Number", "", "2", "", "", "",false,false); parameters.push_back(pmaxp);
-		CommandParameter pskipgaps("skipgaps", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pskipgaps);
-		CommandParameter pskipgaps2("skipgaps2", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(pskipgaps2);
-		CommandParameter pminlen("minlen", "Number", "", "10", "", "", "",false,false); parameters.push_back(pminlen);
-		CommandParameter pmaxlen("maxlen", "Number", "", "10000", "", "", "",false,false); parameters.push_back(pmaxlen);
-		CommandParameter pucl("ucl", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pucl);
-		CommandParameter pqueryfract("queryfract", "Number", "", "0.5", "", "", "",false,false); parameters.push_back(pqueryfract);
+		CommandParameter pmaxp("maxp", "Number", "", "2", "", "", "","",false,false); parameters.push_back(pmaxp);
+		CommandParameter pskipgaps("skipgaps", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pskipgaps);
+		CommandParameter pskipgaps2("skipgaps2", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pskipgaps2);
+		CommandParameter pminlen("minlen", "Number", "", "10", "", "", "","",false,false); parameters.push_back(pminlen);
+		CommandParameter pmaxlen("maxlen", "Number", "", "10000", "", "", "","",false,false); parameters.push_back(pmaxlen);
+		CommandParameter pucl("ucl", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pucl);
+		CommandParameter pqueryfract("queryfract", "Number", "", "0.5", "", "", "","",false,false); parameters.push_back(pqueryfract);
 
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -103,26 +103,21 @@ string ChimeraUchimeCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string ChimeraUchimeCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string ChimeraUchimeCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "chimera") {  outputFileName =  "uchime.chimeras"; }
-            else if (type == "accnos") {  outputFileName =  "uchime.accnos"; }
-            else if (type == "alns") {  outputFileName =  "uchime.alns"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChimeraUchimeCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "chimera") {  pattern = "[filename],uchime.chimeras"; } 
+        else if (type == "accnos") {  pattern = "[filename],uchime.accnos"; } 
+        else if (type == "alns") {  pattern = "[filename],uchime.alns"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ChimeraUchimeCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 ChimeraUchimeCommand::ChimeraUchimeCommand(){	
@@ -642,9 +637,11 @@ int ChimeraUchimeCommand::execute(){
 			int start = time(NULL);	
 			string nameFile = "";
 			if (outputDir == "") { outputDir = m->hasPath(fastaFileNames[s]);  }//if user entered a file with a path then preserve it				
-			string outputFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + getOutputFileNameTag("chimera");
-			string accnosFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + getOutputFileNameTag("accnos");
-			string alnsFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]))  + getOutputFileNameTag("alns");
+			map<string, string> variables; 
+            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]));
+			string outputFileName = getOutputFileName("chimera", variables);
+			string accnosFileName = getOutputFileName("accnos", variables);
+			string alnsFileName = getOutputFileName("alns", variables);
 			string newFasta = m->getRootName(fastaFileNames[s]) + "temp";
 				
 			//you provided a groupfile

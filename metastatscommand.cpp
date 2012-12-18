@@ -14,16 +14,16 @@
 //**********************************************************************************************************************
 vector<string> MetaStatsCommand::setParameters(){	
 	try {
-		CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pshared);
-		CommandParameter pdesign("design", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pdesign);
-		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
-		CommandParameter piters("iters", "Number", "", "1000", "", "", "",false,false); parameters.push_back(piters);
-		CommandParameter pthreshold("threshold", "Number", "", "0.05", "", "", "",false,false); parameters.push_back(pthreshold);
-		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
-		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
-		CommandParameter psets("sets", "String", "", "", "", "", "",false,false); parameters.push_back(psets);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none","metastats",false,true,true); parameters.push_back(pshared);
+		CommandParameter pdesign("design", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(pdesign);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
+		CommandParameter piters("iters", "Number", "", "1000", "", "", "","",false,false); parameters.push_back(piters);
+		CommandParameter pthreshold("threshold", "Number", "", "0.05", "", "", "","",false,false); parameters.push_back(pthreshold);
+		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
+		CommandParameter psets("sets", "String", "", "", "", "", "","",false,false); parameters.push_back(psets);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -61,26 +61,20 @@ string MetaStatsCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string MetaStatsCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string MetaStatsCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "metastats")        {   outputFileName = "metastats";       }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "MetaStatsCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "metastats") {  pattern = "[filename],[distance],[groups],metastats"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MetaStatsCommand", "getOutputPattern");
+        exit(1);
+    }
 }
-
 //**********************************************************************************************************************
 MetaStatsCommand::MetaStatsCommand(){	
 	try {
@@ -470,7 +464,11 @@ int MetaStatsCommand::driver(int start, int num, vector<SharedRAbundVector*>& th
 			string setB = namesOfGroupCombos[c][1];
 		
 			//get filename
-			string outputFileName = outputDir +  m->getRootName(m->getSimpleName(sharedfile)) + thisLookUp[0]->getLabel() + "." + setA + "-" + setB + "." + getOutputFileNameTag("metastats");
+            map<string, string> variables; 
+            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
+            variables["[distance]"] = thisLookUp[0]->getLabel();
+            variables["[group]"] = setA + "-" + setB;
+			string outputFileName = getOutputFileName("metastats",variables);
 			outputNames.push_back(outputFileName); outputTypes["metastats"].push_back(outputFileName);
 			//int nameLength = outputFileName.length();
 			//char * output = new char[nameLength];

@@ -30,8 +30,9 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "make.shared";				}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
-	string getOutputFileNameTag(string, string);
+	
 	string getHelpString();	
+    string getOutputPattern(string);	
 	string getCitation() { return "http://www.mothur.org/wiki/Make.shared"; }
 	string getDescription()		{ return "make a shared file from a list and group file"; }
 

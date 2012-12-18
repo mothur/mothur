@@ -12,12 +12,12 @@
 //**********************************************************************************************************************
 vector<string> GetRAbundCommand::setParameters(){	
 	try {
-		CommandParameter plist("list", "InputTypes", "", "", "LRSS", "LRSS", "none",false,false); parameters.push_back(plist);
-		CommandParameter psabund("sabund", "InputTypes", "", "", "LRSS", "LRSS", "none",false,false); parameters.push_back(psabund);		
-		CommandParameter psorted("sorted", "Boolean", "", "T", "", "", "",false,false); parameters.push_back(psorted);
-		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter plist("list", "InputTypes", "", "", "LRSS", "LRSS", "none","rabund",false,false, true); parameters.push_back(plist);
+		CommandParameter psabund("sabund", "InputTypes", "", "", "LRSS", "LRSS", "none","rabund",false,false, true); parameters.push_back(psabund);		
+		CommandParameter psorted("sorted", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(psorted);
+		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -48,25 +48,21 @@ string GetRAbundCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string GetRAbundCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string GetRAbundCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "rabund")            {   outputFileName = "rabund";  }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetRAbundCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "rabund")      {   pattern = "[filename],rabund";    }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GetRAbundCommand", "getOutputPattern");
+        exit(1);
+    }
 }
+
 //**********************************************************************************************************************
 GetRAbundCommand::GetRAbundCommand(){	
 	try {
@@ -192,7 +188,9 @@ int GetRAbundCommand::execute(){
 	
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
-		filename = outputDir + m->getRootName(m->getSimpleName(inputfile)) + getOutputFileNameTag("rabund");
+        map<string, string> variables; 
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputfile));
+		filename = getOutputFileName("rabund", variables);
 		m->openOutputFile(filename, out);
 		
 		input = new InputData(inputfile, format);
@@ -274,7 +272,7 @@ int GetRAbundCommand::execute(){
 		}
 		
 		m->mothurOutEndLine();
-		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		m->mothurOut(filename); m->mothurOutEndLine();	outputNames.push_back(filename); outputTypes["rabund"].push_back(filename);
 		m->mothurOutEndLine();
 		

@@ -12,19 +12,19 @@
 //**********************************************************************************************************************
 vector<string> HeatMapCommand::setParameters(){	
 	try {
-		CommandParameter plist("list", "InputTypes", "", "", "LRSS", "LRSS", "none",false,false); parameters.push_back(plist);
-		CommandParameter prabund("rabund", "InputTypes", "", "", "LRSS", "LRSS", "none",false,false); parameters.push_back(prabund);
-		CommandParameter psabund("sabund", "InputTypes", "", "", "LRSS", "LRSS", "none",false,false); parameters.push_back(psabund);
-		CommandParameter pshared("shared", "InputTypes", "", "", "LRSS", "LRSS", "none",false,false); parameters.push_back(pshared);	
-		CommandParameter prelabund("relabund", "InputTypes", "", "", "LRSS", "LRSS", "none",false,false); parameters.push_back(prelabund);
-		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
-		CommandParameter pscale("scale", "Multiple", "log10-log2-linear", "log10", "", "", "",false,false); parameters.push_back(pscale);
-		CommandParameter psorted("sorted", "Multiple", "none-shared-topotu-topgroup", "shared", "", "", "",false,false); parameters.push_back(psorted);
-		CommandParameter pnumotu("numotu", "Number", "", "0", "", "", "",false,false); parameters.push_back(pnumotu);
-		CommandParameter pfontsize("fontsize", "Number", "", "24", "", "", "",false,false); parameters.push_back(pfontsize);
-		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter plist("list", "InputTypes", "", "", "LRSS", "LRSS", "none","svg",false,false,true); parameters.push_back(plist);
+		CommandParameter prabund("rabund", "InputTypes", "", "", "LRSS", "LRSS", "none","svg",false,false); parameters.push_back(prabund);
+		CommandParameter psabund("sabund", "InputTypes", "", "", "LRSS", "LRSS", "none","svg",false,false); parameters.push_back(psabund);
+		CommandParameter pshared("shared", "InputTypes", "", "", "LRSS", "LRSS", "none","svg",false,false,true); parameters.push_back(pshared);	
+		CommandParameter prelabund("relabund", "InputTypes", "", "", "LRSS", "LRSS", "none","svg",false,false); parameters.push_back(prelabund);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
+		CommandParameter pscale("scale", "Multiple", "log10-log2-linear", "log10", "", "", "","",false,false); parameters.push_back(pscale);
+		CommandParameter psorted("sorted", "Multiple", "none-shared-topotu-topgroup", "shared", "", "", "","",false,false); parameters.push_back(psorted);
+		CommandParameter pnumotu("numotu", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pnumotu);
+		CommandParameter pfontsize("fontsize", "Number", "", "24", "", "", "","",false,false); parameters.push_back(pfontsize);
+		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -62,25 +62,19 @@ string HeatMapCommand::getHelpString(){
 }
 
 //**********************************************************************************************************************
-
-string HeatMapCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string HeatMapCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "svg")            {   outputFileName =  "svg";   }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "HeatMapCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "svg") {  pattern = "[filename],svg"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "HeatMapCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 
 //**********************************************************************************************************************

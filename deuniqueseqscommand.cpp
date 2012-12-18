@@ -13,10 +13,10 @@
 //**********************************************************************************************************************
 vector<string> DeUniqueSeqsCommand::setParameters(){	
 	try {
-		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
-		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pname);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","fasta",false,true,true); parameters.push_back(pfasta);
+		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(pname);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -45,24 +45,19 @@ string DeUniqueSeqsCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string DeUniqueSeqsCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string DeUniqueSeqsCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "fasta") {  outputFileName =  "redundant.fasta"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "DeUniqueSeqsCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "fasta") {  pattern = "[filename],redundant.fasta"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "DeUniqueSeqsCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 DeUniqueSeqsCommand::DeUniqueSeqsCommand(){	
@@ -167,11 +162,11 @@ int DeUniqueSeqsCommand::execute() {
 		ofstream out;
 		string outFastaFile = m->getRootName(m->getSimpleName(fastaFile));
 		int pos = outFastaFile.find("unique");
-		if (pos != string::npos) {
-			outFastaFile = outputDir + outFastaFile.substr(0, pos) + getOutputFileNameTag("fasta");
-		}else{
-			outFastaFile = outputDir + m->getRootName(m->getSimpleName(fastaFile)) + getOutputFileNameTag("fasta");
-		}
+		if (pos != string::npos) { outFastaFile = outputDir + outFastaFile.substr(0, pos); }
+        else { outFastaFile = outputDir + outFastaFile; }
+        map<string, string> variables; 
+        variables["[filename]"] = outFastaFile;
+        outFastaFile = getOutputFileName("fasta", variables);
 		m->openOutputFile(outFastaFile, out);
 		
 		readNamesFile();

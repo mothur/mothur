@@ -40,8 +40,9 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "shhh.flows";	}
 	string getCommandCategory()		{ return "Sequence Processing";		}
-	string getOutputFileNameTag(string, string);
+	
 	string getHelpString();	
+    string getOutputPattern(string);	
 	string getCitation() { return "Schloss PD, Gevers D, Westcott SL (2011).  Reducing the effects of PCR amplification and sequencing artifacts on 16S rRNA-based studies.  PLoS ONE.  6:e27310.\nQuince C, Lanzen A, Davenport RJ, Turnbaugh PJ (2011).  Removing noise from pyrosequenced amplicons.  BMC Bioinformatics  12:38.\nQuince C, Lanzén A, Curtis TP, Davenport RJ, Hall N, Head IM, Read LF, Sloan WT (2009).  Accurate determination of microbial diversity from 454 pyrosequencing data.  Nat. Methods 6:639.\nhttp://www.mothur.org/wiki/Shhh.flows"; }
 	string getDescription()		{ return "shhh.flows"; }
 

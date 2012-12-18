@@ -22,8 +22,9 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "make.group";	}
 	string getCommandCategory()		{ return "General";		}
-	string getOutputFileNameTag(string, string);
+	
 	string getHelpString();	
+    string getOutputPattern(string);	
 	string getCitation() { return "http://www.mothur.org/wiki/Make.group"; }
 	string getDescription()		{ return "creates a group file"; }
 

@@ -36,8 +36,9 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "split.abund";				}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
-	string getOutputFileNameTag(string, string);
+	
 	string getHelpString();	
+    string getOutputPattern(string);	
 	string getCitation() { return "http://www.mothur.org/wiki/Split.abund"; }
 	string getDescription()		{ return "split a list, name, group or fasta file based on abundance"; }
 	

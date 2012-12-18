@@ -27,8 +27,9 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "get.otus";				}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
-	string getOutputFileNameTag(string, string);
+	
 	string getHelpString();	
+    string getOutputPattern(string);	
 	string getCitation() { return "http://www.mothur.org/wiki/Get.otus"; }
 	string getDescription()		{ return "outputs a new list file containing the otus containing sequences from the groups specified"; }
 

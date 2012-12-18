@@ -39,22 +39,22 @@ inline bool compareGroup(repStruct left, repStruct right){
 //**********************************************************************************************************************
 vector<string> GetOTURepCommand::setParameters(){	
 	try {
-		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(plist);
-		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pfasta);
-		CommandParameter pphylip("phylip", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "none",false,false); parameters.push_back(pphylip);
-        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "ColumnName",false,false); parameters.push_back(pname);
-        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "ColumnName",false,false); parameters.push_back(pcount);
-		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none",false,false); parameters.push_back(pgroup);
-		CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "ColumnName",false,false); parameters.push_back(pcolumn);
-		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
-		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
-		CommandParameter pcutoff("cutoff", "Number", "", "10", "", "", "",false,false); parameters.push_back(pcutoff);
-		CommandParameter pprecision("precision", "Number", "", "100", "", "", "",false,false); parameters.push_back(pprecision);
-		CommandParameter pweighted("weighted", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pweighted);
-		CommandParameter psorted("sorted", "Multiple", "none-name-bin-size-group", "none", "", "", "",false,false); parameters.push_back(psorted);
-		CommandParameter plarge("large", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(plarge);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none","name",false,true, true); parameters.push_back(plist);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","fasta",false,false, true); parameters.push_back(pfasta);
+		CommandParameter pphylip("phylip", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "none","",false,false, true); parameters.push_back(pphylip);
+        CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "ColumnName","",false,false, true); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "ColumnName","count",false,false, true); parameters.push_back(pcount);
+		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false, true); parameters.push_back(pgroup);
+		CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumn", "PhylipColumn", "ColumnName","",false,false, true); parameters.push_back(pcolumn);
+		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
+		CommandParameter pcutoff("cutoff", "Number", "", "10", "", "", "","",false,false); parameters.push_back(pcutoff);
+		CommandParameter pprecision("precision", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pprecision);
+		CommandParameter pweighted("weighted", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pweighted);
+		CommandParameter psorted("sorted", "Multiple", "none-name-bin-size-group", "none", "", "", "","",false,false); parameters.push_back(psorted);
+		CommandParameter plarge("large", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(plarge);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -96,26 +96,21 @@ string GetOTURepCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string GetOTURepCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string GetOTURepCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "fasta")            {   outputFileName =  "rep.fasta";   }
-            else if (type == "name")        {   outputFileName =  "rep.names";   }
-            else if (type == "count")        {   outputFileName =  "rep.count_table";   }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetOTURepCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "fasta") {  pattern = "[filename],[tag],rep.fasta-[filename],[tag],[group],rep.fasta"; } 
+        else if (type == "name") {  pattern = "[filename],[tag],rep.names-[filename],[tag],[group],rep.names"; } 
+        else if (type == "count") {  pattern = "[filename],[tag],rep.count_table-[filename],[tag],[group],rep.count_table"; }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GetOTURepCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 GetOTURepCommand::GetOTURepCommand(){	
@@ -861,13 +856,16 @@ int GetOTURepCommand::process(ListVector* processList) {
 		string outputNamesFile;
 		map<string, ofstream*> filehandles;
 		
+        map<string, string> variables; 
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(listfile));
+        
 		if (Groups.size() == 0) { //you don't want to use groups
-			outputNamesFile  = outputDir + m->getRootName(m->getSimpleName(listfile)) + processList->getLabel() + ".";
+            variables["[tag]"] = processList->getLabel();
             if (countfile == "") { 
-                outputNamesFile += getOutputFileNameTag("name");
+                outputNamesFile = getOutputFileName("name", variables);
                 outputNames.push_back(outputNamesFile); outputTypes["name"].push_back(outputNamesFile); 
             }else {
-                outputNamesFile += getOutputFileNameTag("count");
+                outputNamesFile = getOutputFileName("count", variables);
                 outputNames.push_back(outputNamesFile); outputTypes["count"].push_back(outputNamesFile); 
             }
 			outputNameFiles[outputNamesFile] = processList->getLabel();
@@ -877,13 +875,15 @@ int GetOTURepCommand::process(ListVector* processList) {
 			ofstream* temp;
 			for (int i=0; i<Groups.size(); i++) {
 				temp = new ofstream;
+                variables["[tag]"] = processList->getLabel();
+                variables["[group]"] = Groups[i];
 				filehandles[Groups[i]] = temp;
 				outputNamesFile = outputDir + m->getRootName(m->getSimpleName(listfile)) + processList->getLabel() + "." + Groups[i] + ".";
                 if (countfile == "") { 
-                    outputNamesFile += getOutputFileNameTag("name");
+                    outputNamesFile = getOutputFileName("name", variables);
                     outputNames.push_back(outputNamesFile); outputTypes["name"].push_back(outputNamesFile); 
                 }else {
-                    outputNamesFile += getOutputFileNameTag("count");
+                    outputNamesFile = getOutputFileName("count", variables);
                     outputNames.push_back(outputNamesFile); outputTypes["count"].push_back(outputNamesFile); 
                 }
 				
@@ -978,7 +978,10 @@ int GetOTURepCommand::processFastaNames(string filename, string label) {
 
 		//create output file
 		if (outputDir == "") { outputDir += m->hasPath(listfile); }
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(listfile)) + label + "." + getOutputFileNameTag("fasta");
+        map<string, string> variables; 
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(listfile));
+        variables["[tag]"] = label;
+		string outputFileName = getOutputFileName("fasta",variables);
 		m->openOutputFile(outputFileName, out);
 		vector<repStruct> reps;
 		outputNames.push_back(outputFileName); outputTypes["fasta"].push_back(outputFileName);

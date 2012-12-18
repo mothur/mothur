@@ -13,13 +13,13 @@
 //**********************************************************************************************************************
 vector<string> MergeGroupsCommand::setParameters(){	
 	try {
-		CommandParameter pshared("shared", "InputTypes", "", "", "none", "sharedGroup", "none",false,false); parameters.push_back(pshared);
-		CommandParameter pgroup("group", "InputTypes", "", "", "none", "sharedGroup", "none",false,false); parameters.push_back(pgroup);
-		CommandParameter pdesign("design", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pdesign);
-		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
-		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pshared("shared", "InputTypes", "", "", "none", "sharedGroup", "none","shared",false,false,true); parameters.push_back(pshared);
+		CommandParameter pgroup("group", "InputTypes", "", "", "none", "sharedGroup", "none","group",false,false,true); parameters.push_back(pgroup);
+		CommandParameter pdesign("design", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(pdesign);
+		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -52,26 +52,22 @@ string MergeGroupsCommand::getHelpString(){
 		exit(1);
 	}
 }
+
 //**********************************************************************************************************************
-string MergeGroupsCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string MergeGroupsCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "shared")        {   outputFileName = "merge" +  m->getExtension(inputName);       }
-            else if (type == "group")    {   outputFileName =   "merge" +  m->getExtension(inputName);     }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "MergeGroupsCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "shared") {  pattern = "[filename],merge,[extension]"; } 
+        else if (type == "group") {  pattern = "[filename],merge,[extension]"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MergeGroupsCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 MergeGroupsCommand::MergeGroupsCommand(){	
@@ -305,7 +301,10 @@ int MergeGroupsCommand::processSharedFile(GroupMap*& designMap){
 		
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(sharedfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(sharedfile)) + getOutputFileNameTag("shared", sharedfile);
+        map<string, string> variables; 
+        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(sharedfile));
+        variables["[extension]"] = m->getExtension(sharedfile);
+		string outputFileName = getOutputFileName("shared", variables);
         outputTypes["shared"].push_back(outputFileName); outputNames.push_back(outputFileName);
 		
 		ofstream out;
@@ -408,7 +407,10 @@ int MergeGroupsCommand::processGroupFile(GroupMap*& designMap){
 		
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(groupfile);  }
-		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(groupfile)) + getOutputFileNameTag("group", groupfile);
+        map<string, string> variables; 
+        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(groupfile));
+        variables["[extension]"] = m->getExtension(groupfile);
+		string outputFileName = getOutputFileName("group", variables);
 		outputTypes["group"].push_back(outputFileName); outputNames.push_back(outputFileName);
 		
 		ofstream out;

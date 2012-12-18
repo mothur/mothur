@@ -28,8 +28,9 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "bin.seqs";			}
 	string getCommandCategory()		{ return "Sequence Processing"; }
-	string getOutputFileNameTag(string, string);
+	
 	string getHelpString();	
+    string getOutputPattern(string);	
 	string getCitation() { return "http://www.mothur.org/wiki/Bin.seqs"; }
 	string getDescription()		{ return "maps sequences to otus"; }
 	

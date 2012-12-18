@@ -21,8 +21,9 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "clear.memory";			}
 	string getCommandCategory()		{ return "General";	}
-	string getOutputFileNameTag(string, string);
+	
 	string getHelpString();	
+    string getOutputPattern(string) { return ""; }	
 	string getCitation() { return "http://www.mothur.org/wiki/Clear.memory"; }
 	string getDescription()		{ return "remove saved references from memory"; }
 	

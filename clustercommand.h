@@ -35,8 +35,9 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "cluster";		}
 	string getCommandCategory()		{ return "Clustering";	}
-	string getOutputFileNameTag(string, string);
+	
 	string getHelpString();	
+    string getOutputPattern(string);	
 	string getCitation() { return "Schloss PD, Westcott SL (2011). Assessing and improving methods used in OTU-based approaches for 16S rRNA gene sequence analysis. Appl Environ Microbiol 77:3219.\nSchloss PD, Handelsman J (2005). Introducing DOTUR, a computer program for defining operational taxonomic units and estimating species richness. Appl Environ Microbiol 71: 1501-6.\nhttp://www.mothur.org/wiki/Cluster"; }
 	string getDescription()		{ return "cluster your sequences into OTUs using a distance matrix"; }
 	

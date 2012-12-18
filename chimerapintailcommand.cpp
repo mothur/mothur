@@ -14,18 +14,18 @@
 //**********************************************************************************************************************
 vector<string> ChimeraPintailCommand::setParameters(){	
 	try {
-		CommandParameter ptemplate("reference", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(ptemplate);
-		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
-		CommandParameter pconservation("conservation", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pconservation);
-		CommandParameter pquantile("quantile", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(pquantile);
-		CommandParameter pfilter("filter", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pfilter);
-		CommandParameter pwindow("window", "Number", "", "0", "", "", "",false,false); parameters.push_back(pwindow);
-		CommandParameter pincrement("increment", "Number", "", "25", "", "", "",false,false); parameters.push_back(pincrement);
-		CommandParameter pmask("mask", "String", "", "", "", "", "",false,false); parameters.push_back(pmask);
-		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
-		CommandParameter psave("save", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(psave);
+		CommandParameter ptemplate("reference", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(ptemplate);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","chimera-accnos",false,true,true); parameters.push_back(pfasta);
+		CommandParameter pconservation("conservation", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pconservation);
+		CommandParameter pquantile("quantile", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pquantile);
+		CommandParameter pfilter("filter", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pfilter);
+		CommandParameter pwindow("window", "Number", "", "0", "", "", "","","",false,false); parameters.push_back(pwindow);
+		CommandParameter pincrement("increment", "Number", "", "25", "", "", "","",false,false); parameters.push_back(pincrement);
+		CommandParameter pmask("mask", "String", "", "", "", "", "","",false,false); parameters.push_back(pmask);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+		CommandParameter psave("save", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(psave);
 
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -69,25 +69,20 @@ string ChimeraPintailCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string ChimeraPintailCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string ChimeraPintailCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "chimera") {  outputFileName =  "pintail.chimeras"; }
-            else if (type == "accnos") {  outputFileName =  "pintail.accnos"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChimeraPintailCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "chimera") {  pattern = "[filename],[tag],pintail.chimeras-[filename],pintail.chimeras"; } 
+        else if (type == "accnos") {  pattern = "[filename],[tag],pintail.accnos-[filename],pintail.accnos"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ChimeraPintailCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 ChimeraPintailCommand::ChimeraPintailCommand(){	
@@ -97,6 +92,7 @@ ChimeraPintailCommand::ChimeraPintailCommand(){
 		vector<string> tempOutNames;
 		outputTypes["chimera"] = tempOutNames;
 		outputTypes["accnos"] = tempOutNames;
+        
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ChimeraPintailCommand", "ChimeraPintailCommand");
@@ -130,6 +126,7 @@ ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
 			vector<string> tempOutNames;
 			outputTypes["chimera"] = tempOutNames;
 			outputTypes["accnos"] = tempOutNames;
+        
 		
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -417,13 +414,12 @@ int ChimeraPintailCommand::execute(){
 			
 			if (outputDir == "") { outputDir = m->hasPath(fastaFileNames[s]);  }//if user entered a file with a path then preserve it
 			string outputFileName, accnosFileName;
-			if (maskfile != "") {
-				outputFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + m->getSimpleName(m->getRootName(maskfile)) + getOutputFileNameTag("chimera");
-				accnosFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + m->getSimpleName(m->getRootName(maskfile)) + getOutputFileNameTag("accnos");
-			}else {
-				outputFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + getOutputFileNameTag("chimera");
-				accnosFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + getOutputFileNameTag("accnos");
-			}
+            map<string, string> variables;
+            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]));
+			if (maskfile != "") { variables["[tag]"] = m->getSimpleName(m->getRootName(maskfile)); }
+            outputFileName = getOutputFileName("chimera", variables);
+            accnosFileName = getOutputFileName("accnos", variables);
+			
 			
 			if (m->control_pressed) { delete chimera; for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}
 			

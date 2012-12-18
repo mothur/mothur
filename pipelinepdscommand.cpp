@@ -14,16 +14,16 @@
 //**********************************************************************************************************************
 vector<string> PipelineCommand::setParameters(){	
 	try {
-		CommandParameter psff("sff", "InputTypes", "", "", "none", "oneRequired", "pipe",false,false); parameters.push_back(psff);
-		CommandParameter poligos("oligos", "InputTypes", "", "", "none", "oneRequired", "pipe",false,false); parameters.push_back(poligos);
-		CommandParameter palign("align", "InputTypes", "", "", "none", "oneRequired", "pipe",false,false); parameters.push_back(palign);
-		CommandParameter pchimera("chimera", "InputTypes", "", "", "none", "oneRequired", "pipe",false,false); parameters.push_back(pchimera);
-		CommandParameter pclassify("classify", "InputTypes", "", "", "none", "oneRequired", "pipe",false,false); parameters.push_back(pclassify);
-		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "oneRequired", "pipe",false,false); parameters.push_back(ptaxonomy);
-		CommandParameter ppipeline("pipeline", "InputTypes", "", "", "none", "oneRequired", "none",false,false); parameters.push_back(ppipeline);
-		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter psff("sff", "InputTypes", "", "", "none", "oneRequired", "pipe","",false,false,true); parameters.push_back(psff);
+		CommandParameter poligos("oligos", "InputTypes", "", "", "none", "oneRequired", "pipe","",false,false,true); parameters.push_back(poligos);
+		CommandParameter palign("align", "InputTypes", "", "", "none", "oneRequired", "pipe","",false,false,true); parameters.push_back(palign);
+		CommandParameter pchimera("chimera", "InputTypes", "", "", "none", "oneRequired", "pipe","",false,false,true); parameters.push_back(pchimera);
+		CommandParameter pclassify("classify", "InputTypes", "", "", "none", "oneRequired", "pipe","",false,false,true); parameters.push_back(pclassify);
+		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "oneRequired", "pipe","",false,false,true); parameters.push_back(ptaxonomy);
+		CommandParameter ppipeline("pipeline", "InputTypes", "", "", "none", "oneRequired", "none","",false,false,true); parameters.push_back(ppipeline);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}

@@ -31,8 +31,9 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "catchall";			}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
-	string getOutputFileNameTag(string, string);
+	
 	string getHelpString();	
+    string getOutputPattern(string);	
 	string getCitation() { return "Bunge J, Woodard L, Bohning D, Foster JA, Connolly S, Allen HK (2012). Estimating population diversity with CatchAll. Bioinformatics  28:1045.\nhttp://www.northeastern.edu/catchall/index.html\nhttp://www.mothur.org/wiki/Catchall"; }
 	string getDescription()		{ return "estimate number of species"; }
 	

@@ -26,8 +26,8 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "pipeline.pds";	}
 	string getCommandCategory()		{ return "Hidden";			}
-	string getOutputFileNameTag(string, string) { return ""; }
 	string getHelpString();	
+    string getOutputPattern(string) { return ""; }	
 	string getCitation() { return "Schloss PD, Gevers D, Westcott SL (2011).  Reducing the effects of PCR amplification and sequencing artifacts on 16S rRNA-based studies.  PLoS ONE.  6:e27310.\nhttp://www.mothur.org/wiki/Pipeline.pds"; }
 	string getDescription()		{ return "pat's pipeline"; }
 

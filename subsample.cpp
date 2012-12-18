@@ -24,7 +24,7 @@ Tree* SubSample::getSample(Tree* T, CountTable* ct, CountTable* newCt, int size)
         for (int i = 0; i < Groups.size(); i++) {
             if (m->inUsersGroups(Groups[i], m->getGroups())) {
                 if (m->control_pressed) { break; }
-                cout << Groups[i] << endl;
+        
                 int thisSize = ct->getGroupCount(Groups[i]);
                 
                 if (thisSize >= size) {	

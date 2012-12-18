@@ -13,16 +13,16 @@
 //**********************************************************************************************************************
 vector<string> ChimeraCcodeCommand::setParameters(){	
 	try {
-		CommandParameter ptemplate("reference", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(ptemplate);
-		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pfasta);
-		CommandParameter pfilter("filter", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pfilter);
-		CommandParameter pwindow("window", "Number", "", "0", "", "", "",false,false); parameters.push_back(pwindow);
-		CommandParameter pnumwanted("numwanted", "Number", "", "20", "", "", "",false,false); parameters.push_back(pnumwanted);
-		CommandParameter pmask("mask", "String", "", "", "", "", "",false,false); parameters.push_back(pmask);
-		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
-		CommandParameter psave("save", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(psave);
+		CommandParameter ptemplate("reference", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(ptemplate);
+		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","chimera-mapinfo-accnos",false,true,true); parameters.push_back(pfasta);
+		CommandParameter pfilter("filter", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pfilter);
+		CommandParameter pwindow("window", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pwindow);
+		CommandParameter pnumwanted("numwanted", "Number", "", "20", "", "", "","",false,false); parameters.push_back(pnumwanted);
+		CommandParameter pmask("mask", "String", "", "", "", "", "","",false,false); parameters.push_back(pmask);
+		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+		CommandParameter psave("save", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(psave);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -64,26 +64,21 @@ string ChimeraCcodeCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string ChimeraCcodeCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string ChimeraCcodeCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "chimera") {  outputFileName =  "ccode.chimeras"; }
-            else if (type == "mapinfo") {  outputFileName =  "mapinfo"; }
-            else if (type == "accnos") {  outputFileName =  "ccode.accnos"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChimeraCcodeCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "chimera") {  pattern = "[filename],[tag],ccode.chimeras-[filename],ccode.chimeras"; } 
+        else if (type == "accnos") {  pattern = "[filename],[tag],ccode.accnos-[filename],ccode.accnos"; } 
+        else if (type == "mapinfo") {  pattern =  "[filename],mapinfo"; }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ChimeraCcodeCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 ChimeraCcodeCommand::ChimeraCcodeCommand(){	
@@ -94,6 +89,7 @@ ChimeraCcodeCommand::ChimeraCcodeCommand(){
 		outputTypes["chimera"] = tempOutNames;
 		outputTypes["mapinfo"] = tempOutNames;
 		outputTypes["accnos"] = tempOutNames;
+        
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ChimeraCcodeCommand", "ChimeraCcodeCommand");
@@ -128,6 +124,7 @@ ChimeraCcodeCommand::ChimeraCcodeCommand(string option)  {
 			outputTypes["chimera"] = tempOutNames;
 			outputTypes["mapinfo"] = tempOutNames;
 			outputTypes["accnos"] = tempOutNames;
+            
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -305,18 +302,13 @@ int ChimeraCcodeCommand::execute(){
 			
 			if (outputDir == "") { outputDir = m->hasPath(fastaFileNames[s]);  }//if user entered a file with a path then preserve it
 			string outputFileName, accnosFileName;
-			if (maskfile != "") {
-				outputFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + maskfile + getOutputFileNameTag("chimera");
-				accnosFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + maskfile + getOutputFileNameTag("accnos");
-			}else {
-				outputFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]))  + getOutputFileNameTag("chimera");
-				accnosFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]))  + getOutputFileNameTag("accnos");
-
-			}
-
-			string mapInfo = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + getOutputFileNameTag("mapinfo");
-
-			
+            map<string, string> variables; 
+            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]));
+            string mapInfo = getOutputFileName("mapinfo", variables);
+			if (maskfile != "") { variables["[tag]"] = maskfile; }
+            outputFileName = getOutputFileName("chimera", variables);
+            accnosFileName = getOutputFileName("accnos", variables);
+						
 			if (m->control_pressed) { delete chimera;  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	} outputTypes.clear(); return 0;	}
 			
 		#ifdef USE_MPI

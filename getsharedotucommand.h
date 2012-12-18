@@ -28,8 +28,9 @@ class GetSharedOTUCommand : public Command {
 		string getCommandName()			{ return "get.sharedseqs";			}
 		string getCommandCategory()		{ return "OTU-Based Approaches";	}
 		string getRequiredCommand()		{ return "none";					}
-		string getOutputFileNameTag(string, string);
+		
 	string getHelpString();	
+    string getOutputPattern(string);	
 		string getCitation() { return "http://www.mothur.org/wiki/Get.sharedseqs"; }
 		string getDescription()		{ return "identifies sequences that are either unique or shared by specific groups"; }
 

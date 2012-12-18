@@ -378,7 +378,7 @@ int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T, CountTable* ct) {
 		
 			//set group info
 			vector<string> group = ct->getGroups(name);
-			
+            //cout << name << endl;	
 			//find index in tree of name
 			int n1 = T->getIndex(name);
 			

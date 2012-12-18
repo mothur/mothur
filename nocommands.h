@@ -25,7 +25,7 @@ public:
 	string getCommandName()             { return "NoCommand";       }
 	string getCommandCategory()         { return "Hidden";          }
 	string getHelpString()              { return "No Command";      }	
-    string getOutputFileNameTag(string, string) { return "";                }
+    string getOutputPattern(string) { return "";                }
 	string getCitation()                { return "no citation";     }
 	string getDescription()             { return "no description";  }
 

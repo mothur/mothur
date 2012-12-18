@@ -12,11 +12,11 @@
 //**********************************************************************************************************************
 vector<string> ParseListCommand::setParameters(){	
 	try {
-		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(plist);
-		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none",false,true); parameters.push_back(pgroup);
-		CommandParameter plabel("label", "String", "", "", "", "", "",false,false); parameters.push_back(plabel);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none","list",false,true,true); parameters.push_back(plist);
+		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(pgroup);
+		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -46,26 +46,20 @@ string ParseListCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string ParseListCommand::getOutputFileNameTag(string type, string inputName=""){	
-	try {
-        string outputFileName = "";
-		map<string, vector<string> >::iterator it;
+string ParseListCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
         
-        //is this a type this command creates
-        it = outputTypes.find(type);
-        if (it == outputTypes.end()) {  m->mothurOut("[ERROR]: this command doesn't create a " + type + " output file.\n"); }
-        else {
-            if (type == "list") {  outputFileName =  "list"; }
-            else { m->mothurOut("[ERROR]: No definition for type " + type + " output file tag.\n"); m->control_pressed = true;  }
-        }
-        return outputFileName;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ParseListCommand", "getOutputFileNameTag");
-		exit(1);
-	}
+        if (type == "list") {  pattern = "[filename],[group],list"; } 
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ParseListCommand", "getOutputPattern");
+        exit(1);
+    }
 }
-
 //**********************************************************************************************************************
 ParseListCommand::ParseListCommand(){	
 	try {
@@ -191,7 +185,8 @@ int ParseListCommand::execute(){
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//set fileroot
-		string fileroot = outputDir + m->getRootName(m->getSimpleName(listfile));
+		map<string, string> variables; 
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(listfile));
 		
 		//fill filehandles with neccessary ofstreams
 		int i;
@@ -201,7 +196,8 @@ int ParseListCommand::execute(){
 			temp = new ofstream;
 			filehandles[gGroups[i]] = temp;
 			
-			string filename = fileroot +  gGroups[i] + "." + getOutputFileNameTag("list");
+            variables["[group]"] = gGroups[i];
+			string filename = getOutputFileName("list",variables);
 			outputNames.push_back(filename); outputTypes["list"].push_back(filename);
 			m->openOutputFile(filename, *temp);
 		}

@@ -25,8 +25,9 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "remove.groups";			}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
-	string getOutputFileNameTag(string, string);
+	
 	string getHelpString();	
+    string getOutputPattern(string);	
 	string getCitation() { return "http://www.mothur.org/wiki/Remove.groups"; }
 	string getDescription()		{ return "removes sequences from a list, fasta, name, group, shared, design or taxonomy file from a given group or set of groups"; }
 	

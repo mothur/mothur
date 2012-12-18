@@ -39,8 +39,10 @@ int SparseDistanceMatrix::updateCellCompliment(ull row, ull col){
         ull vcol = 0;
         
         //find the columns entry for this cell as well
-        for (int i = 0; i < seqVec[vrow].size(); i++) {  if (seqVec[vrow][i].index == row) { vcol = i;  break; }  }
-
+        for (int i = 0; i < seqVec[vrow].size(); i++) {  
+            if (seqVec[vrow][i].index == row) { vcol = i;  break; }  
+        }
+       
         seqVec[vrow][vcol].dist = seqVec[row][col].dist;
         
         return 0;
@@ -98,7 +100,9 @@ ull SparseDistanceMatrix::getSmallestCell(ull& row){
        
         for (int i = 0; i < seqVec.size(); i++) {
             for (int j = 0; j < seqVec[i].size(); j++) {
- 
+                
+                if (m->control_pressed) { return smallDist; }
+                
                 //already checked everyone else in row
                 if (i < seqVec[i][j].index) {  
 			    

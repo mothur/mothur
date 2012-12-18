@@ -14,13 +14,13 @@
 //**********************************************************************************************************************
 vector<string> CountGroupsCommand::setParameters(){	
 	try {
-		CommandParameter pshared("shared", "InputTypes", "", "", "sharedGroup", "sharedGroup", "none",false,false); parameters.push_back(pshared);
-		CommandParameter pgroup("group", "InputTypes", "", "", "sharedGroup", "sharedGroup", "none",false,false); parameters.push_back(pgroup);
-        CommandParameter pcount("count", "InputTypes", "", "", "sharedGroup", "sharedGroup", "none",false,false); parameters.push_back(pcount);
-		CommandParameter paccnos("accnos", "InputTypes", "", "", "none", "none", "none",false,false); parameters.push_back(paccnos);
-		CommandParameter pgroups("groups", "String", "", "", "", "", "",false,false); parameters.push_back(pgroups);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pshared("shared", "InputTypes", "", "", "sharedGroup", "sharedGroup", "none","",false,false,true); parameters.push_back(pshared);
+		CommandParameter pgroup("group", "InputTypes", "", "", "sharedGroup", "sharedGroup", "none","",false,false,true); parameters.push_back(pgroup);
+        CommandParameter pcount("count", "InputTypes", "", "", "sharedGroup", "sharedGroup", "none","",false,false,true); parameters.push_back(pcount);
+		CommandParameter paccnos("accnos", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(paccnos);
+		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}

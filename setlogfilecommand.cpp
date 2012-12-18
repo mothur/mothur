@@ -13,10 +13,10 @@
 //**********************************************************************************************************************
 vector<string> SetLogFileCommand::setParameters(){	
 	try {
-		CommandParameter pappend("append", "Boolean", "", "F", "", "", "",false,false); parameters.push_back(pappend);
-		CommandParameter pname("name", "String", "", "", "", "", "",false,true); parameters.push_back(pname);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "",false,false); parameters.push_back(pinputdir);
-		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "",false,false); parameters.push_back(poutputdir);
+		CommandParameter pappend("append", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pappend);
+		CommandParameter pname("name", "String", "", "", "", "", "","",false,true,true); parameters.push_back(pname);
+		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}

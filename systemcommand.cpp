@@ -12,7 +12,7 @@
 //**********************************************************************************************************************
 vector<string> SystemCommand::setParameters(){	
 	try {
-		CommandParameter pcommand("command", "String", "", "", "", "", "",false,false); parameters.push_back(pcommand);
+		CommandParameter pcommand("command", "String", "", "", "", "", "","",false,false); parameters.push_back(pcommand);
 				
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}

@@ -23,9 +23,10 @@ public:
 	vector<string> setParameters();
 	string getCommandName()			{ return "amova";					}
 	string getCommandCategory()		{ return "Hypothesis Testing";		}
-	string getOutputFileNameTag(string, string);
+	
 	string getHelpString();	
-	string getCitation() { return "Anderson MJ (2001). A new method for non-parametric multivariate analysis of variance. Austral Ecol 26: 32-46.\nhttp://www.mothur.org/wiki/Amova"; }
+    string getOutputPattern(string);	
+    string getCitation() { return "Anderson MJ (2001). A new method for non-parametric multivariate analysis of variance. Austral Ecol 26: 32-46.\nhttp://www.mothur.org/wiki/Amova"; }
 	string getDescription()		{ return "analysis of molecular variance"; }
 	
 	int execute();
