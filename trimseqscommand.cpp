@@ -109,7 +109,7 @@ string TrimSeqsCommand::getOutputPattern(string type) {
         else if (type == "fasta") {  pattern = "[filename],[tag],fasta"; } 
         else if (type == "group") {  pattern = "[filename],groups"; }
         else if (type == "name") {  pattern = "[filename],[tag],names"; }
-        else if (type == "count") {  pattern = "[filename],count_table"; }
+        else if (type == "count") {  pattern = "[filename],[tag],count_table"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
         
         return pattern;

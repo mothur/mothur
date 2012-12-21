@@ -190,7 +190,9 @@ SummarySharedCommand::SummarySharedCommand(string option)  {
             temp = validParameter.validFile(parameters, "iters", false);			if (temp == "not found") { temp = "1000"; }
 			m->mothurConvert(temp, iters); 
             
-            output = validParameter.validFile(parameters, "output", false);		if(output == "not found"){	output = "lt"; }
+            output = validParameter.validFile(parameters, "output", false);		
+            if(output == "not found"){	output = "lt"; }
+            else { createPhylip = true; }
 			if ((output != "lt") && (output != "square")) { m->mothurOut(output + " is not a valid output form. Options are lt and square. I will use lt."); m->mothurOutEndLine(); output = "lt"; }
             
             temp = validParameter.validFile(parameters, "subsample", false);		if (temp == "not found") { temp = "F"; }
@@ -789,6 +791,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                         variables["[calc]"] = sumCalculators[i]->getName();
                         variables["[distance]"] = thisLookup[0]->getLabel();
                         variables["[outputtag]"] = output;
+                        variables["[tag2]"] = "";
                         string distFileName = getOutputFileName("phylip",variables);
                         outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
                         ofstream outDist;
@@ -804,7 +807,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
             for (int i = 0; i < calcDists.size(); i++) {  calcDists[i].clear(); }
 		}
 
-        if (iters != 1) {
+        if (iters != 0) {
             //we need to find the average distance and standard deviation for each groups distance
             
             vector< vector<seqDist>  > calcAverages; calcAverages.resize(sumCalculators.size()); 
