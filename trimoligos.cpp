@@ -259,7 +259,7 @@ int TrimOligos::stripBarcode(Sequence& seq, QualityScores& qual, int& group){
 	}
 }
 //*******************************************************************/
-int TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq, QualityScores& forwardQual, QualityScores& reverseQual, int& group){
+int TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq, int& group){
 	try {
 		//look for forward barcode
 		string rawFSequence = forwardSeq.getUnaligned();
@@ -284,8 +284,6 @@ int TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq, Quality
 				group = it->first;
 				forwardSeq.setUnaligned(rawFSequence.substr(foligo.length()));
                 reverseSeq.setUnaligned(rawRSequence.substr(0,(rawRSequence.length()-roligo.length())));
-                forwardQual.trimQScores(foligo.length(), -1);
-                reverseQual.trimQScores(-1, rawRSequence.length()-roligo.length());
 				success = 0;
 				break;
 			}
@@ -443,6 +441,233 @@ int TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq, Quality
                     cout << endl;
                 }
                 cout << endl;*/
+                if(minDiff > bdiffs)	{	success = minDiff;		}	//no good matches
+                else  {  
+                    bool foundMatch = false;
+                    vector<int> matches;
+                    for (int i = 0; i < minFGroup.size(); i++) {
+                        for (int j = 0; j < minFGroup[i].size(); j++) {
+                            for (int k = 0; k < minRGroup.size(); k++) {
+                                if (m->inUsersGroups(minFGroup[i][j], minRGroup[k])) { matches.push_back(minFGroup[i][j]); k+= minRGroup.size(); }
+                            }
+                        }
+                    }
+                    
+                    int fStart = 0;
+                    int rStart = 0;
+                    if (matches.size() == 1) { 
+                        foundMatch = true;
+                        group = matches[0]; 
+                        fStart = minFPos[0];
+                        rStart = minRPos[0];
+                    }
+                    
+                    //we have an acceptable match for the forward and reverse, but do they match?
+                    if (foundMatch) {
+                        forwardSeq.setUnaligned(rawFSequence.substr(fStart));
+                        reverseSeq.setUnaligned(rawRSequence.substr(rStart));
+                        success = minDiff;
+                    }else { success = bdiffs + 100;	}
+                }
+			}
+			
+			if (alignment != NULL) {  delete alignment;  }
+		}
+		
+		return success;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "TrimOligos", "stripIBarcode");
+		exit(1);
+	}
+	
+}
+//*******************************************************************/
+int TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq, QualityScores& forwardQual, QualityScores& reverseQual, int& group){
+	try {
+		//look for forward barcode
+		string rawFSequence = forwardSeq.getUnaligned();
+        string rawRSequence = reverseSeq.getUnaligned();
+		int success = bdiffs + 1;	//guilty until proven innocent
+		
+		//can you find the forward barcode
+		for(map<int,oligosPair>::iterator it=ipbarcodes.begin();it!=ipbarcodes.end();it++){
+			string foligo = it->second.forward;
+            string roligo = it->second.reverse;
+            
+			if(rawFSequence.length() < foligo.length()){	//let's just assume that the barcodes are the same length
+				success = bdiffs + 10;					//if the sequence is shorter than the barcode then bail out
+				break;	
+			}
+            if(rawRSequence.length() < roligo.length()){	//let's just assume that the barcodes are the same length
+				success = bdiffs + 10;					//if the sequence is shorter than the barcode then bail out
+				break;	
+			}
+			
+			if((compareDNASeq(foligo, rawFSequence.substr(0,foligo.length()))) && (compareDNASeq(roligo, rawRSequence.substr((rawRSequence.length()-roligo.length()),roligo.length())))) {
+				group = it->first;
+				forwardSeq.setUnaligned(rawFSequence.substr(foligo.length()));
+                reverseSeq.setUnaligned(rawRSequence.substr(0,(rawRSequence.length()-roligo.length())));
+                forwardQual.trimQScores(foligo.length(), -1);
+                reverseQual.trimQScores(-1, rawRSequence.length()-roligo.length());
+				success = 0;
+				break;
+			}
+		}
+		
+		//if you found the barcode or if you don't want to allow for diffs
+		if ((bdiffs == 0) || (success == 0)) { return success;  }
+		else { //try aligning and see if you can find it
+			Alignment* alignment;
+			if (ifbarcodes.size() > 0) {  alignment = new NeedlemanOverlap(-1.0, 1.0, -1.0, (maxFBarcodeLength+bdiffs+1));   }
+			else{ alignment = NULL; } 
+			
+			//can you find the barcode
+			int minDiff = 1e6;
+			int minCount = 1;
+			vector< vector<int> > minFGroup;
+			vector<int> minFPos; 
+            
+            //the pair can have duplicates, but we only want to search for the unique forward and reverses, example
+            /*
+             1   Sarah   Westcott
+             2   John    Westcott
+             3   Anna    Westcott
+             4   Sarah   Schloss
+             5   Pat     Schloss
+             6   Gail    Brown
+             7   Pat     Moore
+             
+             only want to look for forward = Sarah, John, Anna, Pat, Gail
+             reverse = Westcott, Schloss, Brown, Moore
+             
+             but if best match forward = 4, and reverse = 1, we want to count as a valid match because forward 1 and forward 4 are the same.  so both barcodes map to same group.
+             */
+            //cout << endl << forwardSeq.getName() << endl;         
+			for(map<string, vector<int> >::iterator it=ifbarcodes.begin();it!=ifbarcodes.end();it++){
+				string oligo = it->first;
+				
+				if(rawFSequence.length() < maxFBarcodeLength){	//let's just assume that the barcodes are the same length
+					success = bdiffs + 10;
+					break;
+				}
+				//cout << "before = " << oligo << '\t' << rawFSequence.substr(0,oligo.length()+bdiffs) << endl;
+				//use needleman to align first barcode.length()+numdiffs of sequence to each barcode
+				alignment->align(oligo, rawFSequence.substr(0,oligo.length()+bdiffs));
+				oligo = alignment->getSeqAAln();
+				string temp = alignment->getSeqBAln();
+                
+				int alnLength = oligo.length();
+				
+				for(int i=oligo.length()-1;i>=0;i--){ if(oligo[i] != '-'){	alnLength = i+1;	break;	} }
+				oligo = oligo.substr(0,alnLength);
+				temp = temp.substr(0,alnLength);
+                int numDiff = countDiffs(oligo, temp);
+				
+                if (alnLength == 0) { numDiff = bdiffs + 100; }
+                //cout << "after = " << oligo << '\t' << temp << '\t' << numDiff << endl;
+                
+				if(numDiff < minDiff){
+					minDiff = numDiff;
+					minCount = 1;
+					minFGroup.clear();
+                    minFGroup.push_back(it->second);
+					int tempminFPos = 0;
+                    minFPos.clear();
+					for(int i=0;i<alnLength;i++){
+						if(temp[i] != '-'){
+							tempminFPos++;
+						}
+					}
+                    minFPos.push_back(tempminFPos);
+				}else if(numDiff == minDiff){
+					minFGroup.push_back(it->second);
+                    int tempminFPos = 0;
+					for(int i=0;i<alnLength;i++){
+						if(temp[i] != '-'){
+							tempminFPos++;
+						}
+					}
+                    minFPos.push_back(tempminFPos);
+				}
+			}
+            
+			//cout << minDiff << '\t' << minCount << '\t' << endl;
+			if(minDiff > bdiffs)	{	success = minDiff;		}	//no good matches
+			else{	
+                //check for reverse match
+                if (alignment != NULL) {  delete alignment;  }
+                
+                if (irbarcodes.size() > 0) { alignment = new NeedlemanOverlap(-1.0, 1.0, -1.0, (maxRBarcodeLength+bdiffs+1));   }
+                else{ alignment = NULL; } 
+                
+                //can you find the barcode
+                minDiff = 1e6;
+                minCount = 1;
+                vector< vector<int> > minRGroup;
+                vector<int> minRPos;
+                
+                for(map<string, vector<int> >::iterator it=irbarcodes.begin();it!=irbarcodes.end();it++){
+                    string oligo = it->first;
+                    //cout << "before = " << oligo << '\t' << rawRSequence.substr(0,oligo.length()+bdiffs) << endl;
+                    if(rawRSequence.length() < maxRBarcodeLength){	//let's just assume that the barcodes are the same length
+                        success = bdiffs + 10;
+                        break;
+                    }
+                    
+                    //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
+                    alignment->align(oligo, rawRSequence.substr(0,oligo.length()+bdiffs));
+                    oligo = alignment->getSeqAAln();
+                    string temp = alignment->getSeqBAln();
+                    
+                    int alnLength = oligo.length();
+                    for(int i=oligo.length()-1;i>=0;i--){ if(oligo[i] != '-'){	alnLength = i+1;	break;	} }
+                    oligo = oligo.substr(0,alnLength);
+                    temp = temp.substr(0,alnLength);
+                    int numDiff = countDiffs(oligo, temp);
+                    if (alnLength == 0) { numDiff = bdiffs + 100; }
+                    
+                    //cout << "after = " << oligo << '\t' << temp << '\t' << numDiff << endl;
+                    if(numDiff < minDiff){
+                        minDiff = numDiff;
+                        minCount = 1;
+                        minRGroup.clear();
+                        minRGroup.push_back(it->second);
+                        int tempminRPos = 0;
+                        minRPos.clear();
+                        for(int i=0;i<alnLength;i++){
+                            if(temp[i] != '-'){
+                                tempminRPos++;
+                            }
+                        }
+                        minRPos.push_back(tempminRPos);                    
+                    }else if(numDiff == minDiff){
+                        int tempminRPos = 0;
+                        for(int i=0;i<alnLength;i++){
+                            if(temp[i] != '-'){
+                                tempminRPos++;
+                            }
+                        }
+                        minRPos.push_back(tempminRPos);  
+                        minRGroup.push_back(it->second);
+                    }
+                    
+                }
+                
+                /*cout << minDiff << '\t' << minCount << '\t' << endl;
+                 for (int i = 0; i < minFGroup.size(); i++) { 
+                 cout << i << '\t';
+                 for (int j = 0; j < minFGroup[i].size(); j++) {  cout << minFGroup[i][j] << " "; }
+                 cout << endl;
+                 }
+                 cout << endl;
+                 for (int i = 0; i < minRGroup.size(); i++) { 
+                 cout << i << '\t';
+                 for (int j = 0; j < minRGroup[i].size(); j++) {  cout << minRGroup[i][j] << " "; }
+                 cout << endl;
+                 }
+                 cout << endl;*/
                 if(minDiff > bdiffs)	{	success = minDiff;		}	//no good matches
                 else  {  
                     bool foundMatch = false;
@@ -699,6 +924,231 @@ int TrimOligos::stripForward(Sequence& forwardSeq, Sequence& reverseSeq, Quality
                         reverseSeq.setUnaligned(rawRSequence.substr(rStart));
                         forwardQual.trimQScores(fStart, -1);
                         reverseQual.trimQScores(rStart, -1);
+                        success = minDiff;
+                    }else { success = pdiffs + 100;	}
+                }
+			}
+			
+			if (alignment != NULL) {  delete alignment;  }
+		}
+		
+		return success;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "TrimOligos", "stripIForward");
+		exit(1);
+	}
+	
+}
+//*******************************************************************/
+int TrimOligos::stripForward(Sequence& forwardSeq, Sequence& reverseSeq, int& group){
+	try {
+		//look for forward barcode
+		string rawFSequence = forwardSeq.getUnaligned();
+        string rawRSequence = reverseSeq.getUnaligned();
+		int success = pdiffs + 1;	//guilty until proven innocent
+		
+		//can you find the forward barcode
+		for(map<int,oligosPair>::iterator it=ipprimers.begin();it!=ipprimers.end();it++){
+			string foligo = it->second.forward;
+            string roligo = it->second.reverse;
+            
+			if(rawFSequence.length() < foligo.length()){	//let's just assume that the barcodes are the same length
+				success = pdiffs + 10;					//if the sequence is shorter than the barcode then bail out
+				break;	
+			}
+            if(rawRSequence.length() < roligo.length()){	//let's just assume that the barcodes are the same length
+				success = pdiffs + 10;					//if the sequence is shorter than the barcode then bail out
+				break;	
+			}
+			
+			if((compareDNASeq(foligo, rawFSequence.substr(0,foligo.length()))) && (compareDNASeq(roligo, rawRSequence.substr((rawRSequence.length()-roligo.length()),roligo.length())))) {
+				group = it->first;
+				forwardSeq.setUnaligned(rawFSequence.substr(foligo.length()));
+                reverseSeq.setUnaligned(rawRSequence.substr(0,(rawRSequence.length()-roligo.length())));
+				success = 0;
+				break;
+			}
+		}
+		
+		//if you found the barcode or if you don't want to allow for diffs
+		if ((pdiffs == 0) || (success == 0)) { return success;  }
+		else { //try aligning and see if you can find it
+			Alignment* alignment;
+			if (ifprimers.size() > 0) {  alignment = new NeedlemanOverlap(-1.0, 1.0, -1.0, (maxFPrimerLength+pdiffs+1));   }
+			else{ alignment = NULL; } 
+			
+			//can you find the barcode
+			int minDiff = 1e6;
+			int minCount = 1;
+			vector< vector<int> > minFGroup;
+			vector<int> minFPos; 
+            
+            //the pair can have duplicates, but we only want to search for the unique forward and reverses, example
+            /*
+             1   Sarah   Westcott
+             2   John    Westcott
+             3   Anna    Westcott
+             4   Sarah   Schloss
+             5   Pat     Schloss
+             6   Gail    Brown
+             7   Pat     Moore
+             
+             only want to look for forward = Sarah, John, Anna, Pat, Gail
+             reverse = Westcott, Schloss, Brown, Moore
+             
+             but if best match forward = 4, and reverse = 1, we want to count as a valid match because forward 1 and forward 4 are the same.  so both barcodes map to same group.
+             */
+            //cout << endl << forwardSeq.getName() << endl;         
+			for(map<string, vector<int> >::iterator it=ifprimers.begin();it!=ifprimers.end();it++){
+				string oligo = it->first;
+				
+				if(rawFSequence.length() < maxFPrimerLength){	//let's just assume that the barcodes are the same length
+					success = pdiffs + 10;
+					break;
+				}
+				//cout << "before = " << oligo << '\t' << rawFSequence.substr(0,oligo.length()+pdiffs) << endl;
+				//use needleman to align first barcode.length()+numdiffs of sequence to each barcode
+				alignment->align(oligo, rawFSequence.substr(0,oligo.length()+pdiffs));
+				oligo = alignment->getSeqAAln();
+				string temp = alignment->getSeqBAln();
+                
+				int alnLength = oligo.length();
+				
+				for(int i=oligo.length()-1;i>=0;i--){ if(oligo[i] != '-'){	alnLength = i+1;	break;	} }
+				oligo = oligo.substr(0,alnLength);
+				temp = temp.substr(0,alnLength);
+                int numDiff = countDiffs(oligo, temp);
+				
+                if (alnLength == 0) { numDiff = pdiffs + 100; }
+                //cout << "after = " << oligo << '\t' << temp << '\t' << numDiff << endl;
+                
+				if(numDiff < minDiff){
+					minDiff = numDiff;
+					minCount = 1;
+					minFGroup.clear();
+                    minFGroup.push_back(it->second);
+					int tempminFPos = 0;
+                    minFPos.clear();
+					for(int i=0;i<alnLength;i++){
+						if(temp[i] != '-'){
+							tempminFPos++;
+						}
+					}
+                    minFPos.push_back(tempminFPos);
+				}else if(numDiff == minDiff){
+					minFGroup.push_back(it->second);
+                    int tempminFPos = 0;
+					for(int i=0;i<alnLength;i++){
+						if(temp[i] != '-'){
+							tempminFPos++;
+						}
+					}
+                    minFPos.push_back(tempminFPos);
+				}
+			}
+            
+			//cout << minDiff << '\t' << minCount << '\t' << endl;
+			if(minDiff > pdiffs)	{	success = minDiff;		}	//no good matches
+			else{	
+                //check for reverse match
+                if (alignment != NULL) {  delete alignment;  }
+                
+                if (irbarcodes.size() > 0) { alignment = new NeedlemanOverlap(-1.0, 1.0, -1.0, (maxRPrimerLength+pdiffs+1));   }
+                else{ alignment = NULL; } 
+                
+                //can you find the barcode
+                minDiff = 1e6;
+                minCount = 1;
+                vector< vector<int> > minRGroup;
+                vector<int> minRPos;
+                
+                for(map<string, vector<int> >::iterator it=irprimers.begin();it!=irprimers.end();it++){
+                    string oligo = it->first;
+                    //cout << "before = " << oligo << '\t' << rawRSequence.substr(0,oligo.length()+pdiffs) << endl;
+                    if(rawRSequence.length() < maxRPrimerLength){	//let's just assume that the barcodes are the same length
+                        success = pdiffs + 10;
+                        break;
+                    }
+                    
+                    //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
+                    alignment->align(oligo, rawRSequence.substr(0,oligo.length()+pdiffs));
+                    oligo = alignment->getSeqAAln();
+                    string temp = alignment->getSeqBAln();
+                    
+                    int alnLength = oligo.length();
+                    for(int i=oligo.length()-1;i>=0;i--){ if(oligo[i] != '-'){	alnLength = i+1;	break;	} }
+                    oligo = oligo.substr(0,alnLength);
+                    temp = temp.substr(0,alnLength);
+                    int numDiff = countDiffs(oligo, temp);
+                    if (alnLength == 0) { numDiff = pdiffs + 100; }
+                    
+                    //cout << "after = " << oligo << '\t' << temp << '\t' << numDiff << endl;
+                    if(numDiff < minDiff){
+                        minDiff = numDiff;
+                        minCount = 1;
+                        minRGroup.clear();
+                        minRGroup.push_back(it->second);
+                        int tempminRPos = 0;
+                        minRPos.clear();
+                        for(int i=0;i<alnLength;i++){
+                            if(temp[i] != '-'){
+                                tempminRPos++;
+                            }
+                        }
+                        minRPos.push_back(tempminRPos);                    
+                    }else if(numDiff == minDiff){
+                        int tempminRPos = 0;
+                        for(int i=0;i<alnLength;i++){
+                            if(temp[i] != '-'){
+                                tempminRPos++;
+                            }
+                        }
+                        minRPos.push_back(tempminRPos);  
+                        minRGroup.push_back(it->second);
+                    }
+                    
+                }
+                
+                /*cout << minDiff << '\t' << minCount << '\t' << endl;
+                 for (int i = 0; i < minFGroup.size(); i++) { 
+                 cout << i << '\t';
+                 for (int j = 0; j < minFGroup[i].size(); j++) {  cout << minFGroup[i][j] << " "; }
+                 cout << endl;
+                 }
+                 cout << endl;
+                 for (int i = 0; i < minRGroup.size(); i++) { 
+                 cout << i << '\t';
+                 for (int j = 0; j < minRGroup[i].size(); j++) {  cout << minRGroup[i][j] << " "; }
+                 cout << endl;
+                 }
+                 cout << endl;*/
+                if(minDiff > pdiffs)	{	success = minDiff;		}	//no good matches
+                else  {  
+                    bool foundMatch = false;
+                    vector<int> matches;
+                    for (int i = 0; i < minFGroup.size(); i++) {
+                        for (int j = 0; j < minFGroup[i].size(); j++) {
+                            for (int k = 0; k < minRGroup.size(); k++) {
+                                if (m->inUsersGroups(minFGroup[i][j], minRGroup[k])) { matches.push_back(minFGroup[i][j]); k+= minRGroup.size(); }
+                            }
+                        }
+                    }
+                    
+                    int fStart = 0;
+                    int rStart = 0;
+                    if (matches.size() == 1) { 
+                        foundMatch = true;
+                        group = matches[0]; 
+                        fStart = minFPos[0];
+                        rStart = minRPos[0];
+                    }
+                    
+                    //we have an acceptable match for the forward and reverse, but do they match?
+                    if (foundMatch) {
+                        forwardSeq.setUnaligned(rawFSequence.substr(fStart));
+                        reverseSeq.setUnaligned(rawRSequence.substr(rStart));
                         success = minDiff;
                     }else { success = pdiffs + 100;	}
                 }
