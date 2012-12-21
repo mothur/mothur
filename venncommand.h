@@ -44,7 +44,7 @@ private:
 	SAbundVector* sabund;
 	int abund, fontsize;
 	
-	bool abort, allLines, nseqs, perm;
+	bool abort, allLines, nseqs, perm, sharedOtus;
 	set<string> labels; //holds labels to be used
 	string format, groups, calc, label, outputDir, sharedfile, listfile, inputfile;
 	vector<string> Estimators, Groups, outputNames;
