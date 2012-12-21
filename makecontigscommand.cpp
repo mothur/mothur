@@ -628,8 +628,10 @@ int MakeContigsCommand::createProcesses(vector< vector<string> > files, string o
 								tempFASTAFileNames[i][j] += toString(getpid()) + ".temp";
 								m->openOutputFile(tempFASTAFileNames[i][j], temp);			temp.close();
                                 
-                                tempPrimerQualFileNames[i][j] += toString(getpid()) + ".temp";
-                                m->openOutputFile(tempPrimerQualFileNames[i][j], temp);		temp.close();
+                                if (files[processors-1][1] != "") {
+                                    tempPrimerQualFileNames[i][j] += toString(getpid()) + ".temp";
+                                    m->openOutputFile(tempPrimerQualFileNames[i][j], temp);		temp.close();
+                                }
 							}
 						}
 					}
@@ -750,9 +752,10 @@ int MakeContigsCommand::createProcesses(vector< vector<string> > files, string o
                             tempFASTAFileNames[i][j] += extension;
                             m->openOutputFile(tempFASTAFileNames[i][j], temp);			temp.close();
                             
-                            
-                            tempPrimerQualFileNames[i][j] += extension;
-                            m->openOutputFile(tempPrimerQualFileNames[i][j], temp);		temp.close();
+                            if (files[processors-1][1] != "") {
+                                tempPrimerQualFileNames[i][j] += extension;
+                                m->openOutputFile(tempPrimerQualFileNames[i][j], temp);		temp.close();
+                            }
                         }
                     }
                 }
@@ -778,9 +781,10 @@ int MakeContigsCommand::createProcesses(vector< vector<string> > files, string o
                         tempFASTAFileNames[i][j] += extension;
                         m->openOutputFile(tempFASTAFileNames[i][j], temp);			temp.close();
                         
-                        
-                        tempPrimerQualFileNames[i][j] += extension;
-                        m->openOutputFile(tempPrimerQualFileNames[i][j], temp);		temp.close();
+                        if (files[processors-1][1] != "") {
+                            tempPrimerQualFileNames[i][j] += extension;
+                            m->openOutputFile(tempPrimerQualFileNames[i][j], temp);		temp.close();
+                        }
                     }
                 }
             }
@@ -796,6 +800,7 @@ int MakeContigsCommand::createProcesses(vector< vector<string> > files, string o
 		}
         
         //do my part
+        processIDS.push_back(processors-1);
 		num = driver(files[processors-1], (outputFasta+ toString(processors-1) + ".temp"), (outputQual+ toString(processors-1) + ".temp"), (outputScrapFasta+ toString(processors-1) + ".temp"), (outputScrapQual+ toString(processors-1) + ".temp"), (outputMisMatches+ toString(processors-1) + ".temp"), tempFASTAFileNames, tempPrimerQualFileNames);	
         
 		//Wait until all threads have terminated.
@@ -1032,8 +1037,12 @@ int MakeContigsCommand::driver(vector<string> files, string outputFasta, string 
                 }
                 
             }
-
+            
             if(trashCode.length() == 0){
+                bool ignore = false;
+                
+                if (m->debug) { m->mothurOut(fSeq.getName()); }
+                
                 if (createGroup) {
                     if(barcodes.size() != 0){
                         string thisGroup = barcodeNameVector[barcodeIndex];
@@ -1049,16 +1058,20 @@ int MakeContigsCommand::driver(vector<string> files, string outputFasta, string 
                         
                         if (m->debug) { m->mothurOut(", group= " + thisGroup + "\n"); }
                         
-                        groupMap[fSeq.getName()] = thisGroup; 
+                        int pos = thisGroup.find("ignore");
+                        if (pos == string::npos) {
+                            groupMap[fSeq.getName()] = thisGroup; 
                         
-                        map<string, int>::iterator it = groupCounts.find(thisGroup);
-                        if (it == groupCounts.end()) {	groupCounts[thisGroup] = 1; }
-                        else { groupCounts[it->first] ++; }
+                            map<string, int>::iterator it = groupCounts.find(thisGroup);
+                            if (it == groupCounts.end()) {	groupCounts[thisGroup] = 1; }
+                            else { groupCounts[it->first] ++; }
+                        }else { ignore = true; }
                         
                     }
                 }
+                if (m->debug) { m->mothurOut("\n"); }
                 
-                if(allFiles){
+                if(allFiles && !ignore){
                     ofstream output;
                     m->openOutputFileAppend(fastaFileNames[barcodeIndex][primerIndex], output);
                     output << ">" << fSeq.getName() << endl << contig << endl;
@@ -1657,7 +1670,7 @@ bool MakeContigsCommand::getOligos(vector<vector<string> >& fastaFileNames, vect
 		while(!in.eof()){
             
 			in >> type; 
-            
+            cout << type << endl;
 		 	if (m->debug) { m->mothurOut("[DEBUG]: reading type - " + type + ".\n"); }	
             
 			if(type[0] == '#'){
@@ -1740,6 +1753,7 @@ bool MakeContigsCommand::getOligos(vector<vector<string> >& fastaFileNames, vect
                         
                     barcodes[indexBarcode]=newPair; indexBarcode++;
 					barcodeNameVector.push_back(group);
+                    cout << group << endl;
 				}else if(type == "LINKER"){
 					linker.push_back(foligo);
                     m->mothurOut("[WARNING]: make.contigs is not setup to remove linkers, ignoring.\n");
@@ -1781,46 +1795,49 @@ bool MakeContigsCommand::getOligos(vector<vector<string> >& fastaFileNames, vect
 					
 					string primerName = primerNameVector[itPrimer->first];
 					string barcodeName = barcodeNameVector[itBar->first];
-					
-					string comboGroupName = "";
-					string fastaFileName = "";
-					string qualFileName = "";
-					string nameFileName = "";
-                    string countFileName = "";
-					
-					if(primerName == ""){
-						comboGroupName = barcodeNameVector[itBar->first];
-					}
-					else{
-						if(barcodeName == ""){
-							comboGroupName = primerNameVector[itPrimer->first];
-						}
-						else{
-							comboGroupName = barcodeNameVector[itBar->first] + "." + primerNameVector[itPrimer->first];
-						}
-					}
-					
-					
-					ofstream temp;
-					fastaFileName = rootname + comboGroupName + ".fasta";
-					if (uniqueNames.count(fastaFileName) == 0) {
-						outputNames.push_back(fastaFileName);
-						outputTypes["fasta"].push_back(fastaFileName);
-						uniqueNames.insert(fastaFileName);
-					}
-					
-					fastaFileNames[itBar->first][itPrimer->first] = fastaFileName;
-					m->openOutputFile(fastaFileName, temp);		temp.close();
-					
-                    if ((fqualfile != "") || (ffastqfile != "") || (file != "")) {
-                        qualFileName = rootname + ".qual";
-                        if (uniqueNames.count(qualFileName) == 0) {
-                            outputNames.push_back(qualFileName);
-                            outputTypes["qfile"].push_back(qualFileName);
+                    
+                    if ((primerName == "ignore") || (barcodeName == "ignore")) { } //do nothing 
+					else {
+                        string comboGroupName = "";
+                        string fastaFileName = "";
+                        string qualFileName = "";
+                        string nameFileName = "";
+                        string countFileName = "";
+                        
+                        if(primerName == ""){
+                            comboGroupName = barcodeNameVector[itBar->first];
                         }
-						
-                        qualFileNames[itBar->first][itPrimer->first] = qualFileName;
-                        m->openOutputFile(qualFileName, temp);		temp.close();
+                        else{
+                            if(barcodeName == ""){
+                                comboGroupName = primerNameVector[itPrimer->first];
+                            }
+                            else{
+                                comboGroupName = barcodeNameVector[itBar->first] + "." + primerNameVector[itPrimer->first];
+                            }
+                        }
+                        
+                        
+                        ofstream temp;
+                        fastaFileName = rootname + comboGroupName + ".fasta";
+                        if (uniqueNames.count(fastaFileName) == 0) {
+                            outputNames.push_back(fastaFileName);
+                            outputTypes["fasta"].push_back(fastaFileName);
+                            uniqueNames.insert(fastaFileName);
+                        }
+                        
+                        fastaFileNames[itBar->first][itPrimer->first] = fastaFileName;
+                        m->openOutputFile(fastaFileName, temp);		temp.close();
+                        
+                        if ((fqualfile != "") || (ffastqfile != "") || (file != "")) {
+                            qualFileName = rootname + ".qual";
+                            if (uniqueNames.count(qualFileName) == 0) {
+                                outputNames.push_back(qualFileName);
+                                outputTypes["qfile"].push_back(qualFileName);
+                            }
+                            
+                            qualFileNames[itBar->first][itPrimer->first] = qualFileName;
+                            m->openOutputFile(qualFileName, temp);		temp.close();
+                        }
                     }
 				}
 			}
