@@ -16,7 +16,7 @@
 class RefChimeraTest {
 	
 public:
-	RefChimeraTest(vector<Sequence>&);
+	RefChimeraTest(vector<Sequence>&, bool);
 	int printHeader(ofstream&);
 	int analyzeQuery(string, string, ofstream&);
 	int getClosestRefIndex();
@@ -34,7 +34,8 @@ private:
 	int alignLength;
 	int bestMatch;
 	//ofstream chimeraReportFile;
-	
+	bool aligned;
+    
 	MothurOut* m;
 };
 

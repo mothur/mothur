@@ -14,7 +14,7 @@ int MAXINT = numeric_limits<int>::max();
 
 //***************************************************************************************************************
 
-RefChimeraTest::RefChimeraTest(vector<Sequence>& refs){
+RefChimeraTest::RefChimeraTest(vector<Sequence>& refs, bool aligned) : aligned(aligned){
 
 	m = MothurOut::getInstance();
 
@@ -28,7 +28,6 @@ RefChimeraTest::RefChimeraTest(vector<Sequence>& refs){
 	}
 	
 	alignLength = referenceSeqs[0].length();
-
 
 }
 //***************************************************************************************************************
@@ -61,28 +60,12 @@ int RefChimeraTest::analyzeQuery(string queryName, string querySeq, ofstream& ch
 	int leftParentBi, rightParentBi, breakPointBi;
 	int minMismatchToChimera = getChimera(left, right, leftParentBi, rightParentBi, breakPointBi, singleLeft, bestLeft, singleRight, bestRight);
 	
-//	int minMismatchToTrimera = MAXINT;
-//	int leftParentTri, middleParentTri, rightParentTri, breakPointTriA, breakPointTriB;
-	
 	int nMera = 0;
 	string chimeraRefSeq = "";
 	
 	if(bestSequenceMismatch - minMismatchToChimera >= 3){// || (minMismatchToChimera == 0 && bestSequenceMismatch != 0)){
-	
 		nMera = 2;
 		chimeraRefSeq = stitchBimera(leftParentBi, rightParentBi, breakPointBi);
-		
-//		minMismatchToTrimera = getTrimera(left, right, leftParentTri, middleParentTri, rightParentTri, breakPointTriA, breakPointTriB, singleLeft, bestLeft, singleRight, bestRight);
-//
-//		if(minMismatchToChimera - minMismatchToTrimera <= 3){
-//			nMera = 2;
-//			chimeraRefSeq = stitchBimera(leftParentBi, rightParentBi, breakPointBi);
-//		}
-//		else{			
-//			nMera = 3;
-//			chimeraRefSeq = stitchTrimera(leftParentTri, middleParentTri, rightParentTri, breakPointTriA, breakPointTriB);
-//		}
-		
 	}
 	else{
 		nMera = 1;
@@ -92,20 +75,10 @@ int RefChimeraTest::analyzeQuery(string queryName, string querySeq, ofstream& ch
 	
 	double distToChimera = calcDistToChimera(querySeq, chimeraRefSeq);
 	
-//	double loonIndex = calcLoonIndex(querySeq, referenceSeqs[leftParentBi], referenceSeqs[rightParentBi], breakPointBi, binMatrix);		
-	
 	chimeraReportFile << queryName << '\t' << referenceNames[bestMatch] << '\t' << bestSequenceMismatch << '\t';
 	chimeraReportFile << referenceNames[leftParentBi] << ',' << referenceNames[rightParentBi] << '\t' << breakPointBi << '\t';
 	chimeraReportFile << minMismatchToChimera << '\t';
-	
-//	if(nMera == 1){
-//		chimeraReportFile << "NA" << '\t' << "NA" << '\t' << "NA";
-//	}
-//	else{
-//		chimeraReportFile << referenceNames[leftParentTri] << ',' << referenceNames[middleParentTri] << ',' << referenceNames[rightParentTri] << '\t' << breakPointTriA << ',' << breakPointTriB << '\t' << minMismatchToTrimera;	
-//	}
-	
-	chimeraReportFile << '\t' << distToChimera << '\t' << nMera << endl;
+    chimeraReportFile << '\t' << distToChimera << '\t' << nMera << endl;
 		
 	return nMera;
 }
@@ -121,8 +94,6 @@ int RefChimeraTest::getMismatches(string& querySeq, vector<vector<int> >& left, 
 		int lDiffs = 0;
 		
 		for(int l=0;l<alignLength;l++){
-//			if(querySeq[l] != '.' && querySeq[l] != referenceSeqs[i][l]){
-						
 			if(querySeq[l] != '.' && referenceSeqs[i][l] != '.' && querySeq[l] != referenceSeqs[i][l] && referenceSeqs[i][l] != 'N'){
 				lDiffs++;
 			}
@@ -132,7 +103,6 @@ int RefChimeraTest::getMismatches(string& querySeq, vector<vector<int> >& left, 
 		int rDiffs = 0;
 		int index = 0;
 		for(int l=alignLength-1;l>=0;l--){
-//			if(querySeq[l] != '.' && querySeq[l] != referenceSeqs[i][l]){
 			if(querySeq[l] != '.' && referenceSeqs[i][l] != '.' && querySeq[l] != referenceSeqs[i][l] && referenceSeqs[i][l] != 'N'){
 				rDiffs++;
 			}			

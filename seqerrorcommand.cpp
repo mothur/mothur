@@ -24,6 +24,7 @@ vector<string> SeqErrorCommand::setParameters(){
 		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pname);
 		CommandParameter pignorechimeras("ignorechimeras", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pignorechimeras);
 		CommandParameter pthreshold("threshold", "Number", "", "1.0", "", "", "","",false,false); parameters.push_back(pthreshold);
+		CommandParameter paligned("aligned", "Boolean", "T", "", "", "", "","",false,false); parameters.push_back(paligned);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
 		CommandParameter psave("save", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(psave);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
@@ -243,6 +244,13 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 			// ...at some point should added some additional type checking...
 			temp = validParameter.validFile(parameters, "threshold", false);	if (temp == "not found") { temp = "1.00"; }
 			m->mothurConvert(temp, threshold);  
+            
+            temp = validParameter.validFile(parameters, "aligned", true);			if (temp == "not found"){	temp = "t";				}
+			aligned = m->isTrue(temp); 
+//			rdb->aligned = aligned;                     #do we need these lines for aligned?
+//			if (aligned) { //clear out old references
+//				rdb->clearMemory();	
+//			}
 			
 			temp = validParameter.validFile(parameters, "save", false);			if (temp == "not found"){	temp = "f";				}
 			save = m->isTrue(temp); 
@@ -686,8 +694,10 @@ int SeqErrorCommand::driver(string filename, string qFileName, string rFileName,
 		
 		ofstream outChimeraReport;
 		m->openOutputFile(chimeraOutputFileName, outChimeraReport);
-		RefChimeraTest chimeraTest(referenceSeqs);
-		if (line.start == 0) { chimeraTest.printHeader(outChimeraReport); }
+		
+        RefChimeraTest chimeraTest(referenceSeqs, aligned);
+        
+        if (line.start == 0) { chimeraTest.printHeader(outChimeraReport); }
 		
 		ofstream errorSummaryFile;
 		m->openOutputFile(summaryFileName, errorSummaryFile);
