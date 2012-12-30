@@ -109,7 +109,7 @@ string TrimSeqsCommand::getOutputPattern(string type) {
         else if (type == "fasta") {  pattern = "[filename],[tag],fasta"; } 
         else if (type == "group") {  pattern = "[filename],groups"; }
         else if (type == "name") {  pattern = "[filename],[tag],names"; }
-        else if (type == "count") {  pattern = "[filename],count_table"; }
+        else if (type == "count") {  pattern = "[filename],[tag],count_table-[filename],count_table"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
         
         return pattern;
@@ -495,8 +495,8 @@ int TrimSeqsCommand::execute(){
                 map<string, string> myvariables; 
                 myvariables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(it->first));
                 string thisGroupName = "";
-                if (countfile == "") { thisGroupName = getOutputFileName("group",variables); outputNames.push_back(thisGroupName); outputTypes["group"].push_back(thisGroupName); }
-                else {  thisGroupName = getOutputFileName("count",variables); outputNames.push_back(thisGroupName); outputTypes["count"].push_back(thisGroupName);  }
+                if (countfile == "") { thisGroupName = getOutputFileName("group",myvariables); outputNames.push_back(thisGroupName); outputTypes["group"].push_back(thisGroupName); }
+                else {  thisGroupName = getOutputFileName("count",myvariables); outputNames.push_back(thisGroupName); outputTypes["count"].push_back(thisGroupName);  }
                 m->openOutputFile(thisGroupName, out);
                 
                 if (countfile != "") {  out << "Representative_Sequence\ttotal\t" << it->second << endl;  }
@@ -779,32 +779,10 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
                 if (m->debug) { m->mothurOut("[DEBUG]: " + currSeq.getName() + ", trashcode= " + trashCode); if (trashCode.length() != 0) { m->mothurOutEndLine(); } }
                 
 				if(trashCode.length() == 0){
-					currSeq.setAligned(currSeq.getUnaligned());
-					currSeq.printSequence(trimFASTAFile);
-					
-					if(qFileName != ""){
-						currQual.printQScores(trimQualFile);
-					}
-					
-                    
-					if(nameFile != ""){
-						map<string, string>::iterator itName = nameMap.find(currSeq.getName());
-						if (itName != nameMap.end()) {  trimNameFile << itName->first << '\t' << itName->second << endl; }
-						else { m->mothurOut("[ERROR]: " + currSeq.getName() + " is not in your namefile, please correct."); m->mothurOutEndLine(); }
-					}
-                    
-                    int numRedundants = 0;
-                    if (countfile != "") {
-                        map<string, int>::iterator itCount = nameCount.find(currSeq.getName());
-                        if (itCount != nameCount.end()) { 
-                            trimCountFile << itCount->first << '\t' << itCount->second << endl;
-                            numRedundants = itCount->second-1;
-                        }else { m->mothurOut("[ERROR]: " + currSeq.getName() + " is not in your count file, please correct."); m->mothurOutEndLine(); }
-                    }
-					
-					if (createGroup) {
+                    string thisGroup = "";
+                    if (createGroup) {
 						if(barcodes.size() != 0){
-							string thisGroup = barcodeNameVector[barcodeIndex];
+							thisGroup = barcodeNameVector[barcodeIndex];
 							if (primers.size() != 0) { 
 								if (primerNameVector[primerIndex] != "") { 
 									if(thisGroup != "") {
@@ -814,52 +792,83 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 									}
 								} 
 							}
-							
-                            if (m->debug) { m->mothurOut(", group= " + thisGroup + "\n"); }
-                            
-							if (countfile == "") { outGroupsFile << currSeq.getName() << '\t' << thisGroup << endl; }
-                            else {   groupMap[currSeq.getName()] = thisGroup; }
-							
-							if (nameFile != "") {
-								map<string, string>::iterator itName = nameMap.find(currSeq.getName());
-								if (itName != nameMap.end()) { 
-									vector<string> thisSeqsNames; 
-									m->splitAtChar(itName->second, thisSeqsNames, ',');
-                                    numRedundants = thisSeqsNames.size()-1; //we already include ourselves below
-									for (int k = 1; k < thisSeqsNames.size(); k++) { //start at 1 to skip self
-										outGroupsFile << thisSeqsNames[k] << '\t' << thisGroup << endl;
-									}
-								}else { m->mothurOut("[ERROR]: " + currSeq.getName() + " is not in your namefile, please correct."); m->mothurOutEndLine(); }							
-							}
-							
-							map<string, int>::iterator it = groupCounts.find(thisGroup);
-							if (it == groupCounts.end()) {	groupCounts[thisGroup] = 1 + numRedundants; }
-							else { groupCounts[it->first] += (1 + numRedundants); }
+                        }
+                    }
+                    
+                    int pos = thisGroup.find("ignore");
+                    if (pos == string::npos) {
+                        currSeq.setAligned(currSeq.getUnaligned());
+                        currSeq.printSequence(trimFASTAFile);
+                        
+                        if(qFileName != ""){
+                            currQual.printQScores(trimQualFile);
+                        }
+                        
+                        
+                        if(nameFile != ""){
+                            map<string, string>::iterator itName = nameMap.find(currSeq.getName());
+                            if (itName != nameMap.end()) {  trimNameFile << itName->first << '\t' << itName->second << endl; }
+                            else { m->mothurOut("[ERROR]: " + currSeq.getName() + " is not in your namefile, please correct."); m->mothurOutEndLine(); }
+                        }
+                        
+                        int numRedundants = 0;
+                        if (countfile != "") {
+                            map<string, int>::iterator itCount = nameCount.find(currSeq.getName());
+                            if (itCount != nameCount.end()) { 
+                                trimCountFile << itCount->first << '\t' << itCount->second << endl;
+                                numRedundants = itCount->second-1;
+                            }else { m->mothurOut("[ERROR]: " + currSeq.getName() + " is not in your count file, please correct."); m->mothurOutEndLine(); }
+                        }
+                        
+                        if (createGroup) {
+                            if(barcodes.size() != 0){
+                                                                
+                                if (m->debug) { m->mothurOut(", group= " + thisGroup + "\n"); }
+                                
+                                if (countfile == "") { outGroupsFile << currSeq.getName() << '\t' << thisGroup << endl; }
+                                else {   groupMap[currSeq.getName()] = thisGroup; }
+                                
+                                if (nameFile != "") {
+                                    map<string, string>::iterator itName = nameMap.find(currSeq.getName());
+                                    if (itName != nameMap.end()) { 
+                                        vector<string> thisSeqsNames; 
+                                        m->splitAtChar(itName->second, thisSeqsNames, ',');
+                                        numRedundants = thisSeqsNames.size()-1; //we already include ourselves below
+                                        for (int k = 1; k < thisSeqsNames.size(); k++) { //start at 1 to skip self
+                                            outGroupsFile << thisSeqsNames[k] << '\t' << thisGroup << endl;
+                                        }
+                                    }else { m->mothurOut("[ERROR]: " + currSeq.getName() + " is not in your namefile, please correct."); m->mothurOutEndLine(); }							
+                                }
+                                
+                                map<string, int>::iterator it = groupCounts.find(thisGroup);
+                                if (it == groupCounts.end()) {	groupCounts[thisGroup] = 1 + numRedundants; }
+                                else { groupCounts[it->first] += (1 + numRedundants); }
 								
-						}
-					}
-					
-					if(allFiles){
-						ofstream output;
-						m->openOutputFileAppend(fastaFileNames[barcodeIndex][primerIndex], output);
-						currSeq.printSequence(output);
-						output.close();
-						
-						if(qFileName != ""){
-							m->openOutputFileAppend(qualFileNames[barcodeIndex][primerIndex], output);
-							currQual.printQScores(output);
-							output.close();							
-						}
-						
-						if(nameFile != ""){
-							map<string, string>::iterator itName = nameMap.find(currSeq.getName());
-							if (itName != nameMap.end()) { 
-								m->openOutputFileAppend(nameFileNames[barcodeIndex][primerIndex], output);
-								output << itName->first << '\t' << itName->second << endl; 
-								output.close();
-							}else { m->mothurOut("[ERROR]: " + currSeq.getName() + " is not in your namefile, please correct."); m->mothurOutEndLine(); }
-						}
-					}
+                            }
+                        }
+                        
+                        if(allFiles){
+                            ofstream output;
+                            m->openOutputFileAppend(fastaFileNames[barcodeIndex][primerIndex], output);
+                            currSeq.printSequence(output);
+                            output.close();
+                            
+                            if(qFileName != ""){
+                                m->openOutputFileAppend(qualFileNames[barcodeIndex][primerIndex], output);
+                                currQual.printQScores(output);
+                                output.close();							
+                            }
+                            
+                            if(nameFile != ""){
+                                map<string, string>::iterator itName = nameMap.find(currSeq.getName());
+                                if (itName != nameMap.end()) { 
+                                    m->openOutputFileAppend(nameFileNames[barcodeIndex][primerIndex], output);
+                                    output << itName->first << '\t' << itName->second << endl; 
+                                    output.close();
+                                }else { m->mothurOut("[ERROR]: " + currSeq.getName() + " is not in your namefile, please correct."); m->mothurOutEndLine(); }
+                            }
+                        }
+                    }
 				}
 				else{
 					if(nameFile != ""){ //needs to be before the currSeq name is changed
@@ -1505,62 +1514,65 @@ bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
 					string primerName = primerNameVector[itPrimer->second];
 					string barcodeName = barcodeNameVector[itBar->second];
 					
-					string comboGroupName = "";
-					string fastaFileName = "";
-					string qualFileName = "";
-					string nameFileName = "";
-                    string countFileName = "";
-					
-					if(primerName == ""){
-						comboGroupName = barcodeNameVector[itBar->second];
-					}
-					else{
-						if(barcodeName == ""){
-							comboGroupName = primerNameVector[itPrimer->second];
-						}
-						else{
-							comboGroupName = barcodeNameVector[itBar->second] + "." + primerNameVector[itPrimer->second];
-						}
-					}
-					
-					
-					ofstream temp;
-                    map<string, string> variables; 
-                    variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastaFile));
-                    variables["[tag]"] = comboGroupName;
-					fastaFileName = getOutputFileName("fasta", variables);
-					if (uniqueNames.count(fastaFileName) == 0) {
-						outputNames.push_back(fastaFileName);
-						outputTypes["fasta"].push_back(fastaFileName);
-						uniqueNames.insert(fastaFileName);
-					}
-					
-					fastaFileNames[itBar->second][itPrimer->second] = fastaFileName;
-					m->openOutputFile(fastaFileName, temp);		temp.close();
-					
-					if(qFileName != ""){
-                        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(qFileName));
-						qualFileName = getOutputFileName("qfile", variables);
-						if (uniqueNames.count(qualFileName) == 0) {
-							outputNames.push_back(qualFileName);
-							outputTypes["qfile"].push_back(qualFileName);
-						}
-						
-						qualFileNames[itBar->second][itPrimer->second] = qualFileName;
-						m->openOutputFile(qualFileName, temp);		temp.close();
-					}
-					
-					if(nameFile != ""){
-                        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(nameFile));
-						nameFileName = getOutputFileName("name", variables);
-						if (uniqueNames.count(nameFileName) == 0) {
-							outputNames.push_back(nameFileName);
-							outputTypes["name"].push_back(nameFileName);
-						}
-						
-						nameFileNames[itBar->second][itPrimer->second] = nameFileName;
-						m->openOutputFile(nameFileName, temp);		temp.close();
-					}
+                    if ((primerName == "ignore") || (barcodeName == "ignore")) { } //do nothing 
+					else {
+                        string comboGroupName = "";
+                        string fastaFileName = "";
+                        string qualFileName = "";
+                        string nameFileName = "";
+                        string countFileName = "";
+                        
+                        if(primerName == ""){
+                            comboGroupName = barcodeNameVector[itBar->second];
+                        }
+                        else{
+                            if(barcodeName == ""){
+                                comboGroupName = primerNameVector[itPrimer->second];
+                            }
+                            else{
+                                comboGroupName = barcodeNameVector[itBar->second] + "." + primerNameVector[itPrimer->second];
+                            }
+                        }
+                        
+                        
+                        ofstream temp;
+                        map<string, string> variables; 
+                        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(fastaFile));
+                        variables["[tag]"] = comboGroupName;
+                        fastaFileName = getOutputFileName("fasta", variables);
+                        if (uniqueNames.count(fastaFileName) == 0) {
+                            outputNames.push_back(fastaFileName);
+                            outputTypes["fasta"].push_back(fastaFileName);
+                            uniqueNames.insert(fastaFileName);
+                        }
+                        
+                        fastaFileNames[itBar->second][itPrimer->second] = fastaFileName;
+                        m->openOutputFile(fastaFileName, temp);		temp.close();
+                        
+                        if(qFileName != ""){
+                            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(qFileName));
+                            qualFileName = getOutputFileName("qfile", variables);
+                            if (uniqueNames.count(qualFileName) == 0) {
+                                outputNames.push_back(qualFileName);
+                                outputTypes["qfile"].push_back(qualFileName);
+                            }
+                            
+                            qualFileNames[itBar->second][itPrimer->second] = qualFileName;
+                            m->openOutputFile(qualFileName, temp);		temp.close();
+                        }
+                        
+                        if(nameFile != ""){
+                            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(nameFile));
+                            nameFileName = getOutputFileName("name", variables);
+                            if (uniqueNames.count(nameFileName) == 0) {
+                                outputNames.push_back(nameFileName);
+                                outputTypes["name"].push_back(nameFileName);
+                            }
+                            
+                            nameFileNames[itBar->second][itPrimer->second] = nameFileName;
+                            m->openOutputFile(nameFileName, temp);		temp.close();
+                        }
+                    }
 				}
 			}
 		}

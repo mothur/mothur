@@ -60,7 +60,7 @@ public:
     
 private:
     bool abort, allFiles, createGroup;
-    string outputDir, ffastqfile, rfastqfile, align, oligosfile;
+    string outputDir, ffastqfile, rfastqfile, align, oligosfile, rfastafile, ffastafile, rqualfile, fqualfile, file;
 	float match, misMatch, gapOpen, gapExtend;
 	int processors, longestBase, threshold, tdiffs, bdiffs, pdiffs, ldiffs, sdiffs;
     vector<string> outputNames;
@@ -74,16 +74,16 @@ private:
     
 	map<string, int> groupCounts; 
     map<string, string> groupMap;
-    //map<string, int> combos;
-	//map<string, int> groupToIndex;
-    //vector<string> groupVector;
     
     fastqRead readFastq(ifstream&, bool&);
-    vector< vector<string> > readFastqFiles(int&);
-    bool checkReads(fastqRead&, fastqRead&);
+    vector< vector< vector<string> > > preProcessData(unsigned long int&);
+    vector< vector<string> > readFileNames(string);
+    vector< vector<string> > readFastqFiles(unsigned long int&, string, string);
+    vector< vector<string> > readFastaFiles(unsigned long int&, string, string);
+    bool checkReads(fastqRead&, fastqRead&, string, string);
     int createProcesses(vector< vector<string> >, string, string, string, string, string, vector<vector<string> >, vector<vector<string> >);
     int driver(vector<string>, string, string, string, string, string, vector<vector<string> >, vector<vector<string> >);
-    bool getOligos(vector<vector<string> >&, vector<vector<string> >&);
+    bool getOligos(vector<vector<string> >&, vector< vector<string> >&, string);
     string reverseOligo(string);
     vector<pairFastqRead> getReads(bool ignoref, bool ignorer, fastqRead forward, fastqRead reverse, map<string, fastqRead>& uniques);
 };
@@ -173,29 +173,31 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
 					if (pDataArray->fastaFileNames[i][j] != "") {
 						ofstream temp;
 						pDataArray->m->openOutputFile(pDataArray->fastaFileNames[i][j], temp);			temp.close();
-                        pDataArray->m->openOutputFile(pDataArray->qualFileNames[i][j], temp);			temp.close();
+                        if (thisfqualfile != "") { pDataArray->m->openOutputFile(pDataArray->qualFileNames[i][j], temp);			temp.close(); }
 					}
 				}
 			}
 		}
         
         ifstream inFFasta, inRFasta, inFQual, inRQual;
-        pDataArray->m->openInputFile(thisffastafile, inFFasta);
-        pDataArray->m->openInputFile(thisfqualfile, inFQual);
-        pDataArray->m->openInputFile(thisrfastafile, inRFasta);
-        pDataArray->m->openInputFile(thisrqualfile, inRQual);
-        
         ofstream outFasta, outQual, outMisMatch, outScrapFasta, outScrapQual;
+        pDataArray->m->openInputFile(thisffastafile, inFFasta);
+        pDataArray->m->openInputFile(thisrfastafile, inRFasta);
+        if (thisfqualfile != "") {
+            pDataArray->m->openInputFile(thisfqualfile, inFQual);
+            pDataArray->m->openInputFile(thisrqualfile, inRQual);
+            pDataArray->m->openOutputFile(pDataArray->outputQual, outQual);
+            pDataArray->m->openOutputFile(pDataArray->outputScrapQual, outScrapQual);
+        }
         pDataArray->m->openOutputFile(pDataArray->outputFasta, outFasta);
-        pDataArray->m->openOutputFile(pDataArray->outputQual, outQual);
         pDataArray->m->openOutputFile(pDataArray->outputMisMatches, outMisMatch);
         pDataArray->m->openOutputFile(pDataArray->outputScrapFasta, outScrapFasta);
-        pDataArray->m->openOutputFile(pDataArray->outputScrapQual, outScrapQual);
+        
         outMisMatch << "Name\tLength\tMisMatches\n";
         
         TrimOligos trimOligos(pDataArray->pdiffs, pDataArray->bdiffs, 0, 0, pDataArray->primers, pDataArray->barcodes);
         
-        while ((!inFQual.eof()) && (!inFFasta.eof()) && (!inRFasta.eof()) && (!inRQual.eof())) {
+        while ((!inFFasta.eof()) && (!inRFasta.eof())) {
             
             if (pDataArray->m->control_pressed) { break; }
             
@@ -206,20 +208,31 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
             //read seqs and quality info
             Sequence fSeq(inFFasta); pDataArray->m->gobble(inFFasta);
             Sequence rSeq(inRFasta); pDataArray->m->gobble(inRFasta);
-            QualityScores fQual(inFQual); pDataArray->m->gobble(inFQual);
-            QualityScores rQual(inRQual); pDataArray->m->gobble(inRQual);
+            QualityScores* fQual = NULL; QualityScores* rQual = NULL;
+            if (thisfqualfile != "") {
+                fQual = new QualityScores(inFQual); pDataArray->m->gobble(inFQual);
+                rQual = new QualityScores(inRQual); pDataArray->m->gobble(inRQual);
+            }
             
             int barcodeIndex = 0;
             int primerIndex = 0;
             
             if(pDataArray->barcodes.size() != 0){
-                success = trimOligos.stripBarcode(fSeq, rSeq, fQual, rQual, barcodeIndex);
+                if (thisfqualfile != "") {
+                    success = trimOligos.stripBarcode(fSeq, rSeq, *fQual, *rQual, barcodeIndex);
+                }else {
+                    success = trimOligos.stripBarcode(fSeq, rSeq, barcodeIndex);
+                }
                 if(success > pDataArray->bdiffs)		{	trashCode += 'b';	}
                 else{ currentSeqsDiffs += success;  }
             }
             
             if(pDataArray->primers.size() != 0){
-                success = trimOligos.stripForward(fSeq, rSeq, fQual, rQual, primerIndex);
+                if (thisfqualfile != "") {
+                    success = trimOligos.stripForward(fSeq, rSeq, *fQual, *rQual, primerIndex);
+                }else {
+                    success = trimOligos.stripForward(fSeq, rSeq, primerIndex);
+                }
                 if(success > pDataArray->pdiffs)		{	trashCode += 'f';	}
                 else{ currentSeqsDiffs += success;  }
             }
@@ -228,7 +241,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
             
             //flip the reverse reads
             rSeq.reverseComplement();
-            rQual.flipQScores();
+            if (thisfqualfile != "") { rQual->flipQScores(); }
            
             //pairwise align
             alignment->align(fSeq.getUnaligned(), rSeq.getUnaligned());
@@ -244,8 +257,12 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
             int numMismatches = 0;
             string seq1 = fSeq.getAligned();
             string seq2 = rSeq.getAligned();
-            vector<int> scores1 = fQual.getQualityScores();
-            vector<int> scores2 = rQual.getQualityScores();
+            vector<int> scores1, scores2;
+            if (thisfqualfile != "") {
+                scores1 = fQual->getQualityScores();
+                scores2 = rQual->getQualityScores();
+                delete fQual; delete rQual;
+            }
             
             int overlapStart = fSeq.getStartPos();
             int seq2Start = rSeq.getStartPos();
@@ -254,12 +271,12 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                 overlapStart = seq2Start; 
                 for (int i = 0; i < overlapStart; i++) {
                     contig += seq1[i];
-                    contigScores.push_back(scores1[ABaseMap[i]]);
+                    if (thisfqualfile != "") { contigScores.push_back(scores1[ABaseMap[i]]); }
                 }
             }else { //seq1 starts later so take from 0 to overlapStart from seq2
                 for (int i = 0; i < overlapStart; i++) {
                     contig += seq2[i];
-                    contigScores.push_back(scores2[BBaseMap[i]]);
+                    if (thisfqualfile != "") { contigScores.push_back(scores2[BBaseMap[i]]); }
                 }
             }
             
@@ -271,26 +288,34 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
             for (int i = overlapStart; i < overlapEnd; i++) {
                 if (seq1[i] == seq2[i]) { //match, add base and choose highest score
                     contig += seq1[i];
-                    contigScores.push_back(scores1[ABaseMap[i]]);
-                    if (scores1[ABaseMap[i]] < scores2[BBaseMap[i]]) { contigScores[contigScores.size()-1] = scores2[BBaseMap[i]]; }
-                }else if (((seq1[i] == '.') || (seq1[i] == '-')) && ((seq2[i] != '-') && (seq2[i] != '.'))) { //seq1 is a gap and seq2 is a base, choose seq2, unless quality score for base is below threshold. In that case eliminate base
-                    if (scores2[BBaseMap[i]] < pDataArray->threshold) { } //
-                    else {
-                        contig += seq2[i];
-                        contigScores.push_back(scores2[BBaseMap[i]]);
-                    }
-                }else if (((seq2[i] == '.') || (seq2[i] == '-')) && ((seq1[i] != '-') && (seq1[i] != '.'))) { //seq2 is a gap and seq1 is a base, choose seq1, unless quality score for base is below threshold. In that case eliminate base
-                    if (scores1[ABaseMap[i]] < pDataArray->threshold) { } //
-                    else {
-                        contig += seq1[i];
+                    if (thisfqualfile != "") { 
                         contigScores.push_back(scores1[ABaseMap[i]]);
+                        if (scores1[ABaseMap[i]] < scores2[BBaseMap[i]]) { contigScores[contigScores.size()-1] = scores2[BBaseMap[i]]; }
                     }
+                }else if (((seq1[i] == '.') || (seq1[i] == '-')) && ((seq2[i] != '-') && (seq2[i] != '.'))) { //seq1 is a gap and seq2 is a base, choose seq2, unless quality score for base is below threshold. In that case eliminate base
+                    if (thisfqualfile != "") {
+                        if (scores2[BBaseMap[i]] < pDataArray->threshold) { } //
+                        else {
+                            contig += seq2[i];
+                            contigScores.push_back(scores2[BBaseMap[i]]);
+                        }
+                    }else { contig += seq2[i]; }
+                }else if (((seq2[i] == '.') || (seq2[i] == '-')) && ((seq1[i] != '-') && (seq1[i] != '.'))) { //seq2 is a gap and seq1 is a base, choose seq1, unless quality score for base is below threshold. In that case eliminate base
+                    if (thisfqualfile != "") {
+                        if (scores1[ABaseMap[i]] < pDataArray->threshold) { } //
+                        else {
+                            contig += seq1[i];
+                            contigScores.push_back(scores1[ABaseMap[i]]);
+                        }
+                    }else { contig += seq1[i]; }
                 }else if (((seq1[i] != '-') && (seq1[i] != '.')) && ((seq2[i] != '-') && (seq2[i] != '.'))) { //both bases choose one with better quality
-                    char c = seq1[i];
-                    contigScores.push_back(scores1[ABaseMap[i]]);
-                    if (scores1[ABaseMap[i]] < scores2[BBaseMap[i]]) { contigScores[contigScores.size()-1] = scores2[BBaseMap[i]]; c = seq2[i]; }
-                    contig += c;
-                    numMismatches++;
+                    if (thisfqualfile != "") {
+                        char c = seq1[i];
+                        contigScores.push_back(scores1[ABaseMap[i]]);
+                        if (scores1[ABaseMap[i]] < scores2[BBaseMap[i]]) { contigScores[contigScores.size()-1] = scores2[BBaseMap[i]]; c = seq2[i]; }
+                        contig += c;
+                        numMismatches++;
+                    }else { numMismatches++; }
                 }else { //should never get here
                     pDataArray->m->mothurOut("[ERROR]: case I didn't think of seq1 = " + toString(seq1[i]) + " and seq2 = " + toString(seq2[i]) + "\n");
                 }
@@ -299,17 +324,18 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
             if (seq1End < seq2End) { //seq1 ends before seq2 so take from overlap to length from seq2
                 for (int i = overlapEnd; i < length; i++) {
                     contig += seq2[i];
-                    contigScores.push_back(scores2[BBaseMap[i]]);
+                    if (thisfqualfile != "") { contigScores.push_back(scores2[BBaseMap[i]]); }
                 }
             }else { //seq2 ends before seq1 so take from overlap to length from seq1
                 for (int i = overlapEnd; i < length; i++) {
                     contig += seq1[i];
-                    contigScores.push_back(scores1[ABaseMap[i]]);
+                    if (thisfqualfile != "") { contigScores.push_back(scores1[ABaseMap[i]]); }
                 }
                 
             }
 
             if(trashCode.length() == 0){
+                bool ignore = false;
                 if (pDataArray->createGroup) {
                     if(pDataArray->barcodes.size() != 0){
                         string thisGroup = pDataArray->barcodeNameVector[barcodeIndex];
@@ -325,40 +351,48 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                         
                         if (pDataArray->m->debug) { pDataArray->m->mothurOut(", group= " + thisGroup + "\n"); }
                         
-                        pDataArray->groupMap[fSeq.getName()] = thisGroup; 
+                        int pos = thisGroup.find("ignore");
+                        if (pos == string::npos) {
+                            pDataArray->groupMap[fSeq.getName()] = thisGroup; 
                         
-                        map<string, int>::iterator it = pDataArray->groupCounts.find(thisGroup);
-                        if (it == pDataArray->groupCounts.end()) {	pDataArray->groupCounts[thisGroup] = 1; }
-                        else { pDataArray->groupCounts[it->first] ++; }
-                        
+                            map<string, int>::iterator it = pDataArray->groupCounts.find(thisGroup);
+                            if (it == pDataArray->groupCounts.end()) {	pDataArray->groupCounts[thisGroup] = 1; }
+                            else { pDataArray->groupCounts[it->first] ++; }
+                        }else { ignore = true; }
                     }
                 }
                 
-                if(pDataArray->allFiles){
+                if(pDataArray->allFiles && !ignore){
                     ofstream output;
                     pDataArray->m->openOutputFileAppend(pDataArray->fastaFileNames[barcodeIndex][primerIndex], output);
                     output << ">" << fSeq.getName() << endl << contig << endl;
                     output.close();
                     
-                    pDataArray->m->openOutputFileAppend(pDataArray->qualFileNames[barcodeIndex][primerIndex], output);
-                    output << ">" << fSeq.getName() << endl;
-                    for (int i = 0; i < contigScores.size(); i++) { output << contigScores[i] << ' '; }
-                    output << endl;
-                    output.close();							
+                    if (thisfqualfile != "") {
+                        pDataArray->m->openOutputFileAppend(pDataArray->qualFileNames[barcodeIndex][primerIndex], output);
+                        output << ">" << fSeq.getName() << endl;
+                        for (int i = 0; i < contigScores.size(); i++) { output << contigScores[i] << ' '; }
+                        output << endl;
+                        output.close();	
+                    }
                 }
                 
                 //output
                 outFasta << ">" << fSeq.getName() << endl << contig << endl;
-                outQual << ">" << fSeq.getName() << endl;
-                for (int i = 0; i < contigScores.size(); i++) { outQual << contigScores[i] << ' '; }
-                outQual << endl;
+                if (thisfqualfile != "") {
+                    outQual << ">" << fSeq.getName() << endl;
+                    for (int i = 0; i < contigScores.size(); i++) { outQual << contigScores[i] << ' '; }
+                    outQual << endl;
+                }
                 outMisMatch << fSeq.getName() << '\t' << contig.length() << '\t' << numMismatches << endl;
             }else {
                 //output
                 outScrapFasta << ">" << fSeq.getName() << " | " << trashCode << endl << contig << endl;
-                outScrapQual << ">" << fSeq.getName() << " | " << trashCode << endl;
-                for (int i = 0; i < contigScores.size(); i++) { outScrapQual << contigScores[i] << ' '; }
-                outScrapQual << endl;
+                if (thisfqualfile != "") {
+                    outScrapQual << ">" << fSeq.getName() << " | " << trashCode << endl;
+                    for (int i = 0; i < contigScores.size(); i++) { outScrapQual << contigScores[i] << ' '; }
+                    outScrapQual << endl;
+                }
             }
             num++;
             
@@ -370,17 +404,19 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
 		if((num) % 1000 != 0){	pDataArray->m->mothurOut(toString(num)); pDataArray->m->mothurOutEndLine();		}
         
         inFFasta.close();
-        inFQual.close();
         inRFasta.close();
-        inRQual.close();
         outFasta.close();
-        outQual.close();
         outMisMatch.close();
         outScrapFasta.close();
-        outScrapQual.close();
+        if (thisfqualfile != "") {
+            inFQual.close();
+            inRQual.close();
+            outQual.close();
+            outScrapQual.close();
+        }
         delete alignment;
         
-        if (pDataArray->m->control_pressed) { pDataArray->m->mothurRemove(pDataArray->outputQual); pDataArray->m->mothurRemove(pDataArray->outputFasta);  pDataArray->m->mothurRemove(pDataArray->outputMisMatches); pDataArray->m->mothurRemove(pDataArray->outputScrapQual); pDataArray->m->mothurRemove(pDataArray->outputScrapFasta);}
+        if (pDataArray->m->control_pressed) {  pDataArray->m->mothurRemove(pDataArray->outputFasta);  pDataArray->m->mothurRemove(pDataArray->outputMisMatches);  pDataArray->m->mothurRemove(pDataArray->outputScrapFasta);  if (thisfqualfile != "") { pDataArray->m->mothurRemove(pDataArray->outputQual); pDataArray->m->mothurRemove(pDataArray->outputScrapQual); } }
         
         return 0;
 		

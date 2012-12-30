@@ -19,7 +19,7 @@
 
 class Venn {
 public:
-	Venn(string, bool, string, int);
+	Venn(string, bool, string, int, bool);
 	~Venn(){};
 
 	vector<string> getPic(SAbundVector*, vector<Calculator*>);
@@ -30,7 +30,7 @@ private:
 	string groupComb, outputDir, inputfile;
 	ofstream outsvg;
 	MothurOut* m;
-	bool nseqs;
+	bool nseqs, sharedOtus;
 	int fontSize;
 };
 

@@ -27,6 +27,7 @@ vector<string> VennCommand::setParameters(){
 		CommandParameter pcalc("calc", "String", "", "", "", "", "","",false,false); parameters.push_back(pcalc);
 		CommandParameter pabund("abund", "Number", "", "10", "", "", "","",false,false); parameters.push_back(pabund);
 		CommandParameter pnseqs("nseqs", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pnseqs);
+        CommandParameter psharedotus("sharedotus", "Boolean", "", "t", "", "", "","",false,false); parameters.push_back(psharedotus);
 		CommandParameter pfontsize("fontsize", "Number", "", "24", "", "", "","",false,false); parameters.push_back(pfontsize);
 		CommandParameter ppermute("permute", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(ppermute);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
@@ -215,6 +216,9 @@ VennCommand::VennCommand(string option)  {
 
 			temp = validParameter.validFile(parameters, "permute", false);		if (temp == "not found"){	temp = "f";				}
 			perm = m->isTrue(temp); 
+            
+            temp = validParameter.validFile(parameters, "sharedotus", false);		if (temp == "not found"){	temp = "t";				}
+			sharedOtus = m->isTrue(temp); 
 			
 			temp = validParameter.validFile(parameters, "fontsize", false);		if (temp == "not found") { temp = "24"; }
 			m->mothurConvert(temp, fontsize);
@@ -266,7 +270,7 @@ int VennCommand::execute(){
 		//if the users entered no valid calculators don't execute command
 		if (vennCalculators.size() == 0) { m->mothurOut("No valid calculators given, please correct."); m->mothurOutEndLine(); return 0;  }
 		
-		venn = new Venn(outputDir, nseqs, inputfile, fontsize); 
+		venn = new Venn(outputDir, nseqs, inputfile, fontsize, sharedOtus); 
 		input = new InputData(inputfile, format);
 		
 		string lastLabel;

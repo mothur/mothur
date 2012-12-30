@@ -395,29 +395,8 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
 				}
 				
 				if(trashCode.length() == 0){
-					currSeq.setAligned(currSeq.getUnaligned());
-					currSeq.printSequence(trimFASTAFile);
-					
-					if(pDataArray->qFileName != ""){
-						currQual.printQScores(trimQualFile);
-					}
-					
-					if(pDataArray->nameFile != ""){
-						map<string, string>::iterator itName = pDataArray->nameMap.find(currSeq.getName());
-						if (itName != pDataArray->nameMap.end()) {  trimNameFile << itName->first << '\t' << itName->second << endl; }
-						else { pDataArray->m->mothurOut("[ERROR]: " + currSeq.getName() + " is not in your namefile, please correct."); pDataArray->m->mothurOutEndLine(); }
-					}
-					
-                    int numRedundants = 0;
-                    if (pDataArray->countfile != "") {
-                        map<string, int>::iterator itCount = pDataArray->nameCount.find(currSeq.getName());
-                        if (itCount != pDataArray->nameCount.end()) { 
-                            trimCountFile << itCount->first << '\t' << itCount->second << endl;
-                            numRedundants = itCount->second-1;
-                        }else { pDataArray->m->mothurOut("[ERROR]: " + currSeq.getName() + " is not in your count file, please correct."); pDataArray->m->mothurOutEndLine(); }
-                    }
-					
-					if (pDataArray->createGroup) {
+                    string thisGroup = "";
+                    if (pDataArray->createGroup) {
 						if(pDataArray->barcodes.size() != 0){
 							string thisGroup = pDataArray->barcodeNameVector[barcodeIndex];
 							if (pDataArray->primers.size() != 0) { 
@@ -429,50 +408,81 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
 									}
 								} 
 							}
-							
-							if (pDataArray->countfile == "") { outGroupsFile << currSeq.getName() << '\t' << thisGroup << endl; }
-                            else {   pDataArray->groupMap[currSeq.getName()] = thisGroup; }
-							
-							if (pDataArray->nameFile != "") {
-								map<string, string>::iterator itName = pDataArray->nameMap.find(currSeq.getName());
-								if (itName != pDataArray->nameMap.end()) { 
-									vector<string> thisSeqsNames; 
-									pDataArray->m->splitAtChar(itName->second, thisSeqsNames, ',');
-                                    numRedundants = thisSeqsNames.size()-1; //we already include ourselves below
-									for (int k = 1; k < thisSeqsNames.size(); k++) { //start at 1 to skip self
-										outGroupsFile << thisSeqsNames[k] << '\t' << thisGroup << endl;
-									}
-								}else { pDataArray->m->mothurOut("[ERROR]: " + currSeq.getName() + " is not in your namefile, please correct."); pDataArray->m->mothurOutEndLine(); }							
-							}
-							
-							map<string, int>::iterator it = pDataArray->groupCounts.find(thisGroup);
-							if (it == pDataArray->groupCounts.end()) {	pDataArray->groupCounts[thisGroup] = 1 + numRedundants; }
-							else { pDataArray->groupCounts[it->first] += (1 + numRedundants); }
+                        }
+                    }
+                    
+                    int pos = thisGroup.find("ignore");
+                    if (pos == string::npos) {
+                        
+                        currSeq.setAligned(currSeq.getUnaligned());
+                        currSeq.printSequence(trimFASTAFile);
+                        
+                        if(pDataArray->qFileName != ""){
+                            currQual.printQScores(trimQualFile);
+                        }
+                        
+                        if(pDataArray->nameFile != ""){
+                            map<string, string>::iterator itName = pDataArray->nameMap.find(currSeq.getName());
+                            if (itName != pDataArray->nameMap.end()) {  trimNameFile << itName->first << '\t' << itName->second << endl; }
+                            else { pDataArray->m->mothurOut("[ERROR]: " + currSeq.getName() + " is not in your namefile, please correct."); pDataArray->m->mothurOutEndLine(); }
+                        }
+                        
+                        int numRedundants = 0;
+                        if (pDataArray->countfile != "") {
+                            map<string, int>::iterator itCount = pDataArray->nameCount.find(currSeq.getName());
+                            if (itCount != pDataArray->nameCount.end()) { 
+                                trimCountFile << itCount->first << '\t' << itCount->second << endl;
+                                numRedundants = itCount->second-1;
+                            }else { pDataArray->m->mothurOut("[ERROR]: " + currSeq.getName() + " is not in your count file, please correct."); pDataArray->m->mothurOutEndLine(); }
+                        }
+                        
+                        if (pDataArray->createGroup) {
+                            if(pDataArray->barcodes.size() != 0){
+                                
+                                if (pDataArray->countfile == "") { outGroupsFile << currSeq.getName() << '\t' << thisGroup << endl; }
+                                else {   pDataArray->groupMap[currSeq.getName()] = thisGroup; }
+                                
+                                if (pDataArray->nameFile != "") {
+                                    map<string, string>::iterator itName = pDataArray->nameMap.find(currSeq.getName());
+                                    if (itName != pDataArray->nameMap.end()) { 
+                                        vector<string> thisSeqsNames; 
+                                        pDataArray->m->splitAtChar(itName->second, thisSeqsNames, ',');
+                                        numRedundants = thisSeqsNames.size()-1; //we already include ourselves below
+                                        for (int k = 1; k < thisSeqsNames.size(); k++) { //start at 1 to skip self
+                                            outGroupsFile << thisSeqsNames[k] << '\t' << thisGroup << endl;
+                                        }
+                                    }else { pDataArray->m->mothurOut("[ERROR]: " + currSeq.getName() + " is not in your namefile, please correct."); pDataArray->m->mothurOutEndLine(); }							
+                                }
+                                
+                                map<string, int>::iterator it = pDataArray->groupCounts.find(thisGroup);
+                                if (it == pDataArray->groupCounts.end()) {	pDataArray->groupCounts[thisGroup] = 1 + numRedundants; }
+                                else { pDataArray->groupCounts[it->first] += (1 + numRedundants); }
+                                
+                            }
+                        }
+                        
+                        if(pDataArray->allFiles){
+                            ofstream output;
+                            pDataArray->m->openOutputFileAppend(pDataArray->fastaFileNames[barcodeIndex][primerIndex], output);
+                            currSeq.printSequence(output);
+                            output.close();
                             
-						}
-					}
-					
-					if(pDataArray->allFiles){
-						ofstream output;
-						pDataArray->m->openOutputFileAppend(pDataArray->fastaFileNames[barcodeIndex][primerIndex], output);
-						currSeq.printSequence(output);
-						output.close();
-						
-						if(pDataArray->qFileName != ""){
-							pDataArray->m->openOutputFileAppend(pDataArray->qualFileNames[barcodeIndex][primerIndex], output);
-							currQual.printQScores(output);
-							output.close();							
-						}
-						
-						if(pDataArray->nameFile != ""){
-							map<string, string>::iterator itName = pDataArray->nameMap.find(currSeq.getName());
-							if (itName != pDataArray->nameMap.end()) { 
-								pDataArray->m->openOutputFileAppend(pDataArray->nameFileNames[barcodeIndex][primerIndex], output);
-								output << itName->first << '\t' << itName->second << endl; 
-								output.close();
-							}else { pDataArray->m->mothurOut("[ERROR]: " + currSeq.getName() + " is not in your namefile, please correct."); pDataArray->m->mothurOutEndLine(); }
-						}
-					}
+                            if(pDataArray->qFileName != ""){
+                                pDataArray->m->openOutputFileAppend(pDataArray->qualFileNames[barcodeIndex][primerIndex], output);
+                                currQual.printQScores(output);
+                                output.close();							
+                            }
+                            
+                            if(pDataArray->nameFile != ""){
+                                map<string, string>::iterator itName = pDataArray->nameMap.find(currSeq.getName());
+                                if (itName != pDataArray->nameMap.end()) { 
+                                    pDataArray->m->openOutputFileAppend(pDataArray->nameFileNames[barcodeIndex][primerIndex], output);
+                                    output << itName->first << '\t' << itName->second << endl; 
+                                    output.close();
+                                }else { pDataArray->m->mothurOut("[ERROR]: " + currSeq.getName() + " is not in your namefile, please correct."); pDataArray->m->mothurOutEndLine(); }
+                            }
+                        }
+                    }
 				}
 				else{
 					if(pDataArray->nameFile != ""){ //needs to be before the currSeq name is changed

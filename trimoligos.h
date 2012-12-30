@@ -35,10 +35,12 @@ class TrimOligos {
 		int stripBarcode(Sequence&, int&);	
 		int stripBarcode(Sequence&, QualityScores&, int&);
         int stripBarcode(Sequence&, Sequence&, QualityScores&, QualityScores&, int&);
+        int stripBarcode(Sequence&, Sequence&, int&);
     	
 		int stripForward(Sequence&, int&);
 		int stripForward(Sequence&, QualityScores&, int&, bool);
         int stripForward(Sequence&, Sequence&, QualityScores&, QualityScores&, int&);
+        int stripForward(Sequence&, Sequence&, int&);
 	
 		bool stripReverse(Sequence&);
 		bool stripReverse(Sequence&, QualityScores&);
