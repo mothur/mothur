@@ -10,8 +10,23 @@
 
 /***********************************************************************/
 
-RandomForest::RandomForest(const vector <vector<int> > dataSet,const int numDecisionTrees,
+RandomForest::RandomForest(const vector <vector<int> > dataSet, const int numDecisionTrees,
              const string treeSplitCriterion = "informationGain") : Forest(dataSet, numDecisionTrees, treeSplitCriterion) {
+    m = MothurOut::getInstance();
+}
+
+/***********************************************************************/
+
+RandomForest::RandomForest(const vector <vector<int> > dataSet,
+                           const int numDecisionTrees,
+                           const string treeSplitCriterion = "informationGain",
+                           const bool doPruning = false,
+                           const float pruneAggressiveness = 0.9,
+                           const bool discardHighErrorTrees = true,
+                           const float highErrorTreeDiscardThreshold = 0.4,
+                           const string optimumFeatureSubsetSelectionCriteria = "log2",
+                           const float featureStandardDeviationThreshold = 0.0)
+: Forest(dataSet, numDecisionTrees, treeSplitCriterion, doPruning, pruneAggressiveness, discardHighErrorTrees, highErrorTreeDiscardThreshold, optimumFeatureSubsetSelectionCriteria, featureStandardDeviationThreshold) {
     m = MothurOut::getInstance();
 }
 

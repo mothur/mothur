@@ -24,6 +24,33 @@ treeSplitCriterion(treeSplitCriterion) {
 }
 
 /***********************************************************************/
+Forest::Forest(const std::vector < std::vector<int> > dataSet,
+                                           const int numDecisionTrees,
+                                           const string treeSplitCriterion = "informationGain",
+                                           const bool doPruning = false,
+                                           const float pruneAggressiveness = 0.9,
+                                           const bool discardHighErrorTrees = true,
+                                           const float highErrorTreeDiscardThreshold = 0.4,
+                                           const string optimumFeatureSubsetSelectionCriteria = "log2",
+                                           const float featureStandardDeviationThreshold = 0.0)
+: dataSet(dataSet),
+numDecisionTrees(numDecisionTrees),
+numSamples((int)dataSet.size()),
+numFeatures((int)(dataSet[0].size() - 1)),
+globalDiscardedFeatureIndices(getGlobalDiscardedFeatureIndices()),
+globalVariableImportanceList(numFeatures, 0),
+treeSplitCriterion(treeSplitCriterion),
+doPruning(doPruning),
+pruneAggressiveness(pruneAggressiveness),
+discardHighErrorTrees(discardHighErrorTrees),
+highErrorTreeDiscardThreshold(highErrorTreeDiscardThreshold),
+optimumFeatureSubsetSelectionCriteria(optimumFeatureSubsetSelectionCriteria),
+featureStandardDeviationThreshold(featureStandardDeviationThreshold) {
+    m = MothurOut::getInstance();
+        // TODO: double check if the implemenatation of 'globalOutOfBagEstimates' is correct
+}
+
+/***********************************************************************/
 
 vector<int> Forest::getGlobalDiscardedFeatureIndices() {
     try {
