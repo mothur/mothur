@@ -10,13 +10,6 @@
 
 /***********************************************************************/
 
-RandomForest::RandomForest(const vector <vector<int> > dataSet, const int numDecisionTrees,
-             const string treeSplitCriterion = "informationGain") : Forest(dataSet, numDecisionTrees, treeSplitCriterion) {
-    m = MothurOut::getInstance();
-}
-
-/***********************************************************************/
-
 RandomForest::RandomForest(const vector <vector<int> > dataSet,
                            const int numDecisionTrees,
                            const string treeSplitCriterion = "informationGain",

@@ -336,7 +336,7 @@ void ClassifySharedCommand::processSharedAndDesignData(vector<SharedRAbundVector
             dataSet[i][j] = treatmentToIntMap[treatmentName];
         }
         
-        RandomForest randomForest(dataSet, numDecisionTrees, treeSplitCriterion);
+        RandomForest randomForest(dataSet, numDecisionTrees, treeSplitCriterion, true, 0.9, true, 0.4, "log2", 0.1);
         randomForest.populateDecisionTrees();
         randomForest.calcForrestErrorRate();
         

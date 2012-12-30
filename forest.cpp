@@ -11,21 +11,6 @@
 /***********************************************************************/
 Forest::Forest(const std::vector < std::vector<int> > dataSet,
                                            const int numDecisionTrees,
-                                           const string treeSplitCriterion = "informationGain")
-: dataSet(dataSet),
-numDecisionTrees(numDecisionTrees),
-numSamples((int)dataSet.size()),
-numFeatures((int)(dataSet[0].size() - 1)),
-globalVariableImportanceList(numFeatures, 0),
-treeSplitCriterion(treeSplitCriterion) {
-    m = MothurOut::getInstance();
-    globalDiscardedFeatureIndices = getGlobalDiscardedFeatureIndices();
-    // TODO: double check if the implemenatation of 'globalOutOfBagEstimates' is correct
-}
-
-/***********************************************************************/
-Forest::Forest(const std::vector < std::vector<int> > dataSet,
-                                           const int numDecisionTrees,
                                            const string treeSplitCriterion = "informationGain",
                                            const bool doPruning = false,
                                            const float pruneAggressiveness = 0.9,
