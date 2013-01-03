@@ -335,6 +335,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
             }
 
             if(trashCode.length() == 0){
+                bool ignore = false;
                 if (pDataArray->createGroup) {
                     if(pDataArray->barcodes.size() != 0){
                         string thisGroup = pDataArray->barcodeNameVector[barcodeIndex];
@@ -350,16 +351,18 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                         
                         if (pDataArray->m->debug) { pDataArray->m->mothurOut(", group= " + thisGroup + "\n"); }
                         
-                        pDataArray->groupMap[fSeq.getName()] = thisGroup; 
+                        int pos = thisGroup.find("ignore");
+                        if (pos == string::npos) {
+                            pDataArray->groupMap[fSeq.getName()] = thisGroup; 
                         
-                        map<string, int>::iterator it = pDataArray->groupCounts.find(thisGroup);
-                        if (it == pDataArray->groupCounts.end()) {	pDataArray->groupCounts[thisGroup] = 1; }
-                        else { pDataArray->groupCounts[it->first] ++; }
-                        
+                            map<string, int>::iterator it = pDataArray->groupCounts.find(thisGroup);
+                            if (it == pDataArray->groupCounts.end()) {	pDataArray->groupCounts[thisGroup] = 1; }
+                            else { pDataArray->groupCounts[it->first] ++; }
+                        }else { ignore = true; }
                     }
                 }
                 
-                if(pDataArray->allFiles){
+                if(pDataArray->allFiles && !ignore){
                     ofstream output;
                     pDataArray->m->openOutputFileAppend(pDataArray->fastaFileNames[barcodeIndex][primerIndex], output);
                     output << ">" << fSeq.getName() << endl << contig << endl;
