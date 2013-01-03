@@ -117,10 +117,10 @@ int RefChimeraTest::analyzeUnalignedQuery(string queryName, string querySeq, ofs
     vector<string> queryAlign(numRefSeqs);
     vector<string> refAlign(numRefSeqs);
 
-    vector<vector<int> > leftDiffs(numRefSeqs, 0);
-    vector<vector<int> > rightDiffs(numRefSeqs, 0);
-    vector<vector<int> > leftMaps(numRefSeqs, 0);
-    vector<vector<int> > rightMaps(numRefSeqs, 0);
+    vector<vector<int> > leftDiffs(numRefSeqs);
+    vector<vector<int> > rightDiffs(numRefSeqs);
+    vector<vector<int> > leftMaps(numRefSeqs);
+    vector<vector<int> > rightMaps(numRefSeqs);
     
     int bestRefIndex = -1;
     int bestRefDiffs = numeric_limits<int>::max();
