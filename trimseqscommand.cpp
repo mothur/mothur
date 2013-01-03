@@ -109,7 +109,7 @@ string TrimSeqsCommand::getOutputPattern(string type) {
         else if (type == "fasta") {  pattern = "[filename],[tag],fasta"; } 
         else if (type == "group") {  pattern = "[filename],groups"; }
         else if (type == "name") {  pattern = "[filename],[tag],names"; }
-        else if (type == "count") {  pattern = "[filename],[tag],count_table"; }
+        else if (type == "count") {  pattern = "[filename],[tag],count_table-[filename],count_table"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
         
         return pattern;
@@ -495,8 +495,8 @@ int TrimSeqsCommand::execute(){
                 map<string, string> myvariables; 
                 myvariables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(it->first));
                 string thisGroupName = "";
-                if (countfile == "") { thisGroupName = getOutputFileName("group",variables); outputNames.push_back(thisGroupName); outputTypes["group"].push_back(thisGroupName); }
-                else {  thisGroupName = getOutputFileName("count",variables); outputNames.push_back(thisGroupName); outputTypes["count"].push_back(thisGroupName);  }
+                if (countfile == "") { thisGroupName = getOutputFileName("group",myvariables); outputNames.push_back(thisGroupName); outputTypes["group"].push_back(thisGroupName); }
+                else {  thisGroupName = getOutputFileName("count",myvariables); outputNames.push_back(thisGroupName); outputTypes["count"].push_back(thisGroupName);  }
                 m->openOutputFile(thisGroupName, out);
                 
                 if (countfile != "") {  out << "Representative_Sequence\ttotal\t" << it->second << endl;  }

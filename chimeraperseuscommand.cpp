@@ -911,8 +911,8 @@ int ChimeraPerseusCommand::driver(string chimeraFileName, vector<seqData>& seque
 					type = "chimera";
 					chimeraRefSeq = myPerseus.stitchBimera(alignments, leftParentBi, rightParentBi, breakPointBi, leftMaps, rightMaps);
 				}
-				;
-				if (m->control_pressed) { chimeraFile.close(); m->mothurRemove(chimeraFileName); accnosFile.close(); m->mothurRemove(accnosFileName); return 0; }
+
+                if (m->control_pressed) { chimeraFile.close(); m->mothurRemove(chimeraFileName); accnosFile.close(); m->mothurRemove(accnosFileName); return 0; }
 				
 				double chimeraDist = myPerseus.modeledPairwiseAlignSeqs(sequences[i].sequence, chimeraRefSeq, dummyA, dummyB, correctModel);
 				

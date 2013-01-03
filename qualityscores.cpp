@@ -423,13 +423,13 @@ void QualityScores::updateReverseMap(vector<vector<int> >& reverseMap, int start
 	try {
 		
 		int index = 0;
-		for(int i=stop-1;i>=start;i--){
+		for(int i=stop-1;i>=start-1;i--){
 			reverseMap[index++][qScores[i]] += weight;
 		}
 		
 	}	
 	catch(exception& e) {
-		m->errorOut(e, "QualityScores", "updateForwardMap");
+		m->errorOut(e, "QualityScores", "updateReverseMap");
 		exit(1);
 	}
 }
