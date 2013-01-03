@@ -163,7 +163,7 @@ int RefChimeraTest::analyzeUnalignedQuery(string queryName, string querySeq, ofs
         vector<int> bestRight(seqLength, -1);
         
         for(int l=0;l<seqLength;l++){
-            
+                
             for(int i=0;i<numRefSeqs;i++){
                 if(rightDiffs[i][l] < singleRight[l]){
                     singleRight[l] = rightDiffs[i][l];
