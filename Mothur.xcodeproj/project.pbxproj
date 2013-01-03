@@ -386,7 +386,6 @@
 		219C1DE11552C508004209F9 /* newcommandtemplate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = newcommandtemplate.h; sourceTree = "<group>"; };
 		219C1DE31559BCCD004209F9 /* getcoremicrobiomecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getcoremicrobiomecommand.cpp; sourceTree = "<group>"; };
 		219C1DE51559BCF2004209F9 /* getcoremicrobiomecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getcoremicrobiomecommand.h; sourceTree = "<group>"; };
-		7E16B6F31695CB5C00C0DC4F /* pdsMakeContigs.1 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.man; name = pdsMakeContigs.1; path = pdsMakeContigs/pdsMakeContigs/pdsMakeContigs.1; sourceTree = "<group>"; };
 		7E16B6F41695CB5C00C0DC4F /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = pdsMakeContigs/pdsMakeContigs/main.cpp; sourceTree = "<group>"; };
 		7E6BE10812F710D8007ADDBE /* refchimeratest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = refchimeratest.h; sourceTree = "<group>"; };
 		7E6BE10912F710D8007ADDBE /* refchimeratest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = refchimeratest.cpp; sourceTree = "<group>"; };
@@ -1190,7 +1189,6 @@
 				A7E9B7AD12D37EC400DA6239 /* rarefactioncurvedata.h */,
 				7E6BE10812F710D8007ADDBE /* refchimeratest.h */,
 				7E6BE10912F710D8007ADDBE /* refchimeratest.cpp */,
-				7E16B6F31695CB5C00C0DC4F /* pdsMakeContigs.1 */,
 				7E16B6F41695CB5C00C0DC4F /* main.cpp */,
 				A77410F514697C300098E6AC /* seqnoise.h */,
 				A77410F414697C300098E6AC /* seqnoise.cpp */,
