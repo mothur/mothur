@@ -136,6 +136,7 @@
 #include "loadlogfilecommand.h"
 #include "sffmultiplecommand.h"
 #include "classifysharedcommand.h"
+#include "filtersharedcommand.h"
 
 /*******************************************************/
 
@@ -295,6 +296,7 @@ CommandFactory::CommandFactory(){
     commands["sff.multiple"]        = "sff.multiple";
 	commands["quit"]				= "MPIEnabled"; 
     commands["classify.shared"]		= "classify.shared"; 
+    commands["filter.shared"]		= "filter.shared"; 
     
 
 }
@@ -510,6 +512,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         else if(commandName == "load.logfile")          {	command = new LoadLogfileCommand(optionString);             }
         else if(commandName == "sff.multiple")          {	command = new SffMultipleCommand(optionString);             }
         else if(commandName == "classify.shared")       {	command = new ClassifySharedCommand(optionString);          }
+        else if(commandName == "filter.shared")         {	command = new FilterSharedCommand(optionString);            }
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -666,6 +669,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
         else if(commandName == "load.logfile")          {	pipecommand = new LoadLogfileCommand(optionString);             }
         else if(commandName == "sff.multiple")          {	pipecommand = new SffMultipleCommand(optionString);             }
         else if(commandName == "classify.shared")       {	pipecommand = new ClassifySharedCommand(optionString);          }
+        else if(commandName == "filter.shared")         {	pipecommand = new FilterSharedCommand(optionString);            }
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -808,6 +812,7 @@ Command* CommandFactory::getCommand(string commandName){
         else if(commandName == "load.logfile")          {	shellcommand = new LoadLogfileCommand();            }
         else if(commandName == "sff.multiple")          {	shellcommand = new SffMultipleCommand();            }
         else if(commandName == "classify.shared")       {	shellcommand = new ClassifySharedCommand();         }
+        else if(commandName == "filter.shared")         {	shellcommand = new FilterSharedCommand();           }
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;

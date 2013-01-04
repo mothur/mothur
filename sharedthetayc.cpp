@@ -75,6 +75,10 @@ EstOutput ThetaYC::getValues(vector<SharedRAbundVector*> shared) {
 		if (isnan(data[2]) || isinf(data[2])) { data[2] = 0; }
 		
 		data[0] = 1.0 - data[0];
+        double hold = data[1];
+        data[1] = 1.0 - data[2];
+        data[2] = 1.0 - hold;
+        
 		return data;
 	}
 	catch(exception& e) {

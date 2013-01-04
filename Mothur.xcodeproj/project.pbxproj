@@ -57,6 +57,7 @@
 		A79234D713C74BF6002B08E2 /* mothurfisher.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A79234D613C74BF6002B08E2 /* mothurfisher.cpp */; };
 		A795840D13F13CD900F201D5 /* countgroupscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A795840C13F13CD900F201D5 /* countgroupscommand.cpp */; };
 		A799F5B91309A3E000AEEFA0 /* makefastqcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A799F5B81309A3E000AEEFA0 /* makefastqcommand.cpp */; };
+		A79EEF8616971D4A0006DEC1 /* filtersharedcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A79EEF8516971D4A0006DEC1 /* filtersharedcommand.cpp */; };
 		A7A0671A1562946F0095C8C5 /* listotulabelscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7A067191562946F0095C8C5 /* listotulabelscommand.cpp */; };
 		A7A0671F1562AC3E0095C8C5 /* makecontigscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7A0671E1562AC3E0095C8C5 /* makecontigscommand.cpp */; };
 		A7A32DAA14DC43B00001D2E5 /* sortseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7A32DA914DC43B00001D2E5 /* sortseqscommand.cpp */; };
@@ -481,6 +482,8 @@
 		A795840C13F13CD900F201D5 /* countgroupscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = countgroupscommand.cpp; sourceTree = "<group>"; };
 		A799F5B71309A3E000AEEFA0 /* makefastqcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = makefastqcommand.h; sourceTree = "<group>"; };
 		A799F5B81309A3E000AEEFA0 /* makefastqcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = makefastqcommand.cpp; sourceTree = "<group>"; };
+		A79EEF8516971D4A0006DEC1 /* filtersharedcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = filtersharedcommand.cpp; sourceTree = "<group>"; };
+		A79EEF8816971D640006DEC1 /* filtersharedcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = filtersharedcommand.h; sourceTree = "<group>"; };
 		A7A067191562946F0095C8C5 /* listotulabelscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = listotulabelscommand.cpp; sourceTree = "<group>"; };
 		A7A0671C156294810095C8C5 /* listotulabelscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = listotulabelscommand.h; sourceTree = "<group>"; };
 		A7A0671D1562AC230095C8C5 /* makecontigscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = makecontigscommand.h; sourceTree = "<group>"; };
@@ -1344,6 +1347,8 @@
 				A7E9B6CB12D37EC400DA6239 /* distancecommand.cpp */,
 				A7E9B6E412D37EC400DA6239 /* filterseqscommand.h */,
 				A7E9B6E312D37EC400DA6239 /* filterseqscommand.cpp */,
+				A79EEF8816971D640006DEC1 /* filtersharedcommand.h */,
+				A79EEF8516971D4A0006DEC1 /* filtersharedcommand.cpp */,
 				A778FE69134CA6CA00C0BA33 /* getcommandinfocommand.h */,
 				A778FE6A134CA6CA00C0BA33 /* getcommandinfocommand.cpp */,
 				219C1DE51559BCF2004209F9 /* getcoremicrobiomecommand.h */,
@@ -2304,6 +2309,7 @@
 				834D9D581656D7C400E7FAB9 /* regularizedrandomforest.cpp in Sources */,
 				834D9D5C1656DEC800E7FAB9 /* regularizeddecisiontree.cpp in Sources */,
 				A7496D2E167B531B00CC7D7C /* kruskalwalliscommand.cpp in Sources */,
+				A79EEF8616971D4A0006DEC1 /* filtersharedcommand.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
