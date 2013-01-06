@@ -43,6 +43,7 @@ protected:
     int numFeatures;
     int numOutputClasses;
     vector<int> outputClasses;
+    
     vector< vector<int> > bootstrappedTrainingSamples;
     vector<int> bootstrappedTrainingSampleIndices;
     vector< vector<int> > bootstrappedTestSamples;

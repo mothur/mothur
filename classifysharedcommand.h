@@ -45,8 +45,8 @@ private:
   
     int numDecisionTrees;
     string treeSplitCriterion, optimumFeatureSubsetSelectionCriteria;
-    bool doPruning, discardHighErrorTrees;
-    double pruneAggressiveness, highErrorTreeDiscardThreshold, featureStandardDeviationThreshold;
+//    bool doPruning, discardHighErrorTrees;
+//    double pruneAggressiveness, highErrorTreeDiscardThreshold, featureStandardDeviationThreshold;
     
     void processSharedAndDesignData(vector<SharedRAbundVector*> lookup);
 };
