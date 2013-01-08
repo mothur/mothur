@@ -556,11 +556,11 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 			temp = validParameter.validFile(parameters, "skipgaps2", false);				if (temp == "not found") { temp = "t"; }
 			skipgaps2 = m->isTrue(temp); 
             
-            string usedDups = "false";
+            
 			temp = validParameter.validFile(parameters, "dereplicate", false);	
 			if (temp == "not found") { 
 				if (groupfile != "")    {  temp = "false";					}
-				else                    {  temp = "true"; usedDups = "";	}
+				else                    {  temp = "true"; 	}
 			}
 			dups = m->isTrue(temp);
 

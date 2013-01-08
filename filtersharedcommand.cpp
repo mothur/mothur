@@ -17,6 +17,8 @@ vector<string> FilterSharedCommand::setParameters(){
 		CommandParameter pminpercent("minpercent", "Number", "", "-1", "", "", "","",false,false,true); parameters.push_back(pminpercent);
         CommandParameter pminabund("minabund", "Number", "", "-1", "", "", "","",false,false,true); parameters.push_back(pminabund);
         CommandParameter pmintotal("mintotal", "Number", "", "-1", "", "", "","",false,false,true); parameters.push_back(pmintotal);
+        CommandParameter pminnumsamples("minnumsamples", "Number", "", "-1", "", "", "","",false,false,true); parameters.push_back(pminnumsamples);
+        CommandParameter pminpercentsamples("minpercentsamples", "Number", "", "-1", "", "", "","",false,false,true); parameters.push_back(pminpercentsamples);
 		CommandParameter pmakerare("makerare", "Boolean", "", "T", "", "", "","",false,false,true); parameters.push_back(pmakerare);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -35,12 +37,14 @@ string FilterSharedCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The filter.shared command is used to remove OTUs based on various critieria.\n";
-		helpString += "The filter.shared command parameters are shared, minpercent, minabund, mintotal, makerare, groups and label.  You must provide a shared file.\n";
+		helpString += "The filter.shared command parameters are shared, minpercent, minabund, mintotal, minnumsamples, minpercentsamples, makerare, groups and label.  You must provide a shared file.\n";
 		helpString += "The groups parameter allows you to specify which of the groups you would like included. The group names are separated by dashes.\n";
 		helpString += "The label parameter allows you to select what distance levels you would like, and are also separated by dashes.\n";
         
 		helpString += "The minabund parameter allows you indicate the minimum abundance required for each sample in a given OTU.  If any samples abundance falls below the minimum, the OTU is removed. Default=0\n";
         helpString += "The minpercent parameter allows you indicate the minimum relative abundance of an OTU. For example, if the OTUs total abundance across all samples is 8, and the total abundance across all OTUs is 1000, and minpercent=1. The OTU's relative abundance is 0.008, the minimum is 0.01, so the OTU will be removed. Default=0.\n";
+        helpString += "The minnumsamples parameter allows you indicate the minimum number of samples present in an OTU. If the number of samples present falls below the minimum, the OTU is removed. Default=0.\n";
+        helpString += "The minpercentsamples parameter allows you indicate the minimum percent of sample present in an OTU. For example, if the total number of samples is 10, the number present is 3, and the minpercentsamples=50. The OTU's precent of samples is 0.333, the minimum is 0.50, so the OTU will be removed. Default=0.\n";
         helpString += "The mintotal parameter allows you indicate the minimum abundance required for a given OTU.  If abundance across all samples falls below the minimum, the OTU is removed. Default=0.\n";
         
 		helpString += "The makerare parameter allows you indicate you want the abundances of any removed OTUs to be saved and a new \"rare\" OTU created with its abundances equal to the sum of the OTUs removed.  This will preserve the number of reads in your dataset. Default=T\n";
@@ -166,6 +170,11 @@ FilterSharedCommand::FilterSharedCommand(string option) {
             else { setSomething = true; }
 			m->mothurConvert(temp, minTotal);
             
+            temp = validParameter.validFile(parameters, "minnumsamples", false);		
+            if (temp == "not found"){	temp = "-1";		}
+            else { setSomething = true; }
+			m->mothurConvert(temp, minSamples);
+            
             temp = validParameter.validFile(parameters, "minpercent", false);		
             if (temp == "not found"){	temp = "-1";		}
             else { setSomething = true; }
@@ -173,6 +182,14 @@ FilterSharedCommand::FilterSharedCommand(string option) {
 			m->mothurConvert(temp, minPercent);
             if (minPercent < 1) {} //already in percent form
             else {  minPercent = minPercent / 100.0; } //user gave us a whole number version so convert to %
+            
+            temp = validParameter.validFile(parameters, "minpercentsamples", false);		
+            if (temp == "not found"){	temp = "-1";		}
+            else { setSomething = true; }
+            
+			m->mothurConvert(temp, minPercentSamples);
+            if (minPercentSamples < 1) {} //already in percent form
+            else {  minPercentSamples = minPercentSamples / 100.0; } //user gave us a whole number version so convert to %
 			
 			temp = validParameter.validFile(parameters, "makerare", false);		if (temp == "not found"){	temp = "T";		}
 			makeRare = m->isTrue(temp);
@@ -345,6 +362,25 @@ int FilterSharedCommand::processShared(vector<SharedRAbundVector*>& thislookup) 
                 }
                 double percent = otuTotal / total; 
                 if (percent < minPercent) { okay = false; }
+            }
+            
+            
+            if (okay && (minSamples != -1)) {
+                int samples = 0;
+                for (int j = 0; j < thislookup.size(); j++) { 
+                    if (thislookup[j]->getAbundance(i) != 0) { samples++; }
+                }
+                if (samples < minSamples) { okay = false; }
+            }
+            
+            if (okay && (minPercentSamples != -0.01)) {
+                double samples = 0;
+                double total = thislookup.size();
+                for (int j = 0; j < thislookup.size(); j++) { 
+                    if (thislookup[j]->getAbundance(i) != 0) { samples++; }
+                }
+                double percent = samples / total; 
+                if (percent < minPercentSamples) { okay = false; }
             }
             
             //did this OTU pass the filter criteria

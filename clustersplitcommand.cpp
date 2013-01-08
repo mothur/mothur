@@ -818,10 +818,10 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, map<float, int> us
 		
         map<string, string> variables; 
         variables["[filename]"] = fileroot;
-        if (countfile != "") { variables["[tag2]"] = "unique_list"; }
         variables["[clustertag]"] = tag;
         string sabundFileName = getOutputFileName("sabund", variables);
         string rabundFileName = getOutputFileName("rabund", variables);
+        if (countfile != "") { variables["[tag2]"] = "unique_list"; }
         string listFileName = getOutputFileName("list", variables);
         
         if (countfile == "") {

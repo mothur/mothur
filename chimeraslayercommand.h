@@ -70,7 +70,7 @@ private:
 	int driverMPI(int, int, MPI_File&, MPI_File&, MPI_File&, MPI_File&, vector<unsigned long long>&, string, map<string, int>&, bool);
 	#endif
 
-	bool abort, realign, trim, trimera, save, hasName, hasCount;
+	bool abort, realign, trim, trimera, save, hasName, hasCount, dups;
 	string fastafile, groupfile, templatefile, outputDir, search, namefile, countfile, blastlocation;
 	int processors, window, iters, increment, numwanted, ksize, match, mismatch, parents, minSimilarity, minCoverage, minBS, minSNP, numSeqs, templateSeqsLength;
 	float divR;

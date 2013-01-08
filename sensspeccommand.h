@@ -58,6 +58,7 @@ private:
 	int fillSeqPairSet(set<string>&, ListVector*&);
 	int process(map<string, int>&, string, bool&, string&);
 	int process(set<string>&, string, bool&, string&, int);
+    string preProcessList();
 
 };
 

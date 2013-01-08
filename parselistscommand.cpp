@@ -13,7 +13,8 @@
 vector<string> ParseListCommand::setParameters(){	
 	try {
 		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none","list",false,true,true); parameters.push_back(plist);
-		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(pgroup);
+        CommandParameter pcount("count", "InputTypes", "", "", "CountGroup", "CountGroup", "none","",false,false,true); parameters.push_back(pcount);
+		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "CountGroup", "none","",false,false,true); parameters.push_back(pgroup);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -31,9 +32,11 @@ vector<string> ParseListCommand::setParameters(){
 string ParseListCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The parse.list command reads a list and group file and generates a list file for each group in the groupfile. \n";
-		helpString += "The parse.list command parameters are list, group and label.\n";
-		helpString += "The list and group parameters are required.\n";
+		helpString += "The parse.list command reads a list and group or count file and generates a list file for each group in the group or count file. \n";
+		helpString += "The parse.list command parameters are list, group, count and label.\n";
+		helpString += "The list and group or count parameters are required.\n";
+        helpString += "If a count file is provided, mothur assumes the list file contains only unique names.\n";
+        helpString += "If a group file is provided, mothur assumes the list file contains all names.\n";
 		helpString += "The label parameter is used to read specific labels in your input you want to use.\n";
 		helpString += "The parse.list command should be used in the following format: parse.list(list=yourListFile, group=yourGroupFile, label=yourLabels).\n";
 		helpString += "Example: parse.list(list=abrecovery.fn.list, group=abrecovery.groups, label=0.03).\n";
@@ -121,11 +124,18 @@ ParseListCommand::ParseListCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("count");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["count"] = inputDir + it->second;		}
+				}
 			}
 
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
+			
 
 			//check for required parameters
 			listfile = validParameter.validFile(parameters, "list", true);
@@ -139,28 +149,39 @@ ParseListCommand::ParseListCommand(string option)  {
 						
 				}
 			}else { m->setListFile(listfile); }	
+            
+            //if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(listfile);	}
 			
-			groupfile = validParameter.validFile(parameters, "group", true);
-			if (groupfile == "not open") { abort = true; }	
-			else if (groupfile == "not found") { 
-				groupfile = m->getListFile(); 
-				if (groupfile != "") {  
-					m->mothurOut("Using " + groupfile + " as input file for the group parameter."); m->mothurOutEndLine(); 
-					groupMap = new GroupMap(groupfile);
-					
-					int error = groupMap->readMap();
-					if (error == 1) { abort = true; }
-				}else { m->mothurOut("No valid current group file. You must provide a group file."); m->mothurOutEndLine();  abort = true; } 
-			}else {  
-				m->setGroupFile(groupfile);
+            groupfile = validParameter.validFile(parameters, "group", true);
+			if (groupfile == "not found") { groupfile =  "";   groupMap = NULL; }
+			else if (groupfile == "not open") { abort = true; groupfile =  ""; groupMap = NULL; }	
+			else {   
+                m->setGroupFile(groupfile);
 				groupMap = new GroupMap(groupfile);
 				
 				int error = groupMap->readMap();
 				if (error == 1) { abort = true; }
-			}
-			
-			//do you have all files needed
-			if ((listfile == "") || (groupfile == "")) { m->mothurOut("You must enter both a listfile and groupfile for the parse.list command. "); m->mothurOutEndLine(); abort = true;  }
+            }
+            
+            countfile = validParameter.validFile(parameters, "count", true);
+			if (countfile == "not found") { countfile =  "";   }
+			else if (countfile == "not open") { abort = true; countfile =  ""; }	
+			else {   
+                m->setCountTableFile(countfile); 
+                ct.readTable(countfile);
+                if (!ct.hasGroupInfo()) { 
+                    abort = true;
+                    m->mothurOut("[ERROR]: The parse.list command requires group info to be present in your countfile, quitting."); m->mothurOutEndLine();
+                }
+                    
+            }
+            
+            if ((groupfile != "") && (countfile != "")) {
+                m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+            }else if ((groupfile == "") && (countfile == "")) {
+                m->mothurOut("[ERROR]: you must provide one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+            }
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -191,7 +212,10 @@ int ParseListCommand::execute(){
 		//fill filehandles with neccessary ofstreams
 		int i;
 		ofstream* temp;
-		vector<string> gGroups = groupMap->getNamesOfGroups();
+		vector<string> gGroups;
+        if (groupfile != "") { gGroups = groupMap->getNamesOfGroups(); }
+        else { gGroups = ct.getNamesOfGroups(); }
+        
 		for (i=0; i<gGroups.size(); i++) {
 			temp = new ofstream;
 			filehandles[gGroups[i]] = temp;
@@ -206,13 +230,12 @@ int ParseListCommand::execute(){
 		set<string> processedLabels;
 		set<string> userLabels = labels;	
 	
-		input = new InputData(listfile, "list");
-		list = input->getListVector();
+		InputData input(listfile, "list");
+		list = input.getListVector();
 		string lastLabel = list->getLabel();
 		
 		if (m->control_pressed) { 
-			delete input; delete list; delete groupMap;
-			vector<string> gGroups = groupMap->getNamesOfGroups();
+			delete list; if (groupfile != "") { delete groupMap; }
 			for (i=0; i<gGroups.size(); i++) {  (*(filehandles[gGroups[i]])).close();  delete filehandles[gGroups[i]]; } 
 			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
 			return 0;
@@ -221,7 +244,7 @@ int ParseListCommand::execute(){
 		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 		
 			if (m->control_pressed) { 
-				delete input; delete list; delete groupMap;
+				delete list; if (groupfile != "") { delete groupMap; }
 				for (i=0; i<gGroups.size(); i++) {  (*(filehandles[gGroups[i]])).close();  delete filehandles[gGroups[i]]; } 
 				for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
 				return 0;
@@ -239,8 +262,7 @@ int ParseListCommand::execute(){
 			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = list->getLabel();
 					
-					delete list;
-					list = input->getListVector(lastLabel); //get new list vector to process
+					list = input.getListVector(lastLabel); //get new list vector to process
 					
 					m->mothurOut(list->getLabel()); m->mothurOutEndLine();
 					parse(list);
@@ -256,11 +278,11 @@ int ParseListCommand::execute(){
 			lastLabel = list->getLabel();
 				
 			delete list;
-			list = input->getListVector(); //get new list vector to process
+			list = input.getListVector(); //get new list vector to process
 		}
 		
 		if (m->control_pressed) { 
-			delete input; delete groupMap;
+			if (groupfile != "") { delete groupMap; }
 			for (i=0; i<gGroups.size(); i++) {  (*(filehandles[gGroups[i]])).close();  delete filehandles[gGroups[i]]; } 
 			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
 			return 0;
@@ -281,7 +303,7 @@ int ParseListCommand::execute(){
 		}
 		
 		if (m->control_pressed) { 
-			delete input; delete groupMap;
+			if (groupfile != "") { delete groupMap; }
 			for (i=0; i<gGroups.size(); i++) {  (*(filehandles[gGroups[i]])).close();  delete filehandles[gGroups[i]]; } 
 			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
 			return 0;
@@ -290,7 +312,7 @@ int ParseListCommand::execute(){
 		//run last label if you need to
 		if (needToRun == true)  {
 			if (list != NULL) {	delete list;	}
-			list = input->getListVector(lastLabel); //get new list vector to process
+			list = input.getListVector(lastLabel); //get new list vector to process
 			
 			m->mothurOut(list->getLabel()); m->mothurOutEndLine();
 			parse(list);		
@@ -303,9 +325,7 @@ int ParseListCommand::execute(){
 			delete it3->second;
 		}
 		
-		
-		delete groupMap;
-		delete input;
+		if (groupfile != "") { delete groupMap; }
 		
 		if (m->control_pressed) { 
 			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
@@ -357,17 +377,33 @@ int ParseListCommand::parse(ListVector* thisList) {
 			
 			//parse bin into list of sequences in each group
 			for (int j = 0; j < names.size(); j++) {
-				string group = groupMap->getGroup(names[j]);
+                if (groupfile != "") {
+                    string group = groupMap->getGroup(names[j]);
 				
-				if (group == "not found") { m->mothurOut(names[j] + " is not in your groupfile. please correct."); m->mothurOutEndLine(); exit(1); }
+                    if (group == "not found") { m->mothurOut(names[j] + " is not in your groupfile. please correct."); m->mothurOutEndLine(); exit(1); }
 				
-				itGroup = groupBins.find(group);
-				if(itGroup == groupBins.end()) {
-					groupBins[group] = names[j];  //add first name
-					groupNumBins[group]++;
-				}else{ //add another name
-					groupBins[group] = groupBins[group] + "," + names[j];
-				}
+                    itGroup = groupBins.find(group);
+                    if(itGroup == groupBins.end()) {
+                        groupBins[group] = names[j];  //add first name
+                        groupNumBins[group]++;
+                    }else{ //add another name
+                        groupBins[group] = groupBins[group] + "," + names[j];
+                    }
+                }else{
+                    vector<string> thisSeqsGroups = ct.getGroups(names[j]);
+                    
+                    for (int k = 0; k < thisSeqsGroups.size(); k++) {
+                        string group = thisSeqsGroups[k];
+                        itGroup = groupBins.find(group);
+                        if(itGroup == groupBins.end()) {
+                            groupBins[group] = names[j];  //add first name
+                            groupNumBins[group]++;
+                        }else{ //add another name
+                            groupBins[group] = groupBins[group] + "," + names[j];
+                        }
+
+                    }
+                }
 			}
 			
 			//print parsed bin info to files

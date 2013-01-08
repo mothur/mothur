@@ -259,6 +259,8 @@ int PhyloTree::addSeqToTree(string seqName, string seqTaxonomy){
 			//somehow the parent is getting one too many accnos
 			//use print to reassign the taxa id
 			taxon = getNextTaxon(seqTaxonomy, seqName);
+            
+            if (m->debug) { m->mothurOut(seqName +'\t' + taxon +'\n'); }
 			
 			if (taxon == "") {  m->mothurOut(seqName + " has an error in the taxonomy.  This may be due to a ;;"); m->mothurOutEndLine(); if (currentNode != 0) {  uniqueTaxonomies.insert(currentNode); } break;  }
 			
@@ -341,6 +343,9 @@ void PhyloTree::assignHeirarchyIDs(int index){
 		int counter = 1;
 		
 		for(it=tree[index].children.begin();it!=tree[index].children.end();it++){
+            
+            if (m->debug) { m->mothurOut(toString(index) +'\t' + tree[it->second].name +'\n'); }
+                
 			tree[it->second].heirarchyID = tree[index].heirarchyID + '.' + toString(counter);
 			counter++;
 			tree[it->second].level = tree[index].level + 1;
@@ -399,6 +404,8 @@ void PhyloTree::binUnclassified(string file){
 			}
 		}
 		
+        if (m->debug) { m->mothurOut("maxLevel = " + toString(maxLevel) +'\n'); }
+        
 		int copyNodes = copy.size();
 	
 		//go through the seqs and if a sequence finest taxon is not the same level as the most finely defined taxon then classify it as unclassified where necessary
@@ -409,11 +416,14 @@ void PhyloTree::binUnclassified(string file){
 			
 			int level = copy[itLeaf->second].level;
 			int currentNode = itLeaf->second;
+            
+            if (m->debug) { m->mothurOut(copy[currentNode].name +'\n'); }
 			
 			//this sequence is unclassified at some levels
 			while(level < maxLevel){
 		
 				level++;
+                if (m->debug) { m->mothurOut("level = " + toString(level) +'\n'); }
 			
 				string taxon = "unclassified";	
 				

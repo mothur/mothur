@@ -211,14 +211,25 @@ SensSpecCommand::SensSpecCommand(string option)  {
 int SensSpecCommand::execute(){
 	try{
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
-
+        
+        int startTime = time(NULL);
+        
+        //create list file with only unique names, saves time and memory by removing redundant names from list file that are not in the distance file.
+        string newListFile = preProcessList();
+        if (newListFile != "") { listFile = newListFile; }
+        
 		setUpOutput();
 		outputNames.push_back(sensSpecFileName); outputTypes["sensspec"].push_back(sensSpecFileName);
 		if(format == "phylip")		{	processPhylip();	}
 		else if(format == "column")	{	processColumn();	}
 		
+        //remove temp file if created
+        if (newListFile != "") { m->mothurRemove(newListFile); }
+        
 		if (m->control_pressed) { m->mothurRemove(sensSpecFileName); return 0; }
-		
+        
+        m->mothurOut("It took " + toString(time(NULL) - startTime) + " to run sens.spec."); m->mothurOutEndLine();
+        
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		m->mothurOut(sensSpecFileName); m->mothurOutEndLine();	
@@ -684,6 +695,122 @@ void SensSpecCommand::outputStatistics(string label, string cutoff){
 		exit(1);
 	}
 }
+//***************************************************************************************************************
+
+string SensSpecCommand::preProcessList(){
+    try {
+        set<string> uniqueNames;
+        //get unique names from distance file
+        if (format == "phylip") {
+            
+            ifstream phylipFile;
+            m->openInputFile(distFile, phylipFile);
+            string numTest;
+            int pNumSeqs;
+			phylipFile >> numTest;
+			
+			if (!m->isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
+            else {
+                m->mothurConvert(numTest, pNumSeqs);
+            }
+            phylipFile >> pNumSeqs; m->gobble(phylipFile);
+            
+            string seqName;
+            double distance;
+            
+            for(int i=0;i<pNumSeqs;i++){
+                
+                if (m->control_pressed) { return ""; }
+                
+                phylipFile >> seqName; 
+                uniqueNames.insert(seqName);
+                
+                for(int j=0;j<i;j++){
+                    phylipFile >> distance;
+                }
+                m->gobble(phylipFile);
+            }
+            phylipFile.close();
+        }else {
+            ifstream columnFile;
+            m->openInputFile(distFile, columnFile);
+            string seqNameA, seqNameB;
+            double distance;
+            
+            while(columnFile){
+                if (m->control_pressed) { return ""; }
+                columnFile >> seqNameA >> seqNameB >> distance;
+                uniqueNames.insert(seqNameA); uniqueNames.insert(seqNameB);
+                m->gobble(columnFile);
+            }
+            columnFile.close();
+        }
+        
+        //read list file, if numSeqs > unique names then remove redundant names
+        string newListFile = listFile + ".temp";
+        ofstream out;
+        m->openOutputFile(newListFile, out);
+        ifstream in;
+		m->openInputFile(listFile, in);
+		
+		bool wroteSomething = false;
+		
+		while(!in.eof()){
+			
+			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(newListFile);  return ""; }
+            
+			//read in list vector
+			ListVector list(in);
+            
+            //listfile is already unique
+            if (list.getNumSeqs() == uniqueNames.size()) { in.close(); out.close(); m->mothurRemove(newListFile);  return ""; }
+			
+			//make a new list vector
+			ListVector newList;
+			newList.setLabel(list.getLabel());
+			
+			//for each bin
+			for (int i = 0; i < list.getNumBins(); i++) {
+                
+				//parse out names that are in accnos file
+				string binnames = list.get(i);
+                vector<string> bnames;
+                m->splitAtComma(binnames, bnames);
+				
+				string newNames = "";
+                for (int i = 0; i < bnames.size(); i++) {
+					string name = bnames[i];
+					//if that name is in the .accnos file, add it
+					if (uniqueNames.count(name) != 0) {  newNames += name + ",";  }
+				}
+                
+				//if there are names in this bin add to new list
+				if (newNames != "") { 
+					newNames = newNames.substr(0, newNames.length()-1); //rip off extra comma
+					newList.push_back(newNames);	
+				}
+			}
+            
+			//print new listvector
+			if (newList.getNumBins() != 0) {
+				wroteSomething = true;
+				newList.print(out);
+			}
+			
+			m->gobble(in);
+		}
+		in.close();	
+		out.close();
+
+        if (wroteSomething) { return newListFile; }
+        return ""; 
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SensSpecCommand", "preProcessList");
+        exit(1);
+    }
+}
+
 
 //***************************************************************************************************************
 

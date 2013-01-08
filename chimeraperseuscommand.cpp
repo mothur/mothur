@@ -20,6 +20,8 @@ vector<string> ChimeraPerseusCommand::setParameters(){
         CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "NameCount", "none","",false,false,true); parameters.push_back(pcount);
 		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
+        CommandParameter pdups("dereplicate", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pdups);
+
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		CommandParameter pcutoff("cutoff", "Number", "", "0.5", "", "", "","",false,false); parameters.push_back(pcutoff);
@@ -40,13 +42,14 @@ string ChimeraPerseusCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The chimera.perseus command reads a fastafile and namefile or countfile and outputs potentially chimeric sequences.\n";
-		helpString += "The chimera.perseus command parameters are fasta, name, group, cutoff, processors, alpha and beta.\n";
+		helpString += "The chimera.perseus command parameters are fasta, name, group, cutoff, processors, dereplicate, alpha and beta.\n";
 		helpString += "The fasta parameter allows you to enter the fasta file containing your potentially chimeric sequences, and is required, unless you have a valid current fasta file. \n";
 		helpString += "The name parameter allows you to provide a name file associated with your fasta file.\n";
         helpString += "The count parameter allows you to provide a count file associated with your fasta file. A count or name file is required. \n";
 		helpString += "You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amazon.fasta \n";
 		helpString += "The group parameter allows you to provide a group file.  When checking sequences, only sequences from the same group as the query sequence will be used as the reference. \n";
 		helpString += "The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n";
+        helpString += "If the dereplicate parameter is false, then if one group finds the seqeunce to be chimeric, then all groups find it to be chimeric, default=f.\n";
 		helpString += "The alpha parameter ....  The default is -5.54. \n";
 		helpString += "The beta parameter ....  The default is 0.33. \n";
 		helpString += "The cutoff parameter ....  The default is 0.50. \n";
@@ -461,6 +464,13 @@ ChimeraPerseusCommand::ChimeraPerseusCommand(string option)  {
 			
 			temp = validParameter.validFile(parameters, "cutoff", false);	if (temp == "not found"){	temp = "0.33";	}
 			m->mothurConvert(temp, beta);
+            
+			temp = validParameter.validFile(parameters, "dereplicate", false);	
+			if (temp == "not found") { 
+				if (groupfile != "")    {  temp = "false";					}
+				else                    {  temp = "true"; 	}
+			}
+			dups = m->isTrue(temp);
 		}
 	}
 	catch(exception& e) {
@@ -524,7 +534,9 @@ int ChimeraPerseusCommand::execute(){
                     
                     if (m->control_pressed) {  delete ct; delete cparser; for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}				
                     map<string, string> uniqueNames = cparser->getAllSeqsMap();
-                    numChimeras = deconvoluteResults(uniqueNames, outputFileName, accnosFileName);
+                    if (!dups) { 
+                        numChimeras = deconvoluteResults(uniqueNames, outputFileName, accnosFileName);
+                    }
                     delete cparser;
 
                     m->mothurOut("The number of sequences checked may be larger than the number of unique sequences because some sequences are found in several samples."); m->mothurOutEndLine(); 
@@ -560,7 +572,9 @@ int ChimeraPerseusCommand::execute(){
                     
                     if (m->control_pressed) {  delete parser; for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}				
                     map<string, string> uniqueNames = parser->getAllSeqsMap();
-                    numChimeras = deconvoluteResults(uniqueNames, outputFileName, accnosFileName);
+                    if (!dups) { 
+                        numChimeras = deconvoluteResults(uniqueNames, outputFileName, accnosFileName);
+                    }
                     delete parser;
                     
                     m->mothurOut("The number of sequences checked may be larger than the number of unique sequences because some sequences are found in several samples."); m->mothurOutEndLine(); 

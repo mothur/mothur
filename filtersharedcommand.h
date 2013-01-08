@@ -38,8 +38,8 @@ private:
 	set<string> labels; //holds labels to be used
 	string groups, label, outputDir, sharedfile;
 	vector<string> Groups, outputNames;
-	int minAbund, minTotal;
-    float minPercent;
+	int minAbund, minTotal, minSamples;
+    float minPercent, minPercentSamples;
     
     int processShared(vector<SharedRAbundVector*>&);
 	
