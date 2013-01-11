@@ -50,14 +50,22 @@ class Command {
                         //find pattern to use based on number of variables passed in
                         string pattern = "";
                         bool foundPattern = false;
+                        vector<int> numVariablesPerPattern;
                         for (int i = 0; i < patterns.size(); i++) {
                             int numVariables = 0;
                             for (int j = 0; j < patterns[i].length(); j++) { if (patterns[i][j] == '[') { numVariables++; } }
+                            numVariablesPerPattern.push_back(numVariables);
                             
                             if (numVariables == variableParts.size()) { pattern = patterns[i]; foundPattern = true; break; }
                         }
                         
-                        if (!foundPattern) {  m->mothurOut("[ERROR]: Not enough variable pieces for " + type + ".\n"); m->control_pressed = true; }
+                        //if you didn't find an exact match do we have something that might work
+                        if (!foundPattern) {  
+                            for (int i = 0; i < numVariablesPerPattern.size(); i++) {
+                                if (numVariablesPerPattern[i] < variableParts.size()) { pattern = patterns[i]; foundPattern = true; break; }
+                            }
+                            if (!foundPattern) {  m->mothurOut("[ERROR]: Not enough variable pieces for " + type + ".\n"); m->control_pressed = true; }
+                        }
                         
                         if (pattern != "") {
                             int numVariables = 0;

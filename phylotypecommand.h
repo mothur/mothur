@@ -42,7 +42,6 @@ private:
 	int cutoff;
 	map<string, string> namemap;
 	vector<string> outputNames;
-	map<string, vector<string> > outputTypes;
 	
 	map<int, int> currentNodes;
 	map<int, int> parentNodes;

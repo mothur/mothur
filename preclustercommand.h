@@ -79,7 +79,6 @@ private:
 	map<string, int>::iterator itSize; 
 //	map<string, bool> active; //maps sequence name to whether it has already been merged or not.
 	vector<string> outputNames;
-	map<string, vector<string> > outputTypes;
 	
 	int readFASTA();
 	void readNameFile();

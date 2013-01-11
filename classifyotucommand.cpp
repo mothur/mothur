@@ -42,7 +42,7 @@ vector<string> ClassifyOtuCommand::setParameters(){
 string ClassifyOtuCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The classify.otu command parameters are list, taxonomy, reftaxonomy, name, group, count, cutoff, label, basis and probs.  The taxonomy and list parameters are required unless you have a valid current file.\n";
+		helpString += "The classify.otu command parameters are list, taxonomy, reftaxonomy, name, group, count, persample, cutoff, label, basis and probs.  The taxonomy and list parameters are required unless you have a valid current file.\n";
 		helpString += "The reftaxonomy parameter allows you give the name of the reference taxonomy file used when you classified your sequences. Providing it will keep the rankIDs in the summary file static.\n";
 		helpString += "The name parameter allows you add a names file with your taxonomy file.\n";
 		helpString += "The group parameter allows you provide a group file to use in creating the summary file breakdown.\n";
@@ -53,6 +53,7 @@ string ClassifyOtuCommand::getHelpString(){
 		helpString += "Now for basis=otu could give Clostridiales	3	7	6	1	2, where 7 is the number of otus that classified to Clostridiales.\n";
 		helpString += "6 is the number of otus containing sequences from groupA, 1 is the number of otus containing sequences from groupB, and 2 is the number of otus containing sequences from groupC.\n";
 		helpString += "The label parameter allows you to select what distance levels you would like a output files created for, and is separated by dashes.\n";
+        helpString += "The persample parameter allows you to find a consensus taxonomy for each group. Default=f\n";
 		helpString += "The default value for label is all labels in your inputfile.\n";
 		helpString += "The cutoff parameter allows you to specify a consensus confidence threshold for your taxonomy.  The default is 51, meaning 51%. Cutoff cannot be below 51.\n";
 		helpString += "The probs parameter shuts off the outputting of the consensus confidence results. The default is true, meaning you want the confidence to be shown.\n";

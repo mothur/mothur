@@ -796,7 +796,7 @@ int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
                 outAve.close();
                 
                 variables["[tag2]"] = "std";
-                distFileName = outputDir + getOutputFileName("phylip",variables);
+                distFileName = getOutputFileName("phylip",variables);
                 outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
                 ofstream outSTD;
                 m->openOutputFile(distFileName, outSTD);
