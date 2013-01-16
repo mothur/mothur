@@ -447,11 +447,9 @@ int ClusterSplitCommand::execute(){
 		
 		m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to split the distance file."); m->mothurOutEndLine();
 		estart = time(NULL);
-                
+              
         if (!runCluster) { 
-#ifdef USE_MPI
-    }
-#endif	
+
                 m->mothurOutEndLine();
                 m->mothurOut("Output File Names: "); m->mothurOutEndLine();
                 for (int i = 0; i < distName.size(); i++) {	m->mothurOut(distName[i].begin()->first); m->mothurOutEndLine(); m->mothurOut(distName[i].begin()->second); m->mothurOutEndLine();	}
@@ -459,7 +457,7 @@ int ClusterSplitCommand::execute(){
                 return 0;
                 
         }
-                
+   
 		//****************** break up files between processes and cluster each file set ******************************//
 	#ifdef USE_MPI
 			////you are process 0 from above////

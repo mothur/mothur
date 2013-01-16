@@ -49,7 +49,7 @@ private:
 	int createProcesses(string, string, string, string, int&);
 		
 	bool abort, useAbskew, chimealns, useMinH, useMindiv, useXn, useDn, useXa, useChunks, useMinchunk, useIdsmoothwindow, useMinsmoothid, useMaxp, skipgaps, skipgaps2, useMinlen, useMaxlen, ucl, useQueryfract, hasCount, hasName, dups;
-	string fastafile, groupfile, templatefile, outputDir, namefile, countfile, abskew, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, minlen, maxlen, queryfract, uchimeLocation;
+	string fastafile, groupfile, templatefile, outputDir, namefile, countfile, abskew, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, minlen, maxlen, queryfract, uchimeLocation, strand;
 	int processors;
 	
 	SequenceParser* sparser;
@@ -87,7 +87,7 @@ struct uchimeData {
 	int threadID, count, numChimeras;
 	vector<string> groups;
 	bool useAbskew, chimealns, useMinH, useMindiv, useXn, useDn, useXa, useChunks, useMinchunk, useIdsmoothwindow, useMinsmoothid, useMaxp, skipgaps, skipgaps2, useMinlen, useMaxlen, ucl, useQueryfract, hasCount;
-	string abskew, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, minlen, maxlen, queryfract;
+	string abskew, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, minlen, maxlen, queryfract, strand;
 	
 	uchimeData(){}
 	uchimeData(string o, string uloc, string t, string file, string f, string n, string g, string ac,  string al, vector<string> gr, MothurOut* mout, int st, int en, int tid) {
@@ -130,10 +130,11 @@ struct uchimeData {
         hasCount = hc;
 	}
 	
-	void setVariables(string abske, string min, string mindi, string x, string d, string xa2, string chunk, string minchun, string idsmoothwindo, string minsmoothi, string max, string minle, string maxle, string queryfrac) {
+	void setVariables(string abske, string min, string mindi, string x, string d, string xa2, string chunk, string minchun, string idsmoothwindo, string minsmoothi, string max, string minle, string maxle, string queryfrac, string stra) {
 		abskew = abske;
 		minh = min;
 		mindiv = mindi;
+        strand = stra;
 		xn = x;
 		dn = d;
 		xa = xa2;
@@ -243,6 +244,15 @@ static DWORD WINAPI MyUchimeThreadFunction(LPVOID lpParam){
 				cPara.push_back(tempa);
 			}
 			
+            if (pDataArray->strand != "") {
+                char* tempA = new char[9]; 
+                *tempA = '\0'; strncat(tempA, "--strand", 8);
+                cPara.push_back(tempA);
+                char* tempa = new char[pDataArray->strand.length()+1];
+                *tempa = '\0'; strncat(tempa, pDataArray->strand.c_str(), pDataArray->strand.length());
+                cPara.push_back(tempa);
+            }
+            
 			if (pDataArray->useAbskew) {
 				char* tempskew = new char[9];
 				*tempskew = '\0'; strncat(tempskew, "--abskew", 8);
@@ -589,6 +599,15 @@ static DWORD WINAPI MyUchimeSeqsThreadFunction(LPVOID lpParam){
 			cPara.push_back(tempa);
 		}
 		
+        if (pDataArray->strand != "") {
+            char* tempA = new char[9]; 
+            *tempA = '\0'; strncat(tempA, "--strand", 8);
+            cPara.push_back(tempA);
+            char* tempa = new char[pDataArray->strand.length()+1];
+            *tempa = '\0'; strncat(tempa, pDataArray->strand.c_str(), pDataArray->strand.length());
+            cPara.push_back(tempa);
+        }
+        
 		if (pDataArray->useAbskew) {
 			char* tempskew = new char[9];
 			*tempskew = '\0'; strncat(tempskew, "--abskew", 8);

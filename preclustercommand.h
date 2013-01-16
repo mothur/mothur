@@ -29,8 +29,16 @@ struct seqPNode {
 	~seqPNode() {}
 };
 /************************************************************/
-inline bool comparePriority(seqPNode first, seqPNode second) {  
+inline bool comparePriorityTopDown(seqPNode first, seqPNode second) {  
     if (first.numIdentical > second.numIdentical) { return true;  }
+    else if (first.numIdentical == second.numIdentical) { 
+        if (first.seq.getName() > second.seq.getName()) { return true; }
+    }
+    return false; 
+}
+/************************************************************/
+inline bool comparePriorityDownTop(seqPNode first, seqPNode second) {  
+    if (first.numIdentical < second.numIdentical) { return true;  }
     else if (first.numIdentical == second.numIdentical) { 
         if (first.seq.getName() > second.seq.getName()) { return true; }
     }
@@ -71,7 +79,7 @@ private:
     CountTable ct;
     
 	int diffs, length, processors;
-	bool abort, bygroup;
+	bool abort, bygroup, topdown;
 	string fastafile, namefile, outputDir, groupfile, countfile;
 	vector<seqPNode> alignSeqs; //maps the number of identical seqs to a sequence
 	map<string, string> names; //represents the names file first column maps to second column
@@ -107,9 +115,10 @@ struct preClusterData {
 	int diffs, threadID;
 	vector<string> groups;
 	vector<string> mapFileNames;
+    bool topdown;
 	
 	preClusterData(){}
-	preClusterData(string f, string n, string g, string c, string nff,  string nnf, string nmf, vector<string> gr, MothurOut* mout, int st, int en, int d, int tid) {
+	preClusterData(string f, string n, string g, string c, string nff,  string nnf, string nmf, vector<string> gr, MothurOut* mout, int st, int en, int d, bool td, int tid) {
 		fastafile = f;
 		namefile = n;
 		groupfile = g;
@@ -123,6 +132,7 @@ struct preClusterData {
 		threadID = tid;
 		groups = gr;
         countfile = c;
+        topdown = td;
 	}
 };
 
@@ -235,9 +245,10 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
 			pDataArray->m->openOutputFile(pDataArray->newMName+pDataArray->groups[k]+".map", out);
 			pDataArray->mapFileNames.push_back(pDataArray->newMName+pDataArray->groups[k]+".map");
 			
-			//sort seqs by number of identical seqs
-			sort(alignSeqs.begin(), alignSeqs.end(), comparePriority);
-			
+            //sort seqs by number of identical seqs
+            if (pDataArray->topdown) { sort(alignSeqs.begin(), alignSeqs.end(), comparePriorityTopDown);  }
+            else {  sort(alignSeqs.begin(), alignSeqs.end(), comparePriorityDownTop);  }
+            
 			int count = 0;
 			
 			//think about running through twice...

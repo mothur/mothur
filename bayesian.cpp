@@ -308,7 +308,11 @@ string Bayesian::getTaxonomy(Sequence* seq) {
 		//bootstrap - to set confidenceScore
 		int numToSelect = queryKmers.size() / 8;
 	
+        if (m->debug) {  m->mothurOut(seq->getName() + "\t"); }
+        
 		tax = bootstrapResults(queryKmers, index, numToSelect);
+        
+        if (m->debug) {  m->mothurOut("\n"); }
 		
 		return tax;	
 	}
@@ -374,6 +378,7 @@ string Bayesian::bootstrapResults(vector<int> kmers, int tax, int numToSelect) {
 		int seqTaxIndex = tax;
 		TaxNode seqTax = phyloTree->get(tax);
 		
+        
 		while (seqTax.level != 0) { //while you are not at the root
 					
 				itBoot2 = confidenceScores.find(seqTaxIndex); //is this a classification we already have a count on
@@ -383,11 +388,13 @@ string Bayesian::bootstrapResults(vector<int> kmers, int tax, int numToSelect) {
 					confidence = itBoot2->second;
 				}
 				
+                if (m->debug) { m->mothurOut(seqTax.name + "(" + toString(((confidence/(float)iters) * 100)) + ");"); }
+            
 				if (((confidence/(float)iters) * 100) >= confidenceThreshold) {
 					confidenceTax = seqTax.name + "(" + toString(((confidence/(float)iters) * 100)) + ");" + confidenceTax;
 					simpleTax = seqTax.name + ";" + simpleTax;
 				}
-				
+            
 				seqTaxIndex = seqTax.parent;
 				seqTax = phyloTree->get(seqTax.parent);
 		}

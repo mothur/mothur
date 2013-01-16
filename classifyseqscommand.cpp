@@ -610,7 +610,7 @@ int ClassifySeqsCommand::execute(){
 	try {
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
         
-        string outputMethodTag = method + ".";
+        string outputMethodTag = method;
 		if(method == "wang"){	classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, iters, rand(), flip, writeShortcuts);	}
 		else if(method == "knn"){	classify = new Knn(taxonomyFileName, templateFileName, search, kmerSize, gapOpen, gapExtend, match, misMatch, numWanted, rand());				}
         else if(method == "zap"){	

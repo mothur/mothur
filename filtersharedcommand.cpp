@@ -405,22 +405,8 @@ int FilterSharedCommand::processShared(vector<SharedRAbundVector*>& thislookup) 
                 for (int j = 0; j < rareCounts.size(); j++) { //add "rare" OTU to the filtered lookup
                     filteredLookup[j]->push_back(rareCounts[j], thislookup[j]->getGroup());
                 }
-                
-                //create new label
-                string oldLastLabel = saveBinLabels[saveBinLabels.size()-1];
-                string tag = "";
-                string otuNumber = "";
-                for (int i = 0;i < oldLastLabel.length(); i++){
-                    //add numbers
-                    if( oldLastLabel[i]>47 && oldLastLabel[i]<58){ otuNumber += oldLastLabel[i];  }
-                    else { tag += oldLastLabel[i]; }
-                }
-                
-                int oldLastBin;
-                m->mothurConvert(otuNumber, oldLastBin);
-                oldLastBin++;
-                string newLabel = tag + toString(oldLastBin);
-                filteredLabels.push_back(newLabel);
+                //create label for rare OTUs
+                filteredLabels.push_back("rareOTUs");
             }
         }
         

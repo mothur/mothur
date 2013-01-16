@@ -892,6 +892,41 @@ void CommandFactory::printCommands(ostream& out) {
 	}
 }
 /***********************************************************************/
+void CommandFactory::printCommandsCategories(ostream& out) {
+    try {
+        map<string, string> commands = getListCommands();
+        map<string, string>::iterator it;
+
+        map<string, string> categories;
+        map<string, string>::iterator itCat;
+        //loop through each command outputting info
+        for (it = commands.begin(); it != commands.end(); it++) {
+    
+            Command* thisCommand = getCommand(it->first);
+    
+            //don't add hidden commands
+            if (thisCommand->getCommandCategory() != "Hidden") {
+                itCat = categories.find(thisCommand->getCommandCategory());
+                if (itCat == categories.end()) {
+                    categories[thisCommand->getCommandCategory()] = thisCommand->getCommandName();
+                }else {
+                    categories[thisCommand->getCommandCategory()] += ", " + thisCommand->getCommandName();
+                }
+            }
+        }
+        
+        for (itCat = categories.begin(); itCat != categories.end(); itCat++) {
+            out << itCat->first << " commmands include: " << itCat->second << endl;
+        }
+
+    }
+	catch(exception& e) {
+		m->errorOut(e, "CommandFactory", "printCommandsCategories");
+		exit(1);
+	}
+}      
+
+/***********************************************************************/
 
 
 
