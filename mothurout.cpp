@@ -2925,6 +2925,79 @@ bool MothurOut::checkReleaseVersion(ifstream& file, string version) {
 	}
 }
 /**************************************************************************************************/
+vector<double> MothurOut::getAverages(vector< vector<double> >& dists) {
+	try{
+        vector<double> averages; //averages.resize(numComp, 0.0);
+        for (int i = 0; i < dists[0].size(); i++) { averages.push_back(0.0); }
+      
+        for (int thisIter = 0; thisIter < dists.size(); thisIter++) {
+            for (int i = 0; i < dists[thisIter].size(); i++) {  
+                averages[i] += dists[thisIter][i];
+            }
+        }
+        
+        //finds average.
+        for (int i = 0; i < averages.size(); i++) {  averages[i] /= (double) dists.size(); }
+        
+        return averages;
+    }
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "getAverages");		
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+vector<double> MothurOut::getStandardDeviation(vector< vector<double> >& dists) {
+	try{
+        
+        vector<double> averages = getAverages(dists);
+        
+        //find standard deviation
+        vector<double> stdDev; //stdDev.resize(numComp, 0.0);
+        for (int i = 0; i < dists[0].size(); i++) { stdDev.push_back(0.0); }
+        
+        for (int thisIter = 0; thisIter < dists.size(); thisIter++) { //compute the difference of each dist from the mean, and square the result of each
+            for (int j = 0; j < dists[thisIter].size(); j++) {
+                stdDev[j] += ((dists[thisIter][j] - averages[j]) * (dists[thisIter][j] - averages[j]));
+            }
+        }
+        for (int i = 0; i < stdDev.size(); i++) {  
+            stdDev[i] /= (double) dists.size(); 
+            stdDev[i] = sqrt(stdDev[i]);
+        }
+        
+        return stdDev;
+    }
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "getAverages");		
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+vector<double> MothurOut::getStandardDeviation(vector< vector<double> >& dists, vector<double>& averages) {
+	try{
+        //find standard deviation
+        vector<double> stdDev; //stdDev.resize(numComp, 0.0);
+        for (int i = 0; i < dists[0].size(); i++) { stdDev.push_back(0.0); }
+        
+        for (int thisIter = 0; thisIter < dists.size(); thisIter++) { //compute the difference of each dist from the mean, and square the result of each
+            for (int j = 0; j < dists[thisIter].size(); j++) {
+                stdDev[j] += ((dists[thisIter][j] - averages[j]) * (dists[thisIter][j] - averages[j]));
+            }
+        }
+        for (int i = 0; i < stdDev.size(); i++) {  
+            stdDev[i] /= (double) dists.size(); 
+            stdDev[i] = sqrt(stdDev[i]);
+        }
+        
+        return stdDev;
+    }
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "getAverages");		
+		exit(1);
+	}
+}
+/**************************************************************************************************/
 bool MothurOut::isContainingOnlyDigits(string input) {
 	try{
 		

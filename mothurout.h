@@ -155,6 +155,9 @@ class MothurOut {
 		unsigned int fromBase36(string);
 		int getRandomIndex(int); //highest
         double getStandardDeviation(vector<int>&);
+        vector<double> getStandardDeviation(vector< vector<double> >&);
+        vector<double> getStandardDeviation(vector< vector<double> >&, vector<double>&);
+        vector<double> getAverages(vector< vector<double> >&);
 
 		int control_pressed;
 		bool executing, runParse, jumble, gui, mothurCalling, debug;

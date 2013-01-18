@@ -24,7 +24,8 @@ RefChimeraTest::RefChimeraTest(vector<Sequence>& refs, bool aligned) : aligned(a
 	referenceSeqs.resize(numRefSeqs);
 	referenceNames.resize(numRefSeqs);
 	for(int i=0;i<numRefSeqs;i++){
-		referenceSeqs[i] = refs[i].getAligned();
+		if (aligned) { referenceSeqs[i] = refs[i].getAligned(); }
+        else { referenceSeqs[i] = refs[i].getUnaligned(); }
 		referenceNames[i] = refs[i].getName();
 	}
 	
