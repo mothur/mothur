@@ -588,7 +588,7 @@ int ScreenSeqsCommand::screenNameGroupFile(set<string> badSeqNames){
 		while(!inputNames.eof()){
 			if (m->control_pressed) { goodNameOut.close();  inputNames.close(); m->mothurRemove(goodNameFile);  return 0; }
 
-			inputNames >> seqName >> seqList;
+			inputNames >> seqName; m->gobble(inputNames); inputNames >> seqList;
 			it = badSeqNames.find(seqName);
 				
 			if(it != badSeqNames.end()){
@@ -636,7 +636,7 @@ int ScreenSeqsCommand::screenNameGroupFile(set<string> badSeqNames){
 			while(!inputGroups.eof()){
 				if (m->control_pressed) { goodGroupOut.close(); inputGroups.close(); m->mothurRemove(goodNameFile);  m->mothurRemove(goodGroupFile); return 0; }
 
-				inputGroups >> seqName >> group;
+				inputGroups >> seqName; m->gobble(inputGroups); inputGroups >> group;
 				
 				it = badSeqGroups.find(seqName);
 				
@@ -970,7 +970,7 @@ int ScreenSeqsCommand::screenGroupFile(set<string> badSeqNames){
 		while(!inputGroups.eof()){
 			if (m->control_pressed) { goodGroupOut.close(); inputGroups.close(); m->mothurRemove(goodGroupFile); return 0; }
 
-			inputGroups >> seqName >> group;
+			inputGroups >> seqName; m->gobble(inputGroups); inputGroups >> group;
 			it = badSeqNames.find(seqName);
 			
 			if(it != badSeqNames.end()){
@@ -1157,7 +1157,7 @@ int ScreenSeqsCommand::screenTaxonomy(set<string> badSeqNames){
 		while(!input.eof()){
 			if (m->control_pressed) { goodTaxOut.close(); input.close(); m->mothurRemove(goodTaxFile); return 0; }
 			
-			input >> seqName >> tax;
+			input >> seqName; m->gobble(input); input >> tax;
 			it = badSeqNames.find(seqName);
 			
 			if(it != badSeqNames.end()){ badSeqNames.erase(it); }

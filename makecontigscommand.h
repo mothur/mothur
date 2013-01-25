@@ -60,7 +60,7 @@ public:
     
 private:
     bool abort, allFiles, createGroup;
-    string outputDir, ffastqfile, rfastqfile, align, oligosfile, rfastafile, ffastafile, rqualfile, fqualfile, file;
+    string outputDir, ffastqfile, rfastqfile, align, oligosfile, rfastafile, ffastafile, rqualfile, fqualfile, file, format;
 	float match, misMatch, gapOpen, gapExtend;
 	int processors, longestBase, threshold, tdiffs, bdiffs, pdiffs, ldiffs, sdiffs;
     vector<string> outputNames;
@@ -70,11 +70,13 @@ private:
     vector<string>  linker;
     vector<string>  spacer;
 	vector<string> primerNameVector;	
-	vector<string> barcodeNameVector;	
+	vector<string> barcodeNameVector;
+	vector<char> convertTable;
     
 	map<string, int> groupCounts; 
     map<string, string> groupMap;
     
+    vector<int> convertQual(string);
     fastqRead readFastq(ifstream&, bool&);
     vector< vector< vector<string> > > preProcessData(unsigned long int&);
     vector< vector<string> > readFileNames(string);

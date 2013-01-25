@@ -20,6 +20,10 @@ Sequence::Sequence(string newName, string sequence) {
 		m = MothurOut::getInstance();
 		initialize();	
 		name = newName;
+        
+        for (int i = 0; i < name.length(); i++) {
+            if (name[i] == ':') { name[i] = '_'; m->changedSeqNames = true; }
+        }
 		
 		//setUnaligned removes any gap characters for us
 		setUnaligned(sequence);
@@ -36,6 +40,10 @@ Sequence::Sequence(string newName, string sequence, string justUnAligned) {
 		m = MothurOut::getInstance();
 		initialize();	
 		name = newName;
+        
+        for (int i = 0; i < name.length(); i++) {
+            if (name[i] == ':') { name[i] = '_'; m->changedSeqNames = true; }
+        }
 		
 		//setUnaligned removes any gap characters for us
 		setUnaligned(sequence);
@@ -53,11 +61,9 @@ Sequence::Sequence(istringstream& fastaString){
 		m = MothurOut::getInstance();
 	
 		initialize();
-		fastaString >> name;
+        name = getSequenceName(fastaString);
 		
-		if (name.length() != 0) { 
-		
-			name = name.substr(1);
+		if (!m->control_pressed) { 
 			string sequence;
 		
 			//read comments
@@ -84,8 +90,7 @@ Sequence::Sequence(istringstream& fastaString){
 			setUnaligned(sequence);	
 			
 			if ((numAmbig / (float) numBases) > 0.25) { m->mothurOut("[WARNING]: We found more than 25% of the bases in sequence " + name + " to be ambiguous. Mothur is not setup to process protein sequences."); m->mothurOutEndLine(); }
-		
-		}else{ m->mothurOut("Error in reading your fastafile, at position " + toString(fastaString.tellg()) + ". Blank name."); m->mothurOutEndLine(); }
+		}
 		
 	}
 	catch(exception& e) {
@@ -100,11 +105,9 @@ Sequence::Sequence(istringstream& fastaString, string JustUnaligned){
 		m = MothurOut::getInstance();
 	
 		initialize();
-		fastaString >> name;
+		name = getSequenceName(fastaString);
 		
-		if (name.length() != 0) { 
-		
-			name = name.substr(1);
+		if (!m->control_pressed) { 
 			string sequence;
 		
 			//read comments
@@ -131,7 +134,7 @@ Sequence::Sequence(istringstream& fastaString, string JustUnaligned){
 			
 			if ((numAmbig / (float) numBases) > 0.25) { m->mothurOut("[WARNING]: We found more than 25% of the bases in sequence " + name + " to be ambiguous. Mothur is not setup to process protein sequences."); m->mothurOutEndLine(); }
 			
-		}else{ m->mothurOut("Error in reading your fastafile, at position " + toString(fastaString.tellg()) + ". Blank name."); m->mothurOutEndLine(); }
+		}
 		
 	}
 	catch(exception& e) {
@@ -147,11 +150,9 @@ Sequence::Sequence(ifstream& fastaFile){
 	try {
 		m = MothurOut::getInstance();
 		initialize();
-		fastaFile >> name;
+		name = getSequenceName(fastaFile);
 		
-		if (name.length() != 0) { 
-		
-			name = name.substr(1); 
+		if (!m->control_pressed) { 
 			
 			string sequence;
 		
@@ -181,7 +182,7 @@ Sequence::Sequence(ifstream& fastaFile){
 			
 			if ((numAmbig / (float) numBases) > 0.25) { m->mothurOut("[WARNING]: We found more than 25% of the bases in sequence " + name + " to be ambiguous. Mothur is not setup to process protein sequences."); m->mothurOutEndLine(); }
 			
-		}else{ m->mothurOut("Error in reading your fastafile, at position " + toString(fastaFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); }
+		}
 
 	}
 	catch(exception& e) {
@@ -195,13 +196,11 @@ Sequence::Sequence(ifstream& fastaFile, string& extraInfo, bool getInfo){
 	try {
 		m = MothurOut::getInstance();
 		initialize();
-		fastaFile >> name;
         extraInfo = "";
 		
-		if (name.length() != 0) { 
-            
-			name = name.substr(1); 
-			
+		name = getSequenceName(fastaFile);
+		
+		if (!m->control_pressed) { 			
 			string sequence;
             
 			//read comments
@@ -233,8 +232,7 @@ Sequence::Sequence(ifstream& fastaFile, string& extraInfo, bool getInfo){
 			setUnaligned(sequence);	
 			
 			if ((numAmbig / (float) numBases) > 0.25) { m->mothurOut("[WARNING]: We found more than 25% of the bases in sequence " + name + " to be ambiguous. Mothur is not setup to process protein sequences."); m->mothurOutEndLine(); }
-			
-		}else{ m->mothurOut("Error in reading your fastafile, at position " + toString(fastaFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); }
+		}
         
 	}
 	catch(exception& e) {
@@ -248,10 +246,9 @@ Sequence::Sequence(ifstream& fastaFile, string JustUnaligned){
 	try {
 		m = MothurOut::getInstance();
 		initialize();
-		fastaFile >> name;
+		name = getSequenceName(fastaFile);
 		
-		if (name.length() != 0) { 
-			name = name.substr(1);
+		if (!m->control_pressed) { 
 			string sequence;
 			
 			//read comments
@@ -279,7 +276,7 @@ Sequence::Sequence(ifstream& fastaFile, string JustUnaligned){
 			
 			if ((numAmbig / (float) numBases) > 0.25) { m->mothurOut("[WARNING]: We found more than 25% of the bases in sequence " + name + " to be ambiguous. Mothur is not setup to process protein sequences."); m->mothurOutEndLine(); }
 			
-		}else{ m->mothurOut("Error in reading your fastafile, at position " + toString(fastaFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); }
+		}
 		
 	}
 	catch(exception& e) {
@@ -287,7 +284,54 @@ Sequence::Sequence(ifstream& fastaFile, string JustUnaligned){
 		exit(1);
 	}							
 }
-
+//********************************************************************************************************************
+string Sequence::getSequenceName(ifstream& fastaFile) {
+	try {
+		string name = "";
+		
+        fastaFile >> name;
+		
+		if (name.length() != 0) { 
+            
+			name = name.substr(1); 
+            
+            for (int i = 0; i < name.length(); i++) {
+                if (name[i] == ':') { name[i] = '_'; m->changedSeqNames = true; }
+            }
+            
+        }else{ m->mothurOut("Error in reading your fastafile, at position " + toString(fastaFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); m->control_pressed = true;  }
+        
+		return name;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "Sequence", "getSequenceName");
+		exit(1);
+	}
+}
+//********************************************************************************************************************
+string Sequence::getSequenceName(istringstream& fastaFile) {
+	try {
+		string name = "";
+		
+        fastaFile >> name;
+		
+		if (name.length() != 0) { 
+            
+			name = name.substr(1); 
+            
+            for (int i = 0; i < name.length(); i++) {
+                if (name[i] == ':') { name[i] = '_'; m->changedSeqNames = true; }
+            }
+            
+        }else{ m->mothurOut("Error in reading your fastafile, at position " + toString(fastaFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); m->control_pressed = true;  }
+        
+		return name;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "Sequence", "getSequenceName");
+		exit(1);
+	}
+}
 //********************************************************************************************************************
 string Sequence::getSequenceString(ifstream& fastaFile, int& numAmbig) {
 	try {

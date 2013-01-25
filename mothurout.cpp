@@ -1606,6 +1606,7 @@ int MothurOut::readTax(string namefile, map<string, string>& taxMap) {
                 else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
                 
                 if (pairDone) { 
+                    checkName(firstCol);
                     //are there confidence scores, if so remove them
                     if (secondCol.find_first_of('(') != -1) {  removeConfidences(secondCol);	}
                     map<string, string>::iterator itTax = taxMap.find(firstCol);
@@ -1633,6 +1634,7 @@ int MothurOut::readTax(string namefile, map<string, string>& taxMap) {
                 else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
                 
                 if (pairDone) { 
+                    checkName(firstCol);
                     //are there confidence scores, if so remove them
                     if (secondCol.find_first_of('(') != -1) {  removeConfidences(secondCol);	}
                     map<string, string>::iterator itTax = taxMap.find(firstCol);
@@ -1684,6 +1686,9 @@ int MothurOut::readNames(string namefile, map<string, string>& nameMap, bool red
                 else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
                 
                 if (pairDone) { 
+                    checkName(firstCol);
+                    checkName(secondCol);
+                    
                     //parse names into vector
                     vector<string> theseNames;
                     splitAtComma(secondCol, theseNames);
@@ -1702,10 +1707,13 @@ int MothurOut::readNames(string namefile, map<string, string>& nameMap, bool red
                 else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
                 
                 if (pairDone) { 
+                    checkName(firstCol);
+                    checkName(secondCol);
+                    
                     //parse names into vector
                     vector<string> theseNames;
                     splitAtComma(secondCol, theseNames);
-                    for (int i = 0; i < theseNames.size(); i++) {  nameMap[theseNames[i]] = firstCol;  }
+                    for (int i = 0; i < theseNames.size(); i++) {   nameMap[theseNames[i]] = firstCol;  }
                     pairDone = false; 
                 }
             }  
@@ -1743,6 +1751,8 @@ int MothurOut::readNames(string namefile, map<string, string>& nameMap, int flip
                 else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
                 
                 if (pairDone) { 
+                    checkName(firstCol);
+                    checkName(secondCol);
                     nameMap[secondCol] = firstCol;
                     pairDone = false; 
                 }
@@ -1758,6 +1768,8 @@ int MothurOut::readNames(string namefile, map<string, string>& nameMap, int flip
                 else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
                 
                 if (pairDone) { 
+                    checkName(firstCol);
+                    checkName(secondCol);
                     nameMap[secondCol] = firstCol;
                     pairDone = false; 
                 }
@@ -1797,6 +1809,8 @@ int MothurOut::readNames(string namefile, map<string, string>& nameMap, map<stri
                 else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
                 
                 if (pairDone) { 
+                    checkName(firstCol);
+                    checkName(secondCol);
                     //parse names into vector
                     vector<string> theseNames;
                     splitAtComma(secondCol, theseNames);
@@ -1816,6 +1830,8 @@ int MothurOut::readNames(string namefile, map<string, string>& nameMap, map<stri
                 else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
                 
                 if (pairDone) { 
+                    checkName(firstCol);
+                    checkName(secondCol);
                     //parse names into vector
                     vector<string> theseNames;
                     splitAtComma(secondCol, theseNames);
@@ -1857,7 +1873,10 @@ int MothurOut::readNames(string namefile, map<string, string>& nameMap) {
                 if (columnOne) {  firstCol = pieces[i]; columnOne=false; }
                 else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
                 
-                if (pairDone) { nameMap[firstCol] = secondCol; pairDone = false; }
+                if (pairDone) { 
+                    checkName(firstCol);
+                    checkName(secondCol);
+                    nameMap[firstCol] = secondCol; pairDone = false; }
             }
 		}
 		in.close();
@@ -1869,7 +1888,10 @@ int MothurOut::readNames(string namefile, map<string, string>& nameMap) {
                 if (columnOne) {  firstCol = pieces[i]; columnOne=false; }
                 else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
                 
-                if (pairDone) { nameMap[firstCol] = secondCol; pairDone = false; }
+                if (pairDone) { 
+                    checkName(firstCol);
+                    checkName(secondCol);
+                    nameMap[firstCol] = secondCol; pairDone = false; }
             }
         }
 		
@@ -1905,6 +1927,8 @@ int MothurOut::readNames(string namefile, map<string, vector<string> >& nameMap)
                 else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
                 
                 if (pairDone) { 
+                    checkName(firstCol);
+                    checkName(secondCol);
                     vector<string> temp;
                     splitAtComma(secondCol, temp);
                     nameMap[firstCol] = temp;
@@ -1922,6 +1946,8 @@ int MothurOut::readNames(string namefile, map<string, vector<string> >& nameMap)
                 else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
                 
                 if (pairDone) { 
+                    checkName(firstCol);
+                    checkName(secondCol);
                     vector<string> temp;
                     splitAtComma(secondCol, temp);
                     nameMap[firstCol] = temp;
@@ -1963,6 +1989,8 @@ map<string, int> MothurOut::readNames(string namefile) {
                 else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
                 
                 if (pairDone) { 
+                    checkName(firstCol);
+                    checkName(secondCol);
                     int num = getNumNames(secondCol);
                     nameMap[firstCol] = num;
                     pairDone = false;  
@@ -1978,6 +2006,8 @@ map<string, int> MothurOut::readNames(string namefile) {
                 else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
                 
                 if (pairDone) { 
+                    checkName(firstCol);
+                    checkName(secondCol);
                     int num = getNumNames(secondCol);
                     nameMap[firstCol] = num;
                     pairDone = false;  
@@ -1990,6 +2020,82 @@ map<string, int> MothurOut::readNames(string namefile) {
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "readNames");
+		exit(1);
+	}
+}
+/**********************************************************************************************************************/
+map<string, int> MothurOut::readNames(string namefile, unsigned long int& numSeqs) { 
+	try {
+		map<string, int> nameMap;
+        numSeqs = 0;
+		
+		//open input file
+		ifstream in;
+		openInputFile(namefile, in);
+		
+        string rest = "";
+        char buffer[4096];
+        bool pairDone = false;
+        bool columnOne = true;
+        string firstCol, secondCol;
+        
+		while (!in.eof()) {
+			if (control_pressed) { break; }
+			
+            in.read(buffer, 4096);
+            vector<string> pieces = splitWhiteSpace(rest, buffer, in.gcount());
+            
+            for (int i = 0; i < pieces.size(); i++) {
+                if (columnOne) {  firstCol = pieces[i]; columnOne=false; }
+                else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
+                
+                if (pairDone) { 
+                    checkName(firstCol);
+                    checkName(secondCol);
+                    int num = getNumNames(secondCol);
+                    nameMap[firstCol] = num;
+                    pairDone = false;  
+                    numSeqs += num;
+                } 
+            }
+		}
+        in.close();
+        
+        if (rest != "") {
+            vector<string> pieces = splitWhiteSpace(rest);
+            for (int i = 0; i < pieces.size(); i++) {
+                if (columnOne) {  firstCol = pieces[i]; columnOne=false; }
+                else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
+                
+                if (pairDone) { 
+                    checkName(firstCol);
+                    checkName(secondCol);
+                    int num = getNumNames(secondCol);
+                    nameMap[firstCol] = num;
+                    pairDone = false;  
+                    numSeqs += num;
+                } 
+            }
+        }
+		
+		return nameMap;
+		
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "readNames");
+		exit(1);
+	}
+}
+/************************************************************/
+int MothurOut::checkName(string& name) {
+    try {
+        for (int i = 0; i < name.length(); i++) {
+            if (name[i] == ':') { name[i] = '_'; changedSeqNames = true; }
+        }        
+        return 0;
+    }
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "checkName");
 		exit(1);
 	}
 }
@@ -2019,6 +2125,8 @@ int MothurOut::readNames(string namefile, vector<seqPriorityNode>& nameVector, m
                 else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
                 
                 if (pairDone) { 
+                    checkName(firstCol);
+                    checkName(secondCol);
                     int num = getNumNames(secondCol);
                     
                     map<string, string>::iterator it = fastamap.find(firstCol);
@@ -2044,6 +2152,8 @@ int MothurOut::readNames(string namefile, vector<seqPriorityNode>& nameVector, m
                 else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
                 
                 if (pairDone) { 
+                    checkName(firstCol);
+                    checkName(secondCol);
                     int num = getNumNames(secondCol);
                     
                     map<string, string>::iterator it = fastamap.find(firstCol);
@@ -2083,13 +2193,13 @@ set<string> MothurOut::readAccnos(string accnosfile){
             in.read(buffer, 4096);
             vector<string> pieces = splitWhiteSpace(rest, buffer, in.gcount());
             
-            for (int i = 0; i < pieces.size(); i++) {  names.insert(pieces[i]);  }
+            for (int i = 0; i < pieces.size(); i++) {  checkName(pieces[i]); names.insert(pieces[i]);  }
         }
 		in.close();	
 		
         if (rest != "") {
             vector<string> pieces = splitWhiteSpace(rest);
-            for (int i = 0; i < pieces.size(); i++) {  names.insert(pieces[i]);  } 
+            for (int i = 0; i < pieces.size(); i++) {  checkName(pieces[i]); names.insert(pieces[i]);  } 
         }
 		return names;
 	}
@@ -2115,13 +2225,13 @@ int MothurOut::readAccnos(string accnosfile, vector<string>& names){
             in.read(buffer, 4096);
             vector<string> pieces = splitWhiteSpace(rest, buffer, in.gcount());
             
-            for (int i = 0; i < pieces.size(); i++) {  names.push_back(pieces[i]);  }
+            for (int i = 0; i < pieces.size(); i++) {  checkName(pieces[i]); names.push_back(pieces[i]);  }
         }
 		in.close();	
         
         if (rest != "") {
             vector<string> pieces = splitWhiteSpace(rest);
-            for (int i = 0; i < pieces.size(); i++) {  names.push_back(pieces[i]);  }
+            for (int i = 0; i < pieces.size(); i++) {  checkName(pieces[i]); names.push_back(pieces[i]);  }
         }
 		
 		return 0;
@@ -2997,6 +3107,180 @@ vector<double> MothurOut::getStandardDeviation(vector< vector<double> >& dists, 
 		exit(1);
 	}
 }
+/**************************************************************************************************/
+vector< vector<seqDist> > MothurOut::getAverages(vector< vector< vector<seqDist> > >& calcDistsTotals, string mode) {
+	try{
+        
+        vector< vector<seqDist>  > calcAverages; //calcAverages.resize(calcDistsTotals[0].size()); 
+        for (int i = 0; i < calcDistsTotals[0].size(); i++) {  //initialize sums to zero.
+            //calcAverages[i].resize(calcDistsTotals[0][i].size());
+            vector<seqDist> temp;
+            for (int j = 0; j < calcDistsTotals[0][i].size(); j++) {
+                seqDist tempDist;
+                tempDist.seq1 = calcDistsTotals[0][i][j].seq1;
+                tempDist.seq2 = calcDistsTotals[0][i][j].seq2;
+                tempDist.dist = 0.0;
+                temp.push_back(tempDist);
+            }
+            calcAverages.push_back(temp);
+        }
+        
+        if (mode == "average") {
+            for (int thisIter = 0; thisIter < calcDistsTotals.size(); thisIter++) { //sum all groups dists for each calculator
+                for (int i = 0; i < calcAverages.size(); i++) {  //initialize sums to zero.
+                    for (int j = 0; j < calcAverages[i].size(); j++) {
+                        calcAverages[i][j].dist += calcDistsTotals[thisIter][i][j].dist;
+                    }
+                }
+            }
+            
+            for (int i = 0; i < calcAverages.size(); i++) {  //finds average.
+                for (int j = 0; j < calcAverages[i].size(); j++) {
+                    calcAverages[i][j].dist /= (float) calcDistsTotals.size();
+                }
+            }
+        }else { //find median
+            for (int i = 0; i < calcAverages.size(); i++) { //for each calc
+                for (int j = 0; j < calcAverages[i].size(); j++) {  //for each comparison
+                    vector<double> dists;
+                    for (int thisIter = 0; thisIter < calcDistsTotals.size(); thisIter++) { //for each subsample
+                        dists.push_back(calcDistsTotals[thisIter][i][j].dist);
+                    }
+                    sort(dists.begin(), dists.end());
+                    calcAverages[i][j].dist = dists[(calcDistsTotals.size()/2)];
+                }
+            }
+        }
+
+        return calcAverages;
+    }
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "getAverages");		
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+vector< vector<seqDist> > MothurOut::getAverages(vector< vector< vector<seqDist> > >& calcDistsTotals) {
+	try{
+        
+        vector< vector<seqDist>  > calcAverages; //calcAverages.resize(calcDistsTotals[0].size()); 
+        for (int i = 0; i < calcDistsTotals[0].size(); i++) {  //initialize sums to zero.
+            //calcAverages[i].resize(calcDistsTotals[0][i].size());
+            vector<seqDist> temp;
+            for (int j = 0; j < calcDistsTotals[0][i].size(); j++) {
+                seqDist tempDist;
+                tempDist.seq1 = calcDistsTotals[0][i][j].seq1;
+                tempDist.seq2 = calcDistsTotals[0][i][j].seq2;
+                tempDist.dist = 0.0;
+                temp.push_back(tempDist);
+            }
+            calcAverages.push_back(temp);
+        }
+        
+        
+        for (int thisIter = 0; thisIter < calcDistsTotals.size(); thisIter++) { //sum all groups dists for each calculator
+                for (int i = 0; i < calcAverages.size(); i++) {  //initialize sums to zero.
+                    for (int j = 0; j < calcAverages[i].size(); j++) {
+                        calcAverages[i][j].dist += calcDistsTotals[thisIter][i][j].dist;
+                    }
+                }
+        }
+            
+        for (int i = 0; i < calcAverages.size(); i++) {  //finds average.
+                for (int j = 0; j < calcAverages[i].size(); j++) {
+                    calcAverages[i][j].dist /= (float) calcDistsTotals.size();
+                }
+        }
+        
+        return calcAverages;
+    }
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "getAverages");		
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+vector< vector<seqDist> > MothurOut::getStandardDeviation(vector< vector< vector<seqDist> > >& calcDistsTotals) {
+	try{
+        
+        vector< vector<seqDist> > calcAverages = getAverages(calcDistsTotals);
+        
+        //find standard deviation
+        vector< vector<seqDist>  > stdDev;  
+        for (int i = 0; i < calcDistsTotals[0].size(); i++) {  //initialize sums to zero.
+            vector<seqDist> temp;
+            for (int j = 0; j < calcDistsTotals[0][i].size(); j++) {
+                seqDist tempDist;
+                tempDist.seq1 = calcDistsTotals[0][i][j].seq1;
+                tempDist.seq2 = calcDistsTotals[0][i][j].seq2;
+                tempDist.dist = 0.0;
+                temp.push_back(tempDist);
+            }
+            stdDev.push_back(temp);
+        }
+        
+        for (int thisIter = 0; thisIter < calcDistsTotals.size(); thisIter++) { //compute the difference of each dist from the mean, and square the result of each
+            for (int i = 0; i < stdDev.size(); i++) {  
+                for (int j = 0; j < stdDev[i].size(); j++) {
+                    stdDev[i][j].dist += ((calcDistsTotals[thisIter][i][j].dist - calcAverages[i][j].dist) * (calcDistsTotals[thisIter][i][j].dist - calcAverages[i][j].dist));
+                }
+            }
+        }
+        
+        for (int i = 0; i < stdDev.size(); i++) {  //finds average.
+            for (int j = 0; j < stdDev[i].size(); j++) {
+                stdDev[i][j].dist /= (float) calcDistsTotals.size();
+                stdDev[i][j].dist = sqrt(stdDev[i][j].dist);
+            }
+        }
+
+        return stdDev;
+    }
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "getAverages");		
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+vector< vector<seqDist> > MothurOut::getStandardDeviation(vector< vector< vector<seqDist> > >& calcDistsTotals, vector< vector<seqDist> >& calcAverages) {
+	try{
+        //find standard deviation
+        vector< vector<seqDist>  > stdDev;  
+        for (int i = 0; i < calcDistsTotals[0].size(); i++) {  //initialize sums to zero.
+            vector<seqDist> temp;
+            for (int j = 0; j < calcDistsTotals[0][i].size(); j++) {
+                seqDist tempDist;
+                tempDist.seq1 = calcDistsTotals[0][i][j].seq1;
+                tempDist.seq2 = calcDistsTotals[0][i][j].seq2;
+                tempDist.dist = 0.0;
+                temp.push_back(tempDist);
+            }
+            stdDev.push_back(temp);
+        }
+        
+        for (int thisIter = 0; thisIter < calcDistsTotals.size(); thisIter++) { //compute the difference of each dist from the mean, and square the result of each
+            for (int i = 0; i < stdDev.size(); i++) {  
+                for (int j = 0; j < stdDev[i].size(); j++) {
+                    stdDev[i][j].dist += ((calcDistsTotals[thisIter][i][j].dist - calcAverages[i][j].dist) * (calcDistsTotals[thisIter][i][j].dist - calcAverages[i][j].dist));
+                }
+            }
+        }
+        
+        for (int i = 0; i < stdDev.size(); i++) {  //finds average.
+            for (int j = 0; j < stdDev[i].size(); j++) {
+                stdDev[i][j].dist /= (float) calcDistsTotals.size();
+                stdDev[i][j].dist = sqrt(stdDev[i][j].dist);
+            }
+        }
+        
+        return stdDev;
+    }
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "getAverages");		
+		exit(1);
+	}
+}
+
 /**************************************************************************************************/
 bool MothurOut::isContainingOnlyDigits(string input) {
 	try{

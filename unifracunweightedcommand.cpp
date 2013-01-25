@@ -482,39 +482,10 @@ int UnifracUnweightedCommand::getAverageSTDMatrices(vector< vector<double> >& di
 	try {
         //we need to find the average distance and standard deviation for each groups distance
         //finds sum
-        vector<double> averages; //averages.resize(numComp, 0.0);
-        for (int i = 0; i < numComp; i++) { averages.push_back(0.0); }
-        
-        if (m->debug) { m->mothurOut("[DEBUG]: numcomparisons = " + toString(numComp) + ", subsampleIters = " + toString(subsampleIters) + "\n"); }
-        
-        for (int thisIter = 0; thisIter < subsampleIters; thisIter++) {
-            for (int i = 0; i < dists[thisIter].size(); i++) {  
-                averages[i] += dists[thisIter][i];
-            }
-        }
-        
-        if (m->debug) { m->mothurOut("[DEBUG]: numcomparisons = " + toString(numComp) + ", subsampleIters = " + toString(subsampleIters) + "\n"); }
-        
-        //finds average.
-        for (int i = 0; i < averages.size(); i++) {  
-            averages[i] /= (float) subsampleIters; 
-            if (m->debug) { m->mothurOut("[DEBUG]: i = " + toString(i) + ", averages[i] = " + toString(averages[i]) + "\n"); }
-        }
+        vector<double> averages = m->getAverages(dists);
         
         //find standard deviation
-        vector<double> stdDev; //stdDev.resize(numComp, 0.0);
-        for (int i = 0; i < numComp; i++) { stdDev.push_back(0.0); }
-        
-        for (int thisIter = 0; thisIter < subsampleIters; thisIter++) { //compute the difference of each dist from the mean, and square the result of each
-            for (int j = 0; j < dists[thisIter].size(); j++) {
-                stdDev[j] += ((dists[thisIter][j] - averages[j]) * (dists[thisIter][j] - averages[j]));
-            }
-        }
-        for (int i = 0; i < stdDev.size(); i++) {  
-            stdDev[i] /= (float) subsampleIters; 
-            stdDev[i] = sqrt(stdDev[i]);
-            if (m->debug) { m->mothurOut("[DEBUG]: i = " + toString(i) + ", stdDev[i] = " + toString(stdDev[i]) + "\n"); }
-        }
+        vector<double> stdDev = m->getStandardDeviation(dists, averages);
         
         //make matrix with scores in it
         vector< vector<double> > avedists;	//avedists.resize(m->getNumGroups());

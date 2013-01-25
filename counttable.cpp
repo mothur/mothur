@@ -131,6 +131,9 @@ int CountTable::createTable(string namefile, string groupfile, bool createGroup)
             string firstCol, secondCol;
             in >> firstCol; m->gobble(in); in >> secondCol; m->gobble(in);
             
+            m->checkName(firstCol);
+            m->checkName(secondCol);
+            
             vector<string> names;
             m->splitAtChar(secondCol, names, ',');
             

@@ -917,31 +917,7 @@ int TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
 		
         if (iters != 1) {
             //we need to find the average distance and standard deviation for each groups distance
-            
-            vector< vector<seqDist>  > calcAverages; calcAverages.resize(treeCalculators.size()); 
-            for (int i = 0; i < calcAverages.size(); i++) {  //initialize sums to zero.
-                calcAverages[i].resize(calcDistsTotals[0][i].size());
-                
-                for (int j = 0; j < calcAverages[i].size(); j++) {
-                    calcAverages[i][j].seq1 = calcDists[i][j].seq1;
-                    calcAverages[i][j].seq2 = calcDists[i][j].seq2;
-                    calcAverages[i][j].dist = 0.0;
-                }
-            }
-            
-            for (int thisIter = 0; thisIter < iters; thisIter++) { //sum all groups dists for each calculator
-                for (int i = 0; i < calcAverages.size(); i++) {  //initialize sums to zero.
-                    for (int j = 0; j < calcAverages[i].size(); j++) {
-                        calcAverages[i][j].dist += calcDistsTotals[thisIter][i][j].dist;
-                    }
-                }
-            }
-            
-            for (int i = 0; i < calcAverages.size(); i++) {  //finds average.
-                for (int j = 0; j < calcAverages[i].size(); j++) {
-                    calcAverages[i][j].dist /= (float) iters;
-                }
-            }
+            vector< vector<seqDist>  > calcAverages = m->getAverages(calcDistsTotals);  
             
             //create average tree for each calc
             for (int i = 0; i < calcDists.size(); i++) {

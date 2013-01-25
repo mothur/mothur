@@ -69,7 +69,7 @@ class MothurOut {
 		vector<string> binLabelsInFile;
 		vector<string> currentBinLabels;
 		string saveNextLabel, argv, sharedHeaderMode, groupMode;
-		bool printedHeaders, commandInputsConvertError;
+		bool printedHeaders, commandInputsConvertError, changedSeqNames;
 		
 		//functions from mothur.h
 		//file operations
@@ -102,6 +102,7 @@ class MothurOut {
         set<string> readAccnos(string);
         int readAccnos(string, vector<string>&);
         map<string, int> readNames(string);
+        map<string, int> readNames(string, unsigned long int&);
         int readTax(string, map<string, string>&);
         int readNames(string, map<string, string>&, map<string, int>&);
 		int readNames(string, map<string, string>&);
@@ -146,6 +147,7 @@ class MothurOut {
         string removeQuotes(string);
         string makeList(vector<string>&);
         bool isSubset(vector<string>, vector<string>); //bigSet, subset
+        int checkName(string&);
 		
 		//math operation
 		int factorial(int num);
@@ -158,6 +160,10 @@ class MothurOut {
         vector<double> getStandardDeviation(vector< vector<double> >&);
         vector<double> getStandardDeviation(vector< vector<double> >&, vector<double>&);
         vector<double> getAverages(vector< vector<double> >&);
+        vector< vector<seqDist> > getStandardDeviation(vector< vector< vector<seqDist> > >&);
+        vector< vector<seqDist> > getStandardDeviation(vector< vector< vector<seqDist> > >&, vector< vector<seqDist> >&);
+        vector< vector<seqDist> > getAverages(vector< vector< vector<seqDist> > >&, string);
+        vector< vector<seqDist> > getAverages(vector< vector< vector<seqDist> > >&);
 
 		int control_pressed;
 		bool executing, runParse, jumble, gui, mothurCalling, debug;
@@ -252,6 +258,7 @@ class MothurOut {
             debug = false;
 			sharedHeaderMode = "";
             groupMode = "group";
+            changedSeqNames = false;
 		}
 		~MothurOut();
 

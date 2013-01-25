@@ -809,58 +809,10 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
 
         if (iters != 0) {
             //we need to find the average distance and standard deviation for each groups distance
-            
-            vector< vector<seqDist>  > calcAverages; calcAverages.resize(sumCalculators.size()); 
-            for (int i = 0; i < calcAverages.size(); i++) {  //initialize sums to zero.
-                calcAverages[i].resize(calcDistsTotals[0][i].size());
-                
-                for (int j = 0; j < calcAverages[i].size(); j++) {
-                    calcAverages[i][j].seq1 = calcDists[i][j].seq1;
-                    calcAverages[i][j].seq2 = calcDists[i][j].seq2;
-                    calcAverages[i][j].dist = 0.0;
-                }
-            }
-            
-            for (int thisIter = 0; thisIter < iters; thisIter++) { //sum all groups dists for each calculator
-                for (int i = 0; i < calcAverages.size(); i++) {  //initialize sums to zero.
-                    for (int j = 0; j < calcAverages[i].size(); j++) {
-                        calcAverages[i][j].dist += calcDistsTotals[thisIter][i][j].dist;
-                    }
-                }
-            }
-            
-            for (int i = 0; i < calcAverages.size(); i++) {  //finds average.
-                for (int j = 0; j < calcAverages[i].size(); j++) {
-                    calcAverages[i][j].dist /= (float) iters;
-                }
-            }
+            vector< vector<seqDist>  > calcAverages = m->getAverages(calcDistsTotals);
             
             //find standard deviation
-            vector< vector<seqDist>  > stdDev; stdDev.resize(sumCalculators.size());
-            for (int i = 0; i < stdDev.size(); i++) {  //initialize sums to zero.
-                stdDev[i].resize(calcDistsTotals[0][i].size());
-                
-                for (int j = 0; j < stdDev[i].size(); j++) {
-                    stdDev[i][j].seq1 = calcDists[i][j].seq1;
-                    stdDev[i][j].seq2 = calcDists[i][j].seq2;
-                    stdDev[i][j].dist = 0.0;
-                }
-            }
-            
-            for (int thisIter = 0; thisIter < iters; thisIter++) { //compute the difference of each dist from the mean, and square the result of each
-                for (int i = 0; i < stdDev.size(); i++) {  
-                    for (int j = 0; j < stdDev[i].size(); j++) {
-                        stdDev[i][j].dist += ((calcDistsTotals[thisIter][i][j].dist - calcAverages[i][j].dist) * (calcDistsTotals[thisIter][i][j].dist - calcAverages[i][j].dist));
-                    }
-                }
-            }
-            
-            for (int i = 0; i < stdDev.size(); i++) {  //finds average.
-                for (int j = 0; j < stdDev[i].size(); j++) {
-                    stdDev[i][j].dist /= (float) iters;
-                    stdDev[i][j].dist = sqrt(stdDev[i][j].dist);
-                }
-            }
+            vector< vector<seqDist>  > stdDev = m->getStandardDeviation(calcDistsTotals, calcAverages); 
             
             //print results
             for (int i = 0; i < calcDists.size(); i++) {

@@ -30,89 +30,37 @@ QualityScores::QualityScores(ifstream& qFile){
 	try {
 		
 		m = MothurOut::getInstance();
-		
-		seqName = "";
-		int score;
-		
-		qFile >> seqName; 
-		m->getline(qFile);
-		//cout << seqName << endl;	
-		if (seqName == "")	{
-			m->mothurOut("Error reading quality file, name blank at position, " + toString(qFile.tellg()));
-			m->mothurOutEndLine(); 
-		}
-		else{
-			seqName = seqName.substr(1);
-		}
-		
-		string qScoreString = m->getline(qFile);
-		//cout << qScoreString << endl;
-		while(qFile.peek() != '>' && qFile.peek() != EOF){
-			if (m->control_pressed) { break; }
-			string temp = m->getline(qFile);
-			//cout << temp << endl;
-			qScoreString +=  ' ' + temp;
-		}
-		//cout << "done reading " << endl;	
-		istringstream qScoreStringStream(qScoreString);
-		int count = 0;
-		while(!qScoreStringStream.eof()){
-			if (m->control_pressed) { break; }
-			string temp;
-			qScoreStringStream >> temp;  m->gobble(qScoreStringStream);
-			
-			//check temp to make sure its a number
-			if (!m->isContainingOnlyDigits(temp)) { m->mothurOut("[ERROR]: In sequence " + seqName + "'s quality scores, expected a number and got " + temp + ", setting score to 0."); m->mothurOutEndLine(); temp = "0"; }
-			convert(temp, score);
-			
-			//cout << count << '\t' << score << endl;
-			qScores.push_back(score);
-			count++;
-		}
-		//qScores.pop_back();
-		
-//		string scores = "";
-//		
-//		while(!qFile.eof()){	
-//			
-//			qFile >> seqName; 
-//			
-//			//get name
-//			if (seqName.length() != 0) { 
-//				seqName = seqName.substr(1);
-//				while (!qFile.eof())	{	
-//					char c = qFile.get(); 
-//					//gobble junk on line
-//					if (c == 10 || c == 13){	break;	}
-//				} 
-//				m->gobble(qFile);
-//			}
-//			
-//			//get scores
-//			while(qFile){
-//				char letter=qFile.get();
-//				if((letter == '>')){	qFile.putback(letter);	break;	}
-//				else if (isprint(letter)) { scores += letter; }
-//			}
-//			m->gobble(qFile);
-//			
-//			break;
-//		}
-//		
-//		//convert scores string to qScores
-//		istringstream qScoreStringStream(scores);
-//		
-//		int score;
-//		while(!qScoreStringStream.eof()){
-//			
-//			if (m->control_pressed) { break; }
-//			
-//			qScoreStringStream >> score;
-//			qScores.push_back(score);
-//		}
-//		
-//		qScores.pop_back();
 
+		int score;
+		seqName = getSequenceName(qFile);
+		
+		if (!m->control_pressed) {
+            string qScoreString = m->getline(qFile);
+            //cout << qScoreString << endl;
+            while(qFile.peek() != '>' && qFile.peek() != EOF){
+                if (m->control_pressed) { break; }
+                string temp = m->getline(qFile);
+                //cout << temp << endl;
+                qScoreString +=  ' ' + temp;
+            }
+            //cout << "done reading " << endl;	
+            istringstream qScoreStringStream(qScoreString);
+            int count = 0;
+            while(!qScoreStringStream.eof()){
+                if (m->control_pressed) { break; }
+                string temp;
+                qScoreStringStream >> temp;  m->gobble(qScoreStringStream);
+                
+                //check temp to make sure its a number
+                if (!m->isContainingOnlyDigits(temp)) { m->mothurOut("[ERROR]: In sequence " + seqName + "'s quality scores, expected a number and got " + temp + ", setting score to 0."); m->mothurOutEndLine(); temp = "0"; }
+                convert(temp, score);
+                
+                //cout << count << '\t' << score << endl;
+                qScores.push_back(score);
+                count++;
+            }
+        }
+		
 		seqLength = qScores.size();
 		//cout << "seqlength = " << seqLength << '\t' << count << endl;
 		
@@ -123,7 +71,46 @@ QualityScores::QualityScores(ifstream& qFile){
 	}							
 	
 }
-
+//********************************************************************************************************************
+string QualityScores::getSequenceName(ifstream& qFile) {
+	try {
+		string name = "";
+		
+        qFile >> name;
+        m->getline(qFile);
+		
+		if (name.length() != 0) { 
+            
+			name = name.substr(1); 
+            
+            for (int i = 0; i < name.length(); i++) {
+                if (name[i] == ':') { name[i] = '_'; m->changedSeqNames = true; }
+            }
+            
+        }else{ m->mothurOut("Error in reading your qfile, at position " + toString(qFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); m->control_pressed = true;  }
+        
+		return name;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "QualityScores", "getSequenceName");
+		exit(1);
+	}
+}
+//********************************************************************************************************************
+void QualityScores::setName(string name) {
+	try {
+      
+        for (int i = 0; i < name.length(); i++) {
+            if (name[i] == ':') { name[i] = '_'; m->changedSeqNames = true; }
+        }     
+    
+        seqName = name;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "QualityScores", "setName");
+		exit(1);
+	}
+}
 /**************************************************************************************************/
 
 string QualityScores::getName(){

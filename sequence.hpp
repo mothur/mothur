@@ -69,6 +69,8 @@ private:
 	string getCommentString(ifstream&);
 	string getSequenceString(istringstream&, int&);
 	string getCommentString(istringstream&);
+    string getSequenceName(ifstream&);
+    string getSequenceName(istringstream&);
 	string name;
 	string unaligned;
 	string aligned;

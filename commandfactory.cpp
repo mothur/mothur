@@ -137,6 +137,7 @@
 #include "sffmultiplecommand.h"
 #include "classifysharedcommand.h"
 #include "filtersharedcommand.h"
+#include "primerdesigncommand.h"
 
 /*******************************************************/
 
@@ -297,6 +298,7 @@ CommandFactory::CommandFactory(){
 	commands["quit"]				= "MPIEnabled"; 
     commands["classify.shared"]		= "classify.shared"; 
     commands["filter.shared"]		= "filter.shared"; 
+    commands["primer.design"]		= "primer.design"; 
     
 
 }
@@ -513,6 +515,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         else if(commandName == "sff.multiple")          {	command = new SffMultipleCommand(optionString);             }
         else if(commandName == "classify.shared")       {	command = new ClassifySharedCommand(optionString);          }
         else if(commandName == "filter.shared")         {	command = new FilterSharedCommand(optionString);            }
+        else if(commandName == "primer.design")         {	command = new PrimerDesignCommand(optionString);            }
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -670,6 +673,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
         else if(commandName == "sff.multiple")          {	pipecommand = new SffMultipleCommand(optionString);             }
         else if(commandName == "classify.shared")       {	pipecommand = new ClassifySharedCommand(optionString);          }
         else if(commandName == "filter.shared")         {	pipecommand = new FilterSharedCommand(optionString);            }
+        else if(commandName == "primer.design")         {	pipecommand = new PrimerDesignCommand(optionString);            }
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -813,6 +817,7 @@ Command* CommandFactory::getCommand(string commandName){
         else if(commandName == "sff.multiple")          {	shellcommand = new SffMultipleCommand();            }
         else if(commandName == "classify.shared")       {	shellcommand = new ClassifySharedCommand();         }
         else if(commandName == "filter.shared")         {	shellcommand = new FilterSharedCommand();           }
+        else if(commandName == "primer.design")         {	shellcommand = new PrimerDesignCommand();           }
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;

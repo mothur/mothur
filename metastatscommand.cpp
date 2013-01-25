@@ -65,7 +65,7 @@ string MetaStatsCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
         
-        if (type == "metastats") {  pattern = "[filename],[distance],[groups],metastats"; } 
+        if (type == "metastats") {  pattern = "[filename],[distance],[group],metastats"; } 
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
         
         return pattern;

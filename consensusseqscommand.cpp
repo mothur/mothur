@@ -219,6 +219,8 @@ int ConsensusSeqsCommand::execute(){
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
+        int start = time(NULL);
+        
 		readFasta();
 		
 		if (m->control_pressed) { return 0; }
@@ -391,6 +393,8 @@ int ConsensusSeqsCommand::execute(){
 			delete input;
 		}
 		
+        m->mothurOut("It took " + toString(time(NULL) - start) + " secs to find the consensus sequences.");
+        
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}	

@@ -782,7 +782,7 @@ int ClassifySeqsCommand::execute(){
 			}
 #endif
 			
-			if (!m->isBlank(newaccnosFile)) { m->mothurOutEndLine(); m->mothurOut("[WARNING]: mothur suspects some of your sequences may be reversed, please check " + newaccnosFile + " for the list of the sequences."); m->mothurOutEndLine(); 
+			if (!m->isBlank(newaccnosFile)) { m->mothurOutEndLine(); m->mothurOut("[WARNING]: mothur reversed some your sequences for a better classification.  If you would like to take a closer look, please check " + newaccnosFile + " for the list of the sequences."); m->mothurOutEndLine(); 
                 outputNames.push_back(newaccnosFile); outputTypes["accnos"].push_back(newaccnosFile);
             }else { m->mothurRemove(newaccnosFile); }
 

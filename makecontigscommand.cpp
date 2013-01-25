@@ -33,6 +33,7 @@ vector<string> MakeContigsCommand::setParameters(){
 		CommandParameter pgapextend("gapextend", "Number", "", "-1.0", "", "", "","",false,false); parameters.push_back(pgapextend);
         CommandParameter pthreshold("threshold", "Number", "", "40", "", "", "","",false,false); parameters.push_back(pthreshold);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
+        CommandParameter pformat("format", "Multiple", "sanger-illumina-solexa", "sanger", "", "", "","",false,false,true); parameters.push_back(pformat);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
@@ -51,13 +52,14 @@ string MakeContigsCommand::getHelpString(){
 		string helpString = "";
 		helpString += "The make.contigs command reads a file, forward fastq file and a reverse fastq file or forward fasta and reverse fasta files and outputs new fasta.  It will also provide new quality files if the fastq or file parameter is used.\n";
         helpString += "If an oligos file is provided barcodes and primers will be trimmed, and a group file will be created.\n";
-		helpString += "The make.contigs command parameters are ffastq, rfastq, oligos, tdiffs, bdiffs, ldiffs, sdiffs, pdiffs, align, match, mismatch, gapopen, gapextend, allfiles and processors.\n";
+		helpString += "The make.contigs command parameters are ffastq, rfastq, oligos, format, tdiffs, bdiffs, ldiffs, sdiffs, pdiffs, align, match, mismatch, gapopen, gapextend, allfiles and processors.\n";
 		helpString += "The ffastq and rfastq, file, or ffasta and rfasta parameters are required.\n";
         helpString += "The file parameter is 2 column file containing the forward fastq files in the first column and their matching reverse fastq files in the second column.  Mothur will process each pair and create a combined fasta and qual file with all the sequences.\n";
         helpString += "The ffastq and rfastq parameters are used to provide a forward fastq and reverse fastq file to process.  If you provide one, you must provide the other.\n";
         helpString += "The ffasta and rfasta parameters are used to provide a forward fasta and reverse fasta file to process.  If you provide one, you must provide the other.\n";
         helpString += "The fqfile and rqfile parameters are used to provide a forward quality and reverse quality files to process with the ffasta and rfasta parameters.  If you provide one, you must provide the other.\n";
-		helpString += "The align parameter allows you to specify the alignment method to use.  Your options are: gotoh and needleman. The default is needleman.\n";
+		helpString += "The format parameter is used to indicate whether your sequences are sanger, solexa or illumina, default=sanger.\n";
+        helpString += "The align parameter allows you to specify the alignment method to use.  Your options are: gotoh and needleman. The default is needleman.\n";
         helpString += "The tdiffs parameter is used to specify the total number of differences allowed in the sequence. The default is pdiffs + bdiffs + sdiffs + ldiffs.\n";
 		helpString += "The bdiffs parameter is used to specify the number of differences allowed in the barcode. The default is 0.\n";
 		helpString += "The pdiffs parameter is used to specify the number of differences allowed in the primer. The default is 0.\n";
@@ -317,6 +319,19 @@ MakeContigsCommand::MakeContigsCommand(string option)  {
 			
 			align = validParameter.validFile(parameters, "align", false);		if (align == "not found"){	align = "needleman";	}
 			if ((align != "needleman") && (align != "gotoh")) { m->mothurOut(align + " is not a valid alignment method. Options are needleman or gotoh. I will use needleman."); m->mothurOutEndLine(); align = "needleman"; }
+            
+            format = validParameter.validFile(parameters, "format", false);		if (format == "not found"){	format = "sanger";	}
+            
+            if ((format != "sanger") && (format != "illumina") && (format != "solexa"))  { 
+				m->mothurOut(format + " is not a valid format. Your format choices are sanger, solexa and illumina, aborting." ); m->mothurOutEndLine();
+				abort=true;
+			}
+            
+            //fill convert table - goes from solexa to sanger. Used fq_all2std.pl as a reference.
+            for (int i = -64; i < 65; i++) { 
+                char temp = (char) ((int)(33 + 10*log(1+pow(10,(i/10.0)))/log(10)+0.499));
+                convertTable.push_back(temp);
+            }
         }
 		
 	}
@@ -1508,15 +1523,8 @@ fastqRead MakeContigsCommand::readFastq(ifstream& in, bool& ignore){
         if (name2 != "") { if (name != name2) { m->mothurOut("[WARNING]: names do not match. read " + name + " for fasta and " + name2 + " for quality, ignoring."); ignore=true; } }
         if (quality.length() != sequence.length()) { m->mothurOut("[WARNING]: Lengths do not match for sequence " + name + ". Read " + toString(sequence.length()) + " characters for fasta and " + toString(quality.length()) + " characters for quality scores, ignoring read."); ignore=true; }
         
-        vector<int> qualScores;
-		int controlChar = int('!');
-		for (int i = 0; i < quality.length(); i++) { 
-			int temp = int(quality[i]);
-			temp -= controlChar;
-			
-			qualScores.push_back(temp);
-		}
-    
+        vector<int> qualScores = convertQual(quality);
+        
         read.name = name;
         read.sequence = sequence;
         read.scores = qualScores;
@@ -1911,6 +1919,34 @@ string MakeContigsCommand::reverseOligo(string oligo){
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
+vector<int> MakeContigsCommand::convertQual(string qual) {
+	try {
+		vector<int> qualScores;
+		
+		for (int i = 0; i < qual.length(); i++) { 
+            
+            int temp = 0;
+            temp = int(qual[i]);
+            if (format == "illumina") {
+                temp -= 64; //char '@'
+            }else if (format == "solexa") {
+                temp = int(convertTable[temp]); //convert to sanger
+                temp -= int('!'); //char '!'
+            }else {
+                temp -= int('!'); //char '!'
+            }
+			qualScores.push_back(temp);
+		}
+		
+		return qualScores;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "MakeContigsCommand", "convertQual");
+		exit(1);
+	}
+}
+
 //**********************************************************************************************************************
 
 

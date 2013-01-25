@@ -39,6 +39,7 @@
 		A741FAD215D1688E0067BCC5 /* sequencecountparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A741FAD115D1688E0067BCC5 /* sequencecountparser.cpp */; };
 		A7496D2E167B531B00CC7D7C /* kruskalwalliscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7496D2C167B531B00CC7D7C /* kruskalwalliscommand.cpp */; };
 		A74A9A9F148E881E00AB5E3E /* spline.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74A9A9E148E881E00AB5E3E /* spline.cpp */; };
+		A74C06E916A9C0A9008390A3 /* primerdesigncommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74C06E816A9C0A8008390A3 /* primerdesigncommand.cpp */; };
 		A74D36B8137DAFAA00332B0C /* chimerauchimecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D36B7137DAFAA00332B0C /* chimerauchimecommand.cpp */; };
 		A74D59A4159A1E2000043046 /* counttable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D59A3159A1E2000043046 /* counttable.cpp */; };
 		A754149714840CF7005850D1 /* summaryqualcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A754149614840CF7005850D1 /* summaryqualcommand.cpp */; };
@@ -448,6 +449,8 @@
 		A7496D2D167B531B00CC7D7C /* kruskalwalliscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = kruskalwalliscommand.h; sourceTree = "<group>"; };
 		A74A9A9D148E881E00AB5E3E /* spline.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = spline.h; sourceTree = "<group>"; };
 		A74A9A9E148E881E00AB5E3E /* spline.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = spline.cpp; sourceTree = "<group>"; };
+		A74C06E616A9C097008390A3 /* primerdesigncommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = primerdesigncommand.h; sourceTree = "<group>"; };
+		A74C06E816A9C0A8008390A3 /* primerdesigncommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = primerdesigncommand.cpp; sourceTree = "<group>"; };
 		A74D36B6137DAFAA00332B0C /* chimerauchimecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimerauchimecommand.h; sourceTree = "<group>"; };
 		A74D36B7137DAFAA00332B0C /* chimerauchimecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimerauchimecommand.cpp; sourceTree = "<group>"; };
 		A74D59A3159A1E2000043046 /* counttable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = counttable.cpp; sourceTree = "<group>"; };
@@ -1455,6 +1458,8 @@
 				A7E9B79512D37EC400DA6239 /* pipelinepdscommand.cpp */,
 				A7E9B79812D37EC400DA6239 /* preclustercommand.h */,
 				A7E9B79712D37EC400DA6239 /* preclustercommand.cpp */,
+				A74C06E616A9C097008390A3 /* primerdesigncommand.h */,
+				A74C06E816A9C0A8008390A3 /* primerdesigncommand.cpp */,
 				A7E9B7A212D37EC400DA6239 /* quitcommand.h */,
 				A7E9B7A112D37EC400DA6239 /* quitcommand.cpp */,
 				A7E9B7AC12D37EC400DA6239 /* rarefactcommand.h */,
@@ -2310,6 +2315,7 @@
 				834D9D5C1656DEC800E7FAB9 /* regularizeddecisiontree.cpp in Sources */,
 				A7496D2E167B531B00CC7D7C /* kruskalwalliscommand.cpp in Sources */,
 				A79EEF8616971D4A0006DEC1 /* filtersharedcommand.cpp in Sources */,
+				A74C06E916A9C0A9008390A3 /* primerdesigncommand.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
