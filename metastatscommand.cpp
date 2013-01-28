@@ -431,6 +431,9 @@ int MetaStatsCommand::process(vector<SharedRAbundVector*>& thisLookUp){
                     
                     //Close all thread handles and free memory allocations.
                     for(int i=0; i < pDataArray.size(); i++){
+                        if (pDataArray[i]->count != (pDataArray[i]->num)) {
+                            m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->num) + " groups assigned to it, quitting. \n"); m->control_pressed = true; 
+                        }
                         for (int j = 0; j < pDataArray[i]->thisLookUp.size(); j++) {  delete pDataArray[i]->thisLookUp[j];  } 
                         for (int j = 0; j < pDataArray[i]->outputNames.size(); j++) {  
                             outputNames.push_back(pDataArray[i]->outputNames[j]);

@@ -464,6 +464,9 @@ int PreClusterCommand::createProcessesGroups(string newFName, string newNName, s
 		
 		//Close all thread handles and free memory allocations.
 		for(int i=0; i < pDataArray.size(); i++){
+            if (pDataArray[i]->count != (pDataArray[i]->end-pDataArray[i]->start)) {
+                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end-pDataArray[i]->start) + " groups assigned to it, quitting. \n"); m->control_pressed = true; 
+            }
 			for (int j = 0; j < pDataArray[i]->mapFileNames.size(); j++) {
 				outputNames.push_back(pDataArray[i]->mapFileNames[j]); outputTypes["map"].push_back(pDataArray[i]->mapFileNames[j]); 
 			}

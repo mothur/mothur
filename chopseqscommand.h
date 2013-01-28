@@ -60,7 +60,7 @@ struct chopData {
 	string outFasta, outAccnos, keep; 
 	unsigned long long start;
 	unsigned long long end;
-	int numbases;
+	int numbases, count;
     bool countGaps, Short, wroteAccnos;
 	MothurOut* m;
 	string namefile;
@@ -108,7 +108,7 @@ static DWORD WINAPI MyChopThreadFunction(LPVOID lpParam){
 
 		bool done = false;
         bool wroteAccnos = false;
-		int count = 0;
+		pDataArray->count = 0;
 
 		for(int i = 0; i < pDataArray->end; i++){ //end is the number of sequences to process
 						
@@ -238,14 +238,14 @@ static DWORD WINAPI MyChopThreadFunction(LPVOID lpParam){
 					outAcc << seq.getName() << endl;
 					pDataArray->wroteAccnos = true;
 				}
-                count++;
+                pDataArray->count++;
 			}
             //report progress
-			if((count) % 1000 == 0){	pDataArray->m->mothurOut(toString(count)); pDataArray->m->mothurOutEndLine();		}
+			if((pDataArray->count) % 1000 == 0){	pDataArray->m->mothurOut(toString(pDataArray->count)); pDataArray->m->mothurOutEndLine();		}
 			
 		}
 		//report progress
-		if((count) % 1000 != 0){	pDataArray->m->mothurOut(toString(count)); pDataArray->m->mothurOutEndLine();		}
+		if((pDataArray->count) % 1000 != 0){	pDataArray->m->mothurOut(toString(pDataArray->count)); pDataArray->m->mothurOutEndLine();		}
         
 		
 		in.close();

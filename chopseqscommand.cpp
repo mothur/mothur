@@ -331,6 +331,10 @@ bool ChopSeqsCommand::createProcesses(vector<linePair> lines, string filename, s
 		for(int i=0; i < pDataArray.size(); i++){
             if (pDataArray[i]->wroteAccnos) { wroteAccnos = pDataArray[i]->wroteAccnos; nonBlankAccnosFiles.push_back(outAccnos + toString(processIDS[i]) + ".temp");  }
 			else { m->mothurRemove((outAccnos + toString(processIDS[i]) + ".temp"));  }
+            //check to make sure the process finished
+            if (pDataArray[i]->count != pDataArray[i]->end) {
+                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end) + " sequences assigned to it, quitting. \n"); m->control_pressed = true; 
+            }
 			CloseHandle(hThreadArray[i]);
 			delete pDataArray[i];
 		}

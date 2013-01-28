@@ -889,7 +889,9 @@ vector<Sequence> PrimerDesignCommand::createProcessesConSeqs(map<string, int>& n
         
         
 #else
-		counts = driverGetCounts(nameMap, fastaCount, otuCounts, 0, 1000);	
+        unsigned long long start = 0;
+        unsigned long long end = 1000;
+		counts = driverGetCounts(nameMap, fastaCount, otuCounts, start, end);	
 #endif		
         
         //you will have a nameMap error if there is a namefile or countfile, but if those aren't given we want to make sure the fasta and list file match.

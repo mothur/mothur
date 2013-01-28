@@ -132,9 +132,9 @@ static DWORD WINAPI MyPcrThreadFunction(LPVOID lpParam){
 		}
         
         set<int> lengths;
-		pDataArray->count = pDataArray->fend;
+		
 		for(int i = 0; i < pDataArray->fend; i++){ //end is the number of sequences to process
-            
+            pDataArray->count++;
 			if (pDataArray->m->control_pressed) {  break; }
 			
 			Sequence currSeq(inFASTA); pDataArray->m->gobble(inFASTA);

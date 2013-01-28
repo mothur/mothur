@@ -111,7 +111,7 @@ struct preClusterData {
 	string newFName, newNName, newMName;
 	MothurOut* m;
 	int start;
-	int end;
+	int end, count;
 	int diffs, threadID;
 	vector<string> groups;
 	vector<string> mapFileNames;
@@ -133,6 +133,7 @@ struct preClusterData {
 		groups = gr;
         countfile = c;
         topdown = td;
+        count=0;
 	}
 };
 
@@ -164,6 +165,8 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
 		//precluster each group
 		for (int k = pDataArray->start; k < pDataArray->end; k++) {
 			
+            pDataArray->count++;
+            
 			int start = time(NULL);
 			
 			if (pDataArray->m->control_pressed) {  delete parser; return 0; }

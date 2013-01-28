@@ -546,12 +546,13 @@ static DWORD WINAPI MyUchimeSeqsThreadFunction(LPVOID lpParam){
         ofstream out23;
         pDataArray->m->openOutputFile(outputFileName, out23);
         
+        int fcount = 0;
         while (!in23.eof()) {
             if (pDataArray->m->control_pressed) { break;  }
             
             Sequence seq(in23); pDataArray->m->gobble(in23);
             
-            if (seq.getName() != "") { seq.printSequence(out23); }
+            if (seq.getName() != "") { seq.printSequence(out23); fcount++; }
         }
         in23.close();
         out23.close();
@@ -821,12 +822,15 @@ static DWORD WINAPI MyUchimeSeqsThreadFunction(LPVOID lpParam){
 		in.close();
 		out.close();
 		
+        if (fcount != totalSeqs) { pDataArray->m->mothurOut("[ERROR]: process " + toString(pDataArray->threadID) + " only processed " + toString(pDataArray->count) + " of " + toString(pDataArray->end) + " sequences assigned to it, quitting. \n"); pDataArray->m->control_pressed = true; }
+        
 		if (pDataArray->m->control_pressed) { return 0; }
 		
 		pDataArray->m->mothurOutEndLine(); pDataArray->m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(totalSeqs) + " sequences.");	pDataArray->m->mothurOutEndLine();					
 	
 		pDataArray->count = totalSeqs;
 		pDataArray->numChimeras = numChimeras;
+        
 		return totalSeqs;
 		
 	}

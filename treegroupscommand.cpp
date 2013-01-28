@@ -890,6 +890,9 @@ int TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
                 
                 //Close all thread handles and free memory allocations.
                 for(int i=0; i < pDataArray.size(); i++){
+                    if (pDataArray[i]->count != (pDataArray[i]->end-pDataArray[i]->start)) {
+                        m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end-pDataArray[i]->start) + " groups assigned to it, quitting. \n"); m->control_pressed = true; 
+                    }
                     for (int j = 0; j < pDataArray[i]->thisLookup.size(); j++) {  delete pDataArray[i]->thisLookup[j];  } 
                     
                     for (int k = 0; k < calcDists.size(); k++) {

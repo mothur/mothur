@@ -109,7 +109,7 @@ struct contigsData {
 	MothurOut* m;
 	float match, misMatch, gapOpen, gapExtend;
 	int count, threshold, threadID, pdiffs, bdiffs, tdiffs;
-    bool allFiles, createGroup;
+    bool allFiles, createGroup, done;
     map<string, int> groupCounts; 
     map<string, string> groupMap;
     vector<string> primerNameVector;	
@@ -145,6 +145,7 @@ struct contigsData {
         allFiles = all;
         createGroup = cg;
 		threadID = tid;
+        done=false;
 	}
 };
 
@@ -161,7 +162,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
         if(pDataArray->align == "gotoh")			{	alignment = new GotohOverlap(pDataArray->gapOpen, pDataArray->gapExtend, pDataArray->match, pDataArray->misMatch, longestBase);			}
 		else if(pDataArray->align == "needleman")	{	alignment = new NeedlemanOverlap(pDataArray->gapOpen, pDataArray->match, pDataArray->misMatch, longestBase);				}
         
-        int num = 0;
+        pDataArray->count = 0;
         string thisffastafile = pDataArray->files[0];
         string thisfqualfile = pDataArray->files[1];
         string thisrfastafile = pDataArray->files[2];
@@ -396,14 +397,14 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                     outScrapQual << endl;
                 }
             }
-            num++;
+            pDataArray->count++;
             
 			//report progress
-			if((num) % 1000 == 0){	pDataArray->m->mothurOut(toString(num)); pDataArray->m->mothurOutEndLine();		}
+			if((pDataArray->count) % 1000 == 0){	pDataArray->m->mothurOut(toString(pDataArray->count)); pDataArray->m->mothurOutEndLine();		}
 		}
         
 		//report progress
-		if((num) % 1000 != 0){	pDataArray->m->mothurOut(toString(num)); pDataArray->m->mothurOutEndLine();		}
+		if((pDataArray->count) % 1000 != 0){	pDataArray->m->mothurOut(toString(pDataArray->count)); pDataArray->m->mothurOutEndLine();		}
         
         inFFasta.close();
         inRFasta.close();
@@ -418,6 +419,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
         }
         delete alignment;
         
+        pDataArray->done = true;
         if (pDataArray->m->control_pressed) {  pDataArray->m->mothurRemove(pDataArray->outputFasta);  pDataArray->m->mothurRemove(pDataArray->outputMisMatches);  pDataArray->m->mothurRemove(pDataArray->outputScrapFasta);  if (thisfqualfile != "") { pDataArray->m->mothurRemove(pDataArray->outputQual); pDataArray->m->mothurRemove(pDataArray->outputScrapQual); } }
         
         return 0;

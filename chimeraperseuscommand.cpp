@@ -1076,6 +1076,9 @@ int ChimeraPerseusCommand::createProcessesGroups(string outputFName, string accn
 			
 		//Close all thread handles and free memory allocations.
 		for(int i=0; i < pDataArray.size(); i++){
+            if (pDataArray[i]->count != pDataArray[i]->end) {
+                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end) + " sequences assigned to it, quitting. \n"); m->control_pressed = true; 
+            }
 			num += pDataArray[i]->count;
 			CloseHandle(hThreadArray[i]);
 			delete pDataArray[i];

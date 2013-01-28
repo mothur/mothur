@@ -153,7 +153,7 @@ static DWORD WINAPI MyCreateFilterThreadFunction(LPVOID lpParam){
 			in.seekg(pDataArray->start-1); pDataArray->m->gobble(in); 
 		}
 		
-		pDataArray->count = pDataArray->end;
+		pDataArray->count = 0;
 		for(int i = 0; i < pDataArray->end; i++){ //end is the number of sequences to process
 			
 			if (pDataArray->m->control_pressed) { in.close(); pDataArray->count = 1; return 1; }
@@ -166,7 +166,7 @@ static DWORD WINAPI MyCreateFilterThreadFunction(LPVOID lpParam){
                 if(pDataArray->trump != '*')			{	pDataArray->F.doTrump(current);		}
                 if(pDataArray->m->isTrue(pDataArray->vertical) || pDataArray->soft != 0)	{	pDataArray->F.getFreqs(current);	}
 			}
-            
+            pDataArray->count++;
             //report progress
 			if((i) % 100 == 0){	pDataArray->m->mothurOut(toString(i)); pDataArray->m->mothurOutEndLine();		}
 		}
@@ -203,7 +203,7 @@ static DWORD WINAPI MyRunFilterThreadFunction(LPVOID lpParam){
 			in.seekg(pDataArray->start-1); pDataArray->m->gobble(in); 
 		}
 		
-		pDataArray->count = pDataArray->end;
+		pDataArray->count = 0;
 		for(int i = 0; i < pDataArray->end; i++){ //end is the number of sequences to process
 			
 			if (pDataArray->m->control_pressed) { in.close(); out.close(); pDataArray->count = 1; return 1; }
@@ -221,7 +221,7 @@ static DWORD WINAPI MyRunFilterThreadFunction(LPVOID lpParam){
                 
                 out << '>' << seq.getName() << endl << filterSeq << endl;
             }
-            
+            pDataArray->count++;
             //report progress
 			if((i) % 100 == 0){	pDataArray->m->mothurOut(toString(i)); pDataArray->m->mothurOutEndLine();		}
 		}
