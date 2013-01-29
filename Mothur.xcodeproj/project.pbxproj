@@ -17,6 +17,7 @@
 		A70056E6156A93D000924A2D /* getotulabelscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A70056E5156A93D000924A2D /* getotulabelscommand.cpp */; };
 		A70056EB156AB6E500924A2D /* removeotulabelscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A70056EA156AB6E500924A2D /* removeotulabelscommand.cpp */; };
 		A70332B712D3A13400761E33 /* makefile in Sources */ = {isa = PBXBuildFile; fileRef = A70332B512D3A13400761E33 /* makefile */; };
+		A7128B1D16B7002A00723BE4 /* getdistscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7128B1C16B7002600723BE4 /* getdistscommand.cpp */; };
 		A713EBAC12DC7613000092AC /* readphylipvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A713EBAB12DC7613000092AC /* readphylipvector.cpp */; };
 		A713EBED12DC7C5E000092AC /* nmdscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A713EBEC12DC7C5E000092AC /* nmdscommand.cpp */; };
 		A71CB160130B04A2001E7287 /* anosimcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A71CB15E130B04A2001E7287 /* anosimcommand.cpp */; };
@@ -64,6 +65,7 @@
 		A7A32DAA14DC43B00001D2E5 /* sortseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7A32DA914DC43B00001D2E5 /* sortseqscommand.cpp */; };
 		A7A3C8C914D041AD00B1BFBE /* otuassociationcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7A3C8C714D041AD00B1BFBE /* otuassociationcommand.cpp */; };
 		A7A61F2D130062E000E05B6B /* amovacommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7A61F2C130062E000E05B6B /* amovacommand.cpp */; };
+		A7B0231516B8244C006BA09E /* removedistscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7B0231416B8244B006BA09E /* removedistscommand.cpp */; };
 		A7BF221414587886000AD524 /* myPerseus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7BF221214587886000AD524 /* myPerseus.cpp */; };
 		A7BF2232145879B2000AD524 /* chimeraperseuscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7BF2231145879B2000AD524 /* chimeraperseuscommand.cpp */; };
 		A7C3DC0B14FE457500FE1924 /* cooccurrencecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7C3DC0914FE457500FE1924 /* cooccurrencecommand.cpp */; };
@@ -402,6 +404,8 @@
 		A70056E9156AB6D400924A2D /* removeotulabelscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = removeotulabelscommand.h; sourceTree = "<group>"; };
 		A70056EA156AB6E500924A2D /* removeotulabelscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = removeotulabelscommand.cpp; sourceTree = "<group>"; };
 		A70332B512D3A13400761E33 /* makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = makefile; sourceTree = "<group>"; };
+		A7128B1A16B7001200723BE4 /* getdistscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getdistscommand.h; sourceTree = "<group>"; };
+		A7128B1C16B7002600723BE4 /* getdistscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getdistscommand.cpp; sourceTree = "<group>"; };
 		A713EBAA12DC7613000092AC /* readphylipvector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readphylipvector.h; sourceTree = "<group>"; };
 		A713EBAB12DC7613000092AC /* readphylipvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readphylipvector.cpp; sourceTree = "<group>"; };
 		A713EBEB12DC7C5E000092AC /* nmdscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nmdscommand.h; sourceTree = "<group>"; };
@@ -499,6 +503,8 @@
 		A7A61F2B130062E000E05B6B /* amovacommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = amovacommand.h; sourceTree = "<group>"; };
 		A7A61F2C130062E000E05B6B /* amovacommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = amovacommand.cpp; sourceTree = "<group>"; };
 		A7AACFBA132FE008003D6C4D /* currentfile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = currentfile.h; sourceTree = "<group>"; };
+		A7B0231416B8244B006BA09E /* removedistscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = removedistscommand.cpp; sourceTree = "<group>"; };
+		A7B0231716B8245D006BA09E /* removedistscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = removedistscommand.h; sourceTree = "<group>"; };
 		A7BF221214587886000AD524 /* myPerseus.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = myPerseus.cpp; sourceTree = "<group>"; };
 		A7BF221314587886000AD524 /* myPerseus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = myPerseus.h; sourceTree = "<group>"; };
 		A7BF2230145879B2000AD524 /* chimeraperseuscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimeraperseuscommand.h; sourceTree = "<group>"; };
@@ -1358,6 +1364,8 @@
 				219C1DE31559BCCD004209F9 /* getcoremicrobiomecommand.cpp */,
 				A7FE7C3E1330EA1000F7B327 /* getcurrentcommand.h */,
 				A7FE7C3F1330EA1000F7B327 /* getcurrentcommand.cpp */,
+				A7128B1A16B7001200723BE4 /* getdistscommand.h */,
+				A7128B1C16B7002600723BE4 /* getdistscommand.cpp */,
 				A7E9B6F312D37EC400DA6239 /* getgroupcommand.h */,
 				A7E9B6F212D37EC400DA6239 /* getgroupcommand.cpp */,
 				A7E9B6F512D37EC400DA6239 /* getgroupscommand.h */,
@@ -1466,6 +1474,8 @@
 				A7E9B7AB12D37EC400DA6239 /* rarefactcommand.cpp */,
 				A7E9B7AF12D37EC400DA6239 /* rarefactsharedcommand.h */,
 				A7E9B7AE12D37EC400DA6239 /* rarefactsharedcommand.cpp */,
+				A7B0231716B8245D006BA09E /* removedistscommand.h */,
+				A7B0231416B8244B006BA09E /* removedistscommand.cpp */,
 				A7E9B7C412D37EC400DA6239 /* removegroupscommand.h */,
 				A7E9B7C312D37EC400DA6239 /* removegroupscommand.cpp */,
 				A7E9B7C612D37EC400DA6239 /* removelineagecommand.h */,
@@ -2316,6 +2326,8 @@
 				A7496D2E167B531B00CC7D7C /* kruskalwalliscommand.cpp in Sources */,
 				A79EEF8616971D4A0006DEC1 /* filtersharedcommand.cpp in Sources */,
 				A74C06E916A9C0A9008390A3 /* primerdesigncommand.cpp in Sources */,
+				A7128B1D16B7002A00723BE4 /* getdistscommand.cpp in Sources */,
+				A7B0231516B8244C006BA09E /* removedistscommand.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -11,6 +11,9 @@
 //
 
 #include "command.hpp"
+#include "inputdata.h"
+#include "listvector.hpp"
+#include "sharedrabundvector.h"
 
 /**************************************************************************************************/
 
@@ -34,13 +37,19 @@ public:
     
 private:
     bool abort;
-    string outputDir, accnosfile, constaxonomyfile, otucorrfile, corraxesfile;
+    string outputDir, accnosfile, constaxonomyfile, otucorrfile, corraxesfile, listfile, sharedfile, label;
     vector<string> outputNames;
     set<string> labels;
+    ListVector* list;
+    vector<SharedRAbundVector*> lookup;
     
     int readClassifyOtu();
     int readOtuAssociation();
     int readCorrAxes();
+    int readList();
+    int readShared();
+    int getListVector();
+    int getShared();
 };
 
 /**************************************************************************************************/

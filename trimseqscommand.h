@@ -399,7 +399,7 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
                     string thisGroup = "";
                     if (pDataArray->createGroup) {
 						if(pDataArray->barcodes.size() != 0){
-							string thisGroup = pDataArray->barcodeNameVector[barcodeIndex];
+							thisGroup = pDataArray->barcodeNameVector[barcodeIndex];
 							if (pDataArray->primers.size() != 0) { 
 								if (pDataArray->primerNameVector[primerIndex] != "") { 
 									if(thisGroup != "") {

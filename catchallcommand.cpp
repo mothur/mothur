@@ -80,6 +80,7 @@ CatchAllCommand::CatchAllCommand(){
         outputTypes["models"] = tempOutNames;
 		outputTypes["bubble"] = tempOutNames;
 		outputTypes["summary"] = tempOutNames;
+        outputTypes["sabund"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "CatchAllCommand", "CatchAllCommand");
@@ -118,6 +119,7 @@ CatchAllCommand::CatchAllCommand(string option)  {
             outputTypes["models"] = tempOutNames;
             outputTypes["bubble"] = tempOutNames;
             outputTypes["summary"] = tempOutNames;
+            outputTypes["sabund"] = tempOutNames;
 
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
@@ -237,7 +239,7 @@ int CatchAllCommand::execute() {
         catchAllTest = m->getFullPathName(catchAllTest);
         
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-        catchAllCommandExe += "mono " + catchAllTest + " ";
+        catchAllCommandExe += "mono \"" + catchAllTest + "\" ";
 #else
         catchAllCommandExe += "\"" + catchAllTest + "\" ";
 #endif
@@ -291,7 +293,7 @@ int CatchAllCommand::execute() {
 						//create system command
 						string catchAllCommand = "";
 						#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-							catchAllCommand += catchAllCommandExe + filename + " " + outputPath + " 1";
+							catchAllCommand += catchAllCommandExe + "\"" + filename + "\" \""  + outputPath + + "\" 1";
 						#else
                             //removes extra '\\' catchall doesnt like that
                             vector<string> tempNames;
@@ -354,7 +356,7 @@ int CatchAllCommand::execute() {
 						//create system command
 						string catchAllCommand = "";
 						#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-							catchAllCommand += catchAllCommandExe + filename + " " + outputPath + " 1";
+                            catchAllCommand += catchAllCommandExe + "\"" + filename + "\" \""  + outputPath + + "\" 1";
 						#else
                             //removes extra '\\' catchall doesnt like that
                             vector<string> tempNames;
@@ -439,7 +441,7 @@ int CatchAllCommand::execute() {
 				//create system command
 				string catchAllCommand = "";
 				#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-					catchAllCommand += catchAllCommandExe + filename + " " + outputPath + " 1";
+                    catchAllCommand += catchAllCommandExe + "\"" + filename + "\" \""  + outputPath + + "\" 1";
 				#else
                     //removes extra '\\' catchall doesnt like that
                     vector<string> tempNames;
