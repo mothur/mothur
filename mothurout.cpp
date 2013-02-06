@@ -1430,6 +1430,83 @@ vector<unsigned long long> MothurOut::divideFile(string filename, int& proc) {
 	}
 }
 /**************************************************************************************************/
+
+vector<unsigned long long> MothurOut::divideFilePerLine(string filename, int& proc) {
+	try{
+		vector<unsigned long long> filePos;
+		filePos.push_back(0);
+		
+		FILE * pFile;
+		unsigned long long size;
+		
+		filename = getFullPathName(filename);
+        
+		//get num bytes in file
+		pFile = fopen (filename.c_str(),"rb");
+		if (pFile==NULL) perror ("Error opening file");
+		else{
+			fseek (pFile, 0, SEEK_END);
+			size=ftell (pFile);
+			fclose (pFile);
+		}
+		
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+        
+		//estimate file breaks
+		unsigned long long chunkSize = 0;
+		chunkSize = size / proc;
+        
+		//file to small to divide by processors
+		if (chunkSize == 0)  {  proc = 1;	filePos.push_back(size); return filePos;	}
+        
+		//for each process seekg to closest file break and search for next '>' char. make that the filebreak
+		for (int i = 0; i < proc; i++) {
+			unsigned long long spot = (i+1) * chunkSize;
+			
+			ifstream in;
+			openInputFile(filename, in);
+			in.seekg(spot);
+			
+			//look for next line break
+			unsigned long long newSpot = spot;
+			while (!in.eof()) {
+                char c = in.get();
+				
+				if ((c == '\n') || (c == '\r') || (c == '\f'))	{ gobble(in); newSpot = in.tellg(); break; }
+                else if (int(c) == -1) { break; }
+            }
+            
+			//there was not another line before the end of the file
+			unsigned long long sanityPos = in.tellg();
+            
+			if (sanityPos == -1) {	break;  }
+			else {  filePos.push_back(newSpot);  }
+			
+			in.close();
+		}
+		
+		//save end pos
+		filePos.push_back(size);
+		
+		//sanity check filePos
+		for (int i = 0; i < (filePos.size()-1); i++) {
+			if (filePos[(i+1)] <= filePos[i]) {  filePos.erase(filePos.begin()+(i+1)); i--; }
+		}
+        
+		proc = (filePos.size() - 1);
+#else
+		mothurOut("[ERROR]: Windows version should not be calling the divideFile function."); mothurOutEndLine();
+		proc=1;
+		filePos.push_back(size);
+#endif
+		return filePos;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "divideFile");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
 int MothurOut::divideFile(string filename, int& proc, vector<string>& files) {
 	try{
 		
@@ -2643,7 +2720,7 @@ void MothurOut::splitAtDash(string& estim, vector<string>& container) {
 		string individual = "";
 		int estimLength = estim.size();
 		bool prevEscape = false;
-		for(int i=0;i<estimLength;i++){
+		/*for(int i=0;i<estimLength;i++){
 			if(prevEscape){
 				individual += estim[i];
 				prevEscape = false;
@@ -2662,7 +2739,28 @@ void MothurOut::splitAtDash(string& estim, vector<string>& container) {
 					prevEscape = false;
 				}
 			}
-		}
+		}*/
+        
+        
+        for(int i=0;i<estimLength;i++){
+            if(estim[i] == '-'){
+                if (prevEscape) {  individual += estim[i]; prevEscape = false;  } //add in dash because it was escaped.
+                else {
+                    container.push_back(individual);
+                    individual = "";
+                }
+            }else if(estim[i] == '\\'){
+                if (i < estimLength-1) { 
+                    if (estim[i+1] == '-') { prevEscape=true; }  //are you a backslash before a dash, if yes ignore
+                    else { individual += estim[i]; prevEscape = false;  } //if no, add in
+                }else { individual += estim[i]; }
+            }else {
+                individual += estim[i];
+            }
+        }
+        
+
+        
 		container.push_back(individual);
  	}
 	catch(exception& e) {
@@ -2743,6 +2841,7 @@ void MothurOut::splitAtDash(string& estim, set<int>& container) {
 		exit(1);
 	}	
 }
+
 /***********************************************************************/
 string MothurOut::makeList(vector<string>& names) {
 	try {
@@ -2810,11 +2909,11 @@ void MothurOut::splitAtChar(string& prefix, string& suffix, char c){
 			string space = " ";
 			while(suffix.at(0) == ' ')
 				suffix = suffix.substr(1, suffix.length());
-		}
+		}else {  suffix = "";  }
         
-	}
+    }
 	catch(exception& e) {
-		errorOut(e, "MothurOut", "splitAtComma");
+		errorOut(e, "MothurOut", "splitAtChar");
 		exit(1);
 	}	
 }
@@ -2830,7 +2929,7 @@ void MothurOut::splitAtComma(string& prefix, string& suffix){
 			string space = " ";
 			while(suffix.at(0) == ' ')
 				suffix = suffix.substr(1, suffix.length());
-		}
+		}else {  suffix = "";  }
 
 	}
 	catch(exception& e) {

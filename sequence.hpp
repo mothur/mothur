@@ -48,6 +48,7 @@ public:
 	string getPairwise();
 	string getUnaligned();
 	string getInlineSeq();
+    int getNumNs();
 	int getNumBases();
 	int getStartPos();
 	int getEndPos();

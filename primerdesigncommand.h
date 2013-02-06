@@ -31,7 +31,7 @@ public:
     string getOutputPattern(string);
 	string getHelpString();	
     string getCitation() { return "http://www.mothur.org/wiki/Primer.design"; }
-    string getDescription()		{ return "design sequence fragments that are specific to particular OTUs"; }
+    string getDescription()		{ return "identify sequence fragments that are specific to particular OTUs"; }
     
     int execute(); 
     void help() { m->mothurOut(getHelpString()); }	

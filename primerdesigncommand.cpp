@@ -39,7 +39,7 @@ vector<string> PrimerDesignCommand::setParameters(){
 string PrimerDesignCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The primer.design allows you to design sequence fragments that are specific to particular OTUs.\n";
+		helpString += "The primer.design allows you to identify sequence fragments that are specific to particular OTUs.\n";
 		helpString += "The primer.design command parameters are: list, fasta, name, count, otunumber, cutoff, length, pdiffs, mintm, maxtm, processors and label.\n";
 		helpString += "The list parameter allows you to provide a list file and is required.\n";
         helpString += "The fasta parameter allows you to provide a fasta file and is required.\n";

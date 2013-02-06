@@ -575,6 +575,15 @@ string Sequence::getUnaligned(){
 int Sequence::getNumBases(){
 	return numBases;
 }
+//********************************************************************************************************************
+
+int Sequence::getNumNs(){
+    int numNs = 0;
+	for (int i = 0; i < unaligned.length(); i++) {
+        if(toupper(unaligned[i]) == 'N') { numNs++; }
+    }
+    return numNs;
+}
 
 //********************************************************************************************************************
 

@@ -439,6 +439,8 @@ int ClusterSplitCommand::execute(){
 		vector< map<string, string> > distName = split->getDistanceFiles();  //returns map of distance files -> namefile sorted by distance file size
 		delete split;
 		
+        if (m->debug) { m->mothurOut("[DEBUG]: distName.size() = " + toString(distName.size()) + ".\n"); }
+                
 		//output a merged distance file
 		if (splitmethod == "fasta")		{ createMergedDistanceFile(distName); }
 			
