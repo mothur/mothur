@@ -298,7 +298,7 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 			}
             else{
                 if(reportFileName != ""){
-                    m->mothurOut("we are ignoring the report file if your sequences are not aligned.  we will check that the sequences in your fasta and and qual fileare the same length.");
+                    m->mothurOut("we are ignoring the report file if your sequences are not aligned.  we will check that the sequences in your fasta and and qual file are the same length.");
                     m->mothurOutEndLine();
                 }
             }
@@ -759,7 +759,10 @@ int SeqErrorCommand::driver(string filename, string qFileName, string rFileName,
             int numParentSeqs = -1;
             int closestRefIndex = -1;
                         
-            numParentSeqs = chimeraTest.analyzeQuery(query.getName(), query.getAligned(), outChimeraReport);
+            string querySeq = query.getAligned();
+            if (!aligned) {  querySeq = query.getUnaligned();  }
+            
+            numParentSeqs = chimeraTest.analyzeQuery(query.getName(), querySeq, outChimeraReport);
             
             closestRefIndex = chimeraTest.getClosestRefIndex();
             

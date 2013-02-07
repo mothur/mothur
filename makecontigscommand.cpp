@@ -15,8 +15,8 @@ vector<string> MakeContigsCommand::setParameters(){
         CommandParameter prfastq("rfastq", "InputTypes", "", "", "none", "none", "fastqGroup","fasta-qfile",false,false,true); parameters.push_back(prfastq);
         CommandParameter pfasta("ffasta", "InputTypes", "", "", "FastaFastqFile", "FastaFastqFile", "fastaGroup","fasta",false,false,true); parameters.push_back(pfasta);
         CommandParameter prfasta("rfasta", "InputTypes", "", "", "none", "none", "none","fastaGroup",false,false,true); parameters.push_back(prfasta);
-        CommandParameter pfqual("fqfile", "InputTypes", "", "", "none", "none", "qfileGroup","qfile",false,false,true); parameters.push_back(pfqual);
-        CommandParameter prqual("rqfile", "InputTypes", "", "", "none", "none", "qfileGroup","qfile",false,false,true); parameters.push_back(prqual);
+        CommandParameter pfqual("fqfile", "InputTypes", "", "", "none", "none", "qfileGroup","",false,false,true); parameters.push_back(pfqual);
+        CommandParameter prqual("rqfile", "InputTypes", "", "", "none", "none", "qfileGroup","",false,false,true); parameters.push_back(prqual);
         CommandParameter pfile("file", "InputTypes", "", "", "FastaFastqFile", "FastaFastqFile", "none","fasta-qfile",false,false,true); parameters.push_back(pfile);
         CommandParameter poligos("oligos", "InputTypes", "", "", "none", "none", "none","group",false,false,true); parameters.push_back(poligos);
 		CommandParameter ppdiffs("pdiffs", "Number", "", "0", "", "", "","",false,false,true); parameters.push_back(ppdiffs);
@@ -31,8 +31,10 @@ vector<string> MakeContigsCommand::setParameters(){
 		CommandParameter pmismatch("mismatch", "Number", "", "-1.0", "", "", "","",false,false); parameters.push_back(pmismatch);
 		CommandParameter pgapopen("gapopen", "Number", "", "-2.0", "", "", "","",false,false); parameters.push_back(pgapopen);
 		CommandParameter pgapextend("gapextend", "Number", "", "-1.0", "", "", "","",false,false); parameters.push_back(pgapextend);
-        CommandParameter pthreshold("threshold", "Number", "", "40", "", "", "","",false,false); parameters.push_back(pthreshold);
+        CommandParameter pthreshold("insert", "Number", "", "25", "", "", "","",false,false); parameters.push_back(pthreshold);
+        CommandParameter pdeltaq("deltaq", "Number", "", "6", "", "", "","",false,false); parameters.push_back(pdeltaq);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
+        CommandParameter pformat("format", "Multiple", "sanger-illumina-solexa-illumina1.8+", "illumina1.8+", "", "", "","",false,false,true); parameters.push_back(pformat);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
@@ -51,23 +53,25 @@ string MakeContigsCommand::getHelpString(){
 		string helpString = "";
 		helpString += "The make.contigs command reads a file, forward fastq file and a reverse fastq file or forward fasta and reverse fasta files and outputs new fasta.  It will also provide new quality files if the fastq or file parameter is used.\n";
         helpString += "If an oligos file is provided barcodes and primers will be trimmed, and a group file will be created.\n";
-		helpString += "The make.contigs command parameters are ffastq, rfastq, oligos, tdiffs, bdiffs, ldiffs, sdiffs, pdiffs, align, match, mismatch, gapopen, gapextend, allfiles and processors.\n";
+		helpString += "The make.contigs command parameters are file, ffastq, rfastq, ffasta, rfasta, fqfile, rqfile, oligos, format, tdiffs, bdiffs, pdiffs, align, match, mismatch, gapopen, gapextend, insert, deltaq, allfiles and processors.\n";
 		helpString += "The ffastq and rfastq, file, or ffasta and rfasta parameters are required.\n";
-        helpString += "The file parameter is 2 column file containing the forward fastq files in the first column and their matching reverse fastq files in the second column.  Mothur will process each pair and create a combined fasta and qual file with all the sequences.\n";
+        helpString += "The file parameter is 2 column file containing the forward fastq files in the first column and their matching reverse fastq files in the second column.  Mothur will process each pair and create a combined fasta and report file with all the sequences.\n";
         helpString += "The ffastq and rfastq parameters are used to provide a forward fastq and reverse fastq file to process.  If you provide one, you must provide the other.\n";
         helpString += "The ffasta and rfasta parameters are used to provide a forward fasta and reverse fasta file to process.  If you provide one, you must provide the other.\n";
         helpString += "The fqfile and rqfile parameters are used to provide a forward quality and reverse quality files to process with the ffasta and rfasta parameters.  If you provide one, you must provide the other.\n";
-		helpString += "The align parameter allows you to specify the alignment method to use.  Your options are: gotoh and needleman. The default is needleman.\n";
+		helpString += "The format parameter is used to indicate whether your sequences are sanger, solexa, illumina1.8+ or illumina, default=illumina1.8+.\n";
+        helpString += "The align parameter allows you to specify the alignment method to use.  Your options are: gotoh and needleman. The default is needleman.\n";
         helpString += "The tdiffs parameter is used to specify the total number of differences allowed in the sequence. The default is pdiffs + bdiffs + sdiffs + ldiffs.\n";
 		helpString += "The bdiffs parameter is used to specify the number of differences allowed in the barcode. The default is 0.\n";
 		helpString += "The pdiffs parameter is used to specify the number of differences allowed in the primer. The default is 0.\n";
-        helpString += "The ldiffs parameter is used to specify the number of differences allowed in the linker. The default is 0.\n";
-		helpString += "The sdiffs parameter is used to specify the number of differences allowed in the spacer. The default is 0.\n";
+        //helpString += "The ldiffs parameter is used to specify the number of differences allowed in the linker. The default is 0.\n";
+		//helpString += "The sdiffs parameter is used to specify the number of differences allowed in the spacer. The default is 0.\n";
 		helpString += "The match parameter allows you to specify the bonus for having the same base. The default is 1.0.\n";
 		helpString += "The mistmatch parameter allows you to specify the penalty for having different bases.  The default is -1.0.\n";
+        helpString += "The deltaq parameter allows you to specify the delta allowed between quality scores of a mismatched base.  For example in the overlap, if deltaq=5 and in the alignment seqA, pos 200 has a quality score of 30 and the same position in seqB has a quality score of 20, you take the base from seqA (30-20 >= 5).  If the quality score in seqB is 28 then the base in the consensus will be an N (30-28<5) The default is 6.\n";
 		helpString += "The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -2.0.\n";
 		helpString += "The gapextend parameter allows you to specify the penalty for extending a gap in an alignment.  The default is -1.0.\n";
-        helpString += "The threshold parameter allows you to set a quality scores threshold. In the case where we are trying to decide whether to keep a base or remove it because the base is compared to a gap in the other fragment, if the base has a quality score below the threshold we eliminate it. Default=40.\n";
+        helpString += "The insert parameter allows you to set a quality scores threshold. In the case where we are trying to decide whether to keep a base or remove it because the base is compared to a gap in the other fragment, if the base has a quality score below the threshold we eliminate it. Default=25.\n";
         helpString += "The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n";
         helpString += "The allfiles parameter will create separate group and fasta file for each grouping. The default is F.\n";
         helpString += "The make.contigs command should be in the following format: \n";
@@ -86,9 +90,8 @@ string MakeContigsCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "fasta") {  pattern = "[filename],[tag],contigs.fasta"; } 
-        else if (type == "qfile") {  pattern = "[filename],[tag],contigs.qual"; } 
         else if (type == "group") {  pattern = "[filename],[tag],contigs.groups"; }
-        else if (type == "mismatch") {  pattern = "[filename],[tag],contigs.mismatch"; }
+        else if (type == "report") {  pattern = "[filename],[tag],contigs.report"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
         
         return pattern;
@@ -105,9 +108,8 @@ MakeContigsCommand::MakeContigsCommand(){
 		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
-		outputTypes["qfile"] = tempOutNames;
         outputTypes["group"] = tempOutNames;
-        outputTypes["mismatch"] = tempOutNames;
+        outputTypes["report"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "MakeContigsCommand", "MakeContigsCommand");
@@ -140,8 +142,7 @@ MakeContigsCommand::MakeContigsCommand(string option)  {
 			//initialize outputTypes
 			vector<string> tempOutNames;
 			outputTypes["fasta"] = tempOutNames;
-			outputTypes["qfile"] = tempOutNames;
-            outputTypes["mismatch"] = tempOutNames;
+            outputTypes["report"] = tempOutNames;
             outputTypes["group"] = tempOutNames;
 			
             
@@ -285,10 +286,13 @@ MakeContigsCommand::MakeContigsCommand(string option)  {
 			m->mothurConvert(temp, gapExtend); 
             if (gapExtend > 0) { m->mothurOut("[ERROR]: gapextend must be negative.\n"); abort=true; }
 			
-            temp = validParameter.validFile(parameters, "threshold", false);	if (temp == "not found"){	temp = "40";			}
-			m->mothurConvert(temp, threshold); 
-            if ((threshold < 0) || (threshold > 40)) { m->mothurOut("[ERROR]: threshold must be between 0 and 40.\n"); abort=true; }
+            temp = validParameter.validFile(parameters, "insert", false);	if (temp == "not found"){	temp = "25";			}
+			m->mothurConvert(temp, insert); 
+            if ((insert < 0) || (insert > 40)) { m->mothurOut("[ERROR]: insert must be between 0 and 40.\n"); abort=true; }
 
+            temp = validParameter.validFile(parameters, "deltaq", false);	if (temp == "not found"){	temp = "6";			}
+			m->mothurConvert(temp, deltaq);
+            
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
 			m->mothurConvert(temp, processors);
@@ -317,6 +321,19 @@ MakeContigsCommand::MakeContigsCommand(string option)  {
 			
 			align = validParameter.validFile(parameters, "align", false);		if (align == "not found"){	align = "needleman";	}
 			if ((align != "needleman") && (align != "gotoh")) { m->mothurOut(align + " is not a valid alignment method. Options are needleman or gotoh. I will use needleman."); m->mothurOutEndLine(); align = "needleman"; }
+            
+            format = validParameter.validFile(parameters, "format", false);		if (format == "not found"){	format = "illumina1.8+";	}
+            
+            if ((format != "sanger") && (format != "illumina") && (format != "illumina1.8+") && (format != "solexa"))  { 
+				m->mothurOut(format + " is not a valid format. Your format choices are sanger, solexa, illumina1.8+ and illumina, aborting." ); m->mothurOutEndLine();
+				abort=true;
+			}
+            
+            //fill convert table - goes from solexa to sanger. Used fq_all2std.pl as a reference.
+            for (int i = -64; i < 65; i++) { 
+                char temp = (char) ((int)(33 + 10*log(1+pow(10,(i/10.0)))/log(10)+0.499));
+                convertTable.push_back(temp);
+            }
         }
 		
 	}
@@ -350,25 +367,19 @@ int MakeContigsCommand::execute(){
         string compositeGroupFile = getOutputFileName("group",cvars);
         cvars["[tag]"] = "trim";
         string compositeFastaFile = getOutputFileName("fasta",cvars);
-        string compositeQualFile = getOutputFileName("qfile",cvars);
         cvars["[tag]"] = "scrap";
         string compositeScrapFastaFile = getOutputFileName("fasta",cvars);
-        string compositeScrapQualFile = getOutputFileName("qfile",cvars);
         cvars["[tag]"] = "";
-        string compositeMisMatchFile = getOutputFileName("mismatch",cvars);
+        string compositeMisMatchFile = getOutputFileName("report",cvars);
         
         if (filesToProcess.size() > 1) { //clear files for append below
             ofstream outCTFasta, outCTQual, outCSFasta, outCSQual, outCMisMatch;
             m->openOutputFile(compositeFastaFile, outCTFasta); outCTFasta.close();
             m->openOutputFile(compositeScrapFastaFile, outCSFasta); outCSFasta.close();
             m->openOutputFile(compositeMisMatchFile, outCMisMatch); outCMisMatch.close();
-            m->openOutputFile(compositeQualFile, outCTQual); outCTQual.close();
-            m->openOutputFile(compositeScrapQualFile, outCSQual); outCSQual.close();
             outputNames.push_back(compositeFastaFile); outputTypes["fasta"].push_back(compositeFastaFile);
-            outputNames.push_back(compositeQualFile); outputTypes["qfile"].push_back(compositeQualFile);
-            outputNames.push_back(compositeMisMatchFile); outputTypes["mismatch"].push_back(compositeMisMatchFile);
+            outputNames.push_back(compositeMisMatchFile); outputTypes["report"].push_back(compositeMisMatchFile);
             outputNames.push_back(compositeScrapFastaFile); outputTypes["fasta"].push_back(compositeScrapFastaFile);
-            outputNames.push_back(compositeScrapQualFile); outputTypes["qfile"].push_back(compositeScrapQualFile);
         }
         
         for (int l = 0; l < filesToProcess.size(); l++) {
@@ -376,7 +387,6 @@ int MakeContigsCommand::execute(){
             m->mothurOut("\n>>>>>\tProcessing " + filesToProcess[l][0][0] + " (file " + toString(l+1) + " of " + toString(filesToProcess.size()) + ")\t<<<<<\n");
             
             vector<vector<string> > fastaFileNames;
-            vector<vector<string> > qualFileNames;
             createGroup = false;
             string outputGroupFileName;
             map<string, string> variables; 
@@ -385,7 +395,7 @@ int MakeContigsCommand::execute(){
             variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(filesToProcess[l][0][0]));
             variables["[tag]"] = "";
             if(oligosfile != ""){
-                createGroup = getOligos(fastaFileNames, qualFileNames, variables["[filename]"]);
+                createGroup = getOligos(fastaFileNames, variables["[filename]"]);
                 if (createGroup) { 
                     outputGroupFileName = getOutputFileName("group",variables);
                     outputNames.push_back(outputGroupFileName); outputTypes["group"].push_back(outputGroupFileName);
@@ -394,22 +404,16 @@ int MakeContigsCommand::execute(){
             
             variables["[tag]"] = "trim";
             string outFastaFile = getOutputFileName("fasta",variables);
-            string outQualFile = getOutputFileName("qfile",variables);
             variables["[tag]"] = "scrap";
             string outScrapFastaFile = getOutputFileName("fasta",variables);
-            string outScrapQualFile = getOutputFileName("qfile",variables);
             variables["[tag]"] = "";
-            string outMisMatchFile = getOutputFileName("mismatch",variables);
+            string outMisMatchFile = getOutputFileName("report",variables);
             outputNames.push_back(outFastaFile); outputTypes["fasta"].push_back(outFastaFile);
             outputNames.push_back(outScrapFastaFile); outputTypes["fasta"].push_back(outScrapFastaFile);
-            if (filesToProcess[l][0][1] != "") {
-                outputNames.push_back(outQualFile); outputTypes["qfile"].push_back(outQualFile);
-                outputNames.push_back(outScrapQualFile); outputTypes["qfile"].push_back(outScrapQualFile);
-            }
-            outputNames.push_back(outMisMatchFile); outputTypes["mismatch"].push_back(outMisMatchFile);
+            outputNames.push_back(outMisMatchFile); outputTypes["report"].push_back(outMisMatchFile);
             
             m->mothurOut("Making contigs...\n"); 
-            createProcesses(filesToProcess[l], outFastaFile, outQualFile, outScrapFastaFile, outScrapQualFile, outMisMatchFile, fastaFileNames, qualFileNames);
+            createProcesses(filesToProcess[l], outFastaFile, outScrapFastaFile, outMisMatchFile, fastaFileNames);
             m->mothurOut("Done.\n");
             
             //remove temp fasta and qual files
@@ -428,11 +432,6 @@ int MakeContigsCommand::execute(){
                                 if(m->isBlank(fastaFileNames[i][j])){
                                     m->mothurRemove(fastaFileNames[i][j]);
                                     namesToRemove.insert(fastaFileNames[i][j]);
-                                    
-                                    if (filesToProcess[l][0][1] != "") {
-                                        m->mothurRemove(qualFileNames[i][j]);
-                                        namesToRemove.insert(qualFileNames[i][j]);
-                                    }
                                 }else{	
                                     it = uniqueFastaNames.find(fastaFileNames[i][j]);
                                     if (it == uniqueFastaNames.end()) {	
@@ -489,9 +488,7 @@ int MakeContigsCommand::execute(){
                 }
                 m->appendFiles(outMisMatchFile, compositeMisMatchFile);
                 m->appendFiles(outFastaFile, compositeFastaFile);
-                m->appendFiles(outQualFile, compositeQualFile);
                 m->appendFiles(outScrapFastaFile, compositeScrapFastaFile);
-                m->appendFiles(outScrapQualFile, compositeScrapQualFile);
             }
         }
         m->mothurOut("It took " + toString(time(NULL) - start) + " secs to process " + toString(numReads) + " sequences.\n");
@@ -513,12 +510,6 @@ int MakeContigsCommand::execute(){
 		itTypes = outputTypes.find("fasta");
 		if (itTypes != outputTypes.end()) {
 			if ((itTypes->second).size() != 0) { currentFasta = (itTypes->second)[0]; m->setFastaFile(currentFasta); }
-		}
-        
-        string currentQual = "";
-		itTypes = outputTypes.find("qfile");
-		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { currentQual = (itTypes->second)[0]; m->setQualFile(currentQual); }
 		}
         
         string currentGroup = "";
@@ -601,7 +592,7 @@ vector< vector< vector<string> > > MakeContigsCommand::preProcessData(unsigned l
 	}
 }
 //**********************************************************************************************************************
-int MakeContigsCommand::createProcesses(vector< vector<string> > files, string outputFasta, string outputQual, string outputScrapFasta, string outputScrapQual, string outputMisMatches, vector<vector<string> > fastaFileNames, vector<vector<string> > qualFileNames) {
+int MakeContigsCommand::createProcesses(vector< vector<string> > files, string outputFasta, string outputScrapFasta, string outputMisMatches, vector<vector<string> > fastaFileNames) {
 	try {
 		int num = 0;
 		vector<int> processIDS;
@@ -617,7 +608,6 @@ int MakeContigsCommand::createProcesses(vector< vector<string> > files, string o
 				process++;
 			}else if (pid == 0){
                 vector<vector<string> > tempFASTAFileNames = fastaFileNames;
-				vector<vector<string> > tempPrimerQualFileNames = qualFileNames;
                 
 				if(allFiles){
 					ofstream temp;
@@ -627,11 +617,6 @@ int MakeContigsCommand::createProcesses(vector< vector<string> > files, string o
 							if (tempFASTAFileNames[i][j] != "") {
 								tempFASTAFileNames[i][j] += toString(getpid()) + ".temp";
 								m->openOutputFile(tempFASTAFileNames[i][j], temp);			temp.close();
-                                
-                                if (files[processors-1][1] != "") {
-                                    tempPrimerQualFileNames[i][j] += toString(getpid()) + ".temp";
-                                    m->openOutputFile(tempPrimerQualFileNames[i][j], temp);		temp.close();
-                                }
 							}
 						}
 					}
@@ -639,12 +624,9 @@ int MakeContigsCommand::createProcesses(vector< vector<string> > files, string o
 
 				num = driver(files[process], 
                              outputFasta + toString(getpid()) + ".temp", 
-                             outputQual + toString(getpid()) + ".temp", 
                              outputScrapFasta + toString(getpid()) + ".temp", 
-                             outputScrapQual + toString(getpid()) + ".temp",
                              outputMisMatches + toString(getpid()) + ".temp",
-                             tempFASTAFileNames,
-                             tempPrimerQualFileNames);
+                             tempFASTAFileNames, process);
 				
 				//pass groupCounts to parent
                 ofstream out;
@@ -676,13 +658,9 @@ int MakeContigsCommand::createProcesses(vector< vector<string> > files, string o
         ofstream temp;
 		m->openOutputFile(outputFasta, temp);		temp.close();
         m->openOutputFile(outputScrapFasta, temp);		temp.close();
-        if (files[processors-1][1] != "") {
-            m->openOutputFile(outputScrapQual, temp);		temp.close();
-            m->openOutputFile(outputQual, temp);	temp.close();
-        }
-        
+                
 		//do my part
-		num = driver(files[processors-1], outputFasta, outputQual, outputScrapFasta, outputScrapQual, outputMisMatches, fastaFileNames, qualFileNames);
+		num = driver(files[processors-1], outputFasta, outputScrapFasta,  outputMisMatches, fastaFileNames, processors-1);
 		
 		//force parent to wait until all the processes are done
 		for (int i=0;i<processIDS.size();i++) { 
@@ -741,8 +719,7 @@ int MakeContigsCommand::createProcesses(vector< vector<string> > files, string o
 			string extension = "";
 			if (h != 0) { extension = toString(h) + ".temp"; processIDS.push_back(h); }
             vector<vector<string> > tempFASTAFileNames = fastaFileNames;
-            vector<vector<string> > tempPrimerQualFileNames = qualFileNames;
-            
+                        
             if(allFiles){
                 ofstream temp;
                 
@@ -751,25 +728,19 @@ int MakeContigsCommand::createProcesses(vector< vector<string> > files, string o
                         if (tempFASTAFileNames[i][j] != "") {
                             tempFASTAFileNames[i][j] += extension;
                             m->openOutputFile(tempFASTAFileNames[i][j], temp);			temp.close();
-                            
-                            if (files[processors-1][1] != "") {
-                                tempPrimerQualFileNames[i][j] += extension;
-                                m->openOutputFile(tempPrimerQualFileNames[i][j], temp);		temp.close();
-                            }
                         }
                     }
                 }
             }
 
 			          
-			contigsData* tempcontig = new contigsData(files[h], (outputFasta + extension), (outputQual + extension), (outputScrapFasta + extension), (outputScrapQual + extension),(outputMisMatches + extension), align, m, match, misMatch, gapOpen, gapExtend, threshold, barcodes, primers, tempFASTAFileNames, tempPrimerQualFileNames, barcodeNameVector, primerNameVector, pdiffs, bdiffs, tdiffs, createGroup, allFiles, h);
+			contigsData* tempcontig = new contigsData(files[h], (outputFasta + extension), (outputScrapFasta + extension), (outputMisMatches + extension), align, m, match, misMatch, gapOpen, gapExtend, insert, deltaq, barcodes, primers, tempFASTAFileNames, barcodeNameVector, primerNameVector, pdiffs, bdiffs, tdiffs, createGroup, allFiles, h);
 			pDataArray.push_back(tempcontig);
             
 			hThreadArray[h] = CreateThread(NULL, 0, MyContigsThreadFunction, pDataArray[h], 0, &dwThreadIdArray[h]);   
 		}
         
         vector<vector<string> > tempFASTAFileNames = fastaFileNames;
-        vector<vector<string> > tempPrimerQualFileNames = qualFileNames;
 
         if(allFiles){
             ofstream temp;
@@ -780,11 +751,6 @@ int MakeContigsCommand::createProcesses(vector< vector<string> > files, string o
                     if (tempFASTAFileNames[i][j] != "") {
                         tempFASTAFileNames[i][j] += extension;
                         m->openOutputFile(tempFASTAFileNames[i][j], temp);			temp.close();
-                        
-                        if (files[processors-1][1] != "") {
-                            tempPrimerQualFileNames[i][j] += extension;
-                            m->openOutputFile(tempPrimerQualFileNames[i][j], temp);		temp.close();
-                        }
                     }
                 }
             }
@@ -794,14 +760,10 @@ int MakeContigsCommand::createProcesses(vector< vector<string> > files, string o
 		ofstream temp;
 		m->openOutputFile(outputFasta, temp);		temp.close();
         m->openOutputFile(outputScrapFasta, temp);		temp.close();
-        if (files[processors-1][1] != "") {
-            m->openOutputFile(outputScrapQual, temp);		temp.close();
-            m->openOutputFile(outputQual, temp);	temp.close();
-		}
         
         //do my part
         processIDS.push_back(processors-1);
-		num = driver(files[processors-1], (outputFasta+ toString(processors-1) + ".temp"), (outputQual+ toString(processors-1) + ".temp"), (outputScrapFasta+ toString(processors-1) + ".temp"), (outputScrapQual+ toString(processors-1) + ".temp"), (outputMisMatches+ toString(processors-1) + ".temp"), tempFASTAFileNames, tempPrimerQualFileNames);	
+		num = driver(files[processors-1], (outputFasta+ toString(processors-1) + ".temp"),  (outputScrapFasta+ toString(processors-1) + ".temp"),  (outputMisMatches+ toString(processors-1) + ".temp"), tempFASTAFileNames, processors-1);	
         
 		//Wait until all threads have terminated.
 		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
@@ -809,6 +771,9 @@ int MakeContigsCommand::createProcesses(vector< vector<string> > files, string o
 		//Close all thread handles and free memory allocations.
 		for(int i=0; i < pDataArray.size(); i++){
 			num += pDataArray[i]->count;
+            if (!pDataArray[i]->done) {
+                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of sequences assigned to it, quitting. \n"); m->control_pressed = true; 
+            }
             for (map<string, int>::iterator it = pDataArray[i]->groupCounts.begin(); it != pDataArray[i]->groupCounts.end(); it++) {
                 map<string, int>::iterator it2 = groupCounts.find(it->first);
                 if (it2 == groupCounts.end()) {	groupCounts[it->first] = it->second; }
@@ -831,14 +796,6 @@ int MakeContigsCommand::createProcesses(vector< vector<string> > files, string o
 			
 			m->appendFiles((outputScrapFasta + toString(processIDS[i]) + ".temp"), outputScrapFasta);
 			m->mothurRemove((outputScrapFasta + toString(processIDS[i]) + ".temp"));
-			
-            if (files[processors-1][1] != "") {
-                m->appendFiles((outputScrapQual + toString(processIDS[i]) + ".temp"), outputScrapQual);
-                m->mothurRemove((outputScrapQual + toString(processIDS[i]) + ".temp"));
-                
-                m->appendFiles((outputQual + toString(processIDS[i]) + ".temp"), outputQual);
-                m->mothurRemove((outputQual + toString(processIDS[i]) + ".temp"));
-            }
             
             m->appendFiles((outputMisMatches + toString(processIDS[i]) + ".temp"), outputMisMatches);
 			m->mothurRemove((outputMisMatches + toString(processIDS[i]) + ".temp"));
@@ -849,11 +806,6 @@ int MakeContigsCommand::createProcesses(vector< vector<string> > files, string o
 						if (fastaFileNames[j][k] != "") {
 							m->appendFiles((fastaFileNames[j][k] + toString(processIDS[i]) + ".temp"), fastaFileNames[j][k]);
 							m->mothurRemove((fastaFileNames[j][k] + toString(processIDS[i]) + ".temp"));
-							
-                            if (files[processors-1][1] != "") {
-                                m->appendFiles((qualFileNames[j][k] + toString(processIDS[i]) + ".temp"), qualFileNames[j][k]);
-                                m->mothurRemove((qualFileNames[j][k] + toString(processIDS[i]) + ".temp"));
-                            }
 						}
 					}
 				}
@@ -868,7 +820,7 @@ int MakeContigsCommand::createProcesses(vector< vector<string> > files, string o
 	}
 }
 //**********************************************************************************************************************
-int MakeContigsCommand::driver(vector<string> files, string outputFasta, string outputQual, string outputScrapFasta, string outputScrapQual, string outputMisMatches, vector<vector<string> > fastaFileNames, vector<vector<string> > qualFileNames){
+int MakeContigsCommand::driver(vector<string> files, string outputFasta, string outputScrapFasta, string outputMisMatches, vector<vector<string> > fastaFileNames, int process){
     try {
         
         Alignment* alignment;
@@ -884,19 +836,17 @@ int MakeContigsCommand::driver(vector<string> files, string outputFasta, string 
         if (m->debug) {  m->mothurOut("[DEBUG]: ffasta = " + thisffastafile + ".\n[DEBUG]: fqual = " + thisfqualfile + ".\n[DEBUG]: rfasta = " + thisrfastafile + ".\n[DEBUG]: rqual = " + thisrqualfile + ".\n"); }
         
         ifstream inFFasta, inRFasta, inFQual, inRQual;
-        ofstream outFasta, outQual, outMisMatch, outScrapFasta, outScrapQual;
+        ofstream outFasta, outMisMatch, outScrapFasta;
         m->openInputFile(thisffastafile, inFFasta);
         m->openInputFile(thisrfastafile, inRFasta);
         if (thisfqualfile != "") {
             m->openInputFile(thisfqualfile, inFQual);
             m->openInputFile(thisrqualfile, inRQual);
-            m->openOutputFile(outputScrapQual, outScrapQual);
-            m->openOutputFile(outputQual, outQual);
         }
         m->openOutputFile(outputFasta, outFasta);
         m->openOutputFile(outputScrapFasta, outScrapFasta);
         m->openOutputFile(outputMisMatches, outMisMatch);
-        outMisMatch << "Name\tLength\tMisMatches\n";
+        if (process == 0) { outMisMatch << "Name\tLength\tOverlap_Length\tOverlap_Start\tOverlap_End\tMisMatches\tNum_Ns\n";  }
         
         TrimOligos trimOligos(pdiffs, bdiffs, 0, 0, primers, barcodes);
         
@@ -956,7 +906,6 @@ int MakeContigsCommand::driver(vector<string> files, string outputFasta, string 
             
             //traverse alignments merging into one contiguous seq
             string contig = "";
-            vector<int> contigScores; 
             int numMismatches = 0;
             string seq1 = fSeq.getAligned();
             string seq2 = rSeq.getAligned();
@@ -973,15 +922,9 @@ int MakeContigsCommand::driver(vector<string> files, string outputFasta, string 
             //bigger of the 2 starting positions is the location of the overlapping start
             if (overlapStart < seq2Start) { //seq2 starts later so take from 0 to seq2Start from seq1
                 overlapStart = seq2Start; 
-                for (int i = 0; i < overlapStart; i++) {
-                    contig += seq1[i];
-                    if (thisfqualfile != "") { contigScores.push_back(scores1[ABaseMap[i]]); }
-                }
+                for (int i = 0; i < overlapStart; i++) { contig += seq1[i];  }
             }else { //seq1 starts later so take from 0 to overlapStart from seq2
-                for (int i = 0; i < overlapStart; i++) {
-                    contig += seq2[i];
-                    if (thisfqualfile != "") { contigScores.push_back(scores2[BBaseMap[i]]); }
-                }
+                for (int i = 0; i < overlapStart; i++) {  contig += seq2[i]; }
             }
             
             int seq1End = fSeq.getEndPos();
@@ -989,53 +932,40 @@ int MakeContigsCommand::driver(vector<string> files, string outputFasta, string 
             int overlapEnd = seq1End;
             if (seq2End < overlapEnd) { overlapEnd = seq2End; }  //smallest end position is where overlapping ends
             
+            int oStart = contig.length();
             for (int i = overlapStart; i < overlapEnd; i++) {
                 if (seq1[i] == seq2[i]) { //match, add base and choose highest score
                     contig += seq1[i];
-                    if (thisfqualfile != "") { 
-                        contigScores.push_back(scores1[ABaseMap[i]]); 
-                        if (scores1[ABaseMap[i]] < scores2[BBaseMap[i]]) { contigScores[contigScores.size()-1] = scores2[BBaseMap[i]]; }
-                    }
-                }else if (((seq1[i] == '.') || (seq1[i] == '-')) && ((seq2[i] != '-') && (seq2[i] != '.'))) { //seq1 is a gap and seq2 is a base, choose seq2, unless quality score for base is below threshold. In that case eliminate base
+                }else if (((seq1[i] == '.') || (seq1[i] == '-')) && ((seq2[i] != '-') && (seq2[i] != '.'))) { //seq1 is a gap and seq2 is a base, choose seq2, unless quality score for base is below insert. In that case eliminate base
                     if (thisfqualfile != "") {
-                        if (scores2[BBaseMap[i]] < threshold) { } //
-                        else {
-                            contig += seq2[i];
-                            contigScores.push_back(scores2[BBaseMap[i]]);
-                        }
+                        if (scores2[BBaseMap[i]] < insert) { } //
+                        else { contig += seq2[i];  }
                     }else { contig += seq2[i]; } //with no quality info, then we keep it?
-                }else if (((seq2[i] == '.') || (seq2[i] == '-')) && ((seq1[i] != '-') && (seq1[i] != '.'))) { //seq2 is a gap and seq1 is a base, choose seq1, unless quality score for base is below threshold. In that case eliminate base
+                }else if (((seq2[i] == '.') || (seq2[i] == '-')) && ((seq1[i] != '-') && (seq1[i] != '.'))) { //seq2 is a gap and seq1 is a base, choose seq1, unless quality score for base is below insert. In that case eliminate base
                     if (thisfqualfile != "") {
-                        if (scores1[ABaseMap[i]] < threshold) { } //
-                        else {
-                            contig += seq1[i];
-                            contigScores.push_back(scores1[ABaseMap[i]]);
-                        }
+                        if (scores1[ABaseMap[i]] < insert) { } //
+                        else { contig += seq1[i];  }
                     }else { contig += seq1[i]; } //with no quality info, then we keep it?
                 }else if (((seq1[i] != '-') && (seq1[i] != '.')) && ((seq2[i] != '-') && (seq2[i] != '.'))) { //both bases choose one with better quality
                     if (thisfqualfile != "") {
-                        char c = seq1[i];
-                        contigScores.push_back(scores1[ABaseMap[i]]);
-                        if (scores1[ABaseMap[i]] < scores2[BBaseMap[i]]) { contigScores[contigScores.size()-1] = scores2[BBaseMap[i]]; c = seq2[i]; }
-                        contig += c;
+                        if (abs(scores1[ABaseMap[i]] - scores2[BBaseMap[i]]) >= deltaq) { //is the difference in qual scores >= deltaq, if yes choose base with higher score
+                            char c = seq1[i];
+                            if (scores1[ABaseMap[i]] < scores2[BBaseMap[i]]) { c = seq2[i]; }
+                            contig += c;
+                        }else { //if no, base becomes n
+                            contig += 'N';
+                        }
                         numMismatches++;
                     }else { numMismatches++; } //cant decide, so eliminate and mark as mismatch
                 }else { //should never get here
                     m->mothurOut("[ERROR]: case I didn't think of seq1 = " + toString(seq1[i]) + " and seq2 = " + toString(seq2[i]) + "\n");
                 }
             }
-            
+            int oend = contig.length();
             if (seq1End < seq2End) { //seq1 ends before seq2 so take from overlap to length from seq2
-                for (int i = overlapEnd; i < length; i++) {
-                    contig += seq2[i];
-                    if (thisfqualfile != "") { contigScores.push_back(scores2[BBaseMap[i]]); }
-                }
+                for (int i = overlapEnd; i < length; i++) { contig += seq2[i];  }
             }else { //seq2 ends before seq1 so take from overlap to length from seq1
-                for (int i = overlapEnd; i < length; i++) {
-                    contig += seq1[i];
-                    if (thisfqualfile != "") { contigScores.push_back(scores1[ABaseMap[i]]); }
-                }
-                
+                for (int i = overlapEnd; i < length; i++) {  contig += seq1[i]; }
             }
             
             if(trashCode.length() == 0){
@@ -1076,32 +1006,16 @@ int MakeContigsCommand::driver(vector<string> files, string outputFasta, string 
                     m->openOutputFileAppend(fastaFileNames[barcodeIndex][primerIndex], output);
                     output << ">" << fSeq.getName() << endl << contig << endl;
                     output.close();
-                    
-                    if (thisfqualfile != "") {
-                        m->openOutputFileAppend(qualFileNames[barcodeIndex][primerIndex], output);
-                        output << ">" << fSeq.getName() << endl;
-                        for (int i = 0; i < contigScores.size(); i++) { output << contigScores[i] << ' '; }
-                        output << endl;
-                        output.close();	
-                    }
                 }
                 
                 //output
                 outFasta << ">" << fSeq.getName() << endl << contig << endl;
-                if (thisfqualfile != "") {
-                    outQual << ">" << fSeq.getName() << endl;
-                    for (int i = 0; i < contigScores.size(); i++) { outQual << contigScores[i] << ' '; }
-                    outQual << endl;
-                }
-                outMisMatch << fSeq.getName() << '\t' << contig.length() << '\t' << numMismatches << endl;
+                int numNs = 0;
+                for (int i = 0; i < contig.length(); i++) { if (contig[i] == 'N') { numNs++; }  }
+                outMisMatch << fSeq.getName() << '\t' << contig.length() << '\t' << (oend-oStart) << '\t' << oStart << '\t' << oend << '\t' << numMismatches << '\t' << numNs << endl;
             }else {
                 //output
                 outScrapFasta << ">" << fSeq.getName() << " | " << trashCode << endl << contig << endl;
-                if (thisfqualfile != "") {
-                    outScrapQual << ">" << fSeq.getName() << " | " << trashCode << endl;
-                    for (int i = 0; i < contigScores.size(); i++) { outScrapQual << contigScores[i] << ' '; }
-                    outScrapQual << endl;
-                }
             }
             num++;
             
@@ -1120,12 +1034,10 @@ int MakeContigsCommand::driver(vector<string> files, string outputFasta, string 
         if (thisfqualfile != "") {
             inFQual.close();
             inRQual.close();
-            outQual.close();
-            outScrapQual.close();
         }
         delete alignment;
         
-        if (m->control_pressed) {  m->mothurRemove(outputFasta); m->mothurRemove(outputScrapFasta);m->mothurRemove(outputMisMatches); if (thisfqualfile != "") { m->mothurRemove(outputQual); m->mothurRemove(outputScrapQual); } }
+        if (m->control_pressed) {  m->mothurRemove(outputFasta); m->mothurRemove(outputScrapFasta);m->mothurRemove(outputMisMatches);  }
     
         return num;
     }
@@ -1206,7 +1118,7 @@ vector< vector<string> > MakeContigsCommand::readFastqFiles(unsigned long int& c
                 
                 if (m->debug) { m->mothurOut(toString(count) + '\t' + fread.name + '\t' + rread.name + '\n'); }
                
-                if (checkReads(fread, rread, ffastq, rfastq)) {
+                //if (checkReads(fread, rread, ffastq, rfastq)) {
                     if (m->control_pressed) { for (it = tempfiles.begin(); it!=tempfiles.end(); it++) { for (int i = 0; i < (it->second).size(); i++) { (*(it->second)[i]).close();  delete (it->second)[i]; } } for (int i = 0; i < files.size(); i++) {  for(int j = 0; j < files[i].size(); j++) { m->mothurRemove(files[i][j]); } } inForward.close(); inReverse.close(); return files; }
                     
                     //if the reads are okay write to output files
@@ -1225,7 +1137,7 @@ vector< vector<string> > MakeContigsCommand::readFastqFiles(unsigned long int& c
                     
                     //report progress
                     if((count) % 10000 == 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
-                }
+                //}
             }
 		}
 		//report progress
@@ -1349,7 +1261,7 @@ vector< vector<string> > MakeContigsCommand::readFastaFiles(unsigned long int& c
                 
                 if (m->debug) { m->mothurOut(toString(count) + '\t' + fread.name + '\t' + rread.name + '\n'); }
                 
-                if (checkReads(fread, rread, ffasta, rfasta)) {
+               // if (checkReads(fread, rread, ffasta, rfasta)) {
                     if (m->control_pressed) { for (it = tempfiles.begin(); it!=tempfiles.end(); it++) { for (int i = 0; i < (it->second).size(); i++) { (*(it->second)[i]).close();  delete (it->second)[i]; } } for (int i = 0; i < files.size(); i++) {  for(int j = 0; j < files[i].size(); j++) { m->mothurRemove(files[i][j]); } } inReverseFasta.close(); inForwardFasta.close(); if (fqualfile != "") { inReverseQual.close(); inReverseQual.close(); } return files; }
                     
                     //if the reads are okay write to output files
@@ -1369,7 +1281,7 @@ vector< vector<string> > MakeContigsCommand::readFastaFiles(unsigned long int& c
                     
                     //report progress
                     if((count) % 10000 == 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
-                }
+                //}
             }
 		}
 		//report progress
@@ -1508,15 +1420,8 @@ fastqRead MakeContigsCommand::readFastq(ifstream& in, bool& ignore){
         if (name2 != "") { if (name != name2) { m->mothurOut("[WARNING]: names do not match. read " + name + " for fasta and " + name2 + " for quality, ignoring."); ignore=true; } }
         if (quality.length() != sequence.length()) { m->mothurOut("[WARNING]: Lengths do not match for sequence " + name + ". Read " + toString(sequence.length()) + " characters for fasta and " + toString(quality.length()) + " characters for quality scores, ignoring read."); ignore=true; }
         
-        vector<int> qualScores;
-		int controlChar = int('!');
-		for (int i = 0; i < quality.length(); i++) { 
-			int temp = int(quality[i]);
-			temp -= controlChar;
-			
-			qualScores.push_back(temp);
-		}
-    
+        vector<int> qualScores = convertQual(quality);
+        
         read.name = name;
         read.sequence = sequence;
         read.scores = qualScores;
@@ -1528,7 +1433,7 @@ fastqRead MakeContigsCommand::readFastq(ifstream& in, bool& ignore){
         exit(1);
     }
 }
-//**********************************************************************************************************************
+/**********************************************************************************************************************
 bool MakeContigsCommand::checkReads(fastqRead& forward, fastqRead& reverse, string ffile, string rfile){
     try {
         bool good = true;
@@ -1551,7 +1456,7 @@ bool MakeContigsCommand::checkReads(fastqRead& forward, fastqRead& reverse, stri
         m->errorOut(e, "MakeContigsCommand", "checkReads");
         exit(1);
     }
-}
+}*/
 //***************************************************************************************************************
 vector< vector<string> > MakeContigsCommand::readFileNames(string filename){
 	try {
@@ -1653,7 +1558,7 @@ vector< vector<string> > MakeContigsCommand::readFileNames(string filename){
 //BARCODE   atgcatgc   atgcatgc    groupName 
 //PRIMER   atgcatgc   atgcatgc    groupName  
 //PRIMER   atgcatgc   atgcatgc  
-bool MakeContigsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<vector<string> >& qualFileNames, string rootname){
+bool MakeContigsCommand::getOligos(vector<vector<string> >& fastaFileNames, string rootname){
 	try {
 		ifstream in;
 		m->openInputFile(oligosfile, in);
@@ -1670,7 +1575,7 @@ bool MakeContigsCommand::getOligos(vector<vector<string> >& fastaFileNames, vect
 		while(!in.eof()){
             
 			in >> type; 
-            cout << type << endl;
+    
 		 	if (m->debug) { m->mothurOut("[DEBUG]: reading type - " + type + ".\n"); }	
             
 			if(type[0] == '#'){
@@ -1753,7 +1658,6 @@ bool MakeContigsCommand::getOligos(vector<vector<string> >& fastaFileNames, vect
                         
                     barcodes[indexBarcode]=newPair; indexBarcode++;
 					barcodeNameVector.push_back(group);
-                    cout << group << endl;
 				}else if(type == "LINKER"){
 					linker.push_back(foligo);
                     m->mothurOut("[WARNING]: make.contigs is not setup to remove linkers, ignoring.\n");
@@ -1786,7 +1690,6 @@ bool MakeContigsCommand::getOligos(vector<vector<string> >& fastaFileNames, vect
 		for(int i=0;i<fastaFileNames.size();i++){
 			fastaFileNames[i].assign(primerNameVector.size(), "");
 		}
-		qualFileNames = fastaFileNames;	
 		
 		if(allFiles){
 			set<string> uniqueNames; //used to cleanup outputFileNames
@@ -1827,17 +1730,6 @@ bool MakeContigsCommand::getOligos(vector<vector<string> >& fastaFileNames, vect
                         
                         fastaFileNames[itBar->first][itPrimer->first] = fastaFileName;
                         m->openOutputFile(fastaFileName, temp);		temp.close();
-                        
-                        if ((fqualfile != "") || (ffastqfile != "") || (file != "")) {
-                            qualFileName = rootname + ".qual";
-                            if (uniqueNames.count(qualFileName) == 0) {
-                                outputNames.push_back(qualFileName);
-                                outputTypes["qfile"].push_back(qualFileName);
-                            }
-                            
-                            qualFileNames[itBar->first][itPrimer->first] = qualFileName;
-                            m->openOutputFile(qualFileName, temp);		temp.close();
-                        }
                     }
 				}
 			}
@@ -1911,6 +1803,41 @@ string MakeContigsCommand::reverseOligo(string oligo){
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
+vector<int> MakeContigsCommand::convertQual(string qual) {
+	try {
+		vector<int> qualScores;
+        bool negativeScores = false;
+		
+		for (int i = 0; i < qual.length(); i++) { 
+            
+            int temp = 0;
+            temp = int(qual[i]);
+            if (format == "illumina") {
+                temp -= 64; //char '@'
+            }else if (format == "illumina1.8+") {
+                    temp -= int('!'); //char '!'
+            }else if (format == "solexa") {
+                temp = int(convertTable[temp]); //convert to sanger
+                temp -= int('!'); //char '!'
+            }else {
+                temp -= int('!'); //char '!'
+            }
+            
+            if (temp < -5) { negativeScores = true; }
+			qualScores.push_back(temp);
+		}
+		
+        if (negativeScores) { m->mothurOut("[ERROR]: finding negative quality scores, do you have the right format selected? http://en.wikipedia.org/wiki/FASTQ_format#Encoding \n");  m->control_pressed = true;  }
+        
+		return qualScores;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "MakeContigsCommand", "convertQual");
+		exit(1);
+	}
+}
+
 //**********************************************************************************************************************
 
 

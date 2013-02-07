@@ -183,7 +183,7 @@ NewCommand::NewCommand(string option)  {
             
             ///variables for examples below that you will most likely want to put in the header for 
             //use by the other class functions.
-            string phylipfile, columnfile, namefile, fastafile, sharedfile, method;
+            string phylipfile, columnfile, namefile, fastafile, sharedfile, method, countfile;
             int processors;
             bool useTiming, allLines;
             vector<string> Estimators, Groups;
@@ -304,10 +304,13 @@ NewCommand::NewCommand(string option)  {
             //saved by mothur that is associated with the other files you are using as inputs.  
             //You can do so by adding the files associated with the namefile to the files vector and then asking parser to check.  
             //This saves our users headaches over file mismatches because they forgot to include the namefile, :)
-            if (namefile == "") {
-				vector<string> files; files.push_back(fastafile);
-				parser.getNameFile(files);
-			}
+            if (countfile == "") { 
+                if (namefile == "") {
+                    vector<string> files; files.push_back(fastafile);
+                    parser.getNameFile(files);
+                }
+            }
+
 			
 		}
 		

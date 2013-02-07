@@ -14,7 +14,7 @@
 //**********************************************************************************************************************
 vector<string> TrimFlowsCommand::setParameters(){	
 	try {
-		CommandParameter pflow("flow", "InputTypes", "", "", "none", "none", "none","flow",false,true,true); parameters.push_back(pflow);
+		CommandParameter pflow("flow", "InputTypes", "", "", "none", "none", "none","flow-file",false,true,true); parameters.push_back(pflow);
 		CommandParameter poligos("oligos", "InputTypes", "", "", "none", "none", "none","",false,false,true); parameters.push_back(poligos);
 		CommandParameter pmaxhomop("maxhomop", "Number", "", "9", "", "", "","",false,false); parameters.push_back(pmaxhomop);
 		CommandParameter pmaxflows("maxflows", "Number", "", "450", "", "", "","",false,false); parameters.push_back(pmaxflows);
@@ -63,7 +63,7 @@ string TrimFlowsCommand::getOutputPattern(string type) {
         
         if (type == "flow") {  pattern = "[filename],[tag],flow"; } 
         else if (type == "fasta") {  pattern = "[filename],flow.fasta"; } 
-        else if (type == "file") {  pattern = "[filename],[tag],flow.files"; }
+        else if (type == "file") {  pattern = "[filename],flow.files"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
         
         return pattern;
@@ -306,7 +306,6 @@ int TrimFlowsCommand::execute(){
 		
 		if(allFiles){
 			set<string> namesAlreadyProcessed;
-            variables["[tag]"] = "";
 			flowFilesFileName = getOutputFileName("file",variables);
 			m->openOutputFile(flowFilesFileName, output);
 
@@ -342,7 +341,6 @@ int TrimFlowsCommand::execute(){
 			output.close();
 		}
 		else{
-            variables["[tag]"] = "";
 			flowFilesFileName = getOutputFileName("file",variables);
 			m->openOutputFile(flowFilesFileName, output);
 			

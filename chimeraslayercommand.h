@@ -213,8 +213,6 @@ static DWORD WINAPI MySlayerThreadFunction(LPVOID lpParam){
 			inFASTA.seekg(pDataArray->start-1); pDataArray->m->gobble(inFASTA); 
 		}
 		
-		pDataArray->count = pDataArray->end;
-		
 		if (pDataArray->m->control_pressed) { out.close(); out2.close(); if (pDataArray->trim) { out3.close(); } inFASTA.close(); delete chimera;  return 0;	}
 		
 		if (chimera->getUnaligned()) { 
@@ -227,7 +225,7 @@ static DWORD WINAPI MySlayerThreadFunction(LPVOID lpParam){
 		
 		if (pDataArray->start == 0) { chimera->printHeader(out); }
 		
-		int count = 0;
+		pDataArray->count = 0;
 		for(int i = 0; i < pDataArray->end; i++){
 			
 			if (pDataArray->m->control_pressed) {	out.close(); out2.close(); if (pDataArray->trim) { out3.close(); } inFASTA.close(); delete chimera; return 1;	}
@@ -318,18 +316,18 @@ static DWORD WINAPI MySlayerThreadFunction(LPVOID lpParam){
 					
 					
 				}
-				count++;
+				pDataArray->count++;
 			}
 			
 			delete candidateSeq;
 			//report progress
-			if((count) % 100 == 0){	pDataArray->m->mothurOut("Processing sequence: " + toString(count)); pDataArray->m->mothurOutEndLine();		}
+			if((pDataArray->count) % 100 == 0){	pDataArray->m->mothurOut("Processing sequence: " + toString(pDataArray->count)); pDataArray->m->mothurOutEndLine();		}
 		}
 		//report progress
-		if((count) % 100 != 0){	pDataArray->m->mothurOut("Processing sequence: " + toString(count)); pDataArray->m->mothurOutEndLine();		}
+		if((pDataArray->count) % 100 != 0){	pDataArray->m->mothurOut("Processing sequence: " + toString(pDataArray->count)); pDataArray->m->mothurOutEndLine();		}
 		
 		pDataArray->numNoParents = chimera->getNumNoParents();
-		if (pDataArray->numNoParents == count) { 	pDataArray->m->mothurOut("[WARNING]: megablast returned 0 potential parents for all your sequences. This could be due to formatdb.exe not being setup properly, please check formatdb.log for errors.\n"); }
+		if (pDataArray->numNoParents == pDataArray->count) { 	pDataArray->m->mothurOut("[WARNING]: megablast returned 0 potential parents for all your sequences. This could be due to formatdb.exe not being setup properly, please check formatdb.log for errors.\n"); }
 
 		out.close();
 		out2.close();

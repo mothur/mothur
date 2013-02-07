@@ -36,7 +36,7 @@ public:
 	void updateQScoreErrorMap(map<char, vector<int> >&, string, int, int, int);
 	void updateForwardMap(vector<vector<int> >&, int, int, int);
 	void updateReverseMap(vector<vector<int> >&, int, int, int);
-    void setName(string n) { seqName = n; }
+    void setName(string n); 
     void setScores(vector<int> qs) { qScores = qs; seqLength = qScores.size(); }
     
 	
@@ -48,6 +48,8 @@ private:
 	
 	string seqName;
 	int seqLength;
+    
+    string getSequenceName(ifstream&);
 };
 	
 /**************************************************************************************************/

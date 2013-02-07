@@ -68,7 +68,7 @@ struct metastatsData {
     vector<string> designMapGroups;
     vector<string> outputNames;
 	int start;
-	int num, iters;
+	int num, iters, count;
 	float threshold;
 	MothurOut* m;
 	string sharedfile;
@@ -86,6 +86,7 @@ struct metastatsData {
         designMapGroups = dg;
         iters = i;
         threshold = thr;
+        count=0;
 	}
 };
 /**************************************************************************************************/
@@ -99,7 +100,7 @@ static DWORD WINAPI MyMetastatsThreadFunction(LPVOID lpParam){
 		
         //for each combo
 		for (int c = pDataArray->start; c < (pDataArray->start+pDataArray->num); c++) {
-			
+			pDataArray->count++;
 			//get set names
 			string setA = pDataArray->namesOfGroupCombos[c][0]; 
 			string setB = pDataArray->namesOfGroupCombos[c][1];

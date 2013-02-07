@@ -19,6 +19,8 @@ vector<string> PreClusterCommand::setParameters(){
 		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
 		CommandParameter pdiffs("diffs", "Number", "", "0", "", "", "","",false,false,true); parameters.push_back(pdiffs);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
+        CommandParameter ptopdown("topdown", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(ptopdown);
+
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
@@ -37,11 +39,12 @@ string PreClusterCommand::getHelpString(){
 		string helpString = "";
 		helpString += "The pre.cluster command groups sequences that are within a given number of base mismatches.\n";
 		helpString += "The pre.cluster command outputs a new fasta and name file.\n";
-		helpString += "The pre.cluster command parameters are fasta, name, group, count, processors and diffs. The fasta parameter is required. \n";
+		helpString += "The pre.cluster command parameters are fasta, name, group, count, topdown, processors and diffs. The fasta parameter is required. \n";
 		helpString += "The name parameter allows you to give a list of seqs that are identical. This file is 2 columns, first column is name or representative sequence, second column is a list of its identical sequences separated by commas.\n";
 		helpString += "The group parameter allows you to provide a group file so you can cluster by group. \n";
         helpString += "The count parameter allows you to provide a count file so you can cluster by group. \n";
 		helpString += "The diffs parameter allows you to specify maximum number of mismatched bases allowed between sequences in a grouping. The default is 1.\n";
+        helpString += "The topdown parameter allows you to specify whether to cluster from largest abundance to smallest or smallest to largest.  Default=T, meanging largest to smallest.\n";
 		helpString += "The pre.cluster command should be in the following format: \n";
 		helpString += "pre.cluster(fasta=yourFastaFile, names=yourNamesFile, diffs=yourMaxDiffs) \n";
 		helpString += "Example pre.cluster(fasta=amazon.fasta, diffs=2).\n";
@@ -210,6 +213,9 @@ PreClusterCommand::PreClusterCommand(string option) {
 			m->setProcessors(temp);
 			m->mothurConvert(temp, processors);
 			
+            temp = validParameter.validFile(parameters, "topdown", false);		if(temp == "not found"){  temp = "T"; }
+			topdown = m->isTrue(temp);
+            
             if (countfile == "") {
                 if (namefile == "") {
                     vector<string> files; files.push_back(fastafile);
@@ -440,7 +446,7 @@ int PreClusterCommand::createProcessesGroups(string newFName, string newNName, s
 			// Allocate memory for thread data.
 			string extension = toString(i) + ".temp";
 			
-			preClusterData* tempPreCluster = new preClusterData(fastafile, namefile, groupfile, countfile, (newFName+extension), (newNName+extension), newMFile, groups, m, lines[i].start, lines[i].end, diffs, i);
+			preClusterData* tempPreCluster = new preClusterData(fastafile, namefile, groupfile, countfile, (newFName+extension), (newNName+extension), newMFile, groups, m, lines[i].start, lines[i].end, diffs, topdown, i);
 			pDataArray.push_back(tempPreCluster);
 			processIDS.push_back(i);
 			
@@ -458,6 +464,9 @@ int PreClusterCommand::createProcessesGroups(string newFName, string newNName, s
 		
 		//Close all thread handles and free memory allocations.
 		for(int i=0; i < pDataArray.size(); i++){
+            if (pDataArray[i]->count != (pDataArray[i]->end-pDataArray[i]->start)) {
+                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end-pDataArray[i]->start) + " groups assigned to it, quitting. \n"); m->control_pressed = true; 
+            }
 			for (int j = 0; j < pDataArray[i]->mapFileNames.size(); j++) {
 				outputNames.push_back(pDataArray[i]->mapFileNames[j]); outputTypes["map"].push_back(pDataArray[i]->mapFileNames[j]); 
 			}
@@ -545,7 +554,8 @@ int PreClusterCommand::process(string newMapFile){
 		m->openOutputFile(newMapFile, out);
 		
 		//sort seqs by number of identical seqs
-		sort(alignSeqs.begin(), alignSeqs.end(), comparePriority);
+        if (topdown) { sort(alignSeqs.begin(), alignSeqs.end(), comparePriorityTopDown);  }
+        else {  sort(alignSeqs.begin(), alignSeqs.end(), comparePriorityDownTop);  }
 		
 		int count = 0;
 		int numSeqs = alignSeqs.size();

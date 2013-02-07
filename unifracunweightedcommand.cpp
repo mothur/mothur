@@ -481,42 +481,30 @@ int UnifracUnweightedCommand::execute() {
 int UnifracUnweightedCommand::getAverageSTDMatrices(vector< vector<double> >& dists, int treeNum) {
 	try {
         //we need to find the average distance and standard deviation for each groups distance
-        
         //finds sum
-        vector<double> averages; averages.resize(numComp, 0); 
-        for (int thisIter = 0; thisIter < subsampleIters; thisIter++) {
-            for (int i = 0; i < dists[thisIter].size(); i++) {  
-                averages[i] += dists[thisIter][i];
-            }
-        }
-        
-        //finds average.
-        for (int i = 0; i < averages.size(); i++) {  averages[i] /= (float) subsampleIters; }
+        vector<double> averages = m->getAverages(dists);
         
         //find standard deviation
-        vector<double> stdDev; stdDev.resize(numComp, 0);
+        vector<double> stdDev = m->getStandardDeviation(dists, averages);
         
-        for (int thisIter = 0; thisIter < subsampleIters; thisIter++) { //compute the difference of each dist from the mean, and square the result of each
-            for (int j = 0; j < dists[thisIter].size(); j++) {
-                stdDev[j] += ((dists[thisIter][j] - averages[j]) * (dists[thisIter][j] - averages[j]));
-            }
-        }
-        for (int i = 0; i < stdDev.size(); i++) {  
-            stdDev[i] /= (float) subsampleIters; 
-            stdDev[i] = sqrt(stdDev[i]);
+        //make matrix with scores in it
+        vector< vector<double> > avedists;	//avedists.resize(m->getNumGroups());
+        for (int i = 0; i < m->getNumGroups(); i++) {
+            vector<double> temp;
+            for (int j = 0; j < m->getNumGroups(); j++) { temp.push_back(0.0); }
+            avedists.push_back(temp);
         }
         
         //make matrix with scores in it
-        vector< vector<double> > avedists;	avedists.resize(m->getNumGroups());
+        vector< vector<double> > stddists;	//stddists.resize(m->getNumGroups());
         for (int i = 0; i < m->getNumGroups(); i++) {
-            avedists[i].resize(m->getNumGroups(), 0.0);
+            vector<double> temp;
+            for (int j = 0; j < m->getNumGroups(); j++) { temp.push_back(0.0); }
+            //stddists[i].resize(m->getNumGroups(), 0.0);
+            stddists.push_back(temp);
         }
         
-        //make matrix with scores in it
-        vector< vector<double> > stddists;	stddists.resize(m->getNumGroups());
-        for (int i = 0; i < m->getNumGroups(); i++) {
-            stddists[i].resize(m->getNumGroups(), 0.0);
-        }
+        if (m->debug) { m->mothurOut("[DEBUG]: about to fill matrix.\n"); }
         
         //flip it so you can print it
         int count = 0;
@@ -529,6 +517,8 @@ int UnifracUnweightedCommand::getAverageSTDMatrices(vector< vector<double> >& di
                 count++;
             }
         }
+        
+        if (m->debug) { m->mothurOut("[DEBUG]: done filling matrix.\n"); }
         
         map<string, string> variables; 
 		variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(treefile));

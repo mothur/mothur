@@ -236,7 +236,11 @@ int CountSeqsCommand::processSmall(string outputFileName){
 			
 			string firstCol, secondCol;
 			in >> firstCol; m->gobble(in); in >> secondCol; m->gobble(in);
-			
+            //cout << firstCol << '\t' << secondCol << endl;
+            m->checkName(firstCol);
+            m->checkName(secondCol);
+			//cout << firstCol << '\t' << secondCol << endl;
+           
 			vector<string> names;
 			m->splitAtChar(secondCol, names, ',');
 			
@@ -435,6 +439,8 @@ map<int, string> CountSeqsCommand::processNameFile(string name) {
                 else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
                 
                 if (pairDone) { 
+                    m->checkName(firstCol);
+                    m->checkName(secondCol);
                     //parse names into vector
                     vector<string> theseNames;
                     m->splitAtComma(secondCol, theseNames);
@@ -456,6 +462,8 @@ map<int, string> CountSeqsCommand::processNameFile(string name) {
                 else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
                 
                 if (pairDone) { 
+                    m->checkName(firstCol);
+                    m->checkName(secondCol);
                     //parse names into vector
                     vector<string> theseNames;
                     m->splitAtComma(secondCol, theseNames);
@@ -507,6 +515,7 @@ map<int, string> CountSeqsCommand::getGroupNames(string filename, set<string>& n
                 else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
                 
                 if (pairDone) { 
+                    m->checkName(firstCol);
                     it = groupIndex.find(secondCol);
                     if (it == groupIndex.end()) { //add group, assigning the group and number so we can use vectors above
                         groupIndex[secondCol] = count;
@@ -529,6 +538,7 @@ map<int, string> CountSeqsCommand::getGroupNames(string filename, set<string>& n
                 else  { secondCol = pieces[i]; pairDone = true; columnOne=true; }
                 
                 if (pairDone) { 
+                    m->checkName(firstCol);
                     it = groupIndex.find(secondCol);
                     if (it == groupIndex.end()) { //add group, assigning the group and number so we can use vectors above
                         groupIndex[secondCol] = count;

@@ -33,7 +33,7 @@ struct distanceData {
 	vector<string> Estimators;
 	MothurOut* m;
 	string output;
-	int numNewFasta;
+	int numNewFasta, count;
 	string countends;
 	
 	distanceData(){}
@@ -86,7 +86,7 @@ static DWORD WINAPI MyDistThreadFunction(LPVOID lpParam){
 		ofstream outFile(pDataArray->dFileName.c_str(), ios::trunc);
 		outFile.setf(ios::fixed, ios::showpoint);
 		outFile << setprecision(4);
-		
+		pDataArray->count = 0;
 		
 		if (pDataArray->output != "square") { 
 			if((pDataArray->output == "lt") && (pDataArray->startLine == 0)){	outFile << pDataArray->alignDB.getNumSeqs() << endl;	}
@@ -121,9 +121,9 @@ static DWORD WINAPI MyDistThreadFunction(LPVOID lpParam){
 				if(i % 100 == 0){
 					pDataArray->m->mothurOut(toString(i) + "\t" + toString(time(NULL) - startTime)); pDataArray->m->mothurOutEndLine();
 				}
-				
+				pDataArray->count++;
 			}
-			pDataArray->m->mothurOut(toString(pDataArray->endLine-1) + "\t" + toString(time(NULL) - startTime)); pDataArray->m->mothurOutEndLine();
+			pDataArray->m->mothurOut(toString(pDataArray->count) + "\t" + toString(time(NULL) - startTime)); pDataArray->m->mothurOutEndLine();
 		}else{
 			if(pDataArray->startLine == 0){	outFile << pDataArray->alignDB.getNumSeqs() << endl;	}
 			
@@ -150,9 +150,9 @@ static DWORD WINAPI MyDistThreadFunction(LPVOID lpParam){
 				if(i % 100 == 0){
 					pDataArray->m->mothurOut(toString(i) + "\t" + toString(time(NULL) - startTime)); pDataArray->m->mothurOutEndLine();
 				}
-				
+				pDataArray->count++;
 			}
-			pDataArray->m->mothurOut(toString(pDataArray->endLine-1) + "\t" + toString(time(NULL) - startTime)); pDataArray->m->mothurOutEndLine();
+			pDataArray->m->mothurOut(toString(pDataArray->count) + "\t" + toString(time(NULL) - startTime)); pDataArray->m->mothurOutEndLine();
 		}
 		
 		outFile.close();

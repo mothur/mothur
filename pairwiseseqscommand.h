@@ -128,7 +128,7 @@ static DWORD WINAPI MyPairwiseSquareThreadFunction(LPVOID lpParam){
 		outFile.setf(ios::fixed, ios::showpoint);
 		outFile << setprecision(4);
 		
-		pDataArray->count = pDataArray->end;
+		pDataArray->count = 0;
         
         int startTime = time(NULL);
         
@@ -162,6 +162,7 @@ static DWORD WINAPI MyPairwiseSquareThreadFunction(LPVOID lpParam){
         if(pDataArray->start == 0){	outFile << pDataArray->alignDB.getNumSeqs() << endl;	}
 		
 		for(int i=pDataArray->start;i<pDataArray->end;i++){
+            pDataArray->count++;
             
 			string name = pDataArray->alignDB.get(i).getName();
 			//pad with spaces to make compatible
@@ -201,7 +202,7 @@ static DWORD WINAPI MyPairwiseSquareThreadFunction(LPVOID lpParam){
 			}
 			
 		}
-		pDataArray->m->mothurOut(toString(pDataArray->end-1) + "\t" + toString(time(NULL) - startTime)); pDataArray->m->mothurOutEndLine();
+		pDataArray->m->mothurOut(toString(pDataArray->count) + "\t" + toString(time(NULL) - startTime)); pDataArray->m->mothurOutEndLine();
 		
 		outFile.close();
         delete alignment;

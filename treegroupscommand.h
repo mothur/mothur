@@ -139,6 +139,7 @@ struct treeSharedData {
 	unsigned long long start;
 	unsigned long long end;
 	MothurOut* m;
+    int count;
 	
 	treeSharedData(){}
 	treeSharedData(MothurOut* mout, unsigned long long st, unsigned long long en, vector<string> est, vector<SharedRAbundVector*> lu) {
@@ -147,6 +148,7 @@ struct treeSharedData {
 		end = en;
         Estimators = est;
         thisLookup = lu;
+        count=0;
 	}
 };
 /**************************************************************************************************/
@@ -249,6 +251,8 @@ static DWORD WINAPI MyTreeSharedThreadFunction(LPVOID lpParam){
 		vector<SharedRAbundVector*> subset;
 		for (int k = pDataArray->start; k < pDataArray->end; k++) { // pass cdd each set of groups to compare
 			
+            pDataArray->count++;
+            
 			for (int l = 0; l < k; l++) {
 				
 				if (k != l) { //we dont need to similiarity of a groups to itself

@@ -12,6 +12,7 @@
 
 #include "command.hpp"
 #include "sharedrabundvector.h"
+#include "listvector.hpp"
 
 /**************************************************************************************************/
 
@@ -36,13 +37,14 @@ public:
     
 private:
     bool abort, allLines;
-    string outputDir, sharedfile, relabundfile, label, inputFileName, format;
+    string outputDir, sharedfile, relabundfile, label, inputFileName, format, listfile;
     vector<string> outputNames;
     vector<string> Groups;
     set<string> labels;
     
     int createList(vector<SharedRAbundFloatVector*>&);
     int createList(vector<SharedRAbundVector*>&);
+    int createList(ListVector*&);
 
 };
 

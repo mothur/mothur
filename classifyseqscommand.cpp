@@ -610,7 +610,7 @@ int ClassifySeqsCommand::execute(){
 	try {
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
         
-        string outputMethodTag = method + ".";
+        string outputMethodTag = method;
 		if(method == "wang"){	classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, iters, rand(), flip, writeShortcuts);	}
 		else if(method == "knn"){	classify = new Knn(taxonomyFileName, templateFileName, search, kmerSize, gapOpen, gapExtend, match, misMatch, numWanted, rand());				}
         else if(method == "zap"){	
@@ -782,7 +782,7 @@ int ClassifySeqsCommand::execute(){
 			}
 #endif
 			
-			if (!m->isBlank(newaccnosFile)) { m->mothurOutEndLine(); m->mothurOut("[WARNING]: mothur suspects some of your sequences may be reversed, please check " + newaccnosFile + " for the list of the sequences."); m->mothurOutEndLine(); 
+			if (!m->isBlank(newaccnosFile)) { m->mothurOutEndLine(); m->mothurOut("[WARNING]: mothur reversed some your sequences for a better classification.  If you would like to take a closer look, please check " + newaccnosFile + " for the list of the sequences."); m->mothurOutEndLine(); 
                 outputNames.push_back(newaccnosFile); outputTypes["accnos"].push_back(newaccnosFile);
             }else { m->mothurRemove(newaccnosFile); }
 
@@ -1044,6 +1044,9 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
 		//Close all thread handles and free memory allocations.
 		for(int i=0; i < pDataArray.size(); i++){
 			num += pDataArray[i]->count;
+            if (pDataArray[i]->count != pDataArray[i]->end) {
+                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end) + " sequences assigned to it, quitting. \n"); m->control_pressed = true; 
+            }
 			CloseHandle(hThreadArray[i]);
 			delete pDataArray[i];
 		}

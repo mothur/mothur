@@ -114,9 +114,10 @@ static DWORD WINAPI MySeqSumThreadFunction(LPVOID lpParam){
 			in.seekg(pDataArray->start-1); pDataArray->m->gobble(in); 
 		}
 		
-		pDataArray->count = pDataArray->end;
 		for(int i = 0; i < pDataArray->end; i++){ //end is the number of sequences to process
 			
+            pDataArray->count++;
+            
 			if (pDataArray->m->control_pressed) { in.close(); outSummary.close(); pDataArray->count = 1; return 1; }
 			
 			Sequence current(in); pDataArray->m->gobble(in); 

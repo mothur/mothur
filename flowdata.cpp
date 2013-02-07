@@ -42,15 +42,14 @@ FlowData::FlowData(int numFlows, float signal, float noise, int maxHomoP, string
 bool FlowData::getNext(ifstream& flowFile){
 	
 	try {
-		flowFile >> seqName >> endFlow;	
-        if (seqName.length() != 0) {
-            //cout << "in Flowdata " + seqName << endl;
+        seqName = getSequenceName(flowFile);
+		flowFile >> endFlow;	
+        if (!m->control_pressed) {
             for(int i=0;i<numFlows;i++)	{	flowFile >> flowData[i]; 	}
-            //cout << "in Flowdata read " << seqName + " done" << endl;
             updateEndFlow(); 
             translateFlow();
             m->gobble(flowFile);
-		}else{ m->mothurOut("Error in reading your flowfile, at position " + toString(flowFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); }
+		}
             
 		if(flowFile){	return 1;	}
 		else		{	return 0;	}
@@ -60,6 +59,26 @@ bool FlowData::getNext(ifstream& flowFile){
 		exit(1);
 	}
 	
+}
+//********************************************************************************************************************
+string FlowData::getSequenceName(ifstream& flowFile) {
+	try {
+		string name = "";
+		
+        flowFile >> name;
+		
+		if (name.length() != 0) { 
+            for (int i = 0; i < name.length(); i++) {
+                if (name[i] == ':') { name[i] = '_'; m->changedSeqNames = true; }
+            }
+        }else{ m->mothurOut("Error in reading your flowfile, at position " + toString(flowFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); m->control_pressed = true;  }
+        
+		return name;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "FlowData", "getSequenceName");
+		exit(1);
+	}
 }
 
 //**********************************************************************************************************************

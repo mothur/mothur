@@ -23,6 +23,7 @@ vector<string> ChimeraUchimeCommand::setParameters(){
         CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none","",false,false,true); parameters.push_back(pcount);
 		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
+        CommandParameter pstrand("strand", "String", "", "", "", "", "","",false,false); parameters.push_back(pstrand);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		CommandParameter pabskew("abskew", "Number", "", "1.9", "", "", "","",false,false); parameters.push_back(pabskew);
@@ -61,7 +62,7 @@ string ChimeraUchimeCommand::getHelpString(){
 		string helpString = "";
 		helpString += "The chimera.uchime command reads a fastafile and referencefile and outputs potentially chimeric sequences.\n";
 		helpString += "This command is a wrapper for uchime written by Robert C. Edgar.\n";
-		helpString += "The chimera.uchime command parameters are fasta, name, count, reference, processors, dereplicate, abskew, chimealns, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, skipgaps, skipgaps2, minlen, maxlen, ucl and queryfact.\n";
+		helpString += "The chimera.uchime command parameters are fasta, name, count, reference, processors, dereplicate, abskew, chimealns, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, skipgaps, skipgaps2, minlen, maxlen, ucl, strand and queryfact.\n";
 		helpString += "The fasta parameter allows you to enter the fasta file containing your potentially chimeric sequences, and is required, unless you have a valid current fasta file. \n";
 		helpString += "The name parameter allows you to provide a name file, if you are using template=self. \n";
         helpString += "The count parameter allows you to provide a count file, if you are using template=self. \n";
@@ -543,6 +544,8 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 			maxp = validParameter.validFile(parameters, "maxp", false);						if (maxp == "not found")			{ useMaxp = false; maxp = "2";						}	else{ useMaxp = true;			}
 			minlen = validParameter.validFile(parameters, "minlen", false);					if (minlen == "not found")			{ useMinlen = false; minlen = "10";					}	else{ useMinlen = true;			}
 			maxlen = validParameter.validFile(parameters, "maxlen", false);					if (maxlen == "not found")			{ useMaxlen = false; maxlen = "10000";				}	else{ useMaxlen = true;			}
+            
+            strand = validParameter.validFile(parameters, "strand", false);	if (strand == "not found")	{  strand = "";	}
 			
 			temp = validParameter.validFile(parameters, "ucl", false);						if (temp == "not found") { temp = "f"; }
 			ucl = m->isTrue(temp);
@@ -1232,6 +1235,15 @@ int ChimeraUchimeCommand::driver(string outputFName, string filename, string acc
 			*tempa = '\0'; strncat(tempa, alns.c_str(), alns.length());
 			cPara.push_back(tempa);
 		}
+        
+        if (strand != "") {
+			char* tempA = new char[9]; 
+			*tempA = '\0'; strncat(tempA, "--strand", 8);
+			cPara.push_back(tempA);
+			char* tempa = new char[strand.length()+1];
+			*tempa = '\0'; strncat(tempa, strand.c_str(), strand.length());
+			cPara.push_back(tempa);
+		}
 		
 		if (useAbskew) {
 			char* tempskew = new char[9];
@@ -1631,7 +1643,7 @@ int ChimeraUchimeCommand::createProcesses(string outputFileName, string filename
 			
 			uchimeData* tempUchime = new uchimeData(outputFileName+extension, uchimeLocation, templatefile, files[i], "", "", "", accnos+extension, alns+extension, dummy, m, 0, 0,  i);
 			tempUchime->setBooleans(useAbskew, chimealns, useMinH, useMindiv, useXn, useDn, useXa, useChunks, useMinchunk, useIdsmoothwindow, useMinsmoothid, useMaxp, skipgaps, skipgaps2, useMinlen, useMaxlen, ucl, useQueryfract, hasCount);
-			tempUchime->setVariables(abskew, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, minlen, maxlen, queryfract);
+			tempUchime->setVariables(abskew, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, minlen, maxlen, queryfract, strand);
 			
 			pDataArray.push_back(tempUchime);
 			processIDS.push_back(i);
@@ -1763,7 +1775,7 @@ int ChimeraUchimeCommand::createProcessesGroups(string outputFName, string filen
 			
 			uchimeData* tempUchime = new uchimeData(outputFName+extension, uchimeLocation, templatefile, filename+extension, fastaFile, nameFile, groupFile, accnos+extension, alns+extension, groups, m, lines[i].start, lines[i].end,  i);
 			tempUchime->setBooleans(useAbskew, chimealns, useMinH, useMindiv, useXn, useDn, useXa, useChunks, useMinchunk, useIdsmoothwindow, useMinsmoothid, useMaxp, skipgaps, skipgaps2, useMinlen, useMaxlen, ucl, useQueryfract, hasCount);
-			tempUchime->setVariables(abskew, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, minlen, maxlen, queryfract);
+			tempUchime->setVariables(abskew, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, minlen, maxlen, queryfract, strand);
 			
 			pDataArray.push_back(tempUchime);
 			processIDS.push_back(i);

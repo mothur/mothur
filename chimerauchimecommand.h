@@ -49,7 +49,7 @@ private:
 	int createProcesses(string, string, string, string, int&);
 		
 	bool abort, useAbskew, chimealns, useMinH, useMindiv, useXn, useDn, useXa, useChunks, useMinchunk, useIdsmoothwindow, useMinsmoothid, useMaxp, skipgaps, skipgaps2, useMinlen, useMaxlen, ucl, useQueryfract, hasCount, hasName, dups;
-	string fastafile, groupfile, templatefile, outputDir, namefile, countfile, abskew, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, minlen, maxlen, queryfract, uchimeLocation;
+	string fastafile, groupfile, templatefile, outputDir, namefile, countfile, abskew, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, minlen, maxlen, queryfract, uchimeLocation, strand;
 	int processors;
 	
 	SequenceParser* sparser;
@@ -87,7 +87,7 @@ struct uchimeData {
 	int threadID, count, numChimeras;
 	vector<string> groups;
 	bool useAbskew, chimealns, useMinH, useMindiv, useXn, useDn, useXa, useChunks, useMinchunk, useIdsmoothwindow, useMinsmoothid, useMaxp, skipgaps, skipgaps2, useMinlen, useMaxlen, ucl, useQueryfract, hasCount;
-	string abskew, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, minlen, maxlen, queryfract;
+	string abskew, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, minlen, maxlen, queryfract, strand;
 	
 	uchimeData(){}
 	uchimeData(string o, string uloc, string t, string file, string f, string n, string g, string ac,  string al, vector<string> gr, MothurOut* mout, int st, int en, int tid) {
@@ -130,10 +130,11 @@ struct uchimeData {
         hasCount = hc;
 	}
 	
-	void setVariables(string abske, string min, string mindi, string x, string d, string xa2, string chunk, string minchun, string idsmoothwindo, string minsmoothi, string max, string minle, string maxle, string queryfrac) {
+	void setVariables(string abske, string min, string mindi, string x, string d, string xa2, string chunk, string minchun, string idsmoothwindo, string minsmoothi, string max, string minle, string maxle, string queryfrac, string stra) {
 		abskew = abske;
 		minh = min;
 		mindiv = mindi;
+        strand = stra;
 		xn = x;
 		dn = d;
 		xa = xa2;
@@ -243,6 +244,15 @@ static DWORD WINAPI MyUchimeThreadFunction(LPVOID lpParam){
 				cPara.push_back(tempa);
 			}
 			
+            if (pDataArray->strand != "") {
+                char* tempA = new char[9]; 
+                *tempA = '\0'; strncat(tempA, "--strand", 8);
+                cPara.push_back(tempA);
+                char* tempa = new char[pDataArray->strand.length()+1];
+                *tempa = '\0'; strncat(tempa, pDataArray->strand.c_str(), pDataArray->strand.length());
+                cPara.push_back(tempa);
+            }
+            
 			if (pDataArray->useAbskew) {
 				char* tempskew = new char[9];
 				*tempskew = '\0'; strncat(tempskew, "--abskew", 8);
@@ -536,12 +546,13 @@ static DWORD WINAPI MyUchimeSeqsThreadFunction(LPVOID lpParam){
         ofstream out23;
         pDataArray->m->openOutputFile(outputFileName, out23);
         
+        int fcount = 0;
         while (!in23.eof()) {
             if (pDataArray->m->control_pressed) { break;  }
             
             Sequence seq(in23); pDataArray->m->gobble(in23);
             
-            if (seq.getName() != "") { seq.printSequence(out23); }
+            if (seq.getName() != "") { seq.printSequence(out23); fcount++; }
         }
         in23.close();
         out23.close();
@@ -589,6 +600,15 @@ static DWORD WINAPI MyUchimeSeqsThreadFunction(LPVOID lpParam){
 			cPara.push_back(tempa);
 		}
 		
+        if (pDataArray->strand != "") {
+            char* tempA = new char[9]; 
+            *tempA = '\0'; strncat(tempA, "--strand", 8);
+            cPara.push_back(tempA);
+            char* tempa = new char[pDataArray->strand.length()+1];
+            *tempa = '\0'; strncat(tempa, pDataArray->strand.c_str(), pDataArray->strand.length());
+            cPara.push_back(tempa);
+        }
+        
 		if (pDataArray->useAbskew) {
 			char* tempskew = new char[9];
 			*tempskew = '\0'; strncat(tempskew, "--abskew", 8);
@@ -802,12 +822,15 @@ static DWORD WINAPI MyUchimeSeqsThreadFunction(LPVOID lpParam){
 		in.close();
 		out.close();
 		
+        if (fcount != totalSeqs) { pDataArray->m->mothurOut("[ERROR]: process " + toString(pDataArray->threadID) + " only processed " + toString(pDataArray->count) + " of " + toString(pDataArray->end) + " sequences assigned to it, quitting. \n"); pDataArray->m->control_pressed = true; }
+        
 		if (pDataArray->m->control_pressed) { return 0; }
 		
 		pDataArray->m->mothurOutEndLine(); pDataArray->m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(totalSeqs) + " sequences.");	pDataArray->m->mothurOutEndLine();					
 	
 		pDataArray->count = totalSeqs;
 		pDataArray->numChimeras = numChimeras;
+        
 		return totalSeqs;
 		
 	}

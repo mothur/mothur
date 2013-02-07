@@ -21,7 +21,7 @@ public:
 	~ParseFastaQCommand() {}
 	
 	vector<string> setParameters();
-	string getCommandName()			{ return "parse.fastq";		}
+	string getCommandName()			{ return "fastq.info";		}
 	string getCommandCategory()		{ return "Sequence Processing"; }
 	
 	string getHelpString();	

@@ -137,6 +137,9 @@
 #include "sffmultiplecommand.h"
 #include "classifysharedcommand.h"
 #include "filtersharedcommand.h"
+#include "primerdesigncommand.h"
+#include "getdistscommand.h"
+#include "removedistscommand.h"
 
 /*******************************************************/
 
@@ -297,6 +300,9 @@ CommandFactory::CommandFactory(){
 	commands["quit"]				= "MPIEnabled"; 
     commands["classify.shared"]		= "classify.shared"; 
     commands["filter.shared"]		= "filter.shared"; 
+    commands["primer.design"]		= "primer.design";
+    commands["get.dists"]           = "get.dists";
+    commands["remove.dists"]        = "remove.dists";
     
 
 }
@@ -513,6 +519,9 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         else if(commandName == "sff.multiple")          {	command = new SffMultipleCommand(optionString);             }
         else if(commandName == "classify.shared")       {	command = new ClassifySharedCommand(optionString);          }
         else if(commandName == "filter.shared")         {	command = new FilterSharedCommand(optionString);            }
+        else if(commandName == "primer.design")         {	command = new PrimerDesignCommand(optionString);            }
+        else if(commandName == "get.dists")             {	command = new GetDistsCommand(optionString);                }
+        else if(commandName == "remove.dists")          {	command = new RemoveDistsCommand(optionString);             }
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -670,6 +679,9 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
         else if(commandName == "sff.multiple")          {	pipecommand = new SffMultipleCommand(optionString);             }
         else if(commandName == "classify.shared")       {	pipecommand = new ClassifySharedCommand(optionString);          }
         else if(commandName == "filter.shared")         {	pipecommand = new FilterSharedCommand(optionString);            }
+        else if(commandName == "primer.design")         {	pipecommand = new PrimerDesignCommand(optionString);            }
+        else if(commandName == "get.dists")             {	pipecommand = new GetDistsCommand(optionString);                }
+        else if(commandName == "remove.dists")          {	pipecommand = new RemoveDistsCommand(optionString);             }
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -813,6 +825,9 @@ Command* CommandFactory::getCommand(string commandName){
         else if(commandName == "sff.multiple")          {	shellcommand = new SffMultipleCommand();            }
         else if(commandName == "classify.shared")       {	shellcommand = new ClassifySharedCommand();         }
         else if(commandName == "filter.shared")         {	shellcommand = new FilterSharedCommand();           }
+        else if(commandName == "primer.design")         {	shellcommand = new PrimerDesignCommand();           }
+        else if(commandName == "get.dists")             {	shellcommand = new GetDistsCommand();               }
+        else if(commandName == "remove.dists")          {	shellcommand = new RemoveDistsCommand();            }
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;
@@ -891,6 +906,41 @@ void CommandFactory::printCommands(ostream& out) {
 		exit(1);
 	}
 }
+/***********************************************************************/
+void CommandFactory::printCommandsCategories(ostream& out) {
+    try {
+        map<string, string> commands = getListCommands();
+        map<string, string>::iterator it;
+
+        map<string, string> categories;
+        map<string, string>::iterator itCat;
+        //loop through each command outputting info
+        for (it = commands.begin(); it != commands.end(); it++) {
+    
+            Command* thisCommand = getCommand(it->first);
+    
+            //don't add hidden commands
+            if (thisCommand->getCommandCategory() != "Hidden") {
+                itCat = categories.find(thisCommand->getCommandCategory());
+                if (itCat == categories.end()) {
+                    categories[thisCommand->getCommandCategory()] = thisCommand->getCommandName();
+                }else {
+                    categories[thisCommand->getCommandCategory()] += ", " + thisCommand->getCommandName();
+                }
+            }
+        }
+        
+        for (itCat = categories.begin(); itCat != categories.end(); itCat++) {
+            out << itCat->first << " commmands include: " << itCat->second << endl;
+        }
+
+    }
+	catch(exception& e) {
+		m->errorOut(e, "CommandFactory", "printCommandsCategories");
+		exit(1);
+	}
+}      
+
 /***********************************************************************/
 
 

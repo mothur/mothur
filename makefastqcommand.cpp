@@ -16,7 +16,7 @@ vector<string> MakeFastQCommand::setParameters(){
 	try {
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","fastq",false,true,true); parameters.push_back(pfasta);
 		CommandParameter pqfile("qfile", "InputTypes", "", "", "none", "none", "none","fastq",false,true,true); parameters.push_back(pqfile);
-		CommandParameter pformat("format", "Multiple", "sanger-illumina", "sanger", "", "", "","",false,false); parameters.push_back(pformat);
+		CommandParameter pformat("format", "Multiple", "sanger-illumina-illumina1.8+", "sanger", "", "", "","",false,false); parameters.push_back(pformat);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
@@ -35,7 +35,7 @@ string MakeFastQCommand::getHelpString(){
 		string helpString = "";
 		helpString += "The make.fastq command reads a fasta and quality file and creates a fastq file.\n";
 		helpString += "The make.fastq command parameters are fasta, qfile and format.  fasta and qfile are required.\n";
-		helpString += "The format parameter is used to indicate whether your sequences are sanger or illumina, default=sanger.\n";
+		helpString += "The format parameter is used to indicate whether your sequences are sanger, illumina1.8+ or illumina, default=sanger.\n";
 		helpString += "The make.fastq command should be in the following format: make.fastq(qfile=yourQualityFile, fasta=yourFasta).\n";
 		helpString += "Example make.fastq(fasta=amazon.fasta, qfile=amazon.qual).\n";
 		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n";
@@ -147,8 +147,8 @@ MakeFastQCommand::MakeFastQCommand(string option)  {
             
             format = validParameter.validFile(parameters, "format", false);		if (format == "not found"){	format = "sanger";	}
             
-            if ((format != "sanger") && (format != "illumina") && (format != "solexa"))  { 
-				m->mothurOut(format + " is not a valid format. Your format choices are sanger, solexa and illumina, aborting." ); m->mothurOutEndLine();
+            if ((format != "sanger") && (format != "illumina") && (format != "illumina1.8+"))  { 
+				m->mothurOut(format + " is not a valid format. Your format choices are sanger, illumina1.8+ and illumina, aborting." ); m->mothurOutEndLine();
 				abort=true;
 			}
 

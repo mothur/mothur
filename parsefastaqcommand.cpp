@@ -16,7 +16,7 @@ vector<string> ParseFastaQCommand::setParameters(){
 		CommandParameter pfastq("fastq", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(pfastq);
 		CommandParameter pfasta("fasta", "Boolean", "", "T", "", "", "","fasta",false,false); parameters.push_back(pfasta);
 		CommandParameter pqual("qfile", "Boolean", "", "T", "", "", "","qfile",false,false); parameters.push_back(pqual);
- 		CommandParameter pformat("format", "Multiple", "sanger-illumina-solexa", "sanger", "", "", "","",false,false,true); parameters.push_back(pformat);
+ 		CommandParameter pformat("format", "Multiple", "sanger-illumina-solexa-illumina1.8+", "sanger", "", "", "","",false,false,true); parameters.push_back(pformat);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
@@ -36,7 +36,7 @@ string ParseFastaQCommand::getHelpString(){
 		helpString += "The fastq.info command reads a fastq file and creates a fasta and quality file.\n";
 		helpString += "The fastq.info command parameters are fastq, fasta, qfile and format; fastq is required.\n";
         helpString += "The fastq.info command should be in the following format: fastq.info(fastaq=yourFastaQFile).\n";
-		helpString += "The format parameter is used to indicate whether your sequences are sanger, solexa or illumina, default=sanger.\n";
+		helpString += "The format parameter is used to indicate whether your sequences are sanger, solexa, illumina1.8+ or illumina, default=sanger.\n";
         helpString += "The fasta parameter allows you to indicate whether you want a fasta file generated. Default=T.\n";
         helpString += "The qfile parameter allows you to indicate whether you want a quality file generated. Default=T.\n";
 		helpString += "Example fastq.info(fastaq=test.fastaq).\n";
@@ -136,8 +136,8 @@ ParseFastaQCommand::ParseFastaQCommand(string option){
 			
             format = validParameter.validFile(parameters, "format", false);		if (format == "not found"){	format = "sanger";	}
             
-            if ((format != "sanger") && (format != "illumina") && (format != "solexa"))  { 
-				m->mothurOut(format + " is not a valid format. Your format choices are sanger, solexa and illumina, aborting." ); m->mothurOutEndLine();
+            if ((format != "sanger") && (format != "illumina") && (format != "illumina1.8+") && (format != "solexa"))  { 
+				m->mothurOut(format + " is not a valid format. Your format choices are sanger, solexa, illumina1.8+ and illumina, aborting." ); m->mothurOutEndLine();
 				abort=true;
 			}
 
@@ -249,21 +249,28 @@ vector<int> ParseFastaQCommand::convertQual(string qual) {
 	try {
 		vector<int> qualScores;
 		
+        bool negativeScores = false;
+        
 		for (int i = 0; i < qual.length(); i++) { 
             
             int temp = 0;
             temp = int(qual[i]);
             if (format == "illumina") {
                 temp -= 64; //char '@'
+            }else if (format == "illumina1.8+") {
+                temp -= int('!'); //char '!'
             }else if (format == "solexa") {
                 temp = int(convertTable[temp]); //convert to sanger
                 temp -= int('!'); //char '!'
             }else {
                 temp -= int('!'); //char '!'
             }
+            if (temp < -5) { negativeScores = true; }
 			qualScores.push_back(temp);
 		}
 		
+        if (negativeScores) { m->mothurOut("[ERROR]: finding negative quality scores, do you have the right format selected? http://en.wikipedia.org/wiki/FASTQ_format#Encoding \n");  m->control_pressed = true;  }
+        
 		return qualScores;
 	}
 	catch(exception& e) {

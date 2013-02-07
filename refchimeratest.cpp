@@ -24,7 +24,8 @@ RefChimeraTest::RefChimeraTest(vector<Sequence>& refs, bool aligned) : aligned(a
 	referenceSeqs.resize(numRefSeqs);
 	referenceNames.resize(numRefSeqs);
 	for(int i=0;i<numRefSeqs;i++){
-		referenceSeqs[i] = refs[i].getAligned();
+		if (aligned) { referenceSeqs[i] = refs[i].getAligned(); }
+        else { referenceSeqs[i] = refs[i].getUnaligned(); }
 		referenceNames[i] = refs[i].getName();
 	}
 	
@@ -128,7 +129,7 @@ int RefChimeraTest::analyzeUnalignedQuery(string queryName, string querySeq, ofs
     
     for(int i=0;i<numRefSeqs;i++){
         double length = 0;
-        int diffs = alignQueryToReferences(querySeq, referenceSeqs[i], queryAlign[i], refAlign[i], length);
+        double diffs = alignQueryToReferences(querySeq, referenceSeqs[i], queryAlign[i], refAlign[i], length);
         if(diffs < bestRefDiffs){
             bestRefDiffs = diffs;
             bestRefLength = length;
@@ -324,7 +325,7 @@ double RefChimeraTest::alignQueryToReferences(string query, string reference, st
         		
 		int end = refLength - 1;
         int maxRow = 0;
-        double maxRowValue = -100000000000;
+        double maxRowValue = -2147483647;
         for(int i=0;i<queryLength;i++){
             if(alignMatrix[i][end] > maxRowValue){
                 maxRow = i;
@@ -334,7 +335,7 @@ double RefChimeraTest::alignQueryToReferences(string query, string reference, st
         
         end = queryLength - 1;
         int maxColumn = 0;
-        double maxColumnValue = -100000000000;
+        double maxColumnValue = -2147483647;
 
         for(int j=0;j<refLength;j++){
             if(alignMatrix[end][j] > maxColumnValue){

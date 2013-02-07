@@ -77,7 +77,7 @@ struct shhhseqsData {
 	MothurOut* m;
 	int start;
 	int end;
-	int sigma, threadID;
+	int sigma, threadID, count;
 	vector<string> groups;
 	vector<string> mapfileNames;
 	
@@ -95,6 +95,7 @@ struct shhhseqsData {
 		sigma = s;
 		threadID = tid;
 		groups = gr;
+        count=0;
 	}
 };
 
@@ -113,6 +114,8 @@ static DWORD WINAPI MyShhhSeqsThreadFunction(LPVOID lpParam){
 		//precluster each group
 		for (int k = pDataArray->start; k < pDataArray->end; k++) {
 			
+            pDataArray->count++;
+            
 			int start = time(NULL);
 			
 			if (pDataArray->m->control_pressed) {  return 0; }

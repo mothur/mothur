@@ -254,7 +254,7 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
 		
 		TrimOligos trimOligos(pDataArray->pdiffs, pDataArray->bdiffs, pDataArray->ldiffs, pDataArray->sdiffs, pDataArray->primers, pDataArray->barcodes, pDataArray->revPrimer, pDataArray->linker, pDataArray->spacer);
         
-		pDataArray->count = pDataArray->lineEnd;
+		pDataArray->count = 0;
 		for(int i = 0; i < pDataArray->lineEnd; i++){ //end is the number of sequences to process
 			           
 			if (pDataArray->m->control_pressed) { 
@@ -281,6 +281,7 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
 			
 			string origSeq = currSeq.getUnaligned();
 			if (origSeq != "") {
+                pDataArray->count++;
 				
 				int barcodeIndex = 0;
 				int primerIndex = 0;
@@ -398,7 +399,7 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
                     string thisGroup = "";
                     if (pDataArray->createGroup) {
 						if(pDataArray->barcodes.size() != 0){
-							string thisGroup = pDataArray->barcodeNameVector[barcodeIndex];
+							thisGroup = pDataArray->barcodeNameVector[barcodeIndex];
 							if (pDataArray->primers.size() != 0) { 
 								if (pDataArray->primerNameVector[primerIndex] != "") { 
 									if(thisGroup != "") {
