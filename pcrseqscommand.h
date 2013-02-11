@@ -48,10 +48,10 @@ private:
 	bool getOligos(vector<vector<string> >&, vector<vector<string> >&, vector<vector<string> >&);
     bool abort, keepprimer, keepdots;
 	string fastafile, oligosfile, taxfile, groupfile, namefile, countfile, ecolifile, outputDir, nomatch;
-	int start, end, processors, length;
+	int start, end, processors, length, pdiffs;
 	
     vector<string> revPrimer, outputNames;
-	vector<string> primers;
+	map<string, int> primers;
     
     int writeAccnos(set<string>);
     int readName(set<string>&);
@@ -62,10 +62,7 @@ private:
     bool readEcoli();
 	int driverPcr(string, string, string, set<string>&, linePair);	
 	int createProcesses(string, string, string, set<string>&);
-    bool findForward(Sequence&, int&, int&);
-    bool findReverse(Sequence&, int&, int&);
     bool isAligned(string, map<int, int>&);
-    bool compareDNASeq(string, string);
     string reverseOligo(string);
 };
 
@@ -78,7 +75,7 @@ struct pcrData {
     string goodFasta, badFasta, oligosfile, ecolifile, nomatch;
 	unsigned long long fstart;
 	unsigned long long fend;
-	int count, start, end, length;
+	int count, start, end, length, pdiffs;
 	MothurOut* m;
 	vector<string> primers;
     vector<string> revPrimer;
@@ -87,7 +84,7 @@ struct pcrData {
 	
 	
 	pcrData(){}
-	pcrData(string f, string gf, string bfn, MothurOut* mout, string ol, string ec, vector<string> pr, vector<string> rpr, string nm, bool kp, bool kd, int st, int en, int l, unsigned long long fst, unsigned long long fen) {
+	pcrData(string f, string gf, string bfn, MothurOut* mout, string ol, string ec, vector<string> pr, vector<string> rpr, string nm, bool kp, bool kd, int st, int en, int l, int pd, unsigned long long fst, unsigned long long fen) {
 		filename = f;
         goodFasta = gf;
         badFasta = bfn;
@@ -104,6 +101,7 @@ struct pcrData {
         length = l;
 		fstart = fst;
         fend = fen;
+        pdiffs = pd;
 		count = 0;
 	}
 };
@@ -132,6 +130,9 @@ static DWORD WINAPI MyPcrThreadFunction(LPVOID lpParam){
 		}
         
         set<int> lengths;
+        //pdiffs, bdiffs, primers, barcodes, revPrimers
+        map<string, int> faked;
+        TrimOligos trim(pdiffs, 0, primers, faked, revPrimer);
 		
 		for(int i = 0; i < pDataArray->fend; i++){ //end is the number of sequences to process
             pDataArray->count++;
@@ -160,62 +161,7 @@ static DWORD WINAPI MyPcrThreadFunction(LPVOID lpParam){
                     //process primers
                     if (pDataArray->primers.size() != 0) {
                         int primerStart = 0; int primerEnd = 0;
-                        //bool good = findForward(currSeq, primerStart, primerEnd);
-                        ///////////////////////////////////////////////////////////////
-                        bool good = false;
-                        string rawSequence = currSeq.getUnaligned();
-                        
-                        for(int j=0;j<pDataArray->primers.size();j++){
-                            string oligo = pDataArray->primers[j];
-                            
-                            if (pDataArray->m->control_pressed) {  primerStart = 0; primerEnd = 0; good = false; break; }
-                            
-                            if(rawSequence.length() < oligo.length()) {  break;  }
-                            
-                            //search for primer
-                            int olength = oligo.length();
-                            for (int l = 0; l < rawSequence.length()-olength; l++){
-                                if (pDataArray->m->control_pressed) {  primerStart = 0; primerEnd = 0; good = false; break; }
-                                string rawChunk = rawSequence.substr(l, olength);
-                                //compareDNASeq(oligo, rawChunk)
-                                ////////////////////////////////////////////////////////
-                                bool success = 1;
-                                for(int k=0;k<olength;k++){
-                                    
-                                    if(oligo[k] != rawChunk[k]){
-                                        if(oligo[k] == 'A' || oligo[k] == 'T' || oligo[k] == 'G' || oligo[k] == 'C')	{	success = 0; 	}
-                                        else if((oligo[k] == 'N' || oligo[k] == 'I') && (rawChunk[k] == 'N'))				{	success = 0;	}
-                                        else if(oligo[k] == 'R' && (rawChunk[k] != 'A' && rawChunk[k] != 'G'))					{	success = 0;	}
-                                        else if(oligo[k] == 'Y' && (rawChunk[k] != 'C' && rawChunk[k] != 'T'))					{	success = 0;	}
-                                        else if(oligo[k] == 'M' && (rawChunk[k] != 'C' && rawChunk[k] != 'A'))					{	success = 0;	}
-                                        else if(oligo[k] == 'K' && (rawChunk[k] != 'T' && rawChunk[k] != 'G'))					{	success = 0;	}
-                                        else if(oligo[k] == 'W' && (rawChunk[k] != 'T' && rawChunk[k] != 'A'))					{	success = 0;	}
-                                        else if(oligo[k] == 'S' && (rawChunk[k] != 'C' && rawChunk[k] != 'G'))					{	success = 0;	}
-                                        else if(oligo[k] == 'B' && (rawChunk[k] != 'C' && rawChunk[k] != 'T' && rawChunk[k] != 'G'))	{	success = 0;	}
-                                        else if(oligo[k] == 'D' && (rawChunk[k] != 'A' && rawChunk[k] != 'T' && rawChunk[k] != 'G'))	{	success = 0;	}
-                                        else if(oligo[k] == 'H' && (rawChunk[k] != 'A' && rawChunk[k] != 'T' && rawChunk[k] != 'C'))	{	success = 0;	}
-                                        else if(oligo[k] == 'V' && (rawChunk[k] != 'A' && rawChunk[k] != 'C' && rawChunk[k] != 'G'))	{	success = 0;	}			
-                                        
-                                        if(success == 0)	{	break;	 }
-                                    }
-                                    else{
-                                        success = 1;
-                                    }
-                                }
-                                
-                                ////////////////////////////////////////////////////////////////////
-                                if(success) {
-                                    primerStart = j;
-                                    primerEnd = primerStart + olength;
-                                    good = true; break;
-                                }
-                            }
-                            if (good) { break; }
-                        }	
-                        
-                        if (!good) { primerStart = 0; primerEnd = 0; }
-                        ///////////////////////////////////////////////////////////////
-                        
+                        bool good = trim.findForward(currSeq, primerStart, primerEnd);
                         
                         if(!good){	if (pDataArray->nomatch == "reject") { goodSeq = false; } trashCode += "f";	}
                         else{
@@ -229,6 +175,15 @@ static DWORD WINAPI MyPcrThreadFunction(LPVOID lpParam){
                                     if (pDataArray->keepdots)   { currSeq.filterToPos(mapAligned[primerStart]);  }
                                     else            { currSeq.setAligned(currSeq.getAligned().substr(mapAligned[primerStart]));                                              }
                                 }
+                                ///////////////////////////////////////////////////////////////
+                                mapAligned.clear();
+                                string seq = currSeq.getAligned(); 
+                                int countBases = 0;
+                                for (int k = 0; k < seq.length(); k++) {
+                                    if (!isalpha(seq[k])) { ; }
+                                    else { mapAligned[countBases] = k; countBases++; } 
+                                }                                                   
+                                ///////////////////////////////////////////////////////////////
                             }else { 
                                 if (!pDataArray->keepprimer)    { currSeq.setAligned(currSeq.getUnaligned().substr(primerEnd)); } 
                                 else                { currSeq.setAligned(currSeq.getUnaligned().substr(primerStart)); } 
@@ -239,60 +194,8 @@ static DWORD WINAPI MyPcrThreadFunction(LPVOID lpParam){
                     //process reverse primers
                     if (pDataArray->revPrimer.size() != 0) {
                         int primerStart = 0; int primerEnd = 0;
-                        bool good = false;
-                        //findReverse(currSeq, primerStart, primerEnd);
-                         ///////////////////////////////////////////////////////////////
-                        string rawSequence = currSeq.getUnaligned();
-                        
-                        for(int j=0;j<pDataArray->revPrimer.size();j++){
-                            string oligo = pDataArray->revPrimer[j];
-                            if (pDataArray->m->control_pressed) {  primerStart = 0; primerEnd = 0; good = false; break; }
-                            if(rawSequence.length() < oligo.length()) {  break;  }
-                            
-                            //search for primer
-                            int olength = oligo.length();
-                            for (int l = rawSequence.length()-olength; l >= 0; l--){
-                                
-                                string rawChunk = rawSequence.substr(l, olength);
-                                //compareDNASeq(oligo, rawChunk)
-                                ////////////////////////////////////////////////////////
-                                bool success = 1;
-                                for(int k=0;k<olength;k++){
-                                    
-                                    if(oligo[k] != rawChunk[k]){
-                                        if(oligo[k] == 'A' || oligo[k] == 'T' || oligo[k] == 'G' || oligo[k] == 'C')	{	success = 0; 	}
-                                        else if((oligo[k] == 'N' || oligo[k] == 'I') && (rawChunk[k] == 'N'))				{	success = 0;	}
-                                        else if(oligo[k] == 'R' && (rawChunk[k] != 'A' && rawChunk[k] != 'G'))					{	success = 0;	}
-                                        else if(oligo[k] == 'Y' && (rawChunk[k] != 'C' && rawChunk[k] != 'T'))					{	success = 0;	}
-                                        else if(oligo[k] == 'M' && (rawChunk[k] != 'C' && rawChunk[k] != 'A'))					{	success = 0;	}
-                                        else if(oligo[k] == 'K' && (rawChunk[k] != 'T' && rawChunk[k] != 'G'))					{	success = 0;	}
-                                        else if(oligo[k] == 'W' && (rawChunk[k] != 'T' && rawChunk[k] != 'A'))					{	success = 0;	}
-                                        else if(oligo[k] == 'S' && (rawChunk[k] != 'C' && rawChunk[k] != 'G'))					{	success = 0;	}
-                                        else if(oligo[k] == 'B' && (rawChunk[k] != 'C' && rawChunk[k] != 'T' && rawChunk[k] != 'G'))	{	success = 0;	}
-                                        else if(oligo[k] == 'D' && (rawChunk[k] != 'A' && rawChunk[k] != 'T' && rawChunk[k] != 'G'))	{	success = 0;	}
-                                        else if(oligo[k] == 'H' && (rawChunk[k] != 'A' && rawChunk[k] != 'T' && rawChunk[k] != 'C'))	{	success = 0;	}
-                                        else if(oligo[k] == 'V' && (rawChunk[k] != 'A' && rawChunk[k] != 'C' && rawChunk[k] != 'G'))	{	success = 0;	}			
-                                        
-                                        if(success == 0)	{	break;	 }
-                                    }
-                                    else{
-                                        success = 1;
-                                    }
-                                }
-                                
-                                ////////////////////////////////////////////////////////////////////
-                                if(success) {
-                                    primerStart = j;
-                                    primerEnd = primerStart + olength;
-                                    good = true; break;
-                                }
-                            }
-                            if (good) { break; }
-                        }	
-                        
-                        if (!good) { primerStart = 0; primerEnd = 0; }
-
-                         ///////////////////////////////////////////////////////////////
+                        bool good = trim.findReverse(currSeq, primerStart, primerEnd);
+                         
                         if(!good){	if (pDataArray->nomatch == "reject") { goodSeq = false; } trashCode += "r";	}
                         else{ 
                             //are you aligned

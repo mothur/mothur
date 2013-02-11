@@ -183,7 +183,10 @@ int ParseFastaQCommand::execute(){
 			string name = m->getline(in); m->gobble(in);
 			if (name == "") {  m->mothurOut("[ERROR]: Blank fasta name."); m->mothurOutEndLine(); m->control_pressed = true; break; }
 			else if (name[0] != '@') { m->mothurOut("[ERROR]: reading " + name + " expected a name with @ as a leading character."); m->mothurOutEndLine(); m->control_pressed = true; break; }
-			else { name = name.substr(1); }
+			else { 
+                name = name.substr(1); 
+                for (int i = 0; i < name.length(); i++) { if (name[i] == ':') { name[i] = '_'; m->changedSeqNames = true; } }
+            }
 			
 			//read sequence
 			string sequence = m->getline(in); m->gobble(in);
@@ -193,7 +196,10 @@ int ParseFastaQCommand::execute(){
 			string name2 = m->getline(in); m->gobble(in);
 			if (name2 == "") {  m->mothurOut("[ERROR]: Blank quality name."); m->mothurOutEndLine(); m->control_pressed = true; break; }
 			else if (name2[0] != '+') { m->mothurOut("[ERROR]: reading " + name2 + " expected a name with + as a leading character."); m->mothurOutEndLine(); m->control_pressed = true; break; }
-			else { name2 = name2.substr(1);  }
+			else { 
+                name2 = name2.substr(1);  
+                for (int i = 0; i < name2.length(); i++) { if (name2[i] == ':') { name2[i] = '_'; m->changedSeqNames = true; } }
+            }
 			
 			//read quality scores
 			string quality = m->getline(in); m->gobble(in);

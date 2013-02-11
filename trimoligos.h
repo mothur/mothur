@@ -50,6 +50,11 @@ class TrimOligos {
     
         bool stripSpacer(Sequence&);
         bool stripSpacer(Sequence&, QualityScores&);
+    
+        //seq, primerStart, primerEnd
+        bool findForward(Sequence&, int&, int&);
+        bool findReverse(Sequence&, int&, int&);
+    
 				
 	
 	private:

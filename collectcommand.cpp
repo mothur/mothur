@@ -67,8 +67,8 @@ string CollectCommand::getHelpString(){
 		helpString += "The collect.single command parameters are list, sabund, rabund, shared, label, freq, calc and abund.  list, sabund, rabund or shared is required unless you have a valid current file. \n";
 		helpString += "The collect.single command should be in the following format: \n";
 		helpString += "The freq parameter is used indicate when to output your data, by default it is set to 100. But you can set it to a percentage of the number of sequence. For example freq=0.10, means 10%. \n";
-		helpString += "collect.single(label=yourLabel, iters=yourIters, freq=yourFreq, calc=yourEstimators).\n";
-		helpString += "Example collect(label=unique-.01-.03, iters=10000, freq=10, calc=sobs-chao-ace-jack).\n";
+		helpString += "collect.single(label=yourLabel, freq=yourFreq, calc=yourEstimators).\n";
+		helpString += "Example collect(label=unique-.01-.03, freq=10, calc=sobs-chao-ace-jack).\n";
 		helpString += "The default values for freq is 100, and calc are sobs-chao-ace-jack-shannon-npshannon-simpson.\n";
 		helpString += validCalculator.printCalc("single");
 		helpString += "The label parameter is used to analyze specific labels in your input.\n";

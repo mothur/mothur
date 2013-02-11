@@ -1381,6 +1381,10 @@ int SeqErrorCommand::setLines(string filename, string qfilename, string rfilenam
 					
 					string sname = "";  nameStream >> sname;
 					sname = sname.substr(1);
+                    
+                    for (int i = 0; i < sname.length(); i++) {
+                        if (sname[i] == ':') { sname[i] = '_'; m->changedSeqNames = true; }
+                    }
 					
 					map<string, int>::iterator it = firstSeqNames.find(sname);
 					
@@ -1440,6 +1444,10 @@ int SeqErrorCommand::setLines(string filename, string qfilename, string rfilenam
                     
                     istringstream nameStream(input);
                     string sname = "";  nameStream >> sname;
+                    
+                    for (int i = 0; i < sname.length(); i++) {
+                        if (sname[i] == ':') { sname[i] = '_'; m->changedSeqNames = true; }
+                    }
                     
                     map<string, int>::iterator it = firstSeqNamesReport.find(sname);
                 

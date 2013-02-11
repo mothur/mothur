@@ -144,6 +144,24 @@ TrimOligos::TrimOligos(int p, int b, map<string, int> pr, map<string, int> br, v
 		barcodes = br;
 		primers = pr;
 		revPrimer = r;
+        
+        maxFBarcodeLength = 0;
+        for(map<string,int>::iterator it=barcodes.begin();it!=barcodes.end();it++){
+            string oligo = it->first;
+            if(oligo.length() > maxFBarcodeLength){
+                maxFBarcodeLength = oligo.length();
+            }
+        }
+        maxRBarcodeLength = maxFBarcodeLength;
+        
+        maxFPrimerLength = 0;
+        for(map<string,int>::iterator it=primers.begin();it!=primers.end();it++){
+            string oligo = it->first;
+            if(oligo.length() > maxFPrimerLength){
+                maxFPrimerLength = oligo.length();
+            }
+        }
+        maxRPrimerLength = maxFPrimerLength;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "TrimOligos", "TrimOligos");
@@ -152,7 +170,135 @@ TrimOligos::TrimOligos(int p, int b, map<string, int> pr, map<string, int> br, v
 }
 /********************************************************************/
 TrimOligos::~TrimOligos() {}
+//********************************************************************/
+bool TrimOligos::findForward(Sequence& seq, int& primerStart, int& primerEnd){
+	try {
+		
+		string rawSequence = seq.getUnaligned();
+		
+		for(map<string,int>::iterator it=primers.begin();it!=primers.end();it++){
+			string oligo = it->first;
+			
+			if(rawSequence.length() < oligo.length()) {  break;  }
+			
+			//search for primer
+            int olength = oligo.length();
+            for (int j = 0; j < rawSequence.length()-olength; j++){
+                if (m->control_pressed) {  primerStart = 0; primerEnd = 0; return false; }
+                string rawChunk = rawSequence.substr(j, olength);
+                if(compareDNASeq(oligo, rawChunk)) {
+                    primerStart = j;
+                    primerEnd = primerStart + olength;
+                    return true;
+                }
+                
+            }
+        }	
+		
+        primerStart = 0; primerEnd = 0;
+        //if you don't want to allow for diffs
+		if (pdiffs == 0) { return false;  }
+		else { //try aligning and see if you can find it
+						
+			//can you find the barcode
+			int minDiff = 1e6;
+			int minCount = 1;
+			
+            Alignment* alignment;
+            if (primers.size() > 0) { alignment = new NeedlemanOverlap(-1.0, 1.0, -1.0, (maxFPrimerLength+pdiffs+1));  }
+            else{ alignment = NULL; } 
+            
+			for(map<string,int>::iterator it=primers.begin();it!=primers.end();it++){
+                
+                string prim = it->first;
+                //search for primer
+                int olength = prim.length();
+                if (rawSequence.length() < olength) {} //ignore primers too long for this seq
+                else{
+                    for (int j = 0; j < rawSequence.length()-olength; j++){
+                        
+                        string oligo = it->first;
+
+                        if (m->control_pressed) {  primerStart = 0; primerEnd = 0; return false; }
+				
+                        string rawChunk = rawSequence.substr(j, olength+pdiffs);
+                        
+                        //use needleman to align first primer.length()+numdiffs of sequence to each barcode
+                        alignment->align(oligo, rawChunk);
+                        oligo = alignment->getSeqAAln();
+                        string temp = alignment->getSeqBAln();
+				
+                        int alnLength = oligo.length();
+				
+                        for(int i=oligo.length()-1;i>=0;i--){
+                            if(oligo[i] != '-'){	alnLength = i+1;	break;	}
+                        }
+                        oligo = oligo.substr(0,alnLength);
+                        temp = temp.substr(0,alnLength);
+				
+                        int numDiff = countDiffs(oligo, temp);
+				
+                        if(numDiff < minDiff){
+                            minDiff = numDiff;
+                            minCount = 1;
+                            primerStart = j;
+                            primerEnd = primerStart + alnLength;
+                        }else if(numDiff == minDiff){ minCount++; }
+                    }
+                }
+			}
+			
+            if (alignment != NULL) {  delete alignment;  }
+            
+			if(minDiff > pdiffs)	{	primerStart = 0; primerEnd = 0; return false;		}	//no good matches
+			else if(minCount > 1)	{	primerStart = 0; primerEnd = 0; return false;	}	//can't tell the difference between multiple primers
+			else{  return true; }
+		}
+       
+        primerStart = 0; primerEnd = 0;
+		return false;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "TrimOligos", "stripForward");
+		exit(1);
+	}
+}
+//******************************************************************/
+bool TrimOligos::findReverse(Sequence& seq, int& primerStart, int& primerEnd){
+	try {
+		
+		string rawSequence = seq.getUnaligned();
+		
+		for(int i=0;i<revPrimer.size();i++){
+			string oligo = revPrimer[i];
+			if(rawSequence.length() < oligo.length()) {  break;  }
+			
+			//search for primer
+            int olength = oligo.length();
+            for (int j = rawSequence.length()-olength; j >= 0; j--){
+                if (m->control_pressed) {  primerStart = 0; primerEnd = 0; return false; }
+                string rawChunk = rawSequence.substr(j, olength);
+                
+                if(compareDNASeq(oligo, rawChunk)) {
+                    primerStart = j;
+                    primerEnd = primerStart + olength;
+                    return true;
+                }
+                
+            }
+		}	
+		
+        primerStart = 0; primerEnd = 0;
+		return false;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PcrSeqsCommand", "findReverse");
+		exit(1);
+	}
+}
 //*******************************************************************/
+
 int TrimOligos::stripBarcode(Sequence& seq, QualityScores& qual, int& group){
 	try {
 		
