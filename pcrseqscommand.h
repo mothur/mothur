@@ -77,14 +77,14 @@ struct pcrData {
 	unsigned long long fend;
 	int count, start, end, length, pdiffs;
 	MothurOut* m;
-	vector<string> primers;
+	map<string, int> primers;
     vector<string> revPrimer;
     set<string> badSeqNames;
     bool keepprimer, keepdots;
 	
 	
 	pcrData(){}
-	pcrData(string f, string gf, string bfn, MothurOut* mout, string ol, string ec, vector<string> pr, vector<string> rpr, string nm, bool kp, bool kd, int st, int en, int l, int pd, unsigned long long fst, unsigned long long fen) {
+	pcrData(string f, string gf, string bfn, MothurOut* mout, string ol, string ec, map<string, int> pr, vector<string> rpr, string nm, bool kp, bool kd, int st, int en, int l, int pd, unsigned long long fst, unsigned long long fen) {
 		filename = f;
         goodFasta = gf;
         badFasta = bfn;
@@ -132,7 +132,7 @@ static DWORD WINAPI MyPcrThreadFunction(LPVOID lpParam){
         set<int> lengths;
         //pdiffs, bdiffs, primers, barcodes, revPrimers
         map<string, int> faked;
-        TrimOligos trim(pdiffs, 0, primers, faked, revPrimer);
+        TrimOligos trim(pDataArray->pdiffs, 0, pDataArray->primers, faked, pDataArray->revPrimer);
 		
 		for(int i = 0; i < pDataArray->fend; i++){ //end is the number of sequences to process
             pDataArray->count++;

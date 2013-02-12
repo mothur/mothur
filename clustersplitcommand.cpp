@@ -947,7 +947,7 @@ vector<string>  ClusterSplitCommand::createProcesses(vector< map<string, string>
             if ((processToAssign-1) == 1) { m->mothurOut(distName[i].begin()->first + "\n"); }
         }
         
-        //not lets reverse the order of ever other process, so we balance big files running with little ones
+        //now lets reverse the order of ever other process, so we balance big files running with little ones
         for (int i = 0; i < processors; i++) {
             //cout << i << endl;
             int remainder = ((i+1) % processors);
