@@ -27,6 +27,7 @@ vector<string> MakeContigsCommand::setParameters(){
 
         CommandParameter palign("align", "Multiple", "needleman-gotoh", "needleman", "", "", "","",false,false); parameters.push_back(palign);
         CommandParameter pallfiles("allfiles", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pallfiles);
+        CommandParameter ptrimoverlap("trimoverlap", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(ptrimoverlap);
 		CommandParameter pmatch("match", "Number", "", "1.0", "", "", "","",false,false); parameters.push_back(pmatch);
 		CommandParameter pmismatch("mismatch", "Number", "", "-1.0", "", "", "","",false,false); parameters.push_back(pmismatch);
 		CommandParameter pgapopen("gapopen", "Number", "", "-2.0", "", "", "","",false,false); parameters.push_back(pgapopen);
@@ -74,6 +75,7 @@ string MakeContigsCommand::getHelpString(){
         helpString += "The insert parameter allows you to set a quality scores threshold. In the case where we are trying to decide whether to keep a base or remove it because the base is compared to a gap in the other fragment, if the base has a quality score below the threshold we eliminate it. Default=25.\n";
         helpString += "The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n";
         helpString += "The allfiles parameter will create separate group and fasta file for each grouping. The default is F.\n";
+        helpString += "The trimoverlap parameter allows you to trim the sequences to only the overlapping section. The default is F.\n";
         helpString += "The make.contigs command should be in the following format: \n";
 		helpString += "make.contigs(ffastq=yourForwardFastqFile, rfastq=yourReverseFastqFile, align=yourAlignmentMethod) \n";
 		helpString += "Note: No spaces between parameter labels (i.e. ffastq), '=' and parameters (i.e.yourForwardFastqFile).\n";
@@ -318,6 +320,9 @@ MakeContigsCommand::MakeContigsCommand(string option)  {
 
             temp = validParameter.validFile(parameters, "allfiles", false);		if (temp == "not found") { temp = "F"; }
 			allFiles = m->isTrue(temp);
+            
+            temp = validParameter.validFile(parameters, "trimoverlap", false);		if (temp == "not found") { temp = "F"; }
+			trimOverlap = m->isTrue(temp);
 			
 			align = validParameter.validFile(parameters, "align", false);		if (align == "not found"){	align = "needleman";	}
 			if ((align != "needleman") && (align != "gotoh")) { m->mothurOut(align + " is not a valid alignment method. Options are needleman or gotoh. I will use needleman."); m->mothurOutEndLine(); align = "needleman"; }
@@ -734,7 +739,7 @@ int MakeContigsCommand::createProcesses(vector< vector<string> > files, string o
             }
 
 			          
-			contigsData* tempcontig = new contigsData(files[h], (outputFasta + extension), (outputScrapFasta + extension), (outputMisMatches + extension), align, m, match, misMatch, gapOpen, gapExtend, insert, deltaq, barcodes, primers, tempFASTAFileNames, barcodeNameVector, primerNameVector, pdiffs, bdiffs, tdiffs, createGroup, allFiles, h);
+			contigsData* tempcontig = new contigsData(files[h], (outputFasta + extension), (outputScrapFasta + extension), (outputMisMatches + extension), align, m, match, misMatch, gapOpen, gapExtend, insert, deltaq, barcodes, primers, tempFASTAFileNames, barcodeNameVector, primerNameVector, pdiffs, bdiffs, tdiffs, createGroup, allFiles, trimOverlap, h);
 			pDataArray.push_back(tempcontig);
             
 			hThreadArray[h] = CreateThread(NULL, 0, MyContigsThreadFunction, pDataArray[h], 0, &dwThreadIdArray[h]);   
@@ -919,6 +924,7 @@ int MakeContigsCommand::driver(vector<string> files, string outputFasta, string 
             // if (num < 5) {  cout << fSeq.getStartPos() << '\t' << fSeq.getEndPos() << '\t' << rSeq.getStartPos() << '\t' << rSeq.getEndPos() << endl; }
             int overlapStart = fSeq.getStartPos();
             int seq2Start = rSeq.getStartPos();
+            
             //bigger of the 2 starting positions is the location of the overlapping start
             if (overlapStart < seq2Start) { //seq2 starts later so take from 0 to seq2Start from seq1
                 overlapStart = seq2Start; 
@@ -967,6 +973,8 @@ int MakeContigsCommand::driver(vector<string> files, string outputFasta, string 
             }else { //seq2 ends before seq1 so take from overlap to length from seq1
                 for (int i = overlapEnd; i < length; i++) {  contig += seq1[i]; }
             }
+            
+            if (trimOverlap) { contig = contig.substr(overlapStart-1, oend-oStart);  if (contig.length() == 0) { trashCode += "l"; } }
             
             if(trashCode.length() == 0){
                 bool ignore = false;
