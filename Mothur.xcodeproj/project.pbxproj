@@ -368,7 +368,7 @@
 			outputFiles = (
 				"$(TARGET_BUILD_DIR)/$(INPUT_FILE_BASE).o",
 			);
-			script = "/usr/local/gfortran/bin/gfortran -g -m64 -c ${PROJECT_DIR}/${INPUT_FILE_NAME} -o ${TARGET_BUILD_DIR}/${INPUT_FILE_BASE}.o";
+			script = "/usr/local/bin/gfortran -g -m64 -c ${PROJECT_DIR}/${INPUT_FILE_NAME} -o ${TARGET_BUILD_DIR}/${INPUT_FILE_BASE}.o";
 		};
 /* End PBXBuildRule section */
 
@@ -2353,7 +2353,7 @@
 				GCC_OPTIMIZATION_LEVEL = 3;
 				"INSTALL_PATH[sdk=*]" = TARGET_BUILD_DIR;
 				PRODUCT_NAME = mothur;
-				SDKROOT = macosx10.6;
+				SDKROOT = macosx10.8;
 				SKIP_INSTALL = NO;
 			};
 			name = Debug;
@@ -2405,7 +2405,7 @@
 					"-lncurses",
 					"-lreadline",
 				);
-				SDKROOT = macosx10.6;
+				SDKROOT = macosx10.8;
 				SKIP_INSTALL = NO;
 				USER_HEADER_SEARCH_PATHS = "";
 			};
@@ -2421,8 +2421,8 @@
 				GCC_MODEL_TUNING = "";
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"VERSION=\"\\\"1.28.0\\\"\"",
-					"RELEASE_DATE=\"\\\"11/2/2012\\\"\"",
+					"VERSION=\"\\\"1.29.2\\\"\"",
+					"RELEASE_DATE=\"\\\"2/12/2013\\\"\"",
 				);
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -2443,7 +2443,7 @@
 					"-lncurses",
 					"-lreadline",
 				);
-				SDKROOT = macosx10.6;
+				SDKROOT = macosx10.8;
 				SKIP_INSTALL = NO;
 			};
 			name = Release;
