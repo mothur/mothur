@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Schloss Lab. All rights reserved.
 //
 
-
+//test
 #include "newcommandtemplate.h"
 
 //**********************************************************************************************************************
