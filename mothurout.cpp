@@ -453,7 +453,7 @@ void MothurOut::errorOut(exception& e, string object, string function) {
         if (object == "cluster"){
             mothurOut(" has occurred in the " + object + " class function " + function + ". This error indicates your computer is running out of memory.  There are two common causes for this, file size and format.\n\nFile Size:\nThe cluster command loads your distance matrix into RAM, and your distance file is most likely too large to fit in RAM. There are two options to help with this. The first is to use a cutoff. By using a cutoff mothur will only load distances that are below the cutoff. If that is still not enough, there is a command called cluster.split, http://www.mothur.org/wiki/cluster.split which divides the distance matrix, and clusters the smaller pieces separately. You may also be able to reduce the size of the original distance matrix by using the commands outlined in the Schloss SOP, http://www.mothur.org/wiki/Schloss_SOP. \n\nWrong Format:\nThis error can be caused by trying to read a column formatted distance matrix using the phylip parameter. By default, the dist.seqs command generates a column formatted distance matrix. To make a phylip formatted matrix set the dist.seqs command parameter output to lt.  \n\nIf you are uable to resolve the issue, please contact Pat Schloss at mothur.bugs@gmail.com, and be sure to include the mothur.logFile with your inquiry.");
         }else {
-            mothurOut(" has occurred in the " + object + " class function " + function + ". This error indicates your computer is running out of memory.  This is most commonly caused by trying to process a dataset too large, or a file format issue. If you are running our 32bit version, your memory usage is limited to 4G.  If you have more than 4G of RAM and are running a 64bit OS, using our 64bit version may resolve your issue.  Also, you may be able to reduce the size of your dataset by using the commands outlined in the Schloss SOP, http://www.mothur.org/wiki/Schloss_SOP. If you are uable to resolve the issue, please contact Pat Schloss at mothur.bugs@gmail.com, and be sure to include the mothur.logFile with your inquiry.");
+            mothurOut(" has occurred in the " + object + " class function " + function + ". This error indicates your computer is running out of memory.  This is most commonly caused by trying to process a dataset too large, using multiple processors, or a file format issue. If you are running our 32bit version, your memory usage is limited to 4G.  If you have more than 4G of RAM and are running a 64bit OS, using our 64bit version may resolve your issue.  If you are using multiple processors, try running the command with processors=1, the more processors you use the more memory is required. Also, you may be able to reduce the size of your dataset by using the commands outlined in the Schloss SOP, http://www.mothur.org/wiki/Schloss_SOP. If you are uable to resolve the issue, please contact Pat Schloss at mothur.bugs@gmail.com, and be sure to include the mothur.logFile with your inquiry.");
         }
     }
 }
@@ -951,7 +951,7 @@ string MothurOut::getFullPathName(string fileName){
 				}
 			
 				for (int i = index; i >= 0; i--) {
-					newFileName = dirs[i] +  "\\\\" + newFileName;		
+					newFileName = dirs[i] +  "\\" + newFileName;		
 				}
 				
 				return newFileName;
@@ -2776,6 +2776,7 @@ void MothurOut::splitAtDash(string& estim, set<string>& container) {
 		string individual = "";
 		int estimLength = estim.size();
 		bool prevEscape = false;
+        /*
 		for(int i=0;i<estimLength;i++){
 			if(prevEscape){
 				individual += estim[i];
@@ -2796,7 +2797,25 @@ void MothurOut::splitAtDash(string& estim, set<string>& container) {
 				}
 			}
 		}
-		container.insert(individual);
+		*/
+        
+        for(int i=0;i<estimLength;i++){
+            if(estim[i] == '-'){
+                if (prevEscape) {  individual += estim[i]; prevEscape = false;  } //add in dash because it was escaped.
+                else {
+                    container.insert(individual);
+                    individual = "";
+                }
+            }else if(estim[i] == '\\'){
+                if (i < estimLength-1) { 
+                    if (estim[i+1] == '-') { prevEscape=true; }  //are you a backslash before a dash, if yes ignore
+                    else { individual += estim[i]; prevEscape = false;  } //if no, add in
+                }else { individual += estim[i]; }
+            }else {
+                individual += estim[i];
+            }
+        }
+        container.insert(individual);
         
 	}
 	catch(exception& e) {
@@ -2812,6 +2831,7 @@ void MothurOut::splitAtDash(string& estim, set<int>& container) {
 		int lineNum;
 		int estimLength = estim.size();
 		bool prevEscape = false;
+        /*
 		for(int i=0;i<estimLength;i++){
 			if(prevEscape){
 				individual += estim[i];
@@ -2832,7 +2852,26 @@ void MothurOut::splitAtDash(string& estim, set<int>& container) {
 					prevEscape = false;
 				}
 			}
-		}
+		}*/
+        
+        for(int i=0;i<estimLength;i++){
+            if(estim[i] == '-'){
+                if (prevEscape) {  individual += estim[i]; prevEscape = false;  } //add in dash because it was escaped.
+                else {
+                    convert(individual, lineNum); //convert the string to int
+                    container.insert(lineNum);
+                    individual = "";
+                }
+            }else if(estim[i] == '\\'){
+                if (i < estimLength-1) { 
+                    if (estim[i+1] == '-') { prevEscape=true; }  //are you a backslash before a dash, if yes ignore
+                    else { individual += estim[i]; prevEscape = false;  } //if no, add in
+                }else { individual += estim[i]; }
+            }else {
+                individual += estim[i];
+            }
+        }
+        
 		convert(individual, lineNum); //convert the string to int
 		container.insert(lineNum);
 	}

@@ -21,8 +21,7 @@ vector<string> ShhherCommand::setParameters(){
         CommandParameter plarge("large", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(plarge);
 		CommandParameter psigma("sigma", "Number", "", "60", "", "", "","",false,false); parameters.push_back(psigma);
 		CommandParameter pmindelta("mindelta", "Number", "", "0.000001", "", "", "","",false,false); parameters.push_back(pmindelta);
-		CommandParameter porder("order", "String", "", "", "", "", "","",false,false); parameters.push_back(porder);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+        CommandParameter porder("order", "Multiple", "A-B", "A", "", "", "","",false,false, true); parameters.push_back(porder);		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
@@ -39,6 +38,11 @@ string ShhherCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The shhh.flows command reads a file containing flowgrams and creates a file of corrected sequences.\n";
+        helpString += "The shhh.flows command parameters are flow, file, lookup, cutoff, processors, large, maxiter, sigma, mindelta and order.\n";
+        helpString += "The flow parameter is used to input your flow file.\n";
+        helpString += "The file parameter is used to input the *flow.files file created by trim.flows.\n";
+        helpString += "The lookup parameter is used specify the lookup file you would like to use. http://www.mothur.org/wiki/Lookup_files.\n";
+        helpString += "The order parameter options are A or B.  A = TACG and B = TACGTACGTACGATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATAGATCGCATGACGATCGCATATCGTCAGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATAGATCGCATGACGATCGCATATCGTCAGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATAGATCGCATGACGATCGCATATCGTCAGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGATCTCAGTCAGCAGC.\n";
 		return helpString;
 	}
 	catch(exception& e) {
@@ -357,11 +361,18 @@ ShhherCommand::ShhherCommand(string option) {
 			temp = validParameter.validFile(parameters, "sigma", false);if (temp == "not found")	{	temp = "60";		}
 			m->mothurConvert(temp, sigma); 
 			
-			flowOrder = validParameter.validFile(parameters, "order", false);
-			if (flowOrder == "not found"){ flowOrder = "TACG";		}
-			else if(flowOrder.length() != 4){
-				m->mothurOut("The value of the order option must be four bases long\n");
-			}
+			temp = validParameter.validFile(parameters, "order", false);  if (temp == "not found"){ 	temp = "A";	}
+            if (temp.length() > 1) {  m->mothurOut("[ERROR]: " + temp + " is not a valid option for order. order options are A or B. A = TACG and B = TACGTACGTACGATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATAGATCGCATGACGATCGCATATCGTCAGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATAGATCGCATGACGATCGCATATCGTCAGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATAGATCGCATGACGATCGCATATCGTCAGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGATCTCAGTCAGCAGC.\n");  abort=true;
+            }
+            else {
+                if (toupper(temp[0]) == 'A') {  flowOrder = "TACG";   }
+                else if(toupper(temp[0]) == 'B'){ 
+                    flowOrder = "TACGTACGTACGATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATAGATCGCATGACGATCGCATATCGTCAGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATAGATCGCATGACGATCGCATATCGTCAGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATAGATCGCATGACGATCGCATATCGTCAGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGATCTCAGTCAGCAGC";   }
+                else {
+                    m->mothurOut("[ERROR]: " + temp + " is not a valid option for order. order options are A or B. A = TACG and B = TACGTACGTACGATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATAGATCGCATGACGATCGCATATCGTCAGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATAGATCGCATGACGATCGCATATCGTCAGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATAGATCGCATGACGATCGCATATCGTCAGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATAGATCGCATGACGATCGCATATCGTCAGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGTAGTCGAGCATCATCTGACGCAGTACGTGCATGATCTCAGTCAGCAGCTATGTCAGTGCATGCATAGATCGCATGACGATCGCATATCGTCAGTGCAGTGACTGATCGTCATCAGCTAGCATCGACTGCATGATCTCAGTCAGCAGC.\n");  abort=true;
+                }
+            }
+
 			
 		}
 #ifdef USE_MPI
@@ -1777,7 +1788,7 @@ void ShhherCommand::writeSequences(vector<int> otuCounts){
                 
                 for(int j=0;j<numFlowCells;j++){
                     
-                    char base = flowOrder[j % 4];
+                    char base = flowOrder[j % flowOrder.length()];
                     for(int k=0;k<uniqueFlowgrams[index * numFlowCells + j];k++){
                         newSeq += base;
                     }
@@ -1895,7 +1906,7 @@ void ShhherCommand::writeClusters(vector<int> otuCounts){
                 
                 otuCountsFile << "ideal\t";
                 for(int j=8;j<numFlowCells;j++){
-                    char base = bases[j % 4];
+                    char base = bases[j % bases.length()];
                     for(int s=0;s<uniqueFlowgrams[index * numFlowCells + j];s++){
                         otuCountsFile << base;
                     }
@@ -1909,7 +1920,7 @@ void ShhherCommand::writeClusters(vector<int> otuCounts){
                     string newSeq = "";
                     
                     for(int k=0;k<lengths[sequence];k++){
-                        char base = bases[k % 4];
+                        char base = bases[k % bases.length()];
                         int freq = int(0.01 * (double)flowDataIntI[sequence * numFlowCells + k] + 0.5);
                         
                         for(int s=0;s<freq;s++){
@@ -1947,10 +1958,10 @@ int ShhherCommand::execute(){
         if (numFiles < processors) { processors = numFiles; }
         
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-        if (processors == 1) { driver(flowFileVector, compositeFASTAFileName, compositeNamesFileName, 0, flowFileVector.size()); }
+        if (processors == 1) { driver(flowFileVector, compositeFASTAFileName, compositeNamesFileName); }
         else { createProcesses(flowFileVector); } //each processor processes one file
 #else
-        driver(flowFileVector, compositeFASTAFileName, compositeNamesFileName, 0, flowFileVector.size());
+        driver(flowFileVector, compositeFASTAFileName, compositeNamesFileName);
 #endif
         
 		if(compositeFASTAFileName != ""){
@@ -1971,6 +1982,40 @@ int ShhherCommand::execute(){
 	}
 }
 #endif
+//********************************************************************************************************************
+//sorts biggest to smallest
+inline bool compareFileSizes(string left, string right){
+    
+    FILE * pFile;
+    long leftsize = 0;
+    
+    //get num bytes in file
+    string filename = left;
+    pFile = fopen (filename.c_str(),"rb");
+    string error = "Error opening " + filename;
+    if (pFile==NULL) perror (error.c_str());
+    else{
+        fseek (pFile, 0, SEEK_END);
+        leftsize=ftell (pFile);
+        fclose (pFile);
+    }
+    
+    FILE * pFile2;
+    long rightsize = 0;
+    
+    //get num bytes in file
+    filename = right;
+    pFile2 = fopen (filename.c_str(),"rb");
+    error = "Error opening " + filename;
+    if (pFile2==NULL) perror (error.c_str());
+    else{
+        fseek (pFile2, 0, SEEK_END);
+        rightsize=ftell (pFile2);
+        fclose (pFile2);
+    }
+    
+    return (leftsize > rightsize);	
+} 
 /**************************************************************************************************/
 
 int ShhherCommand::createProcesses(vector<string> filenames){
@@ -1981,9 +2026,31 @@ int ShhherCommand::createProcesses(vector<string> filenames){
 		
 		//sanity check
 		if (filenames.size() < processors) { processors = filenames.size(); }
-		
+        
+        //sort file names by size to divide load better
+        sort(filenames.begin(), filenames.end(), compareFileSizes);
+        
+        vector < vector <string> > dividedFiles; //dividedFiles[1] = vector of filenames for process 1...
+        dividedFiles.resize(processors);
+        
+        //for each file, figure out which process will complete it
+        //want to divide the load intelligently so the big files are spread between processes
+        for (int i = 0; i < filenames.size(); i++) { 
+            int processToAssign = (i+1) % processors; 
+            if (processToAssign == 0) { processToAssign = processors; }
+            
+            dividedFiles[(processToAssign-1)].push_back(filenames[i]);
+        }
+        
+        //now lets reverse the order of ever other process, so we balance big files running with little ones
+        for (int i = 0; i < processors; i++) {
+            int remainder = ((i+1) % processors);
+            if (remainder) {  reverse(dividedFiles[i].begin(), dividedFiles[i].end());  }
+        }
+        
+          		
 		//divide the groups between the processors
-		vector<linePair> lines;
+		/*vector<linePair> lines;
         vector<int> numFilesToComplete;
 		int numFilesPerProcessor = filenames.size() / processors;
 		for (int i = 0; i < processors; i++) {
@@ -1992,7 +2059,7 @@ int ShhherCommand::createProcesses(vector<string> filenames){
 			if(i == (processors - 1)){	endIndex = filenames.size(); 	}
 			lines.push_back(linePair(startIndex, endIndex));
             numFilesToComplete.push_back((endIndex-startIndex));
-		}
+		}*/
 		
         #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)		
 		
@@ -2004,7 +2071,7 @@ int ShhherCommand::createProcesses(vector<string> filenames){
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				num = driver(filenames, compositeFASTAFileName + toString(getpid()) + ".temp", compositeNamesFileName  + toString(getpid()) + ".temp", lines[process].start, lines[process].end);
+				num = driver(dividedFiles[process], compositeFASTAFileName + toString(getpid()) + ".temp", compositeNamesFileName  + toString(getpid()) + ".temp");
                 
                 //pass numSeqs to parent
 				ofstream out;
@@ -2022,7 +2089,7 @@ int ShhherCommand::createProcesses(vector<string> filenames){
 		}
 		
 		//do my part
-		driver(filenames, compositeFASTAFileName, compositeNamesFileName, lines[0].start, lines[0].end);
+		driver(dividedFiles[0], compositeFASTAFileName, compositeNamesFileName);
 		
 		//force parent to wait until all the processes are done
 		for (int i=0;i<processIDS.size();i++) { 
@@ -2081,8 +2148,8 @@ int ShhherCommand::createProcesses(vector<string> filenames){
 			if (!in.eof()) { 
                 int tempNum = 0; 
                 in >> tempNum; 
-                if (tempNum != numFilesToComplete[i+1]) {
-                    m->mothurOut("[ERROR]: main process expected " + toString(processIDS[i]) + " to complete " + toString(numFilesToComplete[i+1]) + " files, and it only reported completing " + toString(tempNum) + ". This will cause file mismatches.  The flow files may be too large to process with multiple processors. \n");
+                if (tempNum != dividedFiles[i+1].size()) {
+                    m->mothurOut("[ERROR]: main process expected " + toString(processIDS[i]) + " to complete " + toString(dividedFiles[i+1].size()) + " files, and it only reported completing " + toString(tempNum) + ". This will cause file mismatches.  The flow files may be too large to process with multiple processors. \n");
                 }
             }
 			in.close(); m->mothurRemove(tempFile);
@@ -2152,12 +2219,12 @@ vector<string> ShhherCommand::parseFlowFiles(string filename){
 }
 /**************************************************************************************************/
 
-int ShhherCommand::driver(vector<string> filenames, string thisCompositeFASTAFileName, string thisCompositeNamesFileName, int start, int end){
+int ShhherCommand::driver(vector<string> filenames, string thisCompositeFASTAFileName, string thisCompositeNamesFileName){
     try {
         
         int numCompleted = 0;
         
-        for(int i=start;i<end;i++){
+        for(int i=0;i<filenames.size();i++){
 			
 			if (m->control_pressed) { break; }
 			
@@ -3307,7 +3374,7 @@ void ShhherCommand::writeSequences(string thisCompositeFASTAFileName, int numOTU
 				
 				for(int j=0;j<numFlowCells;j++){
 					
-					char base = flowOrder[j % 4];
+					char base = flowOrder[j % flowOrder.length()];
 					for(int k=0;k<uniqueFlowgrams[index * numFlowCells + j];k++){
 						newSeq += base;
 					}
@@ -3408,7 +3475,7 @@ void ShhherCommand::writeClusters(string otuCountsFileName, int numOTUs, int num
 				
 				otuCountsFile << "ideal\t";
 				for(int j=8;j<numFlowCells;j++){
-					char base = bases[j % 4];
+					char base = bases[j % bases.length()];
 					for(int s=0;s<uniqueFlowgrams[index * numFlowCells + j];s++){
 						otuCountsFile << base;
 					}
@@ -3422,7 +3489,7 @@ void ShhherCommand::writeClusters(string otuCountsFileName, int numOTUs, int num
 					string newSeq = "";
 					
 					for(int k=0;k<lengths[sequence];k++){
-						char base = bases[k % 4];
+						char base = bases[k % bases.length()];
 						int freq = int(0.01 * (double)flowDataIntI[sequence * numFlowCells + k] + 0.5);
                         
 						for(int s=0;s<freq;s++){

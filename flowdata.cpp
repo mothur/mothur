@@ -50,7 +50,7 @@ bool FlowData::getNext(ifstream& flowFile){
             translateFlow();
             m->gobble(flowFile);
 		}
-            
+           
 		if(flowFile){	return 1;	}
 		else		{	return 0;	}
 	}
@@ -86,16 +86,18 @@ string FlowData::getSequenceName(ifstream& flowFile) {
 void FlowData::updateEndFlow(){
 	try{
 		
+        if (baseFlow.length() > 4) { return; }
+        
 		//int currLength = 0;
 		float maxIntensity = (float) maxHomoP + 0.49;
 		
 		int deadSpot = 0;
-				
+			
 		while(deadSpot < endFlow){
 			int signal = 0;
 			int noise = 0;
 			
-			for(int i=0;i<4;i++){
+			for(int i=0;i<baseFlow.length();i++){
 				float intensity = flowData[i + deadSpot];
 				if(intensity > signalIntensity){
 					signal++;
@@ -110,7 +112,7 @@ void FlowData::updateEndFlow(){
 				break;
 			}
 		
-			deadSpot += 4;
+			deadSpot += baseFlow.length();
 		}
 		endFlow = deadSpot;
 
@@ -129,13 +131,13 @@ void FlowData::translateFlow(){
 		sequence = "";
 		for(int i=0;i<endFlow;i++){
 			int intensity = (int)(flowData[i] + 0.5);
-			char base = baseFlow[i % 4];
+			char base = baseFlow[i % baseFlow.length()];
 			
 			for(int j=0;j<intensity;j++){
 				sequence += base;
 			}
 		}
-
+        
 		if(sequence.size() > 4){
 			sequence = sequence.substr(4);
 		}

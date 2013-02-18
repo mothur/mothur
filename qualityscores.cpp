@@ -34,13 +34,17 @@ QualityScores::QualityScores(ifstream& qFile){
 		int score;
 		seqName = getSequenceName(qFile);
 		
+        if (m->debug) { m->mothurOut("[DEBUG]: name = '" + seqName + "'\n.");  }
+        
 		if (!m->control_pressed) {
             string qScoreString = m->getline(qFile);
-            //cout << qScoreString << endl;
+            
+            if (m->debug) { m->mothurOut("[DEBUG]: scores = '" + qScoreString + "'\n.");  }
+            
             while(qFile.peek() != '>' && qFile.peek() != EOF){
                 if (m->control_pressed) { break; }
                 string temp = m->getline(qFile);
-                //cout << temp << endl;
+                if (m->debug) { m->mothurOut("[DEBUG]: scores = '" + temp + "'\n.");  }
                 qScoreString +=  ' ' + temp;
             }
             //cout << "done reading " << endl;	
@@ -50,6 +54,8 @@ QualityScores::QualityScores(ifstream& qFile){
                 if (m->control_pressed) { break; }
                 string temp;
                 qScoreStringStream >> temp;  m->gobble(qScoreStringStream);
+                
+                if (m->debug) { m->mothurOut("[DEBUG]: score " + toString(qScores.size()) + " = '" + temp + "'\n.");  }
                 
                 //check temp to make sure its a number
                 if (!m->isContainingOnlyDigits(temp)) { m->mothurOut("[ERROR]: In sequence " + seqName + "'s quality scores, expected a number and got " + temp + ", setting score to 0."); m->mothurOutEndLine(); temp = "0"; }

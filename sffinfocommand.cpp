@@ -1039,7 +1039,11 @@ int SffInfoCommand::findGroup(Header header, seqRead read, int& barcode, int& pr
         
         if (trim) {
             if(header.clipQualRight < header.clipQualLeft){
-                seq = "NNNN";
+                if (header.clipQualRight == 0) { //don't trim right
+                    seq = seq.substr(header.clipQualLeft-1);
+                }else {
+                    seq = "NNNN";
+                }
             }
             else if((header.clipQualRight != 0) && ((header.clipQualRight-header.clipQualLeft) >= 0)){
                 seq = seq.substr((header.clipQualLeft-1), (header.clipQualRight-header.clipQualLeft));
@@ -1260,7 +1264,11 @@ int SffInfoCommand::printFastaSeqData(ofstream& out, seqRead& read, Header& head
 		
         if (trim) {
 			if(header.clipQualRight < header.clipQualLeft){
-				seq = "NNNN";
+				if (header.clipQualRight == 0) { //don't trim right
+                    seq = seq.substr(header.clipQualLeft-1);
+                }else {
+                    seq = "NNNN";
+                }
 			}
 			else if((header.clipQualRight != 0) && ((header.clipQualRight-header.clipQualLeft) >= 0)){
 				seq = seq.substr((header.clipQualLeft-1), (header.clipQualRight-header.clipQualLeft));
@@ -1296,8 +1304,13 @@ int SffInfoCommand::printQualSeqData(ofstream& out, seqRead& read, Header& heade
 		
 		if (trim) {
 			if(header.clipQualRight < header.clipQualLeft){
-				out << ">" << header.name << " xy=" << header.xy << endl;
-				out << "0\t0\t0\t0";
+                if (header.clipQualRight == 0) { //don't trim right
+                    out << ">" << header.name << " xy=" << header.xy << " length=" << (read.qualScores.size()-header.clipQualLeft) << endl;
+                    for (int i = (header.clipQualLeft-1); i < read.qualScores.size(); i++) {   out << read.qualScores[i] << '\t';	}	
+                }else {
+                    out << ">" << header.name << " xy=" << header.xy << endl;
+                    out << "0\t0\t0\t0";
+                }
 			}
 			else if((header.clipQualRight != 0) && ((header.clipQualRight-header.clipQualLeft) >= 0)){
 				out << ">" << header.name << " xy=" << header.xy << " length=" << (header.clipQualRight-header.clipQualLeft) << endl;
@@ -1325,6 +1338,8 @@ int SffInfoCommand::printQualSeqData(ofstream& out, seqRead& read, Header& heade
 //**********************************************************************************************************************
 int SffInfoCommand::printFlowSeqData(ofstream& out, seqRead& read, Header& header) {
 	try {
+        if (header.clipQualRight == 0) { header.clipQualRight = read.flowgram.size(); }
+        
 		if(header.clipQualRight > header.clipQualLeft){
 			
 			int rightIndex = 0;

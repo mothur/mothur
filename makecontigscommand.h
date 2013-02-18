@@ -59,7 +59,7 @@ public:
     void help() { m->mothurOut(getHelpString()); }	
     
 private:
-    bool abort, allFiles, createGroup;
+    bool abort, allFiles, createGroup, trimOverlap;
     string outputDir, ffastqfile, rfastqfile, align, oligosfile, rfastafile, ffastafile, rqualfile, fqualfile, file, format;
 	float match, misMatch, gapOpen, gapExtend;
 	int processors, longestBase, insert, tdiffs, bdiffs, pdiffs, ldiffs, sdiffs, deltaq;
@@ -106,7 +106,7 @@ struct contigsData {
 	MothurOut* m;
 	float match, misMatch, gapOpen, gapExtend;
 	int count, insert, threadID, pdiffs, bdiffs, tdiffs, deltaq;
-    bool allFiles, createGroup, done;
+    bool allFiles, createGroup, done, trimOverlap;
     map<string, int> groupCounts; 
     map<string, string> groupMap;
     vector<string> primerNameVector;	
@@ -115,7 +115,7 @@ struct contigsData {
 	map<int, oligosPair> primers;
 	
 	contigsData(){}
-	contigsData(vector<string> f, string of, string osf, string om, string al, MothurOut* mout, float ma, float misMa, float gapO, float gapE, int thr, int delt, map<int, oligosPair> br, map<int, oligosPair> pr, vector<vector<string> > ffn, vector<string>bnv, vector<string> pnv, int pdf, int bdf, int tdf, bool cg, bool all, int tid) {
+	contigsData(vector<string> f, string of, string osf, string om, string al, MothurOut* mout, float ma, float misMa, float gapO, float gapE, int thr, int delt, map<int, oligosPair> br, map<int, oligosPair> pr, vector<vector<string> > ffn, vector<string>bnv, vector<string> pnv, int pdf, int bdf, int tdf, bool cg, bool all, bool to, int tid) {
         files = f;
 		outputFasta = of;
         outputMisMatches = om;
@@ -137,6 +137,7 @@ struct contigsData {
         bdiffs = bdf;
         tdiffs = tdf;
         allFiles = all;
+        trimOverlap = to;
         createGroup = cg;
 		threadID = tid;
         deltaq = delt;
@@ -310,6 +311,8 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                 for (int i = overlapEnd; i < length; i++) {  contig += seq1[i]; }
             }
 
+            if (pDataArray->trimOverlap) { contig = contig.substr(overlapStart-1, oend-oStart); if (contig.length() == 0) { trashCode += "l"; } }
+            
             if(trashCode.length() == 0){
                 bool ignore = false;
                 if (pDataArray->createGroup) {

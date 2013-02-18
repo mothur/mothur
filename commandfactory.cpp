@@ -140,6 +140,7 @@
 #include "primerdesigncommand.h"
 #include "getdistscommand.h"
 #include "removedistscommand.h"
+#include "mergetaxsummarycommand.h"
 
 /*******************************************************/
 
@@ -303,6 +304,7 @@ CommandFactory::CommandFactory(){
     commands["primer.design"]		= "primer.design";
     commands["get.dists"]           = "get.dists";
     commands["remove.dists"]        = "remove.dists";
+    commands["merge.taxsummary"]    = "merge.taxsummary";
     
 
 }
@@ -522,6 +524,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         else if(commandName == "primer.design")         {	command = new PrimerDesignCommand(optionString);            }
         else if(commandName == "get.dists")             {	command = new GetDistsCommand(optionString);                }
         else if(commandName == "remove.dists")          {	command = new RemoveDistsCommand(optionString);             }
+        else if(commandName == "merge.taxsummary")      {	command = new MergeTaxSummaryCommand(optionString);         }
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -682,6 +685,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
         else if(commandName == "primer.design")         {	pipecommand = new PrimerDesignCommand(optionString);            }
         else if(commandName == "get.dists")             {	pipecommand = new GetDistsCommand(optionString);                }
         else if(commandName == "remove.dists")          {	pipecommand = new RemoveDistsCommand(optionString);             }
+        else if(commandName == "merge.taxsummary")      {	pipecommand = new MergeTaxSummaryCommand(optionString);         }
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -828,6 +832,7 @@ Command* CommandFactory::getCommand(string commandName){
         else if(commandName == "primer.design")         {	shellcommand = new PrimerDesignCommand();           }
         else if(commandName == "get.dists")             {	shellcommand = new GetDistsCommand();               }
         else if(commandName == "remove.dists")          {	shellcommand = new RemoveDistsCommand();            }
+        else if(commandName == "merge.taxsummary")      {	shellcommand = new MergeTaxSummaryCommand();        }
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;

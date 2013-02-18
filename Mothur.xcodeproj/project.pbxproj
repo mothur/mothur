@@ -58,6 +58,7 @@
 		A7876A26152A017C00A0AE86 /* subsample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7876A25152A017C00A0AE86 /* subsample.cpp */; };
 		A79234D713C74BF6002B08E2 /* mothurfisher.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A79234D613C74BF6002B08E2 /* mothurfisher.cpp */; };
 		A795840D13F13CD900F201D5 /* countgroupscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A795840C13F13CD900F201D5 /* countgroupscommand.cpp */; };
+		A799314B16CBD0CD0017E888 /* mergetaxsummarycommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A799314A16CBD0CD0017E888 /* mergetaxsummarycommand.cpp */; };
 		A799F5B91309A3E000AEEFA0 /* makefastqcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A799F5B81309A3E000AEEFA0 /* makefastqcommand.cpp */; };
 		A79EEF8616971D4A0006DEC1 /* filtersharedcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A79EEF8516971D4A0006DEC1 /* filtersharedcommand.cpp */; };
 		A7A0671A1562946F0095C8C5 /* listotulabelscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7A067191562946F0095C8C5 /* listotulabelscommand.cpp */; };
@@ -367,7 +368,7 @@
 			outputFiles = (
 				"$(TARGET_BUILD_DIR)/$(INPUT_FILE_BASE).o",
 			);
-			script = "/usr/local/gfortran/bin/gfortran -g -m64 -c ${PROJECT_DIR}/${INPUT_FILE_NAME} -o ${TARGET_BUILD_DIR}/${INPUT_FILE_BASE}.o";
+			script = "/usr/local/bin/gfortran -g -m64 -c ${PROJECT_DIR}/${INPUT_FILE_NAME} -o ${TARGET_BUILD_DIR}/${INPUT_FILE_BASE}.o";
 		};
 /* End PBXBuildRule section */
 
@@ -487,6 +488,8 @@
 		A79234D613C74BF6002B08E2 /* mothurfisher.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mothurfisher.cpp; sourceTree = "<group>"; };
 		A795840B13F13CD900F201D5 /* countgroupscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = countgroupscommand.h; sourceTree = "<group>"; };
 		A795840C13F13CD900F201D5 /* countgroupscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = countgroupscommand.cpp; sourceTree = "<group>"; };
+		A799314816CBD0BC0017E888 /* mergetaxsummarycommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mergetaxsummarycommand.h; sourceTree = "<group>"; };
+		A799314A16CBD0CD0017E888 /* mergetaxsummarycommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mergetaxsummarycommand.cpp; sourceTree = "<group>"; };
 		A799F5B71309A3E000AEEFA0 /* makefastqcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = makefastqcommand.h; sourceTree = "<group>"; };
 		A799F5B81309A3E000AEEFA0 /* makefastqcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = makefastqcommand.cpp; sourceTree = "<group>"; };
 		A79EEF8516971D4A0006DEC1 /* filtersharedcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = filtersharedcommand.cpp; sourceTree = "<group>"; };
@@ -1430,6 +1433,8 @@
 				A7E9B75312D37EC400DA6239 /* mergefilecommand.cpp */,
 				A71FE12A12EDF72400963CA7 /* mergegroupscommand.h */,
 				A71FE12B12EDF72400963CA7 /* mergegroupscommand.cpp */,
+				A799314816CBD0BC0017E888 /* mergetaxsummarycommand.h */,
+				A799314A16CBD0CD0017E888 /* mergetaxsummarycommand.cpp */,
 				A7E9B75812D37EC400DA6239 /* metastatscommand.h */,
 				A7E9B75712D37EC400DA6239 /* metastatscommand.cpp */,
 				A7E9B75A12D37EC400DA6239 /* mgclustercommand.h */,
@@ -2328,6 +2333,7 @@
 				A74C06E916A9C0A9008390A3 /* primerdesigncommand.cpp in Sources */,
 				A7128B1D16B7002A00723BE4 /* getdistscommand.cpp in Sources */,
 				A7B0231516B8244C006BA09E /* removedistscommand.cpp in Sources */,
+				A799314B16CBD0CD0017E888 /* mergetaxsummarycommand.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2416,8 +2422,8 @@
 				GCC_MODEL_TUNING = "";
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"VERSION=\"\\\"1.28.0\\\"\"",
-					"RELEASE_DATE=\"\\\"11/2/2012\\\"\"",
+					"VERSION=\"\\\"1.29.2\\\"\"",
+					"RELEASE_DATE=\"\\\"2/12/2013\\\"\"",
 				);
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
