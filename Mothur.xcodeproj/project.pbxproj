@@ -2354,6 +2354,7 @@
 				"INSTALL_PATH[sdk=*]" = TARGET_BUILD_DIR;
 				PRODUCT_NAME = mothur;
 				SDKROOT = macosx;
+				SDKROOT = macosx10.8;
 				SKIP_INSTALL = NO;
 			};
 			name = Debug;
