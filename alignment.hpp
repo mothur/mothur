@@ -25,6 +25,7 @@ public:
 	Alignment();
 	virtual ~Alignment();
 	virtual void align(string, string) = 0;
+    virtual void alignPrimer(string, string) {}
 	
 	
 //	float getAlignmentScore();

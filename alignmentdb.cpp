@@ -47,7 +47,7 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
 			int start = time(NULL);
 			m->mothurOutEndLine();
 			m->mothurOut("Reading in the " + fastaFileName + " template sequences...\t");	cout.flush();
-			bool aligned = false;
+			//bool aligned = false;
             int tempLength = 0;
             
 			#ifdef USE_MPI	

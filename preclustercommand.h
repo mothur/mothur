@@ -329,7 +329,7 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
                                 if (mismatch > pDataArray->diffs) { mismatch = length; break; } //to far to cluster
                             }
                             
-                            if (mismatch <= diffs) {
+                            if (mismatch <= pDataArray->diffs) {
                                 //merge
                                 alignSeqs[j].names += ',' + alignSeqs[i].names;
                                 alignSeqs[j].numIdentical += alignSeqs[i].numIdentical;

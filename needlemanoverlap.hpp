@@ -32,12 +32,13 @@ public:
 	NeedlemanOverlap(float, float, float, int);
 	~NeedlemanOverlap();
 	void align(string, string);
-
+    void alignPrimer(string, string);
 	
 private:	
 	float gap;
 	float match;
 	float mismatch;
+    bool isEquivalent(char, char);
 };
 
 /**************************************************************************************************/

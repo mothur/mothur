@@ -2236,6 +2236,8 @@ int ShhherCommand::driver(vector<string> filenames, string thisCompositeFASTAFil
             double begClock = clock();
             unsigned long long begTime;
             
+            string fileNameForOutput = filenames[i];
+            
             for (int g = 0; g < theseFlowFileNames.size(); g++) {
                 
                 string flowFileName = theseFlowFileNames[g];
@@ -2269,7 +2271,7 @@ int ShhherCommand::driver(vector<string> filenames, string thisCompositeFASTAFil
                 begTime = time(NULL);
                
                 
-                flowDistParentFork(numFlowCells, distFileName, numUniques, mapUniqueToSeq, mapSeqToUnique, lengths, flowDataPrI, flowDataIntI);	
+                flowDistParentFork(numFlowCells, distFileName, numUniques, mapUniqueToSeq, mapSeqToUnique, lengths, flowDataPrI, flowDataIntI);
                 
                 m->mothurOutEndLine();
                 m->mothurOut("Total time: " + toString(time(NULL) - begTime) + '\t' + toString((clock() - begClock)/CLOCKS_PER_SEC) + '\n');
@@ -2434,7 +2436,7 @@ int ShhherCommand::driver(vector<string> filenames, string thisCompositeFASTAFil
 			}
             
             numCompleted++;
-			m->mothurOut("Total time to process " + flowFileName + ":\t" + toString(time(NULL) - begTime) + '\t' + toString((clock() - begClock)/(double)CLOCKS_PER_SEC) + '\n');
+			m->mothurOut("Total time to process " + fileNameForOutput + ":\t" + toString(time(NULL) - begTime) + '\t' + toString((clock() - begClock)/(double)CLOCKS_PER_SEC) + '\n');
 		}
 		
         if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
