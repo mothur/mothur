@@ -1730,11 +1730,11 @@
 				A7E9B66512D37EC400DA6239 /* blastdb.hpp */,
 				A74D59A6159A1E3600043046 /* counttable.h */,
 				A74D59A3159A1E2000043046 /* counttable.cpp */,
-				A7E9B6CD12D37EC400DA6239 /* distancedb.cpp */,
 				A7E9B6BD12D37EC400DA6239 /* database.cpp */,
 				A7E9B6BE12D37EC400DA6239 /* database.hpp */,
 				A7E9B6BF12D37EC400DA6239 /* datavector.hpp */,
 				A7E9B6CE12D37EC400DA6239 /* distancedb.hpp */,
+				A7E9B6CD12D37EC400DA6239 /* distancedb.cpp */,
 				A7E9B6DE12D37EC400DA6239 /* fastamap.cpp */,
 				A7E9B6DF12D37EC400DA6239 /* fastamap.h */,
 				A7E9B6E812D37EC400DA6239 /* flowdata.h */,
@@ -2386,9 +2386,9 @@
 				GCC_ENABLE_SSE42_EXTENSIONS = NO;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"MOTHUR_FILES=\"\\\"../release\\\"\"",
-					"VERSION=\"\\\"1.28.0\\\"\"",
-					"RELEASE_DATE=\"\\\"11/2/2012\\\"\"",
+					"MOTHUR_FILES=\"\\\"../../release\\\"\"",
+					"VERSION=\"\\\"1.29.2\\\"\"",
+					"RELEASE_DATE=\"\\\"2/12/2013\\\"\"",
 				);
 				"GCC_VERSION[arch=*]" = "";
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;

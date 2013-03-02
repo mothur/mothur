@@ -1080,8 +1080,6 @@ int ScreenSeqsCommand::screenNameGroupFile(map<string, string> badSeqNames){
 			it = badSeqNames.find(seqName);
 				
 			if(it != badSeqNames.end()){
-				badSeqNames.erase(it);
-				
 				if(namefile != ""){
 					int start = 0;
 					for(int i=0;i<seqList.length();i++){
@@ -1092,6 +1090,7 @@ int ScreenSeqsCommand::screenNameGroupFile(map<string, string> badSeqNames){
 					}
 					badSeqGroups[seqList.substr(start,seqList.length()-start)] = it->second;
 				}
+                badSeqNames.erase(it);
 			}
 			else{
 				goodNameOut << seqName << '\t' << seqList << endl;

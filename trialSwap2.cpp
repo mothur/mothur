@@ -149,7 +149,7 @@ int TrialSwap2::calc_combo (int nrows, int ncols, vector<vector<int> > &nullmatr
 {
     try {
         //need to transpose so we can compare rows (row-major order)
-        int tmpnrows = nrows;
+        //int tmpnrows = nrows;
         vector<vector<int> > tmpmatrix;
         
         vector<int> tmprow;

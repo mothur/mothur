@@ -55,12 +55,14 @@ private:
 	bool abort, createGroup;
 	string fastaFile, oligoFile, qFileName, groupfile, nameFile, countfile, outputDir;
 	
-	bool flip, allFiles, qtrim, keepforward;
+	bool flip, allFiles, qtrim, keepforward, pairedOligos, reorient;
 	int numFPrimers, numRPrimers, numLinkers, numSpacers, maxAmbig, maxHomoP, minLength, maxLength, processors, tdiffs, bdiffs, pdiffs, ldiffs, sdiffs, comboStarts;
 	int qWindowSize, qWindowStep, keepFirst, removeLast;
 	double qRollAverage, qThreshold, qWindowAverage, qAverage;
 	vector<string> revPrimer, outputNames;
 	set<string> filesToRemove;
+    map<int, oligosPair> pairedBarcodes;
+    map<int, oligosPair> pairedPrimers;
 	map<string, int> barcodes;
 	vector<string> groupVector;
 	map<string, int> primers;
@@ -96,7 +98,7 @@ struct trimData {
     vector<vector<string> > qualFileNames;
     vector<vector<string> > nameFileNames;
     unsigned long long lineStart, lineEnd, qlineStart, qlineEnd;
-    bool flip, allFiles, qtrim, keepforward, createGroup;
+    bool flip, allFiles, qtrim, keepforward, createGroup, pairedOligos, reorient;
 	int numFPrimers, numRPrimers, numLinkers, numSpacers, maxAmbig, maxHomoP, minLength, maxLength, tdiffs, bdiffs, pdiffs, ldiffs, sdiffs;
 	int qWindowSize, qWindowStep, keepFirst, removeLast, count;
 	double qRollAverage, qThreshold, qWindowAverage, qAverage;
@@ -112,13 +114,15 @@ struct trimData {
 	map<string, int> groupCounts;  
 	map<string, string> nameMap;
     map<string, string> groupMap;
+    map<int, oligosPair> pairedBarcodes;
+    map<int, oligosPair> pairedPrimers;
     
 	trimData(){}
 	trimData(string fn, string qn, string nf, string cf, string tn, string sn, string tqn, string sqn, string tnn, string snn, string tcn, string scn,string gn, vector<vector<string> > ffn, vector<vector<string> > qfn, vector<vector<string> > nfn, unsigned long long lstart, unsigned long long lend, unsigned long long qstart, unsigned long long qend,  MothurOut* mout,
-                      int pd, int bd, int ld, int sd, int td, map<string, int> pri, map<string, int> bar, vector<string> revP, vector<string> li, vector<string> spa, 
+                      int pd, int bd, int ld, int sd, int td, map<string, int> pri, map<string, int> bar, vector<string> revP, vector<string> li, vector<string> spa, map<int, oligosPair> pbr, map<int, oligosPair> ppr, bool po,
                       vector<string> priNameVector, vector<string> barNameVector, bool cGroup, bool aFiles, bool keepF, int keepfi, int removeL,
                       int WindowStep, int WindowSize, int WindowAverage, bool trim, double Threshold, double Average, double RollAverage,
-                      int minL, int maxA, int maxH, int maxL, bool fli, map<string, string> nm, map<string, int> ncount) {
+                      int minL, int maxA, int maxH, int maxL, bool fli, bool reo, map<string, string> nm, map<string, int> ncount) {
         filename = fn;
         qFileName = qn;
         nameFile = nf;
@@ -148,6 +152,9 @@ struct trimData {
         sdiffs = sd;
         tdiffs = td;
         barcodes = bar;
+        pairedPrimers = ppr;
+        pairedBarcodes = pbr;
+        pairedOligos = po;
         primers = pri;      numFPrimers = primers.size();
         revPrimer = revP;   numRPrimers = revPrimer.size();
         linker = li;        numLinkers = linker.size();
@@ -172,6 +179,7 @@ struct trimData {
         maxHomoP = maxH;
         maxLength = maxL;
         flip = fli;
+        reorient = reo;
         nameMap = nm;
         count = 0;
 	}
@@ -251,13 +259,31 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
             } 
 		}
 		
-		
-		TrimOligos trimOligos(pDataArray->pdiffs, pDataArray->bdiffs, pDataArray->ldiffs, pDataArray->sdiffs, pDataArray->primers, pDataArray->barcodes, pDataArray->revPrimer, pDataArray->linker, pDataArray->spacer);
+        TrimOligos* trimOligos = NULL;
+        int numBarcodes = pDataArray->barcodes.size();
+        if (pDataArray->pairedOligos)   {   trimOligos = new TrimOligos(pDataArray->pdiffs, pDataArray->bdiffs, 0, 0, pDataArray->pairedPrimers, pDataArray->pairedBarcodes);   numBarcodes = pDataArray->pairedBarcodes.size(); }
+        else                {   trimOligos = new TrimOligos(pDataArray->pdiffs, pDataArray->bdiffs, pDataArray->ldiffs, pDataArray->sdiffs, pDataArray->primers, pDataArray->barcodes, pDataArray->revPrimer, pDataArray->linker, pDataArray->spacer);  }
+        
+        TrimOligos* rtrimOligos = NULL;
+        if (pDataArray->reorient) {
+            //create reoriented primer and barcode pairs
+            map<int, oligosPair> rpairedPrimers, rpairedBarcodes;
+            for (map<int, oligosPair>::iterator it = pDataArray->pairedPrimers.begin(); it != pDataArray->pairedPrimers.end(); it++) {
+                oligosPair tempPair(trimOligos->reverseOligo((it->second).reverse), (trimOligos->reverseOligo((it->second).forward))); //reversePrimer, rc ForwardPrimer
+                rpairedPrimers[it->first] = tempPair;
+            }
+            for (map<int, oligosPair>::iterator it = pDataArray->pairedBarcodes.begin(); it != pDataArray->pairedBarcodes.end(); it++) {
+                oligosPair tempPair(trimOligos->reverseOligo((it->second).reverse), (trimOligos->reverseOligo((it->second).forward))); //reverseBarcode, rc ForwardBarcode
+                rpairedBarcodes[it->first] = tempPair;
+            }
+            rtrimOligos = new TrimOligos(pDataArray->pdiffs, pDataArray->bdiffs, 0, 0, rpairedPrimers, rpairedBarcodes); numBarcodes = rpairedBarcodes.size();
+        }
         
 		pDataArray->count = 0;
 		for(int i = 0; i < pDataArray->lineEnd; i++){ //end is the number of sequences to process
 			           
-			if (pDataArray->m->control_pressed) { 
+			if (pDataArray->m->control_pressed) {
+                delete trimOligos;
 				inFASTA.close(); trimFASTAFile.close(); scrapFASTAFile.close();
 				if ((pDataArray->createGroup) && (pDataArray->countfile == "")) {	 outGroupsFile.close();   }
                 if(pDataArray->qFileName != "")	{	qFile.close();	scrapQualFile.close(); trimQualFile.close();	}
@@ -287,26 +313,26 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
 				int primerIndex = 0;
 				
                 if(pDataArray->numLinkers != 0){
-					success = trimOligos.stripLinker(currSeq, currQual);
+					success = trimOligos->stripLinker(currSeq, currQual);
 					if(success > pDataArray->ldiffs)		{	trashCode += 'k';	}
 					else{ currentSeqsDiffs += success;  }
 				}
                 
-				if(pDataArray->barcodes.size() != 0){
-					success = trimOligos.stripBarcode(currSeq, currQual, barcodeIndex);
+				if(numBarcodes != 0){
+					success = trimOligos->stripBarcode(currSeq, currQual, barcodeIndex);
 					if(success > pDataArray->bdiffs)		{	trashCode += 'b';	}
 					else{ currentSeqsDiffs += success;  }
 				}
                 
                 if(pDataArray->numSpacers != 0){
-					success = trimOligos.stripSpacer(currSeq, currQual);
+					success = trimOligos->stripSpacer(currSeq, currQual);
 					if(success > pDataArray->sdiffs)		{	trashCode += 's';	}
 					else{ currentSeqsDiffs += success;  }
 
 				}
                 
 				if(pDataArray->numFPrimers != 0){
-					success = trimOligos.stripForward(currSeq, currQual, primerIndex, pDataArray->keepforward);
+					success = trimOligos->stripForward(currSeq, currQual, primerIndex, pDataArray->keepforward);
 					if(success > pDataArray->pdiffs)		{	trashCode += 'f';	}
 					else{ currentSeqsDiffs += success;  }
 				}
@@ -314,9 +340,41 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
 				if (currentSeqsDiffs > pDataArray->tdiffs)	{	trashCode += 't';   }
 				
 				if(pDataArray->numRPrimers != 0){
-					success = trimOligos.stripReverse(currSeq, currQual);
+					success = trimOligos->stripReverse(currSeq, currQual);
 					if(!success)				{	trashCode += 'r';	}
 				}
+                
+                if (pDataArray->reorient && (trashCode != "")) { //if you failed and want to check the reverse
+                    int thisSuccess = 0;
+                    string thisTrashCode = "";
+                    int thisCurrentSeqsDiffs = 0;
+                    
+                    int thisBarcodeIndex = 0;
+                    int thisPrimerIndex = 0;
+                    
+                    if(numBarcodes != 0){
+                        thisSuccess = rtrimOligos->stripBarcode(currSeq, currQual, thisBarcodeIndex);
+                        if(thisSuccess > pDataArray->bdiffs)		{	thisTrashCode += 'b';	}
+                        else{ thisCurrentSeqsDiffs += thisSuccess;  }
+                    }
+                    
+                    if(pDataArray->numFPrimers != 0){
+                        thisSuccess = rtrimOligos->stripForward(currSeq, currQual, thisPrimerIndex, pDataArray->keepforward);
+                        if(thisSuccess > pDataArray->pdiffs)		{	thisTrashCode += 'f';	}
+                        else{ thisCurrentSeqsDiffs += thisSuccess;  }
+                    }
+                    
+                    if (thisCurrentSeqsDiffs > pDataArray->tdiffs)	{	thisTrashCode += 't';   }
+                    
+                    if (thisTrashCode == "") {
+                        trashCode = thisTrashCode;
+                        success = thisSuccess;
+                        currentSeqsDiffs = thisCurrentSeqsDiffs;
+                        barcodeIndex = thisBarcodeIndex;
+                        primerIndex = thisPrimerIndex;
+                    }
+                }
+
                 
 				if(pDataArray->keepFirst != 0){
 					//success = keepFirstTrim(currSeq, currQual);
@@ -398,9 +456,9 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
 				if(trashCode.length() == 0){
                     string thisGroup = "";
                     if (pDataArray->createGroup) {
-						if(pDataArray->barcodes.size() != 0){
+						if(numBarcodes != 0){
 							thisGroup = pDataArray->barcodeNameVector[barcodeIndex];
-							if (pDataArray->primers.size() != 0) { 
+							if (pDataArray->numFPrimers != 0) {
 								if (pDataArray->primerNameVector[primerIndex] != "") { 
 									if(thisGroup != "") {
 										thisGroup += "." + pDataArray->primerNameVector[primerIndex]; 
@@ -438,7 +496,7 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
                         }
                         
                         if (pDataArray->createGroup) {
-                            if(pDataArray->barcodes.size() != 0){
+                            if(numBarcodes != 0){
                                 
                                 if (pDataArray->countfile == "") { outGroupsFile << currSeq.getName() << '\t' << thisGroup << endl; }
                                 else {   pDataArray->groupMap[currSeq.getName()] = thisGroup; }
@@ -515,7 +573,7 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
 		//report progress
 		if((pDataArray->count) % 1000 != 0){	pDataArray->m->mothurOut(toString(pDataArray->count)); pDataArray->m->mothurOutEndLine();		}
 		
-		
+		delete trimOligos;
 		inFASTA.close();
 		trimFASTAFile.close();
 		scrapFASTAFile.close();

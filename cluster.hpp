@@ -14,6 +14,7 @@ class Cluster {
 	
 public:
 	Cluster(RAbundVector*, ListVector*, SparseDistanceMatrix*, float, string);
+    virtual ~Cluster() {}
     virtual void update(double&);				
 	virtual string getTag() = 0;
 	virtual void setMapWanted(bool m);  

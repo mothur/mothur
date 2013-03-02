@@ -312,7 +312,7 @@ int ConsensusSeqsCommand::execute(){
 		
 		}else {
 			
-						
+            
 			InputData* input = new InputData(listfile, "list");
 			ListVector* list = input->getListVector();
 			
@@ -435,15 +435,24 @@ int ConsensusSeqsCommand::processList(ListVector*& list){
 		
 		outSummary << "OTU#\tPositioninAlignment\tA\tT\tG\tC\tGap\tNumberofSeqs\tConsensusBase" << endl;
 		
+        string snumBins = toString(list->getNumBins());
 		for (int i = 0; i < list->getNumBins(); i++) {
 			
 			if (m->control_pressed) { outSummary.close(); outName.close(); outFasta.close(); return 0; }
 			
 			string bin = list->get(i);
 			string consSeq = getConsSeq(bin, outSummary, i);
+            
+            string seqName = "Otu";
+            string sbinNumber = toString(i+1);
+            if (sbinNumber.length() < snumBins.length()) {
+                int diff = snumBins.length() - sbinNumber.length();
+                for (int h = 0; h < diff; h++) { seqName += "0"; }
+            }
+            seqName += sbinNumber;
 			
-			outFasta << ">seq" << (i+1) << endl << consSeq << endl;
-			outName << "seq" << (i+1) << '\t' << "seq" << (i+1) << "," << bin << endl;
+			outFasta << ">" << seqName << endl << consSeq << endl;
+			outName << seqName << '\t' << seqName << "," << bin << endl;
 		}
 		
 		outSummary.close(); outName.close(); outFasta.close();

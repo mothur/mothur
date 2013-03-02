@@ -357,7 +357,7 @@ string KmerTree::getTaxonomy(Sequence* thisSeq){
                     //			levelProbabilityOutput << tree[indices[i][maxIndex[i]]]->getName() << '(' << setprecision(6) << pLevel_X[i] << ");";
                 }
                 else{
-                    taxonProbabilityString += "unclassified" + '(' + toString(confidenceScore) + ");";
+                    taxonProbabilityString += "unclassified(" + toString(confidenceScore) + ");";
                     //			levelProbabilityOutput << "unclassified" << '(' << setprecision(6) << pLevel_X[i] << ");";
                     simpleTax += "unclassified;";
                 }
