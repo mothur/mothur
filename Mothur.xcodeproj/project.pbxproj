@@ -1958,7 +1958,7 @@
 		08FB7793FE84155DC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0420;
+				LastUpgradeCheck = 0460;
 				ORGANIZATIONNAME = "Schloss Lab";
 			};
 			buildConfigurationList = 1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "Mothur" */;
@@ -2353,6 +2353,7 @@
 				GCC_OPTIMIZATION_LEVEL = 3;
 				"INSTALL_PATH[sdk=*]" = TARGET_BUILD_DIR;
 				PRODUCT_NAME = mothur;
+				SDKROOT = macosx;
 				SDKROOT = macosx10.8;
 				SKIP_INSTALL = NO;
 			};
@@ -2369,6 +2370,7 @@
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_WARN_UNUSED_VALUE = YES;
 				PRODUCT_NAME = mothur;
+				SDKROOT = macosx;
 				SKIP_INSTALL = NO;
 			};
 			name = Release;
@@ -2405,7 +2407,7 @@
 					"-lncurses",
 					"-lreadline",
 				);
-				SDKROOT = macosx10.8;
+				SDKROOT = macosx;
 				SKIP_INSTALL = NO;
 				USER_HEADER_SEARCH_PATHS = "";
 			};
@@ -2443,7 +2445,7 @@
 					"-lncurses",
 					"-lreadline",
 				);
-				SDKROOT = macosx10.8;
+				SDKROOT = macosx;
 				SKIP_INSTALL = NO;
 			};
 			name = Release;

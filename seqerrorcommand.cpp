@@ -680,10 +680,10 @@ int SeqErrorCommand::driver(string filename, string qFileName, string rFileName,
 		int numSeqs = 0;
 		
 		map<string, int>::iterator it;
-		qScoreErrorMap['m'].assign(41, 0);
-		qScoreErrorMap['s'].assign(41, 0);
-		qScoreErrorMap['i'].assign(41, 0);
-		qScoreErrorMap['a'].assign(41, 0);
+		qScoreErrorMap['m'].assign(101, 0);
+		qScoreErrorMap['s'].assign(101, 0);
+		qScoreErrorMap['i'].assign(101, 0);
+		qScoreErrorMap['a'].assign(101, 0);
 		
 		errorForward['m'].assign(maxLength,0);
 		errorForward['s'].assign(maxLength,0);
@@ -719,8 +719,8 @@ int SeqErrorCommand::driver(string filename, string qFileName, string rFileName,
 			qualForwardMap.resize(maxLength);
 			qualReverseMap.resize(maxLength);
 			for(int i=0;i<maxLength;i++){
-				qualForwardMap[i].assign(41,0);
-				qualReverseMap[i].assign(41,0);
+				qualForwardMap[i].assign(101,0);
+				qualReverseMap[i].assign(101,0);
 			}	
 		}
 		else if(qFileName != "" && !aligned){
@@ -731,8 +731,8 @@ int SeqErrorCommand::driver(string filename, string qFileName, string rFileName,
 			qualForwardMap.resize(maxLength);
 			qualReverseMap.resize(maxLength);
 			for(int i=0;i<maxLength;i++){
-				qualForwardMap[i].assign(41,0);
-				qualReverseMap[i].assign(41,0);
+				qualForwardMap[i].assign(101,0);
+				qualReverseMap[i].assign(101,0);
 			}	
         }
         
@@ -1278,7 +1278,7 @@ void SeqErrorCommand::printErrorQuality(map<char, vector<int> > qScoreErrorMap){
 		outputNames.push_back(errorQualityFileName);  outputTypes["errorquality"].push_back(errorQualityFileName);
 
 		errorQualityFile << "qscore\tmatches\tsubstitutions\tinsertions\tambiguous" << endl;
-		for(int i=0;i<41;i++){
+		for(int i=0;i<101;i++){
 			errorQualityFile << i << '\t' << qScoreErrorMap['m'][i] << '\t' << qScoreErrorMap['s'][i] << '\t' << qScoreErrorMap['i'][i] << '\t'<< qScoreErrorMap['a'][i] << endl;
 		}
 		errorQualityFile.close();
