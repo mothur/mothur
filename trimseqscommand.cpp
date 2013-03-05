@@ -684,15 +684,11 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
             //create reoriented primer and barcode pairs
             map<int, oligosPair> rpairedPrimers, rpairedBarcodes;
             for (map<int, oligosPair>::iterator it = pairedPrimers.begin(); it != pairedPrimers.end(); it++) {
-                cout << "primer " << (it->second).forward << '\t' << (it->second).reverse << '\t' << primerNameVector[it->first] << endl;
-                cout << "rprimer " << trimOligos->reverseOligo((it->second).reverse) << '\t' << (trimOligos->reverseOligo((it->second).forward)) << endl;
-                 oligosPair tempPair(reverseOligo((it->second).reverse), (reverseOligo((it->second).forward))); //reversePrimer, rc ForwardPrimer
+                  oligosPair tempPair(reverseOligo((it->second).reverse), (reverseOligo((it->second).forward))); //reversePrimer, rc ForwardPrimer
                 rpairedPrimers[it->first] = tempPair;
             }
             for (map<int, oligosPair>::iterator it = pairedBarcodes.begin(); it != pairedBarcodes.end(); it++) {
-                cout << "barcode " << (it->second).forward << '\t' << (it->second).reverse << '\t' << barcodeNameVector[it->first] << endl;
-                cout << "rbarcode " << trimOligos->reverseOligo((it->second).reverse) << '\t' << (trimOligos->reverseOligo((it->second).forward)) << endl;
-                oligosPair tempPair(reverseOligo((it->second).reverse), (reverseOligo((it->second).forward))); //reverseBarcode, rc ForwardBarcode
+                 oligosPair tempPair(reverseOligo((it->second).reverse), (reverseOligo((it->second).forward))); //reverseBarcode, rc ForwardBarcode
                 rpairedBarcodes[it->first] = tempPair;
             }
             rtrimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, rpairedPrimers, rpairedBarcodes); numBarcodes = rpairedBarcodes.size();
@@ -1561,6 +1557,8 @@ bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
 					}
                     
                     oligosPair newPrimer(oligo, roligo);
+                    
+                     if (m->debug) { m->mothurOut("[DEBUG]: primer pair " + newPrimer.forward + " " + newPrimer.reverse + ", and group = " + group + ".\n"); }
 					
 					//check for repeat barcodes
                     string tempPair = oligo+roligo;
@@ -1604,7 +1602,8 @@ bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
                             if(reverseBarcode[i] == 'U')	{	reverseBarcode[i] = 'T';	}
                         }
                         
-                        oligosPair newPair(oligo, reverseOligo(reverseBarcode));
+                        reverseBarcode = reverseOligo(reverseBarcode);
+                        oligosPair newPair(oligo, reverseBarcode);
                         
                         if (m->debug) { m->mothurOut("[DEBUG]: barcode pair " + newPair.forward + " " + newPair.reverse + ", and group = " + group + ".\n"); }
                         

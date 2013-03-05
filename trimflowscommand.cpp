@@ -489,7 +489,7 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
                 if (pos == string::npos) {		
                     flowData.printFlows(trimFlowFile);
                     
-                    if(fasta)	{	currSeq.printSequence(fastaFile);	}
+                    if(fasta)	{	currSeq.setAligned(currSeq.getUnaligned()); currSeq.printSequence(fastaFile);	}
                     
                     if(allFiles){
                         ofstream output;

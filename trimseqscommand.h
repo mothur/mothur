@@ -261,7 +261,7 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
 		
         TrimOligos* trimOligos = NULL;
         int numBarcodes = pDataArray->barcodes.size();
-        if (pDataArray->pairedOligos)   {   trimOligos = new TrimOligos(pDataArray->pdiffs, pDataArray->bdiffs, 0, 0, pDataArray->pairedPrimers, pDataArray->pairedBarcodes);   numBarcodes = pDataArray->pairedBarcodes.size(); }
+        if (pDataArray->pairedOligos)   {   trimOligos = new TrimOligos(pDataArray->pdiffs, pDataArray->bdiffs, 0, 0, pDataArray->pairedPrimers, pDataArray->pairedBarcodes);   numBarcodes = pDataArray->pairedBarcodes.size(); pDataArray->numFPrimers = pDataArray->pairedPrimers.size(); }
         else                {   trimOligos = new TrimOligos(pDataArray->pdiffs, pDataArray->bdiffs, pDataArray->ldiffs, pDataArray->sdiffs, pDataArray->primers, pDataArray->barcodes, pDataArray->revPrimer, pDataArray->linker, pDataArray->spacer);  }
         
         TrimOligos* rtrimOligos = NULL;
@@ -283,7 +283,7 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
 		for(int i = 0; i < pDataArray->lineEnd; i++){ //end is the number of sequences to process
 			           
 			if (pDataArray->m->control_pressed) {
-                delete trimOligos;
+                delete trimOligos; if (pDataArray->reorient) { delete rtrimOligos; }
 				inFASTA.close(); trimFASTAFile.close(); scrapFASTAFile.close();
 				if ((pDataArray->createGroup) && (pDataArray->countfile == "")) {	 outGroupsFile.close();   }
                 if(pDataArray->qFileName != "")	{	qFile.close();	scrapQualFile.close(); trimQualFile.close();	}
@@ -372,6 +372,10 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
                         currentSeqsDiffs = thisCurrentSeqsDiffs;
                         barcodeIndex = thisBarcodeIndex;
                         primerIndex = thisPrimerIndex;
+                        currSeq.reverseComplement();
+                        if(pDataArray->qFileName != ""){
+                            currQual.flipQScores();
+                        }
                     }
                 }
 
@@ -567,12 +571,13 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
 			}
 			
 			//report progress
-			if((i) % 1000 == 0){	pDataArray->m->mothurOut(toString(i)); pDataArray->m->mothurOutEndLine();		}
+			if((pDataArray->count) % 1000 == 0){	pDataArray->m->mothurOut(toString(pDataArray->count)); pDataArray->m->mothurOutEndLine();		}
 			
 		}
 		//report progress
 		if((pDataArray->count) % 1000 != 0){	pDataArray->m->mothurOut(toString(pDataArray->count)); pDataArray->m->mothurOutEndLine();		}
 		
+        if (pDataArray->reorient) { delete rtrimOligos; }
 		delete trimOligos;
 		inFASTA.close();
 		trimFASTAFile.close();

@@ -224,7 +224,7 @@ static DWORD WINAPI MyTrimFlowThreadFunction(LPVOID lpParam){
 				
 				flowData.printFlows(trimFlowFile);
 				
-				if(pDataArray->fasta)	{	currSeq.printSequence(fastaFile);	}
+				if(pDataArray->fasta)	{	currSeq.setAligned(currSeq.getUnaligned()); currSeq.printSequence(fastaFile);	}
 				
 				if(pDataArray->allFiles){
 					ofstream output;
