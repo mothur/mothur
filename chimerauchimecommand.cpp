@@ -727,10 +727,8 @@ int ChimeraUchimeCommand::execute(){
 				
 				if(processors == 1)	{	totalSeqs = driverGroups(outputFileName, newFasta, accnosFileName, alnsFileName, newCountFile, 0, groups.size(), groups);
                     
-                    //read my own
-                    if (hasCount && !dups) {
-                        CountTable newCount; newCount.readTable(nameFile);
-                        
+                    if (hasCount && dups) {
+                        CountTable c; c.readTable(nameFile);
                         if (!m->isBlank(newCountFile)) {
                             ifstream in2;
                             m->openInputFile(newCountFile, in2);
@@ -738,12 +736,12 @@ int ChimeraUchimeCommand::execute(){
                             string name, group;
                             while (!in2.eof()) {
                                 in2 >> name >> group; m->gobble(in2);
-                                newCount.setAbund(name, group, 0);
+                                c.setAbund(name, group, 0);
                             }
                             in2.close();
                         }
                         m->mothurRemove(newCountFile);
-                        newCount.printTable(newCountFile);
+                        c.printTable(newCountFile);
                     }
 
                 }else				{	totalSeqs = createProcessesGroups(outputFileName, newFasta, accnosFileName, alnsFileName, newCountFile, groups, nameFile, groupFile, fastaFileNames[s]);			}
@@ -757,25 +755,26 @@ int ChimeraUchimeCommand::execute(){
                     m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(totalSeqs) + " sequences. " + toString(totalChimeras) + " chimeras were found.");	m->mothurOutEndLine();
                     m->mothurOut("The number of sequences checked may be larger than the number of unique sequences because some sequences are found in several samples."); m->mothurOutEndLine(); 
 				}else {
-                    /*if (hasCount) {  //removed empty seqs
+                    
+                    if (hasCount) {
+                        set<string> doNotRemove;
+                        CountTable c; c.readTable(newCountFile);
+                        vector<string> namesInTable = c.getNamesOfSeqs();
+                        for (int i = 0; i < namesInTable.size(); i++) {
+                            int temp = c.getNumSeqs(namesInTable[i]);
+                            if (temp == 0) {  c.remove(namesInTable[i]);  }
+                            else { doNotRemove.insert((namesInTable[i])); }
+                        }
+                        //remove names we want to keep from accnos file.
+                        set<string> accnosNames = m->readAccnos(accnosFileName);
                         ofstream out2;
                         m->openOutputFile(accnosFileName, out2);
-                        
-                        CountTable c; c.readTable(newCountFile);
-                        vector<string> nseqs = c.getNamesOfSeqs();
-                        vector<string> ngroups = c.getNamesOfGroups();
-                        for (int l = 0; l < nseqs.size(); l++) {
-                            if (c.getNumSeqs(nseqs[l]) == 0) {
-                                c.remove(nseqs[l]);
-                                out2 << nseqs[l] << endl;
-                            }
-                        }
-                        for (int l = 0; l < ngroups.size(); l++) {
-                            if (c.getGroupCount(ngroups[l]) == 0) {  c.removeGroup(ngroups[l]); }
+                        for (set<string>::iterator it = accnosNames.begin(); it != accnosNames.end(); it++) {
+                            if (doNotRemove.count(*it) == 0) {  out2 << (*it) << endl; }
                         }
                         out2.close();
                         c.printTable(newCountFile);
-                    }*/
+                    }
                 }
                 
                 if (hasCount) { delete cparser; }
@@ -1893,7 +1892,7 @@ int ChimeraUchimeCommand::createProcessesGroups(string outputFName, string filen
         
         
 #endif		
-		
+      
         //read my own
         if (hasCount && dups) {
             if (!m->isBlank(accnos + ".byCount")) {
@@ -1909,7 +1908,7 @@ int ChimeraUchimeCommand::createProcessesGroups(string outputFName, string filen
             }
             m->mothurRemove(accnos + ".byCount");
         }
-				
+       
 		//append output files
 		for(int i=0;i<processIDS.size();i++){
 			m->appendFiles((outputFName + toString(processIDS[i]) + ".temp"), outputFName);
@@ -1941,8 +1940,8 @@ int ChimeraUchimeCommand::createProcessesGroups(string outputFName, string filen
 		}
         
         //print new *.pick.count_table
-        if (hasCount && dups) { newCount.printTable(newCountFile); }
-		
+        if (hasCount && dups) {  newCount.printTable(newCountFile);   }
+ 		
 		return num;	
 		
 	}
