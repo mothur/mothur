@@ -299,11 +299,14 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
 			int currentSeqsDiffs = 0;
             
 			Sequence currSeq(inFASTA); pDataArray->m->gobble(inFASTA);
+            Sequence savedSeq(currSeq.getName(), currSeq.getAligned());
 			
-			QualityScores currQual;
+			QualityScores currQual; QualityScores savedQual;
 			if(pDataArray->qFileName != ""){
 				currQual = QualityScores(qFile);  pDataArray->m->gobble(qFile);
+                savedQual.setName(currQual.getName()); savedQual.setScores(currQual.getScores());
 			}
+              
 			
 			string origSeq = currSeq.getUnaligned();
 			if (origSeq != "") {
@@ -353,13 +356,13 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
                     int thisPrimerIndex = 0;
                     
                     if(numBarcodes != 0){
-                        thisSuccess = rtrimOligos->stripBarcode(currSeq, currQual, thisBarcodeIndex);
+                        thisSuccess = rtrimOligos->stripBarcode(savedSeq, savedQual, thisBarcodeIndex);
                         if(thisSuccess > pDataArray->bdiffs)		{	thisTrashCode += 'b';	}
                         else{ thisCurrentSeqsDiffs += thisSuccess;  }
                     }
                     
                     if(pDataArray->numFPrimers != 0){
-                        thisSuccess = rtrimOligos->stripForward(currSeq, currQual, thisPrimerIndex, pDataArray->keepforward);
+                        thisSuccess = rtrimOligos->stripForward(savedSeq, savedQual, thisPrimerIndex, pDataArray->keepforward);
                         if(thisSuccess > pDataArray->pdiffs)		{	thisTrashCode += 'f';	}
                         else{ thisCurrentSeqsDiffs += thisSuccess;  }
                     }
@@ -372,9 +375,11 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
                         currentSeqsDiffs = thisCurrentSeqsDiffs;
                         barcodeIndex = thisBarcodeIndex;
                         primerIndex = thisPrimerIndex;
-                        currSeq.reverseComplement();
+                        savedSeq.reverseComplement();
+                        currSeq.setAligned(savedSeq.getAligned());
                         if(pDataArray->qFileName != ""){
-                            currQual.flipQScores();
+                            savedQual.flipQScores();
+                            currQual.setScores(savedQual.getScores());
                         }
                     }
                 }

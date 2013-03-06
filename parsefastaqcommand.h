@@ -36,7 +36,7 @@ private:
 
 	vector<string> outputNames;	
 	string outputDir, fastaQFile, format;
-	bool abort, fasta, qual;
+	bool abort, fasta, qual, pacbio;
 	
 	vector<int> convertQual(string);
     vector<char> convertTable;
