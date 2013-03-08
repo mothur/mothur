@@ -18,6 +18,7 @@ TrimOligos::TrimOligos(int p, int b, int l, int s, map<string, int> pr, map<stri
 	try {
 		m = MothurOut::getInstance();
         paired = false;
+        trashCode = "";
 		
 		pdiffs = p;
 		bdiffs = b;
@@ -73,6 +74,7 @@ TrimOligos::TrimOligos(int p, int b, int l, int s, map<int, oligosPair> pr, map<
         ldiffs = l;
         sdiffs = s;
         paired = true;
+        trashCode = "";
 		
         maxFBarcodeLength = 0;
         for(map<int,oligosPair>::iterator it=br.begin();it!=br.end();it++){
@@ -147,6 +149,7 @@ TrimOligos::TrimOligos(int p, int b, map<string, int> pr, map<string, int> br, v
 		primers = pr;
 		revPrimer = r;
         paired = false;
+        trashCode = "";
         
         maxFBarcodeLength = 0;
         for(map<string,int>::iterator it=barcodes.begin();it!=barcodes.end();it++){
@@ -178,6 +181,7 @@ bool TrimOligos::findForward(Sequence& seq, int& primerStart, int& primerEnd){
 	try {
 		
 		string rawSequence = seq.getUnaligned();
+        trashCode = "";
 		
 		for(map<string,int>::iterator it=primers.begin();it!=primers.end();it++){
 			string oligo = it->first;
@@ -200,7 +204,7 @@ bool TrimOligos::findForward(Sequence& seq, int& primerStart, int& primerEnd){
 		
         primerStart = 0; primerEnd = 0;
         //if you don't want to allow for diffs
-		if (pdiffs == 0) { return false;  }
+		if (pdiffs == 0) { trashCode = "f"; return false;  }
 		else { //try aligning and see if you can find it
 						
 			//can you find the barcode
@@ -253,11 +257,12 @@ bool TrimOligos::findForward(Sequence& seq, int& primerStart, int& primerEnd){
 			
             if (alignment != NULL) {  delete alignment;  }
             
-			if(minDiff > pdiffs)	{	primerStart = 0; primerEnd = 0; return false;		}	//no good matches
-			else if(minCount > 1)	{	primerStart = 0; primerEnd = 0; return false;	}	//can't tell the difference between multiple primers
-			else{  return true; }
+			if(minDiff > pdiffs)	{	primerStart = 0; primerEnd = 0; trashCode = "f"; return false;		}	//no good matches
+			else if(minCount > 1)	{	primerStart = 0; primerEnd = 0; trashCode = "f"; return false;	}	//can't tell the difference between multiple primers
+			else{  trashCode = ""; return true; }
 		}
-       
+        
+        trashCode = "f";
         primerStart = 0; primerEnd = 0;
 		return false;
 		
@@ -270,7 +275,7 @@ bool TrimOligos::findForward(Sequence& seq, int& primerStart, int& primerEnd){
 //******************************************************************/
 bool TrimOligos::findReverse(Sequence& seq, int& primerStart, int& primerEnd){
 	try {
-		
+		trashCode = "";
 		string rawSequence = seq.getUnaligned();
 		
 		for(int i=0;i<revPrimer.size();i++){
@@ -292,6 +297,7 @@ bool TrimOligos::findReverse(Sequence& seq, int& primerStart, int& primerEnd){
             }
 		}	
 		
+        trashCode = "r";
         primerStart = 0; primerEnd = 0;
 		return false;
 	}
@@ -304,7 +310,7 @@ bool TrimOligos::findReverse(Sequence& seq, int& primerStart, int& primerEnd){
 
 int TrimOligos::stripBarcode(Sequence& seq, QualityScores& qual, int& group){
 	try {
-		
+		trashCode = "";
         if (paired) {  int success = stripPairedBarcode(seq, qual, group);  return success; }
         
 		string rawSequence = seq.getUnaligned();
@@ -327,12 +333,13 @@ int TrimOligos::stripBarcode(Sequence& seq, QualityScores& qual, int& group){
 				}
 				
 				success = 0;
-				break;
+                trashCode = "";
+				return success;
 			}
 		}
 		
 		//if you found the barcode or if you don't want to allow for diffs
-		if ((bdiffs == 0) || (success == 0)) { return success;  }
+		if (bdiffs == 0) { trashCode = "b"; return success;  }
 		
 		else { //try aligning and see if you can find it
 			Alignment* alignment;
@@ -350,7 +357,7 @@ int TrimOligos::stripBarcode(Sequence& seq, QualityScores& qual, int& group){
 				//				int length = oligo.length();
 				
 				if(rawSequence.length() < maxFBarcodeLength){	//let's just assume that the barcodes are the same length
-					success = bdiffs + 10;
+					success = bdiffs + 10; trashCode = "b";
 					break;
 				}
 				
@@ -385,8 +392,8 @@ int TrimOligos::stripBarcode(Sequence& seq, QualityScores& qual, int& group){
 				
 			}
 			
-			if(minDiff > bdiffs)	{	success = minDiff;		}	//no good matches
-			else if(minCount > 1)	{	success = bdiffs + 100;	}	//can't tell the difference between multiple barcodes
+			if(minDiff > bdiffs)	{	trashCode = "b"; success = minDiff;		}	//no good matches
+			else if(minCount > 1)	{	trashCode = "b"; success = bdiffs + 100;	}	//can't tell the difference between multiple barcodes
 			else{													//use the best match
 				group = minGroup;
 				seq.setUnaligned(rawSequence.substr(minPos));
@@ -395,6 +402,7 @@ int TrimOligos::stripBarcode(Sequence& seq, QualityScores& qual, int& group){
 					qual.trimQScores(minPos, -1);
 				}
 				success = minDiff;
+                trashCode = "";
 			}
 			
 			if (alignment != NULL) {  delete alignment;  }
@@ -412,6 +420,7 @@ int TrimOligos::stripBarcode(Sequence& seq, QualityScores& qual, int& group){
 //*******************************************************************/
 int TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq, int& group){
 	try {
+        trashCode = "";
 		//look for forward barcode
 		string rawFSequence = forwardSeq.getUnaligned();
         string rawRSequence = reverseSeq.getUnaligned();
@@ -424,25 +433,33 @@ int TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq, int& gr
             
 			if(rawFSequence.length() < foligo.length()){	//let's just assume that the barcodes are the same length
 				success = bdiffs + 10;					//if the sequence is shorter than the barcode then bail out
-				break;	
+                trashCode += "b";
+                break;
 			}
             if(rawRSequence.length() < roligo.length()){	//let's just assume that the barcodes are the same length
 				success = bdiffs + 10;					//if the sequence is shorter than the barcode then bail out
+                trashCode += "d";
 				break;	
 			}
 			
-			if((compareDNASeq(foligo, rawFSequence.substr(0,foligo.length()))) && (compareDNASeq(roligo, rawRSequence.substr((rawRSequence.length()-roligo.length()),roligo.length())))) {
-				group = it->first;
-				forwardSeq.setUnaligned(rawFSequence.substr(foligo.length()));
-                reverseSeq.setUnaligned(rawRSequence.substr(0,(rawRSequence.length()-roligo.length())));
-				success = 0;
-				break;
-			}
+			if(compareDNASeq(foligo, rawFSequence.substr(0,foligo.length()))) {
+                if (compareDNASeq(roligo, rawRSequence.substr((rawRSequence.length()-roligo.length()),roligo.length()))) {
+                    group = it->first;
+                    forwardSeq.setUnaligned(rawFSequence.substr(foligo.length()));
+                    reverseSeq.setUnaligned(rawRSequence.substr(0,(rawRSequence.length()-roligo.length())));
+                    success = 0; trashCode = "";
+                    return success;
+                }
+            }else {
+                trashCode = "b";
+                if (!compareDNASeq(roligo, rawRSequence.substr((rawRSequence.length()-roligo.length()),roligo.length()))) { trashCode += "d";  }
+            }
 		}
 		
 		//if you found the barcode or if you don't want to allow for diffs
-		if ((bdiffs == 0) || (success == 0)) { return success;  }
+		if (bdiffs == 0) {  return success;  }
 		else { //try aligning and see if you can find it
+            trashCode = "";
 			Alignment* alignment;
 			if (ifbarcodes.size() > 0) {  alignment = new NeedlemanOverlap(-1.0, 1.0, -1.0, (maxFBarcodeLength+bdiffs+1));   }
 			else{ alignment = NULL; } 
@@ -518,8 +535,8 @@ int TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq, int& gr
 			}
             
 			//cout << minDiff << '\t' << minCount << '\t' << endl;
-			if(minDiff > bdiffs)	{	success = minDiff;		}	//no good matches
-			else{	
+			if(minDiff > bdiffs)	{	trashCode = "b"; minFGroup.clear(); success = minDiff;		}	//no good matches
+			//else{
                 //check for reverse match
                 if (alignment != NULL) {  delete alignment;  }
                 
@@ -592,7 +609,7 @@ int TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq, int& gr
                     cout << endl;
                 }
                 cout << endl;*/
-                if(minDiff > bdiffs)	{	success = minDiff;		}	//no good matches
+                if(minDiff > bdiffs)	{	trashCode += "d"; success = minDiff;		}	//no good matches
                 else  {  
                     bool foundMatch = false;
                     vector<int> matches;
@@ -618,13 +635,16 @@ int TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq, int& gr
                         forwardSeq.setUnaligned(rawFSequence.substr(fStart));
                         reverseSeq.setUnaligned(rawRSequence.substr(rStart));
                         success = minDiff;
-                    }else { success = bdiffs + 100;	}
+                    }else { if (trashCode == "") { trashCode = "bd"; } success = bdiffs + 100;	}
                 }
-			}
+			//}
 			
 			if (alignment != NULL) {  delete alignment;  }
 		}
 		
+        //catchall for case I didn't think of
+        if ((trashCode == "") && (success > bdiffs)) { trashCode = "bd"; }
+        
 		return success;
 		
 	}
@@ -637,6 +657,8 @@ int TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq, int& gr
 //*******************************************************************/
 int TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq, QualityScores& forwardQual, QualityScores& reverseQual, int& group){
 	try {
+        trashCode = "";
+        
 		//look for forward barcode
 		string rawFSequence = forwardSeq.getUnaligned();
         string rawRSequence = reverseSeq.getUnaligned();
@@ -649,27 +671,36 @@ int TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq, Quality
             
 			if(rawFSequence.length() < foligo.length()){	//let's just assume that the barcodes are the same length
 				success = bdiffs + 10;					//if the sequence is shorter than the barcode then bail out
+                trashCode = "b";
 				break;	
 			}
             if(rawRSequence.length() < roligo.length()){	//let's just assume that the barcodes are the same length
 				success = bdiffs + 10;					//if the sequence is shorter than the barcode then bail out
+                trashCode += "d";
 				break;	
 			}
 			
-			if((compareDNASeq(foligo, rawFSequence.substr(0,foligo.length()))) && (compareDNASeq(roligo, rawRSequence.substr((rawRSequence.length()-roligo.length()),roligo.length())))) {
-				group = it->first;
-				forwardSeq.setUnaligned(rawFSequence.substr(foligo.length()));
-                reverseSeq.setUnaligned(rawRSequence.substr(0,(rawRSequence.length()-roligo.length())));
-                forwardQual.trimQScores(foligo.length(), -1);
-                reverseQual.trimQScores(-1, rawRSequence.length()-roligo.length());
-				success = 0;
-				break;
+			if(compareDNASeq(foligo, rawFSequence.substr(0,foligo.length()))) {
+                if (compareDNASeq(roligo, rawRSequence.substr((rawRSequence.length()-roligo.length()),roligo.length()))) {
+                    group = it->first;
+                    forwardSeq.setUnaligned(rawFSequence.substr(foligo.length()));
+                    reverseSeq.setUnaligned(rawRSequence.substr(0,(rawRSequence.length()-roligo.length())));
+                    forwardQual.trimQScores(foligo.length(), -1);
+                    reverseQual.trimQScores(-1, rawRSequence.length()-roligo.length());
+                    success = 0; trashCode = "";
+                    return success;
+                }
+            }else {
+                trashCode = "b";
+                if (!compareDNASeq(roligo, rawRSequence.substr((rawRSequence.length()-roligo.length()),roligo.length()))) {  trashCode += "d";
+                }
 			}
 		}
 		
 		//if you found the barcode or if you don't want to allow for diffs
-		if ((bdiffs == 0) || (success == 0)) { return success;  }
+		if (bdiffs == 0) { return success;  }
 		else { //try aligning and see if you can find it
+            trashCode = "";
 			Alignment* alignment;
 			if (ifbarcodes.size() > 0) {  alignment = new NeedlemanOverlap(-1.0, 1.0, -1.0, (maxFBarcodeLength+bdiffs+1));   }
 			else{ alignment = NULL; } 
@@ -745,8 +776,8 @@ int TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq, Quality
 			}
             
 			//cout << minDiff << '\t' << minCount << '\t' << endl;
-			if(minDiff > bdiffs)	{	success = minDiff;		}	//no good matches
-			else{	
+			if(minDiff > bdiffs)	{	trashCode = "b"; minFGroup.clear(); success = minDiff;		}	//no good matches
+			//else{
                 //check for reverse match
                 if (alignment != NULL) {  delete alignment;  }
                 
@@ -819,7 +850,7 @@ int TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq, Quality
                  cout << endl;
                  }
                  cout << endl;*/
-                if(minDiff > bdiffs)	{	success = minDiff;		}	//no good matches
+                if(minDiff > bdiffs)	{	trashCode = "d"; success = minDiff;		}	//no good matches
                 else  {  
                     bool foundMatch = false;
                     vector<int> matches;
@@ -847,13 +878,16 @@ int TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq, Quality
                         forwardQual.trimQScores(fStart, -1);
                         reverseQual.trimQScores(rStart, -1);
                         success = minDiff;
-                    }else { success = bdiffs + 100;	}
+                    }else { if (trashCode == "") { trashCode = "bd"; } success = bdiffs + 100;	}
                 }
-			}
+			//}
 			
 			if (alignment != NULL) {  delete alignment;  }
 		}
 		
+        //catchall for case I didn't think of
+        if ((trashCode == "") && (success > bdiffs)) { trashCode = "bd"; }
+        
 		return success;
 		
 	}
@@ -866,6 +900,8 @@ int TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq, Quality
 //*******************************************************************/
 int TrimOligos::stripPairedBarcode(Sequence& seq, QualityScores& qual, int& group){
 	try {
+        trashCode = "";
+        
 		//look for forward barcode
 		string rawSeq = seq.getUnaligned();
 		int success = bdiffs + 1;	//guilty until proven innocent
@@ -878,28 +914,36 @@ int TrimOligos::stripPairedBarcode(Sequence& seq, QualityScores& qual, int& grou
             //cout << it->first << '\t' << rawSeq.substr(0,foligo.length()) << '\t' << rawSeq.substr(rawSeq.length()-roligo.length(),roligo.length()) << endl;
 			if(rawSeq.length() < foligo.length()){	//let's just assume that the barcodes are the same length
 				success = bdiffs + 10;					//if the sequence is shorter than the barcode then bail out
+                trashCode = "b";
 				break;
 			}
             if(rawSeq.length() < roligo.length()){	//let's just assume that the barcodes are the same length
 				success = bdiffs + 10;					//if the sequence is shorter than the barcode then bail out
+                trashCode += "d";
 				break;
 			}
 			
-			if((compareDNASeq(foligo, rawSeq.substr(0,foligo.length()))) && (compareDNASeq(roligo, rawSeq.substr(rawSeq.length()-roligo.length(),roligo.length())))) {
-				group = it->first;
-                string trimmedSeq = rawSeq.substr(foligo.length()); //trim forward barcode
-                seq.setUnaligned(trimmedSeq.substr(0,(trimmedSeq.length()-roligo.length()))); //trim reverse barcode
-                if(qual.getName() != ""){
-                    qual.trimQScores(-1, rawSeq.length()-roligo.length());
-                    qual.trimQScores(foligo.length(), -1);
+			if(compareDNASeq(foligo, rawSeq.substr(0,foligo.length()))) { //find forward
+                if (compareDNASeq(roligo, rawSeq.substr(rawSeq.length()-roligo.length(),roligo.length()))) { //find reverse
+                    group = it->first;
+                    string trimmedSeq = rawSeq.substr(foligo.length()); //trim forward barcode
+                    seq.setUnaligned(trimmedSeq.substr(0,(trimmedSeq.length()-roligo.length()))); //trim reverse barcode
+                    if(qual.getName() != ""){
+                        qual.trimQScores(-1, rawSeq.length()-roligo.length());
+                        qual.trimQScores(foligo.length(), -1);
+                    }
+                    success = 0;
+                    trashCode = "";
+                    return success;
                 }
-				success = 0;
-				break;
+            }else {
+                trashCode = "b";
+				if (!compareDNASeq(roligo, rawSeq.substr(rawSeq.length()-roligo.length(),roligo.length()))) { trashCode += "d"; }
 			}
 		}
 		//cout << "success=" << success << endl;
 		//if you found the barcode or if you don't want to allow for diffs
-		if ((bdiffs == 0) || (success == 0)) { return success;  }
+		if (bdiffs == 0) { return success;  }
 		else { //try aligning and see if you can find it
 			Alignment* alignment;
 			if (ifbarcodes.size() > 0) {  alignment = new NeedlemanOverlap(-1.0, 1.0, -1.0, (maxFBarcodeLength+bdiffs+1));   }
@@ -976,8 +1020,8 @@ int TrimOligos::stripPairedBarcode(Sequence& seq, QualityScores& qual, int& grou
 			}
             
 			//cout << minDiff << '\t' << minCount << '\t' << endl;
-			if(minDiff > bdiffs)	{	success = minDiff;		}	//no good matches
-			else{
+			if(minDiff > bdiffs)	{	trashCode = "b"; minFGroup.clear(); success = minDiff;		}	//no good matches
+			//else{
                 //check for reverse match
                 if (alignment != NULL) {  delete alignment;  }
                 
@@ -1052,7 +1096,7 @@ int TrimOligos::stripPairedBarcode(Sequence& seq, QualityScores& qual, int& grou
                  cout << endl;
                  }
                  cout << endl;*/
-                if(minDiff > bdiffs)	{	success = minDiff;		}	//no good matches
+                if(minDiff > bdiffs)	{	trashCode += "d"; success = minDiff;		}	//no good matches
                 else  {
                     bool foundMatch = false;
                     vector<int> matches;
@@ -1083,13 +1127,16 @@ int TrimOligos::stripPairedBarcode(Sequence& seq, QualityScores& qual, int& grou
                         }
                         success = minDiff;
                         //cout << "barcode = " << ipbarcodes[group].forward << '\t' << ipbarcodes[group].reverse << endl;
-                    }else { success = bdiffs + 100;	}
+                    }else { if (trashCode == "") { trashCode = "bd"; } success = bdiffs + 100;	}
                 }
-			}
+			//}
 			
 			if (alignment != NULL) {  delete alignment;  }
 		}
 		
+        //catchall for case I didn't think of
+        if ((trashCode == "") && (success > bdiffs)) { trashCode = "bd"; }
+
 		return success;
 		
 	}
@@ -1102,6 +1149,7 @@ int TrimOligos::stripPairedBarcode(Sequence& seq, QualityScores& qual, int& grou
 //*******************************************************************/
 int TrimOligos::stripPairedPrimers(Sequence& seq, QualityScores& qual, int& group, bool keepForward){
 	try {
+        trashCode = "";
 		//look for forward 
 		string rawSeq = seq.getUnaligned();
 		int success = pdiffs + 1;	//guilty until proven innocent
@@ -1115,30 +1163,37 @@ int TrimOligos::stripPairedPrimers(Sequence& seq, QualityScores& qual, int& grou
             //cout << it->first << '\t' << rawSeq.substr(0,foligo.length()) << '\t' << rawSeq.substr(rawSeq.length()-roligo.length(),roligo.length()) << endl;
 			if(rawSeq.length() < foligo.length()){	//let's just assume that the barcodes are the same length
 				success = pdiffs + 10;					//if the sequence is shorter than the barcode then bail out
+                trashCode = "p";
 				break;
 			}
             if(rawSeq.length() < roligo.length()){	//let's just assume that the barcodes are the same length
 				success = pdiffs + 10;					//if the sequence is shorter than the barcode then bail out
+                trashCode += "q";
 				break;
 			}
 			
-			if((compareDNASeq(foligo, rawSeq.substr(0,foligo.length()))) && (compareDNASeq(roligo, rawSeq.substr(rawSeq.length()-roligo.length(),roligo.length())))) {
-				group = it->first;
-                if (!keepForward) { 
+            if(compareDNASeq(foligo, rawSeq.substr(0,foligo.length()))) { //find forward
+                if (compareDNASeq(roligo, rawSeq.substr(rawSeq.length()-roligo.length(),roligo.length()))) { //find reverse
+                    group = it->first;
                     string trimmedSeq = rawSeq.substr(foligo.length()); //trim forward barcode
                     seq.setUnaligned(trimmedSeq.substr(0,(trimmedSeq.length()-roligo.length()))); //trim reverse barcode
                     if(qual.getName() != ""){
                         qual.trimQScores(-1, rawSeq.length()-roligo.length());
                         qual.trimQScores(foligo.length(), -1);
                     }
+                    success = 0;
+                    trashCode = "";
+                    return success;
                 }
-				success = 0;
-				break;
+            }else {
+                trashCode = "b";
+				if (!compareDNASeq(roligo, rawSeq.substr(rawSeq.length()-roligo.length(),roligo.length()))) { trashCode += "d"; }
 			}
-		}
+
+        }
 		//cout << "success=" << success << endl;
 		//if you found the barcode or if you don't want to allow for diffs
-		if ((pdiffs == 0) || (success == 0)) { return success;  }
+		if (pdiffs == 0) { return success;  }
 		else { //try aligning and see if you can find it
 			Alignment* alignment;
 			if (ifprimers.size() > 0) {  alignment = new NeedlemanOverlap(-1.0, 1.0, -1.0, (maxFPrimerLength+pdiffs+1));   }
@@ -1215,8 +1270,8 @@ int TrimOligos::stripPairedPrimers(Sequence& seq, QualityScores& qual, int& grou
 			}
             
 			//cout << minDiff << '\t' << minCount << '\t' << endl;
-			if(minDiff > pdiffs)	{	success = minDiff;		}	//no good matches
-			else{
+			if(minDiff > pdiffs)	{	trashCode = "p"; minFGroup.clear(); success = minDiff;		}	//no good matches
+			//else{
                 //check for reverse match
                 if (alignment != NULL) {  delete alignment;  }
                 
@@ -1291,7 +1346,7 @@ int TrimOligos::stripPairedPrimers(Sequence& seq, QualityScores& qual, int& grou
                  cout << endl;
                  }
                  cout << endl;*/
-                if(minDiff > pdiffs)	{	success = minDiff;		}	//no good matches
+                if(minDiff > pdiffs)	{ trashCode += "q"; 	success = minDiff;		}	//no good matches
                 else  {
                     bool foundMatch = false;
                     vector<int> matches;
@@ -1324,13 +1379,16 @@ int TrimOligos::stripPairedPrimers(Sequence& seq, QualityScores& qual, int& grou
                         }
                         success = minDiff;
                         //cout << "primer = " << ipprimers[group].forward << '\t' << ipprimers[group].reverse << endl;
-                    }else { success = pdiffs + 100;	}
+                    }else { if (trashCode == "") { trashCode = "pq"; } success = pdiffs + 100;	}
                 }
-			}
+			//}
 			
 			if (alignment != NULL) {  delete alignment;  }
 		}
 		
+        //catchall for case I didn't think of
+        if ((trashCode == "") && (success > pdiffs)) { trashCode = "pq"; }
+        
 		return success;
 		
 	}
