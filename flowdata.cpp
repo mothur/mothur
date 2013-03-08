@@ -86,7 +86,7 @@ string FlowData::getSequenceName(ifstream& flowFile) {
 void FlowData::updateEndFlow(){
 	try{
 		
-        if (baseFlow.length() > 4) { return; }
+        //if (baseFlow.length() > 4) { return; }
         
 		//int currLength = 0;
 		float maxIntensity = (float) maxHomoP + 0.49;
