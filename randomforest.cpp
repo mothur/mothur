@@ -20,7 +20,6 @@ RandomForest::RandomForest(const vector <vector<int> > dataSet,
                            const string optimumFeatureSubsetSelectionCriteria = "log2",
                            const float featureStandardDeviationThreshold = 0.0)
 : Forest(dataSet, numDecisionTrees, treeSplitCriterion, doPruning, pruneAggressiveness, discardHighErrorTrees, highErrorTreeDiscardThreshold, optimumFeatureSubsetSelectionCriteria, featureStandardDeviationThreshold) {
-    
     m = MothurOut::getInstance();
 }
 
