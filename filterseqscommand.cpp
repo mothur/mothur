@@ -729,6 +729,9 @@ int FilterSeqsCommand::createProcessesRunFilter(string F, string filename, strin
 		//Close all thread handles and free memory allocations.
 		for(int i=0; i < pDataArray.size(); i++){
 			num += pDataArray[i]->count;
+            if (pDataArray[i]->count != pDataArray[i]->end) {
+                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end) + " sequences assigned to it, quitting. \n"); m->control_pressed = true; 
+            }
             CloseHandle(hThreadArray[i]);
 			delete pDataArray[i];
 		}
@@ -1176,6 +1179,9 @@ int FilterSeqsCommand::createProcessesCreateFilter(Filters& F, string filename) 
 		//Close all thread handles and free memory allocations.
 		for(int i=0; i < pDataArray.size(); i++){
 			num += pDataArray[i]->count;
+            if (pDataArray[i]->count != pDataArray[i]->end) {
+                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end) + " sequences assigned to it, quitting. \n"); m->control_pressed = true; 
+            }
             F.mergeFilter(pDataArray[i]->F.getFilter());
             
 			for (int k = 0; k < alignmentLength; k++) {	 F.a[k] += pDataArray[i]->F.a[k];       }

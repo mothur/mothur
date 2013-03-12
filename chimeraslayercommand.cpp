@@ -31,12 +31,14 @@ vector<string> ChimeraSlayerCommand::setParameters(){
 		CommandParameter pminbs("minbs", "Number", "", "90", "", "", "","",false,false); parameters.push_back(pminbs);
 		CommandParameter psearch("search", "Multiple", "kmer-blast", "blast", "", "", "","",false,false); parameters.push_back(psearch);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
+        
 		CommandParameter prealign("realign", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(prealign);
 		CommandParameter ptrim("trim", "Boolean", "", "F", "", "", "","fasta",false,false); parameters.push_back(ptrim);
 		CommandParameter psplit("split", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(psplit);
 		CommandParameter pnumwanted("numwanted", "Number", "", "15", "", "", "","",false,false); parameters.push_back(pnumwanted);
 		CommandParameter piters("iters", "Number", "", "1000", "", "", "","",false,false); parameters.push_back(piters);
 		CommandParameter pdivergence("divergence", "Number", "", "1.007", "", "", "","",false,false); parameters.push_back(pdivergence);
+        CommandParameter pdups("dereplicate", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pdups);
 		CommandParameter pparents("parents", "Number", "", "3", "", "", "","",false,false); parameters.push_back(pparents);
 		CommandParameter pincrement("increment", "Number", "", "5", "", "", "","",false,false); parameters.push_back(pincrement);
 		CommandParameter pblastlocation("blastlocation", "String", "", "", "", "", "","",false,false); parameters.push_back(pblastlocation);
@@ -59,7 +61,7 @@ string ChimeraSlayerCommand::getHelpString(){
 		string helpString = "";
 		helpString += "The chimera.slayer command reads a fastafile and referencefile and outputs potentially chimeric sequences.\n";
 		helpString += "This command was modeled after the chimeraSlayer written by the Broad Institute.\n";
-		helpString += "The chimera.slayer command parameters are fasta, name, group, template, processors, trim, ksize, window, match, mismatch, divergence. minsim, mincov, minbs, minsnp, parents, search, iters, increment, numwanted, blastlocation and realign.\n";
+		helpString += "The chimera.slayer command parameters are fasta, name, group, template, processors, dereplicate, trim, ksize, window, match, mismatch, divergence. minsim, mincov, minbs, minsnp, parents, search, iters, increment, numwanted, blastlocation and realign.\n";
 		helpString += "The fasta parameter allows you to enter the fasta file containing your potentially chimeric sequences, and is required, unless you have a valid current fasta file. \n";
 		helpString += "The name parameter allows you to provide a name file, if you are using reference=self. \n";
 		helpString += "The group parameter allows you to provide a group file. The group file can be used with a namesfile and reference=self. When checking sequences, only sequences from the same group as the query sequence will be used as the reference. \n";
@@ -70,6 +72,7 @@ string ChimeraSlayerCommand::getHelpString(){
 #ifdef USE_MPI
 		helpString += "When using MPI, the processors parameter is set to the number of MPI processes running. \n";
 #endif
+        helpString += "If the dereplicate parameter is false, then if one group finds the seqeunce to be chimeric, then all groups find it to be chimeric, default=f.\n";
 		helpString += "The trim parameter allows you to output a new fasta file containing your sequences with the chimeric ones trimmed to include only their longest piece, default=F. \n";
 		helpString += "The split parameter allows you to check both pieces of non-chimeric sequence for chimeras, thus looking for trimeras and quadmeras. default=F. \n";
 		helpString += "The window parameter allows you to specify the window size for searching for chimeras, default=50. \n";
@@ -595,6 +598,13 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 			
 			temp = validParameter.validFile(parameters, "numwanted", false);		if (temp == "not found") { temp = "15"; }		
 			m->mothurConvert(temp, numwanted);
+            
+			temp = validParameter.validFile(parameters, "dereplicate", false);	
+			if (temp == "not found") { 
+				if (groupfile != "")    {  temp = "false";					}
+				else                    {  temp = "true"; 	}
+			}
+			dups = m->isTrue(temp);
 			
 			blastlocation = validParameter.validFile(parameters, "blastlocation", false);	
 			if (blastlocation == "not found") { blastlocation = ""; }
@@ -749,8 +759,10 @@ int ChimeraSlayerCommand::execute(){
 				
 				if (pid == 0) {
 #endif
-				totalChimeras = deconvoluteResults(uniqueNames, outputFileName, accnosFileName, trimFastaFileName);
-                m->mothurOutEndLine(); m->mothurOut(toString(totalChimeras) + " chimera found."); m->mothurOutEndLine();
+                    if (!dups) {
+                        totalChimeras = deconvoluteResults(uniqueNames, outputFileName, accnosFileName, trimFastaFileName);
+                        m->mothurOutEndLine(); m->mothurOut(toString(totalChimeras) + " chimera found."); m->mothurOutEndLine();
+                    }
 #ifdef USE_MPI	
 				}
 				MPI_Barrier(MPI_COMM_WORLD); //make everyone wait
@@ -1485,6 +1497,9 @@ int ChimeraSlayerCommand::createProcessesGroups(string outputFName, string accno
 		
 		//Close all thread handles and free memory allocations.
 		for(int i=0; i < pDataArray.size(); i++){
+            if (pDataArray[i]->count != pDataArray[i]->end) {
+                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end) + " sequences assigned to it, quitting. \n"); m->control_pressed = true; 
+            }
 			num += pDataArray[i]->count;
 			CloseHandle(hThreadArray[i]);
 			delete pDataArray[i];

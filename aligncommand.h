@@ -144,8 +144,6 @@ static DWORD WINAPI MyAlignThreadFunction(LPVOID lpParam){
 			inFASTA.seekg(pDataArray->start-1); pDataArray->m->gobble(inFASTA); 
 		}
 		
-		pDataArray->count = pDataArray->end;
-		
 		AlignmentDB* templateDB = new AlignmentDB(pDataArray->templateFileName, pDataArray->search, pDataArray->kmerSize, pDataArray->gapOpen, pDataArray->gapExtend, pDataArray->match, pDataArray->misMatch, pDataArray->threadID);
 		
 		//moved this into driver to avoid deep copies in windows paralellized version
@@ -161,7 +159,7 @@ static DWORD WINAPI MyAlignThreadFunction(LPVOID lpParam){
 			alignment = new NeedlemanOverlap(pDataArray->gapOpen, pDataArray->match, pDataArray->misMatch, longestBase);
 		}
 		
-		int count = 0;
+		pDataArray->count = 0;
 		for(int i = 0; i < pDataArray->end; i++){ //end is the number of sequences to process
 			
 			if (pDataArray->m->control_pressed) {  break; }
@@ -242,16 +240,16 @@ static DWORD WINAPI MyAlignThreadFunction(LPVOID lpParam){
 				delete nast;
 				if (needToDeleteCopy) {   delete copy;   }
 				
-				count++;
+				pDataArray->count++;
 			}
 			delete candidateSeq;
 			
 			//report progress
-			if((count) % 100 == 0){	pDataArray->m->mothurOut(toString(count)); pDataArray->m->mothurOutEndLine();		}
+			if((pDataArray->count) % 100 == 0){	pDataArray->m->mothurOut(toString(pDataArray->count)); pDataArray->m->mothurOutEndLine();		}
 			
 		}
 		//report progress
-		if((count) % 100 != 0){	pDataArray->m->mothurOut(toString(count)); pDataArray->m->mothurOutEndLine();		}
+		if((pDataArray->count) % 100 != 0){	pDataArray->m->mothurOut(toString(pDataArray->count)); pDataArray->m->mothurOutEndLine();		}
 		
 		delete alignment;
 		delete templateDB;

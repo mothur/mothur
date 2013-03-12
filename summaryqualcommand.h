@@ -66,7 +66,7 @@ struct seqSumQualData {
 	string filename; 
 	unsigned long long start;
 	unsigned long long end;
-	int count;
+	int count, numSeqs;
 	MothurOut* m;
     bool hasNameMap;
 	map<string, int> nameMap;
@@ -101,7 +101,8 @@ static DWORD WINAPI MySeqSumQualThreadFunction(LPVOID lpParam){
 			in.seekg(pDataArray->start-1); pDataArray->m->gobble(in); 
 		}
 		
-		int count = 0;
+		pDataArray->count = 0;
+        pDataArray->numSeqs = 0;
 		for(int i = 0; i < pDataArray->end; i++){ //end is the number of sequences to process
 				
 			if (pDataArray->m->control_pressed) { in.close(); pDataArray->count = 1; return 1; }
@@ -138,11 +139,11 @@ static DWORD WINAPI MySeqSumQualThreadFunction(LPVOID lpParam){
 					else { pDataArray->scores.at(i)[thisScores[i]] += num; }  
 				}
 				
-				count += num;
+				pDataArray->numSeqs += num;
+                pDataArray->count++;
 			}
 		}
 		
-		pDataArray->count = count;
 		in.close();
 		
 		return 0;

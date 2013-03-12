@@ -40,10 +40,10 @@ private:
 		
 	ListVector* list;
 	GroupMap* groupMap;
-	InputData* input;
+    CountTable ct;
 	
 	ofstream out;
-	string outputDir, listfile, groupfile, label;
+	string outputDir, listfile, groupfile, label, countfile;
 	set<string> labels;
 	bool abort, allLines;
 	vector<string> outputNames;

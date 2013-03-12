@@ -161,7 +161,7 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 				//in essence you want to run it like a single 
 				if (vCalcs[i]->getName() == "sharedsobs") {
 					singleCalc = new Sobs();
-                    if (sharedOtus) {
+                    if (sharedOtus &&  (labels.size() != 0)) {
                         string filenameShared = outputDir + m->getRootName(m->getSimpleName(inputfile)) + lookup[0]->getLabel() + "." + vCalcs[i]->getName() + ".sharedotus";
                         
                         outputNames.push_back(filenameShared);
@@ -482,7 +482,7 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 					subset.push_back(lookup[0]); subset.push_back(lookup[1]);
                     vector<string> labels;
 					vector<double> sharedab =  vCalcs[i]->getValues(subset, labels);
-                    if (sharedOtus && (vCalcs[i]->getName() == "sharedsobs")) {
+                    if (sharedOtus && (vCalcs[i]->getName() == "sharedsobs") &&  (labels.size() != 0)) {
                         outShared << lookup[0]->getGroup() + "-" + lookup[1]->getGroup() << '\t' << labels.size() << '\t';
                         for (int k = 0; k < labels.size()-1; k++) {
                             outShared << labels[k] << ",";
@@ -494,7 +494,7 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 					subset.clear(); 
 					subset.push_back(lookup[0]); subset.push_back(lookup[2]);
 					vector<double> sharedac =  vCalcs[i]->getValues(subset, labels);
-                    if (sharedOtus && (vCalcs[i]->getName() == "sharedsobs")) {
+                    if (sharedOtus && (vCalcs[i]->getName() == "sharedsobs") &&  (labels.size() != 0)) {
                         outShared << lookup[0]->getGroup() + "-" + lookup[2]->getGroup() << '\t'<< labels.size() << '\t';
                         for (int k = 0; k < labels.size()-1; k++) {
                             outShared << labels[k] << ",";
@@ -506,7 +506,7 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 					subset.clear(); 
 					subset.push_back(lookup[1]); subset.push_back(lookup[2]);
 					vector<double> sharedbc =  vCalcs[i]->getValues(subset, labels);
-                    if (sharedOtus && (vCalcs[i]->getName() == "sharedsobs")) {
+                    if (sharedOtus && (vCalcs[i]->getName() == "sharedsobs") &&  (labels.size() != 0)) {
                         outShared << lookup[1]->getGroup() + "-" + lookup[2]->getGroup() << '\t'<< labels.size() << '\t';
                         for (int k = 0; k < labels.size()-1; k++) {
                             outShared << labels[k] << ",";
@@ -519,7 +519,7 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 					subset.clear(); 
 					subset.push_back(lookup[0]); subset.push_back(lookup[1]); subset.push_back(lookup[2]);
 					vector<double> sharedabc =  vCalcs[i]->getValues(subset, labels);
-                    if (sharedOtus && (vCalcs[i]->getName() == "sharedsobs")) {
+                    if (sharedOtus && (vCalcs[i]->getName() == "sharedsobs") &&  (labels.size() != 0)) {
                         outShared << lookup[0]->getGroup() + "-" + lookup[1]->getGroup() + "-" + lookup[2]->getGroup() << '\t'<< labels.size() << '\t';
                         for (int k = 0; k < labels.size()-1; k++) {
                             outShared << labels[k] << ",";
@@ -674,7 +674,7 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 					subset.push_back(lookup[0]); subset.push_back(lookup[1]);
 					data = vCalcs[i]->getValues(subset, labels);
 					sharedAB = data[0];
-                    if (sharedOtus && (vCalcs[i]->getName() == "sharedsobs")) {
+                    if (sharedOtus && (vCalcs[i]->getName() == "sharedsobs") &&  (labels.size() != 0)) {
                         outShared << lookup[0]->getGroup() + "-" + lookup[1]->getGroup() << '\t'<< labels.size() << '\t';
                         for (int k = 0; k < labels.size()-1; k++) {
                             outShared << labels[k] << ",";
@@ -687,7 +687,7 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 					subset.push_back(lookup[0]); subset.push_back(lookup[2]);
 					data = vCalcs[i]->getValues(subset, labels);
 					sharedAC = data[0];
-                    if (sharedOtus && (vCalcs[i]->getName() == "sharedsobs")) {
+                    if (sharedOtus && (vCalcs[i]->getName() == "sharedsobs") &&  (labels.size() != 0)) {
                         outShared << lookup[0]->getGroup() + "-" + lookup[2]->getGroup() << '\t'<< labels.size() << '\t';
                         for (int k = 0; k < labels.size()-1; k++) {
                             outShared << labels[k] << ",";
@@ -700,7 +700,7 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 					subset.push_back(lookup[0]); subset.push_back(lookup[3]);
 					data = vCalcs[i]->getValues(subset, labels);
 					sharedAD = data[0];
-                    if (sharedOtus && (vCalcs[i]->getName() == "sharedsobs")) {
+                    if (sharedOtus && (vCalcs[i]->getName() == "sharedsobs") &&  (labels.size() != 0)) {
                         outShared << lookup[0]->getGroup() + "-" + lookup[3]->getGroup() << '\t'<< labels.size() << '\t';
                         for (int k = 0; k < labels.size()-1; k++) {
                             outShared << labels[k] << ",";
@@ -713,7 +713,7 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 					subset.push_back(lookup[1]); subset.push_back(lookup[2]);
 					data = vCalcs[i]->getValues(subset, labels);
 					sharedBC = data[0];
-                    if (sharedOtus && (vCalcs[i]->getName() == "sharedsobs")) {
+                    if (sharedOtus && (vCalcs[i]->getName() == "sharedsobs") &&  (labels.size() != 0)) {
                         outShared << lookup[1]->getGroup() + "-" + lookup[2]->getGroup() << '\t'<< labels.size() << '\t';
                         for (int k = 0; k < labels.size()-1; k++) {
                             outShared << labels[k] << ",";
@@ -726,7 +726,7 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 					subset.push_back(lookup[1]); subset.push_back(lookup[3]);
 					data = vCalcs[i]->getValues(subset, labels);
 					sharedBD = data[0];
-                    if (sharedOtus && (vCalcs[i]->getName() == "sharedsobs")) {
+                    if (sharedOtus && (vCalcs[i]->getName() == "sharedsobs") &&  (labels.size() != 0)) {
                         outShared << lookup[1]->getGroup() + "-" + lookup[3]->getGroup() << '\t'<< labels.size() << '\t';
                         for (int k = 0; k < labels.size()-1; k++) {
                             outShared << labels[k] << ",";
@@ -739,7 +739,7 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 					subset.push_back(lookup[2]); subset.push_back(lookup[3]);
 					data = vCalcs[i]->getValues(subset, labels);
 					sharedCD = data[0];
-                    if (sharedOtus && (vCalcs[i]->getName() == "sharedsobs")) {
+                    if (sharedOtus && (vCalcs[i]->getName() == "sharedsobs") &&  (labels.size() != 0)) {
                         outShared << lookup[2]->getGroup() + "-" + lookup[3]->getGroup() << '\t'<< labels.size() << '\t';
                         for (int k = 0; k < labels.size()-1; k++) {
                             outShared << labels[k] << ",";
@@ -754,7 +754,7 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 					subset.push_back(lookup[0]); subset.push_back(lookup[1]); subset.push_back(lookup[2]);
 					data = vCalcs[i]->getValues(subset, labels);
 					sharedABC = data[0];
-                    if (sharedOtus && (vCalcs[i]->getName() == "sharedsobs")) {
+                    if (sharedOtus && (vCalcs[i]->getName() == "sharedsobs") &&  (labels.size() != 0)) {
                         outShared << lookup[0]->getGroup() + "-" + lookup[1]->getGroup()+ "-" + lookup[2]->getGroup()<< '\t'<< labels.size() << '\t';
                         for (int k = 0; k < labels.size()-1; k++) {
                             outShared << labels[k] << ",";
@@ -767,7 +767,7 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 					subset.push_back(lookup[0]); subset.push_back(lookup[2]); subset.push_back(lookup[3]);
 					data = vCalcs[i]->getValues(subset, labels);
 					sharedACD = data[0];
-                    if (sharedOtus && (vCalcs[i]->getName() == "sharedsobs")) {
+                    if (sharedOtus && (vCalcs[i]->getName() == "sharedsobs") &&  (labels.size() != 0)) {
                         outShared << lookup[0]->getGroup() + "-" + lookup[2]->getGroup()+ "-" + lookup[3]->getGroup()<< '\t'<< labels.size() << '\t';
                         for (int k = 0; k < labels.size()-1; k++) {
                             outShared << labels[k] << ",";
@@ -780,12 +780,12 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 					subset.push_back(lookup[1]); subset.push_back(lookup[2]); subset.push_back(lookup[3]);
 					data = vCalcs[i]->getValues(subset,labels);
 					sharedBCD = data[0];
-                    if (sharedOtus && (vCalcs[i]->getName() == "sharedsobs")) {
+                    if (sharedOtus && (vCalcs[i]->getName() == "sharedsobs") &&  (labels.size() != 0)) {
                         outShared << lookup[1]->getGroup() + "-" + lookup[2]->getGroup()+ "-" + lookup[3]->getGroup()<< '\t'<< labels.size() << '\t';
                         for (int k = 0; k < labels.size()-1; k++) {
                             outShared << labels[k] << ",";
                         }
-                        if (labels.size() != 0) { outShared << labels[labels.size()-1]; }
+                        outShared << labels[labels.size()-1]; 
                         outShared << endl;
                     }
 		//cout << "num bcd = " << sharedBCD << endl;		
@@ -793,19 +793,19 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 					subset.push_back(lookup[0]); subset.push_back(lookup[1]); subset.push_back(lookup[3]);
 					data = vCalcs[i]->getValues(subset, labels);
 					sharedABD = data[0];
-                    if (sharedOtus && (vCalcs[i]->getName() == "sharedsobs")) {
+                    if (sharedOtus && (vCalcs[i]->getName() == "sharedsobs") &&  (labels.size() != 0)) {
                         outShared << lookup[0]->getGroup() + "-" + lookup[1]->getGroup()+ "-" + lookup[3]->getGroup()<< '\t'<< labels.size() << '\t';
                         for (int k = 0; k < labels.size()-1; k++) {
                             outShared << labels[k] << ",";
                         }
-                        if (labels.size() != 0) { outShared << labels[labels.size()-1]; }
+                        outShared << labels[labels.size()-1]; 
                         outShared << endl;
                     }
 //cout << "num abd = " << sharedABD << endl;
 					//get estimate for all four
 					data = vCalcs[i]->getValues(lookup, labels);
 					sharedABCD = data[0];
-                    if (sharedOtus && (vCalcs[i]->getName() == "sharedsobs")) {
+                    if (sharedOtus && (vCalcs[i]->getName() == "sharedsobs") &&  (labels.size() != 0)) {
                         outShared << lookup[0]->getGroup() + "-" + lookup[1]->getGroup() + "-" + lookup[2]->getGroup()+ "-" + lookup[3]->getGroup()<< '\t'<< labels.size() << '\t';
                         for (int k = 0; k < labels.size()-1; k++) {
                             outShared << labels[k] << ",";

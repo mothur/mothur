@@ -18,7 +18,7 @@ vector<string> MatrixOutputCommand::setParameters(){
         CommandParameter psubsample("subsample", "String", "", "", "", "", "","",false,false); parameters.push_back(psubsample);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
 		CommandParameter pcalc("calc", "Multiple", "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan-kstest-sharednseqs-ochiai-anderberg-kulczynski-kulczynskicody-lennon-morisitahorn-braycurtis-whittaker-odum-canberra-structeuclidean-structchord-hellinger-manhattan-structpearson-soergel-spearman-structkulczynski-speciesprofile-hamming-structchi2-gower-memchi2-memchord-memeuclidean-mempearson", "jclass-thetayc", "", "", "","",true,false,true); parameters.push_back(pcalc);
-		CommandParameter poutput("output", "Multiple", "lt-square", "lt", "", "", "","",false,false); parameters.push_back(poutput);
+		CommandParameter poutput("output", "Multiple", "lt-square-column", "lt", "", "", "","",false,false); parameters.push_back(poutput);
         CommandParameter pmode("mode", "Multiple", "average-median", "average", "", "", "","",false,false); parameters.push_back(pmode);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
         CommandParameter piters("iters", "Number", "", "1000", "", "", "","",false,false); parameters.push_back(piters);
@@ -45,7 +45,7 @@ string MatrixOutputCommand::getHelpString(){
         helpString += "The iters parameter allows you to choose the number of times you would like to run the subsample.\n";
         helpString += "The subsample parameter allows you to enter the size pergroup of the sample or you can set subsample=T and mothur will use the size of your smallest group.\n";
 		helpString += "The dist.shared command should be in the following format: dist.shared(groups=yourGroups, calc=yourCalcs, label=yourLabels).\n";
-		helpString += "The output parameter allows you to specify format of your distance matrix. Options are lt, and square. The default is lt.\n";
+		helpString += "The output parameter allows you to specify format of your distance matrix. Options are lt, column and square. The default is lt.\n";
         helpString += "The mode parameter allows you to specify if you want the average or the median values reported when subsampling. Options are average, and median. The default is average.\n";
 		helpString += "Example dist.shared(groups=A-B-C, calc=jabund-sorabund).\n";
 		helpString += "The default value for groups is all the groups in your groupfile.\n";
@@ -156,7 +156,7 @@ MatrixOutputCommand::MatrixOutputCommand(string option)  {
 			}
 			
 			output = validParameter.validFile(parameters, "output", false);		if(output == "not found"){	output = "lt"; }
-			if ((output != "lt") && (output != "square")) { m->mothurOut(output + " is not a valid output form. Options are lt and square. I will use lt."); m->mothurOutEndLine(); output = "lt"; }
+			if ((output != "lt") && (output != "square") && (output != "column")) { m->mothurOut(output + " is not a valid output form. Options are lt, column and square. I will use lt."); m->mothurOutEndLine(); output = "lt"; }
             
             mode = validParameter.validFile(parameters, "mode", false);		if(mode == "not found"){	mode = "average"; }
 			if ((mode != "average") && (mode != "median")) { m->mothurOut(mode + " is not a valid mode. Options are average and medina. I will use average."); m->mothurOutEndLine(); output = "average"; }
@@ -449,11 +449,9 @@ void MatrixOutputCommand::printSims(ostream& out, vector< vector<double> >& simM
 	try {
 		
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
-		
-		//output num seqs
-		out << simMatrix.size() << endl;
-		
+				
 		if (output == "lt") {
+            out << simMatrix.size() << endl;
 			for (int b = 0; b < simMatrix.size(); b++)	{
 				out << lookup[b]->getGroup() << '\t';
 				for (int n = 0; n < b; n++)	{
@@ -461,7 +459,14 @@ void MatrixOutputCommand::printSims(ostream& out, vector< vector<double> >& simM
 				}
 				out << endl;
 			}
+        }else if (output == "column") {
+            for (int b = 0; b < simMatrix.size(); b++)	{
+                for (int n = 0; n < b; n++)	{
+                    out << lookup[b]->getGroup() << '\t' << lookup[n]->getGroup() << '\t' << simMatrix[b][n] << endl;
+                }
+            }
 		}else{
+            out << simMatrix.size() << endl;
 			for (int b = 0; b < simMatrix.size(); b++)	{
 				out << lookup[b]->getGroup() << '\t';
 				for (int n = 0; n < simMatrix[b].size(); n++)	{
@@ -629,6 +634,9 @@ int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
                 
                 //Close all thread handles and free memory allocations.
                 for(int i=0; i < pDataArray.size(); i++){
+                    if (pDataArray[i]->count != (pDataArray[i]->end-pDataArray[i]->start)) {
+                        m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end-pDataArray[i]->start) + " groups assigned to it, quitting. \n"); m->control_pressed = true; 
+                    }
                     for (int j = 0; j < pDataArray[i]->thisLookup.size(); j++) {  delete pDataArray[i]->thisLookup[j];  } 
                     
                     for (int k = 0; k < calcDists.size(); k++) {
@@ -691,70 +699,10 @@ int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
 		
         if (iters != 0) {
             //we need to find the average distance and standard deviation for each groups distance
+            vector< vector<seqDist>  > calcAverages = m->getAverages(calcDistsTotals, mode);
             
-            vector< vector<seqDist>  > calcAverages; calcAverages.resize(matrixCalculators.size()); 
-            for (int i = 0; i < calcAverages.size(); i++) {  //initialize sums to zero.
-                calcAverages[i].resize(calcDistsTotals[0][i].size());
-                
-                for (int j = 0; j < calcAverages[i].size(); j++) {
-                    calcAverages[i][j].seq1 = calcDistsTotals[0][i][j].seq1;
-                    calcAverages[i][j].seq2 = calcDistsTotals[0][i][j].seq2;
-                    calcAverages[i][j].dist = 0.0;
-                }
-            }
-            if (mode == "average") {
-                for (int thisIter = 0; thisIter < iters; thisIter++) { //sum all groups dists for each calculator
-                    for (int i = 0; i < calcAverages.size(); i++) {  //initialize sums to zero.
-                        for (int j = 0; j < calcAverages[i].size(); j++) {
-                            calcAverages[i][j].dist += calcDistsTotals[thisIter][i][j].dist;
-                            if (m->debug) {  m->mothurOut("[DEBUG]: Totaling for average calc: iter = " + toString(thisIter) + ", " + thisLookup[calcDistsTotals[thisIter][i][j].seq1]->getGroup() + " - " + thisLookup[calcDistsTotals[thisIter][i][j].seq2]->getGroup() + " distance = " + toString(calcDistsTotals[thisIter][i][j].dist) + ". New total = " + toString(calcAverages[i][j].dist) + ".\n");  }
-                        }
-                    }
-                }
-                
-                for (int i = 0; i < calcAverages.size(); i++) {  //finds average.
-                    for (int j = 0; j < calcAverages[i].size(); j++) {
-                        calcAverages[i][j].dist /= (float) iters;
-                    }
-                }
-            }else { //find median
-                for (int i = 0; i < calcAverages.size(); i++) { //for each calc
-                    for (int j = 0; j < calcAverages[i].size(); j++) {  //for each comparison
-                        vector<double> dists;
-                        for (int thisIter = 0; thisIter < iters; thisIter++) { //for each subsample
-                            dists.push_back(calcDistsTotals[thisIter][i][j].dist);
-                        }
-                        sort(dists.begin(), dists.end());
-                        calcAverages[i][j].dist = dists[(iters/2)];
-                    }
-                }
-            }
             //find standard deviation
-            vector< vector<seqDist>  > stdDev; stdDev.resize(matrixCalculators.size());
-            for (int i = 0; i < stdDev.size(); i++) {  //initialize sums to zero.
-                stdDev[i].resize(calcDistsTotals[0][i].size());
-                
-                for (int j = 0; j < stdDev[i].size(); j++) {
-                    stdDev[i][j].seq1 = calcDistsTotals[0][i][j].seq1;
-                    stdDev[i][j].seq2 = calcDistsTotals[0][i][j].seq2;
-                    stdDev[i][j].dist = 0.0;
-                }
-            }
-            
-            for (int thisIter = 0; thisIter < iters; thisIter++) { //compute the difference of each dist from the mean, and square the result of each
-                for (int i = 0; i < stdDev.size(); i++) {  
-                    for (int j = 0; j < stdDev[i].size(); j++) {
-                        stdDev[i][j].dist += ((calcDistsTotals[thisIter][i][j].dist - calcAverages[i][j].dist) * (calcDistsTotals[thisIter][i][j].dist - calcAverages[i][j].dist));
-                    }
-                }
-            }
-
-            for (int i = 0; i < stdDev.size(); i++) {  //finds average.
-                for (int j = 0; j < stdDev[i].size(); j++) {
-                    stdDev[i][j].dist /= (float) iters;
-                    stdDev[i][j].dist = sqrt(stdDev[i][j].dist);
-                }
-            }
+            vector< vector<seqDist>  > stdDev = m->getStandardDeviation(calcDistsTotals, calcAverages);
             
             //print results
             for (int i = 0; i < calcDists.size(); i++) {
@@ -796,7 +744,7 @@ int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
                 outAve.close();
                 
                 variables["[tag2]"] = "std";
-                distFileName = outputDir + getOutputFileName("phylip",variables);
+                distFileName = getOutputFileName("phylip",variables);
                 outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
                 ofstream outSTD;
                 m->openOutputFile(distFileName, outSTD);

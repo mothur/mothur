@@ -49,7 +49,7 @@ private:
 	int createProcesses(string, string, string, string, int&);
 		
 	bool abort, useAbskew, chimealns, useMinH, useMindiv, useXn, useDn, useXa, useChunks, useMinchunk, useIdsmoothwindow, useMinsmoothid, useMaxp, skipgaps, skipgaps2, useMinlen, useMaxlen, ucl, useQueryfract, hasCount, hasName, dups;
-	string fastafile, groupfile, templatefile, outputDir, namefile, countfile, abskew, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, minlen, maxlen, queryfract, uchimeLocation;
+	string fastafile, groupfile, templatefile, outputDir, namefile, countfile, abskew, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, minlen, maxlen, queryfract, uchimeLocation, strand;
 	int processors;
 	
 	SequenceParser* sparser;
@@ -63,8 +63,8 @@ private:
 	int readFasta(string, map<string, string>&);
 	int printFile(vector<seqPriorityNode>&, string);
 	int deconvoluteResults(map<string, string>&, string, string, string);
-	int driverGroups(string, string, string, string, int, int, vector<string>);
-	int createProcessesGroups(string, string, string, string, vector<string>, string, string, string);
+	int driverGroups(string, string, string, string, string, int, int, vector<string>);
+	int createProcessesGroups(string, string, string, string, string, vector<string>, string, string, string);
     int prepFile(string filename, string);
 
 
@@ -80,17 +80,17 @@ struct uchimeData {
 	string namefile; 
 	string groupfile;
 	string outputFName;
-	string accnos, alns, filename, templatefile, uchimeLocation;
+	string accnos, alns, filename, templatefile, uchimeLocation, countlist;
 	MothurOut* m;
 	int start;
 	int end;
 	int threadID, count, numChimeras;
 	vector<string> groups;
-	bool useAbskew, chimealns, useMinH, useMindiv, useXn, useDn, useXa, useChunks, useMinchunk, useIdsmoothwindow, useMinsmoothid, useMaxp, skipgaps, skipgaps2, useMinlen, useMaxlen, ucl, useQueryfract, hasCount;
-	string abskew, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, minlen, maxlen, queryfract;
+	bool dups, useAbskew, chimealns, useMinH, useMindiv, useXn, useDn, useXa, useChunks, useMinchunk, useIdsmoothwindow, useMinsmoothid, useMaxp, skipgaps, skipgaps2, useMinlen, useMaxlen, ucl, useQueryfract, hasCount;
+	string abskew, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, minlen, maxlen, queryfract, strand;
 	
 	uchimeData(){}
-	uchimeData(string o, string uloc, string t, string file, string f, string n, string g, string ac,  string al, vector<string> gr, MothurOut* mout, int st, int en, int tid) {
+	uchimeData(string o, string uloc, string t, string file, string f, string n, string g, string ac,  string al, string nc, vector<string> gr, MothurOut* mout, int st, int en, int tid) {
 		fastafile = f;
 		namefile = n;
 		groupfile = g;
@@ -107,8 +107,9 @@ struct uchimeData {
 		count = 0;
 		numChimeras = 0;
         uchimeLocation = uloc;
+        countlist = nc;
 	}
-	void setBooleans(bool Abskew, bool calns, bool MinH, bool Mindiv, bool Xn, bool Dn, bool Xa, bool Chunks, bool Minchunk, bool Idsmoothwindow, bool Minsmoothid, bool Maxp, bool skipgap, bool skipgap2, bool Minlen, bool Maxlen, bool uc, bool Queryfract, bool hc) {
+	void setBooleans(bool dps, bool Abskew, bool calns, bool MinH, bool Mindiv, bool Xn, bool Dn, bool Xa, bool Chunks, bool Minchunk, bool Idsmoothwindow, bool Minsmoothid, bool Maxp, bool skipgap, bool skipgap2, bool Minlen, bool Maxlen, bool uc, bool Queryfract, bool hc) {
 		useAbskew = Abskew;
 		chimealns = calns;
 		useMinH = MinH;
@@ -128,12 +129,14 @@ struct uchimeData {
 		ucl = uc;
 		useQueryfract = Queryfract;
         hasCount = hc;
+        dups = dps;
 	}
 	
-	void setVariables(string abske, string min, string mindi, string x, string d, string xa2, string chunk, string minchun, string idsmoothwindo, string minsmoothi, string max, string minle, string maxle, string queryfrac) {
+	void setVariables(string abske, string min, string mindi, string x, string d, string xa2, string chunk, string minchun, string idsmoothwindo, string minsmoothi, string max, string minle, string maxle, string queryfrac, string stra) {
 		abskew = abske;
 		minh = min;
 		mindiv = mindi;
+        strand = stra;
 		xn = x;
 		dn = d;
 		xa = xa2;
@@ -182,6 +185,10 @@ static DWORD WINAPI MyUchimeThreadFunction(LPVOID lpParam){
 		
 		int totalSeqs = 0;
 		int numChimeras = 0;
+        
+        ofstream outCountList;
+        if (pDataArray->hasCount && pDataArray->dups) { pDataArray->m->openOutputFile(pDataArray->countlist, outCountList); }
+
 		
 		for (int i = pDataArray->start; i < pDataArray->end; i++) {
 			int start = time(NULL);	 if (pDataArray->m->control_pressed) {  if (pDataArray->hasCount) { delete cparser; } { delete parser; } return 0; }
@@ -243,6 +250,15 @@ static DWORD WINAPI MyUchimeThreadFunction(LPVOID lpParam){
 				cPara.push_back(tempa);
 			}
 			
+            if (pDataArray->strand != "") {
+                char* tempA = new char[9]; 
+                *tempA = '\0'; strncat(tempA, "--strand", 8);
+                cPara.push_back(tempA);
+                char* tempa = new char[pDataArray->strand.length()+1];
+                *tempa = '\0'; strncat(tempa, pDataArray->strand.c_str(), pDataArray->strand.length());
+                cPara.push_back(tempa);
+            }
+            
 			if (pDataArray->useAbskew) {
 				char* tempskew = new char[9];
 				*tempskew = '\0'; strncat(tempskew, "--abskew", 8);
@@ -438,9 +454,14 @@ static DWORD WINAPI MyUchimeThreadFunction(LPVOID lpParam){
 			
 			ofstream out;
 			pDataArray->m->openOutputFile(accnos, out);
+            
 			
 			int num = 0;
 			numChimeras = 0;
+            map<string, string> thisnamemap;
+            map<string, string>::iterator itN;
+            if (pDataArray->dups && !pDataArray->hasCount) { thisnamemap = parser->getNameMap(pDataArray->groups[i]); }
+                
 			while(!in.eof()) {
 				
 				if (pDataArray->m->control_pressed) { break; }
@@ -456,7 +477,22 @@ static DWORD WINAPI MyUchimeThreadFunction(LPVOID lpParam){
 				for (int j = 0; j < 15; j++) {  in >> chimeraFlag; }
 				pDataArray->m->gobble(in);
 				
-				if (chimeraFlag == "Y") {  out << name << endl; numChimeras++; }
+				if (chimeraFlag == "Y") {
+                    if (pDataArray->dups) {
+                        if (!pDataArray->hasCount) { //output redundant names for each group
+                            itN = thisnamemap.find(name);
+                            if (itN != thisnamemap.end()) {
+                                vector<string> tempNames; pDataArray->m->splitAtComma(itN->second, tempNames);
+                                for (int j = 0; j < tempNames.size(); j++) { out << tempNames[j] << endl; }
+                            }else { pDataArray->m->mothurOut("[ERROR]: parsing cannot find " + name + ".\n"); pDataArray->m->control_pressed = true; }
+
+                        }else {
+                            out << name << endl;
+                            outCountList << name << '\t' << pDataArray->groups[i] << endl;
+                        }
+                    }else{  out << name << endl;  }
+                    numChimeras++;
+                }
 				num++;
 			}
 			in.close();
@@ -481,6 +517,7 @@ static DWORD WINAPI MyUchimeThreadFunction(LPVOID lpParam){
 			
 		}	
 		
+        if (pDataArray->hasCount && pDataArray->dups) { outCountList.close(); }
 		pDataArray->count = totalSeqs;
 		if (pDataArray->hasCount) { delete cparser; } { delete parser; }
 		return totalSeqs;
@@ -536,12 +573,13 @@ static DWORD WINAPI MyUchimeSeqsThreadFunction(LPVOID lpParam){
         ofstream out23;
         pDataArray->m->openOutputFile(outputFileName, out23);
         
+        int fcount = 0;
         while (!in23.eof()) {
             if (pDataArray->m->control_pressed) { break;  }
             
             Sequence seq(in23); pDataArray->m->gobble(in23);
             
-            if (seq.getName() != "") { seq.printSequence(out23); }
+            if (seq.getName() != "") { seq.printSequence(out23); fcount++; }
         }
         in23.close();
         out23.close();
@@ -589,6 +627,15 @@ static DWORD WINAPI MyUchimeSeqsThreadFunction(LPVOID lpParam){
 			cPara.push_back(tempa);
 		}
 		
+        if (pDataArray->strand != "") {
+            char* tempA = new char[9]; 
+            *tempA = '\0'; strncat(tempA, "--strand", 8);
+            cPara.push_back(tempA);
+            char* tempa = new char[pDataArray->strand.length()+1];
+            *tempa = '\0'; strncat(tempa, pDataArray->strand.c_str(), pDataArray->strand.length());
+            cPara.push_back(tempa);
+        }
+        
 		if (pDataArray->useAbskew) {
 			char* tempskew = new char[9];
 			*tempskew = '\0'; strncat(tempskew, "--abskew", 8);
@@ -802,12 +849,15 @@ static DWORD WINAPI MyUchimeSeqsThreadFunction(LPVOID lpParam){
 		in.close();
 		out.close();
 		
+        if (fcount != totalSeqs) { pDataArray->m->mothurOut("[ERROR]: process " + toString(pDataArray->threadID) + " only processed " + toString(pDataArray->count) + " of " + toString(pDataArray->end) + " sequences assigned to it, quitting. \n"); pDataArray->m->control_pressed = true; }
+        
 		if (pDataArray->m->control_pressed) { return 0; }
 		
 		pDataArray->m->mothurOutEndLine(); pDataArray->m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(totalSeqs) + " sequences.");	pDataArray->m->mothurOutEndLine();					
 	
 		pDataArray->count = totalSeqs;
 		pDataArray->numChimeras = numChimeras;
+        
 		return totalSeqs;
 		
 	}

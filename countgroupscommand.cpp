@@ -14,9 +14,9 @@
 //**********************************************************************************************************************
 vector<string> CountGroupsCommand::setParameters(){	
 	try {
-		CommandParameter pshared("shared", "InputTypes", "", "", "sharedGroup", "sharedGroup", "none","",false,false,true); parameters.push_back(pshared);
-		CommandParameter pgroup("group", "InputTypes", "", "", "sharedGroup", "sharedGroup", "none","",false,false,true); parameters.push_back(pgroup);
-        CommandParameter pcount("count", "InputTypes", "", "", "sharedGroup", "sharedGroup", "none","",false,false,true); parameters.push_back(pcount);
+		CommandParameter pshared("shared", "InputTypes", "", "", "sharedGroup", "sharedGroup", "none","summary",false,false,true); parameters.push_back(pshared);
+		CommandParameter pgroup("group", "InputTypes", "", "", "sharedGroup", "sharedGroup", "none","summary",false,false,true); parameters.push_back(pgroup);
+        CommandParameter pcount("count", "InputTypes", "", "", "sharedGroup", "sharedGroup", "none","summary",false,false,true); parameters.push_back(pcount);
 		CommandParameter paccnos("accnos", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(paccnos);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
@@ -30,6 +30,21 @@ vector<string> CountGroupsCommand::setParameters(){
 		m->errorOut(e, "CountGroupsCommand", "setParameters");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+string CountGroupsCommand::getOutputPattern(string type) {
+    try {
+        string pattern = "";
+        
+        if (type == "summary") {  pattern = "[filename],count.summary"; }
+        else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
+        
+        return pattern;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "PrimerDesignCommand", "getOutputPattern");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 string CountGroupsCommand::getHelpString(){	
@@ -55,6 +70,8 @@ CountGroupsCommand::CountGroupsCommand(){
 	try {
 		abort = true; calledHelp = true;
 		setParameters();
+        vector<string> tempOutNames;
+		outputTypes["summary"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "CountGroupsCommand", "CountGroupsCommand");
@@ -125,6 +142,8 @@ CountGroupsCommand::CountGroupsCommand(string option)  {
 				}
 			}
 			
+            vector<string> tempOutNames;
+            outputTypes["summary"] = tempOutNames;
 			
 			//check for required parameters
 			accnosfile = validParameter.validFile(parameters, "accnos", true);
@@ -200,6 +219,15 @@ int CountGroupsCommand::execute(){
 		if (accnosfile != "") { m->readAccnos(accnosfile, Groups); m->setGroups(Groups); }
 		
 		if (groupfile != "") {
+            map<string, string> variables; 
+            string thisOutputDir = outputDir;
+            if (outputDir == "") {  thisOutputDir += m->hasPath(groupfile);  }
+            variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(groupfile));
+            string outputFileName = getOutputFileName("summary", variables);
+            outputNames.push_back(outputFileName); outputTypes["summary"].push_back(outputFileName);
+            ofstream out;
+            m->openOutputFile(outputFileName, out);
+            
 			GroupMap groupMap(groupfile);
 			groupMap.readMap();
 			
@@ -214,14 +242,24 @@ int CountGroupsCommand::execute(){
                 int num = groupMap.getNumSeqs(Groups[i]);
                 total += num;
 				m->mothurOut(Groups[i] + " contains " + toString(num) + "."); m->mothurOutEndLine();
+                out << Groups[i] << '\t' << num << endl;
 			}
-            
+            out.close();
             m->mothurOut("\nTotal seqs: " + toString(total) + "."); m->mothurOutEndLine();
 		}
         
         if (m->control_pressed) { return 0; }
         
         if (countfile != "") {
+            map<string, string> variables; 
+            string thisOutputDir = outputDir;
+            if (outputDir == "") {  thisOutputDir += m->hasPath(countfile);  }
+            variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(countfile));
+            string outputFileName = getOutputFileName("summary", variables);
+            outputNames.push_back(outputFileName); outputTypes["summary"].push_back(outputFileName);
+            ofstream out;
+            m->openOutputFile(outputFileName, out);
+            
 			CountTable ct;
 			ct.readTable(countfile);
             
@@ -236,7 +274,9 @@ int CountGroupsCommand::execute(){
                 int num = ct.getGroupCount(Groups[i]);
                 total += num;
 				m->mothurOut(Groups[i] + " contains " + toString(num) + "."); m->mothurOutEndLine();
+                out << Groups[i] << '\t' << num << endl;
 			}
+            out.close();
             
             m->mothurOut("\nTotal seqs: " + toString(total) + "."); m->mothurOutEndLine();
 		}
@@ -247,17 +287,33 @@ int CountGroupsCommand::execute(){
 			InputData input(sharedfile, "sharedfile");
 			vector<SharedRAbundVector*> lookup = input.getSharedRAbundVectors();
 			
+            map<string, string> variables; 
+            string thisOutputDir = outputDir;
+            if (outputDir == "") {  thisOutputDir += m->hasPath(countfile);  }
+            variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(countfile));
+            string outputFileName = getOutputFileName("summary", variables);
+            outputNames.push_back(outputFileName); outputTypes["summary"].push_back(outputFileName);
+            ofstream out;
+            m->openOutputFile(outputFileName, out);
+            
             int total = 0;
 			for (int i = 0; i < lookup.size(); i++) {
                 int num = lookup[i]->getNumSeqs();
                 total += num;
 				m->mothurOut(lookup[i]->getGroup() + " contains " + toString(num) + "."); m->mothurOutEndLine();
 				delete lookup[i];
+                out << lookup[i]->getGroup() << '\t' << num << endl;
 			}
+            out.close();
 			
             m->mothurOut("\nTotal seqs: " + toString(total) + "."); m->mothurOutEndLine();
 		}
-				
+			
+        m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}	
+		m->mothurOutEndLine();
+        
 		return 0;		
 	}
 	

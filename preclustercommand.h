@@ -29,8 +29,16 @@ struct seqPNode {
 	~seqPNode() {}
 };
 /************************************************************/
-inline bool comparePriority(seqPNode first, seqPNode second) {  
+inline bool comparePriorityTopDown(seqPNode first, seqPNode second) {  
     if (first.numIdentical > second.numIdentical) { return true;  }
+    else if (first.numIdentical == second.numIdentical) { 
+        if (first.seq.getName() > second.seq.getName()) { return true; }
+    }
+    return false; 
+}
+/************************************************************/
+inline bool comparePriorityDownTop(seqPNode first, seqPNode second) {  
+    if (first.numIdentical < second.numIdentical) { return true;  }
     else if (first.numIdentical == second.numIdentical) { 
         if (first.seq.getName() > second.seq.getName()) { return true; }
     }
@@ -71,7 +79,7 @@ private:
     CountTable ct;
     
 	int diffs, length, processors;
-	bool abort, bygroup;
+	bool abort, bygroup, topdown;
 	string fastafile, namefile, outputDir, groupfile, countfile;
 	vector<seqPNode> alignSeqs; //maps the number of identical seqs to a sequence
 	map<string, string> names; //represents the names file first column maps to second column
@@ -79,7 +87,6 @@ private:
 	map<string, int>::iterator itSize; 
 //	map<string, bool> active; //maps sequence name to whether it has already been merged or not.
 	vector<string> outputNames;
-	map<string, vector<string> > outputTypes;
 	
 	int readFASTA();
 	void readNameFile();
@@ -104,13 +111,14 @@ struct preClusterData {
 	string newFName, newNName, newMName;
 	MothurOut* m;
 	int start;
-	int end;
+	int end, count;
 	int diffs, threadID;
 	vector<string> groups;
 	vector<string> mapFileNames;
+    bool topdown;
 	
 	preClusterData(){}
-	preClusterData(string f, string n, string g, string c, string nff,  string nnf, string nmf, vector<string> gr, MothurOut* mout, int st, int en, int d, int tid) {
+	preClusterData(string f, string n, string g, string c, string nff,  string nnf, string nmf, vector<string> gr, MothurOut* mout, int st, int en, int d, bool td, int tid) {
 		fastafile = f;
 		namefile = n;
 		groupfile = g;
@@ -124,6 +132,8 @@ struct preClusterData {
 		threadID = tid;
 		groups = gr;
         countfile = c;
+        topdown = td;
+        count=0;
 	}
 };
 
@@ -155,6 +165,8 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
 		//precluster each group
 		for (int k = pDataArray->start; k < pDataArray->end; k++) {
 			
+            pDataArray->count++;
+            
 			int start = time(NULL);
 			
 			if (pDataArray->m->control_pressed) {  delete parser; return 0; }
@@ -236,61 +248,114 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
 			pDataArray->m->openOutputFile(pDataArray->newMName+pDataArray->groups[k]+".map", out);
 			pDataArray->mapFileNames.push_back(pDataArray->newMName+pDataArray->groups[k]+".map");
 			
-			//sort seqs by number of identical seqs
-			sort(alignSeqs.begin(), alignSeqs.end(), comparePriority);
-			
+            //sort seqs by number of identical seqs
+            if (pDataArray->topdown) { sort(alignSeqs.begin(), alignSeqs.end(), comparePriorityTopDown);  }
+            else {  sort(alignSeqs.begin(), alignSeqs.end(), comparePriorityDownTop);  }
+            
 			int count = 0;
 			
-			//think about running through twice...
-			for (int i = 0; i < numSeqs; i++) {
-				
-				//are you active
-				//			itActive = active.find(alignSeqs[i].seq.getName());
-				
-				if (alignSeqs[i].active) {  //this sequence has not been merged yet
-					
-					string chunk = alignSeqs[i].seq.getName() + "\t" + toString(alignSeqs[i].numIdentical) + "\t" + toString(0) + "\t" + alignSeqs[i].seq.getAligned() + "\n";
+            if (pDataArray->topdown) {
+                //think about running through twice...
+                for (int i = 0; i < numSeqs; i++) {
+                    
+                    //are you active
+                    //			itActive = active.find(alignSeqs[i].seq.getName());
+                    
+                    if (alignSeqs[i].active) {  //this sequence has not been merged yet
+                        
+                        string chunk = alignSeqs[i].seq.getName() + "\t" + toString(alignSeqs[i].numIdentical) + "\t" + toString(0) + "\t" + alignSeqs[i].seq.getAligned() + "\n";
 
-					//try to merge it with all smaller seqs
-					for (int j = i+1; j < numSeqs; j++) {
-						
-						if (pDataArray->m->control_pressed) { delete parser; return 0; }
-						
-						if (alignSeqs[j].active) {  //this sequence has not been merged yet
-							//are you within "diff" bases
-							//int mismatch = calcMisMatches(alignSeqs[i].seq.getAligned(), alignSeqs[j].seq.getAligned());
-							int mismatch = 0;
-							
-							for (int k = 0; k < alignSeqs[i].seq.getAligned().length(); k++) {
-								//do they match
-								if (alignSeqs[i].seq.getAligned()[k] != alignSeqs[j].seq.getAligned()[k]) { mismatch++; }
-								if (mismatch > pDataArray->diffs) { mismatch = length; break; } //to far to cluster
-							}
-							
-							if (mismatch <= pDataArray->diffs) {
-								//merge
-								alignSeqs[i].names += ',' + alignSeqs[j].names;
-								alignSeqs[i].numIdentical += alignSeqs[j].numIdentical;
-								
-								alignSeqs[j].active = 0;
-								alignSeqs[j].numIdentical = 0;
-								alignSeqs[j].diffs = mismatch;
-								count++;
-								chunk += alignSeqs[j].seq.getName() + "\t" + toString(alignSeqs[j].numIdentical) + "\t" + toString(mismatch) + "\t" + alignSeqs[j].seq.getAligned() + "\n";
-							}
-						}//end if j active
-					}//end for loop j
-					
-					//remove from active list 
-					alignSeqs[i].active = 0;
-					
-					out << "ideal_seq_" << (i+1) << '\t' << alignSeqs[i].numIdentical << endl << chunk << endl;
-					
-				}//end if active i
-				if(i % 100 == 0)	{ pDataArray->m->mothurOut(toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)); pDataArray->m->mothurOutEndLine();	}
-			}
-			out.close();
-			if(numSeqs % 100 != 0)	{ pDataArray->m->mothurOut(toString(numSeqs) + "\t" + toString(numSeqs - count) + "\t" + toString(count)); pDataArray->m->mothurOutEndLine();	}	
+                        //try to merge it with all smaller seqs
+                        for (int j = i+1; j < numSeqs; j++) {
+                            
+                            if (pDataArray->m->control_pressed) { delete parser; return 0; }
+                            
+                            if (alignSeqs[j].active) {  //this sequence has not been merged yet
+                                //are you within "diff" bases
+                                //int mismatch = calcMisMatches(alignSeqs[i].seq.getAligned(), alignSeqs[j].seq.getAligned());
+                                int mismatch = 0;
+                                
+                                for (int k = 0; k < alignSeqs[i].seq.getAligned().length(); k++) {
+                                    //do they match
+                                    if (alignSeqs[i].seq.getAligned()[k] != alignSeqs[j].seq.getAligned()[k]) { mismatch++; }
+                                    if (mismatch > pDataArray->diffs) { mismatch = length; break; } //to far to cluster
+                                }
+                                
+                                if (mismatch <= pDataArray->diffs) {
+                                    //merge
+                                    alignSeqs[i].names += ',' + alignSeqs[j].names;
+                                    alignSeqs[i].numIdentical += alignSeqs[j].numIdentical;
+                                    
+                                    alignSeqs[j].active = 0;
+                                    alignSeqs[j].numIdentical = 0;
+                                    alignSeqs[j].diffs = mismatch;
+                                    count++;
+                                    chunk += alignSeqs[j].seq.getName() + "\t" + toString(alignSeqs[j].numIdentical) + "\t" + toString(mismatch) + "\t" + alignSeqs[j].seq.getAligned() + "\n";
+                                }
+                            }//end if j active
+                        }//end for loop j
+                        
+                        //remove from active list 
+                        alignSeqs[i].active = 0;
+                        
+                        out << "ideal_seq_" << (i+1) << '\t' << alignSeqs[i].numIdentical << endl << chunk << endl;
+                        
+                    }//end if active i
+                    if(i % 100 == 0)	{ pDataArray->m->mothurOut(toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)); pDataArray->m->mothurOutEndLine();	}
+                }
+                
+            }else {
+                map<int, string> mapFile;
+                map<int, int> originalCount;
+                map<int, int>::iterator itCount;
+                for (int i = 0; i < numSeqs; i++) { mapFile[i] = ""; originalCount[i] = alignSeqs[i].numIdentical; }
+                
+                //think about running through twice...
+                for (int i = 0; i < numSeqs; i++) {
+                    
+                    //try to merge it into larger seqs
+                    for (int j = i+1; j < numSeqs; j++) {
+                        
+                        if (pDataArray->m->control_pressed) { out.close(); return 0; }
+                        
+                        if (originalCount[j] > originalCount[i]) {  //this sequence is more abundant than I am
+                            //are you within "diff" bases
+                            //int mismatch = calcMisMatches(alignSeqs[i].seq.getAligned(), alignSeqs[j].seq.getAligned());
+                            int mismatch = 0;
+                            
+                            for (int k = 0; k < alignSeqs[i].seq.getAligned().length(); k++) {
+                                //do they match
+                                if (alignSeqs[i].seq.getAligned()[k] != alignSeqs[j].seq.getAligned()[k]) { mismatch++; }
+                                if (mismatch > pDataArray->diffs) { mismatch = length; break; } //to far to cluster
+                            }
+                            
+                            if (mismatch <= pDataArray->diffs) {
+                                //merge
+                                alignSeqs[j].names += ',' + alignSeqs[i].names;
+                                alignSeqs[j].numIdentical += alignSeqs[i].numIdentical;
+                                
+                                mapFile[j] = alignSeqs[i].seq.getName() + "\t" + toString(alignSeqs[i].numIdentical) + "\t" + toString(mismatch) + "\t" + alignSeqs[i].seq.getAligned() + "\n" + mapFile[i];
+                                alignSeqs[i].numIdentical = 0;
+                                originalCount.erase(i);
+                                mapFile[i] = "";
+                                count++;
+                                j+=numSeqs; //exit search, we merged this one in.
+                            }
+                        }//end abundance check
+                    }//end for loop j
+                    
+                    if(i % 100 == 0)	{ pDataArray->m->mothurOut(toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)); pDataArray->m->mothurOutEndLine();	}
+                }
+                
+                for (int i = 0; i < numSeqs; i++) {
+                    if (alignSeqs[i].numIdentical != 0) {
+                        out << "ideal_seq_" << (i+1) << '\t' << alignSeqs[i].numIdentical << endl  << alignSeqs[i].seq.getName() + "\t" + toString(alignSeqs[i].numIdentical) + "\t" + toString(0) + "\t" + alignSeqs[i].seq.getAligned() + "\n" << mapFile[i] << endl;
+                    }
+                }
+
+            }
+            out.close();
+            if(numSeqs % 100 != 0)	{ pDataArray->m->mothurOut(toString(numSeqs) + "\t" + toString(numSeqs - count) + "\t" + toString(count)); pDataArray->m->mothurOutEndLine();	}
 			////////////////////////////////////////////////////
 			
 			if (pDataArray->m->control_pressed) {  delete parser; return 0; }

@@ -24,7 +24,7 @@ public:
 	string getCommandName()			{ return "count.groups";			}
 	string getCommandCategory()		{ return "Sequence Processing";		}
 	string getHelpString();	
-    string getOutputPattern(string){ return ""; }	
+    string getOutputPattern(string);	
 	string getCitation() { return "http://www.mothur.org/wiki/Count.groups"; }
 	string getDescription()		{ return "counts the number of sequences in each group"; }
 	
@@ -36,6 +36,7 @@ private:
 	string sharedfile, groupfile, countfile, outputDir, groups, accnosfile;
 	bool abort;
 	vector<string> Groups;
+    vector<string> outputNames;
 };
 
 #endif

@@ -42,16 +42,15 @@ FlowData::FlowData(int numFlows, float signal, float noise, int maxHomoP, string
 bool FlowData::getNext(ifstream& flowFile){
 	
 	try {
-		flowFile >> seqName >> endFlow;	
-        if (seqName.length() != 0) {
-            //cout << "in Flowdata " + seqName << endl;
+        seqName = getSequenceName(flowFile);
+		flowFile >> endFlow;	
+        if (!m->control_pressed) {
             for(int i=0;i<numFlows;i++)	{	flowFile >> flowData[i]; 	}
-            //cout << "in Flowdata read " << seqName + " done" << endl;
             updateEndFlow(); 
             translateFlow();
             m->gobble(flowFile);
-		}else{ m->mothurOut("Error in reading your flowfile, at position " + toString(flowFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); }
-            
+		}
+           
 		if(flowFile){	return 1;	}
 		else		{	return 0;	}
 	}
@@ -61,22 +60,44 @@ bool FlowData::getNext(ifstream& flowFile){
 	}
 	
 }
+//********************************************************************************************************************
+string FlowData::getSequenceName(ifstream& flowFile) {
+	try {
+		string name = "";
+		
+        flowFile >> name;
+		
+		if (name.length() != 0) { 
+            for (int i = 0; i < name.length(); i++) {
+                if (name[i] == ':') { name[i] = '_'; m->changedSeqNames = true; }
+            }
+        }else{ m->mothurOut("Error in reading your flowfile, at position " + toString(flowFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); m->control_pressed = true;  }
+        
+		return name;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "FlowData", "getSequenceName");
+		exit(1);
+	}
+}
 
 //**********************************************************************************************************************
 
 void FlowData::updateEndFlow(){
 	try{
 		
+        if (baseFlow.length() > 4) { return; }
+        
 		//int currLength = 0;
 		float maxIntensity = (float) maxHomoP + 0.49;
 		
 		int deadSpot = 0;
-				
+			
 		while(deadSpot < endFlow){
 			int signal = 0;
 			int noise = 0;
 			
-			for(int i=0;i<4;i++){
+			for(int i=0;i<baseFlow.length();i++){
 				float intensity = flowData[i + deadSpot];
 				if(intensity > signalIntensity){
 					signal++;
@@ -91,7 +112,7 @@ void FlowData::updateEndFlow(){
 				break;
 			}
 		
-			deadSpot += 4;
+			deadSpot += baseFlow.length();
 		}
 		endFlow = deadSpot;
 
@@ -103,27 +124,49 @@ void FlowData::updateEndFlow(){
 }
 
 //**********************************************************************************************************************
-
+//TATGCT
+//1 0 0 0 0 1
+//then the second positive flow is for a T, but you saw a T between the last and previous flow adn it wasn't positive, so something is missing
+//Becomes TNT
 void FlowData::translateFlow(){
-	
 	try{
-		sequence = "";
-		for(int i=0;i<endFlow;i++){
+        sequence = "";
+        set<char> charInMiddle;
+        int oldspot = -1;
+        bool updateOld = false;
+        
+        for(int i=0;i<endFlow;i++){
 			int intensity = (int)(flowData[i] + 0.5);
-			char base = baseFlow[i % 4];
+			char base = baseFlow[i % baseFlow.length()];
+            
+            if (intensity == 0) { //are we in the middle
+                if (oldspot != -1) { charInMiddle.insert(base); }
+            }else if (intensity >= 1) {
+                if (oldspot == -1) { updateOld = true;  }
+                else {  //check for bases inbetween two 1's
+                    if (charInMiddle.count(base) != 0) { //we want to covert to an N
+                        sequence = sequence.substr(0, oldspot+1);
+                        sequence += 'N';
+                    }
+                    updateOld = true;
+                    charInMiddle.clear();
+                }
+            }
 			
 			for(int j=0;j<intensity;j++){
 				sequence += base;
 			}
+            
+            if (updateOld) { oldspot = sequence.length()-1;  updateOld = false; }
 		}
-
+        
 		if(sequence.size() > 4){
 			sequence = sequence.substr(4);
 		}
 		else{
 			sequence = "NNNN";
 		}
-	}
+    }
 	catch(exception& e) {
 		m->errorOut(e, "FlowData", "translateFlow");
 		exit(1);

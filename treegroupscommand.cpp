@@ -644,6 +644,7 @@ int TreeGroupCommand::makeSimsShared() {
             }else {
                 m->clearGroups();
                 Groups.clear();
+                m->Treenames.clear();
                 vector<SharedRAbundVector*> temp;
                 for (int i = 0; i < lookup.size(); i++) {
                     if (lookup[i]->getNumSeqs() < subsampleSize) { 
@@ -652,6 +653,7 @@ int TreeGroupCommand::makeSimsShared() {
                     }else { 
                         Groups.push_back(lookup[i]->getGroup()); 
                         temp.push_back(lookup[i]);
+                        m->Treenames.push_back(lookup[i]->getGroup());
                     }
                 } 
                 lookup = temp;
@@ -890,6 +892,9 @@ int TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
                 
                 //Close all thread handles and free memory allocations.
                 for(int i=0; i < pDataArray.size(); i++){
+                    if (pDataArray[i]->count != (pDataArray[i]->end-pDataArray[i]->start)) {
+                        m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end-pDataArray[i]->start) + " groups assigned to it, quitting. \n"); m->control_pressed = true; 
+                    }
                     for (int j = 0; j < pDataArray[i]->thisLookup.size(); j++) {  delete pDataArray[i]->thisLookup[j];  } 
                     
                     for (int k = 0; k < calcDists.size(); k++) {
@@ -914,34 +919,14 @@ int TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
                 for (int i = 0; i < calcDists.size(); i++) {  calcDists[i].clear(); }
             }
 		}
-		
+        
+		if (m->debug) {  m->mothurOut("[DEBUG]: done with iters.\n"); }
+            
         if (iters != 1) {
             //we need to find the average distance and standard deviation for each groups distance
+            vector< vector<seqDist>  > calcAverages = m->getAverages(calcDistsTotals);  
             
-            vector< vector<seqDist>  > calcAverages; calcAverages.resize(treeCalculators.size()); 
-            for (int i = 0; i < calcAverages.size(); i++) {  //initialize sums to zero.
-                calcAverages[i].resize(calcDistsTotals[0][i].size());
-                
-                for (int j = 0; j < calcAverages[i].size(); j++) {
-                    calcAverages[i][j].seq1 = calcDists[i][j].seq1;
-                    calcAverages[i][j].seq2 = calcDists[i][j].seq2;
-                    calcAverages[i][j].dist = 0.0;
-                }
-            }
-            
-            for (int thisIter = 0; thisIter < iters; thisIter++) { //sum all groups dists for each calculator
-                for (int i = 0; i < calcAverages.size(); i++) {  //initialize sums to zero.
-                    for (int j = 0; j < calcAverages[i].size(); j++) {
-                        calcAverages[i][j].dist += calcDistsTotals[thisIter][i][j].dist;
-                    }
-                }
-            }
-            
-            for (int i = 0; i < calcAverages.size(); i++) {  //finds average.
-                for (int j = 0; j < calcAverages[i].size(); j++) {
-                    calcAverages[i][j].dist /= (float) iters;
-                }
-            }
+            if (m->debug) {  m->mothurOut("[DEBUG]: found averages.\n"); }
             
             //create average tree for each calc
             for (int i = 0; i < calcDists.size(); i++) {
@@ -971,6 +956,8 @@ int TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
                 Tree* newTree = createTree(matrix);
                 if (newTree != NULL) { writeTree(outputFile, newTree); }                
             }
+            
+            if (m->debug) {  m->mothurOut("[DEBUG]: done averages trees.\n"); }
             
             //create all trees for each calc and find their consensus tree
             for (int i = 0; i < calcDists.size(); i++) {
@@ -1003,7 +990,7 @@ int TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
                         int row = calcDistsTotals[myIter][i][j].seq1;
                         int column = calcDistsTotals[myIter][i][j].seq2;
                         double dist = calcDistsTotals[myIter][i][j].dist;
-                        
+                       
                         matrix[row][column] = dist;
                         matrix[column][row] = dist;
                     }
@@ -1018,10 +1005,14 @@ int TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
                 outAll.close();
                 if (m->control_pressed) { for (int k = 0; k < trees.size(); k++) { delete trees[k]; } }
                 
+                if (m->debug) {  m->mothurOut("[DEBUG]: done all trees.\n"); }
+                
                 Consensus consensus;
                 //clear old tree names if any
                 m->Treenames.clear(); m->Treenames = m->getGroups(); //may have changed if subsample eliminated groups
                 Tree* conTree = consensus.getTree(trees);
+                
+                if (m->debug) {  m->mothurOut("[DEBUG]: done cons tree.\n"); }
                 
                 //create a new filename
                 variables["[tag]"] = "cons";

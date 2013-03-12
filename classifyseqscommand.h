@@ -163,8 +163,6 @@ static DWORD WINAPI MyClassThreadFunction(LPVOID lpParam){
 			inFASTA.seekg(pDataArray->start-1); pDataArray->m->gobble(inFASTA); 
 		}
 		
-		pDataArray->count = pDataArray->end;
-		
 		//make classify
 		Classify* myclassify;
         string outputMethodTag = pDataArray->method + ".";
@@ -183,7 +181,7 @@ static DWORD WINAPI MyClassThreadFunction(LPVOID lpParam){
 		
 		if (pDataArray->m->control_pressed) { delete myclassify; return 0; }
 		
-		int count = 0;
+		pDataArray->count = 0;
 		for(int i = 0; i < pDataArray->end; i++){ //end is the number of sequences to process
 			
 			if (pDataArray->m->control_pressed) { delete myclassify; return 0; }
@@ -209,15 +207,15 @@ static DWORD WINAPI MyClassThreadFunction(LPVOID lpParam){
 					
 				if (myclassify->getFlipped()) { outAcc << candidateSeq->getName() << endl; }
 				
-				count++;
+				pDataArray->count++;
 			}
 			delete candidateSeq;
 			//report progress
-			if((count) % 100 == 0){	pDataArray->m->mothurOut("Processing sequence: " + toString(count)); pDataArray->m->mothurOutEndLine();		}
+			if((pDataArray->count) % 100 == 0){	pDataArray->m->mothurOut("Processing sequence: " + toString(pDataArray->count)); pDataArray->m->mothurOutEndLine();		}
 			
 		}
 		//report progress
-		if((count) % 100 != 0){	pDataArray->m->mothurOut("Processing sequence: " + toString(count)); pDataArray->m->mothurOutEndLine();		}
+		if((pDataArray->count) % 100 != 0){	pDataArray->m->mothurOut("Processing sequence: " + toString(pDataArray->count)); pDataArray->m->mothurOutEndLine();		}
 		
 		delete myclassify;
 		inFASTA.close();

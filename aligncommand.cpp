@@ -27,8 +27,8 @@ vector<string> AlignCommand::setParameters(){
 		CommandParameter pmatch("match", "Number", "", "1.0", "", "", "","",false,false); parameters.push_back(pmatch);
 		CommandParameter palign("align", "Multiple", "needleman-gotoh-blast-noalign", "needleman", "", "", "","",false,false,true); parameters.push_back(palign);
 		CommandParameter pmismatch("mismatch", "Number", "", "-1.0", "", "", "","",false,false); parameters.push_back(pmismatch);
-		CommandParameter pgapopen("gapopen", "Number", "", "-2.0", "", "", "","",false,false); parameters.push_back(pgapopen);
-		CommandParameter pgapextend("gapextend", "Number", "", "-1.0", "", "", "","",false,false); parameters.push_back(pgapextend);
+		CommandParameter pgapopen("gapopen", "Number", "", "-5.0", "", "", "","",false,false); parameters.push_back(pgapopen);
+		CommandParameter pgapextend("gapextend", "Number", "", "-2.0", "", "", "","",false,false); parameters.push_back(pgapextend);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
 		CommandParameter pflip("flip", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pflip);
 		CommandParameter psave("save", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(psave);
@@ -57,8 +57,8 @@ string AlignCommand::getHelpString(){
 		helpString += "The ksize parameter allows you to specify the kmer size for finding most similar template to candidate.  The default is 8.";
 		helpString += "The match parameter allows you to specify the bonus for having the same base. The default is 1.0.";
 		helpString += "The mistmatch parameter allows you to specify the penalty for having different bases.  The default is -1.0.";
-		helpString += "The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -2.0.";
-		helpString += "The gapextend parameter allows you to specify the penalty for extending a gap in an alignment.  The default is -1.0.";
+		helpString += "The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -5.0.";
+		helpString += "The gapextend parameter allows you to specify the penalty for extending a gap in an alignment.  The default is -2.0.";
 		helpString += "The flip parameter is used to specify whether or not you want mothur to try the reverse complement if a sequence falls below the threshold.  The default is false.";
 		helpString += "The threshold is used to specify a cutoff at which an alignment is deemed 'bad' and the reverse complement may be tried. The default threshold is 0.50, meaning 50% of the bases are removed in the alignment.";
 		helpString += "If the flip parameter is set to true the reverse complement of the sequence is aligned and the better alignment is reported.";
@@ -249,10 +249,10 @@ AlignCommand::AlignCommand(string option)  {
 			temp = validParameter.validFile(parameters, "mismatch", false);		if (temp == "not found"){	temp = "-1.0";			}
 			m->mothurConvert(temp, misMatch);  
 			
-			temp = validParameter.validFile(parameters, "gapopen", false);		if (temp == "not found"){	temp = "-2.0";			}
+			temp = validParameter.validFile(parameters, "gapopen", false);		if (temp == "not found"){	temp = "-5.0";			}
 			m->mothurConvert(temp, gapOpen);  
 			
-			temp = validParameter.validFile(parameters, "gapextend", false);	if (temp == "not found"){	temp = "-1.0";			}
+			temp = validParameter.validFile(parameters, "gapextend", false);	if (temp == "not found"){	temp = "-2.0";			}
 			m->mothurConvert(temp, gapExtend); 
 			
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
@@ -965,6 +965,9 @@ int AlignCommand::createProcesses(string alignFileName, string reportFileName, s
 		
 		//Close all thread handles and free memory allocations.
 		for(int i=0; i < pDataArray.size(); i++){
+            if (pDataArray[i]->count != pDataArray[i]->end) {
+                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end) + " sequences assigned to it, quitting. \n"); m->control_pressed = true; 
+            }
 			num += pDataArray[i]->count;
 			CloseHandle(hThreadArray[i]);
 			delete pDataArray[i];

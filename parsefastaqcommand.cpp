@@ -16,7 +16,8 @@ vector<string> ParseFastaQCommand::setParameters(){
 		CommandParameter pfastq("fastq", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(pfastq);
 		CommandParameter pfasta("fasta", "Boolean", "", "T", "", "", "","fasta",false,false); parameters.push_back(pfasta);
 		CommandParameter pqual("qfile", "Boolean", "", "T", "", "", "","qfile",false,false); parameters.push_back(pqual);
- 		CommandParameter pformat("format", "Multiple", "sanger-illumina-solexa", "sanger", "", "", "","",false,false,true); parameters.push_back(pformat);
+        CommandParameter ppacbio("pacbio", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(ppacbio);
+ 		CommandParameter pformat("format", "Multiple", "sanger-illumina-solexa-illumina1.8+", "sanger", "", "", "","",false,false,true); parameters.push_back(pformat);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
@@ -36,9 +37,10 @@ string ParseFastaQCommand::getHelpString(){
 		helpString += "The fastq.info command reads a fastq file and creates a fasta and quality file.\n";
 		helpString += "The fastq.info command parameters are fastq, fasta, qfile and format; fastq is required.\n";
         helpString += "The fastq.info command should be in the following format: fastq.info(fastaq=yourFastaQFile).\n";
-		helpString += "The format parameter is used to indicate whether your sequences are sanger, solexa or illumina, default=sanger.\n";
+		helpString += "The format parameter is used to indicate whether your sequences are sanger, solexa, illumina1.8+ or illumina, default=sanger.\n";
         helpString += "The fasta parameter allows you to indicate whether you want a fasta file generated. Default=T.\n";
         helpString += "The qfile parameter allows you to indicate whether you want a quality file generated. Default=T.\n";
+        helpString += "The pacbio parameter allows you to indicate .... When set to true, quality scores of 0 will results in a corresponding base of N. Default=F.\n";
 		helpString += "Example fastq.info(fastaq=test.fastaq).\n";
 		helpString += "Note: No spaces between parameter labels (i.e. fastq), '=' and yourFastQFile.\n";
 		return helpString;
@@ -132,12 +134,16 @@ ParseFastaQCommand::ParseFastaQCommand(string option){
 			fasta = m->isTrue(temp); 
 
 			temp = validParameter.validFile(parameters, "qfile", false);	if(temp == "not found"){	temp = "T";	}
-			qual = m->isTrue(temp); 
+			qual = m->isTrue(temp);
+            
+            temp = validParameter.validFile(parameters, "pacbio", false);	if(temp == "not found"){	temp = "F";	}
+			pacbio = m->isTrue(temp);
+
 			
             format = validParameter.validFile(parameters, "format", false);		if (format == "not found"){	format = "sanger";	}
             
-            if ((format != "sanger") && (format != "illumina") && (format != "solexa"))  { 
-				m->mothurOut(format + " is not a valid format. Your format choices are sanger, solexa and illumina, aborting." ); m->mothurOutEndLine();
+            if ((format != "sanger") && (format != "illumina") && (format != "illumina1.8+") && (format != "solexa"))  { 
+				m->mothurOut(format + " is not a valid format. Your format choices are sanger, solexa, illumina1.8+ and illumina, aborting." ); m->mothurOutEndLine();
 				abort=true;
 			}
 
@@ -183,7 +189,10 @@ int ParseFastaQCommand::execute(){
 			string name = m->getline(in); m->gobble(in);
 			if (name == "") {  m->mothurOut("[ERROR]: Blank fasta name."); m->mothurOutEndLine(); m->control_pressed = true; break; }
 			else if (name[0] != '@') { m->mothurOut("[ERROR]: reading " + name + " expected a name with @ as a leading character."); m->mothurOutEndLine(); m->control_pressed = true; break; }
-			else { name = name.substr(1); }
+			else { 
+                name = name.substr(1); 
+                for (int i = 0; i < name.length(); i++) { if (name[i] == ':') { name[i] = '_'; m->changedSeqNames = true; } }
+            }
 			
 			//read sequence
 			string sequence = m->getline(in); m->gobble(in);
@@ -193,7 +202,10 @@ int ParseFastaQCommand::execute(){
 			string name2 = m->getline(in); m->gobble(in);
 			if (name2 == "") {  m->mothurOut("[ERROR]: Blank quality name."); m->mothurOutEndLine(); m->control_pressed = true; break; }
 			else if (name2[0] != '+') { m->mothurOut("[ERROR]: reading " + name2 + " expected a name with + as a leading character."); m->mothurOutEndLine(); m->control_pressed = true; break; }
-			else { name2 = name2.substr(1);  }
+			else { 
+                name2 = name2.substr(1);  
+                for (int i = 0; i < name2.length(); i++) { if (name2[i] == ':') { name2[i] = '_'; m->changedSeqNames = true; } }
+            }
 			
 			//read quality scores
 			string quality = m->getline(in); m->gobble(in);
@@ -203,22 +215,33 @@ int ParseFastaQCommand::execute(){
 			if (name2 != "") { if (name != name2) { m->mothurOut("[ERROR]: names do not match. read " + name + " for fasta and " + name2 + " for quality."); m->mothurOutEndLine(); m->control_pressed = true; break; } }
 			if (quality.length() != sequence.length()) { m->mothurOut("[ERROR]: Lengths do not match for sequence " + name + ". Read " + toString(sequence.length()) + " characters for fasta and " + toString(quality.length()) + " characters for quality scores."); m->mothurOutEndLine(); m->control_pressed = true; break; }
 			
-			//print sequence info to files
-			if (fasta) { outFasta << ">" << name << endl << sequence << endl; }
-			
-			if (qual) { 
-				vector<int> qualScores = convertQual(quality);
+            vector<int> qualScores;
+            if (qual) {
+				qualScores = convertQual(quality);
 				outQual << ">" << name << endl;
 				for (int i = 0; i < qualScores.size(); i++) { outQual << qualScores[i] << " "; }
 				outQual << endl;
 			}
+            
+            if (m->control_pressed) { break; }
+            
+            if (pacbio) {
+                if (!qual) { qualScores = convertQual(quality); } //get scores if we didn't already
+                for (int i = 0; i < qualScores.size(); i++) {
+                    if (qualScores[i] == 0){ sequence[i] = 'N'; }
+                }
+            }
+            
+			//print sequence info to files
+			if (fasta) { outFasta << ">" << name << endl << sequence << endl; }
+			
 		}
 		
 		in.close();
 		if (fasta)	{ outFasta.close();	}
 		if (qual)	{ outQual.close();	}
 		
-		if (m->control_pressed) { outputTypes.clear(); m->mothurRemove(fastaFile); m->mothurRemove(qualFile); return 0; }
+		if (m->control_pressed) { outputTypes.clear(); outputNames.clear(); m->mothurRemove(fastaFile); m->mothurRemove(qualFile); return 0; }
 		
 		//set fasta file as new current fastafile
 		string current = "";
@@ -249,21 +272,28 @@ vector<int> ParseFastaQCommand::convertQual(string qual) {
 	try {
 		vector<int> qualScores;
 		
+        bool negativeScores = false;
+        
 		for (int i = 0; i < qual.length(); i++) { 
             
             int temp = 0;
             temp = int(qual[i]);
             if (format == "illumina") {
                 temp -= 64; //char '@'
+            }else if (format == "illumina1.8+") {
+                temp -= int('!'); //char '!'
             }else if (format == "solexa") {
                 temp = int(convertTable[temp]); //convert to sanger
                 temp -= int('!'); //char '!'
             }else {
                 temp -= int('!'); //char '!'
             }
+            if (temp < -5) { negativeScores = true; }
 			qualScores.push_back(temp);
 		}
 		
+        if (negativeScores) { m->mothurOut("[ERROR]: finding negative quality scores, do you have the right format selected? http://en.wikipedia.org/wiki/FASTQ_format#Encoding \n");  m->control_pressed = true;  }
+        
 		return qualScores;
 	}
 	catch(exception& e) {

@@ -21,7 +21,7 @@ public:
 	~ParseFastaQCommand() {}
 	
 	vector<string> setParameters();
-	string getCommandName()			{ return "parse.fastq";		}
+	string getCommandName()			{ return "fastq.info";		}
 	string getCommandCategory()		{ return "Sequence Processing"; }
 	
 	string getHelpString();	
@@ -36,7 +36,7 @@ private:
 
 	vector<string> outputNames;	
 	string outputDir, fastaQFile, format;
-	bool abort, fasta, qual;
+	bool abort, fasta, qual, pacbio;
 	
 	vector<int> convertQual(string);
     vector<char> convertTable;

@@ -17,8 +17,10 @@ vector<string> PreClusterCommand::setParameters(){
 		CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none","name",false,false,true); parameters.push_back(pname);
         CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none","count",false,false,true); parameters.push_back(pcount);
 		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
-		CommandParameter pdiffs("diffs", "Number", "", "0", "", "", "","",false,false,true); parameters.push_back(pdiffs);
+		CommandParameter pdiffs("diffs", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pdiffs);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
+        CommandParameter ptopdown("topdown", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(ptopdown);
+
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
@@ -37,11 +39,12 @@ string PreClusterCommand::getHelpString(){
 		string helpString = "";
 		helpString += "The pre.cluster command groups sequences that are within a given number of base mismatches.\n";
 		helpString += "The pre.cluster command outputs a new fasta and name file.\n";
-		helpString += "The pre.cluster command parameters are fasta, name, group, count, processors and diffs. The fasta parameter is required. \n";
+		helpString += "The pre.cluster command parameters are fasta, name, group, count, topdown, processors and diffs. The fasta parameter is required. \n";
 		helpString += "The name parameter allows you to give a list of seqs that are identical. This file is 2 columns, first column is name or representative sequence, second column is a list of its identical sequences separated by commas.\n";
 		helpString += "The group parameter allows you to provide a group file so you can cluster by group. \n";
         helpString += "The count parameter allows you to provide a count file so you can cluster by group. \n";
 		helpString += "The diffs parameter allows you to specify maximum number of mismatched bases allowed between sequences in a grouping. The default is 1.\n";
+        helpString += "The topdown parameter allows you to specify whether to cluster from largest abundance to smallest or smallest to largest.  Default=T, meanging largest to smallest.\n";
 		helpString += "The pre.cluster command should be in the following format: \n";
 		helpString += "pre.cluster(fasta=yourFastaFile, names=yourNamesFile, diffs=yourMaxDiffs) \n";
 		helpString += "Example pre.cluster(fasta=amazon.fasta, diffs=2).\n";
@@ -210,6 +213,9 @@ PreClusterCommand::PreClusterCommand(string option) {
 			m->setProcessors(temp);
 			m->mothurConvert(temp, processors);
 			
+            temp = validParameter.validFile(parameters, "topdown", false);		if(temp == "not found"){  temp = "T"; }
+			topdown = m->isTrue(temp);
+            
             if (countfile == "") {
                 if (namefile == "") {
                     vector<string> files; files.push_back(fastafile);
@@ -440,7 +446,7 @@ int PreClusterCommand::createProcessesGroups(string newFName, string newNName, s
 			// Allocate memory for thread data.
 			string extension = toString(i) + ".temp";
 			
-			preClusterData* tempPreCluster = new preClusterData(fastafile, namefile, groupfile, countfile, (newFName+extension), (newNName+extension), newMFile, groups, m, lines[i].start, lines[i].end, diffs, i);
+			preClusterData* tempPreCluster = new preClusterData(fastafile, namefile, groupfile, countfile, (newFName+extension), (newNName+extension), newMFile, groups, m, lines[i].start, lines[i].end, diffs, topdown, i);
 			pDataArray.push_back(tempPreCluster);
 			processIDS.push_back(i);
 			
@@ -458,6 +464,9 @@ int PreClusterCommand::createProcessesGroups(string newFName, string newNName, s
 		
 		//Close all thread handles and free memory allocations.
 		for(int i=0; i < pDataArray.size(); i++){
+            if (pDataArray[i]->count != (pDataArray[i]->end-pDataArray[i]->start)) {
+                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end-pDataArray[i]->start) + " groups assigned to it, quitting. \n"); m->control_pressed = true; 
+            }
 			for (int j = 0; j < pDataArray[i]->mapFileNames.size(); j++) {
 				outputNames.push_back(pDataArray[i]->mapFileNames[j]); outputTypes["map"].push_back(pDataArray[i]->mapFileNames[j]); 
 			}
@@ -545,52 +554,94 @@ int PreClusterCommand::process(string newMapFile){
 		m->openOutputFile(newMapFile, out);
 		
 		//sort seqs by number of identical seqs
-		sort(alignSeqs.begin(), alignSeqs.end(), comparePriority);
+        if (topdown) { sort(alignSeqs.begin(), alignSeqs.end(), comparePriorityTopDown);  }
+        else {  sort(alignSeqs.begin(), alignSeqs.end(), comparePriorityDownTop);  }
 		
 		int count = 0;
 		int numSeqs = alignSeqs.size();
 		
-		//think about running through twice...
-		for (int i = 0; i < numSeqs; i++) {
-			
-			//are you active
-			//			itActive = active.find(alignSeqs[i].seq.getName());
-			
-			if (alignSeqs[i].active) {  //this sequence has not been merged yet
-				
-				string chunk = alignSeqs[i].seq.getName() + "\t" + toString(alignSeqs[i].numIdentical) + "\t" + toString(0) + "\t" + alignSeqs[i].seq.getAligned() + "\n";
-				
-				//try to merge it with all smaller seqs
-				for (int j = i+1; j < numSeqs; j++) {
-					
-					if (m->control_pressed) { out.close(); return 0; }
-					
-					if (alignSeqs[j].active) {  //this sequence has not been merged yet
-						//are you within "diff" bases
-						int mismatch = calcMisMatches(alignSeqs[i].seq.getAligned(), alignSeqs[j].seq.getAligned());
-						
-						if (mismatch <= diffs) {
-							//merge
-							alignSeqs[i].names += ',' + alignSeqs[j].names;
-							alignSeqs[i].numIdentical += alignSeqs[j].numIdentical;
-							
-							chunk += alignSeqs[j].seq.getName() + "\t" + toString(alignSeqs[j].numIdentical) + "\t" + toString(mismatch) + "\t" + alignSeqs[j].seq.getAligned() + "\n";
-							
-							alignSeqs[j].active = 0;
-							alignSeqs[j].numIdentical = 0;
-							count++;
-						}
-					}//end if j active
-				}//end for loop j
-				
-				//remove from active list 
-				alignSeqs[i].active = 0;
-				
-				out << "ideal_seq_" << (i+1) << '\t' << alignSeqs[i].numIdentical << endl << chunk << endl;;
-				
-			}//end if active i
-			if(i % 100 == 0)	{ m->mothurOut(toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)); m->mothurOutEndLine();	}
-		}
+        if (topdown) {
+            //think about running through twice...
+            for (int i = 0; i < numSeqs; i++) {
+                
+                if (alignSeqs[i].active) {  //this sequence has not been merged yet
+                    
+                    string chunk = alignSeqs[i].seq.getName() + "\t" + toString(alignSeqs[i].numIdentical) + "\t" + toString(0) + "\t" + alignSeqs[i].seq.getAligned() + "\n";
+                    
+                    //try to merge it with all smaller seqs
+                    for (int j = i+1; j < numSeqs; j++) {
+                        
+                        if (m->control_pressed) { out.close(); return 0; }
+                        
+                        if (alignSeqs[j].active) {  //this sequence has not been merged yet
+                            //are you within "diff" bases
+                            int mismatch = calcMisMatches(alignSeqs[i].seq.getAligned(), alignSeqs[j].seq.getAligned());
+                            
+                            if (mismatch <= diffs) {
+                                //merge
+                                alignSeqs[i].names += ',' + alignSeqs[j].names;
+                                alignSeqs[i].numIdentical += alignSeqs[j].numIdentical;
+                                
+                                chunk += alignSeqs[j].seq.getName() + "\t" + toString(alignSeqs[j].numIdentical) + "\t" + toString(mismatch) + "\t" + alignSeqs[j].seq.getAligned() + "\n";
+                                
+                                alignSeqs[j].active = 0;
+                                alignSeqs[j].numIdentical = 0;
+                                count++;
+                            }
+                        }//end if j active
+                    }//end for loop j
+                    
+                    //remove from active list 
+                    alignSeqs[i].active = 0;
+                    
+                    out << "ideal_seq_" << (i+1) << '\t' << alignSeqs[i].numIdentical << endl << chunk << endl;;
+                    
+                }//end if active i
+                if(i % 100 == 0)	{ m->mothurOut(toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)); m->mothurOutEndLine();	}
+            }
+        }else {
+            map<int, string> mapFile;
+            map<int, int> originalCount;
+            map<int, int>::iterator itCount;
+            for (int i = 0; i < numSeqs; i++) { mapFile[i] = ""; originalCount[i] = alignSeqs[i].numIdentical; }
+            
+            //think about running through twice...
+            for (int i = 0; i < numSeqs; i++) {
+                
+                //try to merge it into larger seqs
+                for (int j = i+1; j < numSeqs; j++) {
+                    
+                    if (m->control_pressed) { out.close(); return 0; }
+                    
+                    if (originalCount[j] > originalCount[i]) {  //this sequence is more abundant than I am
+                        //are you within "diff" bases
+                        int mismatch = calcMisMatches(alignSeqs[i].seq.getAligned(), alignSeqs[j].seq.getAligned());
+                        
+                        if (mismatch <= diffs) {
+                            //merge
+                            alignSeqs[j].names += ',' + alignSeqs[i].names;
+                            alignSeqs[j].numIdentical += alignSeqs[i].numIdentical;
+                            
+                            mapFile[j] = alignSeqs[i].seq.getName() + "\t" + toString(alignSeqs[i].numIdentical) + "\t" + toString(mismatch) + "\t" + alignSeqs[i].seq.getAligned() + "\n" + mapFile[i];
+                            alignSeqs[i].numIdentical = 0;
+                            originalCount.erase(i);
+                            mapFile[i] = "";
+                            count++;
+                            j+=numSeqs; //exit search, we merged this one in.
+                        }
+                    }//end abundance check
+                }//end for loop j
+                
+                if(i % 100 == 0)	{ m->mothurOut(toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)); m->mothurOutEndLine();	}
+            }
+            
+            for (int i = 0; i < numSeqs; i++) {
+                if (alignSeqs[i].numIdentical != 0) {
+                    out << "ideal_seq_" << (i+1) << '\t' << alignSeqs[i].numIdentical << endl  << alignSeqs[i].seq.getName() + "\t" + toString(alignSeqs[i].numIdentical) + "\t" + toString(0) + "\t" + alignSeqs[i].seq.getAligned() + "\n" << mapFile[i] << endl;
+                }
+            }
+            
+        }
 		out.close();
 		
 		if(numSeqs % 100 != 0)	{ m->mothurOut(toString(numSeqs) + "\t" + toString(numSeqs - count) + "\t" + toString(count)); m->mothurOutEndLine();	}	
@@ -851,13 +902,19 @@ void PreClusterCommand::readNameFile(){
 				
 		while (!in.eof()) {
 			in >> firstCol >> secondCol; m->gobble(in);
+            
+            for (int i = 0; i < firstCol.length(); i++) {
+                if (firstCol[i] == ':') { firstCol[i] = '_'; m->changedSeqNames = true; }
+            }
+            
+            int size = 1;
+            for (int i = 0; i < secondCol.length(); i++) {
+                if (secondCol[i] == ':') { secondCol[i] = '_'; m->changedSeqNames = true; }
+                else if(secondCol[i] == ','){	size++;	}
+            }
+            
 			names[firstCol] = secondCol;
-			int size = 1;
-
-			for(int i=0;i<secondCol.size();i++){
-				if(secondCol[i] == ','){	size++;	}
-			}
-			sizes[firstCol] = size;
+            sizes[firstCol] = size;
 		}
 		in.close();
 	}

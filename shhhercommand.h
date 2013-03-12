@@ -70,7 +70,7 @@ private:
     vector<string> flowFileVector;
 	
     vector<string> parseFlowFiles(string);
-    int driver(vector<string>, string, string, int, int);
+    int driver(vector<string>, string, string);
     int createProcesses(vector<string>);
     int getFlowData(string, vector<string>&, vector<int>&, vector<short>&, map<string, int>&, int&);
     int getUniques(int, int, vector<short>&, vector<int>&, vector<int>&, vector<int>&, vector<int>&, vector<int>&, vector<double>&, vector<short>&);

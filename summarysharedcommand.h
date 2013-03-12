@@ -112,6 +112,7 @@ struct summarySharedData {
 	unsigned long long end;
 	MothurOut* m;
 	string sumFile;
+    int count;
 	
 	summarySharedData(){}
 	summarySharedData(string sf, MothurOut* mout, unsigned long long st, unsigned long long en, vector<string> est, vector<SharedRAbundVector*> lu) {
@@ -121,6 +122,7 @@ struct summarySharedData {
 		end = en;
         Estimators = est;
         thisLookup = lu;
+        count=0;
 	}
 };
 /**************************************************************************************************/
@@ -225,7 +227,7 @@ static DWORD WINAPI MySummarySharedThreadFunction(LPVOID lpParam){
 		
 		vector<SharedRAbundVector*> subset;
 		for (int k = pDataArray->start; k < pDataArray->end; k++) { // pass cdd each set of groups to compare
-            
+            pDataArray->count++;
 			for (int l = 0; l < k; l++) {
 				
 				outputFileHandle << pDataArray->thisLookup[0]->getLabel() << '\t';

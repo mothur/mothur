@@ -46,7 +46,7 @@ vector<string> VennCommand::setParameters(){
 string VennCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The venn command parameters are list, shared, groups, calc, abund, nseqs, permute, fontsize and label.   shared, relabund, list, rabund or sabund is required unless you have a valid current file.\n";
+		helpString += "The venn command parameters are list, shared, groups, calc, abund, nseqs, permute, sharedotus, fontsize and label.   shared, relabund, list, rabund or sabund is required unless you have a valid current file.\n";
 		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like included in your venn diagram, you may only use a maximum of 4 groups.\n";
 		helpString += "The group names are separated by dashes. The label allows you to select what distance levels you would like a venn diagram created for, and are also separated by dashes.\n";
 		helpString += "The fontsize parameter allows you to adjust the font size of the picture created, default=24.\n";
@@ -58,6 +58,7 @@ string VennCommand::getHelpString(){
 		helpString += "The nseqs parameter will output the number of sequences represented by the otus in the picture, default=F.\n";
 		helpString += "If you have more than 4 groups, the permute parameter will find all possible combos of 4 of your groups and create pictures for them, default=F.\n";
 		helpString += "The only estimators available four 4 groups are sharedsobs and sharedchao.\n";
+        helpString += "The sharedotus parameter can be used with the sharedsobs calculator to get the names of the OTUs in each section of the venn diagram. Default=t.\n";
 		helpString += "The venn command outputs a .svg file for each calculator you specify at each distance you choose.\n";
 		helpString += "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n";
 		return helpString;

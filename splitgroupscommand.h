@@ -28,7 +28,7 @@ public:
 	~SplitGroupCommand() {}
 	
 	vector<string> setParameters();
-	string getCommandName()			{ return "split.group";				}
+	string getCommandName()			{ return "split.groups";				}
 	string getCommandCategory()		{ return "Sequence Processing";		}
 	
 	string getHelpString();	

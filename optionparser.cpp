@@ -116,6 +116,8 @@ map<string, string> OptionParser::getParameters() {
                         it->second = m->getDesignFile();
                     }else if (it->first == "sff") {
                         it->second = m->getSFFFile();
+                    }else if (it->first == "flow") {
+                            it->second = m->getFlowFile();
                     }else if (it->first == "oligos") {
                         it->second = m->getOligosFile();
                     }else if (it->first == "accnos") {

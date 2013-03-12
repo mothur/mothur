@@ -14,6 +14,7 @@ vector<string> ListOtuLabelsCommand::setParameters(){
 	try {
         CommandParameter pshared("shared", "InputTypes", "", "", "SharedRel", "SharedRel", "none","otulabels",false,false,true); parameters.push_back(pshared);
 		CommandParameter prelabund("relabund", "InputTypes", "", "", "SharedRel", "SharedRel", "none","otulabels",false,false); parameters.push_back(prelabund);
+        CommandParameter plist("list", "InputTypes", "", "", "SharedRel", "SharedRel", "none","otulabels",false,false); parameters.push_back(plist);
         CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
         //every command must have inputdir and outputdir.  This allows mothur users to redirect input and output files.
@@ -33,7 +34,7 @@ vector<string> ListOtuLabelsCommand::setParameters(){
 string ListOtuLabelsCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The list.otulabels lists otu labels from shared or relabund file. The results can be used by the get.otulabels to select specific otus with the output from classify.otu, otu.association, or corr.axes.\n";
+		helpString += "The list.otulabels lists otu labels from shared, relabund or list file. The results can be used by the get.otulabels to select specific otus with the output from classify.otu, otu.association, or corr.axes.\n";
 		helpString += "The list.otulabels parameters are: shared, relabund, label and groups.\n";
 		helpString += "The label parameter is used to analyze specific labels in your input.\n";
 		helpString += "The groups parameter allows you to specify which of the groups you would like analyzed.\n";
@@ -122,6 +123,14 @@ ListOtuLabelsCommand::ListOtuLabelsCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("list");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["list"] = inputDir + it->second;		}
+				}
             }
             
             vector<string> tempOutNames;
@@ -138,7 +147,13 @@ ListOtuLabelsCommand::ListOtuLabelsCommand(string option)  {
 			else if (relabundfile == "not found") { relabundfile = ""; }
 			else { inputFileName = relabundfile; format = "relabund"; m->setRelAbundFile(relabundfile); }
             
-            if ((relabundfile == "") && (sharedfile == "")) { 
+            listfile = validParameter.validFile(parameters, "list", true);
+			if (listfile == "not open") { abort = true; }
+			else if (listfile == "not found") { listfile = ""; }
+			else { inputFileName = listfile; format = "list"; m->setListFile(listfile); }
+
+            
+            if ((relabundfile == "") && (sharedfile == "") && (listfile== "")) { 
 				//is there are current file available for either of these?
 				//give priority to shared, then relabund
 				sharedfile = m->getSharedFile(); 
@@ -147,8 +162,12 @@ ListOtuLabelsCommand::ListOtuLabelsCommand(string option)  {
 					relabundfile = m->getRelAbundFile(); 
 					if (relabundfile != "") {  inputFileName = relabundfile; format="relabund"; m->mothurOut("Using " + relabundfile + " as input file for the relabund parameter."); m->mothurOutEndLine(); }
 					else { 
-						m->mothurOut("No valid current files. You must provide a shared or relabund."); m->mothurOutEndLine(); 
-						abort = true;
+                        listfile = m->getListFile();
+						if (listfile != "") {  inputFileName = listfile; format="list"; m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
+                        else { 
+                            m->mothurOut("No valid current files. You must provide a shared, list or relabund."); m->mothurOutEndLine(); 
+                            abort = true;
+                        }
 					}
 				}
 			}
@@ -261,7 +280,7 @@ int ListOtuLabelsCommand::execute(){
                 
                 for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
             }
-        }else {
+        }else if (format == "sharedfile") {
             
             vector<SharedRAbundVector*> lookup = input.getSharedRAbundVectors();
             string lastLabel = lookup[0]->getLabel();
@@ -337,6 +356,81 @@ int ListOtuLabelsCommand::execute(){
                 
                 for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
             }
+        }else {
+            ListVector* list = input.getListVector();
+            string lastLabel = list->getLabel();
+            
+            //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
+            set<string> processedLabels;
+            set<string> userLabels = labels;
+            
+            //as long as you are not at the end of the file or done wih the lines you want
+            while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+                
+                if (m->control_pressed) { delete list;  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); } return 0; }
+                
+                if(allLines == 1 || labels.count(list->getLabel()) == 1){			
+                    
+                    m->mothurOut(list->getLabel()); m->mothurOutEndLine();
+                    
+                    createList(list);
+                    
+                    processedLabels.insert(list->getLabel());
+                    userLabels.erase(list->getLabel());
+                }
+                
+                if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+                    string saveLabel = list->getLabel();
+                    
+                    delete list; 
+                    list = input.getListVector(lastLabel);
+                    m->mothurOut(list->getLabel()); m->mothurOutEndLine();
+                    
+                    createList(list);
+                    
+                    processedLabels.insert(list->getLabel());
+                    userLabels.erase(list->getLabel());
+                    
+                    //restore real lastlabel to save below
+                    list->setLabel(saveLabel);
+                }
+                
+                lastLabel = list->getLabel();
+                //prevent memory leak
+                delete list; list = NULL;
+                
+                if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); }  return 0; }
+                
+                //get next line to process
+                list = input.getListVector();				
+            }
+            
+            if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); }  return 0; }
+            
+            //output error messages about any remaining user labels
+            set<string>::iterator it;
+            bool needToRun = false;
+            for (it = userLabels.begin(); it != userLabels.end(); it++) {  
+                m->mothurOut("Your file does not include the label " + *it); 
+                if (processedLabels.count(lastLabel) != 1) {
+                    m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
+                    needToRun = true;
+                }else {
+                    m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
+                }
+            }
+            
+            //run last label if you need to
+            if (needToRun == true)  {
+                delete list;  
+                list = input.getListVector(lastLabel);
+                
+                m->mothurOut(list->getLabel()); m->mothurOutEndLine();
+                
+                createList(list);
+                
+                delete list;
+            }
         }
         
         if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { m->mothurRemove(outputNames[i]); }  return 0; }
@@ -374,7 +468,7 @@ int ListOtuLabelsCommand::createList(vector<SharedRAbundVector*>& lookup){
         return 0;
     }
 	catch(exception& e) {
-		m->errorOut(e, "ListOtuLabelsCommand", "createTable");
+		m->errorOut(e, "ListOtuLabelsCommand", "createList");
 		exit(1);
 	}
 }
@@ -398,7 +492,42 @@ int ListOtuLabelsCommand::createList(vector<SharedRAbundFloatVector*>& lookup){
         return 0;
     }
 	catch(exception& e) {
-		m->errorOut(e, "ListOtuLabelsCommand", "createTable");
+		m->errorOut(e, "ListOtuLabelsCommand", "createList");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+int ListOtuLabelsCommand::createList(ListVector*& list){
+	try {
+        map<string, string> variables; 
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputFileName));
+        variables["[distance]"] = list->getLabel();
+        string outputFileName = getOutputFileName("otulabels",variables);
+        outputNames.push_back(outputFileName);  outputTypes["accnos"].push_back(outputFileName);
+		ofstream out;
+		m->openOutputFile(outputFileName, out);
+        
+        string snumBins = toString(list->getNumBins());
+        for (int i = 0; i < list->getNumBins(); i++) {
+            if (m->control_pressed) { break; }
+            
+            string otuLabel = "Otu";
+            string sbinNumber = toString(i+1);
+            if (sbinNumber.length() < snumBins.length()) { 
+                int diff = snumBins.length() - sbinNumber.length();
+                for (int h = 0; h < diff; h++) { otuLabel += "0"; }
+            }
+            otuLabel += sbinNumber; 
+            
+            out << otuLabel << endl;
+        }
+
+        out.close();
+        
+        return 0;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "ListOtuLabelsCommand", "createList");
 		exit(1);
 	}
 }

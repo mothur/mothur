@@ -65,7 +65,9 @@ bool InteractEngine::getInput(){
 				if (pid == 0) {
 				
 			#endif
-			
+                    
+			if (mout->changedSeqNames) { mout->mothurOut("[WARNING]: your sequence names contained ':'.  I changed them to '_' to avoid problems in your downstream analysis.\n"); }
+                    
 			mout->mothurOutEndLine();
 			
 			input = getCommand();	
@@ -115,6 +117,7 @@ bool InteractEngine::getInput(){
 					//cout << pid << " is in execute " << commandName << endl;
 					#endif
 					//executes valid command
+                    mout->changedSeqNames = false;
 					mout->runParse = true;
 					mout->clearGroups();
 					mout->clearAllGroups();
@@ -276,7 +279,7 @@ bool BatchEngine::getInput(){
 			
 			
 			if (input[0] != '#') {
-				
+				if (mout->changedSeqNames) { mout->mothurOut("[WARNING]: your sequence names contained ':'.  I changed them to '_' to avoid problems in your downstream analysis.\n"); }
 				mout->mothurOutEndLine();
 				mout->mothurOut("mothur > " + input);
 				mout->mothurOutEndLine();
@@ -300,6 +303,7 @@ bool BatchEngine::getInput(){
 						if ((cFactory->MPIEnabled(commandName)) || (pid == 0)) {
 					#endif
 					//executes valid command
+                    mout->changedSeqNames = false;
 					mout->runParse = true;
 					mout->clearGroups();
 					mout->clearAllGroups();
@@ -413,6 +417,8 @@ bool ScriptEngine::getInput(){
 			input = getNextCommand(listOfCommands);	
 			
 			if (input == "") { input = "quit()"; }
+                    
+            if (mout->changedSeqNames) { mout->mothurOut("[WARNING]: your sequence names contained ':'.  I changed them to '_' to avoid problems in your downstream analysis.\n"); }
 			
 			if (mout->gui) {
 				if ((input.find("quit") != string::npos) || (input.find("set.logfile") != string::npos)) {}
@@ -468,6 +474,7 @@ bool ScriptEngine::getInput(){
 							//cout << pid << " is in execute" << endl;	
 					#endif
 					//executes valid command
+                    mout->changedSeqNames = false;
 					mout->runParse = true;
 					mout->clearGroups();
 					mout->clearAllGroups();

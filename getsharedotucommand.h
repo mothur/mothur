@@ -14,6 +14,8 @@
 #include "listvector.hpp"
 #include "sequence.hpp"
 #include "groupmap.h"
+#include "sharedrabundvector.h"
+#include "inputdata.h"
 
 //**********************************************************************************************************************
 class GetSharedOTUCommand : public Command {
@@ -44,7 +46,7 @@ class GetSharedOTUCommand : public Command {
 		GroupMap* groupMap;
 		
 		set<string> labels;
-		string fastafile, label, groups, listfile, groupfile, output, userGroups, outputDir, format;
+		string fastafile, label, groups, listfile, groupfile, sharedfile, output, userGroups, outputDir, format;
 		bool abort, allLines, unique;
 		vector<string> Groups;
 		map<string, string> groupFinder;
@@ -53,6 +55,8 @@ class GetSharedOTUCommand : public Command {
 		vector<string> outputNames;
 		
 		int process(ListVector*);
+        int process(vector<SharedRAbundVector*>&);
+        int runShared();
 		
 };
 //**********************************************************************************************************************

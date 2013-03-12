@@ -46,7 +46,7 @@ private:
 		linePair(int i, int j) : start(i), end(j) {}
 	};
 	
-	bool abort, hasName, hasCount;
+	bool abort, hasName, hasCount, dups;
 	string fastafile, groupfile, countfile, outputDir, namefile;
 	int processors, alignLength;
 	double cutoff, alpha, beta;

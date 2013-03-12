@@ -291,8 +291,8 @@ int IndicatorCommand::execute(){
             for (int i = 0; i < m->Treenames.size(); i++) { 
                 nameMap.insert(m->Treenames[i]); 
                 //sanity check - is this a group that is not in the sharedfile?
+                if (i == 0) { gps.insert("Group1"); }
 				if (designfile == "") {
-                    if (i == 0) { gps.insert("Group1"); }
 					if (!(m->inUsersGroups(m->Treenames[i], m->getAllGroups()))) {
 						m->mothurOut("[ERROR]: " + m->Treenames[i] + " is not a group in your shared or relabund file."); m->mothurOutEndLine();
 						mismatch = true;

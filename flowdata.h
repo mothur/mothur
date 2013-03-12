@@ -38,6 +38,7 @@ private:
 	string seqName, locationString, sequence, baseFlow;
 	int numFlows, maxFlows, endFlow;
 	vector<float> flowData;
+    string getSequenceName(ifstream&);
 };
 
 #endif

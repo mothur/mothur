@@ -170,7 +170,6 @@ inline bool compareIndexes(PDistCell left, PDistCell right){
 	return (left.index > right.index);	
 }
 //********************************************************************************************************************
-//sorts highest to lowest
 inline bool compareSpearman(spearmanRank left, spearmanRank right){
 	return (left.score < right.score);	
 } 
@@ -185,11 +184,7 @@ inline bool compareSeqPriorityNodes(seqPriorityNode left, seqPriorityNode right)
     }
     return false;	
 } 
-//********************************************************************************************************************
-//sorts lowest to highest
-inline bool compareSpearmanReverse(spearmanRank left, spearmanRank right){
-	return (left.score < right.score);	
-} 
+ 
 /************************************************************/
 //sorts lowest to highest
 inline bool compareDistLinePairs(distlinePair left, distlinePair right){

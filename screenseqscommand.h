@@ -43,30 +43,44 @@ private:
 
 	vector<linePair> lines;
 
-	int screenNameGroupFile(set<string>);
-	int screenGroupFile(set<string>);
-    int screenCountFile(set<string>);
-	int screenAlignReport(set<string>);
-	int screenQual(set<string>);
-	int screenTaxonomy(set<string>);
+	int screenNameGroupFile(map<string, string>);
+	int screenGroupFile(map<string, string>);
+    int screenCountFile(map<string, string>);
+	int screenAlignReport(map<string, string>&);
+	int screenQual(map<string, string>);
+	int screenTaxonomy(map<string, string>);
 	
-	int driver(linePair, string, string, string, set<string>&);
-	int createProcesses(string, string, string, set<string>&);
-	
+    int optimizeContigs();
+    int optimizeAlign();
+	int driver(linePair, string, string, string, map<string, string>&);
+	int createProcesses(string, string, string, map<string, string>&);
+    int screenSummary(map<string, string>&);
+    int screenContigs(map<string, string>&);
+    int runFastaScreening(map<string, string>&);
+    int screenFasta(map<string, string>&);
+    int screenReports(map<string, string>&);
+	int getSummary(vector<unsigned long long>&);
+	int createProcessesCreateSummary(vector<int>&, vector<int>&, vector<int>&, vector<int>&, vector<int>&, vector<int>&, string);
+	int driverCreateSummary(vector<int>&, vector<int>&, vector<int>&, vector<int>&, vector<int>&, vector<int>&, string, linePair);	
+	int getSummaryReport();
+    int driverContigsSummary(vector<int>&, vector<int>&, vector<int>&, vector<int>&, vector<int>&, linePair);
+    int createProcessesContigsSummary(vector<int>&, vector<int>&, vector<int>&, vector<int>&, vector<int>&, vector<linePair>);
+    int driverAlignSummary(vector<float>&, vector<float>&, vector<int>&, linePair);
+    int createProcessesAlignSummary(vector<float>&, vector<float>&, vector<int>&, vector<linePair>);
+    
 	#ifdef USE_MPI
-	int driverMPI(int, int, MPI_File&, MPI_File&, MPI_File&, vector<unsigned long long>&, set<string>&);
+	int driverMPI(int, int, MPI_File&, MPI_File&, MPI_File&, vector<unsigned long long>&, map<string, string>&);
 	#endif
 
 	bool abort;
-	string fastafile, namefile, groupfile, alignreport, outputDir, qualfile, taxonomy, countfile;
-	int startPos, endPos, maxAmbig, maxHomoP, minLength, maxLength, processors, criteria;
+	string fastafile, namefile, groupfile, alignreport, outputDir, qualfile, taxonomy, countfile, contigsreport, summaryfile;
+	int startPos, endPos, maxAmbig, maxHomoP, minLength, maxLength, processors, criteria, minOverlap, oStart, oEnd, mismatches, maxN, maxInsert;
+    float minSim, minScore;
 	vector<string> outputNames;
 	vector<string> optimize;
 	map<string, int> nameMap;
 	
-	int getSummary(vector<unsigned long long>&);
-	int createProcessesCreateSummary(vector<int>&, vector<int>&, vector<int>&, vector<int>&, vector<int>&, string);
-	int driverCreateSummary(vector<int>&, vector<int>&, vector<int>&, vector<int>&, vector<int>&, string, linePair);	
+    
 };
 
 /**************************************************************************************************/
@@ -79,7 +93,8 @@ struct sumData {
 	vector<int> seqLength; 
 	vector<int> ambigBases; 
 	vector<int> longHomoPolymer; 
-	string filename, namefile; 
+    vector<int> numNs;
+	string filename, namefile, countfile; 
 	unsigned long long start;
 	unsigned long long end;
 	int count;
@@ -88,9 +103,10 @@ struct sumData {
 	
 	
 	sumData(){}
-	sumData(string f, MothurOut* mout, unsigned long long st, unsigned long long en, string nf, map<string, int> nam) {
+	sumData(string f, MothurOut* mout, unsigned long long st, unsigned long long en, string nf, string cf, map<string, int> nam) {
 		filename = f;
         namefile = nf;
+        countfile = cf;
 		m = mout;
 		start = st;
 		end = en;
@@ -102,30 +118,91 @@ struct sumData {
 //custom data structure for threads to use.
 // This is passed by void pointer so it can be any data type
 // that can be passed using a single void pointer (LPVOID).
+struct contigsSumData {
+	vector<int> ostartPosition;
+	vector<int> oendPosition;
+	vector<int> oLength; 
+	vector<int> omismatches; 
+    vector<int> numNs;
+	string filename, namefile, countfile; 
+	unsigned long long start;
+	unsigned long long end;
+	int count;
+	MothurOut* m;
+	map<string, int> nameMap;
+	
+	
+	contigsSumData(){}
+	contigsSumData(string f, MothurOut* mout, unsigned long long st, unsigned long long en, string nf, string cf, map<string, int> nam) {
+		filename = f;
+        namefile = nf;
+        countfile = cf;
+		m = mout;
+		start = st;
+		end = en;
+		nameMap = nam;
+		count = 0;
+	}
+};
+/**************************************************************************************************/
+struct alignsData {
+	vector<float> sims;
+	vector<float> scores;
+	vector<int> inserts;
+	string filename, namefile, countfile; 
+	unsigned long long start;
+	unsigned long long end;
+	int count;
+	MothurOut* m;
+	map<string, int> nameMap;
+	
+	
+	alignsData(){}
+	alignsData(string f, MothurOut* mout, unsigned long long st, unsigned long long en, string nf, string cf, map<string, int> nam) {
+		filename = f;
+        namefile = nf;
+        countfile = cf;
+		m = mout;
+		start = st;
+		end = en;
+		nameMap = nam;
+		count = 0;
+	}
+};
+
+/**************************************************************************************************/
+//custom data structure for threads to use.
+// This is passed by void pointer so it can be any data type
+// that can be passed using a single void pointer (LPVOID).
 struct sumScreenData {
-    int startPos, endPos, maxAmbig, maxHomoP, minLength, maxLength;
+    int startPos, endPos, maxAmbig, maxHomoP, minLength, maxLength, maxN;
 	unsigned long long start;
 	unsigned long long end;
 	int count;
 	MothurOut* m;
 	string goodFName, badAccnosFName, filename;
-    set<string> badSeqNames;
+    map<string, string> badSeqNames;
+    string summaryfile, contigsreport;
 	
 	
 	sumScreenData(){}
-	sumScreenData(int s, int e, int a, int h, int minl, int maxl, string f, MothurOut* mout, unsigned long long st, unsigned long long en, string gf, string bf) {
+	sumScreenData(int s, int e, int a, int h, int minl, int maxl, int mn, map<string, string> bs, string f, string sum, string cont, MothurOut* mout, unsigned long long st, unsigned long long en, string gf, string bf) {
 		startPos = s;
 		endPos = e;
 		minLength = minl;
         maxLength = maxl;
 		maxAmbig = a;
 		maxHomoP = h;
+        maxN = mn;
 		filename = f;
         goodFName = gf;
         badAccnosFName = bf;
 		m = mout;
 		start = st;
 		end = en;
+        summaryfile = sum;
+        contigsreport = cont;
+        badSeqNames = bs;
 		count = 0;
 	}
 };
@@ -149,9 +226,11 @@ static DWORD WINAPI MySumThreadFunction(LPVOID lpParam){
 			in.seekg(pDataArray->start-1); pDataArray->m->gobble(in); 
 		}
 		
-		pDataArray->count = pDataArray->end;
+		
 		for(int i = 0; i < pDataArray->end; i++){ //end is the number of sequences to process
 			
+            pDataArray->count++;
+            
 			if (pDataArray->m->control_pressed) { in.close();  pDataArray->count = 1; return 1; }
 			
 			Sequence current(in); pDataArray->m->gobble(in); 
@@ -159,7 +238,7 @@ static DWORD WINAPI MySumThreadFunction(LPVOID lpParam){
 			if (current.getName() != "") {
 				
 				int num = 1;
-				if (pDataArray->namefile != "") {
+				if ((pDataArray->namefile != "") || (pDataArray->countfile !="")){
 					//make sure this sequence is in the namefile, else error 
 					map<string, int>::iterator it = pDataArray->nameMap.find(current.getName());
 					
@@ -168,12 +247,14 @@ static DWORD WINAPI MySumThreadFunction(LPVOID lpParam){
 				}
 				
 				//for each sequence this sequence represents
+                int numns = current.getNumNs();
 				for (int i = 0; i < num; i++) {
 					pDataArray->startPosition.push_back(current.getStartPos());
 					pDataArray->endPosition.push_back(current.getEndPos());
 					pDataArray->seqLength.push_back(current.getNumBases());
 					pDataArray->ambigBases.push_back(current.getAmbigBases());
 					pDataArray->longHomoPolymer.push_back(current.getLongHomoPolymer());
+                    pDataArray->numNs.push_back(numns);
 				}
             }
 		}
@@ -190,7 +271,124 @@ static DWORD WINAPI MySumThreadFunction(LPVOID lpParam){
 } 
 
 /**************************************************************************************************/
+static DWORD WINAPI MyContigsSumThreadFunction(LPVOID lpParam){ 
+	contigsSumData* pDataArray;
+	pDataArray = (contigsSumData*)lpParam;
+	
+	try {
+        string name;
+        //Name	Length	Overlap_Length	Overlap_Start	Overlap_End	MisMatches	Num_Ns
+        int length, OLength, thisOStart, thisOEnd, numMisMatches, numns;
+        
+		ifstream in;
+		pDataArray->m->openInputFile(pDataArray->filename, in);
+        
+		//print header if you are process 0
+		if ((pDataArray->start == 0) || (pDataArray->start == 1)) {
+			in.seekg(0);  pDataArray->m->getline(in); pDataArray->m->gobble(in);
+		}else { //this accounts for the difference in line endings. 
+			in.seekg(pDataArray->start-1); pDataArray->m->gobble(in); 
+		}
+		
+		
+		for(int i = 0; i < pDataArray->end; i++){ //end is the number of sequences to process
+            
+            pDataArray->count++;
+            
+			if (pDataArray->m->control_pressed) { in.close();  pDataArray->count = 1; return 1; }
+			
+            //seqname	start	end	nbases	ambigs	polymer	numSeqs
+            in >> name >> length >> OLength >> thisOStart >> thisOEnd >> numMisMatches >> numns; pDataArray->m->gobble(in);
+            
+            int num = 1;
+            if ((pDataArray->namefile != "") || (pDataArray->countfile !="")){
+                //make sure this sequence is in the namefile, else error 
+                map<string, int>::iterator it = pDataArray->nameMap.find(name);
+                
+                if (it == pDataArray->nameMap.end()) { pDataArray->m->mothurOut("[ERROR]: " + name + " is not in your namefile, please correct."); pDataArray->m->mothurOutEndLine(); pDataArray->m->control_pressed = true; }
+                else { num = it->second; }
+            }
+            
+            //for each sequence this sequence represents
+            for (int i = 0; i < num; i++) {
+                pDataArray->ostartPosition.push_back(thisOStart);
+                pDataArray->oendPosition.push_back(thisOEnd);
+                pDataArray->oLength.push_back(OLength);
+                pDataArray->omismatches.push_back(numMisMatches);
+                pDataArray->numNs.push_back(numns);
+            }
+		}
+		
+		in.close();
+		
+		return 0;
+		
+	}
+	catch(exception& e) {
+		pDataArray->m->errorOut(e, "ScreenSeqsCommand", "MyContigsThreadFunction");
+		exit(1);
+	}
+} 
+/**************************************************************************************************/
+static DWORD WINAPI MyAlignsThreadFunction(LPVOID lpParam){ 
+	alignsData* pDataArray;
+	pDataArray = (alignsData*)lpParam;
+	
+	try {
+        
+        string name, TemplateName, SearchMethod, AlignmentMethod;
+        //QueryName	QueryLength	TemplateName	TemplateLength	SearchMethod	SearchScore	AlignmentMethod	QueryStart	QueryEnd	TemplateStart	TemplateEnd	PairwiseAlignmentLength	GapsInQuery	GapsInTemplate	LongestInsert	SimBtwnQuery&Template
+        //checking for minScore, maxInsert, minSim
+        int length, TemplateLength,	 QueryStart,	QueryEnd,	TemplateStart,	TemplateEnd,	PairwiseAlignmentLength,	GapsInQuery,	GapsInTemplate,	LongestInsert;
+        float SearchScore, SimBtwnQueryTemplate;
+        
+        ifstream in;
+		pDataArray->m->openInputFile(pDataArray->filename, in);
+        
+		//print header if you are process 0
+		if ((pDataArray->start == 0) || (pDataArray->start == 1)) {
+			in.seekg(0);  pDataArray->m->getline(in); pDataArray->m->gobble(in);
+		}else { //this accounts for the difference in line endings. 
+			in.seekg(pDataArray->start-1); pDataArray->m->gobble(in); 
+		}
+		
+		for(int i = 0; i < pDataArray->end; i++){ //end is the number of sequences to process
+            
+            pDataArray->count++;
+            
+			if (pDataArray->m->control_pressed) { in.close();  pDataArray->count = 1; return 1; }
 
+            in >> name >> length >> TemplateName >> TemplateLength >> SearchMethod >> SearchScore >> AlignmentMethod >> QueryStart >> QueryEnd >> TemplateStart >> TemplateEnd >> PairwiseAlignmentLength >> GapsInQuery >> GapsInTemplate >> LongestInsert >> SimBtwnQueryTemplate; pDataArray->m->gobble(in);
+            cout << i << '\t' << name << endl;
+            int num = 1;
+            if ((pDataArray->namefile != "") || (pDataArray->countfile !="")){
+                //make sure this sequence is in the namefile, else error 
+                map<string, int>::iterator it = pDataArray->nameMap.find(name);
+                
+                if (it == pDataArray->nameMap.end()) { pDataArray->m->mothurOut("[ERROR]: " + name + " is not in your namefile, please correct."); pDataArray->m->mothurOutEndLine(); pDataArray->m->control_pressed = true; }
+                else { num = it->second; }
+            }
+            
+            //for each sequence this sequence represents
+            for (int i = 0; i < num; i++) {
+                pDataArray->sims.push_back(SimBtwnQueryTemplate);
+                pDataArray->scores.push_back(SearchScore);
+                pDataArray->inserts.push_back(LongestInsert);
+            }
+		}
+		
+		in.close();
+		
+		return 0;
+        
+    }
+	catch(exception& e) {
+		pDataArray->m->errorOut(e, "ScreenSeqsCommand", "MyAlignsThreadFunction");
+		exit(1);
+	}
+} 
+
+/**************************************************************************************************/
 static DWORD WINAPI MySumScreenThreadFunction(LPVOID lpParam){ 
 	sumScreenData* pDataArray;
 	pDataArray = (sumScreenData*)lpParam;
@@ -212,29 +410,41 @@ static DWORD WINAPI MySumScreenThreadFunction(LPVOID lpParam){
 		}else { //this accounts for the difference in line endings. 
 			in.seekg(pDataArray->start-1); pDataArray->m->gobble(in); 
 		}
-		
-		pDataArray->count = pDataArray->end;
+        
 		for(int i = 0; i < pDataArray->end; i++){ //end is the number of sequences to process
 			
+            pDataArray->count++;
+            
 			if (pDataArray->m->control_pressed) { in.close(); badAccnosFile.close(); goodFile.close(); pDataArray->count = 1; return 1; }
 			
 			Sequence currSeq(in); pDataArray->m->gobble(in); 
 			
 			if (currSeq.getName() != "") {
 				bool goodSeq = 1;		//	innocent until proven guilty
-				if(goodSeq == 1 && pDataArray->startPos != -1 && pDataArray->startPos < currSeq.getStartPos())			{	goodSeq = 0;	}
-				if(goodSeq == 1 && pDataArray->endPos != -1 && pDataArray->endPos > currSeq.getEndPos())				{	goodSeq = 0;	}
-				if(goodSeq == 1 && pDataArray->maxAmbig != -1 && pDataArray->maxAmbig <	currSeq.getAmbigBases())		{	goodSeq = 0;	}
-				if(goodSeq == 1 && pDataArray->maxHomoP != -1 && pDataArray->maxHomoP < currSeq.getLongHomoPolymer())	{	goodSeq = 0;	}
-				if(goodSeq == 1 && pDataArray->minLength != -1 && pDataArray->minLength > currSeq.getNumBases())		{	goodSeq = 0;	}
-				if(goodSeq == 1 && pDataArray->maxLength != -1 && pDataArray->maxLength < currSeq.getNumBases())		{	goodSeq = 0;	}
+                string trashCode = "";
+                //have the report files found you bad
+                map<string, string>::iterator it = pDataArray->badSeqNames.find(currSeq.getName());
+                if (it != pDataArray->badSeqNames.end()) { goodSeq = 0;  trashCode = it->second; } //found it 
+                
+                if (pDataArray->summaryfile == "") {
+                    if(pDataArray->startPos != -1 && pDataArray->startPos < currSeq.getStartPos())			{	goodSeq = 0;	trashCode += "start|"; }
+                    if(pDataArray->endPos != -1 && pDataArray->endPos > currSeq.getEndPos())				{	goodSeq = 0;	trashCode += "end|"; }
+                    if(pDataArray->maxAmbig != -1 && pDataArray->maxAmbig <	currSeq.getAmbigBases())		{	goodSeq = 0;	trashCode += "ambig|"; }
+                    if(pDataArray->maxHomoP != -1 && pDataArray->maxHomoP < currSeq.getLongHomoPolymer())	{	goodSeq = 0;	trashCode += "homop|"; }
+                    if(pDataArray->minLength != -1 && pDataArray->minLength > currSeq.getNumBases())		{	goodSeq = 0;	trashCode += "<length|"; }
+                    if(pDataArray->maxLength != -1 && pDataArray->maxLength < currSeq.getNumBases())		{	goodSeq = 0;	trashCode += ">length|"; }
+                }
+                if (pDataArray->contigsreport == "") { //contigs report includes this so no need to check again
+                    if(pDataArray->maxN != -1 && pDataArray->maxN < currSeq.getNumNs())                     {	goodSeq = 0;	trashCode += "n|"; }
+                }
 				
+                
 				if(goodSeq == 1){
 					currSeq.printSequence(goodFile);	
 				}
 				else{
-					badAccnosFile << currSeq.getName() << endl;
-					pDataArray->badSeqNames.insert(currSeq.getName());
+					badAccnosFile << currSeq.getName() << '\t' << trashCode.substr(0, trashCode.length()-1) << endl;
+					pDataArray->badSeqNames[currSeq.getName()] = trashCode;
 				}
     
 			}		

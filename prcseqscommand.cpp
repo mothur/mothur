@@ -21,6 +21,8 @@ vector<string> PcrSeqsCommand::setParameters(){
 		CommandParameter pstart("start", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(pstart);
 		CommandParameter pend("end", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(pend);
  		CommandParameter pnomatch("nomatch", "Multiple", "reject-keep", "reject", "", "", "","",false,false); parameters.push_back(pnomatch);
+        CommandParameter ppdiffs("pdiffs", "Number", "", "0", "", "", "","",false,false,true); parameters.push_back(ppdiffs);
+
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
 		CommandParameter pkeepprimer("keepprimer", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pkeepprimer);
         CommandParameter pkeepdots("keepdots", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pkeepdots);
@@ -41,7 +43,7 @@ string PcrSeqsCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The pcr.seqs command reads a fasta file.\n";
-        helpString += "The pcr.seqs command parameters are fasta, oligos, name, group, count, taxonomy, ecoli, start, end, nomatch, processors, keepprimer and keepdots.\n";
+        helpString += "The pcr.seqs command parameters are fasta, oligos, name, group, count, taxonomy, ecoli, start, end, nomatch, pdiffs, processors, keepprimer and keepdots.\n";
 		helpString += "The ecoli parameter is used to provide a fasta file containing a single reference sequence (e.g. for e. coli) this must be aligned. Mothur will trim to the start and end positions of the reference sequence.\n";
         helpString += "The start parameter allows you to provide a starting position to trim to.\n";
         helpString += "The end parameter allows you to provide a ending position to trim from.\n";
@@ -49,6 +51,7 @@ string PcrSeqsCommand::getHelpString(){
         helpString += "The processors parameter allows you to use multiple processors.\n";
         helpString += "The keepprimer parameter allows you to keep the primer, default=false.\n";
         helpString += "The keepdots parameter allows you to keep the leading and trailing .'s, default=true.\n";
+        helpString += "The pdiffs parameter is used to specify the number of differences allowed in the primer. The default is 0.\n";
 		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n";
 		helpString += "For more details please check out the wiki http://www.mothur.org/wiki/Pcr.seqs .\n";
 		return helpString;
@@ -262,6 +265,9 @@ PcrSeqsCommand::PcrSeqsCommand(string option)  {
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
 			m->mothurConvert(temp, processors); 
+            
+            temp = validParameter.validFile(parameters, "pdiffs", false);		if (temp == "not found") { temp = "0"; }
+			m->mothurConvert(temp, pdiffs);
 			
             nomatch = validParameter.validFile(parameters, "nomatch", false);	if (nomatch == "not found") { nomatch = "reject"; }
 			
@@ -319,7 +325,7 @@ int PcrSeqsCommand::execute(){
 		
 		
         length = 0;
-		if(oligosfile != ""){    readOligos();     }  if (m->control_pressed) {  return 0; }
+		if(oligosfile != ""){    readOligos();     if (m->debug) { m->mothurOut("[DEBUG]: read oligos file. numprimers = " + toString(primers.size()) + ", revprimers = " + toString(revPrimer.size()) + ".\n"); } }  if (m->control_pressed) {  return 0; }
         if(ecolifile != "") {    readEcoli();      }  if (m->control_pressed) {  return 0; }
         
         vector<unsigned long long> positions; 
@@ -499,7 +505,7 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
             if (i!=0) {extension += toString(i) + ".temp"; processIDS.push_back(i); }
             
 			// Allocate memory for thread data.
-			pcrData* tempPcr = new pcrData(filename, goodFileName+extension, badFileName+extension, m, oligosfile, ecolifile, primers, revPrimer, nomatch, keepprimer, keepdots, start, end, length, lines[i].start, lines[i].end);
+			pcrData* tempPcr = new pcrData(filename, goodFileName+extension, badFileName+extension, m, oligosfile, ecolifile, primers, revPrimer, nomatch, keepprimer, keepdots, start, end, length, pdiffs, lines[i].start, lines[i].end);
 			pDataArray.push_back(tempPcr);
 			
 			//default security attributes, thread function name, argument to thread function, use default creation flags, returns the thread identifier
@@ -516,6 +522,9 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
 		//Close all thread handles and free memory allocations.
 		for(int i=0; i < pDataArray.size(); i++){
 			num += pDataArray[i]->count;
+            if (pDataArray[i]->count != pDataArray[i]->fend) {
+                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->fend) + " sequences assigned to it, quitting. \n"); m->control_pressed = true; 
+            }
             for (set<string>::iterator it = pDataArray[i]->badSeqNames.begin(); it != pDataArray[i]->badSeqNames.end(); it++) {	badSeqNames.insert(*it);       }
 			CloseHandle(hThreadArray[i]);
 			delete pDataArray[i];
@@ -558,6 +567,10 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
 		int count = 0;
         set<int> lengths;
         
+        //pdiffs, bdiffs, primers, barcodes, revPrimers
+        map<string, int> faked;
+        TrimOligos trim(pdiffs, 0, primers, faked, revPrimer);
+        
 		while (!done) {
             
 			if (m->control_pressed) {  break; }
@@ -567,6 +580,8 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
             string trashCode = "";
 			if (currSeq.getName() != "") {
                 
+                if (m->debug) { m->mothurOut("[DEBUG]: seq name = " + currSeq.getName() + ".\n"); } 
+                
                 bool goodSeq = true;
                 if (oligosfile != "") {
                     map<int, int> mapAligned;
@@ -575,7 +590,7 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
                     //process primers
                     if (primers.size() != 0) {
                         int primerStart = 0; int primerEnd = 0;
-                        bool good = findForward(currSeq, primerStart, primerEnd);
+                        bool good = trim.findForward(currSeq, primerStart, primerEnd);
                         
                         if(!good){	if (nomatch == "reject") { goodSeq = false; } trashCode += "f";	}
                         else{
@@ -587,8 +602,9 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
                                 } 
                                 else                {  
                                     if (keepdots)   { currSeq.filterToPos(mapAligned[primerStart]);  }
-                                    else            { currSeq.setAligned(currSeq.getAligned().substr(mapAligned[primerStart]));                                              }
+                                    else            { currSeq.setAligned(currSeq.getAligned().substr(mapAligned[primerStart]));                                             }
                                 }
+                                isAligned(currSeq.getAligned(), mapAligned);
                             }else { 
                                 if (!keepprimer)    { currSeq.setAligned(currSeq.getUnaligned().substr(primerEnd)); } 
                                 else                { currSeq.setAligned(currSeq.getUnaligned().substr(primerStart)); } 
@@ -599,10 +615,10 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
                     //process reverse primers
                     if (revPrimer.size() != 0) {
                         int primerStart = 0; int primerEnd = 0;
-                        bool good = findReverse(currSeq, primerStart, primerEnd);
+                        bool good = trim.findReverse(currSeq, primerStart, primerEnd);
                         if(!good){	if (nomatch == "reject") { goodSeq = false; } trashCode += "r";	}
                         else{ 
-                            //are you aligned
+                              //are you aligned
                             if (aligned) { 
                                 if (!keepprimer)    {  
                                     if (keepdots)   { currSeq.filterFromPos(mapAligned[primerStart]); }
@@ -697,75 +713,9 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
 	}
 }
 //********************************************************************/
-bool PcrSeqsCommand::findForward(Sequence& seq, int& primerStart, int& primerEnd){
-	try {
-		
-		string rawSequence = seq.getUnaligned();
-		
-		for(int j=0;j<primers.size();j++){
-			string oligo = primers[j];
-			
-			if(rawSequence.length() < oligo.length()) {  break;  }
-			
-			//search for primer
-            int olength = oligo.length();
-            for (int j = 0; j < rawSequence.length()-olength; j++){
-                if (m->control_pressed) {  primerStart = 0; primerEnd = 0; return false; }
-                string rawChunk = rawSequence.substr(j, olength);
-                if(compareDNASeq(oligo, rawChunk)) {
-                    primerStart = j;
-                    primerEnd = primerStart + olength;
-                    return true;
-                }
-                
-            }
-        }	
-		
-        primerStart = 0; primerEnd = 0;
-		return false;
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "TrimOligos", "stripForward");
-		exit(1);
-	}
-}
-//******************************************************************/
-bool PcrSeqsCommand::findReverse(Sequence& seq, int& primerStart, int& primerEnd){
-	try {
-		
-		string rawSequence = seq.getUnaligned();
-		
-		for(int i=0;i<revPrimer.size();i++){
-			string oligo = revPrimer[i];
-			if(rawSequence.length() < oligo.length()) {  break;  }
-			
-			//search for primer
-            int olength = oligo.length();
-            for (int j = rawSequence.length()-olength; j >= 0; j--){
-                 if (m->control_pressed) {  primerStart = 0; primerEnd = 0; return false; }
-                string rawChunk = rawSequence.substr(j, olength);
-            
-                if(compareDNASeq(oligo, rawChunk)) {
-                    primerStart = j;
-                    primerEnd = primerStart + olength;
-                    return true;
-                }
-                
-            }
-		}	
-		
-        primerStart = 0; primerEnd = 0;
-		return false;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PcrSeqsCommand", "findReverse");
-		exit(1);
-	}
-}
-//********************************************************************/
 bool PcrSeqsCommand::isAligned(string seq, map<int, int>& aligned){
 	try {
+        aligned.clear();
         bool isAligned = false;
         
         int countBases = 0;
@@ -829,6 +779,7 @@ bool PcrSeqsCommand::readOligos(){
 		m->openInputFile(oligosfile, inOligos);
 		
 		string type, oligo, group;
+        int primerCount = 0;
 		
 		while(!inOligos.eof()){
             
@@ -856,7 +807,7 @@ bool PcrSeqsCommand::readOligos(){
                         if (c == 10 || c == 13){	break;	} 
                         else if (c == 32 || c == 9){;} //space or tab
 					} 
-					primers.push_back(oligo);
+					primers[oligo] = primerCount; primerCount++;
                 }else if(type == "REVERSE"){
                     string oligoRC = reverseOligo(oligo);
                     revPrimer.push_back(oligoRC);
@@ -932,43 +883,6 @@ int PcrSeqsCommand::writeAccnos(set<string> badNames){
 		exit(1);
 	}
     
-}
-//******************************************************************/
-bool PcrSeqsCommand::compareDNASeq(string oligo, string seq){
-	try {
-		bool success = 1;
-		int length = oligo.length();
-		
-		for(int i=0;i<length;i++){
-			
-			if(oligo[i] != seq[i]){
-				if(oligo[i] == 'A' || oligo[i] == 'T' || oligo[i] == 'G' || oligo[i] == 'C')	{	success = 0; 	}
-				else if((oligo[i] == 'N' || oligo[i] == 'I') && (seq[i] == 'N'))				{	success = 0;	}
-				else if(oligo[i] == 'R' && (seq[i] != 'A' && seq[i] != 'G'))					{	success = 0;	}
-				else if(oligo[i] == 'Y' && (seq[i] != 'C' && seq[i] != 'T'))					{	success = 0;	}
-				else if(oligo[i] == 'M' && (seq[i] != 'C' && seq[i] != 'A'))					{	success = 0;	}
-				else if(oligo[i] == 'K' && (seq[i] != 'T' && seq[i] != 'G'))					{	success = 0;	}
-				else if(oligo[i] == 'W' && (seq[i] != 'T' && seq[i] != 'A'))					{	success = 0;	}
-				else if(oligo[i] == 'S' && (seq[i] != 'C' && seq[i] != 'G'))					{	success = 0;	}
-				else if(oligo[i] == 'B' && (seq[i] != 'C' && seq[i] != 'T' && seq[i] != 'G'))	{	success = 0;	}
-				else if(oligo[i] == 'D' && (seq[i] != 'A' && seq[i] != 'T' && seq[i] != 'G'))	{	success = 0;	}
-				else if(oligo[i] == 'H' && (seq[i] != 'A' && seq[i] != 'T' && seq[i] != 'C'))	{	success = 0;	}
-				else if(oligo[i] == 'V' && (seq[i] != 'A' && seq[i] != 'C' && seq[i] != 'G'))	{	success = 0;	}			
-				
-				if(success == 0)	{	break;	 }
-			}
-			else{
-				success = 1;
-			}
-		}
-		
-		return success;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PcrSeqsCommand", "compareDNASeq");
-		exit(1);
-	}
-	
 }
 //***************************************************************************************************************
 int PcrSeqsCommand::readName(set<string>& names){
