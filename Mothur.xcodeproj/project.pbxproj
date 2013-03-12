@@ -31,6 +31,7 @@
 		A727864412E9E28C00F86ABA /* removerarecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A727864312E9E28C00F86ABA /* removerarecommand.cpp */; };
 		A7386C231619CCE600651424 /* classifysharedcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7386C211619CCE600651424 /* classifysharedcommand.cpp */; };
 		A7386C251619E52300651424 /* abstractdecisiontree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7386C241619E52200651424 /* abstractdecisiontree.cpp */; };
+		A7386C27161A0F9D00651424 /* abstractrandomforest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7386C26161A0F9C00651424 /* abstractrandomforest.cpp */; };
 		A7386C29161A110800651424 /* decisiontree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7386C28161A110700651424 /* decisiontree.cpp */; };
 		A73901081588C40900ED2ED6 /* loadlogfilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A73901071588C40900ED2ED6 /* loadlogfilecommand.cpp */; };
 		A73DDBBA13C4A0D1006AAE38 /* clearmemorycommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A73DDBB913C4A0D1006AAE38 /* clearmemorycommand.cpp */; };
@@ -393,7 +394,7 @@
 		834D9D5B1656DEC700E7FAB9 /* regularizeddecisiontree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = regularizeddecisiontree.h; sourceTree = "<group>"; };
 		83F25B0A163B031200ABE73D /* forest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = forest.cpp; sourceTree = "<group>"; };
 		83F25B0B163B031200ABE73D /* forest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = forest.h; sourceTree = "<group>"; };
-		8DD76FB20486AB0100D96B5E /* mothur */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = mothur; path = Mothur; sourceTree = BUILT_PRODUCTS_DIR; };
+		8DD76FB20486AB0100D96B5E /* mothur */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = mothur; sourceTree = BUILT_PRODUCTS_DIR; };
 		A70056E5156A93D000924A2D /* getotulabelscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getotulabelscommand.cpp; sourceTree = "<group>"; };
 		A70056E8156A93E300924A2D /* getotulabelscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getotulabelscommand.h; sourceTree = "<group>"; };
 		A70056E9156AB6D400924A2D /* removeotulabelscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = removeotulabelscommand.h; sourceTree = "<group>"; };
@@ -424,6 +425,7 @@
 		A727864212E9E28C00F86ABA /* removerarecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = removerarecommand.h; sourceTree = "<group>"; };
 		A727864312E9E28C00F86ABA /* removerarecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = removerarecommand.cpp; sourceTree = "<group>"; };
 		A7386C1B1619CACB00651424 /* abstractdecisiontree.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = abstractdecisiontree.hpp; sourceTree = "<group>"; };
+		A7386C1C1619CACB00651424 /* abstractrandomforest.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = abstractrandomforest.hpp; sourceTree = "<group>"; };
 		A7386C1D1619CACB00651424 /* decisiontree.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = decisiontree.hpp; sourceTree = "<group>"; };
 		A7386C1E1619CACB00651424 /* macros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = macros.h; sourceTree = "<group>"; };
 		A7386C1F1619CACB00651424 /* randomforest.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = randomforest.hpp; sourceTree = "<group>"; };
@@ -431,6 +433,7 @@
 		A7386C211619CCE600651424 /* classifysharedcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = classifysharedcommand.cpp; sourceTree = "<group>"; };
 		A7386C221619CCE600651424 /* classifysharedcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = classifysharedcommand.h; sourceTree = "<group>"; };
 		A7386C241619E52200651424 /* abstractdecisiontree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = abstractdecisiontree.cpp; sourceTree = "<group>"; };
+		A7386C26161A0F9C00651424 /* abstractrandomforest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = abstractrandomforest.cpp; sourceTree = "<group>"; };
 		A7386C28161A110700651424 /* decisiontree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = decisiontree.cpp; sourceTree = "<group>"; };
 		A73901051588C3EF00ED2ED6 /* loadlogfilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = loadlogfilecommand.h; sourceTree = "<group>"; };
 		A73901071588C40900ED2ED6 /* loadlogfilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = loadlogfilecommand.cpp; sourceTree = "<group>"; };
@@ -1222,6 +1225,8 @@
 			children = (
 				A7386C1B1619CACB00651424 /* abstractdecisiontree.hpp */,
 				A7386C241619E52200651424 /* abstractdecisiontree.cpp */,
+				A7386C1C1619CACB00651424 /* abstractrandomforest.hpp */,
+				A7386C26161A0F9C00651424 /* abstractrandomforest.cpp */,
 				A7386C1D1619CACB00651424 /* decisiontree.hpp */,
 				A7386C28161A110700651424 /* decisiontree.cpp */,
 				A7386C1E1619CACB00651424 /* macros.h */,
@@ -2286,6 +2291,7 @@
 				A7C7DAB915DA758B0059B0CF /* sffmultiplecommand.cpp in Sources */,
 				A7386C231619CCE600651424 /* classifysharedcommand.cpp in Sources */,
 				A7386C251619E52300651424 /* abstractdecisiontree.cpp in Sources */,
+				A7386C27161A0F9D00651424 /* abstractrandomforest.cpp in Sources */,
 				A7386C29161A110800651424 /* decisiontree.cpp in Sources */,
 				A77E1938161B201E00DB1A2A /* randomforest.cpp in Sources */,
 				A77E193B161B289600DB1A2A /* rftreenode.cpp in Sources */,
@@ -2318,6 +2324,7 @@
 				INSTALL_PATH = /usr/local/bin;
 				PRODUCT_NAME = Mothur;
 				SDKROOT = macosx;
+
 			};
 			name = Debug;
 		};

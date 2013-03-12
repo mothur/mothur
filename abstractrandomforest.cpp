@@ -1,37 +1,36 @@
 //
-//  forest.cpp
+//  abstractrandomforest.cpp
 //  Mothur
 //
-//  Created by Kathryn Iverson on 10/26/12.
+//  Created by Sarah Westcott on 10/1/12.
 //  Copyright (c) 2012 Schloss Lab. All rights reserved.
 //
 
-#include "forest.h"
+#include "abstractrandomforest.hpp"
 
 /***********************************************************************/
-Forest::Forest(const std::vector < std::vector<int> > dataSet,
-                                           const int numDecisionTrees,
-                                           const string treeSplitCriterion = "informationGain")
-: dataSet(dataSet),
+AbstractRandomForest::AbstractRandomForest(const std::vector < std::vector<int> > dataSet, 
+                     const int numDecisionTrees, 
+                     const string treeSplitCriterion = "informationGain")
+: dataSet(dataSet), 
 numDecisionTrees(numDecisionTrees),
 numSamples((int)dataSet.size()),
 numFeatures((int)(dataSet[0].size() - 1)),
+globalDiscardedFeatureIndices(getGlobalDiscardedFeatureIndices()),
 globalVariableImportanceList(numFeatures, 0),
 treeSplitCriterion(treeSplitCriterion) {
     m = MothurOut::getInstance();
-    globalDiscardedFeatureIndices = getGlobalDiscardedFeatureIndices();
     // TODO: double check if the implemenatation of 'globalOutOfBagEstimates' is correct
 }
 
 /***********************************************************************/
 
-vector<int> Forest::getGlobalDiscardedFeatureIndices() {
+vector<int> AbstractRandomForest::getGlobalDiscardedFeatureIndices() {
     try {
-        //vector<int> globalDiscardedFeatureIndices;
-        //globalDiscardedFeatureIndices.push_back(1);
+        vector<int> globalDiscardedFeatureIndices;
         
         // calculate feature vectors
-        vector< vector<int> > featureVectors(numFeatures, vector<int>(numSamples, 0) );
+        vector< vector<int> > featureVectors(numFeatures, vector<int>(numSamples, 0));
         for (int i = 0; i < numSamples; i++) {
             if (m->control_pressed) { return globalDiscardedFeatureIndices; }
             for (int j = 0; j < numFeatures; j++) { featureVectors[j][i] = dataSet[i][j]; }
@@ -51,10 +50,9 @@ vector<int> Forest::getGlobalDiscardedFeatureIndices() {
         return globalDiscardedFeatureIndices;
     }
 	catch(exception& e) {
-		m->errorOut(e, "Forest", "getGlobalDiscardedFeatureIndices");
+		m->errorOut(e, "AbstractRandomForest", "getGlobalDiscardedFeatureIndices");
 		exit(1);
-	}
+	} 
 }
 
 /***********************************************************************/
-

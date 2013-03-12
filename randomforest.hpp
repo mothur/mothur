@@ -18,16 +18,7 @@ class RandomForest: public Forest {
 public:
     
     // DONE
-    RandomForest(const vector <vector<int> > dataSet, const int numDecisionTrees, const string treeSplitCriterion);
-    RandomForest(const vector <vector<int> > dataSet,
-                 const int numDecisionTrees,
-                 const string treeSplitCriterion,
-                 const bool doPruning,
-                 const float pruneAggressiveness,
-                 const bool discardHighErrorTrees,
-                 const float highErrorTreeDiscardThreshold,
-                 const string optimumFeatureSubsetSelectionCriteria,
-                 const float featureStandardDeviationThreshold);
+    RandomForest(const vector <vector<int> > dataSet,const int numDecisionTrees, const string);
     
     
     //NOTE:: if you are going to dynamically cast, aren't you undoing the advantage of abstraction. Why abstract at all?

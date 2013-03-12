@@ -1025,7 +1025,7 @@ if __name__ == "__main__":
 
 								# discard any feature that has a lower standard deviation than this, good value is 0.1 or
 								# similar. set to 0.0 to completely disable this feature
-								featureStandardDeviationThreshold = 0.1)
+								featureStandardDeviationThreshold= 0.1)
 	randomForest.populateDecisionTrees()
 	randomForest.calcForrestErrorRate()
 	randomForest.calcForrestVariableImportance()

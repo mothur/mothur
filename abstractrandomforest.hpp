@@ -1,44 +1,43 @@
 //
-//  forest.h
-//  Mothur
+//  abstractrandomforest.hpp
+//  rrf-fs-prototype
 //
-//  Created by Kathryn Iverson on 10/26/12. Modified abstractrandomforest
+//  Created by Abu Zaher Faridee on 7/20/12.
 //  Copyright (c) 2012 Schloss Lab. All rights reserved.
 //
 
-#ifndef __Mothur__forest__
-#define __Mothur__forest__
+#ifndef RF_ABSTRACTRANDOMFOREST_HPP
+#define RF_ABSTRACTRANDOMFOREST_HPP
 
-#include <iostream>
 #include "mothurout.h"
 #include "macros.h"
-#include "decisiontree.hpp"
 #include "abstractdecisiontree.hpp"
-/***********************************************************************/
-//this is a re-implementation of the abstractrandomforest class
 
-class Forest{
+#define DEBUG_MODE
+
+/***********************************************************************/
+
+class AbstractRandomForest{
 public:
     // intialization with vectors
-    Forest(const std::vector < std::vector<int> > dataSet,
-                         const int numDecisionTrees,
-                         const string);
-    virtual ~Forest(){ }
+    AbstractRandomForest(const std::vector < std::vector<int> > dataSet, 
+                       const int numDecisionTrees, 
+                       const string);
+    virtual ~AbstractRandomForest(){ }
     virtual int populateDecisionTrees() = 0;
     virtual int calcForrestErrorRate() = 0;
     virtual int calcForrestVariableImportance(string) = 0;
-    virtual int updateGlobalOutOfBagEstimates(DecisionTree* decisionTree) = 0;
-    
-    /***********************************************************************/
-    
+ 
+/***********************************************************************/
+  
 protected:
-    
+  
     // TODO: create a better way of discarding feature
     // currently we just set FEATURE_DISCARD_SD_THRESHOLD to 0 to solved this
     // it can be tuned for better selection
     // also, there might be other factors like Mean or other stuffs
     // same would apply for createLocalDiscardedFeatureList in the TreeNode class
-    
+  
     // TODO: Another idea is getting an aggregated discarded feature indices after the run, from combining
     // the local discarded feature indices
     // this would penalize a feature, even if in global space the feature looks quite good
@@ -61,9 +60,8 @@ protected:
     vector<AbstractDecisionTree*> decisionTrees;
     
     MothurOut* m;
-    
+  
 private:
-    
-};
 
-#endif /* defined(__Mothur__forest__) */
+};
+#endif
