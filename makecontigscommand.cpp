@@ -32,7 +32,7 @@ vector<string> MakeContigsCommand::setParameters(){
 		CommandParameter pmismatch("mismatch", "Number", "", "-1.0", "", "", "","",false,false); parameters.push_back(pmismatch);
 		CommandParameter pgapopen("gapopen", "Number", "", "-2.0", "", "", "","",false,false); parameters.push_back(pgapopen);
 		CommandParameter pgapextend("gapextend", "Number", "", "-1.0", "", "", "","",false,false); parameters.push_back(pgapextend);
-        CommandParameter pthreshold("insert", "Number", "", "25", "", "", "","",false,false); parameters.push_back(pthreshold);
+        CommandParameter pthreshold("insert", "Number", "", "20", "", "", "","",false,false); parameters.push_back(pthreshold);
         CommandParameter pdeltaq("deltaq", "Number", "", "6", "", "", "","",false,false); parameters.push_back(pdeltaq);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
         CommandParameter pformat("format", "Multiple", "sanger-illumina-solexa-illumina1.8+", "illumina1.8+", "", "", "","",false,false,true); parameters.push_back(pformat);
@@ -72,7 +72,7 @@ string MakeContigsCommand::getHelpString(){
         helpString += "The deltaq parameter allows you to specify the delta allowed between quality scores of a mismatched base.  For example in the overlap, if deltaq=5 and in the alignment seqA, pos 200 has a quality score of 30 and the same position in seqB has a quality score of 20, you take the base from seqA (30-20 >= 5).  If the quality score in seqB is 28 then the base in the consensus will be an N (30-28<5) The default is 6.\n";
 		helpString += "The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -2.0.\n";
 		helpString += "The gapextend parameter allows you to specify the penalty for extending a gap in an alignment.  The default is -1.0.\n";
-        helpString += "The insert parameter allows you to set a quality scores threshold. In the case where we are trying to decide whether to keep a base or remove it because the base is compared to a gap in the other fragment, if the base has a quality score below the threshold we eliminate it. Default=25.\n";
+        helpString += "The insert parameter allows you to set a quality scores threshold. In the case where we are trying to decide whether to keep a base or remove it because the base is compared to a gap in the other fragment, if the base has a quality score equal to or below the threshold we eliminate it. Default=20.\n";
         helpString += "The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n";
         helpString += "The allfiles parameter will create separate group and fasta file for each grouping. The default is F.\n";
         helpString += "The trimoverlap parameter allows you to trim the sequences to only the overlapping section. The default is F.\n";
@@ -288,7 +288,7 @@ MakeContigsCommand::MakeContigsCommand(string option)  {
 			m->mothurConvert(temp, gapExtend); 
             if (gapExtend > 0) { m->mothurOut("[ERROR]: gapextend must be negative.\n"); abort=true; }
 			
-            temp = validParameter.validFile(parameters, "insert", false);	if (temp == "not found"){	temp = "25";			}
+            temp = validParameter.validFile(parameters, "insert", false);	if (temp == "not found"){	temp = "20";			}
 			m->mothurConvert(temp, insert); 
             if ((insert < 0) || (insert > 40)) { m->mothurOut("[ERROR]: insert must be between 0 and 40.\n"); abort=true; }
 
@@ -944,12 +944,12 @@ int MakeContigsCommand::driver(vector<string> files, string outputFasta, string 
                     contig += seq1[i];
                 }else if (((seq1[i] == '.') || (seq1[i] == '-')) && ((seq2[i] != '-') && (seq2[i] != '.'))) { //seq1 is a gap and seq2 is a base, choose seq2, unless quality score for base is below insert. In that case eliminate base
                     if (thisfqualfile != "") {
-                        if (scores2[BBaseMap[i]] < insert) { } //
+                        if (scores2[BBaseMap[i]] <= insert) { } //
                         else { contig += seq2[i];  }
                     }else { contig += seq2[i]; } //with no quality info, then we keep it?
                 }else if (((seq2[i] == '.') || (seq2[i] == '-')) && ((seq1[i] != '-') && (seq1[i] != '.'))) { //seq2 is a gap and seq1 is a base, choose seq1, unless quality score for base is below insert. In that case eliminate base
                     if (thisfqualfile != "") {
-                        if (scores1[ABaseMap[i]] < insert) { } //
+                        if (scores1[ABaseMap[i]] <= insert) { } //
                         else { contig += seq1[i];  }
                     }else { contig += seq1[i]; } //with no quality info, then we keep it?
                 }else if (((seq1[i] != '-') && (seq1[i] != '.')) && ((seq2[i] != '-') && (seq2[i] != '.'))) { //both bases choose one with better quality
