@@ -124,18 +124,40 @@ void FlowData::updateEndFlow(){
 }
 
 //**********************************************************************************************************************
-
+//TATGCT
+//1 0 0 0 0 1
+//then the second positive flow is for a T, but you saw a T between the last and previous flow adn it wasn't positive, so something is missing
+//Becomes TNT
 void FlowData::translateFlow(){
-	
 	try{
-		sequence = "";
-		for(int i=0;i<endFlow;i++){
+        sequence = "";
+        set<char> charInMiddle;
+        int oldspot = -1;
+        bool updateOld = false;
+        
+        for(int i=0;i<endFlow;i++){
 			int intensity = (int)(flowData[i] + 0.5);
 			char base = baseFlow[i % baseFlow.length()];
+            
+            if (intensity == 0) { //are we in the middle
+                if (oldspot != -1) { charInMiddle.insert(base); }
+            }else if (intensity >= 1) {
+                if (oldspot == -1) { updateOld = true;  }
+                else {  //check for bases inbetween two 1's
+                    if (charInMiddle.count(base) != 0) { //we want to covert to an N
+                        sequence = sequence.substr(0, oldspot+1);
+                        sequence += 'N';
+                    }
+                    updateOld = true;
+                    charInMiddle.clear();
+                }
+            }
 			
 			for(int j=0;j<intensity;j++){
 				sequence += base;
 			}
+            
+            if (updateOld) { oldspot = sequence.length()-1;  updateOld = false; }
 		}
         
 		if(sequence.size() > 4){
@@ -144,7 +166,7 @@ void FlowData::translateFlow(){
 		else{
 			sequence = "NNNN";
 		}
-	}
+    }
 	catch(exception& e) {
 		m->errorOut(e, "FlowData", "translateFlow");
 		exit(1);

@@ -283,7 +283,23 @@ int CountTable::printTable(string file) {
         for (int i = 0; i < groups.size(); i++) { out << groups[i] << '\t'; }
         out << endl;
         
-        for (map<string, int>::iterator itNames = indexNameMap.begin(); itNames != indexNameMap.end(); itNames++) {
+        map<int, string> reverse; //use this to preserve order
+        for (map<string, int>::iterator it = indexNameMap.begin(); it !=indexNameMap.end(); it++) { reverse[it->second] = it->first;  }
+        
+        for (int i = 0; i < totals.size(); i++) {
+            map<int, string>::iterator itR = reverse.find(i);
+            
+            if (itR != reverse.end()) { //will equal end if seqs were removed because remove just removes from indexNameMap
+                out << itR->second << '\t' << totals[i] << '\t';
+                if (hasGroups) {
+                    for (int j = 0; j < groups.size(); j++) {
+                        out << counts[i][j] << '\t';
+                    }
+                }
+                out << endl;
+            }
+        }
+        /*for (map<string, int>::iterator itNames = indexNameMap.begin(); itNames != indexNameMap.end(); itNames++) {
             out << itNames->first << '\t' << totals[itNames->second] << '\t';
             if (hasGroups) {
                 
@@ -292,7 +308,7 @@ int CountTable::printTable(string file) {
                 }
             }
             out << endl;
-        }
+        }*/
         out.close();
         return 0;
     }
@@ -364,7 +380,7 @@ int CountTable::getGroupCount(string groupName) {
         if (hasGroups) {
             map<string, int>::iterator it = indexGroupMap.find(groupName);
             if (it == indexGroupMap.end()) {
-                m->mothurOut("[ERROR]: " + groupName + " is not in your count table. Please correct.\n"); m->control_pressed = true;
+                m->mothurOut("[ERROR]: group " + groupName + " is not in your count table. Please correct.\n"); m->control_pressed = true;
             }else { 
                 return totalGroups[it->second];
             }
@@ -384,11 +400,11 @@ int CountTable::getGroupCount(string seqName, string groupName) {
         if (hasGroups) {
             map<string, int>::iterator it = indexGroupMap.find(groupName);
             if (it == indexGroupMap.end()) {
-                m->mothurOut("[ERROR]: " + groupName + " is not in your count table. Please correct.\n"); m->control_pressed = true;
+                m->mothurOut("[ERROR]: group " + groupName + " is not in your count table. Please correct.\n"); m->control_pressed = true;
             }else { 
                 map<string, int>::iterator it2 = indexNameMap.find(seqName);
                 if (it2 == indexNameMap.end()) {
-                    m->mothurOut("[ERROR]: " + seqName + " is not in your count table. Please correct.\n"); m->control_pressed = true;
+                    m->mothurOut("[ERROR]: seq " + seqName + " is not in your count table. Please correct.\n"); m->control_pressed = true;
                 }else { 
                     return counts[it2->second][it->second];
                 }

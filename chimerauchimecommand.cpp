@@ -65,7 +65,7 @@ string ChimeraUchimeCommand::getHelpString(){
 		helpString += "The chimera.uchime command parameters are fasta, name, count, reference, processors, dereplicate, abskew, chimealns, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, skipgaps, skipgaps2, minlen, maxlen, ucl, strand and queryfact.\n";
 		helpString += "The fasta parameter allows you to enter the fasta file containing your potentially chimeric sequences, and is required, unless you have a valid current fasta file. \n";
 		helpString += "The name parameter allows you to provide a name file, if you are using template=self. \n";
-        helpString += "The count parameter allows you to provide a count file, if you are using template=self. \n";
+        helpString += "The count parameter allows you to provide a count file, if you are using template=self. When you use a count file with group info and dereplicate=T, mothur will create a *.pick.count_table file containing seqeunces after chimeras are removed. \n";
 		helpString += "You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amazon.fasta \n";
 		helpString += "The group parameter allows you to provide a group file. The group file can be used with a namesfile and reference=self. When checking sequences, only sequences from the same group as the query sequence will be used as the reference. \n";
         helpString += "If the dereplicate parameter is false, then if one group finds the seqeunce to be chimeric, then all groups find it to be chimeric, default=f.\n";
@@ -110,7 +110,8 @@ string ChimeraUchimeCommand::getOutputPattern(string type) {
         
         if (type == "chimera") {  pattern = "[filename],uchime.chimeras"; } 
         else if (type == "accnos") {  pattern = "[filename],uchime.accnos"; } 
-        else if (type == "alns") {  pattern = "[filename],uchime.alns"; } 
+        else if (type == "alns") {  pattern = "[filename],uchime.alns"; }
+        else if (type == "count") {  pattern = "[filename],uchime.pick.count_table"; } 
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
         
         return pattern;
@@ -129,6 +130,7 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(){
 		outputTypes["chimera"] = tempOutNames;
 		outputTypes["accnos"] = tempOutNames;
 		outputTypes["alns"] = tempOutNames;
+        outputTypes["count"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ChimeraUchimeCommand", "ChimeraUchimeCommand");
@@ -163,6 +165,7 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 			outputTypes["chimera"] = tempOutNames;
 			outputTypes["accnos"] = tempOutNames;
 			outputTypes["alns"] = tempOutNames;
+            outputTypes["count"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -646,6 +649,7 @@ int ChimeraUchimeCommand::execute(){
 			string accnosFileName = getOutputFileName("accnos", variables);
 			string alnsFileName = getOutputFileName("alns", variables);
 			string newFasta = m->getRootName(fastaFileNames[s]) + "temp";
+            string newCountFile = "";
 				
 			//you provided a groupfile
 			string groupFile = "";
@@ -654,6 +658,8 @@ int ChimeraUchimeCommand::execute(){
             else if (hasCount) {
                 CountTable ct;
                 if (ct.testGroups(nameFileNames[s])) { hasGroup = true; }
+                variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(nameFileNames[s]));
+                newCountFile = getOutputFileName("count", variables);
             }
 			
 			if ((templatefile == "self") && (!hasGroup)) { //you want to run uchime with a template=self and no groups
@@ -719,19 +725,60 @@ int ChimeraUchimeCommand::execute(){
 				if (chimealns) { m->openOutputFile(alnsFileName, out2); out2.close(); }
 				int totalSeqs = 0;
 				
-				if(processors == 1)	{	totalSeqs = driverGroups(outputFileName, newFasta, accnosFileName, alnsFileName, 0, groups.size(), groups);	}
-				else				{	totalSeqs = createProcessesGroups(outputFileName, newFasta, accnosFileName, alnsFileName, groups, nameFile, groupFile, fastaFileNames[s]);			}
+				if(processors == 1)	{	totalSeqs = driverGroups(outputFileName, newFasta, accnosFileName, alnsFileName, newCountFile, 0, groups.size(), groups);
+                    
+                    if (hasCount && dups) {
+                        CountTable c; c.readTable(nameFile);
+                        if (!m->isBlank(newCountFile)) {
+                            ifstream in2;
+                            m->openInputFile(newCountFile, in2);
+                            
+                            string name, group;
+                            while (!in2.eof()) {
+                                in2 >> name >> group; m->gobble(in2);
+                                c.setAbund(name, group, 0);
+                            }
+                            in2.close();
+                        }
+                        m->mothurRemove(newCountFile);
+                        c.printTable(newCountFile);
+                    }
+
+                }else				{	totalSeqs = createProcessesGroups(outputFileName, newFasta, accnosFileName, alnsFileName, newCountFile, groups, nameFile, groupFile, fastaFileNames[s]);			}
 
 				if (m->control_pressed) {  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}				
-                if (hasCount) { delete cparser; }
-                else { delete sparser; }
+               
                 
                 if (!dups) { 
                     int totalChimeras = deconvoluteResults(uniqueNames, outputFileName, accnosFileName, alnsFileName);
 				
                     m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(totalSeqs) + " sequences. " + toString(totalChimeras) + " chimeras were found.");	m->mothurOutEndLine();
                     m->mothurOut("The number of sequences checked may be larger than the number of unique sequences because some sequences are found in several samples."); m->mothurOutEndLine(); 
-				}
+				}else {
+                    
+                    if (hasCount) {
+                        set<string> doNotRemove;
+                        CountTable c; c.readTable(newCountFile);
+                        vector<string> namesInTable = c.getNamesOfSeqs();
+                        for (int i = 0; i < namesInTable.size(); i++) {
+                            int temp = c.getNumSeqs(namesInTable[i]);
+                            if (temp == 0) {  c.remove(namesInTable[i]);  }
+                            else { doNotRemove.insert((namesInTable[i])); }
+                        }
+                        //remove names we want to keep from accnos file.
+                        set<string> accnosNames = m->readAccnos(accnosFileName);
+                        ofstream out2;
+                        m->openOutputFile(accnosFileName, out2);
+                        for (set<string>::iterator it = accnosNames.begin(); it != accnosNames.end(); it++) {
+                            if (doNotRemove.count(*it) == 0) {  out2 << (*it) << endl; }
+                        }
+                        out2.close();
+                        c.printTable(newCountFile);
+                    }
+                }
+                
+                if (hasCount) { delete cparser; }
+                else { delete sparser; }
                 
 				if (m->control_pressed) {  for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0;	}				
 					
@@ -1128,20 +1175,23 @@ string ChimeraUchimeCommand::getNamesFile(string& inputFile){
 	}
 }
 //**********************************************************************************************************************
-int ChimeraUchimeCommand::driverGroups(string outputFName, string filename, string accnos, string alns, int start, int end, vector<string> groups){
+int ChimeraUchimeCommand::driverGroups(string outputFName, string filename, string accnos, string alns, string countlist, int start, int end, vector<string> groups){
 	try {
 		
 		int totalSeqs = 0;
 		int numChimeras = 0;
-		
+        
+        ofstream outCountList;
+        if (hasCount && dups) { m->openOutputFile(countlist, outCountList); }
+        
 		for (int i = start; i < end; i++) {
-			int start = time(NULL);	 if (m->control_pressed) {  return 0; }
+			int start = time(NULL);	 if (m->control_pressed) {  outCountList.close(); m->mothurRemove(countlist); return 0; }
             
 			int error;
             if (hasCount) { error = cparser->getSeqs(groups[i], filename, true); if ((error == 1) || m->control_pressed) {  return 0; } }
             else { error = sparser->getSeqs(groups[i], filename, true); if ((error == 1) || m->control_pressed) {  return 0; } }
 			
-			int numSeqs = driver((outputFName + groups[i]), filename, (accnos+ groups[i]), (alns+ groups[i]), numChimeras);
+			int numSeqs = driver((outputFName + groups[i]), filename, (accnos+groups[i]), (alns+ groups[i]), numChimeras);
 			totalSeqs += numSeqs;
 			
 			if (m->control_pressed) { return 0; }
@@ -1150,14 +1200,52 @@ int ChimeraUchimeCommand::driverGroups(string outputFName, string filename, stri
 			if (!m->debug) {  m->mothurRemove(filename);  }
             else { m->mothurOut("[DEBUG]: saving file: " + filename + ".\n"); }
 			
+            //if we provided a count file with group info and set dereplicate=t, then we want to create a *.pick.count_table
+            //This table will zero out group counts for seqs determined to be chimeric by that group.
+            if (dups) {
+                if (!m->isBlank(accnos+groups[i])) {
+                    ifstream in;
+                    m->openInputFile(accnos+groups[i], in);
+                    string name;
+                    if (hasCount) {
+                        while (!in.eof()) {
+                            in >> name; m->gobble(in);
+                            outCountList << name << '\t' << groups[i] << endl;
+                        }
+                        in.close();
+                    }else {
+                        map<string, string> thisnamemap = sparser->getNameMap(groups[i]);
+                        map<string, string>::iterator itN;
+                        ofstream out;
+                        m->openOutputFile(accnos+groups[i]+".temp", out);
+                        while (!in.eof()) {
+                            in >> name; m->gobble(in); 
+                            itN = thisnamemap.find(name);
+                            if (itN != thisnamemap.end()) {
+                                vector<string> tempNames; m->splitAtComma(itN->second, tempNames); 
+                                for (int j = 0; j < tempNames.size(); j++) { out << tempNames[j] << endl; }
+                                
+                            }else { m->mothurOut("[ERROR]: parsing cannot find " + name + ".\n"); m->control_pressed = true; }
+                        }
+                        out.close();
+                        in.close();
+                        m->renameFile(accnos+groups[i]+".temp", accnos+groups[i]);
+                    }
+                   
+                }
+            }
+            
 			//append files
 			m->appendFiles((outputFName+groups[i]), outputFName); m->mothurRemove((outputFName+groups[i]));
 			m->appendFiles((accnos+groups[i]), accnos); m->mothurRemove((accnos+groups[i]));
 			if (chimealns) { m->appendFiles((alns+groups[i]), alns); m->mothurRemove((alns+groups[i])); }
 			
 			m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences from group " + groups[i] + ".");	m->mothurOutEndLine();					
-		}	
-		return totalSeqs;
+		}
+
+        if (hasCount && dups) { outCountList.close(); }
+        
+        return totalSeqs;
 		
 	}
 	catch(exception& e) {
@@ -1641,8 +1729,8 @@ int ChimeraUchimeCommand::createProcesses(string outputFileName, string filename
 			// Allocate memory for thread data.
 			string extension = toString(i) + ".temp";
 			
-			uchimeData* tempUchime = new uchimeData(outputFileName+extension, uchimeLocation, templatefile, files[i], "", "", "", accnos+extension, alns+extension, dummy, m, 0, 0,  i);
-			tempUchime->setBooleans(useAbskew, chimealns, useMinH, useMindiv, useXn, useDn, useXa, useChunks, useMinchunk, useIdsmoothwindow, useMinsmoothid, useMaxp, skipgaps, skipgaps2, useMinlen, useMaxlen, ucl, useQueryfract, hasCount);
+			uchimeData* tempUchime = new uchimeData(outputFileName+extension, uchimeLocation, templatefile, files[i], "", "", "", accnos+extension, alns+extension, "", dummy, m, 0, 0,  i);
+			tempUchime->setBooleans(dups, useAbskew, chimealns, useMinH, useMindiv, useXn, useDn, useXa, useChunks, useMinchunk, useIdsmoothwindow, useMinsmoothid, useMaxp, skipgaps, skipgaps2, useMinlen, useMaxlen, ucl, useQueryfract, hasCount);
 			tempUchime->setVariables(abskew, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, minlen, maxlen, queryfract, strand);
 			
 			pDataArray.push_back(tempUchime);
@@ -1694,12 +1782,15 @@ int ChimeraUchimeCommand::createProcesses(string outputFileName, string filename
 }
 /**************************************************************************************************/
 
-int ChimeraUchimeCommand::createProcessesGroups(string outputFName, string filename, string accnos, string alns, vector<string> groups, string nameFile, string groupFile, string fastaFile) {
+int ChimeraUchimeCommand::createProcessesGroups(string outputFName, string filename, string accnos, string alns, string newCountFile, vector<string> groups, string nameFile, string groupFile, string fastaFile) {
 	try {
 		
 		processIDS.clear();
 		int process = 1;
 		int num = 0;
+        
+        CountTable newCount;
+        if (hasCount && dups) { newCount.readTable(nameFile); }
 		
 		//sanity check
 		if (groups.size() < processors) { processors = groups.size(); }
@@ -1724,7 +1815,7 @@ int ChimeraUchimeCommand::createProcessesGroups(string outputFName, string filen
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				num = driverGroups(outputFName + toString(getpid()) + ".temp", filename + toString(getpid()) + ".temp", accnos + toString(getpid()) + ".temp", alns + toString(getpid()) + ".temp", lines[process].start, lines[process].end, groups);
+				num = driverGroups(outputFName + toString(getpid()) + ".temp", filename + toString(getpid()) + ".temp", accnos + toString(getpid()) + ".temp", alns + toString(getpid()) + ".temp", accnos + ".byCount." + toString(getpid()) + ".temp", lines[process].start, lines[process].end, groups);
 				
 				//pass numSeqs to parent
 				ofstream out;
@@ -1742,22 +1833,22 @@ int ChimeraUchimeCommand::createProcessesGroups(string outputFName, string filen
 		}
 		
 		//do my part
-		num = driverGroups(outputFName, filename, accnos, alns, lines[0].start, lines[0].end, groups);
+		num = driverGroups(outputFName, filename, accnos, alns, accnos + ".byCount", lines[0].start, lines[0].end, groups);
 		
 		//force parent to wait until all the processes are done
 		for (int i=0;i<processIDS.size();i++) { 
 			int temp = processIDS[i];
 			wait(&temp);
 		}
-		
+        
 		for (int i = 0; i < processIDS.size(); i++) {
 			ifstream in;
 			string tempFile =  outputFName + toString(processIDS[i]) + ".num.temp";
 			m->openInputFile(tempFile, in);
 			if (!in.eof()) { int tempNum = 0; in >> tempNum; num += tempNum; }
 			in.close(); m->mothurRemove(tempFile);
-		}
-				
+        }
+        
 #else
 		//////////////////////////////////////////////////////////////////////////////////////////////////////
 		//Windows version shared memory, so be careful when passing variables through the uchimeData struct. 
@@ -1773,8 +1864,8 @@ int ChimeraUchimeCommand::createProcessesGroups(string outputFName, string filen
 			// Allocate memory for thread data.
 			string extension = toString(i) + ".temp";
 			
-			uchimeData* tempUchime = new uchimeData(outputFName+extension, uchimeLocation, templatefile, filename+extension, fastaFile, nameFile, groupFile, accnos+extension, alns+extension, groups, m, lines[i].start, lines[i].end,  i);
-			tempUchime->setBooleans(useAbskew, chimealns, useMinH, useMindiv, useXn, useDn, useXa, useChunks, useMinchunk, useIdsmoothwindow, useMinsmoothid, useMaxp, skipgaps, skipgaps2, useMinlen, useMaxlen, ucl, useQueryfract, hasCount);
+			uchimeData* tempUchime = new uchimeData(outputFName+extension, uchimeLocation, templatefile, filename+extension, fastaFile, nameFile, groupFile, accnos+extension, alns+extension, accnos+".byCount."+extension, groups, m, lines[i].start, lines[i].end,  i);
+			tempUchime->setBooleans(dups, useAbskew, chimealns, useMinH, useMindiv, useXn, useDn, useXa, useChunks, useMinchunk, useIdsmoothwindow, useMinsmoothid, useMaxp, skipgaps, skipgaps2, useMinlen, useMaxlen, ucl, useQueryfract, hasCount);
 			tempUchime->setVariables(abskew, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, minlen, maxlen, queryfract, strand);
 			
 			pDataArray.push_back(tempUchime);
@@ -1787,7 +1878,7 @@ int ChimeraUchimeCommand::createProcessesGroups(string outputFName, string filen
 		
 		
 		//using the main process as a worker saves time and memory
-		num = driverGroups(outputFName, filename, accnos, alns, lines[0].start, lines[0].end, groups);
+		num = driverGroups(outputFName, filename, accnos, alns, accnos + ".byCount", lines[0].start, lines[0].end, groups);
 		
 		//Wait until all threads have terminated.
 		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
@@ -1798,9 +1889,26 @@ int ChimeraUchimeCommand::createProcessesGroups(string outputFName, string filen
 			CloseHandle(hThreadArray[i]);
 			delete pDataArray[i];
 		}
+        
+        
 #endif		
-		
-				
+      
+        //read my own
+        if (hasCount && dups) {
+            if (!m->isBlank(accnos + ".byCount")) {
+                ifstream in2;
+                m->openInputFile(accnos + ".byCount", in2);
+                
+                string name, group;
+                while (!in2.eof()) {
+                    in2 >> name >> group; m->gobble(in2);
+                    newCount.setAbund(name, group, 0);
+                }
+                in2.close();
+            }
+            m->mothurRemove(accnos + ".byCount");
+        }
+       
 		//append output files
 		for(int i=0;i<processIDS.size();i++){
 			m->appendFiles((outputFName + toString(processIDS[i]) + ".temp"), outputFName);
@@ -1813,8 +1921,27 @@ int ChimeraUchimeCommand::createProcessesGroups(string outputFName, string filen
 				m->appendFiles((alns + toString(processIDS[i]) + ".temp"), alns);
 				m->mothurRemove((alns + toString(processIDS[i]) + ".temp"));
 			}
+            
+            if (hasCount && dups) {
+                if (!m->isBlank(accnos + ".byCount." + toString(processIDS[i]) + ".temp")) {
+                    ifstream in2;
+                    m->openInputFile(accnos + ".byCount." + toString(processIDS[i]) + ".temp", in2);
+                    
+                    string name, group;
+                    while (!in2.eof()) {
+                        in2 >> name >> group; m->gobble(in2);
+                        newCount.setAbund(name, group, 0);
+                    }
+                    in2.close();
+                }
+                m->mothurRemove(accnos + ".byCount." + toString(processIDS[i]) + ".temp");
+            }
+
 		}
-		
+        
+        //print new *.pick.count_table
+        if (hasCount && dups) {  newCount.printTable(newCountFile);   }
+ 		
 		return num;	
 		
 	}

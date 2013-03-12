@@ -307,7 +307,7 @@ double AmovaCommand::runAMOVA(ofstream& AMOVAFile, map<string, vector<int> > gro
 		for(int i=0;i<iters;i++){
 			map<string, vector<int> > randomizedGroup = getRandomizedGroups(groupSampleMap);
 			double ssWithinRand = calcSSWithin(randomizedGroup);
-			if(ssWithinRand < ssWithinOrig){	counter++;	}
+			if(ssWithinRand <= ssWithinOrig){	counter++;	}
 		}
 		
 		double pValue = (double)counter / (double) iters;

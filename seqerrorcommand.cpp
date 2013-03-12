@@ -407,6 +407,13 @@ int SeqErrorCommand::execute(){
 		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.");
 		m->mothurOutEndLine();
 		
+        //set fasta file as new current fastafile
+		string current = "";
+		itTypes = outputTypes.find("errorseq");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setFastaFile(current); }
+		}
+        
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		for (int i = 0; i < outputNames.size(); i++) { m->mothurOut(outputNames[i]); m->mothurOutEndLine(); }

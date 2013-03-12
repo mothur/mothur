@@ -684,16 +684,14 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
             //create reoriented primer and barcode pairs
             map<int, oligosPair> rpairedPrimers, rpairedBarcodes;
             for (map<int, oligosPair>::iterator it = pairedPrimers.begin(); it != pairedPrimers.end(); it++) {
-                cout << "primer " << (it->second).forward << '\t' << (it->second).reverse << '\t' << primerNameVector[it->first] << endl;
-                cout << "rprimer " << trimOligos->reverseOligo((it->second).reverse) << '\t' << (trimOligos->reverseOligo((it->second).forward)) << endl;
-                 oligosPair tempPair(reverseOligo((it->second).reverse), (reverseOligo((it->second).forward))); //reversePrimer, rc ForwardPrimer
+                  oligosPair tempPair(reverseOligo((it->second).reverse), (reverseOligo((it->second).forward))); //reversePrimer, rc ForwardPrimer
                 rpairedPrimers[it->first] = tempPair;
+                //cout  << reverseOligo((it->second).reverse) << '\t' << (reverseOligo((it->second).forward)) << '\t' << primerNameVector[it->first] << endl;
             }
             for (map<int, oligosPair>::iterator it = pairedBarcodes.begin(); it != pairedBarcodes.end(); it++) {
-                cout << "barcode " << (it->second).forward << '\t' << (it->second).reverse << '\t' << barcodeNameVector[it->first] << endl;
-                cout << "rbarcode " << trimOligos->reverseOligo((it->second).reverse) << '\t' << (trimOligos->reverseOligo((it->second).forward)) << endl;
-                oligosPair tempPair(reverseOligo((it->second).reverse), (reverseOligo((it->second).forward))); //reverseBarcode, rc ForwardBarcode
+                 oligosPair tempPair(reverseOligo((it->second).reverse), (reverseOligo((it->second).forward))); //reverseBarcode, rc ForwardBarcode
                 rpairedBarcodes[it->first] = tempPair;
+                 //cout  << reverseOligo((it->second).reverse) << '\t' << (reverseOligo((it->second).forward)) << '\t' << barcodeNameVector[it->first] << endl;
             }
             rtrimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, rpairedPrimers, rpairedBarcodes); numBarcodes = rpairedBarcodes.size();
         }
@@ -716,13 +714,15 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 
 			Sequence currSeq(inFASTA); m->gobble(inFASTA);
 			//cout << currSeq.getName() << '\t' << currSeq.getUnaligned().length() << endl;
+            Sequence savedSeq(currSeq.getName(), currSeq.getAligned());
             
-			QualityScores currQual;
+			QualityScores currQual; QualityScores savedQual;
 			if(qFileName != ""){
 				currQual = QualityScores(qFile);  m->gobble(qFile);
+                savedQual.setName(currQual.getName()); savedQual.setScores(currQual.getScores());
                 //cout << currQual.getName() << endl;
 			}
-			
+			  
 			string origSeq = currSeq.getUnaligned();
 			if (origSeq != "") {
 				
@@ -751,7 +751,11 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
                 
 				if(numFPrimers != 0){
 					success = trimOligos->stripForward(currSeq, currQual, primerIndex, keepforward);
-					if(success > pdiffs)		{	trashCode += 'f';	}
+					if(success > pdiffs)		{
+                        //if (pairedOligos) {  trashCode += trimOligos->getTrashCode(); }
+                        //else {  trashCode += 'f';  }
+                        trashCode += 'f';
+                    }
 					else{ currentSeqsDiffs += success;  }
 				}
 				
@@ -771,17 +775,21 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
                     int thisPrimerIndex = 0;
                     
                     if(numBarcodes != 0){
-                        thisSuccess = rtrimOligos->stripBarcode(currSeq, currQual, thisBarcodeIndex);
+                        thisSuccess = rtrimOligos->stripBarcode(savedSeq, savedQual, thisBarcodeIndex);
                         if(thisSuccess > bdiffs)		{	thisTrashCode += 'b';	}
                         else{ thisCurrentSeqsDiffs += thisSuccess;  }
                     }
                     
                     if(numFPrimers != 0){
-                        thisSuccess = rtrimOligos->stripForward(currSeq, currQual, thisPrimerIndex, keepforward);
-                        if(thisSuccess > pdiffs)		{	thisTrashCode += 'f';	}
+                        thisSuccess = rtrimOligos->stripForward(savedSeq, savedQual, thisPrimerIndex, keepforward);
+                            if(thisSuccess > pdiffs)		{
+                            //if (pairedOligos) {  thisTrashCode += rtrimOligos->getTrashCode(); }
+                            //else {  thisTrashCode += 'f';  }
+                            thisTrashCode += 'f'; 
+                        }
                         else{ thisCurrentSeqsDiffs += thisSuccess;  }
                     }
-                    
+                   
                     if (thisCurrentSeqsDiffs > tdiffs)	{	thisTrashCode += 't';   }
                     
                     if (thisTrashCode == "") { 
@@ -790,9 +798,11 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
                         currentSeqsDiffs = thisCurrentSeqsDiffs;
                         barcodeIndex = thisBarcodeIndex;
                         primerIndex = thisPrimerIndex;
-                        currSeq.reverseComplement();
+                        savedSeq.reverseComplement();
+                        currSeq.setAligned(savedSeq.getAligned());
                         if(qFileName != ""){
-                            currQual.flipQScores();
+                            savedQual.flipQScores();
+                            currQual.setScores(savedQual.getScores());
                         }
                     }
                 }
@@ -1555,12 +1565,14 @@ bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
 					// get rest of line in case there is a primer name
 					while (!inOligos.eof())	{
 						char c = inOligos.get();
-						if (c == 10 || c == 13){	break;	}
+						if (c == 10 || c == 13 || c == -1){	break;	}
 						else if (c == 32 || c == 9){;} //space or tab
 						else { 	group += c;  }
 					}
                     
                     oligosPair newPrimer(oligo, roligo);
+                    
+                     if (m->debug) { m->mothurOut("[DEBUG]: primer pair " + newPrimer.forward + " " + newPrimer.reverse + ", and group = " + group + ".\n"); }
 					
 					//check for repeat barcodes
                     string tempPair = oligo+roligo;
@@ -1588,7 +1600,7 @@ bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
                     string temp = "";
                     while (!inOligos.eof())	{
 						char c = inOligos.get();
-						if (c == 10 || c == 13){	break;	}
+						if (c == 10 || c == 13 || c == -1){	break;	}
 						else if (c == 32 || c == 9){;} //space or tab
 						else { 	temp += c;  }
 					}
@@ -1604,7 +1616,8 @@ bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
                             if(reverseBarcode[i] == 'U')	{	reverseBarcode[i] = 'T';	}
                         }
                         
-                        oligosPair newPair(oligo, reverseOligo(reverseBarcode));
+                        reverseBarcode = reverseOligo(reverseBarcode);
+                        oligosPair newPair(oligo, reverseBarcode);
                         
                         if (m->debug) { m->mothurOut("[DEBUG]: barcode pair " + newPair.forward + " " + newPair.reverse + ", and group = " + group + ".\n"); }
                         

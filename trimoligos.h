@@ -56,11 +56,13 @@ class TrimOligos {
         bool findReverse(Sequence&, int&, int&);
     
         string reverseOligo(string);
+        string getTrashCode() { return trashCode; }
 				
 	
 	private:
 		int pdiffs, bdiffs, ldiffs, sdiffs;
         bool paired;
+        string trashCode;
 	
 		map<string, int> barcodes;
 		map<string, int> primers;

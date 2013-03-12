@@ -308,7 +308,7 @@ double HomovaCommand::runHOMOVA(ofstream& HOMOVAFile, map<string, vector<int> > 
 			vector<double> ssWithinRandVector;
 			map<string, vector<int> > randomizedGroup = getRandomizedGroups(groupSampleMap);
 			double bValueRand = calcBValue(randomizedGroup, ssWithinRandVector);
-			if(bValueRand > bValueOrig){	counter++;	}
+			if(bValueRand >= bValueOrig){	counter++;	}
 		}
 		
 		double pValue = (double) counter / (double) iters;
