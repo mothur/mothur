@@ -8,8 +8,13 @@
 
 #include "regularizedrandomforest.h"
 
-RegularizedRandomForest::RegularizedRandomForest(const vector <vector<int> > dataSet,const int numDecisionTrees,
-                           const string treeSplitCriterion = "informationGain") : Forest(dataSet, numDecisionTrees, treeSplitCriterion) {
+RegularizedRandomForest::RegularizedRandomForest(const vector <vector<int> > dataSet,
+                                                 const int numDecisionTrees,
+                                                 const string treeSplitCriterion = "informationGain")
+                      : Forest(dataSet,
+                               numDecisionTrees,
+                               treeSplitCriterion,
+                               false, 0.9, true, 0.4, "log2", 0.0) {
     m = MothurOut::getInstance();
 }
 
