@@ -643,7 +643,7 @@ int SeqErrorCommand::createProcesses(string filename, string qFileName, string r
 			int misMatchSize;
 			in >> misMatchSize; m->gobble(in);
 			if (misMatchSize > misMatchCounts.size()) {	misMatchCounts.resize(misMatchSize, 0);	}
-			for (int j = 0; j < misMatchCounts.size(); j++) {
+			for (int j = 0; j < misMatchSize; j++) {
 				in >> tempNum; misMatchCounts[j] += tempNum;
 			}
 			m->gobble(in);

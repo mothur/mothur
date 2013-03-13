@@ -1854,7 +1854,13 @@ bool TrimSeqsCommand::keepFirstTrim(Sequence& sequence, QualityScores& qscores){
 		if(qscores.getName() != ""){
 			qscores.trimQScores(-1, keepFirst);
 		}
+
+//        sequence.printSequence(cout);cout << endl;
+        
 		sequence.trim(keepFirst);
+        
+//        sequence.printSequence(cout);cout << endl << endl;;
+
 		return success;
 	}
 	catch(exception& e) {

@@ -772,6 +772,8 @@ void Sequence::trim(int length){
 	if(numBases > length){
 		unaligned = unaligned.substr(0,length);
 		numBases = length;
+        aligned = "";
+        isAligned = 0;
 	}
 	
 }
