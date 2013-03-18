@@ -22,9 +22,9 @@ class AbstractDecisionTree{
 public:
   
     AbstractDecisionTree(vector<vector<int> >baseDataSet, 
-                       vector<int> globalDiscardedFeatureIndices, 
-                       OptimumFeatureSubsetSelector optimumFeatureSubsetSelector, 
-                       string treeSplitCriterion);    
+                           vector<int> globalDiscardedFeatureIndices, 
+                           OptimumFeatureSubsetSelector optimumFeatureSubsetSelector, 
+                           string treeSplitCriterion);    
     virtual ~AbstractDecisionTree(){}
     
   
@@ -43,12 +43,17 @@ protected:
     int numFeatures;
     int numOutputClasses;
     vector<int> outputClasses;
+    
     vector< vector<int> > bootstrappedTrainingSamples;
     vector<int> bootstrappedTrainingSampleIndices;
     vector< vector<int> > bootstrappedTestSamples;
     vector<int> bootstrappedTestSampleIndices;
     
+    vector<vector<int> > testSampleFeatureVectors;
+    
     RFTreeNode* rootNode;
+    int nodeIdCount;
+    map<int, int> nodeMisclassificationCounts;
     vector<int> globalDiscardedFeatureIndices;
     int optimumFeatureSubsetSize;
     string treeSplitCriterion;

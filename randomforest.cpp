@@ -13,7 +13,7 @@
 RandomForest::RandomForest(const vector <vector<int> > dataSet,
                            const int numDecisionTrees,
                            const string treeSplitCriterion = "informationGain")
-            : Forest(dataSet, numDecisionTrees, treeSplitCriterion, false, 0.9, true, 0.4, "log2", 0.0) {
+            : Forest(dataSet, numDecisionTrees, treeSplitCriterion, true, 0.9, true, 0.4, "log2", 0.0) {
     m = MothurOut::getInstance();
 }
 
@@ -54,36 +54,36 @@ int RandomForest::calcForrestErrorRate() {
 int RandomForest::calcForrestVariableImportance(string filename) {
     try {
     
-    // TODO: need to add try/catch operators to fix this
-    // follow the link: http://en.wikipedia.org/wiki/Dynamic_cast
+        // follow the link: http://en.wikipedia.org/wiki/Dynamic_cast
         //if you are going to dynamically cast, aren't you undoing the advantage of abstraction. Why abstract at all?
         //could cause maintenance issues later if other types of Abstract decison trees are created that cannot be cast as a decision tree.
-    for (int i = 0; i < decisionTrees.size(); i++) {
-        if (m->control_pressed) { return 0; }
-        
-        DecisionTree* decisionTree = dynamic_cast<DecisionTree*>(decisionTrees[i]);
-        
-        for (int j = 0; j < numFeatures; j++) {
-            globalVariableImportanceList[j] += (double)decisionTree->variableImportanceList[j];
+        for (int i = 0; i < decisionTrees.size(); i++) {
+            if (m->control_pressed) { return 0; }
+            
+            DecisionTree* decisionTree = dynamic_cast<DecisionTree*>(decisionTrees[i]);
+            
+            for (int j = 0; j < numFeatures; j++) {
+                globalVariableImportanceList[j] += (double)decisionTree->variableImportanceList[j];
+            }
         }
-    }
-    
-    for (int i = 0;  i < numFeatures; i++) {
-        cout << "[" << i << ',' << globalVariableImportanceList[i] << "], ";
-        globalVariableImportanceList[i] /= (double)numDecisionTrees;
-    }
-    
-    vector< vector<double> > globalVariableRanks;
-    for (int i = 0; i < globalVariableImportanceList.size(); i++) {
-        if (globalVariableImportanceList[i] > 0) {
-            vector<double> globalVariableRank(2, 0);
-            globalVariableRank[0] = i; globalVariableRank[1] = globalVariableImportanceList[i];
-            globalVariableRanks.push_back(globalVariableRank);
+        
+        for (int i = 0;  i < numFeatures; i++) {
+            cout << "[" << i << ',' << globalVariableImportanceList[i] << "], ";
+            globalVariableImportanceList[i] /= (double)numDecisionTrees;
         }
-    }
-    
-    VariableRankDescendingSorterDouble variableRankDescendingSorter;
-    sort(globalVariableRanks.begin(), globalVariableRanks.end(), variableRankDescendingSorter);
+        
+        vector< vector<double> > globalVariableRanks;
+        for (int i = 0; i < globalVariableImportanceList.size(); i++) {
+            if (globalVariableImportanceList[i] > 0) {
+                vector<double> globalVariableRank(2, 0);
+                globalVariableRank[0] = i; globalVariableRank[1] = globalVariableImportanceList[i];
+                globalVariableRanks.push_back(globalVariableRank);
+            }
+        }
+        
+        VariableRankDescendingSorterDouble variableRankDescendingSorter;
+        sort(globalVariableRanks.begin(), globalVariableRanks.end(), variableRankDescendingSorter);
+        
         ofstream out;
         m->openOutputFile(filename, out);
         out <<"OTU\tRank\n";
@@ -99,25 +99,81 @@ int RandomForest::calcForrestVariableImportance(string filename) {
 	}  
 }
 /***********************************************************************/
-// DONE
+// TODO: need to update this for pruning code
 int RandomForest::populateDecisionTrees() {
     try {
         
+        vector<double> errorRateImprovements;
+        
         for (int i = 0; i < numDecisionTrees; i++) {
+          
             if (m->control_pressed) { return 0; }
             if (((i+1) % 10) == 0) {  m->mothurOut("Creating " + toString(i+1) + " (th) Decision tree\n");  }
+          
             // TODO: need to first fix if we are going to use pointer based system or anything else
-            DecisionTree* decisionTree = new DecisionTree(dataSet, globalDiscardedFeatureIndices, OptimumFeatureSubsetSelector("log2"), treeSplitCriterion);
-            decisionTree->calcTreeVariableImportanceAndError();
-            if (m->control_pressed) { return 0; }
-            updateGlobalOutOfBagEstimates(decisionTree);
-            if (m->control_pressed) { return 0; }
-            decisionTree->purgeDataSetsFromTree();
-            if (m->control_pressed) { return 0; }
-            decisionTrees.push_back(decisionTree);
+            DecisionTree* decisionTree = new DecisionTree(dataSet, globalDiscardedFeatureIndices, OptimumFeatureSubsetSelector(optimumFeatureSubsetSelectionCriteria), treeSplitCriterion, featureStandardDeviationThreshold);
+          
+            if (m->debug && doPruning) {
+                m->mothurOut("Before pruning\n");
+                decisionTree->printTree(decisionTree->rootNode, "ROOT");
+            }
+            
+            int numCorrect;
+            double treeErrorRate;
+            decisionTree->calcTreeErrorRate(numCorrect, treeErrorRate);
+            double prePrunedErrorRate = treeErrorRate;
+            
+            if (m->debug) {
+                m->mothurOut("treeErrorRate:" + toString(treeErrorRate) + "numCorrect:" + toString(numCorrect) + "\n");
+            }
+            
+            if (doPruning) {
+                decisionTree->pruneTree(pruneAggressiveness);
+                if (m->debug) {
+                    m->mothurOut("After pruning\n");
+                    decisionTree->printTree(decisionTree->rootNode, "ROOT");
+                }
+                decisionTree->calcTreeErrorRate(numCorrect, treeErrorRate);
+            }
+            int postPrunedErrorRate = treeErrorRate;
+            
+          
+            decisionTree->calcTreeVariableImportanceAndError(numCorrect, treeErrorRate);
+            if (m->debug && doPruning) {
+                m->mothurOut("treeErrorRate:" + toString(treeErrorRate) + "numCorrect:" + toString(numCorrect) + "\n");
+            }
+            
+            double errorRateImprovement = (prePrunedErrorRate - postPrunedErrorRate) / prePrunedErrorRate;
+            m->mothurOut("errorRateImprovement:" + toString(errorRateImprovement));
+                        
+            if (discardHighErrorTrees) {
+                if (treeErrorRate < highErrorTreeDiscardThreshold) {
+                    updateGlobalOutOfBagEstimates(decisionTree);
+                    decisionTree->purgeDataSetsFromTree();
+                    decisionTrees.push_back(decisionTree);
+                    if (doPruning) {
+                        errorRateImprovements.push_back(errorRateImprovement);
+                    }
+                } else {
+                    delete decisionTree;
+                }
+            } else {
+                updateGlobalOutOfBagEstimates(decisionTree);
+                decisionTree->purgeDataSetsFromTree();
+                decisionTrees.push_back(decisionTree);
+                if (doPruning) {
+                    errorRateImprovements.push_back(errorRateImprovement);
+                }
+            }          
+        }
+        
+        double avgErrorRateImprovement = 0;
+        if (errorRateImprovements.size() > 0) {
+            avgErrorRateImprovement = accumulate(errorRateImprovements.begin(), errorRateImprovements.end(), 0) / errorRateImprovements.size();
         }
         
         if (m->debug) {
+            m->mothurOut("avgErrorRateImprovement:" + toString(avgErrorRateImprovement));
             // m->mothurOut("globalOutOfBagEstimates = " + toStringVectorMap(globalOutOfBagEstimates)+ "\n");
         }
         

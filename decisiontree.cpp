@@ -9,12 +9,17 @@
 #include "decisiontree.hpp"
 
 DecisionTree::DecisionTree(vector< vector<int> > baseDataSet,
-             vector<int> globalDiscardedFeatureIndices,
-             OptimumFeatureSubsetSelector optimumFeatureSubsetSelector,
-             string treeSplitCriterion) : AbstractDecisionTree(baseDataSet,
-                       globalDiscardedFeatureIndices,
-                       optimumFeatureSubsetSelector,
-                       treeSplitCriterion), variableImportanceList(numFeatures, 0){
+                           vector<int> globalDiscardedFeatureIndices,
+                           OptimumFeatureSubsetSelector optimumFeatureSubsetSelector,
+                           string treeSplitCriterion,
+                           float featureStandardDeviationThreshold)
+            : AbstractDecisionTree(baseDataSet,
+                                   globalDiscardedFeatureIndices,
+                                   optimumFeatureSubsetSelector,
+                                   treeSplitCriterion),
+            variableImportanceList(numFeatures, 0),
+            featureStandardDeviationThreshold(featureStandardDeviationThreshold) {
+                
     try {
         m = MothurOut::getInstance();
         createBootStrappedSamples();
@@ -28,31 +33,42 @@ DecisionTree::DecisionTree(vector< vector<int> > baseDataSet,
 
 /***********************************************************************/
 
-int DecisionTree::calcTreeVariableImportanceAndError() {
+int DecisionTree::calcTreeVariableImportanceAndError(int numCorrect, double treeErrorRate) {
     try {
         
-        int numCorrect;
-        double treeErrorRate;
-        calcTreeErrorRate(numCorrect, treeErrorRate);
+//        int numCorrect;
+//        double treeErrorRate;
+//        calcTreeErrorRate(numCorrect, treeErrorRate);
+//        
+//        if (m->control_pressed) {return 0; }
         
-        if (m->control_pressed) {return 0; }
-                
         for (int i = 0; i < numFeatures; i++) {
-            if (m->control_pressed) {return 0; }
-            // NOTE: only shuffle the features, never shuffle the output vector
-            // so i = 0 and i will be alwaays <= (numFeatures - 1) as the index at numFeatures will denote
-            // the feature vector
-            vector< vector<int> > randomlySampledTestData = randomlyShuffleAttribute(bootstrappedTestSamples, i);
+            if (m->control_pressed) { return 0; }
             
-            int numCorrectAfterShuffle = 0;
-            for (int j = 0; j < randomlySampledTestData.size(); j++) {
-                if (m->control_pressed) {return 0; }
-                vector<int> shuffledSample = randomlySampledTestData[j];
-                int actualSampleOutputClass = shuffledSample[numFeatures];
-                int predictedSampleOutputClass = evaluateSample(shuffledSample);
-                if (actualSampleOutputClass == predictedSampleOutputClass) { numCorrectAfterShuffle++; }
+            
+                // if the index is in globalDiscardedFeatureIndices (i.e, null feature) we don't want to shuffle them
+            vector<int>::iterator it = find(globalDiscardedFeatureIndices.begin(), globalDiscardedFeatureIndices.end(), i);
+            if (it == globalDiscardedFeatureIndices.end()) {        // NOT FOUND
+                // if the standard deviation is very low, we know it's not a good feature at all
+                // we can save some time here by discarding that feature
+                if (m->getStandardDeviation(testSampleFeatureVectors[i]) > featureStandardDeviationThreshold) {
+                    // NOTE: only shuffle the features, never shuffle the output vector
+                    // so i = 0 and i will be alwaays <= (numFeatures - 1) as the index at numFeatures will denote
+                    // the feature vector
+                    vector< vector<int> > randomlySampledTestData = randomlyShuffleAttribute(bootstrappedTestSamples, i);
+
+                    int numCorrectAfterShuffle = 0;
+                    for (int j = 0; j < randomlySampledTestData.size(); j++) {
+                        if (m->control_pressed) {return 0; }
+                        
+                        vector<int> shuffledSample = randomlySampledTestData[j];
+                        int actualSampleOutputClass = shuffledSample[numFeatures];
+                        int predictedSampleOutputClass = evaluateSample(shuffledSample);
+                        if (actualSampleOutputClass == predictedSampleOutputClass) { numCorrectAfterShuffle++; }
+                    }
+                    variableImportanceList[i] += (numCorrect - numCorrectAfterShuffle);
+                }
             }
-            variableImportanceList[i] += (numCorrect - numCorrectAfterShuffle);
         }
         
         // TODO: do we need to save the variableRanks in the DecisionTree, do we need it later?
@@ -84,8 +100,10 @@ int DecisionTree::evaluateSample(vector<int> testSample) {
     try {
         RFTreeNode *node = rootNode;
         while (true) {
-            if (m->control_pressed) {return 0; }
+            if (m->control_pressed) { return 0; }
+            
             if (node->checkIsLeaf()) { return node->getOutputClass(); }
+            
             int sampleSplitFeatureValue = testSample[node->getSplitFeatureIndex()];
             if (sampleSplitFeatureValue < node->getSplitFeatureValue()) { node = node->getLeftChildNode(); }
             else { node = node->getRightChildNode(); } 
@@ -181,10 +199,12 @@ int DecisionTree::purgeTreeNodesDataRecursively(RFTreeNode* treeNode) {
 void DecisionTree::buildDecisionTree(){
     try {
     
-    int generation = 0;
-    rootNode = new RFTreeNode(bootstrappedTrainingSamples, globalDiscardedFeatureIndices, numFeatures, numSamples, numOutputClasses, generation);
-    
-    splitRecursively(rootNode);
+        int generation = 0;
+        rootNode = new RFTreeNode(bootstrappedTrainingSamples, globalDiscardedFeatureIndices, numFeatures, numSamples, numOutputClasses, generation, nodeIdCount, featureStandardDeviationThreshold);
+        nodeIdCount++;
+        
+        splitRecursively(rootNode);
+        
         }
 	catch(exception& e) {
 		m->errorOut(e, "DecisionTree", "buildDecisionTree");
@@ -210,24 +230,32 @@ int DecisionTree::splitRecursively(RFTreeNode* rootNode) {
             rootNode->setOutputClass(classifiedOutputClass);
             return 0;
         }
-        if (m->control_pressed) {return 0;}
+        if (m->control_pressed) { return 0; }
         vector<int> featureSubsetIndices = selectFeatureSubsetRandomly(globalDiscardedFeatureIndices, rootNode->getLocalDiscardedFeatureIndices());
+        
+            // TODO: need to check if the value is actually copied correctly
         rootNode->setFeatureSubsetIndices(featureSubsetIndices);
-        if (m->control_pressed) {return 0;}
+        if (m->control_pressed) { return 0; }
       
         findAndUpdateBestFeatureToSplitOn(rootNode);
         
-        if (m->control_pressed) {return 0;}
+        // update rootNode outputClass, this is needed for pruning
+        // this is only for internal nodes
+        updateOutputClassOfNode(rootNode);
+        
+        if (m->control_pressed) { return 0; }
         
         vector< vector<int> > leftChildSamples;
         vector< vector<int> > rightChildSamples;
         getSplitPopulation(rootNode, leftChildSamples, rightChildSamples);
         
-        if (m->control_pressed) {return 0;}
+        if (m->control_pressed) { return 0; }
         
         // TODO: need to write code to clear this memory
-        RFTreeNode* leftChildNode = new RFTreeNode(leftChildSamples, globalDiscardedFeatureIndices, numFeatures, (int)leftChildSamples.size(), numOutputClasses, rootNode->getGeneration() + 1);
-        RFTreeNode* rightChildNode = new RFTreeNode(rightChildSamples, globalDiscardedFeatureIndices, numFeatures, (int)rightChildSamples.size(), numOutputClasses, rootNode->getGeneration() + 1);
+        RFTreeNode* leftChildNode = new RFTreeNode(leftChildSamples, globalDiscardedFeatureIndices, numFeatures, (int)leftChildSamples.size(), numOutputClasses, rootNode->getGeneration() + 1, nodeIdCount, featureStandardDeviationThreshold);
+        nodeIdCount++;
+        RFTreeNode* rightChildNode = new RFTreeNode(rightChildSamples, globalDiscardedFeatureIndices, numFeatures, (int)rightChildSamples.size(), numOutputClasses, rootNode->getGeneration() + 1, nodeIdCount, featureStandardDeviationThreshold);
+        nodeIdCount++;
         
         rootNode->setLeftChildNode(leftChildNode);
         leftChildNode->setParentNode(rootNode);
@@ -237,7 +265,7 @@ int DecisionTree::splitRecursively(RFTreeNode* rootNode) {
         
         // TODO: This recursive split can be parrallelized later
         splitRecursively(leftChildNode);
-        if (m->control_pressed) {return 0;}
+        if (m->control_pressed) { return 0; }
         
         splitRecursively(rightChildNode);
         return 0;
@@ -254,11 +282,11 @@ int DecisionTree::findAndUpdateBestFeatureToSplitOn(RFTreeNode* node){
     try {
 
         vector< vector<int> > bootstrappedFeatureVectors = node->getBootstrappedFeatureVectors();
-        if (m->control_pressed) {return 0;}
+        if (m->control_pressed) { return 0; }
         vector<int> bootstrappedOutputVector = node->getBootstrappedOutputVector();
-        if (m->control_pressed) {return 0;}
+        if (m->control_pressed) { return 0; }
         vector<int> featureSubsetIndices = node->getFeatureSubsetIndices();
-        if (m->control_pressed) {return 0;}
+        if (m->control_pressed) { return 0; }
         
         vector<double> featureSubsetEntropies;
         vector<int> featureSubsetSplitValues;
@@ -266,7 +294,7 @@ int DecisionTree::findAndUpdateBestFeatureToSplitOn(RFTreeNode* node){
         vector<double> featureSubsetGainRatios;
         
         for (int i = 0; i < featureSubsetIndices.size(); i++) {
-            if (m->control_pressed) {return 0;}
+            if (m->control_pressed) { return 0; }
             
             int tryIndex = featureSubsetIndices[i];
                        
@@ -275,7 +303,7 @@ int DecisionTree::findAndUpdateBestFeatureToSplitOn(RFTreeNode* node){
             double featureIntrinsicValue;
             
             getMinEntropyOfFeature(bootstrappedFeatureVectors[tryIndex], bootstrappedOutputVector, featureMinEntropy, featureSplitValue, featureIntrinsicValue);
-            if (m->control_pressed) {return 0;}
+            if (m->control_pressed) { return 0; }
             
             featureSubsetEntropies.push_back(featureMinEntropy);
             featureSubsetSplitValues.push_back(featureSplitValue);
@@ -290,7 +318,9 @@ int DecisionTree::findAndUpdateBestFeatureToSplitOn(RFTreeNode* node){
         vector<double>::iterator minEntropyIterator = min_element(featureSubsetEntropies.begin(), featureSubsetEntropies.end());
         vector<double>::iterator maxGainRatioIterator = max_element(featureSubsetGainRatios.begin(), featureSubsetGainRatios.end());
         double featureMinEntropy = *minEntropyIterator;
-        //double featureMaxGainRatio = *maxGainRatioIterator;
+        
+        // TODO: kept the following line as future reference, can be useful
+        // double featureMaxGainRatio = *maxGainRatioIterator;
         
         double bestFeatureSplitEntropy = featureMinEntropy;
         int bestFeatureToSplitOnIndex = -1;
@@ -302,11 +332,16 @@ int DecisionTree::findAndUpdateBestFeatureToSplitOn(RFTreeNode* node){
         }
         else { bestFeatureToSplitOnIndex = (int)(minEntropyIterator - featureSubsetEntropies.begin()); }
         
+            // TODO: is the following line needed? kept is as future reference
+        // splitInformationGain = node.ownEntropy - node.splitFeatureEntropy
+        
         int bestFeatureSplitValue = featureSubsetSplitValues[bestFeatureToSplitOnIndex];
         
         node->setSplitFeatureIndex(featureSubsetIndices[bestFeatureToSplitOnIndex]);
         node->setSplitFeatureValue(bestFeatureSplitValue);
         node->setSplitFeatureEntropy(bestFeatureSplitEntropy);
+            // TODO: kept the following line as future reference
+        // node.splitInformationGain = splitInformationGain
         
         return 0;
     }
@@ -363,17 +398,17 @@ vector<int> DecisionTree::selectFeatureSubsetRandomly(vector<int> globalDiscarde
 int DecisionTree::printTree(RFTreeNode* treeNode, string caption){
     try { 
         string tabs = "";
-        for (int i = 0; i < treeNode->getGeneration(); i++) { tabs += "   "; }
+        for (int i = 0; i < treeNode->getGeneration(); i++) { tabs += "|--"; }
         //    for (int i = 0; i < treeNode->getGeneration() - 1; i++) { tabs += "|  "; }
         //    if (treeNode->getGeneration() != 0) { tabs += "|--"; }
         
         if (treeNode != NULL && treeNode->checkIsLeaf() == false){
-            m->mothurOut(tabs + caption + " [ gen: " + toString(treeNode->getGeneration()) + " ] ( " + toString(treeNode->getSplitFeatureValue()) + " < X" + toString(treeNode->getSplitFeatureIndex()) +" )\n");
+            m->mothurOut(tabs + caption + " [ gen: " + toString(treeNode->getGeneration()) + " , id: " + toString(treeNode->nodeId) + " ] ( " + toString(treeNode->getSplitFeatureValue()) + " < X" + toString(treeNode->getSplitFeatureIndex()) + " ) ( predicted: " + toString(treeNode->outputClass) + " , misclassified: " + toString(treeNode->testSampleMisclassificationCount) + " )\n");
             
-            printTree(treeNode->getLeftChildNode(), "leftChild");
-            printTree(treeNode->getRightChildNode(), "rightChild");
+            printTree(treeNode->getLeftChildNode(), "left ");
+            printTree(treeNode->getRightChildNode(), "right");
         }else {
-            m->mothurOut(tabs + caption + " [ gen: " + toString(treeNode->getGeneration()) + " ] ( classified to: " + toString(treeNode->getOutputClass()) + ", samples: " + toString(treeNode->getNumSamples()) + " )\n");
+            m->mothurOut(tabs + caption + " [ gen: " + toString(treeNode->getGeneration()) + " , id: " + toString(treeNode->nodeId) + " ] ( classified to: " + toString(treeNode->getOutputClass()) + ", samples: " + toString(treeNode->getNumSamples()) + " , misclassified: " + toString(treeNode->testSampleMisclassificationCount) + " )\n");
         }
         return 0;
     }
@@ -396,4 +431,88 @@ void DecisionTree::deleteTreeNodesRecursively(RFTreeNode* treeNode) {
 	} 
 }
 /***********************************************************************/
+
+void DecisionTree::pruneTree(double pruneAggressiveness = 0.9) {
+    
+    // find out the number of misclassification by each of the nodes
+    for (int i = 0; i < bootstrappedTestSamples.size(); i++) {
+        if (m->control_pressed) { return; }
+        
+        vector<int> testSample = bootstrappedTestSamples[i];
+        updateMisclassificationCountRecursively(rootNode, testSample);
+    }
+    
+    // do the actual pruning
+    pruneRecursively(rootNode, pruneAggressiveness);
+}
+/***********************************************************************/
+
+void DecisionTree::pruneRecursively(RFTreeNode* treeNode, double pruneAggressiveness){
+    
+    if (treeNode != NULL && treeNode->checkIsLeaf() == false) {
+        if (m->control_pressed) { return; }
+        
+        pruneRecursively(treeNode->leftChildNode, pruneAggressiveness);
+        pruneRecursively(treeNode->rightChildNode, pruneAggressiveness);
+        
+        int subTreeMisclassificationCount = treeNode->leftChildNode->getTestSampleMisclassificationCount() + treeNode->rightChildNode->getTestSampleMisclassificationCount();
+        int ownMisclassificationCount = treeNode->getTestSampleMisclassificationCount();
+        
+        if (subTreeMisclassificationCount * pruneAggressiveness > ownMisclassificationCount) {
+                // TODO: need to check the effect of these two delete calls
+            delete treeNode->leftChildNode;
+            treeNode->leftChildNode = NULL;
+            
+            delete treeNode->rightChildNode;
+            treeNode->rightChildNode = NULL;
+            
+            treeNode->isLeaf = true;
+        }
+        
+    }
+}
+/***********************************************************************/
+
+void DecisionTree::updateMisclassificationCountRecursively(RFTreeNode* treeNode, vector<int> testSample) {
+    
+    int actualSampleOutputClass = testSample[numFeatures];
+    int nodePredictedOutputClass = treeNode->outputClass;
+    
+    if (actualSampleOutputClass != nodePredictedOutputClass) {
+        treeNode->testSampleMisclassificationCount++;
+        map<int, int>::iterator it = nodeMisclassificationCounts.find(treeNode->nodeId);
+        if (it == nodeMisclassificationCounts.end()) {  // NOT FOUND
+            nodeMisclassificationCounts[treeNode->nodeId] = 0;
+        }
+        nodeMisclassificationCounts[treeNode->nodeId]++;
+    }
+    
+    if (treeNode->checkIsLeaf() == false) { // NOT A LEAF
+        int sampleSplitFeatureValue = testSample[treeNode->splitFeatureIndex];
+        if (sampleSplitFeatureValue < treeNode->splitFeatureValue) {
+            updateMisclassificationCountRecursively(treeNode->leftChildNode, testSample);
+        } else {
+            updateMisclassificationCountRecursively(treeNode->rightChildNode, testSample);
+        }
+    }
+}
+
+/***********************************************************************/
+
+void DecisionTree::updateOutputClassOfNode(RFTreeNode* treeNode) {
+    vector<int> counts(numOutputClasses, 0);
+    for (int i = 0; i < treeNode->bootstrappedOutputVector.size(); i++) {
+        int bootstrappedOutput = treeNode->bootstrappedOutputVector[i];
+        counts[bootstrappedOutput]++;
+    }
+
+    vector<int>::iterator majorityVotedOutputClassCountIterator = max_element(counts.begin(), counts.end());
+    int majorityVotedOutputClassCount = *majorityVotedOutputClassCountIterator;
+    vector<int>::iterator it = find(counts.begin(), counts.end(), majorityVotedOutputClassCount);
+    int majorityVotedOutputClass = (int)(it - counts.begin());
+    treeNode->setOutputClass(majorityVotedOutputClass);
+
+}
+/***********************************************************************/
+
 

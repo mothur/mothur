@@ -16,7 +16,14 @@ class RFTreeNode{
     
 public:
     
-    RFTreeNode(vector< vector<int> > bootstrappedTrainingSamples, vector<int> globalDiscardedFeatureIndices, int numFeatures, int numSamples, int numOutputClasses, int generation);
+    RFTreeNode(vector< vector<int> > bootstrappedTrainingSamples,
+               vector<int> globalDiscardedFeatureIndices,
+               int numFeatures,
+               int numSamples,
+               int numOutputClasses,
+               int generation,
+               int nodeId,
+               float featureStandardDeviationThreshold = 0.0);
     
     virtual ~RFTreeNode(){}
     
@@ -41,6 +48,7 @@ public:
     const vector<int>& getBootstrappedOutputVector() { return bootstrappedOutputVector; }
     const vector<int>& getFeatureSubsetIndices() { return featureSubsetIndices; }
     const double getOwnEntropy() { return ownEntropy; }
+    const int getTestSampleMisclassificationCount() { return testSampleMisclassificationCount; }
     
     // setters
     void setIsLeaf(bool isLeaf) { this->isLeaf = isLeaf; }
@@ -76,6 +84,10 @@ private:
     int splitFeatureValue;
     double splitFeatureEntropy;
     double ownEntropy;
+    
+    int nodeId;
+    float featureStandardDeviationThreshold;
+    int testSampleMisclassificationCount;
     
     RFTreeNode* leftChildNode;
     RFTreeNode* rightChildNode;

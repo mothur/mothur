@@ -32,15 +32,22 @@ public:
     DecisionTree(vector< vector<int> > baseDataSet,
                  vector<int> globalDiscardedFeatureIndices,
                  OptimumFeatureSubsetSelector optimumFeatureSubsetSelector,
-                 string treeSplitCriterion);
+                 string treeSplitCriterion,
+                 float featureStandardDeviationThreshold);
+    
     virtual ~DecisionTree(){ deleteTreeNodesRecursively(rootNode); }
     
-    int calcTreeVariableImportanceAndError();
+    int calcTreeVariableImportanceAndError(int numCorrect, double treeErrorRate);
     int evaluateSample(vector<int> testSample);
     int calcTreeErrorRate(int& numCorrect, double& treeErrorRate);
     vector< vector<int> > randomlyShuffleAttribute(vector< vector<int> > samples, int featureIndex);  
     void purgeDataSetsFromTree() { purgeTreeNodesDataRecursively(rootNode); }
     int purgeTreeNodesDataRecursively(RFTreeNode* treeNode);
+    
+    void pruneTree(double pruneAggressiveness);
+    void pruneRecursively(RFTreeNode* treeNode, double pruneAggressiveness);
+    void updateMisclassificationCountRecursively(RFTreeNode* treeNode, vector<int> testSample);
+    void updateOutputClassOfNode(RFTreeNode* treeNode);
     
     
 private:
@@ -54,6 +61,8 @@ private:
     
     vector<int> variableImportanceList;
     map<int, int> outOfBagEstimates;
+  
+    float featureStandardDeviationThreshold;
 };
 
 #endif

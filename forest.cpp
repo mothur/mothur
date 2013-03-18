@@ -54,7 +54,7 @@ vector<int> Forest::getGlobalDiscardedFeatureIndices() {
         for (int i = 0; i < featureVectors.size(); i++) {
             if (m->control_pressed) { return globalDiscardedFeatureIndices; }
             double standardDeviation = m->getStandardDeviation(featureVectors[i]);
-            if (standardDeviation <= 0){ globalDiscardedFeatureIndices.push_back(i); }
+            if (standardDeviation <= featureStandardDeviationThreshold){ globalDiscardedFeatureIndices.push_back(i); }
         }
         
         if (m->debug) {
