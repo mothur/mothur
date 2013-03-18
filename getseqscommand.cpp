@@ -427,6 +427,11 @@ int GetSeqsCommand::readFasta(){
 			
 			Sequence currSeq(in);
 			name = currSeq.getName();
+            
+            if (!dups) {//adjust name if needed
+                map<string, string>::iterator it = uniqueMap.find(name);
+                if (it != uniqueMap.end()) { name = it->second; }
+            }
 			
 			if (name != "") {
 				//if this name is in the accnos file
@@ -485,7 +490,12 @@ int GetSeqsCommand::readQual(){
 			string name = "";
 			string scores = "";
 			
-			in >> name; 
+			in >> name;
+            
+            if (!dups) {//adjust name if needed
+                map<string, string>::iterator it = uniqueMap.find(name);
+                if (it != uniqueMap.end()) { name = it->second; }
+            }
 				
 			if (name.length() != 0) { 
 				saveName = name.substr(1);
@@ -748,6 +758,8 @@ int GetSeqsCommand::readName(){
 						wroteSomething = true;
 						
 						out << validSecond[0] << '\t';
+                        //we are changing the unique name in the fasta file
+                        uniqueMap[firstCol] = validSecond[0];
 					
 						//you know you have at least one valid second since first column is valid
 						for (int i = 0; i < validSecond.size()-1; i++) {  out << validSecond[i] << ',';  }
@@ -805,6 +817,7 @@ int GetSeqsCommand::readGroup(){
 
 			in >> name;				//read from first column
 			in >> group;			//read from second column
+            
 			
 			//if this name is in the accnos file
 			if (names.count(name) != 0) {
@@ -862,6 +875,11 @@ int GetSeqsCommand::readTax(){
 
 			in >> name;				//read from first column
 			in >> tax;			//read from second column
+            
+            if (!dups) {//adjust name if needed
+                map<string, string>::iterator it = uniqueMap.find(name);
+                if (it != uniqueMap.end()) { name = it->second; }
+            }
 			
 			//if this name is in the accnos file
 			if (names.count(name) != 0) {
@@ -924,6 +942,11 @@ int GetSeqsCommand::readAlign(){
 
 
 			in >> name;				//read from first column
+            
+            if (!dups) {//adjust name if needed
+                map<string, string>::iterator it = uniqueMap.find(name);
+                if (it != uniqueMap.end()) { name = it->second; }
+            }
 			
 			//if this name is in the accnos file
 			if (names.count(name) != 0) {

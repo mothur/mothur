@@ -64,8 +64,8 @@ private:
     vector<seqData> readFiles(string inputFile, CountTable* ct);
 	vector<seqData> loadSequences(string);
 	int deconvoluteResults(map<string, string>&, string, string);
-	int driverGroups(string, string, int, int, vector<string>);
-	int createProcessesGroups(string, string, vector<string>, string, string, string);
+	int driverGroups(string, string, string, int, int, vector<string>);
+	int createProcessesGroups(string, string, string, vector<string>, string, string, string);
     string removeNs(string);
 };
 
@@ -79,16 +79,17 @@ struct perseusData {
 	string groupfile;
 	string outputFName;
 	string accnos;
+    string countlist;
 	MothurOut* m;
 	int start;
 	int end;
-    bool hasName, hasCount;
+    bool hasName, hasCount, dups;
 	int threadID, count, numChimeras;
 	double alpha, beta, cutoff;
 	vector<string> groups;
 	
 	perseusData(){}
-	perseusData(bool hn, bool hc, double a, double b, double c, string o,  string f, string n, string g, string ac, vector<string> gr, MothurOut* mout, int st, int en, int tid) {
+	perseusData(bool dps, bool hn, bool hc, double a, double b, double c, string o,  string f, string n, string g, string ac, string ctlist, vector<string> gr, MothurOut* mout, int st, int en, int tid) {
 		alpha = a;
 		beta = b;
 		cutoff = c;
@@ -96,6 +97,7 @@ struct perseusData {
 		namefile = n;
 		groupfile = g;
 		outputFName = o;
+        countlist = ctlist;
 		accnos = ac;
 		m = mout;
 		start = st;
@@ -104,6 +106,7 @@ struct perseusData {
 		groups = gr;
         hasName = hn;
         hasCount = hc;
+        dups = dps;
 		count = 0;
 		numChimeras = 0;
 	}
@@ -137,6 +140,9 @@ static DWORD WINAPI MyPerseusThreadFunction(LPVOID lpParam){
     
 		int totalSeqs = 0;
 		int numChimeras = 0;
+        
+        ofstream outCountList;
+        if (pDataArray->hasCount && pDataArray->dups) { pDataArray->m->openOutputFile(pDataArray->countlist, outCountList); }
 		
 		for (int u = pDataArray->start; u < pDataArray->end; u++) {
 			
@@ -347,6 +353,39 @@ static DWORD WINAPI MyPerseusThreadFunction(LPVOID lpParam){
 			////////////////////////////////////////////////////////////////////////////////////////
 
 			totalSeqs += numSeqs;
+            
+            if (pDataArray->dups) {
+                if (!pDataArray->m->isBlank(accnosFileName)) {
+                    ifstream in;
+                    pDataArray->m->openInputFile(accnosFileName, in);
+                    string name;
+                    if (pDataArray->hasCount) {
+                        while (!in.eof()) {
+                            in >> name; pDataArray->m->gobble(in);
+                            outCountList << name << '\t' << groups[u] << endl;
+                        }
+                        in.close();
+                    }else {
+                        map<string, string> thisnamemap = parser->getNameMap(groups[u]);
+                        map<string, string>::iterator itN;
+                        ofstream out;
+                        pDataArray->m->openOutputFile(accnosFileName+".temp", out);
+                        while (!in.eof()) {
+                            in >> name; pDataArray->m->gobble(in);
+                            itN = thisnamemap.find(name);
+                            if (itN != thisnamemap.end()) {
+                                vector<string> tempNames; pDataArray->m->splitAtComma(itN->second, tempNames);
+                                for (int j = 0; j < tempNames.size(); j++) { out << tempNames[j] << endl; }
+                                
+                            }else { pDataArray->m->mothurOut("[ERROR]: parsing cannot find " + name + ".\n"); pDataArray->m->control_pressed = true; }
+                        }
+                        out.close();
+                        in.close();
+                        pDataArray->m->renameFile(accnosFileName+".temp", accnosFileName);
+                    }
+                    
+                }
+            }
 			
 			//append files
 			pDataArray->m->appendFiles(chimeraFileName, pDataArray->outputFName); pDataArray->m->mothurRemove(chimeraFileName);
@@ -356,6 +395,8 @@ static DWORD WINAPI MyPerseusThreadFunction(LPVOID lpParam){
 			if (pDataArray->m->control_pressed) { if (pDataArray->hasCount) { delete cparser; } { delete parser; } pDataArray->m->mothurRemove(pDataArray->outputFName); pDataArray->m->mothurRemove(pDataArray->accnos); return 0; }
 		}	
 		
+        if (pDataArray->hasCount && pDataArray->dups) { outCountList.close(); }
+        
 		pDataArray->count = totalSeqs;
 		if (pDataArray->hasCount) { delete cparser; } { delete parser; }
 		return totalSeqs;

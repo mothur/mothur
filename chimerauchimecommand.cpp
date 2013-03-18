@@ -774,6 +774,7 @@ int ChimeraUchimeCommand::execute(){
                         }
                         out2.close();
                         c.printTable(newCountFile);
+                        outputNames.push_back(newCountFile); outputTypes["count"].push_back(newCountFile);
                     }
                 }
                 
@@ -839,10 +840,6 @@ int ChimeraUchimeCommand::deconvoluteResults(map<string, string>& uniqueNames, s
 		map<string, string>::iterator itUnique;
 		int total = 0;
 		
-		//edit accnos file
-		ifstream in2; 
-		m->openInputFile(accnosFileName, in2);
-		
 		ofstream out2;
 		m->openOutputFile(accnosFileName+".temp", out2);
 		
@@ -852,27 +849,32 @@ int ChimeraUchimeCommand::deconvoluteResults(map<string, string>& uniqueNames, s
 		set<string> chimerasInFile;
 		set<string>::iterator itChimeras;
 
-		
-		while (!in2.eof()) {
-			if (m->control_pressed) { in2.close(); out2.close(); m->mothurRemove(outputFileName); m->mothurRemove((accnosFileName+".temp")); return 0; }
-			
-			in2 >> name; m->gobble(in2);
-			
-			//find unique name
-			itUnique = uniqueNames.find(name);
-			
-			if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing accnos results. Cannot find " + name + "."); m->mothurOutEndLine(); m->control_pressed = true; }
-			else {
-				itChimeras = chimerasInFile.find((itUnique->second));
-				
-				if (itChimeras == chimerasInFile.end()) {
-					out2 << itUnique->second << endl;
-					chimerasInFile.insert((itUnique->second));
-					total++;
-				}
-			}
-		}
-		in2.close();
+        if (!m->isBlank(accnosFileName)) {
+            //edit accnos file
+            ifstream in2;
+            m->openInputFile(accnosFileName, in2);
+            
+            while (!in2.eof()) {
+                if (m->control_pressed) { in2.close(); out2.close(); m->mothurRemove(outputFileName); m->mothurRemove((accnosFileName+".temp")); return 0; }
+                
+                in2 >> name; m->gobble(in2);
+                
+                //find unique name
+                itUnique = uniqueNames.find(name);
+                
+                if (itUnique == uniqueNames.end()) { m->mothurOut("[ERROR]: trouble parsing accnos results. Cannot find " + name + "."); m->mothurOutEndLine(); m->control_pressed = true; }
+                else {
+                    itChimeras = chimerasInFile.find((itUnique->second));
+                    
+                    if (itChimeras == chimerasInFile.end()) {
+                        out2 << itUnique->second << endl;
+                        chimerasInFile.insert((itUnique->second));
+                        total++;
+                    }
+                }
+            }
+            in2.close();
+        }
 		out2.close();
 		
 		m->mothurRemove(accnosFileName);
@@ -1180,6 +1182,7 @@ int ChimeraUchimeCommand::driverGroups(string outputFName, string filename, stri
 		
 		int totalSeqs = 0;
 		int numChimeras = 0;
+        
         
         ofstream outCountList;
         if (hasCount && dups) { m->openOutputFile(countlist, outCountList); }

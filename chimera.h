@@ -165,7 +165,7 @@ class Chimera {
 		
 		#ifdef USE_MPI
 		virtual Sequence print(MPI_File&, MPI_File&){  Sequence temp; return temp; }
-		virtual Sequence print(MPI_File&, MPI_File&, data_results, data_results){  Sequence temp; return temp; }
+		virtual Sequence print(MPI_File&, MPI_File&, data_results, data_results, bool&){  Sequence temp; return temp; }
 		virtual int print(MPI_File&, MPI_File&, string){  return 0; }
 		#endif
 		

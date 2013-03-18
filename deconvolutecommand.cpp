@@ -198,17 +198,24 @@ int DeconvoluteCommand::execute() {
 		map<string, string> nameMap;
 		map<string, string>::iterator itNames;
 		if (oldNameMapFName != "")  {  
-            m->readNames(oldNameMapFName, nameMap); 
-            if (oldNameMapFName == outNameFile){ 
-                variables["[tag]"] = "unique";
-                outNameFile = getOutputFileName("name", variables);   }
+            m->readNames(oldNameMapFName, nameMap);
+            if (oldNameMapFName == outNameFile){
+                //prepare filenames and open files
+                map<string, string> mvariables;
+                mvariables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inFastaName));
+                mvariables["[tag]"] = "unique";
+                outNameFile = getOutputFileName("name", mvariables);
+            }
         }
         CountTable ct;
         if (countfile != "")  {  
             ct.readTable(countfile);
-            if (countfile == outCountFile){ 
-                variables["[tag]"] = "unique";
-                outCountFile = getOutputFileName("count", variables);   }
+            if (countfile == outCountFile){
+                //prepare filenames and open files
+                map<string, string> mvariables;
+                mvariables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inFastaName));
+                mvariables["[tag]"] = "unique";
+                outCountFile = getOutputFileName("count", mvariables);   }
         }
 		
 		if (m->control_pressed) { return 0; }

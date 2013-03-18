@@ -574,12 +574,13 @@ Sequence ChimeraSlayer::print(ostream& out, ostream& outAcc, data_results leftPi
 
 #ifdef USE_MPI
 //***************************************************************************************************************
-Sequence ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc, data_results leftPiece, data_results rightPiece) {
+Sequence ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc, data_results leftPiece, data_results rightPiece, bool& chimFlag) {
 	try {
 		MPI_Status status;
 		bool results = false;
 		string outAccString = "";
 		string outputString = "";
+        chimFlag = false;
 		
 		Sequence trim;
 		
@@ -628,6 +629,7 @@ Sequence ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc, data_results left
 					memcpy(buf2, outAccString.c_str(), length);
 				
 					MPI_File_write_shared(outAcc, buf2, length, MPI_CHAR, &status);
+                    chimFlag = true;
 					delete buf2;
 					
 					if (trimChimera) {  

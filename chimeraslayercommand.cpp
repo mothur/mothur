@@ -65,7 +65,7 @@ string ChimeraSlayerCommand::getHelpString(){
 		helpString += "The fasta parameter allows you to enter the fasta file containing your potentially chimeric sequences, and is required, unless you have a valid current fasta file. \n";
 		helpString += "The name parameter allows you to provide a name file, if you are using reference=self. \n";
 		helpString += "The group parameter allows you to provide a group file. The group file can be used with a namesfile and reference=self. When checking sequences, only sequences from the same group as the query sequence will be used as the reference. \n";
-        helpString += "The count parameter allows you to provide a count file. The count file reference=self. If your count file contains group information, when checking sequences, only sequences from the same group as the query sequence will be used as the reference. \n";
+        helpString += "The count parameter allows you to provide a count file. The count file reference=self. If your count file contains group information, when checking sequences, only sequences from the same group as the query sequence will be used as the reference. When you use a count file with group info and dereplicate=T, mothur will create a *.pick.count_table file containing seqeunces after chimeras are removed. \n";
 		helpString += "You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amazon.fasta \n";
 		helpString += "The reference parameter allows you to enter a reference file containing known non-chimeric sequences, and is required. You may also set template=self, in this case the abundant sequences will be used as potential parents. \n";
 		helpString += "The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n";
@@ -110,7 +110,8 @@ string ChimeraSlayerCommand::getOutputPattern(string type) {
         
         if (type == "chimera") {  pattern = "[filename],slayer.chimeras"; } 
         else if (type == "accnos") {  pattern = "[filename],slayer.accnos"; } 
-        else if (type == "fasta") {  pattern = "[filename],slayer.fasta"; } 
+        else if (type == "fasta") {  pattern = "[filename],slayer.fasta"; }
+        else if (type == "count") {  pattern = "[filename],slayer.pick.count_table"; } 
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
         
         return pattern;
@@ -129,6 +130,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(){
 		outputTypes["chimera"] = tempOutNames;
 		outputTypes["accnos"] = tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
+        outputTypes["count"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ChimeraSlayerCommand", "ChimeraSlayerCommand");
@@ -165,6 +167,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 			outputTypes["chimera"] = tempOutNames;
 			outputTypes["accnos"] = tempOutNames;
 			outputTypes["fasta"] = tempOutNames;
+            outputTypes["count"] = tempOutNames;
 		
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -677,6 +680,7 @@ int ChimeraSlayerCommand::execute(){
 			string outputFileName = getOutputFileName("chimera", variables);
 			string accnosFileName = getOutputFileName("accnos", variables);
 			string trimFastaFileName = getOutputFileName("fasta", variables);
+            string newCountFile = "";
 			
 			//clears files
 			ofstream out, out1, out2;
@@ -746,11 +750,36 @@ int ChimeraSlayerCommand::execute(){
 				if (m->control_pressed) {  outputTypes.clear(); if (trim) { m->mothurRemove(trimFastaFileName); } m->mothurRemove(outputFileName); m->mothurRemove(accnosFileName); for (int j = 0; j < outputNames.size(); j++) {	m->mothurRemove(outputNames[j]);	}  return 0; }				
 #endif
 			}else { //you have provided a groupfile
+                string countFile = "";
+                if (hasCount) {
+                    countFile = nameFileNames[s];
+                    variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(nameFileNames[s]));
+                    newCountFile = getOutputFileName("count", variables);
+                }
 #ifdef USE_MPI	
-				MPIExecuteGroups(outputFileName, accnosFileName, trimFastaFileName, fileToPriority, fileGroup);
+				MPIExecuteGroups(outputFileName, accnosFileName, trimFastaFileName, fileToPriority, fileGroup, newCountFile, countFile);
 #else
-				if (processors == 1) { numSeqs = driverGroups(outputFileName, accnosFileName, trimFastaFileName, fileToPriority, fileGroup);	}
-				else {  numSeqs = createProcessesGroups(outputFileName, accnosFileName, trimFastaFileName, fileToPriority, fileGroup); 		} //destroys fileToPriority
+				if (processors == 1) {
+                    numSeqs = driverGroups(outputFileName, accnosFileName, trimFastaFileName, fileToPriority, fileGroup, newCountFile);
+                    if (hasCount && dups) {
+                        CountTable c; c.readTable(nameFileNames[s]);
+                        if (!m->isBlank(newCountFile)) {
+                            ifstream in2;
+                            m->openInputFile(newCountFile, in2);
+                            
+                            string name, group;
+                            while (!in2.eof()) {
+                                in2 >> name >> group; m->gobble(in2);
+                                c.setAbund(name, group, 0);
+                            }
+                            in2.close();
+                        }
+                        m->mothurRemove(newCountFile);
+                        c.printTable(newCountFile);
+                    }
+
+                }
+				else {  numSeqs = createProcessesGroups(outputFileName, accnosFileName, trimFastaFileName, fileToPriority, fileGroup, newCountFile, countFile); 		} //destroys fileToPriority
 #endif
 
 #ifdef USE_MPI	
@@ -762,7 +791,29 @@ int ChimeraSlayerCommand::execute(){
                     if (!dups) {
                         totalChimeras = deconvoluteResults(uniqueNames, outputFileName, accnosFileName, trimFastaFileName);
                         m->mothurOutEndLine(); m->mothurOut(toString(totalChimeras) + " chimera found."); m->mothurOutEndLine();
+                    }else {
+                        if (hasCount) {
+                            set<string> doNotRemove;
+                            CountTable c; c.readTable(newCountFile);
+                            vector<string> namesInTable = c.getNamesOfSeqs();
+                            for (int i = 0; i < namesInTable.size(); i++) {
+                                int temp = c.getNumSeqs(namesInTable[i]);
+                                if (temp == 0) {  c.remove(namesInTable[i]);  }
+                                else { doNotRemove.insert((namesInTable[i])); }
+                            }
+                            //remove names we want to keep from accnos file.
+                            set<string> accnosNames = m->readAccnos(accnosFileName);
+                            ofstream out2;
+                            m->openOutputFile(accnosFileName, out2);
+                            for (set<string>::iterator it = accnosNames.begin(); it != accnosNames.end(); it++) {
+                                if (doNotRemove.count(*it) == 0) {  out2 << (*it) << endl; }
+                            }
+                            out2.close();
+                            c.printTable(newCountFile);
+                            outputNames.push_back(newCountFile); outputTypes["count"].push_back(newCountFile);
+                        }
                     }
+
 #ifdef USE_MPI	
 				}
 				MPI_Barrier(MPI_COMM_WORLD); //make everyone wait
@@ -800,7 +851,7 @@ int ChimeraSlayerCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-int ChimeraSlayerCommand::MPIExecuteGroups(string outputFileName, string accnosFileName, string trimFastaFileName, map<string, map<string, int> >& fileToPriority, map<string, string>& fileGroup){
+int ChimeraSlayerCommand::MPIExecuteGroups(string outputFileName, string accnosFileName, string trimFastaFileName, map<string, map<string, int> >& fileToPriority, map<string, string>& fileGroup, string countlist, string countfile){
 	try {
 #ifdef USE_MPI	
 		int pid; 
@@ -826,6 +877,7 @@ int ChimeraSlayerCommand::MPIExecuteGroups(string outputFileName, string accnosF
 		MPI_File outMPI;
 		MPI_File outMPIAccnos;
 		MPI_File outMPIFasta;
+        MPI_File outMPICount;
 		
 		int outMode=MPI_MODE_CREATE|MPI_MODE_WRONLY; 
 		int inMode=MPI_MODE_RDONLY; 
@@ -838,12 +890,16 @@ int ChimeraSlayerCommand::MPIExecuteGroups(string outputFileName, string accnosF
 		
 		char outFastaFilename[1024];
 		strcpy(outFastaFilename, trimFastaFileName.c_str());
+        
+        char outCountFilename[1024];
+		strcpy(outCountFilename, countlist.c_str());
 		
 		MPI_File_open(MPI_COMM_WORLD, outFilename, outMode, MPI_INFO_NULL, &outMPI);
 		MPI_File_open(MPI_COMM_WORLD, outAccnosFilename, outMode, MPI_INFO_NULL, &outMPIAccnos);
 		if (trim) { MPI_File_open(MPI_COMM_WORLD, outFastaFilename, outMode, MPI_INFO_NULL, &outMPIFasta); }
+        if (hasCount && dups) {  MPI_File_open(MPI_COMM_WORLD, outCountFilename, outMode, MPI_INFO_NULL, &outMPICount); }
 		
-		if (m->control_pressed) {   MPI_File_close(&outMPI); if (trim) {  MPI_File_close(&outMPIFasta);  } MPI_File_close(&outMPIAccnos);  return 0;  }
+		if (m->control_pressed) {   MPI_File_close(&outMPI); if (trim) {  MPI_File_close(&outMPIFasta);  } MPI_File_close(&outMPIAccnos); if (hasCount && dups) { MPI_File_close(&outMPICount); } return 0;  }
 		
 		//print headers
 		if (pid == 0) { //you are the root process 
@@ -874,16 +930,55 @@ int ChimeraSlayerCommand::MPIExecuteGroups(string outputFileName, string accnosF
 			strcpy(inFileName, thisFastaName.c_str());
 			MPI_File inMPI;
 			MPI_File_open(MPI_COMM_SELF, inFileName, inMode, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
-			
+            
 			MPIPos = m->setFilePosFasta(thisFastaName, num); //fills MPIPos, returns numSeqs
 			
 			cout << endl << "Checking sequences from group: " << fileGroup[thisFastaName] << "." << endl; 
 			
-			driverMPI(0, num, inMPI, outMPI, outMPIAccnos, outMPIFasta, MPIPos, thisFastaName, thisPriority, true);
+            set<string> cnames;
+			driverMPI(0, num, inMPI, outMPI, outMPIAccnos, outMPIFasta, cnames, MPIPos, thisFastaName, thisPriority, true);
 			numSeqs += num;
 			
 			MPI_File_close(&inMPI);
 			m->mothurRemove(thisFastaName);
+            
+            if (dups) {
+                if (cnames.size() != 0) {
+                    if (hasCount) {
+                        for (set<string>::iterator it = cnames.begin(); it != cnames.end(); it++) {
+                            string outputString = (*it) + "\t" + fileGroup[thisFastaName] + "\n";
+                            int length = outputString.length();
+                            char* buf2 = new char[length];
+                            memcpy(buf2, outputString.c_str(), length);
+                            MPI_File_write_shared(outMPICount, buf2, length, MPI_CHAR, &status);
+                            delete buf2;
+                        }
+                    }else {
+                        map<string, map<string, string> >::iterator itGroupNameMap = group2NameMap.find(fileGroup[thisFastaName]);
+                        if (itGroupNameMap != group2NameMap.end()) {
+                            map<string, string> thisnamemap = itGroupNameMap->second;
+                            map<string, string>::iterator itN;
+                            for (set<string>::iterator it = cnames.begin(); it != cnames.end(); it++) {
+                                itN = thisnamemap.find(*it);
+                                if (itN != thisnamemap.end()) {
+                                    vector<string> tempNames; m->splitAtComma(itN->second, tempNames);
+                                    for (int j = 0; j < tempNames.size(); j++) { //write to accnos file
+                                        string outputString = tempNames[j] + "\n";
+                                        int length = outputString.length();
+                                        char* buf2 = new char[length];
+                                        memcpy(buf2, outputString.c_str(), length);
+                                        
+                                        MPI_File_write_shared(outMPIAccnos, buf2, length, MPI_CHAR, &status);
+                                        delete buf2;
+                                    }
+                                    
+                                }else { m->mothurOut("[ERROR]: parsing cannot find " + *it + ".\n"); m->control_pressed = true; }
+                            }
+                        }else { m->mothurOut("[ERROR]: parsing cannot find " + fileGroup[thisFastaName] + ".\n"); m->control_pressed = true; }
+                    }
+                    
+                }
+            }
 						
 			cout << endl << "It took " << toString(time(NULL) - start) << " secs to check " + toString(num) + " sequences from group " << fileGroup[thisFastaName] << "." << endl;
 		}
@@ -899,6 +994,7 @@ int ChimeraSlayerCommand::MPIExecuteGroups(string outputFileName, string accnosF
 		MPI_File_close(&outMPI);
 		MPI_File_close(&outMPIAccnos); 
 		if (trim) { MPI_File_close(&outMPIFasta); }
+        if (hasCount && dups) { MPI_File_close(&outMPICount); }
 		
 		MPI_Barrier(MPI_COMM_WORLD); //make everyone wait
 #endif
@@ -984,7 +1080,8 @@ int ChimeraSlayerCommand::MPIExecute(string inputFile, string outputFileName, st
 			}
 			
 			//do your part
-			driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPI, outMPIAccnos, outMPIFasta, MPIPos, inputFile, priority, false);
+            set<string> cnames;
+			driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPI, outMPIAccnos, outMPIFasta, cnames, MPIPos, inputFile, priority, false);
 						
 			if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI); if (trim) { MPI_File_close(&outMPIFasta); }  MPI_File_close(&outMPIAccnos);   return 0;  }
 			
@@ -1000,7 +1097,8 @@ int ChimeraSlayerCommand::MPIExecute(string inputFile, string outputFileName, st
 				if(pid == (processors - 1)){	numSeqsPerProcessor = numSeqs - pid * numSeqsPerProcessor; 	}
 				
 				//do your part
-				driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPI, outMPIAccnos, outMPIFasta, MPIPos, inputFile, priority, false);
+                set<string> cnames;
+				driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPI, outMPIAccnos, outMPIFasta, cnames, MPIPos, inputFile, priority, false);
 				
 				if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI); if (trim) { MPI_File_close(&outMPIFasta); }  MPI_File_close(&outMPIAccnos);  return 0;  }
 				
@@ -1258,6 +1356,7 @@ int ChimeraSlayerCommand::setUpForSelfReference(SequenceParser*& parser, map<str
 			for (int i = 0; i < groups.size(); i++) {
 				vector<Sequence> thisGroupsSeqs = parser->getSeqs(groups[i]);
 				map<string, string> thisGroupsMap = parser->getNameMap(groups[i]);
+                group2NameMap[groups[i]] = thisGroupsMap;
 				string newFastaFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + groups[i] + "-sortedTemp.fasta";
 				priority = sortFastaFile(thisGroupsSeqs, thisGroupsMap, newFastaFile); 
 				fileToPriority[newFastaFile] = priority;
@@ -1352,9 +1451,12 @@ string ChimeraSlayerCommand::getNamesFile(string& inputFile){
 }
 //**********************************************************************************************************************
 
-int ChimeraSlayerCommand::driverGroups(string outputFName, string accnos, string fasta, map<string, map<string, int> >& fileToPriority, map<string, string>& fileGroup){
+int ChimeraSlayerCommand::driverGroups(string outputFName, string accnos, string fasta, map<string, map<string, int> >& fileToPriority, map<string, string>& fileGroup, string countlist){
 	try {
 		int totalSeqs = 0;
+        ofstream outCountList;
+
+        if (hasCount && dups) { m->openOutputFile(countlist, outCountList); }
 		
 		for (map<string, map<string, int> >::iterator itFile = fileToPriority.begin(); itFile != fileToPriority.end(); itFile++) {
 			
@@ -1379,6 +1481,44 @@ int ChimeraSlayerCommand::driverGroups(string outputFName, string accnos, string
 #endif			
 			int numSeqs = driver(lines[0], thisoutputFileName, thisFastaName, thisaccnosFileName, thistrimFastaFileName, thisPriority);
 			
+            //if we provided a count file with group info and set dereplicate=t, then we want to create a *.pick.count_table
+            //This table will zero out group counts for seqs determined to be chimeric by that group.
+            if (dups) {
+                if (!m->isBlank(thisaccnosFileName)) {
+                    ifstream in;
+                    m->openInputFile(thisaccnosFileName, in);
+                    string name;
+                    if (hasCount) {
+                        while (!in.eof()) {
+                            in >> name; m->gobble(in);
+                            outCountList << name << '\t' << fileGroup[thisFastaName] << endl;
+                        }
+                        in.close();
+                    }else {
+                        map<string, map<string, string> >::iterator itGroupNameMap = group2NameMap.find(fileGroup[thisFastaName]);
+                        if (itGroupNameMap != group2NameMap.end()) {
+                            map<string, string> thisnamemap = itGroupNameMap->second;
+                            map<string, string>::iterator itN;
+                            ofstream out;
+                            m->openOutputFile(thisaccnosFileName+".temp", out);
+                            while (!in.eof()) {
+                                in >> name; m->gobble(in);
+                                itN = thisnamemap.find(name);
+                                if (itN != thisnamemap.end()) {
+                                    vector<string> tempNames; m->splitAtComma(itN->second, tempNames);
+                                    for (int j = 0; j < tempNames.size(); j++) { out << tempNames[j] << endl; }
+                                
+                                }else { m->mothurOut("[ERROR]: parsing cannot find " + name + ".\n"); m->control_pressed = true; }
+                            }
+                            out.close();
+                            in.close();
+                            m->renameFile(thisaccnosFileName+".temp", thisaccnosFileName);
+                        }else { m->mothurOut("[ERROR]: parsing cannot find " + fileGroup[thisFastaName] + ".\n"); m->control_pressed = true; }
+                    }
+                    
+                }
+            }
+
 			//append files
 			m->appendFiles(thisoutputFileName, outputFName); m->mothurRemove(thisoutputFileName); 
 			m->appendFiles(thisaccnosFileName, accnos); m->mothurRemove(thisaccnosFileName);
@@ -1390,6 +1530,8 @@ int ChimeraSlayerCommand::driverGroups(string outputFName, string accnos, string
 			m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences from group " + fileGroup[thisFastaName] + ".");	m->mothurOutEndLine();
 		}
 		
+        if (hasCount && dups) { outCountList.close(); }
+        
 		return totalSeqs;
 	}
 	catch(exception& e) {
@@ -1398,13 +1540,16 @@ int ChimeraSlayerCommand::driverGroups(string outputFName, string accnos, string
 	}
 }
 /**************************************************************************************************/
-int ChimeraSlayerCommand::createProcessesGroups(string outputFName, string accnos, string fasta, map<string, map<string, int> >& fileToPriority, map<string, string>& fileGroup) {
+int ChimeraSlayerCommand::createProcessesGroups(string outputFName, string accnos, string fasta, map<string, map<string, int> >& fileToPriority, map<string, string>& fileGroup, string countlist, string countFile) {
 	try {
 		int process = 1;
 		int num = 0;
 		processIDS.clear();
 		
 		if (fileToPriority.size() < processors) { processors = fileToPriority.size(); }
+        
+        CountTable newCount;
+        if (hasCount && dups) { newCount.readTable(countFile); }
 		
 		int groupsPerProcessor = fileToPriority.size() / processors;
 		int remainder = fileToPriority.size() % processors;
@@ -1436,7 +1581,7 @@ int ChimeraSlayerCommand::createProcessesGroups(string outputFName, string accno
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				num = driverGroups(outputFName + toString(getpid()) + ".temp", accnos + toString(getpid()) + ".temp", fasta + toString(getpid()) + ".temp", breakUp[process], fileGroup);
+				num = driverGroups(outputFName + toString(getpid()) + ".temp", accnos + toString(getpid()) + ".temp", fasta + toString(getpid()) + ".temp", breakUp[process], fileGroup, accnos + toString(getpid()) + ".byCount");
 				
 				//pass numSeqs to parent
 				ofstream out;
@@ -1452,7 +1597,7 @@ int ChimeraSlayerCommand::createProcessesGroups(string outputFName, string accno
 			}
 		}
 		
-		num = driverGroups(outputFName, accnos, fasta, breakUp[0], fileGroup);
+		num = driverGroups(outputFName, accnos, fasta, breakUp[0], fileGroup, accnos + ".byCount");
 
 		//force parent to wait until all the processes are done
 		for (int i=0;i<processors;i++) { 
@@ -1481,7 +1626,7 @@ int ChimeraSlayerCommand::createProcessesGroups(string outputFName, string accno
 		//Create processor worker threads.
 		for(int i=1; i<processors; i++ ){
 			string extension = toString(i) + ".temp";
-			slayerData* tempslayer = new slayerData((outputFName + extension), (fasta + extension), (accnos + extension), templatefile, search, blastlocation, trimera, trim, realign, m, breakUp[i], fileGroup, ksize, match, mismatch, window, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, divR, priority, i);
+			slayerData* tempslayer = new slayerData(group2NameMap, hasCount, dups, (accnos + extension+".byCount"), (outputFName + extension), (fasta + extension), (accnos + extension), templatefile, search, blastlocation, trimera, trim, realign, m, breakUp[i], fileGroup, ksize, match, mismatch, window, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, divR, priority, i);
 			pDataArray.push_back(tempslayer);
 			processIDS.push_back(i);
 			
@@ -1490,21 +1635,37 @@ int ChimeraSlayerCommand::createProcessesGroups(string outputFName, string accno
 			hThreadArray[i-1] = CreateThread(NULL, 0, MySlayerGroupThreadFunction, pDataArray[i-1], 0, &dwThreadIdArray[i-1]);   
 		}
 		
-		num = driverGroups(outputFName, accnos, fasta, breakUp[0], fileGroup);
+		num = driverGroups(outputFName, accnos, fasta, breakUp[0], fileGroup, accnos + ".byCount");
 		
 		//Wait until all threads have terminated.
 		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
 		
 		//Close all thread handles and free memory allocations.
 		for(int i=0; i < pDataArray.size(); i++){
-            if (pDataArray[i]->count != pDataArray[i]->end) {
-                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->end) + " sequences assigned to it, quitting. \n"); m->control_pressed = true; 
+            if (pDataArray[i]->fileToPriority.size() != pDataArray[i]->end) {
+                m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->end) + " of " + toString(pDataArray[i]->fileToPriority.size()) + " groups assigned to it, quitting. \n"); m->control_pressed = true;
             }
 			num += pDataArray[i]->count;
 			CloseHandle(hThreadArray[i]);
 			delete pDataArray[i];
 		}
 #endif	
+        //read my own
+        if (hasCount && dups) {
+            if (!m->isBlank(accnos + ".byCount")) {
+                ifstream in2;
+                m->openInputFile(accnos + ".byCount", in2);
+                
+                string name, group;
+                while (!in2.eof()) {
+                    in2 >> name >> group; m->gobble(in2);
+                    newCount.setAbund(name, group, 0);
+                }
+                in2.close();
+            }
+            m->mothurRemove(accnos + ".byCount");
+        }
+
 		
 		//append output files
 		for(int i=0;i<processIDS.size();i++){
@@ -1518,8 +1679,26 @@ int ChimeraSlayerCommand::createProcessesGroups(string outputFName, string accno
 				m->appendFiles((fasta + toString(processIDS[i]) + ".temp"), fasta);
 				m->mothurRemove((fasta + toString(processIDS[i]) + ".temp"));
 			}
+            
+            if (hasCount && dups) {
+                if (!m->isBlank(accnos + toString(processIDS[i]) + ".byCount")) {
+                    ifstream in2;
+                    m->openInputFile(accnos  + toString(processIDS[i]) + ".byCount", in2);
+                    
+                    string name, group;
+                    while (!in2.eof()) {
+                        in2 >> name >> group; m->gobble(in2);
+                        newCount.setAbund(name, group, 0);
+                    }
+                    in2.close();
+                }
+                m->mothurRemove(accnos + toString(processIDS[i]) + ".byCount");
+            }
+
 		}
 		
+        //print new *.pick.count_table
+        if (hasCount && dups) {  newCount.printTable(countlist);   }
 		
 		return num;
 	}
@@ -1667,7 +1846,7 @@ int ChimeraSlayerCommand::driver(linePair filePos, string outputFName, string fi
 }
 //**********************************************************************************************************************
 #ifdef USE_MPI
-int ChimeraSlayerCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& outMPI, MPI_File& outAccMPI, MPI_File& outFastaMPI, vector<unsigned long long>& MPIPos, string filename, map<string, int>& priority, bool byGroup){
+int ChimeraSlayerCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& outMPI, MPI_File& outAccMPI, MPI_File& outFastaMPI, set<string>& cnames, vector<unsigned long long>& MPIPos, string filename, map<string, int>& priority, bool byGroup){
 	try {
 		MPI_Status status; 
 		int pid;
@@ -1751,7 +1930,10 @@ int ChimeraSlayerCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_Fil
 						data_results rightResults = chimera->getResults();
 						
 						//if either piece is chimeric then report
-						Sequence trimmed = chimera->print(outMPI, outAccMPI, leftResults, rightResults);
+                        bool flag = false;
+						Sequence trimmed = chimera->print(outMPI, outAccMPI, leftResults, rightResults, flag);
+                        if (flag) { cnames.insert(candidateSeq->getName()); }
+                            
 						if (trim) {  
 							string outputString = ">" + trimmed.getName() + "\n" + trimmed.getAligned() + "\n";
 							
@@ -1769,6 +1951,7 @@ int ChimeraSlayerCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_Fil
 					}else { 
 						//print results
 						Sequence trimmed = chimera->print(outMPI, outAccMPI);
+                        cnames.insert(candidateSeq->getName());
 						
 						if (trim) {  
 							string outputString = ">" + trimmed.getName() + "\n" + trimmed.getAligned() + "\n";

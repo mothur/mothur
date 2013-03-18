@@ -1170,7 +1170,42 @@ int MothurOut::appendFiles(string temp, string filename) {
 		exit(1);
 	}	
 }
-
+/**************************************************************************************************/
+int MothurOut::appendFilesWithoutHeaders(string temp, string filename) {
+	try{
+		ofstream output;
+		ifstream input;
+        
+		//open output file in append mode
+		openOutputFileAppend(filename, output);
+		int ableToOpen = openInputFile(temp, input, "no error");
+		//int ableToOpen = openInputFile(temp, input);
+		
+		int numLines = 0;
+		if (ableToOpen == 0) { //you opened it
+        
+            string headers = getline(input); gobble(input);
+            if (debug) { mothurOut("[DEBUG]: skipping headers " + headers +'\n'); }
+            
+            char buffer[4096];
+            while (!input.eof()) {
+                input.read(buffer, 4096);
+                output.write(buffer, input.gcount());
+                //count number of lines
+                for (int i = 0; i < input.gcount(); i++) {  if (buffer[i] == '\n') {numLines++;} }
+            }
+			input.close();
+		}
+		
+		output.close();
+		
+		return numLines;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "appendFiles");
+		exit(1);
+	}	
+}
 /**************************************************************************************************/
 string MothurOut::sortFile(string distFile, string outputDir){
 	try {	

@@ -59,7 +59,7 @@ public:
     void help() { m->mothurOut(getHelpString()); }	
     
 private:
-    bool abort, allFiles, createGroup, trimOverlap;
+    bool abort, allFiles, trimOverlap, createFileGroup, createOligosGroup;
     string outputDir, ffastqfile, rfastqfile, align, oligosfile, rfastafile, ffastafile, rqualfile, fqualfile, file, format;
 	float match, misMatch, gapOpen, gapExtend;
 	int processors, longestBase, insert, tdiffs, bdiffs, pdiffs, ldiffs, sdiffs, deltaq;
@@ -75,6 +75,7 @@ private:
     
 	map<string, int> groupCounts; 
     map<string, string> groupMap;
+    map<int, string> file2Group;
     
     vector<int> convertQual(string);
     fastqRead readFastq(ifstream&, bool&);
@@ -83,8 +84,8 @@ private:
     vector< vector<string> > readFastqFiles(unsigned long int&, string, string);
     vector< vector<string> > readFastaFiles(unsigned long int&, string, string);
     //bool checkReads(fastqRead&, fastqRead&, string, string);
-    int createProcesses(vector< vector<string> >, string, string, string, vector<vector<string> >);
-    int driver(vector<string>, string, string, string, vector<vector<string> >, int);
+    int createProcesses(vector< vector<string> >, string, string, string, vector<vector<string> >, int);
+    int driver(vector<string>, string, string, string, vector<vector<string> >, int, string);
     bool getOligos(vector<vector<string> >&, string);
     string reverseOligo(string);
     vector<pairFastqRead> getReads(bool ignoref, bool ignorer, fastqRead forward, fastqRead reverse, map<string, fastqRead>& uniques);
@@ -100,13 +101,13 @@ struct contigsData {
 	string outputFasta; 
     string outputScrapFasta; 
 	string outputMisMatches;
-	string align;
+	string align, group;
     vector<string> files;
     vector<vector<string> > fastaFileNames;
 	MothurOut* m;
 	float match, misMatch, gapOpen, gapExtend;
 	int count, insert, threadID, pdiffs, bdiffs, tdiffs, deltaq;
-    bool allFiles, createGroup, done, trimOverlap;
+    bool allFiles, createOligosGroup, createFileGroup, done, trimOverlap;
     map<string, int> groupCounts; 
     map<string, string> groupMap;
     vector<string> primerNameVector;	
@@ -115,7 +116,7 @@ struct contigsData {
 	map<int, oligosPair> primers;
 	
 	contigsData(){}
-	contigsData(vector<string> f, string of, string osf, string om, string al, MothurOut* mout, float ma, float misMa, float gapO, float gapE, int thr, int delt, map<int, oligosPair> br, map<int, oligosPair> pr, vector<vector<string> > ffn, vector<string>bnv, vector<string> pnv, int pdf, int bdf, int tdf, bool cg, bool all, bool to, int tid) {
+	contigsData(string g, vector<string> f, string of, string osf, string om, string al, MothurOut* mout, float ma, float misMa, float gapO, float gapE, int thr, int delt, map<int, oligosPair> br, map<int, oligosPair> pr, vector<vector<string> > ffn, vector<string>bnv, vector<string> pnv, int pdf, int bdf, int tdf, bool cg, bool cfg, bool all, bool to, int tid) {
         files = f;
 		outputFasta = of;
         outputMisMatches = om;
@@ -126,6 +127,7 @@ struct contigsData {
 		gapExtend = gapE; 
         insert = thr;
 		align = al;
+        group = g;
 		count = 0;
         outputScrapFasta = osf;
         fastaFileNames = ffn;
@@ -138,7 +140,8 @@ struct contigsData {
         tdiffs = tdf;
         allFiles = all;
         trimOverlap = to;
-        createGroup = cg;
+        createOligosGroup = cg;
+        createFileGroup = cfg;
 		threadID = tid;
         deltaq = delt;
         done=false;
@@ -189,7 +192,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
         pDataArray->m->openOutputFile(pDataArray->outputMisMatches, outMisMatch);
         pDataArray->m->openOutputFile(pDataArray->outputScrapFasta, outScrapFasta);
         
-        if (pDataArray->threadID == 0) {  outMisMatch << "Name\tLength\tOverlap_Length\tOverlap_Start\tOverlap_End\tMisMatches\tNum_Ns\n";  }
+        outMisMatch << "Name\tLength\tOverlap_Length\tOverlap_Start\tOverlap_End\tMisMatches\tNum_Ns\n";  
         
         TrimOligos trimOligos(pDataArray->pdiffs, pDataArray->bdiffs, 0, 0, pDataArray->primers, pDataArray->barcodes);
         
@@ -315,7 +318,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
             
             if(trashCode.length() == 0){
                 bool ignore = false;
-                if (pDataArray->createGroup) {
+                if (pDataArray->createOligosGroup) {
                     if(pDataArray->barcodes.size() != 0){
                         string thisGroup = pDataArray->barcodeNameVector[barcodeIndex];
                         if (pDataArray->primers.size() != 0) { 
@@ -339,7 +342,17 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                             else { pDataArray->groupCounts[it->first] ++; }
                         }else { ignore = true; }
                     }
+                }else if (pDataArray->createFileGroup) {
+                    int pos = pDataArray->group.find("ignore");
+                    if (pos == string::npos) {
+                        pDataArray->groupMap[fSeq.getName()] = pDataArray->group;
+                        
+                        map<string, int>::iterator it = pDataArray->groupCounts.find(pDataArray->group);
+                        if (it == pDataArray->groupCounts.end()) {	pDataArray->groupCounts[pDataArray->group] = 1; }
+                        else { pDataArray->groupCounts[it->first]++; }
+                    }else { ignore = true; }
                 }
+
                 
                 if(pDataArray->allFiles && !ignore){
                     ofstream output;

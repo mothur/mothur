@@ -13,6 +13,7 @@
 #include "command.hpp"
 #include "sequence.hpp"
 #include "referencedb.h"
+#include "counttable.h"
 
 
 class SeqErrorCommand : public Command {
@@ -90,7 +91,7 @@ private:
 	int driver(string, string, string, string, string, string, linePair, linePair, linePair);
 	int createProcesses(string, string, string, string, string, string);
 
-	string queryFileName, referenceFileName, qualFileName, reportFileName, namesFileName, outputDir;
+	string queryFileName, referenceFileName, qualFileName, reportFileName, namesFileName, outputDir, countfile;
 	double threshold;
 	bool ignoreChimeras, save, aligned;
 	int numRefs, processors;
