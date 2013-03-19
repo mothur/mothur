@@ -362,11 +362,11 @@ static DWORD WINAPI MyPerseusThreadFunction(LPVOID lpParam){
                     if (pDataArray->hasCount) {
                         while (!in.eof()) {
                             in >> name; pDataArray->m->gobble(in);
-                            outCountList << name << '\t' << groups[u] << endl;
+                            outCountList << name << '\t' << pDataArray->groups[u] << endl;
                         }
                         in.close();
                     }else {
-                        map<string, string> thisnamemap = parser->getNameMap(groups[u]);
+                        map<string, string> thisnamemap = parser->getNameMap(pDataArray->groups[u]);
                         map<string, string>::iterator itN;
                         ofstream out;
                         pDataArray->m->openOutputFile(accnosFileName+".temp", out);

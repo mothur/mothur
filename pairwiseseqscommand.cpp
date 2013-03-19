@@ -643,7 +643,8 @@ int PairwiseSeqsCommand::driver(int startLine, int endLine, string dFileName, fl
 		outFile << setprecision(4);
 		
 		if((output == "lt") && startLine == 0){	outFile << alignDB.getNumSeqs() << endl;	}
-		
+		int countSmall = 0;
+        int countAll = 0;
 		for(int i=startLine;i<endLine;i++){
 			if(output == "lt")	{	
 				string name = alignDB.get(i).getName();
@@ -672,11 +673,18 @@ int PairwiseSeqsCommand::driver(int startLine, int endLine, string dFileName, fl
 				seqI.setAligned(alignment->getSeqAAln());
 				seqJ.setAligned(alignment->getSeqBAln());
 
-				
+				//cout << seqI.getName() << '\t' << seqJ.getName() << endl;
+                //cout << alignment->getSeqAAln() << endl << alignment->getSeqBAln() << endl;
+                
 				distCalculator->calcDist(seqI, seqJ);
 				double dist = distCalculator->getDist();
-				
+                
+                //cout << "dist = " << dist << endl;
+				                
 				if(dist <= cutoff){
+                    if (dist < 0.01) { countSmall++; }
+                    countAll++;
+
 					if (output == "column") { outFile << alignDB.get(i).getName() << ' ' << alignDB.get(j).getName() << ' ' << dist << endl; }
 				}
 				if (output == "lt") {  outFile << dist << '\t'; }
@@ -690,7 +698,7 @@ int PairwiseSeqsCommand::driver(int startLine, int endLine, string dFileName, fl
 			
 		}
 		m->mothurOut(toString(endLine-1) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
-		
+		cout << "num less than 0.01 = " << countSmall << " of " << countAll << endl;
 		outFile.close();
         delete alignment;
         delete distCalculator;

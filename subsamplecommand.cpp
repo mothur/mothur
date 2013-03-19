@@ -10,6 +10,7 @@
 #include "subsamplecommand.h"
 #include "sharedutilities.h"
 #include "deconvolutecommand.h"
+#include "getseqscommand.h"
 #include "subsample.h"
 
 //**********************************************************************************************************************
@@ -17,6 +18,7 @@ vector<string> SubSampleCommand::setParameters(){
 	try {		
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "FLSSR", "none","fasta",false,false,true); parameters.push_back(pfasta);
         CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none","name",false,false,true); parameters.push_back(pname);
+        CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "none", "none","taxonomy",false,false,true); parameters.push_back(ptaxonomy);
         CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none","count",false,false,true); parameters.push_back(pcount);
 		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","group",false,false,true); parameters.push_back(pgroup);
 		CommandParameter plist("list", "InputTypes", "", "", "none", "FLSSR", "none","list",false,false,true); parameters.push_back(plist);
@@ -44,7 +46,7 @@ string SubSampleCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The sub.sample command is designed to be used as a way to normalize your data, or create a smaller set from your original set.\n";
-		helpString += "The sub.sample command parameters are fasta, name, list, group, count, rabund, sabund, shared, groups, size, persample and label.  You must provide a fasta, list, sabund, rabund or shared file as an input file.\n";
+		helpString += "The sub.sample command parameters are fasta, name, list, group, count, rabund, sabund, shared, taxonomy, groups, size, persample and label.  You must provide a fasta, list, sabund, rabund or shared file as an input file.\n";
 		helpString += "The namefile is only used with the fasta file, not with the listfile, because the list file should contain all sequences.\n";
 		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like included. The group names are separated by dashes.\n";
 		helpString += "The label parameter allows you to select what distance levels you would like, and are also separated by dashes.\n";
@@ -70,11 +72,12 @@ string SubSampleCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "fasta")            {   pattern = "[filename],subsample,[extension]";    }
-        else if (type == "sabund")    {   pattern = "[filename],subsample,[extension]";    }
+        else if (type == "sabund")      {   pattern = "[filename],subsample,[extension]";    }
         else if (type == "name")        {   pattern = "[filename],subsample,[extension]";    }
         else if (type == "group")       {   pattern = "[filename],subsample,[extension]";    }
         else if (type == "count")       {   pattern = "[filename],subsample,[extension]";    }
         else if (type == "list")        {   pattern = "[filename],subsample,[extension]";    }
+        else if (type == "taxonomy")    {   pattern = "[filename],subsample,[extension]";    }
         else if (type == "shared")      {   pattern = "[filename],[distance],subsample,[extension]";    }
         else if (type == "rabund")      {   pattern = "[filename],subsample,[extension]";    }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
@@ -100,6 +103,7 @@ SubSampleCommand::SubSampleCommand(){
 		outputTypes["name"] = tempOutNames;
 		outputTypes["group"] = tempOutNames;
         outputTypes["count"] = tempOutNames;
+        outputTypes["taxonomy"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SubSampleCommand", "GetRelAbundCommand");
@@ -140,6 +144,7 @@ SubSampleCommand::SubSampleCommand(string option) {
 			outputTypes["name"] = tempOutNames;
 			outputTypes["group"] = tempOutNames;
             outputTypes["count"] = tempOutNames;
+            outputTypes["taxonomy"] = tempOutNames;
 					
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
@@ -212,6 +217,14 @@ SubSampleCommand::SubSampleCommand(string option) {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("taxonomy");
+				//user has given a template file
+				if(it != parameters.end()){
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
+				}
 			}
 			
 			//check for required parameters
@@ -249,6 +262,11 @@ SubSampleCommand::SubSampleCommand(string option) {
 			if (groupfile == "not open") { groupfile = ""; abort = true; }	
 			else if (groupfile == "not found") { groupfile = ""; }
 			else { m->setGroupFile(groupfile); }
+            
+            taxonomyfile = validParameter.validFile(parameters, "taxonomy", true);
+			if (taxonomyfile == "not open") { taxonomyfile = ""; abort = true; }
+			else if (taxonomyfile == "not found") { taxonomyfile = ""; }
+			else { m->setTaxonomyFile(taxonomyfile); }
 			
             countfile = validParameter.validFile(parameters, "count", true);
 			if (countfile == "not open") { countfile = ""; abort = true; }
@@ -297,7 +315,10 @@ SubSampleCommand::SubSampleCommand(string option) {
                 }
             }
 			
-			if ((namefile != "") && (fastafile == "")) { m->mothurOut("You may only use a namefile with a fastafile."); m->mothurOutEndLine(); abort = true; }
+			if ((namefile != "") && ((fastafile == "") && (taxonomyfile == ""))) { m->mothurOut("You may only use a name file with a fasta file or taxonomy file."); m->mothurOutEndLine(); abort = true; }
+            
+            if ((taxonomyfile != "") && ((fastafile == "") && (listfile == ""))) { m->mothurOut("You may only use a taxonomyfile with a fastafile or listfile."); m->mothurOutEndLine(); abort = true; }
+            
 			
 			if ((fastafile == "") && (listfile == "") && (sabundfile == "") && (rabundfile == "") && (sharedfile == "")) {
 				m->mothurOut("You must provide a fasta, list, sabund, rabund or shared file as an input file."); m->mothurOutEndLine(); abort = true; }
@@ -389,6 +410,10 @@ int SubSampleCommand::execute(){
 			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setCountTableFile(current); }
 		}
 		
+        itTypes = outputTypes.find("taxonomy");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setTaxonomyFile(current); }
+		}
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -632,6 +657,7 @@ int SubSampleCommand::getSubSampleFasta() {
 		}
 		in.close();	
 		out.close();
+        
 		
 		if (count != subset.size()) {
 			m->mothurOut("[ERROR]: The subset selected contained " + toString(subset.size()) + " sequences, but I only found " + toString(count) + " of those in the fastafile."); m->mothurOutEndLine();
@@ -665,7 +691,33 @@ int SubSampleCommand::getSubSampleFasta() {
 			m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
 			
 			m->mothurOut("Done."); m->mothurOutEndLine();
-		}
+            
+            if (taxonomyfile != "") {
+                set<string> tempSubset;
+                //get new unique names from fasta file
+                //read through fasta file outputting only the names on the subsample list after deconvolute
+                ifstream in2;
+                m->openInputFile(outputFileName, in2);
+                
+                while (!in2.eof()) {
+                    Sequence seq(in2); m->gobble(in2);
+                    if (seq.getName() != "") {
+                        tempSubset.insert(seq.getName());
+                    }
+                }
+                in2.close();
+                
+                //send that list to getTax
+                int tcount = getTax(tempSubset);
+                if (tcount != tempSubset.size()) { m->mothurOut("[ERROR]: subsampled fasta file contains " + toString(tempSubset.size()) + " sequences, but I only found " + toString(tcount) + " in your taxonomy file, please correct."); m->mothurOutEndLine(); }
+            }
+		}else {
+            if (taxonomyfile != "") {
+                int tcount = getTax(subset);
+                if (tcount != subset.size()) { m->mothurOut("[ERROR]: subsampled fasta file contains " + toString(subset.size()) + " sequences, but I only found " + toString(tcount) + " in your taxonomy file, please correct."); m->mothurOutEndLine(); }
+            
+            }  //should only contain uniques.
+        }
 		
 		outputTypes["fasta"].push_back(outputFileName);  outputNames.push_back(outputFileName);
 		
@@ -938,7 +990,9 @@ int SubSampleCommand::processShared(vector<SharedRAbundVector*>& thislookup) {
 //**********************************************************************************************************************
 int SubSampleCommand::getSubSampleList() {
 	try {
-		
+        
+		if (namefile != "") { m->readNames(namefile, nameMap); }
+        
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(listfile);  }
 		map<string, string> variables; 
@@ -1208,6 +1262,63 @@ int SubSampleCommand::getSubSampleList() {
 		out.close();  
 		if (list != NULL) { delete list; }
 		delete input;
+        
+        if (taxonomyfile != "") {
+            if (namefile == "") {
+                //fake nameMap
+                for (set<string>::iterator it = subset.begin(); it != subset.end(); it++) {
+                    vector<string> temp; temp.push_back(*it);
+                    nameMap[*it] = temp;
+                }
+                int tcount = getTax(subset);
+                if (tcount != subset.size()) { m->mothurOut("[ERROR]: subsampled list file contains " + toString(subset.size()) + " sequences, but I only found " + toString(tcount) + " in your taxonomy file, did you forget a name file? Please correct."); m->mothurOutEndLine(); }
+            }else {
+                string tempAccnos = "temp.accnos";
+                ofstream outAccnos;
+                m->openOutputFile(tempAccnos, outAccnos);
+                for (set<string>::iterator it = subset.begin(); it != subset.end(); it++) { outAccnos << *it << endl; }
+                outAccnos.close();
+                
+                m->mothurOut("Sampling taxonomy and name file... "); m->mothurOutEndLine();
+                string thisNameOutputDir = outputDir;
+                if (outputDir == "") {  thisNameOutputDir += m->hasPath(namefile);  }
+                map<string, string> variables;
+                variables["[filename]"] = thisNameOutputDir + m->getRootName(m->getSimpleName(namefile));
+                variables["[extension]"] = m->getExtension(namefile);
+                string outputNameFileName = getOutputFileName("name", variables);
+                
+                string thisTaxOutputDir = outputDir;
+                if (outputDir == "") {  thisTaxOutputDir += m->hasPath(taxonomyfile);  }
+                variables["[filename]"] = thisTaxOutputDir + m->getRootName(m->getSimpleName(taxonomyfile));
+                variables["[extension]"] = m->getExtension(taxonomyfile);
+                string outputTaxFileName = getOutputFileName("taxonomy", variables);
+                
+                
+                //use unique.seqs to create new name and fastafile
+                string inputString = "dups=f, name=" + namefile + ", taxonomy=" + taxonomyfile + ", accnos=" + tempAccnos;
+                m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+                m->mothurOut("Running command: get.seqs(" + inputString + ")"); m->mothurOutEndLine();
+                m->mothurCalling = true;
+                
+                Command* getCommand = new GetSeqsCommand(inputString);
+                getCommand->execute();
+                
+                map<string, vector<string> > filenames = getCommand->getOutputFiles();
+                
+                delete getCommand;
+                m->mothurCalling = false;
+                
+                m->renameFile(filenames["name"][0], outputNameFileName);
+                m->renameFile(filenames["taxonomy"][0], outputTaxFileName);
+                
+                outputTypes["name"].push_back(outputNameFileName);  outputNames.push_back(outputNameFileName);
+                outputNames.push_back(outputTaxFileName); outputTypes["taxonomy"].push_back(outputTaxFileName);
+                
+                m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
+                
+                m->mothurOut("Done."); m->mothurOutEndLine();
+            }
+        }
 						
 		return 0;
  
@@ -1579,7 +1690,63 @@ int SubSampleCommand::processSabund(SAbundVector*& sabund, ofstream& out) {
 		m->errorOut(e, "SubSampleCommand", "processSabund");
 		exit(1);
 	}
-}			
+}
+
+//**********************************************************************************************************************
+int SubSampleCommand::getTax(set<string>& subset) {
+	try {
+
+        string thisTaxOutputDir = outputDir;
+        if (outputDir == "") {  thisTaxOutputDir += m->hasPath(taxonomyfile);  }
+        map<string, string> variables;
+        variables["[filename]"] = thisTaxOutputDir + m->getRootName(m->getSimpleName(taxonomyfile));
+        variables["[extension]"] = m->getExtension(taxonomyfile);
+        string outputTaxFileName = getOutputFileName("taxonomy", variables);
+        ofstream outTax;
+        m->openOutputFile(outputTaxFileName, outTax);
+        outputNames.push_back(outputTaxFileName); outputTypes["taxonomy"].push_back(outputTaxFileName);
+        
+        //read through fasta file outputting only the names on the subsample list
+        ifstream inTax;
+        m->openInputFile(taxonomyfile, inTax);
+        
+        string tname, tax;
+        int tcount = 0;
+        map<string, vector<string> >::iterator itNameMap;
+        
+        while(!inTax.eof()){
+            
+            if (m->control_pressed) { inTax.close(); outTax.close();  return 0; }
+            
+            inTax >> tname;	m->gobble(inTax);			//read from first column
+            inTax >> tax;	m->gobble(inTax);		//read from second column
+            
+            //does the subset contain a sequence that this sequence represents
+            itNameMap = nameMap.find(tname);
+            if (itNameMap != nameMap.end()) {
+                vector<string> nameRepresents = itNameMap->second;
+                
+            
+                for (int i = 0; i < nameRepresents.size(); i++){
+                    if (subset.count(nameRepresents[i]) != 0) {
+                        outTax << nameRepresents[i] << '\t' << tax << endl;
+                        tcount++;
+                       
+                    }
+                }
+            }else{ m->mothurOut("[ERROR]: " + tname + " is missing, please correct."); m->mothurOutEndLine(); }
+        }
+        inTax.close();
+        outTax.close();
+        
+        return tcount;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SubSampleCommand", "getTax");
+        exit(1);
+    }
+}
+
 //**********************************************************************************************************************
 
 

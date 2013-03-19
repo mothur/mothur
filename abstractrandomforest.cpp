@@ -56,3 +56,4 @@ vector<int> AbstractRandomForest::getGlobalDiscardedFeatureIndices() {
 }
 
 /***********************************************************************/
+
