@@ -99,7 +99,6 @@ int RandomForest::calcForrestVariableImportance(string filename) {
 	}  
 }
 /***********************************************************************/
-// TODO: need to update this for pruning code
 int RandomForest::populateDecisionTrees() {
     try {
         
@@ -136,7 +135,7 @@ int RandomForest::populateDecisionTrees() {
                 }
                 decisionTree->calcTreeErrorRate(numCorrect, treeErrorRate);
             }
-            int postPrunedErrorRate = treeErrorRate;
+            double postPrunedErrorRate = treeErrorRate;
             
           
             decisionTree->calcTreeVariableImportanceAndError(numCorrect, treeErrorRate);
