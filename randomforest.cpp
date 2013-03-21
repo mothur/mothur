@@ -120,11 +120,12 @@ int RandomForest::populateDecisionTrees() {
             
             int numCorrect;
             double treeErrorRate;
+            
             decisionTree->calcTreeErrorRate(numCorrect, treeErrorRate);
             double prePrunedErrorRate = treeErrorRate;
             
             if (m->debug) {
-                m->mothurOut("treeErrorRate:" + toString(treeErrorRate) + "numCorrect:" + toString(numCorrect) + "\n");
+                m->mothurOut("treeErrorRate: " + toString(treeErrorRate) + " numCorrect: " + toString(numCorrect) + "\n");
             }
             
             if (doPruning) {
@@ -140,11 +141,11 @@ int RandomForest::populateDecisionTrees() {
           
             decisionTree->calcTreeVariableImportanceAndError(numCorrect, treeErrorRate);
             if (m->debug && doPruning) {
-                m->mothurOut("treeErrorRate:" + toString(treeErrorRate) + "numCorrect:" + toString(numCorrect) + "\n");
+                m->mothurOut("treeErrorRate: " + toString(treeErrorRate) + " numCorrect: " + toString(numCorrect) + "\n");
             }
             
             double errorRateImprovement = (prePrunedErrorRate - postPrunedErrorRate) / prePrunedErrorRate;
-            m->mothurOut("errorRateImprovement:" + toString(errorRateImprovement));
+            m->mothurOut("errorRateImprovement: " + toString(errorRateImprovement) + "\n");
                         
             if (discardHighErrorTrees) {
                 if (treeErrorRate < highErrorTreeDiscardThreshold) {
@@ -173,7 +174,7 @@ int RandomForest::populateDecisionTrees() {
         }
         
         if (m->debug) {
-            m->mothurOut("avgErrorRateImprovement:" + toString(avgErrorRateImprovement));
+            m->mothurOut("avgErrorRateImprovement:" + toString(avgErrorRateImprovement) + "\n");
             // m->mothurOut("globalOutOfBagEstimates = " + toStringVectorMap(globalOutOfBagEstimates)+ "\n");
         }
         

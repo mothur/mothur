@@ -72,7 +72,20 @@ int AbstractDecisionTree::createBootStrappedSamples(){
             }
         }
         
-            return 0;
+            // do the transpose of Test Samples
+        for (int i = 0; i < bootstrappedTestSamples[0].size(); i++) {
+            if (m->control_pressed) { return 0; }
+            
+            vector<int> tmpFeatureVector(bootstrappedTestSamples.size(), 0);
+            for (int j = 0; j < bootstrappedTestSamples.size(); j++) {
+                if (m->control_pressed) { return 0; }
+                
+                tmpFeatureVector[j] = bootstrappedTestSamples[j][i];
+            }
+            testSampleFeatureVectors.push_back(tmpFeatureVector);
+        }
+        
+        return 0;
     }
 	catch(exception& e) {
 		m->errorOut(e, "AbstractDecisionTree", "createBootStrappedSamples");

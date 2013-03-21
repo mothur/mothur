@@ -33,25 +33,21 @@ DecisionTree::DecisionTree(vector< vector<int> > baseDataSet,
 
 /***********************************************************************/
 
-int DecisionTree::calcTreeVariableImportanceAndError(int numCorrect, double treeErrorRate) {
+int DecisionTree::calcTreeVariableImportanceAndError(int& numCorrect, double& treeErrorRate) {
     try {
-        
-//        int numCorrect;
-//        double treeErrorRate;
-//        calcTreeErrorRate(numCorrect, treeErrorRate);
-//        
-//        if (m->control_pressed) {return 0; }
+        numCorrect = 0;
         
         for (int i = 0; i < numFeatures; i++) {
             if (m->control_pressed) { return 0; }
-            
             
                 // if the index is in globalDiscardedFeatureIndices (i.e, null feature) we don't want to shuffle them
             vector<int>::iterator it = find(globalDiscardedFeatureIndices.begin(), globalDiscardedFeatureIndices.end(), i);
             if (it == globalDiscardedFeatureIndices.end()) {        // NOT FOUND
                 // if the standard deviation is very low, we know it's not a good feature at all
                 // we can save some time here by discarding that feature
-                if (m->getStandardDeviation(testSampleFeatureVectors[i]) > featureStandardDeviationThreshold) {
+                
+                vector<int> featureVector = testSampleFeatureVectors[i];
+                if (m->getStandardDeviation(featureVector) > featureStandardDeviationThreshold) {
                     // NOTE: only shuffle the features, never shuffle the output vector
                     // so i = 0 and i will be alwaays <= (numFeatures - 1) as the index at numFeatures will denote
                     // the feature vector
@@ -119,8 +115,8 @@ int DecisionTree::evaluateSample(vector<int> testSample) {
 /***********************************************************************/
 
 int DecisionTree::calcTreeErrorRate(int& numCorrect, double& treeErrorRate){
+    numCorrect = 0;
     try {
-        numCorrect = 0;
         for (int i = 0; i < bootstrappedTestSamples.size(); i++) {
              if (m->control_pressed) {return 0; }
             

@@ -37,7 +37,7 @@ public:
     
     virtual ~DecisionTree(){ deleteTreeNodesRecursively(rootNode); }
     
-    int calcTreeVariableImportanceAndError(int numCorrect, double treeErrorRate);
+    int calcTreeVariableImportanceAndError(int& numCorrect, double& treeErrorRate);
     int evaluateSample(vector<int> testSample);
     int calcTreeErrorRate(int& numCorrect, double& treeErrorRate);
     vector< vector<int> > randomlyShuffleAttribute(vector< vector<int> > samples, int featureIndex);  
