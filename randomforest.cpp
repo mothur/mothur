@@ -13,7 +13,7 @@
 RandomForest::RandomForest(const vector <vector<int> > dataSet,
                            const int numDecisionTrees,
                            const string treeSplitCriterion = "informationGain")
-            : Forest(dataSet, numDecisionTrees, treeSplitCriterion, true, 0.9, true, 0.4, "log2", 0.0) {
+            : Forest(dataSet, numDecisionTrees, treeSplitCriterion, true, 0.9, true, 0.4, "log2", 0.1) {
     m = MothurOut::getInstance();
 }
 
@@ -167,9 +167,11 @@ int RandomForest::populateDecisionTrees() {
             }          
         }
         
-        double avgErrorRateImprovement = 0;
+        double avgErrorRateImprovement = -1.0;
         if (errorRateImprovements.size() > 0) {
-            avgErrorRateImprovement = accumulate(errorRateImprovements.begin(), errorRateImprovements.end(), 0) / errorRateImprovements.size();
+            avgErrorRateImprovement = accumulate(errorRateImprovements.begin(), errorRateImprovements.end(), 0.0);
+            cout << "Total " << avgErrorRateImprovement << " size " << errorRateImprovements.size() << endl;
+            avgErrorRateImprovement /= errorRateImprovements.size();
         }
         
         if (m->debug) {
