@@ -7,6 +7,7 @@
 //
 
 #include "makecontigscommand.h"
+#include "counttable.h"
 
 //**********************************************************************************************************************
 vector<string> MakeContigsCommand::setParameters(){	
@@ -25,6 +26,7 @@ vector<string> MakeContigsCommand::setParameters(){
 
         CommandParameter palign("align", "Multiple", "needleman-gotoh", "needleman", "", "", "","",false,false); parameters.push_back(palign);
         CommandParameter pallfiles("allfiles", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pallfiles);
+        CommandParameter pmakecount("makecount", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pmakecount);
         CommandParameter ptrimoverlap("trimoverlap", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(ptrimoverlap);
 		CommandParameter pmatch("match", "Number", "", "1.0", "", "", "","",false,false); parameters.push_back(pmatch);
 		CommandParameter pmismatch("mismatch", "Number", "", "-1.0", "", "", "","",false,false); parameters.push_back(pmismatch);
@@ -52,7 +54,7 @@ string MakeContigsCommand::getHelpString(){
 		string helpString = "";
 		helpString += "The make.contigs command reads a file, forward fastq file and a reverse fastq file or forward fasta and reverse fasta files and outputs new fasta.  It will also provide new quality files if the fastq or file parameter is used.\n";
         helpString += "If an oligos file is provided barcodes and primers will be trimmed, and a group file will be created.\n";
-		helpString += "The make.contigs command parameters are file, ffastq, rfastq, ffasta, rfasta, fqfile, rqfile, oligos, format, tdiffs, bdiffs, pdiffs, align, match, mismatch, gapopen, gapextend, insert, deltaq, allfiles and processors.\n";
+		helpString += "The make.contigs command parameters are file, ffastq, rfastq, ffasta, rfasta, fqfile, rqfile, oligos, format, tdiffs, bdiffs, pdiffs, align, match, mismatch, gapopen, gapextend, insert, deltaq, allfiles, makecount and processors.\n";
 		helpString += "The ffastq and rfastq, file, or ffasta and rfasta parameters are required.\n";
         helpString += "The file parameter is 2 or 3 column file containing the forward fastq files in the first column and their matching reverse fastq files in the second column, or a groupName then forward fastq file and reverse fastq file.  Mothur will process each pair and create a combined fasta and report file with all the sequences.\n";
         helpString += "The ffastq and rfastq parameters are used to provide a forward fastq and reverse fastq file to process.  If you provide one, you must provide the other.\n";
@@ -73,6 +75,8 @@ string MakeContigsCommand::getHelpString(){
         helpString += "The insert parameter allows you to set a quality scores threshold. In the case where we are trying to decide whether to keep a base or remove it because the base is compared to a gap in the other fragment, if the base has a quality score equal to or below the threshold we eliminate it. Default=20.\n";
         helpString += "The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n";
         helpString += "The allfiles parameter will create separate group and fasta file for each grouping. The default is F.\n";
+        helpString += "The makecount parameter will create a count table file instead of a group file. The default is F.\n";
+
         helpString += "The trimoverlap parameter allows you to trim the sequences to only the overlapping section. The default is F.\n";
         helpString += "The make.contigs command should be in the following format: \n";
 		helpString += "make.contigs(ffastq=yourForwardFastqFile, rfastq=yourReverseFastqFile, align=yourAlignmentMethod) \n";
@@ -91,6 +95,7 @@ string MakeContigsCommand::getOutputPattern(string type) {
         
         if (type == "fasta") {  pattern = "[filename],[tag],contigs.fasta"; } 
         else if (type == "group") {  pattern = "[filename],[tag],contigs.groups"; }
+        else if (type == "count") {  pattern = "[filename],[tag],contigs.count_table"; }
         else if (type == "report") {  pattern = "[filename],[tag],contigs.report"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
         
@@ -110,6 +115,7 @@ MakeContigsCommand::MakeContigsCommand(){
 		outputTypes["fasta"] = tempOutNames;
         outputTypes["group"] = tempOutNames;
         outputTypes["report"] = tempOutNames;
+        outputTypes["count"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "MakeContigsCommand", "MakeContigsCommand");
@@ -145,6 +151,7 @@ MakeContigsCommand::MakeContigsCommand(string option)  {
 			outputTypes["fasta"] = tempOutNames;
             outputTypes["report"] = tempOutNames;
             outputTypes["group"] = tempOutNames;
+            outputTypes["count"] = tempOutNames;
 			
             
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
@@ -320,6 +327,9 @@ MakeContigsCommand::MakeContigsCommand(string option)  {
             temp = validParameter.validFile(parameters, "allfiles", false);		if (temp == "not found") { temp = "F"; }
 			allFiles = m->isTrue(temp);
             
+            temp = validParameter.validFile(parameters, "makecount", false);		if (temp == "not found") { temp = "F"; }
+			makeCount = m->isTrue(temp);
+            
             temp = validParameter.validFile(parameters, "trimoverlap", false);		if (temp == "not found") { temp = "F"; }
 			trimOverlap = m->isTrue(temp);
 			
@@ -369,6 +379,7 @@ int MakeContigsCommand::execute(){
         cvars["[filename]"] = compOutputDir + m->getRootName(m->getSimpleName(file));
         cvars["[tag]"] = "";
         string compositeGroupFile = getOutputFileName("group",cvars);
+        if (makeCount) { compositeGroupFile = getOutputFileName("count",cvars); }
         cvars["[tag]"] = "trim";
         string compositeFastaFile = getOutputFileName("fasta",cvars);
         cvars["[tag]"] = "scrap";
@@ -386,10 +397,14 @@ int MakeContigsCommand::execute(){
             outputNames.push_back(compositeScrapFastaFile); outputTypes["fasta"].push_back(compositeScrapFastaFile);
         }
         
+        map<string, int> totalGroupCounts;
+        CountTable compositeCt;
         for (int l = 0; l < filesToProcess.size(); l++) {
             
             m->mothurOut("\n>>>>>\tProcessing " + filesToProcess[l][0][0] + " (file " + toString(l+1) + " of " + toString(filesToProcess.size()) + ")\t<<<<<\n");
             
+            groupCounts.clear();
+            groupMap.clear();
             vector<vector<string> > fastaFileNames;
             createOligosGroup = false;
             string outputGroupFileName;
@@ -401,6 +416,7 @@ int MakeContigsCommand::execute(){
             if(oligosfile != ""){  createOligosGroup = getOligos(fastaFileNames, variables["[filename]"]);  }
             if (createOligosGroup || createFileGroup) {
                 outputGroupFileName = getOutputFileName("group",variables);
+                if (makeCount) { outputGroupFileName = getOutputFileName("count",variables); }
             }
             
             //give group in file file precedence
@@ -455,39 +471,90 @@ int MakeContigsCommand::execute(){
                     
                     ofstream out;
                     string thisGroupName = thisOutputDir + m->getRootName(m->getSimpleName(it->first));
-                    thisGroupName += getOutputFileName("group",variables); outputNames.push_back(thisGroupName); outputTypes["group"].push_back(thisGroupName); 
-                    m->openOutputFile(thisGroupName, out);
-                    
-                    while (!in.eof()){
-                        if (m->control_pressed) { break; }
+                    if (!makeCount) { thisGroupName += getOutputFileName("group",variables); outputNames.push_back(thisGroupName); outputTypes["group"].push_back(thisGroupName);
+                        m->openOutputFile(thisGroupName, out);
                         
-                        Sequence currSeq(in); m->gobble(in);
-                        out << currSeq.getName() << '\t' << it->second << endl;  
+                        while (!in.eof()){
+                            if (m->control_pressed) { break; }
+                            
+                            Sequence currSeq(in); m->gobble(in);
+                            out << currSeq.getName() << '\t' << it->second << endl;
+                        }
+                        out.close();
+                    }
+                    else {
+                        thisGroupName += getOutputFileName("count",variables); outputNames.push_back(thisGroupName); outputTypes["count"].push_back(thisGroupName);
+                        CountTable ct;
+                        ct.addGroup(it->second);
+                        while (!in.eof()){
+                            if (m->control_pressed) { break; }
+                            
+                            Sequence currSeq(in); m->gobble(in);
+                            vector<int> tempGroupCount; tempGroupCount.push_back(1);
+                            ct.push_back(currSeq.getName(), tempGroupCount);
+                        }
+                        ct.printTable(thisGroupName);
                     }
                     in.close();
-                    out.close();
                 }
             }
             
             if (createFileGroup || createOligosGroup) {
-                ofstream outGroup;
-                m->openOutputFile(outputGroupFileName, outGroup);
-                for (map<string, string>::iterator itGroup = groupMap.begin(); itGroup != groupMap.end(); itGroup++) {
-                    outGroup << itGroup->first << '\t' << itGroup->second << endl;
+                if (makeCount) {
+                    if ((allFiles) || (filesToProcess.size() == 1)) {
+                        CountTable ct;
+                        for (map<string, int>::iterator itGroups = groupCounts.begin(); itGroups != groupCounts.end(); itGroups++) {
+                            ct.addGroup(itGroups->first);
+                        }
+                        vector<string> groups = ct.getNamesOfGroups();
+                        for (map<string, string>::iterator itGroup = groupMap.begin(); itGroup != groupMap.end(); itGroup++) {
+                            vector<int> tempGroupCounts; tempGroupCounts.resize(groups.size(), 0);
+                            ct.push_back(itGroup->first, tempGroupCounts);
+                            ct.setAbund(itGroup->first, itGroup->second, 1);
+                        }
+                        ct.printTable(outputGroupFileName);
+                    }
+                }else {
+                    ofstream outGroup;
+                    m->openOutputFile(outputGroupFileName, outGroup);
+                    for (map<string, string>::iterator itGroup = groupMap.begin(); itGroup != groupMap.end(); itGroup++) {
+                        outGroup << itGroup->first << '\t' << itGroup->second << endl;
+                    }
+                    outGroup.close();
                 }
-                outGroup.close();
             }
             
             if (filesToProcess.size() > 1) { //merge into large combo files
-                if (createFileGroup || createOligosGroup) { 
-                    if (l == 0) { 
-                        ofstream outCGroup;
-                        m->openOutputFile(compositeGroupFile, outCGroup); outCGroup.close();
-                        outputNames.push_back(compositeGroupFile); outputTypes["group"].push_back(compositeGroupFile);
+                if (createFileGroup || createOligosGroup) {
+                    if (makeCount) {
+                        for (map<string, string>::iterator itGroup = groupMap.begin(); itGroup != groupMap.end(); itGroup++) {
+                            vector<string> groups = compositeCt.getNamesOfGroups();
+                            if (m->inUsersGroups(itGroup->second, groups)) {
+                                vector<int> tempGroupCounts; tempGroupCounts.resize(groups.size(), 0);
+                                compositeCt.push_back(itGroup->first, tempGroupCounts);
+                                compositeCt.setAbund(itGroup->first, itGroup->second, 1);
+                            }else{
+                                compositeCt.addGroup(itGroup->second);
+                                vector<int> tempGroupCounts; tempGroupCounts.resize(groups.size()+1, 0);
+                                compositeCt.push_back(itGroup->first, tempGroupCounts);
+                                compositeCt.setAbund(itGroup->first, itGroup->second, 1);
+                            }
+                        }
+                    }else {
+                        if (l == 0) {
+                            ofstream outCGroup;
+                            m->openOutputFile(compositeGroupFile, outCGroup); outCGroup.close();
+                            outputNames.push_back(compositeGroupFile); outputTypes["group"].push_back(compositeGroupFile);
+                        }
+                        m->appendFiles(outputGroupFileName, compositeGroupFile);
+                        if (!allFiles) { m->mothurRemove(outputGroupFileName);  }
+                        else { outputNames.push_back(outputGroupFileName); outputTypes["group"].push_back(outputGroupFileName); }
                     }
-                    m->appendFiles(outputGroupFileName, compositeGroupFile);
-                    if (!allFiles) { m->mothurRemove(outputGroupFileName);  }
-                    else { outputNames.push_back(outputGroupFileName); outputTypes["group"].push_back(outputGroupFileName); }
+                    for (map<string, int>::iterator itGroups = groupCounts.begin(); itGroups != groupCounts.end(); itGroups++) {
+                        map<string, int>::iterator itTemp = totalGroupCounts.find(itGroups->first);
+                        if (itTemp == totalGroupCounts.end()) { totalGroupCounts[itGroups->first] = itGroups->second; } //new group create it in totalGroups
+                        else { itTemp->second += itGroups->second; } //existing group, update total
+                    }
                 }
                 if (l == 0) {  m->appendFiles(outMisMatchFile, compositeMisMatchFile);  }
                 else {  m->appendFilesWithoutHeaders(outMisMatchFile, compositeMisMatchFile);  }
@@ -503,11 +570,20 @@ int MakeContigsCommand::execute(){
                     outputNames.push_back(outMisMatchFile); outputTypes["report"].push_back(outMisMatchFile);
                 }
             }else {
+                totalGroupCounts = groupCounts;
                 outputNames.push_back(outFastaFile); outputTypes["fasta"].push_back(outFastaFile);
                 outputNames.push_back(outScrapFastaFile); outputTypes["fasta"].push_back(outScrapFastaFile);
                 outputNames.push_back(outMisMatchFile); outputTypes["report"].push_back(outMisMatchFile);
-                if (createFileGroup || createOligosGroup) { outputNames.push_back(outputGroupFileName); outputTypes["group"].push_back(outputGroupFileName); }
+                if (createFileGroup || createOligosGroup) {
+                    if (makeCount) { outputNames.push_back(outputGroupFileName); outputTypes["count"].push_back(outputGroupFileName);  }
+                    else { outputNames.push_back(outputGroupFileName); outputTypes["group"].push_back(outputGroupFileName); }
+                }
             }
+        }
+        
+        if ((filesToProcess.size() > 1) && makeCount) { //merge into large combo files
+            compositeCt.printTable(compositeGroupFile);
+            outputNames.push_back(compositeGroupFile); outputTypes["count"].push_back(compositeGroupFile);
         }
         m->mothurOut("It took " + toString(time(NULL) - start) + " secs to process " + toString(numReads) + " sequences.\n");
         
@@ -516,8 +592,8 @@ int MakeContigsCommand::execute(){
 		//output group counts
 		m->mothurOutEndLine();
 		int total = 0;
-		if (groupCounts.size() != 0) {  m->mothurOut("Group count: \n");  }
-		for (map<string, int>::iterator it = groupCounts.begin(); it != groupCounts.end(); it++) {
+		if (totalGroupCounts.size() != 0) {  m->mothurOut("Group count: \n");  }
+		for (map<string, int>::iterator it = totalGroupCounts.begin(); it != totalGroupCounts.end(); it++) {
             total += it->second; m->mothurOut(it->first + "\t" + toString(it->second)); m->mothurOutEndLine(); 
 		}
 		if (total != 0) { m->mothurOut("Total of all groups is " + toString(total)); m->mothurOutEndLine(); }
@@ -534,6 +610,12 @@ int MakeContigsCommand::execute(){
 		itTypes = outputTypes.find("group");
 		if (itTypes != outputTypes.end()) {
 			if ((itTypes->second).size() != 0) { currentGroup = (itTypes->second)[0]; m->setGroupFile(currentGroup); }
+		}
+        
+        string currentCount = "";
+		itTypes = outputTypes.find("count");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { currentCount = (itTypes->second)[0]; m->setCountTableFile(currentCount); }
 		}
 		
         //output files created by command
@@ -643,7 +725,7 @@ int MakeContigsCommand::createProcesses(vector< vector<string> > files, string o
 						}
 					}
 				}
-
+                
 				num = driver(files[process], 
                              outputFasta + toString(getpid()) + ".temp", 
                              outputScrapFasta + toString(getpid()) + ".temp", 
@@ -754,8 +836,7 @@ int MakeContigsCommand::createProcesses(vector< vector<string> > files, string o
                     }
                 }
             }
-
-			          
+			         
 			contigsData* tempcontig = new contigsData(group, files[h], (outputFasta + extension), (outputScrapFasta + extension), (outputMisMatches + extension), align, m, match, misMatch, gapOpen, gapExtend, insert, deltaq, barcodes, primers, tempFASTAFileNames, barcodeNameVector, primerNameVector, pdiffs, bdiffs, tdiffs, createOligosGroup, createFileGroup, allFiles, trimOverlap, h);
 			pDataArray.push_back(tempcontig);
             

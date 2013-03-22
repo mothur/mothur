@@ -59,7 +59,7 @@ public:
     void help() { m->mothurOut(getHelpString()); }	
     
 private:
-    bool abort, allFiles, trimOverlap, createFileGroup, createOligosGroup;
+    bool abort, allFiles, trimOverlap, createFileGroup, createOligosGroup, makeCount;
     string outputDir, ffastqfile, rfastqfile, align, oligosfile, rfastafile, ffastafile, rqualfile, fqualfile, file, format;
 	float match, misMatch, gapOpen, gapExtend;
 	int processors, longestBase, insert, tdiffs, bdiffs, pdiffs, ldiffs, sdiffs, deltaq;
