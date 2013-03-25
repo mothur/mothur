@@ -1007,7 +1007,7 @@ int SubSampleCommand::getSubSampleList() {
 		ListVector* list = input->getListVector();
 		string lastLabel = list->getLabel();
 		
-		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
+        //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = labels;
 
@@ -1265,11 +1265,18 @@ int SubSampleCommand::getSubSampleList() {
         
         if (taxonomyfile != "") {
             if (namefile == "") {
-                //fake nameMap
-                for (set<string>::iterator it = subset.begin(); it != subset.end(); it++) {
-                    vector<string> temp; temp.push_back(*it);
-                    nameMap[*it] = temp;
+                InputData input(listfile, "list");
+                ListVector* list = input.getListVector();
+                string lastLabel = list->getLabel();
+                
+                for (int i = 0; i < list->getNumBins(); i++) {
+                    vector<string> temp;
+                    string bin = list->get(i);
+                    m->splitAtComma(bin, temp);
+                    for (int j = 0; j < temp.size(); j++) { vector<string> tempFakeOut; tempFakeOut.push_back(temp[j]); nameMap[temp[j]] = tempFakeOut; }
                 }
+                delete list;
+                    
                 int tcount = getTax(subset);
                 if (tcount != subset.size()) { m->mothurOut("[ERROR]: subsampled list file contains " + toString(subset.size()) + " sequences, but I only found " + toString(tcount) + " in your taxonomy file, did you forget a name file? Please correct."); m->mothurOutEndLine(); }
             }else {
