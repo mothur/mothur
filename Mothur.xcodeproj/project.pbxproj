@@ -2353,7 +2353,6 @@
 				GCC_OPTIMIZATION_LEVEL = 3;
 				"INSTALL_PATH[sdk=*]" = TARGET_BUILD_DIR;
 				PRODUCT_NAME = mothur;
-				SDKROOT = macosx;
 				SDKROOT = macosx10.8;
 				SKIP_INSTALL = NO;
 			};
@@ -2423,8 +2422,8 @@
 				GCC_MODEL_TUNING = "";
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"VERSION=\"\\\"1.29.2\\\"\"",
-					"RELEASE_DATE=\"\\\"2/12/2013\\\"\"",
+					"VERSION=\"\\\"1.30.0\\\"\"",
+					"RELEASE_DATE=\"\\\"4/01/2013\\\"\"",
 				);
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;

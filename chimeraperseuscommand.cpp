@@ -469,10 +469,7 @@ ChimeraPerseusCommand::ChimeraPerseusCommand(string option)  {
 			m->mothurConvert(temp, beta);
             
 			temp = validParameter.validFile(parameters, "dereplicate", false);	
-			if (temp == "not found") { 
-				if (groupfile != "")    {  temp = "false";					}
-				else                    {  temp = "true"; 	}
-			}
+			if (temp == "not found") { temp = "false";			}
 			dups = m->isTrue(temp);
 		}
 	}

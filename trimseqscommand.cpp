@@ -1533,7 +1533,7 @@ bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
 					// get rest of line in case there is a primer name
 					while (!inOligos.eof())	{	
 						char c = inOligos.get(); 
-						if (c == 10 || c == 13){	break;	}
+						if (c == 10 || c == 13 || c == -1){	break;	}
 						else if (c == 32 || c == 9){;} //space or tab
 						else { 	group += c;  }
 					} 

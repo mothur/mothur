@@ -603,10 +603,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 			m->mothurConvert(temp, numwanted);
             
 			temp = validParameter.validFile(parameters, "dereplicate", false);	
-			if (temp == "not found") { 
-				if (groupfile != "")    {  temp = "false";					}
-				else                    {  temp = "true"; 	}
-			}
+			if (temp == "not found") { temp = "false";			}
 			dups = m->isTrue(temp);
 			
 			blastlocation = validParameter.validFile(parameters, "blastlocation", false);	
@@ -1631,7 +1628,7 @@ int ChimeraSlayerCommand::createProcessesGroups(string outputFName, string accno
 		//Create processor worker threads.
 		for(int i=1; i<processors; i++ ){
 			string extension = toString(i) + ".temp";
-			slayerData* tempslayer = new slayerData(group2NameMap, hasCount, dups, (accnos + extension+".byCount"), (outputFName + extension), (fasta + extension), (accnos + extension), templatefile, search, blastlocation, trimera, trim, realign, m, breakUp[i], fileGroup, ksize, match, mismatch, window, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, divR, priority, i);
+			slayerData* tempslayer = new slayerData(group2NameMap, hasCount, dups, (accnos + toString(i) +".byCount"), (outputFName + extension), (fasta + extension), (accnos + extension), templatefile, search, blastlocation, trimera, trim, realign, m, breakUp[i], fileGroup, ksize, match, mismatch, window, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, divR, priority, i);
 			pDataArray.push_back(tempslayer);
 			processIDS.push_back(i);
 			

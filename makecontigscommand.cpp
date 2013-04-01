@@ -1681,7 +1681,7 @@ bool MakeContigsCommand::getOligos(vector<vector<string> >& fastaFileNames, stri
 					// get rest of line in case there is a primer name
 					while (!in.eof())	{	
 						char c = in.get(); 
-						if (c == 10 || c == 13){	break;	}
+						if (c == 10 || c == 13 || c == -1){	break;	}
 						else if (c == 32 || c == 9){;} //space or tab
 						else { 	group += c;  }
 					} 
@@ -1713,7 +1713,7 @@ bool MakeContigsCommand::getOligos(vector<vector<string> >& fastaFileNames, stri
                     group = "";
                     while (!in.eof())	{	
 						char c = in.get(); 
-						if (c == 10 || c == 13){	break;	}
+						if (c == 10 || c == 13 || c == -1){	break;	}
 						else if (c == 32 || c == 9){;} //space or tab
 						else { 	group += c;  }
 					} 

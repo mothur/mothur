@@ -220,7 +220,7 @@ Sequence::Sequence(ifstream& fastaFile, string& extraInfo, bool getInfo){
 			//read info after sequence name
 			while (!fastaFile.eof())	{	
                 char c = fastaFile.get(); 
-                if (c == 10 || c == 13){  break;	}	
+                if (c == 10 || c == 13 || c == -1){  break;	}
                 extraInfo += c;
             } 
 			

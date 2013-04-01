@@ -469,7 +469,7 @@ int RemoveSeqsCommand::readQual(){
 				saveName = name.substr(1);
 				while (!in.eof())	{	
 					char c = in.get(); 
-					if (c == 10 || c == 13){	break;	}
+					if (c == 10 || c == 13 || c == -1){	break;	}
 					else { name += c; }	
 				} 
 				m->gobble(in);

@@ -564,10 +564,7 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
             
             
 			temp = validParameter.validFile(parameters, "dereplicate", false);	
-			if (temp == "not found") { 
-				if (groupfile != "")    {  temp = "false";					}
-				else                    {  temp = "true"; 	}
-			}
+			if (temp == "not found") { temp = "false";			}
 			dups = m->isTrue(temp);
 
 			

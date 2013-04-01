@@ -28,7 +28,7 @@ vector<string> TrimFlowsCommand::setParameters(){
 		CommandParameter psignal("signal", "Number", "", "0.50", "", "", "","",false,false); parameters.push_back(psignal);
 		CommandParameter pnoise("noise", "Number", "", "0.70", "", "", "","",false,false); parameters.push_back(pnoise);
 		CommandParameter pallfiles("allfiles", "Boolean", "", "t", "", "", "","",false,false); parameters.push_back(pallfiles);
-        CommandParameter porder("order", "Multiple", "A-B", "A", "", "", "","",false,false, true); parameters.push_back(porder);
+        CommandParameter porder("order", "Multiple", "A-B-I", "A", "", "", "","",false,false, true); parameters.push_back(porder);
 		CommandParameter pfasta("fasta", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pfasta);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -578,7 +578,7 @@ void TrimFlowsCommand::getOligos(vector<vector<string> >& outFlowFileNames){
 
 					while (!oligosFile.eof())	{	// get rest of line in case there is a primer name = will have the name of the primer
 						char c = oligosFile.get(); 
-						if (c == 10 || c == 13){	break;	}
+						if (c == 10 || c == 13 || c == -1){	break;	}
 						else if (c == 32 || c == 9){;} //space or tab
 						else { 	group += c;  }
 					} 
