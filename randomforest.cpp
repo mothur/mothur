@@ -56,7 +56,6 @@ int RandomForest::calcForrestErrorRate() {
 }
 
 /***********************************************************************/
-// DONE
 int RandomForest::calcForrestVariableImportance(string filename) {
     try {
     
@@ -74,18 +73,23 @@ int RandomForest::calcForrestVariableImportance(string filename) {
         }
         
         for (int i = 0;  i < numFeatures; i++) {
-            cout << "[" << i << ',' << globalVariableImportanceList[i] << "], ";
             globalVariableImportanceList[i] /= (double)numDecisionTrees;
         }
         
         vector< vector<double> > globalVariableRanks;
         for (int i = 0; i < globalVariableImportanceList.size(); i++) {
+            cout << "[" << i << ',' << globalVariableImportanceList[i] << "], ";
             if (globalVariableImportanceList[i] > 0) {
                 vector<double> globalVariableRank(2, 0);
                 globalVariableRank[0] = i; globalVariableRank[1] = globalVariableImportanceList[i];
                 globalVariableRanks.push_back(globalVariableRank);
             }
         }
+        
+//        for (int i = 0; i < globalVariableRanks.size(); i++) {
+//            cout << m->currentBinLabels[(int)globalVariableRanks[i][0]] << '\t' << globalVariableImportanceList[globalVariableRanks[i][0]] << endl;
+//        }
+
         
         VariableRankDescendingSorterDouble variableRankDescendingSorter;
         sort(globalVariableRanks.begin(), globalVariableRanks.end(), variableRankDescendingSorter);
@@ -145,12 +149,14 @@ int RandomForest::populateDecisionTrees() {
             
           
             decisionTree->calcTreeVariableImportanceAndError(numCorrect, treeErrorRate);
-            if (m->debug && doPruning) {
+            if (m->debug) {
                 m->mothurOut("treeErrorRate: " + toString(treeErrorRate) + " numCorrect: " + toString(numCorrect) + "\n");
             }
             
             double errorRateImprovement = (prePrunedErrorRate - postPrunedErrorRate) / prePrunedErrorRate;
-            m->mothurOut("errorRateImprovement: " + toString(errorRateImprovement) + "\n");
+            if (doPruning) {
+                m->mothurOut("errorRateImprovement: " + toString(errorRateImprovement) + "\n");
+            } 
                         
             if (discardHighErrorTrees) {
                 if (treeErrorRate < highErrorTreeDiscardThreshold) {
@@ -176,14 +182,15 @@ int RandomForest::populateDecisionTrees() {
         double avgErrorRateImprovement = -1.0;
         if (errorRateImprovements.size() > 0) {
             avgErrorRateImprovement = accumulate(errorRateImprovements.begin(), errorRateImprovements.end(), 0.0);
-            cout << "Total " << avgErrorRateImprovement << " size " << errorRateImprovements.size() << endl;
+//            cout << "Total " << avgErrorRateImprovement << " size " << errorRateImprovements.size() << endl;
             avgErrorRateImprovement /= errorRateImprovements.size();
         }
         
-        if (m->debug) {
+        if (m->debug && doPruning) {
             m->mothurOut("avgErrorRateImprovement:" + toString(avgErrorRateImprovement) + "\n");
-            // m->mothurOut("globalOutOfBagEstimates = " + toStringVectorMap(globalOutOfBagEstimates)+ "\n");
         }
+        // m->mothurOut("globalOutOfBagEstimates = " + toStringVectorMap(globalOutOfBagEstimates)+ "\n");
+
         
         return 0;
     }
