@@ -320,13 +320,16 @@ int DecisionTree::findAndUpdateBestFeatureToSplitOn(RFTreeNode* node){
         
         double bestFeatureSplitEntropy = featureMinEntropy;
         int bestFeatureToSplitOnIndex = -1;
-        if (treeSplitCriterion == "gainRatio"){ 
+        if (treeSplitCriterion == "gainratio"){
             bestFeatureToSplitOnIndex = (int)(maxGainRatioIterator - featureSubsetGainRatios.begin());
             // if using 'gainRatio' measure, then featureMinEntropy must be re-updated, as the index
             // for 'featureMaxGainRatio' would be different
             bestFeatureSplitEntropy = featureSubsetEntropies[bestFeatureToSplitOnIndex];
+        } else  if ( treeSplitCriterion == "infogain"){
+            bestFeatureToSplitOnIndex = (int)(minEntropyIterator - featureSubsetEntropies.begin());
+        } else {
+                // TODO: we need an abort mechanism here
         }
-        else { bestFeatureToSplitOnIndex = (int)(minEntropyIterator - featureSubsetEntropies.begin()); }
         
             // TODO: is the following line needed? kept is as future reference
         // splitInformationGain = node.ownEntropy - node.splitFeatureEntropy

@@ -10,7 +10,7 @@
 
 RegularizedRandomForest::RegularizedRandomForest(const vector <vector<int> > dataSet,
                                                  const int numDecisionTrees,
-                                                 const string treeSplitCriterion = "informationGain")
+                                                 const string treeSplitCriterion = "gainratio")
                       : Forest(dataSet,
                                numDecisionTrees,
                                treeSplitCriterion,

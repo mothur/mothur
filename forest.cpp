@@ -11,7 +11,7 @@
 /***********************************************************************/
 Forest::Forest(const std::vector < std::vector<int> > dataSet,
                const int numDecisionTrees,
-               const string treeSplitCriterion = "informationGain",
+               const string treeSplitCriterion = "gainratio",
                const bool doPruning = false,
                const float pruneAggressiveness = 0.9,
                const bool discardHighErrorTrees = true,

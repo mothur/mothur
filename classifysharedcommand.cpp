@@ -166,14 +166,17 @@ ClassifySharedCommand::ClassifySharedCommand(string option) {
       }
       
         // NEW CODE for OTU per split selection criteria
-      string temp = validParameter.validFile(parameters, "otupersplit", false);
-      if (temp == "not found") { temp = "log2"; }
-      if ((temp == "squareroot") || (temp == "log2")) {
-        optimumFeatureSubsetSelectionCriteria = temp;
-      }else { m->mothurOut("Not a valid OTU per split selection method. Valid OTU per split selection methods are 'log2' and 'squareroot'."); m->mothurOutEndLine(); abort = true; }
-      
-      temp = validParameter.validFile(parameters, "numtrees", false); if (temp == "not found"){	temp = "100";	}
-      m->mothurConvert(temp, numDecisionTrees);
+        string temp = validParameter.validFile(parameters, "splitcriteria", false);
+        if (temp == "not found") { temp = "gainratio"; }
+        if ((temp == "gainratio") || (temp == "infogain")) {
+            treeSplitCriterion = temp;
+        } else { m->mothurOut("Not a valid tree splitting criterio. Valid tree splitting criteria are 'gainratio' and 'infogain'.");
+            m->mothurOutEndLine();
+            abort = true;
+        }
+        
+        temp = validParameter.validFile(parameters, "numtrees", false); if (temp == "not found"){	temp = "100";	}
+        m->mothurConvert(temp, numDecisionTrees);
         
             // parameters for pruning
         temp = validParameter.validFile(parameters, "prune", false);
@@ -192,11 +195,14 @@ ClassifySharedCommand::ClassifySharedCommand(string option) {
         if (temp == "not found") { temp = "0.4"; }
         m->mothurConvert(temp, highErrorTreeDiscardThreshold);
         
-        temp = validParameter.validFile(parameters, "splitcriteria", false);
-        if (temp == "not found") { temp = "gainratio"; }
-        if ((temp == "gainratio") || (temp == "infogain")) {
-            treeSplitCriterion = temp;
-        }else { m->mothurOut("Not a valid tree splitting criterio. Valid tree splitting criteria are 'gainratio' and 'infogain'."); m->mothurOutEndLine(); abort = true; }
+        temp = validParameter.validFile(parameters, "otupersplit", false);
+        if (temp == "not found") { temp = "log2"; }
+        if ((temp == "squareroot") || (temp == "log2")) {
+            optimumFeatureSubsetSelectionCriteria = temp;
+        } else { m->mothurOut("Not a valid OTU per split selection method. Valid OTU per split selection methods are 'log2' and 'squareroot'.");
+            m->mothurOutEndLine();
+            abort = true;
+        }
         
         temp = validParameter.validFile(parameters, "stdthreshold", false);
         if (temp == "not found") { temp = "0.0"; }
@@ -365,7 +371,8 @@ void ClassifySharedCommand::processSharedAndDesignData(vector<SharedRAbundVector
             dataSet[i][j] = treatmentToIntMap[treatmentName];
         }
         
-        RandomForest randomForest(dataSet, numDecisionTrees, treeSplitCriterion);
+        RandomForest randomForest(dataSet, numDecisionTrees, treeSplitCriterion, doPruning, pruneAggressiveness, discardHighErrorTrees, highErrorTreeDiscardThreshold, optimumFeatureSubsetSelectionCriteria, featureStandardDeviationThreshold);
+        
         randomForest.populateDecisionTrees();
         randomForest.calcForrestErrorRate();
         
