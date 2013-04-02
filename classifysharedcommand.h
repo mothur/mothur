@@ -34,7 +34,7 @@ private:
     string outputDir;
     vector<string> outputNames, Groups;
   
-    string sharedfile, designfile, otupersplit, splitcriteria;
+    string sharedfile, designfile;
     set<string> labels;
     bool allLines;
   
