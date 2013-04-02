@@ -34,9 +34,7 @@ DecisionTree::DecisionTree(vector< vector<int> > baseDataSet,
 /***********************************************************************/
 
 int DecisionTree::calcTreeVariableImportanceAndError(int& numCorrect, double& treeErrorRate) {
-    try {
-        numCorrect = 0;
-        
+    try {        
         for (int i = 0; i < numFeatures; i++) {
             if (m->control_pressed) { return 0; }
             

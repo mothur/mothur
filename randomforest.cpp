@@ -149,15 +149,16 @@ int RandomForest::populateDecisionTrees() {
             
           
             decisionTree->calcTreeVariableImportanceAndError(numCorrect, treeErrorRate);
+            double errorRateImprovement = (prePrunedErrorRate - postPrunedErrorRate) / prePrunedErrorRate;
+
             if (m->debug) {
                 m->mothurOut("treeErrorRate: " + toString(treeErrorRate) + " numCorrect: " + toString(numCorrect) + "\n");
+                if (doPruning) {
+                    m->mothurOut("errorRateImprovement: " + toString(errorRateImprovement) + "\n");
+                }
             }
             
-            double errorRateImprovement = (prePrunedErrorRate - postPrunedErrorRate) / prePrunedErrorRate;
-            if (doPruning) {
-                m->mothurOut("errorRateImprovement: " + toString(errorRateImprovement) + "\n");
-            } 
-                        
+            
             if (discardHighErrorTrees) {
                 if (treeErrorRate < highErrorTreeDiscardThreshold) {
                     updateGlobalOutOfBagEstimates(decisionTree);
