@@ -66,13 +66,15 @@ int DecisionTree::calcTreeVariableImportanceAndError(int& numCorrect, double& tr
         }
         
         // TODO: do we need to save the variableRanks in the DecisionTree, do we need it later?
-        vector< vector<int> > variableRanks;
+        vector< pair<int, int> > variableRanks;
+        
         for (int i = 0; i < variableImportanceList.size(); i++) {
             if (m->control_pressed) {return 0; }
             if (variableImportanceList[i] > 0) {
                 // TODO: is there a way to optimize the follow line's code?
-                vector<int> variableRank(2, 0);
-                variableRank[0] = i; variableRank[1] = variableImportanceList[i];
+                pair<int, int> variableRank(0, 0);
+                variableRank.first = i;
+                variableRank.second = variableImportanceList[i];
                 variableRanks.push_back(variableRank);
             }
         }

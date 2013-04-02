@@ -76,12 +76,13 @@ int RandomForest::calcForrestVariableImportance(string filename) {
             globalVariableImportanceList[i] /= (double)numDecisionTrees;
         }
         
-        vector< vector<double> > globalVariableRanks;
+        vector< pair<int, double> > globalVariableRanks;
         for (int i = 0; i < globalVariableImportanceList.size(); i++) {
             cout << "[" << i << ',' << globalVariableImportanceList[i] << "], ";
             if (globalVariableImportanceList[i] > 0) {
-                vector<double> globalVariableRank(2, 0);
-                globalVariableRank[0] = i; globalVariableRank[1] = globalVariableImportanceList[i];
+                pair<int, double> globalVariableRank(0, 0.0);
+                globalVariableRank.first = i;
+                globalVariableRank.second = globalVariableImportanceList[i];
                 globalVariableRanks.push_back(globalVariableRank);
             }
         }
@@ -98,7 +99,7 @@ int RandomForest::calcForrestVariableImportance(string filename) {
         m->openOutputFile(filename, out);
         out <<"OTU\tRank\n";
         for (int i = 0; i < globalVariableRanks.size(); i++) {
-            out << m->currentBinLabels[(int)globalVariableRanks[i][0]] << '\t' << globalVariableImportanceList[globalVariableRanks[i][0]] << endl;
+            out << m->currentBinLabels[(int)globalVariableRanks[i].first] << '\t' << globalVariableImportanceList[globalVariableRanks[i].first] << endl;
         }
         out.close();
         return 0;

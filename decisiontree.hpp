@@ -16,10 +16,14 @@
 /***********************************************************************/
 
 struct VariableRankDescendingSorter {
-  bool operator() (vector<int> first, vector<int> second){ return first[1] > second[1]; }
+  bool operator() (const pair<int, int>& firstPair, const pair<int, int>& secondPair){
+      return firstPair.second > secondPair.second;
+  }
 };
 struct VariableRankDescendingSorterDouble {
-    bool operator() (vector<double> first, vector<double> second){ return first[1] > second[1]; }
+    bool operator() (const pair<int, double>& firstPair, const pair<int, double>& secondPair){
+        return firstPair.second > secondPair.second;
+    }
 };
 /***********************************************************************/
 
