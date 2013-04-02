@@ -17,6 +17,14 @@
 
 /**************************************************************************************************/
 
+struct IntPairVectorSorter{
+    bool operator() (const pair<int, int>& firstPair, const pair<int, int>& secondPair) {
+        return firstPair.first < secondPair.first;
+    }
+};
+
+/**************************************************************************************************/
+
 class AbstractDecisionTree{
   
 public:
@@ -32,9 +40,10 @@ protected:
   
     virtual int createBootStrappedSamples();
     virtual int getMinEntropyOfFeature(vector<int> featureVector, vector<int> outputVector, double& minEntropy, int& featureSplitValue, double& intrinsicValue);
-    virtual int getBestSplitAndMinEntropy(vector< vector<int> > featureOutputPairs, vector<int> splitPoints, double& minEntropy, int& minEntropyIndex, double& relatedIntrinsicValue);
+        virtual int getBestSplitAndMinEntropy(vector< pair<int, int> > featureOutputPairs, vector<int> splitPoints, double& minEntropy, int& minEntropyIndex, double& relatedIntrinsicValue);
     virtual double calcIntrinsicValue(int numLessThanValueAtSplitPoint, int numGreaterThanValueAtSplitPoint, int numSamples);
-    virtual double calcSplitEntropy(vector< vector<int> > featureOutputPairs, int splitIndex, int numOutputClasses, bool);
+    virtual double calcSplitEntropy(vector< pair<int, int> > featureOutputPairs, int splitIndex, int numOutputClasses, bool);
+
     virtual int getSplitPopulation(RFTreeNode* node, vector< vector<int> >& leftChildSamples, vector< vector<int> >& rightChildSamples);
     virtual bool checkIfAlreadyClassified(RFTreeNode* treeNode, int& outputClass);
 

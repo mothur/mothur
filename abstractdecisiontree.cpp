@@ -100,22 +100,27 @@ int AbstractDecisionTree::getMinEntropyOfFeature(vector<int> featureVector,
                                                  double& intrinsicValue){
     try {
 
-        vector< vector<int> > featureOutputPair(featureVector.size(), vector<int>(2, 0));
+        vector< pair<int, int> > featureOutputPair(featureVector.size(), pair<int, int>(0, 0));
+        
         for (int i = 0; i < featureVector.size(); i++) { 
             if (m->control_pressed) { return 0; }
-            featureOutputPair[i][0] = featureVector[i];
-            featureOutputPair[i][1] = outputVector[i];
+            
+            featureOutputPair[i].first = featureVector[i];
+            featureOutputPair[i].second = outputVector[i];
         }
-        // TODO: using default behavior to sort(), need to specify the comparator for added safety and compiler portability
-        sort(featureOutputPair.begin(), featureOutputPair.end());
+        // TODO: using default behavior to sort(), need to specify the comparator for added safety and compiler portability,
         
+        IntPairVectorSorter intPairVectorSorter;
+        sort(featureOutputPair.begin(), featureOutputPair.end(), intPairVectorSorter);
         
         vector<int> splitPoints;
-        vector<int> uniqueFeatureValues(1, featureOutputPair[0][0]);
+        vector<int> uniqueFeatureValues(1, featureOutputPair[0].first);
         
         for (int i = 0; i < featureOutputPair.size(); i++) {
+
             if (m->control_pressed) { return 0; }
-            int featureValue = featureOutputPair[i][0];
+            int featureValue = featureOutputPair[i].first;
+
             vector<int>::iterator it = find(uniqueFeatureValues.begin(), uniqueFeatureValues.end(), featureValue);
             if (it == uniqueFeatureValues.end()){                 // NOT FOUND
                 uniqueFeatureValues.push_back(featureValue);
@@ -135,7 +140,7 @@ int AbstractDecisionTree::getMinEntropyOfFeature(vector<int> featureVector,
             featureSplitValue = -1;                                                   // OUTPUT
         }else{
             getBestSplitAndMinEntropy(featureOutputPair, splitPoints, minEntropy, bestSplitIndex, intrinsicValue);  // OUTPUT
-            featureSplitValue = featureOutputPair[splitPoints[bestSplitIndex]][0];    // OUTPUT
+            featureSplitValue = featureOutputPair[splitPoints[bestSplitIndex]].first;    // OUTPUT
         }
         
         return 0;
@@ -166,8 +171,9 @@ double AbstractDecisionTree::calcIntrinsicValue(int numLessThanValueAtSplitPoint
 	} 
 }
 /**************************************************************************************************/
-int AbstractDecisionTree::getBestSplitAndMinEntropy(vector< vector<int> > featureOutputPairs, vector<int> splitPoints,
-                               double& minEntropy, int& minEntropyIndex, double& relatedIntrinsicValue){
+
+int AbstractDecisionTree::getBestSplitAndMinEntropy(vector< pair<int, int> > featureOutputPairs, vector<int> splitPoints,
+                                                    double& minEntropy, int& minEntropyIndex, double& relatedIntrinsicValue){
     try {
         
         int numSamples = (int)featureOutputPairs.size();
@@ -177,14 +183,15 @@ int AbstractDecisionTree::getBestSplitAndMinEntropy(vector< vector<int> > featur
         for (int i = 0; i < splitPoints.size(); i++) {
             if (m->control_pressed) { return 0; }
             int index = splitPoints[i];
-            int valueAtSplitPoint = featureOutputPairs[index][0];
+            int valueAtSplitPoint = featureOutputPairs[index].first;
+
             int numLessThanValueAtSplitPoint = 0;
             int numGreaterThanValueAtSplitPoint = 0;
             
             for (int j = 0; j < featureOutputPairs.size(); j++) {
                 if (m->control_pressed) { return 0; }
-                vector<int> record = featureOutputPairs[j];
-                if (record[0] < valueAtSplitPoint){ numLessThanValueAtSplitPoint++; }
+                pair<int, int> record = featureOutputPairs[j];
+                if (record.first < valueAtSplitPoint){ numLessThanValueAtSplitPoint++; }
                 else{ numGreaterThanValueAtSplitPoint++; }
             }
             
@@ -213,19 +220,19 @@ int AbstractDecisionTree::getBestSplitAndMinEntropy(vector< vector<int> > featur
 }
 /**************************************************************************************************/
 
-double AbstractDecisionTree::calcSplitEntropy(vector< vector<int> > featureOutputPairs, int splitIndex, int numOutputClasses, bool isUpperSplit = true) {
+double AbstractDecisionTree::calcSplitEntropy(vector< pair<int, int> > featureOutputPairs, int splitIndex, int numOutputClasses, bool isUpperSplit = true) {
     try {
         vector<int> classCounts(numOutputClasses, 0);
         
         if (isUpperSplit) { 
-            for (int i = 0; i < splitIndex; i++) { 
+            for (int i = 0; i < splitIndex; i++) {
                 if (m->control_pressed) { return 0; }
-                classCounts[featureOutputPairs[i][1]]++; 
+                classCounts[featureOutputPairs[i].second]++;
             }
         } else {
             for (int i = splitIndex; i < featureOutputPairs.size(); i++) { 
                 if (m->control_pressed) { return 0; }
-                classCounts[featureOutputPairs[i][1]]++; 
+                classCounts[featureOutputPairs[i].second]++;
             }
         }
         
