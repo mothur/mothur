@@ -29,7 +29,7 @@ class AbstractDecisionTree{
   
 public:
   
-    AbstractDecisionTree(vector<vector<int> >baseDataSet, 
+    AbstractDecisionTree(vector<vector<int> >& baseDataSet,
                            vector<int> globalDiscardedFeatureIndices, 
                            OptimumFeatureSubsetSelector optimumFeatureSubsetSelector, 
                            string treeSplitCriterion);    
@@ -47,7 +47,7 @@ protected:
     virtual int getSplitPopulation(RFTreeNode* node, vector< vector<int> >& leftChildSamples, vector< vector<int> >& rightChildSamples);
     virtual bool checkIfAlreadyClassified(RFTreeNode* treeNode, int& outputClass);
 
-    vector< vector<int> > baseDataSet;
+    vector< vector<int> >& baseDataSet;
     int numSamples;
     int numFeatures;
     int numOutputClasses;

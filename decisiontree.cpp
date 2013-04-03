@@ -8,7 +8,7 @@
 
 #include "decisiontree.hpp"
 
-DecisionTree::DecisionTree(vector< vector<int> > baseDataSet,
+DecisionTree::DecisionTree(vector< vector<int> >& baseDataSet,
                            vector<int> globalDiscardedFeatureIndices,
                            OptimumFeatureSubsetSelector optimumFeatureSubsetSelector,
                            string treeSplitCriterion,
