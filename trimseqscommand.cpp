@@ -1648,7 +1648,7 @@ bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
         if (hasPairedBarcodes || hasPrimer) {
             pairedOligos = true;
             if ((primers.size() != 0) || (barcodes.size() != 0) || (linker.size() != 0) || (spacer.size() != 0) || (revPrimer.size() != 0)) { m->control_pressed = true;  m->mothurOut("[ERROR]: cannot mix paired primers and barcodes with non paired or linkers and spacers, quitting."); m->mothurOutEndLine();  return 0; }
-        }
+        }else if (reorient) { m->mothurOut("[Warning]: cannot use checkorient without paired barcodes or primers, ignoring.\n"); m->mothurOutEndLine(); reorient = false; }
         
 		if(barcodeNameVector.size() == 0 && primerNameVector[0] == ""){	allFiles = 0;	}
         

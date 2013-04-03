@@ -44,7 +44,7 @@ string PreClusterCommand::getHelpString(){
 		helpString += "The group parameter allows you to provide a group file so you can cluster by group. \n";
         helpString += "The count parameter allows you to provide a count file so you can cluster by group. \n";
 		helpString += "The diffs parameter allows you to specify maximum number of mismatched bases allowed between sequences in a grouping. The default is 1.\n";
-        helpString += "The topdown parameter allows you to specify whether to cluster from largest abundance to smallest or smallest to largest.  Default=T, meanging largest to smallest.\n";
+        helpString += "The topdown parameter allows you to specify whether to cluster from largest abundance to smallest or smallest to largest.  Default=T, meaning largest to smallest.\n";
 		helpString += "The pre.cluster command should be in the following format: \n";
 		helpString += "pre.cluster(fasta=yourFastaFile, names=yourNamesFile, diffs=yourMaxDiffs) \n";
 		helpString += "Example pre.cluster(fasta=amazon.fasta, diffs=2).\n";

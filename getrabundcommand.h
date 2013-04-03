@@ -38,17 +38,16 @@ public:
 	
 private:
 	
-	string filename, listfile, sabundfile, inputfile, format, outputDir;
+	string filename, listfile, sabundfile, inputfile, format, outputDir, countfile;
 	ofstream out;
-	InputData* input;
-	RAbundVector* rabund;
 	vector<string> outputNames;
 
 	bool abort, allLines, sorted;
 	set<string> labels; //holds labels to be used
 	string label;
 
-	
+	int processList(ofstream& out);
+    int createRabund(CountTable& ct, ListVector*& list, RAbundVector*& rabund);
 };
 
 #endif

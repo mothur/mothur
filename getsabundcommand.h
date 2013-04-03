@@ -34,15 +34,16 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	string filename, format, inputfile, listfile, rabundfile, outputDir;
+	string filename, format, inputfile, listfile, rabundfile, outputDir, countfile;
 	ofstream out;
-	InputData* input;
-	SAbundVector* sabund;
 	vector<string> outputNames;
 
 	bool abort, allLines;
 	set<string> labels; //holds labels to be used
 	string label;
+    
+    int processList(ofstream& out);
+    int createRabund(CountTable& ct, ListVector*& list, RAbundVector*& rabund);
 
 };
 

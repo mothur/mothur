@@ -730,17 +730,6 @@ int RemoveRareCommand::processShared(){
 	try {
 		m->setGroups(Groups);
 		
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(sharedfile);  }
-        map<string, string> variables; 
-        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(sharedfile));
-        variables["[extension]"] = m->getExtension(sharedfile);
-		string outputFileName = getOutputFileName("shared", variables);
-		outputTypes["shared"].push_back(outputFileName); outputNames.push_back(outputFileName);
-		
-		ofstream out;
-		m->openOutputFile(outputFileName, out);
-		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		InputData input(sharedfile, "sharedfile");
 		vector<SharedRAbundVector*> lookup = input.getSharedRAbundVectors();
@@ -750,7 +739,7 @@ int RemoveRareCommand::processShared(){
 		
 		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-			if (m->control_pressed) { for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  out.close(); return 0; }
+			if (m->control_pressed) { for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }   return 0; }
 			
 			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
 				
@@ -758,8 +747,7 @@ int RemoveRareCommand::processShared(){
 				processedLabels.insert(lookup[0]->getLabel());
 				userLabels.erase(lookup[0]->getLabel());
 				
-				if (!m->printedHeaders) { lookup[0]->printHeaders(out); }
-				processLookup(lookup, out);
+				processLookup(lookup);
 			}
 			
 			if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
@@ -772,8 +760,7 @@ int RemoveRareCommand::processShared(){
 				processedLabels.insert(lookup[0]->getLabel());
 				userLabels.erase(lookup[0]->getLabel());
 				
-				if (!m->printedHeaders) { lookup[0]->printHeaders(out); }
-				processLookup(lookup, out);			
+				processLookup(lookup);			
 				
 				//restore real lastlabel to save below
 				lookup[0]->setLabel(saveLabel);
@@ -785,7 +772,7 @@ int RemoveRareCommand::processShared(){
 			lookup = input.getSharedRAbundVectors();
 		}
 		
-		if (m->control_pressed) {  out.close(); return 0; }	
+		if (m->control_pressed) {  return 0; }	
 		
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -806,9 +793,7 @@ int RemoveRareCommand::processShared(){
 			lookup = input.getSharedRAbundVectors(lastLabel);
 			
 			m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
-			
-			if (!m->printedHeaders) { lookup[0]->printHeaders(out); }
-			processLookup(lookup, out);	
+			processLookup(lookup);	
 			
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 		}
@@ -821,10 +806,23 @@ int RemoveRareCommand::processShared(){
 	}
 }
 //**********************************************************************************************************************
-int RemoveRareCommand::processLookup(vector<SharedRAbundVector*>& lookup, ofstream& out){
+int RemoveRareCommand::processLookup(vector<SharedRAbundVector*>& lookup){
 	try {
 		
+        string thisOutputDir = outputDir;
+		if (outputDir == "") {  thisOutputDir += m->hasPath(sharedfile);  }
+        map<string, string> variables;
+        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(sharedfile));
+        variables["[extension]"] = m->getExtension(sharedfile);
+        variables["[tag]"] = lookup[0]->getLabel();
+		string outputFileName = getOutputFileName("shared", variables);
+		outputTypes["shared"].push_back(outputFileName); outputNames.push_back(outputFileName);
+		
+		ofstream out;
+		m->openOutputFile(outputFileName, out);
+        
 		vector<SharedRAbundVector> newRabunds;  newRabunds.resize(lookup.size());
+        vector<string> headers;
 		for (int i = 0; i < lookup.size(); i++) {  
 			newRabunds[i].setGroup(lookup[i]->getGroup());
 			newRabunds[i].setLabel(lookup[i]->getLabel());
@@ -836,7 +834,7 @@ int RemoveRareCommand::processLookup(vector<SharedRAbundVector*>& lookup, ofstre
 			for (int i = 0; i < lookup[0]->getNumBins(); i++) {
 				bool allZero = true;
 				
-				if (m->control_pressed) { return 0; }
+				if (m->control_pressed) { out.close(); return 0; }
 				
 				//for each group
 				for (int j = 0; j < lookup.size(); j++) {
@@ -852,12 +850,13 @@ int RemoveRareCommand::processLookup(vector<SharedRAbundVector*>& lookup, ofstre
 				
 				//eliminates zero otus
 				if (allZero) { for (int j = 0; j < newRabunds.size(); j++) {  newRabunds[j].pop_back(); } }
+                else { headers.push_back(m->currentBinLabels[i]); }
 			}
 		}else {
 			//for each otu
 			for (int i = 0; i < lookup[0]->getNumBins(); i++) {
 				
-				if (m->control_pressed) { return 0; }
+				if (m->control_pressed) { out.close(); return 0; }
 				
 				int totalAbund = 0;
 				//get total otu abundance
@@ -868,17 +867,23 @@ int RemoveRareCommand::processLookup(vector<SharedRAbundVector*>& lookup, ofstre
 				
 				//eliminates otus below rare cutoff
 				if (totalAbund <= nseqs) { for (int j = 0; j < newRabunds.size(); j++) {  newRabunds[j].pop_back(); } }
+                else { headers.push_back(m->currentBinLabels[i]); }
 			}
 		}
 		
 		//do we have any otus above the rare cutoff
-		if (newRabunds[0].getNumBins() != 0) { 
+		if (newRabunds[0].getNumBins() != 0) {
+            out << "label\tGroup\tnumOtus\t";
+            for (int j = 0; j < headers.size(); j++) { out << headers[j] << '\t'; }
+            out << endl;
 			for (int j = 0; j < newRabunds.size(); j++) { 
 				out << newRabunds[j].getLabel() << '\t' << newRabunds[j].getGroup() << '\t';
 				newRabunds[j].print(out); 
 			}
 		}
 		
+        out.close();
+        
 		return 0;
 	}
 	catch(exception& e) {
