@@ -27,7 +27,7 @@ class ChopSeqsCommand : public Command {
 		string getCommandCategory()		{ return "Sequence Processing"; }
 		
         string getHelpString();	
-    string getOutputPattern(string);	
+        string getOutputPattern(string);	
 		string getCitation() { return "http://www.mothur.org/wiki/Chops.seqs"; }
 		string getDescription()		{ return "trim sequence length"; }
 	
@@ -41,7 +41,7 @@ class ChopSeqsCommand : public Command {
             linePair(unsigned long long i, unsigned long long j) : start(i), end(j) {}
         };
     
-		string fastafile, outputDir, keep;
+		string fastafile, outputDir, keep, namefile, groupfile, countfile;
 		bool abort, countGaps, Short;
 		int numbases, processors;
 		vector<string> outputNames;

@@ -115,8 +115,10 @@ int ReadNewickTree::read(CountTable* ct) {
 		
 		//if you are not a nexus file 
 		if ((c = filehandle.peek()) != '#') {  
-			while((c = filehandle.peek()) != EOF) { 
+			while((c = filehandle.peek()) != EOF) {
+                if (m->control_pressed) {  filehandle.close(); return 0; }
 				while ((c = filehandle.peek()) != EOF) {
+                    if (m->control_pressed) {  filehandle.close(); return 0; }
 					// get past comments
 					if(c == '[') {
 						comment = 1;
@@ -146,9 +148,11 @@ int ReadNewickTree::read(CountTable* ct) {
 			Tree* temp = new Tree(ct);  delete temp;
 			
 			nexusTranslation(ct);  //reads file through the translation and updates treemap
-			while((c = filehandle.peek()) != EOF) { 
+			while((c = filehandle.peek()) != EOF) {
+                if (m->control_pressed) {  filehandle.close(); return 0; }
 				// get past comments
-				while ((c = filehandle.peek()) != EOF) {	
+				while ((c = filehandle.peek()) != EOF) {
+                    if (m->control_pressed) {  filehandle.close(); return 0; }
 					if(holder == "[" || holder == "[!"){
 						comment = 1;
 					}
@@ -242,7 +246,7 @@ int ReadNewickTree::readTreeString(CountTable* ct) {
 			n = numLeaves;  //number of leaves / sequences, we want node 1 to start where the leaves left off
 
 			lc = readNewickInt(filehandle, n, T, ct);
-			if (lc == -1) { m->mothurOut("error with lc"); m->mothurOutEndLine(); return -1; } //reports an error in reading
+			if (lc == -1) { m->mothurOut("error with lc"); m->mothurOutEndLine(); m->control_pressed = true; return -1; } //reports an error in reading
 	
 			if(filehandle.peek()==','){							
 				readSpecialChar(filehandle,',',"comma");
@@ -254,7 +258,7 @@ int ReadNewickTree::readTreeString(CountTable* ct) {
 		
 			if(rooted != 1){								
 				rc = readNewickInt(filehandle, n, T, ct);
-				if (rc == -1) { m->mothurOut("error with rc"); m->mothurOutEndLine(); return -1; } //reports an error in reading
+				if (rc == -1) { m->mothurOut("error with rc"); m->mothurOutEndLine(); m->control_pressed = true; return -1; } //reports an error in reading
 				if(filehandle.peek() == ')'){					
 					readSpecialChar(filehandle,')',"right parenthesis");
 				}											

@@ -69,7 +69,7 @@ private:
 	//void randomLabels(string, string);
 	void printBranch(int, ostream&, map<string, string>);  //recursively print out tree
     void printBranch(int, ostream&, string);
-	void parseTreeFile();	//parses through tree file to find names of nodes and number of them
+	int parseTreeFile();	//parses through tree file to find names of nodes and number of them
 							//this is required in case user has sequences in the names file that are
 							//not included in the tree. 
 							//only takes names from the first tree in the tree file and assumes that all trees use the same names.
