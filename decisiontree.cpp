@@ -34,7 +34,16 @@ DecisionTree::DecisionTree(vector< vector<int> > baseDataSet,
 /***********************************************************************/
 
 int DecisionTree::calcTreeVariableImportanceAndError(int& numCorrect, double& treeErrorRate) {
-    try {        
+    try {
+        vector< vector<int> > randomlySampledTestData(bootstrappedTestSamples.size(), vector<int>(bootstrappedTestSamples[0].size(), 0));
+        
+            // TODO: is is possible to further speed up the following O(N^2) by using std::copy?
+        for (int i = 0; i < bootstrappedTestSamples.size(); i++) {
+            for (int j = 0; j < bootstrappedTestSamples[i].size(); j++) {
+                randomlySampledTestData[i][j] = bootstrappedTestSamples[i][j];
+            }
+        }
+        
         for (int i = 0; i < numFeatures; i++) {
             if (m->control_pressed) { return 0; }
             
@@ -49,7 +58,7 @@ int DecisionTree::calcTreeVariableImportanceAndError(int& numCorrect, double& tr
                     // NOTE: only shuffle the features, never shuffle the output vector
                     // so i = 0 and i will be alwaays <= (numFeatures - 1) as the index at numFeatures will denote
                     // the feature vector
-                    vector< vector<int> > randomlySampledTestData = randomlyShuffleAttribute(bootstrappedTestSamples, i);
+                    randomlyShuffleAttribute(bootstrappedTestSamples, i, i - 1, randomlySampledTestData);
 
                     int numCorrectAfterShuffle = 0;
                     for (int j = 0; j < randomlySampledTestData.size(); j++) {
@@ -142,35 +151,44 @@ int DecisionTree::calcTreeErrorRate(int& numCorrect, double& treeErrorRate){
 }
 
 /***********************************************************************/
-
 // TODO: optimize the algo, instead of transposing two time, we can extarct the feature,
 // shuffle it and then re-insert in the original place, thus iproving runnting time
 //This function randomize abundances for a given OTU/feature.
-vector< vector<int> > DecisionTree::randomlyShuffleAttribute(vector< vector<int> > samples, int featureIndex) {
+
+void DecisionTree::randomlyShuffleAttribute(const vector< vector<int> >& samples,
+                               const int featureIndex,
+                               const int prevFeatureIndex,
+                               vector< vector<int> >& shuffledSample) {
     try {
         // NOTE: we need (numFeatures + 1) featureVecotors, the last extra vector is actually outputVector
-        vector< vector<int> > shuffledSample = samples;
-        vector<int> featureVectors(samples.size(), 0);
         
+        // restore previously shuffled feature
+        if (prevFeatureIndex > -1) {
+            for (int j = 0; j < samples.size(); j++) {
+                if (m->control_pressed) { return; }
+                shuffledSample[j][prevFeatureIndex] = samples[j][prevFeatureIndex];
+            }
+        }
+        
+        // now do the shuffling
+        vector<int> featureVectors(samples.size(), 0);
         for (int j = 0; j < samples.size(); j++) {
-            if (m->control_pressed) { return shuffledSample; }
+            if (m->control_pressed) { return; }
             featureVectors[j] = samples[j][featureIndex];
         }
-        
         random_shuffle(featureVectors.begin(), featureVectors.end());
-
         for (int j = 0; j < samples.size(); j++) {
-            if (m->control_pressed) {return shuffledSample; }
+            if (m->control_pressed) { return; }
             shuffledSample[j][featureIndex] = featureVectors[j];
         }
-        
-        return shuffledSample;
     }
 	catch(exception& e) {
-		m->errorOut(e, "DecisionTree", "randomlyShuffleAttribute");
+        m->errorOut(e, "DecisionTree", "randomlyShuffleAttribute");
 		exit(1);
-	} 
+	}
+    
 }
+
 /***********************************************************************/
 
 int DecisionTree::purgeTreeNodesDataRecursively(RFTreeNode* treeNode) {

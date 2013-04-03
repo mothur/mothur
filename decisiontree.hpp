@@ -44,7 +44,12 @@ public:
     int calcTreeVariableImportanceAndError(int& numCorrect, double& treeErrorRate);
     int evaluateSample(vector<int> testSample);
     int calcTreeErrorRate(int& numCorrect, double& treeErrorRate);
-    vector< vector<int> > randomlyShuffleAttribute(vector< vector<int> > samples, int featureIndex);  
+    
+    void randomlyShuffleAttribute(const vector< vector<int> >& samples,
+                                  const int featureIndex,
+                                  const int prevFeatureIndex,
+                                  vector< vector<int> >& shuffledSample);
+    
     void purgeDataSetsFromTree() { purgeTreeNodesDataRecursively(rootNode); }
     int purgeTreeNodesDataRecursively(RFTreeNode* treeNode);
     
