@@ -170,7 +170,7 @@ class MothurOut {
 		int control_pressed;
 		bool executing, runParse, jumble, gui, mothurCalling, debug;
 		
-		//current files - if you add a new type you must edit optionParser->getParameters, get.current command and mothurOut->printCurrentFiles/clearCurrentFiles/getCurrentTypes.
+		//current files - if you add a new type you must edit optionParser->getParameters, get.current and set.current commands and mothurOut->printCurrentFiles/clearCurrentFiles/getCurrentTypes. add a get and set function.
 		string getPhylipFile()		{ return phylipfile;		}
 		string getColumnFile()		{ return columnfile;		}
 		string getListFile()		{ return listfile;			}
@@ -193,6 +193,7 @@ class MothurOut {
 		string getFlowFile()		{ return flowfile;			}
         string getBiomFile()		{ return biomfile;			}
         string getCountTableFile()	{ return counttablefile;	}
+        string getSummaryFile()     { return summaryfile;       }
 		string getProcessors()		{ return processors;		}
 		
 		void setListFile(string f)			{ listfile = getFullPathName(f);			}
@@ -216,6 +217,7 @@ class MothurOut {
 		void setTaxonomyFile(string f)		{ taxonomyfile = getFullPathName(f);		}
 		void setFlowFile(string f)			{ flowfile = getFullPathName(f);			}
         void setBiomFile(string f)			{ biomfile = getFullPathName(f);			}
+        void setSummaryFile(string f)		{ summaryfile = getFullPathName(f);			}
         void setCountTableFile(string f)	{ counttablefile = getFullPathName(f);	groupMode = "count";	}
         void setProcessors(string p)		{ processors = p; mothurOut("\nUsing " + toString(p) + " processors.\n");	}
 		
@@ -253,6 +255,7 @@ class MothurOut {
 			flowfile = "";
             biomfile = "";
             counttablefile = "";
+            summaryfile = "";
 			gui = false;
 			printedHeaders = false;
 			commandInputsConvertError = false;
@@ -269,7 +272,7 @@ class MothurOut {
 		string releaseDate, version;
 	
 		string accnosfile, phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, designfile, taxonomyfile, biomfile;
-		string orderfile, treefile, sharedfile, ordergroupfile, relabundfile, fastafile, qualfile, sfffile, oligosfile, processors, flowfile, counttablefile;
+		string orderfile, treefile, sharedfile, ordergroupfile, relabundfile, fastafile, qualfile, sfffile, oligosfile, processors, flowfile, counttablefile, summaryfile;
 
 		vector<string> Groups;
 		vector<string> namesOfGroups;

@@ -415,6 +415,13 @@ int SeqSummaryCommand::execute(){
 			}
 		#endif
 
+        //set fasta file as new current fastafile
+		string current = "";
+		itTypes = outputTypes.find("summary");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setSummaryFile(current); }
+		}
+        
 		return 0;
 	}
 	catch(exception& e) {

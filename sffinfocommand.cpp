@@ -920,7 +920,7 @@ int SffInfoCommand::readSeqData(ifstream& in, seqRead& read, int numFlowReads, H
 			char buffer5 [2];
 			in.read(buffer5, 2);
 			header.clipQualRight =  be_int2(*(unsigned short *)(&buffer5));
-			
+            
 			//read clipAdapterLeft
 			char buffer6 [2];
 			in.read(buffer6, 2);
@@ -1343,7 +1343,10 @@ int SffInfoCommand::printFlowSeqData(ofstream& out, seqRead& read, Header& heade
 	try {
         
         int endValue = header.clipQualRight;
-        if (header.clipQualRight == 0) {  endValue = read.flowIndex.size(); }
+        if (header.clipQualRight == 0) {
+            endValue = read.flowIndex.size();
+            if (m->debug) { m->mothurOut("[DEBUG]: " + header.name + " has clipQualRight=0.\n"); }
+        }
         if(endValue > header.clipQualLeft){
             
             int rightIndex = 0;

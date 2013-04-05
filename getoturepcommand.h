@@ -56,14 +56,12 @@ public:
 	
 private:
 	ListVector* list;
-	InputData* input;
-	FastaMap* fasta;
 	GroupMap* groupMap;
 	ReadMatrix* readMatrix;
 	FormatMatrix* formatMatrix;
 	NameAssignment* nameMap;
     CountTable ct;
-	string filename, fastafile, listfile, namefile, groupfile, label, sorted, phylipfile, countfile, columnfile, distFile, format, outputDir, groups;
+	string filename, fastafile, listfile, namefile, groupfile, label, sorted, phylipfile, countfile, columnfile, distFile, format, outputDir, groups, method;
 	ofstream out;
 	ifstream in, inNames, inRow;
 	bool abort, allLines, groupError, large, weighted, hasGroups;
@@ -78,13 +76,14 @@ private:
 									// for all distances related to a certain sequence
 	vector<int> rowPositions;
 
-	void readNamesFile();
+	void readNamesFile(FastaMap*&);
 	void readNamesFile(bool);
 	int process(ListVector*);
 	SeqMap getMap(int);
 	string findRep(vector<string>, string); 	// returns the name of the "representative" sequence of given bin or subset of a bin, for groups
+    string findRepAbund(vector<string>, string);
 	int processNames(string, string);
-	int processFastaNames(string, string);
+	int processFastaNames(string, string, FastaMap*&);
     int readDist();
 };
 

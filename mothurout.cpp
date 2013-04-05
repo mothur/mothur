@@ -23,6 +23,7 @@ set<string> MothurOut::getCurrentTypes()  {
         
         set<string> types;
         types.insert("fasta");
+        types.insert("summary");
         types.insert("accnos");
         types.insert("column");
         types.insert("design");
@@ -81,6 +82,7 @@ void MothurOut::printCurrentFiles()  {
         if (biomfile != "")			{  mothurOut("biom=" + biomfile); mothurOutEndLine();				}
         if (counttablefile != "")	{  mothurOut("count=" + counttablefile); mothurOutEndLine();	}
 		if (processors != "1")		{  mothurOut("processors=" + processors); mothurOutEndLine();		}
+        if (summaryfile != "")		{  mothurOut("summary=" + summaryfile); mothurOutEndLine();		}
 		
 	}
 	catch(exception& e) {
@@ -115,6 +117,7 @@ bool MothurOut::hasCurrentFiles()  {
 		if (flowfile != "")			{  return true;			}
         if (biomfile != "")			{  return true;			}
         if (counttablefile != "")	{  return true;			}
+        if (summaryfile != "")	{  return true;			}
 		if (processors != "1")		{  return true;			}
 		
 		return hasCurrent;
@@ -151,6 +154,7 @@ void MothurOut::clearCurrentFiles()  {
 		flowfile = "";
         biomfile = "";
         counttablefile = "";
+        summaryfile = "";
 		processors = "1";
 	}
 	catch(exception& e) {

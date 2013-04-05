@@ -294,7 +294,8 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
             
             summaryfile = validParameter.validFile(parameters, "summary", true);
 			if (summaryfile == "not open") { summaryfile = ""; abort = true; }
-			else if (summaryfile == "not found") { summaryfile = "";  }	
+			else if (summaryfile == "not found") { summaryfile = "";  }
+            else { m->setSummaryFile(summaryfile); }
             
             if ((namefile != "") && (countfile != "")) {
                 m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
