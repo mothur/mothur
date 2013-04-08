@@ -15,10 +15,12 @@ vector<string> FilterSharedCommand::setParameters(){
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
 		CommandParameter pminpercent("minpercent", "Number", "", "-1", "", "", "","",false,false,true); parameters.push_back(pminpercent);
+        CommandParameter prarepercent("rarepercent", "Number", "", "-1", "", "", "","",false,false,true); parameters.push_back(prarepercent);
         CommandParameter pminabund("minabund", "Number", "", "-1", "", "", "","",false,false,true); parameters.push_back(pminabund);
         CommandParameter pmintotal("mintotal", "Number", "", "-1", "", "", "","",false,false,true); parameters.push_back(pmintotal);
         CommandParameter pminnumsamples("minnumsamples", "Number", "", "-1", "", "", "","",false,false,true); parameters.push_back(pminnumsamples);
         CommandParameter pminpercentsamples("minpercentsamples", "Number", "", "-1", "", "", "","",false,false,true); parameters.push_back(pminpercentsamples);
+        CommandParameter pkeepties("keepties", "Boolean", "", "T", "", "", "","",false,false,true); parameters.push_back(pkeepties);
 		CommandParameter pmakerare("makerare", "Boolean", "", "T", "", "", "","",false,false,true); parameters.push_back(pmakerare);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -37,12 +39,14 @@ string FilterSharedCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The filter.shared command is used to remove OTUs based on various critieria.\n";
-		helpString += "The filter.shared command parameters are shared, minpercent, minabund, mintotal, minnumsamples, minpercentsamples, makerare, groups and label.  You must provide a shared file.\n";
+		helpString += "The filter.shared command parameters are shared, minpercent, minabund, mintotal, minnumsamples, minpercentsamples, rarepercent, makerare, keepties, groups and label.  You must provide a shared file.\n";
 		helpString += "The groups parameter allows you to specify which of the groups you would like included. The group names are separated by dashes.\n";
 		helpString += "The label parameter allows you to select what distance levels you would like, and are also separated by dashes.\n";
         
 		helpString += "The minabund parameter allows you indicate the minimum abundance required for each sample in a given OTU.  If any samples abundance falls below the minimum, the OTU is removed. Default=0\n";
         helpString += "The minpercent parameter allows you indicate the minimum relative abundance of an OTU. For example, if the OTUs total abundance across all samples is 8, and the total abundance across all OTUs is 1000, and minpercent=1. The OTU's relative abundance is 0.008, the minimum is 0.01, so the OTU will be removed. Default=0.\n";
+        helpString += "The rarepercent parameter allows you indicate the percentage of otus to remove.  The OTUs chosen to be removed are the rarest.  For example if you have 1000 OTUs, rarepercent=20 would remove the 200 OTUs with the lowest abundance. Default=0.\n";
+        helpString += "The keepties parameter is used with the rarepercent parameter.  It allows you indicate you want to keep the OTUs with the same abundance as the first 'not rare' OTU. For example if you have 10 OTUs, rarepercent=20 abundances of 20, 18, 15, 15, 10, 5, 3, 3, 3, 1. keepties=t, would remove the 10th OTU, but keep the 9th because its abundance ties the 8th OTU. keepties=f would remove OTUs 9 and 10.  Default=T\n";   
         helpString += "The minnumsamples parameter allows you indicate the minimum number of samples present in an OTU. If the number of samples present falls below the minimum, the OTU is removed. Default=0.\n";
         helpString += "The minpercentsamples parameter allows you indicate the minimum percent of sample present in an OTU. For example, if the total number of samples is 10, the number present is 3, and the minpercentsamples=50. The OTU's precent of samples is 0.333, the minimum is 0.50, so the OTU will be removed. Default=0.\n";
         helpString += "The mintotal parameter allows you indicate the minimum abundance required for a given OTU.  If abundance across all samples falls below the minimum, the OTU is removed. Default=0.\n";
@@ -183,6 +187,14 @@ FilterSharedCommand::FilterSharedCommand(string option) {
             if (minPercent < 1) {} //already in percent form
             else {  minPercent = minPercent / 100.0; } //user gave us a whole number version so convert to %
             
+            temp = validParameter.validFile(parameters, "rarepercent", false);
+            if (temp == "not found"){	temp = "-1";		}
+            else { setSomething = true; }
+            
+			m->mothurConvert(temp, rarePercent);
+            if (rarePercent < 1) {} //already in percent form
+            else {  rarePercent = rarePercent / 100.0; } //user gave us a whole number version so convert to %
+            
             temp = validParameter.validFile(parameters, "minpercentsamples", false);		
             if (temp == "not found"){	temp = "-1";		}
             else { setSomething = true; }
@@ -193,6 +205,9 @@ FilterSharedCommand::FilterSharedCommand(string option) {
 			
 			temp = validParameter.validFile(parameters, "makerare", false);		if (temp == "not found"){	temp = "T";		}
 			makeRare = m->isTrue(temp);
+            
+            temp = validParameter.validFile(parameters, "keepties", false);		if (temp == "not found"){	temp = "T";		}
+			keepties = m->isTrue(temp);
             
             if (!setSomething) { m->mothurOut("\nYou did not set any parameters. I will filter using minabund=1.\n\n"); minAbund = 1; }
         }
@@ -332,6 +347,45 @@ int FilterSharedCommand::processShared(vector<SharedRAbundVector*>& thislookup) 
 			filteredLookup.push_back(temp);
         }
         
+        //you want to remove a percentage of OTUs
+        set<string> removeLabels;
+        if (rarePercent != -0.01) {
+            vector<spearmanRank> otus;
+            //rank otus by abundance
+            for (int i = 0; i < thislookup[0]->getNumBins(); i++) {
+                float otuTotal = 0.0;
+                for (int j = 0; j < thislookup.size(); j++) {
+                    otuTotal += thislookup[j]->getAbundance(i);
+                }
+                spearmanRank temp(saveBinLabels[i], otuTotal);
+                otus.push_back(temp);
+            }
+            
+            //sort by abundance
+            sort(otus.begin(), otus.end(), compareSpearman);
+            
+            //find index of cutoff
+            int indexFirstNotRare = ceil(rarePercent * (float)thislookup[0]->getNumBins());
+            
+            //handle ties
+            if (keepties) { //adjust indexFirstNotRare if needed
+                if (indexFirstNotRare != 0) { //not out of bounds
+                    if (otus[indexFirstNotRare].score == otus[indexFirstNotRare-1].score) { //you have a tie
+                        bool tie = true;
+                        for (int i = indexFirstNotRare-1; i >=0; i--) {
+                            if (otus[indexFirstNotRare].score != otus[i].score) { //found value below tie
+                                indexFirstNotRare = i+1; tie = false; break;
+                            }
+                        }
+                        if (tie) { if (m->debug) { m->mothurOut("For distance " + thislookup[0]->getLabel() + " all rare OTUs abundance tie with first 'non rare' OTU, not removing any for rarepercent parameter.\n"); }indexFirstNotRare = 0; }
+                    }
+                }
+            }
+            
+            //saved labels for OTUs above rarepercent
+            for (int i = 0; i < indexFirstNotRare; i++) { removeLabels.insert(otus[i].name); }
+        }
+        
         bool filteredSomething = false;
         int numRemoved = 0;
         for (int i = 0; i < thislookup[0]->getNumBins(); i++) {
@@ -381,6 +435,12 @@ int FilterSharedCommand::processShared(vector<SharedRAbundVector*>& thislookup) 
                 }
                 double percent = samples / total; 
                 if (percent < minPercentSamples) { okay = false; }
+            }
+            
+            if (okay && (rarePercent != -0.01)) {
+                if (removeLabels.count(saveBinLabels[i]) != 0) { //are we on the 'bad' list
+                    okay = false;
+                }
             }
             
             //did this OTU pass the filter criteria

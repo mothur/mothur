@@ -258,7 +258,6 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 
 			namefile = validParameter.validFile(parameters, "name", false);
 			if (namefile == "not found") { namefile = "";  }
-
 			else { 
 				m->splitAtDash(namefile, namefileNames);
 				
