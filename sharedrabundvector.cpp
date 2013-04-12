@@ -212,6 +212,18 @@ int SharedRAbundVector::getAbundance(int index){
 	
 }
 /***********************************************************************/
+//returns vector of abundances 
+vector<int> SharedRAbundVector::getAbundances(){
+    vector<int> abunds;
+    for (int i = 0; i < data.size(); i++) {
+        abunds.push_back(data[i].abundance);
+    }
+    
+	return abunds;
+}
+
+
+/***********************************************************************/
 
 int SharedRAbundVector::numNZ(){
 	int sum = 0;

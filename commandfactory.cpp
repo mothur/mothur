@@ -141,6 +141,7 @@
 #include "getdistscommand.h"
 #include "removedistscommand.h"
 #include "mergetaxsummarycommand.h"
+#include "getmetacommunitycommand.h"
 
 /*******************************************************/
 
@@ -305,6 +306,7 @@ CommandFactory::CommandFactory(){
     commands["get.dists"]           = "get.dists";
     commands["remove.dists"]        = "remove.dists";
     commands["merge.taxsummary"]    = "merge.taxsummary";
+    commands["get.metacommunity"]   = "get.metacommunity";
     
 
 }
@@ -525,6 +527,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         else if(commandName == "get.dists")             {	command = new GetDistsCommand(optionString);                }
         else if(commandName == "remove.dists")          {	command = new RemoveDistsCommand(optionString);             }
         else if(commandName == "merge.taxsummary")      {	command = new MergeTaxSummaryCommand(optionString);         }
+        else if(commandName == "get.metacommunity")     {	command = new GetMetaCommunityCommand(optionString);        }
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -686,6 +689,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
         else if(commandName == "get.dists")             {	pipecommand = new GetDistsCommand(optionString);                }
         else if(commandName == "remove.dists")          {	pipecommand = new RemoveDistsCommand(optionString);             }
         else if(commandName == "merge.taxsummary")      {	pipecommand = new MergeTaxSummaryCommand(optionString);         }
+        else if(commandName == "get.metacommunity")     {	pipecommand = new GetMetaCommunityCommand(optionString);        }
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -833,6 +837,7 @@ Command* CommandFactory::getCommand(string commandName){
         else if(commandName == "get.dists")             {	shellcommand = new GetDistsCommand();               }
         else if(commandName == "remove.dists")          {	shellcommand = new RemoveDistsCommand();            }
         else if(commandName == "merge.taxsummary")      {	shellcommand = new MergeTaxSummaryCommand();        }
+        else if(commandName == "get.metacommunity")     {	shellcommand = new GetMetaCommunityCommand();       }
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;
