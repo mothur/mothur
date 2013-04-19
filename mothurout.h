@@ -40,6 +40,7 @@ class MothurOut {
 		void mothurOutEndLine(); //writes to cout and the logfile
 		void mothurOut(string, ofstream&); //writes to the ofstream, cout and the logfile
 		void mothurOutEndLine(ofstream&); //writes to the ofstream, cout and the logfile
+        void mothurOutJustToScreen(string); //writes to cout
 		void mothurOutJustToLog(string);
 		void errorOut(exception&, string, string);
 		void closeLog();

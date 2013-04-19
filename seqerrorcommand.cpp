@@ -881,7 +881,7 @@ int SeqErrorCommand::driver(string filename, string qFileName, string rFileName,
 				if (queryFile.eof()) { break; }
 			#endif
 			
-			if(index % 100 == 0){	m->mothurOut(toString(index));	m->mothurOutEndLine(); }
+			if(index % 100 == 0){	m->mothurOutJustToScreen(toString(index)+"\n");	 }
 		}
 		queryFile.close();
 		outChimeraReport.close();
@@ -892,7 +892,7 @@ int SeqErrorCommand::driver(string filename, string qFileName, string rFileName,
 		else if(qFileName != "" && aligned == false){   qualFile.close();                       }
         
 		//report progress
-		m->mothurOut(toString(index));	m->mothurOutEndLine();
+		m->mothurOutJustToScreen(toString(index)+"\n");	
 		
 		return index;
 	}

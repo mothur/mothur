@@ -494,13 +494,8 @@ int SeqSummaryCommand::driverCreateSummary(vector<int>& startPosition, vector<in
 			#else
 				if (in.eof()) { break; }
 			#endif
-			
-			//report progress
-			//if((count) % 100 == 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
 		}
-		//report progress
-		//if((count) % 100 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
-		
+				
 		in.close();
 		
 		return count;

@@ -1823,10 +1823,10 @@ int ChimeraSlayerCommand::driver(linePair filePos, string outputFName, string fi
 			
 			delete candidateSeq;
 			//report progress
-			if((count) % 100 == 0){	m->mothurOut("Processing sequence: " + toString(count)); m->mothurOutEndLine();		}
+			if((count) % 100 == 0){	m->mothurOutJustToScreen("Processing sequence: " + toString(count) + "\n");		}
 		}
 		//report progress
-		if((count) % 100 != 0){	m->mothurOut("Processing sequence: " + toString(count)); m->mothurOutEndLine();		}
+		if((count) % 100 != 0){	m->mothurOutJustToScreen("Processing sequence: " + toString(count)+ "\n"); 		}
 		
 		int numNoParents = chimera->getNumNoParents();
 		if (numNoParents == count) { m->mothurOut("[WARNING]: megablast returned 0 potential parents for all your sequences. This could be due to formatdb.exe not being setup properly, please check formatdb.log for errors."); m->mothurOutEndLine(); } 
@@ -1973,10 +1973,10 @@ int ChimeraSlayerCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_Fil
 			delete candidateSeq;
 			
 			//report progress
-			if((i+1) % 100 == 0){  cout << "Processing sequence: " << (i+1) << endl;	m->mothurOutJustToLog("Processing sequence: " + toString(i+1) + "\n");		}
+			if((i+1) % 100 == 0){  cout << "Processing sequence: " << (i+1) << endl;		}
 		}
 		//report progress
-		if(num % 100 != 0){		cout << "Processing sequence: " << num << endl;	m->mothurOutJustToLog("Processing sequence: " + toString(num) + "\n"); 	}
+		if(num % 100 != 0){		cout << "Processing sequence: " << num << endl;		}
 		
 		int numNoParents = chimera->getNumNoParents();
 		if (numNoParents == num) { cout << "[WARNING]: megablast returned 0 potential parents for all your sequences. This could be due to formatdb.exe not being setup properly, please check formatdb.log for errors." << endl; }

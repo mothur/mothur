@@ -597,7 +597,7 @@ int PreClusterCommand::process(string newMapFile){
                     out << "ideal_seq_" << (i+1) << '\t' << alignSeqs[i].numIdentical << endl << chunk << endl;;
                     
                 }//end if active i
-                if(i % 100 == 0)	{ m->mothurOut(toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)); m->mothurOutEndLine();	}
+                if(i % 100 == 0)	{ m->mothurOutJustToScreen(toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)+"\n"); 	}
             }
         }else {
             map<int, string> mapFile;
@@ -632,7 +632,7 @@ int PreClusterCommand::process(string newMapFile){
                     }//end abundance check
                 }//end for loop j
                 
-                if(i % 100 == 0)	{ m->mothurOut(toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)); m->mothurOutEndLine();	}
+                if(i % 100 == 0)	{ m->mothurOutJustToScreen(toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)+"\n"); 	}
             }
             
             for (int i = 0; i < numSeqs; i++) {

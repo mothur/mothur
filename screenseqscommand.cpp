@@ -2409,10 +2409,10 @@ int ScreenSeqsCommand::driver(linePair filePos, string goodFName, string badAccn
 			#endif
 			
 			//report progress
-			if((count) % 100 == 0){	m->mothurOut("Processing sequence: " + toString(count)); m->mothurOutEndLine();		}
+			if((count) % 100 == 0){	m->mothurOutJustToScreen("Processing sequence: " + toString(count)+"\n"); 		}
 		}
 		//report progress
-		if((count) % 100 != 0){	m->mothurOut("Processing sequence: " + toString(count)); m->mothurOutEndLine();		}
+		if((count) % 100 != 0){	m->mothurOutJustToScreen("Processing sequence: " + toString(count)+"\n"); 	}
 		
 			
 		goodFile.close();
@@ -2504,7 +2504,7 @@ int ScreenSeqsCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& 
 			}
 			
 			//report progress
-			if((i) % 100 == 0){	m->mothurOut("Processing sequence: " + toString(i)); m->mothurOutEndLine();		}
+			if((i) % 100 == 0){	m->mothurOutJustToScreen("Processing sequence: " + toString(i)+"\n"); 		}
 		}
 				
 		return 1;

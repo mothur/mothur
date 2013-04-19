@@ -301,7 +301,7 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
                         out << "ideal_seq_" << (i+1) << '\t' << alignSeqs[i].numIdentical << endl << chunk << endl;
                         
                     }//end if active i
-                    if(i % 100 == 0)	{ pDataArray->m->mothurOut(toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)); pDataArray->m->mothurOutEndLine();	}
+                    if(i % 100 == 0)	{ pDataArray->m->mothurOutJustToScreen(toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)+"\n"); 	}
                 }
                 
             }else {
@@ -344,7 +344,7 @@ static DWORD WINAPI MyPreclusterThreadFunction(LPVOID lpParam){
                         }//end abundance check
                     }//end for loop j
                     
-                    if(i % 100 == 0)	{ pDataArray->m->mothurOut(toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)); pDataArray->m->mothurOutEndLine();	}
+                    if(i % 100 == 0)	{ pDataArray->m->mothurOutJustToScreen(toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)+"\n"); 	}
                 }
                 
                 for (int i = 0; i < numSeqs; i++) {

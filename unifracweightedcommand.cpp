@@ -408,7 +408,7 @@ int UnifracWeightedCommand::execute() {
                 delete newCt;
                 delete subSampleTree;
                 
-                if((thisIter+1) % 100 == 0){	m->mothurOut(toString(thisIter+1)); m->mothurOutEndLine();		}
+                if((thisIter+1) % 100 == 0){	m->mothurOutJustToScreen(toString(thisIter+1)+"\n"); 	}
             }
             
             if (m->control_pressed) { delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; } if (random) { delete output; } outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }

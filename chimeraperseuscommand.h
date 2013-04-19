@@ -343,10 +343,10 @@ static DWORD WINAPI MyPerseusThreadFunction(LPVOID lpParam){
 					chimeraFile << j << '\t' << sequences[j].seqName << "\t0\t0\tNull\t0\t0\t0\tNull\tNull\t0.0\t0.0\t0.0\t0\t0\t0\t0.0\t0.0\tgood" << endl;
 				}
 				//report progress
-				if((j+1) % 100 == 0){ 	pDataArray->m->mothurOut("Processing sequence: " + toString(j+1) + "\n");		}
+				if((j+1) % 100 == 0){ 	pDataArray->m->mothurOutJustToScreen("Processing sequence: " + toString(j+1) + "\n");		}
 			}
 			
-			if((numSeqs) % 100 != 0){ 	pDataArray->m->mothurOut("Processing sequence: " + toString(numSeqs) + "\n");		}
+			if((numSeqs) % 100 != 0){ 	pDataArray->m->mothurOutJustToScreen("Processing sequence: " + toString(numSeqs) + "\n");		}
 			
 			chimeraFile.close();
 			accnosFile.close();

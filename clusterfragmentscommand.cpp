@@ -262,10 +262,10 @@ int ClusterFragmentsCommand::execute(){
 				alignSeqs[i].active = 0;
 				
 			}//end if active i
-			if(i % 100 == 0)	{ m->mothurOut(toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)); m->mothurOutEndLine();	}
+			if(i % 100 == 0)	{ m->mothurOutJustToScreen(toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)+"\n"); 	}
 		}
 		
-		if(numSeqs % 100 != 0)	{ m->mothurOut(toString(numSeqs) + "\t" + toString(numSeqs - count) + "\t" + toString(count)); m->mothurOutEndLine();	}
+		if(numSeqs % 100 != 0)	{ m->mothurOutJustToScreen(toString(numSeqs) + "\t" + toString(numSeqs - count) + "\t" + toString(count)+"\n");	}
 	
 		
 		string fileroot = outputDir + m->getRootName(m->getSimpleName(fastafile));

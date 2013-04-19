@@ -421,7 +421,7 @@ int UnifracUnweightedCommand::execute() {
                 delete newCt;
                 delete subSampleTree;
                 
-                if((thisIter+1) % 100 == 0){	m->mothurOut(toString(thisIter+1)); m->mothurOutEndLine();		}
+                if((thisIter+1) % 100 == 0){	m->mothurOutJustToScreen(toString(thisIter+1)+"\n"); 		}
             }
             if (subsample) { m->mothurOut("It took " + toString(time(NULL) - startSubsample) + " secs to run the subsampling."); m->mothurOutEndLine(); }
             

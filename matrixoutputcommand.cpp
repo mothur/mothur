@@ -652,7 +652,7 @@ int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
             }
             
             if (subsample && (thisIter != 0)) {  
-                if((thisIter) % 100 == 0){	m->mothurOut(toString(thisIter)); m->mothurOutEndLine();		}
+                if((thisIter) % 100 == 0){	m->mothurOutJustToScreen(toString(thisIter)+"\n"); 		}
                 calcDistsTotals.push_back(calcDists);
                 for (int i = 0; i < calcDists.size(); i++) {
                     for (int j = 0; j < calcDists[i].size(); j++) {

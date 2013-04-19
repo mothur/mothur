@@ -1046,10 +1046,10 @@ int ChimeraPerseusCommand::driver(string chimeraFileName, vector<seqData>& seque
 			}
 	
 			//report progress
-			if((i+1) % 100 == 0){ 	m->mothurOut("Processing sequence: " + toString(i+1) + "\n");		}
+			if((i+1) % 100 == 0){ 	m->mothurOutJustToScreen("Processing sequence: " + toString(i+1) + "\n");		}
 		}
 		
-		if((numSeqs) % 100 != 0){ 	m->mothurOut("Processing sequence: " + toString(numSeqs) + "\n");		}
+		if((numSeqs) % 100 != 0){ 	m->mothurOutJustToScreen("Processing sequence: " + toString(numSeqs) + "\n");		}
 		
 		chimeraFile.close();
 		accnosFile.close();

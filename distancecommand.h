@@ -119,11 +119,10 @@ static DWORD WINAPI MyDistThreadFunction(LPVOID lpParam){
 				if (pDataArray->output == "lt") { outFile << endl; }
 				
 				if(i % 100 == 0){
-					pDataArray->m->mothurOut(toString(i) + "\t" + toString(time(NULL) - startTime)); pDataArray->m->mothurOutEndLine();
-				}
+					pDataArray->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime)+"\n"); 				}
 				pDataArray->count++;
 			}
-			pDataArray->m->mothurOut(toString(pDataArray->count) + "\t" + toString(time(NULL) - startTime)); pDataArray->m->mothurOutEndLine();
+			pDataArray->m->mothurOutJustToScreen(toString(pDataArray->count) + "\t" + toString(time(NULL) - startTime)+"\n");
 		}else{
 			if(pDataArray->startLine == 0){	outFile << pDataArray->alignDB.getNumSeqs() << endl;	}
 			
@@ -148,11 +147,11 @@ static DWORD WINAPI MyDistThreadFunction(LPVOID lpParam){
 				outFile << endl; 
 				
 				if(i % 100 == 0){
-					pDataArray->m->mothurOut(toString(i) + "\t" + toString(time(NULL) - startTime)); pDataArray->m->mothurOutEndLine();
+					pDataArray->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime)+"\n"); 
 				}
 				pDataArray->count++;
 			}
-			pDataArray->m->mothurOut(toString(pDataArray->count) + "\t" + toString(time(NULL) - startTime)); pDataArray->m->mothurOutEndLine();
+			pDataArray->m->mothurOutJustToScreen(toString(pDataArray->count) + "\t" + toString(time(NULL) - startTime)+"\n"); 
 		}
 		
 		outFile.close();

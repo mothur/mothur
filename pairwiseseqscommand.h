@@ -199,11 +199,11 @@ static DWORD WINAPI MyPairwiseSquareThreadFunction(LPVOID lpParam){
 			outFile << endl; 
 			
 			if(i % 100 == 0){
-				pDataArray->m->mothurOut(toString(i) + "\t" + toString(time(NULL) - startTime)); pDataArray->m->mothurOutEndLine();
+				pDataArray->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime)+"\n"); 
 			}
 			
 		}
-		pDataArray->m->mothurOut(toString(pDataArray->count) + "\t" + toString(time(NULL) - startTime)); pDataArray->m->mothurOutEndLine();
+		pDataArray->m->mothurOutJustToScreen(toString(pDataArray->count) + "\t" + toString(time(NULL) - startTime)+"\n");
 		
 		outFile.close();
         delete alignment;
@@ -302,11 +302,11 @@ static DWORD WINAPI MyPairwiseThreadFunction(LPVOID lpParam){
 			if (pDataArray->output == "lt") { outFile << endl; }
 			
 			if(i % 100 == 0){
-				pDataArray->m->mothurOut(toString(i) + "\t" + toString(time(NULL) - startTime)); pDataArray->m->mothurOutEndLine();
+				pDataArray->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime)+"\n"); 
 			}
 			
 		}
-		pDataArray->m->mothurOut(toString(pDataArray->end-1) + "\t" + toString(time(NULL) - startTime)); pDataArray->m->mothurOutEndLine();
+		pDataArray->m->mothurOutJustToScreen(toString(pDataArray->end-1) + "\t" + toString(time(NULL) - startTime)+"\n");
 		
 		outFile.close();
         delete alignment;

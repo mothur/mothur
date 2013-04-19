@@ -644,11 +644,11 @@ int AlignCommand::driver(linePair* filePos, string alignFName, string reportFNam
 			#endif
 			
 			//report progress
-			if((count) % 100 == 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
+			if((count) % 100 == 0){	m->mothurOutJustToScreen(toString(count) + "\n"); 		}
 			
 		}
 		//report progress
-		if((count) % 100 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
+		if((count) % 100 != 0){	m->mothurOutJustToScreen(toString(count) + "\n"); 		}
 		
 		delete alignment;
 		alignmentFile.close();

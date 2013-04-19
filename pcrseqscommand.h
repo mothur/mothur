@@ -265,10 +265,10 @@ static DWORD WINAPI MyPcrThreadFunction(LPVOID lpParam){
 			}
 						
 			//report progress
-			if((i+1) % 100 == 0){	pDataArray->m->mothurOut("Processing sequence: " + toString(i+1)); pDataArray->m->mothurOutEndLine();		}
+			if((i+1) % 100 == 0){	pDataArray->m->mothurOutJustToScreen("Processing sequence: " + toString(i+1)+"\n"); 	}
 		}
 		//report progress
-		if((pDataArray->count) % 100 != 0){	pDataArray->m->mothurOut("Thread Processing sequence: " + toString(pDataArray->count)); pDataArray->m->mothurOutEndLine();		}
+		if((pDataArray->count) % 100 != 0){	pDataArray->m->mothurOutJustToScreen("Thread Processing sequence: " + toString(pDataArray->count)+"\n"); 		}
 		
 		goodFile.close();
 		inFASTA.close();

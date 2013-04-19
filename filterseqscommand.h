@@ -168,10 +168,10 @@ static DWORD WINAPI MyCreateFilterThreadFunction(LPVOID lpParam){
 			}
             pDataArray->count++;
             //report progress
-			if((i) % 100 == 0){	pDataArray->m->mothurOut(toString(i)); pDataArray->m->mothurOutEndLine();		}
+			if((i) % 100 == 0){	pDataArray->m->mothurOutJustToScreen(toString(i)+"\n"); 		}
 		}
 		
-        if((pDataArray->count) % 100 != 0){	pDataArray->m->mothurOut(toString(pDataArray->count)); pDataArray->m->mothurOutEndLine();		}
+        if((pDataArray->count) % 100 != 0){	pDataArray->m->mothurOutJustToScreen(toString(pDataArray->count)+"\n"); 		}
         
 		in.close();
 		
@@ -223,10 +223,10 @@ static DWORD WINAPI MyRunFilterThreadFunction(LPVOID lpParam){
             }
             pDataArray->count++;
             //report progress
-			if((i) % 100 == 0){	pDataArray->m->mothurOut(toString(i)); pDataArray->m->mothurOutEndLine();		}
+			if((i) % 100 == 0){	pDataArray->m->mothurOutJustToScreen(toString(i)+"\n"); 		}
 		}
 		
-        if((pDataArray->count) % 100 != 0){	pDataArray->m->mothurOut(toString(pDataArray->count)); pDataArray->m->mothurOutEndLine();		}
+        if((pDataArray->count) % 100 != 0){	pDataArray->m->mothurOutJustToScreen(toString(pDataArray->count)+"\n"); 		}
         
 		in.close();
         out.close();

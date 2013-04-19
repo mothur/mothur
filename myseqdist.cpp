@@ -219,11 +219,11 @@ int correctDist::driver(int start, int end, string distFileName){
 			}
 			distFile << endl;
 			
-			if(i % 100 == 0){ m->mothurOut(toString(i) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine(); }
+			if(i % 100 == 0){ m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime)+"\n"); }
 		}
 		distFile.close();
 		
-		if((end-1) % 100 != 0){ m->mothurOut(toString(end-1) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine(); }
+		if((end-1) % 100 != 0){ m->mothurOutJustToScreen(toString(end-1) + "\t" + toString(time(NULL) - startTime)+"\n"); }
 		m->mothurOut("Done.\n");
 		
 		return 0;

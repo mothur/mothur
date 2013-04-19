@@ -327,10 +327,10 @@ static DWORD WINAPI MySlayerThreadFunction(LPVOID lpParam){
 			
 			delete candidateSeq;
 			//report progress
-			if((pDataArray->count) % 100 == 0){	pDataArray->m->mothurOut("Processing sequence: " + toString(pDataArray->count)); pDataArray->m->mothurOutEndLine();		}
+			if((pDataArray->count) % 100 == 0){	pDataArray->m->mothurOutJustToScreen("Processing sequence: " + toString(pDataArray->count) +"\n"); 	}
 		}
 		//report progress
-		if((pDataArray->count) % 100 != 0){	pDataArray->m->mothurOut("Processing sequence: " + toString(pDataArray->count)); pDataArray->m->mothurOutEndLine();		}
+		if((pDataArray->count) % 100 != 0){	pDataArray->m->mothurOutJustToScreen("Processing sequence: " + toString(pDataArray->count)+"\n"); 		}
 		
 		pDataArray->numNoParents = chimera->getNumNoParents();
 		if (pDataArray->numNoParents == pDataArray->count) { 	pDataArray->m->mothurOut("[WARNING]: megablast returned 0 potential parents for all your sequences. This could be due to formatdb.exe not being setup properly, please check formatdb.log for errors.\n"); }
@@ -506,10 +506,10 @@ static DWORD WINAPI MySlayerGroupThreadFunction(LPVOID lpParam){
 				if (inFASTA.eof()) { break; }
 				
 				//report progress
-				if((numSeqs) % 100 == 0){	pDataArray->m->mothurOut("Processing sequence: " + toString(numSeqs)); pDataArray->m->mothurOutEndLine();		}
+				if((numSeqs) % 100 == 0){	pDataArray->m->mothurOutJustToScreen("Processing sequence: " + toString(numSeqs)+"\n"); pDataArray->m->mothurOutEndLine();		}
 			}
 			//report progress
-			if((numSeqs) % 100 != 0){	pDataArray->m->mothurOut("Processing sequence: " + toString(numSeqs)); pDataArray->m->mothurOutEndLine();		}
+			if((numSeqs) % 100 != 0){	pDataArray->m->mothurOutJustToScreen("Processing sequence: " + toString(numSeqs)+"\n"); 		}
 			
 			pDataArray->numNoParents = chimera->getNumNoParents();
 			if (pDataArray->numNoParents == numSeqs) { 	pDataArray->m->mothurOut("[WARNING]: megablast returned 0 potential parents for all your sequences. This could be due to formatdb.exe not being setup properly, please check formatdb.log for errors.\n"); }

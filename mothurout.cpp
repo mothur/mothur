@@ -348,6 +348,27 @@ void MothurOut::mothurOut(string output) {
 	}
 }
 /*********************************************************************************************/
+void MothurOut::mothurOutJustToScreen(string output) {
+	try {
+		
+#ifdef USE_MPI
+        int pid;
+        MPI_Comm_rank(MPI_COMM_WORLD, &pid);
+        
+        if (pid == 0) { //only one process should output to screen
+#endif
+            logger() << output;
+            
+#ifdef USE_MPI
+        }
+#endif
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "MothurOut");
+		exit(1);
+	}
+}
+/*********************************************************************************************/
 void MothurOut::mothurOutEndLine() {
 	try {
 		#ifdef USE_MPI
