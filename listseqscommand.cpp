@@ -297,7 +297,7 @@ int ListSeqsCommand::readFasta(){
 		//ofstream out;
 		//string newFastaName = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "numsAdded.fasta";
 		//m->openOutputFile(newFastaName, out);
-		//int count = 1;
+		int count = 1;
 		//string lastName = "";
 		
 		while(!in.eof()){
@@ -310,7 +310,7 @@ int ListSeqsCommand::readFasta(){
 			if (name != "") {  names.push_back(name);  }
 			
 			m->gobble(in);
-			//count++;
+			if (m->debug) { count++; cout << "[DEBUG]: count = " + toString(count) + ", name = " + currSeq.getName() + "\n"; }
 		}
 		in.close();	
 		//out.close();

@@ -452,11 +452,15 @@ int SeqSummaryCommand::driverCreateSummary(vector<int>& startPosition, vector<in
 		while (!done) {
 				
 			if (m->control_pressed) { in.close(); outSummary.close(); return 1; }
-					
+            
+            if (m->debug) { m->mothurOut("[DEBUG]: count = " + toString(count) + "\n");  }
+            
 			Sequence current(in); m->gobble(in);
            
 			if (current.getName() != "") {
 				
+                if (m->debug) { m->mothurOut("[DEBUG]: " + current.getName() + '\t' + toString(current.getNumBases()) + "\n");  }
+                
 				int num = 1;
 				if ((namefile != "") || (countfile != "")) {
 					//make sure this sequence is in the namefile, else error 
@@ -480,6 +484,8 @@ int SeqSummaryCommand::driverCreateSummary(vector<int>& startPosition, vector<in
 				outSummary << current.getStartPos() << '\t' << current.getEndPos() << '\t';
 				outSummary << current.getNumBases() << '\t' << current.getAmbigBases() << '\t';
 				outSummary << current.getLongHomoPolymer() << '\t' << num << endl;
+                
+                if (m->debug) { m->mothurOut("[DEBUG]: " + current.getName() + '\t' + toString(current.getNumBases()) + "\n");  }
 			}
 			
 			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)

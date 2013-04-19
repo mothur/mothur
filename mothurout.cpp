@@ -1296,15 +1296,15 @@ vector<unsigned long long> MothurOut::setFilePosFasta(string filename, int& num)
 				char c = inFASTA.get(); count++;
 				if (c == '>') {
 					positions.push_back(count-1);
-					//cout << count << endl;
+					if (debug) { mothurOut("[DEBUG]: numSeqs = " + toString(positions.size()) +  " count = " + toString(count) + ".\n"); }
 				}
 			}
 			inFASTA.close();
 		
 			num = positions.size();
-		
-			/*FILE * pFile;
-			long size;
+            if (debug) { mothurOut("[DEBUG]: num = " + toString(num) + ".\n"); }
+			FILE * pFile;
+			unsigned long long size;
 		
 			//get num bytes in file
 			pFile = fopen (filename.c_str(),"rb");
@@ -1313,9 +1313,9 @@ vector<unsigned long long> MothurOut::setFilePosFasta(string filename, int& num)
 				fseek (pFile, 0, SEEK_END);
 				size=ftell (pFile);
 				fclose (pFile);
-			}*/
+			}
 			
-			unsigned long long size = positions[(positions.size()-1)];
+			/*unsigned long long size = positions[(positions.size()-1)];
 			ifstream in;
 			openInputFile(filename, in);
 			
@@ -1325,8 +1325,10 @@ vector<unsigned long long> MothurOut::setFilePosFasta(string filename, int& num)
 				if(in.eof())		{	break;	}
 				else				{	size++;	}
 			}
-			in.close();
-		
+			in.close();*/
+        
+            if (debug) { mothurOut("[DEBUG]: size = " + toString(size) + ".\n"); }
+        
 			positions.push_back(size);
 			positions[0] = 0;
 		

@@ -683,12 +683,12 @@ int Sequence::filterToPos(int start){
     
     if (start > aligned.length()) { start = aligned.length(); m->mothurOut("[ERROR]: start to large.\n"); }
     
-	for(int j = 0; j < start-1; j++) {
+	for(int j = 0; j < start; j++) {
 		aligned[j] = '.';
 	}
 	
     //things like ......----------AT become ................AT
-    for(int j = start-1; j < aligned.length(); j++) {
+    for(int j = start; j < aligned.length(); j++) {
         if (isalpha(aligned[j])) { break; }
         else { aligned[j] = '.'; }
     }
