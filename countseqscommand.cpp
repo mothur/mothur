@@ -8,7 +8,6 @@
  */
 
 #include "countseqscommand.h"
-#include "groupmap.h"
 #include "sharedutilities.h"
 #include "counttable.h"
 
@@ -149,6 +148,10 @@ CountSeqsCommand::CountSeqsCommand(string option)  {
             
             string temp = validParameter.validFile(parameters, "large", false);		if (temp == "not found") {	temp = "F";	}
 			large = m->isTrue(temp);
+            
+            temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
+			m->setProcessors(temp);
+			m->mothurConvert(temp, processors);
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(namefile);		}
@@ -173,11 +176,16 @@ int CountSeqsCommand::execute(){
 		string outputFileName = getOutputFileName("count", variables);
 		
         int total = 0;
+        int start = time(NULL);
         if (!large) { total = processSmall(outputFileName); }
         else { total = processLarge(outputFileName);  }
         
 		if (m->control_pressed) { m->mothurRemove(outputFileName); return 0; }
 		
+        m->mothurOut("It took " + toString(time(NULL) - start) + " secs to create a table for " + toString(total) + " sequences.");
+        m->mothurOutEndLine();
+        m->mothurOutEndLine();
+        
         //set rabund file as new current rabundfile
 		itTypes = outputTypes.find("count");
 		if (itTypes != outputTypes.end()) {
@@ -227,13 +235,171 @@ int CountSeqsCommand::processSmall(string outputFileName){
 			}
 		}
 		out << endl;
-		
-		//open input file
-		ifstream in;
-		m->openInputFile(namefile, in);
+        out.close();
         
-		int total = 0;
-		while (!in.eof()) {
+        int total = createProcesses(groupMap, outputFileName);
+        
+        if (groupfile != "") { delete groupMap; }
+        
+        return total;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "CountSeqsCommand", "processSmall");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+int CountSeqsCommand::createProcesses(GroupMap*& groupMap, string outputFileName) {
+	try {
+		
+		vector<int> processIDS;
+		int process = 0;
+        vector<unsigned long long> positions;
+        vector<linePair> lines;
+        int numSeqs = 0;
+        
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+		positions = m->divideFilePerLine(namefile, processors);
+		for (int i = 0; i < (positions.size()-1); i++) { lines.push_back(linePair(positions[i], positions[(i+1)])); }
+#else
+		if(processors == 1){ lines.push_back(linePair(0, 1000));  }
+        else {
+            int numSeqs = 0;
+            positions = m->setFilePosEachLine(namefile, numSeqs);
+            if (positions.size() < processors) { processors = positions.size(); }
+            
+            //figure out how many sequences you have to process
+            int numSeqsPerProcessor = numSeqs / processors;
+            for (int i = 0; i < processors; i++) {
+                int startIndex =  i * numSeqsPerProcessor;
+                if(i == (processors - 1)){	numSeqsPerProcessor = numSeqs - i * numSeqsPerProcessor; 	}
+                lines.push_back(linePair(positions[startIndex], numSeqsPerProcessor));
+            }
+        }
+#endif
+
+        		
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+		
+		//loop through and create all the processes you want
+		while (process != processors-1) {
+			int pid = fork();
+			
+			if (pid > 0) {
+				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+				process++;
+			}else if (pid == 0){
+                string filename = toString(getpid()) + ".temp";
+				numSeqs = driver(lines[process].start, lines[process].end, filename, groupMap);
+                
+                string tempFile = toString(getpid()) + ".num.temp";
+                ofstream outTemp;
+                m->openOutputFile(tempFile, outTemp);
+                
+                outTemp << numSeqs << endl;
+                outTemp.close();
+                
+				exit(0);
+			}else {
+				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine();
+				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+				exit(0);
+			}
+		}
+		
+		string filename = toString(getpid()) + ".temp";
+        numSeqs = driver(lines[processors-1].start, lines[processors-1].end, filename, groupMap);
+        
+		//force parent to wait until all the processes are done
+		for (int i=0;i<processIDS.size();i++) {
+			int temp = processIDS[i];
+			wait(&temp);
+		}
+        
+        for (int i = 0; i < processIDS.size(); i++) {
+            string tempFile = toString(processIDS[i]) +  ".num.temp";
+            ifstream intemp;
+            m->openInputFile(tempFile, intemp);
+            
+            int num;
+            intemp >> num; intemp.close();
+            numSeqs += num;
+            m->mothurRemove(tempFile);
+        }
+#else		
+		vector<countData*> pDataArray;
+		DWORD   dwThreadIdArray[processors-1];
+		HANDLE  hThreadArray[processors-1];
+        vector<GroupMap*> copies;
+		
+		//Create processor worker threads.
+		for( int i=0; i<processors-1; i++ ){
+			string filename = toString(i) + ".temp";
+            
+            GroupMap* copyGroup = new GroupMap();
+            copyGroup->getCopy(groupMap);
+            copies.push_back(copyGroup);
+            vector<string> cGroups = Groups;
+           
+			countData* temp = new countData(filename, copyGroup, m, lines[i].start, lines[i].end, groupfile, namefile, cGroups);
+			pDataArray.push_back(temp);
+			processIDS.push_back(i);
+			
+			hThreadArray[i] = CreateThread(NULL, 0, MyCountThreadFunction, pDataArray[i], 0, &dwThreadIdArray[i]);
+		}
+		
+		string filename = toString(processors-1) + ".temp";
+        numSeqs = driver(lines[processors-1].start, lines[processors-1].end, filename, groupMap);
+        		
+		//Wait until all threads have terminated.
+		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
+		
+		//Close all thread handles and free memory allocations.
+		for(int i=0; i < pDataArray.size(); i++){
+            numSeqs += pDataArray[i]->total;
+            delete copies[i];
+			CloseHandle(hThreadArray[i]);
+			delete pDataArray[i];
+		}
+#endif
+		
+		//append output files
+		for(int i=0;i<processIDS.size();i++){
+			m->appendFiles((toString(processIDS[i]) + ".temp"), outputFileName);
+			m->mothurRemove((toString(processIDS[i]) + ".temp"));
+		}
+        m->appendFiles(filename, outputFileName);
+        m->mothurRemove(filename);
+
+        
+        //sanity check
+        if (numSeqs != groupMap->getNumSeqs()) {
+            m->mothurOut("[ERROR]: processes reported processing " + toString(numSeqs) + " sequences, but group file indicates you have " + toString(groupMap->getNumSeqs()) + " sequences.");
+            if (processors == 1) { m->mothurOut(" Could you have a file mismatch?\n"); }
+            else { m->mothurOut(" Either you have a file mismatch or a process failed to complete the task assigned to it.\n"); m->control_pressed = true; }
+        }
+		
+		return numSeqs;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "CountSeqsCommand", "createProcesses");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+int CountSeqsCommand::driver(unsigned long long start, unsigned long long end, string outputFileName, GroupMap*& groupMap) {
+	try {
+        
+        ofstream out;
+        m->openOutputFile(outputFileName, out);
+        
+        ifstream in;
+		m->openInputFile(namefile, in);
+		in.seekg(start);
+        
+		bool done = false;
+        int total = 0;
+		while (!done) {
 			if (m->control_pressed) { break; }
 			
 			string firstCol, secondCol;
@@ -242,7 +408,7 @@ int CountSeqsCommand::processSmall(string outputFileName){
             m->checkName(firstCol);
             m->checkName(secondCol);
 			//cout << firstCol << '\t' << secondCol << endl;
-           
+            
 			vector<string> names;
 			m->splitAtChar(secondCol, names, ',');
 			
@@ -280,16 +446,23 @@ int CountSeqsCommand::processSmall(string outputFileName){
 			}
 			
 			total += names.size();
+            
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+            unsigned long long pos = in.tellg();
+            if ((pos == -1) || (pos >= end)) { break; }
+#else
+            if (in.eof()) { break; }
+#endif
+
 		}
 		in.close();
         out.close();
-		
-		if (groupfile != "") { delete groupMap; }
-
+        
         return total;
+
     }
 	catch(exception& e) {
-		m->errorOut(e, "CountSeqsCommand", "processSmall");
+		m->errorOut(e, "CountSeqsCommand", "driver");
 		exit(1);
 	}
 }

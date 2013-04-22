@@ -372,6 +372,22 @@ bool GroupMap::isValidGroup(string groupname) {
 	}
 }
 /************************************************************/
+int GroupMap::getCopy(GroupMap* g) {
+	try {
+        vector<string> names = g->getNamesSeqs();
+        for (int i = 0; i < names.size(); i++) {
+            if (m->control_pressed) { break; }
+            string group = g->getGroup(names[i]);
+            setGroup(names[i], group);
+        }
+        return names.size();
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GroupMap", "getCopy");
+		exit(1);
+	}
+}
+/************************************************************/
 int GroupMap::getNumSeqs(string group) {
 	try {
 		

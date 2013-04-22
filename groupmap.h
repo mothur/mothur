@@ -34,19 +34,22 @@ public:
 		for (int i = 0; i < namesOfGroups.size(); i++) { groupIndex[namesOfGroups[i]] = i; }
 		return namesOfGroups;
 	}
+    vector<string> getNamesSeqs();
 	void setNamesOfGroups(vector<string> sn) { namesOfGroups = sn; }
-	map<string, int> groupIndex;  //groupname, vectorIndex in namesOfGroups. - used by collectdisplays and libshuff commands.
 	int getNumSeqs()  {  return groupmap.size();  }
-	vector<string> getNamesSeqs();
 	vector<string> getNamesSeqs(vector<string>); //get names of seqs belonging to a group or set of groups
 	int getNumSeqs(string); //return the number of seqs in a given group
-			
+    int getCopy(GroupMap*);
+    
+    
+    map<string, int> groupIndex;  //groupname, vectorIndex in namesOfGroups. - used by collectdisplays and libshuff commands.
+    
 private:
 	vector<string> namesOfGroups;
 	MothurOut* m;
 	ifstream fileHandle;
 	string groupFileName;
-	int index;
+    int index;
 	map<string, string>::iterator it;
 	void setNamesOfGroups(string); 
 	map<string, string> groupmap; //sequence name and groupname
