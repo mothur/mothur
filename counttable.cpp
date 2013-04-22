@@ -211,7 +211,7 @@ int CountTable::createTable(string namefile, string groupfile, bool createGroup)
 	}
 }
 /************************************************************/
-int CountTable::readTable(string file) {
+int CountTable::readTable(string file, bool readGroups) {
     try {
         filename = file;
         ifstream in;
@@ -227,7 +227,7 @@ int CountTable::readTable(string file) {
         indexNameMap.clear();
         counts.clear();
         map<int, string> originalGroupIndexes;
-        if (columnHeaders.size() > 2) { hasGroups = true; numGroups = columnHeaders.size() - 2;  }
+        if ((columnHeaders.size() > 2) && readGroups) { hasGroups = true; numGroups = columnHeaders.size() - 2;  }
         for (int i = 2; i < columnHeaders.size(); i++) {  groups.push_back(columnHeaders[i]);  originalGroupIndexes[i-2] = columnHeaders[i]; totalGroups.push_back(0); }
         //sort groups to keep consistent with how we store the groups in groupmap
         sort(groups.begin(), groups.end());
@@ -248,7 +248,13 @@ int CountTable::readTable(string file) {
             
             //if group info, then read it
             vector<int> groupCounts; groupCounts.resize(numGroups, 0);
-            for (int i = 0; i < numGroups; i++) {  int thisIndex = indexGroupMap[originalGroupIndexes[i]]; in >> groupCounts[thisIndex]; m->gobble(in); totalGroups[thisIndex] += groupCounts[thisIndex];  }
+            if (columnHeaders.size() > 2) { //file contains groups
+                if (readGroups) { //user wants to save them
+                    for (int i = 0; i < numGroups; i++) {  int thisIndex = indexGroupMap[originalGroupIndexes[i]]; in >> groupCounts[thisIndex]; m->gobble(in); totalGroups[thisIndex] += groupCounts[thisIndex];  }
+                }else { //read and discard
+                    m->getline(in); m->gobble(in);
+                }
+            }
             
             map<string, int>::iterator it = indexNameMap.find(name);
             if (it == indexNameMap.end()) {

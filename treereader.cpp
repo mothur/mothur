@@ -15,7 +15,7 @@ TreeReader::TreeReader(string tf, string cf) : treefile(tf), countfile(cf)  {
     try {
         m = MothurOut::getInstance();
         ct = new CountTable();
-        ct->readTable(cf);
+        ct->readTable(cf, true);
         
         //if no groupinfo in count file we need to add it
         if (!ct->hasGroupInfo()) {

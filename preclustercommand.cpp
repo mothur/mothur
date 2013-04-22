@@ -192,7 +192,7 @@ PreClusterCommand::PreClusterCommand(string option) {
 			else if (countfile == "not open") { abort = true; countfile =  ""; }	
 			else {   
                 m->setCountTableFile(countfile); 
-                ct.readTable(countfile);
+                ct.readTable(countfile, true);
                 if (ct.hasGroupInfo()) { bygroup = true; }
                 else { bygroup = false;  }
             }

@@ -1168,7 +1168,7 @@ string ClusterSplitCommand::clusterClassicFile(string thisDistFile, string thisN
             cluster->readPhylipFile(thisDistFile, nameMap);
 		}else if (countfile != "") {
             ct = new CountTable();
-            ct->readTable(thisNamefile);
+            ct->readTable(thisNamefile, false);
             cluster->readPhylipFile(thisDistFile, ct);
         }
         tag = cluster->getTag();
@@ -1296,7 +1296,7 @@ string ClusterSplitCommand::clusterFile(string thisDistFile, string thisNamefile
             read->read(nameMap);
 		}else if (countfile != "") {
             ct = new CountTable();
-            ct->readTable(thisNamefile);
+            ct->readTable(thisNamefile, false);
             read->read(ct);
         }else { read->read(nameMap); }
 		

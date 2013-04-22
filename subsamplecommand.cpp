@@ -273,7 +273,7 @@ SubSampleCommand::SubSampleCommand(string option) {
 			else if (countfile == "not found") { countfile = "";  }	
 			else {
                 m->setCountTableFile(countfile); 
-                ct.readTable(countfile);
+                ct.readTable(countfile, true);
             }
             
             if ((namefile != "") && (countfile != "")) {

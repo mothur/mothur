@@ -181,7 +181,7 @@ ClusterFragmentsCommand::ClusterFragmentsCommand(string option) {
             countfile = validParameter.validFile(parameters, "count", true);
 			if (countfile == "not open") { abort = true; countfile = ""; }	
 			else if (countfile == "not found") { countfile = ""; }
-			else { ct.readTable(countfile); m->setCountTableFile(countfile); }
+			else { ct.readTable(countfile, false); m->setCountTableFile(countfile); }
 			
             if ((countfile != "") && (namefile != "")) { m->mothurOut("When executing a cluster.fragments command you must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
 			

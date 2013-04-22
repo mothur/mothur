@@ -32,7 +32,7 @@ SharedListVector::SharedListVector(ifstream& f) : DataVector(), maxRank(0), numB
             groupmap->readMap(); 
         }else {
             countTable = new CountTable();
-            countTable->readTable(m->getCountTableFile());
+            countTable->readTable(m->getCountTableFile(), true);
         }
 
 		int hold;

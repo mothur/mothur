@@ -683,7 +683,7 @@ int ScreenSeqsCommand::screenReports(map<string, string>& badSeqNames){
             if (namefile != "") { nameMap = m->readNames(namefile); }
             else if (countfile != "") {
                 CountTable ct;
-                ct.readTable(countfile);
+                ct.readTable(countfile, true);
                 nameMap = ct.getNameMap();
             }
             getSummary(positions); 
@@ -714,7 +714,7 @@ int ScreenSeqsCommand::screenReports(map<string, string>& badSeqNames){
             if (namefile != "") { nameMap = m->readNames(namefile); }
             else if (countfile != "") {
                 CountTable ct;
-                ct.readTable(countfile);
+                ct.readTable(countfile, true);
                 nameMap = ct.getNameMap();
             }
             getSummaryReport();
@@ -1019,7 +1019,7 @@ int ScreenSeqsCommand::screenFasta(map<string, string>& badSeqNames){
 			if (namefile != "") { nameMap = m->readNames(namefile); }
             else if (countfile != "") {
                 CountTable ct;
-                ct.readTable(countfile);
+                ct.readTable(countfile, true);
                 nameMap = ct.getNameMap();
             }
 			getSummary(positions); 
@@ -2206,7 +2206,7 @@ int ScreenSeqsCommand::screenCountFile(map<string, string> badSeqNames){
         //check for groups that have been eliminated
         CountTable ct;
         if (ct.testGroups(goodCountFile)) {
-            ct.readTable(goodCountFile);
+            ct.readTable(goodCountFile, true);
             ct.printTable(goodCountFile);
         }
 		

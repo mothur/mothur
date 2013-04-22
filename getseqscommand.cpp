@@ -587,7 +587,7 @@ int GetSeqsCommand::readCount(){
         //check for groups that have been eliminated
         CountTable ct;
         if (ct.testGroups(outputFileName)) {
-            ct.readTable(outputFileName);
+            ct.readTable(outputFileName, true);
             ct.printTable(outputFileName);
         }
 		

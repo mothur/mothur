@@ -307,7 +307,7 @@ int GetSAbundCommand::execute(){
 int GetSAbundCommand::processList(ofstream& out){
 	try {
         CountTable ct;
-        ct.readTable(countfile);
+        ct.readTable(countfile, false);
         
         InputData input(inputfile, format);
         ListVector* list = input.getListVector();

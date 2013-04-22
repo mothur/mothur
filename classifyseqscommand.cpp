@@ -812,7 +812,7 @@ int ClassifySeqsCommand::execute(){
                 PhyloSummary* taxaSum;
                 if (hasCount) { 
                     ct = new CountTable();
-                    ct->readTable(countfileNames[s]);
+                    ct->readTable(countfileNames[s], true);
                     taxaSum = new PhyloSummary(taxonomyFileName, ct);
                     taxaSum->summarize(tempTaxonomyFile);
                 }else {

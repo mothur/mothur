@@ -17,6 +17,7 @@ vector<string> CountSeqsCommand::setParameters(){
 	try {
 		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none","count",false,true,true); parameters.push_back(pname);
 		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none","",false,false,true); parameters.push_back(pgroup);
+        CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
         CommandParameter plarge("large", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(plarge);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
@@ -39,6 +40,7 @@ string CountSeqsCommand::getHelpString(){
 		helpString += "The groups parameter allows you to indicate which groups you want to include in the counts, by default all groups in your groupfile are used.\n";
         helpString += "The large parameter indicates the name and group files are too large to fit in RAM.\n";
 		helpString += "When you use the groups parameter and a sequence does not represent any sequences from the groups you specify it is not included in the .count.summary file.\n";
+        helpString += "The processors parameter allows you to specify the number of processors to use. The default is 1.\n";
 		helpString += "The count.seqs command should be in the following format: count.seqs(name=yourNameFile).\n";
 		helpString += "Example count.seqs(name=amazon.names) or make.table(name=amazon.names).\n";
 		helpString += "Note: No spaces between parameter labels (i.e. name), '=' and parameters (i.e.yourNameFile).\n";

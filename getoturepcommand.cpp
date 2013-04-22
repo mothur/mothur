@@ -261,7 +261,7 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 			else if (countfile == "not open") { abort = true; countfile =  ""; }	
 			else {   
                 m->setCountTableFile(countfile); 
-                ct.readTable(countfile);
+                ct.readTable(countfile, true);
                 if (ct.hasGroupInfo()) { hasGroups = true; }
             }
             
@@ -1106,7 +1106,7 @@ int GetOTURepCommand::processFastaNames(string filename, string label, FastaMap*
         
         CountTable thisCt;
         if (countfile != "") {
-            thisCt.readTable(countfile);
+            thisCt.readTable(countfile, true);
             if (tempGroup != "noGroup") { out2 << "Representative_Sequence\ttotal\t" << tempGroup << endl; }
         }
     
@@ -1253,7 +1253,7 @@ int GetOTURepCommand::processNames(string filename, string label) {
         
         CountTable thisCt;
         if (countfile != "") {
-            thisCt.readTable(countfile);
+            thisCt.readTable(countfile, true);
             if (tempGroup != "noGroup") { out2 << "Representative_Sequence\ttotal\t" << tempGroup << endl; }
         }
         

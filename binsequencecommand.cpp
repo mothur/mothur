@@ -249,7 +249,7 @@ int BinSeqCommand::execute(){
 		
 		//if user gave a namesfile then use it
 		if (namesfile != "") {  readNamesFile();  }
-        if (countfile != "") {  ct.readTable(countfile);  }
+        if (countfile != "") {  ct.readTable(countfile, true);  }
 		
 		input = new InputData(listfile, "list");
 		list = input->getListVector();

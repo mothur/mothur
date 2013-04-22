@@ -1088,7 +1088,7 @@ int PcrSeqsCommand::readCount(set<string> badSeqNames){
         //check for groups that have been eliminated
         CountTable ct;
         if (ct.testGroups(goodCountFile)) {
-            ct.readTable(goodCountFile);
+            ct.readTable(goodCountFile, true);
             ct.printTable(goodCountFile);
         }
 		

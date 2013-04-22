@@ -37,6 +37,7 @@ private:
 	string namefile, groupfile, outputDir, groups;
 	bool abort, large;
 	vector<string> Groups, outputNames;
+    int processors;
     
     int processSmall(string);
     int processLarge(string);

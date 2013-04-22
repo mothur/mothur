@@ -203,7 +203,7 @@ int SeqSummaryCommand::execute(){
 		if (namefile != "") { nameMap = m->readNames(namefile); }
         else if (countfile != "") {
             CountTable ct;
-            ct.readTable(countfile);
+            ct.readTable(countfile, false);
             nameMap = ct.getNameMap();
         }
 		

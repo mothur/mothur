@@ -369,7 +369,7 @@ int RemoveGroupsCommand::execute(){
                 m->mothurOut("\n[NOTE]: The count file should contain only unique names, so mothur assumes your fasta, list and taxonomy files also contain only uniques.\n\n");
             }
             CountTable ct;
-            ct.readTable(countfile);
+            ct.readTable(countfile, true);
             if (!ct.hasGroupInfo()) { m->mothurOut("[ERROR]: your count file does not contain group info, aborting.\n"); return 0; }
             
             vector<string> gNamesOfGroups = ct.getNamesOfGroups();

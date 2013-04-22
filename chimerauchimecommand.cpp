@@ -674,7 +674,7 @@ int ChimeraUchimeCommand::execute(){
                 int error;
                 if (hasCount) {
                     CountTable ct;
-                    ct.readTable(nameFile);
+                    ct.readTable(nameFile, true);
                     for(map<string, string>::iterator it = seqs.begin(); it != seqs.end(); it++) {
                         int num = ct.getNumSeqs(it->first);
                         if (num == 0) { error = 1; }
@@ -725,7 +725,7 @@ int ChimeraUchimeCommand::execute(){
 				if(processors == 1)	{	totalSeqs = driverGroups(outputFileName, newFasta, accnosFileName, alnsFileName, newCountFile, 0, groups.size(), groups);
                     
                     if (hasCount && dups) {
-                        CountTable c; c.readTable(nameFile);
+                        CountTable c; c.readTable(nameFile, true);
                         if (!m->isBlank(newCountFile)) {
                             ifstream in2;
                             m->openInputFile(newCountFile, in2);
@@ -755,7 +755,7 @@ int ChimeraUchimeCommand::execute(){
                     
                     if (hasCount) {
                         set<string> doNotRemove;
-                        CountTable c; c.readTable(newCountFile);
+                        CountTable c; c.readTable(newCountFile, true);
                         vector<string> namesInTable = c.getNamesOfSeqs();
                         for (int i = 0; i < namesInTable.size(); i++) {
                             int temp = c.getNumSeqs(namesInTable[i]);
@@ -1795,7 +1795,7 @@ int ChimeraUchimeCommand::createProcessesGroups(string outputFName, string filen
 		int num = 0;
         
         CountTable newCount;
-        if (hasCount && dups) { newCount.readTable(nameFile); }
+        if (hasCount && dups) { newCount.readTable(nameFile, true); }
 		
 		//sanity check
 		if (groups.size() < processors) { processors = groups.size(); }
