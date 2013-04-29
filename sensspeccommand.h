@@ -48,7 +48,7 @@ private:
 	set<string> labels; //holds labels to be used
 
 	long int truePositives, falsePositives, trueNegatives, falseNegatives;
-	bool abort, allLines;
+	bool abort, allLines, square;
 	bool hard;
 	//string lineLabel;
 	double cutoff;
@@ -59,6 +59,7 @@ private:
 	int process(map<string, int>&, string, bool&, string&);
 	int process(set<string>&, string, bool&, string&, int);
     string preProcessList();
+    bool testFile();
 
 };
 
