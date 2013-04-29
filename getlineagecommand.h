@@ -11,6 +11,8 @@
  */
  
 #include "command.hpp"
+#include "sharedrabundvector.h"
+#include "listvector.hpp"
 
 class GetLineageCommand : public Command {
 	
@@ -37,8 +39,10 @@ class GetLineageCommand : public Command {
 	private:
 		set<string> names;
 		vector<string> outputNames, listOfTaxons;
-		string fastafile, namefile, groupfile, alignfile, countfile, listfile, taxfile, outputDir, taxons;
+		string fastafile, namefile, groupfile, alignfile, countfile, listfile, taxfile, outputDir, taxons, sharedfile, constaxonomy, label;
 		bool abort, dups;
+        vector<SharedRAbundVector*> lookup;
+        ListVector* list;
 		
 		int readFasta();
 		int readName();
@@ -46,7 +50,12 @@ class GetLineageCommand : public Command {
 		int readGroup();
 		int readAlign();
 		int readList();
-		int readTax();	
+		int readTax();
+        int readShared();
+        int readConsTax();
+        int readConsList();
+        int getShared();
+        int getListVector();
 		vector< map<string, float> > getTaxons(string);
 };
 

@@ -303,7 +303,7 @@ int ClassifyTreeCommand::getClassifications(Tree*& T){
 		//create a map from tree node index to names of descendants, save time later
 		map<int, map<string, set<string> > > nodeToDescendants; //node# -> (groupName -> groupMembers)
 		for (int i = 0; i < T->getNumNodes(); i++) {
-			if (m->control_pressed) { return 0; }
+            if (m->control_pressed) { return 0; }
 			
 			nodeToDescendants[i] = getDescendantList(T, i, nodeToDescendants);
 		}
@@ -327,7 +327,7 @@ int ClassifyTreeCommand::getClassifications(Tree*& T){
                 tax = getTaxonomy(nodeToDescendants[i][group], size);
                 out << (i+1) << '\t' << size << '\t' << tax << endl;
             }
-           			
+           	
 			T->tree[i].setLabel((i+1));
 		}
 		out.close();
@@ -356,7 +356,6 @@ string ClassifyTreeCommand::getTaxonomy(set<string> names, int& size) {
 		
 		for (set<string>::iterator it = names.begin(); it != names.end(); it++) {
             
-            
 			//if namesfile include the names
 			if (namefile != "") {
                 
@@ -377,7 +376,7 @@ string ClassifyTreeCommand::getTaxonomy(set<string> names, int& size) {
 					}else{
 						//add seq to tree
                         int num = nameCount[(*it)]; // we know its there since we found it in nameMap
-						for (int i = 0; i < num; i++) {  phylo->addSeqToTree((*it)+toString(i), it2->second);  }
+						for (int i = 0; i < num; i++) {  phylo->addSeqToTree((*it)+toString(i), itTax->second);  }
                         size += num;
 					}
 				}

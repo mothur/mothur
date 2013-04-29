@@ -373,12 +373,13 @@ int CountSeqsCommand::createProcesses(GroupMap*& groupMap, string outputFileName
 
         
         //sanity check
-        if (numSeqs != groupMap->getNumSeqs()) {
-            m->mothurOut("[ERROR]: processes reported processing " + toString(numSeqs) + " sequences, but group file indicates you have " + toString(groupMap->getNumSeqs()) + " sequences.");
-            if (processors == 1) { m->mothurOut(" Could you have a file mismatch?\n"); }
-            else { m->mothurOut(" Either you have a file mismatch or a process failed to complete the task assigned to it.\n"); m->control_pressed = true; }
-        }
-		
+        if (groupfile != "") {
+            if (numSeqs != groupMap->getNumSeqs()) {
+                m->mothurOut("[ERROR]: processes reported processing " + toString(numSeqs) + " sequences, but group file indicates you have " + toString(groupMap->getNumSeqs()) + " sequences.");
+                if (processors == 1) { m->mothurOut(" Could you have a file mismatch?\n"); }
+                else { m->mothurOut(" Either you have a file mismatch or a process failed to complete the task assigned to it.\n"); m->control_pressed = true; }
+            }
+		}
 		return numSeqs;
 	}
 	catch(exception& e) {
