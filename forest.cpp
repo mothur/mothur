@@ -10,14 +10,28 @@
 
 /***********************************************************************/
 Forest::Forest(const std::vector < std::vector<int> > dataSet,
-                                           const int numDecisionTrees,
-                                           const string treeSplitCriterion = "informationGain")
-: dataSet(dataSet),
-numDecisionTrees(numDecisionTrees),
-numSamples((int)dataSet.size()),
-numFeatures((int)(dataSet[0].size() - 1)),
-globalVariableImportanceList(numFeatures, 0),
-treeSplitCriterion(treeSplitCriterion) {
+               const int numDecisionTrees,
+               const string treeSplitCriterion = "gainratio",
+               const bool doPruning = false,
+               const float pruneAggressiveness = 0.9,
+               const bool discardHighErrorTrees = true,
+               const float highErrorTreeDiscardThreshold = 0.4,
+               const string optimumFeatureSubsetSelectionCriteria = "log2",
+               const float featureStandardDeviationThreshold = 0.0)
+      : dataSet(dataSet),
+        numDecisionTrees(numDecisionTrees),
+        numSamples((int)dataSet.size()),
+        numFeatures((int)(dataSet[0].size() - 1)),
+        globalVariableImportanceList(numFeatures, 0),
+        treeSplitCriterion(treeSplitCriterion),
+        doPruning(doPruning),
+        pruneAggressiveness(pruneAggressiveness),
+        discardHighErrorTrees(discardHighErrorTrees),
+        highErrorTreeDiscardThreshold(highErrorTreeDiscardThreshold),
+        optimumFeatureSubsetSelectionCriteria(optimumFeatureSubsetSelectionCriteria),
+        featureStandardDeviationThreshold(featureStandardDeviationThreshold)
+        {
+        
     m = MothurOut::getInstance();
     globalDiscardedFeatureIndices = getGlobalDiscardedFeatureIndices();
     // TODO: double check if the implemenatation of 'globalOutOfBagEstimates' is correct
@@ -40,7 +54,7 @@ vector<int> Forest::getGlobalDiscardedFeatureIndices() {
         for (int i = 0; i < featureVectors.size(); i++) {
             if (m->control_pressed) { return globalDiscardedFeatureIndices; }
             double standardDeviation = m->getStandardDeviation(featureVectors[i]);
-            if (standardDeviation <= 0){ globalDiscardedFeatureIndices.push_back(i); }
+            if (standardDeviation <= featureStandardDeviationThreshold){ globalDiscardedFeatureIndices.push_back(i); }
         }
         
         if (m->debug) {

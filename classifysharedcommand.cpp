@@ -20,6 +20,14 @@ vector<string> ClassifySharedCommand::setParameters(){
         CommandParameter potupersplit("otupersplit", "Multiple", "log2-squareroot", "log2", "", "", "","",false,false); parameters.push_back(potupersplit);
         CommandParameter psplitcriteria("splitcriteria", "Multiple", "gainratio-infogain", "gainratio", "", "", "","",false,false); parameters.push_back(psplitcriteria);
 		CommandParameter pnumtrees("numtrees", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pnumtrees);
+        
+            // parameters related to pruning
+        CommandParameter pdopruning("prune", "Boolean", "", "F", "", "", "", "", false, false); parameters.push_back(pdopruning);
+        CommandParameter ppruneaggrns("pruneaggressiveness", "Number", "", "0.9", "", "", "", "", false, false); parameters.push_back(ppruneaggrns);
+        CommandParameter pdiscardhetrees("discarderrortrees", "Boolean", "", "F", "", "", "", "", false, false); parameters.push_back(pdiscardhetrees);
+        CommandParameter phetdiscardthreshold("errorthreshold", "Number", "", "0.4", "", "", "", "", false, false); parameters.push_back(phetdiscardthreshold);
+        CommandParameter psdthreshold("stdthreshold", "Number", "", "0.0", "", "", "", "", false, false); parameters.push_back(psdthreshold);
+            // pruning params end
 
         CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
@@ -81,6 +89,7 @@ ClassifySharedCommand::ClassifySharedCommand() {
     exit(1);
   }
 }
+
 //**********************************************************************************************************************
 ClassifySharedCommand::ClassifySharedCommand(string option) {
   try {
@@ -104,7 +113,6 @@ ClassifySharedCommand::ClassifySharedCommand(string option) {
       for (it = parameters.begin(); it != parameters.end(); it++) {
         if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
       }
-        
         vector<string> tempOutNames;
         outputTypes["summary"] = tempOutNames;
       
@@ -130,7 +138,6 @@ ClassifySharedCommand::ClassifySharedCommand(string option) {
         }
         
       }
-       
         //check for parameters
         //get shared file, it is required
       sharedfile = validParameter.validFile(parameters, "shared", true);
@@ -158,25 +165,51 @@ ClassifySharedCommand::ClassifySharedCommand(string option) {
         outputDir = m->hasPath(sharedfile); //if user entered a file with a path then preserve it
       }
       
-    
         // NEW CODE for OTU per split selection criteria
-      otupersplit = validParameter.validFile(parameters, "otupersplit", false);
-      if (otupersplit == "not found") { otupersplit = "log2"; }
-      if ((otupersplit == "squareroot") || (otupersplit == "log2")) {
-        optimumFeatureSubsetSelectionCriteria = otupersplit;
-      }else { m->mothurOut("Not a valid OTU per split selection method. Valid OTU per split selection methods are 'log2' and 'squareroot'."); m->mothurOutEndLine(); abort = true; }
-      
-        // splitcriteria
-      splitcriteria = validParameter.validFile(parameters, "splitcriteria", false);
-      if (splitcriteria == "not found") { splitcriteria = "gainratio"; }
-      if ((splitcriteria == "gainratio") || (splitcriteria == "infogain")) {
-        treeSplitCriterion = splitcriteria;
-      }else { m->mothurOut("Not a valid tree splitting criterio. Valid tree splitting criteria are 'gainratio' and 'infogain'."); m->mothurOutEndLine(); abort = true; }
-      
-      
-      string temp = validParameter.validFile(parameters, "numtrees", false); if (temp == "not found"){	temp = "100";	}
-      m->mothurConvert(temp, numDecisionTrees);
-
+        string temp = validParameter.validFile(parameters, "splitcriteria", false);
+        if (temp == "not found") { temp = "gainratio"; }
+        if ((temp == "gainratio") || (temp == "infogain")) {
+            treeSplitCriterion = temp;
+        } else { m->mothurOut("Not a valid tree splitting criterio. Valid tree splitting criteria are 'gainratio' and 'infogain'.");
+            m->mothurOutEndLine();
+            abort = true;
+        }
+        
+        temp = validParameter.validFile(parameters, "numtrees", false); if (temp == "not found"){	temp = "100";	}
+        m->mothurConvert(temp, numDecisionTrees);
+        
+            // parameters for pruning
+        temp = validParameter.validFile(parameters, "prune", false);
+        if (temp == "not found") { temp = "f"; }
+        doPruning = m->isTrue(temp);
+        
+        temp = validParameter.validFile(parameters, "pruneaggressiveness", false);
+        if (temp == "not found") { temp = "0.9"; }
+        m->mothurConvert(temp, pruneAggressiveness);
+        
+        temp = validParameter.validFile(parameters, "discarderrortrees", false);
+        if (temp == "not found") { temp = "f"; }
+        discardHighErrorTrees = m->isTrue(temp);
+        
+        temp = validParameter.validFile(parameters, "errorthreshold", false);
+        if (temp == "not found") { temp = "0.4"; }
+        m->mothurConvert(temp, highErrorTreeDiscardThreshold);
+        
+        temp = validParameter.validFile(parameters, "otupersplit", false);
+        if (temp == "not found") { temp = "log2"; }
+        if ((temp == "squareroot") || (temp == "log2")) {
+            optimumFeatureSubsetSelectionCriteria = temp;
+        } else { m->mothurOut("Not a valid OTU per split selection method. Valid OTU per split selection methods are 'log2' and 'squareroot'.");
+            m->mothurOutEndLine();
+            abort = true;
+        }
+        
+        temp = validParameter.validFile(parameters, "stdthreshold", false);
+        if (temp == "not found") { temp = "0.0"; }
+        m->mothurConvert(temp, featureStandardDeviationThreshold);
+                        
+            // end of pruning params
+        
         //Groups must be checked later to make sure they are valid. SharedUtilities has functions of check the validity, just make to so m->setGroups() after the checks.  If you are using these with a shared file no need to check the SharedRAbundVector class will call SharedUtilites for you, kinda nice, huh?
       string groups = validParameter.validFile(parameters, "groups", false);
       if (groups == "not found") { groups = ""; }
@@ -235,7 +268,6 @@ int ClassifySharedCommand::execute() {
         for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
         lookup = input.getSharedRAbundVectors(lastLabel);
         m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
-           
         processSharedAndDesignData(lookup);        
         
         processedLabels.insert(lookup[0]->getLabel());
@@ -339,7 +371,8 @@ void ClassifySharedCommand::processSharedAndDesignData(vector<SharedRAbundVector
             dataSet[i][j] = treatmentToIntMap[treatmentName];
         }
         
-        RandomForest randomForest(dataSet, numDecisionTrees, treeSplitCriterion);
+        RandomForest randomForest(dataSet, numDecisionTrees, treeSplitCriterion, doPruning, pruneAggressiveness, discardHighErrorTrees, highErrorTreeDiscardThreshold, optimumFeatureSubsetSelectionCriteria, featureStandardDeviationThreshold);
+        
         randomForest.populateDecisionTrees();
         randomForest.calcForrestErrorRate();
         

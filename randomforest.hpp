@@ -6,8 +6,8 @@
 //  Copyright (c) 2012 Schloss Lab. All rights reserved.
 //
 
-#ifndef rrf_fs_prototype_randomforest_hpp
-#define rrf_fs_prototype_randomforest_hpp
+#ifndef RF_RANDOMFOREST_HPP
+#define RF_RANDOMFOREST_HPP
 
 #include "macros.h"
 #include "forest.h"
@@ -17,8 +17,15 @@ class RandomForest: public Forest {
     
 public:
     
-    // DONE
-    RandomForest(const vector <vector<int> > dataSet,const int numDecisionTrees, const string);
+    RandomForest(const vector <vector<int> > dataSet,
+                 const int numDecisionTrees,
+                 const string treeSplitCriterion,
+                 const bool doPruning,
+                 const float pruneAggressiveness,
+                 const bool discardHighErrorTrees,
+                 const float highErrorTreeDiscardThreshold,
+                 const string optimumFeatureSubsetSelectionCriteria,
+                 const float featureStandardDeviationThreshold);
     
     
     //NOTE:: if you are going to dynamically cast, aren't you undoing the advantage of abstraction. Why abstract at all?
