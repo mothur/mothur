@@ -211,11 +211,11 @@ static DWORD WINAPI MyClassThreadFunction(LPVOID lpParam){
 			}
 			delete candidateSeq;
 			//report progress
-			if((pDataArray->count) % 100 == 0){	pDataArray->m->mothurOut("Processing sequence: " + toString(pDataArray->count)); pDataArray->m->mothurOutEndLine();		}
+			if((pDataArray->count) % 100 == 0){	pDataArray->m->mothurOutJustToScreen("Processing sequence: " + toString(pDataArray->count)+"\n"); 	}
 			
 		}
 		//report progress
-		if((pDataArray->count) % 100 != 0){	pDataArray->m->mothurOut("Processing sequence: " + toString(pDataArray->count)); pDataArray->m->mothurOutEndLine();		}
+		if((pDataArray->count) % 100 != 0){	pDataArray->m->mothurOutJustToScreen("Processing sequence: " + toString(pDataArray->count)+"\n"); 		}
 		
 		delete myclassify;
 		inFASTA.close();

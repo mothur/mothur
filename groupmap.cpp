@@ -317,6 +317,10 @@ string GroupMap::getGroup(string sequenceName) {
 	if (it != groupmap.end()) { //sequence name was in group file
 		return it->second;	
 	}else {
+        //look for it in names of groups to see if the user accidently used the wrong file
+        if (m->inUsersGroups(sequenceName, namesOfGroups)) {
+            m->mothurOut("[WARNING]: Your group or design file contains a group named " + sequenceName + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group."); m->mothurOutEndLine(); 
+        }
 		return "not found";
 	}
 }
@@ -364,6 +368,22 @@ bool GroupMap::isValidGroup(string groupname) {
 	}
 	catch(exception& e) {
 		m->errorOut(e, "GroupMap", "isValidGroup");
+		exit(1);
+	}
+}
+/************************************************************/
+int GroupMap::getCopy(GroupMap* g) {
+	try {
+        vector<string> names = g->getNamesSeqs();
+        for (int i = 0; i < names.size(); i++) {
+            if (m->control_pressed) { break; }
+            string group = g->getGroup(names[i]);
+            setGroup(names[i], group);
+        }
+        return names.size();
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GroupMap", "getCopy");
 		exit(1);
 	}
 }

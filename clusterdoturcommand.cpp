@@ -226,7 +226,7 @@ int ClusterDoturCommand::execute(){
             delete nameMap;
 		}else if (countfile != "") {
             ct = new CountTable();
-            ct->readTable(countfile);
+            ct->readTable(countfile, false);
             cluster->readPhylipFile(phylipfile, ct);
             delete ct;
         }else {

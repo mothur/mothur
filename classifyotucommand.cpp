@@ -293,7 +293,7 @@ int ClassifyOtuCommand::execute(){
 		if (namefile != "")     {	m->readNames(namefile, nameMap, true);	}
         if (groupfile != "")    {   groupMap = new GroupMap(groupfile);  groupMap->readMap();  groups = groupMap->getNamesOfGroups(); }
         else { groupMap = NULL;  }
-        if (countfile != "") {  ct = new CountTable(); ct->readTable(countfile);  if (ct->hasGroupInfo()) { groups = ct->getNamesOfGroups(); } }
+        if (countfile != "") {  ct = new CountTable(); ct->readTable(countfile, true);  if (ct->hasGroupInfo()) { groups = ct->getNamesOfGroups(); } }
         else {  ct = NULL;    }
         
 		//read taxonomy file and save in map for easy access in building bin trees

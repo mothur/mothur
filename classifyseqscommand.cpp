@@ -258,7 +258,6 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 
 			namefile = validParameter.validFile(parameters, "name", false);
 			if (namefile == "not found") { namefile = "";  }
-
 			else { 
 				m->splitAtDash(namefile, namefileNames);
 				
@@ -813,7 +812,7 @@ int ClassifySeqsCommand::execute(){
                 PhyloSummary* taxaSum;
                 if (hasCount) { 
                     ct = new CountTable();
-                    ct->readTable(countfileNames[s]);
+                    ct->readTable(countfileNames[s], true);
                     taxaSum = new PhyloSummary(taxonomyFileName, ct);
                     taxaSum->summarize(tempTaxonomyFile);
                 }else {
@@ -1152,11 +1151,11 @@ int ClassifySeqsCommand::driver(linePair* filePos, string taxFName, string tempT
 			#endif
 			
 			//report progress
-			if((count) % 100 == 0){	m->mothurOut("Processing sequence: " + toString(count)); m->mothurOutEndLine();		}
+			if((count) % 100 == 0){	m->mothurOutJustToScreen("Processing sequence: " + toString(count) +"\n"); 		}
 			
 		}
 		//report progress
-		if((count) % 100 != 0){	m->mothurOut("Processing sequence: " + toString(count)); m->mothurOutEndLine();		}
+		if((count) % 100 != 0){	m->mothurOutJustToScreen("Processing sequence: " + toString(count)+"\n"); 		}
 			
 		inFASTA.close();
 		outTax.close();

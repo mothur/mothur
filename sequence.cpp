@@ -220,7 +220,7 @@ Sequence::Sequence(ifstream& fastaFile, string& extraInfo, bool getInfo){
 			//read info after sequence name
 			while (!fastaFile.eof())	{	
                 char c = fastaFile.get(); 
-                if (c == 10 || c == 13){  break;	}	
+                if (c == 10 || c == 13 || c == -1){  break;	}
                 extraInfo += c;
             } 
 			
@@ -683,12 +683,12 @@ int Sequence::filterToPos(int start){
     
     if (start > aligned.length()) { start = aligned.length(); m->mothurOut("[ERROR]: start to large.\n"); }
     
-	for(int j = 0; j < start-1; j++) {
+	for(int j = 0; j < start; j++) {
 		aligned[j] = '.';
 	}
 	
     //things like ......----------AT become ................AT
-    for(int j = start-1; j < aligned.length(); j++) {
+    for(int j = start; j < aligned.length(); j++) {
         if (isalpha(aligned[j])) { break; }
         else { aligned[j] = '.'; }
     }
@@ -772,6 +772,8 @@ void Sequence::trim(int length){
 	if(numBases > length){
 		unaligned = unaligned.substr(0,length);
 		numBases = length;
+        aligned = "";
+        isAligned = 0;
 	}
 	
 }

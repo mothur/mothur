@@ -558,7 +558,7 @@ int FilterSeqsCommand::driverMPIRun(int start, int num, MPI_File& inMPI, MPI_Fil
 
 			}
 			
-			if((i+1) % 100 == 0){	cout << (i+1) << endl;	 m->mothurOutJustToLog(toString(i+1) + "\n");	}
+			if((i+1) % 100 == 0){	cout << (i+1) << endl;		}
 		}
 		
 		if(outputString != ""){ //output to file 
@@ -572,7 +572,7 @@ int FilterSeqsCommand::driverMPIRun(int start, int num, MPI_File& inMPI, MPI_Fil
 			delete buf;
 		}
 		
-		if((num) % 100 != 0){	cout << (num) << endl;	 m->mothurOutJustToLog(toString(num) + "\n");	}
+		if((num) % 100 != 0){	cout << (num) << endl;	 	}
 			
 		return 0;
 	}
@@ -623,10 +623,10 @@ int FilterSeqsCommand::driverRunFilter(string F, string outputFilename, string i
 			#endif
 			
 			//report progress
-			if((count) % 100 == 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
+			if((count) % 100 == 0){	m->mothurOutJustToScreen(toString(count)+"\n"); 	}
 		}
 		//report progress
-		if((count) % 100 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
+		if((count) % 100 != 0){	m->mothurOutJustToScreen(toString(count)+"\n"); 		}
 		
 		
 		out.close();
@@ -1006,10 +1006,10 @@ int FilterSeqsCommand::driverCreateFilter(Filters& F, string filename, linePair*
 			#endif
 			
 			//report progress
-			if((count) % 100 == 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
+			if((count) % 100 == 0){	m->mothurOutJustToScreen(toString(count)+"\n"); 		}
 		}
 		//report progress
-		if((count) % 100 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
+		if((count) % 100 != 0){	m->mothurOutJustToScreen(toString(count)+"\n"); 	}
 		in.close();
 		
 		return count;
@@ -1052,11 +1052,11 @@ int FilterSeqsCommand::MPICreateFilter(int start, int num, Filters& F, MPI_File&
 			cout.flush();
 						
 			//report progress
-			if((i+1) % 100 == 0){	cout << (i+1) << endl;	 m->mothurOutJustToLog(toString(i+1) + "\n");	}
+			if((i+1) % 100 == 0){	cout << (i+1) << endl;		}
 		}
 		
 		//report progress
-		if((num) % 100 != 0){	cout << num << endl; m->mothurOutJustToLog(toString(num) + "\n"); 	}
+		if((num) % 100 != 0){	cout << num << endl; 	}
 		
 		return 0;
 	}

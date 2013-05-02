@@ -154,7 +154,7 @@ void NeedlemanOverlap::alignPrimer(string A, string B){
         
 	}
 	catch(exception& e) {
-		m->errorOut(e, "NeedlemanOverlap", "align");
+		m->errorOut(e, "NeedlemanOverlap", "alignPrimer");
 		exit(1);
 	}
     

@@ -203,7 +203,7 @@ int SeqSummaryCommand::execute(){
 		if (namefile != "") { nameMap = m->readNames(namefile); }
         else if (countfile != "") {
             CountTable ct;
-            ct.readTable(countfile);
+            ct.readTable(countfile, false);
             nameMap = ct.getNameMap();
         }
 		
@@ -415,6 +415,13 @@ int SeqSummaryCommand::execute(){
 			}
 		#endif
 
+        //set fasta file as new current fastafile
+		string current = "";
+		itTypes = outputTypes.find("summary");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setSummaryFile(current); }
+		}
+        
 		return 0;
 	}
 	catch(exception& e) {
@@ -445,11 +452,15 @@ int SeqSummaryCommand::driverCreateSummary(vector<int>& startPosition, vector<in
 		while (!done) {
 				
 			if (m->control_pressed) { in.close(); outSummary.close(); return 1; }
-					
+            
+            if (m->debug) { m->mothurOut("[DEBUG]: count = " + toString(count) + "\n");  }
+            
 			Sequence current(in); m->gobble(in);
            
 			if (current.getName() != "") {
 				
+                if (m->debug) { m->mothurOut("[DEBUG]: " + current.getName() + '\t' + toString(current.getNumBases()) + "\n");  }
+                
 				int num = 1;
 				if ((namefile != "") || (countfile != "")) {
 					//make sure this sequence is in the namefile, else error 
@@ -473,6 +484,8 @@ int SeqSummaryCommand::driverCreateSummary(vector<int>& startPosition, vector<in
 				outSummary << current.getStartPos() << '\t' << current.getEndPos() << '\t';
 				outSummary << current.getNumBases() << '\t' << current.getAmbigBases() << '\t';
 				outSummary << current.getLongHomoPolymer() << '\t' << num << endl;
+                
+                if (m->debug) { m->mothurOut("[DEBUG]: " + current.getName() + '\t' + toString(current.getNumBases()) + "\n");  }
 			}
 			
 			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
@@ -481,13 +494,8 @@ int SeqSummaryCommand::driverCreateSummary(vector<int>& startPosition, vector<in
 			#else
 				if (in.eof()) { break; }
 			#endif
-			
-			//report progress
-			//if((count) % 100 == 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
 		}
-		//report progress
-		//if((count) % 100 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
-		
+				
 		in.close();
 		
 		return count;

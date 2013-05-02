@@ -469,7 +469,7 @@ int RemoveSeqsCommand::readQual(){
 				saveName = name.substr(1);
 				while (!in.eof())	{	
 					char c = in.get(); 
-					if (c == 10 || c == 13){	break;	}
+					if (c == 10 || c == 13 || c == -1){	break;	}
 					else { name += c; }	
 				} 
 				m->gobble(in);
@@ -557,7 +557,7 @@ int RemoveSeqsCommand::readCount(){
         //check for groups that have been eliminated
         CountTable ct;
         if (ct.testGroups(outputFileName)) {
-            ct.readTable(outputFileName);
+            ct.readTable(outputFileName, true);
             ct.printTable(outputFileName);
         }
 
@@ -813,7 +813,7 @@ int RemoveSeqsCommand::readTax(){
 		while(!in.eof()){
 			if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 			
-			in >> name;				//read from first column
+			in >> name;	m->gobble(in);			//read from first column
 			in >> tax;			//read from second column
 			
             if (!dups) {//adjust name if needed

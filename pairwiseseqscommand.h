@@ -95,7 +95,7 @@ struct pairwiseData {
     SequenceDB alignDB;
 	
 	pairwiseData(){}
-	pairwiseData(string ofn, string al, string sq, string di, bool co, string op, SequenceDB DB, MothurOut* mout, unsigned long long st, unsigned long long en, float ma, float misMa, float gapO, float gapE, int thr, int tid) {
+	pairwiseData(string ofn, string al, string sq, string di, bool co, string op, SequenceDB DB, MothurOut* mout, unsigned long long st, unsigned long long en, float ma, float misMa, float gapO, float gapE, int thr, float cu, int tid) {
 		outputFileName = ofn;
 		m = mout;
 		start = st;
@@ -112,6 +112,7 @@ struct pairwiseData {
         alignDB = DB;
 		count = 0;
         output = op;
+        cutoff = cu;
 		threadID = tid;
 	}
 };
@@ -198,11 +199,11 @@ static DWORD WINAPI MyPairwiseSquareThreadFunction(LPVOID lpParam){
 			outFile << endl; 
 			
 			if(i % 100 == 0){
-				pDataArray->m->mothurOut(toString(i) + "\t" + toString(time(NULL) - startTime)); pDataArray->m->mothurOutEndLine();
+				pDataArray->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime)+"\n"); 
 			}
 			
 		}
-		pDataArray->m->mothurOut(toString(pDataArray->count) + "\t" + toString(time(NULL) - startTime)); pDataArray->m->mothurOutEndLine();
+		pDataArray->m->mothurOutJustToScreen(toString(pDataArray->count) + "\t" + toString(time(NULL) - startTime)+"\n");
 		
 		outFile.close();
         delete alignment;
@@ -225,8 +226,6 @@ static DWORD WINAPI MyPairwiseThreadFunction(LPVOID lpParam){
 		ofstream outFile((pDataArray->outputFileName).c_str(), ios::trunc);
 		outFile.setf(ios::fixed, ios::showpoint);
 		outFile << setprecision(4);
-		
-        pDataArray->count = pDataArray->end;
         
         int startTime = time(NULL);
         
@@ -259,7 +258,9 @@ static DWORD WINAPI MyPairwiseThreadFunction(LPVOID lpParam){
         
         if((pDataArray->output == "lt") && pDataArray->start == 0){	outFile << pDataArray->alignDB.getNumSeqs() << endl;	}
 		
+        pDataArray->count = 0;
 		for(int i=pDataArray->start;i<pDataArray->end;i++){
+            pDataArray->count++;
             
 			if(pDataArray->output == "lt")	{	
 				string name = pDataArray->alignDB.get(i).getName();
@@ -301,11 +302,11 @@ static DWORD WINAPI MyPairwiseThreadFunction(LPVOID lpParam){
 			if (pDataArray->output == "lt") { outFile << endl; }
 			
 			if(i % 100 == 0){
-				pDataArray->m->mothurOut(toString(i) + "\t" + toString(time(NULL) - startTime)); pDataArray->m->mothurOutEndLine();
+				pDataArray->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime)+"\n"); 
 			}
 			
 		}
-		pDataArray->m->mothurOut(toString(pDataArray->end-1) + "\t" + toString(time(NULL) - startTime)); pDataArray->m->mothurOutEndLine();
+		pDataArray->m->mothurOutJustToScreen(toString(pDataArray->end-1) + "\t" + toString(time(NULL) - startTime)+"\n");
 		
 		outFile.close();
         delete alignment;

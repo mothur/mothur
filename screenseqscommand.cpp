@@ -294,7 +294,8 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
             
             summaryfile = validParameter.validFile(parameters, "summary", true);
 			if (summaryfile == "not open") { summaryfile = ""; abort = true; }
-			else if (summaryfile == "not found") { summaryfile = "";  }	
+			else if (summaryfile == "not found") { summaryfile = "";  }
+            else { m->setSummaryFile(summaryfile); }
             
             if ((namefile != "") && (countfile != "")) {
                 m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
@@ -682,7 +683,7 @@ int ScreenSeqsCommand::screenReports(map<string, string>& badSeqNames){
             if (namefile != "") { nameMap = m->readNames(namefile); }
             else if (countfile != "") {
                 CountTable ct;
-                ct.readTable(countfile);
+                ct.readTable(countfile, true);
                 nameMap = ct.getNameMap();
             }
             getSummary(positions); 
@@ -713,7 +714,7 @@ int ScreenSeqsCommand::screenReports(map<string, string>& badSeqNames){
             if (namefile != "") { nameMap = m->readNames(namefile); }
             else if (countfile != "") {
                 CountTable ct;
-                ct.readTable(countfile);
+                ct.readTable(countfile, true);
                 nameMap = ct.getNameMap();
             }
             getSummaryReport();
@@ -1018,7 +1019,7 @@ int ScreenSeqsCommand::screenFasta(map<string, string>& badSeqNames){
 			if (namefile != "") { nameMap = m->readNames(namefile); }
             else if (countfile != "") {
                 CountTable ct;
-                ct.readTable(countfile);
+                ct.readTable(countfile, true);
                 nameMap = ct.getNameMap();
             }
 			getSummary(positions); 
@@ -2205,7 +2206,7 @@ int ScreenSeqsCommand::screenCountFile(map<string, string> badSeqNames){
         //check for groups that have been eliminated
         CountTable ct;
         if (ct.testGroups(goodCountFile)) {
-            ct.readTable(goodCountFile);
+            ct.readTable(goodCountFile, true);
             ct.printTable(goodCountFile);
         }
 		
@@ -2301,7 +2302,7 @@ int ScreenSeqsCommand::screenQual(map<string, string> badSeqNames){
 				saveName = name.substr(1);
 				while (!in.eof())	{	
 					char c = in.get(); 
-					if (c == 10 || c == 13){	break;	}
+					if (c == 10 || c == 13 || c == -1){	break;	}
 					else { name += c; }	
 				} 
 				m->gobble(in);
@@ -2408,10 +2409,10 @@ int ScreenSeqsCommand::driver(linePair filePos, string goodFName, string badAccn
 			#endif
 			
 			//report progress
-			if((count) % 100 == 0){	m->mothurOut("Processing sequence: " + toString(count)); m->mothurOutEndLine();		}
+			if((count) % 100 == 0){	m->mothurOutJustToScreen("Processing sequence: " + toString(count)+"\n"); 		}
 		}
 		//report progress
-		if((count) % 100 != 0){	m->mothurOut("Processing sequence: " + toString(count)); m->mothurOutEndLine();		}
+		if((count) % 100 != 0){	m->mothurOutJustToScreen("Processing sequence: " + toString(count)+"\n"); 	}
 		
 			
 		goodFile.close();
@@ -2503,7 +2504,7 @@ int ScreenSeqsCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& 
 			}
 			
 			//report progress
-			if((i) % 100 == 0){	m->mothurOut("Processing sequence: " + toString(i)); m->mothurOutEndLine();		}
+			if((i) % 100 == 0){	m->mothurOutJustToScreen("Processing sequence: " + toString(i)+"\n"); 		}
 		}
 				
 		return 1;

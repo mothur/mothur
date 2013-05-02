@@ -920,7 +920,7 @@ int SffInfoCommand::readSeqData(ifstream& in, seqRead& read, int numFlowReads, H
 			char buffer5 [2];
 			in.read(buffer5, 2);
 			header.clipQualRight =  be_int2(*(unsigned short *)(&buffer5));
-			
+            
 			//read clipAdapterLeft
 			char buffer6 [2];
 			in.read(buffer6, 2);
@@ -1054,11 +1054,12 @@ int SffInfoCommand::findGroup(Header header, seqRead read, int& barcode, int& pr
         }else{
             //if you wanted the sfftxt then you already converted the bases to the right case
             if (!sfftxt) {
+                int endValue = header.clipQualRight;
                 //make the bases you want to clip lowercase and the bases you want to keep upper case
-                if(header.clipQualRight == 0){	header.clipQualRight = seq.length();	}
+                if(endValue == 0){	endValue = seq.length();	}
                 for (int i = 0; i < (header.clipQualLeft-1); i++) { seq[i] = tolower(seq[i]);  }
-                for (int i = (header.clipQualLeft-1); i < (header.clipQualRight-1); i++)  {   seq[i] = toupper(seq[i]);  }
-                for (int i = (header.clipQualRight-1); i < seq.length(); i++) {   seq[i] = tolower(seq[i]);  }
+                for (int i = (header.clipQualLeft-1); i < (endValue-1); i++)  {   seq[i] = toupper(seq[i]);  }
+                for (int i = (endValue-1); i < seq.length(); i++) {   seq[i] = tolower(seq[i]);  }
             }
         }
         
@@ -1239,10 +1240,11 @@ int SffInfoCommand::printSffTxtSeqData(ofstream& out, seqRead& read, Header& hea
 		for (int i = 0; i < read.flowIndex.size(); i++) {  sum +=  read.flowIndex[i];  out << sum << '\t'; }
 		
 		//make the bases you want to clip lowercase and the bases you want to keep upper case
-		if(header.clipQualRight == 0){	header.clipQualRight = read.bases.length();	}
+        int endValue = header.clipQualRight;
+		if(endValue == 0){	endValue = read.bases.length();	}
 		for (int i = 0; i < (header.clipQualLeft-1); i++) { read.bases[i] = tolower(read.bases[i]); }
-		for (int i = (header.clipQualLeft-1); i < (header.clipQualRight-1); i++) {   read.bases[i] = toupper(read.bases[i]);  }
-		for (int i = (header.clipQualRight-1); i < read.bases.length(); i++) {   read.bases[i] = tolower(read.bases[i]);  }
+		for (int i = (header.clipQualLeft-1); i < (endValue-1); i++) {   read.bases[i] = toupper(read.bases[i]);  }
+		for (int i = (endValue-1); i < read.bases.length(); i++) {   read.bases[i] = tolower(read.bases[i]);  }
 		
 		out << endl <<  "Bases: " << read.bases << endl << "Quality Scores: ";
 		for (int i = 0; i < read.qualScores.size(); i++) {   out << read.qualScores[i] << '\t';  }
@@ -1279,11 +1281,12 @@ int SffInfoCommand::printFastaSeqData(ofstream& out, seqRead& read, Header& head
 		}else{
 			//if you wanted the sfftxt then you already converted the bases to the right case
 			if (!sfftxt) {
+                int endValue = header.clipQualRight;
 				//make the bases you want to clip lowercase and the bases you want to keep upper case
-				if(header.clipQualRight == 0){	header.clipQualRight = seq.length();	}
+				if(endValue == 0){	endValue = seq.length();	}
 				for (int i = 0; i < (header.clipQualLeft-1); i++) { seq[i] = tolower(seq[i]);  }
-				for (int i = (header.clipQualLeft-1); i < (header.clipQualRight-1); i++)  {   seq[i] = toupper(seq[i]);  }
-				for (int i = (header.clipQualRight-1); i < seq.length(); i++) {   seq[i] = tolower(seq[i]);  }
+				for (int i = (header.clipQualLeft-1); i < (endValue-1); i++)  {   seq[i] = toupper(seq[i]);  }
+				for (int i = (endValue-1); i < seq.length(); i++) {   seq[i] = tolower(seq[i]);  }
 			}
 		}
 		
@@ -1338,17 +1341,21 @@ int SffInfoCommand::printQualSeqData(ofstream& out, seqRead& read, Header& heade
 //**********************************************************************************************************************
 int SffInfoCommand::printFlowSeqData(ofstream& out, seqRead& read, Header& header) {
 	try {
-        if (header.clipQualRight == 0) { header.clipQualRight = read.flowgram.size(); }
         
-		if(header.clipQualRight > header.clipQualLeft){
-			
-			int rightIndex = 0;
-			for (int i = 0; i < header.clipQualRight; i++) {  rightIndex +=  read.flowIndex[i];	}
-
-			out << header.name << ' ' << rightIndex;
-			for (int i = 0; i < read.flowgram.size(); i++) { out << setprecision(2) << ' ' << (read.flowgram[i]/(float)100);  }
-			out << endl;
-		}
+        int endValue = header.clipQualRight;
+        if (header.clipQualRight == 0) {
+            endValue = read.flowIndex.size();
+            if (m->debug) { m->mothurOut("[DEBUG]: " + header.name + " has clipQualRight=0.\n"); }
+        }
+        if(endValue > header.clipQualLeft){
+            
+            int rightIndex = 0;
+            for (int i = 0; i < endValue; i++) {  rightIndex +=  read.flowIndex[i];	 }
+            
+            out << header.name << ' ' << rightIndex;
+            for (int i = 0; i < read.flowgram.size(); i++) { out << setprecision(2) << ' ' << (read.flowgram[i]/(float)100);  }
+            out << endl;
+        }
 		
 		
 		return 0;
@@ -1656,7 +1663,7 @@ bool SffInfoCommand::readOligos(string oligoFile){
 					// get rest of line in case there is a primer name
 					while (!inOligos.eof())	{	
 						char c = inOligos.get(); 
-						if (c == 10 || c == 13){	break;	}
+						if (c == 10 || c == 13 || c == -1){	break;	}
 						else if (c == 32 || c == 9){;} //space or tab
 						else { 	group += c;  }
 					} 

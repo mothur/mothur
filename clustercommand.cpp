@@ -305,7 +305,7 @@ int ClusterCommand::execute(){
             read->read(nameMap);
 		}else if (countfile != "") {
             ct = new CountTable();
-            ct->readTable(countfile);
+            ct->readTable(countfile, false);
             read->read(ct);
         }else { read->read(nameMap); }
 		

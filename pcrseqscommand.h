@@ -46,7 +46,7 @@ private:
     
     vector<linePair> lines;
 	bool getOligos(vector<vector<string> >&, vector<vector<string> >&, vector<vector<string> >&);
-    bool abort, keepprimer, keepdots;
+    bool abort, keepprimer, keepdots, fileAligned;
 	string fastafile, oligosfile, taxfile, groupfile, namefile, countfile, ecolifile, outputDir, nomatch;
 	int start, end, processors, length, pdiffs;
 	
@@ -60,10 +60,12 @@ private:
     int readCount(set<string>);
     bool readOligos();
     bool readEcoli();
-	int driverPcr(string, string, string, set<string>&, linePair);	
+	int driverPcr(string, string, string, string, set<string>&, linePair, int&, int&, bool&);
 	int createProcesses(string, string, string, set<string>&);
     bool isAligned(string, map<int, int>&);
     string reverseOligo(string);
+    int adjustDots(string, string, int, int);
+    
 };
 
 /**************************************************************************************************/
@@ -72,19 +74,19 @@ private:
 // that can be passed using a single void pointer (LPVOID).
 struct pcrData {
 	string filename; 
-    string goodFasta, badFasta, oligosfile, ecolifile, nomatch;
+    string goodFasta, badFasta, oligosfile, ecolifile, nomatch, locationsName;
 	unsigned long long fstart;
 	unsigned long long fend;
-	int count, start, end, length, pdiffs;
+	int count, start, end, length, pdiffs, pstart, pend;
 	MothurOut* m;
 	map<string, int> primers;
     vector<string> revPrimer;
     set<string> badSeqNames;
-    bool keepprimer, keepdots;
+    bool keepprimer, keepdots, fileAligned, adjustNeeded;
 	
 	
 	pcrData(){}
-	pcrData(string f, string gf, string bfn, MothurOut* mout, string ol, string ec, map<string, int> pr, vector<string> rpr, string nm, bool kp, bool kd, int st, int en, int l, int pd, unsigned long long fst, unsigned long long fen) {
+	pcrData(string f, string gf, string bfn, string loc, MothurOut* mout, string ol, string ec, map<string, int> pr, vector<string> rpr, string nm, bool kp, bool kd, int st, int en, int l, int pd, unsigned long long fst, unsigned long long fen) {
 		filename = f;
         goodFasta = gf;
         badFasta = bfn;
@@ -102,7 +104,12 @@ struct pcrData {
 		fstart = fst;
         fend = fen;
         pdiffs = pd;
+        locationsName = loc;
 		count = 0;
+        fileAligned = true;
+        adjustNeeded = false;
+        pstart = -1;
+        pend = -1;
 	}
 };
 /**************************************************************************************************/
@@ -118,6 +125,9 @@ static DWORD WINAPI MyPcrThreadFunction(LPVOID lpParam){
         
         ofstream badFile;
 		pDataArray->m->openOutputFile(pDataArray->badFasta, badFile);
+        
+        ofstream locationsFile;
+		pDataArray->m->openOutputFile(pDataArray->locationsName, locationsFile);
 		
 		ifstream inFASTA;
 		pDataArray->m->openInputFile(pDataArray->filename, inFASTA);
@@ -132,6 +142,8 @@ static DWORD WINAPI MyPcrThreadFunction(LPVOID lpParam){
         set<int> lengths;
         //pdiffs, bdiffs, primers, barcodes, revPrimers
         map<string, int> faked;
+        vector< set<int> > locations; //locations[0] = beginning locations, locations[1] = ending locations
+        locations.resize(2);
         TrimOligos trim(pDataArray->pdiffs, 0, pDataArray->primers, faked, pDataArray->revPrimer);
 		
 		for(int i = 0; i < pDataArray->fend; i++){ //end is the number of sequences to process
@@ -139,8 +151,16 @@ static DWORD WINAPI MyPcrThreadFunction(LPVOID lpParam){
 			if (pDataArray->m->control_pressed) {  break; }
 			
 			Sequence currSeq(inFASTA); pDataArray->m->gobble(inFASTA);
-          
+            
+            if (pDataArray->fileAligned) { //assume aligned until proven otherwise
+                lengths.insert(currSeq.getAligned().length());
+                if (lengths.size() > 1) { pDataArray->fileAligned = false; }
+            }
+            
             string trashCode = "";
+            string locationsString = "";
+            int thisPStart = -1;
+            int thisPEnd = -1;
 			if (currSeq.getName() != "") {
                 
                 bool goodSeq = true;
@@ -168,12 +188,24 @@ static DWORD WINAPI MyPcrThreadFunction(LPVOID lpParam){
                             //are you aligned
                             if (aligned) { 
                                 if (!pDataArray->keepprimer)    {  
-                                    if (pDataArray->keepdots)   { currSeq.filterToPos(mapAligned[primerEnd]);   }
-                                    else            { currSeq.setAligned(currSeq.getAligned().substr(mapAligned[primerEnd]));                                              }
+                                    if (pDataArray->keepdots)   { currSeq.filterToPos(mapAligned[primerEnd-1]+1);   }
+                                    else            {
+                                        currSeq.setAligned(currSeq.getAligned().substr(mapAligned[primerEnd-1]+1));
+                                        if (pDataArray->fileAligned) {
+                                            thisPStart = mapAligned[primerEnd-1]+1; //locations[0].insert(mapAligned[primerEnd-1]+1);
+                                            locationsString += currSeq.getName() + "\t" + toString(mapAligned[primerEnd-1]+1) + "\n";
+                                        }
+}
                                 } 
                                 else                {  
                                     if (pDataArray->keepdots)   { currSeq.filterToPos(mapAligned[primerStart]);  }
-                                    else            { currSeq.setAligned(currSeq.getAligned().substr(mapAligned[primerStart]));                                              }
+                                    else            {
+                                        currSeq.setAligned(currSeq.getAligned().substr(mapAligned[primerStart]));
+                                        if (pDataArray->fileAligned) {
+                                            thisPStart = mapAligned[primerStart]; //locations[0].insert(mapAligned[primerStart]);
+                                            locationsString += currSeq.getName() + "\t" + toString(mapAligned[primerStart]) + "\n";
+                                        }
+                                    }
                                 }
                                 ///////////////////////////////////////////////////////////////
                                 mapAligned.clear();
@@ -202,11 +234,25 @@ static DWORD WINAPI MyPcrThreadFunction(LPVOID lpParam){
                             if (aligned) { 
                                 if (!pDataArray->keepprimer)    {  
                                     if (pDataArray->keepdots)   { currSeq.filterFromPos(mapAligned[primerStart]); }
-                                    else            { currSeq.setAligned(currSeq.getAligned().substr(0, mapAligned[primerStart]));   }
+                                    else            {
+                                        currSeq.setAligned(currSeq.getAligned().substr(0, mapAligned[primerStart]));
+                                        if (pDataArray->fileAligned) {
+                                            thisPEnd = mapAligned[primerStart]; //locations[1].insert(mapAligned[primerStart]);
+                                            locationsString += currSeq.getName() + "\t" + toString(mapAligned[primerStart]) + "\n";
+                                        }
+
+                                    }
                                 } 
                                 else                {  
-                                    if (pDataArray->keepdots)   { currSeq.filterFromPos(mapAligned[primerEnd]); }
-                                    else            { currSeq.setAligned(currSeq.getAligned().substr(0, mapAligned[primerEnd]));   }
+                                    if (pDataArray->keepdots)   { currSeq.filterFromPos(mapAligned[primerEnd-1]+1); }
+                                    else            {
+                                        currSeq.setAligned(currSeq.getAligned().substr(0, mapAligned[primerEnd-1]+1));
+                                        if (pDataArray->fileAligned) {
+                                            thisPEnd = mapAligned[primerEnd-1]+1; //locations[1].insert(mapAligned[primerEnd-1]+1);
+                                            locationsString += currSeq.getName() + "\t" + toString(mapAligned[primerEnd-1]+1) + "\n";
+                                        }
+
+                                    }
                                 }                             }
                             else { 
                                 if (!pDataArray->keepprimer)    { currSeq.setAligned(currSeq.getUnaligned().substr(0, primerStart));   } 
@@ -216,8 +262,7 @@ static DWORD WINAPI MyPcrThreadFunction(LPVOID lpParam){
                     }
                 }else if (pDataArray->ecolifile != "") {
                     //make sure the seqs are aligned
-                    lengths.insert(currSeq.getAligned().length());
-                    if (lengths.size() > 1) { pDataArray->m->mothurOut("[ERROR]: seqs are not aligned. When using start and end your sequences must be aligned.\n"); pDataArray->m->control_pressed = true; break; }
+                    if (!pDataArray->fileAligned) { pDataArray->m->mothurOut("[ERROR]: seqs are not aligned. When using start and end your sequences must be aligned.\n"); pDataArray->m->control_pressed = true; break; }
                     else if (currSeq.getAligned().length() != pDataArray->length) {
                         pDataArray->m->mothurOut("[ERROR]: seqs are not the same length as ecoli seq. When using ecoli option your sequences must be aligned and the same length as the ecoli sequence.\n"); pDataArray->m->control_pressed = true; break; 
                     }else {
@@ -232,8 +277,7 @@ static DWORD WINAPI MyPcrThreadFunction(LPVOID lpParam){
                     }
                 }else{ //using start and end to trim
                     //make sure the seqs are aligned
-                    lengths.insert(currSeq.getAligned().length());
-                    if (lengths.size() > 1) { pDataArray->m->mothurOut("[ERROR]: seqs are not aligned. When using start and end your sequences must be aligned.\n"); pDataArray->m->control_pressed = true; break; }
+                    if (!pDataArray->fileAligned) { pDataArray->m->mothurOut("[ERROR]: seqs are not aligned. When using start and end your sequences must be aligned.\n"); pDataArray->m->control_pressed = true; break; }
                     else {
                         if (pDataArray->end != -1) {
                             if (pDataArray->end > currSeq.getAligned().length()) {  pDataArray->m->mothurOut("[ERROR]: end is longer than your sequence length, aborting.\n"); pDataArray->m->control_pressed = true; break; }
@@ -256,7 +300,12 @@ static DWORD WINAPI MyPcrThreadFunction(LPVOID lpParam){
                     }
                 }
                 
-				if(goodSeq == 1)    {   currSeq.printSequence(goodFile);        }
+				if(goodSeq == 1)    {
+                    currSeq.printSequence(goodFile);
+                    if (locationsString != "") { locationsFile << locationsString; }
+                    if (thisPStart != -1)   { locations[0].insert(thisPStart);  }
+                    if (thisPEnd != -1)     { locations[1].insert(thisPEnd);    }
+                }
 				else {  
                     pDataArray->badSeqNames.insert(currSeq.getName()); 
                     currSeq.setName(currSeq.getName() + '|' + trashCode);
@@ -265,17 +314,25 @@ static DWORD WINAPI MyPcrThreadFunction(LPVOID lpParam){
 			}
 						
 			//report progress
-			if((i+1) % 100 == 0){	pDataArray->m->mothurOut("Processing sequence: " + toString(i+1)); pDataArray->m->mothurOutEndLine();		}
+			if((i+1) % 100 == 0){	pDataArray->m->mothurOutJustToScreen("Processing sequence: " + toString(i+1)+"\n"); 	}
 		}
 		//report progress
-		if((pDataArray->count) % 100 != 0){	pDataArray->m->mothurOut("Thread Processing sequence: " + toString(pDataArray->count)); pDataArray->m->mothurOutEndLine();		}
+		if((pDataArray->count) % 100 != 0){	pDataArray->m->mothurOutJustToScreen("Thread Processing sequence: " + toString(pDataArray->count)+"\n"); 		}
 		
 		goodFile.close();
 		inFASTA.close();
         badFile.close();
+        locationsFile.close();
+        
+        if (pDataArray->m->debug) { pDataArray->m->mothurOut("[DEBUG]: fileAligned = " + toString(pDataArray->fileAligned) +'\n'); }
+        
+        if (pDataArray->fileAligned && !pDataArray->keepdots) { //print out smallest start value and largest end value
+            if ((locations[0].size() > 1) || (locations[1].size() > 1)) { pDataArray->adjustNeeded = true; }
+            if (pDataArray->primers.size() != 0)    {   set<int>::iterator it = locations[0].begin();  pDataArray->pstart = *it;  }
+            if (pDataArray->revPrimer.size() != 0)  {   set<int>::reverse_iterator it2 = locations[1].rbegin();  pDataArray->pend = *it2; }
+        }
         
         return 0;
-		
 	}
 	catch(exception& e) {
 		pDataArray->m->errorOut(e, "PcrSeqsCommand", "MyPcrThreadFunction");

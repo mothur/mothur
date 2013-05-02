@@ -80,6 +80,77 @@ class UnifracWeightedCommand : public Command {
 		
 };
 
+/***********************************************************************/
+struct weightedRandomData {
+    int start;
+	int num;
+	MothurOut* m;
+    vector< vector<double> > scores;
+    vector< vector<string> > namesOfGroupCombos;
+    Tree* t;
+    CountTable* ct;
+    bool includeRoot;
+	
+	weightedRandomData(){}
+	weightedRandomData(MothurOut* mout, int st, int en, vector< vector<string> > ngc, Tree* tree, CountTable* count, bool ir, vector< vector<double> > sc) {
+        m = mout;
+		start = st;
+		num = en;
+        namesOfGroupCombos = ngc;
+        t = tree;
+        ct = count;
+        includeRoot = ir;
+        scores = sc;
+	}
+};
+
+/**************************************************************************************************/
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#else
+static DWORD WINAPI MyWeightedRandomThreadFunction(LPVOID lpParam){
+	weightedRandomData* pDataArray;
+	pDataArray = (weightedRandomData*)lpParam;
+	try {
+        
+        Tree* randT = new Tree(pDataArray->ct);
+        
+        Weighted weighted(pDataArray->includeRoot);
+        
+		for (int h = pDataArray->start; h < (pDataArray->start+pDataArray->num); h++) {
+            
+			if (pDataArray->m->control_pressed) { return 0; }
+            
+			//initialize weighted score
+			string groupA = pDataArray->namesOfGroupCombos[h][0];
+			string groupB = pDataArray->namesOfGroupCombos[h][1];
+			
+			//copy T[i]'s info.
+			randT->getCopy(pDataArray->t);
+            
+			//create a random tree with same topology as T[i], but different labels
+			randT->assembleRandomUnifracTree(groupA, groupB);
+			
+			if (pDataArray->m->control_pressed) { delete randT;  return 0;  }
+            
+			//get wscore of random tree
+			EstOutput randomData = weighted.getValues(randT, groupA, groupB);
+            
+			if (pDataArray->m->control_pressed) { delete randT;  return 0;  }
+            
+			//save scores
+			pDataArray->scores[h].push_back(randomData[0]);
+		}
+        
+		delete randT;
+        
+        return 0;
+    }
+	catch(exception& e) {
+		pDataArray->m->errorOut(e, "Weighted", "MyWeightedRandomThreadFunction");
+		exit(1);
+	}
+}
+#endif
 
 
 #endif

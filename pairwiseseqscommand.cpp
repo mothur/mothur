@@ -564,7 +564,7 @@ void PairwiseSeqsCommand::createProcesses(string filename) {
 			string extension = toString(i) + ".temp";
 
 			// Allocate memory for thread data.
-			pairwiseData* tempDist = new pairwiseData((filename+extension), align, "square", Estimators[0], countends, output, alignDB, m, lines[i+1].start, lines[i+1].end, match, misMatch, gapOpen, gapExtend, longestBase, i);
+			pairwiseData* tempDist = new pairwiseData((filename+extension), align, "square", Estimators[0], countends, output, alignDB, m, lines[i+1].start, lines[i+1].end, match, misMatch, gapOpen, gapExtend, longestBase, cutoff, i);
 			pDataArray.push_back(tempDist);
 			processIDS.push_back(i);
 			
@@ -672,10 +672,14 @@ int PairwiseSeqsCommand::driver(int startLine, int endLine, string dFileName, fl
 				seqI.setAligned(alignment->getSeqAAln());
 				seqJ.setAligned(alignment->getSeqBAln());
 
-				
+				//cout << seqI.getName() << '\t' << seqJ.getName() << endl;
+                //cout << alignment->getSeqAAln() << endl << alignment->getSeqBAln() << endl;
+                
 				distCalculator->calcDist(seqI, seqJ);
 				double dist = distCalculator->getDist();
-				
+                
+                //cout << "dist = " << dist << endl;
+				                
 				if(dist <= cutoff){
 					if (output == "column") { outFile << alignDB.get(i).getName() << ' ' << alignDB.get(j).getName() << ' ' << dist << endl; }
 				}
@@ -685,11 +689,11 @@ int PairwiseSeqsCommand::driver(int startLine, int endLine, string dFileName, fl
 			if (output == "lt") { outFile << endl; }
 			
 			if(i % 100 == 0){
-				m->mothurOut(toString(i) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
+				m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime)+"\n");
 			}
 			
 		}
-		m->mothurOut(toString(endLine-1) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
+		m->mothurOutJustToScreen(toString(endLine-1) + "\t" + toString(time(NULL) - startTime)+"\n");
 		
 		outFile.close();
         delete alignment;
@@ -779,11 +783,11 @@ int PairwiseSeqsCommand::driver(int startLine, int endLine, string dFileName, st
 			outFile << endl; 
 			
 			if(i % 100 == 0){
-				m->mothurOut(toString(i) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
+				m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime)+"\n"); 
 			}
 			
 		}
-		m->mothurOut(toString(endLine-1) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
+		m->mothurOutJustToScreen(toString(endLine-1) + "\t" + toString(time(NULL) - startTime)+"\n");
 		
 		outFile.close();
         delete alignment;

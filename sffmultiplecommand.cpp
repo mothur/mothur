@@ -435,7 +435,7 @@ int SffMultipleCommand::readFile(vector<string>& sffFiles, vector<string>& oligo
                 // get rest of line in case there is a oligos filename
                 while (!in.eof())	{	
                     char c = in.get(); 
-                    if (c == 10 || c == 13){	break;	}
+                    if (c == 10 || c == 13 || c == -1){	break;	}
                     else if (c == 32 || c == 9){;} //space or tab
                     else { 	oligos += c;  }
                 } 

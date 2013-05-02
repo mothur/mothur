@@ -11,6 +11,7 @@
 #include "sequence.hpp"
 #include "listvector.hpp"
 #include "counttable.h"
+#include "inputdata.h"
 
 //**********************************************************************************************************************
 vector<string> RemoveLineageCommand::setParameters(){	
@@ -20,8 +21,11 @@ vector<string> RemoveLineageCommand::setParameters(){
         CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "FNGLT", "none","count",false,false,true); parameters.push_back(pcount);
 		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "FNGLT", "none","group",false,false,true); parameters.push_back(pgroup);
 		CommandParameter plist("list", "InputTypes", "", "", "none", "FNGLT", "none","list",false,false,true); parameters.push_back(plist);
-		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "FNGLT", "none","taxonomy",false,true,true); parameters.push_back(ptaxonomy);
+        CommandParameter pshared("shared", "InputTypes", "", "", "none", "FNGLT", "none","shared",false,false, true); parameters.push_back(pshared);
+		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "tax", "FNGLT", "none","taxonomy",false,false, true); parameters.push_back(ptaxonomy);
+        CommandParameter pconstaxonomy("constaxonomy", "InputTypes", "", "", "tax", "FNGLT", "none","constaxonomy",false,false, true); parameters.push_back(pconstaxonomy);
 		CommandParameter palignreport("alignreport", "InputTypes", "", "", "none", "FNGLT", "none","alignreport",false,false); parameters.push_back(palignreport);
+        CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
 		CommandParameter ptaxon("taxon", "String", "", "", "", "", "","",false,true,true); parameters.push_back(ptaxon);
 		CommandParameter pdups("dups", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pdups);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
@@ -40,13 +44,14 @@ vector<string> RemoveLineageCommand::setParameters(){
 string RemoveLineageCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The remove.lineage command reads a taxonomy file and any of the following file types: fasta, name, group, count, list or alignreport file.\n";
-		helpString += "It outputs a file containing only the sequences from the taxonomy file that are not from the taxon you requested to be removed.\n";
-		helpString += "The remove.lineage command parameters are taxon, fasta, name, group, list, taxonomy, count, alignreport and dups.  You must provide taxonomy unless you have a valid current taxonomy file.\n";
+		helpString += "The remove.lineage command reads a taxonomy or constaxonomy file and any of the following file types: fasta, name, group, count, list, shared or alignreport file. The constaxonomy can only be used with a shared or list file.\n";
+		helpString += "It outputs a file containing only the sequences or OTUS from the taxonomy file that are not from the taxon you requested to be removed.\n";
+		helpString += "The remove.lineage command parameters are taxon, fasta, name, group, count, list, shared, taxonomy, alignreport, label and dups.  You must provide taxonomy or constaxonomy unless you have a valid current taxonomy file.\n";
 		helpString += "The dups parameter allows you to add the entire line from a name file if you add any name from the line. default=false. \n";
 		helpString += "The taxon parameter allows you to select the taxons you would like to remove, and is required.\n";
 		helpString += "You may enter your taxons with confidence scores, doing so will remove only those sequences that belong to the taxonomy and whose cofidence scores fall below the scores you give.\n";
 		helpString += "If they belong to the taxonomy and have confidences above those you provide the sequence will not be removed.\n";
+        helpString += "The label parameter is used to analyze specific labels in your input. \n";
 		helpString += "The remove.lineage command should be in the following format: remove.lineage(taxonomy=yourTaxonomyFile, taxon=yourTaxons).\n";
 		helpString += "Example remove.lineage(taxonomy=amazon.silva.taxonomy, taxon=Bacteria;Firmicutes;Bacilli;Lactobacillales;).\n";
 		helpString += "Note: If you are running mothur in script mode you must wrap the taxon in ' characters so mothur will ignore the ; in the taxon.\n";
@@ -64,13 +69,15 @@ string RemoveLineageCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
         
-        if (type == "fasta")            {   pattern = "[filename],pick,[extension]";    }
-        else if (type == "taxonomy")    {   pattern = "[filename],pick,[extension]";    }
-        else if (type == "name")        {   pattern = "[filename],pick,[extension]";    }
-        else if (type == "group")       {   pattern = "[filename],pick,[extension]";    }
-        else if (type == "count")       {   pattern = "[filename],pick,[extension]";    }
-        else if (type == "list")        {   pattern = "[filename],pick,[extension]";    }
-        else if (type == "alignreport")      {   pattern = "[filename],pick.align.report";    }
+        if (type == "fasta")                {   pattern = "[filename],pick,[extension]";    }
+        else if (type == "taxonomy")        {   pattern = "[filename],pick,[extension]";    }
+        else if (type == "constaxonomy")    {   pattern = "[filename],pick,[extension]";    }
+        else if (type == "name")            {   pattern = "[filename],pick,[extension]";    }
+        else if (type == "group")           {   pattern = "[filename],pick,[extension]";    }
+        else if (type == "count")           {   pattern = "[filename],pick,[extension]";    }
+        else if (type == "list")            {   pattern = "[filename],pick,[extension]-[filename],[distance],pick,[extension]";    }
+        else if (type == "shared")          {   pattern = "[filename],[distance],pick,[extension]";    }
+        else if (type == "alignreport")     {   pattern = "[filename],pick.align.report";    }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
         
         return pattern;
@@ -94,6 +101,9 @@ RemoveLineageCommand::RemoveLineageCommand(){
 		outputTypes["alignreport"] = tempOutNames;
 		outputTypes["list"] = tempOutNames;
         outputTypes["count"] = tempOutNames;
+        outputTypes["constaxonomy"] = tempOutNames;
+        outputTypes["shared"] = tempOutNames;
+
 	}
 	catch(exception& e) {
 		m->errorOut(e, "RemoveLineageCommand", "RemoveLineageCommand");
@@ -132,6 +142,9 @@ RemoveLineageCommand::RemoveLineageCommand(string option)  {
 			outputTypes["alignreport"] = tempOutNames;
 			outputTypes["list"] = tempOutNames;
             outputTypes["count"] = tempOutNames;
+            outputTypes["constaxonomy"] = tempOutNames;
+            outputTypes["shared"] = tempOutNames;
+
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
@@ -196,6 +209,22 @@ RemoveLineageCommand::RemoveLineageCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("constaxonomy");
+				//user has given a template file
+				if(it != parameters.end()){
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["constaxonomy"] = inputDir + it->second;		}
+				}
+                
+                it = parameters.find("shared");
+				//user has given a template file
+				if(it != parameters.end()){
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
+				}
 			}
 
 			
@@ -226,11 +255,26 @@ RemoveLineageCommand::RemoveLineageCommand(string option)  {
 			
 			taxfile = validParameter.validFile(parameters, "taxonomy", true);
 			if (taxfile == "not open") { taxfile = ""; abort = true; }
-			else if (taxfile == "not found") {  		
-				taxfile = m->getTaxonomyFile(); 
-				if (taxfile != "") { m->mothurOut("Using " + taxfile + " as input file for the taxonomy parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current taxonomy file and the taxonomy parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { m->setTaxonomyFile(taxfile); }
+			else if (taxfile == "not found") {  taxfile = "";		}
+			else { m->setTaxonomyFile(taxfile); }
+            
+            sharedfile = validParameter.validFile(parameters, "shared", true);
+			if (sharedfile == "not open") { sharedfile = ""; abort = true; }
+			else if (sharedfile == "not found") {  sharedfile = "";		}
+			else { m->setSharedFile(sharedfile); }
+            
+            
+            constaxonomy = validParameter.validFile(parameters, "constaxonomy", true);
+			if (constaxonomy == "not open") { constaxonomy = ""; abort = true; }
+			else if (constaxonomy == "not found") {  constaxonomy = "";		}
+            
+            if ((constaxonomy == "") && (taxfile == "")) {
+                taxfile = m->getTaxonomyFile();
+                if (taxfile != "") { m->mothurOut("Using " + taxfile + " as input file for the taxonomy parameter."); m->mothurOutEndLine(); }
+                else {
+                    m->mothurOut("You have no current taxonomy file and did not provide a constaxonomy file. The taxonomy or constaxonomy parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}
+
 			
             countfile = validParameter.validFile(parameters, "count", true);
             if (countfile == "not open") { countfile = ""; abort = true; }
@@ -262,7 +306,25 @@ RemoveLineageCommand::RemoveLineageCommand(string option)  {
 			}
 			m->splitAtChar(taxons, listOfTaxons, '-');
 			
-			if ((fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == "") && (taxfile == "") && (countfile == ""))  { m->mothurOut("You must provide one of the following: fasta, name, group, count, alignreport, taxonomy or listfile."); m->mothurOutEndLine(); abort = true; }
+			if ((fastafile == "") && (constaxonomy == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == "") && (taxfile == "") && (countfile == ""))  { m->mothurOut("You must provide one of the following: fasta, name, group, count, alignreport, taxonomy, constaxonomy, shared or listfile."); m->mothurOutEndLine(); abort = true; }
+            
+            if ((constaxonomy != "") && ((fastafile != "") || (namefile != "") || (groupfile != "") || (alignfile != "") || (taxfile != "") || (countfile != ""))) {
+                m->mothurOut("[ERROR]: can only use constaxonomy file with a list or shared file, aborting.\n");  abort = true;
+            }
+            
+            if ((constaxonomy != "") && (taxfile != "")) {
+                m->mothurOut("[ERROR]: Choose only one: taxonomy or constaxonomy, aborting.\n"); abort = true;
+            }
+            
+            if ((sharedfile != "") && (taxfile != "")) {
+                m->mothurOut("[ERROR]: sharedfile can only be used with constaxonomy file, aborting.\n"); abort = true;
+            }
+            
+            if ((sharedfile != "") || (listfile != "")) {
+                label = validParameter.validFile(parameters, "label", false);
+                if (label == "not found") { label = ""; m->mothurOut("You did not provide a label, I will use the first label in your inputfile."); m->mothurOutEndLine(); label=""; }
+            }
+
 		
 			if ((usedDups != "") && (namefile == "")) {  m->mothurOut("You may only use dups with the name option."); m->mothurOutEndLine();  abort = true; }			
 			
@@ -297,13 +359,20 @@ int RemoveLineageCommand::execute(){
         }
 		
 		//read through the correct file and output lines you want to keep
-		if (taxfile != "")			{		readTax();		}  //fills the set of names to remove
-		if (namefile != "")			{		readName();		}
-		if (fastafile != "")		{		readFasta();	}
-		if (groupfile != "")		{		readGroup();	}
-		if (alignfile != "")		{		readAlign();	}
-		if (listfile != "")			{		readList();		}
-        if (countfile != "")		{		readCount();	}
+		if (taxfile != "")			{
+            readTax(); //fills the set of names to get
+            if (namefile != "")			{		readName();		}
+            if (fastafile != "")		{		readFasta();	}
+            if (countfile != "")		{		readCount();	}
+            if (groupfile != "")		{		readGroup();	}
+            if (alignfile != "")		{		readAlign();	}
+            if (listfile != "")			{		readList();		}
+            
+        }else {
+            readConsTax();
+            if (listfile != "")			{		readConsList();		}
+            if (sharedfile != "")		{		readShared();		}
+        }
 		
 		
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
@@ -435,18 +504,15 @@ int RemoveLineageCommand::readList(){
 			
 				//parse out names that are in accnos file
 				string binnames = list.get(i);
+                vector<string> bnames;
+                m->splitAtComma(binnames, bnames);
 				
 				string newNames = "";
-				while (binnames.find_first_of(',') != -1) { 
-					string name = binnames.substr(0,binnames.find_first_of(','));
-					binnames = binnames.substr(binnames.find_first_of(',')+1, binnames.length());
-					
+                for (int j = 0; j < bnames.size(); j++) {
+					string name = bnames[j];
 					//if that name is in the .accnos file, add it
 					if (names.count(name) == 0) {  newNames += name + ",";  }
 				}
-			
-				//get last name
-				if (names.count(binnames) == 0) {  newNames += binnames + ",";  }
 
 				//if there are names in this bin add to new list
 				if (newNames != "") {  
@@ -599,7 +665,7 @@ int RemoveLineageCommand::readCount(){
         //check for groups that have been eliminated
         CountTable ct;
         if (ct.testGroups(outputFileName)) {
-            ct.readTable(outputFileName);
+            ct.readTable(outputFileName, true);
             ct.printTable(outputFileName);
         }
 		
@@ -613,6 +679,292 @@ int RemoveLineageCommand::readCount(){
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
+int RemoveLineageCommand::readConsList(){
+	try {
+		getListVector();
+        
+        if (m->control_pressed) { delete list; return 0;}
+        
+        ListVector newList;
+        newList.setLabel(list->getLabel());
+        int removedCount = 0;
+        bool wroteSomething = false;
+        string snumBins = toString(list->getNumBins());
+        
+        for (int i = 0; i < list->getNumBins(); i++) {
+            
+            if (m->control_pressed) { delete list; return 0;}
+            
+            //create a label for this otu
+            string otuLabel = "Otu";
+            string sbinNumber = toString(i+1);
+            if (sbinNumber.length() < snumBins.length()) {
+                int diff = snumBins.length() - sbinNumber.length();
+                for (int h = 0; h < diff; h++) { otuLabel += "0"; }
+            }
+            otuLabel += sbinNumber;
+            
+            if (names.count(otuLabel) == 0) {
+                newList.push_back(list->get(i));
+            }else { removedCount++; }
+        }
+        
+        string thisOutputDir = outputDir;
+		if (outputDir == "") {  thisOutputDir += m->hasPath(listfile);  }
+        map<string, string> variables;
+		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(listfile));
+        variables["[extension]"] = m->getExtension(listfile);
+        variables["[distance]"] = list->getLabel();
+		string outputFileName = getOutputFileName("list", variables);
+		ofstream out;
+		m->openOutputFile(outputFileName, out);
+        
+		delete list;
+        //print new listvector
+        if (newList.getNumBins() != 0) {
+            wroteSomething = true;
+            newList.print(out);
+        }
+		out.close();
+		
+		if (wroteSomething == false) { m->mothurOut("Your file only contains OTUs from " + taxons + "."); m->mothurOutEndLine();  }
+		outputNames.push_back(outputFileName); outputTypes["list"].push_back(outputFileName);
+		
+		m->mothurOut("Removed " + toString(removedCount) + " OTUs from your list file."); m->mothurOutEndLine();
+        
+		return 0;
+        
+	}
+	catch(exception& e) {
+		m->errorOut(e, "RemoveLineageCommand", "readConsList");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+int RemoveLineageCommand::getListVector(){
+	try {
+		InputData input(listfile, "list");
+		list = input.getListVector();
+		string lastLabel = list->getLabel();
+		
+		if (label == "") { label = lastLabel;  return 0; }
+		
+		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
+		set<string> labels; labels.insert(label);
+		set<string> processedLabels;
+		set<string> userLabels = labels;
+		
+		//as long as you are not at the end of the file or done wih the lines you want
+		while((list != NULL) && (userLabels.size() != 0)) {
+			if (m->control_pressed) {  return 0;  }
+			
+			if(labels.count(list->getLabel()) == 1){
+				processedLabels.insert(list->getLabel());
+				userLabels.erase(list->getLabel());
+				break;
+			}
+			
+			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				string saveLabel = list->getLabel();
+				
+				delete list;
+				list = input.getListVector(lastLabel);
+				
+				processedLabels.insert(list->getLabel());
+				userLabels.erase(list->getLabel());
+				
+				//restore real lastlabel to save below
+				list->setLabel(saveLabel);
+				break;
+			}
+			
+			lastLabel = list->getLabel();
+			
+			//get next line to process
+			//prevent memory leak
+			delete list;
+			list = input.getListVector();
+		}
+		
+		
+		if (m->control_pressed) {  return 0;  }
+		
+		//output error messages about any remaining user labels
+		set<string>::iterator it;
+		bool needToRun = false;
+		for (it = userLabels.begin(); it != userLabels.end(); it++) {
+			m->mothurOut("Your file does not include the label " + *it);
+			if (processedLabels.count(lastLabel) != 1) {
+				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
+				needToRun = true;
+			}else {
+				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
+			}
+		}
+		
+		//run last label if you need to
+		if (needToRun == true)  {
+			delete list;
+			list = input.getListVector(lastLabel);
+		}
+		
+		return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "RemoveLineageCommand", "getListVector");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
+int RemoveLineageCommand::readShared(){
+	try {
+        
+        getShared();
+        
+        if (m->control_pressed) { for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } return 0; }
+        
+        vector<string> newLabels;
+        
+        //create new "filtered" lookup
+        vector<SharedRAbundVector*> newLookup;
+        for (int i = 0; i < lookup.size(); i++) {
+            SharedRAbundVector* temp = new SharedRAbundVector();
+			temp->setLabel(lookup[i]->getLabel());
+			temp->setGroup(lookup[i]->getGroup());
+			newLookup.push_back(temp);
+        }
+        
+        bool wroteSomething = false;
+        int numRemoved = 0;
+        for (int i = 0; i < lookup[0]->getNumBins(); i++) {
+            
+            if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) { delete newLookup[j]; } for (int j = 0; j < lookup.size(); j++) { delete lookup[j]; } return 0; }
+            
+            //is this otu on the list
+            if (names.count(m->currentBinLabels[i]) == 0) {
+                wroteSomething = true;
+                newLabels.push_back(m->currentBinLabels[i]);
+                for (int j = 0; j < newLookup.size(); j++) { //add this OTU to the new lookup
+                    newLookup[j]->push_back(lookup[j]->getAbundance(i), lookup[j]->getGroup());
+                }
+            }else { numRemoved++; }
+        }
+        
+        string thisOutputDir = outputDir;
+		if (outputDir == "") {  thisOutputDir += m->hasPath(sharedfile);  }
+        map<string, string> variables;
+		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(sharedfile));
+        variables["[extension]"] = m->getExtension(sharedfile);
+        variables["[distance]"] = lookup[0]->getLabel();
+		string outputFileName = getOutputFileName("shared", variables);
+        ofstream out;
+		m->openOutputFile(outputFileName, out);
+		outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
+        
+		for (int j = 0; j < lookup.size(); j++) { delete lookup[j]; }
+        
+        m->currentBinLabels = newLabels;
+        
+		newLookup[0]->printHeaders(out);
+		
+		for (int i = 0; i < newLookup.size(); i++) {
+			out << newLookup[i]->getLabel() << '\t' << newLookup[i]->getGroup() << '\t';
+			newLookup[i]->print(out);
+		}
+		out.close();
+        
+        for (int j = 0; j < newLookup.size(); j++) { delete newLookup[j]; }
+        
+        if (wroteSomething == false) { m->mothurOut("Your file only contains OTUs from " + taxons + "."); m->mothurOutEndLine();  }
+        
+		m->mothurOut("Removed " + toString(numRemoved) + " OTUs from your shared file."); m->mothurOutEndLine();
+        
+        return 0;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "RemoveLineageCommand", "readShared");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+int RemoveLineageCommand::getShared(){
+	try {
+		InputData input(sharedfile, "sharedfile");
+		lookup = input.getSharedRAbundVectors();
+		string lastLabel = lookup[0]->getLabel();
+		
+		if (label == "") { label = lastLabel;  return 0; }
+		
+		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
+		set<string> labels; labels.insert(label);
+		set<string> processedLabels;
+		set<string> userLabels = labels;
+		
+		//as long as you are not at the end of the file or done wih the lines you want
+		while((lookup[0] != NULL) && (userLabels.size() != 0)) {
+			if (m->control_pressed) {   return 0;  }
+			
+			if(labels.count(lookup[0]->getLabel()) == 1){
+				processedLabels.insert(lookup[0]->getLabel());
+				userLabels.erase(lookup[0]->getLabel());
+				break;
+			}
+			
+			if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				string saveLabel = lookup[0]->getLabel();
+				
+				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+				lookup = input.getSharedRAbundVectors(lastLabel);
+				
+				processedLabels.insert(lookup[0]->getLabel());
+				userLabels.erase(lookup[0]->getLabel());
+				
+				//restore real lastlabel to save below
+				lookup[0]->setLabel(saveLabel);
+				break;
+			}
+			
+			lastLabel = lookup[0]->getLabel();
+			
+			//get next line to process
+			//prevent memory leak
+			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+			lookup = input.getSharedRAbundVectors();
+		}
+		
+		
+		if (m->control_pressed) {  return 0;  }
+		
+		//output error messages about any remaining user labels
+		set<string>::iterator it;
+		bool needToRun = false;
+		for (it = userLabels.begin(); it != userLabels.end(); it++) {
+			m->mothurOut("Your file does not include the label " + *it);
+			if (processedLabels.count(lastLabel) != 1) {
+				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
+				needToRun = true;
+			}else {
+				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
+			}
+		}
+		
+		//run last label if you need to
+		if (needToRun == true)  {
+			for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) {	delete lookup[i];	} }
+			lookup = input.getSharedRAbundVectors(lastLabel);
+		}
+		
+		return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "RemoveLineageCommand", "getShared");
+		exit(1);
+	}
+}
+
+
 //**********************************************************************************************************************
 int RemoveLineageCommand::readGroup(){
 	try {
@@ -818,6 +1170,174 @@ int RemoveLineageCommand::readTax(){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "RemoveLineageCommand", "readTax");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+int RemoveLineageCommand::readConsTax(){
+	try {
+		string thisOutputDir = outputDir;
+		if (outputDir == "") {  thisOutputDir += m->hasPath(constaxonomy);  }
+		map<string, string> variables;
+		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(constaxonomy));
+        variables["[extension]"] = m->getExtension(constaxonomy);
+		string outputFileName = getOutputFileName("constaxonomy", variables);
+		ofstream out;
+		m->openOutputFile(outputFileName, out);
+		
+		ifstream in;
+		m->openInputFile(constaxonomy, in);
+		string otuLabel, tax;
+        int numReps;
+        bool wroteSomething = false;
+        
+        //read headers
+        string headers = m->getline(in);
+        out << headers << endl;
+		
+		//bool wroteSomething = false;
+		vector<bool> taxonsHasConfidence; taxonsHasConfidence.resize(listOfTaxons.size(), false);
+		vector< vector< map<string, float> > > searchTaxons; searchTaxons.resize(listOfTaxons.size());
+		vector<string> noConfidenceTaxons; noConfidenceTaxons.resize(listOfTaxons.size(), "");
+		
+		for (int i = 0; i < listOfTaxons.size(); i++) {
+			noConfidenceTaxons[i] = listOfTaxons[i];
+			int hasConPos = listOfTaxons[i].find_first_of('(');
+			if (hasConPos != string::npos) {
+				taxonsHasConfidence[i] = true;
+				searchTaxons[i] = getTaxons(listOfTaxons[i]);
+				noConfidenceTaxons[i] = listOfTaxons[i];
+				m->removeConfidences(noConfidenceTaxons[i]);
+			}
+		}
+		
+        
+		while(!in.eof()){
+            
+			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
+            
+			in >> otuLabel;	 		m->gobble(in);
+            in >> numReps;          m->gobble(in);
+			in >> tax;              m->gobble(in);
+			
+            bool remove = false;
+			
+            string noQuotesTax = m->removeQuotes(tax);
+            
+			for (int j = 0; j < listOfTaxons.size(); j++) {
+				string newtax = noQuotesTax;
+				
+				//if the users file contains confidence scores we want to ignore them when searching for the taxons, unless the taxon has them
+				if (!taxonsHasConfidence[j]) {
+					
+					int hasConfidences = noQuotesTax.find_first_of('(');
+					if (hasConfidences != string::npos) {
+						newtax = noQuotesTax;
+						m->removeConfidences(newtax);
+					}
+					
+					int pos = newtax.find(noConfidenceTaxons[j]);
+					
+					if (pos == string::npos) {
+						//wroteSomething = true;
+						//out << name << '\t' << tax << endl;
+					}else{ //this sequence contains the taxon the user wants to remove
+						names.insert(otuLabel);
+						remove=true; break;
+					}
+					
+				}else{//if taxons has them and you don't them remove taxons
+					int hasConfidences = noQuotesTax.find_first_of('(');
+					if (hasConfidences == string::npos) {
+						
+						int pos = newtax.find(noConfidenceTaxons[j]);
+						
+						if (pos == string::npos) {
+							//wroteSomething = true;
+							//out << name << '\t' << tax << endl;
+						}else{ //this sequence contains the taxon the user wants to remove
+							names.insert(otuLabel);
+							remove=true; break;
+						}
+					}else { //both have confidences so we want to make sure the users confidences are greater then or equal to the taxons
+						//first remove confidences from both and see if the taxonomy exists
+						
+						string noNewTax = noQuotesTax;
+						int hasConfidences = noQuotesTax.find_first_of('(');
+						if (hasConfidences != string::npos) {
+							noNewTax = noQuotesTax;
+							m->removeConfidences(noNewTax);
+						}
+						
+						int pos = noNewTax.find(noConfidenceTaxons[j]);
+						
+						if (pos != string::npos) { //if yes, then are the confidences okay
+							
+							vector< map<string, float> > usersTaxon = getTaxons(newtax);
+							
+							//the usersTaxon is most likely longer than the searchTaxons, and searchTaxon[0] may relate to userTaxon[4]
+							//we want to "line them up", so we will find the the index where the searchstring starts
+							int index = 0;
+							for (int i = 0; i < usersTaxon.size(); i++) {
+								
+								if (usersTaxon[i].begin()->first == searchTaxons[j][0].begin()->first) {
+									index = i;
+									int spot = 0;
+									bool goodspot = true;
+									//is this really the start, or are we dealing with a taxon of the same name?
+									while ((spot < searchTaxons[j].size()) && ((i+spot) < usersTaxon.size())) {
+										if (usersTaxon[i+spot].begin()->first != searchTaxons[j][spot].begin()->first) { goodspot = false; break; }
+										else { spot++; }
+									}
+									
+									if (goodspot) { break; }
+								}
+							}
+							
+							for (int i = 0; i < searchTaxons[j].size(); i++) {
+								
+								if ((i+index) < usersTaxon.size()) { //just in case, should never be false
+									if (usersTaxon[i+index].begin()->second < searchTaxons[j][i].begin()->second) { //is the users cutoff less than the search taxons
+										remove = true;
+										break;
+									}
+								}else {
+									remove = true;
+									break;
+								}
+							}
+							
+							//passed the test so remove you
+							if (remove) {
+								names.insert(otuLabel);
+								remove=true; break;
+							}else {
+								//wroteSomething = true;
+								//out << name << '\t' << tax << endl;
+							}
+						}else {
+							//wroteSomething = true;
+							//out << name << '\t' << tax << endl;
+						}
+					}
+				}
+				
+			}
+			
+			if (!remove) {  wroteSomething = true; out << otuLabel << '\t' << numReps << '\t' << tax << endl; }
+			
+		}
+		in.close();
+		out.close();
+		
+		if (names.size() == 0) { m->mothurOut("Your constaxonomy file contains OTUs only from " + taxons + "."); m->mothurOutEndLine();  }
+		outputNames.push_back(outputFileName); outputTypes["constaxonomy"].push_back(outputFileName);
+        
+		return 0;
+        
+	}
+	catch(exception& e) {
+		m->errorOut(e, "RemoveLineageCommand", "readConsTax");
 		exit(1);
 	}
 }

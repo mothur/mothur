@@ -28,7 +28,7 @@ vector<string> TrimFlowsCommand::setParameters(){
 		CommandParameter psignal("signal", "Number", "", "0.50", "", "", "","",false,false); parameters.push_back(psignal);
 		CommandParameter pnoise("noise", "Number", "", "0.70", "", "", "","",false,false); parameters.push_back(pnoise);
 		CommandParameter pallfiles("allfiles", "Boolean", "", "t", "", "", "","",false,false); parameters.push_back(pallfiles);
-        CommandParameter porder("order", "Multiple", "A-B", "A", "", "", "","",false,false, true); parameters.push_back(porder);
+        CommandParameter porder("order", "Multiple", "A-B-I", "A", "", "", "","",false,false, true); parameters.push_back(porder);
 		CommandParameter pfasta("fasta", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pfasta);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -429,6 +429,7 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
 			flowData.capFlows(maxFlows);	
 			
 			Sequence currSeq = flowData.getSequence();
+            //cout << currSeq.getName() << '\t' << currSeq.getUnaligned() << endl;
 			if(!flowData.hasMinFlows(minFlows)){	//screen to see if sequence is of a minimum number of flows
 				success = 0;
 				trashCode += 'l';
@@ -551,13 +552,16 @@ void TrimFlowsCommand::getOligos(vector<vector<string> >& outFlowFileNames){
 		
 		while(!oligosFile.eof()){
 		
-			oligosFile >> type; m->gobble(oligosFile);	//get the first column value of the row - is it a comment or a feature we are interested in?
-
+			oligosFile >> type; 	//get the first column value of the row - is it a comment or a feature we are interested in?
+            
+            if (m->debug) { m->mothurOut("[DEBUG]: type = " + type + ".\n"); }
+            
 			if(type[0] == '#'){	//igore the line because there's a comment
-				while (!oligosFile.eof())	{	char c = oligosFile.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
+				while (!oligosFile.eof())	{	char c = oligosFile.get(); if (c == 10 || c == 13){	break;	}	}
+                m->gobble(oligosFile);// get rest of line if there's any crap there
 			}
 			else{				//there's a feature we're interested in
-
+                m->gobble(oligosFile);
 				for(int i=0;i<type.length();i++){	type[i] = toupper(type[i]);  }					//make type case insensitive
 
 				oligosFile >> oligo;	//get the DNA sequence for the feature
@@ -566,13 +570,15 @@ void TrimFlowsCommand::getOligos(vector<vector<string> >& outFlowFileNames){
 					oligo[i] = toupper(oligo[i]);
 					if(oligo[i] == 'U')	{	oligo[i] = 'T';	}
 				}
-
+                
+                if (m->debug) { m->mothurOut("[DEBUG]: oligos = " + oligo + ".\n"); }
+                
 				if(type == "FORWARD"){	//if the feature is a forward primer...
 					group = "";
 
 					while (!oligosFile.eof())	{	// get rest of line in case there is a primer name = will have the name of the primer
 						char c = oligosFile.get(); 
-						if (c == 10 || c == 13){	break;	}
+						if (c == 10 || c == 13 || c == -1){	break;	}
 						else if (c == 32 || c == 9){;} //space or tab
 						else { 	group += c;  }
 					} 
@@ -595,7 +601,9 @@ void TrimFlowsCommand::getOligos(vector<vector<string> >& outFlowFileNames){
 					//check for repeat barcodes
 					map<string, int>::iterator itBar = barcodes.find(oligo);
 					if (itBar != barcodes.end()) { m->mothurOut("barcode " + oligo + " is in your oligos file already."); m->mothurOutEndLine();  }
-
+                    
+                    if (m->debug) { m->mothurOut("[DEBUG]: group = " + group + ".\n"); }
+                    
 					barcodes[oligo]=indexBarcode; indexBarcode++;
 					barcodeNameVector.push_back(group);
 				}else if(type == "LINKER"){

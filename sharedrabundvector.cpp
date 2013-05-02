@@ -72,7 +72,7 @@ SharedRAbundVector::SharedRAbundVector(ifstream& f) : DataVector(), maxRank(0), 
 		//are we at the beginning of the file??
 		if (m->saveNextLabel == "") {  
 			f >> label; 
-	
+            
 			//is this a shared file that has headers
 			if (label == "label") { 
 				//gets "group"
@@ -120,6 +120,8 @@ SharedRAbundVector::SharedRAbundVector(ifstream& f) : DataVector(), maxRank(0), 
             
             //read in first row since you know there is at least 1 group.
             f >> groupN >> num;
+            
+            if (m->debug) { m->mothurOut("[DEBUG]: "+ groupN + '\t' + toString(num)); }
         }
 		
 		//reset labels, currentLabels may have gotten changed as otus were eliminated because of group choices or sampling
@@ -138,6 +140,7 @@ SharedRAbundVector::SharedRAbundVector(ifstream& f) : DataVector(), maxRank(0), 
 		//fill vector.  data = first sharedrabund in file
 		for(int i=0;i<num;i++){
 			f >> inputData;
+            if (m->debug) { m->mothurOut("[DEBUG]: OTU" + toString(i+1)+ '\t' +toString(inputData)); }
 			
 			lookup[0]->push_back(inputData, groupN); //abundance, bin, group
 			push_back(inputData, groupN);
@@ -152,6 +155,7 @@ SharedRAbundVector::SharedRAbundVector(ifstream& f) : DataVector(), maxRank(0), 
 		//read the rest of the groups info in
 		while ((nextLabel == holdLabel) && (f.eof() != true)) {
 			f >> groupN >> num;
+            if (m->debug) { m->mothurOut("[DEBUG]: "+ groupN + '\t' + toString(num)); }
 			count++;
 			
 			allGroups.push_back(groupN);
@@ -165,6 +169,7 @@ SharedRAbundVector::SharedRAbundVector(ifstream& f) : DataVector(), maxRank(0), 
 			//fill vector.  
 			for(int i=0;i<num;i++){
 				f >> inputData;
+                if (m->debug) { m->mothurOut("[DEBUG]: OTU" + toString(i+1)+ '\t' +toString(inputData)); }
 				
 				lookup[count]->push_back(inputData, groupN); //abundance, bin, group
 			}
@@ -211,6 +216,18 @@ int SharedRAbundVector::getAbundance(int index){
 	return data[index].abundance;
 	
 }
+/***********************************************************************/
+//returns vector of abundances 
+vector<int> SharedRAbundVector::getAbundances(){
+    vector<int> abunds;
+    for (int i = 0; i < data.size(); i++) {
+        abunds.push_back(data[i].abundance);
+    }
+    
+	return abunds;
+}
+
+
 /***********************************************************************/
 
 int SharedRAbundVector::numNZ(){

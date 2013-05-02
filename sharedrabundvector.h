@@ -50,6 +50,7 @@ public:
 	individual get(int);
 	vector <individual> getData();
 	int getAbundance(int);
+    vector<int> getAbundances();
 	int numNZ();
 	void sortD();  //Sorts the data in descending order.
 	void push_front(int, int, string); //abundance, otu, groupname

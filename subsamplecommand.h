@@ -40,7 +40,7 @@ public:
 	
 private:	
 	bool abort, pickedGroups, allLines, persample;
-	string listfile, groupfile, countfile, sharedfile, rabundfile, sabundfile, fastafile, namefile;
+	string listfile, groupfile, countfile, sharedfile, rabundfile, sabundfile, fastafile, namefile, taxonomyfile;
 	set<string> labels; //holds labels to be used
 	string groups, label, outputDir;
 	vector<string> Groups, outputNames;
@@ -60,6 +60,7 @@ private:
 	int processList(ListVector*&, ofstream&, set<string>&);
 	int getNames();
 	int readNames();
+    int getTax(set<string>&);
 	
 };
 

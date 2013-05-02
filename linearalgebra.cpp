@@ -1479,29 +1479,189 @@ double LinearAlgebra::calcPearsonSig(double n, double r){
 /*********************************************************************************************************************************/
 
 vector<vector<double> > LinearAlgebra::getObservedEuclideanDistance(vector<vector<double> >& relAbundData){
+    try {
 
-	int numSamples = relAbundData.size();
-	int numOTUs = relAbundData[0].size();
-	
-	vector<vector<double> > dMatrix(numSamples);
-	for(int i=0;i<numSamples;i++){
-		dMatrix[i].resize(numSamples);
+        int numSamples = relAbundData.size();
+        int numOTUs = relAbundData[0].size();
+        
+        vector<vector<double> > dMatrix(numSamples);
+        for(int i=0;i<numSamples;i++){
+            dMatrix[i].resize(numSamples);
+        }
+        
+        for(int i=0;i<numSamples;i++){
+            for(int j=0;j<numSamples;j++){
+                
+                if (m->control_pressed) { return dMatrix; }
+                
+                double d = 0;
+                for(int k=0;k<numOTUs;k++){
+                    d += pow((relAbundData[i][k] - relAbundData[j][k]), 2.0000);
+                }
+                dMatrix[i][j] = pow(d, 0.50000);
+                dMatrix[j][i] = dMatrix[i][j];
+                
+            }
+        }
+        return dMatrix;
 	}
-	
-	for(int i=0;i<numSamples;i++){
-		for(int j=0;j<numSamples;j++){
-			
-			double d = 0;
-			for(int k=0;k<numOTUs;k++){
-				d += pow((relAbundData[i][k] - relAbundData[j][k]), 2.0000);
-			}
-			dMatrix[i][j] = pow(d, 0.50000);
-			dMatrix[j][i] = dMatrix[i][j];
-			
-		}
+	catch(exception& e) {
+		m->errorOut(e, "LinearAlgebra", "getObservedEuclideanDistance");
+		exit(1);
 	}
-	return dMatrix;
-	
+}
+
+/*********************************************************************************************************************************/
+vector<double> LinearAlgebra::solveEquations(vector<vector<double> > A, vector<double> b){
+    try {
+        int length = (int)b.size();
+        vector<double> x(length, 0);
+        vector<int> index(length);
+        for(int i=0;i<length;i++){  index[i] = i;   }
+        double d;
+        
+        ludcmp(A, index, d);  if (m->control_pressed) { return b; }
+        lubksb(A, index, b);
+        
+        return b;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "LinearAlgebra", "solveEquations");
+		exit(1);
+	}
+}
+
+/*********************************************************************************************************************************/
+
+void LinearAlgebra::ludcmp(vector<vector<double> >& A, vector<int>& index, double& d){
+    try {
+        double tiny = 1e-20;
+        
+        int n = (int)A.size();
+        vector<double> vv(n, 0.0);
+        double temp;
+        int imax;
+        
+        d = 1.0;
+        
+        for(int i=0;i<n;i++){
+            double big = 0.0;
+            for(int j=0;j<n;j++){   if((temp=fabs(A[i][j])) > big ) big=temp;  }
+            if(big==0.0){   m->mothurOut("Singular matrix in routine ludcmp\n");    }
+            vv[i] = 1.0/big;
+        }
+        
+        for(int j=0;j<n;j++){
+            if (m->control_pressed) { break; }
+            for(int i=0;i<j;i++){
+                double sum = A[i][j];
+                for(int k=0;k<i;k++){   sum -= A[i][k] * A[k][j];   }
+                A[i][j] = sum;
+            }
+            
+            double big = 0.0;
+            for(int i=j;i<n;i++){
+                double sum = A[i][j];
+                for(int k=0;k<j;k++){   sum -= A[i][k] * A[k][j];   }
+                A[i][j] = sum;
+                double dum;
+                if((dum = vv[i] * fabs(sum)) >= big){
+                    big = dum;
+                    imax = i;
+                }
+            }
+            if(j != imax){
+                for(int k=0;k<n;k++){
+                    double dum = A[imax][k];
+                    A[imax][k] = A[j][k];
+                    A[j][k] = dum;
+                }
+                d = -d;
+                vv[imax] = vv[j];
+            }
+            index[j] = imax;
+            
+            if(A[j][j] == 0.0){ A[j][j] = tiny; }
+            
+            if(j != n-1){
+                double dum = 1.0/A[j][j];
+                for(int i=j+1;i<n;i++){ A[i][j] *= dum; }
+            }
+        }
+    }
+	catch(exception& e) {
+		m->errorOut(e, "LinearAlgebra", "ludcmp");
+		exit(1);
+	}
+}
+
+/*********************************************************************************************************************************/
+
+void LinearAlgebra::lubksb(vector<vector<double> >& A, vector<int>& index, vector<double>& b){
+    try {
+        double total;
+        int n = (int)A.size();
+        int ii = 0;
+        
+        for(int i=0;i<n;i++){
+            if (m->control_pressed) { break; }
+            int ip = index[i];
+            total = b[ip];
+            b[ip] = b[i];
+            
+            if (ii != 0) {
+                for(int j=ii-1;j<i;j++){
+                    total -= A[i][j] * b[j];
+                }
+            }
+            else if(total != 0){  ii = i+1;   }
+            b[i] = total;
+        }
+        for(int i=n-1;i>=0;i--){
+            total = b[i];
+            for(int j=i+1;j<n;j++){ total -= A[i][j] * b[j];  }
+            b[i] = total / A[i][i];
+        }
+    }
+	catch(exception& e) {
+		m->errorOut(e, "LinearAlgebra", "lubksb");
+		exit(1);
+	}
+}
+
+/*********************************************************************************************************************************/
+
+vector<vector<double> > LinearAlgebra::getInverse(vector<vector<double> > matrix){
+    try {
+        int n = (int)matrix.size();
+        
+        vector<vector<double> > inverse(n);
+        for(int i=0;i<n;i++){   inverse[i].assign(n, 0.0000);   }
+        
+        vector<double> column(n, 0.0000);
+        vector<int> index(n, 0);
+        double dummy;
+        
+        ludcmp(matrix, index, dummy);
+        
+        for(int j=0;j<n;j++){
+            if (m->control_pressed) { break; }
+            
+            column.assign(n, 0);
+            
+            column[j] = 1.0000;
+            
+            lubksb(matrix, index, column);
+            
+            for(int i=0;i<n;i++){   inverse[i][j] = column[i];  }
+        }
+        
+        return inverse;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "LinearAlgebra", "getInverse");
+		exit(1);
+	}
 }
 
 /*********************************************************************************************************************************/

@@ -422,7 +422,7 @@ int TrimSeqsCommand::execute(){
 		
 		if (countfile != "") {
             CountTable ct;
-            ct.readTable(countfile);
+            ct.readTable(countfile, true);
             nameCount = ct.getNameMap();
 			outputNames.push_back(trimCountFile);
 			outputNames.push_back(scrapCountFile);
@@ -443,7 +443,9 @@ int TrimSeqsCommand::execute(){
 				outputNames.push_back(outputGroupFileName); outputTypes["group"].push_back(outputGroupFileName);
 			}
 		}
-       
+        
+        if (!pairedOligos) { if (reorient) { m->mothurOut("[WARNING]: You cannot use reorient without paired barcodes or primers, skipping."); m->mothurOutEndLine(); reorient = false; } }
+        
         if (m->control_pressed) { return 0; }
             
         //fills lines and qlines
@@ -538,7 +540,7 @@ int TrimSeqsCommand::execute(){
             
             if (countfile != "") { //create countfile with group info included
                 CountTable* ct = new CountTable();
-                ct->readTable(trimCountFile);
+                ct->readTable(trimCountFile, true);
                 map<string, int> justTrimmedNames = ct->getNameMap();
                 delete ct;
                 
@@ -738,7 +740,9 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
                 
 				if(numBarcodes != 0){
 					success = trimOligos->stripBarcode(currSeq, currQual, barcodeIndex);
-					if(success > bdiffs)		{	trashCode += 'b';	}
+					if(success > bdiffs)		{
+                        trashCode += 'b';
+                    }
 					else{ currentSeqsDiffs += success;  }
 				}
 				
@@ -752,9 +756,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 				if(numFPrimers != 0){
 					success = trimOligos->stripForward(currSeq, currQual, primerIndex, keepforward);
 					if(success > pdiffs)		{
-                        //if (pairedOligos) {  trashCode += trimOligos->getTrashCode(); }
-                        //else {  trashCode += 'f';  }
-                        trashCode += 'f';
+                          trashCode += 'f';  
                     }
 					else{ currentSeqsDiffs += success;  }
 				}
@@ -776,17 +778,13 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
                     
                     if(numBarcodes != 0){
                         thisSuccess = rtrimOligos->stripBarcode(savedSeq, savedQual, thisBarcodeIndex);
-                        if(thisSuccess > bdiffs)		{	thisTrashCode += 'b';	}
+                        if(thisSuccess > bdiffs)		{ thisTrashCode += "b"; }
                         else{ thisCurrentSeqsDiffs += thisSuccess;  }
                     }
                     
                     if(numFPrimers != 0){
                         thisSuccess = rtrimOligos->stripForward(savedSeq, savedQual, thisPrimerIndex, keepforward);
-                            if(thisSuccess > pdiffs)		{
-                            //if (pairedOligos) {  thisTrashCode += rtrimOligos->getTrashCode(); }
-                            //else {  thisTrashCode += 'f';  }
-                            thisTrashCode += 'f'; 
-                        }
+                        if(thisSuccess > pdiffs)		{ thisTrashCode += "f"; }
                         else{ thisCurrentSeqsDiffs += thisSuccess;  }
                     }
                    
@@ -804,7 +802,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
                             savedQual.flipQScores();
                             currQual.setScores(savedQual.getScores());
                         }
-                    }
+                    }else { trashCode += "(" + thisTrashCode + ")";  }
                 }
                 
 				if(keepFirst != 0){
@@ -1535,7 +1533,7 @@ bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
 					// get rest of line in case there is a primer name
 					while (!inOligos.eof())	{	
 						char c = inOligos.get(); 
-						if (c == 10 || c == 13){	break;	}
+						if (c == 10 || c == 13 || c == -1){	break;	}
 						else if (c == 32 || c == 9){;} //space or tab
 						else { 	group += c;  }
 					} 
@@ -1650,10 +1648,10 @@ bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
         if (hasPairedBarcodes || hasPrimer) {
             pairedOligos = true;
             if ((primers.size() != 0) || (barcodes.size() != 0) || (linker.size() != 0) || (spacer.size() != 0) || (revPrimer.size() != 0)) { m->control_pressed = true;  m->mothurOut("[ERROR]: cannot mix paired primers and barcodes with non paired or linkers and spacers, quitting."); m->mothurOutEndLine();  return 0; }
-        }
+        }else if (reorient) { m->mothurOut("[Warning]: cannot use checkorient without paired barcodes or primers, ignoring.\n"); m->mothurOutEndLine(); reorient = false; }
         
 		if(barcodeNameVector.size() == 0 && primerNameVector[0] == ""){	allFiles = 0;	}
-		
+        
 		//add in potential combos
 		if(barcodeNameVector.size() == 0){
 			barcodes[""] = 0;
@@ -1854,7 +1852,13 @@ bool TrimSeqsCommand::keepFirstTrim(Sequence& sequence, QualityScores& qscores){
 		if(qscores.getName() != ""){
 			qscores.trimQScores(-1, keepFirst);
 		}
+
+//        sequence.printSequence(cout);cout << endl;
+        
 		sequence.trim(keepFirst);
+        
+//        sequence.printSequence(cout);cout << endl << endl;;
+
 		return success;
 	}
 	catch(exception& e) {

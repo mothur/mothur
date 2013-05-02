@@ -104,7 +104,7 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
 				
 				if (m->control_pressed) { exit(0); }
 				
-				m->mothurOut("Merging results."); m->mothurOutEndLine();
+				//m->mothurOut("Merging results."); m->mothurOutEndLine();
 				
 				//pass numSeqs to parent
 				ofstream out;
@@ -156,7 +156,7 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
 			m->mothurRemove(s);
 		}
 		
-		m->mothurOut("DONE."); m->mothurOutEndLine(); m->mothurOutEndLine();
+		//m->mothurOut("DONE."); m->mothurOutEndLine(); m->mothurOutEndLine();
 		
 		return results;
 #endif		

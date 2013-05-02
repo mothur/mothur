@@ -47,7 +47,7 @@ private:
 	int processRabund();
 	int processList();
 	int processShared();
-	int processLookup(vector<SharedRAbundVector*>&, ofstream&);
+	int processLookup(vector<SharedRAbundVector*>&);
 	
 };
 

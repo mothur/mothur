@@ -261,7 +261,7 @@ int CountGroupsCommand::execute(){
             m->openOutputFile(outputFileName, out);
             
 			CountTable ct;
-			ct.readTable(countfile);
+			ct.readTable(countfile, true);
             
 			//make sure groups are valid
 			//takes care of user setting groupNames that are invalid or setting groups=all

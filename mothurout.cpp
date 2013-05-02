@@ -23,6 +23,7 @@ set<string> MothurOut::getCurrentTypes()  {
         
         set<string> types;
         types.insert("fasta");
+        types.insert("summary");
         types.insert("accnos");
         types.insert("column");
         types.insert("design");
@@ -81,6 +82,7 @@ void MothurOut::printCurrentFiles()  {
         if (biomfile != "")			{  mothurOut("biom=" + biomfile); mothurOutEndLine();				}
         if (counttablefile != "")	{  mothurOut("count=" + counttablefile); mothurOutEndLine();	}
 		if (processors != "1")		{  mothurOut("processors=" + processors); mothurOutEndLine();		}
+        if (summaryfile != "")		{  mothurOut("summary=" + summaryfile); mothurOutEndLine();		}
 		
 	}
 	catch(exception& e) {
@@ -115,6 +117,7 @@ bool MothurOut::hasCurrentFiles()  {
 		if (flowfile != "")			{  return true;			}
         if (biomfile != "")			{  return true;			}
         if (counttablefile != "")	{  return true;			}
+        if (summaryfile != "")	{  return true;			}
 		if (processors != "1")		{  return true;			}
 		
 		return hasCurrent;
@@ -151,6 +154,7 @@ void MothurOut::clearCurrentFiles()  {
 		flowfile = "";
         biomfile = "";
         counttablefile = "";
+        summaryfile = "";
 		processors = "1";
 	}
 	catch(exception& e) {
@@ -337,6 +341,27 @@ void MothurOut::mothurOut(string output) {
 		#ifdef USE_MPI
 			}
 		#endif
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "MothurOut");
+		exit(1);
+	}
+}
+/*********************************************************************************************/
+void MothurOut::mothurOutJustToScreen(string output) {
+	try {
+		
+#ifdef USE_MPI
+        int pid;
+        MPI_Comm_rank(MPI_COMM_WORLD, &pid);
+        
+        if (pid == 0) { //only one process should output to screen
+#endif
+            logger() << output;
+            
+#ifdef USE_MPI
+        }
+#endif
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "MothurOut");
@@ -1170,7 +1195,42 @@ int MothurOut::appendFiles(string temp, string filename) {
 		exit(1);
 	}	
 }
-
+/**************************************************************************************************/
+int MothurOut::appendFilesWithoutHeaders(string temp, string filename) {
+	try{
+		ofstream output;
+		ifstream input;
+        
+		//open output file in append mode
+		openOutputFileAppend(filename, output);
+		int ableToOpen = openInputFile(temp, input, "no error");
+		//int ableToOpen = openInputFile(temp, input);
+		
+		int numLines = 0;
+		if (ableToOpen == 0) { //you opened it
+        
+            string headers = getline(input); gobble(input);
+            if (debug) { mothurOut("[DEBUG]: skipping headers " + headers +'\n'); }
+            
+            char buffer[4096];
+            while (!input.eof()) {
+                input.read(buffer, 4096);
+                output.write(buffer, input.gcount());
+                //count number of lines
+                for (int i = 0; i < input.gcount(); i++) {  if (buffer[i] == '\n') {numLines++;} }
+            }
+			input.close();
+		}
+		
+		output.close();
+		
+		return numLines;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "appendFiles");
+		exit(1);
+	}	
+}
 /**************************************************************************************************/
 string MothurOut::sortFile(string distFile, string outputDir){
 	try {	
@@ -1257,15 +1317,15 @@ vector<unsigned long long> MothurOut::setFilePosFasta(string filename, int& num)
 				char c = inFASTA.get(); count++;
 				if (c == '>') {
 					positions.push_back(count-1);
-					//cout << count << endl;
+					if (debug) { mothurOut("[DEBUG]: numSeqs = " + toString(positions.size()) +  " count = " + toString(count) + ".\n"); }
 				}
 			}
 			inFASTA.close();
 		
 			num = positions.size();
-		
-			/*FILE * pFile;
-			long size;
+            if (debug) { mothurOut("[DEBUG]: num = " + toString(num) + ".\n"); }
+			FILE * pFile;
+			unsigned long long size;
 		
 			//get num bytes in file
 			pFile = fopen (filename.c_str(),"rb");
@@ -1274,9 +1334,9 @@ vector<unsigned long long> MothurOut::setFilePosFasta(string filename, int& num)
 				fseek (pFile, 0, SEEK_END);
 				size=ftell (pFile);
 				fclose (pFile);
-			}*/
+			}
 			
-			unsigned long long size = positions[(positions.size()-1)];
+			/*unsigned long long size = positions[(positions.size()-1)];
 			ifstream in;
 			openInputFile(filename, in);
 			
@@ -1286,8 +1346,10 @@ vector<unsigned long long> MothurOut::setFilePosFasta(string filename, int& num)
 				if(in.eof())		{	break;	}
 				else				{	size++;	}
 			}
-			in.close();
-		
+			in.close();*/
+        
+            if (debug) { mothurOut("[DEBUG]: size = " + toString(size) + ".\n"); }
+        
 			positions.push_back(size);
 			positions[0] = 0;
 		

@@ -247,7 +247,7 @@ int MGClusterCommand::execute(){
         if(countfile != "") {
             //map<string, int> nameMapCounts = m->readNames(namefile);
             ct = new CountTable();
-            ct->readTable(countfile);
+            ct->readTable(countfile, false);
             rabund = new RAbundVector();
             createRabund(ct, list, rabund);
         }else {

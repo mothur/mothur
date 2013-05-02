@@ -43,6 +43,8 @@
 		A74D36B8137DAFAA00332B0C /* chimerauchimecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D36B7137DAFAA00332B0C /* chimerauchimecommand.cpp */; };
 		A74D59A4159A1E2000043046 /* counttable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D59A3159A1E2000043046 /* counttable.cpp */; };
 		A754149714840CF7005850D1 /* summaryqualcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A754149614840CF7005850D1 /* summaryqualcommand.cpp */; };
+		A7548FAD17142EBC00B1F05A /* getmetacommunitycommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7548FAC17142EBC00B1F05A /* getmetacommunitycommand.cpp */; };
+		A7548FB0171440ED00B1F05A /* qFinderDMM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7548FAE171440EC00B1F05A /* qFinderDMM.cpp */; };
 		A75790591301749D00A30DAB /* homovacommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A75790581301749D00A30DAB /* homovacommand.cpp */; };
 		A76CDD821510F143004C8458 /* prcseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A76CDD811510F143004C8458 /* prcseqscommand.cpp */; };
 		A7730EFF13967241007433A3 /* countseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7730EFE13967241007433A3 /* countseqscommand.cpp */; };
@@ -459,6 +461,10 @@
 		A74D59A6159A1E3600043046 /* counttable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = counttable.h; sourceTree = "<group>"; };
 		A754149514840CF7005850D1 /* summaryqualcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = summaryqualcommand.h; sourceTree = "<group>"; };
 		A754149614840CF7005850D1 /* summaryqualcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = summaryqualcommand.cpp; sourceTree = "<group>"; };
+		A7548FAB17142EA500B1F05A /* getmetacommunitycommand.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = getmetacommunitycommand.h; sourceTree = "<group>"; };
+		A7548FAC17142EBC00B1F05A /* getmetacommunitycommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getmetacommunitycommand.cpp; sourceTree = "<group>"; };
+		A7548FAE171440EC00B1F05A /* qFinderDMM.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = qFinderDMM.cpp; sourceTree = "<group>"; };
+		A7548FAF171440ED00B1F05A /* qFinderDMM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = qFinderDMM.h; sourceTree = "<group>"; };
 		A75790571301749D00A30DAB /* homovacommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = homovacommand.h; sourceTree = "<group>"; };
 		A75790581301749D00A30DAB /* homovacommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = homovacommand.cpp; sourceTree = "<group>"; };
 		A76CDD7F1510F09A004C8458 /* pcrseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pcrseqscommand.h; sourceTree = "<group>"; };
@@ -1189,6 +1195,8 @@
 				A7E9B77C12D37EC400DA6239 /* overlap.hpp */,
 				A7E9B79B12D37EC400DA6239 /* progress.cpp */,
 				A7E9B79C12D37EC400DA6239 /* progress.hpp */,
+				A7548FAF171440ED00B1F05A /* qFinderDMM.h */,
+				A7548FAE171440EC00B1F05A /* qFinderDMM.cpp */,
 				A7E9B7A512D37EC400DA6239 /* rarecalc.cpp */,
 				A7386C191619C9FB00651424 /* randomforest */,
 				A7E9B7A612D37EC400DA6239 /* rarecalc.h */,
@@ -1370,6 +1378,8 @@
 				A7E9B6F412D37EC400DA6239 /* getgroupscommand.cpp */,
 				A7E9B6F712D37EC400DA6239 /* getlabelcommand.h */,
 				A7E9B6F612D37EC400DA6239 /* getlabelcommand.cpp */,
+				A7548FAB17142EA500B1F05A /* getmetacommunitycommand.h */,
+				A7548FAC17142EBC00B1F05A /* getmetacommunitycommand.cpp */,
 				A70056E8156A93E300924A2D /* getotulabelscommand.h */,
 				A70056E5156A93D000924A2D /* getotulabelscommand.cpp */,
 				A7E9B6F912D37EC400DA6239 /* getlineagecommand.h */,
@@ -2328,6 +2338,8 @@
 				A7128B1D16B7002A00723BE4 /* getdistscommand.cpp in Sources */,
 				A7B0231516B8244C006BA09E /* removedistscommand.cpp in Sources */,
 				A799314B16CBD0CD0017E888 /* mergetaxsummarycommand.cpp in Sources */,
+				A7548FAD17142EBC00B1F05A /* getmetacommunitycommand.cpp in Sources */,
+				A7548FB0171440ED00B1F05A /* qFinderDMM.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2416,8 +2428,8 @@
 				GCC_MODEL_TUNING = "";
 				GCC_OPTIMIZATION_LEVEL = s;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"VERSION=\"\\\"1.29.2\\\"\"",
-					"RELEASE_DATE=\"\\\"2/12/2013\\\"\"",
+					"VERSION=\"\\\"1.30.0\\\"\"",
+					"RELEASE_DATE=\"\\\"4/01/2013\\\"\"",
 				);
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;

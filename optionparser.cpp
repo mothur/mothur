@@ -128,6 +128,8 @@ map<string, string> OptionParser::getParameters() {
                         it->second = m->getBiomFile();
                     }else if (it->first == "count") {
                             it->second = m->getCountTableFile();
+                    }else if (it->first == "summary") {
+                            it->second = m->getSummaryFile();
                     }else {
                         m->mothurOut("[ERROR]: mothur does not save a current file for " + it->first); m->mothurOutEndLine();
                     }

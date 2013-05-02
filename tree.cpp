@@ -1233,7 +1233,7 @@ void Tree::printTree() {
 
 /*****************************************************************/
 //this code is a mess and should be rethought...-slw
-void Tree::parseTreeFile() {
+int Tree::parseTreeFile() {
 	
 	//only takes names from the first tree and assumes that all trees use the same names.
 	try {
@@ -1246,8 +1246,10 @@ void Tree::parseTreeFile() {
 		
 		//ifyou are not a nexus file 
 		if((c = filehandle.peek()) != '#') {  
-			while((c = filehandle.peek()) != ';') { 
+			while((c = filehandle.peek()) != ';') {
+                if (m->control_pressed) {  filehandle.close(); return 0; }
 				while ((c = filehandle.peek()) != ';') {
+                    if (m->control_pressed) {  filehandle.close(); return 0; }
 					// get past comments
 					if(c == '[') {
 						comment = 1;
@@ -1267,7 +1269,8 @@ void Tree::parseTreeFile() {
 			string holder = "";
 					
 			// get past comments
-			while(holder != "translate" && holder != "Translate"){	
+			while(holder != "translate" && holder != "Translate"){
+                if (m->control_pressed) {  filehandle.close(); return 0; }
 				if(holder == "[" || holder == "[!"){
 					comment = 1;
 				}
@@ -1296,7 +1299,8 @@ void Tree::parseTreeFile() {
 
 				string number, name, h;
 				h = ""; // so it enters the loop the first time
-				while((h != ";") && (number != ";")) { 
+				while((h != ";") && (number != ";")) {
+                    if (m->control_pressed) {  filehandle.close(); return 0; }
 					filehandle >> number;
 					filehandle >> name;
 	
@@ -1309,7 +1313,7 @@ void Tree::parseTreeFile() {
 			}
 		}
 		filehandle.close();
-		
+		return 0;
 		//for (int i = 0; i < globaldata->Treenames.size(); i++) {
 //cout << globaldata->Treenames[i] << endl; }
 //cout << globaldata->Treenames.size() << endl;
@@ -1327,7 +1331,8 @@ int Tree::readTreeString(ifstream& filehandle)	{
 		int c;
 		string name;  //, k
 		
-		while((c = filehandle.peek()) != ';') { 
+		while((c = filehandle.peek()) != ';') {
+            if (m->control_pressed) {  return 0; }
 //k = c;
 //cout << " at beginning of while " <<  k << endl;			
 			if(c == ')')  {    

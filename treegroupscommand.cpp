@@ -458,7 +458,7 @@ int TreeGroupCommand::execute(){
                 readMatrix->read(nameMap);
             }else if (countfile != "") {
                 ct = new CountTable();
-                ct->readTable(countfile);
+                ct->readTable(countfile, true);
                 readMatrix->read(ct);
             }else {
                 readMatrix->read(nameMap);

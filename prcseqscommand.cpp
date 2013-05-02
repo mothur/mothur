@@ -312,6 +312,7 @@ int PcrSeqsCommand::execute(){
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
         int start = time(NULL);
+        fileAligned = true;
         
         string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(fastafile);  }
@@ -352,8 +353,7 @@ int PcrSeqsCommand::execute(){
         if (m->control_pressed) {  return 0; }
 
         set<string> badNames;
-        if(processors == 1) {    numFastaSeqs = driverPcr(fastafile, trimSeqFile, badSeqFile, badNames, lines[0]);   }
-        else                {    numFastaSeqs = createProcesses(fastafile, trimSeqFile, badSeqFile, badNames);       }	
+        numFastaSeqs = createProcesses(fastafile, trimSeqFile, badSeqFile, badNames);  	
 		
 		if (m->control_pressed) {  return 0; }		
         
@@ -429,6 +429,8 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
         vector<int> processIDS;   
         int process = 1;
 		int num = 0;
+        int pstart = -1; int pend = -1;
+        bool adjustNeeded = false;
         
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
         
@@ -440,12 +442,14 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				num = driverPcr(filename, goodFileName + toString(getpid()) + ".temp", badFileName + toString(getpid()) + ".temp", badSeqNames, lines[process]);
+                string locationsFile = toString(getpid()) + ".temp";
+				num = driverPcr(filename, goodFileName + toString(getpid()) + ".temp", badFileName + toString(getpid()) + ".temp", locationsFile, badSeqNames, lines[process], pstart, pend, adjustNeeded);
 				
 				//pass numSeqs to parent
 				ofstream out;
 				string tempFile = filename + toString(getpid()) + ".num.temp";
 				m->openOutputFile(tempFile, out);
+                out << pstart << '\t' << pend << '\t' << adjustNeeded << endl;
 				out << num << '\t' << badSeqNames.size() << endl;
                 for (set<string>::iterator it = badSeqNames.begin(); it != badSeqNames.end(); it++) {
                     out << (*it) << endl;
@@ -460,7 +464,8 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
 			}
 		}
 		
-        num = driverPcr(filename, goodFileName, badFileName, badSeqNames, lines[0]);
+        string locationsFile = toString(getpid()) + ".temp";
+        num = driverPcr(filename, goodFileName, badFileName, locationsFile, badSeqNames, lines[0], pstart, pend, adjustNeeded);
         
 		//force parent to wait until all the processes are done
 		for (int i=0;i<processIDS.size();i++) { 
@@ -473,7 +478,22 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
 			string tempFile =  filename + toString(processIDS[i]) + ".num.temp";
 			m->openInputFile(tempFile, in);
             int numBadNames = 0; string name = "";
-			if (!in.eof()) { int tempNum = 0; in >> tempNum >> numBadNames; num += tempNum; m->gobble(in); }
+            int tpstart = -1; int tpend = -1; bool tempAdjust = false;
+            
+			if (!in.eof()) {
+                in >> tpstart >> tpend >> tempAdjust; m->gobble(in);
+                
+                if (tempAdjust) { adjustNeeded = true; }
+                if (tpstart != -1)   {
+                    if (tpstart != pstart) { adjustNeeded = true; }
+                    if (tpstart < pstart) { pstart = tpstart; } //smallest start
+                } 
+                if (tpend != -1)     {
+                    if (tpend != pend) { adjustNeeded = true; }
+                    if (tpend > pend) { pend = tpend; } //largest end
+                } 
+                int tempNum = 0; in >> tempNum >> numBadNames; num += tempNum; m->gobble(in);
+            }
             for (int j = 0; j < numBadNames; j++) {
                 in >> name; m->gobble(in);
                 badSeqNames.insert(name);
@@ -485,6 +505,9 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
             
             m->appendFiles((badFileName + toString(processIDS[i]) + ".temp"), badFileName);
             m->mothurRemove((badFileName + toString(processIDS[i]) + ".temp"));
+            
+            m->appendFiles((toString(processIDS[i]) + ".temp"), locationsFile);
+            m->mothurRemove((toString(processIDS[i]) + ".temp"));
 		}
     #else
         
@@ -498,6 +521,11 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
 		DWORD   dwThreadIdArray[processors-1];
 		HANDLE  hThreadArray[processors-1]; 
 		
+        string locationsFile = "locationsFile.txt";
+        m->mothurRemove(locationsFile);
+        m->mothurRemove(goodFileName);
+        m->mothurRemove(badFileName);
+        
 		//Create processor worker threads.
 		for( int i=0; i<processors-1; i++ ){
             
@@ -505,7 +533,7 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
             if (i!=0) {extension += toString(i) + ".temp"; processIDS.push_back(i); }
             
 			// Allocate memory for thread data.
-			pcrData* tempPcr = new pcrData(filename, goodFileName+extension, badFileName+extension, m, oligosfile, ecolifile, primers, revPrimer, nomatch, keepprimer, keepdots, start, end, length, pdiffs, lines[i].start, lines[i].end);
+			pcrData* tempPcr = new pcrData(filename, goodFileName+extension, badFileName+extension, locationsFile+extension, m, oligosfile, ecolifile, primers, revPrimer, nomatch, keepprimer, keepdots, start, end, length, pdiffs, lines[i].start, lines[i].end);
 			pDataArray.push_back(tempPcr);
 			
 			//default security attributes, thread function name, argument to thread function, use default creation flags, returns the thread identifier
@@ -513,7 +541,7 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
 		}
 		
         //do your part
-        num = driverPcr(filename, (goodFileName+toString(processors-1)+".temp"), (badFileName+toString(processors-1)+".temp"),badSeqNames, lines[processors-1]);
+        num = driverPcr(filename, (goodFileName+toString(processors-1)+".temp"), (badFileName+toString(processors-1)+".temp"), (locationsFile+toString(processors-1)+".temp"), badSeqNames, lines[processors-1], pstart, pend, adjustNeeded);
         processIDS.push_back(processors-1);
         
 		//Wait until all threads have terminated.
@@ -525,6 +553,16 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
             if (pDataArray[i]->count != pDataArray[i]->fend) {
                 m->mothurOut("[ERROR]: process " + toString(i) + " only processed " + toString(pDataArray[i]->count) + " of " + toString(pDataArray[i]->fend) + " sequences assigned to it, quitting. \n"); m->control_pressed = true; 
             }
+            if (pDataArray[i]->adjustNeeded) { adjustNeeded = true; }
+            if (pDataArray[i]->pstart != -1)   {
+                if (pDataArray[i]->pstart != pstart) { adjustNeeded = true; }
+                if (pDataArray[i]->pstart < pstart) { pstart = pDataArray[i]->pstart; }
+            } //smallest start
+            if (pDataArray[i]->pend != -1)     {
+                if (pDataArray[i]->pend != pend) { adjustNeeded = true; }
+                if (pDataArray[i]->pend > pend) { pend = pDataArray[i]->pend; }
+            } //largest end
+
             for (set<string>::iterator it = pDataArray[i]->badSeqNames.begin(); it != pDataArray[i]->badSeqNames.end(); it++) {	badSeqNames.insert(*it);       }
 			CloseHandle(hThreadArray[i]);
 			delete pDataArray[i];
@@ -536,9 +574,13 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
             
             m->appendFiles((badFileName + toString(processIDS[i]) + ".temp"), badFileName);
             m->mothurRemove((badFileName + toString(processIDS[i]) + ".temp"));
+            
+            m->appendFiles((locationsFile+toString(processIDS[i]) + ".temp"), locationsFile);
+            m->mothurRemove((locationsFile+toString(processIDS[i]) + ".temp"));
 		}
         
 #endif	
+        if (fileAligned && adjustNeeded) { adjustDots(goodFileName, locationsFile, pstart, pend); }
         
         return num;
         
@@ -550,13 +592,16 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
 }
 
 //**********************************************************************************************************************
-int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta, set<string>& badSeqNames, linePair filePos){
+int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta, string locationsName, set<string>& badSeqNames, linePair filePos, int& pstart, int& pend, bool& adjustNeeded){
 	try {
 		ofstream goodFile;
 		m->openOutputFile(goodFasta, goodFile);
         
         ofstream badFile;
 		m->openOutputFile(badFasta, badFile);
+        
+        ofstream locationsFile;
+		m->openOutputFile(locationsName, locationsFile);
 		
 		ifstream inFASTA;
 		m->openInputFile(filename, inFASTA);
@@ -566,6 +611,8 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
 		bool done = false;
 		int count = 0;
         set<int> lengths;
+        vector< set<int> > locations; //locations[0] = beginning locations, locations[1] = ending locations
+        locations.resize(2);
         
         //pdiffs, bdiffs, primers, barcodes, revPrimers
         map<string, int> faked;
@@ -577,7 +624,15 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
 			
 			Sequence currSeq(inFASTA); m->gobble(inFASTA);
             
+            if (fileAligned) { //assume aligned until proven otherwise
+                lengths.insert(currSeq.getAligned().length());
+                if (lengths.size() > 1) { fileAligned = false; }
+            }
+            
             string trashCode = "";
+            string locationsString = "";
+            int thisPStart = -1;
+            int thisPEnd = -1;
 			if (currSeq.getName() != "") {
                 
                 if (m->debug) { m->mothurOut("[DEBUG]: seq name = " + currSeq.getName() + ".\n"); } 
@@ -596,13 +651,25 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
                         else{
                             //are you aligned
                             if (aligned) { 
-                                if (!keepprimer)    {  
-                                    if (keepdots)   { currSeq.filterToPos(mapAligned[primerEnd]);   }
-                                    else            { currSeq.setAligned(currSeq.getAligned().substr(mapAligned[primerEnd]));                                              }
+                                if (!keepprimer)    {
+                                    if (keepdots)   { currSeq.filterToPos(mapAligned[primerEnd-1]+1);   } //mapAligned[primerEnd-1] is the location of the last base in the primer. we want to trim to the space just after that.  The -1 & +1 ensures if the primer is followed by gaps they are not trimmed causing an aligned sequence dataset to become unaligned.
+                                    else            {
+                                        currSeq.setAligned(currSeq.getAligned().substr(mapAligned[primerEnd-1]+1));
+                                        if (fileAligned) {
+                                            thisPStart = mapAligned[primerEnd-1]+1; //locations[0].insert(mapAligned[primerEnd-1]+1);
+                                            locationsString += currSeq.getName() + "\t" + toString(mapAligned[primerEnd-1]+1) + "\n";
+                                        }
+                                    }
                                 } 
                                 else                {  
                                     if (keepdots)   { currSeq.filterToPos(mapAligned[primerStart]);  }
-                                    else            { currSeq.setAligned(currSeq.getAligned().substr(mapAligned[primerStart]));                                             }
+                                    else            {
+                                        currSeq.setAligned(currSeq.getAligned().substr(mapAligned[primerStart]));
+                                        if (fileAligned) {
+                                            thisPStart = mapAligned[primerStart]; //locations[0].insert(mapAligned[primerStart]);
+                                            locationsString += currSeq.getName() + "\t" + toString(mapAligned[primerStart]) + "\n";
+                                        }
+                                    }
                                 }
                                 isAligned(currSeq.getAligned(), mapAligned);
                             }else { 
@@ -617,16 +684,28 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
                         int primerStart = 0; int primerEnd = 0;
                         bool good = trim.findReverse(currSeq, primerStart, primerEnd);
                         if(!good){	if (nomatch == "reject") { goodSeq = false; } trashCode += "r";	}
-                        else{ 
-                              //are you aligned
+                        else{
+                            //are you aligned
                             if (aligned) { 
                                 if (!keepprimer)    {  
                                     if (keepdots)   { currSeq.filterFromPos(mapAligned[primerStart]); }
-                                    else            { currSeq.setAligned(currSeq.getAligned().substr(0, mapAligned[primerStart]));   }
+                                    else            {
+                                        currSeq.setAligned(currSeq.getAligned().substr(0, mapAligned[primerStart]));
+                                        if (fileAligned) {
+                                            thisPEnd = mapAligned[primerStart]; //locations[1].insert(mapAligned[primerStart]);
+                                            locationsString += currSeq.getName() + "\t" + toString(mapAligned[primerStart]) + "\n";
+                                        }
+                                    }
                                 } 
                                 else                {  
-                                    if (keepdots)   { currSeq.filterFromPos(mapAligned[primerEnd]); }
-                                    else            { currSeq.setAligned(currSeq.getAligned().substr(0, mapAligned[primerEnd]));   }
+                                    if (keepdots)   { currSeq.filterFromPos(mapAligned[primerEnd-1]+1); }
+                                    else            {
+                                        currSeq.setAligned(currSeq.getAligned().substr(0, mapAligned[primerEnd-1]+1));
+                                        if (fileAligned) {
+                                            thisPEnd = mapAligned[primerEnd-1]+1; //locations[1].insert(mapAligned[primerEnd-1]+1);
+                                            locationsString += currSeq.getName() + "\t" + toString(mapAligned[primerEnd-1]+1) + "\n";
+                                        }
+                                    }
                                 } 
                             }
                             else { 
@@ -637,8 +716,7 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
                     }
                 }else if (ecolifile != "") {
                     //make sure the seqs are aligned
-                    lengths.insert(currSeq.getAligned().length());
-                    if (lengths.size() > 1) { m->mothurOut("[ERROR]: seqs are not aligned. When using start and end your sequences must be aligned.\n"); m->control_pressed = true; break; }
+                    if (!fileAligned) { m->mothurOut("[ERROR]: seqs are not aligned. When using start and end your sequences must be aligned.\n"); m->control_pressed = true; break; }
                     else if (currSeq.getAligned().length() != length) {
                         m->mothurOut("[ERROR]: seqs are not the same length as ecoli seq. When using ecoli option your sequences must be aligned and the same length as the ecoli sequence.\n"); m->control_pressed = true; break; 
                     }else {
@@ -653,8 +731,7 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
                     }
                 }else{ //using start and end to trim
                     //make sure the seqs are aligned
-                    lengths.insert(currSeq.getAligned().length());
-                    if (lengths.size() > 1) { m->mothurOut("[ERROR]: seqs are not aligned. When using start and end your sequences must be aligned.\n"); m->control_pressed = true; break; }
+                    if (!fileAligned) { m->mothurOut("[ERROR]: seqs are not aligned. When using start and end your sequences must be aligned.\n"); m->control_pressed = true; break; }
                     else {
                         if (end != -1) {
                             if (end > currSeq.getAligned().length()) {  m->mothurOut("[ERROR]: end is longer than your sequence length, aborting.\n"); m->control_pressed = true; break; }
@@ -679,7 +756,13 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
                 //trimming removed all bases
                 if (currSeq.getUnaligned() == "") { goodSeq = false; }
                 
-				if(goodSeq == 1)    {   currSeq.printSequence(goodFile);        }
+				if(goodSeq == 1)    {
+                    currSeq.printSequence(goodFile);
+                    if (m->debug) { m->mothurOut("[DEBUG]: " + locationsString + "\n"); }
+                    if (locationsString != "") { locationsFile << locationsString; }
+                    if (thisPStart != -1)   { locations[0].insert(thisPStart);  }
+                    if (thisPEnd != -1)     { locations[1].insert(thisPEnd);    }
+                }
 				else {  
                     badSeqNames.insert(currSeq.getName()); 
                     currSeq.setName(currSeq.getName() + '|' + trashCode);
@@ -696,15 +779,24 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
 #endif
 			
 			//report progress
-			if((count) % 100 == 0){	m->mothurOut("Processing sequence: " + toString(count)); m->mothurOutEndLine();		}
+			if((count) % 100 == 0){	m->mothurOutJustToScreen("Processing sequence: " + toString(count)+"\n");		}
 		}
 		//report progress
-		if((count) % 100 != 0){	m->mothurOut("Processing sequence: " + toString(count)); m->mothurOutEndLine();		}
+		if((count) % 100 != 0){	m->mothurOutJustToScreen("Processing sequence: " + toString(count)+"\n"); 	}
 		
         badFile.close();
 		goodFile.close();
 		inFASTA.close();
-		
+        locationsFile.close();
+        
+        if (m->debug) { m->mothurOut("[DEBUG]: fileAligned = " + toString(fileAligned) +'\n'); }
+    
+        if (fileAligned && !keepdots) { //print out smallest start value and largest end value
+            if ((locations[0].size() > 1) || (locations[1].size() > 1)) { adjustNeeded = true; }
+            if (primers.size() != 0)    {   set<int>::iterator it = locations[0].begin();  pstart = *it;  }
+            if (revPrimer.size() != 0)  {   set<int>::reverse_iterator it2 = locations[1].rbegin();  pend = *it2; }
+        }
+
 		return count;
 	}
 	catch(exception& e) {
@@ -730,6 +822,80 @@ bool PcrSeqsCommand::isAligned(string seq, map<int, int>& aligned){
 		m->errorOut(e, "PcrSeqsCommand", "isAligned");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+int PcrSeqsCommand::adjustDots(string goodFasta, string locations, int pstart, int pend){
+    try {
+        ifstream inFasta;
+        m->openInputFile(goodFasta, inFasta);
+        
+        ifstream inLocations;
+        m->openInputFile(locations, inLocations);
+        
+        ofstream out;
+        m->openOutputFile(goodFasta+".temp", out);
+        
+        set<int> lengths;
+        //cout << pstart << '\t' << pend << endl;
+        
+        while(!inFasta.eof()) {
+            if(m->control_pressed) { break; }
+            
+            Sequence seq(inFasta); m->gobble(inFasta);
+            
+            string name = "";
+            int thisStart = -1; int thisEnd = -1;
+            if (primers.size() != 0)    { inLocations >> name >> thisStart; m->gobble(inLocations); }
+            if (revPrimer.size() != 0)  { inLocations >> name >> thisEnd;   m->gobble(inLocations); }
+            //cout << seq.getName() << '\t' << thisStart << '\t' << thisEnd << '\t' << seq.getAligned().length() << endl;
+            //cout << seq.getName() << '\t' << pstart << '\t' << pend << endl;
+            
+            if (name != seq.getName()) { m->mothurOut("[ERROR]: name mismatch in pcr.seqs.\n"); }
+            else {
+                if (pstart != -1) {
+                    if (thisStart != -1) {
+                        if (thisStart != pstart) {
+                            string dots = "";
+                            for (int i = pstart; i < thisStart; i++) { dots += "."; }
+                            thisEnd += dots.length();
+                            dots += seq.getAligned();
+                            seq.setAligned(dots);
+                        }
+                    }
+                }
+                
+                if (pend != -1) {
+                    if (thisEnd != -1) {
+                        if (thisEnd != pend) {
+                            string dots = seq.getAligned();
+                            for (int i = thisEnd; i < pend; i++) { dots += "."; }
+                            seq.setAligned(dots);
+                        }
+                    }
+                }
+                lengths.insert(seq.getAligned().length());
+            }
+            
+            seq.printSequence(out);
+        }
+        inFasta.close();
+        inLocations.close();
+        out.close();
+        m->mothurRemove(locations);
+        m->mothurRemove(goodFasta);
+        m->renameFile(goodFasta+".temp", goodFasta);
+        
+        //cout << "final lengths = \n";
+        //for (set<int>::iterator it = lengths.begin(); it != lengths.end(); it++) {
+           // cout << *it << endl;
+       // }
+        
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "PcrSeqsCommand", "adjustDots");
+        exit(1);
+    }
 }
 //********************************************************************/
 string PcrSeqsCommand::reverseOligo(string oligo){
@@ -804,7 +970,7 @@ bool PcrSeqsCommand::readOligos(){
 					// get rest of line in case there is a primer name
 					while (!inOligos.eof())	{	
                         char c = inOligos.get(); 
-                        if (c == 10 || c == 13){	break;	} 
+                        if (c == 10 || c == 13 || c == -1){	break;	}
                         else if (c == 32 || c == 9){;} //space or tab
 					} 
 					primers[oligo] = primerCount; primerCount++;
@@ -1088,7 +1254,7 @@ int PcrSeqsCommand::readCount(set<string> badSeqNames){
         //check for groups that have been eliminated
         CountTable ct;
         if (ct.testGroups(goodCountFile)) {
-            ct.readTable(goodCountFile);
+            ct.readTable(goodCountFile, true);
             ct.printTable(goodCountFile);
         }
 		

@@ -23,7 +23,8 @@ vector<string> SeqErrorCommand::setParameters(){
 		CommandParameter preference("reference", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(preference);
 		CommandParameter pqfile("qfile", "InputTypes", "", "", "none", "none", "QualReport","",false,false); parameters.push_back(pqfile);
 		CommandParameter preport("report", "InputTypes", "", "", "none", "none", "QualReport","",false,false); parameters.push_back(preport);
-		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pname);
+		CommandParameter pname("name", "InputTypes", "", "", "namecount", "none", "none","",false,false,true); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "namecount", "none", "none","",false,false,true); parameters.push_back(pcount);
 		CommandParameter pignorechimeras("ignorechimeras", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pignorechimeras);
 		CommandParameter pthreshold("threshold", "Number", "", "1.0", "", "", "","",false,false); parameters.push_back(pthreshold);
 		CommandParameter paligned("aligned", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(paligned);
@@ -52,7 +53,8 @@ string SeqErrorCommand::getHelpString(){
 		helpString += "The reference parameter...\n";
 		helpString += "The qfile parameter...\n";
 		helpString += "The report parameter...\n";
-		helpString += "The name parameter...\n";
+		helpString += "The name parameter allows you to provide a name file associated with the fasta file.\n";
+        helpString += "The count parameter allows you to provide a count file associated with the fasta file.\n";
 		helpString += "The ignorechimeras parameter...\n";
 		helpString += "The threshold parameter...\n";
 		helpString += "The processors parameter...\n";
@@ -190,6 +192,14 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("count");
+				//user has given a names file
+				if(it != parameters.end()){
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["count"] = inputDir + it->second;		}
+				}
 
 				it = parameters.find("qfile");
 				//user has given a quality score file
@@ -227,6 +237,12 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 			if(namesFileName == "not found"){	namesFileName = "";	}
 			else if (namesFileName == "not open") { namesFileName = ""; abort = true; }	
 			else { m->setNameFile(namesFileName); }
+            
+            //check for optional parameters
+			countfile = validParameter.validFile(parameters, "count", true);
+			if(countfile == "not found"){	countfile = "";	}
+			else if (countfile == "not open") { countfile = ""; abort = true; }
+			else { m->setCountTableFile(countfile); }
 			
 			qualFileName = validParameter.validFile(parameters, "qfile", true);
 			if(qualFileName == "not found"){	qualFileName = "";	}
@@ -243,6 +259,8 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 				outputDir += m->hasPath(queryFileName); //if user entered a file with a path then preserve it	
 			}
 			
+            if ((countfile != "") && (namesFileName != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
+            
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			temp = validParameter.validFile(parameters, "threshold", false);	if (temp == "not found") { temp = "1.00"; }
@@ -337,7 +355,12 @@ int SeqErrorCommand::execute(){
 		
 		getReferences();	//read in reference sequences - make sure there's no ambiguous bases
 
-		if(namesFileName != ""){	weights = getWeights();	}
+		if(namesFileName != "")     {	weights = getWeights();         }
+        else if (countfile != "")   {
+            CountTable ct;
+            ct.readTable(countfile, false);
+            weights = ct.getNameMap();
+        }
 		
 		vector<unsigned long long> fastaFilePos;
 		vector<unsigned long long> qFilePos;
@@ -643,7 +666,7 @@ int SeqErrorCommand::createProcesses(string filename, string qFileName, string r
 			int misMatchSize;
 			in >> misMatchSize; m->gobble(in);
 			if (misMatchSize > misMatchCounts.size()) {	misMatchCounts.resize(misMatchSize, 0);	}
-			for (int j = 0; j < misMatchCounts.size(); j++) {
+			for (int j = 0; j < misMatchSize; j++) {
 				in >> tempNum; misMatchCounts[j] += tempNum;
 			}
 			m->gobble(in);
@@ -785,7 +808,7 @@ int SeqErrorCommand::driver(string filename, string qFileName, string rFileName,
             
             getErrors(query, reference, minCompare);
 			
-			if(namesFileName != ""){
+			if((namesFileName != "") || (countfile != "")){
 				it = weights.find(query.getName());
 				minCompare.weight = it->second;
 			}
@@ -858,7 +881,7 @@ int SeqErrorCommand::driver(string filename, string qFileName, string rFileName,
 				if (queryFile.eof()) { break; }
 			#endif
 			
-			if(index % 100 == 0){	m->mothurOut(toString(index));	m->mothurOutEndLine(); }
+			if(index % 100 == 0){	m->mothurOutJustToScreen(toString(index)+"\n");	 }
 		}
 		queryFile.close();
 		outChimeraReport.close();
@@ -869,7 +892,7 @@ int SeqErrorCommand::driver(string filename, string qFileName, string rFileName,
 		else if(qFileName != "" && aligned == false){   qualFile.close();                       }
         
 		//report progress
-		m->mothurOut(toString(index));	m->mothurOutEndLine();
+		m->mothurOutJustToScreen(toString(index)+"\n");	
 		
 		return index;
 	}

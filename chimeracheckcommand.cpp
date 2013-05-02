@@ -547,11 +547,10 @@ int ChimeraCheckCommand::driver(linePair* filePos, string outputFName, string fi
 			#endif
 			
 			//report progress
-			if((count) % 100 == 0){	m->mothurOut("Processing sequence: " + toString(count)); m->mothurOutEndLine();		}
-            count++;
+			if((count) % 100 == 0){	m->mothurOutJustToScreen("Processing sequence: " + toString(count) + "\n");		}
 		}
 		//report progress
-		if((count) % 100 != 0){	m->mothurOut("Processing sequence: " + toString(count)); m->mothurOutEndLine();		}
+		if((count) % 100 != 0){	m->mothurOutJustToScreen("Processing sequence: " + toString(count) + "\n");	}
 		
 		out.close();
 		inFASTA.close();
@@ -599,10 +598,10 @@ int ChimeraCheckCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File
 			delete candidateSeq;
 			
 			//report progress
-			if((i+1) % 100 == 0){  cout << "Processing sequence: " << (i+1) << endl;	m->mothurOutJustToLog("Processing sequence: " + toString(i+1) + "\n");		}
+			if((i+1) % 100 == 0){  cout << "Processing sequence: " << (i+1) << endl;		}
 		}
 		//report progress
-		if(num % 100 != 0){		cout << "Processing sequence: " << num << endl;	m->mothurOutJustToLog("Processing sequence: " + toString(num) + "\n"); 	}
+		if(num % 100 != 0){		cout << "Processing sequence: " << num << endl;		}
 		
 		return 0;
 	}

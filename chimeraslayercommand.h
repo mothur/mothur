@@ -61,13 +61,13 @@ private:
 	map<string, int> priority;
 	int setUpForSelfReference(SequenceParser*&, map<string, string>&, map<string, map<string, int> >&, int);
     int setUpForSelfReference(SequenceCountParser*&, map<string, string>&, map<string, map<string, int> >&, int);
-	int driverGroups(string, string, string, map<string, map<string, int> >&, map<string, string>&);
-	int createProcessesGroups(string, string, string, map<string, map<string, int> >&, map<string, string>&);
-	int MPIExecuteGroups(string, string, string, map<string, map<string, int> >&, map<string, string>&);
+	int driverGroups(string, string, string, map<string, map<string, int> >&, map<string, string>&, string);
+	int createProcessesGroups(string, string, string, map<string, map<string, int> >&, map<string, string>&, string, string);
+	int MPIExecuteGroups(string, string, string, map<string, map<string, int> >&, map<string, string>&, string, string);
 
 		
 	#ifdef USE_MPI
-	int driverMPI(int, int, MPI_File&, MPI_File&, MPI_File&, MPI_File&, vector<unsigned long long>&, string, map<string, int>&, bool);
+	int driverMPI(int, int, MPI_File&, MPI_File&, MPI_File&, MPI_File&, set<string>&, vector<unsigned long long>&, string, map<string, int>&, bool);
 	#endif
 
 	bool abort, realign, trim, trimera, save, hasName, hasCount, dups;
@@ -75,6 +75,7 @@ private:
 	int processors, window, iters, increment, numwanted, ksize, match, mismatch, parents, minSimilarity, minCoverage, minBS, minSNP, numSeqs, templateSeqsLength;
 	float divR;
 	
+    map<string, map<string, string> > group2NameMap;
 	vector<string> outputNames;
 	vector<string> fastaFileNames;
 	vector<string> nameFileNames;
@@ -91,12 +92,12 @@ struct slayerData {
 	string outputFName; 
 	string fasta; 
 	string accnos;
-	string filename;
+	string filename, countlist;
 	string templatefile;
 	string search;
 	string blastlocation;
 	bool trimera;
-	bool trim, realign;
+	bool trim, realign, dups, hasCount;
 	unsigned long long start;
 	unsigned long long end;
 	int ksize, match, mismatch, window, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted;
@@ -108,6 +109,7 @@ struct slayerData {
 	int threadId;
 	map<string, map<string, int> > fileToPriority;
 	map<string, string> fileGroup;
+    map<string, map<string, string> > group2NameMap;
 	
 	slayerData(){}
 	slayerData(string o, string fa, string ac, string f, string te, string se, string bl, bool tri, bool trm, bool re, MothurOut* mout, unsigned long long st, unsigned long long en, int ks, int ma, int mis, int win, int minS, int minC, int miBS, int minSN, int par, int it, int inc, int numw, float div, map<string, int> prior, int tid) {
@@ -142,13 +144,17 @@ struct slayerData {
 		count = 0;
 		numNoParents = 0;
 	}
-	slayerData(string o, string fa, string ac, string te, string se, string bl, bool tri, bool trm, bool re, MothurOut* mout, map<string, map<string, int> >& fPriority, map<string, string>& fileG, int ks, int ma, int mis, int win, int minS, int minC, int miBS, int minSN, int par, int it, int inc, int numw, float div, map<string, int> prior, int tid) {
+	slayerData(map<string, map<string, string> > g2n, bool hc, bool dps, string cl, string o, string fa, string ac, string te, string se, string bl, bool tri, bool trm, bool re, MothurOut* mout, map<string, map<string, int> >& fPriority, map<string, string>& fileG, int ks, int ma, int mis, int win, int minS, int minC, int miBS, int minSN, int par, int it, int inc, int numw, float div, map<string, int> prior, int tid) {
 		outputFName = o;
 		fasta = fa;
 		accnos = ac;
 		templatefile = te;
 		search = se;
 		blastlocation = bl;
+        countlist = cl;
+        dups = dps;
+        hasCount = hc;
+        group2NameMap = g2n;
 		trimera = tri;
 		trim = trm;
 		realign = re;
@@ -321,10 +327,10 @@ static DWORD WINAPI MySlayerThreadFunction(LPVOID lpParam){
 			
 			delete candidateSeq;
 			//report progress
-			if((pDataArray->count) % 100 == 0){	pDataArray->m->mothurOut("Processing sequence: " + toString(pDataArray->count)); pDataArray->m->mothurOutEndLine();		}
+			if((pDataArray->count) % 100 == 0){	pDataArray->m->mothurOutJustToScreen("Processing sequence: " + toString(pDataArray->count) +"\n"); 	}
 		}
 		//report progress
-		if((pDataArray->count) % 100 != 0){	pDataArray->m->mothurOut("Processing sequence: " + toString(pDataArray->count)); pDataArray->m->mothurOutEndLine();		}
+		if((pDataArray->count) % 100 != 0){	pDataArray->m->mothurOutJustToScreen("Processing sequence: " + toString(pDataArray->count)+"\n"); 		}
 		
 		pDataArray->numNoParents = chimera->getNumNoParents();
 		if (pDataArray->numNoParents == pDataArray->count) { 	pDataArray->m->mothurOut("[WARNING]: megablast returned 0 potential parents for all your sequences. This could be due to formatdb.exe not being setup properly, please check formatdb.log for errors.\n"); }
@@ -351,8 +357,11 @@ static DWORD WINAPI MySlayerGroupThreadFunction(LPVOID lpParam){
 	pDataArray = (slayerData*)lpParam;
 	
 	try {
-		
+        ofstream outCountList;
+        if (pDataArray->hasCount && pDataArray->dups) { pDataArray->m->openOutputFile(pDataArray->countlist, outCountList); }
+
 		int totalSeqs = 0;
+        pDataArray->end = 0;
 		
 		for (map<string, map<string, int> >::iterator itFile = pDataArray->fileToPriority.begin(); itFile != pDataArray->fileToPriority.end(); itFile++) {
 			
@@ -497,10 +506,10 @@ static DWORD WINAPI MySlayerGroupThreadFunction(LPVOID lpParam){
 				if (inFASTA.eof()) { break; }
 				
 				//report progress
-				if((numSeqs) % 100 == 0){	pDataArray->m->mothurOut("Processing sequence: " + toString(numSeqs)); pDataArray->m->mothurOutEndLine();		}
+				if((numSeqs) % 100 == 0){	pDataArray->m->mothurOutJustToScreen("Processing sequence: " + toString(numSeqs)+"\n"); pDataArray->m->mothurOutEndLine();		}
 			}
 			//report progress
-			if((numSeqs) % 100 != 0){	pDataArray->m->mothurOut("Processing sequence: " + toString(numSeqs)); pDataArray->m->mothurOutEndLine();		}
+			if((numSeqs) % 100 != 0){	pDataArray->m->mothurOutJustToScreen("Processing sequence: " + toString(numSeqs)+"\n"); 		}
 			
 			pDataArray->numNoParents = chimera->getNumNoParents();
 			if (pDataArray->numNoParents == numSeqs) { 	pDataArray->m->mothurOut("[WARNING]: megablast returned 0 potential parents for all your sequences. This could be due to formatdb.exe not being setup properly, please check formatdb.log for errors.\n"); }
@@ -510,10 +519,51 @@ static DWORD WINAPI MySlayerGroupThreadFunction(LPVOID lpParam){
 			if (pDataArray->trim) { out3.close(); }
 			inFASTA.close();
 			delete chimera;
-			
+			pDataArray->end++;
 			
 			////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			
+            //if we provided a count file with group info and set dereplicate=t, then we want to create a *.pick.count_table
+            //This table will zero out group counts for seqs determined to be chimeric by that group.
+            if (pDataArray->dups) {
+                if (!pDataArray->m->isBlank(thisaccnosFileName)) {
+                    ifstream in;
+                    pDataArray->m->openInputFile(thisaccnosFileName, in);
+                    string name;
+                    if (pDataArray->hasCount) {
+                        while (!in.eof()) {
+                            in >> name; pDataArray->m->gobble(in);
+                            outCountList << name << '\t' << pDataArray->fileGroup[thisFastaName] << endl;
+                        }
+                        in.close();
+                    }else {
+                        map<string, map<string, string> >::iterator itGroupNameMap = pDataArray->group2NameMap.find(pDataArray->fileGroup[thisFastaName]);
+                        if (itGroupNameMap != pDataArray->group2NameMap.end()) {
+                            map<string, string> thisnamemap = itGroupNameMap->second;
+                            map<string, string>::iterator itN;
+                            ofstream out;
+                            pDataArray->m->openOutputFile(thisaccnosFileName+".temp", out);
+                            while (!in.eof()) {
+                                in >> name; pDataArray->m->gobble(in);
+                                //pDataArray->m->mothurOut("here = " + name + '\t');
+                                itN = thisnamemap.find(name);
+                                if (itN != thisnamemap.end()) {
+                                    vector<string> tempNames; pDataArray->m->splitAtComma(itN->second, tempNames);
+                                    for (int j = 0; j < tempNames.size(); j++) { out << tempNames[j] << endl; }
+                                    //pDataArray->m->mothurOut(itN->second + '\n');
+                                    
+                                }else { pDataArray->m->mothurOut("[ERROR]: parsing cannot find " + name + ".\n"); pDataArray->m->control_pressed = true; }
+                            }
+                            out.close();
+                            in.close();
+                            pDataArray->m->renameFile(thisaccnosFileName+".temp", thisaccnosFileName);
+                        }else { pDataArray->m->mothurOut("[ERROR]: parsing cannot find " + pDataArray->fileGroup[thisFastaName] + ".\n"); pDataArray->m->control_pressed = true; }
+                    }
+                    
+                }
+            }
+            
+            
 			//append files
 			pDataArray->m->appendFiles(thisoutputFileName, pDataArray->outputFName); pDataArray->m->mothurRemove(thisoutputFileName); 
 			pDataArray->m->appendFiles(thisaccnosFileName, pDataArray->accnos); pDataArray->m->mothurRemove(thisaccnosFileName);
@@ -526,6 +576,7 @@ static DWORD WINAPI MySlayerGroupThreadFunction(LPVOID lpParam){
 		}
 		
 		pDataArray->count = totalSeqs;
+        if (pDataArray->hasCount && pDataArray->dups) { outCountList.close(); }
 		
 		return 0;
 		

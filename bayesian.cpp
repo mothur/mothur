@@ -298,7 +298,7 @@ string Bayesian::getTaxonomy(Sequence* seq) {
 			}  
 		}
 		
-		if (queryKmers.size() == 0) {  m->mothurOut(seq->getName() + "is bad."); m->mothurOutEndLine(); simpleTax = "unknown;";  return "unknown;"; }
+		if (queryKmers.size() == 0) {  m->mothurOut(seq->getName() + " is bad. It has no kmers of length " + toString(kmerSize) + "."); m->mothurOutEndLine(); simpleTax = "unknown;";  return "unknown;"; }
 		
 		
 		int index = getMostProbableTaxonomy(queryKmers);

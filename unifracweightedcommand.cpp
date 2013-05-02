@@ -408,7 +408,7 @@ int UnifracWeightedCommand::execute() {
                 delete newCt;
                 delete subSampleTree;
                 
-                if((thisIter+1) % 100 == 0){	m->mothurOut(toString(thisIter+1)); m->mothurOutEndLine();		}
+                if((thisIter+1) % 100 == 0){	m->mothurOutJustToScreen(toString(thisIter+1)+"\n"); 	}
             }
             
             if (m->control_pressed) { delete ct; for (int i = 0; i < T.size(); i++) { delete T[i]; } if (random) { delete output; } outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
@@ -698,39 +698,32 @@ int UnifracWeightedCommand::runRandomCalcs(Tree* thisTree, vector<double> usersS
         
         lines.clear();
         
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-        if(processors != 1){
-            int numPairs = namesOfGroupCombos.size();
-            int numPairsPerProcessor = numPairs / processors;
+        //breakdown work between processors
+        int numPairs = namesOfGroupCombos.size();
+        int numPairsPerProcessor = numPairs / processors;
             
-            for (int i = 0; i < processors; i++) {
-                int startPos = i * numPairsPerProcessor;
-                if(i == processors - 1){
-                    numPairsPerProcessor = numPairs - i * numPairsPerProcessor;
-                }
-                lines.push_back(linePair(startPos, numPairsPerProcessor));
-            }
+        for (int i = 0; i < processors; i++) {
+            int startPos = i * numPairsPerProcessor;
+            if(i == processors - 1){ numPairsPerProcessor = numPairs - i * numPairsPerProcessor; }
+            lines.push_back(linePair(startPos, numPairsPerProcessor));
         }
-#endif
         
         
         //get scores for random trees
         for (int j = 0; j < iters; j++) {
-            cout << j << endl; 
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-            if(processors == 1){
-                driver(thisTree,  namesOfGroupCombos, 0, namesOfGroupCombos.size(),  rScores);
-            }else{
+//#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+            //if(processors == 1){
+              //  driver(thisTree,  namesOfGroupCombos, 0, namesOfGroupCombos.size(),  rScores);
+           // }else{
                 createProcesses(thisTree,  namesOfGroupCombos, rScores);
-            }
-#else
-            driver(thisTree, namesOfGroupCombos, 0, namesOfGroupCombos.size(), rScores);
-#endif
+           // }
+//#else
+            //driver(thisTree, namesOfGroupCombos, 0, namesOfGroupCombos.size(), rScores);
+//#endif
+ 
             
             if (m->control_pressed) { delete ct;  for (int i = 0; i < T.size(); i++) { delete T[i]; } delete output; outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  } return 0; }
             
-            //report progress
-            //					m->mothurOut("Iter: " + toString(j+1)); m->mothurOutEndLine();		
         }
         lines.clear();
         
@@ -766,12 +759,11 @@ int UnifracWeightedCommand::runRandomCalcs(Tree* thisTree, vector<double> usersS
 
 int UnifracWeightedCommand::createProcesses(Tree* t, vector< vector<string> > namesOfGroupCombos, vector< vector<double> >& scores) {
 	try {
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-		int process = 1;
+        int process = 1;
 		vector<int> processIDS;
-		
 		EstOutput results;
-		
+        
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		//loop through and create all the processes you want
 		while (process != processors) {
 			int pid = fork();
@@ -817,9 +809,53 @@ int UnifracWeightedCommand::createProcesses(Tree* t, vector< vector<string> > na
 			in.close();
 			m->mothurRemove(s);
 		}
+#else
+        //fill in functions
+        vector<weightedRandomData*> pDataArray;
+		DWORD   dwThreadIdArray[processors-1];
+		HANDLE  hThreadArray[processors-1];
+        vector<CountTable*> cts;
+        vector<Tree*> trees;
 		
-		return 0;
-#endif		
+		//Create processor worker threads.
+		for( int i=1; i<processors; i++ ){
+            CountTable* copyCount = new CountTable();
+            copyCount->copy(ct);
+            Tree* copyTree = new Tree(copyCount);
+            copyTree->getCopy(t);
+            
+            cts.push_back(copyCount);
+            trees.push_back(copyTree);
+            
+            vector< vector<double> > copyScores = rScores;
+            
+            weightedRandomData* tempweighted = new weightedRandomData(m, lines[i].start, lines[i].num, namesOfGroupCombos, copyTree, copyCount, includeRoot, copyScores);
+			pDataArray.push_back(tempweighted);
+			processIDS.push_back(i);
+            
+			hThreadArray[i-1] = CreateThread(NULL, 0, MyWeightedRandomThreadFunction, pDataArray[i-1], 0, &dwThreadIdArray[i-1]);
+		}
+		
+		driver(t, namesOfGroupCombos, lines[0].start, lines[0].num, scores);
+		
+		//Wait until all threads have terminated.
+		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
+		
+		//Close all thread handles and free memory allocations.
+		for(int i=0; i < pDataArray.size(); i++){
+            for (int j = pDataArray[i]->start; j < (pDataArray[i]->start+pDataArray[i]->num); j++) {
+                scores[j].push_back(pDataArray[i]->scores[j][pDataArray[i]->scores[j].size()-1]);
+            }
+			delete cts[i];
+            delete trees[i];
+			CloseHandle(hThreadArray[i]);
+			delete pDataArray[i];
+		}
+
+		
+#endif	
+        
+        return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "UnifracWeightedCommand", "createProcesses");

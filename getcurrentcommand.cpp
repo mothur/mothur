@@ -142,6 +142,8 @@ int GetCurrentCommand::execute(){
 					m->setBiomFile("");
                 }else if (types[i] == "count") {
 					m->setCountTableFile("");
+                }else if (types[i] == "summary") {
+					m->setSummaryFile("");
 				}else if (types[i] == "processors") {
 					m->setProcessors("1");
 				}else if (types[i] == "all") {

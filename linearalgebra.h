@@ -38,6 +38,9 @@ public:
     double calcPearsonSig(double, double); //length, coeff.
     double calcKendallSig(double, double); //length, coeff.
     
+    vector<double> solveEquations(vector<vector<double> >, vector<double>);
+    vector<vector<double> > getInverse(vector<vector<double> >);
+
     
 private:
 	MothurOut* m;
@@ -58,6 +61,10 @@ private:
     double ran3(int&); //for testing
     double ran4(int&); //for testing
     void psdes(unsigned long &, unsigned long &); //for testing
+    
+    void ludcmp(vector<vector<double> >&, vector<int>&, double&);
+    void lubksb(vector<vector<double> >&, vector<int>&, vector<double>&);
+
     
 };
 

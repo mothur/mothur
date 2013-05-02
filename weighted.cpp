@@ -36,30 +36,19 @@ EstOutput Weighted::getValues(Tree* t, int p, string o) {
 			}
 		}
 		
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-			if(processors == 1){
-				data = driver(t, namesOfGroupCombos, 0, namesOfGroupCombos.size(), ct);
-			}else{
-				int numPairs = namesOfGroupCombos.size();
-				
-				int numPairsPerProcessor = numPairs / processors;
-				
-				for (int i = 0; i < processors; i++) {
-					int startPos = i * numPairsPerProcessor;
-					if(i == processors - 1){
-						numPairsPerProcessor = numPairs - i * numPairsPerProcessor;
-					}
-					lines.push_back(linePair(startPos, numPairsPerProcessor));
-				}
+        int numPairs = namesOfGroupCombos.size();
+        int numPairsPerProcessor = numPairs / processors;
+        
+        for (int i = 0; i < processors; i++) {
+            int startPos = i * numPairsPerProcessor;
+            if(i == processors - 1){ numPairsPerProcessor = numPairs - i * numPairsPerProcessor; }
+            lines.push_back(linePair(startPos, numPairsPerProcessor));
+        }
+        
+        data = createProcesses(t, namesOfGroupCombos, ct);
+        
+        lines.clear();
 
-				data = createProcesses(t, namesOfGroupCombos, ct);
-				
-				lines.clear();
-			}
-		#else
-			data = driver(t, namesOfGroupCombos, 0, namesOfGroupCombos.size(), ct);
-		#endif
-		
 		return data;
 	}
 	catch(exception& e) {
@@ -71,11 +60,10 @@ EstOutput Weighted::getValues(Tree* t, int p, string o) {
 
 EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGroupCombos, CountTable* ct) {
 	try {
+        vector<int> processIDS;
+		EstOutput results;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		int process = 1;
-		vector<int> processIDS;
-		
-		EstOutput results;
 		
 		//loop through and create all the processes you want
 		while (process != processors) {
@@ -85,17 +73,12 @@ EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGro
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-	
 				EstOutput Myresults;
 				Myresults = driver(t, namesOfGroupCombos, lines[process].start, lines[process].num, ct);
 			
-				//m->mothurOut("Merging results."); m->mothurOutEndLine();
-				
 				//pass numSeqs to parent
 				ofstream out;
-
 				string tempFile = outputDir + toString(getpid()) + ".weighted.results.temp";
-	
 				m->openOutputFile(tempFile, out);
 	
 				out << Myresults.size() << endl;
@@ -143,11 +126,48 @@ EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGro
 			in.close();
 			m->mothurRemove(s);
 		}
+#else
+        
+        //fill in functions
+        vector<weightedData*> pDataArray;
+		DWORD   dwThreadIdArray[processors-1];
+		HANDLE  hThreadArray[processors-1];
+        vector<CountTable*> cts;
+        vector<Tree*> trees;
 		
-		//m->mothurOut("DONE."); m->mothurOutEndLine(); m->mothurOutEndLine();
+		//Create processor worker threads.
+		for( int i=1; i<processors; i++ ){
+            CountTable* copyCount = new CountTable();
+            copyCount->copy(ct);
+            Tree* copyTree = new Tree(copyCount);
+            copyTree->getCopy(t);
+            
+            cts.push_back(copyCount);
+            trees.push_back(copyTree);
+            
+            weightedData* tempweighted = new weightedData(m, lines[i].start, lines[i].num, namesOfGroupCombos, copyTree, copyCount, includeRoot);
+			pDataArray.push_back(tempweighted);
+			processIDS.push_back(i);
+            
+			hThreadArray[i-1] = CreateThread(NULL, 0, MyWeightedThreadFunction, pDataArray[i-1], 0, &dwThreadIdArray[i-1]);
+		}
 		
-		return results;
-#endif		
+		results = driver(t, namesOfGroupCombos, lines[0].start, lines[0].num, ct);
+		
+		//Wait until all threads have terminated.
+		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
+		
+		//Close all thread handles and free memory allocations.
+		for(int i=0; i < pDataArray.size(); i++){
+            for (int j = 0; j < pDataArray[i]->results.size(); j++) {  results.push_back(pDataArray[i]->results[j]);  }
+			delete cts[i];
+            delete trees[i];
+			CloseHandle(hThreadArray[i]);
+			delete pDataArray[i];
+		} 
+#endif
+        
+        return results;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Weighted", "createProcesses");

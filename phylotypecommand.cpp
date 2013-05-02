@@ -17,7 +17,8 @@
 vector<string> PhylotypeCommand::setParameters(){	
 	try {
 		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "none", "none","list-rabund-sabund",false,true,true); parameters.push_back(ptaxonomy);
-		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none","",false,false,true); parameters.push_back(pname);
+		CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "ColumnName","rabund-sabund",false,false,true); parameters.push_back(pname);
+		CommandParameter pcount("count", "InputTypes", "", "", "NameCount", "none", "none","",false,false,true); parameters.push_back(pcount);
 		CommandParameter pcutoff("cutoff", "Number", "", "-1", "", "", "","",false,false,true); parameters.push_back(pcutoff);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
@@ -37,7 +38,7 @@ string PhylotypeCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The phylotype command reads a taxonomy file and outputs a .list, .rabund and .sabund file. \n";
-		helpString += "The phylotype command parameter options are taxonomy, cutoff and label. The taxonomy parameter is required.\n";
+		helpString += "The phylotype command parameter options are taxonomy, name, count, cutoff and label. The taxonomy parameter is required.\n";
 		helpString += "The cutoff parameter allows you to specify the level you want to stop at.  The default is the highest level in your taxonomy file. \n";
 		helpString += "For example: taxonomy = Bacteria;Bacteroidetes-Chlorobi;Bacteroidetes; - cutoff=2, would truncate the taxonomy to Bacteria;Bacteroidetes-Chlorobi; \n";
 		helpString += "For the cutoff parameter levels count up from the root of the phylotree. This enables you to look at the grouping down to a specific resolution, say the genus level.\n";
@@ -58,9 +59,9 @@ string PhylotypeCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
         
-        if (type == "list") {  pattern = "[filename],[tag],list"; } 
-        else if (type == "rabund") {  pattern = "[filename],[tag],rabund"; } 
-        else if (type == "sabund") {  pattern = "[filename],[tag],sabund"; }
+        if (type == "list") {  pattern = "[filename],[clustertag],list-[filename],[clustertag],[tag2],list"; }
+        else if (type == "rabund") {  pattern = "[filename],[clustertag],rabund"; }
+        else if (type == "sabund") {  pattern = "[filename],[clustertag],sabund"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
         
         return pattern;
@@ -134,6 +135,14 @@ PhylotypeCommand::PhylotypeCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("count");
+				//user has given a template file
+				if(it != parameters.end()){
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["count"] = inputDir + it->second;		}
+				}
 			}
 
 			taxonomyFileName = validParameter.validFile(parameters, "taxonomy", true);
@@ -150,7 +159,12 @@ PhylotypeCommand::PhylotypeCommand(string option)  {
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not open") { namefile = ""; abort = true; }
 			else if (namefile == "not found") { namefile = ""; }
-			else { readNamesFile(); m->setNameFile(namefile); }	
+			else { readNamesFile(); m->setNameFile(namefile); }
+            
+            countfile = validParameter.validFile(parameters, "count", true);
+			if (countfile == "not open") { abort = true; countfile = ""; }
+			else if (countfile == "not found") { countfile = ""; }
+			else { m->setCountTableFile(countfile); }
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
@@ -158,6 +172,8 @@ PhylotypeCommand::PhylotypeCommand(string option)  {
 				outputDir += m->hasPath(taxonomyFileName); //if user entered a file with a path then preserve it	
 			}
 			
+            if ((countfile != "") && (namefile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
+            
 			string temp = validParameter.validFile(parameters, "cutoff", false);
 			if (temp == "not found") { temp = "-1"; }
 			m->mothurConvert(temp, cutoff); 
@@ -169,11 +185,12 @@ PhylotypeCommand::PhylotypeCommand(string option)  {
 				else { allLines = 1;  }
 			}
 			
-			if (namefile == "") {
-				vector<string> files; files.push_back(taxonomyFileName);
-				parser.getNameFile(files);
+            if (countfile == "") {
+                if (namefile == "") {
+                    vector<string> files; files.push_back(taxonomyFileName);
+                    parser.getNameFile(files);
+                }
 			}
-			
 		}
 	}
 	catch(exception& e) {
@@ -211,24 +228,27 @@ int PhylotypeCommand::execute(){
 		
 		if (m->control_pressed) { delete tree; return 0; }
 		
-		string fileroot = outputDir + m->getRootName(m->getSimpleName(taxonomyFileName));
-		map<string, string> variables; 
+		ofstream outList, outRabund, outSabund;
+        map<string, string> variables;
+        string fileroot = outputDir + m->getRootName(m->getSimpleName(taxonomyFileName));
         variables["[filename]"] = fileroot;
-        variables["[tag]"] = "tx";
-        ofstream outList;
-		string outputListFile = getOutputFileName("list",variables);
-		m->openOutputFile(outputListFile, outList);
-		ofstream outSabund;
-		string outputSabundFile = getOutputFileName("sabund",variables);
-		m->openOutputFile(outputSabundFile, outSabund);
-		ofstream outRabund;
-		string outputRabundFile = getOutputFileName("rabund",variables);
-		m->openOutputFile(outputRabundFile, outRabund);
-		
-		outputNames.push_back(outputListFile); outputTypes["list"].push_back(outputListFile);
-		outputNames.push_back(outputSabundFile); outputTypes["sabund"].push_back(outputSabundFile);
-		outputNames.push_back(outputRabundFile); outputTypes["rabund"].push_back(outputRabundFile);
-		
+        variables["[clustertag]"] = "tx";
+        string sabundFileName = getOutputFileName("sabund", variables);
+        string rabundFileName = getOutputFileName("rabund", variables);
+        if (countfile != "") { variables["[tag2]"] = "unique_list"; }
+        string listFileName = getOutputFileName("list", variables);
+        
+        if (countfile == "") {
+            m->openOutputFile(sabundFileName,	outSabund);
+            m->openOutputFile(rabundFileName,	outRabund);
+            outputNames.push_back(sabundFileName); outputTypes["sabund"].push_back(sabundFileName);
+            outputNames.push_back(rabundFileName); outputTypes["rabund"].push_back(rabundFileName);
+            
+        }
+		m->openOutputFile(listFileName,	outList);
+        outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
+
+        
 		int count = 1;		
 		//start at leaves of tree and work towards root, processing the labels the user wants
 		while((!done) && ((allLines == 1) || (labels.size() != 0))) {
@@ -237,7 +257,7 @@ int PhylotypeCommand::execute(){
 			count++;
 			
 			if (m->control_pressed) { 
-				outRabund.close(); outSabund.close(); outList.close();
+				if (countfile == "") { outRabund.close(); outSabund.close(); } outList.close();
 				for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);  }
 				delete tree; return 0; 
 			}
@@ -284,11 +304,12 @@ int PhylotypeCommand::execute(){
 				
 				//print listvector
 				list.print(outList);
-				//print rabund
-				list.getRAbundVector().print(outRabund);
-				//print sabund
-				list.getSAbundVector().print(outSabund);
-			
+                if (countfile == "") {
+                    //print rabund
+                    list.getRAbundVector().print(outRabund);
+                    //print sabund
+                    list.getSAbundVector().print(outSabund);
+                }
 				labels.erase(level);
 				
 			}else {
@@ -309,8 +330,10 @@ int PhylotypeCommand::execute(){
 		}
 			
 		outList.close();
-		outSabund.close();
-		outRabund.close();	
+        if (countfile == "") {
+            outSabund.close();
+            outRabund.close();
+        }
 		
 		delete tree;
 		

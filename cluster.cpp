@@ -64,7 +64,7 @@ void Cluster::update(double& cutOFF){
         nRowCells = dMatrix->seqVec[smallRow].size();
         
 		vector<int> foundCol(nColCells, 0);
-        //cout << dMatrix->getNNodes() << " small cell: " << smallRow << '\t' << smallCol << endl;  
+        //cout << dMatrix->getNNodes() << " small cell: " << smallRow << '\t' << smallCol << endl;
 		int search;
 		bool changed;
         
@@ -91,7 +91,8 @@ void Cluster::update(double& cutOFF){
 				//if not merged it you need it for warning 
 				if ((!merged) && (method == "average" || method == "weighted")) {  
 					if (cutOFF > dMatrix->seqVec[smallRow][i].dist) {  
-						cutOFF = dMatrix->seqVec[smallRow][i].dist;  
+						cutOFF = dMatrix->seqVec[smallRow][i].dist;
+                        //cout << "changing cutoff to " << cutOFF << endl;
 					}
                     
 				}

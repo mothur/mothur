@@ -40,7 +40,7 @@ class ChimeraSlayer : public Chimera {
 		
 		#ifdef USE_MPI
 		Sequence print(MPI_File&, MPI_File&);
-		Sequence print(MPI_File&, MPI_File&, data_results, data_results);
+		Sequence print(MPI_File&, MPI_File&, data_results, data_results, bool&);
 		#endif
 		
 	private:

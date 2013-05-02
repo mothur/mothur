@@ -44,7 +44,7 @@ string PreClusterCommand::getHelpString(){
 		helpString += "The group parameter allows you to provide a group file so you can cluster by group. \n";
         helpString += "The count parameter allows you to provide a count file so you can cluster by group. \n";
 		helpString += "The diffs parameter allows you to specify maximum number of mismatched bases allowed between sequences in a grouping. The default is 1.\n";
-        helpString += "The topdown parameter allows you to specify whether to cluster from largest abundance to smallest or smallest to largest.  Default=T, meanging largest to smallest.\n";
+        helpString += "The topdown parameter allows you to specify whether to cluster from largest abundance to smallest or smallest to largest.  Default=T, meaning largest to smallest.\n";
 		helpString += "The pre.cluster command should be in the following format: \n";
 		helpString += "pre.cluster(fasta=yourFastaFile, names=yourNamesFile, diffs=yourMaxDiffs) \n";
 		helpString += "Example pre.cluster(fasta=amazon.fasta, diffs=2).\n";
@@ -192,7 +192,7 @@ PreClusterCommand::PreClusterCommand(string option) {
 			else if (countfile == "not open") { abort = true; countfile =  ""; }	
 			else {   
                 m->setCountTableFile(countfile); 
-                ct.readTable(countfile);
+                ct.readTable(countfile, true);
                 if (ct.hasGroupInfo()) { bygroup = true; }
                 else { bygroup = false;  }
             }
@@ -597,7 +597,7 @@ int PreClusterCommand::process(string newMapFile){
                     out << "ideal_seq_" << (i+1) << '\t' << alignSeqs[i].numIdentical << endl << chunk << endl;;
                     
                 }//end if active i
-                if(i % 100 == 0)	{ m->mothurOut(toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)); m->mothurOutEndLine();	}
+                if(i % 100 == 0)	{ m->mothurOutJustToScreen(toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)+"\n"); 	}
             }
         }else {
             map<int, string> mapFile;
@@ -632,7 +632,7 @@ int PreClusterCommand::process(string newMapFile){
                     }//end abundance check
                 }//end for loop j
                 
-                if(i % 100 == 0)	{ m->mothurOut(toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)); m->mothurOutEndLine();	}
+                if(i % 100 == 0)	{ m->mothurOutJustToScreen(toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)+"\n"); 	}
             }
             
             for (int i = 0; i < numSeqs; i++) {

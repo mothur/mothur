@@ -381,7 +381,7 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
                             savedQual.flipQScores();
                             currQual.setScores(savedQual.getScores());
                         }
-                    }
+                    }else { trashCode += "(" + thisTrashCode + ")";  }
                 }
 
                 

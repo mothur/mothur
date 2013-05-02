@@ -858,7 +858,7 @@ string ShhherCommand::flowDistMPI(int startSeq, int stopSeq){
 				}
 			}
 			if(i % 100 == 0){
-				m->mothurOut(toString(i) + '\t' + toString(time(NULL) - begTime) + '\t' + toString((clock()-begClock)/CLOCKS_PER_SEC) + '\n');
+				m->mothurOutJustToScreen(toString(i) + '\t' + toString(time(NULL) - begTime) + '\t' + toString((clock()-begClock)/CLOCKS_PER_SEC) + '\n');
 			}
 		}
 		
@@ -867,7 +867,7 @@ string ShhherCommand::flowDistMPI(int startSeq, int stopSeq){
 		
 		if (m->control_pressed) { return fDistFileName; }
 		
-		m->mothurOut(toString(stopSeq) + '\t' + toString(time(NULL) - begTime) + '\t' + toString((clock()-begClock)/CLOCKS_PER_SEC) + '\n');
+		m->mothurOutJustToScreen(toString(stopSeq) + '\t' + toString(time(NULL) - begTime) + '\t' + toString((clock()-begClock)/CLOCKS_PER_SEC) + '\n');
 
 		ofstream distFile(fDistFileName.c_str());
 		distFile << outStream.str();		
@@ -2545,9 +2545,8 @@ int ShhherCommand::flowDistParentFork(int numFlowCells, string distFileName, int
 				}
 			}
 			if(i % 100 == 0){
-				m->mothurOut(toString(i) + "\t" + toString(time(NULL) - begTime));
-				m->mothurOut("\t" + toString((clock()-begClock)/CLOCKS_PER_SEC));
-				m->mothurOutEndLine();
+				m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - begTime));
+				m->mothurOutJustToScreen("\t" + toString((clock()-begClock)/CLOCKS_PER_SEC)+"\n");
 			}
 		}
 		
@@ -2557,9 +2556,8 @@ int ShhherCommand::flowDistParentFork(int numFlowCells, string distFileName, int
 		
 		if (m->control_pressed) {}
 		else {
-			m->mothurOut(toString(stopSeq-1) + "\t" + toString(time(NULL) - begTime));
-			m->mothurOut("\t" + toString((clock()-begClock)/CLOCKS_PER_SEC));
-			m->mothurOutEndLine();
+			m->mothurOutJustToScreen(toString(stopSeq-1) + "\t" + toString(time(NULL) - begTime));
+			m->mothurOutJustToScreen("\t" + toString((clock()-begClock)/CLOCKS_PER_SEC)+"\n");
 		}
         
         return 0;
