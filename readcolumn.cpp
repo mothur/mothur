@@ -48,7 +48,11 @@ int ReadColumnMatrix::read(NameAssignment* nameMap){
 		while(fileHandle && lt == 1){  //let's assume it's a triangular matrix...
 
 		
-			fileHandle >> firstName >> secondName >> distance;	// get the row and column names and distance
+			fileHandle >> firstName; m->gobble(fileHandle);
+            fileHandle >> secondName; m->gobble(fileHandle);
+            fileHandle >> distance;	// get the row and column names and distance
+            
+            if (m->debug) { cout << firstName << '\t' << secondName << '\t' << distance << endl; }
 			
 			if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
 	
@@ -106,7 +110,9 @@ int ReadColumnMatrix::read(NameAssignment* nameMap){
 			m->openInputFile(distFile, fileHandle);  //let's start over
 
 			while(fileHandle){
-				fileHandle >> firstName >> secondName >> distance;
+				fileHandle >> firstName; m->gobble(fileHandle);
+                fileHandle >> secondName; m->gobble(fileHandle);
+                fileHandle >> distance;	// get the row and column names and distance
 				
 				if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
 		
@@ -167,8 +173,10 @@ int ReadColumnMatrix::read(CountTable* countTable){
 		while(fileHandle && lt == 1){  //let's assume it's a triangular matrix...
             
             
-			fileHandle >> firstName >> secondName >> distance;	// get the row and column names and distance
-			
+			fileHandle >> firstName; m->gobble(fileHandle);
+            fileHandle >> secondName; m->gobble(fileHandle);
+            fileHandle >> distance;	// get the row and column names and distance
+            
 			if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
             
 			int itA = countTable->get(firstName);
@@ -224,7 +232,9 @@ int ReadColumnMatrix::read(CountTable* countTable){
 			m->openInputFile(distFile, fileHandle);  //let's start over
             
 			while(fileHandle){
-				fileHandle >> firstName >> secondName >> distance;
+				fileHandle >> firstName; m->gobble(fileHandle);
+                fileHandle >> secondName; m->gobble(fileHandle);
+                fileHandle >> distance;	// get the row and column names and distance
 				
 				if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
                 

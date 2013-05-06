@@ -703,7 +703,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                 
                 vector<summarySharedData*> pDataArray; 
                 DWORD   dwThreadIdArray[processors-1];
-                HANDLE  hThreadArray[processors-1]; 
+                HANDLE  hThreadArray[processors-1];
                 
                 //Create processor worker threads.
                 for( int i=1; i<processors; i++ ){
@@ -716,6 +716,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
                         temp->setGroup(thisLookup[k]->getGroup());
                         newLookup.push_back(temp);
                     }
+                
                     
                     //for each bin
                     for (int k = 0; k < thisLookup[0]->getNumBins(); k++) {
