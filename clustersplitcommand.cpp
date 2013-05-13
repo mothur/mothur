@@ -843,9 +843,12 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, map<float, int> us
 			if (itLabel->first == -1) { thisLabel = "unique"; }
 			else { thisLabel = toString(itLabel->first,  length-1);  } 
 			
-			outList << thisLabel << '\t' << itLabel->second << '\t';
+			//outList << thisLabel << '\t' << itLabel->second << '\t';
             
             RAbundVector* rabund = NULL;
+            ListVector completeList;
+            completeList.setLabel(thisLabel);
+            
             if (countfile == "") {
                 rabund = new RAbundVector();
                 rabund->setLabel(thisLabel);
@@ -854,7 +857,8 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, map<float, int> us
 			//add in singletons
 			if (listSingle != NULL) {
 				for (int j = 0; j < listSingle->getNumBins(); j++) {
-					outList << listSingle->get(j) << '\t';
+					//outList << listSingle->get(j) << '\t';
+                    completeList.push_back(listSingle->get(j));
 					if (countfile == "") { rabund->push_back(m->getNumNames(listSingle->get(j))); }
 				}
 			}
@@ -871,7 +875,8 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, map<float, int> us
 				if (list == NULL) { m->mothurOut("Error merging listvectors in file " + listNames[k]); m->mothurOutEndLine();  }	
 				else {		
 					for (int j = 0; j < list->getNumBins(); j++) {
-						outList << list->get(j) << '\t';
+						//outList << list->get(j) << '\t';
+                        completeList.push_back(list->get(j));
 						if (countfile == "") { rabund->push_back(m->getNumNames(list->get(j))); }
 					}
 					delete list;
@@ -884,7 +889,8 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, map<float, int> us
                 sabund.print(outSabund);
                 rabund->print(outRabund);
             }
-			outList << endl;
+			//outList << endl;
+            completeList.print(outList);
 			
 			if (rabund != NULL) { delete rabund; }
 		}
