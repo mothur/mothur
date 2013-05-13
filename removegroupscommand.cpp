@@ -355,11 +355,19 @@ int RemoveGroupsCommand::execute(){
 			
 			//make sure groups are valid
 			//takes care of user setting groupNames that are invalid or setting groups=all
-			SharedUtil* util = new SharedUtil();
 			vector<string> namesGroups = groupMap->getNamesOfGroups();
-			util->setGroups(Groups, namesGroups);
-			delete util;
-			
+			vector<string> checkedGroups;
+            for (int i = 0; i < Groups.size(); i++) {
+                if (m->inUsersGroups(Groups[i], namesGroups)) { checkedGroups.push_back(Groups[i]); }
+                else {  m->mothurOut("[WARNING]: " + Groups[i] + " is not a valid group in your groupfile, ignoring.\n"); }
+            }
+            
+            if (checkedGroups.size() == 0) { m->mothurOut("[ERROR]: no valid groups, aborting.\n"); delete groupMap; return 0; }
+			else {
+                Groups = checkedGroups;
+                m->setGroups(Groups);
+            }
+            
 			//fill names with names of sequences that are from the groups we want to remove 
 			fillNames();
 			

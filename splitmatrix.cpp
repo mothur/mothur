@@ -182,7 +182,7 @@ int SplitMatrix::createDistanceFilesFromTax(map<string, int>& seqGroup, int numG
 		}
 		
 		copyGroups.clear();
-		
+        
 		//process each distance file
 		for (int i = 0; i < numGroups; i++) { 
 			
@@ -206,6 +206,9 @@ int SplitMatrix::createDistanceFilesFromTax(map<string, int>& seqGroup, int numG
 			if (namefile != "") { m->mothurRemove((namefile + "." + toString(i) + ".temp")); }
             else { m->mothurRemove((countfile + "." + toString(i) + ".temp")); }
 		}
+        
+        //restore old fasta file name since dist.seqs overwrites it with the temp files
+        m->setFastaFile(fastafile);
         
         vector<string> tempDistFiles;    
         for(int i=0;i<numGroups;i++){
