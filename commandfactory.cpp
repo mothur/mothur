@@ -143,6 +143,7 @@
 #include "mergetaxsummarycommand.h"
 #include "getmetacommunitycommand.h"
 #include "sparcccommand.h"
+#include "makelookupcommand.h"
 
 /*******************************************************/
 
@@ -309,6 +310,7 @@ CommandFactory::CommandFactory(){
     commands["merge.taxsummary"]    = "merge.taxsummary";
     commands["get.metacommunity"]   = "get.metacommunity";
     commands["sparcc"]              = "sparcc";
+    commands["make.lookup"]         = "make.lookup";
     
 
 }
@@ -531,6 +533,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         else if(commandName == "merge.taxsummary")      {	command = new MergeTaxSummaryCommand(optionString);         }
         else if(commandName == "get.metacommunity")     {	command = new GetMetaCommunityCommand(optionString);        }
         else if(commandName == "sparcc")                {	command = new SparccCommand(optionString);                  }
+        else if(commandName == "make.lookup")			{	command = new MakeLookupCommand(optionString);				}
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -694,6 +697,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
         else if(commandName == "merge.taxsummary")      {	pipecommand = new MergeTaxSummaryCommand(optionString);         }
         else if(commandName == "get.metacommunity")     {	pipecommand = new GetMetaCommunityCommand(optionString);        }
         else if(commandName == "sparcc")                {	pipecommand = new SparccCommand(optionString);                  }
+        else if(commandName == "make.lookup")			{	pipecommand = new MakeLookupCommand(optionString);				}
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -843,6 +847,7 @@ Command* CommandFactory::getCommand(string commandName){
         else if(commandName == "merge.taxsummary")      {	shellcommand = new MergeTaxSummaryCommand();        }
         else if(commandName == "get.metacommunity")     {	shellcommand = new GetMetaCommunityCommand();       }
         else if(commandName == "sparcc")                {	shellcommand = new SparccCommand();                 }
+        else if(commandName == "make.lookup")			{	shellcommand = new MakeLookupCommand();				}
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;

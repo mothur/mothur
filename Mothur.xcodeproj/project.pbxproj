@@ -79,6 +79,7 @@
 		A7C7DAB915DA758B0059B0CF /* sffmultiplecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7C7DAB815DA758B0059B0CF /* sffmultiplecommand.cpp */; };
 		A7D755DA1535F679009BF21A /* treereader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7D755D91535F679009BF21A /* treereader.cpp */; };
 		A7E0243D15B4520A00A5F046 /* sparsedistancematrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E0243C15B4520A00A5F046 /* sparsedistancematrix.cpp */; };
+		A7E6F69E17427D06006775E2 /* makelookupcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E6F69D17427D06006775E2 /* makelookupcommand.cpp */; };
 		A7E9B88112D37EC400DA6239 /* ace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B64F12D37EC300DA6239 /* ace.cpp */; };
 		A7E9B88212D37EC400DA6239 /* aligncommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B65112D37EC300DA6239 /* aligncommand.cpp */; };
 		A7E9B88312D37EC400DA6239 /* alignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B65312D37EC300DA6239 /* alignment.cpp */; };
@@ -538,6 +539,8 @@
 		A7DAAFA3133A254E003956EB /* commandparameter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = commandparameter.h; sourceTree = "<group>"; };
 		A7E0243C15B4520A00A5F046 /* sparsedistancematrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sparsedistancematrix.cpp; sourceTree = "<group>"; };
 		A7E0243F15B4522000A5F046 /* sparsedistancematrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sparsedistancematrix.h; sourceTree = "<group>"; };
+		A7E6F69C17427CF2006775E2 /* makelookupcommand.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = makelookupcommand.h; sourceTree = "<group>"; };
+		A7E6F69D17427D06006775E2 /* makelookupcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = makelookupcommand.cpp; sourceTree = "<group>"; };
 		A7E9B64F12D37EC300DA6239 /* ace.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ace.cpp; sourceTree = "<group>"; };
 		A7E9B65012D37EC300DA6239 /* ace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ace.h; sourceTree = "<group>"; };
 		A7E9B65112D37EC300DA6239 /* aligncommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = aligncommand.cpp; sourceTree = "<group>"; };
@@ -1450,6 +1453,8 @@
 				A799F5B81309A3E000AEEFA0 /* makefastqcommand.cpp */,
 				A7E9B74412D37EC400DA6239 /* makegroupcommand.h */,
 				A7E9B74312D37EC400DA6239 /* makegroupcommand.cpp */,
+				A7E6F69C17427CF2006775E2 /* makelookupcommand.h */,
+				A7E6F69D17427D06006775E2 /* makelookupcommand.cpp */,
 				A7E9B74A12D37EC400DA6239 /* matrixoutputcommand.h */,
 				A7E9B74912D37EC400DA6239 /* matrixoutputcommand.cpp */,
 				A7E9B75412D37EC400DA6239 /* mergefilecommand.h */,
@@ -2364,6 +2369,7 @@
 				A77B7185173D2240002163C2 /* sparcccommand.cpp in Sources */,
 				A77B7188173D4042002163C2 /* randomnumber.cpp in Sources */,
 				A77B718B173D40E5002163C2 /* calcsparcc.cpp in Sources */,
+				A7E6F69E17427D06006775E2 /* makelookupcommand.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
