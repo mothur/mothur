@@ -78,7 +78,7 @@ int RandomForest::calcForrestVariableImportance(string filename) {
         
         vector< pair<int, double> > globalVariableRanks;
         for (int i = 0; i < globalVariableImportanceList.size(); i++) {
-            cout << "[" << i << ',' << globalVariableImportanceList[i] << "], ";
+            //cout << "[" << i << ',' << globalVariableImportanceList[i] << "], ";
             if (globalVariableImportanceList[i] > 0) {
                 pair<int, double> globalVariableRank(0, 0.0);
                 globalVariableRank.first = i;
@@ -118,7 +118,7 @@ int RandomForest::populateDecisionTrees() {
         for (int i = 0; i < numDecisionTrees; i++) {
           
             if (m->control_pressed) { return 0; }
-            if (((i+1) % 10) == 0) {  m->mothurOut("Creating " + toString(i+1) + " (th) Decision tree\n");  }
+            if (((i+1) % 100) == 0) {  m->mothurOut("Creating " + toString(i+1) + " (th) Decision tree\n");  }
           
             // TODO: need to first fix if we are going to use pointer based system or anything else
             DecisionTree* decisionTree = new DecisionTree(dataSet, globalDiscardedFeatureIndices, OptimumFeatureSubsetSelector(optimumFeatureSubsetSelectionCriteria), treeSplitCriterion, featureStandardDeviationThreshold);
