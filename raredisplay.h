@@ -11,7 +11,7 @@
 class RareDisplay : public Display {
 	
 public:
-	RareDisplay(Calculator* calc, FileOutput* file) : estimate(calc), output(file), nIters(1), index(0) {};
+	RareDisplay(Calculator* calc, FileOutput* file) : estimate(calc), output(file), nIters(1) {};
 	~RareDisplay()					{	delete estimate; delete output;		};
 	void init(string);
 	void reset();
@@ -27,10 +27,8 @@ private:
 	Calculator* estimate;
 	FileOutput* output;
 	string label;
-	vector<int> seqs;  
-	vector<double> results;
-	vector<double> var;
-	int index, nIters;
+	map<int, vector<double> > results; //maps seqCount to results for that number of sequences
+	int nIters;
 };
 
 #endif

@@ -3273,6 +3273,26 @@ vector<double> MothurOut::getAverages(vector< vector<double> >& dists) {
 	}
 }
 /**************************************************************************************************/
+double MothurOut::getAverage(vector<double> dists) {
+	try{
+        double average = 0;
+        
+        for (int i = 0; i < dists.size(); i++) {
+            average += dists[i];
+        }
+       
+        //finds average.
+        average /= (double) dists.size(); 
+        
+        return average;
+    }
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "getAverage");
+		exit(1);
+	}
+}
+
+/**************************************************************************************************/
 vector<double> MothurOut::getStandardDeviation(vector< vector<double> >& dists) {
 	try{
         

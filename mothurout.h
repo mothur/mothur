@@ -163,6 +163,7 @@ class MothurOut {
         vector<double> getStandardDeviation(vector< vector<double> >&);
         vector<double> getStandardDeviation(vector< vector<double> >&, vector<double>&);
         vector<double> getAverages(vector< vector<double> >&);
+        double getAverage(vector<double>);
         vector< vector<seqDist> > getStandardDeviation(vector< vector< vector<seqDist> > >&);
         vector< vector<seqDist> > getStandardDeviation(vector< vector< vector<seqDist> > >&, vector< vector<seqDist> >&);
         vector< vector<seqDist> > getAverages(vector< vector< vector<seqDist> > >&, string);
