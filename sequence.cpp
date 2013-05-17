@@ -21,9 +21,7 @@ Sequence::Sequence(string newName, string sequence) {
 		initialize();	
 		name = newName;
         
-        for (int i = 0; i < name.length(); i++) {
-            if (name[i] == ':') { name[i] = '_'; m->changedSeqNames = true; }
-        }
+        m->checkName(name);
 		
 		//setUnaligned removes any gap characters for us
 		setUnaligned(sequence);
@@ -41,9 +39,7 @@ Sequence::Sequence(string newName, string sequence, string justUnAligned) {
 		initialize();	
 		name = newName;
         
-        for (int i = 0; i < name.length(); i++) {
-            if (name[i] == ':') { name[i] = '_'; m->changedSeqNames = true; }
-        }
+        m->checkName(name);
 		
 		//setUnaligned removes any gap characters for us
 		setUnaligned(sequence);
@@ -295,9 +291,7 @@ string Sequence::getSequenceName(ifstream& fastaFile) {
             
 			name = name.substr(1); 
             
-            for (int i = 0; i < name.length(); i++) {
-                if (name[i] == ':') { name[i] = '_'; m->changedSeqNames = true; }
-            }
+            m->checkName(name);
             
         }else{ m->mothurOut("Error in reading your fastafile, at position " + toString(fastaFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); m->control_pressed = true;  }
         
@@ -319,9 +313,7 @@ string Sequence::getSequenceName(istringstream& fastaFile) {
             
 			name = name.substr(1); 
             
-            for (int i = 0; i < name.length(); i++) {
-                if (name[i] == ':') { name[i] = '_'; m->changedSeqNames = true; }
-            }
+            m->checkName(name);
             
         }else{ m->mothurOut("Error in reading your fastafile, at position " + toString(fastaFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); m->control_pressed = true;  }
         

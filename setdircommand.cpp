@@ -14,6 +14,7 @@ vector<string> SetDirectoryCommand::setParameters(){
 	try {
 		CommandParameter ptempdefault("tempdefault", "String", "", "", "", "", "","",false,false); parameters.push_back(ptempdefault);
         CommandParameter pdebug("debug", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pdebug);
+        CommandParameter pmodnames("modifynames", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pmodnames);
 		CommandParameter pinput("input", "String", "", "", "", "", "","",false,false,true); parameters.push_back(pinput);
 		CommandParameter poutput("output", "String", "", "", "", "", "","",false,false,true); parameters.push_back(poutput);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
@@ -36,6 +37,7 @@ string SetDirectoryCommand::getHelpString(){
 		helpString += "The set.dir command can also be used to specify the directory where your input files are located, the directory must exist.\n";
 		helpString += "The set.dir command can also be used to override or set the default location mothur will look for files if it is unable to find them, the directory must exist.\n";
         helpString += "The set.dir command can also be used to run mothur in debug mode.\n";
+        helpString += "The set.dir command can also be used to set the modifynames parameter. Default=t, meaning if your sequence names contain ':' change them to '_' to aviod issues while making trees.  modifynames=F will leave sequence names as they are.\n";
 		helpString += "The set.dir command parameters are input, output, tempdefault and debug and one is required.\n";
         helpString += "To run mothur in debug mode set debug=true. Default debug=false.\n";
 		helpString += "To return the output to the same directory as the input files you may enter: output=clear.\n";
@@ -93,10 +95,17 @@ SetDirectoryCommand::SetDirectoryCommand(string option)  {
             else {  debug = m->isTrue(temp); }
             m->debug = debug;
             
+            bool nomod = false;
+            temp = validParameter.validFile(parameters, "modifynames", false);
+			if (temp == "not found") {  modifyNames = true;  nomod=true; }
+            else {  modifyNames = m->isTrue(temp); }
+            m->modifyNames = modifyNames;
+            
             if (debug) { m->mothurOut("Setting [DEBUG] flag.\n"); }
+            
 				
-			if ((input == "") && (output == "") && (tempdefault == "") && nodebug) {	
-				m->mothurOut("You must provide either an input, output, tempdefault or debug for the set.outdir command."); m->mothurOutEndLine(); abort = true;
+			if ((input == "") && (output == "") && (tempdefault == "") && nodebug && nomod) {
+				m->mothurOut("You must provide either an input, output, tempdefault, debug or modifynames for the set.outdir command."); m->mothurOutEndLine(); abort = true;
 			}else if((input == "") && (output == "") && (tempdefault == "")) { debugOnly = true; }
 		}
 	}

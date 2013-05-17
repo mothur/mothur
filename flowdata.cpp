@@ -68,9 +68,7 @@ string FlowData::getSequenceName(ifstream& flowFile) {
         flowFile >> name;
 		
 		if (name.length() != 0) { 
-            for (int i = 0; i < name.length(); i++) {
-                if (name[i] == ':') { name[i] = '_'; m->changedSeqNames = true; }
-            }
+            m->checkName(name);
         }else{ m->mothurOut("Error in reading your flowfile, at position " + toString(flowFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); m->control_pressed = true;  }
         
 		return name;

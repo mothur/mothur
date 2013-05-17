@@ -2242,9 +2242,11 @@ map<string, int> MothurOut::readNames(string namefile, unsigned long int& numSeq
 /************************************************************/
 int MothurOut::checkName(string& name) {
     try {
-        for (int i = 0; i < name.length(); i++) {
-            if (name[i] == ':') { name[i] = '_'; changedSeqNames = true; }
-        }        
+        if (modifyNames) {
+            for (int i = 0; i < name.length(); i++) {
+                if (name[i] == ':') { name[i] = '_'; changedSeqNames = true; }
+            }
+        }
         return 0;
     }
 	catch(exception& e) {
