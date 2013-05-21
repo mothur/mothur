@@ -34,6 +34,7 @@ Forest::Forest(const std::vector < std::vector<int> > dataSet,
         
     m = MothurOut::getInstance();
     globalDiscardedFeatureIndices = getGlobalDiscardedFeatureIndices();
+//    calculateFScore();
     // TODO: double check if the implemenatation of 'globalOutOfBagEstimates' is correct
 }
 
@@ -71,4 +72,81 @@ vector<int> Forest::getGlobalDiscardedFeatureIndices() {
 }
 
 /***********************************************************************/
+
+void Forest::calculateFScore() {
+    vector< vector<int> > featureVectors(numFeatures, vector<int>(numSamples, 0) );
+    vector<int> outputVector(numSamples, 0);
+    vector<int> outputClasses;
+    int numOutputClasses = 0;
+
+        // calculate feature vectors and output vector
+    for (int i = 0; i < numSamples; i++) {
+        for (int j = 0; j < numFeatures; j++) { featureVectors[j][i] = dataSet[i][j]; }
+        int outcome = dataSet[i][numFeatures];
+        outputVector[i] = outcome;
+        vector<int>::iterator it = find(outputClasses.begin(), outputClasses.end(), outcome);
+        if (it == outputClasses.end()){       // find() will return classes.end() if the element is not found
+            outputClasses.push_back(outcome);
+            numOutputClasses++;
+        }
+    }    
+    
+    for (int i = 0; i < numFeatures; i++) {
+        double fisherNumerator = 0;
+        double fisherDenominator = 0;
+        double fisherScore = 0;
+        
+        long featureSum = accumulate(featureVectors[i].begin(), featureVectors[i].end(), 0);
+        double featureMean = (double) featureSum / (double) numSamples;
+        
+        vector<int> outputClassCounts(numOutputClasses, 0);
+        vector<long> outputClassBasedSums(numOutputClasses, 0);
+        vector<double> outputClassBasedMeans(numOutputClasses, 0);
+        
+        for (int j = 0; j < numSamples; j++) {
+            outputClassCounts[outputVector[j]]++;
+            outputClassBasedSums[outputVector[j]] += featureVectors[i][j];
+        }
+        
+        for (int k = 0; k < numOutputClasses; k++) {
+            outputClassBasedMeans[k] = (double) outputClassBasedSums[k] / (double)outputClassCounts[k];
+            fisherNumerator += pow(outputClassBasedMeans[k] - featureMean, 2);
+        }
+        
+        for (int j = 0; j < numSamples; j++) {
+                // TODO: choose between weighted and un-weighted denominator calculation
+                // which one is the correct and/or perfect?
+            
+                // This is the unweighted calculation
+//            fisherDenominator += pow(featureVectors[i][j] - outputClassBasedMeans[outputVector[j]], 2);
+            
+                // this is the weighted calculation
+            fisherDenominator += (1 / ((double)outputClassCounts[outputVector[j]] - 1)) * pow(featureVectors[i][j] - outputClassBasedMeans[outputVector[j]], 2);
+        }
+        
+        if (fisherDenominator == 0) { fisherDenominator = numeric_limits<double>::min(); }
+        
+        fisherScore = fisherNumerator / fisherDenominator;
+        pair<int, double> fisherScoreRank(i, fisherScore);
+        featureRanksByFScore.push_back(fisherScoreRank);
+    }
+    
+    VariableRankDescendingSorterDouble sorter;
+    sort(featureRanksByFScore.begin(), featureRanksByFScore.end(), sorter);
+        
+    // scale the scores, the top feature will have it's value scaled to 1
+//    for (vector<pair<int, double> >::iterator it = featureRanksByFScore.begin(); it != featureRanksByFScore.end(); it++) {
+//        it->second /= featureRanksByFScore.begin()->second;
+//        if (it->second < 0) {
+//            featureRanksByFScore.erase(it, featureRanksByFScore.end());
+//            break;
+//        }
+//    }
+    
+//    for (int i = 0; i < featureRanksByFScore.size(); i++) {
+//        cout << featureRanksByFScore[i].first << "\t" << featureRanksByFScore[i].second << endl;
+//    }
+//    cout << endl;
+//    exit(1);
+}
 

@@ -51,6 +51,7 @@ protected:
     // the penalization would be averaged, so this woould unlikely to create a local optmina
     
     vector<int> getGlobalDiscardedFeatureIndices();
+    void calculateFScore();
     
     int numDecisionTrees;
     int numSamples;
@@ -58,6 +59,9 @@ protected:
     vector< vector<int> > dataSet;
     vector<int> globalDiscardedFeatureIndices;
     vector<double> globalVariableImportanceList;
+    
+    vector< pair<int, double> > featureRanksByFScore;
+    
     string treeSplitCriterion;
   
     bool doPruning;

@@ -78,7 +78,7 @@ int RandomForest::calcForrestVariableImportance(string filename) {
         
         vector< pair<int, double> > globalVariableRanks;
         for (int i = 0; i < globalVariableImportanceList.size(); i++) {
-            cout << "[" << i << ',' << globalVariableImportanceList[i] << "], ";
+//            cout << "[" << i << ',' << globalVariableImportanceList[i] << "], ";
             if (globalVariableImportanceList[i] > 0) {
                 pair<int, double> globalVariableRank(0, 0.0);
                 globalVariableRank.first = i;
@@ -94,6 +94,10 @@ int RandomForest::calcForrestVariableImportance(string filename) {
         
         VariableRankDescendingSorterDouble variableRankDescendingSorter;
         sort(globalVariableRanks.begin(), globalVariableRanks.end(), variableRankDescendingSorter);
+        
+        for (int i = 0; i < globalVariableRanks.size(); i++) {
+            cout << "[" << globalVariableRanks[i].first << ',' << globalVariableRanks[i].second << "], ";
+        }
         
         ofstream out;
         m->openOutputFile(filename, out);
