@@ -974,14 +974,35 @@ bool PcrSeqsCommand::readOligos(){
                         else if (c == 32 || c == 9){;} //space or tab
 					} 
 					primers[oligo] = primerCount; primerCount++;
+                    //cout << "for oligo = " << oligo  << endl;
                 }else if(type == "REVERSE"){
                     string oligoRC = reverseOligo(oligo);
                     revPrimer.push_back(oligoRC);
-                    //cout << "oligo = " << oligo << " reverse = " << oligoRC << endl;
+                    //cout << "rev oligo = " << oligo << " reverse = " << oligoRC << endl;
 				}else if(type == "BARCODE"){
-					inOligos >> group;
+                    inOligos >> group;
+                }else if(type == "PRIMER"){
+					m->gobble(inOligos);
+                    primers[oligo] = primerCount; primerCount++;
+					
+                    string roligo="";
+                    inOligos >> roligo;
+                    
+                    for(int i=0;i<roligo.length();i++){
+                        roligo[i] = toupper(roligo[i]);
+                        if(roligo[i] == 'U')	{	roligo[i] = 'T';	}
+                    }
+                    revPrimer.push_back(reverseOligo(roligo));
+                    
+                    // get rest of line in case there is a primer name
+					while (!inOligos.eof())	{
+                        char c = inOligos.get();
+                        if (c == 10 || c == 13 || c == -1){	break;	}
+                        else if (c == 32 || c == 9){;} //space or tab
+					}
+                    //cout << "prim oligo = " << oligo << " reverse = " << roligo << endl;
 				}else if((type == "LINKER")||(type == "SPACER")) {;}
-				else{	m->mothurOut(type + " is not recognized as a valid type. Choices are forward, reverse, linker, spacer and barcode. Ignoring " + oligo + "."); m->mothurOutEndLine(); m->control_pressed = true; }
+				else{	m->mothurOut(type + " is not recognized as a valid type. Choices are primer, forward, reverse, linker, spacer and barcode. Ignoring " + oligo + "."); m->mothurOutEndLine(); m->control_pressed = true; }
 			}
 			m->gobble(inOligos);
 		}	

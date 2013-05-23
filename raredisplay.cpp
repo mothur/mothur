@@ -28,25 +28,14 @@ void RareDisplay::update(SAbundVector* rank){
 		int newNSeqs = rank->getNumSeqs();
 		vector<double> data = estimate->getValues(rank);
 
-		if(nIters != 1){
-
-			double oldS = var[index] * ( nIters - 2 );
-			double delta = data[0] - results[index];
-			double newMean = results[index] + delta / nIters;
-			double newS = oldS + delta * ( data[0] - newMean );
-			double newVar = newS / ( nIters - 1 );
-
-			seqs[index] = newNSeqs;
-			results[index] = newMean; 
-			var[index] = newVar;
-			
-			index++;  
-		}
-		else{
-			seqs.push_back(newNSeqs); 
-			results.push_back(data[0]);
-			var.push_back(0.0);
-		}
+		map<int, vector<double> >::iterator it = results.find(newNSeqs);
+        if (it == results.end()) { //first iter for this count
+            vector<double> temp;
+            temp.push_back(data[0]);
+            results[newNSeqs] = temp;
+        }else {
+            it->second.push_back(data[0]);
+        }
 	}
 	catch(exception& e) {
 		m->errorOut(e, "RareDisplay", "update");
@@ -58,28 +47,15 @@ void RareDisplay::update(SAbundVector* rank){
 void RareDisplay::update(vector<SharedRAbundVector*> shared, int numSeqs, int numGroupComb) {
 	try {
 		vector<double> data = estimate->getValues(shared); 
-		double newNSeqs = data[0];
 		
-		if(nIters != 1){
-		
-			double oldS = var[index] * ( nIters - 2 );
-			double delta = data[0] - results[index];
-			double newMean = results[index] + delta / nIters;
-			double newS = oldS + delta * ( data[0] - newMean );
-			double newVar = newS / ( nIters - 1 );
-			seqs[index] = newNSeqs;
-			results[index] = newMean; 
-			var[index] = newVar;
-			
-			index++;  
-		}
-		else{
-			
-			seqs.push_back(newNSeqs); 
-			results.push_back(data[0]);
-			var.push_back(0.0);
-
-		}
+		map<int, vector<double> >::iterator it = results.find(numSeqs);
+        if (it == results.end()) { //first iter for this count
+            vector<double> temp;
+            temp.push_back(data[0]);
+            results[numSeqs] = temp;
+        }else {
+            it->second.push_back(data[0]);
+        }
 	}
 	catch(exception& e) {
 		m->errorOut(e, "RareDisplay", "update");
@@ -92,7 +68,6 @@ void RareDisplay::update(vector<SharedRAbundVector*> shared, int numSeqs, int nu
 void RareDisplay::reset(){
 	try {
 		nIters++;
-		index = 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "RareDisplay", "reset");
@@ -104,29 +79,28 @@ void RareDisplay::reset(){
 
 void RareDisplay::close(){
 	try {
-		
 		output->initFile(label);
 	
-		for (int i = 0; i < seqs.size(); i++) {
+		for (map<int, vector<double> >::iterator it = results.begin(); it != results.end(); it++) {
 		
 			vector<double> data(3,0);
-			double variance = var[i];
-			
-			data[0] = results[i];
-			
-			double ci = 1.96 * pow(variance, 0.5);
-			data[1] = data[0] - ci;
-			data[2] = data[0] + ci;
+            
+            sort((it->second).begin(), (it->second).end());
+            
+            //lci=results[int(0.025*iter)] and hci=results[int(0.975*iter)]
+			data[0] = (it->second)[(int)(0.50*(nIters-1))];
+            //data[0] = m->getAverage(it->second);
+			data[1] = (it->second)[(int)(0.025*(nIters-1))];
+			data[2] = (it->second)[(int)(0.975*(nIters-1))];
+            //cout << nIters << '\t' << (int)(0.025*(nIters-1)) << '\t' << (int)(0.975*(nIters-1)) << endl;
+            
+            //cout << it->first << '\t' << data[1] << '\t' << data[2] << endl;
 		
-			output->output(seqs[i], data);
+			output->output(it->first, data);
 		}
 		
 		nIters = 1;
-		index = 0;
-		
-		seqs.clear();
-		results.clear();
-		var.clear();
+        results.clear();
 		
 		output->resetFile();
 	}
@@ -142,17 +116,29 @@ void RareDisplay::inputTempFiles(string filename){
 		ifstream in;
 		m->openInputFile(filename, in);
 		
-		int thisIters;
-		in >> thisIters; m->gobble(in);
+		int thisIters, size;
+		in >> thisIters >> size; m->gobble(in);
+        nIters += thisIters;
 		
-		for (int i = 0; i < seqs.size(); i++) {
-			double tempresult, tempvar;
-			in >> tempresult >> tempvar; m->gobble(in);
-			
-			//find weighted result
-			results[i] = ((nIters * results[i]) + (thisIters * tempresult)) / (float)(nIters + thisIters);
-			
-			var[i] = ((nIters * var[i]) + (thisIters * tempvar)) / (float)(nIters + thisIters);
+		for (int i = 0; i < size; i++) {
+			int tempCount;
+            in >> tempCount; m->gobble(in);
+            map<int, vector<double> >::iterator it = results.find(tempCount);
+            if (it != results.end()) {
+                for (int j = 0; j < thisIters; j++) {
+                    double value;
+                    in >> value; m->gobble(in);
+                    (it->second).push_back(value);
+                }
+            }else {
+                vector<double> tempValues;
+                for (int j = 0; j < thisIters; j++) {
+                    double value;
+                    in >> value; m->gobble(in);
+                    tempValues.push_back(value);
+                }
+                results[tempCount] = tempValues;
+            }
 		}
 		
 		in.close();
@@ -170,10 +156,14 @@ void RareDisplay::outputTempFiles(string filename){
 		ofstream out;
 		m->openOutputFile(filename, out);
 		
-		out << nIters << endl;
+		out << nIters-1 << '\t' << results.size() << endl;
 		
-		for (int i = 0; i < seqs.size(); i++) {
-			out << results[i] << '\t' << var[i] << endl;
+		for (map<int, vector<double> >::iterator it = results.begin(); it != results.end(); it++) {
+            out << it->first << '\t';
+            for(int i = 0; i < (it->second).size(); i++) {
+                out << (it->second)[i] << '\t';
+            }
+            out << endl;
 		}
 		
 		out.close();

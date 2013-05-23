@@ -662,8 +662,18 @@ int TreeGroupCommand::makeSimsShared() {
             
             if (lookup.size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); m->control_pressed = true; return 0; }
         }
-        
         numGroups = lookup.size();
+        
+        //sanity check to make sure processors < numComparisions
+        int numDists = 0;
+        for(int i=0;i<numGroups;i++){
+            for(int j=0;j<i;j++){
+                numDists++;
+                if (numDists > processors) { break; }
+            }
+        }
+        if (numDists < processors) { processors = numDists; }
+        
 		lines.resize(processors);
 		for (int i = 0; i < processors; i++) {
 			lines[i].start = int (sqrt(float(i)/float(processors)) * numGroups);
@@ -918,6 +928,8 @@ int TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
                 thisItersLookup.clear();
                 for (int i = 0; i < calcDists.size(); i++) {  calcDists[i].clear(); }
             }
+            
+            if (m->debug) {  m->mothurOut("[DEBUG]: iter = " + toString(thisIter) + ".\n"); }
 		}
         
 		if (m->debug) {  m->mothurOut("[DEBUG]: done with iters.\n"); }

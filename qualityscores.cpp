@@ -89,9 +89,7 @@ string QualityScores::getSequenceName(ifstream& qFile) {
             
 			name = name.substr(1); 
             
-            for (int i = 0; i < name.length(); i++) {
-                if (name[i] == ':') { name[i] = '_'; m->changedSeqNames = true; }
-            }
+            m->checkName(name);
             
         }else{ m->mothurOut("Error in reading your qfile, at position " + toString(qFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); m->control_pressed = true;  }
         
@@ -106,10 +104,7 @@ string QualityScores::getSequenceName(ifstream& qFile) {
 void QualityScores::setName(string name) {
 	try {
       
-        for (int i = 0; i < name.length(); i++) {
-            if (name[i] == ':') { name[i] = '_'; m->changedSeqNames = true; }
-        }     
-    
+        m->checkName(name);   
         seqName = name;
 	}
 	catch(exception& e) {

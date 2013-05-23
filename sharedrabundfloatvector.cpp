@@ -191,6 +191,16 @@ float SharedRAbundFloatVector::getAbundance(int index){
 	return data[index].abundance;	
 }
 /***********************************************************************/
+//returns vector of abundances
+vector<float> SharedRAbundFloatVector::getAbundances(){
+    vector<float> abunds;
+    for (int i = 0; i < data.size(); i++) {
+        abunds.push_back(data[i].abundance);
+    }
+    
+	return abunds;
+}
+/***********************************************************************/
 individualFloat SharedRAbundFloatVector::get(int index){
 	return data[index];	
 }

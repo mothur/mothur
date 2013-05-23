@@ -191,7 +191,7 @@ int ParseFastaQCommand::execute(){
 			else if (name[0] != '@') { m->mothurOut("[ERROR]: reading " + name + " expected a name with @ as a leading character."); m->mothurOutEndLine(); m->control_pressed = true; break; }
 			else { 
                 name = name.substr(1); 
-                for (int i = 0; i < name.length(); i++) { if (name[i] == ':') { name[i] = '_'; m->changedSeqNames = true; } }
+                m->checkName(name);
             }
 			
 			//read sequence
@@ -204,7 +204,7 @@ int ParseFastaQCommand::execute(){
 			else if (name2[0] != '+') { m->mothurOut("[ERROR]: reading " + name2 + " expected a name with + as a leading character."); m->mothurOutEndLine(); m->control_pressed = true; break; }
 			else { 
                 name2 = name2.substr(1);  
-                for (int i = 0; i < name2.length(); i++) { if (name2[i] == ':') { name2[i] = '_'; m->changedSeqNames = true; } }
+                m->checkName(name2);
             }
 			
 			//read quality scores
