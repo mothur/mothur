@@ -134,7 +134,6 @@
 #include "removeotulabelscommand.h"
 #include "makecontigscommand.h"
 #include "loadlogfilecommand.h"
-#include "classifysharedcommand.h"
 #include "sffmultiplecommand.h"
 #include "classifysharedcommand.h"
 #include "filtersharedcommand.h"
@@ -302,7 +301,6 @@ CommandFactory::CommandFactory(){
     commands["load.logfile"]        = "load.logfile";
     commands["make.table"]          = "make.table";
     commands["sff.multiple"]        = "sff.multiple";
-	commands["classify.shared"]     = "classify.shared";
 	commands["quit"]				= "MPIEnabled"; 
     commands["classify.shared"]		= "classify.shared"; 
     commands["filter.shared"]		= "filter.shared"; 
@@ -526,7 +524,6 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         else if(commandName == "remove.otulabels")      {	command = new RemoveOtuLabelsCommand(optionString);         }
         else if(commandName == "make.contigs")          {	command = new MakeContigsCommand(optionString);             }
         else if(commandName == "load.logfile")          {	command = new LoadLogfileCommand(optionString);             }
-        else if(commandName == "classify.shared")       {   command = new ClassifySharedCommand(optionString);          }
         else if(commandName == "sff.multiple")          {	command = new SffMultipleCommand(optionString);             }
         else if(commandName == "classify.shared")       {	command = new ClassifySharedCommand(optionString);          }
         else if(commandName == "filter.shared")         {	command = new FilterSharedCommand(optionString);            }
@@ -691,7 +688,6 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
         else if(commandName == "remove.otulabels")      {	pipecommand = new RemoveOtuLabelsCommand(optionString);         }
         else if(commandName == "make.contigs")          {	pipecommand = new MakeContigsCommand(optionString);             }
         else if(commandName == "load.logfile")          {	pipecommand = new LoadLogfileCommand(optionString);             }
-        else if(commandName == "classify.shared")       {   command = new ClassifySharedCommand(optionString);          }
         else if(commandName == "sff.multiple")          {	pipecommand = new SffMultipleCommand(optionString);             }
         else if(commandName == "classify.shared")       {	pipecommand = new ClassifySharedCommand(optionString);          }
         else if(commandName == "filter.shared")         {	pipecommand = new FilterSharedCommand(optionString);            }
@@ -842,7 +838,6 @@ Command* CommandFactory::getCommand(string commandName){
         else if(commandName == "remove.otulabels")      {	shellcommand = new RemoveOtuLabelsCommand();        }
         else if(commandName == "make.contigs")          {	shellcommand = new MakeContigsCommand();            }
         else if(commandName == "load.logfile")          {	shellcommand = new LoadLogfileCommand();            }
-        else if(commandName == "classify.shared")       {   shellcommand = new ClassifySharedCommand();         }
         else if(commandName == "sff.multiple")          {	shellcommand = new SffMultipleCommand();            }
         else if(commandName == "classify.shared")       {	shellcommand = new ClassifySharedCommand();         }
         else if(commandName == "filter.shared")         {	shellcommand = new FilterSharedCommand();           }
