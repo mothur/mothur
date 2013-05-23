@@ -362,34 +362,22 @@ int PhyloDiversityCommand::execute(){
 				if (numSampledList.count(diversity[mGroups[j]].size()-1) == 0) {  numSampledList.insert(diversity[mGroups[j]].size()-1); }
 			}
 			
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-				if(processors == 1){
-					driver(trees[i], diversity, sumDiversity, iters, increment, randomLeaf, numSampledList, outCollect, outSum, true);	
-				}else{
-					if (rarefy) {
-						vector<int> procIters;
-						
-						int numItersPerProcessor = iters / processors;
-						
-						//divide iters between processes
-						for (int h = 0; h < processors; h++) {
-							if(h == processors - 1){
-								numItersPerProcessor = iters - h * numItersPerProcessor;
-							}
-							procIters.push_back(numItersPerProcessor);
-						}
-						
-						createProcesses(procIters, trees[i], diversity, sumDiversity, iters, increment, randomLeaf, numSampledList, outCollect, outSum); 
-						
-					}else{ //no need to paralellize if you dont want to rarefy
-						driver(trees[i], diversity, sumDiversity, iters, increment, randomLeaf, numSampledList, outCollect, outSum, true);	
-					}
-				}
-
-			#else
-				driver(trees[i], diversity, sumDiversity, iters, increment, randomLeaf, numSampledList, outCollect, outSum, true);	
-			#endif
-
+            if (rarefy) {
+                vector<int> procIters;
+                int numItersPerProcessor = iters / processors;
+                
+                //divide iters between processes
+                for (int h = 0; h < processors; h++) {
+                    if(h == processors - 1){ numItersPerProcessor = iters - h * numItersPerProcessor; }
+                    procIters.push_back(numItersPerProcessor);
+                }
+                
+                createProcesses(procIters, trees[i], diversity, sumDiversity, iters, increment, randomLeaf, numSampledList, outCollect, outSum);
+                
+            }else{ //no need to paralellize if you dont want to rarefy
+                driver(trees[i], diversity, sumDiversity, iters, increment, randomLeaf, numSampledList, outCollect, outSum, true);	
+            }
+				
 			if (rarefy) {	printData(numSampledList, sumDiversity, outRare, iters);	}
 		}
 		
@@ -415,12 +403,13 @@ int PhyloDiversityCommand::execute(){
 //**********************************************************************************************************************
 int PhyloDiversityCommand::createProcesses(vector<int>& procIters, Tree* t, map< string, vector<float> >& div, map<string, vector<float> >& sumDiv, int numIters, int increment, vector<int>& randomLeaf, set<int>& numSampledList, ofstream& outCollect, ofstream& outSum){
 	try {
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
-		int process = 1;
+        int process = 1;
 		
 		vector<int> processIDS;
 		map< string, vector<float> >::iterator itSum;
-		
+
+		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+				
 		//loop through and create all the processes you want
 		while (process != processors) {
 			int pid = fork();
@@ -488,6 +477,56 @@ int PhyloDiversityCommand::createProcesses(vector<int>& procIters, Tree* t, map<
 				
 			in.close();
 			m->mothurRemove(inTemp);
+		}
+#else
+        
+        //fill in functions
+        vector<phylodivData*> pDataArray;
+		DWORD   dwThreadIdArray[processors-1];
+		HANDLE  hThreadArray[processors-1];
+        vector<CountTable*> cts;
+        vector<Tree*> trees;
+        map<string, int> rootForGroup = getRootForGroups(t);
+		
+		//Create processor worker threads.
+		for( int i=1; i<processors; i++ ){
+            CountTable* copyCount = new CountTable();
+            copyCount->copy(ct);
+            Tree* copyTree = new Tree(copyCount);
+            copyTree->getCopy(t);
+            
+            cts.push_back(copyCount);
+            trees.push_back(copyTree);
+            
+            map<string, vector<float> > copydiv = div;
+            map<string, vector<float> > copysumDiv = sumDiv;
+            vector<int> copyrandomLeaf = randomLeaf;
+            set<int> copynumSampledList = numSampledList;
+            map<string, int> copyRootForGrouping = rootForGroup;
+            
+            phylodivData* temp = new phylodivData(m, procIters[i], copydiv, copysumDiv, copyTree, copyCount, increment, copyrandomLeaf, copynumSampledList, copyRootForGrouping);
+			pDataArray.push_back(temp);
+			processIDS.push_back(i);
+            
+			hThreadArray[i-1] = CreateThread(NULL, 0, MyPhyloDivThreadFunction, pDataArray[i-1], 0, &dwThreadIdArray[i-1]);
+		}
+		
+		driver(t, div, sumDiv, procIters[0], increment, randomLeaf, numSampledList, outCollect, outSum, true);
+		
+		//Wait until all threads have terminated.
+		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
+		
+		//Close all thread handles and free memory allocations.
+		for(int i=0; i < pDataArray.size(); i++){
+            for (itSum = pDataArray[i]->sumDiv.begin(); itSum != pDataArray[i]->sumDiv.end(); itSum++) {
+                for (int k = 0; k < (itSum->second).size(); k++) {
+                    sumDiv[itSum->first][k] += (itSum->second)[k];
+                }
+            }
+			delete cts[i];
+            delete trees[i];
+			CloseHandle(hThreadArray[i]);
+			delete pDataArray[i];
 		}
 		
 #endif
@@ -594,7 +633,7 @@ void PhyloDiversityCommand::printSumData(map< string, vector<float> >& div, ofst
 			else		{	score = div[mGroups[j]][numSampled] / (float)numIters;	}
 				
 			out << setprecision(4) << score << endl;
-            cout << mGroups[j] << '\t' << numSampled << '\t'<< setprecision(4) << score << endl;
+            //cout << mGroups[j] << '\t' << numSampled << '\t'<< setprecision(4) << score << endl;
 		}
 					
 		out.close();

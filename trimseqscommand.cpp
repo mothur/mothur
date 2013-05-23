@@ -1391,9 +1391,7 @@ int TrimSeqsCommand::setLines(string filename, string qfilename) {
                         string sname = "";  nameStream >> sname;
                         sname = sname.substr(1);
                         
-                        for (int i = 0; i < sname.length(); i++) {
-                            if (sname[i] == ':') { sname[i] = '_'; m->changedSeqNames = true; }
-                        }
+                        m->checkName(sname);
                         
                         map<string, int>::iterator it = firstSeqNames.find(sname);
                         

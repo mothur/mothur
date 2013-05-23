@@ -13,11 +13,12 @@
 vector<string> CreateDatabaseCommand::setParameters(){	
 	try {
 		CommandParameter pfasta("repfasta", "InputTypes", "", "", "none", "none", "none","database",false,true,true); parameters.push_back(pfasta);
-		CommandParameter pname("repname", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(pname);
+		CommandParameter pname("repname", "InputTypes", "", "", "NameCount", "NameCount", "none","",false,false,true); parameters.push_back(pname);
+        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "NameCount", "none","",false,false,true); parameters.push_back(pcount);
+		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
 		CommandParameter pcontaxonomy("contaxonomy", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(pcontaxonomy);
 		CommandParameter plist("list", "InputTypes", "", "", "ListShared", "ListShared", "none","",false,false,true); parameters.push_back(plist);
         CommandParameter pshared("shared", "InputTypes", "", "", "ListShared", "ListShared", "none","",false,false,true); parameters.push_back(pshared);
-		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pgroup);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -35,17 +36,18 @@ vector<string> CreateDatabaseCommand::setParameters(){
 string CreateDatabaseCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The create.database command reads a list file or a shared file, *.cons.taxonomy, *.rep.fasta, *.rep.names and optional groupfile, and creates a database file.\n";
-		helpString += "The create.database command parameters are repfasta, list, shared, repname, contaxonomy, group and label. List, repfasta, repnames, and contaxonomy are required.\n";
+		helpString += "The create.database command reads a list file or a shared file, *.cons.taxonomy, *.rep.fasta, *.rep.names and optional groupfile, or count file and creates a database file.\n";
+		helpString += "The create.database command parameters are repfasta, list, shared, repname, contaxonomy, group, count and label. List, repfasta, repnames or count, and contaxonomy are required.\n";
         helpString += "The repfasta file is fasta file outputted by get.oturep(fasta=yourFastaFile, list=yourListfile, column=yourDistFile, name=yourNameFile).\n";
         helpString += "The repname file is the name file outputted by get.oturep(fasta=yourFastaFile, list=yourListfile, column=yourDistFile, name=yourNameFile).\n";
-        helpString += "The contaxonomy file is the taxonomy file outputted by classify.otu(list=yourListfile, taxonomy=yourTaxonomyFile).\n";
+        helpString += "The count file is the count file outputted by get.oturep(fasta=yourFastaFile, list=yourListfile, column=yourDistFile, count=yourCountFile). If it includes group info, mothur will give you the abundance breakdown by group. \n";
+        helpString += "The contaxonomy file is the taxonomy file outputted by classify.otu(list=yourListfile, taxonomy=yourTaxonomyFile, name=yourNameFile).\n";
         helpString += "The group file is optional and will just give you the abundance breakdown by group.\n";
         helpString += "The label parameter allows you to specify a label to be used from your listfile.\n";
         helpString += "NOTE: Make SURE the repfasta, repnames and contaxonomy are for the same label as the listfile.\n";
         helpString += "The create.database command should be in the following format: \n";
 		helpString += "create.database(repfasta=yourFastaFileFromGetOTURep, repname=yourNameFileFromGetOTURep, contaxonomy=yourConTaxFileFromClassifyOTU, list=yourListFile) \n";	
-		helpString += "Example: create.database(repfasta=final.an.0.03.rep.fasta, name=final.an.0.03.rep.names, list=fina.an.list, label=0.03, contaxonomy=final.an.0.03.cons.taxonomy) \n";
+		helpString += "Example: create.database(repfasta=final.an.0.03.rep.fasta, repname=final.an.0.03.rep.names, list=final.an.list, label=0.03, contaxonomy=final.an.0.03.cons.taxonomy) \n";
 		helpString += "Note: No spaces between parameter labels (i.e. repfasta), '=' and parameters (i.e.yourFastaFileFromGetOTURep).\n";	
 		return helpString;
 	}
@@ -155,6 +157,14 @@ CreateDatabaseCommand::CreateDatabaseCommand(string option)  {
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
                 
+                it = parameters.find("count");
+				//user has given a template file
+				if(it != parameters.end()){
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["count"] = inputDir + it->second;		}
+				}
+                
                 it = parameters.find("shared");
 				//user has given a template file
 				if(it != parameters.end()){ 
@@ -211,10 +221,23 @@ CreateDatabaseCommand::CreateDatabaseCommand(string option)  {
 			else if (repfastafile == "not open") { repfastafile = ""; abort = true; }
 
             repnamesfile = validParameter.validFile(parameters, "repname", true);
-			if (repnamesfile == "not found") {  //if there is a current list file, use it
-                repnamesfile = "";  m->mothurOut("The repnames parameter is required, aborting."); m->mothurOutEndLine(); abort = true; 
-			}
+			if (repnamesfile == "not found") {  repnamesfile = "";  			}
 			else if (repnamesfile == "not open") { repnamesfile = ""; abort = true; }
+            
+            countfile = validParameter.validFile(parameters, "count", true);
+			if (countfile == "not found") {  countfile = "";  			}
+			else if (countfile == "not open") { countfile = ""; abort = true; }
+            
+            if ((countfile == "") && (repnamesfile == "")) {
+                //if there is a current name file, use it, else look for current count file
+                string repnamesfile = m->getNameFile();
+				if (repnamesfile != "") {  m->mothurOut("Using " + repnamesfile + " as input file for the repname parameter."); m->mothurOutEndLine(); }
+				else {
+                    countfile = m->getCountTableFile();
+                    if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
+                    else { m->mothurOut("[ERROR]: You must provide a count or repname file."); m->mothurOutEndLine(); abort = true;  }
+                }
+            }
 
 			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") { groupfile = ""; abort = true; }	
@@ -253,7 +276,32 @@ int CreateDatabaseCommand::execute(){
         
         //names redundants to uniques. backwards to how we normally do it, but each bin is the list file will be a key entry in the map.
         map<string, string> repNames;
-        int numUniqueNamesFile = m->readNames(repnamesfile, repNames, 1);
+        map<string, int> nameMap;
+        int numUniqueNamesFile = 0;
+        CountTable ct;
+        if (countfile == "") {
+            numUniqueNamesFile = m->readNames(repnamesfile, repNames, 1);
+            //the repnames file does not have the same order as the list file bins so we need to sort and reassemble for the search below
+            map<string, string> tempRepNames;
+            for (map<string, string>::iterator it = repNames.begin(); it != repNames.end();) {
+                string bin = it->first;
+                vector<string> temp;
+                m->splitAtChar(bin, temp, ',');
+                sort(temp.begin(), temp.end());
+                bin = "";
+                for (int i = 0; i < temp.size()-1; i++) {
+                    bin += temp[i] + ',';
+                }
+                bin += temp[temp.size()-1];
+                tempRepNames[bin] = it->second;
+                repNames.erase(it++);
+            }
+            repNames = tempRepNames;
+        }else {
+            ct.readTable(countfile, true);
+            numUniqueNamesFile = ct.getNumUniqueSeqs();
+            nameMap = ct.getNameMap();
+        }
         
         //are there the same number of otus in the fasta and name files
         if (repOtusSizes.size() != numUniqueNamesFile) { m->mothurOut("[ERROR]: you have " + toString(numUniqueNamesFile) + " unique seqs in your repname file, but " + toString(repOtusSizes.size()) + " seqs in your repfasta file.  These should match.\n"); m->control_pressed = true; }
@@ -307,6 +355,11 @@ int CreateDatabaseCommand::execute(){
             if (groupfile != "") { 
                 header = "OTUNumber\t";
                 for (int i = 0; i < groupmap->getNamesOfGroups().size(); i++) { header += (groupmap->getNamesOfGroups())[i] + '\t'; }
+            }else if (countfile != "") {
+                if (ct.hasGroupInfo()) {
+                    header = "OTUNumber\t";
+                    for (int i = 0; i < ct.getNamesOfGroups().size(); i++) { header += (ct.getNamesOfGroups())[i] + '\t'; }
+                }
             }
             header += "repSeqName\trepSeq\tOTUConTaxonomy";
             out << header << endl;
@@ -319,17 +372,46 @@ int CreateDatabaseCommand::execute(){
                 
                 vector<string> binNames;
                 string bin = list->get(i);
-                
-                map<string, string>::iterator it = repNames.find(bin);
-                if (it == repNames.end()) {
-                    m->mothurOut("[ERROR: OTU " + otuLabels[i] + " is not in the repnames file. Make sure you are using files for the same distance.\n"); m->control_pressed = true;   break;
-                }
-                
                 m->splitAtComma(bin, binNames);
                 
-                //sanity check
-                if (binNames.size() != classifyOtuSizes[i]) {
-                    m->mothurOut("[ERROR: OTU " + otuLabels[i] + " contains " + toString(binNames.size()) + " sequence, but the rep and taxonomy files indicated this OTU should have " + toString(classifyOtuSizes[i]) + ". Make sure you are using files for the same distance.\n"); m->control_pressed = true;   break;
+                string seqRepName = "";
+                int numSeqsRep = 0;
+                
+                if (countfile == "") {
+                    sort(binNames.begin(), binNames.end());
+                    bin = "";
+                    for (int i = 0; i < binNames.size()-1; i++) {
+                        bin += binNames[i] + ',';
+                    }
+                    bin += binNames[binNames.size()-1];
+                    map<string, string>::iterator it = repNames.find(bin);
+                    
+                    if (it == repNames.end()) {
+                        m->mothurOut("[ERROR: OTU " + otuLabels[i] + " is not in the repnames file. Make sure you are using files for the same distance.\n"); m->control_pressed = true;   break;
+                    }else { seqRepName = it->second;  numSeqsRep = binNames.size(); }
+                    
+                    //sanity check
+                    if (binNames.size() != classifyOtuSizes[i]) {
+                        m->mothurOut("[ERROR: OTU " + otuLabels[i] + " contains " + toString(binNames.size()) + " sequence, but the rep and taxonomy files indicated this OTU should have " + toString(classifyOtuSizes[i]) + ". Make sure you are using files for the same distance.\n"); m->control_pressed = true;   break;
+                    }
+                }else {
+                    //find rep sequence in bin
+                    for (int j = 0; j < binNames.size(); j++) {
+                        map<string, int>::iterator itNameMap = nameMap.find(binNames[j]); //if you are in the counttable you must be the rep. because get.oturep with a countfile only includes the rep sequences in the rep.count file.
+                        if (itNameMap != nameMap.end()) {
+                            seqRepName = itNameMap->first;
+                            numSeqsRep = itNameMap->second;
+                            j += binNames.size();
+                        }
+                    }
+                    
+                    if (seqRepName == "") {
+                        m->mothurOut("[ERROR: OTU " + otuLabels[i] + " is not in the count file. Make sure you are using files for the same distance.\n"); m->control_pressed = true;   break;
+                    }
+                    
+                    if (numSeqsRep != classifyOtuSizes[i]) {
+                        m->mothurOut("[ERROR: OTU " + otuLabels[i] + " contains " + toString(numSeqsRep) + " sequence, but the rep and taxonomy files indicated this OTU should have " + toString(classifyOtuSizes[i]) + ". Make sure you are using files for the same distance.\n"); m->control_pressed = true;   break;
+                    }
                 }
                 
                 //output abundances
@@ -353,10 +435,15 @@ int CreateDatabaseCommand::execute(){
                     for (int j = 0; j < groupmap->getNamesOfGroups().size(); j++) { out << counts[(groupmap->getNamesOfGroups())[j]] << '\t';  }
                     
                     if (error) { m->control_pressed = true; }
-                }else { out << binNames.size() << '\t'; }
+                }else if (countfile != "") {
+                    if (ct.hasGroupInfo()) {
+                        vector<int> groupCounts = ct.getGroupCounts(seqRepName);
+                        for (int j = 0; j < groupCounts.size(); j++) { out << groupCounts[j] << '\t';  }
+                    }else { out << numSeqsRep << '\t'; }
+                }else { out << numSeqsRep << '\t'; }
                 
                 //output repSeq
-                out << it->second << '\t' << seqs[i].getAligned() << '\t' << taxonomies[i] << endl;
+                out << seqRepName << '\t' << seqs[i].getAligned() << '\t' << taxonomies[i] << endl;
             }
             
             
@@ -471,6 +558,7 @@ vector<int> CreateDatabaseCommand::readFasta(vector<Sequence>& seqs){
         ifstream in;
         m->openInputFile(repfastafile, in);
         
+        set<int> sanity;
         while (!in.eof()) {
             
             if (m->control_pressed) { break; }
@@ -481,10 +569,19 @@ vector<int> CreateDatabaseCommand::readFasta(vector<Sequence>& seqs){
             //the binInfo should look like - binNumber|size ie. 1|200 if it is binNumber|size|group then the user gave us the wrong repfasta file
             vector<string> info;
             m->splitAtChar(binInfo, info, '|');
-            if (info.size() != 2) { m->mothurOut("[ERROR]: your repfasta file is not the right format.  The create database command is designed to be used with the output from get.oturep.  When running get.oturep you can not use a group file, because mothur is only expecting one representative sequence per OTU and when you use a group file with get.oturep a representative is found for each group.\n");  m->control_pressed = true; break;}
+            //if (info.size() != 2) { m->mothurOut("[ERROR]: your repfasta file is not the right format.  The create database command is designed to be used with the output from get.oturep.  When running get.oturep you can not use a group file, because mothur is only expecting one representative sequence per OTU and when you use a group file with get.oturep a representative is found for each group.\n");  m->control_pressed = true; break;}
             
             int size = 0;
             m->mothurConvert(info[1], size);
+            
+            int binNumber = 0;
+            string temp = "";
+            for (int i = 0; i < info[0].size(); i++) { if (isspace(info[0][i])) {;}else{temp +=info[0][i]; } }
+            m->mothurConvert(temp, binNumber);
+            set<int>::iterator it = sanity.find(binNumber);
+            if (it != sanity.end()) {
+                m->mothurOut("[ERROR]: your repfasta file is not the right format.  The create database command is designed to be used with the output from get.oturep.  When running get.oturep you can not use a group file, because mothur is only expecting one representative sequence per OTU and when you use a group file with get.oturep a representative is found for each group.\n");  m->control_pressed = true; break;
+            }else { sanity.insert(binNumber); }
             
             sizes.push_back(size);
             seqs.push_back(seq);

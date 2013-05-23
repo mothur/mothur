@@ -243,16 +243,49 @@ int SensSpecCommand::execute(){
 		exit(1);
 	}
 }
+//***************************************************************************************************************
+bool SensSpecCommand::testFile(){
+	try{
+        ifstream fileHandle;
+        m->openInputFile(phylipfile, fileHandle);
+        
+        bool square = false;
+        string numTest, name;
+        fileHandle >> numTest >> name;
+
+        if (!m->isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
+
+        char d;
+        while((d=fileHandle.get()) != EOF){
+            if(isalnum(d)){
+                square = true;
+                break;
+            }
+            if(d == '\n'){
+                square = false;
+                break;
+            }
+        }
+        fileHandle.close();
+        
+        return square;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "SensSpecCommand", "testFile");
+		exit(1);
+	}
+}
 
 //***************************************************************************************************************
 
 int SensSpecCommand::processPhylip(){
 	try{
 		//probably need some checking to confirm that the names in the distance matrix are the same as those in the list file
-		string origCutoff = "";
+        square = testFile();
+ 		string origCutoff = "";
 		bool getCutoff = 0;
 		if(cutoff == -1.00)	{	getCutoff = 1;															}
-		else				{	origCutoff = toString(cutoff);	cutoff += (0.49 / double(precision));	}		
+		else				{	origCutoff = toString(cutoff);	cutoff += (0.49 / double(precision));	}
 		
 		map<string, int> seqMap;
 		string seqList;
@@ -264,7 +297,6 @@ int SensSpecCommand::processPhylip(){
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = labels;
-		
 		
 		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
@@ -461,6 +493,9 @@ int SensSpecCommand::process(map<string, int>& seqMap, string label, bool& getCu
 					else								{	trueNegatives++;	}
 				}
 			}
+            
+            if (square) { m->getline(phylipFile); } //get rest of line - redundant distances
+            m->gobble(phylipFile);
 		}
 		phylipFile.close();
 		
@@ -707,28 +742,18 @@ string SensSpecCommand::preProcessList(){
             m->openInputFile(distFile, phylipFile);
             string numTest;
             int pNumSeqs;
-			phylipFile >> numTest;
+			phylipFile >> numTest; m->gobble(phylipFile);
 			
 			if (!m->isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
             else {
                 m->mothurConvert(numTest, pNumSeqs);
             }
-            phylipFile >> pNumSeqs; m->gobble(phylipFile);
             
             string seqName;
-            double distance;
-            
             for(int i=0;i<pNumSeqs;i++){
-                
                 if (m->control_pressed) { return ""; }
-                
-                phylipFile >> seqName; 
+                phylipFile >> seqName;  m->getline(phylipFile);  m->gobble(phylipFile);
                 uniqueNames.insert(seqName);
-                
-                for(int j=0;j<i;j++){
-                    phylipFile >> distance;
-                }
-                m->gobble(phylipFile);
             }
             phylipFile.close();
         }else {
@@ -778,8 +803,8 @@ string SensSpecCommand::preProcessList(){
                 m->splitAtComma(binnames, bnames);
 				
 				string newNames = "";
-                for (int i = 0; i < bnames.size(); i++) {
-					string name = bnames[i];
+                for (int j = 0; j < bnames.size(); j++) {
+					string name = bnames[j];
 					//if that name is in the .accnos file, add it
 					if (uniqueNames.count(name) != 0) {  newNames += name + ",";  }
 				}
@@ -803,6 +828,8 @@ string SensSpecCommand::preProcessList(){
 		out.close();
 
         if (wroteSomething) { return newListFile; }
+        else { m->mothurRemove(newListFile); }
+        
         return ""; 
     }
     catch(exception& e) {
