@@ -22,9 +22,9 @@ vector<string> ClassifySharedCommand::setParameters(){
 		CommandParameter pnumtrees("numtrees", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pnumtrees);
         
             // parameters related to pruning
-        CommandParameter pdopruning("prune", "Boolean", "", "F", "", "", "", "", false, false); parameters.push_back(pdopruning);
+        CommandParameter pdopruning("prune", "Boolean", "", "T", "", "", "", "", false, false); parameters.push_back(pdopruning);
         CommandParameter ppruneaggrns("pruneaggressiveness", "Number", "", "0.9", "", "", "", "", false, false); parameters.push_back(ppruneaggrns);
-        CommandParameter pdiscardhetrees("discarderrortrees", "Boolean", "", "F", "", "", "", "", false, false); parameters.push_back(pdiscardhetrees);
+        CommandParameter pdiscardhetrees("discarderrortrees", "Boolean", "", "T", "", "", "", "", false, false); parameters.push_back(pdiscardhetrees);
         CommandParameter phetdiscardthreshold("errorthreshold", "Number", "", "0.4", "", "", "", "", false, false); parameters.push_back(phetdiscardthreshold);
         CommandParameter psdthreshold("stdthreshold", "Number", "", "0.0", "", "", "", "", false, false); parameters.push_back(psdthreshold);
             // pruning params end
