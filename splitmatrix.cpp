@@ -182,7 +182,7 @@ int SplitMatrix::createDistanceFilesFromTax(map<string, int>& seqGroup, int numG
 		}
 		
 		copyGroups.clear();
-		
+        
 		//process each distance file
 		for (int i = 0; i < numGroups; i++) { 
 			
@@ -206,6 +206,9 @@ int SplitMatrix::createDistanceFilesFromTax(map<string, int>& seqGroup, int numG
 			if (namefile != "") { m->mothurRemove((namefile + "." + toString(i) + ".temp")); }
             else { m->mothurRemove((countfile + "." + toString(i) + ".temp")); }
 		}
+        
+        //restore old fasta file name since dist.seqs overwrites it with the temp files
+        m->setFastaFile(fastafile);
         
         vector<string> tempDistFiles;    
         for(int i=0;i<numGroups;i++){
@@ -332,7 +335,7 @@ int SplitMatrix::splitDistanceLarge(){
 		
 		int numGroups = 0;
 
-		ofstream outFile;
+		//ofstream outFile;
 		ifstream dFile;
 		m->openInputFile(distFile, dFile);
 	
@@ -408,6 +411,7 @@ int SplitMatrix::splitDistanceLarge(){
 											
 					//have we reached the max buffer size
 					if (numOutputs[groupID] > 60) { //write out sequence
+                        ofstream outFile;
 						outFile.open(fileName.c_str(), ios::app);
 						outFile << outputs[groupID] << seqA << '\t' << seqB << '\t' << dist << endl;
 						outFile.close();
@@ -434,7 +438,7 @@ int SplitMatrix::splitDistanceLarge(){
 							//if groupB is written to file it is above buffer size so read and write to new merged file
 							if (wroteOutPut[groupIDB]) {
 								string fileName2 = distFile + "." + toString(groupIDB) + ".temp";
-								ifstream fileB(fileName2.c_str(), ios::ate);
+								/*ifstream fileB(fileName2.c_str(), ios::ate);
 								
 								outFile.open(fileName.c_str(), ios::app);
 								
@@ -469,17 +473,22 @@ int SplitMatrix::splitDistanceLarge(){
 								outFile << temp.substr(0, lastRead);
 								delete memblock;
 								
-								fileB.close();
+								fileB.close();*/
+                                m->appendFiles(fileName2, fileName);
 								m->mothurRemove(fileName2);
+                        
 								
 								//write out the merged memory
 								if (numOutputs[groupID] > 60) {
-									outFile << outputs[groupID];
+                                    ofstream tempOut;
+                                    m->openOutputFile(fileName, tempOut);
+									tempOut << outputs[groupID];
 									outputs[groupID] = "";
 									numOutputs[groupID] = 0;
+                                    tempOut.close();
 								}
 								
-								outFile.close();
+								//outFile.close();
 								
 								wroteOutPut[groupID] = true;
 								wroteOutPut[groupIDB] = false;
@@ -494,7 +503,7 @@ int SplitMatrix::splitDistanceLarge(){
 							
 							if (wroteOutPut[groupIDA]) {
 								string fileName2 = distFile + "." + toString(groupIDA) + ".temp";
-								ifstream fileB(fileName2.c_str(), ios::ate);
+								/*ifstream fileB(fileName2.c_str(), ios::ate);
 								
 								outFile.open(fileName.c_str(), ios::app);
 								
@@ -529,17 +538,21 @@ int SplitMatrix::splitDistanceLarge(){
 									
 								delete memblock;
 								
-								fileB.close();
+								fileB.close();*/
+                                m->appendFiles(fileName2, fileName);
 								m->mothurRemove(fileName2);
 								
 								//write out the merged memory
 								if (numOutputs[groupID] > 60) {
-									outFile << outputs[groupID];
+                                    ofstream tempOut;
+                                    m->openOutputFile(fileName, tempOut);
+									tempOut << outputs[groupID];
 									outputs[groupID] = "";
 									numOutputs[groupID] = 0;
+                                    tempOut.close();
 								}
 								
-								outFile.close();
+								//outFile.close();
 								
 								wroteOutPut[groupID] = true;
 								wroteOutPut[groupIDA] = false;
@@ -559,6 +572,7 @@ int SplitMatrix::splitDistanceLarge(){
             //remove old names files just in case
 			
 			if (numOutputs[i] > 0) {
+                ofstream outFile;
 				outFile.open(fileName.c_str(), ios::app);
 				outFile << outputs[i];
 				outFile.close();

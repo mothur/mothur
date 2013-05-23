@@ -39,6 +39,7 @@ public:
     double calcKendallSig(double, double); //length, coeff.
     
     vector<double> solveEquations(vector<vector<double> >, vector<double>);
+    vector<float> solveEquations(vector<vector<float> >, vector<float>);
     vector<vector<double> > getInverse(vector<vector<double> >);
 
     
@@ -64,6 +65,9 @@ private:
     
     void ludcmp(vector<vector<double> >&, vector<int>&, double&);
     void lubksb(vector<vector<double> >&, vector<int>&, vector<double>&);
+    
+    void ludcmp(vector<vector<float> >&, vector<int>&, float&);
+    void lubksb(vector<vector<float> >&, vector<int>&, vector<float>&);
 
     
 };

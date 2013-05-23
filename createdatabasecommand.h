@@ -35,7 +35,7 @@ public:
 private:
 	
 	bool abort;
-	string sharedfile, listfile, groupfile, repfastafile, repnamesfile, contaxonomyfile, label, outputDir;
+	string sharedfile, listfile, groupfile, repfastafile, repnamesfile, contaxonomyfile, label, outputDir, countfile;
 	
 	vector<string> outputNames;
 		

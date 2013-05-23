@@ -2242,9 +2242,11 @@ map<string, int> MothurOut::readNames(string namefile, unsigned long int& numSeq
 /************************************************************/
 int MothurOut::checkName(string& name) {
     try {
-        for (int i = 0; i < name.length(); i++) {
-            if (name[i] == ':') { name[i] = '_'; changedSeqNames = true; }
-        }        
+        if (modifyNames) {
+            for (int i = 0; i < name.length(); i++) {
+                if (name[i] == ':') { name[i] = '_'; changedSeqNames = true; }
+            }
+        }
         return 0;
     }
 	catch(exception& e) {
@@ -3270,6 +3272,26 @@ vector<double> MothurOut::getAverages(vector< vector<double> >& dists) {
 		exit(1);
 	}
 }
+/**************************************************************************************************/
+double MothurOut::getAverage(vector<double> dists) {
+	try{
+        double average = 0;
+        
+        for (int i = 0; i < dists.size(); i++) {
+            average += dists[i];
+        }
+       
+        //finds average.
+        average /= (double) dists.size(); 
+        
+        return average;
+    }
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "getAverage");
+		exit(1);
+	}
+}
+
 /**************************************************************************************************/
 vector<double> MothurOut::getStandardDeviation(vector< vector<double> >& dists) {
 	try{

@@ -70,7 +70,7 @@ class MothurOut {
 		vector<string> binLabelsInFile;
 		vector<string> currentBinLabels;
 		string saveNextLabel, argv, sharedHeaderMode, groupMode;
-		bool printedHeaders, commandInputsConvertError, changedSeqNames;
+		bool printedHeaders, commandInputsConvertError, changedSeqNames, modifyNames;
 		
 		//functions from mothur.h
 		//file operations
@@ -163,6 +163,7 @@ class MothurOut {
         vector<double> getStandardDeviation(vector< vector<double> >&);
         vector<double> getStandardDeviation(vector< vector<double> >&, vector<double>&);
         vector<double> getAverages(vector< vector<double> >&);
+        double getAverage(vector<double>);
         vector< vector<seqDist> > getStandardDeviation(vector< vector< vector<seqDist> > >&);
         vector< vector<seqDist> > getStandardDeviation(vector< vector< vector<seqDist> > >&, vector< vector<seqDist> >&);
         vector< vector<seqDist> > getAverages(vector< vector< vector<seqDist> > >&, string);
@@ -265,6 +266,7 @@ class MothurOut {
 			sharedHeaderMode = "";
             groupMode = "group";
             changedSeqNames = false;
+            modifyNames = true;
 		}
 		~MothurOut();
 

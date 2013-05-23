@@ -903,15 +903,9 @@ void PreClusterCommand::readNameFile(){
 		while (!in.eof()) {
 			in >> firstCol >> secondCol; m->gobble(in);
             
-            for (int i = 0; i < firstCol.length(); i++) {
-                if (firstCol[i] == ':') { firstCol[i] = '_'; m->changedSeqNames = true; }
-            }
-            
-            int size = 1;
-            for (int i = 0; i < secondCol.length(); i++) {
-                if (secondCol[i] == ':') { secondCol[i] = '_'; m->changedSeqNames = true; }
-                else if(secondCol[i] == ','){	size++;	}
-            }
+            m->checkName(firstCol);
+            m->checkName(secondCol);
+            int size = m->getNumNames(secondCol);
             
 			names[firstCol] = secondCol;
             sizes[firstCol] = size;
