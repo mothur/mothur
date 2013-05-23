@@ -37,7 +37,7 @@ string SetDirectoryCommand::getHelpString(){
 		helpString += "The set.dir command can also be used to specify the directory where your input files are located, the directory must exist.\n";
 		helpString += "The set.dir command can also be used to override or set the default location mothur will look for files if it is unable to find them, the directory must exist.\n";
         helpString += "The set.dir command can also be used to run mothur in debug mode.\n";
-        helpString += "The set.dir command can also be used to set the modifynames parameter. Default=t, meaning if your sequence names contain ':' change them to '_' to aviod issues while making trees.  modifynames=F will leave sequence names as they are.\n";
+        helpString += "The set.dir command can also be used to set the modifynames parameter. Default=t, meaning if your sequence names contain ':' change them to '_' to avoid issues while making trees.  modifynames=F will leave sequence names as they are.\n";
 		helpString += "The set.dir command parameters are input, output, tempdefault and debug and one is required.\n";
         helpString += "To run mothur in debug mode set debug=true. Default debug=false.\n";
 		helpString += "To return the output to the same directory as the input files you may enter: output=clear.\n";

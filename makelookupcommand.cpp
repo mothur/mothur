@@ -197,7 +197,7 @@ int MakeLookupCommand::execute(){
         
         double gapOpening = 10;
         int maxHomoP = 101;
-        vector<vector<double> > penaltyMatrix(maxHomoP);
+        vector<vector<double> > penaltyMatrix; penaltyMatrix.resize(maxHomoP);
         for(int i=0;i<maxHomoP;i++){
             penaltyMatrix[i].resize(maxHomoP, 5);
             penaltyMatrix[i][i] = 0;
@@ -210,7 +210,10 @@ int MakeLookupCommand::execute(){
         
         while(!refFASTA.eof()){
             if (m->control_pressed) { refFASTA.close(); return 0; }
+            
             Sequence seq(refFASTA);  m->gobble(refFASTA);
+            
+            if (m->debug) { m->mothurOut("[DEBUG]: seq = " + seq.getName() + ".\n"); }
             
             string fullSequence = keySequence + barcodeSequence + seq.getAligned(); //  *   concatenate the keySequence, barcodeSequence, and
             //      referenceSequences
@@ -218,17 +221,19 @@ int MakeLookupCommand::execute(){
         }
         refFASTA.close();
         
-        vector<vector<double> > lookupTable(1000);
+        vector<vector<double> > lookupTable; lookupTable.resize(1000);
         for(int i=0;i<1000;i++){
             lookupTable[i].resize(11, 0);
         }
         
-        
+        if (m->debug) { m->mothurOut("[DEBUG]: here .\n"); }
         //Loop through each sequence in the flow file and the error summary file.
         ifstream flowFile;
         m->openInputFile(flowFileName, flowFile);
         int numFlows;
         flowFile >> numFlows;
+        
+        if (m->debug) { m->mothurOut("[DEBUG]: numflows = " + toString(numFlows) +  ".\n"); }
         
         ifstream errorFile;
         m->openInputFile(errorFileName, errorFile);
@@ -238,7 +243,7 @@ int MakeLookupCommand::execute(){
         string chimera;
         float intensity;
         
-        vector<double> std(11, 0);
+        vector<double> std;  std.resize(11, 0);
         
         while(errorFile && flowFile){
             
@@ -260,26 +265,37 @@ int MakeLookupCommand::execute(){
                 flowFile >> flowQuery >> dummy;
                 if(flowQuery != errorQuery){    cout << flowQuery << " != " << errorQuery << endl;  }
                 
-                vector<double> refFlow = refFlowgrams[referenceName];       //  * compare sequence to its closest reference
-                
-                vector<double> flowgram(numFlows);
-                
-                for(int i=0;i<numFlows;i++){
-                    flowFile >> intensity;
-                    flowgram[i] = intensity;// (int)round(100 * intensity);
-                }
-                m->gobble(flowFile);
-                
-                alignFlowGrams(flowgram, refFlow, gapOpening, penaltyMatrix, flowOrder);
-                
-                if (m->control_pressed) { errorFile.close(); flowFile.close(); return 0; }
-                
-                for(int i=0;i<flowgram.size();i++){
-                    int count = (int)round(100*flowgram[i]);
-                    if(count > 1000){count = 999;}
-                    if(abs(flowgram[i]-refFlow[i])<=0.50){
-                        lookupTable[count][int(refFlow[i])]++;               //  * build table
-                        std[int(refFlow[i])] += (100*refFlow[i]-count)*(100*refFlow[i]-count);
+                map<string, vector<double> >::iterator it = refFlowgrams.find(referenceName);       //  * compare sequence to its closest reference
+                if (it == refFlowgrams.end()) {
+                    m->mothurOut("[WARNING]: missing reference flow " + referenceName + ", ignoring flow " + flowQuery + ".\n");
+                    m->getline(flowFile); m->gobble(flowFile);
+                }else {
+                    vector<double> refFlow = it->second;
+                    vector<double> flowgram; flowgram.resize(numFlows);
+                    
+                    if (m->debug) { m->mothurOut("[DEBUG]: flowQuery = " + flowQuery +  ".\t" + "refName " + referenceName+  ".\n"); }
+                    
+                    for(int i=0;i<numFlows;i++){
+                        flowFile >> intensity;
+                        flowgram[i] = intensity;// (int)round(100 * intensity);
+                    }
+                    m->gobble(flowFile);
+                    
+                    if (m->debug) { m->mothurOut("[DEBUG]: before align.\n"); }
+                    
+                    alignFlowGrams(flowgram, refFlow, gapOpening, penaltyMatrix, flowOrder);
+                    
+                    if (m->debug) { m->mothurOut("[DEBUG]: after align.\n"); }
+                    
+                    if (m->control_pressed) { errorFile.close(); flowFile.close(); return 0; }
+                    
+                    for(int i=0;i<flowgram.size();i++){
+                        int count = (int)round(100*flowgram[i]);
+                        if(count > 1000){count = 999;}
+                        if(abs(flowgram[i]-refFlow[i])<=0.50){
+                            lookupTable[count][int(refFlow[i])]++;               //  * build table
+                            std[int(refFlow[i])] += (100*refFlow[i]-count)*(100*refFlow[i]-count);
+                        }
                     }
                 }
                 
@@ -289,8 +305,9 @@ int MakeLookupCommand::execute(){
         }
         errorFile.close(); flowFile.close();
         
+        
         //get probabilities
-        vector<int> counts(11, 0);
+        vector<int> counts; counts.resize(11, 0);
         int totalCount = 0;
         for(int i=0;i<1000;i++){
             for(int j=0;j<11;j++){
@@ -337,7 +354,7 @@ int MakeLookupCommand::execute(){
         
         
         //calculate the probability of each homopolymer length
-        vector<double> negLogHomoProb(11, 0.00);  //bring back
+        vector<double> negLogHomoProb; negLogHomoProb.resize(11, 0.00);  //bring back
         for(int i=0;i<N;i++){
             negLogHomoProb[i] = -log(counts[i] / (double)totalCount);
         }
@@ -438,8 +455,8 @@ int MakeLookupCommand::alignFlowGrams(vector<double>& flowgram, vector<double>& 
         
             //cout << numQueryFlows << '\t' << numRefFlows << endl;
         
-        vector<vector<double> > scoreMatrix(numQueryFlows+1);
-        vector<vector<char> > directMatrix(numQueryFlows+1);
+        vector<vector<double> > scoreMatrix; scoreMatrix.resize(numQueryFlows+1);
+        vector<vector<char> > directMatrix; directMatrix.resize(numQueryFlows+1);
         
         for(int i=0;i<=numQueryFlows;i++){
             if (m->control_pressed) { return 0; }
@@ -457,6 +474,7 @@ int MakeLookupCommand::alignFlowGrams(vector<double>& flowgram, vector<double>& 
             scoreMatrix[0][i] = i * gapOpening;
             directMatrix[0][i] = 'l';
         }
+        
         
         for(int i=1;i<=numQueryFlows;i++){
             for(int j=1;j<=numRefFlows;j++){
@@ -498,7 +516,7 @@ int MakeLookupCommand::alignFlowGrams(vector<double>& flowgram, vector<double>& 
         
         int minColumnIndex = numRefFlows;
         double minColumnScore = scoreMatrix[numQueryFlows][numRefFlows];
-        for(int i=0;i<numQueryFlows;i++){
+        for(int i=0;i<numRefFlows;i++){
             if (m->control_pressed) { return 0; }
             if(scoreMatrix[numQueryFlows][i] < minColumnScore){
                 minColumnScore = scoreMatrix[numQueryFlows][i];
@@ -512,7 +530,7 @@ int MakeLookupCommand::alignFlowGrams(vector<double>& flowgram, vector<double>& 
         
         vector<double> newFlowgram;
         vector<double> newRefFlowgram;
-        
+       
         while(i > 0 && j > 0){
             if (m->control_pressed) { return 0; }
             if(directMatrix[i][j] == 'd'){
