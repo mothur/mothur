@@ -817,7 +817,7 @@ int ScreenSeqsCommand::screenAlignReport(map<string, string>& badSeqNames){
             m->mothurRemove(outSummary+".temp");
         }
         
-        if (numFastaSeqs != count) {  m->mothurOut("[ERROR]: found " + toString(numFastaSeqs) + " sequences in your fasta file, and " + toString(count) + " sequences in your contigs report file, quitting.\n"); m->control_pressed = true; }
+        if (numFastaSeqs != count) {  m->mothurOut("[ERROR]: found " + toString(numFastaSeqs) + " sequences in your fasta file, and " + toString(count) + " sequences in your align report file, quitting.\n"); m->control_pressed = true; }
         
         
         return count;
