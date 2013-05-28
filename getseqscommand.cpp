@@ -45,7 +45,7 @@ string GetSeqsCommand::getHelpString(){
 		helpString += "The get.seqs command reads an .accnos file and any of the following file types: fasta, name, group, count, list, taxonomy, quality or alignreport file.\n";
 		helpString += "It outputs a file containing only the sequences in the .accnos file.\n";
 		helpString += "The get.seqs command parameters are accnos, fasta, name, group, list, taxonomy, qfile, alignreport and dups.  You must provide accnos unless you have a valid current accnos file, and at least one of the other parameters.\n";
-		helpString += "The dups parameter allows you to add the entire line from a name file if you add any name from the line. default=false. \n";
+		helpString += "The dups parameter allows you to add the entire line from a name file if you add any name from the line. default=true. \n";
 		helpString += "The get.seqs command should be in the following format: get.seqs(accnos=yourAccnos, fasta=yourFasta).\n";
 		helpString += "Example get.seqs(accnos=amazon.accnos, fasta=amazon.fasta).\n";
 		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n";
