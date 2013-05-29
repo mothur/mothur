@@ -405,7 +405,66 @@ int GroupMap::getNumSeqs(string group) {
 		exit(1);
 	}
 }
-
+/************************************************************/
+int GroupMap::renameSeq(string oldName, string newName) {
+	try {
+		
+		map<string, string>::iterator itName;
+		
+		itName = groupmap.find(oldName);
+		
+		if (itName == groupmap.end()) {
+            m->mothurOut("[ERROR]: cannot find " + toString(oldName) + " in group file");
+            m->control_pressed = true;
+            return 0;
+        }else {
+            string group = itName->second;
+            groupmap.erase(itName);
+            groupmap[newName] = group;
+        }
+        
+        return 0;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GroupMap", "renameSeq");
+		exit(1);
+	}
+}
+/************************************************************/
+int GroupMap::print(ofstream& out) {
+	try {
+		
+		for (map<string, string>::iterator itName = groupmap.begin(); itName != groupmap.end(); itName++) {
+            out << itName->first << '\t' << itName->second << endl;
+        }
+             
+        return 0;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GroupMap", "print");
+		exit(1);
+	}
+}
+/************************************************************/
+int GroupMap::print(ofstream& out, vector<string> userGroups) {
+	try {
+		
+		for (map<string, string>::iterator itName = groupmap.begin(); itName != groupmap.end(); itName++) {
+            if (m->inUsersGroups(itName->second, userGroups)) {
+                out << itName->first << '\t' << itName->second << endl;
+            }
+        }
+        
+        return 0;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GroupMap", "print");
+		exit(1);
+	}
+}
 /************************************************************/
 vector<string> GroupMap::getNamesSeqs(){
 	try {
