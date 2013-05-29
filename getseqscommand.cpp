@@ -430,9 +430,11 @@ int GetSeqsCommand::readFasta(){
             
             if (!dups) {//adjust name if needed
                 map<string, string>::iterator it = uniqueMap.find(name);
-                if (it != uniqueMap.end()) { name = it->second; }
+                if (it != uniqueMap.end()) { currSeq.setName(it->second); }
             }
 			
+            name = currSeq.getName();
+            
 			if (name != "") {
 				//if this name is in the accnos file
 				if (names.count(name) != 0) {
@@ -710,7 +712,7 @@ int GetSeqsCommand::readName(){
 		
 			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
 
-			in >> firstCol;				
+			in >> firstCol;			m->gobble(in);
 			in >> secondCol;
 			
 			string hold = "";
@@ -734,6 +736,7 @@ int GetSeqsCommand::readName(){
 				selectedCount += parsedNames.size();
                 if (m->debug) { sanity["name"].insert(firstCol); }
 			}else {
+                
 				selectedCount += validSecond.size();
 				
 				//if the name in the first column is in the set then print it and any other names in second column also in set
@@ -752,6 +755,7 @@ int GetSeqsCommand::readName(){
 				
 				//make first name in set you come to first column and then add the remaining names to second column
 				}else {
+                    
 					//you want part of this row
 					if (validSecond.size() != 0) {
 					
