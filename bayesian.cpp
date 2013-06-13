@@ -145,6 +145,8 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 
 				//for each word
 				for (int i = 0; i < numKmers; i++) {
+                    //m->mothurOut("[DEBUG]: kmer = " + toString(i) + "\n");
+                    
 					if (m->control_pressed) {  break; }
 					
 					#ifdef USE_MPI
@@ -239,7 +241,9 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 			}
 		}
 		
+        if (m->debug) { m->mothurOut("[DEBUG]: about to generateWordPairDiffArr\n"); }
 		generateWordPairDiffArr();
+        if (m->debug) { m->mothurOut("[DEBUG]: done generateWordPairDiffArr\n"); }
 		
 		//save probabilities
 		if (rdb->save) { rdb->wordGenusProb = wordGenusProb; rdb->WordPairDiffArr = WordPairDiffArr; }

@@ -127,6 +127,21 @@ struct PDistCell{
 	PDistCell() :  index(0), dist(0) {};
 	PDistCell(ull c, float d) :  index(c), dist(d) {}
 };
+/***********************************************************************/
+struct consTax{
+	string name;
+    string taxonomy;
+    int abundance;
+	consTax() :  name(""), taxonomy("unknown"), abundance(0) {};
+	consTax(string n, string t, int a) :  name(n), taxonomy(t), abundance(a) {}
+};
+/***********************************************************************/
+struct consTax2{
+    string taxonomy;
+    int abundance;
+	consTax2() :  taxonomy("unknown"), abundance(0) {};
+	consTax2(string t, int a) :  taxonomy(t), abundance(a) {}
+};
 /************************************************************/
 struct clusterNode {
 	int numSeq;

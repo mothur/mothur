@@ -431,10 +431,10 @@ int TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq, int& gr
                 break;
             }
             
-            if((compareDNASeq(foligo, rawFSequence.substr(0,foligo.length()))) && (compareDNASeq(roligo, rawRSequence.substr((rawRSequence.length()-roligo.length()),roligo.length())))) {
+            if((compareDNASeq(foligo, rawFSequence.substr(0,foligo.length()))) && (compareDNASeq(roligo, rawRSequence.substr(0,roligo.length())))) {
                 group = it->first;
                 forwardSeq.setUnaligned(rawFSequence.substr(foligo.length()));
-                reverseSeq.setUnaligned(rawRSequence.substr(0,(rawRSequence.length()-roligo.length())));
+                reverseSeq.setUnaligned(rawRSequence.substr(roligo.length()));
                 success = 0;
                 break;
             }
@@ -577,19 +577,6 @@ int TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq, int& gr
                     
                 }
                 
-                /*cout << minDiff << '\t' << minCount << '\t' << endl;
-                 for (int i = 0; i < minFGroup.size(); i++) {
-                 cout << i << '\t';
-                 for (int j = 0; j < minFGroup[i].size(); j++) { cout << minFGroup[i][j] << " "; }
-                 cout << endl;
-                 }
-                 cout << endl;
-                 for (int i = 0; i < minRGroup.size(); i++) {
-                 cout << i << '\t';
-                 for (int j = 0; j < minRGroup[i].size(); j++) { cout << minRGroup[i][j] << " "; }
-                 cout << endl;
-                 }
-                 cout << endl;*/
                 if(minDiff > bdiffs)	{	success = minDiff;	}	//no good matches
                 else {
                     bool foundMatch = false;
@@ -654,12 +641,12 @@ int TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq, Quality
                 break;
             }
             
-            if((compareDNASeq(foligo, rawFSequence.substr(0,foligo.length()))) && (compareDNASeq(roligo, rawRSequence.substr((rawRSequence.length()-roligo.length()),roligo.length())))) {
+            if((compareDNASeq(foligo, rawFSequence.substr(0,foligo.length()))) && (compareDNASeq(roligo, rawRSequence.substr(0,roligo.length())))) {
                 group = it->first;
                 forwardSeq.setUnaligned(rawFSequence.substr(foligo.length()));
-                reverseSeq.setUnaligned(rawRSequence.substr(0,(rawRSequence.length()-roligo.length())));
+                reverseSeq.setUnaligned(rawRSequence.substr(roligo.length()));
                 forwardQual.trimQScores(foligo.length(), -1);
-                reverseQual.trimQScores(-1, rawRSequence.length()-roligo.length());
+                reverseQual.trimQScores(roligo.length(), -1);
                 success = 0;
                 break;
             }
@@ -802,19 +789,6 @@ int TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq, Quality
                     
                 }
                 
-                /*cout << minDiff << '\t' << minCount << '\t' << endl;
-                 for (int i = 0; i < minFGroup.size(); i++) {
-                 cout << i << '\t';
-                 for (int j = 0; j < minFGroup[i].size(); j++) { cout << minFGroup[i][j] << " "; }
-                 cout << endl;
-                 }
-                 cout << endl;
-                 for (int i = 0; i < minRGroup.size(); i++) {
-                 cout << i << '\t';
-                 for (int j = 0; j < minRGroup[i].size(); j++) { cout << minRGroup[i][j] << " "; }
-                 cout << endl;
-                 }
-                 cout << endl;*/
                 if(minDiff > bdiffs)	{	success = minDiff;	}	//no good matches
                 else {
                     bool foundMatch = false;
@@ -1033,19 +1007,6 @@ int TrimOligos::stripPairedBarcode(Sequence& seq, QualityScores& qual, int& grou
                     
                 }
                 
-                /*cout << minDiff << '\t' << minCount << '\t' << endl;
-                 for (int i = 0; i < minFGroup.size(); i++) {
-                 cout << i << '\t';
-                 for (int j = 0; j < minFGroup[i].size(); j++) { cout << minFGroup[i][j] << " "; }
-                 cout << endl;
-                 }
-                 cout << endl;
-                 for (int i = 0; i < minRGroup.size(); i++) {
-                 cout << i << '\t';
-                 for (int j = 0; j < minRGroup[i].size(); j++) { cout << minRGroup[i][j] << " "; }
-                 cout << endl;
-                 }
-                 cout << endl;*/
                 if(minDiff > bdiffs)	{	success = minDiff;	}	//no good matches
                 else {
                     bool foundMatch = false;
@@ -1065,6 +1026,7 @@ int TrimOligos::stripPairedBarcode(Sequence& seq, QualityScores& qual, int& grou
                         group = matches[0];
                         fStart = minFPos[0];
                         rStart = rawSeq.length() - minRPos[0];
+                        if (fStart > rStart) { foundMatch = false; } //only barcodes not a good sequence
                     }
                     
                     //we have an acceptable match for the forward and reverse, but do they match?
@@ -1165,7 +1127,7 @@ int TrimOligos::stripPairedPrimers(Sequence& seq, QualityScores& qual, int& grou
                     success = pdiffs + 10;
                     break;
                 }
-                //cout << "before = " << oligo << '\t' << rawSeq.substr(0,oligo.length()+bdiffs) << endl;
+                //cout << "before = " << oligo << '\t' << rawSeq.substr(0,oligo.length()+pdiffs) << endl;
                 //use needleman to align first barcode.length()+numdiffs of sequence to each barcode
                 alignment->alignPrimer(oligo, rawSeq.substr(0,oligo.length()+pdiffs));
                 oligo = alignment->getSeqAAln();
@@ -1270,19 +1232,6 @@ int TrimOligos::stripPairedPrimers(Sequence& seq, QualityScores& qual, int& grou
                     
                 }
                 
-                /*cout << minDiff << '\t' << minCount << '\t' << endl;
-                 for (int i = 0; i < minFGroup.size(); i++) {
-                 cout << i << '\t';
-                 for (int j = 0; j < minFGroup[i].size(); j++) { cout << minFGroup[i][j] << " "; }
-                 cout << endl;
-                 }
-                 cout << endl;
-                 for (int i = 0; i < minRGroup.size(); i++) {
-                 cout << i << '\t';
-                 for (int j = 0; j < minRGroup[i].size(); j++) { cout << minRGroup[i][j] << " "; }
-                 cout << endl;
-                 }
-                 cout << endl;*/
                 if(minDiff > pdiffs)	{	success = minDiff;	}	//no good matches
                 else {
                     bool foundMatch = false;
@@ -1302,6 +1251,7 @@ int TrimOligos::stripPairedPrimers(Sequence& seq, QualityScores& qual, int& grou
                         group = matches[0];
                         fStart = minFPos[0];
                         rStart = rawSeq.length() - minRPos[0];
+                        if (fStart > rStart) { foundMatch = false; } //only primers not a good sequence
                     }
                     
                     //we have an acceptable match for the forward and reverse, but do they match?
@@ -1355,12 +1305,12 @@ int TrimOligos::stripForward(Sequence& forwardSeq, Sequence& reverseSeq, Quality
                 break;
             }
             
-            if((compareDNASeq(foligo, rawFSequence.substr(0,foligo.length()))) && (compareDNASeq(roligo, rawRSequence.substr((rawRSequence.length()-roligo.length()),roligo.length())))) {
+            if((compareDNASeq(foligo, rawFSequence.substr(0,foligo.length()))) && (compareDNASeq(roligo, rawRSequence.substr(0,roligo.length())))) {
                 group = it->first;
                 forwardSeq.setUnaligned(rawFSequence.substr(foligo.length()));
-                reverseSeq.setUnaligned(rawRSequence.substr(0,(rawRSequence.length()-roligo.length())));
+                reverseSeq.setUnaligned(rawRSequence.substr(roligo.length()));
                 forwardQual.trimQScores(foligo.length(), -1);
-                reverseQual.trimQScores(-1, rawRSequence.length()-roligo.length());
+                reverseQual.trimQScores(roligo.length(), -1);
                 success = 0;
                 break;
             }
@@ -1503,19 +1453,6 @@ int TrimOligos::stripForward(Sequence& forwardSeq, Sequence& reverseSeq, Quality
                     
                 }
                 
-                /*cout << minDiff << '\t' << minCount << '\t' << endl;
-                 for (int i = 0; i < minFGroup.size(); i++) {
-                 cout << i << '\t';
-                 for (int j = 0; j < minFGroup[i].size(); j++) { cout << minFGroup[i][j] << " "; }
-                 cout << endl;
-                 }
-                 cout << endl;
-                 for (int i = 0; i < minRGroup.size(); i++) {
-                 cout << i << '\t';
-                 for (int j = 0; j < minRGroup[i].size(); j++) { cout << minRGroup[i][j] << " "; }
-                 cout << endl;
-                 }
-                 cout << endl;*/
                 if(minDiff > pdiffs)	{	success = minDiff;	}	//no good matches
                 else {
                     bool foundMatch = false;
@@ -1585,7 +1522,7 @@ int TrimOligos::stripForward(Sequence& forwardSeq, Sequence& reverseSeq, int& gr
             if((compareDNASeq(foligo, rawFSequence.substr(0,foligo.length()))) && (compareDNASeq(roligo, rawRSequence.substr((rawRSequence.length()-roligo.length()),roligo.length())))) {
                 group = it->first;
                 forwardSeq.setUnaligned(rawFSequence.substr(foligo.length()));
-                reverseSeq.setUnaligned(rawRSequence.substr(0,(rawRSequence.length()-roligo.length())));
+                reverseSeq.setUnaligned(rawRSequence.substr(roligo.length()));
                 success = 0;
                 break;
             }
@@ -1728,19 +1665,6 @@ int TrimOligos::stripForward(Sequence& forwardSeq, Sequence& reverseSeq, int& gr
                     
                 }
                 
-                /*cout << minDiff << '\t' << minCount << '\t' << endl;
-                 for (int i = 0; i < minFGroup.size(); i++) {
-                 cout << i << '\t';
-                 for (int j = 0; j < minFGroup[i].size(); j++) { cout << minFGroup[i][j] << " "; }
-                 cout << endl;
-                 }
-                 cout << endl;
-                 for (int i = 0; i < minRGroup.size(); i++) {
-                 cout << i << '\t';
-                 for (int j = 0; j < minRGroup[i].size(); j++) { cout << minRGroup[i][j] << " "; }
-                 cout << endl;
-                 }
-                 cout << endl;*/
                 if(minDiff > pdiffs)	{	success = minDiff;	}	//no good matches
                 else {
                     bool foundMatch = false;

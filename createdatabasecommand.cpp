@@ -743,7 +743,7 @@ vector<SharedRAbundVector*> CreateDatabaseCommand::getShared(){
         return lookup;
     }
 	catch(exception& e) {
-		m->errorOut(e, "CreateDatabaseCommand", "getList");
+		m->errorOut(e, "CreateDatabaseCommand", "getShared");
 		exit(1);
 	}
 }

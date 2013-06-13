@@ -1360,6 +1360,67 @@ vector<unsigned long long> MothurOut::setFilePosFasta(string filename, int& num)
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
+vector<consTax> MothurOut::readConsTax(string inputfile){
+	try {
+		
+        vector<consTax> taxes;
+        
+        ifstream in;
+        openInputFile(inputfile, in);
+        
+        //read headers
+        getline(in);
+        
+        while (!in.eof()) {
+            
+            if (control_pressed) { break; }
+            
+            string otu = ""; string tax = "unknown";
+            int size = 0;
+            
+            in >> otu >> size >> tax; gobble(in);
+            consTax temp(otu, tax, size);
+            taxes.push_back(temp);
+        }
+        in.close();
+        
+        return taxes;
+    }
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "readConsTax");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+int MothurOut::readConsTax(string inputfile, map<string, consTax2>& taxes){
+	try {
+        ifstream in;
+        openInputFile(inputfile, in);
+        
+        //read headers
+        getline(in);
+        
+        while (!in.eof()) {
+            
+            if (control_pressed) { break; }
+            
+            string otu = ""; string tax = "unknown";
+            int size = 0;
+            
+            in >> otu >> size >> tax; gobble(in);
+            consTax2 temp(tax, size);
+            taxes[otu] = temp;
+        }
+        in.close();
+        
+        return 0;
+    }
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "readConsTax");
+		exit(1);
+	}
+}
 /**************************************************************************************************/
 vector<unsigned long long> MothurOut::setFilePosEachLine(string filename, int& num) {
 	try {
@@ -2348,7 +2409,9 @@ set<string> MothurOut::readAccnos(string accnosfile){
             in.read(buffer, 4096);
             vector<string> pieces = splitWhiteSpace(rest, buffer, in.gcount());
             
-            for (int i = 0; i < pieces.size(); i++) {  checkName(pieces[i]); names.insert(pieces[i]);  }
+            for (int i = 0; i < pieces.size(); i++) {  checkName(pieces[i]);
+                names.insert(pieces[i]);
+            }
         }
 		in.close();	
 		

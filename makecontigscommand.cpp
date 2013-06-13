@@ -1676,6 +1676,8 @@ bool MakeContigsCommand::getOligos(vector<vector<string> >& fastaFileNames, stri
                     }
                     //roligo = reverseOligo(roligo);
                     
+                    if (m->debug) { m->mothurOut("[DEBUG]: reading - " + roligo + ".\n"); }
+                    
                     group = "";
                     
 					// get rest of line in case there is a primer name
@@ -1687,6 +1689,8 @@ bool MakeContigsCommand::getOligos(vector<vector<string> >& fastaFileNames, stri
 					} 
                     
                     oligosPair newPrimer(foligo, roligo);
+                    
+                    if (m->debug) { m->mothurOut("[DEBUG]: primer pair " + newPrimer.forward + " " + newPrimer.reverse + ", and group = " + group + ".\n"); }
 					
 					//check for repeat barcodes
                     string tempPair = foligo+roligo;
