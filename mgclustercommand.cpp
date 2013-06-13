@@ -228,7 +228,13 @@ int MGClusterCommand::execute(){
 		if (namefile != "") {
 			nameMap = new NameAssignment(namefile);
 			nameMap->readMap();
-		}else{ nameMap= new NameAssignment(); }
+		}else if (countfile != "") {
+            ct = new CountTable();
+            ct->readTable(countfile, false);
+            nameMap= new NameAssignment();
+            vector<string> tempNames = ct->getNamesOfSeqs();
+            for (int i = 0; i < tempNames.size(); i++) {  nameMap->push_back(tempNames[i]);  }
+        }else{ nameMap= new NameAssignment(); }
 		
 		string fileroot = outputDir + m->getRootName(m->getSimpleName(blastfile));
 		string tag = "";
@@ -245,9 +251,6 @@ int MGClusterCommand::execute(){
         RAbundVector* rabund = NULL;
         
         if(countfile != "") {
-            //map<string, int> nameMapCounts = m->readNames(namefile);
-            ct = new CountTable();
-            ct->readTable(countfile, false);
             rabund = new RAbundVector();
             createRabund(ct, list, rabund);
         }else {
