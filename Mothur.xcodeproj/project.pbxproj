@@ -2401,7 +2401,7 @@
 				GCC_OPTIMIZATION_LEVEL = 3;
 				"INSTALL_PATH[sdk=*]" = TARGET_BUILD_DIR;
 				PRODUCT_NAME = mothur;
-				SDKROOT = macosx10.8;
+				SDKROOT = macosx;
 				SKIP_INSTALL = NO;
 			};
 			name = Debug;
@@ -2454,7 +2454,7 @@
 					"-lncurses",
 					"-lreadline",
 				);
-				SDKROOT = macosx;
+				SDKROOT = macosx10.6;
 				SKIP_INSTALL = NO;
 				USER_HEADER_SEARCH_PATHS = "";
 			};
@@ -2492,7 +2492,7 @@
 					"-lncurses",
 					"-lreadline",
 				);
-				SDKROOT = macosx;
+				SDKROOT = macosx10.6;
 				SKIP_INSTALL = NO;
 			};
 			name = Release;
