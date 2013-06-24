@@ -54,6 +54,7 @@
 		A774104814696F320098E6AC /* myseqdist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A774104614696F320098E6AC /* myseqdist.cpp */; };
 		A77410F614697C300098E6AC /* seqnoise.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A77410F414697C300098E6AC /* seqnoise.cpp */; };
 		A778FE6B134CA6CA00C0BA33 /* getcommandinfocommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A778FE6A134CA6CA00C0BA33 /* getcommandinfocommand.cpp */; };
+		A77916E8176F7F7600EEFE18 /* designmap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A77916E6176F7F7600EEFE18 /* designmap.cpp */; };
 		A77A221F139001B600B0BE70 /* deuniquetreecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A77A221E139001B600B0BE70 /* deuniquetreecommand.cpp */; };
 		A77B7185173D2240002163C2 /* sparcccommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A77B7184173D2240002163C2 /* sparcccommand.cpp */; };
 		A77B7188173D4042002163C2 /* randomnumber.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A77B7186173D4041002163C2 /* randomnumber.cpp */; };
@@ -490,6 +491,8 @@
 		A77410F514697C300098E6AC /* seqnoise.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = seqnoise.h; sourceTree = "<group>"; };
 		A778FE69134CA6CA00C0BA33 /* getcommandinfocommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getcommandinfocommand.h; sourceTree = "<group>"; };
 		A778FE6A134CA6CA00C0BA33 /* getcommandinfocommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getcommandinfocommand.cpp; sourceTree = "<group>"; };
+		A77916E6176F7F7600EEFE18 /* designmap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = designmap.cpp; sourceTree = "<group>"; };
+		A77916E7176F7F7600EEFE18 /* designmap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = designmap.h; sourceTree = "<group>"; };
 		A77A221D139001B600B0BE70 /* deuniquetreecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = deuniquetreecommand.h; sourceTree = "<group>"; };
 		A77A221E139001B600B0BE70 /* deuniquetreecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = deuniquetreecommand.cpp; sourceTree = "<group>"; };
 		A77B7183173D222F002163C2 /* sparcccommand.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sparcccommand.h; sourceTree = "<group>"; };
@@ -1773,6 +1776,8 @@
 				A7E9B6BD12D37EC400DA6239 /* database.cpp */,
 				A7E9B6BE12D37EC400DA6239 /* database.hpp */,
 				A7E9B6BF12D37EC400DA6239 /* datavector.hpp */,
+				A77916E7176F7F7600EEFE18 /* designmap.h */,
+				A77916E6176F7F7600EEFE18 /* designmap.cpp */,
 				A7E9B6CE12D37EC400DA6239 /* distancedb.hpp */,
 				A7E9B6CD12D37EC400DA6239 /* distancedb.cpp */,
 				A7E9B6DE12D37EC400DA6239 /* fastamap.cpp */,
@@ -2382,6 +2387,7 @@
 				A7CFA4311755401800D9ED4D /* renameseqscommand.cpp in Sources */,
 				A741744C175CD9B1007DF49B /* makelefsecommand.cpp in Sources */,
 				A7190B221768E0DF00A9AFA6 /* lefsecommand.cpp in Sources */,
+				A77916E8176F7F7600EEFE18 /* designmap.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -7,6 +7,7 @@
 //
 
 #include "makelefsecommand.h"
+#include "designmap.h"
 
 //**********************************************************************************************************************
 vector<string> MakeLefseCommand::setParameters(){
@@ -258,19 +259,22 @@ int MakeLefseCommand::runRelabund(map<string, consTax2>& consTax, vector<SharedR
         ofstream out;
         m->openOutputFile(outputFile, out);
 
-        GroupMap* designMap = NULL;
+        DesignMap* designMap = NULL;
         if (designfile != "") {
-            designMap = new GroupMap(designfile);
-            designMap->readDesignMap();
+            designMap = new DesignMap(designfile);
+            vector<string> categories = designMap->getNamesOfCategories();
             
-            out << "treatment\t";
-            for (int i = 0; i < lookup.size(); i++) {
-                string treatment = designMap->getGroup(lookup[i]->getGroup());
-                if (treatment == "not found") {
-                    m->mothurOut("[ERROR]: " + lookup[i]->getGroup() + " is not in your design file, please correct.\n"); 
-                }else { out << treatment << '\t'; }
+            for (int j = 0; j < categories.size(); j++) {
+                out << categories[j] << "\t";
+                for (int i = 0; i < lookup.size(); i++) {
+                    if (m->control_pressed) { out.close(); delete designMap; return 0; }
+                    string value = designMap->get(lookup[i]->getGroup(), categories[j]);
+                    if (value == "not found") {
+                        m->mothurOut("[ERROR]: " + lookup[i]->getGroup() + " is not in your design file, please correct.\n"); m->control_pressed = true;
+                    }else { out << value << '\t'; }
+                }
+                out << endl;
             }
-            out << endl;
         }
         
         out << "group\t";
