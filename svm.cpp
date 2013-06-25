@@ -5,6 +5,7 @@
 //  Created by Joshua Lynch on 6/19/2013.
 //  Copyright (c) 2013 Schloss Lab. All rights reserved.
 //
+#include <iostream>
 #include <utility>
 #include <stack>
 
@@ -25,7 +26,7 @@ MultiClassSVM::MultiClassSVM() {
 MultiClassSVM::~MultiClassSVM() {
 }
 
-SmoTrainer::SmoTrainer() {
+SmoTrainer::SmoTrainer() : C(0.0){
 }
 
 SmoTrainer::~SmoTrainer() {
@@ -34,11 +35,31 @@ SmoTrainer::~SmoTrainer() {
 //
 // OneVsOneMultiClassSvmTrainer
 //
+// An instance of OneVsOneMultiClassSvmTrainer is intended to work with a single set of data
+// to produce a single instance of MultiClassSVM.  That's why observations and labels go in to
+// the constructor.
+// the ObservationVector use here is not quite right
+OneVsOneMultiClassSvmTrainer::OneVsOneMultiClassSvmTrainer(const ObservationVector& o, const LabelVector& l) :
+    observations(o), observationLabels(l) {
+	labelSet.clear();
+	labelSet.insert(observationLabels.begin(), observationLabels.end());
+    // should maybe require a vector of label-observation pairs?
+    // insert label, observation vector pairs
+    LabelSet::iterator i;
+    for (i = labelSet.begin(); i != labelSet.end(); i++) {
+        std::cout << "creating observation vector for label " << *i << std::endl;
+        //labeledObservations.insert(make_pair(*i, ObservationVector()));
+    }
 
-OneVsOneMultiClassSvmTrainer::OneVsOneMultiClassSvmTrainer() {
 }
 
 OneVsOneMultiClassSvmTrainer::~OneVsOneMultiClassSvmTrainer() {
+    // destroy the ObservationVectors
+    LabeledObservations::iterator i;
+    for (i = labeledObservations.begin(); i != labeledObservations.end(); i++) {
+        std::cout << "deleting observation vector for label " << i->first << std::endl;
+        //delete i->second;
+    }
 }
 
 SVM* OneVsOneMultiClassSvmTrainer::train(
@@ -46,8 +67,21 @@ SVM* OneVsOneMultiClassSvmTrainer::train(
         const LabelVector& observationLabels) {
 
     // TODO: enumerate the labels, figure out how many two-class classifiers we need
+    // insert labeled observations in a map of labels to observation vectors
+    LabeledObservations labeledObservations;
+
     LabelSet labelSet;
-    getLabelSet(labelSet, observationLabels);
+    //getLabelSet(labelSet, observationLabels);
+    labelSet.clear();
+    labelSet.insert(observationLabels.begin(), observationLabels.end());
+    // fix this method name it stinks
+    //getLabeledObservations(labeledObservations, observations, observationLabels);
+    // insert label, observation vector pairs
+    //LabelSet::iterator i;
+    //for (i = labelSet.begin(); i != labelSet.end(); i++) {
+    //    Label label = *i;
+    //    labeledObservations.insert(make_pair(label, new ObservationVector()));
+    //}
     std::set<LabelPair> labelPairs;
     getLabelPairSet(labelPairs, labelSet);
 
@@ -109,9 +143,24 @@ SVM* OneVsOneMultiClassSvmTrainer::train(
     return NULL;
 }
 
-void OneVsOneMultiClassSvmTrainer::getLabelSet(LabelSet& labelSet, const LabelVector& labelVector) {
+//void OneVsOneMultiClassSvmTrainer::getLabelSet(LabelSet& labelSet, const LabelVector& labelVector) {
+//    labelSet.clear();
+//    labelSet.insert(labelVector.begin(), labelVector.end());
+//}
+
+void OneVsOneMultiClassSvmTrainer::getLabeledObservations(LabeledObservations& labeledObservations, const ObservationVector& observationVector, const LabelVector& labelVector) {
+    LabelSet labelSet;
+    //getLabelSet(labelSet, labelVector);
     labelSet.clear();
     labelSet.insert(labelVector.begin(), labelVector.end());
+
+    // the LabeledObservation map must deallocate
+    labeledObservations.clear();
+    LabelSet::iterator i;
+    for (i = labelSet.begin(); i != labelSet.end(); i++) {
+        ObservationVector* v = new ObservationVector();
+        //labeledObservations.insert(make_pair(*i, v));
+    }
 }
 
 void OneVsOneMultiClassSvmTrainer::getLabelPairSet(LabelPairSet& labelPairSet, const LabelSet& labelSet) {

@@ -16,12 +16,13 @@
 #include <vector>
 
 typedef std::vector<double> FeatureVector;
-typedef std::vector<FeatureVector> ObservationVector;
+typedef std::vector<FeatureVector*> ObservationVector;
 typedef std::string Label;
 typedef std::vector<std::string> LabelVector;
 typedef std::set<std::string> LabelSet;
 typedef std::pair<Label,Label> LabelPair;
 typedef std::set<LabelPair> LabelPairSet;
+typedef std::map<Label, ObservationVector> LabeledObservations;
 
 
 class classifier {
@@ -86,16 +87,22 @@ private:
 
 class OneVsOneMultiClassSvmTrainer {
 public:
-    OneVsOneMultiClassSvmTrainer();
+    OneVsOneMultiClassSvmTrainer(const ObservationVector& observations, const LabelVector& observationLabels);
     ~OneVsOneMultiClassSvmTrainer();
 
     // training requires splitting the data in to training and testing sets
     // for now, this class will take responsibility for splitting
     // return a pointer to MultiClassSVM
     SVM* train(const ObservationVector& observations, const LabelVector& observationLabels);
-
-    void getLabelSet(LabelSet& labelSet, const LabelVector& observationLabels);
+    const LabelSet& getLabelSet() { return labelSet; }
+    void getLabeledObservations(LabeledObservations&, const ObservationVector& observations, const LabelVector& observationLabels);
     void getLabelPairSet(LabelPairSet& labelPairSet, const LabelSet& labelSet);
+
+private:
+    const ObservationVector& observations;
+    const LabelVector& observationLabels;
+    LabelSet labelSet;
+    LabeledObservations labeledObservations;
 };
 
 #endif /* svm_hpp_ */
