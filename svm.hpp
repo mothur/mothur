@@ -9,10 +9,12 @@
 #ifndef svm_hpp_
 #define svm_hpp_
 
+#include <algorithm>
 #include <cmath>
-#include <string>
+#include <exception>
 #include <map>
 #include <set>
+#include <string>
 #include <vector>
 
 typedef std::vector<double> FeatureVector;
@@ -32,7 +34,7 @@ public:
 
 	// better to return something other than int?
 	// how to represent classes?
-	// int will work but ultimately a human-readable class representation is neeeded
+	// int will work but ultimately a human-readable class representation is needed
 	virtual int classify(double observations) = 0;
 };
 
@@ -43,13 +45,16 @@ private:
 
 
 public:
-	SVM();
-	~SVM();
+    SVM(const std::vector<double>& yy, const std::vector<double>& aa) : y(yy), a(aa) {}
+    ~SVM() {}
 
-	// stub
-	// the classify method should accept a list of observations
-	int classify(double observations) { return 0; }
-	double score(const ObservationVector& twoClassObservationVector, const LabelVector& twoClassLabelVector) { return 0.0; }
+    // stub
+    // the classify method should accept a list of observations
+    int classify(double observations) { return 0; }
+    double score(const ObservationVector& twoClassObservationVector, const LabelVector& twoClassLabelVector) { return 0.0; }
+private:
+    const std::vector<double> y;
+    const std::vector<double> a;
 };
 
 
@@ -75,13 +80,17 @@ public:
 	SmoTrainer();
 	~SmoTrainer();
 
-	double getC()       { return this->C; }
+	double getC()       { return C; }
     void setC(double C) { this->C = C; }
 
-    SVM* train(const ObservationVector& twoClassObservationVector, const LabelVector& twoClassLabelVector) {return NULL;}
+    SVM* train(const ObservationVector& twoClassObservationVector, const LabelVector& twoClassLabelVector);
+    void assignNumericLabels(std::vector<double>& y, const LabelVector& labelVector);
+    void elementwise_multiply(std::vector<double>& a, std::vector<double>& b, std::vector<double>& c) {
+        std::transform(a.begin(), a.end(), b.begin(), c.begin(), std::multiplies<double>());
+    }
 
 private:
-    double C = nan("");
+    double C = 1.0;
 };
 
 

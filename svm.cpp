@@ -6,19 +6,12 @@
 //  Copyright (c) 2013 Schloss Lab. All rights reserved.
 //
 #include <iostream>
-#include <utility>
+#include <numeric>
 #include <stack>
+#include <utility>
 
 #include "svm.hpp"
 
-SVM::SVM() {
-	// TODO Auto-generated constructor stub
-
-}
-
-SVM::~SVM() {
-	// TODO Auto-generated destructor stub
-}
 
 MultiClassSVM::MultiClassSVM() {
 }
@@ -26,11 +19,106 @@ MultiClassSVM::MultiClassSVM() {
 MultiClassSVM::~MultiClassSVM() {
 }
 
-SmoTrainer::SmoTrainer() : C(0.0){
+SmoTrainer::SmoTrainer() : C(1.0){
 }
 
 SmoTrainer::~SmoTrainer() {
 }
+
+SVM* SmoTrainer::train(const ObservationVector& twoClassObservationVector, const LabelVector& twoClassLabelVector) {
+    const int observationCount = twoClassObservationVector.size();
+    const int featureCount = twoClassObservationVector[0]->size();
+    std::cout << "observation count : " << observationCount << std::endl;
+    std::cout << "feature count     : " << featureCount << std::endl;
+    // dual coefficients
+    std::vector<double> a(featureCount, 0.0);
+    // gradient
+    std::vector<double> g(featureCount, 1.0);
+    // convert the labels to -1.0,+1.0
+    std::vector<double> y(observationCount);
+    std::cout << "assign numeric labels" << std::endl;
+    assignNumericLabels(y, twoClassLabelVector);
+    std::cout << "assign A and B" << std::endl;
+    std::vector<double> A(featureCount);
+    std::vector<double> B(featureCount);
+    for ( int n = 0; n < featureCount; n++ ) {
+        if ( y[n] == +1.0) {
+            A[n] = 0.0;
+            B[n] = C;
+        }
+        else {
+            A[n] = -C;
+            B[n] = 0;
+        }
+    }
+    std::cout << "assign K" << std::endl;
+    // this is inefficient
+    std::vector<std::vector<double> > K(observationCount, std::vector<double>(observationCount));
+    for ( int u = 0; u < observationCount; u++ ) {
+        for ( int v = 0; v < observationCount; v++ ) {
+            K[u][v] = std::inner_product(
+                twoClassObservationVector[u]->begin(),
+                twoClassObservationVector[u]->end(),
+                twoClassObservationVector[v]->begin(),
+                0.0);
+        }
+    }
+    std::cout << "train" << std::endl;
+    std::vector<double> u(3);
+    std::vector<double> yg(featureCount);
+    while ( true ) {
+        int i = 0;
+        int j = 0;
+        for ( int n = 0; n < featureCount; n++ ) {
+            yg[n] = y[n] * g[n];
+            if ( yg[n] < B[n] && yg[n] > yg[i] ) {
+                i = n;
+            }
+            if ( A[n] < yg[n] && yg[n] < yg[j] ) {
+                j = n;
+            }
+            if ( yg[i] <= yg[j] ) {
+                break;
+            }
+            u[0] = B[i] - y[i]*a[i];
+            u[1] = y[j]*a[j] - A[j];
+            u[2] = (y[i]*g[i] - y[j]*g[j]) / (K[i][i]+K[j][j]-2.0*K[i][j]);
+            double lambda = *std::min_element(u.begin(), u.end());
+            std::cout << "lambda: " << lambda << std::endl;
+            for ( int k = 0; k < featureCount; k++ ) {
+                g[k] -= lambda * y[k] * K[i][k] + lambda * y[k] * K[j][k];
+            }
+            a[i] += y[i] * lambda;
+            a[j] -= y[j] * lambda;
+        }
+    }
+
+    return new SVM(y, a);
+}
+
+// For SVM we need to assign numeric labels of -1.0 and +1.0.
+// This method populates the y vector argument with -1.0 and +1.0
+// corresponding to the two classes in the labelVector argument.
+void SmoTrainer::assignNumericLabels(std::vector<double>& y, const LabelVector& labelVector) {
+    // it would be nice if we assign -1.0 and +1.0 consistently for each pair of labels
+	// I think the set will always be traversed in sorted order so we should get this for free
+    LabelSet labelSet(labelVector.begin(), labelVector.end());
+    LabelVector uniqueLabels(labelSet.begin(), labelSet.end());
+    if (labelSet.size() != 2) {
+        // throw an exception
+        throw std::exception();
+    }
+    else {
+        // should make certain y has correct size?
+        // this loop will populate the y vector with
+        // -1.0 for uniqueLabel[0] and +1.0 for uniqueLabel[1]
+        for ( int i = 0; i < labelVector.size(); i++ ) {
+            y[i] = (labelVector[i] == uniqueLabels[0] ? -1.0 : 1.0);
+        }
+    }
+    std::cout << "returning from assign numeric labels" << std::endl;
+}
+
 
 //
 // OneVsOneMultiClassSvmTrainer
