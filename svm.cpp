@@ -31,17 +31,17 @@ SVM* SmoTrainer::train(const ObservationVector& twoClassObservationVector, const
     std::cout << "observation count : " << observationCount << std::endl;
     std::cout << "feature count     : " << featureCount << std::endl;
     // dual coefficients
-    std::vector<double> a(featureCount, 0.0);
+    std::vector<double> a(observationCount, 0.0);
     // gradient
-    std::vector<double> g(featureCount, 1.0);
+    std::vector<double> g(observationCount, 1.0);
     // convert the labels to -1.0,+1.0
     std::vector<double> y(observationCount);
     std::cout << "assign numeric labels" << std::endl;
     assignNumericLabels(y, twoClassLabelVector);
     std::cout << "assign A and B" << std::endl;
-    std::vector<double> A(featureCount);
-    std::vector<double> B(featureCount);
-    for ( int n = 0; n < featureCount; n++ ) {
+    std::vector<double> A(observationCount);
+    std::vector<double> B(observationCount);
+    for ( int n = 0; n < observationCount; n++ ) {
         if ( y[n] == +1.0) {
             A[n] = 0.0;
             B[n] = C;
@@ -65,32 +65,39 @@ SVM* SmoTrainer::train(const ObservationVector& twoClassObservationVector, const
     }
     std::cout << "train" << std::endl;
     std::vector<double> u(3);
-    std::vector<double> yg(featureCount);
+    std::vector<double> ya(observationCount);
+    std::vector<double> yg(observationCount);
     while ( true ) {
         int i = 0;
         int j = 0;
-        for ( int n = 0; n < featureCount; n++ ) {
+        for ( int n = 0; n < observationCount; n++ ) {
+            ya[n] = y[n] * a[n];
             yg[n] = y[n] * g[n];
-            if ( yg[n] < B[n] && yg[n] > yg[i] ) {
+            if ( ya[n] < B[n] && yg[n] > yg[i] ) {
                 i = n;
             }
-            if ( A[n] < yg[n] && yg[n] < yg[j] ) {
+            if ( A[n] < ya[n] && yg[n] < yg[j] ) {
                 j = n;
             }
-            if ( yg[i] <= yg[j] ) {
-                break;
-            }
-            u[0] = B[i] - y[i]*a[i];
-            u[1] = y[j]*a[j] - A[j];
-            u[2] = (y[i]*g[i] - y[j]*g[j]) / (K[i][i]+K[j][j]-2.0*K[i][j]);
-            double lambda = *std::min_element(u.begin(), u.end());
-            std::cout << "lambda: " << lambda << std::endl;
-            for ( int k = 0; k < featureCount; k++ ) {
-                g[k] -= lambda * y[k] * K[i][k] + lambda * y[k] * K[j][k];
-            }
-            a[i] += y[i] * lambda;
-            a[j] -= y[j] * lambda;
         }
+        // maximum violating pair is i,j
+        std::cout << "stopping criterion:" << std::endl;
+        std::cout << "i = " << i << " yg[i] = " << yg[i] << std::endl;
+        std::cout << "j = " << j << " yg[j] = " << yg[j] << std::endl;
+
+        if ( yg[i] <= yg[j] ) {
+            break;
+        }
+        u[0] = B[i] - y[i]*a[i];
+        u[1] = y[j]*a[j] - A[j];
+        u[2] = (y[i]*g[i] - y[j]*g[j]) / (K[i][i]+K[j][j]-2.0*K[i][j]);
+        double lambda = *std::min_element(u.begin(), u.end());
+        std::cout << "lambda: " << lambda << std::endl;
+        for ( int k = 0; k < featureCount; k++ ) {
+            g[k] -= lambda * y[k] * K[i][k] + lambda * y[k] * K[j][k];
+        }
+        a[i] += y[i] * lambda;
+        a[j] -= y[j] * lambda;
     }
 
     return new SVM(y, a);
