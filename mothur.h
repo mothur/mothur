@@ -173,6 +173,15 @@ struct seqPriorityNode {
 	seqPriorityNode(int n, string s, string nm) : numIdentical(n), seq(s), name(nm) {}
 	~seqPriorityNode() {}
 };
+/************************************************************/
+struct compGroup {
+	string group1;
+	string group2;
+	compGroup() {}
+	compGroup(string s, string nm) : group1(s), group2(nm) {}
+    string getCombo() { return group1+"-"+group2; }
+	~compGroup() {}
+};
 /***************************************************************/
 struct spearmanRank {
 	string name;
@@ -209,7 +218,15 @@ inline bool compareDistLinePairs(distlinePair left, distlinePair right){
 //sorts lowest to highest
 inline bool compareSequenceDistance(seqDist left, seqDist right){
 	return (left.dist < right.dist);	
-} 
+}
+//********************************************************************************************************************
+//returns sign of double
+inline double sign(double temp){
+	//find sign
+    if (temp > 0)       { return 1.0;   }
+    else if (temp < 0)  { return -1.0;  }
+    return 0;
+}
 /***********************************************************************/
 
 // snagged from http://www.parashift.com/c++-faq-lite/misc-technical-issues.html#faq-39.2

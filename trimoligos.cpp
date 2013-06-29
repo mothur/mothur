@@ -855,6 +855,8 @@ int TrimOligos::stripPairedBarcode(Sequence& seq, QualityScores& qual, int& grou
                 break;
             }
             
+            if (rawSeq.length() < (foligo.length() + roligo.length())) {  success = pdiffs + 10; break; }
+            
             if((compareDNASeq(foligo, rawSeq.substr(0,foligo.length()))) && (compareDNASeq(roligo, rawSeq.substr(rawSeq.length()-roligo.length(),roligo.length())))) {
                 group = it->first;
                 string trimmedSeq = rawSeq.substr(foligo.length()); //trim forward barcode
@@ -1077,6 +1079,8 @@ int TrimOligos::stripPairedPrimers(Sequence& seq, QualityScores& qual, int& grou
                 success = pdiffs + 10;	//if the sequence is shorter than the barcode then bail out
                 break;
             }
+            
+            if (rawSeq.length() < (foligo.length() + roligo.length())) {  success = pdiffs + 10; break; }
             
             if((compareDNASeq(foligo, rawSeq.substr(0,foligo.length()))) && (compareDNASeq(roligo, rawSeq.substr(rawSeq.length()-roligo.length(),roligo.length())))) {
                 group = it->first;

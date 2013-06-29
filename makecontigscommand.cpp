@@ -1541,6 +1541,7 @@ vector< vector<string> > MakeContigsCommand::readFileNames(string filename){
             }
             m->gobble(in);
             
+            if (m->debug) { m->mothurOut("[DEBUG]: group = " + group + ", forward = " + forward + ", reverse = " + reverse + ".\n"); }
             
             //check to make sure both are able to be opened
             ifstream in2;

@@ -10,8 +10,7 @@
 
 #include "command.hpp"
 #include "inputdata.h"
-#include "sharedrabundvector.h"
-
+#include "designmap.h"
 
 class KruskalWallisCommand : public Command {
    
@@ -22,11 +21,11 @@ public:
 	~KruskalWallisCommand(){}
 	
 	vector<string> setParameters();
-	string getCommandName()			{ return "kruskalwallis";			}
+	string getCommandName()			{ return "kruskal.wallis";			}
 	string getCommandCategory()		{ return "Hypothesis Testing";	}
     string getOutputPattern(string);	
 	string getHelpString();	
-	string getCitation() { return "http://www.mothur.org/wiki/kruskalwallis"; }
+	string getCitation() { return "http://www.mothur.org/wiki/Kruskal.wallis"; }
 	string getDescription()		{ return "Non-parametric method for testing whether samples originate from the same distribution."; }
     
     struct groupRank {
@@ -42,22 +41,12 @@ public:
     
     
 private:
-    string outputDir, sharedfile, groups;
-    bool abort;
+    bool abort, allLines;
+    string outputDir, sharedfile, designfile, mclass, classes;
+    vector<string> outputNames;
     set<string> labels;
-    vector<string> outputNames, Groups;
-    vector<int> counts;
-    vector<double> rankSums;
-    vector<double> rankMeans;
     
-  
-        
-    static bool comparevalue(const groupRank &a, const groupRank &b) { return a.value < b.value; }
-    static bool equalvalue(const groupRank &a, const groupRank &b) { return a.value == b.value; }
-    static bool comparerank(const groupRank &a, const groupRank &b) { return a.rank < b.rank; }
-    static bool equalrank(const groupRank &a, const groupRank &b) { return a.rank == b.rank; }
-    static bool equalgroup(const groupRank &a, const groupRank &b) { return a.group == b.group; }
-    
+    int process(vector<SharedRAbundVector*>&, DesignMap&);    
 };
 
 #endif	/* KRUSKALWALLISCOMMAND_H */

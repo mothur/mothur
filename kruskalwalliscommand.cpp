@@ -6,14 +6,19 @@
  */
 
 #include "kruskalwalliscommand.h"
+#include "linearalgebra.h"
 
 //**********************************************************************************************************************
-vector<string> KruskalWallisCommand::setParameters(){	
+vector<string> KruskalWallisCommand::setParameters(){
 	try {
+        CommandParameter pdesign("design", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(pdesign);
+        CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none","summary",false,true,true); parameters.push_back(pshared);
+        CommandParameter pclass("class", "String", "", "", "", "", "","",false,false); parameters.push_back(pclass);
+		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
+		CommandParameter pclasses("classes", "String", "", "", "", "", "","",false,false); parameters.push_back(pclasses);
+        //every command must have inputdir and outputdir.  This allows mothur users to redirect input and output files.
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
-        CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false,true); parameters.push_back(pgroups);
-        CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none","summary",false,true,true); parameters.push_back(pshared);	
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -25,12 +30,16 @@ vector<string> KruskalWallisCommand::setParameters(){
 	}
 }
 //**********************************************************************************************************************
-string KruskalWallisCommand::getHelpString(){	
+string KruskalWallisCommand::getHelpString(){
 	try {
 		string helpString = "";
-		helpString += "The kruskalwallis command parameter options are \n";
-        helpString += "Kruskal–Wallis one-way analysis of variance is a non-parametric method for testing whether samples originate from the same distribution.";
-		return helpString;
+		helpString += "The kruskal.wallis command allows you to ....\n";
+		helpString += "The kruskal.wallis command parameters are: shared, design, class,  label and classes.\n";
+		helpString += "The class parameter is used to indicate the which category you would like used for the Kruskal Wallis analysis. If none is provided first category is used.\n";
+        helpString += "The classes parameter is used to indicate the classes you would like to use. Clases should be inputted in the following format: classes=label<value1|value2|value3>-label<value1|value2>. For example to include groups from treatment with value early or late and age= young or old.  class=treatment<Early|Late>-age<young|old>.\n";
+        helpString += "The label parameter is used to indicate which distances in the shared file you would like to use. labels are separated by dashes.\n";
+		helpString += "The kruskal.wallis command should be in the following format: kruskal.wallis(shared=final.an.shared, design=final.design, class=treatment).\n";
+        return helpString;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "KruskalWallisCommand", "getHelpString");
@@ -42,7 +51,7 @@ string KruskalWallisCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
         
-        if (type == "summary") {  pattern = "[filename],cooccurence.summary"; } 
+        if (type == "kruskall-wallis") {  pattern = "[filename],[distance],kruskall_wallis"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
         
         return pattern;
@@ -53,13 +62,12 @@ string KruskalWallisCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-KruskalWallisCommand::KruskalWallisCommand(){	
+KruskalWallisCommand::KruskalWallisCommand(){
 	try {
-		abort = true; calledHelp = true; 
+		abort = true; calledHelp = true;
 		setParameters();
         vector<string> tempOutNames;
-		outputTypes["summary"] = tempOutNames;
-
+        outputTypes["kruskall-wallis"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "KruskalWallisCommand", "KruskalWallisCommand");
@@ -67,68 +75,95 @@ KruskalWallisCommand::KruskalWallisCommand(){
 	}
 }
 //**********************************************************************************************************************
-KruskalWallisCommand::KruskalWallisCommand(string option) {
+KruskalWallisCommand::KruskalWallisCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
-				
+		abort = false; calledHelp = false;
+        allLines = 1;
+		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
 		
 		else {
+			//valid paramters for this command
 			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
-			map<string,string>::iterator it;
 			
 			ValidParameters validParameter;
-			
+			map<string,string>::iterator it;
 			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
+			for (it = parameters.begin(); it != parameters.end(); it++) {
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			vector<string> tempOutNames;
+            outputTypes["kruskall-wallis"] = tempOutNames;
             
-            //get shared file
-			sharedfile = validParameter.validFile(parameters, "shared", true);
-			if (sharedfile == "not open") { sharedfile = ""; abort = true; }	
-			else if (sharedfile == "not found") { 
-				//if there is a current shared file, use it
-				sharedfile = m->getSharedFile(); 
-				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { m->setSharedFile(sharedfile); }
-            
-            //if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(sharedfile);		}
-                    
-            groups = validParameter.validFile(parameters, "groups", false);   
-            if (groups == "not found") { groups = "";   }
-            else { 
-            m->splitAtDash(groups, Groups); 
-            }   
-            m->setGroups(Groups);
-				
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			//if the user changes the input directory command factory will send this info to us in the output parameter
+			string inputDir = validParameter.validFile(parameters, "inputdir", false);
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
-				string path;
-				it = parameters.find("shared");
+                
+                string path;
+				it = parameters.find("design");
 				//user has given a template file
-				if(it != parameters.end()){ 
+				if(it != parameters.end()){
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["desing"] = inputDir + it->second;		}
+				}
+				
+                it = parameters.find("shared");
+				//user has given a template file
+				if(it != parameters.end()){
 					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
+            }
+            
+            //get shared file, it is required
+			sharedfile = validParameter.validFile(parameters, "shared", true);
+			if (sharedfile == "not open") { sharedfile = ""; abort = true; }
+			else if (sharedfile == "not found") {
+				//if there is a current shared file, use it
+				sharedfile = m->getSharedFile();
+				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}else { m->setSharedFile(sharedfile); }
+            
+            //get shared file, it is required
+			designfile = validParameter.validFile(parameters, "design", true);
+			if (designfile == "not open") { designfile = ""; abort = true; }
+			else if (designfile == "not found") {
+				//if there is a current shared file, use it
+				designfile = m->getDesignFile();
+				if (designfile != "") { m->mothurOut("Using " + designfile + " as input file for the design parameter."); m->mothurOutEndLine(); }
+				else { 	m->mothurOut("You have no current design file and the design parameter is required."); m->mothurOutEndLine(); abort = true; }
+			}else { m->setDesignFile(designfile); }
+            
+            //if the user changes the output directory command factory will send this info to us in the output parameter
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){
+				outputDir = m->hasPath(sharedfile); //if user entered a file with a path then preserve it
 			}
-		
-            vector<string> tempOutNames;
-            outputTypes["summary"] = tempOutNames;
-
-
+            
+            string label = validParameter.validFile(parameters, "label", false);
+			if (label == "not found") { label = ""; }
+			else {
+				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
+				else { allLines = 1;  }
+			}
+            
+            mclass = validParameter.validFile(parameters, "class", false);
+			if (mclass == "not found") { mclass = ""; }
+            
+            classes = validParameter.validFile(parameters, "classes", false);
+			if (classes == "not found") { classes = ""; }
+            
 		}
-
+		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "KruskalWallisCommand", "KruskalWallisCommand");
@@ -136,128 +171,165 @@ KruskalWallisCommand::KruskalWallisCommand(string option) {
 	}
 }
 //**********************************************************************************************************************
+
 int KruskalWallisCommand::execute(){
 	try {
+		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
         
-        InputData* input = new InputData(sharedfile, "sharedfile");
-        vector<SharedRAbundVector*> lookup = input->getSharedRAbundVectors();
-		string lastLabel = lookup[0]->getLabel();
-        
-	
-		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-		set<string> processedLabels;
-		set<string> userLabels = labels;
-
-        ofstream out;
-        map<string,string> variables;
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
-		string outputFileName = getOutputFileName("summary",variables);
-        m->openOutputFile(outputFileName, out);
-        outputNames.push_back(outputFileName);  outputTypes["summary"].push_back(outputFileName);
-        out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
-        out << "H\tpvalue\n";
-        
-        //math goes here
-        
-        int N = m->getNumGroups();
-        double H;
-        double tmp = 0.0;
-        vector<groupRank> vec;
-        vector<string> groups = m->getGroups();
-        string group;
-        int count;
-        double sum;
-                
-        //merge all groups into a vector
-        
-        
-        
-        //rank function here
-        assignRank(vec);
-        
-        //populate counts and ranSums vectors
-        for (int i=0;i<N;i++) {
-            count = 0;
-            sum = 0;
-            group = groups[i];
-            for(int j;j<vec.size();j++) {
-                if (vec[j].group == group) {
-                    count++;
-                    sum = sum + vec[j].rank;
-                }
-            }
-            counts[i] = count;
-            rankSums[i] = sum;
+        DesignMap designMap(designfile);
+        //if user set classes set groups=those classes
+        if (classes != "") {
+            map<string, vector<string> > thisClasses = m->parseClasses(classes);
+            vector<string> groups = designMap.getNamesUnique(thisClasses);
+            if (groups.size() != 0) { m->setGroups(groups); }
+            else { m->mothurOut("[ERROR]: no groups meet your classes requirement, quitting.\n"); return 0; }
         }
         
-        //test statistic
-        for (int i=0;i<N;i++) { tmp = tmp + (pow(rankSums[i],2) / counts[i]); }
+        //if user did not select class use first column
+        if (mclass == "") {  mclass = designMap.getDefaultClass(); m->mothurOut("\nYou did not provide a class, using " + mclass +".\n\n"); }
         
-        H = (12 / (N*(N+1))) * tmp - (3*(N+1));
+        InputData input(sharedfile, "sharedfile");
+        vector<SharedRAbundVector*> lookup = input.getSharedRAbundVectors();
+        string lastLabel = lookup[0]->getLabel();
         
-        //ss = tmp - pow(accumulate(rankSums.begin(), rankSums.end(), 0), 2);
+        //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
+        set<string> processedLabels;
+        set<string> userLabels = labels;
         
-        //H = ss / ( (N * (N + 1))/12 );
         
-        //correction for ties?
+        //as long as you are not at the end of the file or done wih the lines you want
+        while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+            
+            if (m->control_pressed) { for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  return 0; }
+            
+            if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){
+                
+                m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+                
+                process(lookup, designMap);
+                
+                processedLabels.insert(lookup[0]->getLabel());
+                userLabels.erase(lookup[0]->getLabel());
+            }
+            
+            if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+                string saveLabel = lookup[0]->getLabel();
+                
+                for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+                lookup = input.getSharedRAbundVectors(lastLabel);
+                m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+                
+                process(lookup, designMap);
+                
+                processedLabels.insert(lookup[0]->getLabel());
+                userLabels.erase(lookup[0]->getLabel());
+                
+                //restore real lastlabel to save below
+                lookup[0]->setLabel(saveLabel);
+            }
+            
+            lastLabel = lookup[0]->getLabel();
+            //prevent memory leak
+            for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
+            
+            if (m->control_pressed) { return 0; }
+            
+            //get next line to process
+            lookup = input.getSharedRAbundVectors();
+        }
         
-        //p-value calculation
+        if (m->control_pressed) {  return 0; }
         
-		return 0;
-	}
+        //output error messages about any remaining user labels
+        set<string>::iterator it;
+        bool needToRun = false;
+        for (it = userLabels.begin(); it != userLabels.end(); it++) {
+            m->mothurOut("Your file does not include the label " + *it);
+            if (processedLabels.count(lastLabel) != 1) {
+                m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
+                needToRun = true;
+            }else {
+                m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
+            }
+        }
+        
+        //run last label if you need to
+        if (needToRun == true)  {
+            for (int i = 0; i < lookup.size(); i++) { if (lookup[i] != NULL) { delete lookup[i]; } }
+            lookup = input.getSharedRAbundVectors(lastLabel);
+            
+            m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+            process(lookup, designMap);
+            
+            for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+        }
+        
+		
+        //output files created by command
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+		m->mothurOutEndLine();
+        return 0;
+		
+    }
 	catch(exception& e) {
 		m->errorOut(e, "KruskalWallisCommand", "execute");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-void KruskalWallisCommand::assignRank(vector<groupRank> &vec) {
-    try {
-        double rank = 1;
-        double numRanks, avgRank, j;
-        vector<groupRank>::iterator it, oldit;
 
-        sort (vec.begin(), vec.end(), comparevalue);
-
-        it = vec.begin();
-
-        while ( it != vec.end() ) {
-            j = rank;
-            oldit = it;
-            if (!equalvalue(*it, *(it+1))) {
-                (*it).rank = rank; 
-                rank = rank+1; 
-                it++; }
-            else {
-                while(equalrank(*it, *(it+1))) {
-                    j = j + (j+1);
-                    rank++;
-                    it++;
-                }
-                numRanks = double (distance(oldit, it));
-                avgRank = j / numRanks;
-                while(oldit != it) {
-                    (*oldit).rank = avgRank;
-                    oldit++;
-                }
-            }
-
-        }
+int KruskalWallisCommand::process(vector<SharedRAbundVector*>& lookup, DesignMap& designMap) {
+	try {
+        map<string, string> variables;
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
+        variables["[distance]"] = lookup[0]->getLabel();
+		string outputFileName = getOutputFileName("kruskall-wallis",variables);
         
-
+		ofstream out;
+		m->openOutputFile(outputFileName, out);
+		outputNames.push_back(outputFileName); outputTypes["kruskall-wallis"].push_back(outputFileName);
+        out << "OTULabel\tKW\tPvalue\n";
+        
+        int numBins = lookup[0]->getNumBins();
+        //sanity check to make sure each treatment has a group in the shared file
+        set<string> treatments;
+        for (int j = 0; j < lookup.size(); j++) {
+            string group = lookup[j]->getGroup();
+            string treatment = designMap.get(group, mclass); //get value for this group in this category
+            treatments.insert(treatment);
+        }
+        if (treatments.size() < 2) { m->mothurOut("[ERROR]: need at least 2 things to classes to compare, quitting.\n"); m->control_pressed = true; }
+        
+        LinearAlgebra linear;
+        for (int i = 0; i < numBins; i++) {
+            if (m->control_pressed) { break; }
+            
+            vector<spearmanRank> values;
+            for (int j = 0; j < lookup.size(); j++) {
+                string group = lookup[j]->getGroup();
+                string treatment = designMap.get(group, mclass); //get value for this group in this category
+                spearmanRank temp(treatment, lookup[j]->getAbundance(i));
+                values.push_back(temp);
+            }
+            
+            double pValue = 0.0;
+            double H = linear.calcKruskalWallis(values, pValue);
+            
+            //output H and signifigance
+            out << m->currentBinLabels[i] << '\t' << H << '\t' << pValue << endl;
+        }
+        out.close();
+                
+        return 0;
     }
-    catch(exception& e) {
-		m->errorOut(e, "KruskalWallisCommand", "getRank");
+	catch(exception& e) {
+		m->errorOut(e, "KruskalWallisCommand", "process");
 		exit(1);
 	}
-    
 }
 //**********************************************************************************************************************
-void KruskalWallisCommand::assignValue(vector<groupRank> &vec) {
-    
-}
-//**********************************************************************************************************************
-//**********************************************************************************************************************
-//**********************************************************************************************************************
+
 

@@ -796,6 +796,39 @@ bool MothurOut::dirCheck(string& dirName){
 	}	
     
 }
+//**********************************************************************************************************************
+
+map<string, vector<string> > MothurOut::parseClasses(string classes){
+	try {
+        map<string, vector<string> > parts;
+        
+        //treatment<Early|Late>-age<young|old>
+        vector<string> pieces; splitAtDash(classes, pieces); // -> treatment<Early|Late>, age<young|old>
+        
+        for (int i = 0; i < pieces.size(); i++) {
+            string category = ""; string value = "";
+            bool foundOpen = false;
+            for (int j = 0; j < pieces[i].length(); j++) {
+                if (control_pressed) { return parts; }
+                
+                if (pieces[i][j] == '<')        { foundOpen = true;         }
+                else if (pieces[i][j] == '>')   { j += pieces[i].length();  }
+                else {
+                    if (!foundOpen) { category += pieces[i][j]; }
+                    else { value += pieces[i][j]; }
+                }
+            }
+            vector<string> values; splitAtChar(value, values, '|');
+            parts[category] = values;
+        }
+        
+        return parts;
+    }
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "parseClasses");
+		exit(1);
+	}
+}
 /***********************************************************************/
 
 string MothurOut::hasPath(string longName){

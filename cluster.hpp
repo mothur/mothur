@@ -1,7 +1,7 @@
 #ifndef CLUSTER_H
 #define CLUSTER_H
 
-
+//test change
 
 #include "mothur.h"
 #include "sparsedistancematrix.h"
