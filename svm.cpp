@@ -25,6 +25,37 @@ SmoTrainer::SmoTrainer() : C(1.0){
 SmoTrainer::~SmoTrainer() {
 }
 
+//  The train method implements Sequential Minimal Optimization as described in
+//  "Support Vector Machine Solvers" by Bottou and Lin.
+//
+//  Here is a helpful example showing the details of this implementation.
+//  Consider a dataset of 4 observations, each having 2 features:
+//    observation  feature 1  feature 2  label    y (class)
+//      1            0.0        0.0        blue     -1.0
+//      2            1.0        0.0        green    +1.0
+//      3            0.0        1.0        blue     -1.0
+//      4            1.0        1.0        green    +1.0
+//
+//  The dual coefficients a and the gradient g are initially:
+//    a = (0.0. 0.0, 0.0, 0.0)
+//    g = (1.0, 1.0, 1.0, 1.0)
+//  The box constraint vectors A and B are:
+//    A = (-1.0, 0.0, -1.0, 0.0)
+//    B = ( 0.0, 1.0,  0.0, 1.0)
+//  The (linear) kernel matrix:
+//      1 2 3 4
+//    1 0 0 0 0
+//    2 0 4 0 4
+//    3 0 0 1 1
+//    4 0 4 1 5
+//
+//  First time through the loop:
+//        A    B    y    a    g    ya   yg   ya<B yg[n]>yg[i] i
+//    1  -1.0  0.0 -1.0  0.0  1.0  0.0 -1.0   f        f      0
+//    2   0.0  1.0 +1.0  0.0  1.0  0.0  1.0   t        t      1
+//    3  -1.0  0.0 -1.0  0.0  1.0  0.0 -1.0   f        f      1
+//    4   0.0  1.0 +1.0  0.0  1.0  0.0  1.0   t        f      1
+
 SVM* SmoTrainer::train(const ObservationVector& twoClassObservationVector, const LabelVector& twoClassLabelVector) {
     const int observationCount = twoClassObservationVector.size();
     const int featureCount = twoClassObservationVector[0]->size();
@@ -50,9 +81,10 @@ SVM* SmoTrainer::train(const ObservationVector& twoClassObservationVector, const
             A[n] = -C;
             B[n] = 0;
         }
+        std::cout << n << " " << A[n] << " " << B[n] << std::endl;
     }
     std::cout << "assign K" << std::endl;
-    // this is inefficient
+    // this is inefficient in general
     std::vector<std::vector<double> > K(observationCount, std::vector<double>(observationCount));
     for ( int u = 0; u < observationCount; u++ ) {
         for ( int v = 0; v < observationCount; v++ ) {
@@ -61,6 +93,7 @@ SVM* SmoTrainer::train(const ObservationVector& twoClassObservationVector, const
                 twoClassObservationVector[u]->end(),
                 twoClassObservationVector[v]->begin(),
                 0.0);
+            std::cout << "u = " << u << " v = " << v << " K = " << K[u][v] << std::endl;
         }
     }
     std::cout << "train" << std::endl;
@@ -79,18 +112,19 @@ SVM* SmoTrainer::train(const ObservationVector& twoClassObservationVector, const
             if ( A[n] < ya[n] && yg[n] < yg[j] ) {
                 j = n;
             }
+            std::cout << "n = " << n << std::endl;
+            std::cout << "i = " << i << " yg[i] = " << yg[i] << std::endl;
+            std::cout << "j = " << j << " yg[j] = " << yg[j] << std::endl;
         }
         // maximum violating pair is i,j
-        std::cout << "stopping criterion:" << std::endl;
-        std::cout << "i = " << i << " yg[i] = " << yg[i] << std::endl;
-        std::cout << "j = " << j << " yg[j] = " << yg[j] << std::endl;
+        //std::cout << "stopping criterion:" << std::endl;
 
         if ( yg[i] <= yg[j] ) {
             break;
         }
-        u[0] = B[i] - y[i]*a[i];
-        u[1] = y[j]*a[j] - A[j];
-        u[2] = (y[i]*g[i] - y[j]*g[j]) / (K[i][i]+K[j][j]-2.0*K[i][j]);
+        u[0] = B[i] - ya[i];
+        u[1] = ya[j] - A[j];
+        u[2] = (yg[i] - yg[j]) / (K[i][i]+K[j][j]-2.0*K[i][j]);
         double lambda = *std::min_element(u.begin(), u.end());
         std::cout << "lambda: " << lambda << std::endl;
         for ( int k = 0; k < featureCount; k++ ) {
