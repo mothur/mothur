@@ -29,32 +29,36 @@ typedef std::map<Label, ObservationVector> LabeledObservations;
 
 class classifier {
 public:
-	classifier() {}
-	virtual ~classifier() {}
+    classifier() {}
+    virtual ~classifier() {}
 
-	// better to return something other than int?
-	// how to represent classes?
-	// int will work but ultimately a human-readable class representation is needed
-	virtual int classify(double observations) = 0;
+    virtual const Label& classify(const FeatureVector& observation) = 0;
+    static const Label empty;
 };
 
+// The SVM class implements the Support Vector Machine
+// discriminant function.  Instances are constructed with
+// a vector of class labels (+1 or -1), a vector of dual
+// coefficients, a vector of observations, and a bias value.
+//
+// The class SmoTrainer is responsible for determining the dual
+// coefficients and bias value.
+//
 class SVM : public classifier {
-private:
-	// need a set of weights
-	// need dual coefficients??
-
-
 public:
-    SVM(const std::vector<double>& yy, const std::vector<double>& aa) : y(yy), a(aa) {}
+    SVM(const std::vector<double>& yy, const std::vector<double>& aa, const ObservationVector& oo, double bb) :
+        y(yy), a(aa), x(oo), b(bb) {}
     ~SVM() {}
 
-    // stub
     // the classify method should accept a list of observations
-    int classify(double observations) { return 0; }
+    int discriminant(const FeatureVector& observation);
+    const Label& classify(const FeatureVector& observation) { return std::string(""); }
     double score(const ObservationVector& twoClassObservationVector, const LabelVector& twoClassLabelVector) { return 0.0; }
 private:
     const std::vector<double> y;
     const std::vector<double> a;
+    const ObservationVector& x;
+    const double b;
 };
 
 
@@ -68,9 +72,7 @@ public:
 
 	// stub
 	// the classify method should accept a list of observations
-	void classify(const std::vector<double> observation, int& classification) {}
-
-	void classify(const std::vector<std::vector<double> > observations, std::vector<int> classifications) {}
+	const Label& classify(const FeatureVector& observation) { return empty; }
 };
 
 

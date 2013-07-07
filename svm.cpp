@@ -6,12 +6,26 @@
 //  Copyright (c) 2013 Schloss Lab. All rights reserved.
 //
 #include <iostream>
+#include <limits>
 #include <numeric>
 #include <stack>
 #include <utility>
 
 #include "svm.hpp"
 
+// the classify method should return a class label
+const Label classifier::empty("empty");
+
+// the discriminant function returns +1 or -1
+int SVM::discriminant(const FeatureVector& observation) {
+    // d is the discriminant function
+    double d = b;
+    for ( int i = 0; i < y.size(); i++ ) {
+        d += y[i]*a[i]*std::inner_product(observation.begin(), observation.end(), x[i]->begin(), 0.0);
+    }
+    std::cout << "d = " << d << std::endl;
+    return d > 0.0 ? 1 : -1;
+}
 
 MultiClassSVM::MultiClassSVM() {
 }
@@ -32,9 +46,9 @@ SmoTrainer::~SmoTrainer() {
 //  Consider a dataset of 4 observations, each having 2 features:
 //    observation  feature 1  feature 2  label    y (class)
 //      1            0.0        0.0        blue     -1.0
-//      2            1.0        0.0        green    +1.0
+//      2            2.0        0.0        green    +1.0
 //      3            0.0        1.0        blue     -1.0
-//      4            1.0        1.0        green    +1.0
+//      4            2.0        1.0        green    +1.0
 //
 //  The dual coefficients a and the gradient g are initially:
 //    a = (0.0. 0.0, 0.0, 0.0)
@@ -50,11 +64,11 @@ SmoTrainer::~SmoTrainer() {
 //    4 0 4 1 5
 //
 //  First time through the loop:
-//        A    B    y    a    g    ya   yg   ya<B yg[n]>yg[i] i
-//    1  -1.0  0.0 -1.0  0.0  1.0  0.0 -1.0   f        f      0
-//    2   0.0  1.0 +1.0  0.0  1.0  0.0  1.0   t        t      1
-//    3  -1.0  0.0 -1.0  0.0  1.0  0.0 -1.0   f        f      1
-//    4   0.0  1.0 +1.0  0.0  1.0  0.0  1.0   t        f      1
+//    n   A    B    y    a    g    ya   yg   ya<B  i  yg[n]>yg[i] A<ya yg[n]<yg[j] i
+//    1  -1.0  0.0 -1.0  0.0  1.0  0.0 -1.0    f   0       f       t        f 0
+//    2   0.0  1.0 +1.0  0.0  1.0  0.0  1.0    t       t       f   1
+//    3  -1.0  0.0 -1.0  0.0  1.0  0.0 -1.0    f       f       t   1
+//    4   0.0  1.0 +1.0  0.0  1.0  0.0  1.0    t       f       f   1
 
 SVM* SmoTrainer::train(const ObservationVector& twoClassObservationVector, const LabelVector& twoClassLabelVector) {
     const int observationCount = twoClassObservationVector.size();
@@ -93,48 +107,105 @@ SVM* SmoTrainer::train(const ObservationVector& twoClassObservationVector, const
                 twoClassObservationVector[u]->end(),
                 twoClassObservationVector[v]->begin(),
                 0.0);
-            std::cout << "u = " << u << " v = " << v << " K = " << K[u][v] << std::endl;
+            //std::cout << "u = " << u << " v = " << v << " K = " << K[u][v] << std::endl;
+            std::cout << " " << K[u][v];
         }
+        std::cout << std::endl;
     }
+    int m = 0;
     std::cout << "train" << std::endl;
     std::vector<double> u(3);
     std::vector<double> ya(observationCount);
     std::vector<double> yg(observationCount);
     while ( true ) {
+        m++;
         int i = 0;
         int j = 0;
-        for ( int n = 0; n < observationCount; n++ ) {
-            ya[n] = y[n] * a[n];
-            yg[n] = y[n] * g[n];
-            if ( ya[n] < B[n] && yg[n] > yg[i] ) {
-                i = n;
+        double yg_max = std::numeric_limits<double>::min();
+        double yg_min = std::numeric_limits<double>::max();
+        std::cout << "m = " << m << std::endl;
+        for ( int k = 0; k < observationCount; k++ ) {
+            ya[k] = y[k] * a[k];
+            yg[k] = y[k] * g[k];
+        }
+        std::cout << "yg =";
+        for ( int k = 0; k < observationCount; k++ ) {
+            //std::cout << A[k] << " " << B[k] << " " << y[k] << " " << a[k] << " " << g[k] << " " << ya[k] << " " << yg[k] << std::endl;
+            std::cout << " " << yg[k];
+        }
+        std::cout << std::endl;
+
+        for ( int k = 0; k < observationCount; k++ ) {
+            //ya[k] = y[k] * a[k];
+            //yg[k] = y[k] * g[k];
+            if ( ya[k] < B[k] && yg[k] > yg_max ) {
+                yg_max = yg[k];
+                i = k;
             }
-            if ( A[n] < ya[n] && yg[n] < yg[j] ) {
-                j = n;
+            if ( A[k] < ya[k] && yg[k] < yg_min ) {
+                yg_min = yg[k];
+                j = k;
             }
-            std::cout << "n = " << n << std::endl;
-            std::cout << "i = " << i << " yg[i] = " << yg[i] << std::endl;
-            std::cout << "j = " << j << " yg[j] = " << yg[j] << std::endl;
+            //std::cout << "n = " << n << std::endl;
+            //std::cout << ya[k] << " " << yg[k] << std::endl;
+            //std::cout << "j = " << j << " yg[j] = " << yg[j] << std::endl;
         }
         // maximum violating pair is i,j
+        std::cout << "maximal violating pair:" << std::endl;
+        std::cout << "  i = " << i << " ";
+        for ( int feature = 0; feature < featureCount; feature++ ) {
+            std::cout << twoClassObservationVector[i]->at(feature) << " ";
+        };
+        std::cout << std::endl;
+        std::cout << "  j = " << j << " ";
+        for ( int feature = 0; feature < featureCount; feature++ ) {
+            std::cout << twoClassObservationVector[j]->at(feature) << " ";
+        };
+        std::cout << std::endl;
         //std::cout << "stopping criterion:" << std::endl;
+
+        //if ( m > 10) {
+        //    break;
+        //}
 
         if ( yg[i] <= yg[j] ) {
             break;
         }
         u[0] = B[i] - ya[i];
         u[1] = ya[j] - A[j];
+        //std::cout << "(" << yg[i] << " - " << yg[j] << ") / (" << K[i][i] << " + " << K[j][j] << " - 2.0 * " << K[i][j] << ")" << std::endl;
         u[2] = (yg[i] - yg[j]) / (K[i][i]+K[j][j]-2.0*K[i][j]);
+        std::cout << "directions: (" << u[0] << "," << u[1] << "," << u[2] << ")" << std::endl;
         double lambda = *std::min_element(u.begin(), u.end());
         std::cout << "lambda: " << lambda << std::endl;
-        for ( int k = 0; k < featureCount; k++ ) {
-            g[k] -= lambda * y[k] * K[i][k] + lambda * y[k] * K[j][k];
+        for ( int k = 0; k < observationCount; k++ ) {
+            g[k] += (-lambda * y[k] * K[i][k] + lambda * y[k] * K[j][k]);
         }
         a[i] += y[i] * lambda;
         a[j] -= y[j] * lambda;
     }
 
-    return new SVM(y, a);
+
+    // at this point the optimal a's have been found
+    // now use them to find w and b
+    std::vector<double> w(twoClassObservationVector[0]->size(), 0.0);
+    double b = 0.0;
+    for ( int i = 0; i < y.size(); i++ ) {
+        //std::cout << "alpha[" << j << "] = " << a[j] << std::endl;
+        for ( int j = 0; j < w.size(); j++ ) {
+            w[j] += a[i] * y[i] * twoClassObservationVector[i]->at(j);
+        }
+        if ( A[i] < a[i] && a[i] < B[i] ) {
+            b = yg[i];
+            std::cout << "b = " << b << std::endl;
+        }
+    }
+
+    for ( int i = 0; i < w.size(); i++ ) {
+        std::cout << "w[" << i << "] = " << w[i] << std::endl;
+    }
+
+    return new SVM(y, a, twoClassObservationVector, b);
 }
 
 // For SVM we need to assign numeric labels of -1.0 and +1.0.
