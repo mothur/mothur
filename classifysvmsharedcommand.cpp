@@ -412,7 +412,7 @@ void ClassifySvmSharedCommand::processSharedAndDesignData(vector<SharedRAbundVec
         int numFeatures = lookup[0]->getNumBins();
 
         int numRows = numSamples;
-        int numColumns = numFeatures + 1; // extra one space needed for the treatment/outcome
+        int numColumns = numFeatures; // + 1; // extra one space needed for the treatment/outcome
 
         vector<vector<double> > dataSet(numRows, vector<double>(numColumns, 0.0));
         vector<vector<double>* > observations(numRows);
@@ -426,7 +426,7 @@ void ClassifySvmSharedCommand::processSharedAndDesignData(vector<SharedRAbundVec
                 int otuCount = lookup[i]->getAbundance(j);
                 dataSet[i][j] = otuCount;
             }
-            dataSet[i][j] = treatmentToIntMap[treatmentName];
+            //dataSet[i][j] = treatmentToIntMap[treatmentName];
         }
 
         OneVsOneMultiClassSvmTrainer t(observations, designMap.getNamesOfGroups());
