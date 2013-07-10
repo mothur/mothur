@@ -22,7 +22,7 @@ int SVM::discriminant(const FeatureVector& observation) {
     // d is the discriminant function
     double d = b;
     for ( int i = 0; i < y.size(); i++ ) {
-        d += y[i]*a[i]*std::inner_product(observation.begin(), observation.end(), x[i]->begin(), 0.0);
+        d += y[i]*a[i]*std::inner_product(observation.begin(), observation.end(), x[i].second->begin(), 0.0);
     }
     //std::cout << "d = " << d << std::endl;
     return d > 0.0 ? 1 : -1;
@@ -33,18 +33,18 @@ Label SVM::classify(const FeatureVector& observation) {
     return discriminantToLabel[d];
 }
 
-double SVM::score(const ObservationVector& twoClassObservationVector, const LabelVector& twoClassLabelVector) {
+double SVM::score(const LabeledObservationVector& twoClassLabeledObservationVector) {
     double s = 0.0;
-    for ( int i = 0; i < twoClassObservationVector.size(); i++ ) {
-        Label predicted_label = classify(*twoClassObservationVector[i]);
-        if ( predicted_label == twoClassLabelVector[i] ) {
+    for ( int i = 0; i < twoClassLabeledObservationVector.size(); i++ ) {
+        Label predicted_label = classify(*twoClassLabeledObservationVector[i].second);
+        if ( predicted_label == twoClassLabeledObservationVector[i].first ) {
             s = s + 1.0;
         }
         else {
 
         }
     }
-    return s / double(twoClassObservationVector.size());
+    return s / double(twoClassLabeledObservationVector.size());
 }
 
 
@@ -80,18 +80,18 @@ Label MultiClassSVM::classify(const FeatureVector& observation) {
     return winningLabel;
 }
 
-double MultiClassSVM::score(const ObservationVector& twoClassObservationVector, const LabelVector& twoClassLabelVector) {
+double MultiClassSVM::score(const LabeledObservationVector& twoClassLabeledObservationVector) {
     double s = 0.0;
-    for ( int i = 0; i < twoClassObservationVector.size(); i++ ) {
-        Label predicted_label = classify(*twoClassObservationVector[i]);
-        if ( predicted_label == twoClassLabelVector[i] ) {
+    for ( int i = 0; i < twoClassLabeledObservationVector.size(); i++ ) {
+        Label predicted_label = classify(*twoClassLabeledObservationVector[i].second);
+        if ( predicted_label == twoClassLabeledObservationVector[i].first ) {
             s = s + 1.0;
         }
         else {
 
         }
     }
-    return s / double(twoClassObservationVector.size());
+    return s / double(twoClassLabeledObservationVector.size());
 }
 
 SmoTrainer::SmoTrainer() : C(1.0){
@@ -131,9 +131,9 @@ SmoTrainer::~SmoTrainer() {
 //    3  -1.0  0.0 -1.0  0.0  1.0  0.0 -1.0    f       f       t   1
 //    4   0.0  1.0 +1.0  0.0  1.0  0.0  1.0    t       f       f   1
 
-SVM* SmoTrainer::train(const ObservationVector& twoClassObservationVector, const LabelVector& twoClassLabelVector) {
-    const int observationCount = twoClassObservationVector.size();
-    const int featureCount = twoClassObservationVector[0]->size();
+SVM* SmoTrainer::train(const LabeledObservationVector& twoClassLabeledObservationVector) {
+    const int observationCount = twoClassLabeledObservationVector.size();
+    const int featureCount = twoClassLabeledObservationVector[0].second->size();
     bool verbose = false;
     if (verbose) std::cout << "observation count : " << observationCount << std::endl;
     if (verbose) std::cout << "feature count     : " << featureCount << std::endl;
@@ -145,7 +145,7 @@ SVM* SmoTrainer::train(const ObservationVector& twoClassObservationVector, const
     std::vector<double> y(observationCount);
     if (verbose) std::cout << "assign numeric labels" << std::endl;
     NumericClassToLabel discriminantToLabel;
-    assignNumericLabels(y, twoClassLabelVector, discriminantToLabel);
+    assignNumericLabels(y, twoClassLabeledObservationVector, discriminantToLabel);
     if (verbose) std::cout << "assign A and B" << std::endl;
     std::vector<double> A(observationCount);
     std::vector<double> B(observationCount);
@@ -166,9 +166,9 @@ SVM* SmoTrainer::train(const ObservationVector& twoClassObservationVector, const
     for ( int u = 0; u < observationCount; u++ ) {
         for ( int v = 0; v < observationCount; v++ ) {
             K[u][v] = std::inner_product(
-                twoClassObservationVector[u]->begin(),
-                twoClassObservationVector[u]->end(),
-                twoClassObservationVector[v]->begin(),
+                twoClassLabeledObservationVector[u].second->begin(),
+                twoClassLabeledObservationVector[u].second->end(),
+                twoClassLabeledObservationVector[v].second->begin(),
                 0.0);
             //std::cout << "u = " << u << " v = " << v << " K = " << K[u][v] << std::endl;
             if (verbose) std::cout << " " << K[u][v];
@@ -217,12 +217,12 @@ SVM* SmoTrainer::train(const ObservationVector& twoClassObservationVector, const
         if (verbose) std::cout << "maximal violating pair:" << std::endl;
         if (verbose) std::cout << "  i = " << i << " ";
         for ( int feature = 0; feature < featureCount; feature++ ) {
-            if (verbose) std::cout << twoClassObservationVector[i]->at(feature) << " ";
+            if (verbose) std::cout << twoClassLabeledObservationVector[i].second->at(feature) << " ";
         };
         if (verbose) std::cout << std::endl;
         if (verbose) std::cout << "  j = " << j << " ";
         for ( int feature = 0; feature < featureCount; feature++ ) {
-            if (verbose) std::cout << twoClassObservationVector[j]->at(feature) << " ";
+            if (verbose) std::cout << twoClassLabeledObservationVector[j].second->at(feature) << " ";
         };
         if (verbose) std::cout << std::endl;
         //std::cout << "stopping criterion:" << std::endl;
@@ -252,12 +252,12 @@ SVM* SmoTrainer::train(const ObservationVector& twoClassObservationVector, const
 
     // at this point the optimal a's have been found
     // now use them to find w and b
-    std::vector<double> w(twoClassObservationVector[0]->size(), 0.0);
+    std::vector<double> w(twoClassLabeledObservationVector[0].second->size(), 0.0);
     double b = 0.0;
     for ( int i = 0; i < y.size(); i++ ) {
         //std::cout << "alpha[" << j << "] = " << a[j] << std::endl;
         for ( int j = 0; j < w.size(); j++ ) {
-            w[j] += a[i] * y[i] * twoClassObservationVector[i]->at(j);
+            w[j] += a[i] * y[i] * twoClassLabeledObservationVector[i].second->at(j);
         }
         if ( A[i] < a[i] && a[i] < B[i] ) {
             b = yg[i];
@@ -269,16 +269,17 @@ SVM* SmoTrainer::train(const ObservationVector& twoClassObservationVector, const
         if (verbose) std::cout << "w[" << i << "] = " << w[i] << std::endl;
     }
 
-    return new SVM(y, a, twoClassObservationVector, b, discriminantToLabel);
+    return new SVM(y, a, twoClassLabeledObservationVector, b, discriminantToLabel);
 }
 
 // For SVM we need to assign numeric labels of -1.0 and +1.0.
 // This method populates the y vector argument with -1.0 and +1.0
 // corresponding to the two classes in the labelVector argument.
-void SmoTrainer::assignNumericLabels(std::vector<double>& y, const LabelVector& labelVector, NumericClassToLabel& discriminantToLabel) {
+void SmoTrainer::assignNumericLabels(std::vector<double>& y, const LabeledObservationVector& labeledObservationVector, NumericClassToLabel& discriminantToLabel) {
     // it would be nice if we assign -1.0 and +1.0 consistently for each pair of labels
 	// I think the set will always be traversed in sorted order so we should get this for free
-    LabelSet labelSet(labelVector.begin(), labelVector.end());
+    LabelSet labelSet;
+    OneVsOneMultiClassSvmTrainer::buildLabelSet(labelSet, labeledObservationVector);
     LabelVector uniqueLabels(labelSet.begin(), labelSet.end());
     if (labelSet.size() != 2) {
         // throw an exception
@@ -289,8 +290,8 @@ void SmoTrainer::assignNumericLabels(std::vector<double>& y, const LabelVector& 
         // should make certain y has correct size?
         // this loop will populate the y vector with
         // -1.0 for uniqueLabel[0] and +1.0 for uniqueLabel[1]
-        for ( int i = 0; i < labelVector.size(); i++ ) {
-            y[i] = (labelVector[i] == uniqueLabels[0] ? -1.0 : 1.0);
+        for ( int i = 0; i < labeledObservationVector.size(); i++ ) {
+            y[i] = (labeledObservationVector[i].first == uniqueLabels[0] ? -1.0 : 1.0);
         }
         discriminantToLabel[-1] = uniqueLabels[0];
         discriminantToLabel[+1] = uniqueLabels[1];
@@ -304,47 +305,70 @@ void SmoTrainer::assignNumericLabels(std::vector<double>& y, const LabelVector& 
 // An instance of OneVsOneMultiClassSvmTrainer is intended to work with a single set of data
 // to produce a single instance of MultiClassSVM.  That's why observations and labels go in to
 // the constructor.
-OneVsOneMultiClassSvmTrainer::OneVsOneMultiClassSvmTrainer(const ObservationVector& o, const LabelVector& l) :
-    observations(o), observationLabels(l) {
+//OneVsOneMultiClassSvmTrainer::OneVsOneMultiClassSvmTrainer(const ObservationVector& o, const LabelVector& l) :
+//observations(o), observationLabels(l) {
+OneVsOneMultiClassSvmTrainer::OneVsOneMultiClassSvmTrainer(const LabeledObservationVector& lo) :
+    labeledObservations(lo) {
 
-    labelSet.insert(observationLabels.begin(), observationLabels.end());
-
-    // should maybe require a vector of label-observation pairs?
-    // insert label, observation vector pairs
-    buildLabeledObservations(labeledObservations, labelSet, observations, observationLabels);
-    buildLabelPairSet(labelPairSet, labelSet);
-    standardizeObservations(observations);
+    buildLabelSet(labelSet, labeledObservations);
+    buildLabelToLabeledObservationVector(labelToLabeledObservationVector, labeledObservations);
+    buildLabelPairSet(labelPairSet, labeledObservations);
+    standardizeObservations(labeledObservations);
 }
 
 OneVsOneMultiClassSvmTrainer::~OneVsOneMultiClassSvmTrainer() {
-    // destroy the ObservationVectors (but not the associated FeatureVectors)
-    LabeledObservations::iterator i;
-    for (i = labeledObservations.begin(); i != labeledObservations.end(); i++) {
-        std::cout << "deleting observation vector for label " << i->first << std::endl;
-        delete i->second;
+    std::cout << "~OneVsOneMultiClassSvmTrainer" << std::endl;
+    // no need to delete anything
+}
+
+void OneVsOneMultiClassSvmTrainer::buildLabelSet(LabelSet& labelSet, const LabeledObservationVector& labeledObservationVector) {
+    for (LabeledObservationVector::const_iterator i = labeledObservationVector.begin(); i != labeledObservationVector.end(); i++) {
+        labelSet.insert(i->first);
     }
 }
 
-void OneVsOneMultiClassSvmTrainer::buildLabeledObservations(LabeledObservations& labeledObservations, const LabelSet& labelSet, const ObservationVector& observations, const LabelVector& observationLabels) {
-    LabelSet::iterator i;
-    for (i = labelSet.begin(); i != labelSet.end(); i++) {
-        std::cout << "creating observation vector for label " << *i << std::endl;
-        labeledObservations.insert(make_pair(*i, new ObservationVector()));
-    }
-    for ( int j = 0; j < observations.size(); j++ ) {
-        labeledObservations[observationLabels[j]]->push_back(observations[j]);
+void OneVsOneMultiClassSvmTrainer::buildLabelToLabeledObservationVector(LabelToLabeledObservationVector& labelToLabeledObservationVector, const LabeledObservationVector& labeledObservationVector) {
+    std::cout << "buildLabelToLabelObservationVector" << std::endl;
+    for ( LabeledObservationVector::const_iterator j = labeledObservationVector.begin(); j != labeledObservationVector.end(); j++ ) {
+        labelToLabeledObservationVector[j->first].push_back(*j);
     }
 }
 
-void OneVsOneMultiClassSvmTrainer::standardizeObservations(const ObservationVector& observations) {
+//  This function uses the LabeledObservationVector argument to populate the LabelPairSet
+//  argument with pairs of labels.  For example, if labeledObservationVector looks like this:
+//    [ ("blue", x), ("green", y), ("red", z) ]
+//  then the labelPairSet will be populated with the following label pairs:
+//    ("blue", "green"), ("blue", "red"), ("green", "red")
+//  The order of labels in the pairs is determined by the ordering of labels in the temporary
+//  LabelSet.  By default this order will be ascending.  However, labels are taken off the
+//  temporary labelStack in reverse order, so the labelStack is initialized with reverse iterators.
+//  In the end our label pairs will be in sorted order.
+void OneVsOneMultiClassSvmTrainer::buildLabelPairSet(LabelPairSet& labelPairSet, const LabeledObservationVector& labeledObservationVector) {
+    //std::cout << "buildLabelPairSet" << std::endl;
+    LabelSet labelSet;
+    buildLabelSet(labelSet, labeledObservationVector);
+    LabelVector labelStack(labelSet.rbegin(), labelSet.rend());
+    while (labelStack.size() > 1) {
+        Label label = labelStack.back();
+        labelStack.pop_back();
+        for (LabelVector::const_iterator i = labelStack.begin(); i != labelStack.end(); i++) {
+            labelPairSet.insert(
+                std::make_pair(label, *i)
+            );
+        }
+    }
+}
+
+void OneVsOneMultiClassSvmTrainer::standardizeObservations(const LabeledObservationVector& observations) {
+    std::cout << "standardizeObservations" << std::endl;
     // online method for mean and variance
-    for ( FeatureVector::size_type feature = 0; feature < observations[0]->size(); feature++ ) {
+    for ( FeatureVector::size_type feature = 0; feature < observations[0].second->size(); feature++ ) {
         double n = 0.0;
         double mean = 0.0;
         double M2 = 0.0;
         for ( ObservationVector::size_type observation = 0; observation < observations.size(); observation++ ) {
             n += 1.0;
-            double x = observations[observation]->at(feature);
+            double x = observations[observation].second->at(feature);
             double delta = x - mean;
             mean += delta / n;
             M2 += delta * (x - mean);
@@ -355,21 +379,7 @@ void OneVsOneMultiClassSvmTrainer::standardizeObservations(const ObservationVect
         std::cout << "std of feature " << feature << " is " << standardDeviation << std::endl;
         // normalize the feature
         for ( ObservationVector::size_type observation = 0; observation < observations.size(); observation++ ) {
-            observations[observation]->at(feature) = (observations[observation]->at(feature) - mean ) / standardDeviation;
-        }
-    }
-}
-
-void OneVsOneMultiClassSvmTrainer::buildLabelPairSet(LabelPairSet& labelPairSet, const LabelSet& labelSet) {
-    labelPairSet.clear();
-    LabelVector labelStack(labelSet.begin(), labelSet.end());
-    while (labelStack.size() > 1) {
-        Label label = labelStack.back();
-        labelStack.pop_back();
-        for (int i = 0; i < labelStack.size(); i++) {
-            labelPairSet.insert(
-                std::make_pair(label, labelStack[i])
-            );
+            observations[observation].second->at(feature) = (observations[observation].second->at(feature) - mean ) / standardDeviation;
         }
     }
 }
@@ -378,34 +388,33 @@ void OneVsOneMultiClassSvmTrainer::buildLabelPairSet(LabelPairSet& labelPairSet,
 // split the observations and labels into a training set and a testing set
 // for now 2/3 and 1/3
 void OneVsOneMultiClassSvmTrainer::appendTrainingAndTestingData(
-        Label label, const ObservationVector& observationsWithLabel,
-        ObservationVector& trainingObservations, LabelVector& trainingLabels,
-        ObservationVector& testingObservations, LabelVector& testingLabels) {
+        Label label,
+        const LabeledObservationVector& observationsWithLabel,
+        LabeledObservationVector& trainingObservations,
+        LabeledObservationVector& testingObservations) {
 
     for (int i = 0; i < observationsWithLabel.size(); i++) {
         if (i % 3 == 0) {
             testingObservations.push_back(observationsWithLabel[i]);
-            testingLabels.push_back(label);
         }
         else {
             trainingObservations.push_back(observationsWithLabel[i]);
-            trainingLabels.push_back(label);
         }
     }
 }
 
 MultiClassSVM* OneVsOneMultiClassSvmTrainer::train() {
     // divide the data into development and evaluation sets
-    LabeledObservations labeledDevelopmentObservations;
+    LabelToLabeledObservationVector labeledDevelopmentObservations;
     //LabeledObservations labeledEvaluationObservations;
-    ObservationVector developmentObservations;
-    ObservationVector evaluationObservations;
-    LabelVector developmentLabels;
-    LabelVector evaluationLabels;
+    LabeledObservationVector developmentObservations;
+    LabeledObservationVector evaluationObservations;
+    //LabelVector developmentLabels;
+    //LabelVector evaluationLabels;
     for (LabelSet::iterator label = labelSet.begin(); label != labelSet.end(); label++) {
-        appendTrainingAndTestingData(*label, *labeledObservations[*label], developmentObservations, developmentLabels, evaluationObservations, evaluationLabels);
+        appendTrainingAndTestingData(*label, labelToLabeledObservationVector[*label], developmentObservations, evaluationObservations);
     }
-    buildLabeledObservations(labeledDevelopmentObservations, labelSet, developmentObservations, developmentLabels);
+    buildLabelToLabeledObservationVector(labeledDevelopmentObservations, developmentObservations);
 
     // determine hyperparameters by cross validation
     // fill a map with parameter lists
@@ -435,12 +444,12 @@ MultiClassSVM* OneVsOneMultiClassSvmTrainer::train() {
         Label label_0 = labelPair->first;
         Label label_1 = labelPair->second;
         std::cout << "training SVM on labels " << label_0 << " and " << label_1 << std::endl;
-        ObservationVector twoClassTrainingVector;
-        LabelVector twoClassTrainingLabelVector;
-        ObservationVector twoClassTestingVector;
-        LabelVector twoClassTestingLabelVector;
-        appendTrainingAndTestingData(label_0, *labeledDevelopmentObservations[label_0], twoClassTrainingVector, twoClassTrainingLabelVector, twoClassTestingVector, twoClassTestingLabelVector);
-        appendTrainingAndTestingData(label_1, *labeledDevelopmentObservations[label_1], twoClassTrainingVector, twoClassTrainingLabelVector, twoClassTestingVector, twoClassTestingLabelVector);
+        LabeledObservationVector twoClassTrainingVector;
+
+        LabeledObservationVector twoClassTestingVector;
+
+        appendTrainingAndTestingData(label_0, labeledDevelopmentObservations[label_0], twoClassTrainingVector, twoClassTestingVector);
+        appendTrainingAndTestingData(label_1, labeledDevelopmentObservations[label_1], twoClassTrainingVector, twoClassTestingVector);
 
         SVM* bestSvm = NULL;
         double bestScore = 0.0;
@@ -448,8 +457,8 @@ MultiClassSVM* OneVsOneMultiClassSvmTrainer::train() {
             double C = *hp;
             smoTrainer.setC(C);
             try {
-                SVM* evaluationSvm = smoTrainer.train(twoClassTrainingVector, twoClassTrainingLabelVector);
-                double score = evaluationSvm->score(twoClassTestingVector, twoClassTestingLabelVector);
+                SVM* evaluationSvm = smoTrainer.train(twoClassTrainingVector);
+                double score = evaluationSvm->score(twoClassTestingVector);
                 std::cout << "score on test data for C = "<< C << " : " << score << std::endl;
                 if ( score > bestScore ) {
                     bestSvm = evaluationSvm;
@@ -473,7 +482,7 @@ MultiClassSVM* OneVsOneMultiClassSvmTrainer::train() {
     }
 
     MultiClassSVM* mc = new MultiClassSVM(twoClassSvmList);
-    double score = mc->score(evaluationObservations, evaluationLabels);
+    double score = mc->score(evaluationObservations);
     std::cout << "multiclass SVM score: " << score << std::endl;
 
     return mc;

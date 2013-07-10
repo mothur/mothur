@@ -13,6 +13,7 @@
 
 #include "command.hpp"
 #include "inputdata.h"
+#include "svm.hpp"
 
 class ClassifySvmSharedCommand : public Command {
 public:
@@ -30,6 +31,8 @@ public:
   int execute();
   
   void help() { m->mothurOut(getHelpString()); }
+
+  static void readSharedAndDesignFiles(const std::string&, const std::string&, LabeledObservationVector&);
 
 private:
     bool abort;

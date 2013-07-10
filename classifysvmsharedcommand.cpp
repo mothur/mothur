@@ -7,7 +7,7 @@
 //
 
 #include "classifysvmsharedcommand.h"
-#include "svm.hpp"
+
 
 //**********************************************************************************************************************
 vector<string> ClassifySvmSharedCommand::setParameters() {
@@ -252,6 +252,38 @@ ClassifySvmSharedCommand::ClassifySvmSharedCommand(string option) {
         exit(1);
     }
 }
+
+//**********************************************************************************************************************
+// This static function is intended to read all the necessary information from
+// a pair of shared and design files needed for SVM classification.  This information
+// is used to build a LabeledObservationVector.  Each element of the LabeledObservationVector
+// looks like this:
+//   LabeledObservationVector[0] = pair("label 0", &vector[10.0, 21.0, 13.0])
+// where the vector in the second position of the pair records OTU abundances.
+void ClassifySvmSharedCommand::readSharedAndDesignFiles(const std::string& sharedFilePath, const std::string& designFilePath, LabeledObservationVector& labeledObservationVector) {
+    int i = 0;
+    InputData input(sharedFilePath, "sharedfile");
+    vector<SharedRAbundVector*> lookup = input.getSharedRAbundVectors();
+    std::cout << sharedFilePath << " lookup.size() = " << lookup.size() << std::endl;
+    while ( lookup[0] != NULL ) {
+        for ( int j = 0; j < lookup.size(); j++ ) {
+            i++;
+            vector<individual> data = lookup[j]->getData();
+            Observation* observation = new Observation(data.size(), 0.0);
+            labeledObservationVector.push_back(std::make_pair(lookup[j]->getGroup(), observation));
+            std::cout << "i=" << i << " j=" << j << " label : " << lookup[j]->getLabel() << " group: " << lookup[j]->getGroup();
+            for (int k = 0; k < data.size(); k++) {
+                std::cout << " abundance " << data[k].abundance;
+                observation->at(k) = double(data[k].abundance);
+            }
+            std::cout << std::endl;
+            delete lookup[j];
+        }
+        //lookup[0] = NULL;
+        lookup = input.getSharedRAbundVectors();
+    }
+}
+
 //**********************************************************************************************************************
 int ClassifySvmSharedCommand::execute() {
     try {
@@ -428,8 +460,9 @@ void ClassifySvmSharedCommand::processSharedAndDesignData(vector<SharedRAbundVec
             }
             //dataSet[i][j] = treatmentToIntMap[treatmentName];
         }
-
-        OneVsOneMultiClassSvmTrainer t(observations, designMap.getNamesOfGroups());
+        LabeledObservationVector labeledObservationVector;
+        readSharedAndDesignFiles(sharedfile, designfile, labeledObservationVector);
+        OneVsOneMultiClassSvmTrainer t(labeledObservationVector);
         //RandomForest randomForest(dataSet, numDecisionTrees, treeSplitCriterion, doPruning, pruneAggressiveness,
         //        discardHighErrorTrees, highErrorTreeDiscardThreshold, optimumFeatureSubsetSelectionCriteria,
         //        featureStandardDeviationThreshold);

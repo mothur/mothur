@@ -17,14 +17,18 @@
 #include <string>
 #include <vector>
 
+// a FeatureVector is an Observation ....
 typedef std::vector<double> FeatureVector;
-typedef std::vector<FeatureVector*> ObservationVector;
+typedef std::vector<double> Observation;
+typedef std::vector<Observation*> ObservationVector;
 typedef std::string Label;
-typedef std::vector<std::string> LabelVector;
+typedef std::vector<Label> LabelVector;
 typedef std::set<std::string> LabelSet;
 typedef std::pair<Label,Label> LabelPair;
 typedef std::set<LabelPair> LabelPairSet;
-typedef std::map<Label, ObservationVector*> LabeledObservations;
+typedef std::pair<Label, Observation*> LabeledObservation;
+typedef std::vector<LabeledObservation> LabeledObservationVector;
+typedef std::map<Label, LabeledObservationVector> LabelToLabeledObservationVector;
 typedef std::map<int, Label> NumericClassToLabel;
 
 
@@ -47,19 +51,19 @@ public:
 //
 class SVM : public classifier {
 public:
-    SVM(const std::vector<double>& yy, const std::vector<double>& aa, const ObservationVector& oo, double bb, const NumericClassToLabel& mm) :
+    SVM(const std::vector<double>& yy, const std::vector<double>& aa, const LabeledObservationVector& oo, double bb, const NumericClassToLabel& mm) :
         y(yy), a(aa), x(oo), b(bb), discriminantToLabel(mm) {}
     ~SVM() {}
 
     // the classify method should accept a list of observations?
     int discriminant(const FeatureVector& observation);
     Label classify(const FeatureVector& observation);
-    double score(const ObservationVector& twoClassObservationVector, const LabelVector& twoClassLabelVector);
+    double score(const LabeledObservationVector&);
 
 private:
     const std::vector<double> y;
     const std::vector<double> a;
-    const ObservationVector& x;
+    const LabeledObservationVector& x;
     const double b;
     NumericClassToLabel discriminantToLabel; // trouble if this is declared const....
 };
@@ -72,7 +76,7 @@ public:
 
     // the classify method should accept a list of observations
     Label classify(const FeatureVector& observation);
-    double score(const ObservationVector& twoClassObservationVector, const LabelVector& twoClassLabelVector);
+    double score(const LabeledObservationVector&);
 private:
     const std::vector<SVM*> twoClassSvmList;
 };
@@ -87,8 +91,8 @@ public:
 	double getC()       { return C; }
     void setC(double C) { this->C = C; }
 
-    SVM* train(const ObservationVector& twoClassObservationVector, const LabelVector& twoClassLabelVector);
-    void assignNumericLabels(std::vector<double>& y, const LabelVector& labelVector, NumericClassToLabel&);
+    SVM* train(const LabeledObservationVector&);
+    void assignNumericLabels(std::vector<double>&, const LabeledObservationVector&, NumericClassToLabel&);
     void elementwise_multiply(std::vector<double>& a, std::vector<double>& b, std::vector<double>& c) {
         std::transform(a.begin(), a.end(), b.begin(), c.begin(), std::multiplies<double>());
     }
@@ -100,7 +104,8 @@ private:
 
 class OneVsOneMultiClassSvmTrainer {
 public:
-    OneVsOneMultiClassSvmTrainer(const ObservationVector& observations, const LabelVector& observationLabels);
+    //OneVsOneMultiClassSvmTrainer(const ObservationVector& observations, const LabelVector& observationLabels);
+    OneVsOneMultiClassSvmTrainer(const LabeledObservationVector& observations);
     ~OneVsOneMultiClassSvmTrainer();
 
     // training requires splitting the data in to training and testing sets
@@ -108,20 +113,22 @@ public:
     // return a pointer to MultiClassSVM
     MultiClassSVM* train();
     const LabelSet& getLabelSet() { return labelSet; }
-    LabeledObservations& getLabeledObservations() { return labeledObservations; }
+    const LabeledObservationVector& getLabeledObservations() { return labeledObservations; }
     const LabelPairSet& getLabelPairSet() { return labelPairSet; }
 
-    static void buildLabeledObservations(LabeledObservations&, const LabelSet&, const ObservationVector&, const LabelVector&);
-    static void buildLabelPairSet(LabelPairSet&, const LabelSet&);
-    static void appendTrainingAndTestingData(Label, const ObservationVector&, ObservationVector&, LabelVector&, ObservationVector&, LabelVector&);
-    static void standardizeObservations(const ObservationVector&);
+    static void buildLabelSet(LabelSet&, const LabeledObservationVector&);
+    static void buildLabelToLabeledObservationVector(LabelToLabeledObservationVector&, const LabeledObservationVector&);
+    static void buildLabelPairSet(LabelPairSet&, const LabeledObservationVector&);
+    static void appendTrainingAndTestingData(Label, const LabeledObservationVector&, LabeledObservationVector&, LabeledObservationVector&);
+    static void standardizeObservations(const LabeledObservationVector&);
 
 
 private:
-    const ObservationVector& observations;
-    const LabelVector& observationLabels;
+    const LabeledObservationVector& labeledObservations;
+    //const ObservationVector& observations;
+    //const LabelVector& observationLabels;
     LabelSet labelSet;
-    LabeledObservations labeledObservations;
+    LabelToLabeledObservationVector labelToLabeledObservationVector;
     LabelPairSet labelPairSet;
 };
 
