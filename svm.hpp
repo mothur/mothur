@@ -24,13 +24,17 @@ typedef std::vector<Observation*> ObservationVector;
 typedef std::string Label;
 typedef std::vector<Label> LabelVector;
 typedef std::set<std::string> LabelSet;
-typedef std::pair<Label,Label> LabelPair;
+
+//typedef std::pair<Label,Label> LabelPair;
+typedef std::vector<Label> LabelPair;
+
 typedef std::set<LabelPair> LabelPairSet;
 typedef std::pair<Label, Observation*> LabeledObservation;
 typedef std::vector<LabeledObservation> LabeledObservationVector;
 typedef std::map<Label, LabeledObservationVector> LabelToLabeledObservationVector;
 typedef std::map<int, Label> NumericClassToLabel;
 
+LabelPair make_label_pair(const Label& one, const Label& two);
 
 class classifier {
 public:
@@ -130,6 +134,78 @@ private:
     LabelSet labelSet;
     LabelToLabeledObservationVector labelToLabeledObservationVector;
     LabelPairSet labelPairSet;
+};
+
+// KFoldLabeledObservationDivider is used in cross validation to generate
+// training and testing data sets of labeled observations.  The labels will
+// be distributed in equal proportions, as much as possible.
+//
+// Consider a data set with 100 observations from five classes.  Also, let
+// each class have 20 observations.  If we want to do 10-fold cross validation
+// then training sets should have 90 observations and test sets should have
+// 10 observations.  A training set should have approximately equal representation
+// from each class, as should the test sets.
+//
+// An instance of KFoldLabeledObservationDivider will generate training and test
+// sets within a for loop like this:
+//
+//   KFoldLabeledObservationDivider X(10, allLabeledObservations);
+//   for (X.start(); !X.end(); X.next()) {
+//        const LabeledObservationVector& trainingData = X.getTrainingData();
+//        const LabeledObservationVector& testingData  = X.getTestingData();
+//        // do cross validation on one fold
+//   }
+class KFoldLabeledObservationsDivider {
+public:
+    KFoldLabeledObservationsDivider(int _K, const LabeledObservationVector& l) : K(_K) {
+        OneVsOneMultiClassSvmTrainer::buildLabelToLabeledObservationVector(labelToLabeledObservationVector, l);
+    }
+    ~KFoldLabeledObservationsDivider() {}
+
+    // argument labelContainer holds the labels we will work with
+    // would it be better to restrict the KFoldLabeledObservationsDivider at construction?
+    void start(const LabelVector& labelContainer) {
+        labelVector.clear();
+        labelVector.assign(labelContainer.begin(), labelContainer.end());
+        k = 0;
+        next();
+    }
+
+    bool end() {
+        return k > K;
+    }
+
+    void next() {
+        trainingData.clear();
+        testingData.clear();
+        for (LabelVector::const_iterator label = labelVector.begin(); label != labelVector.end(); label++ ) {
+            appendKthFold(k, K, labelToLabeledObservationVector[*label], trainingData, testingData);
+        }
+        k++;
+    }
+
+    int getFoldNumber() { return k; }
+    const LabeledObservationVector& getTrainingData() { return trainingData; }
+    const LabeledObservationVector& getTestingData() { return testingData; }
+
+    static void appendKthFold(int k, int K, const LabeledObservationVector& x, LabeledObservationVector& trainingData, LabeledObservationVector& testingData) {
+        for ( int i = 0; i < x.size(); i++) {
+            if ( (i % K) == k) {
+                testingData.push_back(x[i]);
+            }
+            else {
+                trainingData.push_back(x[i]);
+            }
+        }
+    }
+
+private:
+    int K;
+    int k;
+    LabelVector labelVector;
+    LabelToLabeledObservationVector labelToLabeledObservationVector;
+    LabeledObservationVector trainingData;
+    LabeledObservationVector testingData;
 };
 
 #endif /* svm_hpp_ */

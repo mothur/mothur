@@ -17,6 +17,13 @@
 // the classify method should return a class label
 Label classifier::empty("empty");
 
+LabelPair make_label_pair(const Label& one, const Label& two) {
+    LabelVector labelPair;
+    labelPair.push_back(one);
+    labelPair.push_back(two);
+    return labelPair;
+}
+
 // the discriminant member function returns +1 or -1
 int SVM::discriminant(const FeatureVector& observation) {
     // d is the discriminant function
@@ -351,9 +358,13 @@ void OneVsOneMultiClassSvmTrainer::buildLabelPairSet(LabelPairSet& labelPairSet,
     while (labelStack.size() > 1) {
         Label label = labelStack.back();
         labelStack.pop_back();
+        LabelPair labelPair(2);
+        labelPair[0] = label;
         for (LabelVector::const_iterator i = labelStack.begin(); i != labelStack.end(); i++) {
+            labelPair[1] = *i;
             labelPairSet.insert(
-                std::make_pair(label, *i)
+                //std::make_pair(label, *i)
+                labelPair
             );
         }
     }
@@ -405,16 +416,26 @@ void OneVsOneMultiClassSvmTrainer::appendTrainingAndTestingData(
 
 MultiClassSVM* OneVsOneMultiClassSvmTrainer::train() {
     // divide the data into development and evaluation sets
-    LabelToLabeledObservationVector labeledDevelopmentObservations;
+    //LabelToLabeledObservationVector labeledDevelopmentObservations;
     //LabeledObservations labeledEvaluationObservations;
-    LabeledObservationVector developmentObservations;
-    LabeledObservationVector evaluationObservations;
+    //LabeledObservationVector developmentObservations;
+    //LabeledObservationVector evaluationObservations;
     //LabelVector developmentLabels;
     //LabelVector evaluationLabels;
-    for (LabelSet::iterator label = labelSet.begin(); label != labelSet.end(); label++) {
-        appendTrainingAndTestingData(*label, labelToLabeledObservationVector[*label], developmentObservations, evaluationObservations);
-    }
-    buildLabelToLabeledObservationVector(labeledDevelopmentObservations, developmentObservations);
+    //for (LabelSet::iterator label = labelSet.begin(); label != labelSet.end(); label++) {
+    //    appendTrainingAndTestingData(*label, labelToLabeledObservationVector[*label], developmentObservations, evaluationObservations);
+    //}
+    //buildLabelToLabeledObservationVector(labeledDevelopmentObservations, developmentObservations);
+
+    LabelVector labelList(labelSet.begin(), labelSet.end());
+    int deK = 3;
+    KFoldLabeledObservationsDivider kFoldDevEvalDivider(deK, labeledObservations);
+    //for (kFoldDevEvalDivider.start(labelList); !kFoldDevEvalDivider.end(); kFoldDevEvalDivider.next()) {
+
+//    }
+    kFoldDevEvalDivider.start(labelList);
+    const LabeledObservationVector& developmentObservations = kFoldDevEvalDivider.getTrainingData();
+    const LabeledObservationVector& evaluationObservations  = kFoldDevEvalDivider.getTestingData();
 
     // determine hyperparameters by cross validation
     // fill a map with parameter lists
@@ -441,39 +462,49 @@ MultiClassSVM* OneVsOneMultiClassSvmTrainer::train() {
     HyperparameterList::iterator hp;
     for (labelPair = labelPairSet.begin(); labelPair != labelPairSet.end(); labelPair++) {
         // generate training and testing data for this label pair
-        Label label_0 = labelPair->first;
-        Label label_1 = labelPair->second;
-        std::cout << "training SVM on labels " << label_0 << " and " << label_1 << std::endl;
-        LabeledObservationVector twoClassTrainingVector;
+        Label label0 = (*labelPair)[0];
+        Label label1 = (*labelPair)[1];
+        std::cout << "training SVM on labels " << label0 << " and " << label1 << std::endl;
 
-        LabeledObservationVector twoClassTestingVector;
-
-        appendTrainingAndTestingData(label_0, labeledDevelopmentObservations[label_0], twoClassTrainingVector, twoClassTestingVector);
-        appendTrainingAndTestingData(label_1, labeledDevelopmentObservations[label_1], twoClassTrainingVector, twoClassTestingVector);
-
+        int K = 3;
+        KFoldLabeledObservationsDivider kFoldLabeledObservationsDivider(K, developmentObservations);
         SVM* bestSvm = NULL;
+        SVM* evaluationSvm = NULL;
         double bestScore = 0.0;
         for (hp = cList.begin(); hp != cList.end(); ++hp) {
+            // we need to calculate the mean score over the k-folds for the current C
+            // oh how I love to calculate mean on-line
+            double online_mean_n = 0.0;
+            double online_mean_score = 0.0;
+
             double C = *hp;
             smoTrainer.setC(C);
             try {
-                SVM* evaluationSvm = smoTrainer.train(twoClassTrainingVector);
-                double score = evaluationSvm->score(twoClassTestingVector);
-                std::cout << "score on test data for C = "<< C << " : " << score << std::endl;
-                if ( score > bestScore ) {
-                    bestSvm = evaluationSvm;
-                }
-                else {
-                    delete evaluationSvm;
+                for ( kFoldLabeledObservationsDivider.start(*labelPair); !kFoldLabeledObservationsDivider.end(); kFoldLabeledObservationsDivider.next() ) {
+                    const LabeledObservationVector& kthTwoClassTrainingFold = kFoldLabeledObservationsDivider.getTrainingData();
+                    const LabeledObservationVector& kthTwoClassTestingFold = kFoldLabeledObservationsDivider.getTestingData();
+                    evaluationSvm = smoTrainer.train(kthTwoClassTrainingFold);
+                    double score = evaluationSvm->score(kthTwoClassTestingFold);
+                    std::cout << "score on fold " << kFoldLabeledObservationsDivider.getFoldNumber() << " test data for C = "<< C << " : " << score << std::endl;
+                    online_mean_n += 1.0;
+                    double online_mean_delta = score - online_mean_score;
+                    online_mean_score += online_mean_delta / online_mean_n;
                 }
             }
             catch (std::exception& e) {
                 std::cout << e.what() << std::endl;
                 std::cout << "failed to train SVM with C = " << C << std::endl;
             }
+            if ( online_mean_score > bestScore ) {
+                bestSvm = evaluationSvm;
+            }
+            else {
+                delete evaluationSvm;
+            }
         }
+
         if ( bestSvm == NULL ) {
-            std::cout << "failed to train SVM on labels " << label_0 << " and " << label_1 << std::endl;
+            std::cout << "failed to train SVM on labels " << label0 << " and " << label1 << std::endl;
             throw std::exception();
         }
         else {
@@ -487,3 +518,5 @@ MultiClassSVM* OneVsOneMultiClassSvmTrainer::train() {
 
     return mc;
 }
+
+
