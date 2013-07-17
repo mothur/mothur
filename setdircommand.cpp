@@ -37,7 +37,7 @@ string SetDirectoryCommand::getHelpString(){
 		helpString += "The set.dir command can also be used to specify the directory where your input files are located, the directory must exist.\n";
 		helpString += "The set.dir command can also be used to override or set the default location mothur will look for files if it is unable to find them, the directory must exist.\n";
         helpString += "The set.dir command can also be used to run mothur in debug mode.\n";
-        helpString += "The set.dir command can also be used to set the modifynames parameter. Default=t, meaning if your sequence names contain ':' change them to '_' to aviod issues while making trees.  modifynames=F will leave sequence names as they are.\n";
+        helpString += "The set.dir command can also be used to set the modifynames parameter. Default=t, meaning if your sequence names contain ':' change them to '_' to avoid issues while making trees.  modifynames=F will leave sequence names as they are.\n";
 		helpString += "The set.dir command parameters are input, output, tempdefault and debug and one is required.\n";
         helpString += "To run mothur in debug mode set debug=true. Default debug=false.\n";
 		helpString += "To return the output to the same directory as the input files you may enter: output=clear.\n";
@@ -121,67 +121,67 @@ int SetDirectoryCommand::execute(){
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
-        if (debugOnly) { return 0; }
-        
-		commandFactory = CommandFactory::getInstance();
-		
-		m->mothurOut("Mothur's directories:"); m->mothurOutEndLine();
-		
-		//redirect output
-		if ((output == "clear") || (output == "")) {  output = "";  commandFactory->setOutputDirectory(output);  }
-		else if (output == "default") { 
-			string exepath = m->argv;
-			output = exepath.substr(0, (exepath.find_last_of('m')));
-			
-			m->mothurOut("outputDir=" + output); m->mothurOutEndLine();  
-			commandFactory->setOutputDirectory(output);
-		}else {
-            if (m->dirCheck(output)) {
-                m->mothurOut("outputDir=" + output); m->mothurOutEndLine();  
-				commandFactory->setOutputDirectory(output);
+        if (debugOnly) {  }
+        else {
+            commandFactory = CommandFactory::getInstance();
+            
+            m->mothurOut("Mothur's directories:"); m->mothurOutEndLine();
+            
+            //redirect output
+            if ((output == "clear") || (output == "")) {  output = "";  commandFactory->setOutputDirectory(output);  }
+            else if (output == "default") {
+                string exepath = m->argv;
+                output = exepath.substr(0, (exepath.find_last_of('m')));
+                
+                m->mothurOut("outputDir=" + output); m->mothurOutEndLine();
+                commandFactory->setOutputDirectory(output);
+            }else {
+                if (m->dirCheck(output)) {
+                    m->mothurOut("outputDir=" + output); m->mothurOutEndLine();
+                    commandFactory->setOutputDirectory(output);
+                }
             }
-		}
-		
-		//redirect input
-		if ((input == "clear") || (input == "")) {  input = "";  commandFactory->setInputDirectory(input);  }
-		else if (input == "default") { 
-			string exepath = m->argv;
-			input = exepath.substr(0, (exepath.find_last_of('m')));
-			
-			m->mothurOut("inputDir=" + input); m->mothurOutEndLine();  
-			commandFactory->setInputDirectory(input);
-		}else {
-            if (m->dirCheck(input)) {
-                m->mothurOut("inputDir=" + input); m->mothurOutEndLine();  
-				commandFactory->setInputDirectory(input); 
+            
+            //redirect input
+            if ((input == "clear") || (input == "")) {  input = "";  commandFactory->setInputDirectory(input);  }
+            else if (input == "default") {
+                string exepath = m->argv;
+                input = exepath.substr(0, (exepath.find_last_of('m')));
+                
+                m->mothurOut("inputDir=" + input); m->mothurOutEndLine();
+                commandFactory->setInputDirectory(input);
+            }else {
+                if (m->dirCheck(input)) {
+                    m->mothurOut("inputDir=" + input); m->mothurOutEndLine();
+                    commandFactory->setInputDirectory(input);
+                }
             }
-        }
-		
-		//set default
-		if (tempdefault == "clear") {  
-			#ifdef MOTHUR_FILES
-				string temp = MOTHUR_FILES; 
-				m->mothurOut("tempDefault=" + temp); m->mothurOutEndLine();  
+            
+            //set default
+            if (tempdefault == "clear") {
+#ifdef MOTHUR_FILES
+				string temp = MOTHUR_FILES;
+				m->mothurOut("tempDefault=" + temp); m->mothurOutEndLine();
 				m->setDefaultPath(temp);
-			#else
-				string temp = ""; 
-				m->mothurOut("No default directory defined at compile time."); m->mothurOutEndLine();  
+#else
+				string temp = "";
+				m->mothurOut("No default directory defined at compile time."); m->mothurOutEndLine();
 				m->setDefaultPath(temp);
-			#endif
-		}else if (tempdefault == "") {  //do nothing
-		}else if (tempdefault == "default") { 
-			string exepath = m->argv;
-			tempdefault = exepath.substr(0, (exepath.find_last_of('m')));
-			
-			m->mothurOut("tempDefault=" + tempdefault); m->mothurOutEndLine();  
-			m->setDefaultPath(tempdefault);
-		}else {
-            if (m->dirCheck(tempdefault)) {
+#endif
+            }else if (tempdefault == "") {  //do nothing
+            }else if (tempdefault == "default") {
+                string exepath = m->argv;
+                tempdefault = exepath.substr(0, (exepath.find_last_of('m')));
+                
                 m->mothurOut("tempDefault=" + tempdefault); m->mothurOutEndLine();  
-				m->setDefaultPath(tempdefault); 
+                m->setDefaultPath(tempdefault);
+            }else {
+                if (m->dirCheck(tempdefault)) {
+                    m->mothurOut("tempDefault=" + tempdefault); m->mothurOutEndLine();  
+                    m->setDefaultPath(tempdefault); 
+                }
             }
         }
-
 		return 0;
 	}
 	catch(exception& e) {

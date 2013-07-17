@@ -28,8 +28,8 @@ public:
     string getOutputPattern(string);
     
 	string getHelpString();
-    string getCitation() { return "http://www.mothur.org/wiki/Get.metacommunity"; }
-    string getDescription()		{ return "brief description"; }
+    string getCitation() { return "Holmes I, Harris K, Quince C (2012) Dirichlet Multinomial Mixtures: Generative Models for Microbial Metagenomics. PLoS ONE 7(2): e30126. doi:10.1371/journal.pone.0030126 http://www.mothur.org/wiki/Get.metacommunity"; }
+    string getDescription()		{ return "Assigns samples to bins using a Dirichlet multinomial mixture model"; }
     
     int execute();
     void help() { m->mothurOut(getHelpString()); }

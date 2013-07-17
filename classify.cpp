@@ -309,16 +309,19 @@ int Classify::readTaxonomy(string file) {
         
         taxonomy.clear(); 
         m->readTax(file, taxonomy);
-        map<string, string> tempTaxonomy;
+        
+        //commented out to save time with large templates. 6/12/13
+        //map<string, string> tempTaxonomy;
         for (map<string, string>::iterator itTax = taxonomy.begin(); itTax != taxonomy.end(); itTax++) {  
-            if (m->inUsersGroups(itTax->first, names)) {
-                phyloTree->addSeqToTree(itTax->first, itTax->second); 
-                tempTaxonomy[itTax->first] = itTax->second;
-            }else {
-                m->mothurOut("[WARNING]: " + itTax->first + " is in your taxonomy file and not in your reference file, ignoring.\n");
-            }
+            //if (m->inUsersGroups(itTax->first, names)) {
+                phyloTree->addSeqToTree(itTax->first, itTax->second);
+            if (m->control_pressed) { break; }
+                //tempTaxonomy[itTax->first] = itTax->second;
+           // }else {
+            //    m->mothurOut("[WARNING]: " + itTax->first + " is in your taxonomy file and not in your reference file, ignoring.\n");
+            //}
         }
-        taxonomy = tempTaxonomy;
+        //taxonomy = tempTaxonomy;
 #endif	
 		phyloTree->assignHeirarchyIDs(0);
 		
@@ -340,21 +343,8 @@ int Classify::readTaxonomy(string file) {
 vector<string> Classify::parseTax(string tax) {
 	try {
 		vector<string> taxons;
-		
-		tax = tax.substr(0, tax.length()-1);  //get rid of last ';'
-	
-		//parse taxonomy
-		string individual;
-		while (tax.find_first_of(';') != -1) {
-			individual = tax.substr(0,tax.find_first_of(';'));
-			tax = tax.substr(tax.find_first_of(';')+1, tax.length());
-			taxons.push_back(individual);
-			
-		}
-		//get last one
-		taxons.push_back(tax);
-		
-		return taxons;
+		m->splitAtChar(tax, taxons, ';');
+        return taxons;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Classify", "parseTax");

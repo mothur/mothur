@@ -20,12 +20,11 @@ public:
   
   vector<string> setParameters();
   string getCommandName()			{ return "classify.shared";     }
-   string getCommandCategory()		{ return "OTU-Based Approaches";		}
-  
+  string getCommandCategory()		{ return "OTU-Based Approaches";		}  
   string getHelpString();	
-    string getOutputPattern(string);
+  string getOutputPattern(string);
   string getCitation() { return "http://www.mothur.org/wiki/Classify.shared\n"; }
-  string getDescription()		{ return "description"; }
+  string getDescription()		{ return "implements the random forest machine learning algorithm to identify OTUs that can be used to differentiate between various groups of samples"; }
   int execute();
   
   void help() { m->mothurOut(getHelpString()); }
@@ -35,7 +34,7 @@ private:
     string outputDir;
     vector<string> outputNames, Groups;
   
-    string sharedfile, designfile, otupersplit, splitcriteria;
+    string sharedfile, designfile;
     set<string> labels;
     bool allLines;
   

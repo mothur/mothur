@@ -318,7 +318,7 @@ GetLineageCommand::GetLineageCommand(string option)  {
             
             if ((sharedfile != "") || (listfile != "")) {
                 label = validParameter.validFile(parameters, "label", false);
-                if (label == "not found") { label = ""; m->mothurOut("You did not provide a label, I will use the first label in your inputfile."); m->mothurOutEndLine(); label=""; }
+                if (label == "not found") { label = ""; m->mothurOut("[WARNING]: You did not provide a label, I will use the first label in your inputfile."); m->mothurOutEndLine(); }
             }
             
             if (countfile == "") {

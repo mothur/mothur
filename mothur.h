@@ -127,6 +127,21 @@ struct PDistCell{
 	PDistCell() :  index(0), dist(0) {};
 	PDistCell(ull c, float d) :  index(c), dist(d) {}
 };
+/***********************************************************************/
+struct consTax{
+	string name;
+    string taxonomy;
+    int abundance;
+	consTax() :  name(""), taxonomy("unknown"), abundance(0) {};
+	consTax(string n, string t, int a) :  name(n), taxonomy(t), abundance(a) {}
+};
+/***********************************************************************/
+struct consTax2{
+    string taxonomy;
+    int abundance;
+	consTax2() :  taxonomy("unknown"), abundance(0) {};
+	consTax2(string t, int a) :  taxonomy(t), abundance(a) {}
+};
 /************************************************************/
 struct clusterNode {
 	int numSeq;
@@ -157,6 +172,15 @@ struct seqPriorityNode {
 	seqPriorityNode() {}
 	seqPriorityNode(int n, string s, string nm) : numIdentical(n), seq(s), name(nm) {}
 	~seqPriorityNode() {}
+};
+/************************************************************/
+struct compGroup {
+	string group1;
+	string group2;
+	compGroup() {}
+	compGroup(string s, string nm) : group1(s), group2(nm) {}
+    string getCombo() { return group1+"-"+group2; }
+	~compGroup() {}
 };
 /***************************************************************/
 struct spearmanRank {
@@ -194,7 +218,15 @@ inline bool compareDistLinePairs(distlinePair left, distlinePair right){
 //sorts lowest to highest
 inline bool compareSequenceDistance(seqDist left, seqDist right){
 	return (left.dist < right.dist);	
-} 
+}
+//********************************************************************************************************************
+//returns sign of double
+inline double sign(double temp){
+	//find sign
+    if (temp > 0)       { return 1.0;   }
+    else if (temp < 0)  { return -1.0;  }
+    return 0;
+}
 /***********************************************************************/
 
 // snagged from http://www.parashift.com/c++-faq-lite/misc-technical-issues.html#faq-39.2

@@ -29,7 +29,7 @@ public:
     //commmand category choices: Sequence Processing, OTU-Based Approaches, Hypothesis Testing, Phylotype Analysis, General, Clustering and Hidden
 	string getHelpString();
     string getCitation() { return "Friedman J, Alm EJ (2012) Inferring Correlation Networks from Genomic Survey Data. PLoS Comput Biol 8(9): e1002687. doi:10.1371/journal.pcbi.1002687 http://www.mothur.org/wiki/Sparcc"; }
-    string getDescription()		{ return "brief description"; }
+    string getDescription()		{ return "Calculates correlations between OTUs using a method that is insensitive to the use of relative abundance data"; }
     
     int execute();
     void help() { m->mothurOut(getHelpString()); }

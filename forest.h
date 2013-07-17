@@ -21,8 +21,14 @@ class Forest{
 public:
     // intialization with vectors
     Forest(const std::vector < std::vector<int> > dataSet,
-                         const int numDecisionTrees,
-                         const string);
+           const int numDecisionTrees,
+           const string treeSplitCriterion,
+           const bool doPruning,
+           const float pruneAggressiveness,
+           const bool discardHighErrorTrees,
+           const float highErrorTreeDiscardThreshold,
+           const string optimumFeatureSubsetSelectionCriteria,
+           const float featureStandardDeviationThreshold);
     virtual ~Forest(){ }
     virtual int populateDecisionTrees() = 0;
     virtual int calcForrestErrorRate() = 0;
@@ -53,6 +59,14 @@ protected:
     vector<int> globalDiscardedFeatureIndices;
     vector<double> globalVariableImportanceList;
     string treeSplitCriterion;
+  
+    bool doPruning;
+    float pruneAggressiveness;
+    bool discardHighErrorTrees;
+    float highErrorTreeDiscardThreshold;
+    string optimumFeatureSubsetSelectionCriteria;
+    float featureStandardDeviationThreshold;
+  
     // This is a map of each feature to outcome count of each classes
     // e.g. 1 => [2 7] means feature 1 has 2 outcome of 0 and 7 outcome of 1
     map<int, vector<int> > globalOutOfBagEstimates;

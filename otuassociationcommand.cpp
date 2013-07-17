@@ -572,6 +572,7 @@ int OTUAssociationCommand::readMetadata(){
 		//save names of columns you are reading
 		while (!iss.eof()) {
 			iss >> columnLabel; m->gobble(iss);
+            if (m->debug) { m->mothurOut("[DEBUG]: metadata column Label = " + columnLabel + "\n"); }
 			metadataLabels.push_back(columnLabel);
 		}
 		int count = metadataLabels.size();
@@ -583,6 +584,7 @@ int OTUAssociationCommand::readMetadata(){
 			
 			string group = "";
 			in >> group; m->gobble(in);
+            if (m->debug) { m->mothurOut("[DEBUG]: metadata group = " + group + "\n"); }
             
 			SharedRAbundFloatVector* tempLookup = new SharedRAbundFloatVector();
 			tempLookup->setGroup(group);
@@ -590,7 +592,8 @@ int OTUAssociationCommand::readMetadata(){
 			
 			for (int i = 0; i < count; i++) {
 				float temp = 0.0;
-				in >> temp; 
+				in >> temp;
+                if (m->debug) { m->mothurOut("[DEBUG]: metadata value = " + toString(temp) + "\n"); }
 				tempLookup->push_back(temp, group);
 			}
 			

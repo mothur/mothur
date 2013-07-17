@@ -85,9 +85,14 @@ int SetLogFileCommand::execute(){
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
-		commandFactory = CommandFactory::getInstance();
-		
-		commandFactory->setLogfileName(name, append);
+        commandFactory = CommandFactory::getInstance();
+        
+        string directory = m->hasPath(name);
+        if (directory == "") {
+            commandFactory->setLogfileName(name, append);
+        }else if (m->dirCheck(directory)) {
+             commandFactory->setLogfileName(name, append);
+        }
 		
 		return 0;
 	}

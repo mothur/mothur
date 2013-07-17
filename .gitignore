@@ -1,4 +1,9 @@
-.DS_Store
-*.zip
+*.logfile
+*.o
 *.pbxproj
 *.xcuserdata
+*.zip
+.DS_Store
+.idea
+build
+xcuserdata
