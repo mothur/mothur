@@ -435,7 +435,11 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
 				success = 0;
 				trashCode += 'l';
 			}
-			
+            if(!flowData.hasGoodHomoP()){	//screen to see if sequence meets the maximum homopolymer limit
+				success = 0;
+				trashCode += 'h';
+			}
+
 			int primerIndex = 0;
 			int barcodeIndex = 0;
 			
