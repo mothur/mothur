@@ -1330,9 +1330,10 @@ string ClusterSplitCommand::clusterFile(string thisDistFile, string thisNamefile
         m->mothurOutEndLine(); m->mothurOut("Clustering " + thisDistFile); m->mothurOutEndLine();
 		
         //create cluster
-        if (method == "furthest")	{	cluster = new CompleteLinkage(rabund, list, matrix, cutoff, method); }
-        else if(method == "nearest"){	cluster = new SingleLinkage(rabund, list, matrix, cutoff, method); }
-        else if(method == "average"){	cluster = new AverageLinkage(rabund, list, matrix, cutoff, method);	}
+        float adjust = -1.0;
+        if (method == "furthest")	{	cluster = new CompleteLinkage(rabund, list, matrix, cutoff, method, adjust); }
+        else if(method == "nearest"){	cluster = new SingleLinkage(rabund, list, matrix, cutoff, method, adjust); }
+        else if(method == "average"){	cluster = new AverageLinkage(rabund, list, matrix, cutoff, method, adjust);	}
         tag = cluster->getTag();
 		
         if (outputDir == "") { outputDir += m->hasPath(thisDistFile); }

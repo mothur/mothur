@@ -616,9 +616,10 @@ int ClassifyOtuCommand::process(ListVector* processList) {
 			//add this bins taxonomy to summary
 			if (basis == "sequence") {
 				for(int j = 0; j < names.size(); j++) {  
-                    int numReps = 1;
-                    if (countfile != "") {  numReps = ct->getNumSeqs(names[j]); }
-                    for(int k = 0; k < numReps; k++) {  taxaSum->addSeqToTree(names[j], noConfidenceConTax);  }
+                    //int numReps = 1;
+                    //if (countfile != "") {  numReps = ct->getNumSeqs(names[j]); }
+                    //for(int k = 0; k < numReps; k++) {  taxaSum->addSeqToTree(names[j], noConfidenceConTax);  }
+                    taxaSum->addSeqToTree(names[j], noConfidenceConTax);
                 }
 			}else { //otu
                 map<string, bool> containsGroup; 

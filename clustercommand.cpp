@@ -29,6 +29,7 @@ vector<string> ClusterCommand::setParameters(){
 		CommandParameter psim("sim", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(psim);
 		CommandParameter phard("hard", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(phard);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+        //CommandParameter padjust("adjust", "String", "", "F", "", "", "","",false,false); parameters.push_back(padjust);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
@@ -45,7 +46,8 @@ string ClusterCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The cluster command parameter options are phylip, column, name, count, method, cuttoff, hard, precision, sim, showabund and timing. Phylip or column and name are required, unless you have a valid current file.\n";
-		helpString += "The cluster command should be in the following format: \n";
+		//helpString += "The adjust parameter is used to handle missing distances.  If you set a cutoff, adjust=f by default.  If not, adjust=t by default. Adjust=f, means ignore missing distances and adjust cutoff as needed with the average neighbor method.  Adjust=t, will treat missing distances as 1.0. You can also set the value the missing distances should be set to, adjust=0.5 would give missing distances a value of 0.5.\n";
+        helpString += "The cluster command should be in the following format: \n";
 		helpString += "cluster(method=yourMethod, cutoff=yourCutoff, precision=yourPrecision) \n";
 		helpString += "The acceptable cluster methods are furthest, nearest, average and weighted.  If no method is provided then average is assumed.\n";	
 		return helpString;
@@ -229,10 +231,18 @@ ClusterCommand::ClusterCommand(string option)  {
 			temp = validParameter.validFile(parameters, "sim", false);				if (temp == "not found") { temp = "F"; }
 			sim = m->isTrue(temp); 
 			
+            //bool cutoffSet = false;
 			temp = validParameter.validFile(parameters, "cutoff", false);
 			if (temp == "not found") { temp = "10"; }
+            //else { cutoffSet = true; }
 			m->mothurConvert(temp, cutoff); 
-			cutoff += (5 / (precision * 10.0));  
+			cutoff += (5 / (precision * 10.0));
+            
+            //temp = validParameter.validFile(parameters, "adjust", false);				if (temp == "not found") { temp = "F"; }
+            //if (m->isNumeric1(temp))    { m->mothurConvert(temp, adjust);   }
+            //else if (m->isTrue(temp))   { adjust = 1.0;                     }
+            //else                        { adjust = -1.0;                    }
+            adjust=-1.0;
 			
 			method = validParameter.validFile(parameters, "method", false);
 			if (method == "not found") { method = "average"; }
@@ -325,10 +335,10 @@ int ClusterCommand::execute(){
 		}
 		
 		//create cluster
-		if (method == "furthest")	{	cluster = new CompleteLinkage(rabund, list, matrix, cutoff, method); }
-		else if(method == "nearest"){	cluster = new SingleLinkage(rabund, list, matrix, cutoff, method); }
-		else if(method == "average"){	cluster = new AverageLinkage(rabund, list, matrix, cutoff, method);	}
-		else if(method == "weighted"){	cluster = new WeightedLinkage(rabund, list, matrix, cutoff, method);	}
+		if (method == "furthest")	{	cluster = new CompleteLinkage(rabund, list, matrix, cutoff, method, adjust); }
+		else if(method == "nearest"){	cluster = new SingleLinkage(rabund, list, matrix, cutoff, method, adjust); }
+		else if(method == "average"){	cluster = new AverageLinkage(rabund, list, matrix, cutoff, method, adjust);	}
+		else if(method == "weighted"){	cluster = new WeightedLinkage(rabund, list, matrix, cutoff, method, adjust);	}
 		tag = cluster->getTag();
 		
 		if (outputDir == "") { outputDir += m->hasPath(distfile); }
