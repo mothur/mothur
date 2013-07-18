@@ -817,7 +817,7 @@ int ScreenSeqsCommand::screenAlignReport(map<string, string>& badSeqNames){
             m->mothurRemove(outSummary+".temp");
         }
         
-        if (numFastaSeqs != count) {  m->mothurOut("[ERROR]: found " + toString(numFastaSeqs) + " sequences in your fasta file, and " + toString(count) + " sequences in your contigs report file, quitting.\n"); m->control_pressed = true; }
+        if (numFastaSeqs != count) {  m->mothurOut("[ERROR]: found " + toString(numFastaSeqs) + " sequences in your fasta file, and " + toString(count) + " sequences in your align report file, quitting.\n"); m->control_pressed = true; }
         
         
         return count;
@@ -1820,7 +1820,6 @@ int ScreenSeqsCommand::getSummary(vector<unsigned long long>& positions){
 		vector<int> longHomoPolymer;
         vector<int> numNs;
 		
-        vector<unsigned long long> positions;
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 		positions = m->divideFile(fastafile, processors);
 		for (int i = 0; i < (positions.size()-1); i++) { lines.push_back(linePair(positions[i], positions[(i+1)])); }	
@@ -1845,8 +1844,9 @@ int ScreenSeqsCommand::getSummary(vector<unsigned long long>& positions){
 		int pid;
 		MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
 		
-		if (pid == 0) { 
-			driverCreateSummary(startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, numNs, fastafile, lines[0]);
+		if (pid == 0) {
+            linePair tempLine(0, positions[positions.size()-1]);
+			driverCreateSummary(startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, numNs, fastafile, tempLine);
 #else
 		int numSeqs = 0;
 		//#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)

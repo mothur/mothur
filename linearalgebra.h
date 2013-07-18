@@ -29,6 +29,8 @@ public:
 	double calcPearson(vector<vector<double> >&, vector<vector<double> >&);
 	double calcSpearman(vector<vector<double> >&, vector<vector<double> >&);
 	double calcKendall(vector<vector<double> >&, vector<vector<double> >&);
+    double calcKruskalWallis(vector<spearmanRank>&, double&);
+    double calcWilcoxon(vector<double>&, vector<double>&, double&);
 	
 	double calcPearson(vector<double>&, vector<double>&, double&);
 	double calcSpearman(vector<double>&, vector<double>&, double&);
@@ -41,7 +43,7 @@ public:
     vector<double> solveEquations(vector<vector<double> >, vector<double>);
     vector<float> solveEquations(vector<vector<float> >, vector<float>);
     vector<vector<double> > getInverse(vector<vector<double> >);
-
+    
     
 private:
 	MothurOut* m;
@@ -50,11 +52,11 @@ private:
     double betacf(const double, const double, const double);
     double betai(const double, const double, const double);
     double gammln(const double);
-    double gammp(const double, const double);
     double gammq(const double, const double);
     double gser(double&, const double, const double, double&);
     double gcf(double&, const double, const double, double&);
     double erfcc(double);
+    double gammp(const double, const double);
     
     double ran0(int&); //for testing 
     double ran1(int&); //for testing

@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 University of Michigan. All rights reserved.
 //
 
-#include "calcSparcc.h"
+#include "calcsparcc.h"
 #include "linearalgebra.h"
 
 /**************************************************************************************************/
