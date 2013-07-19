@@ -78,6 +78,10 @@ protected:
     // TODO: fix this, do we use pointers?
     vector<AbstractDecisionTree*> decisionTrees;
     
+    // predictedClasses[i] denotes the class predicted by the algorithm
+    // for i'th training sample
+    vector<int> predictedClasses;
+
     MothurOut* m;
     
 private:
