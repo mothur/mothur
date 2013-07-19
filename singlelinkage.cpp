@@ -5,8 +5,8 @@
 
 /***********************************************************************/
 
-SingleLinkage::SingleLinkage(RAbundVector* rav, ListVector* lv, SparseDistanceMatrix* dm, float c, string s) :
-Cluster(rav, lv, dm, c, s)
+SingleLinkage::SingleLinkage(RAbundVector* rav, ListVector* lv, SparseDistanceMatrix* dm, float c, string s, float a) :
+Cluster(rav, lv, dm, c, s, a)
 {}
 
 

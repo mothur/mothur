@@ -2727,7 +2727,8 @@ int ShhherCommand::cluster(string filename, string distFileName, string namesFil
         
 		RAbundVector* rabund = new RAbundVector(list->getRAbundVector());
 		
-		Cluster* cluster = new CompleteLinkage(rabund, list, matrix, cutoff, "furthest"); 
+        float adjust = -1.0;
+		Cluster* cluster = new CompleteLinkage(rabund, list, matrix, cutoff, "furthest", adjust);
 		string tag = cluster->getTag();
 		
 		double clusterCutoff = cutoff;

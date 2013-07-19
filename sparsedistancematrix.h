@@ -46,7 +46,9 @@ public:
     void resize(ull n) { seqVec.resize(n);  }
     void clear();
 	void addCell(ull, PDistCell);
+    int addCellSorted(ull, PDistCell);
     vector<vector<PDistCell> > seqVec;
+    
     
 private:
 	PDistCell smallCell;				//The cell with the smallest distance
@@ -54,9 +56,11 @@ private:
     
     bool sorted;
     int sortSeqVec();
+    int sortSeqVec(int);
 	float smallDist, aboveCutoff;
     
 	MothurOut* m;
+
 };
 
 /***********************************************************************/

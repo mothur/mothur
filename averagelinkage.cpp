@@ -11,8 +11,8 @@
 
 /***********************************************************************/
 
-AverageLinkage::AverageLinkage(RAbundVector* rav, ListVector* lv, SparseDistanceMatrix* dm, float c, string s) :
-Cluster(rav, lv, dm, c, s)
+AverageLinkage::AverageLinkage(RAbundVector* rav, ListVector* lv, SparseDistanceMatrix* dm, float c, string s, float a) :
+Cluster(rav, lv, dm, c, s, a)
 {
 	saveRow = -1;
 	saveCol = -1;
