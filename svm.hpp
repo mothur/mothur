@@ -18,81 +18,172 @@
 #include <vector>
 
 // a FeatureVector is an Observation ....
+// For the purpose of training a support vector machine
+// we need to calculate a dot product between two feature
+// vectors.  In general these feature vectors are not
+// restricted to lists of doubles, but in this implementation
+// feature vectors will be vectors of doubles.
 typedef std::vector<double> FeatureVector;
 typedef std::vector<double> Observation;
+
+// A dataset is a collection of labeled observations (or labeled
+// feature vectors).  The ObservationVector typedef is a vector
+// of pointers to ObservationVectors.  Pointers are used here since
+// datasets will be rearranged many times during cross validation.
+// Using pointers to Observations makes copying the elements of
+// an ObservationVector cheap.
 typedef std::vector<Observation*> ObservationVector;
+
+// Training a support vector machine requires labeled data.  The
+// Label typedef defines what will constitute a class 'label' in
+// this implementation.
 typedef std::string Label;
 typedef std::vector<Label> LabelVector;
-typedef std::set<std::string> LabelSet;
+typedef std::set<Label> LabelSet;
 
-//typedef std::pair<Label,Label> LabelPair;
+// Pairs of class labels are important because a support vector machine
+// can only learn two classes of data.  The LabelPair typedef is a vector
+// even though a std::pair might seem more natural, but it is useful to
+// iterate over the pair.
 typedef std::vector<Label> LabelPair;
-
-typedef std::set<LabelPair> LabelPairSet;
-typedef std::pair<Label, Observation*> LabeledObservation;
-typedef std::vector<LabeledObservation> LabeledObservationVector;
-typedef std::map<Label, LabeledObservationVector> LabelToLabeledObservationVector;
-typedef std::map<int, Label> NumericClassToLabel;
-
 LabelPair make_label_pair(const Label& one, const Label& two);
 
-class classifier {
-public:
-    classifier() {}
-    virtual ~classifier() {}
+// Learning to classify a dataset with more than two classes requires
+// training a separate support vector machine for each pair of classes.
+// The LabelPairSet typedef defines a container for the collection of
+// all unique label pairs for a set of data.
+typedef std::set<LabelPair> LabelPairSet;
 
-    virtual Label classify(const FeatureVector& observation) = 0;
-    static Label empty;
+// A dataset is a set of observations with associated labels.  The
+// LabeledObservation typedef is a label-observation pair intended to
+// hold one observation and its corresponding label.
+typedef std::pair<Label, Observation*> LabeledObservation;
+
+// A LabeledObservationVector is a container for an entire dataset (or a
+// subset of an entire dataset).
+typedef std::vector<LabeledObservation> LabeledObservationVector;
+
+// Dividing a dataset into training and testing sets while maintaing equal
+// representation of all classes is done using a LabelToLabeledObservationVector.
+// This container is used to divide datasets into groups of LabeledObservations
+// having the same label.
+typedef std::map<Label, LabeledObservationVector> LabelToLabeledObservationVector;
+
+// A support vector machine uses +1 and -1 in calculations to represent
+// the two classes of data it is trained to distinguish.  The NumericClassToLabel
+// container is used to record the labels associated with these integers.
+typedef std::map<int, Label> NumericClassToLabel;
+
+
+class KernelFunction {
+public:
+    KernelFunction() {}
+    virtual ~KernelFunction() {}
+
+    virtual double similarity(const Observation&, const Observation&) = 0;
 };
+
+
+class LinearKernelFunction : KernelFunction {
+public:
+    LinearKernelFunction() {}
+    ~LinearKernelFunction() {}
+
+    double similarity(const Observation& i, const Observation& j) {
+        return std::inner_product(i.begin(), i.end(), j.begin(), 0.0);
+    }
+};
+
+
+class RBFKernelFunction : KernelFunction {
+public:
+    RBFKernelFunction(double g) : gamma(g) {}
+    ~RBFKernelFunction() {}
+
+    double similarity(const Observation& i, const Observation& j) {
+        double sumOfSquaredDifs = 0.0;
+        for (int n = 0; n < i.size(); n++) {
+            sumOfSquaredDifs += pow((i[n] - j[n]), 2.0);
+        }
+        return gamma * exp(sqrt(sumOfSquaredDifs));
+    }
+
+    double getGamma()       { return gamma; }
+    void setGamma(double g) { gamma = g; }
+
+private:
+    double gamma;
+};
+
+
+class PolynomialKernelFunction : KernelFunction {
+public:
+    PolynomialKernelFunction(double _c, int _d) : c(_c), d(_d) {}
+    ~PolynomialKernelFunction() {}
+
+    double similarity(const Observation& i, const Observation& j) {
+        return pow(std::inner_product(i.begin(), i.end(), j.begin(), c), d);
+    }
+
+private:
+    double c;
+    int d;
+};
+
 
 // The SVM class implements the Support Vector Machine
 // discriminant function.  Instances are constructed with
-// a vector of class labels (+1 or -1), a vector of dual
+// a vector of class labels (+1.0 or -1.0), a vector of dual
 // coefficients, a vector of observations, and a bias value.
 //
 // The class SmoTrainer is responsible for determining the dual
 // coefficients and bias value.
 //
-class SVM : public classifier {
+class SVM {
 public:
     SVM(const std::vector<double>& yy, const std::vector<double>& aa, const LabeledObservationVector& oo, double bb, const NumericClassToLabel& mm) :
         y(yy), a(aa), x(oo), b(bb), discriminantToLabel(mm) {}
     ~SVM() {}
 
     // the classify method should accept a list of observations?
-    int discriminant(const FeatureVector& observation);
-    Label classify(const FeatureVector& observation);
+    int discriminant(const Observation& observation);
+    Label classify(const Observation& observation);
     double score(const LabeledObservationVector&);
 
 private:
     const std::vector<double> y;
     const std::vector<double> a;
-    const LabeledObservationVector& x;
+    const LabeledObservationVector x;
     const double b;
     NumericClassToLabel discriminantToLabel; // trouble if this is declared const....
 };
 
 
-class MultiClassSVM : public classifier {
+// Using SVM with more than two classes requires training multiple SVMs.
+// The MultiClassSVM uses a vector of trained SVMs to do classification
+// on data having more than two classes.
+class MultiClassSVM {
 public:
-	MultiClassSVM(std::vector<SVM*>);
-	~MultiClassSVM();
+    MultiClassSVM(std::vector<SVM*>);
+    ~MultiClassSVM();
 
     // the classify method should accept a list of observations
-    Label classify(const FeatureVector& observation);
+    Label classify(const Observation& observation);
     double score(const LabeledObservationVector&);
 private:
     const std::vector<SVM*> twoClassSvmList;
 };
 
 
-// the SmoTrainer trains a 2-class SVM
+// SmoTrainer trains a support vector machine using Sequential
+// Minimal Optimization as described in the article
+// "Support Vector Machine Solvers" by Bottou and Lin.
 class SmoTrainer {
 public:
-	SmoTrainer();
-	~SmoTrainer();
+    SmoTrainer();
+    ~SmoTrainer();
 
-	double getC()       { return C; }
+    double getC()       { return C; }
     void setC(double C) { this->C = C; }
 
     SVM* train(const LabeledObservationVector&);
@@ -106,19 +197,18 @@ private:
 };
 
 
+// OneVsOneMultiClassSvmTrainer trains a support vector machine for each
+// pair of labels in a set of data.
 class OneVsOneMultiClassSvmTrainer {
 public:
-    //OneVsOneMultiClassSvmTrainer(const ObservationVector& observations, const LabelVector& observationLabels);
     OneVsOneMultiClassSvmTrainer(const LabeledObservationVector& observations);
-    ~OneVsOneMultiClassSvmTrainer();
+    ~OneVsOneMultiClassSvmTrainer() {}
 
-    // training requires splitting the data in to training and testing sets
-    // for now, this class will take responsibility for splitting
-    // return a pointer to MultiClassSVM
     MultiClassSVM* train();
     const LabelSet& getLabelSet() { return labelSet; }
     const LabeledObservationVector& getLabeledObservations() { return labeledObservations; }
     const LabelPairSet& getLabelPairSet() { return labelPairSet; }
+    const LabeledObservationVector& getLabeledObservationVectorForLabel(const Label& label) { return labelToLabeledObservationVector[label]; }
 
     static void buildLabelSet(LabelSet&, const LabeledObservationVector&);
     static void buildLabelToLabeledObservationVector(LabelToLabeledObservationVector&, const LabeledObservationVector&);
@@ -126,19 +216,17 @@ public:
     static void appendTrainingAndTestingData(Label, const LabeledObservationVector&, LabeledObservationVector&, LabeledObservationVector&);
     static void standardizeObservations(const LabeledObservationVector&);
 
-
 private:
     const LabeledObservationVector& labeledObservations;
-    //const ObservationVector& observations;
-    //const LabelVector& observationLabels;
     LabelSet labelSet;
     LabelToLabeledObservationVector labelToLabeledObservationVector;
     LabelPairSet labelPairSet;
 };
 
+
 // KFoldLabeledObservationDivider is used in cross validation to generate
 // training and testing data sets of labeled observations.  The labels will
-// be distributed in equal proportions, as much as possible.
+// be distributed in proportion to their frequency in the data, as much as possible.
 //
 // Consider a data set with 100 observations from five classes.  Also, let
 // each class have 20 observations.  If we want to do 10-fold cross validation
@@ -157,37 +245,60 @@ private:
 //   }
 class KFoldLabeledObservationsDivider {
 public:
-    KFoldLabeledObservationsDivider(int _K, const LabeledObservationVector& l) : K(_K) {
+    // initialize the k member variable to K so end() will return true if it is called before start()
+    // this is not perfect protection against misuse but it's better than nothing
+    KFoldLabeledObservationsDivider(int _K, const LabeledObservationVector& l) : K(_K), k(_K) {
         OneVsOneMultiClassSvmTrainer::buildLabelToLabeledObservationVector(labelToLabeledObservationVector, l);
     }
     ~KFoldLabeledObservationsDivider() {}
 
     // argument labelContainer holds the labels we will work with
+    // the trainingData and testingData containers will only have observations with these labels
     // would it be better to restrict the KFoldLabeledObservationsDivider at construction?
     void start(const LabelVector& labelContainer) {
         labelVector.clear();
         labelVector.assign(labelContainer.begin(), labelContainer.end());
         k = 0;
-        next();
+        trainingData.clear();
+        testingData.clear();
+        for (LabelVector::const_iterator label = labelVector.begin(); label != labelVector.end(); label++) {
+            appendKthFold(k, K, labelToLabeledObservationVector[*label], trainingData, testingData);
+        }
     }
 
     bool end() {
-        return k > K;
+        return k >= K;
     }
 
     void next() {
+        k++;
         trainingData.clear();
         testingData.clear();
-        for (LabelVector::const_iterator label = labelVector.begin(); label != labelVector.end(); label++ ) {
+        for (LabelVector::const_iterator label = labelVector.begin(); label != labelVector.end(); label++) {
             appendKthFold(k, K, labelToLabeledObservationVector[*label], trainingData, testingData);
         }
-        k++;
     }
 
     int getFoldNumber() { return k; }
     const LabeledObservationVector& getTrainingData() { return trainingData; }
     const LabeledObservationVector& getTestingData() { return testingData; }
 
+    // Function appendKthFold takes care of partitioning the observations in x into two sets,
+    // one for training and one for testing.  The argument K specifies how many folds
+    // will be requested in all.  The argument k specifies which fold to return.
+    // An example: let K=3, k=0, and let there be 10 observations (all having the same label)
+    //     i  i%3  (i%3)==0  k=0 partition  (i%3)==1  k=1 partition  (i%3)==2  k=2 partition
+    //     0   0     true      testing        false     training       false     training
+    //     1   1     false     training       true      testing        false     training
+    //     2   2     false     training       false     training       true      testing
+    //     3   0     true      testing        false     training       false     training
+    //     4   1     false     training       true      testing        false     training
+    //     5   2     false     training       false     training       true      testing
+    //     6   0     true      testing        false     training       false     training
+    //     7   1     false     training       true      testing        false     training
+    //     8   2     false     training       false     training       true      testing
+    //     9   0     true      testing        false     training       false     training
+    //
     static void appendKthFold(int k, int K, const LabeledObservationVector& x, LabeledObservationVector& trainingData, LabeledObservationVector& testingData) {
         for ( int i = 0; i < x.size(); i++) {
             if ( (i % K) == k) {
@@ -200,7 +311,7 @@ public:
     }
 
 private:
-    int K;
+    const int K;
     int k;
     LabelVector labelVector;
     LabelToLabeledObservationVector labelToLabeledObservationVector;
