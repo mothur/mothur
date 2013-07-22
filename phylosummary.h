@@ -43,12 +43,14 @@ public:
 	int addSeqToTree(string, string);
 	int addSeqToTree(string, map<string, bool>);
 	void print(ofstream&);
+    void print(ofstream&, bool);
 	int getMaxLevel() { return maxLevel; }
 	
 private:
 	string getNextTaxon(string&);
 	vector<rawTaxNode> tree;
 	void print(int, ofstream&);
+    void print(int, ofstream&, bool);
 	void assignRank(int);
 	void readTreeStruct(ifstream&);
 	GroupMap* groupmap;

@@ -440,7 +440,7 @@ void DecisionTree::deleteTreeNodesRecursively(RFTreeNode* treeNode) {
         if (treeNode == NULL) { return; }
         deleteTreeNodesRecursively(treeNode->leftChildNode);
         deleteTreeNodesRecursively(treeNode->rightChildNode);
-        delete treeNode;
+        delete treeNode; treeNode = NULL;
     }
 	catch(exception& e) {
 		m->errorOut(e, "DecisionTree", "deleteTreeNodesRecursively");

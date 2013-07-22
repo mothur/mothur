@@ -1,21 +1,25 @@
-/* 
- * File:   kruskalwalliscommand.cpp
- * Author: kiverson
- *
- * Created on June 26, 2012, 11:06 AM
- */
+//
+//  lefsecommand.cpp
+//  Mothur
+//
+//  Created by SarahsWork on 6/12/13.
+//  Copyright (c) 2013 Schloss Lab. All rights reserved.
+//
 
-#include "kruskalwalliscommand.h"
+#include "lefsecommand.h"
 #include "linearalgebra.h"
 
 //**********************************************************************************************************************
-vector<string> KruskalWallisCommand::setParameters(){
+vector<string> LefseCommand::setParameters(){
 	try {
         CommandParameter pdesign("design", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(pdesign);
         CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none","summary",false,true,true); parameters.push_back(pshared);
         CommandParameter pclass("class", "String", "", "", "", "", "","",false,false); parameters.push_back(pclass);
+        CommandParameter psubclass("subclass", "String", "", "", "", "", "","",false,false); parameters.push_back(psubclass);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
 		CommandParameter pclasses("classes", "String", "", "", "", "", "","",false,false); parameters.push_back(pclasses);
+        CommandParameter palpha("anova_alpha", "Number", "", "0.05", "", "", "","",false,false); parameters.push_back(palpha);
+        CommandParameter pwalpha("wilcoxon_alpha", "Number", "", "0.05", "", "", "","",false,false); parameters.push_back(pwalpha);
         //every command must have inputdir and outputdir.  This allows mothur users to redirect input and output files.
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -25,57 +29,62 @@ vector<string> KruskalWallisCommand::setParameters(){
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "KruskalWallisCommand", "setParameters");
+		m->errorOut(e, "LefseCommand", "setParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-string KruskalWallisCommand::getHelpString(){
+string LefseCommand::getHelpString(){
 	try {
 		string helpString = "";
-		helpString += "The kruskal.wallis command allows you to ....\n";
-		helpString += "The kruskal.wallis command parameters are: shared, design, class,  label and classes.\n";
+		helpString += "The lefse command allows you to ....\n";
+		helpString += "The lefse command parameters are: shared, design, class, subclass, label, classes, wilcoxon_alpha, anova_alpha.\n";
 		helpString += "The class parameter is used to indicate the which category you would like used for the Kruskal Wallis analysis. If none is provided first category is used.\n";
+        helpString += "The subclass parameter is used to indicate the .....If none is provided second category is used, or if only one category subclass is ignored. \n";
         helpString += "The classes parameter is used to indicate the classes you would like to use. Clases should be inputted in the following format: classes=label<value1|value2|value3>-label<value1|value2>. For example to include groups from treatment with value early or late and age= young or old.  class=treatment<Early|Late>-age<young|old>.\n";
         helpString += "The label parameter is used to indicate which distances in the shared file you would like to use. labels are separated by dashes.\n";
-		helpString += "The kruskal.wallis command should be in the following format: kruskal.wallis(shared=final.an.shared, design=final.design, class=treatment).\n";
+		helpString += "The lefse command should be in the following format: lefse(shared=final.an.shared, design=final.design, class=treatment, subclass=age).\n";
         return helpString;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "KruskalWallisCommand", "getHelpString");
+		m->errorOut(e, "LefseCommand", "getHelpString");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-string KruskalWallisCommand::getOutputPattern(string type) {
+string LefseCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
         
-        if (type == "kruskall-wallis") {  pattern = "[filename],[distance],kruskall_wallis"; }
+        if (type == "summary") {  pattern = "[filename],[distance],lefse_summary"; }
+        else if (type == "kruskall-wallis") {  pattern = "[filename],[distance],kruskall_wallis"; }
+        else if (type == "wilcoxon") {  pattern = "[filename],[distance],wilcoxon"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
         
         return pattern;
     }
     catch(exception& e) {
-        m->errorOut(e, "KruskalWallisCommand", "getOutputPattern");
+        m->errorOut(e, "LefseCommand", "getOutputPattern");
         exit(1);
     }
 }
 //**********************************************************************************************************************
-KruskalWallisCommand::KruskalWallisCommand(){
+LefseCommand::LefseCommand(){
 	try {
 		abort = true; calledHelp = true;
 		setParameters();
         vector<string> tempOutNames;
+		outputTypes["summary"] = tempOutNames;
         outputTypes["kruskall-wallis"] = tempOutNames;
+        outputTypes["wilcoxon"] = tempOutNames;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "KruskalWallisCommand", "KruskalWallisCommand");
+		m->errorOut(e, "LefseCommand", "LefseCommand");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-KruskalWallisCommand::KruskalWallisCommand(string option)  {
+LefseCommand::LefseCommand(string option)  {
 	try {
 		abort = false; calledHelp = false;
         allLines = 1;
@@ -99,7 +108,9 @@ KruskalWallisCommand::KruskalWallisCommand(string option)  {
 			}
 			
 			vector<string> tempOutNames;
+            outputTypes["summary"] = tempOutNames;
             outputTypes["kruskall-wallis"] = tempOutNames;
+            outputTypes["wilcoxon"] = tempOutNames;
             
 			//if the user changes the input directory command factory will send this info to us in the output parameter
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);
@@ -123,7 +134,7 @@ KruskalWallisCommand::KruskalWallisCommand(string option)  {
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
             }
-            
+                    
             //get shared file, it is required
 			sharedfile = validParameter.validFile(parameters, "shared", true);
 			if (sharedfile == "not open") { sharedfile = ""; abort = true; }
@@ -158,21 +169,32 @@ KruskalWallisCommand::KruskalWallisCommand(string option)  {
             
             mclass = validParameter.validFile(parameters, "class", false);
 			if (mclass == "not found") { mclass = ""; }
+			
+            subclass = validParameter.validFile(parameters, "subclass", false);
+			if (subclass == "not found") { subclass = ""; }
             
             classes = validParameter.validFile(parameters, "classes", false);
 			if (classes == "not found") { classes = ""; }
             
+            string temp = validParameter.validFile(parameters, "anova_alpha", false);
+			if (temp == "not found") { temp = "0.05"; }
+			m->mothurConvert(temp, anovaAlpha);
+            
+            temp = validParameter.validFile(parameters, "wilcoxon_alpha", false);
+			if (temp == "not found") { temp = "0.05"; }
+			m->mothurConvert(temp, wilcoxonAlpha);
+
 		}
 		
 	}
 	catch(exception& e) {
-		m->errorOut(e, "KruskalWallisCommand", "KruskalWallisCommand");
+		m->errorOut(e, "LefseCommand", "LefseCommand");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
 
-int KruskalWallisCommand::execute(){
+int LefseCommand::execute(){
 	try {
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
@@ -264,7 +286,7 @@ int KruskalWallisCommand::execute(){
             
             for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
         }
-        
+                
 		
         //output files created by command
 		m->mothurOutEndLine();
@@ -275,13 +297,30 @@ int KruskalWallisCommand::execute(){
 		
     }
 	catch(exception& e) {
-		m->errorOut(e, "KruskalWallisCommand", "execute");
+		m->errorOut(e, "LefseCommand", "execute");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
 
-int KruskalWallisCommand::process(vector<SharedRAbundVector*>& lookup, DesignMap& designMap) {
+int LefseCommand::process(vector<SharedRAbundVector*>& lookup, DesignMap& designMap) {
+	try {
+        //run kruskal wallis on each otu
+        vector<int> significantOtuLabels = runKruskalWallis(lookup, designMap);
+        
+        //check for subclass
+        if (subclass != "") {  significantOtuLabels = runWilcoxon(lookup, designMap, significantOtuLabels);  }
+        
+        return 0;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "LefseCommand", "process");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+
+vector<int> LefseCommand::runKruskalWallis(vector<SharedRAbundVector*>& lookup, DesignMap& designMap) {
 	try {
         map<string, string> variables;
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
@@ -293,6 +332,7 @@ int KruskalWallisCommand::process(vector<SharedRAbundVector*>& lookup, DesignMap
 		outputNames.push_back(outputFileName); outputTypes["kruskall-wallis"].push_back(outputFileName);
         out << "OTULabel\tKW\tPvalue\n";
         
+        vector<int> significantOtuLabels;
         int numBins = lookup[0]->getNumBins();
         //sanity check to make sure each treatment has a group in the shared file
         set<string> treatments;
@@ -320,16 +360,130 @@ int KruskalWallisCommand::process(vector<SharedRAbundVector*>& lookup, DesignMap
             
             //output H and signifigance
             out << m->currentBinLabels[i] << '\t' << H << '\t' << pValue << endl;
+            
+            if (pValue < anovaAlpha) {  significantOtuLabels.push_back(i);  }
         }
         out.close();
-                
-        return 0;
+        
+        return significantOtuLabels;
     }
 	catch(exception& e) {
-		m->errorOut(e, "KruskalWallisCommand", "process");
+		m->errorOut(e, "LefseCommand", "runKruskalWallis");
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
+
+vector<int> LefseCommand::runWilcoxon(vector<SharedRAbundVector*>& lookup, DesignMap& designMap, vector<int> bins) {
+    try {
+        vector<int> significantOtuLabels;
+        //if it exists and meets the following requirements run Wilcoxon
+        /*
+         1. Subclass members all belong to same main class
+         2. Number of groups in each subclass is the same
+         3. anything else??
+         
+         */
+        vector<string> subclasses;
+        map<string, string> subclass2Class;
+        map<string, int> subclassCounts;
+        map<string, vector<int> > subClass2GroupIndex; //maps subclass name to vector of indexes in lookup from that subclass. old -> 1,2,3 means groups in location 1,2,3 of lookup are from old.  Saves time below.
+        bool error = false;
+        for (int j = 0; j < lookup.size(); j++) {
+            string group = lookup[j]->getGroup();
+            string treatment = designMap.get(group, mclass); //get value for this group in this category
+            string thisSub = designMap.get(group, subclass);
+            map<string, string>::iterator it = subclass2Class.find(thisSub);
+            if (it == subclass2Class.end()) {
+                subclass2Class[thisSub] = treatment;
+                subclassCounts[thisSub] = 1;
+                vector<int> temp; temp.push_back(j);
+                subClass2GroupIndex[thisSub] = temp;
+            }
+            else {
+                subclassCounts[thisSub]++;
+                subClass2GroupIndex[thisSub].push_back(j);
+                if (it->second != treatment) {
+                    error = true;
+                    m->mothurOut("[ERROR]: subclass " + thisSub + " has members in " + it->second + " and " + treatment + ". Subclass members must be from the same class. Ignoring wilcoxon.\n");
+                }
+            }
+        }
+        
+        if (error) { return significantOtuLabels; }
+        else { //check counts to make sure subclasses are the same size
+            set<int> counts;
+            for (map<string, int>::iterator it = subclassCounts.begin(); it != subclassCounts.end(); it++) { counts.insert(it->second); }
+            if (counts.size() > 1) { m->mothurOut("[ERROR]: subclasses must be the same size. Ignoring wilcoxon.\n");
+                return significantOtuLabels;  }
+        }
+        
+        int numBins = lookup[0]->getNumBins();
+        vector<compGroup> comp;
+        //find comparisons and fill comp
+        map<string, int>::iterator itB;
+        for(map<string, int>::iterator it=subclassCounts.begin();it!=subclassCounts.end();it++){
+            itB = it;itB++;
+            for(itB;itB!=subclassCounts.end();itB++){
+                compGroup temp(it->first,itB->first);
+                comp.push_back(temp);
+            }			
+        }
+
+        int numComp = comp.size();
+        if (numComp < 2) {  m->mothurOut("[ERROR]: Need at least 2 subclasses, Ignoring Wilcoxon.\n");
+            return significantOtuLabels;  }
+        
+        map<string, string> variables;
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
+        variables["[distance]"] = lookup[0]->getLabel();
+        string outputFileName = getOutputFileName("wilcoxon",variables);
+        
+        ofstream out;
+        m->openOutputFile(outputFileName, out);
+        outputNames.push_back(outputFileName); outputTypes["wilcoxon"].push_back(outputFileName);
+        out << "OTULabel\tComparision\tWilcoxon\tPvalue\n";
+        
+        LinearAlgebra linear;
+        for (int i = 0; i < numBins; i++) {
+            if (m->control_pressed) { break; }
+            
+            if (m->inUsersGroups(i, bins)) { //flagged in Kruskal Wallis
+                
+                bool sig = false;
+                //for each subclass comparision
+                for (int j = 0; j < numComp; j++) {
+                    //fill x and y with this comparisons data
+                    vector<double> x; vector<double> y;
+                    
+                    //fill x and y
+                    vector<int> xIndexes = subClass2GroupIndex[comp[j].group1]; //indexes in lookup for this subclass
+                    for (int k = 0; k < xIndexes.size(); k++) { x.push_back(lookup[xIndexes[k]]->getAbundance(i)); }
+                    
+                    vector<int> yIndexes = subClass2GroupIndex[comp[j].group2]; //indexes in lookup for this subclass
+                    for (int k = 0; k < yIndexes.size(); k++) { y.push_back(lookup[yIndexes[k]]->getAbundance(i)); }
+                    
+                    double pValue = 0.0;
+                    double H = linear.calcWilcoxon(x, y, pValue);
+            
+                    //output H and signifigance
+                    out << m->currentBinLabels[i] << '\t' << comp[j].getCombo() << '\t' << H << '\t' << pValue << endl;
+                    
+                    //set sig - not sure how yet
+                }
+                if (sig) {  significantOtuLabels.push_back(i);  }
+            }
+        }
+        out.close();
+        
+        return significantOtuLabels;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "LefseCommand", "runWilcoxon");
+        exit(1);
+    }
+}
+
 //**********************************************************************************************************************
 
 

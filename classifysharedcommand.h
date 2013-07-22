@@ -24,7 +24,7 @@ public:
   string getHelpString();	
   string getOutputPattern(string);
   string getCitation() { return "http://www.mothur.org/wiki/Classify.shared\n"; }
-  string getDescription()		{ return "description"; }
+  string getDescription()		{ return "implements the random forest machine learning algorithm to identify OTUs that can be used to differentiate between various groups of samples"; }
   int execute();
   
   void help() { m->mothurOut(getHelpString()); }

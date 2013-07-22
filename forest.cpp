@@ -29,7 +29,8 @@ Forest::Forest(const std::vector < std::vector<int> > dataSet,
         discardHighErrorTrees(discardHighErrorTrees),
         highErrorTreeDiscardThreshold(highErrorTreeDiscardThreshold),
         optimumFeatureSubsetSelectionCriteria(optimumFeatureSubsetSelectionCriteria),
-        featureStandardDeviationThreshold(featureStandardDeviationThreshold)
+        featureStandardDeviationThreshold(featureStandardDeviationThreshold),
+		predictedClasses((int)dataSet.size(), -1)
         {
         
     m = MothurOut::getInstance();

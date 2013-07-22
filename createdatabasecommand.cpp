@@ -380,8 +380,8 @@ int CreateDatabaseCommand::execute(){
                 if (countfile == "") {
                     sort(binNames.begin(), binNames.end());
                     bin = "";
-                    for (int i = 0; i < binNames.size()-1; i++) {
-                        bin += binNames[i] + ',';
+                    for (int j = 0; j < binNames.size()-1; j++) {
+                        bin += binNames[j] + ',';
                     }
                     bin += binNames[binNames.size()-1];
                     map<string, string>::iterator it = repNames.find(bin);
@@ -743,7 +743,7 @@ vector<SharedRAbundVector*> CreateDatabaseCommand::getShared(){
         return lookup;
     }
 	catch(exception& e) {
-		m->errorOut(e, "CreateDatabaseCommand", "getList");
+		m->errorOut(e, "CreateDatabaseCommand", "getShared");
 		exit(1);
 	}
 }

@@ -24,7 +24,7 @@ vector<string> TrimSeqsCommand::setParameters(){
         CommandParameter preorient("checkorient", "Boolean", "", "F", "", "", "","",false,false,true); parameters.push_back(preorient);
 		CommandParameter pmaxambig("maxambig", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(pmaxambig);
 		CommandParameter pmaxhomop("maxhomop", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pmaxhomop);
-		CommandParameter pminlength("minlength", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pminlength);
+		CommandParameter pminlength("minlength", "Number", "", "1", "", "", "","",false,false); parameters.push_back(pminlength);
 		CommandParameter pmaxlength("maxlength", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pmaxlength);
 		CommandParameter ppdiffs("pdiffs", "Number", "", "0", "", "", "","",false,false,true); parameters.push_back(ppdiffs);
 		CommandParameter pbdiffs("bdiffs", "Number", "", "0", "", "", "","",false,false,true); parameters.push_back(pbdiffs);
@@ -256,7 +256,7 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 			temp = validParameter.validFile(parameters, "maxhomop", false);		if (temp == "not found") { temp = "0"; }
 			m->mothurConvert(temp, maxHomoP);  
 
-			temp = validParameter.validFile(parameters, "minlength", false);	if (temp == "not found") { temp = "0"; }
+			temp = validParameter.validFile(parameters, "minlength", false);	if (temp == "not found") { temp = "1"; }
 			m->mothurConvert(temp, minLength); 
 			
 			temp = validParameter.validFile(parameters, "maxlength", false);	if (temp == "not found") { temp = "0"; }
@@ -715,7 +715,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 			int currentSeqsDiffs = 0;
 
 			Sequence currSeq(inFASTA); m->gobble(inFASTA);
-			//cout << currSeq.getName() << '\t' << currSeq.getUnaligned().length() << endl;
+			//cout << currSeq.getName() << '\t' << currSeq.getUnaligned() << endl;
             Sequence savedSeq(currSeq.getName(), currSeq.getAligned());
             
 			QualityScores currQual; QualityScores savedQual;
@@ -745,7 +745,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
                     }
 					else{ currentSeqsDiffs += success;  }
 				}
-				
+				//cout << currSeq.getName() << '\t' << currSeq.getUnaligned() << endl;
                 if(numSpacers != 0){
 					success = trimOligos->stripSpacer(currSeq, currQual);
 					if(success > sdiffs)		{	trashCode += 's';	}
@@ -775,13 +775,13 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
                     
                     int thisBarcodeIndex = 0;
                     int thisPrimerIndex = 0;
-                    
+                    //cout << currSeq.getName() << '\t' << savedSeq.getUnaligned() << endl;
                     if(numBarcodes != 0){
                         thisSuccess = rtrimOligos->stripBarcode(savedSeq, savedQual, thisBarcodeIndex);
                         if(thisSuccess > bdiffs)		{ thisTrashCode += "b"; }
                         else{ thisCurrentSeqsDiffs += thisSuccess;  }
                     }
-                    
+                    //cout << currSeq.getName() << '\t' << savedSeq.getUnaligned() << endl;
                     if(numFPrimers != 0){
                         thisSuccess = rtrimOligos->stripForward(savedSeq, savedQual, thisPrimerIndex, keepforward);
                         if(thisSuccess > pdiffs)		{ thisTrashCode += "f"; }

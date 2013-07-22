@@ -40,6 +40,9 @@ public:
 	vector<string> getNamesSeqs(vector<string>); //get names of seqs belonging to a group or set of groups
 	int getNumSeqs(string); //return the number of seqs in a given group
     int getCopy(GroupMap*);
+    int renameSeq(string, string);
+    int print(ofstream&);
+    int print(ofstream&, vector<string>); //print certain groups
     
     
     map<string, int> groupIndex;  //groupname, vectorIndex in namesOfGroups. - used by collectdisplays and libshuff commands.
