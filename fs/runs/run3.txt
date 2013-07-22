@@ -1,0 +1,507 @@
+populateDecisionTrees()
+Creating 0 (th) Decision tree
+len(self.bootstrappedTestSamples): 61
+numCorrect: 33
+treeErrorRate: 0.459016393443
+variableRanks: [[9, 2], [15, 2], [39, 2], [1, 1], [11, 1], [22, 1], [34, 1], [36, 1], [143, 1], [144, 1]]
+Creating 1 (th) Decision tree
+len(self.bootstrappedTestSamples): 64
+numCorrect: 30
+treeErrorRate: 0.53125
+variableRanks: [[9, 3], [12, 3], [21, 1], [22, 1], [33, 1]]
+Creating 2 (th) Decision tree
+len(self.bootstrappedTestSamples): 71
+numCorrect: 37
+treeErrorRate: 0.478873239437
+variableRanks: [[12, 4], [158, 3], [64, 2], [65, 2], [112, 2], [120, 2], [2, 1], [32, 1], [33, 1], [52, 1], [76, 1], [82, 1], [91, 1], [140, 1], [144, 1], [145, 1]]
+Creating 3 (th) Decision tree
+len(self.bootstrappedTestSamples): 71
+numCorrect: 51
+treeErrorRate: 0.281690140845
+variableRanks: [[9, 9], [30, 4], [158, 4], [64, 3], [182, 2], [423, 2], [40, 1], [61, 1], [78, 1], [414, 1]]
+Creating 4 (th) Decision tree
+len(self.bootstrappedTestSamples): 70
+numCorrect: 42
+treeErrorRate: 0.4
+variableRanks: [[9, 8], [31, 6], [24, 5], [21, 3], [7, 2], [40, 1], [57, 1], [182, 1], [399, 1]]
+Creating 5 (th) Decision tree
+len(self.bootstrappedTestSamples): 64
+numCorrect: 39
+treeErrorRate: 0.390625
+variableRanks: [[22, 5], [9, 4], [21, 2], [24, 2], [151, 2], [3, 1], [4, 1], [52, 1], [91, 1], [118, 1], [144, 1], [258, 1]]
+Creating 6 (th) Decision tree
+len(self.bootstrappedTestSamples): 67
+numCorrect: 47
+treeErrorRate: 0.298507462687
+variableRanks: [[9, 20], [37, 4], [15, 3], [31, 3], [155, 2], [2, 1], [228, 1], [240, 1]]
+Creating 7 (th) Decision tree
+len(self.bootstrappedTestSamples): 73
+numCorrect: 40
+treeErrorRate: 0.452054794521
+variableRanks: [[151, 6], [30, 2], [36, 2], [37, 2], [104, 2], [119, 2], [195, 2], [7, 1], [69, 1]]
+Creating 8 (th) Decision tree
+len(self.bootstrappedTestSamples): 65
+numCorrect: 33
+treeErrorRate: 0.492307692308
+variableRanks: [[23, 4], [24, 2], [31, 2], [129, 1], [143, 1]]
+Creating 9 (th) Decision tree
+len(self.bootstrappedTestSamples): 72
+numCorrect: 45
+treeErrorRate: 0.375
+variableRanks: [[2, 4], [9, 4], [39, 4], [159, 3], [58, 2], [264, 2], [7, 1], [10, 1], [37, 1]]
+Creating 10 (th) Decision tree
+len(self.bootstrappedTestSamples): 66
+numCorrect: 36
+treeErrorRate: 0.454545454545
+variableRanks: [[9, 3], [37, 3], [33, 2], [2, 1], [12, 1], [25, 1], [285, 1], [380, 1]]
+Creating 11 (th) Decision tree
+len(self.bootstrappedTestSamples): 68
+numCorrect: 39
+treeErrorRate: 0.426470588235
+variableRanks: [[31, 4], [11, 1], [21, 1], [41, 1], [65, 1], [184, 1]]
+Creating 12 (th) Decision tree
+len(self.bootstrappedTestSamples): 78
+numCorrect: 37
+treeErrorRate: 0.525641025641
+variableRanks: [[159, 4], [15, 2], [22, 1], [57, 1], [232, 1]]
+Creating 13 (th) Decision tree
+len(self.bootstrappedTestSamples): 73
+numCorrect: 50
+treeErrorRate: 0.315068493151
+variableRanks: [[32, 5], [41, 4], [15, 3], [64, 2], [2, 1], [9, 1], [36, 1], [51, 1], [57, 1], [286, 1]]
+Creating 14 (th) Decision tree
+len(self.bootstrappedTestSamples): 77
+numCorrect: 38
+treeErrorRate: 0.506493506494
+variableRanks: [[58, 2], [69, 2], [2, 1], [100, 1], [114, 1], [141, 1]]
+Creating 15 (th) Decision tree
+len(self.bootstrappedTestSamples): 73
+numCorrect: 43
+treeErrorRate: 0.41095890411
+variableRanks: [[47, 8], [24, 3], [2, 2], [3, 1], [9, 1], [33, 1], [34, 1], [36, 1], [40, 1], [41, 1], [61, 1], [79, 1], [84, 1], [155, 1], [483, 1]]
+Creating 16 (th) Decision tree
+len(self.bootstrappedTestSamples): 63
+numCorrect: 34
+treeErrorRate: 0.460317460317
+variableRanks: [[9, 5], [22, 2], [27, 2], [31, 2], [67, 2], [282, 2], [32, 1], [69, 1], [183, 1]]
+Creating 17 (th) Decision tree
+len(self.bootstrappedTestSamples): 72
+numCorrect: 47
+treeErrorRate: 0.347222222222
+variableRanks: [[9, 5], [33, 3], [34, 2], [74, 2], [105, 2], [17, 1], [68, 1], [78, 1], [262, 1], [277, 1], [373, 1]]
+Creating 18 (th) Decision tree
+len(self.bootstrappedTestSamples): 65
+numCorrect: 42
+treeErrorRate: 0.353846153846
+variableRanks: [[9, 9], [31, 6], [7, 2], [11, 2], [15, 1], [36, 1], [100, 1], [108, 1], [253, 1]]
+Creating 19 (th) Decision tree
+len(self.bootstrappedTestSamples): 73
+numCorrect: 29
+treeErrorRate: 0.602739726027
+variableRanks: [[182, 2], [25, 1], [80, 1], [154, 1], [158, 1]]
+Creating 20 (th) Decision tree
+len(self.bootstrappedTestSamples): 72
+numCorrect: 46
+treeErrorRate: 0.361111111111
+variableRanks: [[9, 11], [27, 8], [22, 1], [494, 1]]
+Creating 21 (th) Decision tree
+len(self.bootstrappedTestSamples): 63
+numCorrect: 36
+treeErrorRate: 0.428571428571
+variableRanks: [[9, 3], [36, 3], [37, 3], [144, 3], [28, 2], [64, 2], [2, 1], [31, 1], [117, 1], [133, 1], [142, 1]]
+Creating 22 (th) Decision tree
+len(self.bootstrappedTestSamples): 69
+numCorrect: 44
+treeErrorRate: 0.36231884058
+variableRanks: [[33, 5], [3, 2], [9, 2], [39, 2], [92, 2], [121, 2], [10, 1], [40, 1], [293, 1], [378, 1]]
+Creating 23 (th) Decision tree
+len(self.bootstrappedTestSamples): 64
+numCorrect: 37
+treeErrorRate: 0.421875
+variableRanks: [[82, 7], [32, 3], [3, 2], [31, 1], [41, 1], [57, 1], [319, 1], [373, 1]]
+Creating 24 (th) Decision tree
+len(self.bootstrappedTestSamples): 67
+numCorrect: 43
+treeErrorRate: 0.358208955224
+variableRanks: [[253, 6], [12, 4], [264, 4], [373, 2], [141, 1], [144, 1], [285, 1]]
+Creating 25 (th) Decision tree
+len(self.bootstrappedTestSamples): 63
+numCorrect: 41
+treeErrorRate: 0.349206349206
+variableRanks: [[9, 10], [36, 5], [31, 2], [57, 2], [3, 1], [35, 1], [64, 1], [87, 1], [141, 1]]
+Creating 26 (th) Decision tree
+len(self.bootstrappedTestSamples): 76
+numCorrect: 46
+treeErrorRate: 0.394736842105
+variableRanks: [[9, 5], [33, 5], [37, 3], [47, 3], [155, 3], [34, 2], [141, 2], [1, 1], [7, 1], [40, 1], [65, 1], [243, 1]]
+Creating 27 (th) Decision tree
+len(self.bootstrappedTestSamples): 68
+numCorrect: 49
+treeErrorRate: 0.279411764706
+variableRanks: [[9, 10], [41, 6], [36, 3], [43, 2], [26, 1], [40, 1], [98, 1], [151, 1], [174, 1], [202, 1]]
+Creating 28 (th) Decision tree
+len(self.bootstrappedTestSamples): 72
+numCorrect: 50
+treeErrorRate: 0.305555555556
+variableRanks: [[9, 10], [36, 10], [7, 8], [43, 4], [27, 3], [16, 1], [37, 1], [313, 1]]
+Creating 29 (th) Decision tree
+len(self.bootstrappedTestSamples): 72
+numCorrect: 42
+treeErrorRate: 0.416666666667
+variableRanks: [[12, 1], [27, 1], [28, 1], [36, 1], [42, 1], [54, 1], [72, 1], [78, 1], [143, 1], [264, 1], [398, 1]]
+Creating 30 (th) Decision tree
+len(self.bootstrappedTestSamples): 76
+numCorrect: 55
+treeErrorRate: 0.276315789474
+variableRanks: [[9, 19], [23, 4], [1, 2], [62, 2], [2, 1], [64, 1], [219, 1]]
+Creating 31 (th) Decision tree
+len(self.bootstrappedTestSamples): 65
+numCorrect: 41
+treeErrorRate: 0.369230769231
+variableRanks: [[36, 7], [39, 3], [65, 3], [9, 2], [56, 2], [60, 2], [182, 2], [7, 1], [13, 1], [15, 1], [32, 1], [100, 1], [399, 1], [421, 1]]
+Creating 32 (th) Decision tree
+len(self.bootstrappedTestSamples): 67
+numCorrect: 40
+treeErrorRate: 0.402985074627
+variableRanks: [[31, 10], [9, 9], [36, 3], [92, 2], [144, 2], [174, 2], [2, 1], [43, 1], [167, 1]]
+Creating 33 (th) Decision tree
+len(self.bootstrappedTestSamples): 65
+numCorrect: 25
+treeErrorRate: 0.615384615385
+variableRanks: [[58, 3], [12, 1], [34, 1], [101, 1]]
+Creating 34 (th) Decision tree
+len(self.bootstrappedTestSamples): 71
+numCorrect: 51
+treeErrorRate: 0.281690140845
+variableRanks: [[9, 14], [98, 3], [105, 2], [24, 1], [103, 1], [161, 1]]
+Creating 35 (th) Decision tree
+len(self.bootstrappedTestSamples): 62
+numCorrect: 43
+treeErrorRate: 0.306451612903
+variableRanks: [[11, 5], [33, 5], [43, 4], [3, 3], [9, 2], [21, 1], [28, 1], [79, 1], [141, 1]]
+Creating 36 (th) Decision tree
+len(self.bootstrappedTestSamples): 68
+numCorrect: 41
+treeErrorRate: 0.397058823529
+variableRanks: [[41, 6], [64, 6], [34, 3], [7, 2], [65, 2], [88, 2], [119, 2], [51, 1], [180, 1], [279, 1]]
+Creating 37 (th) Decision tree
+len(self.bootstrappedTestSamples): 68
+numCorrect: 49
+treeErrorRate: 0.279411764706
+variableRanks: [[9, 13], [23, 4], [285, 3], [41, 2], [7, 1], [25, 1], [31, 1], [43, 1], [151, 1], [322, 1]]
+Creating 38 (th) Decision tree
+len(self.bootstrappedTestSamples): 66
+numCorrect: 37
+treeErrorRate: 0.439393939394
+variableRanks: [[43, 4], [9, 3], [11, 2], [44, 2], [12, 1], [16, 1]]
+Creating 39 (th) Decision tree
+len(self.bootstrappedTestSamples): 68
+numCorrect: 40
+treeErrorRate: 0.411764705882
+variableRanks: [[9, 7], [36, 7], [25, 3], [61, 3], [74, 3], [41, 2], [155, 2], [158, 2], [14, 1], [231, 1], [265, 1], [367, 1]]
+Creating 40 (th) Decision tree
+len(self.bootstrappedTestSamples): 78
+numCorrect: 40
+treeErrorRate: 0.487179487179
+variableRanks: [[34, 3], [51, 3], [160, 2], [24, 1], [144, 1], [255, 1]]
+Creating 41 (th) Decision tree
+len(self.bootstrappedTestSamples): 72
+numCorrect: 45
+treeErrorRate: 0.375
+variableRanks: [[9, 9], [27, 7], [100, 4], [7, 2], [39, 2], [159, 2], [12, 1], [21, 1], [31, 1], [52, 1], [108, 1], [156, 1]]
+Creating 42 (th) Decision tree
+len(self.bootstrappedTestSamples): 61
+numCorrect: 38
+treeErrorRate: 0.377049180328
+variableRanks: [[27, 7], [15, 5], [34, 3], [39, 3], [9, 2], [143, 2], [3, 1], [33, 1], [44, 1], [47, 1], [79, 1], [87, 1], [122, 1], [232, 1]]
+Creating 43 (th) Decision tree
+len(self.bootstrappedTestSamples): 70
+numCorrect: 38
+treeErrorRate: 0.457142857143
+variableRanks: [[3, 2], [64, 2], [76, 2], [32, 1], [69, 1], [180, 1]]
+Creating 44 (th) Decision tree
+len(self.bootstrappedTestSamples): 70
+numCorrect: 36
+treeErrorRate: 0.485714285714
+variableRanks: [[9, 5], [2, 3], [21, 3], [23, 1], [84, 1]]
+Creating 45 (th) Decision tree
+len(self.bootstrappedTestSamples): 62
+numCorrect: 37
+treeErrorRate: 0.403225806452
+variableRanks: [[65, 5], [9, 4], [62, 3], [11, 2], [69, 2], [103, 2], [2, 1], [7, 1], [29, 1], [41, 1], [47, 1], [64, 1], [285, 1]]
+Creating 46 (th) Decision tree
+len(self.bootstrappedTestSamples): 74
+numCorrect: 43
+treeErrorRate: 0.418918918919
+variableRanks: [[34, 2], [36, 2], [65, 2], [159, 2], [10, 1], [16, 1], [33, 1], [82, 1], [158, 1], [190, 1], [313, 1], [407, 1], [458, 1]]
+Creating 47 (th) Decision tree
+len(self.bootstrappedTestSamples): 65
+numCorrect: 33
+treeErrorRate: 0.492307692308
+variableRanks: [[37, 2], [51, 2], [56, 2], [7, 1], [41, 1]]
+Creating 48 (th) Decision tree
+len(self.bootstrappedTestSamples): 72
+numCorrect: 42
+treeErrorRate: 0.416666666667
+variableRanks: [[12, 3], [1, 2], [2, 2], [51, 2], [58, 2], [11, 1], [28, 1], [37, 1], [56, 1], [88, 1], [113, 1], [120, 1], [217, 1]]
+Creating 49 (th) Decision tree
+len(self.bootstrappedTestSamples): 73
+numCorrect: 41
+treeErrorRate: 0.438356164384
+variableRanks: [[1, 5], [65, 5], [24, 3], [27, 3], [31, 2], [43, 2], [228, 2], [0, 1], [2, 1], [3, 1], [7, 1], [30, 1]]
+Creating 50 (th) Decision tree
+len(self.bootstrappedTestSamples): 64
+numCorrect: 36
+treeErrorRate: 0.4375
+variableRanks: [[27, 6], [43, 3], [21, 2], [11, 1], [12, 1], [26, 1], [36, 1], [47, 1], [61, 1], [285, 1]]
+Creating 51 (th) Decision tree
+len(self.bootstrappedTestSamples): 65
+numCorrect: 47
+treeErrorRate: 0.276923076923
+variableRanks: [[9, 17], [32, 3], [43, 3], [184, 2], [285, 2], [2, 1], [44, 1], [78, 1]]
+Creating 52 (th) Decision tree
+len(self.bootstrappedTestSamples): 67
+numCorrect: 38
+treeErrorRate: 0.432835820896
+variableRanks: [[33, 6], [21, 5], [37, 4], [82, 4], [87, 3], [7, 2], [22, 1], [40, 1], [65, 1], [91, 1], [160, 1], [217, 1], [407, 1]]
+Creating 53 (th) Decision tree
+len(self.bootstrappedTestSamples): 68
+numCorrect: 36
+treeErrorRate: 0.470588235294
+variableRanks: [[9, 4], [22, 4], [23, 2], [7, 1], [33, 1], [108, 1], [429, 1]]
+Creating 54 (th) Decision tree
+len(self.bootstrappedTestSamples): 73
+numCorrect: 43
+treeErrorRate: 0.41095890411
+variableRanks: [[34, 6], [39, 6], [21, 3], [86, 3], [12, 1], [20, 1], [29, 1], [47, 1], [112, 1]]
+Creating 55 (th) Decision tree
+len(self.bootstrappedTestSamples): 59
+numCorrect: 39
+treeErrorRate: 0.338983050847
+variableRanks: [[9, 3], [11, 2], [133, 2], [143, 2], [3, 1], [41, 1], [64, 1], [293, 1]]
+Creating 56 (th) Decision tree
+len(self.bootstrappedTestSamples): 68
+numCorrect: 45
+treeErrorRate: 0.338235294118
+variableRanks: [[9, 3], [73, 3], [105, 3], [41, 2], [127, 2], [21, 1], [22, 1], [58, 1], [60, 1], [143, 1], [154, 1], [158, 1], [182, 1], [264, 1], [318, 1], [367, 1], [679, 1]]
+Creating 57 (th) Decision tree
+len(self.bootstrappedTestSamples): 71
+numCorrect: 34
+treeErrorRate: 0.521126760563
+variableRanks: [[1, 2], [10, 2], [125, 2], [15, 1], [26, 1], [264, 1]]
+Creating 58 (th) Decision tree
+len(self.bootstrappedTestSamples): 76
+numCorrect: 41
+treeErrorRate: 0.460526315789
+variableRanks: [[31, 4], [2, 2], [11, 2], [151, 2], [3, 1], [44, 1]]
+Creating 59 (th) Decision tree
+len(self.bootstrappedTestSamples): 74
+numCorrect: 40
+treeErrorRate: 0.459459459459
+variableRanks: [[51, 6], [21, 5], [11, 4], [1, 1], [2, 1], [20, 1], [34, 1], [37, 1], [67, 1], [71, 1], [77, 1], [190, 1]]
+Creating 60 (th) Decision tree
+len(self.bootstrappedTestSamples): 67
+numCorrect: 44
+treeErrorRate: 0.34328358209
+variableRanks: [[11, 5], [2, 4], [25, 3], [27, 3], [37, 3], [52, 3], [9, 2], [33, 2], [90, 2], [12, 1], [16, 1], [117, 1], [231, 1], [399, 1]]
+Creating 61 (th) Decision tree
+len(self.bootstrappedTestSamples): 61
+numCorrect: 36
+treeErrorRate: 0.409836065574
+variableRanks: [[264, 3], [129, 2], [175, 2], [285, 2], [9, 1], [24, 1], [25, 1], [61, 1], [65, 1], [86, 1], [182, 1]]
+Creating 62 (th) Decision tree
+len(self.bootstrappedTestSamples): 67
+numCorrect: 44
+treeErrorRate: 0.34328358209
+variableRanks: [[9, 14], [52, 2], [129, 2], [21, 1], [27, 1]]
+Creating 63 (th) Decision tree
+len(self.bootstrappedTestSamples): 70
+numCorrect: 50
+treeErrorRate: 0.285714285714
+variableRanks: [[9, 15], [11, 5], [96, 3], [40, 2], [7, 1], [21, 1], [27, 1], [31, 1], [41, 1], [57, 1], [92, 1], [212, 1]]
+Creating 64 (th) Decision tree
+len(self.bootstrappedTestSamples): 58
+numCorrect: 31
+treeErrorRate: 0.465517241379
+variableRanks: [[9, 4], [23, 2], [0, 1], [1, 1], [22, 1], [24, 1], [33, 1], [43, 1], [82, 1]]
+Creating 65 (th) Decision tree
+len(self.bootstrappedTestSamples): 70
+numCorrect: 46
+treeErrorRate: 0.342857142857
+variableRanks: [[9, 9], [7, 6], [11, 1], [32, 1], [154, 1], [156, 1]]
+Creating 66 (th) Decision tree
+len(self.bootstrappedTestSamples): 65
+numCorrect: 42
+treeErrorRate: 0.353846153846
+variableRanks: [[9, 14], [23, 2], [52, 1], [74, 1], [100, 1], [182, 1]]
+Creating 67 (th) Decision tree
+len(self.bootstrappedTestSamples): 74
+numCorrect: 48
+treeErrorRate: 0.351351351351
+variableRanks: [[9, 10], [24, 3], [89, 3], [1, 2], [34, 2], [74, 2], [26, 1], [64, 1], [398, 1]]
+Creating 68 (th) Decision tree
+len(self.bootstrappedTestSamples): 63
+numCorrect: 40
+treeErrorRate: 0.365079365079
+variableRanks: [[9, 8], [7, 2], [127, 2], [1, 1], [14, 1], [30, 1], [232, 1]]
+Creating 69 (th) Decision tree
+len(self.bootstrappedTestSamples): 64
+numCorrect: 42
+treeErrorRate: 0.34375
+variableRanks: [[33, 7], [7, 3], [9, 3], [32, 3], [119, 3], [65, 2], [1, 1], [24, 1], [34, 1], [40, 1], [43, 1], [55, 1], [158, 1], [190, 1], [365, 1]]
+Creating 70 (th) Decision tree
+len(self.bootstrappedTestSamples): 71
+numCorrect: 44
+treeErrorRate: 0.380281690141
+variableRanks: [[47, 3], [286, 2], [33, 1], [65, 1], [86, 1], [126, 1], [157, 1]]
+Creating 71 (th) Decision tree
+len(self.bootstrappedTestSamples): 67
+numCorrect: 40
+treeErrorRate: 0.402985074627
+variableRanks: [[41, 6], [9, 4], [23, 1], [100, 1], [133, 1], [143, 1], [207, 1]]
+Creating 72 (th) Decision tree
+len(self.bootstrappedTestSamples): 72
+numCorrect: 50
+treeErrorRate: 0.305555555556
+variableRanks: [[9, 8], [26, 4], [29, 2], [32, 2], [77, 2]]
+Creating 73 (th) Decision tree
+len(self.bootstrappedTestSamples): 69
+numCorrect: 40
+treeErrorRate: 0.420289855072
+variableRanks: [[39, 6], [9, 3], [22, 3], [41, 3], [24, 1], [65, 1], [100, 1]]
+Creating 74 (th) Decision tree
+len(self.bootstrappedTestSamples): 71
+numCorrect: 39
+treeErrorRate: 0.450704225352
+variableRanks: [[158, 5], [21, 3], [100, 3], [42, 2], [1, 1], [44, 1], [67, 1], [129, 1], [407, 1]]
+Creating 75 (th) Decision tree
+len(self.bootstrappedTestSamples): 72
+numCorrect: 35
+treeErrorRate: 0.513888888889
+variableRanks: [[1, 1], [22, 1], [78, 1], [93, 1], [141, 1], [158, 1], [161, 1], [182, 1]]
+Creating 76 (th) Decision tree
+len(self.bootstrappedTestSamples): 71
+numCorrect: 43
+treeErrorRate: 0.394366197183
+variableRanks: [[81, 4], [282, 3], [158, 2], [9, 1], [12, 1], [98, 1], [293, 1]]
+Creating 77 (th) Decision tree
+len(self.bootstrappedTestSamples): 69
+numCorrect: 39
+treeErrorRate: 0.434782608696
+variableRanks: [[9, 3], [52, 3], [27, 2], [58, 2], [157, 2], [160, 2], [11, 1], [22, 1], [29, 1], [62, 1], [92, 1]]
+Creating 78 (th) Decision tree
+len(self.bootstrappedTestSamples): 72
+numCorrect: 37
+treeErrorRate: 0.486111111111
+variableRanks: [[9, 2], [76, 2], [2, 1], [12, 1], [30, 1], [105, 1], [207, 1], [636, 1]]
+Creating 79 (th) Decision tree
+len(self.bootstrappedTestSamples): 70
+numCorrect: 38
+treeErrorRate: 0.457142857143
+variableRanks: [[117, 6], [9, 4], [39, 3], [7, 2], [24, 2], [47, 2], [122, 1], [273, 1], [400, 1]]
+Creating 80 (th) Decision tree
+len(self.bootstrappedTestSamples): 64
+numCorrect: 30
+treeErrorRate: 0.53125
+variableRanks: [[9, 6], [71, 2], [37, 1], [64, 1], [114, 1], [264, 1]]
+Creating 81 (th) Decision tree
+len(self.bootstrappedTestSamples): 71
+numCorrect: 42
+treeErrorRate: 0.408450704225
+variableRanks: [[9, 5], [29, 2], [34, 2], [25, 1], [36, 1], [43, 1], [156, 1], [262, 1]]
+Creating 82 (th) Decision tree
+len(self.bootstrappedTestSamples): 65
+numCorrect: 37
+treeErrorRate: 0.430769230769
+variableRanks: [[3, 3], [174, 3], [9, 1], [24, 1], [61, 1], [82, 1], [88, 1], [108, 1], [151, 1], [161, 1], [390, 1]]
+Creating 83 (th) Decision tree
+len(self.bootstrappedTestSamples): 68
+numCorrect: 40
+treeErrorRate: 0.411764705882
+variableRanks: [[9, 6], [37, 4], [7, 3], [253, 3], [12, 2], [61, 2], [100, 2], [3, 1], [25, 1], [26, 1], [72, 1], [161, 1]]
+Creating 84 (th) Decision tree
+len(self.bootstrappedTestSamples): 66
+numCorrect: 49
+treeErrorRate: 0.257575757576
+variableRanks: [[9, 8], [41, 8], [23, 3], [32, 3], [1, 2], [11, 2], [39, 2], [7, 1], [15, 1], [34, 1], [57, 1], [64, 1], [69, 1], [87, 1], [230, 1]]
+Creating 85 (th) Decision tree
+len(self.bootstrappedTestSamples): 65
+numCorrect: 46
+treeErrorRate: 0.292307692308
+variableRanks: [[9, 9], [27, 2], [31, 2], [65, 2], [141, 2], [21, 1], [22, 1], [32, 1], [40, 1], [44, 1], [47, 1], [84, 1], [100, 1], [219, 1]]
+Creating 86 (th) Decision tree
+len(self.bootstrappedTestSamples): 73
+numCorrect: 41
+treeErrorRate: 0.438356164384
+variableRanks: [[27, 4], [87, 3], [22, 1], [31, 1], [33, 1], [52, 1], [56, 1], [128, 1], [285, 1]]
+Creating 87 (th) Decision tree
+len(self.bootstrappedTestSamples): 70
+numCorrect: 44
+treeErrorRate: 0.371428571429
+variableRanks: [[9, 2], [21, 2], [24, 2], [27, 2], [41, 2], [79, 2], [7, 1], [34, 1], [100, 1], [182, 1]]
+Creating 88 (th) Decision tree
+len(self.bootstrappedTestSamples): 73
+numCorrect: 39
+treeErrorRate: 0.465753424658
+variableRanks: [[33, 2], [91, 2], [43, 1], [69, 1], [87, 1], [483, 1]]
+Creating 89 (th) Decision tree
+len(self.bootstrappedTestSamples): 69
+numCorrect: 38
+treeErrorRate: 0.449275362319
+variableRanks: [[33, 6], [9, 3], [31, 3], [145, 1]]
+Creating 90 (th) Decision tree
+len(self.bootstrappedTestSamples): 67
+numCorrect: 48
+treeErrorRate: 0.283582089552
+variableRanks: [[42, 5], [44, 5], [9, 3], [15, 3], [24, 3], [65, 3], [2, 2], [7, 2], [133, 2], [264, 2], [16, 1], [86, 1], [184, 1]]
+Creating 91 (th) Decision tree
+len(self.bootstrappedTestSamples): 71
+numCorrect: 37
+treeErrorRate: 0.478873239437
+variableRanks: [[34, 7], [82, 2], [2, 1], [9, 1], [28, 1], [58, 1], [101, 1]]
+Creating 92 (th) Decision tree
+len(self.bootstrappedTestSamples): 70
+numCorrect: 40
+treeErrorRate: 0.428571428571
+variableRanks: [[36, 5], [31, 3], [34, 3], [2, 2], [49, 2], [14, 1], [28, 1], [64, 1]]
+Creating 93 (th) Decision tree
+len(self.bootstrappedTestSamples): 64
+numCorrect: 47
+treeErrorRate: 0.265625
+variableRanks: [[15, 6], [71, 3], [2, 2], [9, 2], [145, 2], [232, 2], [3, 1], [4, 1], [92, 1], [120, 1], [141, 1], [204, 1], [571, 1]]
+Creating 94 (th) Decision tree
+len(self.bootstrappedTestSamples): 69
+numCorrect: 40
+treeErrorRate: 0.420289855072
+variableRanks: [[33, 7], [65, 2], [100, 2], [418, 2], [3, 1], [24, 1], [39, 1], [42, 1], [144, 1]]
+Creating 95 (th) Decision tree
+len(self.bootstrappedTestSamples): 78
+numCorrect: 34
+treeErrorRate: 0.564102564103
+variableRanks: [[3, 5], [29, 2], [31, 2], [34, 1], [44, 1], [145, 1]]
+Creating 96 (th) Decision tree
+len(self.bootstrappedTestSamples): 65
+numCorrect: 41
+treeErrorRate: 0.369230769231
+variableRanks: [[98, 4], [7, 3], [9, 3], [122, 2], [456, 2], [1, 1], [3, 1], [27, 1], [255, 1], [360, 1]]
+Creating 97 (th) Decision tree
+len(self.bootstrappedTestSamples): 76
+numCorrect: 45
+treeErrorRate: 0.407894736842
+variableRanks: [[11, 10], [216, 2], [9, 1], [155, 1]]
+Creating 98 (th) Decision tree
+len(self.bootstrappedTestSamples): 73
+numCorrect: 44
+treeErrorRate: 0.397260273973
+variableRanks: [[27, 4], [180, 4], [9, 3], [34, 2], [39, 2], [4, 1], [11, 1], [16, 1], [129, 1]]
+Creating 99 (th) Decision tree
+len(self.bootstrappedTestSamples): 62
+numCorrect: 43
+treeErrorRate: 0.306451612903
+variableRanks: [[9, 4], [27, 3], [22, 2], [33, 2], [71, 2], [23, 1], [26, 1], [155, 1], [204, 1]]
+calcForrestErrorRate()
+len(self.globalOutOfBagEstimates): 187
+numCorrect 135
+forrestErrorRate: 0.27807486631
+calcForrestVariableImportance()
+globalVariableRanks: [[9, 3.96], [27, 0.53], [31, 0.41], [36, 0.41], [11, 0.4], [33, 0.4], [34, 0.3], [7, 0.28], [21, 0.25], [65, 0.25], [41, 0.23], [24, 0.22], [2, 0.19], [64, 0.17], [23, 0.16], [12, 0.15], [82, 0.15], [22, 0.14], [37, 0.14], [39, 0.14], [43, 0.14], [51, 0.14], [264, 0.14], [58, 0.13], [15, 0.11], [144, 0.11], [44, 0.1], [285, 0.1], [32, 0.09], [158, 0.09], [253, 0.09], [151, 0.08], [100, 0.07], [119, 0.07], [86, 0.06], [98, 0.06], [129, 0.06], [25, 0.05], [40, 0.05], [47, 0.05], [52, 0.05], [143, 0.05], [29, 0.04], [88, 0.04], [127, 0.04], [155, 0.04], [182, 0.04], [42, 0.03], [67, 0.03], [74, 0.03], [79, 0.03], [96, 0.03], [103, 0.03], [112, 0.03], [161, 0.03], [174, 0.03], [373, 0.03], [399, 0.03], [4, 0.02], [16, 0.02], [69, 0.02], [73, 0.02], [81, 0.02], [114, 0.02], [120, 0.02], [125, 0.02], [133, 0.02], [156, 0.02], [204, 0.02], [228, 0.02], [232, 0.02], [282, 0.02], [293, 0.02], [367, 0.02], [398, 0.02], [407, 0.02], [418, 0.02], [483, 0.02], [13, 0.01], [17, 0.01], [20, 0.01], [57, 0.01], [60, 0.01], [77, 0.01], [84, 0.01], [92, 0.01], [101, 0.01], [104, 0.01], [118, 0.01], [128, 0.01], [140, 0.01], [142, 0.01], [145, 0.01], [157, 0.01], [160, 0.01], [167, 0.01], [175, 0.01], [195, 0.01], [207, 0.01], [212, 0.01], [216, 0.01], [217, 0.01], [219, 0.01], [230, 0.01], [255, 0.01], [262, 0.01], [265, 0.01], [279, 0.01], [286, 0.01], [318, 0.01], [322, 0.01], [378, 0.01], [380, 0.01], [400, 0.01], [421, 0.01], [423, 0.01], [456, 0.01], [458, 0.01], [571, 0.01], [636, 0.01], [679, 0.01]]

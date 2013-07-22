@@ -39,6 +39,7 @@ int RandomForest::calcForrestErrorRate() {
             int realOutcome = dataSet[indexOfSample][numFeatures];
             
             if (majorityVotedOutcome == realOutcome) { numCorrect++; }
+            predictedClasses[indexOfSample] = majorityVotedOutcome;
         }
         
         // TODO: save or return forrestErrorRate for future use;
@@ -94,6 +95,10 @@ int RandomForest::calcForrestVariableImportance(string filename) {
         
         VariableRankDescendingSorterDouble variableRankDescendingSorter;
         sort(globalVariableRanks.begin(), globalVariableRanks.end(), variableRankDescendingSorter);
+        
+        for (int i = 0; i < globalVariableRanks.size(); i++) {
+            cout << "[" << globalVariableRanks[i].first << ',' << globalVariableRanks[i].second << "], ";
+        }
         
         ofstream out;
         m->openOutputFile(filename, out);
@@ -229,4 +234,41 @@ int RandomForest::updateGlobalOutOfBagEstimates(DecisionTree* decisionTree) {
 }
 /***********************************************************************/
 
+vector<vector<int> > RandomForest::calcConfusionMatrix(map<int, string> intToTreatmentMap) {
+	int noOfClasses = intToTreatmentMap.size();
+	vector<vector<int> > confusionMatrix(noOfClasses, vector<int>(noOfClasses, 0));
 
+	for (int indexOfSample = 0; indexOfSample < predictedClasses.size(); indexOfSample++) {
+		int predictedClass = predictedClasses[indexOfSample];
+		int realClass = dataSet[indexOfSample][numFeatures];
+
+		// all values of predictedClasses are initialized to -1
+		if (predictedClass != -1) {
+			confusionMatrix[realClass][predictedClass]++;
+		}
+	}
+
+	// print the confusion matrix
+	m->mothurOut("\nConfusion Matrix\n------------------------------------------------------------------\n");
+	m->mothurOut("Real/Predicted");
+	for (int idx = 0; idx < noOfClasses; idx++) {
+		m->mothurOut("\t");
+		m->mothurOut(intToTreatmentMap[idx]);
+	}
+	m->mothurOut("\tclass.error\n");
+
+	for (int realClassIdx = 0; realClassIdx < noOfClasses; realClassIdx++) {
+		int classSize = 0;
+		m->mothurOut(intToTreatmentMap[realClassIdx] + "\t");
+		for (int predictedClassIdx = 0; predictedClassIdx < noOfClasses; predictedClassIdx++) {
+			classSize += confusionMatrix[realClassIdx][predictedClassIdx];
+			m->mothurOut(toString(confusionMatrix[realClassIdx][predictedClassIdx]) + "\t");
+		}
+		int wrongPrediction = classSize - confusionMatrix[realClassIdx][realClassIdx];
+		double errorPercentage = (double) wrongPrediction / classSize * 100;
+		m->mothurOut(toString(errorPercentage) + "\n");
+	}
+	m->mothurOut("\n");
+
+	return confusionMatrix;
+}

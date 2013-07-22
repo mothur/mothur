@@ -51,6 +51,7 @@ protected:
     // the penalization would be averaged, so this woould unlikely to create a local optmina
     
     vector<int> getGlobalDiscardedFeatureIndices();
+    void calculateFScore();
     
     int numDecisionTrees;
     int numSamples;
@@ -58,6 +59,9 @@ protected:
     vector< vector<int> > dataSet;
     vector<int> globalDiscardedFeatureIndices;
     vector<double> globalVariableImportanceList;
+    
+    vector< pair<int, double> > featureRanksByFScore;
+    
     string treeSplitCriterion;
   
     bool doPruning;
@@ -74,6 +78,10 @@ protected:
     // TODO: fix this, do we use pointers?
     vector<AbstractDecisionTree*> decisionTrees;
     
+    // predictedClasses[i] denotes the class predicted by the algorithm
+    // for i'th training sample
+    vector<int> predictedClasses;
+
     MothurOut* m;
     
 private:
