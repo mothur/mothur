@@ -56,6 +56,7 @@ private:
 
 	string method, fileroot, tag, outputDir, phylipfile, columnfile, namefile, format, distfile, countfile;
 	double cutoff;
+    float adjust;
 	string showabund, timing;
 	int precision, length;
 	ofstream sabundFile, rabundFile, listFile;

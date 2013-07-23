@@ -56,9 +56,9 @@ private:
 	string blastfile, method, namefile, countfile, overlapFile, distFile, outputDir;
 	ofstream sabundFile, rabundFile, listFile;
 	double cutoff;
-	float penalty;
+	float penalty, adjust;
 	int precision, length, precisionLength;
-	bool abort, minWanted, hclusterWanted, merge, hard;
+	bool abort, minWanted, hclusterWanted, merge, hard, cutoffSet;
 	
 	void printData(ListVector*);
 	ListVector* mergeOPFs(map<string, int>, float);

@@ -13,8 +13,8 @@
 
 /***********************************************************************/
 
-Cluster::Cluster(RAbundVector* rav, ListVector* lv, SparseDistanceMatrix* dm, float c, string f) :
-rabund(rav), list(lv), dMatrix(dm), method(f)
+Cluster::Cluster(RAbundVector* rav, ListVector* lv, SparseDistanceMatrix* dm, float c, string f, float cs) :
+rabund(rav), list(lv), dMatrix(dm), method(f), adjust(cs)
 {
 	try {
         
@@ -85,7 +85,21 @@ void Cluster::update(double& cutOFF){
 							changed = updateDistance(dMatrix->seqVec[smallCol][j], dMatrix->seqVec[smallRow][i]);
                             dMatrix->updateCellCompliment(smallCol, j);
 							break;
-						}else if (dMatrix->seqVec[smallCol][j].index < search) { j+=nColCells; } //we don't have a distance for this cell 
+						}else if (dMatrix->seqVec[smallCol][j].index < search) { //we don't have a distance for this cell
+                            if (adjust != -1.0) { //adjust
+                                merged = true;
+                                PDistCell value(search, adjust); //create a distance for the missing value
+                                int location = dMatrix->addCellSorted(smallCol, value);
+                                changed = updateDistance(dMatrix->seqVec[smallCol][location], dMatrix->seqVec[smallRow][i]);
+                                dMatrix->updateCellCompliment(smallCol, location);
+                                nColCells++;
+                                foundCol.push_back(0); //add a new found column
+                                //adjust value
+                                for (int k = foundCol.size()-1; k > location; k--) { foundCol[k] = foundCol[k-1]; }
+                                foundCol[location] = 1;
+                            }
+                            j+=nColCells;
+                        } 
 					}	
 				}
 				//if not merged it you need it for warning 
@@ -105,14 +119,20 @@ void Cluster::update(double& cutOFF){
 		// Special handling for singlelinkage case, not sure whether this
 		// could be avoided
 		for (int i=nColCells-1;i>=0;i--) {
-			if (foundCol[i] == 0) { 
-				if (method == "average" || method == "weighted") {
-					if (dMatrix->seqVec[smallCol][i].index != smallRow) { //if you are not hte smallest distance 
-						if (cutOFF > dMatrix->seqVec[smallCol][i].dist) {  
-							cutOFF = dMatrix->seqVec[smallCol][i].dist;  
-						}
-					}
-				}
+			if (foundCol[i] == 0) {
+                if (adjust != -1.0) { //adjust
+                    PDistCell value(smallCol, adjust); //create a distance for the missing value
+                    changed = updateDistance(dMatrix->seqVec[smallCol][i], value);
+                    dMatrix->updateCellCompliment(smallCol, i);
+                }else {
+                    if (method == "average" || method == "weighted") {
+                        if (dMatrix->seqVec[smallCol][i].index != smallRow) { //if you are not hte smallest distance 
+                            if (cutOFF > dMatrix->seqVec[smallCol][i].dist) {  
+                                cutOFF = dMatrix->seqVec[smallCol][i].dist;  
+                            }
+                        }
+                    }
+                }
                 dMatrix->rmCell(smallCol, i);
 			}
 		}

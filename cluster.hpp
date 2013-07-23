@@ -13,7 +13,7 @@ class ListVector;
 class Cluster {
 	
 public:
-	Cluster(RAbundVector*, ListVector*, SparseDistanceMatrix*, float, string);
+	Cluster(RAbundVector*, ListVector*, SparseDistanceMatrix*, float, string, float);
     virtual ~Cluster() {}
     virtual void update(double&);				
 	virtual string getTag() = 0;
@@ -33,7 +33,7 @@ protected:
 	
 	ull smallRow;
 	ull smallCol;
-	float smallDist;
+	float smallDist, adjust;
 	bool mapWanted;
 	float cutoff;
 	map<string, int> seq2Bin;
@@ -48,7 +48,7 @@ protected:
 
 class CompleteLinkage : public Cluster {
 public:
-	CompleteLinkage(RAbundVector*, ListVector*, SparseDistanceMatrix*, float, string);
+	CompleteLinkage(RAbundVector*, ListVector*, SparseDistanceMatrix*, float, string, float);
 	bool updateDistance(PDistCell& colCell, PDistCell& rowCell);
 	string getTag();
 	
@@ -60,7 +60,7 @@ private:
 
 class SingleLinkage : public Cluster {
 public:
-	SingleLinkage(RAbundVector*, ListVector*, SparseDistanceMatrix*, float, string);
+	SingleLinkage(RAbundVector*, ListVector*, SparseDistanceMatrix*, float, string, float);
     void update(double&);
 	bool updateDistance(PDistCell& colCell, PDistCell& rowCell);
 	string getTag();
@@ -73,7 +73,7 @@ private:
 
 class AverageLinkage : public Cluster {
 public:
-	AverageLinkage(RAbundVector*, ListVector*, SparseDistanceMatrix*, float, string);
+	AverageLinkage(RAbundVector*, ListVector*, SparseDistanceMatrix*, float, string, float);
 	bool updateDistance(PDistCell& colCell, PDistCell& rowCell);
 	string getTag();
 	
@@ -90,7 +90,7 @@ private:
 
 class WeightedLinkage : public Cluster {
 public:
-	WeightedLinkage(RAbundVector*, ListVector*, SparseDistanceMatrix*, float, string);
+	WeightedLinkage(RAbundVector*, ListVector*, SparseDistanceMatrix*, float, string, float);
 	bool updateDistance(PDistCell& colCell, PDistCell& rowCell);
 	string getTag();
 	
