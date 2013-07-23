@@ -220,7 +220,10 @@ ClassifySvmSharedCommand::ClassifySvmSharedCommand(string option) {
                 outputDir = m->hasPath(sharedfile); //if user entered a file with a path then preserve it
             }
 
-            //Groups must be checked later to make sure they are valid. SharedUtilities has functions of check the validity, just make to so m->setGroups() after the checks.  If you are using these with a shared file no need to check the SharedRAbundVector class will call SharedUtilites for you, kinda nice, huh?
+            //Groups must be checked later to make sure they are valid.
+            //SharedUtilities has functions of check the validity, just make to so m->setGroups() after the checks.
+            //If you are using these with a shared file no need to check the SharedRAbundVector class will call SharedUtilites for you,
+            //kinda nice, huh?
             string groups = validParameter.validFile(parameters, "groups", false);
             if (groups == "not found") {
                 groups = "";
@@ -230,7 +233,8 @@ ClassifySvmSharedCommand::ClassifySvmSharedCommand(string option) {
             }
             m->setGroups(Groups);
 
-            //Commonly used to process list, rabund, sabund, shared and relabund files.  Look at "smart distancing" examples below in the execute function.
+            //Commonly used to process list, rabund, sabund, shared and relabund files.
+            //Look at "smart distancing" examples below in the execute function.
             string label = validParameter.validFile(parameters, "label", false);
             if (label == "not found") {
                 label = "";
@@ -261,27 +265,64 @@ ClassifySvmSharedCommand::ClassifySvmSharedCommand(string option) {
 //   LabeledObservationVector[0] = pair("label 0", &vector[10.0, 21.0, 13.0])
 // where the vector in the second position of the pair records OTU abundances.
 void ClassifySvmSharedCommand::readSharedAndDesignFiles(const std::string& sharedFilePath, const std::string& designFilePath, LabeledObservationVector& labeledObservationVector) {
-    int i = 0;
     InputData input(sharedFilePath, "sharedfile");
     vector<SharedRAbundVector*> lookup = input.getSharedRAbundVectors();
-    std::cout << sharedFilePath << " lookup.size() = " << lookup.size() << std::endl;
+
+    GroupMap designMap;
+    designMap.readDesignMap(designFilePath);
+
+    while ( lookup[0] != NULL ) {
+        readSharedRAbundVectors(lookup, designMap, labeledObservationVector);
+        lookup = input.getSharedRAbundVectors();
+    }
+    /*
+    int i = 0;
     while ( lookup[0] != NULL ) {
         for ( int j = 0; j < lookup.size(); j++ ) {
             i++;
             vector<individual> data = lookup[j]->getData();
             Observation* observation = new Observation(data.size(), 0.0);
-            labeledObservationVector.push_back(std::make_pair(lookup[j]->getGroup(), observation));
-            std::cout << "i=" << i << " j=" << j << " label : " << lookup[j]->getLabel() << " group: " << lookup[j]->getGroup();
+            string sharedGroupName = lookup[j]->getGroup();
+            string treatmentName = designMap.getGroup(sharedGroupName);
+            //std::cout << "shared group name: " << sharedGroupName << " treatment name: " << treatmentName << std::endl;
+            labeledObservationVector.push_back(std::make_pair(treatmentName, observation));
+            //std::cout << "i=" << i << " j=" << j << " label : " << lookup[j]->getLabel() << " group: " << lookup[j]->getGroup();
             for (int k = 0; k < data.size(); k++) {
-                std::cout << " abundance " << data[k].abundance;
+                //std::cout << " abundance " << data[k].abundance;
                 observation->at(k) = double(data[k].abundance);
             }
-            std::cout << std::endl;
+            //std::cout << std::endl;
             delete lookup[j];
         }
         //lookup[0] = NULL;
         lookup = input.getSharedRAbundVectors();
     }
+    */
+}
+
+void ClassifySvmSharedCommand::readSharedRAbundVectors(vector<SharedRAbundVector*>& lookup, GroupMap& designMap, LabeledObservationVector& labeledObservationVector) {
+    std::cout << " lookup.size() = " << lookup.size() << std::endl;
+    //int i = 0;
+    //while ( lookup[0] != NULL ) {
+        for ( int j = 0; j < lookup.size(); j++ ) {
+            //i++;
+            vector<individual> data = lookup[j]->getData();
+            Observation* observation = new Observation(data.size(), 0.0);
+            string sharedGroupName = lookup[j]->getGroup();
+            string treatmentName = designMap.getGroup(sharedGroupName);
+            //std::cout << "shared group name: " << sharedGroupName << " treatment name: " << treatmentName << std::endl;
+            labeledObservationVector.push_back(std::make_pair(treatmentName, observation));
+            //std::cout << " j=" << j << " label : " << lookup[j]->getLabel() << " group: " << lookup[j]->getGroup();
+            for (int k = 0; k < data.size(); k++) {
+                //std::cout << " abundance " << data[k].abundance;
+                observation->at(k) = double(data[k].abundance);
+            }
+            //std::cout << std::endl;
+            delete lookup[j];
+        }
+        //lookup[0] = NULL;
+        //lookup = input.getSharedRAbundVectors();
+    //}
 }
 
 //**********************************************************************************************************************
@@ -446,22 +487,21 @@ void ClassifySvmSharedCommand::processSharedAndDesignData(vector<SharedRAbundVec
         int numRows = numSamples;
         int numColumns = numFeatures; // + 1; // extra one space needed for the treatment/outcome
 
-        vector<vector<double> > dataSet(numRows, vector<double>(numColumns, 0.0));
-        vector<vector<double>* > observations(numRows);
+        //vector<vector<double> > dataSet(numRows, vector<double>(numColumns, 0.0));
+        //vector<vector<double>* > observations(numRows);
 
-        for (int i = 0; i < lookup.size(); i++) {
-            string sharedGroupName = lookup[i]->getGroup();
-            string treatmentName = designMap.getGroup(sharedGroupName);
-            observations[i] = &dataSet[i];
-            int j = 0;
-            for (; j < lookup[i]->getNumBins(); j++) {
-                int otuCount = lookup[i]->getAbundance(j);
-                dataSet[i][j] = otuCount;
-            }
-            //dataSet[i][j] = treatmentToIntMap[treatmentName];
-        }
+        //for (int i = 0; i < lookup.size(); i++) {
+        //    string sharedGroupName = lookup[i]->getGroup();
+        //    string treatmentName = designMap.getGroup(sharedGroupName);
+        //    observations[i] = &dataSet[i];
+        //    for (int j = 0; j < lookup[i]->getNumBins(); j++) {
+        //        int otuCount = lookup[i]->getAbundance(j);
+        //        dataSet[i][j] = otuCount;
+        //    }
+        //    //dataSet[i][j] = treatmentToIntMap[treatmentName];
+        //}
         LabeledObservationVector labeledObservationVector;
-        readSharedAndDesignFiles(sharedfile, designfile, labeledObservationVector);
+        readSharedRAbundVectors(lookup, designMap, labeledObservationVector);
         OneVsOneMultiClassSvmTrainer t(labeledObservationVector);
         //RandomForest randomForest(dataSet, numDecisionTrees, treeSplitCriterion, doPruning, pruneAggressiveness,
         //        discardHighErrorTrees, highErrorTreeDiscardThreshold, optimumFeatureSubsetSelectionCriteria,

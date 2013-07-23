@@ -33,6 +33,7 @@ public:
   void help() { m->mothurOut(getHelpString()); }
 
   static void readSharedAndDesignFiles(const std::string&, const std::string&, LabeledObservationVector&);
+  static void readSharedRAbundVectors(vector<SharedRAbundVector*>&, GroupMap&, LabeledObservationVector& labeledObservationVector);
 
 private:
     bool abort;
