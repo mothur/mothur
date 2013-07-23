@@ -11,9 +11,11 @@
 
 #include <algorithm>
 #include <cmath>
+#include <deque>
 #include <exception>
 #include <map>
 #include <set>
+#include <stack>
 #include <string>
 #include <vector>
 
@@ -75,12 +77,81 @@ typedef std::map<Label, LabeledObservationVector> LabelToLabeledObservationVecto
 typedef std::map<int, Label> NumericClassToLabel;
 
 
+typedef double Parameter;
+typedef std::string ParameterName;
+typedef std::vector<double> ParameterRange;
+typedef std::map<ParameterName, ParameterRange> ParameterRangeMap;
+
+typedef std::map<ParameterName, Parameter> ParameterMap;
+typedef std::vector<ParameterMap> ParameterMapVector;
+typedef std::stack<Parameter> ParameterStack;
+
+class ParameterSetBuilder {
+public:
+    ParameterSetBuilder(ParameterRangeMap parameterRangeMap) {
+        std::stack<std::pair<ParameterName, ParameterStack> > stackOfParameterRanges;
+        std::stack<std::pair<ParameterName, ParameterStack> > stackOfEmptyParameterRanges;
+        ParameterMap nextParameterSet;
+        int parameterSetCount = 1;
+        for ( ParameterRangeMap::iterator i = parameterRangeMap.begin(); i != parameterRangeMap.end(); i++ ) {
+            parameterSetCount *= i->second.size();
+            ParameterName parameterName = i->first;
+            ParameterStack emptyParameterStack;
+            stackOfEmptyParameterRanges.push(make_pair(parameterName, emptyParameterStack));
+        }
+        // get started
+        for ( int n = 0; n < parameterSetCount; n++ ) {
+            std::cout << "n = " << n << std::endl;
+            // pull empty stacks off until there are no empty stacks
+            while ( stackOfParameterRanges.size() > 0 and stackOfParameterRanges.top().second.size() == 0 ) {
+                std::cout << "  empty parameter range: " << stackOfParameterRanges.top().first << std::endl;
+                stackOfEmptyParameterRanges.push(stackOfParameterRanges.top());
+                stackOfParameterRanges.pop();
+            }
+
+            // move to the next value for the parameter at the top of the stackOfParameterRanges
+            if ( stackOfParameterRanges.size() > 0 ) {
+                std::cout << "  moving to next value for parameter " << stackOfParameterRanges.top().first << std::endl;
+                std::cout << "    next value is "  << stackOfParameterRanges.top().second.top() << std::endl;
+                ParameterName parameterName = stackOfParameterRanges.top().first;
+                nextParameterSet[parameterName] = stackOfParameterRanges.top().second.top();
+                stackOfParameterRanges.top().second.pop();
+            }
+            std::cout << "stack of empty parameter ranges has size " << stackOfEmptyParameterRanges.size() << std::endl;
+            // reset each parameter range that has been exhausted
+            while ( stackOfEmptyParameterRanges.size() > 0 ) {
+                ParameterName parameterName = stackOfEmptyParameterRanges.top().first;
+                std::cout << "  reseting range for parameter " << stackOfEmptyParameterRanges.top().first << std::endl;
+                stackOfParameterRanges.push(stackOfEmptyParameterRanges.top());
+                stackOfEmptyParameterRanges.pop();
+                for (ParameterRange::iterator i = parameterRangeMap[parameterName].begin(); i != parameterRangeMap[parameterName].end(); i++ ) {
+                    stackOfParameterRanges.top().second.push(*i);
+                }
+                nextParameterSet[parameterName] = stackOfParameterRanges.top().second.top();
+                stackOfParameterRanges.top().second.pop();
+            }
+            parameterSetVector.push_back(nextParameterSet);
+            // print out the next parameter set
+            for (ParameterMap::iterator p = nextParameterSet.begin(); p != nextParameterSet.end(); p++) {
+                std::cout << "  " << p->first << " : " << p->second << std::endl;
+            }
+        }
+    }
+    ~ParameterSetBuilder() {}
+
+    const ParameterMapVector& getParameterSetList() { return parameterSetVector; }
+
+private:
+    ParameterMapVector parameterSetVector;
+};
+
 class KernelFunction {
 public:
     KernelFunction() {}
     virtual ~KernelFunction() {}
 
     virtual double similarity(const Observation&, const Observation&) = 0;
+    virtual void setParameters(const ParameterMap&) = 0;
 };
 
 
@@ -92,6 +163,8 @@ public:
     double similarity(const Observation& i, const Observation& j) {
         return std::inner_product(i.begin(), i.end(), j.begin(), 0.0);
     }
+
+    void setParameters(const ParameterMap&) {};
 };
 
 
@@ -111,6 +184,10 @@ public:
     double getGamma()       { return gamma; }
     void setGamma(double g) { gamma = g; }
 
+    void setParameters(const ParameterMap& p) {
+        setGamma(p.find("rbf_gamma")->second);
+    }
+
 private:
     double gamma;
 };
@@ -125,9 +202,34 @@ public:
         return pow(std::inner_product(i.begin(), i.end(), j.begin(), c), d);
     }
 
+    void setParameters(const ParameterMap& p) {
+        c = p.find("ploynomial_c")->second;
+        d = int(p.find("polynomial_d")->second);
+    }
+
 private:
     double c;
     int d;
+};
+
+
+class SigmoidKernelFunction : KernelFunction {
+public:
+    SigmoidKernelFunction(double _alpha, int _c) : alpha(_alpha), c(_c) {}
+    ~SigmoidKernelFunction() {}
+
+    double similarity(const Observation& i, const Observation& j) {
+        return tanh(alpha * std::inner_product(i.begin(), i.end(), j.begin(), c));
+    }
+
+    void setParameters(const ParameterMap& p) {
+        alpha = p.find("sigmoid_alpha")->second;
+        c = p.find("sigmoid_c")->second;
+    }
+
+private:
+    double alpha;
+    double c;
 };
 
 
@@ -185,6 +287,10 @@ public:
 
     double getC()       { return C; }
     void setC(double C) { this->C = C; }
+
+    void setParameters(const ParameterMap& p) {
+        C = p.find("smo_c")->second;
+    }
 
     SVM* train(const LabeledObservationVector&);
     void assignNumericLabels(std::vector<double>&, const LabeledObservationVector&, NumericClassToLabel&);

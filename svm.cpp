@@ -405,20 +405,17 @@ MultiClassSVM* OneVsOneMultiClassSvmTrainer::train() {
 
     // determine hyperparameters by cross validation
     // fill a map with parameter lists
-    std::map<std::string, std::vector<double> > hyperparameterMap;
-    typedef std::vector<double> HyperparameterList;
-    HyperparameterList cList;
+    ParameterRangeMap hyperparameterMap;
+    ParameterRange cList;
     // TODO: populate this list from an argument
     cList.push_back(0.01);
     cList.push_back(1.0);
     cList.push_back(10.0);
-    hyperparameterMap.insert(std::make_pair("C", cList));
-    hyperparameterMap.insert(std::make_pair("D", cList)); // fake
+    hyperparameterMap.insert(std::make_pair("smo_c", cList));
 
     std::vector<SVM*> twoClassSvmList;
     SmoTrainer smoTrainer;
     LabelPairSet::iterator labelPair;
-    HyperparameterList::iterator hp;
     for (labelPair = labelPairSet.begin(); labelPair != labelPairSet.end(); labelPair++) {
         // generate training and testing data for this label pair
         Label label0 = (*labelPair)[0];
@@ -426,20 +423,23 @@ MultiClassSVM* OneVsOneMultiClassSvmTrainer::train() {
         std::cout << "training SVM on labels " << label0 << " and " << label1 << std::endl;
         std::cout << "    label pair size is " << labelPair->size() << std::endl;
 
+        // loop on kernel functions and kernel function parameters
+        ParameterSetBuilder p(hyperparameterMap);
+
+        // K should be an argument
         int K = 5;
         KFoldLabeledObservationsDivider kFoldLabeledObservationsDivider(K, developmentObservations);
         double bestC = -1.0; // sentinel
         double bestScore = 0.0;
         double meanScoreOverKFolds = 0.0;
-        for (hp = cList.begin(); hp != cList.end(); ++hp) {
+        for ( ParameterMapVector::const_iterator hp = p.getParameterSetList().begin(); hp != p.getParameterSetList().end(); hp++ ) {
             // we need to calculate the mean score over the k-folds for the current C
             // oh how I love to calculate mean on-line
             double online_mean_n = 0.0;
             double online_mean_score = 0.0;
             meanScoreOverKFolds = -1.0;  // means we failed to train a SVM
 
-            double C = *hp;
-            smoTrainer.setC(C);
+            smoTrainer.setParameters(*hp);
 
             for ( kFoldLabeledObservationsDivider.start(*labelPair); !kFoldLabeledObservationsDivider.end(); kFoldLabeledObservationsDivider.next() ) {
                 const LabeledObservationVector& kthTwoClassTrainingFold = kFoldLabeledObservationsDivider.getTrainingData();
@@ -449,7 +449,7 @@ MultiClassSVM* OneVsOneMultiClassSvmTrainer::train() {
                 try {
                     SVM* evaluationSvm = smoTrainer.train(kthTwoClassTrainingFold);
                     double score = evaluationSvm->score(kthTwoClassTestingFold);
-                    std::cout << "score on fold " << kFoldLabeledObservationsDivider.getFoldNumber() << " test data with C = "<< C << " : " << score << std::endl;
+                    std::cout << "score on fold " << kFoldLabeledObservationsDivider.getFoldNumber() << " test data with C = "<< smoTrainer.getC() << " : " << score << std::endl;
                     online_mean_n += 1.0;
                     double online_mean_delta = score - online_mean_score;
                     online_mean_score += online_mean_delta / online_mean_n;
@@ -459,17 +459,17 @@ MultiClassSVM* OneVsOneMultiClassSvmTrainer::train() {
                 }
                 catch ( std::exception& e ) {
                     std::cout << "exception: " << e.what() << std::endl;
-                    std::cout << "    on fold " << kFoldLabeledObservationsDivider.getFoldNumber() << " failed to train SVM with C = " << C << std::endl;
+                    std::cout << "    on fold " << kFoldLabeledObservationsDivider.getFoldNumber() << " failed to train SVM with C = " << smoTrainer.getC() << std::endl;
                 }
             }
-            std::cout << "done with cross validation on C = " << C << std::endl;
+            std::cout << "done with cross validation on C = " << smoTrainer.getC() << std::endl;
             std::cout << "    mean score over " << kFoldLabeledObservationsDivider.getFoldNumber() << " folds is " << meanScoreOverKFolds << std::endl;
             if ( meanScoreOverKFolds > bestScore ) {
-                bestC = C;
+                bestC = smoTrainer.getC();
                 bestScore = meanScoreOverKFolds;
             }
             else if ( meanScoreOverKFolds < 0.0 ) {
-                std::cout << "failed to train SVM with C = " << C << std::endl;
+                std::cout << "failed to train SVM with C = " << smoTrainer.getC() << std::endl;
             }
         }
         std::cout << "done with cross validation on all C values" << std::endl;
@@ -503,4 +503,3 @@ MultiClassSVM* OneVsOneMultiClassSvmTrainer::train() {
 
     return mc;
 }
-
