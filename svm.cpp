@@ -134,7 +134,7 @@ Label MultiClassSVM::classify(const Observation& observation) {
     }
     else {
         // we have a tie
-        throw new MultiClassSvmClassificationTie(winningLabels, winner.second);
+        throw MultiClassSvmClassificationTie(winningLabels, winner.second);
     }
 
     return winner.first;
@@ -143,12 +143,18 @@ Label MultiClassSVM::classify(const Observation& observation) {
 double MultiClassSVM::score(const LabeledObservationVector& multiClassLabeledObservationVector) {
     double s = 0.0;
     for (LabeledObservationVector::const_iterator i = multiClassLabeledObservationVector.begin(); i != multiClassLabeledObservationVector.end(); i++) {
-        Label predicted_label = classify(*(i->second));
-        if ( predicted_label == i->first ) {
-            s = s + 1.0;
-        }
-        else {
+        std::cout << "classifying observation with label " << i->first << std::endl;
+        try {
+            Label predicted_label = classify(*(i->second));
+            if ( predicted_label == i->first ) {
+                s = s + 1.0;
+            }
+            else {
 
+            }
+        }
+        catch ( MultiClassSvmClassificationTie& m ) {
+            std::cout << "classification tie for observation with label " << i->first << std::endl;
         }
     }
     return s / double(multiClassLabeledObservationVector.size());
@@ -209,7 +215,6 @@ SVM* SmoTrainer::train(KernelFunction* kernelFunction, const LabeledObservationV
         if (verbose) std::cout << std::endl;
     }
     int m = 0;
-    std::cout << "train" << std::endl;
     std::vector<double> u(3);
     std::vector<double> ya(observationCount);
     std::vector<double> yg(observationCount);
@@ -466,16 +471,6 @@ MultiClassSVM* OneVsOneMultiClassSvmTrainer::train(const KernelParameterRangeMap
     const LabeledObservationVector& developmentObservations = kFoldDevEvalDivider.getTrainingData();
     const LabeledObservationVector& evaluationObservations  = kFoldDevEvalDivider.getTestingData();
 
-    // determine hyperparameters by cross validation
-    // fill a map with parameter lists
-    ParameterRangeMap hyperparameterMap;
-    ParameterRange cList;
-    // TODO: populate this list from an argument
-    cList.push_back(0.01);
-    cList.push_back(1.0);
-    cList.push_back(10.0);
-    hyperparameterMap.insert(std::make_pair("smo_c", cList));
-
     std::vector<SVM*> twoClassSvmList;
     SmoTrainer smoTrainer;
     LabelPairSet::iterator labelPair;
@@ -483,8 +478,8 @@ MultiClassSVM* OneVsOneMultiClassSvmTrainer::train(const KernelParameterRangeMap
         // generate training and testing data for this label pair
         Label label0 = (*labelPair)[0];
         Label label1 = (*labelPair)[1];
-        std::cout << "training SVM on labels " << label0 << " and " << label1 << std::endl;
-        std::cout << "    label pair size is " << labelPair->size() << std::endl;
+        //std::cout << "training SVM on labels " << label0 << " and " << label1 << std::endl;
+        //std::cout << "    label pair size is " << labelPair->size() << std::endl;
 
         double bestScore = 0.0;
         ParameterMap bestParameterMap;
@@ -547,11 +542,14 @@ MultiClassSVM* OneVsOneMultiClassSvmTrainer::train(const KernelParameterRangeMap
             kernelFunction->setParameters(bestParameterMap);
             smoTrainer.setParameters(bestParameterMap);
             SVM* svm = smoTrainer.train(kernelFunction, twoClassDevelopmentObservations);
+            std::cout << "done training final SVM" << std::endl;
             twoClassSvmList.push_back(svm);
         }
     }
 
+    std::cout << "building MultiClassSvm" << std::endl;
     MultiClassSVM* mc = new MultiClassSVM(twoClassSvmList);
+    std::cout << "done building MultiClassSvm" << std::endl;
     double score = mc->score(evaluationObservations);
     std::cout << "multiclass SVM score: " << score << std::endl;
 
@@ -571,8 +569,8 @@ double OneVsOneMultiClassSvmTrainer::trainOnKFolds(SmoTrainer& smoTrainer, Kerne
         for ( kFoldLabeledObservationsDivider.start(); !kFoldLabeledObservationsDivider.end(); kFoldLabeledObservationsDivider.next() ) {
             const LabeledObservationVector& kthTwoClassTrainingFold = kFoldLabeledObservationsDivider.getTrainingData();
             const LabeledObservationVector& kthTwoClassTestingFold = kFoldLabeledObservationsDivider.getTestingData();
-            std::cout << "fold " << kFoldLabeledObservationsDivider.getFoldNumber() << " training data has " << kthTwoClassTrainingFold.size() << " labeled observations" << std::endl;
-            std::cout << "fold " << kFoldLabeledObservationsDivider.getFoldNumber() << " testing data has " << kthTwoClassTestingFold.size() << " labeled observations" << std::endl;
+            //std::cout << "fold " << kFoldLabeledObservationsDivider.getFoldNumber() << " training data has " << kthTwoClassTrainingFold.size() << " labeled observations" << std::endl;
+            //std::cout << "fold " << kFoldLabeledObservationsDivider.getFoldNumber() << " testing data has " << kthTwoClassTestingFold.size() << " labeled observations" << std::endl;
             try {
                 SVM* evaluationSvm = smoTrainer.train(kernelFunction, kthTwoClassTrainingFold);
                 double score = evaluationSvm->score(kthTwoClassTestingFold);
