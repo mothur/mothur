@@ -472,7 +472,7 @@ void ClassifySvmSharedCommand::processSharedAndDesignData(vector<SharedRAbundVec
 //      string treatmentName = designMap->getGroup(sharedGroupName);
 //      cout << sharedGroupName << " : " << treatmentName <<  endl;
 //    }
-
+/*
         map<string, int> treatmentToIntMap;
         map<int, string> intToTreatmentMap;
         for (int i = 0; i < designMap.getNumGroups(); i++) {
@@ -500,14 +500,20 @@ void ClassifySvmSharedCommand::processSharedAndDesignData(vector<SharedRAbundVec
         //    }
         //    //dataSet[i][j] = treatmentToIntMap[treatmentName];
         //}
+*/
         LabeledObservationVector labeledObservationVector;
         readSharedRAbundVectors(lookup, designMap, labeledObservationVector);
         OneVsOneMultiClassSvmTrainer t(labeledObservationVector);
+        KernelParameterRangeMap kernelParameterRangeMap;
+        getDefaultKernelParameterRangeMap(kernelParameterRangeMap);
+        t.train(kernelParameterRangeMap);
         //RandomForest randomForest(dataSet, numDecisionTrees, treeSplitCriterion, doPruning, pruneAggressiveness,
         //        discardHighErrorTrees, highErrorTreeDiscardThreshold, optimumFeatureSubsetSelectionCriteria,
         //        featureStandardDeviationThreshold);
         //randomForest.populateDecisionTrees();
         //randomForest.calcForrestErrorRate();
+
+        std::cout << "done training" << std::endl;
 
         map<string, string> variables;
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
@@ -519,6 +525,7 @@ void ClassifySvmSharedCommand::processSharedAndDesignData(vector<SharedRAbundVec
         //randomForest.calcForrestVariableImportance(filename);
 
         m->mothurOutEndLine();
+        std::cout << "leaving processSharedAndDesignData" << std::endl;
     }
     catch (exception& e) {
         m->errorOut(e, "ClassifySvmSharedCommand", "processSharedAndDesignData");
