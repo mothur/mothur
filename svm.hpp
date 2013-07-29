@@ -19,17 +19,16 @@
 #include <string>
 #include <vector>
 
-// a FeatureVector is an Observation ....
 // For the purpose of training a support vector machine
 // we need to calculate a dot product between two feature
 // vectors.  In general these feature vectors are not
 // restricted to lists of doubles, but in this implementation
-// feature vectors will be vectors of doubles.
-typedef std::vector<double> FeatureVector;
+// feature vectors (or 'observations' as they will be called from here on)
+// will be vectors of doubles.
 typedef std::vector<double> Observation;
 
-// A dataset is a collection of labeled observations (or labeled
-// feature vectors).  The ObservationVector typedef is a vector
+// A dataset is a collection of labeled observations.
+// The ObservationVector typedef is a vector
 // of pointers to ObservationVectors.  Pointers are used here since
 // datasets will be rearranged many times during cross validation.
 // Using pointers to Observations makes copying the elements of
@@ -48,7 +47,7 @@ typedef std::set<Label> LabelSet;
 // even though a std::pair might seem more natural, but it is useful to
 // iterate over the pair.
 typedef std::vector<Label> LabelPair;
-LabelPair make_label_pair(const Label& one, const Label& two);
+LabelPair buildLabelPair(const Label& one, const Label& two);
 
 // Learning to classify a dataset with more than two classes requires
 // training a separate support vector machine for each pair of classes.
@@ -58,29 +57,45 @@ typedef std::set<LabelPair> LabelPairSet;
 
 // A dataset is a set of observations with associated labels.  The
 // LabeledObservation typedef is a label-observation pair intended to
-// hold one observation and its corresponding label.
+// hold one observation and its corresponding label.  Using a pointer
+// to Observation makes this object cheap to copy.
 typedef std::pair<Label, Observation*> LabeledObservation;
 
 // A LabeledObservationVector is a container for an entire dataset (or a
 // subset of an entire dataset).
 typedef std::vector<LabeledObservation> LabeledObservationVector;
+void buildLabelSet(LabelSet&, const LabeledObservationVector&);
 
 // Dividing a dataset into training and testing sets while maintaing equal
 // representation of all classes is done using a LabelToLabeledObservationVector.
 // This container is used to divide datasets into groups of LabeledObservations
-// having the same label.
+// having the same label.  For example, given a LabeledObservationVector like
+//     ["blue",  [1.0, 2.0, 3.0]]
+//     ["green", [3.0, 4.0, 5.0]]
+//     ["blue",  [2,0, 3.0. 4.0]]
+//     ["green", [4.0, 5.0, 6.0]]
+// the corresponding LabelToLabeledObservationVector looks like
+//     "blue",  [["blue",  [1.0, 2.0, 3.0]], ["blue",  [2,0, 3.0. 4.0]]]
+//     "green", [["green", [3.0, 4.0, 5.0]], ["green", [4.0, 5.0, 6.0]]]
 typedef std::map<Label, LabeledObservationVector> LabelToLabeledObservationVector;
+void buildLabelToLabeledObservationVector(LabelToLabeledObservationVector&, const LabeledObservationVector&);
 
 // A support vector machine uses +1 and -1 in calculations to represent
 // the two classes of data it is trained to distinguish.  The NumericClassToLabel
 // container is used to record the labels associated with these integers.
+// For a dataset with labels "blue" and "green" a NumericClassToLabel map looks like
+//     1, "blue"
+//    -1, "green"
 typedef std::map<int, Label> NumericClassToLabel;
-
+void buildNumericClassToLabelMap(LabelPair);
 
 typedef double Parameter;
 typedef std::string ParameterName;
 typedef std::vector<double> ParameterRange;
 typedef std::map<ParameterName, ParameterRange> ParameterRangeMap;
+
+typedef std::map<std::string, ParameterRangeMap> KernelParameterRangeMap;
+void getDefaultKernelParameterRangeMap(KernelParameterRangeMap& kernelParameterRangeMap);
 
 typedef std::map<ParameterName, Parameter> ParameterMap;
 typedef std::vector<ParameterMap> ParameterMapVector;
@@ -88,12 +103,24 @@ typedef std::stack<Parameter> ParameterStack;
 
 class ParameterSetBuilder {
 public:
-    ParameterSetBuilder(ParameterRangeMap parameterRangeMap) {
+    // If the argument ParameterRangeMap looks like this:
+    //     { "a" : [1.0, 2.0], "b" : [-1.0, 1.0], "c" : [0.5, 0.6] }
+    // then the list of parameter sets looks like this:
+    //     [ {"a":1.0, "b":-1.0, "c":0.5},
+    //       {"a":1.0, "b":-1.0, "c":0.6},
+    //       {"a":1.0, "b": 1.0, "c":0.5},
+    //       {"a":1.0, "b": 1.0, "c":0.6},
+    //       {"a":2.0, "b":-1.0, "c":0.5},
+    //       {"a":2.0, "b":-1.0, "c":0.6},
+    //       {"a":2.0, "b": 1.0, "c":0.5},
+    //       {"a":2.0, "b": 1.0, "c":0.6},
+    //     ]
+    ParameterSetBuilder(const ParameterRangeMap& parameterRangeMap) {
         std::stack<std::pair<ParameterName, ParameterStack> > stackOfParameterRanges;
         std::stack<std::pair<ParameterName, ParameterStack> > stackOfEmptyParameterRanges;
         ParameterMap nextParameterSet;
         int parameterSetCount = 1;
-        for ( ParameterRangeMap::iterator i = parameterRangeMap.begin(); i != parameterRangeMap.end(); i++ ) {
+        for ( ParameterRangeMap::const_iterator i = parameterRangeMap.begin(); i != parameterRangeMap.end(); i++ ) {
             parameterSetCount *= i->second.size();
             ParameterName parameterName = i->first;
             ParameterStack emptyParameterStack;
@@ -124,7 +151,8 @@ public:
                 std::cout << "  reseting range for parameter " << stackOfEmptyParameterRanges.top().first << std::endl;
                 stackOfParameterRanges.push(stackOfEmptyParameterRanges.top());
                 stackOfEmptyParameterRanges.pop();
-                for (ParameterRange::iterator i = parameterRangeMap[parameterName].begin(); i != parameterRangeMap[parameterName].end(); i++ ) {
+                const ParameterRange& parameterRange = parameterRangeMap.find(parameterName)->second;
+                for (ParameterRange::const_iterator i = parameterRange.begin(); i != parameterRange.end(); i++ ) {
                     stackOfParameterRanges.top().second.push(*i);
                 }
                 nextParameterSet[parameterName] = stackOfParameterRanges.top().second.top();
@@ -152,26 +180,45 @@ public:
 
     virtual double similarity(const Observation&, const Observation&) = 0;
     virtual void setParameters(const ParameterMap&) = 0;
+    virtual void getDefaultParameterRanges(ParameterRangeMap&) = 0;
 };
 
 
-class LinearKernelFunction : KernelFunction {
+class LinearKernelFunction : public KernelFunction {
 public:
-    LinearKernelFunction() {}
+    // parameters must be set before using a KernelFunction
+    LinearKernelFunction() : constant(0.0) {}
     ~LinearKernelFunction() {}
 
     double similarity(const Observation& i, const Observation& j) {
-        return std::inner_product(i.begin(), i.end(), j.begin(), 0.0);
+        return std::inner_product(i.begin(), i.end(), j.begin(), constant);
     }
 
-    void setParameters(const ParameterMap&) {};
+    double getConstant() { return constant; }
+    void setConstant(double c) { constant = c; }
+
+    void setParameters(const ParameterMap& p) {
+        setConstant(p.find(MapKey_Constant)->second);
+    };
+
+    void getDefaultParameterRanges(ParameterRangeMap& p) {
+        p[MapKey_Constant] = defaultConstantRange;
+    }
+
+    static const std::string MapKey;
+    static const std::string MapKey_Constant;
+    static const ParameterRange defaultConstantRange;
+
+private:
+    double constant;
 };
 
 
-class RBFKernelFunction : KernelFunction {
+class RbfKernelFunction : public KernelFunction {
 public:
-    RBFKernelFunction(double g) : gamma(g) {}
-    ~RBFKernelFunction() {}
+    // parameters must be set before a KernelFunction
+    RbfKernelFunction() : gamma(0.0) {}
+    ~RbfKernelFunction() {}
 
     double similarity(const Observation& i, const Observation& j) {
         double sumOfSquaredDifs = 0.0;
@@ -185,17 +232,27 @@ public:
     void setGamma(double g) { gamma = g; }
 
     void setParameters(const ParameterMap& p) {
-        setGamma(p.find("rbf_gamma")->second);
+        setGamma(p.find(MapKey_Gamma)->second);
     }
+
+    void getDefaultParameterRanges(ParameterRangeMap& p) {
+        p[MapKey_Gamma] = defaultGammaRange;
+    }
+
+    static const std::string MapKey;
+    static const std::string MapKey_Gamma;
+
+    static const ParameterRange defaultGammaRange;
 
 private:
     double gamma;
 };
 
 
-class PolynomialKernelFunction : KernelFunction {
+class PolynomialKernelFunction : public KernelFunction {
 public:
-    PolynomialKernelFunction(double _c, int _d) : c(_c), d(_d) {}
+    // parameters must be set before using a KernelFunction
+    PolynomialKernelFunction() : c(0.0), d(0) {}
     ~PolynomialKernelFunction() {}
 
     double similarity(const Observation& i, const Observation& j) {
@@ -203,9 +260,20 @@ public:
     }
 
     void setParameters(const ParameterMap& p) {
-        c = p.find("ploynomial_c")->second;
-        d = int(p.find("polynomial_d")->second);
+        c = p.find(MapKey_Constant)->second;
+        d = int(p.find(MapKey_Degree)->second);
     }
+
+    void getDefaultParameterRanges(ParameterRangeMap& p) {
+        p[MapKey_Constant] = defaultConstantRange;
+    }
+
+    static const std::string MapKey;
+    static const std::string MapKey_Constant;
+    static const std::string MapKey_Degree;
+
+    static const ParameterRange defaultConstantRange;
+    static const ParameterRange defaultDegreeRange;
 
 private:
     double c;
@@ -213,9 +281,10 @@ private:
 };
 
 
-class SigmoidKernelFunction : KernelFunction {
+class SigmoidKernelFunction : public KernelFunction {
 public:
-    SigmoidKernelFunction(double _alpha, int _c) : alpha(_alpha), c(_c) {}
+    // parameters must be set before using a KernelFunction
+    SigmoidKernelFunction() : alpha(0.0), c(0.0) {}
     ~SigmoidKernelFunction() {}
 
     double similarity(const Observation& i, const Observation& j) {
@@ -223,15 +292,44 @@ public:
     }
 
     void setParameters(const ParameterMap& p) {
-        alpha = p.find("sigmoid_alpha")->second;
-        c = p.find("sigmoid_c")->second;
+        alpha = p.find(MapKey_Alpha)->second;
+        c = p.find(MapKey_Constant)->second;
     }
 
+    void getDefaultParameterRanges(ParameterRangeMap& p) {
+        p[MapKey_Alpha] = defaultAlphaRange;
+        p[MapKey_Constant] = defaultConstantRange;
+    }
+
+    static const std::string MapKey;
+    static const std::string MapKey_Alpha;
+    static const std::string MapKey_Constant;
+
+    static const ParameterRange defaultAlphaRange;
+    static const ParameterRange defaultConstantRange;
 private:
     double alpha;
     double c;
 };
 
+
+class KernelFactory {
+public:
+    static KernelFunction* getKernelFunctionForKey(std::string kernelFunctionKey) {
+        if ( kernelFunctionKey == LinearKernelFunction::MapKey ) {
+            return new LinearKernelFunction();
+        }
+        else if ( kernelFunctionKey == RbfKernelFunction::MapKey ) {
+            return new RbfKernelFunction();
+        }
+        else if ( kernelFunctionKey == PolynomialKernelFunction::MapKey ) {
+            return new PolynomialKernelFunction();
+        }
+        else {
+            throw new std::exception();
+        }
+    }
+};
 
 // The SVM class implements the Support Vector Machine
 // discriminant function.  Instances are constructed with
@@ -249,7 +347,9 @@ public:
 
     // the classify method should accept a list of observations?
     int discriminant(const Observation& observation);
-    Label classify(const Observation& observation);
+    Label classify(const Observation& observation){
+        return discriminantToLabel[discriminant(observation)];
+    }
     double score(const LabeledObservationVector&);
 
 private:
@@ -266,8 +366,12 @@ private:
 // on data having more than two classes.
 class MultiClassSVM {
 public:
-    MultiClassSVM(std::vector<SVM*>);
-    ~MultiClassSVM();
+    MultiClassSVM(const std::vector<SVM*> s) : twoClassSvmList(s.begin(), s.end()) {}
+    ~MultiClassSVM() {
+        for ( int i = 0; i < twoClassSvmList.size(); i++ ) {
+            delete twoClassSvmList[i];
+        }
+    }
 
     // the classify method should accept a list of observations
     Label classify(const Observation& observation);
@@ -282,51 +386,28 @@ private:
 // "Support Vector Machine Solvers" by Bottou and Lin.
 class SmoTrainer {
 public:
-    SmoTrainer();
-    ~SmoTrainer();
+    SmoTrainer() : C(1.0) {}
+
+    ~SmoTrainer() {}
 
     double getC()       { return C; }
     void setC(double C) { this->C = C; }
 
     void setParameters(const ParameterMap& p) {
-        C = p.find("smo_c")->second;
+        C = p.find(MapKey_C)->second;
     }
 
-    SVM* train(const LabeledObservationVector&);
+    SVM* train(KernelFunction*, const LabeledObservationVector&);
     void assignNumericLabels(std::vector<double>&, const LabeledObservationVector&, NumericClassToLabel&);
     void elementwise_multiply(std::vector<double>& a, std::vector<double>& b, std::vector<double>& c) {
         std::transform(a.begin(), a.end(), b.begin(), c.begin(), std::multiplies<double>());
     }
 
+    static const std::string MapKey_C;
+    static const ParameterRange defaultCRange;
+
 private:
     double C = 1.0;
-};
-
-
-// OneVsOneMultiClassSvmTrainer trains a support vector machine for each
-// pair of labels in a set of data.
-class OneVsOneMultiClassSvmTrainer {
-public:
-    OneVsOneMultiClassSvmTrainer(const LabeledObservationVector& observations);
-    ~OneVsOneMultiClassSvmTrainer() {}
-
-    MultiClassSVM* train();
-    const LabelSet& getLabelSet() { return labelSet; }
-    const LabeledObservationVector& getLabeledObservations() { return labeledObservations; }
-    const LabelPairSet& getLabelPairSet() { return labelPairSet; }
-    const LabeledObservationVector& getLabeledObservationVectorForLabel(const Label& label) { return labelToLabeledObservationVector[label]; }
-
-    static void buildLabelSet(LabelSet&, const LabeledObservationVector&);
-    static void buildLabelToLabeledObservationVector(LabelToLabeledObservationVector&, const LabeledObservationVector&);
-    static void buildLabelPairSet(LabelPairSet&, const LabeledObservationVector&);
-    static void appendTrainingAndTestingData(Label, const LabeledObservationVector&, LabeledObservationVector&, LabeledObservationVector&);
-    static void standardizeObservations(const LabeledObservationVector&);
-
-private:
-    const LabeledObservationVector& labeledObservations;
-    LabelSet labelSet;
-    LabelToLabeledObservationVector labelToLabeledObservationVector;
-    LabelPairSet labelPairSet;
 };
 
 
@@ -354,14 +435,14 @@ public:
     // initialize the k member variable to K so end() will return true if it is called before start()
     // this is not perfect protection against misuse but it's better than nothing
     KFoldLabeledObservationsDivider(int _K, const LabeledObservationVector& l) : K(_K), k(_K) {
-        OneVsOneMultiClassSvmTrainer::buildLabelToLabeledObservationVector(labelToLabeledObservationVector, l);
+        buildLabelToLabeledObservationVector(labelToLabeledObservationVector, l);
     }
     ~KFoldLabeledObservationsDivider() {}
 
     // argument labelContainer holds the labels we will work with
     // the trainingData and testingData containers will only have observations with these labels
     // would it be better to restrict the KFoldLabeledObservationsDivider at construction?
-    void start(const LabelVector& labelContainer) {
+    void old_start(const LabelVector& labelContainer) {
         labelVector.clear();
         labelVector.assign(labelContainer.begin(), labelContainer.end());
         k = 0;
@@ -372,16 +453,34 @@ public:
         }
     }
 
+    void start() {
+        k = 0;
+        trainingData.clear();
+        testingData.clear();
+        for (LabelToLabeledObservationVector::const_iterator p = labelToLabeledObservationVector.begin(); p != labelToLabeledObservationVector.end(); p++) {
+            appendKthFold(k, K, p->second, trainingData, testingData);
+        }
+    }
+
     bool end() {
         return k >= K;
+    }
+
+    void old_next() {
+        k++;
+        trainingData.clear();
+        testingData.clear();
+        for (LabelVector::const_iterator label = labelVector.begin(); label != labelVector.end(); label++) {
+            appendKthFold(k, K, labelToLabeledObservationVector[*label], trainingData, testingData);
+        }
     }
 
     void next() {
         k++;
         trainingData.clear();
         testingData.clear();
-        for (LabelVector::const_iterator label = labelVector.begin(); label != labelVector.end(); label++) {
-            appendKthFold(k, K, labelToLabeledObservationVector[*label], trainingData, testingData);
+        for (LabelToLabeledObservationVector::const_iterator p = labelToLabeledObservationVector.begin(); p != labelToLabeledObservationVector.end(); p++) {
+            appendKthFold(k, K, p->second, trainingData, testingData);
         }
     }
 
@@ -424,5 +523,35 @@ private:
     LabeledObservationVector trainingData;
     LabeledObservationVector testingData;
 };
+
+
+// OneVsOneMultiClassSvmTrainer trains a support vector machine for each
+// pair of labels in a set of data.
+class OneVsOneMultiClassSvmTrainer {
+public:
+    OneVsOneMultiClassSvmTrainer(const LabeledObservationVector& observations);
+    ~OneVsOneMultiClassSvmTrainer() {}
+
+    MultiClassSVM* train(const KernelParameterRangeMap&);
+    double trainOnKFolds(SmoTrainer&, KernelFunction*, KFoldLabeledObservationsDivider&);
+    const LabelSet& getLabelSet() { return labelSet; }
+    const LabeledObservationVector& getLabeledObservations() { return labeledObservations; }
+    const LabelPairSet& getLabelPairSet() { return labelPairSet; }
+    const LabeledObservationVector& getLabeledObservationVectorForLabel(const Label& label) { return labelToLabeledObservationVector[label]; }
+
+    static void buildLabelPairSet(LabelPairSet&, const LabeledObservationVector&);
+    static void appendTrainingAndTestingData(Label, const LabeledObservationVector&, LabeledObservationVector&, LabeledObservationVector&);
+    static void standardizeObservations(const LabeledObservationVector&);
+
+private:
+    // maybe this should be a copy rather than a reference
+    // bad idea to carry a reference around between construction and call to train
+    const LabeledObservationVector& labeledObservations;
+    LabelSet labelSet;
+    LabelToLabeledObservationVector labelToLabeledObservationVector;
+    LabelPairSet labelPairSet;
+
+};
+
 
 #endif /* svm_hpp_ */
