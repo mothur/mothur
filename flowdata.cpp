@@ -190,6 +190,27 @@ void FlowData::capFlows(int mF){
 
 //**********************************************************************************************************************
 
+bool FlowData::hasGoodHomoP(){
+	
+	try{
+        
+        float maxIntensity = (float) maxHomoP + 0.49;
+
+        for(int i=0;i<endFlow;i++){
+            if(flowData[i] > maxIntensity){
+                return 0;
+            }
+        }
+		return 1;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "FlowData", "hasMinFlows");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
+
 bool FlowData::hasMinFlows(int minFlows){
 	
 	try{

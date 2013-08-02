@@ -24,6 +24,8 @@ public:
 	string getName();
 	void capFlows(int);
 	bool hasMinFlows(int);
+    bool hasGoodHomoP();
+
 	Sequence getSequence();
 
 	void printFlows(ofstream&);
