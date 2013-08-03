@@ -14,8 +14,6 @@
 
 #include "svm.hpp"
 
-static int cnt = 1;
-
 #define RANGE(X) X, X + sizeof(X)/sizeof(double)
 
 const std::string LinearKernelFunction::MapKey     = "LinearKernel";
