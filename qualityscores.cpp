@@ -32,22 +32,22 @@ QualityScores::QualityScores(ifstream& qFile){
 		m = MothurOut::getInstance();
 
 		int score;
-		seqName = getSequenceName(qFile);
+		seqName = getSequenceName(qFile); m->gobble(qFile);
 		
         if (m->debug) { m->mothurOut("[DEBUG]: name = '" + seqName + "'\n.");  }
         
 		if (!m->control_pressed) {
-            string qScoreString = m->getline(qFile);
+            string qScoreString = m->getline(qFile); m->gobble(qFile);
             
             if (m->debug) { m->mothurOut("[DEBUG]: scores = '" + qScoreString + "'\n.");  }
             
             while(qFile.peek() != '>' && qFile.peek() != EOF){
                 if (m->control_pressed) { break; }
-                string temp = m->getline(qFile);
+                string temp = m->getline(qFile); m->gobble(qFile);
                 if (m->debug) { m->mothurOut("[DEBUG]: scores = '" + temp + "'\n.");  }
                 qScoreString +=  ' ' + temp;
             }
-            //cout << "done reading " << endl;	
+            //cout << "done reading " << endl;
             istringstream qScoreStringStream(qScoreString);
             int count = 0;
             while(!qScoreStringStream.eof()){
@@ -68,7 +68,7 @@ QualityScores::QualityScores(ifstream& qFile){
         }
 		
 		seqLength = qScores.size();
-		//cout << "seqlength = " << seqLength << '\t' << count << endl;
+		//cout << "seqlength = " << seqLength  << endl;
 		
 	}
 	catch(exception& e) {

@@ -180,18 +180,10 @@ int OtuHierarchyCommand::execute(){
 		
 			if (m->control_pressed) {  return 0; }
 			
-			string names = lists[0].get(i); 
-			
-			//parse bin
-			while (names.find_first_of(',') != -1) { 
-				string name = names.substr(0,names.find_first_of(','));
-				names = names.substr(names.find_first_of(',')+1, names.length());
-				littleBins[name] = i;  
-			}
-			
-			//get last name
-			littleBins[names] = i;
-		}
+			string bin = lists[0].get(i);
+            vector<string> names; m->splitAtComma(bin, names);
+			for (int j = 0; j < names.size(); j++) { littleBins[names[j]] = i; }
+        }
 		
 		ofstream out;
         map<string, string> variables; 
@@ -207,24 +199,19 @@ int OtuHierarchyCommand::execute(){
 		
 			if (m->control_pressed) { outputTypes.clear(); out.close(); m->mothurRemove(outputFileName); return 0; }
 			
-			string names = lists[1].get(i);
+			string binnames = lists[1].get(i);
+            vector<string> names; m->splitAtComma(binnames, names);
+            
 			
 			//output column 1
-			if (output == "name")	{   out << names << '\t';	}
-			else					{	out << i << '\t';		}
+			if (output == "name")	{   out << binnames << '\t';	}
+			else					{	out << (i+1) << '\t';		}
 			
 			map<int, int> bins; //bin numbers in little that are in this bin in big
 			map<int, int>::iterator it;
 			
 			//parse bin
-			while (names.find_first_of(',') != -1) { 
-				string name = names.substr(0,names.find_first_of(','));
-				names = names.substr(names.find_first_of(',')+1, names.length());
-				bins[littleBins[name]] = littleBins[name];  
-			}
-			
-			//get last name
-			bins[littleBins[names]] = littleBins[names]; 
+			for (int j = 0; j < names.size(); j++) { bins[littleBins[names[j]]] = littleBins[names[j]];   }
 			
 			string col2 = "";
 			for (it = bins.begin(); it != bins.end(); it++) {
