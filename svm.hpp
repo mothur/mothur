@@ -59,7 +59,22 @@ typedef std::set<LabelPair> LabelPairSet;
 // LabeledObservation typedef is a label-observation pair intended to
 // hold one observation and its corresponding label.  Using a pointer
 // to Observation makes this object cheap to copy.
-typedef std::pair<Label, Observation*> LabeledObservation;
+//typedef std::pair<Label, Observation*> LabeledObservation;
+
+// This is a refactoring of the original LabeledObservation typedef.
+
+class LabeledObservation {
+public:
+    LabeledObservation(Label label, Observation* o) : first(label), second(o) {}
+    // do we need a copy constructor?
+    ~LabeledObservation() {}
+
+//private:
+    Label first;
+    Observation* second;
+};
+
+
 
 // A LabeledObservationVector is a container for an entire dataset (or a
 // subset of an entire dataset).
@@ -407,7 +422,7 @@ public:
     static const ParameterRange defaultCRange;
 
 private:
-    double C = 1.0;
+    double C;
 };
 
 

@@ -17,26 +17,34 @@
 
 const std::string LinearKernelFunction::MapKey     = "LinearKernel";
 const std::string LinearKernelFunction::MapKey_Constant = "LinearKernel_Constant";
-const ParameterRange LinearKernelFunction::defaultConstantRange = ParameterRange({-10.0, -1.0, 0.0, 1.0, 10.0});
+const double defaultLinearConstantRangeArray[5] = {-10.0, -1.0, 0.0, 1.0, 10.0};
+const ParameterRange LinearKernelFunction::defaultConstantRange = ParameterRange(defaultLinearConstantRangeArray, defaultLinearConstantRangeArray+5);
 
 const std::string RbfKernelFunction::MapKey        = "RbfKernel";
 const std::string RbfKernelFunction::MapKey_Gamma  = "RbfKernel_Gamma";
-const ParameterRange RbfKernelFunction::defaultGammaRange = ParameterRange({0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0});
+const double defaultRbfGammaRangeArray[] = {0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0};
+const ParameterRange RbfKernelFunction::defaultGammaRange = ParameterRange(defaultRbfGammaRangeArray, defaultRbfGammaRangeArray+7);
 
 const std::string PolynomialKernelFunction::MapKey          = "PolynomialKernel";
 const std::string PolynomialKernelFunction::MapKey_Constant = "PolynomialKernel_Constant";
 const std::string PolynomialKernelFunction::MapKey_Degree   = "PolynomialKernel_Degree";
-const ParameterRange PolynomialKernelFunction::defaultConstantRange = ParameterRange({-3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0});
-const ParameterRange PolynomialKernelFunction::defaultDegreeRange = ParameterRange({2.0, 3.0, 4.0});
+
+const double defaultPolynomialConstantRangeArray[] = {-3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0};
+const ParameterRange PolynomialKernelFunction::defaultConstantRange = ParameterRange(defaultPolynomialConstantRangeArray, defaultPolynomialConstantRangeArray+7);
+const double defaultPolynomialDegreeRangeArray[] = {2.0, 3.0, 4.0};
+const ParameterRange PolynomialKernelFunction::defaultDegreeRange = ParameterRange(defaultPolynomialDegreeRangeArray, defaultPolynomialDegreeRangeArray+3);
 
 const std::string SigmoidKernelFunction::MapKey          = "SigmoidKernel";
 const std::string SigmoidKernelFunction::MapKey_Alpha    = "SigmoidKernel_Alpha";
 const std::string SigmoidKernelFunction::MapKey_Constant = "SigmoidKernel_Constant";
-const ParameterRange SigmoidKernelFunction::defaultAlphaRange = ParameterRange({1.0, 2.0});
-const ParameterRange SigmoidKernelFunction::defaultConstantRange = ParameterRange({1.0, 2.0});
+const double defaultSigmoidAlphaRangeArray[] = {1.0, 2.0};
+const ParameterRange SigmoidKernelFunction::defaultAlphaRange = ParameterRange(defaultSigmoidAlphaRangeArray, defaultSigmoidAlphaRangeArray+2);
+const double defaultSigmoidConstantRangeArray[] = {1.0, 2.0};
+const ParameterRange SigmoidKernelFunction::defaultConstantRange = ParameterRange(defaultSigmoidConstantRangeArray, defaultSigmoidConstantRangeArray+2);
 
 const std::string SmoTrainer::MapKey_C = "SmoTrainer_C";
-const ParameterRange SmoTrainer::defaultCRange = ParameterRange({0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0});
+const double defaultSmoTrainerCRangeArray[] = {0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0};
+const ParameterRange SmoTrainer::defaultCRange = ParameterRange(defaultSmoTrainerCRangeArray, defaultSmoTrainerCRangeArray+8);
 
 
 LabelPair buildLabelPair(const Label& one, const Label& two) {
@@ -105,6 +113,7 @@ bool fewerVotes(const std::pair<Label, int>& p, const std::pair<Label, int>& q) 
 class MultiClassSvmClassificationTie : public std::exception {
 public:
     MultiClassSvmClassificationTie(LabelVector& t, int c) : tiedLabels(t), tiedVoteCount(c) {}
+    ~MultiClassSvmClassificationTie() throw() {}
 
     virtual const char* what() const throw() {
         return "classification tie";
@@ -203,7 +212,7 @@ SVM* SmoTrainer::train(KernelFunction* kernelFunction, const LabeledObservationV
     }
     if (verbose) std::cout << "assign K" << std::endl;
     // this is inefficient in general
-    std::vector<std::vector<double> > K(observationCount, std::vector<double>(observationCount, std::nan("")));
+    std::vector<std::vector<double> > K(observationCount, std::vector<double>(observationCount, std::numeric_limits<double>::quiet_NaN()));
     /*
     for ( int u = 0; u < observationCount; u++ ) {
         for ( int v = 0; v < observationCount; v++ ) {
@@ -503,6 +512,22 @@ void OneVsOneMultiClassSvmTrainer::appendTrainingAndTestingData(
     }
 }
 
+// The LabelMatchesEither functor is used only in a call to remove_copy_if in the
+// OneVsOneMultiClassSvmTrainer::train method.  It returns true if the labeled
+// observation argument has the same label as either of the two label arguments.
+class LabelMatchesEither {
+public:
+    LabelMatchesEither(const Label& _label0, const Label& _label1) : label0(_label0), label1(_label1) {}
+
+    bool operator() (const LabeledObservation& o) {
+        return !((o.first == label0) || (o.first == label1));
+    }
+
+private:
+    const Label& label0;
+    const Label& label1;
+};
+
 MultiClassSVM* OneVsOneMultiClassSvmTrainer::train(const KernelParameterRangeMap& kernelParameterRangeMap) {
     // first divide the data into a 'development' set for tuning hyperparameters
     // and an 'evaluation' set for measuring performance
@@ -529,13 +554,15 @@ MultiClassSVM* OneVsOneMultiClassSvmTrainer::train(const KernelParameterRangeMap
         // K should be an argument
         int K = 5;
         LabeledObservationVector twoClassDevelopmentObservations;
+        LabelMatchesEither labelMatchesEither(label0, label1);
         std::remove_copy_if(
             developmentObservations.begin(),
             developmentObservations.end(),
             std::back_inserter(twoClassDevelopmentObservations),
-            [&](const LabeledObservation& o){
-                return !((o.first == label0) || (o.first == label1));
-            }
+            labelMatchesEither
+            //[&](const LabeledObservation& o){
+            //    return !((o.first == label0) || (o.first == label1));
+            //}
         );
         KFoldLabeledObservationsDivider kFoldLabeledObservationsDivider(K, twoClassDevelopmentObservations);
         // loop on kernel functions and kernel function parameters
@@ -573,14 +600,16 @@ MultiClassSVM* OneVsOneMultiClassSvmTrainer::train(const KernelParameterRangeMap
                 std::cout << "        "  << p->first << " : " << p->second << std::endl;
             }
 
+            LabelMatchesEither labelMatchesEither(label0, label1);
             LabeledObservationVector twoClassDevelopmentObservations;
             std::remove_copy_if(
                 developmentObservations.begin(),
                 developmentObservations.end(),
                 std::back_inserter(twoClassDevelopmentObservations),
-                [&](const LabeledObservation& o){
-                    return !((o.first == label0) || (o.first == label1));
-                }
+                labelMatchesEither
+                //[&](const LabeledObservation& o){
+                //    return !((o.first == label0) || (o.first == label1));
+                //}
             );
             //std::cout << "training final SVM with C = " << bestC << std::endl;
             std::cout << "training final SVM with " << twoClassDevelopmentObservations.size() << " labeled observations" << std::endl;
