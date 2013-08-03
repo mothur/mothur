@@ -379,7 +379,7 @@
 			outputFiles = (
 				"$(TARGET_BUILD_DIR)/$(INPUT_FILE_BASE).o",
 			);
-			script = "/usr/local/bin/gfortran -g -m64 -c ${PROJECT_DIR}/${INPUT_FILE_NAME} -o ${TARGET_BUILD_DIR}/${INPUT_FILE_BASE}.o";
+			script = "/usr/local/gfortran/bin/gfortran -g -m64 -c ${PROJECT_DIR}/${INPUT_FILE_NAME} -o ${TARGET_BUILD_DIR}/${INPUT_FILE_BASE}.o";
 		};
 /* End PBXBuildRule section */
 

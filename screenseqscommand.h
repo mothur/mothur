@@ -74,8 +74,8 @@ private:
 
 	bool abort;
 	string fastafile, namefile, groupfile, alignreport, outputDir, qualfile, taxonomy, countfile, contigsreport, summaryfile;
-	int startPos, endPos, maxAmbig, maxHomoP, minLength, maxLength, processors, criteria, minOverlap, oStart, oEnd, mismatches, maxN, maxInsert;
-    float minSim, minScore;
+	int startPos, endPos, maxAmbig, maxHomoP, minLength, maxLength, processors, minOverlap, oStart, oEnd, mismatches, maxN, maxInsert;
+    float minSim, minScore, criteria;
 	vector<string> outputNames;
 	vector<string> optimize;
 	map<string, int> nameMap;
