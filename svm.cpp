@@ -14,37 +14,39 @@
 
 #include "svm.hpp"
 
+#define RANGE(X) X, X + sizeof(X)/sizeof(double)
 
 const std::string LinearKernelFunction::MapKey     = "LinearKernel";
 const std::string LinearKernelFunction::MapKey_Constant = "LinearKernel_Constant";
 const double defaultLinearConstantRangeArray[5] = {-10.0, -1.0, 0.0, 1.0, 10.0};
-const ParameterRange LinearKernelFunction::defaultConstantRange = ParameterRange(defaultLinearConstantRangeArray, defaultLinearConstantRangeArray+5);
+const ParameterRange LinearKernelFunction::defaultConstantRange = ParameterRange(RANGE(defaultLinearConstantRangeArray));
 
 const std::string RbfKernelFunction::MapKey        = "RbfKernel";
 const std::string RbfKernelFunction::MapKey_Gamma  = "RbfKernel_Gamma";
 const double defaultRbfGammaRangeArray[] = {0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0};
-const ParameterRange RbfKernelFunction::defaultGammaRange = ParameterRange(defaultRbfGammaRangeArray, defaultRbfGammaRangeArray+7);
+const ParameterRange RbfKernelFunction::defaultGammaRange = ParameterRange(RANGE(defaultRbfGammaRangeArray));
 
 const std::string PolynomialKernelFunction::MapKey          = "PolynomialKernel";
 const std::string PolynomialKernelFunction::MapKey_Constant = "PolynomialKernel_Constant";
 const std::string PolynomialKernelFunction::MapKey_Degree   = "PolynomialKernel_Degree";
 
 const double defaultPolynomialConstantRangeArray[] = {-3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0};
-const ParameterRange PolynomialKernelFunction::defaultConstantRange = ParameterRange(defaultPolynomialConstantRangeArray, defaultPolynomialConstantRangeArray+7);
+const ParameterRange PolynomialKernelFunction::defaultConstantRange = ParameterRange(RANGE(defaultPolynomialConstantRangeArray));
 const double defaultPolynomialDegreeRangeArray[] = {2.0, 3.0, 4.0};
-const ParameterRange PolynomialKernelFunction::defaultDegreeRange = ParameterRange(defaultPolynomialDegreeRangeArray, defaultPolynomialDegreeRangeArray+3);
+const ParameterRange PolynomialKernelFunction::defaultDegreeRange = ParameterRange(RANGE(defaultPolynomialDegreeRangeArray));
 
 const std::string SigmoidKernelFunction::MapKey          = "SigmoidKernel";
 const std::string SigmoidKernelFunction::MapKey_Alpha    = "SigmoidKernel_Alpha";
 const std::string SigmoidKernelFunction::MapKey_Constant = "SigmoidKernel_Constant";
+
 const double defaultSigmoidAlphaRangeArray[] = {1.0, 2.0};
-const ParameterRange SigmoidKernelFunction::defaultAlphaRange = ParameterRange(defaultSigmoidAlphaRangeArray, defaultSigmoidAlphaRangeArray+2);
+const ParameterRange SigmoidKernelFunction::defaultAlphaRange = ParameterRange(RANGE(defaultSigmoidAlphaRangeArray));
 const double defaultSigmoidConstantRangeArray[] = {1.0, 2.0};
-const ParameterRange SigmoidKernelFunction::defaultConstantRange = ParameterRange(defaultSigmoidConstantRangeArray, defaultSigmoidConstantRangeArray+2);
+const ParameterRange SigmoidKernelFunction::defaultConstantRange = ParameterRange(RANGE(defaultSigmoidConstantRangeArray));
 
 const std::string SmoTrainer::MapKey_C = "SmoTrainer_C";
 const double defaultSmoTrainerCRangeArray[] = {0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0};
-const ParameterRange SmoTrainer::defaultCRange = ParameterRange(defaultSmoTrainerCRangeArray, defaultSmoTrainerCRangeArray+8);
+const ParameterRange SmoTrainer::defaultCRange = ParameterRange(RANGE(defaultSmoTrainerCRangeArray));
 
 
 LabelPair buildLabelPair(const Label& one, const Label& two) {
