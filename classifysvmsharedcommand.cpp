@@ -17,6 +17,10 @@ vector<string> ClassifySvmSharedCommand::setParameters() {
         parameters.push_back(pshared);
         CommandParameter pdesign("design", "InputTypes", "", "", "none", "none", "none", "", false, true, true);
         parameters.push_back(pdesign);
+
+        // Support Vector Machine parameters
+        CommandParameter linearKernel("linear", "Boolean", "", "T", "", "", "", "", false, false);
+        parameters.push_back(linearKernel);
         //CommandParameter potupersplit("otupersplit", "Multiple", "log2-squareroot", "log2", "", "", "","",false,false); parameters.push_back(potupersplit);
         //CommandParameter psplitcriteria("splitcriteria", "Multiple", "gainratio-infogain", "gainratio", "", "", "","",false,false); parameters.push_back(psplitcriteria);
         //CommandParameter pnumtrees("numtrees", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pnumtrees);
