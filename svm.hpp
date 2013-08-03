@@ -554,4 +554,9 @@ private:
 };
 
 
+class SvmRfe {
+
+};
+
+
 #endif /* svm_hpp_ */
