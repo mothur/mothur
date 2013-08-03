@@ -7,3 +7,4 @@
 build
 xcuserdata
 *.xcuserdata
+TARGET_BUILD_DIRTARGET_BUILD_DIR
