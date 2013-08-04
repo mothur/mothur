@@ -18,7 +18,7 @@
 
 const std::string LinearKernelFunction::MapKey     = "LinearKernel";
 const std::string LinearKernelFunction::MapKey_Constant = "LinearKernel_Constant";
-const double defaultLinearConstantRangeArray[5] = {-10.0, -1.0, 0.0, 1.0, 10.0};
+const double defaultLinearConstantRangeArray[] = {-10.0, -1.0, 0.0, 1.0, 10.0};
 const ParameterRange LinearKernelFunction::defaultConstantRange = ParameterRange(RANGE(defaultLinearConstantRangeArray));
 
 const std::string RbfKernelFunction::MapKey        = "RbfKernel";
