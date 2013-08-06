@@ -316,7 +316,7 @@ void ClassifySvmSharedCommand::readSharedRAbundVectors(vector<SharedRAbundVector
             string treatmentName = designMap.getGroup(sharedGroupName);
             //std::cout << "shared group name: " << sharedGroupName << " treatment name: " << treatmentName << std::endl;
             //labeledObservationVector.push_back(std::make_pair(treatmentName, observation));
-            labeledObservationVector.push_back(LabeledObservation(treatmentName, observation));
+            labeledObservationVector.push_back(LabeledObservation(j, treatmentName, observation));
             //std::cout << " j=" << j << " label : " << lookup[j]->getLabel() << " group: " << lookup[j]->getGroup();
             for (int k = 0; k < data.size(); k++) {
                 //std::cout << " abundance " << data[k].abundance;

@@ -670,3 +670,19 @@ double OneVsOneMultiClassSvmTrainer::trainOnKFolds(SmoTrainer& smoTrainer, Kerne
     }
     return meanScoreOverKFolds;
 }
+
+// Only the linear kernel can be used here.
+/*
+FeatureLabelVector SvmRfe::getOrderedFeatureList(const LabeledObservationVector& labeledObservationVector, const KernelParameterRangeMap& linearKernelParameterRangeMap) {
+    OneVsOneMultiClassSvmTrainer t(labeledObservationVector);
+    FeatureLabelVector rankedFeatureVector;
+    while ( rankedFeatureVector.size() < labeledObservationVector.at(0).second->size() ) {
+        MultiClassSVM* s = t.train(kernelParameterRangeMap);
+        // calculate the 'ranking criterion' for each feature using each binary svm
+        //for each feature i
+        //    for each svm r
+        //        c_i += (w_r_i^2)
+        //delete s;
+    }
+}
+*/

@@ -62,14 +62,18 @@ typedef std::set<LabelPair> LabelPairSet;
 //typedef std::pair<Label, Observation*> LabeledObservation;
 
 // This is a refactoring of the original LabeledObservation typedef.
-
+// The original typedef has been promoted to a class in order to add
+// at least one additional member variable, int datasetIndex, which
+// will be used to implement kernel function optimizations.
 class LabeledObservation {
 public:
-    LabeledObservation(Label label, Observation* o) : first(label), second(o) {}
+    LabeledObservation(int _datasetIndex, Label _label, Observation* _o) : datasetIndex(_datasetIndex), first(_label), second(_o) {}
     // do we need a copy constructor?
+    //LabeledObservation(const LabeledObservation& o) : datasetIndex(o.datasetIndex), first(o.first), second(o.second) {}
     ~LabeledObservation() {}
 
 //private:
+    int datasetIndex;
     Label first;
     Observation* second;
 };
@@ -520,13 +524,16 @@ public:
     //     9   0     true      testing        false     training       false     training
     //
     static void appendKthFold(int k, int K, const LabeledObservationVector& x, LabeledObservationVector& trainingData, LabeledObservationVector& testingData) {
-        for ( int i = 0; i < x.size(); i++) {
+        //for ( int i = 0; i < x.size(); i++) {
+        int i = 0;
+        for (LabeledObservationVector::const_iterator xi = x.begin(); xi != x.end(); xi++) {
             if ( (i % K) == k) {
-                testingData.push_back(x[i]);
+                testingData.push_back(*xi);
             }
             else {
-                trainingData.push_back(x[i]);
+                trainingData.push_back(*xi);
             }
+            i++;
         }
     }
 
@@ -568,9 +575,18 @@ private:
 
 };
 
+typedef std::string FeatureLabel;
+typedef std::vector<FeatureLabel> FeatureLabelVector;
 
+// A better name for this class is MsvmRfe after MSVM-RFE described in
+// "MSVM_RFE: extensions of SVM-RFE for multiclass gene selection on
+// DNA microarray data", Zhou and Tuck, 2007, Bioinformatics
 class SvmRfe {
+public:
+    SvmRfe() {}
+    ~SvmRfe() {}
 
+    FeatureLabelVector getOrderedFeatureList(const LabeledObservationVector&, const KernelParameterRangeMap&);
 };
 
 
