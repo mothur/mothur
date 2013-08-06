@@ -1145,10 +1145,6 @@
 		08FB7794FE84155DC02AAC07 /* mothur */ = {
 			isa = PBXGroup;
 			children = (
-				7B21820117AD77BD00286E6A /* svm.cpp */,
-				7B21820217AD77BD00286E6A /* svm.hpp */,
-				7B2181FE17AD777B00286E6A /* classifysvmsharedcommand.cpp */,
-				7B2181FF17AD777B00286E6A /* classifysvmsharedcommand.h */,
 				08FB7795FE84155DC02AAC07 /* Source */,
 				C6A0FF2B0290797F04C91782 /* Documentation */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
@@ -1159,6 +1155,7 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				7B17437A17AF6F02004C161B /* svm */,
 				A7A61F1A130035C800E05B6B /* LICENSE */,
 				A70332B512D3A13400761E33 /* makefile */,
 				A7E9B65912D37EC300DA6239 /* averagelinkage.cpp */,
@@ -1276,6 +1273,17 @@
 				8DD76FB20486AB0100D96B5E /* mothur */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		7B17437A17AF6F02004C161B /* svm */ = {
+			isa = PBXGroup;
+			children = (
+				7B21820117AD77BD00286E6A /* svm.cpp */,
+				7B21820217AD77BD00286E6A /* svm.hpp */,
+				7B2181FE17AD777B00286E6A /* classifysvmsharedcommand.cpp */,
+				7B2181FF17AD777B00286E6A /* classifysvmsharedcommand.h */,
+			);
+			name = svm;
 			sourceTree = "<group>";
 		};
 		A7386C191619C9FB00651424 /* randomforest */ = {
