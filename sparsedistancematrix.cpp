@@ -90,6 +90,30 @@ void SparseDistanceMatrix::addCell(ull row, PDistCell cell){
 	}
 }
 /***********************************************************************/
+int SparseDistanceMatrix::addCellSorted(ull row, PDistCell cell){
+	try {
+		numNodes+=2;
+		if(cell.dist < smallDist){ smallDist = cell.dist; }
+        
+        seqVec[row].push_back(cell);
+        PDistCell temp(row, cell.dist);
+        seqVec[cell.index].push_back(temp);
+        
+        sortSeqVec(row);
+        sortSeqVec(cell.index);
+        
+        int location = -1; //find location of new cell when sorted
+        for (int i = 0; i < seqVec[row].size(); i++) {  if (seqVec[row][i].index == cell.index) { location = i; break; } }
+        
+        return location;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SparseDistanceMatrix", "addCellSorted");
+		exit(1);
+	}
+}
+
+/***********************************************************************/
 
 ull SparseDistanceMatrix::getSmallestCell(ull& row){
 	try {
@@ -142,6 +166,21 @@ int SparseDistanceMatrix::sortSeqVec(){
         //saves time in getSmallestCell, by making it so you dont search the repeats
         for (int i = 0; i < seqVec.size(); i++) {  sort(seqVec[i].begin(), seqVec[i].end(), compareIndexes); }
     
+        return 0;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "SparseDistanceMatrix", "sortSeqVec");
+		exit(1);
+	}
+}
+/***********************************************************************/
+
+int SparseDistanceMatrix::sortSeqVec(int index){
+	try {
+        
+        //saves time in getSmallestCell, by making it so you dont search the repeats
+        sort(seqVec[index].begin(), seqVec[index].end(), compareIndexes);
+        
         return 0;
     }
 	catch(exception& e) {

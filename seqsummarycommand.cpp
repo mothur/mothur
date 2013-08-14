@@ -364,7 +364,7 @@ int SeqSummaryCommand::execute(){
 		int size = startPosition.size();
 		
 		//find means
-		double meanStartPosition, meanEndPosition, meanSeqLength, meanAmbigBases, meanLongHomoPolymer;
+		unsigned long long meanStartPosition, meanEndPosition, meanSeqLength, meanAmbigBases, meanLongHomoPolymer;
 		meanStartPosition = 0; meanEndPosition = 0; meanSeqLength = 0; meanAmbigBases = 0; meanLongHomoPolymer = 0;
 		for (int i = 0; i < size; i++) {
 			meanStartPosition += startPosition[i];
@@ -374,8 +374,9 @@ int SeqSummaryCommand::execute(){
 			meanLongHomoPolymer += longHomoPolymer[i];
 		}
                 
-		//this is an int divide so the remainder is lost
-		meanStartPosition /= (float) size; meanEndPosition /= (float) size; meanLongHomoPolymer /= (float) size; meanSeqLength /= (float) size; meanAmbigBases /= (float) size;
+        double meanstartPosition, meanendPosition, meanseqLength, meanambigBases, meanlongHomoPolymer;
+                
+		meanstartPosition /= (double) size; meanendPosition /= (double) size; meanlongHomoPolymer /= (double) size; meanseqLength /= (double) size; meanambigBases /= (double) size;
 				
 		int ptile0_25	= int(size * 0.025);
 		int ptile25		= int(size * 0.250);
@@ -399,7 +400,7 @@ int SeqSummaryCommand::execute(){
 		m->mothurOut("75%-tile:\t" + toString(startPosition[ptile75]) + "\t" + toString(endPosition[ptile75]) + "\t" + toString(seqLength[ptile75]) + "\t" + toString(ambigBases[ptile75]) + "\t" + toString(longHomoPolymer[ptile75]) + "\t" + toString(ptile75+1)); m->mothurOutEndLine();
 		m->mothurOut("97.5%-tile:\t" + toString(startPosition[ptile97_5]) + "\t" + toString(endPosition[ptile97_5]) + "\t" + toString(seqLength[ptile97_5]) + "\t" + toString(ambigBases[ptile97_5]) + "\t" + toString(longHomoPolymer[ptile97_5]) + "\t" + toString(ptile97_5+1)); m->mothurOutEndLine();
 		m->mothurOut("Maximum:\t" + toString(startPosition[ptile100]) + "\t" + toString(endPosition[ptile100]) + "\t" + toString(seqLength[ptile100]) + "\t" + toString(ambigBases[ptile100]) + "\t" + toString(longHomoPolymer[ptile100]) + "\t" + toString(ptile100+1)); m->mothurOutEndLine();
-		m->mothurOut("Mean:\t" + toString(meanStartPosition) + "\t" + toString(meanEndPosition) + "\t" + toString(meanSeqLength) + "\t" + toString(meanAmbigBases) + "\t" + toString(meanLongHomoPolymer)); m->mothurOutEndLine();
+		m->mothurOut("Mean:\t" + toString(meanstartPosition) + "\t" + toString(meanendPosition) + "\t" + toString(meanseqLength) + "\t" + toString(meanambigBases) + "\t" + toString(meanlongHomoPolymer)); m->mothurOutEndLine();
 
 		if ((namefile == "") && (countfile == "")) {  m->mothurOut("# of Seqs:\t" + toString(numSeqs)); m->mothurOutEndLine(); }
 		else { m->mothurOut("# of unique seqs:\t" + toString(numSeqs)); m->mothurOutEndLine(); m->mothurOut("total # of seqs:\t" + toString(startPosition.size())); m->mothurOutEndLine(); }
@@ -543,7 +544,7 @@ int SeqSummaryCommand::MPICreateSummary(int start, int num, vector<int>& startPo
 				}
 				
 				//for each sequence this sequence represents
-				for (int i = 0; i < num; i++) {
+				for (int j = 0; j < num; j++) {
 					startPosition.push_back(current.getStartPos());
 					endPosition.push_back(current.getEndPos());
 					seqLength.push_back(current.getNumBases());

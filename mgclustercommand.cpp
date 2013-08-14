@@ -23,6 +23,7 @@ vector<string> MGClusterCommand::setParameters(){
 		CommandParameter phard("hard", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(phard);
 		CommandParameter pmin("min", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pmin);
 		CommandParameter pmerge("merge", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pmerge);
+        CommandParameter padjust("adjust", "String", "", "F", "", "", "","",false,false); parameters.push_back(padjust);
 		CommandParameter phcluster("hcluster", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(phcluster);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -40,7 +41,7 @@ vector<string> MGClusterCommand::setParameters(){
 string MGClusterCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The mgcluster command parameter options are blast, name, cutoff, precision, hard,  method, merge, min, length, penalty and hcluster. The blast parameter is required.\n";
+		helpString += "The mgcluster command parameter options are blast, name, cutoff, precision, hard,  method, merge, min, length, penalty, adjust and hcluster. The blast parameter is required.\n";
 		helpString += "The mgcluster command reads a blast and name file and clusters the sequences into OPF units similiar to the OTUs.\n";
 		helpString += "This command outputs a .list, .rabund and .sabund file that can be used with mothur other commands to estimate richness.\n";
 		helpString += "The cutoff parameter is used to specify the maximum distance you would like to cluster to. The default is 0.70.\n";
@@ -48,6 +49,7 @@ string MGClusterCommand::getHelpString(){
 		helpString += "The acceptable mgcluster methods are furthest, nearest and average.  If no method is provided then average is assumed.\n";	
 		helpString += "The min parameter allows you to specify is you want the minimum or maximum blast score ratio used in calculating the distance. The default is true, meaning you want the minimum.\n";
 		helpString += "The length parameter is used to specify the minimum overlap required.  The default is 5.\n";
+        helpString += "The adjust parameter is used to handle missing distances.  If you set a cutoff, adjust=f by default.  If not, adjust=t by default. Adjust=f, means ignore missing distances and adjust cutoff as needed with the average neighbor method.  Adjust=t, will treat missing distances as 1.0. You can also set the value the missing distances should be set to, adjust=0.5 would give missing distances a value of 0.5.\n";
 		helpString += "The penalty parameter is used to adjust the error rate.  The default is 0.10.\n";
 		helpString += "The merge parameter allows you to shut off merging based on overlaps and just cluster.  By default merge is true, meaning you want to merge.\n";
 		helpString += "The hcluster parameter allows you to use the hcluster algorithm when clustering.  This may be neccessary if your file is too large to fit into RAM. The default is false.\n";
@@ -184,7 +186,10 @@ MGClusterCommand::MGClusterCommand(string option) {
 			precisionLength = temp.length();
 			m->mothurConvert(temp, precision); 
 			
-			temp = validParameter.validFile(parameters, "cutoff", false);			if (temp == "not found") { temp = "0.70"; }
+            cutoffSet = false;
+			temp = validParameter.validFile(parameters, "cutoff", false);
+            if (temp == "not found") { temp = "0.70"; }
+            else { cutoffSet = true;  }
 			m->mothurConvert(temp, cutoff); 
 			cutoff += (5 / (precision * 10.0));
 			
@@ -210,7 +215,12 @@ MGClusterCommand::MGClusterCommand(string option) {
 			hclusterWanted = m->isTrue(temp); 
 			
 			temp = validParameter.validFile(parameters, "hard", false);			if (temp == "not found") { temp = "T"; }
-			hard = m->isTrue(temp);            
+			hard = m->isTrue(temp);
+            
+            temp = validParameter.validFile(parameters, "adjust", false);				if (temp == "not found") { if (cutoffSet) { temp = "F"; }else { temp="T"; } }
+            if (m->isNumeric1(temp))    { m->mothurConvert(temp, adjust);   }
+            else if (m->isTrue(temp))   { adjust = 1.0;                     }
+            else                        { adjust = -1.0;                    }
 		}
 
 	}
@@ -302,9 +312,9 @@ int MGClusterCommand::execute(){
 			delete read;
 		
 			//create cluster
-			if (method == "furthest")	{	cluster = new CompleteLinkage(rabund, list, distMatrix, cutoff, method); }
-			else if(method == "nearest"){	cluster = new SingleLinkage(rabund, list, distMatrix, cutoff, method); }
-			else if(method == "average"){	cluster = new AverageLinkage(rabund, list, distMatrix, cutoff, method);	}
+			if (method == "furthest")	{	cluster = new CompleteLinkage(rabund, list, distMatrix, cutoff, method, adjust); }
+			else if(method == "nearest"){	cluster = new SingleLinkage(rabund, list, distMatrix, cutoff, method, adjust); }
+			else if(method == "average"){	cluster = new AverageLinkage(rabund, list, distMatrix, cutoff, method, adjust);	}
 			cluster->setMapWanted(true);
 			Seq2Bin = cluster->getSeqtoBin();
 			oldSeq2Bin = Seq2Bin;

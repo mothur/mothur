@@ -1,9 +1,9 @@
 *.logfile
 *.o
 *.pbxproj
-*.xcuserdata
 *.zip
 .DS_Store
 .idea
 build
 xcuserdata
+*.xcuserdata
