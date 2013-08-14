@@ -373,17 +373,16 @@ vector<int> LefseCommand::runKruskalWallis(vector<SharedRAbundVector*>& lookup, 
 	}
 }
 //**********************************************************************************************************************
-
+//assumes not neccessarily paired
 vector<int> LefseCommand::runWilcoxon(vector<SharedRAbundVector*>& lookup, DesignMap& designMap, vector<int> bins) {
     try {
+        LinearAlgebra linear;
         vector<int> significantOtuLabels;
         //if it exists and meets the following requirements run Wilcoxon
         /*
          1. Subclass members all belong to same main class
-         2. Number of groups in each subclass is the same
-         3. anything else??
-         
-         */
+         anything else
+        */
         vector<string> subclasses;
         map<string, string> subclass2Class;
         map<string, int> subclassCounts;
@@ -411,12 +410,6 @@ vector<int> LefseCommand::runWilcoxon(vector<SharedRAbundVector*>& lookup, Desig
         }
         
         if (error) { return significantOtuLabels; }
-        else { //check counts to make sure subclasses are the same size
-            set<int> counts;
-            for (map<string, int>::iterator it = subclassCounts.begin(); it != subclassCounts.end(); it++) { counts.insert(it->second); }
-            if (counts.size() > 1) { m->mothurOut("[ERROR]: subclasses must be the same size. Ignoring wilcoxon.\n");
-                return significantOtuLabels;  }
-        }
         
         int numBins = lookup[0]->getNumBins();
         vector<compGroup> comp;
@@ -444,7 +437,6 @@ vector<int> LefseCommand::runWilcoxon(vector<SharedRAbundVector*>& lookup, Desig
         outputNames.push_back(outputFileName); outputTypes["wilcoxon"].push_back(outputFileName);
         out << "OTULabel\tComparision\tWilcoxon\tPvalue\n";
         
-        LinearAlgebra linear;
         for (int i = 0; i < numBins; i++) {
             if (m->control_pressed) { break; }
             
@@ -454,20 +446,26 @@ vector<int> LefseCommand::runWilcoxon(vector<SharedRAbundVector*>& lookup, Desig
                 //for each subclass comparision
                 for (int j = 0; j < numComp; j++) {
                     //fill x and y with this comparisons data
-                    vector<double> x; vector<double> y;
+                    vector<double> x; vector<double> y; 
                     
+                    cout << m->currentBinLabels[i] << '\t' << comp[j].getCombo() << " x <- (";
                     //fill x and y
                     vector<int> xIndexes = subClass2GroupIndex[comp[j].group1]; //indexes in lookup for this subclass
-                    for (int k = 0; k < xIndexes.size(); k++) { x.push_back(lookup[xIndexes[k]]->getAbundance(i)); }
+                    for (int k = 0; k < xIndexes.size(); k++) { x.push_back(lookup[xIndexes[k]]->getAbundance(i)); cout << lookup[xIndexes[k]]->getAbundance(i) << ", "; }
+                    cout << ")\n";
+                    
+                    cout << m->currentBinLabels[i] << '\t' << comp[j].getCombo() << " y <- (";
                     
                     vector<int> yIndexes = subClass2GroupIndex[comp[j].group2]; //indexes in lookup for this subclass
-                    for (int k = 0; k < yIndexes.size(); k++) { y.push_back(lookup[yIndexes[k]]->getAbundance(i)); }
+                    for (int k = 0; k < yIndexes.size(); k++) { y.push_back(lookup[yIndexes[k]]->getAbundance(i)); cout << lookup[yIndexes[k]]->getAbundance(i) << ", ";}
+                    cout << ")\n";
                     
                     double pValue = 0.0;
                     double H = linear.calcWilcoxon(x, y, pValue);
             
                     //output H and signifigance
-                    out << m->currentBinLabels[i] << '\t' << comp[j].getCombo() << '\t' << H << '\t' << pValue << endl;
+                    if (!isnan(pValue)) { out << m->currentBinLabels[i] << '\t' << comp[j].getCombo() << '\t' << H << '\t' << pValue << endl; }
+                    else { out << m->currentBinLabels[i] << '\t' << comp[j].getCombo() << '\t' << H << '\t' << "NA" << endl; }
                     
                     //set sig - not sure how yet
                 }

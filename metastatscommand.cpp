@@ -214,6 +214,14 @@ int MetaStatsCommand::execute(){
 	try {
 	
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+        
+        //just used to convert files to test metastats online
+        /****************************************************/
+        bool convertInputToShared = false;
+        convertSharedToInput = false;
+        if (convertInputToShared) { convertToShared(sharedfile); return 0; }
+        /****************************************************/
+        
 		
 		designMap = new GroupMap(designfile);
 		designMap->readDesignMap();
@@ -463,7 +471,7 @@ int MetaStatsCommand::driver(int start, int num, vector<SharedRAbundVector*>& th
 		for (int c = start; c < (start+num); c++) {
 			
 			//get set names
-			string setA = namesOfGroupCombos[c][0]; 
+			string setA = namesOfGroupCombos[c][0];
 			string setB = namesOfGroupCombos[c][1];
 		
 			//get filename
@@ -517,6 +525,7 @@ int MetaStatsCommand::driver(int start, int num, vector<SharedRAbundVector*>& th
 				
 				m->mothurOut("Comparing " + setA + " and " + setB + "..."); m->mothurOutEndLine(); 
 				//metastat_main(output, thisLookUp[0]->getNumBins(), subset.size(), threshold, iters, data, setACount);
+                if (convertSharedToInput) { convertToInput(subset, outputFileName);  }
 				
 				m->mothurOutEndLine();
 				MothurMetastats mothurMeta(threshold, iters);
@@ -539,4 +548,118 @@ int MetaStatsCommand::driver(int start, int num, vector<SharedRAbundVector*>& th
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
+/*Metastats files look like:
+ 13_0	14_0	13_52	14_52	70S	71S	72S	M1	M2	M3	C11	C12	C21	C15	C16	C19	C3	C4	C9
+ Alphaproteobacteria	0	0	0	0	0	0	5	0	0	0	0	0	0	0	0	0	0	0	0
+ Mollicutes	0	0	2	0	0	59	5	11	4	1	0	2	8	1	0	1	0	3	0
+ Verrucomicrobiae	0	0	0	0	0	1	6	0	0	0	0	0	0	0	0	0	0	0	0
+ Deltaproteobacteria	0	0	0	0	0	6	1	0	1	0	1	1	7	0	0	0	0	0	0
+ Cyanobacteria	0	0	1	0	0	0	1	0	0	0	0	0	0	0	0	0	0	0	0
+ Epsilonproteobacteria	0	0	0	0	0	0	0	0	6	0	0	3	1	0	0	0	0	0	0
+ Clostridia	75	65	207	226	801	280	267	210	162	197	81	120	106	148	120	94	84	98	121
+ Bacilli	3	2	16	8	21	52	31	70	46	65	4	28	5	23	62	26	20	30	25
+ Bacteroidetes (class)	21	25	22	64	226	193	296	172	98	55	19	149	201	85	50	76	113	92	82
+ Gammaproteobacteria	0	0	0	0	0	1	0	0	0	0	1	1	0	0	0	1	0	0	0
+ TM7_genera_incertae_sedis	0	0	0	0	0	0	0	0	1	0	1	2	0	2	0	0	0	0	0
+ Actinobacteria (class)	1	1	1	2	0	0	0	9	3	7	1	1	1	3	1	2	1	2	3
+ Betaproteobacteria	0	0	3	3	0	0	9	1	1	0	1	2	3	1	1	0	0	0	0
+*/
+//this function is just used to convert files to test the differences between the metastats version and mothurs version
+int MetaStatsCommand::convertToShared(string filename) {
+	try {
+        ifstream in;
+        m->openInputFile(filename, in);
+        
+        string header = m->getline(in); m->gobble(in);
+        
+        vector<string> groups = m->splitWhiteSpace(header);
+        vector<SharedRAbundVector*> newLookup;
+        for (int i = 0; i < groups.size(); i++) {
+            SharedRAbundVector* temp = new SharedRAbundVector();
+            temp->setLabel("0.03");
+            temp->setGroup(groups[i]);
+            newLookup.push_back(temp);
+        }
+        
+        int otuCount = 0;
+        while (!in.eof()) {
+            if (m->control_pressed) { break; }
+            
+            string otuname;
+            in >> otuname; m->gobble(in);
+            otuCount++;
+            
+            for (int i = 0; i < groups.size(); i++) {
+                int temp;
+                in >> temp; m->gobble(in);
+                newLookup[i]->push_back(temp, groups[i]);
+            }
+            m->gobble(in);
+        }
+        in.close();
+    
+        ofstream out;
+        m->openOutputFile(filename+".shared", out);
+        
+        out << "label\tgroup\tnumOTUs\t";
+        
+        string snumBins = toString(otuCount);
+        for (int i = 0; i < otuCount; i++) {
+            string binLabel = "Otu";
+            string sbinNumber = toString(i+1);
+            if (sbinNumber.length() < snumBins.length()) {
+                int diff = snumBins.length() - sbinNumber.length();
+                for (int h = 0; h < diff; h++) { binLabel += "0"; }
+            }
+            binLabel += sbinNumber;
+            out << binLabel << '\t';
+        }
+        out << endl;
+        
+        for (int i = 0; i < groups.size(); i++) {
+            out << "0.03" << '\t' << groups[i] << '\t';
+            newLookup[i]->print(out);
+        }
+        out.close();
+        
+        cout << filename+".shared" << endl;
+        
+        return 0;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "MetaStatsCommand", "convertToShared");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+
+int MetaStatsCommand::convertToInput(vector<SharedRAbundVector*>& subset, string thisfilename) {
+	try {
+        ofstream out;
+        m->openOutputFile(thisfilename+".matrix", out);
+        
+        out << "\t";
+        for (int i = 0; i < subset.size()-1; i++) {
+            out << subset[i]->getGroup() << '\t';
+        }
+        out << subset[subset.size()-1]->getGroup() << endl;
+        
+        for (int i = 0; i < subset[0]->getNumBins(); i++) {
+            out << m->currentBinLabels[i] << '\t';
+            for (int j = 0; j < subset.size()-1; j++) {
+                out << subset[j]->getAbundance(i) << '\t';
+            }
+            out << subset[subset.size()-1]->getAbundance(i) << endl;
+        }
+        out.close();
+        
+        return 0;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "MetaStatsCommand", "convertToInput");
+		exit(1);
+	}
+}
+
 //**********************************************************************************************************************

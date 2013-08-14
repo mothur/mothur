@@ -26,8 +26,8 @@ class MothurMetastats {
 		int row, column, numPermutations, secondGroupingStart;
 		double threshold;
         
-    vector<double> permuted_pvalues(vector< vector<double> >&, vector<double>&, vector< vector<double> >&);
-    vector<double> permute_and_calc_ts(vector< vector<double> >&);
+        vector<double> permuted_pvalues(vector< vector<double> >&, vector<double>&, vector< vector<double> >&);
+        vector<double> permute_and_calc_ts(vector< vector<double> >&);
     
 		int start(vector<double>&, int, vector<double>&, vector< vector<double> >&); //Find the initial values for the matrix
 		int meanvar(vector<double>&, int, vector<double>&);

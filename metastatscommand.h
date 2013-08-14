@@ -56,6 +56,9 @@ private:
 	
 	int process(vector<SharedRAbundVector*>&);
 	int driver(int, int, vector<SharedRAbundVector*>&);
+    int convertToShared(string filename);
+    int convertToInput(vector<SharedRAbundVector*>&, string);
+    bool convertSharedToInput;
 };
 
 /**************************************************************************************************/

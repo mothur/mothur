@@ -234,6 +234,8 @@ int RemoveOtuLabelsCommand::execute(){
         
         //get labels you want to keep
 		labels = m->readAccnos(accnosfile);
+        
+        if (m->debug) { m->mothurOut("[DEBUG]: numlabels = " + toString(labels.size()) + "\n"); }
 		
 		if (m->control_pressed) { return 0; }
 		
@@ -289,7 +291,7 @@ int RemoveOtuLabelsCommand::readClassifyOtu(){
 		int removedCount = 0;
 		
         //read headers
-        string headers = m->getline(in);
+        string headers = m->getline(in); m->gobble(in);
         out << headers << endl;
         
         while (!in.eof()) {
@@ -300,6 +302,8 @@ int RemoveOtuLabelsCommand::readClassifyOtu(){
             int size = 0;
             
             in >> otu >> size >> tax; m->gobble(in);
+            
+            if (m->debug) { m->mothurOut("[DEBUG]: " + otu + toString(size) + tax + "\n"); }
             
             if (labels.count(otu) == 0) {
 				wroteSomething = true;
@@ -341,7 +345,7 @@ int RemoveOtuLabelsCommand::readOtuAssociation(){
 		int removedCount = 0;
 		
         //read headers
-        string headers = m->getline(in);
+        string headers = m->getline(in); m->gobble(in);
         out << headers << endl;
         
         while (!in.eof()) {
@@ -395,7 +399,7 @@ int RemoveOtuLabelsCommand::readCorrAxes(){
 		int removedCount = 0;
 		
         //read headers
-        string headers = m->getline(in);
+        string headers = m->getline(in); m->gobble(in);
         out << headers << endl;
         
         while (!in.eof()) {

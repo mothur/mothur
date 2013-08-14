@@ -35,14 +35,14 @@ vector<string> GetMetaCommunityCommand::setParameters(){
 string GetMetaCommunityCommand::getHelpString(){
 	try {
 		string helpString = "";
-		helpString += "The get.metacommunity command parameters are shared, label, groups, minpartitions, maxpartitions, optimizegap and processors. The shared file is required. \n";
+		helpString += "The get.communitytype command parameters are shared, label, groups, minpartitions, maxpartitions, optimizegap and processors. The shared file is required. \n";
         helpString += "The label parameter is used to analyze specific labels in your input. labels are separated by dashes.\n";
 		helpString += "The groups parameter allows you to specify which of the groups in your shared file you would like analyzed.  Group names are separated by dashes.\n";
 		helpString += "The minpartitions parameter is used to .... Default=5.\n";
         helpString += "The maxpartitions parameter is used to .... Default=10.\n";
         helpString += "The optimizegap parameter is used to .... Default=3.\n";
         helpString += "The processors parameter allows you to specify number of processors to use.  The default is 1.\n";
-		helpString += "The get.metacommunity command should be in the following format: get.metacommunity(shared=yourSharedFile).\n";
+		helpString += "The get.communitytype command should be in the following format: get.communitytype(shared=yourSharedFile).\n";
 		return helpString;
 	}
 	catch(exception& e) {
@@ -324,7 +324,7 @@ int GetMetaCommunityCommand::createProcesses(vector<SharedRAbundVector*>& thislo
         }
         
         for (int i = 0; i < processors; i++) { //read from everyone elses, just write to yours
-            string tempDoneFile = toString(i) + ".done.temp";
+            string tempDoneFile = m->getRootName(m->getSimpleName(sharedfile)) + toString(i) + ".done.temp";
             doneFlags.push_back(tempDoneFile);
             ofstream out;
             m->openOutputFile(tempDoneFile, out); //clear out 
@@ -363,6 +363,7 @@ int GetMetaCommunityCommand::createProcesses(vector<SharedRAbundVector*>& thislo
 		}
 		
 		//do my part
+        m->mothurOut("K\tNLE\t\tlogDet\tBIC\t\tAIC\t\tLaplace\n");
 		minPartition = processDriver(thislookup, dividedPartitions[0], outputFileName, rels[0], matrix[0], doneFlags, 0);
 		
 		//force parent to wait until all the processes are done
@@ -486,10 +487,11 @@ int GetMetaCommunityCommand::createProcesses(vector<SharedRAbundVector*>& thislo
 			delete pDataArray[i];
 		} */
         //do my part
+        m->mothurOut("K\tNLE\t\tlogDet\tBIC\t\tAIC\t\tLaplace\n");
 		minPartition = processDriver(thislookup, dividedPartitions[0], outputFileName, rels[0], matrix[0], doneFlags, 0);
 #endif
         for (int i = 0; i < processors; i++) { //read from everyone elses, just write to yours
-            string tempDoneFile = toString(i) + ".done.temp";
+            string tempDoneFile = m->getRootName(m->getSimpleName(sharedfile)) + toString(i) + ".done.temp";
             m->mothurRemove(tempDoneFile);
         }
         
@@ -524,9 +526,9 @@ int GetMetaCommunityCommand::processDriver(vector<SharedRAbundVector*>& thislook
         cout.setf(ios::showpoint);
 
         vector< vector<int> > sharedMatrix;
-        for (int i = 0; i < thislookup.size(); i++) { sharedMatrix.push_back(thislookup[i]->getAbundances()); }
+        vector<string> thisGroups;
+        for (int i = 0; i < thislookup.size(); i++) { sharedMatrix.push_back(thislookup[i]->getAbundances()); thisGroups.push_back(thislookup[i]->getGroup()); }
         
-        m->mothurOut("K\tNLE\t\tlogDet\tBIC\t\tAIC\t\tLaplace\n");
         fitData << "K\tNLE\tlogDet\tBIC\tAIC\tLaplace" << endl;
         
         for(int i=0;i<parts.size();i++){
@@ -574,11 +576,11 @@ int GetMetaCommunityCommand::processDriver(vector<SharedRAbundVector*>& thislook
             string matrixName = matrix[i];
             outputNames.push_back(matrixName); outputTypes["matrix"].push_back(matrixName);
             
-            findQ.printZMatrix(matrixName, m->getGroups());
+            findQ.printZMatrix(matrixName, thisGroups);
             findQ.printRelAbund(relabund, m->currentBinLabels);
             
             if(optimizegap != -1 && (numPartitions - minPartition) >= optimizegap && numPartitions >= minpartitions){
-                string tempDoneFile = toString(processID) + ".done.temp";
+                string tempDoneFile = m->getRootName(m->getSimpleName(sharedfile)) + toString(processID) + ".done.temp";
                 ofstream outDone;
                 m->openOutputFile(tempDoneFile, outDone);
                 outDone << minPartition << endl;
