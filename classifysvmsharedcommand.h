@@ -15,7 +15,7 @@
 #include "inputdata.h"
 #include "svm.hpp"
 
-class ClassifySvmSharedCommand : public Command {
+class ClassifySvmSharedCommand : public Command, ExternalSvmTrainingInterruption {
 public:
   ClassifySvmSharedCommand();
   ClassifySvmSharedCommand(string);
@@ -32,8 +32,12 @@ public:
   
   void help() { m->mothurOut(getHelpString()); }
 
-  static void readSharedAndDesignFiles(const std::string&, const std::string&, LabeledObservationVector&);
-  static void readSharedRAbundVectors(vector<SharedRAbundVector*>&, GroupMap&, LabeledObservationVector& labeledObservationVector);
+  //static void readSharedAndDesignFiles(const std::string&, const std::string&, LabeledObservationVector&, FeatureVector&);
+  //static void readSharedRAbundVectors(vector<SharedRAbundVector*>&, GroupMap&, LabeledObservationVector&, FeatureVector&);
+  void readSharedAndDesignFiles(const std::string&, const std::string&, LabeledObservationVector&, FeatureVector&);
+  void readSharedRAbundVectors(vector<SharedRAbundVector*>&, GroupMap&, LabeledObservationVector&, FeatureVector&);
+
+  bool interruptTraining() { return m->control_pressed; }
 
 private:
     bool abort;

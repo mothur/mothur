@@ -268,7 +268,7 @@ ClassifySvmSharedCommand::ClassifySvmSharedCommand(string option) {
 // looks like this:
 //   LabeledObservationVector[0] = pair("label 0", &vector[10.0, 21.0, 13.0])
 // where the vector in the second position of the pair records OTU abundances.
-void ClassifySvmSharedCommand::readSharedAndDesignFiles(const std::string& sharedFilePath, const std::string& designFilePath, LabeledObservationVector& labeledObservationVector) {
+void ClassifySvmSharedCommand::readSharedAndDesignFiles(const std::string& sharedFilePath, const std::string& designFilePath, LabeledObservationVector& labeledObservationVector, FeatureVector& featureVector) {
     InputData input(sharedFilePath, "sharedfile");
     vector<SharedRAbundVector*> lookup = input.getSharedRAbundVectors();
 
@@ -276,7 +276,7 @@ void ClassifySvmSharedCommand::readSharedAndDesignFiles(const std::string& share
     designMap.readDesignMap(designFilePath);
 
     while ( lookup[0] != NULL ) {
-        readSharedRAbundVectors(lookup, designMap, labeledObservationVector);
+        readSharedRAbundVectors(lookup, designMap, labeledObservationVector, featureVector);
         lookup = input.getSharedRAbundVectors();
     }
     /*
@@ -304,7 +304,7 @@ void ClassifySvmSharedCommand::readSharedAndDesignFiles(const std::string& share
     */
 }
 
-void ClassifySvmSharedCommand::readSharedRAbundVectors(vector<SharedRAbundVector*>& lookup, GroupMap& designMap, LabeledObservationVector& labeledObservationVector) {
+void ClassifySvmSharedCommand::readSharedRAbundVectors(vector<SharedRAbundVector*>& lookup, GroupMap& designMap, LabeledObservationVector& labeledObservationVector, FeatureVector& featureVector) {
     std::cout << " lookup.size() = " << lookup.size() << std::endl;
     //int i = 0;
     //while ( lookup[0] != NULL ) {
@@ -321,6 +321,9 @@ void ClassifySvmSharedCommand::readSharedRAbundVectors(vector<SharedRAbundVector
             for (int k = 0; k < data.size(); k++) {
                 //std::cout << " abundance " << data[k].abundance;
                 observation->at(k) = double(data[k].abundance);
+                if ( j == 0) {
+                    featureVector.push_back(Feature(k, m->currentBinLabels[k]));
+                }
             }
             //std::cout << std::endl;
             delete lookup[j];
@@ -507,8 +510,12 @@ void ClassifySvmSharedCommand::processSharedAndDesignData(vector<SharedRAbundVec
         //}
 */
         LabeledObservationVector labeledObservationVector;
-        readSharedRAbundVectors(lookup, designMap, labeledObservationVector);
-        OneVsOneMultiClassSvmTrainer t(labeledObservationVector);
+        FeatureVector featureVector;
+        readSharedRAbundVectors(lookup, designMap, labeledObservationVector, featureVector);
+        SvmDataset svmDataset(labeledObservationVector, featureVector);
+        int evaluationFoldCount = 3;
+        int trainFoldCount = 5;
+        OneVsOneMultiClassSvmTrainer t(svmDataset, evaluationFoldCount, trainFoldCount, *this);
         KernelParameterRangeMap kernelParameterRangeMap;
         getDefaultKernelParameterRangeMap(kernelParameterRangeMap);
         t.train(kernelParameterRangeMap);

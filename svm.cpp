@@ -16,37 +16,37 @@
 
 #define RANGE(X) X, X + sizeof(X)/sizeof(double)
 
-const std::string LinearKernelFunction::MapKey     = "LinearKernel";
-const std::string LinearKernelFunction::MapKey_Constant = "LinearKernel_Constant";
-const double defaultLinearConstantRangeArray[] = {-10.0, -1.0, 0.0, 1.0, 10.0};
-const ParameterRange LinearKernelFunction::defaultConstantRange = ParameterRange(RANGE(defaultLinearConstantRangeArray));
+const std::string LinearKernelFunction::MapKey                      = "LinearKernel";
+const std::string LinearKernelFunction::MapKey_Constant             = "LinearKernel_Constant";
+const double defaultLinearConstantRangeArray[]                      = {-10.0, -1.0, 0.0, 1.0, 10.0};
+const ParameterRange LinearKernelFunction::defaultConstantRange     = ParameterRange(RANGE(defaultLinearConstantRangeArray));
 
-const std::string RbfKernelFunction::MapKey        = "RbfKernel";
-const std::string RbfKernelFunction::MapKey_Gamma  = "RbfKernel_Gamma";
-const double defaultRbfGammaRangeArray[] = {0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0};
-const ParameterRange RbfKernelFunction::defaultGammaRange = ParameterRange(RANGE(defaultRbfGammaRangeArray));
+const std::string RbfKernelFunction::MapKey                         = "RbfKernel";
+const std::string RbfKernelFunction::MapKey_Gamma                   = "RbfKernel_Gamma";
+const double defaultRbfGammaRangeArray[]                            = {0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0};
+const ParameterRange RbfKernelFunction::defaultGammaRange           = ParameterRange(RANGE(defaultRbfGammaRangeArray));
 
-const std::string PolynomialKernelFunction::MapKey          = "PolynomialKernel";
-const std::string PolynomialKernelFunction::MapKey_Constant = "PolynomialKernel_Constant";
-const std::string PolynomialKernelFunction::MapKey_Degree   = "PolynomialKernel_Degree";
+const std::string PolynomialKernelFunction::MapKey                  = "PolynomialKernel";
+const std::string PolynomialKernelFunction::MapKey_Constant         = "PolynomialKernel_Constant";
+const std::string PolynomialKernelFunction::MapKey_Degree           = "PolynomialKernel_Degree";
 
-const double defaultPolynomialConstantRangeArray[] = {-3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0};
+const double defaultPolynomialConstantRangeArray[]                  = {-3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0};
 const ParameterRange PolynomialKernelFunction::defaultConstantRange = ParameterRange(RANGE(defaultPolynomialConstantRangeArray));
-const double defaultPolynomialDegreeRangeArray[] = {2.0, 3.0, 4.0};
-const ParameterRange PolynomialKernelFunction::defaultDegreeRange = ParameterRange(RANGE(defaultPolynomialDegreeRangeArray));
+const double defaultPolynomialDegreeRangeArray[]                    = {2.0, 3.0, 4.0};
+const ParameterRange PolynomialKernelFunction::defaultDegreeRange   = ParameterRange(RANGE(defaultPolynomialDegreeRangeArray));
 
-const std::string SigmoidKernelFunction::MapKey          = "SigmoidKernel";
-const std::string SigmoidKernelFunction::MapKey_Alpha    = "SigmoidKernel_Alpha";
-const std::string SigmoidKernelFunction::MapKey_Constant = "SigmoidKernel_Constant";
+const std::string SigmoidKernelFunction::MapKey                     = "SigmoidKernel";
+const std::string SigmoidKernelFunction::MapKey_Alpha               = "SigmoidKernel_Alpha";
+const std::string SigmoidKernelFunction::MapKey_Constant            = "SigmoidKernel_Constant";
 
-const double defaultSigmoidAlphaRangeArray[] = {1.0, 2.0};
-const ParameterRange SigmoidKernelFunction::defaultAlphaRange = ParameterRange(RANGE(defaultSigmoidAlphaRangeArray));
-const double defaultSigmoidConstantRangeArray[] = {1.0, 2.0};
-const ParameterRange SigmoidKernelFunction::defaultConstantRange = ParameterRange(RANGE(defaultSigmoidConstantRangeArray));
+const double defaultSigmoidAlphaRangeArray[]                        = {1.0, 2.0};
+const ParameterRange SigmoidKernelFunction::defaultAlphaRange       = ParameterRange(RANGE(defaultSigmoidAlphaRangeArray));
+const double defaultSigmoidConstantRangeArray[]                     = {1.0, 2.0};
+const ParameterRange SigmoidKernelFunction::defaultConstantRange    = ParameterRange(RANGE(defaultSigmoidConstantRangeArray));
 
-const std::string SmoTrainer::MapKey_C = "SmoTrainer_C";
-const double defaultSmoTrainerCRangeArray[] = {0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0};
-const ParameterRange SmoTrainer::defaultCRange = ParameterRange(RANGE(defaultSmoTrainerCRangeArray));
+const std::string SmoTrainer::MapKey_C                              = "SmoTrainer_C";
+const double defaultSmoTrainerCRangeArray[]                         = {0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0};
+const ParameterRange SmoTrainer::defaultCRange                      = ParameterRange(RANGE(defaultSmoTrainerCRangeArray));
 
 
 LabelPair buildLabelPair(const Label& one, const Label& two) {
@@ -372,32 +372,55 @@ SVM* SmoTrainer::train(KernelFunction* kernelFunction, const LabeledObservationV
     // is deleted???
     return new SVM(y, a, twoClassLabeledObservationVector, b, discriminantToLabel);
 }
-// For SVM we need to assign numeric labels of -1.0 and +1.0.
+
+typedef std::map<Label, double> LabelToNumericClassLabel;
+
+// For SVM training we need to assign numeric class labels of -1.0 and +1.0.
 // This method populates the y vector argument with -1.0 and +1.0
 // corresponding to the two classes in the labelVector argument.
+// For example, if labeledObservationVector looks like this:
+//     [ (0, "blue",  [...some observations...]),
+//       (1, "green", [...some observations...]),
+//       (2, "blue",  [...some observations...]) ]
+// Then after the function executes the y vector will look like this:
+//     [-1.0,   blue
+//      +1.0,   green
+//      -1.0]   blue
+// and discriminantToLabel will look like this:
+//     { -1.0 : "blue",
+//       +1.0 : "green" }
+// The label "blue" is mapped to -1.0 because it is (lexicographically) less than "green".
+// When given labels "blue" and "green" this function will always assign "blue" to -1.0 and
+// "green" to +1.0.  This is not fundamentally important but it makes testing easier and is
+// not a hassle to implement.
 void SmoTrainer::assignNumericLabels(std::vector<double>& y, const LabeledObservationVector& labeledObservationVector, NumericClassToLabel& discriminantToLabel) {
     // it would be nice if we assign -1.0 and +1.0 consistently for each pair of labels
-	// I think the set will always be traversed in sorted order so we should get this for free
+	// I think the label set will always be traversed in sorted order so we should get this for free
+
+    // we are going to overwrite arguments y and discriminantToLabel
+    y.clear();
+    discriminantToLabel.clear();
+
     LabelSet labelSet;
     buildLabelSet(labelSet, labeledObservationVector);
     LabelVector uniqueLabels(labelSet.begin(), labelSet.end());
     if (labelSet.size() != 2) {
         // throw an exception
-        std::cout << "unexpected label set size " << labelSet.size() << std::endl;
+        std::cerr << "unexpected label set size " << labelSet.size() << std::endl;
         for (LabelSet::const_iterator i = labelSet.begin(); i != labelSet.end(); i++) {
-            std::cout << "    label " << *i << std::endl;
+            std::cerr << "    label " << *i << std::endl;
         }
-        throw std::exception();
+        throw SmoTrainerException("SmoTrainer::assignNumericLabels was passed more than 2 labels");
     }
     else {
-        // should make certain y has correct size?
-        // this loop will populate the y vector with
-        // -1.0 for uniqueLabel[0] and +1.0 for uniqueLabel[1]
-        for ( int i = 0; i < labeledObservationVector.size(); i++ ) {
-            y[i] = (labeledObservationVector[i].first == uniqueLabels[0] ? -1.0 : 1.0);
+        LabelToNumericClassLabel labelToNumericClassLabel;
+        labelToNumericClassLabel[uniqueLabels[0]] = -1.0;
+        labelToNumericClassLabel[uniqueLabels[1]] = +1.0;
+        for ( LabeledObservationVector::const_iterator i = labeledObservationVector.begin(); i != labeledObservationVector.end(); i++ ) {
+            y.push_back( labelToNumericClassLabel[i->first] );
         }
-        discriminantToLabel[-1] = uniqueLabels[0];
-        discriminantToLabel[+1] = uniqueLabels[1];
+        discriminantToLabel[-1.0] = uniqueLabels[0];
+        discriminantToLabel[+1.0] = uniqueLabels[1];
     }
 }
 
@@ -419,21 +442,31 @@ void getDefaultKernelParameterRangeMap(KernelParameterRangeMap& kernelParameterR
     kernelParameterRangeMap[RbfKernelFunction::MapKey] = rbfParameterRangeMap;
     kernelParameterRangeMap[PolynomialKernelFunction::MapKey] = polynomialParameterRangeMap;
 }
+
+
 //
 // OneVsOneMultiClassSvmTrainer
 //
 // An instance of OneVsOneMultiClassSvmTrainer is intended to work with a single set of data
 // to produce a single instance of MultiClassSVM.  That's why observations and labels go in to
 // the constructor.
-OneVsOneMultiClassSvmTrainer::OneVsOneMultiClassSvmTrainer(const LabeledObservationVector& lo) :
-    labeledObservations(lo) {
 
-    buildLabelSet(labelSet, labeledObservations);
-    buildLabelToLabeledObservationVector(labelToLabeledObservationVector, labeledObservations);
-    buildLabelPairSet(labelPairSet, labeledObservations);
-    standardizeObservations(labeledObservations);
+OneVsOneMultiClassSvmTrainer::OneVsOneMultiClassSvmTrainer(SvmDataset& d, int e, int t, ExternalSvmTrainingInterruption& es) : svmDataset(d), evaluationFoldCount(e), trainFoldCount(t), externalSvmTrainingInterruption(es) {
+    buildLabelSet(labelSet, svmDataset.getLabeledObservationVector());
+    buildLabelToLabeledObservationVector(labelToLabeledObservationVector, svmDataset.getLabeledObservationVector());
+    buildLabelPairSet(labelPairSet, svmDataset.getLabeledObservationVector());
+    standardizeObservations(svmDataset.getLabeledObservationVector());
 }
 
+//OneVsOneMultiClassSvmTrainer::OneVsOneMultiClassSvmTrainer(SvmDataset& d, int e, int t) : OneVsOneMultiClassSvmTrainer(d, e, t, x) {}
+/*
+OneVsOneMultiClassSvmTrainer::OneVsOneMultiClassSvmTrainer(SvmDataset& d, int e, int t) : svmDataset(d), evaluationFoldCount(e), trainFoldCount(t) {
+    buildLabelSet(labelSet, svmDataset.getLabeledObservationVector());
+    buildLabelToLabeledObservationVector(labelToLabeledObservationVector, svmDataset.getLabeledObservationVector());
+    buildLabelPairSet(labelPairSet, svmDataset.getLabeledObservationVector());
+    standardizeObservations(svmDataset.getLabeledObservationVector());
+}
+*/
 void buildLabelSet(LabelSet& labelSet, const LabeledObservationVector& labeledObservationVector) {
     for (LabeledObservationVector::const_iterator i = labeledObservationVector.begin(); i != labeledObservationVector.end(); i++) {
         labelSet.insert(i->first);
@@ -471,7 +504,8 @@ void OneVsOneMultiClassSvmTrainer::buildLabelPairSet(LabelPairSet& labelPairSet,
 }
 
 void OneVsOneMultiClassSvmTrainer::standardizeObservations(const LabeledObservationVector& observations) {
-    std::cout << "standardizeObservations" << std::endl;
+    bool vebose = false;
+    std::cout << "entering standardizeObservations" << std::endl;
     // online method for mean and variance
     for ( Observation::size_type feature = 0; feature < observations[0].second->size(); feature++ ) {
         double n = 0.0;
@@ -486,13 +520,16 @@ void OneVsOneMultiClassSvmTrainer::standardizeObservations(const LabeledObservat
         }
         double variance = M2 / (n - 1.0);
         double standardDeviation = sqrt(variance);
-        //std::cout << "mean of feature " << feature << " is " << mean << std::endl;
-        //std::cout << "std of feature " << feature << " is " << standardDeviation << std::endl;
+        if (vebose) {
+            std::cout << "mean of feature " << feature << " is " << mean << std::endl;
+            std::cout << "std of feature " << feature << " is " << standardDeviation << std::endl;
+        }
         // normalize the feature
         for ( ObservationVector::size_type observation = 0; observation < observations.size(); observation++ ) {
             observations[observation].second->at(feature) = (observations[observation].second->at(feature) - mean ) / standardDeviation;
         }
     }
+    std::cout << "exiting standardizeObservations" << std::endl;
 }
 
 // this method has too many arguments
@@ -534,8 +571,7 @@ MultiClassSVM* OneVsOneMultiClassSvmTrainer::train(const KernelParameterRangeMap
     // first divide the data into a 'development' set for tuning hyperparameters
     // and an 'evaluation' set for measuring performance
     LabelVector labelList(labelSet.begin(), labelSet.end());
-    int deK = 3;
-    KFoldLabeledObservationsDivider kFoldDevEvalDivider(deK, labeledObservations);
+    KFoldLabeledObservationsDivider kFoldDevEvalDivider(evaluationFoldCount, svmDataset.getLabeledObservationVector());
     kFoldDevEvalDivider.start();
     const LabeledObservationVector& developmentObservations = kFoldDevEvalDivider.getTrainingData();
     const LabeledObservationVector& evaluationObservations  = kFoldDevEvalDivider.getTestingData();
@@ -553,8 +589,6 @@ MultiClassSVM* OneVsOneMultiClassSvmTrainer::train(const KernelParameterRangeMap
         double bestScore = 0.0;
         ParameterMap bestParameterMap;
         std::string bestKernelFunctionKey;
-        // K should be an argument
-        int K = 5;
         LabeledObservationVector twoClassDevelopmentObservations;
         LabelMatchesEither labelMatchesEither(label0, label1);
         std::remove_copy_if(
@@ -566,7 +600,7 @@ MultiClassSVM* OneVsOneMultiClassSvmTrainer::train(const KernelParameterRangeMap
             //    return !((o.first == label0) || (o.first == label1));
             //}
         );
-        KFoldLabeledObservationsDivider kFoldLabeledObservationsDivider(K, twoClassDevelopmentObservations);
+        KFoldLabeledObservationsDivider kFoldLabeledObservationsDivider(trainFoldCount, twoClassDevelopmentObservations);
         // loop on kernel functions and kernel function parameters
         for ( KernelParameterRangeMap::const_iterator kmap = kernelParameterRangeMap.begin(); kmap != kernelParameterRangeMap.end(); kmap++ ) {
             std::string kernelFunctionKey = kmap->first;
@@ -642,25 +676,36 @@ double OneVsOneMultiClassSvmTrainer::trainOnKFolds(SmoTrainer& smoTrainer, Kerne
     double online_mean_score = 0.0;
     meanScoreOverKFolds = -1.0;  // means we failed to train a SVM
 
+    // make this a member variable
+    bool verbose = false;
+
     for ( kFoldLabeledObservationsDivider.start(); !kFoldLabeledObservationsDivider.end(); kFoldLabeledObservationsDivider.next() ) {
         const LabeledObservationVector& kthTwoClassTrainingFold = kFoldLabeledObservationsDivider.getTrainingData();
         const LabeledObservationVector& kthTwoClassTestingFold = kFoldLabeledObservationsDivider.getTestingData();
-        //std::cout << "fold " << kFoldLabeledObservationsDivider.getFoldNumber() << " training data has " << kthTwoClassTrainingFold.size() << " labeled observations" << std::endl;
-        //std::cout << "fold " << kFoldLabeledObservationsDivider.getFoldNumber() << " testing data has " << kthTwoClassTestingFold.size() << " labeled observations" << std::endl;
-        try {
-            SVM* evaluationSvm = smoTrainer.train(kernelFunction, kthTwoClassTrainingFold);
-            double score = evaluationSvm->score(kthTwoClassTestingFold);
-            std::cout << "score on fold " << kFoldLabeledObservationsDivider.getFoldNumber() << " of test data is " << score << std::endl;
-            online_mean_n += 1.0;
-            double online_mean_delta = score - online_mean_score;
-            online_mean_score += online_mean_delta / online_mean_n;
-            meanScoreOverKFolds = online_mean_score;
-
-            delete evaluationSvm;
+        if (verbose) {
+            std::cout << "fold " << kFoldLabeledObservationsDivider.getFoldNumber() << " training data has " << kthTwoClassTrainingFold.size() << " labeled observations" << std::endl;
+            std::cout << "fold " << kFoldLabeledObservationsDivider.getFoldNumber() << " testing data has " << kthTwoClassTestingFold.size() << " labeled observations" << std::endl;
         }
-        catch ( std::exception& e ) {
-            std::cout << "exception: " << e.what() << std::endl;
-            std::cout << "    on fold " << kFoldLabeledObservationsDivider.getFoldNumber() << " failed to train SVM with C = " << smoTrainer.getC() << std::endl;
+        if ( externalSvmTrainingInterruption.interruptTraining() ) {
+            // this should be a specialized exception
+            throw new std::exception;
+        }
+        else {
+            try {
+                SVM* evaluationSvm = smoTrainer.train(kernelFunction, kthTwoClassTrainingFold);
+                double score = evaluationSvm->score(kthTwoClassTestingFold);
+                std::cout << "score on fold " << kFoldLabeledObservationsDivider.getFoldNumber() << " of test data is " << score << std::endl;
+                online_mean_n += 1.0;
+                double online_mean_delta = score - online_mean_score;
+                online_mean_score += online_mean_delta / online_mean_n;
+                meanScoreOverKFolds = online_mean_score;
+
+                delete evaluationSvm;
+            }
+            catch ( std::exception& e ) {
+                std::cout << "exception: " << e.what() << std::endl;
+                std::cout << "    on fold " << kFoldLabeledObservationsDivider.getFoldNumber() << " failed to train SVM with C = " << smoTrainer.getC() << std::endl;
+            }
         }
     }
     std::cout << "done with cross validation on C = " << smoTrainer.getC() << std::endl;
@@ -671,18 +716,168 @@ double OneVsOneMultiClassSvmTrainer::trainOnKFolds(SmoTrainer& smoTrainer, Kerne
     return meanScoreOverKFolds;
 }
 
-// Only the linear kernel can be used here.
-/*
-FeatureLabelVector SvmRfe::getOrderedFeatureList(const LabeledObservationVector& labeledObservationVector, const KernelParameterRangeMap& linearKernelParameterRangeMap) {
-    OneVsOneMultiClassSvmTrainer t(labeledObservationVector);
-    FeatureLabelVector rankedFeatureVector;
-    while ( rankedFeatureVector.size() < labeledObservationVector.at(0).second->size() ) {
-        MultiClassSVM* s = t.train(kernelParameterRangeMap);
-        // calculate the 'ranking criterion' for each feature using each binary svm
-        //for each feature i
-        //    for each svm r
-        //        c_i += (w_r_i^2)
-        //delete s;
-    }
+
+// using this class rather than a std::pair<Feature, double>
+class UnrankedFeature {
+public:
+    UnrankedFeature(const Feature& f) : feature(f), rankingCriterion(0.0) {}
+    ~UnrankedFeature() {}
+
+    Feature getFeature() const { return feature; }
+
+    double getRankingCriterion() const { return rankingCriterion; }
+    void setRankingCriterion(double rc) { rankingCriterion = rc; }
+
+private:
+    Feature feature;
+    double rankingCriterion;
+};
+
+bool lessRankingCriterion(const UnrankedFeature& a, const UnrankedFeature& b) {
+    return a.getRankingCriterion() < b.getRankingCriterion();
 }
-*/
+
+typedef std::list<UnrankedFeature> UnrankedFeatureList;
+
+// Only the linear svm can be used here.
+// Consider allowing only parameter ranges as arguments.
+// Right now any kernel can be sent in.
+// It would be useful to remove more than one feature at a time
+// Might make sense to turn last two arguments into one
+FeatureList SvmRfe::getOrderedFeatureList(SvmDataset& svmDataset, OneVsOneMultiClassSvmTrainer& t, const ParameterRange& linearKernelConstantRange, const ParameterRange& smoTrainerParameterRange) {
+    //OneVsOneMultiClassSvmTrainer t(svmDataset, evaluationFoldCount, trainFoldCount);
+
+    // the featureMask indicates whether each feature has or has not been eliminated
+    // if the featureMask entry corresponding to a feature is 1.0 the feature has not been eliminated yet
+    // if the featureMask entry corresponding to a feature is 0.0 the feature has been eliminated
+    std::vector<double> featureMask(svmDataset.getFeatureVector().size(), 1.0);
+
+    svmDataset.setFeatureMask(&featureMask);
+
+    KernelParameterRangeMap rfeKernelParameterRangeMap;
+    ParameterRangeMap linearParameterRangeMap;
+    linearParameterRangeMap[SmoTrainer::MapKey_C] = smoTrainerParameterRange;
+    linearParameterRangeMap[LinearKernelFunction::MapKey_Constant] = linearKernelConstantRange;
+
+    rfeKernelParameterRangeMap[LinearKernelFunction::MapKey] = linearParameterRangeMap;
+
+    UnrankedFeatureList unrankedFeatureList;
+    for ( FeatureVector::iterator f = svmDataset.getFeatureVector().begin(); f != svmDataset.getFeatureVector().end(); f++ ) {
+        unrankedFeatureList.push_back(UnrankedFeature(*f));
+    }
+
+    // the rankedFeatureVector is empty at first
+    // use a list instead?
+    FeatureList rankedFeatureList;
+    // loop until all but one feature have been eliminated
+    // no need to eliminate the last feature, after all
+    while ( rankedFeatureList.size() < (svmDataset.getFeatureVector().size()-1) ) {
+
+        MultiClassSVM* s = t.train(rfeKernelParameterRangeMap);
+
+        // calculate the 'ranking criterion' for each (remaining) feature using each binary svm
+        //for ( int i = 0; i < svmDataset.getFeatureVector().size(); i++ ) {
+        for (UnrankedFeatureList::iterator f = unrankedFeatureList.begin(); f != unrankedFeatureList.end(); f++) {
+            const int i = f->getFeature().getFeatureIndex();
+            //if ( featureMask[i] == 0.0 ) {
+                // this feature has been ranked
+                // do not rank it again
+                // just go to the next feature
+            //}
+            //else {
+                // rankingCriterion combines feature weights for feature i in all svms
+                double rankingCriterion = 0.0;
+                for ( SvmVector::const_iterator svm = s->getSvmList().begin(); svm != s->getSvmList().end(); svm++ ) {
+                    // calculate the weight w of feature i for this svm
+                    double wi = 0.0;
+                    for (int j = 0; j < (*svm)->x.size(); j++) {
+                        // all support vectors contribute to wi
+                        wi += (*svm)->a.at(j) * (*svm)->y.at(j) * (*svm)->x.at(j).second->at(i);
+                    }
+                    // accumulate weights for feature i from all svms
+                    rankingCriterion += pow(wi, 2);
+                }
+                // update the (unranked) feature ranking criterion
+                //featureRankingCriterion[i] = rankingCriterion;
+                f->setRankingCriterion(rankingCriterion);
+            //}
+        }
+
+        delete s;
+
+        // sort the unranked features by ranking criterion
+        //std::stable_sort(unrankedFeatureList.begin(), unrankedFeatureList.end(), lessRankingCriterion);
+        unrankedFeatureList.sort(lessRankingCriterion);
+
+        // eliminate the bottom 1/3 features
+        int eliminateFeatureCount = ceil(unrankedFeatureList.size() / 3.0);
+        std::cout << "eliminating " << eliminateFeatureCount << " features of " << unrankedFeatureList.size() << " total features"<< std::endl;
+        for ( int i = 0; i < eliminateFeatureCount; i++ ) {
+            // remove the lowest ranked feature from the list of unranked features
+            UnrankedFeature unrankedFeature = unrankedFeatureList.front();
+            unrankedFeatureList.pop_front();
+
+            // put the lowest ranked feature at the front of the list of ranked features
+            // the first feature to be eliminated will be at the back of this list
+            // the last feature to be eliminated will be at the front of this list
+            rankedFeatureList.push_front(unrankedFeature.getFeature());
+
+            const int unrankedFeatureIndex = unrankedFeature.getFeature().getFeatureIndex();
+            for (LabeledObservationVector::iterator v = svmDataset.getLabeledObservationVector().begin(); v != svmDataset.getLabeledObservationVector().end(); v++) {
+                v->second->at(unrankedFeatureIndex) = 0.0;
+            }
+        }
+
+        // after ranking criteria are calculated
+        // it is time to eliminate features
+        // find the unranked feature with minimum ranking criterion
+        // keep this separate from the ranking criteria calculation so it can be changed to remove multiple features
+        // in each pass
+        /*
+        int minFeatureIndex = -1;
+        double minFeatureRankingCriterion = std::numeric_limits<double>::infinity();
+        //for ( int i = 0; i < svmDataset.getFeatureVector().size(); i++ ) {
+        for (FeatureList::iterator f = unrankedFeatureList.begin(); f != unrankedFeatureList.end(); f++) {
+            const int i = f->getFeatureIndex();
+            if ( featureMask[i] == 0.0 ) {
+                // this feature has already been ranked
+            }
+            else {
+                if ( featureRankingCriterion[i] < minFeatureRankingCriterion ) {
+                    minFeatureIndex = i;
+                    minFeatureRankingCriterion = featureRankingCriterion[minFeatureIndex];
+                }
+                else {
+                    // original minimum feature ranking criterion stands
+                }
+            }
+        }
+        std::cout << "eliminating feature " << svmDataset.getFeatureVector()[minFeatureIndex].getFeatureLabel() << " with index " << minFeatureIndex << std::endl;
+        featureMask[minFeatureIndex] = 0.0;
+        rankedFeatureVector.push_back(svmDataset.getFeatureVector()[minFeatureIndex]);
+        // now eliminate the feature from the data
+        // by setting all observations of this feature to 0.0
+        for (LabeledObservationVector::iterator v = svmDataset.getLabeledObservationVector().begin(); v != svmDataset.getLabeledObservationVector().end(); v++) {
+            v->second->at(minFeatureIndex) = 0.0;
+        }
+        */
+    }
+
+    // there may be one feature left
+    std::cout << unrankedFeatureList.size() << " feature(s) remain" << std::endl;
+    for ( UnrankedFeatureList::iterator f = unrankedFeatureList.begin(); f != unrankedFeatureList.end(); f++ ) {
+        rankedFeatureList.push_front(f->getFeature());
+    }
+
+    // there is one feature left with 1.0 in the feature mask
+    // and we need to find it and put it in the rankedFeatureVector
+    //for ( int i = 0; i < svmDataset.getFeatureVector().size(); i++ ) {
+    //    if ( featureMask[i] == 1.0 ) {
+    //        rankedFeatureVector.push_back(svmDataset.getFeatureVector()[i]);
+    //        break;
+    //    }
+    //}
+
+    return rankedFeatureList;
+}
+

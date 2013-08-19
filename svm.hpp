@@ -13,6 +13,7 @@
 #include <cmath>
 #include <deque>
 #include <exception>
+#include <list>
 #include <map>
 #include <set>
 #include <stack>
@@ -85,6 +86,44 @@ public:
 typedef std::vector<LabeledObservation> LabeledObservationVector;
 void buildLabelSet(LabelSet&, const LabeledObservationVector&);
 
+
+//typedef std::string FeatureLabel;
+//typedef std::vector<FeatureLabel> FeatureLabelVector;
+class Feature {
+public:
+    Feature(int i, const std::string& l) : index(i), label(l) {}
+    Feature(const Feature& f) : index(f.index), label(f.label) {}
+    ~Feature() {}
+
+    int getFeatureIndex() const { return index; }
+    std::string getFeatureLabel() const { return label; }
+
+private:
+    int index;
+    std::string label;
+};
+
+typedef std::list<Feature> FeatureList;
+typedef std::vector<Feature> FeatureVector;
+
+
+// The SvmDataset class encapsulates labeled observations and feature information.
+// All data required to train SVMs is found in SvmDataset.
+class SvmDataset {
+public:
+    SvmDataset(const LabeledObservationVector& v, const FeatureVector& f) : labeledObservationVector(v), featureVector(f), featureMask(NULL) {}
+    ~SvmDataset() {}
+
+    LabeledObservationVector& getLabeledObservationVector() { return labeledObservationVector; }
+    FeatureVector& getFeatureVector() { return featureVector; }
+    void setFeatureMask(std::vector<double>* f) { featureMask = f; }
+private:
+    LabeledObservationVector labeledObservationVector;
+    FeatureVector featureVector;
+    std::vector<double>* featureMask;
+};
+
+
 // Dividing a dataset into training and testing sets while maintaing equal
 // representation of all classes is done using a LabelToLabeledObservationVector.
 // This container is used to divide datasets into groups of LabeledObservations
@@ -135,6 +174,9 @@ public:
     //       {"a":2.0, "b": 1.0, "c":0.6},
     //     ]
     ParameterSetBuilder(const ParameterRangeMap& parameterRangeMap) {
+        // a small step toward quieting down this code
+        bool verbose = false;
+
         std::stack<std::pair<ParameterName, ParameterStack> > stackOfParameterRanges;
         std::stack<std::pair<ParameterName, ParameterStack> > stackOfEmptyParameterRanges;
         ParameterMap nextParameterSet;
@@ -147,27 +189,33 @@ public:
         }
         // get started
         for ( int n = 0; n < parameterSetCount; n++ ) {
-            std::cout << "n = " << n << std::endl;
+
+            if (verbose) std::cout << "n = " << n << std::endl;
+
             // pull empty stacks off until there are no empty stacks
             while ( stackOfParameterRanges.size() > 0 and stackOfParameterRanges.top().second.size() == 0 ) {
-                std::cout << "  empty parameter range: " << stackOfParameterRanges.top().first << std::endl;
+
+                if (verbose) std::cout << "  empty parameter range: " << stackOfParameterRanges.top().first << std::endl;
+
                 stackOfEmptyParameterRanges.push(stackOfParameterRanges.top());
                 stackOfParameterRanges.pop();
             }
 
             // move to the next value for the parameter at the top of the stackOfParameterRanges
             if ( stackOfParameterRanges.size() > 0 ) {
-                std::cout << "  moving to next value for parameter " << stackOfParameterRanges.top().first << std::endl;
-                std::cout << "    next value is "  << stackOfParameterRanges.top().second.top() << std::endl;
+                if (verbose) {
+                    std::cout << "  moving to next value for parameter " << stackOfParameterRanges.top().first << std::endl;
+                    std::cout << "    next value is "  << stackOfParameterRanges.top().second.top() << std::endl;
+                }
                 ParameterName parameterName = stackOfParameterRanges.top().first;
                 nextParameterSet[parameterName] = stackOfParameterRanges.top().second.top();
                 stackOfParameterRanges.top().second.pop();
             }
-            std::cout << "stack of empty parameter ranges has size " << stackOfEmptyParameterRanges.size() << std::endl;
+            if (verbose) std::cout << "stack of empty parameter ranges has size " << stackOfEmptyParameterRanges.size() << std::endl;
             // reset each parameter range that has been exhausted
             while ( stackOfEmptyParameterRanges.size() > 0 ) {
                 ParameterName parameterName = stackOfEmptyParameterRanges.top().first;
-                std::cout << "  reseting range for parameter " << stackOfEmptyParameterRanges.top().first << std::endl;
+                if (verbose) std::cout << "  reseting range for parameter " << stackOfEmptyParameterRanges.top().first << std::endl;
                 stackOfParameterRanges.push(stackOfEmptyParameterRanges.top());
                 stackOfEmptyParameterRanges.pop();
                 const ParameterRange& parameterRange = parameterRangeMap.find(parameterName)->second;
@@ -179,8 +227,10 @@ public:
             }
             parameterSetVector.push_back(nextParameterSet);
             // print out the next parameter set
-            for (ParameterMap::iterator p = nextParameterSet.begin(); p != nextParameterSet.end(); p++) {
-                std::cout << "  " << p->first << " : " << p->second << std::endl;
+            if (verbose) {
+                for (ParameterMap::iterator p = nextParameterSet.begin(); p != nextParameterSet.end(); p++) {
+                    std::cout << "  " << p->first << " : " << p->second << std::endl;
+                }
             }
         }
     }
@@ -371,14 +421,19 @@ public:
     }
     double score(const LabeledObservationVector&);
 
-private:
+public:
+    // y holds the numeric class: +1.0 or -1.0
     const std::vector<double> y;
+    // a holds the optimal dual coefficients
     const std::vector<double> a;
+    // x holds the support vectors
     const LabeledObservationVector x;
     const double b;
     NumericClassToLabel discriminantToLabel; // trouble if this is declared const....
 };
 
+
+typedef std::vector<SVM*> SvmVector;
 
 // Using SVM with more than two classes requires training multiple SVMs.
 // The MultiClassSVM uses a vector of trained SVMs to do classification
@@ -386,6 +441,7 @@ private:
 class MultiClassSVM {
 public:
     MultiClassSVM(const std::vector<SVM*> s) : twoClassSvmList(s.begin(), s.end()) {}
+    // these objects will delete their svms
     ~MultiClassSVM() {
         for ( int i = 0; i < twoClassSvmList.size(); i++ ) {
             delete twoClassSvmList[i];
@@ -395,10 +451,25 @@ public:
     // the classify method should accept a list of observations
     Label classify(const Observation& observation);
     double score(const LabeledObservationVector&);
+
+    // no need to delete these pointers
+    const SvmVector& getSvmList() { return twoClassSvmList; }
 private:
-    const std::vector<SVM*> twoClassSvmList;
+    const SvmVector twoClassSvmList;
 };
 
+
+class SmoTrainerException : public std::exception {
+public:
+    SmoTrainerException(const std::string& m) : message(m) {}
+    ~SmoTrainerException() throw() {};
+    virtual const char* what() const throw() {
+        return message.c_str();
+    }
+
+private:
+    std::string message;
+};
 
 // SmoTrainer trains a support vector machine using Sequential
 // Minimal Optimization as described in the article
@@ -461,6 +532,7 @@ public:
     // argument labelContainer holds the labels we will work with
     // the trainingData and testingData containers will only have observations with these labels
     // would it be better to restrict the KFoldLabeledObservationsDivider at construction?
+    /*
     void old_start(const LabelVector& labelContainer) {
         labelVector.clear();
         labelVector.assign(labelContainer.begin(), labelContainer.end());
@@ -471,6 +543,7 @@ public:
             appendKthFold(k, K, labelToLabeledObservationVector[*label], trainingData, testingData);
         }
     }
+    */
 
     void start() {
         k = 0;
@@ -485,6 +558,7 @@ public:
         return k >= K;
     }
 
+    /*
     void old_next() {
         k++;
         trainingData.clear();
@@ -493,6 +567,7 @@ public:
             appendKthFold(k, K, labelToLabeledObservationVector[*label], trainingData, testingData);
         }
     }
+    */
 
     void next() {
         k++;
@@ -547,17 +622,23 @@ private:
 };
 
 
+class ExternalSvmTrainingInterruption {
+public:
+    bool interruptTraining() { return false; }
+};
+
 // OneVsOneMultiClassSvmTrainer trains a support vector machine for each
 // pair of labels in a set of data.
 class OneVsOneMultiClassSvmTrainer {
 public:
-    OneVsOneMultiClassSvmTrainer(const LabeledObservationVector& observations);
+    //OneVsOneMultiClassSvmTrainer(SvmDataset&, int, int);
+    OneVsOneMultiClassSvmTrainer(SvmDataset&, int, int, ExternalSvmTrainingInterruption&);
     ~OneVsOneMultiClassSvmTrainer() {}
 
     MultiClassSVM* train(const KernelParameterRangeMap&);
     double trainOnKFolds(SmoTrainer&, KernelFunction*, KFoldLabeledObservationsDivider&);
     const LabelSet& getLabelSet() { return labelSet; }
-    const LabeledObservationVector& getLabeledObservations() { return labeledObservations; }
+    const LabeledObservationVector& getLabeledObservations() { return svmDataset.getLabeledObservationVector(); }
     const LabelPairSet& getLabelPairSet() { return labelPairSet; }
     const LabeledObservationVector& getLabeledObservationVectorForLabel(const Label& label) { return labelToLabeledObservationVector[label]; }
 
@@ -566,27 +647,28 @@ public:
     static void standardizeObservations(const LabeledObservationVector&);
 
 private:
-    // maybe this should be a copy rather than a reference
-    // bad idea to carry a reference around between construction and call to train
-    const LabeledObservationVector& labeledObservations;
+    ExternalSvmTrainingInterruption& externalSvmTrainingInterruption;
+
+    // can we make this const?
+    SvmDataset& svmDataset;
+
+    const int evaluationFoldCount;
+    const int trainFoldCount;
+
     LabelSet labelSet;
     LabelToLabeledObservationVector labelToLabeledObservationVector;
     LabelPairSet labelPairSet;
-
 };
 
-typedef std::string FeatureLabel;
-typedef std::vector<FeatureLabel> FeatureLabelVector;
-
 // A better name for this class is MsvmRfe after MSVM-RFE described in
-// "MSVM_RFE: extensions of SVM-RFE for multiclass gene selection on
+// "MSVM-RFE: extensions of SVM-RFE for multiclass gene selection on
 // DNA microarray data", Zhou and Tuck, 2007, Bioinformatics
 class SvmRfe {
 public:
     SvmRfe() {}
     ~SvmRfe() {}
 
-    FeatureLabelVector getOrderedFeatureList(const LabeledObservationVector&, const KernelParameterRangeMap&);
+    FeatureList getOrderedFeatureList(SvmDataset&, OneVsOneMultiClassSvmTrainer&, const ParameterRange&, const ParameterRange&);
 };
 
 
