@@ -291,8 +291,18 @@ SffMultipleCommand::SffMultipleCommand(string option)  {
 			keepforward = m->isTrue(temp);
             
             temp = validParameter.validFile(parameters, "lookup", true);
-			if (temp == "not found")	{	
-				lookupFileName = "LookUp_Titanium.pat";	
+			if (temp == "not found")	{
+                string path = m->argv;
+                string tempPath = path;
+                for (int i = 0; i < path.length(); i++) { tempPath[i] = tolower(path[i]); }
+                path = path.substr(0, (tempPath.find_last_of('m')));
+                
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+                path += "lookupFiles/";
+#else
+                path += "lookupFiles\\";
+#endif
+				lookupFileName = m->getFullPathName(path) + "LookUp_Titanium.pat";
 				
 				int ableToOpen;
 				ifstream in;
@@ -302,7 +312,7 @@ SffMultipleCommand::SffMultipleCommand(string option)  {
 				//if you can't open it, try input location
 				if (ableToOpen == 1) {
 					if (inputDir != "") { //default path is set
-						string tryPath = inputDir + lookupFileName;
+						string tryPath = inputDir + m->getSimpleName(lookupFileName);
 						m->mothurOut("Unable to open " + lookupFileName + ". Trying input directory " + tryPath); m->mothurOutEndLine();
 						ifstream in2;
 						ableToOpen = m->openInputFile(tryPath, in2, "noerror");
@@ -350,7 +360,7 @@ SffMultipleCommand::SffMultipleCommand(string option)  {
 				for (int i = 0; i < exepath.length(); i++) { tempPath[i] = tolower(exepath[i]); }
 				exepath = exepath.substr(0, (tempPath.find_last_of('m')));
                 
-				string tryPath = m->getFullPathName(exepath) + lookupFileName;
+				string tryPath = m->getFullPathName(exepath) + m->getSimpleName(lookupFileName);
 				m->mothurOut("Unable to open " + lookupFileName + ". Trying mothur's executable location " + tryPath); m->mothurOutEndLine();
 				ifstream in2;
 				int ableToOpen = m->openInputFile(tryPath, in2, "noerror");

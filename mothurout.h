@@ -93,7 +93,9 @@ class MothurOut {
 		string getRootName(string);
 		bool isBlank(string);
 		int openOutputFile(string, ofstream&);
+        int openOutputFileBinary(string, ofstream&);
 		int openOutputFileAppend(string, ofstream&);
+        int openOutputFileBinaryAppend(string, ofstream&);
 		int openInputFile(string, ifstream&);
 		int openInputFile(string, ifstream&, string); //no error given 
 		string getline(ifstream&);
