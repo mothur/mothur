@@ -8,6 +8,7 @@
  */
 
 #include "linearalgebra.h"
+#include "wilcox.h"
 
 // This class references functions used from "Numerical Recipes in C++" //
 
@@ -805,80 +806,7 @@ double LinearAlgebra::calcSpearman(vector< vector<double> >& euclidDists, vector
 		exit(1);
 	}
 }
-/*********************************************************************************************************************************/
-double LinearAlgebra::calcKruskalWallis(vector<spearmanRank>& values, double& pValue){
-	try {
-        double H;
-        set<string> treatments;
-        
-        //rank values
-        sort(values.begin(), values.end(), compareSpearman);
-        vector<spearmanRank*> ties;
-        int rankTotal = 0;
-        vector<int> TIES;
-        for (int j = 0; j < values.size(); j++) {
-            treatments.insert(values[j].name);
-            rankTotal += (j+1);
-            ties.push_back(&(values[j]));
-            
-            if (j != values.size()-1) { // you are not the last so you can look ahead
-                if (values[j].score != values[j+1].score) { // you are done with ties, rank them and continue
-                    if (ties.size() > 1) { TIES.push_back(ties.size()); }
-                    for (int k = 0; k < ties.size(); k++) {
-                        double thisrank = rankTotal / (double) ties.size();
-                        (*ties[k]).score = thisrank;
-                    }
-                    ties.clear();
-                    rankTotal = 0;
-                }
-            }else { // you are the last one
-                if (ties.size() > 1) { TIES.push_back(ties.size()); }
-                for (int k = 0; k < ties.size(); k++) {
-                    double thisrank = rankTotal / (double) ties.size();
-                    (*ties[k]).score = thisrank;
-                }
-            }
-        }
-        
-        
-        // H = 12/(N*(N+1)) * (sum Ti^2/n) - 3(N+1)
-        map<string, double> sums;
-        map<string, double> counts;
-        for (set<string>::iterator it = treatments.begin(); it != treatments.end(); it++) { sums[*it] = 0.0; counts[*it] = 0; }
-        
-        for (int j = 0; j < values.size(); j++) {
-            sums[values[j].name] += values[j].score;
-            counts[values[j].name]+= 1.0;
-        }
-        
-        double middleTerm = 0.0;
-        for (set<string>::iterator it = treatments.begin(); it != treatments.end(); it++) {
-            middleTerm += ((sums[*it]*sums[*it])/counts[*it]);
-        }
-        
-        double firstTerm = 12 / (double) (values.size()*(values.size()+1));
-        double lastTerm = 3 * (values.size()+1);
-        
-        H = firstTerm * middleTerm - lastTerm;
-        
-        //adjust for ties
-        if (TIES.size() != 0) {
-            double sum = 0.0;
-            for (int j = 0; j < TIES.size(); j++) { sum += ((TIES[j]*TIES[j]*TIES[j])-TIES[j]); }
-            double result = 1.0 - (sum / (double) ((values.size()*values.size()*values.size())-values.size()));
-            H /= result;
-        }
-        
-        //Numerical Recipes pg221
-        pValue = 1.0 - (gammp(((treatments.size()-1)/(double)2.0), H/2.0));
-        
-        return H;
-    }
-	catch(exception& e) {
-		m->errorOut(e, "LinearAlgebra", "calcKruskalWallis");
-		exit(1);
-	}
-}
+
 /*********************************************************************************************************************************/
 //assumes both matrices are square and the same size
 double LinearAlgebra::calcKendall(vector< vector<double> >& euclidDists, vector< vector<double> >& userDists){
@@ -1302,40 +1230,143 @@ double LinearAlgebra::calcKendallSig(double n, double r){
 	}
 }
 /*********************************************************************************************************************************/
-double LinearAlgebra::calcWilcoxon(vector<double>& x, vector<double>& y, double& sig){
+double LinearAlgebra::calcKruskalWallis(vector<spearmanRank>& values, double& pValue){
 	try {
-		if (x.size() != y.size()) { m->mothurOut("[ERROR]: vector size mismatch."); m->mothurOutEndLine(); return 0.0; }
-		
-		double W = 0.0;
-        sig = 0.0;
+        double H;
+        set<string> treatments;
         
-        vector<double> signPairs;
-        vector<spearmanRank> absV;
-        for (int i = 0; i < x.size(); i++) {
-            if (m->control_pressed) { return W; }
-            double temp = y[i]-x[i];
-            double signV = sign(temp);
-            if (signV != 0) { // exclude zeros
-                spearmanRank member(toString(i), abs(temp));
-                absV.push_back(member);
-                signPairs.push_back(signV);
+        //rank values
+        sort(values.begin(), values.end(), compareSpearman);
+        vector<spearmanRank*> ties;
+        int rankTotal = 0;
+        vector<int> TIES;
+        for (int j = 0; j < values.size(); j++) {
+            treatments.insert(values[j].name);
+            rankTotal += (j+1);
+            ties.push_back(&(values[j]));
+            
+            if (j != values.size()-1) { // you are not the last so you can look ahead
+                if (values[j].score != values[j+1].score) { // you are done with ties, rank them and continue
+                    if (ties.size() > 1) { TIES.push_back(ties.size()); }
+                    for (int k = 0; k < ties.size(); k++) {
+                        double thisrank = rankTotal / (double) ties.size();
+                        (*ties[k]).score = thisrank;
+                    }
+                    ties.clear();
+                    rankTotal = 0;
+                }
+            }else { // you are the last one
+                if (ties.size() > 1) { TIES.push_back(ties.size()); }
+                for (int k = 0; k < ties.size(); k++) {
+                    double thisrank = rankTotal / (double) ties.size();
+                    (*ties[k]).score = thisrank;
+                }
             }
         }
         
-        //rank absV
-        //sort xscores
-		sort(absV.begin(), absV.end(), compareSpearman);
+        
+        // H = 12/(N*(N+1)) * (sum Ti^2/n) - 3(N+1)
+        map<string, double> sums;
+        map<string, double> counts;
+        for (set<string>::iterator it = treatments.begin(); it != treatments.end(); it++) { sums[*it] = 0.0; counts[*it] = 0; }
+        
+        for (int j = 0; j < values.size(); j++) {
+            sums[values[j].name] += values[j].score;
+            counts[values[j].name]+= 1.0;
+        }
+        
+        double middleTerm = 0.0;
+        for (set<string>::iterator it = treatments.begin(); it != treatments.end(); it++) {
+            middleTerm += ((sums[*it]*sums[*it])/counts[*it]);
+        }
+        
+        double firstTerm = 12 / (double) (values.size()*(values.size()+1));
+        double lastTerm = 3 * (values.size()+1);
+        
+        H = firstTerm * middleTerm - lastTerm;
+        
+        //adjust for ties
+        if (TIES.size() != 0) {
+            double sum = 0.0;
+            for (int j = 0; j < TIES.size(); j++) { sum += ((TIES[j]*TIES[j]*TIES[j])-TIES[j]); }
+            double result = 1.0 - (sum / (double) ((values.size()*values.size()*values.size())-values.size()));
+            H /= result;
+        }
+        
+        //Numerical Recipes pg221
+        pValue = 1.0 - (gammp(((treatments.size()-1)/(double)2.0), H/2.0));
+        
+        return H;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "LinearAlgebra", "calcKruskalWallis");
+		exit(1);
+	}
+}
+/*********************************************************************************************************************************/
+//thanks http://www.johndcook.com/cpp_phi.html
+double LinearAlgebra::pnorm(double x){
+    try {
+        // constants
+        double a1 =  0.254829592;
+        double a2 = -0.284496736;
+        double a3 =  1.421413741;
+        double a4 = -1.453152027;
+        double a5 =  1.061405429;
+        double p  =  0.3275911;
+        
+        // Save the sign of x
+        int sign = 1;
+        if (x < 0)
+            sign = -1;
+        x = fabs(x)/sqrt(2.0);
+        
+        // A&S formula 7.1.26
+        double t = 1.0/(1.0 + p*x);
+        double y = 1.0 - (((((a5*t + a4)*t) + a3)*t + a2)*t + a1)*t*exp(-x*x);
+        
+        return 0.5*(1.0 + sign*y);
+    }
+	catch(exception& e) {
+		m->errorOut(e, "LinearAlgebra", "pnorm");
+		exit(1);
+	}
+}
+
+/*********************************************************************************************************************************/
+double LinearAlgebra::calcWilcoxon(vector<double>& x, vector<double>& y, double& sig){
+	try {		
+		double W = 0.0;
+        sig = 0.0;
+        
+        vector<spearmanRank> ranks;
+        for (int i = 0; i < x.size(); i++) {
+            if (m->control_pressed) { return W; }
+            spearmanRank member("x", x[i]);
+            ranks.push_back(member);
+        }
+        
+        for (int i = 0; i < y.size(); i++) {
+            if (m->control_pressed) { return W; }
+            spearmanRank member("y", y[i]);
+            ranks.push_back(member);
+        }
+        
+        //sort values
+		sort(ranks.begin(), ranks.end(), compareSpearman);
 		
 		//convert scores to ranks of x
 		vector<spearmanRank*> ties;
 		int rankTotal = 0;
-		for (int j = 0; j < absV.size(); j++) {
+        vector<int> TIES;
+		for (int j = 0; j < ranks.size(); j++) {
             if (m->control_pressed) { return W; }
 			rankTotal += (j+1);
-			ties.push_back(&(absV[j]));
+			ties.push_back(&(ranks[j]));
             
-			if (j != absV.size()-1) { // you are not the last so you can look ahead
-				if (absV[j].score != absV[j+1].score) { // you are done with ties, rank them and continue
+			if (j != ranks.size()-1) { // you are not the last so you can look ahead
+				if (ranks[j].score != ranks[j+1].score) { // you are done with ties, rank them and continue
+                    if (ties.size() > 1) { TIES.push_back(ties.size()); }
 					for (int k = 0; k < ties.size(); k++) {
 						float thisrank = rankTotal / (float) ties.size();
 						(*ties[k]).score = thisrank;
@@ -1344,27 +1375,92 @@ double LinearAlgebra::calcWilcoxon(vector<double>& x, vector<double>& y, double&
 					rankTotal = 0;
 				}
 			}else { // you are the last one
+                if (ties.size() > 1) { TIES.push_back(ties.size()); }
 				for (int k = 0; k < ties.size(); k++) {
 					float thisrank = rankTotal / (float) ties.size();
 					(*ties[k]).score = thisrank;
 				}
 			}
 		}
-
-        //sum ranks times sign
-        for (int i = 0; i < absV.size(); i++) {
+        
+        //from R wilcox.test function
+        //STATISTIC <- sum(r[seq_along(x)]) - n.x * (n.x + 1)/2
+        double sumRanks = 0.0;
+        for (int i = 0; i < ranks.size(); i++) {
             if (m->control_pressed) { return W; }
-            W += (absV[i].score*signPairs[i]);
+            if (ranks[i].name == "x") { sumRanks += ranks[i].score; }
         }
-        W = abs(W);
         
-        //find zScore
-        cout << "still need to find sig!!" << endl;
+        W = sumRanks - x.size() * ((double)(x.size() + 1)) / 2.0;
         
-		return W;
+        //exact <- (n.x < 50) && (n.y < 50)
+        bool findExact = false;
+        if ((x.size() < 50) && (y.size() < 50)) { findExact = true; }
+        
+        
+        if (findExact && (TIES.size() == 0)) { //find exact and no ties
+            //PVAL <- switch(alternative, two.sided = {
+            //p <- if (STATISTIC > (n.x * n.y/2))
+            PWilcox wilcox;
+            double pval = 0.0;
+            if (W > ((double)x.size()*y.size()/2.0)) {
+                //pwilcox(STATISTIC-1, n.x, n.y, lower.tail = FALSE)
+                pval = wilcox.pwilcox(W-1, x.size(), y.size(), false);
+            }else {
+                //pwilcox(STATISTIC,n.x, n.y)
+                pval = wilcox.pwilcox(W, x.size(), y.size(), true);
+            }
+            sig = 2.0 * pval;
+            if (1.0 < sig) { sig = 1.0; }
+        }else {
+            //z <- STATISTIC - n.x * n.y/2
+            double z = W - (double)(x.size() * y.size()/2.0);
+            //NTIES <- table(r)
+            double sum = 0.0;
+            for (int j = 0; j < TIES.size(); j++) { sum += ((TIES[j]*TIES[j]*TIES[j])-TIES[j]); }
+           
+            //SIGMA <- sqrt((n.x * n.y/12) * ((n.x + n.y + 1) -
+                                            //sum(NTIES^3 - NTIES)/((n.x + n.y) * (n.x + n.y -
+                                                                            //1))))
+            double sigma = 0.0;
+            double firstTerm = (double)(x.size() * y.size()/12.0);
+            double secondTerm = (double)(x.size() + y.size() + 1) - sum / (double)((x.size() + y.size()) * (x.size() + y.size() - 1));
+            sigma = sqrt(firstTerm * secondTerm);
+            
+            //CORRECTION <- switch(alternative, two.sided = sign(z) * 0.5, greater = 0.5, less = -0.5)
+            double CORRECTION = 0.0;
+            if (z < 0) { CORRECTION = -1.0; }
+            else if (z > 0) { CORRECTION = 1.0; }
+            CORRECTION *= 0.5;
+            
+            z = (z - CORRECTION)/sigma;
+            
+            //PVAL <- switch(alternative,  two.sided = 2 * min(pnorm(z), pnorm(z, lower.tail = FALSE)))
+            sig = pnorm(z);
+            if ((1.0-sig) < sig) { sig = 1.0 - sig; }
+            sig *= 2;
+        }
+        
+        return W;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "LinearAlgebra", "calcWilcoxon");
+		exit(1);
+	}
+}
+
+/*********************************************************************************************************************************/
+double LinearAlgebra::choose(double n, double k){
+	try {
+        n = floor(n + 0.5);
+        k = floor(k + 0.5);
+        
+        double lchoose = gammln(n + 1.0) - gammln(k + 1.0) - gammln(n - k + 1.0);
+        
+        return (floor(exp(lchoose) + 0.5));
+    }
+	catch(exception& e) {
+		m->errorOut(e, "LinearAlgebra", "choose");
 		exit(1);
 	}
 }
@@ -1884,7 +1980,6 @@ void LinearAlgebra::lubksb(vector<vector<float> >& A, vector<int>& index, vector
 	}
 }
 
-
 /*********************************************************************************************************************************/
 
 vector<vector<double> > LinearAlgebra::getInverse(vector<vector<double> > matrix){
@@ -1919,5 +2014,3 @@ vector<vector<double> > LinearAlgebra::getInverse(vector<vector<double> > matrix
 		exit(1);
 	}
 }
-
-/*********************************************************************************************************************************/

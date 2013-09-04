@@ -31,7 +31,7 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
     try {
         row = data.size();		 //numBins
 		column = data[0].size(); //numGroups in subset
-        secondGroupingStart = secGroupingStart; //g
+        secondGroupingStart = secGroupingStart; //g number of samples in group 1
          
         vector< vector<double> > Pmatrix; Pmatrix.resize(row);
         for (int i = 0; i < row; i++) { Pmatrix[i].resize(column, 0.0);  } // the relative proportion matrix
@@ -58,7 +58,6 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
         for (int i = 0; i < column; i++) {
 			for (int j = 0; j < row; j++) {
 				Pmatrix[j][i] = data[j][i]/totals[i];
-               
 			}
         }
         
@@ -70,7 +69,7 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
             //#************************************************************
             //#  generate p values fisher's exact test
             //#************************************************************
-            double total1, total2;
+            double total1, total2; total1 = 0; total2 = 0;
 			//total for first grouping
             for (int i = 0; i < secondGroupingStart; i++) { total1 += totals[i]; }
             
@@ -139,13 +138,20 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
                 T_statistics[i] = xbar_diff/denom;  // calculate two sample t-statistic
             }
             
-            /*for (int i = 0; i < row; i++) {  
+           /*for (int i = 0; i < row; i++) {
                 for (int j = 0; j < 3; j++) {
                     cout << "C1[" << i+1 << "," << j+1 << "]=" << C1[i][j] << ";" << endl;
                     cout << "C2[" << i+1 << "," << j+1 << "]=" << C2[i][j] << ";" << endl;
                 }
                 cout << "T_statistics[" << i+1 << "]=" << T_statistics[i] << ";" << endl;
+            }
+            
+            for (int i = 0; i < row; i++) {
+                for (int j = 0; j < column; j++) {
+                    cout << "Fmatrix[" << i+1 << "," << j+1 << "]=" << data[i][j] << ";" << endl;
+                }
             }*/
+
             //#*************************************
             //# generate initial permuted p-values
             //#*************************************
@@ -155,12 +161,12 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
             //#  generate p values for sparse data 
             //#  using fisher's exact test
             //#*************************************
-            double total1, total2;
+            double total1, total2; total1 = 0; total2 = 0;
 			//total for first grouping
-            for (int i = 0; i < secondGroupingStart; i++) { total1 += totals[i]; }
+            for (int i = 0; i < secondGroupingStart; i++) { total1 += totals[i];  }
             
             //total for second grouping
-            for (int i = secondGroupingStart; i < column; i++) { total2 += totals[i]; }
+            for (int i = secondGroupingStart; i < column; i++) { total2 += totals[i];  }
             
             vector<double> fish;	fish.resize(row, 0.0);
 			vector<double> fish2;	fish2.resize(row, 0.0);
@@ -169,8 +175,9 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
 				
 				for(int j = 0; j < secondGroupingStart; j++)		{ fish[i] += data[i][j];	}
 				for(int j = secondGroupingStart; j < column; j++)	{ fish2[i] += data[i][j];	}
-				
-                if ((fish[1] < secondGroupingStart) && (fish2[i] < (column-secondGroupingStart))) {
+                
+                if ((fish[i] < secondGroupingStart) && (fish2[i] < (column-secondGroupingStart))) {
+    
                     double f11, f12, f21, f22;
                     f11 = fish[i];
                     f12 = fish2[i];
@@ -269,7 +276,7 @@ vector<double> MothurMetastats::permuted_pvalues(vector< vector<double> >& Imatr
                     for (int j = 0; j < numPermutations; j++) {   cleanedpermuted_ttests[j].push_back(permuted_ttests[j][i]); }
                 }
             }
-              
+            
             //#now for each taxa
             for (int i = 0; i < row; i++) { 
                 //number of cleanedpermuted_ttests greater than tstat[i]
@@ -304,7 +311,11 @@ vector<double> MothurMetastats::permute_and_calc_ts(vector< vector<double> >& Im
         vector< vector<double> > permutedMatrix = Imatrix;
         
         //randomize columns, ie group abundances.
-        for (int i = 0; i < permutedMatrix.size(); i++) {   random_shuffle(permutedMatrix[i].begin(), permutedMatrix[i].end());     }
+        map<int, int> randomMap;
+        vector<int> randoms;
+        for (int i = 0; i < column; i++) { randoms.push_back(i); }
+        random_shuffle(randoms.begin(), randoms.end());
+        for (int i = 0; i < randoms.size(); i++) {   randomMap[i] = randoms[i];   }
         
         //calc ts
         vector< vector<double> > C1; C1.resize(row);
@@ -319,16 +330,16 @@ vector<double> MothurMetastats::permute_and_calc_ts(vector< vector<double> >& Im
         for(int i = 0; i < row; i++){ // for each taxa
             //# find the mean of each group
             double g1Total = 0.0; double g2Total = 0.0;
-            for (int j = 0; j < secondGroupingStart; j++)       {     g1Total += permutedMatrix[i][j]; }
+            for (int j = 0; j < secondGroupingStart; j++)       {     g1Total += permutedMatrix[i][randomMap[j]]; }
             C1[i][0] = g1Total/(double)(secondGroupingStart);
-            for (int j = secondGroupingStart; j < column; j++)  {     g2Total += permutedMatrix[i][j]; }
+            for (int j = secondGroupingStart; j < column; j++)  {     g2Total += permutedMatrix[i][randomMap[j]]; }
             C2[i][0] = g2Total/(double)(column-secondGroupingStart);
             
             //# find the variance of each group
             double g1Var = 0.0; double g2Var = 0.0;
-            for (int j = 0; j < secondGroupingStart; j++)       {     g1Var += pow((permutedMatrix[i][j]-C1[i][0]), 2);  }
+            for (int j = 0; j < secondGroupingStart; j++)       {     g1Var += pow((permutedMatrix[i][randomMap[j]]-C1[i][0]), 2);  }
             C1[i][1] = g1Var/(double)(secondGroupingStart-1);
-            for (int j = secondGroupingStart; j < column; j++)  {     g2Var += pow((permutedMatrix[i][j]-C2[i][0]), 2);  }
+            for (int j = secondGroupingStart; j < column; j++)  {     g2Var += pow((permutedMatrix[i][randomMap[j]]-C2[i][0]), 2);  }
             C2[i][1] = g2Var/(double)(column-secondGroupingStart-1);
             
             //# find the std error of each group -std err^2 (will change to std err at end)
@@ -336,6 +347,8 @@ vector<double> MothurMetastats::permute_and_calc_ts(vector< vector<double> >& Im
             C2[i][2] = C2[i][1]/(double)(column-secondGroupingStart);
         }
         
+        
+
         //#*************************************
         //#  two sample t-statistics
         //#*************************************
@@ -356,14 +369,7 @@ vector<double> MothurMetastats::permute_and_calc_ts(vector< vector<double> >& Im
 /***********************************************************/
 vector<double> MothurMetastats::calc_qvalues(vector<double>& pValues) {
 	try {
-		
-       /* cout << "x <- c(" << pValues[0];
-        for (int l = 1; l < pValues.size(); l++){
-            cout << ", " << pValues[l];
-        }
-        cout << ")\n";*/
-        
-		int numRows = pValues.size();
+        int numRows = pValues.size();
 		vector<double> qvalues(numRows, 0.0);
 
 		//fill lambdas with 0.00, 0.01, 0.02... 0.95
@@ -378,7 +384,8 @@ vector<double> MothurMetastats::calc_qvalues(vector<double>& pValues) {
 			for (int i = 0; i < numRows; i++){ // for each p-value in order
 				if (pValues[i] > lambdas[l]){ count++; }
 			}
-			pi0_hat[l] = count/(double)(numRows*(1-lambdas[l]));
+			pi0_hat[l] = count/(double)(numRows*(1.0-lambdas[l]));
+            //cout << lambdas[l] << '\t' << count << '\t' << numRows*(1.0-lambdas[l]) << '\t' << pi0_hat[l] << endl;
 		}
 		
 		double pi0 = smoothSpline(lambdas, pi0_hat, 3);

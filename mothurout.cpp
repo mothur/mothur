@@ -589,6 +589,26 @@ int MothurOut::openOutputFileAppend(string fileName, ofstream& fileHandle){
 	}
 }
 /***********************************************************************/
+int MothurOut::openOutputFileBinaryAppend(string fileName, ofstream& fileHandle){
+	try {
+		fileName = getFullPathName(fileName);
+		
+		fileHandle.open(fileName.c_str(), ios::app | ios::binary);
+		if(!fileHandle) {
+			mothurOut("[ERROR]: Could not open " + fileName); mothurOutEndLine();
+			return 1;
+		}
+		else {
+			return 0;
+		}
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "openOutputFileAppend");
+		exit(1);
+	}
+}
+
+/***********************************************************************/
 void MothurOut::gobble(istream& f){
 	try {
 		
@@ -1194,7 +1214,48 @@ int MothurOut::openOutputFile(string fileName, ofstream& fileHandle){
 	}	
 
 }
+/***********************************************************************/
 
+int MothurOut::openOutputFileBinary(string fileName, ofstream& fileHandle){
+	try {
+        
+		string completeFileName = getFullPathName(fileName);
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#ifdef USE_COMPRESSION
+        // check for gzipped file
+        if (endsWith(completeFileName, ".gz") || endsWith(completeFileName, ".bz2")) {
+            string tempName = string(tmpnam(0));
+            mkfifo(tempName.c_str(), 0666);
+            cerr << "Compressing " << completeFileName << " via temporary named pipe " << tempName << "\n";
+            int fork_result = fork();
+            if (fork_result < 0) {
+                cerr << "Error forking.\n";
+                exit(1);
+            } else if (fork_result == 0) {
+                string command = string(endsWith(completeFileName, ".gz") ?  "gzip" : "bzip2") + " -v > " + completeFileName + string(" < ") + tempName;
+                system(command.c_str());
+                exit(0);
+            } else {
+                completeFileName = tempName;
+            }
+        }
+#endif
+#endif
+		fileHandle.open(completeFileName.c_str(), ios::trunc | ios::binary);
+		if(!fileHandle) {
+			mothurOut("[ERROR]: Could not open " + completeFileName); mothurOutEndLine();
+			return 1;
+		}
+		else {
+			return 0;
+		}
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "openOutputFileBinary");
+		exit(1);
+	}	
+    
+}
 /**************************************************************************************************/
 int MothurOut::appendFiles(string temp, string filename) {
 	try{
@@ -1841,6 +1902,7 @@ int MothurOut::readTax(string namefile, map<string, string>& taxMap) {
         bool pairDone = false;
         bool columnOne = true;
         string firstCol, secondCol;
+        bool error = false;
         
 		while (!in.eof()) {
 			if (control_pressed) { break; }
@@ -1865,7 +1927,7 @@ int MothurOut::readTax(string namefile, map<string, string>& taxMap) {
                         if (!ignore) { taxMap[firstCol] = secondCol; }
                         if (debug) {  mothurOut("[DEBUG]: name = '" + firstCol + "' tax = '" + secondCol + "'\n");  }
                     }else {
-                        mothurOut("[ERROR]: " + firstCol + " is already in your taxonomy file, names must be unique./n"); control_pressed = true;
+                        mothurOut("[ERROR]: " + firstCol + " is already in your taxonomy file, names must be unique.\n"); error = true;
                     }
                     pairDone = false; 
                 }
@@ -1893,7 +1955,7 @@ int MothurOut::readTax(string namefile, map<string, string>& taxMap) {
                         if (!ignore) { taxMap[firstCol] = secondCol; }
                         if (debug) {  mothurOut("[DEBUG]: name = '" + firstCol + "' tax = '" + secondCol + "'\n");  }
                     }else {
-                        mothurOut("[ERROR]: " + firstCol + " is already in your taxonomy file, names must be unique./n"); control_pressed = true;
+                        mothurOut("[ERROR]: " + firstCol + " is already in your taxonomy file, names must be unique./n"); error = true;
                     }
 
                     pairDone = false; 
@@ -1901,6 +1963,8 @@ int MothurOut::readTax(string namefile, map<string, string>& taxMap) {
             } 
         }
 		
+        if (error) { control_pressed = true; }
+        if (debug) {  mothurOut("[DEBUG]: numSeqs saved = '" + toString(taxMap.size()) + "'\n"); }
 		return taxMap.size();
 
 	}

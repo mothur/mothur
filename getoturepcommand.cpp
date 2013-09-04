@@ -265,7 +265,11 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
                 if (ct.hasGroupInfo()) { hasGroups = true; }
             }
             
-            			
+            groupfile = validParameter.validFile(parameters, "group", true);
+			if (groupfile == "not open") { groupfile = ""; abort = true; }
+			else if (groupfile == "not found") { groupfile = ""; }
+			else { m->setGroupFile(groupfile); }
+			
             method = validParameter.validFile(parameters, "method", false);		if (method == "not found"){	method = "distance";	}
 			if ((method != "distance") && (method != "abundance")) {
 				m->mothurOut(method + " is not a valid option for the method parameter. The only options are: distance and abundance, aborting."); m->mothurOutEndLine(); abort = true;
@@ -337,11 +341,7 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 				else { allLines = 1;  }
 			}
 			
-			groupfile = validParameter.validFile(parameters, "group", true);
-			if (groupfile == "not open") { groupfile = ""; abort = true; }
-			else if (groupfile == "not found") { groupfile = ""; }
-			else { m->setGroupFile(groupfile); }
-			
+						
 			sorted = validParameter.validFile(parameters, "sorted", false);		if (sorted == "not found"){	sorted = "";	}
 			if (sorted == "none") { sorted=""; }
 			if ((sorted != "") && (sorted != "name") && (sorted != "bin") && (sorted != "size") && (sorted != "group")) {
