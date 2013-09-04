@@ -21,7 +21,7 @@
 	The cluster command outputs a .list , .rabund and .sabund files.  
 	The cluster command parameter options are method, cuttoff and precision. No parameters are required.  
 	The cluster command should be in the following format: cluster(method=yourMethod, cutoff=yourCutoff, precision=yourPrecision).  
-	The acceptable methods are furthest, nearest and average.  If you do not provide a method the default algorythm is furthest neighbor.  
+	The acceptable methods are furthest, nearest and average.  If you do not provide a method the default algorithm is furthest neighbor.  
 	The cluster() command outputs three files *.list, *.rabund, and *.sabund.   */
 
 
