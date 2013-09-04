@@ -242,25 +242,59 @@ private:
     ParameterMapVector parameterSetVector;
 };
 
+
+// The KernelFunction class caches a partial kernel value that does not depend on kernel parameters.
 class KernelFunction {
 public:
-    KernelFunction() {}
+    KernelFunction(const LabeledObservationVector& _obs) : obs(_obs), cache(_obs.size(), std::vector<double>(_obs.size(), std::numeric_limits<double>::quiet_NaN())) {}
     virtual ~KernelFunction() {}
 
-    virtual double similarity(const Observation&, const Observation&) = 0;
+    virtual double similarity(const LabeledObservation&, const LabeledObservation&) = 0;
     virtual void setParameters(const ParameterMap&) = 0;
     virtual void getDefaultParameterRanges(ParameterRangeMap&) = 0;
+
+    virtual double calculateParameterFreeSimilarity(const LabeledObservation&, const LabeledObservation&) = 0;
+
+    double getCachedParameterFreeSimilarity(const LabeledObservation& obs_i, const LabeledObservation& obs_j) {
+        const int i = obs_i.datasetIndex;
+        const int j = obs_j.datasetIndex;
+        // if the first element of row i is NaN then calculate all elements for row i
+        if ( rowNotCached(i) ) {
+            for ( int v = 0; v < obs.size(); v++ ) {
+                cache[i][v] = calculateParameterFreeSimilarity(obs[i], obs[v]);
+                //cache[i][v] = std::inner_product(
+                //    obs[i].second->begin(),
+                //    obs[i].second->end(),
+                //    obs[v].second->begin(),
+                //    0.0
+                //);
+            }
+        }
+        return cache[i][j];
+    }
+
+    bool rowNotCached(int i) {
+        return isnan(cache[i][0]);
+    }
+
+private:
+    const LabeledObservationVector& obs;
+    std::vector<std::vector<double> > cache;
 };
 
 
 class LinearKernelFunction : public KernelFunction {
 public:
-    // parameters must be set before using a KernelFunction
-    LinearKernelFunction() : constant(0.0) {}
+    // parameters must be set before using a KernelFunction is used
+    LinearKernelFunction(const LabeledObservationVector& _obs) : KernelFunction(_obs), constant(0.0) {}
     ~LinearKernelFunction() {}
 
-    double similarity(const Observation& i, const Observation& j) {
-        return std::inner_product(i.begin(), i.end(), j.begin(), constant);
+    double similarity(const LabeledObservation& i, const LabeledObservation& j) {
+        return getCachedParameterFreeSimilarity(i, j) + constant;
+    }
+
+    double calculateParameterFreeSimilarity(const LabeledObservation& i, const LabeledObservation& j) {
+        return std::inner_product(i.second->begin(), i.second->end(), j.second->begin(), 0.0);
     }
 
     double getConstant() { return constant; }
@@ -285,16 +319,24 @@ private:
 
 class RbfKernelFunction : public KernelFunction {
 public:
-    // parameters must be set before a KernelFunction
-    RbfKernelFunction() : gamma(0.0) {}
+    // parameters must be set before a KernelFunction is used
+    RbfKernelFunction(const LabeledObservationVector& _obs) : KernelFunction(_obs), gamma(0.0) {}
     ~RbfKernelFunction() {}
 
-    double similarity(const Observation& i, const Observation& j) {
+    double similarity(const LabeledObservation& i, const LabeledObservation& j) {
+        //double sumOfSquaredDifs = 0.0;
+        //for (int n = 0; n < i.second->size(); n++) {
+        //    sumOfSquaredDifs += pow((i.second->at(n) - j.second->at(n)), 2.0);
+        //}
+        return gamma * getCachedParameterFreeSimilarity(i, j);
+    }
+
+    double calculateParameterFreeSimilarity(const LabeledObservation& i, const LabeledObservation& j) {
         double sumOfSquaredDifs = 0.0;
-        for (int n = 0; n < i.size(); n++) {
-            sumOfSquaredDifs += pow((i[n] - j[n]), 2.0);
+        for (int n = 0; n < i.second->size(); n++) {
+            sumOfSquaredDifs += pow((i.second->at(n) - j.second->at(n)), 2.0);
         }
-        return gamma * exp(sqrt(sumOfSquaredDifs));
+        return exp(sqrt(sumOfSquaredDifs));
     }
 
     double getGamma()       { return gamma; }
@@ -320,12 +362,17 @@ private:
 
 class PolynomialKernelFunction : public KernelFunction {
 public:
-    // parameters must be set before using a KernelFunction
-    PolynomialKernelFunction() : c(0.0), d(0) {}
+    // parameters must be set before using a KernelFunction is used
+    PolynomialKernelFunction(const LabeledObservationVector& _obs) : KernelFunction(_obs), c(0.0), d(0) {}
     ~PolynomialKernelFunction() {}
 
-    double similarity(const Observation& i, const Observation& j) {
-        return pow(std::inner_product(i.begin(), i.end(), j.begin(), c), d);
+    double similarity(const LabeledObservation& i, const LabeledObservation& j) {
+        return pow((getCachedParameterFreeSimilarity(i, j) + c), d);
+        //return pow(std::inner_product(i.second->begin(), i.second->end(), j.second->begin(), c), d);
+    }
+
+    double calculateParameterFreeSimilarity(const LabeledObservation& i, const LabeledObservation& j) {
+        return std::inner_product(i.second->begin(), i.second->end(), j.second->begin(), 0.0);
     }
 
     void setParameters(const ParameterMap& p) {
@@ -352,12 +399,17 @@ private:
 
 class SigmoidKernelFunction : public KernelFunction {
 public:
-    // parameters must be set before using a KernelFunction
-    SigmoidKernelFunction() : alpha(0.0), c(0.0) {}
+    // parameters must be set before using a KernelFunction is used
+    SigmoidKernelFunction(const LabeledObservationVector& _obs) : KernelFunction(_obs), alpha(0.0), c(0.0) {}
     ~SigmoidKernelFunction() {}
 
-    double similarity(const Observation& i, const Observation& j) {
-        return tanh(alpha * std::inner_product(i.begin(), i.end(), j.begin(), c));
+    double similarity(const LabeledObservation& i, const LabeledObservation& j) {
+        return tanh(alpha * getCachedParameterFreeSimilarity(i, j) + c);
+        //return tanh(alpha * std::inner_product(i.second->begin(), i.second->end(), j.second->begin(), c));
+    }
+
+    double calculateParameterFreeSimilarity(const LabeledObservation& i, const LabeledObservation& j) {
+        return std::inner_product(i.second->begin(), i.second->end(), j.second->begin(), 0.0);
     }
 
     void setParameters(const ParameterMap& p) {
@@ -384,21 +436,89 @@ private:
 
 class KernelFactory {
 public:
-    static KernelFunction* getKernelFunctionForKey(std::string kernelFunctionKey) {
+    static KernelFunction* getKernelFunctionForKey(std::string kernelFunctionKey, const LabeledObservationVector& obs) {
         if ( kernelFunctionKey == LinearKernelFunction::MapKey ) {
-            return new LinearKernelFunction();
+            return new LinearKernelFunction(obs);
         }
         else if ( kernelFunctionKey == RbfKernelFunction::MapKey ) {
-            return new RbfKernelFunction();
+            return new RbfKernelFunction(obs);
         }
         else if ( kernelFunctionKey == PolynomialKernelFunction::MapKey ) {
-            return new PolynomialKernelFunction();
+            return new PolynomialKernelFunction(obs);
         }
         else {
             throw new std::exception();
         }
     }
 };
+
+
+typedef std::map<std::string, KernelFunction*> KernelFunctionMap;
+
+// An instance of KernelFunctionFactory dynamically allocates kernel function
+// instances and maintains a table of pointers to them.  This allows kernel
+// function instances to be reused which improves performance since the
+// kernel values do not have to be recalculated as often.
+class KernelFunctionFactory {
+public:
+    KernelFunctionFactory(const LabeledObservationVector& _obs) : obs(_obs) {}
+    ~KernelFunctionFactory() {
+        for ( KernelFunctionMap::iterator i = kernelFunctionTable.begin(); i != kernelFunctionTable.end(); i++ ) {
+            delete i->second;
+        }
+    }
+
+    KernelFunction& getKernelFunctionForKey(std::string kernelFunctionKey) {
+        std::cout << "getKernelFunctionForKey " << kernelFunctionKey << std::endl;
+        if ( kernelFunctionTable.count(kernelFunctionKey) == 0 ) {
+            std::cout << "creating new kernel function" << std::endl;
+            kernelFunctionTable.insert(
+                std::make_pair(
+                    kernelFunctionKey,
+                    KernelFactory::getKernelFunctionForKey(kernelFunctionKey, obs)
+                )
+            );
+        }
+        std::cout << "returning from getKernelFunctionForKey" << std::endl;
+        return *kernelFunctionTable[kernelFunctionKey];
+    }
+
+private:
+    const LabeledObservationVector& obs;
+    KernelFunctionMap kernelFunctionTable;
+};
+
+
+class KernelFunctionCache {
+public:
+    KernelFunctionCache(KernelFunction& _k, const LabeledObservationVector& _obs) : k(_k), obs(_obs), cache(_obs.size(), std::vector<double>(_obs.size(), std::numeric_limits<double>::quiet_NaN())) {};
+    ~KernelFunctionCache() {}
+
+    double similarity(const LabeledObservation& obs_i, const LabeledObservation& obs_j) {
+        const int i = obs_i.datasetIndex;
+        const int j = obs_j.datasetIndex;
+        // if the first element of row i is NaN then calculate all elements for row i
+        if ( rowNotCached(i) ) {
+            for ( int v = 0; v < obs.size(); v++ ) {
+                cache[i][v] = k.similarity(
+                    obs[i],
+                    obs[v]
+                );
+            }
+        }
+        return cache[i][j];
+    }
+
+    bool rowNotCached(int i) {
+        return isnan(cache[i][0]);
+    }
+
+private:
+    KernelFunction& k;
+    const LabeledObservationVector& obs;
+    std::vector<std::vector<double> > cache;
+};
+
 
 // The SVM class implements the Support Vector Machine
 // discriminant function.  Instances are constructed with
@@ -487,7 +607,8 @@ public:
         C = p.find(MapKey_C)->second;
     }
 
-    SVM* train(KernelFunction*, const LabeledObservationVector&);
+    SVM* train(KernelFunctionCache&, const LabeledObservationVector&);
+    //SVM* train(KernelFunction*, const LabeledObservationVector&);
     void assignNumericLabels(std::vector<double>&, const LabeledObservationVector&, NumericClassToLabel&);
     void elementwise_multiply(std::vector<double>& a, std::vector<double>& b, std::vector<double>& c) {
         std::transform(a.begin(), a.end(), b.begin(), c.begin(), std::multiplies<double>());
@@ -529,22 +650,6 @@ public:
     }
     ~KFoldLabeledObservationsDivider() {}
 
-    // argument labelContainer holds the labels we will work with
-    // the trainingData and testingData containers will only have observations with these labels
-    // would it be better to restrict the KFoldLabeledObservationsDivider at construction?
-    /*
-    void old_start(const LabelVector& labelContainer) {
-        labelVector.clear();
-        labelVector.assign(labelContainer.begin(), labelContainer.end());
-        k = 0;
-        trainingData.clear();
-        testingData.clear();
-        for (LabelVector::const_iterator label = labelVector.begin(); label != labelVector.end(); label++) {
-            appendKthFold(k, K, labelToLabeledObservationVector[*label], trainingData, testingData);
-        }
-    }
-    */
-
     void start() {
         k = 0;
         trainingData.clear();
@@ -557,17 +662,6 @@ public:
     bool end() {
         return k >= K;
     }
-
-    /*
-    void old_next() {
-        k++;
-        trainingData.clear();
-        testingData.clear();
-        for (LabelVector::const_iterator label = labelVector.begin(); label != labelVector.end(); label++) {
-            appendKthFold(k, K, labelToLabeledObservationVector[*label], trainingData, testingData);
-        }
-    }
-    */
 
     void next() {
         k++;
@@ -636,7 +730,7 @@ public:
     ~OneVsOneMultiClassSvmTrainer() {}
 
     MultiClassSVM* train(const KernelParameterRangeMap&);
-    double trainOnKFolds(SmoTrainer&, KernelFunction*, KFoldLabeledObservationsDivider&);
+    double trainOnKFolds(SmoTrainer&, KernelFunctionCache&, KFoldLabeledObservationsDivider&);
     const LabelSet& getLabelSet() { return labelSet; }
     const LabeledObservationVector& getLabeledObservations() { return svmDataset.getLabeledObservationVector(); }
     const LabelPairSet& getLabelPairSet() { return labelPairSet; }

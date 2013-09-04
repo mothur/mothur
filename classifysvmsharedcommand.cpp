@@ -305,7 +305,7 @@ void ClassifySvmSharedCommand::readSharedAndDesignFiles(const std::string& share
 }
 
 void ClassifySvmSharedCommand::readSharedRAbundVectors(vector<SharedRAbundVector*>& lookup, GroupMap& designMap, LabeledObservationVector& labeledObservationVector, FeatureVector& featureVector) {
-    std::cout << " lookup.size() = " << lookup.size() << std::endl;
+    //std::cout << " lookup.size() = " << lookup.size() << std::endl;
     //int i = 0;
     //while ( lookup[0] != NULL ) {
         for ( int j = 0; j < lookup.size(); j++ ) {
@@ -470,61 +470,27 @@ int ClassifySvmSharedCommand::execute() {
 
 void ClassifySvmSharedCommand::processSharedAndDesignData(vector<SharedRAbundVector*> lookup) {
     try {
-//    for (int i = 0; i < designMap->getNamesOfGroups().size(); i++) {
-//      string groupName = designMap->getNamesOfGroups()[i];
-//      cout << groupName << endl;
-//    }
-
-//    for (int i = 0; i < designMap->getNumSeqs(); i++) {
-//      string sharedGroupName = designMap->getNamesSeqs()[i];
-//      string treatmentName = designMap->getGroup(sharedGroupName);
-//      cout << sharedGroupName << " : " << treatmentName <<  endl;
-//    }
-/*
-        map<string, int> treatmentToIntMap;
-        map<int, string> intToTreatmentMap;
-        for (int i = 0; i < designMap.getNumGroups(); i++) {
-            string treatmentName = designMap.getNamesOfGroups()[i];
-            treatmentToIntMap[treatmentName] = i;
-            intToTreatmentMap[i] = treatmentName;
-        }
-
-        int numSamples = lookup.size();
-        int numFeatures = lookup[0]->getNumBins();
-
-        int numRows = numSamples;
-        int numColumns = numFeatures; // + 1; // extra one space needed for the treatment/outcome
-
-        //vector<vector<double> > dataSet(numRows, vector<double>(numColumns, 0.0));
-        //vector<vector<double>* > observations(numRows);
-
-        //for (int i = 0; i < lookup.size(); i++) {
-        //    string sharedGroupName = lookup[i]->getGroup();
-        //    string treatmentName = designMap.getGroup(sharedGroupName);
-        //    observations[i] = &dataSet[i];
-        //    for (int j = 0; j < lookup[i]->getNumBins(); j++) {
-        //        int otuCount = lookup[i]->getAbundance(j);
-        //        dataSet[i][j] = otuCount;
-        //    }
-        //    //dataSet[i][j] = treatmentToIntMap[treatmentName];
-        //}
-*/
         LabeledObservationVector labeledObservationVector;
         FeatureVector featureVector;
         readSharedRAbundVectors(lookup, designMap, labeledObservationVector, featureVector);
         SvmDataset svmDataset(labeledObservationVector, featureVector);
         int evaluationFoldCount = 3;
         int trainFoldCount = 5;
-        OneVsOneMultiClassSvmTrainer t(svmDataset, evaluationFoldCount, trainFoldCount, *this);
-        KernelParameterRangeMap kernelParameterRangeMap;
-        getDefaultKernelParameterRangeMap(kernelParameterRangeMap);
-        t.train(kernelParameterRangeMap);
-        //RandomForest randomForest(dataSet, numDecisionTrees, treeSplitCriterion, doPruning, pruneAggressiveness,
-        //        discardHighErrorTrees, highErrorTreeDiscardThreshold, optimumFeatureSubsetSelectionCriteria,
-        //        featureStandardDeviationThreshold);
-        //randomForest.populateDecisionTrees();
-        //randomForest.calcForrestErrorRate();
+        OneVsOneMultiClassSvmTrainer trainer(svmDataset, evaluationFoldCount, trainFoldCount, *this);
+        //KernelParameterRangeMap kernelParameterRangeMap;
+        //getDefaultKernelParameterRangeMap(kernelParameterRangeMap);
+        //trainer.train(kernelParameterRangeMap);
 
+        SvmRfe svmRfe;
+        FeatureList orderedFeatureList = svmRfe.getOrderedFeatureList(svmDataset, trainer, LinearKernelFunction::defaultConstantRange, SmoTrainer::defaultCRange);
+
+        int n = 0;
+        std::cout << "ordered features:" << std::endl;
+        for (FeatureList::iterator i = orderedFeatureList.begin(); i != orderedFeatureList.end(); i++) {
+            std::cout << i->getFeatureLabel() << std::endl;
+            n++;
+            if (n > 20) break;
+        }
         std::cout << "done training" << std::endl;
 
         map<string, string> variables;
@@ -533,8 +499,6 @@ void ClassifySvmSharedCommand::processSharedAndDesignData(vector<SharedRAbundVec
         string filename = getOutputFileName("summary", variables);
         outputNames.push_back(filename);
         outputTypes["summary"].push_back(filename);
-
-        //randomForest.calcForrestVariableImportance(filename);
 
         m->mothurOutEndLine();
         std::cout << "leaving processSharedAndDesignData" << std::endl;
@@ -546,3 +510,34 @@ void ClassifySvmSharedCommand::processSharedAndDesignData(vector<SharedRAbundVec
 }
 //**********************************************************************************************************************
 
+void ClassifySvmSharedCommand::trainSharedAndDesignData(vector<SharedRAbundVector*> lookup) {
+    try {
+        LabeledObservationVector labeledObservationVector;
+        FeatureVector featureVector;
+        readSharedRAbundVectors(lookup, designMap, labeledObservationVector, featureVector);
+        SvmDataset svmDataset(labeledObservationVector, featureVector);
+        int evaluationFoldCount = 3;
+        int trainFoldCount = 5;
+        OneVsOneMultiClassSvmTrainer t(svmDataset, evaluationFoldCount, trainFoldCount, *this);
+        KernelParameterRangeMap kernelParameterRangeMap;
+        getDefaultKernelParameterRangeMap(kernelParameterRangeMap);
+        t.train(kernelParameterRangeMap);
+
+        std::cout << "done training" << std::endl;
+
+        map<string, string> variables;
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
+        variables["[distance]"] = lookup[0]->getLabel();
+        string filename = getOutputFileName("summary", variables);
+        outputNames.push_back(filename);
+        outputTypes["summary"].push_back(filename);
+
+        m->mothurOutEndLine();
+        std::cout << "leaving processSharedAndDesignData" << std::endl;
+    }
+    catch (exception& e) {
+        m->errorOut(e, "ClassifySvmSharedCommand", "processSharedAndDesignData");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************

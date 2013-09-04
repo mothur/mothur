@@ -59,6 +59,7 @@ private:
     //double pruneAggressiveness, highErrorTreeDiscardThreshold, featureStandardDeviationThreshold;
     
     void processSharedAndDesignData(vector<SharedRAbundVector*> lookup);
+    void trainSharedAndDesignData(vector<SharedRAbundVector*> lookup);
 };
 
 #endif /* defined(__Mothur__classifysvmsharedcommand__) */
