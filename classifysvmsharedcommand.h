@@ -19,7 +19,7 @@ class ClassifySvmSharedCommand : public Command, ExternalSvmTrainingInterruption
 public:
   ClassifySvmSharedCommand();
   ClassifySvmSharedCommand(string);
-  ~ClassifySvmSharedCommand() {};
+  ~ClassifySvmSharedCommand() throw() {};
   
   vector<string> setParameters();
   string getCommandName()			{ return "classifysvm.shared";     }
@@ -43,23 +43,36 @@ private:
     bool abort;
     string outputDir;
     vector<string> outputNames, Groups;
-  
+
     string sharedfile, designfile;
     set<string> labels;
     bool allLines;
-  
+
     int processors;
     bool useTiming;
 
     GroupMap designMap;
-  
+
+    int evaluationFoldCount;
+    int trainingFoldCount;
     //int numDecisionTrees;
     //string treeSplitCriterion, optimumFeatureSubsetSelectionCriteria;
     //bool doPruning, discardHighErrorTrees;
     //double pruneAggressiveness, highErrorTreeDiscardThreshold, featureStandardDeviationThreshold;
-    
+
     void processSharedAndDesignData(vector<SharedRAbundVector*> lookup);
     void trainSharedAndDesignData(vector<SharedRAbundVector*> lookup);
+
+    void getParameterValue(int& target, std::string pstring, int defaultvalue) {
+        if (pstring == "not found" or pstring == "") {
+            target = defaultvalue;
+        }
+        else {
+            m->mothurConvert(pstring, target);
+        }
+    }
+
+
 };
 
 #endif /* defined(__Mothur__classifysvmsharedcommand__) */

@@ -18,6 +18,12 @@ vector<string> ClassifySvmSharedCommand::setParameters() {
         CommandParameter pdesign("design", "InputTypes", "", "", "none", "none", "none", "", false, true, true);
         parameters.push_back(pdesign);
 
+        // cross validation parameters
+        CommandParameter evaluationFoldCountParam("evaluationfolds", "Number", "", "3", "", "", "", "", false, false);
+        parameters.push_back(evaluationFoldCountParam);
+        CommandParameter trainingFoldCountParam("trainingfolds", "Number", "", "10", "", "", "", "", false, false);
+        parameters.push_back(trainingFoldCountParam);
+
         // Support Vector Machine parameters
         CommandParameter linearKernel("linear", "Boolean", "", "T", "", "", "", "", false, false);
         parameters.push_back(linearKernel);
@@ -252,6 +258,22 @@ ClassifySvmSharedCommand::ClassifySvmSharedCommand(string option) {
                     allLines = 1;
                 }
             }
+
+            string ef = validParameter.validFile(parameters, "evaluationfolds", false);
+            if ( ef == "not found") {
+                evaluationFoldCount = 3;
+            }
+            else {
+                evaluationFoldCount = m->mothurConvert(ef, evaluationFoldCount);
+            }
+            string tf = validParameter.validFile(parameters, "trainingfolds", false);
+            if ( tf == "not found") {
+                trainingFoldCount = 5;
+            }
+            else {
+                evaluationFoldCount = m->mothurConvert(tf, trainingFoldCount);
+            }
+
         }
 
     }
@@ -279,58 +301,29 @@ void ClassifySvmSharedCommand::readSharedAndDesignFiles(const std::string& share
         readSharedRAbundVectors(lookup, designMap, labeledObservationVector, featureVector);
         lookup = input.getSharedRAbundVectors();
     }
-    /*
-    int i = 0;
-    while ( lookup[0] != NULL ) {
-        for ( int j = 0; j < lookup.size(); j++ ) {
-            i++;
-            vector<individual> data = lookup[j]->getData();
-            Observation* observation = new Observation(data.size(), 0.0);
-            string sharedGroupName = lookup[j]->getGroup();
-            string treatmentName = designMap.getGroup(sharedGroupName);
-            //std::cout << "shared group name: " << sharedGroupName << " treatment name: " << treatmentName << std::endl;
-            labeledObservationVector.push_back(std::make_pair(treatmentName, observation));
-            //std::cout << "i=" << i << " j=" << j << " label : " << lookup[j]->getLabel() << " group: " << lookup[j]->getGroup();
-            for (int k = 0; k < data.size(); k++) {
-                //std::cout << " abundance " << data[k].abundance;
-                observation->at(k) = double(data[k].abundance);
-            }
-            //std::cout << std::endl;
-            delete lookup[j];
-        }
-        //lookup[0] = NULL;
-        lookup = input.getSharedRAbundVectors();
-    }
-    */
 }
 
 void ClassifySvmSharedCommand::readSharedRAbundVectors(vector<SharedRAbundVector*>& lookup, GroupMap& designMap, LabeledObservationVector& labeledObservationVector, FeatureVector& featureVector) {
-    //std::cout << " lookup.size() = " << lookup.size() << std::endl;
-    //int i = 0;
-    //while ( lookup[0] != NULL ) {
-        for ( int j = 0; j < lookup.size(); j++ ) {
-            //i++;
-            vector<individual> data = lookup[j]->getData();
-            Observation* observation = new Observation(data.size(), 0.0);
-            string sharedGroupName = lookup[j]->getGroup();
-            string treatmentName = designMap.getGroup(sharedGroupName);
-            //std::cout << "shared group name: " << sharedGroupName << " treatment name: " << treatmentName << std::endl;
-            //labeledObservationVector.push_back(std::make_pair(treatmentName, observation));
-            labeledObservationVector.push_back(LabeledObservation(j, treatmentName, observation));
-            //std::cout << " j=" << j << " label : " << lookup[j]->getLabel() << " group: " << lookup[j]->getGroup();
-            for (int k = 0; k < data.size(); k++) {
-                //std::cout << " abundance " << data[k].abundance;
-                observation->at(k) = double(data[k].abundance);
-                if ( j == 0) {
-                    featureVector.push_back(Feature(k, m->currentBinLabels[k]));
-                }
+    for ( int j = 0; j < lookup.size(); j++ ) {
+        //i++;
+        vector<individual> data = lookup[j]->getData();
+        Observation* observation = new Observation(data.size(), 0.0);
+        string sharedGroupName = lookup[j]->getGroup();
+        string treatmentName = designMap.getGroup(sharedGroupName);
+        //std::cout << "shared group name: " << sharedGroupName << " treatment name: " << treatmentName << std::endl;
+        //labeledObservationVector.push_back(std::make_pair(treatmentName, observation));
+        labeledObservationVector.push_back(LabeledObservation(j, treatmentName, observation));
+        //std::cout << " j=" << j << " label : " << lookup[j]->getLabel() << " group: " << lookup[j]->getGroup();
+        for (int k = 0; k < data.size(); k++) {
+            //std::cout << " abundance " << data[k].abundance;
+            observation->at(k) = double(data[k].abundance);
+            if ( j == 0) {
+                featureVector.push_back(Feature(k, m->currentBinLabels[k]));
             }
-            //std::cout << std::endl;
-            delete lookup[j];
         }
-        //lookup[0] = NULL;
-        //lookup = input.getSharedRAbundVectors();
-    //}
+        //std::cout << std::endl;
+        delete lookup[j];
+    }
 }
 
 //**********************************************************************************************************************
@@ -474,9 +467,9 @@ void ClassifySvmSharedCommand::processSharedAndDesignData(vector<SharedRAbundVec
         FeatureVector featureVector;
         readSharedRAbundVectors(lookup, designMap, labeledObservationVector, featureVector);
         SvmDataset svmDataset(labeledObservationVector, featureVector);
-        int evaluationFoldCount = 3;
-        int trainFoldCount = 5;
-        OneVsOneMultiClassSvmTrainer trainer(svmDataset, evaluationFoldCount, trainFoldCount, *this);
+        //int evaluationFoldCount = 3;
+        //int trainFoldCount = 5;
+        OneVsOneMultiClassSvmTrainer trainer(svmDataset, evaluationFoldCount, trainingFoldCount, *this);
         //KernelParameterRangeMap kernelParameterRangeMap;
         //getDefaultKernelParameterRangeMap(kernelParameterRangeMap);
         //trainer.train(kernelParameterRangeMap);
@@ -487,14 +480,15 @@ void ClassifySvmSharedCommand::processSharedAndDesignData(vector<SharedRAbundVec
         int n = 0;
         std::cout << "ordered features:" << std::endl;
         for (FeatureList::iterator i = orderedFeatureList.begin(); i != orderedFeatureList.end(); i++) {
-            std::cout << i->getFeatureLabel() << std::endl;
             n++;
+            std::cout << i->getFeatureLabel() << " " << n << std::endl;
             if (n > 20) break;
         }
         std::cout << "done training" << std::endl;
 
         map<string, string> variables;
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
+        // the next line causes a segmentation fault
         variables["[distance]"] = lookup[0]->getLabel();
         string filename = getOutputFileName("summary", variables);
         outputNames.push_back(filename);

@@ -111,16 +111,14 @@ typedef std::vector<Feature> FeatureVector;
 // All data required to train SVMs is found in SvmDataset.
 class SvmDataset {
 public:
-    SvmDataset(const LabeledObservationVector& v, const FeatureVector& f) : labeledObservationVector(v), featureVector(f), featureMask(NULL) {}
+    SvmDataset(const LabeledObservationVector& v, const FeatureVector& f) : labeledObservationVector(v), featureVector(f) {}
     ~SvmDataset() {}
 
     LabeledObservationVector& getLabeledObservationVector() { return labeledObservationVector; }
     FeatureVector& getFeatureVector() { return featureVector; }
-    void setFeatureMask(std::vector<double>* f) { featureMask = f; }
 private:
     LabeledObservationVector labeledObservationVector;
     FeatureVector featureVector;
-    std::vector<double>* featureMask;
 };
 
 
@@ -219,7 +217,11 @@ public:
                 stackOfParameterRanges.push(stackOfEmptyParameterRanges.top());
                 stackOfEmptyParameterRanges.pop();
                 const ParameterRange& parameterRange = parameterRangeMap.find(parameterName)->second;
-                for (ParameterRange::const_iterator i = parameterRange.begin(); i != parameterRange.end(); i++ ) {
+                // it is nice to have the parameters used in order smallest to largest
+                // so that we choose the smallest in ties
+                // but we will not enforce this so users can specify parameters in the order they like
+                // this loop will use parameters in the order they are found in the parameter range
+                for (ParameterRange::const_reverse_iterator i = parameterRange.rbegin(); i != parameterRange.rend(); i++ ) {
                     stackOfParameterRanges.top().second.push(*i);
                 }
                 nextParameterSet[parameterName] = stackOfParameterRanges.top().second.top();
@@ -469,9 +471,7 @@ public:
     }
 
     KernelFunction& getKernelFunctionForKey(std::string kernelFunctionKey) {
-        std::cout << "getKernelFunctionForKey " << kernelFunctionKey << std::endl;
         if ( kernelFunctionTable.count(kernelFunctionKey) == 0 ) {
-            std::cout << "creating new kernel function" << std::endl;
             kernelFunctionTable.insert(
                 std::make_pair(
                     kernelFunctionKey,
@@ -479,7 +479,6 @@ public:
                 )
             );
         }
-        std::cout << "returning from getKernelFunctionForKey" << std::endl;
         return *kernelFunctionTable[kernelFunctionKey];
     }
 
@@ -579,10 +578,10 @@ private:
 };
 
 
-class SmoTrainerException : public std::exception {
+class SvmTrainingInterruptedException : public std::exception {
 public:
-    SmoTrainerException(const std::string& m) : message(m) {}
-    ~SmoTrainerException() throw() {};
+    SvmTrainingInterruptedException(const std::string& m) : message(m) {}
+    ~SvmTrainingInterruptedException() throw() {}
     virtual const char* what() const throw() {
         return message.c_str();
     }
@@ -591,12 +590,32 @@ private:
     std::string message;
 };
 
+class SmoTrainerException : public std::exception {
+public:
+    SmoTrainerException(const std::string& m) : message(m) {}
+    ~SmoTrainerException() throw() {}
+    virtual const char* what() const throw() {
+        return message.c_str();
+    }
+
+private:
+    std::string message;
+};
+
+class ExternalSvmTrainingInterruption {
+public:
+    ExternalSvmTrainingInterruption() {}
+    virtual ~ExternalSvmTrainingInterruption() throw() {}
+    virtual bool interruptTraining() { return false; }
+};
+
+
 // SmoTrainer trains a support vector machine using Sequential
 // Minimal Optimization as described in the article
 // "Support Vector Machine Solvers" by Bottou and Lin.
 class SmoTrainer {
 public:
-    SmoTrainer() : C(1.0) {}
+    SmoTrainer(ExternalSvmTrainingInterruption& e, bool v = false) : externalSvmTrainingInterruption(e), verbose(v), C(1.0) {}
 
     ~SmoTrainer() {}
 
@@ -618,6 +637,10 @@ public:
     static const ParameterRange defaultCRange;
 
 private:
+    ExternalSvmTrainingInterruption& externalSvmTrainingInterruption;
+
+    const bool verbose;
+
     double C;
 };
 
@@ -716,17 +739,11 @@ private:
 };
 
 
-class ExternalSvmTrainingInterruption {
-public:
-    bool interruptTraining() { return false; }
-};
-
 // OneVsOneMultiClassSvmTrainer trains a support vector machine for each
 // pair of labels in a set of data.
 class OneVsOneMultiClassSvmTrainer {
 public:
-    //OneVsOneMultiClassSvmTrainer(SvmDataset&, int, int);
-    OneVsOneMultiClassSvmTrainer(SvmDataset&, int, int, ExternalSvmTrainingInterruption&);
+    OneVsOneMultiClassSvmTrainer(SvmDataset&, int, int, ExternalSvmTrainingInterruption&,bool=false);
     ~OneVsOneMultiClassSvmTrainer() {}
 
     MultiClassSVM* train(const KernelParameterRangeMap&);
@@ -742,6 +759,8 @@ public:
 
 private:
     ExternalSvmTrainingInterruption& externalSvmTrainingInterruption;
+
+    bool verbose;
 
     // can we make this const?
     SvmDataset& svmDataset;

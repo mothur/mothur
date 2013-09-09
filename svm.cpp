@@ -16,9 +16,11 @@
 
 #define RANGE(X) X, X + sizeof(X)/sizeof(double)
 
+// parameters will be tested in the order they are specified
+
 const std::string LinearKernelFunction::MapKey                      = "LinearKernel";
 const std::string LinearKernelFunction::MapKey_Constant             = "LinearKernel_Constant";
-const double defaultLinearConstantRangeArray[]                      = {-10.0, -1.0, 0.0, 1.0, 10.0};
+const double defaultLinearConstantRangeArray[]                      = {0.0, -1.0, 1.0, -10.0, 10.0};
 const ParameterRange LinearKernelFunction::defaultConstantRange     = ParameterRange(RANGE(defaultLinearConstantRangeArray));
 
 const std::string RbfKernelFunction::MapKey                         = "RbfKernel";
@@ -30,7 +32,7 @@ const std::string PolynomialKernelFunction::MapKey                  = "Polynomia
 const std::string PolynomialKernelFunction::MapKey_Constant         = "PolynomialKernel_Constant";
 const std::string PolynomialKernelFunction::MapKey_Degree           = "PolynomialKernel_Degree";
 
-const double defaultPolynomialConstantRangeArray[]                  = {-3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0};
+const double defaultPolynomialConstantRangeArray[]                  = {0.0, -1.0, 1.0, -2.0, 2.0, -3.0, 3.0};
 const ParameterRange PolynomialKernelFunction::defaultConstantRange = ParameterRange(RANGE(defaultPolynomialConstantRangeArray));
 const double defaultPolynomialDegreeRangeArray[]                    = {2.0, 3.0, 4.0};
 const ParameterRange PolynomialKernelFunction::defaultDegreeRange   = ParameterRange(RANGE(defaultPolynomialDegreeRangeArray));
@@ -165,7 +167,7 @@ double MultiClassSVM::score(const LabeledObservationVector& multiClassLabeledObs
             }
         }
         catch ( MultiClassSvmClassificationTie& m ) {
-            std::cout << "classification tie for observation with label " << i->first << std::endl;
+            std::cout << "classification tie for observation " << i->datasetIndex << " with label " << i->first << std::endl;
         }
     }
     return s / double(multiClassLabeledObservationVector.size());
@@ -178,6 +180,14 @@ class MaxIterationsExceeded : public std::exception {
 } maxIterationsExceeded;
 
 
+//class TrainingInterruptedException : public std::exception {
+//    virtual const char* what() const throw() {
+//        return "SMO training interrupted";
+//    }
+//} smoTrainingInterrupted;
+
+SvmTrainingInterruptedException smoTrainingInterruptedException("SMO training interrupted by user");
+
 //  The train method implements Sequential Minimal Optimization as described in
 //  "Support Vector Machine Solvers" by Bottou and Lin.
 //
@@ -187,7 +197,7 @@ class MaxIterationsExceeded : public std::exception {
 SVM* SmoTrainer::train(KernelFunctionCache& K, const LabeledObservationVector& twoClassLabeledObservationVector) {
     const int observationCount = twoClassLabeledObservationVector.size();
     const int featureCount = twoClassLabeledObservationVector[0].second->size();
-    bool verbose = false;
+
     if (verbose) std::cout << "observation count : " << observationCount << std::endl;
     if (verbose) std::cout << "feature count     : " << featureCount << std::endl;
     // dual coefficients
@@ -220,6 +230,12 @@ SVM* SmoTrainer::train(KernelFunctionCache& K, const LabeledObservationVector& t
     std::vector<double> yg(observationCount);
     double lambda = std::numeric_limits<double>::max();
     while ( true ) {
+        if ( externalSvmTrainingInterruption.interruptTraining() ) {
+            // this should be a specialized exception
+            std::cout << "***************************** interrupting training **********************************" << std::endl;
+            throw smoTrainingInterruptedException;
+        }
+
         m++;
         int i = 0; // 0
         int j = 0; // 0
@@ -272,7 +288,7 @@ SVM* SmoTrainer::train(KernelFunctionCache& K, const LabeledObservationVector& t
             // what happens if we just go with what we've got instead of throwing an exception?
             // things work pretty well for the most part
             // might be better to look at lambda???
-            std::cout << "iteration limit reached with lambda = " << lambda << std::endl;
+            if (verbose) std::cout << "iteration limit reached with lambda = " << lambda << std::endl;
             break;
         }
 
@@ -333,197 +349,7 @@ SVM* SmoTrainer::train(KernelFunctionCache& K, const LabeledObservationVector& t
     // is deleted???
     return new SVM(y, a, twoClassLabeledObservationVector, b, discriminantToLabel);
 }
-/*
-SVM* SmoTrainer::train(KernelFunction* kernelFunction, const LabeledObservationVector& twoClassLabeledObservationVector) {
-    const int observationCount = twoClassLabeledObservationVector.size();
-    const int featureCount = twoClassLabeledObservationVector[0].second->size();
-    bool verbose = false;
-    if (verbose) std::cout << "observation count : " << observationCount << std::endl;
-    if (verbose) std::cout << "feature count     : " << featureCount << std::endl;
-    // dual coefficients
-    std::vector<double> a(observationCount, 0.0);
-    // gradient
-    std::vector<double> g(observationCount, 1.0);
-    // convert the labels to -1.0,+1.0
-    std::vector<double> y(observationCount);
-    if (verbose) std::cout << "assign numeric labels" << std::endl;
-    NumericClassToLabel discriminantToLabel;
-    assignNumericLabels(y, twoClassLabeledObservationVector, discriminantToLabel);
-    if (verbose) std::cout << "assign A and B" << std::endl;
-    std::vector<double> A(observationCount);
-    std::vector<double> B(observationCount);
-    for ( int n = 0; n < observationCount; n++ ) {
-        if ( y[n] == +1.0) {
-            A[n] = 0.0;
-            B[n] = C;
-        }
-        else {
-            A[n] = -C;
-            B[n] = 0;
-        }
-        if (verbose) std::cout << n << " " << A[n] << " " << B[n] << std::endl;
-    }
-    if (verbose) std::cout << "assign K" << std::endl;
-    // this is inefficient in general
-    std::vector<std::vector<double> > K(observationCount, std::vector<double>(observationCount, std::numeric_limits<double>::quiet_NaN()));
-    /*
-    for ( int u = 0; u < observationCount; u++ ) {
-        for ( int v = 0; v < observationCount; v++ ) {
-            K[u][v] = kernelFunction->similarity(
-                *twoClassLabeledObservationVector[u].second,
-                *twoClassLabeledObservationVector[v].second
-            );
-            if (verbose) std::cout << " " << K[u][v];
-        }
-        if (verbose) std::cout << std::endl;
-    }
-    //
-    int m = 0;
-    std::vector<double> u(3);
-    std::vector<double> ya(observationCount);
-    std::vector<double> yg(observationCount);
-    double lambda = std::numeric_limits<double>::max();
-    while ( true ) {
-        m++;
-        int i = 0; // 0
-        int j = 0; // 0
-        double yg_max = std::numeric_limits<double>::min();
-        double yg_min = std::numeric_limits<double>::max();
-        if (verbose) std::cout << "m = " << m << std::endl;
-        for ( int k = 0; k < observationCount; k++ ) {
-            ya[k] = y[k] * a[k];
-            yg[k] = y[k] * g[k];
-        }
-        if (verbose) {
-            std::cout << "yg =";
-            for ( int k = 0; k < observationCount; k++ ) {
-                //std::cout << A[k] << " " << B[k] << " " << y[k] << " " << a[k] << " " << g[k] << " " << ya[k] << " " << yg[k] << std::endl;
-                std::cout << " " << yg[k];
-            }
-            std::cout << std::endl;
-        }
 
-        for ( int k = 0; k < observationCount; k++ ) {
-            if ( ya[k] < B[k] && yg[k] > yg_max ) {
-                yg_max = yg[k];
-                i = k;
-            }
-            if ( A[k] < ya[k] && yg[k] < yg_min ) {
-                yg_min = yg[k];
-                j = k;
-            }
-            //std::cout << "n = " << n << std::endl;
-            //std::cout << ya[k] << " " << yg[k] << std::endl;
-            //std::cout << "j = " << j << " yg[j] = " << yg[j] << std::endl;
-        }
-        // maximum violating pair is i,j
-        if (verbose) {
-            std::cout << "maximal violating pair: " << i << " " << j << std::endl;
-            std::cout << "  i = " << i << " features: ";
-            for ( int feature = 0; feature < featureCount; feature++ ) {
-                std::cout << twoClassLabeledObservationVector[i].second->at(feature) << " ";
-            };
-            std::cout << std::endl;
-            std::cout << "  j = " << j << " features: ";
-            for ( int feature = 0; feature < featureCount; feature++ ) {
-                std::cout << twoClassLabeledObservationVector[j].second->at(feature) << " ";
-            };
-            std::cout << std::endl;
-        }
-
-        // parameterize this
-        if ( m > 1000 ) { //1000
-            // what happens if we just go with what we've got instead of throwing an exception?
-            // things work pretty well for the most part
-            // might be better to look at lambda???
-            std::cout << "iteration limit reached with lambda = " << lambda << std::endl;
-            break;
-        }
-
-        // using lambda to break is a good performance enhancement
-        if ( yg[i] <= yg[j] or lambda < 0.0001) {
-            break;
-        }
-        u[0] = B[i] - ya[i];
-        u[1] = ya[j] - A[j];
-        // calculate similarities for i and j if we have not done so yet
-        //std::cout << "K[" << i << "][0] = " << K[i][0] << std::endl;
-        if (std::isnan(K[i][0])) {
-            //std::cout << "calculating row " << i << " of K" << std::endl;
-            //for ( int u = 0; u < observationCount; u++ ) {
-                for ( int v = 0; v < observationCount; v++ ) {
-                    K[i][v] = kernelFunction->similarity(
-                        *twoClassLabeledObservationVector[i].second,
-                        *twoClassLabeledObservationVector[v].second);
-                    //K[v][i] = K[i][v];
-                    //if (verbose) std::cout << " " << K[u][v];
-                }
-                //if (verbose) std::cout << std::endl;
-            //}
-            //std::cout << "    done" << std::endl;
-        }
-        //std::cout << "K[" << j << "][0] = " << K[j][0] << std::endl;
-        if (std::isnan(K[j][0])) {
-            //std::cout << "calculating row " << j << " of K" << std::endl;
-            //for ( int u = 0; u < observationCount; u++ ) {
-                for ( int v = 0; v < observationCount; v++ ) {
-                    K[j][v] = kernelFunction->similarity(
-                        *twoClassLabeledObservationVector[j].second,
-                        *twoClassLabeledObservationVector[v].second);
-                    //K[v][j] = K[j][v];
-                    //if (verbose) std::cout << " " << K[u][v];
-                }
-                //if (verbose) std::cout << std::endl;
-            //}
-            //std::cout << "    done" << std::endl;
-        }
-
-        u[2] = (yg[i] - yg[j]) / (K[i][i]+K[j][j]-2.0*K[i][j]);
-        if (verbose) std::cout << "directions: (" << u[0] << "," << u[1] << "," << u[2] << ")" << std::endl;
-        lambda = *std::min_element(u.begin(), u.end());
-        if (verbose) std::cout << "lambda: " << lambda << std::endl;
-        for ( int k = 0; k < observationCount; k++ ) {
-            g[k] += (-lambda * y[k] * K[i][k] + lambda * y[k] * K[j][k]);
-        }
-        if (verbose) {
-            std::cout << "g =";
-            for ( int k = 0; k < observationCount; k++ ) {
-                std::cout << " " << g[k];
-            }
-            std::cout << std::endl;
-        }
-        a[i] += y[i] * lambda;
-        a[j] -= y[j] * lambda;
-    }
-
-
-    // at this point the optimal a's have been found
-    // now use them to find w and b
-    if (verbose) std::cout << "find w" << std::endl;
-    std::vector<double> w(twoClassLabeledObservationVector[0].second->size(), 0.0);
-    double b = 0.0;
-    for ( int i = 0; i < y.size(); i++ ) {
-        if (verbose) std::cout << "alpha[" << i << "] = " << a[i] << std::endl;
-        for ( int j = 0; j < w.size(); j++ ) {
-            w[j] += a[i] * y[i] * twoClassLabeledObservationVector[i].second->at(j);
-        }
-        if ( A[i] < a[i] && a[i] < B[i] ) {
-            b = yg[i];
-            if (verbose) std::cout << "b = " << b << std::endl;
-        }
-    }
-
-    if (verbose) {
-        for ( int i = 0; i < w.size(); i++ ) {
-            std::cout << "w[" << i << "] = " << w[i] << std::endl;
-        }
-    }
-
-    // be careful about passing twoClassLabeledObservationVector - what if this vector
-    // is deleted???
-    return new SVM(y, a, twoClassLabeledObservationVector, b, discriminantToLabel);
-}
-*/
 typedef std::map<Label, double> LabelToNumericClassLabel;
 
 // For SVM training we need to assign numeric class labels of -1.0 and +1.0.
@@ -602,7 +428,7 @@ void getDefaultKernelParameterRangeMap(KernelParameterRangeMap& kernelParameterR
 // to produce a single instance of MultiClassSVM.  That's why observations and labels go in to
 // the constructor.
 
-OneVsOneMultiClassSvmTrainer::OneVsOneMultiClassSvmTrainer(SvmDataset& d, int e, int t, ExternalSvmTrainingInterruption& es) : svmDataset(d), evaluationFoldCount(e), trainFoldCount(t), externalSvmTrainingInterruption(es) {
+OneVsOneMultiClassSvmTrainer::OneVsOneMultiClassSvmTrainer(SvmDataset& d, int e, int t, ExternalSvmTrainingInterruption& es, bool v) : svmDataset(d), evaluationFoldCount(e), trainFoldCount(t), externalSvmTrainingInterruption(es), verbose(v) {
     buildLabelSet(labelSet, svmDataset.getLabeledObservationVector());
     buildLabelToLabeledObservationVector(labelToLabeledObservationVector, svmDataset.getLabeledObservationVector());
     buildLabelPairSet(labelPairSet, svmDataset.getLabeledObservationVector());
@@ -647,7 +473,6 @@ void OneVsOneMultiClassSvmTrainer::buildLabelPairSet(LabelPairSet& labelPairSet,
 
 void OneVsOneMultiClassSvmTrainer::standardizeObservations(const LabeledObservationVector& observations) {
     bool vebose = false;
-    std::cout << "entering standardizeObservations" << std::endl;
     // online method for mean and variance
     for ( Observation::size_type feature = 0; feature < observations[0].second->size(); feature++ ) {
         double n = 0.0;
@@ -671,7 +496,6 @@ void OneVsOneMultiClassSvmTrainer::standardizeObservations(const LabeledObservat
             observations[observation].second->at(feature) = (observations[observation].second->at(feature) - mean ) / standardDeviation;
         }
     }
-    std::cout << "exiting standardizeObservations" << std::endl;
 }
 
 // this method has too many arguments
@@ -710,7 +534,6 @@ private:
 };
 
 MultiClassSVM* OneVsOneMultiClassSvmTrainer::train(const KernelParameterRangeMap& kernelParameterRangeMap) {
-    bool verbose = false;
     double bestMultiClassSvmScore = 0.0;
     MultiClassSVM* bestMc;
 
@@ -724,7 +547,7 @@ MultiClassSVM* OneVsOneMultiClassSvmTrainer::train(const KernelParameterRangeMap
         const LabeledObservationVector& evaluationObservations  = kFoldDevEvalDivider.getTestingData();
 
         std::vector<SVM*> twoClassSvmList;
-        SmoTrainer smoTrainer;
+        SmoTrainer smoTrainer(externalSvmTrainingInterruption, verbose);
         LabelPairSet::iterator labelPair;
         for (labelPair = labelPairSet.begin(); labelPair != labelPairSet.end(); labelPair++) {
             // generate training and testing data for this label pair
@@ -750,7 +573,6 @@ MultiClassSVM* OneVsOneMultiClassSvmTrainer::train(const KernelParameterRangeMap
             // loop on kernel functions and kernel function parameters
             for ( KernelParameterRangeMap::const_iterator kmap = kernelParameterRangeMap.begin(); kmap != kernelParameterRangeMap.end(); kmap++ ) {
                 std::string kernelFunctionKey = kmap->first;
-                std::cout << "training with kernel " << kmap->first << std::endl;
                 //KernelFunction* kernelFunction = KernelFactory::getKernelFunctionForKey(kmap->first, svmDataset.getLabeledObservationVector());
                 KernelFunction& kernelFunction = kernelFunctionFactory.getKernelFunctionForKey(kmap->first);
                 ParameterSetBuilder p(kmap->second);
@@ -772,13 +594,13 @@ MultiClassSVM* OneVsOneMultiClassSvmTrainer::train(const KernelParameterRangeMap
                 }
             }
 
-            std::cout << "done with cross validation on all parameter values" << std::endl;
+            //std::cout << "done with cross validation on all parameter values" << std::endl;
             if ( bestMeanScoreOnKFolds == 0.0 ) {
                 std::cout << "failed to train SVM on labels " << label0 << " and " << label1 << std::endl;
                 throw std::exception();
             }
             else {
-                std::cout << "trained SVM on labels " << label0 << " and " << label1 << std::endl;
+                //std::cout << "trained SVM on labels " << label0 << " and " << label1 << std::endl;
                 std::cout << "    best mean score over " << trainFoldCount << " folds is " << bestMeanScoreOnKFolds << std::endl;
                 std::cout << "    best parameters are " << std::endl;
                 for ( ParameterMap::const_iterator p = bestParameterMap.begin(); p != bestParameterMap.end(); p++ ) {
@@ -807,14 +629,12 @@ MultiClassSVM* OneVsOneMultiClassSvmTrainer::train(const KernelParameterRangeMap
                 smoTrainer.setParameters(bestParameterMap);
                 KernelFunctionCache kernelFunctionCache(kernelFunction, svmDataset.getLabeledObservationVector());
                 SVM* svm = smoTrainer.train(kernelFunctionCache, twoClassDevelopmentObservations);
-                std::cout << "done training final SVM" << std::endl;
+                //std::cout << "done training final SVM" << std::endl;
                 twoClassSvmList.push_back(svm);
             }
         }
 
-        std::cout << "building MultiClassSvm" << std::endl;
         MultiClassSVM* mc = new MultiClassSVM(twoClassSvmList);
-        std::cout << "done building MultiClassSvm" << std::endl;
         double score = mc->score(evaluationObservations);
         std::cout << "multiclass SVM score: " << score << std::endl;
 
@@ -831,14 +651,13 @@ MultiClassSVM* OneVsOneMultiClassSvmTrainer::train(const KernelParameterRangeMap
     return bestMc;
 }
 
+SvmTrainingInterruptedException multiClassSvmTrainingInterruptedException("one-vs-one multiclass SVM training interrupted by user");
+
 double OneVsOneMultiClassSvmTrainer::trainOnKFolds(SmoTrainer& smoTrainer, KernelFunctionCache& kernelFunction, KFoldLabeledObservationsDivider& kFoldLabeledObservationsDivider) {
     double meanScoreOverKFolds = 0.0;
     double online_mean_n = 0.0;
     double online_mean_score = 0.0;
     meanScoreOverKFolds = -1.0;  // means we failed to train a SVM
-
-    // make this a member variable
-    bool verbose = false;
 
     for ( kFoldLabeledObservationsDivider.start(); !kFoldLabeledObservationsDivider.end(); kFoldLabeledObservationsDivider.next() ) {
         const LabeledObservationVector& kthTwoClassTrainingFold = kFoldLabeledObservationsDivider.getTrainingData();
@@ -848,11 +667,13 @@ double OneVsOneMultiClassSvmTrainer::trainOnKFolds(SmoTrainer& smoTrainer, Kerne
             std::cout << "fold " << kFoldLabeledObservationsDivider.getFoldNumber() << " testing data has " << kthTwoClassTestingFold.size() << " labeled observations" << std::endl;
         }
         if ( externalSvmTrainingInterruption.interruptTraining() ) {
-            // this should be a specialized exception
-            throw new std::exception;
+            std::cout << "training interrupted by user" << std::endl;
+            throw multiClassSvmTrainingInterruptedException;
         }
         else {
             try {
+                if (verbose) std::cout << "begin training" << std::endl;
+
                 SVM* evaluationSvm = smoTrainer.train(kernelFunction, kthTwoClassTrainingFold);
                 double score = evaluationSvm->score(kthTwoClassTestingFold);
                 if (verbose) std::cout << "score on fold " << kFoldLabeledObservationsDivider.getFoldNumber() << " of test data is " << score << std::endl;
@@ -896,7 +717,7 @@ private:
     double rankingCriterion;
 };
 
-bool lessRankingCriterion(const UnrankedFeature& a, const UnrankedFeature& b) {
+bool lessThanRankingCriterion(const UnrankedFeature& a, const UnrankedFeature& b) {
     return a.getRankingCriterion() < b.getRankingCriterion();
 }
 
@@ -908,12 +729,6 @@ typedef std::list<UnrankedFeature> UnrankedFeatureList;
 // It would be useful to remove more than one feature at a time
 // Might make sense to turn last two arguments into one
 FeatureList SvmRfe::getOrderedFeatureList(SvmDataset& svmDataset, OneVsOneMultiClassSvmTrainer& t, const ParameterRange& linearKernelConstantRange, const ParameterRange& smoTrainerParameterRange) {
-    // the featureMask indicates whether each feature has or has not been eliminated
-    // if the featureMask entry corresponding to a feature is 1.0 the feature has not been eliminated yet
-    // if the featureMask entry corresponding to a feature is 0.0 the feature has been eliminated
-    std::vector<double> featureMask(svmDataset.getFeatureVector().size(), 1.0);
-
-    svmDataset.setFeatureMask(&featureMask);
 
     KernelParameterRangeMap rfeKernelParameterRangeMap;
     ParameterRangeMap linearParameterRangeMap;
@@ -932,9 +747,9 @@ FeatureList SvmRfe::getOrderedFeatureList(SvmDataset& svmDataset, OneVsOneMultiC
     FeatureList rankedFeatureList;
     // loop until all but one feature have been eliminated
     // no need to eliminate the last feature, after all
-    int iterationCount = 0.0;
+    int iterationCount = 0;
     while ( rankedFeatureList.size() < (svmDataset.getFeatureVector().size()-1) ) {
-        iterationCount = iterationCount + 1.0;
+        iterationCount++;
 
         MultiClassSVM* s = t.train(rfeKernelParameterRangeMap);
 
@@ -961,11 +776,14 @@ FeatureList SvmRfe::getOrderedFeatureList(SvmDataset& svmDataset, OneVsOneMultiC
         delete s;
 
         // sort the unranked features by ranking criterion
-        unrankedFeatureList.sort(lessRankingCriterion);
+        unrankedFeatureList.sort(lessThanRankingCriterion);
 
-        // eliminate the bottom 1/(n+1) features
-        int eliminateFeatureCount = ceil(unrankedFeatureList.size() / (iterationCount+1.0));
-        std::cout << "eliminating " << eliminateFeatureCount << " features of " << unrankedFeatureList.size() << " total features"<< std::endl;
+        // eliminate the bottom 1/(n+1) features - this is very slow but good results
+        ////int eliminateFeatureCount = ceil(unrankedFeatureList.size() / (iterationCount+1.0));
+        // eliminate the bottom 1/3 features - fast but results slightly different from above
+        // how about 1/4?
+        int eliminateFeatureCount = ceil(unrankedFeatureList.size() / 4.0);
+        std::cout << "SVM-RFE round " << iterationCount << ": eliminating " << eliminateFeatureCount << " feature(s) of " << unrankedFeatureList.size() << " total features"<< std::endl;
         for ( int i = 0; i < eliminateFeatureCount; i++ ) {
             // remove the lowest ranked feature from the list of unranked features
             UnrankedFeature unrankedFeature = unrankedFeatureList.front();
