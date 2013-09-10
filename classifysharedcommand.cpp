@@ -377,7 +377,7 @@ void ClassifySharedCommand::processSharedAndDesignData(vector<SharedRAbundVector
         randomForest.calcForrestErrorRate();
         
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + ".RF.";
         variables["[distance]"] = lookup[0]->getLabel();
         string filename = getOutputFileName("summary", variables);
         outputNames.push_back(filename); outputTypes["summary"].push_back(filename);
