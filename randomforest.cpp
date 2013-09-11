@@ -70,22 +70,31 @@ int RandomForest::printConfusionMatrix(map<int, string> intToTreatmentMap) {
             vector<int>::iterator maxPredictedOutComeIterator = max_element(predictedOutComes.begin(), predictedOutComes.end());
             int majorityVotedOutcome = (int)(maxPredictedOutComeIterator - predictedOutComes.begin());
             int realOutcome = dataSet[indexOfSample][numFeatures];                       
-            cm[realOutcome][majorityVotedOutcome] = cm[realOutcome][majorityVotedOutcome] + 1;            
+            cm[realOutcome][majorityVotedOutcome] = cm[realOutcome][majorityVotedOutcome] + 1;
+        }
+        
+        vector<int> fw;
+        for (int w = 0; w <numGroups; w++) {
+            fw.push_back(intToTreatmentMap[w].length());
         }
         
         m->mothurOut("confusion matrix:\n\t\t");
-        for (int i = 0; i < numGroups; i++) {
-            m->mothurOut(intToTreatmentMap[i] + "\t");
+        for (int k = 0; k < numGroups; k++) {
+            //m->mothurOut(intToTreatmentMap[k] + "\t");
+            cout << setw(fw[k]) << intToTreatmentMap[k] << "\t";
         }
         for (int i = 0; i < numGroups; i++) {
+            cout << "\n" << setw(fw[i]) << intToTreatmentMap[i] << "\t";
             //m->mothurOut("\n" + intToTreatmentMap[i] + "\t");
             if (m->control_pressed) { return 0; }
             for (int j = 0; j < numGroups; j++) {
-                m->mothurOut(cm[i][j] + "\t");            
+                //m->mothurOut(toString(cm[i][j]) + "\t");
+                cout << setw(fw[i]) << cm[i][j] << "\t";
             }    
         }
-        m->mothurOut("\n");
-    
+        //m->mothurOut("\n");
+        cout << "\n";
+
         return 0;
     }
     
