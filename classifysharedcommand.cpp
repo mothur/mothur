@@ -375,6 +375,7 @@ void ClassifySharedCommand::processSharedAndDesignData(vector<SharedRAbundVector
         
         randomForest.populateDecisionTrees();
         randomForest.calcForrestErrorRate();
+        //randomForest.printConfusionMatrix(intToTreatmentMap);
         
         map<string, string> variables; 
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + ".RF.";
