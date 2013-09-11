@@ -105,6 +105,42 @@ int RandomForest::printConfusionMatrix(map<int, string> intToTreatmentMap) {
 }
 
 /***********************************************************************/
+
+int RandomForest::getMissclassifications(string filename, map<int, string> intToTreatmentMap, vector<string> names) {
+    try {
+        ofstream out;
+        m->openOutputFile(filename, out);
+        out <<"Sample\tRF classification\tActual classification\n";
+        for (map<int, vector<int> >::iterator it = globalOutOfBagEstimates.begin(); it != globalOutOfBagEstimates.end(); it++) {
+            
+            if (m->control_pressed) { return 0; }
+            
+            int indexOfSample = it->first;
+            vector<int> predictedOutComes = it->second;
+            vector<int>::iterator maxPredictedOutComeIterator = max_element(predictedOutComes.begin(), predictedOutComes.end());
+            int majorityVotedOutcome = (int)(maxPredictedOutComeIterator - predictedOutComes.begin());
+            int realOutcome = dataSet[indexOfSample][numFeatures];
+                                   
+            if (majorityVotedOutcome != realOutcome) {             
+                //write to file
+                //dataSet[indexOfSample][];
+                
+                out << names[indexOfSample] << "\t" << intToTreatmentMap[majorityVotedOutcome] << "\t" << intToTreatmentMap[realOutcome] << endl;
+                //out << m->currentBinLabels[(int)globalVariableRanks[i].first] << '\t' << globalVariableImportanceList[globalVariableRanks[i].first] << endl;
+                                
+            }
+        }
+        
+        out.close();    
+        return 0;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "RandomForest", "calcForrestErrorRate");
+		exit(1);
+	} 
+}
+
+/***********************************************************************/
 int RandomForest::calcForrestVariableImportance(string filename) {
     try {
     
