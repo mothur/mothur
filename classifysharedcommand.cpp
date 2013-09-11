@@ -359,8 +359,11 @@ void ClassifySharedCommand::processSharedAndDesignData(vector<SharedRAbundVector
         
         vector< vector<int> > dataSet(numRows, vector<int>(numColumns, 0));
         
+        vector<string> names;
+        
         for (int i = 0; i < lookup.size(); i++) {
             string sharedGroupName = lookup[i]->getGroup();
+            names.push_back(sharedGroupName);
             string treatmentName = designMap.getGroup(sharedGroupName);
             
             int j = 0;
@@ -382,8 +385,16 @@ void ClassifySharedCommand::processSharedAndDesignData(vector<SharedRAbundVector
         variables["[distance]"] = lookup[0]->getLabel();
         string filename = getOutputFileName("summary", variables);
         outputNames.push_back(filename); outputTypes["summary"].push_back(filename);
-        
         randomForest.calcForrestVariableImportance(filename);
+        
+        //
+        map<string, string> variable; 
+        variable["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + "misclassifications.";
+        variable["[distance]"] = lookup[0]->getLabel();
+        string mc_filename = getOutputFileName("summary", variable);
+        outputNames.push_back(mc_filename); outputTypes["summary"].push_back(mc_filename);
+        randomForest.getMissclassifications(mc_filename, intToTreatmentMap, names);
+        //
         
         m->mothurOutEndLine();
     }
