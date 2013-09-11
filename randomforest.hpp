@@ -43,6 +43,7 @@ public:
     int calcForrestVariableImportance(string);
     int populateDecisionTrees();
     int updateGlobalOutOfBagEstimates(DecisionTree* decisionTree);
+    int printConfusionMatrix(map<int, string> intToTreatmentMap);
     
 private:
     MothurOut* m;
