@@ -122,11 +122,7 @@ int RandomForest::getMissclassifications(string filename, map<int, string> intTo
             int realOutcome = dataSet[indexOfSample][numFeatures];
                                    
             if (majorityVotedOutcome != realOutcome) {             
-                //write to file
-                //dataSet[indexOfSample][];
-                
                 out << names[indexOfSample] << "\t" << intToTreatmentMap[majorityVotedOutcome] << "\t" << intToTreatmentMap[realOutcome] << endl;
-                //out << m->currentBinLabels[(int)globalVariableRanks[i].first] << '\t' << globalVariableImportanceList[globalVariableRanks[i].first] << endl;
                                 
             }
         }
@@ -135,7 +131,7 @@ int RandomForest::getMissclassifications(string filename, map<int, string> intTo
         return 0;
     }
 	catch(exception& e) {
-		m->errorOut(e, "RandomForest", "calcForrestErrorRate");
+		m->errorOut(e, "RandomForest", "getMissclassifications");
 		exit(1);
 	} 
 }
