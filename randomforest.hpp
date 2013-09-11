@@ -44,6 +44,7 @@ public:
     int populateDecisionTrees();
     int updateGlobalOutOfBagEstimates(DecisionTree* decisionTree);
     int printConfusionMatrix(map<int, string> intToTreatmentMap);
+    int getMissclassifications(string, map<int, string> intToTreatmentMap, vector<string> names);
     
 private:
     MothurOut* m;
