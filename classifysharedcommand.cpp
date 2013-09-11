@@ -375,10 +375,10 @@ void ClassifySharedCommand::processSharedAndDesignData(vector<SharedRAbundVector
         
         randomForest.populateDecisionTrees();
         randomForest.calcForrestErrorRate();
-        //randomForest.printConfusionMatrix(intToTreatmentMap);
+        randomForest.printConfusionMatrix(intToTreatmentMap);
         
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + ".RF.";
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + "RF.";
         variables["[distance]"] = lookup[0]->getLabel();
         string filename = getOutputFileName("summary", variables);
         outputNames.push_back(filename); outputTypes["summary"].push_back(filename);
