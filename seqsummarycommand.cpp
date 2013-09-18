@@ -376,7 +376,7 @@ int SeqSummaryCommand::execute(){
                 
         double meanstartPosition, meanendPosition, meanseqLength, meanambigBases, meanlongHomoPolymer;
                 
-		meanstartPosition /= (double) size; meanendPosition /= (double) size; meanlongHomoPolymer /= (double) size; meanseqLength /= (double) size; meanambigBases /= (double) size;
+		meanstartPosition = meanStartPosition / (double) size; meanendPosition = meanEndPosition /(double) size; meanlongHomoPolymer = meanLongHomoPolymer / (double) size; meanseqLength = meanSeqLength / (double) size; meanambigBases = meanAmbigBases /(double) size;
 				
 		int ptile0_25	= int(size * 0.025);
 		int ptile25		= int(size * 0.250);

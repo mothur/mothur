@@ -32,9 +32,12 @@ struct fastqRead {
 struct pairFastqRead {
 	fastqRead forward;
     fastqRead reverse;
+    fastqRead findex;
+    fastqRead rindex;
 	
 	pairFastqRead() {};
 	pairFastqRead(fastqRead f, fastqRead r) : forward(f), reverse(r){};
+    pairFastqRead(fastqRead f, fastqRead r, fastqRead fi, fastqRead ri) : forward(f), reverse(r), findex(fi), rindex(ri) {};
 	~pairFastqRead() {};
 };
 /**************************************************************************************************/
@@ -59,8 +62,8 @@ public:
     void help() { m->mothurOut(getHelpString()); }	
     
 private:
-    bool abort, allFiles, trimOverlap, createFileGroup, createOligosGroup, makeCount;
-    string outputDir, ffastqfile, rfastqfile, align, oligosfile, rfastafile, ffastafile, rqualfile, fqualfile, file, format;
+    bool abort, allFiles, trimOverlap, createFileGroup, createOligosGroup, makeCount, noneOk;
+    string outputDir, ffastqfile, rfastqfile, align, oligosfile, rfastafile, ffastafile, rqualfile, fqualfile, findexfile, rindexfile, file, format;
 	float match, misMatch, gapOpen, gapExtend;
 	int processors, longestBase, insert, tdiffs, bdiffs, pdiffs, ldiffs, sdiffs, deltaq;
     vector<string> outputNames;
@@ -81,14 +84,15 @@ private:
     fastqRead readFastq(ifstream&, bool&);
     vector< vector< vector<string> > > preProcessData(unsigned long int&);
     vector< vector<string> > readFileNames(string);
-    vector< vector<string> > readFastqFiles(unsigned long int&, string, string);
+    vector< vector<string> > readFastqFiles(unsigned long int&, string, string, string, string);
     vector< vector<string> > readFastaFiles(unsigned long int&, string, string);
     //bool checkReads(fastqRead&, fastqRead&, string, string);
     int createProcesses(vector< vector<string> >, string, string, string, vector<vector<string> >, int);
     int driver(vector<string>, string, string, string, vector<vector<string> >, int, string);
     bool getOligos(vector<vector<string> >&, string);
     string reverseOligo(string);
-    vector<pairFastqRead> getReads(bool ignoref, bool ignorer, fastqRead forward, fastqRead reverse, map<string, fastqRead>& uniques);
+    vector<pairFastqRead> getReads(bool ignoref, bool ignorer, fastqRead forward, fastqRead reverse, map<string, fastqRead>& uniques, bool);
+    vector<pairFastqRead> mergeReads(vector<pairFastqRead> frReads, vector<pairFastqRead> friReads, map<string, pairFastqRead>& pairUniques);
 };
 
 /**************************************************************************************************/
@@ -166,8 +170,10 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
         string thisfqualfile = pDataArray->files[1];
         string thisrfastafile = pDataArray->files[2];
         string thisrqualfile = pDataArray->files[3];
+        string thisfindexfile = pDataArray->files[4];
+        string thisrindexfile = pDataArray->files[5];
         
-        if (pDataArray->m->debug) {  pDataArray->m->mothurOut("[DEBUG]: ffasta = " + thisffastafile + ".\n[DEBUG]: fqual = " + thisfqualfile + ".\n[DEBUG]: rfasta = " + thisrfastafile + ".\n[DEBUG]: rqual = " + thisrqualfile + ".\n"); }
+        if (pDataArray->m->debug) {  pDataArray->m->mothurOut("[DEBUG]: ffasta = " + thisffastafile + ".\n[DEBUG]: fqual = " + thisfqualfile + ".\n[DEBUG]: rfasta = " + thisrfastafile + ".\n[DEBUG]: rqual = " + thisrqualfile + ".\n[DEBUG]: findex = " + thisfindexfile + ".\n[DEBUG]: rindex = " + thisrindexfile + ".\n"); }
         
 		if(pDataArray->allFiles){
 			for (int i = 0; i < pDataArray->fastaFileNames.size(); i++) { //clears old file
@@ -180,7 +186,7 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
 			}
 		}
         
-        ifstream inFFasta, inRFasta, inFQual, inRQual;
+        ifstream inFFasta, inRFasta, inFQual, inRQual, inFIndex, inRIndex;
         ofstream outFasta, outMisMatch, outScrapFasta;
         pDataArray->m->openInputFile(thisffastafile, inFFasta);
         pDataArray->m->openInputFile(thisrfastafile, inRFasta);
@@ -188,6 +194,10 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
             pDataArray->m->openInputFile(thisfqualfile, inFQual);
             pDataArray->m->openInputFile(thisrqualfile, inRQual);
         }
+        
+        if (thisfindexfile != "") { pDataArray->m->openInputFile(thisfindexfile, inFIndex);  }
+        if (thisrindexfile != "") { pDataArray->m->openInputFile(thisrindexfile, inRIndex);  }
+        
         pDataArray->m->openOutputFile(pDataArray->outputFasta, outFasta);
         pDataArray->m->openOutputFile(pDataArray->outputMisMatches, outMisMatch);
         pDataArray->m->openOutputFile(pDataArray->outputScrapFasta, outScrapFasta);
@@ -213,12 +223,27 @@ static DWORD WINAPI MyContigsThreadFunction(LPVOID lpParam){
                 rQual = new QualityScores(inRQual); pDataArray->m->gobble(inRQual);
             }
             
+            Sequence findexBarcode("findex", "NONE");  Sequence rindexBarcode("rindex", "NONE");
+            if (thisfindexfile != "") {
+                Sequence temp(inFIndex); pDataArray->m->gobble(inFIndex);
+                findexBarcode.setAligned(temp.getAligned());
+            }
+            
+            if (thisrindexfile != "") {
+                Sequence temp(inRIndex); pDataArray->m->gobble(inRIndex);
+                rindexBarcode.setAligned(temp.getAligned());
+            }
+
             int barcodeIndex = 0;
             int primerIndex = 0;
             
             if(pDataArray->barcodes.size() != 0){
                 if (thisfqualfile != "") {
-                    success = trimOligos.stripBarcode(fSeq, rSeq, *fQual, *rQual, barcodeIndex);
+                    if ((thisfindexfile != "") || (thisrindexfile != "")) {
+                        success = trimOligos.stripBarcode(findexBarcode, rindexBarcode, *fQual, *rQual, barcodeIndex);
+                    }else {
+                        success = trimOligos.stripBarcode(fSeq, rSeq, *fQual, *rQual, barcodeIndex);
+                    }
                 }else {
                     success = trimOligos.stripBarcode(fSeq, rSeq, barcodeIndex);
                 }

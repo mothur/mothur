@@ -362,7 +362,7 @@ int SplitGroupCommand::runCount(){
                 for (int i = 0; i < thisSeqsGroups.size(); i++) {
                     if (m->inUsersGroups(thisSeqsGroups[i], Groups)) { //if this sequence belongs to a group we want them print
                         seq.printSequence(*(ffiles[thisSeqsGroups[i]]));
-                        int numSeqs = ct.getGroupCount(seq.getName(), Groups[i]);
+                        int numSeqs = ct.getGroupCount(seq.getName(), thisSeqsGroups[i]);
                         (*(cfiles[thisSeqsGroups[i]])) << seq.getName() << '\t' << numSeqs << '\t' << numSeqs << endl;
                     }
                 }

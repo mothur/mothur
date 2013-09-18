@@ -138,6 +138,7 @@ class MothurOut {
 		bool isTrue(string);
 		bool isContainingOnlyDigits(string);
 		bool isNumeric1(string);
+        string findEdianness();
 	
 		
 		//string manipulation
@@ -158,11 +159,14 @@ class MothurOut {
         map<string, vector<string> > parseClasses(string);
 		
 		//math operation
+        double max(vector<double>&); //returns largest value in vector
+        double min(vector<double>&); //returns smallest value in vector
 		int factorial(int num);
 		vector<vector<double> > binomial(int);
 		float ceilDist(float, int);
 		float roundDist(float, int);
 		unsigned int fromBase36(string);
+        double median(vector<double>);
 		int getRandomIndex(int); //highest
         double getStandardDeviation(vector<int>&);
         vector<double> getStandardDeviation(vector< vector<double> >&);

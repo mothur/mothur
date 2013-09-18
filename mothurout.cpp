@@ -2864,7 +2864,50 @@ unsigned int MothurOut::fromBase36(string base36){
 	}
 }
 /***********************************************************************/
-
+string  MothurOut::findEdianness() {
+    try {
+        // find real endian type
+        unsigned char EndianTest[2] = {1,0};
+        short x = *(short *)EndianTest;
+        
+        string endianType = "unknown";
+        if(x == 1) { endianType = "BIG_ENDIAN"; }
+        else { endianType = "LITTLE_ENDIAN";    }
+    
+        return endianType;
+    }
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "findEdianness");
+		exit(1);
+	}
+}
+/***********************************************************************/
+double  MothurOut::median(vector<double> x) {
+    try {
+        double value = 0.0;
+        
+        if (x.size() == 0) { } //error
+        else {
+            //For example, if a < b < c, then the median of the list {a, b, c} is b, and, if a < b < c < d, then the median of the list {a, b, c, d} is the mean of b and c; i.e., it is (b + c)/2.
+            sort(x.begin(), x.end());
+            //is x.size even?
+            if ((x.size()%2) == 0) { //size() is even. median = average of 2 midpoints
+                int midIndex1 = (x.size()/2)-1;
+                int midIndex2 = (x.size()/2);
+                value = (x[midIndex1]+ x[midIndex2]) / 2.0;
+            }else { 
+                int midIndex = (x.size()/2);
+                value = x[midIndex];
+            }
+        }
+        return value;
+    }
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "median");
+		exit(1);
+	}
+}
+/***********************************************************************/
 int MothurOut::factorial(int num){
 	try {
 		int total = 1;
@@ -3499,7 +3542,7 @@ vector<double> MothurOut::getStandardDeviation(vector< vector<double> >& dists, 
         return stdDev;
     }
 	catch(exception& e) {
-		errorOut(e, "MothurOut", "getAverages");		
+		errorOut(e, "MothurOut", "getStandardDeviation");		
 		exit(1);
 	}
 }
@@ -3778,6 +3821,44 @@ double MothurOut::getStandardDeviation(vector<int>& featureVector){
     }
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "getStandardDeviation");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+// returns largest value in vector
+double MothurOut::max(vector<double>& featureVector){
+    try {
+        if (featureVector.size() == 0) { mothurOut("[ERROR]: vector size = 0!\n"); control_pressed=true; return 0.0; }
+        
+        //finds largest
+        double largest = featureVector[0];
+        for (int i = 1; i < featureVector.size(); i++) {
+            if (featureVector[i] > largest) { largest = featureVector[i]; }
+        }
+                
+        return largest;
+    }
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "max");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+// returns smallest value in vector
+double MothurOut::min(vector<double>& featureVector){
+    try {
+        if (featureVector.size() == 0) { mothurOut("[ERROR]: vector size = 0!\n"); control_pressed=true; return 0.0; }
+        
+        //finds smallest
+        double smallest = featureVector[0];
+        for (int i = 1; i < featureVector.size(); i++) {
+            if (featureVector[i] < smallest) { smallest = featureVector[i]; }
+        }
+        
+        return smallest;
+    }
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "min");
 		exit(1);
 	}
 }

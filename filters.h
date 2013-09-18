@@ -82,6 +82,8 @@ public:
 		fileHandle >> filter;
 	
 		fileHandle.close();
+        
+        if (filter.length() != alignmentLength) {  m->mothurOut("[ERROR]: Sequences are not all the same length as the filter, please correct.\n");  m->control_pressed = true; }
 	}
 
 	void getFreqs(Sequence seq) {

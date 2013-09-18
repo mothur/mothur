@@ -253,7 +253,7 @@ double LinearAlgebra::betacf(const double a, const double b, const double x) {
 	}
 }
 /*********************************************************************************************************************************/
-
+//[3][4] * [4][5] - columns in first must match rows in second, returns matrix[3][5]
 vector<vector<double> > LinearAlgebra::matrix_mult(vector<vector<double> > first, vector<vector<double> > second){
 	try {
 		vector<vector<double> > product;
@@ -287,7 +287,23 @@ vector<vector<double> > LinearAlgebra::matrix_mult(vector<vector<double> > first
 	}
 	
 }
+/*********************************************************************************************************************************/
 
+vector<vector<double> > LinearAlgebra::transpose(vector<vector<double> >matrix){
+	try {
+		vector<vector<double> > trans; trans.resize(matrix[0].size());
+        for (int i = 0; i < trans.size(); i++) {
+            for (int j = 0; j < matrix.size(); j++) { trans[i].push_back(matrix[j][i]); }
+        }
+ 				
+		return trans;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "LinearAlgebra", "transpose");
+		exit(1);
+	}
+	
+}
 /*********************************************************************************************************************************/
 
 void LinearAlgebra::recenter(double offset, vector<vector<double> > D, vector<vector<double> >& G){
@@ -1304,6 +1320,31 @@ double LinearAlgebra::calcKruskalWallis(vector<spearmanRank>& values, double& pV
 	}
 }
 /*********************************************************************************************************************************/
+//python random.normalvariate - thanks http://madssj.com/blog/2008/05/07/porting-normalvariate-from-python-to-c/
+double LinearAlgebra::normalvariate(double mu, double sigma) {
+    try {
+        double NV_MAGICCONST = 1.7155277699214135; /* (4 * exp(-0.5) / sqrt(2.0)); */
+        unsigned long int MAX_RANDOM = 2147483647; /* (2 ** 31) - 1; */
+        
+        double u1, u2, z, zz;
+        for (;;) {
+            if (m->control_pressed) { break; }
+            u1 = ((float)random()) / MAX_RANDOM;
+            u2 = 1.0 - (((float)random()) / MAX_RANDOM);
+            z = NV_MAGICCONST * (u1 - 0.5) / u2;
+            zz = z * z / 4.0;
+            if (zz <= -(log(u2))) {
+                break;
+            }
+        }
+        return mu + z * sigma;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "LinearAlgebra", "normalvariate");
+		exit(1);
+	}
+}
+/*********************************************************************************************************************************/
 //thanks http://www.johndcook.com/cpp_phi.html
 double LinearAlgebra::pnorm(double x){
     try {
@@ -2014,3 +2055,565 @@ vector<vector<double> > LinearAlgebra::getInverse(vector<vector<double> > matrix
 		exit(1);
 	}
 }
+/*********************************************************************************************************************************/
+//modelled R lda function - MASS:::lda.default
+vector< vector<double> > LinearAlgebra::lda(vector< vector<double> >& a, vector<string> groups, vector< vector<double> >& means, bool& ignore) {
+    try {
+        
+        set<string> uniqueGroups;
+        for (int i = 0; i < groups.size(); i++) { uniqueGroups.insert(groups[i]); }
+        int numGroups = uniqueGroups.size();
+        
+        map<string, int> quickIndex; //className to index. hoping to save counts, proportions and means in vectors to save time. This map will allow us to know index 0 in counts refers to group1.
+        int count = 0;
+        for (set<string>::iterator it = uniqueGroups.begin(); it != uniqueGroups.end(); it++) { quickIndex[*it] = count; count++; }
+        
+        int numSampled = groups.size(); //number of sampled groups
+        int numOtus = a.size(); //number of flagged bins
+        
+        //counts <- as.vector(table(g)) //number of samples from each class in random sampling
+        vector<int> counts; counts.resize(numGroups, 0);
+        for (int i = 0; i < groups.size(); i++) {
+            counts[quickIndex[groups[i]]]++;
+        }
+        
+        vector<double> proportions; proportions.resize(numGroups, 0.0);
+        for (int i = 0; i < numGroups; i++) {  proportions[i] = counts[i] / (double) numSampled; }
+        
+        means.clear(); //means[0] -> means[0][0] average for [group0][OTU0].
+        means.resize(numGroups); for (int i = 0; i < means.size(); i++) { means[i].resize(numOtus, 0.0); }
+        for (int j = 0; j < numSampled; j++) { //total for each class for each OTU
+            for (int i = 0; i < numOtus; i++) { means[quickIndex[groups[j]]][i] += a[i][j]; }
+        }
+        //average for each class for each OTU
+        for (int j = 0; j < numGroups; j++) { for (int i = 0; i < numOtus; i++) { means[j][i] /= counts[j]; }  }
+        
+        //randCov <- x - group.means[g, ]
+        vector< vector<double> > randCov; //randCov[0][0] -> (random sample value0 for OTU0 - average for samples group in OTU0). example OTU0, random sample 0.01 from class early. average of class early for OTU0 is 0.005. randCov[0][0] = (0.01-0.005)
+        for (int i = 0; i < numOtus; i++) { //for each flagged OTU
+            vector<double> tempRand;
+            for (int j = 0; j < numSampled; j++) { tempRand.push_back(a[i][j] - means[quickIndex[groups[j]]][i]);  }
+            randCov.push_back(tempRand);
+        }
+        
+        //find variance and std for each OTU
+        //f1 <- sqrt(diag(var(x - group.means[g, ])))
+        vector<double> stdF1;
+        vector<double> ave;
+        for (int i = 0; i < numOtus; i++) {
+            stdF1.push_back(0.0);
+            ave.push_back(m->getAverage(randCov[i]));
+        }
+        
+        for (int i = 0; i < numOtus; i++) {
+            for (int j = 0; j < numSampled; j++) { stdF1[i] += ((randCov[i][j] - ave[i]) * (randCov[i][j] - ave[i]));  }
+        }
+        
+        //fac <- 1/(n - ng)
+        double fac = 1 / (double) (numSampled-numGroups);
+        
+        for (int i = 0; i < stdF1.size(); i++) {
+            stdF1[i] /= (double) (numSampled-1);
+            stdF1[i] = sqrt(stdF1[i]);
+        }
+        
+        vector< vector<double> > scaling; //[numOTUS][numOTUS]
+        for (int i = 0; i < numOtus; i++) {
+            vector<double> temp;
+            for (int j = 0; j < numOtus; j++) {
+                if (i == j) { temp.push_back(1.0/stdF1[i]); }
+                else { temp.push_back(0.0); }
+                
+            }
+            scaling.push_back(temp);
+        }
+        /*
+         cout << "scaling = " << endl;
+         for (int i = 0; i < scaling.size(); i++) {
+         for (int j = 0; j < scaling[i].size(); j++) { cout << scaling[i][j] << '\t'; }
+         cout << endl;
+         }*/
+        
+        //X <- sqrt(fac) * ((x - group.means[g, ]) %*% scaling)
+        vector< vector<double> > X = randCov; //[numOTUS][numSampled]
+        //((x - group.means[g, ]) %*% scaling)
+        //matrix multiplication of randCov and scaling
+        LinearAlgebra linear;
+        X = linear.matrix_mult(scaling, randCov); //[numOTUS][numOTUS] * [numOTUS][numSampled] = [numOTUS][numSampled]
+        fac = sqrt(fac);
+        
+        for (int i = 0; i < X.size(); i++) {
+            for (int j = 0; j < X[i].size(); j++) { X[i][j] *= fac;  }
+        }
+        
+        vector<double> d;
+        vector< vector<double> > v;
+        vector< vector<double> > Xcopy; //X = [numOTUS][numSampled]
+        bool transpose = false; //svd requires rows < columns, so if they are not then I need to transpose and look for the results in v.
+        if (X.size() < X[0].size()) { Xcopy = linear.transpose(X); transpose=true; }
+        else                        { Xcopy = X;                    }
+        linear.svd(Xcopy, d, v); //Xcopy gets the results we want for v below, because R's version is [numSampled][numOTUS]
+        
+        /*cout << "Xcopy = " << endl;
+        for (int i = 0; i < Xcopy.size(); i++) {
+            for (int j = 0; j < Xcopy[i].size(); j++) { cout << Xcopy[i][j] << '\t'; }
+            cout << endl;
+        }
+        cout << "v = " << endl;
+        for (int i = 0; i < v.size(); i++) {
+            for (int j = 0; j < v[i].size(); j++) { cout << v[i][j] << '\t'; }
+            cout << endl;
+        }
+         */
+        
+        int rank = 0;
+        set<int> goodColumns;
+        //cout << "d = " << endl;
+        for (int i = 0; i < d.size(); i++) {  if (d[i] > 0.0000000001) { rank++; goodColumns.insert(i); } } //cout << d[i] << endl;
+        
+        if (rank == 0) {
+            ignore=true; //m->mothurOut("[ERROR]: rank = 0: variables are numerically const\n"); m->control_pressed = true;
+            return scaling; }
+        
+        //scaling <- scaling %*% X.s$v[, 1L:rank] %*% diag(1/X.s$d[1L:rank], , rank)
+        //X.s$v[, 1L:rank] = columns in Xcopy that correspond to "good" d values
+        //diag(1/X.s$d[1L:rank], , rank) = matrix size rank * rank where the diagonal is 1/"good" dvalues
+        /*example:
+         d
+         [1] 3.721545e+00 3.034607e+00 2.296649e+00 7.986927e-16 6.922408e-16
+         [6] 5.471102e-16
+         
+         $v
+         [,1]        [,2]        [,3]        [,4]        [,5]        [,6]
+         [1,]  0.31122175  0.10944725  0.20183340 -0.30136820  0.60786235 -0.13537095
+         [2,] -0.29563726 -0.20568893  0.11233366 -0.05073289  0.48234270  0.21965978
+         ...
+         
+         [1] "X.s$v[, 1L:rank]"
+         [,1]        [,2]        [,3]
+         [1,]  0.31122175  0.10944725  0.20183340
+         [2,] -0.29563726 -0.20568893  0.11233366
+         ...
+         [1] "1/X.s$d[1L:rank]"
+         [1] 0.2687056 0.3295320 0.4354170
+         
+         [1] "diag(1/X.s$d[1L:rank], , rank)"
+         [,1]     [,2]     [,3]
+         [1,] 0.2687056 0.000000 0.000000
+         [2,] 0.0000000 0.329532 0.000000
+         [3,] 0.0000000 0.000000 0.435417
+         */
+        if (transpose) {
+            Xcopy = linear.transpose(v);
+            /*
+            cout << "Xcopy = " << endl;
+            for (int i = 0; i < Xcopy.size(); i++) {
+                for (int j = 0; j < Xcopy[i].size(); j++) { cout << Xcopy[i][j] << '\t'; }
+                cout << endl;
+            }*/
+        }
+        v.clear(); //store "good" columns - X.s$v[, 1L:rank]
+        v.resize(Xcopy.size()); //[numOTUS]["good" columns]
+        for (set<int>::iterator it = goodColumns.begin(); it != goodColumns.end(); it++) {
+            for (int i = 0; i < Xcopy.size(); i++) {
+                v[i].push_back(Xcopy[i][*it]);
+            }
+        }
+        
+        vector< vector<double> > diagRanks; diagRanks.resize(rank);
+        for (int i = 0; i < rank; i++) { diagRanks[i].resize(rank, 0.0); }
+        count = 0;
+        for (set<int>::iterator it = goodColumns.begin(); it != goodColumns.end(); it++) {  diagRanks[count][count] = 1.0 / d[*it]; count++; }
+        
+        scaling = linear.matrix_mult(linear.matrix_mult(scaling, v), diagRanks); //([numOTUS][numOTUS]*[numOTUS]["good" columns]) = [numOTUS]["good" columns] then ([numOTUS]["good" columns] * ["good" columns]["good" columns] = scaling = [numOTUS]["good" columns]
+        
+        /*cout << "scaling = " << endl;
+        for (int i = 0; i < scaling.size(); i++) {
+            for (int j = 0; j < scaling[i].size(); j++) { cout << scaling[i][j] << '\t'; }
+            cout << endl;
+        }*/
+        
+        //Note: linear.matrix_mult [1][numGroups] * [numGroups][numOTUs] - columns in first must match rows in second, returns matrix[1][numOTUs]
+        vector< vector<double> > prior; prior.push_back(proportions);
+        vector< vector<double> >  xbar = linear.matrix_mult(prior, means);
+        vector<double> xBar = xbar[0]; //length numOTUs
+        
+        /*cout << "xbar" << endl;
+        for (int j = 0; j < numOtus; j++) {  cout << xBar[j] <<'\t'; }cout <<  endl;*/
+        //fac <- 1/(ng - 1)
+        fac = 1 / (double) (numGroups-1);
+        //scale(group.means, center = xbar, scale = FALSE) %*% scaling
+        vector< vector<double> > scaledMeans = means; //[numGroups][numOTUs]
+        for (int i = 0; i < numGroups; i++) {
+            for (int j = 0; j < numOtus; j++) {  scaledMeans[i][j] -= xBar[j]; }
+        }
+        scaledMeans = linear.matrix_mult(scaledMeans, scaling); //[numGroups][numOTUS]*[numOTUS]["good"columns] = [numGroups]["good"columns]
+        
+        
+        //sqrt((n * prior) * fac)
+        vector<double> temp = proportions; //[numGroups]
+        for (int i = 0; i < temp.size(); i++) { temp[i] *= numSampled * fac; temp[i] = sqrt(temp[i]);  }
+        
+        //X <- sqrt((n * prior) * fac) * (scale(group.means, center = xbar, scale = FALSE) %*% scaling)
+        //X <- temp * scaledMeans
+        X.clear(); X = scaledMeans; //[numGroups]["good"columns]
+        for (int i = 0; i < X.size(); i++) {
+            for (int j = 0; j < X[i].size(); j++) {  X[i][j] *= temp[j];  }
+        }
+        /*
+        cout << "X = " << endl;
+        for (int i = 0; i < X.size(); i++) {
+            for (int j = 0; j < X[i].size(); j++) { cout << X[i][j] << '\t'; }
+            cout << endl;
+        }
+        */
+        
+        d.clear(); v.clear();
+        //we want to transpose so results are in Xcopy, but if that makes rows > columns then we don't since svd requires rows < cols.
+        transpose=false;
+        if (X.size() > X[0].size()) {   Xcopy = X;  transpose=true;     }
+        else                        {   Xcopy = linear.transpose(X);    }
+        linear.svd(Xcopy, d, v); //Xcopy gets the results we want for v below
+        /*cout << "Xcopy = " << endl;
+        for (int i = 0; i < Xcopy.size(); i++) {
+            for (int j = 0; j < Xcopy[i].size(); j++) { cout << Xcopy[i][j] << '\t'; }
+            cout << endl;
+        }
+        
+        cout << "v = " << endl;
+        for (int i = 0; i < v.size(); i++) {
+            for (int j = 0; j < v[i].size(); j++) { cout << v[i][j] << '\t'; }
+            cout << endl;
+        }
+        
+        cout << "d = " << endl;
+        for (int i = 0; i < d.size(); i++) { cout << d[i] << endl; }*/
+        
+        //rank <- sum(X.s$d > tol * X.s$d[1L])
+        //X.s$d[1L] = larger value in d vector
+        double largeD = m->max(d);
+        rank = 0; goodColumns.clear();
+        for (int i = 0; i < d.size(); i++) { if (d[i] > (0.0000000001*largeD)) { rank++; goodColumns.insert(i); } }
+        
+        if (rank == 0) {
+            ignore=true;//m->mothurOut("[ERROR]: rank = 0: class means are numerically identical.\n"); m->control_pressed = true;
+            return scaling; }
+        
+        if (transpose) { Xcopy = linear.transpose(v);  }
+        //scaling <- scaling %*% X.s$v[, 1L:rank] - scaling * "good" columns
+        v.clear(); //store "good" columns - X.s$v[, 1L:rank]
+        v.resize(Xcopy.size()); //Xcopy = ["good"columns][numGroups]
+        for (set<int>::iterator it = goodColumns.begin(); it != goodColumns.end(); it++) {
+            for (int i = 0; i < Xcopy.size(); i++) {
+                v[i].push_back(Xcopy[i][*it]);
+            }
+        }
+        
+        scaling = linear.matrix_mult(scaling, v); //[numOTUS]["good" columns] * ["good"columns][new "good" columns]
+        
+        /*cout << "scaling = " << endl;
+        for (int i = 0; i < scaling.size(); i++) {
+            for (int j = 0; j < scaling[i].size(); j++) { cout << scaling[i][j] << '\t'; }
+            cout << endl;
+        }*/
+        ignore=false;
+        return scaling;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "LinearAlgebra", "lda");
+		exit(1);
+	}
+}
+/*********************************************************************************************************************************/
+//Singular value decomposition (SVD) - adapted from http://svn.lirec.eu/libs/magicsquares/src/SVD.cpp
+/*
+ * svdcomp - SVD decomposition routine.
+ * Takes an mxn matrix a and decomposes it into udv, where u,v are
+ * left and right orthogonal transformation matrices, and d is a
+ * diagonal matrix of singular values.
+ *
+ * This routine is adapted from svdecomp.c in XLISP-STAT 2.1 which is
+ * code from Numerical Recipes adapted by Luke Tierney and David Betz.
+ *
+ * Input to dsvd is as follows:
+ *   a = mxn matrix to be decomposed, gets overwritten with u
+ *   m = row dimension of a
+ *   n = column dimension of a
+ *   w = returns the vector of singular values of a
+ *   v = returns the right orthogonal transformation matrix
+ */
+
+int LinearAlgebra::svd(vector< vector<double> >& a, vector<double>& w, vector< vector<double> >& v) {
+    try {
+        int flag, i, its, j, jj, k, l, nm;
+        double c, f, h, s, x, y, z;
+        double anorm = 0.0, g = 0.0, scale = 0.0;
+
+        int numRows = a.size(); if (numRows == 0) { return 0; }
+        int numCols = a[0].size();
+        w.resize(numCols, 0.0);
+        v.resize(numCols); for (int i = 0; i < numCols; i++) { v[i].resize(numRows, 0.0); }
+    
+        vector<double> rv1; rv1.resize(numCols, 0.0);
+        if (numRows < numCols){  m->mothurOut("[ERROR]: numRows < numCols\n"); m->control_pressed = true; return 0; }
+
+        /* Householder reduction to bidiagonal form */
+        for (i = 0; i < numCols; i++)
+        {
+            /* left-hand reduction */
+            l = i + 1;
+            rv1[i] = scale * g;
+            g = s = scale = 0.0;
+            if (i < numRows)
+            {
+                for (k = i; k < numRows; k++)
+                    scale += fabs((double)a[k][i]);
+                if (scale)
+                {
+                    for (k = i; k < numRows; k++)
+                    {
+                        a[k][i] = (double)((double)a[k][i]/scale);
+                        s += ((double)a[k][i] * (double)a[k][i]);
+                    }
+                    f = (double)a[i][i];
+                    g = -SIGN(sqrt(s), f);
+                    h = f * g - s;
+                    a[i][i] = (double)(f - g);
+                    if (i != numCols - 1)
+                    {
+                        for (j = l; j < numCols; j++)
+                        {
+                            for (s = 0.0, k = i; k < numRows; k++)
+                                s += ((double)a[k][i] * (double)a[k][j]);
+                            f = s / h;
+                            for (k = i; k < numRows; k++)
+                                a[k][j] += (double)(f * (double)a[k][i]);
+                        }
+                    }
+                    for (k = i; k < numRows; k++)
+                        a[k][i] = (double)((double)a[k][i]*scale);
+                }
+            }
+            w[i] = (double)(scale * g);
+            
+            /* right-hand reduction */
+            g = s = scale = 0.0;
+            if (i < numRows && i != numCols - 1)
+            {
+                for (k = l; k < numCols; k++)
+                    scale += fabs((double)a[i][k]);
+                if (scale)
+                {
+                    for (k = l; k < numCols; k++)
+                    {
+                        a[i][k] = (double)((double)a[i][k]/scale);
+                        s += ((double)a[i][k] * (double)a[i][k]);
+                    }
+                    f = (double)a[i][l];
+                    g = -SIGN(sqrt(s), f);
+                    h = f * g - s;
+                    a[i][l] = (double)(f - g);
+                    for (k = l; k < numCols; k++)
+                        rv1[k] = (double)a[i][k] / h;
+                    if (i != numRows - 1)
+                    {
+                        for (j = l; j < numRows; j++)
+                        {
+                            for (s = 0.0, k = l; k < numCols; k++)
+                                s += ((double)a[j][k] * (double)a[i][k]);
+                            for (k = l; k < numCols; k++)
+                                a[j][k] += (double)(s * rv1[k]);
+                        }
+                    }
+                    for (k = l; k < numCols; k++)
+                        a[i][k] = (double)((double)a[i][k]*scale);
+                }
+            }
+            anorm = max(anorm, (fabs((double)w[i]) + fabs(rv1[i])));
+        }
+        
+        /* accumulate the right-hand transformation */
+        for (i = numCols - 1; i >= 0; i--)
+        {
+            if (i < numCols - 1)
+            {
+                if (g)
+                {
+                    for (j = l; j < numCols; j++)
+                        v[j][i] = (double)(((double)a[i][j] / (double)a[i][l]) / g);
+                    /* double division to avoid underflow */
+                    for (j = l; j < numCols; j++)
+                    {
+                        for (s = 0.0, k = l; k < numCols; k++)
+                            s += ((double)a[i][k] * (double)v[k][j]);
+                        for (k = l; k < numCols; k++)
+                            v[k][j] += (double)(s * (double)v[k][i]);
+                    }
+                }
+                for (j = l; j < numCols; j++)
+                    v[i][j] = v[j][i] = 0.0;
+            }
+            v[i][i] = 1.0;
+            g = rv1[i];
+            l = i;
+        }
+        
+        /* accumulate the left-hand transformation */
+        for (i = numCols - 1; i >= 0; i--)
+        {
+            l = i + 1;
+            g = (double)w[i];
+            if (i < numCols - 1)
+                for (j = l; j < numCols; j++)
+                    a[i][j] = 0.0;
+            if (g)
+            {
+                g = 1.0 / g;
+                if (i != numCols - 1)
+                {
+                    for (j = l; j < numCols; j++)
+                    {
+                        for (s = 0.0, k = l; k < numRows; k++)
+                            s += ((double)a[k][i] * (double)a[k][j]);
+                        f = (s / (double)a[i][i]) * g;
+                        for (k = i; k < numRows; k++)
+                            a[k][j] += (double)(f * (double)a[k][i]);
+                    }
+                }
+                for (j = i; j < numRows; j++)
+                    a[j][i] = (double)((double)a[j][i]*g);
+            }
+            else
+            {
+                for (j = i; j < numRows; j++)
+                    a[j][i] = 0.0;
+            }
+            ++a[i][i];
+        }
+        
+        /* diagonalize the bidiagonal form */
+        for (k = numCols - 1; k >= 0; k--)
+        {                             /* loop over singular values */
+            for (its = 0; its < 30; its++)
+            {                         /* loop over allowed iterations */
+                flag = 1;
+                for (l = k; l >= 0; l--)
+                {                     /* test for splitting */
+                    nm = l - 1;
+                    if (fabs(rv1[l]) + anorm == anorm)
+                    {
+                        flag = 0;
+                        break;
+                    }
+                    if (fabs((double)w[nm]) + anorm == anorm)
+                        break;
+                }
+                if (flag)
+                {
+                    c = 0.0;
+                    s = 1.0;
+                    for (i = l; i <= k; i++)
+                    {
+                        f = s * rv1[i];
+                        if (fabs(f) + anorm != anorm)
+                        {
+                            g = (double)w[i];
+                            h = pythag(f, g);
+                            w[i] = (double)h;
+                            h = 1.0 / h;
+                            c = g * h;
+                            s = (- f * h);
+                            for (j = 0; j < numRows; j++)
+                            {
+                                y = (double)a[j][nm];
+                                z = (double)a[j][i];
+                                a[j][nm] = (double)(y * c + z * s);
+                                a[j][i] = (double)(z * c - y * s);
+                            }
+                        }
+                    }
+                }
+                z = (double)w[k];
+                if (l == k)
+                {                  /* convergence */
+                    if (z < 0.0)
+                    {              /* make singular value nonnegative */
+                        w[k] = (double)(-z);
+                        for (j = 0; j < numCols; j++)
+                            v[j][k] = (-v[j][k]);
+                    }
+                    break;
+                }
+                if (its >= 30) {
+                    m->mothurOut("No convergence after 30,000! iterations \n"); m->control_pressed = true;
+                    return(0);
+                }
+                
+                /* shift from bottom 2 x 2 minor */
+                x = (double)w[l];
+                nm = k - 1;
+                y = (double)w[nm];
+                g = rv1[nm];
+                h = rv1[k];
+                f = ((y - z) * (y + z) + (g - h) * (g + h)) / (2.0 * h * y);
+                g = pythag(f, 1.0);
+                f = ((x - z) * (x + z) + h * ((y / (f + SIGN(g, f))) - h)) / x;
+                
+                /* next QR transformation */
+                c = s = 1.0;
+                for (j = l; j <= nm; j++)
+                {
+                    i = j + 1;
+                    g = rv1[i];
+                    y = (double)w[i];
+                    h = s * g;
+                    g = c * g;
+                    z = pythag(f, h);
+                    rv1[j] = z;
+                    c = f / z;
+                    s = h / z;
+                    f = x * c + g * s;
+                    g = g * c - x * s;
+                    h = y * s;
+                    y = y * c;
+                    for (jj = 0; jj < numCols; jj++)
+                    {
+                        x = (double)v[jj][j];
+                        z = (double)v[jj][i];
+                        v[jj][j] = (float)(x * c + z * s);
+                        v[jj][i] = (float)(z * c - x * s);
+                    }
+                    z = pythag(f, h);
+                    w[j] = (float)z;
+                    if (z) 
+                    {
+                        z = 1.0 / z;
+                        c = f * z;
+                        s = h * z;
+                    }
+                    f = (c * g) + (s * y);
+                    x = (c * y) - (s * g);
+                    for (jj = 0; jj < numRows; jj++)
+                    {
+                        y = (double)a[jj][j];
+                        z = (double)a[jj][i];
+                        a[jj][j] = (double)(y * c + z * s);
+                        a[jj][i] = (double)(z * c - y * s);
+                    }
+                }
+                rv1[l] = 0.0;
+                rv1[k] = f;
+                w[k] = (double)x;
+            }
+        }
+        
+        return(0);
+        
+    }
+	catch(exception& e) {
+		m->errorOut(e, "LinearAlgebra", "svd");
+		exit(1);
+	}
+}
+
+

@@ -405,6 +405,7 @@ int MakeBiomCommand::getBiom(vector<SharedRAbundVector*>& lookup){
         out << "{\n" + spaces + "\"id\":\"" + sharedfile + "-" + lookup[0]->getLabel() + "\",\n" + spaces + "\"format\": \"Biological Observation Matrix 0.9.1\",\n" + spaces + "\"format_url\": \"http://biom-format.org\",\n";
         out << spaces + "\"type\": \"OTU table\",\n" + spaces + "\"generated_by\": \"" << mothurString << "\",\n" + spaces + "\"date\": \"" << dateString << "\",\n";
         
+        int numBins = lookup[0]->getNumBins();
         vector<string> metadata = getMetaData(lookup);  
         
         if (m->control_pressed) {  out.close(); return 0; }
@@ -420,11 +421,11 @@ int MakeBiomCommand::getBiom(vector<SharedRAbundVector*>& lookup){
         out << spaces + "\"rows\":[\n";
         string rowFront = spaces + spaces + "{\"id\":\"";
         string rowBack = "\", \"metadata\":";
-        for (int i = 0; i < m->currentBinLabels.size()-1; i++) {
+        for (int i = 0; i < numBins-1; i++) {
             if (m->control_pressed) {  out.close(); return 0; }
             out << rowFront << m->currentBinLabels[i] << rowBack << metadata[i] << "},\n";
         }
-        out << rowFront << m->currentBinLabels[(m->currentBinLabels.size()-1)] << rowBack << metadata[(m->currentBinLabels.size()-1)] << "}\n" + spaces + "],\n";
+        out << rowFront << m->currentBinLabels[(numBins-1)] << rowBack << metadata[(numBins-1)] << "}\n" + spaces + "],\n";
         
         //get column info
         /*"columns": [
@@ -624,8 +625,8 @@ vector<string> MakeBiomCommand::getMetaData(vector<SharedRAbundVector*>& lookup)
 //**********************************************************************************************************************
 int MakeBiomCommand::getSampleMetaData(vector<SharedRAbundVector*>& lookup){
 	try {
-        
-        if (metadatafile == "") { for (int i = 0; i < lookup.size(); i++) {  sampleMetadata.push_back("null");  } }
+        sampleMetadata.clear();
+        if (metadatafile == "") {  for (int i = 0; i < lookup.size(); i++) {  sampleMetadata.push_back("null");  } }
         else {
             ifstream in;
             m->openInputFile(metadatafile, in);
