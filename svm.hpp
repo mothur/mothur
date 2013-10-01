@@ -9,6 +9,8 @@
 #ifndef svm_hpp_
 #define svm_hpp_
 
+#include <math.h>
+
 #include <algorithm>
 #include <cmath>
 #include <deque>
@@ -18,6 +20,7 @@
 #include <set>
 #include <stack>
 #include <string>
+#include <sstream>
 #include <vector>
 
 // For the purpose of training a support vector machine
@@ -59,7 +62,7 @@ typedef std::set<LabelPair> LabelPairSet;
 // A dataset is a set of observations with associated labels.  The
 // LabeledObservation typedef is a label-observation pair intended to
 // hold one observation and its corresponding label.  Using a pointer
-// to Observation makes this object cheap to copy.
+// to Observation makes these objects cheap to copy.
 //typedef std::pair<Label, Observation*> LabeledObservation;
 
 // This is a refactoring of the original LabeledObservation typedef.
@@ -69,8 +72,6 @@ typedef std::set<LabelPair> LabelPairSet;
 class LabeledObservation {
 public:
     LabeledObservation(int _datasetIndex, Label _label, Observation* _o) : datasetIndex(_datasetIndex), first(_label), second(_o) {}
-    // do we need a copy constructor?
-    //LabeledObservation(const LabeledObservation& o) : datasetIndex(o.datasetIndex), first(o.first), second(o.second) {}
     ~LabeledObservation() {}
 
 //private:
@@ -87,8 +88,13 @@ typedef std::vector<LabeledObservation> LabeledObservationVector;
 void buildLabelSet(LabelSet&, const LabeledObservationVector&);
 
 
-//typedef std::string FeatureLabel;
-//typedef std::vector<FeatureLabel> FeatureLabelVector;
+double getMinimumFeatureValueForObservation(Observation::size_type featureIndex, LabeledObservationVector& observations);
+double getMaximumFeatureValueForObservation(Observation::size_type featureIndex, LabeledObservationVector& observations);
+
+
+void transformZeroOne(LabeledObservationVector&);
+
+
 class Feature {
 public:
     Feature(int i, const std::string& l) : index(i), label(l) {}
@@ -116,6 +122,7 @@ public:
 
     LabeledObservationVector& getLabeledObservationVector() { return labeledObservationVector; }
     FeatureVector& getFeatureVector() { return featureVector; }
+
 private:
     LabeledObservationVector labeledObservationVector;
     FeatureVector featureVector;
@@ -365,11 +372,11 @@ private:
 class PolynomialKernelFunction : public KernelFunction {
 public:
     // parameters must be set before using a KernelFunction is used
-    PolynomialKernelFunction(const LabeledObservationVector& _obs) : KernelFunction(_obs), c(0.0), d(0) {}
+    PolynomialKernelFunction(const LabeledObservationVector& _obs) : KernelFunction(_obs), c(0.0), gamma(0.0), d(0) {}
     ~PolynomialKernelFunction() {}
 
     double similarity(const LabeledObservation& i, const LabeledObservation& j) {
-        return pow((getCachedParameterFreeSimilarity(i, j) + c), d);
+        return pow((gamma * getCachedParameterFreeSimilarity(i, j) + c), d);
         //return pow(std::inner_product(i.second->begin(), i.second->end(), j.second->begin(), c), d);
     }
 
@@ -379,22 +386,28 @@ public:
 
     void setParameters(const ParameterMap& p) {
         c = p.find(MapKey_Constant)->second;
+        gamma = p.find(MapKey_Coefficient)->second;
         d = int(p.find(MapKey_Degree)->second);
     }
 
     void getDefaultParameterRanges(ParameterRangeMap& p) {
         p[MapKey_Constant] = defaultConstantRange;
+        p[MapKey_Coefficient] = defaultCoefficientRange;
+        p[MapKey_Degree] = defaultDegreeRange;
     }
 
     static const std::string MapKey;
     static const std::string MapKey_Constant;
+    static const std::string MapKey_Coefficient;
     static const std::string MapKey_Degree;
 
     static const ParameterRange defaultConstantRange;
+    static const ParameterRange defaultCoefficientRange;
     static const ParameterRange defaultDegreeRange;
 
 private:
     double c;
+    double gamma;
     int d;
 };
 
@@ -447,6 +460,9 @@ public:
         }
         else if ( kernelFunctionKey == PolynomialKernelFunction::MapKey ) {
             return new PolynomialKernelFunction(obs);
+        }
+        else if ( kernelFunctionKey == SigmoidKernelFunction::MapKey ) {
+            return new SigmoidKernelFunction(obs);
         }
         else {
             throw new std::exception();
@@ -739,12 +755,24 @@ private:
 };
 
 
+class OutputHandler {
+public:
+    OutputHandler() {}
+    virtual ~OutputHandler() {}
+
+    virtual void writebuf() { std::cout << stringbuf.str();}
+    std::ostringstream stringbuf;
+};
+
+
 // OneVsOneMultiClassSvmTrainer trains a support vector machine for each
 // pair of labels in a set of data.
 class OneVsOneMultiClassSvmTrainer {
 public:
     OneVsOneMultiClassSvmTrainer(SvmDataset&, int, int, ExternalSvmTrainingInterruption&,bool=false);
     ~OneVsOneMultiClassSvmTrainer() {}
+
+    //void setOutputHandler(OutputHandler* o) { outputHandler = o; }
 
     MultiClassSVM* train(const KernelParameterRangeMap&);
     double trainOnKFolds(SmoTrainer&, KernelFunctionCache&, KFoldLabeledObservationsDivider&);
@@ -760,6 +788,7 @@ public:
 private:
     ExternalSvmTrainingInterruption& externalSvmTrainingInterruption;
 
+    //OutputHandler* outputHandler;
     bool verbose;
 
     // can we make this const?

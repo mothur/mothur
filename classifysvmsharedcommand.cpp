@@ -24,9 +24,12 @@ vector<string> ClassifySvmSharedCommand::setParameters() {
         CommandParameter trainingFoldCountParam("trainingfolds", "Number", "", "10", "", "", "", "", false, false);
         parameters.push_back(trainingFoldCountParam);
 
+        CommandParameter smoc("smoc", "Number", "", "3", "", "", "", "", false, false);
+        parameters.push_back(smoc);
+
         // Support Vector Machine parameters
-        CommandParameter linearKernel("linear", "Boolean", "", "T", "", "", "", "", false, false);
-        parameters.push_back(linearKernel);
+        CommandParameter kernelParam("kernel", "String", "", "", "", "", "", "", false, false);
+        parameters.push_back(kernelParam);
         //CommandParameter potupersplit("otupersplit", "Multiple", "log2-squareroot", "log2", "", "", "","",false,false); parameters.push_back(potupersplit);
         //CommandParameter psplitcriteria("splitcriteria", "Multiple", "gainratio-infogain", "gainratio", "", "", "","",false,false); parameters.push_back(psplitcriteria);
         //CommandParameter pnumtrees("numtrees", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pnumtrees);
@@ -111,6 +114,17 @@ ClassifySvmSharedCommand::ClassifySvmSharedCommand() {
         m->errorOut(e, "ClassifySvmSharedCommand", "ClassifySvmSharedCommand");
         exit(1);
     }
+}
+
+// here is a little function from StackExchange for splitting a string on a single character
+// allow return value optimization
+std::vector<string>& split(const std::string &s, char delim, std::vector<std::string>& elems) {
+    std::stringstream ss(s);
+    std::string item;
+    while (std::getline(ss, item, delim)) {
+        elems.push_back(item);
+    }
+    return elems;
 }
 
 //**********************************************************************************************************************
@@ -273,6 +287,95 @@ ClassifySvmSharedCommand::ClassifySvmSharedCommand(string option) {
             else {
                 evaluationFoldCount = m->mothurConvert(tf, trainingFoldCount);
             }
+
+            string smocOption = validParameter.validFile(parameters, "smoc", false);
+            smocList.clear();
+            if ( smocOption == "not found" ) {
+                //smocOption = "0.001,0.01,0.1,1.0,10.0,100.0,1000.0";
+            }
+            else {
+                std::vector<string> smocOptionList;
+                split(smocOption, ';', smocOptionList);
+                for (std::vector<string>::iterator i = smocOptionList.begin(); i != smocOptionList.end(); i++) {
+                    smocList.push_back(std::atof(i->c_str()));
+                }
+            }
+
+            // kernel specification
+            // start with default parameter ranges for all kernels
+            kernelParameterRangeMap.clear();
+            getDefaultKernelParameterRangeMap(kernelParameterRangeMap);
+            // get the kernel option
+            string kernelOption = validParameter.validFile(parameters, "kernel", false);
+            // if the kernel option is "not found" then use all kernels with default parameter ranges
+            // otherwise use only kernels listed in the kernelOption string
+            if ( kernelOption == "not found" ) {
+
+            }
+            else {
+                // if the kernel option has been specified then
+                // remove kernel parameters from the kernel parameter map if
+                // they are not listed in the kernel option
+                // at this point the kernelParameterRangeMap looks like this:
+                //    linear_key     : [
+                //        smoc_key                : smoc parameter range
+                //        linear_constant_key     : linear constant range
+                //    ]
+                //    rbf_key        : [
+                //        smoc_key                : smoc parameter range
+                //        rbf_gamma_key           : rbf gamma range
+                //    ]
+                //    polynomial_key : [
+                //        smoc_key                : smoc parameter range
+                //        polynomial_degree_key   : polynomial degree range
+                //        polynomial_constant_key : polynomial constant range
+                //    ]
+                std::vector<std::string> kernelList;
+                std::vector<std::string> unspecifiedKernelList;
+                split(kernelOption, '-', kernelList);
+                std::set<std::string> kernelSet(kernelList.begin(), kernelList.end());
+                // make a list of strings that are keys in the kernel parameter range map
+                // but are not in the kernel list
+                for (KernelParameterRangeMap::iterator i = kernelParameterRangeMap.begin(); i != kernelParameterRangeMap.end(); i++) {
+                    //std::cout << "looking for kernel " << *i << " in kernel option" << std::endl;
+                    //should be kernelList here
+                    std::string kernelKey = i->first;
+                    if ( kernelSet.find(kernelKey) == kernelSet.end() ) {
+                        unspecifiedKernelList.push_back(kernelKey);
+                    }
+                }
+                for (std::vector<std::string>::iterator i = unspecifiedKernelList.begin(); i != unspecifiedKernelList.end(); i++) {
+                    std::cout << "removing kernel " << *i << std::endl;
+                    kernelParameterRangeMap.erase(*i);
+                }
+            }
+
+            // go through the kernel parameter range map and check for options for each kernel
+            for (KernelParameterRangeMap::iterator i = kernelParameterRangeMap.begin(); i != kernelParameterRangeMap.end(); i++) {
+                std::string kernelKey = i->first;
+                ParameterRangeMap& kernelParameters = i->second;
+                for (ParameterRangeMap::iterator j = kernelParameters.begin(); j != kernelParameters.end(); j++) {
+                    std::string parameterKey = j->first;
+                    ParameterRange& kernelParameterRange = j->second;
+                    // has an option for this kernel parameter been specified?
+                    std::string kernelParameterKey = kernelKey + parameterKey;
+                    std::cout << "looking for option " << kernelParameterKey << std::endl;
+                    std::string kernelParameterOption = validParameter.validFile(parameters, kernelParameterKey, false);
+                    if (kernelParameterOption == "not found") {
+                        // we already have default values in the kernel parameter map
+                    }
+                    else {
+                        // replace the default parameters with the specified parameters
+                        kernelParameterRange.clear();
+                        std::vector<string> parameterList;
+                        split(kernelParameterOption, ';', parameterList);
+                        for (std::vector<string>::iterator k = parameterList.begin(); k != parameterList.end(); k++) {
+                            kernelParameterRange.push_back(std::atof(k->c_str()));
+                        }
+                    }
+                }
+            }
+
 
         }
 
@@ -466,16 +569,20 @@ void ClassifySvmSharedCommand::processSharedAndDesignData(vector<SharedRAbundVec
         LabeledObservationVector labeledObservationVector;
         FeatureVector featureVector;
         readSharedRAbundVectors(lookup, designMap, labeledObservationVector, featureVector);
+
+        // apply [0,1] standardization
+        transformZeroOne(labeledObservationVector);
+        // optionally remove features with low standard deviation
+
         SvmDataset svmDataset(labeledObservationVector, featureVector);
-        //int evaluationFoldCount = 3;
-        //int trainFoldCount = 5;
+
         OneVsOneMultiClassSvmTrainer trainer(svmDataset, evaluationFoldCount, trainingFoldCount, *this);
-        //KernelParameterRangeMap kernelParameterRangeMap;
-        //getDefaultKernelParameterRangeMap(kernelParameterRangeMap);
-        //trainer.train(kernelParameterRangeMap);
 
         SvmRfe svmRfe;
-        FeatureList orderedFeatureList = svmRfe.getOrderedFeatureList(svmDataset, trainer, LinearKernelFunction::defaultConstantRange, SmoTrainer::defaultCRange);
+        ParameterRange& linearKernelConstantRange = kernelParameterRangeMap["linear"]["constant"];
+        ParameterRange& linearKernelSmoCRange = kernelParameterRangeMap["linear"]["smoc"];
+        FeatureList orderedFeatureList = svmRfe.getOrderedFeatureList(svmDataset, trainer, linearKernelConstantRange, linearKernelSmoCRange);
+        //FeatureList orderedFeatureList = svmRfe.getOrderedFeatureList(svmDataset, trainer, LinearKernelFunction::defaultConstantRange, smocList);
 
         int n = 0;
         std::cout << "ordered features:" << std::endl;

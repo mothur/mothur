@@ -18,35 +18,38 @@
 
 // parameters will be tested in the order they are specified
 
-const std::string LinearKernelFunction::MapKey                      = "LinearKernel";
-const std::string LinearKernelFunction::MapKey_Constant             = "LinearKernel_Constant";
+const std::string LinearKernelFunction::MapKey                      = "linear";//"LinearKernel";
+const std::string LinearKernelFunction::MapKey_Constant             = "constant";//"LinearKernel_Constant";
 const double defaultLinearConstantRangeArray[]                      = {0.0, -1.0, 1.0, -10.0, 10.0};
 const ParameterRange LinearKernelFunction::defaultConstantRange     = ParameterRange(RANGE(defaultLinearConstantRangeArray));
 
-const std::string RbfKernelFunction::MapKey                         = "RbfKernel";
-const std::string RbfKernelFunction::MapKey_Gamma                   = "RbfKernel_Gamma";
+const std::string RbfKernelFunction::MapKey                         = "rbf";//"RbfKernel";
+const std::string RbfKernelFunction::MapKey_Gamma                   = "gamma";//"RbfKernel_Gamma";
 const double defaultRbfGammaRangeArray[]                            = {0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0};
 const ParameterRange RbfKernelFunction::defaultGammaRange           = ParameterRange(RANGE(defaultRbfGammaRangeArray));
 
-const std::string PolynomialKernelFunction::MapKey                  = "PolynomialKernel";
-const std::string PolynomialKernelFunction::MapKey_Constant         = "PolynomialKernel_Constant";
-const std::string PolynomialKernelFunction::MapKey_Degree           = "PolynomialKernel_Degree";
+const std::string PolynomialKernelFunction::MapKey                  = "polynomial";//"PolynomialKernel";
+const std::string PolynomialKernelFunction::MapKey_Constant         = "constant";//"PolynomialKernel_Constant";
+const std::string PolynomialKernelFunction::MapKey_Coefficient      = "coefficient";//"PolynomialKernel_Coefficient";
+const std::string PolynomialKernelFunction::MapKey_Degree           = "degree";//"PolynomialKernel_Degree";
 
-const double defaultPolynomialConstantRangeArray[]                  = {0.0, -1.0, 1.0, -2.0, 2.0, -3.0, 3.0};
-const ParameterRange PolynomialKernelFunction::defaultConstantRange = ParameterRange(RANGE(defaultPolynomialConstantRangeArray));
-const double defaultPolynomialDegreeRangeArray[]                    = {2.0, 3.0, 4.0};
-const ParameterRange PolynomialKernelFunction::defaultDegreeRange   = ParameterRange(RANGE(defaultPolynomialDegreeRangeArray));
+const double defaultPolynomialConstantRangeArray[]                     = {0.0, -1.0, 1.0, -2.0, 2.0, -3.0, 3.0};
+const ParameterRange PolynomialKernelFunction::defaultConstantRange    = ParameterRange(RANGE(defaultPolynomialConstantRangeArray));
+const double defaultPolynomialCoefficientRangeArray[]                  = {0.01, 0.1, 1.0, 10.0, 100.0};
+const ParameterRange PolynomialKernelFunction::defaultCoefficientRange = ParameterRange(RANGE(defaultPolynomialCoefficientRangeArray));
+const double defaultPolynomialDegreeRangeArray[]                       = {2.0, 3.0, 4.0};
+const ParameterRange PolynomialKernelFunction::defaultDegreeRange      = ParameterRange(RANGE(defaultPolynomialDegreeRangeArray));
 
-const std::string SigmoidKernelFunction::MapKey                     = "SigmoidKernel";
-const std::string SigmoidKernelFunction::MapKey_Alpha               = "SigmoidKernel_Alpha";
-const std::string SigmoidKernelFunction::MapKey_Constant            = "SigmoidKernel_Constant";
+const std::string SigmoidKernelFunction::MapKey                     = "sigmoid";
+const std::string SigmoidKernelFunction::MapKey_Alpha               = "alpha";
+const std::string SigmoidKernelFunction::MapKey_Constant            = "constant";
 
 const double defaultSigmoidAlphaRangeArray[]                        = {1.0, 2.0};
 const ParameterRange SigmoidKernelFunction::defaultAlphaRange       = ParameterRange(RANGE(defaultSigmoidAlphaRangeArray));
 const double defaultSigmoidConstantRangeArray[]                     = {1.0, 2.0};
 const ParameterRange SigmoidKernelFunction::defaultConstantRange    = ParameterRange(RANGE(defaultSigmoidConstantRangeArray));
 
-const std::string SmoTrainer::MapKey_C                              = "SmoTrainer_C";
+const std::string SmoTrainer::MapKey_C                              = "smoc";//"SmoTrainer_C";
 const double defaultSmoTrainerCRangeArray[]                         = {0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0};
 const ParameterRange SmoTrainer::defaultCRange                      = ParameterRange(RANGE(defaultSmoTrainerCRangeArray));
 
@@ -58,7 +61,7 @@ LabelPair buildLabelPair(const Label& one, const Label& two) {
     return labelPair;
 }
 
-// Dividing a dataset into training and testing sets while maintaing equal
+// Dividing a dataset into training and testing sets while maintaining equal
 // representation of all classes is done using a LabelToLabeledObservationVector.
 // This container is used to divide datasets into groups of LabeledObservations
 // having the same label.  For example, given a LabeledObservationVector like
@@ -67,11 +70,78 @@ LabelPair buildLabelPair(const Label& one, const Label& two) {
 //     ["blue",  [2,0, 3.0. 4.0]]
 //     ["green", [4.0, 5.0, 6.0]]
 // the corresponding LabelToLabeledObservationVector looks like
-//     "blue",  [["blue",  [1.0, 2.0, 3.0]], ["blue",  [2,0, 3.0. 4.0]]]
-//     "green", [["green", [3.0, 4.0, 5.0]], ["green", [4.0, 5.0, 6.0]]]
+//     "blue"  : [["blue",  [1.0, 2.0, 3.0]], ["blue",  [2,0, 3.0. 4.0]]]
+//     "green" : [["green", [3.0, 4.0, 5.0]], ["green", [4.0, 5.0, 6.0]]]
 void buildLabelToLabeledObservationVector(LabelToLabeledObservationVector& labelToLabeledObservationVector, const LabeledObservationVector& labeledObservationVector) {
     for ( LabeledObservationVector::const_iterator j = labeledObservationVector.begin(); j != labeledObservationVector.end(); j++ ) {
         labelToLabeledObservationVector[j->first].push_back(*j);
+    }
+}
+
+
+// this function standardizes data to mean 0 and variance 1
+// but this may not be a good standardization for OTU data
+void transformZeroMeanUnitVariance(const LabeledObservationVector& observations) {
+    bool vebose = false;
+    // online method for mean and variance
+    for ( Observation::size_type feature = 0; feature < observations[0].second->size(); feature++ ) {
+        double n = 0.0;
+        double mean = 0.0;
+        double M2 = 0.0;
+        for ( ObservationVector::size_type observation = 0; observation < observations.size(); observation++ ) {
+            n += 1.0;
+            double x = observations[observation].second->at(feature);
+            double delta = x - mean;
+            mean += delta / n;
+            M2 += delta * (x - mean);
+        }
+        double variance = M2 / (n - 1.0);
+        double standardDeviation = sqrt(variance);
+        if (vebose) {
+            std::cout << "mean of feature " << feature << " is " << mean << std::endl;
+            std::cout << "std of feature " << feature << " is " << standardDeviation << std::endl;
+        }
+        // normalize the feature
+        for ( ObservationVector::size_type observation = 0; observation < observations.size(); observation++ ) {
+            observations[observation].second->at(feature) = (observations[observation].second->at(feature) - mean ) / standardDeviation;
+        }
+    }
+}
+
+
+double getMinimumFeatureValueForObservation(Observation::size_type featureIndex, LabeledObservationVector& observations) {
+    double featureMinimum = std::numeric_limits<double>::max();
+    for ( ObservationVector::size_type observation = 0; observation < observations.size(); observation++ ) {
+        if ( observations[observation].second->at(featureIndex) < featureMinimum ) {
+            featureMinimum = observations[observation].second->at(featureIndex);
+        }
+    }
+    return featureMinimum;
+}
+
+
+double getMaximumFeatureValueForObservation(Observation::size_type featureIndex, LabeledObservationVector& observations) {
+    double featureMaximum = std::numeric_limits<double>::min();
+    for ( ObservationVector::size_type observation = 0; observation < observations.size(); observation++ ) {
+        if ( observations[observation].second->at(featureIndex) > featureMaximum ) {
+            featureMaximum = observations[observation].second->at(featureIndex);
+        }
+    }
+    return featureMaximum;
+}
+
+
+// this function standardizes data to minimum value 0.0 and maximum value 1.0
+void transformZeroOne(LabeledObservationVector& observations) {
+    for ( Observation::size_type feature = 0; feature < observations[0].second->size(); feature++ ) {
+        double featureMinimum = getMinimumFeatureValueForObservation(feature, observations);
+        double featureMaximum = getMaximumFeatureValueForObservation(feature, observations);
+        // standardize the feature
+        for ( ObservationVector::size_type observation = 0; observation < observations.size(); observation++ ) {
+            double x = observations[observation].second->at(feature);
+            double xstd = (x - featureMinimum) / (featureMaximum - featureMinimum);
+            observations[observation].second->at(feature) = xstd / (1.0 - 0.0) + 0.0;
+        }
     }
 }
 
@@ -180,12 +250,6 @@ class MaxIterationsExceeded : public std::exception {
 } maxIterationsExceeded;
 
 
-//class TrainingInterruptedException : public std::exception {
-//    virtual const char* what() const throw() {
-//        return "SMO training interrupted";
-//    }
-//} smoTrainingInterrupted;
-
 SvmTrainingInterruptedException smoTrainingInterruptedException("SMO training interrupted by user");
 
 //  The train method implements Sequential Minimal Optimization as described in
@@ -232,7 +296,7 @@ SVM* SmoTrainer::train(KernelFunctionCache& K, const LabeledObservationVector& t
     while ( true ) {
         if ( externalSvmTrainingInterruption.interruptTraining() ) {
             // this should be a specialized exception
-            std::cout << "***************************** interrupting training **********************************" << std::endl;
+            //std::cout << "***************************** interrupting training **********************************" << std::endl;
             throw smoTrainingInterruptedException;
         }
 
@@ -401,6 +465,7 @@ void SmoTrainer::assignNumericLabels(std::vector<double>& y, const LabeledObserv
     }
 }
 
+// the is a convenience function for getting parameter ranges for all kernels
 void getDefaultKernelParameterRangeMap(KernelParameterRangeMap& kernelParameterRangeMap) {
     ParameterRangeMap linearParameterRangeMap;
     linearParameterRangeMap[SmoTrainer::MapKey_C] = SmoTrainer::defaultCRange;
@@ -413,11 +478,18 @@ void getDefaultKernelParameterRangeMap(KernelParameterRangeMap& kernelParameterR
     ParameterRangeMap polynomialParameterRangeMap;
     polynomialParameterRangeMap[SmoTrainer::MapKey_C] = SmoTrainer::defaultCRange;
     polynomialParameterRangeMap[PolynomialKernelFunction::MapKey_Constant] = PolynomialKernelFunction::defaultConstantRange;
+    polynomialParameterRangeMap[PolynomialKernelFunction::MapKey_Coefficient] = PolynomialKernelFunction::defaultCoefficientRange;
     polynomialParameterRangeMap[PolynomialKernelFunction::MapKey_Degree] = PolynomialKernelFunction::defaultDegreeRange;
+
+    ParameterRangeMap sigmoidParameterRangeMap;
+    sigmoidParameterRangeMap[SmoTrainer::MapKey_C] = SmoTrainer::defaultCRange;
+    sigmoidParameterRangeMap[SigmoidKernelFunction::MapKey_Alpha] = SigmoidKernelFunction::defaultAlphaRange;
+    sigmoidParameterRangeMap[SigmoidKernelFunction::MapKey_Constant] = SigmoidKernelFunction::defaultConstantRange;
 
     kernelParameterRangeMap[LinearKernelFunction::MapKey] = linearParameterRangeMap;
     kernelParameterRangeMap[RbfKernelFunction::MapKey] = rbfParameterRangeMap;
     kernelParameterRangeMap[PolynomialKernelFunction::MapKey] = polynomialParameterRangeMap;
+    kernelParameterRangeMap[SigmoidKernelFunction::MapKey] = sigmoidParameterRangeMap;
 }
 
 
@@ -428,11 +500,16 @@ void getDefaultKernelParameterRangeMap(KernelParameterRangeMap& kernelParameterR
 // to produce a single instance of MultiClassSVM.  That's why observations and labels go in to
 // the constructor.
 
-OneVsOneMultiClassSvmTrainer::OneVsOneMultiClassSvmTrainer(SvmDataset& d, int e, int t, ExternalSvmTrainingInterruption& es, bool v) : svmDataset(d), evaluationFoldCount(e), trainFoldCount(t), externalSvmTrainingInterruption(es), verbose(v) {
+OneVsOneMultiClassSvmTrainer::OneVsOneMultiClassSvmTrainer(SvmDataset& d, int e, int t, ExternalSvmTrainingInterruption& es, bool v) :
+        svmDataset(d),
+        evaluationFoldCount(e),
+        trainFoldCount(t),
+        externalSvmTrainingInterruption(es),
+        //outputHandler(new OutputHandler()),
+        verbose(v) {
     buildLabelSet(labelSet, svmDataset.getLabeledObservationVector());
     buildLabelToLabeledObservationVector(labelToLabeledObservationVector, svmDataset.getLabeledObservationVector());
     buildLabelPairSet(labelPairSet, svmDataset.getLabeledObservationVector());
-    standardizeObservations(svmDataset.getLabeledObservationVector());
 }
 
 void buildLabelSet(LabelSet& labelSet, const LabeledObservationVector& labeledObservationVector) {
@@ -471,6 +548,8 @@ void OneVsOneMultiClassSvmTrainer::buildLabelPairSet(LabelPairSet& labelPairSet,
     }
 }
 
+// this function standardizes data to mean 0 and variance 1
+// but this may not be a good standardization for OTU data
 void OneVsOneMultiClassSvmTrainer::standardizeObservations(const LabeledObservationVector& observations) {
     bool vebose = false;
     // online method for mean and variance
@@ -498,24 +577,6 @@ void OneVsOneMultiClassSvmTrainer::standardizeObservations(const LabeledObservat
     }
 }
 
-// this method has too many arguments
-// split the observations and labels into a training set and a testing set
-// for now 2/3 and 1/3
-void OneVsOneMultiClassSvmTrainer::appendTrainingAndTestingData(
-        Label label,
-        const LabeledObservationVector& observationsWithLabel,
-        LabeledObservationVector& trainingObservations,
-        LabeledObservationVector& testingObservations) {
-
-    for (int i = 0; i < observationsWithLabel.size(); i++) {
-        if (i % 3 == 0) {
-            testingObservations.push_back(observationsWithLabel[i]);
-        }
-        else {
-            trainingObservations.push_back(observationsWithLabel[i]);
-        }
-    }
-}
 
 // The LabelMatchesEither functor is used only in a call to remove_copy_if in the
 // OneVsOneMultiClassSvmTrainer::train method.  It returns true if the labeled
@@ -594,18 +655,20 @@ MultiClassSVM* OneVsOneMultiClassSvmTrainer::train(const KernelParameterRangeMap
                 }
             }
 
-            //std::cout << "done with cross validation on all parameter values" << std::endl;
             if ( bestMeanScoreOnKFolds == 0.0 ) {
                 std::cout << "failed to train SVM on labels " << label0 << " and " << label1 << std::endl;
+                //outputHandler->writebuf();
                 throw std::exception();
             }
             else {
                 //std::cout << "trained SVM on labels " << label0 << " and " << label1 << std::endl;
                 std::cout << "    best mean score over " << trainFoldCount << " folds is " << bestMeanScoreOnKFolds << std::endl;
                 std::cout << "    best parameters are " << std::endl;
+                //outputHandler->writebuf();
                 for ( ParameterMap::const_iterator p = bestParameterMap.begin(); p != bestParameterMap.end(); p++ ) {
                     std::cout << "        "  << p->first << " : " << p->second << std::endl;
                 }
+                //outputHandler->writebuf();
 
                 LabelMatchesEither labelMatchesEither(label0, label1);
                 LabeledObservationVector twoClassDevelopmentObservations;

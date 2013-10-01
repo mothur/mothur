@@ -32,12 +32,13 @@ public:
   
   void help() { m->mothurOut(getHelpString()); }
 
-  //static void readSharedAndDesignFiles(const std::string&, const std::string&, LabeledObservationVector&, FeatureVector&);
-  //static void readSharedRAbundVectors(vector<SharedRAbundVector*>&, GroupMap&, LabeledObservationVector&, FeatureVector&);
   void readSharedAndDesignFiles(const std::string&, const std::string&, LabeledObservationVector&, FeatureVector&);
   void readSharedRAbundVectors(vector<SharedRAbundVector*>&, GroupMap&, LabeledObservationVector&, FeatureVector&);
 
   bool interruptTraining() { return m->control_pressed; }
+
+  std::vector<double>& getSmocList() { return smocList; }
+  const KernelParameterRangeMap& getKernelParameterRangeMap() { return kernelParameterRangeMap; }
 
 private:
     bool abort;
@@ -55,6 +56,9 @@ private:
 
     int evaluationFoldCount;
     int trainingFoldCount;
+    std::vector<double> smocList;
+    KernelParameterRangeMap kernelParameterRangeMap;
+
     //int numDecisionTrees;
     //string treeSplitCriterion, optimumFeatureSubsetSelectionCriteria;
     //bool doPruning, discardHighErrorTrees;

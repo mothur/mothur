@@ -28,7 +28,7 @@ ifeq  ($(strip $(64BIT_VERSION)),yes)
 	#CXX = g++44
 	
 	#if you are a mac user use the following line
-	TARGET_ARCH += -arch x86_64
+	#TARGET_ARCH += -arch x86_64
 	
 	#if you using cygwin to build Windows the following line
 	#CXX = x86_64-w64-mingw32-g++
@@ -37,7 +37,7 @@ ifeq  ($(strip $(64BIT_VERSION)),yes)
  	#TARGET_ARCH += -m64 -static
 
 	#if you are a linux user use the following line
-	#CXXFLAGS += -mtune=native -march=native -m64
+	CXXFLAGS += -mtune=native -march=native -m64
 	
 	CXXFLAGS += -DBIT_VERSION 
     FORTRAN_FLAGS = -m64
@@ -94,6 +94,9 @@ endif
 OBJECTS=$(patsubst %.cpp,%.o,$(wildcard *.cpp))
 OBJECTS+=$(patsubst %.c,%.o,$(wildcard *.c))
 OBJECTS+=$(patsubst %.f,%.o,$(wildcard *.f))
+
+#  jkl added this
+all : mothur
 
 mothur : fortranSource $(OBJECTS) uchime
 	$(CXX) $(LDFLAGS) $(TARGET_ARCH) -o $@ $(OBJECTS) $(LIBS)

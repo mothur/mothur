@@ -535,7 +535,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         else if(commandName == "load.logfile")          {	command = new LoadLogfileCommand(optionString);             }
         else if(commandName == "sff.multiple")          {	command = new SffMultipleCommand(optionString);             }
         else if(commandName == "classify.shared")       {	command = new ClassifySharedCommand(optionString);          }
-        else if(commandName == "classifysvm.shared")    {   command = new ClassifySvmSharedCommand(optionString);       }
+        else if(commandName == "classify.svm")          {   command = new ClassifySvmSharedCommand(optionString);       }
         else if(commandName == "filter.shared")         {	command = new FilterSharedCommand(optionString);            }
         else if(commandName == "primer.design")         {	command = new PrimerDesignCommand(optionString);            }
         else if(commandName == "get.dists")             {	command = new GetDistsCommand(optionString);                }
