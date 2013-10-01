@@ -14,7 +14,7 @@
 
 /***********************************************************************/
 
-//This class was created using the algorythms described in the 
+//This class was created using the algorithms described in the 
 // "At Least 1 in 20 16S rRNA Sequence Records Currently Held in the Public Repositories is Estimated To Contain Substantial Anomalies" paper 
 //by Kevin E. Ashelford 1, Nadia A. Chuzhanova 3, John C. Fry 1, Antonia J. Jones 2 and Andrew J. Weightman 1.
 

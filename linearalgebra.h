@@ -20,9 +20,12 @@ public:
 	~LinearAlgebra() {}
 	
 	vector<vector<double> > matrix_mult(vector<vector<double> >, vector<vector<double> >);
+    vector<vector<double> >transpose(vector<vector<double> >);
 	void recenter(double, vector<vector<double> >, vector<vector<double> >&);
-	int tred2(vector<vector<double> >&, vector<double>&, vector<double>&);
+	//eigenvectors
+    int tred2(vector<vector<double> >&, vector<double>&, vector<double>&);
 	int qtli(vector<double>&, vector<double>&, vector<vector<double> >&);
+    
 	vector< vector<double> > calculateEuclidianDistance(vector<vector<double> >&, int); //pass in axes and number of dimensions
 	vector< vector<double> > calculateEuclidianDistance(vector<vector<double> >&); //pass in axes
 	vector<vector<double> > getObservedEuclideanDistance(vector<vector<double> >&);
@@ -44,7 +47,9 @@ public:
     vector<float> solveEquations(vector<vector<float> >, vector<float>);
     vector<vector<double> > getInverse(vector<vector<double> >);
     double choose(double, double);
-    
+    double normalvariate(double mu, double sigma);
+    vector< vector<double> > lda(vector< vector<double> >& a, vector<string> groups, vector< vector<double> >& means, bool&); //Linear discriminant analysis - a is [features][valuesFromGroups] groups indicates which group each sampling comes from. For example if groups = early, late, mid, early, early. a[0][0] = value for feature0 from groupEarly.
+    int svd(vector< vector<double> >& a, vector<double>& w, vector< vector<double> >& v); //Singular value decomposition
 private:
 	MothurOut* m;
 	
@@ -71,8 +76,6 @@ private:
     
     void ludcmp(vector<vector<float> >&, vector<int>&, float&);
     void lubksb(vector<vector<float> >&, vector<int>&, vector<float>&);
-    
-    
     
 };
 

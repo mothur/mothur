@@ -135,8 +135,12 @@
 #include "makecontigscommand.h"
 #include "loadlogfilecommand.h"
 #include "sffmultiplecommand.h"
+<<<<<<< HEAD
 #include "classifysharedcommand.h"
 #include "classifysvmsharedcommand.h"
+=======
+#include "classifyrfsharedcommand.h"
+>>>>>>> upstream/master
 #include "filtersharedcommand.h"
 #include "primerdesigncommand.h"
 #include "getdistscommand.h"
@@ -307,7 +311,7 @@ CommandFactory::CommandFactory(){
     commands["make.table"]          = "make.table";
     commands["sff.multiple"]        = "sff.multiple";
 	commands["quit"]				= "MPIEnabled"; 
-    commands["classify.shared"]		= "classify.shared"; 
+    commands["classifyrf.shared"]		= "classifyrf.shared"; 
     commands["filter.shared"]		= "filter.shared"; 
     commands["primer.design"]		= "primer.design";
     commands["get.dists"]           = "get.dists";
@@ -534,8 +538,12 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         else if(commandName == "make.contigs")          {	command = new MakeContigsCommand(optionString);             }
         else if(commandName == "load.logfile")          {	command = new LoadLogfileCommand(optionString);             }
         else if(commandName == "sff.multiple")          {	command = new SffMultipleCommand(optionString);             }
+<<<<<<< HEAD
         else if(commandName == "classify.shared")       {	command = new ClassifySharedCommand(optionString);          }
         else if(commandName == "classify.svm")          {   command = new ClassifySvmSharedCommand(optionString);       }
+=======
+        else if(commandName == "classifyrf.shared")       {	command = new ClassifyRFSharedCommand(optionString);          }
+>>>>>>> upstream/master
         else if(commandName == "filter.shared")         {	command = new FilterSharedCommand(optionString);            }
         else if(commandName == "primer.design")         {	command = new PrimerDesignCommand(optionString);            }
         else if(commandName == "get.dists")             {	command = new GetDistsCommand(optionString);                }
@@ -703,7 +711,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
         else if(commandName == "make.contigs")          {	pipecommand = new MakeContigsCommand(optionString);             }
         else if(commandName == "load.logfile")          {	pipecommand = new LoadLogfileCommand(optionString);             }
         else if(commandName == "sff.multiple")          {	pipecommand = new SffMultipleCommand(optionString);             }
-        else if(commandName == "classify.shared")       {	pipecommand = new ClassifySharedCommand(optionString);          }
+        else if(commandName == "classifyrf.shared")       {	pipecommand = new ClassifyRFSharedCommand(optionString);          }
         else if(commandName == "filter.shared")         {	pipecommand = new FilterSharedCommand(optionString);            }
         else if(commandName == "primer.design")         {	pipecommand = new PrimerDesignCommand(optionString);            }
         else if(commandName == "get.dists")             {	pipecommand = new GetDistsCommand(optionString);                }
@@ -857,7 +865,7 @@ Command* CommandFactory::getCommand(string commandName){
         else if(commandName == "make.contigs")          {	shellcommand = new MakeContigsCommand();            }
         else if(commandName == "load.logfile")          {	shellcommand = new LoadLogfileCommand();            }
         else if(commandName == "sff.multiple")          {	shellcommand = new SffMultipleCommand();            }
-        else if(commandName == "classify.shared")       {	shellcommand = new ClassifySharedCommand();         }
+        else if(commandName == "classifyrf.shared")       {	shellcommand = new ClassifyRFSharedCommand();         }
         else if(commandName == "filter.shared")         {	shellcommand = new FilterSharedCommand();           }
         else if(commandName == "primer.design")         {	shellcommand = new PrimerDesignCommand();           }
         else if(commandName == "get.dists")             {	shellcommand = new GetDistsCommand();               }

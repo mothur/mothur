@@ -54,9 +54,9 @@ class UnifracWeightedCommand : public Command {
 		int iters, numGroups, numComp, counter;
 		vector< vector<double> > rScores;  //vector<weighted scores for random trees.> each group comb has an entry
 		vector< vector<double> > uScores;  //vector<weighted scores for user trees.> each group comb has an entry
-		vector< map<float, float> > rScoreFreq;  //map <weighted score, number of random trees with that score.> -vector entry for each combination.
-		vector< map<float, float> > rCumul;  //map <weighted score, cumulative percentage of number of random trees with that score or higher.> -vector entry for each c								
-		map<float, float>  validScores;  //map contains scores from random
+		vector< map<double, double> > rScoreFreq;  //map <weighted score, number of random trees with that score.> -vector entry for each combination.
+		vector< map<double, double> > rCumul;  //map <weighted score, cumulative percentage of number of random trees with that score or higher.> -vector entry for each c								
+		map<double, double>  validScores;  //map contains scores from random
 		
 		bool abort, phylip, random, includeRoot, subsample, consensus;
 		string groups, itersString, outputForm, treefile, groupfile, namefile, countfile;

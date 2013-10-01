@@ -559,6 +559,7 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
 			if (m->control_pressed) { count = 0; break;   }
 			
 			if (count >= header.numReads) { break; }
+            //if (count >= 100) { break; }
 		}
 		
 		//report progress
@@ -651,6 +652,8 @@ int SffInfoCommand::readCommonHeader(ifstream& in, CommonHeader& header){
 			char buffer4 [4];
 			in.read(buffer4, 4);
 			header.numReads =  be_int4(*(unsigned int *)(&buffer4));
+            
+            if (m->debug) { m->mothurOut("[DEBUG]: numReads = " + toString(header.numReads) + "\n"); }
 				
 			//read header length
 			char buffer5 [2];
@@ -716,7 +719,7 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
         for (int i = 0; i < filehandlesHeaders.size(); i++) {  
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
                 ofstream out;
-                m->openOutputFileAppend(filehandlesHeaders[i][j], out);
+                m->openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
                 out.write(mybuffer, in.gcount()); 
                 out.close();
             }
@@ -729,7 +732,7 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
         for (int i = 0; i < filehandlesHeaders.size(); i++) {  
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
                 ofstream out;
-                m->openOutputFileAppend(filehandlesHeaders[i][j], out);
+                m->openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
                 out.write(mybuffer, in.gcount()); 
                 out.close();
             }
@@ -752,7 +755,7 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
                 thisbuffer[6] = (offset >> 8) & 0xFF;
                 thisbuffer[7] = offset & 0xFF;
                 ofstream out;
-                m->openOutputFileAppend(filehandlesHeaders[i][j], out);
+                m->openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
                 out.write(thisbuffer, 8);
                 out.close();
             }
@@ -766,8 +769,8 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
         for (int i = 0; i < filehandlesHeaders.size(); i++) {  
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
                 ofstream out;
-                m->openOutputFileAppend(filehandlesHeaders[i][j], out);
-                int offset = 0;
+                m->openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
+                unsigned int offset = 0;
                 char* thisbuffer = new char[4];
                 thisbuffer[0] = (offset >> 24) & 0xFF;
                 thisbuffer[1] = (offset >> 16) & 0xFF;
@@ -786,13 +789,20 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
         for (int i = 0; i < filehandlesHeaders.size(); i++) {  
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
                 ofstream out;
-                m->openOutputFileAppend(filehandlesHeaders[i][j], out);
+                m->openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
                 //convert number of reads to 4 byte char*
                 char* thisbuffer = new char[4];
-                thisbuffer[0] = (numSplitReads[i][j] >> 24) & 0xFF;
-                thisbuffer[1] = (numSplitReads[i][j] >> 16) & 0xFF;
-                thisbuffer[2] = (numSplitReads[i][j] >> 8) & 0xFF;
-                thisbuffer[3] = numSplitReads[i][j] & 0xFF;
+                if ((m->findEdianness()) == "BIG_ENDIAN") {
+                    thisbuffer[0] = (numSplitReads[i][j] >> 24) & 0xFF;
+                    thisbuffer[1] = (numSplitReads[i][j] >> 16) & 0xFF;
+                    thisbuffer[2] = (numSplitReads[i][j] >> 8) & 0xFF;
+                    thisbuffer[3] = numSplitReads[i][j] & 0xFF;
+                }else {
+                    thisbuffer[0] = numSplitReads[i][j] & 0xFF;
+                    thisbuffer[1] = (numSplitReads[i][j] >> 8) & 0xFF;
+                    thisbuffer[2] = (numSplitReads[i][j] >> 16) & 0xFF;
+                    thisbuffer[3] = (numSplitReads[i][j] >> 24) & 0xFF;
+                 }
                 out.write(thisbuffer, 4);
                 out.close();
                 delete[] thisbuffer;
@@ -805,7 +815,7 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
         for (int i = 0; i < filehandlesHeaders.size(); i++) {  
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
                 ofstream out;
-                m->openOutputFileAppend(filehandlesHeaders[i][j], out);
+                m->openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
                 out.write(mybuffer, in.gcount()); 
                 out.close();
             }
@@ -818,7 +828,7 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
         for (int i = 0; i < filehandlesHeaders.size(); i++) {  
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
                 ofstream out;
-                m->openOutputFileAppend(filehandlesHeaders[i][j], out);
+                m->openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
                 out.write(mybuffer, in.gcount()); 
                 out.close();
             }
@@ -831,7 +841,7 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
         for (int i = 0; i < filehandlesHeaders.size(); i++) {  
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
                 ofstream out;
-                m->openOutputFileAppend(filehandlesHeaders[i][j], out);
+                m->openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
                 out.write(mybuffer, in.gcount()); 
                 out.close();
             }
@@ -844,7 +854,7 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
         for (int i = 0; i < filehandlesHeaders.size(); i++) {  
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
                 ofstream out;
-                m->openOutputFileAppend(filehandlesHeaders[i][j], out);
+                m->openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
                 out.write(mybuffer, in.gcount()); 
                 out.close();
             }
@@ -857,7 +867,7 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
         for (int i = 0; i < filehandlesHeaders.size(); i++) {  
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
                 ofstream out;
-                m->openOutputFileAppend(filehandlesHeaders[i][j], out);
+                m->openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
                 out.write(mybuffer, in.gcount()); 
                 out.close();
             }
@@ -870,7 +880,7 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
         for (int i = 0; i < filehandlesHeaders.size(); i++) {  
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
                 ofstream out;
-                m->openOutputFileAppend(filehandlesHeaders[i][j], out);
+                m->openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
                 out.write(mybuffer, in.gcount()); 
                 out.close();
             }
@@ -913,7 +923,7 @@ int SffInfoCommand::readSeqData(ifstream& in, seqRead& read, int numFlowReads, H
             
             //read header length
 			char buffer [2];
-			in.read(buffer, 2);
+			in.read(buffer, 2); 
 			header.headerLength = be_int2(*(unsigned short *)(&buffer));
             
 			//read name length
@@ -925,33 +935,39 @@ int SffInfoCommand::readSeqData(ifstream& in, seqRead& read, int numFlowReads, H
 			char buffer3 [4];
 			in.read(buffer3, 4);
 			header.numBases =  be_int4(*(unsigned int *)(&buffer3));
+            
 			
 			//read clip qual left
 			char buffer4 [2];
 			in.read(buffer4, 2);
 			header.clipQualLeft =  be_int2(*(unsigned short *)(&buffer4));
-			header.clipQualLeft = 5; 
+			header.clipQualLeft = 5;
+            
 			
 			//read clip qual right
 			char buffer5 [2];
 			in.read(buffer5, 2);
 			header.clipQualRight =  be_int2(*(unsigned short *)(&buffer5));
+           
             
 			//read clipAdapterLeft
 			char buffer6 [2];
 			in.read(buffer6, 2);
 			header.clipAdapterLeft = be_int2(*(unsigned short *)(&buffer6));
             
+            
 			//read clipAdapterRight
 			char buffer7 [2];
 			in.read(buffer7, 2);
 			header.clipAdapterRight = be_int2(*(unsigned short *)(&buffer7));
+            
             
 			//read name
 			char* tempBuffer = new char[header.nameLength];
 			in.read(&(*tempBuffer), header.nameLength);
 			header.name = tempBuffer;
 			if (header.name.length() > header.nameLength) { header.name = header.name.substr(0, header.nameLength);  }
+            
 			delete[] tempBuffer;
 			
 			//extract info from name
@@ -1014,11 +1030,12 @@ int SffInfoCommand::readSeqData(ifstream& in, seqRead& read, int numFlowReads, H
                 int trashCodeLength = findGroup(header, read, barcodeIndex, primerIndex);
                                 
                 if(trashCodeLength == 0){
+                    //cout << header.name << " length = " << spot << '\t' << startSpotInFile << '\t' << in2.gcount() << endl;
+                    
                     ofstream out;
                     m->openOutputFileBinaryAppend(filehandles[barcodeIndex][primerIndex], out);
                     out.write(mybuffer, in2.gcount()); 
                     out.close();
-                    delete[] mybuffer;
                     numSplitReads[barcodeIndex][primerIndex]++;
 				}
 				else{
@@ -1026,9 +1043,8 @@ int SffInfoCommand::readSeqData(ifstream& in, seqRead& read, int numFlowReads, H
                     m->openOutputFileBinaryAppend(noMatchFile, out);
                     out.write(mybuffer, in2.gcount()); 
                     out.close();
-                    delete[] mybuffer;
 				}
-				
+				delete[] mybuffer;
 			}
 		}else{
 			m->mothurOut("Error reading."); m->mothurOutEndLine();
@@ -1771,7 +1787,7 @@ bool SffInfoCommand::readOligos(string oligoFile){
 					}
 					
 					filehandles[itBar->second][itPrimer->second] = thisFilename;
-					m->openOutputFile(thisFilename, temp);		temp.close();
+					temp.open(thisFilename.c_str(), ios::binary);		temp.close();
 				}
 			}
 		}

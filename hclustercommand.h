@@ -18,7 +18,7 @@
 #include "readcluster.h"
 
 /******************************************************************/
-//This command is an implementation of the HCluster algorythmn described in 
+//This command is an implementation of the HCluster algorithmn described in 
 //ESPRIT: estimating species richness using large collections of 16S rRNA pyrosequences by
 //Yijun Sun1,2,*, Yunpeng Cai2, Li Liu1, Fahong Yu1, Michael L. Farrell3, William McKendree3 
 //and William Farmerie1 1 

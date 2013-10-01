@@ -246,6 +246,9 @@ int CountTable::readTable(string file, bool readGroups) {
             in >> name; m->gobble(in); in >> thisTotal; m->gobble(in);
             if (m->debug) { m->mothurOut("[DEBUG]: " + name + '\t' + toString(thisTotal) + "\n"); }
             
+            if (thisTotal == 0) { error=true; m->mothurOut("[ERROR]: Your count table contains a sequence named " + name + " with a total=0. Please correct."); m->mothurOutEndLine();
+            }
+            
             //if group info, then read it
             vector<int> groupCounts; groupCounts.resize(numGroups, 0);
             if (columnHeaders.size() > 2) { //file contains groups

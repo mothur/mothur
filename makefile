@@ -15,8 +15,8 @@ USEREADLINE ?= yes
 CYGWIN_BUILD ?= no
 USECOMPRESSION ?= no
 MOTHUR_FILES="\"Enter_your_default_path_here\""
-RELEASE_DATE = "\"5/29/2013\""
-VERSION = "\"1.31.1\""
+RELEASE_DATE = "\"8/19/2013\""
+VERSION = "\"1.31.2\""
 FORTAN_COMPILER = gfortran
 FORTRAN_FLAGS = 
 
@@ -37,10 +37,13 @@ ifeq  ($(strip $(64BIT_VERSION)),yes)
  	#TARGET_ARCH += -m64 -static
 
 	#if you are a linux user use the following line
+<<<<<<< HEAD
 	CXXFLAGS += -mtune=native -march=native -m64
+=======
+	#CXXFLAGS += -mtune=native -march=native 
+>>>>>>> upstream/master
 	
 	CXXFLAGS += -DBIT_VERSION 
-    FORTRAN_FLAGS = -m64
 endif
 
 

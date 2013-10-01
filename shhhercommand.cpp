@@ -1690,10 +1690,8 @@ void ShhherCommand::writeQualities(vector<int> otuCounts){
             if (m->control_pressed) { break; }
             
             int index = 0;
-            int base = 0;
             
             if(nSeqsPerOTU[i] > 0){
-                qualities[i].assign(1024, -1);
                 
                 while(index < numFlowCells){
                     double maxPrValue = 1e8;
@@ -1742,8 +1740,7 @@ void ShhherCommand::writeQualities(vector<int> otuCounts){
                             value = (int)floor(temp);
                             if(value > 100){	value = 100;	}
                             
-                            qualities[i][base] = (int)value;
-                            base++;
+                            qualities[i].push_back((int)value);
                         }
                     }
                     
@@ -1754,12 +1751,7 @@ void ShhherCommand::writeQualities(vector<int> otuCounts){
             
             if(otuCounts[i] > 0){
                 qualityFile << '>' << seqNameVector[mapUniqueToSeq[i]] << endl;
-                
-                int j=4;	//need to get past the first four bases
-                while(qualities[i][j] != -1){
-                    qualityFile << qualities[i][j] << ' ';
-                    j++;
-                }
+                for (int j = 4; j < qualities[i].size(); j++) { qualityFile << qualities[i][j] << ' '; }
                 qualityFile << endl;
             }
         }
@@ -2394,16 +2386,22 @@ int ShhherCommand::driver(vector<string> filenames, string thisCompositeFASTAFil
                 m->mothurOut("\nFinalizing...\n");
                 fill(numOTUs, seqNumber, seqIndex, cumNumSeqs, nSeqsPerOTU, aaP, aaI);
                 
+                if (m->debug) { m->mothurOut("[DEBUG]: done fill().\n"); }
+
                 if (m->control_pressed) { break; }
                 
                 setOTUs(numOTUs, numSeqs, seqNumber, seqIndex, cumNumSeqs, nSeqsPerOTU, otuData, singleTau, dist, aaP, aaI);
+                
+                if (m->debug) { m->mothurOut("[DEBUG]: done setOTUs().\n"); }
                 
                 if (m->control_pressed) { break; }
                 
                 vector<int> otuCounts(numOTUs, 0);
                 for(int j=0;j<numSeqs;j++)	{	otuCounts[otuData[j]]++;	}
                 
-                calcCentroidsDriver(numOTUs, cumNumSeqs, nSeqsPerOTU, seqIndex, change, centroids, singleTau, mapSeqToUnique, uniqueFlowgrams, flowDataIntI, lengths, numFlowCells, seqNumber);	
+                calcCentroidsDriver(numOTUs, cumNumSeqs, nSeqsPerOTU, seqIndex, change, centroids, singleTau, mapSeqToUnique, uniqueFlowgrams, flowDataIntI, lengths, numFlowCells, seqNumber);
+                
+                if (m->debug) { m->mothurOut("[DEBUG]: done calcCentroidsDriver().\n"); }
                 
                 if (m->control_pressed) { break; }
                 
@@ -3280,12 +3278,11 @@ void ShhherCommand::writeQualities(int numOTUs, int numFlowCells, string quality
 			if (m->control_pressed) { break; }
 			
 			int index = 0;
-			int base = 0;
-			
+            
 			if(nSeqsPerOTU[i] > 0){
-				qualities[i].assign(1024, -1);
 				
 				while(index < numFlowCells){
+                    
 					double maxPrValue = 1e8;
 					short maxPrIndex = -1;
 					double count = 0.0000;
@@ -3304,7 +3301,7 @@ void ShhherCommand::writeQualities(int numOTUs, int numFlowCells, string quality
 							pr[s] += tauValue * singleLookUp[s * NUMBINS + intensity];
 						}
 					}
-					
+                    
 					maxPrIndex = uniqueFlowgrams[centroids[i] * numFlowCells + index];
 					maxPrValue = pr[maxPrIndex];
 					
@@ -3315,7 +3312,7 @@ void ShhherCommand::writeQualities(int numOTUs, int numFlowCells, string quality
 						for(int s=0;s<HOMOPS;s++){
 							norm += exp(-(pr[s] - maxPrValue));
 						}
-						
+                        
 						for(int s=1;s<=maxPrIndex;s++){
 							int value = 0;
 							double temp = 0.0000;
@@ -3332,28 +3329,24 @@ void ShhherCommand::writeQualities(int numOTUs, int numFlowCells, string quality
 							value = (int)floor(temp);
 							if(value > 100){	value = 100;	}
 							
-							qualities[i][base] = (int)value;
-							base++;
+                            qualities[i].push_back((int)value);
 						}
-					}
+					}//end if
 					
 					index++;
-				}
-			}
+                    
+				}//end while
+                
+			}//end if
 			
-			
+            
 			if(otuCounts[i] > 0){
 				qualityFile << '>' << seqNameVector[mapUniqueToSeq[i]] << endl;
-                	
-				int j=4;	//need to get past the first four bases
-				while(qualities[i][j] != -1){
-                    qualityFile << qualities[i][j] << ' ';
-                    if (j > qualities[i].size()) { break; }
-                    j++;
-				}
+                //need to get past the first four bases
+                for (int j = 4; j < qualities[i].size(); j++) { qualityFile << qualities[i][j] << ' '; }
 				qualityFile << endl;
 			}
-		}
+		}//end for
 		qualityFile.close();
 		outputNames.push_back(qualityFileName); outputTypes["qfile"].push_back(qualityFileName);
         

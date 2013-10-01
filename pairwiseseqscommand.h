@@ -193,6 +193,8 @@ static DWORD WINAPI MyPairwiseSquareThreadFunction(LPVOID lpParam){
 				distCalculator->calcDist(seqI, seqJ);
 				double dist = distCalculator->getDist();
                 
+                if (pDataArray->m->debug) { pDataArray->m->mothurOut("[DEBUG]: " + seqI.getName() + '\t' +  alignment->getSeqAAln() + '\n' + seqJ.getName() + alignment->getSeqBAln() + '\n' + "distance = " + toString(dist) + "\n"); }
+                
 				outFile << dist << '\t'; 
 			}
 			
@@ -292,6 +294,8 @@ static DWORD WINAPI MyPairwiseThreadFunction(LPVOID lpParam){
 				
 				distCalculator->calcDist(seqI, seqJ);
 				double dist = distCalculator->getDist();
+                
+                if (pDataArray->m->debug) { pDataArray->m->mothurOut("[DEBUG]: " + seqI.getName() + '\t' +  alignment->getSeqAAln() + '\n' + seqJ.getName() + alignment->getSeqBAln() + '\n' + "distance = " + toString(dist) + "\n"); }
                 
 				if(dist <= pDataArray->cutoff){
 					if (pDataArray->output == "column") { outFile << pDataArray->alignDB.get(i).getName() << ' ' << pDataArray->alignDB.get(j).getName() << ' ' << dist << endl; }

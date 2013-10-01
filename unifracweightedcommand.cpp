@@ -915,7 +915,7 @@ void UnifracWeightedCommand::printWeightedFile() {
 		for(int a = 0; a < numComp; a++) {
 			output->initFile(groupComb[a], tags);
 			//print each line
-			for (map<float,float>::iterator it = validScores.begin(); it != validScores.end(); it++) { 
+			for (map<double,double>::iterator it = validScores.begin(); it != validScores.end(); it++) {
 				data.push_back(it->first);  data.push_back(rScoreFreq[a][it->first]); data.push_back(rCumul[a][it->first]); 
 				output->output(data);
 				data.clear();
@@ -1085,7 +1085,7 @@ void UnifracWeightedCommand::calculateFreqsCumuls() {
 		for (int f = 0; f < numComp; f++) {
 			for (int i = 0; i < rScores[f].size(); i++) { //looks like 0,0,1,1,1,2,4,7...  you want to make a map that say rScoreFreq[0] = 2, rScoreFreq[1] = 3...
 				validScores[rScores[f][i]] = rScores[f][i];
-				map<float,float>::iterator it = rScoreFreq[f].find(rScores[f][i]);
+				map<double,double>::iterator it = rScoreFreq[f].find(rScores[f][i]);
 				if (it != rScoreFreq[f].end()) {
 					rScoreFreq[f][rScores[f][i]]++;
 				}else{
@@ -1098,9 +1098,9 @@ void UnifracWeightedCommand::calculateFreqsCumuls() {
 		for(int a = 0; a < numComp; a++) {
 			float rcumul = 1.0000;
 			//this loop fills the cumulative maps and put 0.0000 in the score freq map to make it easier to print.
-			for (map<float,float>::iterator it = validScores.begin(); it != validScores.end(); it++) {
+			for (map<double,double>::iterator it = validScores.begin(); it != validScores.end(); it++) {
 				//make rscoreFreq map and rCumul
-				map<float,float>::iterator it2 = rScoreFreq[a].find(it->first);
+				map<double,double>::iterator it2 = rScoreFreq[a].find(it->first);
 				rCumul[a][it->first] = rcumul;
 				//get percentage of random trees with that info
 				if (it2 != rScoreFreq[a].end()) {  rScoreFreq[a][it->first] /= iters; rcumul-= it2->second;  }

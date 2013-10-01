@@ -368,6 +368,8 @@ int TrimOligos::stripBarcode(Sequence& seq, QualityScores& qual, int& group){
                 temp = temp.substr(0,alnLength);
                 int numDiff = countDiffs(oligo, temp);
                 
+                if (m->debug) { m->mothurOut("[DEBUG]: " + seq.getName() + " aligned fragment =" + temp + ", barcode =" + oligo + ", numDiffs = " + toString(numDiff) + "\n"); }
+                
                 if(numDiff < minDiff){
                     minDiff = numDiff;
                     minCount = 1;
@@ -487,6 +489,8 @@ int TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq, int& gr
                 temp = temp.substr(0,alnLength);
                 int numDiff = countDiffs(oligo, temp);
                 
+                if (m->debug) { m->mothurOut("[DEBUG]: forward " + forwardSeq.getName() + " aligned fragment=" + temp + ", barcode=" + oligo + ", numDiffs=" + toString(numDiff) + ".\n");  }
+                
                 if (alnLength == 0) { numDiff = bdiffs + 100; }
                 //cout << "after = " << oligo << '\t' << temp << '\t' << numDiff << endl;
                 
@@ -548,6 +552,9 @@ int TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq, int& gr
                     oligo = oligo.substr(0,alnLength);
                     temp = temp.substr(0,alnLength);
                     int numDiff = countDiffs(oligo, temp);
+                    
+                    if (m->debug) { m->mothurOut("[DEBUG]: reverse " + forwardSeq.getName() + " aligned fragment=" + temp + ", barcode=" + oligo + ", numDiffs=" + toString(numDiff) + ".\n");  }
+                    
                     if (alnLength == 0) { numDiff = bdiffs + 100; }
                     
                     //cout << "after = " << oligo << '\t' << temp << '\t' << numDiff << endl;
@@ -700,7 +707,7 @@ int TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq, Quality
                 int numDiff = countDiffs(oligo, temp);
                 
                 if (alnLength == 0) { numDiff = bdiffs + 100; }
-                //cout << "after = " << oligo << '\t' << temp << '\t' << numDiff << endl;
+                if (m->debug) { m->mothurOut("[DEBUG]: forward " + forwardSeq.getName() + " aligned fragment=" + temp + ", barcode=" + oligo + ", numDiffs=" + toString(numDiff) + ".\n");  }
                 
                 if(numDiff < minDiff){
                     minDiff = numDiff;
@@ -761,6 +768,8 @@ int TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq, Quality
                     temp = temp.substr(0,alnLength);
                     int numDiff = countDiffs(oligo, temp);
                     if (alnLength == 0) { numDiff = bdiffs + 100; }
+                    
+                    if (m->debug) { m->mothurOut("[DEBUG]: reverse " + reverseSeq.getName() + " aligned fragment=" + temp + ", barcode=" + oligo + ", numDiffs=" + toString(numDiff) + ".\n");  }
                     
                     //cout << "after = " << oligo << '\t' << temp << '\t' << numDiff << endl;
                     if(numDiff < minDiff){
@@ -1370,6 +1379,8 @@ int TrimOligos::stripForward(Sequence& forwardSeq, Sequence& reverseSeq, Quality
                 if (alnLength == 0) { numDiff = pdiffs + 100; }
                 //cout << "after = " << oligo << '\t' << temp << '\t' << numDiff << endl;
                 
+                if (m->debug) { m->mothurOut("[DEBUG]: forward " + forwardSeq.getName() + " aligned fragment=" + temp + ", primer=" + oligo + ", numDiffs=" + toString(numDiff) + ".\n");  }
+                
                 if(numDiff < minDiff){
                     minDiff = numDiff;
                     minCount = 1;
@@ -1429,6 +1440,8 @@ int TrimOligos::stripForward(Sequence& forwardSeq, Sequence& reverseSeq, Quality
                     temp = temp.substr(0,alnLength);
                     int numDiff = countDiffs(oligo, temp);
                     if (alnLength == 0) { numDiff = pdiffs + 100; }
+                    
+                    if (m->debug) { m->mothurOut("[DEBUG]: reverse " + forwardSeq.getName() + " aligned fragment=" + temp + ", primer=" + oligo + ", numDiffs=" + toString(numDiff) + ".\n");  }
                     
                     //cout << "after = " << oligo << '\t' << temp << '\t' << numDiff << endl;
                     if(numDiff < minDiff){
@@ -1579,6 +1592,8 @@ int TrimOligos::stripForward(Sequence& forwardSeq, Sequence& reverseSeq, int& gr
                 temp = temp.substr(0,alnLength);
                 int numDiff = countDiffs(oligo, temp);
                 
+                if (m->debug) { m->mothurOut("[DEBUG]: forward " + forwardSeq.getName() + " aligned fragment=" + temp + ", primer=" + oligo + ", numDiffs=" + toString(numDiff) + ".\n");  }
+                
                 if (alnLength == 0) { numDiff = pdiffs + 100; }
                 //cout << "after = " << oligo << '\t' << temp << '\t' << numDiff << endl;
                 
@@ -1640,6 +1655,9 @@ int TrimOligos::stripForward(Sequence& forwardSeq, Sequence& reverseSeq, int& gr
                     oligo = oligo.substr(0,alnLength);
                     temp = temp.substr(0,alnLength);
                     int numDiff = countDiffs(oligo, temp);
+                    
+                    if (m->debug) { m->mothurOut("[DEBUG]: reverse " + forwardSeq.getName() + " aligned fragment=" + temp + ", primer=" + oligo + ", numDiffs=" + toString(numDiff) + ".\n");  }
+                    
                     if (alnLength == 0) { numDiff = pdiffs + 100; }
                     
                     //cout << "after = " << oligo << '\t' << temp << '\t' << numDiff << endl;
@@ -1772,6 +1790,8 @@ int TrimOligos::stripBarcode(Sequence& seq, int& group){
                 temp = temp.substr(0,alnLength);
                 
                 int numDiff = countDiffs(oligo, temp);
+                
+                if (m->debug) { m->mothurOut("[DEBUG]: " + seq.getName() + " aligned fragment =" + temp + ", barcode =" + oligo + ", numDiffs = " + toString(numDiff) + "\n"); }
                 
                 if(numDiff < minDiff){
                     minDiff = numDiff;

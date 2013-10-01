@@ -552,7 +552,7 @@ int SubSampleCommand::getSubSampleFasta() {
                     else{
                         itGroupCounts = groupCounts.find(group);
                         if (itGroupCounts != groupCounts.end()) {
-                            if (groupCounts[group] < size) {	subset.insert(names[j]); 	groupCounts[group]++; }
+                            if (itGroupCounts->second < size) {	subset.insert(names[j]); 	(itGroupCounts->second)++; }
                         }
                     }				
                 }

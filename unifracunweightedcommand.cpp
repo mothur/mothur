@@ -736,7 +736,7 @@ int UnifracUnweightedCommand::runRandomCalcs(Tree* thisTree, vector<double> user
             float rcumul = 1.0000;
     
             //this loop fills the cumulative maps and put 0.0000 in the score freq map to make it easier to print.
-            for (map<float,float>::iterator it = validScores.begin(); it != validScores.end(); it++) { 
+            for (map<float,float>::iterator it = validScores.begin(); it != validScores.end(); it++) {
                 //make rscoreFreq map and rCumul
                 map<float,float>::iterator it2 = rscoreFreq[a].find(it->first);
                 rCumul[a][it->first] = rcumul;

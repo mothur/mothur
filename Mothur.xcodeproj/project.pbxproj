@@ -595,20 +595,20 @@
 		A7E9B67212D37EC400DA6239 /* catchallcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = catchallcommand.cpp; sourceTree = "<group>"; };
 		A7E9B67312D37EC400DA6239 /* catchallcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = catchallcommand.h; sourceTree = "<group>"; };
 		A7E9B67412D37EC400DA6239 /* ccode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ccode.cpp; sourceTree = "<group>"; };
-		A7E9B67512D37EC400DA6239 /* ccode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ccode.h; sourceTree = "<group>"; };
+		A7E9B67512D37EC400DA6239 /* ccode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = ccode.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		A7E9B67612D37EC400DA6239 /* chao1.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chao1.cpp; sourceTree = "<group>"; };
 		A7E9B67712D37EC400DA6239 /* chao1.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chao1.h; sourceTree = "<group>"; };
 		A7E9B67812D37EC400DA6239 /* chimera.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimera.cpp; sourceTree = "<group>"; };
 		A7E9B67912D37EC400DA6239 /* chimera.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimera.h; sourceTree = "<group>"; };
 		A7E9B67A12D37EC400DA6239 /* chimerabellerophoncommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimerabellerophoncommand.cpp; sourceTree = "<group>"; };
 		A7E9B67B12D37EC400DA6239 /* chimerabellerophoncommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimerabellerophoncommand.h; sourceTree = "<group>"; };
-		A7E9B67C12D37EC400DA6239 /* chimeraccodecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimeraccodecommand.cpp; sourceTree = "<group>"; };
+		A7E9B67C12D37EC400DA6239 /* chimeraccodecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = chimeraccodecommand.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		A7E9B67D12D37EC400DA6239 /* chimeraccodecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimeraccodecommand.h; sourceTree = "<group>"; };
-		A7E9B67E12D37EC400DA6239 /* chimeracheckcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimeracheckcommand.cpp; sourceTree = "<group>"; };
+		A7E9B67E12D37EC400DA6239 /* chimeracheckcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = chimeracheckcommand.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		A7E9B67F12D37EC400DA6239 /* chimeracheckcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimeracheckcommand.h; sourceTree = "<group>"; };
 		A7E9B68012D37EC400DA6239 /* chimeracheckrdp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimeracheckrdp.cpp; sourceTree = "<group>"; };
-		A7E9B68112D37EC400DA6239 /* chimeracheckrdp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimeracheckrdp.h; sourceTree = "<group>"; };
-		A7E9B68212D37EC400DA6239 /* chimerapintailcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimerapintailcommand.cpp; sourceTree = "<group>"; };
+		A7E9B68112D37EC400DA6239 /* chimeracheckrdp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = chimeracheckrdp.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		A7E9B68212D37EC400DA6239 /* chimerapintailcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = chimerapintailcommand.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		A7E9B68312D37EC400DA6239 /* chimerapintailcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimerapintailcommand.h; sourceTree = "<group>"; };
 		A7E9B68412D37EC400DA6239 /* chimerarealigner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimerarealigner.cpp; sourceTree = "<group>"; };
 		A7E9B68512D37EC400DA6239 /* chimerarealigner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimerarealigner.h; sourceTree = "<group>"; };
@@ -633,12 +633,12 @@
 		A7E9B69A12D37EC400DA6239 /* clusterclassic.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = clusterclassic.cpp; sourceTree = "<group>"; };
 		A7E9B69B12D37EC400DA6239 /* clusterclassic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = clusterclassic.h; sourceTree = "<group>"; };
 		A7E9B69C12D37EC400DA6239 /* clustercommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = clustercommand.cpp; sourceTree = "<group>"; };
-		A7E9B69D12D37EC400DA6239 /* clustercommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = clustercommand.h; sourceTree = "<group>"; };
+		A7E9B69D12D37EC400DA6239 /* clustercommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = clustercommand.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		A7E9B69E12D37EC400DA6239 /* clusterdoturcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = clusterdoturcommand.cpp; sourceTree = "<group>"; };
 		A7E9B69F12D37EC400DA6239 /* clusterdoturcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = clusterdoturcommand.h; sourceTree = "<group>"; };
 		A7E9B6A012D37EC400DA6239 /* clusterfragmentscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = clusterfragmentscommand.cpp; sourceTree = "<group>"; };
 		A7E9B6A112D37EC400DA6239 /* clusterfragmentscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = clusterfragmentscommand.h; sourceTree = "<group>"; };
-		A7E9B6A212D37EC400DA6239 /* clustersplitcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = clustersplitcommand.cpp; sourceTree = "<group>"; };
+		A7E9B6A212D37EC400DA6239 /* clustersplitcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = clustersplitcommand.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		A7E9B6A312D37EC400DA6239 /* clustersplitcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = clustersplitcommand.h; sourceTree = "<group>"; };
 		A7E9B6A412D37EC400DA6239 /* cmdargs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cmdargs.cpp; sourceTree = "<group>"; };
 		A7E9B6A512D37EC400DA6239 /* cmdargs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cmdargs.h; sourceTree = "<group>"; };
@@ -670,7 +670,7 @@
 		A7E9B6BF12D37EC400DA6239 /* datavector.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = datavector.hpp; sourceTree = "<group>"; };
 		A7E9B6C012D37EC400DA6239 /* dayhoff.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dayhoff.h; sourceTree = "<group>"; };
 		A7E9B6C112D37EC400DA6239 /* decalc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = decalc.cpp; sourceTree = "<group>"; };
-		A7E9B6C212D37EC400DA6239 /* decalc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = decalc.h; sourceTree = "<group>"; };
+		A7E9B6C212D37EC400DA6239 /* decalc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = decalc.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		A7E9B6C312D37EC400DA6239 /* deconvolutecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = deconvolutecommand.cpp; sourceTree = "<group>"; };
 		A7E9B6C412D37EC400DA6239 /* deconvolutecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = deconvolutecommand.h; sourceTree = "<group>"; };
 		A7E9B6C512D37EC400DA6239 /* degapseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = degapseqscommand.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
@@ -755,7 +755,7 @@
 		A7E9B71812D37EC400DA6239 /* hcluster.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = hcluster.cpp; sourceTree = SOURCE_ROOT; };
 		A7E9B71912D37EC400DA6239 /* hcluster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hcluster.h; sourceTree = SOURCE_ROOT; };
 		A7E9B71A12D37EC400DA6239 /* hclustercommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = hclustercommand.cpp; sourceTree = "<group>"; };
-		A7E9B71B12D37EC400DA6239 /* hclustercommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hclustercommand.h; sourceTree = "<group>"; };
+		A7E9B71B12D37EC400DA6239 /* hclustercommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = hclustercommand.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		A7E9B71C12D37EC400DA6239 /* heatmap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = heatmap.cpp; sourceTree = SOURCE_ROOT; };
 		A7E9B71D12D37EC400DA6239 /* heatmap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = heatmap.h; sourceTree = SOURCE_ROOT; };
 		A7E9B71E12D37EC400DA6239 /* heatmapcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = heatmapcommand.cpp; sourceTree = "<group>"; };
@@ -2473,6 +2473,7 @@
 					"VERSION=\"\\\"1.31.0\\\"\"",
 					"RELEASE_DATE=\"\\\"5/24/2013\\\"\"",
 				);
+				GCC_VERSION = "";
 				"GCC_VERSION[arch=*]" = "";
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -2490,7 +2491,7 @@
 					"-lncurses",
 					"-lreadline",
 				);
-				SDKROOT = macosx10.6;
+				SDKROOT = macosx10.8;
 				SKIP_INSTALL = NO;
 				USER_HEADER_SEARCH_PATHS = "";
 			};
@@ -2509,6 +2510,7 @@
 					"VERSION=\"\\\"1.31.0\\\"\"",
 					"RELEASE_DATE=\"\\\"5/24/2013\\\"\"",
 				);
+				GCC_VERSION = "";
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_MISSING_PARENTHESES = YES;
@@ -2528,7 +2530,7 @@
 					"-lncurses",
 					"-lreadline",
 				);
-				SDKROOT = macosx10.6;
+				SDKROOT = macosx10.8;
 				SKIP_INSTALL = NO;
 			};
 			name = Release;

@@ -558,7 +558,6 @@ int AlignCommand::driver(linePair* filePos, string alignFName, string reportFNam
 			if (m->control_pressed) {  break; }
 			
 			Sequence* candidateSeq = new Sequence(inFASTA);  m->gobble(inFASTA);
-            cout  << candidateSeq->getAligned() << endl;
 			report.setCandidate(candidateSeq);
 
 			int origNumBases = candidateSeq->getNumBases();

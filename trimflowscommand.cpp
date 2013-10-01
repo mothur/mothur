@@ -637,8 +637,7 @@ void TrimFlowsCommand::getOligos(vector<vector<string> >& outFlowFileNames){
 			primers[""] = 0;
 			primerNameVector.push_back("");			
 		}
-		
-		
+
 		outFlowFileNames.resize(barcodeNameVector.size());
 		for(int i=0;i<outFlowFileNames.size();i++){
 			outFlowFileNames[i].assign(primerNameVector.size(), "");

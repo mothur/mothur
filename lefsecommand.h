@@ -48,16 +48,27 @@ public:
     void help() { m->mothurOut(getHelpString()); }
     
 private:
-    bool abort, allLines;
-    string outputDir, sharedfile, designfile, mclass, subclass, classes;
+    bool abort, allLines, wilc, wilcsamename, curv, subject, normMillion;
+    string outputDir, sharedfile, designfile, mclass, subclass, classes, rankTec, multiClassStrat;
     vector<string> outputNames;
     set<string> labels;
-    float anovaAlpha, wilcoxonAlpha;
+    double anovaAlpha, wilcoxonAlpha, fBoots, ldaThreshold;
+    int nlogs, iters, strict, minC;
     
-    int process(vector<SharedRAbundVector*>&, DesignMap&);
-    vector<int> runKruskalWallis(vector<SharedRAbundVector*>&, DesignMap&);
-    vector<int> runWilcoxon(vector<SharedRAbundVector*>&, DesignMap&, vector<int>);
-
+    int process(vector<SharedRAbundFloatVector*>&, DesignMap&);
+    int normalize(vector<SharedRAbundFloatVector*>&);
+    map<int, double> runKruskalWallis(vector<SharedRAbundFloatVector*>&, DesignMap&);
+    map<int, double> runWilcoxon(vector<SharedRAbundFloatVector*>&, DesignMap&, map<int, double>, map<string, set<string> >& class2SubClasses, map<string, vector<int> >& subClass2GroupIndex, map<string, string>);
+    bool testOTUWilcoxon(map<string, set<string> >& class2SubClasses, vector<float> abunds, map<string, vector<int> >& subClass2GroupIndex, map<string, string>);
+    map<int, double> testLDA(vector<SharedRAbundFloatVector*>&, map<int, double>, map<string, vector<int> >& class2GroupIndex, map<string, vector<int> >&);
+    bool contastWithinClassesOrFewPerClass(vector< vector<double> >&, vector<int> rands, int minCl, map<string, vector<int> > class2GroupIndex,  map<int, string> indexToClass);
+    vector< vector<double> > lda(vector< vector<double> >& adjustedLookup, vector<int> rand_s, map<int, string>& indexToClass, vector<string>);
+    vector< vector<double> > getMeans(vector<SharedRAbundFloatVector*>& lookup, map<string, vector<int> >& class2GroupIndex);
+    int printResults(vector< vector<double> >, map<int, double>, map<int, double>, string, vector<string>);
+    
+    //for testing
+    bool printToCoutForRTesting(vector< vector<double> >& adjustedLookup, vector<int> rand_s, map<string, vector<int> >& class2GroupIndex, map<int, double> bins, map<string, vector<int> >&, vector<string>);
+    int makeShared(int);
 };
 
 /**************************************************************************************************/

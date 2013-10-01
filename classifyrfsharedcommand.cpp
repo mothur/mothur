@@ -6,13 +6,13 @@
 //  Copyright (c) 2012 Schloss Lab. All rights reserved.
 //
 
-#include "classifysharedcommand.h"
+#include "classifyrfsharedcommand.h"
 #include "randomforest.hpp"
 #include "decisiontree.hpp"
 #include "rftreenode.hpp"
 
 //**********************************************************************************************************************
-vector<string> ClassifySharedCommand::setParameters(){	
+vector<string> ClassifyRFSharedCommand::setParameters(){	
 	try {
 		//CommandParameter pprocessors("processors", "Number", "", "1", "", "", "",false,false); parameters.push_back(pprocessors);        
         CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none","summary",false,true,true); parameters.push_back(pshared);		
@@ -44,7 +44,7 @@ vector<string> ClassifySharedCommand::setParameters(){
 	}
 }
 //**********************************************************************************************************************
-string ClassifySharedCommand::getHelpString(){	
+string ClassifyRFSharedCommand::getHelpString(){	
 	try {
 		string helpString = "";
 		helpString += "The classify.shared command allows you to ....\n";
@@ -61,7 +61,7 @@ string ClassifySharedCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-string ClassifySharedCommand::getOutputPattern(string type) {
+string ClassifyRFSharedCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
         
@@ -77,7 +77,7 @@ string ClassifySharedCommand::getOutputPattern(string type) {
 }
 //**********************************************************************************************************************
 
-ClassifySharedCommand::ClassifySharedCommand() {
+ClassifyRFSharedCommand::ClassifyRFSharedCommand() {
   try {
     abort = true; calledHelp = true;
     setParameters();
@@ -91,7 +91,7 @@ ClassifySharedCommand::ClassifySharedCommand() {
 }
 
 //**********************************************************************************************************************
-ClassifySharedCommand::ClassifySharedCommand(string option) {
+ClassifyRFSharedCommand::ClassifyRFSharedCommand(string option) {
   try {
     abort = false; calledHelp = false;
     allLines = 1;
@@ -232,7 +232,7 @@ ClassifySharedCommand::ClassifySharedCommand(string option) {
   }
 }
 //**********************************************************************************************************************
-int ClassifySharedCommand::execute() {
+int ClassifyRFSharedCommand::execute() {
   try {
     
     if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
@@ -330,7 +330,7 @@ int ClassifySharedCommand::execute() {
 }
 //**********************************************************************************************************************
 
-void ClassifySharedCommand::processSharedAndDesignData(vector<SharedRAbundVector*> lookup){  
+void ClassifyRFSharedCommand::processSharedAndDesignData(vector<SharedRAbundVector*> lookup){  
     try {
 //    for (int i = 0; i < designMap->getNamesOfGroups().size(); i++) {
 //      string groupName = designMap->getNamesOfGroups()[i];
