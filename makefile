@@ -37,11 +37,8 @@ ifeq  ($(strip $(64BIT_VERSION)),yes)
  	#TARGET_ARCH += -m64 -static
 
 	#if you are a linux user use the following line
-<<<<<<< HEAD
 	CXXFLAGS += -mtune=native -march=native -m64
-=======
 	#CXXFLAGS += -mtune=native -march=native 
->>>>>>> upstream/master
 	
 	CXXFLAGS += -DBIT_VERSION 
 endif
