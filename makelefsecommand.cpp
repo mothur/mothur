@@ -43,8 +43,8 @@ string MakeLefseCommand::getHelpString(){
         helpString += "The constaxonomy parameter is used to input your taxonomy file. http://www.wiki.mothur.org/wiki/Constaxonomy_file. The contaxonomy file is the taxonomy file outputted by classify.otu(list=yourListfile, taxonomy=yourTaxonomyFile). Be SURE that the you are the constaxonomy file distance matches the shared file distance.  ie, for *.0.03.cons.taxonomy set label=0.03. Mothur is smart enough to handle shared files that have been subsampled. \n";
         helpString += "The scale parameter allows you to select what scale you would like to use to convert your shared file abundances to relative abundances. Choices are totalgroup, totalotu, averagegroup, averageotu, default is totalgroup.\n";
 		helpString += "The label parameter allows you to select what distance level you would like used, if none is given the first distance is used.\n";
-		helpString += "The make.lefse command should be in the following format: make.lefse(list=yourListFile, taxonomy=outputFromClassify.seqsCommand, name=yourNameFile)\n";
-		helpString += "make.lefse(shared=final.an.list, taxonomy=final.an.taxonomy, name=final.names)\n";
+		helpString += "The make.lefse command should be in the following format: make.lefse(shared=yourSharedFile)\n";
+		helpString += "make.lefse(shared=final.an.shared)\n";
 		return helpString;
 	}
 	catch(exception& e) {

@@ -19,11 +19,11 @@ public:
   ~ClassifyRFSharedCommand() {};
   
   vector<string> setParameters();
-  string getCommandName()			{ return "classifyrf.shared";     }
+  string getCommandName()			{ return "classify.rf";     }
   string getCommandCategory()		{ return "OTU-Based Approaches";		}  
   string getHelpString();	
   string getOutputPattern(string);
-  string getCitation() { return "http://www.mothur.org/wiki/Classifyrf.shared\n"; }
+  string getCitation() { return "http://www.mothur.org/wiki/Classify.rf\n"; }
   string getDescription()		{ return "implements the random forest machine learning algorithm to identify OTUs that can be used to differentiate between various groups of samples"; }
   int execute();
   

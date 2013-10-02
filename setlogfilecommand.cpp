@@ -91,7 +91,7 @@ int SetLogFileCommand::execute(){
         if (directory == "") {
             commandFactory->setLogfileName(name, append);
         }else if (m->dirCheck(directory)) {
-             commandFactory->setLogfileName(name, append);
+            commandFactory->setLogfileName(name, append);
         }
 		
 		return 0;

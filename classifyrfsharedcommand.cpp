@@ -47,12 +47,12 @@ vector<string> ClassifyRFSharedCommand::setParameters(){
 string ClassifyRFSharedCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The classify.shared command allows you to ....\n";
-		helpString += "The classify.shared command parameters are: shared, design, label, groups, otupersplit.\n";
+		helpString += "The classify.rf command allows you to ....\n";
+		helpString += "The classify.rf command parameters are: shared, design, label, groups, otupersplit.\n";
         helpString += "The label parameter is used to analyze specific labels in your input.\n";
 		helpString += "The groups parameter allows you to specify which of the groups in your designfile you would like analyzed.\n";
-		helpString += "The classify.shared should be in the following format: \n";
-		helpString += "classify.shared(shared=yourSharedFile, design=yourDesignFile)\n";
+		helpString += "The classify.rf should be in the following format: \n";
+		helpString += "classify.rf(shared=yourSharedFile, design=yourDesignFile)\n";
 		return helpString;
 	}
 	catch(exception& e) {

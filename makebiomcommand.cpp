@@ -93,11 +93,13 @@
 vector<string> MakeBiomCommand::setParameters(){	
 	try {
 		CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none","biom",false,true,true); parameters.push_back(pshared);
-        CommandParameter pcontaxonomy("contaxonomy", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pcontaxonomy);
+        CommandParameter pcontaxonomy("constaxonomy", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pcontaxonomy);
+        //CommandParameter preference("referencetax", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(preference);
         CommandParameter pmetadata("metadata", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(pmetadata);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+        //CommandParameter ppicrust("picrust", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(ppicrust);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
         CommandParameter pmatrixtype("matrixtype", "Multiple", "sparse-dense", "sparse", "", "", "","",false,false); parameters.push_back(pmatrixtype);
 
@@ -114,12 +116,14 @@ vector<string> MakeBiomCommand::setParameters(){
 string MakeBiomCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The make.biom command parameters are shared, contaxonomy, metadata, groups, matrixtype and label.  shared is required, unless you have a valid current file.\n";
+		helpString += "The make.biom command parameters are shared, contaxonomy, metadata, groups, matrixtype and label.  shared is required, unless you have a valid current file.\n"; //, picrust and referencetax
 		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like included. The group names are separated by dashes.\n";
 		helpString += "The label parameter allows you to select what distance levels you would like, and are also separated by dashes.\n";
 		helpString += "The matrixtype parameter allows you to select what type you would like to make. Choices are sparse and dense, default is sparse.\n";
         helpString += "The contaxonomy file is the taxonomy file outputted by classify.otu(list=yourListfile, taxonomy=yourTaxonomyFile). Be SURE that the you are the constaxonomy file distance matches the shared file distance.  ie, for *.0.03.cons.taxonomy set label=0.03. Mothur is smart enough to handle shared files that have been subsampled. It is used to assign taxonomy information to the metadata of rows.\n";
         helpString += "The metadata parameter is used to provide experimental parameters to the columns.  Things like 'sample1 gut human_gut'. \n";
+        //helpString += "The picrust parameter is used to indicate the biom file is for input to picrust.  NOTE: Picrust requires a greengenes taxonomy. \n";
+        //helpString += "The referencetax parameter is used with the picrust parameter.  Picrust requires the name of the reference taxonomy sequence to be in the biom file. \n";
 		helpString += "The make.biom command should be in the following format: make.biom(shared=yourShared, groups=yourGroups, label=yourLabels).\n";
 		helpString += "Example make.biom(shared=abrecovery.an.shared, groups=A-B-C).\n";
 		helpString += "The default value for groups is all the groups in your groupfile, and all labels in your inputfile will be used.\n";
@@ -202,12 +206,20 @@ MakeBiomCommand::MakeBiomCommand(string option) {
 					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
 				}
                 
-                it = parameters.find("contaxonomy");
+                it = parameters.find("constaxonomy");
 				//user has given a template file
 				if(it != parameters.end()){ 
 					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["contaxonomy"] = inputDir + it->second;		}
+					if (path == "") {	parameters["constaxonomy"] = inputDir + it->second;		}
+				}
+                
+                it = parameters.find("referencetax");
+				//user has given a template file
+				if(it != parameters.end()){
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["referencetax"] = inputDir + it->second;		}
 				}
                 
                 it = parameters.find("metadata");
@@ -233,9 +245,13 @@ MakeBiomCommand::MakeBiomCommand(string option) {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(sharedfile);		}
             
-            contaxonomyfile = validParameter.validFile(parameters, "contaxonomy", true);
+            contaxonomyfile = validParameter.validFile(parameters, "constaxonomy", true);
 			if (contaxonomyfile == "not found") {  contaxonomyfile = "";  }
 			else if (contaxonomyfile == "not open") { contaxonomyfile = ""; abort = true; }
+            
+            //referenceTax = validParameter.validFile(parameters, "referencetax", true);
+			//if (referenceTax == "not found") {  referenceTax = "";  }
+			//else if (referenceTax == "not open") { referenceTax = ""; abort = true; }
 
             metadatafile = validParameter.validFile(parameters, "metadata", true);
 			if (metadatafile == "not found") {  metadatafile = "";  }
@@ -249,6 +265,13 @@ MakeBiomCommand::MakeBiomCommand(string option) {
 				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
+            
+            //string temp = validParameter.validFile(parameters, "picrust", false);			if (temp == "not found"){	temp = "f";				}
+			//picrust = m->isTrue(temp);
+            //if (picrust && ((contaxonomyfile == "") || (referenceTax == ""))) {
+                //m->mothurOut("[ERROR]: the picrust parameter requires a consensus taxonomy with greengenes taxonomy the reference."); m->mothurOutEndLine(); abort = true;
+           //}
+            picrust=false;
 			
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = ""; }
@@ -406,7 +429,8 @@ int MakeBiomCommand::getBiom(vector<SharedRAbundVector*>& lookup){
         out << spaces + "\"type\": \"OTU table\",\n" + spaces + "\"generated_by\": \"" << mothurString << "\",\n" + spaces + "\"date\": \"" << dateString << "\",\n";
         
         int numBins = lookup[0]->getNumBins();
-        vector<string> metadata = getMetaData(lookup);  
+        vector<string> picrustLabels;
+        vector<string> metadata = getMetaData(lookup, picrustLabels);
         
         if (m->control_pressed) {  out.close(); return 0; }
         
@@ -423,10 +447,11 @@ int MakeBiomCommand::getBiom(vector<SharedRAbundVector*>& lookup){
         string rowBack = "\", \"metadata\":";
         for (int i = 0; i < numBins-1; i++) {
             if (m->control_pressed) {  out.close(); return 0; }
-            out << rowFront << m->currentBinLabels[i] << rowBack << metadata[i] << "},\n";
+            if (!picrust) { out << rowFront << m->currentBinLabels[i] << rowBack << metadata[i] << "},\n"; }
+            else {  out << rowFront << picrustLabels[i] << rowBack << metadata[i] << "},\n"; }
         }
-        out << rowFront << m->currentBinLabels[(numBins-1)] << rowBack << metadata[(numBins-1)] << "}\n" + spaces + "],\n";
-        
+        if (!picrust) {  out << rowFront << m->currentBinLabels[(numBins-1)] << rowBack << metadata[(numBins-1)] << "}\n" + spaces + "],\n"; }
+        else {  out << rowFront << picrustLabels[(numBins-1)] << rowBack << metadata[(numBins-1)] << "}\n" + spaces + "],\n"; }
         //get column info
         /*"columns": [
                     {"id":"Sample1", "metadata":null},
@@ -446,7 +471,7 @@ int MakeBiomCommand::getBiom(vector<SharedRAbundVector*>& lookup){
         out << rowFront << lookup[(lookup.size()-1)]->getGroup() << colBack << sampleMetadata[lookup.size()-1] << "}\n" + spaces + "],\n";
         
         out << spaces + "\"matrix_type\": \"" << format << "\",\n" + spaces + "\"matrix_element_type\": \"int\",\n";
-        out <<  spaces + "\"shape\": [" << m->currentBinLabels.size() << "," << lookup.size() << "],\n";
+        out <<  spaces + "\"shape\": [" << numBins << "," << lookup.size() << "],\n";
         out << spaces + "\"data\":  [";
         
         vector<string> dataRows;
@@ -518,7 +543,7 @@ int MakeBiomCommand::getBiom(vector<SharedRAbundVector*>& lookup){
 	}
 }
 //**********************************************************************************************************************
-vector<string> MakeBiomCommand::getMetaData(vector<SharedRAbundVector*>& lookup){
+vector<string> MakeBiomCommand::getMetaData(vector<SharedRAbundVector*>& lookup, vector<string>& picrustLabels){
 	try {
         vector<string> metadata;
         
@@ -581,7 +606,7 @@ vector<string> MakeBiomCommand::getMetaData(vector<SharedRAbundVector*>& lookup)
             //traverse the binLabels forming the metadata strings and saving them
             //make sure to sanity check
             map<string, string>::iterator it;
-            for (int i = 0; i < m->currentBinLabels.size(); i++) {
+            for (int i = 0; i < lookup[0]->getNumBins(); i++) {
                 
                 if (m->control_pressed) { return metadata; }
                 
@@ -589,6 +614,10 @@ vector<string> MakeBiomCommand::getMetaData(vector<SharedRAbundVector*>& lookup)
                 
                 if (it == labelTaxMap.end()) { m->mothurOut("[ERROR]: can't find taxonomy information for " + m->currentBinLabels[i] + ".\n"); m->control_pressed = true; }
                 else {
+                    if (picrust) {
+                        string temp = it->second; m->removeConfidences(temp);
+                        picrustLabels.push_back(temp);
+                    }
                     vector<string> bootstrapValues;
                     string data = "{\"taxonomy\":[";
             
