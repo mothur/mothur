@@ -93,6 +93,7 @@ double getMaximumFeatureValueForObservation(Observation::size_type featureIndex,
 
 
 void transformZeroOne(LabeledObservationVector&);
+void transformZeroMeanUnitVariance(LabeledObservationVector&);
 
 
 class Feature {
@@ -255,8 +256,18 @@ private:
 // The KernelFunction class caches a partial kernel value that does not depend on kernel parameters.
 class KernelFunction {
 public:
-    KernelFunction(const LabeledObservationVector& _obs) : obs(_obs), cache(_obs.size(), std::vector<double>(_obs.size(), std::numeric_limits<double>::quiet_NaN())) {}
-    virtual ~KernelFunction() {}
+    KernelFunction(const LabeledObservationVector& _obs) :
+        obs(_obs), //cache(_obs.size(), std::vector<double>(_obs.size(), std::numeric_limits<double>::quiet_NaN())) {}
+        cache(_obs.size(), NULL) {}
+
+    virtual ~KernelFunction() {
+        std::cout << "deleting KernelFunction cache" << std::endl;
+        for (int i = 0; i < cache.size(); i++) {
+            if ( !rowNotCached(i) ) {
+                delete cache[i];
+            }
+        }
+    }
 
     virtual double similarity(const LabeledObservation&, const LabeledObservation&) = 0;
     virtual void setParameters(const ParameterMap&) = 0;
@@ -269,26 +280,23 @@ public:
         const int j = obs_j.datasetIndex;
         // if the first element of row i is NaN then calculate all elements for row i
         if ( rowNotCached(i) ) {
+            cache[i] = new std::vector<double>(obs.size(), std::numeric_limits<double>::signaling_NaN());
             for ( int v = 0; v < obs.size(); v++ ) {
-                cache[i][v] = calculateParameterFreeSimilarity(obs[i], obs[v]);
-                //cache[i][v] = std::inner_product(
-                //    obs[i].second->begin(),
-                //    obs[i].second->end(),
-                //    obs[v].second->begin(),
-                //    0.0
-                //);
+                cache.at(i)->at(v) = calculateParameterFreeSimilarity(obs[i], obs[v]);
             }
         }
-        return cache[i][j];
+        return cache.at(i)->at(j);
     }
 
     bool rowNotCached(int i) {
-        return isnan(cache[i][0]);
+        //return isnan(cache[i][0]);
+        return cache[i] == NULL;
     }
 
 private:
     const LabeledObservationVector& obs;
-    std::vector<std::vector<double> > cache;
+    //std::vector<std::vector<double> > cache;
+    std::vector<std::vector<double>* > cache;
 };
 
 
@@ -506,32 +514,43 @@ private:
 
 class KernelFunctionCache {
 public:
-    KernelFunctionCache(KernelFunction& _k, const LabeledObservationVector& _obs) : k(_k), obs(_obs), cache(_obs.size(), std::vector<double>(_obs.size(), std::numeric_limits<double>::quiet_NaN())) {};
-    ~KernelFunctionCache() {}
+    KernelFunctionCache(KernelFunction& _k, const LabeledObservationVector& _obs) :
+        k(_k), obs(_obs),
+        cache(_obs.size(), NULL) {}
+    ~KernelFunctionCache() {
+        //std::cout << "deleting KernelFunctionCache cache" << std::endl;
+        for (int i = 0; i < cache.size(); i++) {
+            if ( !rowNotCached(i) ) {
+                delete cache[i];
+            }
+        }
+    }
 
     double similarity(const LabeledObservation& obs_i, const LabeledObservation& obs_j) {
         const int i = obs_i.datasetIndex;
         const int j = obs_j.datasetIndex;
         // if the first element of row i is NaN then calculate all elements for row i
         if ( rowNotCached(i) ) {
+            cache[i] = new std::vector<double>(obs.size(), std::numeric_limits<double>::signaling_NaN());
             for ( int v = 0; v < obs.size(); v++ ) {
-                cache[i][v] = k.similarity(
+                cache.at(i)->at(v) = k.similarity(
                     obs[i],
                     obs[v]
                 );
             }
         }
-        return cache[i][j];
+        return cache.at(i)->at(j);
     }
 
     bool rowNotCached(int i) {
-        return isnan(cache[i][0]);
+        return cache[i] == NULL;
     }
 
 private:
     KernelFunction& k;
     const LabeledObservationVector& obs;
-    std::vector<std::vector<double> > cache;
+    //std::vector<std::vector<double> > cache;
+    std::vector<std::vector<double>* > cache;
 };
 
 
@@ -626,12 +645,32 @@ public:
 };
 
 
+//
+//  info  - 2
+//  debug - 1
+//  trace = 0
+//
+class OutputFilter {
+public:
+    OutputFilter(int v) : verbosity(v) {}
+    OutputFilter(const OutputFilter& of) : verbosity(of.verbosity) {}
+    ~OutputFilter() {}
+
+    bool info()  const { return verbosity < 3; }
+    bool debug() const { return verbosity < 2; }
+    bool trace() const { return verbosity < 1; }
+
+private:
+    const int verbosity;
+};
+
+
 // SmoTrainer trains a support vector machine using Sequential
 // Minimal Optimization as described in the article
 // "Support Vector Machine Solvers" by Bottou and Lin.
 class SmoTrainer {
 public:
-    SmoTrainer(ExternalSvmTrainingInterruption& e, bool v = false) : externalSvmTrainingInterruption(e), verbose(v), C(1.0) {}
+    SmoTrainer(ExternalSvmTrainingInterruption& e, OutputFilter of) : externalSvmTrainingInterruption(e), outputFilter(of), C(1.0) {}
 
     ~SmoTrainer() {}
 
@@ -643,7 +682,6 @@ public:
     }
 
     SVM* train(KernelFunctionCache&, const LabeledObservationVector&);
-    //SVM* train(KernelFunction*, const LabeledObservationVector&);
     void assignNumericLabels(std::vector<double>&, const LabeledObservationVector&, NumericClassToLabel&);
     void elementwise_multiply(std::vector<double>& a, std::vector<double>& b, std::vector<double>& c) {
         std::transform(a.begin(), a.end(), b.begin(), c.begin(), std::multiplies<double>());
@@ -655,7 +693,7 @@ public:
 private:
     ExternalSvmTrainingInterruption& externalSvmTrainingInterruption;
 
-    const bool verbose;
+    const OutputFilter outputFilter;
 
     double C;
 };
@@ -755,24 +793,12 @@ private:
 };
 
 
-class OutputHandler {
-public:
-    OutputHandler() {}
-    virtual ~OutputHandler() {}
-
-    virtual void writebuf() { std::cout << stringbuf.str();}
-    std::ostringstream stringbuf;
-};
-
-
 // OneVsOneMultiClassSvmTrainer trains a support vector machine for each
 // pair of labels in a set of data.
 class OneVsOneMultiClassSvmTrainer {
 public:
-    OneVsOneMultiClassSvmTrainer(SvmDataset&, int, int, ExternalSvmTrainingInterruption&,bool=false);
+    OneVsOneMultiClassSvmTrainer(SvmDataset&, int, int, ExternalSvmTrainingInterruption&, OutputFilter&);
     ~OneVsOneMultiClassSvmTrainer() {}
-
-    //void setOutputHandler(OutputHandler* o) { outputHandler = o; }
 
     MultiClassSVM* train(const KernelParameterRangeMap&);
     double trainOnKFolds(SmoTrainer&, KernelFunctionCache&, KFoldLabeledObservationsDivider&);
@@ -788,7 +814,7 @@ public:
 private:
     ExternalSvmTrainingInterruption& externalSvmTrainingInterruption;
 
-    //OutputHandler* outputHandler;
+    const OutputFilter& outputFilter;
     bool verbose;
 
     // can we make this const?

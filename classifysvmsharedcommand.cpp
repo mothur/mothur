@@ -576,7 +576,9 @@ void ClassifySvmSharedCommand::processSharedAndDesignData(vector<SharedRAbundVec
 
         SvmDataset svmDataset(labeledObservationVector, featureVector);
 
-        OneVsOneMultiClassSvmTrainer trainer(svmDataset, evaluationFoldCount, trainingFoldCount, *this);
+        OutputFilter outputFilter(2);
+
+        OneVsOneMultiClassSvmTrainer trainer(svmDataset, evaluationFoldCount, trainingFoldCount, *this, outputFilter);
 
         SvmRfe svmRfe;
         ParameterRange& linearKernelConstantRange = kernelParameterRangeMap["linear"]["constant"];
@@ -619,7 +621,8 @@ void ClassifySvmSharedCommand::trainSharedAndDesignData(vector<SharedRAbundVecto
         SvmDataset svmDataset(labeledObservationVector, featureVector);
         int evaluationFoldCount = 3;
         int trainFoldCount = 5;
-        OneVsOneMultiClassSvmTrainer t(svmDataset, evaluationFoldCount, trainFoldCount, *this);
+        OutputFilter outputFilter(2);
+        OneVsOneMultiClassSvmTrainer t(svmDataset, evaluationFoldCount, trainFoldCount, *this, outputFilter);
         KernelParameterRangeMap kernelParameterRangeMap;
         getDefaultKernelParameterRangeMap(kernelParameterRangeMap);
         t.train(kernelParameterRangeMap);

@@ -81,7 +81,7 @@ void buildLabelToLabeledObservationVector(LabelToLabeledObservationVector& label
 
 // this function standardizes data to mean 0 and variance 1
 // but this may not be a good standardization for OTU data
-void transformZeroMeanUnitVariance(const LabeledObservationVector& observations) {
+void transformZeroMeanUnitVariance(LabeledObservationVector& observations) {
     bool vebose = false;
     // online method for mean and variance
     for ( Observation::size_type feature = 0; feature < observations[0].second->size(); feature++ ) {
@@ -262,18 +262,18 @@ SVM* SmoTrainer::train(KernelFunctionCache& K, const LabeledObservationVector& t
     const int observationCount = twoClassLabeledObservationVector.size();
     const int featureCount = twoClassLabeledObservationVector[0].second->size();
 
-    if (verbose) std::cout << "observation count : " << observationCount << std::endl;
-    if (verbose) std::cout << "feature count     : " << featureCount << std::endl;
+    if (outputFilter.debug()) std::cout << "observation count : " << observationCount << std::endl;
+    if (outputFilter.debug()) std::cout << "feature count     : " << featureCount << std::endl;
     // dual coefficients
     std::vector<double> a(observationCount, 0.0);
     // gradient
     std::vector<double> g(observationCount, 1.0);
     // convert the labels to -1.0,+1.0
     std::vector<double> y(observationCount);
-    if (verbose) std::cout << "assign numeric labels" << std::endl;
+    if (outputFilter.debug()) std::cout << "assign numeric labels" << std::endl;
     NumericClassToLabel discriminantToLabel;
     assignNumericLabels(y, twoClassLabeledObservationVector, discriminantToLabel);
-    if (verbose) std::cout << "assign A and B" << std::endl;
+    if (outputFilter.debug()) std::cout << "assign A and B" << std::endl;
     std::vector<double> A(observationCount);
     std::vector<double> B(observationCount);
     for ( int n = 0; n < observationCount; n++ ) {
@@ -285,9 +285,9 @@ SVM* SmoTrainer::train(KernelFunctionCache& K, const LabeledObservationVector& t
             A[n] = -C;
             B[n] = 0;
         }
-        if (verbose) std::cout << n << " " << A[n] << " " << B[n] << std::endl;
+        if (outputFilter.debug()) std::cout << n << " " << A[n] << " " << B[n] << std::endl;
     }
-    if (verbose) std::cout << "assign K" << std::endl;
+    if (outputFilter.debug()) std::cout << "assign K" << std::endl;
     int m = 0;
     std::vector<double> u(3);
     std::vector<double> ya(observationCount);
@@ -305,12 +305,12 @@ SVM* SmoTrainer::train(KernelFunctionCache& K, const LabeledObservationVector& t
         int j = 0; // 0
         double yg_max = std::numeric_limits<double>::min();
         double yg_min = std::numeric_limits<double>::max();
-        if (verbose) std::cout << "m = " << m << std::endl;
+        if (outputFilter.debug()) std::cout << "m = " << m << std::endl;
         for ( int k = 0; k < observationCount; k++ ) {
             ya[k] = y[k] * a[k];
             yg[k] = y[k] * g[k];
         }
-        if (verbose) {
+        if (outputFilter.debug()) {
             std::cout << "yg =";
             for ( int k = 0; k < observationCount; k++ ) {
                 //std::cout << A[k] << " " << B[k] << " " << y[k] << " " << a[k] << " " << g[k] << " " << ya[k] << " " << yg[k] << std::endl;
@@ -333,7 +333,7 @@ SVM* SmoTrainer::train(KernelFunctionCache& K, const LabeledObservationVector& t
             //std::cout << "j = " << j << " yg[j] = " << yg[j] << std::endl;
         }
         // maximum violating pair is i,j
-        if (verbose) {
+        if (outputFilter.debug()) {
             std::cout << "maximal violating pair: " << i << " " << j << std::endl;
             std::cout << "  i = " << i << " features: ";
             for ( int feature = 0; feature < featureCount; feature++ ) {
@@ -352,7 +352,7 @@ SVM* SmoTrainer::train(KernelFunctionCache& K, const LabeledObservationVector& t
             // what happens if we just go with what we've got instead of throwing an exception?
             // things work pretty well for the most part
             // might be better to look at lambda???
-            if (verbose) std::cout << "iteration limit reached with lambda = " << lambda << std::endl;
+            if (outputFilter.debug()) std::cout << "iteration limit reached with lambda = " << lambda << std::endl;
             break;
         }
 
@@ -367,15 +367,15 @@ SVM* SmoTrainer::train(KernelFunctionCache& K, const LabeledObservationVector& t
         double K_jj = K.similarity(twoClassLabeledObservationVector[j], twoClassLabeledObservationVector[j]);
         double K_ij = K.similarity(twoClassLabeledObservationVector[i], twoClassLabeledObservationVector[j]);
         u[2] = (yg[i] - yg[j]) / (K_ii+K_jj-2.0*K_ij);
-        if (verbose) std::cout << "directions: (" << u[0] << "," << u[1] << "," << u[2] << ")" << std::endl;
+        if (outputFilter.debug()) std::cout << "directions: (" << u[0] << "," << u[1] << "," << u[2] << ")" << std::endl;
         lambda = *std::min_element(u.begin(), u.end());
-        if (verbose) std::cout << "lambda: " << lambda << std::endl;
+        if (outputFilter.debug()) std::cout << "lambda: " << lambda << std::endl;
         for ( int k = 0; k < observationCount; k++ ) {
             double K_ik = K.similarity(twoClassLabeledObservationVector[i], twoClassLabeledObservationVector[k]);
             double K_jk = K.similarity(twoClassLabeledObservationVector[j], twoClassLabeledObservationVector[k]);
             g[k] += (-lambda * y[k] * K_ik + lambda * y[k] * K_jk);
         }
-        if (verbose) {
+        if (outputFilter.debug()) {
             std::cout << "g =";
             for ( int k = 0; k < observationCount; k++ ) {
                 std::cout << " " << g[k];
@@ -389,21 +389,21 @@ SVM* SmoTrainer::train(KernelFunctionCache& K, const LabeledObservationVector& t
 
     // at this point the optimal a's have been found
     // now use them to find w and b
-    if (verbose) std::cout << "find w" << std::endl;
+    if (outputFilter.debug()) std::cout << "find w" << std::endl;
     std::vector<double> w(twoClassLabeledObservationVector[0].second->size(), 0.0);
     double b = 0.0;
     for ( int i = 0; i < y.size(); i++ ) {
-        if (verbose) std::cout << "alpha[" << i << "] = " << a[i] << std::endl;
+        if (outputFilter.debug()) std::cout << "alpha[" << i << "] = " << a[i] << std::endl;
         for ( int j = 0; j < w.size(); j++ ) {
             w[j] += a[i] * y[i] * twoClassLabeledObservationVector[i].second->at(j);
         }
         if ( A[i] < a[i] && a[i] < B[i] ) {
             b = yg[i];
-            if (verbose) std::cout << "b = " << b << std::endl;
+            if (outputFilter.debug()) std::cout << "b = " << b << std::endl;
         }
     }
 
-    if (verbose) {
+    if (outputFilter.debug()) {
         for ( int i = 0; i < w.size(); i++ ) {
             std::cout << "w[" << i << "] = " << w[i] << std::endl;
         }
@@ -499,14 +499,12 @@ void getDefaultKernelParameterRangeMap(KernelParameterRangeMap& kernelParameterR
 // An instance of OneVsOneMultiClassSvmTrainer is intended to work with a single set of data
 // to produce a single instance of MultiClassSVM.  That's why observations and labels go in to
 // the constructor.
-
-OneVsOneMultiClassSvmTrainer::OneVsOneMultiClassSvmTrainer(SvmDataset& d, int e, int t, ExternalSvmTrainingInterruption& es, bool v) :
+OneVsOneMultiClassSvmTrainer::OneVsOneMultiClassSvmTrainer(SvmDataset& d, int e, int t, ExternalSvmTrainingInterruption& es, OutputFilter& of) :
         svmDataset(d),
         evaluationFoldCount(e),
         trainFoldCount(t),
         externalSvmTrainingInterruption(es),
-        //outputHandler(new OutputHandler()),
-        verbose(v) {
+        outputFilter(of) {
     buildLabelSet(labelSet, svmDataset.getLabeledObservationVector());
     buildLabelToLabeledObservationVector(labelToLabeledObservationVector, svmDataset.getLabeledObservationVector());
     buildLabelPairSet(labelPairSet, svmDataset.getLabeledObservationVector());
@@ -602,13 +600,17 @@ MultiClassSVM* OneVsOneMultiClassSvmTrainer::train(const KernelParameterRangeMap
 
     // first divide the data into a 'development' set for tuning hyperparameters
     // and an 'evaluation' set for measuring performance
+    int evaluationFoldNumber = 0;
     KFoldLabeledObservationsDivider kFoldDevEvalDivider(evaluationFoldCount, svmDataset.getLabeledObservationVector());
     for ( kFoldDevEvalDivider.start(); !kFoldDevEvalDivider.end(); kFoldDevEvalDivider.next() ) {
         const LabeledObservationVector& developmentObservations = kFoldDevEvalDivider.getTrainingData();
         const LabeledObservationVector& evaluationObservations  = kFoldDevEvalDivider.getTestingData();
 
+        evaluationFoldNumber++;
+        std::cout << "evaluation fold " << evaluationFoldNumber << " of " << evaluationFoldCount << std::endl;
+
         std::vector<SVM*> twoClassSvmList;
-        SmoTrainer smoTrainer(externalSvmTrainingInterruption, verbose);
+        SmoTrainer smoTrainer(externalSvmTrainingInterruption, outputFilter);
         LabelPairSet::iterator labelPair;
         for (labelPair = labelPairSet.begin(); labelPair != labelPairSet.end(); labelPair++) {
             // generate training and testing data for this label pair
@@ -634,14 +636,14 @@ MultiClassSVM* OneVsOneMultiClassSvmTrainer::train(const KernelParameterRangeMap
             // loop on kernel functions and kernel function parameters
             for ( KernelParameterRangeMap::const_iterator kmap = kernelParameterRangeMap.begin(); kmap != kernelParameterRangeMap.end(); kmap++ ) {
                 std::string kernelFunctionKey = kmap->first;
-                //KernelFunction* kernelFunction = KernelFactory::getKernelFunctionForKey(kmap->first, svmDataset.getLabeledObservationVector());
                 KernelFunction& kernelFunction = kernelFunctionFactory.getKernelFunctionForKey(kmap->first);
                 ParameterSetBuilder p(kmap->second);
                 for (ParameterMapVector::const_iterator hp = p.getParameterSetList().begin(); hp != p.getParameterSetList().end(); hp++) {
                     kernelFunction.setParameters(*hp);
                     KernelFunctionCache kernelFunctionCache(kernelFunction, svmDataset.getLabeledObservationVector());
                     smoTrainer.setParameters(*hp);
-                    if (verbose) {
+                    if (outputFilter.debug()) {
+                        std::cout << "parameters for " << kernelFunctionKey << " kernel" << std::endl;
                         for ( ParameterMap::const_iterator i = hp->begin(); i != hp->end(); i++ ) {
                             std::cout << "    " << i->first << ":" << i->second << std::endl;
                         }
@@ -657,18 +659,15 @@ MultiClassSVM* OneVsOneMultiClassSvmTrainer::train(const KernelParameterRangeMap
 
             if ( bestMeanScoreOnKFolds == 0.0 ) {
                 std::cout << "failed to train SVM on labels " << label0 << " and " << label1 << std::endl;
-                //outputHandler->writebuf();
                 throw std::exception();
             }
             else {
-                //std::cout << "trained SVM on labels " << label0 << " and " << label1 << std::endl;
+                std::cout << "trained SVM on labels " << label0 << " and " << label1 << std::endl;
                 std::cout << "    best mean score over " << trainFoldCount << " folds is " << bestMeanScoreOnKFolds << std::endl;
-                std::cout << "    best parameters are " << std::endl;
-                //outputHandler->writebuf();
+                std::cout << "    best parameters for " << bestKernelFunctionKey << " kernel" << std::endl;
                 for ( ParameterMap::const_iterator p = bestParameterMap.begin(); p != bestParameterMap.end(); p++ ) {
                     std::cout << "        "  << p->first << " : " << p->second << std::endl;
                 }
-                //outputHandler->writebuf();
 
                 LabelMatchesEither labelMatchesEither(label0, label1);
                 LabeledObservationVector twoClassDevelopmentObservations;
@@ -681,8 +680,8 @@ MultiClassSVM* OneVsOneMultiClassSvmTrainer::train(const KernelParameterRangeMap
                     //    return !((o.first == label0) || (o.first == label1));
                     //}
                 );
-                //std::cout << "training final SVM with C = " << bestC << std::endl;
-                std::cout << "training final SVM with " << twoClassDevelopmentObservations.size() << " labeled observations" << std::endl;
+                if (outputFilter.info()) std::cout << "training final SVM with " << twoClassDevelopmentObservations.size() << " labeled observations" << std::endl;
+
                 for ( ParameterMap::const_iterator i = bestParameterMap.begin(); i != bestParameterMap.end(); i++ ) {
                     std::cout << "    " << i->first << ":" << i->second << std::endl;
                 }
@@ -725,7 +724,7 @@ double OneVsOneMultiClassSvmTrainer::trainOnKFolds(SmoTrainer& smoTrainer, Kerne
     for ( kFoldLabeledObservationsDivider.start(); !kFoldLabeledObservationsDivider.end(); kFoldLabeledObservationsDivider.next() ) {
         const LabeledObservationVector& kthTwoClassTrainingFold = kFoldLabeledObservationsDivider.getTrainingData();
         const LabeledObservationVector& kthTwoClassTestingFold = kFoldLabeledObservationsDivider.getTestingData();
-        if (verbose) {
+        if (outputFilter.info()) {
             std::cout << "fold " << kFoldLabeledObservationsDivider.getFoldNumber() << " training data has " << kthTwoClassTrainingFold.size() << " labeled observations" << std::endl;
             std::cout << "fold " << kFoldLabeledObservationsDivider.getFoldNumber() << " testing data has " << kthTwoClassTestingFold.size() << " labeled observations" << std::endl;
         }
@@ -735,11 +734,11 @@ double OneVsOneMultiClassSvmTrainer::trainOnKFolds(SmoTrainer& smoTrainer, Kerne
         }
         else {
             try {
-                if (verbose) std::cout << "begin training" << std::endl;
+                if (outputFilter.debug()) std::cout << "begin training" << std::endl;
 
                 SVM* evaluationSvm = smoTrainer.train(kernelFunction, kthTwoClassTrainingFold);
                 double score = evaluationSvm->score(kthTwoClassTestingFold);
-                if (verbose) std::cout << "score on fold " << kFoldLabeledObservationsDivider.getFoldNumber() << " of test data is " << score << std::endl;
+                if (outputFilter.debug()) std::cout << "score on fold " << kFoldLabeledObservationsDivider.getFoldNumber() << " of test data is " << score << std::endl;
                 online_mean_n += 1.0;
                 double online_mean_delta = score - online_mean_score;
                 online_mean_score += online_mean_delta / online_mean_n;
@@ -753,7 +752,7 @@ double OneVsOneMultiClassSvmTrainer::trainOnKFolds(SmoTrainer& smoTrainer, Kerne
             }
         }
     }
-    if (verbose) {
+    if (outputFilter.debug()) {
         std::cout << "done with cross validation on C = " << smoTrainer.getC() << std::endl;
         std::cout << "    mean score over " << kFoldLabeledObservationsDivider.getFoldNumber() << " folds is " << meanScoreOverKFolds << std::endl;
     }
