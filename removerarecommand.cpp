@@ -411,7 +411,7 @@ int RemoveRareCommand::processList(){
 			util.setGroups(Groups, namesGroups);
 			m->openOutputFile(outputGroupFileName, outGroup);
 		}else if (countfile != "") {
-            ct.readTable(countfile, true);
+            ct.readTable(countfile, true, false);
             if (ct.hasGroupInfo()) {
                 vector<string> namesGroups = ct.getNamesOfGroups();
                 SharedUtil util;

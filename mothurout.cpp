@@ -2599,6 +2599,65 @@ int MothurOut::getNumChar(string line, char c){
 		exit(1);
 	}
 }
+/***********************************************************************/
+string MothurOut::getSimpleLabel(string label){
+	try {
+		string simple = "";
+        
+        //remove OTU or phylo tag
+        string newLabel1 = "";
+        for (int i = 0; i < label.length(); i++) {
+            if(label[i]>47 && label[i]<58) { //is a digit
+                newLabel1 += label[i];
+            }
+        }
+        
+        int num1;
+        mothurConvert(newLabel1, num1);
+        
+        simple = toString(num1);
+        
+		return simple;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "isLabelEquivalent");
+		exit(1);
+	}
+}
+/***********************************************************************/
+
+bool MothurOut::isLabelEquivalent(string label1,  string label2){
+	try {
+		bool same = false;
+        
+        //remove OTU or phylo tag
+        string newLabel1 = "";
+        for (int i = 0; i < label1.length(); i++) {
+            if(label1[i]>47 && label1[i]<58) { //is a digit
+                newLabel1 += label1[i];
+            }
+        }
+        
+        string newLabel2 = "";
+        for (int i = 0; i < label2.length(); i++) {
+            if(label2[i]>47 && label2[i]<58) { //is a digit
+                newLabel2 += label2[i];
+            }
+        }
+        
+        int num1, num2;
+        mothurConvert(newLabel1, num1);
+        mothurConvert(newLabel2, num2);
+        
+        if (num1 == num2) { same = true; }
+		
+		return same;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "isLabelEquivalent");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 bool MothurOut::isSubset(vector<string> bigset, vector<string> subset) {
 	try {

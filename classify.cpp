@@ -295,12 +295,13 @@ int Classify::readTaxonomy(string file) {
 			iss >> name; m->gobble(iss);
             iss >> taxInfo;
             if (m->debug) { m->mothurOut("[DEBUG]: name = " + name + " tax = " + taxInfo + "\n"); }
-			if (m->inUsersGroups(name, names)) {
+            //commented out to save time with large templates. 10/7/13
+			//if (m->inUsersGroups(name, names)) {
                 taxonomy[name] = taxInfo;
                 phyloTree->addSeqToTree(name, taxInfo);
-            }else {
-                m->mothurOut("[WARNING]: " + name + " is in your taxonomy file and not in your reference file, ignoring.\n");
-            }		
+            //}else {
+            //    m->mothurOut("[WARNING]: " + name + " is in your taxonomy file and not in your reference file, ignoring.\n");
+            //}
         }
 		
 		MPI_File_close(&inMPI);

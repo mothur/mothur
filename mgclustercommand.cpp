@@ -240,7 +240,7 @@ int MGClusterCommand::execute(){
 			nameMap->readMap();
 		}else if (countfile != "") {
             ct = new CountTable();
-            ct->readTable(countfile, false);
+            ct->readTable(countfile, false, false);
             nameMap= new NameAssignment();
             vector<string> tempNames = ct->getNamesOfSeqs();
             for (int i = 0; i < tempNames.size(); i++) {  nameMap->push_back(tempNames[i]);  }

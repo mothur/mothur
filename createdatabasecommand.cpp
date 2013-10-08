@@ -298,7 +298,7 @@ int CreateDatabaseCommand::execute(){
             }
             repNames = tempRepNames;
         }else {
-            ct.readTable(countfile, true);
+            ct.readTable(countfile, true, false);
             numUniqueNamesFile = ct.getNumUniqueSeqs();
             nameMap = ct.getNameMap();
         }
@@ -506,7 +506,7 @@ int CreateDatabaseCommand::findIndex(vector<string>& otuLabels, string label){
 	try {
         int index = -1;
         for (int i = 0; i < otuLabels.size(); i++) {
-            if (otuLabels[i] == label) { index = i; break; }
+            if (m->isLabelEquivalent(otuLabels[i],label)) { index = i; break; }
         }
 		return index;
     }

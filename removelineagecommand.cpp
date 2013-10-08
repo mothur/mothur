@@ -665,7 +665,7 @@ int RemoveLineageCommand::readCount(){
         //check for groups that have been eliminated
         CountTable ct;
         if (ct.testGroups(outputFileName)) {
-            ct.readTable(outputFileName, true);
+            ct.readTable(outputFileName, true, false);
             ct.printTable(outputFileName);
         }
 		
@@ -705,7 +705,7 @@ int RemoveLineageCommand::readConsList(){
             }
             otuLabel += sbinNumber;
             
-            if (names.count(otuLabel) == 0) {
+            if (names.count(m->getSimpleLabel(otuLabel)) == 0) {
                 newList.push_back(list->get(i));
             }else { removedCount++; }
         }
@@ -843,7 +843,7 @@ int RemoveLineageCommand::readShared(){
             if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) { delete newLookup[j]; } for (int j = 0; j < lookup.size(); j++) { delete lookup[j]; } return 0; }
             
             //is this otu on the list
-            if (names.count(m->currentBinLabels[i]) == 0) {
+            if (names.count(m->getSimpleLabel(m->currentBinLabels[i])) == 0) {
                 wroteSomething = true;
                 newLabels.push_back(m->currentBinLabels[i]);
                 for (int j = 0; j < newLookup.size(); j++) { //add this OTU to the new lookup
@@ -1242,7 +1242,7 @@ int RemoveLineageCommand::readConsTax(){
 						//wroteSomething = true;
 						//out << name << '\t' << tax << endl;
 					}else{ //this sequence contains the taxon the user wants to remove
-						names.insert(otuLabel);
+						names.insert(m->getSimpleLabel(otuLabel));
 						remove=true; break;
 					}
 					
@@ -1256,7 +1256,7 @@ int RemoveLineageCommand::readConsTax(){
 							//wroteSomething = true;
 							//out << name << '\t' << tax << endl;
 						}else{ //this sequence contains the taxon the user wants to remove
-							names.insert(otuLabel);
+							names.insert(m->getSimpleLabel(otuLabel));
 							remove=true; break;
 						}
 					}else { //both have confidences so we want to make sure the users confidences are greater then or equal to the taxons
@@ -1309,7 +1309,7 @@ int RemoveLineageCommand::readConsTax(){
 							
 							//passed the test so remove you
 							if (remove) {
-								names.insert(otuLabel);
+								names.insert(m->getSimpleLabel(otuLabel));
 								remove=true; break;
 							}else {
 								//wroteSomething = true;

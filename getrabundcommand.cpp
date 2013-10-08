@@ -319,7 +319,7 @@ int GetRAbundCommand::execute(){
 int GetRAbundCommand::processList(ofstream& out){
 	try {
         CountTable ct;
-        ct.readTable(countfile, false);
+        ct.readTable(countfile, false, false);
         
         InputData input(inputfile, format);
         ListVector* list = input.getListVector();

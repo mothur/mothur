@@ -1042,7 +1042,9 @@ int MakeContigsCommand::driver(vector<string> files, string outputFasta, string 
             if (seq2End < overlapEnd) { overlapEnd = seq2End; }  //smallest end position is where overlapping ends
             
             int oStart = contig.length();
+            //cout << fSeq.getAligned()  << endl; cout << rSeq.getAligned() << endl;
             for (int i = overlapStart; i < overlapEnd; i++) {
+                //cout << seq1[i] << ' ' << seq2[i] << ' ' << scores1[ABaseMap[i]] << ' ' << scores2[BBaseMap[i]] << endl;
                 if (seq1[i] == seq2[i]) { //match, add base and choose highest score
                     contig += seq1[i];
                 }else if (((seq1[i] == '.') || (seq1[i] == '-')) && ((seq2[i] != '-') && (seq2[i] != '.'))) { //seq1 is a gap and seq2 is a base, choose seq2, unless quality score for base is below insert. In that case eliminate base
@@ -1076,7 +1078,8 @@ int MakeContigsCommand::driver(vector<string> files, string outputFasta, string 
             }else { //seq2 ends before seq1 so take from overlap to length from seq1
                 for (int i = overlapEnd; i < length; i++) {  contig += seq1[i]; }
             }
-            
+            //cout << contig << endl;
+            //exit(1);
             if (trimOverlap) { contig = contig.substr(overlapStart-1, oend-oStart);  if (contig.length() == 0) { trashCode += "l"; } }
             
             if(trashCode.length() == 0){

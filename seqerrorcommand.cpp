@@ -358,7 +358,7 @@ int SeqErrorCommand::execute(){
 		if(namesFileName != "")     {	weights = getWeights();         }
         else if (countfile != "")   {
             CountTable ct;
-            ct.readTable(countfile, false);
+            ct.readTable(countfile, false, false);
             weights = ct.getNameMap();
         }
 		

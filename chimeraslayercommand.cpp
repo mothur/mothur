@@ -759,7 +759,7 @@ int ChimeraSlayerCommand::execute(){
 				if (processors == 1) {
                     numSeqs = driverGroups(outputFileName, accnosFileName, trimFastaFileName, fileToPriority, fileGroup, newCountFile);
                     if (hasCount && dups) {
-                        CountTable c; c.readTable(nameFileNames[s], true);
+                        CountTable c; c.readTable(nameFileNames[s], true, false);
                         if (!m->isBlank(newCountFile)) {
                             ifstream in2;
                             m->openInputFile(newCountFile, in2);
@@ -791,7 +791,7 @@ int ChimeraSlayerCommand::execute(){
                     }else {
                         if (hasCount) {
                             set<string> doNotRemove;
-                            CountTable c; c.readTable(newCountFile, true);
+                            CountTable c; c.readTable(newCountFile, true, true);
                             vector<string> namesInTable = c.getNamesOfSeqs();
                             for (int i = 0; i < namesInTable.size(); i++) {
                                 int temp = c.getNumSeqs(namesInTable[i]);
@@ -1551,7 +1551,7 @@ int ChimeraSlayerCommand::createProcessesGroups(string outputFName, string accno
 		if (fileToPriority.size() < processors) { processors = fileToPriority.size(); }
         
         CountTable newCount;
-        if (hasCount && dups) { newCount.readTable(countFile, true); }
+        if (hasCount && dups) { newCount.readTable(countFile, true, false); }
 		
 		int groupsPerProcessor = fileToPriority.size() / processors;
 		int remainder = fileToPriority.size() % processors;
@@ -2161,7 +2161,7 @@ map<string, int> ChimeraSlayerCommand::sortFastaFile(string fastaFile, string na
         int error;
         if (hasCount) { 
             CountTable ct;
-            ct.readTable(nameFile, true);
+            ct.readTable(nameFile, true, false);
             
             for(map<string, string>::iterator it = seqs.begin(); it != seqs.end(); it++) {
                 int num = ct.getNumSeqs(it->first);

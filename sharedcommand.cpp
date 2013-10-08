@@ -766,7 +766,7 @@ int SharedCommand::createSharedFromListGroup(string filename) {
             m->setAllGroups(allGroups);
         }else{
             countTable = new CountTable();
-            countTable->readTable(countfile, true);
+            countTable->readTable(countfile, true, false);
         }
         
         if (m->control_pressed) { return 0; }

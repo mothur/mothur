@@ -169,7 +169,7 @@ ParseListCommand::ParseListCommand(string option)  {
 			else if (countfile == "not open") { abort = true; countfile =  ""; }	
 			else {   
                 m->setCountTableFile(countfile); 
-                ct.readTable(countfile, true);
+                ct.readTable(countfile, true, false);
                 if (!ct.hasGroupInfo()) { 
                     abort = true;
                     m->mothurOut("[ERROR]: The parse.list command requires group info to be present in your countfile, quitting."); m->mothurOutEndLine();

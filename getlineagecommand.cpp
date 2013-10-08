@@ -514,7 +514,7 @@ int GetLineageCommand::readCount(){
         //check for groups that have been eliminated
         CountTable ct;
         if (ct.testGroups(outputFileName)) {
-            ct.readTable(outputFileName, true);
+            ct.readTable(outputFileName, true, false);
             ct.printTable(outputFileName);
         }
 
@@ -628,7 +628,7 @@ int GetLineageCommand::readConsList(){
             }
             otuLabel += sbinNumber;
             
-            if (names.count(otuLabel) != 0) {
+            if (names.count(m->getSimpleLabel(otuLabel)) != 0) {
 				selectedCount++;
                 newList.push_back(list->get(i));
             }
@@ -767,7 +767,7 @@ int GetLineageCommand::readShared(){
             if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) { delete newLookup[j]; } for (int j = 0; j < lookup.size(); j++) { delete lookup[j]; } return 0; }
             
             //is this otu on the list
-            if (names.count(m->currentBinLabels[i]) != 0) {
+            if (names.count(m->getSimpleLabel(m->currentBinLabels[i])) != 0) {
                 numSelected++; wroteSomething = true;
                 newLabels.push_back(m->currentBinLabels[i]);
                 for (int j = 0; j < newLookup.size(); j++) { //add this OTU to the new lookup
@@ -1241,7 +1241,7 @@ int GetLineageCommand::readConsTax(){
 					int pos = newtax.find(noConfidenceTaxons[j]);
                     
 					if (pos != string::npos) { //this sequence contains the taxon the user wants
-						names.insert(otuLabel);
+						names.insert(m->getSimpleLabel(otuLabel));
 						out << otuLabel << '\t' << numReps << '\t' << tax << endl;
 						//since you belong to at least one of the taxons we want you are included so no need to search for other
 						break;
@@ -1253,7 +1253,7 @@ int GetLineageCommand::readConsTax(){
 						int pos = newtax.find(noConfidenceTaxons[j]);
                         
 						if (pos != string::npos) { //this sequence contains the taxon the user wants
-							names.insert(otuLabel);
+							names.insert(m->getSimpleLabel(otuLabel));
 							out << otuLabel << '\t' << numReps << '\t' << tax << endl;
 							//since you belong to at least one of the taxons we want you are included so no need to search for other
 							break;
@@ -1309,7 +1309,7 @@ int GetLineageCommand::readConsTax(){
                             
 							//passed the test so add you
 							if (good) {
-								names.insert(otuLabel);
+								names.insert(m->getSimpleLabel(otuLabel));
 								out << otuLabel << '\t' << numReps << '\t' << tax << endl;
 								break;
 							}

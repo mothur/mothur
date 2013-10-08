@@ -212,7 +212,7 @@ SplitAbundCommand::SplitAbundCommand(string option)  {
 			else if (countfile == "not found") { countfile = "";  }	
 			else {
                 m->setCountTableFile(countfile); 
-                ct.readTable(countfile, true);
+                ct.readTable(countfile, true, false);
             }
             
             if ((namefile != "") && (countfile != "")) {

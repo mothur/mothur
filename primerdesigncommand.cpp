@@ -1088,7 +1088,7 @@ map<string, int> PrimerDesignCommand::readCount(unsigned long int& numSeqs){
         map<string, int> nameMap;
         
         CountTable ct;
-        ct.readTable(countfile, false);
+        ct.readTable(countfile, false, false);
         vector<string> namesOfSeqs = ct.getNamesOfSeqs();
         numSeqs = ct.getNumUniqueSeqs();
         

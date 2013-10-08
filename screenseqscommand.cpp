@@ -14,7 +14,7 @@
 vector<string> ScreenSeqsCommand::setParameters(){	
 	try {
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","fasta",false,true,true); parameters.push_back(pfasta);
-        CommandParameter pcontigsreport("contigsreport", "InputTypes", "", "", "report", "none", "none","contigsreport",false,true,true); parameters.push_back(pcontigsreport);
+        CommandParameter pcontigsreport("contigsreport", "InputTypes", "", "", "report", "none", "none","contigsreport",false,false,true); parameters.push_back(pcontigsreport);
         CommandParameter palignreport("alignreport", "InputTypes", "", "", "report", "none", "none","alignreport",false,false); parameters.push_back(palignreport);
         CommandParameter psummary("summary", "InputTypes", "", "", "report", "none", "none","summary",false,false); parameters.push_back(psummary);
         CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none","name",false,false,true); parameters.push_back(pname);
@@ -683,7 +683,7 @@ int ScreenSeqsCommand::screenReports(map<string, string>& badSeqNames){
             if (namefile != "") { nameMap = m->readNames(namefile); }
             else if (countfile != "") {
                 CountTable ct;
-                ct.readTable(countfile, true);
+                ct.readTable(countfile, true, false);
                 nameMap = ct.getNameMap();
             }
             getSummary(positions); 
@@ -714,7 +714,7 @@ int ScreenSeqsCommand::screenReports(map<string, string>& badSeqNames){
             if (namefile != "") { nameMap = m->readNames(namefile); }
             else if (countfile != "") {
                 CountTable ct;
-                ct.readTable(countfile, true);
+                ct.readTable(countfile, true, false);
                 nameMap = ct.getNameMap();
             }
             getSummaryReport();
@@ -1019,7 +1019,7 @@ int ScreenSeqsCommand::screenFasta(map<string, string>& badSeqNames){
 			if (namefile != "") { nameMap = m->readNames(namefile); }
             else if (countfile != "") {
                 CountTable ct;
-                ct.readTable(countfile, true);
+                ct.readTable(countfile, true, false);
                 nameMap = ct.getNameMap();
             }
 			getSummary(positions); 
@@ -2205,7 +2205,7 @@ int ScreenSeqsCommand::screenCountFile(map<string, string> badSeqNames){
         //check for groups that have been eliminated
         CountTable ct;
         if (ct.testGroups(goodCountFile)) {
-            ct.readTable(goodCountFile, true);
+            ct.readTable(goodCountFile, true, false);
             ct.printTable(goodCountFile);
         }
 		

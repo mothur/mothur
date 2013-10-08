@@ -543,7 +543,7 @@ int HeatMapSimCommand::runCommandDist() {
                 }
              }else if (countfile != "") {
                 nameMap = NULL;
-                ct.readTable(countfile, true);
+                ct.readTable(countfile, true, false);
                 names = ct.getNamesOfSeqs();
             }
 			

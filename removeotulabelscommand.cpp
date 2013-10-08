@@ -234,6 +234,10 @@ int RemoveOtuLabelsCommand::execute(){
         
         //get labels you want to keep
 		labels = m->readAccnos(accnosfile);
+        //simplfy labels
+        set<string> newLabels;
+        for (set<string>::iterator it = labels.begin(); it != labels.end(); it++) {  newLabels.insert(m->getSimpleLabel(*it)); }
+        labels = newLabels;
         
         if (m->debug) { m->mothurOut("[DEBUG]: numlabels = " + toString(labels.size()) + "\n"); }
 		
@@ -305,7 +309,7 @@ int RemoveOtuLabelsCommand::readClassifyOtu(){
             
             if (m->debug) { m->mothurOut("[DEBUG]: " + otu + toString(size) + tax + "\n"); }
             
-            if (labels.count(otu) == 0) {
+            if (labels.count(m->getSimpleLabel(otu)) == 0) {
 				wroteSomething = true;
                 out << otu << '\t' << size << '\t' << tax << endl;
             }else {  removedCount++;  }
@@ -357,7 +361,7 @@ int RemoveOtuLabelsCommand::readOtuAssociation(){
             in >> otu1 >> otu2;
             string line = m->getline(in); m->gobble(in);
             
-            if ((labels.count(otu1) == 0) && (labels.count(otu2) == 0)){
+            if ((labels.count(m->getSimpleLabel(otu1)) == 0) && (labels.count(m->getSimpleLabel(otu2)) == 0)){
 				wroteSomething = true;
                 
                 out << otu1 << '\t' << otu2 << '\t' << line << endl;
@@ -410,7 +414,7 @@ int RemoveOtuLabelsCommand::readCorrAxes(){
             in >> otu;
             string line = m->getline(in); m->gobble(in);
             
-            if (labels.count(otu) == 0) {
+            if (labels.count(m->getSimpleLabel(otu)) == 0) {
 				wroteSomething = true;
                 
                 out << otu << '\t' << line << endl;
@@ -458,7 +462,7 @@ int RemoveOtuLabelsCommand::readShared(){
             if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) { delete newLookup[j]; } for (int j = 0; j < lookup.size(); j++) { delete lookup[j]; } return 0; }
             
             //is this otu on the list
-            if (labels.count(m->currentBinLabels[i]) == 0) {
+            if (labels.count(m->getSimpleLabel(m->currentBinLabels[i])) == 0) {
                 wroteSomething = true;
                 newLabels.push_back(m->currentBinLabels[i]);
                 for (int j = 0; j < newLookup.size(); j++) { //add this OTU to the new lookup
@@ -529,7 +533,7 @@ int RemoveOtuLabelsCommand::readList(){
             }
             otuLabel += sbinNumber; 
             
-            if (labels.count(otuLabel) == 0) {
+            if (labels.count(m->getSimpleLabel(otuLabel)) == 0) {
                 newList.push_back(list->get(i));
             }else { removedCount++; }
         }

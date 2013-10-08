@@ -209,7 +209,7 @@ int DeconvoluteCommand::execute() {
         }
         CountTable ct;
         if (countfile != "")  {  
-            ct.readTable(countfile, true);
+            ct.readTable(countfile, true, false);
             if (countfile == outCountFile){
                 //prepare filenames and open files
                 map<string, string> mvariables;

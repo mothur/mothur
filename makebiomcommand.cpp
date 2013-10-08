@@ -596,8 +596,9 @@ vector<string> MakeBiomCommand::getMetaData(vector<SharedRAbundVector*>& lookup,
                         for (int h = 0; h < diff; h++) { binLabel += "0"; }
                     }
                     binLabel += sbinNumber;
+                    binLabel = m->getSimpleLabel(binLabel);
                     labelTaxMap[binLabel] = taxs[i];
-                }else {  labelTaxMap[otuLabels[i]] = taxs[i]; }
+                }else {  labelTaxMap[m->getSimpleLabel(otuLabels[i])] = taxs[i]; }
             }
             
             
@@ -610,7 +611,7 @@ vector<string> MakeBiomCommand::getMetaData(vector<SharedRAbundVector*>& lookup,
                 
                 if (m->control_pressed) { return metadata; }
                 
-                it = labelTaxMap.find(m->currentBinLabels[i]);
+                it = labelTaxMap.find(m->getSimpleLabel(m->currentBinLabels[i]));
                 
                 if (it == labelTaxMap.end()) { m->mothurOut("[ERROR]: can't find taxonomy information for " + m->currentBinLabels[i] + ".\n"); m->control_pressed = true; }
                 else {

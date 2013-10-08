@@ -211,7 +211,7 @@ int CountTable::createTable(string namefile, string groupfile, bool createGroup)
 	}
 }
 /************************************************************/
-int CountTable::readTable(string file, bool readGroups) {
+int CountTable::readTable(string file, bool readGroups, bool mothurRunning) {
     try {
         filename = file;
         ifstream in;
@@ -246,7 +246,7 @@ int CountTable::readTable(string file, bool readGroups) {
             in >> name; m->gobble(in); in >> thisTotal; m->gobble(in);
             if (m->debug) { m->mothurOut("[DEBUG]: " + name + '\t' + toString(thisTotal) + "\n"); }
             
-            if (thisTotal == 0) { error=true; m->mothurOut("[ERROR]: Your count table contains a sequence named " + name + " with a total=0. Please correct."); m->mothurOutEndLine();
+            if ((thisTotal == 0) && !mothurRunning) { error=true; m->mothurOut("[ERROR]: Your count table contains a sequence named " + name + " with a total=0. Please correct."); m->mothurOutEndLine();
             }
             
             //if group info, then read it

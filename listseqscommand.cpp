@@ -415,7 +415,7 @@ int ListSeqsCommand::readGroup(){
 int ListSeqsCommand::readCount(){
 	try {
 		CountTable ct;
-		ct.readTable(countfile, false);
+		ct.readTable(countfile, false, false);
         
         if (m->control_pressed) { return 0; }
         

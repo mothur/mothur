@@ -119,7 +119,8 @@ string HeatMap::getPic(vector<SharedRAbundVector*> lookup) {
 		}
 		
 		//sort lookup so shared bins are on top
-		if (sorted != "none") {  sortSharedVectors(lookup);  }
+        vector<string> sortedLabels = m->currentBinLabels;
+		if (sorted != "none") {  sortedLabels = sortSharedVectors(lookup);  }
 		
 		vector<vector<string> > scaleRelAbund;
 		vector<float> maxRelAbund(lookup[0]->size(), 0.0);		
@@ -158,36 +159,46 @@ string HeatMap::getPic(vector<SharedRAbundVector*> lookup) {
 
 		string filenamesvg = outputDir + m->getRootName(m->getSimpleName(inputfile)) + lookup[0]->getLabel() + ".heatmap.bin.svg";
 		m->openOutputFile(filenamesvg, outsvg);
+        int binHeight = 20;
+        int labelBump = 100;
+        int binWidth = 300;
 		
 		//svg image
-		outsvg << "<svg xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" height=\"100%\" viewBox=\"0 0 " + toString(lookup.size() * 300) + " " + toString((numBinsToDisplay*5 + 120))  + "\">\n";
+		outsvg << "<svg xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" height=\"100%\" viewBox=\"0 0 " + toString(lookup.size() * binWidth + labelBump) + " " + toString((numBinsToDisplay*binHeight + 120))  + "\">\n";
 		outsvg << "<g>\n";
 		
 		//white backround
-		outsvg << "<rect fill=\"white\" stroke=\"white\" x=\"0\" y=\"0\" width=\"" + toString(lookup.size() * 300) + "\" height=\"" + toString((numBinsToDisplay*5 + 120))  + "\"/>"; 
+		outsvg << "<rect fill=\"white\" stroke=\"white\" x=\"0\" y=\"0\" width=\"" + toString(lookup.size() * binWidth+labelBump) + "\" height=\"" + toString((numBinsToDisplay*binHeight + 120))  + "\"/>";
 		outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" text-anchor=\"middle\" x=\"" + toString((lookup.size() * 150) - 40) + "\" y=\"25\">Heatmap at distance " + lookup[0]->getLabel() + "</text>\n";
 		
 		//column labels
-		for (int h = 0; h < lookup.size(); h++) {
-			outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(((300 * (h+1)) - 150) - ((int)lookup[h]->getGroup().length() / 2)) + "\" y=\"50\">" + lookup[h]->getGroup() + "</text>\n"; 
+		for (int h = 0; h < lookup.size()+1; h++) {
+            if (h == 0) {
+                string tempLabel = "OTU";
+                outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(labelBump-labelBump/2+1) + "\" y=\"50\">" + tempLabel + "</text>\n";
+            }else {
+                outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(((binWidth * h) - 150) - ((int)lookup[h-1]->getGroup().length() / 2)+labelBump/2) + "\" y=\"50\">" + lookup[h-1]->getGroup() + "</text>\n";
+            }
 		}
 
 		//output legend and color labels
 		string color;
 		int x = 0;
-		int y = 103 + (numBinsToDisplay*5);
+		int y = 103 + (numBinsToDisplay*binHeight);
 		printLegend(y, superMaxRelAbund);
 		
 		y = 70;
 		for (int i = 0; i < numBinsToDisplay; i++) {
+            outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(x) + "\" y=\"" + toString(y) + "\">" + sortedLabels[i] + "</text>\n";
+            x += labelBump;
 			for (int j = 0; j < scaleRelAbund.size(); j++) {
 				if (m->control_pressed) { outsvg.close(); return "control"; }
 				
-				outsvg << "<rect fill=\"#" + scaleRelAbund[j][i] + "\" stroke=\"#" + scaleRelAbund[j][i] + "\" x=\"" + toString(x) + "\" y=\"" + toString(y) + "\" width=\"300\" height=\"5\"/>\n";
-				x += 300;
+				outsvg << "<rect fill=\"#" + scaleRelAbund[j][i] + "\" stroke=\"#" + scaleRelAbund[j][i] + "\" x=\"" + toString(x) + "\" y=\"" + toString(y) + "\" width=\"" + toString(binWidth) +  "\" height=\"" + toString(binHeight) +  "\"/>\n";
+				x += binWidth;
 			}
 			x = 0;
-			y += 5;
+			y += binHeight;
 		}
 		
 		outsvg << "</g>\n</svg>\n";
@@ -203,12 +214,14 @@ string HeatMap::getPic(vector<SharedRAbundVector*> lookup) {
 }
 
 //**********************************************************************************************************************
-int HeatMap::sortSharedVectors(vector<SharedRAbundVector*>& lookup){
+vector<string> HeatMap::sortSharedVectors(vector<SharedRAbundVector*>& lookup){
 	try {
 				
 		vector<SharedRAbundVector*> looktemp;
 		map<int, int> place; //spot in lookup where you insert shared by, ie, 3 -> 2 if they are shared by 3 inset into location 2.
 		map<int, int>::iterator it;
+        
+        vector<string> sortedLabels = m->currentBinLabels;
 		
 		/****************** find order of otus **********************/
 		if (sorted == "shared") {
@@ -217,7 +230,7 @@ int HeatMap::sortSharedVectors(vector<SharedRAbundVector*>& lookup){
 			place = orderTopOtu(lookup);	
 		}else if (sorted == "topgroup") {
 			place = orderTopGroup(lookup);	
-		}else { m->mothurOut("Error: invalid sort option."); m->mothurOutEndLine();  return 1; }
+		}else { m->mothurOut("Error: invalid sort option."); m->mothurOutEndLine();  return sortedLabels; }
 				
 		
 		/******************* create copy of lookup *********************/
@@ -241,6 +254,7 @@ int HeatMap::sortSharedVectors(vector<SharedRAbundVector*>& lookup){
 				int newAbund = looktemp[j]->getAbundance(i);												// 1 -> 3
 				lookup[j]->set(place[i], newAbund, looktemp[j]->getGroup()); //binNumber, abundance, group
 			}
+            sortedLabels[place[i]] = m->currentBinLabels[i];
 		}
 		
 		//delete looktemp -- Sarah look at - this is causing segmentation faults
@@ -248,7 +262,7 @@ int HeatMap::sortSharedVectors(vector<SharedRAbundVector*>& lookup){
 //			delete looktemp[j];
 		}
 		
-		return 0;
+		return sortedLabels;
 		
 	}
 	catch(exception& e) {
@@ -416,7 +430,8 @@ string HeatMap::getPic(vector<SharedRAbundFloatVector*> lookup) {
 		}
 		
 		//sort lookup so shared bins are on top
-		if (sorted != "none") {  sortSharedVectors(lookup);  }
+		vector<string> sortedLabels = m->currentBinLabels;
+		if (sorted != "none") {  sortedLabels = sortSharedVectors(lookup);  }
 		
 		vector<vector<string> > scaleRelAbund;
 		vector<float> maxRelAbund(lookup.size(), 0.0);		
@@ -455,36 +470,47 @@ string HeatMap::getPic(vector<SharedRAbundFloatVector*> lookup) {
 
 		string filenamesvg = outputDir + m->getRootName(m->getSimpleName(inputfile)) + lookup[0]->getLabel() + ".heatmap.bin.svg";
 		m->openOutputFile(filenamesvg, outsvg);
+        
+        int binHeight = 20;
+        int labelBump = 100;
+        int binWidth = 300;
 		
 		//svg image
-		outsvg << "<svg xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" height=\"100%\" viewBox=\"0 0 " + toString(lookup.size() * 300) + " " + toString((numBinsToDisplay*5 + 120))  + "\">\n";
+		outsvg << "<svg xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" height=\"100%\" viewBox=\"0 0 " + toString(lookup.size() * binWidth + labelBump) + " " + toString((numBinsToDisplay*binHeight + 120))  + "\">\n";
 		outsvg << "<g>\n";
 		
 		//white backround
-		outsvg << "<rect fill=\"white\" stroke=\"white\" x=\"0\" y=\"0\" width=\"" + toString(lookup.size() * 300) + "\" height=\"" + toString((numBinsToDisplay*5 + 120))  + "\"/>"; 
+		outsvg << "<rect fill=\"white\" stroke=\"white\" x=\"0\" y=\"0\" width=\"" + toString(lookup.size() * binWidth+labelBump) + "\" height=\"" + toString((numBinsToDisplay*binHeight + 120))  + "\"/>";
 		outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" text-anchor=\"middle\" x=\"" + toString((lookup.size() * 150) - 40) + "\" y=\"25\">Heatmap at distance " + lookup[0]->getLabel() + "</text>\n";
 		
 		//column labels
-		for (int h = 0; h < lookup.size(); h++) {
-			outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(((300 * (h+1)) - 150) - ((int)lookup[h]->getGroup().length() / 2)) + "\" y=\"50\">" + lookup[h]->getGroup() + "</text>\n"; 
+		for (int h = 0; h < lookup.size()+1; h++) {
+            if (h == 0) {
+                string tempLabel = "OTU";
+                outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(labelBump-labelBump/2+1) + "\" y=\"50\">" + tempLabel + "</text>\n";
+            }else {
+                outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(((binWidth * h) - 150) - ((int)lookup[h-1]->getGroup().length() / 2)+labelBump/2) + "\" y=\"50\">" + lookup[h-1]->getGroup() + "</text>\n";
+            }
 		}
-
+        
 		//output legend and color labels
 		string color;
 		int x = 0;
-		int y = 103 + (numBinsToDisplay*5);
+		int y = 103 + (numBinsToDisplay*binHeight);
 		printLegend(y, superMaxRelAbund);
 		
 		y = 70;
 		for (int i = 0; i < numBinsToDisplay; i++) {
+            outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(x) + "\" y=\"" + toString(y) + "\">" + sortedLabels[i] + "</text>\n";
+            x += labelBump;
 			for (int j = 0; j < scaleRelAbund.size(); j++) {
 				if (m->control_pressed) { outsvg.close(); return "control"; }
 				
-				outsvg << "<rect fill=\"#" + scaleRelAbund[j][i] + "\" stroke=\"#" + scaleRelAbund[j][i] + "\" x=\"" + toString(x) + "\" y=\"" + toString(y) + "\" width=\"300\" height=\"5\"/>\n";
-				x += 300;
+				outsvg << "<rect fill=\"#" + scaleRelAbund[j][i] + "\" stroke=\"#" + scaleRelAbund[j][i] + "\" x=\"" + toString(x) + "\" y=\"" + toString(y) + "\" width=\"" + toString(binWidth) +  "\" height=\"" + toString(binHeight) +  "\"/>\n";
+				x += binWidth;
 			}
 			x = 0;
-			y += 5;
+			y += binHeight;
 		}
 		
 		outsvg << "</g>\n</svg>\n";
@@ -499,12 +525,14 @@ string HeatMap::getPic(vector<SharedRAbundFloatVector*> lookup) {
 	}
 }
 //**********************************************************************************************************************
-int HeatMap::sortSharedVectors(vector<SharedRAbundFloatVector*>& lookup){
+vector<string> HeatMap::sortSharedVectors(vector<SharedRAbundFloatVector*>& lookup){
 	try {
 				
 		vector<SharedRAbundFloatVector*> looktemp;
 		map<int, int> place; //spot in lookup where you insert shared by, ie, 3 -> 2 if they are shared by 3 inset into location 2.
 		map<int, int>::iterator it;
+        
+        vector<string> sortedLabels = m->currentBinLabels;
 		
 		/****************** find order of otus **********************/
 		if (sorted == "shared") {
@@ -513,7 +541,7 @@ int HeatMap::sortSharedVectors(vector<SharedRAbundFloatVector*>& lookup){
 			place = orderTopOtu(lookup);	
 		}else if (sorted == "topgroup") {
 			place = orderTopGroup(lookup);	
-		}else { m->mothurOut("Error: invalid sort option."); m->mothurOutEndLine();  return 1; }
+		}else { m->mothurOut("Error: invalid sort option."); m->mothurOutEndLine();  return sortedLabels; }
 				
 		
 		/******************* create copy of lookup *********************/
@@ -536,6 +564,7 @@ int HeatMap::sortSharedVectors(vector<SharedRAbundFloatVector*>& lookup){
 			for (int j = 0; j < looktemp.size(); j++) {														// 3 -> 2
 				float newAbund = looktemp[j]->getAbundance(i);												// 1 -> 3
 				lookup[j]->set(place[i], newAbund, looktemp[j]->getGroup()); //binNumber, abundance, group
+                sortedLabels[place[i]] = m->currentBinLabels[i];
 			}
 		}
 		
@@ -544,7 +573,7 @@ int HeatMap::sortSharedVectors(vector<SharedRAbundFloatVector*>& lookup){
 //			delete looktemp[j];
 		}
 		
-		return 0;
+		return sortedLabels;
 		
 	}
 	catch(exception& e) {

@@ -226,7 +226,7 @@ int ConsensusSeqsCommand::execute(){
 		if (m->control_pressed) { return 0; }
 		
 		if (namefile != "") { readNames(); }
-        if (countfile != "") { ct.readTable(countfile, true);  }
+        if (countfile != "") { ct.readTable(countfile, true, false);  }
 		
 		if (m->control_pressed) { return 0; }
 		
