@@ -2177,19 +2177,18 @@ int ScreenSeqsCommand::screenCountFile(map<string, string> badSeqNames){
 			if (m->control_pressed) { goodCountOut.close(); in.close(); m->mothurRemove(goodCountFile); return 0; }
             
 			in >> name; m->gobble(in); 
-            in >> thisTotal; m->gobble(in);
+            in >> thisTotal; 
             rest = m->getline(in); m->gobble(in);
             
 			it = badSeqNames.find(name);
 			
 			if(it != badSeqNames.end()){
-				badSeqNames.erase(it);
+				badSeqNames.erase(it); 
 			}
 			else{
 				goodCountOut << name << '\t' << thisTotal << '\t' << rest << endl;
 			}
 		}
-		
 		if (m->control_pressed) { goodCountOut.close();  in.close(); m->mothurRemove(goodCountFile);  return 0; }
         
 		//we were unable to remove some of the bad sequences

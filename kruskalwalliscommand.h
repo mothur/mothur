@@ -42,7 +42,7 @@ public:
     
 private:
     bool abort, allLines;
-    string outputDir, sharedfile, designfile, mclass, classes;
+    string outputDir, sharedfile, designfile, mclass;
     vector<string> outputNames;
     set<string> labels;
     

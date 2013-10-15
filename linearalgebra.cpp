@@ -10,6 +10,8 @@
 #include "linearalgebra.h"
 #include "wilcox.h"
 
+#define PI 3.1415926535897932384626433832795
+
 // This class references functions used from "Numerical Recipes in C++" //
 
 /*********************************************************************************************************************************/
@@ -1320,24 +1322,14 @@ double LinearAlgebra::calcKruskalWallis(vector<spearmanRank>& values, double& pV
 	}
 }
 /*********************************************************************************************************************************/
-//python random.normalvariate - thanks http://madssj.com/blog/2008/05/07/porting-normalvariate-from-python-to-c/
-double LinearAlgebra::normalvariate(double mu, double sigma) {
+double LinearAlgebra::normalvariate(double mean, double standardDeviation) {
     try {
-        double NV_MAGICCONST = 1.7155277699214135; /* (4 * exp(-0.5) / sqrt(2.0)); */
-        unsigned long int MAX_RANDOM = 2147483647; /* (2 ** 31) - 1; */
-        
-        double u1, u2, z, zz;
-        for (;;) {
-            if (m->control_pressed) { break; }
-            u1 = ((float)random()) / MAX_RANDOM;
-            u2 = 1.0 - (((float)random()) / MAX_RANDOM);
-            z = NV_MAGICCONST * (u1 - 0.5) / u2;
-            zz = z * z / 4.0;
-            if (zz <= -(log(u2))) {
-                break;
-            }
-        }
-        return mu + z * sigma;
+        double u1 = ((double)(rand()) + 1.0 )/( (double)(RAND_MAX) + 1.0);
+        double u2 = ((double)(rand()) + 1.0 )/( (double)(RAND_MAX) + 1.0);
+        //double r = sqrt( -2.0*log(u1) );
+        //double theta = 2.0*PI*u2;
+        //cout << cos(8.*atan(1.)*u2)*sqrt(-2.*log(u1)) << endl;
+        return cos(8.*atan(1.)*u2)*sqrt(-2.*log(u1));
     }
 	catch(exception& e) {
 		m->errorOut(e, "LinearAlgebra", "normalvariate");
@@ -1367,6 +1359,7 @@ double LinearAlgebra::pnorm(double x){
         double y = 1.0 - (((((a5*t + a4)*t) + a3)*t + a2)*t + a1)*t*exp(-x*x);
         
         return 0.5*(1.0 + sign*y);
+        
     }
 	catch(exception& e) {
 		m->errorOut(e, "LinearAlgebra", "pnorm");

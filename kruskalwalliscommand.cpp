@@ -15,7 +15,6 @@ vector<string> KruskalWallisCommand::setParameters(){
         CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none","summary",false,true,true); parameters.push_back(pshared);
         CommandParameter pclass("class", "String", "", "", "", "", "","",false,false); parameters.push_back(pclass);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
-		CommandParameter pclasses("classes", "String", "", "", "", "", "","",false,false); parameters.push_back(pclasses);
         //every command must have inputdir and outputdir.  This allows mothur users to redirect input and output files.
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -34,9 +33,8 @@ string KruskalWallisCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The kruskal.wallis command allows you to ....\n";
-		helpString += "The kruskal.wallis command parameters are: shared, design, class,  label and classes.\n";
+		helpString += "The kruskal.wallis command parameters are: shared, design, class, label and classes.\n";
 		helpString += "The class parameter is used to indicate the which category you would like used for the Kruskal Wallis analysis. If none is provided first category is used.\n";
-        helpString += "The classes parameter is used to indicate the classes you would like to use. Clases should be inputted in the following format: classes=label<value1|value2|value3>-label<value1|value2>. For example to include groups from treatment with value early or late and age= young or old.  class=treatment<Early|Late>-age<young|old>.\n";
         helpString += "The label parameter is used to indicate which distances in the shared file you would like to use. labels are separated by dashes.\n";
 		helpString += "The kruskal.wallis command should be in the following format: kruskal.wallis(shared=final.an.shared, design=final.design, class=treatment).\n";
         return helpString;
@@ -159,9 +157,6 @@ KruskalWallisCommand::KruskalWallisCommand(string option)  {
             mclass = validParameter.validFile(parameters, "class", false);
 			if (mclass == "not found") { mclass = ""; }
             
-            classes = validParameter.validFile(parameters, "classes", false);
-			if (classes == "not found") { classes = ""; }
-            
 		}
 		
 	}
@@ -178,13 +173,6 @@ int KruskalWallisCommand::execute(){
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
         
         DesignMap designMap(designfile);
-        //if user set classes set groups=those classes
-        if (classes != "") {
-            map<string, vector<string> > thisClasses = m->parseClasses(classes);
-            vector<string> groups = designMap.getNamesUnique(thisClasses);
-            if (groups.size() != 0) { m->setGroups(groups); }
-            else { m->mothurOut("[ERROR]: no groups meet your classes requirement, quitting.\n"); return 0; }
-        }
         
         //if user did not select class use first column
         if (mclass == "") {  mclass = designMap.getDefaultClass(); m->mothurOut("\nYou did not provide a class, using " + mclass +".\n\n"); }

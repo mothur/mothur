@@ -41,7 +41,7 @@ public:
     
     string getOutputPattern(string);
 	string getHelpString();
-    string getCitation() { return "http://www.mothur.org/wiki/Lefse"; }
+    string getCitation() { return "Segata, N., J. Izard, L. Waldron, D. Gevers, L. Miropolsky, W. S. Garrett, and C. Huttenhower. 2011. Metagenomic biomarker discovery and explanation. Genome Biol 12:R60, http://www.mothur.org/wiki/Lefse"; }
     string getDescription()		{ return "brief description"; }
     
     int execute();
@@ -49,7 +49,7 @@ public:
     
 private:
     bool abort, allLines, wilc, wilcsamename, curv, subject, normMillion;
-    string outputDir, sharedfile, designfile, mclass, subclass, classes, rankTec, multiClassStrat;
+    string outputDir, sharedfile, designfile, mclass, subclass, rankTec, multiClassStrat;
     vector<string> outputNames;
     set<string> labels;
     double anovaAlpha, wilcoxonAlpha, fBoots, ldaThreshold;

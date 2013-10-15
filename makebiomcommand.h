@@ -36,14 +36,14 @@ public:
 	
 private:
     
-	string sharedfile, contaxonomyfile, metadatafile, groups, outputDir, format, label;
+	string sharedfile, contaxonomyfile, metadatafile, groups, outputDir, format, label, referenceTax;
 	vector<string> outputNames, Groups, sampleMetadata;
 	set<string> labels;
     
-	bool abort, allLines;
+	bool abort, allLines, picrust;
     
     int getBiom(vector<SharedRAbundVector*>&);
-    vector<string> getMetaData(vector<SharedRAbundVector*>&);
+    vector<string> getMetaData(vector<SharedRAbundVector*>&, vector<string>&);
     vector<string> parseTax(string tax, vector<string>& scores);
     int getSampleMetaData(vector<SharedRAbundVector*>&);
 };

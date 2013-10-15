@@ -6,6 +6,7 @@
 //  Copyright (c) 2013 Schloss Lab. All rights reserved.
 //
 #include <algorithm>
+#include <functional>
 #include <iostream>
 #include <limits>
 #include <numeric>
@@ -13,6 +14,13 @@
 #include <utility>
 
 #include "svm.hpp"
+
+// OutputFilter constants
+const int OutputFilter::QUIET  = 0;
+const int OutputFilter::INFO   = 1;
+const int OutputFilter::DEBUG  = 2;
+const int OutputFilter::TRACE  = 3;
+
 
 #define RANGE(X) X, X + sizeof(X)/sizeof(double)
 
@@ -79,31 +87,127 @@ void buildLabelToLabeledObservationVector(LabelToLabeledObservationVector& label
 }
 
 
+class MeanAndStd {
+private:
+    double n;
+    double M2;
+    double mean;
+
+public:
+    MeanAndStd() {}
+    ~MeanAndStd() {}
+
+    void initialize() {
+        n = 0.0;
+        mean = 0.0;
+        M2 = 0.0;
+    }
+
+    void processNextValue(double x) {
+        n += 1.0;
+        double delta = x - mean;
+        mean += delta / n;
+        M2 += delta * (x - mean);
+    }
+
+    double getMean() {
+        return mean;
+    }
+
+    double getStd() {
+        double variance = M2 / (n - 1.0);
+        return sqrt(variance);
+    }
+};
+
+
+// The LabelMatchesEither functor is used only in a call to remove_copy_if in the
+// OneVsOneMultiClassSvmTrainer::train method.  It returns true if the labeled
+// observation argument has the same label as either of the two label arguments.
+class FeatureLabelMatches {
+public:
+    FeatureLabelMatches(const std::string& _featureLabel) : featureLabel(_featureLabel){}
+
+    bool operator() (const Feature& f) {
+        return f.getFeatureLabel() == featureLabel;
+    }
+
+private:
+    const std::string& featureLabel;
+};
+
+FeatureVector applyStdThreshold(double stdThreshold, LabeledObservationVector& observations, FeatureVector& featureVector) {
+    // calculate standard deviation of each feature
+    // remove features with standard deviation less than or equal to stdThreshold
+    MeanAndStd m;
+    // loop over features in reverse order so we can get the index of each
+    // for example,
+    //     if there are 5 features a,b,c,d,e
+    //     and features a, c, e fall below the stdThreshold
+    //     loop iteration 0: remove feature e (index 4) -- features are now a,b,c,d
+    //     loop iteration 1: leave feature d (index 3)
+    //     loop iteration 2: remove feature c (index 2) -- features are now a,b,d
+    //     loop iteration 3: leave feature b (index 1)
+    //     loop iteration 4: remove feature a (index 0) -- features are now b,d
+    FeatureVector removedFeatureVector;
+    for ( int feature = observations[0].second->size()-1; feature >= 0 ; feature-- ) {
+        m.initialize();
+        std::cout << "feature index " << feature << std::endl;
+        for ( ObservationVector::size_type observation = 0; observation < observations.size(); observation++ ) {
+            m.processNextValue(observations[observation].second->at(feature));
+        }
+        std::cout << "feature " << feature << " has std " << m.getStd() << std::endl;
+        if ( m.getStd() <= stdThreshold ) {
+            std::cout << "removing feature with index " << feature << std::endl;
+            // remove this feature
+            //removedFeatureInd.push_back(feature);
+            Feature removedFeature = featureVector.at(feature);
+            FeatureLabelMatches matchFeatureLabel(removedFeature.getFeatureLabel());
+            featureVector.erase(
+                    std::remove_if(featureVector.begin(), featureVector.end(), matchFeatureLabel),
+                    featureVector.end()
+            );
+            removedFeatureVector.push_back(removedFeature);
+            for ( ObservationVector::size_type observation = 0; observation < observations.size(); observation++ ) {
+                observations[observation].removeFeatureAtIndex(feature);
+            }
+        }
+    }
+    std::reverse(removedFeatureVector.begin(), removedFeatureVector.end());
+    return removedFeatureVector;
+}
+
+
 // this function standardizes data to mean 0 and variance 1
 // but this may not be a good standardization for OTU data
 void transformZeroMeanUnitVariance(LabeledObservationVector& observations) {
     bool vebose = false;
     // online method for mean and variance
+    MeanAndStd m;
     for ( Observation::size_type feature = 0; feature < observations[0].second->size(); feature++ ) {
-        double n = 0.0;
-        double mean = 0.0;
-        double M2 = 0.0;
+        m.initialize();
+        //double n = 0.0;
+        //double mean = 0.0;
+        //double M2 = 0.0;
         for ( ObservationVector::size_type observation = 0; observation < observations.size(); observation++ ) {
-            n += 1.0;
-            double x = observations[observation].second->at(feature);
-            double delta = x - mean;
-            mean += delta / n;
-            M2 += delta * (x - mean);
+            m.processNextValue(observations[observation].second->at(feature));
+            //n += 1.0;
+            //double x = observations[observation].second->at(feature);
+            //double delta = x - mean;
+            //mean += delta / n;
+            //M2 += delta * (x - mean);
         }
-        double variance = M2 / (n - 1.0);
-        double standardDeviation = sqrt(variance);
+        //double variance = M2 / (n - 1.0);
+        //double standardDeviation = sqrt(variance);
         if (vebose) {
-            std::cout << "mean of feature " << feature << " is " << mean << std::endl;
-            std::cout << "std of feature " << feature << " is " << standardDeviation << std::endl;
+            std::cout << "mean of feature " << feature << " is " << m.getMean() << std::endl;
+            std::cout << "std of feature " << feature << " is " << m.getStd() << std::endl;
         }
         // normalize the feature
+        double mean = m.getMean();
+        double std = m.getStd();
         for ( ObservationVector::size_type observation = 0; observation < observations.size(); observation++ ) {
-            observations[observation].second->at(feature) = (observations[observation].second->at(feature) - mean ) / standardDeviation;
+            observations[observation].second->at(feature) = (observations[observation].second->at(feature) - mean ) / std;
         }
     }
 }
@@ -270,10 +374,10 @@ SVM* SmoTrainer::train(KernelFunctionCache& K, const LabeledObservationVector& t
     std::vector<double> g(observationCount, 1.0);
     // convert the labels to -1.0,+1.0
     std::vector<double> y(observationCount);
-    if (outputFilter.debug()) std::cout << "assign numeric labels" << std::endl;
+    if (outputFilter.trace()) std::cout << "assign numeric labels" << std::endl;
     NumericClassToLabel discriminantToLabel;
     assignNumericLabels(y, twoClassLabeledObservationVector, discriminantToLabel);
-    if (outputFilter.debug()) std::cout << "assign A and B" << std::endl;
+    if (outputFilter.trace()) std::cout << "assign A and B" << std::endl;
     std::vector<double> A(observationCount);
     std::vector<double> B(observationCount);
     for ( int n = 0; n < observationCount; n++ ) {
@@ -285,9 +389,9 @@ SVM* SmoTrainer::train(KernelFunctionCache& K, const LabeledObservationVector& t
             A[n] = -C;
             B[n] = 0;
         }
-        if (outputFilter.debug()) std::cout << n << " " << A[n] << " " << B[n] << std::endl;
+        if (outputFilter.trace()) std::cout << n << " " << A[n] << " " << B[n] << std::endl;
     }
-    if (outputFilter.debug()) std::cout << "assign K" << std::endl;
+    if (outputFilter.trace()) std::cout << "assign K" << std::endl;
     int m = 0;
     std::vector<double> u(3);
     std::vector<double> ya(observationCount);
@@ -305,12 +409,12 @@ SVM* SmoTrainer::train(KernelFunctionCache& K, const LabeledObservationVector& t
         int j = 0; // 0
         double yg_max = std::numeric_limits<double>::min();
         double yg_min = std::numeric_limits<double>::max();
-        if (outputFilter.debug()) std::cout << "m = " << m << std::endl;
+        if (outputFilter.trace()) std::cout << "m = " << m << std::endl;
         for ( int k = 0; k < observationCount; k++ ) {
             ya[k] = y[k] * a[k];
             yg[k] = y[k] * g[k];
         }
-        if (outputFilter.debug()) {
+        if (outputFilter.trace()) {
             std::cout << "yg =";
             for ( int k = 0; k < observationCount; k++ ) {
                 //std::cout << A[k] << " " << B[k] << " " << y[k] << " " << a[k] << " " << g[k] << " " << ya[k] << " " << yg[k] << std::endl;
@@ -333,7 +437,7 @@ SVM* SmoTrainer::train(KernelFunctionCache& K, const LabeledObservationVector& t
             //std::cout << "j = " << j << " yg[j] = " << yg[j] << std::endl;
         }
         // maximum violating pair is i,j
-        if (outputFilter.debug()) {
+        if (outputFilter.trace()) {
             std::cout << "maximal violating pair: " << i << " " << j << std::endl;
             std::cout << "  i = " << i << " features: ";
             for ( int feature = 0; feature < featureCount; feature++ ) {
@@ -367,15 +471,15 @@ SVM* SmoTrainer::train(KernelFunctionCache& K, const LabeledObservationVector& t
         double K_jj = K.similarity(twoClassLabeledObservationVector[j], twoClassLabeledObservationVector[j]);
         double K_ij = K.similarity(twoClassLabeledObservationVector[i], twoClassLabeledObservationVector[j]);
         u[2] = (yg[i] - yg[j]) / (K_ii+K_jj-2.0*K_ij);
-        if (outputFilter.debug()) std::cout << "directions: (" << u[0] << "," << u[1] << "," << u[2] << ")" << std::endl;
+        if (outputFilter.trace()) std::cout << "directions: (" << u[0] << "," << u[1] << "," << u[2] << ")" << std::endl;
         lambda = *std::min_element(u.begin(), u.end());
-        if (outputFilter.debug()) std::cout << "lambda: " << lambda << std::endl;
+        if (outputFilter.trace()) std::cout << "lambda: " << lambda << std::endl;
         for ( int k = 0; k < observationCount; k++ ) {
             double K_ik = K.similarity(twoClassLabeledObservationVector[i], twoClassLabeledObservationVector[k]);
             double K_jk = K.similarity(twoClassLabeledObservationVector[j], twoClassLabeledObservationVector[k]);
             g[k] += (-lambda * y[k] * K_ik + lambda * y[k] * K_jk);
         }
-        if (outputFilter.debug()) {
+        if (outputFilter.trace()) {
             std::cout << "g =";
             for ( int k = 0; k < observationCount; k++ ) {
                 std::cout << " " << g[k];
@@ -389,21 +493,21 @@ SVM* SmoTrainer::train(KernelFunctionCache& K, const LabeledObservationVector& t
 
     // at this point the optimal a's have been found
     // now use them to find w and b
-    if (outputFilter.debug()) std::cout << "find w" << std::endl;
+    if (outputFilter.trace()) std::cout << "find w" << std::endl;
     std::vector<double> w(twoClassLabeledObservationVector[0].second->size(), 0.0);
     double b = 0.0;
     for ( int i = 0; i < y.size(); i++ ) {
-        if (outputFilter.debug()) std::cout << "alpha[" << i << "] = " << a[i] << std::endl;
+        if (outputFilter.trace()) std::cout << "alpha[" << i << "] = " << a[i] << std::endl;
         for ( int j = 0; j < w.size(); j++ ) {
             w[j] += a[i] * y[i] * twoClassLabeledObservationVector[i].second->at(j);
         }
         if ( A[i] < a[i] && a[i] < B[i] ) {
             b = yg[i];
-            if (outputFilter.debug()) std::cout << "b = " << b << std::endl;
+            if (outputFilter.trace()) std::cout << "b = " << b << std::endl;
         }
     }
 
-    if (outputFilter.debug()) {
+    if (outputFilter.trace()) {
         for ( int i = 0; i < w.size(); i++ ) {
             std::cout << "w[" << i << "] = " << w[i] << std::endl;
         }
@@ -411,7 +515,24 @@ SVM* SmoTrainer::train(KernelFunctionCache& K, const LabeledObservationVector& t
 
     // be careful about passing twoClassLabeledObservationVector - what if this vector
     // is deleted???
-    return new SVM(y, a, twoClassLabeledObservationVector, b, discriminantToLabel);
+    //
+    // we can eliminate elements of y, a and observation vectors corresponding to a = 0
+    std::vector<double> support_y;
+    std::vector<double> nonzero_a;
+    LabeledObservationVector supportVectors;
+    for (int i = 0; i < a.size(); i++) {
+        if ( a.at(i) == 0.0 ) {
+            // this dual coefficient does not correspond to a support vector
+        }
+        else {
+            support_y.push_back(y.at(i));
+            nonzero_a.push_back(a.at(i));
+            supportVectors.push_back(twoClassLabeledObservationVector.at(i));
+        }
+    }
+    //return new SVM(y, a, twoClassLabeledObservationVector, b, discriminantToLabel);
+    if (outputFilter.info()) std::cout << "found " << supportVectors.size() << " support vectors" << std::endl;
+    return new SVM(support_y, nonzero_a, supportVectors, b, discriminantToLabel);
 }
 
 typedef std::map<Label, double> LabelToNumericClassLabel;

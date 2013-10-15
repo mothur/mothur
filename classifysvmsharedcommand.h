@@ -59,6 +59,12 @@ private:
     std::vector<double> smocList;
     KernelParameterRangeMap kernelParameterRangeMap;
 
+    string transformName;
+
+    int verbosity;
+
+    double stdthreshold;
+
     //int numDecisionTrees;
     //string treeSplitCriterion, optimumFeatureSubsetSelectionCriteria;
     //bool doPruning, discardHighErrorTrees;

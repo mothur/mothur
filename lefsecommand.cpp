@@ -17,7 +17,7 @@ vector<string> LefseCommand::setParameters(){
         CommandParameter pclass("class", "String", "", "", "", "", "","",false,false); parameters.push_back(pclass);
         CommandParameter psubclass("subclass", "String", "", "", "", "", "","",false,false); parameters.push_back(psubclass);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
-		CommandParameter pclasses("classes", "String", "", "", "", "", "","",false,false); parameters.push_back(pclasses);
+		//CommandParameter pclasses("classes", "String", "", "", "", "", "","",false,false); parameters.push_back(pclasses);
         CommandParameter palpha("aalpha", "Number", "", "0.05", "", "", "","",false,false); parameters.push_back(palpha);
         CommandParameter pwalpha("walpha", "Number", "", "0.05", "", "", "","",false,false); parameters.push_back(pwalpha);
         
@@ -58,7 +58,7 @@ string LefseCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The lefse command allows you to ....\n";
-		helpString += "The lefse command parameters are: shared, design, class, subclass, label, classes, walpha, aalpha, lda, wilc, iters, curv, fboots, strict, minc, multiclass and norm.\n";
+		helpString += "The lefse command parameters are: shared, design, class, subclass, label, walpha, aalpha, lda, wilc, iters, curv, fboots, strict, minc, multiclass and norm.\n";
 		helpString += "The class parameter is used to indicate the which category you would like used for the Kruskal Wallis analysis. If none is provided first category is used.\n";
         helpString += "The subclass parameter is used to indicate the .....If none is provided, second category is used, or if only one category subclass is ignored. \n";
         helpString += "The aalpha parameter is used to set the alpha value for the Krukal Wallis Anova test Default=0.05. \n";
@@ -67,13 +67,13 @@ string LefseCommand::getHelpString(){
         helpString += "The wilc parameter is used to indicate whether to perform the Wilcoxon test. Default=T. \n";
         helpString += "The iters parameter is used to set the number of bootstrap iteration for LDA. Default=30. \n";
         //helpString += "The wilcsamename parameter is used to indicate whether perform the wilcoxon test only among the subclasses with the same name. Default=F. \n";
-        helpString += "The curv parameter is used to set whether perform the wilcoxon test ing the Curtis's approach [BETA VERSION] Default=F. \n";
+        helpString += "The curv parameter is used to set whether perform the wilcoxon testing the Curtis's approach [BETA VERSION] Default=F. \n";
         helpString += "The norm parameter is used to multiply relative abundances by 1000000. Recommended when very low values are present. Default=T. \n";
         helpString += "The fboots parameter is used to set the subsampling fraction value for each bootstrap iteration. Default=0.67. \n";
         helpString += "The strict parameter is used to set the multiple testing correction options. 0 no correction (more strict, default), 1 correction for independent comparisons, 2 correction for independent comparison. Options = 0,1,2. Default=0. \n";
         helpString += "The minc parameter is used to minimum number of samples per subclass for performing wilcoxon test. Default=10. \n";
         helpString += "The multiclass parameter is used to (for multiclass tasks) set whether the test is performed in a one-against-one ( onevone - more strict!) or in a one-against-all setting ( onevall - less strict). Default=onevall. \n";
-        helpString += "The classes parameter is used to indicate the classes you would like to use. Classes should be inputted in the following format: classes=label<value1|value2|value3>-label<value1|value2>. For example to include groups from treatment with value early or late and age= young or old.  class=treatment<Early|Late>-age<young|old>.\n";
+        //helpString += "The classes parameter is used to indicate the classes you would like to use. Classes should be inputted in the following format: classes=label<value1|value2|value3>-label<value1|value2>. For example to include groups from treatment with value early or late and age= young or old.  class=treatment<Early|Late>-age<young|old>.\n";
         helpString += "The label parameter is used to indicate which distances in the shared file you would like to use. labels are separated by dashes.\n";
 		helpString += "The lefse command should be in the following format: lefse(shared=final.an.shared, design=final.design, class=treatment, subclass=age).\n";
         return helpString;
@@ -199,9 +199,6 @@ LefseCommand::LefseCommand(string option)  {
             subclass = validParameter.validFile(parameters, "subclass", false);
 			if (subclass == "not found") { subclass = mclass; }
             
-            classes = validParameter.validFile(parameters, "classes", false);
-			if (classes == "not found") { classes = ""; }
-            
             string temp = validParameter.validFile(parameters, "aalpha", false);
 			if (temp == "not found") { temp = "0.05"; }
 			m->mothurConvert(temp, anovaAlpha);
@@ -266,22 +263,16 @@ LefseCommand::LefseCommand(string option)  {
 
 int LefseCommand::execute(){
 	try {
+        srand(1982);
         //for reading lefse formatted file and running in mothur for testing - pass number of rows used for design file
         if (false) {  makeShared(1); exit(1); }
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
         
         DesignMap designMap(designfile);
-        //if user set classes set groups=those classes
-        if (classes != "") {
-            map<string, vector<string> > thisClasses = m->parseClasses(classes);
-            vector<string> groups = designMap.getNamesUnique(thisClasses);
-            if (groups.size() != 0) { m->setGroups(groups); }
-            else { m->mothurOut("[ERROR]: no groups meet your classes requirement, quitting.\n"); return 0; }
-        }
         
         //if user did not select class use first column
-        if (mclass == "") {  mclass = designMap.getDefaultClass(); m->mothurOut("\nYou did not provide a class, using " + mclass +".\n\n"); }
+        if (mclass == "") {  mclass = designMap.getDefaultClass(); m->mothurOut("\nYou did not provide a class, using " + mclass +".\n\n"); if (subclass == "") { subclass = mclass; } }
         
         InputData input(sharedfile, "sharedfile");
         vector<SharedRAbundFloatVector*> lookup = input.getSharedRAbundFloatVectors();
@@ -365,6 +356,7 @@ int LefseCommand::execute(){
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
 		m->mothurOutEndLine();
+        srand(time(NULL));
         return 0;
 		
     }
@@ -383,8 +375,8 @@ int LefseCommand::process(vector<SharedRAbundFloatVector*>& lookup, DesignMap& d
         map<string, set<string> > class2SubClasses; //maps class name to vector of its subclasses
         map<string, vector<int> > subClass2GroupIndex; //maps subclass name to vector of indexes in lookup from that subclass. old -> 1,2,3 means groups in location 1,2,3 of lookup are from old.  Saves time below.
         map<string, vector<int> > class2GroupIndex; //maps subclass name to vector of indexes in lookup from that class. old -> 1,2,3 means groups in location 1,2,3 of lookup are from old.  Saves time below.
+        if (normMillion) {  normalize(lookup);  }
         for (int j = 0; j < lookup.size(); j++) {
-            if (normMillion) {  normalize(lookup);  }
             string group = lookup[j]->getGroup();
             string treatment = designMap.get(group, mclass); //get value for this group in this category
             string thisSub = designMap.get(group, subclass);
@@ -426,11 +418,15 @@ int LefseCommand::process(vector<SharedRAbundFloatVector*>& lookup, DesignMap& d
         
         int numSigBeforeWilcox = significantOtuLabels.size();
         
+        if (m->debug) { m->mothurOut("[DEBUG]: completed Kruskal Wallis\n"); } 
+        
         //check for subclass
         string wilcoxString = "";
         if ((subclass != "") && wilc) {  significantOtuLabels = runWilcoxon(lookup, designMap, significantOtuLabels, class2SubClasses, subClass2GroupIndex, subclass2Class);  wilcoxString += " ( " + toString(numSigBeforeWilcox) + " ) before internal wilcoxon"; }
         
         int numSigAfterWilcox = significantOtuLabels.size();
+        
+        if (m->debug) { m->mothurOut("[DEBUG]: completed Wilcoxon\n"); } 
         
         m->mothurOut("\nNumber of significantly discriminative features: " + toString(numSigAfterWilcox) + wilcoxString + ".\n"); 
         
@@ -440,6 +436,8 @@ int LefseCommand::process(vector<SharedRAbundFloatVector*>& lookup, DesignMap& d
             m->mothurOut("Number of discriminative features with abs LDA score > " + toString(ldaThreshold) + " : " + toString(significantOtuLabels.size()) + ".\n");
         }
         else { m->mothurOut("No features with significant differences between the classes.\n"); }
+        
+        if (m->debug) { m->mothurOut("[DEBUG]: completed lda\n"); } 
         
         printResults(means, significantOtuLabels, sigOTUSLDA, lookup[0]->getLabel(), classes);
         
@@ -461,7 +459,9 @@ int LefseCommand::normalize(vector<SharedRAbundFloatVector*>& lookup) {
         }
         
         for (int i = 0; i < lookup.size(); i++) {
-            for (int j = 0; j < lookup[i]->getNumBins(); j++) { lookup[i]->set(j, lookup[i]->getAbundance(j)*mul[i], lookup[i]->getGroup()); }
+            for (int j = 0; j < lookup[i]->getNumBins(); j++) {
+                lookup[i]->set(j, lookup[i]->getAbundance(j)*mul[i], lookup[i]->getGroup());
+            }
         }
         
         return 0;
@@ -713,8 +713,12 @@ map<int, double> LefseCommand::testLDA(vector<SharedRAbundFloatVector*>& lookup,
         for (int i = 0; i < numBins; i++) {
             if (m->control_pressed) { break; }
             
+            if (m->debug) { m->mothurOut("[DEBUG]: bin = " + toString(i) + "\n."); }
+            
             it = bins.find(i);
             if (it != bins.end()) { //flagged in Kruskal Wallis and Wilcoxon(if we ran it)
+                
+                if (m->debug) { m->mothurOut("[DEBUG]:flagged bin = " + toString(i) + "\n."); }
                 
                 //fill x with this OTUs abundances
                 vector<double> x;
@@ -722,6 +726,9 @@ map<int, double> LefseCommand::testLDA(vector<SharedRAbundFloatVector*>& lookup,
                 
                 //go through classes
                 for (map<string, vector<int> >::iterator it = class2GroupIndex.begin(); it != class2GroupIndex.end(); it++) {
+                    
+                    if (m->debug) { m->mothurOut("[DEBUG]: class = " + it->first + "\n."); }
+                    
                     //max(float(feats['class'].count(c))*0.5,4)
                     //max(numGroups in this class*0.5, 4.0)
                     double necessaryNum = ((double)((it->second).size())*0.5);
@@ -760,9 +767,13 @@ map<int, double> LefseCommand::testLDA(vector<SharedRAbundFloatVector*>& lookup,
         minCl = (int)((float)(minCl*fBoots*fBoots*0.05));
         minCl = max(minCl, 1);
         
+        if (m->debug) { m->mothurOut("[DEBUG]: about to start iters. \n."); }
+        
         vector< vector< vector<double> > > results;//[iters][numComparison][numOTUs]
         for (int j = 0; j < iters; j++) {
             if (m->control_pressed) { return sigOTUS; }
+            
+            if (m->debug) { m->mothurOut("[DEBUG]: iter = " + toString(j) + "\n."); }
             
             //find "good" random vector
             vector<int> rand_s;

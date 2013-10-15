@@ -34,12 +34,18 @@ EstOutput Jest::getValues(vector<SharedRAbundVector*> shared) {
 		
 		*chaoS1Sabund = shared[0]->getSAbundVector();
 		*chaoS2Sabund = shared[1]->getSAbundVector();
+        
+        //chaoS1Sabund->print(cout);
+        //chaoS2Sabund->print(cout);
 		
 		S12 = sharedChao->getValues(shared);
 		S1 = chaoS1->getValues(chaoS1Sabund);
 		S2 = chaoS2->getValues(chaoS2Sabund);
+        
+        //cout << S12[0] << '\t' << S1[0] << '\t' << S2[0] << endl;
 		
 		data[0] = 1.0 - S12[0] / (float)(S1[0] + S2[0] - S12[0]);
+        //cout << data[0] << endl;
 		
 		if (isnan(data[0]) || isinf(data[0])) { data[0] = 0; }
 		

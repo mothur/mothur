@@ -30,6 +30,15 @@ vector<string> ClassifySvmSharedCommand::setParameters() {
         // Support Vector Machine parameters
         CommandParameter kernelParam("kernel", "String", "", "", "", "", "", "", false, false);
         parameters.push_back(kernelParam);
+
+        // data transformation parameters
+        // transform should be 'zeroone' or 'zeromean' ('zeromean' is default)
+        CommandParameter transformParam("transform", "String", "", "", "", "", "", "", false, false);
+        parameters.push_back(transformParam);
+
+        CommandParameter verbosityParam("verbose", "Number", "", "0", "", "", "", "", false, false);
+        parameters.push_back(verbosityParam);
+
         //CommandParameter potupersplit("otupersplit", "Multiple", "log2-squareroot", "log2", "", "", "","",false,false); parameters.push_back(potupersplit);
         //CommandParameter psplitcriteria("splitcriteria", "Multiple", "gainratio-infogain", "gainratio", "", "", "","",false,false); parameters.push_back(psplitcriteria);
         //CommandParameter pnumtrees("numtrees", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pnumtrees);
@@ -39,7 +48,10 @@ vector<string> ClassifySvmSharedCommand::setParameters() {
         //CommandParameter ppruneaggrns("pruneaggressiveness", "Number", "", "0.9", "", "", "", "", false, false); parameters.push_back(ppruneaggrns);
         //CommandParameter pdiscardhetrees("discarderrortrees", "Boolean", "", "T", "", "", "", "", false, false); parameters.push_back(pdiscardhetrees);
         //CommandParameter phetdiscardthreshold("errorthreshold", "Number", "", "0.4", "", "", "", "", false, false); parameters.push_back(phetdiscardthreshold);
-        //CommandParameter psdthreshold("stdthreshold", "Number", "", "0.0", "", "", "", "", false, false); parameters.push_back(psdthreshold);
+
+        // want this parameter to behave like the one in classify.rf
+        CommandParameter pstdthreshold("stdthreshold", "Number", "", "0.0", "", "", "", "", false, false);
+        parameters.push_back(pstdthreshold);
         // pruning params end
 
         CommandParameter pgroups("groups", "String", "", "", "", "", "", "", false, false);
@@ -117,7 +129,7 @@ ClassifySvmSharedCommand::ClassifySvmSharedCommand() {
 }
 
 // here is a little function from StackExchange for splitting a string on a single character
-// allow return value optimization
+// allows return value optimization
 std::vector<string>& split(const std::string &s, char delim, std::vector<std::string>& elems) {
     std::stringstream ss(s);
     std::string item;
@@ -278,14 +290,14 @@ ClassifySvmSharedCommand::ClassifySvmSharedCommand(string option) {
                 evaluationFoldCount = 3;
             }
             else {
-                evaluationFoldCount = m->mothurConvert(ef, evaluationFoldCount);
+                m->mothurConvert(ef, evaluationFoldCount);
             }
             string tf = validParameter.validFile(parameters, "trainingfolds", false);
             if ( tf == "not found") {
                 trainingFoldCount = 5;
             }
             else {
-                evaluationFoldCount = m->mothurConvert(tf, trainingFoldCount);
+                m->mothurConvert(tf, trainingFoldCount);
             }
 
             string smocOption = validParameter.validFile(parameters, "smoc", false);
@@ -376,7 +388,43 @@ ClassifySvmSharedCommand::ClassifySvmSharedCommand(string option) {
                 }
             }
 
+            // get the transform option
+            string transformOption = validParameter.validFile(parameters, "transform", false);
+            if ( transformOption == "not found" || transformOption == "unitmean") {
+                transformName = "unitmean";
+            }
+            else if ( transformOption == "zeroone" ) {
+                transformName = "zeroone";
+            }
+            else {
+                m->mothurOut("the transform option " + transformOption + " is not recognized -- must be 'unitmean' or 'zeroone'");
+                m->mothurOutEndLine();
+                abort = true;
+            }
 
+            // get the verbosity option
+            string verbosityOption = validParameter.validFile(parameters, "verbose", false);
+            if ( verbosityOption == "not found") {
+                verbosity = 0;
+            }
+            else {
+                m->mothurConvert(tf, verbosity);
+                if (verbosity < OutputFilter::QUIET || verbosity > OutputFilter::TRACE) {
+                    m->mothurOut("verbose set to unsupported value " + verbosityOption  + " -- must be between 0 and 3");
+                }
+            }
+
+            // get the std threshold option
+            string stdthresholdOption = validParameter.validFile(parameters, "stdthreshold", false);
+            if ( stdthresholdOption == "not found" ) {
+                stdthreshold = -1.0;
+            }
+            else {
+                m->mothurConvert(stdthresholdOption, stdthreshold);
+                if ( stdthreshold <= 0.0 ) {
+                    m->mothurOut("stdthreshold set to unsupported value " + stdthresholdOption  + " -- must be greater than 0.0");
+                }
+            }
         }
 
     }
@@ -425,6 +473,7 @@ void ClassifySvmSharedCommand::readSharedRAbundVectors(vector<SharedRAbundVector
             }
         }
         //std::cout << std::endl;
+        // let this happen later?
         delete lookup[j];
     }
 }
@@ -464,11 +513,14 @@ int ClassifySvmSharedCommand::execute() {
 
                 m->mothurOut(lookup[0]->getLabel());
                 m->mothurOutEndLine();
-
+                std::cout << "entering first case processSharedAndDesignData" << std::endl;
                 processSharedAndDesignData(lookup);
+                std::cout << "exited first case processSharedAndDesignData" << std::endl;
 
                 processedLabels.insert(lookup[0]->getLabel());
+                std::cout << "exited processedLabels.insert" << std::endl;
                 userLabels.erase(lookup[0]->getLabel());
+                std::cout << "exited userLabels.erase" << std::endl;
             }
 
             if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true)
@@ -481,7 +533,9 @@ int ClassifySvmSharedCommand::execute() {
                 lookup = input.getSharedRAbundVectors(lastLabel);
                 m->mothurOut(lookup[0]->getLabel());
                 m->mothurOutEndLine();
+                std::cout << "entering second case processSharedAndDesignData" << std::endl;
                 processSharedAndDesignData(lookup);
+                std::cout << "exited second case processSharedAndDesignData" << std::endl;
 
                 processedLabels.insert(lookup[0]->getLabel());
                 userLabels.erase(lookup[0]->getLabel());
@@ -490,12 +544,15 @@ int ClassifySvmSharedCommand::execute() {
                 lookup[0]->setLabel(saveLabel);
             }
 
+            //std::cout << "preventing memory leak" << std::endl;
             lastLabel = lookup[0]->getLabel();
             //prevent memory leak
-            for (int i = 0; i < lookup.size(); i++) {
-                delete lookup[i];
-                lookup[i] = NULL;
-            }
+            //for (int i = 0; i < lookup.size(); i++) {
+            //    //std::cout << "deleting lookup[" << i << "] = " << lookup[i] << " of " << lookup.size() << std::endl;
+            //    delete lookup[i];
+            //    lookup[i] = NULL;
+            //}
+            //std::cout << "prevented memory leak" << std::endl;
 
             if (m->control_pressed) {
                 return 0;
@@ -527,21 +584,24 @@ int ClassifySvmSharedCommand::execute() {
 
         //run last label if you need to
         if (needToRun == true) {
-            for (int i = 0; i < lookup.size(); i++) {
-                if (lookup[i] != NULL) {
-                    delete lookup[i];
-                }
-            }
+            //for (int i = 0; i < lookup.size(); i++) {
+            //    if (lookup[i] != NULL) {
+            //        delete lookup[i];
+            //    }
+            //}
             lookup = input.getSharedRAbundVectors(lastLabel);
 
             m->mothurOut(lookup[0]->getLabel());
             m->mothurOutEndLine();
 
+            std::cout << "entering third case processSharedAndDesignData" << std::endl;
             processSharedAndDesignData(lookup);
+            std::cout << "exited third case processSharedAndDesignData" << std::endl;
 
-            for (int i = 0; i < lookup.size(); i++) {
-                delete lookup[i];
-            }
+            // did this in readSharedRAbundVectors
+            //for (int i = 0; i < lookup.size(); i++) {
+            //    delete lookup[i];
+            //}
 
         }
 
@@ -566,17 +626,39 @@ int ClassifySvmSharedCommand::execute() {
 
 void ClassifySvmSharedCommand::processSharedAndDesignData(vector<SharedRAbundVector*> lookup) {
     try {
+        OutputFilter outputFilter(verbosity);
+
         LabeledObservationVector labeledObservationVector;
         FeatureVector featureVector;
         readSharedRAbundVectors(lookup, designMap, labeledObservationVector, featureVector);
 
+        FeatureVector removedFeatureVector;
+        if ( stdthreshold > 0.0 ) {
+            removedFeatureVector = applyStdThreshold(stdthreshold, labeledObservationVector, featureVector);
+            if (removedFeatureVector.size() > 0) {
+                std::cout << removedFeatureVector.size() << " OTUs were below the stdthreshold of " << stdthreshold << " and were removed" << std::endl;
+                if ( outputFilter.debug() ) {
+                    std::cout << "the following OTUs were below the standard deviation threshold of " << stdthreshold << std::endl;
+                    for (FeatureVector::iterator i = removedFeatureVector.begin(); i != removedFeatureVector.end(); i++) {
+                        std::cout << "  " << i->getFeatureLabel() << std::endl;
+                    }
+                }
+            }
+        }
+
         // apply [0,1] standardization
-        transformZeroOne(labeledObservationVector);
+        if ( transformName == "zeroone") {
+            std::cout << "transforming data to lie within range [0,1]" << std::endl;
+            transformZeroOne(labeledObservationVector);
+        }
+        else {
+            std::cout << "transforming data to have zero mean and unit variance" << std::endl;
+            transformZeroMeanUnitVariance(labeledObservationVector);
+        }
         // optionally remove features with low standard deviation
 
         SvmDataset svmDataset(labeledObservationVector, featureVector);
 
-        OutputFilter outputFilter(2);
 
         OneVsOneMultiClassSvmTrainer trainer(svmDataset, evaluationFoldCount, trainingFoldCount, *this, outputFilter);
 

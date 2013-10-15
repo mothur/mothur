@@ -74,6 +74,16 @@ public:
     LabeledObservation(int _datasetIndex, Label _label, Observation* _o) : datasetIndex(_datasetIndex), first(_label), second(_o) {}
     ~LabeledObservation() {}
 
+    void removeFeatureAtIndex(int n) {
+        int m = 0;
+        Observation::iterator i = second->begin();
+        while ( m < n ) {
+            i++;
+            m++;
+        }
+        second->erase(i);
+    }
+
 //private:
     int datasetIndex;
     Label first;
@@ -112,6 +122,9 @@ private:
 
 typedef std::list<Feature> FeatureList;
 typedef std::vector<Feature> FeatureVector;
+
+// might make sense for this to be a member function of SvmDataset
+FeatureVector applyStdThreshold(double, LabeledObservationVector&, FeatureVector&);
 
 
 // The SvmDataset class encapsulates labeled observations and feature information.
@@ -257,11 +270,10 @@ private:
 class KernelFunction {
 public:
     KernelFunction(const LabeledObservationVector& _obs) :
-        obs(_obs), //cache(_obs.size(), std::vector<double>(_obs.size(), std::numeric_limits<double>::quiet_NaN())) {}
+        obs(_obs),
         cache(_obs.size(), NULL) {}
 
     virtual ~KernelFunction() {
-        std::cout << "deleting KernelFunction cache" << std::endl;
         for (int i = 0; i < cache.size(); i++) {
             if ( !rowNotCached(i) ) {
                 delete cache[i];
@@ -278,7 +290,7 @@ public:
     double getCachedParameterFreeSimilarity(const LabeledObservation& obs_i, const LabeledObservation& obs_j) {
         const int i = obs_i.datasetIndex;
         const int j = obs_j.datasetIndex;
-        // if the first element of row i is NaN then calculate all elements for row i
+
         if ( rowNotCached(i) ) {
             cache[i] = new std::vector<double>(obs.size(), std::numeric_limits<double>::signaling_NaN());
             for ( int v = 0; v < obs.size(); v++ ) {
@@ -289,7 +301,6 @@ public:
     }
 
     bool rowNotCached(int i) {
-        //return isnan(cache[i][0]);
         return cache[i] == NULL;
     }
 
@@ -646,9 +657,10 @@ public:
 
 
 //
-//  info  - 2
-//  debug - 1
-//  trace = 0
+//  0 - print no optional information (quiet)
+//  1 - print minimum optional information (info)
+//  2 - print a little more optional information (debug)
+//  3 - print the maximum amount of optional information (trace)
 //
 class OutputFilter {
 public:
@@ -656,9 +668,14 @@ public:
     OutputFilter(const OutputFilter& of) : verbosity(of.verbosity) {}
     ~OutputFilter() {}
 
-    bool info()  const { return verbosity < 3; }
-    bool debug() const { return verbosity < 2; }
-    bool trace() const { return verbosity < 1; }
+    bool info()  const { return verbosity >= INFO; }
+    bool debug() const { return verbosity >= DEBUG; }
+    bool trace() const { return verbosity >= TRACE; }
+
+    static const int QUIET;
+    static const int INFO;
+    static const int DEBUG;
+    static const int TRACE;
 
 private:
     const int verbosity;
@@ -814,7 +831,7 @@ public:
 private:
     ExternalSvmTrainingInterruption& externalSvmTrainingInterruption;
 
-    const OutputFilter& outputFilter;
+    const OutputFilter outputFilter;
     bool verbose;
 
     // can we make this const?
