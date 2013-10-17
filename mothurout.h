@@ -97,7 +97,9 @@ class MothurOut {
 		int openOutputFileAppend(string, ofstream&);
         int openOutputFileBinaryAppend(string, ofstream&);
 		int openInputFile(string, ifstream&);
-		int openInputFile(string, ifstream&, string); //no error given 
+		int openInputFile(string, ifstream&, string); //no error given
+    
+        bool checkLocations(string&, string);  //filename, inputDir. checks for file in ./, inputdir, default and mothur's exe location.  Returns false if cant be found. If found completes name with location
 		string getline(ifstream&);
 		string getline(istringstream&);
 		void gobble(istream&);

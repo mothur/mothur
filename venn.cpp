@@ -162,7 +162,9 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 				if (vCalcs[i]->getName() == "sharedsobs") {
 					singleCalc = new Sobs();
                     if (sharedOtus &&  (labels.size() != 0)) {
-                        string filenameShared = outputDir + m->getRootName(m->getSimpleName(inputfile)) + lookup[0]->getLabel() + "." + vCalcs[i]->getName() + ".sharedotus";
+                        string groupsTag = "";
+                        for (int h = 0; h < lookup.size()-1; h++) { groupsTag += lookup[h]->getGroup() + "-"; }  groupsTag += lookup[lookup.size()-1]->getGroup();
+                        string filenameShared = outputDir + m->getRootName(m->getSimpleName(inputfile)) + lookup[0]->getLabel() + "." + vCalcs[i]->getName() + "." + groupsTag + ".sharedotus";
                         
                         outputNames.push_back(filenameShared);
                         ofstream outShared;
@@ -455,7 +457,9 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 					
                     ofstream outShared;
                     if (sharedOtus && (vCalcs[i]->getName() == "sharedsobs")) {
-                        string filenameShared = outputDir + m->getRootName(m->getSimpleName(inputfile)) + lookup[0]->getLabel() + "." + vCalcs[i]->getName() + ".sharedotus";
+                        string groupsTag = "";
+                        for (int h = 0; h < lookup.size()-1; h++) { groupsTag += lookup[h]->getGroup() + "-"; }  groupsTag += lookup[lookup.size()-1]->getGroup();
+                        string filenameShared = outputDir + m->getRootName(m->getSimpleName(inputfile)) + lookup[0]->getLabel() + "." + vCalcs[i]->getName() + "." + groupsTag + ".sharedotus";
                         
                         outputNames.push_back(filenameShared);
                        
@@ -660,7 +664,9 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
                     
                     ofstream outShared;
                     if (sharedOtus && (vCalcs[i]->getName() == "sharedsobs")) {
-                        string filenameShared = outputDir + m->getRootName(m->getSimpleName(inputfile)) + lookup[0]->getLabel() + "." + vCalcs[i]->getName() + ".sharedotus";
+                        string groupsTag = "";
+                        for (int h = 0; h < lookup.size()-1; h++) { groupsTag += lookup[h]->getGroup() + "-"; }  groupsTag += lookup[lookup.size()-1]->getGroup();
+                        string filenameShared = outputDir + m->getRootName(m->getSimpleName(inputfile)) + lookup[0]->getLabel() + "." + vCalcs[i]->getName() + "." + groupsTag + ".sharedotus";
                         
                         outputNames.push_back(filenameShared);
                         
