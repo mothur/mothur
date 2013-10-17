@@ -31,7 +31,7 @@ CommandOptionParser::CommandOptionParser(string input){
 			optionString = input.substr((openParen+1), (closeParen-openParen-1)); //optionString contains everything between "(" and ")".
 		}
 		else if (openParen == -1) { m->mothurOut("[ERROR]: You are missing ("); m->mothurOutEndLine(); }
-		else if (closeParen == -1) { m->mothurOut("[ERROR]:You are missing )"); m->mothurOutEndLine(); }
+		else if (closeParen == -1) { m->mothurOut("[ERROR]: You are missing )"); m->mothurOutEndLine(); }
     }
 	catch(exception& e) {
 		m->errorOut(e, "CommandOptionParser", "CommandOptionParser");

@@ -3013,6 +3013,64 @@ void MothurOut::getNumSeqs(ifstream& file, int& numSeqs){
 	}	
 }
 /***********************************************************************/
+bool MothurOut::checkLocations(string& filename, string inputDir){
+	try {
+		filename = getFullPathName(filename);
+        
+        int ableToOpen;
+        ifstream in;
+        ableToOpen = openInputFile(filename, in, "noerror");
+        in.close();
+        
+        //if you can't open it, try input location
+        if (ableToOpen == 1) {
+            if (inputDir != "") { //default path is set
+                string tryPath = inputDir + getSimpleName(filename);
+                mothurOut("Unable to open " + filename + ". Trying input directory " + tryPath); mothurOutEndLine();
+                ifstream in2;
+                ableToOpen = openInputFile(tryPath, in2, "noerror");
+                in2.close();
+                filename = tryPath;
+            }
+        }
+        
+        //if you can't open it, try default location
+        if (ableToOpen == 1) {
+            if (getDefaultPath() != "") { //default path is set
+                string tryPath = getDefaultPath() + getSimpleName(filename);
+                mothurOut("Unable to open " + filename + ". Trying default " + tryPath); mothurOutEndLine();
+                ifstream in2;
+                ableToOpen = openInputFile(tryPath, in2, "noerror");
+                in2.close();
+                filename = tryPath;
+            }
+        }
+        
+        //if you can't open it its not in current working directory or inputDir, try mothur excutable location
+        if (ableToOpen == 1) {
+            string exepath = argv;
+            string tempPath = exepath;
+            for (int i = 0; i < exepath.length(); i++) { tempPath[i] = tolower(exepath[i]); }
+            exepath = exepath.substr(0, (tempPath.find_last_of('m')));
+            
+            string tryPath = getFullPathName(exepath) + getSimpleName(filename);
+            mothurOut("Unable to open " + filename + ". Trying mothur's executable location " + tryPath); mothurOutEndLine();
+            ifstream in2;
+            ableToOpen = openInputFile(tryPath, in2, "noerror");
+            in2.close();
+            filename = tryPath;
+        }
+        
+        if (ableToOpen == 1) { mothurOut("Unable to open " + filename + "."); mothurOutEndLine(); return false;  }
+        
+        return true;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "checkLocations");
+		exit(1);
+	}
+}
+/***********************************************************************/
 
 //This function parses the estimator options and puts them in a vector
 void MothurOut::splitAtChar(string& estim, vector<string>& container, char symbol) {
