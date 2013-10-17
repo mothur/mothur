@@ -947,7 +947,7 @@ int SubSampleCommand::processShared(vector<SharedRAbundVector*>& thislookup) {
 	try {
 		
 		//save mothurOut's binLabels to restore for next label
-		vector<string> saveBinLabels = m->currentBinLabels;
+		vector<string> saveBinLabels = m->currentSharedBinLabels;
 		
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(sharedfile);  }
@@ -965,7 +965,7 @@ int SubSampleCommand::processShared(vector<SharedRAbundVector*>& thislookup) {
 		m->openOutputFile(outputFileName, out);
 		outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
 		
-        m->currentBinLabels = subsampledLabels;
+        m->currentSharedBinLabels = subsampledLabels;
         
 		thislookup[0]->printHeaders(out);
 		
@@ -977,7 +977,7 @@ int SubSampleCommand::processShared(vector<SharedRAbundVector*>& thislookup) {
         
         
         //save mothurOut's binLabels to restore for next label
-		m->currentBinLabels = saveBinLabels;
+		m->currentSharedBinLabels = saveBinLabels;
 		
 		return 0;
 		

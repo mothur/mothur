@@ -577,7 +577,7 @@ int GetMetaCommunityCommand::processDriver(vector<SharedRAbundVector*>& thislook
             outputNames.push_back(matrixName); outputTypes["matrix"].push_back(matrixName);
             
             findQ.printZMatrix(matrixName, thisGroups);
-            findQ.printRelAbund(relabund, m->currentBinLabels);
+            findQ.printRelAbund(relabund, m->currentSharedBinLabels);
             
             if(optimizegap != -1 && (numPartitions - minPartition) >= optimizegap && numPartitions >= minpartitions){
                 string tempDoneFile = m->getRootName(m->getSimpleName(sharedfile)) + toString(processID) + ".done.temp";

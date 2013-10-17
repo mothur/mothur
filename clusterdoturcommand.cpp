@@ -259,6 +259,7 @@ int ClusterDoturCommand::execute(){
         }
 		m->openOutputFile(listFileName,	listFile);
         outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
+        list->printHeaders(listFile);
 		
 		float previousDist = 0.00000;
 		float rndPreviousDist = 0.00000;

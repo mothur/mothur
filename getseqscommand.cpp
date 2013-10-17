@@ -88,7 +88,7 @@ string GetSeqsCommand::getOutputPattern(string type) {
         else if (type == "name")        {   pattern = "[filename],pick,[extension]";    }
         else if (type == "group")       {   pattern = "[filename],pick,[extension]";    }
         else if (type == "count")       {   pattern = "[filename],pick,[extension]";    }
-        else if (type == "list")        {   pattern = "[filename],pick,[extension]";    }
+        else if (type == "list")        {   pattern = "[filename],[distance],pick,[extension]";    }
         else if (type == "qfile")       {   pattern = "[filename],pick,[extension]";    }
         else if (type == "accnosreport")      {   pattern = "[filename],pick.accnos.report";    }
         else if (type == "alignreport")      {   pattern = "[filename],pick.align.report";    }
@@ -614,9 +614,6 @@ int GetSeqsCommand::readList(){
         map<string, string> variables; 
 		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(listfile));
         variables["[extension]"] = m->getExtension(listfile);
-		string outputFileName = getOutputFileName("list", variables);
-		ofstream out;
-		m->openOutputFile(outputFileName, out);
 		
 		ifstream in;
 		m->openInputFile(listfile, in);
@@ -629,8 +626,6 @@ int GetSeqsCommand::readList(){
 		while(!in.eof()){
 			
 			selectedCount = 0;
-			
-			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName);  return 0; }
 
 			//read in list vector
 			ListVector list(in);
@@ -638,6 +633,18 @@ int GetSeqsCommand::readList(){
 			//make a new list vector
 			ListVector newList;
 			newList.setLabel(list.getLabel());
+            
+            variables["[distance]"] = list.getLabel();
+            string outputFileName = getOutputFileName("list", variables);
+			
+			ofstream out;
+			m->openOutputFile(outputFileName, out);
+			outputTypes["list"].push_back(outputFileName);  outputNames.push_back(outputFileName);
+            
+            vector<string> binLabels = list.getLabels();
+            vector<string> newBinLabels;
+            
+            if (m->control_pressed) { in.close(); out.close();  return 0; }
 			
 			//for each bin
 			for (int i = 0; i < list.getNumBins(); i++) {
@@ -657,23 +664,26 @@ int GetSeqsCommand::readList(){
 				//if there are names in this bin add to new list
 				if (newNames != "") { 
 					newNames = newNames.substr(0, newNames.length()-1); //rip off extra comma
-					newList.push_back(newNames);	
+					newList.push_back(newNames);
+                    newBinLabels.push_back(binLabels[i]);
 				}
 			}
 				
 			//print new listvector
 			if (newList.getNumBins() != 0) {
 				wroteSomething = true;
+				newList.setLabels(newBinLabels);
+                newList.printHeaders(out);
 				newList.print(out);
 			}
 			
 			m->gobble(in);
+            out.close();
 		}
 		in.close();	
-		out.close();
+		
 		
 		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();  }
-		outputNames.push_back(outputFileName); outputTypes["list"].push_back(outputFileName);
 		
 		m->mothurOut("Selected " + toString(selectedCount) + " sequences from your list file."); m->mothurOutEndLine();
 		

@@ -490,17 +490,17 @@ int IndicatorCommand::GetIndicatorSpecies(){
 				
 			if (m->control_pressed) { out.close(); return 0; }
 			
-			out << m->currentBinLabels[j] << '\t' << indicatorGroups[j] << '\t' << indicatorValues[j] << '\t'; 
+			out << m->currentSharedBinLabels[j] << '\t' << indicatorGroups[j] << '\t' << indicatorValues[j] << '\t';
 			
 			if (pValues[j] > (1/(float)iters)) { out << pValues[j] << endl; } 
 			else { out << "<" << (1/(float)iters) << endl; }
 			
 			if (pValues[j] <= 0.05) {
-				cout << m->currentBinLabels[j] << '\t' << indicatorGroups[j] << '\t' << indicatorValues[j]  << '\t';
+				cout << m->currentSharedBinLabels[j] << '\t' << indicatorGroups[j] << '\t' << indicatorValues[j]  << '\t';
 				string pValueString = "<" + toString((1/(float)iters)); 
 				if (pValues[j] > (1/(float)iters)) { pValueString = toString(pValues[j]); cout << pValues[j];} 
 				else { cout << "<" << (1/(float)iters); }
-				m->mothurOutJustToLog(m->currentBinLabels[j] + "\t" + indicatorGroups[j] + "\t" + toString(indicatorValues[j]) + "\t" + pValueString); 
+				m->mothurOutJustToLog(m->currentSharedBinLabels[j] + "\t" + indicatorGroups[j] + "\t" + toString(indicatorValues[j]) + "\t" + pValueString);
 				m->mothurOutEndLine(); 
 			}
 		}
@@ -538,7 +538,7 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 		
 		//print headings
 		out << "TreeNode\t";
-		for (int i = 0; i < numBins; i++) { out << m->currentBinLabels[i] << "_IndGroups" << '\t' << m->currentBinLabels[i] << "_IndValue" << '\t' << "pValue" << '\t'; }
+		for (int i = 0; i < numBins; i++) { out << m->currentSharedBinLabels[i] << "_IndGroups" << '\t' << m->currentSharedBinLabels[i] << "_IndValue" << '\t' << "pValue" << '\t'; }
 		out << endl;
 		
 		m->mothurOutEndLine(); m->mothurOut("Node\tSpecies\tIndicator_Groups\tIndicatorValue\tpValue\n");
@@ -697,11 +697,11 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 				}
 				
 				if (pValues[j] <= 0.05) {
-					cout << i+1 << '\t' << m->currentBinLabels[j] << '\t' << indicatorGroups[j] << '\t' << indicatorValues[j]  << '\t';
+					cout << i+1 << '\t' << m->currentSharedBinLabels[j] << '\t' << indicatorGroups[j] << '\t' << indicatorValues[j]  << '\t';
 					string pValueString = "<" + toString((1/(float)iters)); 
 					if (pValues[j] > (1/(float)iters)) { pValueString = toString(pValues[j]); cout << pValues[j];} 
 					else { cout << "<" << (1/(float)iters); }
-					m->mothurOutJustToLog(toString(i) + "\t" + m->currentBinLabels[j] + "\t" + indicatorGroups[j] + "\t" + toString(indicatorValues[j]) + "\t" + pValueString); 
+					m->mothurOutJustToLog(toString(i) + "\t" + m->currentSharedBinLabels[j] + "\t" + indicatorGroups[j] + "\t" + toString(indicatorValues[j]) + "\t" + pValueString);
 					m->mothurOutEndLine(); 
 				}
 			}

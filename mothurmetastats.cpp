@@ -229,7 +229,7 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
 			if (m->control_pressed) { out.close(); return 0; }
 			
             //if there are binlabels use them otherwise count.
-			if (m->binLabelsInFile.size() == row) { out << m->binLabelsInFile[i] << '\t'; }
+			if (i < m->currentSharedBinLabels.size()) { out << m->currentSharedBinLabels[i] << '\t'; }
             else { out << (i+1) << '\t'; }
             
             out << C1[i][0] << '\t' << C1[i][1] << '\t' << C1[i][2] << '\t' << C2[i][0] << '\t' << C2[i][1] << '\t' << C2[i][2] << '\t' << pvalues[i] << '\t' << qvalues[i] << endl;

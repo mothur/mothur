@@ -45,8 +45,8 @@ private:
 	bool isValidGroup(string, vector<string>);
 	int eliminateZeroOTUS(vector<SharedRAbundVector*>&);
 	int ListGroupSameSeqs(vector<string>&, SharedListVector*);
-    int createSharedFromListGroup(string);
-    int createSharedFromBiom(string);
+    int createSharedFromListGroup();
+    int createSharedFromBiom();
     string getTag(string&);
     vector<string> readRows(string, int&); 
     int getDims(string, int&, int&);

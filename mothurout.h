@@ -67,10 +67,12 @@ class MothurOut {
 		vector<string> getAllGroups() { sort(namesOfGroups.begin(), namesOfGroups.end()); return namesOfGroups; }
 		vector<string> Treenames;
 		//map<string, string> names;
-		vector<string> binLabelsInFile;
-		vector<string> currentBinLabels;
+		vector<string> sharedBinLabelsInFile;
+		vector<string> currentSharedBinLabels;
+        vector<string> listBinLabelsInFile;
+        //vector<string> currentListBinLabels;
 		string saveNextLabel, argv, sharedHeaderMode, groupMode;
-		bool printedHeaders, commandInputsConvertError, changedSeqNames, modifyNames;
+		bool printedSharedHeaders, printedListHeaders, commandInputsConvertError, changedSeqNames, modifyNames;
 		
 		//functions from mothur.h
 		//file operations
@@ -270,7 +272,8 @@ class MothurOut {
             counttablefile = "";
             summaryfile = "";
 			gui = false;
-			printedHeaders = false;
+			printedSharedHeaders = false;
+            printedListHeaders = false;
 			commandInputsConvertError = false;
             mothurCalling = false;
             debug = false;

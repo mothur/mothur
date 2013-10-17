@@ -289,7 +289,7 @@ int MakeLefseCommand::runRelabund(map<string, consTax2>& consTax, vector<SharedR
         
         for (int i = 0; i < lookup[0]->getNumBins(); i++) { //process each otu
             if (m->control_pressed) { break; }
-            string nameOfOtu = m->currentBinLabels[i];
+            string nameOfOtu = m->currentSharedBinLabels[i];
             if (constaxonomyfile != "") { //try to find the otuName in consTax to replace with consensus taxonomy
                 map<string, consTax2>::iterator it = consTax.find(nameOfOtu);
                 if (it != consTax.end()) {
@@ -299,7 +299,7 @@ int MakeLefseCommand::runRelabund(map<string, consTax2>& consTax, vector<SharedR
                     //remove confidences and change ; to |
                     m->removeConfidences(nameOfOtu);
                     for (int j = 0; j < nameOfOtu.length()-1; j++) {
-                        if (nameOfOtu[j] == ';') { fixedName += "_" + m->currentBinLabels[i] + '|'; }
+                        if (nameOfOtu[j] == ';') { fixedName += "_" + m->currentSharedBinLabels[i] + '|'; }
                         else { fixedName += nameOfOtu[j]; }
                     }
                     nameOfOtu = fixedName;

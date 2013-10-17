@@ -55,13 +55,13 @@ SharedOrderVector::SharedOrderVector(ifstream& f) : DataVector() {  //reads in a
 				
 				//parse labels to save
 				istringstream iStringStream(label);
-				m->binLabelsInFile.clear();
+				m->sharedBinLabelsInFile.clear();
 				while(!iStringStream.eof()){
 					if (m->control_pressed) { break; }
 					string temp;
 					iStringStream >> temp;  m->gobble(iStringStream);
 					
-					m->binLabelsInFile.push_back(temp);
+					m->sharedBinLabelsInFile.push_back(temp);
 				}
 				
 				f >> label;
@@ -69,7 +69,7 @@ SharedOrderVector::SharedOrderVector(ifstream& f) : DataVector() {  //reads in a
 		}else { label = m->saveNextLabel; }
 		
 		//reset labels, currentLabels may have gotten changed as otus were eliminated because of group choices or sampling
-		m->currentBinLabels = m->binLabelsInFile;
+		m->currentSharedBinLabels = m->sharedBinLabelsInFile;
 		
 		//read in first row since you know there is at least 1 group.
 		f >> groupN >> num;

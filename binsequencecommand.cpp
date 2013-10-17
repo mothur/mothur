@@ -398,6 +398,7 @@ int BinSeqCommand::process(ListVector* list) {
         m->mothurOut(list->getLabel()); m->mothurOutEndLine();
         
         //for each bin in the list vector
+        vector<string> binLabels = list->getLabels();
         for (int i = 0; i < list->size(); i++) {
             
             if (m->control_pressed) {  return 1; }
@@ -421,11 +422,11 @@ int BinSeqCommand::process(ListVector* list) {
                             }
                             if (groups.size() != 0) { groupInfo += groups[groups.size()-1]; }
                             else { groupInfo = "not found";  }
-                            name = name + "\t" + groupInfo + "\t" + toString(i+1)+ "\tNumRep=" + toString(ct.getNumSeqs(name));
+                            name = name + "\t" + groupInfo + "\t" + binLabels[i] + "\tNumRep=" + toString(ct.getNumSeqs(name));
                             out << ">" << name << endl;
                             out << sequence << endl;
                         }else {
-                            name = name + "\t" + toString(i+1) + "\tNumRep=" + toString(ct.getNumSeqs(name));
+                            name = name + "\t" + binLabels[i] + "\tNumRep=" + toString(ct.getNumSeqs(name));
                             out << ">" << name << endl;
                             out << sequence << endl;
                         }
@@ -435,7 +436,7 @@ int BinSeqCommand::process(ListVector* list) {
                     if (sequence != "not found") {
                         //if you don't have groups
                         if (groupfile == "") {
-                            name = name + "\t" + toString(i+1);
+                            name = name + "\t" + binLabels[i];
                             out << ">" << name << endl;
                             out << sequence << endl;
                         }else {//if you do have groups
@@ -444,7 +445,7 @@ int BinSeqCommand::process(ListVector* list) {
                                 m->mothurOut(name + " is missing from your group file. Please correct. ");  m->mothurOutEndLine();
                                 return 1;
                             }else{
-                                name = name + "\t" + group + "\t" + toString(i+1);
+                                name = name + "\t" + group + "\t" + binLabels[i];
                                 out << ">" << name << endl;
                                 out << sequence << endl;
                             }

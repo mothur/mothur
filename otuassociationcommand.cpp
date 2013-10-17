@@ -360,7 +360,7 @@ int OTUAssociationCommand::process(vector<SharedRAbundVector*>& lookup){
                     else if (method == "kendall")	{	coef = linear.calcKendall(xy[i], xy[k], sig);	}                   
                     else { m->mothurOut("[ERROR]: invalid method, choices are spearman, pearson or kendall."); m->mothurOutEndLine(); m->control_pressed = true; }
                     
-                    if (sig < cutoff) { out << m->binLabelsInFile[i] << '\t' << m->binLabelsInFile[k] << '\t' << coef << '\t' << sig << endl; }
+                    if (sig < cutoff) { out << m->currentSharedBinLabels[i] << '\t' << m->currentSharedBinLabels[k] << '\t' << coef << '\t' << sig << endl; }
                 }
             }
 		}else { //compare otus to metadata
@@ -377,7 +377,7 @@ int OTUAssociationCommand::process(vector<SharedRAbundVector*>& lookup){
                     else if (method == "kendall")	{	coef = linear.calcKendall(xy[i], metadata[k], sig);	}                   
                     else { m->mothurOut("[ERROR]: invalid method, choices are spearman, pearson or kendall."); m->mothurOutEndLine(); m->control_pressed = true; }
                     
-                    if (sig < cutoff) { out << m->binLabelsInFile[i] << '\t' << metadataLabels[k] << '\t' << coef << '\t' << sig << endl; }
+                    if (sig < cutoff) { out << m->currentSharedBinLabels[i] << '\t' << metadataLabels[k] << '\t' << coef << '\t' << sig << endl; }
                 }
             }
 
@@ -523,7 +523,7 @@ int OTUAssociationCommand::process(vector<SharedRAbundFloatVector*>& lookup){
                     else if (method == "kendall")	{	coef = linear.calcKendall(xy[i], xy[k], sig);	}                   
                     else { m->mothurOut("[ERROR]: invalid method, choices are spearman, pearson or kendall."); m->mothurOutEndLine(); m->control_pressed = true; }
                     
-                    if (sig < cutoff) { out << m->binLabelsInFile[i] << '\t' << m->binLabelsInFile[k] << '\t' << coef << '\t' << sig << endl; }
+                    if (sig < cutoff) { out << m->currentSharedBinLabels[i] << '\t' << m->currentSharedBinLabels[k] << '\t' << coef << '\t' << sig << endl; }
                 }
             }
 		}else { //compare otus to metadata
@@ -540,7 +540,7 @@ int OTUAssociationCommand::process(vector<SharedRAbundFloatVector*>& lookup){
                     else if (method == "kendall")	{	coef = linear.calcKendall(xy[i], metadata[k], sig);	}                   
                     else { m->mothurOut("[ERROR]: invalid method, choices are spearman, pearson or kendall."); m->mothurOutEndLine(); m->control_pressed = true; }
                     
-                    if (sig < cutoff) { out << m->binLabelsInFile[i] << '\t' << metadataLabels[k] << '\t' << coef << '\t' << sig << endl; }
+                    if (sig < cutoff) { out << m->currentSharedBinLabels[i] << '\t' << metadataLabels[k] << '\t' << coef << '\t' << sig << endl; }
                 }
             }
             

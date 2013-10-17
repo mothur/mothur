@@ -447,10 +447,10 @@ int MakeBiomCommand::getBiom(vector<SharedRAbundVector*>& lookup){
         string rowBack = "\", \"metadata\":";
         for (int i = 0; i < numBins-1; i++) {
             if (m->control_pressed) {  out.close(); return 0; }
-            if (!picrust) { out << rowFront << m->currentBinLabels[i] << rowBack << metadata[i] << "},\n"; }
+            if (!picrust) { out << rowFront << m->currentSharedBinLabels[i] << rowBack << metadata[i] << "},\n"; }
             else {  out << rowFront << picrustLabels[i] << rowBack << metadata[i] << "},\n"; }
         }
-        if (!picrust) {  out << rowFront << m->currentBinLabels[(numBins-1)] << rowBack << metadata[(numBins-1)] << "}\n" + spaces + "],\n"; }
+        if (!picrust) {  out << rowFront << m->currentSharedBinLabels[(numBins-1)] << rowBack << metadata[(numBins-1)] << "}\n" + spaces + "],\n"; }
         else {  out << rowFront << picrustLabels[(numBins-1)] << rowBack << metadata[(numBins-1)] << "}\n" + spaces + "],\n"; }
         //get column info
         /*"columns": [
@@ -574,7 +574,7 @@ vector<string> MakeBiomCommand::getMetaData(vector<SharedRAbundVector*>& lookup,
             in.close();
             
             //should the labels be Otu001 or PhyloType001
-            string firstBin = m->currentBinLabels[0];
+            string firstBin = m->currentSharedBinLabels[0];
             string binTag = "Otu";
             if ((firstBin.find("Otu")) == string::npos) { binTag = "PhyloType";  }
             
@@ -611,9 +611,9 @@ vector<string> MakeBiomCommand::getMetaData(vector<SharedRAbundVector*>& lookup,
                 
                 if (m->control_pressed) { return metadata; }
                 
-                it = labelTaxMap.find(m->getSimpleLabel(m->currentBinLabels[i]));
+                it = labelTaxMap.find(m->getSimpleLabel(m->currentSharedBinLabels[i]));
                 
-                if (it == labelTaxMap.end()) { m->mothurOut("[ERROR]: can't find taxonomy information for " + m->currentBinLabels[i] + ".\n"); m->control_pressed = true; }
+                if (it == labelTaxMap.end()) { m->mothurOut("[ERROR]: can't find taxonomy information for " + m->currentSharedBinLabels[i] + ".\n"); m->control_pressed = true; }
                 else {
                     if (picrust) {
                         string temp = it->second; m->removeConfidences(temp);

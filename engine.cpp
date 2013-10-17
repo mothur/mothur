@@ -123,10 +123,12 @@ bool InteractEngine::getInput(){
 					mout->clearAllGroups();
 					mout->Treenames.clear();
 					mout->saveNextLabel = "";
-					mout->printedHeaders = false;
-					mout->commandInputsConvertError = false;
-					mout->currentBinLabels.clear();
-					mout->binLabelsInFile.clear();
+                    mout->commandInputsConvertError = false;
+					mout->printedSharedHeaders = false;
+					mout->currentSharedBinLabels.clear();
+					mout->sharedBinLabelsInFile.clear();
+                    mout->printedListHeaders = false;
+                    mout->listBinLabelsInFile.clear();
 							
 					Command* command = cFactory->getCommand(commandName, options);
 					if (mout->commandInputsConvertError) { quitCommandCalled = 2; }
@@ -309,10 +311,12 @@ bool BatchEngine::getInput(){
 					mout->clearAllGroups();
 					mout->Treenames.clear();
 					mout->saveNextLabel = "";
-					mout->printedHeaders = false;
 					mout->commandInputsConvertError = false;
-					mout->currentBinLabels.clear();
-					mout->binLabelsInFile.clear();
+                    mout->printedSharedHeaders = false;
+                    mout->currentSharedBinLabels.clear();
+                    mout->sharedBinLabelsInFile.clear();
+                    mout->printedListHeaders = false;
+                    mout->listBinLabelsInFile.clear();
 
 							
 					Command* command = cFactory->getCommand(commandName, options);
@@ -480,10 +484,12 @@ bool ScriptEngine::getInput(){
 					mout->clearAllGroups();
 					mout->Treenames.clear();
 					mout->saveNextLabel = "";
-					mout->printedHeaders = false;
-					mout->commandInputsConvertError = false;
-					mout->currentBinLabels.clear();
-					mout->binLabelsInFile.clear();
+                    mout->commandInputsConvertError = false;
+                    mout->printedSharedHeaders = false;
+                    mout->currentSharedBinLabels.clear();
+                    mout->sharedBinLabelsInFile.clear();
+                    mout->printedListHeaders = false;
+                    mout->listBinLabelsInFile.clear();
 
 					Command* command = cFactory->getCommand(commandName, options);
 					if (mout->commandInputsConvertError) { quitCommandCalled = 2; }

@@ -325,7 +325,7 @@ int FilterSharedCommand::processShared(vector<SharedRAbundVector*>& thislookup) 
 	try {
 		
 		//save mothurOut's binLabels to restore for next label
-		vector<string> saveBinLabels = m->currentBinLabels;
+		vector<string> saveBinLabels = m->currentSharedBinLabels;
 		
         map<string, string> variables; 
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
@@ -474,7 +474,7 @@ int FilterSharedCommand::processShared(vector<SharedRAbundVector*>& thislookup) 
 		m->openOutputFile(outputFileName, out);
 		outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
 		
-        m->currentBinLabels = filteredLabels;
+        m->currentSharedBinLabels = filteredLabels;
         
 		filteredLookup[0]->printHeaders(out);
 		
@@ -486,7 +486,7 @@ int FilterSharedCommand::processShared(vector<SharedRAbundVector*>& thislookup) 
         
         
         //save mothurOut's binLabels to restore for next label
-		m->currentBinLabels = saveBinLabels;
+		m->currentSharedBinLabels = saveBinLabels;
         
         for (int j = 0; j < filteredLookup.size(); j++) { delete filteredLookup[j]; }
 		

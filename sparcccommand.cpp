@@ -317,7 +317,7 @@ int SparccCommand::process(vector<SharedRAbundVector*>& lookup){
         cout.setf(ios::showpoint);
         
         vector<vector<float> > sharedVector;
-        vector<string> otuNames = m->currentBinLabels;
+        vector<string> otuNames = m->currentSharedBinLabels;
         
         //fill sharedVector to pass to CalcSparcc
         for (int i = 0; i < lookup.size(); i++) {

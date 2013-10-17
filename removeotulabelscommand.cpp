@@ -462,9 +462,9 @@ int RemoveOtuLabelsCommand::readShared(){
             if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) { delete newLookup[j]; } for (int j = 0; j < lookup.size(); j++) { delete lookup[j]; } return 0; }
             
             //is this otu on the list
-            if (labels.count(m->getSimpleLabel(m->currentBinLabels[i])) == 0) {
+            if (labels.count(m->getSimpleLabel(m->currentSharedBinLabels[i])) == 0) {
                 wroteSomething = true;
-                newLabels.push_back(m->currentBinLabels[i]);
+                newLabels.push_back(m->currentSharedBinLabels[i]);
                 for (int j = 0; j < newLookup.size(); j++) { //add this OTU to the new lookup
                     newLookup[j]->push_back(lookup[j]->getAbundance(i), lookup[j]->getGroup());
                 }
@@ -484,7 +484,7 @@ int RemoveOtuLabelsCommand::readShared(){
         
 		for (int j = 0; j < lookup.size(); j++) { delete lookup[j]; }
         
-        m->currentBinLabels = newLabels;
+        m->currentSharedBinLabels = newLabels;
         
 		newLookup[0]->printHeaders(out);
 		

@@ -560,9 +560,9 @@ int RemoveGroupsCommand::readShared(){
 		m->setGroups(groupsToKeep);
 		m->clearAllGroups();
 		m->saveNextLabel = "";
-		m->printedHeaders = false;
-		m->currentBinLabels.clear();
-		m->binLabelsInFile.clear();
+		m->printedSharedHeaders = false;
+		m->currentSharedBinLabels.clear();
+		m->sharedBinLabelsInFile.clear();
 		
 		InputData input(sharedfile, "sharedfile");
 		lookup = input.getSharedRAbundVectors();

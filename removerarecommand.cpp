@@ -850,7 +850,7 @@ int RemoveRareCommand::processLookup(vector<SharedRAbundVector*>& lookup){
 				
 				//eliminates zero otus
 				if (allZero) { for (int j = 0; j < newRabunds.size(); j++) {  newRabunds[j].pop_back(); } }
-                else { headers.push_back(m->currentBinLabels[i]); }
+                else { headers.push_back(m->currentSharedBinLabels[i]); }
 			}
 		}else {
 			//for each otu
@@ -867,7 +867,7 @@ int RemoveRareCommand::processLookup(vector<SharedRAbundVector*>& lookup){
 				
 				//eliminates otus below rare cutoff
 				if (totalAbund <= nseqs) { for (int j = 0; j < newRabunds.size(); j++) {  newRabunds[j].pop_back(); } }
-                else { headers.push_back(m->currentBinLabels[i]); }
+                else { headers.push_back(m->currentSharedBinLabels[i]); }
 			}
 		}
 		
