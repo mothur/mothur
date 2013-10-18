@@ -521,7 +521,6 @@ int GetOtuLabelsCommand::readList(){
         newList.setLabel(list->getLabel());
         int selectedCount = 0;
         bool wroteSomething = false;
-        string snumBins = toString(list->getNumBins());
         
         vector<string> binLabels = list->getLabels();
         vector<string> newLabels;

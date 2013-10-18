@@ -408,7 +408,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 			else { optionString += "inputdir=" + inputDir; }
 		}
 		
-		if(commandName == "cluster")				{	command = new ClusterCommand(optionString);					}
+		if(commandName == "cluster")                    {	command = new ClusterCommand(optionString);					}
 		else if(commandName == "unique.seqs")			{	command = new DeconvoluteCommand(optionString);				}
 		else if(commandName == "parsimony")				{	command = new ParsimonyCommand(optionString);				}
 		else if(commandName == "help")					{	command = new HelpCommand(optionString);					}

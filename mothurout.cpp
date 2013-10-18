@@ -797,7 +797,7 @@ bool MothurOut::dirCheck(string& dirName){
 
         //test to make sure directory exists
         dirName = getFullPathName(dirName);
-        string outTemp = dirName + tag + "temp";
+        string outTemp = dirName + tag + "temp"+ toString(time(NULL));
         ofstream out;
         out.open(outTemp.c_str(), ios::trunc);
         if(!out) {

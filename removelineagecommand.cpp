@@ -75,7 +75,7 @@ string RemoveLineageCommand::getOutputPattern(string type) {
         else if (type == "name")            {   pattern = "[filename],pick,[extension]";    }
         else if (type == "group")           {   pattern = "[filename],pick,[extension]";    }
         else if (type == "count")           {   pattern = "[filename],pick,[extension]";    }
-        else if (type == "list")            {   pattern = "[filename],pick,[extension]-[filename],[distance],pick,[extension]";    }
+        else if (type == "list")            {   pattern = "[filename],[distance],pick,[extension]";    }
         else if (type == "shared")          {   pattern = "[filename],[distance],pick,[extension]";    }
         else if (type == "alignreport")     {   pattern = "[filename],pick.align.report";    }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
@@ -481,9 +481,6 @@ int RemoveLineageCommand::readList(){
 		map<string, string> variables; 
         variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(listfile));
         variables["[extension]"] = m->getExtension(listfile);
-		string outputFileName = getOutputFileName("list", variables);	
-		ofstream out;
-		m->openOutputFile(outputFileName, out);
 		
 		ifstream in;
 		m->openInputFile(listfile, in);
@@ -491,12 +488,25 @@ int RemoveLineageCommand::readList(){
 		bool wroteSomething = false;
 		
 		while(!in.eof()){
+            
 			//read in list vector
 			ListVector list(in);
 			
 			//make a new list vector
 			ListVector newList;
 			newList.setLabel(list.getLabel());
+            
+            variables["[distance]"] = list.getLabel();
+            string outputFileName = getOutputFileName("list", variables);
+			
+			ofstream out;
+			m->openOutputFile(outputFileName, out);
+			outputTypes["list"].push_back(outputFileName);  outputNames.push_back(outputFileName);
+            
+            if (m->control_pressed) { in.close(); out.close(); return 0; }
+            
+            vector<string> binLabels = list.getLabels();
+            vector<string> newBinLabels;
 			
 			//for each bin
 			for (int i = 0; i < list.getNumBins(); i++) {
@@ -517,23 +527,26 @@ int RemoveLineageCommand::readList(){
 				//if there are names in this bin add to new list
 				if (newNames != "") {  
 					newNames = newNames.substr(0, newNames.length()-1); //rip off extra comma
-					newList.push_back(newNames);	
+					newList.push_back(newNames);
+                    newBinLabels.push_back(binLabels[i]);
 				}
 			}
 				
 			//print new listvector
 			if (newList.getNumBins() != 0) {
 				wroteSomething = true;
+				newList.setLabels(newBinLabels);
+                newList.printHeaders(out);
 				newList.print(out);
 			}
 			
 			m->gobble(in);
+            out.close();
 		}
 		in.close();	
-		out.close();
+		
 		
 		if (wroteSomething == false) {  m->mothurOut("Your list file contains only sequences from " + taxons + "."); m->mothurOutEndLine();  }
-		outputNames.push_back(outputFileName); outputTypes["list"].push_back(outputFileName); 
 				
 		return 0;
 
@@ -692,6 +705,8 @@ int RemoveLineageCommand::readConsList(){
         bool wroteSomething = false;
         string snumBins = toString(list->getNumBins());
         
+        vector<string> binLabels = list->getLabels();
+        vector<string> newBinLabels;
         for (int i = 0; i < list->getNumBins(); i++) {
             
             if (m->control_pressed) { delete list; return 0;}
@@ -707,6 +722,7 @@ int RemoveLineageCommand::readConsList(){
             
             if (names.count(m->getSimpleLabel(otuLabel)) == 0) {
                 newList.push_back(list->get(i));
+                newBinLabels.push_back(binLabels[i]);
             }else { removedCount++; }
         }
         
@@ -724,6 +740,8 @@ int RemoveLineageCommand::readConsList(){
         //print new listvector
         if (newList.getNumBins() != 0) {
             wroteSomething = true;
+            newList.setLabels(newBinLabels);
+            newList.printHeaders(out);
             newList.print(out);
         }
 		out.close();

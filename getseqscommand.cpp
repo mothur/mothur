@@ -737,8 +737,8 @@ int GetSeqsCommand::readList(){
                 m->splitAtComma(binnames, bnames);
 				
 				string newNames = "";
-                for (int i = 0; i < bnames.size(); i++) {
-					string name = bnames[i];
+                for (int j = 0; j < bnames.size(); j++) {
+					string name = bnames[j];
 					//if that name is in the .accnos file, add it
 					if (names.count(name) != 0) {  newNames += name + ",";  selectedCount++; if (m->debug) { sanity["list"].insert(name); } }
 				}

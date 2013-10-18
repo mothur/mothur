@@ -57,7 +57,7 @@ private:
 	int processShared(vector<SharedRAbundVector*>&);
 	int processRabund(RAbundVector*&, ofstream&);
 	int processSabund(SAbundVector*&, ofstream&);
-	int processList(ListVector*&, ofstream&, set<string>&);
+	int processList(ListVector*&, set<string>&);
 	int getNames();
 	int readNames();
     int getTax(set<string>&);

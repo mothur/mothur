@@ -793,6 +793,8 @@ string SensSpecCommand::preProcessList(){
 			//make a new list vector
 			ListVector newList;
 			newList.setLabel(list.getLabel());
+            vector<string> binLabels = list.getLabels();
+            vector<string> newLabels;
 			
 			//for each bin
 			for (int i = 0; i < list.getNumBins(); i++) {
@@ -812,13 +814,16 @@ string SensSpecCommand::preProcessList(){
 				//if there are names in this bin add to new list
 				if (newNames != "") { 
 					newNames = newNames.substr(0, newNames.length()-1); //rip off extra comma
-					newList.push_back(newNames);	
+					newList.push_back(newNames);
+                    newLabels.push_back(binLabels[i]);
 				}
 			}
             
 			//print new listvector
 			if (newList.getNumBins() != 0) {
 				wroteSomething = true;
+                newList.setLabels(newLabels);
+                if (!m->printedListHeaders) { newList.printHeaders(out); }
 				newList.print(out);
 			}
 			
