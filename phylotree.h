@@ -46,6 +46,7 @@ public:
 	string getName(int i);			
 	int getGenusIndex(string seqName);	
 	string getFullTaxonomy(string);	 //pass a sequence name return taxonomy
+    vector<string> getSeqs(string);	 //returns names of sequences in given taxonomy
 	
 	int getMaxLevel()		{	return maxLevel;	}
 	int getNumSeqs()		{	return numSeqs;		}

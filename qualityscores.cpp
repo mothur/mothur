@@ -200,7 +200,7 @@ bool QualityScores::stripQualThreshold(Sequence& sequence, double qThreshold){
 		
 		if(seqName != sequence.getName()){
 			m->mothurOut("sequence name mismatch btwn fasta: " + sequence.getName() + " and qual file: " + seqName);
-			m->mothurOutEndLine();	
+			m->mothurOutEndLine();	m->control_pressed = true;
 		}
 		
 		int end;
