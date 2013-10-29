@@ -6,6 +6,8 @@
 //  Copyright (c) 2013 Schloss Lab. All rights reserved.
 //
 
+#include <fstream>
+
 #include "classifysvmsharedcommand.h"
 
 
@@ -474,7 +476,7 @@ void ClassifySvmSharedCommand::readSharedRAbundVectors(vector<SharedRAbundVector
         }
         //std::cout << std::endl;
         // let this happen later?
-        delete lookup[j];
+        //delete lookup[j];
     }
 }
 
@@ -547,11 +549,11 @@ int ClassifySvmSharedCommand::execute() {
             //std::cout << "preventing memory leak" << std::endl;
             lastLabel = lookup[0]->getLabel();
             //prevent memory leak
-            //for (int i = 0; i < lookup.size(); i++) {
-            //    //std::cout << "deleting lookup[" << i << "] = " << lookup[i] << " of " << lookup.size() << std::endl;
-            //    delete lookup[i];
-            //    lookup[i] = NULL;
-            //}
+            for (int i = 0; i < lookup.size(); i++) {
+                //std::cout << "deleting lookup[" << i << "] = " << lookup[i] << " of " << lookup.size() << std::endl;
+                delete lookup[i];
+                lookup[i] = NULL;
+            }
             //std::cout << "prevented memory leak" << std::endl;
 
             if (m->control_pressed) {
@@ -584,11 +586,11 @@ int ClassifySvmSharedCommand::execute() {
 
         //run last label if you need to
         if (needToRun == true) {
-            //for (int i = 0; i < lookup.size(); i++) {
-            //    if (lookup[i] != NULL) {
-            //        delete lookup[i];
-            //    }
-            //}
+            for (int i = 0; i < lookup.size(); i++) {
+                if (lookup[i] != NULL) {
+                    delete lookup[i];
+                }
+            }
             lookup = input.getSharedRAbundVectors(lastLabel);
 
             m->mothurOut(lookup[0]->getLabel());
@@ -599,9 +601,9 @@ int ClassifySvmSharedCommand::execute() {
             std::cout << "exited third case processSharedAndDesignData" << std::endl;
 
             // did this in readSharedRAbundVectors
-            //for (int i = 0; i < lookup.size(); i++) {
-            //    delete lookup[i];
-            //}
+            for (int i = 0; i < lookup.size(); i++) {
+                delete lookup[i];
+            }
 
         }
 
@@ -666,16 +668,6 @@ void ClassifySvmSharedCommand::processSharedAndDesignData(vector<SharedRAbundVec
         ParameterRange& linearKernelConstantRange = kernelParameterRangeMap["linear"]["constant"];
         ParameterRange& linearKernelSmoCRange = kernelParameterRangeMap["linear"]["smoc"];
         FeatureList orderedFeatureList = svmRfe.getOrderedFeatureList(svmDataset, trainer, linearKernelConstantRange, linearKernelSmoCRange);
-        //FeatureList orderedFeatureList = svmRfe.getOrderedFeatureList(svmDataset, trainer, LinearKernelFunction::defaultConstantRange, smocList);
-
-        int n = 0;
-        std::cout << "ordered features:" << std::endl;
-        for (FeatureList::iterator i = orderedFeatureList.begin(); i != orderedFeatureList.end(); i++) {
-            n++;
-            std::cout << i->getFeatureLabel() << " " << n << std::endl;
-            if (n > 20) break;
-        }
-        std::cout << "done training" << std::endl;
 
         map<string, string> variables;
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
@@ -684,9 +676,21 @@ void ClassifySvmSharedCommand::processSharedAndDesignData(vector<SharedRAbundVec
         string filename = getOutputFileName("summary", variables);
         outputNames.push_back(filename);
         outputTypes["summary"].push_back(filename);
-
         m->mothurOutEndLine();
-        std::cout << "leaving processSharedAndDesignData" << std::endl;
+
+        std::ofstream outputFile(filename.c_str());
+
+        int n = 0;
+        std::cout << "ordered features:" << std::endl;
+        for (FeatureList::iterator i = orderedFeatureList.begin(); i != orderedFeatureList.end(); i++) {
+            n++;
+            outputFile << i->getFeatureLabel() << " " << n << std::endl;
+            if ( n <= 20 ) {
+                std::cout << i->getFeatureLabel() << " " << n << std::endl;
+            }
+        }
+        //std::cout << "done training" << std::endl;
+
     }
     catch (exception& e) {
         m->errorOut(e, "ClassifySvmSharedCommand", "processSharedAndDesignData");
