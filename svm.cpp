@@ -960,11 +960,9 @@ RankedFeatureList SvmRfe::getOrderedFeatureList(SvmDataset& svmDataset, OneVsOne
         svmRfeRound++;
 
         MultiClassSVM* s = t.train(rfeKernelParameterRangeMap);
-std::cout << "ha" << std::endl;
         // calculate the 'ranking criterion' for each (remaining) feature using each binary svm
         for (UnrankedFeatureList::iterator f = unrankedFeatureList.begin(); f != unrankedFeatureList.end(); f++) {
             const int i = f->getFeature().getFeatureIndex();
-            std::cout << "calculate ranking criterion for feature with index " << i << std::endl;
             // rankingCriterion combines feature weights for feature i in all svms
             double rankingCriterion = 0.0;
             for ( SvmVector::const_iterator svm = s->getSvmList().begin(); svm != s->getSvmList().end(); svm++ ) {
@@ -980,9 +978,7 @@ std::cout << "ha" << std::endl;
             // update the (unranked) feature ranking criterion
             f->setRankingCriterion(rankingCriterion);
         }
-        std::cout << "ha" << std::endl;
         delete s;
-        std::cout << "ha" << std::endl;
 
         // sort the unranked features by ranking criterion
         unrankedFeatureList.sort(lessThanRankingCriterion);
@@ -1018,13 +1014,13 @@ std::cout << "ha" << std::endl;
         std::reverse(featuresToEliminate.begin(), featuresToEliminate.end());
         for (UnrankedFeatureList::iterator g = featuresToEliminate.begin(); g != featuresToEliminate.end(); g++) {
             Feature unrankedFeature = g->getFeature();
-            std::cout << "eliminating feature " << unrankedFeature.getFeatureLabel() << " with index " << unrankedFeature.getFeatureIndex() << std::endl;
+            //std::cout << "eliminating feature " << unrankedFeature.getFeatureLabel() << " with index " << unrankedFeature.getFeatureIndex() << std::endl;
             removeFeature(unrankedFeature, svmDataset.getLabeledObservationVector(), svmDataset.getFeatureVector());
         }
-        std::cout << "remaining unranked features:" << std::endl;
-        for (UnrankedFeatureList::iterator g = unrankedFeatureList.begin(); g != unrankedFeatureList.end(); g++) {
-            std::cout << "  feature " << g->getFeature().getFeatureLabel() << " with index " << g->getFeature().getFeatureIndex() << std::endl;
-        }
+        //std::cout << "remaining unranked features:" << std::endl;
+        //for (UnrankedFeatureList::iterator g = unrankedFeatureList.begin(); g != unrankedFeatureList.end(); g++) {
+        //    std::cout << "  feature " << g->getFeature().getFeatureLabel() << " with index " << g->getFeature().getFeatureIndex() << std::endl;
+        //}
         // end of experiment
 
     }
