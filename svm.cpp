@@ -136,6 +136,23 @@ private:
     const std::string& featureLabel;
 };
 
+Feature removeFeature(Feature featureToRemove, LabeledObservationVector& observations, FeatureVector& featureVector) {
+    FeatureLabelMatches matchFeatureLabel(featureToRemove.getFeatureLabel());
+    featureVector.erase(
+            std::remove_if(featureVector.begin(), featureVector.end(), matchFeatureLabel),
+            featureVector.end()
+    );
+    for ( ObservationVector::size_type observation = 0; observation < observations.size(); observation++ ) {
+        observations[observation].removeFeatureAtIndex(featureToRemove.getFeatureIndex());
+    }
+    // update the feature indices
+    for ( int i = 0; i < featureVector.size(); i++ ) {
+        featureVector.at(i).setFeatureIndex(i);
+    }
+    featureToRemove.setFeatureIndex(-1);
+    return featureToRemove;
+}
+
 FeatureVector applyStdThreshold(double stdThreshold, LabeledObservationVector& observations, FeatureVector& featureVector) {
     // calculate standard deviation of each feature
     // remove features with standard deviation less than or equal to stdThreshold
@@ -160,17 +177,11 @@ FeatureVector applyStdThreshold(double stdThreshold, LabeledObservationVector& o
         if ( m.getStd() <= stdThreshold ) {
             std::cout << "removing feature with index " << feature << std::endl;
             // remove this feature
-            //removedFeatureInd.push_back(feature);
-            Feature removedFeature = featureVector.at(feature);
-            FeatureLabelMatches matchFeatureLabel(removedFeature.getFeatureLabel());
-            featureVector.erase(
-                    std::remove_if(featureVector.begin(), featureVector.end(), matchFeatureLabel),
-                    featureVector.end()
+
+            Feature featureToRemove = featureVector.at(feature);
+            removedFeatureVector.push_back(
+                removeFeature(featureToRemove, observations, featureVector)
             );
-            removedFeatureVector.push_back(removedFeature);
-            for ( ObservationVector::size_type observation = 0; observation < observations.size(); observation++ ) {
-                observations[observation].removeFeatureAtIndex(feature);
-            }
         }
     }
     std::reverse(removedFeatureVector.begin(), removedFeatureVector.end());
@@ -884,7 +895,6 @@ double OneVsOneMultiClassSvmTrainer::trainOnKFolds(SmoTrainer& smoTrainer, Kerne
 }
 
 
-// using this class rather than a std::pair<Feature, double>
 class UnrankedFeature {
 public:
     UnrankedFeature(const Feature& f) : feature(f), rankingCriterion(0.0) {}
@@ -904,14 +914,19 @@ bool lessThanRankingCriterion(const UnrankedFeature& a, const UnrankedFeature& b
     return a.getRankingCriterion() < b.getRankingCriterion();
 }
 
+bool lessThanFeatureIndex(const UnrankedFeature& a, const UnrankedFeature& b) {
+    return a.getFeature().getFeatureIndex() < b.getFeature().getFeatureIndex();
+}
+
 typedef std::list<UnrankedFeature> UnrankedFeatureList;
+
 
 // Only the linear svm can be used here.
 // Consider allowing only parameter ranges as arguments.
 // Right now any kernel can be sent in.
 // It would be useful to remove more than one feature at a time
 // Might make sense to turn last two arguments into one
-FeatureList SvmRfe::getOrderedFeatureList(SvmDataset& svmDataset, OneVsOneMultiClassSvmTrainer& t, const ParameterRange& linearKernelConstantRange, const ParameterRange& smoTrainerParameterRange) {
+RankedFeatureList SvmRfe::getOrderedFeatureList(SvmDataset& svmDataset, OneVsOneMultiClassSvmTrainer& t, const ParameterRange& linearKernelConstantRange, const ParameterRange& smoTrainerParameterRange) {
 
     KernelParameterRangeMap rfeKernelParameterRangeMap;
     ParameterRangeMap linearParameterRangeMap;
@@ -920,25 +935,36 @@ FeatureList SvmRfe::getOrderedFeatureList(SvmDataset& svmDataset, OneVsOneMultiC
 
     rfeKernelParameterRangeMap[LinearKernelFunction::MapKey] = linearParameterRangeMap;
 
+    /*
     UnrankedFeatureList unrankedFeatureList;
-    for ( FeatureVector::iterator f = svmDataset.getFeatureVector().begin(); f != svmDataset.getFeatureVector().end(); f++ ) {
-        unrankedFeatureList.push_back(UnrankedFeature(*f));
+    //for ( FeatureVector::iterator f = svmDataset.getFeatureVector().begin(); f != svmDataset.getFeatureVector().end(); f++ ) {
+    for (int featureIndex = 0; featureIndex < svmDataset.getFeatureVector().size(); featureIndex++) {
+        Feature f = svmDataset.getFeatureVector().at(featureIndex);
+        unrankedFeatureList.push_back(UnrankedFeature(f));
     }
+    */
 
-    // the rankedFeatureVector is empty at first
-    // use a list instead?
-    FeatureList rankedFeatureList;
+    // the rankedFeatureList is empty at first
+    RankedFeatureList rankedFeatureList;
     // loop until all but one feature have been eliminated
     // no need to eliminate the last feature, after all
-    int iterationCount = 0;
-    while ( rankedFeatureList.size() < (svmDataset.getFeatureVector().size()-1) ) {
-        iterationCount++;
+    int svmRfeRound = 0;
+    //while ( rankedFeatureList.size() < (svmDataset.getFeatureVector().size()-1) ) {
+    while ( svmDataset.getFeatureVector().size() > 1 ) {
+        UnrankedFeatureList unrankedFeatureList;
+        for (int featureIndex = 0; featureIndex < svmDataset.getFeatureVector().size(); featureIndex++) {
+            Feature f = svmDataset.getFeatureVector().at(featureIndex);
+            unrankedFeatureList.push_back(UnrankedFeature(f));
+        }
+        std::cout << "unranked feature list has length " << unrankedFeatureList.size() << std::endl;
+        svmRfeRound++;
 
         MultiClassSVM* s = t.train(rfeKernelParameterRangeMap);
-
+std::cout << "ha" << std::endl;
         // calculate the 'ranking criterion' for each (remaining) feature using each binary svm
         for (UnrankedFeatureList::iterator f = unrankedFeatureList.begin(); f != unrankedFeatureList.end(); f++) {
             const int i = f->getFeature().getFeatureIndex();
+            std::cout << "calculate ranking criterion for feature with index " << i << std::endl;
             // rankingCriterion combines feature weights for feature i in all svms
             double rankingCriterion = 0.0;
             for ( SvmVector::const_iterator svm = s->getSvmList().begin(); svm != s->getSvmList().end(); svm++ ) {
@@ -952,43 +978,62 @@ FeatureList SvmRfe::getOrderedFeatureList(SvmDataset& svmDataset, OneVsOneMultiC
                 rankingCriterion += pow(wi, 2);
             }
             // update the (unranked) feature ranking criterion
-            //featureRankingCriterion[i] = rankingCriterion;
             f->setRankingCriterion(rankingCriterion);
         }
-
+        std::cout << "ha" << std::endl;
         delete s;
+        std::cout << "ha" << std::endl;
 
         // sort the unranked features by ranking criterion
         unrankedFeatureList.sort(lessThanRankingCriterion);
 
-        // eliminate the bottom 1/(n+1) features - this is very slow but good results
+        // eliminate the bottom 1/(n+1) features - this is very slow but gives good results
         ////int eliminateFeatureCount = ceil(unrankedFeatureList.size() / (iterationCount+1.0));
         // eliminate the bottom 1/3 features - fast but results slightly different from above
         // how about 1/4?
         int eliminateFeatureCount = ceil(unrankedFeatureList.size() / 4.0);
-        std::cout << "SVM-RFE round " << iterationCount << ": eliminating " << eliminateFeatureCount << " feature(s) of " << unrankedFeatureList.size() << " total features"<< std::endl;
+        std::cout << "SVM-RFE round " << svmRfeRound << ": eliminating " << eliminateFeatureCount << " feature(s) of " << unrankedFeatureList.size() << " total features"<< std::endl;
+        UnrankedFeatureList featuresToEliminate;
         for ( int i = 0; i < eliminateFeatureCount; i++ ) {
-            // remove the lowest ranked feature from the list of unranked features
+            // remove the lowest ranked feature(s) from the list of unranked features
             UnrankedFeature unrankedFeature = unrankedFeatureList.front();
             unrankedFeatureList.pop_front();
 
+            featuresToEliminate.push_back(unrankedFeature);
             // put the lowest ranked feature at the front of the list of ranked features
             // the first feature to be eliminated will be at the back of this list
             // the last feature to be eliminated will be at the front of this list
-            rankedFeatureList.push_front(unrankedFeature.getFeature());
+            rankedFeatureList.push_front(RankedFeature(unrankedFeature.getFeature(), svmRfeRound));
 
+            /*
+            // TODO speed things up by removing the feature completely???
             const int unrankedFeatureIndex = unrankedFeature.getFeature().getFeatureIndex();
             for (LabeledObservationVector::iterator v = svmDataset.getLabeledObservationVector().begin(); v != svmDataset.getLabeledObservationVector().end(); v++) {
                 v->second->at(unrankedFeatureIndex) = 0.0;
             }
+            */
         }
+        // experiment - remove features completely
+        featuresToEliminate.sort(lessThanFeatureIndex);
+        std::reverse(featuresToEliminate.begin(), featuresToEliminate.end());
+        for (UnrankedFeatureList::iterator g = featuresToEliminate.begin(); g != featuresToEliminate.end(); g++) {
+            Feature unrankedFeature = g->getFeature();
+            std::cout << "eliminating feature " << unrankedFeature.getFeatureLabel() << " with index " << unrankedFeature.getFeatureIndex() << std::endl;
+            removeFeature(unrankedFeature, svmDataset.getLabeledObservationVector(), svmDataset.getFeatureVector());
+        }
+        std::cout << "remaining unranked features:" << std::endl;
+        for (UnrankedFeatureList::iterator g = unrankedFeatureList.begin(); g != unrankedFeatureList.end(); g++) {
+            std::cout << "  feature " << g->getFeature().getFeatureLabel() << " with index " << g->getFeature().getFeatureIndex() << std::endl;
+        }
+        // end of experiment
 
     }
 
     // there may be one feature left
-    std::cout << unrankedFeatureList.size() << " feature(s) remain" << std::endl;
-    for ( UnrankedFeatureList::iterator f = unrankedFeatureList.begin(); f != unrankedFeatureList.end(); f++ ) {
-        rankedFeatureList.push_front(f->getFeature());
+    svmRfeRound++;
+    //std::cout << unrankedFeatureList.size() << " feature(s) remain" << std::endl;
+    for ( FeatureVector::iterator f = svmDataset.getFeatureVector().begin(); f != svmDataset.getFeatureVector().end(); f++ ) {
+        rankedFeatureList.push_front(RankedFeature(*f, svmRfeRound));
     }
 
     return rankedFeatureList;

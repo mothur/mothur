@@ -113,6 +113,7 @@ public:
     ~Feature() {}
 
     int getFeatureIndex() const { return index; }
+    void setFeatureIndex(int i) { index = i; }
     std::string getFeatureLabel() const { return label; }
 
 private:
@@ -127,6 +128,26 @@ typedef std::vector<Feature> FeatureVector;
 FeatureVector applyStdThreshold(double, LabeledObservationVector&, FeatureVector&);
 
 
+//  A RankedFeature is just a Feature and a its associated 'rank', where
+//  rank is the SVM-RFE iteration during which the feature was eliminated.
+//  If the SVM-RFE method eliminates multiple features in an iteration
+//  then some features will have the same rank.
+class RankedFeature {
+public:
+    RankedFeature(const Feature& f, int r) : feature(f), rank(r) {}
+    ~RankedFeature() {}
+
+    Feature getFeature() const { return feature; }
+    int getRank() const { return rank; }
+
+private:
+    Feature feature;
+    int rank;
+};
+
+typedef std::list<RankedFeature> RankedFeatureList;
+
+
 // The SvmDataset class encapsulates labeled observations and feature information.
 // All data required to train SVMs is found in SvmDataset.
 class SvmDataset {
@@ -136,6 +157,10 @@ public:
 
     LabeledObservationVector& getLabeledObservationVector() { return labeledObservationVector; }
     FeatureVector& getFeatureVector() { return featureVector; }
+
+    void removeFeature(const Feature feature) {
+
+    }
 
 private:
     LabeledObservationVector labeledObservationVector;
@@ -834,7 +859,6 @@ private:
     const OutputFilter outputFilter;
     bool verbose;
 
-    // can we make this const?
     SvmDataset& svmDataset;
 
     const int evaluationFoldCount;
@@ -853,7 +877,7 @@ public:
     SvmRfe() {}
     ~SvmRfe() {}
 
-    FeatureList getOrderedFeatureList(SvmDataset&, OneVsOneMultiClassSvmTrainer&, const ParameterRange&, const ParameterRange&);
+    RankedFeatureList getOrderedFeatureList(SvmDataset&, OneVsOneMultiClassSvmTrainer&, const ParameterRange&, const ParameterRange&);
 };
 
 

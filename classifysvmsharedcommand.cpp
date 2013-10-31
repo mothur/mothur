@@ -437,6 +437,103 @@ ClassifySvmSharedCommand::ClassifySvmSharedCommand(string option) {
 }
 
 //**********************************************************************************************************************
+int ClassifySvmSharedCommand::execute() {
+  try {
+
+    if (abort == true) { if (calledHelp) { return 0; }  return 2;   }
+
+    InputData input(sharedfile, "sharedfile");
+    vector<SharedRAbundVector*> lookup = input.getSharedRAbundVectors();
+
+    //read design file
+    designMap.readDesignMap(designfile);
+
+    string lastLabel = lookup[0]->getLabel();
+    set<string> processedLabels;
+    set<string> userLabels = labels;
+
+      //as long as you are not at the end of the file or done wih the lines you want
+    while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+
+      if (m->control_pressed) { for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  return 0; }
+
+      if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){
+
+        m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+
+        processSharedAndDesignData(lookup);
+
+        processedLabels.insert(lookup[0]->getLabel());
+        userLabels.erase(lookup[0]->getLabel());
+      }
+
+      if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+        string saveLabel = lookup[0]->getLabel();
+
+        for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+        lookup = input.getSharedRAbundVectors(lastLabel);
+        m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+        processSharedAndDesignData(lookup);
+
+        processedLabels.insert(lookup[0]->getLabel());
+        userLabels.erase(lookup[0]->getLabel());
+
+          //restore real lastlabel to save below
+        lookup[0]->setLabel(saveLabel);
+      }
+
+      lastLabel = lookup[0]->getLabel();
+        //prevent memory leak
+      for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
+
+      if (m->control_pressed) { return 0; }
+
+        //get next line to process
+      lookup = input.getSharedRAbundVectors();
+    }
+
+    if (m->control_pressed) {  return 0; }
+
+      //output error messages about any remaining user labels
+    set<string>::iterator it;
+    bool needToRun = false;
+    for (it = userLabels.begin(); it != userLabels.end(); it++) {
+      m->mothurOut("Your file does not include the label " + *it);
+      if (processedLabels.count(lastLabel) != 1) {
+        m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
+        needToRun = true;
+      }else {
+        m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
+      }
+    }
+
+      //run last label if you need to
+    if (needToRun == true)  {
+      for (int i = 0; i < lookup.size(); i++) { if (lookup[i] != NULL) { delete lookup[i]; } }
+      lookup = input.getSharedRAbundVectors(lastLabel);
+
+      m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+
+      processSharedAndDesignData(lookup);
+
+      for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+
+    }
+
+      m->mothurOutEndLine();
+      m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+      for (int i = 0; i < outputNames.size(); i++) {    m->mothurOut(outputNames[i]); m->mothurOutEndLine();    }
+      m->mothurOutEndLine();
+
+    return 0;
+
+  }
+  catch(exception& e) {
+    m->errorOut(e, "ClassifySharedCommand", "execute");
+    exit(1);
+  }
+}
+//**********************************************************************************************************************
 // This static function is intended to read all the necessary information from
 // a pair of shared and design files needed for SVM classification.  This information
 // is used to build a LabeledObservationVector.  Each element of the LabeledObservationVector
@@ -481,150 +578,6 @@ void ClassifySvmSharedCommand::readSharedRAbundVectors(vector<SharedRAbundVector
 }
 
 //**********************************************************************************************************************
-int ClassifySvmSharedCommand::execute() {
-    try {
-
-        if (abort == true) {
-            if (calledHelp) {
-                return 0;
-            }
-            return 2;
-        }
-
-        InputData input(sharedfile, "sharedfile");
-        vector<SharedRAbundVector*> lookup = input.getSharedRAbundVectors();
-
-        //read design file
-        designMap.readDesignMap(designfile);
-
-        string lastLabel = lookup[0]->getLabel();
-        set<string> processedLabels;
-        set<string> userLabels = labels;
-
-        //as long as you are not at the end of the file or done with the lines you want
-        while ((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-
-            if (m->control_pressed) {
-                for (int i = 0; i < lookup.size(); i++) {
-                    delete lookup[i];
-                }
-                return 0;
-            }
-
-            if (allLines == 1 || labels.count(lookup[0]->getLabel()) == 1) {
-
-                m->mothurOut(lookup[0]->getLabel());
-                m->mothurOutEndLine();
-                std::cout << "entering first case processSharedAndDesignData" << std::endl;
-                processSharedAndDesignData(lookup);
-                std::cout << "exited first case processSharedAndDesignData" << std::endl;
-
-                processedLabels.insert(lookup[0]->getLabel());
-                std::cout << "exited processedLabels.insert" << std::endl;
-                userLabels.erase(lookup[0]->getLabel());
-                std::cout << "exited userLabels.erase" << std::endl;
-            }
-
-            if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true)
-                    && (processedLabels.count(lastLabel) != 1)) {
-                string saveLabel = lookup[0]->getLabel();
-
-                for (int i = 0; i < lookup.size(); i++) {
-                    delete lookup[i];
-                }
-                lookup = input.getSharedRAbundVectors(lastLabel);
-                m->mothurOut(lookup[0]->getLabel());
-                m->mothurOutEndLine();
-                std::cout << "entering second case processSharedAndDesignData" << std::endl;
-                processSharedAndDesignData(lookup);
-                std::cout << "exited second case processSharedAndDesignData" << std::endl;
-
-                processedLabels.insert(lookup[0]->getLabel());
-                userLabels.erase(lookup[0]->getLabel());
-
-                //restore real lastlabel to save below
-                lookup[0]->setLabel(saveLabel);
-            }
-
-            //std::cout << "preventing memory leak" << std::endl;
-            lastLabel = lookup[0]->getLabel();
-            //prevent memory leak
-            for (int i = 0; i < lookup.size(); i++) {
-                //std::cout << "deleting lookup[" << i << "] = " << lookup[i] << " of " << lookup.size() << std::endl;
-                delete lookup[i];
-                lookup[i] = NULL;
-            }
-            //std::cout << "prevented memory leak" << std::endl;
-
-            if (m->control_pressed) {
-                return 0;
-            }
-
-            //get next line to process
-            lookup = input.getSharedRAbundVectors();
-        }
-
-        if (m->control_pressed) {
-            return 0;
-        }
-
-        //output error messages about any remaining user labels
-        set<string>::iterator it;
-        bool needToRun = false;
-        for (it = userLabels.begin(); it != userLabels.end(); it++) {
-            m->mothurOut("Your file does not include the label " + *it);
-            if (processedLabels.count(lastLabel) != 1) {
-                m->mothurOut(". I will use " + lastLabel + ".");
-                m->mothurOutEndLine();
-                needToRun = true;
-            }
-            else {
-                m->mothurOut(". Please refer to " + lastLabel + ".");
-                m->mothurOutEndLine();
-            }
-        }
-
-        //run last label if you need to
-        if (needToRun == true) {
-            for (int i = 0; i < lookup.size(); i++) {
-                if (lookup[i] != NULL) {
-                    delete lookup[i];
-                }
-            }
-            lookup = input.getSharedRAbundVectors(lastLabel);
-
-            m->mothurOut(lookup[0]->getLabel());
-            m->mothurOutEndLine();
-
-            std::cout << "entering third case processSharedAndDesignData" << std::endl;
-            processSharedAndDesignData(lookup);
-            std::cout << "exited third case processSharedAndDesignData" << std::endl;
-
-            // did this in readSharedRAbundVectors
-            for (int i = 0; i < lookup.size(); i++) {
-                delete lookup[i];
-            }
-
-        }
-
-        m->mothurOutEndLine();
-        m->mothurOut("Output File Names: ");
-        m->mothurOutEndLine();
-        for (int i = 0; i < outputNames.size(); i++) {
-            m->mothurOut(outputNames[i]);
-            m->mothurOutEndLine();
-        }
-        m->mothurOutEndLine();
-
-        return 0;
-
-    }
-    catch (exception& e) {
-        m->errorOut(e, "ClassifySvmSharedCommand", "execute");
-        exit(1);
-    }
-}
-//**********************************************************************************************************************
 
 void ClassifySvmSharedCommand::processSharedAndDesignData(vector<SharedRAbundVector*> lookup) {
     try {
@@ -667,7 +620,7 @@ void ClassifySvmSharedCommand::processSharedAndDesignData(vector<SharedRAbundVec
         SvmRfe svmRfe;
         ParameterRange& linearKernelConstantRange = kernelParameterRangeMap["linear"]["constant"];
         ParameterRange& linearKernelSmoCRange = kernelParameterRangeMap["linear"]["smoc"];
-        FeatureList orderedFeatureList = svmRfe.getOrderedFeatureList(svmDataset, trainer, linearKernelConstantRange, linearKernelSmoCRange);
+        RankedFeatureList rankedFeatureList = svmRfe.getOrderedFeatureList(svmDataset, trainer, linearKernelConstantRange, linearKernelSmoCRange);
 
         map<string, string> variables;
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
@@ -682,11 +635,11 @@ void ClassifySvmSharedCommand::processSharedAndDesignData(vector<SharedRAbundVec
 
         int n = 0;
         std::cout << "ordered features:" << std::endl;
-        for (FeatureList::iterator i = orderedFeatureList.begin(); i != orderedFeatureList.end(); i++) {
+        for (RankedFeatureList::iterator i = rankedFeatureList.begin(); i != rankedFeatureList.end(); i++) {
             n++;
-            outputFile << i->getFeatureLabel() << " " << n << std::endl;
+            outputFile << n << " " << i->getFeature().getFeatureLabel() << " " << i->getRank() << std::endl;
             if ( n <= 20 ) {
-                std::cout << i->getFeatureLabel() << " " << n << std::endl;
+                std::cout << n << " " << i->getFeature().getFeatureLabel() << " " << i->getRank() << std::endl;
             }
         }
         //std::cout << "done training" << std::endl;
