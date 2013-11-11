@@ -26,8 +26,8 @@ public:
   string getCommandCategory()		{ return "OTU-Based Approaches";		}  
   string getHelpString();	
   string getOutputPattern(string);
-  string getCitation() { return "http://www.mothur.org/wiki/ClassifySvm.shared\n"; }
-  string getDescription()		{ return "implements the support vector machine machine learning algorithm to identify OTUs that can be used to differentiate between various groups of samples"; }
+  string getCitation()              { return "http://www.mothur.org/wiki/ClassifySvm.shared\n"; }
+  string getDescription()		    { return "implements the support vector machine machine learning algorithm to identify OTUs that can be used to differentiate between various groups of samples"; }
   int execute();
   
   void help() { m->mothurOut(getHelpString()); }

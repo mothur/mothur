@@ -586,7 +586,7 @@ void ClassifySvmSharedCommand::readSharedRAbundVectors(vector<SharedRAbundVector
             //std::cout << " abundance " << data[k].abundance;
             observation->at(k) = double(data[k].abundance);
             if ( j == 0) {
-                featureVector.push_back(Feature(k, m->currentBinLabels[k]));
+                featureVector.push_back(Feature(k, m->currentSharedBinLabels[k]));
             }
         }
         //std::cout << std::endl;
