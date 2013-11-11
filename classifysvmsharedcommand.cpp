@@ -20,6 +20,11 @@ vector<string> ClassifySvmSharedCommand::setParameters() {
         CommandParameter pdesign("design", "InputTypes", "", "", "none", "none", "none", "", false, true, true);
         parameters.push_back(pdesign);
 
+        // RFE or classification?
+        // mode should be either 'rfe' or 'classify'
+        CommandParameter mode("mode", "String", "", "", "", "", "", "", false, false);
+        parameters.push_back(mode);
+
         // cross validation parameters
         CommandParameter evaluationFoldCountParam("evaluationfolds", "Number", "", "3", "", "", "", "", false, false);
         parameters.push_back(evaluationFoldCountParam);
@@ -287,6 +292,19 @@ ClassifySvmSharedCommand::ClassifySvmSharedCommand(string option) {
                 }
             }
 
+            string modeOption = validParameter.validFile(parameters, "mode", false);
+            if ( modeOption == "not found" || modeOption == "rfe" ) {
+                mode = "rfe";
+            }
+            else if ( modeOption == "classify" ) {
+                mode = "classify";
+            }
+            else {
+                m->mothurOut("the mode option " + modeOption + " is not recognized -- must be 'rfe' or 'classify'");
+                m->mothurOutEndLine();
+                abort = true;
+            }
+
             string ef = validParameter.validFile(parameters, "evaluationfolds", false);
             if ( ef == "not found") {
                 evaluationFoldCount = 3;
@@ -373,7 +391,7 @@ ClassifySvmSharedCommand::ClassifySvmSharedCommand(string option) {
                     ParameterRange& kernelParameterRange = j->second;
                     // has an option for this kernel parameter been specified?
                     std::string kernelParameterKey = kernelKey + parameterKey;
-                    std::cout << "looking for option " << kernelParameterKey << std::endl;
+                    //std::cout << "looking for option " << kernelParameterKey << std::endl;
                     std::string kernelParameterOption = validParameter.validFile(parameters, kernelParameterKey, false);
                     if (kernelParameterOption == "not found") {
                         // we already have default values in the kernel parameter map
@@ -390,7 +408,7 @@ ClassifySvmSharedCommand::ClassifySvmSharedCommand(string option) {
                 }
             }
 
-            // get the transform option
+            // get the normalization option
             string transformOption = validParameter.validFile(parameters, "transform", false);
             if ( transformOption == "not found" || transformOption == "unitmean") {
                 transformName = "unitmean";
@@ -587,9 +605,9 @@ void ClassifySvmSharedCommand::processSharedAndDesignData(vector<SharedRAbundVec
         FeatureVector featureVector;
         readSharedRAbundVectors(lookup, designMap, labeledObservationVector, featureVector);
 
-        FeatureVector removedFeatureVector;
+        // optionally remove features with low standard deviation
         if ( stdthreshold > 0.0 ) {
-            removedFeatureVector = applyStdThreshold(stdthreshold, labeledObservationVector, featureVector);
+            FeatureVector removedFeatureVector = applyStdThreshold(stdthreshold, labeledObservationVector, featureVector);
             if (removedFeatureVector.size() > 0) {
                 std::cout << removedFeatureVector.size() << " OTUs were below the stdthreshold of " << stdthreshold << " and were removed" << std::endl;
                 if ( outputFilter.debug() ) {
@@ -610,39 +628,84 @@ void ClassifySvmSharedCommand::processSharedAndDesignData(vector<SharedRAbundVec
             std::cout << "transforming data to have zero mean and unit variance" << std::endl;
             transformZeroMeanUnitVariance(labeledObservationVector);
         }
-        // optionally remove features with low standard deviation
 
         SvmDataset svmDataset(labeledObservationVector, featureVector);
 
-
         OneVsOneMultiClassSvmTrainer trainer(svmDataset, evaluationFoldCount, trainingFoldCount, *this, outputFilter);
 
-        SvmRfe svmRfe;
-        ParameterRange& linearKernelConstantRange = kernelParameterRangeMap["linear"]["constant"];
-        ParameterRange& linearKernelSmoCRange = kernelParameterRangeMap["linear"]["smoc"];
-        RankedFeatureList rankedFeatureList = svmRfe.getOrderedFeatureList(svmDataset, trainer, linearKernelConstantRange, linearKernelSmoCRange);
+        if ( mode == "rfe" ) {
+            SvmRfe svmRfe;
+            ParameterRange& linearKernelConstantRange = kernelParameterRangeMap["linear"]["constant"];
+            ParameterRange& linearKernelSmoCRange = kernelParameterRangeMap["linear"]["smoc"];
+            RankedFeatureList rankedFeatureList = svmRfe.getOrderedFeatureList(svmDataset, trainer, linearKernelConstantRange, linearKernelSmoCRange);
 
-        map<string, string> variables;
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
-        // the next line causes a segmentation fault
-        variables["[distance]"] = lookup[0]->getLabel();
-        string filename = getOutputFileName("summary", variables);
-        outputNames.push_back(filename);
-        outputTypes["summary"].push_back(filename);
-        m->mothurOutEndLine();
+            map<string, string> variables;
+            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
+            variables["[distance]"] = lookup[0]->getLabel();
+            string filename = getOutputFileName("summary", variables);
+            outputNames.push_back(filename);
+            outputTypes["summary"].push_back(filename);
+            m->mothurOutEndLine();
 
-        std::ofstream outputFile(filename.c_str());
+            std::ofstream outputFile(filename.c_str());
 
-        int n = 0;
-        std::cout << "ordered features:" << std::endl;
-        for (RankedFeatureList::iterator i = rankedFeatureList.begin(); i != rankedFeatureList.end(); i++) {
-            n++;
-            outputFile << n << " " << i->getFeature().getFeatureLabel() << " " << i->getRank() << std::endl;
-            if ( n <= 20 ) {
-                std::cout << n << " " << i->getFeature().getFeatureLabel() << " " << i->getRank() << std::endl;
+            int n = 0;
+            int rfeRoundCount = rankedFeatureList.front().getRank();
+            std::cout << "ordered features:" << std::endl;
+            std::cout << setw(5)  << "index"
+                      << setw(12) << "OTU"
+                      << setw(5)  << "rank"
+                      << std::endl;
+            outputFile << setw(5)  << "index"
+                       << setw(12) << "OTU"
+                       << setw(5)  << "rank"
+                       << std::endl;
+            for (RankedFeatureList::iterator i = rankedFeatureList.begin(); i != rankedFeatureList.end(); i++) {
+                n++;
+                int rank = rfeRoundCount - i->getRank() + 1;
+                outputFile << setw(5)  << n
+                           << setw(12) << i->getFeature().getFeatureLabel()
+                           << setw(5)  << rank
+                           << std::endl;
+                if ( n <= 20 ) {
+                    std::cout << setw(5) << n
+                              << setw(12) << i->getFeature().getFeatureLabel()
+                              << setw(5) << rank
+                              << std::endl;
+                }
             }
+            outputFile.close();
         }
-        //std::cout << "done training" << std::endl;
+        else {
+            MultiClassSVM* mcsvm = trainer.train(kernelParameterRangeMap);
+
+            map<string, string> variables;
+            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
+            variables["[distance]"] = lookup[0]->getLabel();
+            string filename = getOutputFileName("summary", variables);
+            outputNames.push_back(filename);
+            outputTypes["summary"].push_back(filename);
+            m->mothurOutEndLine();
+
+            std::ofstream outputFile(filename.c_str());
+
+            outputFile << "actual  predicted" << std::endl;
+            for ( LabeledObservationVector::const_iterator i = labeledObservationVector.begin(); i != labeledObservationVector.end(); i++ ) {
+                Label actualLabel = i->getLabel();
+                outputFile << i->getDatasetIndex() << " " << actualLabel << " ";
+                try {
+                    Label predictedLabel = mcsvm->classify(*(i->getObservation()));
+                    outputFile << predictedLabel << std::endl;
+                }
+                catch ( MultiClassSvmClassificationTie& m ) {
+                    outputFile << "tie" << std::endl;
+                    std::cout << "classification tie for observation " << i->datasetIndex << " with label " << i->first << std::endl;
+                }
+
+            }
+            outputFile.close();
+            delete mcsvm;
+        }
 
     }
     catch (exception& e) {

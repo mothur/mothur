@@ -7,6 +7,7 @@
 //
 #include <algorithm>
 #include <functional>
+#include <iomanip>
 #include <iostream>
 #include <limits>
 #include <numeric>
@@ -265,7 +266,7 @@ void transformZeroOne(LabeledObservationVector& observations) {
 // SVM member functions
 //
 // the discriminant member function returns +1 or -1
-int SVM::discriminant(const Observation& observation) {
+int SVM::discriminant(const Observation& observation) const {
     // d is the discriminant function
     double d = b;
     for ( int i = 0; i < y.size(); i++ ) {
@@ -274,12 +275,26 @@ int SVM::discriminant(const Observation& observation) {
     return d > 0.0 ? 1 : -1;
 }
 
+LabelVector SVM::classify(const LabeledObservationVector& twoClassLabeledObservationVector) const {
+    LabelVector predictionVector;
+    for ( LabeledObservationVector::const_iterator i =  twoClassLabeledObservationVector.begin(); i != twoClassLabeledObservationVector.end(); i++ ) {
+        Label prediction = classify(*(i->getObservation()));
+        Label actual = i->getLabel();
+        //std::cout << "classification of actual " << actual << " is " << prediction << std::endl;
+        predictionVector.push_back(prediction);
+    }
+    return predictionVector;
+}
+
 // the score member function classifies each labeled observation from the
-// argument and returns the percent of correct classifications
-double SVM::score(const LabeledObservationVector& twoClassLabeledObservationVector) {
+// argument and returns the fraction of correct classifications
+// don't need this any more????
+double SVM::score(const LabeledObservationVector& twoClassLabeledObservationVector) const {
+    //std::cout << "score:" << std::endl;
     double s = 0.0;
-    for (LabeledObservationVector::const_iterator i = twoClassLabeledObservationVector.begin(); i != twoClassLabeledObservationVector.end(); i++) {
+    for ( LabeledObservationVector::const_iterator i = twoClassLabeledObservationVector.begin(); i != twoClassLabeledObservationVector.end(); i++ ) {
         Label predicted_label = classify(*(i->second));
+        //std::cout << "in score actual label: '" << i->first << "' predicted label: '" << predicted_label << "'" << std::endl;
         if ( predicted_label == i->first ) {
             s = s + 1.0;
         }
@@ -290,6 +305,92 @@ double SVM::score(const LabeledObservationVector& twoClassLabeledObservationVect
     return s / double(twoClassLabeledObservationVector.size());
 }
 
+void SvmPerformanceSummary::init(const SVM& svm, const LabeledObservationVector& actualLabels, const LabelVector& predictedLabels) {
+    // accumulate four counts:
+    //     tp (true positive)  -- correct classifications (classified +1 as +1)
+    //     fp (false positive) -- incorrect classifications (classified -1 as +1)
+    //     fn (false negative) -- incorrect classifications (classified +1 as -1)
+    //     tn (true negative)  -- correct classification (classified -1 as -1)
+    // the label corresponding to discriminant +1 will be the 'positive' class
+    NumericClassToLabel discriminantToLabel = svm.getDiscriminantToLabel();
+    positiveClassLabel = discriminantToLabel[1];
+    negativeClassLabel = discriminantToLabel[-1];
+    //std::cout << "positive class label: " << positiveClassLabel << std::endl;
+    //std::cout << "negative class label: " << negativeClassLabel << std::endl;
+    //std::cout << "actual labels vector has length " << actualLabels.size() << std::endl;
+    //std::cout << "predicted labels vector has length " << predictedLabels.size() << std::endl;
+    double tp = 0;
+    double fp = 0;
+    double fn = 0;
+    double tn = 0;
+    double unknown = 0;
+    for (int i = 0; i < actualLabels.size(); i++) {
+        Label predictedLabel = predictedLabels.at(i);
+        Label actualLabel = actualLabels.at(i).getLabel();
+        //std::cout << "predicted: " << predictedLabel << " actual: " << actualLabel << std::endl;
+        if ( actualLabel.compare(positiveClassLabel) == 0) {
+            if ( predictedLabel.compare(positiveClassLabel) == 0 ) {
+                tp++;
+            }
+            else if ( predictedLabel.compare(negativeClassLabel) == 0 ) {
+                fn++;
+            }
+            else {
+                std::cout << "actual label is positive but something is wrong" << std::endl;
+            }
+        }
+        else if ( actualLabel.compare(negativeClassLabel) == 0 ) {
+            if ( predictedLabel.compare(positiveClassLabel) == 0 ) {
+                fp++;
+            }
+            else if ( predictedLabel.compare(negativeClassLabel) == 0 ) {
+                tn++;
+            }
+            else {
+                std::cout << "actual label is negative but something is wrong" << std::endl;
+            }
+        }
+        else {
+            // in the event we have been given an observation that is labeled
+            // neither positive nor negative then we will get a false classification
+            //std::cout << "unrecognized actual label " << actualLabel << std::endl;
+            if ( predictedLabel.compare(positiveClassLabel) ) {
+                fp++;
+            }
+            else {
+                fn++;
+            }
+        }
+    }
+    if ( tp == 0 && fp == 0 ) {
+        precision = 0;
+    }
+    else {
+        precision = tp / (tp + fp);
+    }
+    recall = tp / (tp + fn);
+    if ( precision == 0 && recall == 0 ) {
+        f = 0;
+    }
+    else {
+        f = 2.0 * (precision * recall) / (precision + recall);
+    }
+    accuracy = (tp + tn) / (tp + tn + fp + fn);
+    //std::cout << "svm performance summary for labels " << positiveClassLabel << " " << negativeClassLabel << std::endl;
+    //std::cout << "tp: " << tp << " fp: " << fp << " tn: " << tn << " fn: " << fn << std::endl;
+    //std::cout << "precision: " << precision << " recall: " << recall << " f: " << f << " accuracy: " << accuracy << std::endl;
+}
+
+
+MultiClassSVM::MultiClassSVM(const std::vector<SVM*> s, const LabelSet& l, const SvmToSvmPerformanceSummary& p, OutputFilter of) : twoClassSvmList(s.begin(), s.end()), labelSet(l), svmToSvmPerformanceSummary(p), outputFilter(of), accuracy(0) {}
+
+
+MultiClassSVM::~MultiClassSVM() {
+    for ( int i = 0; i < twoClassSvmList.size(); i++ ) {
+        delete twoClassSvmList[i];
+    }
+}
+
 // The fewerVotes function is used to find the maximum vote
 // tally in MultiClassSVM::classify.  This function returns true
 // if the first element (number of votes for the first label) is
@@ -298,20 +399,6 @@ bool fewerVotes(const std::pair<Label, int>& p, const std::pair<Label, int>& q) 
     return p.second < q.second;
 }
 
-
-class MultiClassSvmClassificationTie : public std::exception {
-public:
-    MultiClassSvmClassificationTie(LabelVector& t, int c) : tiedLabels(t), tiedVoteCount(c) {}
-    ~MultiClassSvmClassificationTie() throw() {}
-
-    virtual const char* what() const throw() {
-        return "classification tie";
-    }
-
-private:
-    const LabelVector tiedLabels;
-    const int tiedVoteCount;
-};
 
 Label MultiClassSVM::classify(const Observation& observation) {
     std::map<Label, int> labelToVoteCount;
@@ -348,11 +435,13 @@ double MultiClassSVM::score(const LabeledObservationVector& multiClassLabeledObs
                 s = s + 1.0;
             }
             else {
-
+                // predicted label does not match actual label
             }
         }
         catch ( MultiClassSvmClassificationTie& m ) {
-            std::cout << "classification tie for observation " << i->datasetIndex << " with label " << i->first << std::endl;
+            if ( outputFilter.debug() ) {
+                std::cout << "classification tie for observation " << i->datasetIndex << " with label " << i->first << std::endl;
+            }
         }
     }
     return s / double(multiClassLabeledObservationVector.size());
@@ -678,35 +767,6 @@ void OneVsOneMultiClassSvmTrainer::buildLabelPairSet(LabelPairSet& labelPairSet,
     }
 }
 
-// this function standardizes data to mean 0 and variance 1
-// but this may not be a good standardization for OTU data
-void OneVsOneMultiClassSvmTrainer::standardizeObservations(const LabeledObservationVector& observations) {
-    bool vebose = false;
-    // online method for mean and variance
-    for ( Observation::size_type feature = 0; feature < observations[0].second->size(); feature++ ) {
-        double n = 0.0;
-        double mean = 0.0;
-        double M2 = 0.0;
-        for ( ObservationVector::size_type observation = 0; observation < observations.size(); observation++ ) {
-            n += 1.0;
-            double x = observations[observation].second->at(feature);
-            double delta = x - mean;
-            mean += delta / n;
-            M2 += delta * (x - mean);
-        }
-        double variance = M2 / (n - 1.0);
-        double standardDeviation = sqrt(variance);
-        if (vebose) {
-            std::cout << "mean of feature " << feature << " is " << mean << std::endl;
-            std::cout << "std of feature " << feature << " is " << standardDeviation << std::endl;
-        }
-        // normalize the feature
-        for ( ObservationVector::size_type observation = 0; observation < observations.size(); observation++ ) {
-            observations[observation].second->at(feature) = (observations[observation].second->at(feature) - mean ) / standardDeviation;
-        }
-    }
-}
-
 
 // The LabelMatchesEither functor is used only in a call to remove_copy_if in the
 // OneVsOneMultiClassSvmTrainer::train method.  It returns true if the labeled
@@ -739,16 +799,21 @@ MultiClassSVM* OneVsOneMultiClassSvmTrainer::train(const KernelParameterRangeMap
         const LabeledObservationVector& evaluationObservations  = kFoldDevEvalDivider.getTestingData();
 
         evaluationFoldNumber++;
-        std::cout << "evaluation fold " << evaluationFoldNumber << " of " << evaluationFoldCount << std::endl;
+        if ( outputFilter.debug() ) {
+            std::cout << "evaluation fold " << evaluationFoldNumber << " of " << evaluationFoldCount << std::endl;
+        }
 
         std::vector<SVM*> twoClassSvmList;
+        SvmToSvmPerformanceSummary svmToSvmPerformanceSummary;
         SmoTrainer smoTrainer(externalSvmTrainingInterruption, outputFilter);
         LabelPairSet::iterator labelPair;
         for (labelPair = labelPairSet.begin(); labelPair != labelPairSet.end(); labelPair++) {
             // generate training and testing data for this label pair
             Label label0 = (*labelPair)[0];
             Label label1 = (*labelPair)[1];
-            std::cout << "training SVM on labels " << label0 << " and " << label1 << std::endl;
+            if ( outputFilter.debug() ) {
+                std::cout << "training SVM on labels " << label0 << " and " << label1 << std::endl;
+            }
 
             double bestMeanScoreOnKFolds = 0.0;
             ParameterMap bestParameterMap;
@@ -794,11 +859,13 @@ MultiClassSVM* OneVsOneMultiClassSvmTrainer::train(const KernelParameterRangeMap
                 throw std::exception();
             }
             else {
-                std::cout << "trained SVM on labels " << label0 << " and " << label1 << std::endl;
-                std::cout << "    best mean score over " << trainFoldCount << " folds is " << bestMeanScoreOnKFolds << std::endl;
-                std::cout << "    best parameters for " << bestKernelFunctionKey << " kernel" << std::endl;
-                for ( ParameterMap::const_iterator p = bestParameterMap.begin(); p != bestParameterMap.end(); p++ ) {
-                    std::cout << "        "  << p->first << " : " << p->second << std::endl;
+                if ( outputFilter.debug() ) {
+                    std::cout << "trained SVM on labels " << label0 << " and " << label1 << std::endl;
+                    std::cout << "    best mean score over " << trainFoldCount << " folds is " << bestMeanScoreOnKFolds << std::endl;
+                    std::cout << "    best parameters for " << bestKernelFunctionKey << " kernel" << std::endl;
+                    for ( ParameterMap::const_iterator p = bestParameterMap.begin(); p != bestParameterMap.end(); p++ ) {
+                        std::cout << "        "  << p->first << " : " << p->second << std::endl;
+                    }
                 }
 
                 LabelMatchesEither labelMatchesEither(label0, label1);
@@ -812,12 +879,13 @@ MultiClassSVM* OneVsOneMultiClassSvmTrainer::train(const KernelParameterRangeMap
                     //    return !((o.first == label0) || (o.first == label1));
                     //}
                 );
-                if (outputFilter.info()) std::cout << "training final SVM with " << twoClassDevelopmentObservations.size() << " labeled observations" << std::endl;
-
-                for ( ParameterMap::const_iterator i = bestParameterMap.begin(); i != bestParameterMap.end(); i++ ) {
-                    std::cout << "    " << i->first << ":" << i->second << std::endl;
+                if (outputFilter.info()) {
+                    std::cout << "training final SVM with " << twoClassDevelopmentObservations.size() << " labeled observations" << std::endl;
+                    for ( ParameterMap::const_iterator i = bestParameterMap.begin(); i != bestParameterMap.end(); i++ ) {
+                        std::cout << "    " << i->first << ":" << i->second << std::endl;
+                    }
                 }
-                //KernelFunction* kernelFunction = KernelFactory::getKernelFunctionForKey(bestKernelFunctionKey, svmDataset.getLabeledObservationVector());
+
                 KernelFunction& kernelFunction = kernelFunctionFactory.getKernelFunctionForKey(bestKernelFunctionKey);
                 kernelFunction.setParameters(bestParameterMap);
                 smoTrainer.setParameters(bestParameterMap);
@@ -825,23 +893,43 @@ MultiClassSVM* OneVsOneMultiClassSvmTrainer::train(const KernelParameterRangeMap
                 SVM* svm = smoTrainer.train(kernelFunctionCache, twoClassDevelopmentObservations);
                 //std::cout << "done training final SVM" << std::endl;
                 twoClassSvmList.push_back(svm);
+                // return a performance summary using the evaluation dataset
+                LabeledObservationVector twoClassEvaluationObservations;
+                std::remove_copy_if(
+                    evaluationObservations.begin(),
+                    evaluationObservations.end(),
+                    std::back_inserter(twoClassEvaluationObservations),
+                    labelMatchesEither
+                    //[&](const LabeledObservation& o){
+                    //    return !((o.first == label0) || (o.first == label1));
+                    //}
+                );
+                SvmPerformanceSummary p(*svm, twoClassEvaluationObservations);
+                svmToSvmPerformanceSummary[svm->getLabelPair()] = p;
             }
         }
 
-        MultiClassSVM* mc = new MultiClassSVM(twoClassSvmList);
-        double score = mc->score(evaluationObservations);
-        std::cout << "multiclass SVM score: " << score << std::endl;
-
-        if ( score > bestMultiClassSvmScore ) {
+        MultiClassSVM* mc = new MultiClassSVM(twoClassSvmList, labelSet, svmToSvmPerformanceSummary, outputFilter);
+        //double score = mc->score(evaluationObservations);
+        mc->setAccuracy(evaluationObservations);
+        if ( outputFilter.debug() ) {
+            std::cout << "fold " << evaluationFoldNumber << " multiclass SVM score: " << mc->getAccuracy() << std::endl;
+        }
+        if ( mc->getAccuracy() > bestMultiClassSvmScore ) {
             bestMc = mc;
-            bestMultiClassSvmScore = score;
+            bestMultiClassSvmScore = mc->getAccuracy();
         }
         else {
             delete mc;
         }
     }
 
-    std::cout << "best MultiClassSvm has score " << bestMultiClassSvmScore << std::endl;
+    if ( outputFilter.info() ) {
+        std::cout << "best multiclass SVM has score " << bestMc->getAccuracy() << std::endl;
+    }
+    //for ( SvmVector::iterator i = bestMc->getSvmList().begin(); i != bestMc->getSvmList().end(); i++ ) {
+    //    SvmPerformanceSummary bestMc->getSvmPerformanceSummary(*i);
+    //}
     return bestMc;
 }
 
@@ -869,8 +957,21 @@ double OneVsOneMultiClassSvmTrainer::trainOnKFolds(SmoTrainer& smoTrainer, Kerne
                 if (outputFilter.debug()) std::cout << "begin training" << std::endl;
 
                 SVM* evaluationSvm = smoTrainer.train(kernelFunction, kthTwoClassTrainingFold);
+                SvmPerformanceSummary svmPerformanceSummary(*evaluationSvm, kthTwoClassTestingFold);
                 double score = evaluationSvm->score(kthTwoClassTestingFold);
-                if (outputFilter.debug()) std::cout << "score on fold " << kFoldLabeledObservationsDivider.getFoldNumber() << " of test data is " << score << std::endl;
+                //double score = svmPerformanceSummary.getAccuracy();
+                if (outputFilter.debug()) {
+                    std::cout << "score on fold " << kFoldLabeledObservationsDivider.getFoldNumber() << " of test data is " << score << std::endl;
+                    std::cout << "positive label: " << svmPerformanceSummary.getPositiveClassLabel()
+                              << std::endl
+                              << "negative label: " << svmPerformanceSummary.getNegativeClassLabel()
+                              << std::endl;
+                    std::cout << "  precision: " << svmPerformanceSummary.getPrecision()
+                              << "     recall: " << svmPerformanceSummary.getRecall()
+                              << "          f: " << svmPerformanceSummary.getF()
+                              << "   accuracy: " << svmPerformanceSummary.getAccuracy()
+                              << std::endl;
+                }
                 online_mean_n += 1.0;
                 double online_mean_delta = score - online_mean_score;
                 online_mean_score += online_mean_delta / online_mean_n;
@@ -951,21 +1052,44 @@ RankedFeatureList SvmRfe::getOrderedFeatureList(SvmDataset& svmDataset, OneVsOne
     int svmRfeRound = 0;
     //while ( rankedFeatureList.size() < (svmDataset.getFeatureVector().size()-1) ) {
     while ( svmDataset.getFeatureVector().size() > 1 ) {
+        svmRfeRound++;
+        std::cout << "SVM-RFE round " << svmRfeRound << ":" << std::endl;
         UnrankedFeatureList unrankedFeatureList;
         for (int featureIndex = 0; featureIndex < svmDataset.getFeatureVector().size(); featureIndex++) {
             Feature f = svmDataset.getFeatureVector().at(featureIndex);
             unrankedFeatureList.push_back(UnrankedFeature(f));
         }
-        std::cout << "unranked feature list has length " << unrankedFeatureList.size() << std::endl;
-        svmRfeRound++;
+        std::cout << unrankedFeatureList.size() << " unranked features" << std::endl;
 
         MultiClassSVM* s = t.train(rfeKernelParameterRangeMap);
+        std::cout << "multiclass SVM accuracy: " << s->getAccuracy() << std::endl;
+
+        std::cout << "two-class SVM performance" << std::endl;
+        int labelFieldWidth = 2 + std::max_element(s->getLabels().begin(), s->getLabels().end())->size();
+        int performanceFieldWidth = 10;
+        int performancePrecision = 3;
+        std::cout << std::setw(labelFieldWidth) << "class 1"
+                  << std::setw(labelFieldWidth) << "class 2"
+                  << std::setw(performanceFieldWidth) << "precision"
+                  << std::setw(performanceFieldWidth) << "recall"
+                  << std::setw(performanceFieldWidth) << "f"
+                  << std::setw(performanceFieldWidth) << "accuracy" << std::endl;
+        for ( SvmVector::const_iterator svm = s->getSvmList().begin(); svm != s->getSvmList().end(); svm++ ) {
+            SvmPerformanceSummary sps = s->getSvmPerformanceSummary(**svm);
+            std::cout << std::setw(labelFieldWidth) << std::setprecision(performancePrecision) << sps.getPositiveClassLabel()
+                      << std::setw(labelFieldWidth) << std::setprecision(performancePrecision) << sps.getNegativeClassLabel()
+                      << std::setw(performanceFieldWidth) << std::setprecision(performancePrecision) << sps.getPrecision()
+                      << std::setw(performanceFieldWidth) << std::setprecision(performancePrecision) << sps.getRecall()
+                      << std::setw(performanceFieldWidth) << std::setprecision(performancePrecision) << sps.getF()
+                      << std::setw(performanceFieldWidth) << std::setprecision(performancePrecision) << sps.getAccuracy() << std::endl;
+        }
         // calculate the 'ranking criterion' for each (remaining) feature using each binary svm
         for (UnrankedFeatureList::iterator f = unrankedFeatureList.begin(); f != unrankedFeatureList.end(); f++) {
             const int i = f->getFeature().getFeatureIndex();
             // rankingCriterion combines feature weights for feature i in all svms
             double rankingCriterion = 0.0;
             for ( SvmVector::const_iterator svm = s->getSvmList().begin(); svm != s->getSvmList().end(); svm++ ) {
+                // output SVM performance summary
                 // calculate the weight w of feature i for this svm
                 double wi = 0.0;
                 for (int j = 0; j < (*svm)->x.size(); j++) {
@@ -988,7 +1112,8 @@ RankedFeatureList SvmRfe::getOrderedFeatureList(SvmDataset& svmDataset, OneVsOne
         // eliminate the bottom 1/3 features - fast but results slightly different from above
         // how about 1/4?
         int eliminateFeatureCount = ceil(unrankedFeatureList.size() / 4.0);
-        std::cout << "SVM-RFE round " << svmRfeRound << ": eliminating " << eliminateFeatureCount << " feature(s) of " << unrankedFeatureList.size() << " total features"<< std::endl;
+        std::cout << "eliminating " << eliminateFeatureCount << " feature(s) of " << unrankedFeatureList.size() << " total features"<< std::endl;
+        std::cout << std::endl;
         UnrankedFeatureList featuresToEliminate;
         for ( int i = 0; i < eliminateFeatureCount; i++ ) {
             // remove the lowest ranked feature(s) from the list of unranked features
@@ -1009,12 +1134,11 @@ RankedFeatureList SvmRfe::getOrderedFeatureList(SvmDataset& svmDataset, OneVsOne
             }
             */
         }
-        // experiment - remove features completely
+
         featuresToEliminate.sort(lessThanFeatureIndex);
         std::reverse(featuresToEliminate.begin(), featuresToEliminate.end());
         for (UnrankedFeatureList::iterator g = featuresToEliminate.begin(); g != featuresToEliminate.end(); g++) {
             Feature unrankedFeature = g->getFeature();
-            //std::cout << "eliminating feature " << unrankedFeature.getFeatureLabel() << " with index " << unrankedFeature.getFeatureIndex() << std::endl;
             removeFeature(unrankedFeature, svmDataset.getLabeledObservationVector(), svmDataset.getFeatureVector());
         }
         //std::cout << "remaining unranked features:" << std::endl;

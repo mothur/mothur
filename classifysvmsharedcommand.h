@@ -54,6 +54,9 @@ private:
 
     GroupMap designMap;
 
+    // mode is either "rfe" or "classify"
+    string mode;
+
     int evaluationFoldCount;
     int trainingFoldCount;
     std::vector<double> smocList;

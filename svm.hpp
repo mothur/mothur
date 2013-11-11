@@ -84,6 +84,10 @@ public:
         second->erase(i);
     }
 
+    int getDatasetIndex()         const   { return datasetIndex; }
+    Label getLabel()              const   { return first; }
+    Observation* getObservation() const   { return second; }
+
 //private:
     int datasetIndex;
     Label first;
@@ -165,6 +169,32 @@ public:
 private:
     LabeledObservationVector labeledObservationVector;
     FeatureVector featureVector;
+};
+
+
+//
+//  0 - print no optional information (quiet)
+//  1 - print minimum optional information (info)
+//  2 - print a little more optional information (debug)
+//  3 - print the maximum amount of optional information (trace)
+//
+class OutputFilter {
+public:
+    OutputFilter(int v) : verbosity(v) {}
+    OutputFilter(const OutputFilter& of) : verbosity(of.verbosity) {}
+    ~OutputFilter() {}
+
+    bool info()  const { return verbosity >= INFO; }
+    bool debug() const { return verbosity >= DEBUG; }
+    bool trace() const { return verbosity >= TRACE; }
+
+    static const int QUIET;
+    static const int INFO;
+    static const int DEBUG;
+    static const int TRACE;
+
+private:
+    const int verbosity;
 };
 
 
@@ -605,11 +635,16 @@ public:
     ~SVM() {}
 
     // the classify method should accept a list of observations?
-    int discriminant(const Observation& observation);
-    Label classify(const Observation& observation){
-        return discriminantToLabel[discriminant(observation)];
+    int discriminant(const Observation&) const;
+    Label classify(const Observation& observation) const {
+        //return discriminantToLabel[discriminant(observation)];
+        return discriminantToLabel.find(discriminant(observation))->second;
     }
-    double score(const LabeledObservationVector&);
+    LabelVector classify(const LabeledObservationVector&) const;
+    double score(const LabeledObservationVector&) const;
+
+    NumericClassToLabel getDiscriminantToLabel() const { return discriminantToLabel; }
+    LabelPair getLabelPair() const { return buildLabelPair(discriminantToLabel.find(1)->second, discriminantToLabel.find(-1)->second); }
 
 public:
     // y holds the numeric class: +1.0 or -1.0
@@ -619,24 +654,69 @@ public:
     // x holds the support vectors
     const LabeledObservationVector x;
     const double b;
-    NumericClassToLabel discriminantToLabel; // trouble if this is declared const....
+    const NumericClassToLabel discriminantToLabel; // trouble if this is declared const....
 };
 
 
+class SvmPerformanceSummary {
+public:
+    SvmPerformanceSummary() {}
+    // this constructor should be used by clients other than tests
+    SvmPerformanceSummary(const SVM& svm, const LabeledObservationVector& actual) {
+        init(svm, actual, svm.classify(actual));
+    }
+    // this constructor is intended for unit testing
+    SvmPerformanceSummary(const SVM& svm, const LabeledObservationVector& actual, const LabelVector& predictions) {
+        init(svm, actual, predictions);
+    }
+
+    Label getPositiveClassLabel() const { return positiveClassLabel; }
+    Label getNegativeClassLabel() const { return negativeClassLabel; }
+
+    double getPrecision() const { return precision; }
+    double getRecall()    const { return recall; }
+    double getF()         const { return f; }
+    double getAccuracy()  const { return accuracy; }
+
+private:
+    void init(const SVM&, const LabeledObservationVector&, const LabelVector&);
+
+    //const SVM& svm;
+
+    Label positiveClassLabel;
+    Label negativeClassLabel;
+
+    double precision;
+    double recall;
+    double f;
+    double accuracy;
+};
+
+
+class MultiClassSvmClassificationTie : public std::exception {
+public:
+    MultiClassSvmClassificationTie(LabelVector& t, int c) : tiedLabels(t), tiedVoteCount(c) {}
+    ~MultiClassSvmClassificationTie() throw() {}
+
+    virtual const char* what() const throw() {
+        return "classification tie";
+    }
+
+private:
+    const LabelVector tiedLabels;
+    const int tiedVoteCount;
+};
+
 typedef std::vector<SVM*> SvmVector;
+typedef std::map<LabelPair, SvmPerformanceSummary> SvmToSvmPerformanceSummary;
 
 // Using SVM with more than two classes requires training multiple SVMs.
 // The MultiClassSVM uses a vector of trained SVMs to do classification
 // on data having more than two classes.
 class MultiClassSVM {
 public:
-    MultiClassSVM(const std::vector<SVM*> s) : twoClassSvmList(s.begin(), s.end()) {}
-    // these objects will delete their svms
-    ~MultiClassSVM() {
-        for ( int i = 0; i < twoClassSvmList.size(); i++ ) {
-            delete twoClassSvmList[i];
-        }
-    }
+    MultiClassSVM(const std::vector<SVM*>, const LabelSet&, const SvmToSvmPerformanceSummary&, OutputFilter);
+    ~MultiClassSVM();
 
     // the classify method should accept a list of observations
     Label classify(const Observation& observation);
@@ -644,8 +724,23 @@ public:
 
     // no need to delete these pointers
     const SvmVector& getSvmList() { return twoClassSvmList; }
+
+    const LabelSet& getLabels() { return labelSet; }
+
+    const SvmPerformanceSummary& getSvmPerformanceSummary(const SVM& svm) { return svmToSvmPerformanceSummary.at(svm.getLabelPair()); }
+
+    double getAccuracy() { return accuracy; }
+    void setAccuracy(const LabeledObservationVector& obs) { accuracy = score(obs); }
+
 private:
     const SvmVector twoClassSvmList;
+    const LabelSet labelSet;
+    const OutputFilter outputFilter;
+
+    double accuracy;
+
+    // this is a map from label pairs to performance summaries
+    SvmToSvmPerformanceSummary svmToSvmPerformanceSummary;
 };
 
 
@@ -678,32 +773,6 @@ public:
     ExternalSvmTrainingInterruption() {}
     virtual ~ExternalSvmTrainingInterruption() throw() {}
     virtual bool interruptTraining() { return false; }
-};
-
-
-//
-//  0 - print no optional information (quiet)
-//  1 - print minimum optional information (info)
-//  2 - print a little more optional information (debug)
-//  3 - print the maximum amount of optional information (trace)
-//
-class OutputFilter {
-public:
-    OutputFilter(int v) : verbosity(v) {}
-    OutputFilter(const OutputFilter& of) : verbosity(of.verbosity) {}
-    ~OutputFilter() {}
-
-    bool info()  const { return verbosity >= INFO; }
-    bool debug() const { return verbosity >= DEBUG; }
-    bool trace() const { return verbosity >= TRACE; }
-
-    static const int QUIET;
-    static const int INFO;
-    static const int DEBUG;
-    static const int TRACE;
-
-private:
-    const int verbosity;
 };
 
 
@@ -849,15 +918,16 @@ public:
     const LabelPairSet& getLabelPairSet() { return labelPairSet; }
     const LabeledObservationVector& getLabeledObservationVectorForLabel(const Label& label) { return labelToLabeledObservationVector[label]; }
 
+    const OutputFilter& getOutputFilter() { return outputFilter; }
+
     static void buildLabelPairSet(LabelPairSet&, const LabeledObservationVector&);
     static void appendTrainingAndTestingData(Label, const LabeledObservationVector&, LabeledObservationVector&, LabeledObservationVector&);
-    static void standardizeObservations(const LabeledObservationVector&);
 
 private:
     ExternalSvmTrainingInterruption& externalSvmTrainingInterruption;
 
     const OutputFilter outputFilter;
-    bool verbose;
+    //bool verbose;
 
     SvmDataset& svmDataset;
 
@@ -867,6 +937,7 @@ private:
     LabelSet labelSet;
     LabelToLabeledObservationVector labelToLabeledObservationVector;
     LabelPairSet labelPairSet;
+
 };
 
 // A better name for this class is MsvmRfe after MSVM-RFE described in
