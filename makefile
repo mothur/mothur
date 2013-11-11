@@ -22,6 +22,8 @@ FORTRAN_FLAGS =
 
 # Optimize to level 3:
 CXXFLAGS += -O3 
+# -g -O0 for valgrind
+#CXXFLAGS += -g -O0 
 
 ifeq  ($(strip $(64BIT_VERSION)),yes)
 	#if you are using centos uncomment the following lines
