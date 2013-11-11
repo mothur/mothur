@@ -234,6 +234,10 @@ int GetOtuLabelsCommand::execute(){
         
         //get labels you want to keep
 		labels = m->readAccnos(accnosfile);
+        //simplfy labels
+        set<string> newLabels;
+        for (set<string>::iterator it = labels.begin(); it != labels.end(); it++) {  newLabels.insert(m->getSimpleLabel(*it)); }
+        labels = newLabels;
 		
 		if (m->control_pressed) { return 0; }
 		
@@ -302,7 +306,7 @@ int GetOtuLabelsCommand::readClassifyOtu(){
             
             in >> otu >> size >> tax; m->gobble(in);
             
-            if (labels.count(otu) != 0) {
+            if (labels.count(m->getSimpleLabel(otu)) != 0) {
 				wroteSomething = true;
 				selectedCount++;
                 
@@ -357,7 +361,7 @@ int GetOtuLabelsCommand::readOtuAssociation(){
             in >> otu1 >> otu2;
             string line = m->getline(in); m->gobble(in);
             
-            if ((labels.count(otu1) != 0) && (labels.count(otu2) != 0)){
+            if ((labels.count(m->getSimpleLabel(otu1)) != 0) && (labels.count(m->getSimpleLabel(otu2)) != 0)){
 				wroteSomething = true;
 				selectedCount++;
                 
@@ -412,7 +416,7 @@ int GetOtuLabelsCommand::readCorrAxes(){
             in >> otu;
             string line = m->getline(in); m->gobble(in);
             
-            if (labels.count(otu) != 0) {
+            if (labels.count(m->getSimpleLabel(otu)) != 0) {
 				wroteSomething = true;
 				selectedCount++;
                 
@@ -461,9 +465,9 @@ int GetOtuLabelsCommand::readShared(){
             if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) { delete newLookup[j]; } for (int j = 0; j < lookup.size(); j++) { delete lookup[j]; } return 0; }
             
             //is this otu on the list
-            if (labels.count(m->currentBinLabels[i]) != 0) {
+            if (labels.count(m->getSimpleLabel(m->currentSharedBinLabels[i])) != 0) {
                 numSelected++; wroteSomething = true;
-                newLabels.push_back(m->currentBinLabels[i]);
+                newLabels.push_back(m->currentSharedBinLabels[i]);
                 for (int j = 0; j < newLookup.size(); j++) { //add this OTU to the new lookup
                     newLookup[j]->push_back(lookup[j]->getAbundance(i), lookup[j]->getGroup());
                 }
@@ -483,7 +487,7 @@ int GetOtuLabelsCommand::readShared(){
         
 		for (int j = 0; j < lookup.size(); j++) { delete lookup[j]; }
         
-        m->currentBinLabels = newLabels;
+        m->currentSharedBinLabels = newLabels;
         
 		newLookup[0]->printHeaders(out);
 		
@@ -517,24 +521,17 @@ int GetOtuLabelsCommand::readList(){
         newList.setLabel(list->getLabel());
         int selectedCount = 0;
         bool wroteSomething = false;
-        string snumBins = toString(list->getNumBins());
         
+        vector<string> binLabels = list->getLabels();
+        vector<string> newLabels;
         for (int i = 0; i < list->getNumBins(); i++) {
             
             if (m->control_pressed) { delete list; return 0;}
             
-            //create a label for this otu
-            string otuLabel = "Otu";
-            string sbinNumber = toString(i+1);
-            if (sbinNumber.length() < snumBins.length()) { 
-                int diff = snumBins.length() - sbinNumber.length();
-                for (int h = 0; h < diff; h++) { otuLabel += "0"; }
-            }
-            otuLabel += sbinNumber; 
-            
-            if (labels.count(otuLabel) != 0) {
+            if (labels.count(m->getSimpleLabel(binLabels[i])) != 0) {
 				selectedCount++;
                 newList.push_back(list->get(i));
+                newLabels.push_back(binLabels[i]);
             }
         }
         
@@ -552,6 +549,8 @@ int GetOtuLabelsCommand::readList(){
         //print new listvector
         if (newList.getNumBins() != 0) {
             wroteSomething = true;
+            newList.setLabels(newLabels);
+            newList.printHeaders(out);
             newList.print(out);
         }
 		out.close();

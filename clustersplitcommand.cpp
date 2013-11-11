@@ -833,8 +833,10 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, map<float, int> us
 		m->openOutputFile(listFileName,	outList);
         outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
 		
-		
 		map<float, int>::iterator itLabel;
+        
+        //clears out junk for autocompleting of list files above.  Perhaps there is a beter way to handle this from within the data structure?
+        m->printedListHeaders = false;
 
 		//for each label needed
 		for(itLabel = userLabels.begin(); itLabel != userLabels.end(); itLabel++) {
@@ -890,6 +892,8 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, map<float, int> us
                 rabund->print(outRabund);
             }
 			//outList << endl;
+            if (!m->printedListHeaders) { 
+                m->listBinLabelsInFile.clear(); completeList.printHeaders(outList); }
             completeList.print(outList);
 			
 			if (rabund != NULL) { delete rabund; }
@@ -1174,7 +1178,7 @@ string ClusterSplitCommand::clusterClassicFile(string thisDistFile, string thisN
             cluster->readPhylipFile(thisDistFile, nameMap);
 		}else if (countfile != "") {
             ct = new CountTable();
-            ct->readTable(thisNamefile, false);
+            ct->readTable(thisNamefile, false, false);
             cluster->readPhylipFile(thisDistFile, ct);
         }
         tag = cluster->getTag();
@@ -1302,7 +1306,7 @@ string ClusterSplitCommand::clusterFile(string thisDistFile, string thisNamefile
             read->read(nameMap);
 		}else if (countfile != "") {
             ct = new CountTable();
-            ct->readTable(thisNamefile, false);
+            ct->readTable(thisNamefile, false, false);
             read->read(ct);
         }else { read->read(nameMap); }
 		

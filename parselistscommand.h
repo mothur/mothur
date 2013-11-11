@@ -47,9 +47,6 @@ private:
 	set<string> labels;
 	bool abort, allLines;
 	vector<string> outputNames;
-	
-	map<string, ofstream*> filehandles;
-	map<string, ofstream*>::iterator it3;
 
 };
 

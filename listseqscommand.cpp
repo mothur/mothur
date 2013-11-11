@@ -16,6 +16,7 @@
 //**********************************************************************************************************************
 vector<string> ListSeqsCommand::setParameters(){	
 	try {
+        CommandParameter pfastq("fastq", "InputTypes", "", "", "FNGLT", "FNGLT", "none","accnos",false,false,true); parameters.push_back(pfastq);
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "FNGLT", "FNGLT", "none","accnos",false,false,true); parameters.push_back(pfasta);
 		CommandParameter pname("name", "InputTypes", "", "", "FNGLT", "FNGLT", "none","accnos",false,false,true); parameters.push_back(pname);
         CommandParameter pcount("count", "InputTypes", "", "", "FNGLT", "FNGLT", "none","accnos",false,false,true); parameters.push_back(pcount);
@@ -39,8 +40,8 @@ vector<string> ListSeqsCommand::setParameters(){
 string ListSeqsCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The list.seqs command reads a fasta, name, group, count, list, taxonomy or alignreport file and outputs a .accnos file containing sequence names.\n";
-		helpString += "The list.seqs command parameters are fasta, name, group, count, list, taxonomy and alignreport.  You must provide one of these parameters.\n";
+		helpString += "The list.seqs command reads a fasta, name, group, count, list, taxonomy, fastq or alignreport file and outputs a .accnos file containing sequence names.\n";
+		helpString += "The list.seqs command parameters are fasta, name, group, count, list, taxonomy, fastq and alignreport.  You must provide one of these parameters.\n";
 		helpString += "The list.seqs command should be in the following format: list.seqs(fasta=yourFasta).\n";
 		helpString += "Example list.seqs(fasta=amazon.fasta).\n";
 		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n";
@@ -169,6 +170,14 @@ ListSeqsCommand::ListSeqsCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("fastq");
+				//user has given a template file
+				if(it != parameters.end()){
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["fastq"] = inputDir + it->second;		}
+				}
 			}
 
 			//check for required parameters
@@ -205,8 +214,12 @@ ListSeqsCommand::ListSeqsCommand(string option)  {
 			if (countfile == "not open") { abort = true; }
 			else if (countfile == "not found") {  countfile = "";  }
 			else { m->setCountTableFile(countfile); }
+            
+            fastqfile = validParameter.validFile(parameters, "fastq", true);
+			if (fastqfile == "not open") { abort = true; }
+			else if (fastqfile == "not found") {  fastqfile = "";  }
 			
-			if ((countfile == "") && (fastafile == "") && (namefile == "") && (listfile == "") && (groupfile == "") && (alignfile == "") && (taxfile == ""))  { m->mothurOut("You must provide a file."); m->mothurOutEndLine(); abort = true; }
+			if ((fastqfile == "") && (countfile == "") && (fastafile == "") && (namefile == "") && (listfile == "") && (groupfile == "") && (alignfile == "") && (taxfile == ""))  { m->mothurOut("You must provide a file."); m->mothurOutEndLine(); abort = true; }
 			
 			int okay = 1;
 			if (outputDir != "") { okay++; }
@@ -230,6 +243,7 @@ int ListSeqsCommand::execute(){
 		
 		//read functions fill names vector
 		if (fastafile != "")		{	inputFileName = fastafile;	readFasta();	}
+        else if (fastqfile != "")	{	inputFileName = fastqfile;	readFastq();	}
 		else if (namefile != "")	{	inputFileName = namefile;	readName();		}
 		else if (groupfile != "")	{	inputFileName = groupfile;	readGroup();	}
 		else if (alignfile != "")	{	inputFileName = alignfile;	readAlign();	}
@@ -282,6 +296,53 @@ int ListSeqsCommand::execute(){
 
 	catch(exception& e) {
 		m->errorOut(e, "ListSeqsCommand", "execute");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+int ListSeqsCommand::readFastq(){
+	try {
+		
+		ifstream in;
+		m->openInputFile(fastqfile, in);
+		string name;
+		
+		//ofstream out;
+		//string newFastaName = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "numsAdded.fasta";
+		//m->openOutputFile(newFastaName, out);
+		int count = 1;
+		//string lastName = "";
+		
+		while(!in.eof()){
+			
+			if (m->control_pressed) { in.close(); return 0; }
+			
+			//read sequence name
+			string name = m->getline(in); m->gobble(in);
+			
+			if (name[0] == '@') {
+                vector<string> splits = m->splitWhiteSpace(name);
+                name = splits[0];
+                name = name.substr(1);
+                m->checkName(name);
+                names.push_back(name);
+                //get rest of lines
+                name = m->getline(in); m->gobble(in);
+                name = m->getline(in); m->gobble(in);
+                name = m->getline(in); m->gobble(in);
+            }
+			
+			m->gobble(in);
+			if (m->debug) { count++; cout << "[DEBUG]: count = " + toString(count) + ", name = " + name + "\n"; }
+		}
+		in.close();
+		//out.close();
+		
+		return 0;
+        
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ListSeqsCommand", "readFastq");
 		exit(1);
 	}
 }
@@ -415,7 +476,7 @@ int ListSeqsCommand::readGroup(){
 int ListSeqsCommand::readCount(){
 	try {
 		CountTable ct;
-		ct.readTable(countfile, false);
+		ct.readTable(countfile, false, false);
         
         if (m->control_pressed) { return 0; }
         

@@ -53,7 +53,7 @@ string ParseListCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
         
-        if (type == "list") {  pattern = "[filename],[group],list"; } 
+        if (type == "list") {  pattern = "[filename],[group],[distance],list"; } 
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
         
         return pattern;
@@ -169,7 +169,7 @@ ParseListCommand::ParseListCommand(string option)  {
 			else if (countfile == "not open") { abort = true; countfile =  ""; }	
 			else {   
                 m->setCountTableFile(countfile); 
-                ct.readTable(countfile, true);
+                ct.readTable(countfile, true, false);
                 if (!ct.hasGroupInfo()) { 
                     abort = true;
                     m->mothurOut("[ERROR]: The parse.list command requires group info to be present in your countfile, quitting."); m->mothurOutEndLine();
@@ -205,27 +205,6 @@ int ParseListCommand::execute(){
 	
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
-		//set fileroot
-		map<string, string> variables; 
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(listfile));
-		
-		//fill filehandles with neccessary ofstreams
-		int i;
-		ofstream* temp;
-		vector<string> gGroups;
-        if (groupfile != "") { gGroups = groupMap->getNamesOfGroups(); }
-        else { gGroups = ct.getNamesOfGroups(); }
-        
-		for (i=0; i<gGroups.size(); i++) {
-			temp = new ofstream;
-			filehandles[gGroups[i]] = temp;
-			
-            variables["[group]"] = gGroups[i];
-			string filename = getOutputFileName("list",variables);
-			outputNames.push_back(filename); outputTypes["list"].push_back(filename);
-			m->openOutputFile(filename, *temp);
-		}
-		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = labels;	
@@ -236,16 +215,13 @@ int ParseListCommand::execute(){
 		
 		if (m->control_pressed) { 
 			delete list; if (groupfile != "") { delete groupMap; }
-			for (i=0; i<gGroups.size(); i++) {  (*(filehandles[gGroups[i]])).close();  delete filehandles[gGroups[i]]; } 
-			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
-			return 0;
+			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear(); return 0;
 		}
 		
 		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 		
 			if (m->control_pressed) { 
 				delete list; if (groupfile != "") { delete groupMap; }
-				for (i=0; i<gGroups.size(); i++) {  (*(filehandles[gGroups[i]])).close();  delete filehandles[gGroups[i]]; } 
 				for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
 				return 0;
 			}
@@ -283,7 +259,6 @@ int ParseListCommand::execute(){
 		
 		if (m->control_pressed) { 
 			if (groupfile != "") { delete groupMap; }
-			for (i=0; i<gGroups.size(); i++) {  (*(filehandles[gGroups[i]])).close();  delete filehandles[gGroups[i]]; } 
 			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
 			return 0;
 		}
@@ -304,7 +279,6 @@ int ParseListCommand::execute(){
 		
 		if (m->control_pressed) { 
 			if (groupfile != "") { delete groupMap; }
-			for (i=0; i<gGroups.size(); i++) {  (*(filehandles[gGroups[i]])).close();  delete filehandles[gGroups[i]]; } 
 			for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } outputTypes.clear();
 			return 0;
 		}
@@ -318,11 +292,6 @@ int ParseListCommand::execute(){
 			parse(list);		
 			
 			delete list;
-		}
-		
-		for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {
-			(*(filehandles[it3->first])).close();
-			delete it3->second;
 		}
 		
 		if (groupfile != "") { delete groupMap; }
@@ -354,8 +323,33 @@ int ParseListCommand::execute(){
 /**********************************************************************************************************************/
 int ParseListCommand::parse(ListVector* thisList) {
 	try {
+        map<string, ofstream*> filehandles;
+        map<string, ofstream*>::iterator it3;
+        
+        //set fileroot
+		map<string, string> variables;
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(listfile));
+        variables["[distance]"] = thisList->getLabel();
+		
+		//fill filehandles with neccessary ofstreams
+		ofstream* temp;
+		vector<string> gGroups;
+        if (groupfile != "") { gGroups = groupMap->getNamesOfGroups(); }
+        else { gGroups = ct.getNamesOfGroups(); }
+        
+		for (int i=0; i<gGroups.size(); i++) {
+			temp = new ofstream;
+			filehandles[gGroups[i]] = temp;
+			
+            variables["[group]"] = gGroups[i];
+			string filename = getOutputFileName("list",variables);
+			m->openOutputFile(filename, *temp);
+            outputNames.push_back(filename); outputTypes["list"].push_back(filename);
+		}
+
 	
 		map<string, string> groupVector;
+        map<string, string> groupLabels;
 		map<string, string>::iterator itGroup;
 		map<string, int> groupNumBins;
 		
@@ -363,11 +357,12 @@ int ParseListCommand::parse(ListVector* thisList) {
 		for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {
 			groupNumBins[it3->first] = 0;
 			groupVector[it3->first] = "";
+            groupLabels[it3->first] = "label\tnumOtus\t";
 		}
 
-		
+		vector<string> binLabels = thisList->getLabels();
 		for (int i = 0; i < thisList->getNumBins(); i++) {
-			if (m->control_pressed) { return 0; }
+			if (m->control_pressed) { break; }
 			
 			map<string, string> groupBins;
 			string bin = list->get(i); 
@@ -408,14 +403,26 @@ int ParseListCommand::parse(ListVector* thisList) {
 			
 			//print parsed bin info to files
 			for (itGroup = groupBins.begin(); itGroup != groupBins.end(); itGroup++) {
-				groupVector[itGroup->first] +=  itGroup->second + '\t'; 
+				groupVector[itGroup->first] +=  itGroup->second + '\t';
+                groupLabels[itGroup->first] +=  binLabels[i] + '\t';
 			}
 		
 		}
 		
+        if (m->control_pressed) {
+            for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {
+                (*(filehandles[it3->first])).close();
+                delete it3->second;
+            }
+            return 0;
+        }
+        
 		//end list vector
 		for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {
+            (*(filehandles[it3->first])) << groupLabels[it3->first] << endl;
 			(*(filehandles[it3->first])) << thisList->getLabel() << '\t' << groupNumBins[it3->first] << '\t' << groupVector[it3->first] << endl;  // label numBins  listvector for that group
+            (*(filehandles[it3->first])).close();
+            delete it3->second;
 		}
 		
 		return 0;

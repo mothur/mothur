@@ -293,7 +293,7 @@ int ClassifyOtuCommand::execute(){
 		if (namefile != "")     {	m->readNames(namefile, nameMap, true);	}
         if (groupfile != "")    {   groupMap = new GroupMap(groupfile);  groupMap->readMap();  groups = groupMap->getNamesOfGroups(); }
         else { groupMap = NULL;  }
-        if (countfile != "") {  ct = new CountTable(); ct->readTable(countfile, true);  if (ct->hasGroupInfo()) { groups = ct->getNamesOfGroups(); } }
+        if (countfile != "") {  ct = new CountTable(); ct->readTable(countfile, true, false);  if (ct->hasGroupInfo()) { groups = ct->getNamesOfGroups(); } }
         else {  ct = NULL;    }
         
 		//read taxonomy file and save in map for easy access in building bin trees
@@ -586,6 +586,7 @@ int ClassifyOtuCommand::process(ListVector* processList) {
         
 		//for each bin in the list vector
         string snumBins = toString(processList->getNumBins());
+        vector<string> binLabels = processList->getLabels();
 		for (int i = 0; i < processList->getNumBins(); i++) {
 			
 			if (m->control_pressed) { break; }
@@ -598,17 +599,8 @@ int ClassifyOtuCommand::process(ListVector* processList) {
 			names = findConsensusTaxonomy(thisNames, size, conTax);
 		
 			if (m->control_pressed) { break; }
-			
-			//output to new names file
-            string binLabel = "Otu";
-            string sbinNumber = toString(i+1);
-            if (sbinNumber.length() < snumBins.length()) { 
-                int diff = snumBins.length() - sbinNumber.length();
-                for (int h = 0; h < diff; h++) { binLabel += "0"; }
-            }
-            binLabel += sbinNumber;
 
-			out << binLabel << '\t' << size << '\t' << conTax << endl;
+			out << binLabels[i] << '\t' << size << '\t' << conTax << endl;
 			
 			string noConfidenceConTax = conTax;
 			m->removeConfidences(noConfidenceConTax);
@@ -683,16 +675,8 @@ int ClassifyOtuCommand::process(ListVector* processList) {
                     
                     if (m->control_pressed) { break; }
                     
-                    //output to new names file
-                    string binLabel = "Otu";
-                    string sbinNumber = toString(i+1);
-                    if (sbinNumber.length() < snumBins.length()) { 
-                        int diff = snumBins.length() - sbinNumber.length();
-                        for (int h = 0; h < diff; h++) { binLabel += "0"; }
-                    }
-                    binLabel += sbinNumber;
                     
-                    (*outs[groupIndex[itParsed->first]]) << binLabel << '\t' << size << '\t' << conTax << endl;
+                    (*outs[groupIndex[itParsed->first]]) << binLabels[i] << '\t' << size << '\t' << conTax << endl;
                     
                     string noConfidenceConTax = conTax;
                     m->removeConfidences(noConfidenceConTax);

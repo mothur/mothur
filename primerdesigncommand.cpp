@@ -20,7 +20,7 @@ vector<string> PrimerDesignCommand::setParameters(){
         CommandParameter pmintm("mintm", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(pmintm);
         CommandParameter pmaxtm("maxtm", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(pmaxtm);
         CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false); parameters.push_back(pprocessors);
-        CommandParameter potunumber("otunumber", "Number", "", "-1", "", "", "","",false,true,true); parameters.push_back(potunumber);
+        CommandParameter potunumber("otulabel", "String", "", "", "", "", "","",false,true,true); parameters.push_back(potunumber);
         CommandParameter ppdiffs("pdiffs", "Number", "", "0", "", "", "","",false,false,true); parameters.push_back(ppdiffs);
         CommandParameter pcutoff("cutoff", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pcutoff);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
@@ -40,13 +40,13 @@ string PrimerDesignCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The primer.design allows you to identify sequence fragments that are specific to particular OTUs.\n";
-		helpString += "The primer.design command parameters are: list, fasta, name, count, otunumber, cutoff, length, pdiffs, mintm, maxtm, processors and label.\n";
+		helpString += "The primer.design command parameters are: list, fasta, name, count, otulabel, cutoff, length, pdiffs, mintm, maxtm, processors and label.\n";
 		helpString += "The list parameter allows you to provide a list file and is required.\n";
         helpString += "The fasta parameter allows you to provide a fasta file and is required.\n";
         helpString += "The name parameter allows you to provide a name file associated with your fasta file.\n";
         helpString += "The count parameter allows you to provide a count file associated with your fasta file.\n";
         helpString += "The label parameter is used to indicate the label you want to use from your list file.\n";
-        helpString += "The otunumber parameter is used to indicate the otu you want to use from your list file. It is required.\n";
+        helpString += "The otulabel parameter is used to indicate the otu you want to use from your list file. It is required.\n";
         helpString += "The pdiffs parameter is used to specify the number of differences allowed in the primer. The default is 0.\n";
         helpString += "The length parameter is used to indicate the length of the primer. The default is 18.\n";
         helpString += "The mintm parameter is used to indicate minimum melting temperature.\n";
@@ -216,9 +216,8 @@ PrimerDesignCommand::PrimerDesignCommand(string option)  {
             temp = validParameter.validFile(parameters, "maxtm", false);  if (temp == "not found") { temp = "-1"; }
 			m->mothurConvert(temp, maxTM); 
             
-            temp = validParameter.validFile(parameters, "otunumber", false);  if (temp == "not found") { temp = "-1"; }
-			m->mothurConvert(temp, otunumber); 
-            if (otunumber < 1) {  m->mothurOut("[ERROR]: You must provide an OTU number, aborting.\n"); abort = true; }
+            otulabel = validParameter.validFile(parameters, "otulabel", false);  if (otulabel == "not found") { temp = ""; }
+            if (otulabel == "") {  m->mothurOut("[ERROR]: You must provide an OTU label, aborting.\n"); abort = true; }
             
             temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
@@ -253,7 +252,9 @@ int PrimerDesignCommand::execute(){
         
         //reads list file and selects the label the users specified or the first label
         getListVector();
-        if (otunumber > list->getNumBins()) { m->mothurOut("[ERROR]: You selected an OTU number larger than the number of OTUs you have in your list file, quitting.\n"); return 0; }
+        vector<string> binLabels = list->getLabels();
+        int binIndex = findIndex(otulabel, binLabels);
+        if (binIndex == -1) { m->mothurOut("[ERROR]: You selected an OTU label that is not in your in your list file, quitting.\n"); return 0; }
         
         map<string, int> nameMap;
         unsigned long int numSeqs;  //used to sanity check the files. numSeqs = total seqs for namefile and uniques for count.
@@ -293,7 +294,7 @@ int PrimerDesignCommand::execute(){
         
         m->mothurOut("Done.\n\n");
         
-        set<string> primers = getPrimer(conSeqs[otunumber-1]);  
+        set<string> primers = getPrimer(conSeqs[binIndex]);
         
         if (m->control_pressed) { delete list; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
         
@@ -302,7 +303,7 @@ int PrimerDesignCommand::execute(){
         ofstream outSum;
         m->openOutputFile(consSummaryFile, outSum);
         
-        outSum << "PrimerOtu: " << otunumber << " Members: " << list->get(otunumber-1) << endl << "Primers\tminTm\tmaxTm" << endl;
+        outSum << "PrimerOtu: " << otulabel << " Members: " << list->get(binIndex) << endl << "Primers\tminTm\tmaxTm" << endl;
         
         //find min and max melting points
         vector<double> minTms;
@@ -339,7 +340,7 @@ int PrimerDesignCommand::execute(){
         outSum.close();
         
         //check each otu's conseq for each primer in otunumber
-        set<int> otuToRemove = createProcesses(consSummaryFile, minTms, maxTms, primers, conSeqs);
+        set<int> otuToRemove = createProcesses(consSummaryFile, minTms, maxTms, primers, conSeqs, binIndex);
         
         if (m->control_pressed) { delete list; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
         
@@ -348,21 +349,29 @@ int PrimerDesignCommand::execute(){
         mvariables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(listfile));
         mvariables["[extension]"] = m->getExtension(listfile);
         string newListFile = getOutputFileName("list", mvariables);
-        outputNames.push_back(newListFile); outputTypes["list"].push_back(newListFile);
-        ofstream outList;
-        m->openOutputFile(newListFile, outList);
+        ofstream outListTemp;
+        m->openOutputFile(newListFile+".temp", outListTemp);
         
-        outList << list->getLabel() << '\t' << (list->getNumBins()-otuToRemove.size()) << '\t';
+        outListTemp << list->getLabel() << '\t' << (list->getNumBins()-otuToRemove.size()) << '\t';
+        string headers = "label\tnumOtus\t";
         for (int j = 0; j < list->getNumBins(); j++) {
             if (m->control_pressed) { break; }
             //good otus
             if (otuToRemove.count(j) == 0) {  
                 string bin = list->get(j);
-                if (bin != "") {  outList << bin << '\t';  } 
+                if (bin != "") {  outListTemp << bin << '\t';  headers += binLabels[j] + '\t'; }
             }
         }
-        outList << endl;
+        outListTemp << endl;
+        outListTemp.close();
+        
+        ofstream outList;
+        m->openOutputFile(newListFile, outList);
+        outList << headers << endl;
         outList.close();
+        m->appendFiles(newListFile+".temp", newListFile);
+        m->mothurRemove(newListFile+".temp");
+        outputNames.push_back(newListFile); outputTypes["list"].push_back(newListFile);
         
         if (m->control_pressed) { delete list; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
         
@@ -525,7 +534,7 @@ set<string> PrimerDesignCommand::getPrimer(Sequence primerSeq){
 	}
 }
 /**************************************************************************************************/
-set<int> PrimerDesignCommand::createProcesses(string newSummaryFile, vector<double>& minTms, vector<double>& maxTms, set<string>& primers, vector<Sequence>& conSeqs) {
+set<int> PrimerDesignCommand::createProcesses(string newSummaryFile, vector<double>& minTms, vector<double>& maxTms, set<string>& primers, vector<Sequence>& conSeqs, int binIndex) {
 	try {
 		
 		vector<int> processIDS;
@@ -560,7 +569,7 @@ set<int> PrimerDesignCommand::createProcesses(string newSummaryFile, vector<doub
                 //clear old file because we append in driver
                 m->mothurRemove(newSummaryFile + toString(getpid()) + ".temp");
                 
-				otusToRemove = driver(newSummaryFile + toString(getpid()) + ".temp", minTms, maxTms, primers, conSeqs, lines[process].start, lines[process].end, numBinsProcessed);
+				otusToRemove = driver(newSummaryFile + toString(getpid()) + ".temp", minTms, maxTms, primers, conSeqs, lines[process].start, lines[process].end, numBinsProcessed, binIndex);
                 
                 string tempFile = toString(getpid()) + ".otus2Remove.temp";
                 ofstream outTemp;
@@ -580,7 +589,7 @@ set<int> PrimerDesignCommand::createProcesses(string newSummaryFile, vector<doub
 		}
 		
 		//do my part
-		otusToRemove = driver(newSummaryFile, minTms, maxTms, primers, conSeqs, lines[0].start, lines[0].end, numBinsProcessed);
+		otusToRemove = driver(newSummaryFile, minTms, maxTms, primers, conSeqs, lines[0].start, lines[0].end, numBinsProcessed, binIndex);
 		
 		//force parent to wait until all the processes are done
 		for (int i=0;i<processIDS.size();i++) { 
@@ -624,7 +633,7 @@ set<int> PrimerDesignCommand::createProcesses(string newSummaryFile, vector<doub
 			string extension = toString(i) + ".temp";
 			m->mothurRemove(newSummaryFile+extension);
             
-			primerDesignData* tempPrimer = new primerDesignData((newSummaryFile+extension), m, lines[i].start, lines[i].end, minTms, maxTms, primers, conSeqs, pdiffs, otunumber, length, i);
+			primerDesignData* tempPrimer = new primerDesignData((newSummaryFile+extension), m, lines[i].start, lines[i].end, minTms, maxTms, primers, conSeqs, pdiffs, binIndex, length, i);
 			pDataArray.push_back(tempPrimer);
 			processIDS.push_back(i);
 			
@@ -635,7 +644,7 @@ set<int> PrimerDesignCommand::createProcesses(string newSummaryFile, vector<doub
 		
         
 		//using the main process as a worker saves time and memory
-		otusToRemove = driver(newSummaryFile, minTms, maxTms, primers, conSeqs, lines[0].start, lines[0].end, numBinsProcessed);
+		otusToRemove = driver(newSummaryFile, minTms, maxTms, primers, conSeqs, lines[0].start, lines[0].end, numBinsProcessed, binIndex);
 		
 		//Wait until all threads have terminated.
 		WaitForMultipleObjects(processors-1, hThreadArray, TRUE, INFINITE);
@@ -668,7 +677,7 @@ set<int> PrimerDesignCommand::createProcesses(string newSummaryFile, vector<doub
 	}
 }
 //**********************************************************************************************************************
-set<int> PrimerDesignCommand::driver(string summaryFileName, vector<double>& minTms, vector<double>& maxTms, set<string>& primers, vector<Sequence>& conSeqs, int start, int end, int& numBinsProcessed){
+set<int> PrimerDesignCommand::driver(string summaryFileName, vector<double>& minTms, vector<double>& maxTms, set<string>& primers, vector<Sequence>& conSeqs, int start, int end, int& numBinsProcessed, int binIndex){
 	try {
         set<int> otuToRemove;
         
@@ -679,7 +688,7 @@ set<int> PrimerDesignCommand::driver(string summaryFileName, vector<double>& min
         
             if (m->control_pressed) { break; }
             
-            if (i != (otunumber-1)) {
+            if (i != (binIndex)) {
                 int primerIndex = 0;
                 for (set<string>::iterator it = primers.begin(); it != primers.end(); it++) {
                     vector<int> primerStarts;
@@ -1088,7 +1097,7 @@ map<string, int> PrimerDesignCommand::readCount(unsigned long int& numSeqs){
         map<string, int> nameMap;
         
         CountTable ct;
-        ct.readTable(countfile, false);
+        ct.readTable(countfile, false, false);
         vector<string> namesOfSeqs = ct.getNamesOfSeqs();
         numSeqs = ct.getNumUniqueSeqs();
         
@@ -1232,6 +1241,21 @@ int PrimerDesignCommand::countDiffs(string oligo, string seq){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PrimerDesignCommand", "countDiffs");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+int PrimerDesignCommand::findIndex(string binLabel, vector<string> binLabels){
+	try {
+        int index = -1;
+        for (int i = 0; i < binLabels.size(); i++){
+            if (m->control_pressed) { return index; }
+            if (m->isLabelEquivalent(binLabel, binLabels[i])) { index = i; break; }
+        }
+        return index;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "PrimerDesignCommand", "findIndex");
 		exit(1);
 	}
 }

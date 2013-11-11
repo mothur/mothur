@@ -16,7 +16,7 @@ SequenceCountParser::SequenceCountParser(string countfile, string fastafile) {
 		
 		//read count file
 		CountTable countTable;
-		countTable.readTable(countfile, true);
+		countTable.readTable(countfile, true, false);
 		
 		//initialize maps
 		namesOfGroups = countTable.getNamesOfGroups();

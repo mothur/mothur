@@ -175,7 +175,7 @@ static DWORD WINAPI MyUchimeThreadFunction(LPVOID lpParam){
         SequenceCountParser* cparser;
 		if (pDataArray->hasCount) {
             CountTable* ct = new CountTable();
-            ct->readTable(pDataArray->namefile, true);
+            ct->readTable(pDataArray->namefile, true, false);
             cparser = new SequenceCountParser(pDataArray->fastafile, *ct);
             delete ct;
         }else {

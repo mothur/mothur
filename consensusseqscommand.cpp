@@ -226,7 +226,7 @@ int ConsensusSeqsCommand::execute(){
 		if (m->control_pressed) { return 0; }
 		
 		if (namefile != "") { readNames(); }
-        if (countfile != "") { ct.readTable(countfile, true);  }
+        if (countfile != "") { ct.readTable(countfile, true, false);  }
 		
 		if (m->control_pressed) { return 0; }
 		
@@ -436,23 +436,16 @@ int ConsensusSeqsCommand::processList(ListVector*& list){
 		outSummary << "OTU#\tPositioninAlignment\tA\tT\tG\tC\tGap\tNumberofSeqs\tConsensusBase" << endl;
 		
         string snumBins = toString(list->getNumBins());
+        vector<string> binLabels = list->getLabels();
 		for (int i = 0; i < list->getNumBins(); i++) {
 			
 			if (m->control_pressed) { outSummary.close(); outName.close(); outFasta.close(); return 0; }
 			
 			string bin = list->get(i);
 			string consSeq = getConsSeq(bin, outSummary, i);
-            
-            string seqName = "Otu";
-            string sbinNumber = toString(i+1);
-            if (sbinNumber.length() < snumBins.length()) {
-                int diff = snumBins.length() - sbinNumber.length();
-                for (int h = 0; h < diff; h++) { seqName += "0"; }
-            }
-            seqName += sbinNumber;
 			
-			outFasta << ">" << seqName << endl << consSeq << endl;
-			outName << seqName << '\t' << seqName << "," << bin << endl;
+			outFasta << ">" << binLabels[i] << endl << consSeq << endl;
+			outName << binLabels[i] << '\t' << binLabels[i] << "," << bin << endl;
 		}
 		
 		outSummary.close(); outName.close(); outFasta.close();

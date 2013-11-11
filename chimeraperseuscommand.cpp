@@ -516,7 +516,7 @@ int ChimeraPerseusCommand::execute(){
             
             if (hasCount) {
                 CountTable* ct = new CountTable();
-                ct->readTable(nameFile, true);
+                ct->readTable(nameFile, true, false);
                 
                 if (ct->hasGroupInfo()) {
                     cparser = new SequenceCountParser(fastaFileNames[s], *ct);
@@ -534,7 +534,7 @@ int ChimeraPerseusCommand::execute(){
                     
                     if(processors == 1)	{	numSeqs = driverGroups(outputFileName, accnosFileName, newCountFile, 0, groups.size(), groups);
                         if (dups) {
-                            CountTable c; c.readTable(nameFile, true);
+                            CountTable c; c.readTable(nameFile, true, false);
                             if (!m->isBlank(newCountFile)) {
                                 ifstream in2;
                                 m->openInputFile(newCountFile, in2);
@@ -559,7 +559,7 @@ int ChimeraPerseusCommand::execute(){
                         numChimeras = deconvoluteResults(uniqueNames, outputFileName, accnosFileName);
                     }else {
                         set<string> doNotRemove;
-                        CountTable c; c.readTable(newCountFile, true);
+                        CountTable c; c.readTable(newCountFile, true, true);
                         vector<string> namesInTable = c.getNamesOfSeqs();
                         for (int i = 0; i < namesInTable.size(); i++) {
                             int temp = c.getNumSeqs(namesInTable[i]);
@@ -1070,7 +1070,7 @@ int ChimeraPerseusCommand::createProcessesGroups(string outputFName, string accn
 		int num = 0;
 		
         CountTable newCount;
-        if (hasCount && dups) { newCount.readTable(name, true); }
+        if (hasCount && dups) { newCount.readTable(name, true, false); }
         
 		//sanity check
 		if (groups.size() < processors) { processors = groups.size(); }

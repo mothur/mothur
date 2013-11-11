@@ -68,7 +68,7 @@ string RemoveRareCommand::getOutputPattern(string type) {
         else if (type == "sabund")    {   pattern = "[filename],pick,[extension]";    }
         else if (type == "group")       {   pattern = "[filename],pick,[extension]";    }
         else if (type == "count")       {   pattern = "[filename],pick,[extension]";    }
-        else if (type == "list")        {   pattern = "[filename],pick,[extension]";    }
+        else if (type == "list")        {   pattern = "[filename],[tag],pick,[extension]";    }
         else if (type == "shared")      {   pattern = "[filename],[tag],pick,[extension]";    }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
         
@@ -344,24 +344,7 @@ int RemoveRareCommand::execute(){
 //**********************************************************************************************************************
 int RemoveRareCommand::processList(){
 	try {
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(listfile);  }
-        map<string, string> variables; 
-        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(listfile));
-        variables["[extension]"] = m->getExtension(listfile);
-		string outputFileName = getOutputFileName("list", variables);
-        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(groupfile));
-        variables["[extension]"] = m->getExtension(groupfile);
-		string outputGroupFileName = getOutputFileName("group", variables);
-        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(countfile));
-        variables["[extension]"] = m->getExtension(countfile);
-        string outputCountFileName = getOutputFileName("count", variables);
-        
-		ofstream out, outGroup;
-		m->openOutputFile(outputFileName, out);
-		
-		bool wroteSomething = false;
-		
+				
 		//you must provide a label because the names in the listfile need to be consistent
 		string thisLabel = "";
 		if (allLines) { m->mothurOut("For the listfile you must select one label, using first label in your listfile."); m->mothurOutEndLine(); }
@@ -400,6 +383,26 @@ int RemoveRareCommand::processList(){
 				list = input.getListVector(lastLabel); 
 			}
 		}
+        
+        string thisOutputDir = outputDir;
+		if (outputDir == "") {  thisOutputDir += m->hasPath(listfile);  }
+        map<string, string> variables;
+        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(listfile));
+        variables["[extension]"] = m->getExtension(listfile);
+        variables["[tag]"] = list->getLabel();
+		string outputFileName = getOutputFileName("list", variables);
+        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(groupfile));
+        variables["[extension]"] = m->getExtension(groupfile);
+		string outputGroupFileName = getOutputFileName("group", variables);
+        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(countfile));
+        variables["[extension]"] = m->getExtension(countfile);
+        string outputCountFileName = getOutputFileName("count", variables);
+        
+		ofstream out, outGroup;
+		m->openOutputFile(outputFileName, out);
+		
+		bool wroteSomething = false;
+
 		
 		//if groupfile is given then use it
 		GroupMap* groupMap;
@@ -411,7 +414,7 @@ int RemoveRareCommand::processList(){
 			util.setGroups(Groups, namesGroups);
 			m->openOutputFile(outputGroupFileName, outGroup);
 		}else if (countfile != "") {
-            ct.readTable(countfile, true);
+            ct.readTable(countfile, true, false);
             if (ct.hasGroupInfo()) {
                 vector<string> namesGroups = ct.getNamesOfGroups();
                 SharedUtil util;
@@ -420,7 +423,11 @@ int RemoveRareCommand::processList(){
         }
 		
 		
-		if (list != NULL) {	
+		if (list != NULL) {
+            
+            vector<string> binLabels = list->getLabels();
+            vector<string> newLabels;
+            
 			//make a new list vector
 			ListVector newList;
 			newList.setLabel(list->getLabel());
@@ -479,6 +486,7 @@ int RemoveRareCommand::processList(){
 
 				if (binsize > nseqs) { //keep bin
 					newList.push_back(saveBinNames);
+                    newLabels.push_back(binLabels[i]);
 					if (groupfile != "") {  for(int k = 0; k < newGroupFile.size(); k++) { outGroup << newGroupFile[k] << endl; }  }
                     else if (countfile != "") { for(int k = 0; k < newGroupFile.size(); k++) {  ct.remove(newGroupFile[k]); } }  
 				}else {  if (countfile != "") {  for(int k = 0; k < names.size(); k++) {  ct.remove(names[k]); } }  }
@@ -487,7 +495,9 @@ int RemoveRareCommand::processList(){
 			//print new listvector
 			if (newList.getNumBins() != 0) {
 				wroteSomething = true;
-				newList.print(out);
+				newList.setLabels(newLabels);
+                newList.printHeaders(out);
+                newList.print(out);
 			}
 		}	
 		
@@ -850,7 +860,7 @@ int RemoveRareCommand::processLookup(vector<SharedRAbundVector*>& lookup){
 				
 				//eliminates zero otus
 				if (allZero) { for (int j = 0; j < newRabunds.size(); j++) {  newRabunds[j].pop_back(); } }
-                else { headers.push_back(m->currentBinLabels[i]); }
+                else { headers.push_back(m->currentSharedBinLabels[i]); }
 			}
 		}else {
 			//for each otu
@@ -867,7 +877,7 @@ int RemoveRareCommand::processLookup(vector<SharedRAbundVector*>& lookup){
 				
 				//eliminates otus below rare cutoff
 				if (totalAbund <= nseqs) { for (int j = 0; j < newRabunds.size(); j++) {  newRabunds[j].pop_back(); } }
-                else { headers.push_back(m->currentBinLabels[i]); }
+                else { headers.push_back(m->currentSharedBinLabels[i]); }
 			}
 		}
 		

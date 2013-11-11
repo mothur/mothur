@@ -66,11 +66,11 @@ class MothurOut {
 	
 		vector<string> getAllGroups() { sort(namesOfGroups.begin(), namesOfGroups.end()); return namesOfGroups; }
 		vector<string> Treenames;
-		//map<string, string> names;
-		vector<string> binLabelsInFile;
-		vector<string> currentBinLabels;
+		vector<string> sharedBinLabelsInFile;
+		vector<string> currentSharedBinLabels;
+        vector<string> listBinLabelsInFile;
 		string saveNextLabel, argv, sharedHeaderMode, groupMode;
-		bool printedHeaders, commandInputsConvertError, changedSeqNames, modifyNames;
+		bool printedSharedHeaders, printedListHeaders, commandInputsConvertError, changedSeqNames, modifyNames;
 		
 		//functions from mothur.h
 		//file operations
@@ -97,7 +97,9 @@ class MothurOut {
 		int openOutputFileAppend(string, ofstream&);
         int openOutputFileBinaryAppend(string, ofstream&);
 		int openInputFile(string, ifstream&);
-		int openInputFile(string, ifstream&, string); //no error given 
+		int openInputFile(string, ifstream&, string); //no error given
+    
+        bool checkLocations(string&, string);  //filename, inputDir. checks for file in ./, inputdir, default and mothur's exe location.  Returns false if cant be found. If found completes name with location
 		string getline(ifstream&);
 		string getline(istringstream&);
 		void gobble(istream&);
@@ -138,6 +140,8 @@ class MothurOut {
 		bool isTrue(string);
 		bool isContainingOnlyDigits(string);
 		bool isNumeric1(string);
+        bool isLabelEquivalent(string, string);
+        string getSimpleLabel(string);
         string findEdianness();
 	
 		
@@ -268,7 +272,8 @@ class MothurOut {
             counttablefile = "";
             summaryfile = "";
 			gui = false;
-			printedHeaders = false;
+			printedSharedHeaders = false;
+            printedListHeaders = false;
 			commandInputsConvertError = false;
             mothurCalling = false;
             debug = false;

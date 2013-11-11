@@ -1009,8 +1009,8 @@ int LefseCommand::printResults(vector< vector<double> > means, map<int, double> 
             if (maxMean > logMaxMean) { logMaxMean = maxMean; }
             logMaxMean = log10(logMaxMean);
             
-            out << m->currentBinLabels[i] << '\t' << logMaxMean << '\t';
-            if (m->debug) { temp = m->currentBinLabels[i] + '\t' + toString(logMaxMean) + '\t'; }
+            out << m->currentSharedBinLabels[i] << '\t' << logMaxMean << '\t';
+            if (m->debug) { temp = m->currentSharedBinLabels[i] + '\t' + toString(logMaxMean) + '\t'; }
             
             map<int, double>::iterator it = sigLDA.find(i);
             if (it != sigLDA.end()) {
@@ -1040,7 +1040,7 @@ bool LefseCommand::printToCoutForRTesting(vector< vector<double> >& adjustedLook
         for (map<int, double>::iterator it = bins.begin(); it != bins.end(); it++) {
             if (m->control_pressed) { break; }
             
-            cout << m->currentBinLabels[it->first] << " <- c(";
+            cout << m->currentSharedBinLabels[it->first] << " <- c(";
             for (int h = 0; h < rand_s.size()-1; h++) {  cout << (adjustedLookup[count][rand_s[h]]) << ", "; }
             cout << (adjustedLookup[count][rand_s[rand_s.size()-1]]) << ")\n";
             count++;
@@ -1096,7 +1096,7 @@ bool LefseCommand::printToCoutForRTesting(vector< vector<double> >& adjustedLook
         for (map<int, double>::iterator it = bins.begin(); it != bins.end(); it++) {
             if (m->control_pressed) { break; }
             
-            tempOutput += "\"" + m->currentBinLabels[it->first] + "\"=" + m->currentBinLabels[it->first] + ",";
+            tempOutput += "\"" + m->currentSharedBinLabels[it->first] + "\"=" + m->currentSharedBinLabels[it->first] + ",";
         }
         //tempOutput = tempOutput.substr(0, tempOutput.length()-1);
         tempOutput += " class=treatments";
@@ -1109,7 +1109,7 @@ bool LefseCommand::printToCoutForRTesting(vector< vector<double> >& adjustedLook
         for (map<int, double>::iterator it = bins.begin(); it != bins.end(); it++) {
             if (m->control_pressed) { break; }
             
-            tempOutput +=  m->currentBinLabels[it->first] + "+";
+            tempOutput +=  m->currentSharedBinLabels[it->first] + "+";
         }
         tempOutput = tempOutput.substr(0, tempOutput.length()-1); //rip off extra plus sign
         tempOutput += "), data = dat, tol = 1e-10))";
@@ -1168,7 +1168,7 @@ int LefseCommand::makeShared(int numDesignLines) {
             lookup.push_back(temp);
         }
         
-        m->currentBinLabels.clear();
+        m->currentSharedBinLabels.clear();
         int count = 0;
         while (!in.eof()) {
             if (m->control_pressed) { return 0; }
@@ -1189,7 +1189,7 @@ int LefseCommand::makeShared(int numDesignLines) {
                     lookup[i-1]->push_back(value, toString(i-1));
                     //cout << pieces[i] << '\t';
                 }
-                m->currentBinLabels.push_back(toString(count));
+                m->currentSharedBinLabels.push_back(toString(count));
                 //m->currentBinLabels.push_back(pieces[0]);
                 //cout << line<< endl;
                 //cout << endl;

@@ -339,7 +339,7 @@ int CorrAxesCommand::calcPearson(map<string, vector<float> >& axes, ofstream& ou
 	   //for each otu
 	   for (int i = 0; i < lookupFloat[0]->getNumBins(); i++) {
 		   
-		   if (metadatafile == "") {  out << m->currentBinLabels[i];	}
+		   if (metadatafile == "") {  out << m->currentSharedBinLabels[i];	}
 		   else {  out << metadataLabels[i];		}
 		   		   
 		   //find the averages this otu - Y
@@ -474,7 +474,7 @@ int CorrAxesCommand::calcSpearman(map<string, vector<float> >& axes, ofstream& o
 		//for each otu
 		for (int i = 0; i < lookupFloat[0]->getNumBins(); i++) {
 			
-			if (metadatafile == "") {  out << m->currentBinLabels[i];	}
+			if (metadatafile == "") {  out << m->currentSharedBinLabels[i];	}
 			else {  out << metadataLabels[i];		}
 			
 			//find the ranks of this otu - Y
@@ -627,7 +627,7 @@ int CorrAxesCommand::calcKendall(map<string, vector<float> >& axes, ofstream& ou
 		//for each otu
 		for (int i = 0; i < lookupFloat[0]->getNumBins(); i++) {
 		
-			if (metadatafile == "") {  out << m->currentBinLabels[i];	}
+			if (metadatafile == "") {  out << m->currentSharedBinLabels[i];	}
 			else {  out << metadataLabels[i];		}
 			
 			//find the ranks of this otu - Y
@@ -834,7 +834,7 @@ int CorrAxesCommand::eliminateZeroOTUS(vector<SharedRAbundFloatVector*>& thisloo
 					for (int h = 0; h < diff; h++) { binLabel += "0"; }
 				}
 				binLabel += sbinNumber; 
-				if (i < m->currentBinLabels.size()) {  binLabel = m->currentBinLabels[i]; }
+				if (i < m->currentSharedBinLabels.size()) {  binLabel = m->currentSharedBinLabels[i]; }
 				
 				newBinLabels.push_back(binLabel);
 			}
@@ -843,7 +843,7 @@ int CorrAxesCommand::eliminateZeroOTUS(vector<SharedRAbundFloatVector*>& thisloo
 		for (int j = 0; j < thislookup.size(); j++) {  delete thislookup[j];  }
 		
 		thislookup = newLookup;
-		m->currentBinLabels = newBinLabels;
+		m->currentSharedBinLabels = newBinLabels;
 		
 		return 0;
 		

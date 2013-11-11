@@ -226,7 +226,7 @@ int ClusterDoturCommand::execute(){
             delete nameMap;
 		}else if (countfile != "") {
             ct = new CountTable();
-            ct->readTable(countfile, false);
+            ct->readTable(countfile, false, false);
             cluster->readPhylipFile(phylipfile, ct);
             delete ct;
         }else {
@@ -259,6 +259,7 @@ int ClusterDoturCommand::execute(){
         }
 		m->openOutputFile(listFileName,	listFile);
         outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
+        list->printHeaders(listFile);
 		
 		float previousDist = 0.00000;
 		float rndPreviousDist = 0.00000;

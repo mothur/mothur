@@ -42,7 +42,8 @@ private:
 		int end;
 		linePair(int i, int j) : start(i), end(j) {}
 	};
-
+    
+    string inputDir;
 	string filename, outputDir, flowOrder, lookupFileName, minDelta;
 	vector<string> outputNames;
 	bool abort, trim, large, flip, allFiles, keepforward, append, makeGroup;

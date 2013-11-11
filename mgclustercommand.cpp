@@ -240,7 +240,7 @@ int MGClusterCommand::execute(){
 			nameMap->readMap();
 		}else if (countfile != "") {
             ct = new CountTable();
-            ct->readTable(countfile, false);
+            ct->readTable(countfile, false, false);
             nameMap= new NameAssignment();
             vector<string> tempNames = ct->getNamesOfSeqs();
             for (int i = 0; i < tempNames.size(); i++) {  nameMap->push_back(tempNames[i]);  }
@@ -295,6 +295,7 @@ int MGClusterCommand::execute(){
             m->openOutputFile(rabundFileName,	rabundFile);
         }
 		m->openOutputFile(listFileName,	listFile);
+        list->printHeaders(listFile);
 		
 		if (m->control_pressed) { 
 			delete nameMap; delete read; delete list; delete rabund; 

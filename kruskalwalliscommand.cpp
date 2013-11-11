@@ -307,7 +307,7 @@ int KruskalWallisCommand::process(vector<SharedRAbundVector*>& lookup, DesignMap
             double H = linear.calcKruskalWallis(values, pValue);
             
             //output H and signifigance
-            out << m->currentBinLabels[i] << '\t' << H << '\t' << pValue << endl;
+            out << m->currentSharedBinLabels[i] << '\t' << H << '\t' << pValue << endl;
         }
         out.close();
                 

@@ -67,8 +67,59 @@ ListVector::ListVector(string id, vector<string> lv) : DataVector(id), data(lv){
 ListVector::ListVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), numSeqs(0) {
 	try {
 		int hold;
-		f >> label >> hold;
+        
+        //are we at the beginning of the file??
+		if (m->saveNextLabel == "") {
+			f >> label;
+            
+			//is this a shared file that has headers
+			if (label == "label") {
+				
+				//gets "numOtus"
+				f >> label; m->gobble(f);
+				
+				//eat rest of line
+				label = m->getline(f); m->gobble(f);
+				
+				//parse labels to save
+				istringstream iStringStream(label);
+				m->listBinLabelsInFile.clear();
+				while(!iStringStream.eof()){
+					if (m->control_pressed) { break; }
+					string temp;
+					iStringStream >> temp;  m->gobble(iStringStream);
+                    
+					m->listBinLabelsInFile.push_back(temp);
+				}
+				
+				f >> label >> hold;
+			}else {
+                //read in first row
+                f >> hold;
+                
+                //make binlabels because we don't have any
+                string snumBins = toString(hold);
+                m->listBinLabelsInFile.clear();
+                for (int i = 0; i < hold; i++) {
+                    //if there is a bin label use it otherwise make one
+                    string binLabel = "Otu";
+                    string sbinNumber = toString(i+1);
+                    if (sbinNumber.length() < snumBins.length()) {
+                        int diff = snumBins.length() - sbinNumber.length();
+                        for (int h = 0; h < diff; h++) { binLabel += "0"; }
+                    }
+                    binLabel += sbinNumber;
+                    m->listBinLabelsInFile.push_back(binLabel);
+                }
+            }
+            m->saveNextLabel = label;
+		}else {
+            f >> label >> hold;
+            m->saveNextLabel = label;
+        }
 	
+        binLabels.assign(m->listBinLabelsInFile.begin(), m->listBinLabelsInFile.begin()+hold);
+		
 		data.assign(hold, "");
 		string inputData = "";
 	
@@ -77,6 +128,8 @@ ListVector::ListVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), numS
 			set(i, inputData);
 		}
 		m->gobble(f);
+        
+        if (f.eof()) { m->saveNextLabel = ""; }
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ListVector", "ListVector");
@@ -108,6 +161,60 @@ void ListVector::set(int binNumber, string seqNames){
 
 string ListVector::get(int index){
 	return data[index];
+}
+/***********************************************************************/
+
+void ListVector::setLabels(vector<string> labels){
+	try {
+		binLabels = labels;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ListVector", "setLabels");
+		exit(1);
+	}
+}
+
+/***********************************************************************/
+//could potentially end up with duplicate binlabel names with code below.
+//we don't currently use them in a way that would do that.
+//if you had a listfile that had been subsampled and then added to it, dup names would be possible.
+vector<string> ListVector::getLabels(){
+    try {
+        
+        string tagHeader = "Otu";
+        if (m->sharedHeaderMode == "tax") { tagHeader = "PhyloType"; }
+        
+        if (binLabels.size() < data.size()) {
+            string snumBins = toString(numBins);
+            
+            for (int i = 0; i < numBins; i++) {
+                string binLabel = tagHeader;
+                
+                if (i < binLabels.size()) { //label exists, check leading zeros length
+                    string sbinNumber = m->getSimpleLabel(binLabels[i]);
+                    if (sbinNumber.length() < snumBins.length()) {
+                        int diff = snumBins.length() - sbinNumber.length();
+                        for (int h = 0; h < diff; h++) { binLabel += "0"; }
+                    }
+                    binLabel += sbinNumber;
+                    binLabels[i] = binLabel;
+                }else{
+                    string sbinNumber = toString(i+1);
+                    if (sbinNumber.length() < snumBins.length()) {
+                        int diff = snumBins.length() - sbinNumber.length();
+                        for (int h = 0; h < diff; h++) { binLabel += "0"; }
+                    }
+                    binLabel += sbinNumber;
+                    binLabels.push_back(binLabel);
+                }
+            }
+        }
+        return binLabels;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "ListVector", "getLabels");
+		exit(1);
+	}
 }
 
 /***********************************************************************/
@@ -148,6 +255,52 @@ void ListVector::clear(){
 	numSeqs = 0;
 	return data.clear();
 	
+}
+
+/***********************************************************************/
+void ListVector::printHeaders(ostream& output){
+	try {
+		string snumBins = toString(numBins);
+		output << "label\tnumOtus\t";
+		if (m->sharedHeaderMode == "tax") {
+			for (int i = 0; i < numBins; i++) {
+				
+				//if there is a bin label use it otherwise make one
+				string binLabel = "PhyloType";
+				string sbinNumber = toString(i+1);
+				if (sbinNumber.length() < snumBins.length()) {
+					int diff = snumBins.length() - sbinNumber.length();
+					for (int h = 0; h < diff; h++) { binLabel += "0"; }
+				}
+				binLabel += sbinNumber;
+				if (i < binLabels.size()) {  binLabel = binLabels[i]; }
+				
+				output << binLabel << '\t';
+			}
+			output << endl;
+		}else {
+			for (int i = 0; i < numBins; i++) {
+				//if there is a bin label use it otherwise make one
+				string binLabel = "Otu";
+				string sbinNumber = toString(i+1);
+				if (sbinNumber.length() < snumBins.length()) {
+					int diff = snumBins.length() - sbinNumber.length();
+					for (int h = 0; h < diff; h++) { binLabel += "0"; }
+				}
+				binLabel += sbinNumber;
+				if (i < binLabels.size()) {  binLabel = binLabels[i]; }
+				
+				output << binLabel << '\t';
+			}
+			
+			output << endl;
+		}
+		m->printedListHeaders = true;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ListVector", "printHeaders");
+		exit(1);
+	}
 }
 
 /***********************************************************************/

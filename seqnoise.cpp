@@ -9,6 +9,8 @@
 
 #include "seqnoise.h"
 #include "sequence.hpp"
+#include "listvector.hpp"
+#include "inputdata.h"
 
 #define MIN_DELTA 1.0e-6
 #define MIN_ITER 20
@@ -138,91 +140,93 @@ int seqNoise::getListData(string listFileName, double cutOff, vector<int>& otuDa
 		
 		ifstream listFile;
 		m->openInputFile(listFileName, listFile);
-		double threshold;
-		int numOTUs;
-		string line = "";
+		
 		bool adjustCutoff = true;
-		
-		if(listFile.peek() == 'u'){	m->getline(listFile);	}
-		
-		while(listFile){
-			listFile >> threshold;
-			
-			if(threshold < cutOff){
-				line = m->getline(listFile); m->gobble(listFile);
-			}
-			else{
-				adjustCutoff = false;
-				listFile >> numOTUs;
-				otuFreq.resize(numOTUs, 0);
-				
-				for(int i=0;i<numOTUs;i++){
-					
-					if (m->control_pressed) { return 0; }
-					
-					string otu;
-					listFile >> otu;
-					
-					int count = 0;
-					
-					string number = "";
-					
-					for(int j=0;j<otu.size();j++){
-						if(otu[j] != ','){
-							number += otu[j];
-						}
-						else{
-							int index = atoi(number.c_str());
-							otuData[index] = i;
-							count++;
-							number = "";
-						}
-					}
-					
-					int index = atoi(number.c_str());
-					otuData[index] = i;
-					count++;
-					
-					otuFreq[i] = count;
-				}
-				
-				otuBySeqLookUp.resize(numOTUs);
-				
-				int numSeqs = otuData.size();
-				
-				for(int i=0;i<numSeqs;i++){
-					if (m->control_pressed) { return 0; }
-					otuBySeqLookUp[otuData[i]].push_back(i);
-				}
-				for(int i=0;i<numOTUs;i++){
-					if (m->control_pressed) { return 0; }
-					for(int j=otuBySeqLookUp[i].size();j<numSeqs;j++){
-						otuBySeqLookUp[i].push_back(0);
-					}
-				}
-				
-				break;
-			}
+        string lastLabel = "";
+        
+		while(!listFile.eof()){
+            
+            ListVector list(listFile); m->gobble(listFile); //10/18/13 - change to reading with listvector to accomodate changes to the listfiel format. ie. adding header labels.
+            
+            string thisLabel = list.getLabel();
+            lastLabel = thisLabel;
+            
+            if (thisLabel == "unique") {} //skip to next label in listfile
+            else {
+                double threshold;
+                m->mothurConvert(thisLabel, threshold);
+                
+                if(threshold < cutOff){} //skip to next label in listfile
+                else{
+                    adjustCutoff = false;
+                    int numOTUs = list.getNumBins();
+                    otuFreq.resize(numOTUs, 0);
+                    
+                    for(int i=0;i<numOTUs;i++){
+                        
+                        if (m->control_pressed) { return 0; }
+                        
+                        string otu = list.get(i);
+                        int count = 0;
+                        string number = "";
+                        
+                        for(int j=0;j<otu.size();j++){
+                            if(otu[j] != ','){
+                                number += otu[j];
+                            }
+                            else{
+                                int index = atoi(number.c_str());
+                                otuData[index] = i;
+                                count++;
+                                number = "";
+                            }
+                        }
+                        
+                        int index = atoi(number.c_str());
+                        otuData[index] = i;
+                        count++;
+                        
+                        otuFreq[i] = count;
+                    }
+                    
+                    otuBySeqLookUp.resize(numOTUs);
+                    
+                    int numSeqs = otuData.size();
+                    
+                    for(int i=0;i<numSeqs;i++){
+                        if (m->control_pressed) { return 0; }
+                        otuBySeqLookUp[otuData[i]].push_back(i);
+                    }
+                    for(int i=0;i<numOTUs;i++){
+                        if (m->control_pressed) { return 0; }
+                        for(int j=otuBySeqLookUp[i].size();j<numSeqs;j++){
+                            otuBySeqLookUp[i].push_back(0);
+                        }
+                    }
+                    
+                    break;
+                }
+            }
 		}
 		
 		listFile.close();
 		
 		//the listfile does not contain a threshold greater than the cutoff so use highest value
 		if (adjustCutoff) {
-			istringstream iss (line,istringstream::in);
-			
-			iss >> numOTUs;
-			otuFreq.resize(numOTUs, 0);
+            
+            InputData input(listFileName, "list");
+            ListVector* list = input.getListVector(lastLabel);
+            
+            int numOTUs = list->getNumBins();
+            otuFreq.resize(numOTUs, 0);
 			
 			for(int i=0;i<numOTUs;i++){
 				
 				if (m->control_pressed) { return 0; }
 				
-				string otu;
-				iss >> otu;
+				string otu = list->get(i);
 				
 				int count = 0;
-				
 				string number = "";
 				
 				for(int j=0;j<otu.size();j++){
@@ -259,6 +263,7 @@ int seqNoise::getListData(string listFileName, double cutOff, vector<int>& otuDa
 				}
 			}
 			
+            delete list;
 		}
 		
 		return 0;

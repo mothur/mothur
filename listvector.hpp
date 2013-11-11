@@ -20,7 +20,7 @@ public:
 	ListVector(int);
 //	ListVector(const ListVector&);
 	ListVector(string, vector<string>);
-	ListVector(const ListVector& lv) : DataVector(lv.label), data(lv.data), maxRank(lv.maxRank), numBins(lv.numBins), numSeqs(lv.numSeqs){};
+	ListVector(const ListVector& lv) : DataVector(lv.label), data(lv.data), maxRank(lv.maxRank), numBins(lv.numBins), numSeqs(lv.numSeqs), binLabels(lv.binLabels) {};
 	ListVector(ifstream&);
 	~ListVector(){};
 	
@@ -30,11 +30,14 @@ public:
 
 	void set(int, string);	
 	string get(int);
+    vector<string> getLabels();
+    void setLabels(vector<string>);
 	void push_back(string);
 	void resize(int);
 	void clear();
 	int size();
 	void print(ostream&);
+    void printHeaders(ostream&);
 	
 	RAbundVector getRAbundVector();
 	SAbundVector getSAbundVector();
@@ -45,6 +48,7 @@ private:
 	int maxRank;
 	int numBins;
 	int numSeqs;
+    vector<string> binLabels;
 
 };
 

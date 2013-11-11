@@ -315,7 +315,7 @@ int ClusterCommand::execute(){
             read->read(nameMap);
 		}else if (countfile != "") {
             ct = new CountTable();
-            ct->readTable(countfile, false);
+            ct->readTable(countfile, false, false);
             read->read(ct);
         }else { read->read(nameMap); }
 		
@@ -361,7 +361,7 @@ int ClusterCommand::execute(){
         }
 		m->openOutputFile(listFileName,	listFile);
         outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
-		
+        list->printHeaders(listFile);
 		
 		time_t estart = time(NULL);
 		float previousDist = 0.00000;

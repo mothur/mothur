@@ -51,8 +51,8 @@ class HeatMap {
 		string getPic(vector<SharedRAbundFloatVector*>);
 
 	private:
-		int sortSharedVectors(vector<SharedRAbundVector*>& );
-		int sortSharedVectors(vector<SharedRAbundFloatVector*>& );
+		vector<string> sortSharedVectors(vector<SharedRAbundVector*>& );
+		vector<string> sortSharedVectors(vector<SharedRAbundFloatVector*>& );
 		int sortRabund(RAbundVector*&);
 		void printLegend(int, float);
 

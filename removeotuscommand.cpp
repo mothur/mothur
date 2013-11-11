@@ -243,6 +243,13 @@ int RemoveOtusCommand::execute(){
 //**********************************************************************************************************************
 int RemoveOtusCommand::readListGroup(){
 	try {
+        InputData* input = new InputData(listfile, "list");
+		ListVector* list = input->getListVector();
+		string lastLabel = list->getLabel();
+		
+		//using first label seen if none is provided
+		if (label == "") { label = lastLabel; }
+        
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(listfile);  }
 		map<string, string> variables; 
@@ -262,13 +269,6 @@ int RemoveOtusCommand::readListGroup(){
 		
 		ofstream outGroup;
 		m->openOutputFile(outputGroupFileName, outGroup);
-		
-		InputData* input = new InputData(listfile, "list");
-		ListVector* list = input->getListVector();
-		string lastLabel = list->getLabel();
-		
-		//using first label seen if none is provided
-		if (label == "") { label = lastLabel; }
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> labels; labels.insert(label);
@@ -365,6 +365,8 @@ int RemoveOtusCommand::processList(ListVector*& list, GroupMap*& groupMap, ofstr
 		
 		int numOtus = 0;
 		//for each bin
+        vector<string> binLabels = list->getLabels();
+        vector<string> newBinLabels;
 		for (int i = 0; i < list->getNumBins(); i++) {
 			if (m->control_pressed) { return 0; }
 			
@@ -400,7 +402,8 @@ int RemoveOtusCommand::processList(ListVector*& list, GroupMap*& groupMap, ofstr
 				
 				if (!removeBin) {
 					//if there are no sequences from the groups we want to remove in this bin add to new list, output to groupfile
-					newList.push_back(binnames);	
+					newList.push_back(binnames);
+                    newBinLabels.push_back(binLabels[i]);
 					outGroup << groupFileOutput;
 				}else {
 					numOtus++;
@@ -414,7 +417,9 @@ int RemoveOtusCommand::processList(ListVector*& list, GroupMap*& groupMap, ofstr
 		//print new listvector
 		if (newList.getNumBins() != 0) {
 			wroteSomething = true;
-			newList.print(out);
+			newList.setLabels(newBinLabels);
+            newList.printHeaders(out);
+            newList.print(out);
 		}
 		
 		m->mothurOut(newList.getLabel() + " - removed " + toString(numOtus) + " of the " + toString(list->getNumBins()) + " OTUs."); m->mothurOutEndLine();

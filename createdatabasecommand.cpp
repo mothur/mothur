@@ -298,7 +298,7 @@ int CreateDatabaseCommand::execute(){
             }
             repNames = tempRepNames;
         }else {
-            ct.readTable(countfile, true);
+            ct.readTable(countfile, true, false);
             numUniqueNamesFile = ct.getNumUniqueSeqs();
             nameMap = ct.getNameMap();
         }
@@ -364,11 +364,15 @@ int CreateDatabaseCommand::execute(){
             header += "repSeqName\trepSeq\tOTUConTaxonomy";
             out << header << endl;
             
+            vector<string> binLabels = list->getLabels();
             for (int i = 0; i < list->getNumBins(); i++) {
+                
+                int index = findIndex(otuLabels, binLabels[i]);
+                if (index == -1) {  m->mothurOut("[ERROR]: " + binLabels[i] + " is not in your constaxonomy file, aborting.\n"); m->control_pressed = true; }
                 
                 if (m->control_pressed) { break; }
                 
-                out << otuLabels[i] << '\t';
+                out << otuLabels[index] << '\t';
                 
                 vector<string> binNames;
                 string bin = list->get(i);
@@ -387,12 +391,12 @@ int CreateDatabaseCommand::execute(){
                     map<string, string>::iterator it = repNames.find(bin);
                     
                     if (it == repNames.end()) {
-                        m->mothurOut("[ERROR: OTU " + otuLabels[i] + " is not in the repnames file. Make sure you are using files for the same distance.\n"); m->control_pressed = true;   break;
+                        m->mothurOut("[ERROR: OTU " + otuLabels[index] + " is not in the repnames file. Make sure you are using files for the same distance.\n"); m->control_pressed = true;   break;
                     }else { seqRepName = it->second;  numSeqsRep = binNames.size(); }
                     
                     //sanity check
-                    if (binNames.size() != classifyOtuSizes[i]) {
-                        m->mothurOut("[ERROR: OTU " + otuLabels[i] + " contains " + toString(binNames.size()) + " sequence, but the rep and taxonomy files indicated this OTU should have " + toString(classifyOtuSizes[i]) + ". Make sure you are using files for the same distance.\n"); m->control_pressed = true;   break;
+                    if (binNames.size() != classifyOtuSizes[index]) {
+                        m->mothurOut("[ERROR: OTU " + otuLabels[index] + " contains " + toString(binNames.size()) + " sequence, but the rep and taxonomy files indicated this OTU should have " + toString(classifyOtuSizes[index]) + ". Make sure you are using files for the same distance.\n"); m->control_pressed = true;   break;
                     }
                 }else {
                     //find rep sequence in bin
@@ -406,11 +410,11 @@ int CreateDatabaseCommand::execute(){
                     }
                     
                     if (seqRepName == "") {
-                        m->mothurOut("[ERROR: OTU " + otuLabels[i] + " is not in the count file. Make sure you are using files for the same distance.\n"); m->control_pressed = true;   break;
+                        m->mothurOut("[ERROR: OTU " + otuLabels[index] + " is not in the count file. Make sure you are using files for the same distance.\n"); m->control_pressed = true;   break;
                     }
                     
                     if (numSeqsRep != classifyOtuSizes[i]) {
-                        m->mothurOut("[ERROR: OTU " + otuLabels[i] + " contains " + toString(numSeqsRep) + " sequence, but the rep and taxonomy files indicated this OTU should have " + toString(classifyOtuSizes[i]) + ". Make sure you are using files for the same distance.\n"); m->control_pressed = true;   break;
+                        m->mothurOut("[ERROR: OTU " + otuLabels[index] + " contains " + toString(numSeqsRep) + " sequence, but the rep and taxonomy files indicated this OTU should have " + toString(classifyOtuSizes[index]) + ". Make sure you are using files for the same distance.\n"); m->control_pressed = true;   break;
                     }
                 }
                 
@@ -443,7 +447,7 @@ int CreateDatabaseCommand::execute(){
                 }else { out << numSeqsRep << '\t'; }
                 
                 //output repSeq
-                out << seqRepName << '\t' << seqs[i].getAligned() << '\t' << taxonomies[i] << endl;
+                out << seqRepName << '\t' << seqs[index].getAligned() << '\t' << taxonomies[index] << endl;
             }
             
             
@@ -462,8 +466,8 @@ int CreateDatabaseCommand::execute(){
                 
                 if (m->control_pressed) { break; }
                 
-                int index = findIndex(otuLabels, m->currentBinLabels[h]);
-                if (index == -1) {  m->mothurOut("[ERROR]: " + m->currentBinLabels[h] + " is not in your constaxonomy file, aborting.\n"); m->control_pressed = true; }
+                int index = findIndex(otuLabels, m->currentSharedBinLabels[h]);
+                if (index == -1) {  m->mothurOut("[ERROR]: " + m->currentSharedBinLabels[h] + " is not in your constaxonomy file, aborting.\n"); m->control_pressed = true; }
                 
                 if (m->control_pressed) { break; }
                 
@@ -478,7 +482,7 @@ int CreateDatabaseCommand::execute(){
                 
                 //sanity check
                 if (totalAbund != classifyOtuSizes[index]) {
-                    m->mothurOut("[WARNING]: OTU " + m->currentBinLabels[h] + " contains " + toString(totalAbund) + " sequence, but the rep and taxonomy files indicated this OTU should have " + toString(classifyOtuSizes[index]) + ". Make sure you are using files for the same distance.\n"); //m->control_pressed = true;   break;
+                    m->mothurOut("[WARNING]: OTU " + m->currentSharedBinLabels[h] + " contains " + toString(totalAbund) + " sequence, but the rep and taxonomy files indicated this OTU should have " + toString(classifyOtuSizes[index]) + ". Make sure you are using files for the same distance.\n"); //m->control_pressed = true;   break;
                 }
                 
                 //output repSeq
@@ -506,7 +510,7 @@ int CreateDatabaseCommand::findIndex(vector<string>& otuLabels, string label){
 	try {
         int index = -1;
         for (int i = 0; i < otuLabels.size(); i++) {
-            if (otuLabels[i] == label) { index = i; break; }
+            if (m->isLabelEquivalent(otuLabels[i],label)) { index = i; break; }
         }
 		return index;
     }

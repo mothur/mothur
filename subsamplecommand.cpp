@@ -76,7 +76,7 @@ string SubSampleCommand::getOutputPattern(string type) {
         else if (type == "name")        {   pattern = "[filename],subsample,[extension]";    }
         else if (type == "group")       {   pattern = "[filename],subsample,[extension]";    }
         else if (type == "count")       {   pattern = "[filename],subsample,[extension]";    }
-        else if (type == "list")        {   pattern = "[filename],subsample,[extension]";    }
+        else if (type == "list")        {   pattern = "[filename],[distance],subsample,[extension]";    }
         else if (type == "taxonomy")    {   pattern = "[filename],subsample,[extension]";    }
         else if (type == "shared")      {   pattern = "[filename],[distance],subsample,[extension]";    }
         else if (type == "rabund")      {   pattern = "[filename],subsample,[extension]";    }
@@ -273,7 +273,7 @@ SubSampleCommand::SubSampleCommand(string option) {
 			else if (countfile == "not found") { countfile = "";  }	
 			else {
                 m->setCountTableFile(countfile); 
-                ct.readTable(countfile, true);
+                ct.readTable(countfile, true, false);
             }
             
             if ((namefile != "") && (countfile != "")) {
@@ -947,7 +947,7 @@ int SubSampleCommand::processShared(vector<SharedRAbundVector*>& thislookup) {
 	try {
 		
 		//save mothurOut's binLabels to restore for next label
-		vector<string> saveBinLabels = m->currentBinLabels;
+		vector<string> saveBinLabels = m->currentSharedBinLabels;
 		
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(sharedfile);  }
@@ -965,7 +965,7 @@ int SubSampleCommand::processShared(vector<SharedRAbundVector*>& thislookup) {
 		m->openOutputFile(outputFileName, out);
 		outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
 		
-        m->currentBinLabels = subsampledLabels;
+        m->currentSharedBinLabels = subsampledLabels;
         
 		thislookup[0]->printHeaders(out);
 		
@@ -977,7 +977,7 @@ int SubSampleCommand::processShared(vector<SharedRAbundVector*>& thislookup) {
         
         
         //save mothurOut's binLabels to restore for next label
-		m->currentBinLabels = saveBinLabels;
+		m->currentSharedBinLabels = saveBinLabels;
 		
 		return 0;
 		
@@ -993,16 +993,6 @@ int SubSampleCommand::getSubSampleList() {
         
 		if (namefile != "") { m->readNames(namefile, nameMap); }
         
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += m->hasPath(listfile);  }
-		map<string, string> variables; 
-        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(listfile));
-        variables["[extension]"] = m->getExtension(listfile);
-		string outputFileName = getOutputFileName("list", variables);	
-		ofstream out;
-		m->openOutputFile(outputFileName, out);
-		outputTypes["list"].push_back(outputFileName);  outputNames.push_back(outputFileName);
-		
 		InputData* input = new InputData(listfile, "list");
 		ListVector* list = input->getListVector();
 		string lastLabel = list->getLabel();
@@ -1029,7 +1019,7 @@ int SubSampleCommand::getSubSampleList() {
 			//file mismatch quit
 			if (list->getNumSeqs() != groupMap.getNumSeqs()) { 
 				m->mothurOut("[ERROR]: your list file contains " + toString(list->getNumSeqs()) + " sequences, and your groupfile contains " + toString(groupMap.getNumSeqs()) + ", please correct."); 
-				m->mothurOutEndLine(); delete list; delete input; out.close(); outGroup.close(); return 0;
+				m->mothurOutEndLine(); delete list; delete input;  outGroup.close(); return 0;
 			}			
 		}else if (countfile != "") {
             if (ct.hasGroupInfo()) {
@@ -1193,13 +1183,13 @@ int SubSampleCommand::getSubSampleList() {
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-			if (m->control_pressed) {  delete list; delete input;  out.close();  return 0;  }
+			if (m->control_pressed) {  delete list; delete input;  return 0;  }
 			
 			if(allLines == 1 || labels.count(list->getLabel()) == 1){			
 				
 				m->mothurOut(list->getLabel()); m->mothurOutEndLine();
 				
-				processList(list, out, subset);
+				processList(list,  subset);
 				
 				processedLabels.insert(list->getLabel());
 				userLabels.erase(list->getLabel());
@@ -1213,7 +1203,7 @@ int SubSampleCommand::getSubSampleList() {
 				list = input->getListVector(lastLabel);
 				m->mothurOut(list->getLabel()); m->mothurOutEndLine();
 				
-				processList(list, out, subset);
+				processList(list,  subset);
 				
 				processedLabels.insert(list->getLabel());
 				userLabels.erase(list->getLabel());
@@ -1231,7 +1221,7 @@ int SubSampleCommand::getSubSampleList() {
 		}
 		
 		
-		if (m->control_pressed) {  if (list != NULL) { delete list; } delete input; out.close(); return 0;  }
+		if (m->control_pressed) {  if (list != NULL) { delete list; } delete input;  return 0;  }
 		
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -1254,12 +1244,11 @@ int SubSampleCommand::getSubSampleList() {
 			
 			m->mothurOut(list->getLabel()); m->mothurOutEndLine();
 			
-			processList(list, out, subset);
+			processList(list, subset);
 			
 			delete list; list = NULL;
 		}
 		
-		out.close();  
 		if (list != NULL) { delete list; }
 		delete input;
         
@@ -1336,14 +1325,26 @@ int SubSampleCommand::getSubSampleList() {
 	}
 }
 //**********************************************************************************************************************
-int SubSampleCommand::processList(ListVector*& list, ofstream& out, set<string>& subset) {
+int SubSampleCommand::processList(ListVector*& list, set<string>& subset) {
 	try {
-				
+		string thisOutputDir = outputDir;
+		if (outputDir == "") {  thisOutputDir += m->hasPath(listfile);  }
+		map<string, string> variables;
+        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(listfile));
+        variables["[extension]"] = m->getExtension(listfile);
+        variables["[distance]"] = list->getLabel();
+		string outputFileName = getOutputFileName("list", variables);
+		ofstream out;
+		m->openOutputFile(outputFileName, out);
+		outputTypes["list"].push_back(outputFileName);  outputNames.push_back(outputFileName);
+		
 		int numBins = list->getNumBins();
 
 		ListVector* temp = new ListVector();
 		temp->setLabel(list->getLabel());
 		
+        vector<string> binLabels = list->getLabels();
+        vector<string> newLabels;
 		for (int i = 0; i < numBins; i++) {
 			
 			if (m->control_pressed) { break; }
@@ -1359,15 +1360,19 @@ int SubSampleCommand::processList(ListVector*& list, ofstream& out, set<string>&
 			if (newNames != "") { 
 				newNames = newNames.substr(0, newNames.length()-1); //rip off extra comma
 				temp->push_back(newNames);
+                newLabels.push_back(binLabels[i]);
 			}
 		}
 		
+        temp->setLabels(newLabels);
 		delete list;
 		list = temp;
 		
-		if (m->control_pressed) { return 0; }
+		if (m->control_pressed) { out.close(); return 0; }
 		
+        list->printHeaders(out);
 		list->print(out);
+        out.close();
 		
 		return 0;
 		

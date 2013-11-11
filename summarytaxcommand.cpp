@@ -223,7 +223,7 @@ int SummaryTaxCommand::execute(){
             groupMap->readMap();
         }else if (countfile != "") {
             ct = new CountTable();
-            ct->readTable(countfile, true);
+            ct->readTable(countfile, true, false);
         }
 		
         PhyloSummary* taxaSum;

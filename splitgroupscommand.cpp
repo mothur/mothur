@@ -320,7 +320,7 @@ int SplitGroupCommand::runCount(){
 	try {
         
         CountTable ct;
-        ct.readTable(countfile, true);
+        ct.readTable(countfile, true, false);
         if (!ct.hasGroupInfo()) { m->mothurOut("[ERROR]: your count file does not contain group info, cannot split by group.\n"); m->control_pressed = true; }
         
         if (m->control_pressed) { return 0; }

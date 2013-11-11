@@ -244,9 +244,16 @@ int GetOtusCommand::execute(){
 //**********************************************************************************************************************
 int GetOtusCommand::readListGroup(){
 	try {
-		string thisOutputDir = outputDir;
+		InputData* input = new InputData(listfile, "list");
+		ListVector* list = input->getListVector();
+		string lastLabel = list->getLabel();
+		
+		//using first label seen if none is provided
+		if (label == "") { label = lastLabel; }
+        
+        string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(listfile);  }
-        map<string, string> variables; 
+        map<string, string> variables;
         variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(listfile));
         variables["[tag]"] = label;
         variables["[extension]"] = m->getExtension(listfile);
@@ -254,8 +261,8 @@ int GetOtusCommand::readListGroup(){
 		
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
-		
-		string GroupOutputDir = outputDir;
+        
+        string GroupOutputDir = outputDir;
 		if (outputDir == "") {  GroupOutputDir += m->hasPath(groupfile);  }
         variables["[filename]"] = GroupOutputDir + m->getRootName(m->getSimpleName(groupfile));
         variables["[extension]"] = m->getExtension(groupfile);
@@ -263,13 +270,7 @@ int GetOtusCommand::readListGroup(){
 		
 		ofstream outGroup;
 		m->openOutputFile(outputGroupFileName, outGroup);
-			
-		InputData* input = new InputData(listfile, "list");
-		ListVector* list = input->getListVector();
-		string lastLabel = list->getLabel();
-		
-		//using first label seen if none is provided
-		if (label == "") { label = lastLabel; }
+
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> labels; labels.insert(label);
@@ -366,6 +367,8 @@ int GetOtusCommand::processList(ListVector*& list, GroupMap*& groupMap, ofstream
 		
 		int numOtus = 0;
 		//for each bin
+        vector<string> binLabels = list->getLabels();
+        vector<string> newBinLabels;
 		for (int i = 0; i < list->getNumBins(); i++) {
 			if (m->control_pressed) { return 0; }
 			
@@ -399,7 +402,8 @@ int GetOtusCommand::processList(ListVector*& list, GroupMap*& groupMap, ofstream
 			
 			//if there are sequences from the groups we want in this bin add to new list, output to groupfile
 			if (keepBin) {  
-				newList.push_back(binnames);	
+				newList.push_back(binnames);
+                newBinLabels.push_back(binLabels[i]);
 				outGroup << groupFileOutput;
 				numOtus++;
 			}
@@ -408,7 +412,9 @@ int GetOtusCommand::processList(ListVector*& list, GroupMap*& groupMap, ofstream
 		//print new listvector
 		if (newList.getNumBins() != 0) {
 			wroteSomething = true;
-			newList.print(out);
+			newList.setLabels(newBinLabels);
+            newList.printHeaders(out);
+            newList.print(out);
 		}
 		
 		m->mothurOut(newList.getLabel() + " - selected " + toString(numOtus) + " of the " + toString(list->getNumBins()) + " OTUs."); m->mothurOutEndLine();

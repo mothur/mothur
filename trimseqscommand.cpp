@@ -422,7 +422,7 @@ int TrimSeqsCommand::execute(){
 		
 		if (countfile != "") {
             CountTable ct;
-            ct.readTable(countfile, true);
+            ct.readTable(countfile, true, false);
             nameCount = ct.getNameMap();
 			outputNames.push_back(trimCountFile);
 			outputNames.push_back(scrapCountFile);
@@ -540,7 +540,7 @@ int TrimSeqsCommand::execute(){
             
             if (countfile != "") { //create countfile with group info included
                 CountTable* ct = new CountTable();
-                ct->readTable(trimCountFile, true);
+                ct->readTable(trimCountFile, true, false);
                 map<string, int> justTrimmedNames = ct->getNameMap();
                 delete ct;
                 

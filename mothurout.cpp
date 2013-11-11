@@ -797,7 +797,7 @@ bool MothurOut::dirCheck(string& dirName){
 
         //test to make sure directory exists
         dirName = getFullPathName(dirName);
-        string outTemp = dirName + tag + "temp";
+        string outTemp = dirName + tag + "temp"+ toString(time(NULL));
         ofstream out;
         out.open(outTemp.c_str(), ios::trunc);
         if(!out) {
@@ -2599,6 +2599,65 @@ int MothurOut::getNumChar(string line, char c){
 		exit(1);
 	}
 }
+/***********************************************************************/
+string MothurOut::getSimpleLabel(string label){
+	try {
+		string simple = "";
+        
+        //remove OTU or phylo tag
+        string newLabel1 = "";
+        for (int i = 0; i < label.length(); i++) {
+            if(label[i]>47 && label[i]<58) { //is a digit
+                newLabel1 += label[i];
+            }
+        }
+        
+        int num1;
+        mothurConvert(newLabel1, num1);
+        
+        simple = toString(num1);
+        
+		return simple;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "isLabelEquivalent");
+		exit(1);
+	}
+}
+/***********************************************************************/
+
+bool MothurOut::isLabelEquivalent(string label1,  string label2){
+	try {
+		bool same = false;
+        
+        //remove OTU or phylo tag
+        string newLabel1 = "";
+        for (int i = 0; i < label1.length(); i++) {
+            if(label1[i]>47 && label1[i]<58) { //is a digit
+                newLabel1 += label1[i];
+            }
+        }
+        
+        string newLabel2 = "";
+        for (int i = 0; i < label2.length(); i++) {
+            if(label2[i]>47 && label2[i]<58) { //is a digit
+                newLabel2 += label2[i];
+            }
+        }
+        
+        int num1, num2;
+        mothurConvert(newLabel1, num1);
+        mothurConvert(newLabel2, num2);
+        
+        if (num1 == num2) { same = true; }
+		
+		return same;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "isLabelEquivalent");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 bool MothurOut::isSubset(vector<string> bigset, vector<string> subset) {
 	try {
@@ -2952,6 +3011,64 @@ void MothurOut::getNumSeqs(ifstream& file, int& numSeqs){
 		errorOut(e, "MothurOut", "getNumSeqs");
 		exit(1);
 	}	
+}
+/***********************************************************************/
+bool MothurOut::checkLocations(string& filename, string inputDir){
+	try {
+		filename = getFullPathName(filename);
+        
+        int ableToOpen;
+        ifstream in;
+        ableToOpen = openInputFile(filename, in, "noerror");
+        in.close();
+        
+        //if you can't open it, try input location
+        if (ableToOpen == 1) {
+            if (inputDir != "") { //default path is set
+                string tryPath = inputDir + getSimpleName(filename);
+                mothurOut("Unable to open " + filename + ". Trying input directory " + tryPath); mothurOutEndLine();
+                ifstream in2;
+                ableToOpen = openInputFile(tryPath, in2, "noerror");
+                in2.close();
+                filename = tryPath;
+            }
+        }
+        
+        //if you can't open it, try default location
+        if (ableToOpen == 1) {
+            if (getDefaultPath() != "") { //default path is set
+                string tryPath = getDefaultPath() + getSimpleName(filename);
+                mothurOut("Unable to open " + filename + ". Trying default " + tryPath); mothurOutEndLine();
+                ifstream in2;
+                ableToOpen = openInputFile(tryPath, in2, "noerror");
+                in2.close();
+                filename = tryPath;
+            }
+        }
+        
+        //if you can't open it its not in current working directory or inputDir, try mothur excutable location
+        if (ableToOpen == 1) {
+            string exepath = argv;
+            string tempPath = exepath;
+            for (int i = 0; i < exepath.length(); i++) { tempPath[i] = tolower(exepath[i]); }
+            exepath = exepath.substr(0, (tempPath.find_last_of('m')));
+            
+            string tryPath = getFullPathName(exepath) + getSimpleName(filename);
+            mothurOut("Unable to open " + filename + ". Trying mothur's executable location " + tryPath); mothurOutEndLine();
+            ifstream in2;
+            ableToOpen = openInputFile(tryPath, in2, "noerror");
+            in2.close();
+            filename = tryPath;
+        }
+        
+        if (ableToOpen == 1) { mothurOut("Unable to open " + filename + "."); mothurOutEndLine(); return false;  }
+        
+        return true;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "checkLocations");
+		exit(1);
+	}
 }
 /***********************************************************************/
 

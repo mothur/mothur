@@ -75,7 +75,7 @@ string RemoveLineageCommand::getOutputPattern(string type) {
         else if (type == "name")            {   pattern = "[filename],pick,[extension]";    }
         else if (type == "group")           {   pattern = "[filename],pick,[extension]";    }
         else if (type == "count")           {   pattern = "[filename],pick,[extension]";    }
-        else if (type == "list")            {   pattern = "[filename],pick,[extension]-[filename],[distance],pick,[extension]";    }
+        else if (type == "list")            {   pattern = "[filename],[distance],pick,[extension]";    }
         else if (type == "shared")          {   pattern = "[filename],[distance],pick,[extension]";    }
         else if (type == "alignreport")     {   pattern = "[filename],pick.align.report";    }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
@@ -481,9 +481,6 @@ int RemoveLineageCommand::readList(){
 		map<string, string> variables; 
         variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(listfile));
         variables["[extension]"] = m->getExtension(listfile);
-		string outputFileName = getOutputFileName("list", variables);	
-		ofstream out;
-		m->openOutputFile(outputFileName, out);
 		
 		ifstream in;
 		m->openInputFile(listfile, in);
@@ -491,12 +488,25 @@ int RemoveLineageCommand::readList(){
 		bool wroteSomething = false;
 		
 		while(!in.eof()){
+            
 			//read in list vector
 			ListVector list(in);
 			
 			//make a new list vector
 			ListVector newList;
 			newList.setLabel(list.getLabel());
+            
+            variables["[distance]"] = list.getLabel();
+            string outputFileName = getOutputFileName("list", variables);
+			
+			ofstream out;
+			m->openOutputFile(outputFileName, out);
+			outputTypes["list"].push_back(outputFileName);  outputNames.push_back(outputFileName);
+            
+            if (m->control_pressed) { in.close(); out.close(); return 0; }
+            
+            vector<string> binLabels = list.getLabels();
+            vector<string> newBinLabels;
 			
 			//for each bin
 			for (int i = 0; i < list.getNumBins(); i++) {
@@ -517,23 +527,26 @@ int RemoveLineageCommand::readList(){
 				//if there are names in this bin add to new list
 				if (newNames != "") {  
 					newNames = newNames.substr(0, newNames.length()-1); //rip off extra comma
-					newList.push_back(newNames);	
+					newList.push_back(newNames);
+                    newBinLabels.push_back(binLabels[i]);
 				}
 			}
 				
 			//print new listvector
 			if (newList.getNumBins() != 0) {
 				wroteSomething = true;
+				newList.setLabels(newBinLabels);
+                newList.printHeaders(out);
 				newList.print(out);
 			}
 			
 			m->gobble(in);
+            out.close();
 		}
 		in.close();	
-		out.close();
+		
 		
 		if (wroteSomething == false) {  m->mothurOut("Your list file contains only sequences from " + taxons + "."); m->mothurOutEndLine();  }
-		outputNames.push_back(outputFileName); outputTypes["list"].push_back(outputFileName); 
 				
 		return 0;
 
@@ -665,7 +678,7 @@ int RemoveLineageCommand::readCount(){
         //check for groups that have been eliminated
         CountTable ct;
         if (ct.testGroups(outputFileName)) {
-            ct.readTable(outputFileName, true);
+            ct.readTable(outputFileName, true, false);
             ct.printTable(outputFileName);
         }
 		
@@ -692,6 +705,8 @@ int RemoveLineageCommand::readConsList(){
         bool wroteSomething = false;
         string snumBins = toString(list->getNumBins());
         
+        vector<string> binLabels = list->getLabels();
+        vector<string> newBinLabels;
         for (int i = 0; i < list->getNumBins(); i++) {
             
             if (m->control_pressed) { delete list; return 0;}
@@ -705,8 +720,9 @@ int RemoveLineageCommand::readConsList(){
             }
             otuLabel += sbinNumber;
             
-            if (names.count(otuLabel) == 0) {
+            if (names.count(m->getSimpleLabel(otuLabel)) == 0) {
                 newList.push_back(list->get(i));
+                newBinLabels.push_back(binLabels[i]);
             }else { removedCount++; }
         }
         
@@ -724,6 +740,8 @@ int RemoveLineageCommand::readConsList(){
         //print new listvector
         if (newList.getNumBins() != 0) {
             wroteSomething = true;
+            newList.setLabels(newBinLabels);
+            newList.printHeaders(out);
             newList.print(out);
         }
 		out.close();
@@ -843,9 +861,9 @@ int RemoveLineageCommand::readShared(){
             if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) { delete newLookup[j]; } for (int j = 0; j < lookup.size(); j++) { delete lookup[j]; } return 0; }
             
             //is this otu on the list
-            if (names.count(m->currentBinLabels[i]) == 0) {
+            if (names.count(m->getSimpleLabel(m->currentSharedBinLabels[i])) == 0) {
                 wroteSomething = true;
-                newLabels.push_back(m->currentBinLabels[i]);
+                newLabels.push_back(m->currentSharedBinLabels[i]);
                 for (int j = 0; j < newLookup.size(); j++) { //add this OTU to the new lookup
                     newLookup[j]->push_back(lookup[j]->getAbundance(i), lookup[j]->getGroup());
                 }
@@ -865,7 +883,7 @@ int RemoveLineageCommand::readShared(){
         
 		for (int j = 0; j < lookup.size(); j++) { delete lookup[j]; }
         
-        m->currentBinLabels = newLabels;
+        m->currentSharedBinLabels = newLabels;
         
 		newLookup[0]->printHeaders(out);
 		
@@ -1242,7 +1260,7 @@ int RemoveLineageCommand::readConsTax(){
 						//wroteSomething = true;
 						//out << name << '\t' << tax << endl;
 					}else{ //this sequence contains the taxon the user wants to remove
-						names.insert(otuLabel);
+						names.insert(m->getSimpleLabel(otuLabel));
 						remove=true; break;
 					}
 					
@@ -1256,7 +1274,7 @@ int RemoveLineageCommand::readConsTax(){
 							//wroteSomething = true;
 							//out << name << '\t' << tax << endl;
 						}else{ //this sequence contains the taxon the user wants to remove
-							names.insert(otuLabel);
+							names.insert(m->getSimpleLabel(otuLabel));
 							remove=true; break;
 						}
 					}else { //both have confidences so we want to make sure the users confidences are greater then or equal to the taxons
@@ -1309,7 +1327,7 @@ int RemoveLineageCommand::readConsTax(){
 							
 							//passed the test so remove you
 							if (remove) {
-								names.insert(otuLabel);
+								names.insert(m->getSimpleLabel(otuLabel));
 								remove=true; break;
 							}else {
 								//wroteSomething = true;

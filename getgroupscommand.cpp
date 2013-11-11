@@ -68,7 +68,7 @@ string GetGroupsCommand::getOutputPattern(string type) {
         else if (type == "name")        {   pattern = "[filename],pick,[extension]";    }
         else if (type == "group")       {   pattern = "[filename],pick,[extension]";    }
         else if (type == "count")       {   pattern = "[filename],pick,[extension]";    }
-        else if (type == "list")        {   pattern = "[filename],pick,[extension]";    }
+        else if (type == "list")        {   pattern = "[filename],[tag],pick,[extension]";    }
         else if (type == "shared")      {   pattern = "[filename],[tag],pick,[extension]";    }
         else if (type == "design")      {   pattern = "[filename],pick,[extension]";    }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
@@ -370,7 +370,7 @@ int GetGroupsCommand::execute(){
                 m->mothurOut("\n[NOTE]: The count file should contain only unique names, so mothur assumes your fasta, list and taxonomy files also contain only uniques.\n\n");
             }
             CountTable ct;
-            ct.readTable(countfile, true);
+            ct.readTable(countfile, true, false);
             if (!ct.hasGroupInfo()) { m->mothurOut("[ERROR]: your count file does not contain group info, aborting.\n"); return 0; }
                 
             vector<string> gNamesOfGroups = ct.getNamesOfGroups();
@@ -585,10 +585,6 @@ int GetGroupsCommand::readList(){
         map<string, string> variables; 
         variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(listfile));
         variables["[extension]"] = m->getExtension(listfile);
-		string outputFileName = getOutputFileName("list", variables);
-		
-		ofstream out;
-		m->openOutputFile(outputFileName, out);
 		
 		ifstream in;
 		m->openInputFile(listfile, in);
@@ -599,9 +595,19 @@ int GetGroupsCommand::readList(){
 		while(!in.eof()){
 			
 			selectedCount = 0;
-			
+
 			//read in list vector
 			ListVector list(in);
+            
+            variables["[tag]"] = list.getLabel();
+            string outputFileName = getOutputFileName("list", variables);
+			
+			ofstream out;
+			m->openOutputFile(outputFileName, out);
+			outputTypes["list"].push_back(outputFileName);  outputNames.push_back(outputFileName);
+            
+            vector<string> binLabels = list.getLabels();
+            vector<string> newBinLabels;
 			
 			//make a new list vector
 			ListVector newList;
@@ -613,13 +619,14 @@ int GetGroupsCommand::readList(){
 				
 				//parse out names that are in accnos file
 				string binnames = list.get(i);
+                vector<string> thisBinNames;
+                m->splitAtComma(binnames, thisBinNames);
 				
 				string newNames = "";
-				while (binnames.find_first_of(',') != -1) { 
-					string name = binnames.substr(0,binnames.find_first_of(','));
-					binnames = binnames.substr(binnames.find_first_of(',')+1, binnames.length());
-					
-					//if that name is in the .accnos file, add it
+                for (int j = 0; j < thisBinNames.size(); j++) {
+                    string name = thisBinNames[j];
+                    
+                    //if that name is in the .accnos file, add it
 					if (names.count(name) != 0) {  newNames += name + ",";  selectedCount++;  }
 					else{
 						//if you are not in the accnos file check if you are a name that needs to be changed
@@ -629,39 +636,30 @@ int GetGroupsCommand::readList(){
 							selectedCount++;
 						}
 					}
-				}
-				
-				//get last name
-				if (names.count(binnames) != 0) {  newNames += binnames + ",";  selectedCount++;  }
-				else{
-					//if you are not in the accnos file check if you are a name that needs to be changed
-					map<string, string>::iterator it = uniqueToRedundant.find(binnames);
-					if (it != uniqueToRedundant.end()) {
-						newNames += it->second + ",";
-						selectedCount++;
-					}
-				}
-				
+                }
+								
 				//if there are names in this bin add to new list
 				if (newNames != "") {  
 					newNames = newNames.substr(0, newNames.length()-1); //rip off extra comma
-					newList.push_back(newNames);	
+					newList.push_back(newNames);
+                    newBinLabels.push_back(binLabels[i]);
 				}
 			}
 			
 			//print new listvector
 			if (newList.getNumBins() != 0) {
 				wroteSomething = true;
+                newList.setLabels(newBinLabels);
+                newList.printHeaders(out);
 				newList.print(out);
 			}
 			
 			m->gobble(in);
+            out.close();
 		}
-		in.close();	
-		out.close();
+		in.close();
 		
 		if (wroteSomething == false) {  m->mothurOut("Your file does NOT contain sequences from the groups you wish to get."); m->mothurOutEndLine();  }
-		outputTypes["list"].push_back(outputFileName); outputNames.push_back(outputFileName);
 		
 		m->mothurOut("Selected " + toString(selectedCount) + " sequences from your list file."); m->mothurOutEndLine();
 		
