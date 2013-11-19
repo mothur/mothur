@@ -166,7 +166,7 @@ static DWORD WINAPI MyClassThreadFunction(LPVOID lpParam){
 		//make classify
 		Classify* myclassify;
         string outputMethodTag = pDataArray->method + ".";
-		if(pDataArray->method == "bayesian"){	myclassify = new Bayesian(pDataArray->taxonomyFileName, pDataArray->templateFileName, pDataArray->search, pDataArray->kmerSize, pDataArray->cutoff, pDataArray->iters, pDataArray->threadID, pDataArray->flip, pDataArray->writeShortcuts);		}
+		if(pDataArray->method == "wang"){	myclassify = new Bayesian(pDataArray->taxonomyFileName, pDataArray->templateFileName, pDataArray->search, pDataArray->kmerSize, pDataArray->cutoff, pDataArray->iters, pDataArray->threadID, pDataArray->flip, pDataArray->writeShortcuts);		}
 		else if(pDataArray->method == "knn"){	myclassify = new Knn(pDataArray->taxonomyFileName, pDataArray->templateFileName, pDataArray->search, pDataArray->kmerSize, pDataArray->gapOpen, pDataArray->gapExtend, pDataArray->match, pDataArray->misMatch, pDataArray->numWanted, pDataArray->threadID);				}
         else if(pDataArray->method == "zap"){	
             outputMethodTag = pDataArray->search + "_" + outputMethodTag;
@@ -174,7 +174,7 @@ static DWORD WINAPI MyClassThreadFunction(LPVOID lpParam){
             else {  myclassify = new AlignTree(pDataArray->templateFileName, pDataArray->taxonomyFileName, pDataArray->cutoff);  }
         }
 		else {
-			pDataArray->m->mothurOut(pDataArray->search + " is not a valid method option. I will run the command using bayesian.");
+			pDataArray->m->mothurOut(pDataArray->method + " is not a valid method option. I will run the command using wang.");
 			pDataArray->m->mothurOutEndLine();
 			myclassify = new Bayesian(pDataArray->taxonomyFileName, pDataArray->templateFileName, pDataArray->search, pDataArray->kmerSize, pDataArray->cutoff, pDataArray->iters, pDataArray->threadID, pDataArray->flip, pDataArray->writeShortcuts);	
 		}

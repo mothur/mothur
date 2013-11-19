@@ -443,13 +443,13 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
 				process++;
 			}else if (pid == 0){
                 string locationsFile = toString(getpid()) + ".temp";
-				num = driverPcr(filename, goodFileName + toString(getpid()) + ".temp", badFileName + toString(getpid()) + ".temp", locationsFile, badSeqNames, lines[process], pstart, pend, adjustNeeded);
+				num = driverPcr(filename, goodFileName + toString(getpid()) + ".temp", badFileName + toString(getpid()) + ".temp", locationsFile, badSeqNames, lines[process], pstart, adjustNeeded);
 				
 				//pass numSeqs to parent
 				ofstream out;
 				string tempFile = filename + toString(getpid()) + ".num.temp";
 				m->openOutputFile(tempFile, out);
-                out << pstart << '\t' << pend << '\t' << adjustNeeded << endl;
+                out << pstart << '\t' << adjustNeeded << endl;
 				out << num << '\t' << badSeqNames.size() << endl;
                 for (set<string>::iterator it = badSeqNames.begin(); it != badSeqNames.end(); it++) {
                     out << (*it) << endl;
@@ -465,7 +465,7 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
 		}
 		
         string locationsFile = toString(getpid()) + ".temp";
-        num = driverPcr(filename, goodFileName, badFileName, locationsFile, badSeqNames, lines[0], pstart, pend, adjustNeeded);
+        num = driverPcr(filename, goodFileName, badFileName, locationsFile, badSeqNames, lines[0], pstart, adjustNeeded);
         
 		//force parent to wait until all the processes are done
 		for (int i=0;i<processIDS.size();i++) { 
@@ -478,19 +478,15 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
 			string tempFile =  filename + toString(processIDS[i]) + ".num.temp";
 			m->openInputFile(tempFile, in);
             int numBadNames = 0; string name = "";
-            int tpstart = -1; int tpend = -1; bool tempAdjust = false;
+            int tpstart = -1; bool tempAdjust = false;
             
 			if (!in.eof()) {
-                in >> tpstart >> tpend >> tempAdjust; m->gobble(in);
+                in >> tpstart >> tempAdjust; m->gobble(in);
                 
                 if (tempAdjust) { adjustNeeded = true; }
                 if (tpstart != -1)   {
                     if (tpstart != pstart) { adjustNeeded = true; }
                     if (tpstart < pstart) { pstart = tpstart; } //smallest start
-                } 
-                if (tpend != -1)     {
-                    if (tpend != pend) { adjustNeeded = true; }
-                    if (tpend > pend) { pend = tpend; } //largest end
                 } 
                 int tempNum = 0; in >> tempNum >> numBadNames; num += tempNum; m->gobble(in);
             }
@@ -541,7 +537,7 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
 		}
 		
         //do your part
-        num = driverPcr(filename, (goodFileName+toString(processors-1)+".temp"), (badFileName+toString(processors-1)+".temp"), (locationsFile+toString(processors-1)+".temp"), badSeqNames, lines[processors-1], pstart, pend, adjustNeeded);
+        num = driverPcr(filename, (goodFileName+toString(processors-1)+".temp"), (badFileName+toString(processors-1)+".temp"), (locationsFile+toString(processors-1)+".temp"), badSeqNames, lines[processors-1], pstart, adjustNeeded);
         processIDS.push_back(processors-1);
         
 		//Wait until all threads have terminated.
@@ -558,11 +554,7 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
                 if (pDataArray[i]->pstart != pstart) { adjustNeeded = true; }
                 if (pDataArray[i]->pstart < pstart) { pstart = pDataArray[i]->pstart; }
             } //smallest start
-            if (pDataArray[i]->pend != -1)     {
-                if (pDataArray[i]->pend != pend) { adjustNeeded = true; }
-                if (pDataArray[i]->pend > pend) { pend = pDataArray[i]->pend; }
-            } //largest end
-
+            
             for (set<string>::iterator it = pDataArray[i]->badSeqNames.begin(); it != pDataArray[i]->badSeqNames.end(); it++) {	badSeqNames.insert(*it);       }
 			CloseHandle(hThreadArray[i]);
 			delete pDataArray[i];
@@ -580,7 +572,43 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
 		}
         
 #endif	
-        if (fileAligned && adjustNeeded) { adjustDots(goodFileName, locationsFile, pstart, pend); }
+        
+        
+
+        if (fileAligned) {
+            //find pend - pend is the biggest ending value, but we must account for when we adjust the start.  That adjustment may make the "new" end larger then the largest end. So lets find out what that "new" end will be.
+            ifstream inLocations;
+            m->openInputFile(locationsFile, inLocations);
+            
+            while(!inLocations.eof()) {
+                
+                if (m->control_pressed) { break; }
+                
+                string name = "";
+                int thisStart = -1; int thisEnd = -1;
+                if (primers.size() != 0)    { inLocations >> name >> thisStart; m->gobble(inLocations); }
+                if (revPrimer.size() != 0)  { inLocations >> name >> thisEnd;   m->gobble(inLocations); }
+                else { pend = -1; break; }
+                
+                int myDiff = 0;
+                if (pstart != -1) {
+                    if (thisStart != -1) {
+                        if (thisStart != pstart) { myDiff += (thisStart - pstart); }
+                    }
+                }
+                
+                int myEnd = thisEnd + myDiff;
+                //cout << name << '\t' << thisStart << '\t' << thisEnd << " diff = " << myDiff << '\t' << myEnd << endl;
+                
+                if (thisEnd != -1) {
+                    if (myEnd > pend) { pend = myEnd; }
+                }
+                
+            }
+            inLocations.close();
+            
+            adjustDots(goodFileName, locationsFile, pstart, pend);
+        }
         
         return num;
         
@@ -592,7 +620,7 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
 }
 
 //**********************************************************************************************************************
-int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta, string locationsName, set<string>& badSeqNames, linePair filePos, int& pstart, int& pend, bool& adjustNeeded){
+int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta, string locationsName, set<string>& badSeqNames, linePair filePos, int& pstart, bool& adjustNeeded){
 	try {
 		ofstream goodFile;
 		m->openOutputFile(goodFasta, goodFile);
@@ -611,8 +639,7 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
 		bool done = false;
 		int count = 0;
         set<int> lengths;
-        vector< set<int> > locations; //locations[0] = beginning locations, locations[1] = ending locations
-        locations.resize(2);
+        set<int> locations; //locations[0] = beginning locations, 
         
         //pdiffs, bdiffs, primers, barcodes, revPrimers
         map<string, int> faked;
@@ -759,9 +786,8 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
 				if(goodSeq == 1)    {
                     currSeq.printSequence(goodFile);
                     if (m->debug) { m->mothurOut("[DEBUG]: " + locationsString + "\n"); }
+                    if (thisPStart != -1)   { locations.insert(thisPStart);  }
                     if (locationsString != "") { locationsFile << locationsString; }
-                    if (thisPStart != -1)   { locations[0].insert(thisPStart);  }
-                    if (thisPEnd != -1)     { locations[1].insert(thisPEnd);    }
                 }
 				else {  
                     badSeqNames.insert(currSeq.getName()); 
@@ -792,9 +818,8 @@ int PcrSeqsCommand::driverPcr(string filename, string goodFasta, string badFasta
         if (m->debug) { m->mothurOut("[DEBUG]: fileAligned = " + toString(fileAligned) +'\n'); }
     
         if (fileAligned && !keepdots) { //print out smallest start value and largest end value
-            if ((locations[0].size() > 1) || (locations[1].size() > 1)) { adjustNeeded = true; }
-            if (primers.size() != 0)    {   set<int>::iterator it = locations[0].begin();  pstart = *it;  }
-            if (revPrimer.size() != 0)  {   set<int>::reverse_iterator it2 = locations[1].rbegin();  pend = *it2; }
+            if (locations.size() > 1) { adjustNeeded = true; }
+            if (primers.size() != 0)    {   set<int>::iterator it = locations.begin();  pstart = *it;  }
         }
 
 		return count;
@@ -837,6 +862,7 @@ int PcrSeqsCommand::adjustDots(string goodFasta, string locations, int pstart, i
         
         set<int> lengths;
         //cout << pstart << '\t' << pend << endl;
+        //if (pstart > pend) { //swap them
         
         while(!inFasta.eof()) {
             if(m->control_pressed) { break; }
@@ -847,6 +873,8 @@ int PcrSeqsCommand::adjustDots(string goodFasta, string locations, int pstart, i
             int thisStart = -1; int thisEnd = -1;
             if (primers.size() != 0)    { inLocations >> name >> thisStart; m->gobble(inLocations); }
             if (revPrimer.size() != 0)  { inLocations >> name >> thisEnd;   m->gobble(inLocations); }
+            
+            
             //cout << seq.getName() << '\t' << thisStart << '\t' << thisEnd << '\t' << seq.getAligned().length() << endl;
             //cout << seq.getName() << '\t' << pstart << '\t' << pend << endl;
             
@@ -887,7 +915,8 @@ int PcrSeqsCommand::adjustDots(string goodFasta, string locations, int pstart, i
         
         //cout << "final lengths = \n";
         //for (set<int>::iterator it = lengths.begin(); it != lengths.end(); it++) {
-           // cout << *it << endl;
+           //cout << *it << endl;
+           // cout << lengths.count(*it) << endl;
        // }
         
         return 0;

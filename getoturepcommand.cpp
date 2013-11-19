@@ -23,7 +23,7 @@ inline bool compareName(repStruct left, repStruct right){
 //********************************************************************************************************************
 //sorts lowest to highest
 inline bool compareBin(repStruct left, repStruct right){
-	return (left.bin < right.bin);	
+	return (left.simpleBin < right.simpleBin);
 }
 //********************************************************************************************************************
 //sorts lowest to highest
@@ -979,6 +979,7 @@ int GetOTURepCommand::process(ListVector* processList) {
 		}
 		
 		//for each bin in the list vector
+        vector<string> binLabels = processList->getLabels();
 		for (int i = 0; i < processList->size(); i++) {
 			if (m->control_pressed) { 
 				out.close();  
@@ -999,7 +1000,7 @@ int GetOTURepCommand::process(ListVector* processList) {
 			
 			if (Groups.size() == 0) {
 				nameRep = findRep(namesInBin, "");
-				newNamesOutput << i << '\t' << nameRep << '\t';
+				newNamesOutput << binLabels[i] << '\t' << nameRep << '\t';
                 
                 //put rep at first position in names line
                 string outputString = nameRep + ",";
@@ -1042,7 +1043,7 @@ int GetOTURepCommand::process(ListVector* processList) {
 						nameRep = findRep(NamesInGroup[Groups[j]], Groups[j]);
 						
 						//output group rep and other members of this group
-						(*(filehandles[Groups[j]])) << i << '\t' << nameRep << '\t';
+						(*(filehandles[Groups[j]])) << binLabels[i] << '\t' << nameRep << '\t';
 						
                         //put rep at first position in names line
                         string outputString = nameRep + ",";
@@ -1100,7 +1101,6 @@ int GetOTURepCommand::processFastaNames(string filename, string label, FastaMap*
 		ifstream in;
 		m->openInputFile(filename, in);
 		
-		int i = 0;
         string tempGroup = "";
         in >> tempGroup; m->gobble(in);
         
@@ -1112,8 +1112,8 @@ int GetOTURepCommand::processFastaNames(string filename, string label, FastaMap*
     
         int thistotal = 0;
 		while (!in.eof()) {
-			string rep, binnames;
-			in >> i >> rep >> binnames; m->gobble(in);
+			string rep, binnames, binLabel;
+			in >> binLabel >> rep >> binnames; m->gobble(in);
 			
 			vector<string> names;
 			m->splitAtComma(binnames, names);
@@ -1178,7 +1178,7 @@ int GetOTURepCommand::processFastaNames(string filename, string label, FastaMap*
 
 			if (sequence != "not found") {
 				if (sorted == "") { //print them out
-					rep = rep + "\t" + toString(i+1);
+					rep = rep + "\t" + binLabel;
 					rep = rep + "|" + toString(binsize);
 					if (group != "") {
 						rep = rep + "|" + group;
@@ -1186,7 +1186,9 @@ int GetOTURepCommand::processFastaNames(string filename, string label, FastaMap*
 					out << ">" << rep << endl;
 					out << sequence << endl;
 				}else { //save them
-					repStruct newRep(rep, i+1, binsize, group);
+                    int simpleLabel;
+                    m->mothurConvert(m->getSimpleLabel(binLabel), simpleLabel);
+					repStruct newRep(rep, binLabel, simpleLabel, binsize, group);
 					reps.push_back(newRep);
 				}
 			}else { 
@@ -1204,7 +1206,7 @@ int GetOTURepCommand::processFastaNames(string filename, string label, FastaMap*
 			//print them
 			for (int i = 0; i < reps.size(); i++) {
 				string sequence = fasta->getSequence(reps[i].name);
-				string outputName = reps[i].name + "\t" + toString(reps[i].bin);
+				string outputName = reps[i].name + "\t" + reps[i].bin;
 				outputName = outputName + "|" + toString(reps[i].size);
 				if (reps[i].group != "") {
 					outputName = outputName + "|" + reps[i].group;
@@ -1245,7 +1247,6 @@ int GetOTURepCommand::processNames(string filename, string label) {
 		ifstream in;
 		m->openInputFile(filename, in);
 		
-		int i = 0;
 		string rep, binnames;
         
         string tempGroup = "";
@@ -1259,7 +1260,8 @@ int GetOTURepCommand::processNames(string filename, string label) {
         
 		while (!in.eof()) {
 			if (m->control_pressed) { break; }
-			in >> i >> rep >> binnames; m->gobble(in);
+            string binLabel;
+			in >> binLabel >> rep >> binnames; m->gobble(in);
             
 			if (countfile == "") { out2 << rep << '\t' << binnames << endl; }
             else {

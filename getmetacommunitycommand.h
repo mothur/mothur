@@ -146,7 +146,7 @@ static DWORD WINAPI MyMetaCommunityThreadFunction(LPVOID lpParam){
             pDataArray->outputNames.push_back(pDataArray->matrix[i]);
             
             findQ->printZMatrix(pDataArray->matrix[i], pDataArray->m->getGroups());
-            findQ->printRelAbund(pDataArray->relabunds[i], pDataArray->m->currentBinLabels);
+            findQ->printRelAbund(pDataArray->relabunds[i], pDataArray->m->currentSharedBinLabels);
             
             if(pDataArray->optimizegap != -1 && (numPartitions - pDataArray->minPartition) >= pDataArray->optimizegap && numPartitions >= pDataArray->minpartitions){ break; }
             

@@ -2119,7 +2119,7 @@ int ScreenSeqsCommand::screenGroupFile(map<string, string> badSeqNames){
 		while(!inputGroups.eof()){
 			if (m->control_pressed) { goodGroupOut.close(); inputGroups.close(); m->mothurRemove(goodGroupFile); return 0; }
 
-			inputGroups >> seqName; m->gobble(inputGroups); inputGroups >> group;
+			inputGroups >> seqName; m->gobble(inputGroups); inputGroups >> group; m->gobble(inputGroups);
 			it = badSeqNames.find(seqName);
 			
 			if(it != badSeqNames.end()){
@@ -2128,7 +2128,6 @@ int ScreenSeqsCommand::screenGroupFile(map<string, string> badSeqNames){
 			else{
 				goodGroupOut << seqName << '\t' << group << endl;
 			}
-			m->gobble(inputGroups);
 		}
 		
 		if (m->control_pressed) { goodGroupOut.close();  inputGroups.close(); m->mothurRemove(goodGroupFile);  return 0; }

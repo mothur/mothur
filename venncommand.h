@@ -40,11 +40,11 @@ private:
 	Venn* venn;
 	vector<Calculator*> vennCalculators;	
 	vector<SharedRAbundVector*> lookup;
-	set< set<int> > combosOfFour;
+	set< set<int> > combos;
 	SAbundVector* sabund;
-	int abund, fontsize;
+	int abund, fontsize, perm;
 	
-	bool abort, allLines, nseqs, perm, sharedOtus;
+	bool abort, allLines, nseqs, sharedOtus;
 	set<string> labels; //holds labels to be used
 	string format, groups, calc, label, outputDir, sharedfile, listfile, inputfile;
 	vector<string> Estimators, Groups, outputNames;

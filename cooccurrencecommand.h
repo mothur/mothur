@@ -26,7 +26,7 @@ public:
 	~CooccurrenceCommand(){}
 	
 	vector<string> setParameters();
-	string getCommandName()			{ return "Cooccurrence";			}
+	string getCommandName()			{ return "cooccurrence";			}
 	string getCommandCategory()		{ return "Hypothesis Testing";	}
 	
 	string getHelpString();	

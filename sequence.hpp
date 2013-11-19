@@ -76,6 +76,7 @@ private:
 	string unaligned;
 	string aligned;
 	string pairwise;
+    string comment;
 	int numBases;
 	int alignmentLength;
 	bool isAligned;

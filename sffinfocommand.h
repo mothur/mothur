@@ -82,19 +82,20 @@ private:
 	string sffFilename, sfftxtFilename, outputDir, accnosName, currentFileName, oligosfile, noMatchFile;
 	vector<string> filenames, outputNames, accnosFileNames, oligosFileNames;
 	bool abort, fasta, qual, trim, flow, sfftxt, hasAccnos, hasOligos;
-	int mycount, split, numFPrimers, numLinkers, numSpacers, pdiffs, bdiffs, ldiffs, sdiffs, tdiffs;
+	int mycount, split, numFPrimers, numLinkers, numSpacers, pdiffs, bdiffs, ldiffs, sdiffs, tdiffs, numNoMatch;
 	set<string> seqNames;
     map<string, int> barcodes;
     map<string, int> primers;
     vector<string> linker, spacer, primerNameVector, barcodeNameVector, revPrimer;
     vector<vector<int> > numSplitReads;
-    vector<vector<string> > filehandles, filehandlesHeaders;
+    vector<vector<map<string, ofstream*> > > filehandles;
+    vector<vector<map<string, ofstream*> > > filehandlesHeaders;
     
 	//extract sff file functions
 	int extractSffInfo(string, string, string);
 	int readCommonHeader(ifstream&, CommonHeader&);
-	//int readHeader(ifstream&, Header&);
-	int readSeqData(ifstream&, seqRead&, int, Header&);
+	int readHeader(ifstream&, Header&);
+	bool readSeqData(ifstream&, seqRead&, int, Header&);
 	int decodeName(string&, string&, string&, string);
     bool readOligos(string oligosFile);
 	
