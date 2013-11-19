@@ -359,7 +359,7 @@ int UnifracWeightedCommand::execute() {
                 variables["[tag]"] = toString(i+1);
                 string wFileName = getOutputFileName("weighted", variables);
                 output = new ColumnFile(wFileName, itersString);
-				outputNames.push_back(wFileName); outputTypes["wweighted"].push_back(wFileName);
+				outputNames.push_back(wFileName); outputTypes["weighted"].push_back(wFileName);
             } 
             
             userData = weighted.getValues(T[i], processors, outputDir); //userData[0] = weightedscore
