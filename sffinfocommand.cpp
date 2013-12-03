@@ -17,7 +17,8 @@
 vector<string> SffInfoCommand::setParameters(){	
 	try {		
 		CommandParameter psff("sff", "InputTypes", "", "", "none", "none", "none","",false,false,true); parameters.push_back(psff);
-        CommandParameter poligos("oligos", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(poligos);
+        CommandParameter poligos("oligos", "InputTypes", "", "", "oligosGroup", "none", "none","",false,false); parameters.push_back(poligos);
+        CommandParameter pgroup("group", "InputTypes", "", "", "oligosGroup", "none", "none","",false,false); parameters.push_back(pgroup);
 		CommandParameter paccnos("accnos", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(paccnos);
 		CommandParameter psfftxt("sfftxt", "String", "", "", "", "", "","",false,false); parameters.push_back(psfftxt);
 		CommandParameter pflow("flow", "Boolean", "", "T", "", "", "","flow",false,false); parameters.push_back(pflow);
@@ -46,11 +47,12 @@ string SffInfoCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The sffinfo command reads a sff file and extracts the sequence data, or you can use it to parse a sfftxt file.\n";
-		helpString += "The sffinfo command parameters are sff, fasta, qfile, accnos, flow, sfftxt, oligos, bdiffs, tdiffs, ldiffs, sdiffs, pdiffs and trim. sff is required. \n";
+		helpString += "The sffinfo command parameters are sff, fasta, qfile, accnos, flow, sfftxt, oligos, group, bdiffs, tdiffs, ldiffs, sdiffs, pdiffs and trim. sff is required. \n";
 		helpString += "The sff parameter allows you to enter the sff file you would like to extract data from.  You may enter multiple files by separating them by -'s.\n";
 		helpString += "The fasta parameter allows you to indicate if you would like a fasta formatted file generated.  Default=True. \n";
 		helpString += "The qfile parameter allows you to indicate if you would like a quality file generated.  Default=True. \n";
         helpString += "The oligos parameter allows you to provide an oligos file to split your sff file into separate sff files by barcode. \n";
+        helpString += "The group parameter allows you to provide a group file to split your sff file into separate sff files by group. \n";
         helpString += "The tdiffs parameter is used to specify the total number of differences allowed in the sequence. The default is pdiffs + bdiffs + sdiffs + ldiffs.\n";
 		helpString += "The bdiffs parameter is used to specify the number of differences allowed in the barcode. The default is 0.\n";
 		helpString += "The pdiffs parameter is used to specify the number of differences allowed in the primer. The default is 0.\n";
@@ -112,7 +114,7 @@ SffInfoCommand::SffInfoCommand(){
 SffInfoCommand::SffInfoCommand(string option)  {
 	try {
 		abort = false; calledHelp = false;   
-		hasAccnos = false; hasOligos = false;
+		hasAccnos = false; hasOligos = false; hasGroup = false;
         split = 1;
 		
 		//allow user to run help
@@ -293,7 +295,7 @@ SffInfoCommand::SffInfoCommand(string option)  {
 					bool ignore = false;
 					if (oligosFileNames[i] == "current") { 
 						oligosFileNames[i] = m->getOligosFile(); 
-						if (oligosFileNames[i] != "") {  m->mothurOut("Using " + oligosFileNames[i] + " as input file for the accnos parameter where you had given current."); m->mothurOutEndLine(); }
+						if (oligosFileNames[i] != "") {  m->mothurOut("Using " + oligosFileNames[i] + " as input file for the oligos parameter where you had given current."); m->mothurOutEndLine(); }
 						else { 	
 							m->mothurOut("You have no current oligosfile, ignoring current."); m->mothurOutEndLine(); ignore=true; 
 							//erase from file list
@@ -349,11 +351,86 @@ SffInfoCommand::SffInfoCommand(string option)  {
 				//make sure there is at least one valid file left
 				if (oligosFileNames.size() == 0) { m->mothurOut("no valid oligos files."); m->mothurOutEndLine(); abort = true; }
 			}
-
-			if (hasOligos) {
-                split = 2;
-				if (oligosFileNames.size() != filenames.size()) { abort = true; m->mothurOut("If you provide a oligos file, you must have one for each sff file."); m->mothurOutEndLine(); }
+            
+            groupfile = validParameter.validFile(parameters, "group", false);
+			if (groupfile == "not found") { groupfile = "";  }
+			else {
+				hasGroup = true;
+				m->splitAtDash(groupfile, groupFileNames);
+				
+				//go through files and make sure they are good, if not, then disregard them
+				for (int i = 0; i < groupFileNames.size(); i++) {
+					bool ignore = false;
+					if (groupFileNames[i] == "current") {
+						groupFileNames[i] = m->getGroupFile();
+						if (groupFileNames[i] != "") {  m->mothurOut("Using " + groupFileNames[i] + " as input file for the group parameter where you had given current."); m->mothurOutEndLine(); }
+						else {
+							m->mothurOut("You have no current group file, ignoring current."); m->mothurOutEndLine(); ignore=true;
+							//erase from file list
+							groupFileNames.erase(groupFileNames.begin()+i);
+							i--;
+						}
+					}
+					
+					if (!ignore) {
+                        
+						if (inputDir != "") {
+							string path = m->hasPath(groupFileNames[i]);
+							//if the user has not given a path then, add inputdir. else leave path alone.
+							if (path == "") {	groupFileNames[i] = inputDir + groupFileNames[i];		}
+						}
+                        
+						ifstream in;
+						int ableToOpen = m->openInputFile(groupFileNames[i], in, "noerror");
+                        
+						//if you can't open it, try default location
+						if (ableToOpen == 1) {
+							if (m->getDefaultPath() != "") { //default path is set
+								string tryPath = m->getDefaultPath() + m->getSimpleName(groupFileNames[i]);
+								m->mothurOut("Unable to open " + groupFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
+								ifstream in2;
+								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+								in2.close();
+								groupFileNames[i] = tryPath;
+							}
+						}
+						//if you can't open it, try default location
+						if (ableToOpen == 1) {
+							if (m->getOutputDir() != "") { //default path is set
+								string tryPath = m->getOutputDir() + m->getSimpleName(groupFileNames[i]);
+								m->mothurOut("Unable to open " + groupFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
+								ifstream in2;
+								ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+								in2.close();
+								groupFileNames[i] = tryPath;
+							}
+						}
+						in.close();
+						
+						if (ableToOpen == 1) {
+							m->mothurOut("Unable to open " + groupFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine();
+							//erase from file list
+							groupFileNames.erase(groupFileNames.begin()+i);
+							i--;
+						}
+					}
+				}
+				
+				//make sure there is at least one valid file left
+				if (groupFileNames.size() == 0) { m->mothurOut("no valid group files."); m->mothurOutEndLine(); abort = true; }
 			}
+
+			if (hasGroup) {
+                split = 2;
+				if (groupFileNames.size() != filenames.size()) { abort = true; m->mothurOut("If you provide a group file, you must have one for each sff file."); m->mothurOutEndLine(); }
+			}
+            
+            if (hasOligos) {
+                split = 2;
+				if (oligosFileNames.size() != filenames.size()) { abort = true; m->mothurOut("If you provide an oligos file, you must have one for each sff file."); m->mothurOutEndLine(); }
+			}
+            
+            if (hasGroup && hasOligos) { m->mothurOut("You must enter ONLY ONE of the following: oligos or group."); m->mothurOutEndLine(); abort = true;}
             
 			if (hasAccnos) {
 				if (accnosFileNames.size() != filenames.size()) { abort = true; m->mothurOut("If you provide a accnos file, you must have one for each sff file."); m->mothurOutEndLine(); }
@@ -442,7 +519,8 @@ int SffInfoCommand::execute(){
             
             string oligos = "";
             if (hasOligos) { oligos = oligosFileNames[s]; }
-			
+            if (hasGroup) { oligos = groupFileNames[s]; }
+            
 			int numReads = extractSffInfo(filenames[s], accnos, oligos);
 
 			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to extract " + toString(numReads) + ".");
@@ -490,9 +568,10 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
 		
 		if (accnos != "")	{  readAccnosFile(accnos);  }
 		else				{	seqNames.clear();		}
-         
-        if (oligos != "")   {   readOligos(oligos);  split = 2;   }
-
+        
+        if (hasOligos)   {   readOligos(oligos);    split = 2;      }
+        if (hasGroup)    {   readGroup(oligos);     split = 2;      }
+        
 		ofstream outSfftxt, outFasta, outQual, outFlow;
 		string outFastaFileName, outQualFileName;
         string rootName = outputDir + m->getRootName(m->getSimpleName(input));
@@ -526,7 +605,7 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
 		//print common header
 		if (sfftxt) {	printCommonHeader(outSfftxt, header);		}
 		if (flow)	{	outFlow << header.numFlowsPerRead << endl;	}
-			
+		
 		//read through the sff file
 		while (!in.eof()) {
 			
@@ -551,7 +630,7 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
 			}
 			
 			count++;
-        
+            
 			//report progress
 			if((count+1) % 10000 == 0){	m->mothurOut(toString(count+1)); m->mothurOutEndLine();		}
 		
@@ -574,13 +653,7 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
             //create new common headers for each file with the correct number of reads
             adjustCommonHeader(header);
             
-            //close files and delete ofstreams
-            for(int i=0;i<filehandles.size();i++){
-				for(int j=0;j<filehandles[0].size();j++){
-                    (filehandles[i][j].begin()->second)->close(); delete (filehandles[i][j].begin()->second);
-                    (filehandlesHeaders[i][j].begin()->second)->close(); delete (filehandlesHeaders[i][j].begin()->second);
-                }
-            }
+            if (hasGroup) { delete groupMap; }
             
             //cout << "here" << endl;
 			map<string, string>::iterator it;
@@ -588,13 +661,13 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
 			for(int i=0;i<filehandles.size();i++){
 				for(int j=0;j<filehandles[0].size();j++){
                     //cout << i << '\t' << '\t' << j  << '\t' << filehandles[i][j] << endl;
-					if (filehandles[i][j].begin()->first != "") {
-						if (namesToRemove.count(filehandles[i][j].begin()->first) == 0) {
-							if(m->isBlank(filehandles[i][j].begin()->first)){
+					if (filehandles[i][j] != "") {
+						if (namesToRemove.count(filehandles[i][j]) == 0) {
+							if(m->isBlank(filehandles[i][j])){
                                 //cout << i << '\t' << '\t' << j  << '\t' << filehandles[i][j] << " is blank removing" << endl;
-								m->mothurRemove(filehandles[i][j].begin()->first);
-                                m->mothurRemove(filehandlesHeaders[i][j].begin()->first);
-								namesToRemove.insert(filehandles[i][j].begin()->first);
+								m->mothurRemove(filehandles[i][j]);
+                                m->mothurRemove(filehandlesHeaders[i][j]);
+								namesToRemove.insert(filehandles[i][j]);
                             }
 						}
 					}
@@ -604,11 +677,11 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
             //append new header to reads
             for (int i = 0; i < filehandles.size(); i++) {
                 for (int j = 0; j < filehandles[i].size(); j++) {
-                    m->appendBinaryFiles(filehandles[i][j].begin()->first, filehandlesHeaders[i][j].begin()->first);
-                    m->renameFile(filehandlesHeaders[i][j].begin()->first, filehandles[i][j].begin()->first);
-                    m->mothurRemove(filehandlesHeaders[i][j].begin()->first);
+                    m->appendBinaryFiles(filehandles[i][j], filehandlesHeaders[i][j]);
+                    m->renameFile(filehandlesHeaders[i][j], filehandles[i][j]);
+                    m->mothurRemove(filehandlesHeaders[i][j]);
                     //cout << i << '\t' << '\t' << j  << '\t' << filehandles[i][j] << " done appending headers and removing " << filehandlesHeaders[i][j] << endl;
-                    if (numSplitReads[i][j] == 0) { m->mothurRemove(filehandles[i][j].begin()->first); }
+                    if (numSplitReads[i][j] == 0) { m->mothurRemove(filehandles[i][j]); }
                 }
             }
 			//cout << "here3" << endl;
@@ -733,7 +806,10 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
         in.read(mybuffer,4);
         for (int i = 0; i < filehandlesHeaders.size(); i++) {  
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
-                (*(filehandlesHeaders[i][j].begin()->second)).write(mybuffer, in.gcount());
+                ofstream out;
+                m->openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
+                out.write(mybuffer, in.gcount());
+                out.close();
             }
         }
         outNoMatchHeader.write(mybuffer, in.gcount());
@@ -744,7 +820,10 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
         in.read(mybuffer,4);
         for (int i = 0; i < filehandlesHeaders.size(); i++) {  
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
-               (*(filehandlesHeaders[i][j].begin()->second)).write(mybuffer, in.gcount());
+                ofstream out;
+                m->openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
+                out.write(mybuffer, in.gcount());
+                out.close();
             }
         }
         outNoMatchHeader.write(mybuffer, in.gcount());
@@ -765,7 +844,10 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
         thisbuffer[7] = offset & 0xFF;
         for (int i = 0; i < filehandlesHeaders.size(); i++) {
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
-                (*(filehandlesHeaders[i][j].begin()->second)).write(thisbuffer, 8);
+                ofstream out;
+                m->openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
+                out.write(thisbuffer, 8);
+                out.close();
             }
         }
         outNoMatchHeader.write(thisbuffer, 8);
@@ -784,7 +866,10 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
         thisbuffer2[3] = offset & 0xFF;
         for (int i = 0; i < filehandlesHeaders.size(); i++) {
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
-                (*(filehandlesHeaders[i][j].begin()->second)).write(thisbuffer2, 4);
+                ofstream out;
+                m->openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
+                out.write(thisbuffer2, 4);
+                out.close();
             }
         }
         outNoMatchHeader.write(thisbuffer2, 4);
@@ -809,7 +894,10 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
                     thisbuffer[2] = (numSplitReads[i][j] >> 16) & 0xFF;
                     thisbuffer[3] = (numSplitReads[i][j] >> 24) & 0xFF;
                  }
-                (*(filehandlesHeaders[i][j].begin()->second)).write(thisbuffer, 4);
+                ofstream out;
+                m->openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
+                out.write(thisbuffer, 4);
+                out.close();
                 delete[] thisbuffer;
             }
         }
@@ -834,7 +922,10 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
         in.read(mybuffer,2);
         for (int i = 0; i < filehandlesHeaders.size(); i++) {  
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
-                (*(filehandlesHeaders[i][j].begin()->second)).write(mybuffer, in.gcount());
+                ofstream out;
+                m->openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
+                out.write(mybuffer, in.gcount());
+                out.close();
             }
         }
         outNoMatchHeader.write(mybuffer, in.gcount());
@@ -845,7 +936,10 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
         in.read(mybuffer,2);
         for (int i = 0; i < filehandlesHeaders.size(); i++) {  
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
-                (*(filehandlesHeaders[i][j].begin()->second)).write(mybuffer, in.gcount());
+                ofstream out;
+                m->openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
+                out.write(mybuffer, in.gcount());
+                out.close();
             }
         }
         outNoMatchHeader.write(mybuffer, in.gcount());
@@ -856,7 +950,10 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
         in.read(mybuffer,2);
         for (int i = 0; i < filehandlesHeaders.size(); i++) {  
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
-                (*(filehandlesHeaders[i][j].begin()->second)).write(mybuffer, in.gcount());
+                ofstream out;
+                m->openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
+                out.write(mybuffer, in.gcount());
+                out.close();
             }
         }
         outNoMatchHeader.write(mybuffer, in.gcount());
@@ -867,7 +964,10 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
         in.read(mybuffer,1);
         for (int i = 0; i < filehandlesHeaders.size(); i++) {  
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
-                (*(filehandlesHeaders[i][j].begin()->second)).write(mybuffer, in.gcount());
+                ofstream out;
+                m->openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
+                out.write(mybuffer, in.gcount());
+                out.close();
             }
         }
         outNoMatchHeader.write(mybuffer, in.gcount());
@@ -878,7 +978,10 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
         in.read(mybuffer,header.numFlowsPerRead);
         for (int i = 0; i < filehandlesHeaders.size(); i++) {  
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
-                (*(filehandlesHeaders[i][j].begin()->second)).write(mybuffer, in.gcount());
+                ofstream out;
+                m->openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
+                out.write(mybuffer, in.gcount());
+                out.close();
             }
         }
         outNoMatchHeader.write(mybuffer, in.gcount());
@@ -889,7 +992,10 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
         in.read(mybuffer,header.keyLength);
         for (int i = 0; i < filehandlesHeaders.size(); i++) {  
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
-                (*(filehandlesHeaders[i][j].begin()->second)).write(mybuffer, in.gcount());
+                ofstream out;
+                m->openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
+                out.write(mybuffer, in.gcount());
+                out.close();
             }
         }
         outNoMatchHeader.write(mybuffer, in.gcount());
@@ -904,7 +1010,10 @@ int SffInfoCommand::adjustCommonHeader(CommonHeader header){
         mybuffer = new char[spot-spotInFile];
         for (int i = 0; i < filehandlesHeaders.size(); i++) { 
             for (int j = 0; j < filehandlesHeaders[i].size(); j++) {
-                (*(filehandlesHeaders[i][j].begin()->second)).write(mybuffer, spot-spotInFile);
+                ofstream out;
+                m->openOutputFileBinaryAppend(filehandlesHeaders[i][j], out);
+                out.write(mybuffer, spot-spotInFile);
+                out.close();
             }
         }
         outNoMatchHeader.write(mybuffer, spot-spotInFile);
@@ -1031,9 +1140,12 @@ bool SffInfoCommand::readSeqData(ifstream& in, seqRead& read, int numFlowReads, 
             
             if (split > 1) { 
                
-                int barcodeIndex, primerIndex;
-                int trashCodeLength = findGroup(header, read, barcodeIndex, primerIndex);
-                                
+                int barcodeIndex, primerIndex, trashCodeLength;
+                
+                if (hasOligos)      {  trashCodeLength = findGroup(header, read, barcodeIndex, primerIndex);                }
+                else if (hasGroup)  {  trashCodeLength = findGroup(header, read, barcodeIndex, primerIndex, "groupMode");   }
+                else {  m->mothurOut("[ERROR]: uh oh, we shouldn't be here...\n"); }
+
                 char * mybuffer;
                 mybuffer = new char [spot-startSpotInFile];
                 
@@ -1044,7 +1156,10 @@ bool SffInfoCommand::readSeqData(ifstream& in, seqRead& read, int numFlowReads, 
                 
                 
                 if(trashCodeLength == 0){
-                    (*(filehandles[barcodeIndex][primerIndex].begin()->second)).write(mybuffer, in2.gcount());
+                    ofstream out;
+                    m->openOutputFileBinaryAppend(filehandles[barcodeIndex][primerIndex], out);
+                    out.write(mybuffer, in2.gcount());
+                    out.close();
                     numSplitReads[barcodeIndex][primerIndex]++;
 				}
 				else{
@@ -1152,7 +1267,29 @@ int SffInfoCommand::findGroup(Header header, seqRead read, int& barcode, int& pr
 		m->errorOut(e, "SffInfoCommand", "findGroup");
 		exit(1);
 	}
-}     
+}
+//**********************************************************************************************************************
+int SffInfoCommand::findGroup(Header header, seqRead read, int& barcode, int& primer, string groupMode) {
+	try {
+        string trashCode = "";
+        primer = 0;
+        
+        string group = groupMap->getGroup(header.name);
+        if (group == "not found") {     trashCode += "g";   } //scrap for group
+        else { //find file group
+            map<string, int>::iterator it = barcodes.find(group);
+            if (it != barcodes.end()) {
+                barcode = it->second;
+            }else { trashCode += "g"; }
+        }
+        
+        return trashCode.length();
+    }
+	catch(exception& e) {
+		m->errorOut(e, "SffInfoCommand", "findGroup");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 int SffInfoCommand::decodeName(string& timestamp, string& region, string& xy, string name) {
 	try {
@@ -1685,7 +1822,7 @@ bool SffInfoCommand::readOligos(string oligoFile){
 		
 		while(!inOligos.eof()){
             
-			inOligos >> type; 
+			inOligos >> type;
             
 			if(type[0] == '#'){
 				while (!inOligos.eof())	{	char c = inOligos.get();  if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
@@ -1707,19 +1844,20 @@ bool SffInfoCommand::readOligos(string oligoFile){
 					group = "";
 					
 					// get rest of line in case there is a primer name
-					while (!inOligos.eof())	{	
-						char c = inOligos.get(); 
+					while (!inOligos.eof())	{
+						char c = inOligos.get();
 						if (c == 10 || c == 13 || c == -1){	break;	}
 						else if (c == 32 || c == 9){;} //space or tab
 						else { 	group += c;  }
-					} 
+					}
 					
 					//check for repeat barcodes
 					map<string, int>::iterator itPrime = primers.find(oligo);
 					if (itPrime != primers.end()) { m->mothurOut("primer " + oligo + " is in your oligos file already."); m->mothurOutEndLine();  }
 					
-					primers[oligo]=indexPrimer; indexPrimer++;		
+					primers[oligo]=indexPrimer; indexPrimer++;
 					primerNameVector.push_back(group);
+                   
 				}else if(type == "REVERSE"){
 					//Sequence oligoRC("reverse", oligo);
 					//oligoRC.reverseComplement();
@@ -1728,6 +1866,7 @@ bool SffInfoCommand::readOligos(string oligoFile){
 				}
 				else if(type == "BARCODE"){
 					inOligos >> group;
+                    
 					
 					//check for repeat barcodes
 					map<string, int>::iterator itBar = barcodes.find(oligo);
@@ -1743,31 +1882,27 @@ bool SffInfoCommand::readOligos(string oligoFile){
 				else{	m->mothurOut("[WARNING]: " + type + " is not recognized as a valid type. Choices are forward, reverse, and barcode. Ignoring " + oligo + "."); m->mothurOutEndLine(); }
 			}
 			m->gobble(inOligos);
-		}	
+		}
 		inOligos.close();
-		
+    
 		if(barcodeNameVector.size() == 0 && primerNameVector[0] == ""){	split = 1;	}
-		
+    
 		//add in potential combos
 		if(barcodeNameVector.size() == 0){
 			barcodes[""] = 0;
-			barcodeNameVector.push_back("");			
+			barcodeNameVector.push_back("");
 		}
 		
 		if(primerNameVector.size() == 0){
 			primers[""] = 0;
-			primerNameVector.push_back("");			
+			primerNameVector.push_back("");
 		}
 		
 		filehandles.resize(barcodeNameVector.size());
-        for (int i = 0; i < filehandles.size(); i++) {
-            for (int j = 0; j < primerNameVector.size(); j++) {
-                ofstream* temp;
-                map<string, ofstream*> myMap; myMap[""] = temp;
-                filehandles[i].push_back(myMap);
-            }
-        }
-			
+		for(int i=0;i<filehandles.size();i++){
+			filehandles[i].assign(primerNameVector.size(), "");
+		}
+        
 		if(split > 1){
 			set<string> uniqueNames; //used to cleanup outputFileNames
 			for(map<string, int>::iterator itBar = barcodes.begin();itBar != barcodes.end();itBar++){
@@ -1793,8 +1928,8 @@ bool SffInfoCommand::readOligos(string oligoFile){
 						}
 					}
 					
-					ofstream* temp = new ofstream;
-                    map<string, string> variables; 
+					ofstream temp;
+                    map<string, string> variables;
                     variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(currentFileName));
                     variables["[group]"] = comboGroupName;
 					string thisFilename = getOutputFileName("sff",variables);
@@ -1804,23 +1939,21 @@ bool SffInfoCommand::readOligos(string oligoFile){
 						uniqueNames.insert(thisFilename);
 					}
 					
-                    map<string, ofstream*> myMap; myMap[thisFilename] = temp;
-                    m->openOutputFileBinary(thisFilename, *(temp));
-					filehandles[itBar->second][itPrimer->second] = myMap;
-                    map<string, ofstream*>::iterator itOfstream = filehandles[itBar->second][itPrimer->second].find("");
-                    if (itOfstream != filehandles[itBar->second][itPrimer->second].end()) { filehandles[itBar->second][itPrimer->second].erase(itOfstream); } //remove blank entry so we dont mess with .begin() above. code above assumes only 1 file name in the map
+					filehandles[itBar->second][itPrimer->second] = thisFilename;
+					temp.open(thisFilename.c_str(), ios::binary);		temp.close();
 				}
 			}
 		}
 		numFPrimers = primers.size();
         numLinkers = linker.size();
         numSpacers = spacer.size();
-        map<string, string> variables; 
+        map<string, string> variables;
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(currentFileName));
         variables["[group]"] = "scrap";
 		noMatchFile = getOutputFileName("sff",variables);
         m->mothurRemove(noMatchFile);
         numNoMatch = 0;
+        
         
 		bool allBlank = true;
 		for (int i = 0; i < barcodeNameVector.size(); i++) {
@@ -1838,15 +1971,10 @@ bool SffInfoCommand::readOligos(string oligoFile){
 		
         filehandlesHeaders.resize(filehandles.size());
         numSplitReads.resize(filehandles.size());
-        for (int i = 0; i < filehandles.size(); i++) { 
-            numSplitReads[i].resize(filehandles[i].size(), 0); 
+        for (int i = 0; i < filehandles.size(); i++) {
+            numSplitReads[i].resize(filehandles[i].size(), 0);
             for (int j = 0; j < filehandles[i].size(); j++) {
-                ofstream* temp = new ofstream;
-                map<string, ofstream* > myMap;
-                string thisHeader = (filehandles[i][j].begin())->first+"headers";
-                myMap[thisHeader] = temp;
-                m->openOutputFileBinary(thisHeader, *(temp));
-                filehandlesHeaders[i].push_back(myMap);
+                filehandlesHeaders[i].push_back(filehandles[i][j]+"headers");
             }
         }
         
@@ -1864,6 +1992,68 @@ bool SffInfoCommand::readOligos(string oligoFile){
 		exit(1);
 	}
 }
+//***************************************************************************************************************
+
+bool SffInfoCommand::readGroup(string oligoFile){
+	try {
+        filehandles.clear();
+        numSplitReads.clear();
+        filehandlesHeaders.clear();
+        barcodes.clear();
+        
+        groupMap = new GroupMap();
+        groupMap->readMap(oligoFile);
+    
+        //like barcodeNameVector - no primer names
+        vector<string> groups = groupMap->getNamesOfGroups();
+		
+		filehandles.resize(groups.size());
+        for (int i = 0; i < filehandles.size(); i++) {
+            for (int j = 0; j < 1; j++) {
+                
+                map<string, string> variables;
+                variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(currentFileName));
+                variables["[group]"] = groups[i];
+                string thisFilename = getOutputFileName("sff",variables);
+                outputNames.push_back(thisFilename);
+                outputTypes["sff"].push_back(thisFilename);
+               
+                ofstream temp;
+                m->openOutputFileBinary(thisFilename, temp); temp.close();
+                filehandles[i].push_back(thisFilename);
+                barcodes[groups[i]] = i;
+            }
+        }
+        
+        map<string, string> variables;
+        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(currentFileName));
+        variables["[group]"] = "scrap";
+		noMatchFile = getOutputFileName("sff",variables);
+        m->mothurRemove(noMatchFile);
+        numNoMatch = 0;
+        
+		
+        filehandlesHeaders.resize(groups.size());
+        numSplitReads.resize(filehandles.size());
+        for (int i = 0; i < filehandles.size(); i++) {
+            numSplitReads[i].resize(filehandles[i].size(), 0);
+            for (int j = 0; j < filehandles[i].size(); j++) {
+                ofstream temp ;
+                string thisHeader = filehandles[i][j]+"headers";
+                m->openOutputFileBinary(thisHeader, temp); temp.close();
+                filehandlesHeaders[i].push_back(thisHeader);
+            }
+        }
+		
+		return true;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SffInfoCommand", "readGroup");
+		exit(1);
+	}
+}
+
 //********************************************************************/
 string SffInfoCommand::reverseOligo(string oligo){
 	try {

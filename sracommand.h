@@ -35,8 +35,14 @@ public:
     
 private:
     bool abort;
-    string sfffiles, fastqfiles, platform, outputDir;
+    int tdiffs, bdiffs, pdiffs, sdiffs, ldiffs;
+    string sfffile, fastqfile, platform, outputDir, groupfile, file, oligosfile;
     vector<string> outputNames;
+    
+    int readFile(vector<string>&);
+    int parseSffFile(vector<string>&);
+    int parseFastqFile(vector<string>&);
+    
 };
 
 /**************************************************************************************************/

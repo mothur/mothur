@@ -1977,7 +1977,6 @@ bool MakeContigsCommand::getOligos(vector<vector<string> >& fastaFileNames, stri
                     else { uniquePrimers.insert(tempPair); }
 					
                     if (m->debug) {  if (group != "") { m->mothurOut("[DEBUG]: reading group " + group + ".\n"); }else{ m->mothurOut("[DEBUG]: no group for primer pair " + newPrimer.forward + " " + newPrimer.reverse + ".\n"); }  }
-                    
 					primers[indexPrimer]=newPrimer; indexPrimer++;		
 					primerNameVector.push_back(group);
 				}else if(type == "BARCODE"){
