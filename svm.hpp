@@ -9,7 +9,6 @@
 #ifndef svm_hpp_
 #define svm_hpp_
 
-#include <math.h>
 
 #include <algorithm>
 #include <cmath>
@@ -30,6 +29,17 @@
 // feature vectors (or 'observations' as they will be called from here on)
 // will be vectors of doubles.
 typedef std::vector<double> Observation;
+
+/*
+class Observation {
+public:
+    Observation() {}
+    ~Observation() {}
+
+private:
+    std::vector<double> obs;
+};
+*/
 
 // A dataset is a collection of labeled observations.
 // The ObservationVector typedef is a vector
@@ -321,9 +331,68 @@ private:
 };
 
 
+class RowCache {
+public:
+    RowCache(int d) : cache(d, NULL) {}
+    virtual ~RowCache() {
+        for (int i = 0; i < cache.size(); i++) {
+            if ( !rowNotCached(i) ) {
+                delete cache[i];
+            }
+        }
+    }
+
+    double getCachedValue(int i, int j) {
+        if ( rowNotCached(i) ) {
+            createRow(i);
+        }
+        return cache.at(i)->at(j);
+    }
+
+    void createRow(int i) {
+        cache[i] = new std::vector<double>(cache.size(), std::numeric_limits<double>::signaling_NaN());
+        for ( int v = 0; v < cache.size(); v++ ) {
+            cache.at(i)->at(v) = calculateValueForCache(i, v);
+        }
+    }
+
+    bool rowNotCached(int i) {
+        return cache[i] == NULL;
+    }
+
+    virtual double calculateValueForCache(int, int) = 0;
+
+private:
+    std::vector<std::vector<double>* > cache;
+};
+
+
+class InnerProductRowCache : public RowCache {
+public:
+    InnerProductRowCache(const LabeledObservationVector& _obs) : obs(_obs), RowCache(_obs.size()) {}
+    virtual ~InnerProductRowCache() {}
+
+    double getInnerProduct(const LabeledObservation& obs_i, const LabeledObservation& obs_j) {
+        return getCachedValue(
+            obs_i.datasetIndex,
+            obs_j.datasetIndex
+        );
+    }
+
+    double calculateValueForCache(int i, int j) {
+        return std::inner_product(obs[i].second->begin(), obs[i].second->end(), obs[j].second->begin(), 0.0);
+    }
+
+private:
+    const LabeledObservationVector& obs;
+};
+
+
 // The KernelFunction class caches a partial kernel value that does not depend on kernel parameters.
 class KernelFunction {
 public:
+    //KernelFunction(const LabeledObservationVector& _obs, InnerProductCache& _ipc) : obs(_obs), innerProductRowCache(_ipc) {}
+
     KernelFunction(const LabeledObservationVector& _obs) :
         obs(_obs),
         cache(_obs.size(), NULL) {}
@@ -363,6 +432,7 @@ private:
     const LabeledObservationVector& obs;
     //std::vector<std::vector<double> > cache;
     std::vector<std::vector<double>* > cache;
+    //InnerProductRowCache& innerProductCache;
 };
 
 
@@ -415,10 +485,14 @@ public:
     }
 
     double calculateParameterFreeSimilarity(const LabeledObservation& i, const LabeledObservation& j) {
-        double sumOfSquaredDifs = 0.0;
-        for (int n = 0; n < i.second->size(); n++) {
-            sumOfSquaredDifs += pow((i.second->at(n) - j.second->at(n)), 2.0);
-        }
+        //double sumOfSquaredDifs = 0.0;
+        //for (int n = 0; n < i.second->size(); n++) {
+        //    sumOfSquaredDifs += pow((i.second->at(n) - j.second->at(n)), 2.0);
+        //}
+        double sumOfSquaredDifs =
+                      std::inner_product(i.second->begin(), i.second->end(), i.second->begin(), 0.0)
+              - 2.0 * std::inner_product(i.second->begin(), i.second->end(), j.second->begin(), 0.0)
+              +       std::inner_product(j.second->begin(), j.second->end(), j.second->begin(), 0.0);
         return exp(sqrt(sumOfSquaredDifs));
     }
 
@@ -550,7 +624,8 @@ typedef std::map<std::string, KernelFunction*> KernelFunctionMap;
 // An instance of KernelFunctionFactory dynamically allocates kernel function
 // instances and maintains a table of pointers to them.  This allows kernel
 // function instances to be reused which improves performance since the
-// kernel values do not have to be recalculated as often.
+// kernel values do not have to be recalculated as often.  A KernelFunctionFactory
+// maintains an inner product cache used by the KernelFunctions it builds.
 class KernelFunctionFactory {
 public:
     KernelFunctionFactory(const LabeledObservationVector& _obs) : obs(_obs) {}
@@ -575,6 +650,7 @@ public:
 private:
     const LabeledObservationVector& obs;
     KernelFunctionMap kernelFunctionTable;
+    //InnerProductCache innerProductCache;
 };
 
 
