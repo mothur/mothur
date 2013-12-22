@@ -1298,9 +1298,11 @@ vector< vector<string> > MakeContigsCommand::readFastqFiles(unsigned long int& c
         
         if (uniques.size() != 0) {
             for (itUniques = uniques.begin(); itUniques != uniques.end(); itUniques++) {
+                if (m->control_pressed) { break; }
                 m->mothurOut("[WARNING]: did not find paired read for " + itUniques->first + ", ignoring.\n");
             }
             for (map<string, pairFastqRead>:: iterator it = pairUniques.begin(); it != pairUniques.end(); it++) {
+                if (m->control_pressed) { break; }
                 m->mothurOut("[WARNING]: did not find paired read for " + (it->first).substr(1) + ", ignoring.\n");
             }
             m->mothurOutEndLine();
@@ -1660,6 +1662,7 @@ fastqRead MakeContigsCommand::readFastq(ifstream& in, bool& ignore){
         
         vector<int> qualScores = convertQual(quality);
         
+        m->checkName(name);
         read.name = name;
         read.sequence = sequence;
         read.scores = qualScores;
@@ -1974,7 +1977,6 @@ bool MakeContigsCommand::getOligos(vector<vector<string> >& fastaFileNames, stri
                     else { uniquePrimers.insert(tempPair); }
 					
                     if (m->debug) {  if (group != "") { m->mothurOut("[DEBUG]: reading group " + group + ".\n"); }else{ m->mothurOut("[DEBUG]: no group for primer pair " + newPrimer.forward + " " + newPrimer.reverse + ".\n"); }  }
-                    
 					primers[indexPrimer]=newPrimer; indexPrimer++;		
 					primerNameVector.push_back(group);
 				}else if(type == "BARCODE"){

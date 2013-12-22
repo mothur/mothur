@@ -29,8 +29,7 @@ vector<string> VennCommand::setParameters(){
 		CommandParameter pnseqs("nseqs", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pnseqs);
         CommandParameter psharedotus("sharedotus", "Boolean", "", "t", "", "", "","",false,false); parameters.push_back(psharedotus);
 		CommandParameter pfontsize("fontsize", "Number", "", "24", "", "", "","",false,false); parameters.push_back(pfontsize);
-		CommandParameter ppermute("permute", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(ppermute);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+        CommandParameter ppermute("permute", "Multiple", "1-2-3-4", "4", "", "", "","",false,false); parameters.push_back(ppermute);		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
@@ -56,7 +55,7 @@ string VennCommand::getHelpString(){
 		helpString += "The default value for calc is sobs if you have only read a list file or if you have selected only one group, and sharedsobs if you have multiple groups.\n";
 		helpString += "The default available estimators for calc are sobs, chao and ace if you have only read a list file, and sharedsobs, sharedchao and sharedace if you have read a shared file.\n";
 		helpString += "The nseqs parameter will output the number of sequences represented by the otus in the picture, default=F.\n";
-		helpString += "If you have more than 4 groups, the permute parameter will find all possible combos of 4 of your groups and create pictures for them, default=F.\n";
+		helpString += "If you have more than 4 groups, you can use the permute parameter to set the number of groups you would like mothur to divide the samples into to draw the venn diagrams for all possible combos. Default=4.\n";
 		helpString += "The only estimators available four 4 groups are sharedsobs and sharedchao.\n";
         helpString += "The sharedotus parameter can be used with the sharedsobs calculator to get the names of the OTUs in each section of the venn diagram. Default=t.\n";
 		helpString += "The venn command outputs a .svg file for each calculator you specify at each distance you choose.\n";
@@ -215,8 +214,10 @@ VennCommand::VennCommand(string option)  {
 			temp = validParameter.validFile(parameters, "nseqs", false);		if (temp == "not found"){	temp = "f";				}
 			nseqs = m->isTrue(temp); 
 
-			temp = validParameter.validFile(parameters, "permute", false);		if (temp == "not found"){	temp = "f";				}
-			perm = m->isTrue(temp); 
+			temp = validParameter.validFile(parameters, "permute", false);		if (temp == "not found"){	temp = "4";				}
+			m->mothurConvert(temp, perm);
+            if ((perm == 1) || (perm == 2) || (perm == 3) || (perm == 4)) { }
+            else { m->mothurOut("[ERROR]: Not a valid permute value.  Valid values are 1, 2, 3, and 4."); m->mothurOutEndLine(); abort = true;  }
             
             temp = validParameter.validFile(parameters, "sharedotus", false);		if (temp == "not found"){	temp = "t";				}
 			sharedOtus = m->isTrue(temp); 
@@ -280,7 +281,7 @@ int VennCommand::execute(){
 			lookup = input->getSharedRAbundVectors();
 			lastLabel = lookup[0]->getLabel();
 			
-			if ((lookup.size() > 4) && (perm)) { combosOfFour = findCombinations(lookup.size()); }
+			if ((lookup.size() > 4)) { combos = findCombinations(lookup.size()); }
 		}else if (format == "list") {
 			sabund = input->getSAbundVector();
 			lastLabel = sabund->getLabel();
@@ -308,17 +309,12 @@ int VennCommand::execute(){
 					processedLabels.insert(lookup[0]->getLabel());
 					userLabels.erase(lookup[0]->getLabel());
 					
-					if ((lookup.size() > 4) && (!perm)){
-						m->mothurOut("Error: Too many groups chosen.  You may use up to 4 groups with the venn command.  I will use the first four groups in your groupfile. If you set perm=t, I will find all possible combos of 4 groups."); m->mothurOutEndLine();
-						for (int i = lookup.size(); i > 4; i--) { lookup.pop_back(); } //no memmory leak because pop_back calls destructor
 					
-						vector<string> outfilenames = venn->getPic(lookup, vennCalculators);
-						for(int i = 0; i < outfilenames.size(); i++) { if (outfilenames[i] != "control" ) { outputNames.push_back(outfilenames[i]);  outputTypes["svg"].push_back(outfilenames[i]);  } }
 
-					}else if ((lookup.size() > 4) && (perm)) {
+					if (lookup.size() > 4) {
 						set< set<int> >::iterator it3;
 						set<int>::iterator it2;
-						for (it3 = combosOfFour.begin(); it3 != combosOfFour.end(); it3++) {  
+						for (it3 = combos.begin(); it3 != combos.end(); it3++) {  
 			
 							set<int> poss = *it3;
 							vector<SharedRAbundVector*> subset;
@@ -343,17 +339,10 @@ int VennCommand::execute(){
 					processedLabels.insert(lookup[0]->getLabel());
 					userLabels.erase(lookup[0]->getLabel());
 
-					if ((lookup.size() > 4) && (!perm)){
-						m->mothurOut("Error: Too many groups chosen.  You may use up to 4 groups with the venn command.  I will use the first four groups in your groupfile. If you set perm=t, I will find all possible combos of 4 groups."); m->mothurOutEndLine();
-						for (int i = lookup.size(); i > 4; i--) { lookup.pop_back(); } //no memmory leak because pop_back calls destructor
-					
-						vector<string> outfilenames = venn->getPic(lookup, vennCalculators);
-						for(int i = 0; i < outfilenames.size(); i++) { if (outfilenames[i] != "control" ) { outputNames.push_back(outfilenames[i]);  outputTypes["svg"].push_back(outfilenames[i]);  }  }
-
-					}else if ((lookup.size() > 4) && (perm)) {
+					if (lookup.size() > 4) {
 						set< set<int> >::iterator it3;
 						set<int>::iterator it2;
-						for (it3 = combosOfFour.begin(); it3 != combosOfFour.end(); it3++) {  
+						for (it3 = combos.begin(); it3 != combos.end(); it3++) {  
 			
 							set<int> poss = *it3;
 							vector<SharedRAbundVector*> subset;
@@ -409,17 +398,10 @@ int VennCommand::execute(){
 					processedLabels.insert(lookup[0]->getLabel());
 					userLabels.erase(lookup[0]->getLabel());
 
-					if ((lookup.size() > 4) && (!perm)){
-						m->mothurOut("Error: Too many groups chosen.  You may use up to 4 groups with the venn command.  I will use the first four groups in your groupfile. If you set perm=t, I will find all possible combos of 4 groups."); m->mothurOutEndLine();
-						for (int i = lookup.size(); i > 4; i--) { lookup.pop_back(); } //no memmory leak because pop_back calls destructor
-					
-						vector<string> outfilenames = venn->getPic(lookup, vennCalculators);
-						for(int i = 0; i < outfilenames.size(); i++) { if (outfilenames[i] != "control" ) { outputNames.push_back(outfilenames[i]);  outputTypes["svg"].push_back(outfilenames[i]); }  }
-
-					}else if ((lookup.size() > 4) && (perm)) {
+					if (lookup.size() > 4) {
 						set< set<int> >::iterator it3;
 						set<int>::iterator it2;
-						for (it3 = combosOfFour.begin(); it3 != combosOfFour.end(); it3++) {  
+						for (it3 = combos.begin(); it3 != combos.end(); it3++) {  
 			
 							set<int> poss = *it3;
 							vector<SharedRAbundVector*> subset;
@@ -552,7 +534,7 @@ int VennCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-//returns a vector of sets containing the 4 group combinations
+//returns a vector of sets containing the group combinations
 set< set<int> > VennCommand::findCombinations(int lookupSize){
 	try {
 		set< set<int> > combos;
@@ -561,7 +543,7 @@ set< set<int> > VennCommand::findCombinations(int lookupSize){
 		for (int i = 0; i < lookupSize; i++) {  possibles.insert(i);  }
 		
 		getCombos(possibles, combos);
-		
+        
 		return combos;
 		
 	}
@@ -571,11 +553,11 @@ set< set<int> > VennCommand::findCombinations(int lookupSize){
 	}
 }
 //**********************************************************************************************************************
-//recusively finds combos of 4
+//recusively finds combos of length perm
 int VennCommand::getCombos(set<int> possibles, set< set<int> >& combos){
 	try {
 		
-		if (possibles.size() == 4) { //done
+		if (possibles.size() == perm) { //done
 			if (combos.count(possibles) == 0) { //no dups
 				combos.insert(possibles);
 			}

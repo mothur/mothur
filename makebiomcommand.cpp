@@ -824,7 +824,7 @@ map<string, string> MakeBiomCommand::readGGOtuMap(){
             vector<string> pieces = m->splitWhiteSpace(line);
             
             if (pieces.size() != 0) {
-                string otuID = pieces[0];
+                string otuID = pieces[1];
                 for (int i = 1; i < pieces.size(); i++) {  otuMap[pieces[i]] = otuID; }
             }
         }

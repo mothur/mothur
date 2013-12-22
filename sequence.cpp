@@ -76,7 +76,8 @@ Sequence::Sequence(istringstream& fastaString){
 				}
 			}
 			
-			while (!fastaString.eof())	{	char c = fastaString.get();  if (c == 10 || c == 13){ break;	}	} // get rest of line if there's any crap there
+			//while (!fastaString.eof())	{	char c = fastaString.get();  if (c == 10 || c == 13){ break;	}	} // get rest of line if there's any crap there
+            comment = getCommentString(fastaString);
 			
 			int numAmbig = 0;
 			sequence = getSequenceString(fastaString, numAmbig);
@@ -120,7 +121,8 @@ Sequence::Sequence(istringstream& fastaString, string JustUnaligned){
 				}
 			}
 			
-			while (!fastaString.eof())	{	char c = fastaString.get();  if (c == 10 || c == 13){ break;	}	} // get rest of line if there's any crap there
+			//while (!fastaString.eof())	{	char c = fastaString.get();  if (c == 10 || c == 13){ break;	}	} // get rest of line if there's any crap there
+            comment = getCommentString(fastaString);
 			
 			int numAmbig = 0;
 			sequence = getSequenceString(fastaString, numAmbig);
@@ -166,8 +168,8 @@ Sequence::Sequence(ifstream& fastaFile){
 				}
 			}
 			
-			//read real sequence
-			while (!fastaFile.eof())	{	char c = fastaFile.get(); if (c == 10 || c == 13){  break;	}	} // get rest of line if there's any crap there
+			//while (!fastaFile.eof())	{	char c = fastaFile.get(); if (c == 10 || c == 13){  break;	}	} // get rest of line if there's any crap there
+            comment = getCommentString(fastaFile);
 			
 			int numAmbig = 0;
 			sequence = getSequenceString(fastaFile, numAmbig);
@@ -216,9 +218,11 @@ Sequence::Sequence(ifstream& fastaFile, string& extraInfo, bool getInfo){
 			//read info after sequence name
 			while (!fastaFile.eof())	{	
                 char c = fastaFile.get(); 
-                if (c == 10 || c == 13 || c == -1){  break;	}
+                if (c == 10 || c == 13 || c == -1){   break;	}
                 extraInfo += c;
-            } 
+            }
+            
+            comment = extraInfo;
 			
 			int numAmbig = 0;
 			sequence = getSequenceString(fastaFile, numAmbig);
@@ -261,8 +265,8 @@ Sequence::Sequence(ifstream& fastaFile, string JustUnaligned){
 				}
 			}
 			
-			//read real sequence
-			while (!fastaFile.eof())	{	char c = fastaFile.get(); if (c == 10 || c == 13){	 break;	}	} // get rest of line if there's any crap there
+			//while (!fastaFile.eof())	{	char c = fastaFile.get(); if (c == 10 || c == 13){	 break;	}	} // get rest of line if there's any crap there
+            comment = getCommentString(fastaFile);
 			
 			int numAmbig = 0;
 			sequence = getSequenceString(fastaFile, numAmbig);
@@ -360,17 +364,19 @@ string Sequence::getSequenceString(ifstream& fastaFile, int& numAmbig) {
 string Sequence::getCommentString(ifstream& fastaFile) {
 	try {
 		char letter;
-		string sequence = "";
+		string temp = "";
 		
 		while(fastaFile){
 			letter=fastaFile.get();
-			if((letter == '\r') || (letter == '\n')){  
+			if((letter == '\r') || (letter == '\n') || letter == -1){
 				m->gobble(fastaFile);  //in case its a \r\n situation
 				break;
-			}
+			}else {
+                temp += letter;
+            }
 		}
 		
-		return sequence;
+		return temp;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Sequence", "getCommentString");
@@ -414,17 +420,19 @@ string Sequence::getSequenceString(istringstream& fastaFile, int& numAmbig) {
 string Sequence::getCommentString(istringstream& fastaFile) {
 	try {
 		char letter;
-		string sequence = "";
+		string temp = "";
 		
 		while(fastaFile){
 			letter=fastaFile.get();
-			if((letter == '\r') || (letter == '\n')){  
+			if((letter == '\r') || (letter == '\n') || letter == -1){  
 				m->gobble(fastaFile);  //in case its a \r\n situation
 				break;
-			}
+			}else {
+                temp += letter;
+            }
 		}
 		
-		return sequence;
+		return temp;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Sequence", "getCommentString");
@@ -439,6 +447,7 @@ void Sequence::initialize(){
 	unaligned = "";
 	aligned = "";
 	pairwise = "";
+    comment = "";
 	
 	numBases = 0;
 	alignmentLength = 0;
@@ -581,7 +590,7 @@ int Sequence::getNumNs(){
 
 void Sequence::printSequence(ostream& out){
 
-	out << ">" << name << endl;
+	out << ">" << name << comment << endl;
 	if(isAligned){
 		out << aligned << endl;
 	}

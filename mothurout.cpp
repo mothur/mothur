@@ -779,6 +779,8 @@ string MothurOut::getPathName(string longName){
 bool MothurOut::dirCheck(string& dirName){
 	try {
         
+        if (dirName == "") { return false; }
+        
         string tag = "";
         #ifdef USE_MPI
             int pid; 
@@ -1141,6 +1143,105 @@ int MothurOut::openInputFile(string fileName, ifstream& fileHandle){
 	}	
 }
 /***********************************************************************/
+int MothurOut::openInputFileBinary(string fileName, ifstream& fileHandle){
+	try {
+        
+		//get full path name
+		string completeFileName = getFullPathName(fileName);
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#ifdef USE_COMPRESSION
+        // check for gzipped or bzipped file
+        if (endsWith(completeFileName, ".gz") || endsWith(completeFileName, ".bz2")) {
+            string tempName = string(tmpnam(0));
+            mkfifo(tempName.c_str(), 0666);
+            int fork_result = fork();
+            if (fork_result < 0) {
+                cerr << "Error forking.\n";
+                exit(1);
+            } else if (fork_result == 0) {
+                string command = (endsWith(completeFileName, ".gz") ? "zcat " : "bzcat ") + completeFileName + string(" > ") + tempName;
+                cerr << "Decompressing " << completeFileName << " via temporary named pipe " << tempName << "\n";
+                system(command.c_str());
+                cerr << "Done decompressing " << completeFileName << "\n";
+                mothurRemove(tempName);
+                exit(EXIT_SUCCESS);
+            } else {
+                cerr << "waiting on child process " << fork_result << "\n";
+                completeFileName = tempName;
+            }
+        }
+#endif
+#endif
+        
+		fileHandle.open(completeFileName.c_str(), ios::binary);
+		if(!fileHandle) {
+			mothurOut("[ERROR]: Could not open " + completeFileName); mothurOutEndLine();
+			return 1;
+		}
+		else {
+			//check for blank file
+			gobble(fileHandle);
+			if (fileHandle.eof()) { mothurOut("[ERROR]: " + completeFileName + " is blank. Please correct."); mothurOutEndLine();  }
+			
+			return 0;
+		}
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "openInputFileBinary");
+		exit(1);
+	}	
+}
+/***********************************************************************/
+int MothurOut::openInputFileBinary(string fileName, ifstream& fileHandle, string noerror){
+	try {
+        
+		//get full path name
+		string completeFileName = getFullPathName(fileName);
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#ifdef USE_COMPRESSION
+        // check for gzipped or bzipped file
+        if (endsWith(completeFileName, ".gz") || endsWith(completeFileName, ".bz2")) {
+            string tempName = string(tmpnam(0));
+            mkfifo(tempName.c_str(), 0666);
+            int fork_result = fork();
+            if (fork_result < 0) {
+                cerr << "Error forking.\n";
+                exit(1);
+            } else if (fork_result == 0) {
+                string command = (endsWith(completeFileName, ".gz") ? "zcat " : "bzcat ") + completeFileName + string(" > ") + tempName;
+                cerr << "Decompressing " << completeFileName << " via temporary named pipe " << tempName << "\n";
+                system(command.c_str());
+                cerr << "Done decompressing " << completeFileName << "\n";
+                mothurRemove(tempName);
+                exit(EXIT_SUCCESS);
+            } else {
+                cerr << "waiting on child process " << fork_result << "\n";
+                completeFileName = tempName;
+            }
+        }
+#endif
+#endif
+        
+		fileHandle.open(completeFileName.c_str(), ios::binary);
+		if(!fileHandle) {
+			//mothurOut("[ERROR]: Could not open " + completeFileName); mothurOutEndLine();
+			return 1;
+		}
+		else {
+			//check for blank file
+			gobble(fileHandle);
+			//if (fileHandle.eof()) { mothurOut("[ERROR]: " + completeFileName + " is blank. Please correct."); mothurOutEndLine();  }
+			
+			return 0;
+		}
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "openInputFileBinary - no error");
+		exit(1);
+	}
+}
+
+/***********************************************************************/
 
 int MothurOut::renameFile(string oldName, string newName){
 	try {
@@ -1289,6 +1390,36 @@ int MothurOut::appendFiles(string temp, string filename) {
 		exit(1);
 	}	
 }
+/**************************************************************************************************/
+int MothurOut::appendBinaryFiles(string temp, string filename) {
+	try{
+		ofstream output;
+		ifstream input;
+        
+		//open output file in append mode
+		openOutputFileBinaryAppend(filename, output);
+		int ableToOpen = openInputFileBinary(temp, input, "no error");
+		
+		if (ableToOpen == 0) { //you opened it
+            
+            char buffer[4096];
+            while (!input.eof()) {
+                input.read(buffer, 4096);
+                output.write(buffer, input.gcount());
+            }
+			input.close();
+		}
+		
+		output.close();
+		
+		return ableToOpen;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "appendBinaryFiles");
+		exit(1);
+	}	
+}
+
 /**************************************************************************************************/
 int MothurOut::appendFilesWithoutHeaders(string temp, string filename) {
 	try{

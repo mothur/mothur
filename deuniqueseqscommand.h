@@ -36,13 +36,10 @@ public:
 	
 private:
 
-	string fastaFile, nameFile, outputDir;
+	string fastaFile, nameFile, outputDir, countfile;
 	vector<string> outputNames;
 	bool abort;
-	
-	map<string, string> nameMap;
-	
-	int readNamesFile();
+
 	
 };
 

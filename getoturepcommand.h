@@ -24,12 +24,13 @@ typedef map<int, float> SeqMap;
 
 struct repStruct {
 		string name;
-		int	bin;
+		string bin;
+        int simpleBin;
 		int size;
 		string group;
 		
 		repStruct(){}
-		repStruct(string n, int b, int s, string g) : name(n), bin(b), size(s), group(g) {}
+		repStruct(string n, string b, int sb, int s, string g) : name(n), bin(b), size(s), group(g), simpleBin(sb) { }
 		~repStruct() {}
 };
 

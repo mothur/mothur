@@ -82,6 +82,7 @@ class MothurOut {
 		vector<unsigned long long> setFilePosFasta(string, int&);
 		string sortFile(string, string);
 		int appendFiles(string, string);
+        int appendBinaryFiles(string, string);
         int appendFilesWithoutHeaders(string, string);
 		int renameFile(string, string); //oldname, newname
 		string getFullPathName(string);
@@ -97,6 +98,8 @@ class MothurOut {
 		int openOutputFileAppend(string, ofstream&);
         int openOutputFileBinaryAppend(string, ofstream&);
 		int openInputFile(string, ifstream&);
+        int openInputFileBinary(string, ifstream&);
+        int openInputFileBinary(string, ifstream&, string);
 		int openInputFile(string, ifstream&, string); //no error given
     
         bool checkLocations(string&, string);  //filename, inputDir. checks for file in ./, inputdir, default and mothur's exe location.  Returns false if cant be found. If found completes name with location

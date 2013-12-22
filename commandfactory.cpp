@@ -149,6 +149,7 @@
 #include "makelefsecommand.h"
 #include "lefsecommand.h"
 #include "kruskalwalliscommand.h"
+#include "sracommand.h"
 
 /*******************************************************/
 
@@ -320,6 +321,7 @@ CommandFactory::CommandFactory(){
     commands["make.lefse"]          = "make.lefse";
     commands["lefse"]               = "lefse";
     commands["kruskal.wallis"]      = "kruskal.wallis";
+    commands["sra"]                 = "sra";
     
 
 }
@@ -548,6 +550,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         else if(commandName == "make.lefse")			{	command = new MakeLefseCommand(optionString);				}
         else if(commandName == "lefse")                 {	command = new LefseCommand(optionString);                   }
         else if(commandName == "kruskal.wallis")        {	command = new KruskalWallisCommand(optionString);           }
+        else if(commandName == "sra")                   {	command = new SRACommand(optionString);                     }
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -716,6 +719,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
         else if(commandName == "make.lefse")			{	pipecommand = new MakeLefseCommand(optionString);				}
         else if(commandName == "lefse")                 {	pipecommand = new LefseCommand(optionString);                   }
         else if(commandName == "kruskal.wallis")        {	pipecommand = new KruskalWallisCommand(optionString);           }
+        else if(commandName == "sra")                   {	pipecommand = new SRACommand(optionString);                     }
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -870,6 +874,7 @@ Command* CommandFactory::getCommand(string commandName){
         else if(commandName == "make.lefse")			{	shellcommand = new MakeLefseCommand();				}
         else if(commandName == "lefse")                 {	shellcommand = new LefseCommand();                  }
         else if(commandName == "kruskal.wallis")        {	shellcommand = new KruskalWallisCommand();          }
+        else if(commandName == "sra")                   {	shellcommand = new SRACommand();                    }
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;
