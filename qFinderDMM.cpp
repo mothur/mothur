@@ -82,7 +82,6 @@ qFinderDMM::qFinderDMM(vector<vector<int> > cm, int p): countMatrix(cm), numPart
                 logDeterminant += log(abs(hessian[i][i]));
                 error[currentPartition][i] = invHessian[i][i];
             }
-            
         }
         
         int numParameters = numPartitions * numOTUs + numPartitions - 1;
