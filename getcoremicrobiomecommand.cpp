@@ -352,14 +352,14 @@ int GetCoreMicroBiomeCommand::createTable(vector<SharedRAbundFloatVector*>& look
                 for (int k = 0; k < counts[j]; k++) { table[j][k]++; }
                 
                 if ((abund == -1) && (samples != -1)) { //we want all OTUs with this number of samples
-                    if (counts[j] >= samples) { otuNames[j].push_back(m->currentBinLabels[i]); }
+                    if (counts[j] >= samples) { otuNames[j].push_back(m->currentSharedBinLabels[i]); }
                 }else if ((abund != -1) && (samples == -1)) { //we want all OTUs with this relabund
                     if (j == abund) {  
-                        for (int k = 0; k < counts[j]; k++) {  otuNames[k+1].push_back(m->currentBinLabels[i]); }
+                        for (int k = 0; k < counts[j]; k++) {  otuNames[k+1].push_back(m->currentSharedBinLabels[i]); }
                     }
                 }else if ((abund != -1) && (samples != -1)) { //we want only OTUs with this relabund for this number of samples
                     if ((j == abund) && (counts[j] >= samples)) {  
-                        otuNames[j].push_back(m->currentBinLabels[i]); 
+                        otuNames[j].push_back(m->currentSharedBinLabels[i]); 
                     }
                 }
             }

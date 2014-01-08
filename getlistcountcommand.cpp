@@ -260,19 +260,20 @@ void GetListCountCommand::process(ListVector* list) {
 		m->mothurOut(list->getLabel()); m->mothurOutEndLine();
 		
 		//for each bin in the list vector
+        vector<string> binLabels = list->getLabels();
 		for (int i = 0; i < list->getNumBins(); i++) {
 			if (m->control_pressed) { break; }
 			
 			binnames = list->get(i);
 			
 			if (sort == "otu") {
-				out << i+1 << '\t' << binnames << endl;
+				out << binLabels[i] << '\t' << binnames << endl;
 			}else{ //sort = name
 				vector<string> names;
 				m->splitAtComma(binnames, names);
 				
 				for (int j = 0; j < names.size(); j++) {
-					out << names[j] << '\t' << i+1 << endl;
+					out << names[j] << '\t' << binLabels[i] << endl;
 				}
 			}
 		}

@@ -57,7 +57,7 @@ EstOutput SharedSobsCS::getValues(vector<SharedRAbundVector*> shared, vector<str
 			}
 			
 			//they are shared
-			if (sharedByAll == true) {  observed++;  labels.push_back(m->currentBinLabels[i]); }
+			if (sharedByAll == true) {  observed++;  labels.push_back(m->currentSharedBinLabels[i]); }
 		}
         
 		data[0] = observed;

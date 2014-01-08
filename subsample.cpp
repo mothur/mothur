@@ -108,7 +108,7 @@ vector<string> SubSample::getSample(vector<SharedRAbundVector*>& thislookup, int
 	try {
 		
 		//save mothurOut's binLabels to restore for next label
-		vector<string> saveBinLabels = m->currentBinLabels;
+		vector<string> saveBinLabels = m->currentSharedBinLabels;
 		
 		int numBins = thislookup[0]->getNumBins();
 		for (int i = 0; i < thislookup.size(); i++) {		
@@ -136,7 +136,7 @@ vector<string> SubSample::getSample(vector<SharedRAbundVector*>& thislookup, int
 				
 				for (int j = 0; j < size; j++) {
 					
-					if (m->control_pressed) {  return m->currentBinLabels; }
+					if (m->control_pressed) {  return m->currentSharedBinLabels; }
 					
 					int bin = order.get(j);
 					
@@ -149,11 +149,11 @@ vector<string> SubSample::getSample(vector<SharedRAbundVector*>& thislookup, int
 		//subsampling may have created some otus with no sequences in them
 		eliminateZeroOTUS(thislookup);
         
-		if (m->control_pressed) { return m->currentBinLabels; }
+		if (m->control_pressed) { return m->currentSharedBinLabels; }
 		
 		//save mothurOut's binLabels to restore for next label
-        vector<string> subsampleBinLabels = m->currentBinLabels;
-		m->currentBinLabels = saveBinLabels;
+        vector<string> subsampleBinLabels = m->currentSharedBinLabels;
+		m->currentSharedBinLabels = saveBinLabels;
 		
 		return subsampleBinLabels;
 		
@@ -200,7 +200,7 @@ int SubSample::eliminateZeroOTUS(vector<SharedRAbundVector*>& thislookup) {
 					for (int h = 0; h < diff; h++) { binLabel += "0"; }
 				}
 				binLabel += sbinNumber; 
-				if (i < m->currentBinLabels.size()) {  binLabel = m->currentBinLabels[i]; }
+				if (i < m->currentSharedBinLabels.size()) {  binLabel = m->currentSharedBinLabels[i]; }
 				
 				newBinLabels.push_back(binLabel);
 			}
@@ -210,7 +210,7 @@ int SubSample::eliminateZeroOTUS(vector<SharedRAbundVector*>& thislookup) {
 		thislookup.clear();
 		
 		thislookup = newLookup;
-		m->currentBinLabels = newBinLabels;
+		m->currentSharedBinLabels = newBinLabels;
 		
 		return 0;
 		

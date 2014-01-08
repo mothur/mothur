@@ -646,7 +646,7 @@ int MetaStatsCommand::convertToInput(vector<SharedRAbundVector*>& subset, string
         out << subset[subset.size()-1]->getGroup() << endl;
         
         for (int i = 0; i < subset[0]->getNumBins(); i++) {
-            out << m->currentBinLabels[i] << '\t';
+            out << m->currentSharedBinLabels[i] << '\t';
             for (int j = 0; j < subset.size()-1; j++) {
                 out << subset[j]->getAbundance(i) << '\t';
             }

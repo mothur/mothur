@@ -461,7 +461,7 @@ int ListOtuLabelsCommand::createList(vector<SharedRAbundVector*>& lookup){
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
         
-        for (int i = 0; i < m->currentBinLabels.size(); i++) {  out << m->currentBinLabels[i] << endl;  }
+        for (int i = 0; i < m->currentSharedBinLabels.size(); i++) {  out << m->currentSharedBinLabels[i] << endl;  }
         
         out.close();
         
@@ -485,7 +485,7 @@ int ListOtuLabelsCommand::createList(vector<SharedRAbundFloatVector*>& lookup){
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
         
-        for (int i = 0; i < m->currentBinLabels.size(); i++) {  out << m->currentBinLabels[i] << endl;  }
+        for (int i = 0; i < m->currentSharedBinLabels.size(); i++) {  out << m->currentSharedBinLabels[i] << endl;  }
         
         out.close();
         
@@ -507,20 +507,8 @@ int ListOtuLabelsCommand::createList(ListVector*& list){
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
         
-        string snumBins = toString(list->getNumBins());
-        for (int i = 0; i < list->getNumBins(); i++) {
-            if (m->control_pressed) { break; }
-            
-            string otuLabel = "Otu";
-            string sbinNumber = toString(i+1);
-            if (sbinNumber.length() < snumBins.length()) { 
-                int diff = snumBins.length() - sbinNumber.length();
-                for (int h = 0; h < diff; h++) { otuLabel += "0"; }
-            }
-            otuLabel += sbinNumber; 
-            
-            out << otuLabel << endl;
-        }
+        vector<string> binLabels = list->getLabels();
+        for (int i = 0; i < binLabels.size(); i++) {  out << binLabels[i] << endl;  }
 
         out.close();
         

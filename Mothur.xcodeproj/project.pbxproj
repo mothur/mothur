@@ -38,6 +38,7 @@
 		A73DDC3813C4BF64006AAE38 /* mothurmetastats.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A73DDC3713C4BF64006AAE38 /* mothurmetastats.cpp */; };
 		A741744C175CD9B1007DF49B /* makelefsecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A741744A175CD9B1007DF49B /* makelefsecommand.cpp */; };
 		A741FAD215D1688E0067BCC5 /* sequencecountparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A741FAD115D1688E0067BCC5 /* sequencecountparser.cpp */; };
+		A747EC71181EA0F900345732 /* sracommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A747EC70181EA0F900345732 /* sracommand.cpp */; };
 		A7496D2E167B531B00CC7D7C /* kruskalwalliscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7496D2C167B531B00CC7D7C /* kruskalwalliscommand.cpp */; };
 		A74A9A9F148E881E00AB5E3E /* spline.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74A9A9E148E881E00AB5E3E /* spline.cpp */; };
 		A74C06E916A9C0A9008390A3 /* primerdesigncommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74C06E816A9C0A8008390A3 /* primerdesigncommand.cpp */; };
@@ -460,6 +461,8 @@
 		A741744B175CD9B1007DF49B /* makelefsecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = makelefsecommand.h; sourceTree = "<group>"; };
 		A741FAD115D1688E0067BCC5 /* sequencecountparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sequencecountparser.cpp; sourceTree = "<group>"; };
 		A741FAD415D168A00067BCC5 /* sequencecountparser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sequencecountparser.h; sourceTree = "<group>"; };
+		A747EC6F181EA0E500345732 /* sracommand.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sracommand.h; sourceTree = "<group>"; };
+		A747EC70181EA0F900345732 /* sracommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sracommand.cpp; sourceTree = "<group>"; };
 		A7496D2C167B531B00CC7D7C /* kruskalwalliscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = kruskalwalliscommand.cpp; sourceTree = "<group>"; };
 		A7496D2D167B531B00CC7D7C /* kruskalwalliscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = kruskalwalliscommand.h; sourceTree = "<group>"; };
 		A74A9A9D148E881E00AB5E3E /* spline.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = spline.h; sourceTree = "<group>"; };
@@ -1575,6 +1578,8 @@
 				A7E9B83F12D37EC400DA6239 /* splitabundcommand.cpp */,
 				A7E9B84212D37EC400DA6239 /* splitgroupscommand.h */,
 				A7E9B84112D37EC400DA6239 /* splitgroupscommand.cpp */,
+				A747EC6F181EA0E500345732 /* sracommand.h */,
+				A747EC70181EA0F900345732 /* sracommand.cpp */,
 				A7E9B85012D37EC400DA6239 /* subsamplecommand.h */,
 				A7E9B84F12D37EC400DA6239 /* subsamplecommand.cpp */,
 				A7E9B85812D37EC400DA6239 /* summarycommand.h */,
@@ -2394,6 +2399,7 @@
 				A77916E8176F7F7600EEFE18 /* designmap.cpp in Sources */,
 				A7D9378A17B146B5001E90B0 /* wilcox.cpp in Sources */,
 				A7F24FC317EA36600021DC9A /* classifyrfsharedcommand.cpp in Sources */,
+				A747EC71181EA0F900345732 /* sracommand.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2410,7 +2416,7 @@
 				"DSTROOT[sdk=*]" = TARGET_BUILD_DIR;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				"INSTALL_PATH[sdk=*]" = TARGET_BUILD_DIR;
 				PRODUCT_NAME = mothur;
 				SDKROOT = macosx;
@@ -2426,7 +2432,7 @@
 				DEPLOYMENT_LOCATION = YES;
 				DSTROOT = TARGET_BUILD_DIR;
 				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_WARN_UNUSED_VALUE = YES;
 				PRODUCT_NAME = mothur;
 				SDKROOT = macosx;
@@ -2443,11 +2449,11 @@
 				GCC_ENABLE_SSE3_EXTENSIONS = NO;
 				GCC_ENABLE_SSE41_EXTENSIONS = NO;
 				GCC_ENABLE_SSE42_EXTENSIONS = NO;
-				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"../../release\\\"\"",
-					"VERSION=\"\\\"1.31.0\\\"\"",
-					"RELEASE_DATE=\"\\\"5/24/2013\\\"\"",
+					"VERSION=\"\\\"1.32.0\\\"\"",
+					"RELEASE_DATE=\"\\\"10/31/2013\\\"\"",
 				);
 				GCC_VERSION = "";
 				"GCC_VERSION[arch=*]" = "";
@@ -2481,10 +2487,10 @@
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = "";
-				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"VERSION=\"\\\"1.32.0\\\"\"",
-					"RELEASE_DATE=\"\\\"10/01/2013\\\"\"",
+					"VERSION=\"\\\"1.32.1\\\"\"",
+					"RELEASE_DATE=\"\\\"10/16/2013\\\"\"",
 				);
 				GCC_VERSION = "";
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;

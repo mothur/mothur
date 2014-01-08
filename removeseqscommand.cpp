@@ -15,6 +15,7 @@
 //**********************************************************************************************************************
 vector<string> RemoveSeqsCommand::setParameters(){	
 	try {
+        CommandParameter pfastq("fastq", "InputTypes", "", "", "none", "FNGLT", "none","fastq",false,false,true); parameters.push_back(pfastq);
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "FNGLT", "none","fasta",false,false,true); parameters.push_back(pfasta);
         CommandParameter pname("name", "InputTypes", "", "", "NameCount", "FNGLT", "none","name",false,false,true); parameters.push_back(pname);
         CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "FNGLT", "none","count",false,false,true); parameters.push_back(pcount);
@@ -41,9 +42,9 @@ vector<string> RemoveSeqsCommand::setParameters(){
 string RemoveSeqsCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The remove.seqs command reads an .accnos file and at least one of the following file types: fasta, name, group, count, list, taxonomy, quality or alignreport file.\n";
+		helpString += "The remove.seqs command reads an .accnos file and at least one of the following file types: fasta, name, group, count, list, taxonomy, quality, fastq or alignreport file.\n";
 		helpString += "It outputs a file containing the sequences NOT in the .accnos file.\n";
-		helpString += "The remove.seqs command parameters are accnos, fasta, name, group, count, list, taxonomy, qfile, alignreport and dups.  You must provide accnos and at least one of the file parameters.\n";
+		helpString += "The remove.seqs command parameters are accnos, fasta, name, group, count, list, taxonomy, qfile, alignreport, fastq and dups.  You must provide accnos and at least one of the file parameters.\n";
 		helpString += "The dups parameter allows you to remove the entire line from a name file if you remove any name from the line. default=true. \n";
 		helpString += "The remove.seqs command should be in the following format: remove.seqs(accnos=yourAccnos, fasta=yourFasta).\n";
 		helpString += "Example remove.seqs(accnos=amazon.accnos, fasta=amazon.fasta).\n";
@@ -61,11 +62,12 @@ string RemoveSeqsCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "fasta")            {   pattern = "[filename],pick,[extension]";    }
+        else if (type == "fastq")       {   pattern = "[filename],pick,[extension]";    }
         else if (type == "taxonomy")    {   pattern = "[filename],pick,[extension]";    }
         else if (type == "name")        {   pattern = "[filename],pick,[extension]";    }
         else if (type == "group")       {   pattern = "[filename],pick,[extension]";    }
         else if (type == "count")       {   pattern = "[filename],pick,[extension]";    }
-        else if (type == "list")        {   pattern = "[filename],pick,[extension]";    }
+        else if (type == "list")        {   pattern = "[filename],[distance],pick,[extension]";    }
         else if (type == "qfile")       {   pattern = "[filename],pick,[extension]";    }
         else if (type == "alignreport")      {   pattern = "[filename],pick.align.report";    }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
@@ -84,6 +86,7 @@ RemoveSeqsCommand::RemoveSeqsCommand(){
 		setParameters();
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
+        outputTypes["fastq"] = tempOutNames;
 		outputTypes["taxonomy"] = tempOutNames;
 		outputTypes["name"] = tempOutNames;
 		outputTypes["group"] = tempOutNames;
@@ -123,6 +126,7 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
 			//initialize outputTypes
 			vector<string> tempOutNames;
 			outputTypes["fasta"] = tempOutNames;
+            outputTypes["fastq"] = tempOutNames;
 			outputTypes["taxonomy"] = tempOutNames;
 			outputTypes["name"] = tempOutNames;
 			outputTypes["group"] = tempOutNames;
@@ -210,6 +214,14 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["count"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("fastq");
+				//user has given a template file
+				if(it != parameters.end()){
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["fastq"] = inputDir + it->second;		}
+				}
 			}
 
 			
@@ -258,6 +270,10 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
 			if (qualfile == "not open") { abort = true; }
 			else if (qualfile == "not found") {  qualfile = "";  }			
 			else { m->setQualFile(qualfile); }
+            
+            fastqfile = validParameter.validFile(parameters, "fastq", true);
+			if (fastqfile == "not open") { abort = true; }
+			else if (fastqfile == "not found") {  fastqfile = "";  }
 			
 			string usedDups = "true";
 			string temp = validParameter.validFile(parameters, "dups", false);	
@@ -280,7 +296,7 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
                 m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
             }
 			
-			if ((countfile == "") && (fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == "") && (taxfile == "") && (qualfile == ""))  { m->mothurOut("You must provide at least one of the following: fasta, name, group, taxonomy, quality, alignreport or list."); m->mothurOutEndLine(); abort = true; }
+			if ((fastqfile == "") && (countfile == "") && (fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == "") && (taxfile == "") && (qualfile == ""))  { m->mothurOut("You must provide at least one of the following: fasta, name, group, taxonomy, quality, alignreport, fastq or list."); m->mothurOutEndLine(); abort = true; }
 			
             if (countfile == "") {
                 if ((fastafile != "") && (namefile == "")) {
@@ -317,6 +333,7 @@ int RemoveSeqsCommand::execute(){
 		//read through the correct file and output lines you want to keep
 		if (namefile != "")			{		readName();		}
 		if (fastafile != "")		{		readFasta();	}
+        if (fastqfile != "")		{		readFastq();		}
 		if (groupfile != "")		{		readGroup();	}
 		if (alignfile != "")		{		readAlign();	}
 		if (listfile != "")			{		readList();		}
@@ -434,6 +451,71 @@ int RemoveSeqsCommand::readFasta(){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "RemoveSeqsCommand", "readFasta");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+int RemoveSeqsCommand::readFastq(){
+	try {
+		bool wroteSomething = false;
+		int removedCount = 0;
+        
+		ifstream in;
+		m->openInputFile(fastqfile, in);
+		
+		string thisOutputDir = outputDir;
+		if (outputDir == "") {  thisOutputDir += m->hasPath(fastqfile);  }
+		map<string, string> variables;
+        variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(fastqfile));
+        variables["[extension]"] = m->getExtension(fastqfile);
+		string outputFileName = getOutputFileName("fastq", variables);
+		ofstream out;
+		m->openOutputFile(outputFileName, out);
+        
+		
+		while(!in.eof()){
+			
+			if (m->control_pressed) { in.close(); out.close(); m->mothurRemove(outputFileName); return 0; }
+			
+			//read sequence name
+			string input = m->getline(in); m->gobble(in);
+			
+            string outputString = input + "\n";
+            
+			if (input[0] == '@') {
+                //get rest of lines
+                outputString += m->getline(in) + "\n"; m->gobble(in);
+                outputString += m->getline(in) + "\n"; m->gobble(in);
+                outputString += m->getline(in) + "\n"; m->gobble(in);
+                
+                vector<string> splits = m->splitWhiteSpace(input);
+                string name = splits[0];
+                name = name.substr(1);
+                m->checkName(name);
+                
+                if (names.count(name) == 0) {
+					wroteSomething = true;
+                    out << outputString;
+                }else { removedCount++; }
+            }
+            
+			m->gobble(in);
+		}
+		in.close();
+		out.close();
+		
+		
+		if (wroteSomething == false) {  m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();  }
+		outputTypes["fasta"].push_back(outputFileName);  outputNames.push_back(outputFileName);
+		
+		m->mothurOut("Removed " + toString(removedCount) + " sequences from your fastq file."); m->mothurOutEndLine();
+
+		
+		return 0;
+        
+	}
+	catch(exception& e) {
+		m->errorOut(e, "RemoveSeqsCommand", "readFastq");
 		exit(1);
 	}
 }
@@ -582,10 +664,7 @@ int RemoveSeqsCommand::readList(){
 		map<string, string> variables; 
 		variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(listfile));
         variables["[extension]"] = m->getExtension(listfile);
-		string outputFileName = getOutputFileName("list", variables);	
-		ofstream out;
-		m->openOutputFile(outputFileName, out);
-		
+				
 		ifstream in;
 		m->openInputFile(listfile, in);
 		
@@ -602,48 +681,60 @@ int RemoveSeqsCommand::readList(){
 			//make a new list vector
 			ListVector newList;
 			newList.setLabel(list.getLabel());
+            
+			variables["[distance]"] = list.getLabel();
+            string outputFileName = getOutputFileName("list", variables);
 			
+			ofstream out;
+			m->openOutputFile(outputFileName, out);
+			outputTypes["list"].push_back(outputFileName);  outputNames.push_back(outputFileName);
+            
+            vector<string> binLabels = list.getLabels();
+            vector<string> newBinLabels;
+            
+            if (m->control_pressed) { in.close(); out.close();  return 0; }
+
 			//for each bin
 			for (int i = 0; i < list.getNumBins(); i++) {
 				if (m->control_pressed) { in.close();  out.close();  m->mothurRemove(outputFileName);  return 0; }
 			
 				//parse out names that are in accnos file
-				string binnames = list.get(i);
+				string bin = list.get(i);
+                vector<string> bnames;
+                m->splitAtComma(bin, bnames);
 				
 				string newNames = "";
-				while (binnames.find_first_of(',') != -1) { 
-					string name = binnames.substr(0,binnames.find_first_of(','));
-					binnames = binnames.substr(binnames.find_first_of(',')+1, binnames.length());
-					
-					//if that name is in the .accnos file, add it
+                for (int j = 0; j < bnames.size(); j++) {
+					string name = bnames[j];
+                    //if that name is in the .accnos file, add it
 					if (names.count(name) == 0) {  newNames += name + ",";  }
 					else {  removedCount++;  }
-				}
-			
-				//get last name
-				if (names.count(binnames) == 0) {  newNames += binnames + ",";  }
-				else {  removedCount++;  }
+                }
 
 				//if there are names in this bin add to new list
 				if (newNames != "") {  
 					newNames = newNames.substr(0, newNames.length()-1); //rip off extra comma
-					newList.push_back(newNames);	
+					newList.push_back(newNames);
+                    newBinLabels.push_back(binLabels[i]);
 				}
 			}
 				
 			//print new listvector
 			if (newList.getNumBins() != 0) {
 				wroteSomething = true;
+				newList.setLabels(newBinLabels);
+                newList.printHeaders(out);
 				newList.print(out);
+
 			}
 			
 			m->gobble(in);
+            out.close();
 		}
 		in.close();	
-		out.close();
+		
 		
 		if (wroteSomething == false) {  m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();  }
-		outputTypes["list"].push_back(outputFileName); outputNames.push_back(outputFileName);
 		
 		m->mothurOut("Removed " + toString(removedCount) + " sequences from your list file."); m->mothurOutEndLine();
 		

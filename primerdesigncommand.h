@@ -50,8 +50,8 @@ private:
 	};
     
     bool abort, allLines, large;
-    int cutoff, pdiffs, length, otunumber, processors, alignedLength;
-    string outputDir, listfile, namefile, countfile, fastafile, label;
+    int cutoff, pdiffs, length, processors, alignedLength;
+    string outputDir, listfile, otulabel, namefile, countfile, fastafile, label;
     double minTM, maxTM;
     ListVector* list;
     vector<string> outputNames;
@@ -65,10 +65,11 @@ private:
     bool findPrimer(string, string, vector<int>&, vector<int>&, vector<int>&);
     int findMeltingPoint(string primer, double&, double&);
     
-    set<int> createProcesses(string, vector<double>&, vector<double>&, set<string>&, vector<Sequence>&);
-    set<int> driver(string, vector<double>&, vector<double>&, set<string>&, vector<Sequence>&, int, int, int&);
+    set<int> createProcesses(string, vector<double>&, vector<double>&, set<string>&, vector<Sequence>&, int);
+    set<int> driver(string, vector<double>&, vector<double>&, set<string>&, vector<Sequence>&, int, int, int&, int);
     vector< vector< vector<unsigned int> > > driverGetCounts(map<string, int>&, unsigned long int&, vector<unsigned int>&, unsigned long long&, unsigned long long&);
     vector<Sequence> createProcessesConSeqs(map<string, int>&, unsigned long int&);
+    int findIndex(string binLabel, vector<string> binLabels);
     
 };
 
@@ -81,7 +82,7 @@ struct primerDesignData {
 	MothurOut* m;
 	int start;
 	int end;
-	int pdiffs, threadID, otunumber, length;
+	int pdiffs, threadID,  length, binIndex;
 	set<string> primers;
 	vector<double> minTms, maxTms;
     set<int> otusToRemove;
@@ -99,7 +100,7 @@ struct primerDesignData {
         maxTms = max;
         primers = pri;
         consSeqs = seqs;
-        otunumber = otun;
+        binIndex = otun;
         length = l;
 		threadID = tid;
         numBinsProcessed = 0;
@@ -121,7 +122,7 @@ static DWORD WINAPI MyPrimerThreadFunction(LPVOID lpParam){
             
             if (pDataArray->m->control_pressed) { break; }
             
-            if (i != (pDataArray->otunumber-1)) {
+            if (i != (pDataArray->binIndex)) {
                 int primerIndex = 0;
                 for (set<string>::iterator it = pDataArray->primers.begin(); it != pDataArray->primers.end(); it++) {
                     vector<int> primerStarts;

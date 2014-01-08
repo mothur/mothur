@@ -417,10 +417,9 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
 			else if (summaryfile == "not found") {  summaryfile = "";  }
 			if (summaryfile != "") { m->setSummaryFile(summaryfile); }
 
-			
-			processors = validParameter.validFile(parameters, "processors", false);
-			if (processors == "not found") {  processors = "1";  }	
-			if (processors != "") { m->setProcessors(processors); }
+			string temp = validParameter.validFile(parameters, "processors", false);
+			if (temp == "not found"){	temp = m->getProcessors();	}
+			m->setProcessors(temp);
 			
 			clearTypes = validParameter.validFile(parameters, "clear", false);			
 			if (clearTypes == "not found") { clearTypes = ""; }

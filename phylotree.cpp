@@ -233,6 +233,48 @@ string PhyloTree::getNextTaxon(string& heirarchy, string seqname){
 		exit(1);
 	}
 }
+/**************************************************************************************************/
+
+vector<string> PhyloTree::getSeqs(string seqTaxonomy){
+	try {
+        string taxCopy = seqTaxonomy;
+        vector<string> names;
+        map<string, int>::iterator childPointer;
+		
+		int currentNode = 0;
+
+        m->removeConfidences(seqTaxonomy);
+        
+        string taxon;
+        while(seqTaxonomy != ""){
+			
+			if (m->control_pressed) { return names; }
+			
+			taxon = getNextTaxon(seqTaxonomy, "");
+            
+            if (m->debug) { m->mothurOut(taxon +'\n'); }
+			
+			if (taxon == "") {  m->mothurOut(taxCopy + " has an error in the taxonomy.  This may be due to a ;;"); m->mothurOutEndLine(); break;  }
+			
+			childPointer = tree[currentNode].children.find(taxon);
+			
+			if(childPointer != tree[currentNode].children.end()){	//if the node already exists, move on
+				currentNode = childPointer->second;
+			}
+			else{											//otherwise, error this taxonomy is not in tree
+				m->mothurOut("[ERROR]: " + taxCopy + " is not in taxonomy tree, please correct."); m->mothurOutEndLine(); m->control_pressed = true; return names;
+			}
+            
+			if (seqTaxonomy == "") {   names = tree[currentNode].accessions;	}
+		}
+        
+        return names;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "PhyloTree", "getSeqs");
+		exit(1);
+	}
+}
 
 /**************************************************************************************************/
 

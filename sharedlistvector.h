@@ -33,7 +33,7 @@ public:
 	SharedListVector();
 	SharedListVector(int);
 	SharedListVector(ifstream&);
-	SharedListVector(const SharedListVector& lv) : DataVector(lv.label), data(lv.data), maxRank(lv.maxRank), numBins(lv.numBins), numSeqs(lv.numSeqs){ groupmap = NULL; countTable = NULL; };
+	SharedListVector(const SharedListVector& lv) : DataVector(lv.label), data(lv.data), maxRank(lv.maxRank), numBins(lv.numBins), numSeqs(lv.numSeqs), binLabels(lv.binLabels) { groupmap = NULL; countTable = NULL; };
 	~SharedListVector(){ if (groupmap != NULL) { delete groupmap; } if (countTable != NULL) { delete countTable; } };
 	
 	int getNumBins()							{	return numBins;		}
@@ -42,6 +42,8 @@ public:
 
 	void set(int, string);	
 	string get(int);
+    vector<string> getLabels();
+    void setLabels(vector<string>);
 	void push_back(string);
 	void resize(int);
 	void clear();
@@ -63,6 +65,7 @@ private:
 	int maxRank;
 	int numBins;
 	int numSeqs;
+    vector<string> binLabels;
 
 };
 

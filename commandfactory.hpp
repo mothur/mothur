@@ -27,8 +27,8 @@ public:
 	bool isValidCommand(string, string);
 	void printCommands(ostream&);
     void printCommandsCategories(ostream&);
-	void setOutputDirectory(string o)		{	outputDir = o;	m->setOutputDir(o);	}
-	void setInputDirectory(string i)		{	inputDir = i;		}
+	void setOutputDirectory(string o)		{	if(m->dirCheck(o) || (o == "")) {  outputDir = o; m->setOutputDir(o); }	}
+	void setInputDirectory(string i)		{	if(m->dirCheck(i) || (i == "")) {  inputDir = i;	}	}
 	void setLogfileName(string n, bool a)	{	logFileName = n;  append = a;		}
 	string getLogfileName()					{	return logFileName; 	}
 	bool getAppend()						{	return append;			}

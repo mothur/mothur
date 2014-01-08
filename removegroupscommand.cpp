@@ -70,7 +70,7 @@ string RemoveGroupsCommand::getOutputPattern(string type) {
         else if (type == "count")       {   pattern = "[filename],pick,[extension]";    }
         else if (type == "list")        {   pattern = "[filename],pick,[extension]";    }
         else if (type == "shared")      {   pattern = "[filename],[tag],pick,[extension]";    }
-        else if (type == "design")      {   pattern = "[filename],pick,[extension]";    }
+        else if (type == "design")      {   pattern = "[filename],[tag],pick,[extension]";    }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
         
         return pattern;
@@ -560,9 +560,9 @@ int RemoveGroupsCommand::readShared(){
 		m->setGroups(groupsToKeep);
 		m->clearAllGroups();
 		m->saveNextLabel = "";
-		m->printedHeaders = false;
-		m->currentBinLabels.clear();
-		m->binLabelsInFile.clear();
+		m->printedSharedHeaders = false;
+		m->currentSharedBinLabels.clear();
+		m->sharedBinLabelsInFile.clear();
 		
 		InputData input(sharedfile, "sharedfile");
 		lookup = input.getSharedRAbundVectors();
@@ -623,12 +623,7 @@ int RemoveGroupsCommand::readList(){
 		map<string, string> variables; 
         variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(listfile));
         variables["[extension]"] = m->getExtension(listfile);
-		string outputFileName = getOutputFileName("list", variables);
-
-		
-		ofstream out;
-		m->openOutputFile(outputFileName, out);
-		
+				
 		ifstream in;
 		m->openInputFile(listfile, in);
 		
@@ -641,6 +636,16 @@ int RemoveGroupsCommand::readList(){
 			
 			//read in list vector
 			ListVector list(in);
+            
+            variables["[tag]"] = list.getLabel();
+            string outputFileName = getOutputFileName("list", variables);
+			
+			ofstream out;
+			m->openOutputFile(outputFileName, out);
+			outputTypes["list"].push_back(outputFileName);  outputNames.push_back(outputFileName);
+            
+            vector<string> binLabels = list.getLabels();
+            vector<string> newBinLabels;
 			
 			//make a new list vector
 			ListVector newList;
@@ -681,24 +686,26 @@ int RemoveGroupsCommand::readList(){
 				//if there are names in this bin add to new list
 				if (newNames != "") {  
 					newNames = newNames.substr(0, newNames.length()-1); //rip off extra comma
-					newList.push_back(newNames);	
+					newList.push_back(newNames);
+                    newBinLabels.push_back(binLabels[i]);
 				}
 			}
 			
 			//print new listvector
 			if (newList.getNumBins() != 0) {
 				wroteSomething = true;
+				newList.setLabels(newBinLabels);
+                newList.printHeaders(out);
 				newList.print(out);
 			}
 			
 			m->gobble(in);
+            out.close();
 		}
 		in.close();	
-		out.close();
+		
 		
 		if (wroteSomething == false) {  m->mothurOut("Your file contains only sequences from the groups you wish to remove."); m->mothurOutEndLine();  }
-		outputTypes["list"].push_back(outputFileName); outputNames.push_back(outputFileName);
-		
 		m->mothurOut("Removed " + toString(removedCount) + " sequences from your list file."); m->mothurOutEndLine();
 		
 		return 0;

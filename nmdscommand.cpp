@@ -288,7 +288,7 @@ int NMDSCommand::execute(){
 		outBest.setf(ios::fixed, ios::floatfield);
 		outBest.setf(ios::showpoint);
 		
-		outBest << '\t';
+		outBest << "group" << '\t';
 		for (int k = 0; k < bestConfig.size(); k++) { outBest << "axis" << (k+1) << '\t'; }
 		outBest << endl;
 		

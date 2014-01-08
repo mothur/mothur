@@ -62,13 +62,13 @@ SharedRAbundFloatVector::SharedRAbundFloatVector(ifstream& f) : DataVector(), ma
 				
 				//parse labels to save
 				istringstream iStringStream(label);
-				m->binLabelsInFile.clear();
+				m->sharedBinLabelsInFile.clear();
 				while(!iStringStream.eof()){
 					if (m->control_pressed) { break; }
 					string temp;
 					iStringStream >> temp;  m->gobble(iStringStream);
                     
-					m->binLabelsInFile.push_back(temp);
+					m->sharedBinLabelsInFile.push_back(temp);
 				}
 				
 				f >> label >> groupN >> num;
@@ -78,7 +78,7 @@ SharedRAbundFloatVector::SharedRAbundFloatVector(ifstream& f) : DataVector(), ma
                 
                 //make binlabels because we don't have any
                 string snumBins = toString(num);
-                m->binLabelsInFile.clear();
+                m->sharedBinLabelsInFile.clear();
                 for (int i = 0; i < num; i++) {  
                     //if there is a bin label use it otherwise make one
                     string binLabel = "Otu";
@@ -88,7 +88,7 @@ SharedRAbundFloatVector::SharedRAbundFloatVector(ifstream& f) : DataVector(), ma
                         for (int h = 0; h < diff; h++) { binLabel += "0"; }
                     }
                     binLabel += sbinNumber;
-                    m->binLabelsInFile.push_back(binLabel);
+                    m->sharedBinLabelsInFile.push_back(binLabel);
                 }
             }
 		}else { 
@@ -99,7 +99,7 @@ SharedRAbundFloatVector::SharedRAbundFloatVector(ifstream& f) : DataVector(), ma
         }
 		
 		//reset labels, currentLabels may have gotten changed as otus were eliminated because of group choices or sampling
-		m->currentBinLabels = m->binLabelsInFile;
+		m->currentSharedBinLabels = m->sharedBinLabelsInFile;
 		
 		holdLabel = label;
 		
@@ -295,7 +295,7 @@ void SharedRAbundFloatVector::printHeaders(ostream& output){
 					for (int h = 0; h < diff; h++) { binLabel += "0"; }
 				}
 				binLabel += sbinNumber;
-				if (i < m->currentBinLabels.size()) {  binLabel = m->currentBinLabels[i]; }
+				if (i < m->currentSharedBinLabels.size()) {  binLabel = m->currentSharedBinLabels[i]; }
 				
 				output << binLabel << '\t'; 
 			}
@@ -310,7 +310,7 @@ void SharedRAbundFloatVector::printHeaders(ostream& output){
 					for (int h = 0; h < diff; h++) { binLabel += "0"; }
 				}
 				binLabel += sbinNumber;
-				if (i < m->currentBinLabels.size()) {  binLabel = m->currentBinLabels[i]; }
+				if (i < m->currentSharedBinLabels.size()) {  binLabel = m->currentSharedBinLabels[i]; }
 				
 				output << binLabel << '\t'; 
 			}
@@ -318,7 +318,7 @@ void SharedRAbundFloatVector::printHeaders(ostream& output){
 			output << endl;
 		}
 		
-		m->printedHeaders = true;
+		m->printedSharedHeaders = true;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SharedRAbundVector", "printHeaders");
@@ -550,7 +550,7 @@ int SharedRAbundFloatVector::eliminateZeroOTUS(vector<SharedRAbundFloatVector*>&
 					for (int h = 0; h < diff; h++) { binLabel += "0"; }
 				}
 				binLabel += sbinNumber; 
-				if (i < m->currentBinLabels.size()) {  binLabel = m->currentBinLabels[i]; }
+				if (i < m->currentSharedBinLabels.size()) {  binLabel = m->currentSharedBinLabels[i]; }
 				
 				newBinLabels.push_back(binLabel);
 			}
@@ -559,7 +559,7 @@ int SharedRAbundFloatVector::eliminateZeroOTUS(vector<SharedRAbundFloatVector*>&
 		for (int j = 0; j < thislookup.size(); j++) {  delete thislookup[j];  }
 		
 		thislookup = newLookup;
-		m->currentBinLabels = newBinLabels;
+		m->currentSharedBinLabels = newBinLabels;
 		
 		return 0;
 		

@@ -315,7 +315,9 @@ int HClusterCommand::execute(){
 		}else{
 			m->mothurOut("Error: no list vector!"); m->mothurOutEndLine(); return 0;
 		}
-		
+        
+        list->printHeaders(listFile);
+        
 		float previousDist = 0.00000;
 		float rndPreviousDist = 0.00000;
 		oldRAbund = *rabund;

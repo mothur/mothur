@@ -23,10 +23,10 @@ class DataVector {
 	
 public:
 	DataVector(){ m = MothurOut::getInstance(); }// : maxRank(0), numBins(0), numSeqs(0){};
-	DataVector(string l) : label(l) {};
-	DataVector(const DataVector& dv) : label(dv.label){};//, maxRank(dv.maxRank), numBins(dv.numBins), numSeqs(dv.numSeqs) {};
-	DataVector(ifstream&);
-	DataVector(ifstream&, GroupMap*);
+	DataVector(string l) : label(l) { m = MothurOut::getInstance();};
+	DataVector(const DataVector& dv) : label(dv.label){ m = MothurOut::getInstance();};//, maxRank(dv.maxRank), numBins(dv.numBins), numSeqs(dv.numSeqs) {};
+	DataVector(ifstream&) {m = MothurOut::getInstance();}
+	DataVector(ifstream&, GroupMap*){m = MothurOut::getInstance();}
 	virtual ~DataVector(){};
 	
 //	virtual int getNumBins()	{	return numBins;		}

@@ -166,7 +166,7 @@ SffMultipleCommand::SffMultipleCommand(string option)  {
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			inputDir = validParameter.validFile(parameters, "inputdir", false);		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
@@ -303,54 +303,9 @@ SffMultipleCommand::SffMultipleCommand(string option)  {
                 path += "lookupFiles\\";
 #endif
 				lookupFileName = m->getFullPathName(path) + "LookUp_Titanium.pat";
-				
-				int ableToOpen;
-				ifstream in;
-				ableToOpen = m->openInputFile(lookupFileName, in, "noerror");
-				in.close();	
-				
-				//if you can't open it, try input location
-				if (ableToOpen == 1) {
-					if (inputDir != "") { //default path is set
-						string tryPath = inputDir + m->getSimpleName(lookupFileName);
-						m->mothurOut("Unable to open " + lookupFileName + ". Trying input directory " + tryPath); m->mothurOutEndLine();
-						ifstream in2;
-						ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-						in2.close();
-						lookupFileName = tryPath;
-					}
-				}
-				
-				//if you can't open it, try default location
-				if (ableToOpen == 1) {
-					if (m->getDefaultPath() != "") { //default path is set
-						string tryPath = m->getDefaultPath() + m->getSimpleName(lookupFileName);
-						m->mothurOut("Unable to open " + lookupFileName + ". Trying default " + tryPath); m->mothurOutEndLine();
-						ifstream in2;
-						ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-						in2.close();
-						lookupFileName = tryPath;
-					}
-				}
-				
-				//if you can't open it its not in current working directory or inputDir, try mothur excutable location
-				if (ableToOpen == 1) {
-					string exepath = m->argv;
-					string tempPath = exepath;
-					for (int i = 0; i < exepath.length(); i++) { tempPath[i] = tolower(exepath[i]); }
-					exepath = exepath.substr(0, (tempPath.find_last_of('m')));
-					
-					string tryPath = m->getFullPathName(exepath) + m->getSimpleName(lookupFileName);
-					m->mothurOut("Unable to open " + lookupFileName + ". Trying mothur's executable location " + tryPath); m->mothurOutEndLine();
-					ifstream in2;
-					ableToOpen = m->openInputFile(tryPath, in2, "noerror");
-					in2.close();
-					lookupFileName = tryPath;
-				}
-				
-				if (ableToOpen == 1) {  m->mothurOut("Unable to open " + lookupFileName + "."); m->mothurOutEndLine(); abort=true;  }
-			}
-			else if(temp == "not open")	{	
+				bool ableToOpen = m->checkLocations(lookupFileName, inputDir);
+                if (!ableToOpen) { abort=true; }
+			}else if(temp == "not open")	{	
 				
 				lookupFileName = validParameter.validFile(parameters, "lookup", false);
 				
@@ -384,8 +339,9 @@ int SffMultipleCommand::execute(){
 		vector<string> sffFiles, oligosFiles;
         readFile(sffFiles, oligosFiles);
         
-        outputDir = m->hasPath(filename);
-        string fileroot = outputDir + m->getRootName(m->getSimpleName(filename));
+        string thisOutputDir = outputDir;
+        if (thisOutputDir == "") { thisOutputDir = m->hasPath(filename); }
+        string fileroot = thisOutputDir + m->getRootName(m->getSimpleName(filename));
         map<string, string> variables; 
 		variables["[filename]"] = fileroot;
         string fasta = getOutputFileName("fasta",variables);
@@ -413,6 +369,8 @@ int SffMultipleCommand::execute(){
             m->setNameFile(name);
             if (makeGroup) { outputNames.push_back(group); outputTypes["group"].push_back(group); m->setGroupFile(group); }
         }
+        
+        m->setProcessors(toString(processors));
         
 		//report output filenames
 		m->mothurOutEndLine();
@@ -443,11 +401,11 @@ int SffMultipleCommand::readFile(vector<string>& sffFiles, vector<string>& oligo
             
             in >> sff;
             
-            sff = m->getFullPathName(sff);
-            
             //ignore file pairing
             if(sff[0] == '#'){ while (!in.eof())	{	char c = in.get();  if (c == 10 || c == 13){	break;	}	} m->gobble(in); }
             else { //check for oligos file
+                bool ableToOpenSff = m->checkLocations(sff, inputDir);
+                
                 oligos = "";
             
                 // get rest of line in case there is a oligos filename
@@ -456,11 +414,18 @@ int SffMultipleCommand::readFile(vector<string>& sffFiles, vector<string>& oligo
                     if (c == 10 || c == 13 || c == -1){	break;	}
                     else if (c == 32 || c == 9){;} //space or tab
                     else { 	oligos += c;  }
-                } 
-                sffFiles.push_back(sff);
-                if (oligos != "") { oligos = m->getFullPathName(oligos); allBlank = false;  }
-                if (oligos == "") { allFull = false;  }
-                oligosFiles.push_back(oligos); //will push a blank if there is not an oligos for this sff file
+                }
+                
+                if (ableToOpenSff) {
+                    sffFiles.push_back(sff);
+                    if (oligos != "") {
+                        bool ableToOpenOligos = m->checkLocations(oligos, inputDir);
+                        if (ableToOpenOligos) {  allBlank = false; }
+                        else { m->mothurOut("Can not find " + oligos + ". Ignoring.\n"); oligos = ""; }
+                    }
+                    if (oligos == "") { allFull = false;  }
+                    oligosFiles.push_back(oligos); //will push a blank if there is not an oligos for this sff file
+                }else { m->mothurOut("Can not find " + sff + ". Ignoring.\n"); }
             }
             m->gobble(in);
         }
@@ -490,8 +455,12 @@ int SffMultipleCommand::driver(vector<string> sffFiles, vector<string> oligosFil
             m->mothurOut("\n>>>>>\tProcessing " + sff + " (file " + toString(s+1) + " of " + toString(sffFiles.size()) + ")\t<<<<<\n");
             
             //run sff.info
+            string redirects = "";
+            if (inputDir != "")     { redirects += ", inputdir=" + inputDir;    }
+            if (outputDir != "")    { redirects += ", outputdir=" + outputDir;  }
             string inputString = "sff=" + sff + ", flow=T";
             if (trim) { inputString += ", trim=T"; }
+            if (redirects != "") { inputString += redirects; }
             m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
             m->mothurOut("Running command: sffinfo(" + inputString + ")"); m->mothurOutEndLine(); 
             m->mothurCalling = true;
@@ -507,6 +476,9 @@ int SffMultipleCommand::driver(vector<string> sffFiles, vector<string> oligosFil
             m->mothurCalling = false;
             m->mothurOutEndLine(); 
             
+            redirects = "";
+            if (outputDir != "")    { redirects += ", outputdir=" + outputDir;  }
+
             //run summary.seqs on the fasta file
             string fastaFile = "";
             map<string, vector<string> >::iterator it = filenames.find("fasta");
@@ -514,6 +486,7 @@ int SffMultipleCommand::driver(vector<string> sffFiles, vector<string> oligosFil
             else {  m->mothurOut("[ERROR]: sffinfo did not create a fasta file, quitting.\n"); m->control_pressed = true; break;  }
             
             inputString = "fasta=" + fastaFile + ", processors=1";
+            if (redirects != "") { inputString += redirects; }
             m->mothurOutEndLine(); 
             m->mothurOut("Running command: summary.seqs(" + inputString + ")"); m->mothurOutEndLine(); 
             m->mothurCalling = true;
@@ -542,7 +515,7 @@ int SffMultipleCommand::driver(vector<string> sffFiles, vector<string> oligosFil
             inputString += ", maxhomop=" + toString(maxHomoP) + ", maxflows=" + toString(maxFlows) + ", minflows=" + toString(minFlows);
             inputString += ", pdiffs=" + toString(pdiffs) + ", bdiffs=" + toString(bdiffs) + ", ldiffs=" + toString(ldiffs) + ", sdiffs=" + toString(sdiffs);
             inputString += ", tdiffs=" + toString(tdiffs) + ", signal=" + toString(signal) + ", noise=" + toString(noise) + ", order=" + flowOrder + ", processors=1";
-            
+            if (redirects != "") { inputString += redirects; }
             m->mothurOutEndLine(); 
             m->mothurOut("Running command: trim.flows(" + inputString + ")"); m->mothurOutEndLine(); 
             m->mothurCalling = true;
@@ -589,7 +562,7 @@ int SffMultipleCommand::driver(vector<string> sffFiles, vector<string> oligosFil
             inputString += ", sigma=" +toString(sigma);
             inputString += ", mindelta=" + toString(minDelta);  
             inputString += ", order=" + flowOrder + ", processors=1";
-            
+            if (redirects != "") { inputString += redirects; }
             //run shhh.flows
             m->mothurOutEndLine(); 
             m->mothurOut("Running command: shhh.flows(" + inputString + ")"); m->mothurOutEndLine(); 
@@ -637,7 +610,7 @@ int SffMultipleCommand::driver(vector<string> sffFiles, vector<string> oligosFil
             if (keepFirst != 0) { inputString += ", keepfirst=" + toString(keepFirst); }
             if (removeLast != 0) { inputString += ", removelast=" + toString(removeLast); }
             inputString += ", processors=1";
-            
+            if (redirects != "") { inputString += redirects; }
             //run trim.seqs
             m->mothurOutEndLine(); 
             m->mothurOut("Running command: trim.seqs(" + inputString + ")"); m->mothurOutEndLine(); 
@@ -688,6 +661,7 @@ int SffMultipleCommand::driver(vector<string> sffFiles, vector<string> oligosFil
             }
             
             inputString = "fasta=" + fastaFile + ", processors=1, name=" + nameFile;
+            if (redirects != "") { inputString += redirects; }
             m->mothurOutEndLine(); 
             m->mothurOut("Running command: summary.seqs(" + inputString + ")"); m->mothurOutEndLine(); 
             m->mothurCalling = true;
@@ -711,13 +685,14 @@ int SffMultipleCommand::driver(vector<string> sffFiles, vector<string> oligosFil
                 m->appendFiles(nameFile, name);
                 if (makeGroup) { m->appendFiles(groupFile, group);  }
             }
-            count++;
+            
             
             for (it = filenames.begin(); it != filenames.end(); it++) {
                 for (int i = 0; i < (it->second).size(); i++) {
                     outputNames.push_back((it->second)[i]); outputTypes[it->first].push_back((it->second)[i]);
                 }
             }
+            count++;
         }
         
         return count;

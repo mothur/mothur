@@ -458,7 +458,7 @@ int NormalizeSharedCommand::execute(){
 int NormalizeSharedCommand::normalize(vector<SharedRAbundVector*>& thisLookUp){
 	try {
 		//save mothurOut's binLabels to restore for next label
-		vector<string> saveBinLabels = m->currentBinLabels;
+		vector<string> saveBinLabels = m->currentSharedBinLabels;
 		
 		if (pickedGroups) { eliminateZeroOTUS(thisLookUp); }
 		
@@ -540,7 +540,7 @@ int NormalizeSharedCommand::normalize(vector<SharedRAbundVector*>& thisLookUp){
 		
 		out.close();
 		
-		m->currentBinLabels = saveBinLabels;
+		m->currentSharedBinLabels = saveBinLabels;
 		
 		return 0;
 	}
@@ -555,7 +555,7 @@ int NormalizeSharedCommand::normalize(vector<SharedRAbundFloatVector*>& thisLook
 	try {
 		
 		//save mothurOut's binLabels to restore for next label
-		vector<string> saveBinLabels = m->currentBinLabels;
+		vector<string> saveBinLabels = m->currentSharedBinLabels;
 		
         map<string, string> variables; 
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(inputfile));
@@ -629,7 +629,7 @@ int NormalizeSharedCommand::normalize(vector<SharedRAbundFloatVector*>& thisLook
 		
 		out.close();
 		
-		m->currentBinLabels = saveBinLabels;
+		m->currentSharedBinLabels = saveBinLabels;
 		
 		return 0;
 	}
@@ -675,7 +675,7 @@ int NormalizeSharedCommand::eliminateZeroOTUS(vector<SharedRAbundVector*>& thisl
 					for (int h = 0; h < diff; h++) { binLabel += "0"; }
 				}
 				binLabel += sbinNumber; 
-				if (i < m->currentBinLabels.size()) {  binLabel = m->currentBinLabels[i]; }
+				if (i < m->currentSharedBinLabels.size()) {  binLabel = m->currentSharedBinLabels[i]; }
 				
 				newBinLabels.push_back(binLabel);
 			}
@@ -684,7 +684,7 @@ int NormalizeSharedCommand::eliminateZeroOTUS(vector<SharedRAbundVector*>& thisl
 		for (int j = 0; j < thislookup.size(); j++) {  delete thislookup[j];  }
 
 		thislookup = newLookup;
-		m->currentBinLabels = newBinLabels;
+		m->currentSharedBinLabels = newBinLabels;
 		
 		return 0;
  
@@ -731,7 +731,7 @@ int NormalizeSharedCommand::eliminateZeroOTUS(vector<SharedRAbundFloatVector*>& 
 					for (int h = 0; h < diff; h++) { binLabel += "0"; }
 				}
 				binLabel += sbinNumber; 
-				if (i < m->currentBinLabels.size()) {  binLabel = m->currentBinLabels[i]; }
+				if (i < m->currentSharedBinLabels.size()) {  binLabel = m->currentSharedBinLabels[i]; }
 				
 				newBinLabels.push_back(binLabel);
 			}
@@ -740,7 +740,7 @@ int NormalizeSharedCommand::eliminateZeroOTUS(vector<SharedRAbundFloatVector*>& 
 		for (int j = 0; j < thislookup.size(); j++) {  delete thislookup[j];  }
 		
 		thislookup = newLookup;
-		m->currentBinLabels = newBinLabels;
+		m->currentSharedBinLabels = newBinLabels;
 		
 		return 0;
 		

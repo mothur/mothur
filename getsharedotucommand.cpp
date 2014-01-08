@@ -431,6 +431,7 @@ int GetSharedOTUCommand::process(ListVector* shared) {
 		int num = 0;
 				
 		//go through each bin, find out if shared
+        vector<string> binLabels = shared->getLabels();
 		for (int i = 0; i < shared->getNumBins(); i++) {
 			if (m->control_pressed) { outNames.close(); m->mothurRemove(outputFileNames); return 0; }
 			
@@ -452,7 +453,7 @@ int GetSharedOTUCommand::process(ListVector* shared) {
 				//find group
 				string seqGroup = groupMap->getGroup(name);
 				if (output != "accnos") {
-					namesOfSeqsInThisBin.push_back((name + "|" + seqGroup + "|" + toString(i+1)));
+					namesOfSeqsInThisBin.push_back((name + "|" + seqGroup + "|" + binLabels[i]));
 				}else {  namesOfSeqsInThisBin.push_back(name);	}
 				
 				if (seqGroup == "not found") { m->mothurOut(name + " is not in your groupfile. Please correct."); m->mothurOutEndLine(); exit(1);  }
@@ -691,7 +692,7 @@ int GetSharedOTUCommand::process(vector<SharedRAbundVector*>& lookup) {
 			
 			for(int j = 0; j < lookup.size(); j++) {
 				string seqGroup = lookup[j]->getGroup();
-                string name = m->currentBinLabels[i];
+                string name = m->currentSharedBinLabels[i];
 				
                 if (lookup[j]->getAbundance(i) != 0) {
                     if (output != "accnos") {

@@ -300,6 +300,7 @@ int PreClusterCommand::execute(){
 			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to run pre.cluster."); m->mothurOutEndLine(); 
 				
 		}else {
+            if (processors != 1) { m->mothurOut("When using running without group information mothur can only use 1 processor, continuing."); m->mothurOutEndLine(); processors = 1; }
 			if (namefile != "") { readNameFile(); }
 		
 			//reads fasta file and return number of seqs

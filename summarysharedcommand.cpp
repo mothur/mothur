@@ -184,9 +184,6 @@ SummarySharedCommand::SummarySharedCommand(string option)  {
 			string temp = validParameter.validFile(parameters, "all", false);				if (temp == "not found") { temp = "false"; }
 			all = m->isTrue(temp);
 			
-			temp = validParameter.validFile(parameters, "distance", false);					if (temp == "not found") { temp = "false"; }
-			createPhylip = m->isTrue(temp);
-			
             temp = validParameter.validFile(parameters, "iters", false);			if (temp == "not found") { temp = "1000"; }
 			m->mothurConvert(temp, iters); 
             
@@ -203,6 +200,10 @@ SummarySharedCommand::SummarySharedCommand(string option)  {
             }
             
             if (subsample == false) { iters = 0; }
+            
+            temp = validParameter.validFile(parameters, "distance", false);					if (temp == "not found") { temp = "false"; }
+			createPhylip = m->isTrue(temp);
+            if (subsample) { createPhylip = true; }
             
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);

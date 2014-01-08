@@ -175,11 +175,11 @@ int OtuHierarchyCommand::execute(){
 		}
 		
 		//map sequences to bin number in the "little" otu
-		map<string, int> littleBins; 
+		map<string, int> littleBins;
+        vector<string> binLabels0 = lists[0].getLabels();
 		for (int i = 0; i < lists[0].getNumBins(); i++) {
 		
 			if (m->control_pressed) {  return 0; }
-			
 			string bin = lists[0].get(i);
             vector<string> names; m->splitAtComma(bin, names);
 			for (int j = 0; j < names.size(); j++) { littleBins[names[j]] = i; }
@@ -195,17 +195,17 @@ int OtuHierarchyCommand::execute(){
 		m->openOutputFile(outputFileName, out);
 		
 		//go through each bin in "big" otu and output the bins in "little" otu which created it
+        vector<string> binLabels1 = lists[1].getLabels();
 		for (int i = 0; i < lists[1].getNumBins(); i++) {
 		
 			if (m->control_pressed) { outputTypes.clear(); out.close(); m->mothurRemove(outputFileName); return 0; }
 			
 			string binnames = lists[1].get(i);
             vector<string> names; m->splitAtComma(binnames, names);
-            
 			
 			//output column 1
 			if (output == "name")	{   out << binnames << '\t';	}
-			else					{	out << (i+1) << '\t';		}
+			else					{	out << binLabels1[i] << '\t';		}
 			
 			map<int, int> bins; //bin numbers in little that are in this bin in big
 			map<int, int>::iterator it;
@@ -216,7 +216,7 @@ int OtuHierarchyCommand::execute(){
 			string col2 = "";
 			for (it = bins.begin(); it != bins.end(); it++) {
 				if (output == "name")	{   col2 += lists[0].get(it->first) + "\t";	}
-				else					{	col2 += toString(it->first) + "\t";		}
+				else					{	col2 += binLabels0[it->first] + "\t";		}
 			}
 			
 			//output column 2

@@ -119,7 +119,7 @@ string HeatMap::getPic(vector<SharedRAbundVector*> lookup) {
 		}
 		
 		//sort lookup so shared bins are on top
-        vector<string> sortedLabels = m->currentBinLabels;
+        vector<string> sortedLabels = m->currentSharedBinLabels;
 		if (sorted != "none") {  sortedLabels = sortSharedVectors(lookup);  }
 		
 		vector<vector<string> > scaleRelAbund;
@@ -221,7 +221,7 @@ vector<string> HeatMap::sortSharedVectors(vector<SharedRAbundVector*>& lookup){
 		map<int, int> place; //spot in lookup where you insert shared by, ie, 3 -> 2 if they are shared by 3 inset into location 2.
 		map<int, int>::iterator it;
         
-        vector<string> sortedLabels = m->currentBinLabels;
+        vector<string> sortedLabels = m->currentSharedBinLabels;
 		
 		/****************** find order of otus **********************/
 		if (sorted == "shared") {
@@ -254,7 +254,7 @@ vector<string> HeatMap::sortSharedVectors(vector<SharedRAbundVector*>& lookup){
 				int newAbund = looktemp[j]->getAbundance(i);												// 1 -> 3
 				lookup[j]->set(place[i], newAbund, looktemp[j]->getGroup()); //binNumber, abundance, group
 			}
-            sortedLabels[place[i]] = m->currentBinLabels[i];
+            sortedLabels[place[i]] = m->currentSharedBinLabels[i];
 		}
 		
 		//delete looktemp -- Sarah look at - this is causing segmentation faults
@@ -430,7 +430,7 @@ string HeatMap::getPic(vector<SharedRAbundFloatVector*> lookup) {
 		}
 		
 		//sort lookup so shared bins are on top
-		vector<string> sortedLabels = m->currentBinLabels;
+		vector<string> sortedLabels = m->currentSharedBinLabels;
 		if (sorted != "none") {  sortedLabels = sortSharedVectors(lookup);  }
 		
 		vector<vector<string> > scaleRelAbund;
@@ -532,7 +532,7 @@ vector<string> HeatMap::sortSharedVectors(vector<SharedRAbundFloatVector*>& look
 		map<int, int> place; //spot in lookup where you insert shared by, ie, 3 -> 2 if they are shared by 3 inset into location 2.
 		map<int, int>::iterator it;
         
-        vector<string> sortedLabels = m->currentBinLabels;
+        vector<string> sortedLabels = m->currentSharedBinLabels;
 		
 		/****************** find order of otus **********************/
 		if (sorted == "shared") {
@@ -564,7 +564,7 @@ vector<string> HeatMap::sortSharedVectors(vector<SharedRAbundFloatVector*>& look
 			for (int j = 0; j < looktemp.size(); j++) {														// 3 -> 2
 				float newAbund = looktemp[j]->getAbundance(i);												// 1 -> 3
 				lookup[j]->set(place[i], newAbund, looktemp[j]->getGroup()); //binNumber, abundance, group
-                sortedLabels[place[i]] = m->currentBinLabels[i];
+                sortedLabels[place[i]] = m->currentSharedBinLabels[i];
 			}
 		}
 		

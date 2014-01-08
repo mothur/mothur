@@ -303,7 +303,9 @@ int PhylotypeCommand::execute(){
 				}	
 				
 				//print listvector
-				list.print(outList);
+				if (!m->printedListHeaders) { list.printHeaders(outList); }
+                list.print(outList);
+                
                 if (countfile == "") {
                     //print rabund
                     list.getRAbundVector().print(outRabund);

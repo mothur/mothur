@@ -295,6 +295,7 @@ int MGClusterCommand::execute(){
             m->openOutputFile(rabundFileName,	rabundFile);
         }
 		m->openOutputFile(listFileName,	listFile);
+        list->printHeaders(listFile);
 		
 		if (m->control_pressed) { 
 			delete nameMap; delete read; delete list; delete rabund; 

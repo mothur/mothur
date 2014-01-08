@@ -628,7 +628,7 @@ map<int, string> CountSeqsCommand::processNameFile(string name) {
             }
 		}
 		in.close();
-        out.close();
+       
 		
         if (rest != "") {
             vector<string> pieces = m->splitWhiteSpace(rest);
@@ -651,6 +651,7 @@ map<int, string> CountSeqsCommand::processNameFile(string name) {
             }
 
         }
+        out.close();
         
         return indexToNames;
     }
@@ -704,7 +705,7 @@ map<int, string> CountSeqsCommand::getGroupNames(string filename, set<string>& n
             }
 		}
 		in.close();
-        out.close();
+        
         
         if (rest != "") {
             vector<string> pieces = m->splitWhiteSpace(rest);
@@ -726,6 +727,7 @@ map<int, string> CountSeqsCommand::getGroupNames(string filename, set<string>& n
                 }
             }
         }
+        out.close();
 		
         for (it = groupIndex.begin(); it != groupIndex.end(); it++) {  indexToGroups[it->second] = it->first;  }
         

@@ -180,7 +180,7 @@ int RandomForest::calcForrestVariableImportance(string filename) {
         m->openOutputFile(filename, out);
         out <<"OTU\tMean decrease accuracy\n";
         for (int i = 0; i < globalVariableRanks.size(); i++) {
-            out << m->currentBinLabels[(int)globalVariableRanks[i].first] << '\t' << globalVariableImportanceList[globalVariableRanks[i].first] << endl;
+            out << m->currentSharedBinLabels[(int)globalVariableRanks[i].first] << '\t' << globalVariableImportanceList[globalVariableRanks[i].first] << endl;
         }
         out.close();
         return 0;
