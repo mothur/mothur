@@ -57,7 +57,7 @@ private:
     double betacf(const double, const double, const double);
     double betai(const double, const double, const double);
     double gammln(const double);
-    double gammq(const double, const double);
+    //double gammq(const double, const double);
     double gser(double&, const double, const double, double&);
     double gcf(double&, const double, const double, double&);
     double erfcc(double);

@@ -34,6 +34,7 @@ vector<string> TrimSeqsCommand::setParameters(){
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
 		CommandParameter pallfiles("allfiles", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pallfiles);
 		CommandParameter pkeepforward("keepforward", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pkeepforward);
+        CommandParameter plogtransform("logtransform", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(plogtransform);
 		CommandParameter pqtrim("qtrim", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pqtrim);
 		CommandParameter pqthreshold("qthreshold", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pqthreshold);
 		CommandParameter pqaverage("qaverage", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pqaverage);
@@ -61,7 +62,7 @@ string TrimSeqsCommand::getHelpString(){
 		string helpString = "";
 		helpString += "The trim.seqs command reads a fastaFile and creates 2 new fasta files, .trim.fasta and scrap.fasta, as well as group files if you provide and oligos file.\n";
 		helpString += "The .trim.fasta contains sequences that meet your requirements, and the .scrap.fasta contains those which don't.\n";
-		helpString += "The trim.seqs command parameters are fasta, name, count, flip, checkorient, oligos, maxambig, maxhomop, minlength, maxlength, qfile, qthreshold, qaverage, diffs, qtrim, keepfirst, removelast and allfiles.\n";
+		helpString += "The trim.seqs command parameters are fasta, name, count, flip, checkorient, oligos, maxambig, maxhomop, minlength, maxlength, qfile, qthreshold, qaverage, diffs, qtrim, keepfirst, removelast, logtransform and allfiles.\n";
 		helpString += "The fasta parameter is required.\n";
 		helpString += "The flip parameter will output the reverse compliment of your trimmed sequence. The default is false.\n";
         helpString += "The checkorient parameter will check the reverse compliment of the sequence if the barcodes and primers cannot be found in the forward. The default is false.\n";
@@ -84,6 +85,7 @@ string TrimSeqsCommand::getHelpString(){
 		helpString += "The qwindowaverage parameter allows you to set a minimum average quality score allowed over a window. \n";
 		helpString += "The rollaverage parameter allows you to set a minimum rolling average quality score allowed over a window. \n";
 		helpString += "The qstepsize parameter allows you to set a number of bases to move the window over. Default=1.\n";
+        helpString += "The logtransform parameter allows you to indicate you want the averages for the qwindowaverage, rollaverage and qaverage to be calculated using a logtransform. Default=F.\n";
 		helpString += "The allfiles parameter will create separate group and fasta file for each grouping. The default is F.\n";
 		helpString += "The keepforward parameter allows you to indicate whether you want the forward primer removed or not. The default is F, meaning remove the forward primer.\n";
 		helpString += "The qtrim parameter will trim sequence from the point that they fall below the qthreshold and put it in the .trim file if set to true. The default is T.\n";
@@ -329,6 +331,9 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
             temp = validParameter.validFile(parameters, "keepforward", false);		if (temp == "not found") { temp = "F"; }
 			keepforward = m->isTrue(temp);
             
+            temp = validParameter.validFile(parameters, "logtransform", false);		if (temp == "not found") { temp = "F"; }
+			logtransform = m->isTrue(temp);
+            
             temp = validParameter.validFile(parameters, "checkorient", false);		if (temp == "not found") { temp = "F"; }
 			reorient = m->isTrue(temp);
 			
@@ -443,8 +448,6 @@ int TrimSeqsCommand::execute(){
 				outputNames.push_back(outputGroupFileName); outputTypes["group"].push_back(outputGroupFileName);
 			}
 		}
-        
-        if (!pairedOligos) { if (reorient) { m->mothurOut("[WARNING]: You cannot use reorient without paired barcodes or primers, skipping."); m->mothurOutEndLine(); reorient = false; } }
         
         if (m->control_pressed) { return 0; }
             
@@ -695,7 +698,21 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
                 rpairedBarcodes[it->first] = tempPair;
                  //cout  << reverseOligo((it->second).reverse) << '\t' << (reverseOligo((it->second).forward)) << '\t' << barcodeNameVector[it->first] << endl;
             }
-            rtrimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, rpairedPrimers, rpairedBarcodes); numBarcodes = rpairedBarcodes.size();
+            int index = rpairedBarcodes.size();
+            for (map<string, int>::iterator it = barcodes.begin(); it != barcodes.end(); it++) {
+                oligosPair tempPair("", reverseOligo((it->first))); //reverseBarcode, rc ForwardBarcode
+                rpairedBarcodes[index] = tempPair; index++;
+                //cout  << reverseOligo((it->second).reverse) << '\t' << (reverseOligo((it->second).forward)) << '\t' << barcodeNameVector[it->first] << endl;
+            }
+            
+            index = rpairedPrimers.size();
+            for (map<string, int>::iterator it = primers.begin(); it != primers.end(); it++) {
+                oligosPair tempPair("", reverseOligo((it->first))); //reverseBarcode, rc ForwardBarcode
+                rpairedPrimers[index] = tempPair; index++;
+                //cout  << reverseOligo((it->second).reverse) << '\t' << (reverseOligo((it->second).forward)) << '\t' << primerNameVector[it->first] << endl;
+            }
+
+            rtrimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, rpairedPrimers, rpairedBarcodes); numBarcodes = rpairedBarcodes.size(); 
         }
         
 		while (moreSeqs) {
@@ -819,9 +836,9 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 					int origLength = currSeq.getNumBases();
 					
 					if(qThreshold != 0)			{	success = currQual.stripQualThreshold(currSeq, qThreshold);			}
-					else if(qAverage != 0)		{	success = currQual.cullQualAverage(currSeq, qAverage);				}
-					else if(qRollAverage != 0)	{	success = currQual.stripQualRollingAverage(currSeq, qRollAverage);	}
-					else if(qWindowAverage != 0){	success = currQual.stripQualWindowAverage(currSeq, qWindowStep, qWindowSize, qWindowAverage);	}
+					else if(qAverage != 0)		{	success = currQual.cullQualAverage(currSeq, qAverage, logtransform);				}
+					else if(qRollAverage != 0)	{	success = currQual.stripQualRollingAverage(currSeq, qRollAverage, logtransform);	}
+					else if(qWindowAverage != 0){	success = currQual.stripQualWindowAverage(currSeq, qWindowStep, qWindowSize, qWindowAverage, logtransform);	}
 					else						{	success = 1;				}
 					
 					//you don't want to trim, if it fails above then scrap it
@@ -1174,7 +1191,7 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
                                               lines[h].start, lines[h].end, qLines[h].start, qLines[h].end, m,
                                               pdiffs, bdiffs, ldiffs, sdiffs, tdiffs, primers, barcodes, revPrimer, linker, spacer, pairedBarcodes, pairedPrimers, pairedOligos,
                                              primerNameVector, barcodeNameVector, createGroup, allFiles, keepforward, keepFirst, removeLast,
-                                              qWindowStep, qWindowSize, qWindowAverage, qtrim, qThreshold, qAverage, qRollAverage,
+                                              qWindowStep, qWindowSize, qWindowAverage, qtrim, qThreshold, qAverage, qRollAverage, logtransform, 
                                              minLength, maxAmbig, maxHomoP, maxLength, flip, reorient, nameMap, nameCount);
 			pDataArray.push_back(tempTrim);
             
@@ -1646,7 +1663,7 @@ bool TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
         if (hasPairedBarcodes || hasPrimer) {
             pairedOligos = true;
             if ((primers.size() != 0) || (barcodes.size() != 0) || (linker.size() != 0) || (spacer.size() != 0) || (revPrimer.size() != 0)) { m->control_pressed = true;  m->mothurOut("[ERROR]: cannot mix paired primers and barcodes with non paired or linkers and spacers, quitting."); m->mothurOutEndLine();  return 0; }
-        }else if (reorient) { m->mothurOut("[Warning]: cannot use checkorient without paired barcodes or primers, ignoring.\n"); m->mothurOutEndLine(); reorient = false; }
+        }
         
 		if(barcodeNameVector.size() == 0 && primerNameVector[0] == ""){	allFiles = 0;	}
         

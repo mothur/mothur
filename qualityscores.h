@@ -30,9 +30,9 @@ public:
 	void trimQScores(int, int);
 	void flipQScores();
 	bool stripQualThreshold(Sequence&, double);
-	bool stripQualRollingAverage(Sequence&, double);
-	bool stripQualWindowAverage(Sequence&, int, int, double);
-	bool cullQualAverage(Sequence&, double);
+	bool stripQualRollingAverage(Sequence&, double, bool);
+	bool stripQualWindowAverage(Sequence&, int, int, double, bool);
+	bool cullQualAverage(Sequence&, double, bool);
 	void updateQScoreErrorMap(map<char, vector<int> >&, string, int, int, int);
 	void updateForwardMap(vector<vector<int> >&, int, int, int);
 	void updateReverseMap(vector<vector<int> >&, int, int, int);
@@ -42,7 +42,7 @@ public:
 	
 private:
 	
-	double calculateAverage();
+	double calculateAverage(bool);
 	MothurOut* m;
 	vector<int> qScores;
 	

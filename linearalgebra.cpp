@@ -114,7 +114,7 @@ double LinearAlgebra::gammp(const double a, const double x) {
 }
 /*********************************************************************************************************************************/
 //Numerical Recipes pg. 223
-double LinearAlgebra::gammq(const double a, const double x) {
+/*double LinearAlgebra::gammq(const double a, const double x) {
     try {
         double gamser,gammcf,gln;
         
@@ -130,11 +130,11 @@ double LinearAlgebra::gammq(const double a, const double x) {
         return 0;
     }
 	catch(exception& e) {
-		m->errorOut(e, "LinearAlgebra", "gammp");
+		m->errorOut(e, "LinearAlgebra", "gammq");
 		exit(1);
 	}
 }
-/*********************************************************************************************************************************/
+*********************************************************************************************************************************/
 //Numerical Recipes pg. 224
 double LinearAlgebra::gcf(double& gammcf, const double a, const double x, double& gln){
     try {
@@ -161,7 +161,7 @@ double LinearAlgebra::gcf(double& gammcf, const double a, const double x, double
             h *= del;
             if (fabs(del-1.0) <= EPS) break;
         }
-        if (i > ITMAX)  { m->mothurOut("[ERROR]: a too large, ITMAX too small in gcf\n"); m->control_pressed = true; }
+        if (i > ITMAX)  { m->mothurOut("[ERROR]: " + toString(a) + " too large, ITMAX=100 too small in gcf\n"); m->control_pressed = true; }
         gammcf=exp(-x+a*log(x)-gln)*h;
         
         return 0.0;
@@ -1302,7 +1302,7 @@ double LinearAlgebra::calcKruskalWallis(vector<spearmanRank>& values, double& pV
         double lastTerm = 3 * (values.size()+1);
         
         H = firstTerm * middleTerm - lastTerm;
-        
+       
         //adjust for ties
         if (TIES.size() != 0) {
             double sum = 0.0;
@@ -1310,6 +1310,8 @@ double LinearAlgebra::calcKruskalWallis(vector<spearmanRank>& values, double& pV
             double result = 1.0 - (sum / (double) ((values.size()*values.size()*values.size())-values.size()));
             H /= result;
         }
+        
+        if (isnan(H) || isinf(H)) { H = 0; }
         
         //Numerical Recipes pg221
         pValue = 1.0 - (gammp(((treatments.size()-1)/(double)2.0), H/2.0));

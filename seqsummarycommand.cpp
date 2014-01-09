@@ -449,7 +449,8 @@ int SeqSummaryCommand::driverCreateSummary(vector<int>& startPosition, vector<in
 
 		bool done = false;
 		int count = 0;
-       
+        
+        
 		while (!done) {
 				
 			if (m->control_pressed) { in.close(); outSummary.close(); return 1; }
@@ -479,7 +480,6 @@ int SeqSummaryCommand::driverCreateSummary(vector<int>& startPosition, vector<in
 					ambigBases.push_back(current.getAmbigBases());
 					longHomoPolymer.push_back(current.getLongHomoPolymer());
 				}
-				
 				count++;
 				outSummary << current.getName() << '\t';
 				outSummary << current.getStartPos() << '\t' << current.getEndPos() << '\t';

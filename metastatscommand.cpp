@@ -9,6 +9,7 @@
 
 #include "metastatscommand.h"
 #include "sharedutilities.h"
+#include "sharedrabundfloatvector.h"
 
 
 //**********************************************************************************************************************
@@ -213,7 +214,7 @@ MetaStatsCommand::MetaStatsCommand(string option) {
 int MetaStatsCommand::execute(){
 	try {
 	
-		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+        if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
         
         //just used to convert files to test metastats online
         /****************************************************/
@@ -221,7 +222,6 @@ int MetaStatsCommand::execute(){
         convertSharedToInput = false;
         if (convertInputToShared) { convertToShared(sharedfile); return 0; }
         /****************************************************/
-        
 		
 		designMap = new GroupMap(designfile);
 		designMap->readDesignMap();
@@ -574,9 +574,11 @@ int MetaStatsCommand::convertToShared(string filename) {
         string header = m->getline(in); m->gobble(in);
         
         vector<string> groups = m->splitWhiteSpace(header);
-        vector<SharedRAbundVector*> newLookup;
+        vector<SharedRAbundFloatVector*> newLookup;
+        cout << groups.size() << endl;
         for (int i = 0; i < groups.size(); i++) {
-            SharedRAbundVector* temp = new SharedRAbundVector();
+            cout << "creating group " << groups[i] << endl;
+            SharedRAbundFloatVector* temp = new SharedRAbundFloatVector();
             temp->setLabel("0.03");
             temp->setGroup(groups[i]);
             newLookup.push_back(temp);
@@ -589,9 +591,9 @@ int MetaStatsCommand::convertToShared(string filename) {
             string otuname;
             in >> otuname; m->gobble(in);
             otuCount++;
-            
+            cout << otuname << endl;
             for (int i = 0; i < groups.size(); i++) {
-                int temp;
+                double temp;
                 in >> temp; m->gobble(in);
                 newLookup[i]->push_back(temp, groups[i]);
             }
@@ -653,6 +655,8 @@ int MetaStatsCommand::convertToInput(vector<SharedRAbundVector*>& subset, string
             out << subset[subset.size()-1]->getAbundance(i) << endl;
         }
         out.close();
+        
+        cout << thisfilename+".matrix" << endl;
         
         return 0;
     }

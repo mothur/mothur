@@ -40,12 +40,19 @@ FlowData::FlowData(int numFlows, float signal, float noise, int maxHomoP, string
 //**********************************************************************************************************************
 
 bool FlowData::getNext(ifstream& flowFile){
-	
 	try {
+        
         seqName = getSequenceName(flowFile);
-		flowFile >> endFlow;	
+        if (m->debug) {  m->mothurOut("[DEBUG]: flow = " + seqName + " "); }
+		flowFile >> endFlow;
+        if (m->debug) {  m->mothurOut(toString(endFlow) + " "); }
         if (!m->control_pressed) {
-            for(int i=0;i<numFlows;i++)	{	flowFile >> flowData[i]; 	}
+            if (m->debug) {  m->mothurOut(" "); }
+            for(int i=0;i<numFlows;i++)	{
+                flowFile >> flowData[i];
+                if (m->debug) {  m->mothurOut(toString(flowData[i]) + " "); }
+            }
+            if (m->debug) {  m->mothurOut("\n"); }
             updateEndFlow(); 
             translateFlow();
             m->gobble(flowFile);

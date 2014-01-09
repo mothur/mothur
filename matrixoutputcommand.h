@@ -54,6 +54,7 @@
 #include "memchord.h"
 #include "memeuclidean.h"
 #include "mempearson.h"
+#include "sharedjsd.h"
 
 
 // aka. dist.shared()
@@ -224,7 +225,10 @@ static DWORD WINAPI MyDistSharedThreadFunction(LPVOID lpParam){
                     matrixCalculators.push_back(new MemEuclidean());
                 }else if (pDataArray->Estimators[i] == "mempearson") { 
                     matrixCalculators.push_back(new MemPearson());
+                }else if (pDataArray->Estimators[i] == "jsd") {
+                    matrixCalculators.push_back(new JSD());
                 }
+
             }
         }
         
