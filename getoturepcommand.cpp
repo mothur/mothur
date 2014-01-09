@@ -760,6 +760,8 @@ string GetOTURepCommand::findRepAbund(vector<string> names, string group) {
 	try{
         vector<string> reps;
         string rep = "notFound";
+    
+        if (m->debug) { m->mothurOut("[DEBUG]: group=" + group + " names.size() = " + toString(names.size()) + " " + names[0] + "\n"); }
         
         if ((names.size() == 1)) {
             return names[0];
@@ -773,7 +775,7 @@ string GetOTURepCommand::findRepAbund(vector<string> names, string group) {
                 if (countfile != "") {  //if countfile is not blank then we can assume the list file contains only uniques, otherwise we assume list file contains everyone.
                     int numRep = 0;
                     if (group != "") {  numRep = ct.getGroupCount(names[i], group);  }
-                    else { numRep = ct.getGroupCount(names[i]);  }
+                    else { numRep = ct.getNumSeqs(names[i]);  }
                     if (numRep > maxAbund) {
                         reps.clear();
                         reps.push_back(names[i]);
@@ -834,7 +836,7 @@ string GetOTURepCommand::findRep(vector<string> names, string group) {
                         if (countfile != "") {  //if countfile is not blank then we can assume the list file contains only uniques, otherwise we assume list file contains everyone.
                             int numRep = 0;
                             if (group != "") {  numRep = ct.getGroupCount(names[i], group);  }
-                            else { numRep = ct.getGroupCount(names[i]);  }
+                            else { numRep = ct.getNumSeqs(names[i]);  }
                             for (int j = 1; j < numRep; j++) { //don't add yourself again
                                 seqIndex.push_back(nameToIndex[names[i]]);
                             }

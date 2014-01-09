@@ -76,6 +76,7 @@
 #include "mempearson.h"
 #include "sharedsobs.h"
 #include "sharednseqs.h"
+#include "sharedjsd.h"
 
 
 /********************************************************************/
@@ -206,6 +207,7 @@ void ValidCalculators::printCitations(vector<string> Estimators) {
 				}else if (Estimators[i] == "mempearson") { Calculator* temp = new MemPearson(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
 				}else if (Estimators[i] == "sharedobserved") { Calculator* temp = new SharedSobs(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
 				}else if (Estimators[i] == "kulczynski") { Calculator* temp = new Kulczynski(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
+                }else if (Estimators[i] == "jsd") { Calculator* temp = new JSD(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
 				}else { m->mothurOut("[ERROR]: Missing else if for " + Estimators[i] + " in printCitations."); m->mothurOutEndLine(); }
 			}else { m->mothurOut(Estimators[i] + " is not a valid calculator, no citation will be given."); m->mothurOutEndLine(); }
 		}
@@ -456,6 +458,7 @@ void ValidCalculators::initialShared() {
 		shared["memchord"]				= "memchord";
 		shared["memeuclidean"]			= "memeuclidean";
 		shared["mempearson"]			= "mempearson";
+        shared["jsd"]				= "jsd";
 		shared["default"]	            = "default";
 	}
 	catch(exception& e) {
@@ -569,6 +572,7 @@ void ValidCalculators::initialSharedSummary() {
 		sharedsummary["memchord"]				= "memchord";
 		sharedsummary["memeuclidean"]			= "memeuclidean";
 		sharedsummary["mempearson"]				= "mempearson";
+        sharedsummary["jsd"]				= "jsd";
 		sharedsummary["default"]				= "default";
 	}
 	catch(exception& e) {
@@ -733,6 +737,7 @@ void ValidCalculators::initialMatrix() {
 		matrix["memchord"]				= "memchord";
 		matrix["memeuclidean"]			= "memeuclidean";
 		matrix["mempearson"]				= "mempearson";
+        matrix["jsd"]				= "jsd";
 		
 	}
 	catch(exception& e) {

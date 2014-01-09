@@ -395,7 +395,7 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
 		
 		if(line->start == 0){
 			flowFile >> numFlows; m->gobble(flowFile);
-			scrapFlowFile << maxFlows << endl;
+			scrapFlowFile << numFlows << endl;
 			trimFlowFile << maxFlows << endl;
 			if(allFiles){
 				for(int i=0;i<thisBarcodePrimerComboFileNames.size();i++){
@@ -599,6 +599,7 @@ void TrimFlowsCommand::getOligos(vector<vector<string> >& outFlowFileNames){
 				else if(type == "REVERSE"){
 					string oligoRC = reverseOligo(oligo);
 					revPrimer.push_back(oligoRC);
+                    if (m->debug) { m->mothurOut("[DEBUG]: reverse oligos = " + oligoRC + ".\n"); }
 				}
 				else if(type == "BARCODE"){
 					oligosFile >> group;

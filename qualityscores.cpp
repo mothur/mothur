@@ -130,7 +130,7 @@ string QualityScores::getName(){
 void QualityScores::printQScores(ofstream& qFile){
 	try {
 		
-		double aveQScore = calculateAverage();
+		double aveQScore = calculateAverage(false);
 		
 		qFile << '>' << seqName << '\t' << aveQScore << endl;
 		
@@ -228,7 +228,7 @@ bool QualityScores::stripQualThreshold(Sequence& sequence, double qThreshold){
 
 /**************************************************************************************************/
 
-bool QualityScores::stripQualRollingAverage(Sequence& sequence, double qThreshold){
+bool QualityScores::stripQualRollingAverage(Sequence& sequence, double qThreshold, bool logTransform){
 	try {
 		string rawSequence = sequence.getUnaligned();
 		int seqLength = sequence.getNumBases();
@@ -240,12 +240,22 @@ bool QualityScores::stripQualRollingAverage(Sequence& sequence, double qThreshol
 		
 		int end = -1;
 		double rollingSum = 0.0000;
+        double value = 0.0;
 		
 		for(int i=0;i<seqLength;i++){
-
-			rollingSum += (double)qScores[i];
+            
+            if (logTransform)   {
+                rollingSum += (double)pow(10.0, qScores[i]);
+                value = log10(rollingSum / (double)(i+1));
+                
+            } //Sum 10^Q
+            else                {
+                rollingSum += (double)qScores[i];
+                value = rollingSum / (double)(i+1);
+            }
 			
-			if(rollingSum / (double)(i+1) < qThreshold){
+			
+			if(value < qThreshold){
 				end = i;
 				break;
 			}
@@ -269,7 +279,7 @@ bool QualityScores::stripQualRollingAverage(Sequence& sequence, double qThreshol
 
 /**************************************************************************************************/
 
-bool QualityScores::stripQualWindowAverage(Sequence& sequence, int stepSize, int windowSize, double qThreshold){
+bool QualityScores::stripQualWindowAverage(Sequence& sequence, int stepSize, int windowSize, double qThreshold, bool logTransform){
 	try {
 		string rawSequence = sequence.getUnaligned();
 		int seqLength = sequence.getNumBases();
@@ -288,9 +298,12 @@ bool QualityScores::stripQualWindowAverage(Sequence& sequence, int stepSize, int
 			double windowSum = 0.0000;
 
 			for(int i=start;i<end;i++){
-				windowSum += qScores[i];
+                if (logTransform)   {  windowSum += pow(10.0, qScores[i]);  }
+                else                {  windowSum += qScores[i];             }
 			}
-			double windowAverage = windowSum / (double)(end-start);
+			double windowAverage = 0.0;
+            if (logTransform)   { windowAverage = log10(windowSum / (double)(end-start)); }
+            else                { windowAverage = windowSum / (double)(end-start);      }
 				
 			if(windowAverage < qThreshold){
 				end = end - stepSize;
@@ -323,21 +336,25 @@ bool QualityScores::stripQualWindowAverage(Sequence& sequence, int stepSize, int
 
 /**************************************************************************************************/
 
-double QualityScores::calculateAverage(){
+double QualityScores::calculateAverage(bool logTransform){
 	
 	double aveQScore = 0.0000;
 	
 	for(int i=0;i<seqLength;i++){
-		aveQScore += (double) qScores[i];
+        if (logTransform)   {  aveQScore += pow(10.0, qScores[i]);  }
+        else                {  aveQScore += qScores[i];             }
 	}
 	aveQScore /= (double) seqLength;
+    
+    if (logTransform)   {  aveQScore = log10(aveQScore /(double) seqLength);  }
+    else                {  aveQScore /= (double) seqLength;                 }
 	
 	return aveQScore;
 }
 
 /**************************************************************************************************/
 
-bool QualityScores::cullQualAverage(Sequence& sequence, double qAverage){
+bool QualityScores::cullQualAverage(Sequence& sequence, double qAverage, bool logTransform){
 	try {
 		string rawSequence = sequence.getUnaligned();
 		bool success = 0;	//guilty until proven innocent
@@ -347,7 +364,7 @@ bool QualityScores::cullQualAverage(Sequence& sequence, double qAverage){
 			m->mothurOutEndLine();	
 		} 
 			
-		double aveQScore = calculateAverage();
+		double aveQScore = calculateAverage(logTransform);
 		
 		if(aveQScore >= qAverage)	{	success = 1;	}
 		else						{	success = 0;	}

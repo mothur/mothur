@@ -55,7 +55,7 @@ private:
 	bool abort, createGroup;
 	string fastaFile, oligoFile, qFileName, groupfile, nameFile, countfile, outputDir;
 	
-	bool flip, allFiles, qtrim, keepforward, pairedOligos, reorient;
+	bool flip, allFiles, qtrim, keepforward, pairedOligos, reorient, logtransform;
 	int numFPrimers, numRPrimers, numLinkers, numSpacers, maxAmbig, maxHomoP, minLength, maxLength, processors, tdiffs, bdiffs, pdiffs, ldiffs, sdiffs, comboStarts;
 	int qWindowSize, qWindowStep, keepFirst, removeLast;
 	double qRollAverage, qThreshold, qWindowAverage, qAverage;
@@ -98,7 +98,7 @@ struct trimData {
     vector<vector<string> > qualFileNames;
     vector<vector<string> > nameFileNames;
     unsigned long long lineStart, lineEnd, qlineStart, qlineEnd;
-    bool flip, allFiles, qtrim, keepforward, createGroup, pairedOligos, reorient;
+    bool flip, allFiles, qtrim, keepforward, createGroup, pairedOligos, reorient, logtransform;
 	int numFPrimers, numRPrimers, numLinkers, numSpacers, maxAmbig, maxHomoP, minLength, maxLength, tdiffs, bdiffs, pdiffs, ldiffs, sdiffs;
 	int qWindowSize, qWindowStep, keepFirst, removeLast, count;
 	double qRollAverage, qThreshold, qWindowAverage, qAverage;
@@ -121,7 +121,7 @@ struct trimData {
 	trimData(string fn, string qn, string nf, string cf, string tn, string sn, string tqn, string sqn, string tnn, string snn, string tcn, string scn,string gn, vector<vector<string> > ffn, vector<vector<string> > qfn, vector<vector<string> > nfn, unsigned long long lstart, unsigned long long lend, unsigned long long qstart, unsigned long long qend,  MothurOut* mout,
                       int pd, int bd, int ld, int sd, int td, map<string, int> pri, map<string, int> bar, vector<string> revP, vector<string> li, vector<string> spa, map<int, oligosPair> pbr, map<int, oligosPair> ppr, bool po,
                       vector<string> priNameVector, vector<string> barNameVector, bool cGroup, bool aFiles, bool keepF, int keepfi, int removeL,
-                      int WindowStep, int WindowSize, int WindowAverage, bool trim, double Threshold, double Average, double RollAverage,
+                      int WindowStep, int WindowSize, int WindowAverage, bool trim, double Threshold, double Average, double RollAverage, bool lt,
                       int minL, int maxA, int maxH, int maxL, bool fli, bool reo, map<string, string> nm, map<string, int> ncount) {
         filename = fn;
         qFileName = qn;
@@ -174,6 +174,7 @@ struct trimData {
         qThreshold = Threshold;
         qAverage = Average;
         qRollAverage = RollAverage;
+        logtransform = lt;
         minLength = minL;
         maxAmbig = maxA;
         maxHomoP = maxH;
@@ -276,6 +277,19 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
                 oligosPair tempPair(trimOligos->reverseOligo((it->second).reverse), (trimOligos->reverseOligo((it->second).forward))); //reverseBarcode, rc ForwardBarcode
                 rpairedBarcodes[it->first] = tempPair;
             }
+            
+            int index = rpairedBarcodes.size();
+            for (map<string, int>::iterator it = pDataArray->barcodes.begin(); it != pDataArray->barcodes.end(); it++) {
+                oligosPair tempPair("", trimOligos->reverseOligo((it->first))); //reverseBarcode, rc ForwardBarcode
+                rpairedBarcodes[index] = tempPair; index++;
+            }
+            
+            index = rpairedPrimers.size();
+            for (map<string, int>::iterator it = pDataArray->primers.begin(); it != pDataArray->primers.end(); it++) {
+                oligosPair tempPair("", trimOligos->reverseOligo((it->first))); //reverseBarcode, rc ForwardBarcode
+                rpairedPrimers[index] = tempPair; index++;
+            }
+
             rtrimOligos = new TrimOligos(pDataArray->pdiffs, pDataArray->bdiffs, 0, 0, rpairedPrimers, rpairedBarcodes); numBarcodes = rpairedBarcodes.size();
         }
         
@@ -416,9 +430,9 @@ static DWORD WINAPI MyTrimThreadFunction(LPVOID lpParam){
 					int origLength = currSeq.getNumBases();
 					
 					if(pDataArray->qThreshold != 0)			{	success = currQual.stripQualThreshold(currSeq, pDataArray->qThreshold);			}
-					else if(pDataArray->qAverage != 0)		{	success = currQual.cullQualAverage(currSeq, pDataArray->qAverage);				}
-					else if(pDataArray->qRollAverage != 0)	{	success = currQual.stripQualRollingAverage(currSeq, pDataArray->qRollAverage);	}
-					else if(pDataArray->qWindowAverage != 0){	success = currQual.stripQualWindowAverage(currSeq, pDataArray->qWindowStep, pDataArray->qWindowSize, pDataArray->qWindowAverage);	}
+					else if(pDataArray->qAverage != 0)		{	success = currQual.cullQualAverage(currSeq, pDataArray->qAverage, pDataArray->logtransform);				}
+					else if(pDataArray->qRollAverage != 0)	{	success = currQual.stripQualRollingAverage(currSeq, pDataArray->qRollAverage, pDataArray->logtransform);	}
+					else if(pDataArray->qWindowAverage != 0){	success = currQual.stripQualWindowAverage(currSeq, pDataArray->qWindowStep, pDataArray->qWindowSize, pDataArray->qWindowAverage, pDataArray->logtransform);	}
 					else						{	success = 1;				}
 					
 					//you don't want to trim, if it fails above then scrap it
