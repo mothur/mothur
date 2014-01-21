@@ -339,6 +339,33 @@ double Pam::calcCHIndex(vector< vector<double> > dists){ //countMatrix = [numSam
             }
         }
         
+        //make countMatrix a relabund
+        vector<vector<double> > relativeAbundance(numSamples);
+        //get relative abundance
+        for(int i=0;i<numSamples;i++){
+            if (m->control_pressed) {  return 0; }
+            int groupTotal = 0;
+            
+            relativeAbundance[i].assign(numOTUs, 0.0);
+            
+            for(int j=0;j<numOTUs;j++){
+                groupTotal += countMatrix[i][j];
+            }
+            for(int j=0;j<numOTUs;j++){
+                relativeAbundance[i][j] = countMatrix[i][j] / (double)groupTotal;
+            }
+        }
+        
+        //find centers
+        vector<vector<double> > centers; centers.resize(numPartitions);
+        int countPartitions = 0;
+        for (set<int>::iterator it = medoids.begin(); it != medoids.end(); it++) {
+            for (int j = 0; j < numOTUs; j++) {
+                centers[countPartitions].push_back(relativeAbundance[*it][j]); //save the relative abundance of the medoid for this partition for this OTU
+            }
+            countPartitions++;
+        }
+        
         double sumBetweenCluster = 0.0;
         double sumWithinClusters = 0.0;
         
