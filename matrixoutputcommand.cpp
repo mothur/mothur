@@ -17,7 +17,7 @@ vector<string> MatrixOutputCommand::setParameters(){
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
         CommandParameter psubsample("subsample", "String", "", "", "", "", "","",false,false); parameters.push_back(psubsample);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
-		CommandParameter pcalc("calc", "Multiple", "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan-kstest-sharednseqs-ochiai-anderberg-kulczynski-kulczynskicody-lennon-morisitahorn-braycurtis-whittaker-odum-canberra-structeuclidean-structchord-hellinger-manhattan-structpearson-soergel-spearman-structkulczynski-speciesprofile-hamming-structchi2-gower-memchi2-memchord-memeuclidean-mempearson-jsd", "jclass-thetayc", "", "", "","",true,false,true); parameters.push_back(pcalc);
+		CommandParameter pcalc("calc", "Multiple", "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan-kstest-sharednseqs-ochiai-anderberg-kulczynski-kulczynskicody-lennon-morisitahorn-braycurtis-whittaker-odum-canberra-structeuclidean-structchord-hellinger-manhattan-structpearson-soergel-spearman-structkulczynski-speciesprofile-hamming-structchi2-gower-memchi2-memchord-memeuclidean-mempearson-jsd-rjsd", "jclass-thetayc", "", "", "","",true,false,true); parameters.push_back(pcalc);
 		CommandParameter poutput("output", "Multiple", "lt-square-column", "lt", "", "", "","",false,false); parameters.push_back(poutput);
         CommandParameter pmode("mode", "Multiple", "average-median", "average", "", "", "","",false,false); parameters.push_back(pmode);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
@@ -283,7 +283,8 @@ MatrixOutputCommand::MatrixOutputCommand(string option)  {
 							matrixCalculators.push_back(new MemPearson());
                         }else if (Estimators[i] == "jsd") {
                                 matrixCalculators.push_back(new JSD());
-
+                        }else if (Estimators[i] == "rjsd") {
+                            matrixCalculators.push_back(new RJSD());
 						}
 					}
 				}

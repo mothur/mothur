@@ -699,14 +699,16 @@ int UnifracWeightedCommand::runRandomCalcs(Tree* thisTree, vector<double> usersS
         lines.clear();
         
         //breakdown work between processors
-        int numPairs = namesOfGroupCombos.size();
-        int numPairsPerProcessor = numPairs / processors;
-            
-        for (int i = 0; i < processors; i++) {
-            int startPos = i * numPairsPerProcessor;
-            if(i == processors - 1){ numPairsPerProcessor = numPairs - i * numPairsPerProcessor; }
-            lines.push_back(linePair(startPos, numPairsPerProcessor));
+        int remainingPairs = namesOfGroupCombos.size();
+        int startIndex = 0;
+        for (int remainingProcessors = processors; remainingProcessors > 0; remainingProcessors--) {
+            int numPairs = remainingPairs; //case for last processor
+            if (remainingProcessors != 1) { numPairs = ceil(remainingPairs / remainingProcessors); }
+            lines.push_back(linePair(startIndex, numPairs)); //startIndex, numPairs
+            startIndex = startIndex + numPairs;
+            remainingPairs = remainingPairs - numPairs;
         }
+
         
         
         //get scores for random trees

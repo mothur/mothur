@@ -18,7 +18,7 @@ vector<string> GetMetaCommunityCommand::setParameters(){
         CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none","outputType",false,true); parameters.push_back(pshared);
         CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
-        CommandParameter pcalc("calc", "Multiple", "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan-kstest-sharednseqs-ochiai-anderberg-kulczynski-kulczynskicody-lennon-morisitahorn-braycurtis-whittaker-odum-canberra-structeuclidean-structchord-hellinger-manhattan-structpearson-soergel-spearman-structkulczynski-speciesprofile-hamming-structchi2-gower-memchi2-memchord-memeuclidean-mempearson-jsd", "jsd", "", "", "","",false,false,true); parameters.push_back(pcalc);
+        CommandParameter pcalc("calc", "Multiple", "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan-kstest-sharednseqs-ochiai-anderberg-kulczynski-kulczynskicody-lennon-morisitahorn-braycurtis-whittaker-odum-canberra-structeuclidean-structchord-hellinger-manhattan-structpearson-soergel-spearman-structkulczynski-speciesprofile-hamming-structchi2-gower-memchi2-memchord-memeuclidean-mempearson-jsd-rjsd", "rjsd", "", "", "","",false,false,true); parameters.push_back(pcalc);
         CommandParameter psubsample("subsample", "String", "", "", "", "", "","",false,false); parameters.push_back(psubsample);
         CommandParameter piters("iters", "Number", "", "1000", "", "", "","",false,false); parameters.push_back(piters);
         CommandParameter pminpartitions("minpartitions", "Number", "", "5", "", "", "","",false,false,true); parameters.push_back(pminpartitions);
@@ -190,9 +190,9 @@ GetMetaCommunityCommand::GetMetaCommunityCommand(string option)  {
 			else { m->mothurOut("[ERROR]: " + method + " is not a valid method.  Valid algorithms are dmm, kmeans and pam."); m->mothurOutEndLine(); abort = true; }
             
             calc = validParameter.validFile(parameters, "calc", false);
-			if (calc == "not found") { calc = "jsd";  }
+			if (calc == "not found") { calc = "rjsd";  }
 			else {
-                if (calc == "default")  {  calc = "jsd";  }
+                if (calc == "default")  {  calc = "rjsd";  }
 			}
 			m->splitAtDash(calc, Estimators);
 			if (m->inUsersGroups("citation", Estimators)) {
@@ -961,6 +961,8 @@ vector<vector<double> > GetMetaCommunityCommand::generateDistanceMatrix(vector<S
                 matrixCalculator = new MemPearson();
             }else if (Estimators[i] == "jsd") {
                 matrixCalculator = new JSD();
+            }else if (Estimators[i] == "rjsd") {
+                matrixCalculator = new RJSD();
             }else {
                 m->mothurOut("[ERROR]: " + Estimators[i] + " is not a valid calculator, please correct.\n"); m->control_pressed = true; return results;
             }

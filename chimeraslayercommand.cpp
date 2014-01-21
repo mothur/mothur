@@ -868,8 +868,8 @@ int ChimeraSlayerCommand::MPIExecuteGroups(string outputFileName, string accnosF
 		map<string, map<string, int> >::iterator itFile;
 		vector<string> filenames;
 		for(itFile = fileToPriority.begin(); itFile != fileToPriority.end(); itFile++) { filenames.push_back(itFile->first); }
-		
-		int numGroupsPerProcessor = filenames.size() / processors;
+        
+        int numGroupsPerProcessor = ceil(filenames.size() / (double) processors);
 		int startIndex =  pid * numGroupsPerProcessor;
 		int endIndex = (pid+1) * numGroupsPerProcessor;
 		if(pid == (processors - 1)){	endIndex = filenames.size(); 	}

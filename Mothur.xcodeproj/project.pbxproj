@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		219C1DE01552C4BD004209F9 /* newcommandtemplate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 219C1DDF1552C4BD004209F9 /* newcommandtemplate.cpp */; };
 		219C1DE41559BCCF004209F9 /* getcoremicrobiomecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 219C1DE31559BCCD004209F9 /* getcoremicrobiomecommand.cpp */; };
+		483C952E188F0CAD0035E7B7 /* sharedrjsd.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 483C952D188F0CAD0035E7B7 /* sharedrjsd.cpp */; };
 		7E6BE10A12F710D8007ADDBE /* refchimeratest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7E6BE10912F710D8007ADDBE /* refchimeratest.cpp */; };
 		834D9D581656D7C400E7FAB9 /* regularizedrandomforest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 834D9D561656D7C400E7FAB9 /* regularizedrandomforest.cpp */; };
 		834D9D5C1656DEC800E7FAB9 /* regularizeddecisiontree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 834D9D5A1656DEC700E7FAB9 /* regularizeddecisiontree.cpp */; };
@@ -406,6 +407,8 @@
 		219C1DE11552C508004209F9 /* newcommandtemplate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = newcommandtemplate.h; sourceTree = "<group>"; };
 		219C1DE31559BCCD004209F9 /* getcoremicrobiomecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getcoremicrobiomecommand.cpp; sourceTree = "<group>"; };
 		219C1DE51559BCF2004209F9 /* getcoremicrobiomecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getcoremicrobiomecommand.h; sourceTree = "<group>"; };
+		483C952C188F0C960035E7B7 /* sharedrjsd.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sharedrjsd.h; sourceTree = "<group>"; };
+		483C952D188F0CAD0035E7B7 /* sharedrjsd.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedrjsd.cpp; sourceTree = "<group>"; };
 		7E6BE10812F710D8007ADDBE /* refchimeratest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = refchimeratest.h; sourceTree = "<group>"; };
 		7E6BE10912F710D8007ADDBE /* refchimeratest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = refchimeratest.cpp; sourceTree = "<group>"; };
 		7E78911B135F3E8600E725D2 /* eachgapdistignorens.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = eachgapdistignorens.h; sourceTree = "<group>"; };
@@ -1732,6 +1735,8 @@
 				A7E9B7FB12D37EC400DA6239 /* sharedjest.h */,
 				A7222D711856276C0055A993 /* sharedjsd.h */,
 				A7222D721856277C0055A993 /* sharedjsd.cpp */,
+				483C952C188F0C960035E7B7 /* sharedrjsd.h */,
+				483C952D188F0CAD0035E7B7 /* sharedrjsd.cpp */,
 				A7E9B7FC12D37EC400DA6239 /* sharedkstest.cpp */,
 				A7E9B7FD12D37EC400DA6239 /* sharedkstest.h */,
 				A7E9B7FE12D37EC400DA6239 /* sharedkulczynski.cpp */,
@@ -2258,6 +2263,7 @@
 				A7E9B94112D37EC400DA6239 /* setlogfilecommand.cpp in Sources */,
 				A7E9B94212D37EC400DA6239 /* sffinfocommand.cpp in Sources */,
 				A7E9B94312D37EC400DA6239 /* shannon.cpp in Sources */,
+				483C952E188F0CAD0035E7B7 /* sharedrjsd.cpp in Sources */,
 				A7E9B94412D37EC400DA6239 /* shannoneven.cpp in Sources */,
 				A7E9B94512D37EC400DA6239 /* sharedace.cpp in Sources */,
 				A7E9B94612D37EC400DA6239 /* sharedanderbergs.cpp in Sources */,

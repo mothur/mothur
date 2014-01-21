@@ -377,13 +377,16 @@ vector<string> ShhhSeqsCommand::createProcessesGroups(SequenceParser& parser, st
 		
 		//divide the groups between the processors
 		vector<linePair> lines;
-		int numGroupsPerProcessor = groups.size() / processors;
-		for (int i = 0; i < processors; i++) {
-			int startIndex =  i * numGroupsPerProcessor;
-			int endIndex = (i+1) * numGroupsPerProcessor;
-			if(i == (processors - 1)){	endIndex = groups.size(); 	}
-			lines.push_back(linePair(startIndex, endIndex));
-		}
+		int remainingPairs = groups.size();
+        int startIndex = 0;
+        for (int remainingProcessors = processors; remainingProcessors > 0; remainingProcessors--) {
+            int numPairs = remainingPairs; //case for last processor
+            if (remainingProcessors != 1) { numPairs = ceil(remainingPairs / remainingProcessors); }
+            lines.push_back(linePair(startIndex, (startIndex+numPairs))); //startIndex, endIndex
+            startIndex = startIndex + numPairs;
+            remainingPairs = remainingPairs - numPairs;
+        }
+
 		
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)		
 		

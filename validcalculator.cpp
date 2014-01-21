@@ -77,6 +77,7 @@
 #include "sharedsobs.h"
 #include "sharednseqs.h"
 #include "sharedjsd.h"
+#include "sharedrjsd.h"
 
 
 /********************************************************************/
@@ -208,6 +209,7 @@ void ValidCalculators::printCitations(vector<string> Estimators) {
 				}else if (Estimators[i] == "sharedobserved") { Calculator* temp = new SharedSobs(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
 				}else if (Estimators[i] == "kulczynski") { Calculator* temp = new Kulczynski(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
                 }else if (Estimators[i] == "jsd") { Calculator* temp = new JSD(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
+                }else if (Estimators[i] == "rjsd") { Calculator* temp = new RJSD(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
 				}else { m->mothurOut("[ERROR]: Missing else if for " + Estimators[i] + " in printCitations."); m->mothurOutEndLine(); }
 			}else { m->mothurOut(Estimators[i] + " is not a valid calculator, no citation will be given."); m->mothurOutEndLine(); }
 		}
@@ -458,7 +460,8 @@ void ValidCalculators::initialShared() {
 		shared["memchord"]				= "memchord";
 		shared["memeuclidean"]			= "memeuclidean";
 		shared["mempearson"]			= "mempearson";
-        shared["jsd"]				= "jsd";
+        shared["jsd"]                   = "jsd";
+        shared["rjsd"]                  = "rjsd";
 		shared["default"]	            = "default";
 	}
 	catch(exception& e) {
@@ -572,7 +575,8 @@ void ValidCalculators::initialSharedSummary() {
 		sharedsummary["memchord"]				= "memchord";
 		sharedsummary["memeuclidean"]			= "memeuclidean";
 		sharedsummary["mempearson"]				= "mempearson";
-        sharedsummary["jsd"]				= "jsd";
+        sharedsummary["jsd"]                    = "jsd";
+        sharedsummary["rjsd"]                   = "rjsd";
 		sharedsummary["default"]				= "default";
 	}
 	catch(exception& e) {
@@ -730,14 +734,15 @@ void ValidCalculators::initialMatrix() {
 		matrix["structchi2"]				= "structchi2";
 		matrix["soergel"]				= "soergel";
 		matrix["spearman"]				= "spearman";
-		matrix["speciesprofile"]			= "speciesprofile";
+		matrix["speciesprofile"]		= "speciesprofile";
 		matrix["hamming"]				= "hamming";
 		matrix["gower"]					= "gower";
 		matrix["memchi2"]				= "memchi2";
 		matrix["memchord"]				= "memchord";
 		matrix["memeuclidean"]			= "memeuclidean";
-		matrix["mempearson"]				= "mempearson";
-        matrix["jsd"]				= "jsd";
+		matrix["mempearson"]			= "mempearson";
+        matrix["rjsd"]                   = "rjsd";
+        matrix["jsd"]                   = "jsd";
 		
 	}
 	catch(exception& e) {

@@ -55,6 +55,7 @@
 #include "memeuclidean.h"
 #include "mempearson.h"
 #include "sharedjsd.h"
+#include "sharedrjsd.h"
 
 /**************************************************************************************************/
 

@@ -57,6 +57,7 @@
 #include "memeuclidean.h"
 #include "mempearson.h"
 #include "sharedjsd.h"
+#include "sharedrjsd.h"
 
 class SummarySharedCommand : public Command {
 
@@ -219,6 +220,8 @@ static DWORD WINAPI MySummarySharedThreadFunction(LPVOID lpParam){
                     sumCalculators.push_back(new MemPearson());
                 }else if (pDataArray->Estimators[i] == "jsd") {
                     sumCalculators.push_back(new JSD());
+                }else if (pDataArray->Estimators[i] == "rjsd") {
+                    sumCalculators.push_back(new RJSD());
                 }
             }
         }

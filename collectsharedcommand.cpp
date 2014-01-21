@@ -50,6 +50,7 @@
 #include "memeuclidean.h"
 #include "mempearson.h"
 #include "sharedjsd.h"
+#include "sharedrjsd.h"
 
 
 //**********************************************************************************************************************
@@ -58,7 +59,7 @@ vector<string> CollectSharedCommand::setParameters(){
 		CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(pshared);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
 		CommandParameter pfreq("freq", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pfreq);
-		CommandParameter pcalc("calc", "Multiple", "sharedchao-sharedsobs-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan-kstest-whittaker-sharednseqs-ochiai-anderberg-kulczynski-kulczynskicody-lennon-morisitahorn-braycurtis-odum-canberra-structeuclidean-structchord-hellinger-manhattan-structpearson-soergel-spearman-structkulczynski-speciesprofile-structchi2-hamming-gower-memchi2-memchord-memeuclidean-mempearson-jsd", "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan", "", "", "","",true,false,true); parameters.push_back(pcalc);
+		CommandParameter pcalc("calc", "Multiple", "sharedchao-sharedsobs-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan-kstest-whittaker-sharednseqs-ochiai-anderberg-kulczynski-kulczynskicody-lennon-morisitahorn-braycurtis-odum-canberra-structeuclidean-structchord-hellinger-manhattan-structpearson-soergel-spearman-structkulczynski-speciesprofile-structchi2-hamming-gower-memchi2-memchord-memeuclidean-mempearson-jsd-rjsd", "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan", "", "", "","",true,false,true); parameters.push_back(pcalc);
 		CommandParameter pall("all", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pall);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
@@ -143,6 +144,7 @@ string CollectSharedCommand::getOutputPattern(string type) {
         else if (type == "memeuclidean")        {  pattern =  "[filename],memeuclidean";    }
         else if (type == "mempearson")          {  pattern =  "[filename],mempearson";      }
         else if (type == "jsd")                 {  pattern =  "[filename],jsd";             }
+        else if (type == "rjsd")                 {  pattern =  "[filename],rjsd";             }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
         
         return pattern;
@@ -199,6 +201,7 @@ CollectSharedCommand::CollectSharedCommand(){
 		outputTypes["memeuclidean"] = tempOutNames;
 		outputTypes["mempearson"] = tempOutNames;
         outputTypes["jsd"] = tempOutNames;
+        outputTypes["rjsd"] = tempOutNames;
 		
 	}
 	catch(exception& e) {
@@ -272,6 +275,7 @@ CollectSharedCommand::CollectSharedCommand(string option)  {
 			outputTypes["memeuclidean"] = tempOutNames;
 			outputTypes["mempearson"] = tempOutNames;
             outputTypes["jsd"] = tempOutNames;
+            outputTypes["rjsd"] = tempOutNames;
 			
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
@@ -467,7 +471,11 @@ CollectSharedCommand::CollectSharedCommand(string option)  {
 						}else if (Estimators[i] == "jsd") {
 							cDisplays.push_back(new CollectDisplay(new JSD(), new SharedOneColumnFile(getOutputFileName("jsd", variables))));
 							outputNames.push_back(getOutputFileName("jsd", variables)); outputTypes["jsd"].push_back(getOutputFileName("jsd", variables));
+						}else if (Estimators[i] == "rjsd") {
+							cDisplays.push_back(new CollectDisplay(new RJSD(), new SharedOneColumnFile(getOutputFileName("rjsd", variables))));
+							outputNames.push_back(getOutputFileName("rjsd", variables)); outputTypes["rjsd"].push_back(getOutputFileName("rjsd", variables));
 						}
+
 						
 					}
 				}	
