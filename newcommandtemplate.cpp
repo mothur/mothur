@@ -9,6 +9,7 @@
 //
 #include "newcommandtemplate.h"
 
+// Test Change.
 //**********************************************************************************************************************
 vector<string> NewCommand::setParameters(){	
 	try {
