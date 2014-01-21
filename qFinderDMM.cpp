@@ -83,7 +83,6 @@ qFinderDMM::qFinderDMM(vector<vector<int> > cm, int p) : CommunityTypeFinder() {
                 logDeterminant += log(abs(hessian[i][i]));
                 error[currentPartition][i] = invHessian[i][i];
             }
-            
         }
         
         int numParameters = numPartitions * numOTUs + numPartitions - 1;
