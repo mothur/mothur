@@ -611,6 +611,12 @@ int GetMetaCommunityCommand::processDriver(vector<SharedRAbundVector*>& thislook
                 finder = new qFinderDMM(sharedMatrix, numPartitions);
             }
             
+            string relabund = relabunds[i];
+            string matrixName = matrix[i];
+            outputNames.push_back(matrixName); outputTypes["matrix"].push_back(matrixName);
+            
+            finder->printZMatrix(matrixName, thisGroups);
+            
             double chi; vector<double> silhouettes;
             if (method == "dmm") {
                 double laplace = finder->getLaplace();
@@ -627,11 +633,6 @@ int GetMetaCommunityCommand::processDriver(vector<SharedRAbundVector*>& thislook
                     minSilhouettes = silhouettes;
                 }
             }
-            string relabund = relabunds[i];
-            string matrixName = matrix[i];
-            outputNames.push_back(matrixName); outputTypes["matrix"].push_back(matrixName);
-            
-            finder->printZMatrix(matrixName, thisGroups);
             
             if (method == "dmm") {
                 finder->printFitData(cout, minLaplace);

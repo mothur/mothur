@@ -194,6 +194,8 @@ void CommunityTypeFinder::printRelAbund(string fileName, vector<string> otuNames
 	}
 }
 
+
+
 /**************************************************************************************************/
 
 vector<vector<double> > CommunityTypeFinder::getHessian(){
@@ -402,8 +404,23 @@ int CommunityTypeFinder::findkMeans(){
             zMatrix[i].assign(numSamples, 0);
         }
         
-        for(int i=0;i<numSamples;i++){
-            zMatrix[rand()%numPartitions][i] = 1;
+        //randomize samples
+        vector<int> temp;
+        for (int i = 0; i < numSamples; i++) { temp.push_back(i); }
+        random_shuffle(temp.begin(), temp.end());
+        
+        //assign each partition at least one random sample
+        int numAssignedSamples = 0;
+        for (int i = 0; i < numPartitions; i++) {
+            zMatrix[i][temp[numAssignedSamples]] = 1;
+            numAssignedSamples++;
+        }
+        
+        //assign rest of samples to partitions
+        int count = 0;
+        for(int i=numAssignedSamples;i<numSamples;i++){
+            zMatrix[count%numPartitions][temp[i]] = 1;
+            count++;
         }
         
         double maxChange = 1;
@@ -436,6 +453,7 @@ int CommunityTypeFinder::findkMeans(){
                 
                 for(int j=0;j<numOTUs;j++){
                     averageRelativeAbundance[j] /= weights[i];
+                    
                     double difference = averageRelativeAbundance[j] - alphaMatrix[i][j];
                     normChange += difference * difference;
                     alphaMatrix[i][j] = averageRelativeAbundance[j];
@@ -498,7 +516,6 @@ int CommunityTypeFinder::findkMeans(){
                 }
             }
         }
-        
         return 0;
     }
     catch(exception& e){
@@ -507,6 +524,289 @@ int CommunityTypeFinder::findkMeans(){
     }
 }
 
+/**************************************************************************************************/
+//based on r function .medoid
+//results is length numOTUs and holds the distances from x of the sample in d with the min sum of distances to all other samples.
+//Basically the "best" medoid.
+//returns the sum of the distances squared
+double CommunityTypeFinder::rMedoid(vector< vector<double> > x, vector< vector<double> > d){
+    try {
+        vector<double> results; results.resize(numOTUs, 0.0);
+        double minSumDist = 1e6;
+        int minGroup = -1;
+        
+        for (int i = 0; i < d.size(); i++) {
+            if (m->control_pressed) { break; }
+            
+            double thisSum = 0.0;
+            for (int j = 0; j < d[i].size(); j++) { thisSum += d[i][j];  }
+            if (thisSum < minSumDist) {
+                minSumDist = thisSum;
+                minGroup = i;
+            }
+        }
+        
+        if (minGroup != -1) {
+            for (int i = 0; i < numOTUs; i++) {  results[i] = x[minGroup][i];  } //save minGroups relativeAbundance for each OTU
+        }else { m->mothurOut("[ERROR]: unable to find rMedoid group.\n"); m->control_pressed = true; }
+        
+        
+        double allMeanDist = 0.0;
+        for (int i = 0; i < x.size(); i++) { //numSamples
+            for (int j = 0; j < x[i].size(); j++) { //numOTus
+                if (m->control_pressed) { break; }
+                allMeanDist += ((x[i][j]-results[j])*(x[i][j]-results[j])); //(otuX sampleY - otuX bestMedoid)^2
+                
+            }
+        }
+        return allMeanDist;
+    }
+    catch(exception& e){
+        m->errorOut(e, "CommunityTypeFinder", "rMedoid");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
 
+/*To assess the optimal number of clusters our dataset was most robustly partitioned into, we used the Calinski-Harabasz (CH) Index that has shown good performance in recovering the number of clusters. It is defined as:
+ 
+ CHk=Bk/(k−1)/Wk/(n−k)
+ 
+ where Bk is the between-cluster sum of squares (i.e. the squared distances between all points i and j, for which i and j are not in the same cluster) and Wk is the within-clusters sum of squares (i.e. the squared distances between all points i and j, for which i and j are in the same cluster). This measure implements the idea that the clustering is more robust when between-cluster distances are substantially larger than within-cluster distances. Consequently, we chose the number of clusters k such that CHk was maximal.*/
+double CommunityTypeFinder::calcCHIndex(vector< vector< double> > dists){
+    try {
+        double CH = 0.0;
+        
+        if (numPartitions < 2) { return CH; }
+        
+        map<int, int> clusterMap; //map sample to partition
+        for (int j = 0; j < numSamples; j++) {
+            double maxValue = -1e6;
+            for (int i = 0; i < numPartitions; i++) {
+                if (m->control_pressed) { return 0.0; }
+                if (zMatrix[i][j] > maxValue) { //for kmeans zmatrix contains values for each sample in each partition. partition with highest value for that sample is the partition where the sample should be
+                    clusterMap[j] = i;
+                    maxValue = zMatrix[i][j];
+                }
+            }
+        }
+        
+        //make countMatrix a relabund
+        vector<vector<double> > relativeAbundance(numSamples); //[numSamples][numOTUs]
+        //get relative abundance
+        for(int i=0;i<numSamples;i++){
+            if (m->control_pressed) {  return 0; }
+            int groupTotal = 0;
+            
+            relativeAbundance[i].assign(numOTUs, 0.0);
+            
+            for(int j=0;j<numOTUs;j++){
+                groupTotal += countMatrix[i][j];
+            }
+            for(int j=0;j<numOTUs;j++){
+                relativeAbundance[i][j] = countMatrix[i][j] / (double)groupTotal;
+            }
+        }
+        
+        //find centers
+        vector<vector<double> > centers = calcCenters(dists, clusterMap, relativeAbundance);
+        
+        if (m->control_pressed) { return 0.0; }
+        
+        double allMeanDist = rMedoid(relativeAbundance, dists);
+        
+        if (m->debug) { m->mothurOut("[DEBUG]: allMeandDist = " + toString(allMeanDist) + "\n"); }
+        
+        for (int i = 0; i < relativeAbundance.size(); i++) {//numSamples
+            for (int j = 0; j < relativeAbundance[i].size(); j++) { //numOtus
+                if (m->control_pressed) {  return 0; }
+                //x <- (x - centers[cl, ])^2
+                relativeAbundance[i][j] = ((relativeAbundance[i][j] - centers[clusterMap[i]][j])*(relativeAbundance[i][j] - centers[clusterMap[i]][j]));
+            }
+        }
+        
+        double wgss = 0.0;
+        for (int j = 0; j < numOTUs; j++) {
+            for(int i=0;i<numSamples;i++){
+                if (m->control_pressed) { return 0.0; }
+                wgss += relativeAbundance[i][j];
+            }
+        }
+        
+        double bgss = allMeanDist - wgss;
+        
+        CH = (bgss / (double)(numPartitions - 1)) / (wgss / (double) (numSamples - numPartitions));
+        
+        return CH;
+    }
+    catch(exception& e){
+        m->errorOut(e, "CommunityTypeFinder", "calcCHIndex");
+        exit(1);
+    }
+}
+
+
+/**************************************************************************************************/
+vector<vector<double> > CommunityTypeFinder::calcCenters(vector<vector<double> >& dists, map<int, int> clusterMap, vector<vector<double> >& relativeAbundance) { //[numsamples][numsamples]
+    try {
+        //for each partition
+        //choose sample with smallest sum of squared dists
+        //       cout << "Here" << clusterMap.size() << endl;
+        //       for(map<int, int>::iterator it = clusterMap.begin(); it != clusterMap.end(); it++) { cout << it->first << '\t' << it->second <<endl; }
+        vector<vector<double> > centers; centers.resize(numPartitions);
+        vector<double>  sums;  sums.resize(numSamples, 0.0);
+        map<int, vector<int> > partition2Samples; //maps partitions to samples in the partition
+        map<int, vector<int> >::iterator it;
+        
+        for (int i = 0; i < numSamples; i++) {
+            int partitionI = clusterMap[i];
+            
+            //add this sample to list of samples in this partition for access later
+            it = partition2Samples.find(partitionI);
+            if (it == partition2Samples.end()) {
+                vector<int> temp; temp.push_back(i);
+                partition2Samples[partitionI] = temp;
+            }else {  partition2Samples[partitionI].push_back(i); }
+            
+            for (int j = 0; j < numSamples; j++) {
+                
+                int partitionJ = clusterMap[j];
+                
+                if (partitionI == partitionJ) { //if you are a distance between samples in the same cluster
+                    sums[i] += dists[i][j];
+                    sums[j] += dists[i][j];
+                }else{}//we dont' care about distance between clusters
+            }
+        }
+        
+        vector<int> medoidsVector; medoidsVector.resize(numPartitions, -1);
+        for (it = partition2Samples.begin(); it != partition2Samples.end(); it++) { //for each partition look for sample with smallest squared
+            
+            //sum dist to all other samples in cluster
+            vector<int> members = it->second;
+            double minSumDist = 1e6;
+            for (int i = 0; i < members.size(); i++) {
+                if (m->control_pressed) { return centers; }
+                if (sums[members[i]] < minSumDist) {
+                    minSumDist = sums[members[i]];
+                    medoidsVector[it->first] = members[i];
+                }
+            }
+            
+        }
+        
+        set<int> medoids;
+        for (int i = 0; i < medoidsVector.size(); i++) {
+            medoids.insert(medoidsVector[i]);
+        }
+        
+        int countPartitions = 0;
+        for (set<int>::iterator it = medoids.begin(); it != medoids.end(); it++) {
+            for (int j = 0; j < numOTUs; j++) {
+                centers[countPartitions].push_back(relativeAbundance[*it][j]); //save the relative abundance of the medoid for this partition for this OTU
+            }
+            countPartitions++;
+        }
+        
+        return centers;
+    }
+    catch(exception& e){
+        m->errorOut(e, "CommunityTypeFinder", "calcCenters");
+        exit(1);
+    }
+}
+
+/**************************************************************************************************/
+//The silhouette width S(i)of individual data points i is calculated using the following formula:
+/*
+ s(i) = b(i) - a(i)
+ -----------
+ max(b(i),a(i))
+ where a(i) is the average dissimilarity (or distance) of sample i to all other samples in the same cluster, while b(i) is the average dissimilarity (or distance) to all objects in the closest other cluster.
+ 
+ The formula implies -1 =< S(i) =< 1 . A sample which is much closer to its own cluster than to any other cluster has a high S(i) value, while S(i) close to 0 implies that the given sample lies somewhere between two clusters. Large negative S(i) values indicate that the sample was assigned to the wrong cluster.
+ */
+//based on silouette.r which calls sildist.c written by Francois Romain
+vector<double> CommunityTypeFinder::calcSilhouettes(vector<vector<double> > dists) {
+    try {
+        vector<double> silhouettes; silhouettes.resize(numSamples, 0.0);
+        if (numPartitions < 2) { return silhouettes; }
+        
+        
+        map<int, int> clusterMap; //map sample to partition
+        for (int j = 0; j < numSamples; j++) {
+            double maxValue = 0.0;
+            for (int i = 0; i < numPartitions; i++) {
+                if (m->control_pressed) { return silhouettes; }
+                if (zMatrix[i][j] > maxValue) { //for kmeans zmatrix contains values for each sample in each partition. partition with highest value for that sample is the partition where the sample should be
+                    clusterMap[j] = i;
+                    maxValue = zMatrix[i][j];
+                }
+            }
+        }
+        
+        //count number of samples in each partition
+        vector<int> counts; counts.resize(numPartitions, 0);
+        vector<double> DiC; DiC.resize((numPartitions*numSamples), 0.0);
+        bool computeSi = true;
+        
+        for (int i = 0; i < numSamples; i++) {
+            int partitionI = clusterMap[i];
+            counts[partitionI]++;
+            
+            for (int j = i+1; j < numSamples; j++) {
+                if (m->control_pressed) { return silhouettes; }
+                int partitionJ = clusterMap[j];
+                
+                DiC[numPartitions*i+partitionJ] += dists[i][j];
+                DiC[numPartitions*j+partitionI] += dists[i][j];
+            }
+        }
+        
+        vector<int> neighbor; neighbor.resize(numSamples, -1);
+        for (int i = 0; i < numSamples; i++) {
+            if (m->control_pressed) { return silhouettes; }
+            int ki = numPartitions*i;
+            int partitionI = clusterMap[i];
+            computeSi = true;
+            
+            for (int j = 0; j < numPartitions; j++) {
+                if (j == partitionI) {
+                    if (counts[j] == 1) { //only one sample in cluster
+                        computeSi = false;
+                    }else { DiC[ki+j] /= (counts[j]-1); }
+                }else{
+                    DiC[ki+j] /= counts[j];
+                }
+            }
+            
+            double ai = DiC[ki+partitionI];
+            
+            double bi = 0.0;
+            if (partitionI == 0) {  bi = DiC[ki+1]; neighbor[i] = 2; }
+            else {  bi =  DiC[ki]; neighbor[i] = 1; }
+            
+            for (int j = 1; j < numPartitions; j++) {
+                if (j != partitionI) {
+                    if (bi > DiC[ki+j]) {
+                        bi = DiC[ki + j];
+                        neighbor[i] = j+1;
+                    }
+                }
+            }
+            
+            silhouettes[i] = 0.0;
+            if (computeSi && bi != ai) {
+                silhouettes[i] = (bi-ai) / (max(ai, bi));
+            }
+        }
+        
+        return silhouettes;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CommunityTypeFinder", "calcSilhouettes");
+        exit(1);
+    }
+}
 /**************************************************************************************************/
 

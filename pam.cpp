@@ -229,102 +229,14 @@ int Pam::updateDp() {
         exit(1);
     }
 }
-/**************************************************************************************************/
-//The silhouette width S(i)of individual data points i is calculated using the following formula:
-/*
- s(i) = b(i) - a(i)
- -----------
- max(b(i),a(i))
- where a(i) is the average dissimilarity (or distance) of sample i to all other samples in the same cluster, while b(i) is the average dissimilarity (or distance) to all objects in the closest other cluster.
- 
- The formula implies -1 =< S(i) =< 1 . A sample which is much closer to its own cluster than to any other cluster has a high S(i) value, while S(i) close to 0 implies that the given sample lies somewhere between two clusters. Large negative S(i) values indicate that the sample was assigned to the wrong cluster.
- */
 
-vector<double> Pam::calcSilhouettes(vector<vector<double> > dists) {
-    try {
-        vector<double> silhouettes; silhouettes.resize(numSamples, 0.0);
-        if (numPartitions < 2) { return silhouettes; }
-        
-        vector<int> whoDp;
-        for (int i = 0; i < numSamples; i++) { // assumes at least 2 partitions
-            vector<seqDist> tempMeds;
-            for (set<int>::iterator it = medoids.begin(); it != medoids.end(); it++) {
-                if (m->control_pressed) { break; }
-                seqDist temp(*it, *it, dists[i][*it]); //medoid, medoid, distance from medoid to sample
-                tempMeds.push_back(temp);
-            }
-            sort(tempMeds.begin(), tempMeds.end(), compareSequenceDistance); //sort by distance
-            whoDp.push_back(tempMeds[1].seq1); //second closest medoid
-        }
-        
-        
-        vector<double> a, b; a.resize(numSamples, 0.0); b.resize(numSamples, 0.0);
-        
-        //calc a - all a[i] are the same in the same partition
-        for (int k = 0; k < numPartitions; k++) {
-            if (m->control_pressed) { break; }
-            
-            int count = 0;
-            double totalA = 0.0;
-            for (int i = 0; i < numSamples; i++) {
-                for (int j = 0; j < numSamples; j++) {
-                    if (m->control_pressed) { break; }
-                    if ((zMatrix[k][i] != 0) && (zMatrix[k][j] != 0)){ //are both samples in the partition, if so add there distance
-                        totalA += dists[j][i]; //distance from this sample to the other samples in the partition
-                        count++;
-                    }
-                }
-            }
-            totalA /= (double) count;
-            
-            //set a[i] to average for cluster
-            for (int i = 0; i < numSamples; i++) {
-                if (zMatrix[k][i] != 0) { a[i] = totalA; }
-            }
-        }
-        
-        //calc b
-        for (int i = 0; i < numSamples; i++) {
-            if (m->control_pressed) { break; }
-            
-            int nextClosestMedoid = whoDp[i];
-            int thisPartition = medoid2Partition[nextClosestMedoid];
-            int count = 0;
-            double totalB = 0.0;
-            for (int j = 0; j < numSamples; j++) {
-                if (zMatrix[thisPartition][j] != 0) { //this sample is in this partition
-                    totalB += dists[i][j];
-                    count++;
-                }
-            }
-            b[i] = totalB / (double) count;
-        }
-        
-        //calc silhouettes
-        for (int i = 0; i < numSamples; i++) {
-            if (m->control_pressed) { break; }
-            
-            double denom = a[i];
-            if (b[i] > denom) { denom = b[i]; } //max(a[i],b[i])
-            
-            silhouettes[i] = (b[i] - a[i]) / denom;
-            
-            //cout << "silhouettes " << i << '\t' << silhouettes[i] << endl;
-        }
-               
-        return silhouettes;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "Pam", "calcSilhouettes");
-        exit(1);
-    }
-}
 /**************************************************************************************************/
 /*To assess the optimal number of clusters our dataset was most robustly partitioned into, we used the Calinski-Harabasz (CH) Index that has shown good performance in recovering the number of clusters. It is defined as:
  
  CHk=Bk/(k−1)/Wk/(n−k)
  
  where Bk is the between-cluster sum of squares (i.e. the squared distances between all points i and j, for which i and j are not in the same cluster) and Wk is the within-clusters sum of squares (i.e. the squared distances between all points i and j, for which i and j are in the same cluster). This measure implements the idea that the clustering is more robust when between-cluster distances are substantially larger than within-cluster distances. Consequently, we chose the number of clusters k such that CHk was maximal.*/
+//based on R index.G1.r function
 double Pam::calcCHIndex(vector< vector<double> > dists){ //countMatrix = [numSamples][numOtus]
     try {
         double CH = 0.0;
@@ -340,7 +252,7 @@ double Pam::calcCHIndex(vector< vector<double> > dists){ //countMatrix = [numSam
         }
         
         //make countMatrix a relabund
-        vector<vector<double> > relativeAbundance(numSamples);
+        vector<vector<double> > relativeAbundance(numSamples); //[numSamples][numOTUs]
         //get relative abundance
         for(int i=0;i<numSamples;i++){
             if (m->control_pressed) {  return 0; }
@@ -366,25 +278,32 @@ double Pam::calcCHIndex(vector< vector<double> > dists){ //countMatrix = [numSam
             countPartitions++;
         }
         
-        double sumBetweenCluster = 0.0;
-        double sumWithinClusters = 0.0;
+        //centers.clear();
+        //centers = calcCenters(dists, clusterMap, relativeAbundance);
         
-        for (int i = 0; i < numSamples; i++) { //lt
-            for (int j = 0; j < i; j++) {
-                if (m->control_pressed) { return 0.0; }
-                int partitionI = clusterMap[i];
-                int partitionJ = clusterMap[j];
-                
-                if (partitionI == partitionJ) { //they are from the same cluster so this distance is added to Wk
-                    sumWithinClusters += (dists[i][j] * dists[i][j]);
-                }else { //they are NOT from the same cluster so this distance is added to Bk
-                    sumBetweenCluster += (dists[i][j] * dists[i][j]);
-                }
+        double allMeanDist = rMedoid(relativeAbundance, dists);
+        
+        if (m->debug) { m->mothurOut("[DEBUG]: allMeandDist = " + toString(allMeanDist) + "\n"); }
+        
+        for (int i = 0; i < relativeAbundance.size(); i++) {//numSamples
+            for (int j = 0; j < relativeAbundance[i].size(); j++) { //numOtus
+                if (m->control_pressed) {  return 0; }
+                //x <- (x - centers[cl, ])^2
+                relativeAbundance[i][j] = ((relativeAbundance[i][j] - centers[clusterMap[i]][j])*(relativeAbundance[i][j] - centers[clusterMap[i]][j]));
             }
         }
-        //cout << numPartitions << '\t' << sumWithinClusters << '\t' << sumBetweenCluster << '\t' <<  (numSamples - numPartitions) << endl;
         
-        CH = (sumBetweenCluster / (double)(numPartitions - 1)) / (sumWithinClusters / (double) (numSamples - numPartitions));
+        double wgss = 0.0;
+        for (int j = 0; j < numOTUs; j++) {
+            for(int i=0;i<numSamples;i++){
+                if (m->control_pressed) { return 0.0; }
+                wgss += relativeAbundance[i][j];
+            }
+        }
+        
+        double bgss = allMeanDist - wgss;
+        
+        CH = (bgss / (double)(numPartitions - 1)) / (wgss / (double) (numSamples - numPartitions));
         
         return CH;
     }
@@ -395,6 +314,5 @@ double Pam::calcCHIndex(vector< vector<double> > dists){ //countMatrix = [numSam
 }
 
 /**************************************************************************************************/
-
 
 

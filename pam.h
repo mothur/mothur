@@ -17,7 +17,6 @@ class Pam : public CommunityTypeFinder {
     
 public:
     Pam(vector<vector<int> >, vector<vector<double> >, int);
-    vector<double> calcSilhouettes(vector< vector< double> >);
     double calcCHIndex(vector< vector< double> >);
     
 private:

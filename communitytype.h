@@ -35,8 +35,8 @@ public:
     virtual double getLogDet()  {    return logDeterminant; }
     virtual double getLaplace() {    return laplace;        }
     
-    virtual double calcCHIndex(vector< vector< double> >) {return 0;}  //Calinski-Harabasz
-    virtual vector<double> calcSilhouettes(vector< vector< double> >) {  vector<double> s; return s; } //if none provided by child class
+    virtual double calcCHIndex(vector< vector< double> >); //Calinski-Harabasz
+    virtual vector<double> calcSilhouettes(vector< vector< double> >); 
 
 
 protected:
@@ -46,6 +46,8 @@ protected:
     double psi1(double);
     double psi(double);
     double cheb_eval(const double[], int, double);
+    double rMedoid(vector< vector<double> > x, vector< vector<double> > d);
+    vector<vector<double> > calcCenters(vector<vector<double> >&, map<int, int>, vector<vector<double> >&);
 
     
 	MothurOut* m;
