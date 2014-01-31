@@ -25,7 +25,7 @@ Pam::Pam(vector<vector<int> > c, vector<vector<double> > d, int p) : CommunityTy
                 if (dists[i][j] > largestDist) { largestDist = dists[i][j]; } 
             }
         }
-        
+       
         buildPhase(); //choosing the medoids
         swapPhase(); //optimize clusters
     }
@@ -65,12 +65,11 @@ int Pam::buildPhase() {
                     gains[i] = 0.0;
                 
                     for (int j = 0; j < numSamples; j++) {
-                        //cout << i << '\t' << j << '\t' <<   Dp[i][0] << '\t' << dists[i][j] << '\t' << totalGain << endl;
-                        totalGain = Dp[i][0] - dists[i][j];
+                        totalGain = Dp[j][0] - dists[i][j];
                         if (totalGain > 0.0) { gains[i] += totalGain; }
                     }
                     if (m->debug) { m->mothurOut("[DEBUG]: " + toString(i) +  " totalGain = " + toString(totalGain) + "\n"); }
-                    
+                   
                     if (clusterGain <= gains[i]) {
                         clusterGain = gains[i];
                         medoid = i;
@@ -104,7 +103,7 @@ int Pam::swapPhase() {
         //calculate cost of initial choice - average distance of samples to their closest medoid
         double sky = 0.0;
         double dzsky = 1.0;
-        for (int i = 0; i < numSamples; i++) { sky += Dp[i][0]; }  sky /= (double) numSamples;
+        for (int i = 0; i < numSamples; i++) { sky += Dp[i][0]; }  //sky /= (double) numSamples;
         
         bool done = false;
         int hbest, nbest; hbest = -1; nbest = -1;
@@ -128,9 +127,9 @@ int Pam::swapPhase() {
                                     double small = 0.0;
                                     if (Dp[j][1] > dists[h][j]) {   small = dists[h][j];    }
                                     else                        {   small = Dp[j][1];       }
-                                    dz += (small - Dp[j][0]);
+                                    dz += (- Dp[j][0]+ small);
                                 }else if (dists[h][j] < Dp[j][0]) {
-                                    dz += (dists[h][j] - Dp[j][0]);
+                                    dz += (- Dp[j][0] + dists[h][j]);
                                 }
                             }
                             if (dzsky > dz) {
@@ -222,6 +221,7 @@ int Pam::updateDp() {
                 }
             }
         }
+    
         return 0;
     }
     catch(exception& e) {
