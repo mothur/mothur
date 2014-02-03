@@ -11,6 +11,7 @@
  */
 
 #include "command.hpp"
+#include "commandfactory.hpp"
 
 class GetCurrentCommand : public Command {
 
@@ -34,6 +35,7 @@ class GetCurrentCommand : public Command {
 	
 	private:
 		
+        CommandFactory* cFactory;
 		vector<string> outputNames;
 		bool abort;
 	

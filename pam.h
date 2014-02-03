@@ -11,6 +11,7 @@
 
 #include "communitytype.h"
 
+//Partitioning Around Medoids
 /**************************************************************************************************/
 
 class Pam : public CommunityTypeFinder {

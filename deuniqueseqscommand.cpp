@@ -190,11 +190,9 @@ int DeUniqueSeqsCommand::execute() {
 		ofstream out;
         string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(fastaFile);  }
-		string outFastaFile = thisOutputDir + m->getRootName(m->getSimpleName(fastaFile));
-		int pos = outFastaFile.find("unique");
-		if (pos != string::npos) { outFastaFile = outputDir + outFastaFile.substr(0, pos); }
-        else { outFastaFile = outputDir + outFastaFile; }
-        map<string, string> variables; 
+        string outFastaFile = thisOutputDir + m->getRootName(m->getSimpleName(fastaFile));
+       
+        map<string, string> variables;
         variables["[filename]"] = outFastaFile;
         outFastaFile = getOutputFileName("fasta", variables);
 		m->openOutputFile(outFastaFile, out);

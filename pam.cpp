@@ -35,6 +35,7 @@ Pam::Pam(vector<vector<int> > c, vector<vector<double> > d, int p) : CommunityTy
 	}
 }
 /**************************************************************************************************/
+//build and swap functions based on pam.c by maechler from R cluster package
 //sets Dp[0] does not set Dp[1]. chooses intial medoids.
 int Pam::buildPhase() {
     try {

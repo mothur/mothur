@@ -33,6 +33,7 @@ public:
 	string getLogfileName()					{	return logFileName; 	}
 	bool getAppend()						{	return append;			}
 	string getOutputDir()					{	return outputDir;		}
+    string getInputDir()					{	return inputDir;		}
 	bool MPIEnabled(string);
 	map<string, string> getListCommands()	{	return commands;		}
 	

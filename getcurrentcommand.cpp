@@ -90,7 +90,9 @@ int GetCurrentCommand::execute(){
 	try {
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
-		
+        
+		cFactory = CommandFactory::getInstance();
+        
 		//user wants to clear a type
 		if (types.size() != 0) {
 			for (int i = 0; i < types.size(); i++) {
@@ -158,8 +160,31 @@ int GetCurrentCommand::execute(){
 			m->mothurOutEndLine(); m->mothurOut("Current files saved by mothur:"); m->mothurOutEndLine();
 			m->printCurrentFiles();
 		}
+        
+        string inputDir = cFactory->getInputDir();
+        if (inputDir != "") {
+            m->mothurOutEndLine(); m->mothurOut("Current input directory saved by mothur: " + inputDir); m->mothurOutEndLine();
+        }
+        
+        string outputDir = cFactory->getOutputDir();
+        if (outputDir != "") {
+            m->mothurOutEndLine(); m->mothurOut("Current output directory saved by mothur: " + outputDir); m->mothurOutEndLine();
+        }
+        string defaultPath = m->getDefaultPath();
+        if (defaultPath != "") {
+            m->mothurOutEndLine(); m->mothurOut("Current default directory saved by mothur: " + defaultPath); m->mothurOutEndLine();
+        }
+        
+        
+        string temp = "./";
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#else
+            temp = ".\\";
+#endif
+        temp = m->getFullPathName(temp);
+        m->mothurOutEndLine(); m->mothurOut("Current working directory: " + temp); m->mothurOutEndLine();
 		
-		return 0;	
+		return 0;
 	}
 	
 	catch(exception& e) {

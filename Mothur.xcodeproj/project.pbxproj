@@ -10,6 +10,7 @@
 		219C1DE01552C4BD004209F9 /* newcommandtemplate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 219C1DDF1552C4BD004209F9 /* newcommandtemplate.cpp */; };
 		219C1DE41559BCCF004209F9 /* getcoremicrobiomecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 219C1DE31559BCCD004209F9 /* getcoremicrobiomecommand.cpp */; };
 		483C952E188F0CAD0035E7B7 /* sharedrjsd.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 483C952D188F0CAD0035E7B7 /* sharedrjsd.cpp */; };
+		48E981CF189C38FB0042BE9D /* mergesfffilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48E981CE189C38FB0042BE9D /* mergesfffilecommand.cpp */; };
 		7E6BE10A12F710D8007ADDBE /* refchimeratest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7E6BE10912F710D8007ADDBE /* refchimeratest.cpp */; };
 		834D9D581656D7C400E7FAB9 /* regularizedrandomforest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 834D9D561656D7C400E7FAB9 /* regularizedrandomforest.cpp */; };
 		834D9D5C1656DEC800E7FAB9 /* regularizeddecisiontree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 834D9D5A1656DEC700E7FAB9 /* regularizeddecisiontree.cpp */; };
@@ -409,6 +410,8 @@
 		219C1DE51559BCF2004209F9 /* getcoremicrobiomecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getcoremicrobiomecommand.h; sourceTree = "<group>"; };
 		483C952C188F0C960035E7B7 /* sharedrjsd.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sharedrjsd.h; sourceTree = "<group>"; };
 		483C952D188F0CAD0035E7B7 /* sharedrjsd.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedrjsd.cpp; sourceTree = "<group>"; };
+		48E981CD189C38E60042BE9D /* mergesfffilecommand.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mergesfffilecommand.h; sourceTree = "<group>"; };
+		48E981CE189C38FB0042BE9D /* mergesfffilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mergesfffilecommand.cpp; sourceTree = "<group>"; };
 		7E6BE10812F710D8007ADDBE /* refchimeratest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = refchimeratest.h; sourceTree = "<group>"; };
 		7E6BE10912F710D8007ADDBE /* refchimeratest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = refchimeratest.cpp; sourceTree = "<group>"; };
 		7E78911B135F3E8600E725D2 /* eachgapdistignorens.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = eachgapdistignorens.h; sourceTree = "<group>"; };
@@ -1512,6 +1515,8 @@
 				A7E9B75312D37EC400DA6239 /* mergefilecommand.cpp */,
 				A71FE12A12EDF72400963CA7 /* mergegroupscommand.h */,
 				A71FE12B12EDF72400963CA7 /* mergegroupscommand.cpp */,
+				48E981CD189C38E60042BE9D /* mergesfffilecommand.h */,
+				48E981CE189C38FB0042BE9D /* mergesfffilecommand.cpp */,
 				A799314816CBD0BC0017E888 /* mergetaxsummarycommand.h */,
 				A799314A16CBD0CD0017E888 /* mergetaxsummarycommand.cpp */,
 				A7E9B75812D37EC400DA6239 /* metastatscommand.h */,
@@ -2102,6 +2107,7 @@
 				A7E9B89712D37EC400DA6239 /* chimerabellerophoncommand.cpp in Sources */,
 				A7E9B89812D37EC400DA6239 /* chimeraccodecommand.cpp in Sources */,
 				A7E9B89912D37EC400DA6239 /* chimeracheckcommand.cpp in Sources */,
+				48E981CF189C38FB0042BE9D /* mergesfffilecommand.cpp in Sources */,
 				A7E9B89A12D37EC400DA6239 /* chimeracheckrdp.cpp in Sources */,
 				A7E9B89B12D37EC400DA6239 /* chimerapintailcommand.cpp in Sources */,
 				A7E9B89C12D37EC400DA6239 /* chimerarealigner.cpp in Sources */,

@@ -149,6 +149,7 @@
 #include "lefsecommand.h"
 #include "kruskalwalliscommand.h"
 #include "sracommand.h"
+#include "mergesfffilecommand.h"
 
 /*******************************************************/
 
@@ -321,6 +322,7 @@ CommandFactory::CommandFactory(){
     commands["lefse"]               = "lefse";
     commands["kruskal.wallis"]      = "kruskal.wallis";
     commands["sra"]                 = "sra";
+    commands["merge.sfffiles"]      = "merge.sfffiles";
     
 
 }
@@ -549,6 +551,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         else if(commandName == "lefse")                 {	command = new LefseCommand(optionString);                   }
         else if(commandName == "kruskal.wallis")        {	command = new KruskalWallisCommand(optionString);           }
         else if(commandName == "sra")                   {	command = new SRACommand(optionString);                     }
+        else if(commandName == "merge.sfffiles")        {	command = new MergeSfffilesCommand(optionString);           }
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -718,6 +721,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
         else if(commandName == "lefse")                 {	pipecommand = new LefseCommand(optionString);                   }
         else if(commandName == "kruskal.wallis")        {	pipecommand = new KruskalWallisCommand(optionString);           }
         else if(commandName == "sra")                   {	pipecommand = new SRACommand(optionString);                     }
+        else if(commandName == "merge.sfffiles")        {	pipecommand = new MergeSfffilesCommand(optionString);           }
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -873,6 +877,7 @@ Command* CommandFactory::getCommand(string commandName){
         else if(commandName == "lefse")                 {	shellcommand = new LefseCommand();                  }
         else if(commandName == "kruskal.wallis")        {	shellcommand = new KruskalWallisCommand();          }
         else if(commandName == "sra")                   {	shellcommand = new SRACommand();                    }
+        else if(commandName == "merge.sfffiles")        {	shellcommand = new MergeSfffilesCommand();          }
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;
