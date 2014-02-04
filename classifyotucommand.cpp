@@ -544,11 +544,11 @@ int ClassifyOtuCommand::process(ListVector* processList) {
 		
 		PhyloSummary* taxaSum;
         if (countfile != "") {
-            if (refTaxonomy != "") { taxaSum = new PhyloSummary(refTaxonomy, ct);  }
-            else {  taxaSum = new PhyloSummary(ct); }
+            if (refTaxonomy != "") { taxaSum = new PhyloSummary(refTaxonomy, ct,false);  }
+            else {  taxaSum = new PhyloSummary(ct,false); }
 		}else {
-            if (refTaxonomy != "") { taxaSum = new PhyloSummary(refTaxonomy, groupMap);  }
-            else {  taxaSum = new PhyloSummary(groupMap); }
+            if (refTaxonomy != "") { taxaSum = new PhyloSummary(refTaxonomy, groupMap,false);  }
+            else {  taxaSum = new PhyloSummary(groupMap,false); }
         }
         
         vector<ofstream*> outSums;
@@ -574,11 +574,11 @@ int ClassifyOtuCommand::process(ListVector* processList) {
                 
                 PhyloSummary* taxaSumt;
                 if (countfile != "") {
-                    if (refTaxonomy != "") { taxaSumt = new PhyloSummary(refTaxonomy, ct);  }
-                    else {  taxaSumt = new PhyloSummary(ct); }
+                    if (refTaxonomy != "") { taxaSumt = new PhyloSummary(refTaxonomy, ct, false);  }
+                    else {  taxaSumt = new PhyloSummary(ct, false); }
                 }else {
-                    if (refTaxonomy != "") { taxaSumt = new PhyloSummary(refTaxonomy, groupMap);  }
-                    else {  taxaSumt = new PhyloSummary(groupMap); }
+                    if (refTaxonomy != "") { taxaSumt = new PhyloSummary(refTaxonomy, groupMap,false);  }
+                    else {  taxaSumt = new PhyloSummary(groupMap,false); }
                 }
                 taxaSums.push_back(taxaSumt);
             }

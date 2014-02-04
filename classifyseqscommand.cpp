@@ -34,6 +34,7 @@ vector<string> ClassifySeqsCommand::setParameters(){
 		CommandParameter piters("iters", "Number", "", "100", "", "", "","",false,true); parameters.push_back(piters);
 		CommandParameter psave("save", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(psave);
         CommandParameter pshortcuts("shortcuts", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pshortcuts);
+        CommandParameter prelabund("relabund", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(prelabund);
 		CommandParameter pnumwanted("numwanted", "Number", "", "10", "", "", "","",false,true); parameters.push_back(pnumwanted);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -52,7 +53,7 @@ string ClassifySeqsCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The classify.seqs command reads a fasta file containing sequences and creates a .taxonomy file and a .tax.summary file.\n";
-		helpString += "The classify.seqs command parameters are reference, fasta, name, group, count, search, ksize, method, taxonomy, processors, match, mismatch, gapopen, gapextend, numwanted and probs.\n";
+		helpString += "The classify.seqs command parameters are reference, fasta, name, group, count, search, ksize, method, taxonomy, processors, match, mismatch, gapopen, gapextend, numwanted, relabund and probs.\n";
 		helpString += "The reference, fasta and taxonomy parameters are required. You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amzon.fasta \n";
 		helpString += "The search parameter allows you to specify the method to find most similar template.  Your options are: suffix, kmer, blast, align and distance. The default is kmer.\n";
 		helpString += "The name parameter allows you add a names file with your fasta file, if you enter multiple fasta files, you must enter matching names files for them.\n";
@@ -72,6 +73,7 @@ string ClassifySeqsCommand::getHelpString(){
 		helpString += "The numwanted parameter allows you to specify the number of sequence matches you want with the knn method.  The default is 10.\n";
 		helpString += "The cutoff parameter allows you to specify a bootstrap confidence threshold for your taxonomy.  The default is 0.\n";
 		helpString += "The probs parameter shuts off the bootstrapping results for the wang and zap method. The default is true, meaning you want the bootstrapping to be shown.\n";
+        helpString += "The relabund parameter allows you to indicate you want the summary file values to be relative abundances rather than raw abundances. Default=F. \n";
 		helpString += "The iters parameter allows you to specify how many iterations to do when calculating the bootstrap confidence score for your taxonomy with the wang method.  The default is 100.\n";
 		//helpString += "The flip parameter allows you shut off mothur's   The default is T.\n";
 		helpString += "The classify.seqs command should be in the following format: \n";
@@ -558,6 +560,9 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 			temp = validParameter.validFile(parameters, "probs", false);		if (temp == "not found"){	temp = "true";			}
 			probs = m->isTrue(temp);
             
+            temp = validParameter.validFile(parameters, "relabund", false);		if (temp == "not found"){	temp = "false";			}
+			relabund = m->isTrue(temp);
+            
             temp = validParameter.validFile(parameters, "shortcuts", false);	if (temp == "not found"){	temp = "true";			}
 			writeShortcuts = m->isTrue(temp);
 			
@@ -813,12 +818,12 @@ int ClassifySeqsCommand::execute(){
                 if (hasCount) { 
                     ct = new CountTable();
                     ct->readTable(countfileNames[s], true, false);
-                    taxaSum = new PhyloSummary(taxonomyFileName, ct);
+                    taxaSum = new PhyloSummary(taxonomyFileName, ct, relabund);
                     taxaSum->summarize(tempTaxonomyFile);
                 }else {
                     if (groupfile != "") {  group = groupfileNames[s]; groupMap = new GroupMap(group); groupMap->readMap(); }
                     
-                    taxaSum = new PhyloSummary(taxonomyFileName, groupMap);
+                    taxaSum = new PhyloSummary(taxonomyFileName, groupMap, relabund);
                     
                     if (m->control_pressed) { outputTypes.clear(); if (ct != NULL) { delete ct; }  if (groupMap != NULL) { delete groupMap; } delete taxaSum; for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]);	} delete classify; return 0; }
                     

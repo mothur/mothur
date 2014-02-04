@@ -77,7 +77,7 @@ private:
 	string fastaFileName, templateFileName, countfile, distanceFileName, namefile, search, method, taxonomyFileName, outputDir, groupfile;
 	int processors, kmerSize, numWanted, cutoff, iters;
 	float match, misMatch, gapOpen, gapExtend;
-	bool abort, probs, save, flip, hasName, hasCount, writeShortcuts;
+	bool abort, probs, save, flip, hasName, hasCount, writeShortcuts, relabund;
 	
 	int driver(linePair*, string, string, string, string);
 	int createProcesses(string, string, string, string); 

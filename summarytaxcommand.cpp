@@ -18,6 +18,8 @@ vector<string> SummaryTaxCommand::setParameters(){
         CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none","",false,false,true); parameters.push_back(pcount);
 		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
 		CommandParameter preftaxonomy("reftaxonomy", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(preftaxonomy);
+        CommandParameter prelabund("relabund", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(prelabund);
+
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
@@ -35,11 +37,12 @@ string SummaryTaxCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The summary.tax command reads a taxonomy file and an optional name file, and summarizes the taxonomy information.\n";
-		helpString += "The summary.tax command parameters are taxonomy, count, group and name. taxonomy is required, unless you have a valid current taxonomy file.\n";
+		helpString += "The summary.tax command parameters are taxonomy, count, group, name and relabund. taxonomy is required, unless you have a valid current taxonomy file.\n";
 		helpString += "The name parameter allows you to enter a name file associated with your taxonomy file. \n";
 		helpString += "The group parameter allows you add a group file so you can have the summary totals broken up by group.\n";
         helpString += "The count parameter allows you add a count file so you can have the summary totals broken up by group.\n";
 		helpString += "The reftaxonomy parameter allows you give the name of the reference taxonomy file used when you classified your sequences. It is not required, but providing it will keep the rankIDs in the summary file static.\n";
+        helpString += "The relabund parameter allows you to indicate you want the summary file values to be relative abundances rather than raw abundances. Default=F. \n";
 		helpString += "The summary.tax command should be in the following format: \n";
 		helpString += "summary.tax(taxonomy=yourTaxonomyFile) \n";
 		helpString += "Note: No spaces between parameter labels (i.e. taxonomy), '=' and parameters (i.e.yourTaxonomyFile).\n";	
@@ -194,6 +197,9 @@ SummaryTaxCommand::SummaryTaxCommand(string option)  {
 				outputDir = "";	
 				outputDir += m->hasPath(taxfile); //if user entered a file with a path then preserve it	
 			}
+            
+            string temp = validParameter.validFile(parameters, "relabund", false);		if (temp == "not found"){	temp = "false";			}
+			relabund = m->isTrue(temp);
 			
             if (countfile == "") {
                 if (namefile == "") {
@@ -228,11 +234,11 @@ int SummaryTaxCommand::execute(){
 		
         PhyloSummary* taxaSum;
         if (countfile != "") {
-            if (refTaxonomy != "") { taxaSum = new PhyloSummary(refTaxonomy, ct); }
-            else { taxaSum = new PhyloSummary(ct); }
+            if (refTaxonomy != "") { taxaSum = new PhyloSummary(refTaxonomy, ct, relabund); }
+            else { taxaSum = new PhyloSummary(ct, relabund); }
         }else {
-            if (refTaxonomy != "") { taxaSum = new PhyloSummary(refTaxonomy, groupMap); }
-            else { taxaSum = new PhyloSummary(groupMap); }
+            if (refTaxonomy != "") { taxaSum = new PhyloSummary(refTaxonomy, groupMap, relabund); }
+            else { taxaSum = new PhyloSummary(groupMap, relabund); }
 		}
         
 		if (m->control_pressed) { if (groupMap != NULL) { delete groupMap; } if (ct != NULL) { delete ct; } delete taxaSum; return 0; }

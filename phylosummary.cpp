@@ -11,12 +11,13 @@
 #include "referencedb.h"
 /**************************************************************************************************/
 
-PhyloSummary::PhyloSummary(string refTfile, CountTable* c){
+PhyloSummary::PhyloSummary(string refTfile, CountTable* c, bool r){
 	try {
 		m = MothurOut::getInstance();
 		maxLevel = 0;
 		ignore = false;
         numSeqs = 0;
+        relabund = r;
 		
 		ct = c;
         groupmap = NULL;
@@ -44,12 +45,13 @@ PhyloSummary::PhyloSummary(string refTfile, CountTable* c){
 
 /**************************************************************************************************/
 
-PhyloSummary::PhyloSummary(CountTable* c){
+PhyloSummary::PhyloSummary(CountTable* c, bool r){
 	try {
 		m = MothurOut::getInstance();
 		maxLevel = 0;
 		ignore = true;
         numSeqs = 0;
+        relabund = r;
 		
 		ct = c;
         groupmap = NULL;
@@ -63,12 +65,13 @@ PhyloSummary::PhyloSummary(CountTable* c){
 	}
 }
 /**************************************************************************************************/
-PhyloSummary::PhyloSummary(string refTfile, GroupMap* g){
+PhyloSummary::PhyloSummary(string refTfile, GroupMap* g, bool r){
 	try {
 		m = MothurOut::getInstance();
 		maxLevel = 0;
 		ignore = false;
         numSeqs = 0;
+        relabund = r;
 		
 		groupmap = g;
         ct = NULL;
@@ -96,12 +99,13 @@ PhyloSummary::PhyloSummary(string refTfile, GroupMap* g){
 
 /**************************************************************************************************/
 
-PhyloSummary::PhyloSummary(GroupMap* g){
+PhyloSummary::PhyloSummary(GroupMap* g, bool r){
 	try {
 		m = MothurOut::getInstance();
 		maxLevel = 0;
 		ignore = true;
         numSeqs = 0;
+        relabund = r;
 		
 		groupmap = g;
         ct = NULL;
@@ -377,11 +381,10 @@ void PhyloSummary::assignRank(int index){
 	try {
 		map<string,int>::iterator it;
 		int counter = 1;
-		
+        
 		for(it=tree[index].children.begin();it!=tree[index].children.end();it++){
 			tree[it->second].rank = tree[index].rank + '.' + toString(counter);
 			counter++;
-									
 			assignRank(it->second);
 		}
 	}
@@ -395,7 +398,7 @@ void PhyloSummary::assignRank(int index){
 void PhyloSummary::print(ofstream& out){
 	try {
 		
-		if (ignore) { assignRank(0); }
+		if (ignore)     {  assignRank(0); }
         vector<string> mGroups;
 		//print labels
 		out << "taxlevel\t rankID\t taxon\t daughterlevels\t total\t";
@@ -414,12 +417,10 @@ void PhyloSummary::print(ofstream& out){
                 }
             }
         }
-		
 		out << endl;
 		
 		int totalChildrenInTree = 0;
 		map<string, int>::iterator itGroup;
-		
 		map<string,int>::iterator it;
 		for(it=tree[0].children.begin();it!=tree[0].children.end();it++){   
 			if (tree[it->second].total != 0)  {   
@@ -435,15 +436,35 @@ void PhyloSummary::print(ofstream& out){
 		}
 		
 		//print root
-		out << tree[0].level << "\t" << tree[0].rank << "\t" << tree[0].name << "\t" << totalChildrenInTree << "\t" << tree[0].total << "\t";
-		
-		
-		if (groupmap != NULL) {
-			for (int i = 0; i < mGroups.size(); i++) {  out << tree[0].groupCount[mGroups[i]] << '\t'; }  
-        }else if ( ct != NULL) {
-            if (ct->hasGroupInfo()) { for (int i = 0; i < mGroups.size(); i++) {  out << tree[0].groupCount[mGroups[i]] << '\t'; } }
-        }
-		out << endl;
+        if (relabund) {
+            out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
+            out << tree[0].level << "\t" << tree[0].rank << "\t" << tree[0].name << "\t" << totalChildrenInTree << "\t" << (tree[0].total/(double) tree[0].total) << '\t';
+            
+            if (groupmap != NULL) {
+                for (int i = 0; i < mGroups.size(); i++) {
+                    double thisNum = tree[0].groupCount[mGroups[i]];
+                    thisNum /= (double) groupmap->getNumSeqs(mGroups[i]);
+                    out << thisNum << '\t';
+                }
+            }else if ( ct != NULL) {
+                if (ct->hasGroupInfo()) {
+                    for (int i = 0; i < mGroups.size(); i++) {
+                        double thisNum = tree[0].groupCount[mGroups[i]];
+                        thisNum /= (double) ct->getGroupCount(mGroups[i]);
+                        out << thisNum << '\t';
+                    }
+                }
+            }
+            out << endl;
+        }else {
+            out << tree[0].level << "\t" << tree[0].rank << "\t" << tree[0].name << "\t" << totalChildrenInTree << "\t" << tree[0].total << "\t";
+            if (groupmap != NULL) {
+                for (int i = 0; i < mGroups.size(); i++) {  out << tree[0].groupCount[mGroups[i]] << '\t'; }
+            }else if ( ct != NULL) {
+                if (ct->hasGroupInfo()) { for (int i = 0; i < mGroups.size(); i++) {  out << tree[0].groupCount[mGroups[i]] << '\t'; } }
+            }
+            out << endl;
+		}
 		
 		//print rest
 		print(0, out);
@@ -525,22 +546,37 @@ void PhyloSummary::print(int i, ofstream& out){
 					if (tree[it2->second].total != 0)  {   totalChildrenInTree++; }
 				}
                 
-				out << tree[it->second].level << "\t" << tree[it->second].rank << "\t" << tree[it->second].name << "\t" << totalChildrenInTree << "\t" << tree[it->second].total << "\t";
-				
-				map<string, int>::iterator itGroup;
-				if (groupmap != NULL) {
-					//for (itGroup = tree[it->second].groupCount.begin(); itGroup != tree[it->second].groupCount.end(); itGroup++) {
-					//	out << itGroup->second << '\t';
-					//}
-					vector<string> mGroups = groupmap->getNamesOfGroups();
-					for (int i = 0; i < mGroups.size(); i++) {  out << tree[it->second].groupCount[mGroups[i]] << '\t'; }
-				}else if (ct != NULL) {
-                    if (ct->hasGroupInfo()) {
-                        vector<string> mGroups = ct->getNamesOfGroups();
-                        for (int i = 0; i < mGroups.size(); i++) {  out << tree[it->second].groupCount[mGroups[i]] << '\t'; }
+                if (relabund) {
+                    out << tree[it->second].level << "\t" << tree[it->second].rank << "\t" << tree[it->second].name << "\t" << totalChildrenInTree << "\t" << (tree[it->second].total/(double) tree[0].total) << "\t";
+                }else {
+                    out << tree[it->second].level << "\t" << tree[it->second].rank << "\t" << tree[it->second].name << "\t" << totalChildrenInTree << "\t" << tree[it->second].total << "\t";
+				}
+                
+                if (relabund) {
+                    map<string, int>::iterator itGroup;
+                    if (groupmap != NULL) {
+                        vector<string> mGroups = groupmap->getNamesOfGroups();
+                        for (int i = 0; i < mGroups.size(); i++) {  out << (tree[it->second].groupCount[mGroups[i]]/(double)groupmap->getNumSeqs(mGroups[i])) << '\t'; }
+                    }else if (ct != NULL) {
+                        if (ct->hasGroupInfo()) {
+                            vector<string> mGroups = ct->getNamesOfGroups();
+                            for (int i = 0; i < mGroups.size(); i++) {  out << (tree[it->second].groupCount[mGroups[i]]/(double)ct->getGroupCount(mGroups[i])) << '\t'; }
+                        }
                     }
+                }else {
+                    map<string, int>::iterator itGroup;
+                    if (groupmap != NULL) {
+                        vector<string> mGroups = groupmap->getNamesOfGroups();
+                        for (int i = 0; i < mGroups.size(); i++) {  out << tree[it->second].groupCount[mGroups[i]] << '\t'; }
+                    }else if (ct != NULL) {
+                        if (ct->hasGroupInfo()) {
+                            vector<string> mGroups = ct->getNamesOfGroups();
+                            for (int i = 0; i < mGroups.size(); i++) {  out << tree[it->second].groupCount[mGroups[i]] << '\t'; }
+                        }
+                    }
+ 
                 }
-				out << endl;
+                out << endl;
 				
 			}
 			

@@ -34,7 +34,7 @@ class SummaryTaxCommand : public Command {
 		void help() { m->mothurOut(getHelpString()); }	
 		
 	private:
-		bool abort;
+		bool abort, relabund;
 		string taxfile, outputDir, namefile, groupfile, refTaxonomy, countfile;
 		vector<string> outputNames;
 		map<string, int> nameMap;
