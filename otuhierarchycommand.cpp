@@ -8,6 +8,7 @@
  */
 
 #include "otuhierarchycommand.h"
+#include "inputdata.h"
 
 //**********************************************************************************************************************
 vector<string> OtuHierarchyCommand::setParameters(){	
@@ -137,8 +138,8 @@ OtuHierarchyCommand::OtuHierarchyCommand(string option) {
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { m->mothurOut("label is a required parameter for the otu.hierarchy command."); m->mothurOutEndLine(); abort = true; }
 			else { 
-				m->splitAtDash(label, labels);
-				if (labels.size() != 2) { m->mothurOut("You must provide 2 labels."); m->mothurOutEndLine(); abort = true; }
+				m->splitAtDash(label, mylabels);
+				if (mylabels.size() != 2) { m->mothurOut("You must provide 2 labels."); m->mothurOutEndLine(); abort = true; }
 			}	
 			
 			output = validParameter.validFile(parameters, "output", false);			if (output == "not found") { output = "name"; }
@@ -160,15 +161,23 @@ int OtuHierarchyCommand::execute(){
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//get listvectors that correspond to labels requested, (or use smart distancing to get closest listvector)
-		vector<ListVector> lists = getListVectors();
+		vector< vector<string> > lists = getListVectors();
 		
 		if (m->control_pressed) { outputTypes.clear(); return 0; }
 		
 		//determine which is little and which is big, putting little first
-		if (lists.size() == 2) {
+		if (lists.size() == 4) {
 			//if big is first swap them
-			if (lists[0].getNumBins() < lists[1].getNumBins()) {
-				reverse(lists.begin(), lists.end());
+			if (lists[0].size() < lists[2].size()) {
+				vector< vector<string> > tempLists;
+                tempLists.push_back(lists[2]);
+                tempLists.push_back(lists[3]);
+                tempLists.push_back(lists[0]);
+                tempLists.push_back(lists[1]);
+                lists = tempLists;
+                string tempLabel = list2Label;
+                list2Label = list1Label;
+                list1Label = tempLabel;
 			}
 		}else{
 			m->mothurOut("error getting listvectors, unable to read 2 different vectors, check your label inputs."); m->mothurOutEndLine(); return 0;
@@ -176,11 +185,11 @@ int OtuHierarchyCommand::execute(){
 		
 		//map sequences to bin number in the "little" otu
 		map<string, int> littleBins;
-        vector<string> binLabels0 = lists[0].getLabels();
-		for (int i = 0; i < lists[0].getNumBins(); i++) {
+        vector<string> binLabels0 = lists[0];
+		for (int i = 0; i < lists[0].size(); i++) {
 		
 			if (m->control_pressed) {  return 0; }
-			string bin = lists[0].get(i);
+			string bin = lists[1][i];
             vector<string> names; m->splitAtComma(bin, names);
 			for (int j = 0; j < names.size(); j++) { littleBins[names[j]] = i; }
         }
@@ -188,19 +197,19 @@ int OtuHierarchyCommand::execute(){
 		ofstream out;
         map<string, string> variables; 
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(listFile));
-        variables["[distance1]"] = lists[0].getLabel();
+        variables["[distance1]"] = list1Label;
         variables["[tag]"] = "-"; 
-        variables["[distance2]"] = lists[1].getLabel();
+        variables["[distance2]"] = list2Label;
 		string outputFileName = getOutputFileName("otuheirarchy",variables);
 		m->openOutputFile(outputFileName, out);
 		
 		//go through each bin in "big" otu and output the bins in "little" otu which created it
-        vector<string> binLabels1 = lists[1].getLabels();
-		for (int i = 0; i < lists[1].getNumBins(); i++) {
+        vector<string> binLabels1 = lists[2];
+		for (int i = 0; i < lists[2].size(); i++) {
 		
 			if (m->control_pressed) { outputTypes.clear(); out.close(); m->mothurRemove(outputFileName); return 0; }
 			
-			string binnames = lists[1].get(i);
+			string binnames = lists[3][i];
             vector<string> names; m->splitAtComma(binnames, names);
 			
 			//output column 1
@@ -215,7 +224,7 @@ int OtuHierarchyCommand::execute(){
 			
 			string col2 = "";
 			for (it = bins.begin(); it != bins.end(); it++) {
-				if (output == "name")	{   col2 += lists[0].get(it->first) + "\t";	}
+				if (output == "name")	{   col2 += lists[1][it->first] + "\t";	}
 				else					{	col2 += binLabels0[it->first] + "\t";		}
 			}
 			
@@ -242,90 +251,84 @@ int OtuHierarchyCommand::execute(){
 
 //**********************************************************************************************************************
 //returns a vector of listVectors where "little" vector is first
-vector<ListVector> OtuHierarchyCommand::getListVectors() {
+vector< vector<string> > OtuHierarchyCommand::getListVectors() { //return value [0] -> otulabelsFirstLabel [1] -> binsFirstLabel [2] -> otulabelsSecondLabel [3] -> binsSecondLabel
 	try {
-		
-		int pos; //to use in smart distancing, position of last read in file
-		int lastPos;
-		vector<ListVector> lists;
+		vector< vector<string> > lists;
+        
+        int count = 0;
+        for (set<string>::iterator it = mylabels.begin(); it != mylabels.end(); it++) {
+            string realLabel;
+            vector< vector<string> > thisList = getListVector(*it, realLabel);
+            
+            if (m->control_pressed) {  return lists; }
+            
+            for (int i = 0; i < thisList.size(); i++) { lists.push_back(thisList[i]); }
+            
+            if (count == 0) {  list1Label = realLabel; count++; }
+            else {  list2Label = realLabel; }
+        }
+        
+        return lists;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "OtuHierarchyCommand", "getListVectors");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector< vector<string> > OtuHierarchyCommand::getListVector(string label, string& realLabel){ //return value [0] -> otulabels [1] -> bins
+	try {
+        vector< vector<string> > myList;
+        
+		InputData input(listFile, "list");
+		ListVector* list = input.getListVector();
+		string lastLabel = list->getLabel();
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
+		set<string> labels; labels.insert(label);
 		set<string> processedLabels;
 		set<string> userLabels = labels;
-
-		//open file
-		ifstream in;
-		m->openInputFile(listFile, in);
 		
-		//get first list vector in file
-		ListVector* list = NULL;
-		string lastLabel = "";
-		if (!in.eof())	{
-			pos = in.tellg();
-			lastPos = pos;
-			list = new ListVector(in);  
-			m->gobble(in);
-			lastLabel = list->getLabel();
-		}
-		
-		while ((list != NULL) && (userLabels.size() != 0)) {
-		
-			if (m->control_pressed) {  in.close(); delete list;  return lists; }
+		//as long as you are not at the end of the file or done wih the lines you want
+		while((list != NULL) && (userLabels.size() != 0)) {
+			if (m->control_pressed) {  return myList;  }
 			
-			//is this a listvector that we want?
 			if(labels.count(list->getLabel()) == 1){
-				
-				//make copy of listvector
-				ListVector temp(*list);
-				lists.push_back(temp);
-			
 				processedLabels.insert(list->getLabel());
 				userLabels.erase(list->getLabel());
+				break;
 			}
-		
-			//you have a label the user want that is smaller than this label and the last label has not already been processed 
+			
 			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = list->getLabel();
-				int savePos = in.tellg();
 				
-				//get smart distance line
 				delete list;
-				in.seekg(lastPos);
-				if (!in.eof())	{	
-					list = new ListVector(in);  
-				}else { list = NULL; }
+				list = input.getListVector(lastLabel);
 				
-				//make copy of listvector
-				ListVector temp(*list);
-				lists.push_back(temp);
-					
 				processedLabels.insert(list->getLabel());
-				userLabels.erase(list->getLabel());					
-										
+				userLabels.erase(list->getLabel());
+				
 				//restore real lastlabel to save below
-				list->setLabel(saveLabel);
-				in.seekg(savePos);
+				//list->setLabel(saveLabel);
+				break;
 			}
 			
 			lastLabel = list->getLabel();
-			lastPos = pos;
 			
-			//get next line
+			//get next line to process
+			//prevent memory leak
 			delete list;
-			if (!in.eof())	{	
-				pos = in.tellg();
-				list = new ListVector(in);  
-				m->gobble(in);
-			}else { list = NULL; }
+			list = input.getListVector();
 		}
 		
-		if (m->control_pressed) { in.close();  return lists; }				
+		
+		if (m->control_pressed) {  return myList;  }
 		
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
 		bool needToRun = false;
-		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-			m->mothurOut("Your file does not include the label " + *it); 
+		for (it = userLabels.begin(); it != userLabels.end(); it++) {
+			m->mothurOut("Your file does not include the label " + *it);
 			if (processedLabels.count(lastLabel) != 1) {
 				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
 				needToRun = true;
@@ -334,29 +337,28 @@ vector<ListVector> OtuHierarchyCommand::getListVectors() {
 			}
 		}
 		
-		if (m->control_pressed) {  in.close(); return lists; }
-		
 		//run last label if you need to
 		if (needToRun == true)  {
-			if (list != NULL) {	delete list;	}
-			
-			in.seekg(lastPos);
-			if (!in.eof())	{	
-				list = new ListVector(in); 
-				
-				//make copy of listvector
-				ListVector temp(*list);
-				lists.push_back(temp);
-				
-				delete list;
-			}
+			delete list;
+			list = input.getListVector(lastLabel);
 		}
 		
-		in.close();
-		return lists;
+        //at this point the list vector has the right distance
+        myList.push_back(list->getLabels());
+        vector<string> bins;
+        for (int i = 0; i < list->getNumBins(); i++) {
+            if (m->control_pressed) {  return myList;  }
+            bins.push_back(list->get(i));
+        }
+        myList.push_back(bins);
+        realLabel = list->getLabel();
+        
+        delete list;
+        
+		return myList;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "OtuHierarchyCommand", "getListVectors");
+		m->errorOut(e, "OtuHierarchyCommand", "getListVector");
 		exit(1);
 	}
 }

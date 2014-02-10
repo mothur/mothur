@@ -2501,9 +2501,9 @@
 				GCC_ENABLE_SSE42_EXTENSIONS = NO;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"MOTHUR_FILES=\"\\\"../../release\\\"\"",
-					"VERSION=\"\\\"1.32.0\\\"\"",
-					"RELEASE_DATE=\"\\\"10/31/2013\\\"\"",
+					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
+					"VERSION=\"\\\"1.33.0\\\"\"",
+					"RELEASE_DATE=\"\\\"2/7/2014\\\"\"",
 				);
 				GCC_VERSION = "";
 				"GCC_VERSION[arch=*]" = "";

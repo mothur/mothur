@@ -214,10 +214,19 @@ VennCommand::VennCommand(string option)  {
 			temp = validParameter.validFile(parameters, "nseqs", false);		if (temp == "not found"){	temp = "f";				}
 			nseqs = m->isTrue(temp); 
 
-			temp = validParameter.validFile(parameters, "permute", false);		if (temp == "not found"){	temp = "4";				}
+			temp = validParameter.validFile(parameters, "permute", false);
+            if (temp == "not found"){	temp = "4";				}
+            else {
+                if ((temp == "1") || (temp == "2") || (temp == "3") || (temp == "4")) {}
+                else {
+                    bool permTrue = m->isTrue(temp);
+                    if (permTrue) { temp = "4"; }
+                    else { }
+                }
+            }
 			m->mothurConvert(temp, perm);
             if ((perm == 1) || (perm == 2) || (perm == 3) || (perm == 4)) { }
-            else { m->mothurOut("[ERROR]: Not a valid permute value.  Valid values are 1, 2, 3, and 4."); m->mothurOutEndLine(); abort = true;  }
+            else { m->mothurOut("[ERROR]: Not a valid permute value.  Valid values are 1, 2, 3, 4 and true."); m->mothurOutEndLine(); abort = true;  }
             
             temp = validParameter.validFile(parameters, "sharedotus", false);		if (temp == "not found"){	temp = "t";				}
 			sharedOtus = m->isTrue(temp); 

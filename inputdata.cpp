@@ -83,6 +83,7 @@ ListVector* InputData::getListVector(string label){
 		ifstream in;
 		string  thisLabel;
 		m->openInputFile(filename, in);
+        m->saveNextLabel = "";
 		
 		if(in){
 
@@ -119,6 +120,7 @@ ListVector* InputData::getListVector(string label, bool resetFP){
 		string  thisLabel;
 		fileHandle.clear();
 		fileHandle.seekg(0);
+        m->saveNextLabel = "";
 		
 		if(fileHandle){
 
@@ -239,6 +241,7 @@ SharedOrderVector* InputData::getSharedOrderVector(string label){
 		ifstream in;
 		string  thisLabel;
 		m->openInputFile(filename, in);
+        m->saveNextLabel = "";
 		
 		if(in){
 
@@ -321,7 +324,7 @@ OrderVector* InputData::getOrderVector(string label){
 		
 		if(in){
 			if((format == "list") || (format == "listorder")) {
-			
+                m->saveNextLabel = "";
 				while (in.eof() != true) {
 					
 					input = new ListVector(in);
@@ -335,7 +338,7 @@ OrderVector* InputData::getOrderVector(string label){
 				}
 			}
 			else if (format == "shared")  {
-				
+				m->saveNextLabel = "";
 				while (in.eof() != true) {
 					
 					input = new SharedListVector(in);
@@ -650,7 +653,7 @@ SAbundVector* InputData::getSAbundVector(string label){
 		
 		if(in){
 			if (format == "list") {
-			
+                m->saveNextLabel = "";
 				while (in.eof() != true) {
 					
 					input = new ListVector(in);
@@ -664,7 +667,7 @@ SAbundVector* InputData::getSAbundVector(string label){
 				}
 			}
 			else if (format == "shared")  {
-				
+				m->saveNextLabel = "";
 				while (in.eof() != true) {
 					
 					input = new SharedListVector(in);
@@ -789,6 +792,7 @@ RAbundVector* InputData::getRAbundVector(string label){
 		
 		if(in){
 			if (format == "list") {
+                m->saveNextLabel = "";
 			
 				while (in.eof() != true) {
 					
@@ -803,6 +807,7 @@ RAbundVector* InputData::getRAbundVector(string label){
 				}
 			}
 			else if (format == "shared")  {
+                m->saveNextLabel = "";
 				
 				while (in.eof() != true) {
 					

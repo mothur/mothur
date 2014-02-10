@@ -14,7 +14,8 @@ vector<string> MergeSfffilesCommand::setParameters(){
 	try {
 		CommandParameter psff("sff", "InputTypes", "", "", "sffFile", "sffFile", "none","sff",false,false); parameters.push_back(psff);
         CommandParameter pfile("file", "InputTypes", "", "", "sffFile", "sffFile", "none","sff",false,false); parameters.push_back(pfile);
-		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+		CommandParameter poutput("output", "String", "", "", "", "", "","",false,true,true); parameters.push_back(poutput);
+        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
 		vector<string> myArray;
@@ -30,10 +31,11 @@ vector<string> MergeSfffilesCommand::setParameters(){
 string MergeSfffilesCommand::getHelpString(){
 	try {
 		string helpString = "";
-		helpString += "The merge.sfffiles command reads a sff set of files or a file containing a list of sff files and merges the individual files into a single sff file.\n";
-		helpString += "The merge.sfffiles command parameters are sff and file. sff or file is required. \n";
+		helpString += "The merge.sfffiles command reads a sff file or a file containing a list of sff files and merges the individual files into a single sff file. \n";
+		helpString += "The merge.sfffiles command parameters are sff, file and output. sff or file is required. \n";
 		helpString += "The sff parameter allows you to enter the sff list of sff files separated by -'s.\n";
 		helpString += "The file parameter allows you to provide a file containing a list of sff files to merge.  \n";
+        helpString += "The output parameter allows you to provide an output filename.  \n";
 		helpString += "Example sffinfo(sff=mySffFile.sff-mySecond.sff).\n";
 		helpString += "Note: No spaces between parameter labels (i.e. sff), '=' and parameters (i.e.yourSffFileName).\n";
 		return helpString;
@@ -49,7 +51,7 @@ string MergeSfffilesCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
         
-        if (type == "sff")            {   pattern =  "[filename],merge.sff";   }
+        if (type == "sff")            {   pattern =  "[filename],";   }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
         
         return pattern;
@@ -192,6 +194,10 @@ MergeSfffilesCommand::MergeSfffilesCommand(string option)  {
                 m->mothurOut("[ERROR]: cannot use file option and sff option at the same time, choose one."); m->mothurOutEndLine(); abort = true;
             }
             
+            outputFile = validParameter.validFile(parameters, "output", false);
+			if (outputFile == "not found") { m->mothurOut("you must enter an output file name"); m->mothurOutEndLine();  abort=true;  }
+			if (outputDir != "") { outputFile = outputDir + m->getSimpleName(outputFile);  }
+            
 		}
 	}
 	catch(exception& e) {
@@ -204,18 +210,15 @@ int MergeSfffilesCommand::execute(){
 	try {
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
         
-        map<string, string> variables;
         if (file != "") {
-            string thisOutputDir = outputDir;
-            if (outputDir == "") {  thisOutputDir += m->hasPath(file);  }
-            variables["[filename]"] = thisOutputDir + m->getRootName(m->getSimpleName(file));
             readFile();
-        }else {
-            string thisOutputDir = outputDir;
-            if (outputDir == "") {  thisOutputDir += m->hasPath(filenames[0]);  }
-            variables["[filename]"] = thisOutputDir + "mergedSff";
+            if (outputDir == "") { outputDir = m->hasPath(file); }
         }
         ofstream out;
+        map<string, string> variables;
+        string thisOutputDir = outputDir;
+		if (outputDir == "") {  thisOutputDir += m->hasPath(outputFile);  }
+        variables["[filename]"] = thisOutputDir + m->getSimpleName(outputFile);
 		outputFile = getOutputFileName("sff",variables);
         m->openOutputFile(outputFile, out);
         outputNames.push_back(outputFile); outputTypes["sff"].push_back(outputFile);

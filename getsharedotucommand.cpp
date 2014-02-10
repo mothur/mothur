@@ -233,6 +233,7 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
 			else { 
 				userGroups = "unique." + groups;
 				m->splitAtDash(groups, Groups);
+                if (Groups.size() > 4) {  userGroups = "unique.selected_groups"; } //if too many groups then the filename becomes too big.
 			}
 			
 			groups = validParameter.validFile(parameters, "sharedgroups", false);			
@@ -240,6 +241,7 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
 			else { 
 				userGroups = groups;
 				m->splitAtDash(groups, Groups);
+                if (Groups.size() > 4) {  userGroups = "selected_groups"; } //if too many groups then the filename becomes too big.
 				unique = false;
 			}
 			
@@ -274,6 +276,7 @@ int GetSharedOTUCommand::execute(){
                 userGroups = "unique.";
                 for(int i = 0; i < Groups.size(); i++) {  userGroups += Groups[i] + "-";  }
                 userGroups = userGroups.substr(0, userGroups.length()-1);
+                if (Groups.size() > 4) {  userGroups = "unique.selected_groups"; } //if too many groups then the filename becomes too big.
             }else{
                 //sanity check for group names
                 SharedUtil util;
@@ -566,6 +569,7 @@ int GetSharedOTUCommand::runShared() {
             userGroups = "unique.";
             for(int i = 0; i < Groups.size(); i++) {  userGroups += Groups[i] + "-";  }
             userGroups = userGroups.substr(0, userGroups.length()-1);
+            if (Groups.size() > 4) {  userGroups = "unique.selected_groups"; } //if too many groups then the filename becomes too big.
         }else {
             //sanity check for group names
             SharedUtil util;

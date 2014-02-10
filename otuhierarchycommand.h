@@ -37,11 +37,12 @@ public:
 	
 private:
 	bool abort;
-	set<string> labels; //holds labels to be used
-	string label, listFile, outputDir, output;
+	set<string> mylabels; //holds labels to be used
+	string label, listFile, outputDir, output, list1Label, list2Label;
 	vector<string> outputNames;
 	
-	vector<ListVector> getListVectors();
+	vector< vector<string> > getListVectors();
+    vector< vector<string> > getListVector(string, string&);
 		
 };
 

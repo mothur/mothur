@@ -66,12 +66,12 @@ string GetMetaCommunityCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
         
-        if (type == "fit")              {  pattern = "[filename],[distance],mix.fit"; }
-        else if (type == "relabund")    {  pattern = "[filename],[distance],[tag],mix.relabund"; }
-        else if (type == "design")      {  pattern = "[filename],[distance],mix.design"; }
-        else if (type == "matrix")      {  pattern = "[filename],[distance],[tag],mix.posterior"; }
-        else if (type == "parameters")  {  pattern = "[filename],[distance],mix.parameters"; }
-        else if (type == "summary")  {  pattern = "[filename],[distance],mix.summary"; }
+        if (type == "fit")              {  pattern = "[filename],[distance],[method],mix.fit"; }
+        else if (type == "relabund")    {  pattern = "[filename],[distance],[method],[tag],mix.relabund"; }
+        else if (type == "design")      {  pattern = "[filename],[distance],[method],mix.design"; }
+        else if (type == "matrix")      {  pattern = "[filename],[distance],[method],[tag],mix.posterior"; }
+        else if (type == "parameters")  {  pattern = "[filename],[distance],[method],mix.parameters"; }
+        else if (type == "summary")  {  pattern = "[filename],[distance],[method],mix.summary"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
         
         return pattern;
@@ -366,6 +366,7 @@ int GetMetaCommunityCommand::createProcesses(vector<SharedRAbundVector*>& thislo
         map<string, string> variables;
         variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
         variables["[distance]"] = thislookup[0]->getLabel();
+        variables["[method]"] = method;
 		string outputFileName = getOutputFileName("fit", variables);
         outputNames.push_back(outputFileName); outputTypes["fit"].push_back(outputFileName);
                 
@@ -755,6 +756,7 @@ int GetMetaCommunityCommand::generateSummaryFile(int numPartitions, map<string,s
         map<string, string> variables;
         variables["[filename]"] = v["[filename]"];
         variables["[distance]"] = v["[distance]"];
+        variables["]method]"] = method;
         variables["[tag]"] = "1";
         string reference = getOutputFileName("relabund", variables);
         m->openInputFile(reference, referenceFile); //((fileRoot + label + ".1mix.relabund").c_str());
