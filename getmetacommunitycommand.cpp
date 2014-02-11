@@ -46,9 +46,9 @@ string GetMetaCommunityCommand::getHelpString(){
         helpString += "The label parameter is used to analyze specific labels in your input. labels are separated by dashes.\n";
 		helpString += "The groups parameter allows you to specify which of the groups in your shared file you would like analyzed.  Group names are separated by dashes.\n";
         helpString += "The method parameter allows to select the method you would like to use.  Options are dmm, kmeans and pam. Default=dmm.\n";
-        helpString += "The calc parameter allows to select the calculator you would like to use to calculate the distance matrix used by the pam method. By default the jsd calculator is used.\n";
-        helpString += "The iters parameter allows you to choose the number of times you would like to run the subsample while calculating the distance matirx for the pam method.\n";
-        helpString += "The subsample parameter allows you to enter the size pergroup of the sample or you can set subsample=T and mothur will use the size of your smallest group while calculating the distance matrix for the pam method.\n";
+        helpString += "The calc parameter allows to select the calculator you would like to use to calculate the distance matrix used by the pam and kmeans method. By default the rjsd calculator is used.\n";
+        helpString += "The iters parameter allows you to choose the number of times you would like to run the subsample while calculating the distance matrix for the pam and kmeans method.\n";
+        helpString += "The subsample parameter allows you to enter the size pergroup of the sample or you can set subsample=T and mothur will use the size of your smallest group while calculating the distance matrix for the pam and kmeans methods.\n";
 		helpString += "The minpartitions parameter is used to .... Default=5.\n";
         helpString += "The maxpartitions parameter is used to .... Default=10.\n";
         helpString += "The optimizegap parameter is used to .... Default=3.\n";
@@ -756,7 +756,7 @@ int GetMetaCommunityCommand::generateSummaryFile(int numPartitions, map<string,s
         map<string, string> variables;
         variables["[filename]"] = v["[filename]"];
         variables["[distance]"] = v["[distance]"];
-        variables["]method]"] = method;
+        variables["[method]"] = method;
         variables["[tag]"] = "1";
         string reference = getOutputFileName("relabund", variables);
         m->openInputFile(reference, referenceFile); //((fileRoot + label + ".1mix.relabund").c_str());
