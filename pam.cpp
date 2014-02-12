@@ -125,10 +125,10 @@ int Pam::swapPhase() {
                             for (int j = 0; j < numSamples; j++) {
                                 if (m->control_pressed) { break; }
                                 if (dists[i][j] == Dp[j][0]) {
-                                    double small = 0.0;
-                                    if (Dp[j][1] > dists[h][j]) {   small = dists[h][j];    }
-                                    else                        {   small = Dp[j][1];       }
-                                    dz += (- Dp[j][0]+ small);
+                                    double smallValue; smallValue = 0.0;
+                                    if (Dp[j][1] > dists[h][j]) {   smallValue = dists[h][j];    }
+                                    else                        {   smallValue = Dp[j][1];       }
+                                    dz += (- Dp[j][0]+ smallValue);
                                 }else if (dists[h][j] < Dp[j][0]) {
                                     dz += (- Dp[j][0] + dists[h][j]);
                                 }

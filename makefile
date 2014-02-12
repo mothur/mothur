@@ -12,11 +12,10 @@
 USEMPI ?= no
 64BIT_VERSION ?= yes
 USEREADLINE ?= yes
-CYGWIN_BUILD ?= no
 USECOMPRESSION ?= no
 MOTHUR_FILES="\"Enter_your_default_path_here\""
-RELEASE_DATE = "\"10/16/2013\""
-VERSION = "\"1.32.1\""
+RELEASE_DATE = "\"2/12/2014\""
+VERSION = "\"1.33.0\""
 FORTAN_COMPILER = gfortran
 FORTRAN_FLAGS = 
 
@@ -50,10 +49,6 @@ else
 	CXXFLAGS += -DMOTHUR_FILES=${MOTHUR_FILES}
 endif
 
-ifeq  ($(strip $(CYGWIN_BUILD)),yes)
-    CXXFLAGS += -mno-cygwin
-    LDFLAGS += -mno-cygwin 
-endif
 
 # if you do not want to use the readline library, set this to no.
 # make sure you have the library installed
