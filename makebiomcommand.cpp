@@ -680,8 +680,17 @@ int MakeBiomCommand::getGreenGenesOTUIDs(vector<SharedRAbundVector*>& lookup, ma
         for (map<string, string>::iterator it = labelTaxMap.begin(); it != labelTaxMap.end(); it++) { //maps label -> consensus taxonomy
             if (m->control_pressed) { break; }
             
+            string OTUTaxonomy = it->second;
+            
+            //remove confidences
+            m->removeConfidences(OTUTaxonomy);
+            
+            //remove unclassifieds to match template
+            int thisPos = OTUTaxonomy.find("unclassified;");
+            if (thisPos != string::npos) {  OTUTaxonomy = OTUTaxonomy.substr(0, thisPos);  }
+            
             //get list of reference ids that map to this taxonomy
-            vector<string> referenceIds = phylo.getSeqs(it->second);
+            vector<string> referenceIds = phylo.getSeqs(OTUTaxonomy);
             
             if (m->control_pressed) { break; }
             
@@ -724,6 +733,7 @@ int MakeBiomCommand::getGreenGenesOTUIDs(vector<SharedRAbundVector*>& lookup, ma
         map<string, string> newLabelTaxMap;
         //loop through ggOTUID list combining mothur otus and adjusting labels
         //ggOTUIDs = 16097 -> <OTU01, OTU10, OTU22>
+        
         for (map<string, vector<string> >::iterator itMap = ggOTUIDs.begin(); itMap != ggOTUIDs.end(); itMap++) {
 			if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) {  delete newLookup[j];  } return 0; }
             
@@ -737,14 +747,18 @@ int MakeBiomCommand::getGreenGenesOTUIDs(vector<SharedRAbundVector*>& lookup, ma
             vector<int> abunds; abunds.resize(lookup.size(), 0);
             string mergeString = "";
             vector<float> boots; boots.resize(scores.size(), 0);
+            bool scoresNULL = false;
             for (int j = 0; j < itMap->second.size(); j++) { //<OTU01, OTU10, OTU22>
-                //merge bootstrap scores
-                vector<string> scores;
-                vector<string> taxonomies = parseTax(it->second, scores);
-                for (int i = 0; i < boots.size(); i++) {
-                    float tempScore; m->mothurConvert(scores[i], tempScore);
-                    boots[i] += tempScore;
-                }
+                
+                if (scores[0] != "null") {
+                    //merge bootstrap scores
+                    vector<string> scores;
+                    vector<string> taxonomies = parseTax(it->second, scores);
+                    for (int i = 0; i < boots.size(); i++) {
+                        float tempScore; m->mothurConvert(scores[i], tempScore);
+                        boots[i] += tempScore;
+                    }
+                }else { scoresNULL = true; }
                 
                 //merge abunds
                 mergeString += (itMap->second)[j] + " ";
@@ -757,14 +771,21 @@ int MakeBiomCommand::getGreenGenesOTUIDs(vector<SharedRAbundVector*>& lookup, ma
             
             //average scores
             //add merged otu to new lookup
-            for (int j = 0; j < boots.size(); j++) { boots[j] /= (float) itMap->second.size(); }
-            
-            //assemble new taxomoy
             string newTaxString = "";
-            for (int j = 0; j < boots.size(); j++) {
-                newTaxString += taxonomies[j] + "(" + toString(boots[j]) + ");";
+            if (!scoresNULL) {
+                for (int j = 0; j < boots.size(); j++) { boots[j] /= (float) itMap->second.size(); }
+            
+                //assemble new taxomoy
+                for (int j = 0; j < boots.size(); j++) {
+                    newTaxString += taxonomies[j] + "(" + toString(boots[j]) + ");";
+                }
+            }else {
+                //assemble new taxomoy
+                for (int j = 0; j < taxonomies.size(); j++) {
+                    newTaxString += taxonomies[j] + ";";
+                }
             }
-
+            
             //set new gg otu id to taxonomy. OTU01 -> k__Bacteria becomes 16097 -> k__Bacteria
             //find taxonomy of this otu
             newLabelTaxMap[itMap->first] = newTaxString;

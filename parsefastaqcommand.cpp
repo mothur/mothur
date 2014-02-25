@@ -308,7 +308,6 @@ int ParseFastaQCommand::execute(){
                 }
                 //report progress
                 if((count+1) % 10000 == 0){	m->mothurOut(toString(count+1)); m->mothurOutEndLine();		}
-                if(count > 100000){	break;	}
                 count++;
 			}
 		}
