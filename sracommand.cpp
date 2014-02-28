@@ -13,11 +13,11 @@
 //**********************************************************************************************************************
 vector<string> SRACommand::setParameters(){
 	try {
-        CommandParameter psff("sff", "InputTypes", "", "", "sffFastQFile", "sffFastQFile", "none","sra",false,false); parameters.push_back(psff);
-        CommandParameter pgroup("group", "InputTypes", "", "", "groupOligos", "none", "none","sra",false,false); parameters.push_back(pgroup);
-        CommandParameter poligos("oligos", "InputTypes", "", "", "groupOligos", "none", "none","sra",false,false); parameters.push_back(poligos);
-        CommandParameter pfile("file", "InputTypes", "", "", "sffFastQFile", "sffFastQFile", "none","sra",false,false); parameters.push_back(pfile);
-		CommandParameter pfastq("fastq", "InputTypes", "", "", "sffFastQFile", "sffFastQFile", "none","sra",false,false); parameters.push_back(pfastq);
+        CommandParameter psff("sff", "InputTypes", "", "", "sffFastQFile", "sffFastQFile", "none","xml",false,false); parameters.push_back(psff);
+        CommandParameter pgroup("group", "InputTypes", "", "", "groupOligos", "none", "none","",false,false); parameters.push_back(pgroup);
+        CommandParameter poligos("oligos", "InputTypes", "", "", "groupOligos", "none", "none","",false,false); parameters.push_back(poligos);
+        CommandParameter pfile("file", "InputTypes", "", "", "sffFastQFile", "sffFastQFile", "none","xml",false,false); parameters.push_back(pfile);
+		CommandParameter pfastq("fastq", "InputTypes", "", "", "sffFastQFile", "sffFastQFile", "none","xml",false,false); parameters.push_back(pfastq);
         //choose only one multiple options
         CommandParameter pplatform("platform", "Multiple", "454-???-???", "454", "", "", "","",false,false); parameters.push_back(pplatform);
         CommandParameter ppdiffs("pdiffs", "Number", "", "0", "", "", "","",false,false); parameters.push_back(ppdiffs);
@@ -43,9 +43,13 @@ vector<string> SRACommand::setParameters(){
 string SRACommand::getHelpString(){
 	try {
 		string helpString = "";
-		helpString += "The sra command creates a sequence read archive from sff or fastq files.\n";
-		helpString += "The sra command parameters are: sff, fastqfiles, oligos, platform....\n";
-		helpString += "The sffiles parameter is used to provide a file containing a \n";
+		helpString += "The sra command creates the necessary files for a NCBI submission. The xml file and individual sff or fastq files parsed from the original sff or fastq file.\n";
+		helpString += "The sra command parameters are: sff, fastq, file, oligos, pdiffs, bdiffs, ldiffs, sdiffs, tdiffs, group.\n";
+        helpString += "The sff parameter is used to provide the original sff file.\n";
+		helpString += "The fastq parameter is used to provide the original fastq file.\n";
+        helpString += "The oligos parameter is used to provide an oligos file to parse your sff or fastq file by.\n";
+        helpString += "The group parameter is used to provide the group file to parse your sff or fastq file by.\n";
+		helpString += "The file parameter is used to provide a file containing a list of individual fastq or sff files.\n";
         helpString += "The tdiffs parameter is used to specify the total number of differences allowed in the sequence. The default is pdiffs + bdiffs + sdiffs + ldiffs.\n";
 		helpString += "The bdiffs parameter is used to specify the number of differences allowed in the barcode. The default is 0.\n";
 		helpString += "The pdiffs parameter is used to specify the number of differences allowed in the primer. The default is 0.\n";
@@ -66,7 +70,7 @@ string SRACommand::getOutputPattern(string type) {
     try {
         string pattern = "";
         
-        if (type == "sra") {  pattern = "[filename],sra"; }
+        if (type == "xml") {  pattern = "[filename],xml"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
         
         return pattern;
@@ -82,7 +86,7 @@ SRACommand::SRACommand(){
 		abort = true; calledHelp = true;
 		setParameters();
         vector<string> tempOutNames;
-		outputTypes["sra"] = tempOutNames; 
+		outputTypes["xml"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SRACommand", "SRACommand");
@@ -112,6 +116,8 @@ SRACommand::SRACommand(string option)  {
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
+            vector<string> tempOutNames;
+            outputTypes["xml"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);
@@ -234,8 +240,6 @@ SRACommand::SRACommand(string option)  {
 			m->mothurConvert(temp, tdiffs);
 			
 			if(tdiffs == 0){	tdiffs = bdiffs + pdiffs + ldiffs + sdiffs;	}
-            
-
             			
 		}
 		
@@ -253,12 +257,13 @@ int SRACommand::execute(){
         
         //parse files
         vector<string> filesBySample;
+        isSFF = false;
         
         if (file != "")             {       readFile(filesBySample);        }
         else if (sfffile != "")     {       parseSffFile(filesBySample);    }
         else if (fastqfile != "")   {       parseFastqFile(filesBySample);  }
         
-        
+        //create xml file
         
 		
         //output files created by command
@@ -277,6 +282,27 @@ int SRACommand::execute(){
 //**********************************************************************************************************************
 int SRACommand::readFile(vector<string>& files){
 	try {
+        files.clear();
+        
+        ifstream in;
+        m->openInputFile(file, in);
+        
+        while(!in.eof()) {
+            
+            if (m->control_pressed) { break; }
+            
+            string filename;
+            in >> filename; m->gobble(in);
+            files.push_back(filename);
+        }
+        in.close();
+        
+        if (!m->control_pressed) {
+            if (files.size() > 0) {
+                int pos = files[0].find(".sff");
+                if (pos != string::npos) { isSFF = true; } //these files are sff files
+            }
+        }
         
         return 0;
     }
@@ -288,6 +314,7 @@ int SRACommand::readFile(vector<string>& files){
 //**********************************************************************************************************************
 int SRACommand::parseSffFile(vector<string>& files){
 	try {
+        isSFF = true;
         //run sffinfo to parse sff file into individual sampled sff files
         string commandString = "sff=" + sfffile;
         if (groupfile != "") { commandString += ", group=" + groupfile; }

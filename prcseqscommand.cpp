@@ -575,7 +575,7 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
         
         
 
-        if (fileAligned) {
+        if (fileAligned && adjustNeeded) {
             //find pend - pend is the biggest ending value, but we must account for when we adjust the start.  That adjustment may make the "new" end larger then the largest end. So lets find out what that "new" end will be.
             ifstream inLocations;
             m->openInputFile(locationsFile, inLocations);
@@ -608,7 +608,7 @@ int PcrSeqsCommand::createProcesses(string filename, string goodFileName, string
             inLocations.close();
             
             adjustDots(goodFileName, locationsFile, pstart, pend);
-        }
+        }else { m->mothurRemove(locationsFile); }
         
         return num;
         

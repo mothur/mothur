@@ -34,7 +34,7 @@ public:
     void help() { m->mothurOut(getHelpString()); }
     
 private:
-    bool abort;
+    bool abort, isSFF;
     int tdiffs, bdiffs, pdiffs, sdiffs, ldiffs;
     string sfffile, fastqfile, platform, outputDir, groupfile, file, oligosfile;
     vector<string> outputNames;
