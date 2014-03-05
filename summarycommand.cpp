@@ -34,6 +34,7 @@
 #include "solow.h"
 #include "shen.h"
 #include "subsample.h"
+#include "shannonrange.h"
 
 //**********************************************************************************************************************
 vector<string> SummaryCommand::setParameters(){	
@@ -45,8 +46,9 @@ vector<string> SummaryCommand::setParameters(){
         CommandParameter psubsample("subsample", "String", "", "", "", "", "","",false,false); parameters.push_back(psubsample);
         CommandParameter piters("iters", "Number", "", "1000", "", "", "","",false,false); parameters.push_back(piters);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
-		CommandParameter pcalc("calc", "Multiple", "sobs-chao-nseqs-coverage-ace-jack-shannon-shannoneven-npshannon-heip-smithwilson-simpson-simpsoneven-invsimpson-bootstrap-geometric-qstat-logseries-bergerparker-bstick-goodscoverage-efron-boneh-solow-shen", "sobs-chao-ace-jack-shannon-npshannon-simpson", "", "", "","",true,false,true); parameters.push_back(pcalc);
-		CommandParameter pabund("abund", "Number", "", "10", "", "", "","",false,false); parameters.push_back(pabund);
+		CommandParameter pcalc("calc", "Multiple", "sobs-chao-nseqs-coverage-ace-jack-shannon-shannoneven-npshannon-heip-smithwilson-simpson-simpsoneven-invsimpson-bootstrap-geometric-qstat-logseries-bergerparker-bstick-goodscoverage-efron-boneh-solow-shen", "sobs-chao-ace-jack-shannon-npshannon-simpson-shannonrange", "", "", "","",true,false,true); parameters.push_back(pcalc);
+		CommandParameter palpha("alpha", "Multiple", "0-1-2", "1", "", "", "","",false,false,true); parameters.push_back(palpha);
+        CommandParameter pabund("abund", "Number", "", "10", "", "", "","",false,false); parameters.push_back(pabund);
 		CommandParameter psize("size", "Number", "", "0", "", "", "","",false,false); parameters.push_back(psize);
 		CommandParameter pgroupmode("groupmode", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pgroupmode);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
@@ -75,6 +77,7 @@ string SummaryCommand::getHelpString(){
         helpString += "The iters parameter allows you to choose the number of times you would like to run the subsample.\n";
 		helpString += "The default value calc is sobs-chao-ace-jack-shannon-npshannon-simpson\n";
 		helpString += "If you are running summary.single with a shared file and would like your summary results collated in one file, set groupmode=t. (Default=true).\n";
+        helpString += "The alpha parameter is used to set the alpha value for the shannonrange calculator.\n";
 		helpString += "The label parameter is used to analyze specific labels in your input.\n";
 		helpString += "Note: No spaces between parameter labels (i.e. label), '=' and parameters (i.e.yourLabels).\n";
 		return helpString;
@@ -268,6 +271,11 @@ SummaryCommand::SummaryCommand(string option)  {
                 else { subsample = false; subsampleSize = -1; }
             }
             
+            temp = validParameter.validFile(parameters, "alpha", false);		if (temp == "not found") { temp = "1"; }
+			m->mothurConvert(temp, alpha);
+            
+            if ((alpha != 0) && (alpha != 1) && (alpha != 2)) { m->mothurOut("[ERROR]: Not a valid alpha value. Valid values are 0, 1 and 2."); m->mothurOutEndLine(); abort=true; }
+            
             if (subsample == false) { iters = 0; }
             else {
                 //if you did not set a samplesize and are not using a sharedfile
@@ -346,6 +354,8 @@ int SummaryCommand::execute(){
 						sumCalculators.push_back(new Shannon());
 					}else if(Estimators[i] == "shannoneven"){
 						sumCalculators.push_back(new ShannonEven());
+                    }else if(Estimators[i] == "shannonrange"){
+						sumCalculators.push_back(new RangeShannon(alpha));
 					}else if(Estimators[i] == "npshannon"){
 						sumCalculators.push_back(new NPShannon());
 					}else if(Estimators[i] == "heip"){

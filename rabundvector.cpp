@@ -76,6 +76,7 @@ RAbundVector::RAbundVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), 
 			f >> inputData;
 			set(i, inputData);
 		}
+        
 	}
 	catch(exception& e) {
 		m->errorOut(e, "RAbundVector", "RAbundVector");

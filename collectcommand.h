@@ -52,7 +52,7 @@ private:
 	InputData* input;
 	Collect* cCurve;
 	vector<Display*> cDisplays;
-	int abund, size;
+	int abund, size, alpha;
 	float freq;
 	vector<string> outputNames;
 

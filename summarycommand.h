@@ -39,7 +39,7 @@ private:
 	vector<Calculator*> sumCalculators;	
 	InputData* input;
 	SAbundVector* sabund;
-	int abund, size, iters, subsampleSize;
+	int abund, size, iters, subsampleSize, alpha;
 
 	bool abort, allLines, groupMode, subsample;
 	set<string> labels; //holds labels to be used

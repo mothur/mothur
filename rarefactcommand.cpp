@@ -23,6 +23,7 @@
 #include "shannon.h"
 #include "jackknife.h"
 #include "coverage.h"
+#include "shannonrange.h"
 
 
 //**********************************************************************************************************************
@@ -35,8 +36,9 @@ vector<string> RareFactCommand::setParameters(){
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
 		CommandParameter pfreq("freq", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pfreq);
 		CommandParameter piters("iters", "Number", "", "1000", "", "", "","",false,false); parameters.push_back(piters);
-		CommandParameter pcalc("calc", "Multiple", "sobs-chao-nseqs-coverage-ace-jack-shannon-shannoneven-npshannon-heip-smithwilson-simpson-simpsoneven-invsimpson-bootstrap", "sobs", "", "", "","",true,false,true); parameters.push_back(pcalc);
+		CommandParameter pcalc("calc", "Multiple", "sobs-chao-nseqs-coverage-ace-jack-shannon-shannoneven-npshannon-heip-smithwilson-simpson-simpsoneven-invsimpson-bootstrap-shannonrange", "sobs", "", "", "","",true,false,true); parameters.push_back(pcalc);
 		CommandParameter pabund("abund", "Number", "", "10", "", "", "","",false,false); parameters.push_back(pabund);
+        CommandParameter palpha("alpha", "Multiple", "0-1-2", "1", "", "", "","",false,false,true); parameters.push_back(palpha);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
 		CommandParameter pgroupmode("groupmode", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pgroupmode);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
@@ -63,6 +65,7 @@ string RareFactCommand::getHelpString(){
 		helpString += "rarefaction.single(label=yourLabel, iters=yourIters, freq=yourFreq, calc=yourEstimators).\n";
 		helpString += "Example rarefaction.single(label=unique-.01-.03, iters=10000, freq=10, calc=sobs-rchao-race-rjack-rbootstrap-rshannon-rnpshannon-rsimpson).\n";
 		helpString += "The default values for iters is 1000, freq is 100, and calc is rarefaction which calculates the rarefaction curve for the observed richness.\n";
+        helpString += "The alpha parameter is used to set the alpha value for the shannonrange calculator.\n";
 		validCalculator.printCalc("rarefaction");
 		helpString += "If you are running rarefaction.single with a shared file and would like your results collated in one file, set groupmode=t. (Default=true).\n";
 		helpString += "The label parameter is used to analyze specific labels in your input.\n";
@@ -86,6 +89,7 @@ string RareFactCommand::getOutputPattern(string type) {
         else if (type == "r_shannoneven") {  pattern =  "[filename],r_shannoneven"; }
         else if (type == "r_smithwilson") {  pattern =  "[filename],r_smithwilson"; }
         else if (type == "r_npshannon") {  pattern =  "[filename],r_npshannon"; }
+        else if (type == "r_shannonrange"){  pattern =  "[filename],r_shannonrange";    }
         else if (type == "r_simpson") {  pattern =  "[filename],r_simpson"; }
         else if (type == "r_simpsoneven") {  pattern =  "[filename],r_simpsoneven"; }
         else if (type == "r_invsimpson") {  pattern =  "[filename],r_invsimpson"; }
@@ -114,6 +118,7 @@ RareFactCommand::RareFactCommand(){
 		outputTypes["r_jack"] = tempOutNames;
 		outputTypes["r_shannon"] = tempOutNames;
 		outputTypes["r_shannoneven"] = tempOutNames;
+        outputTypes["r_shannonrange"] = tempOutNames;
 		outputTypes["r_heip"] = tempOutNames;
 		outputTypes["r_smithwilson"] = tempOutNames;
 		outputTypes["r_npshannon"] = tempOutNames;
@@ -161,6 +166,7 @@ RareFactCommand::RareFactCommand(string option)  {
 			outputTypes["r_jack"] = tempOutNames;
 			outputTypes["r_shannon"] = tempOutNames;
 			outputTypes["r_shannoneven"] = tempOutNames;
+            outputTypes["r_shannonrange"] = tempOutNames;
 			outputTypes["r_heip"] = tempOutNames;
 			outputTypes["r_smithwilson"] = tempOutNames;
 			outputTypes["r_npshannon"] = tempOutNames;
@@ -291,6 +297,11 @@ RareFactCommand::RareFactCommand(string option)  {
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = m->getProcessors();	}
 			m->setProcessors(temp);
 			m->mothurConvert(temp, processors);
+            
+            temp = validParameter.validFile(parameters, "alpha", false);		if (temp == "not found") { temp = "1"; }
+			m->mothurConvert(temp, alpha);
+            
+            if ((alpha != 0) && (alpha != 1) && (alpha != 2)) { m->mothurOut("[ERROR]: Not a valid alpha value. Valid values are 0, 1 and 2."); m->mothurOutEndLine(); abort=true; }
 			
 			temp = validParameter.validFile(parameters, "groupmode", false);		if (temp == "not found") { temp = "T"; }
 			groupMode = m->isTrue(temp);
@@ -356,7 +367,10 @@ int RareFactCommand::execute(){
 					}else if (Estimators[i] == "heip") { 
 						rDisplays.push_back(new RareDisplay(new Heip(), new ThreeColumnFile(getOutputFileName("r_heip",variables))));
 						outputNames.push_back(getOutputFileName("r_heip",variables)); outputTypes["r_heip"].push_back(getOutputFileName("r_heip",variables));
-					}else if (Estimators[i] == "smithwilson") { 
+                    }else if (Estimators[i] == "r_shannonrange") {
+                        rDisplays.push_back(new RareDisplay(new RangeShannon(alpha), new ThreeColumnFile(getOutputFileName("r_shannonrange", variables))));
+                        outputNames.push_back(getOutputFileName("r_shannonrange", variables)); outputTypes["r_shannoneven"].push_back(getOutputFileName("r_shannonrange", variables));
+					}else if (Estimators[i] == "smithwilson") {
 						rDisplays.push_back(new RareDisplay(new SmithWilson(), new ThreeColumnFile(getOutputFileName("r_smithwilson",variables))));
 						outputNames.push_back(getOutputFileName("r_smithwilson",variables)); outputTypes["r_smithwilson"].push_back(getOutputFileName("r_smithwilson",variables));
 					}else if (Estimators[i] == "npshannon") { 

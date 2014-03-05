@@ -33,6 +33,7 @@
 #include "solow.h"
 #include "shen.h"
 #include "coverage.h"
+#include "shannonrange.h"
 
 
 //**********************************************************************************************************************
@@ -44,9 +45,10 @@ vector<string> CollectCommand::setParameters(){
 		CommandParameter pshared("shared", "InputTypes", "", "", "LRSS", "LRSS", "none","",false,false,true); parameters.push_back(pshared);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
 		CommandParameter pfreq("freq", "Number", "", "100", "", "", "","",false,false); parameters.push_back(pfreq);
-		CommandParameter pcalc("calc", "Multiple", "sobs-chao-nseqs-coverage-ace-jack-shannon-shannoneven-npshannon-heip-smithwilson-simpson-simpsoneven-invsimpson-bootstrap-geometric-qstat-logseries-bergerparker-bstick-goodscoverage-efron-boneh-solow-shen", "sobs-chao-ace-jack-shannon-npshannon-simpson", "", "", "","",true,false,true); parameters.push_back(pcalc);
+		CommandParameter pcalc("calc", "Multiple", "sobs-chao-nseqs-coverage-ace-jack-shannon-shannoneven-npshannon-heip-smithwilson-simpson-simpsoneven-invsimpson-bootstrap-geometric-qstat-logseries-bergerparker-bstick-goodscoverage-efron-boneh-solow-shen", "sobs-chao-ace-jack-shannon-npshannon-simpson-shannonrange", "", "", "","",true,false,true); parameters.push_back(pcalc);
 		CommandParameter pabund("abund", "Number", "", "10", "", "", "","",false,false); parameters.push_back(pabund);
-		CommandParameter psize("size", "Number", "", "0", "", "", "","",false,false); parameters.push_back(psize);
+        CommandParameter palpha("alpha", "Multiple", "0-1-2", "1", "", "", "","",false,false,true); parameters.push_back(palpha);
+        CommandParameter psize("size", "Number", "", "0", "", "", "","",false,false); parameters.push_back(psize);
 		CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
@@ -64,12 +66,13 @@ string CollectCommand::getHelpString(){
 	try {
 		string helpString = "";
 		ValidCalculators validCalculator;
-		helpString += "The collect.single command parameters are list, sabund, rabund, shared, label, freq, calc and abund.  list, sabund, rabund or shared is required unless you have a valid current file. \n";
+		helpString += "The collect.single command parameters are list, sabund, rabund, shared, label, freq, calc, alpha and abund.  list, sabund, rabund or shared is required unless you have a valid current file. \n";
 		helpString += "The collect.single command should be in the following format: \n";
 		helpString += "The freq parameter is used indicate when to output your data, by default it is set to 100. But you can set it to a percentage of the number of sequence. For example freq=0.10, means 10%. \n";
 		helpString += "collect.single(label=yourLabel, freq=yourFreq, calc=yourEstimators).\n";
 		helpString += "Example collect(label=unique-.01-.03, freq=10, calc=sobs-chao-ace-jack).\n";
 		helpString += "The default values for freq is 100, and calc are sobs-chao-ace-jack-shannon-npshannon-simpson.\n";
+        helpString += "The alpha parameter is used to set the alpha value for the shannonrange calculator.\n";
 		helpString += validCalculator.printCalc("single");
 		helpString += "The label parameter is used to analyze specific labels in your input.\n";
 		helpString += "Note: No spaces between parameter labels (i.e. freq), '=' and parameters (i.e.yourFreq).\n";
@@ -93,6 +96,7 @@ string CollectCommand::getOutputPattern(string type) {
         else if (type == "jack")        {  pattern =  "[filename],jack";            }
         else if (type == "shannon")     {  pattern =  "[filename],shannon";         }
         else if (type == "shannoneven") {  pattern =  "[filename],shannoneven";     }
+        else if (type == "shannonrange"){  pattern =  "[filename],shannonrange";    }
         else if (type == "npshannon")   {  pattern =  "[filename],npshannon";       }
         else if (type == "heip")        {  pattern =  "[filename],heip";            }
         else if (type == "smithwilson") {  pattern =  "[filename],smithwilson";     }
@@ -133,6 +137,7 @@ CollectCommand::CollectCommand(){
 		outputTypes["jack"] = tempOutNames;
 		outputTypes["shannon"] = tempOutNames;
 		outputTypes["shannoneven"] = tempOutNames;
+        outputTypes["shannonrange"] = tempOutNames;
 		outputTypes["npshannon"] = tempOutNames;
 		outputTypes["heip"] = tempOutNames;
 		outputTypes["smithwilson"] = tempOutNames;
@@ -195,6 +200,7 @@ CollectCommand::CollectCommand(string option)  {
 			outputTypes["smithwilson"] = tempOutNames;
 			outputTypes["simpson"] = tempOutNames;
 			outputTypes["simpsoneven"] = tempOutNames;
+            outputTypes["shannonrange"] = tempOutNames;
 			outputTypes["invsimpson"] = tempOutNames;
 			outputTypes["bootstrap"] = tempOutNames;
 			outputTypes["geometric"] = tempOutNames;
@@ -319,7 +325,12 @@ CollectCommand::CollectCommand(string option)  {
 
 			string temp;
 			temp = validParameter.validFile(parameters, "freq", false);			if (temp == "not found") { temp = "100"; }
-			m->mothurConvert(temp, freq); 
+			m->mothurConvert(temp, freq);
+            
+            temp = validParameter.validFile(parameters, "alpha", false);		if (temp == "not found") { temp = "1"; }
+			m->mothurConvert(temp, alpha);
+            
+            if ((alpha != 0) && (alpha != 1) && (alpha != 2)) { m->mothurOut("[ERROR]: Not a valid alpha value. Valid values are 0, 1 and 2."); m->mothurOutEndLine(); abort=true; }
 			
 			temp = validParameter.validFile(parameters, "abund", false);		if (temp == "not found") { temp = "10"; }
 			m->mothurConvert(temp, abund); 
@@ -386,6 +397,9 @@ int CollectCommand::execute(){
 					}else if (Estimators[i] == "shannoneven") { 
 						cDisplays.push_back(new CollectDisplay(new ShannonEven(), new OneColumnFile(getOutputFileName("shannoneven", variables))));
 						outputNames.push_back(getOutputFileName("shannoneven", variables)); outputTypes["shannoneven"].push_back(getOutputFileName("shannoneven", variables));
+                    }else if (Estimators[i] == "shannonrange") {
+                            cDisplays.push_back(new CollectDisplay(new RangeShannon(alpha), new ThreeColumnFile(getOutputFileName("shannonrange", variables))));
+                            outputNames.push_back(getOutputFileName("shannonrange", variables)); outputTypes["shannoneven"].push_back(getOutputFileName("shannonrange", variables));
 					}else if (Estimators[i] == "npshannon") { 
 						cDisplays.push_back(new CollectDisplay(new NPShannon(), new OneColumnFile(getOutputFileName("npshannon", variables))));
 						outputNames.push_back(getOutputFileName("npshannon", variables)); outputTypes["npshannon"].push_back(getOutputFileName("npshannon", variables));

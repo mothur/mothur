@@ -78,6 +78,7 @@
 #include "sharednseqs.h"
 #include "sharedjsd.h"
 #include "sharedrjsd.h"
+#include "shannonrange.h"
 
 
 /********************************************************************/
@@ -139,6 +140,7 @@ void ValidCalculators::printCitations(vector<string> Estimators) {
 				}else if (Estimators[i] == "jack") { Calculator* temp = new Jackknife(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
 				}else if (Estimators[i] == "shannon") { Calculator* temp = new Shannon(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
 				}else if (Estimators[i] == "shannoneven") { Calculator* temp = new ShannonEven(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
+                }else if (Estimators[i] == "shannonrange") { Calculator* temp = new RangeShannon(0); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
 				}else if (Estimators[i] == "npshannon") { Calculator* temp = new NPShannon(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
 				}else if (Estimators[i] == "heip") { Calculator* temp = new Heip(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp; 
 				
@@ -392,6 +394,7 @@ void ValidCalculators::initialSingle() {
 		single["shannon"]	    = "shannon";
 		single["npshannon"]    	= "npshannon";
 		single["shannoneven"]	= "shannoneven";
+        single["shannonrange"]	= "shannonrange";
 		single["smithwilson"]	= "smithwilson";
 		single["heip"]			= "heip";
 		single["simpson"]	    = "simpson";
@@ -482,6 +485,7 @@ void ValidCalculators::initialRarefaction() {
 		rarefaction["heip"]			= "heip";
 		rarefaction["npshannon"]	= "npshannon";
 		rarefaction["shannoneven"]	= "shannoneven";
+        rarefaction["shannonrange"]	= "shannonrange";
 		rarefaction["simpson"]		= "simpson";
 		rarefaction["invsimpson"]	= "invsimpson";
 		rarefaction["simpsoneven"]	= "simpsoneven";
@@ -510,6 +514,7 @@ void ValidCalculators::initialSummary() {
 		summary["smithwilson"]	= "smithwilson";
 		summary["invsimpson"]	= "invsimpson";
 		summary["npshannon"]	= "npshannon";
+        summary["shannonrange"]	= "shannonrange";
 		summary["simpson"]		= "simpson";
 		summary["simpsoneven"]	= "simpsoneven";
 		summary["bergerparker"] = "bergerparker";

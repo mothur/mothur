@@ -41,7 +41,7 @@ private:
 	OrderVector* order;
 	InputData* input;
 	Rarefact* rCurve;
-	int nIters, abund, processors;
+	int nIters, abund, processors, alpha;
 	float freq;
 	
 	bool abort, allLines, groupMode;

@@ -54,13 +54,12 @@ SAbundVector::SAbundVector(ifstream& f): DataVector(), maxRank(0), numBins(0), n
 	try {
 		int hold;
 		f >> label >> hold;
-	
+        
 		data.assign(hold+1, 0);
 		int inputData;
 	
 		for(int i=1;i<=hold;i++){
 			f >> inputData;
-
 			set(i, inputData);
 		}
 

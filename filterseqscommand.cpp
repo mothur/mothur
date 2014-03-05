@@ -990,7 +990,8 @@ int FilterSeqsCommand::driverCreateFilter(Filters& F, string filename, linePair*
 					
 			Sequence seq(in); m->gobble(in);
 			if (seq.getName() != "") {
-					if (seq.getAligned().length() != alignmentLength) { m->mothurOut("Sequences are not all the same length, please correct."); m->mothurOutEndLine(); m->control_pressed = true;  }
+                    if (m->debug) { m->mothurOut("[DEBUG]: " + seq.getName() + " length = " + toString(seq.getAligned().length())); m->mothurOutEndLine();}
+					if (seq.getAligned().length() != alignmentLength) { m->mothurOut("[ERROR]: Sequences are not all the same length, please correct."); m->mothurOutEndLine(); m->control_pressed = true;  }
 					
 					if(trump != '*')			{	F.doTrump(seq);		}
 					if(m->isTrue(vertical) || soft != 0)	{	F.getFreqs(seq);	}
