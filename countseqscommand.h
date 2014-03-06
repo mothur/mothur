@@ -12,6 +12,7 @@
 
 #include "command.hpp"
 #include "groupmap.h"
+#include "sharedrabundvector.h"
 
 class CountSeqsCommand : public Command {
 	
@@ -28,7 +29,7 @@ public:
 	string getHelpString();	
     string getOutputPattern(string);	
 	string getCitation() { return "http://www.mothur.org/wiki/Count.seqs"; }
-	string getDescription()		{ return "counts the number of sequences represented by each unique sequence in a namesfile"; }
+	string getDescription()		{ return "makes a count file from a names or shared file"; }
 
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }	
@@ -42,10 +43,11 @@ private:
 		linePair(unsigned long long i, unsigned long long j) : start(i), end(j) {}
 	};
     
-	string namefile, groupfile, outputDir, groups;
-	bool abort, large;
+	string namefile, groupfile, outputDir, groups, sharedfile;
+	bool abort, large, allLines;
 	vector<string> Groups, outputNames;
     int processors;
+    set<string> labels;
     
     int processSmall(string);
     int processLarge(string);
@@ -54,6 +56,8 @@ private:
     
     int createProcesses(GroupMap*&, string);
     int driver(unsigned long long, unsigned long long, string, GroupMap*&);
+    int processShared(vector<SharedRAbundVector*>& lookup, map<string, string> variables);
+
     
 };
 

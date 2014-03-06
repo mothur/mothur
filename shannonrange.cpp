@@ -80,7 +80,7 @@ EstOutput RangeShannon::getValues(SAbundVector* rank){
         //this calc has no data[0], just a lower and upper estimate. set data[0] to lower estimate.
         data[0] = data[1];
         if (data[1] > data[2]) { data[1] = data[2]; data[2] = data[0]; }
-        data[0] = data[1];
+        data[0] = -1.0; //no value
         
        	if (isnan(data[0]) || isinf(data[0])) { data[0] = 0; }
 		

@@ -10,12 +10,14 @@
 #include "countseqscommand.h"
 #include "sharedutilities.h"
 #include "counttable.h"
+#include "inputdata.h"
 
 //**********************************************************************************************************************
 vector<string> CountSeqsCommand::setParameters(){	
 	try {
-		CommandParameter pname("name", "InputTypes", "", "", "none", "none", "none","count",false,true,true); parameters.push_back(pname);
-		CommandParameter pgroup("group", "InputTypes", "", "", "none", "none", "none","",false,false,true); parameters.push_back(pgroup);
+        CommandParameter pshared("shared", "InputTypes", "", "", "NameSHared-sharedGroup", "NameSHared", "none","count",false,false,true); parameters.push_back(pshared);
+		CommandParameter pname("name", "InputTypes", "", "", "NameSHared", "NameSHared", "none","count",false,false,true); parameters.push_back(pname);
+		CommandParameter pgroup("group", "InputTypes", "", "", "sharedGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
         CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
         CommandParameter plarge("large", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(plarge);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
@@ -35,7 +37,7 @@ vector<string> CountSeqsCommand::setParameters(){
 string CountSeqsCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The count.seqs aka. make.table command reads a name file and outputs a .count_table file.  You may also provide a group file to get the counts broken down by group.\n";
+		helpString += "The count.seqs aka. make.table command reads a name or shared file and outputs a .count_table file.  You may also provide a group with the names file to get the counts broken down by group.\n";
 		helpString += "The groups parameter allows you to indicate which groups you want to include in the counts, by default all groups in your groupfile are used.\n";
         helpString += "The large parameter indicates the name and group files are too large to fit in RAM.\n";
 		helpString += "When you use the groups parameter and a sequence does not represent any sequences from the groups you specify it is not included in the .count.summary file.\n";
@@ -54,8 +56,7 @@ string CountSeqsCommand::getHelpString(){
 string CountSeqsCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
-        
-        if (type == "count") {  pattern = "[filename],count_table"; }
+        if (type == "count") {  pattern = "[filename],count_table-[filename],[distance],count_table"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->control_pressed = true;  }
         
         return pattern;
@@ -82,7 +83,8 @@ CountSeqsCommand::CountSeqsCommand(){
 
 CountSeqsCommand::CountSeqsCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
+		abort = false; calledHelp = false;
+        allLines = 1;
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
@@ -126,25 +128,48 @@ CountSeqsCommand::CountSeqsCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
+                
+                it = parameters.find("shared");
+				//user has given a template file
+				if(it != parameters.end()){
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
+				}
 			}
 			
 			//check for required parameters
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not open") { namefile = ""; abort = true; }
-			else if (namefile == "not found"){					
-				namefile = m->getNameFile(); 
-				if (namefile != "") { m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current namefile and the name parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { m->setNameFile(namefile); }
-			
+			else if (namefile == "not found"){	namefile = ""; }
+            else { m->setNameFile(namefile); }
+            
+            sharedfile = validParameter.validFile(parameters, "shared", true);
+			if (sharedfile == "not open") { sharedfile = ""; abort = true; }
+			else if (sharedfile == "not found"){	sharedfile = ""; }
+            else { m->setSharedFile(sharedfile); }
+            
 			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") { abort = true; }
 			else if (groupfile == "not found") {  groupfile = "";  }	
 			else { m->setGroupFile(groupfile); }
-			
+            
+            if ((namefile == "") && (sharedfile == "")) {
+                namefile = m->getNameFile();
+				if (namefile != "") { m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
+				else {
+                    sharedfile = m->getSharedFile();
+                    if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+                    else {
+                        m->mothurOut("You have no current namefile or sharedfile and the name or shared parameter is required."); m->mothurOutEndLine(); abort = true;
+                    }
+                }
+			}
+
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = "all"; }
 			m->splitAtDash(groups, Groups);
+            m->setGroups(Groups);
             
             string temp = validParameter.validFile(parameters, "large", false);		if (temp == "not found") {	temp = "F";	}
 			large = m->isTrue(temp);
@@ -154,7 +179,7 @@ CountSeqsCommand::CountSeqsCommand(string option)  {
 			m->mothurConvert(temp, processors);
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(namefile);		}
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
 
 		}
 		
@@ -171,20 +196,107 @@ int CountSeqsCommand::execute(){
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
-        map<string, string> variables; 
-        variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(namefile));
-		string outputFileName = getOutputFileName("count", variables);
-		
-        int total = 0;
-        int start = time(NULL);
-        if (!large) { total = processSmall(outputFileName); }
-        else { total = processLarge(outputFileName);  }
-        
-		if (m->control_pressed) { m->mothurRemove(outputFileName); return 0; }
-		
-        m->mothurOut("It took " + toString(time(NULL) - start) + " secs to create a table for " + toString(total) + " sequences.");
-        m->mothurOutEndLine();
-        m->mothurOutEndLine();
+        map<string, string> variables;
+
+        if (namefile != "") {
+            int total = 0;
+            int start = time(NULL);
+            if (outputDir == "") { outputDir = m->hasPath(namefile); }
+            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(namefile));
+            string outputFileName = getOutputFileName("count", variables);
+            
+            if (!large) { total = processSmall(outputFileName); }
+            else { total = processLarge(outputFileName);  }
+            
+            if (m->control_pressed) { m->mothurRemove(outputFileName); return 0; }
+            
+            m->mothurOut("It took " + toString(time(NULL) - start) + " secs to create a table for " + toString(total) + " sequences.");
+            m->mothurOutEndLine(); m->mothurOutEndLine();
+            
+            m->mothurOutEndLine();
+            m->mothurOut("Total number of sequences: " + toString(total)); m->mothurOutEndLine();
+ 
+        }else {
+            if (outputDir == "") { outputDir = m->hasPath(sharedfile); }
+            variables["[filename]"] = outputDir + m->getRootName(m->getSimpleName(sharedfile));
+            
+            InputData input(sharedfile, "sharedfile");
+            vector<SharedRAbundVector*> lookup = input.getSharedRAbundVectors();
+            string lastLabel = lookup[0]->getLabel();
+            
+            //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
+            set<string> processedLabels;
+            set<string> userLabels = labels;
+            
+            //as long as you are not at the end of the file or done wih the lines you want
+            while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+                
+                if (m->control_pressed) { for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); } return 0; }
+                
+                if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){
+                    
+                    m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+                    
+                    processShared(lookup, variables);
+                    
+                    processedLabels.insert(lookup[0]->getLabel());
+                    userLabels.erase(lookup[0]->getLabel());
+                }
+                
+                if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+                    string saveLabel = lookup[0]->getLabel();
+                    
+                    for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+                    lookup = input.getSharedRAbundVectors(lastLabel);
+                    m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+                    
+                    processShared(lookup, variables);
+                    
+                    processedLabels.insert(lookup[0]->getLabel());
+                    userLabels.erase(lookup[0]->getLabel());
+                    
+                    //restore real lastlabel to save below
+                    lookup[0]->setLabel(saveLabel);
+                }
+                
+                lastLabel = lookup[0]->getLabel();
+                //prevent memory leak
+                for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
+                
+                if (m->control_pressed) { return 0; }
+                
+                //get next line to process
+                lookup = input.getSharedRAbundVectors();
+            }
+            
+            if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	m->mothurRemove(outputNames[i]); }  return 0; }
+            
+            //output error messages about any remaining user labels
+            set<string>::iterator it;
+            bool needToRun = false;
+            for (it = userLabels.begin(); it != userLabels.end(); it++) {
+                m->mothurOut("Your file does not include the label " + *it);
+                if (processedLabels.count(lastLabel) != 1) {
+                    m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
+                    needToRun = true;
+                }else {
+                    m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
+                }
+            }
+            
+            //run last label if you need to
+            if (needToRun == true)  {
+                for (int i = 0; i < lookup.size(); i++) { if (lookup[i] != NULL) { delete lookup[i]; } }
+                lookup = input.getSharedRAbundVectors(lastLabel);
+                
+                m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+                
+                processShared(lookup, variables);
+                
+                for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+            }
+            
+        }
         
         //set rabund file as new current rabundfile
 		itTypes = outputTypes.find("count");
@@ -193,12 +305,10 @@ int CountSeqsCommand::execute(){
 		}
         
         m->mothurOutEndLine();
-		m->mothurOut("Total number of sequences: " + toString(total)); m->mothurOutEndLine();
-		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-		m->mothurOut(outputFileName); m->mothurOutEndLine();	
+		for(int i = 0; i < outputNames.size(); i++) {  m->mothurOut(outputNames[i]); m->mothurOutEndLine();	 }
 		m->mothurOutEndLine();
-		
+        
 		return 0;		
 	}
 	
@@ -206,6 +316,40 @@ int CountSeqsCommand::execute(){
 		m->errorOut(e, "CountSeqsCommand", "execute");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+
+int CountSeqsCommand::processShared(vector<SharedRAbundVector*>& lookup, map<string, string> variables){
+    try {
+        variables["[distance]"] = lookup[0]->getLabel();
+        string outputFileName = getOutputFileName("count", variables);
+        outputNames.push_back(outputFileName); outputTypes["count"].push_back(outputFileName);
+        
+        ofstream out;
+        m->openOutputFile(outputFileName, out);
+        
+        out << "OTU_Label\ttotal\t";
+        for (int i = 0; i < lookup.size(); i++) { out << lookup[i]->getGroup() << '\t'; } out << endl;
+        
+        for (int j = 0; j < lookup[0]->getNumBins(); j++) {
+            if (m->control_pressed) { break; }
+            
+            int total = 0;
+            string output = "";
+            for (int i = 0; i < lookup.size(); i++) {
+                total += lookup[i]->getAbundance(j);
+                output += toString(lookup[i]->getAbundance(j)) + '\t';
+            }
+            out << m->currentSharedBinLabels[j] << '\t' << total << '\t' << output << endl;
+        }
+        out.close();
+        
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CountSeqsCommand", "processShared");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 
