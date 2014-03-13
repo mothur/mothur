@@ -146,15 +146,20 @@ int SplitMatrix::createDistanceFilesFromTax(map<string, int>& seqGroup, int numG
 		map<string, int>::iterator it;
 		set<string> names;
 				
-		for (int i = 0; i < numGroups; i++) { //remove old temp files, just in case
-			m->mothurRemove((fastafile + "." + toString(i) + ".temp"));
-		}
-			
 		ifstream in;
 		m->openInputFile(fastafile, in);
+
+		//open output files
+		map<int, ofstream*> outFiles;
+		for (int i = 0; i < numGroups; i++) {
+			ofstream* outFile = new ofstream();
+			//remove old temp files, just in case
+			m->mothurRemove((fastafile + "." + toString(i) + ".temp"));
+			m->openOutputFileAppend((fastafile + "." + toString(i) + ".temp"), *outFile);
+			outFiles[i] = outFile;
+		}
 	
 		//parse fastafile
-		ofstream outFile;
 		while (!in.eof()) {
 			Sequence query(in); m->gobble(in);
 			if (query.getName() != "") {
@@ -165,16 +170,20 @@ int SplitMatrix::createDistanceFilesFromTax(map<string, int>& seqGroup, int numG
 				if ((namefile == "") && (countfile == "")) {  names.insert(query.getName()); }
 			
 				if (it != seqGroup.end()) { //not singleton 
-					m->openOutputFileAppend((fastafile + "." + toString(it->second) + ".temp"), outFile);
-					query.printSequence(outFile); 
-					outFile.close();
-					
+					query.printSequence(*outFiles[it->second]);
 					copyGroups.erase(query.getName());
 				}
 			}
 		}
 		in.close();
-		
+
+		//Close output files
+		for (map<int, ofstream*>::iterator it = outFiles.begin(); it != outFiles.end(); it++) {
+			it->second->close();
+			delete it->second;
+			it->second = 0;
+		}
+
 		//warn about sequence in groups that are not in fasta file
 		for(it = copyGroups.begin(); it != copyGroups.end(); it++) {
 			m->mothurOut("ERROR: " + it->first + " is missing from your fastafile. This could happen if your taxonomy file is not unique and your fastafile is, or it could indicate and error."); m->mothurOutEndLine();
